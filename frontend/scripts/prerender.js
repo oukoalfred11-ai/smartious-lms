@@ -211,6 +211,12 @@ const ROUTES_TO_PRERENDER = [
   '/blog/homeschooling-dominican-republic-what-the-law-says',
   '/blog/online-school-dominican-republic-diploma-question',
   '/blog/virtual-school-dominican-republic-coasts-and-cibao',
+  '/blog/homeschooling-uruguay-the-contested-position',
+  '/blog/online-school-uruguay-subject-access-and-departments',
+  '/blog/virtual-school-uruguay-litoral-north-and-coast',
+  '/blog/homeschooling-guatemala-what-we-can-verify',
+  '/blog/online-school-guatemala-beyond-the-capital',
+  '/blog/virtual-school-guatemala-highlands-peten-izabal',
   '/homeschool', '/tuition', '/tuition-nairobi', '/tuition-uae',
   '/tuition-uk',
   '/iufp', '/pre-university',
@@ -307,6 +313,8 @@ const ROUTES_TO_PRERENDER = [
   '/online-school/panama',
   '/online-school/costa-rica',
   '/online-school/dominican-republic',
+  '/online-school/uruguay',
+  '/online-school/guatemala',
   '/online-school/nigeria',
   '/online-school/tanzania',
   '/online-school/uganda',
@@ -328,7 +336,7 @@ const ROUTES_TO_PRERENDER = [
    US city links each, which would blow past MAX_URLS instantly.
    US/Canada city pages fall back to SPA rendering (Google's JS
    second-pass crawl will still index them via sitemap.xml). */
-const CRAWL_FROM_HUBS_PATTERN = /^\/online-school\/(kenya|ethiopia|rwanda|south-africa|qatar|saudi-arabia|uae|egypt|morocco|south-korea|japan|vietnam|thailand|malaysia|turkey|kuwait|oman|taiwan|ireland|united-kingdom|india|germany|romania|ukraine|netherlands|spain|denmark|france|italy|poland|portugal|czech-republic|belgium|sweden|norway|new-zealand|austria|hungary|finland|greece|azerbaijan|georgia|pakistan|australia|luxembourg|switzerland|slovakia|slovenia|croatia|serbia|bulgaria|albania|north-macedonia|montenegro|bosnia-and-herzegovina|kosovo|zambia|zimbabwe|botswana|namibia|algeria|tunisia|mauritius|ghana|angola|drc|mexico|brazil|colombia|argentina|chile|peru|ecuador|panama|costa-rica|dominican-republic)$/
+const CRAWL_FROM_HUBS_PATTERN = /^\/online-school\/(kenya|ethiopia|rwanda|south-africa|qatar|saudi-arabia|uae|egypt|morocco|south-korea|japan|vietnam|thailand|malaysia|turkey|kuwait|oman|taiwan|ireland|united-kingdom|india|germany|romania|ukraine|netherlands|spain|denmark|france|italy|poland|portugal|czech-republic|belgium|sweden|norway|new-zealand|austria|hungary|finland|greece|azerbaijan|georgia|pakistan|australia|luxembourg|switzerland|slovakia|slovenia|croatia|serbia|bulgaria|albania|north-macedonia|montenegro|bosnia-and-herzegovina|kosovo|zambia|zimbabwe|botswana|namibia|algeria|tunisia|mauritius|ghana|angola|drc|mexico|brazil|colombia|argentina|chile|peru|ecuador|panama|costa-rica|dominican-republic|uruguay|guatemala)$/
 const CRAWL_LINK_PATTERN = /^\/(?:homeschool-|homeschooling\/)[a-z0-9-]+$/
 
 /* ────────────────────────────────────────────────────────────────
