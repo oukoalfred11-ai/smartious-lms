@@ -658,6 +658,20 @@
     <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-gt" href="https://smartioushomeschool.com/online-school/guatemala"/>
   </url>
   <url>
+    <loc>https://smartioushomeschool.com/online-school/paraguay</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-py" href="https://smartioushomeschool.com/online-school/paraguay"/>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/bolivia</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-bo" href="https://smartioushomeschool.com/online-school/bolivia"/>
+  </url>
+  <url>
     <loc>https://smartioushomeschool.com/online-school/bahrain</loc>
     <priority>0.9</priority>
     <changefreq>weekly</changefreq>
@@ -791,6 +805,42 @@
     <lastmod>2026-08-11</lastmod>
   </url>
   <!-- Europe 2026 articles -->
+  <url>
+    <loc>https://smartioushomeschool.com/blog/homeschooling-paraguay-the-grey-area</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/online-school-paraguay-languages-and-borders</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/virtual-school-paraguay-chaco-and-soy-belt</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/homeschooling-bolivia-ley-070-and-colegios-sombrilla</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/online-school-bolivia-what-we-add</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/virtual-school-bolivia-gas-mining-and-lithium</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
   <url>
     <loc>https://smartioushomeschool.com/blog/homeschooling-uruguay-the-contested-position</loc>
     <priority>0.7</priority>
@@ -1640,6 +1690,68 @@
   </url>
   <url>
     <loc>https://smartioushomeschool.com/homeschool-livingstone-zm</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <!-- Paraguay cities -->
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-asuncion-py</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-ciudad-del-este-py</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-encarnacion-py</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-filadelfia-py</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-santa-rita-py</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <!-- Bolivia cities -->
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-santa-cruz-bo</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-la-paz-bo</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-cochabamba-bo</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-tarija-bo</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-potosi-bo</loc>
     <priority>0.8</priority>
     <changefreq>monthly</changefreq>
     <lastmod>2026-08-11</lastmod>
