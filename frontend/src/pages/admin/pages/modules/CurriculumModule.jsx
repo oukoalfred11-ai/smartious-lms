@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { useStore, api } from '../../../../context/ctx.jsx'
 import { TOKENS } from '../shared/tokens.js'
 import { PCard, PKpi, PSection } from '../shared/ui.jsx'
-import { IGCSE_LIBRARY, IGCSE_MATHS_0580, LOWER_SEC_LIBRARY, PRIMARY_LIBRARY } from './spineData.js'
+import { IGCSE_LIBRARY, IGCSE_MATHS_0580, LOWER_SEC_LIBRARY, PRIMARY_LIBRARY, PRIMARY_Y5_LIBRARY } from './spineData.js'
 
 function SubjectsTab({ toast }) {
   // The 15 curricula from the new catalog
@@ -438,6 +438,33 @@ function SyllabusSpineTab({ toast }) {
     finally { setBusy(false) }
   }
 
+  // ── load Cambridge Primary YEAR 5 spine (lesson-level) ──
+  // Deeper than the all-stage Primary spine: one subtopic == one
+  // lesson, so questions can be tagged to a specific lesson rather
+  // than to a whole stage. Replaces the subject's spine.
+  const loadPrimaryY5Spine = async () => {
+    if (!subjectId) { toast?.error?.('Pick a subject first.'); return }
+    const entry = PRIMARY_Y5_LIBRARY.find(e => e.match.test(subjectName))
+    if (!entry) {
+      toast?.error?.('No Year 5 spine matches "' + subjectName + '". Available: Mathematics, English, Science, Computing, Global Perspectives.')
+      return
+    }
+    const lessons = entry.const_.reduce((n, t) => n + t.subtopics.length, 0)
+    if (topics.length > 0 && !window.confirm(
+      'This REPLACES the entire existing spine for this subject with the ' + lessons +
+      '-lesson Year 5 (Stage 5) structure.\n\nAny lessons or progress already tagged to the current subtopics will lose that link. Continue?'
+    )) return
+    setBusy(true)
+    try {
+      const { data } = await api.post('/syllabus/bulk', {
+        subjectId, topics: entry.const_, sourceSyllabus: entry.source,
+      })
+      if (data?.success) { toast?.ok?.(data.message || 'Loaded.'); loadSpine(subjectId) }
+      else toast?.error?.(data?.message || 'Failed.')
+    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Failed to load structure.') }
+    finally { setBusy(false) }
+  }
+
   // ── load Primary spine — auto-detects which subject ─────
   const loadPrimarySpine = async () => {
     if (!subjectId) { toast?.error?.('Pick a subject first.'); return }
@@ -528,10 +555,16 @@ function SyllabusSpineTab({ toast }) {
               borderRadius: 7, padding: '8px 16px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
             }}>Load IGCSE Maths spine</button>
             {curriculum === 'CambridgePrimary' && (
-              <button onClick={loadPrimarySpine} disabled={busy} title="Auto-detects which Primary spine matches the selected subject" style={{
+              <button onClick={loadPrimarySpine} disabled={busy} title="All-stage planning spine (Stages 1-6): one subtopic per stage per strand" style={{
                 background: '#fff', color: '#9A7B16', border: '1.5px dashed ' + TOKENS.gold,
                 borderRadius: 7, padding: '8px 16px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
-              }}>Load Cambridge Primary spine</button>
+              }}>Load Cambridge Primary spine (all stages)</button>
+            )}
+            {curriculum === 'CambridgePrimary' && (
+              <button onClick={loadPrimaryY5Spine} disabled={busy} title="Year 5 (Stage 5) lesson-level spine — one subtopic per lesson, for tagging questions to a specific lesson" style={{
+                background: '#fff', color: '#8B1A2E', border: '1.5px solid #8B1A2E',
+                borderRadius: 7, padding: '8px 16px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+              }}>Load Year 5 spine (lesson-level)</button>
             )}
             {curriculum === 'CambridgeLowerSec' && (
               <button onClick={loadLowerSecondarySpine} disabled={busy} title="Auto-detects which Lower Secondary spine matches the selected subject" style={{
