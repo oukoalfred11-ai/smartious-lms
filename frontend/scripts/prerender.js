@@ -259,6 +259,12 @@ const ROUTES_TO_PRERENDER = [
   '/blog/homeschooling-nepal-what-we-can-verify',
   '/blog/online-school-nepal-beyond-the-valley',
   '/blog/virtual-school-nepal-pokhara-east-and-west',
+  // Continental pillar articles
+  '/blog/best-online-virtual-homeschool-africa',
+  '/blog/best-online-virtual-homeschool-asia',
+  '/blog/best-online-virtual-homeschool-europe',
+  '/blog/best-online-virtual-homeschool-americas',
+  '/blog/smartious-homeschool-global',
   '/homeschool', '/tuition', '/tuition-nairobi', '/tuition-uae',
   '/tuition-uk',
   '/iufp', '/pre-university',
