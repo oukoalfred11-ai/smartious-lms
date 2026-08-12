@@ -3620,13 +3620,38 @@ const QB_SUBJECTS = [
   'Accounting',
 ]
 
+/**
+ * Canonical curriculum ids — these MUST match the Subject/Question enum
+ * in the backend exactly.
+ *
+ * This constant previously held the pre-2026-05-22 legacy ids (IGCSE,
+ * EDEXCEL, IB, CBC, AMERICAN). Those were removed from the backend when
+ * the 15-curriculum catalogue landed, so every exam created here was
+ * tagged with a curriculum no question could ever match — which is why
+ * the question picker came back empty. Cambridge Primary was not
+ * offered at all, so Primary questions were unreachable.
+ *
+ * Year lists follow the house convention: Cambridge and Edexcel use
+ * Year 1-13, IB uses Grades, American uses K-12, Kenya CBC uses Grade 1-12.
+ */
 const QB_CURRICULA = {
-  IGCSE:    { label: 'Cambridge IGCSE', years: ['Year 9', 'Year 10', 'Year 11'] },
-  EDEXCEL:  { label: 'Edexcel',         years: ['Year 9', 'Year 10', 'Year 11'] },
-  IB:       { label: 'IB',              years: ['Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'] },
-  CBC:      { label: 'Kenya CBC',       years: ['Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'] },
-  BNC:      { label: 'British National', years: ['Year 7', 'Year 8', 'Year 9', 'Year 10', 'Year 11', 'Year 12', 'Year 13'] },
-  AMERICAN: { label: 'American',        years: ['Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'] },
+  CambridgePrimary:  { label: 'Cambridge Primary',                    years: ['Year 1','Year 2','Year 3','Year 4','Year 5','Year 6'] },
+  CambridgeLowerSec: { label: 'Cambridge Lower Secondary',            years: ['Year 7','Year 8','Year 9'] },
+  CambridgeIGCSE:    { label: 'Cambridge IGCSE',                      years: ['Year 9','Year 10','Year 11'] },
+  CambridgeALevel:   { label: 'Cambridge A Level',                    years: ['Year 12','Year 13'] },
+  EdexcelLowerSec:   { label: 'Pearson Edexcel Lower Secondary',      years: ['Year 7','Year 8','Year 9'] },
+  EdexcelIGCSE:      { label: 'Pearson Edexcel International GCSE',   years: ['Year 9','Year 10','Year 11'] },
+  EdexcelALevel:     { label: 'Pearson Edexcel International A Level',years: ['Year 12','Year 13'] },
+  AQALowerSec:       { label: 'AQA Lower Secondary',                  years: ['Year 7','Year 8','Year 9'] },
+  AQAGCSE:           { label: 'AQA GCSE',                             years: ['Year 9','Year 10','Year 11'] },
+  AQAALevel:         { label: 'AQA A Level',                          years: ['Year 12','Year 13'] },
+  IBPYP:             { label: 'IB Primary Years Programme',           years: ['Grade 1','Grade 2','Grade 3','Grade 4','Grade 5'] },
+  IBMYP:             { label: 'IB Middle Years Programme',            years: ['Grade 6','Grade 7','Grade 8','Grade 9','Grade 10'] },
+  IBDP:              { label: 'IB Diploma Programme',                 years: ['Grade 11','Grade 12'] },
+  BNC:               { label: 'British National Curriculum',          years: ['Year 1','Year 2','Year 3','Year 4','Year 5','Year 6','Year 7','Year 8','Year 9','Year 10','Year 11','Year 12','Year 13'] },
+  American:          { label: 'American Curriculum',                  years: ['K','Grade 1','Grade 2','Grade 3','Grade 4','Grade 5','Grade 6','Grade 7','Grade 8','Grade 9','Grade 10','Grade 11','Grade 12'] },
+  Canadian:          { label: 'Canadian Curriculum',                  years: ['Grade 1','Grade 2','Grade 3','Grade 4','Grade 5','Grade 6','Grade 7','Grade 8','Grade 9','Grade 10','Grade 11','Grade 12'] },
+  KenyaCBC:          { label: 'Kenya CBC',                            years: ['Grade 1','Grade 2','Grade 3','Grade 4','Grade 5','Grade 6','Grade 7','Grade 8','Grade 9','Grade 10','Grade 11','Grade 12'] },
 }
 
 function ExamsTab({ user, store, setPage, toast }) {
@@ -4038,7 +4063,7 @@ function ExamsTab({ user, store, setPage, toast }) {
   const resetForm = () => {
     setFormTitle('')
     setFormSubject('Mathematics')
-    setFormCurriculum('IGCSE')
+    setFormCurriculum('CambridgeIGCSE')
     setFormYear('Year 10')
     setFormStartAt(exDefaultStartAt())
     setFormDuration(60)
@@ -4523,7 +4548,14 @@ function ExamsTab({ user, store, setPage, toast }) {
               </div>
               <div className="fg" style={{ marginBottom: 0 }}>
                 <label className="fl">Curriculum</label>
-                <select className="fsel" value={formCurriculum} onChange={e => setFormCurriculum(e.target.value)}>
+                <select className="fsel" value={formCurriculum} onChange={e => {
+                  const next = e.target.value
+                  setFormCurriculum(next)
+                  // Snap the year to one that exists for the new curriculum,
+                  // or the old value lingers and is silently invalid.
+                  const years = QB_CURRICULA[next]?.years || []
+                  if (years.length && !years.includes(formYear)) setFormYear(years[0])
+                }}>
                   {Object.entries(QB_CURRICULA).map(([id, info]) => <option key={id} value={id}>{info.label}</option>)}
                 </select>
               </div>
