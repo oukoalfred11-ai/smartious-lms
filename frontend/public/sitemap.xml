@@ -693,6 +693,27 @@
     <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-il" href="https://smartioushomeschool.com/online-school/israel"/>
   </url>
   <url>
+    <loc>https://smartioushomeschool.com/online-school/jordan</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-08-12</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-jo" href="https://smartioushomeschool.com/online-school/jordan"/>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/iraq</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-08-12</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-iq" href="https://smartioushomeschool.com/online-school/iraq"/>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/cyprus</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-08-12</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-cy" href="https://smartioushomeschool.com/online-school/cyprus"/>
+  </url>
+  <url>
     <loc>https://smartioushomeschool.com/online-school/bahrain</loc>
     <priority>0.9</priority>
     <changefreq>weekly</changefreq>
@@ -826,6 +847,60 @@
     <lastmod>2026-08-11</lastmod>
   </url>
   <!-- Europe 2026 articles -->
+  <url>
+    <loc>https://smartioushomeschool.com/blog/homeschooling-jordan-what-we-can-verify</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-12</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/online-school-jordan-zero-offset</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-12</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/virtual-school-jordan-aqaba-irbid-and-the-valley</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-12</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/homeschooling-iraq-two-education-authorities</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-12</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/online-school-iraq-english-medium-record</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-12</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/virtual-school-iraq-basra-and-the-north</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-12</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/homeschooling-cyprus-three-different-answers</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-12</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/online-school-cyprus-what-we-add</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-12</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/virtual-school-cyprus-paphos-and-the-east</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-12</lastmod>
+  </url>
   <url>
     <loc>https://smartioushomeschool.com/blog/homeschooling-venezuela-what-we-can-verify</loc>
     <priority>0.7</priority>
@@ -1830,6 +1905,99 @@
     <priority>0.8</priority>
     <changefreq>monthly</changefreq>
     <lastmod>2026-08-11</lastmod>
+  </url>
+  <!-- Jordan cities -->
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-amman-jo</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-12</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-aqaba-jo</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-12</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-irbid-jo</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-12</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-zarqa-jo</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-12</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-dead-sea-jo</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-12</lastmod>
+  </url>
+  <!-- Iraq cities -->
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-baghdad-iq</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-12</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-basra-iq</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-12</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-erbil-iq</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-12</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-sulaymaniyah-iq</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-12</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-duhok-iq</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-12</lastmod>
+  </url>
+  <!-- Cyprus cities -->
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-nicosia-cy</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-12</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-limassol-cy</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-12</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-larnaca-cy</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-12</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-paphos-cy</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-12</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-famagusta-cy</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-12</lastmod>
   </url>
   <!-- Israel cities -->
   <url>
