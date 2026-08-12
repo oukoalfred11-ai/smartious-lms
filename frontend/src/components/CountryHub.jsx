@@ -145,6 +145,9 @@ const HREFLANG_MAP = {
   venezuela:'en-ve',
   'puerto-rico':'en-pr',
   israel:'en-il',
+  jordan:'en-jo',
+  iraq:'en-iq',
+  cyprus:'en-cy',
   usa:'en-us',
   canada:'en-ca',
 }
