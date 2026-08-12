@@ -1030,7 +1030,35 @@ export default function TeacherPortal() {
   return (
     <div className="app">
       <style>{`
+        /* ══ THE INVERSION, AND WHY THE --s* SCALE MUST BE RESTORED ══
+           The line below inverts the ink/parchment scale for the dark
+           sidebar chrome: --ink1 becomes CREAM instead of near-black.
+
+           But global.css maps the neutral text scale onto those same
+           names — --s900 is var(--ink1), --s500 is var(--ink7). So the
+           inversion silently turned every piece of body text in this
+           portal cream-on-cream. Question text in the exam bank, the
+           bank-scope labels and the result counts were all rendering
+           invisible.
+
+           Fix: after inverting the chrome tokens, explicitly re-point
+           the --s* text scale at literal dark values. Done here at the
+           source rather than by editing 199 individual call sites, so
+           anything added later inherits correct colours automatically.
+           --muted was never defined anywhere at all, so it is defined
+           here too. */
         :root{--ink0:#FBFAF5;--ink1:#FBFAF5;--ink2:#F4EFEB;--ink3:#F4EFEB;--ink4:#E8E2D6;--ink5:#E8E2D6;--par0:#1A0F0E;--par1:#1A0F0E;--par2:#564844;--par3:#857973;--gold2:#7D1025;--gold3:#C9A030;--gold4:#7D1025;--border:rgba(125,16,37,.15);}
+        :root{
+          --s50:#FDFAF4; --s100:#F4EFEB; --s200:#EDE6DF; --s300:#E0D7CE;
+          --s400:#857973;   /* muted labels  */
+          --s500:#6B5F59;   /* subtle body   */
+          --s600:#564844;
+          --s700:#3A2E2A;   /* strong body   */
+          --s800:#291F1C;
+          --s900:#1A0F0E;   /* titles        */
+          --muted:#6B5F59;  /* never defined anywhere before this */
+          --ink:#1A0F0E;
+        }
         .app{background:#FBFAF5}
         .sidebar{background:#FBFAF5!important;border-right:1px solid #F4EFEB!important;}
         .sb-logo{border-bottom:1px solid #F4EFEB!important;}
@@ -3726,15 +3754,18 @@ function ExamsTab({ user, store, setPage, toast }) {
    * keeps the interceptor and therefore the token.
    */
   const [pdfBusy, setPdfBusy] = useState('')
-  const downloadExamPdf = async (kind) => {
-    const id = selectedExam?._id || selectedExam?.id
+  // Works for ANY exam, so the same downloader serves the list cards and
+  // the detail view. Busy key is scoped per exam so one card spinning
+  // does not put every other card into a loading state.
+  const downloadPdfFor = async (exam, kind) => {
+    const id = exam?._id || exam?.id
     if (!id) return
-    setPdfBusy(kind)
+    setPdfBusy(kind + ':' + id)
     try {
       const res = await api.get(`/exams/${id}/${kind === 'scheme' ? 'scheme' : 'paper'}.pdf`, { responseType: 'blob' })
       const url = URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }))
       const a = document.createElement('a')
-      const safe = String(selectedExam.title || 'paper').replace(/[^a-z0-9]+/gi, '-').toLowerCase()
+      const safe = String(exam.title || 'paper').replace(/[^a-z0-9]+/gi, '-').toLowerCase()
       a.href = url
       a.download = `smartious-${safe}${kind === 'scheme' ? '-mark-scheme' : ''}.pdf`
       document.body.appendChild(a); a.click(); a.remove()
@@ -4123,8 +4154,18 @@ function ExamsTab({ user, store, setPage, toast }) {
     return true
   }
 
-  const scheduleExam = async () => {
-    if (!validateStep(1) || !validateStep(2) || !validateStep(3)) return
+  /**
+   * Save the exam.
+   *
+   * allowUnassigned=true skips the "assign at least one student" check.
+   * The backend never required students — only the frontend did — which
+   * meant a teacher could not create a paper, print it and assign the
+   * class later. That is a normal way to work: build the paper first,
+   * decide who sits it afterwards.
+   */
+  const scheduleExam = async (allowUnassigned = false) => {
+    if (!validateStep(1) || !validateStep(2)) return
+    if (!allowUnassigned && !validateStep(3)) return
 
     // Build the payload in the shape the backend Exam model expects.
     // The backend uses `grade` (not `year`) and `durationMins` (not `duration`).
@@ -4144,9 +4185,15 @@ function ExamsTab({ user, store, setPage, toast }) {
     try {
       const { data } = await api.post('/exams', payload)
       if (data?.success) {
-        toast?.ok?.('Exam scheduled. ' + formSelectedStudents.length + ' student(s) will be notified.')
+        toast?.ok?.(formSelectedStudents.length
+          ? 'Exam scheduled. ' + formSelectedStudents.length + ' student(s) will be notified.'
+          : 'Exam saved. No students assigned yet — you can still download the paper.')
         await loadExamsFromServer() // refresh
-        setView('list')
+        // Land on the new exam rather than the list, so the paper download
+        // is immediately in front of the teacher instead of two clicks away.
+        const created = data.data?.exam
+        if (created?._id) { setSelectedExam(created); setView('detail') }
+        else setView('list')
         resetForm()
       } else {
         toast?.error?.(data?.message || 'Failed to schedule exam.')
@@ -4306,7 +4353,7 @@ function ExamsTab({ user, store, setPage, toast }) {
             Opened in a new tab rather than fetched, so the browser
             handles the download and the auth cookie still applies. */}
         <div style={{ display:'flex', gap:10, flexWrap:'wrap', marginBottom:14 }}>
-          <button onClick={() => downloadExamPdf('paper')}
+          <button onClick={() => downloadPdfFor(selectedExam, 'paper')}
             style={{
               background:'#7D1025', color:'#FBFAF5', border:'none', borderRadius:8,
               padding:'10px 18px', fontSize:12.5, fontWeight:700, cursor:'pointer',
@@ -4315,9 +4362,9 @@ function ExamsTab({ user, store, setPage, toast }) {
             <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
             </svg>
-            {pdfBusy === 'paper' ? 'Generating\u2026' : 'Download question paper'}
+            {pdfBusy === 'paper:' + (selectedExam._id || selectedExam.id) ? 'Generating\u2026' : 'Download question paper'}
           </button>
-          <button onClick={() => downloadExamPdf('scheme')}
+          <button onClick={() => downloadPdfFor(selectedExam, 'scheme')}
             style={{
               background:'#FFF', color:'#7D1025', border:'1.5px solid #7D1025', borderRadius:8,
               padding:'10px 18px', fontSize:12.5, fontWeight:700, cursor:'pointer',
@@ -4326,7 +4373,7 @@ function ExamsTab({ user, store, setPage, toast }) {
             <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
             </svg>
-            {pdfBusy === 'scheme' ? 'Generating\u2026' : 'Download mark scheme'}
+            {pdfBusy === 'scheme:' + (selectedExam._id || selectedExam.id) ? 'Generating\u2026' : 'Download mark scheme'}
           </button>
           <span style={{ fontSize:11.5, color:'var(--muted)', alignSelf:'center' }}>
             Standard Smartious paper &mdash; print or set online, the questions are identical.
@@ -4943,7 +4990,16 @@ function ExamsTab({ user, store, setPage, toast }) {
 
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 18, gap: 8, flexWrap: 'wrap' }}>
               <button onClick={() => setCreateStep(2)} className="btn btn-s">Back</button>
-              <button onClick={scheduleExam}
+              <button onClick={() => scheduleExam(true)}
+                title="Save the paper now and assign students later"
+                style={{
+                  background: '#FFF', border: '1.5px solid #7D1025', color: '#7D1025',
+                  padding: '10px 18px', borderRadius: 8, fontSize: 13, fontWeight: 700,
+                  cursor: 'pointer', marginRight: 8,
+                }}>
+                Save without assigning
+              </button>
+              <button onClick={() => scheduleExam(false)}
                 style={{
                   background: '#C9A030', color: '#7D1025', border: 'none',
                   padding: '12px 24px', borderRadius: 'var(--rmd)',
@@ -5694,6 +5750,38 @@ function ExamsTab({ user, store, setPage, toast }) {
                     </div>
                     <div style={{ fontSize: 10, color: 'var(--s500)', textTransform: 'uppercase', letterSpacing: '.05em' }}>Students</div>
                   </div>
+                  {/* Paper download, available from the moment an exam is
+                      created — a teacher should not have to assign students
+                      or drill into a detail view to print the paper. */}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); downloadPdfFor(exam, 'paper') }}
+                    title="Download the printable question paper"
+                    style={{
+                      background: '#7D1025', border: '1px solid #7D1025',
+                      color: '#FBFAF5', padding: '8px 14px',
+                      borderRadius: 'var(--rsm)', cursor: 'pointer',
+                      fontSize: 12, fontWeight: 700,
+                      display: 'inline-flex', alignItems: 'center', gap: 6,
+                      flexShrink: 0,
+                    }}>
+                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    {pdfBusy === 'paper:' + (exam._id || exam.id) ? 'Generating\u2026' : 'Paper PDF'}
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); downloadPdfFor(exam, 'scheme') }}
+                    title="Download the mark scheme"
+                    style={{
+                      background: '#FFF', border: '1.5px solid #7D1025',
+                      color: '#7D1025', padding: '8px 14px',
+                      borderRadius: 'var(--rsm)', cursor: 'pointer',
+                      fontSize: 12, fontWeight: 700,
+                      display: 'inline-flex', alignItems: 'center', gap: 6,
+                      flexShrink: 0,
+                    }}>
+                    {pdfBusy === 'scheme:' + (exam._id || exam.id) ? 'Generating\u2026' : 'Mark scheme'}
+                  </button>
                   {(status === 'active' || status === 'ended') && (
                     <button
                       onClick={(e) => { e.stopPropagation(); openSubmissions(exam) }}
