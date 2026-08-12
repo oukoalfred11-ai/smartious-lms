@@ -148,6 +148,9 @@ const HREFLANG_MAP = {
   jordan:'en-jo',
   iraq:'en-iq',
   cyprus:'en-cy',
+  lebanon:'en-lb',
+  myanmar:'en-mm',
+  maldives:'en-mv',
   usa:'en-us',
   canada:'en-ca',
 }
