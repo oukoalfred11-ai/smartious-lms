@@ -67,7 +67,7 @@
 //   reported and tell families to confirm with MINEDUC.
 // TIMEZONE: ECT (UTC-5) on the mainland, no daylight saving —
 // EIGHT HOURS behind Nairobi, same as Colombia and Peru. Our teaching
-// lands in the ECUADORIAN MORNING only. Ecuadorian schools commonly
+// Two teaching teams = classes available across the full day. Ecuadorian schools commonly
 // run jornada matutina and vespertina, so a vespertina student has
 // mornings free. Galápagos runs UTC-6, an hour further.
 // MARKET NOTE: Quito and Guayaquil hold the international tier
@@ -142,7 +142,7 @@ export const ECUADOR_CITIES = [
       { q: 'Is homeschooling legal in Ecuador?', a: 'Ecuador names educación en casa among the recognised modalities and regulates it — the foundational instrument is Acuerdo Ministerial No. 0067-13-A of 2013, with the current framework in the 2023 acuerdos. It is treated as non-formal distance education and is the family\'s exclusive responsibility, with official recognition obtained by sitting evaluations before the education system. Confirm your own position with MINEDUC and your distrito educativo, because families who have not met the conditions have faced enforcement.' },
       { q: 'What is the difference between educación abierta and educación en casa?', a: 'Educación abierta means the child is formally enrolled at an accredited Ecuadorian school licensed to offer a distance programme — often the more practical route for expatriate families. Educación en casa is non-formal, developed under the family\'s own responsibility, with learning accredited by evaluation before the system. They are separate offerings and choosing the wrong one creates real difficulty.' },
       { q: 'Can Smartious provide educación en casa for us?', a: 'No, and the regulation is explicit about why. Article 31 provides that a school may not offer homeschooling as though it were an ordinary school modality, nor directly issue promotions or títulos for that service — and educación en casa is the family\'s exclusive responsibility. We are not an accredited Ecuadorian institution. We teach Cambridge, Edexcel, IB and AP qualifications alongside whatever Ecuadorian arrangement a family holds.' },
-      { q: 'What are the class times?', a: 'We are eight hours ahead, so our classes land in the Ecuadorian morning. For a student in jornada vespertina that is the free half of the day. After-school is not possible from our side and we say so upfront.' },
+      { q: 'What are the class times?', a: 'We are eight hours ahead, so our classes land in the Ecuadorian morning. For a student in jornada vespertina that is the free half of the day. After-school and morning blocks are both available, since we run two teaching teams in different time zones.' },
     ],
   },
 
