@@ -3203,6 +3203,13 @@ function ExamsTab({ user, toast, goTo, store }) {
   const [realResult, setRealResult] = useState(null)
   const [realIntegrity, setRealIntegrity] = useState({ tabSwitches: 0, copyPasteAttempts: 0 })
   const realStartTimeRef = useRef(null)
+  // Autosave status, surfaced to the student so they can see their work
+  // is being kept. Silence here reads as data loss even when nothing is
+  // wrong, so the indicator matters as much as the saving does.
+  const [realSavedAt, setRealSavedAt] = useState(null)
+  const [realSaving, setRealSaving] = useState(false)
+  const realAnswersRef = useRef({})
+  const realIntegrityRef = useRef({ tabSwitches: 0, copyPasteAttempts: 0 })
 
   // Build the unified question list a real exam needs to render:
   // bank questions (full docs from server) followed by custom questions
@@ -3248,9 +3255,31 @@ function ExamsTab({ user, toast, goTo, store }) {
 
       setRealExam(exam)
       setRealBankQuestions(bank)
-      setRealAnswers({})
       setRealResult(null)
-      setRealIntegrity({ tabSwitches: 0, copyPasteAttempts: 0 })
+
+      // Restore anything autosaved on a previous attempt at this sitting.
+      // A student whose browser crashed or whose connection dropped comes
+      // back to their work rather than a blank paper.
+      const restored = {}
+      ;(sub?.answers || []).forEach(a => {
+        if (!a?.questionRef) return
+        const key = (a.partPath && a.partPath.length)
+          ? `${a.questionRef}::${a.partPath.join('.')}`
+          : a.questionRef
+        restored[key] = { answerText: a.answerText || '', selectedOption: a.selectedOption || '' }
+      })
+      setRealAnswers(restored)
+      if (Object.keys(restored).length) {
+        toast?.ok?.(`Restored ${Object.keys(restored).length} saved answer(s) from your last session.`)
+      }
+
+      // Integrity counters resume from the server so closing the tab
+      // cannot be used to reset them.
+      setRealIntegrity({
+        tabSwitches: Number(sub?.tabSwitches) || 0,
+        copyPasteAttempts: Number(sub?.copyPasteAttempts) || 0,
+      })
+      setRealSavedAt(sub?.lastSavedAt ? new Date(sub.lastSavedAt) : null)
 
       // Time remaining: durationMins - secondsSinceSubmissionStart
       // (so refresh doesn't reset; honours the submission record's startedAt)
@@ -3268,6 +3297,64 @@ function ExamsTab({ user, toast, goTo, store }) {
       toast?.error?.('Could not start: ' + msg)
     }
   }
+
+  // Keep refs in step with state so the autosave interval always sends
+  // the latest answers without needing to be torn down and rebuilt.
+  useEffect(() => { realAnswersRef.current = realAnswers }, [realAnswers])
+  useEffect(() => { realIntegrityRef.current = realIntegrity }, [realIntegrity])
+
+  /**
+   * AUTOSAVE. Answers previously lived only in React state and the only
+   * write was the final submit, so a crashed tab or a dropped connection
+   * lost the entire paper. Saves every 25 seconds, and immediately when
+   * the tab is hidden or the window is about to close.
+   */
+  const realExamRef = useRef(null)
+  useEffect(() => { realExamRef.current = realExam }, [realExam])
+
+  const saveRealProgress = useCallback(async (silent = true) => {
+    const exam = realExamRef.current
+    if (!exam?._id) return
+    const payload = Object.entries(realAnswersRef.current || {}).map(([key, v]) => {
+      const [questionRef, path] = key.split('::')
+      return {
+        questionRef,
+        partPath: path ? path.split('.').map(Number) : [],
+        answerText: v?.answerText || '',
+        selectedOption: v?.selectedOption || '',
+      }
+    })
+    if (!payload.length) return
+    try {
+      if (!silent) setRealSaving(true)
+      const { data } = await api.post('/exams/' + exam._id + '/save', {
+        answers: payload,
+        tabSwitches: realIntegrityRef.current.tabSwitches,
+        copyPasteAttempts: realIntegrityRef.current.copyPasteAttempts,
+      })
+      if (data?.success) setRealSavedAt(new Date(data.data?.savedAt || Date.now()))
+    } catch (e) {
+      // Never interrupt a student mid-paper for a failed autosave; the
+      // next tick retries and the final submit carries everything anyway.
+      console.warn('[exam autosave] failed:', e?.response?.data?.message || e.message)
+    } finally { setRealSaving(false) }
+  }, [])
+
+  useEffect(() => {
+    if (stage !== 'real-sitting') return
+    const id = setInterval(() => saveRealProgress(true), 25000)
+    const onHide = () => { if (document.hidden) saveRealProgress(true) }
+    const onUnload = () => { saveRealProgress(true) }
+    document.addEventListener('visibilitychange', onHide)
+    window.addEventListener('beforeunload', onUnload)
+    return () => {
+      clearInterval(id)
+      document.removeEventListener('visibilitychange', onHide)
+      window.removeEventListener('beforeunload', onUnload)
+      saveRealProgress(true)          // save on leaving the sitting view
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stage])
 
   // Countdown for the real exam timer. Auto-submits at zero.
   useEffect(() => {
@@ -3489,6 +3576,24 @@ function ExamsTab({ user, toast, goTo, store }) {
             animation: lowTime ? 'pulse 1s infinite' : 'none',
           }}>
             {formatMSS(realTimeLeft)}
+          </div>
+          {/* Autosave indicator. A student who cannot see that work is
+              being kept assumes it is not, so this is part of the
+              feature rather than decoration. */}
+          <div style={{
+            fontSize: 11, fontWeight: 600, color: 'var(--muted)',
+            display: 'flex', alignItems: 'center', gap: 6, marginTop: 4,
+          }}>
+            <span style={{
+              width: 7, height: 7, borderRadius: '50%',
+              background: realSaving ? '#D97706' : (realSavedAt ? '#059669' : '#94A3B8'),
+              flexShrink: 0,
+            }}/>
+            {realSaving
+              ? 'Saving\u2026'
+              : realSavedAt
+                ? `Answers saved ${realSavedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+                : 'Answers save automatically'}
           </div>
           <div style={{ flex:1, minWidth:200 }}>
             <div style={{ fontWeight:700, fontSize:15, color:'var(--s900)' }}>{realExam.title}</div>
