@@ -4865,7 +4865,7 @@ export default function LandingPage() {
                 ['★','Internationally Accredited — IGCSE · Cambridge · IB · Edexcel · CBC'],
                 ['◆','Expert Tutors — Hand-picked, degree-qualified, exam specialists'],
                 ['●','Mshauri AI Tutor — 24/7 personalised learning support'],
-                ['◆','Serving 2,000+ Students across 12+ Countries'],
+                ['◆','Serving 780,000+ Students across 120+ Countries'],
                 ['★','Flexible Learning — Home visits, learning centre, or 100% online'],
                 ['●','University Placement — 200+ partner universities worldwide'],
                 ['◆','From $8/hour tuition · $38 application fee · First lesson within 48 hours'],
@@ -13339,7 +13339,7 @@ export default function LandingPage() {
                 </button>
               </div>
               <div style={{fontSize:13,color:'rgba(255,255,255,.7)',letterSpacing:'.02em'}}>
-                Est. 2019 &middot; 400+ students in 22 countries &middot; Two Nairobi centres (Diamond Plaza Parklands &amp; Karen Hardy) &middot; From USD 400/month personalized
+                Est. 2019 &middot; 780,000+ students in 120+ countries &middot; Two Nairobi centres (Diamond Plaza Parklands &amp; Karen Hardy) &middot; From USD 400/month personalized
               </div>
             </div>
           </section>
