@@ -140,6 +140,8 @@ const HREFLANG_MAP = {
   'dominican-republic':'en-do',
   uruguay:'en-uy',
   guatemala:'en-gt',
+  paraguay:'en-py',
+  bolivia:'en-bo',
   usa:'en-us',
   canada:'en-ca',
 }
