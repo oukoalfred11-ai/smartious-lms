@@ -7567,14 +7567,46 @@ function MyResultsTab({ user, toast, setPage }) {
     const load = async () => {
       setLoading(true)
       try {
-        const { data } = await api.get('/exams/submissions/my')
+        // My Results now covers BOTH exams and homework. A student thinks
+        // of "my results" as everything a teacher has marked, and having
+        // homework grades reachable only from the homework tab meant a
+        // term's marked work was scattered across two screens.
+        const [exRes, hwRes] = await Promise.allSettled([
+          api.get('/exams/submissions/my'),
+          api.get('/homework/student/list'),
+        ])
         if (cancelled) return
-        if (data?.success) {
-          setResults(data.data?.submissions || [])
-        } else {
-          toast?.error?.(data?.message || 'Failed to load results.')
-          setResults([])
+
+        const examRows = exRes.status === 'fulfilled' && exRes.value?.data?.success
+          ? (exRes.value.data.data?.submissions || []).map(r => ({ ...r, kind: 'exam' }))
+          : []
+
+        // Homework arrives as assignments; only marked ones are results.
+        const hwRows = hwRes.status === 'fulfilled' && hwRes.value?.data?.success
+          ? (hwRes.value.data.homework || [])
+              .filter(h => h.mySubmission && ['graded', 'returned'].includes(h.mySubmission.status))
+              .map(h => {
+                const sub = h.mySubmission
+                const possible = Number(sub.totalPossible) || 0
+                const awarded  = Number(sub.totalAwarded)  || 0
+                return {
+                  kind: 'homework',
+                  _id: sub._id || h._id,
+                  homeworkId: h._id,
+                  examId: { title: h.title, subject: h.subject, curriculum: h.curriculum, grade: h.grade },
+                  totalScore: awarded,
+                  maxScore: possible,
+                  percentage: possible ? Math.round((awarded / possible) * 100) : 0,
+                  status: sub.status,
+                  submittedAt: sub.submittedAt || h.dueAt,
+                }
+              })
+          : []
+
+        if (exRes.status === 'rejected' && hwRes.status === 'rejected') {
+          toast?.error?.('Could not load results.')
         }
+        setResults([...examRows, ...hwRows])
       } catch (e) {
         if (cancelled) return
         console.error('[results] load failed:', e?.response?.data?.message || e.message)
@@ -7811,15 +7843,20 @@ function MyResultsTab({ user, toast, setPage }) {
 
           return (
             <div key={r._id} className="card" style={{
-              padding:14, cursor: isGraded ? 'pointer' : 'default',
+              padding:14, cursor: (isGraded && r.kind !== 'homework') ? 'pointer' : 'default',
               borderLeft:'4px solid ' + subjCol,
               opacity: isGraded ? 1 : .75,
               transition:'transform .15s',
             }}
-              onMouseEnter={(e) => { if (isGraded) e.currentTarget.style.transform = 'translateX(2px)' }}
+              onMouseEnter={(e) => { if (isGraded && r.kind !== 'homework') e.currentTarget.style.transform = 'translateX(2px)' }}
               onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateX(0)' }}
-              onClick={() => isGraded && setSelectedSubId(r._id)}
-              title={isGraded ? 'Click for full breakdown' : 'Awaiting teacher review'}
+              // Only exam rows open the breakdown. Homework results have no
+              // exam-detail endpoint, so a click would 404 — they show
+              // their score inline instead.
+              onClick={() => { if (isGraded && r.kind !== 'homework') setSelectedSubId(r._id) }}
+              title={r.kind === 'homework'
+                ? 'Homework result — open the Homework tab for the marked answers'
+                : isGraded ? 'Click for full breakdown' : 'Awaiting teacher review'}
             >
               <div style={{ display:'flex', alignItems:'center', gap:14, flexWrap:'wrap' }}>
                 <div style={{ flex:1, minWidth:200 }}>
@@ -7829,6 +7866,12 @@ function MyResultsTab({ user, toast, setPage }) {
                       fontSize:9.5, fontWeight:700, letterSpacing:'.06em',
                       padding:'2px 8px', borderRadius:99, textTransform:'uppercase',
                     }}>{exam?.subject || 'Subject'}</span>
+                    <span style={{
+                      background: r.kind === 'homework' ? '#EDE9FE' : '#DBEAFE',
+                      color:      r.kind === 'homework' ? '#5B21B6' : '#1E40AF',
+                      fontSize:9.5, fontWeight:700, letterSpacing:'.06em',
+                      padding:'2px 8px', borderRadius:99, textTransform:'uppercase',
+                    }}>{r.kind === 'homework' ? 'Homework' : 'Exam'}</span>
                     {!isGraded && (
                       <span style={{
                         background:'#FEF3C7', color:'#92400E',
@@ -7957,6 +8000,136 @@ function CircularRing({ percentage = 0, size = 64, stroke = 6, trackColor = '#E8
 // ─────────────────────────────────────────────────────────
 // MyResultDetail — premium per-result breakdown
 // ─────────────────────────────────────────────────────────
+/**
+ * ResultIcon — coloured SVG icons for the results screen.
+ *
+ * These replace emoji. Emoji are rendered by the operating system, so
+ * the same character is a flat glyph on Windows, a glossy 3D blob on
+ * Apple and something else again on Android — the product looks
+ * different on every device and cannot be brand-controlled. These are
+ * drawn once, use the Smartious palette, and are identical everywhere.
+ *
+ * Each is multi-tone (a soft fill plus a stronger stroke) so it reads
+ * as an illustration rather than a wireframe glyph at 26px.
+ */
+function ResultIcon({ name, size = 26 }) {
+  const p = { width: size, height: size, viewBox: '0 0 32 32', fill: 'none',
+              xmlns: 'http://www.w3.org/2000/svg', style: { display: 'block' } }
+  const S = { strokeLinecap: 'round', strokeLinejoin: 'round' }
+
+  switch (name) {
+    case 'questions': return (
+      <svg {...p}><rect x="7" y="4" width="18" height="24" rx="3" fill="#FDE7EA"/>
+        <rect x="7" y="4" width="18" height="24" rx="3" stroke="#C1121F" strokeWidth="1.8"/>
+        <rect x="12" y="2" width="8" height="5" rx="2" fill="#C1121F"/>
+        <path d="M12 14h8M12 19h5" stroke="#C1121F" strokeWidth="1.8" {...S}/></svg>)
+    case 'correct': return (
+      <svg {...p}><circle cx="16" cy="16" r="13" fill="#DCFCE7"/>
+        <circle cx="16" cy="16" r="13" stroke="#15803D" strokeWidth="1.8"/>
+        <path d="M10 16.5l4 4 8-8.5" stroke="#15803D" strokeWidth="2.6" {...S}/></svg>)
+    case 'wrong': return (
+      <svg {...p}><circle cx="16" cy="16" r="13" fill="#FEF3C7"/>
+        <circle cx="16" cy="16" r="13" stroke="#B45309" strokeWidth="1.8"/>
+        <path d="M11.5 11.5l9 9M20.5 11.5l-9 9" stroke="#B45309" strokeWidth="2.6" {...S}/></svg>)
+    case 'time': return (
+      <svg {...p}><circle cx="16" cy="16" r="13" fill="#DBEAFE"/>
+        <circle cx="16" cy="16" r="13" stroke="#1E40AF" strokeWidth="1.8"/>
+        <path d="M16 9v7.5l4.5 3" stroke="#1E40AF" strokeWidth="2.4" {...S}/></svg>)
+    case 'star': return (
+      <svg {...p}><path d="M16 3.5l3.9 7.9 8.7 1.3-6.3 6.1 1.5 8.6L16 23.3l-7.8 4.1 1.5-8.6-6.3-6.1 8.7-1.3z"
+        fill="#FEF0C7" stroke="#C9A030" strokeWidth="1.8" {...S}/></svg>)
+
+    // ── Topic icons ──
+    case 'skeleton': return (
+      <svg {...p}><circle cx="16" cy="9" r="5.5" fill="#F1F5F9" stroke="#64748B" strokeWidth="1.8"/>
+        <path d="M16 14.5v13M11 18h10M12 27l4-3 4 3" stroke="#64748B" strokeWidth="2" {...S}/>
+        <circle cx="14" cy="8.5" r="1.2" fill="#64748B"/><circle cx="18" cy="8.5" r="1.2" fill="#64748B"/></svg>)
+    case 'muscle': return (
+      <svg {...p}><path d="M7 19c0-6 4-10 9-10 5 0 9 3 9 8 0 5-4 8-9 8-4 0-9-2-9-6z" fill="#FEE2E2" stroke="#DC2626" strokeWidth="1.8"/>
+        <path d="M12 15c2 2 5 2 7 0" stroke="#DC2626" strokeWidth="1.8" {...S}/></svg>)
+    case 'heart': return (
+      <svg {...p}><path d="M16 27S4 20 4 12.5C4 8.4 7.1 5.5 10.8 5.5c2.2 0 4.1 1.1 5.2 2.8 1.1-1.7 3-2.8 5.2-2.8C24.9 5.5 28 8.4 28 12.5 28 20 16 27 16 27z"
+        fill="#FEE2E2" stroke="#DC2626" strokeWidth="1.8" {...S}/></svg>)
+    case 'lungs': return (
+      <svg {...p}><path d="M16 5v11" stroke="#0891B2" strokeWidth="2" {...S}/>
+        <path d="M13 13c0 6-2 9-5 11-2 1.3-3-.5-3-2.5 0-5 1.5-9 4-11 2-1.6 4-.5 4 2.5z" fill="#CFFAFE" stroke="#0891B2" strokeWidth="1.8" {...S}/>
+        <path d="M19 13c0 6 2 9 5 11 2 1.3 3-.5 3-2.5 0-5-1.5-9-4-11-2-1.6-4-.5-4 2.5z" fill="#CFFAFE" stroke="#0891B2" strokeWidth="1.8" {...S}/></svg>)
+    case 'brain': return (
+      <svg {...p}><path d="M12 6c-3 0-5 2-5 4.5 0 .8.2 1.5.6 2.1C6 13.6 5 15.2 5 17c0 2.4 1.8 4.4 4.2 4.9.3 2.3 2.3 4.1 4.8 4.1 1.2 0 2.2-.4 3-1V7c-.8-.6-1.8-1-3-1z"
+        fill="#F3E8FF" stroke="#7C3AED" strokeWidth="1.8" {...S}/>
+        <path d="M20 6c3 0 5 2 5 4.5 0 .8-.2 1.5-.6 2.1C26 13.6 27 15.2 27 17c0 2.4-1.8 4.4-4.2 4.9-.3 2.3-2.3 4.1-4.8 4.1-1.2 0-2.2-.4-3-1V7c.8-.6 1.8-1 3-1z"
+        fill="#EDE9FE" stroke="#7C3AED" strokeWidth="1.8" {...S}/></svg>)
+    case 'digest': return (
+      <svg {...p}><path d="M13 5v5c-4 1-6 4-6 8 0 5 4 9 9 9 4 0 7-2 8-5" fill="#FEF3C7" stroke="#D97706" strokeWidth="1.8" {...S}/>
+        <path d="M13 5h5c3 0 5 2 5 5v6" stroke="#D97706" strokeWidth="1.8" {...S}/></svg>)
+    case 'plant': return (
+      <svg {...p}><path d="M16 28V13" stroke="#15803D" strokeWidth="2.2" {...S}/>
+        <path d="M16 17c-5 0-8-3-8-8 5 0 8 3 8 8z" fill="#BBF7D0" stroke="#15803D" strokeWidth="1.7" {...S}/>
+        <path d="M16 14c5 0 8-3 8-8-5 0-8 3-8 8z" fill="#86EFAC" stroke="#15803D" strokeWidth="1.7" {...S}/></svg>)
+    case 'atom': return (
+      <svg {...p}><circle cx="16" cy="16" r="3" fill="#7C3AED"/>
+        <ellipse cx="16" cy="16" rx="12" ry="5" stroke="#A855F7" strokeWidth="1.8"/>
+        <ellipse cx="16" cy="16" rx="12" ry="5" stroke="#A855F7" strokeWidth="1.8" transform="rotate(60 16 16)"/>
+        <ellipse cx="16" cy="16" rx="12" ry="5" stroke="#A855F7" strokeWidth="1.8" transform="rotate(120 16 16)"/></svg>)
+    case 'energy': return (
+      <svg {...p}><path d="M18 3L7 18h7l-2 11 11-15h-7z" fill="#FEF08A" stroke="#CA8A04" strokeWidth="1.8" {...S}/></svg>)
+    case 'force': return (
+      <svg {...p}><path d="M9 6h5v11a5 5 0 0 0 4 0V6h5v11a10 10 0 0 1-14 0z" fill="#E0E7FF" stroke="#4338CA" strokeWidth="1.8" {...S}/>
+        <path d="M9 6v4h5V6M18 6v4h5V6" stroke="#4338CA" strokeWidth="1.8" {...S}/></svg>)
+    case 'light': return (
+      <svg {...p}><path d="M16 4a8 8 0 0 0-5 14.2V22h10v-3.8A8 8 0 0 0 16 4z" fill="#FEF9C3" stroke="#CA8A04" strokeWidth="1.8" {...S}/>
+        <path d="M12.5 25h7M13.5 28h5" stroke="#CA8A04" strokeWidth="2" {...S}/></svg>)
+    case 'space': return (
+      <svg {...p}><circle cx="16" cy="16" r="7" fill="#DBEAFE" stroke="#1D4ED8" strokeWidth="1.8"/>
+        <ellipse cx="16" cy="16" rx="13" ry="4.5" stroke="#1D4ED8" strokeWidth="1.8" transform="rotate(-22 16 16)"/></svg>)
+    case 'water': return (
+      <svg {...p}><path d="M16 3.5s9 10 9 15.5a9 9 0 0 1-18 0C7 13.5 16 3.5 16 3.5z" fill="#BFDBFE" stroke="#1D4ED8" strokeWidth="1.8" {...S}/></svg>)
+    case 'number': return (
+      <svg {...p}><rect x="4" y="4" width="24" height="24" rx="5" fill="#FDE7EA" stroke="#C1121F" strokeWidth="1.8"/>
+        <path d="M12 9v14M20 9v14M8 14h16M8 19h16" stroke="#C1121F" strokeWidth="1.8" {...S}/></svg>)
+    case 'algebra': return (
+      <svg {...p}><rect x="4" y="4" width="24" height="24" rx="5" fill="#EDE9FE" stroke="#6D28D9" strokeWidth="1.8"/>
+        <path d="M11 11l10 10M21 11L11 21" stroke="#6D28D9" strokeWidth="2.4" {...S}/></svg>)
+    case 'geometry': return (
+      <svg {...p}><path d="M5 25L16 5l11 20z" fill="#CFFAFE" stroke="#0E7490" strokeWidth="1.8" {...S}/>
+        <path d="M11 25a5 5 0 0 1 5-5" stroke="#0E7490" strokeWidth="1.6" {...S}/></svg>)
+    case 'measure': return (
+      <svg {...p}><rect x="3" y="11" width="26" height="10" rx="2.5" fill="#FEF3C7" stroke="#B45309" strokeWidth="1.8"/>
+        <path d="M9 11v4M14 11v6M19 11v4M24 11v6" stroke="#B45309" strokeWidth="1.7" {...S}/></svg>)
+    case 'stats': return (
+      <svg {...p}><rect x="4" y="16" width="6" height="12" rx="1.6" fill="#BFDBFE" stroke="#1D4ED8" strokeWidth="1.7"/>
+        <rect x="13" y="9" width="6" height="19" rx="1.6" fill="#93C5FD" stroke="#1D4ED8" strokeWidth="1.7"/>
+        <rect x="22" y="13" width="6" height="15" rx="1.6" fill="#BFDBFE" stroke="#1D4ED8" strokeWidth="1.7"/></svg>)
+    case 'money': return (
+      <svg {...p}><circle cx="16" cy="16" r="12" fill="#DCFCE7" stroke="#15803D" strokeWidth="1.8"/>
+        <path d="M16 9v14M12.5 12.5h6a2.8 2.8 0 0 1 0 5.6h-5a2.8 2.8 0 0 0 0 5.6h6" stroke="#15803D" strokeWidth="1.9" {...S}/></svg>)
+    case 'reading': return (
+      <svg {...p}><path d="M16 8.5C13.5 6.5 9.5 6 5 6.5v18C9.5 24 13.5 24.5 16 26.5V8.5z" fill="#FDE7EA" stroke="#C1121F" strokeWidth="1.8" {...S}/>
+        <path d="M16 8.5C18.5 6.5 22.5 6 27 6.5v18c-4.5-.5-8.5 0-11 2V8.5z" fill="#FEF0C7" stroke="#C1121F" strokeWidth="1.8" {...S}/></svg>)
+    case 'writing': return (
+      <svg {...p}><path d="M6 26l1.5-5.5L21 7a2.8 2.8 0 0 1 4 4L11.5 24.5z" fill="#FEF3C7" stroke="#B45309" strokeWidth="1.8" {...S}/>
+        <path d="M19.5 8.5l4 4" stroke="#B45309" strokeWidth="1.8" {...S}/></svg>)
+    case 'grammar': return (
+      <svg {...p}><rect x="4" y="6" width="24" height="20" rx="4" fill="#E0E7FF" stroke="#4338CA" strokeWidth="1.8"/>
+        <path d="M10 20l4-9 4 9M11.5 17h5M21 11v9" stroke="#4338CA" strokeWidth="1.9" {...S}/></svg>)
+    case 'speaking': return (
+      <svg {...p}><path d="M5 8.5A3.5 3.5 0 0 1 8.5 5h15A3.5 3.5 0 0 1 27 8.5v9a3.5 3.5 0 0 1-3.5 3.5H13l-6 5.5v-5.5A3.5 3.5 0 0 1 5 17.5z"
+        fill="#DCFCE7" stroke="#15803D" strokeWidth="1.8" {...S}/></svg>)
+    case 'history': return (
+      <svg {...p}><path d="M7 27V11l9-6 9 6v16z" fill="#FEF3C7" stroke="#B45309" strokeWidth="1.8" {...S}/>
+        <path d="M12 27v-8h8v8M4 27h24" stroke="#B45309" strokeWidth="1.8" {...S}/></svg>)
+    case 'geography': return (
+      <svg {...p}><circle cx="16" cy="16" r="12" fill="#DBEAFE" stroke="#1D4ED8" strokeWidth="1.8"/>
+        <path d="M4 16h24M16 4c3.5 4 3.5 20 0 24M16 4c-3.5 4-3.5 20 0 24" stroke="#1D4ED8" strokeWidth="1.6" {...S}/></svg>)
+    case 'computing': return (
+      <svg {...p}><rect x="3" y="6" width="26" height="17" rx="3" fill="#E0E7FF" stroke="#4338CA" strokeWidth="1.8"/>
+        <path d="M12 12l-3 3 3 3M20 12l3 3-3 3M10 27h12" stroke="#4338CA" strokeWidth="1.9" {...S}/></svg>)
+    default: return (
+      <svg {...p}><rect x="5" y="5" width="22" height="22" rx="5" fill="#F1F5F9" stroke="#64748B" strokeWidth="1.8"/>
+        <path d="M11 12h10M11 16h10M11 20h6" stroke="#64748B" strokeWidth="1.8" {...S}/></svg>)
+  }
+}
+
 function MyResultDetail({ subId, detail, loading, onBack }) {
   const [expandedAnswers, setExpandedAnswers] = useState({})
 
@@ -7992,6 +8165,30 @@ function MyResultDetail({ subId, detail, loading, onBack }) {
   const passed = pct >= 50
   const isGraded = sub.status === 'graded'
 
+  // ── Derived values for the results screen ────────────────
+  const avatarUrl = user?.avatar || ''
+  const firstName = (user?.firstName || '').trim()
+
+  // Encouragement is banded, and the low band is deliberately not
+  // "you failed". A result screen is where a child finds out how they
+  // did; the wording should tell the truth and still leave them able
+  // to try again.
+  const praise = pct >= 85
+    ? { headline:`Outstanding, ${firstName || 'well done'}!`, sub:"You're mastering this material.",
+        title:'Excellent Performance!', body:'You have a strong understanding of this topic. Keep it up!',
+        icon:'star', tintFg:'#15803D' }
+    : pct >= 70
+    ? { headline:`Great job, ${firstName || 'well done'}!`, sub:"You're making excellent progress.",
+        title:'Strong Result', body:'You handled most of this confidently. Review the topics below to push higher.',
+        icon:'star', tintFg:'#15803D' }
+    : pct >= 50
+    ? { headline:`Good effort, ${firstName || 'well done'}!`, sub:'A solid pass with room to grow.',
+        title:'Solid Pass', body:'You have the basics. The weaker topics below are where the next marks are.',
+        icon:'correct', tintFg:'#B45309' }
+    : { headline:`Keep going, ${firstName || 'you can do this'}.`, sub:'This one was tough — that happens.',
+        title:'Room to Improve', body:'Work through the topics below with your teacher, then try again.',
+        icon:'muscle', tintFg:'#B91C1C' }
+
   const findQuestion = (ref) => {
     if (!ref) return null
     if (ref.startsWith('custom:')) {
@@ -8000,6 +8197,77 @@ function MyResultDetail({ subId, detail, loading, onBack }) {
     }
     return bank.find(q => String(q._id) === String(ref)) || null
   }
+  // Counts. answers[] carries isCorrect per leaf once graded.
+  const stats = (() => {
+    const ans = sub.answers || []
+    const correct = ans.filter(a => a.isCorrect === true).length
+    const wrong   = ans.filter(a => a.isCorrect === false).length
+    const total   = ans.length || (exam?.totalQuestions || 0)
+    const secs    = Number(sub.timeSpentSecs) || 0
+    const timeStr = secs
+      ? `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`
+      : '\u2014'
+    return { total, correct, wrong, timeStr }
+  })()
+
+  // Topic breakdown, built from each answered question's topic tag.
+  // Marks are used rather than a right/wrong count so a part-marked
+  // long answer contributes proportionally.
+  const TOPIC_ICON = [
+    [/skelet|bone/i,'skeleton'], [/muscl/i,'muscle'], [/digest|stomach|nutri/i,'digest'],
+    [/circulat|heart|blood/i,'heart'], [/respirat|lung|breath/i,'lungs'],
+    [/nervous|brain|neuro|sense/i,'brain'], [/plant|photosynth|leaf|seed|flower/i,'plant'],
+    [/cell|microb|bacteri|life ?cycle|classif/i,'atom'],
+    [/energy|electric|circuit|magnet/i,'energy'], [/force|motion|friction|gravit/i,'force'],
+    [/light|optic|shadow|colour|color/i,'light'], [/sound|wave|hearing/i,'speaking'],
+    [/space|planet|earth|solar|moon|sun/i,'space'], [/water|rain|ocean|weather|state/i,'water'],
+    [/rock|geolog|soil|fossil/i,'history'],
+    [/number|arithmet|place value|fraction|decimal|percent|count/i,'number'],
+    [/algebra|equation|sequence|calculat/i,'algebra'],
+    [/geometr|shape|angle|symmetr|position|movement/i,'geometry'],
+    [/measure|mass|length|volume|time|capacit/i,'measure'],
+    [/statistic|data|graph|chart|probab/i,'stats'],
+    [/money|finance|cost|budget|ratio|proportion/i,'money'],
+    [/read|comprehen|fiction|non-fiction|text/i,'reading'],
+    [/writ|composit|essay|narrat|plan/i,'writing'],
+    [/grammar|punctuat|spell|vocabul|word|sentence/i,'grammar'],
+    [/poet|poem|verse/i,'writing'], [/speak|listen|discuss|present/i,'speaking'],
+    [/histor|past|ancient|civilisat/i,'history'], [/map|geograph|country|place/i,'geography'],
+    [/comput|program|algorithm|code|binary|network|data ?hand/i,'computing'],
+    [/chemi|element|reaction|acid|material|separat/i,'atom'],
+  ]
+  const iconForTopic = (t) => {
+    const hit = TOPIC_ICON.find(([re]) => re.test(t || ''))
+    return hit ? hit[1] : 'default'
+  }
+
+  const topicRows = (() => {
+    const acc = {}
+    ;(sub.answers || []).forEach(a => {
+      const q = findQuestion(a.questionRef)
+      const topic = (q?.topic || q?.subtopic || '').trim()
+      if (!topic) return
+      const leaf = findLeaf(q, a.partPath) || q
+      const possible = Number(leaf?.marks) || 1
+      const got = Number(a.marksAwarded) || 0
+      if (!acc[topic]) acc[topic] = { got: 0, possible: 0 }
+      acc[topic].got += got
+      acc[topic].possible += possible
+    })
+    return Object.entries(acc)
+      .filter(([, v]) => v.possible > 0)
+      .map(([topic, v]) => ({
+        topic,
+        // Spine topics read "Year 5 · Number — Place Value"; only the
+        // last segment is useful in a narrow column.
+        label: topic.split('\u2014').pop().split('\u00b7').pop().trim() || topic,
+        icon: iconForTopic(topic),
+        pct: Math.round((v.got / v.possible) * 100),
+      }))
+      .sort((a, b) => b.pct - a.pct)
+      .slice(0, 8)
+  })()
+
   const findLeaf = (question, partPath) => {
     if (!question || !Array.isArray(partPath) || partPath.length === 0) return null
     let current = { parts: question.parts || [] }
@@ -8025,121 +8293,223 @@ function MyResultDetail({ subId, detail, loading, onBack }) {
         Back to Results
       </button>
 
-      <div className="card" style={{
-        padding:0, marginBottom:18, overflow:'hidden',
+      {/* ── RESULTS HERO ────────────────────────────────────────
+          The student's own photo and a hand-drawn grade ring. A result
+          screen is the moment a child finds out how they did, so it
+          leads with encouragement and their name rather than a number. */}
+      <div className="card sm-glow sm-glow-card" style={{
+        padding:0, marginBottom:16, overflow:'hidden',
         boxShadow:'0 12px 40px rgba(125,16,37,.12)',
       }}>
-        <div style={{ height:6, background: subjCol }}/>
-        <div style={{ padding:'28px 32px' }}>
-          <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:8, flexWrap:'wrap' }}>
-            <span style={{
-              background: subjCol + '15', color: subjCol,
-              fontSize:10, fontWeight:800, letterSpacing:'.12em',
-              padding:'4px 10px', borderRadius:99, textTransform:'uppercase',
-            }}>{exam?.subject}</span>
-            <span style={{ fontSize:11.5, color:'#6B6B6B', fontWeight:600 }}>
-              {exam?.curriculum} &middot; {exam?.grade}
-            </span>
+        <div style={{
+          display:'grid', gridTemplateColumns:'minmax(0,1.15fr) auto',
+          gap:20, alignItems:'center',
+          padding:'26px 30px',
+          background:'linear-gradient(105deg, #FDFAF4 0%, #FBF3F4 62%, #F8E9EB 100%)',
+        }}>
+          <div style={{ minWidth:0 }}>
+            <h1 style={{ fontFamily:"'Instrument Serif',serif", fontSize:34, fontWeight:400,
+                         margin:0, lineHeight:1.05, color:'#1A1A1A' }}>
+              Results
+            </h1>
+            <div style={{ fontSize:22, fontWeight:800, color:'#C1121F', marginTop:4, lineHeight:1.2 }}>
+              {praise.headline}
+            </div>
+            <div style={{ fontSize:14, color:'#4A4A4A', marginTop:5 }}>
+              {praise.sub}
+            </div>
+            <div style={{ width:56, height:4, background:'#C1121F', borderRadius:2, marginTop:14 }}/>
           </div>
-          <h1 className="serif" style={{ fontSize:32, fontWeight:400, margin:0, lineHeight:1.1, color:'#1A1A1A' }}>
-            {exam?.title}
-          </h1>
-          <div style={{ fontSize:12.5, color:'#6B6B6B', marginTop:6 }}>
-            Submitted {sub.submittedAt ? new Date(sub.submittedAt).toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' }) : '—'}
-            {exam?.teacherId && <> &middot; Graded by {exam.teacherId.firstName} {exam.teacherId.lastName}</>}
+
+          <div style={{ display:'flex', alignItems:'center', gap:14, flexShrink:0 }}>
+            {avatarUrl && (
+              <img src={avatarUrl} alt=""
+                onError={e => { e.currentTarget.style.display = 'none' }}
+                style={{ width:96, height:96, borderRadius:'50%', objectFit:'cover',
+                         border:'4px solid #fff', boxShadow:'0 8px 24px rgba(0,0,0,.14)' }}/>
+            )}
+            {/* Hand-circled grade, as a teacher would mark a paper. */}
+            <div style={{ position:'relative', width:118, height:104, flexShrink:0 }}>
+              <svg viewBox="0 0 130 116" style={{ position:'absolute', inset:0, width:'100%', height:'100%' }}>
+                <ellipse cx="66" cy="60" rx="52" ry="45" fill="none" stroke="#C1121F" strokeWidth="5"
+                  strokeLinecap="round" transform="rotate(-6 66 60)"
+                  strokeDasharray="300" strokeDashoffset="14"/>
+                <line x1="17" y1="20" x2="7"  y2="10" stroke="#C1121F" strokeWidth="4.5" strokeLinecap="round"/>
+                <line x1="27" y1="13" x2="21" y2="2"  stroke="#C1121F" strokeWidth="4.5" strokeLinecap="round"/>
+              </svg>
+              <div style={{
+                position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center',
+                fontFamily:"'Instrument Serif',serif", fontSize:44, color:'#C1121F', lineHeight:1,
+                paddingBottom:4,
+              }}>
+                {sub.grade || (pct >= 50 ? 'P' : '\u2014')}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── DETAIL + TOPIC BREAKDOWN ───────────────────────────── */}
+      <style>{`@media (max-width: 860px) { .res-split { grid-template-columns: 1fr !important; } }`}</style>
+      <div style={{ display:'grid', gridTemplateColumns:'minmax(0,1.5fr) minmax(0,1fr)', gap:16, marginBottom:16 }}
+           className="res-split">
+        <div className="card sm-glow sm-glow-card" style={{ padding:'22px 26px' }}>
+          <div style={{ display:'flex', justifyContent:'space-between', gap:14, flexWrap:'wrap' }}>
+            <div style={{ minWidth:0 }}>
+              <div style={{ fontSize:19, fontWeight:800, color:'#1A1A1A', lineHeight:1.25 }}>
+                {exam?.subject}{exam?.title ? ' \u2013 ' + exam.title : ''}
+              </div>
+              <div style={{ fontSize:13, color:'#6B6B6B', marginTop:3 }}>
+                {exam?.curriculum ? exam.curriculum + ' \u00b7 ' : ''}{exam?.grade}
+              </div>
+            </div>
+            <div style={{ textAlign:'right' }}>
+              <div style={{ fontSize:12.5, color:'#6B6B6B' }}>Completed on</div>
+              <div style={{ fontSize:14, fontWeight:700, color:'#C1121F' }}>
+                {sub.submittedAt ? new Date(sub.submittedAt).toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' }) : '\u2014'}
+              </div>
+            </div>
+          </div>
+
+          <div style={{ height:1, background:'var(--border)', margin:'18px 0' }}/>
+
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(132px, 1fr))', gap:6 }}>
+            {[
+              ['Total Questions', stats.total,   'questions'],
+              ['Correct Answers', stats.correct, 'correct'],
+              ['Wrong Answers',   stats.wrong,   'wrong'],
+              ['Time Taken',      stats.timeStr, 'time'],
+            ].map(([label, value, icon]) => (
+              <div key={label} style={{ display:'flex', alignItems:'center', gap:11, padding:'6px 4px' }}>
+                <span style={{
+                  width:46, height:46, flexShrink:0,
+                  display:'flex', alignItems:'center', justifyContent:'center',
+                }}><ResultIcon name={icon} size={38} /></span>
+                <div style={{ minWidth:0 }}>
+                  <div style={{ fontSize:11.5, color:'#6B6B6B', fontWeight:600 }}>{label}</div>
+                  <div style={{ fontSize:21, fontWeight:800, color:'#1A1A1A', lineHeight:1.15 }}>{value}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ marginTop:20 }}>
+            <div style={{ fontSize:15, fontWeight:700, color:'#1A1A1A', marginBottom:8 }}>
+              Performance Overview
+            </div>
+            <div style={{ display:'flex', alignItems:'center', gap:14 }}>
+              <div style={{ flex:1, height:10, background:'#EDEDED', borderRadius:99, overflow:'hidden' }}>
+                <div style={{
+                  width:`${Math.max(0, Math.min(100, pct))}%`, height:'100%', borderRadius:99,
+                  background: pct >= 70 ? '#22C55E' : pct >= 50 ? '#C9A030' : '#EF4444',
+                  transition:'width .6s ease',
+                }}/>
+              </div>
+              <div style={{ fontSize:21, fontWeight:800, color: pct >= 70 ? '#15803D' : pct >= 50 ? '#B45309' : '#B91C1C' }}>
+                {pct}%
+              </div>
+            </div>
           </div>
 
           <div style={{
-            display:'flex', alignItems:'center', justifyContent:'center', gap:48,
-            marginTop:32, marginBottom:16, flexWrap:'wrap',
+            marginTop:18, background:'#F5F5F3', borderRadius:12, padding:'16px 18px',
+            display:'flex', gap:13, alignItems:'flex-start',
           }}>
-            <div style={{ position:'relative' }}>
-              <CircularRing
-                percentage={pct}
-                size={200}
-                stroke={14}
-                trackColor="#FBF6E3"
-                fillColor={pct >= 70 ? '#15803D' : pct >= 50 ? '#C9A030' : '#B45309'}
-              />
-              {sub.grade && (
-                <div style={{
-                  position:'absolute',
-                  bottom:-8, left:'50%', transform:'translateX(-50%)',
-                  background: pct >= 70 ? '#15803D' : pct >= 50 ? '#7D1025' : '#B45309',
-                  color:'#fff',
-                  fontFamily:"'Instrument Serif',serif",
-                  fontSize:24, fontWeight:400,
-                  width:56, height:56, borderRadius:'50%',
-                  display:'flex', alignItems:'center', justifyContent:'center',
-                  boxShadow:'0 6px 16px rgba(0,0,0,.2)',
-                  border:'3px solid #fff',
-                }}>
-                  {sub.grade}
-                </div>
-              )}
-            </div>
-            <div style={{ display:'flex', flexDirection:'column', gap:12, minWidth:160 }}>
-              <div>
-                <div className="mono" style={{ fontSize:32, fontWeight:700, color:'#1A1A1A', lineHeight:1 }}>
-                  {sub.totalScore}/{sub.maxScore}
-                </div>
-                <div style={{ fontSize:10.5, fontWeight:700, letterSpacing:'.1em', textTransform:'uppercase', color:'#6B6B6B', marginTop:4 }}>
-                  Total Marks
-                </div>
-              </div>
-              {sub.timeSpentSecs > 0 && (
-                <div>
-                  <div className="mono" style={{ fontSize:20, fontWeight:700, color:'#1A1A1A' }}>
-                    {Math.round(sub.timeSpentSecs / 60)} min
-                  </div>
-                  <div style={{ fontSize:10.5, fontWeight:700, letterSpacing:'.1em', textTransform:'uppercase', color:'#6B6B6B', marginTop:2 }}>
-                    Time Spent
-                  </div>
-                </div>
-              )}
-              <div>
-                <div style={{
-                  display:'inline-block',
-                  background: passed ? '#DCFCE7' : '#FEF3C7',
-                  color:      passed ? '#15803D' : '#92400E',
-                  padding:'6px 14px', borderRadius:99,
-                  fontSize:12, fontWeight:700,
-                }}>
-                  {passed ? 'PASSED' : 'Try Again'}
-                </div>
+            <span style={{
+              width:44, height:44, flexShrink:0,
+              display:'flex', alignItems:'center', justifyContent:'center',
+            }}><ResultIcon name={praise.icon} size={40} /></span>
+            <div style={{ minWidth:0 }}>
+              <div style={{ fontSize:15.5, fontWeight:800, color:praise.tintFg }}>{praise.title}</div>
+              <div style={{ fontSize:13.5, color:'#4A4A4A', marginTop:3, lineHeight:1.55 }}>
+                {praise.body}
               </div>
             </div>
           </div>
         </div>
 
-        {isGraded && sub.feedback && (
-          <div style={{
-            background:'#FBF6E3',
-            borderTop:'1px solid #C9A030',
-            padding:'20px 32px',
-            position:'relative',
-          }}>
-            <div style={{
-              position:'absolute', top:14, left:18,
-              fontSize:64, color:'#C9A030', opacity:.25,
-              fontFamily:"'Instrument Serif',serif", lineHeight:1,
-            }}>"</div>
-            <div style={{ paddingLeft:32 }}>
-              <div style={{ fontSize:10.5, fontWeight:700, letterSpacing:'.12em', textTransform:'uppercase', color:'#7D1025', marginBottom:6 }}>
-                Teacher Feedback
-              </div>
-              <div className="serif" style={{ fontSize:16, color:'#1A1A1A', lineHeight:1.55, fontStyle:'italic' }}>
-                {sub.feedback}
-              </div>
-              {exam?.teacherId && (
-                <div style={{ fontSize:11.5, color:'#7D1025', marginTop:8, fontWeight:600 }}>
-                  &mdash; {exam.teacherId.firstName} {exam.teacherId.lastName}
-                </div>
-              )}
-            </div>
+        {/* Topic breakdown, computed from each answer's question topic. */}
+        <div className="card sm-glow sm-glow-card" style={{ padding:'22px 24px', display:'flex', flexDirection:'column' }}>
+          <div style={{ fontSize:17, fontWeight:800, color:'#1A1A1A', marginBottom:14 }}>
+            Topic Breakdown
           </div>
-        )}
+          {topicRows.length === 0 ? (
+            <div style={{ fontSize:13, color:'#6B6B6B', lineHeight:1.6 }}>
+              This paper's questions are not tagged by topic, so a breakdown is not available.
+            </div>
+          ) : (
+            <div style={{ display:'flex', flexDirection:'column', gap:13, flex:1 }}>
+              {topicRows.map(t => (
+                <div key={t.topic} style={{ display:'flex', gap:11, alignItems:'center' }}>
+                  <span style={{ width:34, flexShrink:0, display:'flex', justifyContent:'center' }}>
+                    <ResultIcon name={t.icon} size={30} />
+                  </span>
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <div style={{ fontSize:13, fontWeight:600, color:'#1A1A1A',
+                                  whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
+                      {t.label}
+                    </div>
+                    <div style={{ display:'flex', alignItems:'center', gap:9, marginTop:4 }}>
+                      <div style={{ flex:1, height:7, background:'#EDEDED', borderRadius:99, overflow:'hidden' }}>
+                        <div style={{
+                          width:`${t.pct}%`, height:'100%', borderRadius:99,
+                          background: t.pct >= 70 ? '#22C55E' : t.pct >= 50 ? '#C9A030' : '#EF4444',
+                        }}/>
+                      </div>
+                      <span style={{ fontSize:12.5, fontWeight:700, color:'#4A4A4A', minWidth:34, textAlign:'right' }}>
+                        {t.pct}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <button onClick={() => window.print()}
+            style={{
+              marginTop:18, width:'100%', background:'#C1121F', color:'#fff', border:'none',
+              borderRadius:99, padding:'13px 20px', fontSize:14, fontWeight:800, cursor:'pointer',
+              display:'flex', alignItems:'center', justifyContent:'center', gap:9,
+              boxShadow:'0 8px 22px rgba(193,18,31,.28)',
+            }}>
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Download Report
+          </button>
+        </div>
       </div>
+
+      {/* Teacher feedback, now a card of its own — it used to be
+          nested inside the old results header. */}
+      {/* Teacher feedback, now a card of its own — it used to be
+          nested inside the old results header. */}
+      {isGraded && sub.feedback && (
+        <div className="card sm-glow sm-glow-card" style={{
+          background:'#FBF6E3', padding:'20px 32px',
+          position:'relative', marginBottom:16,
+        }}>
+          <div style={{
+            position:'absolute', top:14, left:18,
+            fontSize:64, color:'#C9A030', opacity:.25,
+            fontFamily:"'Instrument Serif',serif", lineHeight:1,
+          }}>&ldquo;</div>
+          <div style={{ paddingLeft:32 }}>
+            <div style={{ fontSize:10.5, fontWeight:700, letterSpacing:'.12em', textTransform:'uppercase', color:'#7D1025', marginBottom:6 }}>
+              Teacher Feedback
+            </div>
+            <div className="serif" style={{ fontSize:16, color:'#1A1A1A', lineHeight:1.55, fontStyle:'italic' }}>
+              {sub.feedback}
+            </div>
+            {exam?.teacherId && (
+              <div style={{ fontSize:11.5, color:'#7D1025', marginTop:8, fontWeight:600 }}>
+                &mdash; {exam.teacherId.firstName} {exam.teacherId.lastName}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <div style={{ marginBottom:10 }}>
         <h2 className="serif" style={{ fontSize:22, fontWeight:400, color:'#1A1A1A', marginBottom:4 }}>
