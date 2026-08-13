@@ -307,6 +307,97 @@ router.get('/student/list', auth, async (req, res) => {
     return res.status(500).json({ success: false, message: 'Failed to load homework.' });
   }
 });
+/**
+ * Strip everything a student must not see from a submission.
+ *
+ * aiSuggestion holds the AI's proposed mark and feedback. It is a
+ * suggestion for the TEACHER only — marksAwarded stays null until a
+ * teacher accepts or overrides it. Returning it to the student would
+ * show them a machine's opinion of their work, possibly a mark the
+ * teacher later disagreed with, and would undermine the teacher's
+ * judgement. The previous /my-submission route returned it raw.
+ */
+function studentSafeSubmission(sub) {
+  if (!sub) return null;
+  const s = sub.toObject ? sub.toObject() : { ...sub };
+  s.answers = (s.answers || []).map(a => {
+    const { aiSuggestion, ...rest } = a;
+    return rest;
+  });
+  return s;
+}
+
+// ─────────────────────────────────────────────────────────
+// GET /api/homework/submissions/my/:subId
+// One marked homework with its questions, for the results screen.
+// Mirrors /api/exams/submissions/my/:subId so My Results can open a
+// homework breakdown the same way it opens an exam one.
+// ─────────────────────────────────────────────────────────
+router.get('/submissions/my/:subId', auth, async (req, res) => {
+  try {
+    if (!isObjectId(req.params.subId)) {
+      return res.status(400).json({ success: false, message: 'Invalid submission ID.' });
+    }
+
+    const sub = await HomeworkSubmission.findOne({
+      _id: req.params.subId,
+      student: req.user._id,          // a student may only open their own
+    })
+      .populate({
+        path: 'homework',
+        select: 'title subject curriculum grade questions dueAt totalMarks createdBy',
+        populate: { path: 'createdBy', select: 'firstName lastName' },
+      })
+      .lean();
+
+    if (!sub) return res.status(404).json({ success: false, message: 'Submission not found.' });
+
+    const hw = sub.homework || {};
+
+    // Questions are snapshotted onto the homework, so the model answer a
+    // student sees is the one that was set at the time — later edits to
+    // the bank question cannot change a past result.
+    //
+    // correctAnswer and explanation ARE included: this screen is only
+    // reached after marking, and at that point seeing the right answer
+    // is the whole point of reviewing.
+    const questions = (hw.questions || []).map((q, i) => ({
+      index: i,
+      type: q.type,
+      questionText: q.questionText,
+      options: q.options || [],
+      correctAnswer: q.correctAnswer,
+      explanation: q.explanation || '',
+      marks: q.marks || 1,
+      topic: q.topic || '',
+      attachments: q.attachments || [],
+    }));
+
+    return res.json({
+      success: true,
+      data: {
+        submission: studentSafeSubmission(sub),
+        homework: {
+          _id: hw._id,
+          title: hw.title,
+          subject: hw.subject,
+          curriculum: hw.curriculum,
+          grade: hw.grade,
+          dueAt: hw.dueAt,
+          totalMarks: hw.totalMarks,
+          teacher: hw.createdBy
+            ? { firstName: hw.createdBy.firstName, lastName: hw.createdBy.lastName }
+            : null,
+        },
+        questions,
+      },
+    });
+  } catch (e) {
+    console.error('[homework submissions/my/:subId]', e.message);
+    return res.status(500).json({ success: false, message: 'Failed to load the result.' });
+  }
+});
+
 
 // ─────────────────────────────────────────────────────────
 // GET /api/homework/:id  — get one (teacher view)
@@ -517,8 +608,10 @@ router.get('/:id/my-submission', auth, async (req, res) => {
     if (!isObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'Invalid homework ID.' });
     }
-    const sub = await HomeworkSubmission.findOne({ homework: req.params.id, student: req.user._id });
-    return res.json({ success: true, submission: sub || null });
+    const sub = await HomeworkSubmission.findOne({ homework: req.params.id, student: req.user._id }).lean();
+    // Strip aiSuggestion — this route returned it raw, which handed the
+    // student the AI's proposed mark before the teacher had accepted it.
+    return res.json({ success: true, submission: studentSafeSubmission(sub) });
   } catch (e) {
     return res.status(500).json({ success: false, message: 'Failed to load submission.' });
   }
