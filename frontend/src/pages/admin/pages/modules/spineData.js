@@ -1744,7 +1744,7 @@ const IGCSE_ESL_0510 = [
   ]},
 ]
 
-const IGCSE_LIBRARY = [
+export const IGCSE_LIBRARY = [
   // Sciences (also in IGCSE_SCIENCES_LIBRARY for legacy compat)
   { match: /\bbiology\b/i,                       const_: IGCSE_BIOLOGY_0610,      source: 'IGCSE Biology — 130-lesson scheme (Cambridge 0610 & Edexcel 4BI1)' },
   // Chemistry is the first subject where the two boards genuinely differ:
