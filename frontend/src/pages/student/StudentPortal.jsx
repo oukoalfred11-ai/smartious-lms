@@ -7757,6 +7757,7 @@ function MyResultsTab({ user, toast, setPage }) {
         // the photo band never renders and the encouragement line reads
         // "Great job, well done!" with no name.
         user={user}
+        toast={toast}
       />
     )
   }
@@ -8248,7 +8249,7 @@ function ResultIcon({ name, size = 26 }) {
   }
 }
 
-function MyResultDetail({ subId, detail, loading, onBack, user }) {
+function MyResultDetail({ subId, detail, loading, onBack, user, toast }) {
   const [expandedAnswers, setExpandedAnswers] = useState({})
 
   if (loading || !detail) {
@@ -8310,6 +8311,41 @@ function MyResultDetail({ subId, detail, loading, onBack, user }) {
     : { headline:`Keep going, ${firstName || 'you can do this'}.`, sub:'This one was tough — that happens.',
         title:'Room to Improve', body:'Work through the topics below with your teacher, then try again.',
         icon:'muscle', tintFg:'#B91C1C' }
+
+  /**
+   * Download the branded PDF report.
+   *
+   * This button used to call window.print(), which produces a browser
+   * screenshot of the page — cropped panels, nav chrome, whatever is on
+   * screen. The server now renders a real document with the Smartious
+   * lockup, the marks and the teacher's comment.
+   *
+   * Fetched via axios rather than opened in a tab, because auth is a
+   * Bearer token in localStorage and a plain window.open sends no
+   * Authorization header.
+   */
+  const [reportBusy, setReportBusy] = useState(false)
+  const downloadReport = async () => {
+    if (!subId) return
+    setReportBusy(true)
+    try {
+      const isHw = detail?._kind === 'homework'
+      const res = await api.get(
+        (isHw ? '/homework/submissions/my/' : '/exams/submissions/my/') + subId + '/report.pdf',
+        { responseType: 'blob' })
+      const url = URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }))
+      const a = document.createElement('a')
+      const safe = String(exam?.title || 'result').replace(/[^a-z0-9]+/gi, '-').toLowerCase()
+      a.href = url
+      a.download = `smartious-result-${safe}.pdf`
+      document.body.appendChild(a); a.click(); a.remove()
+      setTimeout(() => URL.revokeObjectURL(url), 4000)
+    } catch (e) {
+      let msg = 'Could not generate the report.'
+      try { msg = JSON.parse(await e?.response?.data?.text?.() || '{}').message || msg } catch (_) {}
+      toast?.error?.(msg)
+    } finally { setReportBusy(false) }
+  }
 
   const findQuestion = (ref) => {
     if (!ref) return null
@@ -8621,7 +8657,7 @@ function MyResultDetail({ subId, detail, loading, onBack, user }) {
             </div>
           )}
 
-          <button onClick={() => window.print()}
+          <button onClick={downloadReport} disabled={reportBusy}
             style={{
               marginTop:18, width:'100%', background:'#C1121F', color:'#fff', border:'none',
               borderRadius:99, padding:'13px 20px', fontSize:14, fontWeight:800, cursor:'pointer',
@@ -8631,7 +8667,7 @@ function MyResultDetail({ subId, detail, loading, onBack, user }) {
             <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
             </svg>
-            Download Report
+            {reportBusy ? 'Preparing\u2026' : 'Download Report'}
           </button>
         </div>
       </div>
