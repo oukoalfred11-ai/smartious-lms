@@ -3876,7 +3876,13 @@ function ExamsTab({ user, toast, goTo, store }) {
     // Stats come from REAL graded submissions, not the old localStorage
     // practice history. A student's exam record should reflect what their
     // teacher actually marked, not self-run practice sittings.
-    const graded = scheduledExams.filter(e => e.mySubmission && typeof e.mySubmission.percentage === 'number')
+    // Filter on STATUS, not on percentage being a number. percentage
+    // defaults to 0 and is set to 0 on submit, so a submitted-but-unmarked
+    // paper reads as a legitimate 0% — which is why the header showed
+    // "7 graded, 0% pass rate, grade U" when nothing had actually been
+    // marked. Only 'graded' and 'returned' carry a real score.
+    const graded = scheduledExams.filter(e =>
+      e.mySubmission && ['graded', 'returned'].includes(e.mySubmission.status))
     const pcts   = graded.map(e => e.mySubmission.percentage)
     const passRate = pcts.length ? Math.round((pcts.filter(x => x >= 60).length / pcts.length) * 100) : 0
     const avgGrade = pcts.length
@@ -3885,24 +3891,22 @@ function ExamsTab({ user, toast, goTo, store }) {
  
     return (
       <div>
-        {/* Hero */}
-        <div className="card" style={{
-          padding: 0, marginBottom: 18, overflow: 'hidden',
-          background: 'linear-gradient(135deg, #8B1A2E 0%, #6B0F1E 100%)',
-          color: '#fff',
-        }}>
-          <div style={{ padding: '24px 30px' }}>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .75, marginBottom: 6 }}>
-              Assessment
-            </div>
-            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
-              Exam-style assessments under timed conditions
-            </h2>
-            <p style={{ fontSize: 13.5, opacity: .85, marginTop: 8, marginBottom: 0, maxWidth: 540, lineHeight: 1.55 }}>
-              Papers set by your teachers, sat under timed conditions. Your answers save automatically as you work.
-            </p>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', background: 'rgba(0,0,0,.18)' }}>
+        {/* ── Hero banner ────────────────────────────────────────
+            The artwork carries the message, so no gradient, tint or
+            text overlay is placed on it — anything laid over the image
+            competes with the typography already in it. The stat strip
+            sits underneath on solid crimson. */}
+        <div className="card" style={{ padding: 0, marginBottom: 18, overflow: 'hidden' }}>
+          <img
+            src="/banners/exam-hero.jpg"
+            alt="Success in your exam — prepare with confidence, stay focused, do your best"
+            style={{ width: '100%', display: 'block', height: 'auto' }}
+            onError={e => { e.currentTarget.style.display = 'none' }}
+          />
+          <div style={{
+            display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+            background: '#6B0F1E', color: '#fff',
+          }}>
             {[
               ['Exams Taken',  scheduledExams.length || '\u2014'],
               ['Graded',       pcts.length || '\u2014'],
