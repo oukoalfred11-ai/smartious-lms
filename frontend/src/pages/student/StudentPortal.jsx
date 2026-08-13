@@ -3105,6 +3105,20 @@ const EXAM_DURATION_SECONDS = 60 * 60  // 60 minutes
 // Demo exam-history helpers removed with the practice-exam path.
 // Results now come from the API rather than localStorage.
  
+// Curriculum ids are database values, not display text. "CambridgePrimary"
+// on a student's screen looks like a bug.
+const CURRICULUM_LABEL = {
+  CambridgePrimary:'Cambridge Primary', CambridgeLowerSec:'Cambridge Lower Secondary',
+  CambridgeIGCSE:'Cambridge IGCSE', CambridgeALevel:'Cambridge A Level',
+  EdexcelLowerSec:'Edexcel Lower Secondary', EdexcelIGCSE:'Edexcel International GCSE',
+  EdexcelALevel:'Edexcel International A Level', AQALowerSec:'AQA Lower Secondary',
+  AQAGCSE:'AQA GCSE', AQAALevel:'AQA A Level', IBPYP:'IB PYP', IBMYP:'IB MYP', IBDP:'IB Diploma',
+  BNC:'British National Curriculum', American:'American Curriculum',
+  Canadian:'Canadian Curriculum', KenyaCBC:'Kenya CBC',
+}
+const prettyCurriculum = (c) =>
+  CURRICULUM_LABEL[c] || String(c || '').replace(/([a-z])([A-Z])/g, '$1 $2')
+
 const fmtExamTime = (s) => {
   const m = Math.floor(s / 60)
   const sec = s % 60
@@ -3807,10 +3821,10 @@ function ExamsTab({ user, toast, goTo, store }) {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', background: 'rgba(0,0,0,.18)' }}>
             {[
-              ['Exams Taken',  pcts.length],
+              ['Exams Taken',  scheduledExams.length || '\u2014'],
+              ['Graded',       pcts.length || '\u2014'],
               ['Pass Rate',    pcts.length ? `${passRate}%` : '\u2014'],
               ['Avg Grade',    avgGrade],
-              ['Best Grade',   pcts.length ? gradeFor(Math.max(...pcts)).grade : '\u2014'],
             ].map(([l, v]) => (
               <div key={l} style={{ padding: '12px 18px', borderRight: '1px solid rgba(255,255,255,.08)' }}>
                 <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .6, marginBottom: 2 }}>
@@ -3860,8 +3874,11 @@ function ExamsTab({ user, toast, goTo, store }) {
               No exams have been scheduled for you yet. Your teachers will assign exams here when they're ready.
             </div>
           ) : (
-            <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-              {scheduledExams.map(ex => {
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(300px, 1fr))', gap:14 }}>
+              {/* De-duplicate defensively: an exam should never appear twice,
+                  and a repeated _id in the payload would silently render two
+                  identical cards with a React key collision. */}
+              {Array.from(new Map(scheduledExams.map(e => [String(e._id), e])).values()).map(ex => {
                 const status = computeExamStatus(ex)
                 const submitted = ex.mySubmission && ['submitted','graded','returned'].includes(ex.mySubmission.status)
                 const sCol  = status === 'active'    ? '#B91C1C'
@@ -3878,71 +3895,83 @@ function ExamsTab({ user, toast, goTo, store }) {
                   ? `${ex.teacherId.firstName || ''} ${ex.teacherId.lastName || ''}`.trim()
                   : ''
                 return (
-                  <div key={ex._id} style={{
-                    padding:14,
-                    background:'#fff',
-                    border:'1px solid var(--border)',
-                    borderLeft: `4px solid ${subjCol}`,
-                    borderRadius:8,
-                    display:'flex', gap:14, alignItems:'center', flexWrap:'wrap',
+                  <div key={ex._id} className="card" style={{
+                    padding: 0, overflow: 'hidden',
+                    borderTop: `4px solid ${subjCol}`,
+                    display: 'flex', flexDirection: 'column',
                   }}>
-                    <div style={{ flex:1, minWidth:220 }}>
-                      <div style={{ display:'flex', gap:6, marginBottom:5, flexWrap:'wrap', alignItems:'center' }}>
+                    <div style={{ padding: '18px 20px 14px', flex: 1 }}>
+                      <div style={{ display:'flex', gap:6, marginBottom:8, flexWrap:'wrap', alignItems:'center' }}>
                         <span style={{
                           background:sBg, color:sCol,
                           fontSize:9.5, fontWeight:800, letterSpacing:'.08em',
                           padding:'2px 8px', borderRadius:99,
                         }}>{sLabel}</span>
                         {status === 'active' && (
-                          <span style={{ width:7, height:7, borderRadius:'50%', background:'#B91C1C', animation:'pulse 1.5s infinite' }}/>
+                          <span style={{ width:7, height:7, borderRadius:'50%', background:'#B91C1C' }}/>
                         )}
-                        <span style={{ fontSize:11, fontWeight:700, color:subjCol, letterSpacing:'.06em', textTransform:'uppercase' }}>{ex.subject}</span>
-                        {ex.grade && <span style={{ fontSize:11, color:'var(--s500)' }}>{ex.curriculum} {ex.grade}</span>}
+                        {submitted && (
+                          <span style={{
+                            background:'var(--g50)', color:'var(--g700)',
+                            fontSize:9.5, fontWeight:800, letterSpacing:'.08em',
+                            padding:'2px 8px', borderRadius:99,
+                          }}>{ex.mySubmission.status === 'graded' ? 'GRADED' : 'SUBMITTED'}</span>
+                        )}
                       </div>
-                      <div style={{ fontWeight:700, fontSize:15, color:'var(--s900)', marginBottom:4 }}>
+
+                      <div className="serif" style={{ fontSize: 18, color: 'var(--s900)', marginBottom: 4 }}>
                         {ex.title}
                       </div>
-                      <div style={{ fontSize:12, color:'var(--s500)' }}>
-                        {formatExamWhen(ex.startAt)} · {ex.durationMins} min
-                        {(typeof ex.totalQuestions === 'number') ? ` · ${ex.totalQuestions} questions` : ''}
-                        {ex.totalMarks ? ` · ${ex.totalMarks} marks` : ''}
-                        {teacherName && ` · ${teacherName}`}
+                      <div style={{ fontSize: 11.5, color: 'var(--s500)', textTransform: 'uppercase', letterSpacing: '.05em', fontWeight: 600 }}>
+                        {ex.subject}{ex.grade ? ` \u00b7 ${prettyCurriculum(ex.curriculum)} ${ex.grade}` : ''}
                       </div>
-                    </div>
-                    <div style={{ minWidth:140, textAlign:'right' }}>
-                      {submitted ? (
-                        <div>
-                          <div style={{ fontSize:10, fontWeight:700, color:'var(--g600)', letterSpacing:'.08em', textTransform:'uppercase' }}>
-                            {ex.mySubmission.status === 'graded' ? 'Graded' : 'Submitted'}
+
+                      <div style={{ display:'grid', gridTemplateColumns:'repeat(2, 1fr)', gap:8, margin:'14px 0 0' }}>
+                        {[
+                          ['Questions', typeof ex.totalQuestions === 'number' ? ex.totalQuestions : '\u2014'],
+                          ['Duration',  `${ex.durationMins} min`],
+                          ['Marks',     ex.totalMarks || '\u2014'],
+                          ['Paper',     ex.paperNumber || 'Paper 1'],
+                        ].map(([l, v]) => (
+                          <div key={l} style={{ background:'var(--bg)', borderRadius:'var(--rsm)', padding:'8px 10px' }}>
+                            <div style={{ fontSize:10, fontWeight:700, textTransform:'uppercase', letterSpacing:'.06em', color:'var(--s400)' }}>{l}</div>
+                            <div className="mono" style={{ fontSize:13, fontWeight:700, color:'var(--s800)' }}>{v}</div>
                           </div>
-                          {ex.mySubmission.status === 'graded' && (
-                            <div className="mono" style={{ fontSize:16, fontWeight:700, color:'var(--s900)', marginTop:2 }}>
-                              {ex.mySubmission.totalScore}/{ex.mySubmission.maxScore || ex.totalMarks}
-                              <span style={{ fontSize:11, color:'var(--s500)', marginLeft:6 }}>
-                                ({ex.mySubmission.percentage}%)
-                              </span>
-                            </div>
-                          )}
+                        ))}
+                      </div>
+
+                      <div style={{ fontSize:12, color:'var(--s500)', marginTop:12 }}>
+                        {formatExamWhen(ex.startAt)}{teacherName ? ` \u00b7 ${teacherName}` : ''}
+                      </div>
+
+                      {submitted && ex.mySubmission.status === 'graded' && (
+                        <div style={{
+                          background: ex.mySubmission.percentage >= 60 ? 'var(--g50)' : 'var(--a50)',
+                          border: `1px solid ${ex.mySubmission.percentage >= 60 ? 'var(--g100)' : 'var(--a100)'}`,
+                          borderRadius:'var(--rsm)', padding:'8px 12px', marginTop:12, fontSize:12.5,
+                          color: ex.mySubmission.percentage >= 60 ? 'var(--g700)' : 'var(--a600)',
+                        }}>
+                          Result: <strong>{ex.mySubmission.totalScore}/{ex.mySubmission.maxScore || ex.totalMarks}</strong>
+                          {' '}({ex.mySubmission.percentage}% \u00b7 {gradeFor(ex.mySubmission.percentage).grade})
+                        </div>
+                      )}
+                    </div>
+
+                    <div style={{ marginTop:'auto', padding:'12px 16px', borderTop:'1px solid var(--border)', background:'var(--bg)' }}>
+                      {submitted ? (
+                        <div style={{ fontSize:12, color:'var(--s500)', textAlign:'center', fontWeight:600 }}>
+                          {ex.mySubmission.status === 'graded' ? 'Marked by your teacher' : 'Awaiting marking'}
                         </div>
                       ) : status === 'active' ? (
-                        <button
-                          onClick={() => startRealExam(ex._id)}
-                          style={{
-                            background:'#7D1025', color:'#fff', border:'none',
-                            padding:'8px 14px', borderRadius:6,
-                            fontSize:12, fontWeight:700, cursor:'pointer',
-                          }}
-                        >
+                        <button className="btn btn-p"
+                          style={{ width:'100%', justifyContent:'center', background:subjCol, borderColor:subjCol }}
+                          onClick={() => startRealExam(ex._id)}>
                           Start Exam
                         </button>
                       ) : status === 'scheduled' ? (
-                        <div style={{ fontSize:11, color:'var(--s500)' }}>
-                          Opens at start time
-                        </div>
+                        <div style={{ fontSize:12, color:'var(--s500)', textAlign:'center' }}>Opens at start time</div>
                       ) : (
-                        <div style={{ fontSize:11, color:'var(--s500)' }}>
-                          Closed — not attempted
-                        </div>
+                        <div style={{ fontSize:12, color:'var(--s500)', textAlign:'center' }}>Closed \u2014 not attempted</div>
                       )}
                     </div>
                   </div>
