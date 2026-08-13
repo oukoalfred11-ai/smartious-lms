@@ -447,4 +447,95 @@ router.get('/export/:subjectId', auth, requireRole('admin', 'ops_manager'), asyn
   }
 });
 
+// ═══════════════════════════════════════════════════════════
+// GET /api/syllabus/audit
+// Runs the mismatch detector across EVERY loaded spine.
+//
+// Two wrong spines were found by hand — Physics content on Cambridge
+// IGCSE Biology, and Mathematics content on both Accounting and
+// Additional Mathematics. Each was discovered by chance. This checks
+// all of them at once, and also flags the pattern that gave the game
+// away both times: two subjects sharing an identical spine shape.
+// ═══════════════════════════════════════════════════════════
+router.get('/audit', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
+  try {
+    const subjects = await Subject.find({ isActive: { $ne: false } })
+      .select('subjectName curriculum').lean();
+
+    const all = await SyllabusTopic.find({ isActive: { $ne: false } })
+      .select('subjectId topic subtopics').lean();
+
+    const bySubject = {};
+    all.forEach(t => { (bySubject[String(t.subjectId)] = bySubject[String(t.subjectId)] || []).push(t); });
+
+    const loaded = subjects
+      .filter(s => (bySubject[String(s._id)] || []).length)
+      .map(s => {
+        const topics = bySubject[String(s._id)];
+        return {
+          _id: s._id,
+          subjectName: s.subjectName,
+          curriculum: s.curriculum,
+          topics,
+          topicCount: topics.length,
+          lessonCount: topics.reduce((n, t) => n + ((t.subtopics || []).length), 0),
+        };
+      });
+
+    // 1. Content that reads like another subject.
+    const mismatches = [];
+    loaded.forEach(s => {
+      const m = detectSpineMismatch(s.subjectName, s.topics);
+      if (m) mismatches.push({
+        curriculum: s.curriculum, subject: s.subjectName,
+        looksLike: m.looksLike, ownHits: m.expectedHits, otherHits: m.actualHits,
+        sampleTopics: s.topics.slice(0, 4).map(t => t.topic),
+      });
+    });
+
+    // 2. Identical spines on different subjects. This is what exposed
+    //    both real cases: Biology matched Physics exactly, and
+    //    Accounting matched Additional Mathematics exactly.
+    const sig = {};
+    loaded.forEach(s => {
+      const key = s.topics.map(t => t.topic).sort().join('|');
+      (sig[key] = sig[key] || []).push(`${s.curriculum} ${s.subjectName}`);
+    });
+    const shared = Object.values(sig)
+      .filter(v => v.length > 1)
+      .map(v => ({ subjects: v, note: 'identical topic list — intended only where one scheme serves two boards' }));
+
+    // 3. Spines too thin to place a question on a lesson.
+    const thin = loaded
+      .filter(s => s.lessonCount > 0 && s.lessonCount < 20)
+      .map(s => ({ curriculum: s.curriculum, subject: s.subjectName,
+                   topics: s.topicCount, lessons: s.lessonCount }));
+
+    // 4. Topics carrying no subtopics at all — a question cannot be filed there.
+    const emptyTopics = [];
+    loaded.forEach(s => {
+      const empties = s.topics.filter(t => !(t.subtopics || []).length).map(t => t.topic);
+      if (empties.length) emptyTopics.push({
+        curriculum: s.curriculum, subject: s.subjectName,
+        count: empties.length, sample: empties.slice(0, 3),
+      });
+    });
+
+    return res.json({
+      success: true,
+      data: {
+        checked: loaded.length,
+        mismatches, sharedSpines: shared, thinSpines: thin, emptyTopics,
+      },
+      message: `Checked ${loaded.length} loaded spine(s). `
+             + `${mismatches.length} look like another subject; `
+             + `${shared.length} group(s) share an identical topic list; `
+             + `${thin.length} are thinner than 20 lessons.`,
+    });
+  } catch (e) {
+    console.error('[syllabus audit]', e.message);
+    return res.status(500).json({ success: false, message: e.message });
+  }
+});
+
 module.exports = router;
