@@ -1346,3 +1346,112 @@ img { display: block; max-width: 100% }
   .topbar  { padding: 0 16px }
   .fr2, .fr3, .grid2, .grid3, .grid4 { grid-template-columns: 1fr }
 }
+
+
+/* ══════════════════════════════════════════════════════════════
+   GLOWING GOLD RING
+   One shared treatment for the Suggestion Box and for listing
+   cards. The ring is a conic gradient rotated behind the element,
+   so the light appears to travel around the border rather than
+   pulsing uniformly — that travelling quality is what reads as
+   premium rather than as a flashing highlight.
+
+   Implemented with a ::before pseudo-element so it costs nothing
+   in markup, and animated with transform only so it stays on the
+   compositor and does not repaint on every frame.
+   ══════════════════════════════════════════════════════════════ */
+@property --sm-glow-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes sm-glow-spin {
+  to { --sm-glow-angle: 360deg; }
+}
+
+@keyframes sm-glow-breathe {
+  0%, 100% { opacity: .55; }
+  50%      { opacity: 1; }
+}
+
+/* Base ring — put on any element that should carry the glow. */
+.sm-glow {
+  position: relative;
+  isolation: isolate;
+}
+.sm-glow::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  padding: 2px;
+  background: conic-gradient(
+    from var(--sm-glow-angle),
+    rgba(201,160,48,0)    0deg,
+    rgba(201,160,48,.35) 60deg,
+    #F0CC5A             130deg,
+    #FFE9A8             168deg,
+    #F0CC5A             206deg,
+    rgba(201,160,48,.35) 276deg,
+    rgba(201,160,48,0)  360deg
+  );
+  /* Mask the fill so only the 2px border shows. */
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask-composite: exclude;
+  animation: sm-glow-spin 6s linear infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Cards: the ring rests quietly and lifts on hover, so a list of
+   twenty does not turn into twenty competing light sources.
+
+   inset:0 rather than -2px is deliberate. These cards set
+   overflow:hidden so the banner image and footer clip to the rounded
+   corners — a ring drawn OUTSIDE the border box would be clipped away
+   entirely and simply never appear. Drawing it on the card's own edge
+   keeps it inside the clip. */
+.sm-glow-card::before {
+  inset: 0;
+  opacity: .32;
+  transition: opacity .28s ease;
+  animation-duration: 9s;
+}
+.sm-glow-card:hover::before { opacity: 1; }
+
+/* .card already draws a 1px grey border. Left in place it shows
+   through the gold ring as a dull outline, so cards carrying the glow
+   drop it and let the ring be the edge. The hover lift is kept and
+   warmed to gold. */
+.card.sm-glow-card {
+  border-color: transparent;
+}
+.card.sm-glow-card:hover {
+  box-shadow: 0 10px 30px rgba(201,160,48,.16), var(--shadow-sm);
+}
+
+/* The Suggestion Box is a single always-visible control, so it
+   carries the full treatment: travelling ring, breathing halo. */
+.sm-glow-fab::before { animation-duration: 4.5s; }
+.sm-glow-fab::after {
+  content: '';
+  position: absolute;
+  inset: -7px;
+  border-radius: inherit;
+  background: radial-gradient(closest-side, rgba(240,204,90,.45), rgba(240,204,90,0) 72%);
+  filter: blur(9px);
+  animation: sm-glow-breathe 3.4s ease-in-out infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Respect a reader who has asked for less motion: keep the gold
+   ring, drop the travel and the breathing. */
+@media (prefers-reduced-motion: reduce) {
+  .sm-glow::before,
+  .sm-glow-fab::after { animation: none; }
+  .sm-glow::before { background: linear-gradient(135deg, #F0CC5A, rgba(201,160,48,.4)); }
+}
