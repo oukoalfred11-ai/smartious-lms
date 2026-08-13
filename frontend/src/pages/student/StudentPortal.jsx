@@ -7562,6 +7562,12 @@ function MyResultsTab({ user, toast, setPage }) {
   const [detailLoading, setDetailLoading] = useState(false)
   const [sortBy, setSortBy] = useState('recent')
 
+  // Hero: the student's own photo and a banded encouragement line, the
+  // same treatment as the single-result screen.
+  const heroAvatar = user?.avatar || (() => {
+    try { return localStorage.getItem('sm_profile_avatar') || '' } catch { return '' }
+  })()
+
   useEffect(() => {
     let cancelled = false
     const load = async () => {
@@ -7747,6 +7753,10 @@ function MyResultsTab({ user, toast, setPage }) {
         detail={detail}
         loading={detailLoading}
         onBack={() => { setSelectedSubId(null); setDetail(null) }}
+        // The hero uses the student's photo and first name. Without this
+        // the photo band never renders and the encouragement line reads
+        // "Great job, well done!" with no name.
+        user={user}
       />
     )
   }
@@ -7793,71 +7803,117 @@ function MyResultsTab({ user, toast, setPage }) {
     )
   }
 
+  // Banded encouragement across the whole record, not one paper. The
+  // low band is deliberately not "you are failing" — a results page is
+  // read by a child, and it should tell the truth without closing a door.
+  const heroFirst = (user?.firstName || '').trim()
+  const heroPct = graded.length ? overallStats.avgPct : null
+  const heroPraise =
+    heroPct === null
+      ? { headline: heroFirst ? `Welcome, ${heroFirst}.` : 'Welcome.',
+          sub: 'Your results will appear here once your teachers have marked your work.' }
+    : heroPct >= 85
+      ? { headline: `Outstanding, ${heroFirst || 'well done'}!`, sub: "You're mastering your subjects." }
+    : heroPct >= 70
+      ? { headline: `Great job, ${heroFirst || 'well done'}!`, sub: "You're making excellent progress." }
+    : heroPct >= 50
+      ? { headline: `Good progress, ${heroFirst || 'well done'}.`, sub: 'A solid record with room to grow.' }
+      : { headline: `Keep going, ${heroFirst || 'you can do this'}.`, sub: 'Every result below is a place to improve.' }
+
   return (
     <div>
-      <div className="card" style={{
-        padding:0, marginBottom:18, overflow:'hidden',
-        background:'linear-gradient(135deg, #7D1025 0%, #5A0B1B 100%)',
-        color:'#FBFAF5',
-        boxShadow:'0 12px 40px rgba(125,16,37,.20)',
+      {/* ── MY RESULTS HERO ─────────────────────────────────────
+          Same treatment as the single-result screen: a flat light band,
+          the student's photo bleeding through the middle, and the
+          overall grade circled by hand at the right. Deliberately not a
+          card — the panel edge fought the photo bleed. */}
+      <div style={{
+        position:'relative',
+        background:'linear-gradient(100deg, #FBFAF6 0%, #FDFAF8 52%, #FCF3F4 100%)',
+        borderRadius:20, marginBottom:18, overflow:'hidden', minHeight:300,
       }}>
+        <svg width="120" height="80" style={{ position:'absolute', top:18, right:26, opacity:.5 }}>
+          <defs><pattern id="mrdots" width="20" height="20" patternUnits="userSpaceOnUse">
+            <circle cx="3" cy="3" r="3" fill="#F3B6BC"/></pattern></defs>
+          <rect width="120" height="80" fill="url(#mrdots)"/>
+        </svg>
+
+        {heroAvatar && (
+          <div style={{ position:'absolute', top:0, bottom:0, left:'34%', width:'40%', zIndex:0, pointerEvents:'none' }}>
+            <img src={heroAvatar} alt=""
+              onError={e => { e.currentTarget.parentNode.style.display = 'none' }}
+              style={{
+                width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center',
+                WebkitMaskImage:'linear-gradient(to right, transparent 0%, #000 22%, #000 78%, transparent 100%)',
+                maskImage:'linear-gradient(to right, transparent 0%, #000 22%, #000 78%, transparent 100%)',
+              }}/>
+          </div>
+        )}
+
         <div style={{
-          padding:'28px 32px',
-          display:'flex', alignItems:'center', gap:32, flexWrap:'wrap',
-          backgroundImage:'radial-gradient(circle at 95% 50%, rgba(201,160,48,.18) 0%, transparent 50%)',
+          position:'relative', zIndex:1,
+          display:'flex', alignItems:'center', justifyContent:'space-between',
+          gap:24, padding:'40px 44px', flexWrap:'wrap',
         }}>
-          <div style={{ flex:1, minWidth:220 }}>
-            <div style={{ fontSize:11, fontWeight:700, letterSpacing:'.16em', textTransform:'uppercase', color:'#F0CC5A', marginBottom:6 }}>
-              Academic Performance
+          <div style={{ maxWidth:440, minWidth:250 }}>
+            <div style={{ fontSize:44, fontWeight:800, color:'#1A2130', lineHeight:1, letterSpacing:'-.02em' }}>
+              Results
             </div>
-            <h1 className="serif" style={{ fontSize:32, fontWeight:400, margin:0, lineHeight:1.1 }}>
-              {graded.length > 0
-                ? `Averaging ${overallStats.avgPct}% across ${graded.length} exam${graded.length===1?'':'s'}`
-                : 'Awaiting graded results'}
-            </h1>
-            <div style={{ fontSize:13, opacity:.85, marginTop:6 }}>
-              {overallStats.maxScore > 0 && (
-                <>{overallStats.totalScore} of {overallStats.maxScore} marks total
-                  {pendingCount > 0 && <> &middot; {pendingCount} awaiting grading</>}
-                </>
-              )}
-              {graded.length === 0 && pendingCount > 0 && <>{pendingCount} exam{pendingCount===1?'':'s'} awaiting your teacher's review</>}
+            <div style={{ fontSize:31, fontWeight:800, color:'#D81324', marginTop:10, lineHeight:1.12, letterSpacing:'-.01em' }}>
+              {heroPraise.headline}
+            </div>
+            <div style={{ fontSize:18, color:'#2E3440', marginTop:8, lineHeight:1.4 }}>
+              {heroPraise.sub}
+            </div>
+            <div style={{ fontSize:14.5, color:'#7A7A82', marginTop:10 }}>
+              {overallStats.maxScore > 0
+                ? `${overallStats.totalScore} of ${overallStats.maxScore} marks${pendingCount > 0 ? ` \u00b7 ${pendingCount} awaiting grading` : ''}`
+                : pendingCount > 0 ? `${pendingCount} awaiting grading` : ''}
+            </div>
+            <div style={{ width:66, height:5, background:'#D81324', borderRadius:3, marginTop:18 }}/>
+          </div>
+
+          <div style={{ position:'relative', width:250, height:210, flexShrink:0 }}>
+            <svg viewBox="0 0 260 220" style={{ position:'absolute', inset:0, width:'100%', height:'100%' }}>
+              <ellipse cx="140" cy="126" rx="104" ry="86" fill="none" stroke="#D81324" strokeWidth="9"
+                strokeLinecap="round" transform="rotate(-5 140 126)" strokeDasharray="600" strokeDashoffset="26"/>
+              <line x1="42" y1="46" x2="16" y2="20" stroke="#D81324" strokeWidth="8.5" strokeLinecap="round"/>
+              <line x1="62" y1="28" x2="48" y2="2"  stroke="#D81324" strokeWidth="8.5" strokeLinecap="round"/>
+              <line x1="88" y1="18" x2="84" y2="0"  stroke="#D81324" strokeWidth="8.5" strokeLinecap="round"/>
+            </svg>
+            <div style={{
+              position:'absolute', inset:0, display:'flex', flexDirection:'column',
+              alignItems:'center', justifyContent:'center', paddingLeft:8, paddingBottom:4,
+            }}>
+              <div style={{ fontSize:66, fontWeight:700, color:'#D81324', lineHeight:1,
+                            fontFamily:"'Instrument Serif', Georgia, serif" }}>
+                {graded.length ? `${overallStats.avgPct}%` : '\u2014'}
+              </div>
+              <div style={{ fontSize:11.5, fontWeight:800, letterSpacing:'.16em', color:'#D81324', opacity:.8, marginTop:2 }}>
+                OVERALL
+              </div>
             </div>
           </div>
-          {graded.length > 0 && (
-            <CircularRing
-              percentage={overallStats.avgPct}
-              size={140}
-              stroke={11}
-              trackColor="rgba(251,250,245,.15)"
-              fillColor="#C9A030"
-              label="Overall"
-            />
-          )}
         </div>
+
         {subjectStats.length > 0 && (
           <div style={{
-            background:'rgba(0,0,0,.18)',
-            padding:'18px 32px',
-            display:'flex', flexWrap:'wrap', gap:18,
-            alignItems:'center',
+            position:'relative', zIndex:1,
+            background:'#FFFFFFCC', borderTop:'1px solid rgba(216,19,36,.12)',
+            padding:'14px 44px', display:'flex', flexWrap:'wrap', gap:20, alignItems:'center',
           }}>
-            <div style={{ fontSize:10.5, fontWeight:700, letterSpacing:'.14em', textTransform:'uppercase', color:'#F0CC5A', marginRight:12 }}>
+            <div style={{ fontSize:10.5, fontWeight:800, letterSpacing:'.14em', textTransform:'uppercase', color:'#9A8F92' }}>
               By Subject
             </div>
-            {subjectStats.map(s => (
-              <div key={s.subject} style={{ display:'flex', alignItems:'center', gap:10 }}>
-                <CircularRing
-                  percentage={s.avgPct}
-                  size={56}
-                  stroke={5}
-                  trackColor="rgba(251,250,245,.18)"
-                  fillColor={s.avgPct >= 70 ? '#86EFAC' : s.avgPct >= 50 ? '#FDE68A' : '#FCA5A5'}
-                />
+            {subjectStats.map(st => (
+              <div key={st.subject} style={{ display:'flex', alignItems:'center', gap:10 }}>
+                <CircularRing percentage={st.avgPct} size={52} stroke={5}
+                  trackColor="#EFE7E8"
+                  fillColor={st.avgPct >= 70 ? '#22C55E' : st.avgPct >= 50 ? '#C9A030' : '#D81324'} />
                 <div>
-                  <div style={{ fontSize:12.5, fontWeight:600, color:'#FBFAF5' }}>{s.subject}</div>
-                  <div style={{ fontSize:10.5, color:'#F0CC5A' }}>
-                    {s.count} exam{s.count===1?'':'s'} &middot; {s.avgPct}%
+                  <div style={{ fontSize:13.5, fontWeight:700, color:'#1A2130' }}>{st.subject}</div>
+                  <div style={{ fontSize:11.5, color:'#7A7A82' }}>
+                    {st.count} {st.count === 1 ? 'result' : 'results'} &middot; {st.avgPct}%
                   </div>
                 </div>
               </div>
@@ -8187,7 +8243,7 @@ function ResultIcon({ name, size = 26 }) {
   }
 }
 
-function MyResultDetail({ subId, detail, loading, onBack }) {
+function MyResultDetail({ subId, detail, loading, onBack, user }) {
   const [expandedAnswers, setExpandedAnswers] = useState({})
 
   if (loading || !detail) {
@@ -8223,7 +8279,11 @@ function MyResultDetail({ subId, detail, loading, onBack }) {
   const isGraded = sub.status === 'graded'
 
   // ── Derived values for the results screen ────────────────
-  const avatarUrl = user?.avatar || ''
+  // Same fallback chain the page header uses, so a student who set their
+  // photo in this session sees it here too.
+  const avatarUrl = user?.avatar || (() => {
+    try { return localStorage.getItem('sm_profile_avatar') || '' } catch { return '' }
+  })()
   const firstName = (user?.firstName || '').trim()
 
   // Encouragement is banded, and the low band is deliberately not
