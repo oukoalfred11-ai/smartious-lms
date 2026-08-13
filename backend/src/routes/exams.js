@@ -404,6 +404,101 @@ router.get('/submissions/my/:subId', auth, async (req, res) => {
   }
 });
 
+// ═══════════════════════════════════════════════════════════
+// GET /api/exams/submissions/my/:subId/report.pdf
+// A branded result report the student or parent can keep.
+// Replaces window.print(), which produced a screenshot of the page.
+// ═══════════════════════════════════════════════════════════
+router.get('/submissions/my/:subId/report.pdf', auth, async (req, res) => {
+  try {
+    const { buildResultReportPdf } = require('../lib/resultReportPdf');
+    if (!mongoose.isValidObjectId(req.params.subId))
+      return res.status(400).json({ success:false, message:'Invalid submission id.' });
+
+    const sub = await ExamSubmission.findOne({ _id: req.params.subId, studentId: req.user._id })
+      .populate({ path:'examId', populate:{ path:'teacherId', select:'firstName lastName' } })
+      .lean();
+    if (!sub) return res.status(404).json({ success:false, message:'Result not found.' });
+    if (!['graded','returned'].includes(sub.status))
+      return res.status(400).json({ success:false, message:'This paper has not been marked yet.' });
+
+    const exam = sub.examId || {};
+    let Question, bank = [];
+    try {
+      Question = require('../models/Question');
+      bank = await Question.find({ _id: { $in: exam.questionIds || [] } })
+        .select('topic subtopic marks parts').lean();
+    } catch {}
+    const byId = new Map(bank.map(q => [String(q._id), q]));
+
+    // Topic breakdown by marks, so a part-marked answer counts fairly.
+    const acc = {};
+    (sub.answers || []).forEach(a => {
+      const q = byId.get(String(a.questionRef));
+      const topic = (q?.topic || q?.subtopic || '').trim();
+      if (!topic) return;
+      if (!acc[topic]) acc[topic] = { got: 0, possible: 0 };
+      acc[topic].got += Number(a.marksAwarded) || 0;
+      acc[topic].possible += Number(q.marks) || 1;
+    });
+    const topics = Object.entries(acc)
+      .filter(([, v]) => v.possible > 0)
+      .map(([t, v]) => ({
+        label: t.split('\u2014').pop().split('\u00b7').pop().trim() || t,
+        pct: Math.round((v.got / v.possible) * 100),
+      }))
+      .sort((a, b) => b.pct - a.pct);
+
+    const answers = sub.answers || [];
+    const secs = Number(sub.timeSpentSecs) || 0;
+
+    const pdf = await buildResultReportPdf({
+      kind: 'exam',
+      student: {
+        name: [req.user.firstName, req.user.lastName].filter(Boolean).join(' '),
+        admissionNumber: req.user.admissionNumber || '',
+        grade: exam.grade || req.user.grade || '',
+      },
+      assessment: {
+        title: exam.title || 'Assessment',
+        subject: exam.subject || '',
+        curriculum: exam.curriculum || '',
+        grade: exam.grade || '',
+        completedAt: sub.submittedAt
+          ? new Date(sub.submittedAt).toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' })
+          : '',
+      },
+      score: {
+        awarded: sub.totalScore || 0,
+        possible: sub.maxScore || exam.totalMarks || 0,
+        percentage: sub.percentage || 0,
+        grade: sub.grade || '',
+      },
+      stats: {
+        total: answers.length,
+        correct: answers.filter(a => a.isCorrect === true).length,
+        wrong: answers.filter(a => a.isCorrect === false).length,
+        time: secs ? `${Math.floor(secs/60)}:${String(secs%60).padStart(2,'0')}` : '',
+      },
+      topics,
+      feedback: sub.feedback ? {
+        text: sub.feedback,
+        teacher: exam.teacherId
+          ? [exam.teacherId.firstName, exam.teacherId.lastName].filter(Boolean).join(' ')
+          : '',
+      } : null,
+    });
+
+    const safe = String(exam.title || 'result').replace(/[^a-z0-9]+/gi, '-').toLowerCase();
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="smartious-result-${safe}.pdf"`);
+    return res.end(pdf);
+  } catch (e) {
+    console.error('[exam result report]', e.message, e.stack);
+    return res.status(500).json({ success:false, message:'Failed to generate the report: ' + e.message });
+  }
+});
+
 router.get('/student/list', auth, async (req, res) => {
   try {
     const studentId = req.user._id;
