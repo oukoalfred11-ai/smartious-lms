@@ -3152,6 +3152,383 @@ const IGCSE_SWAHILI_0262 = [
     ] },
 ]
 
+// Cambridge IGCSE Accounting 0452
+// Lesson-level spine, 11 topics / 134 lessons.
+//
+// SEQUENCING NOTE
+// Accounting is cumulative in a way most IGCSE subjects are not. A
+// student who cannot post a transaction cannot prepare a trial balance,
+// and one who cannot prepare a trial balance cannot produce financial
+// statements. The order below is therefore the TEACHING order, not the
+// order the syllabus document lists topics in: the accounting equation
+// and double entry come first and are secured before anything is built
+// on top of them.
+//
+// This replaces the spine previously loaded on Accounting, which was
+// Mathematics 0580 content and covered none of the subject.
+const IGCSE_ACCOUNTING_0452 = [
+  { topic: 'Unit 1 · The Fundamentals of Accounting', code: '1',
+    subtopics: [
+      { name: 'The Purpose of Accounting & Book-keeping Distinguished', code: '1.1' },
+      { name: 'Users of Accounting Information & Their Needs', code: '1.2' },
+      { name: 'The Accounting Equation: Assets, Liabilities & Capital', code: '1.3' },
+      { name: 'Applying the Accounting Equation to Transactions', code: '1.4' },
+      { name: 'Classifying Assets: Non-Current & Current', code: '1.5' },
+      { name: 'Classifying Liabilities: Non-Current & Current', code: '1.6' },
+      { name: 'Capital, Drawings & Profit as Changes in Capital', code: '1.7' },
+      { name: 'The Statement of Financial Position: Purpose & Layout', code: '1.8' },
+    ] },
+
+  { topic: 'Unit 2 · Double Entry Book-keeping', code: '2',
+    subtopics: [
+      { name: 'The Ledger, Accounts & The T-Account Format', code: '2.1' },
+      { name: 'The Rules of Debit and Credit', code: '2.2' },
+      { name: 'Recording Asset & Liability Transactions', code: '2.3' },
+      { name: 'Recording Income & Expense Transactions', code: '2.4' },
+      { name: 'Recording Capital Introduced & Drawings', code: '2.5' },
+      { name: 'Purchases, Sales & The Distinction from Assets', code: '2.6' },
+      { name: 'Returns Inwards & Returns Outwards', code: '2.7' },
+      { name: 'Carriage Inwards & Carriage Outwards', code: '2.8' },
+      { name: 'Balancing an Account & Bringing Down the Balance', code: '2.9' },
+      { name: 'Interpreting a Balance: Debit vs. Credit Meaning', code: '2.10' },
+      { name: 'Discounts Allowed & Discounts Received', code: '2.11' },
+      { name: 'The Division of the Ledger: Sales, Purchases & Nominal', code: '2.12' },
+    ] },
+
+  { topic: 'Unit 3 · Books of Prime Entry', code: '3',
+    subtopics: [
+      { name: 'Why Books of Prime Entry Are Used', code: '3.1' },
+      { name: 'Source Documents: Invoice, Credit Note & Statement', code: '3.2' },
+      { name: 'Source Documents: Cheque, Receipt & Paying-In Slip', code: '3.3' },
+      { name: 'The Sales Journal & Posting to the Ledger', code: '3.4' },
+      { name: 'The Purchases Journal & Posting to the Ledger', code: '3.5' },
+      { name: 'The Sales Returns & Purchases Returns Journals', code: '3.6' },
+      { name: 'Trade Discount: Treatment and Why It Is Not Recorded', code: '3.7' },
+      { name: 'The General Journal: Uses & Narratives', code: '3.8' },
+      { name: 'Opening Entries & Purchase of Non-Current Assets on Credit', code: '3.9' },
+      { name: 'The Cash Book: Two-Column Format', code: '3.10' },
+      { name: 'The Cash Book: Three-Column Format with Discounts', code: '3.11' },
+      { name: 'Contra Entries in the Cash Book', code: '3.12' },
+      { name: 'The Petty Cash Book & The Imprest System', code: '3.13' },
+      { name: 'Analysis Columns & Posting the Petty Cash Book', code: '3.14' },
+    ] },
+
+  { topic: 'Unit 4 · The Trial Balance & Correction of Errors', code: '4',
+    subtopics: [
+      { name: 'Preparing a Trial Balance from Ledger Balances', code: '4.1' },
+      { name: 'The Uses and Limitations of a Trial Balance', code: '4.2' },
+      { name: 'Errors Not Revealed by a Trial Balance: Omission & Commission', code: '4.3' },
+      { name: 'Errors of Principle, Original Entry & Complete Reversal', code: '4.4' },
+      { name: 'Compensating Errors', code: '4.5' },
+      { name: 'Correcting Errors Using Journal Entries', code: '4.6' },
+      { name: 'The Suspense Account: Purpose & Preparation', code: '4.7' },
+      { name: 'Clearing a Suspense Account Through Corrections', code: '4.8' },
+      { name: 'The Effect of Corrections on Profit', code: '4.9' },
+      { name: 'Statements of Corrected Profit', code: '4.10' },
+    ] },
+
+  { topic: 'Unit 5 · Bank Reconciliation & Control Accounts', code: '5',
+    subtopics: [
+      { name: 'The Bank Statement & Why It Differs from the Cash Book', code: '5.1' },
+      { name: 'Updating the Cash Book: Charges, Interest & Direct Debits', code: '5.2' },
+      { name: 'Unpresented Cheques & Uncredited Deposits', code: '5.3' },
+      { name: 'Preparing a Bank Reconciliation Statement', code: '5.4' },
+      { name: 'Dishonoured Cheques & Their Treatment', code: '5.5' },
+      { name: 'The Purpose of Control Accounts', code: '5.6' },
+      { name: 'The Sales Ledger Control Account', code: '5.7' },
+      { name: 'The Purchases Ledger Control Account', code: '5.8' },
+      { name: 'Contra Entries Between Control Accounts', code: '5.9' },
+      { name: 'Reconciling Control Accounts with Ledger Balances', code: '5.10' },
+    ] },
+
+  { topic: 'Unit 6 · Adjustments to Financial Statements', code: '6',
+    subtopics: [
+      { name: 'The Matching (Accruals) Principle in Practice', code: '6.1' },
+      { name: 'Accrued Expenses: Ledger Treatment & Year-End Effect', code: '6.2' },
+      { name: 'Prepaid Expenses: Ledger Treatment & Year-End Effect', code: '6.3' },
+      { name: 'Accrued & Prepaid Income', code: '6.4' },
+      { name: 'Why Non-Current Assets Are Depreciated', code: '6.5' },
+      { name: 'Straight-Line Depreciation: Calculation & Entries', code: '6.6' },
+      { name: 'Reducing Balance Depreciation: Calculation & Entries', code: '6.7' },
+      { name: 'Revaluation Method of Depreciation', code: '6.8' },
+      { name: 'The Provision for Depreciation Account', code: '6.9' },
+      { name: 'Disposal of a Non-Current Asset: Profit or Loss on Disposal', code: '6.10' },
+      { name: 'Irrecoverable Debts & Their Write-Off', code: '6.11' },
+      { name: 'Recovery of Debts Previously Written Off', code: '6.12' },
+      { name: 'Provision for Doubtful Debts: Creating & Adjusting', code: '6.13' },
+      { name: 'Inventory Valuation: Cost vs. Net Realisable Value', code: '6.14' },
+      { name: 'Capital Expenditure vs. Revenue Expenditure', code: '6.15' },
+      { name: 'Effect of Misclassifying Expenditure on Profit & Assets', code: '6.16' },
+    ] },
+
+  { topic: 'Unit 7 · Financial Statements of Sole Traders', code: '7',
+    subtopics: [
+      { name: 'The Income Statement: Purpose & Structure', code: '7.1' },
+      { name: 'The Trading Section & Cost of Sales', code: '7.2' },
+      { name: 'Calculating Gross Profit', code: '7.3' },
+      { name: 'The Profit and Loss Section & Profit for the Year', code: '7.4' },
+      { name: 'Preparing an Income Statement with Adjustments', code: '7.5' },
+      { name: 'The Statement of Financial Position: Vertical Format', code: '7.6' },
+      { name: 'Presenting Non-Current & Current Assets', code: '7.7' },
+      { name: 'Presenting Capital, Drawings & Liabilities', code: '7.8' },
+      { name: 'Working Capital & Its Significance', code: '7.9' },
+      { name: 'Preparing Full Financial Statements from a Trial Balance', code: '7.10' },
+    ] },
+
+  { topic: 'Unit 8 · Financial Statements of Other Organisations', code: '8',
+    subtopics: [
+      { name: 'Manufacturing Accounts: Purpose & Cost Classification', code: '8.1' },
+      { name: 'Direct Materials, Direct Labour & Prime Cost', code: '8.2' },
+      { name: 'Factory Overheads & Cost of Production', code: '8.3' },
+      { name: 'Work in Progress & Its Treatment', code: '8.4' },
+      { name: 'Financial Statements of a Manufacturing Business', code: '8.5' },
+      { name: 'Clubs & Societies: Receipts and Payments Account', code: '8.6' },
+      { name: 'The Subscriptions Account & Amounts in Arrears/Advance', code: '8.7' },
+      { name: 'The Income and Expenditure Account', code: '8.8' },
+      { name: 'The Accumulated Fund & Statement of Financial Position', code: '8.9' },
+      { name: 'Partnerships: The Partnership Agreement', code: '8.10' },
+      { name: 'The Appropriation Account: Salaries, Interest & Share of Profit', code: '8.11' },
+      { name: 'Partners\u2019 Capital & Current Accounts', code: '8.12' },
+      { name: 'Limited Companies: Share Capital & Reserves', code: '8.13' },
+      { name: 'Debentures & The Difference from Shares', code: '8.14' },
+      { name: 'Financial Statements of a Limited Company', code: '8.15' },
+      { name: 'Incomplete Records: Calculating Profit from Capital', code: '8.16' },
+      { name: 'Incomplete Records: Using Mark-Up & Margin', code: '8.17' },
+      { name: 'Preparing Statements from Incomplete Records', code: '8.18' },
+    ] },
+
+  { topic: 'Unit 9 · Analysis & Interpretation', code: '9',
+    subtopics: [
+      { name: 'Why Ratios Are Calculated & Their Limitations', code: '9.1' },
+      { name: 'Gross Margin & Its Interpretation', code: '9.2' },
+      { name: 'Profit Margin & Return on Capital Employed', code: '9.3' },
+      { name: 'Current Ratio & Liquid (Acid Test) Ratio', code: '9.4' },
+      { name: 'Rate of Inventory Turnover', code: '9.5' },
+      { name: 'Trade Receivables & Trade Payables Turnover (Days)', code: '9.6' },
+      { name: 'Interpreting a Change in a Ratio Over Time', code: '9.7' },
+      { name: 'Comparing Two Businesses Using Ratios', code: '9.8' },
+      { name: 'Advising a Business: Justified Recommendations', code: '9.9' },
+      { name: 'Interested Parties & The Decisions They Make', code: '9.10' },
+    ] },
+
+  { topic: 'Unit 10 · Accounting Principles & Policies', code: '10',
+    subtopics: [
+      { name: 'Business Entity & Money Measurement', code: '10.1' },
+      { name: 'Going Concern & Consistency', code: '10.2' },
+      { name: 'Matching, Realisation & Duality', code: '10.3' },
+      { name: 'Historic Cost, Materiality & Prudence', code: '10.4' },
+      { name: 'Identifying the Principle Applied in a Given Situation', code: '10.5' },
+      { name: 'Accounting Policies: Comparability & Relevance', code: '10.6' },
+      { name: 'Reliability, Understandability & Their Trade-Offs', code: '10.7' },
+      { name: 'International Accounting Terminology & Formats', code: '10.8' },
+      { name: 'Computerised Accounting Systems: Benefits & Drawbacks', code: '10.9' },
+    ] },
+
+  { topic: 'Unit 11 · Exam Technique & Revision', code: '11',
+    subtopics: [
+      { name: 'Paper 1 Technique: Multiple Choice Strategy', code: '11.1' },
+      { name: 'Paper 2 Technique: Layout, Workings & Presentation Marks', code: '11.2' },
+      { name: 'Command Words: State, Explain, Calculate, Advise', code: '11.3' },
+      { name: 'Showing Workings & Earning Own-Figure Marks', code: '11.4' },
+      { name: 'Common Errors in Double Entry Questions', code: '11.5' },
+      { name: 'Past Paper Practice: Double Entry & Books of Prime Entry', code: '11.6' },
+      { name: 'Past Paper Practice: Adjustments & Financial Statements', code: '11.7' },
+      { name: 'Past Paper Practice: Ratios & Interpretation', code: '11.8' },
+      { name: 'Mock Exam Review & Revision Planning', code: '11.9' },
+    ] },
+]
+
+// Cambridge IGCSE Additional Mathematics 0606
+// Lesson-level spine, 13 topics / 132 lessons.
+//
+// WHAT THIS SUBJECT ACTUALLY IS
+// 0606 is not "harder 0580". It is a bridging course to A Level, and
+// roughly two thirds of it — calculus, logarithms and exponentials,
+// trigonometric identities, binomial expansion, the factor and
+// remainder theorems — does not appear in core Mathematics at all.
+//
+// The spine previously loaded on this subject WAS the 0580 core
+// Mathematics spine, which meant a student could be examined on
+// differentiation while every question in the bank was filed against
+// "Number" and "Mensuration". This replaces it.
+const IGCSE_ADD_MATHS_0606 = [
+  { topic: 'Topic 1 · Functions', code: '1',
+    subtopics: [
+      { name: 'Function Notation, Domain & Range', code: '1.1' },
+      { name: 'Determining the Range of a Given Function', code: '1.2' },
+      { name: 'One-One Functions & The Horizontal Line Test', code: '1.3' },
+      { name: 'Composite Functions & Order of Operations', code: '1.4' },
+      { name: 'Inverse Functions: Finding & Conditions for Existence', code: '1.5' },
+      { name: 'Graphs of a Function and Its Inverse', code: '1.6' },
+      { name: 'The Modulus Function & Its Graph', code: '1.7' },
+      { name: 'Solving Modulus Equations', code: '1.8' },
+      { name: 'Sketching Graphs of Modulus Functions', code: '1.9' },
+      { name: 'Transformations of Graphs: Translations', code: '1.10' },
+      { name: 'Transformations of Graphs: Stretches & Reflections', code: '1.11' },
+    ] },
+
+  { topic: 'Topic 2 · Quadratic Functions', code: '2',
+    subtopics: [
+      { name: 'Completing the Square & The Vertex Form', code: '2.1' },
+      { name: 'Maximum & Minimum Values of a Quadratic', code: '2.2' },
+      { name: 'Sketching a Quadratic from Its Completed Square Form', code: '2.3' },
+      { name: 'The Discriminant & The Nature of Roots', code: '2.4' },
+      { name: 'Conditions for a Line to Meet, Touch or Miss a Curve', code: '2.5' },
+      { name: 'Solving Quadratic Inequalities', code: '2.6' },
+      { name: 'Solving Simultaneous Equations: One Linear, One Quadratic', code: '2.7' },
+      { name: 'Equations Reducible to Quadratic Form', code: '2.8' },
+    ] },
+
+  { topic: 'Topic 3 · Indices, Surds & Logarithms', code: '3',
+    subtopics: [
+      { name: 'Laws of Indices Including Negative & Fractional Powers', code: '3.1' },
+      { name: 'Simplifying & Rationalising Surds', code: '3.2' },
+      { name: 'Solving Equations Involving Surds', code: '3.3' },
+      { name: 'Exponential Equations with a Common Base', code: '3.4' },
+      { name: 'Introducing the Logarithm & Its Relationship to Indices', code: '3.5' },
+      { name: 'Laws of Logarithms: Product, Quotient & Power', code: '3.6' },
+      { name: 'Change of Base & Natural Logarithms', code: '3.7' },
+      { name: 'Solving Logarithmic Equations', code: '3.8' },
+      { name: 'Solving Exponential Equations Using Logarithms', code: '3.9' },
+      { name: 'Graphs of Exponential & Logarithmic Functions', code: '3.10' },
+      { name: 'Reducing a Relationship to Linear Form: y = ax\u207f', code: '3.11' },
+      { name: 'Reducing a Relationship to Linear Form: y = Ab\u02e3', code: '3.12' },
+      { name: 'Using a Straight-Line Graph to Estimate Constants', code: '3.13' },
+    ] },
+
+  { topic: 'Topic 4 · Polynomials & Partial Fractions', code: '4',
+    subtopics: [
+      { name: 'Polynomial Division', code: '4.1' },
+      { name: 'The Remainder Theorem', code: '4.2' },
+      { name: 'The Factor Theorem', code: '4.3' },
+      { name: 'Factorising a Cubic Polynomial', code: '4.4' },
+      { name: 'Solving Cubic Equations', code: '4.5' },
+      { name: 'Sketching the Graph of a Cubic', code: '4.6' },
+      { name: 'Identities & Equating Coefficients', code: '4.7' },
+      { name: 'Partial Fractions: Distinct Linear Factors', code: '4.8' },
+      { name: 'Partial Fractions: Repeated & Quadratic Factors', code: '4.9' },
+    ] },
+
+  { topic: 'Topic 5 · Simultaneous Equations & Inequalities', code: '5',
+    subtopics: [
+      { name: 'Linear Inequalities & Number Line Representation', code: '5.1' },
+      { name: 'Inequalities Involving the Modulus Function', code: '5.2' },
+      { name: 'Solving Inequalities Graphically', code: '5.3' },
+      { name: 'Simultaneous Equations in Context', code: '5.4' },
+    ] },
+
+  { topic: 'Topic 6 · Straight Line Graphs & Coordinate Geometry', code: '6',
+    subtopics: [
+      { name: 'Gradient, Midpoint & Length of a Line Segment', code: '6.1' },
+      { name: 'Equation of a Straight Line in Various Forms', code: '6.2' },
+      { name: 'Parallel & Perpendicular Lines', code: '6.3' },
+      { name: 'The Perpendicular Bisector', code: '6.4' },
+      { name: 'Point of Intersection of Two Lines', code: '6.5' },
+      { name: 'Area of a Rectilinear Figure Using Coordinates', code: '6.6' },
+      { name: 'Coordinate Geometry Proofs & Problem Solving', code: '6.7' },
+    ] },
+
+  { topic: 'Topic 7 · Circular Measure', code: '7',
+    subtopics: [
+      { name: 'Radians & Conversion Between Radians and Degrees', code: '7.1' },
+      { name: 'Arc Length of a Circle', code: '7.2' },
+      { name: 'Area of a Sector', code: '7.3' },
+      { name: 'Area of a Segment', code: '7.4' },
+      { name: 'Problems Combining Arcs, Sectors & Triangles', code: '7.5' },
+    ] },
+
+  { topic: 'Topic 8 · Trigonometry', code: '8',
+    subtopics: [
+      { name: 'Trigonometric Ratios of Any Angle & The CAST Diagram', code: '8.1' },
+      { name: 'Exact Values for 30\u00b0, 45\u00b0 and 60\u00b0', code: '8.2' },
+      { name: 'Graphs of sine, cosine & tangent', code: '8.3' },
+      { name: 'Amplitude, Period & Transformations of Trigonometric Graphs', code: '8.4' },
+      { name: 'The Reciprocal Ratios: secant, cosecant & cotangent', code: '8.5' },
+      { name: 'The Identity sin\u00b2x + cos\u00b2x = 1 and Its Variants', code: '8.6' },
+      { name: 'Proving Trigonometric Identities', code: '8.7' },
+      { name: 'Solving Trigonometric Equations in Degrees', code: '8.8' },
+      { name: 'Solving Trigonometric Equations in Radians', code: '8.9' },
+      { name: 'Equations Requiring Identities Before Solving', code: '8.10' },
+      { name: 'Equations of the Form sin(ax + b) = k', code: '8.11' },
+    ] },
+
+  { topic: 'Topic 9 · Permutations, Combinations & The Binomial Theorem', code: '9',
+    subtopics: [
+      { name: 'The Factorial Function & Basic Counting Principles', code: '9.1' },
+      { name: 'Permutations: Arrangements in Order', code: '9.2' },
+      { name: 'Permutations with Restrictions', code: '9.3' },
+      { name: 'Combinations: Selections Without Order', code: '9.4' },
+      { name: 'Problems Combining Permutations & Combinations', code: '9.5' },
+      { name: 'Pascal\u2019s Triangle & Binomial Coefficients', code: '9.6' },
+      { name: 'The Binomial Theorem for Positive Integer Powers', code: '9.7' },
+      { name: 'Finding a Particular Term in a Binomial Expansion', code: '9.8' },
+      { name: 'Binomial Expansion in Problem Solving', code: '9.9' },
+    ] },
+
+  { topic: 'Topic 10 · Vectors in Two Dimensions', code: '10',
+    subtopics: [
+      { name: 'Vector Notation, Magnitude & Direction', code: '10.1' },
+      { name: 'Addition, Subtraction & Scalar Multiples of Vectors', code: '10.2' },
+      { name: 'Position Vectors & The Vector Joining Two Points', code: '10.3' },
+      { name: 'Unit Vectors', code: '10.4' },
+      { name: 'Proving Points Are Collinear', code: '10.5' },
+      { name: 'Ratio Problems Using Vectors', code: '10.6' },
+      { name: 'Relative Velocity & Interception Problems', code: '10.7' },
+    ] },
+
+  { topic: 'Topic 11 · Differentiation', code: '11',
+    subtopics: [
+      { name: 'The Gradient of a Curve & The Idea of a Limit', code: '11.1' },
+      { name: 'Differentiation from First Principles', code: '11.2' },
+      { name: 'Differentiating Powers of x', code: '11.3' },
+      { name: 'The Chain Rule', code: '11.4' },
+      { name: 'The Product Rule', code: '11.5' },
+      { name: 'The Quotient Rule', code: '11.6' },
+      { name: 'Differentiating Exponential Functions', code: '11.7' },
+      { name: 'Differentiating Logarithmic Functions', code: '11.8' },
+      { name: 'Differentiating Trigonometric Functions', code: '11.9' },
+      { name: 'Equations of Tangents & Normals', code: '11.10' },
+      { name: 'Stationary Points: Finding & Classifying', code: '11.11' },
+      { name: 'The Second Derivative Test', code: '11.12' },
+      { name: 'Increasing & Decreasing Functions', code: '11.13' },
+      { name: 'Maxima & Minima Problems in Context', code: '11.14' },
+      { name: 'Connected Rates of Change', code: '11.15' },
+      { name: 'Small Increments & Approximations', code: '11.16' },
+    ] },
+
+  { topic: 'Topic 12 · Integration', code: '12',
+    subtopics: [
+      { name: 'Integration as the Reverse of Differentiation', code: '12.1' },
+      { name: 'Integrating Powers of x & The Constant of Integration', code: '12.2' },
+      { name: 'Integrating (ax + b)\u207f', code: '12.3' },
+      { name: 'Integrating Exponential Functions', code: '12.4' },
+      { name: 'Integrating 1/x and Related Forms', code: '12.5' },
+      { name: 'Integrating Trigonometric Functions', code: '12.6' },
+      { name: 'Definite Integration & Evaluating Limits', code: '12.7' },
+      { name: 'Area Under a Curve', code: '12.8' },
+      { name: 'Area Between a Curve and a Line', code: '12.9' },
+      { name: 'Areas Below the x-Axis & Combined Regions', code: '12.10' },
+      { name: 'Finding a Function from Its Derivative', code: '12.11' },
+    ] },
+
+  { topic: 'Topic 13 · Kinematics & Exam Technique', code: '13',
+    subtopics: [
+      { name: 'Displacement, Velocity & Acceleration as Functions of Time', code: '13.1' },
+      { name: 'Differentiating to Find Velocity & Acceleration', code: '13.2' },
+      { name: 'Integrating to Find Velocity & Displacement', code: '13.3' },
+      { name: 'Interpreting Displacement-Time & Velocity-Time Graphs', code: '13.4' },
+      { name: 'Distance Travelled vs. Displacement', code: '13.5' },
+      { name: 'Instantaneous Rest & Change of Direction', code: '13.6' },
+      { name: 'Kinematics Problems in Context', code: '13.7' },
+      { name: 'Exam Technique: Presenting a Full Method', code: '13.8' },
+      { name: 'Common Errors in Calculus Questions', code: '13.9' },
+      { name: 'Past Paper Practice: Algebra, Functions & Logarithms', code: '13.10' },
+      { name: 'Past Paper Practice: Trigonometry & Coordinate Geometry', code: '13.11' },
+      { name: 'Past Paper Practice: Calculus & Kinematics', code: '13.12' },
+      { name: 'Mock Exam Review & Revision Planning', code: '13.13' },
+    ] },
+]
+
 export const IGCSE_LIBRARY = [
   // Sciences (also in IGCSE_SCIENCES_LIBRARY for legacy compat)
   { match: /\bbiology\b/i,                       const_: IGCSE_BIOLOGY_0610,      source: 'IGCSE Biology — 130-lesson scheme (Cambridge 0610 & Edexcel 4BI1)' },
@@ -3172,6 +3549,15 @@ export const IGCSE_LIBRARY = [
   { match: /\b(literature|english\s+lit)\b/i,    const_: IGCSE_ENGLISH_LIT_0475,  source: 'Cambridge IGCSE Literature in English 0475' },
   { match: /\benglish\b/i,                       const_: IGCSE_ENGLISH_LANG_0500, source: 'Cambridge IGCSE First Language English 0500' },
   // Business / Economics
+  // Additional Mathematics MUST be tested before anything matching
+  // "math", or "Additional Mathematics" would fall through to a plain
+  // Maths matcher — which is exactly how this subject ended up carrying
+  // the 0580 core spine. 0606 shares ZERO lessons with 0580: it is a
+  // bridging course to A Level covering calculus, logarithms and
+  // trigonometric identities that core Maths never touches.
+  { match: /\badditional\s+math/i,           const_: IGCSE_ADD_MATHS_0606,   source: 'Cambridge IGCSE Additional Mathematics 0606 \u2014 124-lesson scheme' },
+  { match: /\baccounting\b/i,                const_: IGCSE_ACCOUNTING_0452,  source: 'Cambridge IGCSE Accounting 0452 \u2014 126-lesson scheme' },
+
   // Modern foreign languages. Cambridge MFL syllabuses share a common
   // skeleton — five Areas of Experience, four skills — so these spines
   // are parallel BY DESIGN. The grammar strand is what genuinely
