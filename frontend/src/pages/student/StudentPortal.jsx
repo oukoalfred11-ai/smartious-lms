@@ -3144,7 +3144,7 @@ function ModuleCard({ accent, badges = [], eyebrow, title, tiles = [], meta, not
   return (
     <div
       onClick={onClick}
-      className="card"
+      className="card sm-glow sm-glow-card"
       style={{
         padding: 0, overflow: 'hidden',
         borderTop: `4px solid ${accent}`,
@@ -3991,7 +3991,7 @@ function ExamsTab({ user, toast, goTo, store }) {
                   ? `${ex.teacherId.firstName || ''} ${ex.teacherId.lastName || ''}`.trim()
                   : ''
                 return (
-                  <div key={ex._id} className="card" style={{
+                  <div key={ex._id} className="card sm-glow sm-glow-card" style={{
                     padding: 0, overflow: 'hidden',
                     borderTop: `4px solid ${subjCol}`,
                     display: 'flex', flexDirection: 'column',
@@ -11506,8 +11506,8 @@ function StudentLibraryPage({ user, toast }) {
 function StudentBookCard({ book, onOpen }) {
   const sizeMB = book.sizeBytes ? (book.sizeBytes / (1024 * 1024)).toFixed(1) + ' MB' : ''
   return (
-    <div style={{
-      background: '#fff', border: '1px solid #E8E2D6', borderRadius: 10,
+    <div className="sm-glow sm-glow-card" style={{
+      background: '#fff', border: 'none', borderRadius: 10,
       padding: 14, display: 'flex', flexDirection: 'column',
     }}>
       {book.coverUrl ? (
