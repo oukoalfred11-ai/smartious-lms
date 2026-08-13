@@ -144,7 +144,12 @@ function InvoicesTab({ toast, refreshKey }) {
       })
       toast?.ok?.('Invoice marked paid — receipt emailed to ' + (paidModal.billedToEmail || 'parent') + '.')
       setPaidModal(null)
+      // Refresh whichever view is open. Previously only load() ran, so
+      // marking paid from "Who has not paid" left the row on screen and
+      // the totals stale until a manual reload.
       load()
+      if (invView === 'unpaid')    loadCollections()
+      if (invView === 'reminders') loadReminders()
     } catch { toast?.error?.('Could not mark as paid.') }
     finally { setMarkingPaid(false) }
   }
@@ -315,6 +320,15 @@ function InvoicesTab({ toast, refreshKey }) {
                               <button onClick={()=>sendReminder(inv)} disabled={sendingId===inv._id}
                                 style={{ fontSize:11, background:TOKENS.crimson, color:'#fff', border:'none', padding:'5px 10px', borderRadius:5, fontWeight:700, cursor:sendingId===inv._id?'not-allowed':'pointer' }}>
                                 {sendingId===inv._id ? 'Sending...' : (inv.reminderCount ? 'Send again' : 'Send reminder')}
+                              </button>
+                              {/* MARK PAID — this row previously offered only "Send reminder"
+                                  and "Pause auto", so an invoice that had actually been paid
+                                  could not be closed from the one screen finance staff live in,
+                                  and reminders kept going out after payment. The backend route
+                                  already existed; only the button was missing. */}
+                              <button onClick={()=>openMarkPaid(inv)}
+                                style={{ fontSize:11, background:'#D1FAE5', color:'#065F46', border:'none', padding:'4px 9px', borderRadius:5, cursor:'pointer', fontWeight:700 }}>
+                                Mark paid
                               </button>
                               <button onClick={()=>toggleAutoRemind(inv)}
                                 style={{ fontSize:11, background:'#fff', color:TOKENS.s600, border:'1px solid '+TOKENS.line, padding:'5px 10px', borderRadius:5, fontWeight:600, cursor:'pointer' }}>
