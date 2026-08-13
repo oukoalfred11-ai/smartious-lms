@@ -2110,6 +2110,376 @@ const IGCSE_COMPSCI_EDX = [
     ] },
 ]
 
+// Cambridge IGCSE Information & Communication Technology 0417
+// Lesson-level spine, 11 topics / 138 lessons.
+//
+// WEIGHTING NOTE
+// 0417 is not a theory subject. Paper 1 (theory) carries 40% of the
+// marks; Papers 2 and 3 are PRACTICAL — document production, data
+// manipulation, presentations and website authoring — and carry 60%
+// between them. The spine reflects that: roughly two thirds of these
+// lessons are hands-on software skills. A theory-only breakdown would
+// leave teachers unable to file questions against most of the course.
+const IGCSE_ICT_CAM = [
+  { topic: 'Section 1 · Types & Components of Computer Systems', code: '1',
+    subtopics: [
+      { name: 'Hardware & Software: Definitions and Examples', code: '1.1' },
+      { name: 'Internal Hardware: CPU, Motherboard, RAM, ROM & Graphics Card', code: '1.2' },
+      { name: 'System Software vs. Application Software', code: '1.3' },
+      { name: 'Analogue & Digital Data and the Need for Conversion', code: '1.4' },
+      { name: 'Main Memory: RAM & ROM Compared', code: '1.5' },
+      { name: 'Operating Systems & Their Functions', code: '1.6' },
+      { name: 'User Interfaces: CLI, GUI, Gesture & Voice', code: '1.7' },
+      { name: 'Types of Computer: Desktop, Laptop, Tablet & Smartphone', code: '1.8' },
+      { name: 'Emerging Technologies: Artificial Intelligence & Robotics', code: '1.9' },
+      { name: 'Emerging Technologies: Virtual & Augmented Reality', code: '1.10' },
+    ] },
+
+  { topic: 'Section 2 · Input & Output Devices', code: '2',
+    subtopics: [
+      { name: 'Manual Input Devices: Keyboard, Mouse & Touchpad', code: '2.1' },
+      { name: 'Scanners, Barcode & QR Code Readers', code: '2.2' },
+      { name: 'Digital Cameras, Microphones & Webcams', code: '2.3' },
+      { name: 'Touch Screens: Resistive, Capacitive & Infrared', code: '2.4' },
+      { name: 'Direct Data Entry: OMR, OCR, MICR & RFID', code: '2.5' },
+      { name: 'Sensors: Types and Their Applications', code: '2.6' },
+      { name: 'Output Devices: Monitors & Projectors', code: '2.7' },
+      { name: 'Printers: Inkjet, Laser, 3D & Plotters', code: '2.8' },
+      { name: 'Speakers, Actuators & Control Devices', code: '2.9' },
+      { name: 'Selecting Appropriate Devices for a Given User', code: '2.10' },
+    ] },
+
+  { topic: 'Section 3 · Storage Devices & Media', code: '3',
+    subtopics: [
+      { name: 'Backing Up Data: Purpose & Methods', code: '3.1' },
+      { name: 'Magnetic Storage: Hard Disk Drives & Tape', code: '3.2' },
+      { name: 'Optical Storage: CD, DVD & Blu-ray', code: '3.3' },
+      { name: 'Solid State Storage: SSD, Flash & Memory Cards', code: '3.4' },
+      { name: 'Comparing Storage: Capacity, Speed, Cost & Portability', code: '3.5' },
+      { name: 'Cloud Storage: Benefits, Risks & Suitable Uses', code: '3.6' },
+    ] },
+
+  { topic: 'Section 4 · Networks & Their Effects', code: '4',
+    subtopics: [
+      { name: 'Network Devices: NIC, Hub, Switch, Bridge & Router', code: '4.1' },
+      { name: 'IP Addresses & MAC Addresses', code: '4.2' },
+      { name: 'Wi-Fi & Bluetooth: Differences and Suitable Uses', code: '4.3' },
+      { name: 'LAN, WLAN & WAN', code: '4.4' },
+      { name: 'Client-Server & Peer-to-Peer Networks', code: '4.5' },
+      { name: 'The Internet, Intranet & Extranet', code: '4.6' },
+      { name: 'Network Security: Passwords, Authentication & Firewalls', code: '4.7' },
+      { name: 'Video, Audio & Web Conferencing', code: '4.8' },
+      { name: 'Comparing Conferencing Methods for a Given Task', code: '4.9' },
+    ] },
+
+  { topic: 'Section 5 · The Effects of Using IT', code: '5',
+    subtopics: [
+      { name: 'Health Issues: RSI, Back Problems & Eye Strain', code: '5.1' },
+      { name: 'Safety Issues: Electrocution, Fire & Trailing Cables', code: '5.2' },
+      { name: 'Microprocessor-Controlled Devices in the Home', code: '5.3' },
+      { name: 'Effects on Employment & Working Patterns', code: '5.4' },
+      { name: 'Effects on Leisure Time & Social Interaction', code: '5.5' },
+    ] },
+
+  { topic: 'Section 6 · ICT Applications', code: '6',
+    subtopics: [
+      { name: 'Communication Media: Newsletters, Websites & Multimedia', code: '6.1' },
+      { name: 'Data Handling Applications: Surveys & Address Lists', code: '6.2' },
+      { name: 'Measurement Applications & Data Logging', code: '6.3' },
+      { name: 'Microprocessors in Control Applications', code: '6.4' },
+      { name: 'Modelling Applications: Spreadsheets & Simulations', code: '6.5' },
+      { name: 'Banking Applications: ATMs, EFT & Cheque Clearing', code: '6.6' },
+      { name: 'Computers in Medicine: Records, 3D Printing & Monitoring', code: '6.7' },
+      { name: 'Expert Systems: Structure & Uses', code: '6.8' },
+      { name: 'Computers in the Retail Industry: Stock Control & POS', code: '6.9' },
+      { name: 'Recognition Systems: OMR, OCR, RFID & Biometrics', code: '6.10' },
+      { name: 'Satellite Systems: GPS, GIS & Media Communication', code: '6.11' },
+      { name: 'Computers in Libraries & School Management Systems', code: '6.12' },
+    ] },
+
+  { topic: 'Section 7 · The Systems Life Cycle', code: '7',
+    subtopics: [
+      { name: 'Analysis: Researching the Current System', code: '7.1' },
+      { name: 'Methods of Researching: Observation, Interview & Questionnaire', code: '7.2' },
+      { name: 'Recording & Analysing Requirements', code: '7.3' },
+      { name: 'Design: Data Capture Forms & Screen Layouts', code: '7.4' },
+      { name: 'Design: File Structures, Validation Routines & Report Layouts', code: '7.5' },
+      { name: 'Development & Testing: Test Plans and Test Data', code: '7.6' },
+      { name: 'Implementation Methods: Direct, Parallel, Pilot & Phased', code: '7.7' },
+      { name: 'Documentation: Technical vs. User Documentation', code: '7.8' },
+      { name: 'Evaluation of a Solution Against Requirements', code: '7.9' },
+    ] },
+
+  { topic: 'Section 8 · Safety & Security', code: '8',
+    subtopics: [
+      { name: 'Physical Safety Risks & Their Prevention', code: '8.1' },
+      { name: 'E-Safety: Personal Data & Safe Online Behaviour', code: '8.2' },
+      { name: 'Safe Use of Social Media, Email & Online Gaming', code: '8.3' },
+      { name: 'Data Protection Principles & Why They Exist', code: '8.4' },
+      { name: 'Hacking, Viruses & Malware', code: '8.5' },
+      { name: 'Phishing, Smishing, Vishing & Pharming', code: '8.6' },
+      { name: 'Card Fraud: Shoulder Surfing, Skimming & Key Logging', code: '8.7' },
+      { name: 'Protecting Data: Encryption, Firewalls & Authentication', code: '8.8' },
+      { name: 'Biometric Security & Two-Factor Authentication', code: '8.9' },
+    ] },
+
+  { topic: 'Section 9 · Practical: Documents & Communication', code: '9',
+    subtopics: [
+      { name: 'File Management: Naming, Folders & File Formats', code: '9.1' },
+      { name: 'Importing & Placing Text and Images in a Document', code: '9.2' },
+      { name: 'Page Layout: Size, Orientation, Margins & Columns', code: '9.3' },
+      { name: 'Headers & Footers: Automated Fields and Page Numbers', code: '9.4' },
+      { name: 'Applying & Editing Styles Consistently', code: '9.5' },
+      { name: 'Formatting Text: Fonts, Alignment, Spacing & Lists', code: '9.6' },
+      { name: 'Working with Tables in a Document', code: '9.7' },
+      { name: 'Placing & Wrapping Images Around Text', code: '9.8' },
+      { name: 'Mail Merge: Data Source, Fields & Merged Output', code: '9.9' },
+      { name: 'Proofreading: Spell Check, Consistency & Widows/Orphans', code: '9.10' },
+      { name: 'Corporate House Style & Why It Matters', code: '9.11' },
+      { name: 'Email: Attachments, Cc, Bcc & Netiquette', code: '9.12' },
+      { name: 'Setting Tabs, Indents & Hanging Indents', code: '9.13' },
+      { name: 'Inserting & Formatting a Table of Contents', code: '9.14' },
+      { name: 'Bullets, Numbering & Multi-Level Lists', code: '9.15' },
+      { name: 'Line & Paragraph Spacing to a Specification', code: '9.16' },
+      { name: 'Borders, Shading & Highlighting Text', code: '9.17' },
+      { name: 'Find & Replace and Consistent Terminology', code: '9.18' },
+      { name: 'Splitting Text into Columns with a Balanced Layout', code: '9.19' },
+      { name: 'Cropping & Resizing an Image Without Distortion', code: '9.20' },
+      { name: 'Printing to a Specification: Fit, Orientation & Scale', code: '9.21' },
+      { name: 'Checking a Document Against the Original Brief', code: '9.22' },
+    ] },
+
+  { topic: 'Section 10 · Practical: Data Analysis & Databases', code: '10',
+    subtopics: [
+      { name: 'Creating a Spreadsheet Structure & Entering Data', code: '10.1' },
+      { name: 'Cell Formatting: Number, Currency, Date & Percentage', code: '10.2' },
+      { name: 'Basic Formulae & The Order of Operations', code: '10.3' },
+      { name: 'Absolute & Relative Cell References', code: '10.4' },
+      { name: 'Named Ranges and Why They Are Used', code: '10.5' },
+      { name: 'Functions: SUM, AVERAGE, MAX, MIN & ROUND', code: '10.6' },
+      { name: 'Functions: COUNT, COUNTA & COUNTIF', code: '10.7' },
+      { name: 'Logical Functions: IF and Nested IF', code: '10.8' },
+      { name: 'Lookup Functions: VLOOKUP & HLOOKUP', code: '10.9' },
+      { name: 'Sorting & Filtering Spreadsheet Data', code: '10.10' },
+      { name: 'Testing a Model with Normal, Extreme & Abnormal Data', code: '10.11' },
+      { name: 'Displaying Formulae & Printing to Fit', code: '10.12' },
+      { name: 'Creating Charts: Pie, Bar, Line & Scatter', code: '10.13' },
+      { name: 'Labelling Charts: Titles, Legends, Axes & Data Values', code: '10.14' },
+      { name: 'Choosing the Right Chart for the Data', code: '10.15' },
+      { name: 'Database Structure: Records, Fields & Data Types', code: '10.16' },
+      { name: 'Setting Field Types & Primary Keys', code: '10.17' },
+      { name: 'Importing Data into a Database', code: '10.18' },
+      { name: 'Simple Queries: Single Criterion', code: '10.19' },
+      { name: 'Complex Queries: AND, OR, Wildcards & Ranges', code: '10.20' },
+      { name: 'Calculated Fields in Queries', code: '10.21' },
+      { name: 'Database Reports: Grouping, Sorting & Summary Totals', code: '10.22' },
+      { name: 'Formatting Reports for Print', code: '10.23' },
+      { name: 'Replicating Formulae Down & Across a Sheet', code: '10.24' },
+      { name: 'Nested Functions & Combining IF with COUNTIF', code: '10.25' },
+      { name: 'Text Functions: LEFT, RIGHT, MID, LEN & CONCATENATE', code: '10.26' },
+      { name: 'Date & Time Functions in a Model', code: '10.27' },
+      { name: 'Freezing Panes, Row & Column Headings for Print', code: '10.28' },
+      { name: 'Cross-Sheet References & Multi-Sheet Workbooks', code: '10.29' },
+      { name: 'Interpreting a Chart to Answer a Question', code: '10.30' },
+      { name: 'Database Queries Across Two Linked Tables', code: '10.31' },
+      { name: 'Labelling & Presenting Query Output for a Client', code: '10.32' },
+    ] },
+
+  { topic: 'Section 11 · Practical: Presentations & Website Authoring', code: '11',
+    subtopics: [
+      { name: 'Creating a Presentation & Using the Master Slide', code: '11.1' },
+      { name: 'Slide Layouts, Text & Bullet Levels', code: '11.2' },
+      { name: 'Adding Images, Charts & Tables to Slides', code: '11.3' },
+      { name: 'Transitions, Animations & Timings', code: '11.4' },
+      { name: 'Speaker Notes, Handouts & Printing Options', code: '11.5' },
+      { name: 'Evaluating a Presentation for Its Audience', code: '11.6' },
+      { name: 'Web Page Structure: Content, Presentation & Behaviour Layers', code: '11.7' },
+      { name: 'HTML Basics: Tags, Elements & Document Structure', code: '11.8' },
+      { name: 'Headings, Paragraphs & Lists in HTML', code: '11.9' },
+      { name: 'Tables in HTML: Rows, Cells, Colspan & Rowspan', code: '11.10' },
+      { name: 'Inserting Images & Setting Dimensions', code: '11.11' },
+      { name: 'Hyperlinks: Internal, External, Email & Anchors', code: '11.12' },
+      { name: 'Stylesheets: Attaching an External CSS File', code: '11.13' },
+      { name: 'CSS Selectors & The Cascade', code: '11.14' },
+      { name: 'CSS Properties: Colour, Font, Background & Alignment', code: '11.15' },
+      { name: 'Testing a Web Page Across Browsers', code: '11.16' },
+      { name: 'Planning a Web Page Structure Before Coding', code: '11.17' },
+      { name: 'Semantic HTML: div, span & Meaningful Structure', code: '11.18' },
+      { name: 'CSS Classes vs. IDs & When to Use Each', code: '11.19' },
+      { name: 'CSS Box Model: Padding, Border & Margin', code: '11.20' },
+      { name: 'Positioning Content with Tables & CSS', code: '11.21' },
+      { name: 'Embedding Audio & Video in a Web Page', code: '11.22' },
+      { name: 'Saving, Naming & Publishing Web Files Correctly', code: '11.23' },
+      { name: 'Consistency Across a Multi-Page Website', code: '11.24' },
+    ] },
+
+  { topic: 'Section 12 · Exam & Practical Technique', code: '12',
+    subtopics: [
+      { name: 'Paper 1 Technique: Theory Command Words & Timing', code: '12.1' },
+      { name: 'Practical Paper Technique: Following Instructions Exactly', code: '12.2' },
+      { name: 'Evidence Documents: Screenshots & Naming Conventions', code: '12.3' },
+      { name: 'Common Practical Errors & How to Avoid Them', code: '12.4' },
+      { name: 'Past Paper Practice: Theory & Applications', code: '12.5' },
+      { name: 'Past Paper Practice: Documents & Data Manipulation', code: '12.6' },
+      { name: 'Past Paper Practice: Presentations & Website Authoring', code: '12.7' },
+      { name: 'Mock Exam Review & Revision Planning', code: '12.8' },
+    ] },
+]
+
+// Pearson Edexcel International GCSE Information & Communication
+// Technology 4IT1 — lesson-level spine, 9 topics / 126 lessons.
+//
+// NOT a copy of Cambridge 0417. Edexcel structures ICT around two
+// papers: Paper 1 covers written theory across five broad topics, and
+// Paper 2 is a practical examination in which candidates build a
+// solution using spreadsheets, databases and digital media. Edexcel
+// gives noticeably more weight to digital media authoring (images,
+// sound, video) and to project planning, while Cambridge weights
+// website authoring and document production more heavily.
+const IGCSE_ICT_EDX = [
+  { topic: 'Topic 1 · Digital Devices', code: '1',
+    subtopics: [
+      { name: 'Types of Digital Device & Their Uses', code: '1.1' },
+      { name: 'Input Devices & Choosing One for a Purpose', code: '1.2' },
+      { name: 'Output Devices & Choosing One for a Purpose', code: '1.3' },
+      { name: 'Storage Devices, Capacity & Suitability', code: '1.4' },
+      { name: 'Main Components of a Computer System', code: '1.5' },
+      { name: 'The Processor & Factors Affecting Performance', code: '1.6' },
+      { name: 'Memory: RAM, ROM & Virtual Memory', code: '1.7' },
+      { name: 'Peripherals, Connectivity & Ports', code: '1.8' },
+      { name: 'Operating Systems & System Software', code: '1.9' },
+      { name: 'Application Software & Choosing the Right Tool', code: '1.10' },
+      { name: 'Software Licensing: Proprietary, Open Source & Subscription', code: '1.11' },
+      { name: 'Accessibility Features & Designing for All Users', code: '1.12' },
+    ] },
+
+  { topic: 'Topic 2 · Connectivity', code: '2',
+    subtopics: [
+      { name: 'Networks: Purpose, Benefits & Drawbacks', code: '2.1' },
+      { name: 'LAN, WAN & Home Networks', code: '2.2' },
+      { name: 'Wired vs. Wireless Connectivity', code: '2.3' },
+      { name: 'Network Hardware: Router, Switch, NIC & Access Point', code: '2.4' },
+      { name: 'Mobile Networks & Data Transfer Standards', code: '2.5' },
+      { name: 'Bluetooth, NFC & Personal Area Networks', code: '2.6' },
+      { name: 'Bandwidth, Latency & Factors Affecting Performance', code: '2.7' },
+      { name: 'The Internet, Web Browsers & Search Engines', code: '2.8' },
+      { name: 'Cloud Computing & Online Collaboration Tools', code: '2.9' },
+      { name: 'Selecting a Connection Method for a Given Scenario', code: '2.10' },
+    ] },
+
+  { topic: 'Topic 3 · Operating Online', code: '3',
+    subtopics: [
+      { name: 'Online Communication: Email, Messaging & Forums', code: '3.1' },
+      { name: 'Netiquette & Professional Online Communication', code: '3.2' },
+      { name: 'Social Media: Uses, Benefits & Risks', code: '3.3' },
+      { name: 'Online Shopping & Digital Payment Methods', code: '3.4' },
+      { name: 'Online Banking & Transaction Security', code: '3.5' },
+      { name: 'Online Learning & Remote Working', code: '3.6' },
+      { name: 'Evaluating the Reliability of Online Information', code: '3.7' },
+      { name: 'Digital Footprint & Online Reputation', code: '3.8' },
+      { name: 'Cyberbullying & Reporting Harmful Behaviour', code: '3.9' },
+      { name: 'Threats: Malware, Phishing & Identity Theft', code: '3.10' },
+      { name: 'Protecting Yourself: Passwords, Updates & Privacy Settings', code: '3.11' },
+      { name: 'Data Protection, Consent & Individual Rights', code: '3.12' },
+      { name: 'Copyright, Creative Commons & Acceptable Use', code: '3.13' },
+    ] },
+
+  { topic: 'Topic 4 · Online Goods & Services', code: '4',
+    subtopics: [
+      { name: 'How Organisations Use ICT to Deliver Services', code: '4.1' },
+      { name: 'Transactional Websites & Order Processing', code: '4.2' },
+      { name: 'Targeted Marketing & Customer Data', code: '4.3' },
+      { name: 'Impact of Online Services on Business & Employment', code: '4.4' },
+      { name: 'Impact of Online Services on Society & Communities', code: '4.5' },
+      { name: 'The Digital Divide & Barriers to Access', code: '4.6' },
+      { name: 'Environmental Impact of ICT & Sustainable Practice', code: '4.7' },
+      { name: 'Evaluating the Benefits & Risks of an Online Service', code: '4.8' },
+    ] },
+
+  { topic: 'Topic 5 · Online Communities', code: '5',
+    subtopics: [
+      { name: 'Types of Online Community & Their Purpose', code: '5.1' },
+      { name: 'Collaborative Working & Shared Documents', code: '5.2' },
+      { name: 'User-Generated Content & Crowdsourcing', code: '5.3' },
+      { name: 'Moderation, Terms of Use & Community Standards', code: '5.4' },
+      { name: 'Positive & Negative Effects of Online Communities', code: '5.5' },
+      { name: 'Evaluating an Online Community for a Given Need', code: '5.6' },
+    ] },
+
+  { topic: 'Topic 6 · Practical: Spreadsheets & Modelling', code: '6',
+    subtopics: [
+      { name: 'Planning a Spreadsheet Solution from a Brief', code: '6.1' },
+      { name: 'Entering Data & Applying Cell Formats', code: '6.2' },
+      { name: 'Formulae & The Order of Operations', code: '6.3' },
+      { name: 'Absolute, Relative & Mixed Cell References', code: '6.4' },
+      { name: 'Functions: SUM, AVERAGE, MAX, MIN & ROUND', code: '6.5' },
+      { name: 'Functions: COUNT, COUNTIF & SUMIF', code: '6.6' },
+      { name: 'Logical Functions: IF and Nested IF', code: '6.7' },
+      { name: 'Lookup Functions & Validation Lists', code: '6.8' },
+      { name: 'Conditional Formatting to Highlight Data', code: '6.9' },
+      { name: 'Sorting, Filtering & Multi-Level Sorts', code: '6.10' },
+      { name: 'Building a What-If Model & Testing Scenarios', code: '6.11' },
+      { name: 'Charts: Selecting, Creating & Labelling', code: '6.12' },
+      { name: 'Interpreting a Chart & Drawing Conclusions', code: '6.13' },
+      { name: 'Testing a Spreadsheet with Normal & Extreme Data', code: '6.14' },
+      { name: 'Presenting a Spreadsheet Solution for Print', code: '6.15' },
+    ] },
+
+  { topic: 'Topic 7 · Practical: Databases', code: '7',
+    subtopics: [
+      { name: 'Why Databases Are Used: Flat File vs. Relational', code: '7.1' },
+      { name: 'Tables, Records, Fields & Data Types', code: '7.2' },
+      { name: 'Primary Keys & Foreign Keys', code: '7.3' },
+      { name: 'Relationships Between Tables', code: '7.4' },
+      { name: 'Designing a Database Structure from a Brief', code: '7.5' },
+      { name: 'Data Entry Forms & Input Masks', code: '7.6' },
+      { name: 'Validation Rules & Ensuring Data Quality', code: '7.7' },
+      { name: 'Simple Queries with a Single Criterion', code: '7.8' },
+      { name: 'Complex Queries: AND, OR, Wildcards & Ranges', code: '7.9' },
+      { name: 'Calculated Fields & Query Totals', code: '7.10' },
+      { name: 'Reports: Grouping, Sorting & Summaries', code: '7.11' },
+      { name: 'Formatting & Presenting a Database Report', code: '7.12' },
+      { name: 'Importing & Exporting Data Between Applications', code: '7.13' },
+    ] },
+
+  { topic: 'Topic 8 · Practical: Digital Media & Documents', code: '8',
+    subtopics: [
+      { name: 'File Types & Choosing the Right Format', code: '8.1' },
+      { name: 'File Management, Naming Conventions & Version Control', code: '8.2' },
+      { name: 'Page Layout, Margins & Columns in a Document', code: '8.3' },
+      { name: 'Styles, Headings & Consistent Formatting', code: '8.4' },
+      { name: 'Tables, Lists & Structuring Information', code: '8.5' },
+      { name: 'Headers, Footers & Automated Page Numbers', code: '8.6' },
+      { name: 'Combining Text & Images for a Target Audience', code: '8.7' },
+      { name: 'Image Editing: Cropping, Resizing & Resolution', code: '8.8' },
+      { name: 'Image Editing: Adjusting Colour, Brightness & Contrast', code: '8.9' },
+      { name: 'Layers, Transparency & Non-Destructive Editing', code: '8.10' },
+      { name: 'Sound Editing: Trimming, Fading & Exporting', code: '8.11' },
+      { name: 'Video Editing: Clips, Transitions & Titles', code: '8.12' },
+      { name: 'Combining Media into a Multimedia Product', code: '8.13' },
+      { name: 'Presentations: Master Slides & Consistent Design', code: '8.14' },
+      { name: 'Presentations: Animation, Timing & Delivery Notes', code: '8.15' },
+      { name: 'Accessibility in Digital Media: Contrast, Alt Text & Captions', code: '8.16' },
+      { name: 'Sourcing Assets Legally & Acknowledging Sources', code: '8.17' },
+    ] },
+
+  { topic: 'Topic 9 · Project Work & Exam Technique', code: '9',
+    subtopics: [
+      { name: 'Interpreting a Practical Brief & Identifying Requirements', code: '9.1' },
+      { name: 'Planning a Solution: Task List & Time Management', code: '9.2' },
+      { name: 'Designing Before Building: Sketches & Structure', code: '9.3' },
+      { name: 'Gathering & Organising Source Files', code: '9.4' },
+      { name: 'Testing a Solution Against the Original Brief', code: '9.5' },
+      { name: 'Evaluating Fitness for Purpose & Suggesting Improvements', code: '9.6' },
+      { name: 'Paper 1 Technique: Written Theory Command Words', code: '9.7' },
+      { name: 'Paper 2 Technique: Working Efficiently Under Time Pressure', code: '9.8' },
+      { name: 'Past Paper Practice: Theory Topics 1\u20135', code: '9.9' },
+      { name: 'Past Paper Practice: Spreadsheets & Databases', code: '9.10' },
+      { name: 'Past Paper Practice: Digital Media & Documents', code: '9.11' },
+      { name: 'Mock Exam Review & Revision Planning', code: '9.12' },
+    ] },
+]
+
 export const IGCSE_LIBRARY = [
   // Sciences (also in IGCSE_SCIENCES_LIBRARY for legacy compat)
   { match: /\bbiology\b/i,                       const_: IGCSE_BIOLOGY_0610,      source: 'IGCSE Biology — 130-lesson scheme (Cambridge 0610 & Edexcel 4BI1)' },
@@ -2130,6 +2500,18 @@ export const IGCSE_LIBRARY = [
   { match: /\b(literature|english\s+lit)\b/i,    const_: IGCSE_ENGLISH_LIT_0475,  source: 'Cambridge IGCSE Literature in English 0475' },
   { match: /\benglish\b/i,                       const_: IGCSE_ENGLISH_LANG_0500, source: 'Cambridge IGCSE First Language English 0500' },
   // Business / Economics
+  // ICT. Tested before Computer Science so a subject named
+  // "Information & Communication Technology" can never fall through to
+  // the Computer Science matcher. Cambridge 0417 is practical-heavy
+  // (papers 2 and 3 are 60% of the marks); Edexcel 4IT1 weights digital
+  // media and project work differently, so this is board-aware.
+  { match: /\bict\b|information\s*&?\s*communications?\s+technology/i,
+    byCurriculum: {
+      CambridgeIGCSE: { const_: IGCSE_ICT_CAM, source: 'Cambridge IGCSE ICT 0417 \u2014 156-lesson scheme' },
+      EdexcelIGCSE:   { const_: IGCSE_ICT_EDX, source: 'Edexcel International GCSE ICT 4IT1 \u2014 106-lesson scheme' },
+    },
+    const_: IGCSE_ICT_CAM, source: 'Cambridge IGCSE ICT 0417 \u2014 156-lesson scheme' },
+
   // Computer Science. Cambridge 0478 and Edexcel 4CP0 are genuinely
   // different schemes — Edexcel is Python-specific and carries a "bigger
   // picture" topic on ethics and environment that Cambridge spreads
