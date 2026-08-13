@@ -295,6 +295,90 @@ async function allowedSubjectsFor(user) {
 // only these and marks the rest unavailable.
 // ─────────────────────────────────────────────────────────
 // ─────────────────────────────────────────────────────────
+// POST /api/questions/remap-subtopics
+// Rename subtopics WITHIN one subject so orphaned questions reach the
+// spine.
+//
+// Successive imports each invented their own wording for the same
+// lesson — "Osmoregulation: Role of ADH", "Kidney Function, Nephron
+// Structure & ADH Action" and "Regulation of Water Content" were three
+// names for one subtopic. None matched the spine, so 388 Biology
+// questions could not reach a lesson.
+//
+// Every target is checked against the live spine first: a mapping that
+// points at a subtopic which does not exist is rejected outright rather
+// than quietly creating a new orphan.
+//
+// Body: { subject, curriculum, map: { "old name": "spine name" }, confirm }
+// ─────────────────────────────────────────────────────────
+router.post('/remap-subtopics', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
+  try {
+    const { subject, curriculum, map, confirm } = req.body || {};
+    if (!subject || !curriculum || !map || typeof map !== 'object')
+      return res.status(400).json({ success:false, message:'subject, curriculum and map are required.' });
+
+    const Subject = require('../models/Subject');
+    const SyllabusTopic = require('../models/SyllabusTopic');
+    const subj = await Subject.findOne({
+      subjectName: subject, curriculum, isActive: { $ne: false },
+    }).lean();
+    if (!subj) return res.status(404).json({ success:false, message:`Subject "${subject}" not found under ${curriculum}.` });
+
+    const spine = await SyllabusTopic.find({ subjectId: subj._id }).select('subtopics').lean();
+    const valid = new Set();
+    spine.forEach(t => (t.subtopics || []).forEach(st => valid.add((st.name || '').trim())));
+    if (!valid.size)
+      return res.status(400).json({ success:false, message:'That subject has no spine loaded.' });
+
+    // Reject the whole request if any target is not a real subtopic.
+    const badTargets = [...new Set(Object.values(map))].filter(t => !valid.has(String(t).trim()));
+    if (badTargets.length)
+      return res.status(400).json({
+        success:false,
+        message:`${badTargets.length} target subtopic(s) do not exist on the spine. Nothing was changed.`,
+        data: { badTargets: badTargets.slice(0, 10) },
+      });
+
+    // Count what each mapping would move.
+    const plan = [];
+    let wouldMove = 0;
+    for (const [from, to] of Object.entries(map)) {
+      const n = await Question.countDocuments({
+        subject, curriculum, subtopic: from, isActive: { $ne: false },
+      });
+      if (n) { plan.push({ from, to, questions: n }); wouldMove += n; }
+    }
+
+    if (confirm !== true) {
+      return res.json({
+        success: true, dryRun: true,
+        data: { mappings: Object.keys(map).length, effective: plan.length, wouldMove, plan },
+        message: `DRY RUN — ${plan.length} of ${Object.keys(map).length} mapping(s) match questions; `
+               + `${wouldMove} question(s) would be re-linked. Resend with confirm: true.`,
+      });
+    }
+
+    let moved = 0;
+    for (const item of plan) {
+      const r = await Question.updateMany(
+        { subject, curriculum, subtopic: item.from },
+        { $set: { subtopic: item.to } });
+      moved += r.modifiedCount ?? r.nModified ?? 0;
+    }
+    console.log(`[questions/remap] ${curriculum}/${subject}: ${moved} question(s) re-linked by ${req.user.email}`);
+
+    return res.json({
+      success: true,
+      data: { moved, mappingsApplied: plan.length },
+      message: `Re-linked ${moved} question(s) across ${plan.length} subtopic name(s).`,
+    });
+  } catch (e) {
+    console.error('[questions/remap-subtopics]', e.message);
+    return res.status(500).json({ success:false, message:e.message });
+  }
+});
+
+// ─────────────────────────────────────────────────────────
 // POST /api/questions/retag
 // Move questions from one subject/curriculum label to another.
 //
