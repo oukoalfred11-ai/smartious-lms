@@ -26,8 +26,13 @@ export default function SuggestionBox() {
 
   return (
     <>
+      {/* sm-glow / sm-glow-fab give the travelling gold ring and the
+          breathing halo (defined once in global.css). The border is
+          removed here because the ring IS the border now — keeping
+          both produced a doubled edge. */}
       <button onClick={() => { setOpen(true); setState('') }} title="Suggestion Box"
-        style={{ position:'fixed', bottom:22, right:22, zIndex:250, background:'#7D1025', color:'#F0CC5A', border:'2px solid #C9A030', borderRadius:999, padding:'10px 18px', fontSize:12.5, fontWeight:800, cursor:'pointer', boxShadow:'0 6px 20px rgba(125,16,37,.35)', fontFamily:'Arial, sans-serif' }}>
+        className="sm-glow sm-glow-fab"
+        style={{ position:'fixed', bottom:22, right:22, zIndex:250, background:'#7D1025', color:'#F0CC5A', border:'none', borderRadius:999, padding:'12px 20px', fontSize:12.5, fontWeight:800, cursor:'pointer', boxShadow:'0 6px 22px rgba(125,16,37,.42)', fontFamily:'Arial, sans-serif', letterSpacing:'.02em', textShadow:'0 0 12px rgba(240,204,90,.55)' }}>
         Suggestion Box
       </button>
       {open && (
