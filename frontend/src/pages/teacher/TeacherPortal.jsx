@@ -3738,6 +3738,11 @@ function ExamsTab({ user, store, setPage, toast }) {
 
   // True if we relaxed the grade filter on the last load (so we can warn).
   const [bankRelaxed, setBankRelaxed] = useState(false)
+  // Component number within the subject's assessment set. Cambridge
+  // subjects commonly run Paper 1 to 6, so a school setting its own
+  // papers needs the same label on the cover.
+  const [formPaperNumber, setFormPaperNumber] = useState('Paper 1')
+  const [formSyllabusRef, setFormSyllabusRef] = useState('')
   // Bank-scope filters, independent of the exam's own curriculum/grade.
   // Default to 'all' so a teacher sees the whole subject bank and narrows
   // deliberately, rather than starting from an empty list.
@@ -4095,6 +4100,8 @@ function ExamsTab({ user, store, setPage, toast }) {
     setFormTitle('')
     setFormSubject('Mathematics')
     setFormCurriculum('CambridgeIGCSE')
+    setFormPaperNumber('Paper 1')
+    setFormSyllabusRef('')
     setFormYear('Year 10')
     setFormStartAt(exDefaultStartAt())
     setFormDuration(60)
@@ -4171,6 +4178,8 @@ function ExamsTab({ user, store, setPage, toast }) {
     // The backend uses `grade` (not `year`) and `durationMins` (not `duration`).
     const payload = {
       title:            formTitle.trim(),
+      paperNumber:      formPaperNumber,
+      syllabusRef:      formSyllabusRef.trim(),
       instructions:     formInstructions.trim(),
       subject:          formSubject,
       curriculum:       formCurriculum,
@@ -4630,6 +4639,28 @@ function ExamsTab({ user, store, setPage, toast }) {
                   value={formDuration} onChange={e => setFormDuration(e.target.value)}/>
                 <div style={{ fontSize: 11, color: 'var(--s400)', marginTop: 4 }}>
                   Auto-submits at {formStartAt && formDuration ? new Date(new Date(formStartAt).getTime() + parseInt(formDuration) * 60000).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '—'}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.6fr', gap: 12, marginTop: 14 }}>
+              <div className="fg" style={{ marginBottom: 0 }}>
+                <label className="fl">Paper</label>
+                <select className="fsel" value={formPaperNumber} onChange={e => setFormPaperNumber(e.target.value)}>
+                  {['Paper 1','Paper 2','Paper 3','Paper 4','Paper 5','Paper 6','Paper 7','Paper 8',
+                    'Specimen Paper','Mock Paper','Revision Paper'].map(x => <option key={x} value={x}>{x}</option>)}
+                </select>
+                <div style={{ fontSize: 11, color: 'var(--s400)', marginTop: 4 }}>
+                  Printed top-right on the cover
+                </div>
+              </div>
+              <div className="fg" style={{ marginBottom: 0 }}>
+                <label className="fl">Syllabus reference (optional)</label>
+                <input className="fi" value={formSyllabusRef}
+                  onChange={e => setFormSyllabusRef(e.target.value)}
+                  placeholder="e.g. Prepared for Cambridge IGCSE Accounting 0452"/>
+                <div style={{ fontSize: 11, color: 'var(--s400)', marginTop: 4 }}>
+                  Plain text on the cover. Never an exam board logo &mdash; this is a Smartious paper.
                 </div>
               </div>
             </div>
@@ -5767,7 +5798,7 @@ function ExamsTab({ user, store, setPage, toast }) {
                     <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
                     </svg>
-                    {pdfBusy === 'paper:' + (exam._id || exam.id) ? 'Generating\u2026' : 'Paper PDF'}
+                    {pdfBusy === 'paper:' + (exam._id || exam.id) ? 'Generating\u2026' : (exam.paperNumber || 'Paper PDF')}
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); downloadPdfFor(exam, 'scheme') }}
