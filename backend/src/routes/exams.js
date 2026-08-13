@@ -99,6 +99,7 @@ router.post('/', auth, requireRole('teacher','admin', 'dos'), async (req, res) =
   try {
     const {
       title, instructions, subject, curriculum, grade,
+      paperNumber, syllabusRef,
       startAt, durationMins,
       questionIds = [], customQuestions = [],
       assignedStudents = [], groupRoomIds = [],
@@ -123,6 +124,8 @@ router.post('/', auth, requireRole('teacher','admin', 'dos'), async (req, res) =
 
     const exam = new Exam({
       title: title.trim(),
+      paperNumber: (paperNumber || 'Paper 1').trim(),
+      syllabusRef: (syllabusRef || '').trim(),
       instructions: (instructions || '').trim(),
       subject: subject.trim(),
       curriculum: curriculum.trim(),
@@ -210,6 +213,7 @@ router.put('/:id', auth, requireRole('teacher','admin', 'dos'), async (req, res)
       return res.status(403).json({ success:false, message:'Not your exam.' });
 
     const editable = ['title','instructions','subject','curriculum','grade','startAt','durationMins',
+                      'paperNumber','syllabusRef',
                       'questionIds','customQuestions','assignedStudents','groupRoomIds','status'];
     editable.forEach(k => { if (k in req.body) exam[k] = req.body[k]; });
 
@@ -714,10 +718,15 @@ router.get('/:id/paper.pdf', auth, async (req, res) => {
     if (!questions.length) return res.status(400).json({ success:false, message:'This exam has no questions yet.' });
 
     const pdf = await buildExamPaperPdf(exam, questions, {
-      paperNumber: req.query.paper || 'Paper 1',
-      syllabusRef: req.query.ref || '',
+      // Stored on the exam; the query param remains an override so a
+      // one-off reprint under a different label needs no edit.
+      paperNumber: req.query.paper || exam.paperNumber || 'Paper 1',
+      syllabusRef: req.query.ref   || exam.syllabusRef || '',
     });
-    const safe = String(exam.title || 'paper').replace(/[^a-z0-9]+/gi, '-').toLowerCase();
+    // Include the paper number, or downloading Papers 1-6 of the same
+    // exam title overwrites the previous file each time.
+    const safe = [exam.title || 'paper', exam.paperNumber || '']
+      .filter(Boolean).join('-').replace(/[^a-z0-9]+/gi, '-').toLowerCase();
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="smartious-${safe}.pdf"`);
     return res.end(pdf);
@@ -734,7 +743,9 @@ router.get('/:id/scheme.pdf', auth, requireRole('teacher','admin','dos','ops_man
     if (!exam) return res.status(404).json({ success:false, message:'Exam not found.' });
     const questions = await loadExamQuestions(exam);
     if (!questions.length) return res.status(400).json({ success:false, message:'This exam has no questions yet.' });
-    const pdf = await buildMarkSchemePdf(exam, questions, { paperNumber: req.query.paper || 'Paper 1' });
+    const pdf = await buildMarkSchemePdf(exam, questions, {
+      paperNumber: req.query.paper || exam.paperNumber || 'Paper 1',
+    });
     const safe = String(exam.title || 'paper').replace(/[^a-z0-9]+/gi, '-').toLowerCase();
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="smartious-${safe}-mark-scheme.pdf"`);
