@@ -396,7 +396,15 @@ router.post('/remap-subtopics', auth, requireRole('admin', 'ops_manager'), async
 // ─────────────────────────────────────────────────────────
 router.post('/retag', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
-    const { fromSubject, fromCurriculum, toSubject, toCurriculum, confirm } = req.body || {};
+    const { fromSubject, fromCurriculum, toSubject, toCurriculum, confirm, topics } = req.body || {};
+
+    // Optional topic filter. A corrupt batch can hold two subjects under
+    // one bad label — 125 questions filed as subject "EdexcelIGCSE"
+    // turned out to be 42 Mathematics and 83 Biology. Without this the
+    // whole batch would move to one subject or the other.
+    const topicFilter = Array.isArray(topics) && topics.length
+      ? { topic: { $in: topics } }
+      : {};
     if (!fromSubject || !fromCurriculum)
       return res.status(400).json({ success:false, message:'fromSubject and fromCurriculum are required.' });
 
@@ -407,7 +415,7 @@ router.post('/retag', auth, requireRole('admin', 'ops_manager'), async (req, res
     if (target.subject === fromSubject && target.curriculum === fromCurriculum)
       return res.status(400).json({ success:false, message:'Nothing would change.' });
 
-    const filter = { subject: fromSubject, curriculum: fromCurriculum };
+    const filter = { subject: fromSubject, curriculum: fromCurriculum, ...topicFilter };
     const total = await Question.countDocuments(filter);
     if (!total)
       return res.status(404).json({ success:false, message:`No questions found for "${fromSubject}" / ${fromCurriculum}.` });
