@@ -1602,17 +1602,47 @@ function QuestionBankTab({ user, store, setPage, toast }) {
       .catch(() => setSpineSubjects([]))
   }, [])
 
-  const subjectHasSpine = (subjectName) => {
+  /**
+   * Does this catalog subject have a syllabus spine loaded?
+   *
+   * Three mismatches had to be reconciled here, and getting any of them
+   * wrong showed "syllabus not uploaded" against subjects that were in
+   * fact loaded:
+   *
+   * 1. catalog.subjects entries are { id, name, ... } — there is NO
+   *    subjectName key. The old code passed s.subjectName (undefined),
+   *    so nothing ever matched and EVERY subject read as missing.
+   * 2. The catalog label and the Subject record differ: the catalog
+   *    says "Primary Mathematics" where the Subject collection says
+   *    "Mathematics" under curriculum CambridgePrimary.
+   * 3. Subject is unique per {curriculum, subjectName}, so a name like
+   *    "Mathematics" exists once per curriculum. Matching on name alone
+   *    returns an arbitrary row from the wrong curriculum.
+   */
+  const normaliseSubjectName = (label) =>
+    String(label || '')
+      .replace(/^Primary\s+/i, '')        // "Primary Mathematics" -> "Mathematics"
+      .replace(/^Lower\s+Sec(ondary)?\s+/i, '')
+      .trim()
+
+  const subjectHasSpine = (subjectLabel, curriculumId) => {
     if (spineSubjects === null) return true       // do not block while loading
-    const row = spineSubjects.find(x => x.subjectName === subjectName)
-    return !!row?.hasSpine
+    if (!spineSubjects.length) return true        // endpoint failed — do not block the teacher
+    const wanted = normaliseSubjectName(subjectLabel).toLowerCase()
+    const rows = spineSubjects.filter(x =>
+      normaliseSubjectName(x.subjectName).toLowerCase() === wanted)
+    if (!rows.length) return false
+    // Prefer the row for the curriculum actually selected; fall back to
+    // any curriculum so a shared spine is not reported as missing.
+    const exact = rows.find(x => x.curriculum === curriculumId)
+    return exact ? !!exact.hasSpine : rows.some(x => x.hasSpine)
   }
 
   // Available subjects/grades for the create form
   const formSubjects = form.curriculum
     ? catalog.subjects
         .filter(s => s.availableIn === 'all' || (Array.isArray(s.availableIn) && s.availableIn.includes(form.curriculum)))
-        .map(s => ({ ...s, spineLoaded: subjectHasSpine(s.subjectName) }))
+        .map(s => ({ ...s, spineLoaded: subjectHasSpine(s.name, form.curriculum) }))
         // Spine-loaded subjects first, so the usable ones are at the top.
         .sort((a, b) => Number(b.spineLoaded) - Number(a.spineLoaded)
                      || String(a.subjectName).localeCompare(String(b.subjectName)))
