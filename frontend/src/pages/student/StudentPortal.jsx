@@ -11142,6 +11142,10 @@ function StudentLibraryPage({ user, toast }) {
   const [books, setBooks] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
+  // Quick filters. A search box alone means a student has to already know
+  // what they are looking for, which is the opposite of browsing a library.
+  const [shelfF, setShelfF] = useState('all')     // all | mine | academic | general
+  const [genreF, setGenreF] = useState('all')
   const [viewerBook, setViewerBook] = useState(null)
   const [openFolders, setOpenFolders] = useState({})
   const toggleFolder = (key) => setOpenFolders(f => ({ ...f, [key]: !f[key] }))
@@ -11165,26 +11169,54 @@ function StudentLibraryPage({ user, toast }) {
   }, [])
 
   // Filter by search term
+  const mySubjects = new Set(
+    (user?.subjects || []).map(x => String(x).trim().toLowerCase()).filter(Boolean))
+  const isMine = (b) => mySubjects.has(String(b.subjectName || '').trim().toLowerCase())
+
   const filtered = (() => {
     const q = search.trim().toLowerCase()
-    if (!q) return books
-    return books.filter(b =>
-      (b.title || '').toLowerCase().includes(q) ||
-      (b.description || '').toLowerCase().includes(q) ||
-      (b.author || '').toLowerCase().includes(q) ||
-      (b.subjectName || '').toLowerCase().includes(q)
-    )
+    return books.filter(b => {
+      if (shelfF === 'mine'     && !isMine(b)) return false
+      if (shelfF === 'academic' && (b.shelf || 'academic') !== 'academic') return false
+      if (shelfF === 'general'  && (b.shelf || 'academic') !== 'general')  return false
+      if (genreF !== 'all' && (b.genre || '') !== genreF) return false
+      if (!q) return true
+      return (b.title || '').toLowerCase().includes(q)
+          || (b.description || '').toLowerCase().includes(q)
+          || (b.author || '').toLowerCase().includes(q)
+          || (b.subjectName || '').toLowerCase().includes(q)
+          || (b.genre || '').toLowerCase().includes(q)
+    })
   })()
 
-  // Coursebooks: flat grid grouped by subject (papers are handled separately below)
+  // Genres actually present, so the chip row never offers an empty filter.
+  const genresAvailable = [...new Set(
+    books.filter(b => (b.shelf || 'academic') === 'general' && b.genre).map(b => b.genre)
+  )].sort()
+
+  // Coursebooks grouped by subject, with the student's OWN subjects first.
+  //
+  // The library now returns every book rather than only the student's
+  // enrolled subjects, which is the point — reading should not stop at
+  // the syllabus. But a flat alphabetical list would bury a student's own
+  // coursebooks under everything else, so their subjects are labelled and
+  // sorted to the top and the rest sits under "Explore".
   const grouped = (() => {
-    const out = {}
+    const mine = {}
+    const other = {}
     for (const b of filtered) {
       if (b.section === 'mock' || b.section === 'past_paper') continue
-      const k = 'Coursebooks  \u2014  ' + (b.subjectName || 'Other')
-      if (!out[k]) out[k] = []
-      out[k].push(b)
+      const general = (b.shelf || 'academic') === 'general'
+      const label = general
+        ? 'Reading for pleasure  \u2014  ' + (b.genre || 'Other')
+        : (isMine(b) ? 'Your subjects  \u2014  ' : 'Explore  \u2014  ') + (b.subjectName || 'Other')
+      const target = (!general && isMine(b)) ? mine : other
+      if (!target[label]) target[label] = []
+      target[label].push(b)
     }
+    const out = {}
+    Object.keys(mine).sort().forEach(k => { out[k] = mine[k] })
+    Object.keys(other).sort().forEach(k => { out[k] = other[k] })
     return out
   })()
 
@@ -11256,16 +11288,67 @@ function StudentLibraryPage({ user, toast }) {
         Read your coursebooks inline. Books open in full-screen mode and cannot be downloaded.
       </div>
 
-      {/* Search */}
-      <div style={{ marginBottom: 18, maxWidth: 420 }}>
+      {/* ── Search + quick filters ──────────────────────────────
+          A search box alone requires a student to already know what
+          they want. Chips let them browse: their own subjects, the
+          wider curriculum shelf, or reading for pleasure by genre. */}
+      <div style={{ marginBottom: 16 }}>
         <input value={search} onChange={e => setSearch(e.target.value)}
-          placeholder="Search by title, author, or subject..."
+          placeholder="Search by title, author, subject or genre..."
           style={{
-            width: '100%', boxSizing: 'border-box',
+            width: '100%', maxWidth: 420, boxSizing: 'border-box',
             padding: '10px 14px', borderRadius: 8,
             border: '1.5px solid #E8E2D6',
-            fontSize: 13, background: '#FBFAF5',
+            fontSize: 13, background: '#FBFAF5', marginBottom: 12,
           }}/>
+
+        <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap', alignItems: 'center' }}>
+          {[
+            ['all',      'All books'],
+            ['mine',     'My subjects'],
+            ['academic', 'Curriculum'],
+            ['general',  'Reading for pleasure'],
+          ].map(([id, label]) => (
+            <button key={id}
+              onClick={() => { setShelfF(id); if (id !== 'general') setGenreF('all') }}
+              style={{
+                background: shelfF === id ? '#7D1025' : '#fff',
+                color:      shelfF === id ? '#fff' : 'var(--s600)',
+                border: '1.5px solid ' + (shelfF === id ? '#7D1025' : 'var(--border)'),
+                padding: '6px 14px', borderRadius: 99,
+                fontSize: 12, fontWeight: 700, cursor: 'pointer',
+              }}>{label}</button>
+          ))}
+
+          {/* Genre chips only appear once there is a general shelf to browse. */}
+          {(shelfF === 'general' || shelfF === 'all') && genresAvailable.length > 0 && (
+            <>
+              <span style={{ width: 1, height: 20, background: 'var(--border)', margin: '0 4px' }}/>
+              <button onClick={() => setGenreF('all')} style={{
+                background: genreF === 'all' ? 'var(--s200)' : 'transparent',
+                color: 'var(--s600)', border: 'none',
+                padding: '6px 12px', borderRadius: 99, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+              }}>All genres</button>
+              {genresAvailable.map(g => (
+                <button key={g} onClick={() => { setGenreF(g); setShelfF('general') }} style={{
+                  background: genreF === g ? '#C9A030' : 'transparent',
+                  color: genreF === g ? '#1A0F0E' : 'var(--s600)',
+                  border: 'none', padding: '6px 12px', borderRadius: 99,
+                  fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                }}>{g}</button>
+              ))}
+            </>
+          )}
+
+          {(shelfF !== 'all' || genreF !== 'all' || search) && (
+            <button onClick={() => { setShelfF('all'); setGenreF('all'); setSearch('') }}
+              style={{
+                background: 'transparent', color: 'var(--s500)', border: 'none',
+                padding: '6px 10px', fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                textDecoration: 'underline',
+              }}>Clear</button>
+          )}
+        </div>
       </div>
 
       {loading ? (
@@ -11281,7 +11364,9 @@ function StudentLibraryPage({ user, toast }) {
         </div>
       ) : (
         <div style={{ display:'flex', flexDirection:'column', gap: 22 }}>
-          {Object.keys(grouped).sort().map(subj => (
+          {/* NOT re-sorted: grouped is already ordered with the
+              student's own subjects first, then Explore. */}
+          {Object.keys(grouped).map(subj => (
             <div key={subj}>
               <div style={{
                 fontSize: 11, fontWeight: 700, color: '#7D1025',
