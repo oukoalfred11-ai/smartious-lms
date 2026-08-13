@@ -1534,6 +1534,11 @@ function QuestionBankTab({ user, store, setPage, toast }) {
     difficulty: 'medium',
     attachments: [],              // [{url, publicId, filename, mimeType, sizeBytes}]
     parts: [],                    // for NESTED questions — empty = flat question
+    // Mark scheme. The backend REJECTS any non-MCQ question without one
+    // — a marker cannot mark to nothing — but this form never collected
+    // it, so teachers could only ever save multiple choice.
+    markScheme: { modelAnswer: '', points: [], acceptableAnswers: [], commonErrors: [] },
+    allowMissingScheme: false,
   })
  
   // Load catalog once
@@ -1669,6 +1674,8 @@ function QuestionBankTab({ user, store, setPage, toast }) {
       curriculum: '', grade: '', subject: '', topic: '', subtopic: '', type: 'mcq',
       questionText: '', options: ['', '', '', ''],
       correctIndex: null, correctAnswer: '', explanation: '',
+      markScheme: { modelAnswer: '', points: [], acceptableAnswers: [], commonErrors: [] },
+      allowMissingScheme: false,
       marks: 1, difficulty: 'medium', attachments: [], parts: [],
     })
     setCreateOpen(true)
@@ -1879,6 +1886,16 @@ function QuestionBankTab({ user, store, setPage, toast }) {
         difficulty: form.difficulty,
         attachments: form.attachments,
         parts: Array.isArray(form.parts) ? form.parts : [],
+        // MCQs mark themselves; everything else needs a scheme.
+        markScheme: form.type === 'mcq' ? undefined : {
+          modelAnswer:       (form.markScheme?.modelAnswer || '').trim(),
+          points:            (form.markScheme?.points || [])
+                               .filter(pt => (pt.text || '').trim())
+                               .map(pt => ({ text: pt.text.trim(), marks: Number(pt.marks) || 1 })),
+          acceptableAnswers: form.markScheme?.acceptableAnswers || [],
+          commonErrors:      form.markScheme?.commonErrors || [],
+        },
+        allowMissingScheme: !!form.allowMissingScheme,
       }
  
       const { data } = editingId
@@ -2517,6 +2534,109 @@ function QuestionBankTab({ user, store, setPage, toast }) {
                   <textarea className="fi" rows={form.type === 'long' ? 5 : 3} value={form.correctAnswer} onChange={e => setF('correctAnswer', e.target.value)} placeholder="The expected answer (used for marking)" style={{ resize: 'vertical' }}/>
                 </div>
               )}
+
+              {/* ── MARK SCHEME ───────────────────────────────────
+                  Required by the API for every non-MCQ question: a
+                  marker, human or AI, cannot mark to nothing. This form
+                  never collected it, so saving anything but multiple
+                  choice failed with a 400 and no obvious cause. */}
+              {form.type !== 'mcq' && (
+                <div style={{
+                  background:'#FBF6E3', border:'1px solid #E8D58F',
+                  borderRadius:8, padding:'14px 16px', marginBottom:14,
+                }}>
+                  <div style={{ fontSize:11, fontWeight:800, letterSpacing:'.08em',
+                                textTransform:'uppercase', color:'#7D5A0F', marginBottom:10 }}>
+                    Mark scheme
+                  </div>
+
+                  <div className="fg">
+                    <label className="fl">Model answer</label>
+                    <textarea className="fi" rows={3}
+                      value={form.markScheme?.modelAnswer || ''}
+                      onChange={e => setF('markScheme', { ...form.markScheme, modelAnswer: e.target.value })}
+                      placeholder="The full-credit answer, as you would write it"
+                      style={{ resize:'vertical' }}/>
+                  </div>
+
+                  <div className="fg" style={{ marginBottom:8 }}>
+                    <label className="fl">
+                      Marking points
+                      {(form.markScheme?.points || []).length > 0 && (() => {
+                        const sum = (form.markScheme.points || []).reduce((t,p)=>t+(Number(p.marks)||0),0)
+                        const target = Number(form.marks) || 0
+                        return (
+                          <span style={{
+                            marginLeft:8, fontSize:11, fontWeight:700,
+                            color: sum === target ? 'var(--g600)' : '#B45309',
+                          }}>
+                            {sum} of {target} marks allocated
+                            {sum !== target ? ' — these must match' : ' \u2713'}
+                          </span>
+                        )
+                      })()}
+                    </label>
+                    {(form.markScheme?.points || []).map((pt, idx) => (
+                      <div key={idx} style={{ display:'flex', gap:8, marginBottom:6, alignItems:'center' }}>
+                        <input className="fi" value={pt.text || ''}
+                          onChange={e => {
+                            const pts = [...(form.markScheme.points || [])]
+                            pts[idx] = { ...pts[idx], text: e.target.value }
+                            setF('markScheme', { ...form.markScheme, points: pts })
+                          }}
+                          placeholder={'What earns mark ' + (idx + 1)}/>
+                        <input className="fi" type="number" min="1" style={{ width:70, flexShrink:0 }}
+                          value={pt.marks ?? 1}
+                          onChange={e => {
+                            const pts = [...(form.markScheme.points || [])]
+                            pts[idx] = { ...pts[idx], marks: parseInt(e.target.value) || 1 }
+                            setF('markScheme', { ...form.markScheme, points: pts })
+                          }}/>
+                        <button type="button" className="btn btn-s btn-sm" style={{ flexShrink:0 }}
+                          onClick={() => setF('markScheme', {
+                            ...form.markScheme,
+                            points: (form.markScheme.points || []).filter((_, x) => x !== idx),
+                          })}>&times;</button>
+                      </div>
+                    ))}
+                    <button type="button" className="btn btn-s btn-sm"
+                      onClick={() => setF('markScheme', {
+                        ...form.markScheme,
+                        points: [...(form.markScheme?.points || []), { text:'', marks:1 }],
+                      })}>+ Add marking point</button>
+                  </div>
+
+                  <div className="fg">
+                    <label className="fl">Also accept (optional, comma-separated)</label>
+                    <input className="fi"
+                      value={(form.markScheme?.acceptableAnswers || []).join(', ')}
+                      onChange={e => setF('markScheme', {
+                        ...form.markScheme,
+                        acceptableAnswers: e.target.value.split(',').map(x=>x.trim()).filter(Boolean),
+                      })}
+                      placeholder="e.g. 4800, 4 800, four thousand eight hundred"/>
+                  </div>
+
+                  <div className="fg" style={{ marginBottom:0 }}>
+                    <label className="fl">Common errors (optional, comma-separated)</label>
+                    <input className="fi"
+                      value={(form.markScheme?.commonErrors || []).join(', ')}
+                      onChange={e => setF('markScheme', {
+                        ...form.markScheme,
+                        commonErrors: e.target.value.split(',').map(x=>x.trim()).filter(Boolean),
+                      })}
+                      placeholder="e.g. 4700 (rounded down instead of up)"/>
+                  </div>
+
+                  <label style={{ display:'flex', alignItems:'center', gap:8, marginTop:12,
+                                  fontSize:12, color:'#7D5A0F', cursor:'pointer' }}>
+                    <input type="checkbox" checked={!!form.allowMissingScheme}
+                      onChange={e => setF('allowMissingScheme', e.target.checked)}/>
+                    Save without a mark scheme &mdash; stored as an inactive draft until one is added
+                  </label>
+                </div>
+              )}
+
  
               {(form.type === 'drawing' || form.type === 'upload') && (
                 <div style={{ background: '#FBF6E3', borderLeft: '3px solid #C9A030', padding: '10px 14px', borderRadius: 6, fontSize: 12.5, color: 'var(--s700)', marginBottom: 14, lineHeight: 1.6 }}>
