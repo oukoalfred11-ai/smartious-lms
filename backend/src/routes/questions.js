@@ -295,6 +295,106 @@ async function allowedSubjectsFor(user) {
 // only these and marks the rest unavailable.
 // ─────────────────────────────────────────────────────────
 // ─────────────────────────────────────────────────────────
+// POST /api/questions/retag
+// Move questions from one subject/curriculum label to another.
+//
+// Questions carry `subject` and `curriculum` as STRINGS, so a bank
+// imported under "Business" is invisible to the Subject record called
+// "Business Studies" and can never reach its 118-lesson spine. Same for
+// curriculum values like "IGCSE" where the catalogue says
+// "CambridgeIGCSE".
+//
+// Always DRY RUN first: without { confirm: true } it reports what would
+// change and how many questions would then link to the target spine,
+// and writes nothing.
+//
+// Body: { fromSubject, fromCurriculum, toSubject, toCurriculum, confirm }
+// ─────────────────────────────────────────────────────────
+router.post('/retag', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
+  try {
+    const { fromSubject, fromCurriculum, toSubject, toCurriculum, confirm } = req.body || {};
+    if (!fromSubject || !fromCurriculum)
+      return res.status(400).json({ success:false, message:'fromSubject and fromCurriculum are required.' });
+
+    const target = {
+      subject:    toSubject    || fromSubject,
+      curriculum: toCurriculum || fromCurriculum,
+    };
+    if (target.subject === fromSubject && target.curriculum === fromCurriculum)
+      return res.status(400).json({ success:false, message:'Nothing would change.' });
+
+    const filter = { subject: fromSubject, curriculum: fromCurriculum };
+    const total = await Question.countDocuments(filter);
+    if (!total)
+      return res.status(404).json({ success:false, message:`No questions found for "${fromSubject}" / ${fromCurriculum}.` });
+
+    // Would these questions actually link once renamed? A rename that
+    // leaves them orphaned anyway is worth knowing about BEFORE running.
+    const Subject = require('../models/Subject');
+    const SyllabusTopic = require('../models/SyllabusTopic');
+    const subj = await Subject.findOne({
+      subjectName: target.subject, curriculum: target.curriculum, isActive: { $ne: false },
+    }).lean();
+
+    let wouldLink = 0, wouldOrphan = 0, sampleUnmatched = [];
+    if (subj) {
+      const spine = await SyllabusTopic.find({ subjectId: subj._id }).select('subtopics').lean();
+      const valid = new Set();
+      spine.forEach(t => (t.subtopics || []).forEach(st => valid.add((st.name || '').trim())));
+
+      const grouped = await Question.aggregate([
+        { $match: filter },
+        { $group: { _id: '$subtopic', n: { $sum: 1 } } },
+      ]);
+      grouped.forEach(g => {
+        const st = (g._id || '').trim();
+        if (st && valid.has(st)) wouldLink += g.n;
+        else {
+          wouldOrphan += g.n;
+          if (sampleUnmatched.length < 5) sampleUnmatched.push({ subtopic: st || '(none)', count: g.n });
+        }
+      });
+    }
+
+    if (confirm !== true) {
+      return res.json({
+        success: true,
+        dryRun: true,
+        data: {
+          questions: total,
+          from: `${fromSubject} / ${fromCurriculum}`,
+          to: `${target.subject} / ${target.curriculum}`,
+          targetSubjectExists: !!subj,
+          wouldLink, wouldOrphan, sampleUnmatched,
+        },
+        message: !subj
+          ? `DRY RUN — ${total} question(s) would be renamed, but no ACTIVE subject `
+            + `"${target.subject}" exists under ${target.curriculum}, so they would still not link.`
+          : `DRY RUN — ${total} question(s) would move to "${target.subject}". `
+            + `${wouldLink} would link to the spine, ${wouldOrphan} would still be orphaned. `
+            + `Resend with confirm: true to apply.`,
+      });
+    }
+
+    const r = await Question.updateMany(filter, { $set: target });
+    const moved = r.modifiedCount ?? r.nModified ?? 0;
+    console.log(`[questions/retag] ${fromSubject}/${fromCurriculum} -> ${target.subject}/${target.curriculum}: `
+              + `${moved} question(s) by ${req.user.email}`);
+
+    return res.json({
+      success: true,
+      data: { moved, wouldLink, wouldOrphan },
+      message: `Re-tagged ${moved} question(s) to "${target.subject}" / ${target.curriculum}. `
+             + `${wouldLink} now link to the spine. `
+             + `Reverse with fromSubject "${target.subject}", toSubject "${fromSubject}".`,
+    });
+  } catch (e) {
+    console.error('[questions/retag]', e.message);
+    return res.status(500).json({ success:false, message:e.message });
+  }
+});
+
+// ─────────────────────────────────────────────────────────
 // GET /api/questions/orphan-audit
 // Which questions cannot be placed on a lesson?
 //
