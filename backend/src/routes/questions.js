@@ -409,6 +409,10 @@ router.post('/retag', auth, requireRole('admin', 'ops_manager'), async (req, res
 // ─────────────────────────────────────────────────────────
 router.get('/orphan-audit', auth, requireRole('admin', 'ops_manager', 'dos'), async (req, res) => {
   try {
+    // ?subject=Biology&curriculum=CambridgeIGCSE returns EVERY unmatched
+    // subtopic name for that subject rather than a five-item sample,
+    // which is what a mapping pass needs.
+    const detailMode = !!(req.query.subject && req.query.curriculum);
     const Subject = require('../models/Subject');
     const SyllabusTopic = require('../models/SyllabusTopic');
 
@@ -432,7 +436,9 @@ router.get('/orphan-audit', auth, requireRole('admin', 'ops_manager', 'dos'), as
 
     // Group every question by subject and count how it links.
     const rows = await Question.aggregate([
-      { $match: { isActive: { $ne: false } } },
+      { $match: detailMode
+          ? { isActive: { $ne: false }, subject: req.query.subject, curriculum: req.query.curriculum }
+          : { isActive: { $ne: false } } },
       { $group: {
           _id: { curriculum: '$curriculum', subject: '$subject', subtopic: '$subtopic' },
           n: { $sum: 1 },
@@ -461,12 +467,17 @@ router.get('/orphan-audit', auth, requireRole('admin', 'ops_manager', 'dos'), as
         bucket.notOnSpine += r.n; totalNoSpine += r.n;
       } else if (!validBy[key].has(st)) {
         bucket.notOnSpine += r.n; totalOrphan += r.n;
-        if (bucket.sampleOrphans.length < 5) bucket.sampleOrphans.push({ subtopic: st, count: r.n });
+          // Full list when a single subject is requested, so the exact
+        // unmatched names can be mapped; a short sample otherwise.
+        if (detailMode || bucket.sampleOrphans.length < 5) {
+          bucket.sampleOrphans.push({ subtopic: st, count: r.n });
+        }
       } else {
         bucket.linked += r.n;
       }
     });
 
+    Object.values(report).forEach(b => b.sampleOrphans.sort((a, z) => z.count - a.count));
     const subjectsOut = Object.values(report)
       .map(b => ({ ...b, orphanPct: b.total ? Math.round(((b.noSubtopic + b.notOnSpine) / b.total) * 100) : 0 }))
       .sort((a, b) => (b.noSubtopic + b.notOnSpine) - (a.noSubtopic + a.notOnSpine));
