@@ -294,6 +294,106 @@ async function allowedSubjectsFor(user) {
 // topic and cannot feed auto-homework, so the question editor offers
 // only these and marks the rest unavailable.
 // ─────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────
+// GET /api/questions/orphan-audit
+// Which questions cannot be placed on a lesson?
+//
+// A question links to the syllabus by its `subtopic` STRING matching a
+// subtopic name on the subject's spine. Nothing enforces that at write
+// time, so a question can carry a subtopic that no longer exists —
+// after a spine reload, a rename, or simply a typo at import. Such a
+// question still appears in the bank but can never feed auto-homework,
+// lesson practice or a topic-filtered paper.
+//
+// Read-only. Changes nothing.
+// ─────────────────────────────────────────────────────────
+router.get('/orphan-audit', auth, requireRole('admin', 'ops_manager', 'dos'), async (req, res) => {
+  try {
+    const Subject = require('../models/Subject');
+    const SyllabusTopic = require('../models/SyllabusTopic');
+
+    const subjects = await Subject.find({ isActive: { $ne: false } })
+      .select('subjectName curriculum').lean();
+    const spine = await SyllabusTopic.find({ isActive: { $ne: false } })
+      .select('subjectId topic subtopics').lean();
+
+    // Valid subtopic names per subject, keyed by curriculum + name so a
+    // question is only checked against its OWN subject's spine.
+    const validBy = {};
+    const subjById = {};
+    subjects.forEach(s => { subjById[String(s._id)] = s; });
+    spine.forEach(t => {
+      const subj = subjById[String(t.subjectId)];
+      if (!subj) return;
+      const key = subj.curriculum + '||' + subj.subjectName;
+      validBy[key] = validBy[key] || new Set();
+      (t.subtopics || []).forEach(st => validBy[key].add((st.name || '').trim()));
+    });
+
+    // Group every question by subject and count how it links.
+    const rows = await Question.aggregate([
+      { $match: { isActive: { $ne: false } } },
+      { $group: {
+          _id: { curriculum: '$curriculum', subject: '$subject', subtopic: '$subtopic' },
+          n: { $sum: 1 },
+      } },
+    ]);
+
+    const report = {};
+    let totalQ = 0, totalOrphan = 0, totalNoSubtopic = 0, totalNoSpine = 0;
+
+    rows.forEach(r => {
+      const { curriculum, subject, subtopic } = r._id;
+      const key = curriculum + '||' + subject;
+      const bucket = report[key] || (report[key] = {
+        curriculum, subject, total: 0, linked: 0,
+        noSubtopic: 0, notOnSpine: 0, spineExists: !!validBy[key],
+        sampleOrphans: [],
+      });
+      bucket.total += r.n;
+      totalQ += r.n;
+
+      const st = (subtopic || '').trim();
+      if (!st) {
+        bucket.noSubtopic += r.n; totalNoSubtopic += r.n;
+      } else if (!validBy[key]) {
+        // No spine at all for this subject — every question is unplaceable.
+        bucket.notOnSpine += r.n; totalNoSpine += r.n;
+      } else if (!validBy[key].has(st)) {
+        bucket.notOnSpine += r.n; totalOrphan += r.n;
+        if (bucket.sampleOrphans.length < 5) bucket.sampleOrphans.push({ subtopic: st, count: r.n });
+      } else {
+        bucket.linked += r.n;
+      }
+    });
+
+    const subjectsOut = Object.values(report)
+      .map(b => ({ ...b, orphanPct: b.total ? Math.round(((b.noSubtopic + b.notOnSpine) / b.total) * 100) : 0 }))
+      .sort((a, b) => (b.noSubtopic + b.notOnSpine) - (a.noSubtopic + a.notOnSpine));
+
+    return res.json({
+      success: true,
+      data: {
+        totals: {
+          questions: totalQ,
+          linked: totalQ - totalNoSubtopic - totalOrphan - totalNoSpine,
+          noSubtopic: totalNoSubtopic,
+          orphanedBySpine: totalOrphan,
+          subjectHasNoSpine: totalNoSpine,
+        },
+        subjects: subjectsOut,
+      },
+      message: `${totalQ} active question(s). `
+             + `${totalNoSubtopic} carry no subtopic, `
+             + `${totalOrphan} name a subtopic absent from their spine, `
+             + `${totalNoSpine} belong to a subject with no spine at all.`,
+    });
+  } catch (e) {
+    console.error('[questions/orphan-audit]', e.message);
+    return res.status(500).json({ success: false, message: e.message });
+  }
+});
+
 router.get('/spine-subjects', auth, async (req, res) => {
   try {
     const Subject = require('../models/Subject');
