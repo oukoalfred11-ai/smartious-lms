@@ -328,6 +328,93 @@ function studentSafeSubmission(sub) {
 }
 
 // ─────────────────────────────────────────────────────────
+// GET /api/homework/submissions/my/:subId/report.pdf
+// The same branded report as the exam one, for marked homework.
+// ─────────────────────────────────────────────────────────
+router.get('/submissions/my/:subId/report.pdf', auth, async (req, res) => {
+  try {
+    const { buildResultReportPdf } = require('../lib/resultReportPdf');
+    if (!isObjectId(req.params.subId))
+      return res.status(400).json({ success:false, message:'Invalid submission ID.' });
+
+    const sub = await HomeworkSubmission.findOne({ _id: req.params.subId, student: req.user._id })
+      .populate({
+        path:'homework',
+        select:'title subject curriculum grade questions dueAt totalMarks createdBy',
+        populate:{ path:'createdBy', select:'firstName lastName' },
+      })
+      .lean();
+    if (!sub) return res.status(404).json({ success:false, message:'Result not found.' });
+    if (!['graded','returned'].includes(sub.status))
+      return res.status(400).json({ success:false, message:'This homework has not been marked yet.' });
+
+    const hw = sub.homework || {};
+    const qs = hw.questions || [];
+    const answers = sub.answers || [];
+    const possible = qs.reduce((n, q) => n + (Number(q.marks) || 1), 0);
+    const awarded  = answers.reduce((n, a) => n + (Number(a.marksAwarded) || 0), 0);
+    const pct = possible ? Math.round((awarded / possible) * 100) : 0;
+
+    const acc = {};
+    answers.forEach(a => {
+      const q = qs[a.questionIndex];
+      const topic = (q?.topic || '').trim();
+      if (!topic) return;
+      if (!acc[topic]) acc[topic] = { got: 0, possible: 0 };
+      acc[topic].got += Number(a.marksAwarded) || 0;
+      acc[topic].possible += Number(q.marks) || 1;
+    });
+    const topics = Object.entries(acc)
+      .filter(([, v]) => v.possible > 0)
+      .map(([t, v]) => ({ label: t, pct: Math.round((v.got / v.possible) * 100) }))
+      .sort((a, b) => b.pct - a.pct);
+
+    const correct = answers.filter(a =>
+      a.marksAwarded !== null && Number(a.marksAwarded) >= (Number(qs[a.questionIndex]?.marks) || 1)).length;
+
+    const pdf = await buildResultReportPdf({
+      kind: 'homework',
+      student: {
+        name: [req.user.firstName, req.user.lastName].filter(Boolean).join(' '),
+        admissionNumber: req.user.admissionNumber || '',
+        grade: hw.grade || req.user.grade || '',
+      },
+      assessment: {
+        title: hw.title || 'Homework',
+        subject: hw.subject || '',
+        curriculum: hw.curriculum || '',
+        grade: hw.grade || '',
+        completedAt: sub.submittedAt
+          ? new Date(sub.submittedAt).toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' })
+          : '',
+      },
+      score: { awarded, possible, percentage: pct, grade: sub.grade || '' },
+      stats: {
+        total: qs.length,
+        correct,
+        wrong: Math.max(0, answers.filter(a => a.marksAwarded !== null).length - correct),
+        time: '',
+      },
+      topics,
+      feedback: sub.feedback ? {
+        text: sub.feedback,
+        teacher: hw.createdBy
+          ? [hw.createdBy.firstName, hw.createdBy.lastName].filter(Boolean).join(' ')
+          : '',
+      } : null,
+    });
+
+    const safe = String(hw.title || 'result').replace(/[^a-z0-9]+/gi, '-').toLowerCase();
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="smartious-result-${safe}.pdf"`);
+    return res.end(pdf);
+  } catch (e) {
+    console.error('[homework result report]', e.message);
+    return res.status(500).json({ success:false, message:'Failed to generate the report: ' + e.message });
+  }
+});
+
+// ─────────────────────────────────────────────────────────
 // GET /api/homework/submissions/my/:subId
 // One marked homework with its questions, for the results screen.
 // Mirrors /api/exams/submissions/my/:subId so My Results can open a
