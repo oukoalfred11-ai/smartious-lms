@@ -8314,6 +8314,20 @@ function MyResultDetail({ subId, detail, loading, onBack, user }) {
     }
     return bank.find(q => String(q._id) === String(ref)) || null
   }
+
+  // Declared here, ABOVE topicRows. topicRows is an IIFE that runs
+  // immediately and calls findLeaf; with findLeaf declared below it the
+  // const was still in its temporal dead zone and the whole result
+  // screen crashed with "Cannot access L before initialization".
+  const findLeaf = (question, partPath) => {
+    if (!question || !Array.isArray(partPath) || partPath.length === 0) return null
+    let current = { parts: question.parts || [] }
+    for (const idx of partPath) {
+      if (!Array.isArray(current.parts) || !current.parts[idx]) return null
+      current = current.parts[idx]
+    }
+    return current
+  }
   // Counts. answers[] carries isCorrect per leaf once graded.
   const stats = (() => {
     const ans = sub.answers || []
@@ -8385,15 +8399,6 @@ function MyResultDetail({ subId, detail, loading, onBack, user }) {
       .slice(0, 8)
   })()
 
-  const findLeaf = (question, partPath) => {
-    if (!question || !Array.isArray(partPath) || partPath.length === 0) return null
-    let current = { parts: question.parts || [] }
-    for (const idx of partPath) {
-      if (!Array.isArray(current.parts) || !current.parts[idx]) return null
-      current = current.parts[idx]
-    }
-    return current
-  }
 
   return (
     <div>
