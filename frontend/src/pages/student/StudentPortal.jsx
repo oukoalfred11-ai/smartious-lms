@@ -7901,7 +7901,7 @@ function MyResultsTab({ user, toast, setPage }) {
             : '—'
 
           return (
-            <div key={r._id} className="card" style={{
+            <div key={r._id} className="card sm-glow sm-glow-card" style={{
               padding:14, cursor: isGraded ? 'pointer' : 'default',
               borderLeft:'4px solid ' + subjCol,
               opacity: isGraded ? 1 : .75,
@@ -7937,7 +7937,7 @@ function MyResultsTab({ user, toast, setPage }) {
                       }}>AWAITING GRADE</span>
                     )}
                     <span style={{ fontSize:11, color:'#6B6B6B' }}>
-                      {exam?.curriculum} {exam?.grade}
+                      {prettyCurriculum(exam?.curriculum)} {exam?.grade}
                     </span>
                   </div>
                   <div style={{ fontWeight:700, fontSize:15.5, color:'#1A1A1A', marginBottom:2 }}>
@@ -8351,73 +8351,101 @@ function MyResultDetail({ subId, detail, loading, onBack }) {
       </button>
 
       {/* ── RESULTS HERO ────────────────────────────────────────
-          The student's own photo and a hand-drawn grade ring. A result
-          screen is the moment a child finds out how they did, so it
-          leads with encouragement and their name rather than a number. */}
-      <div className="card sm-glow sm-glow-card" style={{
-        padding:0, marginBottom:16, overflow:'hidden',
-        boxShadow:'0 12px 40px rgba(125,16,37,.12)',
+          Deliberately NOT a card: no border, no glow, no shadow. It is a
+          flat light band that the student's photo bleeds into, with the
+          grade circled by hand at the right — the way a teacher marks a
+          paper. Wrapping this in a card was the mistake in the first
+          attempt; the panel edge fought the photo bleed. */}
+      <div style={{
+        position:'relative',
+        background:'linear-gradient(100deg, #FBFAF6 0%, #FDFAF8 52%, #FCF3F4 100%)',
+        borderRadius:20,
+        marginBottom:18,
+        overflow:'hidden',
+        minHeight:300,
       }}>
+        {/* Dot field, top right */}
+        <svg width="120" height="80" style={{ position:'absolute', top:18, right:26, opacity:.5 }}>
+          <defs><pattern id="resdots" width="20" height="20" patternUnits="userSpaceOnUse">
+            <circle cx="3" cy="3" r="3" fill="#F3B6BC"/></pattern></defs>
+          <rect width="120" height="80" fill="url(#resdots)"/>
+        </svg>
+
+        {/* Student photo, bleeding from the centre. Sits behind the text
+            layer so a wide photo never pushes the wording around. */}
+        {avatarUrl && (
+          <div style={{
+            position:'absolute', top:0, bottom:0, left:'34%', width:'40%',
+            zIndex:0, pointerEvents:'none',
+          }}>
+            <img src={avatarUrl} alt=""
+              onError={e => { e.currentTarget.parentNode.style.display = 'none' }}
+              style={{
+                width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center',
+                WebkitMaskImage:'linear-gradient(to right, transparent 0%, #000 22%, #000 78%, transparent 100%)',
+                maskImage:'linear-gradient(to right, transparent 0%, #000 22%, #000 78%, transparent 100%)',
+              }}/>
+          </div>
+        )}
+
         <div style={{
-          display:'grid', gridTemplateColumns:'minmax(0,1.15fr) auto',
-          gap:20, alignItems:'center',
-          padding:'26px 30px',
-          background:'linear-gradient(105deg, #FDFAF4 0%, #FBF3F4 62%, #F8E9EB 100%)',
+          position:'relative', zIndex:1,
+          display:'flex', alignItems:'center', justifyContent:'space-between',
+          gap:24, padding:'40px 44px', flexWrap:'wrap',
         }}>
-          <div style={{ minWidth:0 }}>
-            <h1 style={{ fontFamily:"'Instrument Serif',serif", fontSize:34, fontWeight:400,
-                         margin:0, lineHeight:1.05, color:'#1A1A1A' }}>
+          <div style={{ maxWidth:430, minWidth:250 }}>
+            <div style={{ fontSize:44, fontWeight:800, color:'#1A2130', lineHeight:1, letterSpacing:'-.02em' }}>
               Results
-            </h1>
-            <div style={{ fontSize:22, fontWeight:800, color:'#C1121F', marginTop:4, lineHeight:1.2 }}>
+            </div>
+            <div style={{ fontSize:31, fontWeight:800, color:'#D81324', marginTop:10, lineHeight:1.12, letterSpacing:'-.01em' }}>
               {praise.headline}
             </div>
-            <div style={{ fontSize:14, color:'#4A4A4A', marginTop:5 }}>
+            <div style={{ fontSize:18, color:'#2E3440', marginTop:8, lineHeight:1.4 }}>
               {praise.sub}
             </div>
-            <div style={{ width:56, height:4, background:'#C1121F', borderRadius:2, marginTop:14 }}/>
+            <div style={{ width:66, height:5, background:'#D81324', borderRadius:3, marginTop:20 }}/>
           </div>
 
-          <div style={{ display:'flex', alignItems:'center', gap:14, flexShrink:0 }}>
-            {avatarUrl && (
-              <img src={avatarUrl} alt=""
-                onError={e => { e.currentTarget.style.display = 'none' }}
-                style={{ width:96, height:96, borderRadius:'50%', objectFit:'cover',
-                         border:'4px solid #fff', boxShadow:'0 8px 24px rgba(0,0,0,.14)' }}/>
-            )}
-            {/* Hand-circled grade, as a teacher would mark a paper. */}
-            <div style={{ position:'relative', width:118, height:104, flexShrink:0 }}>
-              <svg viewBox="0 0 130 116" style={{ position:'absolute', inset:0, width:'100%', height:'100%' }}>
-                <ellipse cx="66" cy="60" rx="52" ry="45" fill="none" stroke="#C1121F" strokeWidth="5"
-                  strokeLinecap="round" transform="rotate(-6 66 60)"
-                  strokeDasharray="300" strokeDashoffset="14"/>
-                <line x1="17" y1="20" x2="7"  y2="10" stroke="#C1121F" strokeWidth="4.5" strokeLinecap="round"/>
-                <line x1="27" y1="13" x2="21" y2="2"  stroke="#C1121F" strokeWidth="4.5" strokeLinecap="round"/>
-              </svg>
-              <div style={{
-                position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center',
-                fontFamily:"'Instrument Serif',serif", fontSize:44, color:'#C1121F', lineHeight:1,
-                paddingBottom:4,
-              }}>
-                {sub.grade || (pct >= 50 ? 'P' : '\u2014')}
-              </div>
+          {/* Hand-circled grade */}
+          <div style={{ position:'relative', width:250, height:210, flexShrink:0 }}>
+            <svg viewBox="0 0 260 220" style={{ position:'absolute', inset:0, width:'100%', height:'100%' }}>
+              <ellipse cx="140" cy="126" rx="104" ry="86" fill="none" stroke="#D81324" strokeWidth="9"
+                strokeLinecap="round" transform="rotate(-5 140 126)"
+                strokeDasharray="600" strokeDashoffset="26"/>
+              <line x1="42" y1="46" x2="16" y2="20" stroke="#D81324" strokeWidth="8.5" strokeLinecap="round"/>
+              <line x1="62" y1="28" x2="48" y2="2"  stroke="#D81324" strokeWidth="8.5" strokeLinecap="round"/>
+              <line x1="88" y1="18" x2="84" y2="0"  stroke="#D81324" strokeWidth="8.5" strokeLinecap="round"/>
+            </svg>
+            <div style={{
+              position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center',
+              paddingLeft:8, paddingBottom:6,
+              fontSize:96, fontWeight:700, color:'#D81324', lineHeight:1,
+              fontFamily:"'Instrument Serif', Georgia, serif",
+            }}>
+              {sub.grade || (pct >= 50 ? 'P' : '\u2014')}
             </div>
           </div>
         </div>
       </div>
 
+
       {/* ── DETAIL + TOPIC BREAKDOWN ───────────────────────────── */}
       <style>{`@media (max-width: 860px) { .res-split { grid-template-columns: 1fr !important; } }`}</style>
       <div style={{ display:'grid', gridTemplateColumns:'minmax(0,1.5fr) minmax(0,1fr)', gap:16, marginBottom:16 }}
            className="res-split">
-        <div className="card sm-glow sm-glow-card" style={{ padding:'22px 26px' }}>
+        {/* Plain white cards here, deliberately. The gold ring belongs on
+            browsable listing cards; on a result panel it competes with
+            the red and green that carry the actual meaning. */}
+        <div className="card" style={{ padding:'24px 28px', boxShadow:'0 6px 24px rgba(20,20,30,.07)' }}>
           <div style={{ display:'flex', justifyContent:'space-between', gap:14, flexWrap:'wrap' }}>
             <div style={{ minWidth:0 }}>
-              <div style={{ fontSize:19, fontWeight:800, color:'#1A1A1A', lineHeight:1.25 }}>
+              <div style={{ fontSize:22, fontWeight:800, color:'#1A2130', lineHeight:1.25 }}>
                 {exam?.subject}{exam?.title ? ' \u2013 ' + exam.title : ''}
               </div>
-              <div style={{ fontSize:13, color:'#6B6B6B', marginTop:3 }}>
-                {exam?.curriculum ? exam.curriculum + ' \u00b7 ' : ''}{exam?.grade}
+              <div style={{ fontSize:14.5, color:'#7A7A82', marginTop:4 }}>
+                {topicRows.length
+                  ? 'Topic: ' + topicRows[0].label
+                  : [prettyCurriculum(exam?.curriculum), exam?.grade].filter(Boolean).join(' \u00b7 ')}
               </div>
             </div>
             <div style={{ textAlign:'right' }}>
@@ -8477,7 +8505,7 @@ function MyResultDetail({ subId, detail, loading, onBack }) {
               display:'flex', alignItems:'center', justifyContent:'center',
             }}><ResultIcon name={praise.icon} size={40} /></span>
             <div style={{ minWidth:0 }}>
-              <div style={{ fontSize:15.5, fontWeight:800, color:praise.tintFg }}>{praise.title}</div>
+              <div style={{ fontSize:17, fontWeight:800, color:praise.tintFg }}>{praise.title}</div>
               <div style={{ fontSize:13.5, color:'#4A4A4A', marginTop:3, lineHeight:1.55 }}>
                 {praise.body}
               </div>
@@ -8486,8 +8514,8 @@ function MyResultDetail({ subId, detail, loading, onBack }) {
         </div>
 
         {/* Topic breakdown, computed from each answer's question topic. */}
-        <div className="card sm-glow sm-glow-card" style={{ padding:'22px 24px', display:'flex', flexDirection:'column' }}>
-          <div style={{ fontSize:17, fontWeight:800, color:'#1A1A1A', marginBottom:14 }}>
+        <div className="card" style={{ padding:'24px 26px', display:'flex', flexDirection:'column', boxShadow:'0 6px 24px rgba(20,20,30,.07)' }}>
+          <div style={{ fontSize:20, fontWeight:800, color:'#1A2130', marginBottom:16 }}>
             Topic Breakdown
           </div>
           {topicRows.length === 0 ? (
@@ -9209,7 +9237,7 @@ function HomeworkTab({ user, toast }) {
               color: '#fff',
             }}>
               <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .8, marginBottom: 4 }}>
-                {selected.subject} · {selected.curriculum} · {selected.grade}
+                {selected.subject} · {prettyCurriculum(selected.curriculum)} · {selected.grade}
               </div>
               <h3 className="serif" style={{ fontSize: 22, margin: 0, lineHeight: 1.2 }}>{selected.title}</h3>
               <div style={{ fontSize: 13, opacity: .9, marginTop: 6 }}>
