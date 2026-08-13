@@ -15476,6 +15476,13 @@ function TeacherLibraryTab({ user, toast }) {
   }
 
   const [upSection, setUpSection] = useState('coursebook')
+  // Shelf: a library is not only a curriculum store. 'general' books —
+  // novels, biographies, careers guides — carry a genre instead of a
+  // subject, and were previously impossible to upload because the model
+  // required subjectId, subjectName and curriculum on every record.
+  const [upShelf, setUpShelf] = useState('academic')
+  const [upGenre, setUpGenre] = useState('Fiction')
+  const [upAgeRange, setUpAgeRange] = useState('')
   const [upYear,    setUpYear]    = useState('')
   const [upPaper,   setUpPaper]   = useState('')
   const [upSession, setUpSession] = useState('')
@@ -15510,7 +15517,7 @@ function TeacherLibraryTab({ user, toast }) {
 
 
   const submitUpload = async () => {
-    if (!upSubjectId)         { toast?.error?.('Pick a subject.'); return }
+    if (upShelf !== 'general' && !upSubjectId) { toast?.error?.('Pick a subject.'); return }
     if (!upTitle.trim())      { toast?.error?.('Title is required.'); return }
     if (!upFile)              { toast?.error?.('Choose a PDF file.'); return }
     if (upSection !== 'coursebook') {
@@ -15522,7 +15529,7 @@ function TeacherLibraryTab({ user, toast }) {
     setUploadProgress(0)
     try {
       // 1. Presign, 2. direct browser-to-R2 PUT, 3. optional cover, 4. confirm
-      const pr = await api.post('/library/presign', { subjectId: upSubjectId, fileName: upFile.name, mimeType: upFile.type || 'application/pdf', fileSize: upFile.size })
+      const pr = await api.post('/library/presign', { subjectId: upSubjectId || (subjects[0]?._id || subjects[0]?.id), fileName: upFile.name, mimeType: upFile.type || 'application/pdf', fileSize: upFile.size })
       const pd = pr.data?.data || pr.data
       if (!pd?.uploadUrl) throw new Error(pd?.message || 'Could not prepare the upload.')
 
@@ -15551,7 +15558,11 @@ function TeacherLibraryTab({ user, toast }) {
 
       const { data } = await api.post('/library/confirm', {
         r2Key: pd.r2Key, publicUrl: pd.publicUrl, coverUrl,
-        subjectId: upSubjectId, title: upTitle.trim(),
+        subjectId: upShelf === 'general' ? null : upSubjectId,
+        shelf: upShelf,
+        genre: upShelf === 'general' ? upGenre : '',
+        ageRange: upAgeRange.trim(),
+        title: upTitle.trim(),
         description: upDescription.trim(), author: upAuthor.trim(),
         grades: upGrades.trim(), section: upSection,
         examYear:    upSection !== 'coursebook' ? upYear    : '',
@@ -15648,6 +15659,34 @@ function TeacherLibraryTab({ user, toast }) {
             letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 14,
           }}>Upload a coursebook</div>
 
+          {/* Shelf — a library is not only a curriculum store. General
+              reading books carry a genre instead of a subject. */}
+          <div style={{ marginBottom: 14 }}>
+            <label className="fl">Shelf</label>
+            <select className="fsel" value={upShelf} onChange={e => setUpShelf(e.target.value)}>
+              <option value="academic">Curriculum book — tied to a subject</option>
+              <option value="general">General reading — novel, biography, reference</option>
+            </select>
+            <div style={{ fontSize:11, color:'var(--s400)', marginTop:4 }}>
+              General reading books need no subject or curriculum.
+            </div>
+          </div>
+          {upShelf === 'general' && (
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14, marginBottom:14 }}>
+              <div>
+                <label className="fl">Genre</label>
+                <select className="fsel" value={upGenre} onChange={e => setUpGenre(e.target.value)}>
+                  {['Fiction','Non-fiction','Biography','Poetry','Reference','Careers','Wellbeing','History','Science & Nature','Other']
+                    .map(g => <option key={g} value={g}>{g}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="fl">Age guidance (optional)</label>
+                <input className="fi" value={upAgeRange} onChange={e => setUpAgeRange(e.target.value)}
+                  placeholder="e.g. 9-12, 13+" />
+              </div>
+            </div>
+          )}
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap: 14, marginBottom: 14 }}>
             <div>
               <label className="fl">Subject *</label>
