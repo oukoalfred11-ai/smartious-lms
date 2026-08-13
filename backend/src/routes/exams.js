@@ -679,7 +679,14 @@ router.post('/submissions/:subId/grade', auth, requireRole('teacher','admin', 'd
 // ═══════════════════════════════════════════════════════════════════
 async function loadExamQuestions(exam) {
   const out = [];
-  if (exam.questionIds && exam.questionIds.length) {
+  // Question is required lazily throughout this file rather than at the
+  // top, so it must be required here too — referencing the bare name
+  // threw ReferenceError: Question is not defined, which the catch block
+  // reported as the generic "Failed to generate the paper".
+  let Question;
+  try { Question = require('../models/Question'); } catch { Question = null; }
+
+  if (Question && exam.questionIds && exam.questionIds.length) {
     const docs = await Question.find({ _id: { $in: exam.questionIds } }).lean();
     const byId = new Map(docs.map(d => [String(d._id), d]));
     // Preserve the teacher's chosen order rather than Mongo's.
@@ -715,8 +722,8 @@ router.get('/:id/paper.pdf', auth, async (req, res) => {
     res.setHeader('Content-Disposition', `attachment; filename="smartious-${safe}.pdf"`);
     return res.end(pdf);
   } catch (e) {
-    console.error('[exam paper pdf]', e.message);
-    return res.status(500).json({ success:false, message:'Failed to generate the paper.' });
+    console.error('[exam paper pdf]', e.message, e.stack);
+    return res.status(500).json({ success:false, message:'Failed to generate the paper: ' + e.message });
   }
 });
 
@@ -733,8 +740,8 @@ router.get('/:id/scheme.pdf', auth, requireRole('teacher','admin','dos','ops_man
     res.setHeader('Content-Disposition', `attachment; filename="smartious-${safe}-mark-scheme.pdf"`);
     return res.end(pdf);
   } catch (e) {
-    console.error('[exam scheme pdf]', e.message);
-    return res.status(500).json({ success:false, message:'Failed to generate the mark scheme.' });
+    console.error('[exam scheme pdf]', e.message, e.stack);
+    return res.status(500).json({ success:false, message:'Failed to generate the mark scheme: ' + e.message });
   }
 });
 
