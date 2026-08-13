@@ -11214,14 +11214,46 @@ function StudentLibraryPage({ user, toast }) {
 
   return (
     <div>
-      <div style={{ marginBottom: 18 }}>
-        <div className="sec-tag">Coursebook PDFs</div>
-        <h2 className="serif" style={{ fontSize: 26, color: 'var(--s900)', margin: '6px 0 4px' }}>
-          Library
-        </h2>
-        <div style={{ fontSize: 13, color: '#6B6B6B' }}>
-          Read your coursebooks inline. Books open in full-screen mode and cannot be downloaded.
+      {/* ── Hero banner ────────────────────────────────────────
+          Same treatment as Exams and Homework: artwork untouched, a
+          slightly narrower card, and a glowing gold stat footer. */}
+      <div className="card" style={{
+        padding: 0, marginBottom: 18, overflow: 'hidden',
+        maxWidth: 1180, marginLeft: 'auto', marginRight: 'auto',
+      }}>
+        <img
+          src="/banners/library-hero.jpg"
+          alt="Digital library — read, learn, grow"
+          style={{ width: '100%', display: 'block', height: 'auto' }}
+          onError={e => { e.currentTarget.style.display = 'none' }}
+        />
+        <div style={{
+          display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))',
+          background: '#6B0F1E',
+        }}>
+          {[
+            ['Books',    books.length || '\u2014'],
+            ['Subjects', Object.keys(grouped).length || '\u2014'],
+            ['Showing',  filtered.length || '\u2014'],
+          ].map(([l, v]) => (
+            <div key={l} style={{ padding: '13px 18px', borderRight: '1px solid rgba(201,160,48,.18)' }}>
+              <div style={{
+                fontSize: 9.5, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase',
+                color: '#E8C97A', opacity: .85, marginBottom: 3,
+                textShadow: '0 0 10px rgba(201,160,48,.45)',
+              }}>{l}</div>
+              <div style={{
+                fontSize: 17, fontWeight: 800, fontFamily: 'JetBrains Mono, monospace',
+                color: '#F5D98B',
+                textShadow: '0 0 12px rgba(245,217,139,.65), 0 0 26px rgba(201,160,48,.35)',
+              }}>{v}</div>
+            </div>
+          ))}
         </div>
+      </div>
+
+      <div style={{ fontSize: 13, color: 'var(--s500)', marginBottom: 16 }}>
+        Read your coursebooks inline. Books open in full-screen mode and cannot be downloaded.
       </div>
 
       {/* Search */}
