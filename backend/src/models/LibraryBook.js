@@ -17,14 +17,40 @@ const libraryBookSchema = new mongoose.Schema({
   // for exam-body papers, or "Term 1".."Term 3" for school mocks.
   session:     { type: String, default: '', trim: true, maxlength: 40 },
 
+  // ── Shelf ────────────────────────────────────────────────
+  // A library is not only a curriculum store. 'academic' books belong
+  // to a subject and curriculum; 'general' books — novels, biographies,
+  // reference, careers, wellbeing — belong to no syllabus and were
+  // previously impossible to upload at all, because subjectId,
+  // subjectName and curriculum were every one of them required.
+  shelf: {
+    type: String,
+    enum: ['academic', 'general'],
+    default: 'academic',
+    index: true,
+  },
+  // Only meaningful for shelf 'general'. Kept as a small closed list so
+  // the student filter stays browsable rather than becoming free tags.
+  genre: {
+    type: String,
+    enum: ['', 'Fiction', 'Non-fiction', 'Biography', 'Poetry', 'Reference',
+           'Careers', 'Wellbeing', 'History', 'Science & Nature', 'Other'],
+    default: '',
+    index: true,
+  },
+  // Guidance, not a gate — a keen reader may go above it.
+  ageRange: { type: String, default: '', trim: true, maxlength: 20 },
+
+  // Academic books only. Optional so a general book can exist without
+  // being forced into a subject it does not belong to.
   subjectId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Subject',
-    required: true,
+    default: null,
     index: true,
   },
-  subjectName: { type: String, required: true, trim: true },
-  curriculum:  { type: String, required: true, trim: true, index: true },
+  subjectName: { type: String, default: '', trim: true },
+  curriculum:  { type: String, default: '', trim: true, index: true },
   grades:      [{ type: String, trim: true }],
 
   // R2 file pointers
@@ -44,8 +70,21 @@ const libraryBookSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
+// An academic book must name its subject; a general book must name its
+// genre. Without one or the other a book cannot be found by any filter.
+libraryBookSchema.pre('validate', function (next) {
+  if (this.shelf === 'academic' && !this.subjectId) {
+    return next(new Error('An academic book needs a subject.'));
+  }
+  if (this.shelf === 'general' && !this.genre) {
+    this.genre = 'Other';
+  }
+  next();
+});
+
 libraryBookSchema.index({ subjectId: 1, isActive: 1, createdAt: -1 });
 libraryBookSchema.index({ curriculum: 1, isActive: 1 });
+libraryBookSchema.index({ shelf: 1, genre: 1, isActive: 1 });
 // Folder browsing: section -> year -> paper
 libraryBookSchema.index({ section: 1, examYear: -1, paperNumber: 1 });
 
