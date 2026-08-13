@@ -7627,9 +7627,66 @@ function MyResultsTab({ user, toast, setPage }) {
     const load = async () => {
       setDetailLoading(true)
       try {
-        const { data } = await api.get('/exams/submissions/my/' + selectedSubId)
+        // Exams and homework have separate detail endpoints with
+        // different payload shapes, so the row's kind decides which to
+        // call and the result is normalised into one shape below.
+        const row = results.find(r => String(r._id) === String(selectedSubId))
+        const isHw = row?.kind === 'homework'
+        const { data } = await api.get(
+          isHw ? '/homework/submissions/my/' + selectedSubId
+               : '/exams/submissions/my/' + selectedSubId)
         if (cancelled) return
-        if (data?.success) setDetail(data.data)
+        if (data?.success) {
+          if (isHw) {
+            // Normalise homework into the exam-shaped payload the result
+            // screen already understands: a submission plus a question
+            // bank, with answers keyed by questionRef rather than index.
+            const d = data.data
+            const hw = d.homework || {}
+            const qs = d.questions || []
+            const possible = qs.reduce((n, q) => n + (Number(q.marks) || 1), 0)
+            const awarded  = (d.submission?.answers || [])
+              .reduce((n, a) => n + (Number(a.marksAwarded) || 0), 0)
+            setDetail({
+              submission: {
+                ...d.submission,
+                totalScore: awarded,
+                maxScore: possible || hw.totalMarks || 0,
+                percentage: possible ? Math.round((awarded / possible) * 100) : 0,
+                answers: (d.submission?.answers || []).map(a => ({
+                  questionRef: 'hw:' + a.questionIndex,
+                  partPath: [],
+                  answerText: typeof a.answer === 'string' ? a.answer : '',
+                  selectedOption: typeof a.answer === 'number'
+                    ? (qs[a.questionIndex]?.options || [])[a.answer] || ''
+                    : '',
+                  marksAwarded: a.marksAwarded,
+                  isCorrect: a.marksAwarded === null ? null
+                    : Number(a.marksAwarded) >= (Number(qs[a.questionIndex]?.marks) || 1),
+                  feedback: a.feedback || '',
+                  attachment: a.attachment || null,
+                  teacherAnnotation: a.teacherAnnotation || '',
+                })),
+              },
+              bankQuestions: qs.map(q => ({
+                _id: 'hw:' + q.index,
+                questionText: q.questionText,
+                type: q.type,
+                options: q.options,
+                correctAnswer: q.correctAnswer,
+                explanation: q.explanation,
+                marks: q.marks,
+                topic: q.topic,
+                attachments: q.attachments,
+                parts: [],
+              })),
+              _kind: 'homework',
+              _meta: hw,
+            })
+          } else {
+            setDetail(data.data)
+          }
+        }
         else toast?.error?.(data?.message || 'Failed to load result.')
       } catch (e) {
         if (cancelled) return
@@ -7641,7 +7698,9 @@ function MyResultsTab({ user, toast, setPage }) {
     }
     load()
     return () => { cancelled = true }
-  }, [selectedSubId, toast])
+    // results is read inside to decide exam vs homework endpoint.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedSubId, toast, results])
 
   const graded = results.filter(r => r.status === 'graded')
   const subjectStats = (() => {
@@ -7843,20 +7902,18 @@ function MyResultsTab({ user, toast, setPage }) {
 
           return (
             <div key={r._id} className="card" style={{
-              padding:14, cursor: (isGraded && r.kind !== 'homework') ? 'pointer' : 'default',
+              padding:14, cursor: isGraded ? 'pointer' : 'default',
               borderLeft:'4px solid ' + subjCol,
               opacity: isGraded ? 1 : .75,
               transition:'transform .15s',
             }}
-              onMouseEnter={(e) => { if (isGraded && r.kind !== 'homework') e.currentTarget.style.transform = 'translateX(2px)' }}
+              onMouseEnter={(e) => { if (isGraded) e.currentTarget.style.transform = 'translateX(2px)' }}
               onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateX(0)' }}
               // Only exam rows open the breakdown. Homework results have no
               // exam-detail endpoint, so a click would 404 — they show
               // their score inline instead.
-              onClick={() => { if (isGraded && r.kind !== 'homework') setSelectedSubId(r._id) }}
-              title={r.kind === 'homework'
-                ? 'Homework result — open the Homework tab for the marked answers'
-                : isGraded ? 'Click for full breakdown' : 'Awaiting teacher review'}
+              onClick={() => { if (isGraded) setSelectedSubId(r._id) }}
+              title={isGraded ? 'Click for full breakdown' : 'Awaiting teacher review'}
             >
               <div style={{ display:'flex', alignItems:'center', gap:14, flexWrap:'wrap' }}>
                 <div style={{ flex:1, minWidth:200 }}>
