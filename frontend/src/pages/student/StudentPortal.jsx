@@ -4396,44 +4396,56 @@ function LiveClassesTab({ user, toast, goTo }) {
   // ── LIST ──
   return (
     <div>
-      {/* ─── HERO ─── */}
+      {/* ── Hero banner ────────────────────────────────────────
+          Same treatment as Exams, Homework and Library: artwork
+          untouched, narrower card, glowing gold stat footer. The live
+          alert bar is kept below the stats — a class in progress is
+          the one thing a student must not miss. */}
       <div className="card" style={{
-        padding:0, marginBottom:18, overflow:'hidden',
-        background:'linear-gradient(135deg, #7D1025 0%, #5A0B1B 100%)',
-        color:'#FBFAF5',
-        boxShadow:'0 12px 40px rgba(125,16,37,.20)',
+        padding: 0, marginBottom: 18, overflow: 'hidden',
+        maxWidth: 1180, marginLeft: 'auto', marginRight: 'auto',
       }}>
+        <img
+          src="/banners/liveclasses-hero.jpg"
+          alt="Live online class — learn, interact, excel"
+          style={{ width: '100%', display: 'block', height: 'auto' }}
+          onError={e => { e.currentTarget.style.display = 'none' }}
+        />
         <div style={{
-          padding:'24px 28px',
-          backgroundImage:'radial-gradient(circle at 95% 50%, rgba(201,160,48,.18) 0%, transparent 50%)',
+          display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))',
+          background: '#6B0F1E',
         }}>
-          <div style={{ fontSize:11, fontWeight:700, letterSpacing:'.16em', textTransform:'uppercase', color:'#F0CC5A', marginBottom:6 }}>
-            Real-Time Learning
-          </div>
-          <h1 className="serif" style={{ fontSize:30, fontWeight:400, margin:0, lineHeight:1.15 }}>
-            {live.length > 0
-              ? `${live.length} class${live.length === 1 ? '' : 'es'} happening right now`
-              : upcoming.length > 0
-                ? `Your next class ${countdownText(upcoming[0])}`
-                : 'Live Classes'}
-          </h1>
-          <div style={{ fontSize:13, opacity:.85, marginTop:6 }}>
-            {classes.length} scheduled
-            {upcoming.length > 0 && <> &middot; {upcoming.length} upcoming</>}
-            {past.length > 0 && <> &middot; {classes.filter(c=>c.computedStatus==='ended').length} completed</>}
-          </div>
+          {[
+            ['Live now',  live.length || '\u2014'],
+            ['Upcoming',  upcoming.length || '\u2014'],
+            ['Completed', classes.filter(c => c.computedStatus === 'ended').length || '\u2014'],
+            ['Next',      upcoming.length ? countdownText(upcoming[0]) : '\u2014'],
+          ].map(([l, v]) => (
+            <div key={l} style={{ padding: '13px 18px', borderRight: '1px solid rgba(201,160,48,.18)' }}>
+              <div style={{
+                fontSize: 9.5, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase',
+                color: '#E8C97A', opacity: .85, marginBottom: 3,
+                textShadow: '0 0 10px rgba(201,160,48,.45)',
+              }}>{l}</div>
+              <div style={{
+                fontSize: 17, fontWeight: 800, fontFamily: 'JetBrains Mono, monospace',
+                color: '#F5D98B',
+                textShadow: '0 0 12px rgba(245,217,139,.65), 0 0 26px rgba(201,160,48,.35)',
+              }}>{v}</div>
+            </div>
+          ))}
         </div>
         {live.length > 0 && (
           <div style={{
-            background:'#15803D', padding:'10px 32px',
-            display:'flex', alignItems:'center', gap:10,
+            background: '#15803D', color: '#FBFAF5', padding: '10px 24px',
+            display: 'flex', alignItems: 'center', gap: 10,
           }}>
             <span style={{
-              width:10, height:10, borderRadius:'50%',
-              background:'#4ADE80', animation:'pulse 1.5s infinite', flexShrink:0,
+              width: 10, height: 10, borderRadius: '50%',
+              background: '#4ADE80', animation: 'pulse 1.5s infinite', flexShrink: 0,
             }}/>
-            <span style={{ fontSize:13, fontWeight:700, letterSpacing:'.04em' }}>
-              Join the live session below.
+            <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: '.04em' }}>
+              {live.length} class{live.length === 1 ? '' : 'es'} happening right now — join below.
             </span>
           </div>
         )}
