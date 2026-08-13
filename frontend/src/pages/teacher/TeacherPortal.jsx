@@ -15657,77 +15657,115 @@ function TeacherLibraryTab({ user, toast }) {
           <div style={{
             fontSize: 11, fontWeight: 700, color: '#7D5A0F',
             letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 14,
-          }}>Upload a coursebook</div>
+          }}>{upShelf === 'general' ? 'Add a book to the library' : 'Upload a coursebook or paper'}</div>
 
-          {/* Shelf — a library is not only a curriculum store. General
-              reading books carry a genre instead of a subject. */}
-          <div style={{ marginBottom: 14 }}>
-            <label className="fl">Shelf</label>
-            <select className="fsel" value={upShelf} onChange={e => setUpShelf(e.target.value)}>
-              <option value="academic">Curriculum book — tied to a subject</option>
-              <option value="general">General reading — novel, biography, reference</option>
-            </select>
-            <div style={{ fontSize:11, color:'var(--s400)', marginTop:4 }}>
-              General reading books need no subject or curriculum.
+          {/* ── STEP 1: what kind of book ──────────────────────────
+              A segmented choice rather than a dropdown, because it
+              decides which half of this form appears. Bolting a "shelf"
+              select on top of the old fields left a teacher adding a
+              novel still looking at Subject, Grades, Library section and
+              Paper folder — none of which apply. */}
+          <div style={{ marginBottom: 18 }}>
+            <label className="fl" style={{ display:'block', marginBottom:7 }}>What are you adding?</label>
+            <div style={{ display:'flex', gap:10, flexWrap:'wrap' }}>
+              {[
+                ['academic', 'Curriculum book', 'Coursebook or past paper, tied to a subject'],
+                ['general',  'General reading', 'Novel, biography, reference — no subject needed'],
+              ].map(([id, title, blurb]) => (
+                <button key={id} type="button"
+                  onClick={() => { setUpShelf(id); if (id === 'general') setUpSection('coursebook') }}
+                  disabled={uploading}
+                  style={{
+                    flex:'1 1 240px', textAlign:'left', cursor:'pointer',
+                    background: upShelf === id ? '#FDF7E2' : '#fff',
+                    border: '1.5px solid ' + (upShelf === id ? '#C9A030' : 'var(--border)'),
+                    borderRadius: 10, padding: '12px 14px',
+                  }}>
+                  <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                    <span style={{
+                      width:15, height:15, borderRadius:'50%', flexShrink:0,
+                      border: '5px solid ' + (upShelf === id ? '#C9A030' : '#D8D2C6'),
+                      background:'#fff',
+                    }}/>
+                    <span style={{ fontSize:13.5, fontWeight:800, color:'var(--s900)' }}>{title}</span>
+                  </div>
+                  <div style={{ fontSize:11.5, color:'var(--s500)', marginTop:5, lineHeight:1.45 }}>{blurb}</div>
+                </button>
+              ))}
             </div>
           </div>
-          {upShelf === 'general' && (
+
+          {/* ── STEP 2: the fields for that kind ─────────────────── */}
+          {upShelf === 'general' ? (
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14, marginBottom:14 }}>
               <div>
-                <label className="fl">Genre</label>
-                <select className="fsel" value={upGenre} onChange={e => setUpGenre(e.target.value)}>
+                <label className="fl">Genre *</label>
+                <select className="fsel" value={upGenre} onChange={e => setUpGenre(e.target.value)} disabled={uploading}>
                   {['Fiction','Non-fiction','Biography','Poetry','Reference','Careers','Wellbeing','History','Science & Nature','Other']
                     .map(g => <option key={g} value={g}>{g}</option>)}
                 </select>
               </div>
               <div>
                 <label className="fl">Age guidance (optional)</label>
-                <input className="fi" value={upAgeRange} onChange={e => setUpAgeRange(e.target.value)}
-                  placeholder="e.g. 9-12, 13+" />
+                <input className="finput" value={upAgeRange} onChange={e => setUpAgeRange(e.target.value)}
+                  placeholder="e.g. 9-12, 13+" disabled={uploading}/>
+              </div>
+            </div>
+          ) : (
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14, marginBottom:14 }}>
+              <div>
+                <label className="fl">Subject *</label>
+                <select className="fsel" value={upSubjectId}
+                  onChange={e => setUpSubjectId(e.target.value)}
+                  disabled={loadingSubjects || uploading}>
+                  <option value="">
+                    {loadingSubjects ? 'Loading subjects...' : 'Select subject...'}
+                  </option>
+                  {subjects.map(s => (
+                    <option key={s._id} value={s._id}>
+                      {s.subjectName} · {s.curriculum}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="fl">Library section *</label>
+                <select className="fsel" value={upSection} onChange={e => setUpSection(e.target.value)} disabled={uploading}>
+                  <option value="coursebook">Coursebook</option>
+                  <option value="mock">Past Paper — Mock Exam</option>
+                  <option value="past_paper">Past Paper — Exam Body</option>
+                </select>
               </div>
             </div>
           )}
+
+          {/* ── STEP 3: details common to both ───────────────────── */}
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap: 14, marginBottom: 14 }}>
-            <div>
-              <label className="fl">Subject *</label>
-              <select className="fsel" value={upSubjectId}
-                onChange={e => setUpSubjectId(e.target.value)}
-                disabled={loadingSubjects || uploading}>
-                <option value="">
-                  {loadingSubjects ? 'Loading subjects...' : 'Select subject...'}
-                </option>
-                {subjects.map(s => (
-                  <option key={s._id} value={s._id}>
-                    {s.subjectName} · {s.curriculum}
-                  </option>
-                ))}
-              </select>
-            </div>
             <div>
               <label className="fl">Title *</label>
               <input className="finput" value={upTitle}
                 onChange={e => setUpTitle(e.target.value)}
-                placeholder="e.g. Cambridge IGCSE Mathematics Coursebook"
+                placeholder={upShelf === 'general' ? 'e.g. Things Fall Apart' : 'e.g. Cambridge IGCSE Mathematics Coursebook'}
                 disabled={uploading}/>
             </div>
-          </div>
-
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap: 14, marginBottom: 14 }}>
             <div>
               <label className="fl">Author (optional)</label>
               <input className="finput" value={upAuthor}
                 onChange={e => setUpAuthor(e.target.value)}
-                placeholder="e.g. Karen Morrison"
+                placeholder={upShelf === 'general' ? 'e.g. Chinua Achebe' : 'e.g. Karen Morrison'}
                 disabled={uploading}/>
             </div>
-            <div>
+          </div>
+
+          {upShelf !== 'general' && (
+            <div style={{ marginBottom: 14 }}>
               <label className="fl">Grade(s) (optional, comma-separated)</label>
               <input className="finput" value={upGrades}
                 onChange={e => setUpGrades(e.target.value)}
                 placeholder="e.g. Year 10, Year 11"
                 disabled={uploading}/>
             </div>
-          </div>
+          )}
 
           <div style={{ marginBottom: 14 }}>
             <label className="fl">Description (optional)</label>
@@ -15755,19 +15793,11 @@ function TeacherLibraryTab({ user, toast }) {
               background: '#FDF7E2', border: '1px solid #E8D58F',
               borderRadius: 5, padding: '6px 10px', lineHeight: 1.5,
             }}>
-              <strong>Tip:</strong> Large coursebooks upload directly to secure storage. Add a cover image so students see a book preview in their library.</div>
+              <strong>Tip:</strong> Large files upload directly to secure storage. A cover image is optional but makes the shelf far easier to browse.</div>
           </div>
 
-          <div style={{ marginBottom: 16 }}>
-            <label className="fl">Library section *</label>
-            <select className="fsel" value={upSection} onChange={e => setUpSection(e.target.value)} disabled={uploading} style={{ marginTop: 4 }}>
-              <option value="coursebook">Coursebook</option>
-              <option value="mock">Past Paper - Mock Exam</option>
-              <option value="past_paper">Past Paper - Exam Body</option>
-            </select>
-          </div>
 
-          {upSection !== 'coursebook' && (
+          {upShelf !== 'general' && upSection !== 'coursebook' && (
             <div style={{ marginBottom: 16, background: '#FBF7EC', border: '1px solid #E8D58F', borderRadius: 8, padding: '12px 14px' }}>
               <div style={{ fontSize: 11, fontWeight: 700, color: '#7D5A0F', letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: 10 }}>
                 Paper folder — groups this file under Year, then Paper 1-6
