@@ -3896,7 +3896,10 @@ function ExamsTab({ user, toast, goTo, store }) {
             text overlay is placed on it — anything laid over the image
             competes with the typography already in it. The stat strip
             sits underneath on solid crimson. */}
-        <div className="card" style={{ padding: 0, marginBottom: 18, overflow: 'hidden' }}>
+        <div className="card" style={{
+          padding: 0, marginBottom: 18, overflow: 'hidden',
+          maxWidth: 1180, marginLeft: 'auto', marginRight: 'auto',
+        }}>
           <img
             src="/banners/exam-hero.jpg"
             alt="Success in your exam — prepare with confidence, stay focused, do your best"
@@ -3905,7 +3908,7 @@ function ExamsTab({ user, toast, goTo, store }) {
           />
           <div style={{
             display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-            background: '#6B0F1E', color: '#fff',
+            background: '#6B0F1E',
           }}>
             {[
               ['Exams Taken',  scheduledExams.length || '\u2014'],
@@ -3913,11 +3916,17 @@ function ExamsTab({ user, toast, goTo, store }) {
               ['Pass Rate',    pcts.length ? `${passRate}%` : '\u2014'],
               ['Avg Grade',    avgGrade],
             ].map(([l, v]) => (
-              <div key={l} style={{ padding: '12px 18px', borderRight: '1px solid rgba(255,255,255,.08)' }}>
-                <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .6, marginBottom: 2 }}>
-                  {l}
-                </div>
-                <div style={{ fontSize: 14, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace' }}>{v}</div>
+              <div key={l} style={{ padding: '13px 18px', borderRight: '1px solid rgba(201,160,48,.18)' }}>
+                <div style={{
+                  fontSize: 9.5, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase',
+                  color: '#E8C97A', opacity: .85, marginBottom: 3,
+                  textShadow: '0 0 10px rgba(201,160,48,.45)',
+                }}>{l}</div>
+                <div style={{
+                  fontSize: 17, fontWeight: 800, fontFamily: 'JetBrains Mono, monospace',
+                  color: '#F5D98B',
+                  textShadow: '0 0 12px rgba(245,217,139,.65), 0 0 26px rgba(201,160,48,.35)',
+                }}>{v}</div>
               </div>
             ))}
           </div>
@@ -8569,47 +8578,58 @@ function HomeworkTab({ user, toast }) {
   // ── RENDER ──
   return (
     <div>
-      {/* Hero */}
+      {/* ── Hero banner ────────────────────────────────────────
+          The artwork carries the message, so nothing is laid over it.
+          Slightly narrower than full width so the card reads as a
+          deliberate object rather than a page-wide strip. The stat
+          footer uses the Smartious gold with a soft glow. */}
       <div className="card" style={{
         padding: 0, marginBottom: 18, overflow: 'hidden',
-        background: 'linear-gradient(135deg, #8B1A2E 0%, #6B0F1E 100%)',
-        color: '#fff',
+        maxWidth: 1180, marginLeft: 'auto', marginRight: 'auto',
       }}>
-        <div style={{ padding: '24px 30px', display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}>
-          <div style={{ flex: 1, minWidth: 200 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .75, marginBottom: 6 }}>
-              Assigned by your teachers
-            </div>
-            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0 }}>
-              Homework
-            </h2>
-            <div style={{ fontSize: 13, opacity: .85, marginTop: 4 }}>
-              Submit on time. Grades count toward your progress.
-            </div>
-          </div>
-          <div style={{ display: 'flex', background: 'rgba(0,0,0,.2)', borderRadius: 99, padding: 3, gap: 2, flexWrap: 'wrap' }}>
-            {[['status', 'Status'], ['subject', 'Subject'], ['date', 'Date']].map(([id, label]) => (
-              <button key={id} onClick={() => setView(id)} style={{
-                background: view === id ? '#fff' : 'transparent',
-                color: view === id ? '#8B1A2E' : 'rgba(255,255,255,.75)',
-                border: 'none', padding: '6px 14px', borderRadius: 99,
-                cursor: 'pointer', fontSize: 12, fontWeight: 700,
-              }}>{label}</button>
-            ))}
-          </div>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', background: 'rgba(0,0,0,.18)' }}>
+        <img
+          src="/banners/homework-hero.jpg"
+          alt="Stay consistent, build success — complete today, understand better"
+          style={{ width: '100%', display: 'block', height: 'auto' }}
+          onError={e => { e.currentTarget.style.display = 'none' }}
+        />
+        <div style={{
+          display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))',
+          background: '#6B0F1E',
+        }}>
           {[
-            ['Locked', counts.locked, 'inherit'],
-            ['Pending', counts.pending, 'inherit'],
-            ['Overdue', counts.overdue, counts.overdue > 0 ? '#FCA5A5' : 'inherit'],
-            ['Submitted', counts.submitted, 'inherit'],
-            ['Graded', counts.graded, counts.graded > 0 ? '#4ADE80' : 'inherit'],
-          ].map(([l, v, c]) => (
-            <div key={l} style={{ padding: '12px 18px', borderRight: '1px solid rgba(255,255,255,.08)' }}>
-              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .6, marginBottom: 2 }}>{l}</div>
-              <div style={{ fontSize: 14, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace', color: c }}>{v}</div>
+            ['Locked', counts.locked],
+            ['Pending', counts.pending],
+            ['Overdue', counts.overdue],
+            ['Submitted', counts.submitted],
+            ['Graded', counts.graded],
+          ].map(([l, v]) => (
+            <div key={l} style={{ padding: '13px 18px', borderRight: '1px solid rgba(201,160,48,.18)' }}>
+              <div style={{
+                fontSize: 9.5, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase',
+                color: '#E8C97A', opacity: .85, marginBottom: 3,
+                textShadow: '0 0 10px rgba(201,160,48,.45)',
+              }}>{l}</div>
+              <div style={{
+                fontSize: 17, fontWeight: 800, fontFamily: 'JetBrains Mono, monospace',
+                color: '#F5D98B',
+                textShadow: '0 0 12px rgba(245,217,139,.65), 0 0 26px rgba(201,160,48,.35)',
+              }}>{v}</div>
             </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Grouping toggle — moved out of the hero, which is now artwork. */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 14 }}>
+        <div style={{ display: 'flex', background: 'var(--s100)', borderRadius: 99, padding: 3, gap: 2 }}>
+          {[['status', 'Status'], ['subject', 'Subject'], ['date', 'Date']].map(([id, label]) => (
+            <button key={id} onClick={() => setView(id)} style={{
+              background: view === id ? '#7D1025' : 'transparent',
+              color: view === id ? '#fff' : 'var(--s600)',
+              border: 'none', padding: '6px 16px', borderRadius: 99,
+              cursor: 'pointer', fontSize: 12, fontWeight: 700,
+            }}>{label}</button>
           ))}
         </div>
       </div>
