@@ -7947,7 +7947,9 @@ function MyResultsTab({ user, toast, setPage }) {
         ))}
       </div>
 
-      <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+      {/* Card grid rather than stacked rows — results are browsed and
+          compared, which a grid supports and a list does not. */}
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(300px, 1fr))', gap:14 }}>
         {sortedResults.map(r => {
           const exam = r.examId
           const isGraded = r.status === 'graded'
@@ -7958,21 +7960,23 @@ function MyResultsTab({ user, toast, setPage }) {
 
           return (
             <div key={r._id} className="card sm-glow sm-glow-card" style={{
-              padding:14, cursor: isGraded ? 'pointer' : 'default',
-              borderLeft:'4px solid ' + subjCol,
-              opacity: isGraded ? 1 : .75,
-              transition:'transform .15s',
+              padding:0, overflow:'hidden',
+              cursor: isGraded ? 'pointer' : 'default',
+              borderTop:'4px solid ' + subjCol,
+              opacity: isGraded ? 1 : .8,
+              display:'flex', flexDirection:'column',
+              transition:'transform .18s',
             }}
-              onMouseEnter={(e) => { if (isGraded) e.currentTarget.style.transform = 'translateX(2px)' }}
-              onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateX(0)' }}
+              onMouseEnter={(e) => { if (isGraded) e.currentTarget.style.transform = 'translateY(-3px)' }}
+              onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)' }}
               // Only exam rows open the breakdown. Homework results have no
               // exam-detail endpoint, so a click would 404 — they show
               // their score inline instead.
               onClick={() => { if (isGraded) setSelectedSubId(r._id) }}
               title={isGraded ? 'Click for full breakdown' : 'Awaiting teacher review'}
             >
-              <div style={{ display:'flex', alignItems:'center', gap:14, flexWrap:'wrap' }}>
-                <div style={{ flex:1, minWidth:200 }}>
+              <div style={{ display:'flex', flexDirection:'column', gap:12, padding:'16px 18px', flex:1 }}>
+                <div style={{ flex:1, minWidth:0 }}>
                   <div style={{ display:'flex', gap:6, marginBottom:4, flexWrap:'wrap', alignItems:'center' }}>
                     <span style={{
                       background: subjCol + '15', color: subjCol,
@@ -8004,37 +8008,38 @@ function MyResultsTab({ user, toast, setPage }) {
                     {exam?.teacherId && <> &middot; Marked by {exam.teacherId.firstName} {exam.teacherId.lastName}</>}
                   </div>
                 </div>
+                {/* Score sits in a footer strip, not floated right — a
+                    card has no right-hand column to float into. */}
                 {isGraded ? (
-                  <>
+                  <div style={{
+                    display:'flex', alignItems:'center', gap:12,
+                    borderTop:'1px solid var(--border)', paddingTop:12, marginTop:'auto',
+                  }}>
                     <CircularRing
                       percentage={r.percentage || 0}
-                      size={64}
-                      stroke={6}
-                      trackColor="#FBF6E3"
-                      fillColor={r.percentage >= 70 ? '#15803D' : r.percentage >= 50 ? '#C9A030' : '#B45309'}
+                      size={54}
+                      stroke={5}
+                      trackColor="#F0EAE0"
+                      fillColor={r.percentage >= 70 ? '#15803D' : r.percentage >= 50 ? '#C9A030' : '#B91C1C'}
                     />
-                    <div style={{ minWidth:80, textAlign:'right' }}>
-                      <div className="mono" style={{ fontSize:14, fontWeight:700, color:'#1A1A1A' }}>
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <div className="mono" style={{ fontSize:16, fontWeight:800, color:'#1A1A1A', lineHeight:1.1 }}>
                         {r.totalScore}/{r.maxScore}
                       </div>
-                      {r.grade && (
-                        <div style={{
-                          display:'inline-block', marginTop:4,
-                          background: r.percentage >= 70 ? '#DCFCE7' : r.percentage >= 50 ? '#FBF6E3' : '#FEE2E2',
-                          color:     r.percentage >= 70 ? '#15803D' : r.percentage >= 50 ? '#7D1025' : '#B45309',
-                          padding:'2px 8px', borderRadius:99,
-                          fontSize:11, fontWeight:700,
-                        }}>
-                          {r.grade}
-                        </div>
-                      )}
+                      <div style={{ fontSize:11, color:'#6B6B6B', marginTop:2 }}>
+                        {r.grade ? `Grade ${r.grade}` : 'Marked'}
+                      </div>
                     </div>
-                  </>
+                    <span style={{ fontSize:11.5, fontWeight:700, color:'#7D1025', flexShrink:0 }}>
+                      View &rarr;
+                    </span>
+                  </div>
                 ) : (
-                  <div style={{ minWidth:80, textAlign:'right' }}>
-                    <div style={{ fontSize:11.5, color:'#92400E', fontStyle:'italic' }}>
-                      Pending teacher review
-                    </div>
+                  <div style={{
+                    borderTop:'1px solid var(--border)', paddingTop:12, marginTop:'auto',
+                    fontSize:12, color:'#B45309', fontStyle:'italic',
+                  }}>
+                    Pending teacher review
                   </div>
                 )}
               </div>
