@@ -123,10 +123,22 @@ async function visibilityFilterFor(user) {
   }
 
   if (user.role === 'student') {
-    const names = Array.isArray(user.subjects) ? user.subjects : [];
-    if (!names.length) return { _id: { $exists: false } };
-    const curr = typeof user.curriculum === 'string' ? user.curriculum : '';
-    return { isActive: true, subjectName: { $in: names }, ...(curr ? { curriculum: curr } : {}) };
+    // OPEN LIBRARY.
+    //
+    // Students previously saw only books matching BOTH their enrolled
+    // subjects AND their exact curriculum, and a student whose subjects
+    // array was empty saw nothing at all with no explanation. That made
+    // the library smaller the newer the student was, which is backwards.
+    //
+    // A library should encourage reading beyond the syllabus. A Year 5
+    // reader who wants a Year 7 science book, or a Cambridge student
+    // curious about an IB text, should be able to open it. Nothing here
+    // is confidential — these are published coursebooks.
+    //
+    // Mock papers are the one exception and stay restricted: a student
+    // should not read a mock before sitting it. Past papers are public
+    // documents and are opened up with everything else.
+    return { isActive: true, section: { $ne: 'mock' } };
   }
 
   return { _id: { $exists: false } };
@@ -218,6 +230,7 @@ router.post('/confirm', auth, requireRole('teacher', 'admin'), async (req, res) 
     const { coverUrl, section,
       r2Key, publicUrl, subjectId, title, fileName,
       fileSize, description, author, grades, mimeType,
+      shelf, genre, ageRange,
       coverImage, coverR2Key,
     } = req.body || {};
 
@@ -227,8 +240,11 @@ router.post('/confirm', auth, requireRole('teacher', 'admin'), async (req, res) 
 
     if (!r2Key)    return fail(res, 400, 'r2Key is required.');
     if (!publicUrl) return fail(res, 400, 'publicUrl is required.');
-    if (!subjectId || !mongoose.isValidObjectId(subjectId))
-      return fail(res, 400, 'Valid subjectId is required.');
+    // A general book — a novel, a biography, a careers guide — belongs
+    // to no syllabus, so it carries a genre instead of a subject.
+    const isGeneral = String(shelf || '').toLowerCase() === 'general';
+    if (!isGeneral && (!subjectId || !mongoose.isValidObjectId(subjectId)))
+      return fail(res, 400, 'Valid subjectId is required for a curriculum book.');
     if (!title || !String(title).trim())
       return fail(res, 400, 'Title is required.');
 
@@ -237,8 +253,12 @@ router.post('/confirm', auth, requireRole('teacher', 'admin'), async (req, res) 
     if (!r2Key.startsWith('library/'))
       return fail(res, 400, 'Invalid r2Key.');
 
-    const subject = await Subject.findById(subjectId).lean();
-    if (!subject) return fail(res, 404, 'Subject not found.');
+    let subject = null;
+    if (!isGeneral) {
+      subject = await Subject.findById(subjectId).lean();
+      if (!subject) return fail(res, 404, 'Subject not found.');
+    }
+
 
     let gradeArr = [];
     if (Array.isArray(grades)) gradeArr = grades.map(g => String(g).trim()).filter(Boolean);
@@ -256,9 +276,12 @@ router.post('/confirm', auth, requireRole('teacher', 'admin'), async (req, res) 
       title:          String(title).trim(),
       description:    description ? String(description).trim() : '',
       author:         author      ? String(author).trim()      : '',
-      subjectId,
-      subjectName:    subject.subjectName,
-      curriculum:     subject.curriculum,
+      shelf:          isGeneral ? 'general' : 'academic',
+      genre:          isGeneral ? (String(genre || 'Other').trim() || 'Other') : '',
+      ageRange:       ageRange ? String(ageRange).trim() : '',
+      subjectId:      isGeneral ? null : subjectId,
+      subjectName:    isGeneral ? '' : subject.subjectName,
+      curriculum:     isGeneral ? '' : subject.curriculum,
       grades:         gradeArr,
       r2Key,
       url:            publicUrl,
@@ -293,6 +316,10 @@ router.get('/', auth, async (req, res) => {
       filter.curriculum = String(req.query.curriculum).trim();
     if (req.query.section && ['coursebook','mock','past_paper'].includes(req.query.section))
       filter.section = req.query.section;
+    if (req.query.shelf && ['academic','general'].includes(req.query.shelf))
+      filter.shelf = req.query.shelf;
+    if (req.query.genre && String(req.query.genre).trim())
+      filter.genre = String(req.query.genre).trim();
     if (req.query.examYear && /^\d{4}$/.test(String(req.query.examYear)))
       filter.examYear = parseInt(req.query.examYear, 10);
     if (req.query.paperNumber && /^[1-6]$/.test(String(req.query.paperNumber)))
@@ -303,6 +330,8 @@ router.get('/', auth, async (req, res) => {
         { title:       { $regex: term, $options: 'i' } },
         { description: { $regex: term, $options: 'i' } },
         { author:      { $regex: term, $options: 'i' } },
+        { subjectName: { $regex: term, $options: 'i' } },
+        { genre:       { $regex: term, $options: 'i' } },
       ];
     }
 
