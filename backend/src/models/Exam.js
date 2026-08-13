@@ -49,6 +49,16 @@ const examSchema = new mongoose.Schema({
   curriculum: { type: String, required: true, trim: true },
   grade:      { type: String, required: true, trim: true },
 
+  // Component number within a subject's assessment set. Cambridge
+  // subjects routinely run Paper 1 through 6 (multiple choice, theory,
+  // practical, alternative-to-practical and so on), so a school setting
+  // its own papers needs the same label on the cover.
+  paperNumber:  { type: String, default: 'Paper 1', trim: true },
+  // Optional plain-text syllabus reference printed on the cover, e.g.
+  // "Prepared for Cambridge IGCSE Accounting 0452". Deliberately free
+  // text and never an exam-board logo.
+  syllabusRef:  { type: String, default: '', trim: true },
+
   startAt:      { type: Date,   required: true },
   durationMins: { type: Number, required: true, min: 5, max: 360 },
 
