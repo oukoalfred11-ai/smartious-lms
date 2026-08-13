@@ -111,9 +111,17 @@ router.post('/save', auth, requireRole('admin','ops_manager','dos','teacher'), a
       }
     }
 
-    // Send email to parent on EVERY save (draft and publish)
+    // Notify ONLY when publishing, and only once per report.
+    //
+    // This previously emailed on EVERY save, draft included, so a teacher
+    // who saved a draft four times while writing sent the parent four
+    // emails before the report even existed properly — then a fifth on
+    // publish. A draft is work in progress and is not something a parent
+    // should hear about at all.
     let emailSent = false
-    const emailTargets = await getParentEmails(student, pEmail)
+    const alreadyNotified = !!report.parentEmailSent
+    const shouldNotify = publish && !alreadyNotified
+    const emailTargets = shouldNotify ? await getParentEmails(student, pEmail) : []
     if (emailTargets.length) {
       emailSent = await sendParentNotification(report, emailTargets, publish)
       if (emailSent) {
@@ -124,8 +132,10 @@ router.post('/save', auth, requireRole('admin','ops_manager','dos','teacher'), a
     }
 
     const msg = publish
-      ? `Report published.${emailSent?' Parent notified by email.':' (No parent email on file)'}`
-      : `Report saved.${emailSent?' Parent notified by email.':''}`
+      ? `Report published.${emailSent ? ' Parent notified by email.'
+          : alreadyNotified ? ' Parent was already notified.'
+          : ' (No parent email on file)'}`
+      : 'Draft saved. The parent is notified when you publish.'
 
     return ok(res, { report }, msg)
   } catch(e) {
@@ -215,29 +225,76 @@ router.post('/:id/publish', auth, requireRole('admin','ops_manager','dos','teach
     if (req.user.role==='teacher' && String(report.teacherId)!==String(req.user._id))
       return fail(res,403,'Not your report.')
 
+    // Idempotent. Publishing an already-notified report used to send the
+    // parent another copy every time the button was pressed, which is the
+    // other half of why one report produced several emails. Re-publishing
+    // is still allowed (a teacher may correct and re-publish) but the
+    // parent is notified exactly once unless notification is reset.
+    const alreadyNotified = !!report.parentEmailSent
     report.status = 'published'
     await report.save()
+
+    let sent = false
+    if (!alreadyNotified) {
+      let student = null
+      if (report.studentId) student = await User.findById(report.studentId).select('parentEmail linkedParents').lean()
+      const emails = await getParentEmails(student, report.parentEmail)
+      sent = emails.length ? await sendParentNotification(report, emails, true) : false
+      if (sent) { report.parentEmailSent = true; report.parentNotifiedAt = new Date(); await report.save() }
+    }
+
+    return ok(res, { report },
+      alreadyNotified ? 'Published. The parent was already notified for this report.'
+                      : `Published.${sent ? ' Parent notified.' : ' (No parent email on file)'}`)
+  } catch(e) { return fail(res,500,e.message) }
+})
+
+// ── POST /api/weekly-reports/:id/resend ────────────────────
+// Deliberate re-send, for when a parent genuinely did not receive the
+// email. Publishing is idempotent, so this is the only way to send a
+// second copy — which keeps accidental duplicates impossible while
+// leaving a real need served.
+router.post('/:id/resend', auth, requireRole('admin','ops_manager','dos','teacher'), async (req, res) => {
+  try {
+    const report = await WeeklyReport.findById(req.params.id)
+    if (!report) return fail(res,404,'Not found.')
+    if (req.user.role==='teacher' && String(report.teacherId)!==String(req.user._id))
+      return fail(res,403,'Not your report.')
+    if (report.status !== 'published')
+      return fail(res,400,'Publish the report before sending it to the parent.')
 
     let student = null
     if (report.studentId) student = await User.findById(report.studentId).select('parentEmail linkedParents').lean()
     const emails = await getParentEmails(student, report.parentEmail)
-    const sent = emails.length ? await sendParentNotification(report, emails, true) : false
-    if (sent) { report.parentEmailSent=true; report.parentNotifiedAt=new Date(); await report.save() }
+    if (!emails.length) return fail(res,400,'No parent email on file for this student.')
 
-    return ok(res, { report }, `Published.${sent?' Parent notified.':''}`)
+    const sent = await sendParentNotification(report, emails, true)
+    if (sent) { report.parentNotifiedAt = new Date(); await report.save() }
+    return ok(res, { report }, sent ? `Re-sent to ${emails.join(', ')}.` : 'Could not send the email.')
   } catch(e) { return fail(res,500,e.message) }
 })
 
 // ── Helpers ───────────────────────────────────────────────
 async function getParentEmails(student, fallbackEmail) {
-  const emails = new Set()
-  if (fallbackEmail) emails.add(fallbackEmail)
-  if (student?.parentEmail) emails.add(student.parentEmail)
+  // The same parent commonly appears in all three sources. A plain Set
+  // de-dupes by exact string, so "Parent@Gmail.com " and
+  // "parent@gmail.com" survived as two recipients and the parent got two
+  // copies of the same report. Normalise before de-duplicating.
+  const seen = new Map()          // normalised -> original casing
+  const add = (e) => {
+    if (!e || typeof e !== 'string') return
+    const clean = e.trim()
+    if (!clean || !clean.includes('@')) return
+    const key = clean.toLowerCase()
+    if (!seen.has(key)) seen.set(key, clean)
+  }
+  add(fallbackEmail)
+  add(student?.parentEmail)
   if (student?.linkedParents?.length) {
     const parents = await User.find({ _id:{ $in:student.linkedParents } }).select('email').lean()
-    parents.forEach(p => p.email && emails.add(p.email))
+    parents.forEach(p => add(p.email))
   }
-  return [...emails].filter(Boolean)
+  return [...seen.values()]
 }
 
 async function sendParentNotification(report, emails, isPublished) {
@@ -283,18 +340,19 @@ async function sendParentNotification(report, emails, isPublished) {
 </table></td></tr></table></body></html>`
 
   let sent = 0
-  for (const email of emails) {
-    try {
-      await t.sendMail({
-        from: process.env.EMAIL_FROM||'Smartious <hellosmartious@gmail.com>',
-        to:   email,
-        subject: `${isPublished?'Weekly report published':'Report update'} — ${report.studentName} · ${report.subject} · Smartious`,
-        html,
-      })
-      sent++
-      console.log(`[weekly-report email] Sent to ${email}`)
-    } catch(e) { console.error('[weekly-report email]', email, e.message) }
-  }
+  // ONE message addressed to all recipients, rather than one message per
+  // recipient. Two guardians on the same report should receive a single
+  // email between them, not one each with the other invisible.
+  try {
+    await t.sendMail({
+      from: process.env.EMAIL_FROM||'Smartious <hellosmartious@gmail.com>',
+      to:   emails.join(', '),
+      subject: `${isPublished?'Weekly report published':'Report update'} — ${report.studentName} · ${report.subject} · Smartious`,
+      html,
+    })
+    sent++
+    console.log(`[weekly-report email] Sent to ${emails.join(', ')}`)
+  } catch(e) { console.error('[weekly-report email]', emails.join(', '), e.message) }
   return sent > 0
 }
 
