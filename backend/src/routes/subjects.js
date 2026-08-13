@@ -160,13 +160,23 @@ router.patch('/:id', auth, requireRole('admin', 'ops_manager'), async (req, res)
  * to the same key; so do "Art & Design" and "Art and Design".
  */
 function dupKey(name) {
+  // Parentheses are NOT stripped.
+  //
+  // An earlier version dropped them, which collapsed
+  //   "Language Acquisition (French)" / "(Mandarin)" / "(Spanish)"
+  // into one key and wrongly deactivated two real subjects. The same
+  // fault would have merged "Arts (Drama)" with "Arts (Music)". A
+  // parenthetical almost always DISTINGUISHES a subject rather than
+  // decorating it, so it is now part of the identity.
+  //
+  // Only the level prefix and the &/and spelling are normalised —
+  // both are genuine spelling variants of one subject.
   return String(name || '')
     .toLowerCase()
-    .replace(/\s*\(.*?\)\s*/g, ' ')          // drop "(ESL)", "(Kiswahili)"
     .replace(/^primary\s+/, '')
     .replace(/^lower\s+secondary\s+/, '')
     .replace(/\s*&\s*/g, ' and ')
-    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/[^a-z0-9()]+/g, ' ')
     .trim();
 }
 
@@ -299,6 +309,83 @@ router.post('/duplicates/resolve', auth, requireRole('admin'), async (req, res) 
   } catch (e) {
     console.error('[subjects/duplicates/resolve]', e.message);
     return res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+// POST /api/subjects/merge
+// Move everything from one Subject onto another, then deactivate the
+// source. Needed where BOTH records hold data and neither can simply
+// be switched off — for example Cambridge Primary, where the syllabus
+// spine sits on "Primary Mathematics" while 1,098 questions are filed
+// under "Mathematics". Split like that, questions cannot be placed on
+// a lesson and the subject reads as having no spine.
+//
+// Body: { fromId, toId, confirm: true }
+// ═══════════════════════════════════════════════════════════
+router.post('/merge', auth, requireRole('admin'), async (req, res) => {
+  try {
+    const { fromId, toId, confirm } = req.body || {};
+    if (confirm !== true)
+      return res.status(400).json({ success:false, message:'Send { "confirm": true } to proceed.' });
+    if (!fromId || !toId || String(fromId) === String(toId))
+      return res.status(400).json({ success:false, message:'fromId and toId must both be given and differ.' });
+
+    const [from, to] = await Promise.all([Subject.findById(fromId), Subject.findById(toId)]);
+    if (!from || !to) return res.status(404).json({ success:false, message:'Subject not found.' });
+    if (from.curriculum !== to.curriculum)
+      return res.status(400).json({
+        success:false,
+        message:`Refusing to merge across curricula (${from.curriculum} into ${to.curriculum}).`,
+      });
+
+    const moved = {};
+    const move = async (modelName, filter, update, opts) => {
+      try {
+        const M = require('../models/' + modelName);
+        const r = await M.updateMany(filter, update, opts || {});
+        moved[modelName] = r.modifiedCount ?? r.nModified ?? 0;
+      } catch (err) {
+        console.error(`[subjects/merge] ${modelName}:`, err.message);
+        moved[modelName] = 0;
+      }
+    };
+
+    // Records that reference the Subject by id.
+    for (const m of ['SyllabusTopic','Lesson','Allocation','TimetableEntry',
+                     'LibraryBook','LessonProgress','StudentSyllabusProgress']) {
+      await move(m, { subjectId: from._id }, { $set: { subjectId: to._id } });
+    }
+
+    // Question stores the subject NAME, so it is re-tagged by name.
+    await move('Question',
+      { subject: from.subjectName, curriculum: from.curriculum },
+      { $set: { subject: to.subjectName } });
+
+    // Teachers' specialties point at the id.
+    // The positional filtered operator needs arrayFilters, or Mongo
+    // rejects the update outright.
+    await move('User',
+      { 'teachingSpecialties.subjectId': from._id },
+      { $set: { 'teachingSpecialties.$[el].subjectId': to._id } },
+      { arrayFilters: [{ 'el.subjectId': from._id }] });
+
+    from.isActive = false;
+    await from.save();
+
+    const total = Object.values(moved).reduce((a, b) => a + b, 0);
+    console.log(`[subjects] merged "${from.subjectName}" into "${to.subjectName}" `
+              + `(${total} records) by ${req.user.email}`);
+
+    return res.json({
+      success: true,
+      data: { from: from.subjectName, to: to.subjectName, moved, total },
+      message: `Moved ${total} record(s) from "${from.subjectName}" to "${to.subjectName}" `
+             + `and deactivated the source. Reload the spine check to confirm.`,
+    });
+  } catch (e) {
+    console.error('[subjects/merge]', e.message);
+    return res.status(500).json({ success:false, message:e.message });
   }
 });
 
