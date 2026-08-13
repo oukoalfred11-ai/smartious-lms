@@ -3119,6 +3119,89 @@ const CURRICULUM_LABEL = {
 const prettyCurriculum = (c) =>
   CURRICULUM_LABEL[c] || String(c || '').replace(/([a-z])([A-Z])/g, '$1 $2')
 
+/**
+ * ModuleCard — the house listing card for the student portal.
+ *
+ * The exam module's card design (accent top border, serif title, 2x2 stat
+ * tiles, footer action) is now the standard for every listing, so a
+ * student meets the same shape whether they are looking at exams,
+ * homework, live classes or the library. Previously each tab invented its
+ * own row style and the portal read as several products stitched together.
+ *
+ * Props
+ *   accent    colour of the top border and the footer button
+ *   badges    [{ label, bg, fg }] — status pills across the top
+ *   eyebrow   small uppercase line under the title (subject, curriculum)
+ *   title     the item name
+ *   tiles     [[label, value]] — up to four; rendered as the 2x2 grid
+ *   meta      one muted line under the tiles (date, teacher)
+ *   note      optional coloured strip, e.g. a released result
+ *   footer    JSX for the foot of the card (button or status text)
+ *   onClick   optional — makes the whole card clickable
+ *   dimmed    reduces opacity for locked/unavailable items
+ */
+function ModuleCard({ accent, badges = [], eyebrow, title, tiles = [], meta, note, footer, onClick, dimmed }) {
+  return (
+    <div
+      onClick={onClick}
+      className="card"
+      style={{
+        padding: 0, overflow: 'hidden',
+        borderTop: `4px solid ${accent}`,
+        display: 'flex', flexDirection: 'column',
+        cursor: onClick ? 'pointer' : 'default',
+        opacity: dimmed ? 0.62 : 1,
+        transition: 'opacity .2s',
+      }}>
+      <div style={{ padding: '18px 20px 14px', flex: 1 }}>
+        {badges.length > 0 && (
+          <div style={{ display: 'flex', gap: 6, marginBottom: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+            {badges.map((b, i) => (
+              <span key={i} style={{
+                background: b.bg, color: b.fg,
+                fontSize: 9.5, fontWeight: 800, letterSpacing: '.08em',
+                padding: '2px 8px', borderRadius: 99,
+              }}>{b.label}</span>
+            ))}
+          </div>
+        )}
+
+        <div className="serif" style={{ fontSize: 18, color: 'var(--s900)', marginBottom: 4, lineHeight: 1.25 }}>
+          {title}
+        </div>
+        {eyebrow && (
+          <div style={{ fontSize: 11.5, color: 'var(--s500)', textTransform: 'uppercase', letterSpacing: '.05em', fontWeight: 600 }}>
+            {eyebrow}
+          </div>
+        )}
+
+        {tiles.length > 0 && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8, margin: '14px 0 0' }}>
+            {tiles.slice(0, 4).map(([l, v]) => (
+              <div key={l} style={{ background: 'var(--bg)', borderRadius: 'var(--rsm)', padding: '8px 10px' }}>
+                <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--s400)' }}>{l}</div>
+                <div className="mono" style={{ fontSize: 13, fontWeight: 700, color: 'var(--s800)' }}>{v}</div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {meta && <div style={{ fontSize: 12, color: 'var(--s500)', marginTop: 12 }}>{meta}</div>}
+        {note}
+      </div>
+
+      {footer && (
+        <div style={{ marginTop: 'auto', padding: '12px 16px', borderTop: '1px solid var(--border)', background: 'var(--bg)' }}>
+          {footer}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/** Standard responsive grid for ModuleCard listings. */
+const MODULE_GRID = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 14 }
+
 const fmtExamTime = (s) => {
   const m = Math.floor(s / 60)
   const sec = s % 60
@@ -4357,7 +4440,7 @@ function LiveClassesTab({ user, toast, goTo }) {
           <h2 className="serif" style={{ fontSize:20, fontWeight:400, color:'#1A1A1A', marginBottom:10 }}>
             Live Now
           </h2>
-          <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+          <div style={MODULE_GRID}>
             {live.map(lc => (
               <LiveClassCard key={lc._id} lc={lc} subjectColour={subjectColour}
                 fmtDateTime={fmtDateTime} countdownText={countdownText}
@@ -4373,7 +4456,7 @@ function LiveClassesTab({ user, toast, goTo }) {
           <h2 className="serif" style={{ fontSize:20, fontWeight:400, color:'#1A1A1A', marginBottom:10 }}>
             Upcoming
           </h2>
-          <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+          <div style={MODULE_GRID}>
             {upcoming.map(lc => (
               <LiveClassCard key={lc._id} lc={lc} subjectColour={subjectColour}
                 fmtDateTime={fmtDateTime} countdownText={countdownText}
@@ -4389,7 +4472,7 @@ function LiveClassesTab({ user, toast, goTo }) {
           <h2 className="serif" style={{ fontSize:20, fontWeight:400, color:'#1A1A1A', marginBottom:10 }}>
             Recently Ended
           </h2>
-          <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+          <div style={MODULE_GRID}>
             {past.map(lc => (
               <LiveClassCard key={lc._id} lc={lc} subjectColour={subjectColour}
                 fmtDateTime={fmtDateTime} countdownText={countdownText}
@@ -4431,118 +4514,43 @@ function LiveClassCard({ lc, subjectColour, fmtDateTime, countdownText, canJoin,
   }
 
   return (
-    <div className="card" style={{
-      padding:16,
-      borderLeft:`4px solid ${col}`,
-      background: isLive
-        ? 'linear-gradient(90deg, rgba(220,252,231,.5) 0%, #FFF 70%)'
-        : '#FFF',
-      opacity: muted ? .7 : 1,
-    }}>
-      <div style={{ display:'flex', alignItems:'flex-start', gap:14, flexWrap:'wrap' }}>
-        <div style={{ flex:1, minWidth:240 }}>
-          <div style={{ display:'flex', gap:6, marginBottom:6, flexWrap:'wrap', alignItems:'center' }}>
-            {isLive && (
-              <span style={{
-                background:'#FEE2E2', color:'#B91C1C',
-                fontSize:9.5, fontWeight:800, letterSpacing:'.08em',
-                padding:'2px 8px', borderRadius:99,
-                display:'inline-flex', alignItems:'center', gap:5,
-              }}>
-                <span style={{
-                  width:6, height:6, borderRadius:'50%', background:'#B91C1C',
-                  animation:'pulse 1.5s infinite',
-                }}/>
-                LIVE NOW
-              </span>
-            )}
-            {!isLive && !isEnded && (
-              <span style={{
-                background:'#FEF3C7', color:'#92400E',
-                fontSize:9.5, fontWeight:800, letterSpacing:'.08em',
-                padding:'2px 8px', borderRadius:99,
-              }}>SCHEDULED</span>
-            )}
-            {isEnded && (
-              <span style={{
-                background:'#F1F5F9', color:'#64748B',
-                fontSize:9.5, fontWeight:800, letterSpacing:'.08em',
-                padding:'2px 8px', borderRadius:99,
-              }}>ENDED</span>
-            )}
-            <span style={{
-              background: col + '15', color: col,
-              fontSize:9.5, fontWeight:700, letterSpacing:'.06em',
-              padding:'2px 8px', borderRadius:99, textTransform:'uppercase',
-            }}>{lc.subject}</span>
-            <span style={{ fontSize:11, color:'#6B6B6B' }}>
-              {lc.curriculum} {lc.grade}
-            </span>
+    <ModuleCard
+      accent={col}
+      dimmed={muted}
+      badges={[
+        isLive  ? { label:'LIVE NOW', bg:'#FEE2E2', fg:'#B91C1C' } :
+        isEnded ? { label:'ENDED',    bg:'#F1F5F9', fg:'#64748B' } :
+                  { label:'UPCOMING', bg:'#FEF3C7', fg:'#92400E' },
+      ]}
+      title={lc.title || lc.topic || `${lc.subject} class`}
+      eyebrow={lc.subject}
+      tiles={[
+        ['When',     fmtDateTime(lc.startAt)],
+        ['Duration', lc.durationMins ? `${lc.durationMins} min` : '\u2014'],
+        ['Teacher',  teacherName],
+        ['Status',   isLive ? 'Live' : isEnded ? 'Ended' : (countdownText?.(lc) || 'Scheduled')],
+      ]}
+      meta={lc.preparationLessonId?.title ? `Prep: ${lc.preparationLessonId.title}` : null}
+      footer={
+        isLive || canJoin?.(lc) ? (
+          <button className="btn btn-p"
+            style={{ width:'100%', justifyContent:'center', background:col, borderColor:col }}
+            onClick={onJoin}>
+            Join class
+          </button>
+        ) : isEnded ? (
+          <div style={{ fontSize:12, color:'var(--s500)', textAlign:'center' }}>This class has ended</div>
+        ) : lc.preparationLessonId ? (
+          <button className="btn btn-s" style={{ width:'100%', justifyContent:'center' }} onClick={onPrepare}>
+            Prepare for this class
+          </button>
+        ) : (
+          <div style={{ fontSize:12, color:'var(--s500)', textAlign:'center' }}>
+            {countdownText?.(lc) || 'Starts soon'}
           </div>
-          <div style={{ fontWeight:700, fontSize:16, color:'#1A1A1A', marginBottom:4 }}>
-            {lc.title}
-          </div>
-          {lc.description && (
-            <div style={{ fontSize:13, color:'#3F3F3F', marginBottom:6, lineHeight:1.5 }}>
-              {lc.description}
-            </div>
-          )}
-          <div style={{ fontSize:12, color:'#6B6B6B' }}>
-            {fmtDateTime(lc.scheduledAt)} &middot; {lc.durationMins} min &middot; {teacherName}
-            {!isEnded && (
-              <> &middot; <strong style={{ color: isLive ? '#15803D' : '#C9A030' }}>
-                {countdownText(lc)}
-              </strong></>
-            )}
-          </div>
-        </div>
-
-        {/* Actions */}
-        <div style={{ display:'flex', flexDirection:'column', gap:6, minWidth:170 }}>
-          {!isEnded && (
-            <button onClick={onPrepare}
-              style={{
-                background: lc.preparationLessonId ? '#C9A030' : '#FBF6E3',
-                color: lc.preparationLessonId ? '#fff' : '#7D1025',
-                border: lc.preparationLessonId ? 'none' : '1px solid #C9A030',
-                padding:'8px 16px', borderRadius:6,
-                cursor:'pointer', fontSize:12, fontWeight:700,
-                display:'inline-flex', alignItems:'center', justifyContent:'center', gap:6,
-              }}>
-              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-              </svg>
-              Prepare for Lesson
-            </button>
-          )}
-          {canJoin(lc) ? (
-            <button onClick={onJoin}
-              style={{
-                background:'#7D1025', color:'#fff', border:'none',
-                padding:'10px 18px', borderRadius:6,
-                cursor:'pointer', fontSize:13, fontWeight:700,
-                display:'inline-flex', alignItems:'center', justifyContent:'center', gap:6,
-                boxShadow: isLive ? '0 6px 16px rgba(125,16,37,.3)' : 'none',
-              }}>
-              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polygon points="23 7 16 12 23 17 23 7"/>
-                <rect x="1" y="5" width="15" height="14" rx="2"/>
-              </svg>
-              {isLive ? 'Join Now' : 'Join Class'}
-            </button>
-          ) : !isEnded ? (
-            <button disabled style={{
-              background:'#F1F5F9', color:'#94A3B8', border:'1px solid #E2E8F0',
-              padding:'10px 18px', borderRadius:6,
-              cursor:'not-allowed', fontSize:12, fontWeight:600,
-            }}>
-              Join opens 10 min before
-            </button>
-          ) : null}
-        </div>
-      </div>
-    </div>
+        )
+      }
+    />
   )
 }
 
@@ -8644,6 +8652,7 @@ function HomeworkTab({ user, toast }) {
                 {items.length}
               </span>
             </div>
+            <div style={MODULE_GRID}>
             {items.map(hw => {
               const col = homeworkColourFor(hw.subject)
               const teacherName = hw.createdBy
@@ -8651,53 +8660,69 @@ function HomeworkTab({ user, toast }) {
                     ? ((hw.createdBy.firstName || '') + ' ' + (hw.createdBy.lastName || '')).trim() || 'Teacher'
                     : 'Teacher')
                 : 'Teacher'
+              const st = hw.computedStatus
+              const badge =
+                st === 'graded'    ? { label:'GRADED',    bg:'var(--g50)',  fg:'var(--g700)' } :
+                st === 'submitted' ? { label:'SUBMITTED', bg:'#DBEAFE',     fg:'#1E40AF'     } :
+                st === 'overdue'   ? { label:'OVERDUE',   bg:'#FEE2E2',     fg:'#991B1B'     } :
+                st === 'locked'    ? { label:'LOCKED',    bg:'#F1F5F9',     fg:'#64748B'     } :
+                                     { label:'DUE',       bg:'#FEF3C7',     fg:'#92400E'     }
+              const graded = st === 'graded' && hw.mySubmission
+              const pct = graded && hw.mySubmission.totalPossible
+                ? Math.round((hw.mySubmission.totalAwarded / hw.mySubmission.totalPossible) * 100)
+                : null
               return (
-                <div key={hw._id} onClick={() => openHomework(hw)} style={{
-                  display: 'flex', gap: 14, padding: '14px 0',
-                  borderBottom: '1px solid var(--border)',
-                  cursor: hw.locked ? 'not-allowed' : 'pointer',
-                  alignItems: 'flex-start',
-                  opacity: hw.locked ? 0.65 : 1,
-                }}>
-                  <div style={{
-                    width: 4, alignSelf: 'stretch', borderRadius: 2,
-                    background: col, flexShrink: 0,
-                  }}/>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap', marginBottom: 4 }}>
-                      <div style={{ flex: 1, minWidth: 200 }}>
-                        <div style={{ fontSize: 11, fontWeight: 700, color: col, letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: 2 }}>
-                          {hw.subject}
-                        </div>
-                        <div style={{ fontSize: 14.5, fontWeight: 700, color: 'var(--s900)' }}>{hw.title}</div>
-                        <div style={{ fontSize: 12, color: 'var(--s500)', marginTop: 2 }}>
-                          {teacherName} · {hw.questionCount || 0} question{hw.questionCount === 1 ? '' : 's'} · {hw.totalMarks || 0} marks
-                        </div>
-                      </div>
-                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                        {hw.computedStatus === 'graded' && hw.mySubmission && (
-                          <div>
-                            <span className="badge badge-green">Graded</span>
-                            <div className="mono" style={{ fontSize: 14, fontWeight: 700, color: 'var(--g600)', marginTop: 4 }}>
-                              {hw.mySubmission.totalAwarded || 0}/{hw.mySubmission.totalPossible || 0}
-                            </div>
-                          </div>
-                        )}
-                        {hw.computedStatus === 'submitted' && <span className="badge badge-blue">Submitted</span>}
-                        {hw.computedStatus === 'overdue' && <span className="badge badge-red" style={{ background: 'var(--r50)', color: 'var(--r600)' }}>Overdue · {formatHomeworkDate(hw.dueAt)}</span>}
-                        {hw.computedStatus === 'pending' && hw.dueAt && <span className="badge badge-amber">Due {formatHomeworkDate(hw.dueAt)}</span>}
-                        {hw.computedStatus === 'pending' && !hw.dueAt && <span className="badge badge-slate">Open</span>}
-                        {hw.computedStatus === 'locked' && (
-                          <span className="badge badge-slate">
-                            Opens {formatHomeworkDate(hw.releaseAt)}
-                          </span>
-                        )}
-                      </div>
+                <ModuleCard
+                  key={hw._id}
+                  accent={col}
+                  dimmed={hw.locked}
+                  onClick={hw.locked ? undefined : () => openHomework(hw)}
+                  badges={[badge]}
+                  title={hw.title}
+                  eyebrow={hw.subject}
+                  tiles={[
+                    ['Questions', hw.questionCount || 0],
+                    ['Due', hw.dueAt ? formatHomeworkDate(hw.dueAt) : '\u2014'],
+                    ['Marks', hw.totalMarks || (hw.mySubmission?.totalPossible ?? '\u2014')],
+                    ['Status', badge.label.charAt(0) + badge.label.slice(1).toLowerCase()],
+                  ]}
+                  meta={teacherName}
+                  note={graded ? (
+                    <div style={{
+                      background: pct >= 60 ? 'var(--g50)' : 'var(--a50)',
+                      border: `1px solid ${pct >= 60 ? 'var(--g100)' : 'var(--a100)'}`,
+                      borderRadius:'var(--rsm)', padding:'8px 12px', marginTop:12, fontSize:12.5,
+                      color: pct >= 60 ? 'var(--g700)' : 'var(--a600)',
+                    }}>
+                      Result: <strong>{hw.mySubmission.totalAwarded || 0}/{hw.mySubmission.totalPossible || 0}</strong>
+                      {pct !== null ? ` (${pct}%)` : ''}
                     </div>
-                  </div>
-                </div>
+                  ) : null}
+                  footer={
+                    hw.locked ? (
+                      <div style={{ fontSize:12, color:'var(--s500)', textAlign:'center' }}>
+                        Opens {formatHomeworkDate(hw.releaseAt)}
+                      </div>
+                    ) : graded ? (
+                      <div style={{ fontSize:12, color:'var(--s500)', textAlign:'center', fontWeight:600 }}>
+                        Marked by your teacher
+                      </div>
+                    ) : st === 'submitted' ? (
+                      <div style={{ fontSize:12, color:'var(--s500)', textAlign:'center', fontWeight:600 }}>
+                        Awaiting marking
+                      </div>
+                    ) : (
+                      <button className="btn btn-p"
+                        style={{ width:'100%', justifyContent:'center', background:col, borderColor:col }}
+                        onClick={(e) => { e.stopPropagation(); openHomework(hw) }}>
+                        {st === 'overdue' ? 'Submit now' : 'Start homework'}
+                      </button>
+                    )
+                  }
+                />
               )
             })}
+            </div>
           </div>
         )
       })}
