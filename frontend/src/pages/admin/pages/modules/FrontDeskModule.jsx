@@ -64,7 +64,7 @@ function FrontDeskLeads({ refreshKey, toast }) {
   // Per-lesson coverage widget state (self-contained)
   const [cov,     setCov]     = useState(null)
   const [covSubj, setCovSubj] = useState({ subject:'Biology', curriculum:'EdexcelIGCSE' })
-  const CURRICULA = ['EdexcelIGCSE','CambridgeIGCSE','CambridgeALevel','EdexcelALevel','IBPYP','IBMYP','IBDP','KenyaCBC','American','BNC']
+  const CURRICULA = ['CambridgePrimary','CambridgeLowerSec','CambridgeIGCSE','CambridgeALevel','EdexcelPrimary','EdexcelLowerSec','EdexcelIGCSE','EdexcelALevel','AQALowerSec','AQAGCSE','AQAALevel','IBPYP','IBMYP','IBDP','BNC','American','Canadian','KenyaCBE','KCSE']
   const loadCoverage = async () => {
     try {
       const r = await api.get('/questions/coverage', { params: covSubj })
