@@ -1678,6 +1678,274 @@ const ILOWERSEC_ICT = [
     ] },
 ]
 
+// Lower Secondary Geography and History — Cambridge (Stages 7-9) and
+// Edexcel International (Years 7-9).
+//
+// NEITHER BOARD PUBLISHES A CHECKPOINT SYLLABUS FOR THESE
+// Cambridge Lower Secondary assesses English, Mathematics, Science and
+// Global Perspectives at Checkpoint; Geography and History are taught
+// but not externally examined. Edexcel iLowerSecondary is the same. So
+// these spines are built to the standard Key Stage 3 shape that both
+// boards' published schemes follow, and that feeds properly into IGCSE.
+//
+// SKILLS ARE STRANDS, NOT A UNIT
+// Geographical enquiry and historical source work are assessed alongside
+// content in every unit at this level, not taught once. A student who
+// cannot read a source cannot answer a history question about one, and
+// map skills are needed from the first geography lesson onward.
+//
+// Content is chosen to build toward IGCSE rather than to cover a fixed
+// list: physical and human geography in balance, and a chronological
+// spine in history that reaches the twentieth century by Stage 9.
+
+const LOWERSEC_GEOGRAPHY = [
+  { topic: 'S7 \u00b7 Geographical Skills', code: 'S7-GS',
+    subtopics: [
+      { name: 'Maps, Atlases and Locating Places (Stage 7)', code: 'S7-GS.1' },
+      { name: 'Grid References and Scale (Stage 7)', code: 'S7-GS.2' },
+      { name: 'Direction, Distance and Bearings (Stage 7)', code: 'S7-GS.3' },
+      { name: 'Relief, Contours and Cross-Sections (Stage 7)', code: 'S7-GS.4' },
+      { name: 'Reading Photographs and Satellite Images (Stage 7)', code: 'S7-GS.5' },
+      { name: 'Presenting Data in Graphs and Charts (Stage 7)', code: 'S7-GS.6' },
+    ] },
+  { topic: 'S7 \u00b7 Physical Geography', code: 'S7-PH',
+    subtopics: [
+      { name: 'The Structure of the Earth (Stage 7)', code: 'S7-PH.1' },
+      { name: 'Plate Tectonics and Plate Boundaries (Stage 7)', code: 'S7-PH.2' },
+      { name: 'Volcanoes: Formation and Effects (Stage 7)', code: 'S7-PH.3' },
+      { name: 'Earthquakes: Causes and Impacts (Stage 7)', code: 'S7-PH.4' },
+      { name: 'Weather and Climate Distinguished (Stage 7)', code: 'S7-PH.5' },
+      { name: 'Measuring and Recording Weather (Stage 7)', code: 'S7-PH.6' },
+      { name: 'The Water Cycle (Stage 7)', code: 'S7-PH.7' },
+      { name: 'Rivers: Features and Processes (Stage 7)', code: 'S7-PH.8' },
+    ] },
+  { topic: 'S7 \u00b7 Human Geography', code: 'S7-HU',
+    subtopics: [
+      { name: 'Continents, Countries and Capitals (Stage 7)', code: 'S7-HU.1' },
+      { name: 'Settlement: Site, Situation and Function (Stage 7)', code: 'S7-HU.2' },
+      { name: 'Land Use in Towns and Cities (Stage 7)', code: 'S7-HU.3' },
+      { name: 'Population Distribution and Density (Stage 7)', code: 'S7-HU.4' },
+      { name: 'Rich and Poor: An Introduction to Development (Stage 7)', code: 'S7-HU.5' },
+      { name: 'Our Local Area: A Fieldwork Enquiry (Stage 7)', code: 'S7-HU.6' },
+    ] },
+
+  { topic: 'S8 \u00b7 Geographical Skills', code: 'S8-GS',
+    subtopics: [
+      { name: 'Choropleth and Thematic Maps (Stage 8)', code: 'S8-GS.1' },
+      { name: 'Interpreting Climate Graphs (Stage 8)', code: 'S8-GS.2' },
+      { name: 'Population Pyramids (Stage 8)', code: 'S8-GS.3' },
+      { name: 'Describing Patterns and Trends from Data (Stage 8)', code: 'S8-GS.4' },
+      { name: 'Planning a Geographical Enquiry (Stage 8)', code: 'S8-GS.5' },
+      { name: 'Collecting Primary Data in the Field (Stage 8)', code: 'S8-GS.6' },
+    ] },
+  { topic: 'S8 \u00b7 Physical Geography', code: 'S8-PH',
+    subtopics: [
+      { name: 'Weathering and Erosion (Stage 8)', code: 'S8-PH.1' },
+      { name: 'River Landforms and Flooding (Stage 8)', code: 'S8-PH.2' },
+      { name: 'Coasts: Processes and Landforms (Stage 8)', code: 'S8-PH.3' },
+      { name: 'Coastal Management (Stage 8)', code: 'S8-PH.4' },
+      { name: 'Global Climate Zones (Stage 8)', code: 'S8-PH.5' },
+      { name: 'Ecosystems: Rainforest and Desert (Stage 8)', code: 'S8-PH.6' },
+      { name: 'Adaptation of Plants and Animals (Stage 8)', code: 'S8-PH.7' },
+      { name: 'Tropical Storms and Their Impacts (Stage 8)', code: 'S8-PH.8' },
+    ] },
+  { topic: 'S8 \u00b7 Human Geography', code: 'S8-HU',
+    subtopics: [
+      { name: 'Population Growth and Change (Stage 8)', code: 'S8-HU.1' },
+      { name: 'Migration: Causes and Effects (Stage 8)', code: 'S8-HU.2' },
+      { name: 'Urbanisation and Megacities (Stage 8)', code: 'S8-HU.3' },
+      { name: 'Informal Settlements and Urban Challenges (Stage 8)', code: 'S8-HU.4' },
+      { name: 'Farming Types and Food Supply (Stage 8)', code: 'S8-HU.5' },
+      { name: 'Industry and Economic Activity (Stage 8)', code: 'S8-HU.6' },
+      { name: 'Tourism: Growth and Impacts (Stage 8)', code: 'S8-HU.7' },
+    ] },
+
+  { topic: 'S9 \u00b7 Geographical Skills', code: 'S9-GS',
+    subtopics: [
+      { name: 'Statistical Techniques in Geography (Stage 9)', code: 'S9-GS.1' },
+      { name: 'Sampling Methods in Fieldwork (Stage 9)', code: 'S9-GS.2' },
+      { name: 'Evaluating Sources and Data Reliability (Stage 9)', code: 'S9-GS.3' },
+      { name: 'Writing an Extended Geographical Answer (Stage 9)', code: 'S9-GS.4' },
+      { name: 'Preparing for IGCSE Geography (Stage 9)', code: 'S9-GS.5' },
+    ] },
+  { topic: 'S9 \u00b7 Physical Geography', code: 'S9-PH',
+    subtopics: [
+      { name: 'Glaciation and Glacial Landforms (Stage 9)', code: 'S9-PH.1' },
+      { name: 'Drainage Basins and Hydrographs (Stage 9)', code: 'S9-PH.2' },
+      { name: 'Natural Hazards and Risk Management (Stage 9)', code: 'S9-PH.3' },
+      { name: 'Climate Change: Evidence and Causes (Stage 9)', code: 'S9-PH.4' },
+      { name: 'Consequences of Climate Change (Stage 9)', code: 'S9-PH.5' },
+      { name: 'Responding to Climate Change (Stage 9)', code: 'S9-PH.6' },
+    ] },
+  { topic: 'S9 \u00b7 Human Geography', code: 'S9-HU',
+    subtopics: [
+      { name: 'Measuring Development (Stage 9)', code: 'S9-HU.1' },
+      { name: 'Causes of Uneven Development (Stage 9)', code: 'S9-HU.2' },
+      { name: 'Globalisation and Trade (Stage 9)', code: 'S9-HU.3' },
+      { name: 'Resources: Energy and Water (Stage 9)', code: 'S9-HU.4' },
+      { name: 'Sustainable Development (Stage 9)', code: 'S9-HU.5' },
+      { name: 'Managing Waste and Pollution (Stage 9)', code: 'S9-HU.6' },
+      { name: 'Population and Resource Pressure (Stage 9)', code: 'S9-HU.7' },
+    ] },
+]
+
+const LOWERSEC_HISTORY = [
+  { topic: 'S7 \u00b7 Historical Skills', code: 'S7-HS',
+    subtopics: [
+      { name: 'What History Is and How We Know (Stage 7)', code: 'S7-HS.1' },
+      { name: 'Chronology, Centuries and Timelines (Stage 7)', code: 'S7-HS.2' },
+      { name: 'Primary and Secondary Sources (Stage 7)', code: 'S7-HS.3' },
+      { name: 'Asking Questions of a Source (Stage 7)', code: 'S7-HS.4' },
+      { name: 'Cause and Consequence (Stage 7)', code: 'S7-HS.5' },
+      { name: 'Change and Continuity (Stage 7)', code: 'S7-HS.6' },
+    ] },
+  { topic: 'S7 \u00b7 The Ancient and Medieval World', code: 'S7-AM',
+    subtopics: [
+      { name: 'Early Civilisations and River Valleys (Stage 7)', code: 'S7-AM.1' },
+      { name: 'Ancient Egypt: Society and Beliefs (Stage 7)', code: 'S7-AM.2' },
+      { name: 'Ancient Greece: City States and Democracy (Stage 7)', code: 'S7-AM.3' },
+      { name: 'The Roman Empire: Rise and Rule (Stage 7)', code: 'S7-AM.4' },
+      { name: 'The Fall of Rome and Its Consequences (Stage 7)', code: 'S7-AM.5' },
+      { name: 'Medieval Society and the Feudal System (Stage 7)', code: 'S7-AM.6' },
+      { name: 'Religion and the Church in the Middle Ages (Stage 7)', code: 'S7-AM.7' },
+      { name: 'The Black Death and Its Impact (Stage 7)', code: 'S7-AM.8' },
+      { name: 'Medieval Africa: Empires and Trade (Stage 7)', code: 'S7-AM.9' },
+      { name: 'The Islamic Golden Age (Stage 7)', code: 'S7-AM.10' },
+    ] },
+
+  { topic: 'S8 \u00b7 Historical Skills', code: 'S8-HS',
+    subtopics: [
+      { name: 'Reliability and Usefulness of Sources (Stage 8)', code: 'S8-HS.1' },
+      { name: 'Detecting Bias and Point of View (Stage 8)', code: 'S8-HS.2' },
+      { name: 'Comparing Sources That Disagree (Stage 8)', code: 'S8-HS.3' },
+      { name: 'Significance: Why Some Events Matter More (Stage 8)', code: 'S8-HS.4' },
+      { name: 'Using Evidence to Support an Argument (Stage 8)', code: 'S8-HS.5' },
+      { name: 'Writing a Structured Historical Paragraph (Stage 8)', code: 'S8-HS.6' },
+    ] },
+  { topic: 'S8 \u00b7 The Early Modern World', code: 'S8-EM',
+    subtopics: [
+      { name: 'The Renaissance and New Ideas (Stage 8)', code: 'S8-EM.1' },
+      { name: 'The Reformation and Religious Division (Stage 8)', code: 'S8-EM.2' },
+      { name: 'Exploration and the Age of Discovery (Stage 8)', code: 'S8-EM.3' },
+      { name: 'Empires in the Americas (Stage 8)', code: 'S8-EM.4' },
+      { name: 'The Transatlantic Slave Trade (Stage 8)', code: 'S8-EM.5' },
+      { name: 'Abolition and Resistance (Stage 8)', code: 'S8-EM.6' },
+      { name: 'The Scientific Revolution (Stage 8)', code: 'S8-EM.7' },
+      { name: 'The French Revolution (Stage 8)', code: 'S8-EM.8' },
+      { name: 'The Industrial Revolution: Causes (Stage 8)', code: 'S8-EM.9' },
+      { name: 'The Industrial Revolution: Social Impact (Stage 8)', code: 'S8-EM.10' },
+    ] },
+
+  { topic: 'S9 \u00b7 Historical Skills', code: 'S9-HS',
+    subtopics: [
+      { name: 'Interpretations and Why Historians Differ (Stage 9)', code: 'S9-HS.1' },
+      { name: 'Weighing Competing Explanations (Stage 9)', code: 'S9-HS.2' },
+      { name: 'Constructing a Balanced Argument (Stage 9)', code: 'S9-HS.3' },
+      { name: 'Reaching and Justifying a Judgement (Stage 9)', code: 'S9-HS.4' },
+      { name: 'Writing an Extended Historical Answer (Stage 9)', code: 'S9-HS.5' },
+      { name: 'Preparing for IGCSE History (Stage 9)', code: 'S9-HS.6' },
+    ] },
+  { topic: 'S9 \u00b7 The Modern World', code: 'S9-MW',
+    subtopics: [
+      { name: 'Empire and Colonial Rule in Africa (Stage 9)', code: 'S9-MW.1' },
+      { name: 'Causes of the First World War (Stage 9)', code: 'S9-MW.2' },
+      { name: 'The First World War and Its Legacy (Stage 9)', code: 'S9-MW.3' },
+      { name: 'The Russian Revolution (Stage 9)', code: 'S9-MW.4' },
+      { name: 'The Rise of Dictatorship in Europe (Stage 9)', code: 'S9-MW.5' },
+      { name: 'The Second World War (Stage 9)', code: 'S9-MW.6' },
+      { name: 'The Holocaust (Stage 9)', code: 'S9-MW.7' },
+      { name: 'The Cold War: Origins and Division (Stage 9)', code: 'S9-MW.8' },
+      { name: 'Independence Movements in Africa and Asia (Stage 9)', code: 'S9-MW.9' },
+      { name: 'Civil Rights and Social Change (Stage 9)', code: 'S9-MW.10' },
+      { name: 'Apartheid and Its End in South Africa (Stage 9)', code: 'S9-MW.11' },
+      { name: 'The World Since 1990 (Stage 9)', code: 'S9-MW.12' },
+    ] },
+]
+
+// ── Edexcel International Lower Secondary — Years 7-9 ──────────
+
+const ILOWERSEC_GEOGRAPHY = [
+  { topic: 'Y7 \u00b7 Geography', code: 'Y7-GE',
+    subtopics: [
+      { name: 'Maps, Scale and Grid References (Year 7)', code: 'Y7-GE.1' },
+      { name: 'Relief, Contours and Fieldsketching (Year 7)', code: 'Y7-GE.2' },
+      { name: 'Presenting Geographical Data (Year 7)', code: 'Y7-GE.3' },
+      { name: 'Plate Tectonics and Earth Structure (Year 7)', code: 'Y7-GE.4' },
+      { name: 'Volcanoes and Earthquakes (Year 7)', code: 'Y7-GE.5' },
+      { name: 'Weather, Climate and Measurement (Year 7)', code: 'Y7-GE.6' },
+      { name: 'The Water Cycle and Rivers (Year 7)', code: 'Y7-GE.7' },
+      { name: 'Settlement and Land Use (Year 7)', code: 'Y7-GE.8' },
+      { name: 'Population Distribution (Year 7)', code: 'Y7-GE.9' },
+      { name: 'Local Fieldwork Enquiry (Year 7)', code: 'Y7-GE.10' },
+    ] },
+  { topic: 'Y8 \u00b7 Geography', code: 'Y8-GE',
+    subtopics: [
+      { name: 'Thematic Maps and Climate Graphs (Year 8)', code: 'Y8-GE.1' },
+      { name: 'Weathering, Erosion and Deposition (Year 8)', code: 'Y8-GE.2' },
+      { name: 'River Landforms and Flood Management (Year 8)', code: 'Y8-GE.3' },
+      { name: 'Coastal Processes and Management (Year 8)', code: 'Y8-GE.4' },
+      { name: 'Global Ecosystems and Biomes (Year 8)', code: 'Y8-GE.5' },
+      { name: 'Tropical Storms and Hazard Response (Year 8)', code: 'Y8-GE.6' },
+      { name: 'Population Change and Migration (Year 8)', code: 'Y8-GE.7' },
+      { name: 'Urbanisation and City Challenges (Year 8)', code: 'Y8-GE.8' },
+      { name: 'Farming, Industry and Tourism (Year 8)', code: 'Y8-GE.9' },
+      { name: 'Planning a Geographical Investigation (Year 8)', code: 'Y8-GE.10' },
+    ] },
+  { topic: 'Y9 \u00b7 Geography', code: 'Y9-GE',
+    subtopics: [
+      { name: 'Glaciation and Cold Environments (Year 9)', code: 'Y9-GE.1' },
+      { name: 'Natural Hazards and Risk (Year 9)', code: 'Y9-GE.2' },
+      { name: 'Climate Change: Causes and Consequences (Year 9)', code: 'Y9-GE.3' },
+      { name: 'Measuring and Explaining Development (Year 9)', code: 'Y9-GE.4' },
+      { name: 'Globalisation and World Trade (Year 9)', code: 'Y9-GE.5' },
+      { name: 'Energy, Water and Resource Management (Year 9)', code: 'Y9-GE.6' },
+      { name: 'Sustainability and Environmental Management (Year 9)', code: 'Y9-GE.7' },
+      { name: 'Statistical and Enquiry Skills (Year 9)', code: 'Y9-GE.8' },
+      { name: 'Preparing for International GCSE Geography (Year 9)', code: 'Y9-GE.9' },
+    ] },
+]
+
+const ILOWERSEC_HISTORY = [
+  { topic: 'Y7 \u00b7 History', code: 'Y7-HI',
+    subtopics: [
+      { name: 'Chronology and Using Timelines (Year 7)', code: 'Y7-HI.1' },
+      { name: 'Primary and Secondary Sources (Year 7)', code: 'Y7-HI.2' },
+      { name: 'Cause, Consequence and Change (Year 7)', code: 'Y7-HI.3' },
+      { name: 'Early Civilisations (Year 7)', code: 'Y7-HI.4' },
+      { name: 'Ancient Greece and Rome (Year 7)', code: 'Y7-HI.5' },
+      { name: 'Medieval Society and the Church (Year 7)', code: 'Y7-HI.6' },
+      { name: 'The Black Death (Year 7)', code: 'Y7-HI.7' },
+      { name: 'African Empires and Trade Routes (Year 7)', code: 'Y7-HI.8' },
+      { name: 'The Islamic World in the Middle Ages (Year 7)', code: 'Y7-HI.9' },
+    ] },
+  { topic: 'Y8 \u00b7 History', code: 'Y8-HI',
+    subtopics: [
+      { name: 'Evaluating Source Reliability (Year 8)', code: 'Y8-HI.1' },
+      { name: 'Bias and Point of View (Year 8)', code: 'Y8-HI.2' },
+      { name: 'The Renaissance and Reformation (Year 8)', code: 'Y8-HI.3' },
+      { name: 'Exploration and Empire (Year 8)', code: 'Y8-HI.4' },
+      { name: 'The Transatlantic Slave Trade (Year 8)', code: 'Y8-HI.5' },
+      { name: 'Abolition and Resistance (Year 8)', code: 'Y8-HI.6' },
+      { name: 'The French Revolution (Year 8)', code: 'Y8-HI.7' },
+      { name: 'The Industrial Revolution (Year 8)', code: 'Y8-HI.8' },
+      { name: 'Social Change in Industrial Society (Year 8)', code: 'Y8-HI.9' },
+    ] },
+  { topic: 'Y9 \u00b7 History', code: 'Y9-HI',
+    subtopics: [
+      { name: 'Historical Interpretations (Year 9)', code: 'Y9-HI.1' },
+      { name: 'Colonial Rule in Africa and Asia (Year 9)', code: 'Y9-HI.2' },
+      { name: 'The First World War (Year 9)', code: 'Y9-HI.3' },
+      { name: 'The Russian Revolution (Year 9)', code: 'Y9-HI.4' },
+      { name: 'Dictatorship in Europe (Year 9)', code: 'Y9-HI.5' },
+      { name: 'The Second World War and the Holocaust (Year 9)', code: 'Y9-HI.6' },
+      { name: 'The Cold War (Year 9)', code: 'Y9-HI.7' },
+      { name: 'Independence and Decolonisation (Year 9)', code: 'Y9-HI.8' },
+      { name: 'Civil Rights and Apartheid (Year 9)', code: 'Y9-HI.9' },
+      { name: 'Writing Extended Historical Answers (Year 9)', code: 'Y9-HI.10' },
+      { name: 'Preparing for International GCSE History (Year 9)', code: 'Y9-HI.11' },
+    ] },
+]
+
 export const LOWER_SEC_LIBRARY = [
   // Cambridge Lower Secondary — Stages 7-9, rebuilt at lesson level.
   // The previous spines were far too thin (27 lessons for three years of
@@ -1690,6 +1958,10 @@ export const LOWER_SEC_LIBRARY = [
     source: 'Cambridge Lower Secondary Science 1113 \u2014 109-lesson scheme (Stages 7-9)' },
   { match: /\bcomputing\b|\bcomputer\s*science\b/i, const_: LOWERSEC_COMPUTING_1129,
     source: 'Cambridge Lower Secondary Computing 1129 \u2014 63-lesson scheme (Stages 7-9)' },
+  { match: /\bgeography\b/i,              const_: LOWERSEC_GEOGRAPHY,
+    source: 'Cambridge Lower Secondary Geography \u2014 60-lesson scheme (Stages 7-9)' },
+  { match: /\bhistory\b/i,                const_: LOWERSEC_HISTORY,
+    source: 'Cambridge Lower Secondary History \u2014 62-lesson scheme (Stages 7-9)' },
   { match: /\bglobal\s*perspective/i,     const_: LOWERSEC_GLOBAL_1129,
     source: 'Cambridge Lower Secondary Global Perspectives 1129 \u2014 41-lesson scheme (Stages 7-9)' },
 ]
@@ -1705,6 +1977,10 @@ export const ILOWER_SEC_LIBRARY = [
     source: 'Edexcel International Lower Secondary English \u2014 Years 7-9' },
   { match: /^(?!.*comput).*\bscience\b/i,                const_: ILOWERSEC_SCIENCE,
     source: 'Edexcel International Lower Secondary Science \u2014 Years 7-9' },
+  { match: /\bgeography\b/i,              const_: ILOWERSEC_GEOGRAPHY,
+    source: 'Edexcel International Lower Secondary Geography \u2014 Years 7-9' },
+  { match: /\bhistory\b/i,                const_: ILOWERSEC_HISTORY,
+    source: 'Edexcel International Lower Secondary History \u2014 Years 7-9' },
   { match: /\bict\b|information|\bcomputing\b|\bcomputer\s*science\b/i, const_: ILOWERSEC_ICT,
     source: 'Edexcel International Lower Secondary ICT \u2014 Years 7-9' },
 ]
