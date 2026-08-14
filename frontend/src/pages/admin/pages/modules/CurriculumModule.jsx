@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { useStore, api } from '../../../../context/ctx.jsx'
 import { TOKENS } from '../shared/tokens.js'
 import { PCard, PKpi, PSection } from '../shared/ui.jsx'
-import { PYP_LIBRARY, MYP_LIBRARY, IBDP_LIBRARY, KCSE_LIBRARY, IPRIMARY_LIBRARY, ILOWER_SEC_LIBRARY, IAL_LIBRARY, ALEVEL_LIBRARY, IGCSE_LIBRARY, IGCSE_MATHS_0580, LOWER_SEC_LIBRARY, PRIMARY_LIBRARY, PRIMARY_Y5_LIBRARY } from './spineData.js'
+import { CBE_LIBRARY, PYP_LIBRARY, MYP_LIBRARY, IBDP_LIBRARY, KCSE_LIBRARY, IPRIMARY_LIBRARY, ILOWER_SEC_LIBRARY, IAL_LIBRARY, ALEVEL_LIBRARY, IGCSE_LIBRARY, IGCSE_MATHS_0580, LOWER_SEC_LIBRARY, PRIMARY_LIBRARY, PRIMARY_Y5_LIBRARY } from './spineData.js'
 
 function SubjectsTab({ toast }) {
   // The 15 curricula from the new catalog
@@ -587,6 +587,35 @@ function SyllabusSpineTab({ toast }) {
    * assessment criterion, DP by SL core plus HL extension and internal
    * assessment. A shared library would load the wrong shape entirely.
    */
+  /**
+   * Load a Kenya CBE spine.
+   *
+   * Only Physics exists so far — 203 lessons across Forms 1-4, carried
+   * over in the CBC-to-CBE rename, with 1,877 questions filed against it.
+   * It is listed so the loader resolves CBE Physics to its own spine
+   * rather than falling through to a Cambridge or KCSE matcher and
+   * replacing that bank.
+   */
+  const loadCbeSpine = async () => {
+    if (!subjectId) { toast?.error?.('Pick a subject first.'); return }
+    const subjectName = subjects.find(s => s._id === subjectId)?.subjectName || ''
+    const entry = CBE_LIBRARY.find(e => e.match.test(subjectName))
+    if (!entry) {
+      toast?.error?.(`No CBE spine exists for "${subjectName}" yet. Available: `
+        + CBE_LIBRARY.map(e => (e.source || '').replace('Kenya CBE ', '').split(' \u2014 ')[0]).join(', '))
+      return
+    }
+    setBusy(true)
+    try {
+      const { data } = await api.post('/syllabus/bulk', {
+        subjectId, topics: entry.const_, sourceSyllabus: entry.source,
+      })
+      if (data?.success) { toast?.ok?.(data.message || 'Loaded.'); loadSpine(subjectId) }
+      else toast?.error?.(data?.message || 'Failed.')
+    } catch (e) { await handleSpineError(e, { subjectId, topics: entry.const_, sourceSyllabus: entry.source }) }
+    finally { setBusy(false) }
+  }
+
   const loadPypSpine = async () => {
     if (!subjectId) { toast?.error?.('Pick a subject first.'); return }
     const subjectName = subjects.find(s => s._id === subjectId)?.subjectName || ''
@@ -838,6 +867,14 @@ function SyllabusSpineTab({ toast }) {
                 background: '#fff', color: '#9A7B16', border: '1.5px dashed ' + TOKENS.gold,
                 borderRadius: 7, padding: '8px 16px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
               }}>Load IGCSE spine</button>
+            )}
+            {curriculum === 'KenyaCBE' && (
+              <button onClick={loadCbeSpine} disabled={busy}
+                title="Only Physics has a CBE spine so far. The rest of CBE is not built yet, and the button will say so rather than loading something from another curriculum."
+                style={{
+                  background: '#fff', color: '#9A7B16', border: '1.5px dashed ' + TOKENS.gold,
+                  borderRadius: 7, padding: '8px 16px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+                }}>Load CBE spine</button>
             )}
             {curriculum === 'IBPYP' && (
               <button onClick={loadPypSpine} disabled={busy}
