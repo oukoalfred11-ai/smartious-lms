@@ -10306,7 +10306,425 @@ const IAL_HISTORY = [
     ] },
 ]
 
+// Pearson Edexcel International A Level
+//   Politics  (YPO01/WPO01) — 4 units / 116 lessons
+//   Sociology (YSO01/WSO01) — 4 units / 124 lessons
+//
+// POLITICS: CONCEPTS BEFORE INSTITUTIONS
+// A student who does not understand what sovereignty, legitimacy or
+// representation mean cannot evaluate a parliament or a constitution —
+// they can only describe one. Core political concepts therefore come
+// first and are secured before the institutional units.
+//
+// SOCIOLOGY: THEORY AND METHODS AS STRANDS
+// Every substantive topic is assessed through theoretical perspective
+// and methodological evidence. Functionalism, Marxism and feminism are
+// not a unit to be finished — they are applied to family, education,
+// crime and every other topic. Both appear as strands across the units.
+
+const IAL_POLITICS = [
+  { topic: 'U1 \u00b7 Political Participation', code: 'U1',
+    subtopics: [
+      { name: 'Democracy: Direct & Representative', code: 'U1.1' },
+      { name: 'Legitimacy, Sovereignty & Authority', code: 'U1.2' },
+      { name: 'The Democratic Deficit & Participation Crisis', code: 'U1.3' },
+      { name: 'Rights, Liberties & Their Protection', code: 'U1.4' },
+      { name: 'Electoral Systems: First Past the Post', code: 'U1.5' },
+      { name: 'Proportional & Mixed Electoral Systems', code: 'U1.6' },
+      { name: 'Evaluating Electoral Systems', code: 'U1.7' },
+      { name: 'Referendums & Direct Democracy in Practice', code: 'U1.8' },
+      { name: 'Voting Behaviour & Its Determinants', code: 'U1.9' },
+      { name: 'The Role of the Media in Elections', code: 'U1.10' },
+      { name: 'Political Parties: Functions & Funding', code: 'U1.11' },
+      { name: 'Party Systems & Their Consequences', code: 'U1.12' },
+      { name: 'Pressure Groups: Types & Methods', code: 'U1.13' },
+      { name: 'Factors Affecting Pressure Group Success', code: 'U1.14' },
+      { name: 'Pluralism, Elitism & Who Really Governs', code: 'U1.15' },
+    ] },
+
+  { topic: 'U2 \u00b7 Governing Modern States', code: 'U2',
+    subtopics: [
+      { name: 'Constitutions: Codified & Uncodified', code: 'U2.1' },
+      { name: 'Sources of a Constitution', code: 'U2.2' },
+      { name: 'Constitutional Reform & Its Drivers', code: 'U2.3' },
+      { name: 'The Legislature: Composition & Functions', code: 'U2.4' },
+      { name: 'Scrutiny of the Executive', code: 'U2.5' },
+      { name: 'The Legislative Process & Its Effectiveness', code: 'U2.6' },
+      { name: 'The Executive: Structure & Powers', code: 'U2.7' },
+      { name: 'Prime Ministerial & Presidential Power', code: 'U2.8' },
+      { name: 'Cabinet Government & Collective Responsibility', code: 'U2.9' },
+      { name: 'The Judiciary & Judicial Independence', code: 'U2.10' },
+      { name: 'Judicial Review & Its Limits', code: 'U2.11' },
+      { name: 'Separation of Powers & Checks and Balances', code: 'U2.12' },
+      { name: 'Devolution & Federalism', code: 'U2.13' },
+      { name: 'Multi-Level Governance', code: 'U2.14' },
+    ] },
+
+  { topic: 'U3 \u00b7 Political Ideologies', code: 'U3',
+    subtopics: [
+      { name: 'What an Ideology Is & Why It Matters', code: 'U3.1' },
+      { name: 'Liberalism: Core Values', code: 'U3.2' },
+      { name: 'Classical & Modern Liberalism', code: 'U3.3' },
+      { name: 'Conservatism: Core Values', code: 'U3.4' },
+      { name: 'Traditional, One Nation & New Right Conservatism', code: 'U3.5' },
+      { name: 'Socialism: Core Values', code: 'U3.6' },
+      { name: 'Revolutionary Socialism & Marxism', code: 'U3.7' },
+      { name: 'Social Democracy & The Third Way', code: 'U3.8' },
+      { name: 'Nationalism: Types & Consequences', code: 'U3.9' },
+      { name: 'Feminism as a Political Ideology', code: 'U3.10' },
+      { name: 'Anarchism & Ecologism', code: 'U3.11' },
+      { name: 'Multiculturalism & Identity Politics', code: 'U3.12' },
+      { name: 'Comparing Ideologies on Human Nature & The State', code: 'U3.13' },
+      { name: 'Ideology in Contemporary Politics', code: 'U3.14' },
+    ] },
+
+  { topic: 'U4 \u00b7 Global Politics', code: 'U4',
+    subtopics: [
+      { name: 'The Nation State & Sovereignty in a Global Age', code: 'U4.1' },
+      { name: 'Globalisation: Political, Economic & Cultural', code: 'U4.2' },
+      { name: 'Realism & Liberalism in International Relations', code: 'U4.3' },
+      { name: 'The United Nations: Structure & Effectiveness', code: 'U4.4' },
+      { name: 'Regional Organisations & Integration', code: 'U4.5' },
+      { name: 'International Law & Its Enforcement', code: 'U4.6' },
+      { name: 'Human Rights & Humanitarian Intervention', code: 'U4.7' },
+      { name: 'Power: Hard, Soft & Structural', code: 'U4.8' },
+      { name: 'Polarity & The Shifting Global Order', code: 'U4.9' },
+      { name: 'Conflict, Terrorism & Security', code: 'U4.10' },
+      { name: 'Global Poverty & Development Politics', code: 'U4.11' },
+      { name: 'Environmental Politics & Climate Governance', code: 'U4.12' },
+      { name: 'Evaluating Global Governance', code: 'U4.13' },
+    ] },
+
+  { topic: 'Exam Technique \u2014 IAL Politics', code: 'EX',
+    subtopics: [
+      { name: 'Assessment Objectives & Their Weighting', code: 'EX.1' },
+      { name: 'Structuring an Analytical Essay', code: 'EX.2' },
+      { name: 'Using Contemporary Examples Effectively', code: 'EX.3' },
+      { name: 'Building a Balanced Evaluative Judgement', code: 'EX.4' },
+      { name: 'Command Words in Edexcel Politics Papers', code: 'EX.5' },
+      { name: 'Source-Based Question Technique', code: 'EX.6' },
+      { name: 'Past Paper Practice: Units 1 & 2', code: 'EX.7' },
+      { name: 'Past Paper Practice: Units 3 & 4', code: 'EX.8' },
+      { name: 'Mock Exam Review & Revision Planning', code: 'EX.9' },
+    ] },
+]
+
+const IAL_SOCIOLOGY = [
+  { topic: 'U1 \u00b7 Socialisation, Culture & Identity', code: 'U1',
+    subtopics: [
+      { name: 'Culture, Norms, Values & Roles', code: 'U1.1' },
+      { name: 'Nature vs. Nurture in Human Behaviour', code: 'U1.2' },
+      { name: 'Primary & Secondary Socialisation', code: 'U1.3' },
+      { name: 'Agencies of Socialisation', code: 'U1.4' },
+      { name: 'Social Control: Formal & Informal', code: 'U1.5' },
+      { name: 'Identity: Class, Gender, Ethnicity & Age', code: 'U1.6' },
+      { name: 'Subcultures & Cultural Diversity', code: 'U1.7' },
+      { name: 'Structural vs. Social Action Perspectives', code: 'U1.8' },
+      { name: 'Functionalism: Core Ideas', code: 'U1.9' },
+      { name: 'Marxism: Core Ideas', code: 'U1.10' },
+      { name: 'Feminism: Its Strands', code: 'U1.11' },
+      { name: 'Interactionism & Labelling', code: 'U1.12' },
+      { name: 'The New Right & Postmodernism', code: 'U1.13' },
+      { name: 'Applying Perspectives to a Single Issue', code: 'U1.14' },
+    ] },
+
+  { topic: 'U2 \u00b7 Research Methods & Researching Society', code: 'U2',
+    subtopics: [
+      { name: 'Positivism & Interpretivism', code: 'U2.1' },
+      { name: 'Quantitative & Qualitative Data', code: 'U2.2' },
+      { name: 'Primary & Secondary Sources', code: 'U2.3' },
+      { name: 'Surveys & Questionnaires', code: 'U2.4' },
+      { name: 'Structured & Unstructured Interviews', code: 'U2.5' },
+      { name: 'Participant & Non-Participant Observation', code: 'U2.6' },
+      { name: 'Experiments & Case Studies', code: 'U2.7' },
+      { name: 'Official Statistics & Documents', code: 'U2.8' },
+      { name: 'Longitudinal Research', code: 'U2.9' },
+      { name: 'Sampling Techniques & Representativeness', code: 'U2.10' },
+      { name: 'Reliability, Validity & Generalisability', code: 'U2.11' },
+      { name: 'Ethical Issues in Research', code: 'U2.12' },
+      { name: 'Practical & Theoretical Factors in Method Choice', code: 'U2.13' },
+      { name: 'Triangulation & Mixed Methods', code: 'U2.14' },
+      { name: 'Interpreting & Presenting Sociological Data', code: 'U2.15' },
+      { name: 'Evaluating a Published Study', code: 'U2.16' },
+    ] },
+
+  { topic: 'U3 \u00b7 Family, Education & Health', code: 'U3',
+    subtopics: [
+      { name: 'Defining Family & Household', code: 'U3.1' },
+      { name: 'Family Diversity & Changing Structures', code: 'U3.2' },
+      { name: 'Perspectives on the Family', code: 'U3.3' },
+      { name: 'Conjugal Roles & Domestic Division of Labour', code: 'U3.4' },
+      { name: 'Childhood as a Social Construction', code: 'U3.5' },
+      { name: 'Marriage, Divorce & Cohabitation Trends', code: 'U3.6' },
+      { name: 'Family & Social Policy', code: 'U3.7' },
+      { name: 'Perspectives on Education', code: 'U3.8' },
+      { name: 'The Hidden Curriculum', code: 'U3.9' },
+      { name: 'Class & Educational Achievement', code: 'U3.10' },
+      { name: 'Gender & Ethnicity in Education', code: 'U3.11' },
+      { name: 'Labelling & The Self-Fulfilling Prophecy', code: 'U3.12' },
+      { name: 'Pupil Subcultures & Education Policy', code: 'U3.13' },
+      { name: 'Defining Health, Illness & Disability', code: 'U3.14' },
+      { name: 'Social Patterns in Health Inequality', code: 'U3.15' },
+      { name: 'Perspectives on Health & Medicine', code: 'U3.16' },
+    ] },
+
+  { topic: 'U4 \u00b7 Crime, Deviance & Social Inequality', code: 'U4',
+    subtopics: [
+      { name: 'Defining Crime & Deviance', code: 'U4.1' },
+      { name: 'Measuring Crime & The Dark Figure', code: 'U4.2' },
+      { name: 'Functionalist & Subcultural Explanations', code: 'U4.3' },
+      { name: 'Marxist & Neo-Marxist Explanations', code: 'U4.4' },
+      { name: 'Interactionism & Labelling Theory', code: 'U4.5' },
+      { name: 'Right & Left Realism', code: 'U4.6' },
+      { name: 'Gender & Crime', code: 'U4.7' },
+      { name: 'Ethnicity & Crime', code: 'U4.8' },
+      { name: 'Class, Age & Crime', code: 'U4.9' },
+      { name: 'White Collar & Corporate Crime', code: 'U4.10' },
+      { name: 'Global & Green Crime', code: 'U4.11' },
+      { name: 'Crime Control, Punishment & Prevention', code: 'U4.12' },
+      { name: 'Systems of Stratification', code: 'U4.13' },
+      { name: 'Theories of Class & Social Mobility', code: 'U4.14' },
+      { name: 'Gender, Ethnic & Age Inequality', code: 'U4.15' },
+      { name: 'Poverty: Definitions, Causes & Responses', code: 'U4.16' },
+      { name: 'Globalisation & Social Inequality', code: 'U4.17' },
+    ] },
+
+  { topic: 'Exam Technique \u2014 IAL Sociology', code: 'EX',
+    subtopics: [
+      { name: 'Assessment Objectives in Sociology Papers', code: 'EX.1' },
+      { name: 'Structuring an Essay: Analysis & Evaluation', code: 'EX.2' },
+      { name: 'Using Named Sociologists & Studies', code: 'EX.3' },
+      { name: 'Building Evaluation Rather Than Listing Views', code: 'EX.4' },
+      { name: 'Applying Methods to Unfamiliar Contexts', code: 'EX.5' },
+      { name: 'Command Words in Edexcel Sociology Papers', code: 'EX.6' },
+      { name: 'Past Paper Practice: Units 1 & 2', code: 'EX.7' },
+      { name: 'Past Paper Practice: Units 3 & 4', code: 'EX.8' },
+      { name: 'Mock Exam Review & Revision Planning', code: 'EX.9' },
+    ] },
+]
+
+// Pearson Edexcel International A Level
+//   Computer Science       (YCS01/WCS01) — 4 units / 128 lessons
+//   Information Technology (YIT01/WIT01) — 4 units / 118 lessons
+//
+// BOTH HAVE PRACTICAL EXAMINATIONS
+// Computer Science assesses programming under exam conditions in Units
+// 2 and 4; Information Technology assesses applied software work in
+// Units 2 and 4. Neither skill can be taught as theory and then
+// expected to work, so practical strands are separate topics rather
+// than lessons appended to the theory.
+//
+// THE TWO SUBJECTS ARE NOT INTERCHANGEABLE
+// Computer Science is about how computation works — algorithms, data
+// structures, architecture. Information Technology is about applying
+// software to solve organisational problems — data modelling,
+// spreadsheets, databases, project work. They share vocabulary and
+// almost nothing else.
+
+const IAL_COMPUTER_SCIENCE = [
+  { topic: 'U1 \u00b7 Principles of Computer Science', code: 'U1',
+    subtopics: [
+      { name: 'Problem Solving & Computational Thinking', code: 'U1.1' },
+      { name: 'Decomposition & Abstraction', code: 'U1.2' },
+      { name: 'Algorithm Design & Pseudocode Conventions', code: 'U1.3' },
+      { name: 'Flowcharts & Structure Diagrams', code: 'U1.4' },
+      { name: 'Linear & Binary Search', code: 'U1.5' },
+      { name: 'Bubble, Insertion & Merge Sort', code: 'U1.6' },
+      { name: 'Comparing Algorithm Efficiency & Big O', code: 'U1.7' },
+      { name: 'Trace Tables & Dry Running', code: 'U1.8' },
+      { name: 'Binary, Denary & Hexadecimal Conversion', code: 'U1.9' },
+      { name: 'Binary Arithmetic & Overflow', code: 'U1.10' },
+      { name: 'Two\u2019s Complement & Signed Integers', code: 'U1.11' },
+      { name: 'Floating Point Representation', code: 'U1.12' },
+      { name: 'Character Sets, Images & Sound', code: 'U1.13' },
+      { name: 'Compression: Lossy & Lossless', code: 'U1.14' },
+      { name: 'Logic Gates & Truth Tables', code: 'U1.15' },
+      { name: 'Boolean Algebra & Simplification', code: 'U1.16' },
+      { name: 'Karnaugh Maps', code: 'U1.17' },
+    ] },
+
+  { topic: 'U2 \u00b7 Programming Practice', code: 'U2',
+    subtopics: [
+      { name: 'Program Structure, Variables & Constants', code: 'U2.1' },
+      { name: 'Data Types & Type Conversion', code: 'U2.2' },
+      { name: 'Input, Output & Formatting', code: 'U2.3' },
+      { name: 'Operators: Arithmetic, Relational & Logical', code: 'U2.4' },
+      { name: 'Selection: if, elif and Nested Conditions', code: 'U2.5' },
+      { name: 'Iteration: Definite & Indefinite Loops', code: 'U2.6' },
+      { name: 'Nested Loops & Loop Control', code: 'U2.7' },
+      { name: 'String Handling & String Methods', code: 'U2.8' },
+      { name: 'One-Dimensional Arrays & Lists', code: 'U2.9' },
+      { name: 'Two-Dimensional Arrays & Nested Iteration', code: 'U2.10' },
+      { name: 'Records & User-Defined Types', code: 'U2.11' },
+      { name: 'Subprograms: Procedures & Functions', code: 'U2.12' },
+      { name: 'Parameters, Arguments & Return Values', code: 'U2.13' },
+      { name: 'Variable Scope: Local & Global', code: 'U2.14' },
+      { name: 'File Handling: Read, Write & Append', code: 'U2.15' },
+      { name: 'Input Validation & Robust Programs', code: 'U2.16' },
+      { name: 'Error Types & Debugging Technique', code: 'U2.17' },
+      { name: 'Test Plans: Normal, Boundary & Erroneous Data', code: 'U2.18' },
+      { name: 'Writing Maintainable, Documented Code', code: 'U2.19' },
+      { name: 'Solving a Full Programming Problem', code: 'U2.20' },
+    ] },
+
+  { topic: 'U3 \u00b7 Advanced Computer Science', code: 'U3',
+    subtopics: [
+      { name: 'Von Neumann Architecture & Registers', code: 'U3.1' },
+      { name: 'The Fetch-Decode-Execute Cycle', code: 'U3.2' },
+      { name: 'Assembly Language & Addressing Modes', code: 'U3.3' },
+      { name: 'RISC, CISC & Parallel Processing', code: 'U3.4' },
+      { name: 'Memory Hierarchy & Cache', code: 'U3.5' },
+      { name: 'Operating System Functions', code: 'U3.6' },
+      { name: 'Process Scheduling & Interrupt Handling', code: 'U3.7' },
+      { name: 'Virtual Memory & Paging', code: 'U3.8' },
+      { name: 'Language Translators & Stages of Compilation', code: 'U3.9' },
+      { name: 'Networks: Topologies, Protocols & Layers', code: 'U3.10' },
+      { name: 'TCP/IP, Packet Switching & Addressing', code: 'U3.11' },
+      { name: 'Network Security & Encryption', code: 'U3.12' },
+      { name: 'Databases: Relational Design & Normalisation', code: 'U3.13' },
+      { name: 'SQL: Querying & Manipulating Data', code: 'U3.14' },
+      { name: 'Big Data & Data Warehousing', code: 'U3.15' },
+      { name: 'Ethical, Legal & Environmental Issues', code: 'U3.16' },
+      { name: 'Artificial Intelligence & Machine Learning', code: 'U3.17' },
+    ] },
+
+  { topic: 'U4 \u00b7 Advanced Programming Practice', code: 'U4',
+    subtopics: [
+      { name: 'Abstract Data Types & Their Selection', code: 'U4.1' },
+      { name: 'Implementing a Stack', code: 'U4.2' },
+      { name: 'Implementing a Queue', code: 'U4.3' },
+      { name: 'Implementing a Linked List', code: 'U4.4' },
+      { name: 'Binary Trees & Their Traversal', code: 'U4.5' },
+      { name: 'Hash Tables & Collision Resolution', code: 'U4.6' },
+      { name: 'Graphs & Graph Traversal', code: 'U4.7' },
+      { name: 'Dijkstra\u2019s Shortest Path Algorithm', code: 'U4.8' },
+      { name: 'Recursion: Base Case & Call Stack', code: 'U4.9' },
+      { name: 'Writing & Tracing Recursive Solutions', code: 'U4.10' },
+      { name: 'Object-Oriented Programming: Classes & Objects', code: 'U4.11' },
+      { name: 'Encapsulation & Access Control', code: 'U4.12' },
+      { name: 'Inheritance & Polymorphism', code: 'U4.13' },
+      { name: 'Class Diagrams & OO Design', code: 'U4.14' },
+      { name: 'Exception Handling', code: 'U4.15' },
+      { name: 'Random & Sequential File Access', code: 'U4.16' },
+      { name: 'Software Development Life Cycle Models', code: 'U4.17' },
+      { name: 'Testing Strategies & Maintenance', code: 'U4.18' },
+      { name: 'Building a Complete Object-Oriented Solution', code: 'U4.19' },
+    ] },
+
+  { topic: 'Exam Technique \u2014 IAL Computer Science', code: 'EX',
+    subtopics: [
+      { name: 'Theory Paper Technique & Command Words', code: 'EX.1' },
+      { name: 'Practical Paper Technique & Time Management', code: 'EX.2' },
+      { name: 'Presenting Pseudocode Clearly', code: 'EX.3' },
+      { name: 'Common Errors in Trace Table Questions', code: 'EX.4' },
+      { name: 'Producing Evidence of Working Code', code: 'EX.5' },
+      { name: 'Past Paper Practice: Units 1 & 3', code: 'EX.6' },
+      { name: 'Past Paper Practice: Units 2 & 4', code: 'EX.7' },
+      { name: 'Mock Exam Review & Revision Planning', code: 'EX.8' },
+    ] },
+]
+
+const IAL_INFORMATION_TECHNOLOGY = [
+  { topic: 'U1 \u00b7 Information Technology Systems', code: 'U1',
+    subtopics: [
+      { name: 'Digital Devices & Their Uses', code: 'U1.1' },
+      { name: 'Hardware Components & Their Functions', code: 'U1.2' },
+      { name: 'Input & Output Devices for Different Users', code: 'U1.3' },
+      { name: 'Storage: Types, Capacity & Selection', code: 'U1.4' },
+      { name: 'Operating Systems & System Software', code: 'U1.5' },
+      { name: 'Application Software & Choosing the Right Tool', code: 'U1.6' },
+      { name: 'Software Licensing & Open Source', code: 'U1.7' },
+      { name: 'Networks: LAN, WAN & Cloud Services', code: 'U1.8' },
+      { name: 'Network Hardware & Connectivity', code: 'U1.9' },
+      { name: 'Data Transmission & Bandwidth', code: 'U1.10' },
+      { name: 'Online Systems & Their Business Uses', code: 'U1.11' },
+      { name: 'Accessibility & Inclusive Design', code: 'U1.12' },
+      { name: 'The Impact of IT on Organisations', code: 'U1.13' },
+      { name: 'The Impact of IT on Individuals & Society', code: 'U1.14' },
+    ] },
+
+  { topic: 'U2 \u00b7 Data Modelling & Spreadsheets', code: 'U2',
+    subtopics: [
+      { name: 'Planning a Spreadsheet Solution from a Brief', code: 'U2.1' },
+      { name: 'Structuring Data & Cell Formatting', code: 'U2.2' },
+      { name: 'Formulae & Order of Operations', code: 'U2.3' },
+      { name: 'Absolute, Relative & Mixed References', code: 'U2.4' },
+      { name: 'Named Ranges & Data Validation', code: 'U2.5' },
+      { name: 'Statistical & Mathematical Functions', code: 'U2.6' },
+      { name: 'Logical Functions: IF & Nested IF', code: 'U2.7' },
+      { name: 'Lookup Functions & Cross-Sheet References', code: 'U2.8' },
+      { name: 'Conditional Formatting', code: 'U2.9' },
+      { name: 'Sorting, Filtering & Pivot Tables', code: 'U2.10' },
+      { name: 'What-If Analysis & Goal Seek', code: 'U2.11' },
+      { name: 'Building a Financial or Operational Model', code: 'U2.12' },
+      { name: 'Charts: Selection, Creation & Labelling', code: 'U2.13' },
+      { name: 'Interpreting Model Output & Drawing Conclusions', code: 'U2.14' },
+      { name: 'Testing a Model with Normal & Extreme Data', code: 'U2.15' },
+      { name: 'Documenting & Presenting a Solution', code: 'U2.16' },
+    ] },
+
+  { topic: 'U3 \u00b7 Using Information Technology', code: 'U3',
+    subtopics: [
+      { name: 'Data, Information & Knowledge', code: 'U3.1' },
+      { name: 'Sources & Quality of Data', code: 'U3.2' },
+      { name: 'Data Collection Methods', code: 'U3.3' },
+      { name: 'Data Processing & Transformation', code: 'U3.4' },
+      { name: 'Relational Database Design', code: 'U3.5' },
+      { name: 'Entity-Relationship Modelling', code: 'U3.6' },
+      { name: 'Normalisation to Third Normal Form', code: 'U3.7' },
+      { name: 'Queries, Forms & Reports', code: 'U3.8' },
+      { name: 'Data Security & Access Control', code: 'U3.9' },
+      { name: 'Data Protection Law & Individual Rights', code: 'U3.10' },
+      { name: 'Threats: Malware, Phishing & Social Engineering', code: 'U3.11' },
+      { name: 'Backup, Recovery & Business Continuity', code: 'U3.12' },
+      { name: 'Ethical Use of Information', code: 'U3.13' },
+      { name: 'Intellectual Property & Licensing', code: 'U3.14' },
+      { name: 'Environmental Impact & Sustainable IT', code: 'U3.15' },
+    ] },
+
+  { topic: 'U4 \u00b7 IT Project Work', code: 'U4',
+    subtopics: [
+      { name: 'Interpreting a Client Brief', code: 'U4.1' },
+      { name: 'Identifying Requirements & Constraints', code: 'U4.2' },
+      { name: 'Planning: Task Breakdown & Scheduling', code: 'U4.3' },
+      { name: 'Designing a Solution Before Building', code: 'U4.4' },
+      { name: 'Selecting Software for the Task', code: 'U4.5' },
+      { name: 'Gathering & Organising Source Materials', code: 'U4.6' },
+      { name: 'Building an Integrated Solution', code: 'U4.7' },
+      { name: 'Combining Data Across Applications', code: 'U4.8' },
+      { name: 'Automating Tasks & Improving Efficiency', code: 'U4.9' },
+      { name: 'Testing Against the Original Requirements', code: 'U4.10' },
+      { name: 'Gathering & Acting on User Feedback', code: 'U4.11' },
+      { name: 'Evaluating Fitness for Purpose', code: 'U4.12' },
+      { name: 'Producing Technical & User Documentation', code: 'U4.13' },
+      { name: 'Presenting a Solution to a Client', code: 'U4.14' },
+    ] },
+
+  { topic: 'Exam Technique \u2014 IAL Information Technology', code: 'EX',
+    subtopics: [
+      { name: 'Theory Paper Technique & Command Words', code: 'EX.1' },
+      { name: 'Practical Paper Technique & Time Management', code: 'EX.2' },
+      { name: 'Producing Evidence & Screenshots', code: 'EX.3' },
+      { name: 'Common Practical Errors & How to Avoid Them', code: 'EX.4' },
+      { name: 'Writing Evaluative Answers About IT Systems', code: 'EX.5' },
+      { name: 'Past Paper Practice: Units 1 & 3', code: 'EX.6' },
+      { name: 'Past Paper Practice: Units 2 & 4', code: 'EX.7' },
+      { name: 'Mock Exam Review & Revision Planning', code: 'EX.8' },
+    ] },
+]
+
 export const IAL_LIBRARY = [
+  // Information Technology before Computer Science, so a subject named
+  // "Information Technology" cannot fall through to the CS matcher.
+  { match: /\binformation\s+technology\b|\bict\b/i, const_: IAL_INFORMATION_TECHNOLOGY,
+    source: 'Edexcel International A Level Information Technology \u2014 4-unit scheme' },
+  { match: /\bcomputer\s*science\b|\bcomputing\b/i, const_: IAL_COMPUTER_SCIENCE,
+    source: 'Edexcel International A Level Computer Science \u2014 4-unit scheme' },
+  { match: /\bpolitics\b/i,    const_: IAL_POLITICS,
+    source: 'Edexcel International A Level Politics \u2014 4-unit scheme' },
+  { match: /\bsociology\b/i,   const_: IAL_SOCIOLOGY,
+    source: 'Edexcel International A Level Sociology \u2014 4-unit scheme' },
+
   // Literature before any bare /english/ matcher, as at Cambridge.
   { match: /\bliterature\b/i,  const_: IAL_ENGLISH_LIT,
     source: 'Edexcel International A Level English Literature \u2014 4-unit scheme' },
