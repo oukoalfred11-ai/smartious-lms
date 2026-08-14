@@ -315,3 +315,6 @@ router.get('/subjects/:curriculumId', auth, (req, res) => {
 })
 
 module.exports = router
+// Exported so the duplicate resolver can prefer the name the enrolment
+// form actually offers when choosing which of two records survives.
+module.exports.SUBJECTS = SUBJECTS
