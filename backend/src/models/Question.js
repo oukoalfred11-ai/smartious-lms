@@ -81,7 +81,7 @@ const questionSchema = new mongoose.Schema({
     enum: [
       // Canonical curriculum IDs
       'CambridgePrimary','CambridgeLowerSec','CambridgeIGCSE','CambridgeALevel',
-      'EdexcelLowerSec','EdexcelIGCSE','EdexcelALevel',
+      'EdexcelPrimary', 'EdexcelLowerSec','EdexcelIGCSE','EdexcelALevel',
       'AQALowerSec','AQAGCSE','AQAALevel',
       'IBPYP','IBMYP','IBDP',
       'KenyaCBC','BNC','American','Canadian',
