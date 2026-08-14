@@ -2200,6 +2200,55 @@ const IPRIMARY_COMPUTING = [
 // KCSE Mathematics — Forms 3 and 4, lesson level.
 // 6 topics / 59 lessons.
 const KCSE_MATHEMATICS = [
+  { topic: 'F1 · Number & Basic Operations', code: 'F1-NBO',
+    subtopics: [
+      { name: 'Natural Numbers and Place Value (Form 1)', code: 'F1-NBO.1' },
+      { name: 'Factors, Multiples, LCM and GCD (Form 1)', code: 'F1-NBO.2' },
+      { name: 'Integers and the Number Line (Form 1)', code: 'F1-NBO.3' },
+      { name: 'Fractions and Their Operations (Form 1)', code: 'F1-NBO.4' },
+      { name: 'Decimals and Their Operations (Form 1)', code: 'F1-NBO.5' },
+      { name: 'Squares and Square Roots (Form 1)', code: 'F1-NBO.6' },
+      { name: 'Algebraic Expressions: Simplification (Form 1)', code: 'F1-NBO.7' },
+      { name: 'Rates, Ratio and Proportion (Form 1)', code: 'F1-NBO.8' },
+      { name: 'Percentages and Their Applications (Form 1)', code: 'F1-NBO.9' },
+      { name: 'Length, Area and Volume (Form 1)', code: 'F1-NBO.10' },
+      { name: 'Mass, Weight and Density (Form 1)', code: 'F1-NBO.11' },
+      { name: 'Time, Speed and Distance (Form 1)', code: 'F1-NBO.12' },
+    ] },
+  { topic: 'F1 · Geometry & Measurement', code: 'F1-GM',
+    subtopics: [
+      { name: 'Angles at a Point and on a Line (Form 1)', code: 'F1-GM.1' },
+      { name: 'Angle Properties of Triangles (Form 1)', code: 'F1-GM.2' },
+      { name: 'Geometric Constructions I (Form 1)', code: 'F1-GM.3' },
+      { name: 'Scale Drawing (Form 1)', code: 'F1-GM.4' },
+      { name: 'Common Solids and Their Nets (Form 1)', code: 'F1-GM.5' },
+      { name: 'Reflection and Line Symmetry (Form 1)', code: 'F1-GM.6' },
+    ] },
+  { topic: 'F2 · Algebra & Number', code: 'F2-AN',
+    subtopics: [
+      { name: 'Cubes and Cube Roots (Form 2)', code: 'F2-AN.1' },
+      { name: 'Reciprocals and Their Use (Form 2)', code: 'F2-AN.2' },
+      { name: 'Indices and Laws of Indices (Form 2)', code: 'F2-AN.3' },
+      { name: 'Logarithms: Introduction and Tables (Form 2)', code: 'F2-AN.4' },
+      { name: 'Equations of Straight Lines (Form 2)', code: 'F2-AN.5' },
+      { name: 'Simultaneous Linear Equations (Form 2)', code: 'F2-AN.6' },
+      { name: 'Quadratic Expressions and Factorisation (Form 2)', code: 'F2-AN.7' },
+      { name: 'Linear Inequalities and Their Graphs (Form 2)', code: 'F2-AN.8' },
+      { name: 'Rates and Mixtures (Form 2)', code: 'F2-AN.9' },
+    ] },
+  { topic: 'F2 · Geometry & Data', code: 'F2-GD',
+    subtopics: [
+      { name: 'Pythagoras Theorem (Form 2)', code: 'F2-GD.1' },
+      { name: 'Trigonometric Ratios: Introduction (Form 2)', code: 'F2-GD.2' },
+      { name: 'Area of a Triangle and Polygons (Form 2)', code: 'F2-GD.3' },
+      { name: 'Area of Part of a Circle (Form 2)', code: 'F2-GD.4' },
+      { name: 'Surface Area of Solids (Form 2)', code: 'F2-GD.5' },
+      { name: 'Volume of Solids (Form 2)', code: 'F2-GD.6' },
+      { name: 'Rotation and Rotational Symmetry (Form 2)', code: 'F2-GD.7' },
+      { name: 'Similarity and Enlargement (Form 2)', code: 'F2-GD.8' },
+      { name: 'Statistics: Collection and Representation (Form 2)', code: 'F2-GD.9' },
+      { name: 'Measures of Central Tendency (Form 2)', code: 'F2-GD.10' },
+    ] },
   { topic: 'F3 · Number & Algebra', code: 'F3-NA',
     subtopics: [
       { name: 'Quadratic Expressions and Equations (Form 3)', code: 'F3-NA.1' },
@@ -2282,6 +2331,47 @@ const KCSE_MATHEMATICS = [
 // KCSE English — Forms 3 and 4, lesson level.
 // 6 topics / 47 lessons.
 const KCSE_ENGLISH = [
+  { topic: 'F1 · Language Foundations', code: 'F1-LF',
+    subtopics: [
+      { name: 'Parts of Speech: Nouns and Pronouns (Form 1)', code: 'F1-LF.1' },
+      { name: 'Parts of Speech: Verbs and Tenses (Form 1)', code: 'F1-LF.2' },
+      { name: 'Adjectives and Adverbs (Form 1)', code: 'F1-LF.3' },
+      { name: 'Sentence Types and Structure (Form 1)', code: 'F1-LF.4' },
+      { name: 'Basic Punctuation (Form 1)', code: 'F1-LF.5' },
+      { name: 'Spelling Rules and Common Errors (Form 1)', code: 'F1-LF.6' },
+      { name: 'Building Vocabulary (Form 1)', code: 'F1-LF.7' },
+    ] },
+  { topic: 'F1 · Reading & Writing', code: 'F1-RW',
+    subtopics: [
+      { name: 'Reading for Comprehension (Form 1)', code: 'F1-RW.1' },
+      { name: 'Reading for Enjoyment: Class Readers (Form 1)', code: 'F1-RW.2' },
+      { name: 'Oral Literature: Introduction (Form 1)', code: 'F1-RW.3' },
+      { name: 'Narrative Composition (Form 1)', code: 'F1-RW.4' },
+      { name: 'Descriptive Composition (Form 1)', code: 'F1-RW.5' },
+      { name: 'Personal Letters (Form 1)', code: 'F1-RW.6' },
+      { name: 'Listening and Speaking Basics (Form 1)', code: 'F1-RW.7' },
+    ] },
+  { topic: 'F2 · Language Development', code: 'F2-LD',
+    subtopics: [
+      { name: 'Phrasal Verbs and Idioms (Form 2)', code: 'F2-LD.1' },
+      { name: 'Active and Passive Voice (Form 2)', code: 'F2-LD.2' },
+      { name: 'Direct and Indirect Speech (Form 2)', code: 'F2-LD.3' },
+      { name: 'Relative Clauses (Form 2)', code: 'F2-LD.4' },
+      { name: 'Conditional Sentences (Form 2)', code: 'F2-LD.5' },
+      { name: 'Prefixes, Suffixes and Word Formation (Form 2)', code: 'F2-LD.6' },
+      { name: 'Register and Appropriate Language (Form 2)', code: 'F2-LD.7' },
+    ] },
+  { topic: 'F2 · Literature & Composition', code: 'F2-LC',
+    subtopics: [
+      { name: 'Elements of a Short Story (Form 2)', code: 'F2-LC.1' },
+      { name: 'Introduction to Poetry (Form 2)', code: 'F2-LC.2' },
+      { name: 'Introduction to Drama (Form 2)', code: 'F2-LC.3' },
+      { name: 'Oral Literature: Genres and Features (Form 2)', code: 'F2-LC.4' },
+      { name: 'Expository Writing (Form 2)', code: 'F2-LC.5' },
+      { name: 'Formal Letters and Applications (Form 2)', code: 'F2-LC.6' },
+      { name: 'Note-Making and Summary (Form 2)', code: 'F2-LC.7' },
+      { name: 'Debating and Public Speaking (Form 2)', code: 'F2-LC.8' },
+    ] },
   { topic: 'F3 · Reading & Literature', code: 'F3-RL',
     subtopics: [
       { name: 'Comprehension: Inference and Evaluation (Form 3)', code: 'F3-RL.1' },
@@ -2352,6 +2442,45 @@ const KCSE_ENGLISH = [
 // KCSE Kiswahili — Forms 3 and 4, lesson level.
 // 6 topics / 43 lessons.
 const KCSE_KISWAHILI = [
+  { topic: 'F1 · Sarufi ya Msingi', code: 'F1-SYM',
+    subtopics: [
+      { name: 'Alfabeti na Matamshi (Form 1)', code: 'F1-SYM.1' },
+      { name: 'Nomino na Aina Zake (Form 1)', code: 'F1-SYM.2' },
+      { name: 'Vitenzi na Matumizi Yake (Form 1)', code: 'F1-SYM.3' },
+      { name: 'Vivumishi na Vielezi (Form 1)', code: 'F1-SYM.4' },
+      { name: 'Sentensi Sahili (Form 1)', code: 'F1-SYM.5' },
+      { name: 'Uakifishaji wa Msingi (Form 1)', code: 'F1-SYM.6' },
+      { name: 'Msamiati wa Kimsingi (Form 1)', code: 'F1-SYM.7' },
+    ] },
+  { topic: 'F1 · Fasihi na Uandishi', code: 'F1-FNU',
+    subtopics: [
+      { name: 'Fasihi Simulizi: Utangulizi (Form 1)', code: 'F1-FNU.1' },
+      { name: 'Hadithi Fupi (Form 1)', code: 'F1-FNU.2' },
+      { name: 'Insha ya Masimulizi (Form 1)', code: 'F1-FNU.3' },
+      { name: 'Insha ya Maelezo (Form 1)', code: 'F1-FNU.4' },
+      { name: 'Barua za Kirafiki (Form 1)', code: 'F1-FNU.5' },
+      { name: 'Kusikiliza na Kuzungumza (Form 1)', code: 'F1-FNU.6' },
+    ] },
+  { topic: 'F2 · Sarufi ya Kati', code: 'F2-SYK',
+    subtopics: [
+      { name: 'Ngeli za Nomino: Utangulizi (Form 2)', code: 'F2-SYK.1' },
+      { name: 'Nyakati na Hali za Vitenzi (Form 2)', code: 'F2-SYK.2' },
+      { name: 'Kauli za Vitenzi: Utangulizi (Form 2)', code: 'F2-SYK.3' },
+      { name: 'Viunganishi na Vihusishi (Form 2)', code: 'F2-SYK.4' },
+      { name: 'Sentensi Ambatani (Form 2)', code: 'F2-SYK.5' },
+      { name: 'Ukanushaji (Form 2)', code: 'F2-SYK.6' },
+      { name: 'Methali za Kawaida (Form 2)', code: 'F2-SYK.7' },
+    ] },
+  { topic: 'F2 · Fasihi na Uandishi', code: 'F2-FNU',
+    subtopics: [
+      { name: 'Ushairi: Utangulizi (Form 2)', code: 'F2-FNU.1' },
+      { name: 'Tamthilia: Utangulizi (Form 2)', code: 'F2-FNU.2' },
+      { name: 'Riwaya: Utangulizi (Form 2)', code: 'F2-FNU.3' },
+      { name: 'Insha ya Hoja (Form 2)', code: 'F2-FNU.4' },
+      { name: 'Barua Rasmi (Form 2)', code: 'F2-FNU.5' },
+      { name: 'Ripoti Fupi (Form 2)', code: 'F2-FNU.6' },
+      { name: 'Ufupisho (Form 2)', code: 'F2-FNU.7' },
+    ] },
   { topic: 'F3 · Lugha', code: 'F3-L',
     subtopics: [
       { name: 'Ngeli za Nomino (Form 3)', code: 'F3-L.1' },
@@ -2418,6 +2547,33 @@ const KCSE_KISWAHILI = [
 // KCSE Biology — Forms 3 and 4, lesson level.
 // 4 topics / 46 lessons.
 const KCSE_BIOLOGY = [
+  { topic: 'F1 · Introduction to Biology', code: 'F1-ITB',
+    subtopics: [
+      { name: 'What Biology Is and Why It Matters (Form 1)', code: 'F1-ITB.1' },
+      { name: 'Characteristics of Living Organisms (Form 1)', code: 'F1-ITB.2' },
+      { name: 'Collecting and Observing Specimens (Form 1)', code: 'F1-ITB.3' },
+      { name: 'The Microscope and Its Use (Form 1)', code: 'F1-ITB.4' },
+      { name: 'Cell Structure and Function (Form 1)', code: 'F1-ITB.5' },
+      { name: 'Cell Specialisation (Form 1)', code: 'F1-ITB.6' },
+      { name: 'Cell Physiology: Diffusion and Osmosis (Form 1)', code: 'F1-ITB.7' },
+      { name: 'Active Transport (Form 1)', code: 'F1-ITB.8' },
+      { name: 'Nutrition in Plants: Photosynthesis (Form 1)', code: 'F1-ITB.9' },
+      { name: 'Nutrition in Animals: Digestion (Form 1)', code: 'F1-ITB.10' },
+    ] },
+  { topic: 'F2 · Transport and Gas Exchange', code: 'F2-TAGE',
+    subtopics: [
+      { name: 'Transport in Plants (Form 2)', code: 'F2-TAGE.1' },
+      { name: 'Transport in Animals: Blood (Form 2)', code: 'F2-TAGE.2' },
+      { name: 'Transport in Animals: Circulation (Form 2)', code: 'F2-TAGE.3' },
+      { name: 'Gaseous Exchange in Plants (Form 2)', code: 'F2-TAGE.4' },
+      { name: 'Gaseous Exchange in Animals (Form 2)', code: 'F2-TAGE.5' },
+      { name: 'Respiration: Aerobic (Form 2)', code: 'F2-TAGE.6' },
+      { name: 'Respiration: Anaerobic (Form 2)', code: 'F2-TAGE.7' },
+      { name: 'Excretion in Plants and Animals (Form 2)', code: 'F2-TAGE.8' },
+      { name: 'The Skin and Temperature Control (Form 2)', code: 'F2-TAGE.9' },
+      { name: 'Classification I: Principles (Form 2)', code: 'F2-TAGE.10' },
+      { name: 'Classification II: Kingdoms (Form 2)', code: 'F2-TAGE.11' },
+    ] },
   { topic: 'F3 · Physiology', code: 'F3-P',
     subtopics: [
       { name: 'Classification I: Principles and Kingdoms (Form 3)', code: 'F3-P.1' },
@@ -2481,6 +2637,32 @@ const KCSE_BIOLOGY = [
 // KCSE Chemistry — Forms 3 and 4, lesson level.
 // 4 topics / 42 lessons.
 const KCSE_CHEMISTRY = [
+  { topic: 'F1 · Introduction to Chemistry', code: 'F1-ITC',
+    subtopics: [
+      { name: 'What Chemistry Is and Laboratory Safety (Form 1)', code: 'F1-ITC.1' },
+      { name: 'Apparatus and Their Uses (Form 1)', code: 'F1-ITC.2' },
+      { name: 'Simple Classification of Substances (Form 1)', code: 'F1-ITC.3' },
+      { name: 'Mixtures and Methods of Separation (Form 1)', code: 'F1-ITC.4' },
+      { name: 'Physical and Chemical Changes (Form 1)', code: 'F1-ITC.5' },
+      { name: 'Acids, Bases and Indicators (Form 1)', code: 'F1-ITC.6' },
+      { name: 'Air and Combustion (Form 1)', code: 'F1-ITC.7' },
+      { name: 'Water and Hydrogen (Form 1)', code: 'F1-ITC.8' },
+      { name: 'The Bunsen Burner and Heating (Form 1)', code: 'F1-ITC.9' },
+    ] },
+  { topic: 'F2 · Structure and Reactions', code: 'F2-SAR',
+    subtopics: [
+      { name: 'Structure of the Atom (Form 2)', code: 'F2-SAR.1' },
+      { name: 'Electron Arrangement (Form 2)', code: 'F2-SAR.2' },
+      { name: 'The Periodic Table: Groups and Periods (Form 2)', code: 'F2-SAR.3' },
+      { name: 'Chemical Families: Alkali Metals (Form 2)', code: 'F2-SAR.4' },
+      { name: 'Chemical Families: Halogens (Form 2)', code: 'F2-SAR.5' },
+      { name: 'Chemical Formulae and Equations (Form 2)', code: 'F2-SAR.6' },
+      { name: 'Ionic Bonding (Form 2)', code: 'F2-SAR.7' },
+      { name: 'Covalent Bonding (Form 2)', code: 'F2-SAR.8' },
+      { name: 'Metallic Bonding (Form 2)', code: 'F2-SAR.9' },
+      { name: 'Salts and Their Preparation (Form 2)', code: 'F2-SAR.10' },
+      { name: 'Effect of Electric Current on Substances (Form 2)', code: 'F2-SAR.11' },
+    ] },
   { topic: 'F3 · Physical & Inorganic', code: 'F3-PI',
     subtopics: [
       { name: 'The Mole and Avogadro Constant (Form 3)', code: 'F3-PI.1' },
@@ -2877,6 +3059,30 @@ const KCSE_PHYSICS = [
 // KCSE Geography — Forms 3 and 4, lesson level.
 // 4 topics / 33 lessons.
 const KCSE_GEOGRAPHY = [
+  { topic: 'F1 · Physical Foundations', code: 'F1-PF',
+    subtopics: [
+      { name: 'Introduction to Geography (Form 1)', code: 'F1-PF.1' },
+      { name: 'The Earth and the Solar System (Form 1)', code: 'F1-PF.2' },
+      { name: 'The Earth Movements and Their Effects (Form 1)', code: 'F1-PF.3' },
+      { name: 'Maps and Map Reading (Form 1)', code: 'F1-PF.4' },
+      { name: 'Statistical Methods: Introduction (Form 1)', code: 'F1-PF.5' },
+      { name: 'Field Work: Introduction (Form 1)', code: 'F1-PF.6' },
+      { name: 'Weather and Weather Measurement (Form 1)', code: 'F1-PF.7' },
+      { name: 'Rocks: Types and Formation (Form 1)', code: 'F1-PF.8' },
+    ] },
+  { topic: 'F2 · Landforms and Human Geography', code: 'F2-LAHG',
+    subtopics: [
+      { name: 'Internal Land-Forming Processes (Form 2)', code: 'F2-LAHG.1' },
+      { name: 'External Land-Forming Processes (Form 2)', code: 'F2-LAHG.2' },
+      { name: 'Water and Drainage Systems (Form 2)', code: 'F2-LAHG.3' },
+      { name: 'Oceans and Their Features (Form 2)', code: 'F2-LAHG.4' },
+      { name: 'Climate: Factors and Types (Form 2)', code: 'F2-LAHG.5' },
+      { name: 'Vegetation Regions (Form 2)', code: 'F2-LAHG.6' },
+      { name: 'Soils: Formation and Types (Form 2)', code: 'F2-LAHG.7' },
+      { name: 'Photograph Work (Form 2)', code: 'F2-LAHG.8' },
+      { name: 'Mining: Introduction (Form 2)', code: 'F2-LAHG.9' },
+      { name: 'Population: Introduction (Form 2)', code: 'F2-LAHG.10' },
+    ] },
   { topic: 'F3 · Physical Geography', code: 'F3-PG',
     subtopics: [
       { name: 'Vegetation: Types and Distribution (Form 3)', code: 'F3-PG.1' },
@@ -2927,6 +3133,30 @@ const KCSE_GEOGRAPHY = [
 // KCSE History & Government — Forms 3 and 4, lesson level.
 // 4 topics / 34 lessons.
 const KCSE_HISTORY_GOVERNMENT = [
+  { topic: 'F1 · Early Societies', code: 'F1-ES',
+    subtopics: [
+      { name: 'Introduction to History and Government (Form 1)', code: 'F1-ES.1' },
+      { name: 'Sources of Information on History (Form 1)', code: 'F1-ES.2' },
+      { name: 'Early Man and His Development (Form 1)', code: 'F1-ES.3' },
+      { name: 'Development of Agriculture (Form 1)', code: 'F1-ES.4' },
+      { name: 'Development of Trade (Form 1)', code: 'F1-ES.5' },
+      { name: 'Early Civilisations of Africa (Form 1)', code: 'F1-ES.6' },
+      { name: 'The Peopling of Kenya: Bantu (Form 1)', code: 'F1-ES.7' },
+      { name: 'The Peopling of Kenya: Nilotes and Cushites (Form 1)', code: 'F1-ES.8' },
+      { name: 'Social and Political Organisation of Kenyan Communities (Form 1)', code: 'F1-ES.9' },
+    ] },
+  { topic: 'F2 · Contact and Change', code: 'F2-CAC',
+    subtopics: [
+      { name: 'Contacts Between East Africa and the Outside World (Form 2)', code: 'F2-CAC.1' },
+      { name: 'The Coming of Missionaries (Form 2)', code: 'F2-CAC.2' },
+      { name: 'Trade in East Africa: Long Distance (Form 2)', code: 'F2-CAC.3' },
+      { name: 'Development of Transport and Communication (Form 2)', code: 'F2-CAC.4' },
+      { name: 'Introduction to Government (Form 2)', code: 'F2-CAC.5' },
+      { name: 'Citizenship and Its Responsibilities (Form 2)', code: 'F2-CAC.6' },
+      { name: 'The Constitution: Introduction (Form 2)', code: 'F2-CAC.7' },
+      { name: 'Human Rights and Freedoms (Form 2)', code: 'F2-CAC.8' },
+      { name: 'Democracy and Its Principles (Form 2)', code: 'F2-CAC.9' },
+    ] },
   { topic: 'F3 · African & World History', code: 'F3-AWH',
     subtopics: [
       { name: 'Development of Transport and Communication (Form 3)', code: 'F3-AWH.1' },
@@ -2978,6 +3208,30 @@ const KCSE_HISTORY_GOVERNMENT = [
 // KCSE Christian Religious Education — Forms 3 and 4, lesson level.
 // 4 topics / 29 lessons.
 const KCSE_CHRISTIAN_RELIGIOUS_EDUCATION = [
+  { topic: 'F1 · Foundations of Faith', code: 'F1-FOF',
+    subtopics: [
+      { name: 'Introduction to CRE and Its Importance (Form 1)', code: 'F1-FOF.1' },
+      { name: 'The Bible: Origin and Translation (Form 1)', code: 'F1-FOF.2' },
+      { name: 'Creation and the Fall (Form 1)', code: 'F1-FOF.3' },
+      { name: 'God’s Plan of Salvation (Form 1)', code: 'F1-FOF.4' },
+      { name: 'The Call of Abraham (Form 1)', code: 'F1-FOF.5' },
+      { name: 'The Covenant with Abraham (Form 1)', code: 'F1-FOF.6' },
+      { name: 'Moses and the Exodus (Form 1)', code: 'F1-FOF.7' },
+      { name: 'The Sinai Covenant and the Ten Commandments (Form 1)', code: 'F1-FOF.8' },
+      { name: 'African Traditional Understanding of God (Form 1)', code: 'F1-FOF.9' },
+    ] },
+  { topic: 'F2 · Prophets and the New Testament', code: 'F2-PATNT',
+    subtopics: [
+      { name: 'Leadership in Israel: Judges and Kings (Form 2)', code: 'F2-PATNT.1' },
+      { name: 'The Prophets: Their Role and Message (Form 2)', code: 'F2-PATNT.2' },
+      { name: 'Prophet Elijah and the Prophets of Baal (Form 2)', code: 'F2-PATNT.3' },
+      { name: 'Prophet Amos and Social Justice (Form 2)', code: 'F2-PATNT.4' },
+      { name: 'Prophet Jeremiah and Faithfulness (Form 2)', code: 'F2-PATNT.5' },
+      { name: 'The Birth and Childhood of Jesus (Form 2)', code: 'F2-PATNT.6' },
+      { name: 'The Baptism and Temptations of Jesus (Form 2)', code: 'F2-PATNT.7' },
+      { name: 'The Galilean Ministry (Form 2)', code: 'F2-PATNT.8' },
+      { name: 'African Traditional Rites of Passage (Form 2)', code: 'F2-PATNT.9' },
+    ] },
   { topic: 'F3 · Biblical Studies', code: 'F3-BS',
     subtopics: [
       { name: 'The Kingdom of God in the Teaching of Jesus (Form 3)', code: 'F3-BS.1' },
@@ -3024,6 +3278,29 @@ const KCSE_CHRISTIAN_RELIGIOUS_EDUCATION = [
 // KCSE Business Studies — Forms 3 and 4, lesson level.
 // 4 topics / 36 lessons.
 const KCSE_BUSINESS_STUDIES = [
+  { topic: 'F1 · Introduction to Business', code: 'F1-ITB',
+    subtopics: [
+      { name: 'Introduction to Business Studies (Form 1)', code: 'F1-ITB.1' },
+      { name: 'Business and Its Environment (Form 1)', code: 'F1-ITB.2' },
+      { name: 'Satisfaction of Human Wants (Form 1)', code: 'F1-ITB.3' },
+      { name: 'Production and Its Factors (Form 1)', code: 'F1-ITB.4' },
+      { name: 'Entrepreneurship: Introduction (Form 1)', code: 'F1-ITB.5' },
+      { name: 'Office and Office Work (Form 1)', code: 'F1-ITB.6' },
+      { name: 'Home Trade: Introduction (Form 1)', code: 'F1-ITB.7' },
+      { name: 'Forms of Business Units (Form 1)', code: 'F1-ITB.8' },
+    ] },
+  { topic: 'F2 · Trade and Records', code: 'F2-TAR',
+    subtopics: [
+      { name: 'Trade: Wholesale and Retail (Form 2)', code: 'F2-TAR.1' },
+      { name: 'Documents Used in Home Trade (Form 2)', code: 'F2-TAR.2' },
+      { name: 'Means of Payment (Form 2)', code: 'F2-TAR.3' },
+      { name: 'Warehousing: Introduction (Form 2)', code: 'F2-TAR.4' },
+      { name: 'Transport: Introduction (Form 2)', code: 'F2-TAR.5' },
+      { name: 'Communication in Business (Form 2)', code: 'F2-TAR.6' },
+      { name: 'Introduction to Book-Keeping (Form 2)', code: 'F2-TAR.7' },
+      { name: 'The Ledger and Double Entry: Basics (Form 2)', code: 'F2-TAR.8' },
+      { name: 'Demand and Supply: Introduction (Form 2)', code: 'F2-TAR.9' },
+    ] },
   { topic: 'F3 · Commerce & Finance', code: 'F3-CF',
     subtopics: [
       { name: 'Product Promotion and Advertising (Form 3)', code: 'F3-CF.1' },
@@ -3077,6 +3354,32 @@ const KCSE_BUSINESS_STUDIES = [
 // KCSE Agriculture — Forms 3 and 4, lesson level.
 // 4 topics / 35 lessons.
 const KCSE_AGRICULTURE = [
+  { topic: 'F1 · Introduction to Agriculture', code: 'F1-ITA',
+    subtopics: [
+      { name: 'Introduction to Agriculture and Its Branches (Form 1)', code: 'F1-ITA.1' },
+      { name: 'Factors Influencing Agriculture (Form 1)', code: 'F1-ITA.2' },
+      { name: 'Farming Systems (Form 1)', code: 'F1-ITA.3' },
+      { name: 'Soil: Formation and Composition (Form 1)', code: 'F1-ITA.4' },
+      { name: 'Soil Fertility: Introduction (Form 1)', code: 'F1-ITA.5' },
+      { name: 'Water Supply on the Farm (Form 1)', code: 'F1-ITA.6' },
+      { name: 'Nursery Practices (Form 1)', code: 'F1-ITA.7' },
+      { name: 'Crop Production: Land Preparation (Form 1)', code: 'F1-ITA.8' },
+      { name: 'Livestock Production: Introduction (Form 1)', code: 'F1-ITA.9' },
+      { name: 'Farm Tools and Equipment (Form 1)', code: 'F1-ITA.10' },
+    ] },
+  { topic: 'F2 · Practices and Management', code: 'F2-PAM',
+    subtopics: [
+      { name: 'Soil and Water Conservation (Form 2)', code: 'F2-PAM.1' },
+      { name: 'Crop Propagation and Planting (Form 2)', code: 'F2-PAM.2' },
+      { name: 'Weeds: Identification and Control (Form 2)', code: 'F2-PAM.3' },
+      { name: 'Crop Pests: Identification (Form 2)', code: 'F2-PAM.4' },
+      { name: 'Crop Diseases: Identification (Form 2)', code: 'F2-PAM.5' },
+      { name: 'Livestock Breeds: Cattle (Form 2)', code: 'F2-PAM.6' },
+      { name: 'Livestock Breeds: Sheep, Goats and Poultry (Form 2)', code: 'F2-PAM.7' },
+      { name: 'Livestock Nutrition: Introduction (Form 2)', code: 'F2-PAM.8' },
+      { name: 'Farm Structures: Introduction (Form 2)', code: 'F2-PAM.9' },
+      { name: 'Agricultural Economics: Introduction (Form 2)', code: 'F2-PAM.10' },
+    ] },
   { topic: 'F3 · Crop & Soil', code: 'F3-CS',
     subtopics: [
       { name: 'Soil Fertility: Organic Manures (Form 3)', code: 'F3-CS.1' },
@@ -3129,6 +3432,31 @@ const KCSE_AGRICULTURE = [
 // KCSE Computer Studies — Forms 3 and 4, lesson level.
 // 4 topics / 34 lessons.
 const KCSE_COMPUTER_STUDIES = [
+  { topic: 'F1 · Computer Fundamentals', code: 'F1-CF',
+    subtopics: [
+      { name: 'Introduction to Computers (Form 1)', code: 'F1-CF.1' },
+      { name: 'History and Development of Computers (Form 1)', code: 'F1-CF.2' },
+      { name: 'Classification of Computers (Form 1)', code: 'F1-CF.3' },
+      { name: 'Computer Hardware: Input Devices (Form 1)', code: 'F1-CF.4' },
+      { name: 'Computer Hardware: Output Devices (Form 1)', code: 'F1-CF.5' },
+      { name: 'Computer Hardware: Storage Devices (Form 1)', code: 'F1-CF.6' },
+      { name: 'Computer Software: System and Application (Form 1)', code: 'F1-CF.7' },
+      { name: 'Operating Systems: Introduction (Form 1)', code: 'F1-CF.8' },
+      { name: 'Computer Laboratory Care and Safety (Form 1)', code: 'F1-CF.9' },
+    ] },
+  { topic: 'F2 · Applications and Systems', code: 'F2-AAS',
+    subtopics: [
+      { name: 'Word Processing: Basics (Form 2)', code: 'F2-AAS.1' },
+      { name: 'Word Processing: Formatting (Form 2)', code: 'F2-AAS.2' },
+      { name: 'Spreadsheets: Basics (Form 2)', code: 'F2-AAS.3' },
+      { name: 'Spreadsheets: Simple Formulae (Form 2)', code: 'F2-AAS.4' },
+      { name: 'Databases: Basic Concepts (Form 2)', code: 'F2-AAS.5' },
+      { name: 'Desktop Publishing: Introduction (Form 2)', code: 'F2-AAS.6' },
+      { name: 'Data Representation: Introduction (Form 2)', code: 'F2-AAS.7' },
+      { name: 'Computer Networks: Introduction (Form 2)', code: 'F2-AAS.8' },
+      { name: 'Internet and Email: Basics (Form 2)', code: 'F2-AAS.9' },
+      { name: 'Impact of Computers on Society (Form 2)', code: 'F2-AAS.10' },
+    ] },
   { topic: 'F3 · Applications', code: 'F3-A',
     subtopics: [
       { name: 'Word Processing: Advanced Formatting (Form 3)', code: 'F3-A.1' },
@@ -3190,6 +3518,30 @@ const KCSE_COMPUTER_STUDIES = [
 // depth, the same form split, and the same balance between text study
 // and contemporary application.
 const KCSE_ISLAMIC_RELIGIOUS_EDUCATION = [
+  { topic: 'F1 · Foundations of Islam', code: 'F1-FOI',
+    subtopics: [
+      { name: 'Introduction to IRE and Its Importance (Form 1)', code: 'F1-FOI.1' },
+      { name: 'The Qur’an: Revelation and Significance (Form 1)', code: 'F1-FOI.2' },
+      { name: 'Selected Short Surahs and Their Meaning (Form 1)', code: 'F1-FOI.3' },
+      { name: 'Tahara: Purity and Cleanliness (Form 1)', code: 'F1-FOI.4' },
+      { name: 'Salat: The Obligatory Prayers (Form 1)', code: 'F1-FOI.5' },
+      { name: 'The Five Pillars of Islam (Form 1)', code: 'F1-FOI.6' },
+      { name: 'The Six Articles of Faith (Form 1)', code: 'F1-FOI.7' },
+      { name: 'The Life of Prophet Muhammad in Makkah (Form 1)', code: 'F1-FOI.8' },
+      { name: 'Akhlaq: Good Manners (Form 1)', code: 'F1-FOI.9' },
+    ] },
+  { topic: 'F2 · Practice and History', code: 'F2-PAH',
+    subtopics: [
+      { name: 'Sawm: Fasting in Ramadhan (Form 2)', code: 'F2-PAH.1' },
+      { name: 'Zakat: Obligatory Charity (Form 2)', code: 'F2-PAH.2' },
+      { name: 'Hajj: The Pilgrimage (Form 2)', code: 'F2-PAH.3' },
+      { name: 'Halal and Haram in Daily Life (Form 2)', code: 'F2-PAH.4' },
+      { name: 'Selected Hadith and Their Teachings (Form 2)', code: 'F2-PAH.5' },
+      { name: 'The Hijra and the Madina Period (Form 2)', code: 'F2-PAH.6' },
+      { name: 'The Battles of Early Islam (Form 2)', code: 'F2-PAH.7' },
+      { name: 'Family Life and Respect for Parents (Form 2)', code: 'F2-PAH.8' },
+      { name: 'Islam and the Environment (Form 2)', code: 'F2-PAH.9' },
+    ] },
   { topic: 'F3 · Qur\u2019an and Hadith', code: 'F3-QH',
     subtopics: [
       { name: 'Revelation and Compilation of the Qur\u2019an (Form 3)', code: 'F3-QH.1' },
