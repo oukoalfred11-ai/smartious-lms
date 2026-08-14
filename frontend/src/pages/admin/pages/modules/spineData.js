@@ -4401,9 +4401,352 @@ const ALEVEL_BIOLOGY_9700 = [
 // and matching against one combined list would let an IGCSE spine load
 // onto an A Level subject.
 // ═══════════════════════════════════════════════════════════
+// Cambridge International AS & A Level Chemistry 9701
+// Lesson-level spine, 22 topics / 254 lessons.
+//
+// STRUCTURE
+// 9701 runs three strands — physical, inorganic and organic — through
+// BOTH levels rather than teaching them in sequence. The topic names
+// keep that visible, because a teacher planning a term needs to see
+// which strand a lesson belongs to, not just which level.
+//
+// AS and A2 are separated by prefix, as in the Biology spine: filtering
+// the bank on "AS ·" returns exactly the AS content. A2 papers assume
+// AS throughout, which is why this is one continuous spine.
+const ALEVEL_CHEMISTRY_9701 = [
+  // ─────────────── AS: PHYSICAL ───────────────
+  { topic: 'AS \u00b7 Physical 1 \u2014 Atomic Structure', code: 'AS1',
+    subtopics: [
+      { name: 'Protons, Neutrons & Electrons: Mass and Charge', code: 'AS1.1' },
+      { name: 'Atomic Number, Mass Number & Isotopes', code: 'AS1.2' },
+      { name: 'Behaviour of Particles in an Electric Field', code: 'AS1.3' },
+      { name: 'Electronic Configuration: Shells, Subshells & Orbitals', code: 'AS1.4' },
+      { name: 'Shapes of s and p Orbitals', code: 'AS1.5' },
+      { name: 'Writing Electronic Configurations Including Ions', code: 'AS1.6' },
+      { name: 'First Ionisation Energy & Its Definition', code: 'AS1.7' },
+      { name: 'Successive Ionisation Energies as Evidence for Shells', code: 'AS1.8' },
+      { name: 'Trends in Ionisation Energy Across a Period', code: 'AS1.9' },
+      { name: 'Trends in Ionisation Energy Down a Group', code: 'AS1.10' },
+    ] },
+
+  { topic: 'AS \u00b7 Physical 2 \u2014 Atoms, Molecules & Stoichiometry', code: 'AS2',
+    subtopics: [
+      { name: 'Relative Atomic, Isotopic & Molecular Mass', code: 'AS2.1' },
+      { name: 'The Mole & The Avogadro Constant', code: 'AS2.2' },
+      { name: 'Calculations Involving Mass, Moles & Molar Mass', code: 'AS2.3' },
+      { name: 'Empirical & Molecular Formulae from Composition', code: 'AS2.4' },
+      { name: 'Writing & Balancing Chemical Equations', code: 'AS2.5' },
+      { name: 'Ionic Equations & Spectator Ions', code: 'AS2.6' },
+      { name: 'Concentration, Volume & Solution Calculations', code: 'AS2.7' },
+      { name: 'Titration Calculations', code: 'AS2.8' },
+      { name: 'The Ideal Gas Equation & Molar Gas Volume', code: 'AS2.9' },
+      { name: 'Limiting Reagent, Percentage Yield & Atom Economy', code: 'AS2.10' },
+    ] },
+
+  { topic: 'AS \u00b7 Physical 3 \u2014 Chemical Bonding', code: 'AS3',
+    subtopics: [
+      { name: 'Ionic Bonding & Lattice Formation', code: 'AS3.1' },
+      { name: 'Covalent Bonding & Dot-and-Cross Diagrams', code: 'AS3.2' },
+      { name: 'Dative Covalent (Coordinate) Bonding', code: 'AS3.3' },
+      { name: 'Bond Energy, Bond Length & Bond Polarity', code: 'AS3.4' },
+      { name: 'Electronegativity & Polar Bonds', code: 'AS3.5' },
+      { name: 'VSEPR Theory & Predicting Molecular Shapes', code: 'AS3.6' },
+      { name: 'Bond Angles in Common Molecules and Ions', code: 'AS3.7' },
+      { name: 'Sigma & Pi Bonds', code: 'AS3.8' },
+      { name: 'Van der Waals Forces & Permanent Dipole Interactions', code: 'AS3.9' },
+      { name: 'Hydrogen Bonding & Its Effect on Physical Properties', code: 'AS3.10' },
+      { name: 'The Anomalous Properties of Water', code: 'AS3.11' },
+      { name: 'Metallic Bonding & The Electron Sea Model', code: 'AS3.12' },
+      { name: 'Giant Structures: Diamond, Graphite & Silicon Dioxide', code: 'AS3.13' },
+      { name: 'Relating Structure & Bonding to Physical Properties', code: 'AS3.14' },
+    ] },
+
+  { topic: 'AS \u00b7 Physical 4 \u2014 States of Matter', code: 'AS4',
+    subtopics: [
+      { name: 'The Kinetic Theory & The Three States', code: 'AS4.1' },
+      { name: 'Ideal & Real Gas Behaviour', code: 'AS4.2' },
+      { name: 'Conditions Under Which Real Gases Deviate', code: 'AS4.3' },
+      { name: 'Lattice Types: Ionic, Simple Molecular, Giant & Metallic', code: 'AS4.4' },
+      { name: 'Comparing Lattice Structures & Their Properties', code: 'AS4.5' },
+    ] },
+
+  { topic: 'AS \u00b7 Physical 5 \u2014 Chemical Energetics', code: 'AS5',
+    subtopics: [
+      { name: 'Exothermic & Endothermic Reactions', code: 'AS5.1' },
+      { name: 'Enthalpy Change & Standard Conditions', code: 'AS5.2' },
+      { name: 'Enthalpy of Formation, Combustion & Neutralisation', code: 'AS5.3' },
+      { name: 'Reaction Pathway (Energy Level) Diagrams', code: 'AS5.4' },
+      { name: 'Calculating Enthalpy Change from Experimental Data', code: 'AS5.5' },
+      { name: 'Hess\u2019s Law & Energy Cycles', code: 'AS5.6' },
+      { name: 'Calculations Using Enthalpies of Formation', code: 'AS5.7' },
+      { name: 'Calculations Using Enthalpies of Combustion', code: 'AS5.8' },
+      { name: 'Bond Energies & Their Use in Calculations', code: 'AS5.9' },
+    ] },
+
+  { topic: 'AS \u00b7 Physical 6 \u2014 Electrochemistry & Redox', code: 'AS6',
+    subtopics: [
+      { name: 'Oxidation Numbers & Assigning Them', code: 'AS6.1' },
+      { name: 'Identifying Oxidation & Reduction in Reactions', code: 'AS6.2' },
+      { name: 'Constructing Redox Half-Equations', code: 'AS6.3' },
+      { name: 'Combining Half-Equations into Full Equations', code: 'AS6.4' },
+      { name: 'Using Oxidation Numbers in Nomenclature', code: 'AS6.5' },
+    ] },
+
+  { topic: 'AS \u00b7 Physical 7 \u2014 Equilibria', code: 'AS7',
+    subtopics: [
+      { name: 'Reversible Reactions & Dynamic Equilibrium', code: 'AS7.1' },
+      { name: 'Le Chatelier\u2019s Principle: Concentration & Pressure', code: 'AS7.2' },
+      { name: 'Le Chatelier\u2019s Principle: Temperature & Catalysts', code: 'AS7.3' },
+      { name: 'The Equilibrium Constant Kc', code: 'AS7.4' },
+      { name: 'Calculations Involving Kc', code: 'AS7.5' },
+      { name: 'The Equilibrium Constant Kp & Partial Pressures', code: 'AS7.6' },
+      { name: 'Industrial Equilibria: Haber & Contact Processes', code: 'AS7.7' },
+      { name: 'Br\u00f8nsted-Lowry Acids & Bases', code: 'AS7.8' },
+      { name: 'Conjugate Acid-Base Pairs', code: 'AS7.9' },
+      { name: 'Strong & Weak Acids and Bases', code: 'AS7.10' },
+    ] },
+
+  { topic: 'AS \u00b7 Physical 8 \u2014 Reaction Kinetics', code: 'AS8',
+    subtopics: [
+      { name: 'Collision Theory & Effective Collisions', code: 'AS8.1' },
+      { name: 'Activation Energy & The Reaction Profile', code: 'AS8.2' },
+      { name: 'The Boltzmann Distribution', code: 'AS8.3' },
+      { name: 'Effect of Temperature on Rate Explained by Boltzmann', code: 'AS8.4' },
+      { name: 'Effect of Concentration, Pressure & Surface Area', code: 'AS8.5' },
+      { name: 'Homogeneous & Heterogeneous Catalysis', code: 'AS8.6' },
+      { name: 'How a Catalyst Alters the Reaction Pathway', code: 'AS8.7' },
+      { name: 'Measuring Rate of Reaction Experimentally', code: 'AS8.8' },
+    ] },
+
+  // ─────────────── AS: INORGANIC ───────────────
+  { topic: 'AS \u00b7 Inorganic 9 \u2014 The Periodic Table: Period 3', code: 'AS9',
+    subtopics: [
+      { name: 'Periodicity & The Structure of the Periodic Table', code: 'AS9.1' },
+      { name: 'Trends in Atomic Radius & Ionic Radius', code: 'AS9.2' },
+      { name: 'Trends in Melting Point Across Period 3', code: 'AS9.3' },
+      { name: 'Trends in Electrical Conductivity', code: 'AS9.4' },
+      { name: 'Reactions of Period 3 Elements with Oxygen', code: 'AS9.5' },
+      { name: 'Reactions of Period 3 Elements with Chlorine', code: 'AS9.6' },
+      { name: 'Reactions of Period 3 Elements with Water', code: 'AS9.7' },
+      { name: 'Acid-Base Behaviour of Period 3 Oxides', code: 'AS9.8' },
+      { name: 'Reactions of Period 3 Chlorides with Water', code: 'AS9.9' },
+      { name: 'Explaining Periodic Trends from Structure & Bonding', code: 'AS9.10' },
+    ] },
+
+  { topic: 'AS \u00b7 Inorganic 10 \u2014 Group 2', code: 'AS10',
+    subtopics: [
+      { name: 'Reactions of Group 2 Elements with Oxygen & Water', code: 'AS10.1' },
+      { name: 'Reactions of Group 2 Oxides & Hydroxides with Acid', code: 'AS10.2' },
+      { name: 'Trends in Solubility of Group 2 Hydroxides & Sulfates', code: 'AS10.3' },
+      { name: 'Thermal Decomposition of Group 2 Carbonates & Nitrates', code: 'AS10.4' },
+      { name: 'Explaining Thermal Stability by Ionic Charge Density', code: 'AS10.5' },
+      { name: 'Uses of Group 2 Compounds', code: 'AS10.6' },
+    ] },
+
+  { topic: 'AS \u00b7 Inorganic 11 \u2014 Group 17', code: 'AS11',
+    subtopics: [
+      { name: 'Physical Properties & Trends Down Group 17', code: 'AS11.1' },
+      { name: 'Halogens as Oxidising Agents & Displacement Reactions', code: 'AS11.2' },
+      { name: 'Reactions of Halide Ions with Silver Nitrate & Ammonia', code: 'AS11.3' },
+      { name: 'Reactions of Halide Ions with Concentrated Sulfuric Acid', code: 'AS11.4' },
+      { name: 'Disproportionation of Chlorine in Water & Alkali', code: 'AS11.5' },
+      { name: 'Uses of Chlorine & Chlorate(I) in Water Treatment', code: 'AS11.6' },
+    ] },
+
+  { topic: 'AS \u00b7 Inorganic 12 \u2014 Nitrogen & Sulfur', code: 'AS12',
+    subtopics: [
+      { name: 'The Unreactivity of Nitrogen & The Nitrogen Cycle', code: 'AS12.1' },
+      { name: 'Ammonia: Structure, Basicity & Manufacture', code: 'AS12.2' },
+      { name: 'Ammonium Salts & The Test for Ammonium Ions', code: 'AS12.3' },
+      { name: 'Environmental Consequences of Nitrogen Compounds', code: 'AS12.4' },
+      { name: 'Sulfur Dioxide, Acid Rain & Flue Gas Desulfurisation', code: 'AS12.5' },
+      { name: 'Uses of Sulfur Dioxide as a Preservative', code: 'AS12.6' },
+    ] },
+
+  // ─────────────── AS: ORGANIC ───────────────
+  { topic: 'AS \u00b7 Organic 13 \u2014 Introduction to Organic Chemistry', code: 'AS13',
+    subtopics: [
+      { name: 'Functional Groups & Homologous Series', code: 'AS13.1' },
+      { name: 'IUPAC Nomenclature of Organic Compounds', code: 'AS13.2' },
+      { name: 'Empirical, Molecular, Structural, Displayed & Skeletal Formulae', code: 'AS13.3' },
+      { name: 'Structural Isomerism: Chain, Position & Functional Group', code: 'AS13.4' },
+      { name: 'Stereoisomerism: Cis-Trans (E/Z)', code: 'AS13.5' },
+      { name: 'Optical Isomerism & Chirality', code: 'AS13.6' },
+      { name: 'Bond Breaking: Homolytic & Heterolytic Fission', code: 'AS13.7' },
+      { name: 'Reaction Types: Addition, Substitution & Elimination', code: 'AS13.8' },
+      { name: 'Nucleophiles, Electrophiles & Free Radicals', code: 'AS13.9' },
+      { name: 'Using Curly Arrows to Represent Mechanisms', code: 'AS13.10' },
+    ] },
+
+  { topic: 'AS \u00b7 Organic 14 \u2014 Hydrocarbons', code: 'AS14',
+    subtopics: [
+      { name: 'Alkanes: Structure, Properties & Sources', code: 'AS14.1' },
+      { name: 'Combustion of Alkanes & Environmental Consequences', code: 'AS14.2' },
+      { name: 'Free Radical Substitution of Alkanes', code: 'AS14.3' },
+      { name: 'Cracking & The Petrochemical Industry', code: 'AS14.4' },
+      { name: 'Alkenes: Structure & The Nature of the Double Bond', code: 'AS14.5' },
+      { name: 'Electrophilic Addition of Hydrogen Halides', code: 'AS14.6' },
+      { name: 'Markovnikov\u2019s Rule & Carbocation Stability', code: 'AS14.7' },
+      { name: 'Addition of Bromine, Hydrogen & Steam', code: 'AS14.8' },
+      { name: 'Oxidation of Alkenes with Manganate(VII)', code: 'AS14.9' },
+      { name: 'Addition Polymerisation & Polymer Disposal', code: 'AS14.10' },
+    ] },
+
+  { topic: 'AS \u00b7 Organic 15 \u2014 Halogenoalkanes, Alcohols & Carbonyls', code: 'AS15',
+    subtopics: [
+      { name: 'Halogenoalkanes: Classification & Reactivity', code: 'AS15.1' },
+      { name: 'Nucleophilic Substitution: SN1 and SN2 Mechanisms', code: 'AS15.2' },
+      { name: 'Elimination Reactions of Halogenoalkanes', code: 'AS15.3' },
+      { name: 'Uses & Environmental Impact of Halogenoalkanes', code: 'AS15.4' },
+      { name: 'Alcohols: Classification, Properties & Hydrogen Bonding', code: 'AS15.5' },
+      { name: 'Oxidation of Primary, Secondary & Tertiary Alcohols', code: 'AS15.6' },
+      { name: 'Esterification & Dehydration of Alcohols', code: 'AS15.7' },
+      { name: 'The Tri-Iodomethane (Iodoform) Test', code: 'AS15.8' },
+      { name: 'Aldehydes & Ketones: Structure and Distinguishing Tests', code: 'AS15.9' },
+      { name: 'Nucleophilic Addition of HCN to Carbonyls', code: 'AS15.10' },
+      { name: 'Reduction of Carbonyl Compounds', code: 'AS15.11' },
+      { name: 'Carboxylic Acids: Preparation & Reactions', code: 'AS15.12' },
+      { name: 'Esters: Formation, Hydrolysis & Uses', code: 'AS15.13' },
+    ] },
+
+  // ─────────────── A2 ───────────────
+  { topic: 'A2 \u00b7 Physical 16 \u2014 Lattice Energy & Born-Haber', code: 'A2-16',
+    subtopics: [
+      { name: 'Lattice Energy & Its Definition', code: 'A2-16.1' },
+      { name: 'Enthalpy of Atomisation & Electron Affinity', code: 'A2-16.2' },
+      { name: 'Constructing a Born-Haber Cycle', code: 'A2-16.3' },
+      { name: 'Calculations Using Born-Haber Cycles', code: 'A2-16.4' },
+      { name: 'Factors Affecting the Magnitude of Lattice Energy', code: 'A2-16.5' },
+      { name: 'Enthalpy of Hydration & Enthalpy of Solution', code: 'A2-16.6' },
+      { name: 'Explaining Solubility Using Energy Cycles', code: 'A2-16.7' },
+      { name: 'Entropy: Meaning & Predicting Sign of Change', code: 'A2-16.8' },
+      { name: 'Gibbs Free Energy & Feasibility of Reaction', code: 'A2-16.9' },
+      { name: 'Effect of Temperature on Feasibility', code: 'A2-16.10' },
+    ] },
+
+  { topic: 'A2 \u00b7 Physical 17 \u2014 Electrochemistry', code: 'A2-17',
+    subtopics: [
+      { name: 'Standard Electrode Potential & The Hydrogen Electrode', code: 'A2-17.1' },
+      { name: 'Measuring Electrode Potentials & The Electrochemical Series', code: 'A2-17.2' },
+      { name: 'Calculating Standard Cell Potential', code: 'A2-17.3' },
+      { name: 'Predicting Feasibility of Redox Reactions', code: 'A2-17.4' },
+      { name: 'Effect of Concentration on Electrode Potential', code: 'A2-17.5' },
+      { name: 'The Nernst Equation', code: 'A2-17.6' },
+      { name: 'Electrolysis: Products & Quantitative Calculations', code: 'A2-17.7' },
+      { name: 'The Faraday Constant & Charge Calculations', code: 'A2-17.8' },
+      { name: 'Fuel Cells & Rechargeable Batteries', code: 'A2-17.9' },
+    ] },
+
+  { topic: 'A2 \u00b7 Physical 18 \u2014 Advanced Equilibria & Kinetics', code: 'A2-18',
+    subtopics: [
+      { name: 'The Ionic Product of Water & pH', code: 'A2-18.1' },
+      { name: 'Calculating pH of Strong Acids and Bases', code: 'A2-18.2' },
+      { name: 'Ka, pKa & Calculating pH of Weak Acids', code: 'A2-18.3' },
+      { name: 'Buffer Solutions: Composition & Action', code: 'A2-18.4' },
+      { name: 'Calculating the pH of a Buffer', code: 'A2-18.5' },
+      { name: 'Buffers in Blood & Their Biological Importance', code: 'A2-18.6' },
+      { name: 'Titration Curves & Choice of Indicator', code: 'A2-18.7' },
+      { name: 'Solubility Product Ksp & Calculations', code: 'A2-18.8' },
+      { name: 'The Common Ion Effect', code: 'A2-18.9' },
+      { name: 'Partition Coefficients', code: 'A2-18.10' },
+      { name: 'Rate Equations, Rate Constants & Order of Reaction', code: 'A2-18.11' },
+      { name: 'Determining Order from Concentration-Time Graphs', code: 'A2-18.12' },
+      { name: 'Half-Life & First Order Reactions', code: 'A2-18.13' },
+      { name: 'Initial Rates Method & Rate-Determining Step', code: 'A2-18.14' },
+      { name: 'Deducing Mechanisms from Rate Equations', code: 'A2-18.15' },
+      { name: 'The Arrhenius Equation', code: 'A2-18.16' },
+      { name: 'Catalysis & Its Effect on the Rate Constant', code: 'A2-18.17' },
+      { name: 'Autocatalysis', code: 'A2-18.18' },
+      { name: 'Acid-Base Indicators & Their pKa', code: 'A2-18.19' },
+      { name: 'Calculating pH Change on Adding Acid or Base to a Buffer', code: 'A2-18.20' },
+    ] },
+
+  { topic: 'A2 \u00b7 Inorganic 19 \u2014 Group 2, 17 & Transition Elements', code: 'A2-19',
+    subtopics: [
+      { name: 'Characteristic Properties of Transition Elements', code: 'A2-19.1' },
+      { name: 'Variable Oxidation States & Their Explanation', code: 'A2-19.2' },
+      { name: 'Complex Ions, Ligands & Coordination Number', code: 'A2-19.3' },
+      { name: 'Shapes of Complex Ions & Isomerism in Complexes', code: 'A2-19.4' },
+      { name: 'Ligand Exchange Reactions & Stability Constants', code: 'A2-19.5' },
+      { name: 'Colour in Transition Metal Complexes & d-Orbital Splitting', code: 'A2-19.6' },
+      { name: 'Transition Metals as Catalysts', code: 'A2-19.7' },
+      { name: 'Redox Chemistry of Manganate(VII) & Dichromate(VI)', code: 'A2-19.8' },
+      { name: 'Reactions of Aqueous Cations with Hydroxide & Ammonia', code: 'A2-19.9' },
+      { name: 'Identifying Transition Metal Ions by Test', code: 'A2-19.10' },
+      { name: 'Thermal Stability of Group 2 Carbonates Revisited', code: 'A2-19.11' },
+      { name: 'Group 2: Quantitative Treatment of Solubility Trends', code: 'A2-19.12' },
+      { name: 'Group 17: Redox Potentials & Relative Oxidising Power', code: 'A2-19.13' },
+      { name: 'Disproportionation Reactions Explained by E° Values', code: 'A2-19.14' },
+      { name: 'Iron(II)/Iron(III) Chemistry & Redox Titrations', code: 'A2-19.15' },
+      { name: 'Manganate(VII) Titrations & Calculations', code: 'A2-19.16' },
+      { name: 'Iodine-Thiosulfate Titrations', code: 'A2-19.17' },
+      { name: 'Copper Chemistry: Complexes & Colour Changes', code: 'A2-19.18' },
+      { name: 'Cobalt & Chromium Complexes', code: 'A2-19.19' },
+      { name: 'Predicting Products of Inorganic Reactions', code: 'A2-19.20' },
+    ] },
+
+  { topic: 'A2 \u00b7 Organic 20 \u2014 Arenes, Nitrogen Compounds & Polymers', code: 'A2-20',
+    subtopics: [
+      { name: 'Benzene: Structure & Evidence for Delocalisation', code: 'A2-20.1' },
+      { name: 'Electrophilic Substitution: Nitration & Halogenation', code: 'A2-20.2' },
+      { name: 'Friedel-Crafts Alkylation & Acylation', code: 'A2-20.3' },
+      { name: 'Directing Effects of Substituents on the Ring', code: 'A2-20.4' },
+      { name: 'Phenol: Acidity & Reactions', code: 'A2-20.5' },
+      { name: 'Comparing Phenol, Alcohols & Carboxylic Acids', code: 'A2-20.6' },
+      { name: 'Amines: Basicity & Comparison of Strengths', code: 'A2-20.7' },
+      { name: 'Preparation of Aliphatic & Aromatic Amines', code: 'A2-20.8' },
+      { name: 'Diazotisation & Azo Dye Formation', code: 'A2-20.9' },
+      { name: 'Amino Acids: Zwitterions & Isoelectric Point', code: 'A2-20.10' },
+      { name: 'Peptide Bonds & Protein Structure', code: 'A2-20.11' },
+      { name: 'Acyl Chlorides & Their Reactions', code: 'A2-20.12' },
+      { name: 'Condensation Polymerisation: Polyesters & Polyamides', code: 'A2-20.13' },
+      { name: 'Hydrolysis of Polymers & Environmental Considerations', code: 'A2-20.14' },
+      { name: 'Organic Synthesis: Devising Multi-Step Routes', code: 'A2-20.15' },
+      { name: 'Nitrile Chemistry: Formation, Hydrolysis & Reduction', code: 'A2-20.16' },
+      { name: 'Extending the Carbon Chain in Synthesis', code: 'A2-20.17' },
+      { name: 'Protecting Groups & Selectivity in Synthesis', code: 'A2-20.18' },
+      { name: 'Reactions of Aromatic Side Chains', code: 'A2-20.19' },
+      { name: 'Comparing Reactivity of Aliphatic & Aromatic Compounds', code: 'A2-20.20' },
+      { name: 'Optical Activity in Synthesis & Racemic Mixtures', code: 'A2-20.21' },
+      { name: 'Predicting Products & Deducing Reagents', code: 'A2-20.22' },
+      { name: 'Identifying Unknown Organic Compounds from Reactions', code: 'A2-20.23' },
+    ] },
+
+  { topic: 'A2 \u00b7 Analysis 21 \u2014 Analytical Techniques', code: 'A2-21',
+    subtopics: [
+      { name: 'Thin-Layer & Paper Chromatography: Rf Values', code: 'A2-21.1' },
+      { name: 'Gas-Liquid Chromatography & Retention Times', code: 'A2-21.2' },
+      { name: 'Mass Spectrometry: Molecular Ion & Fragmentation', code: 'A2-21.3' },
+      { name: 'Isotopic Patterns: Chlorine & Bromine Peaks', code: 'A2-21.4' },
+      { name: 'Infrared Spectroscopy & Characteristic Absorptions', code: 'A2-21.5' },
+      { name: 'Interpreting an Infrared Spectrum', code: 'A2-21.6' },
+      { name: 'Proton NMR: Chemical Shift & Integration', code: 'A2-21.7' },
+      { name: 'Proton NMR: Spin-Spin Splitting & The n+1 Rule', code: 'A2-21.8' },
+      { name: 'Carbon-13 NMR Spectroscopy', code: 'A2-21.9' },
+      { name: 'Combining Spectra to Deduce a Structure', code: 'A2-21.10' },
+    ] },
+
+  { topic: 'A2 \u00b7 Practical & Exam Skills', code: 'A2-EX',
+    subtopics: [
+      { name: 'Paper 3 Technique: Qualitative & Quantitative Practicals', code: 'A2-EX.1' },
+      { name: 'Paper 5 Technique: Planning an Investigation', code: 'A2-EX.2' },
+      { name: 'Titration Technique & Sources of Error', code: 'A2-EX.3' },
+      { name: 'Qualitative Analysis: Tests for Cations', code: 'A2-EX.4' },
+      { name: 'Qualitative Analysis: Tests for Anions & Gases', code: 'A2-EX.5' },
+      { name: 'Handling Uncertainty & Significant Figures', code: 'A2-EX.6' },
+      { name: 'Command Words in A Level Chemistry Papers', code: 'A2-EX.7' },
+      { name: 'Past Paper Practice: Physical Chemistry', code: 'A2-EX.8' },
+      { name: 'Past Paper Practice: Inorganic Chemistry', code: 'A2-EX.9' },
+      { name: 'Past Paper Practice: Organic Chemistry & Analysis', code: 'A2-EX.10' },
+      { name: 'Mock Exam Review & Revision Planning', code: 'A2-EX.11' },
+    ] },
+]
+
 export const ALEVEL_LIBRARY = [
   { match: /\bbiology\b/i, const_: ALEVEL_BIOLOGY_9700,
     source: 'Cambridge International AS & A Level Biology 9700 \u2014 252-lesson scheme (AS 128 / A2 124)' },
+  { match: /\bchemistry\b/i, const_: ALEVEL_CHEMISTRY_9701,
+    source: 'Cambridge International AS & A Level Chemistry 9701 \u2014 235-lesson scheme (AS 132 / A2 103)' },
 ]
 
 export const PRIMARY_Y5_LIBRARY = [
