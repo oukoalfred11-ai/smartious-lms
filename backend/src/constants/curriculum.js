@@ -197,7 +197,7 @@ const SUBJECTS = [
 
   // ── CAMBRIDGE PRIMARY (Year 1–6) ──────────────────────
   // Primary has its own deliberate, age-appropriate subject
-  // set — it does NOT inherit the secondary `availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBMYP', 'IBDP', 'BNC', 'American', 'Canadian']`
+  // set — it does NOT inherit the secondary `availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBDP', 'BNC', 'American', 'Canadian']`
   // subjects (no Economics, separate sciences, etc. at primary).
   { id: 'primary_mathematics', name: 'Primary Mathematics', category: 'Mathematics', availableIn: ['CambridgePrimary'] },
   { id: 'primary_english',     name: 'Primary English',     category: 'English',     availableIn: ['CambridgePrimary'] },
@@ -206,7 +206,7 @@ const SUBJECTS = [
   { id: 'primary_global',      name: 'Primary Global Perspectives', category: 'Humanities', availableIn: ['CambridgePrimary'] },
 
   // ── CORE: MATHEMATICS ─────────────────────────────────
-  { id: 'mathematics',         name: 'Mathematics',                category: 'Mathematics', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBMYP', 'IBDP', 'BNC', 'American', 'Canadian'] },
+  { id: 'mathematics',         name: 'Mathematics',                category: 'Mathematics', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBDP', 'BNC', 'American', 'Canadian'] },
   { id: 'additional_math',     name: 'Additional Mathematics',     category: 'Mathematics', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE'] },
   { id: 'further_math',        name: 'Further Mathematics',        category: 'Mathematics', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'BNC'] },
   { id: 'ap_calculus',         name: 'AP Calculus',                category: 'Mathematics', availableIn: ['American'] },
@@ -215,17 +215,17 @@ const SUBJECTS = [
   { id: 'ib_math_ai',          name: 'IB Mathematics: Applications & Interpretation', category: 'Mathematics', availableIn: ['IBDP'] },
 
   // ── CORE: ENGLISH ─────────────────────────────────────
-  { id: 'english_language',    name: 'English Language',           category: 'English', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBMYP', 'IBDP', 'BNC', 'American', 'Canadian'] },
-  { id: 'english_literature',  name: 'English Literature',         category: 'English', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBMYP', 'IBDP', 'BNC', 'American', 'Canadian'] },
+  { id: 'english_language',    name: 'English Language',           category: 'English', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBDP', 'BNC', 'American', 'Canadian'] },
+  { id: 'english_literature',  name: 'English Literature',         category: 'English', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBDP', 'BNC', 'American', 'Canadian'] },
   { id: 'esl',                 name: 'English as a Second Language (ESL)', category: 'English', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'IBDP'] },
   { id: 'world_literature',    name: 'World Literature',           category: 'English', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE'] },
   { id: 'ap_english_lang',     name: 'AP English Language & Composition', category: 'English', availableIn: ['American'] },
   { id: 'ap_english_lit',      name: 'AP English Literature & Composition', category: 'English', availableIn: ['American'] },
 
   // ── CORE: SCIENCES ────────────────────────────────────
-  { id: 'physics',             name: 'Physics',                    category: 'Sciences', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBMYP', 'IBDP', 'BNC', 'American', 'Canadian'] },
-  { id: 'chemistry',           name: 'Chemistry',                  category: 'Sciences', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBMYP', 'IBDP', 'BNC', 'American', 'Canadian'] },
-  { id: 'biology',             name: 'Biology',                    category: 'Sciences', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBMYP', 'IBDP', 'BNC', 'American', 'Canadian'] },
+  { id: 'physics',             name: 'Physics',                    category: 'Sciences', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBDP', 'BNC', 'American', 'Canadian'] },
+  { id: 'chemistry',           name: 'Chemistry',                  category: 'Sciences', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBDP', 'BNC', 'American', 'Canadian'] },
+  { id: 'biology',             name: 'Biology',                    category: 'Sciences', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBDP', 'BNC', 'American', 'Canadian'] },
   { id: 'combined_science',    name: 'Combined Science',           category: 'Sciences', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'BNC'] },
   { id: 'general_science',     name: 'General Science',            category: 'Sciences', availableIn: ['American', 'Canadian'] },
   { id: 'environmental_sci',   name: 'Environmental Science',      category: 'Sciences', availableIn: ['IBDP', 'American', 'Canadian'] },
@@ -235,9 +235,9 @@ const SUBJECTS = [
   { id: 'ap_biology',          name: 'AP Biology',                 category: 'Sciences', availableIn: ['American'] },
 
   // ── HUMANITIES ────────────────────────────────────────
-  { id: 'history',             name: 'History',                    category: 'Humanities', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBMYP', 'IBDP', 'BNC', 'American', 'Canadian'] },
-  { id: 'geography',           name: 'Geography',                  category: 'Humanities', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBMYP', 'IBDP', 'BNC', 'American', 'Canadian'] },
-  { id: 'religious_studies',   name: 'Religious Studies',          category: 'Humanities', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBMYP', 'IBDP', 'BNC', 'American', 'Canadian'] },
+  { id: 'history',             name: 'History',                    category: 'Humanities', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBDP', 'BNC', 'American', 'Canadian'] },
+  { id: 'geography',           name: 'Geography',                  category: 'Humanities', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBDP', 'BNC', 'American', 'Canadian'] },
+  { id: 'religious_studies',   name: 'Religious Studies',          category: 'Humanities', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBDP', 'BNC', 'American', 'Canadian'] },
   { id: 'global_perspectives', name: 'Global Perspectives',        category: 'Humanities', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'IBDP'] },
   { id: 'world_history',       name: 'World History',              category: 'Humanities', availableIn: ['IBDP', 'American', 'Canadian'] },
   { id: 'ap_world_history',    name: 'AP World History',           category: 'Humanities', availableIn: ['American'] },
@@ -245,47 +245,47 @@ const SUBJECTS = [
   { id: 'civics',              name: 'Civics & Government',        category: 'Humanities', availableIn: ['American', 'Canadian'] },
 
   // ── BUSINESS & SOCIAL SCIENCES ────────────────────────
-  { id: 'business_studies',    name: 'Business Studies',           category: 'Business & Social Sciences', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBMYP', 'IBDP', 'BNC', 'American', 'Canadian'] },
-  { id: 'economics',           name: 'Economics',                  category: 'Business & Social Sciences', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBMYP', 'IBDP', 'BNC', 'American', 'Canadian'] },
+  { id: 'business_studies',    name: 'Business Studies',           category: 'Business & Social Sciences', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBDP', 'BNC', 'American', 'Canadian'] },
+  { id: 'economics',           name: 'Economics',                  category: 'Business & Social Sciences', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBDP', 'BNC', 'American', 'Canadian'] },
   { id: 'accounting',          name: 'Accounting',                 category: 'Business & Social Sciences', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'BNC', 'American', 'Canadian'] },
-  { id: 'psychology',          name: 'Psychology',                 category: 'Business & Social Sciences', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBMYP', 'IBDP', 'BNC', 'American', 'Canadian'] },
-  { id: 'sociology',           name: 'Sociology',                  category: 'Business & Social Sciences', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBMYP', 'IBDP', 'BNC', 'American', 'Canadian'] },
+  { id: 'psychology',          name: 'Psychology',                 category: 'Business & Social Sciences', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBDP', 'BNC', 'American', 'Canadian'] },
+  { id: 'sociology',           name: 'Sociology',                  category: 'Business & Social Sciences', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBDP', 'BNC', 'American', 'Canadian'] },
   { id: 'travel_tourism',      name: 'Travel & Tourism',           category: 'Business & Social Sciences', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE'] },
   { id: 'ap_economics',        name: 'AP Economics (Macro/Micro)', category: 'Business & Social Sciences', availableIn: ['American'] },
   { id: 'ap_psychology',       name: 'AP Psychology',              category: 'Business & Social Sciences', availableIn: ['American'] },
 
   // ── TECHNOLOGY ────────────────────────────────────────
-  { id: 'computer_science',    name: 'Computer Science',           category: 'Technology', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBMYP', 'IBDP', 'BNC', 'American', 'Canadian'] },
+  { id: 'computer_science',    name: 'Computer Science',           category: 'Technology', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBDP', 'BNC', 'American', 'Canadian'] },
   { id: 'ict',                 name: 'Information & Communications Technology (ICT)', category: 'Technology', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'BNC'] },
   { id: 'design_technology',   name: 'Design & Technology',        category: 'Technology', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'IBDP', 'BNC'] },
   { id: 'ap_computer_science', name: 'AP Computer Science',        category: 'Technology', availableIn: ['American'] },
 
   // ── ARTS ──────────────────────────────────────────────
-  { id: 'art_design',          name: 'Art & Design',               category: 'Arts', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBMYP', 'IBDP', 'BNC', 'American', 'Canadian'] },
+  { id: 'art_design',          name: 'Art & Design',               category: 'Arts', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBDP', 'BNC', 'American', 'Canadian'] },
   { id: 'visual_arts',         name: 'Visual Arts',                category: 'Arts', availableIn: ['IBDP', 'American', 'Canadian'] },
-  { id: 'music',               name: 'Music',                      category: 'Arts', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBMYP', 'IBDP', 'BNC', 'American', 'Canadian'] },
+  { id: 'music',               name: 'Music',                      category: 'Arts', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBDP', 'BNC', 'American', 'Canadian'] },
   { id: 'drama',               name: 'Drama',                      category: 'Arts', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'IBDP', 'BNC'] },
   { id: 'theatre_studies',     name: 'Theatre Studies',            category: 'Arts', availableIn: ['IBDP', 'BNC', 'American'] },
   { id: 'film_studies',        name: 'Film Studies',               category: 'Arts', availableIn: ['CambridgeIGCSE', 'EdexcelIGCSE', 'AQAGCSE', 'IBDP', 'BNC', 'American'] },
   { id: 'media_studies',       name: 'Media Studies',              category: 'Arts', availableIn: ['CambridgeIGCSE', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'BNC'] },
 
   // ── PHYSICAL EDUCATION ────────────────────────────────
-  { id: 'physical_education',  name: 'Physical Education',         category: 'Physical Education', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBMYP', 'IBDP', 'BNC', 'American', 'Canadian'] },
+  { id: 'physical_education',  name: 'Physical Education',         category: 'Physical Education', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBDP', 'BNC', 'American', 'Canadian'] },
   { id: 'sports_science',      name: 'Sports Science',             category: 'Physical Education', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'BNC'] },
   { id: 'health_education',    name: 'Health Education',           category: 'Physical Education', availableIn: ['American', 'Canadian'] },
 
   // ── MODERN LANGUAGES ──────────────────────────────────
-  { id: 'french',              name: 'French',                     category: 'Modern Languages', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBMYP', 'IBDP', 'BNC', 'American', 'Canadian'] },
-  { id: 'spanish',             name: 'Spanish',                    category: 'Modern Languages', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBMYP', 'IBDP', 'BNC', 'American', 'Canadian'] },
-  { id: 'german',              name: 'German',                     category: 'Modern Languages', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBMYP', 'IBDP', 'BNC', 'American', 'Canadian'] },
-  { id: 'italian',             name: 'Italian',                    category: 'Modern Languages', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBMYP', 'IBDP', 'BNC', 'American', 'Canadian'] },
-  { id: 'portuguese',          name: 'Portuguese',                 category: 'Modern Languages', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBMYP', 'IBDP', 'BNC', 'American', 'Canadian'] },
-  { id: 'mandarin',            name: 'Mandarin Chinese',           category: 'Modern Languages', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBMYP', 'IBDP', 'BNC', 'American', 'Canadian'] },
-  { id: 'japanese',            name: 'Japanese',                   category: 'Modern Languages', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBMYP', 'IBDP', 'BNC', 'American', 'Canadian'] },
-  { id: 'korean',              name: 'Korean',                     category: 'Modern Languages', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBMYP', 'IBDP', 'BNC', 'American', 'Canadian'] },
-  { id: 'arabic',              name: 'Arabic',                     category: 'Modern Languages', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBMYP', 'IBDP', 'BNC', 'American', 'Canadian'] },
+  { id: 'french',              name: 'French',                     category: 'Modern Languages', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBDP', 'BNC', 'American', 'Canadian'] },
+  { id: 'spanish',             name: 'Spanish',                    category: 'Modern Languages', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBDP', 'BNC', 'American', 'Canadian'] },
+  { id: 'german',              name: 'German',                     category: 'Modern Languages', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBDP', 'BNC', 'American', 'Canadian'] },
+  { id: 'italian',             name: 'Italian',                    category: 'Modern Languages', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBDP', 'BNC', 'American', 'Canadian'] },
+  { id: 'portuguese',          name: 'Portuguese',                 category: 'Modern Languages', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBDP', 'BNC', 'American', 'Canadian'] },
+  { id: 'mandarin',            name: 'Mandarin Chinese',           category: 'Modern Languages', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBDP', 'BNC', 'American', 'Canadian'] },
+  { id: 'japanese',            name: 'Japanese',                   category: 'Modern Languages', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBDP', 'BNC', 'American', 'Canadian'] },
+  { id: 'korean',              name: 'Korean',                     category: 'Modern Languages', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBDP', 'BNC', 'American', 'Canadian'] },
+  { id: 'arabic',              name: 'Arabic',                     category: 'Modern Languages', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBDP', 'BNC', 'American', 'Canadian'] },
   { id: 'russian',             name: 'Russian',                    category: 'Modern Languages', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'IBDP', 'American'] },
-  { id: 'swahili',             name: 'Swahili (Kiswahili)',        category: 'Modern Languages', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBMYP', 'IBDP', 'BNC', 'American', 'Canadian'] },
+  { id: 'swahili',             name: 'Swahili (Kiswahili)',        category: 'Modern Languages', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBDP', 'BNC', 'American', 'Canadian'] },
   { id: 'hindi',               name: 'Hindi',                      category: 'Modern Languages', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'AQAGCSE', 'IBDP'] },
   { id: 'urdu',                name: 'Urdu',                       category: 'Modern Languages', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'AQAGCSE'] },
   { id: 'turkish',             name: 'Turkish',                    category: 'Modern Languages', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'AQAGCSE'] },
@@ -343,7 +343,7 @@ const getSubjectsForCurriculum = (curriculumId) => {
   // Psychology to Primary and Lower Secondary pupils. EXPLICIT_ONLY is
   // kept as a guard in case an 'all' entry is ever reintroduced.
   const EXPLICIT_ONLY = ['CambridgePrimary', 'EdexcelPrimary', 'CambridgeLowerSec',
-                         'EdexcelLowerSec', 'KenyaCBE', 'KCSE', 'IBPYP', 'IBMYP']
+                         'EdexcelLowerSec', 'KenyaCBE', 'KCSE', 'IBPYP']
   const filtered = SUBJECTS.filter(s => {
     if (EXPLICIT_ONLY.includes(curriculumId)) {
       return Array.isArray(s.availableIn) && s.availableIn.includes(curriculumId)
@@ -375,7 +375,7 @@ const isSubjectValidForCurriculum = (subjectId, curriculumId) => {
   // Explicit-only curricula match only subjects that list them by id
   // ('all' means all secondary curricula — see getSubjectsForCurriculum).
   if (['CambridgePrimary', 'EdexcelPrimary', 'CambridgeLowerSec',
-       'EdexcelLowerSec', 'KenyaCBE', 'KCSE', 'IBPYP', 'IBMYP'].includes(curriculumId)) {
+       'EdexcelLowerSec', 'KenyaCBE', 'KCSE', 'IBPYP'].includes(curriculumId)) {
     return Array.isArray(subject.availableIn) && subject.availableIn.includes(curriculumId)
   }
   return subject.availableIn === 'all' || subject.availableIn.includes(curriculumId)
