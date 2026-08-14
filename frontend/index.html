@@ -25,9 +25,11 @@
   <link rel="preconnect" href="https://www.googletagmanager.com"/>
 
   <link rel="preload" as="image" href="/hero-learning-centre.jpg" fetchpriority="high"/>
-  <link rel="preload" as="font" type="font/woff2"
-        href="https://fonts.gstatic.com/s/playfairdisplay/v37/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvUDQ.woff2"
-        crossorigin/>
+  <!-- The Playfair Display preload pointed at a hardcoded Google Fonts
+       version hash (v37). Google rotates those, so the file 404'd and the
+       browser warned about an unused preload on every page load. The
+       stylesheet below already fetches the current version; preloading a
+       specific file is not worth breaking each time Google republishes. -->
 
   <link rel="dns-prefetch" href="https://smartious-backend.onrender.com"/>
   <link rel="dns-prefetch" href="https://formsubmit.co"/>
