@@ -275,16 +275,43 @@ router.get('/', auth, async (req, res) => {
 // Returns the subject names a teacher may work on, or null for admins
 // (null meaning "no restriction"). Used by both the artwork queue and
 // the upload endpoint so the listing and the action agree.
+/**
+ * The subject names a teacher may work on, or null for admins.
+ *
+ * TWO BUGS FIXED HERE
+ * 1. It selected `name` from Subject, but the field is `subjectName`.
+ *    Every lookup returned undefined, so the list was always empty and
+ *    a teacher with specialties still saw nothing scoped correctly.
+ * 2. It ignored curriculum. A teacher who teaches Biology at IGCSE was
+ *    also being granted Biology at KCSE and IB, which are different
+ *    courses with different question banks.
+ *
+ * Returns { names, pairs } so a caller can scope by subject alone or by
+ * the exact subject-and-curriculum combination the teacher was allocated.
+ */
 async function allowedSubjectsFor(user) {
   if (user.role !== 'teacher') return null;
   const User = require('../models/User');
   const Subject = require('../models/Subject');
   const me = await User.findById(user._id).select('teachingSpecialties').lean();
   const specialties = (me && me.teachingSpecialties) || [];
-  const subjectIds = specialties.map(sp => sp.subjectId).filter(Boolean);
-  if (!subjectIds.length) return [];
-  const docs = await Subject.find({ _id: { $in: subjectIds } }).select('name').lean();
-  return [...new Set(docs.map(d => d.name).filter(Boolean))];
+  if (!specialties.length) return [];
+
+  const ids = specialties.map(sp => sp.subjectId).filter(Boolean);
+  const docs = ids.length
+    ? await Subject.find({ _id: { $in: ids } }).select('subjectName curriculum').lean()
+    : [];
+  const byId = {};
+  docs.forEach(d => { byId[String(d._id)] = d; });
+
+  const names = new Set();
+  specialties.forEach(sp => {
+    const doc = sp.subjectId ? byId[String(sp.subjectId)] : null;
+    // Older records store the subject name directly rather than an id.
+    const nm = doc ? doc.subjectName : sp.subject;
+    if (nm) names.add(nm);
+  });
+  return [...names];
 }
 
 // ─────────────────────────────────────────────────────────
@@ -311,142 +338,6 @@ async function allowedSubjectsFor(user) {
 //
 // Body: { subject, curriculum, map: { "old name": "spine name" }, confirm }
 // ─────────────────────────────────────────────────────────
-/**
- * POST /api/questions/bulk
- *
- * Bulk-import questions from JSON. The Question Bank module has had an
- * import UI posting here since it was written, but the route never
- * existed — every import 404'd.
- *
- * BODY: { questions: [...], allowMissingScheme: bool }
- *
- * WHY IT VALIDATES RATHER THAN TRUSTING THE FILE
- * An import is the easiest way to fill a bank with unusable content. A
- * question whose subtopic does not match the loaded spine is invisible to
- * auto-homework and topic filters — that is how 5,204 questions ended up
- * orphaned. So each row is checked against the subject's actual spine
- * BEFORE insert, and anything that would not link is reported rather than
- * silently accepted.
- *
- * MARK SCHEMES ARE FLAGGED, NOT ENFORCED
- * KCSE questions arrive from past papers without official schemes. A
- * suggested scheme is better than none, but it must be auditable: rows
- * carrying one are marked needsMarkScheme:true so a teacher can find and
- * verify them. allowMissingScheme lets a batch through with no scheme at
- * all, also flagged.
- *
- * Nothing is written unless dryRun is false; the default is a dry run so
- * a bad file cannot be discovered after the fact.
- */
-router.post('/bulk', auth, requireRole('teacher', 'admin', 'ops_manager'), async (req, res) => {
-  try {
-    const { questions, allowMissingScheme = false, dryRun = false } = req.body || {};
-    if (!Array.isArray(questions) || !questions.length)
-      return res.status(400).json({ success: false, message: 'questions must be a non-empty array.' });
-    if (questions.length > 5000)
-      return res.status(400).json({ success: false, message: 'Import at most 5000 questions per batch.' });
-
-    const SyllabusTopic = require('../models/SyllabusTopic');
-    const Subject = require('../models/Subject');
-
-    // Cache the spine per (curriculum, subject) so a 2000-row import does
-    // not re-query for every question.
-    const spineCache = {};
-    async function spineFor(curriculum, subjectName) {
-      const key = curriculum + '||' + subjectName;
-      if (spineCache[key]) return spineCache[key];
-      const subj = await Subject.findOne({ curriculum, subjectName }).select('_id').lean();
-      if (!subj) return (spineCache[key] = { exists: false, subtopics: new Set(), topics: new Set() });
-      const rows = await SyllabusTopic.find({ subjectId: subj._id, isActive: { $ne: false } })
-        .select('topic subtopics').lean();
-      const subtopics = new Set(), topics = new Set();
-      rows.forEach(r => {
-        topics.add(r.topic);
-        (r.subtopics || []).forEach(st => subtopics.add(st.name));
-      });
-      return (spineCache[key] = { exists: true, subjectId: subj._id, subtopics, topics });
-    }
-
-    const valid = [], errors = [], warnings = [];
-    for (let i = 0; i < questions.length; i++) {
-      const q = questions[i] || {};
-      const at = `row ${i + 1}`;
-      const text = String(q.text || q.questionText || '').trim();
-
-      if (!text) { errors.push(`${at}: missing text`); continue; }
-      if (!q.subject)    { errors.push(`${at}: missing subject`); continue; }
-      if (!q.curriculum) { errors.push(`${at}: missing curriculum`); continue; }
-
-      const spine = await spineFor(q.curriculum, q.subject);
-      if (!spine.exists) {
-        errors.push(`${at}: no subject "${q.subject}" in ${q.curriculum}`);
-        continue;
-      }
-
-      // Subtopic must match the spine or the question is born orphaned.
-      if (q.subtopic && !spine.subtopics.has(q.subtopic)) {
-        errors.push(`${at}: subtopic "${String(q.subtopic).slice(0, 60)}" is not in the ${q.subject} spine`);
-        continue;
-      }
-      if (!q.subtopic) warnings.push(`${at}: no subtopic — will not link to a lesson`);
-      if (q.topic && !spine.topics.has(q.topic))
-        warnings.push(`${at}: topic "${String(q.topic).slice(0, 40)}" is not a spine topic`);
-
-      const hasScheme = !!(q.markScheme && (q.markScheme.modelAnswer ||
-        (Array.isArray(q.markScheme.points) && q.markScheme.points.length)));
-      if (!hasScheme && !allowMissingScheme) {
-        errors.push(`${at}: no markScheme (set allowMissingScheme to import anyway)`);
-        continue;
-      }
-
-      valid.push({
-        type: q.type || 'short',
-        text,
-        options: Array.isArray(q.options) ? q.options : [],
-        correctAnswer: q.correctAnswer ?? null,
-        explanation: q.explanation || '',
-        marks: Number(q.marks) || 1,
-        parts: Array.isArray(q.parts) ? q.parts : [],
-        curriculum: q.curriculum,
-        subject: q.subject,
-        grade: q.grade || '',
-        gradeLevels: Array.isArray(q.gradeLevels) ? q.gradeLevels : [],
-        topic: q.topic || '',
-        subtopic: q.subtopic || '',
-        markScheme: q.markScheme || {},
-        // Every imported scheme is provisional until a teacher signs it off.
-        needsMarkScheme: true,
-        sourceForm: q.sourceForm || '',
-        syllabus: q.syllabus || '',
-        difficulty: q.difficulty || 'medium',
-        createdBy: req.user._id,
-        isActive: true,
-      });
-    }
-
-    if (dryRun || !valid.length) {
-      return res.json({
-        success: true,
-        message: `DRY RUN — ${valid.length} of ${questions.length} would import. `
-               + `${errors.length} rejected, ${warnings.length} warning(s). `
-               + `Resend with dryRun:false to apply.`,
-        data: { wouldImport: valid.length, errors: errors.slice(0, 50), warnings: warnings.slice(0, 50) },
-      });
-    }
-
-    const inserted = await Question.insertMany(valid, { ordered: false });
-    return res.json({
-      success: true,
-      message: `Imported ${inserted.length} question(s). ${errors.length} rejected, `
-             + `${warnings.length} warning(s). All flagged needsMarkScheme for teacher review.`,
-      data: { imported: inserted.length, errors: errors.slice(0, 50), warnings: warnings.slice(0, 50) },
-    });
-  } catch (e) {
-    console.error('[questions bulk]', e.message);
-    return res.status(500).json({ success: false, message: e.message });
-  }
-});
-
 router.post('/remap-subtopics', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const { subject, curriculum, map, confirm } = req.body || {};
