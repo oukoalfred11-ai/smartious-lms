@@ -116,28 +116,42 @@ const GRADES_BY_CURRICULUM = {
 // `availableIn: 'all'` means available across all 7 curricula.
 const SUBJECTS = [
   // ── Kenya CBE (Grade 1-12) ─────────────────────────────────
-  // CBE previously offered NOTHING: no subject in this catalogue listed
-  // KenyaCBC, so anyone enrolling a CBE student got an empty dropdown.
+  // CBE previously offered NOTHING here: no subject listed KenyaCBC, so
+  // enrolling a CBE student produced an empty dropdown.
   //
-  // Grades 1-6 take the primary learning areas; 7-9 add the junior
-  // school subjects; 10-12 are senior school pathways. Listed as one set
-  // because a school teaches across the grades and the grade field
+  // Grade 1-9 take the junior-school learning areas; Grade 10-12 add the
+  // senior pathway subjects. Listed as one set because the grade field
   // already distinguishes the level.
-  { id: 'cbe_english',         name: 'English',                    category: 'Languages',   availableIn: ['KenyaCBE'] },
-  { id: 'cbe_kiswahili',       name: 'Kiswahili',                  category: 'Languages',   availableIn: ['KenyaCBE'] },
-  { id: 'cbe_mathematics',     name: 'Mathematics',                category: 'Mathematics', availableIn: ['KenyaCBE'] },
-  { id: 'cbe_integrated_sci',  name: 'Integrated Science',         category: 'Sciences',    availableIn: ['KenyaCBE'] },
-  { id: 'cbe_biology',         name: 'Biology',                    category: 'Sciences',    availableIn: ['KenyaCBE'] },
-  { id: 'cbe_chemistry',       name: 'Chemistry',                  category: 'Sciences',    availableIn: ['KenyaCBE'] },
-  { id: 'cbe_physics',         name: 'Physics',                    category: 'Sciences',    availableIn: ['KenyaCBE'] },
-  { id: 'cbe_social_studies',  name: 'Social Studies',             category: 'Humanities',  availableIn: ['KenyaCBE'] },
-  { id: 'cbe_cre',             name: 'Christian Religious Education', category: 'Humanities', availableIn: ['KenyaCBE'] },
-  { id: 'cbe_ire',             name: 'Islamic Religious Education', category: 'Humanities',  availableIn: ['KenyaCBE'] },
-  { id: 'cbe_agriculture',     name: 'Agriculture',                category: 'Sciences',    availableIn: ['KenyaCBE'] },
-  { id: 'cbe_business',        name: 'Business Studies',           category: 'Business & Social Sciences', availableIn: ['KenyaCBE'] },
-  { id: 'cbe_computer_sci',    name: 'Computer Science',           category: 'Technology',  availableIn: ['KenyaCBE'] },
-  { id: 'cbe_pretech',         name: 'Pre-Technical Studies',      category: 'Technology',  availableIn: ['KenyaCBE'] },
-  { id: 'cbe_creative_arts',   name: 'Creative Arts & Sports',     category: 'Creative Arts', availableIn: ['KenyaCBE'] },
+  //
+  // Kept in step with the seeder — a mismatch there is what produced
+  // duplicate records like Computer Studies beside Computer Science.
+  { id: 'cbe_english',           name: 'English',                         category: 'Languages',                   availableIn: ['KenyaCBE'] },
+  { id: 'cbe_kiswahili',         name: 'Kiswahili',                       category: 'Languages',                   availableIn: ['KenyaCBE'] },
+  { id: 'cbe_ksl',               name: 'Kenyan Sign Language',            category: 'Languages',                   availableIn: ['KenyaCBE'] },
+  { id: 'cbe_arabic',            name: 'Arabic',                          category: 'Languages',                   availableIn: ['KenyaCBE'] },
+  { id: 'cbe_french',            name: 'French',                          category: 'Languages',                   availableIn: ['KenyaCBE'] },
+  { id: 'cbe_german',            name: 'German',                          category: 'Languages',                   availableIn: ['KenyaCBE'] },
+  { id: 'cbe_mandarin',          name: 'Mandarin Chinese',                category: 'Languages',                   availableIn: ['KenyaCBE'] },
+  { id: 'cbe_mathematics',       name: 'Mathematics',                     category: 'Mathematics',                 availableIn: ['KenyaCBE'] },
+  { id: 'cbe_integrated_sci',    name: 'Integrated Science',              category: 'Sciences',                    availableIn: ['KenyaCBE'] },
+  { id: 'cbe_biology',           name: 'Biology',                         category: 'Sciences',                    availableIn: ['KenyaCBE'] },
+  { id: 'cbe_chemistry',         name: 'Chemistry',                       category: 'Sciences',                    availableIn: ['KenyaCBE'] },
+  { id: 'cbe_physics',           name: 'Physics',                         category: 'Sciences',                    availableIn: ['KenyaCBE'] },
+  { id: 'cbe_agriculture',       name: 'Agriculture',                     category: 'Sciences',                    availableIn: ['KenyaCBE'] },
+  { id: 'cbe_home_science',      name: 'Home Science',                    category: 'Sciences',                    availableIn: ['KenyaCBE'] },
+  { id: 'cbe_social_studies',    name: 'Social Studies',                  category: 'Humanities',                  availableIn: ['KenyaCBE'] },
+  { id: 'cbe_history',           name: 'History and Government',          category: 'Humanities',                  availableIn: ['KenyaCBE'] },
+  { id: 'cbe_geography',         name: 'Geography',                       category: 'Humanities',                  availableIn: ['KenyaCBE'] },
+  { id: 'cbe_cre',               name: 'Christian Religious Education',   category: 'Humanities',                  availableIn: ['KenyaCBE'] },
+  { id: 'cbe_ire',               name: 'Islamic Religious Education',     category: 'Humanities',                  availableIn: ['KenyaCBE'] },
+  { id: 'cbe_hre',               name: 'Hindu Religious Education',       category: 'Humanities',                  availableIn: ['KenyaCBE'] },
+  { id: 'cbe_business',          name: 'Business Studies',                category: 'Business & Social Sciences',  availableIn: ['KenyaCBE'] },
+  { id: 'cbe_computer_sci',      name: 'Computer Science',                category: 'Technology',                  availableIn: ['KenyaCBE'] },
+  { id: 'cbe_pretech',           name: 'Pre-Technical Studies',           category: 'Technology',                  availableIn: ['KenyaCBE'] },
+  { id: 'cbe_music',             name: 'Music',                           category: 'Creative Arts',               availableIn: ['KenyaCBE'] },
+  { id: 'cbe_pe_sports',         name: 'Physical Education and Sports',   category: 'Physical Education',          availableIn: ['KenyaCBE'] },
+  { id: 'cbe_health',            name: 'Health Education',                category: 'Life Skills',                 availableIn: ['KenyaCBE'] },
+  { id: 'cbe_life_skills',       name: 'Life Skills Education',           category: 'Life Skills',                 availableIn: ['KenyaCBE'] },
 
   // ── KCSE (Form 3-4, phasing out) ───────────────────────────
   // Deliberately its own set. When the last cohort sits the exam, these
