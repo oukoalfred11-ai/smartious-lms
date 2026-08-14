@@ -4742,11 +4742,354 @@ const ALEVEL_CHEMISTRY_9701 = [
     ] },
 ]
 
+// Cambridge International AS & A Level Physics 9702
+// Lesson-level spine, 25 topics / 246 lessons.
+//
+// PRACTICAL WEIGHTING
+// Papers 3 (AS practical) and 5 (A2 planning and analysis) are together
+// worth roughly a third of the qualification, and Paper 5 in particular
+// is a skill that has to be taught rather than absorbed. Both get their
+// own topics here rather than a few lessons tacked on at the end.
+//
+// AS and A2 are separated by prefix, as in Biology and Chemistry.
+// Filtering the bank on "AS ·" returns exactly the AS content.
+const ALEVEL_PHYSICS_9702 = [
+  // ─────────────── AS ───────────────
+  { topic: 'AS \u00b7 Topic 1 \u2014 Physical Quantities & Units', code: 'AS1',
+    subtopics: [
+      { name: 'SI Base Quantities & Their Units', code: 'AS1.1' },
+      { name: 'Derived Units & Homogeneity of Equations', code: 'AS1.2' },
+      { name: 'Prefixes from Pico to Tera', code: 'AS1.3' },
+      { name: 'Estimating Physical Quantities & Orders of Magnitude', code: 'AS1.4' },
+      { name: 'Scalars & Vectors: The Distinction', code: 'AS1.5' },
+      { name: 'Adding Vectors: Graphical & Component Methods', code: 'AS1.6' },
+      { name: 'Resolving a Vector into Perpendicular Components', code: 'AS1.7' },
+      { name: 'Systematic & Random Errors', code: 'AS1.8' },
+      { name: 'Precision, Accuracy & Uncertainty', code: 'AS1.9' },
+      { name: 'Combining Uncertainties in Calculations', code: 'AS1.10' },
+    ] },
+
+  { topic: 'AS \u00b7 Topic 2 \u2014 Kinematics', code: 'AS2',
+    subtopics: [
+      { name: 'Displacement, Velocity & Acceleration Defined', code: 'AS2.1' },
+      { name: 'Distance-Time & Displacement-Time Graphs', code: 'AS2.2' },
+      { name: 'Velocity-Time Graphs: Gradient and Area', code: 'AS2.3' },
+      { name: 'The Equations of Uniformly Accelerated Motion', code: 'AS2.4' },
+      { name: 'Selecting the Right Equation for a Problem', code: 'AS2.5' },
+      { name: 'Motion Under Gravity & Free Fall', code: 'AS2.6' },
+      { name: 'Practical: Determining Acceleration of Free Fall', code: 'AS2.7' },
+      { name: 'Projectile Motion: Independence of Components', code: 'AS2.8' },
+      { name: 'Projectile Problems: Range, Height & Time of Flight', code: 'AS2.9' },
+      { name: 'Effect of Air Resistance on Projectile Paths', code: 'AS2.10' },
+    ] },
+
+  { topic: 'AS \u00b7 Topic 3 \u2014 Dynamics', code: 'AS3',
+    subtopics: [
+      { name: 'Newton\u2019s First Law & Inertia', code: 'AS3.1' },
+      { name: 'Mass, Weight & The Difference Between Them', code: 'AS3.2' },
+      { name: 'Newton\u2019s Second Law & Linear Momentum', code: 'AS3.3' },
+      { name: 'Newton\u2019s Third Law & Identifying Force Pairs', code: 'AS3.4' },
+      { name: 'Free-Body Diagrams', code: 'AS3.5' },
+      { name: 'Resolving Forces on an Inclined Plane', code: 'AS3.6' },
+      { name: 'Frictional Forces & Drag', code: 'AS3.7' },
+      { name: 'Terminal Velocity', code: 'AS3.8' },
+      { name: 'Conservation of Linear Momentum', code: 'AS3.9' },
+      { name: 'Elastic & Inelastic Collisions', code: 'AS3.10' },
+      { name: 'Collisions in Two Dimensions', code: 'AS3.11' },
+    ] },
+
+  { topic: 'AS \u00b7 Topic 4 \u2014 Forces, Density & Pressure', code: 'AS4',
+    subtopics: [
+      { name: 'Centre of Gravity & Its Determination', code: 'AS4.1' },
+      { name: 'The Turning Effect of a Force: Moments', code: 'AS4.2' },
+      { name: 'Couples & Torque', code: 'AS4.3' },
+      { name: 'Conditions for Equilibrium & The Principle of Moments', code: 'AS4.4' },
+      { name: 'Density & Pressure Defined', code: 'AS4.5' },
+      { name: 'Pressure in a Fluid Column', code: 'AS4.6' },
+      { name: 'Upthrust & Archimedes\u2019 Principle', code: 'AS4.7' },
+    ] },
+
+  { topic: 'AS \u00b7 Topic 5 \u2014 Work, Energy & Power', code: 'AS5',
+    subtopics: [
+      { name: 'Work Done by a Force & Work Done Against Resistance', code: 'AS5.1' },
+      { name: 'Work Done by an Expanding Gas', code: 'AS5.2' },
+      { name: 'Kinetic Energy & Its Derivation', code: 'AS5.3' },
+      { name: 'Gravitational Potential Energy', code: 'AS5.4' },
+      { name: 'The Principle of Conservation of Energy', code: 'AS5.5' },
+      { name: 'Energy Transfers & Efficiency', code: 'AS5.6' },
+      { name: 'Power & Its Relationship to Force and Velocity', code: 'AS5.7' },
+    ] },
+
+  { topic: 'AS \u00b7 Topic 6 \u2014 Deformation of Solids', code: 'AS6',
+    subtopics: [
+      { name: 'Tensile & Compressive Forces', code: 'AS6.1' },
+      { name: 'Hooke\u2019s Law & The Spring Constant', code: 'AS6.2' },
+      { name: 'Springs in Series & Parallel', code: 'AS6.3' },
+      { name: 'Stress, Strain & The Young Modulus', code: 'AS6.4' },
+      { name: 'Practical: Determining the Young Modulus of a Wire', code: 'AS6.5' },
+      { name: 'Force-Extension Graphs & Elastic Potential Energy', code: 'AS6.6' },
+      { name: 'Elastic Limit, Plastic Deformation & Brittleness', code: 'AS6.7' },
+    ] },
+
+  { topic: 'AS \u00b7 Topic 7 \u2014 Waves', code: 'AS7',
+    subtopics: [
+      { name: 'Progressive Waves & Wave Terminology', code: 'AS7.1' },
+      { name: 'The Wave Equation', code: 'AS7.2' },
+      { name: 'Transverse & Longitudinal Waves', code: 'AS7.3' },
+      { name: 'Displacement-Distance & Displacement-Time Graphs', code: 'AS7.4' },
+      { name: 'Intensity & Its Relationship to Amplitude', code: 'AS7.5' },
+      { name: 'The Doppler Effect for a Moving Source', code: 'AS7.6' },
+      { name: 'The Electromagnetic Spectrum', code: 'AS7.7' },
+      { name: 'Polarisation & Malus\u2019s Law', code: 'AS7.8' },
+    ] },
+
+  { topic: 'AS \u00b7 Topic 8 \u2014 Superposition', code: 'AS8',
+    subtopics: [
+      { name: 'The Principle of Superposition', code: 'AS8.1' },
+      { name: 'Stationary Waves & Node/Antinode Formation', code: 'AS8.2' },
+      { name: 'Stationary Waves on Strings & In Air Columns', code: 'AS8.3' },
+      { name: 'Practical: Determining Wavelength Using Stationary Waves', code: 'AS8.4' },
+      { name: 'Diffraction & The Effect of Gap Width', code: 'AS8.5' },
+      { name: 'Coherence & Conditions for Observable Interference', code: 'AS8.6' },
+      { name: 'The Two-Source Interference Experiment', code: 'AS8.7' },
+      { name: 'Young\u2019s Double-Slit Formula & Calculations', code: 'AS8.8' },
+      { name: 'The Diffraction Grating & Its Formula', code: 'AS8.9' },
+      { name: 'Practical: Measuring Wavelength with a Grating', code: 'AS8.10' },
+    ] },
+
+  { topic: 'AS \u00b7 Topic 9 \u2014 Electricity', code: 'AS9',
+    subtopics: [
+      { name: 'Electric Current as Rate of Flow of Charge', code: 'AS9.1' },
+      { name: 'Charge Carriers & The Equation I = Anvq', code: 'AS9.2' },
+      { name: 'Potential Difference & The Volt', code: 'AS9.3' },
+      { name: 'Electrical Power & Energy Transfer', code: 'AS9.4' },
+      { name: 'Resistance & Ohm\u2019s Law', code: 'AS9.5' },
+      { name: 'I-V Characteristics: Resistor, Filament Lamp & Diode', code: 'AS9.6' },
+      { name: 'Resistivity & Its Determination', code: 'AS9.7' },
+      { name: 'Effect of Temperature on Resistance: Thermistors', code: 'AS9.8' },
+    ] },
+
+  { topic: 'AS \u00b7 Topic 10 \u2014 D.C. Circuits', code: 'AS10',
+    subtopics: [
+      { name: 'Circuit Symbols & Drawing Circuit Diagrams', code: 'AS10.1' },
+      { name: 'Kirchhoff\u2019s First Law & Conservation of Charge', code: 'AS10.2' },
+      { name: 'Kirchhoff\u2019s Second Law & Conservation of Energy', code: 'AS10.3' },
+      { name: 'Resistors in Series & Parallel', code: 'AS10.4' },
+      { name: 'Solving Multi-Loop Circuit Problems', code: 'AS10.5' },
+      { name: 'Electromotive Force & Internal Resistance', code: 'AS10.6' },
+      { name: 'Practical: Determining EMF and Internal Resistance', code: 'AS10.7' },
+      { name: 'The Potential Divider', code: 'AS10.8' },
+      { name: 'Potential Dividers with Sensors: LDR & Thermistor', code: 'AS10.9' },
+    ] },
+
+  { topic: 'AS \u00b7 Topic 11 \u2014 Particle Physics', code: 'AS11',
+    subtopics: [
+      { name: 'The Nuclear Atom & Rutherford Scattering Evidence', code: 'AS11.1' },
+      { name: 'Nucleon Number, Proton Number & Nuclide Notation', code: 'AS11.2' },
+      { name: 'Isotopes & Their Properties', code: 'AS11.3' },
+      { name: 'Alpha, Beta & Gamma Radiation: Nature and Penetration', code: 'AS11.4' },
+      { name: 'Writing Nuclear Decay Equations', code: 'AS11.5' },
+      { name: 'Quarks, Leptons & The Standard Model', code: 'AS11.6' },
+      { name: 'Quark Composition of Protons and Neutrons', code: 'AS11.7' },
+      { name: 'Beta Decay Explained by Quark Change', code: 'AS11.8' },
+      { name: 'Antiparticles & Conservation Laws', code: 'AS11.9' },
+    ] },
+
+  { topic: 'AS \u00b7 Practical Skills (Paper 3)', code: 'AS-P',
+    subtopics: [
+      { name: 'Planning: Identifying & Controlling Variables', code: 'AS-P.1' },
+      { name: 'Choosing Apparatus & Suitable Ranges', code: 'AS-P.2' },
+      { name: 'Recording Data: Tables, Units & Significant Figures', code: 'AS-P.3' },
+      { name: 'Plotting Graphs: Scales, Axes & Best-Fit Lines', code: 'AS-P.4' },
+      { name: 'Determining Gradient & Intercept', code: 'AS-P.5' },
+      { name: 'Estimating Uncertainty in a Single Reading', code: 'AS-P.6' },
+      { name: 'Propagating Uncertainty Through a Calculation', code: 'AS-P.7' },
+      { name: 'Percentage Uncertainty & Percentage Difference', code: 'AS-P.8' },
+      { name: 'Identifying Limitations & Suggesting Improvements', code: 'AS-P.9' },
+    ] },
+
+  // ─────────────── A2 ───────────────
+  { topic: 'A2 \u00b7 Topic 12 \u2014 Motion in a Circle', code: 'A2-12',
+    subtopics: [
+      { name: 'Radian Measure & Angular Displacement', code: 'A2-12.1' },
+      { name: 'Angular Velocity & Its Relationship to Linear Speed', code: 'A2-12.2' },
+      { name: 'Centripetal Acceleration', code: 'A2-12.3' },
+      { name: 'Centripetal Force & Its Sources', code: 'A2-12.4' },
+      { name: 'Circular Motion in a Vertical Plane', code: 'A2-12.5' },
+      { name: 'The Conical Pendulum & Banked Tracks', code: 'A2-12.6' },
+    ] },
+
+  { topic: 'A2 \u00b7 Topic 13 \u2014 Gravitational Fields', code: 'A2-13',
+    subtopics: [
+      { name: 'Newton\u2019s Law of Gravitation', code: 'A2-13.1' },
+      { name: 'Gravitational Field Strength & Field Lines', code: 'A2-13.2' },
+      { name: 'Gravitational Field of a Point Mass & of the Earth', code: 'A2-13.3' },
+      { name: 'Gravitational Potential Energy & Potential', code: 'A2-13.4' },
+      { name: 'Escape Velocity', code: 'A2-13.5' },
+      { name: 'Circular Orbits & Orbital Period', code: 'A2-13.6' },
+      { name: 'Geostationary Satellites', code: 'A2-13.7' },
+    ] },
+
+  { topic: 'A2 \u00b7 Topic 14 \u2014 Temperature & Thermal Physics', code: 'A2-14',
+    subtopics: [
+      { name: 'Thermal Equilibrium & Temperature Scales', code: 'A2-14.1' },
+      { name: 'Thermometers & Thermometric Properties', code: 'A2-14.2' },
+      { name: 'Specific Heat Capacity & Its Determination', code: 'A2-14.3' },
+      { name: 'Specific Latent Heat of Fusion & Vaporisation', code: 'A2-14.4' },
+      { name: 'The Equation of State for an Ideal Gas', code: 'A2-14.5' },
+      { name: 'The Kinetic Theory of Gases & Its Assumptions', code: 'A2-14.6' },
+      { name: 'Relating Mean Kinetic Energy to Temperature', code: 'A2-14.7' },
+      { name: 'Internal Energy & The First Law of Thermodynamics', code: 'A2-14.8' },
+      { name: 'Applying the First Law to Processes', code: 'A2-14.9' },
+    ] },
+
+  { topic: 'A2 \u00b7 Topic 15 \u2014 Oscillations', code: 'A2-15',
+    subtopics: [
+      { name: 'Simple Harmonic Motion: Definition & Conditions', code: 'A2-15.1' },
+      { name: 'SHM Equations for Displacement, Velocity & Acceleration', code: 'A2-15.2' },
+      { name: 'Graphical Representation of SHM', code: 'A2-15.3' },
+      { name: 'The Mass-Spring System & The Simple Pendulum', code: 'A2-15.4' },
+      { name: 'Energy Changes in Simple Harmonic Motion', code: 'A2-15.5' },
+      { name: 'Damping: Light, Critical & Heavy', code: 'A2-15.6' },
+      { name: 'Forced Oscillations & Resonance', code: 'A2-15.7' },
+      { name: 'Practical Examples & Consequences of Resonance', code: 'A2-15.8' },
+    ] },
+
+  { topic: 'A2 \u00b7 Topic 16 \u2014 Electric Fields', code: 'A2-16',
+    subtopics: [
+      { name: 'Electric Field Strength & Field Line Patterns', code: 'A2-16.1' },
+      { name: 'Uniform Fields Between Parallel Plates', code: 'A2-16.2' },
+      { name: 'Motion of Charged Particles in a Uniform Field', code: 'A2-16.3' },
+      { name: 'Coulomb\u2019s Law', code: 'A2-16.4' },
+      { name: 'Electric Field of a Point Charge', code: 'A2-16.5' },
+      { name: 'Electric Potential & Potential Energy', code: 'A2-16.6' },
+      { name: 'Comparing Electric & Gravitational Fields', code: 'A2-16.7' },
+    ] },
+
+  { topic: 'A2 \u00b7 Topic 17 \u2014 Capacitance', code: 'A2-17',
+    subtopics: [
+      { name: 'Capacitance Defined & The Farad', code: 'A2-17.1' },
+      { name: 'Capacitors in Series & Parallel', code: 'A2-17.2' },
+      { name: 'Energy Stored in a Charged Capacitor', code: 'A2-17.3' },
+      { name: 'Discharging a Capacitor Through a Resistor', code: 'A2-17.4' },
+      { name: 'The Time Constant & Exponential Decay', code: 'A2-17.5' },
+      { name: 'Practical: Investigating Capacitor Discharge', code: 'A2-17.6' },
+    ] },
+
+  { topic: 'A2 \u00b7 Topic 18 \u2014 Magnetic Fields & Electromagnetism', code: 'A2-18',
+    subtopics: [
+      { name: 'Magnetic Field Patterns & Flux Density', code: 'A2-18.1' },
+      { name: 'Force on a Current-Carrying Conductor', code: 'A2-18.2' },
+      { name: 'Fleming\u2019s Left-Hand Rule & The Tesla', code: 'A2-18.3' },
+      { name: 'Force on a Moving Charged Particle', code: 'A2-18.4' },
+      { name: 'Circular Motion of Charges in a Magnetic Field', code: 'A2-18.5' },
+      { name: 'Velocity Selectors & Crossed Fields', code: 'A2-18.6' },
+      { name: 'The Hall Effect & Hall Voltage', code: 'A2-18.7' },
+      { name: 'Magnetic Fields Due to Currents', code: 'A2-18.8' },
+      { name: 'Magnetic Flux & Flux Linkage', code: 'A2-18.9' },
+      { name: 'Faraday\u2019s Law of Electromagnetic Induction', code: 'A2-18.10' },
+      { name: 'Lenz\u2019s Law & Conservation of Energy', code: 'A2-18.11' },
+      { name: 'Applications of Induction', code: 'A2-18.12' },
+    ] },
+
+  { topic: 'A2 \u00b7 Topic 19 \u2014 Alternating Currents', code: 'A2-19',
+    subtopics: [
+      { name: 'Characteristics of Alternating Current', code: 'A2-19.1' },
+      { name: 'Peak, Peak-to-Peak & Root-Mean-Square Values', code: 'A2-19.2' },
+      { name: 'Power in an A.C. Circuit', code: 'A2-19.3' },
+      { name: 'The Transformer & The Turns Ratio', code: 'A2-19.4' },
+      { name: 'Transmission of Electrical Energy at High Voltage', code: 'A2-19.5' },
+      { name: 'Half-Wave & Full-Wave Rectification', code: 'A2-19.6' },
+      { name: 'Smoothing with a Capacitor', code: 'A2-19.7' },
+    ] },
+
+  { topic: 'A2 \u00b7 Topic 20 \u2014 Quantum Physics', code: 'A2-20',
+    subtopics: [
+      { name: 'The Photon Model & Photon Energy', code: 'A2-20.1' },
+      { name: 'The Electronvolt', code: 'A2-20.2' },
+      { name: 'The Photoelectric Effect & Its Observations', code: 'A2-20.3' },
+      { name: 'Threshold Frequency & Work Function', code: 'A2-20.4' },
+      { name: 'Einstein\u2019s Photoelectric Equation', code: 'A2-20.5' },
+      { name: 'Why the Wave Model Fails to Explain Photoemission', code: 'A2-20.6' },
+      { name: 'Wave-Particle Duality & The de Broglie Wavelength', code: 'A2-20.7' },
+      { name: 'Electron Diffraction as Evidence', code: 'A2-20.8' },
+      { name: 'Energy Levels in Atoms', code: 'A2-20.9' },
+      { name: 'Emission & Absorption Line Spectra', code: 'A2-20.10' },
+    ] },
+
+  { topic: 'A2 \u00b7 Topic 21 \u2014 Nuclear Physics', code: 'A2-21',
+    subtopics: [
+      { name: 'Mass Defect & Binding Energy', code: 'A2-21.1' },
+      { name: 'Mass-Energy Equivalence & E = mc\u00b2', code: 'A2-21.2' },
+      { name: 'The Binding Energy per Nucleon Curve', code: 'A2-21.3' },
+      { name: 'Nuclear Fission & Fusion', code: 'A2-21.4' },
+      { name: 'Radioactive Decay as a Random Process', code: 'A2-21.5' },
+      { name: 'The Decay Constant & Activity', code: 'A2-21.6' },
+      { name: 'The Exponential Decay Equation', code: 'A2-21.7' },
+      { name: 'Half-Life & Its Relationship to the Decay Constant', code: 'A2-21.8' },
+      { name: 'Solving Radioactive Decay Problems', code: 'A2-21.9' },
+    ] },
+
+  { topic: 'A2 \u00b7 Topic 22 \u2014 Medical Physics', code: 'A2-22',
+    subtopics: [
+      { name: 'Production & Use of Ultrasound', code: 'A2-22.1' },
+      { name: 'Acoustic Impedance & Reflection at Boundaries', code: 'A2-22.2' },
+      { name: 'A-Scan & B-Scan Ultrasound Imaging', code: 'A2-22.3' },
+      { name: 'Production of X-Rays & The X-Ray Tube', code: 'A2-22.4' },
+      { name: 'X-Ray Attenuation & The Attenuation Coefficient', code: 'A2-22.5' },
+      { name: 'Improving X-Ray Image Contrast & Sharpness', code: 'A2-22.6' },
+      { name: 'Computed Tomography Scanning', code: 'A2-22.7' },
+      { name: 'Principles of Nuclear Magnetic Resonance Imaging', code: 'A2-22.8' },
+      { name: 'Comparing Medical Imaging Techniques', code: 'A2-22.9' },
+    ] },
+
+  { topic: 'A2 \u00b7 Topic 23 \u2014 Astronomy & Cosmology', code: 'A2-23',
+    subtopics: [
+      { name: 'Standard Candles & Luminosity', code: 'A2-23.1' },
+      { name: 'Radiant Flux Intensity & The Inverse Square Law', code: 'A2-23.2' },
+      { name: 'Stefan-Boltzmann Law & Stellar Radius', code: 'A2-23.3' },
+      { name: 'Wien\u2019s Displacement Law & Surface Temperature', code: 'A2-23.4' },
+      { name: 'Doppler Redshift & Recession Velocity', code: 'A2-23.5' },
+      { name: 'Hubble\u2019s Law & The Age of the Universe', code: 'A2-23.6' },
+      { name: 'Evidence for the Big Bang', code: 'A2-23.7' },
+    ] },
+
+  { topic: 'A2 \u00b7 Planning, Analysis & Evaluation (Paper 5)', code: 'A2-P',
+    subtopics: [
+      { name: 'Defining the Problem & Identifying Variables', code: 'A2-P.1' },
+      { name: 'Designing a Method & Selecting Apparatus', code: 'A2-P.2' },
+      { name: 'Describing How Measurements Will Be Taken', code: 'A2-P.3' },
+      { name: 'Safety Considerations & Their Justification', code: 'A2-P.4' },
+      { name: 'Linearising a Relationship for Graphical Analysis', code: 'A2-P.5' },
+      { name: 'Determining Constants from Gradient & Intercept', code: 'A2-P.6' },
+      { name: 'Calculating Absolute & Percentage Uncertainties', code: 'A2-P.7' },
+      { name: 'Plotting Error Bars & Worst-Fit Lines', code: 'A2-P.8' },
+      { name: 'Determining Uncertainty in Gradient & Intercept', code: 'A2-P.9' },
+      { name: 'Drawing a Justified Conclusion from Data', code: 'A2-P.10' },
+      { name: 'Common Errors in Paper 5 Responses', code: 'A2-P.11' },
+    ] },
+
+  { topic: 'A2 \u00b7 Exam Technique & Revision', code: 'A2-EX',
+    subtopics: [
+      { name: 'Command Words in A Level Physics Papers', code: 'A2-EX.1' },
+      { name: 'Structuring Extended Explanation Answers', code: 'A2-EX.2' },
+      { name: 'Working with the Data & Formulae Booklet', code: 'A2-EX.3' },
+      { name: 'Significant Figures & Unit Discipline in Answers', code: 'A2-EX.4' },
+      { name: 'Past Paper Practice: Mechanics & Materials', code: 'A2-EX.5' },
+      { name: 'Past Paper Practice: Waves & Electricity', code: 'A2-EX.6' },
+      { name: 'Past Paper Practice: Fields, Capacitance & Magnetism', code: 'A2-EX.7' },
+      { name: 'Past Paper Practice: Quantum & Nuclear Physics', code: 'A2-EX.8' },
+      { name: 'Mock Exam Review & Revision Planning', code: 'A2-EX.9' },
+    ] },
+]
+
 export const ALEVEL_LIBRARY = [
   { match: /\bbiology\b/i, const_: ALEVEL_BIOLOGY_9700,
     source: 'Cambridge International AS & A Level Biology 9700 \u2014 252-lesson scheme (AS 128 / A2 124)' },
   { match: /\bchemistry\b/i, const_: ALEVEL_CHEMISTRY_9701,
     source: 'Cambridge International AS & A Level Chemistry 9701 \u2014 235-lesson scheme (AS 132 / A2 103)' },
+  { match: /\bphysics\b/i, const_: ALEVEL_PHYSICS_9702,
+    source: 'Cambridge International AS & A Level Physics 9702 \u2014 222-lesson scheme (AS 105 / A2 117)' },
 ]
 
 export const PRIMARY_Y5_LIBRARY = [
