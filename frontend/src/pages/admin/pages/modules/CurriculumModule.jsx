@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { useStore, api } from '../../../../context/ctx.jsx'
 import { TOKENS } from '../shared/tokens.js'
 import { PCard, PKpi, PSection } from '../shared/ui.jsx'
-import { IPRIMARY_LIBRARY, ILOWER_SEC_LIBRARY, IAL_LIBRARY, ALEVEL_LIBRARY, IGCSE_LIBRARY, IGCSE_MATHS_0580, LOWER_SEC_LIBRARY, PRIMARY_LIBRARY, PRIMARY_Y5_LIBRARY } from './spineData.js'
+import { KCSE_LIBRARY, IPRIMARY_LIBRARY, ILOWER_SEC_LIBRARY, IAL_LIBRARY, ALEVEL_LIBRARY, IGCSE_LIBRARY, IGCSE_MATHS_0580, LOWER_SEC_LIBRARY, PRIMARY_LIBRARY, PRIMARY_Y5_LIBRARY } from './spineData.js'
 
 function SubjectsTab({ toast }) {
   // The 15 curricula from the new catalog
@@ -24,7 +24,8 @@ function SubjectsTab({ toast }) {
     { id: 'BNC',                name: 'British National Curriculum' },
     { id: 'American',           name: 'American Curriculum' },
     { id: 'Canadian',           name: 'Canadian Curriculum' },
-    { id: 'KenyaCBC',           name: 'Kenya CBC' },
+    { id: 'KenyaCBE',           name: 'Kenya CBE' },
+    { id: 'KCSE', name: 'KCSE (Form 3-4)' },
   ]
   // Categories grouped by curriculum family — drives the <optgroup>
   // dropdown in the form so admin sees categories organised by which
@@ -43,7 +44,7 @@ function SubjectsTab({ toast }) {
     { label: 'British National Curriculum', categories: [
       'Core', 'English', 'Practical', 'Design',
     ]},
-    { label: 'Kenya CBC', categories: [
+    { label: 'Kenya CBE', categories: [
       'STEM', 'Social Studies', 'Life Skills',
     ]},
     { label: 'American / Other', categories: [
@@ -306,7 +307,8 @@ function SyllabusSpineTab({ toast }) {
     { id: 'BNC',                name: 'British National Curriculum' },
     { id: 'American',           name: 'American Curriculum' },
     { id: 'Canadian',           name: 'Canadian Curriculum' },
-    { id: 'KenyaCBC',           name: 'Kenya CBC' },
+    { id: 'KenyaCBE',           name: 'Kenya CBE' },
+    { id: 'KCSE', name: 'KCSE (Form 3-4)' },
   ])
   const [curriculum, setCurriculum] = useState('CambridgeIGCSE')
   const [subjects, setSubjects] = useState([])
@@ -568,6 +570,34 @@ function SyllabusSpineTab({ toast }) {
    * subjects rather than five, Years rather than Stages, and integrated
    * Science. A shared library would load the wrong scheme.
    */
+  /**
+   * Load a KCSE spine (Forms 3 and 4 only).
+   *
+   * KCSE is being phased out — no new Form 1 is admitted — so only the
+   * cohorts still sitting it are covered. Its own library and curriculum
+   * mean the whole thing can be removed in one move when the last
+   * candidate finishes.
+   */
+  const loadKcseSpine = async () => {
+    if (!subjectId) { toast?.error?.('Pick a subject first.'); return }
+    const subjectName = subjects.find(s => s._id === subjectId)?.subjectName || ''
+    const entry = KCSE_LIBRARY.find(e => e.match.test(subjectName))
+    if (!entry) {
+      toast?.error?.(`No KCSE spine matches "${subjectName}". Available: `
+        + KCSE_LIBRARY.map(e => (e.source || '').replace('KCSE ', '').split(' \u2014 ')[0]).join(', '))
+      return
+    }
+    setBusy(true)
+    try {
+      const { data } = await api.post('/syllabus/bulk', {
+        subjectId, topics: entry.const_, sourceSyllabus: entry.source,
+      })
+      if (data?.success) { toast?.ok?.(data.message || 'Loaded.'); loadSpine(subjectId) }
+      else toast?.error?.(data?.message || 'Failed.')
+    } catch (e) { await handleSpineError(e, { subjectId, topics: entry.const_, sourceSyllabus: entry.source }) }
+    finally { setBusy(false) }
+  }
+
   const loadIPrimarySpine = async () => {
     if (!subjectId) { toast?.error?.('Pick a subject first.'); return }
     const subjectName = subjects.find(s => s._id === subjectId)?.subjectName || ''
@@ -721,6 +751,14 @@ function SyllabusSpineTab({ toast }) {
                 background: '#fff', color: '#9A7B16', border: '1.5px dashed ' + TOKENS.gold,
                 borderRadius: 7, padding: '8px 16px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
               }}>Load IGCSE spine</button>
+            )}
+            {curriculum === 'KCSE' && (
+              <button onClick={loadKcseSpine} disabled={busy}
+                title="Auto-detects which KCSE spine matches the selected subject. Topics arrive prefixed 'F3 ·' and 'F4 ·' so a single form can be filtered on its own."
+                style={{
+                  background: '#fff', color: '#9A7B16', border: '1.5px dashed ' + TOKENS.gold,
+                  borderRadius: 7, padding: '8px 16px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+                }}>Load KCSE spine</button>
             )}
             {curriculum === 'EdexcelPrimary' && (
               <button onClick={loadIPrimarySpine} disabled={busy}
@@ -896,7 +934,7 @@ function CurriculumModule({ refreshKey, toast }) {
           { name: 'IGCSE', subjects: ['Maths', 'English', 'Physics', 'Chemistry', 'Biology'] },
           { name: 'A-Level', subjects: ['Further Maths', 'Physics', 'Chemistry'] },
           { name: 'IB Diploma', subjects: ['HL Maths', 'HL English', 'HL Sciences'] },
-          { name: 'Kenya CBC', subjects: ['Maths', 'English', 'Kiswahili', 'Sciences'] },
+          { name: 'Kenya CBE', subjects: ['Maths', 'English', 'Kiswahili', 'Sciences'] },
           { name: 'American', subjects: ['Algebra', 'Geometry', 'Biology'] },
           { name: 'British', subjects: ['Maths', 'English Lit', 'Sciences'] },
         ]).map((c, i) => {
