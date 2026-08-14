@@ -397,7 +397,7 @@ router.post('/remap-subtopics', auth, requireRole('admin', 'ops_manager'), async
 router.post('/retag', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const { fromSubject, fromCurriculum, toSubject, toCurriculum, confirm, topics,
-            fromGrade, toGrade } = req.body || {};
+            fromGrade, toGrade, fromGradeLevel, toGradeLevel } = req.body || {};
 
     // Optional topic filter. A corrupt batch can hold two subjects under
     // one bad label — 125 questions filed as subject "EdexcelIGCSE"
@@ -419,7 +419,7 @@ router.post('/retag', auth, requireRole('admin', 'ops_manager'), async (req, res
     };
     if (toGrade) target.grade = toGrade;
     if (target.subject === fromSubject && target.curriculum === fromCurriculum
-        && !toGrade)
+        && !toGrade && !toGradeLevel)
       return res.status(400).json({ success:false, message:'Nothing would change.' });
 
     const filter = { subject: fromSubject, curriculum: fromCurriculum, ...topicFilter };
@@ -467,8 +467,10 @@ router.post('/retag', auth, requireRole('admin', 'ops_manager'), async (req, res
             + (toGrade ? `  grade -> "${toGrade}"` : ''),
           targetSubjectExists: !!subj,
           wouldLink, wouldOrphan, sampleUnmatched,
-          gradeLevelsToFix: (fromGrade && toGrade)
-            ? await Question.countDocuments({ ...filter, gradeLevels: fromGrade })
+          gradeLevelsToFix: (fromGradeLevel || (toGrade ? fromGrade : null))
+            ? await Question.countDocuments({
+                subject: fromSubject, curriculum: target.curriculum,
+                gradeLevels: fromGradeLevel || fromGrade })
             : 0,
         },
         message: !subj
@@ -491,12 +493,25 @@ router.post('/retag', auth, requireRole('admin', 'ops_manager'), async (req, res
     //
     // arrayFilters replaces just the matching element. A plain $set on the
     // field would overwrite the whole array and lose the other grades.
+    // gradeLevels is swept SEPARATELY from grade, with its own from/to.
+    //
+    // They have to be independent: once the primary grade has been fixed,
+    // a filter on the old grade value matches nothing, so a combined
+    // update can never reach the array afterwards. That is exactly what
+    // happened on the first run — grade became "Form 3" while gradeLevels
+    // still read ["Grade 11 (Form 3)", "Grade 12 (Form 4)"].
+    const lvlFrom = fromGradeLevel || (toGrade ? fromGrade : null);
+    const lvlTo   = toGradeLevel   || toGrade;
     let levelsFixed = 0;
-    if (fromGrade && toGrade) {
+    if (lvlFrom && lvlTo) {
+      // Deliberately NOT constrained by filter.grade — the array is fixed
+      // wherever the stale label appears, whatever the primary grade says.
+      const lvlFilter = { subject: fromSubject, curriculum: target.curriculum,
+                          gradeLevels: lvlFrom };
       const lr = await Question.updateMany(
-        { ...filter, gradeLevels: fromGrade },
-        { $set: { 'gradeLevels.$[lvl]': toGrade } },
-        { arrayFilters: [{ lvl: fromGrade }] });
+        lvlFilter,
+        { $set: { 'gradeLevels.$[lvl]': lvlTo } },
+        { arrayFilters: [{ lvl: lvlFrom }] });
       levelsFixed = lr.modifiedCount ?? lr.nModified ?? 0;
     }
     console.log(`[questions/retag] ${fromSubject}/${fromCurriculum} -> ${target.subject}/${target.curriculum}: `
