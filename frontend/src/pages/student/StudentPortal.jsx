@@ -3114,7 +3114,7 @@ const CURRICULUM_LABEL = {
   EdexcelALevel:'Edexcel International A Level', AQALowerSec:'AQA Lower Secondary',
   AQAGCSE:'AQA GCSE', AQAALevel:'AQA A Level', IBPYP:'IB PYP', IBMYP:'IB MYP', IBDP:'IB Diploma',
   BNC:'British National Curriculum', American:'American Curriculum',
-  Canadian:'Canadian Curriculum', KenyaCBC:'Kenya CBC',
+  Canadian:'Canadian Curriculum', KenyaCBE:'Kenya CBE', KCSE:'KCSE (Form 3-4)', EdexcelPrimary:'Edexcel iPrimary',
 }
 const prettyCurriculum = (c) =>
   CURRICULUM_LABEL[c] || String(c || '').replace(/([a-z])([A-Z])/g, '$1 $2')
