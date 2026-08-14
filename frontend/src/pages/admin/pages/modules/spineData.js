@@ -517,7 +517,7 @@ const PRIMARY_GLOBAL_0838 = [
 export const PRIMARY_LIBRARY = [
   { match: /\bmath/i,        const_: PRIMARY_MATHS_0096,    source: 'Cambridge Primary Mathematics 0096' },
   { match: /\benglish\b/i,   const_: PRIMARY_ENGLISH_0058,  source: 'Cambridge Primary English 0058' },
-  { match: /\bscience\b/i,   const_: PRIMARY_SCIENCE_0097,  source: 'Cambridge Primary Science 0097' },
+  { match: /^(?!.*comput).*\bscience\b/i,   const_: PRIMARY_SCIENCE_0097,  source: 'Cambridge Primary Science 0097' },
   { match: /comput/i,        const_: PRIMARY_COMPUTING_0059, source: 'Cambridge Primary Computing 0059' },
   { match: /global/i,        const_: PRIMARY_GLOBAL_0838,   source: 'Cambridge Primary Global Perspectives 0838' },
 ]
@@ -1686,7 +1686,7 @@ export const LOWER_SEC_LIBRARY = [
     source: 'Cambridge Lower Secondary Mathematics 1112 \u2014 151-lesson scheme (Stages 7-9)' },
   { match: /\benglish\b/i,                const_: LOWERSEC_ENGLISH_1111,
     source: 'Cambridge Lower Secondary English 1111 \u2014 95-lesson scheme (Stages 7-9)' },
-  { match: /\bscience\b/i,                const_: LOWERSEC_SCIENCE_1113,
+  { match: /^(?!.*comput).*\bscience\b/i,                const_: LOWERSEC_SCIENCE_1113,
     source: 'Cambridge Lower Secondary Science 1113 \u2014 109-lesson scheme (Stages 7-9)' },
   { match: /\bcomputing\b|\bcomputer\s*science\b/i, const_: LOWERSEC_COMPUTING_1129,
     source: 'Cambridge Lower Secondary Computing 1129 \u2014 63-lesson scheme (Stages 7-9)' },
@@ -1703,7 +1703,7 @@ export const ILOWER_SEC_LIBRARY = [
     source: 'Edexcel International Lower Secondary Mathematics \u2014 Years 7-9' },
   { match: /\benglish\b/i,                const_: ILOWERSEC_ENGLISH,
     source: 'Edexcel International Lower Secondary English \u2014 Years 7-9' },
-  { match: /\bscience\b/i,                const_: ILOWERSEC_SCIENCE,
+  { match: /^(?!.*comput).*\bscience\b/i,                const_: ILOWERSEC_SCIENCE,
     source: 'Edexcel International Lower Secondary Science \u2014 Years 7-9' },
   { match: /\bict\b|information|\bcomputing\b|\bcomputer\s*science\b/i, const_: ILOWERSEC_ICT,
     source: 'Edexcel International Lower Secondary ICT \u2014 Years 7-9' },
@@ -12353,7 +12353,7 @@ export const ALEVEL_LIBRARY = [
 export const PRIMARY_Y5_LIBRARY = [
   { match: /\bmath/i, const_: PRIMARY_Y5_MATHS_0096, source: 'Cambridge Primary Mathematics 0096 — Year 5 (Stage 5)' },
   { match: /\benglish\b/i, const_: PRIMARY_Y5_ENGLISH_0058, source: 'Cambridge Primary English 0058 — Year 5 (Stage 5)' },
-  { match: /\bscience\b/i, const_: PRIMARY_Y5_SCIENCE_0097, source: 'Cambridge Primary Science 0097 — Year 5 (Stage 5)' },
+  { match: /^(?!.*comput).*\bscience\b/i, const_: PRIMARY_Y5_SCIENCE_0097, source: 'Cambridge Primary Science 0097 — Year 5 (Stage 5)' },
   { match: /comput/i, const_: PRIMARY_Y5_COMPUTING_0959, source: 'Cambridge Primary Computing 0959 — Year 5 (Stage 5)' },
   { match: /global/i, const_: PRIMARY_Y5_GLOBAL_0838, source: 'Cambridge Primary Global Perspectives 0838 — Year 5 (Stage 5)' },
 ]
