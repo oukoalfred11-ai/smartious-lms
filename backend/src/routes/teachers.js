@@ -111,7 +111,7 @@ router.post('/', auth, requireRole('admin', 'ops_manager'), async (req, res) => 
       'CambridgePrimary', 'CambridgeLowerSec', 'CambridgeIGCSE', 'CambridgeALevel',
       'EdexcelLowerSec',  'EdexcelIGCSE',      'EdexcelALevel',
       'AQALowerSec',      'AQAGCSE',           'AQAALevel',
-      'IB', 'BNC', 'American', 'Canadian', 'KenyaCBC',
+      'IB', 'BNC', 'American', 'Canadian', 'KenyaCBE', 'KCSE', 'KenyaCBC',
       // Legacy strings — kept so existing teacher data is not broken
       'IGCSE', 'A-Level', 'IB Diploma', 'IB MYP', 'Kenya CBC',
     ];
