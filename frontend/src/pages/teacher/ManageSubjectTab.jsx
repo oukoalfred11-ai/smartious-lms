@@ -38,7 +38,12 @@ const BRAND = {
 }
 
 // Curricula known to the system
-const CURRICULA = ['IGCSE', 'A-Level', 'IB Diploma', 'IB MYP', 'Kenya CBC', 'BNC', 'American']
+// These were DISPLAY NAMES, not curriculum ids — 'IGCSE', 'A-Level',
+// 'Kenya CBC'. None matches a real id, so a specialty saved from here
+// could never match a student: allocation does an $elemMatch on
+// curriculum, and 'IGCSE' never equals 'CambridgeIGCSE'.
+import { FALLBACK_CURRICULA } from '../../data/curriculumList.js'
+const CURRICULA = FALLBACK_CURRICULA.map(c => c.id)
 
 // YouTube ID extraction (mirror of backend)
 const extractYouTubeId = (url = '') => {
