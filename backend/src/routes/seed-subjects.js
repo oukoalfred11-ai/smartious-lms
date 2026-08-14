@@ -392,15 +392,32 @@ const ALL_SUBJECTS = [
 // POST /api/seed-subjects
 router.post('/', auth, requireRole('admin','ops_manager'), async (req, res) => {
   try {
-    let inserted = 0, skipped = 0, errors = []
+    let inserted = 0, skipped = 0, errors = [], reactivationsAvoided = 0
 
     for (const s of ALL_SUBJECTS) {
       try {
+        // $setOnInsert, NOT $set, for isActive.
+        //
+        // The seeder used to force isActive:true on every subject in its
+        // list. That silently undid deliberate curation: a school that had
+        // deactivated Art & Design and Physical Education at Lower
+        // Secondary found them back the next time anyone ran this. Category
+        // is still refreshed on existing records — that is a correction, not
+        // a policy decision — but whether a subject is offered is the
+        // school's choice and the seeder must not overrule it.
+        const before = await Subject.findOne({
+          curriculum: s.curriculum, subjectName: s.subjectName,
+        }).select('_id').lean()
+
         await Subject.findOneAndUpdate(
           { curriculum: s.curriculum, subjectName: s.subjectName },
-          { $set: { category: s.category, isActive: true } },
+          {
+            $set: { category: s.category },
+            $setOnInsert: { isActive: true },
+          },
           { upsert: true, new: true }
         )
+        if (before) reactivationsAvoided++
         inserted++
       } catch(e) {
         if (e.code === 11000) { skipped++; continue }
@@ -410,8 +427,9 @@ router.post('/', auth, requireRole('admin','ops_manager'), async (req, res) => {
 
     return res.json({
       success: true,
-      message: `Seeded ${inserted} subjects (${skipped} already existed, ${errors.length} errors).`,
-      data: { inserted, skipped, errors: errors.slice(0, 10) }
+      message: `Seeded ${inserted} subject(s). ${reactivationsAvoided} already existed and kept `
+             + `their current active/inactive state. ${skipped} skipped, ${errors.length} error(s).`,
+      data: { inserted, skipped, existing: reactivationsAvoided, errors: errors.slice(0, 10) }
     })
   } catch(e) {
     return res.status(500).json({ success: false, message: e.message })
