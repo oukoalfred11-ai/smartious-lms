@@ -34,7 +34,8 @@ const CURRICULA = [
   { id: 'CambridgeLowerSec', name: 'Cambridge Lower Secondary',  region: 'International' },
   { id: 'CambridgeIGCSE',     name: 'Cambridge IGCSE',            region: 'International' },
   { id: 'CambridgeALevel',    name: 'Cambridge A-Level',          region: 'International' },
-  // ── EDEXCEL — secondary stages only (no Edexcel Primary) ──
+  // ── EDEXCEL ──
+  { id: 'EdexcelPrimary',    name: 'Edexcel iPrimary',           region: 'International' },
   { id: 'EdexcelLowerSec',   name: 'Edexcel Lower Secondary',    region: 'International' },
   { id: 'EdexcelIGCSE',       name: 'Edexcel IGCSE',              region: 'International' },
   { id: 'EdexcelALevel',      name: 'Edexcel A-Level',            region: 'International' },
@@ -115,6 +116,15 @@ const GRADES_BY_CURRICULUM = {
 // Each subject lists which curricula it's available in.
 // `availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBMYP', 'IBDP', 'BNC', 'American', 'Canadian']` means available across all 7 curricula.
 const SUBJECTS = [
+  // ── Edexcel iPrimary (Years 1-6) ───────────────────────────
+  // Pearson iPrimary covers four subjects. Listed explicitly rather than
+  // inherited, for the same reason Lower Secondary is: a Year 2 pupil
+  // should not be offered Economics.
+  { id: 'iprim_english',     name: 'English',            category: 'Languages',   availableIn: ['EdexcelPrimary'] },
+  { id: 'iprim_mathematics', name: 'Mathematics',        category: 'Mathematics', availableIn: ['EdexcelPrimary'] },
+  { id: 'iprim_science',     name: 'Science',            category: 'Sciences',    availableIn: ['EdexcelPrimary'] },
+  { id: 'iprim_computing',   name: 'Computing',          category: 'Technology',  availableIn: ['EdexcelPrimary'] },
+
   // ── Lower Secondary (Years 7-9) ────────────────────────────
   // Listed explicitly rather than inherited from the IGCSE set. The
   // catalogue previously offered a Year 7 student Accounting, Travel &
