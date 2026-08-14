@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { useStore, api } from '../../../../context/ctx.jsx'
 import { TOKENS } from '../shared/tokens.js'
 import { PCard, PKpi, PSection } from '../shared/ui.jsx'
-import { KCSE_LIBRARY, IPRIMARY_LIBRARY, ILOWER_SEC_LIBRARY, IAL_LIBRARY, ALEVEL_LIBRARY, IGCSE_LIBRARY, IGCSE_MATHS_0580, LOWER_SEC_LIBRARY, PRIMARY_LIBRARY, PRIMARY_Y5_LIBRARY } from './spineData.js'
+import { PYP_LIBRARY, MYP_LIBRARY, IBDP_LIBRARY, KCSE_LIBRARY, IPRIMARY_LIBRARY, ILOWER_SEC_LIBRARY, IAL_LIBRARY, ALEVEL_LIBRARY, IGCSE_LIBRARY, IGCSE_MATHS_0580, LOWER_SEC_LIBRARY, PRIMARY_LIBRARY, PRIMARY_Y5_LIBRARY } from './spineData.js'
 
 function SubjectsTab({ toast }) {
   // The 15 curricula from the new catalog
@@ -578,6 +578,93 @@ function SyllabusSpineTab({ toast }) {
    * mean the whole thing can be removed in one move when the last
    * candidate finishes.
    */
+  /**
+   * Load an IB PYP spine.
+   *
+   * The three IB programmes have separate libraries because they are
+   * genuinely different frameworks, not levels of one syllabus: PYP is
+   * organised by transdisciplinary theme, MYP by key concept and
+   * assessment criterion, DP by SL core plus HL extension and internal
+   * assessment. A shared library would load the wrong shape entirely.
+   */
+  const loadPypSpine = async () => {
+    if (!subjectId) { toast?.error?.('Pick a subject first.'); return }
+    const subjectName = subjects.find(s => s._id === subjectId)?.subjectName || ''
+    const entry = PYP_LIBRARY.find(e => e.match.test(subjectName))
+    if (!entry) {
+      toast?.error?.(`No IB PYP spine matches "${subjectName}". Available: `
+        + PYP_LIBRARY.map(e => (e.source || '').replace('IB PYP ', '').split(' \u2014 ')[0]).join(', '))
+      return
+    }
+    setBusy(true)
+    try {
+      const { data } = await api.post('/syllabus/bulk', {
+        subjectId, topics: entry.const_, sourceSyllabus: entry.source,
+      })
+      if (data?.success) { toast?.ok?.(data.message || 'Loaded.'); loadSpine(subjectId) }
+      else toast?.error?.(data?.message || 'Failed.')
+    } catch (e) { await handleSpineError(e, { subjectId, topics: entry.const_, sourceSyllabus: entry.source }) }
+    finally { setBusy(false) }
+  }
+
+  /**
+   * Load an IB MYP spine.
+   *
+   * The three IB programmes have separate libraries because they are
+   * genuinely different frameworks, not levels of one syllabus: PYP is
+   * organised by transdisciplinary theme, MYP by key concept and
+   * assessment criterion, DP by SL core plus HL extension and internal
+   * assessment. A shared library would load the wrong shape entirely.
+   */
+  const loadMypSpine = async () => {
+    if (!subjectId) { toast?.error?.('Pick a subject first.'); return }
+    const subjectName = subjects.find(s => s._id === subjectId)?.subjectName || ''
+    const entry = MYP_LIBRARY.find(e => e.match.test(subjectName))
+    if (!entry) {
+      toast?.error?.(`No IB MYP spine matches "${subjectName}". Available: `
+        + MYP_LIBRARY.map(e => (e.source || '').replace('IB MYP ', '').split(' \u2014 ')[0]).join(', '))
+      return
+    }
+    setBusy(true)
+    try {
+      const { data } = await api.post('/syllabus/bulk', {
+        subjectId, topics: entry.const_, sourceSyllabus: entry.source,
+      })
+      if (data?.success) { toast?.ok?.(data.message || 'Loaded.'); loadSpine(subjectId) }
+      else toast?.error?.(data?.message || 'Failed.')
+    } catch (e) { await handleSpineError(e, { subjectId, topics: entry.const_, sourceSyllabus: entry.source }) }
+    finally { setBusy(false) }
+  }
+
+  /**
+   * Load an IB Diploma spine.
+   *
+   * The three IB programmes have separate libraries because they are
+   * genuinely different frameworks, not levels of one syllabus: PYP is
+   * organised by transdisciplinary theme, MYP by key concept and
+   * assessment criterion, DP by SL core plus HL extension and internal
+   * assessment. A shared library would load the wrong shape entirely.
+   */
+  const loadIbdpSpine = async () => {
+    if (!subjectId) { toast?.error?.('Pick a subject first.'); return }
+    const subjectName = subjects.find(s => s._id === subjectId)?.subjectName || ''
+    const entry = IBDP_LIBRARY.find(e => e.match.test(subjectName))
+    if (!entry) {
+      toast?.error?.(`No IB Diploma spine matches "${subjectName}". Available: `
+        + IBDP_LIBRARY.map(e => (e.source || '').replace('IB DP ', '').split(' \u2014 ')[0]).join(', '))
+      return
+    }
+    setBusy(true)
+    try {
+      const { data } = await api.post('/syllabus/bulk', {
+        subjectId, topics: entry.const_, sourceSyllabus: entry.source,
+      })
+      if (data?.success) { toast?.ok?.(data.message || 'Loaded.'); loadSpine(subjectId) }
+      else toast?.error?.(data?.message || 'Failed.')
+    } catch (e) { await handleSpineError(e, { subjectId, topics: entry.const_, sourceSyllabus: entry.source }) }
+    finally { setBusy(false) }
+  }
+
   const loadKcseSpine = async () => {
     if (!subjectId) { toast?.error?.('Pick a subject first.'); return }
     const subjectName = subjects.find(s => s._id === subjectId)?.subjectName || ''
@@ -751,6 +838,30 @@ function SyllabusSpineTab({ toast }) {
                 background: '#fff', color: '#9A7B16', border: '1.5px dashed ' + TOKENS.gold,
                 borderRadius: 7, padding: '8px 16px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
               }}>Load IGCSE spine</button>
+            )}
+            {curriculum === 'IBPYP' && (
+              <button onClick={loadPypSpine} disabled={busy}
+                title="Auto-detects which IB PYP spine matches the selected subject. Organised by transdisciplinary theme, prefixed G1 to G5."
+                style={{
+                  background: '#fff', color: '#9A7B16', border: '1.5px dashed ' + TOKENS.gold,
+                  borderRadius: 7, padding: '8px 16px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+                }}>Load PYP spine</button>
+            )}
+            {curriculum === 'IBMYP' && (
+              <button onClick={loadMypSpine} disabled={busy}
+                title="Auto-detects which IB MYP spine matches the selected subject. Content paired with assessment criteria A-D, prefixed Y1 to Y5."
+                style={{
+                  background: '#fff', color: '#9A7B16', border: '1.5px dashed ' + TOKENS.gold,
+                  borderRadius: 7, padding: '8px 16px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+                }}>Load MYP spine</button>
+            )}
+            {curriculum === 'IBDP' && (
+              <button onClick={loadIbdpSpine} disabled={busy}
+                title="Auto-detects which IB DP spine matches the selected subject. SL core, HL extension and internal assessment as separate strands."
+                style={{
+                  background: '#fff', color: '#9A7B16', border: '1.5px dashed ' + TOKENS.gold,
+                  borderRadius: 7, padding: '8px 16px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+                }}>Load IB Diploma spine</button>
             )}
             {curriculum === 'KCSE' && (
               <button onClick={loadKcseSpine} disabled={busy}
