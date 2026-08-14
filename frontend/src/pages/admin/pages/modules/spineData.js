@@ -5064,17 +5064,18 @@ const MYP_PHYSICAL_HEALTH_EDUCATION = [
 // IB PYP LIBRARY — Grades 1-5.
 // ═══════════════════════════════════════════════════════════
 export const PYP_LIBRARY = [
-  { match: /\blanguage\b/i, const_: PYP_LANGUAGE,
+  // Anchored, for the same reason as MYP.
+  { match: /^PYP Language$/i, const_: PYP_LANGUAGE,
     source: 'IB PYP Language \u2014 70-lesson scheme (Grades 1-5)' },
-  { match: /\bmath/i, const_: PYP_MATHEMATICS,
+  { match: /^PYP Mathematics$/i, const_: PYP_MATHEMATICS,
     source: 'IB PYP Mathematics \u2014 70-lesson scheme (Grades 1-5)' },
-  { match: /^(?!.*social).*\bscience\b/i, const_: PYP_SCIENCE,
+  { match: /^PYP Science$/i, const_: PYP_SCIENCE,
     source: 'IB PYP Science \u2014 60-lesson scheme (Grades 1-5)' },
-  { match: /social\s+studies/i, const_: PYP_SOCIAL_STUDIES,
+  { match: /^PYP Social Studies$/i, const_: PYP_SOCIAL_STUDIES,
     source: 'IB PYP Social Studies \u2014 55-lesson scheme (Grades 1-5)' },
-  { match: /\barts?\b/i, const_: PYP_ARTS,
+  { match: /^PYP Arts$/i, const_: PYP_ARTS,
     source: 'IB PYP Arts \u2014 55-lesson scheme (Grades 1-5)' },
-  { match: /personal|physical\s+education|\bpspe\b/i, const_: PYP_PERSONAL_SOCIAL_PHYSICAL_EDUCATION,
+  { match: /^PYP Personal, Social & Physical Education$/i, const_: PYP_PERSONAL_SOCIAL_PHYSICAL_EDUCATION,
     source: 'IB PYP Personal, Social & Physical Education \u2014 55-lesson scheme (Grades 1-5)' },
 ]
 
@@ -5084,667 +5085,74 @@ export const PYP_LIBRARY = [
 // subject GROUPS are the curriculum, not named subjects.
 // ═══════════════════════════════════════════════════════════
 export const MYP_LIBRARY = [
-  { match: /language\s*(?:&|and)\s*literature|\blang\s*lit\b/i, const_: MYP_LANGUAGE_LITERATURE_ENGLISH,
+  // Anchored to the exact record name. The previous patterns were loose
+  // keywords — /\barts?\b/ matched "MYP Arts", "Arts (Drama)", "Arts
+  // (Music)" and "Arts (Visual Arts)" alike, so one spine was loaded onto
+  // four records and the unprefixed set absorbed spines meant for the
+  // eight subject groups.
+  { match: /^MYP Language & Literature \(English\)$/i, const_: MYP_LANGUAGE_LITERATURE_ENGLISH,
     source: 'IB MYP Language & Literature (English) \u2014 80-lesson scheme (Years 1-5)' },
-  { match: /language\s+acquisition/i, const_: MYP_LANGUAGE_ACQUISITION,
+  { match: /^MYP Language Acquisition(?: \(.+\))?$/i, const_: MYP_LANGUAGE_ACQUISITION,
     source: 'IB MYP Language Acquisition \u2014 80-lesson scheme (Years 1-5)' },
-  { match: /individuals?\s*(?:&|and)\s*societ/i, const_: MYP_INDIVIDUALS_SOCIETIES,
+  { match: /^MYP Individuals & Societies$/i, const_: MYP_INDIVIDUALS_SOCIETIES,
     source: 'IB MYP Individuals & Societies \u2014 80-lesson scheme (Years 1-5)' },
-  { match: /\bsciences?\b/i, const_: MYP_SCIENCES,
+  { match: /^MYP Sciences$/i, const_: MYP_SCIENCES,
     source: 'IB MYP Sciences \u2014 75-lesson scheme (Years 1-5)' },
-  { match: /\bmath/i, const_: MYP_MATHEMATICS,
+  { match: /^MYP Mathematics$/i, const_: MYP_MATHEMATICS,
     source: 'IB MYP Mathematics \u2014 75-lesson scheme (Years 1-5)' },
-  { match: /\bdesign\b/i, const_: MYP_DESIGN,
+  { match: /^MYP Design$/i, const_: MYP_DESIGN,
     source: 'IB MYP Design \u2014 75-lesson scheme (Years 1-5)' },
-  { match: /\barts?\b/i, const_: MYP_ARTS,
+  { match: /^MYP Arts(?: \(.+\))?$/i, const_: MYP_ARTS,
     source: 'IB MYP Arts \u2014 70-lesson scheme (Years 1-5)' },
-  { match: /physical\s*(?:&|and)\s*health|\bphe\b/i, const_: MYP_PHYSICAL_HEALTH_EDUCATION,
+  { match: /^MYP Physical & Health Education$/i, const_: MYP_PHYSICAL_HEALTH_EDUCATION,
     source: 'IB MYP Physical & Health Education \u2014 70-lesson scheme (Years 1-5)' },
 ]
 
-// IB DP English Literature — Year 1 and Year 2.
-// SL core plus the HL extension, with the internal assessment as its own
-// strand because it carries 20-30% of the grade.
-const IBDP_ENGLISH_LITERATURE = [
-  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
-    subtopics: [
-      { name: 'Readers, Writers and Texts (DP Year 1)', code: 'Y1-CT.1' },
-      { name: 'Time and Space (DP Year 1)', code: 'Y1-CT.2' },
-      { name: 'Intertextuality: Connecting Texts (DP Year 1)', code: 'Y1-CT.3' },
-      { name: 'Close Reading of Poetry (DP Year 1)', code: 'Y1-CT.4' },
-      { name: 'Close Reading of Prose (DP Year 1)', code: 'Y1-CT.5' },
-      { name: 'Studying Drama in Performance (DP Year 1)', code: 'Y1-CT.6' },
-      { name: 'The Learner Portfolio (DP Year 1)', code: 'Y1-CT.7' },
-      { name: 'Global Issues in Literature (DP Year 1)', code: 'Y1-CT.8' },
-      { name: 'Literary Technique and Effect (DP Year 1)', code: 'Y1-CT.9' },
-      { name: 'Context: Author, Period and Culture (DP Year 1)', code: 'Y1-CT.10' },
-    ] },
-  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
-    subtopics: [
-      { name: 'HL: The Extended Essay in Literature (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: Wider Reading and Comparison (DP Year 2)', code: 'Y2-HL.2' },
-      { name: 'HL: Sustained Critical Argument (DP Year 2)', code: 'Y2-HL.3' },
-    ] },
-  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
-    subtopics: [
-      { name: 'IA: Individual Oral (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Selecting a Global Issue (DP Year 2)', code: 'Y2-IA.2' },
-      { name: 'IA: HL Essay Planning and Drafting (DP Year 2)', code: 'Y2-IA.3' },
-    ] },
-  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
-    subtopics: [
-      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
-      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
-      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
-      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
-      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
-      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
-    ] },
-]
 
-// IB DP English Language — Year 1 and Year 2.
-// SL core plus the HL extension, with the internal assessment as its own
-// strand because it carries 20-30% of the grade.
-const IBDP_ENGLISH_LANGUAGE = [
-  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
-    subtopics: [
-      { name: 'Language in Cultural Context (DP Year 1)', code: 'Y1-CT.1' },
-      { name: 'Language and Mass Communication (DP Year 1)', code: 'Y1-CT.2' },
-      { name: 'Language and Power (DP Year 1)', code: 'Y1-CT.3' },
-      { name: 'Textual Analysis: Non-Literary Texts (DP Year 1)', code: 'Y1-CT.4' },
-      { name: 'Register, Tone and Audience (DP Year 1)', code: 'Y1-CT.5' },
-      { name: 'Rhetoric and Persuasion (DP Year 1)', code: 'Y1-CT.6' },
-      { name: 'Media Representation (DP Year 1)', code: 'Y1-CT.7' },
-      { name: 'Language Change and Variation (DP Year 1)', code: 'Y1-CT.8' },
-      { name: 'Translation and Meaning (DP Year 1)', code: 'Y1-CT.9' },
-      { name: 'Producing Texts for a Purpose (DP Year 1)', code: 'Y1-CT.10' },
-    ] },
-  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
-    subtopics: [
-      { name: 'HL: Extended Textual Analysis (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: Comparative Study of Texts (DP Year 2)', code: 'Y2-HL.2' },
-      { name: 'HL: Independent Language Investigation (DP Year 2)', code: 'Y2-HL.3' },
-    ] },
-  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
-    subtopics: [
-      { name: 'IA: Individual Oral (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Further Oral Activity (DP Year 2)', code: 'Y2-IA.2' },
-      { name: 'IA: Written Task Development (DP Year 2)', code: 'Y2-IA.3' },
-    ] },
-  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
-    subtopics: [
-      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
-      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
-      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
-      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
-      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
-      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
-    ] },
-]
 
-// IB DP English as a Second Language (ESL) — Year 1 and Year 2.
-// SL core plus the HL extension, with the internal assessment as its own
-// strand because it carries 20-30% of the grade.
-const IBDP_ENGLISH_AS_A_SECOND_LANGUAGE_ESL = [
-  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
-    subtopics: [
-      { name: 'Identities and Personal Experience (DP Year 1)', code: 'Y1-CT.1' },
-      { name: 'Experiences: Travel and Migration (DP Year 1)', code: 'Y1-CT.2' },
-      { name: 'Human Ingenuity and Innovation (DP Year 1)', code: 'Y1-CT.3' },
-      { name: 'Social Organisation and Community (DP Year 1)', code: 'Y1-CT.4' },
-      { name: 'Sharing the Planet: Global Issues (DP Year 1)', code: 'Y1-CT.5' },
-      { name: 'Receptive Skills: Reading Strategies (DP Year 1)', code: 'Y1-CT.6' },
-      { name: 'Receptive Skills: Listening Strategies (DP Year 1)', code: 'Y1-CT.7' },
-      { name: 'Productive Skills: Speaking (DP Year 1)', code: 'Y1-CT.8' },
-      { name: 'Productive Skills: Writing (DP Year 1)', code: 'Y1-CT.9' },
-      { name: 'Grammar and Accuracy in Context (DP Year 1)', code: 'Y1-CT.10' },
-    ] },
-  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
-    subtopics: [
-      { name: 'HL: Literary Works in the Target Language (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: Extended Written Production (DP Year 2)', code: 'Y2-HL.2' },
-    ] },
-  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
-    subtopics: [
-      { name: 'IA: Individual Oral Assessment (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Preparing the Stimulus Response (DP Year 2)', code: 'Y2-IA.2' },
-    ] },
-  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
-    subtopics: [
-      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
-      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
-      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
-      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
-      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
-      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
-    ] },
-]
 
-// IB DP World History — Year 1 and Year 2.
-// SL core plus the HL extension, with the internal assessment as its own
-// strand because it carries 20-30% of the grade.
-const IBDP_WORLD_HISTORY = [
-  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
-    subtopics: [
-      { name: 'Historiography and the Nature of History (DP Year 1)', code: 'Y1-CT.1' },
-      { name: 'Sources: Origin, Purpose, Value and Limitations (DP Year 1)', code: 'Y1-CT.2' },
-      { name: 'Causes and Effects of Conflict (DP Year 1)', code: 'Y1-CT.3' },
-      { name: 'Authoritarian States (DP Year 1)', code: 'Y1-CT.4' },
-      { name: 'Independence Movements (DP Year 1)', code: 'Y1-CT.5' },
-      { name: 'The Cold War: Superpower Tensions (DP Year 1)', code: 'Y1-CT.6' },
-      { name: 'Rights and Protest Movements (DP Year 1)', code: 'Y1-CT.7' },
-      { name: 'Economic and Social Developments (DP Year 1)', code: 'Y1-CT.8' },
-      { name: 'Comparative History Across Regions (DP Year 1)', code: 'Y1-CT.9' },
-      { name: 'Continuity and Change Over Time (DP Year 1)', code: 'Y1-CT.10' },
-    ] },
-  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
-    subtopics: [
-      { name: 'HL: Regional Depth Study (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: Extended Historical Investigation (DP Year 2)', code: 'Y2-HL.2' },
-      { name: 'HL: Engaging with Competing Interpretations (DP Year 2)', code: 'Y2-HL.3' },
-    ] },
-  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
-    subtopics: [
-      { name: 'IA: Formulating a Historical Question (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Evaluating Sources (DP Year 2)', code: 'Y2-IA.2' },
-      { name: 'IA: Writing the Historical Investigation (DP Year 2)', code: 'Y2-IA.3' },
-    ] },
-  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
-    subtopics: [
-      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
-      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
-      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
-      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
-      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
-      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
-    ] },
-]
 
-// IB DP History — Year 1 and Year 2.
-// SL core plus the HL extension, with the internal assessment as its own
-// strand because it carries 20-30% of the grade.
-const IBDP_HISTORY = [
-  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
-    subtopics: [
-      { name: 'Prescribed Subject: Rights and Protest (DP Year 1)', code: 'Y1-CT.1' },
-      { name: 'Prescribed Subject: Conflict and Intervention (DP Year 1)', code: 'Y1-CT.2' },
-      { name: 'World History Topic: Authoritarian States (DP Year 1)', code: 'Y1-CT.3' },
-      { name: 'World History Topic: Causes of War (DP Year 1)', code: 'Y1-CT.4' },
-      { name: 'World History Topic: The Cold War (DP Year 1)', code: 'Y1-CT.5' },
-      { name: 'Historical Sources and Their Evaluation (DP Year 1)', code: 'Y1-CT.6' },
-      { name: 'Historiographical Debate (DP Year 1)', code: 'Y1-CT.7' },
-      { name: 'Cause, Consequence and Significance (DP Year 1)', code: 'Y1-CT.8' },
-      { name: 'Change and Continuity (DP Year 1)', code: 'Y1-CT.9' },
-      { name: 'Constructing a Historical Argument (DP Year 1)', code: 'Y1-CT.10' },
-    ] },
-  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
-    subtopics: [
-      { name: 'HL: Depth Study of One Region (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: Extended Source Analysis (DP Year 2)', code: 'Y2-HL.2' },
-      { name: 'HL: Comparative Regional Study (DP Year 2)', code: 'Y2-HL.3' },
-    ] },
-  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
-    subtopics: [
-      { name: 'IA: Choosing an Investigation Question (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Source Evaluation Section (DP Year 2)', code: 'Y2-IA.2' },
-      { name: 'IA: Reflection on Method (DP Year 2)', code: 'Y2-IA.3' },
-    ] },
-  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
-    subtopics: [
-      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
-      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
-      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
-      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
-      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
-      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
-    ] },
-]
 
-// IB DP Geography — Year 1 and Year 2.
-// SL core plus the HL extension, with the internal assessment as its own
-// strand because it carries 20-30% of the grade.
-const IBDP_GEOGRAPHY = [
-  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
-    subtopics: [
-      { name: 'Population Distribution and Change (DP Year 1)', code: 'Y1-CT.1' },
-      { name: 'Global Climate: Vulnerability and Resilience (DP Year 1)', code: 'Y1-CT.2' },
-      { name: 'Resource Consumption and Security (DP Year 1)', code: 'Y1-CT.3' },
-      { name: 'Freshwater: Drainage Basins (DP Year 1)', code: 'Y1-CT.4' },
-      { name: 'Oceans and Coastal Margins (DP Year 1)', code: 'Y1-CT.5' },
-      { name: 'Extreme Environments (DP Year 1)', code: 'Y1-CT.6' },
-      { name: 'Geophysical Hazards (DP Year 1)', code: 'Y1-CT.7' },
-      { name: 'Leisure, Tourism and Sport (DP Year 1)', code: 'Y1-CT.8' },
-      { name: 'Food and Health (DP Year 1)', code: 'Y1-CT.9' },
-      { name: 'Urban Environments (DP Year 1)', code: 'Y1-CT.10' },
-    ] },
-  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
-    subtopics: [
-      { name: 'HL: Power, Places and Networks (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: Human Development and Diversity (DP Year 2)', code: 'Y2-HL.2' },
-      { name: 'HL: Global Risks and Resilience (DP Year 2)', code: 'Y2-HL.3' },
-    ] },
-  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
-    subtopics: [
-      { name: 'IA: Fieldwork Question and Method (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Data Collection and Presentation (DP Year 2)', code: 'Y2-IA.2' },
-      { name: 'IA: Analysis and Conclusion (DP Year 2)', code: 'Y2-IA.3' },
-    ] },
-  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
-    subtopics: [
-      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
-      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
-      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
-      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
-      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
-      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
-    ] },
-]
 
-// IB DP Economics — Year 1 and Year 2.
-// SL core plus the HL extension, with the internal assessment as its own
-// strand because it carries 20-30% of the grade.
-const IBDP_ECONOMICS = [
-  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
-    subtopics: [
-      { name: 'Introduction to Economics and Scarcity (DP Year 1)', code: 'Y1-CT.1' },
-      { name: 'Microeconomics: Demand and Supply (DP Year 1)', code: 'Y1-CT.2' },
-      { name: 'Elasticities and Their Applications (DP Year 1)', code: 'Y1-CT.3' },
-      { name: 'Market Failure and Government Intervention (DP Year 1)', code: 'Y1-CT.4' },
-      { name: 'Macroeconomics: Measuring Activity (DP Year 1)', code: 'Y1-CT.5' },
-      { name: 'Aggregate Demand and Supply (DP Year 1)', code: 'Y1-CT.6' },
-      { name: 'Macroeconomic Objectives and Policy (DP Year 1)', code: 'Y1-CT.7' },
-      { name: 'The Global Economy: Trade (DP Year 1)', code: 'Y1-CT.8' },
-      { name: 'Exchange Rates and Balance of Payments (DP Year 1)', code: 'Y1-CT.9' },
-      { name: 'Economic Development and Sustainability (DP Year 1)', code: 'Y1-CT.10' },
-    ] },
-  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
-    subtopics: [
-      { name: 'HL: Theory of the Firm and Market Structures (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: Costs, Revenues and Profit Maximisation (DP Year 2)', code: 'Y2-HL.2' },
-      { name: 'HL: HL Extension Calculations and Policy Analysis (DP Year 2)', code: 'Y2-HL.3' },
-    ] },
-  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
-    subtopics: [
-      { name: 'IA: Commentary on a News Article (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Applying Diagrams and Theory (DP Year 2)', code: 'Y2-IA.2' },
-      { name: 'IA: Evaluating Real-World Policy (DP Year 2)', code: 'Y2-IA.3' },
-    ] },
-  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
-    subtopics: [
-      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
-      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
-      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
-      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
-      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
-      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
-    ] },
-]
 
-// IB DP Business Studies — Year 1 and Year 2.
-// SL core plus the HL extension, with the internal assessment as its own
-// strand because it carries 20-30% of the grade.
-const IBDP_BUSINESS_STUDIES = [
-  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
-    subtopics: [
-      { name: 'Introduction to Business Organisation (DP Year 1)', code: 'Y1-CT.1' },
-      { name: 'Business Objectives and Stakeholders (DP Year 1)', code: 'Y1-CT.2' },
-      { name: 'Human Resource Management (DP Year 1)', code: 'Y1-CT.3' },
-      { name: 'Organisational Structure and Leadership (DP Year 1)', code: 'Y1-CT.4' },
-      { name: 'Finance and Accounts: Sources of Finance (DP Year 1)', code: 'Y1-CT.5' },
-      { name: 'Final Accounts and Ratio Analysis (DP Year 1)', code: 'Y1-CT.6' },
-      { name: 'Investment Appraisal (DP Year 1)', code: 'Y1-CT.7' },
-      { name: 'Marketing Planning and the Marketing Mix (DP Year 1)', code: 'Y1-CT.8' },
-      { name: 'Operations Management and Quality (DP Year 1)', code: 'Y1-CT.9' },
-      { name: 'Business Strategy and Change (DP Year 1)', code: 'Y1-CT.10' },
-    ] },
-  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
-    subtopics: [
-      { name: 'HL: Human Resource Strategy (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: Advanced Financial Analysis (DP Year 2)', code: 'Y2-HL.2' },
-      { name: 'HL: Operations: Crisis and Contingency (DP Year 2)', code: 'Y2-HL.3' },
-    ] },
-  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
-    subtopics: [
-      { name: 'IA: Research Question and Methodology (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Business Research Project (DP Year 2)', code: 'Y2-IA.2' },
-      { name: 'IA: Evaluating Findings and Recommending (DP Year 2)', code: 'Y2-IA.3' },
-    ] },
-  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
-    subtopics: [
-      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
-      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
-      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
-      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
-      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
-      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
-    ] },
-]
 
-// IB DP Psychology — Year 1 and Year 2.
-// SL core plus the HL extension, with the internal assessment as its own
-// strand because it carries 20-30% of the grade.
-const IBDP_PSYCHOLOGY = [
-  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
-    subtopics: [
-      { name: 'Approaches to Research in Psychology (DP Year 1)', code: 'Y1-CT.1' },
-      { name: 'Biological Approach: Brain and Behaviour (DP Year 1)', code: 'Y1-CT.2' },
-      { name: 'Biological Approach: Hormones and Genetics (DP Year 1)', code: 'Y1-CT.3' },
-      { name: 'Cognitive Approach: Models of Memory (DP Year 1)', code: 'Y1-CT.4' },
-      { name: 'Cognitive Approach: Thinking and Decisions (DP Year 1)', code: 'Y1-CT.5' },
-      { name: 'Sociocultural Approach: Social Identity (DP Year 1)', code: 'Y1-CT.6' },
-      { name: 'Sociocultural Approach: Cultural Influence (DP Year 1)', code: 'Y1-CT.7' },
-      { name: 'Ethics in Psychological Research (DP Year 1)', code: 'Y1-CT.8' },
-      { name: 'Research Methods and Their Evaluation (DP Year 1)', code: 'Y1-CT.9' },
-      { name: 'Abnormal Psychology: Options (DP Year 1)', code: 'Y1-CT.10' },
-    ] },
-  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
-    subtopics: [
-      { name: 'HL: Extension to Each Approach (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: The Role of Animal Research (DP Year 2)', code: 'Y2-HL.2' },
-      { name: 'HL: Additional Option Depth (DP Year 2)', code: 'Y2-HL.3' },
-    ] },
-  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
-    subtopics: [
-      { name: 'IA: Replicating a Simple Experiment (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Statistical Analysis (DP Year 2)', code: 'Y2-IA.2' },
-      { name: 'IA: Writing the Experimental Report (DP Year 2)', code: 'Y2-IA.3' },
-    ] },
-  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
-    subtopics: [
-      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
-      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
-      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
-      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
-      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
-      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
-    ] },
-]
 
-// IB DP Sociology — Year 1 and Year 2.
-// SL core plus the HL extension, with the internal assessment as its own
-// strand because it carries 20-30% of the grade.
-const IBDP_SOCIOLOGY = [
-  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
-    subtopics: [
-      { name: 'Sociological Perspectives and Theory (DP Year 1)', code: 'Y1-CT.1' },
-      { name: 'Culture, Identity and Socialisation (DP Year 1)', code: 'Y1-CT.2' },
-      { name: 'Social Stratification and Inequality (DP Year 1)', code: 'Y1-CT.3' },
-      { name: 'Family and Household Structures (DP Year 1)', code: 'Y1-CT.4' },
-      { name: 'Education and Social Reproduction (DP Year 1)', code: 'Y1-CT.5' },
-      { name: 'Crime, Deviance and Social Control (DP Year 1)', code: 'Y1-CT.6' },
-      { name: 'Globalisation and Social Change (DP Year 1)', code: 'Y1-CT.7' },
-      { name: 'Research Methods in Sociology (DP Year 1)', code: 'Y1-CT.8' },
-      { name: 'Ethics in Social Research (DP Year 1)', code: 'Y1-CT.9' },
-      { name: 'Analysing Sociological Evidence (DP Year 1)', code: 'Y1-CT.10' },
-    ] },
-  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
-    subtopics: [
-      { name: 'HL: Comparative Social Analysis (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: Extended Research Design (DP Year 2)', code: 'Y2-HL.2' },
-    ] },
-  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
-    subtopics: [
-      { name: 'IA: Designing a Sociological Investigation (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Collecting and Analysing Data (DP Year 2)', code: 'Y2-IA.2' },
-    ] },
-  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
-    subtopics: [
-      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
-      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
-      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
-      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
-      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
-      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
-    ] },
-]
 
-// IB DP Global Perspectives — Year 1 and Year 2.
-// SL core plus the HL extension, with the internal assessment as its own
-// strand because it carries 20-30% of the grade.
-const IBDP_GLOBAL_PERSPECTIVES = [
-  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
-    subtopics: [
-      { name: 'Global Issues and Multiple Perspectives (DP Year 1)', code: 'Y1-CT.1' },
-      { name: 'Research Skills and Source Evaluation (DP Year 1)', code: 'Y1-CT.2' },
-      { name: 'Constructing an Evidence-Based Argument (DP Year 1)', code: 'Y1-CT.3' },
-      { name: 'Poverty and Inequality (DP Year 1)', code: 'Y1-CT.4' },
-      { name: 'Conflict, Peace and Security (DP Year 1)', code: 'Y1-CT.5' },
-      { name: 'Environment and Sustainability (DP Year 1)', code: 'Y1-CT.6' },
-      { name: 'Health and Global Wellbeing (DP Year 1)', code: 'Y1-CT.7' },
-      { name: 'Technology and Society (DP Year 1)', code: 'Y1-CT.8' },
-      { name: 'Collaboration Across Cultures (DP Year 1)', code: 'Y1-CT.9' },
-      { name: 'Reflection and Personal Learning (DP Year 1)', code: 'Y1-CT.10' },
-    ] },
-  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
-    subtopics: [
-      { name: 'HL: Extended Independent Research (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: Team Project Leadership (DP Year 2)', code: 'Y2-HL.2' },
-    ] },
-  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
-    subtopics: [
-      { name: 'IA: Individual Research Report (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Reflective Commentary (DP Year 2)', code: 'Y2-IA.2' },
-    ] },
-  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
-    subtopics: [
-      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
-      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
-      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
-      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
-      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
-      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
-    ] },
-]
 
-// IB DP Religious Studies — Year 1 and Year 2.
-// SL core plus the HL extension, with the internal assessment as its own
-// strand because it carries 20-30% of the grade.
-const IBDP_RELIGIOUS_STUDIES = [
-  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
-    subtopics: [
-      { name: 'Introduction to World Religions (DP Year 1)', code: 'Y1-CT.1' },
-      { name: 'Buddhism: Belief and Practice (DP Year 1)', code: 'Y1-CT.2' },
-      { name: 'Christianity: Belief and Practice (DP Year 1)', code: 'Y1-CT.3' },
-      { name: 'Hinduism: Belief and Practice (DP Year 1)', code: 'Y1-CT.4' },
-      { name: 'Islam: Belief and Practice (DP Year 1)', code: 'Y1-CT.5' },
-      { name: 'Judaism: Belief and Practice (DP Year 1)', code: 'Y1-CT.6' },
-      { name: 'Sacred Texts and Interpretation (DP Year 1)', code: 'Y1-CT.7' },
-      { name: 'Religious Experience and Ritual (DP Year 1)', code: 'Y1-CT.8' },
-      { name: 'Ethics and Religious Teaching (DP Year 1)', code: 'Y1-CT.9' },
-      { name: 'Religion in the Contemporary World (DP Year 1)', code: 'Y1-CT.10' },
-    ] },
-  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
-    subtopics: [
-      { name: 'HL: In-Depth Study of Two Religions (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: Comparative Religious Philosophy (DP Year 2)', code: 'Y2-HL.2' },
-    ] },
-  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
-    subtopics: [
-      { name: 'IA: Investigative Study on a Religious Theme (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Evaluating Sources and Perspectives (DP Year 2)', code: 'Y2-IA.2' },
-    ] },
-  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
-    subtopics: [
-      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
-      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
-      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
-      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
-      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
-      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
-    ] },
-]
 
-// IB DP Biology — Year 1 and Year 2.
-// SL core plus the HL extension, with the internal assessment as its own
-// strand because it carries 20-30% of the grade.
-const IBDP_BIOLOGY = [
-  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
-    subtopics: [
-      { name: 'Unity and Diversity: Molecules and Cells (DP Year 1)', code: 'Y1-CT.1' },
-      { name: 'Unity and Diversity: Organisms and Ecosystems (DP Year 1)', code: 'Y1-CT.2' },
-      { name: 'Form and Function: Cell Structure (DP Year 1)', code: 'Y1-CT.3' },
-      { name: 'Form and Function: Gas Exchange and Transport (DP Year 1)', code: 'Y1-CT.4' },
-      { name: 'Nucleic Acids and Protein Synthesis (DP Year 1)', code: 'Y1-CT.5' },
-      { name: 'Cell Respiration and Photosynthesis (DP Year 1)', code: 'Y1-CT.6' },
-      { name: 'Genetics and Inheritance (DP Year 1)', code: 'Y1-CT.7' },
-      { name: 'Evolution and Natural Selection (DP Year 1)', code: 'Y1-CT.8' },
-      { name: 'Ecology and Ecosystem Dynamics (DP Year 1)', code: 'Y1-CT.9' },
-      { name: 'Human Physiology and Homeostasis (DP Year 1)', code: 'Y1-CT.10' },
-    ] },
-  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
-    subtopics: [
-      { name: 'HL: Metabolic Pathways in Depth (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: Plant Biology and Transport (DP Year 2)', code: 'Y2-HL.2' },
-      { name: 'HL: Neurobiology and Behaviour (DP Year 2)', code: 'Y2-HL.3' },
-      { name: 'HL: Advanced Genetics and Biotechnology (DP Year 2)', code: 'Y2-HL.4' },
-    ] },
-  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
-    subtopics: [
-      { name: 'IA: Designing a Biological Investigation (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Data Processing and Uncertainty (DP Year 2)', code: 'Y2-IA.2' },
-      { name: 'IA: Evaluation and Scientific Writing (DP Year 2)', code: 'Y2-IA.3' },
-    ] },
-  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
-    subtopics: [
-      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
-      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
-      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
-      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
-      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
-      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
-    ] },
-]
 
-// IB DP Chemistry — Year 1 and Year 2.
-// SL core plus the HL extension, with the internal assessment as its own
-// strand because it carries 20-30% of the grade.
-const IBDP_CHEMISTRY = [
-  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
-    subtopics: [
-      { name: 'Structure 1: Models of the Particulate Nature (DP Year 1)', code: 'Y1-CT.1' },
-      { name: 'Structure 2: Models of Bonding and Structure (DP Year 1)', code: 'Y1-CT.2' },
-      { name: 'Structure 3: Classification of Matter (DP Year 1)', code: 'Y1-CT.3' },
-      { name: 'Reactivity 1: What Drives Chemical Reactions (DP Year 1)', code: 'Y1-CT.4' },
-      { name: 'Reactivity 2: How Much and How Fast (DP Year 1)', code: 'Y1-CT.5' },
-      { name: 'Reactivity 3: Proton and Electron Transfer (DP Year 1)', code: 'Y1-CT.6' },
-      { name: 'Stoichiometric Relationships (DP Year 1)', code: 'Y1-CT.7' },
-      { name: 'Periodicity and Trends (DP Year 1)', code: 'Y1-CT.8' },
-      { name: 'Organic Chemistry Fundamentals (DP Year 1)', code: 'Y1-CT.9' },
-      { name: 'Measurement and Data Processing (DP Year 1)', code: 'Y1-CT.10' },
-    ] },
-  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
-    subtopics: [
-      { name: 'HL: Energetics and Entropy (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: Chemical Kinetics in Depth (DP Year 2)', code: 'Y2-HL.2' },
-      { name: 'HL: Equilibrium and Acid-Base Calculations (DP Year 2)', code: 'Y2-HL.3' },
-      { name: 'HL: Advanced Organic Mechanisms (DP Year 2)', code: 'Y2-HL.4' },
-    ] },
-  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
-    subtopics: [
-      { name: 'IA: Designing a Chemical Investigation (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Uncertainty and Error Analysis (DP Year 2)', code: 'Y2-IA.2' },
-      { name: 'IA: Evaluation and Scientific Writing (DP Year 2)', code: 'Y2-IA.3' },
-    ] },
-  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
-    subtopics: [
-      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
-      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
-      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
-      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
-      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
-      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
-    ] },
-]
 
-// IB DP Physics — Year 1 and Year 2.
-// SL core plus the HL extension, with the internal assessment as its own
-// strand because it carries 20-30% of the grade.
-const IBDP_PHYSICS = [
-  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
-    subtopics: [
-      { name: 'Space, Time and Motion (DP Year 1)', code: 'Y1-CT.1' },
-      { name: 'Forces and Momentum (DP Year 1)', code: 'Y1-CT.2' },
-      { name: 'Work, Energy and Power (DP Year 1)', code: 'Y1-CT.3' },
-      { name: 'The Particulate Nature of Matter (DP Year 1)', code: 'Y1-CT.4' },
-      { name: 'Thermal Energy Transfers (DP Year 1)', code: 'Y1-CT.5' },
-      { name: 'Wave Model and Wave Phenomena (DP Year 1)', code: 'Y1-CT.6' },
-      { name: 'Electric and Magnetic Fields (DP Year 1)', code: 'Y1-CT.7' },
-      { name: 'Electric Circuits (DP Year 1)', code: 'Y1-CT.8' },
-      { name: 'Nuclear and Quantum Physics (DP Year 1)', code: 'Y1-CT.9' },
-      { name: 'Measurement and Uncertainties (DP Year 1)', code: 'Y1-CT.10' },
-    ] },
-  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
-    subtopics: [
-      { name: 'HL: Rigid Body Mechanics (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: Galilean and Special Relativity (DP Year 2)', code: 'Y2-HL.2' },
-      { name: 'HL: Advanced Fields and Induction (DP Year 2)', code: 'Y2-HL.3' },
-      { name: 'HL: Structure of Matter in Depth (DP Year 2)', code: 'Y2-HL.4' },
-    ] },
-  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
-    subtopics: [
-      { name: 'IA: Designing a Physics Investigation (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Uncertainty Propagation and Graphing (DP Year 2)', code: 'Y2-IA.2' },
-      { name: 'IA: Evaluation and Scientific Writing (DP Year 2)', code: 'Y2-IA.3' },
-    ] },
-  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
-    subtopics: [
-      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
-      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
-      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
-      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
-      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
-      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
-    ] },
-]
 
-// IB DP Environmental Science — Year 1 and Year 2.
-// SL core plus the HL extension, with the internal assessment as its own
-// strand because it carries 20-30% of the grade.
-const IBDP_ENVIRONMENTAL_SCIENCE = [
-  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
-    subtopics: [
-      { name: 'Foundations of Environmental Systems (DP Year 1)', code: 'Y1-CT.1' },
-      { name: 'Systems, Models and Sustainability (DP Year 1)', code: 'Y1-CT.2' },
-      { name: 'Ecosystems and Ecology (DP Year 1)', code: 'Y1-CT.3' },
-      { name: 'Biodiversity and Conservation (DP Year 1)', code: 'Y1-CT.4' },
-      { name: 'Water Systems and Water Pollution (DP Year 1)', code: 'Y1-CT.5' },
-      { name: 'Soil Systems and Terrestrial Food Production (DP Year 1)', code: 'Y1-CT.6' },
-      { name: 'Atmospheric Systems and Air Pollution (DP Year 1)', code: 'Y1-CT.7' },
-      { name: 'Climate Change and Energy Production (DP Year 1)', code: 'Y1-CT.8' },
-      { name: 'Human Populations and Resource Use (DP Year 1)', code: 'Y1-CT.9' },
-      { name: 'Environmental Value Systems (DP Year 1)', code: 'Y1-CT.10' },
-    ] },
-  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
-    subtopics: [
-      { name: 'HL: Environmental Law and Policy (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: Environmental Economics (DP Year 2)', code: 'Y2-HL.2' },
-      { name: 'HL: Environmental Ethics in Depth (DP Year 2)', code: 'Y2-HL.3' },
-    ] },
-  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
-    subtopics: [
-      { name: 'IA: Fieldwork Investigation Design (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Data Collection and Analysis (DP Year 2)', code: 'Y2-IA.2' },
-      { name: 'IA: Evaluating Environmental Impact (DP Year 2)', code: 'Y2-IA.3' },
-    ] },
-  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
-    subtopics: [
-      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
-      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
-      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
-      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
-      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
-      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
-    ] },
-]
 
-// IB DP Computer Science — Year 1 and Year 2.
-// SL core plus the HL extension, with the internal assessment as its own
-// strand because it carries 20-30% of the grade.
-// IB DP Computer Science — exported from the live database.
-// 11 topics / 108 lessons, with 2,489 questions already filed.
-// This REPLACES a thinner 25-lesson version that was in this file:
-// production was ahead of code, and loading the code version would
-// have orphaned the entire bank.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 const IBDP_COMPUTER_SCIENCE = [
   { topic: 'Topic 1 · System Fundamentals (Core)', code: 'T1',
     subtopics: [
@@ -5889,34 +5297,35 @@ const IBDP_COMPUTER_SCIENCE = [
     ] },
 ]
 
-// IB DP Design & Technology — Year 1 and Year 2.
-// SL core plus the HL extension, with the internal assessment as its own
-// strand because it carries 20-30% of the grade.
-const IBDP_DESIGN_TECHNOLOGY = [
+// IB DP Biology (HL)
+// Higher Level: core plus the HL extension inline.
+const IBDP2_BIOLOGY_HL = [
   { topic: 'Y1 · Core Topics', code: 'Y1-CT',
     subtopics: [
-      { name: 'Human Factors and Ergonomics (DP Year 1)', code: 'Y1-CT.1' },
-      { name: 'Resource Management and Sustainable Production (DP Year 1)', code: 'Y1-CT.2' },
-      { name: 'Modelling and Prototyping (DP Year 1)', code: 'Y1-CT.3' },
-      { name: 'Final Production and Manufacturing (DP Year 1)', code: 'Y1-CT.4' },
-      { name: 'Innovation and Design Thinking (DP Year 1)', code: 'Y1-CT.5' },
-      { name: 'Classic Design and Its Principles (DP Year 1)', code: 'Y1-CT.6' },
-      { name: 'Materials and Their Properties (DP Year 1)', code: 'Y1-CT.7' },
-      { name: 'User-Centred Design (DP Year 1)', code: 'Y1-CT.8' },
-      { name: 'Sustainability in Design (DP Year 1)', code: 'Y1-CT.9' },
-      { name: 'Commercial Production Techniques (DP Year 1)', code: 'Y1-CT.10' },
+      { name: 'Unity and Diversity: Molecules and Cells (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Unity and Diversity: Organisms and Ecosystems (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Form and Function: Cell Structure (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Form and Function: Gas Exchange and Transport (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Nucleic Acids and Protein Synthesis (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Cell Respiration and Photosynthesis (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Genetics and Inheritance (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Evolution and Natural Selection (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Ecology and Ecosystem Dynamics (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Human Physiology and Homeostasis (DP Year 1)', code: 'Y1-CT.10' },
     ] },
   { topic: 'Y2 · HL Extension', code: 'Y2-HL',
     subtopics: [
-      { name: 'HL: Innovation and Markets (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: Commercial Production in Depth (DP Year 2)', code: 'Y2-HL.2' },
-      { name: 'HL: Design for Manufacture (DP Year 2)', code: 'Y2-HL.3' },
+      { name: 'Metabolic Pathways and Enzyme Regulation (HL, DP Year 2)', code: 'Y2-HL.1' },
+      { name: 'Plant Biology: Transport and Reproduction (HL, DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Neurobiology and Behaviour (HL, DP Year 2)', code: 'Y2-HL.3' },
+      { name: 'Advanced Genetics and Biotechnology (HL, DP Year 2)', code: 'Y2-HL.4' },
+      { name: 'Animal Physiology in Depth (HL, DP Year 2)', code: 'Y2-HL.5' },
     ] },
   { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
     subtopics: [
-      { name: 'IA: Identifying a Design Opportunity (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Developing and Testing a Prototype (DP Year 2)', code: 'Y2-IA.2' },
-      { name: 'IA: Evaluating the Design Solution (DP Year 2)', code: 'Y2-IA.3' },
+      { name: 'Designing a Biological Investigation (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Data Processing and Uncertainty (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Evaluation and Scientific Writing (DP Year 2)', code: 'Y2-IA.3' },
     ] },
   { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
     subtopics: [
@@ -5929,35 +5338,27 @@ const IBDP_DESIGN_TECHNOLOGY = [
     ] },
 ]
 
-// IB DP IB Mathematics: Analysis & Approaches — Year 1 and Year 2.
-// SL core plus the HL extension, with the internal assessment as its own
-// strand because it carries 20-30% of the grade.
-const IBDP_IB_MATHEMATICS_ANALYSIS_APPROACHES = [
+// IB DP Biology (SL)
+// Standard Level: core only, no HL extension.
+const IBDP2_BIOLOGY_SL = [
   { topic: 'Y1 · Core Topics', code: 'Y1-CT',
     subtopics: [
-      { name: 'Number and Algebra: Sequences and Series (DP Year 1)', code: 'Y1-CT.1' },
-      { name: 'Number and Algebra: Exponents and Logarithms (DP Year 1)', code: 'Y1-CT.2' },
-      { name: 'Functions: Types and Transformations (DP Year 1)', code: 'Y1-CT.3' },
-      { name: 'Functions: Quadratics and Rational Functions (DP Year 1)', code: 'Y1-CT.4' },
-      { name: 'Geometry and Trigonometry: Triangles and Circles (DP Year 1)', code: 'Y1-CT.5' },
-      { name: 'Geometry and Trigonometry: Identities and Equations (DP Year 1)', code: 'Y1-CT.6' },
-      { name: 'Statistics: Descriptive and Bivariate (DP Year 1)', code: 'Y1-CT.7' },
-      { name: 'Probability: Distributions (DP Year 1)', code: 'Y1-CT.8' },
-      { name: 'Calculus: Differentiation (DP Year 1)', code: 'Y1-CT.9' },
-      { name: 'Calculus: Integration (DP Year 1)', code: 'Y1-CT.10' },
-    ] },
-  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
-    subtopics: [
-      { name: 'HL: Proof by Induction and Contradiction (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: Complex Numbers and De Moivre (DP Year 2)', code: 'Y2-HL.2' },
-      { name: 'HL: Vectors, Lines and Planes (DP Year 2)', code: 'Y2-HL.3' },
-      { name: 'HL: Advanced Calculus and Differential Equations (DP Year 2)', code: 'Y2-HL.4' },
+      { name: 'Unity and Diversity: Molecules and Cells (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Unity and Diversity: Organisms and Ecosystems (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Form and Function: Cell Structure (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Form and Function: Gas Exchange and Transport (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Nucleic Acids and Protein Synthesis (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Cell Respiration and Photosynthesis (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Genetics and Inheritance (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Evolution and Natural Selection (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Ecology and Ecosystem Dynamics (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Human Physiology and Homeostasis (DP Year 1)', code: 'Y1-CT.10' },
     ] },
   { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
     subtopics: [
-      { name: 'IA: Choosing a Mathematical Exploration (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Developing Mathematical Reasoning (DP Year 2)', code: 'Y2-IA.2' },
-      { name: 'IA: Personal Engagement and Reflection (DP Year 2)', code: 'Y2-IA.3' },
+      { name: 'Designing a Biological Investigation (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Data Processing and Uncertainty (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Evaluation and Scientific Writing (DP Year 2)', code: 'Y2-IA.3' },
     ] },
   { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
     subtopics: [
@@ -5970,35 +5371,35 @@ const IBDP_IB_MATHEMATICS_ANALYSIS_APPROACHES = [
     ] },
 ]
 
-// IB DP IB Mathematics: Applications & Interpretation — Year 1 and Year 2.
-// SL core plus the HL extension, with the internal assessment as its own
-// strand because it carries 20-30% of the grade.
-const IBDP_IB_MATHEMATICS_APPLICATIONS_INTERPRETATION = [
+// IB DP Chemistry (HL)
+// Higher Level: core plus the HL extension inline.
+const IBDP2_CHEMISTRY_HL = [
   { topic: 'Y1 · Core Topics', code: 'Y1-CT',
     subtopics: [
-      { name: 'Number and Algebra: Approximation and Systems (DP Year 1)', code: 'Y1-CT.1' },
-      { name: 'Functions: Modelling with Functions (DP Year 1)', code: 'Y1-CT.2' },
-      { name: 'Functions: Exponential and Logarithmic Models (DP Year 1)', code: 'Y1-CT.3' },
-      { name: 'Geometry and Trigonometry: Applications (DP Year 1)', code: 'Y1-CT.4' },
-      { name: 'Geometry: Voronoi Diagrams and Networks (DP Year 1)', code: 'Y1-CT.5' },
-      { name: 'Statistics: Sampling and Data Analysis (DP Year 1)', code: 'Y1-CT.6' },
-      { name: 'Statistics: Correlation and Regression (DP Year 1)', code: 'Y1-CT.7' },
-      { name: 'Probability: Distributions and Testing (DP Year 1)', code: 'Y1-CT.8' },
-      { name: 'Calculus: Rates of Change (DP Year 1)', code: 'Y1-CT.9' },
-      { name: 'Calculus: Numerical Integration (DP Year 1)', code: 'Y1-CT.10' },
+      { name: 'Structure 1: Models of the Particulate Nature (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Structure 2: Models of Bonding and Structure (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Structure 3: Classification of Matter (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Reactivity 1: What Drives Chemical Reactions (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Reactivity 2: How Much and How Fast (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Reactivity 3: Proton and Electron Transfer (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Stoichiometric Relationships (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Periodicity and Trends (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Organic Chemistry Fundamentals (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Measurement and Data Processing (DP Year 1)', code: 'Y1-CT.10' },
     ] },
   { topic: 'Y2 · HL Extension', code: 'Y2-HL',
     subtopics: [
-      { name: 'HL: Matrices and Transformations (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: Graph Theory and Networks (DP Year 2)', code: 'Y2-HL.2' },
-      { name: 'HL: Advanced Statistical Testing (DP Year 2)', code: 'Y2-HL.3' },
-      { name: 'HL: Differential Equations and Modelling (DP Year 2)', code: 'Y2-HL.4' },
+      { name: 'Energetics, Entropy and Spontaneity (HL, DP Year 2)', code: 'Y2-HL.1' },
+      { name: 'Chemical Kinetics: Rate Laws and Mechanisms (HL, DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Equilibrium and Acid-Base Calculations (HL, DP Year 2)', code: 'Y2-HL.3' },
+      { name: 'Advanced Organic Mechanisms (HL, DP Year 2)', code: 'Y2-HL.4' },
+      { name: 'Spectroscopic Identification of Compounds (HL, DP Year 2)', code: 'Y2-HL.5' },
     ] },
   { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
     subtopics: [
-      { name: 'IA: Choosing a Real-World Exploration (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Applying Technology and Modelling (DP Year 2)', code: 'Y2-IA.2' },
-      { name: 'IA: Personal Engagement and Reflection (DP Year 2)', code: 'Y2-IA.3' },
+      { name: 'Designing a Chemical Investigation (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Uncertainty and Error Analysis (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Evaluation and Scientific Writing (DP Year 2)', code: 'Y2-IA.3' },
     ] },
   { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
     subtopics: [
@@ -6011,33 +5412,27 @@ const IBDP_IB_MATHEMATICS_APPLICATIONS_INTERPRETATION = [
     ] },
 ]
 
-// IB DP Mathematics — Year 1 and Year 2.
-// SL core plus the HL extension, with the internal assessment as its own
-// strand because it carries 20-30% of the grade.
-const IBDP_MATHEMATICS = [
+// IB DP Chemistry (SL)
+// Standard Level: core only, no HL extension.
+const IBDP2_CHEMISTRY_SL = [
   { topic: 'Y1 · Core Topics', code: 'Y1-CT',
     subtopics: [
-      { name: 'Algebra: Sequences, Series and Logarithms (DP Year 1)', code: 'Y1-CT.1' },
-      { name: 'Functions and Equations (DP Year 1)', code: 'Y1-CT.2' },
-      { name: 'Circular Functions and Trigonometry (DP Year 1)', code: 'Y1-CT.3' },
-      { name: 'Vectors in Two and Three Dimensions (DP Year 1)', code: 'Y1-CT.4' },
-      { name: 'Statistics and Probability (DP Year 1)', code: 'Y1-CT.5' },
-      { name: 'Differential Calculus (DP Year 1)', code: 'Y1-CT.6' },
-      { name: 'Integral Calculus (DP Year 1)', code: 'Y1-CT.7' },
-      { name: 'Kinematics and Applied Calculus (DP Year 1)', code: 'Y1-CT.8' },
-      { name: 'Mathematical Modelling (DP Year 1)', code: 'Y1-CT.9' },
-      { name: 'Use of Technology in Mathematics (DP Year 1)', code: 'Y1-CT.10' },
-    ] },
-  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
-    subtopics: [
-      { name: 'HL: Further Proof and Complex Numbers (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: Advanced Calculus (DP Year 2)', code: 'Y2-HL.2' },
-      { name: 'HL: Option Topic (DP Year 2)', code: 'Y2-HL.3' },
+      { name: 'Structure 1: Models of the Particulate Nature (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Structure 2: Models of Bonding and Structure (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Structure 3: Classification of Matter (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Reactivity 1: What Drives Chemical Reactions (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Reactivity 2: How Much and How Fast (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Reactivity 3: Proton and Electron Transfer (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Stoichiometric Relationships (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Periodicity and Trends (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Organic Chemistry Fundamentals (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Measurement and Data Processing (DP Year 1)', code: 'Y1-CT.10' },
     ] },
   { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
     subtopics: [
-      { name: 'IA: Mathematical Exploration (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Reasoning and Communication (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Designing a Chemical Investigation (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Uncertainty and Error Analysis (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Evaluation and Scientific Writing (DP Year 2)', code: 'Y2-IA.3' },
     ] },
   { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
     subtopics: [
@@ -6050,33 +5445,35 @@ const IBDP_MATHEMATICS = [
     ] },
 ]
 
-// IB DP Visual Arts — Year 1 and Year 2.
-// SL core plus the HL extension, with the internal assessment as its own
-// strand because it carries 20-30% of the grade.
-const IBDP_VISUAL_ARTS = [
+// IB DP Physics (HL)
+// Higher Level: core plus the HL extension inline.
+const IBDP2_PHYSICS_HL = [
   { topic: 'Y1 · Core Topics', code: 'Y1-CT',
     subtopics: [
-      { name: 'Art-Making Forms and Techniques (DP Year 1)', code: 'Y1-CT.1' },
-      { name: 'Visual Arts in Context (DP Year 1)', code: 'Y1-CT.2' },
-      { name: 'Visual Arts Methods (DP Year 1)', code: 'Y1-CT.3' },
-      { name: 'Communicating Visual Arts (DP Year 1)', code: 'Y1-CT.4' },
-      { name: 'Investigating Artists and Movements (DP Year 1)', code: 'Y1-CT.5' },
-      { name: 'Developing a Personal Visual Language (DP Year 1)', code: 'Y1-CT.6' },
-      { name: 'Experimentation with Media (DP Year 1)', code: 'Y1-CT.7' },
-      { name: 'Critical Analysis of Artworks (DP Year 1)', code: 'Y1-CT.8' },
-      { name: 'Cultural Context and Meaning (DP Year 1)', code: 'Y1-CT.9' },
-      { name: 'Curatorial Practice (DP Year 1)', code: 'Y1-CT.10' },
+      { name: 'Space, Time and Motion (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Forces and Momentum (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Work, Energy and Power (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'The Particulate Nature of Matter (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Thermal Energy Transfers (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Wave Model and Wave Phenomena (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Electric and Magnetic Fields (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Electric Circuits (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Nuclear and Quantum Physics (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Measurement and Uncertainties (DP Year 1)', code: 'Y1-CT.10' },
     ] },
   { topic: 'Y2 · HL Extension', code: 'Y2-HL',
     subtopics: [
-      { name: 'HL: Extended Body of Resolved Work (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: In-Depth Comparative Study (DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Rigid Body Mechanics (HL, DP Year 2)', code: 'Y2-HL.1' },
+      { name: 'Galilean and Special Relativity (HL, DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Advanced Fields and Electromagnetic Induction (HL, DP Year 2)', code: 'Y2-HL.3' },
+      { name: 'Structure of Matter in Depth (HL, DP Year 2)', code: 'Y2-HL.4' },
+      { name: 'Quantum Physics Extension (HL, DP Year 2)', code: 'Y2-HL.5' },
     ] },
   { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
     subtopics: [
-      { name: 'IA: Comparative Study (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Process Portfolio (DP Year 2)', code: 'Y2-IA.2' },
-      { name: 'IA: Exhibition and Curatorial Rationale (DP Year 2)', code: 'Y2-IA.3' },
+      { name: 'Designing a Physics Investigation (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Uncertainty Propagation and Graphing (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Evaluation and Scientific Writing (DP Year 2)', code: 'Y2-IA.3' },
     ] },
   { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
     subtopics: [
@@ -6089,32 +5486,27 @@ const IBDP_VISUAL_ARTS = [
     ] },
 ]
 
-// IB DP Art & Design — Year 1 and Year 2.
-// SL core plus the HL extension, with the internal assessment as its own
-// strand because it carries 20-30% of the grade.
-const IBDP_ART_DESIGN = [
+// IB DP Physics (SL)
+// Standard Level: core only, no HL extension.
+const IBDP2_PHYSICS_SL = [
   { topic: 'Y1 · Core Topics', code: 'Y1-CT',
     subtopics: [
-      { name: 'Elements and Principles of Design (DP Year 1)', code: 'Y1-CT.1' },
-      { name: 'Drawing and Observational Skills (DP Year 1)', code: 'Y1-CT.2' },
-      { name: 'Colour Theory and Application (DP Year 1)', code: 'Y1-CT.3' },
-      { name: 'Two-Dimensional Media and Technique (DP Year 1)', code: 'Y1-CT.4' },
-      { name: 'Three-Dimensional Media and Technique (DP Year 1)', code: 'Y1-CT.5' },
-      { name: 'Digital Media in Art and Design (DP Year 1)', code: 'Y1-CT.6' },
-      { name: 'Art Historical Context (DP Year 1)', code: 'Y1-CT.7' },
-      { name: 'Developing an Idea Through Studies (DP Year 1)', code: 'Y1-CT.8' },
-      { name: 'Critique and Peer Response (DP Year 1)', code: 'Y1-CT.9' },
-      { name: 'Presenting Finished Work (DP Year 1)', code: 'Y1-CT.10' },
-    ] },
-  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
-    subtopics: [
-      { name: 'HL: Extended Personal Investigation (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: Advanced Technical Development (DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Space, Time and Motion (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Forces and Momentum (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Work, Energy and Power (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'The Particulate Nature of Matter (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Thermal Energy Transfers (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Wave Model and Wave Phenomena (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Electric and Magnetic Fields (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Electric Circuits (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Nuclear and Quantum Physics (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Measurement and Uncertainties (DP Year 1)', code: 'Y1-CT.10' },
     ] },
   { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
     subtopics: [
-      { name: 'IA: Sketchbook and Process Documentation (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Final Piece and Rationale (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Designing a Physics Investigation (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Uncertainty Propagation and Graphing (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Evaluation and Scientific Writing (DP Year 2)', code: 'Y2-IA.3' },
     ] },
   { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
     subtopics: [
@@ -6127,10 +5519,447 @@ const IBDP_ART_DESIGN = [
     ] },
 ]
 
-// IB DP Music — Year 1 and Year 2.
-// SL core plus the HL extension, with the internal assessment as its own
-// strand because it carries 20-30% of the grade.
-const IBDP_MUSIC = [
+// IB DP Computer Science (HL)
+// Higher Level: core plus the HL extension inline.
+const IBDP2_COMPUTER_SCIENCE_HL = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'System Fundamentals (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Computer Organisation and Architecture (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Networks and Communication (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Computational Thinking and Problem Solving (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Algorithm Design and Analysis (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Programming Fundamentals (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Object-Oriented Programming (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Abstract Data Structures (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Databases and Data Modelling (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Ethics and Social Impact of Computing (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
+    subtopics: [
+      { name: 'Resource Management and Control (HL, DP Year 2)', code: 'Y2-HL.1' },
+      { name: 'Advanced Data Structures and Recursion (HL, DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Object-Oriented Design in Depth (HL, DP Year 2)', code: 'Y2-HL.3' },
+      { name: 'The Annual Case Study (HL, DP Year 2)', code: 'Y2-HL.4' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Identifying a Client and Problem (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Designing and Developing the Solution (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Testing, Evaluation and Documentation (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP Computer Science (SL)
+// Standard Level: core only, no HL extension.
+const IBDP2_COMPUTER_SCIENCE_SL = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'System Fundamentals (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Computer Organisation and Architecture (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Networks and Communication (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Computational Thinking and Problem Solving (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Algorithm Design and Analysis (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Programming Fundamentals (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Object-Oriented Programming (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Abstract Data Structures (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Databases and Data Modelling (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Ethics and Social Impact of Computing (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Identifying a Client and Problem (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Designing and Developing the Solution (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Testing, Evaluation and Documentation (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP Economics (HL)
+// Higher Level: core plus the HL extension inline.
+const IBDP2_ECONOMICS_HL = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Introduction to Economics and Scarcity (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Microeconomics: Demand and Supply (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Elasticities and Their Applications (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Market Failure and Government Intervention (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Macroeconomics: Measuring Activity (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Aggregate Demand and Supply (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Macroeconomic Objectives and Policy (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'The Global Economy: Trade (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Exchange Rates and Balance of Payments (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Economic Development and Sustainability (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
+    subtopics: [
+      { name: 'Theory of the Firm and Market Structures (HL, DP Year 2)', code: 'Y2-HL.1' },
+      { name: 'Costs, Revenues and Profit Maximisation (HL, DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Advanced Calculations and Policy Analysis (HL, DP Year 2)', code: 'Y2-HL.3' },
+      { name: 'Extension: Development Economics (HL, DP Year 2)', code: 'Y2-HL.4' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Commentary on a News Article (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Applying Diagrams and Theory (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Evaluating Real-World Policy (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP Economics (SL)
+// Standard Level: core only, no HL extension.
+const IBDP2_ECONOMICS_SL = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Introduction to Economics and Scarcity (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Microeconomics: Demand and Supply (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Elasticities and Their Applications (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Market Failure and Government Intervention (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Macroeconomics: Measuring Activity (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Aggregate Demand and Supply (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Macroeconomic Objectives and Policy (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'The Global Economy: Trade (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Exchange Rates and Balance of Payments (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Economic Development and Sustainability (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Commentary on a News Article (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Applying Diagrams and Theory (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Evaluating Real-World Policy (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP Business Management (HL)
+// Higher Level: core plus the HL extension inline.
+const IBDP2_BUSINESS_MANAGEMENT_HL = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Introduction to Business Organisation (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Business Objectives and Stakeholders (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Human Resource Management (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Organisational Structure and Leadership (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Finance and Accounts: Sources of Finance (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Final Accounts and Ratio Analysis (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Marketing Planning and the Marketing Mix (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Operations Management and Quality (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Business Strategy and Change (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Ethics and Corporate Social Responsibility (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
+    subtopics: [
+      { name: 'Human Resource Strategy and Change (HL, DP Year 2)', code: 'Y2-HL.1' },
+      { name: 'Advanced Financial Analysis and Investment Appraisal (HL, DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Operations: Crisis Management and Contingency (HL, DP Year 2)', code: 'Y2-HL.3' },
+      { name: 'Extension: Business Strategy Tools (HL, DP Year 2)', code: 'Y2-HL.4' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Research Question and Methodology (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Business Research Project (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Evaluating Findings and Recommending (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP Business Management (SL)
+// Standard Level: core only, no HL extension.
+const IBDP2_BUSINESS_MANAGEMENT_SL = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Introduction to Business Organisation (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Business Objectives and Stakeholders (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Human Resource Management (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Organisational Structure and Leadership (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Finance and Accounts: Sources of Finance (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Final Accounts and Ratio Analysis (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Marketing Planning and the Marketing Mix (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Operations Management and Quality (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Business Strategy and Change (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Ethics and Corporate Social Responsibility (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Research Question and Methodology (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Business Research Project (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Evaluating Findings and Recommending (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP Psychology (HL)
+// Higher Level: core plus the HL extension inline.
+const IBDP2_PSYCHOLOGY_HL = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Approaches to Research in Psychology (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Biological Approach: Brain and Behaviour (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Biological Approach: Hormones and Genetics (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Cognitive Approach: Models of Memory (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Cognitive Approach: Thinking and Decisions (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Sociocultural Approach: Social Identity (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Sociocultural Approach: Cultural Influence (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Ethics in Psychological Research (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Research Methods and Their Evaluation (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Options: Abnormal, Health or Developmental (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
+    subtopics: [
+      { name: 'Extension to Each Approach (HL, DP Year 2)', code: 'Y2-HL.1' },
+      { name: 'The Role of Animal Research (HL, DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Additional Option in Depth (HL, DP Year 2)', code: 'Y2-HL.3' },
+      { name: 'Qualitative Research Methods (HL, DP Year 2)', code: 'Y2-HL.4' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Replicating a Simple Experiment (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Statistical Analysis (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Writing the Experimental Report (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP Psychology (SL)
+// Standard Level: core only, no HL extension.
+const IBDP2_PSYCHOLOGY_SL = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Approaches to Research in Psychology (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Biological Approach: Brain and Behaviour (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Biological Approach: Hormones and Genetics (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Cognitive Approach: Models of Memory (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Cognitive Approach: Thinking and Decisions (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Sociocultural Approach: Social Identity (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Sociocultural Approach: Cultural Influence (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Ethics in Psychological Research (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Research Methods and Their Evaluation (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Options: Abnormal, Health or Developmental (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Replicating a Simple Experiment (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Statistical Analysis (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Writing the Experimental Report (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP Geography (HL)
+// Higher Level: core plus the HL extension inline.
+const IBDP2_GEOGRAPHY_HL = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Population Distribution and Change (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Global Climate: Vulnerability and Resilience (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Resource Consumption and Security (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Freshwater: Drainage Basins (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Oceans and Coastal Margins (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Extreme Environments (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Geophysical Hazards (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Leisure, Tourism and Sport (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Food and Health (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Urban Environments (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
+    subtopics: [
+      { name: 'Power, Places and Networks (HL, DP Year 2)', code: 'Y2-HL.1' },
+      { name: 'Human Development and Diversity (HL, DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Global Risks and Resilience (HL, DP Year 2)', code: 'Y2-HL.3' },
+      { name: 'Extension: Geographic Perspectives (HL, DP Year 2)', code: 'Y2-HL.4' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Fieldwork Question and Method (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Data Collection and Presentation (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Analysis and Conclusion (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP Geography (SL)
+// Standard Level: core only, no HL extension.
+const IBDP2_GEOGRAPHY_SL = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Population Distribution and Change (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Global Climate: Vulnerability and Resilience (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Resource Consumption and Security (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Freshwater: Drainage Basins (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Oceans and Coastal Margins (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Extreme Environments (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Geophysical Hazards (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Leisure, Tourism and Sport (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Food and Health (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Urban Environments (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Fieldwork Question and Method (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Data Collection and Presentation (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Analysis and Conclusion (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP History (HL)
+// Higher Level: core plus the HL extension inline.
+const IBDP2_HISTORY_HL = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Prescribed Subject: Rights and Protest (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Prescribed Subject: Conflict and Intervention (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'World History: Authoritarian States (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'World History: Causes and Effects of War (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'World History: The Cold War (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Historical Sources and Their Evaluation (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Historiographical Debate (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Cause, Consequence and Significance (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Change and Continuity (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Constructing a Historical Argument (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
+    subtopics: [
+      { name: 'Regional Depth Study: Section 1 (HL, DP Year 2)', code: 'Y2-HL.1' },
+      { name: 'Regional Depth Study: Section 2 (HL, DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Regional Depth Study: Section 3 (HL, DP Year 2)', code: 'Y2-HL.3' },
+      { name: 'Extended Source Analysis (HL, DP Year 2)', code: 'Y2-HL.4' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Choosing an Investigation Question (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Source Evaluation Section (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Reflection on Method (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP History (SL)
+// Standard Level: core only, no HL extension.
+const IBDP2_HISTORY_SL = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Prescribed Subject: Rights and Protest (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Prescribed Subject: Conflict and Intervention (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'World History: Authoritarian States (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'World History: Causes and Effects of War (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'World History: The Cold War (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Historical Sources and Their Evaluation (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Historiographical Debate (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Cause, Consequence and Significance (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Change and Continuity (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Constructing a Historical Argument (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Choosing an Investigation Question (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Source Evaluation Section (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Reflection on Method (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP Music (HL)
+// Higher Level: core plus the HL extension inline.
+const IBDP2_MUSIC_HL = [
   { topic: 'Y1 · Core Topics', code: 'Y1-CT',
     subtopics: [
       { name: 'Exploring Music in Context (DP Year 1)', code: 'Y1-CT.1' },
@@ -6146,14 +5975,15 @@ const IBDP_MUSIC = [
     ] },
   { topic: 'Y2 · HL Extension', code: 'Y2-HL',
     subtopics: [
-      { name: 'HL: The Contemporary Music Maker (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: Extended Collaborative Project (DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'The Contemporary Music Maker (HL, DP Year 2)', code: 'Y2-HL.1' },
+      { name: 'Extended Collaborative Project (HL, DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Advanced Composition Portfolio (HL, DP Year 2)', code: 'Y2-HL.3' },
     ] },
   { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
     subtopics: [
-      { name: 'IA: Exploring Music as a Researcher (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Experimenting as a Creator (DP Year 2)', code: 'Y2-IA.2' },
-      { name: 'IA: Presenting as a Performer (DP Year 2)', code: 'Y2-IA.3' },
+      { name: 'Exploring Music as a Researcher (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Experimenting as a Creator (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Presenting as a Performer (DP Year 2)', code: 'Y2-IA.3' },
     ] },
   { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
     subtopics: [
@@ -6166,10 +5996,42 @@ const IBDP_MUSIC = [
     ] },
 ]
 
-// IB DP Drama — Year 1 and Year 2.
-// SL core plus the HL extension, with the internal assessment as its own
-// strand because it carries 20-30% of the grade.
-const IBDP_DRAMA = [
+// IB DP Music (SL)
+// Standard Level: core only, no HL extension.
+const IBDP2_MUSIC_SL = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Exploring Music in Context (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Experimenting with Music (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Presenting Music (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Musical Elements and Terminology (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Western Art Music Traditions (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'World Music Traditions (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Popular Music and Jazz (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Composition Techniques (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Performance Skills and Interpretation (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Music Technology and Production (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Exploring Music as a Researcher (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Experimenting as a Creator (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Presenting as a Performer (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP Theatre (HL)
+// Higher Level: core plus the HL extension inline.
+const IBDP2_THEATRE_HL = [
   { topic: 'Y1 · Core Topics', code: 'Y1-CT',
     subtopics: [
       { name: 'Theatre in Context (DP Year 1)', code: 'Y1-CT.1' },
@@ -6185,14 +6047,15 @@ const IBDP_DRAMA = [
     ] },
   { topic: 'Y2 · HL Extension', code: 'Y2-HL',
     subtopics: [
-      { name: 'HL: Solo Theatre Piece (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: Extended Research Presentation (DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Solo Theatre Piece: Research (HL, DP Year 2)', code: 'Y2-HL.1' },
+      { name: 'Solo Theatre Piece: Performance (HL, DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Extended Theatre Research (HL, DP Year 2)', code: 'Y2-HL.3' },
     ] },
   { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
     subtopics: [
-      { name: 'IA: Collaborative Project (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Production Proposal (DP Year 2)', code: 'Y2-IA.2' },
-      { name: 'IA: Research Presentation (DP Year 2)', code: 'Y2-IA.3' },
+      { name: 'Collaborative Project (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Production Proposal (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Research Presentation (DP Year 2)', code: 'Y2-IA.3' },
     ] },
   { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
     subtopics: [
@@ -6205,33 +6068,66 @@ const IBDP_DRAMA = [
     ] },
 ]
 
-// IB DP Theatre Studies — Year 1 and Year 2.
-// SL core plus the HL extension, with the internal assessment as its own
-// strand because it carries 20-30% of the grade.
-const IBDP_THEATRE_STUDIES = [
+// IB DP Theatre (SL)
+// Standard Level: core only, no HL extension.
+const IBDP2_THEATRE_SL = [
   { topic: 'Y1 · Core Topics', code: 'Y1-CT',
     subtopics: [
-      { name: 'The Theatre Maker: Creator, Producer, Designer (DP Year 1)', code: 'Y1-CT.1' },
-      { name: 'Theatre in Context: Traditions (DP Year 1)', code: 'Y1-CT.2' },
-      { name: 'Theatre Processes: Devising (DP Year 1)', code: 'Y1-CT.3' },
-      { name: 'Presenting Theatre to an Audience (DP Year 1)', code: 'Y1-CT.4' },
-      { name: 'Analysing a Play Text (DP Year 1)', code: 'Y1-CT.5' },
-      { name: 'Performance Conventions Across Cultures (DP Year 1)', code: 'Y1-CT.6' },
-      { name: 'Directing a Scene (DP Year 1)', code: 'Y1-CT.7' },
-      { name: 'Design: Set, Light, Sound and Costume (DP Year 1)', code: 'Y1-CT.8' },
-      { name: 'Working Collaboratively (DP Year 1)', code: 'Y1-CT.9' },
-      { name: 'Reflective Journal Practice (DP Year 1)', code: 'Y1-CT.10' },
+      { name: 'Theatre in Context (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Theatre Processes (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Presenting Theatre (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'World Theatre Traditions (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Theatre Theorists and Practitioners (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Devising Original Theatre (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Performance Skills and Characterisation (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Directing and Staging (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Design Elements in Theatre (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Reflective Practice in Theatre (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Collaborative Project (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Production Proposal (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Research Presentation (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP Visual Arts (HL)
+// Higher Level: core plus the HL extension inline.
+const IBDP2_VISUAL_ARTS_HL = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Art-Making Forms and Techniques (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Visual Arts in Context (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Visual Arts Methods (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Communicating Visual Arts (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Investigating Artists and Movements (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Developing a Personal Visual Language (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Experimentation with Media (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Critical Analysis of Artworks (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Cultural Context and Meaning (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Curatorial Practice (DP Year 1)', code: 'Y1-CT.10' },
     ] },
   { topic: 'Y2 · HL Extension', code: 'Y2-HL',
     subtopics: [
-      { name: 'HL: Solo Theatre Piece (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: Independent Theatre Research (DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Extended Body of Resolved Work (HL, DP Year 2)', code: 'Y2-HL.1' },
+      { name: 'In-Depth Comparative Study (HL, DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Advanced Studio Practice (HL, DP Year 2)', code: 'Y2-HL.3' },
     ] },
   { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
     subtopics: [
-      { name: 'IA: Collaborative Project (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Production Proposal (DP Year 2)', code: 'Y2-IA.2' },
-      { name: 'IA: Research Presentation (DP Year 2)', code: 'Y2-IA.3' },
+      { name: 'Comparative Study (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Process Portfolio (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Exhibition and Curatorial Rationale (DP Year 2)', code: 'Y2-IA.3' },
     ] },
   { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
     subtopics: [
@@ -6244,33 +6140,68 @@ const IBDP_THEATRE_STUDIES = [
     ] },
 ]
 
-// IB DP Film Studies — Year 1 and Year 2.
-// SL core plus the HL extension, with the internal assessment as its own
-// strand because it carries 20-30% of the grade.
-const IBDP_FILM_STUDIES = [
+// IB DP Visual Arts (SL)
+// Standard Level: core only, no HL extension.
+const IBDP2_VISUAL_ARTS_SL = [
   { topic: 'Y1 · Core Topics', code: 'Y1-CT',
     subtopics: [
-      { name: 'Reading Film: Textual Analysis (DP Year 1)', code: 'Y1-CT.1' },
-      { name: 'Contextualising Film (DP Year 1)', code: 'Y1-CT.2' },
-      { name: 'Film Theory and Movements (DP Year 1)', code: 'Y1-CT.3' },
-      { name: 'Cinematography and Mise-en-Scene (DP Year 1)', code: 'Y1-CT.4' },
-      { name: 'Editing and Montage (DP Year 1)', code: 'Y1-CT.5' },
-      { name: 'Sound Design in Film (DP Year 1)', code: 'Y1-CT.6' },
-      { name: 'Narrative Structure in Film (DP Year 1)', code: 'Y1-CT.7' },
-      { name: 'World Cinema Traditions (DP Year 1)', code: 'Y1-CT.8' },
-      { name: 'Documentary and Non-Fiction Film (DP Year 1)', code: 'Y1-CT.9' },
-      { name: 'Film and Cultural Identity (DP Year 1)', code: 'Y1-CT.10' },
+      { name: 'Art-Making Forms and Techniques (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Visual Arts in Context (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Visual Arts Methods (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Communicating Visual Arts (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Investigating Artists and Movements (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Developing a Personal Visual Language (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Experimentation with Media (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Critical Analysis of Artworks (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Cultural Context and Meaning (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Curatorial Practice (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Comparative Study (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Process Portfolio (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Exhibition and Curatorial Rationale (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP Mathematics: Analysis & Approaches (HL)
+// Higher Level: core plus the HL extension inline.
+const IBDP2_MATHEMATICS_ANALYSIS_APPROACHES_HL = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Number and Algebra: Sequences and Series (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Number and Algebra: Exponents and Logarithms (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Functions: Types and Transformations (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Functions: Quadratics and Rational Functions (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Geometry and Trigonometry: Triangles and Circles (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Geometry and Trigonometry: Identities and Equations (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Statistics: Descriptive and Bivariate (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Probability: Distributions (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Calculus: Differentiation (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Calculus: Integration (DP Year 1)', code: 'Y1-CT.10' },
     ] },
   { topic: 'Y2 · HL Extension', code: 'Y2-HL',
     subtopics: [
-      { name: 'HL: Collaborative Film Project (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: Extended Comparative Study (DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Proof by Induction and Contradiction (HL, DP Year 2)', code: 'Y2-HL.1' },
+      { name: 'Complex Numbers and De Moivre (HL, DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Vectors, Lines and Planes (HL, DP Year 2)', code: 'Y2-HL.3' },
+      { name: 'Advanced Calculus and Differential Equations (HL, DP Year 2)', code: 'Y2-HL.4' },
+      { name: 'Maclaurin Series and Limits (HL, DP Year 2)', code: 'Y2-HL.5' },
     ] },
   { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
     subtopics: [
-      { name: 'IA: Textual Analysis (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Comparative Study (DP Year 2)', code: 'Y2-IA.2' },
-      { name: 'IA: Film Portfolio (DP Year 2)', code: 'Y2-IA.3' },
+      { name: 'Choosing a Mathematical Exploration (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Developing Mathematical Reasoning (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Personal Engagement and Reflection (DP Year 2)', code: 'Y2-IA.3' },
     ] },
   { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
     subtopics: [
@@ -6283,32 +6214,68 @@ const IBDP_FILM_STUDIES = [
     ] },
 ]
 
-// IB DP Physical Education — Year 1 and Year 2.
-// SL core plus the HL extension, with the internal assessment as its own
-// strand because it carries 20-30% of the grade.
-const IBDP_PHYSICAL_EDUCATION = [
+// IB DP Mathematics: Analysis & Approaches (SL)
+// Standard Level: core only, no HL extension.
+const IBDP2_MATHEMATICS_ANALYSIS_APPROACHES_SL = [
   { topic: 'Y1 · Core Topics', code: 'Y1-CT',
     subtopics: [
-      { name: 'Anatomy and Physiology (DP Year 1)', code: 'Y1-CT.1' },
-      { name: 'Energy Systems and Exercise (DP Year 1)', code: 'Y1-CT.2' },
-      { name: 'Biomechanics of Movement (DP Year 1)', code: 'Y1-CT.3' },
-      { name: 'Skill Acquisition and Motor Learning (DP Year 1)', code: 'Y1-CT.4' },
-      { name: 'Training Principles and Programme Design (DP Year 1)', code: 'Y1-CT.5' },
-      { name: 'Sport Psychology (DP Year 1)', code: 'Y1-CT.6' },
-      { name: 'Nutrition for Performance (DP Year 1)', code: 'Y1-CT.7' },
-      { name: 'Health, Fitness and Wellbeing (DP Year 1)', code: 'Y1-CT.8' },
-      { name: 'Sport, Ethics and Society (DP Year 1)', code: 'Y1-CT.9' },
-      { name: 'Performance Analysis (DP Year 1)', code: 'Y1-CT.10' },
+      { name: 'Number and Algebra: Sequences and Series (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Number and Algebra: Exponents and Logarithms (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Functions: Types and Transformations (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Functions: Quadratics and Rational Functions (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Geometry and Trigonometry: Triangles and Circles (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Geometry and Trigonometry: Identities and Equations (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Statistics: Descriptive and Bivariate (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Probability: Distributions (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Calculus: Differentiation (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Calculus: Integration (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Choosing a Mathematical Exploration (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Developing Mathematical Reasoning (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Personal Engagement and Reflection (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP Mathematics: Applications & Interpretation (HL)
+// Higher Level: core plus the HL extension inline.
+const IBDP2_MATHEMATICS_APPLICATIONS_INTERPRETATION_HL = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Number and Algebra: Approximation and Systems (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Functions: Modelling with Functions (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Functions: Exponential and Logarithmic Models (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Geometry and Trigonometry: Applications (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Geometry: Voronoi Diagrams and Networks (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Statistics: Sampling and Data Analysis (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Statistics: Correlation and Regression (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Probability: Distributions and Testing (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Calculus: Rates of Change (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Calculus: Numerical Integration (DP Year 1)', code: 'Y1-CT.10' },
     ] },
   { topic: 'Y2 · HL Extension', code: 'Y2-HL',
     subtopics: [
-      { name: 'HL: Advanced Physiology (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: Optimising Training and Performance (DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Matrices and Transformations (HL, DP Year 2)', code: 'Y2-HL.1' },
+      { name: 'Graph Theory and Networks (HL, DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Advanced Statistical Testing (HL, DP Year 2)', code: 'Y2-HL.3' },
+      { name: 'Differential Equations and Modelling (HL, DP Year 2)', code: 'Y2-HL.4' },
+      { name: 'Complex Numbers in Applications (HL, DP Year 2)', code: 'Y2-HL.5' },
     ] },
   { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
     subtopics: [
-      { name: 'IA: Investigating Performance (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Data Analysis and Evaluation (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Choosing a Real-World Exploration (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Applying Technology and Modelling (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Personal Engagement and Reflection (DP Year 2)', code: 'Y2-IA.3' },
     ] },
   { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
     subtopics: [
@@ -6321,33 +6288,66 @@ const IBDP_PHYSICAL_EDUCATION = [
     ] },
 ]
 
-// IB DP French — Year 1 and Year 2.
-// DP language acquisition: five prescribed themes across four skills.
-const IBDP_FRENCH = [
+// IB DP Mathematics: Applications & Interpretation (SL)
+// Standard Level: core only, no HL extension.
+const IBDP2_MATHEMATICS_APPLICATIONS_INTERPRETATION_SL = [
   { topic: 'Y1 · Core Topics', code: 'Y1-CT',
     subtopics: [
-      { name: 'Identities: Self and Relationships (DP Year 1)', code: 'Y1-CT.1' },
-      { name: 'Experiences: Travel and Migration (DP Year 1)', code: 'Y1-CT.2' },
-      { name: 'Human Ingenuity: Science and Innovation (DP Year 1)', code: 'Y1-CT.3' },
-      { name: 'Social Organisation: Community and Work (DP Year 1)', code: 'Y1-CT.4' },
-      { name: 'Sharing the Planet: Environment and Rights (DP Year 1)', code: 'Y1-CT.5' },
-      { name: 'Receptive Skills: Listening Comprehension (DP Year 1)', code: 'Y1-CT.6' },
-      { name: 'Receptive Skills: Reading Comprehension (DP Year 1)', code: 'Y1-CT.7' },
-      { name: 'Productive Skills: Written Production (DP Year 1)', code: 'Y1-CT.8' },
-      { name: 'Interactive Skills: Spoken Interaction (DP Year 1)', code: 'Y1-CT.9' },
-      { name: 'Grammar and Register in Context (DP Year 1)', code: 'Y1-CT.10' },
+      { name: 'Number and Algebra: Approximation and Systems (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Functions: Modelling with Functions (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Functions: Exponential and Logarithmic Models (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Geometry and Trigonometry: Applications (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Geometry: Voronoi Diagrams and Networks (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Statistics: Sampling and Data Analysis (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Statistics: Correlation and Regression (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Probability: Distributions and Testing (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Calculus: Rates of Change (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Calculus: Numerical Integration (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Choosing a Real-World Exploration (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Applying Technology and Modelling (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Personal Engagement and Reflection (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP English A: Literature (HL)
+// Higher Level: core plus the HL extension inline.
+const IBDP2_ENGLISH_A_LITERATURE_HL = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Readers, Writers and Texts (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Time and Space (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Intertextuality: Connecting Texts (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Close Reading of Poetry (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Close Reading of Prose (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Studying Drama in Performance (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'The Learner Portfolio (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Global Issues in Literature (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Literary Technique and Effect (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Context: Author, Period and Culture (DP Year 1)', code: 'Y1-CT.10' },
     ] },
   { topic: 'Y2 · HL Extension', code: 'Y2-HL',
     subtopics: [
-      { name: 'HL: Literary Works in the Target Language (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: Extended Written Production (DP Year 2)', code: 'Y2-HL.2' },
-      { name: 'HL: Nuance, Idiom and Advanced Register (DP Year 2)', code: 'Y2-HL.3' },
+      { name: 'The HL Essay: Developing a Line of Inquiry (HL, DP Year 2)', code: 'Y2-HL.1' },
+      { name: 'Wider Reading and Comparison (HL, DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Sustained Critical Argument (HL, DP Year 2)', code: 'Y2-HL.3' },
     ] },
   { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
     subtopics: [
-      { name: 'IA: Individual Oral Assessment (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Responding to a Visual Stimulus (DP Year 2)', code: 'Y2-IA.2' },
-      { name: 'IA: Discussion on a Theme (DP Year 2)', code: 'Y2-IA.3' },
+      { name: 'Individual Oral (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Selecting a Global Issue (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Preparing the Extract Commentary (DP Year 2)', code: 'Y2-IA.3' },
     ] },
   { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
     subtopics: [
@@ -6360,33 +6360,66 @@ const IBDP_FRENCH = [
     ] },
 ]
 
-// IB DP Spanish — Year 1 and Year 2.
-// DP language acquisition: five prescribed themes across four skills.
-const IBDP_SPANISH = [
+// IB DP English A: Literature (SL)
+// Standard Level: core only, no HL extension.
+const IBDP2_ENGLISH_A_LITERATURE_SL = [
   { topic: 'Y1 · Core Topics', code: 'Y1-CT',
     subtopics: [
-      { name: 'Identities: Self and Relationships (DP Year 1)', code: 'Y1-CT.1' },
-      { name: 'Experiences: Travel and Migration (DP Year 1)', code: 'Y1-CT.2' },
-      { name: 'Human Ingenuity: Science and Innovation (DP Year 1)', code: 'Y1-CT.3' },
-      { name: 'Social Organisation: Community and Work (DP Year 1)', code: 'Y1-CT.4' },
-      { name: 'Sharing the Planet: Environment and Rights (DP Year 1)', code: 'Y1-CT.5' },
-      { name: 'Receptive Skills: Listening Comprehension (DP Year 1)', code: 'Y1-CT.6' },
-      { name: 'Receptive Skills: Reading Comprehension (DP Year 1)', code: 'Y1-CT.7' },
-      { name: 'Productive Skills: Written Production (DP Year 1)', code: 'Y1-CT.8' },
-      { name: 'Interactive Skills: Spoken Interaction (DP Year 1)', code: 'Y1-CT.9' },
-      { name: 'Grammar and Register in Context (DP Year 1)', code: 'Y1-CT.10' },
+      { name: 'Readers, Writers and Texts (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Time and Space (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Intertextuality: Connecting Texts (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Close Reading of Poetry (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Close Reading of Prose (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Studying Drama in Performance (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'The Learner Portfolio (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Global Issues in Literature (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Literary Technique and Effect (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Context: Author, Period and Culture (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Individual Oral (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Selecting a Global Issue (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Preparing the Extract Commentary (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP English A: Language and Literature (HL)
+// Higher Level: core plus the HL extension inline.
+const IBDP2_ENGLISH_A_LANGUAGE_AND_LITERATURE_HL = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Readers, Writers and Texts (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Time and Space (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Intertextuality: Connecting Texts (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Analysing Non-Literary Texts (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Language and Mass Communication (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Language, Power and Persuasion (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Media Representation (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'The Learner Portfolio (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Global Issues in Texts (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Context and Audience (DP Year 1)', code: 'Y1-CT.10' },
     ] },
   { topic: 'Y2 · HL Extension', code: 'Y2-HL',
     subtopics: [
-      { name: 'HL: Literary Works in the Target Language (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: Extended Written Production (DP Year 2)', code: 'Y2-HL.2' },
-      { name: 'HL: Nuance, Idiom and Advanced Register (DP Year 2)', code: 'Y2-HL.3' },
+      { name: 'The HL Essay: Developing a Line of Inquiry (HL, DP Year 2)', code: 'Y2-HL.1' },
+      { name: 'Extended Comparative Analysis (HL, DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Sustained Critical Argument (HL, DP Year 2)', code: 'Y2-HL.3' },
     ] },
   { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
     subtopics: [
-      { name: 'IA: Individual Oral Assessment (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Responding to a Visual Stimulus (DP Year 2)', code: 'Y2-IA.2' },
-      { name: 'IA: Discussion on a Theme (DP Year 2)', code: 'Y2-IA.3' },
+      { name: 'Individual Oral (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Selecting a Global Issue (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Preparing the Extract Commentary (DP Year 2)', code: 'Y2-IA.3' },
     ] },
   { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
     subtopics: [
@@ -6399,33 +6432,66 @@ const IBDP_SPANISH = [
     ] },
 ]
 
-// IB DP German — Year 1 and Year 2.
-// DP language acquisition: five prescribed themes across four skills.
-const IBDP_GERMAN = [
+// IB DP English A: Language and Literature (SL)
+// Standard Level: core only, no HL extension.
+const IBDP2_ENGLISH_A_LANGUAGE_AND_LITERATURE_SL = [
   { topic: 'Y1 · Core Topics', code: 'Y1-CT',
     subtopics: [
-      { name: 'Identities: Self and Relationships (DP Year 1)', code: 'Y1-CT.1' },
-      { name: 'Experiences: Travel and Migration (DP Year 1)', code: 'Y1-CT.2' },
-      { name: 'Human Ingenuity: Science and Innovation (DP Year 1)', code: 'Y1-CT.3' },
-      { name: 'Social Organisation: Community and Work (DP Year 1)', code: 'Y1-CT.4' },
-      { name: 'Sharing the Planet: Environment and Rights (DP Year 1)', code: 'Y1-CT.5' },
-      { name: 'Receptive Skills: Listening Comprehension (DP Year 1)', code: 'Y1-CT.6' },
-      { name: 'Receptive Skills: Reading Comprehension (DP Year 1)', code: 'Y1-CT.7' },
-      { name: 'Productive Skills: Written Production (DP Year 1)', code: 'Y1-CT.8' },
-      { name: 'Interactive Skills: Spoken Interaction (DP Year 1)', code: 'Y1-CT.9' },
-      { name: 'Grammar and Register in Context (DP Year 1)', code: 'Y1-CT.10' },
+      { name: 'Readers, Writers and Texts (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Time and Space (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Intertextuality: Connecting Texts (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Analysing Non-Literary Texts (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Language and Mass Communication (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Language, Power and Persuasion (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Media Representation (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'The Learner Portfolio (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Global Issues in Texts (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Context and Audience (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Individual Oral (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Selecting a Global Issue (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Preparing the Extract Commentary (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP Environmental Systems & Societies (HL)
+// Higher Level: core plus the HL extension inline.
+const IBDP2_ENVIRONMENTAL_SYSTEMS_SOCIETIES_HL = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Foundations of Environmental Systems (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Systems, Models and Sustainability (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Ecosystems and Ecology (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Biodiversity and Conservation (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Water Systems and Water Pollution (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Soil Systems and Terrestrial Food Production (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Atmospheric Systems and Air Pollution (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Climate Change and Energy Production (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Human Populations and Resource Use (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Environmental Value Systems (DP Year 1)', code: 'Y1-CT.10' },
     ] },
   { topic: 'Y2 · HL Extension', code: 'Y2-HL',
     subtopics: [
-      { name: 'HL: Literary Works in the Target Language (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: Extended Written Production (DP Year 2)', code: 'Y2-HL.2' },
-      { name: 'HL: Nuance, Idiom and Advanced Register (DP Year 2)', code: 'Y2-HL.3' },
+      { name: 'Environmental Law and Policy (HL, DP Year 2)', code: 'Y2-HL.1' },
+      { name: 'Environmental Economics (HL, DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Environmental Ethics in Depth (HL, DP Year 2)', code: 'Y2-HL.3' },
     ] },
   { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
     subtopics: [
-      { name: 'IA: Individual Oral Assessment (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Responding to a Visual Stimulus (DP Year 2)', code: 'Y2-IA.2' },
-      { name: 'IA: Discussion on a Theme (DP Year 2)', code: 'Y2-IA.3' },
+      { name: 'Fieldwork Investigation Design (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Data Collection and Analysis (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Evaluating Environmental Impact (DP Year 2)', code: 'Y2-IA.3' },
     ] },
   { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
     subtopics: [
@@ -6438,33 +6504,27 @@ const IBDP_GERMAN = [
     ] },
 ]
 
-// IB DP Italian — Year 1 and Year 2.
-// DP language acquisition: five prescribed themes across four skills.
-const IBDP_ITALIAN = [
+// IB DP Environmental Systems & Societies (SL)
+// Standard Level: core only, no HL extension.
+const IBDP2_ENVIRONMENTAL_SYSTEMS_SOCIETIES_SL = [
   { topic: 'Y1 · Core Topics', code: 'Y1-CT',
     subtopics: [
-      { name: 'Identities: Self and Relationships (DP Year 1)', code: 'Y1-CT.1' },
-      { name: 'Experiences: Travel and Migration (DP Year 1)', code: 'Y1-CT.2' },
-      { name: 'Human Ingenuity: Science and Innovation (DP Year 1)', code: 'Y1-CT.3' },
-      { name: 'Social Organisation: Community and Work (DP Year 1)', code: 'Y1-CT.4' },
-      { name: 'Sharing the Planet: Environment and Rights (DP Year 1)', code: 'Y1-CT.5' },
-      { name: 'Receptive Skills: Listening Comprehension (DP Year 1)', code: 'Y1-CT.6' },
-      { name: 'Receptive Skills: Reading Comprehension (DP Year 1)', code: 'Y1-CT.7' },
-      { name: 'Productive Skills: Written Production (DP Year 1)', code: 'Y1-CT.8' },
-      { name: 'Interactive Skills: Spoken Interaction (DP Year 1)', code: 'Y1-CT.9' },
-      { name: 'Grammar and Register in Context (DP Year 1)', code: 'Y1-CT.10' },
-    ] },
-  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
-    subtopics: [
-      { name: 'HL: Literary Works in the Target Language (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: Extended Written Production (DP Year 2)', code: 'Y2-HL.2' },
-      { name: 'HL: Nuance, Idiom and Advanced Register (DP Year 2)', code: 'Y2-HL.3' },
+      { name: 'Foundations of Environmental Systems (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Systems, Models and Sustainability (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Ecosystems and Ecology (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Biodiversity and Conservation (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Water Systems and Water Pollution (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Soil Systems and Terrestrial Food Production (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Atmospheric Systems and Air Pollution (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Climate Change and Energy Production (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Human Populations and Resource Use (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Environmental Value Systems (DP Year 1)', code: 'Y1-CT.10' },
     ] },
   { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
     subtopics: [
-      { name: 'IA: Individual Oral Assessment (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Responding to a Visual Stimulus (DP Year 2)', code: 'Y2-IA.2' },
-      { name: 'IA: Discussion on a Theme (DP Year 2)', code: 'Y2-IA.3' },
+      { name: 'Fieldwork Investigation Design (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Data Collection and Analysis (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Evaluating Environmental Impact (DP Year 2)', code: 'Y2-IA.3' },
     ] },
   { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
     subtopics: [
@@ -6477,243 +6537,9 @@ const IBDP_ITALIAN = [
     ] },
 ]
 
-// IB DP Portuguese — Year 1 and Year 2.
-// DP language acquisition: five prescribed themes across four skills.
-const IBDP_PORTUGUESE = [
-  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
-    subtopics: [
-      { name: 'Identities: Self and Relationships (DP Year 1)', code: 'Y1-CT.1' },
-      { name: 'Experiences: Travel and Migration (DP Year 1)', code: 'Y1-CT.2' },
-      { name: 'Human Ingenuity: Science and Innovation (DP Year 1)', code: 'Y1-CT.3' },
-      { name: 'Social Organisation: Community and Work (DP Year 1)', code: 'Y1-CT.4' },
-      { name: 'Sharing the Planet: Environment and Rights (DP Year 1)', code: 'Y1-CT.5' },
-      { name: 'Receptive Skills: Listening Comprehension (DP Year 1)', code: 'Y1-CT.6' },
-      { name: 'Receptive Skills: Reading Comprehension (DP Year 1)', code: 'Y1-CT.7' },
-      { name: 'Productive Skills: Written Production (DP Year 1)', code: 'Y1-CT.8' },
-      { name: 'Interactive Skills: Spoken Interaction (DP Year 1)', code: 'Y1-CT.9' },
-      { name: 'Grammar and Register in Context (DP Year 1)', code: 'Y1-CT.10' },
-    ] },
-  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
-    subtopics: [
-      { name: 'HL: Literary Works in the Target Language (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: Extended Written Production (DP Year 2)', code: 'Y2-HL.2' },
-      { name: 'HL: Nuance, Idiom and Advanced Register (DP Year 2)', code: 'Y2-HL.3' },
-    ] },
-  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
-    subtopics: [
-      { name: 'IA: Individual Oral Assessment (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Responding to a Visual Stimulus (DP Year 2)', code: 'Y2-IA.2' },
-      { name: 'IA: Discussion on a Theme (DP Year 2)', code: 'Y2-IA.3' },
-    ] },
-  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
-    subtopics: [
-      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
-      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
-      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
-      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
-      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
-      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
-    ] },
-]
-
-// IB DP Mandarin Chinese — Year 1 and Year 2.
-// DP language acquisition: five prescribed themes across four skills.
-const IBDP_MANDARIN_CHINESE = [
-  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
-    subtopics: [
-      { name: 'Identities: Self and Relationships (DP Year 1)', code: 'Y1-CT.1' },
-      { name: 'Experiences: Travel and Migration (DP Year 1)', code: 'Y1-CT.2' },
-      { name: 'Human Ingenuity: Science and Innovation (DP Year 1)', code: 'Y1-CT.3' },
-      { name: 'Social Organisation: Community and Work (DP Year 1)', code: 'Y1-CT.4' },
-      { name: 'Sharing the Planet: Environment and Rights (DP Year 1)', code: 'Y1-CT.5' },
-      { name: 'Receptive Skills: Listening Comprehension (DP Year 1)', code: 'Y1-CT.6' },
-      { name: 'Receptive Skills: Reading Comprehension (DP Year 1)', code: 'Y1-CT.7' },
-      { name: 'Productive Skills: Written Production (DP Year 1)', code: 'Y1-CT.8' },
-      { name: 'Interactive Skills: Spoken Interaction (DP Year 1)', code: 'Y1-CT.9' },
-      { name: 'Grammar and Register in Context (DP Year 1)', code: 'Y1-CT.10' },
-    ] },
-  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
-    subtopics: [
-      { name: 'HL: Literary Works in the Target Language (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: Extended Written Production (DP Year 2)', code: 'Y2-HL.2' },
-      { name: 'HL: Nuance, Idiom and Advanced Register (DP Year 2)', code: 'Y2-HL.3' },
-    ] },
-  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
-    subtopics: [
-      { name: 'IA: Individual Oral Assessment (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Responding to a Visual Stimulus (DP Year 2)', code: 'Y2-IA.2' },
-      { name: 'IA: Discussion on a Theme (DP Year 2)', code: 'Y2-IA.3' },
-    ] },
-  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
-    subtopics: [
-      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
-      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
-      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
-      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
-      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
-      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
-    ] },
-]
-
-// IB DP Japanese — Year 1 and Year 2.
-// DP language acquisition: five prescribed themes across four skills.
-const IBDP_JAPANESE = [
-  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
-    subtopics: [
-      { name: 'Identities: Self and Relationships (DP Year 1)', code: 'Y1-CT.1' },
-      { name: 'Experiences: Travel and Migration (DP Year 1)', code: 'Y1-CT.2' },
-      { name: 'Human Ingenuity: Science and Innovation (DP Year 1)', code: 'Y1-CT.3' },
-      { name: 'Social Organisation: Community and Work (DP Year 1)', code: 'Y1-CT.4' },
-      { name: 'Sharing the Planet: Environment and Rights (DP Year 1)', code: 'Y1-CT.5' },
-      { name: 'Receptive Skills: Listening Comprehension (DP Year 1)', code: 'Y1-CT.6' },
-      { name: 'Receptive Skills: Reading Comprehension (DP Year 1)', code: 'Y1-CT.7' },
-      { name: 'Productive Skills: Written Production (DP Year 1)', code: 'Y1-CT.8' },
-      { name: 'Interactive Skills: Spoken Interaction (DP Year 1)', code: 'Y1-CT.9' },
-      { name: 'Grammar and Register in Context (DP Year 1)', code: 'Y1-CT.10' },
-    ] },
-  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
-    subtopics: [
-      { name: 'HL: Literary Works in the Target Language (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: Extended Written Production (DP Year 2)', code: 'Y2-HL.2' },
-      { name: 'HL: Nuance, Idiom and Advanced Register (DP Year 2)', code: 'Y2-HL.3' },
-    ] },
-  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
-    subtopics: [
-      { name: 'IA: Individual Oral Assessment (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Responding to a Visual Stimulus (DP Year 2)', code: 'Y2-IA.2' },
-      { name: 'IA: Discussion on a Theme (DP Year 2)', code: 'Y2-IA.3' },
-    ] },
-  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
-    subtopics: [
-      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
-      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
-      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
-      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
-      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
-      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
-    ] },
-]
-
-// IB DP Korean — Year 1 and Year 2.
-// DP language acquisition: five prescribed themes across four skills.
-const IBDP_KOREAN = [
-  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
-    subtopics: [
-      { name: 'Identities: Self and Relationships (DP Year 1)', code: 'Y1-CT.1' },
-      { name: 'Experiences: Travel and Migration (DP Year 1)', code: 'Y1-CT.2' },
-      { name: 'Human Ingenuity: Science and Innovation (DP Year 1)', code: 'Y1-CT.3' },
-      { name: 'Social Organisation: Community and Work (DP Year 1)', code: 'Y1-CT.4' },
-      { name: 'Sharing the Planet: Environment and Rights (DP Year 1)', code: 'Y1-CT.5' },
-      { name: 'Receptive Skills: Listening Comprehension (DP Year 1)', code: 'Y1-CT.6' },
-      { name: 'Receptive Skills: Reading Comprehension (DP Year 1)', code: 'Y1-CT.7' },
-      { name: 'Productive Skills: Written Production (DP Year 1)', code: 'Y1-CT.8' },
-      { name: 'Interactive Skills: Spoken Interaction (DP Year 1)', code: 'Y1-CT.9' },
-      { name: 'Grammar and Register in Context (DP Year 1)', code: 'Y1-CT.10' },
-    ] },
-  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
-    subtopics: [
-      { name: 'HL: Literary Works in the Target Language (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: Extended Written Production (DP Year 2)', code: 'Y2-HL.2' },
-      { name: 'HL: Nuance, Idiom and Advanced Register (DP Year 2)', code: 'Y2-HL.3' },
-    ] },
-  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
-    subtopics: [
-      { name: 'IA: Individual Oral Assessment (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Responding to a Visual Stimulus (DP Year 2)', code: 'Y2-IA.2' },
-      { name: 'IA: Discussion on a Theme (DP Year 2)', code: 'Y2-IA.3' },
-    ] },
-  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
-    subtopics: [
-      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
-      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
-      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
-      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
-      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
-      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
-    ] },
-]
-
-// IB DP Arabic — Year 1 and Year 2.
-// DP language acquisition: five prescribed themes across four skills.
-const IBDP_ARABIC = [
-  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
-    subtopics: [
-      { name: 'Identities: Self and Relationships (DP Year 1)', code: 'Y1-CT.1' },
-      { name: 'Experiences: Travel and Migration (DP Year 1)', code: 'Y1-CT.2' },
-      { name: 'Human Ingenuity: Science and Innovation (DP Year 1)', code: 'Y1-CT.3' },
-      { name: 'Social Organisation: Community and Work (DP Year 1)', code: 'Y1-CT.4' },
-      { name: 'Sharing the Planet: Environment and Rights (DP Year 1)', code: 'Y1-CT.5' },
-      { name: 'Receptive Skills: Listening Comprehension (DP Year 1)', code: 'Y1-CT.6' },
-      { name: 'Receptive Skills: Reading Comprehension (DP Year 1)', code: 'Y1-CT.7' },
-      { name: 'Productive Skills: Written Production (DP Year 1)', code: 'Y1-CT.8' },
-      { name: 'Interactive Skills: Spoken Interaction (DP Year 1)', code: 'Y1-CT.9' },
-      { name: 'Grammar and Register in Context (DP Year 1)', code: 'Y1-CT.10' },
-    ] },
-  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
-    subtopics: [
-      { name: 'HL: Literary Works in the Target Language (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: Extended Written Production (DP Year 2)', code: 'Y2-HL.2' },
-      { name: 'HL: Nuance, Idiom and Advanced Register (DP Year 2)', code: 'Y2-HL.3' },
-    ] },
-  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
-    subtopics: [
-      { name: 'IA: Individual Oral Assessment (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Responding to a Visual Stimulus (DP Year 2)', code: 'Y2-IA.2' },
-      { name: 'IA: Discussion on a Theme (DP Year 2)', code: 'Y2-IA.3' },
-    ] },
-  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
-    subtopics: [
-      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
-      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
-      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
-      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
-      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
-      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
-    ] },
-]
-
-// IB DP Russian — Year 1 and Year 2.
-// DP language acquisition: five prescribed themes across four skills.
-const IBDP_RUSSIAN = [
-  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
-    subtopics: [
-      { name: 'Identities: Self and Relationships (DP Year 1)', code: 'Y1-CT.1' },
-      { name: 'Experiences: Travel and Migration (DP Year 1)', code: 'Y1-CT.2' },
-      { name: 'Human Ingenuity: Science and Innovation (DP Year 1)', code: 'Y1-CT.3' },
-      { name: 'Social Organisation: Community and Work (DP Year 1)', code: 'Y1-CT.4' },
-      { name: 'Sharing the Planet: Environment and Rights (DP Year 1)', code: 'Y1-CT.5' },
-      { name: 'Receptive Skills: Listening Comprehension (DP Year 1)', code: 'Y1-CT.6' },
-      { name: 'Receptive Skills: Reading Comprehension (DP Year 1)', code: 'Y1-CT.7' },
-      { name: 'Productive Skills: Written Production (DP Year 1)', code: 'Y1-CT.8' },
-      { name: 'Interactive Skills: Spoken Interaction (DP Year 1)', code: 'Y1-CT.9' },
-      { name: 'Grammar and Register in Context (DP Year 1)', code: 'Y1-CT.10' },
-    ] },
-  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
-    subtopics: [
-      { name: 'HL: Literary Works in the Target Language (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: Extended Written Production (DP Year 2)', code: 'Y2-HL.2' },
-      { name: 'HL: Nuance, Idiom and Advanced Register (DP Year 2)', code: 'Y2-HL.3' },
-    ] },
-  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
-    subtopics: [
-      { name: 'IA: Individual Oral Assessment (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Responding to a Visual Stimulus (DP Year 2)', code: 'Y2-IA.2' },
-      { name: 'IA: Discussion on a Theme (DP Year 2)', code: 'Y2-IA.3' },
-    ] },
-  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
-    subtopics: [
-      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
-      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
-      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
-      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
-      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
-      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
-    ] },
-]
-
-// IB DP Swahili (Kiswahili) — Year 1 and Year 2.
-// DP language acquisition: five prescribed themes across four skills.
-const IBDP_SWAHILI_KISWAHILI = [
+// IB DP English B (HL)
+// Higher Level: core plus the HL extension inline.
+const IBDP2_ENGLISH_B_HL = [
   { topic: 'Y1 · Core Topics', code: 'Y1-CT',
     subtopics: [
       { name: 'Identities: Self and Relationships (DP Year 1)', code: 'Y1-CT.1' },
@@ -6729,15 +6555,15 @@ const IBDP_SWAHILI_KISWAHILI = [
     ] },
   { topic: 'Y2 · HL Extension', code: 'Y2-HL',
     subtopics: [
-      { name: 'HL: Literary Works in the Target Language (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: Extended Written Production (DP Year 2)', code: 'Y2-HL.2' },
-      { name: 'HL: Nuance, Idiom and Advanced Register (DP Year 2)', code: 'Y2-HL.3' },
+      { name: 'Literary Works in the Target Language (HL, DP Year 2)', code: 'Y2-HL.1' },
+      { name: 'Extended Written Production (HL, DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Nuance, Idiom and Advanced Register (HL, DP Year 2)', code: 'Y2-HL.3' },
     ] },
   { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
     subtopics: [
-      { name: 'IA: Individual Oral Assessment (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Responding to a Visual Stimulus (DP Year 2)', code: 'Y2-IA.2' },
-      { name: 'IA: Discussion on a Theme (DP Year 2)', code: 'Y2-IA.3' },
+      { name: 'Individual Oral Assessment (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Responding to a Visual Stimulus (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Discussion on a Theme (DP Year 2)', code: 'Y2-IA.3' },
     ] },
   { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
     subtopics: [
@@ -6750,9 +6576,42 @@ const IBDP_SWAHILI_KISWAHILI = [
     ] },
 ]
 
-// IB DP Hindi — Year 1 and Year 2.
-// DP language acquisition: five prescribed themes across four skills.
-const IBDP_HINDI = [
+// IB DP English B (SL)
+// Standard Level: core only, no HL extension.
+const IBDP2_ENGLISH_B_SL = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Identities: Self and Relationships (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Experiences: Travel and Migration (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Human Ingenuity: Science and Innovation (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Social Organisation: Community and Work (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Sharing the Planet: Environment and Rights (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Receptive Skills: Listening Comprehension (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Receptive Skills: Reading Comprehension (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Productive Skills: Written Production (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Interactive Skills: Spoken Interaction (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Grammar and Register in Context (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Individual Oral Assessment (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Responding to a Visual Stimulus (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Discussion on a Theme (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP English B
+// Higher Level: core plus the HL extension inline.
+const IBDP2_ENGLISH_B = [
   { topic: 'Y1 · Core Topics', code: 'Y1-CT',
     subtopics: [
       { name: 'Identities: Self and Relationships (DP Year 1)', code: 'Y1-CT.1' },
@@ -6768,15 +6627,15 @@ const IBDP_HINDI = [
     ] },
   { topic: 'Y2 · HL Extension', code: 'Y2-HL',
     subtopics: [
-      { name: 'HL: Literary Works in the Target Language (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: Extended Written Production (DP Year 2)', code: 'Y2-HL.2' },
-      { name: 'HL: Nuance, Idiom and Advanced Register (DP Year 2)', code: 'Y2-HL.3' },
+      { name: 'Literary Works in the Target Language (HL, DP Year 2)', code: 'Y2-HL.1' },
+      { name: 'Extended Written Production (HL, DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Nuance, Idiom and Advanced Register (HL, DP Year 2)', code: 'Y2-HL.3' },
     ] },
   { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
     subtopics: [
-      { name: 'IA: Individual Oral Assessment (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Responding to a Visual Stimulus (DP Year 2)', code: 'Y2-IA.2' },
-      { name: 'IA: Discussion on a Theme (DP Year 2)', code: 'Y2-IA.3' },
+      { name: 'Individual Oral Assessment (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Responding to a Visual Stimulus (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Discussion on a Theme (DP Year 2)', code: 'Y2-IA.3' },
     ] },
   { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
     subtopics: [
@@ -6789,31 +6648,33 @@ const IBDP_HINDI = [
     ] },
 ]
 
-// IB DP Latin — Year 1 and Year 2.
-// Classical language: text-based, no spoken component.
-const IBDP_LATIN = [
+// IB DP French B (HL)
+// Higher Level: core plus the HL extension inline.
+const IBDP2_FRENCH_B_HL = [
   { topic: 'Y1 · Core Topics', code: 'Y1-CT',
     subtopics: [
-      { name: 'Accidence: Nouns, Adjectives and Pronouns (DP Year 1)', code: 'Y1-CT.1' },
-      { name: 'Accidence: The Verb System (DP Year 1)', code: 'Y1-CT.2' },
-      { name: 'Syntax and Constructions (DP Year 1)', code: 'Y1-CT.3' },
-      { name: 'Unseen Translation Technique (DP Year 1)', code: 'Y1-CT.4' },
-      { name: 'Reading Prose Literature (DP Year 1)', code: 'Y1-CT.5' },
-      { name: 'Reading Verse Literature (DP Year 1)', code: 'Y1-CT.6' },
-      { name: 'Metre and Scansion (DP Year 1)', code: 'Y1-CT.7' },
-      { name: 'Literary and Rhetorical Technique (DP Year 1)', code: 'Y1-CT.8' },
-      { name: 'Historical and Cultural Context (DP Year 1)', code: 'Y1-CT.9' },
-      { name: 'Research and Study Skills (DP Year 1)', code: 'Y1-CT.10' },
+      { name: 'Identities: Self and Relationships (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Experiences: Travel and Migration (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Human Ingenuity: Science and Innovation (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Social Organisation: Community and Work (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Sharing the Planet: Environment and Rights (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Receptive Skills: Listening Comprehension (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Receptive Skills: Reading Comprehension (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Productive Skills: Written Production (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Interactive Skills: Spoken Interaction (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Grammar and Register in Context (DP Year 1)', code: 'Y1-CT.10' },
     ] },
   { topic: 'Y2 · HL Extension', code: 'Y2-HL',
     subtopics: [
-      { name: 'HL: Extended Unseen Translation (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: In-Depth Literary Study (DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Literary Works in the Target Language (HL, DP Year 2)', code: 'Y2-HL.1' },
+      { name: 'Extended Written Production (HL, DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Nuance, Idiom and Advanced Register (HL, DP Year 2)', code: 'Y2-HL.3' },
     ] },
   { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
     subtopics: [
-      { name: 'IA: Research Dossier (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Selecting and Annotating Sources (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Individual Oral Assessment (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Responding to a Visual Stimulus (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Discussion on a Theme (DP Year 2)', code: 'Y2-IA.3' },
     ] },
   { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
     subtopics: [
@@ -6826,31 +6687,66 @@ const IBDP_LATIN = [
     ] },
 ]
 
-// IB DP Ancient Greek — Year 1 and Year 2.
-// Classical language: text-based, no spoken component.
-const IBDP_ANCIENT_GREEK = [
+// IB DP French B (SL)
+// Standard Level: core only, no HL extension.
+const IBDP2_FRENCH_B_SL = [
   { topic: 'Y1 · Core Topics', code: 'Y1-CT',
     subtopics: [
-      { name: 'Accidence: Nouns, Adjectives and Pronouns (DP Year 1)', code: 'Y1-CT.1' },
-      { name: 'Accidence: The Verb System (DP Year 1)', code: 'Y1-CT.2' },
-      { name: 'Syntax and Constructions (DP Year 1)', code: 'Y1-CT.3' },
-      { name: 'Unseen Translation Technique (DP Year 1)', code: 'Y1-CT.4' },
-      { name: 'Reading Prose Literature (DP Year 1)', code: 'Y1-CT.5' },
-      { name: 'Reading Verse Literature (DP Year 1)', code: 'Y1-CT.6' },
-      { name: 'Metre and Scansion (DP Year 1)', code: 'Y1-CT.7' },
-      { name: 'Literary and Rhetorical Technique (DP Year 1)', code: 'Y1-CT.8' },
-      { name: 'Historical and Cultural Context (DP Year 1)', code: 'Y1-CT.9' },
-      { name: 'Research and Study Skills (DP Year 1)', code: 'Y1-CT.10' },
+      { name: 'Identities: Self and Relationships (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Experiences: Travel and Migration (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Human Ingenuity: Science and Innovation (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Social Organisation: Community and Work (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Sharing the Planet: Environment and Rights (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Receptive Skills: Listening Comprehension (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Receptive Skills: Reading Comprehension (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Productive Skills: Written Production (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Interactive Skills: Spoken Interaction (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Grammar and Register in Context (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Individual Oral Assessment (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Responding to a Visual Stimulus (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Discussion on a Theme (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP French B
+// Higher Level: core plus the HL extension inline.
+const IBDP2_FRENCH_B = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Identities: Self and Relationships (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Experiences: Travel and Migration (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Human Ingenuity: Science and Innovation (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Social Organisation: Community and Work (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Sharing the Planet: Environment and Rights (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Receptive Skills: Listening Comprehension (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Receptive Skills: Reading Comprehension (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Productive Skills: Written Production (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Interactive Skills: Spoken Interaction (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Grammar and Register in Context (DP Year 1)', code: 'Y1-CT.10' },
     ] },
   { topic: 'Y2 · HL Extension', code: 'Y2-HL',
     subtopics: [
-      { name: 'HL: Extended Unseen Translation (DP Year 2)', code: 'Y2-HL.1' },
-      { name: 'HL: In-Depth Literary Study (DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Literary Works in the Target Language (HL, DP Year 2)', code: 'Y2-HL.1' },
+      { name: 'Extended Written Production (HL, DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Nuance, Idiom and Advanced Register (HL, DP Year 2)', code: 'Y2-HL.3' },
     ] },
   { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
     subtopics: [
-      { name: 'IA: Research Dossier (DP Year 2)', code: 'Y2-IA.1' },
-      { name: 'IA: Selecting and Annotating Sources (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Individual Oral Assessment (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Responding to a Visual Stimulus (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Discussion on a Theme (DP Year 2)', code: 'Y2-IA.3' },
     ] },
   { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
     subtopics: [
@@ -6863,10 +6759,517 @@ const IBDP_ANCIENT_GREEK = [
     ] },
 ]
 
-// IB DP Theory of Knowledge (TOK) — a CORE component, not a subject.
-// No papers, no HL, no subject content: assessed by exhibition, essay
-// or portfolio. Built to its own shape rather than the group-subject one.
-const IBDP_THEORY_OF_KNOWLEDGE_TOK = [
+// IB DP Spanish B (HL)
+// Higher Level: core plus the HL extension inline.
+const IBDP2_SPANISH_B_HL = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Identities: Self and Relationships (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Experiences: Travel and Migration (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Human Ingenuity: Science and Innovation (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Social Organisation: Community and Work (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Sharing the Planet: Environment and Rights (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Receptive Skills: Listening Comprehension (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Receptive Skills: Reading Comprehension (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Productive Skills: Written Production (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Interactive Skills: Spoken Interaction (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Grammar and Register in Context (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
+    subtopics: [
+      { name: 'Literary Works in the Target Language (HL, DP Year 2)', code: 'Y2-HL.1' },
+      { name: 'Extended Written Production (HL, DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Nuance, Idiom and Advanced Register (HL, DP Year 2)', code: 'Y2-HL.3' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Individual Oral Assessment (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Responding to a Visual Stimulus (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Discussion on a Theme (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP Spanish B (SL)
+// Standard Level: core only, no HL extension.
+const IBDP2_SPANISH_B_SL = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Identities: Self and Relationships (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Experiences: Travel and Migration (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Human Ingenuity: Science and Innovation (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Social Organisation: Community and Work (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Sharing the Planet: Environment and Rights (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Receptive Skills: Listening Comprehension (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Receptive Skills: Reading Comprehension (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Productive Skills: Written Production (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Interactive Skills: Spoken Interaction (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Grammar and Register in Context (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Individual Oral Assessment (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Responding to a Visual Stimulus (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Discussion on a Theme (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP Spanish B
+// Higher Level: core plus the HL extension inline.
+const IBDP2_SPANISH_B = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Identities: Self and Relationships (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Experiences: Travel and Migration (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Human Ingenuity: Science and Innovation (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Social Organisation: Community and Work (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Sharing the Planet: Environment and Rights (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Receptive Skills: Listening Comprehension (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Receptive Skills: Reading Comprehension (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Productive Skills: Written Production (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Interactive Skills: Spoken Interaction (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Grammar and Register in Context (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
+    subtopics: [
+      { name: 'Literary Works in the Target Language (HL, DP Year 2)', code: 'Y2-HL.1' },
+      { name: 'Extended Written Production (HL, DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Nuance, Idiom and Advanced Register (HL, DP Year 2)', code: 'Y2-HL.3' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Individual Oral Assessment (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Responding to a Visual Stimulus (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Discussion on a Theme (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP German B (HL)
+// Higher Level: core plus the HL extension inline.
+const IBDP2_GERMAN_B_HL = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Identities: Self and Relationships (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Experiences: Travel and Migration (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Human Ingenuity: Science and Innovation (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Social Organisation: Community and Work (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Sharing the Planet: Environment and Rights (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Receptive Skills: Listening Comprehension (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Receptive Skills: Reading Comprehension (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Productive Skills: Written Production (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Interactive Skills: Spoken Interaction (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Grammar and Register in Context (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
+    subtopics: [
+      { name: 'Literary Works in the Target Language (HL, DP Year 2)', code: 'Y2-HL.1' },
+      { name: 'Extended Written Production (HL, DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Nuance, Idiom and Advanced Register (HL, DP Year 2)', code: 'Y2-HL.3' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Individual Oral Assessment (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Responding to a Visual Stimulus (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Discussion on a Theme (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP German B (SL)
+// Standard Level: core only, no HL extension.
+const IBDP2_GERMAN_B_SL = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Identities: Self and Relationships (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Experiences: Travel and Migration (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Human Ingenuity: Science and Innovation (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Social Organisation: Community and Work (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Sharing the Planet: Environment and Rights (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Receptive Skills: Listening Comprehension (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Receptive Skills: Reading Comprehension (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Productive Skills: Written Production (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Interactive Skills: Spoken Interaction (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Grammar and Register in Context (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Individual Oral Assessment (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Responding to a Visual Stimulus (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Discussion on a Theme (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP German B
+// Higher Level: core plus the HL extension inline.
+const IBDP2_GERMAN_B = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Identities: Self and Relationships (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Experiences: Travel and Migration (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Human Ingenuity: Science and Innovation (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Social Organisation: Community and Work (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Sharing the Planet: Environment and Rights (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Receptive Skills: Listening Comprehension (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Receptive Skills: Reading Comprehension (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Productive Skills: Written Production (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Interactive Skills: Spoken Interaction (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Grammar and Register in Context (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
+    subtopics: [
+      { name: 'Literary Works in the Target Language (HL, DP Year 2)', code: 'Y2-HL.1' },
+      { name: 'Extended Written Production (HL, DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Nuance, Idiom and Advanced Register (HL, DP Year 2)', code: 'Y2-HL.3' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Individual Oral Assessment (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Responding to a Visual Stimulus (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Discussion on a Theme (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP Mandarin B (HL)
+// Higher Level: core plus the HL extension inline.
+const IBDP2_MANDARIN_B_HL = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Identities: Self and Relationships (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Experiences: Travel and Migration (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Human Ingenuity: Science and Innovation (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Social Organisation: Community and Work (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Sharing the Planet: Environment and Rights (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Receptive Skills: Listening Comprehension (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Receptive Skills: Reading Comprehension (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Productive Skills: Written Production (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Interactive Skills: Spoken Interaction (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Grammar and Register in Context (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
+    subtopics: [
+      { name: 'Literary Works in the Target Language (HL, DP Year 2)', code: 'Y2-HL.1' },
+      { name: 'Extended Written Production (HL, DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Nuance, Idiom and Advanced Register (HL, DP Year 2)', code: 'Y2-HL.3' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Individual Oral Assessment (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Responding to a Visual Stimulus (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Discussion on a Theme (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP Mandarin B (SL)
+// Standard Level: core only, no HL extension.
+const IBDP2_MANDARIN_B_SL = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Identities: Self and Relationships (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Experiences: Travel and Migration (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Human Ingenuity: Science and Innovation (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Social Organisation: Community and Work (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Sharing the Planet: Environment and Rights (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Receptive Skills: Listening Comprehension (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Receptive Skills: Reading Comprehension (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Productive Skills: Written Production (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Interactive Skills: Spoken Interaction (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Grammar and Register in Context (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Individual Oral Assessment (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Responding to a Visual Stimulus (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Discussion on a Theme (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP Mandarin B
+// Higher Level: core plus the HL extension inline.
+const IBDP2_MANDARIN_B = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Identities: Self and Relationships (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Experiences: Travel and Migration (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Human Ingenuity: Science and Innovation (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Social Organisation: Community and Work (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Sharing the Planet: Environment and Rights (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Receptive Skills: Listening Comprehension (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Receptive Skills: Reading Comprehension (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Productive Skills: Written Production (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Interactive Skills: Spoken Interaction (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Grammar and Register in Context (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
+    subtopics: [
+      { name: 'Literary Works in the Target Language (HL, DP Year 2)', code: 'Y2-HL.1' },
+      { name: 'Extended Written Production (HL, DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Nuance, Idiom and Advanced Register (HL, DP Year 2)', code: 'Y2-HL.3' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Individual Oral Assessment (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Responding to a Visual Stimulus (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Discussion on a Theme (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP Arabic B (HL)
+// Higher Level: core plus the HL extension inline.
+const IBDP2_ARABIC_B_HL = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Identities: Self and Relationships (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Experiences: Travel and Migration (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Human Ingenuity: Science and Innovation (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Social Organisation: Community and Work (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Sharing the Planet: Environment and Rights (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Receptive Skills: Listening Comprehension (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Receptive Skills: Reading Comprehension (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Productive Skills: Written Production (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Interactive Skills: Spoken Interaction (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Grammar and Register in Context (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
+    subtopics: [
+      { name: 'Literary Works in the Target Language (HL, DP Year 2)', code: 'Y2-HL.1' },
+      { name: 'Extended Written Production (HL, DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Nuance, Idiom and Advanced Register (HL, DP Year 2)', code: 'Y2-HL.3' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Individual Oral Assessment (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Responding to a Visual Stimulus (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Discussion on a Theme (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP Arabic B (SL)
+// Standard Level: core only, no HL extension.
+const IBDP2_ARABIC_B_SL = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Identities: Self and Relationships (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Experiences: Travel and Migration (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Human Ingenuity: Science and Innovation (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Social Organisation: Community and Work (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Sharing the Planet: Environment and Rights (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Receptive Skills: Listening Comprehension (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Receptive Skills: Reading Comprehension (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Productive Skills: Written Production (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Interactive Skills: Spoken Interaction (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Grammar and Register in Context (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Individual Oral Assessment (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Responding to a Visual Stimulus (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Discussion on a Theme (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP Arabic B
+// Higher Level: core plus the HL extension inline.
+const IBDP2_ARABIC_B = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Identities: Self and Relationships (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Experiences: Travel and Migration (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Human Ingenuity: Science and Innovation (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Social Organisation: Community and Work (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Sharing the Planet: Environment and Rights (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Receptive Skills: Listening Comprehension (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Receptive Skills: Reading Comprehension (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Productive Skills: Written Production (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Interactive Skills: Spoken Interaction (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Grammar and Register in Context (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
+    subtopics: [
+      { name: 'Literary Works in the Target Language (HL, DP Year 2)', code: 'Y2-HL.1' },
+      { name: 'Extended Written Production (HL, DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Nuance, Idiom and Advanced Register (HL, DP Year 2)', code: 'Y2-HL.3' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Individual Oral Assessment (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Responding to a Visual Stimulus (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Discussion on a Theme (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP French ab initio
+// Standard Level: core only, no HL extension.
+const IBDP2_FRENCH_AB_INITIO = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Identities: Personal Details and Daily Life (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Experiences: Holidays and Celebrations (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Human Ingenuity: Transport and Technology (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Social Organisation: School and Neighbourhood (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Sharing the Planet: Weather and Environment (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Building Core Vocabulary (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Essential Grammar Structures (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Simple Listening Comprehension (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Simple Reading Comprehension (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Short Written Production (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Individual Oral Assessment (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Responding to a Visual Stimulus (DP Year 2)', code: 'Y2-IA.2' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP Spanish ab initio
+// Standard Level: core only, no HL extension.
+const IBDP2_SPANISH_AB_INITIO = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Identities: Personal Details and Daily Life (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Experiences: Holidays and Celebrations (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Human Ingenuity: Transport and Technology (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Social Organisation: School and Neighbourhood (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Sharing the Planet: Weather and Environment (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Building Core Vocabulary (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Essential Grammar Structures (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Simple Listening Comprehension (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Simple Reading Comprehension (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Short Written Production (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Individual Oral Assessment (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Responding to a Visual Stimulus (DP Year 2)', code: 'Y2-IA.2' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP Theory of Knowledge — a CORE component, not a subject.
+// No papers, no HL/SL: assessed by exhibition, essay or portfolio.
+const IBDP2_THEORY_OF_KNOWLEDGE = [
   { topic: 'Y1 · Foundations', code: 'Y1-F',
     subtopics: [
       { name: 'Knowledge and the Knower (DP Year 1)', code: 'Y1-F.1' },
@@ -6894,9 +7297,8 @@ const IBDP_THEORY_OF_KNOWLEDGE_TOK = [
 ]
 
 // IB DP Extended Essay — a CORE component, not a subject.
-// No papers, no HL, no subject content: assessed by exhibition, essay
-// or portfolio. Built to its own shape rather than the group-subject one.
-const IBDP_EXTENDED_ESSAY = [
+// No papers, no HL/SL: assessed by exhibition, essay or portfolio.
+const IBDP2_EXTENDED_ESSAY = [
   { topic: 'Y1 · Foundations', code: 'Y1-F',
     subtopics: [
       { name: 'What the Extended Essay Requires (DP Year 1)', code: 'Y1-F.1' },
@@ -6922,9 +7324,8 @@ const IBDP_EXTENDED_ESSAY = [
 ]
 
 // IB DP Creativity, Activity, Service (CAS) — a CORE component, not a subject.
-// No papers, no HL, no subject content: assessed by exhibition, essay
-// or portfolio. Built to its own shape rather than the group-subject one.
-const IBDP_CREATIVITY_ACTIVITY_SERVICE_CAS = [
+// No papers, no HL/SL: assessed by exhibition, essay or portfolio.
+const IBDP2_CREATIVITY_ACTIVITY_SERVICE_CAS = [
   { topic: 'Y1 · Foundations', code: 'Y1-F',
     subtopics: [
       { name: 'Understanding the CAS Learning Outcomes (DP Year 1)', code: 'Y1-F.1' },
@@ -6949,103 +7350,451 @@ const IBDP_CREATIVITY_ACTIVITY_SERVICE_CAS = [
     ] },
 ]
 
+// IB DP English A: Literature
+// Higher Level: core plus the HL extension inline.
+const IBDP2_ENGLISH_A_LITERATURE = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Readers, Writers and Texts (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Time and Space (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Intertextuality: Connecting Texts (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Close Reading of Poetry (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Close Reading of Prose (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Studying Drama in Performance (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'The Learner Portfolio (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Global Issues in Literature (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Literary Technique and Effect (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Context: Author, Period and Culture (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
+    subtopics: [
+      { name: 'The HL Essay: Developing a Line of Inquiry (HL, DP Year 2)', code: 'Y2-HL.1' },
+      { name: 'Wider Reading and Comparison (HL, DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Sustained Critical Argument (HL, DP Year 2)', code: 'Y2-HL.3' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Individual Oral (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Selecting a Global Issue (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Preparing the Extract Commentary (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP English A: Language and Literature
+// Higher Level: core plus the HL extension inline.
+const IBDP2_ENGLISH_A_LANGUAGE_AND_LITERATURE = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Readers, Writers and Texts (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Time and Space (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Intertextuality: Connecting Texts (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Analysing Non-Literary Texts (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Language and Mass Communication (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Language, Power and Persuasion (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Media Representation (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'The Learner Portfolio (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Global Issues in Texts (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Context and Audience (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
+    subtopics: [
+      { name: 'The HL Essay: Developing a Line of Inquiry (HL, DP Year 2)', code: 'Y2-HL.1' },
+      { name: 'Extended Comparative Analysis (HL, DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Sustained Critical Argument (HL, DP Year 2)', code: 'Y2-HL.3' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Individual Oral (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Selecting a Global Issue (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Preparing the Extract Commentary (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP Environmental Systems and Societies
+// Standard Level: core only, no HL extension.
+const IBDP2_ENVIRONMENTAL_SYSTEMS_AND_SOCIETIES = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Foundations of Environmental Systems (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Systems, Models and Sustainability (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Ecosystems and Ecology (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Biodiversity and Conservation (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Water Systems and Water Pollution (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Soil Systems and Terrestrial Food Production (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Atmospheric Systems and Air Pollution (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Climate Change and Energy Production (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Human Populations and Resource Use (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Environmental Value Systems (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Fieldwork Investigation Design (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Data Collection and Analysis (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Evaluating Environmental Impact (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP Environmental Systems & Societies
+// Standard Level: core only, no HL extension.
+const IBDP2_ENVIRONMENTAL_SYSTEMS_SOCIETIES = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Foundations of Environmental Systems (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Systems, Models and Sustainability (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Ecosystems and Ecology (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Biodiversity and Conservation (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Water Systems and Water Pollution (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Soil Systems and Terrestrial Food Production (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Atmospheric Systems and Air Pollution (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Climate Change and Energy Production (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Human Populations and Resource Use (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Environmental Value Systems (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Fieldwork Investigation Design (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Data Collection and Analysis (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Evaluating Environmental Impact (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP English Language & Literature (HL)
+// Higher Level: core plus the HL extension inline.
+const IBDP2_ENGLISH_LANGUAGE_LITERATURE_HL = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Readers, Writers and Texts (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Time and Space (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Intertextuality: Connecting Texts (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Analysing Non-Literary Texts (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Language and Mass Communication (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Language, Power and Persuasion (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Media Representation (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'The Learner Portfolio (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Global Issues in Texts (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Context and Audience (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
+    subtopics: [
+      { name: 'The HL Essay: Developing a Line of Inquiry (HL, DP Year 2)', code: 'Y2-HL.1' },
+      { name: 'Extended Comparative Analysis (HL, DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Sustained Critical Argument (HL, DP Year 2)', code: 'Y2-HL.3' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Individual Oral (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Selecting a Global Issue (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Preparing the Extract Commentary (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP English Language & Literature (SL)
+// Standard Level: core only, no HL extension.
+const IBDP2_ENGLISH_LANGUAGE_LITERATURE_SL = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Readers, Writers and Texts (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Time and Space (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Intertextuality: Connecting Texts (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Analysing Non-Literary Texts (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Language and Mass Communication (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Language, Power and Persuasion (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Media Representation (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'The Learner Portfolio (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Global Issues in Texts (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Context and Audience (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Individual Oral (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Selecting a Global Issue (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Preparing the Extract Commentary (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP Mathematics: Analysis and Approaches
+// Higher Level: core plus the HL extension inline.
+const IBDP2_MATHEMATICS_ANALYSIS_AND_APPROACHES = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Number and Algebra: Sequences and Series (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Number and Algebra: Exponents and Logarithms (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Functions: Types and Transformations (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Functions: Quadratics and Rational Functions (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Geometry and Trigonometry: Triangles and Circles (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Geometry and Trigonometry: Identities and Equations (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Statistics: Descriptive and Bivariate (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Probability: Distributions (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Calculus: Differentiation (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Calculus: Integration (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
+    subtopics: [
+      { name: 'Proof by Induction and Contradiction (HL, DP Year 2)', code: 'Y2-HL.1' },
+      { name: 'Complex Numbers and De Moivre (HL, DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Vectors, Lines and Planes (HL, DP Year 2)', code: 'Y2-HL.3' },
+      { name: 'Advanced Calculus and Differential Equations (HL, DP Year 2)', code: 'Y2-HL.4' },
+      { name: 'Maclaurin Series and Limits (HL, DP Year 2)', code: 'Y2-HL.5' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Choosing a Mathematical Exploration (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Developing Mathematical Reasoning (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Personal Engagement and Reflection (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
+// IB DP Mathematics: Applications and Interpretation
+// Higher Level: core plus the HL extension inline.
+const IBDP2_MATHEMATICS_APPLICATIONS_AND_INTERPRETATION = [
+  { topic: 'Y1 · Core Topics', code: 'Y1-CT',
+    subtopics: [
+      { name: 'Number and Algebra: Approximation and Systems (DP Year 1)', code: 'Y1-CT.1' },
+      { name: 'Functions: Modelling with Functions (DP Year 1)', code: 'Y1-CT.2' },
+      { name: 'Functions: Exponential and Logarithmic Models (DP Year 1)', code: 'Y1-CT.3' },
+      { name: 'Geometry and Trigonometry: Applications (DP Year 1)', code: 'Y1-CT.4' },
+      { name: 'Geometry: Voronoi Diagrams and Networks (DP Year 1)', code: 'Y1-CT.5' },
+      { name: 'Statistics: Sampling and Data Analysis (DP Year 1)', code: 'Y1-CT.6' },
+      { name: 'Statistics: Correlation and Regression (DP Year 1)', code: 'Y1-CT.7' },
+      { name: 'Probability: Distributions and Testing (DP Year 1)', code: 'Y1-CT.8' },
+      { name: 'Calculus: Rates of Change (DP Year 1)', code: 'Y1-CT.9' },
+      { name: 'Calculus: Numerical Integration (DP Year 1)', code: 'Y1-CT.10' },
+    ] },
+  { topic: 'Y2 · HL Extension', code: 'Y2-HL',
+    subtopics: [
+      { name: 'Matrices and Transformations (HL, DP Year 2)', code: 'Y2-HL.1' },
+      { name: 'Graph Theory and Networks (HL, DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Advanced Statistical Testing (HL, DP Year 2)', code: 'Y2-HL.3' },
+      { name: 'Differential Equations and Modelling (HL, DP Year 2)', code: 'Y2-HL.4' },
+      { name: 'Complex Numbers in Applications (HL, DP Year 2)', code: 'Y2-HL.5' },
+    ] },
+  { topic: 'Y2 · Internal Assessment', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Choosing a Real-World Exploration (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Applying Technology and Modelling (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Personal Engagement and Reflection (DP Year 2)', code: 'Y2-IA.3' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
 // ═══════════════════════════════════════════════════════════
-// IB DIPLOMA LIBRARY — DP Year 1 and Year 2.
-// Ordered specific-before-general: the two IB Mathematics courses are
-// tested before plain /math/, and "English Literature" before any bare
-// /english/, or each would be swallowed by the broader pattern.
+// IB DIPLOMA LIBRARY — matched to exact record names.
+//
+// Every pattern is anchored with ^...$ rather than a loose keyword.
+// The previous library used /\bbiology\b/, which matched "Biology",
+// "Biology (HL)" and "Biology (SL)" alike — so whichever record was
+// pressed first took the spine and the others were unreachable.
+//
+// "Computer Science" (bare) is absent on purpose: that record holds a
+// 108-lesson production spine with 2,489 questions filed against it.
 // ═══════════════════════════════════════════════════════════
 export const IBDP_LIBRARY = [
-  { match: /analysis\s*(?:&|and)\s*approaches/i, const_: IBDP_IB_MATHEMATICS_ANALYSIS_APPROACHES,
-    source: 'IB DP IB Mathematics: Analysis & Approaches \u2014 23-lesson scheme (Years 1-2)' },
-  { match: /applications?\s*(?:&|and)\s*interpretation/i, const_: IBDP_IB_MATHEMATICS_APPLICATIONS_INTERPRETATION,
-    source: 'IB DP IB Mathematics: Applications & Interpretation \u2014 23-lesson scheme (Years 1-2)' },
-  { match: /theory\s+of\s+knowledge|\btok\b/i, const_: IBDP_THEORY_OF_KNOWLEDGE_TOK,
-    source: 'IB DP Theory of Knowledge (TOK) \u2014 18-lesson scheme (Years 1-2)' },
-  { match: /extended\s+essay|\bee\b/i, const_: IBDP_EXTENDED_ESSAY,
-    source: 'IB DP Extended Essay \u2014 16-lesson scheme (Years 1-2)' },
-  { match: /creativity.*service|\bcas\b/i, const_: IBDP_CREATIVITY_ACTIVITY_SERVICE_CAS,
-    source: 'IB DP Creativity, Activity, Service (CAS) \u2014 16-lesson scheme (Years 1-2)' },
-  { match: /second\s+language|\besl\b/i, const_: IBDP_ENGLISH_AS_A_SECOND_LANGUAGE_ESL,
-    source: 'IB DP English as a Second Language (ESL) \u2014 20-lesson scheme (Years 1-2)' },
-  { match: /english\s+literature/i, const_: IBDP_ENGLISH_LITERATURE,
-    source: 'IB DP English Literature \u2014 22-lesson scheme (Years 1-2)' },
-  { match: /english\s+language/i, const_: IBDP_ENGLISH_LANGUAGE,
-    source: 'IB DP English Language \u2014 22-lesson scheme (Years 1-2)' },
-  { match: /world\s+history/i, const_: IBDP_WORLD_HISTORY,
-    source: 'IB DP World History \u2014 22-lesson scheme (Years 1-2)' },
-  { match: /environmental/i, const_: IBDP_ENVIRONMENTAL_SCIENCE,
-    source: 'IB DP Environmental Science \u2014 22-lesson scheme (Years 1-2)' },
-  { match: /design\s*(?:&|and)\s*technology/i, const_: IBDP_DESIGN_TECHNOLOGY,
-    source: 'IB DP Design & Technology \u2014 22-lesson scheme (Years 1-2)' },
-  { match: /computer\s*science|\bcomputing\b/i, const_: IBDP_COMPUTER_SCIENCE,
-    source: 'IB DP Computer Science \u2014 22-lesson scheme (Years 1-2)' },
-  { match: /theatre\s+studies/i, const_: IBDP_THEATRE_STUDIES,
-    source: 'IB DP Theatre Studies \u2014 21-lesson scheme (Years 1-2)' },
-  { match: /film\s+studies/i, const_: IBDP_FILM_STUDIES,
-    source: 'IB DP Film Studies \u2014 21-lesson scheme (Years 1-2)' },
-  { match: /visual\s+arts/i, const_: IBDP_VISUAL_ARTS,
-    source: 'IB DP Visual Arts \u2014 21-lesson scheme (Years 1-2)' },
-  { match: /art\s*(?:&|and)\s*design/i, const_: IBDP_ART_DESIGN,
-    source: 'IB DP Art & Design \u2014 20-lesson scheme (Years 1-2)' },
-  { match: /physical\s+education/i, const_: IBDP_PHYSICAL_EDUCATION,
-    source: 'IB DP Physical Education \u2014 20-lesson scheme (Years 1-2)' },
-  { match: /religious\s+studies/i, const_: IBDP_RELIGIOUS_STUDIES,
-    source: 'IB DP Religious Studies \u2014 20-lesson scheme (Years 1-2)' },
-  { match: /global\s+perspective/i, const_: IBDP_GLOBAL_PERSPECTIVES,
-    source: 'IB DP Global Perspectives \u2014 20-lesson scheme (Years 1-2)' },
-  { match: /ancient\s+greek/i, const_: IBDP_ANCIENT_GREEK,
-    source: 'IB DP Ancient Greek \u2014 20-lesson scheme (Years 1-2)' },
-  { match: /swahili|kiswahili/i, const_: IBDP_SWAHILI_KISWAHILI,
-    source: 'IB DP Swahili (Kiswahili) \u2014 22-lesson scheme (Years 1-2)' },
-  { match: /mandarin|chinese/i, const_: IBDP_MANDARIN_CHINESE,
-    source: 'IB DP Mandarin Chinese \u2014 22-lesson scheme (Years 1-2)' },
-  { match: /\bhistory\b/i, const_: IBDP_HISTORY,
-    source: 'IB DP History \u2014 22-lesson scheme (Years 1-2)' },
-  { match: /\bgeography\b/i, const_: IBDP_GEOGRAPHY,
-    source: 'IB DP Geography \u2014 22-lesson scheme (Years 1-2)' },
-  { match: /\beconomics\b/i, const_: IBDP_ECONOMICS,
-    source: 'IB DP Economics \u2014 22-lesson scheme (Years 1-2)' },
-  { match: /\bbusiness\b/i, const_: IBDP_BUSINESS_STUDIES,
-    source: 'IB DP Business Studies \u2014 22-lesson scheme (Years 1-2)' },
-  { match: /\bpsychology\b/i, const_: IBDP_PSYCHOLOGY,
-    source: 'IB DP Psychology \u2014 22-lesson scheme (Years 1-2)' },
-  { match: /\bsociology\b/i, const_: IBDP_SOCIOLOGY,
-    source: 'IB DP Sociology \u2014 20-lesson scheme (Years 1-2)' },
-  { match: /\bbiology\b/i, const_: IBDP_BIOLOGY,
-    source: 'IB DP Biology \u2014 23-lesson scheme (Years 1-2)' },
-  { match: /\bchemistry\b/i, const_: IBDP_CHEMISTRY,
-    source: 'IB DP Chemistry \u2014 23-lesson scheme (Years 1-2)' },
-  { match: /\bphysics\b/i, const_: IBDP_PHYSICS,
-    source: 'IB DP Physics \u2014 23-lesson scheme (Years 1-2)' },
-  { match: /\bmath/i, const_: IBDP_MATHEMATICS,
-    source: 'IB DP Mathematics \u2014 21-lesson scheme (Years 1-2)' },
-  { match: /\bmusic\b/i, const_: IBDP_MUSIC,
-    source: 'IB DP Music \u2014 21-lesson scheme (Years 1-2)' },
-  { match: /\bdrama\b/i, const_: IBDP_DRAMA,
-    source: 'IB DP Drama \u2014 21-lesson scheme (Years 1-2)' },
-  { match: /\bfrench\b/i, const_: IBDP_FRENCH,
-    source: 'IB DP French \u2014 22-lesson scheme (Years 1-2)' },
-  { match: /\bspanish\b/i, const_: IBDP_SPANISH,
-    source: 'IB DP Spanish \u2014 22-lesson scheme (Years 1-2)' },
-  { match: /\bgerman\b/i, const_: IBDP_GERMAN,
-    source: 'IB DP German \u2014 22-lesson scheme (Years 1-2)' },
-  { match: /\bitalian\b/i, const_: IBDP_ITALIAN,
-    source: 'IB DP Italian \u2014 22-lesson scheme (Years 1-2)' },
-  { match: /\bportuguese\b/i, const_: IBDP_PORTUGUESE,
-    source: 'IB DP Portuguese \u2014 22-lesson scheme (Years 1-2)' },
-  { match: /\bjapanese\b/i, const_: IBDP_JAPANESE,
-    source: 'IB DP Japanese \u2014 22-lesson scheme (Years 1-2)' },
-  { match: /\bkorean\b/i, const_: IBDP_KOREAN,
-    source: 'IB DP Korean \u2014 22-lesson scheme (Years 1-2)' },
-  { match: /\barabic\b/i, const_: IBDP_ARABIC,
-    source: 'IB DP Arabic \u2014 22-lesson scheme (Years 1-2)' },
-  { match: /\brussian\b/i, const_: IBDP_RUSSIAN,
-    source: 'IB DP Russian \u2014 22-lesson scheme (Years 1-2)' },
-  { match: /\bhindi\b/i, const_: IBDP_HINDI,
-    source: 'IB DP Hindi \u2014 22-lesson scheme (Years 1-2)' },
-  { match: /\blatin\b/i, const_: IBDP_LATIN,
-    source: 'IB DP Latin \u2014 20-lesson scheme (Years 1-2)' },
+  // The bare "Computer Science" record carries a 108-lesson production
+  // spine with 2,489 questions filed against it. Listed FIRST so it wins
+  // over any generated entry.
+  { match: /^Computer Science$/i, const_: IBDP_COMPUTER_SCIENCE,
+    source: 'IB DP Computer Science \u2014 108-lesson scheme (production)' },
+  { match: /^Biology \(HL\)$/i, const_: IBDP2_BIOLOGY_HL,
+    source: 'IB DP Biology (HL) \u2014 24-lesson scheme (HL)' },
+  { match: /^Biology \(SL\)$/i, const_: IBDP2_BIOLOGY_SL,
+    source: 'IB DP Biology (SL) \u2014 19-lesson scheme (SL)' },
+  { match: /^Chemistry \(HL\)$/i, const_: IBDP2_CHEMISTRY_HL,
+    source: 'IB DP Chemistry (HL) \u2014 24-lesson scheme (HL)' },
+  { match: /^Chemistry \(SL\)$/i, const_: IBDP2_CHEMISTRY_SL,
+    source: 'IB DP Chemistry (SL) \u2014 19-lesson scheme (SL)' },
+  { match: /^Physics \(HL\)$/i, const_: IBDP2_PHYSICS_HL,
+    source: 'IB DP Physics (HL) \u2014 24-lesson scheme (HL)' },
+  { match: /^Physics \(SL\)$/i, const_: IBDP2_PHYSICS_SL,
+    source: 'IB DP Physics (SL) \u2014 19-lesson scheme (SL)' },
+  { match: /^Computer Science \(HL\)$/i, const_: IBDP2_COMPUTER_SCIENCE_HL,
+    source: 'IB DP Computer Science (HL) \u2014 23-lesson scheme (HL)' },
+  { match: /^Computer Science \(SL\)$/i, const_: IBDP2_COMPUTER_SCIENCE_SL,
+    source: 'IB DP Computer Science (SL) \u2014 19-lesson scheme (SL)' },
+  { match: /^Economics \(HL\)$/i, const_: IBDP2_ECONOMICS_HL,
+    source: 'IB DP Economics (HL) \u2014 23-lesson scheme (HL)' },
+  { match: /^Economics \(SL\)$/i, const_: IBDP2_ECONOMICS_SL,
+    source: 'IB DP Economics (SL) \u2014 19-lesson scheme (SL)' },
+  { match: /^Business Management \(HL\)$/i, const_: IBDP2_BUSINESS_MANAGEMENT_HL,
+    source: 'IB DP Business Management (HL) \u2014 23-lesson scheme (HL)' },
+  { match: /^Business Management \(SL\)$/i, const_: IBDP2_BUSINESS_MANAGEMENT_SL,
+    source: 'IB DP Business Management (SL) \u2014 19-lesson scheme (SL)' },
+  { match: /^Psychology \(HL\)$/i, const_: IBDP2_PSYCHOLOGY_HL,
+    source: 'IB DP Psychology (HL) \u2014 23-lesson scheme (HL)' },
+  { match: /^Psychology \(SL\)$/i, const_: IBDP2_PSYCHOLOGY_SL,
+    source: 'IB DP Psychology (SL) \u2014 19-lesson scheme (SL)' },
+  { match: /^Geography \(HL\)$/i, const_: IBDP2_GEOGRAPHY_HL,
+    source: 'IB DP Geography (HL) \u2014 23-lesson scheme (HL)' },
+  { match: /^Geography \(SL\)$/i, const_: IBDP2_GEOGRAPHY_SL,
+    source: 'IB DP Geography (SL) \u2014 19-lesson scheme (SL)' },
+  { match: /^History \(HL\)$/i, const_: IBDP2_HISTORY_HL,
+    source: 'IB DP History (HL) \u2014 23-lesson scheme (HL)' },
+  { match: /^History \(SL\)$/i, const_: IBDP2_HISTORY_SL,
+    source: 'IB DP History (SL) \u2014 19-lesson scheme (SL)' },
+  { match: /^Music \(HL\)$/i, const_: IBDP2_MUSIC_HL,
+    source: 'IB DP Music (HL) \u2014 22-lesson scheme (HL)' },
+  { match: /^Music \(SL\)$/i, const_: IBDP2_MUSIC_SL,
+    source: 'IB DP Music (SL) \u2014 19-lesson scheme (SL)' },
+  { match: /^Theatre \(HL\)$/i, const_: IBDP2_THEATRE_HL,
+    source: 'IB DP Theatre (HL) \u2014 22-lesson scheme (HL)' },
+  { match: /^Theatre \(SL\)$/i, const_: IBDP2_THEATRE_SL,
+    source: 'IB DP Theatre (SL) \u2014 19-lesson scheme (SL)' },
+  { match: /^Visual Arts \(HL\)$/i, const_: IBDP2_VISUAL_ARTS_HL,
+    source: 'IB DP Visual Arts (HL) \u2014 22-lesson scheme (HL)' },
+  { match: /^Visual Arts \(SL\)$/i, const_: IBDP2_VISUAL_ARTS_SL,
+    source: 'IB DP Visual Arts (SL) \u2014 19-lesson scheme (SL)' },
+  { match: /^Mathematics: Analysis & Approaches \(HL\)$/i, const_: IBDP2_MATHEMATICS_ANALYSIS_APPROACHES_HL,
+    source: 'IB DP Mathematics: Analysis & Approaches (HL) \u2014 24-lesson scheme (HL)' },
+  { match: /^Mathematics: Analysis & Approaches \(SL\)$/i, const_: IBDP2_MATHEMATICS_ANALYSIS_APPROACHES_SL,
+    source: 'IB DP Mathematics: Analysis & Approaches (SL) \u2014 19-lesson scheme (SL)' },
+  { match: /^Mathematics: Applications & Interpretation \(HL\)$/i, const_: IBDP2_MATHEMATICS_APPLICATIONS_INTERPRETATION_HL,
+    source: 'IB DP Mathematics: Applications & Interpretation (HL) \u2014 24-lesson scheme (HL)' },
+  { match: /^Mathematics: Applications & Interpretation \(SL\)$/i, const_: IBDP2_MATHEMATICS_APPLICATIONS_INTERPRETATION_SL,
+    source: 'IB DP Mathematics: Applications & Interpretation (SL) \u2014 19-lesson scheme (SL)' },
+  { match: /^English A: Literature \(HL\)$/i, const_: IBDP2_ENGLISH_A_LITERATURE_HL,
+    source: 'IB DP English A: Literature (HL) \u2014 22-lesson scheme (HL)' },
+  { match: /^English A: Literature \(SL\)$/i, const_: IBDP2_ENGLISH_A_LITERATURE_SL,
+    source: 'IB DP English A: Literature (SL) \u2014 19-lesson scheme (SL)' },
+  { match: /^English A: Language and Literature \(HL\)$/i, const_: IBDP2_ENGLISH_A_LANGUAGE_AND_LITERATURE_HL,
+    source: 'IB DP English A: Language and Literature (HL) \u2014 22-lesson scheme (HL)' },
+  { match: /^English A: Language and Literature \(SL\)$/i, const_: IBDP2_ENGLISH_A_LANGUAGE_AND_LITERATURE_SL,
+    source: 'IB DP English A: Language and Literature (SL) \u2014 19-lesson scheme (SL)' },
+  { match: /^Environmental Systems & Societies \(HL\)$/i, const_: IBDP2_ENVIRONMENTAL_SYSTEMS_SOCIETIES_HL,
+    source: 'IB DP Environmental Systems & Societies (HL) \u2014 22-lesson scheme (HL)' },
+  { match: /^Environmental Systems & Societies \(SL\)$/i, const_: IBDP2_ENVIRONMENTAL_SYSTEMS_SOCIETIES_SL,
+    source: 'IB DP Environmental Systems & Societies (SL) \u2014 19-lesson scheme (SL)' },
+  { match: /^English B \(HL\)$/i, const_: IBDP2_ENGLISH_B_HL,
+    source: 'IB DP English B (HL) \u2014 22-lesson scheme (HL)' },
+  { match: /^English B \(SL\)$/i, const_: IBDP2_ENGLISH_B_SL,
+    source: 'IB DP English B (SL) \u2014 19-lesson scheme (SL)' },
+  { match: /^English B$/i, const_: IBDP2_ENGLISH_B,
+    source: 'IB DP English B \u2014 22-lesson scheme (HL)' },
+  { match: /^French B \(HL\)$/i, const_: IBDP2_FRENCH_B_HL,
+    source: 'IB DP French B (HL) \u2014 22-lesson scheme (HL)' },
+  { match: /^French B \(SL\)$/i, const_: IBDP2_FRENCH_B_SL,
+    source: 'IB DP French B (SL) \u2014 19-lesson scheme (SL)' },
+  { match: /^French B$/i, const_: IBDP2_FRENCH_B,
+    source: 'IB DP French B \u2014 22-lesson scheme (HL)' },
+  { match: /^Spanish B \(HL\)$/i, const_: IBDP2_SPANISH_B_HL,
+    source: 'IB DP Spanish B (HL) \u2014 22-lesson scheme (HL)' },
+  { match: /^Spanish B \(SL\)$/i, const_: IBDP2_SPANISH_B_SL,
+    source: 'IB DP Spanish B (SL) \u2014 19-lesson scheme (SL)' },
+  { match: /^Spanish B$/i, const_: IBDP2_SPANISH_B,
+    source: 'IB DP Spanish B \u2014 22-lesson scheme (HL)' },
+  { match: /^German B \(HL\)$/i, const_: IBDP2_GERMAN_B_HL,
+    source: 'IB DP German B (HL) \u2014 22-lesson scheme (HL)' },
+  { match: /^German B \(SL\)$/i, const_: IBDP2_GERMAN_B_SL,
+    source: 'IB DP German B (SL) \u2014 19-lesson scheme (SL)' },
+  { match: /^German B$/i, const_: IBDP2_GERMAN_B,
+    source: 'IB DP German B \u2014 22-lesson scheme (HL)' },
+  { match: /^Mandarin B \(HL\)$/i, const_: IBDP2_MANDARIN_B_HL,
+    source: 'IB DP Mandarin B (HL) \u2014 22-lesson scheme (HL)' },
+  { match: /^Mandarin B \(SL\)$/i, const_: IBDP2_MANDARIN_B_SL,
+    source: 'IB DP Mandarin B (SL) \u2014 19-lesson scheme (SL)' },
+  { match: /^Mandarin B$/i, const_: IBDP2_MANDARIN_B,
+    source: 'IB DP Mandarin B \u2014 22-lesson scheme (HL)' },
+  { match: /^Arabic B \(HL\)$/i, const_: IBDP2_ARABIC_B_HL,
+    source: 'IB DP Arabic B (HL) \u2014 22-lesson scheme (HL)' },
+  { match: /^Arabic B \(SL\)$/i, const_: IBDP2_ARABIC_B_SL,
+    source: 'IB DP Arabic B (SL) \u2014 19-lesson scheme (SL)' },
+  { match: /^Arabic B$/i, const_: IBDP2_ARABIC_B,
+    source: 'IB DP Arabic B \u2014 22-lesson scheme (HL)' },
+  { match: /^French ab initio$/i, const_: IBDP2_FRENCH_AB_INITIO,
+    source: 'IB DP French ab initio \u2014 18-lesson scheme (SL)' },
+  { match: /^Spanish ab initio$/i, const_: IBDP2_SPANISH_AB_INITIO,
+    source: 'IB DP Spanish ab initio \u2014 18-lesson scheme (SL)' },
+  { match: /^Theory of Knowledge$/i, const_: IBDP2_THEORY_OF_KNOWLEDGE,
+    source: 'IB DP Theory of Knowledge \u2014 18-lesson scheme' },
+  { match: /^Extended Essay$/i, const_: IBDP2_EXTENDED_ESSAY,
+    source: 'IB DP Extended Essay \u2014 16-lesson scheme' },
+  { match: /^Creativity, Activity, Service \(CAS\)$/i, const_: IBDP2_CREATIVITY_ACTIVITY_SERVICE_CAS,
+    source: 'IB DP Creativity, Activity, Service (CAS) \u2014 16-lesson scheme' },
+  { match: /^English A: Literature$/i, const_: IBDP2_ENGLISH_A_LITERATURE,
+    source: 'IB DP English A: Literature \u2014 22-lesson scheme (HL)' },
+  { match: /^English A: Language and Literature$/i, const_: IBDP2_ENGLISH_A_LANGUAGE_AND_LITERATURE,
+    source: 'IB DP English A: Language and Literature \u2014 22-lesson scheme (HL)' },
+  { match: /^Environmental Systems and Societies$/i, const_: IBDP2_ENVIRONMENTAL_SYSTEMS_AND_SOCIETIES,
+    source: 'IB DP Environmental Systems and Societies \u2014 19-lesson scheme (SL)' },
+  { match: /^Environmental Systems & Societies$/i, const_: IBDP2_ENVIRONMENTAL_SYSTEMS_SOCIETIES,
+    source: 'IB DP Environmental Systems & Societies \u2014 19-lesson scheme (SL)' },
+  { match: /^English Language & Literature \(HL\)$/i, const_: IBDP2_ENGLISH_LANGUAGE_LITERATURE_HL,
+    source: 'IB DP English Language & Literature (HL) \u2014 22-lesson scheme (HL)' },
+  { match: /^English Language & Literature \(SL\)$/i, const_: IBDP2_ENGLISH_LANGUAGE_LITERATURE_SL,
+    source: 'IB DP English Language & Literature (SL) \u2014 19-lesson scheme (SL)' },
+  { match: /^Mathematics: Analysis and Approaches$/i, const_: IBDP2_MATHEMATICS_ANALYSIS_AND_APPROACHES,
+    source: 'IB DP Mathematics: Analysis and Approaches \u2014 24-lesson scheme (HL)' },
+  { match: /^Mathematics: Applications and Interpretation$/i, const_: IBDP2_MATHEMATICS_APPLICATIONS_AND_INTERPRETATION,
+    source: 'IB DP Mathematics: Applications and Interpretation \u2014 24-lesson scheme (HL)' },
 ]
 
 // Kenya CBE Physics — exported from the live database.
