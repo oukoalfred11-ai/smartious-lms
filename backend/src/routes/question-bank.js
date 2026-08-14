@@ -722,6 +722,9 @@ router.post('/bulk', auth, requireRole('admin','ops_manager','dos','teacher'), a
           // They are now accepted but held inactive, so they can be
           // browsed and assigned by a teacher yet never reach a student
           // through auto-homework until a mark scheme is written.
+          // Note: draftMarkScheme deliberately does NOT count here. A
+          // suggested scheme is not a verified one, and a question must
+          // stay flagged and inactive until a teacher approves it.
           const hasPoints = Array.isArray(ms.points) && ms.points.length > 0
           const hasAccept = Array.isArray(ms.acceptableAnswers) && ms.acceptableAnswers.length > 0
           if (!ms.modelAnswer && !hasPoints && !hasAccept) {
@@ -782,6 +785,31 @@ router.post('/bulk', auth, requireRole('admin','ops_manager','dos','teacher'), a
           igcseEquivalent: q.igcseEquivalent || '',
           figures:         Array.isArray(q.figures) ? q.figures : [],
           needsMarkScheme: missingScheme,
+          // A SUGGESTED scheme, kept separate from the verified one.
+          //
+          // Bulk imports of past-paper banks can carry a machine-written
+          // scheme. Writing it into markScheme would mark it verified and
+          // publish the question, so a student could be auto-marked
+          // against an answer no teacher has read. Written into
+          // draftMarkScheme instead, the question stays flagged and
+          // inactive, but a teacher opening the scheme queue finds a
+          // starting point rather than a blank box.
+          //
+          // scheme-queue already counts these via draftMarkScheme.modelAnswer,
+          // and the approve route promotes a draft once a teacher signs it off.
+          draftMarkScheme: q.draftMarkScheme
+            ? {
+                modelAnswer:       q.draftMarkScheme.modelAnswer || '',
+                points:            Array.isArray(q.draftMarkScheme.points) ? q.draftMarkScheme.points : [],
+                acceptableAnswers: (Array.isArray(q.draftMarkScheme.acceptableAnswers) ? q.draftMarkScheme.acceptableAnswers : []).map(a => String(a).toLowerCase().trim()),
+                commonErrors:      Array.isArray(q.draftMarkScheme.commonErrors) ? q.draftMarkScheme.commonErrors : [],
+                generatedAt:       new Date(),
+                model:             q.draftMarkScheme.model || 'imported',
+                confidence:        q.draftMarkScheme.confidence || 'low',
+                needsFigure:       !!q.imageNeeded,
+                approved:          false,
+              }
+            : undefined,
           artwork:         q.artwork && q.artwork.required
                              ? { required: true, status: 'pending',
                                  kind: q.artwork.kind || 'diagram',
