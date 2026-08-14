@@ -637,6 +637,59 @@ router.post('/:id/approve-scheme', auth, requireRole('admin','dos','teacher'), a
 })
 
 // ── GET /api/questions/scheme-queue ────────────────────────
+/**
+ * POST /api/questions/activate-scheme-pending
+ *
+ * Releases questions that were held inactive purely because they had no
+ * mark scheme. Imports before this change hid them, which made a
+ * past-paper bank invisible to the teachers meant to work through it.
+ *
+ * Deliberately does NOT release questions waiting on artwork: a question
+ * reading "study the diagram below" cannot be answered without the
+ * diagram, so those stay inactive until the artwork queue supplies it.
+ *
+ * Dry run by default.
+ */
+router.post('/activate-scheme-pending', auth, requireRole('admin', 'ops_manager', 'dos'), async (req, res) => {
+  try {
+    const { confirm = false, subject, curriculum } = req.body || {};
+    const filter = {
+      isActive: false,
+      $and: [
+        { $or: [{ imageNeeded: { $ne: true } }, { imageNeeded: { $exists: false } }] },
+        { $or: [{ 'artwork.required': { $ne: true } }, { artwork: { $exists: false } }] },
+      ],
+    };
+    if (subject) filter.subject = subject;
+    if (curriculum) filter.curriculum = curriculum;
+
+    const count = await Question.countDocuments(filter);
+    const stillWaitingOnArt = await Question.countDocuments({
+      isActive: false,
+      $or: [{ imageNeeded: true }, { 'artwork.required': true }],
+    });
+
+    if (!confirm) {
+      const sample = await Question.find(filter)
+        .select('subject curriculum questionText needsMarkScheme').limit(5).lean();
+      return ok(res, {
+        wouldActivate: count, stillWaitingOnArtwork: stillWaitingOnArt,
+        sample: sample.map(q => ({
+          subject: q.subject, curriculum: q.curriculum,
+          text: String(q.questionText || '').slice(0, 60),
+        })),
+      }, `DRY RUN — ${count} question(s) would be activated. `
+       + `${stillWaitingOnArt} stay inactive awaiting artwork. Resend with confirm:true.`);
+    }
+
+    const r = await Question.updateMany(filter, { $set: { isActive: true } });
+    return ok(res, { activated: r.modifiedCount ?? 0, stillWaitingOnArtwork: stillWaitingOnArt },
+      `Activated ${r.modifiedCount ?? 0} question(s). `
+      + `${stillWaitingOnArt} remain inactive awaiting artwork. `
+      + `Those with no scheme are still flagged in the scheme queue.`);
+  } catch (e) { return fail(res, 500, e.message) }
+})
+
 // What still needs a mark scheme, worst first.
 router.get('/scheme-queue', auth, requireRole('admin','dos','teacher'), async (req, res) => {
   try {
@@ -745,9 +798,22 @@ router.post('/bulk', auth, requireRole('admin','ops_manager','dos','teacher'), a
         const exists = await Question.findOne({ contentHash: hash }).select('_id').lean()
         if (exists) { skipped++; continue }
 
-        // Held back from homework until a diagram is attached or a
-        // mark scheme is written.
-        const isActiveNow = !(q.imageNeeded || missingScheme || q.artwork?.required)
+        // A MISSING MARK SCHEME NO LONGER HIDES THE QUESTION.
+        //
+        // Auto-homework selects `type: 'mcq'` only — see the filters in
+        // /run-auto-homework and /diagnose. A short or long question can
+        // therefore never be auto-assigned, whatever its isActive value,
+        // so hiding it protected nothing while making imported past-paper
+        // banks invisible to the teachers meant to work through them.
+        //
+        // needsMarkScheme still flags it for the scheme queue. What
+        // changes is that a teacher can now see, search and assign the
+        // question while its scheme is still being written.
+        //
+        // A MISSING FIGURE STILL DOES hide it: a question that says
+        // "study the diagram below" is unanswerable without one, so it
+        // stays inactive until the artwork queue supplies it.
+        const isActiveNow = !(q.imageNeeded || q.artwork?.required)
         if (!isActiveNow) heldInactive++
 
         const schemeMarks = Array.isArray(ms.points)
