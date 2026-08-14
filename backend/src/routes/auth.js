@@ -367,10 +367,13 @@ router.post('/me/teaching-specialties', authMiddleware, async (req, res) => {
 
     // One specialty per (curriculum, subject) pair the teacher selected,
     // limited to curricula they actually chose.
+    // The schema stores subjectId, not a subject name. Writing a name
+    // here produced specialties that allowedSubjectsFor could not resolve
+    // and that allocation's $elemMatch would never match.
     const specialties = [];
     for (const s of subjects) {
       if (!curricula.includes(s.curriculum)) continue;
-      specialties.push({ curriculum: s.curriculum, subject: s.subjectName });
+      specialties.push({ subjectId: s._id, curriculum: s.curriculum });
     }
 
     const user = await User.findByIdAndUpdate(
