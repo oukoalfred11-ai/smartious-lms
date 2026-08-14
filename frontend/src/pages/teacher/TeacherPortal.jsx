@@ -3830,7 +3830,9 @@ const QB_CURRICULA = {
   BNC:               { label: 'British National Curriculum',          years: ['Year 1','Year 2','Year 3','Year 4','Year 5','Year 6','Year 7','Year 8','Year 9','Year 10','Year 11','Year 12','Year 13'] },
   American:          { label: 'American Curriculum',                  years: ['K','Grade 1','Grade 2','Grade 3','Grade 4','Grade 5','Grade 6','Grade 7','Grade 8','Grade 9','Grade 10','Grade 11','Grade 12'] },
   Canadian:          { label: 'Canadian Curriculum',                  years: ['Grade 1','Grade 2','Grade 3','Grade 4','Grade 5','Grade 6','Grade 7','Grade 8','Grade 9','Grade 10','Grade 11','Grade 12'] },
-  KenyaCBC:          { label: 'Kenya CBE',                            years: ['Grade 1','Grade 2','Grade 3','Grade 4','Grade 5','Grade 6','Grade 7','Grade 8','Grade 9','Grade 10','Grade 11','Grade 12'] },
+  KenyaCBE:          { label: 'Kenya CBE',                            years: ['Grade 1','Grade 2','Grade 3','Grade 4','Grade 5','Grade 6','Grade 7','Grade 8','Grade 9','Grade 10','Grade 11','Grade 12'] },
+  KCSE:              { label: 'KCSE (Form 3-4)',                     years: ['Form 3','Form 4'] },
+  EdexcelPrimary:    { label: 'Edexcel iPrimary',                    years: ['Year 1','Year 2','Year 3','Year 4','Year 5','Year 6'] },
 }
 
 function ExamsTab({ user, store, setPage, toast }) {
