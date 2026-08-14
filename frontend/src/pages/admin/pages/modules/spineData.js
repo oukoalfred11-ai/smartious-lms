@@ -5083,6 +5083,375 @@ const ALEVEL_PHYSICS_9702 = [
     ] },
 ]
 
+// Cambridge International AS & A Level Mathematics 9709
+// Lesson-level spine, 27 topics / 268 lessons.
+//
+// WHY THIS IS PREFIXED BY COMPONENT, NOT BY AS/A2
+// 9709 is not one syllabus. It is five examinable components, and
+// candidates sit different combinations:
+//
+//   AS Mathematics   = P1 + M1   or   P1 + S1
+//   A Level          = P1 + P3 + M1 + S1   (the common route)
+//                      or P1 + P3 + S1 + S2, and other variants
+//
+// A school teaching P1/P3/S1 should not have Mechanics lessons
+// cluttering its question bank. Prefixing by component — "P1 ·",
+// "P3 ·", "M1 ·", "S1 ·" — lets a teacher filter to exactly the papers
+// their students will sit. AS/A2 prefixes could not express this,
+// because P3 is A Level only while P1 is AS, and M1 and S1 appear in
+// both routes depending on the combination chosen.
+//
+// P2 is included as its own component. It is the AS-only alternative
+// to P3 and shares much of its content, but a candidate sits one or
+// the other, never both — so they are kept separate rather than merged.
+const ALEVEL_MATHS_9709 = [
+  // ─────────────── PURE MATHEMATICS 1 (AS) ───────────────
+  { topic: 'P1 \u00b7 Quadratics', code: 'P1-1',
+    subtopics: [
+      { name: 'Completing the Square & The Vertex Form', code: 'P1-1.1' },
+      { name: 'Finding Maximum & Minimum Values of a Quadratic', code: 'P1-1.2' },
+      { name: 'Solving Quadratic Equations by Formula & Factorising', code: 'P1-1.3' },
+      { name: 'The Discriminant & The Nature of Roots', code: 'P1-1.4' },
+      { name: 'Solving Quadratic Inequalities', code: 'P1-1.5' },
+      { name: 'Simultaneous Equations: One Linear, One Quadratic', code: 'P1-1.6' },
+      { name: 'Conditions for a Line to Intersect, Touch or Miss a Curve', code: 'P1-1.7' },
+      { name: 'Equations Reducible to Quadratic Form', code: 'P1-1.8' },
+    ] },
+
+  { topic: 'P1 \u00b7 Functions', code: 'P1-2',
+    subtopics: [
+      { name: 'Function Notation, Domain & Range', code: 'P1-2.1' },
+      { name: 'Determining the Range of a Given Function', code: 'P1-2.2' },
+      { name: 'One-One Functions & Restricting the Domain', code: 'P1-2.3' },
+      { name: 'Composite Functions', code: 'P1-2.4' },
+      { name: 'Inverse Functions & Their Existence', code: 'P1-2.5' },
+      { name: 'Graphs of a Function and Its Inverse', code: 'P1-2.6' },
+      { name: 'Transformations: Translations', code: 'P1-2.7' },
+      { name: 'Transformations: Stretches & Reflections', code: 'P1-2.8' },
+      { name: 'Combining Transformations', code: 'P1-2.9' },
+    ] },
+
+  { topic: 'P1 \u00b7 Coordinate Geometry', code: 'P1-3',
+    subtopics: [
+      { name: 'Gradient, Midpoint & Distance Between Two Points', code: 'P1-3.1' },
+      { name: 'Equation of a Straight Line', code: 'P1-3.2' },
+      { name: 'Parallel & Perpendicular Lines', code: 'P1-3.3' },
+      { name: 'The Perpendicular Bisector & Its Applications', code: 'P1-3.4' },
+      { name: 'Equation of a Circle & Its Centre and Radius', code: 'P1-3.5' },
+      { name: 'Intersection of a Line and a Circle', code: 'P1-3.6' },
+      { name: 'Tangents to a Circle', code: 'P1-3.7' },
+      { name: 'Problems Combining Lines and Circles', code: 'P1-3.8' },
+    ] },
+
+  { topic: 'P1 \u00b7 Circular Measure', code: 'P1-4',
+    subtopics: [
+      { name: 'Radians & Conversion from Degrees', code: 'P1-4.1' },
+      { name: 'Arc Length', code: 'P1-4.2' },
+      { name: 'Area of a Sector', code: 'P1-4.3' },
+      { name: 'Area of a Segment', code: 'P1-4.4' },
+      { name: 'Composite Problems with Arcs, Sectors & Triangles', code: 'P1-4.5' },
+    ] },
+
+  { topic: 'P1 \u00b7 Trigonometry', code: 'P1-5',
+    subtopics: [
+      { name: 'Trigonometric Ratios of Any Angle', code: 'P1-5.1' },
+      { name: 'Exact Values for Special Angles', code: 'P1-5.2' },
+      { name: 'Graphs of sine, cosine & tangent', code: 'P1-5.3' },
+      { name: 'Transformations of Trigonometric Graphs', code: 'P1-5.4' },
+      { name: 'The Identities tan x = sin x / cos x and sin\u00b2x + cos\u00b2x = 1', code: 'P1-5.5' },
+      { name: 'Proving Simple Trigonometric Identities', code: 'P1-5.6' },
+      { name: 'Solving Trigonometric Equations in Degrees & Radians', code: 'P1-5.7' },
+      { name: 'Equations Requiring an Identity First', code: 'P1-5.8' },
+    ] },
+
+  { topic: 'P1 \u00b7 Series', code: 'P1-6',
+    subtopics: [
+      { name: 'The Binomial Expansion of (a + b)\u207f', code: 'P1-6.1' },
+      { name: 'Finding a Particular Term in an Expansion', code: 'P1-6.2' },
+      { name: 'Arithmetic Progressions: nth Term & Sum', code: 'P1-6.3' },
+      { name: 'Geometric Progressions: nth Term & Sum', code: 'P1-6.4' },
+      { name: 'The Sum to Infinity & Conditions for Convergence', code: 'P1-6.5' },
+      { name: 'Problems Combining Arithmetic & Geometric Series', code: 'P1-6.6' },
+    ] },
+
+  { topic: 'P1 \u00b7 Differentiation', code: 'P1-7',
+    subtopics: [
+      { name: 'The Gradient of a Curve & The Derivative', code: 'P1-7.1' },
+      { name: 'Differentiating Powers of x', code: 'P1-7.2' },
+      { name: 'The Chain Rule', code: 'P1-7.3' },
+      { name: 'Equations of Tangents & Normals', code: 'P1-7.4' },
+      { name: 'Increasing & Decreasing Functions', code: 'P1-7.5' },
+      { name: 'Stationary Points & The Second Derivative', code: 'P1-7.6' },
+      { name: 'Maxima & Minima Problems in Context', code: 'P1-7.7' },
+      { name: 'Connected Rates of Change', code: 'P1-7.8' },
+    ] },
+
+  { topic: 'P1 \u00b7 Integration', code: 'P1-8',
+    subtopics: [
+      { name: 'Integration as the Reverse of Differentiation', code: 'P1-8.1' },
+      { name: 'Integrating Powers of x & The Arbitrary Constant', code: 'P1-8.2' },
+      { name: 'Integrating (ax + b)\u207f', code: 'P1-8.3' },
+      { name: 'Definite Integration', code: 'P1-8.4' },
+      { name: 'Area Under a Curve', code: 'P1-8.5' },
+      { name: 'Area Between a Curve and a Line', code: 'P1-8.6' },
+      { name: 'Volumes of Revolution About the x-Axis', code: 'P1-8.7' },
+      { name: 'Volumes of Revolution About the y-Axis', code: 'P1-8.8' },
+      { name: 'Finding a Curve from Its Gradient Function', code: 'P1-8.9' },
+    ] },
+
+  // ─────────────── PURE MATHEMATICS 2 (AS alternative) ───────────────
+  { topic: 'P2 \u00b7 Algebra & Logarithms', code: 'P2-1',
+    subtopics: [
+      { name: 'The Modulus Function & Its Graph (P2)', code: 'P2-1.1' },
+      { name: 'Solving Modulus Equations & Inequalities', code: 'P2-1.2' },
+      { name: 'Polynomial Division', code: 'P2-1.3' },
+      { name: 'The Remainder & Factor Theorems', code: 'P2-1.4' },
+      { name: 'Factorising & Solving Cubic Equations', code: 'P2-1.5' },
+      { name: 'Laws of Logarithms', code: 'P2-1.6' },
+      { name: 'Solving Exponential & Logarithmic Equations', code: 'P2-1.7' },
+      { name: 'Graphs of e\u02e3 and ln x', code: 'P2-1.8' },
+      { name: 'Reducing a Relationship to Linear Form', code: 'P2-1.9' },
+    ] },
+
+  { topic: 'P2 \u00b7 Trigonometry & Calculus', code: 'P2-2',
+    subtopics: [
+      { name: 'The Reciprocal Ratios: sec, cosec & cot', code: 'P2-2.1' },
+      { name: 'Pythagorean Identities Involving sec and cosec', code: 'P2-2.2' },
+      { name: 'Compound Angle Formulae', code: 'P2-2.3' },
+      { name: 'Double Angle Formulae', code: 'P2-2.4' },
+      { name: 'Expressing a sin x + b cos x in Harmonic Form', code: 'P2-2.5' },
+      { name: 'Differentiating e\u02e3, ln x & Trigonometric Functions', code: 'P2-2.6' },
+      { name: 'The Product & Quotient Rules', code: 'P2-2.7' },
+      { name: 'Implicit & Parametric Differentiation', code: 'P2-2.8' },
+      { name: 'Integrating Exponential & Trigonometric Functions', code: 'P2-2.9' },
+      { name: 'Integration by Substitution (P2)', code: 'P2-2.10' },
+      { name: 'The Trapezium Rule', code: 'P2-2.11' },
+      { name: 'Locating Roots & Iterative Methods', code: 'P2-2.12' },
+    ] },
+
+  // ─────────────── PURE MATHEMATICS 3 (A Level) ───────────────
+  { topic: 'P3 \u00b7 Algebra', code: 'P3-1',
+    subtopics: [
+      { name: 'The Modulus Function & Its Graph', code: 'P3-1.1' },
+      { name: 'Solving Equations & Inequalities with Modulus', code: 'P3-1.2' },
+      { name: 'Polynomial Division & The Factor Theorem', code: 'P3-1.3' },
+      { name: 'Partial Fractions: Distinct Linear Factors', code: 'P3-1.4' },
+      { name: 'Partial Fractions: Repeated Factors', code: 'P3-1.5' },
+      { name: 'Partial Fractions: Quadratic Factors', code: 'P3-1.6' },
+      { name: 'The Binomial Expansion for Rational n', code: 'P3-1.7' },
+      { name: 'Range of Validity of a Binomial Expansion', code: 'P3-1.8' },
+      { name: 'Expanding Expressions Using Partial Fractions', code: 'P3-1.9' },
+    ] },
+
+  { topic: 'P3 \u00b7 Logarithmic & Exponential Functions', code: 'P3-2',
+    subtopics: [
+      { name: 'The Exponential Function & Its Properties', code: 'P3-2.1' },
+      { name: 'Natural Logarithms & Their Laws', code: 'P3-2.2' },
+      { name: 'Solving Equations Involving e\u02e3 and ln x', code: 'P3-2.3' },
+      { name: 'Graphs of Exponential & Logarithmic Functions', code: 'P3-2.4' },
+      { name: 'Modelling Growth & Decay', code: 'P3-2.5' },
+      { name: 'Reducing to Linear Form to Estimate Constants', code: 'P3-2.6' },
+    ] },
+
+  { topic: 'P3 \u00b7 Trigonometry', code: 'P3-3',
+    subtopics: [
+      { name: 'Reciprocal Ratios & Their Graphs', code: 'P3-3.1' },
+      { name: 'Pythagorean Identities with sec, cosec & cot', code: 'P3-3.2' },
+      { name: 'Compound Angle Formulae & Their Use', code: 'P3-3.3' },
+      { name: 'Double & Half Angle Formulae', code: 'P3-3.4' },
+      { name: 'The Form R sin(x \u00b1 \u03b1) and R cos(x \u00b1 \u03b1)', code: 'P3-3.5' },
+      { name: 'Maximum & Minimum Values Using Harmonic Form', code: 'P3-3.6' },
+      { name: 'Proving Trigonometric Identities', code: 'P3-3.7' },
+      { name: 'Solving Trigonometric Equations Using Identities', code: 'P3-3.8' },
+    ] },
+
+  { topic: 'P3 \u00b7 Differentiation', code: 'P3-4',
+    subtopics: [
+      { name: 'Differentiating e\u02e3 and ln x', code: 'P3-4.1' },
+      { name: 'Differentiating Trigonometric Functions', code: 'P3-4.2' },
+      { name: 'The Product Rule', code: 'P3-4.3' },
+      { name: 'The Quotient Rule', code: 'P3-4.4' },
+      { name: 'Implicit Differentiation', code: 'P3-4.5' },
+      { name: 'Parametric Differentiation', code: 'P3-4.6' },
+      { name: 'Tangents & Normals to Parametric and Implicit Curves', code: 'P3-4.7' },
+      { name: 'Stationary Points of More Complex Functions', code: 'P3-4.8' },
+      { name: 'Connected Rates of Change in Context', code: 'P3-4.9' },
+    ] },
+
+  { topic: 'P3 \u00b7 Integration', code: 'P3-5',
+    subtopics: [
+      { name: 'Integrating e^(ax+b), 1/(ax+b) & Trigonometric Forms', code: 'P3-5.1' },
+      { name: 'Integrating sin\u00b2x and cos\u00b2x Using Double Angle', code: 'P3-5.2' },
+      { name: 'Integration Using Partial Fractions', code: 'P3-5.3' },
+      { name: 'Integration by Substitution', code: 'P3-5.4' },
+      { name: 'Integration by Parts', code: 'P3-5.5' },
+      { name: 'Repeated Integration by Parts', code: 'P3-5.6' },
+      { name: 'Recognising the Form f\u2032(x)/f(x)', code: 'P3-5.7' },
+      { name: 'The Trapezium Rule & Estimating Error', code: 'P3-5.8' },
+      { name: 'Areas & Volumes Using Advanced Integration', code: 'P3-5.9' },
+    ] },
+
+  { topic: 'P3 \u00b7 Numerical Solution of Equations', code: 'P3-6',
+    subtopics: [
+      { name: 'Locating a Root by Sign Change', code: 'P3-6.1' },
+      { name: 'Rearranging an Equation into the Form x = g(x)', code: 'P3-6.2' },
+      { name: 'Iterative Methods & Convergence', code: 'P3-6.3' },
+      { name: 'Cobweb & Staircase Diagrams', code: 'P3-6.4' },
+      { name: 'Accuracy of an Iterative Solution', code: 'P3-6.5' },
+    ] },
+
+  { topic: 'P3 \u00b7 Vectors', code: 'P3-7',
+    subtopics: [
+      { name: 'Vector Notation & Magnitude in Three Dimensions', code: 'P3-7.1' },
+      { name: 'Unit Vectors & Position Vectors', code: 'P3-7.2' },
+      { name: 'The Scalar Product & The Angle Between Vectors', code: 'P3-7.3' },
+      { name: 'Vector Equation of a Line', code: 'P3-7.4' },
+      { name: 'Determining Whether Lines Meet, Are Parallel or Skew', code: 'P3-7.5' },
+      { name: 'The Angle Between Two Lines', code: 'P3-7.6' },
+      { name: 'Perpendicular Distance from a Point to a Line', code: 'P3-7.7' },
+    ] },
+
+  { topic: 'P3 \u00b7 Differential Equations', code: 'P3-8',
+    subtopics: [
+      { name: 'Forming a Differential Equation from a Context', code: 'P3-8.1' },
+      { name: 'Solving by Separation of Variables', code: 'P3-8.2' },
+      { name: 'Using an Initial Condition to Find the Constant', code: 'P3-8.3' },
+      { name: 'Differential Equations Requiring Partial Fractions', code: 'P3-8.4' },
+      { name: 'Interpreting the Solution in Context', code: 'P3-8.5' },
+    ] },
+
+  { topic: 'P3 \u00b7 Complex Numbers', code: 'P3-9',
+    subtopics: [
+      { name: 'Introducing i & The Form a + bi', code: 'P3-9.1' },
+      { name: 'Arithmetic of Complex Numbers', code: 'P3-9.2' },
+      { name: 'Complex Conjugates & Division', code: 'P3-9.3' },
+      { name: 'Roots of Polynomial Equations & Conjugate Pairs', code: 'P3-9.4' },
+      { name: 'The Argand Diagram', code: 'P3-9.5' },
+      { name: 'Modulus & Argument', code: 'P3-9.6' },
+      { name: 'Polar & Exponential Form', code: 'P3-9.7' },
+      { name: 'Multiplication & Division in Polar Form', code: 'P3-9.8' },
+      { name: 'Loci in the Argand Diagram: Circles', code: 'P3-9.9' },
+      { name: 'Loci in the Argand Diagram: Half-Lines & Perpendicular Bisectors', code: 'P3-9.10' },
+    ] },
+
+  // ─────────────── MECHANICS ───────────────
+  { topic: 'M1 \u00b7 Forces & Equilibrium', code: 'M1-1',
+    subtopics: [
+      { name: 'Types of Force & Force Diagrams', code: 'M1-1.1' },
+      { name: 'Resolving Forces into Components', code: 'M1-1.2' },
+      { name: 'Equilibrium of a Particle Under Coplanar Forces', code: 'M1-1.3' },
+      { name: 'The Triangle & Polygon of Forces', code: 'M1-1.4' },
+      { name: 'Objects on an Inclined Plane', code: 'M1-1.5' },
+      { name: 'Friction & The Coefficient of Friction', code: 'M1-1.6' },
+      { name: 'Limiting Equilibrium Problems', code: 'M1-1.7' },
+      { name: 'Connected Particles & Smooth Pulleys', code: 'M1-1.8' },
+    ] },
+
+  { topic: 'M1 \u00b7 Kinematics of Motion in a Straight Line', code: 'M1-2',
+    subtopics: [
+      { name: 'Displacement, Velocity & Acceleration', code: 'M1-2.1' },
+      { name: 'Displacement-Time & Velocity-Time Graphs', code: 'M1-2.2' },
+      { name: 'The Constant Acceleration Equations', code: 'M1-2.3' },
+      { name: 'Vertical Motion Under Gravity', code: 'M1-2.4' },
+      { name: 'Using Calculus for Variable Acceleration', code: 'M1-2.5' },
+      { name: 'Multi-Stage Journeys', code: 'M1-2.6' },
+    ] },
+
+  { topic: 'M1 \u00b7 Newton\u2019s Laws & Momentum', code: 'M1-3',
+    subtopics: [
+      { name: 'Newton\u2019s Laws of Motion', code: 'M1-3.1' },
+      { name: 'Applying F = ma to a Single Particle', code: 'M1-3.2' },
+      { name: 'Connected Particles & Tension in Strings', code: 'M1-3.3' },
+      { name: 'Motion on a Rough Inclined Plane', code: 'M1-3.4' },
+      { name: 'Linear Momentum & Impulse', code: 'M1-3.5' },
+      { name: 'Conservation of Momentum in Collisions', code: 'M1-3.6' },
+    ] },
+
+  { topic: 'M1 \u00b7 Work, Energy & Power', code: 'M1-4',
+    subtopics: [
+      { name: 'Work Done by a Constant Force', code: 'M1-4.1' },
+      { name: 'Kinetic & Gravitational Potential Energy', code: 'M1-4.2' },
+      { name: 'The Work-Energy Principle', code: 'M1-4.3' },
+      { name: 'Conservation of Mechanical Energy', code: 'M1-4.4' },
+      { name: 'Power & Problems Involving Vehicles', code: 'M1-4.5' },
+    ] },
+
+  // ─────────────── PROBABILITY & STATISTICS ───────────────
+  { topic: 'S1 \u00b7 Representation of Data', code: 'S1-1',
+    subtopics: [
+      { name: 'Types of Data & Sampling', code: 'S1-1.1' },
+      { name: 'Stem-and-Leaf Diagrams', code: 'S1-1.2' },
+      { name: 'Box-and-Whisker Plots & Outliers', code: 'S1-1.3' },
+      { name: 'Histograms with Unequal Class Widths', code: 'S1-1.4' },
+      { name: 'Cumulative Frequency Graphs', code: 'S1-1.5' },
+      { name: 'Mean, Median & Mode: Choosing the Right Measure', code: 'S1-1.6' },
+      { name: 'Variance & Standard Deviation', code: 'S1-1.7' },
+      { name: 'Calculating Statistics from Grouped Data', code: 'S1-1.8' },
+      { name: 'Comparing Distributions', code: 'S1-1.9' },
+    ] },
+
+  { topic: 'S1 \u00b7 Permutations, Combinations & Probability', code: 'S1-2',
+    subtopics: [
+      { name: 'Counting Principles & Factorials', code: 'S1-2.1' },
+      { name: 'Permutations With & Without Restrictions', code: 'S1-2.2' },
+      { name: 'Combinations & Selection Problems', code: 'S1-2.3' },
+      { name: 'Probability of an Event & The Sample Space', code: 'S1-2.4' },
+      { name: 'Mutually Exclusive & Independent Events', code: 'S1-2.5' },
+      { name: 'The Addition & Multiplication Rules', code: 'S1-2.6' },
+      { name: 'Tree Diagrams & Venn Diagrams', code: 'S1-2.7' },
+      { name: 'Conditional Probability', code: 'S1-2.8' },
+    ] },
+
+  { topic: 'S1 \u00b7 Discrete Random Variables & The Normal Distribution', code: 'S1-3',
+    subtopics: [
+      { name: 'Probability Distributions of a Discrete Random Variable', code: 'S1-3.1' },
+      { name: 'Expectation & Variance of a Discrete Random Variable', code: 'S1-3.2' },
+      { name: 'The Binomial Distribution: Conditions & Formula', code: 'S1-3.3' },
+      { name: 'Calculating Binomial Probabilities', code: 'S1-3.4' },
+      { name: 'Mean & Variance of the Binomial Distribution', code: 'S1-3.5' },
+      { name: 'The Geometric Distribution', code: 'S1-3.6' },
+      { name: 'The Normal Distribution & Its Properties', code: 'S1-3.7' },
+      { name: 'Standardising & Using the Normal Tables', code: 'S1-3.8' },
+      { name: 'Finding an Unknown Mean or Standard Deviation', code: 'S1-3.9' },
+      { name: 'Normal Approximation to the Binomial', code: 'S1-3.10' },
+    ] },
+
+  { topic: 'S2 \u00b7 Poisson, Sampling & Hypothesis Testing', code: 'S2-1',
+    subtopics: [
+      { name: 'The Poisson Distribution & Its Conditions', code: 'S2-1.1' },
+      { name: 'Calculating Poisson Probabilities', code: 'S2-1.2' },
+      { name: 'The Sum of Independent Poisson Variables', code: 'S2-1.3' },
+      { name: 'Poisson Approximation to the Binomial', code: 'S2-1.4' },
+      { name: 'Normal Approximation to the Poisson', code: 'S2-1.5' },
+      { name: 'Linear Combinations of Random Variables', code: 'S2-1.6' },
+      { name: 'Continuous Random Variables & Probability Density Functions', code: 'S2-1.7' },
+      { name: 'Expectation, Variance & Median of a Continuous Variable', code: 'S2-1.8' },
+      { name: 'Sampling Methods & The Sampling Distribution of the Mean', code: 'S2-1.9' },
+      { name: 'The Central Limit Theorem', code: 'S2-1.10' },
+      { name: 'Confidence Intervals for a Population Mean', code: 'S2-1.11' },
+      { name: 'Hypothesis Testing: Null & Alternative Hypotheses', code: 'S2-1.12' },
+      { name: 'One-Tailed & Two-Tailed Tests', code: 'S2-1.13' },
+      { name: 'Type I & Type II Errors', code: 'S2-1.14' },
+      { name: 'Hypothesis Tests Using the Binomial & Poisson', code: 'S2-1.15' },
+      { name: 'Hypothesis Tests for a Population Mean', code: 'S2-1.16' },
+    ] },
+
+  { topic: 'Exam Technique & Revision', code: 'EX',
+    subtopics: [
+      { name: 'Using the List of Formulae (MF19) Efficiently', code: 'EX.1' },
+      { name: 'Presenting a Full Method & Earning Method Marks', code: 'EX.2' },
+      { name: 'Accuracy, Rounding & When to Keep Exact Values', code: 'EX.3' },
+      { name: 'Common Errors in Calculus Questions', code: 'EX.4' },
+      { name: 'Common Errors in Trigonometry & Vectors', code: 'EX.5' },
+      { name: 'Interpreting Statistics Questions in Context', code: 'EX.6' },
+      { name: 'Past Paper Practice: Pure Mathematics 1', code: 'EX.7' },
+      { name: 'Past Paper Practice: Pure Mathematics 3', code: 'EX.8' },
+      { name: 'Past Paper Practice: Mechanics', code: 'EX.9' },
+      { name: 'Past Paper Practice: Probability & Statistics', code: 'EX.10' },
+      { name: 'Mock Exam Review & Revision Planning', code: 'EX.11' },
+    ] },
+]
+
 export const ALEVEL_LIBRARY = [
   { match: /\bbiology\b/i, const_: ALEVEL_BIOLOGY_9700,
     source: 'Cambridge International AS & A Level Biology 9700 \u2014 252-lesson scheme (AS 128 / A2 124)' },
@@ -5090,6 +5459,11 @@ export const ALEVEL_LIBRARY = [
     source: 'Cambridge International AS & A Level Chemistry 9701 \u2014 235-lesson scheme (AS 132 / A2 103)' },
   { match: /\bphysics\b/i, const_: ALEVEL_PHYSICS_9702,
     source: 'Cambridge International AS & A Level Physics 9702 \u2014 222-lesson scheme (AS 105 / A2 117)' },
+  // Mathematics is prefixed by COMPONENT (P1, P2, P3, M1, S1, S2) rather
+  // than AS/A2, because candidates sit different combinations: a school
+  // teaching P1/P3/S1 can filter to exactly those and never see Mechanics.
+  { match: /\bmathematics\b|\bmaths\b/i, const_: ALEVEL_MATHS_9709,
+    source: 'Cambridge International AS & A Level Mathematics 9709 \u2014 229-lesson scheme (P1 61 / P2 21 / P3 68 / M1 25 / S1 27 / S2 16)' },
 ]
 
 export const PRIMARY_Y5_LIBRARY = [
