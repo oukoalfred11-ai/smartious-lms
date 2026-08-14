@@ -59,8 +59,29 @@ class ErrorBoundary extends React.Component {
 const container = document.getElementById('root')
 const tree = <ErrorBoundary><App /></ErrorBoundary>
 
-if (container.hasChildNodes()) {
+/* Hydrate ONLY on prerendered public routes.
+ *
+ * The old test was "does #root have children" — but Netlify's SPA
+ * fallback serves the prerendered index.html for ANY unmatched path,
+ * including /admin and the portals. Those were prerendered logged-OUT,
+ * so hydrating them against a logged-IN render mismatches on every node:
+ * React throws #418 (text content mismatch), then #423 as it gives up and
+ * re-renders client-side.
+ *
+ * The page still worked — React recovers — but it threw on every load and
+ * discarded the prerendered HTML anyway, so hydration bought nothing.
+ *
+ * Authenticated routes now always render fresh, which is both correct and
+ * what was effectively happening after React bailed out.
+ */
+const AUTHENTICATED_PREFIXES = ['/admin', '/teacher', '/student', '/parent', '/login']
+const isAuthedRoute = AUTHENTICATED_PREFIXES.some(p =>
+  window.location.pathname === p || window.location.pathname.startsWith(p + '/'))
+
+if (container.hasChildNodes() && !isAuthedRoute) {
   hydrateRoot(container, tree)
 } else {
+  // Clear any prerendered markup so React does not paint it twice.
+  if (isAuthedRoute) container.innerHTML = ''
   createRoot(container).render(tree)
 }
