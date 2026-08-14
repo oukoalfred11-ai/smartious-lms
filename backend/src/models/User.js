@@ -76,7 +76,10 @@ const userSchema = new mongoose.Schema({
       'EdexcelPrimary', 'EdexcelLowerSec', 'EdexcelIGCSE', 'EdexcelALevel',
       'AQALowerSec', 'AQAGCSE', 'AQAALevel',
       'IBPYP', 'IBMYP', 'IBDP',
-      'BNC', 'American', 'Canadian', 'KenyaCBC',
+      'BNC', 'American', 'Canadian', 'KenyaCBE', 'KCSE',
+      // Legacy — pre-2026-08 name for CBE. Retained so existing records
+      // stay valid; migrate-cbc-to-cbe.js converts them.
+      'KenyaCBC',
       // Legacy values (backwards-compat for existing records — not used for new writes)
       'IB', 'IGCSE', 'A-Level', 'IB Diploma', 'IB MYP', 'Kenya CBC', 'IUFP',
     ] }
