@@ -319,6 +319,7 @@ const ALL_SUBJECTS = [
   { curriculum:'KCSE', subjectName:'Geography',                     category:'Humanities' },
   { curriculum:'KCSE', subjectName:'History & Government',          category:'Humanities' },
   { curriculum:'KCSE', subjectName:'Christian Religious Education', category:'Humanities' },
+  { curriculum:'KCSE', subjectName:'Islamic Religious Education',   category:'Humanities' },
   { curriculum:'KCSE', subjectName:'Business Studies',              category:'Business' },
   { curriculum:'KCSE', subjectName:'Agriculture',                   category:'STEM' },
   { curriculum:'KCSE', subjectName:'Computer Studies',              category:'Technology' },
