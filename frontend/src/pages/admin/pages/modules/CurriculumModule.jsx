@@ -2,31 +2,12 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { useStore, api } from '../../../../context/ctx.jsx'
 import { TOKENS } from '../shared/tokens.js'
 import { PCard, PKpi, PSection } from '../shared/ui.jsx'
+import { fetchCurricula, FALLBACK_CURRICULA } from '../../../../data/curriculumList.js'
 import { CBE_LIBRARY, PYP_LIBRARY, MYP_LIBRARY, IBDP_LIBRARY, KCSE_LIBRARY, IPRIMARY_LIBRARY, ILOWER_SEC_LIBRARY, IAL_LIBRARY, ALEVEL_LIBRARY, IGCSE_LIBRARY, IGCSE_MATHS_0580, LOWER_SEC_LIBRARY, PRIMARY_LIBRARY, PRIMARY_Y5_LIBRARY } from './spineData.js'
 
 function SubjectsTab({ toast }) {
   // The 15 curricula from the new catalog
-  const CURRICULA_LIST = [
-    { id: 'CambridgePrimary',   name: 'Cambridge Primary' },
-    { id: 'CambridgeLowerSec',  name: 'Cambridge Lower Secondary' },
-    { id: 'CambridgeIGCSE',     name: 'Cambridge IGCSE' },
-    { id: 'CambridgeALevel',    name: 'Cambridge A-Level' },
-    { id: 'EdexcelPrimary',    name: 'Edexcel iPrimary' },
-    { id: 'EdexcelLowerSec',    name: 'Edexcel Lower Secondary' },
-    { id: 'EdexcelIGCSE',       name: 'Edexcel IGCSE' },
-    { id: 'EdexcelALevel',      name: 'Edexcel A-Level' },
-    { id: 'AQALowerSec',        name: 'AQA Lower Secondary' },
-    { id: 'AQAGCSE',            name: 'AQA GCSE' },
-    { id: 'AQAALevel',          name: 'AQA A-Level' },
-    { id: 'IBPYP',              name: 'IB Primary Years (PYP)' },
-    { id: 'IBMYP',              name: 'IB Middle Years (MYP)' },
-    { id: 'IBDP',               name: 'IB Diploma (DP)' },
-    { id: 'BNC',                name: 'British National Curriculum' },
-    { id: 'American',           name: 'American Curriculum' },
-    { id: 'Canadian',           name: 'Canadian Curriculum' },
-    { id: 'KenyaCBE',           name: 'Kenya CBE' },
-    { id: 'KCSE', name: 'KCSE (Form 3-4)' },
-  ]
+  const CURRICULA_LIST = CURRICULA_LIST
   // Categories grouped by curriculum family — drives the <optgroup>
   // dropdown in the form so admin sees categories organised by which
   // curricula use them. CATEGORIES (flat) is exposed for any code path
@@ -289,27 +270,7 @@ function SubjectFormModal({ editing, curricula, categories, categoryGroups, defa
 }
 
 function SyllabusSpineTab({ toast }) {
-  const [curricula] = useState([
-    { id: 'CambridgePrimary',   name: 'Cambridge Primary' },
-    { id: 'CambridgeLowerSec',  name: 'Cambridge Lower Secondary' },
-    { id: 'CambridgeIGCSE',     name: 'Cambridge IGCSE' },
-    { id: 'CambridgeALevel',    name: 'Cambridge A-Level' },
-    { id: 'EdexcelPrimary',    name: 'Edexcel iPrimary' },
-    { id: 'EdexcelLowerSec',    name: 'Edexcel Lower Secondary' },
-    { id: 'EdexcelIGCSE',       name: 'Edexcel IGCSE' },
-    { id: 'EdexcelALevel',      name: 'Edexcel A-Level' },
-    { id: 'AQALowerSec',        name: 'AQA Lower Secondary' },
-    { id: 'AQAGCSE',            name: 'AQA GCSE' },
-    { id: 'AQAALevel',          name: 'AQA A-Level' },
-    { id: 'IBPYP',              name: 'IB Primary Years (PYP)' },
-    { id: 'IBMYP',              name: 'IB Middle Years (MYP)' },
-    { id: 'IBDP',               name: 'IB Diploma (DP)' },
-    { id: 'BNC',                name: 'British National Curriculum' },
-    { id: 'American',           name: 'American Curriculum' },
-    { id: 'Canadian',           name: 'Canadian Curriculum' },
-    { id: 'KenyaCBE',           name: 'Kenya CBE' },
-    { id: 'KCSE', name: 'KCSE (Form 3-4)' },
-  ])
+  const [curricula] = useState(CURRICULA_LIST)
   const [curriculum, setCurriculum] = useState('CambridgeIGCSE')
   const [subjects, setSubjects] = useState([])
   const [subjectId, setSubjectId] = useState('')
@@ -596,6 +557,13 @@ function SyllabusSpineTab({ toast }) {
    * rather than falling through to a Cambridge or KCSE matcher and
    * replacing that bank.
    */
+  // The dropdown reads the backend rather than a hardcoded array. Three
+  // copies of that array used to exist, and a curriculum added server-side
+  // stayed invisible until every one was edited — which is how Edexcel
+  // iPrimary and KCSE passed all backend checks yet could not be selected.
+  const [CURRICULA_LIST, setCurriculaList] = React.useState(FALLBACK_CURRICULA)
+  React.useEffect(() => { fetchCurricula(api).then(setCurriculaList) }, [])
+
   const loadCbeSpine = async () => {
     if (!subjectId) { toast?.error?.('Pick a subject first.'); return }
     const subjectName = subjects.find(s => s._id === subjectId)?.subjectName || ''
