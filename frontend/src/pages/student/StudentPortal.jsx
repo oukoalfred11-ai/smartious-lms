@@ -8250,7 +8250,15 @@ function ResultIcon({ name, size = 26 }) {
 }
 
 function MyResultDetail({ subId, detail, loading, onBack, user, toast }) {
+  // ALL hooks must sit here, above the `if (loading || !detail)` early
+  // return below. React identifies hooks by call order, so a hook placed
+  // after that return runs only once detail arrives: one hook on the
+  // loading render, two on the next. That count change is React error
+  // #310, and it is why opening a result crashed the app as soon as the
+  // downloadable report was added — reportBusy had been declared further
+  // down, past the early return.
   const [expandedAnswers, setExpandedAnswers] = useState({})
+  const [reportBusy, setReportBusy] = useState(false)
 
   if (loading || !detail) {
     return (
@@ -8324,7 +8332,6 @@ function MyResultDetail({ subId, detail, loading, onBack, user, toast }) {
    * Bearer token in localStorage and a plain window.open sends no
    * Authorization header.
    */
-  const [reportBusy, setReportBusy] = useState(false)
   const downloadReport = async () => {
     if (!subId) return
     setReportBusy(true)
