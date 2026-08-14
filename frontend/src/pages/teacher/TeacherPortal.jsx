@@ -16320,6 +16320,7 @@ function TeacherTimetableTab({ user, toast }) {
     { id: 'CambridgeLowerSec',  name: 'Cambridge Lower Secondary' },
     { id: 'CambridgeIGCSE',     name: 'Cambridge IGCSE' },
     { id: 'CambridgeALevel',    name: 'Cambridge A-Level' },
+    { id: 'EdexcelPrimary', name: 'Edexcel iPrimary' },
     { id: 'EdexcelLowerSec',    name: 'Edexcel Lower Secondary' },
     { id: 'EdexcelIGCSE',       name: 'Edexcel IGCSE' },
     { id: 'EdexcelALevel',      name: 'Edexcel A-Level' },
