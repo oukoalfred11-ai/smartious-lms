@@ -13,7 +13,10 @@ const subjectSchema = new mongoose.Schema({
       'EdexcelPrimary', 'EdexcelLowerSec', 'EdexcelIGCSE', 'EdexcelALevel',
       'AQALowerSec', 'AQAGCSE', 'AQAALevel',
       'IBPYP', 'IBMYP', 'IBDP',
-      'BNC', 'American', 'Canadian', 'KenyaCBC',
+      'BNC', 'American', 'Canadian', 'KenyaCBE', 'KCSE',
+      // Legacy — pre-2026-08 name for CBE. Retained so existing records
+      // stay valid; migrate-cbc-to-cbe.js converts them.
+      'KenyaCBC',
       // Legacy — pre-2026-08-04 flat IB curriculum. Existing records
       // are migrated to IBDP by migrate-ib-split.js; kept here so
       // validation does not break before the migration runs.
