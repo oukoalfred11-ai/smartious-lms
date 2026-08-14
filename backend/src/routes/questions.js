@@ -396,7 +396,8 @@ router.post('/remap-subtopics', auth, requireRole('admin', 'ops_manager'), async
 // ─────────────────────────────────────────────────────────
 router.post('/retag', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
-    const { fromSubject, fromCurriculum, toSubject, toCurriculum, confirm, topics } = req.body || {};
+    const { fromSubject, fromCurriculum, toSubject, toCurriculum, confirm, topics,
+            fromGrade, toGrade } = req.body || {};
 
     // Optional topic filter. A corrupt batch can hold two subjects under
     // one bad label — 125 questions filed as subject "EdexcelIGCSE"
@@ -408,14 +409,21 @@ router.post('/retag', auth, requireRole('admin', 'ops_manager'), async (req, res
     if (!fromSubject || !fromCurriculum)
       return res.status(400).json({ success:false, message:'fromSubject and fromCurriculum are required.' });
 
+    // Grade is optional and independent of subject/curriculum. It exists
+    // because a curriculum rename can strand the grade too: KCSE questions
+    // were carrying "Grade 11 (Form 3)", a CBC-era label that no longer
+    // appears in GRADES_BY_CURRICULUM, so every grade filter missed them.
     const target = {
       subject:    toSubject    || fromSubject,
       curriculum: toCurriculum || fromCurriculum,
     };
-    if (target.subject === fromSubject && target.curriculum === fromCurriculum)
+    if (toGrade) target.grade = toGrade;
+    if (target.subject === fromSubject && target.curriculum === fromCurriculum
+        && !toGrade)
       return res.status(400).json({ success:false, message:'Nothing would change.' });
 
     const filter = { subject: fromSubject, curriculum: fromCurriculum, ...topicFilter };
+    if (fromGrade) filter.grade = fromGrade;
     const total = await Question.countDocuments(filter);
     if (!total)
       return res.status(404).json({ success:false, message:`No questions found for "${fromSubject}" / ${fromCurriculum}.` });
@@ -455,7 +463,8 @@ router.post('/retag', auth, requireRole('admin', 'ops_manager'), async (req, res
         data: {
           questions: total,
           from: `${fromSubject} / ${fromCurriculum}`,
-          to: `${target.subject} / ${target.curriculum}`,
+          to: `${target.subject} / ${target.curriculum}`
+            + (toGrade ? `  grade -> "${toGrade}"` : ''),
           targetSubjectExists: !!subj,
           wouldLink, wouldOrphan, sampleUnmatched,
         },
