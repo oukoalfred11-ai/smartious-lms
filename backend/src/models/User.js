@@ -73,7 +73,7 @@ const userSchema = new mongoose.Schema({
     curriculum: { type: String, enum: [
       // New 15-curriculum catalog
       'CambridgePrimary', 'CambridgeLowerSec', 'CambridgeIGCSE', 'CambridgeALevel',
-      'EdexcelLowerSec', 'EdexcelIGCSE', 'EdexcelALevel',
+      'EdexcelPrimary', 'EdexcelLowerSec', 'EdexcelIGCSE', 'EdexcelALevel',
       'AQALowerSec', 'AQAGCSE', 'AQAALevel',
       'IBPYP', 'IBMYP', 'IBDP',
       'BNC', 'American', 'Canadian', 'KenyaCBC',
