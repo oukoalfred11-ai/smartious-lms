@@ -38,7 +38,12 @@ const CURRICULA = [
   { id: 'BNC',                name: 'British National Curriculum',      region: 'United Kingdom' },
   { id: 'American',           name: 'American Curriculum',              region: 'USA' },
   { id: 'Canadian',           name: 'Canadian Curriculum',              region: 'Canada' },
-  { id: 'KenyaCBC',           name: 'Kenya CBC',                        region: 'Kenya' },
+  { id: 'KenyaCBE',           name: 'Kenya CBE',                        region: 'Kenya' },
+  // KCSE is its own curriculum, not CBE grades in disguise. It is being
+  // phased out, and keeping it separate means it can be deactivated in a
+  // single move when the last cohort sits the exam — rather than
+  // unpicking Form 3 records from Grade 11 records afterwards.
+  { id: 'KCSE',               name: 'KCSE (Form 3-4, phasing out)',     region: 'Kenya' },
 ]
 
 // ─────────────────────────────────────────────────────────
@@ -92,13 +97,16 @@ const GRADES_BY_CURRICULUM = {
     'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12',
   ],
   // ── KENYA CBC — Grades 11 & 12 are senior school, named with Form equivalents ──
-  KenyaCBC: [
+  // CBE runs Grade 1-12. The previous list ended 'Grade 11 (Form 3)' and
+  // 'Grade 12 (Form 4)' because KCSE was being hosted in CBE grade slots.
+  // KCSE now has its own curriculum, so those strokes are gone.
+  KenyaCBE: [
     'Grade 1', 'Grade 2', 'Grade 3',
     'Grade 4', 'Grade 5', 'Grade 6',
     'Grade 7', 'Grade 8', 'Grade 9',
-    'Grade 10',
-    'Grade 11 (Form 3)', 'Grade 12 (Form 4)',
+    'Grade 10', 'Grade 11', 'Grade 12',
   ],
+  KCSE: ['Form 3', 'Form 4'],
 }
 
 // ─────────────────────────────────────────────────────────
@@ -107,6 +115,46 @@ const GRADES_BY_CURRICULUM = {
 // Each subject lists which curricula it's available in.
 // `availableIn: 'all'` means available across all 7 curricula.
 const SUBJECTS = [
+  // ── Kenya CBE (Grade 1-12) ─────────────────────────────────
+  // CBE previously offered NOTHING: no subject in this catalogue listed
+  // KenyaCBC, so anyone enrolling a CBE student got an empty dropdown.
+  //
+  // Grades 1-6 take the primary learning areas; 7-9 add the junior
+  // school subjects; 10-12 are senior school pathways. Listed as one set
+  // because a school teaches across the grades and the grade field
+  // already distinguishes the level.
+  { id: 'cbe_english',         name: 'English',                    category: 'Languages',   availableIn: ['KenyaCBE'] },
+  { id: 'cbe_kiswahili',       name: 'Kiswahili',                  category: 'Languages',   availableIn: ['KenyaCBE'] },
+  { id: 'cbe_mathematics',     name: 'Mathematics',                category: 'Mathematics', availableIn: ['KenyaCBE'] },
+  { id: 'cbe_integrated_sci',  name: 'Integrated Science',         category: 'Sciences',    availableIn: ['KenyaCBE'] },
+  { id: 'cbe_biology',         name: 'Biology',                    category: 'Sciences',    availableIn: ['KenyaCBE'] },
+  { id: 'cbe_chemistry',       name: 'Chemistry',                  category: 'Sciences',    availableIn: ['KenyaCBE'] },
+  { id: 'cbe_physics',         name: 'Physics',                    category: 'Sciences',    availableIn: ['KenyaCBE'] },
+  { id: 'cbe_social_studies',  name: 'Social Studies',             category: 'Humanities',  availableIn: ['KenyaCBE'] },
+  { id: 'cbe_cre',             name: 'Christian Religious Education', category: 'Humanities', availableIn: ['KenyaCBE'] },
+  { id: 'cbe_ire',             name: 'Islamic Religious Education', category: 'Humanities',  availableIn: ['KenyaCBE'] },
+  { id: 'cbe_agriculture',     name: 'Agriculture',                category: 'Sciences',    availableIn: ['KenyaCBE'] },
+  { id: 'cbe_business',        name: 'Business Studies',           category: 'Business & Social Sciences', availableIn: ['KenyaCBE'] },
+  { id: 'cbe_computer_sci',    name: 'Computer Science',           category: 'Technology',  availableIn: ['KenyaCBE'] },
+  { id: 'cbe_pretech',         name: 'Pre-Technical Studies',      category: 'Technology',  availableIn: ['KenyaCBE'] },
+  { id: 'cbe_creative_arts',   name: 'Creative Arts & Sports',     category: 'Creative Arts', availableIn: ['KenyaCBE'] },
+
+  // ── KCSE (Form 3-4, phasing out) ───────────────────────────
+  // Deliberately its own set. When the last cohort sits the exam, these
+  // entries and the curriculum go together in one move.
+  { id: 'kcse_english',        name: 'English',                    category: 'Languages',   availableIn: ['KCSE'] },
+  { id: 'kcse_kiswahili',      name: 'Kiswahili',                  category: 'Languages',   availableIn: ['KCSE'] },
+  { id: 'kcse_mathematics',    name: 'Mathematics',                category: 'Mathematics', availableIn: ['KCSE'] },
+  { id: 'kcse_biology',        name: 'Biology',                    category: 'Sciences',    availableIn: ['KCSE'] },
+  { id: 'kcse_chemistry',      name: 'Chemistry',                  category: 'Sciences',    availableIn: ['KCSE'] },
+  { id: 'kcse_physics',        name: 'Physics',                    category: 'Sciences',    availableIn: ['KCSE'] },
+  { id: 'kcse_geography',      name: 'Geography',                  category: 'Humanities',  availableIn: ['KCSE'] },
+  { id: 'kcse_history',        name: 'History & Government',       category: 'Humanities',  availableIn: ['KCSE'] },
+  { id: 'kcse_cre',            name: 'Christian Religious Education', category: 'Humanities', availableIn: ['KCSE'] },
+  { id: 'kcse_business',       name: 'Business Studies',           category: 'Business & Social Sciences', availableIn: ['KCSE'] },
+  { id: 'kcse_agriculture',    name: 'Agriculture',                category: 'Sciences',    availableIn: ['KCSE'] },
+  { id: 'kcse_computer',       name: 'Computer Studies',           category: 'Technology',  availableIn: ['KCSE'] },
+
   // ── Edexcel iPrimary (Years 1-6) ───────────────────────────
   // Pearson iPrimary covers four subjects. Listed explicitly rather than
   // inherited, for the same reason Lower Secondary is: a Year 2 pupil
@@ -280,7 +328,7 @@ const getSubjectsForCurriculum = (curriculumId) => {
   // Psychology to Primary and Lower Secondary pupils. EXPLICIT_ONLY is
   // kept as a guard in case an 'all' entry is ever reintroduced.
   const EXPLICIT_ONLY = ['CambridgePrimary', 'EdexcelPrimary', 'CambridgeLowerSec',
-                         'EdexcelLowerSec', 'IBPYP', 'IBMYP']
+                         'EdexcelLowerSec', 'KenyaCBE', 'KCSE', 'IBPYP', 'IBMYP']
   const filtered = SUBJECTS.filter(s => {
     if (EXPLICIT_ONLY.includes(curriculumId)) {
       return Array.isArray(s.availableIn) && s.availableIn.includes(curriculumId)
@@ -312,7 +360,7 @@ const isSubjectValidForCurriculum = (subjectId, curriculumId) => {
   // Explicit-only curricula match only subjects that list them by id
   // ('all' means all secondary curricula — see getSubjectsForCurriculum).
   if (['CambridgePrimary', 'EdexcelPrimary', 'CambridgeLowerSec',
-       'EdexcelLowerSec', 'IBPYP', 'IBMYP'].includes(curriculumId)) {
+       'EdexcelLowerSec', 'KenyaCBE', 'KCSE', 'IBPYP', 'IBMYP'].includes(curriculumId)) {
     return Array.isArray(subject.availableIn) && subject.availableIn.includes(curriculumId)
   }
   return subject.availableIn === 'all' || subject.availableIn.includes(curriculumId)
