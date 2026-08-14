@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { useStore, api } from '../../../../context/ctx.jsx'
 import { TOKENS } from '../shared/tokens.js'
 import { PCard, PKpi, PSection } from '../shared/ui.jsx'
-import { IGCSE_LIBRARY, IGCSE_MATHS_0580, LOWER_SEC_LIBRARY, PRIMARY_LIBRARY, PRIMARY_Y5_LIBRARY } from './spineData.js'
+import { ALEVEL_LIBRARY, IGCSE_LIBRARY, IGCSE_MATHS_0580, LOWER_SEC_LIBRARY, PRIMARY_LIBRARY, PRIMARY_Y5_LIBRARY } from './spineData.js'
 
 function SubjectsTab({ toast }) {
   // The 15 curricula from the new catalog
@@ -434,7 +434,7 @@ function SyllabusSpineTab({ toast }) {
       })
       if (data?.success) { toast?.ok?.(data.message || 'Loaded.'); loadSpine(subjectId) }
       else toast?.error?.(data?.message || 'Failed.')
-    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Failed to load structure.') }
+    } catch (e) { await handleSpineError(e, { subjectId, topics: IGCSE_MATHS_0580, sourceSyllabus: 'IGCSE Mathematics — 42-lesson scheme (Cambridge 0580 & Edexcel A 4MA1)', }) }
     finally { setBusy(false) }
   }
 
@@ -461,7 +461,7 @@ function SyllabusSpineTab({ toast }) {
       })
       if (data?.success) { toast?.ok?.(data.message || 'Loaded.'); loadSpine(subjectId) }
       else toast?.error?.(data?.message || 'Failed.')
-    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Failed to load structure.') }
+    } catch (e) { await handleSpineError(e, { subjectId, topics: entry.const_, sourceSyllabus: entry.source, }) }
     finally { setBusy(false) }
   }
 
@@ -481,7 +481,7 @@ function SyllabusSpineTab({ toast }) {
       })
       if (data?.success) { toast?.ok?.(data.message || 'Loaded.'); loadSpine(subjectId) }
       else toast?.error?.(data?.message || 'Failed.')
-    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Failed to load structure.') }
+    } catch (e) { await handleSpineError(e, { subjectId, topics: entry.const_, sourceSyllabus: entry.source, }) }
     finally { setBusy(false) }
   }
 
@@ -500,7 +500,66 @@ function SyllabusSpineTab({ toast }) {
       })
       if (data?.success) { toast?.ok?.(data.message || 'Loaded.'); loadSpine(subjectId) }
       else toast?.error?.(data?.message || 'Failed.')
-    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Failed to load structure.') }
+    } catch (e) { await handleSpineError(e, { subjectId, topics: entry.const_, sourceSyllabus: entry.source, }) }
+    finally { setBusy(false) }
+  }
+
+  /**
+   * Handle a failed spine load.
+   *
+   * The bulk route now answers 409 with a code when the load would put
+   * the wrong subject's content in place (SUBJECT_MISMATCH) or would
+   * orphan questions (WOULD_ORPHAN_QUESTIONS). Those need the reason
+   * shown and an explicit override, not a generic "failed" toast.
+   *
+   * Returns true when it handled the error itself.
+   */
+  const handleSpineError = async (e, payload) => {
+    const d = e?.response?.data
+    if (e?.response?.status !== 409 || !d?.code) {
+      toast?.error?.(d?.message || 'Failed to load structure.')
+      return true
+    }
+    if (!window.confirm(d.message + '\n\nPress OK only if you are certain. Cancel to stop.')) {
+      toast?.info?.('Cancelled — nothing was changed.')
+      return true
+    }
+    try {
+      const { data } = await api.post('/syllabus/bulk', {
+        ...payload, overrideSubjectCheck: true, acceptOrphans: true,
+      })
+      if (data?.success) { toast?.ok?.(data.message || 'Loaded.'); loadSpine(payload.subjectId) }
+      else toast?.error?.(data?.message || 'Failed.')
+    } catch (e2) {
+      toast?.error?.(e2?.response?.data?.message || 'Failed to load structure.')
+    }
+    return true
+  }
+
+  /**
+   * Load a Cambridge A Level spine.
+   *
+   * Kept separate from the IGCSE loader because subject NAMES collide —
+   * "Biology" exists at both levels — so a single combined library
+   * would happily put an IGCSE spine on an A Level subject.
+   */
+  const loadALevelSpine = async () => {
+    if (!subjectId) { toast?.error?.('Pick a subject first.'); return }
+    const subjectName = subjects.find(s => s._id === subjectId)?.subjectName || ''
+    const entry = ALEVEL_LIBRARY.find(e => e.match.test(subjectName))
+    if (!entry) {
+      toast?.error?.(`No A Level spine matches "${subjectName}". Available: `
+        + ALEVEL_LIBRARY.map(e => (e.source || '').split(' \u2014 ')[0]).join(', '))
+      return
+    }
+    setBusy(true)
+    try {
+      const { data } = await api.post('/syllabus/bulk', {
+        subjectId, topics: entry.const_, sourceSyllabus: entry.source,
+      })
+      if (data?.success) { toast?.ok?.(data.message || 'Loaded.'); loadSpine(subjectId) }
+      else toast?.error?.(data?.message || 'Failed.')
+    } catch (e) { await handleSpineError(e, { subjectId, topics: entry.const_, sourceSyllabus: entry.source }) }
     finally { setBusy(false) }
   }
 
@@ -522,7 +581,7 @@ function SyllabusSpineTab({ toast }) {
       })
       if (data?.success) { toast?.ok?.(data.message || 'Loaded.'); loadSpine(subjectId) }
       else toast?.error?.(data?.message || 'Failed.')
-    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Failed to load structure.') }
+    } catch (e) { await handleSpineError(e, { subjectId, topics: entry.const_, sourceSyllabus: entry.source, }) }
     finally { setBusy(false) }
   }
 
@@ -577,6 +636,14 @@ function SyllabusSpineTab({ toast }) {
                 background: '#fff', color: '#9A7B16', border: '1.5px dashed ' + TOKENS.gold,
                 borderRadius: 7, padding: '8px 16px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
               }}>Load IGCSE spine</button>
+            )}
+            {curriculum === 'CambridgeALevel' && (
+              <button onClick={loadALevelSpine} disabled={busy}
+                title="Auto-detects which Cambridge A Level spine matches the selected subject. AS and A2 arrive as one spine with topics prefixed 'AS ·' and 'A2 ·', so either half can be filtered on its own."
+                style={{
+                  background: '#fff', color: '#9A7B16', border: '1.5px dashed ' + TOKENS.gold,
+                  borderRadius: 7, padding: '8px 16px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+                }}>Load A Level spine</button>
             )}
             <button style={{ background:'#FDFAF4', color:'#7D1025', border:'1.5px solid #C9A030', borderRadius:8, padding:'8px 14px', fontSize:12.5, fontWeight:700, cursor:'pointer' }}
               onClick={() => {
