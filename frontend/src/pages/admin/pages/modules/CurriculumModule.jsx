@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { useStore, api } from '../../../../context/ctx.jsx'
 import { TOKENS } from '../shared/tokens.js'
 import { PCard, PKpi, PSection } from '../shared/ui.jsx'
-import { ALEVEL_LIBRARY, IGCSE_LIBRARY, IGCSE_MATHS_0580, LOWER_SEC_LIBRARY, PRIMARY_LIBRARY, PRIMARY_Y5_LIBRARY } from './spineData.js'
+import { IAL_LIBRARY, ALEVEL_LIBRARY, IGCSE_LIBRARY, IGCSE_MATHS_0580, LOWER_SEC_LIBRARY, PRIMARY_LIBRARY, PRIMARY_Y5_LIBRARY } from './spineData.js'
 
 function SubjectsTab({ toast }) {
   // The 15 curricula from the new catalog
@@ -543,6 +543,34 @@ function SyllabusSpineTab({ toast }) {
    * "Biology" exists at both levels — so a single combined library
    * would happily put an IGCSE spine on an A Level subject.
    */
+  /**
+   * Load an Edexcel International A Level spine.
+   *
+   * Separate from the Cambridge A Level loader because subject names are
+   * identical across the boards and the structures differ fundamentally:
+   * Edexcel IAL is unit-based and modular, Cambridge is AS/A2. One
+   * combined library would load the wrong scheme.
+   */
+  const loadIALSpine = async () => {
+    if (!subjectId) { toast?.error?.('Pick a subject first.'); return }
+    const subjectName = subjects.find(s => s._id === subjectId)?.subjectName || ''
+    const entry = IAL_LIBRARY.find(e => e.match.test(subjectName))
+    if (!entry) {
+      toast?.error?.(`No Edexcel International A Level spine matches "${subjectName}". Available: `
+        + IAL_LIBRARY.map(e => (e.source || '').replace('Edexcel International A Level ', '').split(' \u2014 ')[0]).join(', '))
+      return
+    }
+    setBusy(true)
+    try {
+      const { data } = await api.post('/syllabus/bulk', {
+        subjectId, topics: entry.const_, sourceSyllabus: entry.source,
+      })
+      if (data?.success) { toast?.ok?.(data.message || 'Loaded.'); loadSpine(subjectId) }
+      else toast?.error?.(data?.message || 'Failed.')
+    } catch (e) { await handleSpineError(e, { subjectId, topics: entry.const_, sourceSyllabus: entry.source }) }
+    finally { setBusy(false) }
+  }
+
   const loadALevelSpine = async () => {
     if (!subjectId) { toast?.error?.('Pick a subject first.'); return }
     const subjectName = subjects.find(s => s._id === subjectId)?.subjectName || ''
@@ -636,6 +664,14 @@ function SyllabusSpineTab({ toast }) {
                 background: '#fff', color: '#9A7B16', border: '1.5px dashed ' + TOKENS.gold,
                 borderRadius: 7, padding: '8px 16px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
               }}>Load IGCSE spine</button>
+            )}
+            {curriculum === 'EdexcelALevel' && (
+              <button onClick={loadIALSpine} disabled={busy}
+                title="Auto-detects which Edexcel International A Level spine matches the selected subject. IAL is unit-based: topics arrive prefixed 'U1 ·' to 'U6 ·' so a single unit can be filtered on its own."
+                style={{
+                  background: '#fff', color: '#9A7B16', border: '1.5px dashed ' + TOKENS.gold,
+                  borderRadius: 7, padding: '8px 16px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+                }}>Load Edexcel IAL spine</button>
             )}
             {curriculum === 'CambridgeALevel' && (
               <button onClick={loadALevelSpine} disabled={busy}
