@@ -723,7 +723,21 @@ router.get('/spine-subjects', auth, async (req, res) => {
 router.get('/artwork/pending', auth, requireRole('teacher', 'admin'), async (req, res) => {
   try {
     const { subject, curriculum, grade, kind } = req.query;
-    const filter = { 'artwork.required': true, 'artwork.status': 'pending' };
+    // Match a question that needs a figure by EITHER signal.
+    //
+    // The queue used to require artwork.status === 'pending', but the bulk
+    // importer only builds an artwork object when the payload supplies
+    // one. A question flagged with imageNeeded alone had no artwork object
+    // at all, so it was held inactive AND absent from this queue — 565
+    // questions invisible in both directions, which is what teachers were
+    // seeing as an empty screen.
+    const filter = {
+      $or: [
+        { 'artwork.required': true, 'artwork.status': 'pending' },
+        { 'artwork.required': true, 'artwork.status': { $exists: false } },
+        { imageNeeded: true, 'artwork.status': { $ne: 'done' } },
+      ],
+    };
     if (subject)    filter.subject    = subject;
     if (curriculum) filter.$and = [...(filter.$and || []),
       { $or: [{ curriculum }, { curricula: curriculum }] }];
@@ -754,11 +768,19 @@ router.get('/artwork/pending', auth, requireRole('teacher', 'admin'), async (req
 
       // Specialities store subjectId, so resolve them to subject names.
       const subjectIds = specialties.map(sp => sp.subjectId).filter(Boolean);
+      // The field is subjectName, not name. Selecting 'name' returned
+      // undefined for every subject, so allowedNames was always empty and
+      // every teacher got the "could not be matched" message with an empty
+      // queue — even when their specialities were set correctly.
       const subjectDocs = subjectIds.length
-        ? await Subject.find({ _id: { $in: subjectIds } }).select('name curriculum').lean()
+        ? await Subject.find({ _id: { $in: subjectIds } }).select('subjectName curriculum').lean()
         : [];
 
-      const allowedNames = [...new Set(subjectDocs.map(d => d.name).filter(Boolean))];
+      const byId = {};
+      subjectDocs.forEach(d => { byId[String(d._id)] = d; });
+      const allowedNames = [...new Set(specialties
+        .map(sp => (sp.subjectId && byId[String(sp.subjectId)]?.subjectName) || sp.subject)
+        .filter(Boolean))];
       const allowedCurricula = [...new Set(specialties.map(sp => sp.curriculum).filter(Boolean))];
 
       if (!allowedNames.length) {
