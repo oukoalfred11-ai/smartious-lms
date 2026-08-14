@@ -6509,6 +6509,420 @@ const ALEVEL_ENGLISH_LIT_9695 = [
     ] },
 ]
 
+// Cambridge International AS & A Level Accounting 9706
+// Lesson-level spine, 14 topics / 168 lessons.
+//
+// SEQUENCING
+// As with the IGCSE spine, this follows the TEACHING order rather than
+// the syllabus document's listing order. Financial accounting is built
+// first and secured before cost and management accounting begins,
+// because a student who cannot prepare a statement of financial
+// position cannot interpret one, and cannot cost a product without
+// understanding how costs behave in the accounts.
+//
+// A2 adds two genuinely new strands: limited company regulation and
+// business purchase, and the whole of management accounting — costing
+// methods, budgeting, standard costing and investment appraisal.
+const ALEVEL_ACCOUNTING_9706 = [
+  // ─────────────── AS ───────────────
+  { topic: 'AS \u00b7 1 The Accounting Framework', code: 'AS1',
+    subtopics: [
+      { name: 'The Purpose of Accounting & Its Users', code: 'AS1.1' },
+      { name: 'The Accounting Equation & Duality', code: 'AS1.2' },
+      { name: 'Accounting Concepts: Going Concern, Accruals & Consistency', code: 'AS1.3' },
+      { name: 'Prudence, Materiality & Business Entity', code: 'AS1.4' },
+      { name: 'Realisation, Substance over Form & Money Measurement', code: 'AS1.5' },
+      { name: 'International Accounting Standards & Terminology', code: 'AS1.6' },
+      { name: 'Ethical Considerations in Accounting', code: 'AS1.7' },
+    ] },
+
+  { topic: 'AS \u00b7 2 Double Entry & Books of Prime Entry', code: 'AS2',
+    subtopics: [
+      { name: 'The Ledger & The Rules of Debit and Credit', code: 'AS2.1' },
+      { name: 'Recording Transactions in Ledger Accounts', code: 'AS2.2' },
+      { name: 'Balancing Accounts & Interpreting Balances', code: 'AS2.3' },
+      { name: 'Source Documents & Their Purpose', code: 'AS2.4' },
+      { name: 'Sales, Purchases & Returns Journals', code: 'AS2.5' },
+      { name: 'The General Journal & Narratives', code: 'AS2.6' },
+      { name: 'The Cash Book & Discount Columns', code: 'AS2.7' },
+      { name: 'The Petty Cash Book & Imprest System', code: 'AS2.8' },
+      { name: 'The Trial Balance & Its Limitations', code: 'AS2.9' },
+    ] },
+
+  { topic: 'AS \u00b7 3 Verification & Correction', code: 'AS3',
+    subtopics: [
+      { name: 'Errors Not Revealed by a Trial Balance', code: 'AS3.1' },
+      { name: 'Correcting Errors by Journal Entry', code: 'AS3.2' },
+      { name: 'The Suspense Account', code: 'AS3.3' },
+      { name: 'Statements of Corrected Profit', code: 'AS3.4' },
+      { name: 'Bank Reconciliation: Timing Differences', code: 'AS3.5' },
+      { name: 'Preparing a Bank Reconciliation Statement', code: 'AS3.6' },
+      { name: 'Sales & Purchases Ledger Control Accounts', code: 'AS3.7' },
+      { name: 'Reconciling Control Accounts with the Ledgers', code: 'AS3.8' },
+    ] },
+
+  { topic: 'AS \u00b7 4 Year-End Adjustments', code: 'AS4',
+    subtopics: [
+      { name: 'Accrued & Prepaid Expenses', code: 'AS4.1' },
+      { name: 'Accrued & Prepaid Income', code: 'AS4.2' },
+      { name: 'Depreciation: Purpose & Causes', code: 'AS4.3' },
+      { name: 'Straight-Line & Reducing Balance Methods', code: 'AS4.4' },
+      { name: 'Revaluation Method & Choosing a Method', code: 'AS4.5' },
+      { name: 'Provision for Depreciation Accounts', code: 'AS4.6' },
+      { name: 'Disposal of Non-Current Assets', code: 'AS4.7' },
+      { name: 'Irrecoverable Debts & Recovery', code: 'AS4.8' },
+      { name: 'Provision for Doubtful Debts', code: 'AS4.9' },
+      { name: 'Inventory Valuation: Cost & Net Realisable Value', code: 'AS4.10' },
+      { name: 'Capital & Revenue Expenditure', code: 'AS4.11' },
+      { name: 'Effect of Adjustments on Profit & Position', code: 'AS4.12' },
+    ] },
+
+  { topic: 'AS \u00b7 5 Financial Statements: Sole Traders & Partnerships', code: 'AS5',
+    subtopics: [
+      { name: 'The Income Statement of a Sole Trader', code: 'AS5.1' },
+      { name: 'The Statement of Financial Position of a Sole Trader', code: 'AS5.2' },
+      { name: 'Preparing Statements from a Trial Balance', code: 'AS5.3' },
+      { name: 'Incomplete Records: Statement of Affairs Method', code: 'AS5.4' },
+      { name: 'Incomplete Records: Using Mark-Up & Margin', code: 'AS5.5' },
+      { name: 'Constructing Missing Figures', code: 'AS5.6' },
+      { name: 'The Partnership Agreement & Its Terms', code: 'AS5.7' },
+      { name: 'The Appropriation Account', code: 'AS5.8' },
+      { name: 'Capital & Current Accounts of Partners', code: 'AS5.9' },
+      { name: 'Partnership Financial Statements', code: 'AS5.10' },
+      { name: 'Manufacturing Accounts: Prime Cost & Cost of Production', code: 'AS5.11' },
+      { name: 'Work in Progress & Factory Profit', code: 'AS5.12' },
+      { name: 'Clubs & Societies: Receipts and Payments', code: 'AS5.13' },
+      { name: 'Income and Expenditure Accounts & Accumulated Fund', code: 'AS5.14' },
+    ] },
+
+  { topic: 'AS \u00b7 6 Limited Companies (Introduction)', code: 'AS6',
+    subtopics: [
+      { name: 'Features of a Limited Company', code: 'AS6.1' },
+      { name: 'Ordinary & Preference Share Capital', code: 'AS6.2' },
+      { name: 'Debentures & Loan Capital', code: 'AS6.3' },
+      { name: 'Reserves: Revenue & Capital', code: 'AS6.4' },
+      { name: 'The Income Statement of a Limited Company', code: 'AS6.5' },
+      { name: 'The Statement of Financial Position of a Limited Company', code: 'AS6.6' },
+      { name: 'Statement of Changes in Equity', code: 'AS6.7' },
+      { name: 'Rights Issues & Bonus Issues', code: 'AS6.8' },
+    ] },
+
+  { topic: 'AS \u00b7 7 Analysis & Cost Introduction', code: 'AS7',
+    subtopics: [
+      { name: 'Profitability Ratios & Their Interpretation', code: 'AS7.1' },
+      { name: 'Liquidity Ratios: Current & Liquid', code: 'AS7.2' },
+      { name: 'Efficiency Ratios: Turnover & Days', code: 'AS7.3' },
+      { name: 'Limitations of Ratio Analysis', code: 'AS7.4' },
+      { name: 'Interpreting Ratios for Different Stakeholders', code: 'AS7.5' },
+      { name: 'Cost Classification: Fixed, Variable & Semi-Variable', code: 'AS7.6' },
+      { name: 'Direct & Indirect Costs', code: 'AS7.7' },
+      { name: 'Contribution & Break-Even Analysis', code: 'AS7.8' },
+      { name: 'Margin of Safety & Target Profit', code: 'AS7.9' },
+      { name: 'Limitations of Break-Even Analysis', code: 'AS7.10' },
+    ] },
+
+  // ─────────────── A2 ───────────────
+  { topic: 'A2 \u00b7 8 Limited Company Regulation & Reporting', code: 'A2-8',
+    subtopics: [
+      { name: 'IAS 1: Presentation of Financial Statements', code: 'A2-8.1' },
+      { name: 'IAS 2: Inventories', code: 'A2-8.2' },
+      { name: 'IAS 7: Statements of Cash Flows', code: 'A2-8.3' },
+      { name: 'Preparing a Statement of Cash Flows', code: 'A2-8.4' },
+      { name: 'Interpreting a Statement of Cash Flows', code: 'A2-8.5' },
+      { name: 'IAS 8, 10 & 16: Policies, Events & Property', code: 'A2-8.6' },
+      { name: 'IAS 36, 37 & 38: Impairment, Provisions & Intangibles', code: 'A2-8.7' },
+      { name: 'Revaluation of Non-Current Assets', code: 'A2-8.8' },
+      { name: 'Auditing & The Auditor\u2019s Report', code: 'A2-8.9' },
+      { name: 'Corporate Governance & Directors\u2019 Responsibilities', code: 'A2-8.10' },
+    ] },
+
+  { topic: 'A2 \u00b7 9 Business Purchase & Partnership Changes', code: 'A2-9',
+    subtopics: [
+      { name: 'Admission of a New Partner', code: 'A2-9.1' },
+      { name: 'Goodwill: Nature, Valuation & Treatment', code: 'A2-9.2' },
+      { name: 'Revaluation of Assets on a Change in Partnership', code: 'A2-9.3' },
+      { name: 'Retirement or Death of a Partner', code: 'A2-9.4' },
+      { name: 'Dissolution of a Partnership', code: 'A2-9.5' },
+      { name: 'The Garner v Murray Rule', code: 'A2-9.6' },
+      { name: 'Conversion of a Partnership into a Limited Company', code: 'A2-9.7' },
+      { name: 'Purchase of a Business & Recording the Acquisition', code: 'A2-9.8' },
+    ] },
+
+  { topic: 'A2 \u00b7 10 Advanced Analysis & Interpretation', code: 'A2-10',
+    subtopics: [
+      { name: 'Gearing & Capital Structure', code: 'A2-10.1' },
+      { name: 'Investor Ratios: EPS, P/E & Dividend Cover', code: 'A2-10.2' },
+      { name: 'Return on Capital Employed in Depth', code: 'A2-10.3' },
+      { name: 'Working Capital Management', code: 'A2-10.4' },
+      { name: 'Inter-Firm Comparison & Its Difficulties', code: 'A2-10.5' },
+      { name: 'Trend Analysis Over Several Years', code: 'A2-10.6' },
+      { name: 'Advising Stakeholders from Ratio Evidence', code: 'A2-10.7' },
+      { name: 'Non-Financial Factors in Business Decisions', code: 'A2-10.8' },
+    ] },
+
+  { topic: 'A2 \u00b7 11 Costing Methods', code: 'A2-11',
+    subtopics: [
+      { name: 'Absorption Costing: Allocation & Apportionment', code: 'A2-11.1' },
+      { name: 'Overhead Absorption Rates', code: 'A2-11.2' },
+      { name: 'Over- and Under-Absorption of Overheads', code: 'A2-11.3' },
+      { name: 'Marginal Costing & Contribution', code: 'A2-11.4' },
+      { name: 'Comparing Marginal & Absorption Costing Profit', code: 'A2-11.5' },
+      { name: 'Reconciling Profit Under the Two Methods', code: 'A2-11.6' },
+      { name: 'Activity Based Costing: Cost Drivers & Pools', code: 'A2-11.7' },
+      { name: 'Calculating Cost per Unit Under ABC', code: 'A2-11.8' },
+      { name: 'Evaluating ABC Against Traditional Costing', code: 'A2-11.9' },
+      { name: 'Job, Batch & Unit Costing', code: 'A2-11.10' },
+      { name: 'Limiting Factor Analysis & Contribution per Unit', code: 'A2-11.11' },
+      { name: 'Make or Buy & Special Order Decisions', code: 'A2-11.12' },
+    ] },
+
+  { topic: 'A2 \u00b7 12 Budgeting & Standard Costing', code: 'A2-12',
+    subtopics: [
+      { name: 'The Purpose & Benefits of Budgeting', code: 'A2-12.1' },
+      { name: 'Preparing Sales, Production & Purchases Budgets', code: 'A2-12.2' },
+      { name: 'Labour & Overhead Budgets', code: 'A2-12.3' },
+      { name: 'The Cash Budget', code: 'A2-12.4' },
+      { name: 'Master Budget & Budgeted Financial Statements', code: 'A2-12.5' },
+      { name: 'Flexed Budgets', code: 'A2-12.6' },
+      { name: 'Behavioural Aspects of Budgeting', code: 'A2-12.7' },
+      { name: 'Standard Costing & Setting Standards', code: 'A2-12.8' },
+      { name: 'Material Price & Usage Variances', code: 'A2-12.9' },
+      { name: 'Labour Rate & Efficiency Variances', code: 'A2-12.10' },
+      { name: 'Sales Price & Volume Variances', code: 'A2-12.11' },
+      { name: 'Fixed & Variable Overhead Variances', code: 'A2-12.12' },
+      { name: 'Reconciling Budgeted & Actual Profit', code: 'A2-12.13' },
+      { name: 'Investigating & Interpreting Variances', code: 'A2-12.14' },
+    ] },
+
+  { topic: 'A2 \u00b7 13 Investment Appraisal', code: 'A2-13',
+    subtopics: [
+      { name: 'Capital Investment Decisions & Relevant Cash Flows', code: 'A2-13.1' },
+      { name: 'Payback Period', code: 'A2-13.2' },
+      { name: 'Accounting Rate of Return', code: 'A2-13.3' },
+      { name: 'The Time Value of Money & Discount Factors', code: 'A2-13.4' },
+      { name: 'Net Present Value', code: 'A2-13.5' },
+      { name: 'Internal Rate of Return', code: 'A2-13.6' },
+      { name: 'Comparing Appraisal Methods', code: 'A2-13.7' },
+      { name: 'Sensitivity & Non-Financial Factors', code: 'A2-13.8' },
+    ] },
+
+  { topic: 'A2 \u00b7 Exam Technique & Revision', code: 'A2-EX',
+    subtopics: [
+      { name: 'Paper Structure & Time Allocation', code: 'A2-EX.1' },
+      { name: 'Layout & Presentation Marks in Financial Statements', code: 'A2-EX.2' },
+      { name: 'Showing Workings & Own-Figure Marks', code: 'A2-EX.3' },
+      { name: 'Command Words: Prepare, Calculate, Analyse, Advise', code: 'A2-EX.4' },
+      { name: 'Writing Evaluative Answers in Accounting', code: 'A2-EX.5' },
+      { name: 'Past Paper Practice: Financial Accounting', code: 'A2-EX.6' },
+      { name: 'Past Paper Practice: Cost & Management Accounting', code: 'A2-EX.7' },
+      { name: 'Mock Exam Review & Revision Planning', code: 'A2-EX.8' },
+    ] },
+]
+
+// Cambridge International AS & A Level Psychology 9990
+// Lesson-level spine, 14 topics / 166 lessons.
+//
+// RESEARCH METHODS ARE A STRAND, NOT A TOPIC
+// 9990 assesses research methods in EVERY paper, including through the
+// core studies at AS and the applied options at A2. Teaching them once
+// and moving on does not work, so methods appear as their own strand at
+// both levels and the core studies are grouped by approach so that the
+// method used is visible alongside the finding.
+//
+// A2 is structured around the four applied options. Most centres teach
+// two of them; prefixing each option separately means a centre teaching
+// Health and Organisational can filter to exactly those and never see
+// Clinical or Consumer lessons in their bank.
+const ALEVEL_PSYCHOLOGY_9990 = [
+  // ─────────────── AS ───────────────
+  { topic: 'AS \u00b7 1 Research Methods: Foundations', code: 'AS1',
+    subtopics: [
+      { name: 'The Scientific Approach in Psychology', code: 'AS1.1' },
+      { name: 'Aims, Hypotheses & Operationalisation', code: 'AS1.2' },
+      { name: 'Null & Alternative Hypotheses', code: 'AS1.3' },
+      { name: 'Independent, Dependent & Extraneous Variables', code: 'AS1.4' },
+      { name: 'The Laboratory Experiment', code: 'AS1.5' },
+      { name: 'Field & Natural Experiments', code: 'AS1.6' },
+      { name: 'Experimental Designs: Independent, Repeated & Matched', code: 'AS1.7' },
+      { name: 'Counterbalancing & Order Effects', code: 'AS1.8' },
+      { name: 'Self-Report: Questionnaires & Interviews', code: 'AS1.9' },
+      { name: 'Observation: Types & Recording Behaviour', code: 'AS1.10' },
+      { name: 'Case Studies & Correlational Studies', code: 'AS1.11' },
+      { name: 'Sampling Techniques & Their Bias', code: 'AS1.12' },
+      { name: 'Reliability & Validity', code: 'AS1.13' },
+      { name: 'Demand Characteristics & Researcher Effects', code: 'AS1.14' },
+      { name: 'Ethical Guidelines in Psychological Research', code: 'AS1.15' },
+      { name: 'Ethics with Animals in Research', code: 'AS1.16' },
+    ] },
+
+  { topic: 'AS \u00b7 2 Data Handling & Analysis', code: 'AS2',
+    subtopics: [
+      { name: 'Quantitative & Qualitative Data', code: 'AS2.1' },
+      { name: 'Levels of Measurement', code: 'AS2.2' },
+      { name: 'Measures of Central Tendency', code: 'AS2.3' },
+      { name: 'Measures of Spread: Range & Standard Deviation', code: 'AS2.4' },
+      { name: 'Tables, Bar Charts & Histograms', code: 'AS2.5' },
+      { name: 'Scatter Graphs & Correlation', code: 'AS2.6' },
+      { name: 'Interpreting Psychological Data', code: 'AS2.7' },
+      { name: 'Strengths & Weaknesses of Data Types', code: 'AS2.8' },
+    ] },
+
+  { topic: 'AS \u00b7 3 The Biological Approach', code: 'AS3',
+    subtopics: [
+      { name: 'Assumptions of the Biological Approach', code: 'AS3.1' },
+      { name: 'Core Study (Biological): Structure & Method', code: 'AS3.2' },
+      { name: 'Core Study (Biological): Results & Conclusions', code: 'AS3.3' },
+      { name: 'Core Study (Biological): Evaluation & Ethics', code: 'AS3.4' },
+      { name: 'Localisation of Function & Brain Imaging', code: 'AS3.5' },
+      { name: 'Neurotransmitters & Behaviour', code: 'AS3.6' },
+      { name: 'Hormones & Behaviour', code: 'AS3.7' },
+      { name: 'Evaluating the Biological Approach', code: 'AS3.8' },
+    ] },
+
+  { topic: 'AS \u00b7 4 The Cognitive Approach', code: 'AS4',
+    subtopics: [
+      { name: 'Assumptions of the Cognitive Approach', code: 'AS4.1' },
+      { name: 'Core Study (Cognitive): Structure & Method', code: 'AS4.2' },
+      { name: 'Core Study (Cognitive): Results & Conclusions', code: 'AS4.3' },
+      { name: 'Core Study (Cognitive): Evaluation & Ethics', code: 'AS4.4' },
+      { name: 'Memory Models & Processes', code: 'AS4.5' },
+      { name: 'Attention & Perception', code: 'AS4.6' },
+      { name: 'Schema Theory', code: 'AS4.7' },
+      { name: 'Evaluating the Cognitive Approach', code: 'AS4.8' },
+    ] },
+
+  { topic: 'AS \u00b7 5 The Learning Approach', code: 'AS5',
+    subtopics: [
+      { name: 'Assumptions of the Learning Approach', code: 'AS5.1' },
+      { name: 'Classical Conditioning', code: 'AS5.2' },
+      { name: 'Operant Conditioning & Reinforcement Schedules', code: 'AS5.3' },
+      { name: 'Social Learning Theory', code: 'AS5.4' },
+      { name: 'Core Study (Learning): Structure & Method', code: 'AS5.5' },
+      { name: 'Core Study (Learning): Results & Conclusions', code: 'AS5.6' },
+      { name: 'Core Study (Learning): Evaluation & Ethics', code: 'AS5.7' },
+      { name: 'Evaluating the Learning Approach', code: 'AS5.8' },
+    ] },
+
+  { topic: 'AS \u00b7 6 The Social Approach', code: 'AS6',
+    subtopics: [
+      { name: 'Assumptions of the Social Approach', code: 'AS6.1' },
+      { name: 'Obedience & Authority', code: 'AS6.2' },
+      { name: 'Conformity & Group Influence', code: 'AS6.3' },
+      { name: 'Core Study (Social): Structure & Method', code: 'AS6.4' },
+      { name: 'Core Study (Social): Results & Conclusions', code: 'AS6.5' },
+      { name: 'Core Study (Social): Evaluation & Ethics', code: 'AS6.6' },
+      { name: 'Situational vs. Dispositional Explanations', code: 'AS6.7' },
+      { name: 'Evaluating the Social Approach', code: 'AS6.8' },
+    ] },
+
+  { topic: 'AS \u00b7 7 Issues & Debates', code: 'AS7',
+    subtopics: [
+      { name: 'Nature vs. Nurture', code: 'AS7.1' },
+      { name: 'Free Will vs. Determinism', code: 'AS7.2' },
+      { name: 'Reductionism vs. Holism', code: 'AS7.3' },
+      { name: 'Individual & Situational Explanations', code: 'AS7.4' },
+      { name: 'Cultural Bias & Ethnocentrism', code: 'AS7.5' },
+      { name: 'The Use of Children in Research', code: 'AS7.6' },
+      { name: 'Applications of Psychology to Everyday Life', code: 'AS7.7' },
+      { name: 'Applying Issues & Debates to a Named Study', code: 'AS7.8' },
+    ] },
+
+  // ─────────────── A2 ───────────────
+  { topic: 'A2 \u00b7 8 Advanced Research Methods', code: 'A2-8',
+    subtopics: [
+      { name: 'Designing an Investigation from a Brief', code: 'A2-8.1' },
+      { name: 'Justifying Design Decisions', code: 'A2-8.2' },
+      { name: 'Controlling Extraneous Variables in Practice', code: 'A2-8.3' },
+      { name: 'Constructing Questionnaires & Interview Schedules', code: 'A2-8.4' },
+      { name: 'Designing Observational Coding Schemes', code: 'A2-8.5' },
+      { name: 'Inferential Statistics: Purpose & Significance', code: 'A2-8.6' },
+      { name: 'Choosing a Statistical Test', code: 'A2-8.7' },
+      { name: 'Type I & Type II Errors', code: 'A2-8.8' },
+      { name: 'Analysing Qualitative Data', code: 'A2-8.9' },
+      { name: 'Evaluating a Proposed Study', code: 'A2-8.10' },
+    ] },
+
+  { topic: 'A2 \u00b7 Option: Clinical Psychology', code: 'A2-CL',
+    subtopics: [
+      { name: 'Defining & Diagnosing Abnormality', code: 'A2-CL.1' },
+      { name: 'Schizophrenia: Symptoms & Types', code: 'A2-CL.2' },
+      { name: 'Explanations & Treatments of Schizophrenia', code: 'A2-CL.3' },
+      { name: 'Depression: Symptoms & Measurement', code: 'A2-CL.4' },
+      { name: 'Explanations & Treatments of Depression', code: 'A2-CL.5' },
+      { name: 'Impulse Control Disorders', code: 'A2-CL.6' },
+      { name: 'Anxiety Disorders & Phobias', code: 'A2-CL.7' },
+      { name: 'Treatments for Phobias', code: 'A2-CL.8' },
+      { name: 'Obsessive-Compulsive Disorder', code: 'A2-CL.9' },
+      { name: 'Evaluating Clinical Explanations & Treatments', code: 'A2-CL.10' },
+    ] },
+
+  { topic: 'A2 \u00b7 Option: Health Psychology', code: 'A2-HE',
+    subtopics: [
+      { name: 'The Patient-Practitioner Relationship', code: 'A2-HE.1' },
+      { name: 'Adherence to Medical Advice', code: 'A2-HE.2' },
+      { name: 'Improving Adherence', code: 'A2-HE.3' },
+      { name: 'Pain: Types, Theories & Measurement', code: 'A2-HE.4' },
+      { name: 'Managing & Controlling Pain', code: 'A2-HE.5' },
+      { name: 'Stress: Sources & Physiological Effects', code: 'A2-HE.6' },
+      { name: 'Measuring & Managing Stress', code: 'A2-HE.7' },
+      { name: 'Health Promotion & Behaviour Change', code: 'A2-HE.8' },
+      { name: 'Substance Use & Addiction', code: 'A2-HE.9' },
+      { name: 'Evaluating Health Psychology Applications', code: 'A2-HE.10' },
+    ] },
+
+  { topic: 'A2 \u00b7 Option: Organisational Psychology', code: 'A2-OR',
+    subtopics: [
+      { name: 'Motivation to Work: Need Theories', code: 'A2-OR.1' },
+      { name: 'Motivation to Work: Cognitive & Reward Theories', code: 'A2-OR.2' },
+      { name: 'Leadership & Management Styles', code: 'A2-OR.3' },
+      { name: 'Group Dynamics & Decision Making', code: 'A2-OR.4' },
+      { name: 'Organisational Work Conditions & Environment', code: 'A2-OR.5' },
+      { name: 'Shift Work, Health & Safety', code: 'A2-OR.6' },
+      { name: 'Job Satisfaction & Its Measurement', code: 'A2-OR.7' },
+      { name: 'Attitudes to Work & Absenteeism', code: 'A2-OR.8' },
+      { name: 'Personnel Selection & Assessment', code: 'A2-OR.9' },
+      { name: 'Evaluating Organisational Applications', code: 'A2-OR.10' },
+    ] },
+
+  { topic: 'A2 \u00b7 Option: Consumer Psychology', code: 'A2-CO',
+    subtopics: [
+      { name: 'The Physical Retail Environment', code: 'A2-CO.1' },
+      { name: 'Store Layout, Atmospherics & Behaviour', code: 'A2-CO.2' },
+      { name: 'Product Packaging & Positioning', code: 'A2-CO.3' },
+      { name: 'The Psychology of Advertising', code: 'A2-CO.4' },
+      { name: 'Brand Recognition & Loyalty', code: 'A2-CO.5' },
+      { name: 'Consumer Decision Making Models', code: 'A2-CO.6' },
+      { name: 'Choice Heuristics & Biases', code: 'A2-CO.7' },
+      { name: 'Product Testing & Consumer Research', code: 'A2-CO.8' },
+      { name: 'The Psychology of Menu Design & Pricing', code: 'A2-CO.9' },
+      { name: 'Evaluating Consumer Psychology Applications', code: 'A2-CO.10' },
+    ] },
+
+  { topic: 'A2 \u00b7 Issues & Debates Applied', code: 'A2-ID',
+    subtopics: [
+      { name: 'Applying Nature-Nurture to Applied Options', code: 'A2-ID.1' },
+      { name: 'Determinism & Free Will in Applied Contexts', code: 'A2-ID.2' },
+      { name: 'Reductionism & Holism in Applied Psychology', code: 'A2-ID.3' },
+      { name: 'Cultural Bias in Applied Research', code: 'A2-ID.4' },
+      { name: 'Ethics in Applied Settings', code: 'A2-ID.5' },
+      { name: 'Generalisability of Applied Findings', code: 'A2-ID.6' },
+      { name: 'Usefulness of Psychological Research', code: 'A2-ID.7' },
+    ] },
+
+  { topic: 'A2 \u00b7 Exam Technique & Revision', code: 'A2-EX',
+    subtopics: [
+      { name: 'Assessment Objectives in Psychology Papers', code: 'A2-EX.1' },
+      { name: 'Describing a Study Precisely & Concisely', code: 'A2-EX.2' },
+      { name: 'Writing Evaluation Rather Than Description', code: 'A2-EX.3' },
+      { name: 'Answering Design-an-Investigation Questions', code: 'A2-EX.4' },
+      { name: 'Using Named Studies as Supporting Evidence', code: 'A2-EX.5' },
+      { name: 'Command Words in Psychology Papers', code: 'A2-EX.6' },
+      { name: 'Past Paper Practice: Approaches & Research Methods', code: 'A2-EX.7' },
+      { name: 'Past Paper Practice: Applied Options', code: 'A2-EX.8' },
+      { name: 'Mock Exam Review & Revision Planning', code: 'A2-EX.9' },
+    ] },
+]
+
 export const ALEVEL_LIBRARY = [
   { match: /\bbiology\b/i, const_: ALEVEL_BIOLOGY_9700,
     source: 'Cambridge International AS & A Level Biology 9700 \u2014 252-lesson scheme (AS 128 / A2 124)' },
@@ -6522,6 +6936,10 @@ export const ALEVEL_LIBRARY = [
   // English Literature MUST be tested before English Language, or
   // "English Literature" would match a bare /english/ pattern. They are
   // separate syllabuses (9695 and 9093) entered separately.
+  { match: /\baccounting\b/i, const_: ALEVEL_ACCOUNTING_9706,
+    source: 'Cambridge International AS & A Level Accounting 9706 \u2014 168-lesson scheme' },
+  { match: /\bpsychology\b/i, const_: ALEVEL_PSYCHOLOGY_9990,
+    source: 'Cambridge International AS & A Level Psychology 9990 \u2014 166-lesson scheme' },
   { match: /\bliterature\b/i, const_: ALEVEL_ENGLISH_LIT_9695,
     source: 'Cambridge International AS & A Level Literature in English 9695 \u2014 138-lesson scheme' },
   { match: /\benglish\s*language\b|\benglish\b/i, const_: ALEVEL_ENGLISH_LANG_9093,
