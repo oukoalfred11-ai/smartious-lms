@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { useStore, api } from '../../../../context/ctx.jsx'
 import { TOKENS } from '../shared/tokens.js'
 import { PCard, PKpi, PSection } from '../shared/ui.jsx'
-import { IAL_LIBRARY, ALEVEL_LIBRARY, IGCSE_LIBRARY, IGCSE_MATHS_0580, LOWER_SEC_LIBRARY, PRIMARY_LIBRARY, PRIMARY_Y5_LIBRARY } from './spineData.js'
+import { ILOWER_SEC_LIBRARY, IAL_LIBRARY, ALEVEL_LIBRARY, IGCSE_LIBRARY, IGCSE_MATHS_0580, LOWER_SEC_LIBRARY, PRIMARY_LIBRARY, PRIMARY_Y5_LIBRARY } from './spineData.js'
 
 function SubjectsTab({ toast }) {
   // The 15 curricula from the new catalog
@@ -551,6 +551,34 @@ function SyllabusSpineTab({ toast }) {
    * Edexcel IAL is unit-based and modular, Cambridge is AS/A2. One
    * combined library would load the wrong scheme.
    */
+  /**
+   * Load an Edexcel International Lower Secondary spine.
+   *
+   * Separate from the Cambridge Lower Secondary loader: subject names
+   * are identical but the frameworks differ — Cambridge uses Stages 7-9
+   * and splits Science into biology, chemistry and physics strands,
+   * Edexcel uses Years 7-9 and integrates it.
+   */
+  const loadILowerSecSpine = async () => {
+    if (!subjectId) { toast?.error?.('Pick a subject first.'); return }
+    const subjectName = subjects.find(s => s._id === subjectId)?.subjectName || ''
+    const entry = ILOWER_SEC_LIBRARY.find(e => e.match.test(subjectName))
+    if (!entry) {
+      toast?.error?.(`No Edexcel Lower Secondary spine matches "${subjectName}". Available: `
+        + ILOWER_SEC_LIBRARY.map(e => (e.source || '').replace('Edexcel International Lower Secondary ', '').split(' \u2014 ')[0]).join(', '))
+      return
+    }
+    setBusy(true)
+    try {
+      const { data } = await api.post('/syllabus/bulk', {
+        subjectId, topics: entry.const_, sourceSyllabus: entry.source,
+      })
+      if (data?.success) { toast?.ok?.(data.message || 'Loaded.'); loadSpine(subjectId) }
+      else toast?.error?.(data?.message || 'Failed.')
+    } catch (e) { await handleSpineError(e, { subjectId, topics: entry.const_, sourceSyllabus: entry.source }) }
+    finally { setBusy(false) }
+  }
+
   const loadIALSpine = async () => {
     if (!subjectId) { toast?.error?.('Pick a subject first.'); return }
     const subjectName = subjects.find(s => s._id === subjectId)?.subjectName || ''
@@ -664,6 +692,14 @@ function SyllabusSpineTab({ toast }) {
                 background: '#fff', color: '#9A7B16', border: '1.5px dashed ' + TOKENS.gold,
                 borderRadius: 7, padding: '8px 16px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
               }}>Load IGCSE spine</button>
+            )}
+            {curriculum === 'EdexcelLowerSec' && (
+              <button onClick={loadILowerSecSpine} disabled={busy}
+                title="Auto-detects which Edexcel International Lower Secondary spine matches the selected subject. Topics arrive prefixed 'Y7 ·' to 'Y9 ·' so a single year can be filtered on its own."
+                style={{
+                  background: '#fff', color: '#9A7B16', border: '1.5px dashed ' + TOKENS.gold,
+                  borderRadius: 7, padding: '8px 16px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+                }}>Load Edexcel Lower Sec spine</button>
             )}
             {curriculum === 'EdexcelALevel' && (
               <button onClick={loadIALSpine} disabled={busy}
