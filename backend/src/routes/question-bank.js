@@ -1414,19 +1414,19 @@ const SEED_QUESTIONS = [
 // KENYA CBC — MATHEMATICS (Grade 7–9)
 // ══════════════════════════════════════════════════════
 
-{ subject:'Mathematics', topic:'Number and Operations', curriculum:'KenyaCBC', grade:'Grade 7', difficulty:'easy',
+{ subject:'Mathematics', topic:'Number and Operations', curriculum:'KenyaCBE', grade:'Grade 7', difficulty:'easy',
   questionText:'What is 25% of 200?',
   options:['50','25','75','100'],
   correctAnswer:'50',
   explanation:'25% = 25/100 = 1/4. 1/4 of 200 = 50', marks:1 },
 
-{ subject:'Mathematics', topic:'Algebra', curriculum:'KenyaCBC', grade:'Grade 8', difficulty:'easy',
+{ subject:'Mathematics', topic:'Algebra', curriculum:'KenyaCBE', grade:'Grade 8', difficulty:'easy',
   questionText:'Solve for y: 2y − 6 = 10',
   options:['y = 8','y = 2','y = 4','y = 16'],
   correctAnswer:'y = 8',
   explanation:'2y = 10 + 6 = 16, y = 16 ÷ 2 = 8', marks:2 },
 
-{ subject:'Mathematics', topic:'Geometry', curriculum:'KenyaCBC', grade:'Grade 7', difficulty:'easy',
+{ subject:'Mathematics', topic:'Geometry', curriculum:'KenyaCBE', grade:'Grade 7', difficulty:'easy',
   questionText:'What is the perimeter of a square with side length 7 cm?',
   options:['28 cm','49 cm','14 cm','21 cm'],
   correctAnswer:'28 cm',
