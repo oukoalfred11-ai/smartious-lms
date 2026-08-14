@@ -31,11 +31,17 @@ export const TOKENS = {
   spacing: { xs: 4, sm: 8, md: 14, lg: 22, xl: 32, xxl: 48 },
 }
 
+// ⚠ Keep in step with backend constants/curriculum.js — that is the
+// source of truth. This list drives the admin Teachers and Allocations
+// modules; a curriculum missing here cannot be assigned to a teacher,
+// which is how KCSE could be created, spined and loaded yet still be
+// unselectable when saving teaching specialties.
 export const SCHOOL_CURRICULA = [
   { id: 'CambridgePrimary',   name: 'Cambridge Primary' },
   { id: 'CambridgeLowerSec',  name: 'Cambridge Lower Secondary' },
   { id: 'CambridgeIGCSE',     name: 'Cambridge IGCSE' },
   { id: 'CambridgeALevel',    name: 'Cambridge A-Level' },
+  { id: 'EdexcelPrimary',     name: 'Edexcel iPrimary' },
   { id: 'EdexcelLowerSec',    name: 'Edexcel Lower Secondary' },
   { id: 'EdexcelIGCSE',       name: 'Edexcel IGCSE' },
   { id: 'EdexcelALevel',      name: 'Edexcel A-Level' },
@@ -48,5 +54,6 @@ export const SCHOOL_CURRICULA = [
   { id: 'BNC',                name: 'British National Curriculum' },
   { id: 'American',           name: 'American Curriculum' },
   { id: 'Canadian',           name: 'Canadian Curriculum' },
-  { id: 'KenyaCBC',           name: 'Kenya CBC' },
+  { id: 'KenyaCBE',           name: 'Kenya CBE' },
+  { id: 'KCSE',               name: 'KCSE (Form 3-4)' },
 ]
