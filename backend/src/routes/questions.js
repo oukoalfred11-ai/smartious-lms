@@ -467,6 +467,9 @@ router.post('/retag', auth, requireRole('admin', 'ops_manager'), async (req, res
             + (toGrade ? `  grade -> "${toGrade}"` : ''),
           targetSubjectExists: !!subj,
           wouldLink, wouldOrphan, sampleUnmatched,
+          gradeLevelsToFix: (fromGrade && toGrade)
+            ? await Question.countDocuments({ ...filter, gradeLevels: fromGrade })
+            : 0,
         },
         message: !subj
           ? `DRY RUN — ${total} question(s) would be renamed, but no ACTIVE subject `
@@ -479,13 +482,31 @@ router.post('/retag', auth, requireRole('admin', 'ops_manager'), async (req, res
 
     const r = await Question.updateMany(filter, { $set: target });
     const moved = r.modifiedCount ?? r.nModified ?? 0;
+
+    // gradeLevels is the ARRAY of other grades a question is shared with,
+    // and $set on `grade` does not touch it. Leaving it means a question
+    // reads grade:"Form 3" while still carrying "Grade 11 (Form 3)" in its
+    // shared list — and the grade filter searches BOTH, so the stale label
+    // keeps matching.
+    //
+    // arrayFilters replaces just the matching element. A plain $set on the
+    // field would overwrite the whole array and lose the other grades.
+    let levelsFixed = 0;
+    if (fromGrade && toGrade) {
+      const lr = await Question.updateMany(
+        { ...filter, gradeLevels: fromGrade },
+        { $set: { 'gradeLevels.$[lvl]': toGrade } },
+        { arrayFilters: [{ lvl: fromGrade }] });
+      levelsFixed = lr.modifiedCount ?? lr.nModified ?? 0;
+    }
     console.log(`[questions/retag] ${fromSubject}/${fromCurriculum} -> ${target.subject}/${target.curriculum}: `
               + `${moved} question(s) by ${req.user.email}`);
 
     return res.json({
       success: true,
-      data: { moved, wouldLink, wouldOrphan },
+      data: { moved, levelsFixed, wouldLink, wouldOrphan },
       message: `Re-tagged ${moved} question(s) to "${target.subject}" / ${target.curriculum}. `
+             + (levelsFixed ? `${levelsFixed} also had "${fromGrade}" replaced in gradeLevels. ` : '')
              + `${wouldLink} now link to the spine. `
              + `Reverse with fromSubject "${target.subject}", toSubject "${fromSubject}".`,
     });
