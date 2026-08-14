@@ -270,27 +270,41 @@ const ALL_SUBJECTS = [
   { curriculum:'American', subjectName:'Spanish',                     category:'Languages' },
   { curriculum:'American', subjectName:'French',                      category:'Languages' },
 
-  // ── KenyaCBE (was KenyaCBC; renamed 2026-08) ─────────────
-  { curriculum:'KenyaCBE', subjectName:'Mathematics',                 category:'Mathematics' },
-  { curriculum:'KenyaCBE', subjectName:'English',                     category:'Languages' },
-  { curriculum:'KenyaCBE', subjectName:'Kiswahili',                   category:'Languages' },
-  { curriculum:'KenyaCBE', subjectName:'Integrated Science',          category:'Sciences' },
-  { curriculum:'KenyaCBE', subjectName:'Biology',                     category:'Sciences' },
-  { curriculum:'KenyaCBE', subjectName:'Chemistry',                   category:'Sciences' },
-  { curriculum:'KenyaCBE', subjectName:'Physics',                     category:'Sciences' },
-  { curriculum:'KenyaCBE', subjectName:'History & Government',        category:'Humanities' },
-  { curriculum:'KenyaCBE', subjectName:'Geography',                   category:'Humanities' },
-  { curriculum:'KenyaCBE', subjectName:'Christian Religious Education', category:'Humanities' },
-  { curriculum:'KenyaCBE', subjectName:'Islamic Religious Education', category:'Humanities' },
-  { curriculum:'KenyaCBE', subjectName:'Business Studies',            category:'Business' },
-  { curriculum:'KenyaCBE', subjectName:'Computer Studies',            category:'Technology' },
-  { curriculum:'KenyaCBE', subjectName:'Agriculture',                 category:'STEM' },
-  { curriculum:'KenyaCBE', subjectName:'Home Science',                category:'Life Skills' },
-  { curriculum:'KenyaCBE', subjectName:'Art & Craft',                 category:'Arts' },
-  { curriculum:'KenyaCBE', subjectName:'Music',                       category:'Arts' },
-  { curriculum:'KenyaCBE', subjectName:'Physical Education',          category:'Physical Education' },
-  { curriculum:'KenyaCBE', subjectName:'Social Studies',              category:'Social Studies' },
-  { curriculum:'KenyaCBE', subjectName:'Creative Arts',               category:'Arts' },
+  // ── KenyaCBE (Grade 1-12) ────────────────────────────────
+  // Trimmed 2026-08 to the learning areas actually offered. The previous
+  // list carried CBC-era names that duplicated each other: Computer
+  // Studies alongside Computer Science, Art & Craft / Creative Arts /
+  // Visual Arts / Performing Arts for one arts area, Physical Education
+  // beside Physical Education and Sports, and 'History & Government'
+  // which is a DIFFERENT record from 'History and Government' — the
+  // ampersand created a silent duplicate.
+  { curriculum:'KenyaCBE', subjectName:'English',                         category:'Languages' },
+  { curriculum:'KenyaCBE', subjectName:'Kiswahili',                       category:'Languages' },
+  { curriculum:'KenyaCBE', subjectName:'Kenyan Sign Language',            category:'Languages' },
+  { curriculum:'KenyaCBE', subjectName:'Arabic',                          category:'Languages' },
+  { curriculum:'KenyaCBE', subjectName:'French',                          category:'Languages' },
+  { curriculum:'KenyaCBE', subjectName:'German',                          category:'Languages' },
+  { curriculum:'KenyaCBE', subjectName:'Mandarin Chinese',                category:'Languages' },
+  { curriculum:'KenyaCBE', subjectName:'Mathematics',                     category:'Mathematics' },
+  { curriculum:'KenyaCBE', subjectName:'Integrated Science',              category:'Sciences' },
+  { curriculum:'KenyaCBE', subjectName:'Biology',                         category:'Sciences' },
+  { curriculum:'KenyaCBE', subjectName:'Chemistry',                       category:'Sciences' },
+  { curriculum:'KenyaCBE', subjectName:'Physics',                         category:'Sciences' },
+  { curriculum:'KenyaCBE', subjectName:'Agriculture',                     category:'Sciences' },
+  { curriculum:'KenyaCBE', subjectName:'Home Science',                    category:'Sciences' },
+  { curriculum:'KenyaCBE', subjectName:'Social Studies',                  category:'Humanities' },
+  { curriculum:'KenyaCBE', subjectName:'History and Government',          category:'Humanities' },
+  { curriculum:'KenyaCBE', subjectName:'Geography',                       category:'Humanities' },
+  { curriculum:'KenyaCBE', subjectName:'Christian Religious Education',   category:'Humanities' },
+  { curriculum:'KenyaCBE', subjectName:'Islamic Religious Education',     category:'Humanities' },
+  { curriculum:'KenyaCBE', subjectName:'Hindu Religious Education',       category:'Humanities' },
+  { curriculum:'KenyaCBE', subjectName:'Business Studies',                category:'Business' },
+  { curriculum:'KenyaCBE', subjectName:'Computer Science',                category:'Technology' },
+  { curriculum:'KenyaCBE', subjectName:'Pre-Technical Studies',           category:'Technology' },
+  { curriculum:'KenyaCBE', subjectName:'Music',                           category:'Arts' },
+  { curriculum:'KenyaCBE', subjectName:'Physical Education and Sports',   category:'Physical Education' },
+  { curriculum:'KenyaCBE', subjectName:'Health Education',                category:'Life Skills' },
+  { curriculum:'KenyaCBE', subjectName:'Life Skills Education',           category:'Life Skills' },
 
   // ── KCSE (Form 3-4 only, phasing out) ────────────────────
   // Separate from CBE so the whole curriculum can be removed in one move
