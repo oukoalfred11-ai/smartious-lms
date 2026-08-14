@@ -165,6 +165,7 @@ const SUBJECTS = [
   { id: 'kcse_geography',      name: 'Geography',                  category: 'Humanities',  availableIn: ['KCSE'] },
   { id: 'kcse_history',        name: 'History & Government',       category: 'Humanities',  availableIn: ['KCSE'] },
   { id: 'kcse_cre',            name: 'Christian Religious Education', category: 'Humanities', availableIn: ['KCSE'] },
+  { id: 'kcse_ire',            name: 'Islamic Religious Education', category: 'Humanities', availableIn: ['KCSE'] },
   { id: 'kcse_business',       name: 'Business Studies',           category: 'Business & Social Sciences', availableIn: ['KCSE'] },
   { id: 'kcse_agriculture',    name: 'Agriculture',                category: 'Sciences',    availableIn: ['KCSE'] },
   { id: 'kcse_computer',       name: 'Computer Studies',           category: 'Technology',  availableIn: ['KCSE'] },
