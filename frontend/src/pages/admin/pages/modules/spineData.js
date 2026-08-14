@@ -9800,7 +9800,524 @@ const IAL_ACCOUNTING = [
     ] },
 ]
 
+// Pearson Edexcel International A Level
+//   English Language   (YEN01/WEN01) — 4 units / 96 lessons
+//   English Literature (YET01/WET01) — 4 units / 100 lessons
+//   Law                (YLA01/WLA01) — 4 units / 128 lessons
+//
+// ENGLISH IS TWO SUBJECTS, NOT ONE
+// Language and Literature carry separate codes and are entered
+// separately. A candidate may sit either or both. Merging them would
+// make it impossible to build a Language paper without Literature
+// lessons appearing.
+//
+// SET TEXTS ARE NOT NAMED
+// Edexcel prescribes texts that rotate. The Literature topics are built
+// around transferable analytical skills — genre, form, context,
+// comparison — so a teacher files questions about their own prescribed
+// texts against the relevant skill.
+
+const IAL_ENGLISH_LANG = [
+  { topic: 'U1 \u00b7 Language: Context & Identity', code: 'U1',
+    subtopics: [
+      { name: 'What Language Study Involves', code: 'U1.1' },
+      { name: 'Audience, Purpose, Genre & Mode', code: 'U1.2' },
+      { name: 'Lexis & Semantics: Word Choice and Field', code: 'U1.3' },
+      { name: 'Grammar & Syntax for Effect', code: 'U1.4' },
+      { name: 'Phonology & Prosodic Features', code: 'U1.5' },
+      { name: 'Graphology & Visual Design of Texts', code: 'U1.6' },
+      { name: 'Pragmatics & Implied Meaning', code: 'U1.7' },
+      { name: 'Discourse Structure & Cohesion', code: 'U1.8' },
+      { name: 'Register, Formality & Tone', code: 'U1.9' },
+      { name: 'Language & Individual Identity', code: 'U1.10' },
+      { name: 'Sociolect, Idiolect & Dialect', code: 'U1.11' },
+      { name: 'Language & Occupation', code: 'U1.12' },
+      { name: 'Using Linguistic Terminology Accurately', code: 'U1.13' },
+      { name: 'Writing an Integrated Analytical Response', code: 'U1.14' },
+    ] },
+
+  { topic: 'U2 \u00b7 Language in Transition', code: 'U2',
+    subtopics: [
+      { name: 'How & Why Language Changes', code: 'U2.1' },
+      { name: 'Lexical Change: Borrowing, Coinage & Compounding', code: 'U2.2' },
+      { name: 'Semantic Change & Shifting Connotation', code: 'U2.3' },
+      { name: 'Grammatical & Orthographic Change', code: 'U2.4' },
+      { name: 'Working with Historical Text Extracts', code: 'U2.5' },
+      { name: 'Attitudes to Change: Prescriptivism & Descriptivism', code: 'U2.6' },
+      { name: 'The Global Spread of English', code: 'U2.7' },
+      { name: 'World Englishes & Their Features', code: 'U2.8' },
+      { name: 'Pidgins, Creoles & Language Contact', code: 'U2.9' },
+      { name: 'English as a Lingua Franca', code: 'U2.10' },
+      { name: 'Language Death & Language Planning', code: 'U2.11' },
+      { name: 'Interpreting Language Data & Corpora', code: 'U2.12' },
+    ] },
+
+  { topic: 'U3 \u00b7 Crafting Language', code: 'U3',
+    subtopics: [
+      { name: 'Writing for a Specified Audience & Purpose', code: 'U3.1' },
+      { name: 'Writing to Inform & Explain', code: 'U3.2' },
+      { name: 'Writing to Persuade & Argue', code: 'U3.3' },
+      { name: 'Narrative & Descriptive Writing', code: 'U3.4' },
+      { name: 'Journalistic Forms & Their Conventions', code: 'U3.5' },
+      { name: 'Scripted Speech & Talk', code: 'U3.6' },
+      { name: 'Digital & Multimodal Forms', code: 'U3.7' },
+      { name: 'Structuring a Piece for Impact', code: 'U3.8' },
+      { name: 'Crafting Sentences Deliberately', code: 'U3.9' },
+      { name: 'Editing & Redrafting Your Own Work', code: 'U3.10' },
+      { name: 'The Reflective Commentary', code: 'U3.11' },
+      { name: 'Analysing Your Own Language Choices', code: 'U3.12' },
+    ] },
+
+  { topic: 'U4 \u00b7 Investigating Language', code: 'U4',
+    subtopics: [
+      { name: 'Child Language Acquisition: Stages', code: 'U4.1' },
+      { name: 'Theories of Language Acquisition', code: 'U4.2' },
+      { name: 'Child-Directed Speech', code: 'U4.3' },
+      { name: 'Development of Reading & Writing', code: 'U4.4' },
+      { name: 'Language & Gender: Theories and Evidence', code: 'U4.5' },
+      { name: 'Language & Power', code: 'U4.6' },
+      { name: 'Language & Technology', code: 'U4.7' },
+      { name: 'Accommodation Theory', code: 'U4.8' },
+      { name: 'Analysing Spoken Transcripts', code: 'U4.9' },
+      { name: 'Designing a Language Investigation', code: 'U4.10' },
+      { name: 'Collecting & Presenting Language Data', code: 'U4.11' },
+      { name: 'Integrating Theory & Data in an Answer', code: 'U4.12' },
+    ] },
+
+  { topic: 'Exam Technique \u2014 IAL English Language', code: 'EX',
+    subtopics: [
+      { name: 'Assessment Objectives & Their Weighting', code: 'EX.1' },
+      { name: 'Structuring an Analytical Essay', code: 'EX.2' },
+      { name: 'Quoting & Referencing Textual Evidence', code: 'EX.3' },
+      { name: 'Timing Across the Papers', code: 'EX.4' },
+      { name: 'Common Errors in Language Analysis', code: 'EX.5' },
+      { name: 'Past Paper Practice: Units 1 & 2', code: 'EX.6' },
+      { name: 'Past Paper Practice: Units 3 & 4', code: 'EX.7' },
+      { name: 'Mock Exam Review & Revision Planning', code: 'EX.8' },
+    ] },
+]
+
+const IAL_ENGLISH_LIT = [
+  { topic: 'U1 \u00b7 Post-2000 Poetry & Prose', code: 'U1',
+    subtopics: [
+      { name: 'Approaching Contemporary Poetry', code: 'U1.1' },
+      { name: 'Voice, Speaker & Persona in Modern Verse', code: 'U1.2' },
+      { name: 'Imagery & Figurative Language', code: 'U1.3' },
+      { name: 'Form & Structure in Contemporary Poetry', code: 'U1.4' },
+      { name: 'Sound, Rhythm & Line Break', code: 'U1.5' },
+      { name: 'Theme & Concern in Modern Poetry', code: 'U1.6' },
+      { name: 'Comparing Poems on a Shared Theme', code: 'U1.7' },
+      { name: 'Approaching a Contemporary Novel', code: 'U1.8' },
+      { name: 'Narrative Voice & Perspective', code: 'U1.9' },
+      { name: 'Characterisation in Modern Prose', code: 'U1.10' },
+      { name: 'Setting, Symbolism & Motif', code: 'U1.11' },
+      { name: 'Structure & Chronology in the Novel', code: 'U1.12' },
+      { name: 'Writing an Unseen Poetry Response', code: 'U1.13' },
+    ] },
+
+  { topic: 'U2 \u00b7 Drama', code: 'U2',
+    subtopics: [
+      { name: 'Drama as Text and as Performance', code: 'U2.1' },
+      { name: 'Dramatic Structure & Pacing', code: 'U2.2' },
+      { name: 'Character, Motivation & Conflict', code: 'U2.3' },
+      { name: 'Dialogue, Monologue & Soliloquy', code: 'U2.4' },
+      { name: 'Dramatic Irony & Audience Positioning', code: 'U2.5' },
+      { name: 'Stagecraft & Stage Directions', code: 'U2.6' },
+      { name: 'Tragedy: Conventions & The Tragic Protagonist', code: 'U2.7' },
+      { name: 'Comedy & Satire on Stage', code: 'U2.8' },
+      { name: 'Shakespeare: Language & Verse', code: 'U2.9' },
+      { name: 'Shakespeare: Context & Interpretation', code: 'U2.10' },
+      { name: 'Modern Drama & Its Departures', code: 'U2.11' },
+      { name: 'Critical Interpretations of a Play', code: 'U2.12' },
+      { name: 'Writing a Drama Essay', code: 'U2.13' },
+    ] },
+
+  { topic: 'U3 \u00b7 Poetry & Prose in Depth', code: 'U3',
+    subtopics: [
+      { name: 'Studying a Poet\u2019s Body of Work', code: 'U3.1' },
+      { name: 'Recurring Concerns Across a Collection', code: 'U3.2' },
+      { name: 'Poetic Technique in Depth', code: 'U3.3' },
+      { name: 'Reading Poetry Against Its Period', code: 'U3.4' },
+      { name: 'The Novel as a Structured Whole', code: 'U3.5' },
+      { name: 'Narrative Technique in Extended Fiction', code: 'U3.6' },
+      { name: 'Social & Historical Context of a Novel', code: 'U3.7' },
+      { name: 'Literary Movements & Their Influence', code: 'U3.8' },
+      { name: 'The Short Story & Its Demands', code: 'U3.9' },
+      { name: 'Selecting & Embedding Evidence', code: 'U3.10' },
+      { name: 'Writing a Sustained Critical Argument', code: 'U3.11' },
+    ] },
+
+  { topic: 'U4 \u00b7 Shakespeare & Pre-1900 Poetry', code: 'U4',
+    subtopics: [
+      { name: 'Shakespeare\u2019s Theatre & Its Conventions', code: 'U4.1' },
+      { name: 'Blank Verse, Prose & Their Alternation', code: 'U4.2' },
+      { name: 'Imagery Patterns Across a Play', code: 'U4.3' },
+      { name: 'Soliloquy & Interior Character', code: 'U4.4' },
+      { name: 'Political & Religious Context', code: 'U4.5' },
+      { name: 'Performance History & Reinterpretation', code: 'U4.6' },
+      { name: 'Approaching Pre-1900 Poetry', code: 'U4.7' },
+      { name: 'Metre & Traditional Verse Forms', code: 'U4.8' },
+      { name: 'Diction & Register in Earlier Poetry', code: 'U4.9' },
+      { name: 'Historical & Cultural Context of Older Verse', code: 'U4.10' },
+      { name: 'Comparing Texts Across Periods', code: 'U4.11' },
+      { name: 'Engaging with Critical Interpretation', code: 'U4.12' },
+      { name: 'Writing a Comparative Essay', code: 'U4.13' },
+    ] },
+
+  { topic: 'Exam Technique \u2014 IAL English Literature', code: 'EX',
+    subtopics: [
+      { name: 'Assessment Objectives in Literature Papers', code: 'EX.1' },
+      { name: 'Passage-Based vs. Essay Questions', code: 'EX.2' },
+      { name: 'Planning an Essay Under Time Pressure', code: 'EX.3' },
+      { name: 'Building a Quotation Bank', code: 'EX.4' },
+      { name: 'Analysing Rather Than Describing', code: 'EX.5' },
+      { name: 'Common Weaknesses in Literature Essays', code: 'EX.6' },
+      { name: 'Past Paper Practice: Units 1 & 2', code: 'EX.7' },
+      { name: 'Past Paper Practice: Units 3 & 4', code: 'EX.8' },
+      { name: 'Mock Exam Review & Revision Planning', code: 'EX.9' },
+    ] },
+]
+
+const IAL_LAW = [
+  { topic: 'U1 \u00b7 The English Legal System', code: 'U1',
+    subtopics: [
+      { name: 'The Nature & Purpose of Law', code: 'U1.1' },
+      { name: 'Law & Morality, Law & Justice', code: 'U1.2' },
+      { name: 'Civil & Criminal Law Distinguished', code: 'U1.3' },
+      { name: 'Common Law & Equity', code: 'U1.4' },
+      { name: 'The Doctrine of Judicial Precedent', code: 'U1.5' },
+      { name: 'The Court Hierarchy & Binding Precedent', code: 'U1.6' },
+      { name: 'Ratio Decidendi & Obiter Dicta', code: 'U1.7' },
+      { name: 'Distinguishing, Overruling & Reversing', code: 'U1.8' },
+      { name: 'Evaluating the Doctrine of Precedent', code: 'U1.9' },
+      { name: 'The Legislative Process & Parliamentary Supremacy', code: 'U1.10' },
+      { name: 'Delegated Legislation & Its Control', code: 'U1.11' },
+      { name: 'Statutory Interpretation: The Literal Rule', code: 'U1.12' },
+      { name: 'The Golden & Mischief Rules', code: 'U1.13' },
+      { name: 'The Purposive Approach & Aids to Interpretation', code: 'U1.14' },
+      { name: 'The Civil Courts & Civil Process', code: 'U1.15' },
+      { name: 'Alternative Dispute Resolution', code: 'U1.16' },
+      { name: 'The Criminal Courts & Criminal Process', code: 'U1.17' },
+      { name: 'The Judiciary & Judicial Independence', code: 'U1.18' },
+      { name: 'The Legal Profession & Lay Participation', code: 'U1.19' },
+      { name: 'Access to Justice & Legal Funding', code: 'U1.20' },
+    ] },
+
+  { topic: 'U2 \u00b7 The Law of Contract', code: 'U2',
+    subtopics: [
+      { name: 'The Nature of a Contract', code: 'U2.1' },
+      { name: 'Offer & Invitation to Treat', code: 'U2.2' },
+      { name: 'Termination of an Offer', code: 'U2.3' },
+      { name: 'Acceptance & Its Communication', code: 'U2.4' },
+      { name: 'The Postal Rule & Electronic Communication', code: 'U2.5' },
+      { name: 'Consideration & Its Requirements', code: 'U2.6' },
+      { name: 'Past Consideration & Existing Duty', code: 'U2.7' },
+      { name: 'Promissory Estoppel', code: 'U2.8' },
+      { name: 'Intention to Create Legal Relations', code: 'U2.9' },
+      { name: 'Privity of Contract', code: 'U2.10' },
+      { name: 'Express & Implied Terms', code: 'U2.11' },
+      { name: 'Conditions, Warranties & Innominate Terms', code: 'U2.12' },
+      { name: 'Exclusion Clauses & Their Control', code: 'U2.13' },
+      { name: 'Misrepresentation & Its Remedies', code: 'U2.14' },
+      { name: 'Duress & Undue Influence', code: 'U2.15' },
+      { name: 'Discharge of Contract', code: 'U2.16' },
+      { name: 'Frustration', code: 'U2.17' },
+      { name: 'Damages & Remoteness in Contract', code: 'U2.18' },
+      { name: 'Equitable Remedies in Contract', code: 'U2.19' },
+      { name: 'Applying Contract Law to a Scenario', code: 'U2.20' },
+    ] },
+
+  { topic: 'U3 \u00b7 The Law of Tort', code: 'U3',
+    subtopics: [
+      { name: 'The Nature & Purpose of Tort', code: 'U3.1' },
+      { name: 'Duty of Care & Its Development', code: 'U3.2' },
+      { name: 'Breach of Duty & The Standard of Care', code: 'U3.3' },
+      { name: 'Causation in Fact & In Law', code: 'U3.4' },
+      { name: 'Remoteness of Damage', code: 'U3.5' },
+      { name: 'Psychiatric Injury', code: 'U3.6' },
+      { name: 'Pure Economic Loss & Negligent Misstatement', code: 'U3.7' },
+      { name: 'Occupiers\u2019 Liability', code: 'U3.8' },
+      { name: 'Private & Public Nuisance', code: 'U3.9' },
+      { name: 'The Rule in Rylands v Fletcher', code: 'U3.10' },
+      { name: 'Trespass to Land & to the Person', code: 'U3.11' },
+      { name: 'Vicarious Liability', code: 'U3.12' },
+      { name: 'Defences: Contributory Negligence & Consent', code: 'U3.13' },
+      { name: 'Remedies in Tort', code: 'U3.14' },
+      { name: 'Applying Tort Law to a Scenario', code: 'U3.15' },
+    ] },
+
+  { topic: 'U4 \u00b7 Criminal Law', code: 'U4',
+    subtopics: [
+      { name: 'Actus Reus: Conduct & Omissions', code: 'U4.1' },
+      { name: 'Causation in Criminal Law', code: 'U4.2' },
+      { name: 'Mens Rea: Intention & Recklessness', code: 'U4.3' },
+      { name: 'Strict Liability Offences', code: 'U4.4' },
+      { name: 'Transferred Malice & Coincidence', code: 'U4.5' },
+      { name: 'Murder: Elements & Sentencing', code: 'U4.6' },
+      { name: 'Voluntary Manslaughter: Loss of Control', code: 'U4.7' },
+      { name: 'Voluntary Manslaughter: Diminished Responsibility', code: 'U4.8' },
+      { name: 'Involuntary Manslaughter', code: 'U4.9' },
+      { name: 'Non-Fatal Offences: Assault & Battery', code: 'U4.10' },
+      { name: 'Non-Fatal Offences: ABH & GBH', code: 'U4.11' },
+      { name: 'Theft & Robbery', code: 'U4.12' },
+      { name: 'Burglary & Criminal Damage', code: 'U4.13' },
+      { name: 'Defences: Insanity & Automatism', code: 'U4.14' },
+      { name: 'Defences: Intoxication & Self-Defence', code: 'U4.15' },
+      { name: 'Defences: Duress & Necessity', code: 'U4.16' },
+      { name: 'Applying Criminal Law to a Scenario', code: 'U4.17' },
+    ] },
+
+  { topic: 'Legal Skills & Exam Technique \u2014 IAL Law', code: 'EX',
+    subtopics: [
+      { name: 'Legal Reasoning: Applying Rule to Fact', code: 'EX.1' },
+      { name: 'The IRAC Structure for Problem Questions', code: 'EX.2' },
+      { name: 'Citing Authority Accurately', code: 'EX.3' },
+      { name: 'Essay Questions on Legal Reform & Evaluation', code: 'EX.4' },
+      { name: 'Command Words in Edexcel Law Papers', code: 'EX.5' },
+      { name: 'Timing Across a Law Paper', code: 'EX.6' },
+      { name: 'Past Paper Practice: Legal System & Contract', code: 'EX.7' },
+      { name: 'Past Paper Practice: Tort & Criminal Law', code: 'EX.8' },
+      { name: 'Mock Exam Review & Revision Planning', code: 'EX.9' },
+    ] },
+]
+
+// Pearson Edexcel International A Level
+//   Geography (YGE01/WGE01) — 4 units / 124 lessons
+//   History   (YHI01/WHI01) — 4 units / 118 lessons
+//
+// GEOGRAPHY: SKILLS AS A STRAND
+// Edexcel IAL Geography assesses fieldwork and geographical skills in
+// every unit, not in a separate paper. Map interpretation, data
+// response and statistical technique therefore appear as their own
+// topics rather than being assumed alongside content.
+//
+// HISTORY: SKILLS FIRST, PERIODS AS OPTIONS
+// As with the Cambridge spine, centres choose which periods to teach.
+// A spine listing one period would be useless to a centre teaching
+// another; listing every option in full would be unusable. So source
+// evaluation and historical interpretation form the backbone, with each
+// period option a filterable topic.
+
+const IAL_GEOGRAPHY = [
+  { topic: 'U1 \u00b7 Global Challenges', code: 'U1',
+    subtopics: [
+      { name: 'World at Risk: Defining Hazards & Risk', code: 'U1.1' },
+      { name: 'Tectonic Hazards: Causes & Distribution', code: 'U1.2' },
+      { name: 'Managing Tectonic Hazards', code: 'U1.3' },
+      { name: 'Hydro-Meteorological Hazards', code: 'U1.4' },
+      { name: 'Vulnerability, Resilience & The Risk Equation', code: 'U1.5' },
+      { name: 'Climate Change: Evidence & Causes', code: 'U1.6' },
+      { name: 'Impacts of Climate Change on People & Environment', code: 'U1.7' },
+      { name: 'Mitigation & Adaptation Strategies', code: 'U1.8' },
+      { name: 'Global Population Growth & Structure', code: 'U1.9' },
+      { name: 'The Demographic Transition Model', code: 'U1.10' },
+      { name: 'Ageing & Youthful Populations', code: 'U1.11' },
+      { name: 'Migration: Causes, Flows & Impacts', code: 'U1.12' },
+      { name: 'Managing Population Change', code: 'U1.13' },
+      { name: 'Globalisation: Drivers & Winners and Losers', code: 'U1.14' },
+      { name: 'The Development Gap & Its Measurement', code: 'U1.15' },
+    ] },
+
+  { topic: 'U2 \u00b7 Geographical Investigations', code: 'U2',
+    subtopics: [
+      { name: 'Crowded Coasts: Pressures & Conflicts', code: 'U2.1' },
+      { name: 'Coastal Processes & Landform Development', code: 'U2.2' },
+      { name: 'Coastal Management & Its Evaluation', code: 'U2.3' },
+      { name: 'Rebranding Places: Why It Happens', code: 'U2.4' },
+      { name: 'Rural & Urban Rebranding Strategies', code: 'U2.5' },
+      { name: 'Measuring the Success of Rebranding', code: 'U2.6' },
+      { name: 'Unequal Spaces & Urban Deprivation', code: 'U2.7' },
+      { name: 'Rural Deprivation & Service Decline', code: 'U2.8' },
+      { name: 'Designing a Geographical Investigation', code: 'U2.9' },
+      { name: 'Primary Data Collection in the Field', code: 'U2.10' },
+      { name: 'Sampling Strategies & Their Justification', code: 'U2.11' },
+      { name: 'Risk Assessment in Fieldwork', code: 'U2.12' },
+      { name: 'Presenting Fieldwork Data', code: 'U2.13' },
+      { name: 'Evaluating Methodology & Reliability', code: 'U2.14' },
+    ] },
+
+  { topic: 'U3 \u00b7 Contested Planet', code: 'U3',
+    subtopics: [
+      { name: 'Energy Security: Supply & Demand', code: 'U3.1' },
+      { name: 'Energy Pathways & Geopolitical Tension', code: 'U3.2' },
+      { name: 'Renewable Energy & The Energy Transition', code: 'U3.3' },
+      { name: 'Water Security & The Global Water Crisis', code: 'U3.4' },
+      { name: 'Water Conflicts & Transboundary Management', code: 'U3.5' },
+      { name: 'Biodiversity Under Threat', code: 'U3.6' },
+      { name: 'Ecosystem Services & Their Value', code: 'U3.7' },
+      { name: 'Conservation Strategies & Their Evaluation', code: 'U3.8' },
+      { name: 'Superpower Geographies & Shifting Influence', code: 'U3.9' },
+      { name: 'Emerging Powers & Global Governance', code: 'U3.10' },
+      { name: 'Bridging the Development Gap: Strategies', code: 'U3.11' },
+      { name: 'Aid, Trade & Debt Relief Evaluated', code: 'U3.12' },
+      { name: 'The Technological Fix & Its Limits', code: 'U3.13' },
+      { name: 'Synoptic Thinking Across Contested Planet', code: 'U3.14' },
+    ] },
+
+  { topic: 'U4 \u00b7 Researching Geography', code: 'U4',
+    subtopics: [
+      { name: 'Tectonic Activity: Advanced Study', code: 'U4.1' },
+      { name: 'Cold Environments: Processes & Landforms', code: 'U4.2' },
+      { name: 'Life on the Margins: Arid Environments', code: 'U4.3' },
+      { name: 'The World of Cultural Diversity', code: 'U4.4' },
+      { name: 'Pollution & Human Health at Risk', code: 'U4.5' },
+      { name: 'Consuming the Rural Landscape', code: 'U4.6' },
+      { name: 'Formulating a Research Question', code: 'U4.7' },
+      { name: 'Selecting & Justifying Research Methods', code: 'U4.8' },
+      { name: 'Using Secondary Sources Critically', code: 'U4.9' },
+      { name: 'Analysing Research Data', code: 'U4.10' },
+      { name: 'Reaching Justified Conclusions', code: 'U4.11' },
+      { name: 'Evaluating a Piece of Research', code: 'U4.12' },
+    ] },
+
+  { topic: 'Geographical Skills \u2014 IAL', code: 'SK',
+    subtopics: [
+      { name: 'Interpreting Topographical & Thematic Maps', code: 'SK.1' },
+      { name: 'Choropleth, Isoline & Flow Maps', code: 'SK.2' },
+      { name: 'Graph Types & Selecting the Right One', code: 'SK.3' },
+      { name: 'Describing Distributions & Trends', code: 'SK.4' },
+      { name: 'Measures of Central Tendency & Dispersion', code: 'SK.5' },
+      { name: 'Spearman\u2019s Rank Correlation', code: 'SK.6' },
+      { name: 'Chi-Squared & Nearest Neighbour Analysis', code: 'SK.7' },
+      { name: 'Photograph & Satellite Image Interpretation', code: 'SK.8' },
+      { name: 'Geographic Information Systems', code: 'SK.9' },
+    ] },
+
+  { topic: 'Exam Technique \u2014 IAL Geography', code: 'EX',
+    subtopics: [
+      { name: 'Command Words in Edexcel Geography Papers', code: 'EX.1' },
+      { name: 'Structuring an Extended Response', code: 'EX.2' },
+      { name: 'Using Case Study Detail Effectively', code: 'EX.3' },
+      { name: 'Building Evaluation into an Answer', code: 'EX.4' },
+      { name: 'Drawing Annotated Diagrams Under Time Pressure', code: 'EX.5' },
+      { name: 'Data Response Technique', code: 'EX.6' },
+      { name: 'Past Paper Practice: Units 1 & 2', code: 'EX.7' },
+      { name: 'Past Paper Practice: Units 3 & 4', code: 'EX.8' },
+      { name: 'Mock Exam Review & Revision Planning', code: 'EX.9' },
+    ] },
+]
+
+const IAL_HISTORY = [
+  { topic: 'Skills 1 \u00b7 Working with Sources', code: 'SK1',
+    subtopics: [
+      { name: 'Primary & Secondary Sources', code: 'SK1.1' },
+      { name: 'Provenance: Author, Date, Audience & Purpose', code: 'SK1.2' },
+      { name: 'Reliability & Its Limits as a Concept', code: 'SK1.3' },
+      { name: 'Utility: Value of a Source for an Enquiry', code: 'SK1.4' },
+      { name: 'Detecting Bias & Reading Against the Grain', code: 'SK1.5' },
+      { name: 'Cross-Referencing & Corroboration', code: 'SK1.6' },
+      { name: 'Handling Contradictory Sources', code: 'SK1.7' },
+      { name: 'Visual & Statistical Sources', code: 'SK1.8' },
+      { name: 'Using Contextual Knowledge to Interpret Sources', code: 'SK1.9' },
+      { name: 'Reaching a Supported Judgement from Sources', code: 'SK1.10' },
+    ] },
+
+  { topic: 'Skills 2 \u00b7 Historical Thinking & Interpretation', code: 'SK2',
+    subtopics: [
+      { name: 'Causation: Long-Term & Short-Term Causes', code: 'SK2.1' },
+      { name: 'Prioritising Causes & Arguing Importance', code: 'SK2.2' },
+      { name: 'Consequence & Its Assessment', code: 'SK2.3' },
+      { name: 'Change, Continuity & Turning Points', code: 'SK2.4' },
+      { name: 'Historical Significance', code: 'SK2.5' },
+      { name: 'Similarity & Difference in Comparison', code: 'SK2.6' },
+      { name: 'Historiography & Schools of Interpretation', code: 'SK2.7' },
+      { name: 'Why Historians Disagree', code: 'SK2.8' },
+      { name: 'Evaluating a Historian\u2019s Argument', code: 'SK2.9' },
+      { name: 'Engaging Critically with an Interpretation', code: 'SK2.10' },
+    ] },
+
+  { topic: 'Option \u00b7 Depth Study: Revolutions & Regimes', code: 'OP-RR',
+    subtopics: [
+      { name: 'Causes of Revolution: Structural & Immediate', code: 'OP-RR.1' },
+      { name: 'The Collapse of an Old Regime', code: 'OP-RR.2' },
+      { name: 'Seizure & Consolidation of Power', code: 'OP-RR.3' },
+      { name: 'Civil War & Its Consequences', code: 'OP-RR.4' },
+      { name: 'Economic Transformation Under a New Regime', code: 'OP-RR.5' },
+      { name: 'Terror, Repression & Control', code: 'OP-RR.6' },
+      { name: 'Propaganda & The Cult of Personality', code: 'OP-RR.7' },
+      { name: 'Society & Culture Under the Regime', code: 'OP-RR.8' },
+      { name: 'Opposition & Its Suppression', code: 'OP-RR.9' },
+      { name: 'Assessing the Legacy of Revolution', code: 'OP-RR.10' },
+    ] },
+
+  { topic: 'Option \u00b7 Depth Study: Conflict & War', code: 'OP-CW',
+    subtopics: [
+      { name: 'Long-Term Causes of Conflict', code: 'OP-CW.1' },
+      { name: 'Alliance Systems & Diplomatic Failure', code: 'OP-CW.2' },
+      { name: 'The Outbreak of War: Contingency & Decision', code: 'OP-CW.3' },
+      { name: 'Military Strategy & Its Evolution', code: 'OP-CW.4' },
+      { name: 'The Home Front & Total War', code: 'OP-CW.5' },
+      { name: 'Technology & Its Impact on Warfare', code: 'OP-CW.6' },
+      { name: 'Turning Points & Why One Side Prevailed', code: 'OP-CW.7' },
+      { name: 'Peace Settlements & Their Consequences', code: 'OP-CW.8' },
+      { name: 'The Human Cost & Social Change', code: 'OP-CW.9' },
+      { name: 'Historiographical Debate on Responsibility', code: 'OP-CW.10' },
+    ] },
+
+  { topic: 'Option \u00b7 Breadth Study: Empire & Decolonisation', code: 'OP-ED',
+    subtopics: [
+      { name: 'Motives for Imperial Expansion', code: 'OP-ED.1' },
+      { name: 'Methods of Colonial Rule', code: 'OP-ED.2' },
+      { name: 'Economic Exploitation & Its Legacy', code: 'OP-ED.3' },
+      { name: 'Resistance to Colonial Rule', code: 'OP-ED.4' },
+      { name: 'The Growth of Nationalism', code: 'OP-ED.5' },
+      { name: 'The Impact of World War on Empire', code: 'OP-ED.6' },
+      { name: 'Paths to Independence: Negotiated & Armed', code: 'OP-ED.7' },
+      { name: 'Post-Independence Challenges', code: 'OP-ED.8' },
+      { name: 'Assessing the Colonial Legacy', code: 'OP-ED.9' },
+    ] },
+
+  { topic: 'Option \u00b7 Breadth Study: Civil Rights & Social Change', code: 'OP-CR',
+    subtopics: [
+      { name: 'The Origins of Inequality & Segregation', code: 'OP-CR.1' },
+      { name: 'Early Campaigns & Legal Challenge', code: 'OP-CR.2' },
+      { name: 'Mass Protest & Non-Violent Direct Action', code: 'OP-CR.3' },
+      { name: 'Radicalisation & Competing Strategies', code: 'OP-CR.4' },
+      { name: 'The Role of Leadership & Organisation', code: 'OP-CR.5' },
+      { name: 'Government Response & Legislation', code: 'OP-CR.6' },
+      { name: 'The Role of Media & Public Opinion', code: 'OP-CR.7' },
+      { name: 'Economic & Social Outcomes', code: 'OP-CR.8' },
+      { name: 'Assessing Progress & Continuing Inequality', code: 'OP-CR.9' },
+    ] },
+
+  { topic: 'Essay Writing \u2014 IAL History', code: 'ES',
+    subtopics: [
+      { name: 'Analysing the Question & Its Focus', code: 'ES.1' },
+      { name: 'Planning an Analytical Structure', code: 'ES.2' },
+      { name: 'Writing an Effective Introduction', code: 'ES.3' },
+      { name: 'Paragraph Construction & Topic Sentences', code: 'ES.4' },
+      { name: 'Deploying Precise Factual Evidence', code: 'ES.5' },
+      { name: 'Handling Counter-Argument', code: 'ES.6' },
+      { name: 'Reaching a Substantiated Judgement', code: 'ES.7' },
+      { name: 'Avoiding Narrative & Description', code: 'ES.8' },
+    ] },
+
+  { topic: 'Exam Technique \u2014 IAL History', code: 'EX',
+    subtopics: [
+      { name: 'Command Words in Edexcel History Papers', code: 'EX.1' },
+      { name: 'Timing Across a History Paper', code: 'EX.2' },
+      { name: 'Source Question Technique', code: 'EX.3' },
+      { name: 'Interpretation Question Technique', code: 'EX.4' },
+      { name: 'Revising Chronology & Key Detail', code: 'EX.5' },
+      { name: 'Building a Bank of Supporting Evidence', code: 'EX.6' },
+      { name: 'Past Paper Practice: Depth Studies', code: 'EX.7' },
+      { name: 'Past Paper Practice: Breadth Studies', code: 'EX.8' },
+      { name: 'Mock Exam Review & Revision Planning', code: 'EX.9' },
+    ] },
+]
+
 export const IAL_LIBRARY = [
+  // Literature before any bare /english/ matcher, as at Cambridge.
+  { match: /\bliterature\b/i,  const_: IAL_ENGLISH_LIT,
+    source: 'Edexcel International A Level English Literature \u2014 4-unit scheme' },
+  { match: /\benglish\b/i,     const_: IAL_ENGLISH_LANG,
+    source: 'Edexcel International A Level English Language \u2014 4-unit scheme' },
+  { match: /\blaw\b/i,         const_: IAL_LAW,
+    source: 'Edexcel International A Level Law \u2014 4-unit scheme' },
+  { match: /\bgeography\b/i,   const_: IAL_GEOGRAPHY,
+    source: 'Edexcel International A Level Geography \u2014 4-unit scheme' },
+  { match: /\bhistory\b/i,     const_: IAL_HISTORY,
+    source: 'Edexcel International A Level History \u2014 4-unit scheme' },
   { match: /\bbusiness\b/i,    const_: IAL_BUSINESS,
     source: 'Edexcel International A Level Business \u2014 4-unit scheme' },
   { match: /\beconomics\b/i,   const_: IAL_ECONOMICS,
