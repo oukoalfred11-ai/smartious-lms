@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
+import { FALLBACK_CURRICULA } from '../../data/curriculumList.js'
 import BirthdayBanner from '../../components/BirthdayBanner.jsx'
 import SuggestionBox from '../../components/SuggestionBox.jsx'
 import { useToast, api } from '../../context/ctx.jsx'
@@ -3810,7 +3811,7 @@ const QB_SUBJECTS = [
  * offered at all, so Primary questions were unreachable.
  *
  * Year lists follow the house convention: Cambridge and Edexcel use
- * Year 1-13, IB uses Grades, American uses K-12, Kenya CBC uses Grade 1-12.
+ * Year 1-13, IB uses Grades, American uses K-12, Kenya CBE uses Grade 1-12.
  */
 const QB_CURRICULA = {
   CambridgePrimary:  { label: 'Cambridge Primary',                    years: ['Year 1','Year 2','Year 3','Year 4','Year 5','Year 6'] },
@@ -3829,7 +3830,7 @@ const QB_CURRICULA = {
   BNC:               { label: 'British National Curriculum',          years: ['Year 1','Year 2','Year 3','Year 4','Year 5','Year 6','Year 7','Year 8','Year 9','Year 10','Year 11','Year 12','Year 13'] },
   American:          { label: 'American Curriculum',                  years: ['K','Grade 1','Grade 2','Grade 3','Grade 4','Grade 5','Grade 6','Grade 7','Grade 8','Grade 9','Grade 10','Grade 11','Grade 12'] },
   Canadian:          { label: 'Canadian Curriculum',                  years: ['Grade 1','Grade 2','Grade 3','Grade 4','Grade 5','Grade 6','Grade 7','Grade 8','Grade 9','Grade 10','Grade 11','Grade 12'] },
-  KenyaCBC:          { label: 'Kenya CBC',                            years: ['Grade 1','Grade 2','Grade 3','Grade 4','Grade 5','Grade 6','Grade 7','Grade 8','Grade 9','Grade 10','Grade 11','Grade 12'] },
+  KenyaCBC:          { label: 'Kenya CBE',                            years: ['Grade 1','Grade 2','Grade 3','Grade 4','Grade 5','Grade 6','Grade 7','Grade 8','Grade 9','Grade 10','Grade 11','Grade 12'] },
 }
 
 function ExamsTab({ user, store, setPage, toast }) {
@@ -4955,7 +4956,7 @@ function ExamsTab({ user, store, setPage, toast }) {
                       <option value="all">All curricula</option>
                       {['CambridgePrimary','CambridgeLowerSec','CambridgeIGCSE','CambridgeALevel',
                         'EdexcelLowerSec','EdexcelIGCSE','EdexcelALevel','AQALowerSec','AQAGCSE','AQAALevel',
-                        'IBPYP','IBMYP','IBDP','BNC','American','Canadian','KenyaCBC'].map(c => (
+                        'IBPYP','IBMYP','IBDP','BNC','American','Canadian','KenyaCBE'].map(c => (
                         <option key={c} value={c}>{c.replace(/([a-z])([A-Z])/g,'$1 $2')}</option>
                       ))}
                     </select>
@@ -10439,7 +10440,7 @@ function WeeklyTimetableTab({ user, toast }) {
     'CambridgePrimary', 'CambridgeLowerSec', 'CambridgeIGCSE', 'CambridgeALevel',
     'EdexcelLowerSec', 'EdexcelIGCSE', 'EdexcelALevel',
     'AQALowerSec', 'AQAGCSE', 'AQAALevel',
-    'IBPYP', 'IBMYP', 'IBDP', 'BNC', 'American', 'Canadian', 'KenyaCBC',
+    'IBPYP', 'IBMYP', 'IBDP', 'BNC', 'American', 'Canadian', 'KenyaCBE',
   ])
 
   const loadMine = useCallback(() => {
@@ -13208,7 +13209,7 @@ const MA_SKILLS = [
     description: 'Create exam or practice questions from any topic',
     formFields: [
       { id: 'subject', label: 'Subject', type: 'select', options: ['Mathematics', 'Physics', 'Chemistry', 'Biology', 'English', 'History', 'Geography', 'Business Studies'], default: 'Mathematics' },
-      { id: 'curriculum', label: 'Curriculum', type: 'select', options: ['IGCSE', 'Cambridge A-Level', 'Edexcel', 'IB', 'Kenya CBC', 'American'], default: 'IGCSE' },
+      { id: 'curriculum', label: 'Curriculum', type: 'select', options: ['IGCSE', 'Cambridge A-Level', 'Edexcel', 'IB', 'Kenya CBE', 'American'], default: 'IGCSE' },
       { id: 'year', label: 'Year / Grade', type: 'text', default: 'Year 10' },
       { id: 'topic', label: 'Topic', type: 'text', default: 'Quadratic equations', placeholder: 'e.g. Trigonometry, Photosynthesis, Algebra' },
       { id: 'difficulty', label: 'Difficulty', type: 'select', options: ['Easy', 'Medium', 'Hard', 'Mixed'], default: 'Medium' },
@@ -13258,7 +13259,7 @@ const MA_SKILLS = [
     description: 'Build a complete lesson plan with timings and activities',
     formFields: [
       { id: 'subject', label: 'Subject', type: 'select', options: ['Mathematics', 'Physics', 'Chemistry', 'Biology', 'English', 'History', 'Geography'], default: 'Mathematics' },
-      { id: 'curriculum', label: 'Curriculum', type: 'select', options: ['IGCSE', 'A-Level', 'Edexcel', 'IB', 'Kenya CBC'], default: 'IGCSE' },
+      { id: 'curriculum', label: 'Curriculum', type: 'select', options: ['IGCSE', 'A-Level', 'Edexcel', 'IB', 'Kenya CBE'], default: 'IGCSE' },
       { id: 'year', label: 'Year / Grade', type: 'text', default: 'Year 10' },
       { id: 'topic', label: 'Topic', type: 'text', default: 'Pythagoras Theorem', placeholder: 'e.g. Trigonometry, French Revolution' },
       { id: 'duration', label: 'Lesson duration (minutes)', type: 'number', default: 60, min: 15, max: 180 },
@@ -13303,7 +13304,7 @@ const maBuildSystemPrompt = (teacherName, skill) => {
   return `You are Mshauri, an AI teaching assistant for Smartious Homeschool, a Kenya-based international online school. You help ${teacherName || 'a teacher'} with daily teaching tasks.
 
 CONTEXT:
-- Smartious teaches Cambridge IGCSE, A-Level, Edexcel, IB, Kenya CBC, and American curricula
+- Smartious teaches Cambridge IGCSE, A-Level, Edexcel, IB, Kenya CBE, and American curricula
 - Students are aged 5-18, mostly remote learners across Kenya, UK, UAE, USA, Canada
 - Brand voice: warm, professional, encouraging, culturally aware (Kenya context)
 - You should be aware of local context (KCSE, CBC competencies, KSh currency, etc.) when relevant
@@ -16315,26 +16316,7 @@ function TeacherTimetableTab({ user, toast }) {
   const DAYS_LONG = { Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday', Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday', Sun: 'Sunday' }
 
   // Canonical curricula — mirrors SCHOOL_CURRICULA used in admin portal
-  const CURRICULA = [
-    { id: 'CambridgePrimary',   name: 'Cambridge Primary' },
-    { id: 'CambridgeLowerSec',  name: 'Cambridge Lower Secondary' },
-    { id: 'CambridgeIGCSE',     name: 'Cambridge IGCSE' },
-    { id: 'CambridgeALevel',    name: 'Cambridge A-Level' },
-    { id: 'EdexcelPrimary', name: 'Edexcel iPrimary' },
-    { id: 'EdexcelLowerSec',    name: 'Edexcel Lower Secondary' },
-    { id: 'EdexcelIGCSE',       name: 'Edexcel IGCSE' },
-    { id: 'EdexcelALevel',      name: 'Edexcel A-Level' },
-    { id: 'AQALowerSec',        name: 'AQA Lower Secondary' },
-    { id: 'AQAGCSE',            name: 'AQA GCSE' },
-    { id: 'AQAALevel',          name: 'AQA A-Level' },
-    { id: 'IBPYP',              name: 'IB Primary Years (PYP)' },
-    { id: 'IBMYP',              name: 'IB Middle Years (MYP)' },
-    { id: 'IBDP',               name: 'IB Diploma (DP)' },
-    { id: 'BNC',                name: 'British National Curriculum' },
-    { id: 'American',           name: 'American Curriculum' },
-    { id: 'Canadian',           name: 'Canadian Curriculum' },
-    { id: 'KenyaCBC',           name: 'Kenya CBC' },
-  ]
+  const CURRICULA = FALLBACK_CURRICULA
 
   // ── Loaders ──
   const loadEntries = async () => {
