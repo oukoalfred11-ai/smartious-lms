@@ -10,7 +10,7 @@ const subjectSchema = new mongoose.Schema({
       // four collections (subjects, allocations, timetables, liveclasses)
       // and both user views (student top-level, teacher arrays).
       'CambridgePrimary', 'CambridgeLowerSec', 'CambridgeIGCSE', 'CambridgeALevel',
-      'EdexcelLowerSec', 'EdexcelIGCSE', 'EdexcelALevel',
+      'EdexcelPrimary', 'EdexcelLowerSec', 'EdexcelIGCSE', 'EdexcelALevel',
       'AQALowerSec', 'AQAGCSE', 'AQAALevel',
       'IBPYP', 'IBMYP', 'IBDP',
       'BNC', 'American', 'Canadian', 'KenyaCBC',
