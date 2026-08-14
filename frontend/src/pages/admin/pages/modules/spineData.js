@@ -5452,6 +5452,485 @@ const ALEVEL_MATHS_9709 = [
     ] },
 ]
 
+// Cambridge International AS & A Level Business 9609
+// Lesson-level spine, 18 topics / 208 lessons.
+//
+// HOW A2 RELATES TO AS
+// Unlike the sciences, A2 Business does not introduce a separate body
+// of content. It revisits the SAME functional areas — marketing,
+// operations, finance, people — at a strategic level, and adds
+// Strategic Management as a genuinely new strand. The topic names make
+// that explicit ("A2 · Marketing — Strategic"), so a teacher can see at
+// a glance whether a lesson is the AS treatment or the A2 one.
+//
+// Evaluation carries heavy marks at A2, so analytical techniques
+// (investment appraisal, ratio analysis, decision trees, critical path)
+// are given their own lessons rather than folded into topic content.
+const ALEVEL_BUSINESS_9609 = [
+  // ─────────────── AS ───────────────
+  { topic: 'AS \u00b7 1 Business & Its Environment', code: 'AS1',
+    subtopics: [
+      { name: 'Enterprise, Entrepreneurs & Intrapreneurship', code: 'AS1.1' },
+      { name: 'Business Activity: Adding Value & Opportunity Cost', code: 'AS1.2' },
+      { name: 'Factors of Production & Business Functions', code: 'AS1.3' },
+      { name: 'Primary, Secondary, Tertiary & Quaternary Sectors', code: 'AS1.4' },
+      { name: 'Sole Traders & Partnerships', code: 'AS1.5' },
+      { name: 'Private & Public Limited Companies', code: 'AS1.6' },
+      { name: 'Choosing a Legal Structure: Advantages & Trade-Offs', code: 'AS1.7' },
+      { name: 'Public Sector, Social Enterprises & Cooperatives', code: 'AS1.8' },
+      { name: 'Business Size: Measures & Why It Matters', code: 'AS1.9' },
+      { name: 'Internal & External Growth', code: 'AS1.10' },
+      { name: 'Why Some Businesses Remain Small', code: 'AS1.11' },
+      { name: 'Business Objectives: Survival, Profit, Growth & Ethics', code: 'AS1.12' },
+      { name: 'Mission Statements, Aims & SMART Objectives', code: 'AS1.13' },
+      { name: 'Stakeholders & Their Competing Objectives', code: 'AS1.14' },
+      { name: 'Managing Stakeholder Conflict', code: 'AS1.15' },
+      { name: 'External Influences: Economic & Political', code: 'AS1.16' },
+      { name: 'External Influences: Social, Technological & Environmental', code: 'AS1.17' },
+      { name: 'Business Ethics & Corporate Social Responsibility', code: 'AS1.18' },
+    ] },
+
+  { topic: 'AS \u00b7 2 People in Organisations', code: 'AS2',
+    subtopics: [
+      { name: 'Human Resource Management & Its Purpose', code: 'AS2.1' },
+      { name: 'Workforce Planning & Recruitment', code: 'AS2.2' },
+      { name: 'Selection Methods & Their Effectiveness', code: 'AS2.3' },
+      { name: 'Induction, Training & Development', code: 'AS2.4' },
+      { name: 'Dismissal, Redundancy & Employment Legislation', code: 'AS2.5' },
+      { name: 'Labour Turnover: Causes, Costs & Reduction', code: 'AS2.6' },
+      { name: 'Organisational Structure: Hierarchy & Chain of Command', code: 'AS2.7' },
+      { name: 'Span of Control, Delayering & Delegation', code: 'AS2.8' },
+      { name: 'Centralisation vs. Decentralisation', code: 'AS2.9' },
+      { name: 'Motivation Theory: Taylor & Mayo', code: 'AS2.10' },
+      { name: 'Motivation Theory: Maslow', code: 'AS2.11' },
+      { name: 'Motivation Theory: Herzberg & McClelland', code: 'AS2.12' },
+      { name: 'Financial Motivators: Pay Systems & Incentives', code: 'AS2.13' },
+      { name: 'Non-Financial Motivators: Job Design & Empowerment', code: 'AS2.14' },
+      { name: 'Leadership Styles & Their Situational Suitability', code: 'AS2.15' },
+      { name: 'Management by Objectives', code: 'AS2.16' },
+    ] },
+
+  { topic: 'AS \u00b7 3 Marketing', code: 'AS3',
+    subtopics: [
+      { name: 'The Role of Marketing & Customer Needs', code: 'AS3.1' },
+      { name: 'Market Orientation vs. Product Orientation', code: 'AS3.2' },
+      { name: 'Market Size, Share & Growth', code: 'AS3.3' },
+      { name: 'Niche vs. Mass Marketing', code: 'AS3.4' },
+      { name: 'Segmentation, Targeting & Positioning', code: 'AS3.5' },
+      { name: 'Primary Market Research Methods', code: 'AS3.6' },
+      { name: 'Secondary Research & Its Limitations', code: 'AS3.7' },
+      { name: 'Sampling Methods & Reliability of Data', code: 'AS3.8' },
+      { name: 'Presenting & Interpreting Market Research Data', code: 'AS3.9' },
+      { name: 'The Marketing Mix: Product & The Product Life Cycle', code: 'AS3.10' },
+      { name: 'Product Portfolio Analysis: The Boston Matrix', code: 'AS3.11' },
+      { name: 'Branding & Unique Selling Points', code: 'AS3.12' },
+      { name: 'Pricing Strategies & Their Selection', code: 'AS3.13' },
+      { name: 'Price Elasticity of Demand & Pricing Decisions', code: 'AS3.14' },
+      { name: 'Promotion: Above and Below the Line', code: 'AS3.15' },
+      { name: 'Place: Channels of Distribution', code: 'AS3.16' },
+      { name: 'Constructing an Integrated Marketing Mix', code: 'AS3.17' },
+    ] },
+
+  { topic: 'AS \u00b7 4 Operations Management', code: 'AS4',
+    subtopics: [
+      { name: 'Operations as a Transformation Process', code: 'AS4.1' },
+      { name: 'Efficiency, Productivity & Effectiveness', code: 'AS4.2' },
+      { name: 'Job, Batch & Flow Production', code: 'AS4.3' },
+      { name: 'Mass Customisation & Cell Production', code: 'AS4.4' },
+      { name: 'Capacity Utilisation & Its Calculation', code: 'AS4.5' },
+      { name: 'Managing Excess & Insufficient Capacity', code: 'AS4.6' },
+      { name: 'Outsourcing & Subcontracting', code: 'AS4.7' },
+      { name: 'Inventory Management & Buffer Stock', code: 'AS4.8' },
+      { name: 'Just-in-Time & Just-in-Case', code: 'AS4.9' },
+      { name: 'Quality Control vs. Quality Assurance', code: 'AS4.10' },
+      { name: 'Total Quality Management & Continuous Improvement', code: 'AS4.11' },
+      { name: 'Benchmarking & Quality Standards', code: 'AS4.12' },
+    ] },
+
+  { topic: 'AS \u00b7 5 Finance & Accounting', code: 'AS5',
+    subtopics: [
+      { name: 'The Need for Business Finance', code: 'AS5.1' },
+      { name: 'Internal Sources of Finance', code: 'AS5.2' },
+      { name: 'Short-Term External Sources of Finance', code: 'AS5.3' },
+      { name: 'Long-Term External Sources of Finance', code: 'AS5.4' },
+      { name: 'Selecting an Appropriate Source of Finance', code: 'AS5.5' },
+      { name: 'Fixed, Variable & Semi-Variable Costs', code: 'AS5.6' },
+      { name: 'Direct & Indirect Costs', code: 'AS5.7' },
+      { name: 'Contribution & Its Uses', code: 'AS5.8' },
+      { name: 'Break-Even Analysis: Calculation & Chart', code: 'AS5.9' },
+      { name: 'Margin of Safety & Limitations of Break-Even', code: 'AS5.10' },
+      { name: 'Cash Flow vs. Profit', code: 'AS5.11' },
+      { name: 'Constructing & Interpreting a Cash Flow Forecast', code: 'AS5.12' },
+      { name: 'Causes of Cash Flow Problems & Their Solutions', code: 'AS5.13' },
+      { name: 'Working Capital & The Working Capital Cycle', code: 'AS5.14' },
+      { name: 'The Income Statement', code: 'AS5.15' },
+      { name: 'The Statement of Financial Position', code: 'AS5.16' },
+      { name: 'Introduction to Ratio Analysis: Profitability & Liquidity', code: 'AS5.17' },
+      { name: 'Budgets, Variance Analysis & Their Uses', code: 'AS5.18' },
+    ] },
+
+  // ─────────────── A2 ───────────────
+  { topic: 'A2 \u00b7 6 Business & Its Environment (Strategic)', code: 'A2-6',
+    subtopics: [
+      { name: 'Business Strategy & The Concept of Competitive Advantage', code: 'A2-6.1' },
+      { name: 'External Growth: Mergers, Takeovers & Joint Ventures', code: 'A2-6.2' },
+      { name: 'Evaluating Growth Strategies & Their Risks', code: 'A2-6.3' },
+      { name: 'Multinational Businesses: Reasons & Impact', code: 'A2-6.4' },
+      { name: 'Globalisation & Its Effect on Business Decisions', code: 'A2-6.5' },
+      { name: 'Exchange Rate Changes & Business Consequences', code: 'A2-6.6' },
+      { name: 'Government Economic Policy & Business Response', code: 'A2-6.7' },
+      { name: 'Sustainability & The Triple Bottom Line', code: 'A2-6.8' },
+    ] },
+
+  { topic: 'A2 \u00b7 7 Human Resource Management (Strategic)', code: 'A2-7',
+    subtopics: [
+      { name: 'Hard vs. Soft HRM Approaches', code: 'A2-7.1' },
+      { name: 'Workforce Audits & Human Resource Strategy', code: 'A2-7.2' },
+      { name: 'Flexible Working & The Flexible Workforce', code: 'A2-7.3' },
+      { name: 'Handy\u2019s Shamrock Organisation', code: 'A2-7.4' },
+      { name: 'Employer-Employee Relations & Collective Bargaining', code: 'A2-7.5' },
+      { name: 'Managing Industrial Disputes', code: 'A2-7.6' },
+      { name: 'Organisational Culture: Types & Influence on Performance', code: 'A2-7.7' },
+      { name: 'Changing Organisational Culture', code: 'A2-7.8' },
+      { name: 'Management by Objectives Evaluated', code: 'A2-7.9' },
+    ] },
+
+  { topic: 'A2 \u00b7 8 Marketing (Strategic)', code: 'A2-8',
+    subtopics: [
+      { name: 'Marketing Planning & The Marketing Plan', code: 'A2-8.1' },
+      { name: 'Sales Forecasting: Time Series Analysis', code: 'A2-8.2' },
+      { name: 'Moving Averages & Identifying Trend', code: 'A2-8.3' },
+      { name: 'Seasonal, Cyclical & Random Variation', code: 'A2-8.4' },
+      { name: 'Extrapolation & Limitations of Forecasting', code: 'A2-8.5' },
+      { name: 'Elasticity: Income & Cross Elasticity of Demand', code: 'A2-8.6' },
+      { name: 'Using Elasticity in Pricing Decisions', code: 'A2-8.7' },
+      { name: 'Ansoff\u2019s Matrix & Growth Strategies', code: 'A2-8.8' },
+      { name: 'International Marketing & Entry Strategies', code: 'A2-8.9' },
+      { name: 'Adapting the Marketing Mix for Overseas Markets', code: 'A2-8.10' },
+      { name: 'Digital Marketing & Its Strategic Impact', code: 'A2-8.11' },
+    ] },
+
+  { topic: 'A2 \u00b7 9 Operations Management (Strategic)', code: 'A2-9',
+    subtopics: [
+      { name: 'Operational Flexibility & Lean Production', code: 'A2-9.1' },
+      { name: 'Kaizen, Waste Elimination & Cell Working', code: 'A2-9.2' },
+      { name: 'Location & Relocation Decisions', code: 'A2-9.3' },
+      { name: 'Quantitative Factors in Location Decisions', code: 'A2-9.4' },
+      { name: 'Scale of Operations & Economies of Scale', code: 'A2-9.5' },
+      { name: 'Diseconomies of Scale', code: 'A2-9.6' },
+      { name: 'Project Management & The Network Diagram', code: 'A2-9.7' },
+      { name: 'Critical Path Analysis: Constructing the Network', code: 'A2-9.8' },
+      { name: 'Earliest Start & Latest Finish Times', code: 'A2-9.9' },
+      { name: 'Identifying the Critical Path & Calculating Float', code: 'A2-9.10' },
+      { name: 'Evaluating Critical Path Analysis', code: 'A2-9.11' },
+    ] },
+
+  { topic: 'A2 \u00b7 10 Finance & Accounting (Strategic)', code: 'A2-10',
+    subtopics: [
+      { name: 'Published Accounts & Their Users', code: 'A2-10.1' },
+      { name: 'Depreciation & Its Effect on Profit', code: 'A2-10.2' },
+      { name: 'Inventory Valuation & Its Effect on Accounts', code: 'A2-10.3' },
+      { name: 'Profitability Ratios & Their Interpretation', code: 'A2-10.4' },
+      { name: 'Liquidity Ratios: Current & Acid Test', code: 'A2-10.5' },
+      { name: 'Efficiency Ratios: Inventory Turnover & Debtor Days', code: 'A2-10.6' },
+      { name: 'Gearing & Financial Risk', code: 'A2-10.7' },
+      { name: 'Shareholder Ratios: EPS & Dividend Yield', code: 'A2-10.8' },
+      { name: 'Limitations of Ratio Analysis', code: 'A2-10.9' },
+      { name: 'Investment Appraisal: Payback Period', code: 'A2-10.10' },
+      { name: 'Investment Appraisal: Average Rate of Return', code: 'A2-10.11' },
+      { name: 'Discounted Cash Flow & Net Present Value', code: 'A2-10.12' },
+      { name: 'Internal Rate of Return', code: 'A2-10.13' },
+      { name: 'Comparing Investment Appraisal Methods', code: 'A2-10.14' },
+      { name: 'Qualitative Factors in Investment Decisions', code: 'A2-10.15' },
+    ] },
+
+  { topic: 'A2 \u00b7 11 Strategic Management', code: 'A2-11',
+    subtopics: [
+      { name: 'Strategy, Tactics & The Planning Process', code: 'A2-11.1' },
+      { name: 'Corporate Planning & Its Value', code: 'A2-11.2' },
+      { name: 'SWOT Analysis as a Strategic Tool', code: 'A2-11.3' },
+      { name: 'PEST Analysis & The External Environment', code: 'A2-11.4' },
+      { name: 'Porter\u2019s Five Forces', code: 'A2-11.5' },
+      { name: 'Porter\u2019s Generic Strategies', code: 'A2-11.6' },
+      { name: 'Core Competences & Resource-Based Strategy', code: 'A2-11.7' },
+      { name: 'Decision Trees: Constructing the Tree', code: 'A2-11.8' },
+      { name: 'Decision Trees: Expected Values & Evaluation', code: 'A2-11.9' },
+      { name: 'Force Field Analysis', code: 'A2-11.10' },
+      { name: 'Managing Change & Overcoming Resistance', code: 'A2-11.11' },
+      { name: 'Contingency Planning & Crisis Management', code: 'A2-11.12' },
+      { name: 'Strategic Implementation & Evaluation', code: 'A2-11.13' },
+    ] },
+
+  { topic: 'A2 \u00b7 Exam Technique & Revision', code: 'A2-EX',
+    subtopics: [
+      { name: 'Paper 1: Short Answer & Essay Technique', code: 'A2-EX.1' },
+      { name: 'Paper 2: Data Response Technique', code: 'A2-EX.2' },
+      { name: 'Paper 3: Case Study Technique & Time Management', code: 'A2-EX.3' },
+      { name: 'The Assessment Objectives: Knowledge to Evaluation', code: 'A2-EX.4' },
+      { name: 'Writing Analysis: Building a Chain of Reasoning', code: 'A2-EX.5' },
+      { name: 'Writing Evaluation: Justified Judgement in Context', code: 'A2-EX.6' },
+      { name: 'Using Case Study Evidence Effectively', code: 'A2-EX.7' },
+      { name: 'Quantitative Skills in Business Papers', code: 'A2-EX.8' },
+      { name: 'Past Paper Practice: AS Content', code: 'A2-EX.9' },
+      { name: 'Past Paper Practice: A2 Content', code: 'A2-EX.10' },
+      { name: 'Mock Exam Review & Revision Planning', code: 'A2-EX.11' },
+    ] },
+]
+
+// Cambridge International AS & A Level Economics 9708
+// Lesson-level spine, 16 topics / 206 lessons.
+//
+// STRUCTURE
+// 9708 runs two strands — microeconomics and macroeconomics — through
+// BOTH levels. A2 does not move on to new territory; it returns to the
+// same questions with more rigour, adding cost and revenue theory,
+// market structures, and open-economy macro. Topics therefore name the
+// strand as well as the level, so a teacher planning a term can see
+// whether a lesson is AS micro, A2 micro, AS macro or A2 macro.
+//
+// Diagram work is where Economics marks are won and lost, so the
+// diagrams that carry analysis marks — AD/AS, cost curves, market
+// structure equilibria — are given their own lessons rather than being
+// assumed alongside the theory.
+const ALEVEL_ECONOMICS_9708 = [
+  // ─────────────── AS MICRO ───────────────
+  { topic: 'AS \u00b7 Micro 1 \u2014 Basic Economic Ideas', code: 'AS1',
+    subtopics: [
+      { name: 'Scarcity, Choice & Opportunity Cost', code: 'AS1.1' },
+      { name: 'The Fundamental Economic Questions', code: 'AS1.2' },
+      { name: 'Factors of Production & Their Rewards', code: 'AS1.3' },
+      { name: 'The Production Possibility Curve', code: 'AS1.4' },
+      { name: 'Movements Along & Shifts of the PPC', code: 'AS1.5' },
+      { name: 'Positive & Normative Statements', code: 'AS1.6' },
+      { name: 'Economic Goods, Free Goods & Merit Goods', code: 'AS1.7' },
+      { name: 'Specialisation & The Division of Labour', code: 'AS1.8' },
+      { name: 'Market, Planned & Mixed Economic Systems', code: 'AS1.9' },
+      { name: 'Money: Functions & Characteristics', code: 'AS1.10' },
+    ] },
+
+  { topic: 'AS \u00b7 Micro 2 \u2014 The Price System', code: 'AS2',
+    subtopics: [
+      { name: 'Demand & The Law of Demand', code: 'AS2.1' },
+      { name: 'Movements Along vs. Shifts of the Demand Curve', code: 'AS2.2' },
+      { name: 'Determinants of Demand', code: 'AS2.3' },
+      { name: 'Supply & Determinants of Supply', code: 'AS2.4' },
+      { name: 'Market Equilibrium & The Role of Price', code: 'AS2.5' },
+      { name: 'Effects of Shifts in Demand and Supply', code: 'AS2.6' },
+      { name: 'Consumer & Producer Surplus', code: 'AS2.7' },
+      { name: 'Price Elasticity of Demand: Calculation & Determinants', code: 'AS2.8' },
+      { name: 'PED & Total Revenue', code: 'AS2.9' },
+      { name: 'Income Elasticity of Demand', code: 'AS2.10' },
+      { name: 'Cross Elasticity of Demand', code: 'AS2.11' },
+      { name: 'Price Elasticity of Supply', code: 'AS2.12' },
+      { name: 'Applications of Elasticity for Firms & Government', code: 'AS2.13' },
+      { name: 'Joint, Composite & Derived Demand', code: 'AS2.14' },
+    ] },
+
+  { topic: 'AS \u00b7 Micro 3 \u2014 Government Microeconomic Intervention', code: 'AS3',
+    subtopics: [
+      { name: 'Maximum & Minimum Prices', code: 'AS3.1' },
+      { name: 'Indirect Taxes: Incidence & Elasticity', code: 'AS3.2' },
+      { name: 'Subsidies & Their Effects', code: 'AS3.3' },
+      { name: 'Direct Provision of Goods & Services', code: 'AS3.4' },
+      { name: 'Nationalisation & Privatisation', code: 'AS3.5' },
+      { name: 'Evaluating Government Intervention', code: 'AS3.6' },
+    ] },
+
+  // ─────────────── AS MACRO ───────────────
+  { topic: 'AS \u00b7 Macro 4 \u2014 The Macroeconomy', code: 'AS4',
+    subtopics: [
+      { name: 'Aggregate Demand & Its Components', code: 'AS4.1' },
+      { name: 'The Aggregate Demand Curve & Its Shifts', code: 'AS4.2' },
+      { name: 'Aggregate Supply: Short Run & Long Run', code: 'AS4.3' },
+      { name: 'Macroeconomic Equilibrium Using AD/AS', code: 'AS4.4' },
+      { name: 'Interpreting AD/AS Diagrams', code: 'AS4.5' },
+      { name: 'National Income: GDP, GNI & Measurement', code: 'AS4.6' },
+      { name: 'Real vs. Nominal & GDP per Capita', code: 'AS4.7' },
+      { name: 'Limitations of National Income as a Measure of Welfare', code: 'AS4.8' },
+      { name: 'The Circular Flow of Income', code: 'AS4.9' },
+      { name: 'Injections, Withdrawals & Equilibrium National Income', code: 'AS4.10' },
+      { name: 'Economic Growth: Actual & Potential', code: 'AS4.11' },
+      { name: 'The Business Cycle', code: 'AS4.12' },
+    ] },
+
+  { topic: 'AS \u00b7 Macro 5 \u2014 Inflation, Employment & Trade', code: 'AS5',
+    subtopics: [
+      { name: 'Inflation: Definition & Measurement', code: 'AS5.1' },
+      { name: 'Demand-Pull & Cost-Push Inflation', code: 'AS5.2' },
+      { name: 'Consequences of Inflation & Deflation', code: 'AS5.3' },
+      { name: 'Unemployment: Measurement & Types', code: 'AS5.4' },
+      { name: 'Causes & Consequences of Unemployment', code: 'AS5.5' },
+      { name: 'The Balance of Payments: Structure', code: 'AS5.6' },
+      { name: 'Causes & Consequences of Current Account Imbalance', code: 'AS5.7' },
+      { name: 'Exchange Rates: Determination & Systems', code: 'AS5.8' },
+      { name: 'Effects of Exchange Rate Changes', code: 'AS5.9' },
+      { name: 'Absolute & Comparative Advantage', code: 'AS5.10' },
+      { name: 'Gains from Trade & Its Limitations', code: 'AS5.11' },
+      { name: 'Protectionism: Tariffs, Quotas & Subsidies', code: 'AS5.12' },
+      { name: 'Arguments For & Against Protectionism', code: 'AS5.13' },
+      { name: 'Economic Integration: Free Trade Areas to Monetary Union', code: 'AS5.14' },
+    ] },
+
+  { topic: 'AS \u00b7 Macro 6 \u2014 Government Macroeconomic Intervention', code: 'AS6',
+    subtopics: [
+      { name: 'Macroeconomic Policy Objectives & Conflicts', code: 'AS6.1' },
+      { name: 'Fiscal Policy: Instruments & Effects', code: 'AS6.2' },
+      { name: 'Monetary Policy: Instruments & Effects', code: 'AS6.3' },
+      { name: 'Supply-Side Policy', code: 'AS6.4' },
+      { name: 'Using AD/AS to Illustrate Policy Effects', code: 'AS6.5' },
+      { name: 'Evaluating Policy Effectiveness', code: 'AS6.6' },
+    ] },
+
+  // ─────────────── A2 MICRO ───────────────
+  { topic: 'A2 \u00b7 Micro 7 \u2014 Utility & Consumer Behaviour', code: 'A2-7',
+    subtopics: [
+      { name: 'Total & Marginal Utility', code: 'A2-7.1' },
+      { name: 'The Law of Diminishing Marginal Utility', code: 'A2-7.2' },
+      { name: 'Equi-Marginal Principle & Consumer Equilibrium', code: 'A2-7.3' },
+      { name: 'Deriving the Demand Curve from Utility', code: 'A2-7.4' },
+      { name: 'Indifference Curves & The Budget Line', code: 'A2-7.5' },
+      { name: 'Income & Substitution Effects', code: 'A2-7.6' },
+      { name: 'Giffen & Veblen Goods', code: 'A2-7.7' },
+      { name: 'Behavioural Economics & Bounded Rationality', code: 'A2-7.8' },
+      { name: 'Nudge Theory & Choice Architecture', code: 'A2-7.9' },
+    ] },
+
+  { topic: 'A2 \u00b7 Micro 8 \u2014 Costs, Revenue & Production', code: 'A2-8',
+    subtopics: [
+      { name: 'Short Run & Long Run in Production', code: 'A2-8.1' },
+      { name: 'The Law of Diminishing Returns', code: 'A2-8.2' },
+      { name: 'Total, Average & Marginal Product', code: 'A2-8.3' },
+      { name: 'Fixed, Variable, Total & Average Costs', code: 'A2-8.4' },
+      { name: 'Marginal Cost & The Shape of Cost Curves', code: 'A2-8.5' },
+      { name: 'Drawing & Interpreting Short-Run Cost Curves', code: 'A2-8.6' },
+      { name: 'Long-Run Average Cost & Economies of Scale', code: 'A2-8.7' },
+      { name: 'Diseconomies of Scale & Minimum Efficient Scale', code: 'A2-8.8' },
+      { name: 'Total, Average & Marginal Revenue', code: 'A2-8.9' },
+      { name: 'Revenue Curves Under Different Market Conditions', code: 'A2-8.10' },
+      { name: 'Profit Maximisation: The MC = MR Rule', code: 'A2-8.11' },
+      { name: 'Normal & Abnormal Profit', code: 'A2-8.12' },
+      { name: 'Shut-Down Points in the Short and Long Run', code: 'A2-8.13' },
+    ] },
+
+  { topic: 'A2 \u00b7 Micro 9 \u2014 Market Structures', code: 'A2-9',
+    subtopics: [
+      { name: 'Characteristics of Perfect Competition', code: 'A2-9.1' },
+      { name: 'Short-Run & Long-Run Equilibrium in Perfect Competition', code: 'A2-9.2' },
+      { name: 'Monopoly: Characteristics & Barriers to Entry', code: 'A2-9.3' },
+      { name: 'Monopoly Equilibrium & Welfare Loss', code: 'A2-9.4' },
+      { name: 'Price Discrimination & Its Conditions', code: 'A2-9.5' },
+      { name: 'Natural Monopoly & Its Regulation', code: 'A2-9.6' },
+      { name: 'Monopolistic Competition', code: 'A2-9.7' },
+      { name: 'Oligopoly: Characteristics & Concentration Ratios', code: 'A2-9.8' },
+      { name: 'The Kinked Demand Curve', code: 'A2-9.9' },
+      { name: 'Collusion, Cartels & Game Theory', code: 'A2-9.10' },
+      { name: 'Contestable Markets & Hit-and-Run Entry', code: 'A2-9.11' },
+      { name: 'Comparing Market Structures on Efficiency', code: 'A2-9.12' },
+      { name: 'Productive, Allocative, Dynamic & X-Efficiency', code: 'A2-9.13' },
+      { name: 'Growth & Survival of Firms', code: 'A2-9.14' },
+      { name: 'Divorce of Ownership from Control', code: 'A2-9.15' },
+    ] },
+
+  { topic: 'A2 \u00b7 Micro 10 \u2014 Market Failure & Intervention', code: 'A2-10',
+    subtopics: [
+      { name: 'Types of Market Failure', code: 'A2-10.1' },
+      { name: 'Externalities: Negative Production & Consumption', code: 'A2-10.2' },
+      { name: 'Externalities: Positive Production & Consumption', code: 'A2-10.3' },
+      { name: 'Drawing Externality Diagrams & Welfare Loss', code: 'A2-10.4' },
+      { name: 'Public Goods & The Free Rider Problem', code: 'A2-10.5' },
+      { name: 'Information Failure & Asymmetric Information', code: 'A2-10.6' },
+      { name: 'Moral Hazard & Adverse Selection', code: 'A2-10.7' },
+      { name: 'Factor Immobility & Unstable Commodity Markets', code: 'A2-10.8' },
+      { name: 'Cost-Benefit Analysis', code: 'A2-10.9' },
+      { name: 'Pollution Permits & Tradable Rights', code: 'A2-10.10' },
+      { name: 'Regulation, Taxation & Property Rights', code: 'A2-10.11' },
+      { name: 'Government Failure & Unintended Consequences', code: 'A2-10.12' },
+      { name: 'Equity, Equality & The Distribution of Income', code: 'A2-10.13' },
+      { name: 'The Lorenz Curve & Gini Coefficient', code: 'A2-10.14' },
+      { name: 'Poverty: Absolute, Relative & Policies to Reduce It', code: 'A2-10.15' },
+      { name: 'Labour Market: Wage Determination & Imperfections', code: 'A2-10.16' },
+    ] },
+
+  // ─────────────── A2 MACRO ───────────────
+  { topic: 'A2 \u00b7 Macro 11 \u2014 National Income & Economic Growth', code: 'A2-11',
+    subtopics: [
+      { name: 'The Keynesian 45-Degree Diagram', code: 'A2-11.1' },
+      { name: 'The Consumption & Savings Functions', code: 'A2-11.2' },
+      { name: 'Marginal Propensity to Consume, Save, Tax & Import', code: 'A2-11.3' },
+      { name: 'The Multiplier Effect & Its Calculation', code: 'A2-11.4' },
+      { name: 'The Accelerator', code: 'A2-11.5' },
+      { name: 'The Investment Decision & Its Determinants', code: 'A2-11.6' },
+      { name: 'Keynesian vs. Monetarist Views of AS', code: 'A2-11.7' },
+      { name: 'Inflationary & Deflationary Gaps', code: 'A2-11.8' },
+      { name: 'Economic Growth: Causes, Costs & Benefits', code: 'A2-11.9' },
+      { name: 'Sustainable Growth & Development Economics', code: 'A2-11.10' },
+      { name: 'Indicators of Development: HDI & Others', code: 'A2-11.11' },
+      { name: 'Characteristics & Constraints of Developing Economies', code: 'A2-11.12' },
+    ] },
+
+  { topic: 'A2 \u00b7 Macro 12 \u2014 Money, Banking & Employment', code: 'A2-12',
+    subtopics: [
+      { name: 'Functions of Money & Measures of Money Supply', code: 'A2-12.1' },
+      { name: 'The Quantity Theory of Money', code: 'A2-12.2' },
+      { name: 'Liquidity Preference & The Demand for Money', code: 'A2-12.3' },
+      { name: 'Determination of the Interest Rate', code: 'A2-12.4' },
+      { name: 'Credit Creation & The Money Multiplier', code: 'A2-12.5' },
+      { name: 'The Role of the Central Bank', code: 'A2-12.6' },
+      { name: 'The Transmission Mechanism of Monetary Policy', code: 'A2-12.7' },
+      { name: 'Quantitative Easing', code: 'A2-12.8' },
+      { name: 'The Phillips Curve: Short Run & Long Run', code: 'A2-12.9' },
+      { name: 'The Natural Rate of Unemployment & NAIRU', code: 'A2-12.10' },
+      { name: 'Expectations & Their Role in Policy', code: 'A2-12.11' },
+    ] },
+
+  { topic: 'A2 \u00b7 Macro 13 \u2014 The Open Economy', code: 'A2-13',
+    subtopics: [
+      { name: 'The Balance of Payments in Detail', code: 'A2-13.1' },
+      { name: 'Correcting a Current Account Deficit', code: 'A2-13.2' },
+      { name: 'The Marshall-Lerner Condition', code: 'A2-13.3' },
+      { name: 'The J-Curve Effect', code: 'A2-13.4' },
+      { name: 'Terms of Trade & Their Significance', code: 'A2-13.5' },
+      { name: 'Fixed, Floating & Managed Exchange Rate Systems', code: 'A2-13.6' },
+      { name: 'Purchasing Power Parity', code: 'A2-13.7' },
+      { name: 'Policies to Influence the Exchange Rate', code: 'A2-13.8' },
+      { name: 'Globalisation & Multinational Corporations', code: 'A2-13.9' },
+      { name: 'Trade Policy & The Role of the WTO', code: 'A2-13.10' },
+    ] },
+
+  { topic: 'A2 \u00b7 Macro 14 \u2014 Government Policy Evaluation', code: 'A2-14',
+    subtopics: [
+      { name: 'Conflicts Between Macroeconomic Objectives', code: 'A2-14.1' },
+      { name: 'Fiscal Policy: Budget Deficits & National Debt', code: 'A2-14.2' },
+      { name: 'Automatic Stabilisers & Discretionary Policy', code: 'A2-14.3' },
+      { name: 'Laffer Curve & Taxation Principles', code: 'A2-14.4' },
+      { name: 'Supply-Side Policies Evaluated', code: 'A2-14.5' },
+      { name: 'Policy Trade-Offs & Time Lags', code: 'A2-14.6' },
+      { name: 'Evaluating a Policy Package in Context', code: 'A2-14.7' },
+    ] },
+
+  { topic: 'A2 \u00b7 Diagram & Data Skills', code: 'A2-D',
+    subtopics: [
+      { name: 'Drawing Accurate Diagrams Under Exam Conditions', code: 'A2-D.1' },
+      { name: 'Labelling & Referring to Diagrams in Written Answers', code: 'A2-D.2' },
+      { name: 'Index Numbers & Real Values', code: 'A2-D.3' },
+      { name: 'Interpreting Economic Data & Identifying Trends', code: 'A2-D.4' },
+      { name: 'Percentage Change & Rates of Change', code: 'A2-D.5' },
+      { name: 'Recognising the Limitations of Data', code: 'A2-D.6' },
+    ] },
+
+  { topic: 'A2 \u00b7 Exam Technique & Revision', code: 'A2-EX',
+    subtopics: [
+      { name: 'Multiple Choice Technique in Economics', code: 'A2-EX.1' },
+      { name: 'Data Response Technique', code: 'A2-EX.2' },
+      { name: 'Essay Structure: Analysis and Evaluation', code: 'A2-EX.3' },
+      { name: 'Command Words & The Assessment Objectives', code: 'A2-EX.4' },
+      { name: 'Building an Evaluative Judgement', code: 'A2-EX.5' },
+      { name: 'Past Paper Practice: Microeconomics', code: 'A2-EX.6' },
+      { name: 'Past Paper Practice: Macroeconomics', code: 'A2-EX.7' },
+      { name: 'Mock Exam Review & Revision Planning', code: 'A2-EX.8' },
+    ] },
+]
+
 export const ALEVEL_LIBRARY = [
   { match: /\bbiology\b/i, const_: ALEVEL_BIOLOGY_9700,
     source: 'Cambridge International AS & A Level Biology 9700 \u2014 252-lesson scheme (AS 128 / A2 124)' },
@@ -5462,6 +5941,10 @@ export const ALEVEL_LIBRARY = [
   // Mathematics is prefixed by COMPONENT (P1, P2, P3, M1, S1, S2) rather
   // than AS/A2, because candidates sit different combinations: a school
   // teaching P1/P3/S1 can filter to exactly those and never see Mechanics.
+  { match: /\bbusiness\b/i, const_: ALEVEL_BUSINESS_9609,
+    source: 'Cambridge International AS & A Level Business 9609 \u2014 159-lesson scheme (AS 81 / A2 78)' },
+  { match: /\beconomics\b/i, const_: ALEVEL_ECONOMICS_9708,
+    source: 'Cambridge International AS & A Level Economics 9708 \u2014 169-lesson scheme (AS 62 / A2 107)' },
   { match: /\bmathematics\b|\bmaths\b/i, const_: ALEVEL_MATHS_9709,
     source: 'Cambridge International AS & A Level Mathematics 9709 \u2014 229-lesson scheme (P1 61 / P2 21 / P3 68 / M1 25 / S1 27 / S2 16)' },
 ]
