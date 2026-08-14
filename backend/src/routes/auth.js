@@ -318,6 +318,79 @@ router.post('/verify-otp', async (req, res) => {
 // Body: { email, newPassword }
 // Also works for authenticated users (checks token OR otp)
 // ─────────────────────────────────────────────────────────
+/**
+ * GET /api/auth/me
+ *
+ * Returns the signed-in user. The frontend has been calling this since
+ * TeacherPortal was written, but the route never existed — every call
+ * 404'd and the portal silently fell back to the localStorage copy of the
+ * user. That works until the stored copy goes stale: a role change, a new
+ * teaching specialty or a name correction would not appear until the user
+ * cleared their browser storage.
+ *
+ * The password hash and reset fields are excluded.
+ */
+router.get('/me', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id)
+      .select('-password -resetToken -resetTokenExpiry -otp -otpExpiry')
+      .lean();
+    if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
+    return res.json({ success: true, user });
+  } catch (e) {
+    console.error('[auth me]', e.message);
+    return res.status(500).json({ success: false, message: 'Failed to load user.' });
+  }
+});
+
+/**
+ * POST /api/auth/me/teaching-specialties
+ *
+ * Replaces the signed-in teacher's specialties. Also missing until now,
+ * so the "save specialties" button in ManageSubjectTab failed silently.
+ *
+ * teachingSpecialties is the field allocation actually matches on — see
+ * routes/allocations.js, which does an $elemMatch against it rather than
+ * against User.curriculum. Keeping the two in step matters: a teacher
+ * whose specialties are stale will not be offered students they can
+ * teach.
+ */
+router.post('/me/teaching-specialties', authMiddleware, async (req, res) => {
+  try {
+    const { curricula, subjectIds } = req.body || {};
+    if (!Array.isArray(curricula) || !Array.isArray(subjectIds))
+      return res.status(400).json({ success: false, message: 'curricula and subjectIds must be arrays.' });
+
+    const Subject = require('../models/Subject');
+    const subjects = await Subject.find({ _id: { $in: subjectIds } })
+      .select('subjectName curriculum').lean();
+
+    // One specialty per (curriculum, subject) pair the teacher selected,
+    // limited to curricula they actually chose.
+    const specialties = [];
+    for (const s of subjects) {
+      if (!curricula.includes(s.curriculum)) continue;
+      specialties.push({ curriculum: s.curriculum, subject: s.subjectName });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { $set: { teachingSpecialties: specialties, curriculum: [...new Set(curricula)] } },
+      { new: true })
+      .select('-password -resetToken -resetTokenExpiry -otp -otpExpiry')
+      .lean();
+
+    return res.json({
+      success: true,
+      message: `Saved ${specialties.length} teaching specialt${specialties.length === 1 ? 'y' : 'ies'} across ${curricula.length} curriculum/a.`,
+      user,
+    });
+  } catch (e) {
+    console.error('[auth teaching-specialties]', e.message);
+    return res.status(500).json({ success: false, message: e.message });
+  }
+});
+
 router.post('/change-password', async (req, res) => {
   try {
     const { email, newPassword } = req.body || {}
