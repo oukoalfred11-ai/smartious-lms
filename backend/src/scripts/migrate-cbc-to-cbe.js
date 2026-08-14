@@ -51,18 +51,25 @@ async function main() {
 
   let totalFound = 0, totalChanged = 0
 
-  // ── 1. plain string fields ──────────────────────────────
+  // ── 1. plain string fields (guarded to strings only) ────
   for (const name of STRING_COLLECTIONS) {
     const col = db.collection(name)
-    const n = await col.countDocuments({ curriculum: OLD })
+    // $type:'string' is essential. In MongoDB { curriculum: OLD } matches
+    // BOTH a string equal to OLD and an ARRAY containing it — so without
+    // this guard, $set replaces a teacher's whole curriculum array with a
+    // single string and silently destroys the other curricula. That is
+    // exactly what happened on the first run; see
+    // scripts/repair-teacher-curricula.js.
+    const stringOnly = { curriculum: { $eq: OLD, $type: 'string' } }
+    const n = await col.countDocuments(stringOnly)
     if (!n) continue
     totalFound += n
     if (APPLY) {
-      const r = await col.updateMany({ curriculum: OLD }, { $set: { curriculum: NEW } })
+      const r = await col.updateMany(stringOnly, { $set: { curriculum: NEW } })
       totalChanged += r.modifiedCount
       console.log(`  ${name.padEnd(28)} curriculum      ${String(n).padStart(5)} -> ${r.modifiedCount} updated`)
     } else {
-      console.log(`  ${name.padEnd(28)} curriculum      ${String(n).padStart(5)} would update`)
+      console.log(`  ${name.padEnd(28)} curriculum      ${String(n).padStart(5)} would update (string only)`)
     }
   }
 
