@@ -6923,6 +6923,591 @@ const ALEVEL_PSYCHOLOGY_9990 = [
     ] },
 ]
 
+// Cambridge International AS & A Level Geography 9696
+// Lesson-level spine, 15 topics / 172 lessons.
+//
+// STRUCTURE
+// AS is compulsory core: three physical topics and three human topics.
+// A2 is OPTIONAL — centres choose one advanced physical option and one
+// advanced human option from a menu. Each option is therefore its own
+// topic, so a centre teaching Tropical Environments and Global
+// Interdependence can filter to exactly those and never see Coastal or
+// Economic Transition lessons in its bank.
+//
+// Skills are a strand rather than a topic. Map work, data response and
+// fieldwork technique are assessed across every paper, so they appear
+// at both levels.
+const ALEVEL_GEOGRAPHY_9696 = [
+  // ─────────────── AS PHYSICAL CORE ───────────────
+  { topic: 'AS \u00b7 Physical 1 \u2014 Hydrology & Fluvial Geomorphology', code: 'AS1',
+    subtopics: [
+      { name: 'The Drainage Basin as a System', code: 'AS1.1' },
+      { name: 'Inputs, Stores, Flows & Outputs', code: 'AS1.2' },
+      { name: 'The Water Balance & Its Components', code: 'AS1.3' },
+      { name: 'Storm Hydrographs & Influencing Factors', code: 'AS1.4' },
+      { name: 'River Discharge & The Hydraulic Radius', code: 'AS1.5' },
+      { name: 'River Channel Processes: Erosion & Transport', code: 'AS1.6' },
+      { name: 'Deposition & The Hjulstrom Curve', code: 'AS1.7' },
+      { name: 'Landforms of Erosion: Waterfalls, Gorges & Meanders', code: 'AS1.8' },
+      { name: 'Landforms of Deposition: Floodplains, Levees & Deltas', code: 'AS1.9' },
+      { name: 'River Flooding: Causes & Consequences', code: 'AS1.10' },
+      { name: 'Hard & Soft Engineering River Management', code: 'AS1.11' },
+      { name: 'Evaluating River Management Strategies', code: 'AS1.12' },
+    ] },
+
+  { topic: 'AS \u00b7 Physical 2 \u2014 Atmosphere & Weather', code: 'AS2',
+    subtopics: [
+      { name: 'The Structure & Composition of the Atmosphere', code: 'AS2.1' },
+      { name: 'The Global Energy Budget', code: 'AS2.2' },
+      { name: 'Energy Transfers: Radiation, Conduction & Convection', code: 'AS2.3' },
+      { name: 'The Greenhouse Effect & Albedo', code: 'AS2.4' },
+      { name: 'Atmospheric Moisture & Humidity', code: 'AS2.5' },
+      { name: 'Condensation, Cloud Formation & Types', code: 'AS2.6' },
+      { name: 'Types of Rainfall: Relief, Convectional & Frontal', code: 'AS2.7' },
+      { name: 'Atmospheric Pressure & Wind', code: 'AS2.8' },
+      { name: 'Global Circulation & The Tri-Cellular Model', code: 'AS2.9' },
+      { name: 'Air Masses & Fronts', code: 'AS2.10' },
+      { name: 'Depressions & Anticyclones', code: 'AS2.11' },
+      { name: 'The Urban Microclimate & The Heat Island Effect', code: 'AS2.12' },
+    ] },
+
+  { topic: 'AS \u00b7 Physical 3 \u2014 Rocks & Weathering', code: 'AS3',
+    subtopics: [
+      { name: 'Plate Tectonics & The Structure of the Earth', code: 'AS3.1' },
+      { name: 'Plate Boundaries & Associated Landforms', code: 'AS3.2' },
+      { name: 'Earthquakes & Volcanic Activity', code: 'AS3.3' },
+      { name: 'The Rock Cycle & Rock Types', code: 'AS3.4' },
+      { name: 'Mechanical Weathering Processes', code: 'AS3.5' },
+      { name: 'Chemical & Biological Weathering', code: 'AS3.6' },
+      { name: 'Factors Affecting Rates of Weathering', code: 'AS3.7' },
+      { name: 'Slope Processes & Mass Movement Types', code: 'AS3.8' },
+      { name: 'Slope Stability & Human Influence', code: 'AS3.9' },
+      { name: 'Managing Mass Movement Hazards', code: 'AS3.10' },
+    ] },
+
+  // ─────────────── AS HUMAN CORE ───────────────
+  { topic: 'AS \u00b7 Human 4 \u2014 Population', code: 'AS4',
+    subtopics: [
+      { name: 'Population Distribution & Density', code: 'AS4.1' },
+      { name: 'Birth Rates, Death Rates & Natural Increase', code: 'AS4.2' },
+      { name: 'Factors Affecting Fertility & Mortality', code: 'AS4.3' },
+      { name: 'The Demographic Transition Model', code: 'AS4.4' },
+      { name: 'Population Pyramids & Their Interpretation', code: 'AS4.5' },
+      { name: 'Ageing Populations & Their Consequences', code: 'AS4.6' },
+      { name: 'Youthful Populations & Dependency', code: 'AS4.7' },
+      { name: 'Migration: Types, Causes & Barriers', code: 'AS4.8' },
+      { name: 'Impacts of Migration on Source & Destination', code: 'AS4.9' },
+      { name: 'Population Policies & Their Effectiveness', code: 'AS4.10' },
+      { name: 'Population, Resources & Carrying Capacity', code: 'AS4.11' },
+    ] },
+
+  { topic: 'AS \u00b7 Human 5 \u2014 Migration & Settlement Dynamics', code: 'AS5',
+    subtopics: [
+      { name: 'Rural-Urban Migration & Its Causes', code: 'AS5.1' },
+      { name: 'Counterurbanisation & Reurbanisation', code: 'AS5.2' },
+      { name: 'Urbanisation & Rates of Urban Growth', code: 'AS5.3' },
+      { name: 'Urban Land Use Models', code: 'AS5.4' },
+      { name: 'The Central Business District & Its Change', code: 'AS5.5' },
+      { name: 'Residential Segregation & Urban Zones', code: 'AS5.6' },
+      { name: 'Informal Settlements & Their Characteristics', code: 'AS5.7' },
+      { name: 'Managing Informal Settlements', code: 'AS5.8' },
+      { name: 'Rural Settlement Patterns & Change', code: 'AS5.9' },
+      { name: 'Rural Deprivation & Service Provision', code: 'AS5.10' },
+    ] },
+
+  { topic: 'AS \u00b7 Human 6 \u2014 Economic Activity & Energy', code: 'AS6',
+    subtopics: [
+      { name: 'Sectors of Economic Activity & Their Change', code: 'AS6.1' },
+      { name: 'The Clark-Fisher Model', code: 'AS6.2' },
+      { name: 'Factors Affecting Industrial Location', code: 'AS6.3' },
+      { name: 'Informal Sector Employment', code: 'AS6.4' },
+      { name: 'Globalisation & Transnational Corporations', code: 'AS6.5' },
+      { name: 'Energy Sources: Renewable & Non-Renewable', code: 'AS6.6' },
+      { name: 'Energy Production & Consumption Patterns', code: 'AS6.7' },
+      { name: 'Environmental Impact of Energy Use', code: 'AS6.8' },
+      { name: 'Managing Energy Supply Sustainably', code: 'AS6.9' },
+    ] },
+
+  { topic: 'AS \u00b7 Geographical Skills', code: 'AS-SK',
+    subtopics: [
+      { name: 'Interpreting Topographical Maps', code: 'AS-SK.1' },
+      { name: 'Grid References, Scale & Cross-Sections', code: 'AS-SK.2' },
+      { name: 'Choropleth, Isoline & Flow Line Maps', code: 'AS-SK.3' },
+      { name: 'Graphs: Line, Bar, Scatter & Triangular', code: 'AS-SK.4' },
+      { name: 'Describing Distributions & Trends from Data', code: 'AS-SK.5' },
+      { name: 'Calculating & Interpreting Statistics', code: 'AS-SK.6' },
+      { name: 'Photograph & Satellite Image Interpretation', code: 'AS-SK.7' },
+      { name: 'Answering Data Response Questions', code: 'AS-SK.8' },
+    ] },
+
+  // ─────────────── A2 ADVANCED PHYSICAL OPTIONS ───────────────
+  { topic: 'A2 \u00b7 Option: Tropical Environments', code: 'A2-TR',
+    subtopics: [
+      { name: 'Tropical Climates & Their Characteristics', code: 'A2-TR.1' },
+      { name: 'Tropical Ecosystems: Rainforest Structure', code: 'A2-TR.2' },
+      { name: 'Nutrient Cycling in Tropical Ecosystems', code: 'A2-TR.3' },
+      { name: 'Savanna Ecosystems & Fire', code: 'A2-TR.4' },
+      { name: 'Tropical Weathering & Deep Weathering Profiles', code: 'A2-TR.5' },
+      { name: 'Tropical Landforms & Granite Landscapes', code: 'A2-TR.6' },
+      { name: 'Human Activity in Tropical Environments', code: 'A2-TR.7' },
+      { name: 'Deforestation & Its Consequences', code: 'A2-TR.8' },
+      { name: 'Sustainable Management of Tropical Environments', code: 'A2-TR.9' },
+    ] },
+
+  { topic: 'A2 \u00b7 Option: Coastal Environments', code: 'A2-CO',
+    subtopics: [
+      { name: 'Waves: Formation, Types & Energy', code: 'A2-CO.1' },
+      { name: 'Tides, Currents & Sediment Cells', code: 'A2-CO.2' },
+      { name: 'Marine Erosion Processes', code: 'A2-CO.3' },
+      { name: 'Landforms of Coastal Erosion', code: 'A2-CO.4' },
+      { name: 'Transport & Longshore Drift', code: 'A2-CO.5' },
+      { name: 'Landforms of Coastal Deposition', code: 'A2-CO.6' },
+      { name: 'Coral Reefs & Mangrove Ecosystems', code: 'A2-CO.7' },
+      { name: 'Sea Level Change & Emergent/Submergent Coasts', code: 'A2-CO.8' },
+      { name: 'Coastal Hazards & Vulnerability', code: 'A2-CO.9' },
+      { name: 'Coastal Management Strategies & Their Evaluation', code: 'A2-CO.10' },
+    ] },
+
+  { topic: 'A2 \u00b7 Option: Hazardous Environments', code: 'A2-HZ',
+    subtopics: [
+      { name: 'Hazard, Risk & Vulnerability Defined', code: 'A2-HZ.1' },
+      { name: 'Hazards from Tectonic Processes', code: 'A2-HZ.2' },
+      { name: 'Predicting & Managing Earthquake Hazards', code: 'A2-HZ.3' },
+      { name: 'Volcanic Hazards & Their Management', code: 'A2-HZ.4' },
+      { name: 'Hazards from Mass Movement', code: 'A2-HZ.5' },
+      { name: 'Atmospheric Hazards: Tropical Cyclones', code: 'A2-HZ.6' },
+      { name: 'Drought & Its Human Consequences', code: 'A2-HZ.7' },
+      { name: 'The Park Model & Hazard Response', code: 'A2-HZ.8' },
+      { name: 'Sustainable Management of Hazardous Environments', code: 'A2-HZ.9' },
+    ] },
+
+  // ─────────────── A2 ADVANCED HUMAN OPTIONS ───────────────
+  { topic: 'A2 \u00b7 Option: Production, Location & Change', code: 'A2-PL',
+    subtopics: [
+      { name: 'Agricultural Systems & Their Classification', code: 'A2-PL.1' },
+      { name: 'Factors Affecting Agricultural Land Use', code: 'A2-PL.2' },
+      { name: 'Agricultural Change & The Green Revolution', code: 'A2-PL.3' },
+      { name: 'Food Security & Its Determinants', code: 'A2-PL.4' },
+      { name: 'Manufacturing Location Theory', code: 'A2-PL.5' },
+      { name: 'Deindustrialisation & Its Consequences', code: 'A2-PL.6' },
+      { name: 'Newly Industrialised Countries', code: 'A2-PL.7' },
+      { name: 'Management of Change in Rural & Industrial Areas', code: 'A2-PL.8' },
+      { name: 'Sustainability in Production Systems', code: 'A2-PL.9' },
+    ] },
+
+  { topic: 'A2 \u00b7 Option: Environmental Management', code: 'A2-EM',
+    subtopics: [
+      { name: 'Sustainable Development & Its Definitions', code: 'A2-EM.1' },
+      { name: 'Managing Water Supply & Demand', code: 'A2-EM.2' },
+      { name: 'Water Quality & Pollution Management', code: 'A2-EM.3' },
+      { name: 'Atmospheric Pollution & Its Control', code: 'A2-EM.4' },
+      { name: 'Degradation of Rural Environments', code: 'A2-EM.5' },
+      { name: 'Desertification & Soil Erosion', code: 'A2-EM.6' },
+      { name: 'Managing Degraded Environments', code: 'A2-EM.7' },
+      { name: 'Conservation & Protected Areas', code: 'A2-EM.8' },
+      { name: 'Evaluating Environmental Management Strategies', code: 'A2-EM.9' },
+    ] },
+
+  { topic: 'A2 \u00b7 Option: Global Interdependence', code: 'A2-GI',
+    subtopics: [
+      { name: 'Trade Flows & Trading Patterns', code: 'A2-GI.1' },
+      { name: 'Trade Blocs & Trade Agreements', code: 'A2-GI.2' },
+      { name: 'Debt, Aid & Their Effects on Development', code: 'A2-GI.3' },
+      { name: 'The Role of Transnational Corporations', code: 'A2-GI.4' },
+      { name: 'Tourism Growth & Its Patterns', code: 'A2-GI.5' },
+      { name: 'Economic & Social Impacts of Tourism', code: 'A2-GI.6' },
+      { name: 'Ecotourism & Sustainable Tourism', code: 'A2-GI.7' },
+      { name: 'Development Indicators & The Development Gap', code: 'A2-GI.8' },
+      { name: 'Strategies to Reduce Global Inequality', code: 'A2-GI.9' },
+    ] },
+
+  { topic: 'A2 \u00b7 Advanced Skills & Fieldwork', code: 'A2-SK',
+    subtopics: [
+      { name: 'Formulating a Geographical Investigation', code: 'A2-SK.1' },
+      { name: 'Primary Data Collection Techniques', code: 'A2-SK.2' },
+      { name: 'Sampling Strategies in Fieldwork', code: 'A2-SK.3' },
+      { name: 'Statistical Tests: Spearman\u2019s Rank', code: 'A2-SK.4' },
+      { name: 'Statistical Tests: Chi-Squared & Nearest Neighbour', code: 'A2-SK.5' },
+      { name: 'Presenting Fieldwork Data Effectively', code: 'A2-SK.6' },
+      { name: 'Evaluating Methodology & Reliability', code: 'A2-SK.7' },
+      { name: 'Drawing Justified Conclusions', code: 'A2-SK.8' },
+    ] },
+
+  { topic: 'A2 \u00b7 Exam Technique & Revision', code: 'A2-EX',
+    subtopics: [
+      { name: 'Command Words in Geography Papers', code: 'A2-EX.1' },
+      { name: 'Structuring an Extended Essay Response', code: 'A2-EX.2' },
+      { name: 'Using Case Study Detail Effectively', code: 'A2-EX.3' },
+      { name: 'Building Evaluation into an Answer', code: 'A2-EX.4' },
+      { name: 'Drawing Annotated Diagrams Under Time Pressure', code: 'A2-EX.5' },
+      { name: 'Past Paper Practice: Physical Core & Options', code: 'A2-EX.6' },
+      { name: 'Past Paper Practice: Human Core & Options', code: 'A2-EX.7' },
+      { name: 'Mock Exam Review & Revision Planning', code: 'A2-EX.8' },
+    ] },
+]
+
+// Cambridge International AS & A Level
+//   History 9489     — 13 topics / 148 lessons
+//   Sociology 9699   — 13 topics / 150 lessons
+
+// ═══════════════════════════════════════════════════════════
+// HISTORY 9489
+//
+// WHY THIS IS BUILT AROUND SKILLS AND PERIOD OPTIONS
+// 9489 offers several period options and centres choose which to teach.
+// A spine listing only one period would be useless to a centre teaching
+// another, and listing every option in full would run to a thousand
+// lessons. So the historical SKILLS — source evaluation, causation,
+// significance, essay construction — form the backbone, and each period
+// option is a topic a centre can filter to.
+//
+// Source work is the backbone of Paper 1 and a spine that treats it as
+// a single lesson would misrepresent the course.
+// ═══════════════════════════════════════════════════════════
+const ALEVEL_HISTORY_9489 = [
+  { topic: 'AS \u00b7 Skills 1 \u2014 Working with Sources', code: 'AS1',
+    subtopics: [
+      { name: 'Primary & Secondary Sources Distinguished', code: 'AS1.1' },
+      { name: 'Provenance: Author, Date, Audience & Purpose', code: 'AS1.2' },
+      { name: 'Reliability & Its Limits as a Concept', code: 'AS1.3' },
+      { name: 'Utility: Value of a Source for an Enquiry', code: 'AS1.4' },
+      { name: 'Detecting Bias & Reading Against the Grain', code: 'AS1.5' },
+      { name: 'Cross-Referencing Sources for Corroboration', code: 'AS1.6' },
+      { name: 'Handling Sources That Disagree', code: 'AS1.7' },
+      { name: 'Visual Sources: Cartoons, Photographs & Posters', code: 'AS1.8' },
+      { name: 'Statistical & Quantitative Sources', code: 'AS1.9' },
+      { name: 'Using Contextual Knowledge to Interpret a Source', code: 'AS1.10' },
+      { name: 'Grouping Sources for a Source-Based Question', code: 'AS1.11' },
+      { name: 'Reaching a Supported Judgement from Sources', code: 'AS1.12' },
+    ] },
+
+  { topic: 'AS \u00b7 Skills 2 \u2014 Historical Thinking', code: 'AS2',
+    subtopics: [
+      { name: 'Causation: Long-Term & Short-Term Causes', code: 'AS2.1' },
+      { name: 'Distinguishing Cause, Catalyst & Trigger', code: 'AS2.2' },
+      { name: 'Prioritising Causes & Arguing Relative Importance', code: 'AS2.3' },
+      { name: 'Consequence: Immediate & Long-Term Effects', code: 'AS2.4' },
+      { name: 'Change & Continuity Over Time', code: 'AS2.5' },
+      { name: 'Turning Points & Periodisation', code: 'AS2.6' },
+      { name: 'Historical Significance & How It Is Judged', code: 'AS2.7' },
+      { name: 'Similarity & Difference in Comparative Study', code: 'AS2.8' },
+      { name: 'Historical Interpretation & Historiography', code: 'AS2.9' },
+      { name: 'Why Historians Disagree', code: 'AS2.10' },
+    ] },
+
+  { topic: 'AS \u00b7 Option: European History 1789\u20131917', code: 'AS-EU',
+    subtopics: [
+      { name: 'The French Revolution: Causes & Course', code: 'AS-EU.1' },
+      { name: 'Napoleon: Rise, Rule & Fall', code: 'AS-EU.2' },
+      { name: 'The Congress of Vienna & Restoration Europe', code: 'AS-EU.3' },
+      { name: 'The Industrial Revolution & Social Change', code: 'AS-EU.4' },
+      { name: 'The Revolutions of 1848', code: 'AS-EU.5' },
+      { name: 'The Unification of Italy', code: 'AS-EU.6' },
+      { name: 'The Unification of Germany', code: 'AS-EU.7' },
+      { name: 'Imperial Russia & The Reforms of Alexander II', code: 'AS-EU.8' },
+      { name: 'The 1905 Revolution & Its Aftermath', code: 'AS-EU.9' },
+      { name: 'The Causes of the First World War', code: 'AS-EU.10' },
+      { name: 'The Russian Revolutions of 1917', code: 'AS-EU.11' },
+    ] },
+
+  { topic: 'AS \u00b7 Option: American History 1840\u20131877', code: 'AS-US',
+    subtopics: [
+      { name: 'Expansion, Manifest Destiny & Sectionalism', code: 'AS-US.1' },
+      { name: 'Slavery & The Southern Economy', code: 'AS-US.2' },
+      { name: 'The Abolitionist Movement', code: 'AS-US.3' },
+      { name: 'Compromise & Its Failure in the 1850s', code: 'AS-US.4' },
+      { name: 'The Election of 1860 & Secession', code: 'AS-US.5' },
+      { name: 'The Civil War: Course & Turning Points', code: 'AS-US.6' },
+      { name: 'Why the North Won', code: 'AS-US.7' },
+      { name: 'Emancipation & Its Significance', code: 'AS-US.8' },
+      { name: 'Reconstruction: Aims & Policies', code: 'AS-US.9' },
+      { name: 'The Failure of Reconstruction', code: 'AS-US.10' },
+    ] },
+
+  { topic: 'AS \u00b7 Option: International History 1871\u20131945', code: 'AS-IN',
+    subtopics: [
+      { name: 'The Alliance System & Great Power Rivalry', code: 'AS-IN.1' },
+      { name: 'Imperialism & Competition for Empire', code: 'AS-IN.2' },
+      { name: 'The Paris Peace Settlement', code: 'AS-IN.3' },
+      { name: 'The League of Nations: Structure & Record', code: 'AS-IN.4' },
+      { name: 'The Great Depression & Its International Effects', code: 'AS-IN.5' },
+      { name: 'The Rise of Fascism in Italy & Germany', code: 'AS-IN.6' },
+      { name: 'Japanese Expansion in Asia', code: 'AS-IN.7' },
+      { name: 'Appeasement & Its Debate', code: 'AS-IN.8' },
+      { name: 'The Outbreak of the Second World War', code: 'AS-IN.9' },
+      { name: 'The Course & Outcome of the Second World War', code: 'AS-IN.10' },
+    ] },
+
+  { topic: 'A2 \u00b7 Option: The Cold War 1945\u20131991', code: 'A2-CW',
+    subtopics: [
+      { name: 'Origins of the Cold War & Wartime Tensions', code: 'A2-CW.1' },
+      { name: 'The Truman Doctrine & Marshall Plan', code: 'A2-CW.2' },
+      { name: 'Berlin Blockade & The Division of Germany', code: 'A2-CW.3' },
+      { name: 'NATO, The Warsaw Pact & The Arms Race', code: 'A2-CW.4' },
+      { name: 'The Korean War', code: 'A2-CW.5' },
+      { name: 'The Cuban Missile Crisis', code: 'A2-CW.6' },
+      { name: 'The Vietnam War & Its Consequences', code: 'A2-CW.7' },
+      { name: 'Détente & Its Limits', code: 'A2-CW.8' },
+      { name: 'The Cold War in Africa, Asia & Latin America', code: 'A2-CW.9' },
+      { name: 'Gorbachev & The End of the Cold War', code: 'A2-CW.10' },
+      { name: 'Historiographical Debate: Who Was Responsible?', code: 'A2-CW.11' },
+    ] },
+
+  { topic: 'A2 \u00b7 Option: Africa & Decolonisation', code: 'A2-AF',
+    subtopics: [
+      { name: 'The Scramble for Africa & Colonial Rule', code: 'A2-AF.1' },
+      { name: 'African Resistance to Colonial Rule', code: 'A2-AF.2' },
+      { name: 'The Growth of African Nationalism', code: 'A2-AF.3' },
+      { name: 'The Impact of the Second World War on Africa', code: 'A2-AF.4' },
+      { name: 'Pan-Africanism & Its Leaders', code: 'A2-AF.5' },
+      { name: 'Paths to Independence: Negotiation & Armed Struggle', code: 'A2-AF.6' },
+      { name: 'Kenya: Mau Mau & Independence', code: 'A2-AF.7' },
+      { name: 'South Africa: Apartheid & Resistance', code: 'A2-AF.8' },
+      { name: 'Post-Independence Challenges', code: 'A2-AF.9' },
+      { name: 'Assessing the Legacy of Colonialism', code: 'A2-AF.10' },
+    ] },
+
+  { topic: 'A2 \u00b7 Option: Modern Europe 1917\u20131991', code: 'A2-ME',
+    subtopics: [
+      { name: 'Lenin & The Consolidation of Bolshevik Power', code: 'A2-ME.1' },
+      { name: 'Stalin\u2019s Rise & The Command Economy', code: 'A2-ME.2' },
+      { name: 'Terror, Purges & Stalinist Society', code: 'A2-ME.3' },
+      { name: 'Weimar Germany & Its Instability', code: 'A2-ME.4' },
+      { name: 'Hitler\u2019s Rise to Power', code: 'A2-ME.5' },
+      { name: 'The Nazi State & Its Policies', code: 'A2-ME.6' },
+      { name: 'Occupied Europe & The Holocaust', code: 'A2-ME.7' },
+      { name: 'Post-War Reconstruction & European Integration', code: 'A2-ME.8' },
+      { name: 'Eastern Europe Under Soviet Control', code: 'A2-ME.9' },
+      { name: 'The Collapse of Communism in Europe', code: 'A2-ME.10' },
+    ] },
+
+  { topic: 'A2 \u00b7 Advanced Historical Skills', code: 'A2-SK',
+    subtopics: [
+      { name: 'Reading & Evaluating Historians\u2019 Arguments', code: 'A2-SK.1' },
+      { name: 'Identifying Schools of Historical Interpretation', code: 'A2-SK.2' },
+      { name: 'Engaging Critically with an Interpretation', code: 'A2-SK.3' },
+      { name: 'Synthesising Evidence Across a Period', code: 'A2-SK.4' },
+      { name: 'Sustaining an Argument Across an Essay', code: 'A2-SK.5' },
+      { name: 'Balancing Breadth & Depth in an Answer', code: 'A2-SK.6' },
+    ] },
+
+  { topic: 'A2 \u00b7 Essay Writing', code: 'A2-ES',
+    subtopics: [
+      { name: 'Analysing the Question & Its Focus', code: 'A2-ES.1' },
+      { name: 'Planning an Analytical Structure', code: 'A2-ES.2' },
+      { name: 'Writing an Effective Introduction', code: 'A2-ES.3' },
+      { name: 'Paragraph Construction & Topic Sentences', code: 'A2-ES.4' },
+      { name: 'Deploying Precise Factual Evidence', code: 'A2-ES.5' },
+      { name: 'Handling Counter-Argument', code: 'A2-ES.6' },
+      { name: 'Reaching a Substantiated Judgement', code: 'A2-ES.7' },
+      { name: 'Avoiding Narrative & Description', code: 'A2-ES.8' },
+    ] },
+
+  { topic: 'A2 \u00b7 Exam Technique & Revision', code: 'A2-EX',
+    subtopics: [
+      { name: 'Command Words in History Papers', code: 'A2-EX.1' },
+      { name: 'Timing Across a History Paper', code: 'A2-EX.2' },
+      { name: 'Source Question Technique', code: 'A2-EX.3' },
+      { name: 'Revising Chronology & Key Dates', code: 'A2-EX.4' },
+      { name: 'Building a Bank of Supporting Detail', code: 'A2-EX.5' },
+      { name: 'Past Paper Practice: Source-Based Questions', code: 'A2-EX.6' },
+      { name: 'Past Paper Practice: Essay Questions', code: 'A2-EX.7' },
+      { name: 'Mock Exam Review & Revision Planning', code: 'A2-EX.8' },
+    ] },
+]
+
+// ═══════════════════════════════════════════════════════════
+// SOCIOLOGY 9699
+//
+// THEORY AND METHODS ARE STRANDS, NOT TOPICS
+// Every substantive topic in 9699 is assessed through theoretical
+// perspective and methodological evidence. Functionalism, Marxism,
+// feminism and interactionism are not a unit to be finished — they are
+// applied to family, education, media and every other topic. Both
+// therefore appear as strands at AS and again at A2.
+// ═══════════════════════════════════════════════════════════
+const ALEVEL_SOCIOLOGY_9699 = [
+  { topic: 'AS \u00b7 1 Socialisation & Identity', code: 'AS1',
+    subtopics: [
+      { name: 'Nature vs. Nurture in Human Behaviour', code: 'AS1.1' },
+      { name: 'Culture, Norms, Values & Roles', code: 'AS1.2' },
+      { name: 'Primary & Secondary Socialisation', code: 'AS1.3' },
+      { name: 'Agencies of Socialisation', code: 'AS1.4' },
+      { name: 'Social Control: Formal & Informal', code: 'AS1.5' },
+      { name: 'Identity: Class, Gender, Ethnicity & Age', code: 'AS1.6' },
+      { name: 'Cultural Diversity & Subcultures', code: 'AS1.7' },
+      { name: 'Feral Children & Evidence on Socialisation', code: 'AS1.8' },
+    ] },
+
+  { topic: 'AS \u00b7 2 Sociological Theory: Foundations', code: 'AS2',
+    subtopics: [
+      { name: 'Structural vs. Social Action Approaches', code: 'AS2.1' },
+      { name: 'Functionalism: Core Ideas', code: 'AS2.2' },
+      { name: 'Marxism: Core Ideas', code: 'AS2.3' },
+      { name: 'Feminism: Liberal, Radical & Marxist Strands', code: 'AS2.4' },
+      { name: 'Interactionism & Labelling', code: 'AS2.5' },
+      { name: 'The New Right', code: 'AS2.6' },
+      { name: 'Postmodernism', code: 'AS2.7' },
+      { name: 'Comparing Perspectives on a Single Issue', code: 'AS2.8' },
+    ] },
+
+  { topic: 'AS \u00b7 3 Research Methods', code: 'AS3',
+    subtopics: [
+      { name: 'Positivism & Interpretivism', code: 'AS3.1' },
+      { name: 'Quantitative & Qualitative Data', code: 'AS3.2' },
+      { name: 'Primary & Secondary Sources of Data', code: 'AS3.3' },
+      { name: 'Social Surveys & Questionnaires', code: 'AS3.4' },
+      { name: 'Structured & Unstructured Interviews', code: 'AS3.5' },
+      { name: 'Participant & Non-Participant Observation', code: 'AS3.6' },
+      { name: 'Experiments in Sociology', code: 'AS3.7' },
+      { name: 'Official Statistics & Documents', code: 'AS3.8' },
+      { name: 'Longitudinal Studies & Case Studies', code: 'AS3.9' },
+      { name: 'Sampling Techniques & Representativeness', code: 'AS3.10' },
+      { name: 'Reliability, Validity & Generalisability', code: 'AS3.11' },
+      { name: 'Ethical Issues in Sociological Research', code: 'AS3.12' },
+      { name: 'Practical Factors Affecting Method Choice', code: 'AS3.13' },
+      { name: 'Triangulation & Mixed Methods', code: 'AS3.14' },
+    ] },
+
+  { topic: 'AS \u00b7 4 The Family', code: 'AS4',
+    subtopics: [
+      { name: 'Defining the Family & Household', code: 'AS4.1' },
+      { name: 'Family Diversity & Changing Structures', code: 'AS4.2' },
+      { name: 'Functionalist Views of the Family', code: 'AS4.3' },
+      { name: 'Marxist & Feminist Views of the Family', code: 'AS4.4' },
+      { name: 'Conjugal Roles & The Domestic Division of Labour', code: 'AS4.5' },
+      { name: 'Power & Decision Making in the Family', code: 'AS4.6' },
+      { name: 'Childhood as a Social Construction', code: 'AS4.7' },
+      { name: 'Marriage, Divorce & Cohabitation Trends', code: 'AS4.8' },
+      { name: 'The Dark Side of the Family', code: 'AS4.9' },
+      { name: 'Family & Social Policy', code: 'AS4.10' },
+    ] },
+
+  { topic: 'AS \u00b7 5 Education', code: 'AS5',
+    subtopics: [
+      { name: 'Functions of Education: Functionalist View', code: 'AS5.1' },
+      { name: 'Marxist Views: Reproduction & Correspondence', code: 'AS5.2' },
+      { name: 'Feminist Perspectives on Education', code: 'AS5.3' },
+      { name: 'The Hidden Curriculum', code: 'AS5.4' },
+      { name: 'Class & Educational Achievement', code: 'AS5.5' },
+      { name: 'Cultural Capital & Material Deprivation', code: 'AS5.6' },
+      { name: 'Gender & Educational Achievement', code: 'AS5.7' },
+      { name: 'Ethnicity & Educational Achievement', code: 'AS5.8' },
+      { name: 'Labelling, Streaming & The Self-Fulfilling Prophecy', code: 'AS5.9' },
+      { name: 'Pupil Subcultures', code: 'AS5.10' },
+      { name: 'Education & Social Policy', code: 'AS5.11' },
+    ] },
+
+  { topic: 'A2 \u00b7 6 Advanced Theory', code: 'A2-6',
+    subtopics: [
+      { name: 'The Structure-Agency Debate', code: 'A2-6.1' },
+      { name: 'Consensus & Conflict Perspectives Compared', code: 'A2-6.2' },
+      { name: 'Neo-Marxism & Gramsci\u2019s Hegemony', code: 'A2-6.3' },
+      { name: 'Weber & Social Action Theory', code: 'A2-6.4' },
+      { name: 'Modernity, Late Modernity & Postmodernity', code: 'A2-6.5' },
+      { name: 'Globalisation & Sociological Theory', code: 'A2-6.6' },
+      { name: 'Is Sociology a Science?', code: 'A2-6.7' },
+      { name: 'Value Freedom & Objectivity', code: 'A2-6.8' },
+      { name: 'Sociology & Social Policy', code: 'A2-6.9' },
+    ] },
+
+  { topic: 'A2 \u00b7 7 Global Development', code: 'A2-7',
+    subtopics: [
+      { name: 'Defining & Measuring Development', code: 'A2-7.1' },
+      { name: 'Modernisation Theory', code: 'A2-7.2' },
+      { name: 'Dependency Theory', code: 'A2-7.3' },
+      { name: 'World Systems Theory', code: 'A2-7.4' },
+      { name: 'Neo-Liberalism & Development', code: 'A2-7.5' },
+      { name: 'Aid, Debt & Trade', code: 'A2-7.6' },
+      { name: 'Transnational Corporations & Development', code: 'A2-7.7' },
+      { name: 'Gender & Development', code: 'A2-7.8' },
+      { name: 'Urbanisation & Population in Development', code: 'A2-7.9' },
+      { name: 'Environment & Sustainable Development', code: 'A2-7.10' },
+      { name: 'War, Conflict & Development', code: 'A2-7.11' },
+    ] },
+
+  { topic: 'A2 \u00b7 8 Media', code: 'A2-8',
+    subtopics: [
+      { name: 'Ownership & Control of the Media', code: 'A2-8.1' },
+      { name: 'Pluralist & Marxist Views of the Media', code: 'A2-8.2' },
+      { name: 'New Media & Its Consequences', code: 'A2-8.3' },
+      { name: 'Media Representations of Gender', code: 'A2-8.4' },
+      { name: 'Media Representations of Ethnicity & Age', code: 'A2-8.5' },
+      { name: 'Media Effects: Hypodermic Syringe & Beyond', code: 'A2-8.6' },
+      { name: 'Uses & Gratifications and Reception Analysis', code: 'A2-8.7' },
+      { name: 'Moral Panics & Folk Devils', code: 'A2-8.8' },
+      { name: 'News Values & The Construction of News', code: 'A2-8.9' },
+      { name: 'Globalisation & The Media', code: 'A2-8.10' },
+    ] },
+
+  { topic: 'A2 \u00b7 9 Religion', code: 'A2-9',
+    subtopics: [
+      { name: 'Defining Religion Sociologically', code: 'A2-9.1' },
+      { name: 'Functionalist Views of Religion', code: 'A2-9.2' },
+      { name: 'Marxist & Feminist Views of Religion', code: 'A2-9.3' },
+      { name: 'Weber & The Protestant Ethic', code: 'A2-9.4' },
+      { name: 'Church, Sect, Denomination & Cult', code: 'A2-9.5' },
+      { name: 'New Religious & New Age Movements', code: 'A2-9.6' },
+      { name: 'Secularisation & The Evidence For It', code: 'A2-9.7' },
+      { name: 'Arguments Against Secularisation', code: 'A2-9.8' },
+      { name: 'Religion, Class, Gender, Ethnicity & Age', code: 'A2-9.9' },
+      { name: 'Fundamentalism & Globalisation', code: 'A2-9.10' },
+    ] },
+
+  { topic: 'A2 \u00b7 10 Crime & Deviance', code: 'A2-10',
+    subtopics: [
+      { name: 'Defining Crime & Deviance', code: 'A2-10.1' },
+      { name: 'Measuring Crime & The Dark Figure', code: 'A2-10.2' },
+      { name: 'Functionalist Explanations: Durkheim & Merton', code: 'A2-10.3' },
+      { name: 'Subcultural Theories', code: 'A2-10.4' },
+      { name: 'Marxist & Neo-Marxist Explanations', code: 'A2-10.5' },
+      { name: 'Interactionism & Labelling Theory', code: 'A2-10.6' },
+      { name: 'Right & Left Realism', code: 'A2-10.7' },
+      { name: 'Gender & Crime', code: 'A2-10.8' },
+      { name: 'Ethnicity & Crime', code: 'A2-10.9' },
+      { name: 'Class, Age & Crime', code: 'A2-10.10' },
+      { name: 'White Collar & Corporate Crime', code: 'A2-10.11' },
+      { name: 'Global Crime & Green Crime', code: 'A2-10.12' },
+      { name: 'Crime Control, Punishment & Prevention', code: 'A2-10.13' },
+    ] },
+
+  { topic: 'A2 \u00b7 11 Social Inequality & Stratification', code: 'A2-11',
+    subtopics: [
+      { name: 'Systems of Stratification', code: 'A2-11.1' },
+      { name: 'Functionalist & Marxist Theories of Class', code: 'A2-11.2' },
+      { name: 'Weberian Approaches to Stratification', code: 'A2-11.3' },
+      { name: 'Measuring Social Class', code: 'A2-11.4' },
+      { name: 'Social Mobility & Its Barriers', code: 'A2-11.5' },
+      { name: 'Gender Inequality & The Labour Market', code: 'A2-11.6' },
+      { name: 'Ethnic Inequality & Discrimination', code: 'A2-11.7' },
+      { name: 'Age & Disability as Sources of Inequality', code: 'A2-11.8' },
+      { name: 'Poverty: Definitions & Measurement', code: 'A2-11.9' },
+      { name: 'Explanations of Poverty', code: 'A2-11.10' },
+      { name: 'Welfare & Responses to Poverty', code: 'A2-11.11' },
+    ] },
+
+  { topic: 'A2 \u00b7 Applying Theory & Methods', code: 'A2-TM',
+    subtopics: [
+      { name: 'Selecting a Method for a Given Research Question', code: 'A2-TM.1' },
+      { name: 'Linking Theory to Methodological Choice', code: 'A2-TM.2' },
+      { name: 'Evaluating Studies Methodologically', code: 'A2-TM.3' },
+      { name: 'Applying Perspectives to Unfamiliar Topics', code: 'A2-TM.4' },
+      { name: 'Using Evidence to Support an Argument', code: 'A2-TM.5' },
+    ] },
+
+  { topic: 'A2 \u00b7 Exam Technique & Revision', code: 'A2-EX',
+    subtopics: [
+      { name: 'Assessment Objectives in Sociology Papers', code: 'A2-EX.1' },
+      { name: 'Structuring an Essay: Analysis & Evaluation', code: 'A2-EX.2' },
+      { name: 'Using Named Sociologists & Studies', code: 'A2-EX.3' },
+      { name: 'Building Evaluation Rather Than Listing Views', code: 'A2-EX.4' },
+      { name: 'Command Words in Sociology Papers', code: 'A2-EX.5' },
+      { name: 'Past Paper Practice: AS Topics', code: 'A2-EX.6' },
+      { name: 'Past Paper Practice: A2 Topics', code: 'A2-EX.7' },
+      { name: 'Mock Exam Review & Revision Planning', code: 'A2-EX.8' },
+    ] },
+]
+
 export const ALEVEL_LIBRARY = [
   { match: /\bbiology\b/i, const_: ALEVEL_BIOLOGY_9700,
     source: 'Cambridge International AS & A Level Biology 9700 \u2014 252-lesson scheme (AS 128 / A2 124)' },
@@ -6936,6 +7521,12 @@ export const ALEVEL_LIBRARY = [
   // English Literature MUST be tested before English Language, or
   // "English Literature" would match a bare /english/ pattern. They are
   // separate syllabuses (9695 and 9093) entered separately.
+  { match: /\bgeography\b/i, const_: ALEVEL_GEOGRAPHY_9696,
+    source: 'Cambridge International AS & A Level Geography 9696 \u2014 172-lesson scheme' },
+  { match: /\bhistory\b/i, const_: ALEVEL_HISTORY_9489,
+    source: 'Cambridge International AS & A Level History 9489 \u2014 148-lesson scheme' },
+  { match: /\bsociology\b/i, const_: ALEVEL_SOCIOLOGY_9699,
+    source: 'Cambridge International AS & A Level Sociology 9699 \u2014 150-lesson scheme' },
   { match: /\baccounting\b/i, const_: ALEVEL_ACCOUNTING_9706,
     source: 'Cambridge International AS & A Level Accounting 9706 \u2014 168-lesson scheme' },
   { match: /\bpsychology\b/i, const_: ALEVEL_PSYCHOLOGY_9990,
