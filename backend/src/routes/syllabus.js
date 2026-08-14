@@ -457,6 +457,75 @@ router.get('/export/:subjectId', auth, requireRole('admin', 'ops_manager'), asyn
 // all of them at once, and also flags the pattern that gave the game
 // away both times: two subjects sharing an identical spine shape.
 // ═══════════════════════════════════════════════════════════
+/**
+ * GET /api/syllabus/source-check
+ *
+ * Compares each loaded spine's stored sourceSyllabus against the name of
+ * the subject it sits on. Every spine records which syllabus it came
+ * from — "Cambridge IGCSE Mathematics 0580" — so a subject called
+ * "Accounting" carrying that string is unambiguous evidence of a wrong
+ * load, with no guessing from topic vocabulary.
+ *
+ * This catches what the vocabulary audit cannot. Accounting loaded with
+ * the Mathematics spine reads like plausible numeracy content to a
+ * vocabulary check; the source string gives it away at once.
+ *
+ * Read-only.
+ */
+router.get('/source-check', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
+  try {
+    const rows = await SyllabusTopic.aggregate([
+      { $match: { isActive: { $ne: false } } },
+      { $group: {
+          _id: { subject: '$subjectId', src: '$sourceSyllabus' },
+          topics: { $sum: 1 },
+          lessons: { $sum: { $size: { $ifNull: ['$subtopics', []] } } },
+      } },
+    ]);
+
+    const Subject = require('../models/Subject');
+    const subjects = await Subject.find({}).select('subjectName curriculum').lean();
+    const byId = {};
+    subjects.forEach(x => { byId[String(x._id)] = x; });
+
+    // Keep only words long enough to be meaningful, so "Additional
+    // Mathematics" and "Mathematics" still share a word (correctly, they
+    // are related) but "Accounting" and "Mathematics" share none.
+    const words = n => String(n || '').toLowerCase()
+      .replace(/[^a-z ]/g, ' ').split(/\s+/).filter(w => w.length > 3);
+
+    const suspect = [], noSource = [];
+    let checked = 0;
+    for (const r of rows) {
+      const subj = byId[String(r._id.subject)];
+      if (!subj) continue;
+      const src = r._id.src || '';
+      const row = {
+        curriculum: subj.curriculum, subject: subj.subjectName,
+        sourceSyllabus: src, topics: r.topics, lessons: r.lessons,
+      };
+      if (!src) { noSource.push(row); continue; }
+      checked++;
+      const nameWords = words(subj.subjectName);
+      const srcLower = src.toLowerCase();
+      const mentioned = nameWords.length === 0 || nameWords.some(w => srcLower.includes(w));
+      if (!mentioned) suspect.push(row);
+    }
+
+    suspect.sort((a, b) => b.lessons - a.lessons);
+    return res.json({
+      success: true,
+      message: `Checked ${checked} spine(s) with a recorded source. `
+             + `${suspect.length} carry a syllabus that does not mention the subject. `
+             + `${noSource.length} have no source recorded.`,
+      data: { suspect, noSource, checked },
+    });
+  } catch (e) {
+    console.error('[syllabus source-check]', e.message);
+    return res.status(500).json({ success: false, message: e.message });
+  }
+});
+
 router.get('/audit', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const subjects = await Subject.find({ isActive: { $ne: false } })
