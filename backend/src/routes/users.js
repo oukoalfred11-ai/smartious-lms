@@ -313,7 +313,7 @@ router.patch('/teachers/:id/specialties', auth, requireRole('admin', 'ops_manage
       'EdexcelLowerSec','EdexcelIGCSE','EdexcelALevel',
       'AQALowerSec','AQAGCSE','AQAALevel',
       'IBPYP','IBMYP','IBDP',
-      'KenyaCBC','BNC','American','Canadian',
+      'KenyaCBE','KCSE','KenyaCBC','BNC','American','Canadian',
       // Legacy IDs — keep for backwards compatibility
       'IB','IGCSE','A-Level','IB Diploma','IB MYP','Kenya CBC',
     ];
