@@ -94,7 +94,7 @@ const CURRICULUM_LABEL = {
   AQALowerSec:'AQA Lower Secondary', AQAGCSE:'AQA GCSE', AQAALevel:'AQA A Level',
   IBPYP:'IB Primary Years Programme', IBMYP:'IB Middle Years Programme', IBDP:'IB Diploma Programme',
   BNC:'British National Curriculum', American:'American Curriculum',
-  Canadian:'Canadian Curriculum', KenyaCBC:'Kenya CBC',
+  Canadian:'Canadian Curriculum', KenyaCBE:'Kenya CBE', KCSE:'KCSE', KenyaCBC:'Kenya CBC',
 }
 const prettyCurriculum = c => CURRICULUM_LABEL[c] || esc(c).replace(/([a-z])([A-Z])/g, '$1 $2')
 
