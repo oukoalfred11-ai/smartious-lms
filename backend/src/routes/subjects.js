@@ -229,9 +229,19 @@ router.get('/duplicates', auth, requireRole('admin', 'ops_manager'), async (req,
       for (const s of arr) withUsage.push({ ...s, usage: await subjectUsage(s) });
       // Keep the one carrying the most data; if tied, the longest name,
       // which is the more specific ("Primary Mathematics" over "Mathematics").
+      // Survivor choice, in order:
+      //   1. most data  — never strand records that are in use
+      //   2. in the CATALOGUE — the name the enrolment form offers is what
+      //      teachers and students actually see
+      //   3. SHORTER name — "Science" over "Lower Secondary Science"
+      //
+      // The old tiebreak preferred the LONGER name, which is how
+      // "Lower Secondary Science" survived and the catalogue-standard
+      // "Science" was deactivated. Length is not evidence of correctness.
       withUsage.sort((a, b) =>
         b.usage.total - a.usage.total ||
-        b.subjectName.length - a.subjectName.length);
+        (catalogueHas(b) ? 1 : 0) - (catalogueHas(a) ? 1 : 0) ||
+        a.subjectName.length - b.subjectName.length);
       const [keep, ...rest] = withUsage;
       report.push({
         curriculum: key.split('::')[0],
@@ -261,6 +271,30 @@ router.get('/duplicates', auth, requireRole('admin', 'ops_manager'), async (req,
   }
 });
 
+/**
+ * Is this subject name offered by the curriculum catalogue?
+ *
+ * When two records hold the same subject, the one the enrolment form
+ * offers should survive — that is the name a student is registered under
+ * and a teacher sees on their timetable.
+ *
+ * Returns false if the catalogue cannot be read, so the sort degrades to
+ * the shorter-name rule rather than throwing mid-resolve.
+ */
+function catalogueHas(subject) {
+  try {
+    const { SUBJECTS } = require('./curriculum');
+    if (!Array.isArray(SUBJECTS)) return false;
+    const name = String(subject.subjectName || '').trim().toLowerCase();
+    return SUBJECTS.some(c =>
+      String(c.name || '').trim().toLowerCase() === name &&
+      (c.availableIn === 'all' ||
+       (Array.isArray(c.availableIn) && c.availableIn.includes(subject.curriculum))));
+  } catch (e) {
+    return false;
+  }
+}
+
 // ── POST /api/subjects/duplicates/resolve — deactivates the empty ones ──
 router.post('/duplicates/resolve', auth, requireRole('admin'), async (req, res) => {
   try {
@@ -283,9 +317,19 @@ router.post('/duplicates/resolve', auth, requireRole('admin'), async (req, res) 
     for (const [, arr] of Object.entries(groups).filter(([, a]) => a.length > 1)) {
       const withUsage = [];
       for (const s of arr) withUsage.push({ ...s, usage: await subjectUsage(s) });
+      // Survivor choice, in order:
+      //   1. most data  — never strand records that are in use
+      //   2. in the CATALOGUE — the name the enrolment form offers is what
+      //      teachers and students actually see
+      //   3. SHORTER name — "Science" over "Lower Secondary Science"
+      //
+      // The old tiebreak preferred the LONGER name, which is how
+      // "Lower Secondary Science" survived and the catalogue-standard
+      // "Science" was deactivated. Length is not evidence of correctness.
       withUsage.sort((a, b) =>
         b.usage.total - a.usage.total ||
-        b.subjectName.length - a.subjectName.length);
+        (catalogueHas(b) ? 1 : 0) - (catalogueHas(a) ? 1 : 0) ||
+        a.subjectName.length - b.subjectName.length);
       const [, ...rest] = withUsage;
       for (const r of rest) {
         if (r.usage.total > 0) {
