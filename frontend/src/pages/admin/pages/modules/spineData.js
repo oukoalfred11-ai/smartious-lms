@@ -5931,6 +5931,584 @@ const ALEVEL_ECONOMICS_9708 = [
     ] },
 ]
 
+// Cambridge International AS & A Level Computer Science 9618
+// Lesson-level spine, 20 topics / 224 lessons.
+//
+// THEORY AND PRACTICE ARE SEPARATE STRANDS
+// 9618 examines Paper 1 and Paper 3 as written theory, and Paper 2 and
+// Paper 4 as PRACTICAL programming — candidates write and debug real
+// code under exam conditions. Programming cannot be taught as theory
+// and then expected to work, so it gets its own strand at both levels
+// rather than a few lessons appended to the algorithm topic.
+//
+// AS and A2 are separated by prefix as elsewhere. A2 assumes AS
+// throughout: file handling at A2 builds directly on the AS treatment
+// of arrays, and object-oriented programming assumes procedural
+// competence already exists.
+const ALEVEL_COMPSCI_9618 = [
+  // ─────────────── AS THEORY ───────────────
+  { topic: 'AS \u00b7 1 Information Representation', code: 'AS1',
+    subtopics: [
+      { name: 'Binary, Denary & Hexadecimal Conversion', code: 'AS1.1' },
+      { name: 'Binary Coded Decimal & Its Uses', code: 'AS1.2' },
+      { name: 'One\u2019s & Two\u2019s Complement Representation', code: 'AS1.3' },
+      { name: 'Binary Addition & Subtraction', code: 'AS1.4' },
+      { name: 'Overflow & Its Detection', code: 'AS1.5' },
+      { name: 'Character Sets: ASCII & Unicode', code: 'AS1.6' },
+      { name: 'Bitmap Images: Resolution, Colour Depth & File Size', code: 'AS1.7' },
+      { name: 'Vector Graphics & Drawing Lists', code: 'AS1.8' },
+      { name: 'Sound Representation: Sampling Rate & Resolution', code: 'AS1.9' },
+      { name: 'Lossless & Lossy Compression', code: 'AS1.10' },
+      { name: 'Choosing a Compression Method for a Purpose', code: 'AS1.11' },
+    ] },
+
+  { topic: 'AS \u00b7 2 Communication & Networking', code: 'AS2',
+    subtopics: [
+      { name: 'Networks: LAN, WAN & Their Characteristics', code: 'AS2.1' },
+      { name: 'Client-Server & Peer-to-Peer Models', code: 'AS2.2' },
+      { name: 'Network Topologies & Their Trade-Offs', code: 'AS2.3' },
+      { name: 'Network Hardware: NIC, Switch, Router & Gateway', code: 'AS2.4' },
+      { name: 'Wired & Wireless Transmission Media', code: 'AS2.5' },
+      { name: 'Bit Streaming: Real-Time & On-Demand', code: 'AS2.6' },
+      { name: 'The Internet, ISPs & The World Wide Web', code: 'AS2.7' },
+      { name: 'IP Addressing: IPv4 & IPv6', code: 'AS2.8' },
+      { name: 'Public, Private & Static IP Addresses', code: 'AS2.9' },
+      { name: 'The Domain Name Service', code: 'AS2.10' },
+    ] },
+
+  { topic: 'AS \u00b7 3 Hardware', code: 'AS3',
+    subtopics: [
+      { name: 'Input, Output & Storage Devices', code: 'AS3.1' },
+      { name: 'Primary & Secondary Storage', code: 'AS3.2' },
+      { name: 'Von Neumann Architecture & The Stored Program Concept', code: 'AS3.3' },
+      { name: 'Registers: PC, MAR, MDR, CIR, ACC & IX', code: 'AS3.4' },
+      { name: 'The Address, Data & Control Buses', code: 'AS3.5' },
+      { name: 'The Fetch-Decode-Execute Cycle in Register Transfer Notation', code: 'AS3.6' },
+      { name: 'Factors Affecting Processor Performance', code: 'AS3.7' },
+      { name: 'Interrupts & Interrupt Handling', code: 'AS3.8' },
+      { name: 'Assembly Language & The Instruction Set', code: 'AS3.9' },
+      { name: 'Addressing Modes: Immediate, Direct, Indirect & Indexed', code: 'AS3.10' },
+      { name: 'Tracing an Assembly Language Program', code: 'AS3.11' },
+      { name: 'Logic Gates & Truth Tables', code: 'AS3.12' },
+      { name: 'Logic Circuits & Boolean Algebra', code: 'AS3.13' },
+      { name: 'Karnaugh Maps & Simplification', code: 'AS3.14' },
+      { name: 'Flip-Flops: SR and JK', code: 'AS3.15' },
+    ] },
+
+  { topic: 'AS \u00b7 4 Processor Fundamentals & System Software', code: 'AS4',
+    subtopics: [
+      { name: 'The Operating System & Its Purpose', code: 'AS4.1' },
+      { name: 'Memory Management & Paging', code: 'AS4.2' },
+      { name: 'File Management & Security Management', code: 'AS4.3' },
+      { name: 'Utility Software & Its Functions', code: 'AS4.4' },
+      { name: 'Program Libraries & Dynamic Link Libraries', code: 'AS4.5' },
+      { name: 'Language Translators: Compiler, Interpreter & Assembler', code: 'AS4.6' },
+      { name: 'Stages of Compilation', code: 'AS4.7' },
+      { name: 'Linkers, Loaders & The Role of an IDE', code: 'AS4.8' },
+    ] },
+
+  { topic: 'AS \u00b7 5 Security, Privacy & Data Integrity', code: 'AS5',
+    subtopics: [
+      { name: 'Data Security, Privacy & Integrity Distinguished', code: 'AS5.1' },
+      { name: 'Threats: Malware, Hacking & Phishing', code: 'AS5.2' },
+      { name: 'Firewalls, Access Rights & Authentication', code: 'AS5.3' },
+      { name: 'Symmetric & Asymmetric Encryption', code: 'AS5.4' },
+      { name: 'Digital Signatures & Digital Certificates', code: 'AS5.5' },
+      { name: 'SSL/TLS & Secure Communication', code: 'AS5.6' },
+      { name: 'Validation & Verification Techniques', code: 'AS5.7' },
+      { name: 'Backup, Archiving & Disaster Recovery', code: 'AS5.8' },
+    ] },
+
+  { topic: 'AS \u00b7 6 Ethics & Ownership', code: 'AS6',
+    subtopics: [
+      { name: 'Professional Ethics & Codes of Conduct', code: 'AS6.1' },
+      { name: 'Copyright, Patents & Intellectual Property', code: 'AS6.2' },
+      { name: 'Software Licensing: Free, Open Source & Proprietary', code: 'AS6.3' },
+      { name: 'Privacy Legislation & Data Protection', code: 'AS6.4' },
+      { name: 'Social & Economic Impact of Computing', code: 'AS6.5' },
+    ] },
+
+  { topic: 'AS \u00b7 7 Databases', code: 'AS7',
+    subtopics: [
+      { name: 'Limitations of a File-Based Approach', code: 'AS7.1' },
+      { name: 'Relational Databases: Tables, Records & Fields', code: 'AS7.2' },
+      { name: 'Primary, Candidate, Composite & Foreign Keys', code: 'AS7.3' },
+      { name: 'Entity-Relationship Diagrams', code: 'AS7.4' },
+      { name: 'Normalisation: First Normal Form', code: 'AS7.5' },
+      { name: 'Normalisation: Second & Third Normal Form', code: 'AS7.6' },
+      { name: 'The DBMS: Data Dictionary & Query Processor', code: 'AS7.7' },
+      { name: 'SQL: Data Definition Language', code: 'AS7.8' },
+      { name: 'SQL: SELECT, WHERE, ORDER BY & GROUP BY', code: 'AS7.9' },
+      { name: 'SQL: Joins Across Multiple Tables', code: 'AS7.10' },
+      { name: 'SQL: INSERT, UPDATE & DELETE', code: 'AS7.11' },
+    ] },
+
+  // ─────────────── AS PRACTICAL ───────────────
+  { topic: 'AS \u00b7 8 Algorithm Design & Problem Solving', code: 'AS8',
+    subtopics: [
+      { name: 'Computational Thinking: Decomposition & Abstraction', code: 'AS8.1' },
+      { name: 'Structure Charts & Top-Down Design', code: 'AS8.2' },
+      { name: 'Pseudocode Conventions in 9618', code: 'AS8.3' },
+      { name: 'Flowcharts & Converting Between Representations', code: 'AS8.4' },
+      { name: 'Identifier Tables & Data Dictionaries', code: 'AS8.5' },
+      { name: 'Linear Search', code: 'AS8.6' },
+      { name: 'Bubble Sort & Insertion Sort', code: 'AS8.7' },
+      { name: 'Trace Tables & Dry Running', code: 'AS8.8' },
+      { name: 'Identifying & Correcting Errors in Algorithms', code: 'AS8.9' },
+      { name: 'Stepwise Refinement of a Solution', code: 'AS8.10' },
+    ] },
+
+  { topic: 'AS \u00b7 9 Programming (Paper 2 Practical)', code: 'AS9',
+    subtopics: [
+      { name: 'Program Structure & Declaring Variables and Constants', code: 'AS9.1' },
+      { name: 'Data Types & Type Conversion', code: 'AS9.2' },
+      { name: 'Input, Output & Formatting', code: 'AS9.3' },
+      { name: 'Arithmetic, Relational & Logical Operators', code: 'AS9.4' },
+      { name: 'Selection: IF and CASE Statements', code: 'AS9.5' },
+      { name: 'Iteration: FOR, WHILE & REPEAT', code: 'AS9.6' },
+      { name: 'Choosing the Right Loop Construct', code: 'AS9.7' },
+      { name: 'Nested Selection & Nested Iteration', code: 'AS9.8' },
+      { name: 'One-Dimensional Arrays: Declaration & Traversal', code: 'AS9.9' },
+      { name: 'Two-Dimensional Arrays & Nested Loops', code: 'AS9.10' },
+      { name: 'String Handling Operations', code: 'AS9.11' },
+      { name: 'Built-In Functions: MOD, DIV, ROUND & RANDOM', code: 'AS9.12' },
+      { name: 'Procedures: Definition, Call & Parameters', code: 'AS9.13' },
+      { name: 'Functions & Return Values', code: 'AS9.14' },
+      { name: 'Passing Parameters by Value & by Reference', code: 'AS9.15' },
+      { name: 'Local & Global Scope', code: 'AS9.16' },
+      { name: 'Text File Handling: Read, Write & Append', code: 'AS9.17' },
+      { name: 'Validation Routines & Robust Input', code: 'AS9.18' },
+      { name: 'Testing: Normal, Boundary & Erroneous Data', code: 'AS9.19' },
+      { name: 'Debugging Techniques & Breakpoints', code: 'AS9.20' },
+      { name: 'Writing a Complete Program from a Specification', code: 'AS9.21' },
+    ] },
+
+  // ─────────────── A2 THEORY ───────────────
+  { topic: 'A2 \u00b7 10 Data Representation & Communication', code: 'A2-10',
+    subtopics: [
+      { name: 'Floating-Point Representation: Mantissa & Exponent', code: 'A2-10.1' },
+      { name: 'Normalisation of Floating-Point Numbers', code: 'A2-10.2' },
+      { name: 'Converting Between Denary & Floating-Point Binary', code: 'A2-10.3' },
+      { name: 'Precision vs. Range Trade-Offs', code: 'A2-10.4' },
+      { name: 'Underflow, Overflow & Rounding Errors', code: 'A2-10.5' },
+      { name: 'Protocols & The Layered Model', code: 'A2-10.6' },
+      { name: 'The TCP/IP Protocol Suite', code: 'A2-10.7' },
+      { name: 'Circuit, Packet & Message Switching', code: 'A2-10.8' },
+    ] },
+
+  { topic: 'A2 \u00b7 11 Hardware & Virtual Machines', code: 'A2-11',
+    subtopics: [
+      { name: 'RISC & CISC Processor Architectures', code: 'A2-11.1' },
+      { name: 'Pipelining & Instruction-Level Parallelism', code: 'A2-11.2' },
+      { name: 'Parallel Processing: SISD, SIMD, MISD & MIMD', code: 'A2-11.3' },
+      { name: 'Massively Parallel Computers', code: 'A2-11.4' },
+      { name: 'Boolean Algebra Laws & De Morgan\u2019s Theorems', code: 'A2-11.5' },
+      { name: 'Simplifying Boolean Expressions', code: 'A2-11.6' },
+      { name: 'Karnaugh Maps for Four Variables', code: 'A2-11.7' },
+      { name: 'Virtual Machines: Purpose & Structure', code: 'A2-11.8' },
+      { name: 'Benefits & Limitations of Virtual Machines', code: 'A2-11.9' },
+    ] },
+
+  { topic: 'A2 \u00b7 12 System Software & Security', code: 'A2-12',
+    subtopics: [
+      { name: 'Process States: Running, Ready & Blocked', code: 'A2-12.1' },
+      { name: 'Scheduling Algorithms & Their Comparison', code: 'A2-12.2' },
+      { name: 'Interrupt Handling & Context Switching', code: 'A2-12.3' },
+      { name: 'Virtual Memory, Paging & Disk Thrashing', code: 'A2-12.4' },
+      { name: 'Purposes of an Operating System Revisited', code: 'A2-12.5' },
+      { name: 'Encryption Protocols & Key Exchange', code: 'A2-12.6' },
+      { name: 'Malware Categories & Countermeasures', code: 'A2-12.7' },
+      { name: 'Ethics of Artificial Intelligence & Automation', code: 'A2-12.8' },
+    ] },
+
+  { topic: 'A2 \u00b7 13 Data Structures & Abstract Data Types', code: 'A2-13',
+    subtopics: [
+      { name: 'Records & User-Defined Data Types', code: 'A2-13.1' },
+      { name: 'Sets & Their Operations', code: 'A2-13.2' },
+      { name: 'Stacks: Push, Pop & Applications', code: 'A2-13.3' },
+      { name: 'Queues: Enqueue, Dequeue & Circular Queues', code: 'A2-13.4' },
+      { name: 'Linked Lists: Structure & Traversal', code: 'A2-13.5' },
+      { name: 'Inserting & Deleting Nodes in a Linked List', code: 'A2-13.6' },
+      { name: 'Binary Trees: Structure & Terminology', code: 'A2-13.7' },
+      { name: 'Traversing a Binary Tree: In-Order, Pre-Order & Post-Order', code: 'A2-13.8' },
+      { name: 'Inserting into a Binary Search Tree', code: 'A2-13.9' },
+      { name: 'Hash Tables & Collision Resolution', code: 'A2-13.10' },
+      { name: 'Dictionaries & Their Implementation', code: 'A2-13.11' },
+      { name: 'Choosing an Appropriate Data Structure', code: 'A2-13.12' },
+    ] },
+
+  { topic: 'A2 \u00b7 14 Algorithms & Complexity', code: 'A2-14',
+    subtopics: [
+      { name: 'Binary Search: Iterative & Recursive', code: 'A2-14.1' },
+      { name: 'Insertion Sort & Bubble Sort Revisited', code: 'A2-14.2' },
+      { name: 'Merge Sort & The Divide-and-Conquer Approach', code: 'A2-14.3' },
+      { name: 'Quicksort', code: 'A2-14.4' },
+      { name: 'Big O Notation & Order of Growth', code: 'A2-14.5' },
+      { name: 'Comparing Algorithm Efficiency', code: 'A2-14.6' },
+      { name: 'Recursion: Base Case & General Case', code: 'A2-14.7' },
+      { name: 'Tracing a Recursive Algorithm', code: 'A2-14.8' },
+      { name: 'Recursion vs. Iteration & The Call Stack', code: 'A2-14.9' },
+      { name: 'Graphs & Their Representation', code: 'A2-14.10' },
+      { name: 'Depth-First & Breadth-First Traversal', code: 'A2-14.11' },
+      { name: 'Dijkstra\u2019s Shortest Path Algorithm', code: 'A2-14.12' },
+      { name: 'A* Search & Heuristics', code: 'A2-14.13' },
+    ] },
+
+  { topic: 'A2 \u00b7 15 Computational Thinking & Problem Solving', code: 'A2-15',
+    subtopics: [
+      { name: 'Abstraction in Program Design', code: 'A2-15.1' },
+      { name: 'Modularisation & Reusable Components', code: 'A2-15.2' },
+      { name: 'Program Design Documentation', code: 'A2-15.3' },
+      { name: 'Testing Strategies: Unit, Integration & Alpha/Beta', code: 'A2-15.4' },
+      { name: 'Test Plans & Test Data Selection', code: 'A2-15.5' },
+      { name: 'Maintenance: Corrective, Adaptive & Perfective', code: 'A2-15.6' },
+    ] },
+
+  { topic: 'A2 \u00b7 16 Software Development', code: 'A2-16',
+    subtopics: [
+      { name: 'The Waterfall Model', code: 'A2-16.1' },
+      { name: 'Iterative & Rapid Application Development', code: 'A2-16.2' },
+      { name: 'Agile Methodologies & Extreme Programming', code: 'A2-16.3' },
+      { name: 'Comparing Development Life Cycle Models', code: 'A2-16.4' },
+      { name: 'Program Development Tools & Version Control', code: 'A2-16.5' },
+      { name: 'Documentation for Users & Maintainers', code: 'A2-16.6' },
+    ] },
+
+  // ─────────────── A2 PRACTICAL ───────────────
+  { topic: 'A2 \u00b7 17 Advanced Programming (Paper 4 Practical)', code: 'A2-17',
+    subtopics: [
+      { name: 'Implementing Records & User-Defined Types in Code', code: 'A2-17.1' },
+      { name: 'Implementing a Stack', code: 'A2-17.2' },
+      { name: 'Implementing a Queue', code: 'A2-17.3' },
+      { name: 'Implementing a Linked List', code: 'A2-17.4' },
+      { name: 'Implementing a Binary Tree', code: 'A2-17.5' },
+      { name: 'Writing Recursive Procedures & Functions', code: 'A2-17.6' },
+      { name: 'Random File Organisation & Direct Access', code: 'A2-17.7' },
+      { name: 'Serial, Sequential & Indexed Sequential Files', code: 'A2-17.8' },
+      { name: 'Hashing Algorithms in File Access', code: 'A2-17.9' },
+      { name: 'Exception Handling', code: 'A2-17.10' },
+      { name: 'Object-Oriented Programming: Classes & Objects', code: 'A2-17.11' },
+      { name: 'Attributes, Methods & Constructors', code: 'A2-17.12' },
+      { name: 'Encapsulation & Access Modifiers', code: 'A2-17.13' },
+      { name: 'Inheritance & Class Hierarchies', code: 'A2-17.14' },
+      { name: 'Polymorphism & Method Overriding', code: 'A2-17.15' },
+      { name: 'Drawing & Interpreting Class Diagrams', code: 'A2-17.16' },
+      { name: 'Choosing Between Procedural & Object-Oriented Design', code: 'A2-17.17' },
+      { name: 'Building a Complete Object-Oriented Solution', code: 'A2-17.18' },
+    ] },
+
+  { topic: 'A2 \u00b7 18 Declarative Programming', code: 'A2-18',
+    subtopics: [
+      { name: 'The Declarative Paradigm & How It Differs', code: 'A2-18.1' },
+      { name: 'Facts, Rules & The Knowledge Base', code: 'A2-18.2' },
+      { name: 'Writing Prolog Facts', code: 'A2-18.3' },
+      { name: 'Writing Prolog Rules', code: 'A2-18.4' },
+      { name: 'Querying a Knowledge Base', code: 'A2-18.5' },
+      { name: 'Instantiation & Backtracking', code: 'A2-18.6' },
+      { name: 'Applications of Declarative Languages', code: 'A2-18.7' },
+    ] },
+
+  { topic: 'A2 \u00b7 Exam Technique & Revision', code: 'A2-EX',
+    subtopics: [
+      { name: 'Paper 1 & 3 Technique: Written Theory', code: 'A2-EX.1' },
+      { name: 'Paper 2 & 4 Technique: Working Under Time Pressure', code: 'A2-EX.2' },
+      { name: 'Producing Evidence Documents & Screenshots', code: 'A2-EX.3' },
+      { name: 'Command Words in Computer Science Papers', code: 'A2-EX.4' },
+      { name: 'Common Errors in Trace Table & Pseudocode Questions', code: 'A2-EX.5' },
+      { name: 'Past Paper Practice: Theory Fundamentals', code: 'A2-EX.6' },
+      { name: 'Past Paper Practice: Data Structures & Algorithms', code: 'A2-EX.7' },
+      { name: 'Past Paper Practice: Practical Programming', code: 'A2-EX.8' },
+      { name: 'Mock Exam Review & Revision Planning', code: 'A2-EX.9' },
+    ] },
+]
+
+// Cambridge International AS & A Level
+//   English Language 9093        — 12 topics / 132 lessons
+//   Literature in English 9695   — 12 topics / 138 lessons
+//
+// TWO SEPARATE SUBJECTS, NOT ONE
+// These carry different syllabus codes and are entered separately. A
+// candidate may sit either or both. Merging them would make it
+// impossible to build a Language paper without Literature lessons
+// appearing, so they are two constants with two library entries.
+//
+// A NOTE ON SET TEXTS
+// 9695 prescribes set texts that change from series to series, so a
+// spine naming particular texts would be wrong within two years.
+// Instead the poetry, prose and drama topics are built around the
+// SKILLS and critical approaches that transfer between texts, with
+// lessons for close reading, context and comparison. A teacher files a
+// question about their own set text against the relevant skill lesson.
+
+const ALEVEL_ENGLISH_LANG_9093 = [
+  // ─────────────── AS ───────────────
+  { topic: 'AS \u00b7 1 Reading & Analysing Texts', code: 'AS1',
+    subtopics: [
+      { name: 'What Text Analysis Involves & The Assessment Objectives', code: 'AS1.1' },
+      { name: 'Audience, Purpose & Context', code: 'AS1.2' },
+      { name: 'Form, Genre & Text Type Conventions', code: 'AS1.3' },
+      { name: 'Register, Tone & Voice', code: 'AS1.4' },
+      { name: 'Lexis & Semantics: Word Choice and Meaning', code: 'AS1.5' },
+      { name: 'Semantic Fields & Connotation', code: 'AS1.6' },
+      { name: 'Figurative Language & Imagery', code: 'AS1.7' },
+      { name: 'Grammar & Syntax: Sentence Structure for Effect', code: 'AS1.8' },
+      { name: 'Phonology: Sound Patterning in Written Texts', code: 'AS1.9' },
+      { name: 'Graphology & Visual Presentation', code: 'AS1.10' },
+      { name: 'Discourse Structure & Cohesion', code: 'AS1.11' },
+      { name: 'Pragmatics & Implied Meaning', code: 'AS1.12' },
+      { name: 'Building an Integrated Analytical Response', code: 'AS1.13' },
+      { name: 'Using Linguistic Terminology Accurately', code: 'AS1.14' },
+    ] },
+
+  { topic: 'AS \u00b7 2 Writing for a Purpose', code: 'AS2',
+    subtopics: [
+      { name: 'Shaping Writing for a Specified Audience', code: 'AS2.1' },
+      { name: 'Writing to Inform & Explain', code: 'AS2.2' },
+      { name: 'Writing to Describe', code: 'AS2.3' },
+      { name: 'Writing to Persuade & Argue', code: 'AS2.4' },
+      { name: 'Narrative & Reflective Writing', code: 'AS2.5' },
+      { name: 'Journalistic Forms: Article, Review & Editorial', code: 'AS2.6' },
+      { name: 'Scripted Speech & Talk', code: 'AS2.7' },
+      { name: 'Digital Forms: Blog, Web Copy & Social Media', code: 'AS2.8' },
+      { name: 'Letters, Reports & Formal Documents', code: 'AS2.9' },
+      { name: 'Controlling Register & Sustaining Voice', code: 'AS2.10' },
+      { name: 'Structuring a Piece: Openings, Development & Endings', code: 'AS2.11' },
+      { name: 'Crafting Sentences for Deliberate Effect', code: 'AS2.12' },
+      { name: 'Editing & Proofreading Your Own Writing', code: 'AS2.13' },
+      { name: 'The Reflective Commentary', code: 'AS2.14' },
+    ] },
+
+  { topic: 'AS \u00b7 3 Directed Writing & Text Transformation', code: 'AS3',
+    subtopics: [
+      { name: 'Reading the Task: Identifying Form, Audience & Purpose', code: 'AS3.1' },
+      { name: 'Selecting Relevant Material from a Source', code: 'AS3.2' },
+      { name: 'Transforming a Text into a New Form', code: 'AS3.3' },
+      { name: 'Maintaining Accuracy of Content While Changing Form', code: 'AS3.4' },
+      { name: 'Adapting Register for a New Audience', code: 'AS3.5' },
+      { name: 'Summary Writing & Selecting Key Points', code: 'AS3.6' },
+      { name: 'Comparing Two Texts in Directed Writing', code: 'AS3.7' },
+      { name: 'Common Pitfalls in Directed Writing Responses', code: 'AS3.8' },
+    ] },
+
+  // ─────────────── A2 ───────────────
+  { topic: 'A2 \u00b7 4 Language Change', code: 'A2-4',
+    subtopics: [
+      { name: 'How and Why Language Changes Over Time', code: 'A2-4.1' },
+      { name: 'Lexical Change: Borrowing, Coinage & Compounding', code: 'A2-4.2' },
+      { name: 'Semantic Change: Broadening, Narrowing & Amelioration', code: 'A2-4.3' },
+      { name: 'Grammatical & Orthographic Change', code: 'A2-4.4' },
+      { name: 'Phonological Change & Accent Shift', code: 'A2-4.5' },
+      { name: 'Attitudes to Change: Prescriptivism & Descriptivism', code: 'A2-4.6' },
+      { name: 'Working with Historical Text Extracts', code: 'A2-4.7' },
+      { name: 'Using Corpus Data & Word Frequency Evidence', code: 'A2-4.8' },
+      { name: 'Interpreting Language Data & Graphs', code: 'A2-4.9' },
+      { name: 'Theories of Language Change', code: 'A2-4.10' },
+    ] },
+
+  { topic: 'A2 \u00b7 5 Child Language Acquisition', code: 'A2-5',
+    subtopics: [
+      { name: 'Stages of Spoken Language Development', code: 'A2-5.1' },
+      { name: 'Phonological Development & Simplification', code: 'A2-5.2' },
+      { name: 'Lexical & Semantic Development', code: 'A2-5.3' },
+      { name: 'Overextension, Underextension & Virtuous Errors', code: 'A2-5.4' },
+      { name: 'Grammatical Development & Inflection', code: 'A2-5.5' },
+      { name: 'Pragmatic Development & Conversational Skills', code: 'A2-5.6' },
+      { name: 'Behaviourist & Nativist Theories', code: 'A2-5.7' },
+      { name: 'Cognitive & Social Interactionist Theories', code: 'A2-5.8' },
+      { name: 'Child-Directed Speech', code: 'A2-5.9' },
+      { name: 'Development of Reading & Writing', code: 'A2-5.10' },
+      { name: 'Analysing a Child Language Transcript', code: 'A2-5.11' },
+    ] },
+
+  { topic: 'A2 \u00b7 6 English in the World', code: 'A2-6',
+    subtopics: [
+      { name: 'The Global Spread of English', code: 'A2-6.1' },
+      { name: 'Kachru\u2019s Circles & Models of World English', code: 'A2-6.2' },
+      { name: 'English as a Lingua Franca', code: 'A2-6.3' },
+      { name: 'Varieties of English & Their Features', code: 'A2-6.4' },
+      { name: 'Pidgins & Creoles', code: 'A2-6.5' },
+      { name: 'Standard & Non-Standard Varieties', code: 'A2-6.6' },
+      { name: 'Language Death & Language Planning', code: 'A2-6.7' },
+      { name: 'Attitudes to Global English & Linguistic Imperialism', code: 'A2-6.8' },
+      { name: 'Analysing Texts from Different World Englishes', code: 'A2-6.9' },
+    ] },
+
+  { topic: 'A2 \u00b7 7 Language & The Self', code: 'A2-7',
+    subtopics: [
+      { name: 'Language & Identity', code: 'A2-7.1' },
+      { name: 'Sociolect, Idiolect & Dialect', code: 'A2-7.2' },
+      { name: 'Language & Social Class', code: 'A2-7.3' },
+      { name: 'Language & Gender: Theories and Evidence', code: 'A2-7.4' },
+      { name: 'Language & Ethnicity', code: 'A2-7.5' },
+      { name: 'Language & Occupation', code: 'A2-7.6' },
+      { name: 'Accommodation Theory: Convergence & Divergence', code: 'A2-7.7' },
+      { name: 'Language, Thought & The Sapir-Whorf Hypothesis', code: 'A2-7.8' },
+      { name: 'Politeness Theory & Face', code: 'A2-7.9' },
+      { name: 'Analysing Spoken Language Transcripts', code: 'A2-7.10' },
+    ] },
+
+  { topic: 'A2 \u00b7 Exam Technique & Revision', code: 'A2-EX',
+    subtopics: [
+      { name: 'Structuring an Analytical Essay', code: 'A2-EX.1' },
+      { name: 'Integrating Theory & Data in an Answer', code: 'A2-EX.2' },
+      { name: 'Quoting & Referencing Textual Evidence', code: 'A2-EX.3' },
+      { name: 'Command Words in English Language Papers', code: 'A2-EX.4' },
+      { name: 'Timing & Planning Under Exam Conditions', code: 'A2-EX.5' },
+      { name: 'Past Paper Practice: Text Analysis & Directed Writing', code: 'A2-EX.6' },
+      { name: 'Past Paper Practice: Language Topics', code: 'A2-EX.7' },
+      { name: 'Mock Exam Review & Revision Planning', code: 'A2-EX.8' },
+    ] },
+]
+
+const ALEVEL_ENGLISH_LIT_9695 = [
+  // ─────────────── AS ───────────────
+  { topic: 'AS \u00b7 1 Reading Poetry', code: 'AS1',
+    subtopics: [
+      { name: 'Approaching an Unseen Poem', code: 'AS1.1' },
+      { name: 'Voice, Speaker & Persona', code: 'AS1.2' },
+      { name: 'Imagery & Figurative Language', code: 'AS1.3' },
+      { name: 'Diction, Connotation & Register', code: 'AS1.4' },
+      { name: 'Form: Sonnet, Ode, Ballad & Free Verse', code: 'AS1.5' },
+      { name: 'Metre, Rhythm & Their Effects', code: 'AS1.6' },
+      { name: 'Rhyme, Half-Rhyme & Sound Patterning', code: 'AS1.7' },
+      { name: 'Enjambment, Caesura & Line Breaks', code: 'AS1.8' },
+      { name: 'Structure & The Movement of a Poem', code: 'AS1.9' },
+      { name: 'Tone & Shifts in Attitude', code: 'AS1.10' },
+      { name: 'Reading a Poem in Its Context', code: 'AS1.11' },
+      { name: 'Comparing Two Poems', code: 'AS1.12' },
+      { name: 'Writing a Close Analysis of a Poem', code: 'AS1.13' },
+    ] },
+
+  { topic: 'AS \u00b7 2 Reading Prose', code: 'AS2',
+    subtopics: [
+      { name: 'Narrative Voice & Point of View', code: 'AS2.1' },
+      { name: 'The Unreliable Narrator', code: 'AS2.2' },
+      { name: 'Characterisation & Its Methods', code: 'AS2.3' },
+      { name: 'Setting, Atmosphere & Place', code: 'AS2.4' },
+      { name: 'Plot, Structure & Chronology', code: 'AS2.5' },
+      { name: 'Time, Pace & Narrative Distance', code: 'AS2.6' },
+      { name: 'Dialogue & Free Indirect Discourse', code: 'AS2.7' },
+      { name: 'Symbolism & Motif in Prose', code: 'AS2.8' },
+      { name: 'Style, Syntax & Prose Rhythm', code: 'AS2.9' },
+      { name: 'Genre Conventions & Their Subversion', code: 'AS2.10' },
+      { name: 'Theme & The Concerns of a Novel', code: 'AS2.11' },
+      { name: 'Analysing an Extract in Relation to the Whole', code: 'AS2.12' },
+    ] },
+
+  { topic: 'AS \u00b7 3 Reading Drama', code: 'AS3',
+    subtopics: [
+      { name: 'Drama as Text and as Performance', code: 'AS3.1' },
+      { name: 'Dramatic Structure & Act Division', code: 'AS3.2' },
+      { name: 'Character, Motivation & Conflict', code: 'AS3.3' },
+      { name: 'Dialogue, Monologue & Soliloquy', code: 'AS3.4' },
+      { name: 'Dramatic Irony & Audience Knowledge', code: 'AS3.5' },
+      { name: 'Stagecraft: Setting, Props & Stage Directions', code: 'AS3.6' },
+      { name: 'Verse Drama & Its Effects', code: 'AS3.7' },
+      { name: 'Comedy: Conventions & Purposes', code: 'AS3.8' },
+      { name: 'Tragedy: Conventions & The Tragic Hero', code: 'AS3.9' },
+      { name: 'Analysing a Dramatic Extract', code: 'AS3.10' },
+      { name: 'Considering Performance Choices in an Answer', code: 'AS3.11' },
+    ] },
+
+  { topic: 'AS \u00b7 4 Critical Writing Skills', code: 'AS4',
+    subtopics: [
+      { name: 'Reading the Question & Identifying Its Demands', code: 'AS4.1' },
+      { name: 'Planning an Essay & Building an Argument', code: 'AS4.2' },
+      { name: 'Constructing a Thesis & Sustaining a Line of Thought', code: 'AS4.3' },
+      { name: 'Selecting & Embedding Textual Evidence', code: 'AS4.4' },
+      { name: 'Analysing Language Rather Than Describing It', code: 'AS4.5' },
+      { name: 'Writing About Form & Structure', code: 'AS4.6' },
+      { name: 'Using Critical Terminology Precisely', code: 'AS4.7' },
+      { name: 'Concluding an Essay Effectively', code: 'AS4.8' },
+    ] },
+
+  // ─────────────── A2 ───────────────
+  { topic: 'A2 \u00b7 5 Shakespeare', code: 'A2-5',
+    subtopics: [
+      { name: 'Shakespeare\u2019s Theatre & Its Conventions', code: 'A2-5.1' },
+      { name: 'Shakespearean Language: Blank Verse & Prose', code: 'A2-5.2' },
+      { name: 'Imagery Patterns Across a Play', code: 'A2-5.3' },
+      { name: 'Soliloquy & Interior Character Development', code: 'A2-5.4' },
+      { name: 'Structure: The Five-Act Pattern', code: 'A2-5.5' },
+      { name: 'Themes & Their Development Through the Play', code: 'A2-5.6' },
+      { name: 'Contexts: Political, Religious & Social', code: 'A2-5.7' },
+      { name: 'Performance History & Interpretation', code: 'A2-5.8' },
+      { name: 'Analysing a Passage in the Context of the Whole Play', code: 'A2-5.9' },
+      { name: 'Writing a Shakespeare Essay', code: 'A2-5.10' },
+    ] },
+
+  { topic: 'A2 \u00b7 6 Advanced Poetry Study', code: 'A2-6',
+    subtopics: [
+      { name: 'The Poet\u2019s Body of Work & Recurring Concerns', code: 'A2-6.1' },
+      { name: 'Poetic Sequences & Collections as Wholes', code: 'A2-6.2' },
+      { name: 'Reading Poetry Against Its Historical Moment', code: 'A2-6.3' },
+      { name: 'Literary Movements & Their Influence', code: 'A2-6.4' },
+      { name: 'Ambiguity, Paradox & Complexity of Meaning', code: 'A2-6.5' },
+      { name: 'Comparing Poems by the Same Poet', code: 'A2-6.6' },
+      { name: 'Comparing Poems Across Poets & Periods', code: 'A2-6.7' },
+      { name: 'Writing a Comparative Poetry Essay', code: 'A2-6.8' },
+    ] },
+
+  { topic: 'A2 \u00b7 7 Advanced Prose Study', code: 'A2-7',
+    subtopics: [
+      { name: 'The Novel as a Structured Whole', code: 'A2-7.1' },
+      { name: 'Narrative Technique in Extended Fiction', code: 'A2-7.2' },
+      { name: 'Character Development Across a Novel', code: 'A2-7.3' },
+      { name: 'Social, Historical & Cultural Context', code: 'A2-7.4' },
+      { name: 'The Short Story & Its Distinct Demands', code: 'A2-7.5' },
+      { name: 'Non-Fiction Prose & Its Analysis', code: 'A2-7.6' },
+      { name: 'Comparing Prose Texts', code: 'A2-7.7' },
+      { name: 'Writing a Prose Essay with Sustained Argument', code: 'A2-7.8' },
+    ] },
+
+  { topic: 'A2 \u00b7 8 Advanced Drama Study', code: 'A2-8',
+    subtopics: [
+      { name: 'Modern Drama & Its Departures from Tradition', code: 'A2-8.1' },
+      { name: 'Realism, Naturalism & Their Alternatives', code: 'A2-8.2' },
+      { name: 'Political & Social Drama', code: 'A2-8.3' },
+      { name: 'Absurdism & Non-Naturalistic Theatre', code: 'A2-8.4' },
+      { name: 'Staging, Space & The Director\u2019s Role', code: 'A2-8.5' },
+      { name: 'Comparing Dramatic Texts', code: 'A2-8.6' },
+      { name: 'Writing a Drama Essay', code: 'A2-8.7' },
+    ] },
+
+  { topic: 'A2 \u00b7 9 Critical Approaches', code: 'A2-9',
+    subtopics: [
+      { name: 'Why Critical Perspectives Matter', code: 'A2-9.1' },
+      { name: 'Feminist Criticism', code: 'A2-9.2' },
+      { name: 'Marxist & Materialist Criticism', code: 'A2-9.3' },
+      { name: 'Postcolonial Criticism', code: 'A2-9.4' },
+      { name: 'Psychoanalytic Criticism', code: 'A2-9.5' },
+      { name: 'Reader-Response & Reception Theory', code: 'A2-9.6' },
+      { name: 'Ecocriticism & Other Recent Approaches', code: 'A2-9.7' },
+      { name: 'Engaging with Critical Opinion in an Essay', code: 'A2-9.8' },
+      { name: 'Evaluating Rather Than Reproducing a Critical View', code: 'A2-9.9' },
+    ] },
+
+  { topic: 'A2 \u00b7 10 Unseen & Comparative Analysis', code: 'A2-10',
+    subtopics: [
+      { name: 'Approaching an Unseen Passage Under Time Pressure', code: 'A2-10.1' },
+      { name: 'Annotating Quickly & Purposefully', code: 'A2-10.2' },
+      { name: 'Identifying Genre & Period from Internal Evidence', code: 'A2-10.3' },
+      { name: 'Building a Comparative Framework', code: 'A2-10.4' },
+      { name: 'Comparing Across Genres', code: 'A2-10.5' },
+      { name: 'Writing a Comparative Response', code: 'A2-10.6' },
+    ] },
+
+  { topic: 'A2 \u00b7 Exam Technique & Revision', code: 'A2-EX',
+    subtopics: [
+      { name: 'The Assessment Objectives in Literature Papers', code: 'A2-EX.1' },
+      { name: 'Passage-Based vs. Essay Questions', code: 'A2-EX.2' },
+      { name: 'Managing Time Across a Literature Paper', code: 'A2-EX.3' },
+      { name: 'Revising a Set Text Effectively', code: 'A2-EX.4' },
+      { name: 'Building a Quotation Bank', code: 'A2-EX.5' },
+      { name: 'Common Weaknesses in Literature Essays', code: 'A2-EX.6' },
+      { name: 'Past Paper Practice: Poetry & Prose', code: 'A2-EX.7' },
+      { name: 'Past Paper Practice: Drama & Shakespeare', code: 'A2-EX.8' },
+      { name: 'Mock Exam Review & Revision Planning', code: 'A2-EX.9' },
+    ] },
+]
+
 export const ALEVEL_LIBRARY = [
   { match: /\bbiology\b/i, const_: ALEVEL_BIOLOGY_9700,
     source: 'Cambridge International AS & A Level Biology 9700 \u2014 252-lesson scheme (AS 128 / A2 124)' },
@@ -5941,6 +6519,15 @@ export const ALEVEL_LIBRARY = [
   // Mathematics is prefixed by COMPONENT (P1, P2, P3, M1, S1, S2) rather
   // than AS/A2, because candidates sit different combinations: a school
   // teaching P1/P3/S1 can filter to exactly those and never see Mechanics.
+  // English Literature MUST be tested before English Language, or
+  // "English Literature" would match a bare /english/ pattern. They are
+  // separate syllabuses (9695 and 9093) entered separately.
+  { match: /\bliterature\b/i, const_: ALEVEL_ENGLISH_LIT_9695,
+    source: 'Cambridge International AS & A Level Literature in English 9695 \u2014 138-lesson scheme' },
+  { match: /\benglish\s*language\b|\benglish\b/i, const_: ALEVEL_ENGLISH_LANG_9093,
+    source: 'Cambridge International AS & A Level English Language 9093 \u2014 132-lesson scheme' },
+  { match: /\bcomputer\s*science\b|\bcomputing\b/i, const_: ALEVEL_COMPSCI_9618,
+    source: 'Cambridge International AS & A Level Computer Science 9618 \u2014 195-lesson scheme (AS 99 / A2 96)' },
   { match: /\bbusiness\b/i, const_: ALEVEL_BUSINESS_9609,
     source: 'Cambridge International AS & A Level Business 9609 \u2014 159-lesson scheme (AS 81 / A2 78)' },
   { match: /\beconomics\b/i, const_: ALEVEL_ECONOMICS_9708,
