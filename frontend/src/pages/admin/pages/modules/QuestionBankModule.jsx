@@ -27,7 +27,7 @@ function QuestionBankModule({ toast }) {
   const [filter,    setFilter]    = useState({ subject:'', curriculum:'', difficulty:'', search:'' })
 
   const SUBJECTS   = ['Mathematics','Physics','Chemistry','Biology','Business Studies','Computer Science','Economics','History','Geography','English Language','English Literature']
-  const CURRICULA  = ['EdexcelIGCSE','CambridgeIGCSE','CambridgeALevel','EdexcelALevel','IBPYP','IBMYP','IBDP','KenyaCBC','American','BNC']
+  const CURRICULA = ['CambridgePrimary','CambridgeLowerSec','CambridgeIGCSE','CambridgeALevel','EdexcelPrimary','EdexcelLowerSec','EdexcelIGCSE','EdexcelALevel','AQALowerSec','AQAGCSE','AQAALevel','IBPYP','IBMYP','IBDP','BNC','American','Canadian','KenyaCBE','KCSE']
   const DIFFICULTY = ['easy','medium','hard']
 
   const BLANK = { subject:'Mathematics', topic:'', subtopic:'', lessonCode:'', curriculum:'EdexcelIGCSE', grade:'Year 10', difficulty:'medium', type:'mcq', questionText:'', options:['','','',''], correctAnswer:'', explanation:'', marks:2, markScheme:{ modelAnswer:'', points:[], acceptableAnswers:[], commonErrors:[] }, imageUrl:'', imageCaption:'' }
