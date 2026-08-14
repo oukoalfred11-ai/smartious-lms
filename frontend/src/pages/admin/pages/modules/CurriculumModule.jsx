@@ -6,8 +6,13 @@ import { fetchCurricula, FALLBACK_CURRICULA } from '../../../../data/curriculumL
 import { CBE_LIBRARY, PYP_LIBRARY, MYP_LIBRARY, IBDP_LIBRARY, KCSE_LIBRARY, IPRIMARY_LIBRARY, ILOWER_SEC_LIBRARY, IAL_LIBRARY, ALEVEL_LIBRARY, IGCSE_LIBRARY, IGCSE_MATHS_0580, LOWER_SEC_LIBRARY, PRIMARY_LIBRARY, PRIMARY_Y5_LIBRARY } from './spineData.js'
 
 function SubjectsTab({ toast }) {
-  // The 15 curricula from the new catalog
-  const CURRICULA_LIST = CURRICULA_LIST
+  // Read the curriculum list from the backend rather than a hardcoded
+  // array. Copies of that array used to live in several files, and a
+  // curriculum added server-side stayed invisible until every one was
+  // edited — which is how Edexcel iPrimary and KCSE passed all backend
+  // checks yet could not be selected.
+  const [CURRICULA_LIST, setCurriculaList] = useState(FALLBACK_CURRICULA)
+  useEffect(() => { fetchCurricula(api).then(setCurriculaList) }, [])
   // Categories grouped by curriculum family — drives the <optgroup>
   // dropdown in the form so admin sees categories organised by which
   // curricula use them. CATEGORIES (flat) is exposed for any code path
@@ -270,6 +275,13 @@ function SubjectFormModal({ editing, curricula, categories, categoryGroups, defa
 }
 
 function SyllabusSpineTab({ toast }) {
+  // Read the curriculum list from the backend rather than a hardcoded
+  // array. Copies of that array used to live in several files, and a
+  // curriculum added server-side stayed invisible until every one was
+  // edited — which is how Edexcel iPrimary and KCSE passed all backend
+  // checks yet could not be selected.
+  const [CURRICULA_LIST, setCurriculaList] = useState(FALLBACK_CURRICULA)
+  useEffect(() => { fetchCurricula(api).then(setCurriculaList) }, [])
   const [curricula] = useState(CURRICULA_LIST)
   const [curriculum, setCurriculum] = useState('CambridgeIGCSE')
   const [subjects, setSubjects] = useState([])
@@ -557,13 +569,6 @@ function SyllabusSpineTab({ toast }) {
    * rather than falling through to a Cambridge or KCSE matcher and
    * replacing that bank.
    */
-  // The dropdown reads the backend rather than a hardcoded array. Three
-  // copies of that array used to exist, and a curriculum added server-side
-  // stayed invisible until every one was edited — which is how Edexcel
-  // iPrimary and KCSE passed all backend checks yet could not be selected.
-  const [CURRICULA_LIST, setCurriculaList] = React.useState(FALLBACK_CURRICULA)
-  React.useEffect(() => { fetchCurricula(api).then(setCurriculaList) }, [])
-
   const loadCbeSpine = async () => {
     if (!subjectId) { toast?.error?.('Pick a subject first.'); return }
     const subjectName = subjects.find(s => s._id === subjectId)?.subjectName || ''
