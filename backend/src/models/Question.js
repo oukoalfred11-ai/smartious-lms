@@ -84,6 +84,9 @@ const questionSchema = new mongoose.Schema({
       'EdexcelPrimary', 'EdexcelLowerSec','EdexcelIGCSE','EdexcelALevel',
       'AQALowerSec','AQAGCSE','AQAALevel',
       'IBPYP','IBMYP','IBDP',
+      'KenyaCBE', 'KCSE',
+      // Legacy — pre-2026-08 name for CBE. Retained so existing records
+      // stay valid; migrate-cbc-to-cbe.js converts them.
       'KenyaCBC','BNC','American','Canadian',
       // Legacy values — keep for existing questions
       'IB','IGCSE','Edexcel','Cambridge',
