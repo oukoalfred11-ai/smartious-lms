@@ -613,8 +613,21 @@ router.post('/:id/approve-scheme', auth, requireRole('admin','dos','teacher'), a
     const sum = points.reduce((t, p) => t + (Number(p.marks) || 0), 0)
     if (!scheme.modelAnswer && !points.length)
       return fail(res, 400, 'A scheme needs a model answer or at least one point.')
-    if (points.length && sum !== q.marks)
-      return fail(res, 400, `Scheme marks total ${sum} but the question is worth ${q.marks}.`)
+    // A scheme may list MORE creditable points than the question's mark
+    // total — that is standard KNEC practice. "State two differences"
+    // carries two marks, but the scheme lists every acceptable difference
+    // so a marker can credit whichever two the candidate gave. Rejecting
+    // those would have forced teachers to delete correct answers before
+    // they could approve.
+    //
+    // A scheme that totals LESS than the question is still an error: some
+    // marks would be unreachable, so the candidate could not score full
+    // marks however good the answer.
+    if (points.length && sum < q.marks)
+      return fail(res, 400,
+        `Scheme marks total ${sum} but the question is worth ${q.marks}. `
+        + `A scheme may list more points than the total, but not fewer — `
+        + `otherwise ${q.marks - sum} mark(s) could never be awarded.`)
 
     q.markScheme = {
       modelAnswer: scheme.modelAnswer || '',
