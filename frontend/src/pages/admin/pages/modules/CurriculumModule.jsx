@@ -466,7 +466,8 @@ function SyllabusSpineTab({ toast }) {
     if (!subjectId) { toast?.error?.('Pick a subject first.'); return }
     const entry = LOWER_SEC_LIBRARY.find(e => e.match.test(subjectName))
     if (!entry) {
-      toast?.error?.('No Lower Secondary spine matches "' + subjectName + '". Expected one of: Mathematics, English, Science, Computing, Global Perspectives.')
+      toast?.error?.('No Lower Secondary spine matches "' + subjectName + '". Available: '
+        + LOWER_SEC_LIBRARY.map(e => (e.source || '').replace('Cambridge Lower Secondary ', '').split(' \u2014 ')[0]).join(', '))
       return
     }
     if (topics.length > 0 && !window.confirm('This REPLACES the entire existing spine for this subject. Continue?')) return
