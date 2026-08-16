@@ -3,6 +3,7 @@ import { AuthProvider, ToastProvider, StoreProvider, useAuth } from './context/c
 import LandingPage       from './pages/LandingPage.jsx'
 import LoginPage         from './pages/LoginPage.jsx'
 import PausedScreen from './components/PausedScreen.jsx'
+import ClassroomPage from './pages/ClassroomPage.jsx'
 import AdminLoginPage    from './pages/AdminLoginPage.jsx'
 import VerifyEmailPage   from './pages/VerifyEmailPage.jsx'
 import ResetPasswordPage from './pages/ResetPasswordPage.jsx'
@@ -71,6 +72,7 @@ export default function App() {
               <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/portal"         element={<RoleRedirect />} />
               <Route path="/paused"         element={<PausedScreen />} />
+              <Route path="/classroom/:liveClassId" element={<Guard roles={['teacher','student','admin','dos','ops_manager']}><ClassroomPage /></Guard>} />
               <Route path="/admin/*"        element={<Guard roles={['admin']}><AdminPortal /></Guard>} />
               <Route path="/ops/*"          element={<Guard roles={['ops_manager','admin']}><OpsPortal /></Guard>} />
               <Route path="/dos/*"          element={<Guard roles={['dos','admin']}><DOSPortal /></Guard>} />
