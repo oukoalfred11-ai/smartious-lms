@@ -1,12 +1,19 @@
 /**
  * components/LibraryViewer.jsx
- * In-portal PDF viewer. Renders the R2-hosted document inside a
- * full-screen iframe modal (no popups, so nothing to block).
- * Falls back to fetching a fresh URL from /library/:id/view.
+ * In-portal PDF viewer. Renders the R2-hosted document inside an
+ * iframe (no popups, so nothing to block). Falls back to fetching
+ * a fresh URL from /library/:id/view.
+ *
+ * Two display modes:
+ *  - overlay (default): full-screen fixed modal covering everything.
+ *  - inline={true}:     a card that lives INSIDE the portal content
+ *    area, so the sidebar and topbar stay visible and the page keeps
+ *    scrolling normally. The reader area is sized to the viewport
+ *    minus the portal chrome so the book still gets real height.
  */
 import React, { useEffect, useState } from 'react'
 
-export default function LibraryViewer({ book, api, onClose, readOnly = false }) {
+export default function LibraryViewer({ book, api, onClose, readOnly = false, inline = false }) {
   const [url, setUrl] = useState(book?.url || book?.publicUrl || '')
   const [err, setErr] = useState('')
   const [frameLoaded, setFrameLoaded] = useState(false)
@@ -19,8 +26,15 @@ export default function LibraryViewer({ book, api, onClose, readOnly = false }) 
   }, [book?._id])
 
   if (!book) return null
+  const rootStyle = inline
+    ? { position: 'relative', display: 'flex', flexDirection: 'column',
+        borderRadius: 14, overflow: 'hidden', border: '1px solid #E8E2D6',
+        background: '#0E1420', boxShadow: '0 14px 44px rgba(0,0,0,.14)',
+        height: 'calc(100vh - 150px)', minHeight: 520 }
+    : { position: 'fixed', inset: 0, background: 'rgba(8,12,20,.85)', zIndex: 400,
+        display: 'flex', flexDirection: 'column' }
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(8,12,20,.85)', zIndex: 400, display: 'flex', flexDirection: 'column' }}>
+    <div style={rootStyle}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px', background: '#7D1025' }}>
         <div style={{ color: '#fff', fontWeight: 700, fontSize: 14, flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontFamily: 'Arial, sans-serif' }}>
           {book.title || book.fileName}
@@ -32,8 +46,8 @@ export default function LibraryViewer({ book, api, onClose, readOnly = false }) 
           </a>
         )}
         <button onClick={onClose}
-          style={{ background: '#C9A030', color: '#7D1025', border: 'none', borderRadius: 7, padding: '7px 14px', fontSize: 12.5, fontWeight: 800, cursor: 'pointer', fontFamily: 'Arial, sans-serif' }}>
-          Close
+          style={{ background: '#C9A030', color: '#7D1025', border: 'none', borderRadius: 7, padding: '7px 14px', fontSize: 12.5, fontWeight: 800, cursor: 'pointer', fontFamily: 'Arial, sans-serif', whiteSpace: 'nowrap' }}>
+          {inline ? '\u2190 Back to Library' : 'Close'}
         </button>
       </div>
       {err ? (
