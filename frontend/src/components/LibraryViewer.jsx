@@ -4,6 +4,14 @@
  * iframe (no popups, so nothing to block). Falls back to fetching
  * a fresh URL from /library/:id/view.
  *
+ * Loading strategy: when the book has an _id and an api client is
+ * available, the iframe opens the bundled pdf.js viewer at
+ * /pdfjs/index.html, which loads the PDF PROGRESSIVELY with HTTP
+ * Range requests through /api/library/:id/stream — the first pages
+ * render within seconds even on 80 MB coursebooks, while the rest
+ * downloads in the background. When there is no _id (ad-hoc URL
+ * previews), it falls back to the plain iframe on the raw URL.
+ *
  * Two display modes:
  *  - overlay (default): full-screen fixed modal covering everything.
  *  - inline={true}:     a card that lives INSIDE the portal content
@@ -26,6 +34,18 @@ export default function LibraryViewer({ book, api, onClose, readOnly = false, in
   }, [book?._id])
 
   if (!book) return null
+
+  // Progressive pdf.js viewer when possible; raw URL iframe otherwise.
+  const apiBase = api?.defaults?.baseURL || ''
+  const token   = (typeof localStorage !== 'undefined' && localStorage.getItem('sm_token')) || ''
+  const viewerSrc = (book._id && apiBase && token)
+    ? '/pdfjs/index.html?' + new URLSearchParams({
+        id: book._id, api: apiBase, token,
+        title: book.title || book.fileName || 'Coursebook',
+        meta: [book.subjectName, book.grade].filter(Boolean).join(' \u00b7 '),
+      }).toString()
+    : url + (readOnly ? '#toolbar=0&navpanes=0&view=FitH' : '#view=FitH')
+
   const rootStyle = inline
     ? { position: 'relative', display: 'flex', flexDirection: 'column',
         borderRadius: 14, overflow: 'hidden', border: '1px solid #E8E2D6',
@@ -56,7 +76,7 @@ export default function LibraryViewer({ book, api, onClose, readOnly = false, in
           <button onClick={() => { setErr(''); setUrl(''); api.get('/library/' + book._id + '/view').then(r => setUrl(r.data?.data?.url || r.data?.data?.publicUrl || '')).catch(() => setErr('Still unavailable. Contact your teacher or support.')) }}
             style={{ background: '#C9A030', color: '#7D1025', border: 'none', borderRadius: 7, padding: '8px 18px', fontSize: 12.5, fontWeight: 800, cursor: 'pointer' }}>Retry</button>
         </div>
-      ) : !url ? (
+      ) : (!url && !(book._id && apiBase && token)) ? (
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#F0CC5A', fontSize: 14, fontFamily: 'Arial, sans-serif' }}>Loading document...</div>
       ) : (
         <div style={{ flex: 1, position: 'relative' }}>
@@ -80,7 +100,7 @@ export default function LibraryViewer({ book, api, onClose, readOnly = false, in
           )}
           <iframe title={book.title || 'Document'} allow="fullscreen"
             onLoad={() => setFrameLoaded(true)}
-            src={url + (readOnly ? '#toolbar=0&navpanes=0&view=FitH' : '#view=FitH')}
+            src={viewerSrc}
             style={{ width: '100%', height: '100%', border: 'none', background: '#fff' }} />
         </div>
       )}
