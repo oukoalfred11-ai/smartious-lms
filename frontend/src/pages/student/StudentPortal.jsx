@@ -13033,6 +13033,46 @@ function QuizGameLauncher({ user, toast, setPage }) {
 
   return (
     <div>
+      {/* ── Hero banner ────────────────────────────────────────
+          Same treatment as Exams, Homework, Library and Live
+          Classes: artwork untouched, narrower card, glowing gold
+          stat footer. */}
+      <div className="card" style={{
+        padding: 0, marginBottom: 18, overflow: 'hidden',
+        maxWidth: 1180, marginLeft: 'auto', marginRight: 'auto',
+      }}>
+        <img
+          src="/banners/quizgame-hero.jpg"
+          alt="Quiz Battle — challenge your friends, climb the leaderboard"
+          style={{ width: '100%', display: 'block', height: 'auto' }}
+          onError={e => { e.currentTarget.style.display = 'none' }}
+        />
+        <div style={{
+          display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))',
+          background: '#6B0F1E',
+        }}>
+          {[
+            ['Subjects',       subjects.length || '\u2014'],
+            ['Topics',         spineLoading ? '\u2026' : (spine.length || '\u2014')],
+            ['XP per correct', '20'],
+            ['Modes',          'Solo \u00b7 Vs'],
+          ].map(([l, v]) => (
+            <div key={l} style={{ padding: '13px 18px', borderRight: '1px solid rgba(201,160,48,.18)' }}>
+              <div style={{
+                fontSize: 9.5, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase',
+                color: '#E8C97A', opacity: .85, marginBottom: 3,
+                textShadow: '0 0 10px rgba(201,160,48,.45)',
+              }}>{l}</div>
+              <div style={{
+                fontSize: 17, fontWeight: 800, fontFamily: 'JetBrains Mono, monospace',
+                color: '#F5D98B',
+                textShadow: '0 0 12px rgba(245,217,139,.65), 0 0 26px rgba(201,160,48,.35)',
+              }}>{v}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <div style={{ marginBottom:20 }}>
         <div className="sec-tag">Student Game</div>
         <h2 className="serif" style={{ fontSize:26, color:TOKENS.ink, margin:'4px 0 6px' }}>
