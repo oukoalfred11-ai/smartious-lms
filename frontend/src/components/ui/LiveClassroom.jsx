@@ -1,592 +1,546 @@
 /**
- * LiveClassroom.jsx — Microsoft Whiteboard-style infinite canvas classroom
- * - Infinite pan/scroll canvas (drag to pan like MS Whiteboard)
- * - Zoom in/out with scroll wheel or pinch
- * - Draw, shapes, text, eraser, sticky notes
- * - Attach images/PDFs by drag-drop or file picker — shown as sticky cards on board
- * - Teacher: full control; Student: view-only board, can raise hand
- * - Chat panel, participants list, mic/cam toggles
+ * LiveClassroom.jsx — the native Smartious Classroom (pilot).
+ *
+ * Real audio/video over a browser-to-browser WebRTC mesh (see
+ * classroom/rtc.js), with the collaboration layer riding the Socket.IO
+ * /classroom namespace on the existing backend:
+ *   - film strip of live video tiles (self + every remote peer)
+ *   - shared infinite whiteboard: pen, eraser, line, rect, circle, text,
+ *     pan and zoom; every operation is broadcast in WORLD coordinates and
+ *     replayed for late joiners, so all boards stay identical
+ *   - chat, participants with raise-hand and mic/cam indicators
+ *   - teacher controls: allow or lock student drawing, clear board
+ *
+ * Runs alongside the meetingLink flow during the pilot: this component
+ * mounts only from the /classroom/:liveClassId route, and nothing about
+ * the existing Zoom-link buttons changes.
+ *
+ * Props: { liveClassId, user, onLeave }
  */
 import { useState, useRef, useEffect, useCallback } from 'react'
+import { io } from 'socket.io-client'
+import { api } from '../../context/ctx.jsx'
+import { MeshEngine } from '../../classroom/rtc.js'
 
-const DEMO_STUDENTS = [
-  { id:'AO', name:'Amara Osei',    col:'#3B82F6', online:true,  hand:true,  muted:false },
-  { id:'KM', name:'Kofi Mensah',   col:'#22C55E', online:true,  hand:false, muted:true  },
-  { id:'ZK', name:'Zara Kamau',    col:'#8B5CF6', online:true,  hand:false, muted:false },
-  { id:'BO', name:'Brian Otieno',  col:'#F59E0B', online:true,  hand:false, muted:true  },
-  { id:'FW', name:'Faith Wanjiru', col:'#EC4899', online:true,  hand:false, muted:false },
-  { id:'DM', name:'David Mwangi',  col:'#14B8A6', online:false, hand:false, muted:true  },
-]
+const BASE = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/api\/?$/, '')
+const BOARD_BG = '#10151F'
 
-const Btn = ({ children, active, danger, label, onClick, style = {} }) => (
-  <button onClick={onClick} title={label} style={{
-    display:'flex', alignItems:'center', justifyContent:'center', gap:4,
-    border:'none', borderRadius:8, padding:'8px 10px', cursor:'pointer', fontSize:12, fontWeight:600,
-    transition:'background .15s',
-    background: danger ? '#EF4444' : active ? 'rgba(96,165,250,.35)' : 'rgba(255,255,255,.1)',
-    color: danger || active ? '#fff' : 'rgba(255,255,255,.8)',
-    ...style,
-  }}>
-    {children}{label && <span>{label}</span>}
-  </button>
+const Btn = ({ children, active, danger, onClick, title, disabled, style = {} }) => (
+  <button onClick={onClick} title={title} disabled={disabled} style={{
+    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+    border: 'none', borderRadius: 8, padding: '8px 11px', cursor: disabled ? 'not-allowed' : 'pointer',
+    fontSize: 12, fontWeight: 600, transition: 'background .15s', whiteSpace: 'nowrap',
+    background: danger ? '#DC2626' : active ? 'rgba(96,165,250,.35)' : 'rgba(255,255,255,.1)',
+    color: danger || active ? '#fff' : 'rgba(255,255,255,.85)',
+    opacity: disabled ? .45 : 1, ...style,
+  }}>{children}</button>
 )
 
-export default function LiveClassroom({ role = 'teacher', onLeave }) {
-  const containerRef = useRef(null)
-  const canvasRef    = useRef(null)
-  const fileRef      = useRef(null)
+// One video tile. Self tile is muted (never hear yourself).
+function Tile({ stream, name, role, self, micOn, camOn, hand }) {
+  const ref = useRef(null)
+  useEffect(() => { if (ref.current && stream) ref.current.srcObject = stream }, [stream])
+  return (
+    <div style={{
+      position: 'relative', width: 150, height: 100, borderRadius: 10, overflow: 'hidden',
+      background: '#1B2230', border: hand ? '2px solid #F59E0B' : '1px solid rgba(255,255,255,.12)',
+      flexShrink: 0,
+    }}>
+      {stream && camOn !== false ? (
+        <video ref={ref} autoPlay playsInline muted={self}
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+      ) : (
+        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {stream && <audio ref={ref} autoPlay muted={self} style={{ display: 'none' }} />}
+          <div style={{
+            width: 42, height: 42, borderRadius: '50%', background: role === 'teacher' ? '#7D1025' : '#1E3A8A',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: '#fff', fontWeight: 800, fontSize: 15,
+          }}>{(name || '?').split(' ').map(w => w[0]).slice(0, 2).join('')}</div>
+        </div>
+      )}
+      <div style={{
+        position: 'absolute', left: 0, right: 0, bottom: 0, padding: '3px 8px',
+        background: 'rgba(0,0,0,.55)', display: 'flex', alignItems: 'center', gap: 5,
+      }}>
+        <span style={{ color: '#fff', fontSize: 10.5, fontWeight: 700, flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          {self ? 'You' : name}{role === 'teacher' ? ' (Teacher)' : ''}
+        </span>
+        {micOn === false && <span style={{ color: '#F87171', fontSize: 9.5, fontWeight: 800 }}>MUTED</span>}
+        {hand && <span style={{ color: '#F59E0B', fontSize: 9.5, fontWeight: 800 }}>HAND</span>}
+      </div>
+    </div>
+  )
+}
 
-  // View/tool state
-  const [tool,       setTool]       = useState('pen')   // pen | eraser | line | rect | circle | text | pan | sticky
-  const [colour,     setColour]     = useState('#FFFFFF')
-  const [lineW,      setLineW]      = useState(3)
-  const [micOn,      setMicOn]      = useState(true)
-  const [camOn,      setCamOn]      = useState(true)
-  const [handRaised, setHandRaised] = useState(false)
-  const [elapsed,    setElapsed]    = useState(0)
-  const [panel,      setPanel]      = useState('chat')  // chat | people | files
+export default function LiveClassroom({ liveClassId, user, onLeave }) {
+  // ── connection state ──
+  const [phase, setPhase] = useState('connecting')   // connecting | live | error
+  const [errMsg, setErrMsg] = useState('')
+  const [classInfo, setClassInfo] = useState({})
+  const [myRole, setMyRole] = useState('student')
+  const [mediaNote, setMediaNote] = useState('')
 
-  // Infinite canvas state
-  const [zoom,    setZoom]    = useState(1)
-  const [offset,  setOffset]  = useState({ x: 0, y: 0 })
-  const [isPanning, setIsPanning] = useState(false)
-  const panStart = useRef(null)
+  // ── people and media ──
+  const [roster, setRoster] = useState([])           // server truth
+  const [streams, setStreams] = useState({})         // socketId -> MediaStream
+  const [localStream, setLocalStream] = useState(null)
+  const [micOn, setMicOn] = useState(true)
+  const [camOn, setCamOn] = useState(true)
+  const [handUp, setHandUp] = useState(false)
 
-  // Drawing state
-  const [isDrawing, setIsDrawing] = useState(false)
-  const lastPt   = useRef(null)
-  const snapshot = useRef(null)
+  // ── board ──
+  const canvasRef = useRef(null)
+  const wrapRef = useRef(null)
+  const opsRef = useRef([])                          // full op log (world coords)
+  const [tool, setTool] = useState('pen')            // pen eraser line rect circle text pan
+  const [colour, setColour] = useState('#FFFFFF')
+  const [lineW, setLineW] = useState(3)
+  const [zoom, setZoom] = useState(1)
+  const [offset, setOffset] = useState({ x: 0, y: 0 })
+  const [boardLocked, setBoardLocked] = useState(true)
+  const viewRef = useRef({ zoom: 1, offset: { x: 0, y: 0 } })
+  viewRef.current = { zoom, offset }
 
-  // Attachments — files dropped onto the board
-  const [attachments, setAttachments] = useState([
-    { id:'att-0', name:'Pythagoras Worksheet.pdf', type:'pdf', x:60, y:80,  col:'#1E3A8A', dragging:false },
-    { id:'att-1', name:'Geometry Diagram.png',     type:'img', x:340, y:200, col:'#14532D', dragging:false },
-  ])
-  const [dragAttach, setDragAttach] = useState(null)
-
-  // Sticky notes
-  const [stickies, setStickies] = useState([
-    { id:'st-0', text:'Remember: c² = a² + b²', x:500, y:60, col:'#FCD34D' },
-  ])
-
-  // Chat
-  const [chatMsgs, setChatMsgs] = useState([
-    { who:'teacher', name:'Mr. Muthomi', text:'Good morning everyone! Today: Pythagoras Theorem.', time:'09:01' },
-    { who:'student',  name:'Amara Osei',  text:'Good morning, sir!', time:'09:01' },
-  ])
-  const [chatInp, setChatInp] = useState('')
+  // ── chat / panel ──
+  const [panel, setPanel] = useState('chat')
+  const [chat, setChat] = useState([])
+  const [chatInput, setChatInput] = useState('')
   const chatEndRef = useRef(null)
+  const [elapsed, setElapsed] = useState(0)
 
-  const [participants, setParticipants] = useState(DEMO_STUDENTS)
+  const socketRef = useRef(null)
+  const engineRef = useRef(null)
+  const drawRef = useRef({ active: false, pts: [], start: null })
 
-  // ── Timer ────────────────────────────────────────────────
-  useEffect(() => {
-    const id = setInterval(() => setElapsed(e => e + 1), 1000)
-    return () => clearInterval(id)
-  }, [])
-  const fmt = s => `${String(Math.floor(s/3600)).padStart(2,'0')}:${String(Math.floor((s%3600)/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`
+  const isTeacher = myRole === 'teacher' || myRole === 'admin'
+  const canDraw = isTeacher || !boardLocked
 
-  // ── Canvas setup ─────────────────────────────────────────
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const resize = () => {
-      const { width, height } = canvas.getBoundingClientRect()
-      const ctx = canvas.getContext('2d')
-      // Save existing content
-      const img = canvas.width > 0 && canvas.height > 0
-        ? ctx.getImageData(0, 0, canvas.width, canvas.height) : null
-      canvas.width  = Math.max(width,  100)
-      canvas.height = Math.max(height, 100)
-      ctx.fillStyle = '#0D1525'
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
-      // Draw subtle dot-grid
-      ctx.fillStyle = 'rgba(255,255,255,.04)'
-      const sp = 32
-      for (let x = 0; x < canvas.width; x += sp)
-        for (let y = 0; y < canvas.height; y += sp)
-          ctx.fillRect(x, y, 1.5, 1.5)
-      if (img) ctx.putImageData(img, 0, 0)
-    }
-    resize()
-    const ro = new ResizeObserver(resize)
-    ro.observe(canvas)
-    return () => ro.disconnect()
-  }, [])
-
-  // ── Coordinate helpers (world ↔ canvas) ──────────────────
-  const toWorld = useCallback((cx, cy) => ({
-    x: (cx - offset.x) / zoom,
-    y: (cy - offset.y) / zoom,
-  }), [offset, zoom])
-
-  const getCanvasPos = (e) => {
-    const rect = canvasRef.current.getBoundingClientRect()
-    const src  = e.touches ? e.touches[0] : e
-    return { cx: src.clientX - rect.left, cy: src.clientY - rect.top }
-  }
-
-  // ── Zoom (scroll wheel) ──────────────────────────────────
-  const onWheel = useCallback((e) => {
-    e.preventDefault()
-    const { cx, cy } = getCanvasPos(e)
-    const factor = e.deltaY < 0 ? 1.1 : 0.9
-    setZoom(z => {
-      const nz = Math.min(4, Math.max(0.25, z * factor))
-      // Keep the point under cursor fixed
-      setOffset(o => ({
-        x: cx - (cx - o.x) * (nz / z),
-        y: cy - (cy - o.y) * (nz / z),
-      }))
-      return nz
-    })
-  }, [])
-
-  useEffect(() => {
-    const el = canvasRef.current
-    if (!el) return
-    el.addEventListener('wheel', onWheel, { passive: false })
-    return () => el.removeEventListener('wheel', onWheel)
-  }, [onWheel])
-
-  // ── Drawing ──────────────────────────────────────────────
-  const ctxStyle = useCallback((ctx) => {
-    ctx.strokeStyle = tool === 'eraser' ? '#0D1525' : colour
-    ctx.lineWidth   = (tool === 'eraser' ? lineW * 6 : lineW) / zoom
-    ctx.lineCap     = 'round'
-    ctx.lineJoin    = 'round'
-  }, [tool, colour, lineW, zoom])
-
-  const onPointerDown = useCallback((e) => {
-    if (role !== 'teacher') return
-    const { cx, cy } = getCanvasPos(e)
-    const wp = toWorld(cx, cy)
-
-    if (tool === 'pan' || (e.button === 1)) {
-      setIsPanning(true)
-      panStart.current = { cx, cy, ox: offset.x, oy: offset.y }
-      return
-    }
-
-    if (tool === 'sticky') {
-      setStickies(s => [...s, { id:'st-'+Date.now(), text:'Double-click to edit', x: wp.x, y: wp.y, col:'#FCD34D' }])
-      return
-    }
-
-    setIsDrawing(true)
-    lastPt.current = wp
-    const canvas = canvasRef.current
-    const ctx = canvas.getContext('2d')
-    snapshot.current = ctx.getImageData(0, 0, canvas.width, canvas.height)
-
-    if (tool === 'pen' || tool === 'eraser') {
-      ctx.save()
-      ctx.translate(offset.x, offset.y)
-      ctx.scale(zoom, zoom)
-      ctxStyle(ctx)
-      ctx.beginPath()
-      ctx.moveTo(wp.x, wp.y)
-      ctx.restore()
-    }
-  }, [role, tool, offset, zoom, toWorld, ctxStyle])
-
-  const onPointerMove = useCallback((e) => {
-    if (role !== 'teacher') return
-    const { cx, cy } = getCanvasPos(e)
-
-    if (isPanning && panStart.current) {
-      setOffset({
-        x: panStart.current.ox + (cx - panStart.current.cx),
-        y: panStart.current.oy + (cy - panStart.current.cy),
-      })
-      return
-    }
-
-    if (!isDrawing) return
-    const wp = toWorld(cx, cy)
-    const canvas = canvasRef.current
-    const ctx = canvas.getContext('2d')
-
-    ctx.save()
-    ctx.translate(offset.x, offset.y)
-    ctx.scale(zoom, zoom)
-    ctxStyle(ctx)
-
-    if (tool === 'pen' || tool === 'eraser') {
-      ctx.beginPath()
-      ctx.moveTo(lastPt.current.x, lastPt.current.y)
-      ctx.lineTo(wp.x, wp.y)
+  // ═══ BOARD RENDERING ═══════════════════════════════════════
+  const drawOp = useCallback((ctx, op) => {
+    if (op.kind === 'lock') return
+    ctx.strokeStyle = op.tool === 'eraser' ? BOARD_BG : (op.color || '#fff')
+    ctx.fillStyle = op.color || '#fff'
+    ctx.lineWidth = (op.tool === 'eraser' ? (op.w || 3) * 6 : (op.w || 3))
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round'
+    if (op.kind === 'stroke' && op.pts && op.pts.length > 1) {
+      ctx.beginPath(); ctx.moveTo(op.pts[0].x, op.pts[0].y)
+      for (let i = 1; i < op.pts.length; i++) ctx.lineTo(op.pts[i].x, op.pts[i].y)
       ctx.stroke()
-      lastPt.current = wp
-    } else if (snapshot.current && (tool === 'line' || tool === 'rect' || tool === 'circle')) {
-      ctx.restore()
-      ctx.putImageData(snapshot.current, 0, 0)
-      ctx.save()
-      ctx.translate(offset.x, offset.y)
-      ctx.scale(zoom, zoom)
-      ctxStyle(ctx)
-      const sx = lastPt.current.x, sy = lastPt.current.y
-      if (tool === 'line') {
-        ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(wp.x, wp.y); ctx.stroke()
-      } else if (tool === 'rect') {
-        ctx.strokeRect(sx, sy, wp.x - sx, wp.y - sy)
-      } else if (tool === 'circle') {
-        const rx = Math.abs(wp.x - sx) / 2, ry = Math.abs(wp.y - sy) / 2
-        ctx.beginPath()
-        ctx.ellipse(sx + (wp.x-sx)/2, sy + (wp.y-sy)/2, rx, ry, 0, 0, Math.PI*2)
-        ctx.stroke()
-      }
+    } else if (op.kind === 'line') {
+      ctx.beginPath(); ctx.moveTo(op.x1, op.y1); ctx.lineTo(op.x2, op.y2); ctx.stroke()
+    } else if (op.kind === 'rect') {
+      ctx.strokeRect(Math.min(op.x1, op.x2), Math.min(op.y1, op.y2), Math.abs(op.x2 - op.x1), Math.abs(op.y2 - op.y1))
+    } else if (op.kind === 'circle') {
+      const r = Math.hypot(op.x2 - op.x1, op.y2 - op.y1)
+      ctx.beginPath(); ctx.arc(op.x1, op.y1, r, 0, Math.PI * 2); ctx.stroke()
+    } else if (op.kind === 'text') {
+      ctx.font = `${op.size || 18}px Arial, sans-serif`
+      ctx.fillText(op.text || '', op.x1, op.y1)
     }
-    ctx.restore()
-  }, [role, isPanning, isDrawing, tool, offset, zoom, toWorld, ctxStyle])
-
-  const onPointerUp = useCallback(() => {
-    setIsDrawing(false)
-    setIsPanning(false)
-    panStart.current = null
-    snapshot.current = null
   }, [])
 
-  // ── File attachment drop / pick ───────────────────────────
-  const handleFileDrop = useCallback((e) => {
-    e.preventDefault()
-    const files = e.dataTransfer?.files || e.target?.files
-    if (!files) return
-    Array.from(files).forEach(file => {
-      const isImg = file.type.startsWith('image/')
-      const isPdf = file.type === 'application/pdf'
-      if (!isImg && !isPdf) return
-      const reader = new FileReader()
-      reader.onload = ev => {
-        const rect = canvasRef.current?.getBoundingClientRect() || { left:0, top:0, width:800, height:500 }
-        const dropX = e.clientX ? (e.clientX - rect.left - offset.x) / zoom : 100 + Math.random()*200
-        const dropY = e.clientY ? (e.clientY - rect.top  - offset.y) / zoom : 100 + Math.random()*200
-        setAttachments(a => [...a, {
-          id:    'att-' + Date.now(),
-          name:  file.name,
-          type:  isImg ? 'img' : 'pdf',
-          src:   isImg ? ev.target.result : null,
-          x:     dropX,
-          y:     dropY,
-          col:   isImg ? '#14532D' : '#7C3AED',
-          w:     isImg ? 180 : 140,
-          h:     isImg ? 130 : 100,
-        }])
+  const redraw = useCallback(() => {
+    const cv = canvasRef.current
+    if (!cv) return
+    const ctx = cv.getContext('2d')
+    const { zoom: z, offset: o } = viewRef.current
+    ctx.setTransform(1, 0, 0, 1, 0, 0)
+    ctx.fillStyle = BOARD_BG
+    ctx.fillRect(0, 0, cv.width, cv.height)
+    ctx.setTransform(z, 0, 0, z, o.x, o.y)
+    for (const op of opsRef.current) drawOp(ctx, op)
+  }, [drawOp])
+
+  useEffect(() => { redraw() }, [zoom, offset, redraw])
+
+  useEffect(() => {
+    const fit = () => {
+      const cv = canvasRef.current, wrap = wrapRef.current
+      if (!cv || !wrap) return
+      cv.width = wrap.clientWidth; cv.height = wrap.clientHeight
+      redraw()
+    }
+    fit()
+    window.addEventListener('resize', fit)
+    return () => window.removeEventListener('resize', fit)
+  }, [redraw, phase])
+
+  const applyOp = useCallback((op) => {
+    if (op.kind === 'lock') { setBoardLocked(!!op.locked); return }
+    opsRef.current.push(op)
+    const cv = canvasRef.current
+    if (!cv) return
+    const ctx = cv.getContext('2d')
+    const { zoom: z, offset: o } = viewRef.current
+    ctx.setTransform(z, 0, 0, z, o.x, o.y)
+    drawOp(ctx, op)
+  }, [drawOp])
+
+  const sendOp = useCallback((op) => {
+    applyOp(op)
+    socketRef.current?.emit('board:op', op)
+  }, [applyOp])
+
+  // Live-flushed stroke chunks bypass local re-draw (already on canvas)
+  const sendOpLive = (op) => { opsRef.current.push(op); socketRef.current?.emit('board:op', op) }
+
+  // ═══ CONNECT ═══════════════════════════════════════════════
+  useEffect(() => {
+    let socket, engine, cancelled = false
+    const boot = async () => {
+      try {
+        // 1. ICE servers (STUN always; TURN when configured server-side)
+        let iceServers = null
+        try { iceServers = (await api.get('/classroom/ice')).data?.data?.iceServers } catch (e) { iceServers = null }
+
+        // 2. Media — degrade gracefully: A/V, then audio-only, then viewer
+        let stream = null
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            audio: { echoCancellation: true, noiseSuppression: true },
+            video: { width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 20 } },
+          })
+        } catch (e1) {
+          try {
+            stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+            setCamOn(false)
+            setMediaNote('Camera unavailable — you have joined with audio only.')
+          } catch (e2) {
+            stream = new MediaStream()
+            setMicOn(false); setCamOn(false)
+            setMediaNote('Microphone and camera are blocked — you have joined as a viewer. Allow them in your browser settings and rejoin to speak.')
+          }
+        }
+        if (cancelled) { stream.getTracks().forEach(t => t.stop()); return }
+        setLocalStream(stream)
+
+        // 3. Signaling socket, same JWT as the REST API
+        const token = localStorage.getItem('sm_token') || ''
+        socket = io(BASE + '/classroom', {
+          auth: { token },
+          transports: ['websocket', 'polling'],
+          reconnection: true, reconnectionDelay: 1000, reconnectionAttempts: 8,
+        })
+        socketRef.current = socket
+
+        // 4. Mesh engine
+        engine = new MeshEngine({
+          socket, localStream: stream, iceServers,
+          onTrack: (id, s) => setStreams(prev => ({ ...prev, [id]: s })),
+          onPeerClosed: (id) => setStreams(prev => { const n = { ...prev }; delete n[id]; return n }),
+        })
+        engineRef.current = engine
+
+        const joinRoom = () => socket.emit('join', { liveClassId }, (ack) => {
+          if (cancelled) return
+          if (!ack?.ok) { setPhase('error'); setErrMsg(ack?.message || 'Could not join.'); return }
+          setMyRole(ack.self.role)
+          setClassInfo(ack.classInfo || {})
+          setRoster(ack.roster || [])
+          setChat(ack.chat || [])
+          opsRef.current = []
+          for (const op of (ack.boardOps || [])) {
+            if (op.kind === 'lock') setBoardLocked(!!op.locked)
+            else opsRef.current.push(op)
+          }
+          redraw()
+          // Initiate toward every peer already present (they answer).
+          for (const p of (ack.roster || [])) if (p.socketId !== socket.id) engine.connectTo(p.socketId)
+          setPhase('live')
+        })
+
+        socket.on('connect', joinRoom)   // also covers reconnects
+        socket.on('connect_error', () => {
+          if (!cancelled) { setPhase(p => p === 'live' ? p : 'error'); setErrMsg('Could not reach the classroom server.') }
+        })
+        socket.on('peer:joined', (p) => {
+          setRoster(prev => [...prev.filter(x => x.socketId !== p.socketId), p])
+          engine.connectTo(p.socketId)
+        })
+        socket.on('peer:left', ({ socketId }) => {
+          setRoster(prev => prev.filter(x => x.socketId !== socketId))
+          engine.close(socketId)
+        })
+        socket.on('peer:state', (s) => {
+          setRoster(prev => prev.map(p => p.socketId === s.socketId ? { ...p, ...s } : p))
+        })
+        socket.on('board:op', applyOp)
+        socket.on('board:clear', () => { opsRef.current = []; redraw() })
+        socket.on('chat:msg', (m) => setChat(prev => [...prev, m]))
+      } catch (e) {
+        console.error('[classroom boot]', e)
+        if (!cancelled) { setPhase('error'); setErrMsg('Something went wrong starting the classroom.') }
       }
-      if (isImg) reader.readAsDataURL(file)
-      else reader.readAsArrayBuffer(file)
-    })
-  }, [offset, zoom])
+    }
+    boot()
+    return () => {
+      cancelled = true
+      try { engineRef.current?.destroy() } catch (e) { /* noop */ }
+      try { socketRef.current?.emit('leave'); socketRef.current?.disconnect() } catch (e) { /* noop */ }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [liveClassId])
 
-  // ── Sticky note edit ─────────────────────────────────────
-  const editSticky = (id, text) => setStickies(s => s.map(n => n.id===id ? {...n, text} : n))
-  const delSticky  = (id) => setStickies(s => s.filter(n => n.id!==id))
+  useEffect(() => {
+    if (phase !== 'live') return
+    const t = setInterval(() => setElapsed(s => s + 1), 1000)
+    return () => clearInterval(t)
+  }, [phase])
 
-  // ── Chat ─────────────────────────────────────────────────
-  const sendChat = () => {
-    if (!chatInp.trim()) return
-    setChatMsgs(m => [...m, { who:'teacher', name:'Mr. Muthomi', text:chatInp.trim(), time: new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) }])
-    setChatInp('')
-    setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior:'smooth' }), 50)
+  useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [chat, panel])
+
+  // ═══ POINTER HANDLING ══════════════════════════════════════
+  const toWorld = (e) => {
+    const rect = canvasRef.current.getBoundingClientRect()
+    const { zoom: z, offset: o } = viewRef.current
+    return { x: (e.clientX - rect.left - o.x) / z, y: (e.clientY - rect.top - o.y) / z }
   }
 
-  // ── Reset view ───────────────────────────────────────────
-  const resetView = () => { setZoom(1); setOffset({ x:0, y:0 }) }
+  const onDown = (e) => {
+    if (phase !== 'live') return
+    const d = drawRef.current
+    if (tool === 'pan' || e.button === 1 || !canDraw) {
+      d.active = 'pan'
+      d.start = { x: e.clientX, y: e.clientY, ox: offset.x, oy: offset.y }
+      return
+    }
+    const p = toWorld(e)
+    if (tool === 'text') {
+      const text = window.prompt('Text:')
+      if (text && text.trim()) sendOp({ kind: 'text', x1: p.x, y1: p.y, text: text.trim(), color: colour, size: 12 + lineW * 3 })
+      return
+    }
+    d.active = tool
+    d.start = p
+    d.pts = [p]
+  }
 
-  // ── RENDER ───────────────────────────────────────────────
-  const toolBtn = (id, icon, title) => (
-    <Btn key={id} active={tool===id} label={title} onClick={() => setTool(id)} style={{flexDirection:'column',padding:'6px 8px',fontSize:10,gap:2}}>
-      {icon}
-    </Btn>
+  const onMove = (e) => {
+    const d = drawRef.current
+    if (!d.active) return
+    if (d.active === 'pan') {
+      setOffset({ x: d.start.ox + (e.clientX - d.start.x), y: d.start.oy + (e.clientY - d.start.y) })
+      return
+    }
+    const p = toWorld(e)
+    const cv = canvasRef.current, ctx = cv.getContext('2d')
+    const { zoom: z, offset: o } = viewRef.current
+    if (d.active === 'pen' || d.active === 'eraser') {
+      // Incremental segment locally; flushed to peers in chunks
+      ctx.setTransform(z, 0, 0, z, o.x, o.y)
+      drawOp(ctx, { kind: 'stroke', tool: d.active, color: colour, w: lineW, pts: [d.pts[d.pts.length - 1], p] })
+      d.pts.push(p)
+      if (d.pts.length >= 24) {
+        sendOpLive({ kind: 'stroke', tool: d.active, color: colour, w: lineW, pts: d.pts })
+        d.pts = [p]
+      }
+    } else {
+      // Shape preview: redraw board, then ghost the shape
+      redraw()
+      ctx.setTransform(z, 0, 0, z, o.x, o.y)
+      drawOp(ctx, { kind: d.active, x1: d.start.x, y1: d.start.y, x2: p.x, y2: p.y, color: colour, w: lineW })
+      d.pts = [p]
+    }
+  }
+
+  const onUp = () => {
+    const d = drawRef.current
+    if (!d.active) return
+    if (d.active === 'pan') { d.active = false; return }
+    if (d.active === 'pen' || d.active === 'eraser') {
+      if (d.pts.length > 1) sendOpLive({ kind: 'stroke', tool: d.active, color: colour, w: lineW, pts: d.pts })
+    } else {
+      const p = d.pts[d.pts.length - 1] || d.start
+      sendOp({ kind: d.active, x1: d.start.x, y1: d.start.y, x2: p.x, y2: p.y, color: colour, w: lineW })
+    }
+    d.active = false; d.pts = []
+  }
+
+  const onWheel = (e) => {
+    e.preventDefault()
+    const rect = canvasRef.current.getBoundingClientRect()
+    const mx = e.clientX - rect.left, my = e.clientY - rect.top
+    const factor = e.deltaY < 0 ? 1.1 : 0.9
+    setZoom(z0 => {
+      const z1 = Math.min(4, Math.max(0.25, z0 * factor))
+      setOffset(o => ({ x: mx - (mx - o.x) * (z1 / z0), y: my - (my - o.y) * (z1 / z0) }))
+      return z1
+    })
+  }
+
+  // ═══ CONTROLS ══════════════════════════════════════════════
+  const toggleMic = () => {
+    const next = !micOn
+    setMicOn(next)
+    engineRef.current?.setTrackEnabled('audio', next)
+    socketRef.current?.emit('state', { micOn: next })
+  }
+  const toggleCam = () => {
+    const next = !camOn
+    setCamOn(next)
+    engineRef.current?.setTrackEnabled('video', next)
+    socketRef.current?.emit('state', { camOn: next })
+  }
+  const toggleHand = () => {
+    const next = !handUp
+    setHandUp(next)
+    socketRef.current?.emit('state', { hand: next })
+  }
+  const toggleBoardLock = () => {
+    const next = !boardLocked
+    setBoardLocked(next)
+    sendOpLive({ kind: 'lock', locked: next })
+  }
+  const clearBoard = () => {
+    if (!window.confirm('Clear the whiteboard for everyone?')) return
+    socketRef.current?.emit('board:clear')
+  }
+  const sendChat = () => {
+    const t = chatInput.trim()
+    if (!t) return
+    socketRef.current?.emit('chat:msg', t)
+    setChatInput('')
+  }
+  const leave = () => { onLeave ? onLeave() : window.history.back() }
+
+  const mm = String(Math.floor(elapsed / 60)).padStart(2, '0')
+  const ss = String(elapsed % 60).padStart(2, '0')
+
+  // ═══ RENDER ════════════════════════════════════════════════
+  if (phase === 'error') return (
+    <div style={{ position: 'fixed', inset: 0, background: '#0B0F17', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, zIndex: 500 }}>
+      <div style={{ color: '#fff', fontSize: 17, fontWeight: 700 }}>Could not join the classroom</div>
+      <div style={{ color: 'rgba(255,255,255,.6)', fontSize: 13, maxWidth: 360, textAlign: 'center', lineHeight: 1.6 }}>{errMsg}</div>
+      <Btn onClick={leave} style={{ background: '#C9A030', color: '#7D1025', fontWeight: 800 }}>Go back</Btn>
+    </div>
   )
 
+  const others = roster.filter(p => p.socketId !== socketRef.current?.id)
+
   return (
-    <div ref={containerRef} style={{ display:'flex', height:'100vh', background:'#060D1A', color:'#fff', fontFamily:'Inter,sans-serif', overflow:'hidden' }}>
-
-      {/* ── LEFT TOOLBAR ── */}
-      <div style={{ width:58, background:'rgba(0,0,0,.4)', borderRight:'1px solid rgba(255,255,255,.08)', display:'flex', flexDirection:'column', alignItems:'center', padding:'12px 6px', gap:4, zIndex:10, overflowY:'auto' }}>
-        {/* Draw tools */}
-        {toolBtn('pen',    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>, 'Pen')}
-        {toolBtn('eraser', <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M20 20H7L3 16l10-10 7 7-3.5 3.5"/><path d="M6.5 17.5l4-4"/></svg>, 'Eraser')}
-        {toolBtn('line',   <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>, 'Line')}
-        {toolBtn('rect',   <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>, 'Rectangle')}
-        {toolBtn('circle', <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="9"/></svg>, 'Circle')}
-        {toolBtn('sticky', <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h8l6-6V4a2 2 0 0 0-2-2z"/><polyline points="14 2 14 8 20 8"/></svg>, 'Sticky Note')}
-        {toolBtn('pan',    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/><path d="M18 11a2 2 0 1 1 4 0v3a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34L4 17"/></svg>, 'Pan / Move')}
-
-        <div style={{ height:1, width:'80%', background:'rgba(255,255,255,.1)', margin:'4px 0' }}/>
-
-        {/* Colour swatches */}
-        {['#FFFFFF','#FF4444','#4ADE80','#60A5FA','#FBBF24','#E879F9','#F97316'].map(c => (
-          <div key={c} onClick={() => setColour(c)} style={{ width:22, height:22, borderRadius:'50%', background:c, cursor:'pointer', border: colour===c ? '2px solid #fff' : '2px solid transparent', flexShrink:0 }}/>
-        ))}
-
-        <div style={{ height:1, width:'80%', background:'rgba(255,255,255,.1)', margin:'4px 0' }}/>
-
-        {/* Line width */}
-        {[2,4,8].map(w => (
-          <div key={w} onClick={() => setLineW(w)} style={{ width:20, height:w+2, borderRadius:w, background: lineW===w?'#60A5FA':'rgba(255,255,255,.3)', cursor:'pointer', margin:'2px 0' }}/>
-        ))}
-
-        <div style={{ flex:1 }}/>
-
-        {/* Attach file button */}
-        <Btn label="Attach" onClick={() => fileRef.current?.click()} style={{flexDirection:'column',padding:'6px 8px',fontSize:10,gap:2}}>
-          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-        </Btn>
-        <input ref={fileRef} type="file" accept="image/*,application/pdf" multiple style={{display:'none'}} onChange={handleFileDrop}/>
-
-        {/* Zoom reset */}
-        <Btn onClick={resetView} label={Math.round(zoom*100)+'%'} style={{flexDirection:'column',padding:'4px 6px',fontSize:9,gap:1}}>
-          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
-        </Btn>
-      </div>
-
-      {/* ── MAIN CANVAS AREA ── */}
-      <div style={{ flex:1, position:'relative', overflow:'hidden' }}
-        onDragOver={e => e.preventDefault()}
-        onDrop={handleFileDrop}
-      >
-        {/* Infinite canvas */}
-        <canvas
-          ref={canvasRef}
-          style={{ width:'100%', height:'100%', display:'block', cursor: tool==='pan'||isPanning ? 'grabbing' : tool==='eraser' ? 'cell' : 'crosshair' }}
-          onMouseDown={onPointerDown}
-          onMouseMove={onPointerMove}
-          onMouseUp={onPointerUp}
-          onMouseLeave={onPointerUp}
-          onTouchStart={onPointerDown}
-          onTouchMove={onPointerMove}
-          onTouchEnd={onPointerUp}
-        />
-
-        {/* ── ATTACHMENTS on board ── */}
-        {attachments.map(att => (
-          <div key={att.id}
-            style={{
-              position:'absolute',
-              left: att.x * zoom + offset.x,
-              top:  att.y * zoom + offset.y,
-              width: (att.w||140) * zoom,
-              minHeight: (att.h||100) * zoom,
-              background: att.type==='img' && att.src ? 'transparent' : att.col+'22',
-              border: `2px solid ${att.col}`,
-              borderRadius: 8*zoom,
-              cursor:'move',
-              userSelect:'none',
-              overflow:'hidden',
-              zIndex:5,
-              fontSize: 11*zoom,
-            }}
-            onMouseDown={e => {
-              e.stopPropagation()
-              const startX = e.clientX, startY = e.clientY
-              const origX = att.x, origY = att.y
-              const move = ev => setAttachments(a => a.map(x => x.id===att.id ? {...x, x: origX+(ev.clientX-startX)/zoom, y: origY+(ev.clientY-startY)/zoom} : x))
-              const up   = () => { document.removeEventListener('mousemove',move); document.removeEventListener('mouseup',up) }
-              document.addEventListener('mousemove',move)
-              document.addEventListener('mouseup',up)
-            }}
-          >
-            {att.type==='img' && att.src ? (
-              <img src={att.src} alt={att.name} style={{width:'100%',height:'100%',objectFit:'cover',borderRadius:6*zoom,display:'block'}}/>
-            ) : (
-              <div style={{padding:8*zoom}}>
-                <div style={{display:'flex',alignItems:'center',gap:4*zoom,marginBottom:4*zoom}}>
-                  <svg width={14*zoom} height={14*zoom} fill="none" viewBox="0 0 24 24" stroke={att.col} strokeWidth="2" strokeLinecap="round">
-                    {att.type==='pdf' ? <><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></> : <><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></>}
-                  </svg>
-                  <span style={{color:att.col,fontWeight:700,fontSize:11*zoom,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',flex:1}}>{att.name}</span>
-                </div>
-                <div style={{fontSize:10*zoom,color:'rgba(255,255,255,.4)',textTransform:'uppercase'}}>{att.type.toUpperCase()}</div>
-              </div>
-            )}
-            {/* Delete handle */}
-            <div onClick={() => setAttachments(a => a.filter(x => x.id!==att.id))}
-              style={{position:'absolute',top:2,right:2,width:16*zoom,height:16*zoom,borderRadius:'50%',background:'rgba(239,68,68,.8)',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',fontSize:10*zoom,color:'#fff',fontWeight:700}}>
-              ×
-            </div>
+    <div style={{ position: 'fixed', inset: 0, background: '#0B0F17', display: 'flex', flexDirection: 'column', zIndex: 500, fontFamily: 'Inter, Arial, sans-serif' }}>
+      {/* ── Top bar ── */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px', background: '#131A26', borderBottom: '1px solid rgba(255,255,255,.08)' }}>
+        <div style={{ width: 30, height: 30, borderRadius: 8, background: 'linear-gradient(135deg,#7D1025,#C9A030)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 900, fontSize: 13 }}>S</div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ color: '#fff', fontWeight: 700, fontSize: 13.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {classInfo.title || 'Smartious Classroom'}
           </div>
-        ))}
-
-        {/* ── STICKY NOTES on board ── */}
-        {stickies.map(note => (
-          <div key={note.id}
-            style={{
-              position:'absolute',
-              left: note.x * zoom + offset.x,
-              top:  note.y * zoom + offset.y,
-              width: 140*zoom,
-              minHeight: 80*zoom,
-              background: note.col,
-              borderRadius: 6*zoom,
-              padding: 8*zoom,
-              zIndex:6,
-              boxShadow:'0 4px 12px rgba(0,0,0,.4)',
-              cursor:'move',
-              userSelect:'none',
-            }}
-            onMouseDown={e => {
-              e.stopPropagation()
-              const sx=e.clientX, sy=e.clientY, ox=note.x, oy=note.y
-              const mv = ev => setStickies(s => s.map(n => n.id===note.id ? {...n, x:ox+(ev.clientX-sx)/zoom, y:oy+(ev.clientY-sy)/zoom} : n))
-              const up = () => { document.removeEventListener('mousemove',mv); document.removeEventListener('mouseup',up) }
-              document.addEventListener('mousemove',mv); document.addEventListener('mouseup',up)
-            }}
-          >
-            <textarea
-              style={{width:'100%',background:'transparent',border:'none',outline:'none',resize:'none',fontSize:11*zoom,fontFamily:'Inter,sans-serif',fontWeight:600,color:'#1A1A2E',minHeight:50*zoom,cursor:'text'}}
-              value={note.text}
-              onChange={e => editSticky(note.id, e.target.value)}
-              onMouseDown={e => e.stopPropagation()}
-            />
-            <div onClick={() => delSticky(note.id)} style={{position:'absolute',top:2,right:2,fontSize:10*zoom,color:'rgba(0,0,0,.4)',cursor:'pointer',fontWeight:700}}>×</div>
-          </div>
-        ))}
-
-        {/* Drop zone hint */}
-        <div style={{position:'absolute',bottom:14,left:'50%',transform:'translateX(-50%)',background:'rgba(0,0,0,.5)',border:'1px solid rgba(255,255,255,.1)',borderRadius:99,padding:'6px 16px',fontSize:11,color:'rgba(255,255,255,.4)',pointerEvents:'none'}}>
-          Drop image or PDF to attach · Scroll to zoom · {role==='teacher'?'Drag with Pan tool to move':'View only'}
-        </div>
-
-        {/* Student view-only banner */}
-        {role === 'student' && (
-          <div style={{position:'absolute',top:12,left:'50%',transform:'translateX(-50%)',background:'rgba(0,0,0,.6)',border:'1px solid rgba(255,255,255,.1)',borderRadius:99,padding:'5px 16px',fontSize:12,color:'rgba(255,255,255,.6)'}}>
-            View-only · Raise hand to ask a question
-          </div>
-        )}
-
-        {/* TOP BAR */}
-        <div style={{position:'absolute',top:0,left:0,right:0,height:52,background:'rgba(6,13,26,.85)',backdropFilter:'blur(8px)',borderBottom:'1px solid rgba(255,255,255,.07)',display:'flex',alignItems:'center',padding:'0 14px',gap:12,zIndex:20}}>
-          <div style={{flex:1}}>
-            <div style={{fontSize:14,fontWeight:700}}>Mathematics — Pythagoras Theorem</div>
-            <div style={{fontSize:11,color:'rgba(255,255,255,.4)'}}>Mr. Muthomi · IGCSE Form 3 · {fmt(elapsed)}</div>
-          </div>
-          <div style={{display:'flex',alignItems:'center',gap:6}}>
-            <div style={{width:8,height:8,borderRadius:'50%',background:'#4ADE80',animation:'pulse 1.5s infinite'}}/>
-            <span style={{fontSize:12,color:'rgba(255,255,255,.6)'}}>{participants.filter(p=>p.online).length} online</span>
-          </div>
-          {/* Zoom controls */}
-          <div style={{display:'flex',gap:4,alignItems:'center'}}>
-            <Btn onClick={() => setZoom(z => Math.max(0.25, z*0.8))}>−</Btn>
-            <span style={{fontSize:11,minWidth:36,textAlign:'center',color:'rgba(255,255,255,.5)'}}>{Math.round(zoom*100)}%</span>
-            <Btn onClick={() => setZoom(z => Math.min(4, z*1.25))}>+</Btn>
-            <Btn onClick={resetView} style={{fontSize:10}}>Reset</Btn>
+          <div style={{ color: 'rgba(255,255,255,.5)', fontSize: 11 }}>
+            {classInfo.subject || ''}{phase === 'live' ? ` \u00b7 ${mm}:${ss}` : ' \u00b7 connecting...'}
           </div>
         </div>
+        <span style={{ background: phase === 'live' ? '#15803D' : '#B45309', color: '#fff', fontSize: 10, fontWeight: 800, padding: '3px 10px', borderRadius: 99, letterSpacing: '.06em' }}>
+          {phase === 'live' ? 'LIVE' : 'CONNECTING'}
+        </span>
+        <Btn danger onClick={leave}>Leave</Btn>
       </div>
 
-      {/* ── RIGHT PANEL ── */}
-      <div style={{width:280, background:'rgba(0,0,0,.4)', borderLeft:'1px solid rgba(255,255,255,.07)', display:'flex', flexDirection:'column', zIndex:10}}>
+      {mediaNote && (
+        <div style={{ background: '#78350F', color: '#FDE68A', fontSize: 12, padding: '7px 16px' }}>{mediaNote}</div>
+      )}
 
-        {/* Panel tabs */}
-        <div style={{display:'flex',borderBottom:'1px solid rgba(255,255,255,.07)'}}>
-          {[['chat','Chat'],['people','People'],['files','Files']].map(([id,l]) => (
-            <button key={id} onClick={() => setPanel(id)}
-              style={{flex:1,padding:'12px 0',fontSize:12,fontWeight:panel===id?700:400,background:'transparent',border:'none',borderBottom:panel===id?'2px solid #60A5FA':'2px solid transparent',color:panel===id?'#60A5FA':'rgba(255,255,255,.5)',cursor:'pointer'}}>
-              {l}
-            </button>
+      {/* ── Video strip ── */}
+      <div style={{ display: 'flex', gap: 8, padding: '10px 14px', overflowX: 'auto', background: '#0E141F', borderBottom: '1px solid rgba(255,255,255,.06)' }}>
+        <Tile stream={localStream} name={user?.firstName ? `${user.firstName} ${user.lastName || ''}` : 'You'}
+          role={myRole} self micOn={micOn} camOn={camOn} hand={handUp} />
+        {others.map(p => (
+          <Tile key={p.socketId} stream={streams[p.socketId]} name={p.name} role={p.role}
+            micOn={p.micOn} camOn={p.camOn} hand={p.hand} />
+        ))}
+      </div>
+
+      {/* ── Main area ── */}
+      <div style={{ flex: 1, display: 'flex', minHeight: 0 }}>
+        {/* Toolbar */}
+        <div style={{ width: 56, background: '#131A26', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '12px 0', borderRight: '1px solid rgba(255,255,255,.06)' }}>
+          {[['pen', 'Pen'], ['eraser', 'Erase'], ['line', 'Line'], ['rect', 'Rect'], ['circle', 'Circ'], ['text', 'Text'], ['pan', 'Pan']].map(([t, l]) => (
+            <Btn key={t} active={tool === t} onClick={() => setTool(t)} title={l}
+              disabled={!canDraw && t !== 'pan'} style={{ width: 42, padding: '8px 0' }}>{l}</Btn>
           ))}
+          <input type="color" value={colour} onChange={e => setColour(e.target.value)} disabled={!canDraw}
+            style={{ width: 34, height: 30, border: 'none', borderRadius: 6, background: 'transparent', cursor: 'pointer', marginTop: 4 }} />
+          <input type="range" min="1" max="10" value={lineW} onChange={e => setLineW(+e.target.value)} disabled={!canDraw}
+            style={{ width: 42 }} />
+          {isTeacher && (<>
+            <Btn active={!boardLocked} onClick={toggleBoardLock} title={boardLocked ? 'Students cannot draw. Click to allow.' : 'Students can draw. Click to lock.'}
+              style={{ width: 42, padding: '7px 0', fontSize: 10.5, marginTop: 8 }}>{boardLocked ? 'Locked' : 'Open'}</Btn>
+            <Btn onClick={clearBoard} title="Clear board for everyone" style={{ width: 42, padding: '7px 0', fontSize: 10.5 }}>Clear</Btn>
+          </>)}
         </div>
 
-        {/* Chat panel */}
-        {panel==='chat' && (
-          <>
-            <div style={{flex:1,overflowY:'auto',padding:12,display:'flex',flexDirection:'column',gap:10}}>
-              {chatMsgs.map((m,i) => (
-                <div key={i} style={{display:'flex',gap:8,flexDirection:m.who==='teacher'?'row-reverse':'row',alignItems:'flex-end'}}>
-                  <div style={{width:24,height:24,borderRadius:'50%',background:m.who==='teacher'?'#1D4ED8':'#374151',display:'flex',alignItems:'center',justifyContent:'center',fontSize:9,fontWeight:700,flexShrink:0}}>
-                    {m.name.split(' ').map(w=>w[0]).join('').slice(0,2)}
+        {/* Board */}
+        <div ref={wrapRef} style={{ flex: 1, position: 'relative', minWidth: 0, background: BOARD_BG }}>
+          <canvas ref={canvasRef}
+            onMouseDown={onDown} onMouseMove={onMove} onMouseUp={onUp} onMouseLeave={onUp} onWheel={onWheel}
+            style={{ display: 'block', cursor: tool === 'pan' || !canDraw ? 'grab' : 'crosshair', touchAction: 'none' }} />
+          {!canDraw && (
+            <div style={{ position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)', background: 'rgba(0,0,0,.55)', color: 'rgba(255,255,255,.75)', fontSize: 11.5, padding: '5px 14px', borderRadius: 99 }}>
+              View only — the teacher controls the board
+            </div>
+          )}
+          <div style={{ position: 'absolute', bottom: 10, right: 12, color: 'rgba(255,255,255,.4)', fontSize: 11 }}>
+            {Math.round(zoom * 100)}%
+          </div>
+        </div>
+
+        {/* Right panel */}
+        <div style={{ width: 280, background: '#131A26', display: 'flex', flexDirection: 'column', borderLeft: '1px solid rgba(255,255,255,.06)' }}>
+          <div style={{ display: 'flex', gap: 6, padding: '10px 12px' }}>
+            {[['chat', 'Chat'], ['people', `People (${roster.length})`]].map(([id, l]) => (
+              <Btn key={id} active={panel === id} onClick={() => setPanel(id)} style={{ flex: 1 }}>{l}</Btn>
+            ))}
+          </div>
+
+          {panel === 'chat' && (<>
+            <div style={{ flex: 1, overflowY: 'auto', padding: '4px 12px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {chat.map((m, i) => (
+                <div key={i}>
+                  <div style={{ fontSize: 10.5, color: m.role === 'teacher' ? '#F0CC5A' : 'rgba(255,255,255,.5)', fontWeight: 700 }}>
+                    {m.name}{m.role === 'teacher' ? ' (Teacher)' : ''}
                   </div>
-                  <div style={{background:m.who==='teacher'?'#1D4ED8':'rgba(255,255,255,.08)',borderRadius:m.who==='teacher'?'12px 12px 4px 12px':'4px 12px 12px 12px',padding:'8px 10px',maxWidth:'78%',fontSize:13}}>
-                    <div style={{opacity:.5,fontSize:10,marginBottom:2}}>{m.name}</div>
-                    {m.text}
-                  </div>
+                  <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,.88)', lineHeight: 1.5, wordBreak: 'break-word' }}>{m.text}</div>
                 </div>
               ))}
-              <div ref={chatEndRef}/>
+              <div ref={chatEndRef} />
             </div>
-            <div style={{padding:10,borderTop:'1px solid rgba(255,255,255,.07)',display:'flex',gap:8}}>
-              <input value={chatInp} onChange={e=>setChatInp(e.target.value)}
-                onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();sendChat()}}}
-                placeholder="Type a message…"
-                style={{flex:1,background:'rgba(255,255,255,.07)',border:'1px solid rgba(255,255,255,.1)',borderRadius:8,padding:'8px 12px',color:'#fff',fontSize:13,outline:'none'}}/>
-              <button onClick={sendChat} style={{background:'#1D4ED8',border:'none',borderRadius:8,padding:'8px 12px',cursor:'pointer',color:'#fff'}}>
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-              </button>
+            <div style={{ display: 'flex', gap: 6, padding: 10, borderTop: '1px solid rgba(255,255,255,.07)' }}>
+              <input value={chatInput} onChange={e => setChatInput(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') sendChat() }}
+                placeholder="Message the class"
+                style={{ flex: 1, background: 'rgba(255,255,255,.08)', border: 'none', borderRadius: 8, padding: '9px 11px', color: '#fff', fontSize: 12.5, outline: 'none' }} />
+              <Btn onClick={sendChat} style={{ background: '#C9A030', color: '#7D1025', fontWeight: 800 }}>Send</Btn>
             </div>
-          </>
-        )}
+          </>)}
 
-        {/* People panel */}
-        {panel==='people' && (
-          <div style={{flex:1,overflowY:'auto',padding:12}}>
-            <div style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,.4)',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:10}}>In this session</div>
-            {participants.map((p,i) => (
-              <div key={i} style={{display:'flex',alignItems:'center',gap:10,padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.05)'}}>
-                <div style={{width:32,height:32,borderRadius:'50%',background:p.col+'30',color:p.col,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700,fontSize:11,flexShrink:0,position:'relative'}}>
-                  {p.id}
-                  <div style={{position:'absolute',bottom:0,right:0,width:8,height:8,borderRadius:'50%',background:p.online?'#4ADE80':'#6B7280',border:'1px solid #060D1A'}}/>
+          {panel === 'people' && (
+            <div style={{ flex: 1, overflowY: 'auto', padding: '4px 12px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {roster.map(p => (
+                <div key={p.socketId} style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '7px 9px', background: 'rgba(255,255,255,.05)', borderRadius: 9 }}>
+                  <div style={{ width: 28, height: 28, borderRadius: '50%', background: p.role === 'teacher' ? '#7D1025' : '#1E3A8A', color: '#fff', fontSize: 10.5, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    {(p.name || '?').split(' ').map(w => w[0]).slice(0, 2).join('')}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ color: '#fff', fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {p.name}{p.socketId === socketRef.current?.id ? ' (you)' : ''}
+                    </div>
+                    <div style={{ color: 'rgba(255,255,255,.45)', fontSize: 10 }}>{p.role}</div>
+                  </div>
+                  {p.hand && <span style={{ color: '#F59E0B', fontSize: 9.5, fontWeight: 800 }}>HAND</span>}
+                  {p.micOn === false && <span style={{ color: '#F87171', fontSize: 9.5, fontWeight: 800 }}>MUTED</span>}
                 </div>
-                <div style={{flex:1}}>
-                  <div style={{fontSize:13,fontWeight:600}}>{p.name}</div>
-                  <div style={{fontSize:11,color:'rgba(255,255,255,.4)'}}>{p.online?'Online':'Offline'}</div>
-                </div>
-                {p.hand && <div style={{fontSize:18}}>✋</div>}
-                {p.muted && <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="rgba(255,100,100,.6)" strokeWidth="2" strokeLinecap="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"/></svg>}
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Files panel */}
-        {panel==='files' && (
-          <div style={{flex:1,overflowY:'auto',padding:12}}>
-            <div style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,.4)',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:10}}>Board attachments</div>
-            <div
-              onDragOver={e=>e.preventDefault()}
-              onDrop={handleFileDrop}
-              style={{border:'2px dashed rgba(255,255,255,.15)',borderRadius:10,padding:16,textAlign:'center',marginBottom:14,cursor:'pointer'}}
-              onClick={() => fileRef.current?.click()}>
-              <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,.3)" strokeWidth="1.5" strokeLinecap="round" style={{margin:'0 auto 8px'}}><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-              <div style={{fontSize:12,color:'rgba(255,255,255,.3)'}}>Drop files here or click to upload</div>
-              <div style={{fontSize:11,color:'rgba(255,255,255,.2)',marginTop:4}}>Images and PDFs</div>
+              ))}
             </div>
-            {attachments.length === 0 && <div style={{fontSize:13,color:'rgba(255,255,255,.3)',textAlign:'center'}}>No files attached yet</div>}
-            {attachments.map(att => (
-              <div key={att.id} style={{display:'flex',alignItems:'center',gap:10,padding:'8px 10px',background:'rgba(255,255,255,.05)',borderRadius:8,marginBottom:8}}>
-                <div style={{width:32,height:32,borderRadius:6,background:att.col+'30',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
-                  <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke={att.col} strokeWidth="2" strokeLinecap="round">
-                    {att.type==='pdf' ? <><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></> : <><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></>}
-                  </svg>
-                </div>
-                <div style={{flex:1,minWidth:0}}>
-                  <div style={{fontSize:12,fontWeight:600,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{att.name}</div>
-                  <div style={{fontSize:10,color:'rgba(255,255,255,.3)',textTransform:'uppercase'}}>{att.type}</div>
-                </div>
-                <button onClick={() => setAttachments(a => a.filter(x => x.id!==att.id))} style={{background:'transparent',border:'none',color:'rgba(255,100,100,.6)',cursor:'pointer',fontSize:16,padding:0}}>×</button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Bottom controls */}
-        <div style={{padding:'10px 12px',borderTop:'1px solid rgba(255,255,255,.07)',display:'flex',gap:8,justifyContent:'center'}}>
-          <Btn active={micOn} onClick={() => setMicOn(v=>!v)} danger={!micOn} label={micOn?'Mic':'Muted'}>
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">{micOn ? <><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></> : <><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 0 0 5.12 2.12"/></>}</svg>
-          </Btn>
-          <Btn active={camOn} onClick={() => setCamOn(v=>!v)} danger={!camOn} label={camOn?'Cam':'Off'}>
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">{camOn ? <><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></> : <><path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2"/><line x1="1" y1="1" x2="23" y2="23"/></>}</svg>
-          </Btn>
-          {role==='student' && (
-            <Btn active={handRaised} onClick={() => setHandRaised(v=>!v)} label={handRaised?'Lower':'Hand'}>
-              <svg width="14" height="14" fill={handRaised?'#FBBF24':'none'} viewBox="0 0 24 24" stroke={handRaised?'#FBBF24':'currentColor'} strokeWidth="2" strokeLinecap="round"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/><path d="M18 11a2 2 0 1 1 4 0v3a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34L4 17"/></svg>
-            </Btn>
           )}
-          <Btn danger onClick={onLeave} label="Leave">
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          </Btn>
         </div>
+      </div>
+
+      {/* ── Bottom controls ── */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '10px 16px', background: '#131A26', borderTop: '1px solid rgba(255,255,255,.08)' }}>
+        <Btn active={micOn} danger={!micOn} onClick={toggleMic}>{micOn ? 'Mic on' : 'Mic off'}</Btn>
+        <Btn active={camOn} danger={!camOn} onClick={toggleCam}>{camOn ? 'Camera on' : 'Camera off'}</Btn>
+        {!isTeacher && <Btn active={handUp} onClick={toggleHand}>{handUp ? 'Lower hand' : 'Raise hand'}</Btn>}
       </div>
     </div>
   )
