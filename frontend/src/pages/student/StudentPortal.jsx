@@ -11824,6 +11824,18 @@ function StudentLibraryPage({ user, toast }) {
   })()
   const hasPapers = Object.keys(paperTree).length > 0
 
+  // ── READER VIEW ─────────────────────────────────────────
+  // An open book renders INLINE in the content area rather than as a
+  // full-screen overlay, so the sidebar and topbar stay visible and
+  // the page scrolls normally. Back to Library returns to the shelf.
+  if (viewerBook) {
+    return (
+      <div>
+        <LibraryViewer book={viewerBook} api={api} readOnly inline onClose={() => setViewerBook(null)}/>
+      </div>
+    )
+  }
+
   return (
     <div>
       {/* ── Hero banner ────────────────────────────────────────
@@ -12059,9 +12071,6 @@ function StudentLibraryPage({ user, toast }) {
         </div>
       )}
 
-      {viewerBook && (
-        <LibraryViewer book={viewerBook} api={api} readOnly onClose={() => setViewerBook(null)}/>
-      )}
     </div>
   )
 }
