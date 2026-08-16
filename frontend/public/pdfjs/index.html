@@ -60,8 +60,8 @@
 </div>
 <div id="loading">
   <div class="spinner"></div>
-  <p id="loading-text">Loading book...</p>
-  <small id="loading-sub">Fetching from secure storage</small>
+  <p id="loading-text">Opening book...</p>
+  <small id="loading-sub">First pages appear before the full download finishes</small>
 </div>
 <div id="error">
   <h2>Could not open this book</h2>
@@ -96,20 +96,24 @@
   }
 
   let directUrl = ''
+  const streamUrl = `${apiBase}/library/${bookId}/stream`
 
+  // Fetch the book's metadata in the background for the fallback
+  // "Open directly" link. Never blocks the reader.
+  fetch(`${apiBase}/library/${bookId}`, { headers: { Authorization: `Bearer ${token}` } })
+    .then(r => r.ok ? r.json() : null)
+    .then(j => { directUrl = j?.data?.book?.url || '' })
+    .catch(() => {})
+
+  // ── FULL-DOWNLOAD FALLBACK ─────────────────────────────
+  // Only used when range-based loading fails (older browsers,
+  // a proxy that strips Range headers, corrupt xref). Downloads
+  // the whole file with a live percentage, exactly as before.
   async function fetchPdfAsBlob() {
-    document.getElementById('loading-text').textContent = 'Authenticating...'
-    const metaRes = await fetch(`${apiBase}/library/${bookId}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-    if (!metaRes.ok) throw new Error('Could not load book metadata (' + metaRes.status + ')')
-    const metaJson = await metaRes.json()
-    directUrl = metaJson?.data?.book?.url || ''
-
     document.getElementById('loading-text').textContent = 'Downloading PDF...'
     document.getElementById('loading-sub').textContent  = 'Large files may take a moment'
 
-    const pdfRes = await fetch(`${apiBase}/library/${bookId}/stream`, {
+    const pdfRes = await fetch(streamUrl, {
       headers: { Authorization: `Bearer ${token}` }
     })
     if (!pdfRes.ok) throw new Error('Could not fetch PDF (' + pdfRes.status + ')')
@@ -193,15 +197,43 @@
     updateUI()
   }
 
+  // ── PROGRESSIVE LOAD (the fix for 80 MB coursebooks) ───
+  // pdf.js is given the URL rather than a downloaded buffer, so it
+  // reads the file structure with HTTP Range requests (a few MB)
+  // and renders the first pages immediately. The rest of the book
+  // keeps downloading in the background while the student reads;
+  // jumping ahead range-fetches just the pages needed. The backend
+  // /stream route forwards Range headers to R2 and answers 206.
   try {
-    const buf = await fetchPdfAsBlob()
-    document.getElementById('loading-text').textContent = 'Rendering...'
-    pdfDoc   = await pdfjsLib.getDocument({ data: buf }).promise
+    const loadingTask = pdfjsLib.getDocument({
+      url: streamUrl,
+      httpHeaders: { Authorization: `Bearer ${token}` },
+      rangeChunkSize: 1048576,        // 1 MB chunks
+    })
+    loadingTask.onProgress = ({ loaded, total }) => {
+      if (total) {
+        document.getElementById('loading-text').textContent =
+          'Opening book... ' + Math.min(99, Math.round((loaded / total) * 100)) + '%'
+      } else if (loaded) {
+        document.getElementById('loading-text').textContent =
+          'Opening book... ' + (loaded / 1048576).toFixed(1) + ' MB'
+      }
+    }
+    pdfDoc   = await loadingTask.promise
     numPages = pdfDoc.numPages
     await buildViewer()
-  } catch(err) {
-    console.error('[viewer]', err)
-    showError(err.message || 'Could not load the PDF.', directUrl)
+  } catch (err) {
+    console.warn('[viewer] progressive load failed, falling back to full download:', err?.message)
+    try {
+      const buf = await fetchPdfAsBlob()
+      document.getElementById('loading-text').textContent = 'Rendering...'
+      pdfDoc   = await pdfjsLib.getDocument({ data: buf }).promise
+      numPages = pdfDoc.numPages
+      await buildViewer()
+    } catch (err2) {
+      console.error('[viewer]', err2)
+      showError(err2.message || 'Could not load the PDF.', directUrl)
+    }
   }
 
   async function applyZoom() {
