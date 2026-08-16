@@ -7815,35 +7815,43 @@ export const IBDP_LIBRARY = [
 // falling through to a Cambridge matcher and replacing a live bank.
 // ═══════════════════════════════════════════════════════════
 export const CBE_LIBRARY = [
+  // Kenya CBE Physics carries the 203-lesson Forms 1-4 scheme that came
+  // over in the CBC-to-CBE rename, with the question bank filed against
+  // its lesson names. It shares the KCSE_PHYSICS constant deliberately:
+  // same teaching content, listed here so the CBE loader resolves
+  // Physics to its own spine instead of erroring out. The bulk route's
+  // orphan guard still blocks the load if the live names ever differ.
+  { match: /\bphysics\b/i, const_: KCSE_PHYSICS,
+    source: 'Kenya CBE Physics \u2014 203-lesson scheme (Forms 1-4)' },
 ]
 
 export const KCSE_LIBRARY = [
   { match: /\bmath/i, const_: KCSE_MATHEMATICS,
-    source: 'KCSE Mathematics \u2014 59-lesson scheme (Forms 3-4)' },
+    source: 'KCSE Mathematics \u2014 96-lesson scheme (Forms 3-4)' },
   { match: /\benglish\b/i, const_: KCSE_ENGLISH,
-    source: 'KCSE English \u2014 47-lesson scheme (Forms 3-4)' },
+    source: 'KCSE English \u2014 76-lesson scheme (Forms 3-4)' },
   { match: /\bkiswahili\b|\bswahili\b/i, const_: KCSE_KISWAHILI,
-    source: 'KCSE Kiswahili \u2014 43-lesson scheme (Forms 3-4)' },
+    source: 'KCSE Kiswahili \u2014 70-lesson scheme (Forms 3-4)' },
   { match: /\bbiology\b/i, const_: KCSE_BIOLOGY,
-    source: 'KCSE Biology \u2014 46-lesson scheme (Forms 3-4)' },
+    source: 'KCSE Biology \u2014 67-lesson scheme (Forms 3-4)' },
   { match: /\bchemistry\b/i, const_: KCSE_CHEMISTRY,
-    source: 'KCSE Chemistry \u2014 42-lesson scheme (Forms 3-4)' },
+    source: 'KCSE Chemistry \u2014 62-lesson scheme (Forms 3-4)' },
   { match: /\bphysics\b/i, const_: KCSE_PHYSICS,
     source: 'KCSE Physics \u2014 203-lesson scheme (Forms 1-4)' },
   { match: /\bgeography\b/i, const_: KCSE_GEOGRAPHY,
-    source: 'KCSE Geography \u2014 33-lesson scheme (Forms 3-4)' },
+    source: 'KCSE Geography \u2014 51-lesson scheme (Forms 3-4)' },
   { match: /\bhistory\b/i, const_: KCSE_HISTORY_GOVERNMENT,
-    source: 'KCSE History & Government \u2014 34-lesson scheme (Forms 3-4)' },
+    source: 'KCSE History & Government \u2014 52-lesson scheme (Forms 3-4)' },
   { match: /islamic\s+religious|\bire\b/i, const_: KCSE_ISLAMIC_RELIGIOUS_EDUCATION,
-    source: 'KCSE Islamic Religious Education \u2014 30-lesson scheme (Forms 3-4)' },
+    source: 'KCSE Islamic Religious Education \u2014 48-lesson scheme (Forms 3-4)' },
   { match: /christian\s+religious|\bcre\b/i, const_: KCSE_CHRISTIAN_RELIGIOUS_EDUCATION,
-    source: 'KCSE Christian Religious Education \u2014 29-lesson scheme (Forms 3-4)' },
+    source: 'KCSE Christian Religious Education \u2014 47-lesson scheme (Forms 3-4)' },
   { match: /\bbusiness\b/i, const_: KCSE_BUSINESS_STUDIES,
-    source: 'KCSE Business Studies \u2014 36-lesson scheme (Forms 3-4)' },
+    source: 'KCSE Business Studies \u2014 53-lesson scheme (Forms 3-4)' },
   { match: /\bagriculture\b/i, const_: KCSE_AGRICULTURE,
-    source: 'KCSE Agriculture \u2014 35-lesson scheme (Forms 3-4)' },
+    source: 'KCSE Agriculture \u2014 55-lesson scheme (Forms 3-4)' },
   { match: /\bcomputer\b|\bcomputing\b/i, const_: KCSE_COMPUTER_STUDIES,
-    source: 'KCSE Computer Studies \u2014 34-lesson scheme (Forms 3-4)' },
+    source: 'KCSE Computer Studies \u2014 53-lesson scheme (Forms 3-4)' },
 ]
 
 export const IPRIMARY_LIBRARY = [
@@ -9312,11 +9320,11 @@ export const LOWER_SEC_LIBRARY = [
   { match: /^(?!.*comput).*\bscience\b/i,                const_: LOWERSEC_SCIENCE_1113,
     source: 'Cambridge Lower Secondary Science 1113 \u2014 109-lesson scheme (Stages 7-9)' },
   { match: /\bcomputing\b|\bcomputer\s*science\b/i, const_: LOWERSEC_COMPUTING_1129,
-    source: 'Cambridge Lower Secondary Computing 1129 \u2014 63-lesson scheme (Stages 7-9)' },
+    source: 'Cambridge Lower Secondary Computing 1129 \u2014 60-lesson scheme (Stages 7-9)' },
   { match: /\bgeography\b/i,              const_: LOWERSEC_GEOGRAPHY,
-    source: 'Cambridge Lower Secondary Geography \u2014 60-lesson scheme (Stages 7-9)' },
+    source: 'Cambridge Lower Secondary Geography \u2014 59-lesson scheme (Stages 7-9)' },
   { match: /\bhistory\b/i,                const_: LOWERSEC_HISTORY,
-    source: 'Cambridge Lower Secondary History \u2014 62-lesson scheme (Stages 7-9)' },
+    source: 'Cambridge Lower Secondary History \u2014 50-lesson scheme (Stages 7-9)' },
   { match: /\bglobal\s*perspective/i,     const_: LOWERSEC_GLOBAL_1129,
     source: 'Cambridge Lower Secondary Global Perspectives 1129 \u2014 41-lesson scheme (Stages 7-9)' },
 ]
@@ -19950,7 +19958,7 @@ export const ALEVEL_LIBRARY = [
   { match: /\bmandarin\b|\bchinese\b/i, const_: ALEVEL_MANDARIN_9715,
     source: 'Cambridge International AS & A Level Chinese 9715 \u2014 100-lesson scheme' },
   { match: /\blaw\b/i, const_: ALEVEL_LAW_9084,
-    source: 'Cambridge International AS & A Level Law 9084 \u2014 154-lesson scheme' },
+    source: 'Cambridge International AS & A Level Law 9084 \u2014 146-lesson scheme' },
   { match: /\bfrench\b/i, const_: ALEVEL_FRENCH_9716,
     source: 'Cambridge International AS & A Level French 9716 \u2014 100-lesson scheme' },
   { match: /\bspanish\b/i, const_: ALEVEL_SPANISH_9719,
@@ -19958,19 +19966,19 @@ export const ALEVEL_LIBRARY = [
   { match: /\bgerman\b/i, const_: ALEVEL_GERMAN_9717,
     source: 'Cambridge International AS & A Level German 9717 \u2014 100-lesson scheme' },
   { match: /\bgeography\b/i, const_: ALEVEL_GEOGRAPHY_9696,
-    source: 'Cambridge International AS & A Level Geography 9696 \u2014 172-lesson scheme' },
+    source: 'Cambridge International AS & A Level Geography 9696 \u2014 143-lesson scheme' },
   { match: /\bhistory\b/i, const_: ALEVEL_HISTORY_9489,
-    source: 'Cambridge International AS & A Level History 9489 \u2014 148-lesson scheme' },
+    source: 'Cambridge International AS & A Level History 9489 \u2014 106-lesson scheme' },
   { match: /\bsociology\b/i, const_: ALEVEL_SOCIOLOGY_9699,
-    source: 'Cambridge International AS & A Level Sociology 9699 \u2014 150-lesson scheme' },
+    source: 'Cambridge International AS & A Level Sociology 9699 \u2014 128-lesson scheme' },
   { match: /\baccounting\b/i, const_: ALEVEL_ACCOUNTING_9706,
-    source: 'Cambridge International AS & A Level Accounting 9706 \u2014 168-lesson scheme' },
+    source: 'Cambridge International AS & A Level Accounting 9706 \u2014 136-lesson scheme' },
   { match: /\bpsychology\b/i, const_: ALEVEL_PSYCHOLOGY_9990,
-    source: 'Cambridge International AS & A Level Psychology 9990 \u2014 166-lesson scheme' },
+    source: 'Cambridge International AS & A Level Psychology 9990 \u2014 130-lesson scheme' },
   { match: /\bliterature\b/i, const_: ALEVEL_ENGLISH_LIT_9695,
-    source: 'Cambridge International AS & A Level Literature in English 9695 \u2014 138-lesson scheme' },
+    source: 'Cambridge International AS & A Level Literature in English 9695 \u2014 101-lesson scheme' },
   { match: /\benglish\s*language\b|\benglish\b/i, const_: ALEVEL_ENGLISH_LANG_9093,
-    source: 'Cambridge International AS & A Level English Language 9093 \u2014 132-lesson scheme' },
+    source: 'Cambridge International AS & A Level English Language 9093 \u2014 84-lesson scheme' },
   { match: /\bcomputer\s*science\b|\bcomputing\b/i, const_: ALEVEL_COMPSCI_9618,
     source: 'Cambridge International AS & A Level Computer Science 9618 \u2014 195-lesson scheme (AS 99 / A2 96)' },
   { match: /\bbusiness\b/i, const_: ALEVEL_BUSINESS_9609,
@@ -19978,7 +19986,7 @@ export const ALEVEL_LIBRARY = [
   { match: /\beconomics\b/i, const_: ALEVEL_ECONOMICS_9708,
     source: 'Cambridge International AS & A Level Economics 9708 \u2014 169-lesson scheme (AS 62 / A2 107)' },
   { match: /\bmathematics\b|\bmaths\b/i, const_: ALEVEL_MATHS_9709,
-    source: 'Cambridge International AS & A Level Mathematics 9709 \u2014 229-lesson scheme (P1 61 / P2 21 / P3 68 / M1 25 / S1 27 / S2 16)' },
+    source: 'Cambridge International AS & A Level Mathematics 9709 \u2014 229-lesson scheme (P1 61 / P2 21 / P3 68 / M1 25 / S1 27 / S2 16 / Exam 11)' },
 ]
 
 export const PRIMARY_Y5_LIBRARY = [
