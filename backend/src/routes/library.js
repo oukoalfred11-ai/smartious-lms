@@ -505,6 +505,11 @@ router.get('/:id/stream', auth, async (req, res) => {
     res.set('Content-Disposition', `inline; filename="${fileName}"`);
     res.set('Cache-Control', 'private, max-age=3600');
     res.set('Accept-Ranges', 'bytes');
+    // pdf.js on the frontend origin must be able to READ these headers
+    // to switch into range-request mode; without exposing them, the
+    // cross-origin fetch hides them and pdf.js silently downloads the
+    // whole file before rendering anything.
+    res.set('Access-Control-Expose-Headers', 'Content-Length, Content-Range, Accept-Ranges');
     // Allow this endpoint to be loaded in an iframe from the frontend domain
     res.set('X-Frame-Options', 'ALLOWALL');
     res.set('Content-Security-Policy', 'frame-ancestors *');
