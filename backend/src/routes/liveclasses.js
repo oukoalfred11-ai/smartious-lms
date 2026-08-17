@@ -80,6 +80,7 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
       subject, curriculum, grade,
       scheduledAt, durationMins = 60,
       meetingLink,
+      classroomMode = 'link',
       assignedStudents = [],
       preparationLessonId = null,
       notes = '',
@@ -93,7 +94,11 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
       return res.status(400).json({ success:false, message:'Subject, curriculum and grade are required.' });
     if (!scheduledAt)
       return res.status(400).json({ success:false, message:'Scheduled time is required.' });
-    if (!meetingLink || !meetingLink.trim())
+    if (!['link', 'native'].includes(classroomMode))
+      return res.status(400).json({ success:false, message:'Invalid classroom mode.' });
+    // A meeting link is only required for link-mode classes; native
+    // classes are joined at /classroom/:id inside the platform.
+    if (classroomMode === 'link' && (!meetingLink || !meetingLink.trim()))
       return res.status(400).json({ success:false, message:'Meeting link is required.' });
 
     const startDate = new Date(scheduledAt);
@@ -121,7 +126,8 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
       subject, curriculum, grade,
       scheduledAt: startDate,
       durationMins: dur,
-      meetingLink: meetingLink.trim(),
+      classroomMode,
+      meetingLink: classroomMode === 'native' ? '' : meetingLink.trim(),
       teacherId: req.user._id,
       assignedStudents: validStudentIds,
       preparationLessonId: mongoose.isValidObjectId(preparationLessonId) ? preparationLessonId : null,
@@ -144,7 +150,9 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
       grade:       liveClass.grade,
       scheduledAt: liveClass.scheduledAt,
       durationMins: liveClass.durationMins,
-      meetingLink: liveClass.meetingLink,
+      meetingLink: liveClass.classroomMode === 'native'
+        ? `${process.env.CLIENT_URL || 'https://smartioushomeschool.com'}/classroom/${liveClass._id}`
+        : liveClass.meetingLink,
     }, false);
 
   } catch (e) {
@@ -236,7 +244,7 @@ router.patch('/:id', auth, requireRole('teacher', 'admin'), async (req, res) => 
 
     const allowed = [
       'title','description','subject','curriculum','grade',
-      'scheduledAt','durationMins','meetingLink',
+      'scheduledAt','durationMins','meetingLink','classroomMode',
       'assignedStudents','notes','preparationLessonId',
       'syllabusTopicName','syllabusSubtopicName',
     ];
@@ -264,7 +272,7 @@ router.patch('/:id', auth, requireRole('teacher', 'admin'), async (req, res) => 
 
     // ── Re-notify students only if the meeting link actually changed ──
     const newMeetingLink = lc.meetingLink;
-    const linkChanged = newMeetingLink &&
+    const linkChanged = lc.classroomMode !== 'native' && newMeetingLink &&
       newMeetingLink.trim() !== (oldMeetingLink || '').trim();
 
     if (linkChanged && lc.assignedStudents && lc.assignedStudents.length > 0) {
