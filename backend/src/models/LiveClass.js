@@ -55,8 +55,24 @@ const liveClassSchema = new mongoose.Schema({
   scheduledAt:  { type: Date, required: true },
   durationMins: { type: Number, required: true, min: 5, max: 240 },
 
+  // ── Classroom mode ──────────────────────────────
+  // 'link'   = external meeting link (Zoom/Meet) — the original flow.
+  // 'native' = the built-in Smartious Classroom at /classroom/:id
+  //            (WebRTC + shared whiteboard). No external link needed.
+  classroomMode: {
+    type: String,
+    enum: ['link', 'native'],
+    default: 'link',
+  },
+
   // ── Meeting link ────────────────────────────────
-  meetingLink:  { type: String, required: true, trim: true },
+  // Required only for link-mode classes; native classes leave it empty.
+  meetingLink: {
+    type: String,
+    trim: true,
+    default: '',
+    required: function () { return this.classroomMode !== 'native'; },
+  },
 
   // ── Delivery mode ───────────────────────────────
   // 'virtual' = online via meetingLink; 'physical' = in-person.
