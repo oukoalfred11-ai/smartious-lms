@@ -106,6 +106,24 @@ export class MeshEngine {
     }
   }
 
+  /**
+   * Swap the outgoing video for every peer (camera <-> screen).
+   * replaceTrack needs no renegotiation, so the switch is instant.
+   * Also swaps the track inside localStream so self-preview tiles
+   * bound to it update automatically.
+   */
+  async replaceVideoTrack(newTrack) {
+    for (const { pc } of this.peers.values()) {
+      const sender = pc.getSenders().find(s => s.track && s.track.kind === 'video');
+      if (sender) await sender.replaceTrack(newTrack).catch(e => console.error('[rtc] replaceTrack', e));
+      else if (newTrack) pc.addTrack(newTrack, this.localStream);
+    }
+    const oldTrack = this.localStream.getVideoTracks()[0];
+    if (oldTrack && oldTrack !== newTrack) this.localStream.removeTrack(oldTrack);
+    if (newTrack && !this.localStream.getVideoTracks().includes(newTrack))
+      this.localStream.addTrack(newTrack);
+  }
+
   /** Toggle a local track kind on/off for every peer at once. */
   setTrackEnabled(kind, enabled) {
     for (const track of this.localStream.getTracks())
