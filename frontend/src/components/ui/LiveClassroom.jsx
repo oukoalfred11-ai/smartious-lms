@@ -96,6 +96,76 @@ const SmartiousCrest = ({ size = 30 }) => (
   </svg>
 )
 
+// ── Teaching diagram templates ─────────────────────────────
+// Each is a single board op {kind:'diagram', name, x1, y1, color, w}
+// drawn procedurally around its centre — synced, replayable,
+// undoable, and erasable like any stroke. Sized in world units so
+// they align with the 40-unit graph grid.
+function drawDiagram(ctx, op) {
+  const { x1: cx, y1: cy } = op
+  const S = 40
+  ctx.font = '13px Arial, sans-serif'
+  const line = (a, b, c, d) => { ctx.beginPath(); ctx.moveTo(a, b); ctx.lineTo(c, d); ctx.stroke() }
+  const arrowTip = (x, y, ang) => {
+    ctx.beginPath()
+    ctx.moveTo(x, y); ctx.lineTo(x - 9 * Math.cos(ang - 0.42), y - 9 * Math.sin(ang - 0.42))
+    ctx.moveTo(x, y); ctx.lineTo(x - 9 * Math.cos(ang + 0.42), y - 9 * Math.sin(ang + 0.42))
+    ctx.stroke()
+  }
+  if (op.name === 'numberline') {
+    line(cx - 5.5 * S, cy, cx + 5.5 * S, cy)
+    arrowTip(cx + 5.5 * S, cy, 0); arrowTip(cx - 5.5 * S, cy, Math.PI)
+    for (let n = -5; n <= 5; n++) {
+      line(cx + n * S, cy - 6, cx + n * S, cy + 6)
+      ctx.fillText(String(n), cx + n * S - (n < 0 ? 8 : 4), cy + 21)
+    }
+  } else if (op.name === 'axes') {
+    line(cx - 5.5 * S, cy, cx + 5.5 * S, cy); arrowTip(cx + 5.5 * S, cy, 0)
+    line(cx, cy + 5.5 * S, cx, cy - 5.5 * S); arrowTip(cx, cy - 5.5 * S, -Math.PI / 2)
+    for (let n = -5; n <= 5; n++) {
+      if (n === 0) continue
+      line(cx + n * S, cy - 4, cx + n * S, cy + 4)
+      line(cx - 4, cy - n * S, cx + 4, cy - n * S)
+      ctx.fillText(String(n), cx + n * S - 4, cy + 17)
+      ctx.fillText(String(n), cx - 18, cy - n * S + 4)
+    }
+    ctx.fillText('x', cx + 5.5 * S + 6, cy + 4)
+    ctx.fillText('y', cx - 4, cy - 5.5 * S - 8)
+    ctx.fillText('O', cx - 15, cy + 15)
+  } else if (op.name === 'venn2') {
+    ctx.beginPath(); ctx.arc(cx - 1.2 * S, cy, 2.2 * S, 0, Math.PI * 2); ctx.stroke()
+    ctx.beginPath(); ctx.arc(cx + 1.2 * S, cy, 2.2 * S, 0, Math.PI * 2); ctx.stroke()
+    ctx.fillText('A', cx - 2.6 * S, cy - 1.7 * S)
+    ctx.fillText('B', cx + 2.4 * S, cy - 1.7 * S)
+  } else if (op.name === 'triABC') {
+    const A = { x: cx, y: cy - 2.4 * S }, B = { x: cx + 2.8 * S, y: cy + 2 * S }, Cc = { x: cx - 2.8 * S, y: cy + 2 * S }
+    ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.lineTo(Cc.x, Cc.y); ctx.closePath(); ctx.stroke()
+    ctx.fillText('A', A.x - 4, A.y - 9)
+    ctx.fillText('B', B.x + 7, B.y + 5)
+    ctx.fillText('C', Cc.x - 17, Cc.y + 5)
+  } else if (op.name === 'circleR') {
+    ctx.beginPath(); ctx.arc(cx, cy, 2.2 * S, 0, Math.PI * 2); ctx.stroke()
+    ctx.beginPath(); ctx.arc(cx, cy, 2.2, 0, Math.PI * 2); ctx.fill()
+    line(cx, cy, cx + 2.2 * S * Math.cos(-0.5), cy + 2.2 * S * Math.sin(-0.5))
+    ctx.fillText('O', cx - 15, cy + 13)
+    ctx.fillText('r', cx + 1.1 * S * Math.cos(-0.5), cy + 1.1 * S * Math.sin(-0.5) - 7)
+  } else if (op.name === 'table') {
+    const cw = 2.2 * S, ch = S, cols = 4, rows = 3
+    const x0 = cx - cols * cw / 2, y0 = cy - rows * ch / 2
+    for (let i = 0; i <= cols; i++) line(x0 + i * cw, y0, x0 + i * cw, y0 + rows * ch)
+    for (let j = 0; j <= rows; j++) line(x0, y0 + j * ch, x0 + cols * cw, y0 + j * ch)
+  }
+}
+
+const DIAGRAMS = [
+  ['numberline', 'Number line'],
+  ['axes', 'Cartesian axes'],
+  ['venn2', 'Venn diagram'],
+  ['triABC', 'Triangle ABC'],
+  ['circleR', 'Circle with radius'],
+  ['table', 'Table grid'],
+]
+
 // Minimal stroke icons (no icon font needed; multi-subpath in one d).
 const Ic = ({ d, size = 18 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -128,6 +198,11 @@ const ICONS = {
   phone: 'M22 16.9V20a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2 4.2 2 2 0 0 1 4 2h3.1a2 2 0 0 1 2 1.7c.13.96.36 1.9.7 2.8a2 2 0 0 1-.45 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.25a2 2 0 0 1 2.1-.45c.9.34 1.84.57 2.8.7A2 2 0 0 1 22 16.9z',
   view: 'M8 3H5a2 2 0 0 0-2 2v3 M16 3h3a2 2 0 0 1 2 2v3 M8 21H5a2 2 0 0 1-2-2v-3 M16 21h3a2 2 0 0 0 2-2v-3',
   record: 'M12 5a7 7 0 1 0 .001 0z',
+  arrow: 'M4 20L18 6 M18 14V6h-8',
+  tri: 'M12 4L21 20H3z',
+  poly: 'M12 3l8 6-3 10H7L4 9z',
+  angle: 'M4 20L20 20 M4 20L16 6 M11 20a8 8 0 0 0-2.5-5.5',
+  shapes: 'M4 4h7v7H4z M17.5 13a4.5 4.5 0 1 0 .001 0z M13 4l4 7h-8z',
 }
 
 // Bottom control: icon over a small label, mockup style.
@@ -225,6 +300,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   const [tilesHidden, setTilesHidden] = useState(false)
   const [moreOpen, setMoreOpen] = useState(false)
   const [swatchOpen, setSwatchOpen] = useState(false)
+  const [diagOpen, setDiagOpen] = useState(false)
   // Open coursebook: shown split-screen beside the whiteboard, the
   // teacher turns pages and every student's copy follows.
   const [openBook, setOpenBook] = useState(null)   // { id, title, page }
@@ -355,6 +431,43 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
     } else if (op.kind === 'text') {
       ctx.font = `${op.size || 18}px Arial, sans-serif`
       ctx.fillText(op.text || '', op.x1, op.y1)
+    } else if (op.kind === 'arrow') {
+      ctx.beginPath(); ctx.moveTo(op.x1, op.y1); ctx.lineTo(op.x2, op.y2); ctx.stroke()
+      const a = Math.atan2(op.y2 - op.y1, op.x2 - op.x1), L = 6 + (op.w || 3) * 2.4
+      ctx.beginPath()
+      ctx.moveTo(op.x2, op.y2)
+      ctx.lineTo(op.x2 - L * Math.cos(a - 0.45), op.y2 - L * Math.sin(a - 0.45))
+      ctx.moveTo(op.x2, op.y2)
+      ctx.lineTo(op.x2 - L * Math.cos(a + 0.45), op.y2 - L * Math.sin(a + 0.45))
+      ctx.stroke()
+    } else if (op.kind === 'tri') {
+      const xa = Math.min(op.x1, op.x2), xb = Math.max(op.x1, op.x2)
+      const ya = Math.min(op.y1, op.y2), yb = Math.max(op.y1, op.y2)
+      ctx.beginPath()
+      ctx.moveTo((xa + xb) / 2, ya); ctx.lineTo(xb, yb); ctx.lineTo(xa, yb)
+      ctx.closePath(); ctx.stroke()
+    } else if (op.kind === 'poly' && op.pts && op.pts.length > 1) {
+      ctx.beginPath(); ctx.moveTo(op.pts[0].x, op.pts[0].y)
+      for (let i = 1; i < op.pts.length; i++) ctx.lineTo(op.pts[i].x, op.pts[i].y)
+      if (op.closed) ctx.closePath()
+      ctx.stroke()
+    } else if (op.kind === 'angle' && op.pts && op.pts.length === 3) {
+      const [A, V, B] = op.pts
+      ctx.beginPath(); ctx.moveTo(V.x, V.y); ctx.lineTo(A.x, A.y)
+      ctx.moveTo(V.x, V.y); ctx.lineTo(B.x, B.y); ctx.stroke()
+      const a1 = Math.atan2(A.y - V.y, A.x - V.x)
+      const a2 = Math.atan2(B.y - V.y, B.x - V.x)
+      let sweep = a2 - a1
+      while (sweep <= -Math.PI) sweep += 2 * Math.PI
+      while (sweep > Math.PI) sweep -= 2 * Math.PI
+      const r = Math.min(34, 0.4 * Math.min(Math.hypot(A.x - V.x, A.y - V.y), Math.hypot(B.x - V.x, B.y - V.y)))
+      ctx.beginPath(); ctx.arc(V.x, V.y, r, a1, a1 + sweep, sweep < 0); ctx.stroke()
+      const deg = Math.abs(sweep) * 180 / Math.PI
+      const mid = a1 + sweep / 2
+      ctx.font = '13px Arial, sans-serif'
+      ctx.fillText(deg.toFixed(1) + '\u00b0', V.x + (r + 14) * Math.cos(mid) - 12, V.y + (r + 14) * Math.sin(mid) + 4)
+    } else if (op.kind === 'diagram') {
+      drawDiagram(ctx, op)
     }
   }, [])
 
@@ -630,6 +743,33 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
     return { x: (e.clientX - rect.left - o.x) / z, y: (e.clientY - rect.top - o.y) / z }
   }
 
+  const snap15 = (p0, p1) => {
+    const ang = Math.atan2(p1.y - p0.y, p1.x - p0.x)
+    const s = Math.round(ang / (Math.PI / 12)) * (Math.PI / 12)
+    const len = Math.hypot(p1.x - p0.x, p1.y - p0.y)
+    return { x: p0.x + len * Math.cos(s), y: p0.y + len * Math.sin(s) }
+  }
+
+  const commitMulti = () => {
+    const m = drawRef.current.multi
+    if (!m) return
+    if (m.tool === 'poly' && m.pts.length >= 2)
+      sendOp({ kind: 'poly', pts: m.pts, closed: true, color: colour, w: lineW })
+    drawRef.current.multi = null
+    redraw()
+  }
+  const cancelMulti = () => { drawRef.current.multi = null; redraw() }
+
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === 'Enter') commitMulti()
+      if (e.key === 'Escape') cancelMulti()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [colour, lineW])
+
   const onDown = (e) => {
     if (phase !== 'live') return
     const d = drawRef.current
@@ -645,6 +785,24 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       return
     }
     const p = toWorld(e)
+
+    // Click-accumulating tools: polygon and angle.
+    if (tool === 'poly' || tool === 'angle') {
+      if (!d.multi || d.multi.tool !== tool) d.multi = { tool, pts: [] }
+      // Clicking near the first polygon point closes the shape.
+      if (tool === 'poly' && d.multi.pts.length >= 2) {
+        const f = d.multi.pts[0]
+        if (Math.hypot(p.x - f.x, p.y - f.y) < 12 / viewRef.current.zoom) { commitMulti(); return }
+      }
+      d.multi.pts.push(p)
+      if (tool === 'angle' && d.multi.pts.length === 3) {
+        sendOp({ kind: 'angle', pts: d.multi.pts, color: colour, w: lineW })
+        d.multi = null
+      }
+      redraw()
+      return
+    }
+
     if (tool === 'text') {
       const text = window.prompt('Text:')
       if (text && text.trim()) sendOp({ kind: 'text', x1: p.x, y1: p.y, text: text.trim(), color: colour, size: 12 + lineW * 3 })
@@ -657,6 +815,23 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
 
   const onMove = (e) => {
     const d = drawRef.current
+    // Live preview for polygon/angle while hovering between clicks.
+    if (!d.active && d.multi && d.multi.pts.length > 0) {
+      const p = toWorld(e)
+      redraw()
+      const cv = canvasRef.current, ctx = cv.getContext('2d')
+      const { zoom: z, offset: o } = viewRef.current
+      ctx.setTransform(z, 0, 0, z, o.x, o.y)
+      if (d.multi.tool === 'poly') {
+        drawOp(ctx, { kind: 'poly', pts: [...d.multi.pts, p], closed: false, color: colour, w: lineW })
+      } else if (d.multi.tool === 'angle') {
+        const pts = d.multi.pts.length === 1 ? [d.multi.pts[0], p] : [d.multi.pts[0], d.multi.pts[1], p]
+        if (pts.length === 2) drawOp(ctx, { kind: 'line', x1: pts[0].x, y1: pts[0].y, x2: pts[1].x, y2: pts[1].y, color: colour, w: lineW })
+        else drawOp(ctx, { kind: 'angle', pts, color: colour, w: lineW })
+      }
+      ctx.globalCompositeOperation = 'source-over'
+      return
+    }
     if (!d.active) return
     if (d.active === 'pan') {
       setOffset({ x: d.start.ox + (e.clientX - d.start.x), y: d.start.oy + (e.clientY - d.start.y) })
@@ -682,12 +857,21 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
         d.pts = [p]
       }
     } else {
-      // Shape preview: full redraw, then ghost the shape on screen only
+      // Shape preview: full redraw, then ghost the shape on screen only.
+      // Shift snaps lines and arrows to 15-degree steps, and a live
+      // length label (in grid squares) rides the drag for measuring.
+      const p2 = (e.shiftKey && (d.active === 'line' || d.active === 'arrow')) ? snap15(d.start, p) : p
       redraw()
       ctx.setTransform(z, 0, 0, z, o.x, o.y)
-      drawOp(ctx, { kind: d.active, x1: d.start.x, y1: d.start.y, x2: p.x, y2: p.y, color: colour, w: lineW })
+      drawOp(ctx, { kind: d.active, x1: d.start.x, y1: d.start.y, x2: p2.x, y2: p2.y, color: colour, w: lineW })
+      if (d.active === 'line' || d.active === 'arrow') {
+        const lenUnits = Math.hypot(p2.x - d.start.x, p2.y - d.start.y) / 40
+        ctx.font = '12px Arial, sans-serif'
+        ctx.fillStyle = colour
+        ctx.fillText(lenUnits.toFixed(1) + ' u', (d.start.x + p2.x) / 2 + 8, (d.start.y + p2.y) / 2 - 8)
+      }
       ctx.globalCompositeOperation = 'source-over'
-      d.pts = [p]
+      d.pts = [p2]
     }
   }
 
@@ -1169,7 +1353,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       background: C.pill, borderRadius: 14, padding: '10px 7px', display: 'flex', flexDirection: 'column',
       alignItems: 'center', gap: 4, boxShadow: '0 8px 28px rgba(0,0,0,.45)',
     }}>
-      {[['pen', 'Pen'], ['eraser', 'Eraser'], ['line', 'Line'], ['rect', 'Rectangle'], ['circle', 'Circle'], ['text', 'Text'], ['hand', 'Move the board']].map(([t, l]) => {
+      {[['pen', 'Pen'], ['eraser', 'Eraser'], ['line', 'Line (Shift snaps the angle)'], ['arrow', 'Arrow'], ['rect', 'Rectangle'], ['circle', 'Circle'], ['tri', 'Triangle'], ['poly', 'Polygon: click the corners, click the first point or press Enter to close'], ['angle', 'Angle: click a point, the vertex, then a second point'], ['text', 'Text'], ['hand', 'Move the board']].map(([t, l]) => {
         const id = t === 'hand' ? 'pan' : t
         return (
           <button key={t} onClick={() => setTool(id)} title={l} style={{
@@ -1215,6 +1399,31 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       )}
       {canDraw && <IconBtn icon="undo" title="Undo my last mark" onClick={doUndo} />}
       {isTeacher && (<>
+        <div style={{ position: 'relative' }}>
+          <IconBtn icon="shapes" title="Insert a teaching diagram" active={diagOpen}
+            onClick={() => setDiagOpen(o => !o)} />
+          {diagOpen && (
+            <div style={{ position: 'absolute', top: 38, right: 0, background: '#1D1D25', borderRadius: 12, padding: 6, zIndex: 40, boxShadow: '0 10px 32px rgba(0,0,0,.5)', minWidth: 180 }}>
+              {DIAGRAMS.map(([id, label]) => (
+                <button key={id}
+                  onClick={() => {
+                    setDiagOpen(false)
+                    const cv = canvasRef.current
+                    const { zoom: z, offset: o } = viewRef.current
+                    sendOp({
+                      kind: 'diagram', name: id,
+                      x1: ((cv?.width || 900) / 2 - o.x) / z,
+                      y1: ((cv?.height || 500) / 2 - o.y) / z,
+                      color: colour, w: Math.max(2, lineW),
+                    })
+                  }}
+                  style={{ display: 'block', width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#fff', fontSize: 12.5, fontWeight: 600, padding: '8px 11px', borderRadius: 8, cursor: 'pointer' }}>
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
         <IconBtn icon="grid" title={grid ? 'Plain board' : 'Graph paper for everyone'} active={grid}
           onClick={() => { const g = !grid; setGrid(g); sendOpLive({ kind: 'bg', grid: g }) }} />
         <IconBtn icon="image" title="Put a picture on the board" onClick={() => imgInputRef.current?.click()} />
