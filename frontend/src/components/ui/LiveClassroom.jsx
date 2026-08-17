@@ -68,14 +68,67 @@ const Btn = ({ children, active, danger, onClick, title, disabled, style = {} })
   )
 }
 
+// Minimal stroke icons (no icon font needed; multi-subpath in one d).
+const Ic = ({ d, size = 18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={d} /></svg>
+)
+const ICONS = {
+  pen: 'M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 3 21l.5-4.5L17 3z',
+  eraser: 'M16 3l5 5L10 19H5l-2-2L16 3z M5 19h14',
+  hand: 'M2 12h20 M12 2v20 M5 9l-3 3 3 3 M9 5l3-3 3 3 M15 19l-3 3-3-3 M19 9l3 3-3 3',
+  text: 'M4 7V4h16v3 M9 20h6 M12 4v16',
+  rect: 'M3 5h18v14H3z',
+  circle: 'M12 3a9 9 0 1 0 0.001 0z',
+  line: 'M4 20L20 4',
+  image: 'M3 5h18v14H3z M8.5 10a1.5 1.5 0 1 0 .001 0z M3 16l5-4 4 3 4-4 5 5',
+  book: 'M4 19.5A2.5 2.5 0 0 1 6.5 17H20 M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z',
+  grid: 'M3 3h18v18H3z M9 3v18 M15 3v18 M3 9h18 M3 15h18',
+  lockC: 'M5 11h14v10H5z M8 11V7a4 4 0 0 1 8 0v4',
+  lockO: 'M5 11h14v10H5z M8 11V7a4 4 0 0 1 7.5-2',
+  undo: 'M3 7v6h6 M3.5 13a9 9 0 1 0 2.5-7.5L3 8',
+  trash: 'M3 6h18 M8 6V4h8v2 M6 6l1 14h10l1-14 M10 10v6 M14 10v6',
+  mic: 'M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z M19 11a7 7 0 0 1-14 0 M12 18v4 M8 22h8',
+  micOff: 'M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z M19 11a7 7 0 0 1-14 0 M12 18v4 M8 22h8 M3 3l18 18',
+  cam: 'M2 6h13v12H2z M15 10l7-4v12l-7-4',
+  camOff: 'M2 6h13v12H2z M15 10l7-4v12l-7-4 M3 3l18 18',
+  share: 'M2 4h20v13H2z M8 21h8 M12 17v4 M12 13V8 M9.5 10.5L12 8l2.5 2.5',
+  raise: 'M8 12V6a1.6 1.6 0 1 1 3.2 0 M11.2 11V4a1.6 1.6 0 1 1 3.2 0v7 M14.4 11V6a1.6 1.6 0 1 1 3.2 0v8.5A6.5 6.5 0 0 1 11.1 21h-.6c-2.6 0-4-.9-5.3-2.8l-2.1-3.3a1.7 1.7 0 0 1 2.8-1.9L8 15',
+  chat: 'M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z',
+  people: 'M9 11a3.5 3.5 0 1 0-.001 0z M2 21a7 7 0 0 1 14 0 M17 3.5a3.5 3.5 0 0 1 0 7 M16 14a7 7 0 0 1 6 7',
+  dots: 'M5 12a1 1 0 1 0 .001 0z M12 12a1 1 0 1 0 .001 0z M19 12a1 1 0 1 0 .001 0z',
+  phone: 'M22 16.9V20a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2 4.2 2 2 0 0 1 4 2h3.1a2 2 0 0 1 2 1.7c.13.96.36 1.9.7 2.8a2 2 0 0 1-.45 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.25a2 2 0 0 1 2.1-.45c.9.34 1.84.57 2.8.7A2 2 0 0 1 22 16.9z',
+  view: 'M8 3H5a2 2 0 0 0-2 2v3 M16 3h3a2 2 0 0 1 2 2v3 M8 21H5a2 2 0 0 1-2-2v-3 M16 21h3a2 2 0 0 0 2-2v-3',
+  record: 'M12 5a7 7 0 1 0 .001 0z',
+}
+
+// Bottom control: icon over a small label, mockup style.
+const CtlBtn = ({ icon, label, active, danger, badge, onClick, title }) => (
+  <button onClick={onClick} title={title || label} style={{
+    position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+    background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px 10px', minWidth: 62,
+    color: danger ? '#F87171' : active ? '#F2C230' : 'rgba(255,255,255,.85)',
+  }}>
+    <Ic d={ICONS[icon]} size={20} />
+    <span style={{ fontSize: 11, fontWeight: 600 }}>{label}</span>
+    {badge != null && (
+      <span style={{ position: 'absolute', top: -2, right: 4, background: '#F2C230', color: '#111', fontSize: 9.5, fontWeight: 800, borderRadius: 99, padding: '1px 6px' }}>{badge}</span>
+    )}
+  </button>
+)
+
 // One video tile. Self tile is muted (never hear yourself).
-function Tile({ stream, name, role, self, micOn, camOn, hand, quality, small }) {
+function Tile({ stream, name, role, self, micOn, camOn, hand, quality, small, big }) {
   const ref = useRef(null)
   useEffect(() => { if (ref.current && stream) ref.current.srcObject = stream }, [stream])
   const qColor = { good: '#22C55E', fair: '#F59E0B', poor: '#EF4444', down: '#6B7280' }[quality]
   return (
     <div style={{
-      position: 'relative', width: small ? 108 : 150, height: small ? 72 : 100, borderRadius: 10, overflow: 'hidden',
+      position: 'relative',
+      width: big ? '100%' : small ? 108 : '100%',
+      height: big ? undefined : small ? 72 : undefined,
+      aspectRatio: big ? '16 / 10' : small ? undefined : '4 / 3',
+      borderRadius: 12, overflow: 'hidden',
       background: '#1B2230', border: hand ? '2px solid #F59E0B' : '1px solid rgba(255,255,255,.12)',
       flexShrink: 0,
     }}>
@@ -133,6 +186,8 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   const [handUp, setHandUp] = useState(false)
   const [sharing, setSharing] = useState(false)
   const [tilesHidden, setTilesHidden] = useState(false)
+  const [moreOpen, setMoreOpen] = useState(false)
+  const [swatchOpen, setSwatchOpen] = useState(false)
   const [mainView, setMainView] = useState('board')   // 'board' | 'screen'
   const camTrackRef = useRef(null)
   const [showLibPicker, setShowLibPicker] = useState(false)
@@ -155,7 +210,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   viewRef.current = { zoom, offset }
 
   // ── layout / resilience ──
-  const [themeId, setThemeId] = useState(() => localStorage.getItem('sm_class_theme') || 'dark')
+  const [themeId, setThemeId] = useState(() => localStorage.getItem('sm_class_theme') || 'light')
   const T = THEMES[themeId] || THEMES.dark
   const themeRef = useRef(T)
   themeRef.current = T
@@ -332,6 +387,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   const applyOp = useCallback((op) => {
     if (op.kind === 'lock') { setBoardLocked(!!op.locked); return }
     if (op.kind === 'bg') { setGrid(op.grid === true); return }
+    if (op.kind === 'undo') { applyUndo(op.by); return }
     opsRef.current.push(op)
     const ink = inkRef.current
     if (!ink) { redrawRef.current(); return }
@@ -343,13 +399,44 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
     composite()
   }, [drawOp, composite])
 
+  const myIdRef = useRef('')
+
+  const applyUndo = useCallback((byId) => {
+    const ops = opsRef.current
+    for (let i = ops.length - 1; i >= 0; i--) {
+      if (ops[i].by === byId) { ops.splice(i, 1); break }
+    }
+    redrawRef.current()
+  }, [])
+
   const sendOp = useCallback((op) => {
+    op.by = myIdRef.current
     applyOp(op)
     socketRef.current?.emit('board:op', op)
   }, [applyOp])
 
   // Live-flushed stroke chunks bypass local re-draw (already on canvas)
-  const sendOpLive = (op) => { opsRef.current.push(op); socketRef.current?.emit('board:op', op) }
+  const sendOpLive = (op) => {
+    op.by = myIdRef.current
+    if (op.kind === 'stroke') opsRef.current.push(op)
+    socketRef.current?.emit('board:op', op)
+  }
+
+  const doUndo = () => {
+    if (!opsRef.current.some(o => o.by === myIdRef.current)) return
+    applyUndo(myIdRef.current)
+    socketRef.current?.emit('board:op', { kind: 'undo', by: myIdRef.current })
+  }
+
+  const zoomBy = (factor) => {
+    const cv = canvasRef.current
+    const mx = (cv?.width || 800) / 2, my = (cv?.height || 500) / 2
+    setZoom(z0 => {
+      const z1 = Math.min(4, Math.max(0.25, z0 * factor))
+      setOffset(o => ({ x: mx - (mx - o.x) * (z1 / z0), y: my - (my - o.y) * (z1 / z0) }))
+      return z1
+    })
+  }
 
   // ═══ CONNECT ═══════════════════════════════════════════════
   useEffect(() => {
@@ -391,6 +478,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
         })
         engineRef.current = engine
 
+        myIdRef.current = String(user?._id || user?.id || '')
         const joinRoom = () => socket.emit('join', { liveClassId }, (ack) => {
           if (cancelled) return
           if (!ack?.ok) { setPhase('error'); setErrMsg(ack?.message || 'Could not join.'); return }
@@ -402,6 +490,12 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
           for (const op of (ack.boardOps || [])) {
             if (op.kind === 'lock') setBoardLocked(!!op.locked)
             else if (op.kind === 'bg') setGrid(op.grid === true)
+            else if (op.kind === 'undo') {
+              const ops = opsRef.current
+              for (let i = ops.length - 1; i >= 0; i--) {
+                if (ops[i].by === op.by) { ops.splice(i, 1); break }
+              }
+            }
             else opsRef.current.push(op)
           }
           redraw()
@@ -953,34 +1047,239 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
 
   const others = roster.filter(p => p.socketId !== socketRef.current?.id)
 
+  // Chrome palette is fixed near-black per the design; the THEME
+  // switcher now recolours the BOARD only (white by default).
+  const C = { bg: '#0A0A0E', card: '#141419', pill: '#1D1D25', border: 'rgba(255,255,255,.08)',
+              text: '#FFFFFF', sub: 'rgba(255,255,255,.55)', gold: '#F2C230' }
+
+  const featured = (isTeacher ? { self: true } : null)
+    || (() => { const t = others.find(x => x.role === 'teacher' || x.role === 'admin'); return t ? { peer: t } : { self: true } })()
+  const gridPeers = others.filter(p => !(featured.peer && p.socketId === featured.peer.socketId))
+
+  const IconBtn = ({ icon, onClick, title, active, disabled }) => (
+    <button onClick={onClick} title={title} disabled={disabled} style={{
+      background: active ? 'rgba(242,194,48,.18)' : 'transparent', border: 'none', borderRadius: 8,
+      width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
+      cursor: disabled ? 'not-allowed' : 'pointer', color: active ? C.gold : '#4B4B55', opacity: disabled ? .35 : 1,
+    }}><Ic d={ICONS[icon]} size={17} /></button>
+  )
+
+
+  const toolPill = (isTeacher || canDraw) && mainView === 'board' && (
+    <div style={{
+      position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', zIndex: 6,
+      background: C.pill, borderRadius: 14, padding: '10px 7px', display: 'flex', flexDirection: 'column',
+      alignItems: 'center', gap: 4, boxShadow: '0 8px 28px rgba(0,0,0,.45)',
+    }}>
+      {[['pen', 'Pen'], ['eraser', 'Eraser'], ['line', 'Line'], ['rect', 'Rectangle'], ['circle', 'Circle'], ['text', 'Text'], ['hand', 'Move the board']].map(([t, l]) => {
+        const id = t === 'hand' ? 'pan' : t
+        return (
+          <button key={t} onClick={() => setTool(id)} title={l} style={{
+            background: tool === id ? 'rgba(242,194,48,.22)' : 'transparent', border: 'none', borderRadius: 9,
+            width: 34, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', color: tool === id ? C.gold : 'rgba(255,255,255,.8)',
+          }}><Ic d={ICONS[t]} size={17} /></button>
+        )
+      })}
+      <div style={{ width: 22, height: 1, background: 'rgba(255,255,255,.12)', margin: '3px 0' }} />
+      <button onClick={() => setSwatchOpen(o => !o)} title="Pen colour" style={{
+        width: 22, height: 22, borderRadius: '50%', background: colour, border: '2.5px solid rgba(255,255,255,.25)', cursor: 'pointer',
+      }} />
+      {swatchOpen && (
+        <div style={{
+          position: 'absolute', left: 52, bottom: 0, background: C.pill, borderRadius: 12, padding: 10,
+          display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, boxShadow: '0 8px 28px rgba(0,0,0,.5)',
+        }}>
+          {PEN_COLOURS.map(c => (
+            <div key={c} onClick={() => { setColour(c); setSwatchOpen(false) }}
+              style={{ width: 20, height: 20, borderRadius: '50%', background: c, cursor: 'pointer',
+                border: colour === c ? '2px solid ' + C.gold : '1.5px solid rgba(255,255,255,.25)', boxSizing: 'border-box' }} />
+          ))}
+          <input type="color" value={colour} onChange={e => setColour(e.target.value)} title="Custom"
+            style={{ gridColumn: 'span 4', width: '100%', height: 24, border: 'none', borderRadius: 6, background: 'transparent', cursor: 'pointer' }} />
+          <input type="range" min="1" max="10" value={lineW} onChange={e => setLineW(+e.target.value)}
+            title="Pen size" style={{ gridColumn: 'span 4', width: '100%' }} />
+        </div>
+      )}
+    </div>
+  )
+
+  const boardHeader = (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 2, padding: '10px 14px', borderBottom: '1px solid rgba(0,0,0,.07)' }}>
+      <span style={{ fontSize: 14, fontWeight: 800, color: '#2A2A2E', marginRight: 'auto' }}>
+        {mainView === 'screen' ? (sharing ? 'Your screen' : (sharingPeer?.name || 'Teacher') + "'s screen") : 'Whiteboard'}
+      </span>
+      {(sharing || sharingPeer) && (
+        <button onClick={() => setMainView(v => v === 'board' ? 'screen' : 'board')} style={{
+          background: 'rgba(242,194,48,.15)', color: '#8a6a00', border: 'none', borderRadius: 7,
+          fontSize: 11.5, fontWeight: 700, padding: '5px 12px', cursor: 'pointer', marginRight: 6,
+        }}>{mainView === 'board' ? 'View screen' : 'View board'}</button>
+      )}
+      {canDraw && <IconBtn icon="undo" title="Undo my last mark" onClick={doUndo} />}
+      {isTeacher && (<>
+        <IconBtn icon="grid" title={grid ? 'Plain board' : 'Graph paper for everyone'} active={grid}
+          onClick={() => { const g = !grid; setGrid(g); sendOpLive({ kind: 'bg', grid: g }) }} />
+        <IconBtn icon="image" title="Put a picture on the board" onClick={() => imgInputRef.current?.click()} />
+        <IconBtn icon="book" title="Put a Library page on the board" onClick={() => setShowLibPicker(true)} />
+        <IconBtn icon={boardLocked ? 'lockC' : 'lockO'} active={!boardLocked}
+          title={boardLocked ? 'Students cannot draw. Click to allow.' : 'Students can draw. Click to lock.'}
+          onClick={toggleBoardLock} />
+        <IconBtn icon="trash" title="Clear the board for everyone" onClick={clearBoard} />
+      </>)}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 2, marginLeft: 8, background: 'rgba(0,0,0,.05)', borderRadius: 8, padding: '2px 4px' }}>
+        <button onClick={() => zoomBy(0.9)} title="Zoom out" style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: 16, color: '#4B4B55', width: 24 }}>-</button>
+        <span style={{ fontSize: 11.5, fontWeight: 700, color: '#4B4B55', minWidth: 40, textAlign: 'center' }}>{Math.round(zoom * 100)}%</span>
+        <button onClick={() => zoomBy(1.1)} title="Zoom in" style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: 15, color: '#4B4B55', width: 24 }}>+</button>
+      </div>
+      <input ref={imgInputRef} type="file" accept="image/*" onChange={onPickImage} style={{ display: 'none' }} />
+    </div>
+  )
+
+  const panelCard = panelOpen && (
+    <div style={narrow ? {
+      position: 'absolute', top: 0, right: 0, bottom: 0, width: 'min(85vw, 310px)', zIndex: 20,
+      background: C.card, display: 'flex', flexDirection: 'column',
+      borderLeft: '1px solid ' + C.border, boxShadow: '-14px 0 36px rgba(0,0,0,.55)',
+    } : {
+      width: 300, background: C.card, display: 'flex', flexDirection: 'column',
+      borderRadius: 16, overflow: 'hidden', flexShrink: 0,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', padding: '13px 16px', borderBottom: '1px solid ' + C.border }}>
+        <span style={{ color: C.text, fontWeight: 800, fontSize: 14.5, flex: 1 }}>
+          {panel === 'chat' ? 'Chat' : 'Participants (' + roster.length + ')'}
+        </span>
+        <button onClick={() => setPanelOpen(false)} style={{ background: 'transparent', border: 'none', color: C.sub, fontSize: 18, cursor: 'pointer' }}>&times;</button>
+      </div>
+
+      {panel === 'chat' && (<>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: 13 }}>
+          {chat.map((m, i) => (
+            <div key={i} style={{ display: 'flex', gap: 9 }}>
+              <div style={{ width: 30, height: 30, borderRadius: '50%', flexShrink: 0, background: m.role === 'teacher' ? '#7D1025' : '#2A3A5C', color: '#fff', fontSize: 10.5, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {(m.name || '?').split(' ').map(w => w[0]).slice(0, 2).join('')}
+              </div>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 11.5 }}>
+                  <span style={{ color: m.role === 'teacher' ? C.gold : C.text, fontWeight: 700 }}>{m.name}</span>
+                  <span style={{ color: C.sub, marginLeft: 7, fontSize: 10.5 }}>
+                    {new Date(m.at).toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
+                <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,.86)', lineHeight: 1.55, wordBreak: 'break-word', marginTop: 2 }}>{m.text}</div>
+              </div>
+            </div>
+          ))}
+          <div ref={chatEndRef} />
+        </div>
+        <div style={{ display: 'flex', gap: 7, padding: 12 }}>
+          <input value={chatInput} onChange={e => setChatInput(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') sendChat() }}
+            placeholder="Type a message..."
+            style={{ flex: 1, background: 'rgba(255,255,255,.07)', border: 'none', borderRadius: 10, padding: '10px 13px', color: '#fff', fontSize: 12.5, outline: 'none' }} />
+          <button onClick={sendChat} title="Send" style={{ background: C.gold, color: '#111', border: 'none', borderRadius: 10, width: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+            <Ic d={'M22 2L11 13 M22 2l-7 20-4-9-9-4 20-7z'} size={16} />
+          </button>
+        </div>
+      </>)}
+
+      {panel === 'people' && (
+        <div style={{ flex: 1, overflowY: 'auto', padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {roster.map(p => (
+            <div key={p.socketId} style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '8px 10px', background: 'rgba(255,255,255,.05)', borderRadius: 10 }}>
+              <div style={{ width: 30, height: 30, borderRadius: '50%', background: p.role === 'teacher' ? '#7D1025' : '#2A3A5C', color: '#fff', fontSize: 10.5, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                {(p.name || '?').split(' ').map(w => w[0]).slice(0, 2).join('')}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ color: C.text, fontSize: 12.5, fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {p.name}{p.socketId === socketRef.current?.id ? ' (you)' : ''}
+                </div>
+                <div style={{ color: C.sub, fontSize: 10.5 }}>{p.role}</div>
+              </div>
+              {p.hand && <span style={{ color: C.gold }}><Ic d={ICONS.raise} size={15} /></span>}
+              {p.micOn === false && <span style={{ color: '#F87171' }}><Ic d={ICONS.micOff} size={15} /></span>}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+
+  const tiles = (
+    <>
+      {(featured.self || featured.peer) && (
+        featured.self
+          ? <Tile big stream={localStream} name={user?.firstName ? user.firstName + ' ' + (user.lastName || '') : 'You'} role={myRole} self micOn={micOn} camOn={camOn} hand={handUp} />
+          : <Tile big stream={streams[featured.peer.socketId]} name={featured.peer.name} role={featured.peer.role}
+              micOn={featured.peer.micOn} camOn={featured.peer.camOn} hand={featured.peer.hand} quality={quality[featured.peer.socketId]} />
+      )}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+        {!featured.self && (
+          <Tile stream={localStream} name={'You'} role={myRole} self micOn={micOn} camOn={camOn} hand={handUp} />
+        )}
+        {gridPeers.map(p => (
+          <Tile key={p.socketId} stream={streams[p.socketId]} name={p.name} role={p.role}
+            micOn={p.micOn} camOn={p.camOn} hand={p.hand} quality={quality[p.socketId]} />
+        ))}
+      </div>
+    </>
+  )
+
   return (
-    <div ref={rootRef} style={{ position: 'fixed', inset: 0, background: T.app, display: 'flex', flexDirection: 'column', zIndex: 500, fontFamily: 'Inter, Arial, sans-serif' }}>
+    <div ref={rootRef} style={{ position: 'fixed', inset: 0, background: C.bg, display: 'flex', flexDirection: 'column', zIndex: 500, fontFamily: 'Inter, Arial, sans-serif' }}>
+
       {/* ── Top bar ── */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px', background: T.panel, borderBottom: '1px solid ' + T.border }}>
-        <div style={{ width: 30, height: 30, borderRadius: 8, background: 'linear-gradient(135deg,#7D1025,#C9A030)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 900, fontSize: 13 }}>S</div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ color: T.text, fontWeight: 700, fontSize: 13.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            {classInfo.title || 'Smartious Classroom'}
-          </div>
-          <div style={{ color: T.sub, fontSize: 11 }}>
-            {classInfo.subject || ''}{phase === 'live' ? ` \u00b7 ${mm}:${ss}` : ' \u00b7 connecting...'}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '10px 16px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+          <span style={{ background: '#FDFAF4', borderRadius: 8, padding: '4px 9px', fontSize: 14, fontWeight: 900, letterSpacing: '.02em' }}>
+            <span style={{ color: '#080C14' }}>SMART</span><span style={{ color: C.gold }}>IOUS</span>
+          </span>
+          {!narrow && <span style={{ color: C.text, fontSize: 14.5, fontWeight: 700 }}>Live Classroom</span>}
+        </div>
+        <div style={{ width: 1, height: 22, background: C.border }} />
+        <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ color: C.text, fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {(classInfo.subject ? classInfo.subject + ' \u2013 ' : '') + (classInfo.title || 'Classroom')}
+          </span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: C.sub, fontSize: 12.5, flexShrink: 0 }}>
+            <Ic d={ICONS.people} size={14} /> {roster.length}
+          </span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: C.text, fontSize: 13.5, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace' }}>
+            <span style={{ width: 9, height: 9, borderRadius: '50%', background: recording ? '#EF4444' : phase === 'live' ? '#22C55E' : '#B45309' }} />
+            {recording
+              ? String(Math.floor(recSecs / 3600)).padStart(2, '0') + ':' + String(Math.floor(recSecs / 60) % 60).padStart(2, '0') + ':' + String(recSecs % 60).padStart(2, '0')
+              : mm + ':' + ss}
+          </span>
+          <button onClick={toggleFull} title={isFull ? 'Exit full screen' : 'Full screen'} style={{
+            display: 'flex', alignItems: 'center', gap: 7, background: C.card, color: C.text, border: '1px solid ' + C.border,
+            borderRadius: 10, padding: '7px 13px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+          }}><Ic d={ICONS.view} size={14} /> View</button>
+          <div style={{ position: 'relative' }}>
+            <button onClick={() => setMoreOpen(o => !o)} title="More" style={{
+              background: C.card, color: C.text, border: '1px solid ' + C.border, borderRadius: 10,
+              width: 36, height: 33, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+            }}><Ic d={ICONS.dots} size={16} /></button>
+            {moreOpen && (
+              <div style={{ position: 'absolute', right: 0, top: 40, background: C.pill, borderRadius: 12, padding: 6, zIndex: 40, boxShadow: '0 10px 32px rgba(0,0,0,.55)', minWidth: 190 }}>
+                {isTeacher && (
+                  <button onClick={() => { setMoreOpen(false); recording ? stopRecording() : startRecording() }} style={{ display: 'flex', alignItems: 'center', gap: 9, width: '100%', background: 'transparent', border: 'none', color: recording ? '#F87171' : C.text, fontSize: 12.5, fontWeight: 600, padding: '9px 11px', borderRadius: 8, cursor: 'pointer' }}>
+                    <Ic d={ICONS.record} size={15} /> {recording ? 'Stop recording' : 'Record the lesson'}
+                  </button>
+                )}
+                <button onClick={() => { setMoreOpen(false); cycleTheme() }} style={{ display: 'flex', alignItems: 'center', gap: 9, width: '100%', background: 'transparent', border: 'none', color: C.text, fontSize: 12.5, fontWeight: 600, padding: '9px 11px', borderRadius: 8, cursor: 'pointer' }}>
+                  <Ic d={ICONS.grid} size={15} /> Board style: {T.name}
+                </button>
+              </div>
+            )}
           </div>
         </div>
-        <span style={{ background: phase === 'live' ? '#15803D' : '#B45309', color: '#fff', fontSize: 10, fontWeight: 800, padding: '3px 10px', borderRadius: 99, letterSpacing: '.06em' }}>
-          {phase === 'live' ? 'LIVE' : 'CONNECTING'}
-        </span>
-        <span style={{ background: isTeacher ? '#7D1025' : '#1E3A8A', color: '#fff', fontSize: 10, fontWeight: 800, padding: '3px 10px', borderRadius: 99, letterSpacing: '.06em' }}>
-          {isTeacher ? 'TEACHER' : 'STUDENT'}
-        </span>
-        <Btn onClick={cycleTheme} title="Switch between dark, light, and bone modes">{T.name}</Btn>
-        <Btn onClick={toggleFull} title={isFull ? 'Exit full screen' : 'Use the whole screen'}>{isFull ? 'Exit full' : 'Full screen'}</Btn>
-        <Btn danger onClick={leave}>Leave</Btn>
       </div>
 
       {mediaNote && (
         <div style={{ background: '#78350F', color: '#FDE68A', fontSize: 12, padding: '7px 16px', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
           <span style={{ flex: 1, minWidth: 200 }}>{mediaNote}</span>
-          <Btn onClick={retryMedia} style={{ background: '#C9A030', color: '#7D1025', fontWeight: 800, padding: '6px 14px' }}>
+          <Btn onClick={retryMedia} style={{ background: C.gold, color: '#111', fontWeight: 800, padding: '6px 14px' }}>
             Enable camera and mic
           </Btn>
         </div>
@@ -991,201 +1290,93 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
         </div>
       )}
 
-      {/* ── Video strip (collapsible: more room to write) ── */}
-      {tilesHidden ? (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '3px 0', background: T.strip, borderBottom: '1px solid ' + T.border }}>
-          <Btn onClick={() => setTilesHidden(false)} style={{ padding: '4px 14px', fontSize: 11 }}>
-            Show videos ({roster.length})
-          </Btn>
-        </div>
-      ) : (
-      <div style={{ display: 'flex', gap: 8, padding: narrow ? '6px 10px' : '8px 14px', overflowX: 'auto', background: T.strip, borderBottom: '1px solid ' + T.border, alignItems: 'center' }}>
-        <Btn onClick={() => setTilesHidden(true)} title="Hide videos for a bigger board"
-          style={{ padding: '4px 8px', fontSize: 10.5, flexShrink: 0, writingMode: 'vertical-rl', height: narrow ? 72 : 100 }}>
-          Hide
-        </Btn>
-        <Tile stream={localStream} name={user?.firstName ? `${user.firstName} ${user.lastName || ''}` : 'You'}
-          role={myRole} self micOn={micOn} camOn={camOn} hand={handUp} small={narrow} />
-        {others.map(p => (
-          <Tile key={p.socketId} stream={streams[p.socketId]} name={p.name} role={p.role}
-            micOn={p.micOn} camOn={p.camOn} hand={p.hand} quality={quality[p.socketId]} small={narrow} />
-        ))}
-      </div>
-      )}
-
       {/* ── Main area ── */}
-      <div style={{ flex: 1, display: 'flex', minHeight: 0, position: 'relative' }}>
-        {/* Toolbar: the full deck for teachers; for students it only
-            appears when the teacher opens the board for drawing. */}
-        {(isTeacher || canDraw) && (
-        <div style={{ width: narrow ? 48 : 56, background: T.panel, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '12px 0', borderRight: '1px solid ' + T.border, overflowY: 'auto' }}>
-          {[['pen', 'Pen'], ['eraser', 'Erase'], ['line', 'Line'], ['rect', 'Rect'], ['circle', 'Circ'], ['text', 'Text'], ['pan', 'Pan']].map(([t, l]) => (
-            <Btn key={t} active={tool === t} onClick={() => setTool(t)} title={l}
-              disabled={!canDraw && t !== 'pan'} style={{ width: 42, padding: '8px 0' }}>{l}</Btn>
-          ))}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4, marginTop: 4 }}>
-            {PEN_COLOURS.map(c => (
-              <div key={c} onClick={() => canDraw && setColour(c)} title={c}
-                style={{
-                  width: 16, height: 16, borderRadius: '50%', background: c, cursor: canDraw ? 'pointer' : 'not-allowed',
-                  border: colour === c ? '2px solid #60A5FA' : '1.5px solid rgba(128,128,128,.45)',
-                  boxSizing: 'border-box',
-                }} />
-            ))}
+      <div style={{ flex: 1, display: 'flex', minHeight: 0, position: 'relative', gap: 10, padding: '2px 10px 10px' }}>
+
+        {/* Video column (desktop) */}
+        {!narrow && (
+          <div style={{ width: 268, flexShrink: 0, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {tiles}
           </div>
-          <input type="color" value={colour} onChange={e => setColour(e.target.value)} disabled={!canDraw}
-            title="Custom colour"
-            style={{ width: 34, height: 26, border: 'none', borderRadius: 6, background: 'transparent', cursor: 'pointer', marginTop: 2 }} />
-          <input type="range" min="1" max="10" value={lineW} onChange={e => setLineW(+e.target.value)} disabled={!canDraw}
-            style={{ width: 42 }} />
-          {isTeacher && (<>
-            <Btn active={!boardLocked} onClick={toggleBoardLock} title={boardLocked ? 'Students cannot draw. Click to allow.' : 'Students can draw. Click to lock.'}
-              style={{ width: 42, padding: '7px 0', fontSize: 10.5, marginTop: 8 }}>{boardLocked ? 'Locked' : 'Open'}</Btn>
-            <Btn onClick={clearBoard} title="Clear board for everyone" style={{ width: 42, padding: '7px 0', fontSize: 10.5 }}>Clear</Btn>
-            <Btn active={grid} onClick={() => { const g = !grid; setGrid(g); sendOpLive({ kind: 'bg', grid: g }) }}
-              title={grid ? 'Back to a plain board' : 'Turn the board into graph paper for everyone'}
-              style={{ width: 42, padding: '7px 0', fontSize: 10.5 }}>Graph</Btn>
-            <Btn onClick={() => imgInputRef.current?.click()} title="Put a picture on the board"
-              style={{ width: 42, padding: '7px 0', fontSize: 10.5, marginTop: 8 }}>Img</Btn>
-            <Btn onClick={() => setShowLibPicker(true)} title="Put a Library PDF page on the board"
-              style={{ width: 42, padding: '7px 0', fontSize: 10.5 }}>Book</Btn>
-            <input ref={imgInputRef} type="file" accept="image/*" onChange={onPickImage} style={{ display: 'none' }} />
-          </>)}
-        </div>
         )}
 
-        {/* Board / presentation */}
-        <div ref={wrapRef} style={{ flex: 1, position: 'relative', minWidth: 0, background: T.board }}>
-          {(sharing || sharingPeer) && (
-            <div style={{ position: 'absolute', top: 10, left: 12, zIndex: 5, display: 'flex', gap: 6 }}>
-              <Btn active={mainView === 'board'} onClick={() => setMainView('board')} style={{ padding: '6px 12px', fontSize: 11 }}>Board</Btn>
-              <Btn active={mainView === 'screen'} onClick={() => setMainView('screen')} style={{ padding: '6px 12px', fontSize: 11 }}>
-                {sharing ? 'Your screen' : (sharingPeer?.name || 'Teacher') + "'s screen"}
-              </Btn>
-            </div>
-          )}
-          {mainView === 'screen' && (sharing || sharingPeer) && (
-            <ScreenView
-              stream={sharing ? localStream : streams[sharingPeer?.socketId]}
-              muted={sharing}
-            />
-          )}
-          <canvas ref={canvasRef}
-            onPointerDown={(e) => {
-              e.currentTarget.setPointerCapture?.(e.pointerId)
-              onPointerDownMulti(e)
-              if (pointersRef.current.size < 2) onDown(e)
-            }}
-            onPointerMove={(e) => { if (!onPointerMoveMulti(e) || pointersRef.current.size < 2) onMove(e) }}
-            onPointerUp={(e) => { onPointerEnd(e); onUp(e) }}
-            onPointerCancel={(e) => { onPointerEnd(e); onUp(e) }}
-            onPointerLeave={(e) => { onPointerEnd(e); onUp(e) }}
-            onWheel={onWheel}
-            style={{ display: 'block', cursor: tool === 'pan' || !canDraw ? 'grab' : 'crosshair', touchAction: 'none',
-              visibility: mainView === 'screen' ? 'hidden' : 'visible' }} />
-          {!canDraw && (
-            <div style={{ position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)', background: 'rgba(0,0,0,.55)', color: 'rgba(255,255,255,.75)', fontSize: 11.5, padding: '5px 14px', borderRadius: 99 }}>
-              View only — the teacher controls the board
-            </div>
-          )}
-          <div style={{ position: 'absolute', bottom: 10, right: 12, color: 'rgba(255,255,255,.4)', fontSize: 11 }}>
-            {Math.round(zoom * 100)}%
-          </div>
-        </div>
-
-        {/* Right panel: fixed sidebar on desktop, slide-over on phones */}
-        {(!narrow || panelOpen) && (
-        <div style={narrow ? {
-          position: 'absolute', top: 0, right: 0, bottom: 0, width: 'min(85vw, 300px)', zIndex: 20,
-          background: T.panel, display: 'flex', flexDirection: 'column',
-          borderLeft: '1px solid ' + T.border, boxShadow: '-12px 0 32px rgba(0,0,0,.5)',
-        } : { width: 280, background: T.panel, display: 'flex', flexDirection: 'column', borderLeft: '1px solid ' + T.border }}>
-          {narrow && (
-            <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '8px 10px 0' }}>
-              <Btn onClick={() => setPanelOpen(false)} style={{ padding: '5px 12px' }}>Close</Btn>
-            </div>
-          )}
-          <div style={{ display: 'flex', gap: 6, padding: '10px 12px' }}>
-            {[['chat', 'Chat'], ['people', `People (${roster.length})`]].map(([id, l]) => (
-              <Btn key={id} active={panel === id} onClick={() => setPanel(id)} style={{ flex: 1 }}>{l}</Btn>
-            ))}
-          </div>
-
-          {panel === 'chat' && (<>
-            <div style={{ flex: 1, overflowY: 'auto', padding: '4px 12px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {chat.map((m, i) => (
-                <div key={i}>
-                  <div style={{ fontSize: 10.5, color: m.role === 'teacher' ? '#F0CC5A' : 'rgba(255,255,255,.5)', fontWeight: 700 }}>
-                    {m.name}{m.role === 'teacher' ? ' (Teacher)' : ''}
-                  </div>
-                  <div style={{ fontSize: 12.5, color: T.text, lineHeight: 1.5, wordBreak: 'break-word' }}>{m.text}</div>
-                </div>
-              ))}
-              <div ref={chatEndRef} />
-            </div>
-            <div style={{ display: 'flex', gap: 6, padding: 10, borderTop: '1px solid rgba(255,255,255,.07)' }}>
-              <input value={chatInput} onChange={e => setChatInput(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') sendChat() }}
-                placeholder="Message the class"
-                style={{ flex: 1, background: T.field, border: 'none', borderRadius: 8, padding: '9px 11px', color: T.text, fontSize: 12.5, outline: 'none' }} />
-              <Btn onClick={sendChat} style={{ background: '#C9A030', color: '#7D1025', fontWeight: 800 }}>Send</Btn>
-            </div>
-          </>)}
-
-          {panel === 'people' && (
-            <div style={{ flex: 1, overflowY: 'auto', padding: '4px 12px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {roster.map(p => (
-                <div key={p.socketId} style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '7px 9px', background: 'rgba(255,255,255,.05)', borderRadius: 9 }}>
-                  <div style={{ width: 28, height: 28, borderRadius: '50%', background: p.role === 'teacher' ? '#7D1025' : '#1E3A8A', color: '#fff', fontSize: 10.5, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    {(p.name || '?').split(' ').map(w => w[0]).slice(0, 2).join('')}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ color: T.text, fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {p.name}{p.socketId === socketRef.current?.id ? ' (you)' : ''}
-                    </div>
-                    <div style={{ color: 'rgba(255,255,255,.45)', fontSize: 10 }}>{p.role}</div>
-                  </div>
-                  {p.hand && <span style={{ color: '#F59E0B', fontSize: 9.5, fontWeight: 800 }}>HAND</span>}
-                  {p.micOn === false && <span style={{ color: '#F87171', fontSize: 9.5, fontWeight: 800 }}>MUTED</span>}
+        {/* Board / presentation card */}
+        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {narrow && !tilesHidden && (
+            <div style={{ display: 'flex', gap: 8, overflowX: 'auto', alignItems: 'center', flexShrink: 0 }}>
+              <Btn onClick={() => setTilesHidden(true)} style={{ padding: '4px 8px', fontSize: 10.5, flexShrink: 0 }}>Hide</Btn>
+              <div style={{ width: 108, flexShrink: 0 }}>
+                <Tile small stream={localStream} name={'You'} role={myRole} self micOn={micOn} camOn={camOn} hand={handUp} />
+              </div>
+              {others.map(p => (
+                <div key={p.socketId} style={{ width: 108, flexShrink: 0 }}>
+                  <Tile small stream={streams[p.socketId]} name={p.name} role={p.role}
+                    micOn={p.micOn} camOn={p.camOn} hand={p.hand} quality={quality[p.socketId]} />
                 </div>
               ))}
             </div>
           )}
+          {narrow && tilesHidden && (
+            <Btn onClick={() => setTilesHidden(false)} style={{ padding: '4px 12px', fontSize: 11, alignSelf: 'center' }}>
+              Show videos ({roster.length})
+            </Btn>
+          )}
+
+          <div style={{ flex: 1, minHeight: 0, background: '#FFFFFF', borderRadius: 16, display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 10px 34px rgba(0,0,0,.35)' }}>
+            {boardHeader}
+            <div ref={wrapRef} style={{ flex: 1, position: 'relative', minHeight: 0, background: T.board }}>
+              {toolPill}
+              {mainView === 'screen' && (sharing || sharingPeer) && (
+                <ScreenView stream={sharing ? localStream : streams[sharingPeer?.socketId]} muted={sharing} />
+              )}
+              <canvas ref={canvasRef}
+                onPointerDown={(e) => {
+                  e.currentTarget.setPointerCapture?.(e.pointerId)
+                  onPointerDownMulti(e)
+                  if (pointersRef.current.size < 2) onDown(e)
+                }}
+                onPointerMove={(e) => { if (!onPointerMoveMulti(e) || pointersRef.current.size < 2) onMove(e) }}
+                onPointerUp={(e) => { onPointerEnd(e); onUp(e) }}
+                onPointerCancel={(e) => { onPointerEnd(e); onUp(e) }}
+                onPointerLeave={(e) => { onPointerEnd(e); onUp(e) }}
+                onWheel={onWheel}
+                style={{ display: 'block', cursor: tool === 'pan' || !canDraw ? 'grab' : 'crosshair', touchAction: 'none',
+                  visibility: mainView === 'screen' ? 'hidden' : 'visible' }} />
+              {!canDraw && mainView === 'board' && (
+                <div style={{ position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)', background: 'rgba(0,0,0,.5)', color: 'rgba(255,255,255,.85)', fontSize: 11.5, padding: '5px 14px', borderRadius: 99 }}>
+                  View only — the teacher controls the board
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-        )}
+
+        {panelCard}
       </div>
 
       {showLibPicker && (
         <LibraryPagePicker onClose={() => setShowLibPicker(false)} onPlace={placeImageOp} />
       )}
 
-      {/* ── Bottom controls ── */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '10px 16px', background: T.panel, borderTop: '1px solid ' + T.border }}>
-        <Btn active={micOn} danger={!micOn} onClick={toggleMic}>{micOn ? 'Mic on' : 'Mic off'}</Btn>
-        <Btn active={camOn} danger={!camOn} onClick={toggleCam}>{camOn ? 'Camera on' : 'Camera off'}</Btn>
-        {isTeacher && (
-          <Btn active={sharing} onClick={sharing ? stopShare : startShare}>
-            {sharing ? 'Stop sharing' : 'Share screen'}
-          </Btn>
-        )}
-        {isTeacher && (
-          <Btn danger={recording} onClick={recording ? stopRecording : startRecording}>
-            {recording
-              ? 'Stop recording ' + String(Math.floor(recSecs / 60)).padStart(2, '0') + ':' + String(recSecs % 60).padStart(2, '0')
-              : 'Record'}
-          </Btn>
-        )}
-        {!isTeacher && <Btn active={handUp} onClick={toggleHand}>{handUp ? 'Lower hand' : 'Raise hand'}</Btn>}
-        {narrow && (
-          <Btn active={panelOpen} onClick={() => setPanelOpen(o => !o)}>
-            Chat ({roster.length})
-          </Btn>
-        )}
+      {/* ── Bottom control bar ── */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: narrow ? 0 : 6, padding: '8px 10px 12px', flexWrap: 'wrap' }}>
+        <CtlBtn icon={micOn ? 'mic' : 'micOff'} label={micOn ? 'Mute' : 'Unmute'} danger={!micOn} onClick={toggleMic} />
+        <CtlBtn icon={camOn ? 'cam' : 'camOff'} label={camOn ? 'Stop Video' : 'Start Video'} danger={!camOn} onClick={toggleCam} />
+        {isTeacher && <CtlBtn icon="share" label={sharing ? 'Stop Share' : 'Share Screen'} active={sharing} onClick={sharing ? stopShare : startShare} />}
+        <CtlBtn icon="pen" label="Whiteboard" active={mainView === 'board'} onClick={() => setMainView('board')} />
+        {!isTeacher && <CtlBtn icon="raise" label={handUp ? 'Lower Hand' : 'Raise Hand'} active={handUp} onClick={toggleHand} />}
+        <CtlBtn icon="chat" label="Chat" active={panelOpen && panel === 'chat'}
+          onClick={() => { setPanel('chat'); setPanelOpen(o => !(o && panel === 'chat')) }} />
+        <CtlBtn icon="people" label="Participants" badge={roster.length} active={panelOpen && panel === 'people'}
+          onClick={() => { setPanel('people'); setPanelOpen(o => !(o && panel === 'people')) }} />
+        <button onClick={leave} style={{
+          display: 'flex', alignItems: 'center', gap: 8, background: '#E23A3A', color: '#fff', border: 'none',
+          borderRadius: 12, padding: '11px 22px', fontSize: 13.5, fontWeight: 800, cursor: 'pointer', marginLeft: narrow ? 6 : 16,
+        }}><Ic d={ICONS.phone} size={16} /> Leave</button>
       </div>
     </div>
   )
 }
-
 
 // ── Full-pane presentation surface ─────────────────────────
 function ScreenView({ stream, muted }) {
