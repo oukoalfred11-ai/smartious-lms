@@ -7,6 +7,12 @@ const mongoose   = require('mongoose');
 
 const app = express();
 
+// Render runs the app behind a reverse proxy; without this, every
+// request appears to come from the proxy's IP and express-rate-limit
+// throws ERR_ERL_UNEXPECTED_X_FORWARDED_FOR while rate-limiting all
+// users as one. Trust exactly one proxy hop.
+app.set('trust proxy', 1);
+
 // ── Security headers ─────────────────────────────────────
 // Disable CSP in development — Vite uses inline scripts for HMR
 app.use(helmet({
@@ -66,6 +72,7 @@ app.use('/api/lesson-progress', require('./routes/lesson-progress'));
 app.use('/api/curriculum',     require('./routes/curriculum'));
 app.use('/api/timetables', require('./routes/timetables'));
 app.use('/api/syllabus', require('./routes/syllabus'));
+app.use('/api/classroom', require('./routes/classroom'));
 app.use('/api/timetable', require('./routes/timetable'));
 app.use('/api/student-profile', require('./routes/student-profile'));
 app.use('/api/students',       require('./routes/students'));
@@ -172,7 +179,11 @@ if (!MONGODB_URI) {
 mongoose.connect(MONGODB_URI)
   .then(() => {
     console.log('[OK] MongoDB connected');
-    app.listen(PORT, () =>
+    // Socket.IO needs the raw http server (WebSocket upgrade requests
+    // never reach Express routes), so wrap the app before listening.
+    const httpServer = require('http').createServer(app);
+    require('./realtime/classroom').attachClassroom(httpServer, ALLOWED_ORIGINS);
+    httpServer.listen(PORT, () =>
       console.log(`API running on port ${PORT} [${process.env.NODE_ENV || 'development'}]`)
     );
 
