@@ -553,6 +553,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
 
   const drawOp = useCallback((ctx, op) => {
     if (op.kind === 'lock') return
+    if (op.kind === 'gsheet') return   // rendered by composite, under the ink
     if (op.kind === 'image') {
       const cache = imgCacheRef.current
       let img = cache.get(op.id)
@@ -673,6 +674,36 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
         ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1 + S, y); ctx.stroke()
       }
     }
+    // Graph SHEETS: bounded pieces of graph paper laid on the board,
+    // drawn UNDER the ink so plots sit on them and erasing ink never
+    // touches the paper. Movable and stretchable with Select.
+    ctx.setTransform(z, 0, 0, z, o.x, o.y)
+    for (const s of opsRef.current) {
+      if (s.kind !== 'gsheet') continue
+      ctx.fillStyle = '#FFFFFF'
+      ctx.fillRect(s.x1, s.y1, s.w, s.h)
+      ctx.strokeStyle = 'rgba(30,64,175,.16)'
+      ctx.lineWidth = 1 / z
+      const S = 40
+      for (let x = s.x1; x <= s.x1 + s.w + 0.1; x += S) {
+        ctx.strokeStyle = (Math.round((x - s.x1) / S) % 5 === 0) ? 'rgba(30,64,175,.32)' : 'rgba(30,64,175,.16)'
+        ctx.beginPath(); ctx.moveTo(x, s.y1); ctx.lineTo(x, s.y1 + s.h); ctx.stroke()
+      }
+      for (let y = s.y1; y <= s.y1 + s.h + 0.1; y += S) {
+        ctx.strokeStyle = (Math.round((y - s.y1) / S) % 5 === 0) ? 'rgba(30,64,175,.32)' : 'rgba(30,64,175,.16)'
+        ctx.beginPath(); ctx.moveTo(s.x1, y); ctx.lineTo(s.x1 + s.w, y); ctx.stroke()
+      }
+      ctx.strokeStyle = 'rgba(30,64,175,.5)'
+      ctx.lineWidth = 1.5 / z
+      ctx.strokeRect(s.x1, s.y1, s.w, s.h)
+      // stretch handle: corner tab bottom-right
+      ctx.fillStyle = 'rgba(30,64,175,.55)'
+      ctx.beginPath()
+      ctx.moveTo(s.x1 + s.w, s.y1 + s.h - 16)
+      ctx.lineTo(s.x1 + s.w, s.y1 + s.h)
+      ctx.lineTo(s.x1 + s.w - 16, s.y1 + s.h)
+      ctx.closePath(); ctx.fill()
+    }
     if (ink) {
       ctx.setTransform(1, 0, 0, 1, 0, 0)
       ctx.drawImage(ink, 0, 0)
@@ -746,6 +777,13 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       composite()
       return
     }
+    if (op.kind === 'resize') {
+      const target = opsRef.current.find(o => o.id === op.target)
+      if (target) { target.w = Math.max(4 * 40, (target.w || 0) + op.dw); target.h = Math.max(4 * 40, (target.h || 0) + op.dh) }
+      opsRef.current.push(op)
+      redrawRef.current()
+      return
+    }
     if (op.kind === 'book') { setOpenBook(op.id ? { id: op.id, title: op.title || 'Coursebook', page: op.page || 1 } : null); return }
     opsRef.current.push(op)
     const ink = inkRef.current
@@ -773,7 +811,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
 
   const opBounds = (op) => {
     const pad = (op.w || 3) + 6
-    if (op.kind === 'image') return { x: op.x1, y: op.y1, w: op.w, h: op.h }
+    if (op.kind === 'image' || op.kind === 'gsheet') return { x: op.x1, y: op.y1, w: op.w, h: op.h }
     if (op.kind === 'diagram') return { x: op.x1 - 240, y: op.y1 - 240, w: 480, h: 480 }
     if (op.kind === 'text') return { x: op.x1 - 4, y: op.y1 - (op.size || 18), w: (op.text || '').length * (op.size || 18) * 0.6 + 8, h: (op.size || 18) + 8 }
     if (op.kind === 'arc') {
@@ -792,7 +830,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
     return { x, y, w: Math.max(...xs) - x + pad * 2, h: Math.max(...ys) - y + pad * 2 }
   }
 
-  const MOVABLE = ['stroke', 'line', 'rect', 'circle', 'text', 'arrow', 'tri', 'poly', 'angle', 'image', 'diagram', 'arc']
+  const MOVABLE = ['stroke', 'line', 'rect', 'circle', 'text', 'arrow', 'tri', 'poly', 'angle', 'image', 'diagram', 'arc', 'gsheet']
   const hitTest = (p) => {
     const ops = opsRef.current
     for (let i = ops.length - 1; i >= 0; i--) {
@@ -814,6 +852,10 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
         if (removed.kind === 'move') {
           const target = ops.find(o => o.id === removed.target)
           if (target) translateOp(target, -removed.dx, -removed.dy)
+        }
+        if (removed.kind === 'resize') {
+          const target = ops.find(o => o.id === removed.target)
+          if (target) { target.w -= removed.dw; target.h -= removed.dh }
         }
         break
       }
@@ -929,6 +971,11 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
             else if (op.kind === 'inst') {
               instRef.current[op.name] = op.st || null
             }
+            else if (op.kind === 'resize') {
+              const target = opsRef.current.find(o => o.id === op.target)
+              if (target) { target.w = Math.max(4 * 40, (target.w || 0) + op.dw); target.h = Math.max(4 * 40, (target.h || 0) + op.dh) }
+              opsRef.current.push(op)
+            }
             else if (op.kind === 'book') {
               setOpenBook(op.id ? { id: op.id, title: op.title || 'Coursebook', page: op.page || 1 } : null)
             }
@@ -1010,10 +1057,16 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
     const rot = R.rot || 0
     const lx = (p.x - R.x) * Math.cos(-rot) - (p.y - R.y) * Math.sin(-rot)
     const ly = (p.x - R.x) * Math.sin(-rot) + (p.y - R.y) * Math.cos(-rot)
-    // Within 16 world-units above the top edge, along its length
     const L = R.len || 10 * 40
-    if (lx >= -8 && lx <= L + 8 && ly > -18 && ly < 10) {
-      return { x: R.x + lx * Math.cos(rot), y: R.y + lx * Math.sin(rot) }
+    // The ruler occludes: anywhere on or near the body snaps the pen
+    // to the NEAREST edge (top y=0 or bottom y=44), so you can rule
+    // along either side but never scribble across the instrument.
+    if (lx >= -8 && lx <= L + 8 && ly > -18 && ly < 62) {
+      const edge = ly < 22 ? 0 : 44
+      return {
+        x: R.x + lx * Math.cos(rot) - edge * Math.sin(rot),
+        y: R.y + lx * Math.sin(rot) + edge * Math.cos(rot),
+      }
     }
     return p
   }
@@ -1130,6 +1183,14 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
     // Select tool: grab whatever is under the cursor and drag it.
     if (tool === 'select') {
       const hit = hitTest(p)
+      if (hit && hit.kind === 'gsheet' &&
+          Math.abs(p.x - (hit.x1 + hit.w)) < 22 && Math.abs(p.y - (hit.y1 + hit.h)) < 22) {
+        d.active = 'resize'
+        d.moveTarget = hit
+        d.moveAcc = { x: 0, y: 0 }
+        d.last = p
+        return
+      }
       if (hit) {
         d.active = 'move'
         d.moveTarget = hit
@@ -1205,6 +1266,16 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       const p = toWorld(e)
       const dx = p.x - d.last.x, dy = p.y - d.last.y
       translateOp(d.moveTarget, dx, dy)
+      d.moveAcc.x += dx; d.moveAcc.y += dy
+      d.last = p
+      redraw()
+      return
+    }
+    if (d.active === 'resize') {
+      const p = toWorld(e)
+      const dx = p.x - d.last.x, dy = p.y - d.last.y
+      d.moveTarget.w = Math.max(4 * 40, d.moveTarget.w + dx)
+      d.moveTarget.h = Math.max(4 * 40, d.moveTarget.h + dy)
       d.moveAcc.x += dx; d.moveAcc.y += dy
       d.last = p
       redraw()
@@ -1299,6 +1370,15 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       }
       sendInst(name, instRef.current[name], true)
       d.active = false; d.inst = null; d.sweep = null
+      return
+    }
+    if (d.active === 'resize') {
+      if (d.moveTarget && (Math.abs(d.moveAcc.x) > 0.5 || Math.abs(d.moveAcc.y) > 0.5)) {
+        const op = { kind: 'resize', target: d.moveTarget.id, dw: d.moveAcc.x, dh: d.moveAcc.y, by: myIdRef.current, id: newOpId() }
+        opsRef.current.push(op)
+        socketRef.current?.emit('board:op', op)
+      }
+      d.active = false; d.moveTarget = null
       return
     }
     if (d.active === 'move') {
@@ -1889,8 +1969,12 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
                 cx: ((cv?.width || 900) / 2 - o.x) / z, cy: ((cv?.height || 500) / 2 - o.y) / z }, true)
             }
           }} />
-        <IconBtn icon="grid" title={grid ? 'Plain board' : 'Graph paper for everyone'} active={grid}
-          onClick={() => { const g = !grid; setGrid(g); sendOpLive({ kind: 'bg', grid: g }) }} />
+        <IconBtn icon="grid" title="Lay a graph-paper sheet on the board (move it with Select, stretch it by its corner)"
+          onClick={() => {
+            const cv = canvasRef.current, { zoom: z, offset: o } = viewRef.current
+            const cx = ((cv?.width || 900) / 2 - o.x) / z, cy = ((cv?.height || 500) / 2 - o.y) / z
+            sendOp({ kind: 'gsheet', x1: cx - 6 * 40, y1: cy - 5 * 40, w: 12 * 40, h: 10 * 40 })
+          }} />
         <IconBtn icon="image" title="Put a picture on the board" onClick={() => imgInputRef.current?.click()} />
         <IconBtn icon="book" title="Put a Library page on the board" onClick={() => setShowLibPicker(true)} />
         <IconBtn icon={boardLocked ? 'lockC' : 'lockO'} active={!boardLocked}
