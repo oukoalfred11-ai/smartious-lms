@@ -678,7 +678,9 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   // The permission prompt only fires from these click handlers — a
   // real user gesture — which is what makes browsers show it
   // reliably, including on phones.
+  const [lobbyErr, setLobbyErr] = useState('')
   const lobbyEnable = async () => {
+    setLobbyErr('')
     try {
       const s = await navigator.mediaDevices.getUserMedia({
         audio: { echoCancellation: true, noiseSuppression: true },
@@ -692,8 +694,10 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
         const s = await navigator.mediaDevices.getUserMedia({ audio: true })
         lobbyStreamRef.current = s
         setLobbyStatus('audio')
+        setLobbyErr(diagnoseMediaError(e1, true))
       } catch (e2) {
         setLobbyStatus('denied')
+        setLobbyErr(diagnoseMediaError(e2, false))
       }
     }
   }
@@ -908,8 +912,8 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
               <LobbyPreview stream={lobbyPreview} />
             ) : (
               <div style={{ color: T.sub, fontSize: 12.5, padding: 20, lineHeight: 1.6 }}>
-                {lobbyStatus === 'denied'
-                  ? 'The browser blocked the camera and microphone. Tap the lock or camera icon in the address bar, allow both for this site, then try again. If you opened this link inside WhatsApp or Gmail, open it in Chrome or Safari instead.'
+                {lobbyErr
+                  ? lobbyErr
                   : lobbyStatus === 'audio'
                   ? 'Microphone ready. Camera unavailable — you can join with audio.'
                   : 'Your camera preview appears here.'}
@@ -1308,4 +1312,30 @@ function LobbyPreview({ stream }) {
   useEffect(() => { if (ref.current && stream) ref.current.srcObject = stream }, [stream])
   return <video ref={ref} autoPlay playsInline muted
     style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }} />
+}
+
+
+// Translate getUserMedia failures into the exact fix for THIS device.
+// The error name tells us which layer blocked it.
+function diagnoseMediaError(err, cameraOnly) {
+  const what = cameraOnly ? 'camera' : 'camera and microphone'
+  switch (err && err.name) {
+    case 'NotAllowedError':
+    case 'PermissionDeniedError':
+      return 'This site is blocked from using the ' + what + ' in the browser. ' +
+        'Click the icon at the LEFT of the address bar, set Camera and Microphone to Allow, then press Try again. ' +
+        'If there is no such option, type chrome://settings/content/camera in the address bar and remove this site from the Not allowed list (and the same for microphone).'
+    case 'NotFoundError':
+    case 'DevicesNotFoundError':
+      return 'No ' + what + ' was detected on this device. If this laptop has a webcam, check the physical camera shutter/switch and that drivers are installed.'
+    case 'NotReadableError':
+    case 'TrackStartError':
+      return 'The ' + what + ' exists but Windows or another app is holding it. Close Zoom, Teams, and any camera app completely, then check Windows Settings, Privacy and security, Camera: turn ON camera access and Let desktop apps access your camera (and the same for Microphone). Then press Try again.'
+    case 'OverconstrainedError':
+      return 'The camera does not support the requested settings. Press Try again — the classroom will fall back automatically.'
+    case 'SecurityError':
+      return 'The browser refused for security reasons. Make sure you opened the classroom at https://smartioushomeschool.com (with https), not inside another app.'
+    default:
+      return 'Could not access the ' + what + ' (' + (err && err.name || 'unknown') + '). Restart the browser and try again; if it persists, test the machine at webrtc.github.io/samples.'
+  }
 }
