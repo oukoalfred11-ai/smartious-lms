@@ -168,47 +168,90 @@ function drawInstruments(ctx, insts, z) {
   if (Cm && Cm.visible) {
     const ha = Cm.ha || 0
     const px = Cm.cx + Cm.r * Math.cos(ha), py = Cm.cy + Cm.r * Math.sin(ha)
-    // Dashed guide circle the pencil would trace
-    ctx.strokeStyle = 'rgba(180,40,60,.55)'
+    // Guide circle the pencil would trace (fades when pencil is up)
+    ctx.strokeStyle = Cm.draw ? 'rgba(180,40,60,.6)' : 'rgba(120,120,130,.35)'
     ctx.lineWidth = lw(1.2)
     ctx.setLineDash([6, 6])
     ctx.beginPath(); ctx.arc(Cm.cx, Cm.cy, Cm.r, 0, Math.PI * 2); ctx.stroke()
     ctx.setLineDash([])
-    // The instrument: hinge above the midpoint, two legs down to the
-    // needle (centre) and the pencil (circumference).
+
+    // Geometry: hinge above the midpoint of needle..pencil
     const mx = (Cm.cx + px) / 2, my = (Cm.cy + py) / 2
-    let nxp = -(py - Cm.cy), nyp = (px - Cm.cx)
-    const nl = Math.hypot(nxp, nyp) || 1
-    nxp /= nl; nyp /= nl
-    if (nyp > 0) { nxp = -nxp; nyp = -nyp }   // hinge opens upward
+    let nx = -(py - Cm.cy), ny = (px - Cm.cx)
+    const nl = Math.hypot(nx, ny) || 1
+    nx /= nl; ny /= nl
+    if (ny > 0) { nx = -nx; ny = -ny }
     const h = Math.max(55, Math.min(150, Cm.r * 0.75))
-    const ax = mx + nxp * h, ay = my + nyp * h
-    ctx.strokeStyle = 'rgba(90,90,100,.95)'
-    ctx.lineWidth = lw(4)
-    ctx.beginPath(); ctx.moveTo(Cm.cx, Cm.cy); ctx.lineTo(ax, ay); ctx.stroke()   // needle leg
-    ctx.strokeStyle = 'rgba(180,40,60,.95)'
-    ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(ax, ay); ctx.stroke()          // pencil leg
-    // hinge head
-    ctx.beginPath(); ctx.arc(ax, ay, 7, 0, Math.PI * 2)
-    ctx.fillStyle = '#6B7280'; ctx.fill()
-    ctx.strokeStyle = 'rgba(60,60,70,.9)'; ctx.lineWidth = lw(1.4); ctx.stroke()
-    ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(ax + nxp * 16, ay + nyp * 16); ctx.stroke()  // grip stem
-    // needle point at the centre
-    ctx.fillStyle = '#374151'
-    ctx.beginPath(); ctx.moveTo(Cm.cx, Cm.cy)
-    const na = Math.atan2(ay - Cm.cy, ax - Cm.cx)
-    ctx.lineTo(Cm.cx + 9 * Math.cos(na + 0.28), Cm.cy + 9 * Math.sin(na + 0.28))
-    ctx.lineTo(Cm.cx + 9 * Math.cos(na - 0.28), Cm.cy + 9 * Math.sin(na - 0.28))
-    ctx.closePath(); ctx.fill()
-    // pencil tip at the circumference (drag me = radius)
+    const ax = mx + nx * h, ay = my + ny * h
+
+    // Soft ground shadows under the two contact points (3-D cue)
+    ctx.fillStyle = 'rgba(0,0,0,.13)'
+    ctx.beginPath(); ctx.ellipse(Cm.cx + 3, Cm.cy + 4, 10, 4, 0, 0, Math.PI * 2); ctx.fill()
+    ctx.beginPath(); ctx.ellipse(px + 3, py + 4, 10, 4, 0, 0, Math.PI * 2); ctx.fill()
+
+    // A leg drawn as a metallic bar: quad with a cross-gradient
+    const leg = (x1, y1, x2, y2, w1, w2, c1, c2, c3) => {
+      const dx = x2 - x1, dy = y2 - y1
+      const L = Math.hypot(dx, dy) || 1
+      const ux = -dy / L, uy = dx / L
+      const g = ctx.createLinearGradient(x1 + ux * w1, y1 + uy * w1, x1 - ux * w1, y1 - uy * w1)
+      g.addColorStop(0, c1); g.addColorStop(0.45, c2); g.addColorStop(1, c3)
+      ctx.fillStyle = g
+      ctx.beginPath()
+      ctx.moveTo(x1 + ux * w1, y1 + uy * w1)
+      ctx.lineTo(x2 + ux * w2, y2 + uy * w2)
+      ctx.lineTo(x2 - ux * w2, y2 - uy * w2)
+      ctx.lineTo(x1 - ux * w1, y1 - uy * w1)
+      ctx.closePath(); ctx.fill()
+      ctx.strokeStyle = 'rgba(40,40,50,.5)'; ctx.lineWidth = lw(0.8); ctx.stroke()
+    }
+
+    // Needle leg: steel, tapering to the point
+    leg(ax, ay, Cm.cx + (Cm.cx - ax) * 0.02, Cm.cy + (Cm.cy - ay) * 0.02, 7, 1.5,
+      '#EDEFF2', '#B9BEC7', '#7C828C')
+    // Pencil leg: steel holder for the upper 55%, wood + graphite below
+    const wx = ax + (px - ax) * 0.55, wy = ay + (py - ay) * 0.55
+    leg(ax, ay, wx, wy, 7, 5, '#EDEFF2', '#B9BEC7', '#7C828C')
+    leg(wx, wy, px + (px - wx) * 0.02, py + (py - wy) * 0.02, 5, 1.5,
+      '#EFC98A', '#D8A35A', '#A9762F')
+    // Graphite tip
     const pa = Math.atan2(ay - py, ax - px)
-    ctx.fillStyle = '#E24B4A'
+    ctx.fillStyle = '#3A3A3E'
     ctx.beginPath(); ctx.moveTo(px, py)
-    ctx.lineTo(px + 12 * Math.cos(pa + 0.3), py + 12 * Math.sin(pa + 0.3))
-    ctx.lineTo(px + 12 * Math.cos(pa - 0.3), py + 12 * Math.sin(pa - 0.3))
+    ctx.lineTo(px + 8 * Math.cos(pa + 0.3), py + 8 * Math.sin(pa + 0.3))
+    ctx.lineTo(px + 8 * Math.cos(pa - 0.3), py + 8 * Math.sin(pa - 0.3))
     ctx.closePath(); ctx.fill()
+    // Needle point
+    const na = Math.atan2(ay - Cm.cy, ax - Cm.cx)
+    ctx.fillStyle = '#565B64'
+    ctx.beginPath(); ctx.moveTo(Cm.cx, Cm.cy)
+    ctx.lineTo(Cm.cx + 9 * Math.cos(na + 0.24), Cm.cy + 9 * Math.sin(na + 0.24))
+    ctx.lineTo(Cm.cx + 9 * Math.cos(na - 0.24), Cm.cy + 9 * Math.sin(na - 0.24))
+    ctx.closePath(); ctx.fill()
+
+    // Hinge knob: radial-gradient sphere with a screw
+    const kg = ctx.createRadialGradient(ax - 3, ay - 3 + nx * 0, 2, ax, ay, 12)
+    kg.addColorStop(0, '#F5F6F8'); kg.addColorStop(0.6, '#9AA0AA'); kg.addColorStop(1, '#5E646E')
+    ctx.fillStyle = kg
+    ctx.beginPath(); ctx.arc(ax, ay, 11, 0, Math.PI * 2); ctx.fill()
+    ctx.strokeStyle = 'rgba(40,40,50,.6)'; ctx.lineWidth = lw(1); ctx.stroke()
+    ctx.fillStyle = '#454A52'
+    ctx.beginPath(); ctx.arc(ax, ay, 3, 0, Math.PI * 2); ctx.fill()
+    // Grip stem
+    leg(ax + nx * 10, ay + ny * 10, ax + nx * 30, ay + ny * 30, 3.5, 3.5, '#EDEFF2', '#B9BEC7', '#7C828C')
+
+    // DRAW toggle chip beside the hinge: pencil down / up
+    const bx = ax + nx * 30 + 24, by = ay + ny * 30
+    Cm._chip = { x: bx + 26, y: by }   // hit centre cached for the interaction layer
+    ctx.fillStyle = Cm.draw ? '#E24B4A' : 'rgba(120,125,135,.9)'
+    ctx.beginPath()
+    ctx.roundRect ? ctx.roundRect(bx, by - 11, 52, 22, 11) : ctx.rect(bx, by - 11, 52, 22)
+    ctx.fill()
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 10px Arial'
+    ctx.fillText(Cm.draw ? 'DRAW' : 'SET', bx + (Cm.draw ? 11 : 15), by + 3.5)
+
     ctx.font = '12px Arial'; ctx.fillStyle = 'rgba(150,20,40,.95)'
-    ctx.fillText('r = ' + (Cm.r / 40).toFixed(1) + ' u', mx + 12, my)
+    ctx.fillText('r = ' + (Cm.r / 40).toFixed(1) + ' u', mx + 14, my + 4)
   }
   ctx.restore()
 }
@@ -1024,25 +1067,42 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       const I = instRef.current
       const near = (x, y, r) => Math.hypot(p.x - x, p.y - y) < r
       if (I.comp && I.comp.visible) {
-        const ha0 = I.comp.ha || 0
-        const hx = I.comp.cx + I.comp.r * Math.cos(ha0)
-        const hy = I.comp.cy + I.comp.r * Math.sin(ha0)
-        // pencil tip: SWEEP an arc onto the board (real ink)
-        if (near(hx, hy, 20)) {
-          d.active = 'inst'; d.inst = ['comp', 'sweep']
-          d.sweep = { a0: ha0, aCur: ha0, last: ha0 }
+        const Cm = I.comp
+        const ha0 = Cm.ha || 0
+        const hx = Cm.cx + Cm.r * Math.cos(ha0)
+        const hy = Cm.cy + Cm.r * Math.sin(ha0)
+        // DRAW/SET chip (position cached by the renderer)
+        if (Cm._chip && near(Cm._chip.x, Cm._chip.y, 26)) {
+          sendInst('comp', { ...Cm, draw: !Cm.draw }, true)
           return
         }
-        // hinge head: open/close the legs (set the radius)
-        const mx = (I.comp.cx + hx) / 2, my = (I.comp.cy + hy) / 2
-        let nx = -(hy - I.comp.cy), ny = (hx - I.comp.cx)
-        const nl = Math.hypot(nx, ny) || 1; nx /= nl; ny /= nl
+        // Pencil tip: SET mode opens/closes the legs freely;
+        // DRAW mode sweeps a real inked arc at the locked radius.
+        if (near(hx, hy, 24)) {
+          if (Cm.draw) {
+            d.active = 'inst'; d.inst = ['comp', 'sweep']
+            d.sweep = { a0: ha0, aCur: ha0, last: ha0 }
+          } else {
+            d.active = 'inst'; d.inst = ['comp', 'radius']
+          }
+          return
+        }
+        // Anywhere else on the instrument (needle, legs, hinge): move
+        const mx = (Cm.cx + hx) / 2, my = (Cm.cy + hy) / 2
+        let nx = -(hy - Cm.cy), ny = (hx - Cm.cx)
+        const nl2 = Math.hypot(nx, ny) || 1; nx /= nl2; ny /= nl2
         if (ny > 0) { nx = -nx; ny = -ny }
-        const hh = Math.max(55, Math.min(150, I.comp.r * 0.75))
-        if (near(mx + nx * hh, my + ny * hh, 20)) { d.active = 'inst'; d.inst = ['comp', 'radius']; return }
-        // needle point or between the legs: move the instrument
-        if (near(I.comp.cx, I.comp.cy, 18) || near(mx, my, Math.max(26, I.comp.r * 0.4))) {
-          d.active = 'inst'; d.inst = ['comp', 'body']; d.last = p; return
+        const hh = Math.max(55, Math.min(150, Cm.r * 0.75))
+        const axp = mx + nx * hh, ayp = my + ny * hh
+        const distToSeg = (x1, y1, x2, y2) => {
+          const L2 = (x2 - x1) ** 2 + (y2 - y1) ** 2 || 1
+          const t = Math.max(0, Math.min(1, ((p.x - x1) * (x2 - x1) + (p.y - y1) * (y2 - y1)) / L2))
+          return Math.hypot(p.x - (x1 + t * (x2 - x1)), p.y - (y1 + t * (y2 - y1)))
+        }
+        if (near(Cm.cx, Cm.cy, 20) || near(axp, ayp, 22) ||
+            distToSeg(Cm.cx, Cm.cy, axp, ayp) < 14 || distToSeg(hx, hy, axp, ayp) < 14) {
+          d.active = 'inst'; d.inst = ['comp', 'body']; d.last = p
+          return
         }
       }
       if (I.prot && I.prot.visible) {
@@ -1163,6 +1223,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
         if (name === 'prot') I.rot = Math.atan2(p.x - I.x, -(p.y - I.y)) * -1
       } else if (part === 'radius') {
         I.r = Math.max(20, Math.hypot(p.x - I.cx, p.y - I.cy))
+        I.ha = Math.atan2(p.y - I.cy, p.x - I.cx)
       } else if (part === 'sweep') {
         const ang = Math.atan2(p.y - I.cy, p.x - I.cx)
         let delta = ang - d.sweep.last
@@ -1818,13 +1879,13 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
                 x: ((cv?.width || 900) / 2 - o.x) / z, y: ((cv?.height || 500) / 2 - o.y) / z }, true)
             }
           }} />
-        <IconBtn icon="comp" title="Compass: drag the needle to place it, the hinge to open the legs (radius), then drag the pencil tip to sweep a real arc" active={!!instRef.current.comp?.visible}
+        <IconBtn icon="comp" title="Compass: drag anywhere on it to move; drag the pencil to open the legs; tap DRAW to lower the pencil, then sweep it to ink an arc" active={!!instRef.current.comp?.visible}
           onClick={() => {
             const cur = instRef.current.comp
             if (cur && cur.visible) sendInst('comp', null, true)
             else {
               const cv = canvasRef.current, { zoom: z, offset: o } = viewRef.current
-              sendInst('comp', { visible: true, r: 2 * 40, ha: -0.6,
+              sendInst('comp', { visible: true, r: 2 * 40, ha: -0.6, draw: false,
                 cx: ((cv?.width || 900) / 2 - o.x) / z, cy: ((cv?.height || 500) / 2 - o.y) / z }, true)
             }
           }} />
