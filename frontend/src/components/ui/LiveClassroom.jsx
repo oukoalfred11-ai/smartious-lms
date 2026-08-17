@@ -1676,6 +1676,14 @@ function BookReader({ book, canControl, onPage, onClose, onStamp }) {
   )
 }
 
+// Mirrored self-preview for the lobby.
+function LobbyPreview({ stream }) {
+  const ref = useRef(null)
+  useEffect(() => { if (ref.current && stream) ref.current.srcObject = stream }, [stream])
+  return <video ref={ref} autoPlay playsInline muted
+    style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }} />
+}
+
 // Translate getUserMedia failures into the exact fix for THIS device.
 // The error name tells us which layer blocked it.
 function diagnoseMediaError(err, cameraOnly) {
