@@ -102,6 +102,16 @@ const liveClassSchema = new mongoose.Schema({
     index: true,
   }],
 
+  // ── Recordings (native Smartious Classroom) ─────
+  // Uploaded by the teacher's browser during/after the lesson.
+  // url points at the public R2 object (WebM video).
+  recordings: [{
+    url:        { type: String, required: true },
+    sizeBytes:  { type: Number, default: 0 },
+    durationSec:{ type: Number, default: 0 },
+    recordedAt: { type: Date, default: Date.now },
+  }],
+
   // ── Lifecycle ───────────────────────────────────
   status: {
     type: String,
