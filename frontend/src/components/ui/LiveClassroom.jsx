@@ -376,12 +376,30 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
     const fit = () => {
       const cv = canvasRef.current, wrap = wrapRef.current
       if (!cv || !wrap) return
-      cv.width = wrap.clientWidth; cv.height = wrap.clientHeight
+      const w = wrap.clientWidth, h = wrap.clientHeight
+      if (!w || !h) return                    // container not laid out yet
+      if (cv.width === w && cv.height === h) return
+      cv.width = w; cv.height = h
       redraw()
     }
     fit()
+    // The board card resizes when the chat panel opens/closes, tiles
+    // hide, fullscreen toggles, or the layout settles after join —
+    // none of which fire a window resize. Observe the container
+    // itself so the canvas can never be stuck at a stale/zero size
+    // (which makes every tool look dead).
+    let ro = null
+    if (typeof ResizeObserver !== 'undefined' && wrapRef.current) {
+      ro = new ResizeObserver(fit)
+      ro.observe(wrapRef.current)
+    }
     window.addEventListener('resize', fit)
-    return () => window.removeEventListener('resize', fit)
+    const t = setInterval(fit, 1500)          // belt and braces
+    return () => {
+      window.removeEventListener('resize', fit)
+      if (ro) ro.disconnect()
+      clearInterval(t)
+    }
   }, [redraw, phase])
 
   const applyOp = useCallback((op) => {
@@ -701,14 +719,50 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   const onPointerEnd = (e) => { pointersRef.current.delete(e.pointerId) }
 
   // ═══ CONTROLS ══════════════════════════════════════════════
-  const toggleMic = () => {
+  const ensureLiveTrack = async (kind) => {
+    const eng = engineRef.current
+    if (!eng) return false
+    const existing = eng.localStream.getTracks().find(t => t.kind === kind)
+    if (existing && existing.readyState === 'live') return true
+    // Track missing or ended (device unplugged, another app grabbed
+    // it, or it was stopped): get a fresh one and swap it in live.
+    try {
+      const fresh = await navigator.mediaDevices.getUserMedia(
+        kind === 'video'
+          ? { video: { width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 20 } } }
+          : { audio: { echoCancellation: true, noiseSuppression: true } }
+      )
+      const track = fresh.getTracks()[0]
+      if (existing) eng.localStream.removeTrack(existing)
+      if (kind === 'video') {
+        await eng.replaceVideoTrack(track)
+      } else {
+        eng.localStream.addTrack(track)
+        for (const { pc } of eng.peers.values()) {
+          const sender = pc.getSenders().find(s => s.track && s.track.kind === 'audio')
+          if (sender) await sender.replaceTrack(track).catch(() => {})
+          else pc.addTrack(track, eng.localStream)
+        }
+      }
+      setLocalStream(eng.localStream)
+      return true
+    } catch (e) {
+      console.error('[media] could not re-acquire ' + kind, e)
+      setMediaNote('Could not turn the ' + (kind === 'video' ? 'camera' : 'microphone') + ' back on — press Enable camera and mic, or check that no other app is using it.')
+      return false
+    }
+  }
+
+  const toggleMic = async () => {
     const next = !micOn
+    if (next && !(await ensureLiveTrack('audio'))) return
     setMicOn(next)
     engineRef.current?.setTrackEnabled('audio', next)
     socketRef.current?.emit('state', { micOn: next })
   }
-  const toggleCam = () => {
+  const toggleCam = async () => {
     const next = !camOn
+    if (next && !(await ensureLiveTrack('video'))) return
     setCamOn(next)
     engineRef.current?.setTrackEnabled('video', next)
     socketRef.current?.emit('state', { camOn: next })
