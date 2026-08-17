@@ -10,6 +10,10 @@
  *     replayed for late joiners, so all boards stay identical
  *   - chat, participants with raise-hand and mic/cam indicators
  *   - teacher controls: allow or lock student drawing, clear board
+ *   - teacher screen share (camera track swapped live, no renegotiation)
+ *     with an automatic presentation view on every screen
+ *   - teacher can push pictures and Library PDF pages onto the board
+ *     as image ops, replayed for late joiners like any stroke
  *
  * Runs alongside the meetingLink flow during the pilot: this component
  * mounts only from the /classroom/:liveClassId route, and nothing about
@@ -88,6 +92,11 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   const [micOn, setMicOn] = useState(true)
   const [camOn, setCamOn] = useState(true)
   const [handUp, setHandUp] = useState(false)
+  const [sharing, setSharing] = useState(false)
+  const [mainView, setMainView] = useState('board')   // 'board' | 'screen'
+  const camTrackRef = useRef(null)
+  const [showLibPicker, setShowLibPicker] = useState(false)
+  const imgInputRef = useRef(null)
 
   // ── board ──
   const canvasRef = useRef(null)
@@ -117,8 +126,31 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   const canDraw = isTeacher || !boardLocked
 
   // ═══ BOARD RENDERING ═══════════════════════════════════════
+  // Images (pictures, PDF pages) are board ops like any stroke; the
+  // bitmap is cached per op and the board redraws once it decodes.
+  const imgCacheRef = useRef(new Map())
+  const redrawRef = useRef(() => {})
+
   const drawOp = useCallback((ctx, op) => {
     if (op.kind === 'lock') return
+    if (op.kind === 'image') {
+      const cache = imgCacheRef.current
+      let img = cache.get(op.id)
+      if (!img) {
+        img = new Image()
+        img.onload = () => redrawRef.current()
+        img.src = op.src
+        cache.set(op.id, img)
+      }
+      if (img.complete && img.naturalWidth) {
+        ctx.drawImage(img, op.x1, op.y1, op.w, op.h)
+      } else {
+        ctx.strokeStyle = 'rgba(255,255,255,.25)'
+        ctx.lineWidth = 1
+        ctx.strokeRect(op.x1, op.y1, op.w, op.h)
+      }
+      return
+    }
     ctx.strokeStyle = op.tool === 'eraser' ? BOARD_BG : (op.color || '#fff')
     ctx.fillStyle = op.color || '#fff'
     ctx.lineWidth = (op.tool === 'eraser' ? (op.w || 3) * 6 : (op.w || 3))
@@ -151,6 +183,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
     ctx.setTransform(z, 0, 0, z, o.x, o.y)
     for (const op of opsRef.current) drawOp(ctx, op)
   }, [drawOp])
+  redrawRef.current = redraw
 
   useEffect(() => { redraw() }, [zoom, offset, redraw])
 
@@ -404,6 +437,74 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   }
   const leave = () => { onLeave ? onLeave() : window.history.back() }
 
+  // ═══ SCREEN SHARE (teacher) ════════════════════════════════
+  const stopShare = useCallback(async () => {
+    const screenTrack = localStream?.getVideoTracks()[0]
+    if (screenTrack && screenTrack !== camTrackRef.current) screenTrack.stop()
+    await engineRef.current?.replaceVideoTrack(camTrackRef.current || null)
+    camTrackRef.current = null
+    setSharing(false)
+    setMainView('board')
+    socketRef.current?.emit('state', { sharing: false })
+  }, [localStream])
+
+  const startShare = async () => {
+    try {
+      const display = await navigator.mediaDevices.getDisplayMedia({
+        video: { frameRate: { ideal: 10 } }, audio: false,
+      })
+      const screenTrack = display.getVideoTracks()[0]
+      camTrackRef.current = localStream?.getVideoTracks()[0] || null
+      await engineRef.current?.replaceVideoTrack(screenTrack)
+      screenTrack.onended = () => stopShare()   // browser "Stop sharing" bar
+      setSharing(true)
+      setMainView('screen')
+      socketRef.current?.emit('state', { sharing: true })
+    } catch (e) { /* user cancelled the picker */ }
+  }
+
+  // Students auto-switch to the presentation when the teacher shares.
+  const sharingPeer = roster.find(p => p.sharing && p.socketId !== socketRef.current?.id)
+  useEffect(() => {
+    if (sharingPeer) setMainView('screen')
+    else if (!sharing) setMainView('board')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [!!sharingPeer])
+
+  // ═══ PUSH CONTENT TO BOARD (teacher) ═══════════════════════
+  // Places the image at the centre of the teacher's current view in
+  // world coordinates, so it lands where they are looking.
+  const placeImageOp = (dataUrl, natW, natH) => {
+    const cv = canvasRef.current
+    const { zoom: z, offset: o } = viewRef.current
+    const worldW = 520
+    const worldH = worldW * (natH / natW)
+    const cx = ((cv?.width || 900) / 2 - o.x) / z
+    const cy = ((cv?.height || 500) / 2 - o.y) / z
+    sendOp({
+      kind: 'image', id: 'img-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+      x1: cx - worldW / 2, y1: cy - worldH / 2, w: worldW, h: worldH, src: dataUrl,
+    })
+  }
+
+  // Compress any picture to <=1280px JPEG so the op stays socket-sized.
+  const onPickImage = (e) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    const img = new Image()
+    img.onload = () => {
+      const scale = Math.min(1, 1280 / Math.max(img.width, img.height))
+      const c = document.createElement('canvas')
+      c.width = Math.round(img.width * scale)
+      c.height = Math.round(img.height * scale)
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height)
+      placeImageOp(c.toDataURL('image/jpeg', 0.8), c.width, c.height)
+      URL.revokeObjectURL(img.src)
+    }
+    img.src = URL.createObjectURL(file)
+  }
+
   const mm = String(Math.floor(elapsed / 60)).padStart(2, '0')
   const ss = String(elapsed % 60).padStart(2, '0')
 
@@ -467,14 +568,34 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
             <Btn active={!boardLocked} onClick={toggleBoardLock} title={boardLocked ? 'Students cannot draw. Click to allow.' : 'Students can draw. Click to lock.'}
               style={{ width: 42, padding: '7px 0', fontSize: 10.5, marginTop: 8 }}>{boardLocked ? 'Locked' : 'Open'}</Btn>
             <Btn onClick={clearBoard} title="Clear board for everyone" style={{ width: 42, padding: '7px 0', fontSize: 10.5 }}>Clear</Btn>
+            <Btn onClick={() => imgInputRef.current?.click()} title="Put a picture on the board"
+              style={{ width: 42, padding: '7px 0', fontSize: 10.5, marginTop: 8 }}>Img</Btn>
+            <Btn onClick={() => setShowLibPicker(true)} title="Put a Library PDF page on the board"
+              style={{ width: 42, padding: '7px 0', fontSize: 10.5 }}>Book</Btn>
+            <input ref={imgInputRef} type="file" accept="image/*" onChange={onPickImage} style={{ display: 'none' }} />
           </>)}
         </div>
 
-        {/* Board */}
+        {/* Board / presentation */}
         <div ref={wrapRef} style={{ flex: 1, position: 'relative', minWidth: 0, background: BOARD_BG }}>
+          {(sharing || sharingPeer) && (
+            <div style={{ position: 'absolute', top: 10, left: 12, zIndex: 5, display: 'flex', gap: 6 }}>
+              <Btn active={mainView === 'board'} onClick={() => setMainView('board')} style={{ padding: '6px 12px', fontSize: 11 }}>Board</Btn>
+              <Btn active={mainView === 'screen'} onClick={() => setMainView('screen')} style={{ padding: '6px 12px', fontSize: 11 }}>
+                {sharing ? 'Your screen' : (sharingPeer?.name || 'Teacher') + "'s screen"}
+              </Btn>
+            </div>
+          )}
+          {mainView === 'screen' && (sharing || sharingPeer) && (
+            <ScreenView
+              stream={sharing ? localStream : streams[sharingPeer?.socketId]}
+              muted={sharing}
+            />
+          )}
           <canvas ref={canvasRef}
             onMouseDown={onDown} onMouseMove={onMove} onMouseUp={onUp} onMouseLeave={onUp} onWheel={onWheel}
-            style={{ display: 'block', cursor: tool === 'pan' || !canDraw ? 'grab' : 'crosshair', touchAction: 'none' }} />
+            style={{ display: 'block', cursor: tool === 'pan' || !canDraw ? 'grab' : 'crosshair', touchAction: 'none',
+              visibility: mainView === 'screen' ? 'hidden' : 'visible' }} />
           {!canDraw && (
             <div style={{ position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)', background: 'rgba(0,0,0,.55)', color: 'rgba(255,255,255,.75)', fontSize: 11.5, padding: '5px 14px', borderRadius: 99 }}>
               View only — the teacher controls the board
@@ -536,11 +657,136 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
         </div>
       </div>
 
+      {showLibPicker && (
+        <LibraryPagePicker onClose={() => setShowLibPicker(false)} onPlace={placeImageOp} />
+      )}
+
       {/* ── Bottom controls ── */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '10px 16px', background: '#131A26', borderTop: '1px solid rgba(255,255,255,.08)' }}>
         <Btn active={micOn} danger={!micOn} onClick={toggleMic}>{micOn ? 'Mic on' : 'Mic off'}</Btn>
         <Btn active={camOn} danger={!camOn} onClick={toggleCam}>{camOn ? 'Camera on' : 'Camera off'}</Btn>
+        {isTeacher && (
+          <Btn active={sharing} onClick={sharing ? stopShare : startShare}>
+            {sharing ? 'Stop sharing' : 'Share screen'}
+          </Btn>
+        )}
         {!isTeacher && <Btn active={handUp} onClick={toggleHand}>{handUp ? 'Lower hand' : 'Raise hand'}</Btn>}
+      </div>
+    </div>
+  )
+}
+
+
+// ── Full-pane presentation surface ─────────────────────────
+function ScreenView({ stream, muted }) {
+  const ref = useRef(null)
+  useEffect(() => { if (ref.current && stream) ref.current.srcObject = stream }, [stream])
+  return (
+    <div style={{ position: 'absolute', inset: 0, background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2 }}>
+      {stream ? (
+        <video ref={ref} autoPlay playsInline muted={muted}
+          style={{ maxWidth: '100%', maxHeight: '100%' }} />
+      ) : (
+        <div style={{ color: 'rgba(255,255,255,.5)', fontSize: 13 }}>Waiting for the shared screen...</div>
+      )}
+    </div>
+  )
+}
+
+// ── Library PDF page picker (teacher) ──────────────────────
+// Search the Library, choose a book and a page, and the page is
+// rendered client-side with the bundled pdf.js, compressed, and
+// pushed onto the shared board as an image op.
+function LibraryPagePicker({ onClose, onPlace }) {
+  const [q, setQ] = useState('')
+  const [books, setBooks] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [book, setBook] = useState(null)
+  const [page, setPage] = useState(1)
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState('')
+
+  useEffect(() => {
+    let alive = true
+    setLoading(true)
+    const t = setTimeout(() => {
+      api.get('/library', { params: q.trim() ? { q: q.trim() } : {} })
+        .then(({ data }) => { if (alive) setBooks(data?.data?.books || []) })
+        .catch(() => { if (alive) setErr('Could not load the Library.') })
+        .finally(() => { if (alive) setLoading(false) })
+    }, 300)
+    return () => { alive = false; clearTimeout(t) }
+  }, [q])
+
+  const addPage = async () => {
+    if (!book) return
+    setBusy(true); setErr('')
+    try {
+      const pdfjs = await import(/* @vite-ignore */ '/pdfjs/pdf.min.mjs')
+      pdfjs.GlobalWorkerOptions.workerSrc = '/pdfjs/pdf.worker.min.mjs'
+      const token = localStorage.getItem('sm_token') || ''
+      const base = (api?.defaults?.baseURL || '')
+      const doc = await pdfjs.getDocument({
+        url: base + '/library/' + book._id + '/stream',
+        httpHeaders: { Authorization: 'Bearer ' + token },
+        rangeChunkSize: 1048576,
+      }).promise
+      const n = Math.min(Math.max(1, Number(page) || 1), doc.numPages)
+      const pdfPage = await doc.getPage(n)
+      const viewport = pdfPage.getViewport({ scale: 1.6 })
+      const c = document.createElement('canvas')
+      c.width = viewport.width; c.height = viewport.height
+      await pdfPage.render({ canvasContext: c.getContext('2d'), viewport }).promise
+      onPlace(c.toDataURL('image/jpeg', 0.82), c.width, c.height)
+      doc.destroy()
+      onClose()
+    } catch (e) {
+      console.error('[lib picker]', e)
+      setErr('Could not render that page. Try another page or book.')
+    } finally { setBusy(false) }
+  }
+
+  return (
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', zIndex: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: '#131A26', border: '1px solid rgba(255,255,255,.1)', borderRadius: 14, width: '100%', maxWidth: 460, maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ padding: '14px 18px', borderBottom: '1px solid rgba(255,255,255,.08)', display: 'flex', alignItems: 'center' }}>
+          <div style={{ color: '#fff', fontWeight: 800, fontSize: 14, flex: 1 }}>Add a Library page to the board</div>
+          <Btn onClick={onClose} style={{ padding: '5px 10px' }}>Close</Btn>
+        </div>
+        <div style={{ padding: '12px 18px' }}>
+          <input value={q} onChange={e => { setQ(e.target.value); setBook(null) }}
+            placeholder="Search books by title or subject"
+            style={{ width: '100%', boxSizing: 'border-box', background: 'rgba(255,255,255,.08)', border: 'none', borderRadius: 8, padding: '10px 12px', color: '#fff', fontSize: 12.5, outline: 'none' }} />
+        </div>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '0 18px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {loading ? (
+            <div style={{ color: 'rgba(255,255,255,.5)', fontSize: 12.5, padding: 16, textAlign: 'center' }}>Loading...</div>
+          ) : books.length === 0 ? (
+            <div style={{ color: 'rgba(255,255,255,.5)', fontSize: 12.5, padding: 16, textAlign: 'center' }}>No books found.</div>
+          ) : books.slice(0, 30).map(b => (
+            <div key={b._id} onClick={() => setBook(b)}
+              style={{
+                padding: '9px 12px', borderRadius: 8, cursor: 'pointer',
+                background: book?._id === b._id ? 'rgba(96,165,250,.25)' : 'rgba(255,255,255,.05)',
+                border: book?._id === b._id ? '1px solid rgba(96,165,250,.6)' : '1px solid transparent',
+              }}>
+              <div style={{ color: '#fff', fontSize: 12.5, fontWeight: 700 }}>{b.title}</div>
+              <div style={{ color: 'rgba(255,255,255,.45)', fontSize: 10.5, marginTop: 2 }}>
+                {[b.subjectName, b.grade, b.curriculum].filter(Boolean).join(' \u00b7 ')}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div style={{ padding: '12px 18px', borderTop: '1px solid rgba(255,255,255,.08)', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ color: 'rgba(255,255,255,.6)', fontSize: 12 }}>Page</span>
+          <input type="number" min="1" value={page} onChange={e => setPage(e.target.value)}
+            style={{ width: 64, background: 'rgba(255,255,255,.08)', border: 'none', borderRadius: 7, padding: '8px 10px', color: '#fff', fontSize: 12.5, outline: 'none' }} />
+          <div style={{ flex: 1, color: '#F87171', fontSize: 11 }}>{err}</div>
+          <Btn onClick={addPage} disabled={!book || busy}
+            style={{ background: '#C9A030', color: '#7D1025', fontWeight: 800 }}>
+            {busy ? 'Rendering...' : 'Add to board'}
+          </Btn>
+        </div>
       </div>
     </div>
   )
