@@ -52,8 +52,19 @@
   Cache-Control: public, max-age=3600
 
 # Security headers — apply to all routes
+# Permissions-Policy: camera=(self) etc. allows THIS SITE to request
+# camera/microphone/screen-share (the Smartious Classroom needs all
+# three) while still denying them to any third-party content.
+# NOTE: camera=() [empty] blocks EVERYONE INCLUDING OUR OWN SITE and
+# silently kills getUserMedia with no prompt — that value was the
+# root cause of the classroom never getting camera access.
 /*
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  Permissions-Policy: camera=(self), microphone=(self), display-capture=(self), fullscreen=(self), geolocation=()
+
+# The bundled pdf.js viewer is embedded by LibraryViewer in a
+# same-origin iframe, so it must not inherit the global DENY.
+/pdfjs/*
+  X-Frame-Options: SAMEORIGIN
