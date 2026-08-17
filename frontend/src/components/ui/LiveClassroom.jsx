@@ -323,13 +323,17 @@ function drawDiagram(ctx, op) {
 // Each participant runs their OWN copy (hands-on practice); the
 // teacher demonstrates by screen sharing, which is also what the
 // lesson recorder captures.
+// The _en.html build carries ONE language; the _all.html build
+// bundles every translation and is many times larger — on slower
+// connections it looks permanently stuck. English build it is.
 const phet = (id, title) => ({
   id: 'phet:' + id, title,
-  url: 'https://phet.colorado.edu/sims/html/' + id + '/latest/' + id + '_all.html',
+  url: 'https://phet.colorado.edu/sims/html/' + id + '/latest/' + id + '_en.html',
 })
 const SIM_CATALOG = [
   { subject: 'Smartious Labs', sims: [
     { id: 'sm:vernier', title: 'Vernier callipers — reading practice' },
+    { id: 'sm:foodtests', title: 'Food tests — iodine, Benedict\u2019s, Biuret, emulsion' },
   ]},
   { subject: 'Physics', sims: [
     phet('projectile-motion', 'Projectile motion'),
@@ -350,11 +354,13 @@ const SIM_CATALOG = [
     phet('states-of-matter-basics', 'States of matter'),
     phet('balancing-chemical-equations', 'Balancing equations'),
     phet('molecule-shapes', 'Molecule shapes'),
+    phet('gas-properties', 'Gas properties'),
   ]},
   { subject: 'Biology', sims: [
     phet('natural-selection', 'Natural selection'),
     phet('neuron', 'Neuron'),
     phet('gene-expression-essentials', 'Gene expression'),
+    phet('diffusion', 'Diffusion (membrane transport)'),
   ]},
   { subject: 'Mathematics', sims: [
     phet('graphing-lines', 'Graphing straight lines'),
@@ -2582,11 +2588,52 @@ function LobbyPreview({ stream }) {
 // teacher demonstrating should Share Screen so all eyes and the
 // lesson recording follow the same instance.
 function SimPanel({ sim }) {
+  const [loaded, setLoaded] = useState(false)
+  const [slow, setSlow] = useState(false)
+  const [attempt, setAttempt] = useState(0)
+
+  useEffect(() => {
+    setLoaded(false); setSlow(false)
+    const t = setTimeout(() => setSlow(true), 12000)
+    return () => clearTimeout(t)
+  }, [sim.url, attempt])
+
   if (sim.id === 'sm:vernier') return <VernierSim />
+  if (sim.id === 'sm:foodtests') return <FoodTestSim />
   return (
     <div style={{ position: 'absolute', inset: 0, background: '#fff', zIndex: 2, display: 'flex', flexDirection: 'column' }}>
-      <iframe src={sim.url} title={sim.title} allowFullScreen
-        style={{ flex: 1, border: 'none', width: '100%' }} />
+      <div style={{ flex: 1, position: 'relative', minHeight: 0 }}>
+        <iframe key={attempt} src={sim.url} title={sim.title} allowFullScreen
+          onLoad={() => setLoaded(true)}
+          style={{ border: 'none', width: '100%', height: '100%' }} />
+        {!loaded && (
+          <div style={{ position: 'absolute', inset: 0, background: '#FBFAF5', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, padding: 20, textAlign: 'center' }}>
+            <SmartiousCrest size={38} />
+            <div style={{ fontSize: 13.5, fontWeight: 800, color: '#2A2A2E' }}>Loading {sim.title}...</div>
+            <div style={{ width: 160, height: 4, background: 'rgba(0,0,0,.08)', borderRadius: 99, overflow: 'hidden' }}>
+              <div style={{ width: '40%', height: '100%', background: '#C9973A', borderRadius: 99, animation: 'smSlide 1.2s ease-in-out infinite alternate' }} />
+            </div>
+            <style>{'@keyframes smSlide { from { margin-left: 0 } to { margin-left: 60% } }'}</style>
+            {slow && (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, marginTop: 4 }}>
+                <div style={{ fontSize: 11.5, color: '#8A8A82', maxWidth: 320, lineHeight: 1.5 }}>
+                  Simulations are a one-off download of a few megabytes — on a slow connection the first open can take a minute. It caches for next time.
+                </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button onClick={() => setAttempt(a => a + 1)}
+                    style={{ background: '#7D1025', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 800, cursor: 'pointer' }}>
+                    Retry
+                  </button>
+                  <a href={sim.url} target="_blank" rel="noopener noreferrer"
+                    style={{ background: 'rgba(125,16,37,.08)', color: '#7D1025', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 800, textDecoration: 'none' }}>
+                    Open in a new tab
+                  </a>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
       <div style={{ fontSize: 10, color: '#8A8A92', padding: '3px 10px', background: '#F4F2ED' }}>
         Interactive simulation by PhET, University of Colorado Boulder — each person controls their own copy.
       </div>
@@ -2739,6 +2786,201 @@ function VernierSim() {
       {feedback && (
         <div style={{ marginTop: 10, fontSize: 12.5, fontWeight: 700, color: feedback.ok ? '#15803D' : '#B45309' }}>{feedback.text}</div>
       )}
+    </div>
+  )
+}
+
+// ── Smartious native sim: KCSE food tests ──────────────────
+// Pick a sample and a test, follow the REAL procedure (Benedict's
+// only reacts when heated; the emulsion test needs ethanol then
+// water), watch the colour change, and record results. Investigation
+// mode serves an unknown sample to identify.
+const FT_SAMPLES = {
+  starch:  { name: 'Starch solution', has: { starch: true,  sugar: false, protein: false, lipid: false }, base: '#EDEAE2' },
+  glucose: { name: 'Glucose solution', has: { starch: false, sugar: true,  protein: false, lipid: false }, base: '#F2F0EA' },
+  albumen: { name: 'Egg albumen',      has: { starch: false, sugar: false, protein: true,  lipid: false }, base: '#F5F2E4' },
+  oil:     { name: 'Cooking oil',      has: { starch: false, sugar: false, protein: false, lipid: true  }, base: '#F2D98A' },
+  milk:    { name: 'Milk',             has: { starch: false, sugar: true,  protein: true,  lipid: true  }, base: '#FDFDF8' },
+}
+const FT_TESTS = {
+  iodine:   { name: 'Iodine test (starch)',            reagent: 'iodine solution', needsHeat: false, needsWater: false },
+  benedict: { name: 'Benedict\u2019s test (reducing sugar)', reagent: 'Benedict\u2019s solution', needsHeat: true,  needsWater: false },
+  biuret:   { name: 'Biuret test (protein)',           reagent: 'NaOH then CuSO\u2084', needsHeat: false, needsWater: false },
+  emulsion: { name: 'Emulsion test (lipids)',          reagent: 'ethanol', needsHeat: false, needsWater: true },
+}
+
+function ftOutcome(sampleKey, testKey, heated, watered) {
+  const s = FT_SAMPLES[sampleKey].has
+  if (testKey === 'iodine')
+    return s.starch
+      ? { colour: '#1E2A4A', text: 'Blue-black colour: starch PRESENT.', positive: true }
+      : { colour: '#B8742D', text: 'Stays yellow-brown: starch absent.', positive: false }
+  if (testKey === 'benedict') {
+    if (!heated) return { colour: '#3B7DD8', text: 'Still blue — Benedict\u2019s must be HEATED in a water bath before it reacts.', positive: null }
+    return s.sugar
+      ? { colour: '#B4451F', text: 'Brick-red/orange precipitate on heating: reducing sugar PRESENT.', positive: true }
+      : { colour: '#3B7DD8', text: 'Remains blue after heating: reducing sugar absent.', positive: false }
+  }
+  if (testKey === 'biuret')
+    return s.protein
+      ? { colour: '#6D4A9E', text: 'Purple/violet colour: protein PRESENT.', positive: true }
+      : { colour: '#78A8DC', text: 'Remains pale blue: protein absent.', positive: false }
+  if (testKey === 'emulsion') {
+    if (!watered) return { colour: '#EFEDE6', text: 'Ethanol added — now ADD WATER and shake to complete the emulsion test.', positive: null }
+    return s.lipid
+      ? { colour: '#F2F1EC', text: 'Cloudy white emulsion forms: lipid PRESENT.', positive: true, cloudy: true }
+      : { colour: '#E8E6DE', text: 'No emulsion — mixture stays clear: lipid absent.', positive: false }
+  }
+}
+
+function FoodTestSim() {
+  const [mode, setMode] = useState('practice')     // practice | unknown
+  const [sample, setSample] = useState('starch')
+  const [unknownKey] = useState(() => Object.keys(FT_SAMPLES)[Math.floor(Math.random() * 5)])
+  const [unknownNonce, setUnknownNonce] = useState(0)
+  const unknownRef = useRef(unknownKey)
+  const [test, setTest] = useState('iodine')
+  const [stage, setStage] = useState('ready')      // ready | added | done
+  const [heated, setHeated] = useState(false)
+  const [watered, setWatered] = useState(false)
+  const [result, setResult] = useState(null)
+  const [log, setLog] = useState([])
+  const [guess, setGuess] = useState({ starch: false, sugar: false, protein: false, lipid: false })
+  const [verdict, setVerdict] = useState(null)
+
+  const activeSample = mode === 'unknown' ? unknownRef.current : sample
+  const T = FT_TESTS[test]
+
+  const reset = (keep) => {
+    setStage('ready'); setHeated(false); setWatered(false); setResult(null)
+    if (!keep) setVerdict(null)
+  }
+  const newUnknown = () => {
+    unknownRef.current = Object.keys(FT_SAMPLES)[Math.floor(Math.random() * 5)]
+    setUnknownNonce(n => n + 1)
+    setLog([]); setGuess({ starch: false, sugar: false, protein: false, lipid: false }); setVerdict(null)
+    reset()
+  }
+
+  const addReagent = () => {
+    setStage('added')
+    const o = ftOutcome(activeSample, test, false, false)
+    setResult(o)
+    if (!T.needsHeat && !T.needsWater) {
+      setStage('done')
+      setLog(l => [...l.filter(e => e.test !== test), { test, text: o.text }])
+    }
+  }
+  const heat = () => {
+    setHeated(true)
+    const o = ftOutcome(activeSample, test, true, watered)
+    setResult(o); setStage('done')
+    setLog(l => [...l.filter(e => e.test !== test), { test, text: o.text }])
+  }
+  const addWater = () => {
+    setWatered(true)
+    const o = ftOutcome(activeSample, test, heated, true)
+    setResult(o); setStage('done')
+    setLog(l => [...l.filter(e => e.test !== test), { test, text: o.text }])
+  }
+  const checkUnknown = () => {
+    const truth = FT_SAMPLES[unknownRef.current].has
+    const keys = ['starch', 'sugar', 'protein', 'lipid']
+    const wrong = keys.filter(k => !!guess[k] !== !!truth[k])
+    setVerdict(wrong.length === 0
+      ? { ok: true, text: 'Correct! The sample was ' + FT_SAMPLES[unknownRef.current].name.toLowerCase() + '.' }
+      : { ok: false, text: 'Not quite — ' + wrong.length + ' nutrient(s) wrong. Run more tests and check your table.' })
+  }
+
+  const liquid = result ? result.colour : FT_SAMPLES[activeSample].base
+  const cloudy = result && result.cloudy
+
+  const btn = (label, onClick, primary, disabled) => (
+    <button onClick={onClick} disabled={disabled} style={{
+      background: primary ? '#7D1025' : 'rgba(125,16,37,.08)', color: primary ? '#fff' : '#7D1025',
+      border: 'none', borderRadius: 9, padding: '9px 14px', fontSize: 12, fontWeight: 800,
+      cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? .4 : 1,
+    }}>{label}</button>
+  )
+
+  return (
+    <div style={{ position: 'absolute', inset: 0, background: '#FBFAF5', zIndex: 2, display: 'flex', overflowY: 'auto' }}>
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '14px 12px' }}>
+        <div style={{ fontSize: 14, fontWeight: 800, color: '#2A2A2E' }}>Food tests</div>
+        <div style={{ display: 'flex', gap: 6, margin: '8px 0' }}>
+          {btn('Practice', () => { setMode('practice'); setLog([]); reset() }, mode === 'practice')}
+          {btn('Identify an unknown', () => { setMode('unknown'); newUnknown() }, mode === 'unknown')}
+        </div>
+
+        {mode === 'practice' ? (
+          <select value={sample} onChange={e => { setSample(e.target.value); setLog([]); reset() }}
+            style={{ padding: '8px 10px', borderRadius: 8, border: '1.5px solid #C9C2B0', fontSize: 12.5, fontWeight: 700 }}>
+            {Object.entries(FT_SAMPLES).map(([k, v]) => <option key={k} value={k}>{v.name}</option>)}
+          </select>
+        ) : (
+          <div style={{ fontSize: 12.5, fontWeight: 700, color: '#7D1025' }}>Unknown sample X{unknownNonce + 1} — test it, then identify its nutrients</div>
+        )}
+
+        {/* Test tube */}
+        <div style={{ position: 'relative', width: 74, height: 190, margin: '16px 0 8px' }}>
+          <div style={{ position: 'absolute', inset: 0, border: '3px solid rgba(90,90,100,.55)', borderTop: 'none', borderRadius: '0 0 37px 37px', background: 'rgba(255,255,255,.35)' }} />
+          <div style={{
+            position: 'absolute', left: 5, right: 5, bottom: 5, height: 120,
+            borderRadius: '0 0 32px 32px', background: liquid, transition: 'background .9s',
+            backgroundImage: cloudy ? 'radial-gradient(circle at 30% 40%, rgba(255,255,255,.9) 2px, transparent 3px), radial-gradient(circle at 70% 60%, rgba(255,255,255,.9) 2px, transparent 3px), radial-gradient(circle at 50% 75%, rgba(255,255,255,.9) 2px, transparent 3px)' : 'none',
+            backgroundSize: cloudy ? '16px 16px, 20px 20px, 14px 14px' : 'auto',
+          }} />
+          {heated && (
+            <div style={{ position: 'absolute', left: -22, bottom: -6, fontSize: 11, color: '#B45309', fontWeight: 800, transform: 'rotate(-90deg)', transformOrigin: 'left' }}>WATER BATH</div>
+          )}
+        </div>
+
+        <select value={test} onChange={e => { setTest(e.target.value); reset(true) }}
+          style={{ padding: '8px 10px', borderRadius: 8, border: '1.5px solid #C9C2B0', fontSize: 12.5, fontWeight: 700, marginBottom: 8 }}>
+          {Object.entries(FT_TESTS).map(([k, v]) => <option key={k} value={k}>{v.name}</option>)}
+        </select>
+
+        <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap', justifyContent: 'center' }}>
+          {btn('Add ' + T.reagent, addReagent, true, stage !== 'ready')}
+          {T.needsHeat && btn('Heat in water bath', heat, false, stage !== 'added' || heated)}
+          {T.needsWater && btn('Add water and shake', addWater, false, stage !== 'added' || watered)}
+          {btn('Rinse the tube', () => reset(true), false, stage === 'ready')}
+        </div>
+
+        {result && (
+          <div style={{ marginTop: 10, fontSize: 12.5, fontWeight: 700, maxWidth: 420, textAlign: 'center',
+            color: result.positive === true ? '#15803D' : result.positive === false ? '#4B4B55' : '#B45309' }}>
+            {result.text}
+          </div>
+        )}
+      </div>
+
+      {/* Results table */}
+      <div style={{ width: 250, flexShrink: 0, borderLeft: '1px solid rgba(0,0,0,.08)', background: '#F4F2ED', padding: '14px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ fontSize: 12, fontWeight: 800, color: '#2A2A2E' }}>Recorded observations</div>
+        {log.length === 0 && <div style={{ fontSize: 11.5, color: '#8A8A82' }}>Complete a test and its result records here.</div>}
+        {log.map(e => (
+          <div key={e.test} style={{ fontSize: 11, color: '#4B4B55', background: '#fff', borderRadius: 8, padding: '7px 9px' }}>
+            <strong style={{ color: '#7D1025' }}>{FT_TESTS[e.test].name}:</strong> {e.text}
+          </div>
+        ))}
+        {mode === 'unknown' && (<>
+          <div style={{ fontSize: 12, fontWeight: 800, color: '#2A2A2E', marginTop: 6 }}>The unknown contains:</div>
+          {[['starch', 'Starch'], ['sugar', 'Reducing sugar'], ['protein', 'Protein'], ['lipid', 'Lipid']].map(([k, l]) => (
+            <label key={k} style={{ fontSize: 12, color: '#4B4B55', display: 'flex', gap: 7, alignItems: 'center' }}>
+              <input type="checkbox" checked={guess[k]} onChange={e => setGuess(g => ({ ...g, [k]: e.target.checked }))} />
+              {l}
+            </label>
+          ))}
+          <div style={{ display: 'flex', gap: 6 }}>
+            {btn('Check', checkUnknown, true)}
+            {btn('New unknown', newUnknown, false)}
+          </div>
+          {verdict && (
+            <div style={{ fontSize: 12, fontWeight: 800, color: verdict.ok ? '#15803D' : '#B45309' }}>{verdict.text}</div>
+          )}
+        </>)}
+      </div>
     </div>
   )
 }
