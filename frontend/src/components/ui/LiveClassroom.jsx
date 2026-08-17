@@ -114,7 +114,10 @@ function Tile({ stream, name, role, self, micOn, camOn, hand, quality, small }) 
 
 export default function LiveClassroom({ liveClassId, user, onLeave }) {
   // ── connection state ──
-  const [phase, setPhase] = useState('connecting')   // connecting | live | error
+  const [phase, setPhase] = useState('lobby')   // lobby | connecting | live | error
+  const lobbyStreamRef = useRef(null)           // media granted in the lobby
+  const [lobbyPreview, setLobbyPreview] = useState(null)
+  const [lobbyStatus, setLobbyStatus] = useState('')   // '', 'granted', 'audio', 'denied'
   const [errMsg, setErrMsg] = useState('')
   const [classInfo, setClassInfo] = useState({})
   const [myRole, setMyRole] = useState('student')
@@ -317,6 +320,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
 
   // ═══ CONNECT ═══════════════════════════════════════════════
   useEffect(() => {
+    if (phase !== 'connecting') return
     let socket, engine, cancelled = false
     const boot = async () => {
       try {
@@ -324,24 +328,16 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
         let iceServers = null
         try { iceServers = (await api.get('/classroom/ice')).data?.data?.iceServers } catch (e) { iceServers = null }
 
-        // 2. Media — degrade gracefully: A/V, then audio-only, then viewer
-        let stream = null
-        try {
-          stream = await navigator.mediaDevices.getUserMedia({
-            audio: { echoCancellation: true, noiseSuppression: true },
-            video: { width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 20 } },
-          })
-        } catch (e1) {
-          try {
-            stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-            setCamOn(false)
-            setMediaNote('Camera unavailable — you have joined with audio only.')
-          } catch (e2) {
-            stream = new MediaStream()
-            setMicOn(false); setCamOn(false)
-            setMediaNote('Microphone and camera are blocked — you have joined as a viewer. Allow them in your browser settings and rejoin to speak.')
-          }
-        }
+        // 2. Media was granted (or declined) in the LOBBY, where the
+        // permission prompt rode a real click. Whatever the person
+        // ended up with is what they join with; the in-class Enable
+        // button can still hot-add devices later.
+        const stream = lobbyStreamRef.current || new MediaStream()
+        const hasVideo = stream.getVideoTracks().length > 0
+        const hasAudio = stream.getAudioTracks().length > 0
+        setCamOn(hasVideo); setMicOn(hasAudio)
+        if (!hasAudio && !hasVideo) setMediaNote('You joined as a viewer. Press Enable camera and mic to speak.')
+        else if (!hasVideo) setMediaNote('Camera unavailable — you have joined with audio only.')
         if (cancelled) { stream.getTracks().forEach(t => t.stop()); return }
         setLocalStream(stream)
 
@@ -424,7 +420,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       try { socketRef.current?.emit('leave'); socketRef.current?.disconnect() } catch (e) { /* noop */ }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [liveClassId])
+  }, [liveClassId, phase === 'connecting'])
 
   useEffect(() => {
     if (phase !== 'live') return
@@ -632,6 +628,31 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [!!sharingPeer])
 
+  // ═══ LOBBY ═════════════════════════════════════════════════
+  // The permission prompt only fires from these click handlers — a
+  // real user gesture — which is what makes browsers show it
+  // reliably, including on phones.
+  const lobbyEnable = async () => {
+    try {
+      const s = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true },
+        video: { width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 20 } },
+      })
+      lobbyStreamRef.current = s
+      setLobbyPreview(s)
+      setLobbyStatus('granted')
+    } catch (e1) {
+      try {
+        const s = await navigator.mediaDevices.getUserMedia({ audio: true })
+        lobbyStreamRef.current = s
+        setLobbyStatus('audio')
+      } catch (e2) {
+        setLobbyStatus('denied')
+      }
+    }
+  }
+  const lobbyJoin = () => setPhase('connecting')
+
   // ═══ MEDIA RETRY ═══════════════════════════════════════════
   // Browsers never let a site force camera/mic access, but if the
   // person joined as a viewer we can re-prompt on a click (a user
@@ -818,6 +839,51 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   const ss = String(elapsed % 60).padStart(2, '0')
 
   // ═══ RENDER ════════════════════════════════════════════════
+  if (phase === 'lobby') {
+    const isTeacherGuess = ['teacher', 'admin'].includes(user?.role)
+    return (
+      <div ref={rootRef} style={{ position: 'fixed', inset: 0, background: T.app, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 500, fontFamily: 'Inter, Arial, sans-serif', padding: 16 }}>
+        <div style={{ background: T.panel, border: '1px solid ' + T.border, borderRadius: 16, width: '100%', maxWidth: 420, padding: '26px 26px 22px', textAlign: 'center' }}>
+          <div style={{ width: 44, height: 44, borderRadius: 12, background: 'linear-gradient(135deg,#7D1025,#C9A030)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 900, fontSize: 19, margin: '0 auto 14px' }}>S</div>
+          <div style={{ color: T.text, fontWeight: 800, fontSize: 17 }}>Smartious Classroom</div>
+          <div style={{ color: T.sub, fontSize: 12.5, marginTop: 4, marginBottom: 18 }}>
+            {isTeacherGuess ? 'Get your camera and microphone ready, then start the class.' : 'Get ready, then join your class.'}
+          </div>
+
+          <div style={{ width: '100%', aspectRatio: '16 / 10', background: themeId === 'dark' ? '#080C14' : 'rgba(0,0,0,.06)', borderRadius: 12, overflow: 'hidden', marginBottom: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {lobbyPreview ? (
+              <LobbyPreview stream={lobbyPreview} />
+            ) : (
+              <div style={{ color: T.sub, fontSize: 12.5, padding: 20, lineHeight: 1.6 }}>
+                {lobbyStatus === 'denied'
+                  ? 'The browser blocked the camera and microphone. Tap the lock or camera icon in the address bar, allow both for this site, then try again. If you opened this link inside WhatsApp or Gmail, open it in Chrome or Safari instead.'
+                  : lobbyStatus === 'audio'
+                  ? 'Microphone ready. Camera unavailable — you can join with audio.'
+                  : 'Your camera preview appears here.'}
+              </div>
+            )}
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {lobbyStatus !== 'granted' && (
+              <Btn onClick={lobbyEnable}
+                style={{ width: '100%', padding: '12px 0', fontSize: 13.5, background: '#C9A030', color: '#7D1025', fontWeight: 800 }}>
+                {lobbyStatus === 'denied' ? 'Try camera and mic again' : 'Enable camera and microphone'}
+              </Btn>
+            )}
+            <Btn onClick={lobbyJoin}
+              style={{ width: '100%', padding: '12px 0', fontSize: 13.5, background: '#7D1025', color: '#fff', fontWeight: 800 }}>
+              {lobbyStatus === 'granted' || lobbyStatus === 'audio'
+                ? (isTeacherGuess ? 'Start the class' : 'Join the class')
+                : (isTeacherGuess ? 'Start without camera' : 'Join as a viewer')}
+            </Btn>
+            <Btn onClick={leave} style={{ width: '100%', padding: '10px 0', fontSize: 12.5 }}>Back</Btn>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   if (phase === 'error') return (
     <div style={{ position: 'fixed', inset: 0, background: '#0B0F17', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, zIndex: 500 }}>
       <div style={{ color: '#fff', fontSize: 17, fontWeight: 700 }}>Could not join the classroom</div>
@@ -829,7 +895,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   const others = roster.filter(p => p.socketId !== socketRef.current?.id)
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: T.app, display: 'flex', flexDirection: 'column', zIndex: 500, fontFamily: 'Inter, Arial, sans-serif' }}>
+    <div ref={rootRef} style={{ position: 'fixed', inset: 0, background: T.app, display: 'flex', flexDirection: 'column', zIndex: 500, fontFamily: 'Inter, Arial, sans-serif' }}>
       {/* ── Top bar ── */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px', background: T.panel, borderBottom: '1px solid ' + T.border }}>
         <div style={{ width: 30, height: 30, borderRadius: 8, background: 'linear-gradient(135deg,#7D1025,#C9A030)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 900, fontSize: 13 }}>S</div>
@@ -843,6 +909,9 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
         </div>
         <span style={{ background: phase === 'live' ? '#15803D' : '#B45309', color: '#fff', fontSize: 10, fontWeight: 800, padding: '3px 10px', borderRadius: 99, letterSpacing: '.06em' }}>
           {phase === 'live' ? 'LIVE' : 'CONNECTING'}
+        </span>
+        <span style={{ background: isTeacher ? '#7D1025' : '#1E3A8A', color: '#fff', fontSize: 10, fontWeight: 800, padding: '3px 10px', borderRadius: 99, letterSpacing: '.06em' }}>
+          {isTeacher ? 'TEACHER' : 'STUDENT'}
         </span>
         <Btn onClick={cycleTheme} title="Switch between dark, light, and bone modes">{T.name}</Btn>
         <Btn onClick={toggleFull} title={isFull ? 'Exit full screen' : 'Use the whole screen'}>{isFull ? 'Exit full' : 'Full screen'}</Btn>
@@ -875,7 +944,9 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
 
       {/* ── Main area ── */}
       <div style={{ flex: 1, display: 'flex', minHeight: 0, position: 'relative' }}>
-        {/* Toolbar */}
+        {/* Toolbar: the full deck for teachers; for students it only
+            appears when the teacher opens the board for drawing. */}
+        {(isTeacher || canDraw) && (
         <div style={{ width: narrow ? 48 : 56, background: T.panel, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '12px 0', borderRight: '1px solid ' + T.border, overflowY: 'auto' }}>
           {[['pen', 'Pen'], ['eraser', 'Erase'], ['line', 'Line'], ['rect', 'Rect'], ['circle', 'Circ'], ['text', 'Text'], ['pan', 'Pan']].map(([t, l]) => (
             <Btn key={t} active={tool === t} onClick={() => setTool(t)} title={l}
@@ -910,6 +981,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
             <input ref={imgInputRef} type="file" accept="image/*" onChange={onPickImage} style={{ display: 'none' }} />
           </>)}
         </div>
+        )}
 
         {/* Board / presentation */}
         <div ref={wrapRef} style={{ flex: 1, position: 'relative', minWidth: 0, background: T.board }}>
@@ -1162,4 +1234,13 @@ function LibraryPagePicker({ onClose, onPlace }) {
       </div>
     </div>
   )
+}
+
+
+// Mirrored self-preview for the lobby.
+function LobbyPreview({ stream }) {
+  const ref = useRef(null)
+  useEffect(() => { if (ref.current && stream) ref.current.srcObject = stream }, [stream])
+  return <video ref={ref} autoPlay playsInline muted
+    style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }} />
 }
