@@ -115,6 +115,7 @@ function Tile({ stream, name, role, self, micOn, camOn, hand, quality, small }) 
 export default function LiveClassroom({ liveClassId, user, onLeave }) {
   // ── connection state ──
   const [phase, setPhase] = useState('lobby')   // lobby | connecting | live | error
+  const [joinNonce, setJoinNonce] = useState(0)  // bumped by the lobby Join click
   const lobbyStreamRef = useRef(null)           // media granted in the lobby
   const [lobbyPreview, setLobbyPreview] = useState(null)
   const [lobbyStatus, setLobbyStatus] = useState('')   // '', 'granted', 'audio', 'denied'
@@ -352,7 +353,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
 
   // ═══ CONNECT ═══════════════════════════════════════════════
   useEffect(() => {
-    if (phase !== 'connecting') return
+    if (!joinNonce) return
     let socket, engine, cancelled = false
     const boot = async () => {
       try {
@@ -452,7 +453,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       try { socketRef.current?.emit('leave'); socketRef.current?.disconnect() } catch (e) { /* noop */ }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [liveClassId, phase === 'connecting'])
+  }, [liveClassId, joinNonce])
 
   useEffect(() => {
     if (phase !== 'live') return
@@ -707,6 +708,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
     // Best effort: iPhones do not allow it for pages; everyone else
     // gets a true full-screen classroom. Esc or Exit full leaves.
     try { rootRef.current?.requestFullscreen?.().catch(() => {}) } catch (e) { /* unsupported */ }
+    setJoinNonce(n => n + 1)
     setPhase('connecting')
   }
 
