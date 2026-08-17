@@ -97,6 +97,9 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   const camTrackRef = useRef(null)
   const [showLibPicker, setShowLibPicker] = useState(false)
   const imgInputRef = useRef(null)
+  const [recording, setRecording] = useState(false)
+  const [recSecs, setRecSecs] = useState(0)
+  const recRef = useRef(null)   // { recorder, recId, audioCtx, rafId, uploadChain, videoEl }
 
   // ── board ──
   const canvasRef = useRef(null)
@@ -471,6 +474,124 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [!!sharingPeer])
 
+  // ═══ LESSON RECORDING (teacher) ════════════════════════════
+  // Client-side capture: a 1280x720 compositor canvas repaints the
+  // board (or the shared screen while presenting) ~10 times a second,
+  // and a Web Audio graph mixes the teacher's mic with every
+  // student's audio. MediaRecorder emits 5-second WebM chunks that
+  // upload as they are produced (a sequential chain keeps byte
+  // order), so an hour-long lesson never sits in browser memory.
+  const startRecording = async () => {
+    try {
+      const { data } = await api.post('/classroom/' + liveClassId + '/recording/start')
+      if (!data?.success) throw new Error(data?.message || 'start failed')
+      const recId = data.data.recId
+
+      const comp = document.createElement('canvas')
+      comp.width = 1280; comp.height = 720
+      const cctx = comp.getContext('2d')
+
+      // Hidden video element mirrors whichever screen is presenting.
+      const videoEl = document.createElement('video')
+      videoEl.muted = true; videoEl.playsInline = true
+
+      const paint = () => {
+        cctx.fillStyle = BOARD_BG
+        cctx.fillRect(0, 0, comp.width, comp.height)
+        const screenStream = sharing ? localStream
+          : (() => { const sp = roster.find(x => x.sharing); return sp ? streams[sp.socketId] : null })()
+        if (screenStream && screenStream.getVideoTracks().length) {
+          if (videoEl.srcObject !== screenStream) { videoEl.srcObject = screenStream; videoEl.play().catch(() => {}) }
+          if (videoEl.videoWidth) {
+            const s = Math.min(comp.width / videoEl.videoWidth, comp.height / videoEl.videoHeight)
+            const w = videoEl.videoWidth * s, h = videoEl.videoHeight * s
+            cctx.drawImage(videoEl, (comp.width - w) / 2, (comp.height - h) / 2, w, h)
+          }
+        } else if (canvasRef.current) {
+          const bc = canvasRef.current
+          const s = Math.min(comp.width / bc.width, comp.height / bc.height)
+          cctx.drawImage(bc, 0, 0, bc.width * s, bc.height * s)
+        }
+        rec.rafId = requestAnimationFrame(paint)
+      }
+
+      // Audio mix: teacher mic + all remote audio, present and future.
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)()
+      const dest = audioCtx.createMediaStreamDestination()
+      const connected = new Set()
+      const connect = (stream) => {
+        if (!stream || connected.has(stream) || !stream.getAudioTracks().length) return
+        try { audioCtx.createMediaStreamSource(stream).connect(dest); connected.add(stream) } catch (e) { /* noop */ }
+      }
+      connect(localStream)
+      Object.values(streams).forEach(connect)
+
+      const mixed = new MediaStream([
+        ...comp.captureStream(10).getVideoTracks(),
+        ...dest.stream.getAudioTracks(),
+      ])
+      const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')
+        ? 'video/webm;codecs=vp8,opus' : 'video/webm'
+      const recorder = new MediaRecorder(mixed, {
+        mimeType: mime, videoBitsPerSecond: 700000, audioBitsPerSecond: 64000,
+      })
+
+      const rec = { recorder, recId, audioCtx, rafId: 0, uploadChain: Promise.resolve(), videoEl, connect }
+      recRef.current = rec
+
+      recorder.ondataavailable = (ev) => {
+        if (!ev.data || !ev.data.size) return
+        rec.uploadChain = rec.uploadChain.then(() =>
+          ev.data.arrayBuffer().then(buf =>
+            api.post('/classroom/' + liveClassId + '/recording/' + recId + '/chunk', buf, {
+              headers: { 'Content-Type': 'application/octet-stream' },
+            })
+          )
+        ).catch(e => console.error('[rec upload]', e))
+      }
+      recorder.onstop = async () => {
+        cancelAnimationFrame(rec.rafId)
+        try { await rec.uploadChain } catch (e) { /* logged above */ }
+        try { audioCtx.close() } catch (e) { /* noop */ }
+        try {
+          const { data: fin } = await api.post('/classroom/' + liveClassId + '/recording/' + recId + '/finish')
+          if (fin?.success && !fin.data?.discarded) window.alert('Recording saved. Students can watch it from the class card.')
+        } catch (e) { window.alert('The recording could not be saved.') }
+      }
+
+      recorder.start(5000)
+      paint()
+      setRecording(true)
+      setRecSecs(0)
+    } catch (e) {
+      console.error('[recording]', e)
+      window.alert('Could not start recording: ' + (e.message || 'unknown error'))
+    }
+  }
+
+  const stopRecording = () => {
+    const rec = recRef.current
+    if (!rec) return
+    recRef.current = null
+    try { rec.recorder.stop() } catch (e) { /* noop */ }
+    setRecording(false)
+  }
+
+  // Students joining mid-recording get their audio added to the mix.
+  useEffect(() => {
+    const rec = recRef.current
+    if (rec && recording) Object.values(streams).forEach(rec.connect)
+  }, [streams, recording])
+
+  useEffect(() => {
+    if (!recording) return
+    const t = setInterval(() => setRecSecs(s => s + 1), 1000)
+    return () => clearInterval(t)
+  }, [recording])
+
+  // Leaving the page ends the recording cleanly.
+  useEffect(() => () => { if (recRef.current) stopRecording() }, [])
+
   // ═══ PUSH CONTENT TO BOARD (teacher) ═══════════════════════
   // Places the image at the centre of the teacher's current view in
   // world coordinates, so it lands where they are looking.
@@ -670,6 +791,13 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
             {sharing ? 'Stop sharing' : 'Share screen'}
           </Btn>
         )}
+        {isTeacher && (
+          <Btn danger={recording} onClick={recording ? stopRecording : startRecording}>
+            {recording
+              ? 'Stop recording ' + String(Math.floor(recSecs / 60)).padStart(2, '0') + ':' + String(recSecs % 60).padStart(2, '0')
+              : 'Record'}
+          </Btn>
+        )}
         {!isTeacher && <Btn active={handUp} onClick={toggleHand}>{handUp ? 'Lower hand' : 'Raise hand'}</Btn>}
       </div>
     </div>
@@ -722,7 +850,12 @@ function LibraryPagePicker({ onClose, onPlace }) {
     if (!book) return
     setBusy(true); setErr('')
     try {
-      const pdfjs = await import(/* @vite-ignore */ '/pdfjs/pdf.min.mjs')
+      // Runtime-only import: pdf.js ships as a static asset in
+      // /public/pdfjs, not as a bundled dependency. The URL is built
+      // at runtime so Vite/Rollup does not try to resolve it at
+      // build time (a literal string here fails the Netlify build).
+      const pdfjsUrl = new URL('/pdfjs/pdf.min.mjs', window.location.origin).href
+      const pdfjs = await import(/* @vite-ignore */ pdfjsUrl)
       pdfjs.GlobalWorkerOptions.workerSrc = '/pdfjs/pdf.worker.min.mjs'
       const token = localStorage.getItem('sm_token') || ''
       const base = (api?.defaults?.baseURL || '')
