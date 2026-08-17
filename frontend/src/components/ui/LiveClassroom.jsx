@@ -147,8 +147,17 @@ const CtlBtn = ({ icon, label, active, danger, badge, onClick, title }) => (
 
 // One video tile. Self tile is muted (never hear yourself).
 function Tile({ stream, name, role, self, micOn, camOn, hand, quality, small, big }) {
-  const ref = useRef(null)
-  useEffect(() => { if (ref.current && stream) ref.current.srcObject = stream }, [stream])
+  // Callback ref, NOT an effect: toggling the camera swaps between a
+  // <video> and a hidden <audio> element, and each swap mounts a
+  // brand-new element that must be (re)attached to the stream. An
+  // effect keyed on [stream] misses those swaps — which made media
+  // die permanently after the first mute/camera-off.
+  const attach = (el) => {
+    if (el && stream && el.srcObject !== stream) {
+      el.srcObject = stream
+      el.play?.().catch(() => {})
+    }
+  }
   const qColor = { good: '#22C55E', fair: '#F59E0B', poor: '#EF4444', down: '#6B7280' }[quality]
   return (
     <div style={{
@@ -161,11 +170,11 @@ function Tile({ stream, name, role, self, micOn, camOn, hand, quality, small, bi
       flexShrink: 0,
     }}>
       {stream && camOn !== false ? (
-        <video ref={ref} autoPlay playsInline muted={self}
+        <video ref={attach} autoPlay playsInline muted={self}
           style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       ) : (
         <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          {stream && <audio ref={ref} autoPlay muted={self} style={{ display: 'none' }} />}
+          {stream && <audio ref={attach} autoPlay muted={self} style={{ display: 'none' }} />}
           <div style={{
             width: 42, height: 42, borderRadius: '50%', background: role === 'teacher' ? '#7D1025' : '#1E3A8A',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -1577,6 +1586,15 @@ function BookReader({ book, canControl, onPage, onClose, onStamp }) {
   const [numPages, setNumPages] = useState(0)
   const [status, setStatus] = useState('Opening book...')
   const renderTaskRef = useRef(null)
+  const [pageInput, setPageInput] = useState(String(book.page || 1))
+  useEffect(() => { setPageInput(String(book.page || 1)) }, [book.page])
+  const jumpTo = () => {
+    const n = parseInt(pageInput, 10)
+    if (!Number.isFinite(n)) { setPageInput(String(book.page || 1)); return }
+    const clamped = Math.min(numPages || 9999, Math.max(1, n))
+    if (clamped !== (book.page || 1)) onPage(clamped)
+    setPageInput(String(clamped))
+  }
 
   useEffect(() => {
     let dead = false
@@ -1661,8 +1679,16 @@ function BookReader({ book, canControl, onPage, onClose, onStamp }) {
         {canControl ? (<>
           <button onClick={() => onPage(Math.max(1, (book.page || 1) - 1))} disabled={(book.page || 1) <= 1}
             style={{ background: 'rgba(0,0,0,.06)', border: 'none', borderRadius: 7, padding: '5px 14px', fontSize: 12, fontWeight: 800, cursor: 'pointer', color: '#2A2A2E' }}>Prev</button>
+          <input
+            type="number" min="1" max={numPages || undefined}
+            value={pageInput}
+            onChange={e => setPageInput(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') jumpTo() }}
+            onBlur={jumpTo}
+            title="Type a page number and press Enter"
+            style={{ width: 52, textAlign: 'center', background: '#fff', border: '1px solid rgba(0,0,0,.15)', borderRadius: 7, padding: '5px 4px', fontSize: 12, fontWeight: 800, color: '#2A2A2E', outline: 'none' }} />
           <span style={{ fontSize: 11.5, fontWeight: 700, color: '#4B4B55' }}>
-            Page {book.page || 1}{numPages ? ' / ' + numPages : ''}
+            {numPages ? '/ ' + numPages : ''}
           </span>
           <button onClick={() => onPage(Math.min(numPages || 9999, (book.page || 1) + 1))} disabled={numPages > 0 && (book.page || 1) >= numPages}
             style={{ background: 'rgba(0,0,0,.06)', border: 'none', borderRadius: 7, padding: '5px 14px', fontSize: 12, fontWeight: 800, cursor: 'pointer', color: '#2A2A2E' }}>Next</button>
