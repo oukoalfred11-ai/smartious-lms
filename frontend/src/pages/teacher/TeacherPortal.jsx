@@ -10848,6 +10848,7 @@ function LiveSessionsTab({ user, toast }) {
     grade: '',
     scheduledAt: defaultScheduleDate(),
     durationMins: 60,
+    classroomMode: 'link',   // 'link' = external Zoom/Meet, 'native' = built-in Smartious Classroom
     meetingLink: currentDefaultLink || '',
     assignedStudents: [], // array of student _ids
     notes: '',
@@ -10990,6 +10991,7 @@ function LiveSessionsTab({ user, toast }) {
       grade: lc.grade,
       scheduledAt: new Date(lc.scheduledAt).toISOString().slice(0, 16),
       durationMins: lc.durationMins,
+      classroomMode: lc.classroomMode || 'link',
       meetingLink: lc.meetingLink,
       assignedStudents: (lc.assignedStudents || []).map(s => s._id || s),
       notes: lc.notes || '',
@@ -11007,7 +11009,7 @@ function LiveSessionsTab({ user, toast }) {
       toast?.error?.('Subject, curriculum and grade are required.'); return
     }
     if (!form.scheduledAt) { toast?.error?.('Scheduled time is required.'); return }
-    if (!form.meetingLink.trim()) { toast?.error?.('Meeting link is required.'); return }
+    if (form.classroomMode !== 'native' && !form.meetingLink.trim()) { toast?.error?.('Meeting link is required.'); return }
     if (form.assignedStudents.length === 0) {
       if (!window.confirm('No students selected. Save anyway? (You can add students later.)')) return
     }
@@ -11022,7 +11024,8 @@ function LiveSessionsTab({ user, toast }) {
         grade: form.grade,
         scheduledAt: new Date(form.scheduledAt).toISOString(),
         durationMins: Number(form.durationMins),
-        meetingLink: form.meetingLink.trim(),
+        classroomMode: form.classroomMode,
+        meetingLink: form.classroomMode === 'native' ? '' : form.meetingLink.trim(),
         assignedStudents: form.assignedStudents,
         notes: form.notes.trim(),
         // Spine linkage (null when not picked)
@@ -11311,25 +11314,68 @@ function LiveSessionsTab({ user, toast }) {
             </div>
           </div>
 
-          {/* Meeting link */}
+          {/* Classroom mode: built-in Smartious Classroom or external link */}
           <div className="fg">
-            <label className="fl">
-              Meeting link *
-              {currentDefaultLink && form.meetingLink === currentDefaultLink && (
-                <span style={{ marginLeft: 8, fontSize: 11, color: '#15803D', fontWeight: 700, fontStyle: 'italic' }}>
-                  (pre-filled from your default)
-                </span>
-              )}
-            </label>
-            <input className="fi"
-              type="url"
-              placeholder="https://us02web.zoom.us/j/XXXXXXX"
-              value={form.meetingLink} onChange={e => setF('meetingLink', e.target.value)}
-            />
-            <div style={{ fontSize: 11.5, color: '#6B6B6B', marginTop: 4 }}>
-              Students see a "Join Class" button that opens this link 10 minutes before the start time.
+            <label className="fl">How will this class run?</label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              {[
+                { id: 'native', name: 'Smartious Classroom', desc: 'Built-in video + shared whiteboard. No external link needed.', badge: 'BETA' },
+                { id: 'link',   name: 'External link',       desc: 'Zoom, Google Meet, or any other meeting link.', badge: null },
+              ].map(m => (
+                <div key={m.id} onClick={() => setF('classroomMode', m.id)}
+                  style={{
+                    border: form.classroomMode === m.id ? '2px solid #7D1025' : '1.5px solid #E0DACB',
+                    background: form.classroomMode === m.id ? '#FDF4F1' : '#fff',
+                    borderRadius: 10, padding: '12px 14px', cursor: 'pointer',
+                  }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{
+                      width: 15, height: 15, borderRadius: '50%', flexShrink: 0,
+                      border: form.classroomMode === m.id ? '5px solid #7D1025' : '2px solid #C9C2B0',
+                    }} />
+                    <span style={{ fontSize: 13, fontWeight: 800, color: '#2B2B2B' }}>{m.name}</span>
+                    {m.badge && (
+                      <span style={{ background: '#C9A030', color: '#7D1025', fontSize: 9, fontWeight: 800, padding: '2px 7px', borderRadius: 99, letterSpacing: '.08em' }}>{m.badge}</span>
+                    )}
+                  </div>
+                  <div style={{ fontSize: 11.5, color: '#6B6B6B', marginTop: 5, lineHeight: 1.45 }}>{m.desc}</div>
+                </div>
+              ))}
             </div>
           </div>
+
+          {/* Meeting link — only for external-link classes */}
+          {form.classroomMode !== 'native' ? (
+            <div className="fg">
+              <label className="fl">
+                Meeting link *
+                {currentDefaultLink && form.meetingLink === currentDefaultLink && (
+                  <span style={{ marginLeft: 8, fontSize: 11, color: '#15803D', fontWeight: 700, fontStyle: 'italic' }}>
+                    (pre-filled from your default)
+                  </span>
+                )}
+              </label>
+              <input className="fi"
+                type="url"
+                placeholder="https://us02web.zoom.us/j/XXXXXXX"
+                value={form.meetingLink} onChange={e => setF('meetingLink', e.target.value)}
+              />
+              <div style={{ fontSize: 11.5, color: '#6B6B6B', marginTop: 4 }}>
+                Students see a "Join Class" button that opens this link 10 minutes before the start time.
+              </div>
+            </div>
+          ) : (
+            <div className="fg">
+              <div style={{
+                background: '#FDF7E2', border: '1px solid #E8D58F', borderRadius: 9,
+                padding: '11px 14px', fontSize: 12, color: '#7D5A0F', lineHeight: 1.55,
+              }}>
+                Students join the built-in classroom from their portal with one tap — live video,
+                voice, and a shared whiteboard, all inside Smartious. You will see an
+                Enter Classroom button on the class card once you press Start.
+              </div>
+            </div>
+          )}
 
           {/* Student selection */}
           <div className="fg">
@@ -11754,7 +11800,15 @@ function TeacherClassCard({ lc, onEdit, onDelete, onStart, onEnd, toast }) {
           <div style={{ fontSize: 12, color: '#6B6B6B' }}>
             {formatDate(lc.scheduledAt)} &middot; {lc.durationMins} min &middot; {studentCount} student{studentCount === 1 ? '' : 's'}
           </div>
-          {lc.meetingLink && (
+          {lc.classroomMode === 'native' ? (
+            <div style={{ marginTop: 5 }}>
+              <span style={{
+                background: '#FDF4F1', border: '1px solid #E8C4BC', color: '#7D1025',
+                fontSize: 10.5, fontWeight: 800, padding: '3px 10px', borderRadius: 99,
+                letterSpacing: '.05em',
+              }}>SMARTIOUS CLASSROOM</span>
+            </div>
+          ) : lc.meetingLink && (
             <div style={{ fontSize: 11.5, color: '#6B6B6B', marginTop: 4, wordBreak: 'break-all' }}>
               <strong style={{ color: '#7D1025' }}>Link:</strong>{' '}
               <a href={lc.meetingLink} target="_blank" rel="noopener noreferrer"
@@ -11797,6 +11851,16 @@ function TeacherClassCard({ lc, onEdit, onDelete, onStart, onEnd, toast }) {
           )}
           {status === 'live' && (
             <>
+              {lc.classroomMode === 'native' ? (
+                <button onClick={() => window.open('/classroom/' + lc._id, '_blank', 'noopener')}
+                  style={{
+                    background: '#7D1025', color: '#fff', border: 'none',
+                    padding: '8px 14px', borderRadius: 6,
+                    fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                  }}>
+                  Enter Classroom
+                </button>
+              ) : (
               <a href={lc.meetingLink} target="_blank" rel="noopener noreferrer"
                 style={{
                   background: '#7D1025', color: '#fff',
@@ -11805,6 +11869,7 @@ function TeacherClassCard({ lc, onEdit, onDelete, onStart, onEnd, toast }) {
                 }}>
                 Join Zoom
               </a>
+              )}
               <button onClick={onEnd}
                 style={{
                   background: 'transparent', border: '1px solid #B91C1C',
