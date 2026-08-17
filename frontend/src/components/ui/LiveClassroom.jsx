@@ -27,18 +27,46 @@ import { api } from '../../context/ctx.jsx'
 import { MeshEngine } from '../../classroom/rtc.js'
 
 const BASE = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/api\/?$/, '')
-const BOARD_BG = '#10151F'
 
-const Btn = ({ children, active, danger, onClick, title, disabled, style = {} }) => (
+// ── Classroom themes ───────────────────────────────────────
+// Applied per user (a student can read in light mode while the
+// teacher stays dark — every board op is colour-explicit, and eraser
+// strokes always paint the LOCAL background, so boards stay in sync
+// across themes).
+const THEMES = {
+  dark:  { name: 'Dark',  app: '#0B0F17', panel: '#131A26', strip: '#0E141F', board: '#10151F',
+           text: '#FFFFFF', sub: 'rgba(255,255,255,.5)', btn: 'rgba(255,255,255,.1)', btnText: 'rgba(255,255,255,.85)',
+           border: 'rgba(255,255,255,.08)', field: 'rgba(255,255,255,.08)', grid: 'rgba(255,255,255,.07)', gridBold: 'rgba(255,255,255,.14)', defaultPen: '#FFFFFF' },
+  light: { name: 'Light', app: '#EDEDEF', panel: '#FFFFFF', strip: '#F4F4F6', board: '#FFFFFF',
+           text: '#1B1B1F', sub: 'rgba(0,0,0,.5)', btn: 'rgba(0,0,0,.07)', btnText: 'rgba(0,0,0,.75)',
+           border: 'rgba(0,0,0,.1)', field: 'rgba(0,0,0,.06)', grid: 'rgba(30,64,175,.12)', gridBold: 'rgba(30,64,175,.25)', defaultPen: '#1B1B1F' },
+  bone:  { name: 'Bone',  app: '#EFE9DC', panel: '#FDFAF4', strip: '#F5F0E4', board: '#FDFAF4',
+           text: '#2B2620', sub: 'rgba(43,38,32,.55)', btn: 'rgba(125,16,37,.08)', btnText: '#5A4634',
+           border: 'rgba(125,16,37,.14)', field: 'rgba(125,16,37,.06)', grid: 'rgba(125,16,37,.1)', gridBold: 'rgba(125,16,37,.2)', defaultPen: '#2B2620' },
+}
+const THEME_ORDER = ['dark', 'light', 'bone']
+
+// Quick pen swatches (theme-independent, chosen to read on all three
+// backgrounds except the matching-background ones, which is why both
+// white and near-black are offered).
+const PEN_COLOURS = ['#FFFFFF', '#1B1B1F', '#E24B4A', '#C9A030', '#60A5FA', '#4ADE80', '#F97316', '#C084FC']
+
+// Buttons read the active theme through this ref so the whole chrome
+// re-skins on a theme switch without threading a prop everywhere.
+const themeTokensRef = { current: null }
+const Btn = ({ children, active, danger, onClick, title, disabled, style = {} }) => {
+  const tk = themeTokensRef.current || THEMES.dark
+  return (
   <button onClick={onClick} title={title} disabled={disabled} style={{
     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
     border: 'none', borderRadius: 8, padding: '8px 11px', cursor: disabled ? 'not-allowed' : 'pointer',
     fontSize: 12, fontWeight: 600, transition: 'background .15s', whiteSpace: 'nowrap',
-    background: danger ? '#DC2626' : active ? 'rgba(96,165,250,.35)' : 'rgba(255,255,255,.1)',
-    color: danger || active ? '#fff' : 'rgba(255,255,255,.85)',
+    background: danger ? '#DC2626' : active ? 'rgba(96,165,250,.35)' : tk.btn,
+    color: danger || active ? '#fff' : tk.btnText,
     opacity: disabled ? .45 : 1, ...style,
   }}>{children}</button>
-)
+  )
+}
 
 // One video tile. Self tile is muted (never hear yourself).
 function Tile({ stream, name, role, self, micOn, camOn, hand, quality, small }) {
@@ -122,6 +150,33 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   viewRef.current = { zoom, offset }
 
   // ── layout / resilience ──
+  const [themeId, setThemeId] = useState(() => localStorage.getItem('sm_class_theme') || 'dark')
+  const T = THEMES[themeId] || THEMES.dark
+  const themeRef = useRef(T)
+  themeRef.current = T
+  themeTokensRef.current = T
+  const [grid, setGrid] = useState(false)
+  const gridRef = useRef(false)
+  gridRef.current = grid
+  const rootRef = useRef(null)
+  const [isFull, setIsFull] = useState(false)
+  const pointersRef = useRef(new Map())   // two-finger pan / pinch zoom
+
+  const cycleTheme = () => {
+    const next = THEME_ORDER[(THEME_ORDER.indexOf(themeId) + 1) % THEME_ORDER.length]
+    setThemeId(next)
+    localStorage.setItem('sm_class_theme', next)
+  }
+  const toggleFull = () => {
+    if (document.fullscreenElement) document.exitFullscreen()
+    else rootRef.current?.requestFullscreen?.()
+  }
+  useEffect(() => {
+    const onF = () => setIsFull(!!document.fullscreenElement)
+    document.addEventListener('fullscreenchange', onF)
+    return () => document.removeEventListener('fullscreenchange', onF)
+  }, [])
+
   const [narrow, setNarrow] = useState(typeof window !== 'undefined' && window.innerWidth < 760)
   const [panelOpen, setPanelOpen] = useState(typeof window === 'undefined' || window.innerWidth >= 760)
   const [quality, setQuality] = useState({})       // socketId -> good|fair|poor|down
@@ -174,7 +229,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       }
       return
     }
-    ctx.strokeStyle = op.tool === 'eraser' ? BOARD_BG : (op.color || '#fff')
+    ctx.strokeStyle = op.tool === 'eraser' ? themeRef.current.board : (op.color || '#fff')
     ctx.fillStyle = op.color || '#fff'
     ctx.lineWidth = (op.tool === 'eraser' ? (op.w || 3) * 6 : (op.w || 3))
     ctx.lineCap = 'round'; ctx.lineJoin = 'round'
@@ -201,14 +256,32 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
     const ctx = cv.getContext('2d')
     const { zoom: z, offset: o } = viewRef.current
     ctx.setTransform(1, 0, 0, 1, 0, 0)
-    ctx.fillStyle = BOARD_BG
+    ctx.fillStyle = themeRef.current.board
     ctx.fillRect(0, 0, cv.width, cv.height)
+    // Graph paper: a 40-world-unit grid drawn only across the visible
+    // window, so the board stays infinite in every direction. Every
+    // fifth line is bolder, like real graph paper.
+    if (gridRef.current) {
+      const S = 40
+      const x0 = Math.floor((-o.x / z) / S) * S, x1 = (cv.width - o.x) / z
+      const y0 = Math.floor((-o.y / z) / S) * S, y1 = (cv.height - o.y) / z
+      ctx.setTransform(z, 0, 0, z, o.x, o.y)
+      ctx.lineWidth = 1 / z
+      for (let x = x0; x <= x1; x += S) {
+        ctx.strokeStyle = (Math.round(x / S) % 5 === 0) ? themeRef.current.gridBold : themeRef.current.grid
+        ctx.beginPath(); ctx.moveTo(x, y0); ctx.lineTo(x, y1 + S); ctx.stroke()
+      }
+      for (let y = y0; y <= y1; y += S) {
+        ctx.strokeStyle = (Math.round(y / S) % 5 === 0) ? themeRef.current.gridBold : themeRef.current.grid
+        ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1 + S, y); ctx.stroke()
+      }
+    }
     ctx.setTransform(z, 0, 0, z, o.x, o.y)
     for (const op of opsRef.current) drawOp(ctx, op)
   }, [drawOp])
   redrawRef.current = redraw
 
-  useEffect(() => { redraw() }, [zoom, offset, redraw])
+  useEffect(() => { redraw() }, [zoom, offset, redraw, themeId, grid])
 
   useEffect(() => {
     const fit = () => {
@@ -224,6 +297,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
 
   const applyOp = useCallback((op) => {
     if (op.kind === 'lock') { setBoardLocked(!!op.locked); return }
+    if (op.kind === 'bg') { setGrid(op.grid === true); return }
     opsRef.current.push(op)
     const cv = canvasRef.current
     if (!cv) return
@@ -298,6 +372,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
           opsRef.current = []
           for (const op of (ack.boardOps || [])) {
             if (op.kind === 'lock') setBoardLocked(!!op.locked)
+            else if (op.kind === 'bg') setGrid(op.grid === true)
             else opsRef.current.push(op)
           }
           redraw()
@@ -430,17 +505,63 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
     d.active = false; d.pts = []
   }
 
+  // Microsoft Whiteboard feel: plain scroll pans the infinite canvas
+  // in any direction (trackpads pan diagonally); Ctrl/Cmd + scroll
+  // zooms about the cursor; pinch on touch devices does both.
   const onWheel = (e) => {
     e.preventDefault()
-    const rect = canvasRef.current.getBoundingClientRect()
-    const mx = e.clientX - rect.left, my = e.clientY - rect.top
-    const factor = e.deltaY < 0 ? 1.1 : 0.9
-    setZoom(z0 => {
-      const z1 = Math.min(4, Math.max(0.25, z0 * factor))
-      setOffset(o => ({ x: mx - (mx - o.x) * (z1 / z0), y: my - (my - o.y) * (z1 / z0) }))
-      return z1
-    })
+    if (e.ctrlKey || e.metaKey) {
+      const rect = canvasRef.current.getBoundingClientRect()
+      const mx = e.clientX - rect.left, my = e.clientY - rect.top
+      const factor = e.deltaY < 0 ? 1.1 : 0.9
+      setZoom(z0 => {
+        const z1 = Math.min(4, Math.max(0.25, z0 * factor))
+        setOffset(o => ({ x: mx - (mx - o.x) * (z1 / z0), y: my - (my - o.y) * (z1 / z0) }))
+        return z1
+      })
+    } else {
+      setOffset(o => ({ x: o.x - e.deltaX, y: o.y - e.deltaY }))
+    }
   }
+
+  // Two-finger touch: pan with the midpoint, pinch to zoom.
+  const onPointerDownMulti = (e) => {
+    pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
+    if (pointersRef.current.size === 2) {
+      // Second finger arrived: cancel any in-progress stroke so a
+      // pinch never leaves a stray line.
+      drawRef.current.active = false
+      drawRef.current.pts = []
+      redraw()
+    }
+  }
+  const onPointerMoveMulti = (e) => {
+    const pts = pointersRef.current
+    if (!pts.has(e.pointerId)) return false
+    const prev = pts.get(e.pointerId)
+    pts.set(e.pointerId, { x: e.clientX, y: e.clientY })
+    if (pts.size !== 2) return false
+    const [a, b] = [...pts.values()]
+    const prevOther = a.x === e.clientX && a.y === e.clientY ? b : a
+    // Pan by this finger's movement (midpoint approximation is fine
+    // at classroom scale), zoom by the distance ratio.
+    const dx = e.clientX - prev.x, dy = e.clientY - prev.y
+    const distNow = Math.hypot(a.x - b.x, a.y - b.y)
+    const distPrev = Math.hypot(prev.x - prevOther.x, prev.y - prevOther.y)
+    setOffset(o => ({ x: o.x + dx / 2, y: o.y + dy / 2 }))
+    if (distPrev > 0 && Math.abs(distNow - distPrev) > 2) {
+      const rect = canvasRef.current.getBoundingClientRect()
+      const mx = (a.x + b.x) / 2 - rect.left, my = (a.y + b.y) / 2 - rect.top
+      const factor = distNow / distPrev
+      setZoom(z0 => {
+        const z1 = Math.min(4, Math.max(0.25, z0 * factor))
+        setOffset(o => ({ x: mx - (mx - o.x) * (z1 / z0), y: my - (my - o.y) * (z1 / z0) }))
+        return z1
+      })
+    }
+    return true
+  }
+  const onPointerEnd = (e) => { pointersRef.current.delete(e.pointerId) }
 
   // ═══ CONTROLS ══════════════════════════════════════════════
   const toggleMic = () => {
@@ -511,6 +632,36 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [!!sharingPeer])
 
+  // ═══ MEDIA RETRY ═══════════════════════════════════════════
+  // Browsers never let a site force camera/mic access, but if the
+  // person joined as a viewer we can re-prompt on a click (a user
+  // gesture) and hot-add the tracks into every live connection —
+  // perfect negotiation renegotiates automatically, no rejoin needed.
+  const retryMedia = async () => {
+    try {
+      const fresh = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true },
+        video: { width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 20 } },
+      }).catch(() => navigator.mediaDevices.getUserMedia({ audio: true }))
+      const eng = engineRef.current
+      if (!eng || !fresh) return
+      for (const track of fresh.getTracks()) {
+        if (!eng.localStream.getTracks().some(t => t.kind === track.kind)) {
+          eng.localStream.addTrack(track)
+          for (const { pc } of eng.peers.values()) pc.addTrack(track, eng.localStream)
+        }
+      }
+      const hasVideo = eng.localStream.getVideoTracks().length > 0
+      const hasAudio = eng.localStream.getAudioTracks().length > 0
+      setMicOn(hasAudio); setCamOn(hasVideo)
+      socketRef.current?.emit('state', { micOn: hasAudio, camOn: hasVideo })
+      setMediaNote(hasVideo ? '' : 'Camera still unavailable — you are on audio only.')
+      setLocalStream(eng.localStream)
+    } catch (e) {
+      setMediaNote('Your browser is blocking the camera and microphone. Click the lock/camera icon in the address bar, set Camera and Microphone to Allow for smartioushomeschool.com, then press Enable again.')
+    }
+  }
+
   // ═══ LESSON RECORDING (teacher) ════════════════════════════
   // Client-side capture: a 1280x720 compositor canvas repaints the
   // board (or the shared screen while presenting) ~10 times a second,
@@ -533,7 +684,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       videoEl.muted = true; videoEl.playsInline = true
 
       const paint = () => {
-        cctx.fillStyle = BOARD_BG
+        cctx.fillStyle = themeRef.current.board
         cctx.fillRect(0, 0, comp.width, comp.height)
         const screenStream = sharing ? localStream
           : (() => { const sp = roster.find(x => x.sharing); return sp ? streams[sp.socketId] : null })()
@@ -678,26 +829,33 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   const others = roster.filter(p => p.socketId !== socketRef.current?.id)
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: '#0B0F17', display: 'flex', flexDirection: 'column', zIndex: 500, fontFamily: 'Inter, Arial, sans-serif' }}>
+    <div style={{ position: 'fixed', inset: 0, background: T.app, display: 'flex', flexDirection: 'column', zIndex: 500, fontFamily: 'Inter, Arial, sans-serif' }}>
       {/* ── Top bar ── */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px', background: '#131A26', borderBottom: '1px solid rgba(255,255,255,.08)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px', background: T.panel, borderBottom: '1px solid ' + T.border }}>
         <div style={{ width: 30, height: 30, borderRadius: 8, background: 'linear-gradient(135deg,#7D1025,#C9A030)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 900, fontSize: 13 }}>S</div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ color: '#fff', fontWeight: 700, fontSize: 13.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <div style={{ color: T.text, fontWeight: 700, fontSize: 13.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {classInfo.title || 'Smartious Classroom'}
           </div>
-          <div style={{ color: 'rgba(255,255,255,.5)', fontSize: 11 }}>
+          <div style={{ color: T.sub, fontSize: 11 }}>
             {classInfo.subject || ''}{phase === 'live' ? ` \u00b7 ${mm}:${ss}` : ' \u00b7 connecting...'}
           </div>
         </div>
         <span style={{ background: phase === 'live' ? '#15803D' : '#B45309', color: '#fff', fontSize: 10, fontWeight: 800, padding: '3px 10px', borderRadius: 99, letterSpacing: '.06em' }}>
           {phase === 'live' ? 'LIVE' : 'CONNECTING'}
         </span>
+        <Btn onClick={cycleTheme} title="Switch between dark, light, and bone modes">{T.name}</Btn>
+        <Btn onClick={toggleFull} title={isFull ? 'Exit full screen' : 'Use the whole screen'}>{isFull ? 'Exit full' : 'Full screen'}</Btn>
         <Btn danger onClick={leave}>Leave</Btn>
       </div>
 
       {mediaNote && (
-        <div style={{ background: '#78350F', color: '#FDE68A', fontSize: 12, padding: '7px 16px' }}>{mediaNote}</div>
+        <div style={{ background: '#78350F', color: '#FDE68A', fontSize: 12, padding: '7px 16px', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <span style={{ flex: 1, minWidth: 200 }}>{mediaNote}</span>
+          <Btn onClick={retryMedia} style={{ background: '#C9A030', color: '#7D1025', fontWeight: 800, padding: '6px 14px' }}>
+            Enable camera and mic
+          </Btn>
+        </div>
       )}
       {reconnecting && phase === 'live' && (
         <div style={{ background: '#7C2D12', color: '#FED7AA', fontSize: 12, padding: '7px 16px', fontWeight: 700 }}>
@@ -706,7 +864,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       )}
 
       {/* ── Video strip ── */}
-      <div style={{ display: 'flex', gap: 8, padding: '10px 14px', overflowX: 'auto', background: '#0E141F', borderBottom: '1px solid rgba(255,255,255,.06)' }}>
+      <div style={{ display: 'flex', gap: 8, padding: '10px 14px', overflowX: 'auto', background: T.strip, borderBottom: '1px solid ' + T.border }}>
         <Tile stream={localStream} name={user?.firstName ? `${user.firstName} ${user.lastName || ''}` : 'You'}
           role={myRole} self micOn={micOn} camOn={camOn} hand={handUp} small={narrow} />
         {others.map(p => (
@@ -718,19 +876,33 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       {/* ── Main area ── */}
       <div style={{ flex: 1, display: 'flex', minHeight: 0, position: 'relative' }}>
         {/* Toolbar */}
-        <div style={{ width: narrow ? 48 : 56, background: '#131A26', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '12px 0', borderRight: '1px solid rgba(255,255,255,.06)', overflowY: 'auto' }}>
+        <div style={{ width: narrow ? 48 : 56, background: T.panel, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '12px 0', borderRight: '1px solid ' + T.border, overflowY: 'auto' }}>
           {[['pen', 'Pen'], ['eraser', 'Erase'], ['line', 'Line'], ['rect', 'Rect'], ['circle', 'Circ'], ['text', 'Text'], ['pan', 'Pan']].map(([t, l]) => (
             <Btn key={t} active={tool === t} onClick={() => setTool(t)} title={l}
               disabled={!canDraw && t !== 'pan'} style={{ width: 42, padding: '8px 0' }}>{l}</Btn>
           ))}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4, marginTop: 4 }}>
+            {PEN_COLOURS.map(c => (
+              <div key={c} onClick={() => canDraw && setColour(c)} title={c}
+                style={{
+                  width: 16, height: 16, borderRadius: '50%', background: c, cursor: canDraw ? 'pointer' : 'not-allowed',
+                  border: colour === c ? '2px solid #60A5FA' : '1.5px solid rgba(128,128,128,.45)',
+                  boxSizing: 'border-box',
+                }} />
+            ))}
+          </div>
           <input type="color" value={colour} onChange={e => setColour(e.target.value)} disabled={!canDraw}
-            style={{ width: 34, height: 30, border: 'none', borderRadius: 6, background: 'transparent', cursor: 'pointer', marginTop: 4 }} />
+            title="Custom colour"
+            style={{ width: 34, height: 26, border: 'none', borderRadius: 6, background: 'transparent', cursor: 'pointer', marginTop: 2 }} />
           <input type="range" min="1" max="10" value={lineW} onChange={e => setLineW(+e.target.value)} disabled={!canDraw}
             style={{ width: 42 }} />
           {isTeacher && (<>
             <Btn active={!boardLocked} onClick={toggleBoardLock} title={boardLocked ? 'Students cannot draw. Click to allow.' : 'Students can draw. Click to lock.'}
               style={{ width: 42, padding: '7px 0', fontSize: 10.5, marginTop: 8 }}>{boardLocked ? 'Locked' : 'Open'}</Btn>
             <Btn onClick={clearBoard} title="Clear board for everyone" style={{ width: 42, padding: '7px 0', fontSize: 10.5 }}>Clear</Btn>
+            <Btn active={grid} onClick={() => { const g = !grid; setGrid(g); sendOpLive({ kind: 'bg', grid: g }) }}
+              title={grid ? 'Back to a plain board' : 'Turn the board into graph paper for everyone'}
+              style={{ width: 42, padding: '7px 0', fontSize: 10.5 }}>Graph</Btn>
             <Btn onClick={() => imgInputRef.current?.click()} title="Put a picture on the board"
               style={{ width: 42, padding: '7px 0', fontSize: 10.5, marginTop: 8 }}>Img</Btn>
             <Btn onClick={() => setShowLibPicker(true)} title="Put a Library PDF page on the board"
@@ -740,7 +912,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
         </div>
 
         {/* Board / presentation */}
-        <div ref={wrapRef} style={{ flex: 1, position: 'relative', minWidth: 0, background: BOARD_BG }}>
+        <div ref={wrapRef} style={{ flex: 1, position: 'relative', minWidth: 0, background: T.board }}>
           {(sharing || sharingPeer) && (
             <div style={{ position: 'absolute', top: 10, left: 12, zIndex: 5, display: 'flex', gap: 6 }}>
               <Btn active={mainView === 'board'} onClick={() => setMainView('board')} style={{ padding: '6px 12px', fontSize: 11 }}>Board</Btn>
@@ -756,9 +928,15 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
             />
           )}
           <canvas ref={canvasRef}
-            onPointerDown={(e) => { e.currentTarget.setPointerCapture?.(e.pointerId); onDown(e) }}
-            onPointerMove={onMove}
-            onPointerUp={onUp} onPointerCancel={onUp} onPointerLeave={onUp}
+            onPointerDown={(e) => {
+              e.currentTarget.setPointerCapture?.(e.pointerId)
+              onPointerDownMulti(e)
+              if (pointersRef.current.size < 2) onDown(e)
+            }}
+            onPointerMove={(e) => { if (!onPointerMoveMulti(e) || pointersRef.current.size < 2) onMove(e) }}
+            onPointerUp={(e) => { onPointerEnd(e); onUp(e) }}
+            onPointerCancel={(e) => { onPointerEnd(e); onUp(e) }}
+            onPointerLeave={(e) => { onPointerEnd(e); onUp(e) }}
             onWheel={onWheel}
             style={{ display: 'block', cursor: tool === 'pan' || !canDraw ? 'grab' : 'crosshair', touchAction: 'none',
               visibility: mainView === 'screen' ? 'hidden' : 'visible' }} />
@@ -776,9 +954,9 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
         {(!narrow || panelOpen) && (
         <div style={narrow ? {
           position: 'absolute', top: 0, right: 0, bottom: 0, width: 'min(85vw, 300px)', zIndex: 20,
-          background: '#131A26', display: 'flex', flexDirection: 'column',
-          borderLeft: '1px solid rgba(255,255,255,.12)', boxShadow: '-12px 0 32px rgba(0,0,0,.5)',
-        } : { width: 280, background: '#131A26', display: 'flex', flexDirection: 'column', borderLeft: '1px solid rgba(255,255,255,.06)' }}>
+          background: T.panel, display: 'flex', flexDirection: 'column',
+          borderLeft: '1px solid ' + T.border, boxShadow: '-12px 0 32px rgba(0,0,0,.5)',
+        } : { width: 280, background: T.panel, display: 'flex', flexDirection: 'column', borderLeft: '1px solid ' + T.border }}>
           {narrow && (
             <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '8px 10px 0' }}>
               <Btn onClick={() => setPanelOpen(false)} style={{ padding: '5px 12px' }}>Close</Btn>
@@ -797,7 +975,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
                   <div style={{ fontSize: 10.5, color: m.role === 'teacher' ? '#F0CC5A' : 'rgba(255,255,255,.5)', fontWeight: 700 }}>
                     {m.name}{m.role === 'teacher' ? ' (Teacher)' : ''}
                   </div>
-                  <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,.88)', lineHeight: 1.5, wordBreak: 'break-word' }}>{m.text}</div>
+                  <div style={{ fontSize: 12.5, color: T.text, lineHeight: 1.5, wordBreak: 'break-word' }}>{m.text}</div>
                 </div>
               ))}
               <div ref={chatEndRef} />
@@ -806,7 +984,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
               <input value={chatInput} onChange={e => setChatInput(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') sendChat() }}
                 placeholder="Message the class"
-                style={{ flex: 1, background: 'rgba(255,255,255,.08)', border: 'none', borderRadius: 8, padding: '9px 11px', color: '#fff', fontSize: 12.5, outline: 'none' }} />
+                style={{ flex: 1, background: T.field, border: 'none', borderRadius: 8, padding: '9px 11px', color: T.text, fontSize: 12.5, outline: 'none' }} />
               <Btn onClick={sendChat} style={{ background: '#C9A030', color: '#7D1025', fontWeight: 800 }}>Send</Btn>
             </div>
           </>)}
@@ -819,7 +997,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
                     {(p.name || '?').split(' ').map(w => w[0]).slice(0, 2).join('')}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ color: '#fff', fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <div style={{ color: T.text, fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {p.name}{p.socketId === socketRef.current?.id ? ' (you)' : ''}
                     </div>
                     <div style={{ color: 'rgba(255,255,255,.45)', fontSize: 10 }}>{p.role}</div>
@@ -839,7 +1017,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       )}
 
       {/* ── Bottom controls ── */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '10px 16px', background: '#131A26', borderTop: '1px solid rgba(255,255,255,.08)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '10px 16px', background: T.panel, borderTop: '1px solid ' + T.border }}>
         <Btn active={micOn} danger={!micOn} onClick={toggleMic}>{micOn ? 'Mic on' : 'Mic off'}</Btn>
         <Btn active={camOn} danger={!camOn} onClick={toggleCam}>{camOn ? 'Camera on' : 'Camera off'}</Btn>
         {isTeacher && (
