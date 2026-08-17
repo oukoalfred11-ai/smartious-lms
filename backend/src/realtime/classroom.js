@@ -23,8 +23,11 @@ const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
 
 const JWT_SECRET = process.env.JWT_SECRET;
-const BOARD_OP_CAP = 8000;   // ~a full lesson of drawing
+const BOARD_OP_CAP = 8000;             // ~a full lesson of drawing
+const BOARD_BYTES_CAP = 25 * 1024 * 1024;  // per-room ceiling for image ops
 const CHAT_CAP = 300;
+
+const opBytes = (op) => (op && typeof op.src === 'string' ? op.src.length : 64);
 
 // roomId -> { peers: Map<socketId, peerInfo>, boardOps: [], chat: [], startedAt }
 const rooms = new Map();
@@ -227,8 +230,20 @@ function attachClassroom(httpServer, allowedOrigins) {
       // the lock itself is a board op so late joiners replay it.
       op.by = peer.userId;
       room.boardOps.push(op);
-      if (room.boardOps.length > BOARD_OP_CAP)
-        room.boardOps.splice(0, room.boardOps.length - BOARD_OP_CAP);
+      room.boardBytes = (room.boardBytes || 0) + opBytes(op);
+      if (room.boardOps.length > BOARD_OP_CAP) {
+        const dropped = room.boardOps.splice(0, room.boardOps.length - BOARD_OP_CAP);
+        for (const d of dropped) room.boardBytes -= opBytes(d);
+      }
+      // With 20 lessons running at once, image-heavy boards must not
+      // bloat server memory: past the byte ceiling, evict the OLDEST
+      // image ops first (strokes are tiny and keep the lesson intact).
+      while (room.boardBytes > BOARD_BYTES_CAP) {
+        const idx = room.boardOps.findIndex(o => o.kind === 'image');
+        if (idx === -1) break;
+        room.boardBytes -= opBytes(room.boardOps[idx]);
+        room.boardOps.splice(idx, 1);
+      }
       socket.to(socket.data.roomId).emit('board:op', op);
     });
 
