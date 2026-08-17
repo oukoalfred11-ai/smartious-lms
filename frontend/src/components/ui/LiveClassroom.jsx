@@ -302,6 +302,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   const [moreOpen, setMoreOpen] = useState(false)
   const [swatchOpen, setSwatchOpen] = useState(false)
   const [diagOpen, setDiagOpen] = useState(false)
+  const [focus, setFocus] = useState(false)   // board-only: maximum writing area
   // Open coursebook: shown split-screen beside the whiteboard, the
   // teacher turns pages and every student's copy follows.
   const [openBook, setOpenBook] = useState(null)   // { id, title, page }
@@ -1503,6 +1504,8 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
           fontSize: 11.5, fontWeight: 700, padding: '5px 12px', cursor: 'pointer', marginRight: 6,
         }}>{mainView === 'board' ? 'View screen' : 'View board'}</button>
       )}
+      <IconBtn icon="view" title={focus ? 'Exit the full board' : 'Maximise the board: hide videos, chat, and controls'} active={focus}
+        onClick={() => setFocus(f => !f)} />
       {canDraw && <IconBtn icon="undo" title="Undo my last mark" onClick={doUndo} />}
       {isTeacher && (<>
         <div style={{ position: 'relative' }}>
@@ -1640,7 +1643,8 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   return (
     <div ref={rootRef} style={{ position: 'fixed', inset: 0, background: C.bg, display: 'flex', flexDirection: 'column', zIndex: 500, fontFamily: 'Inter, Arial, sans-serif' }}>
 
-      {/* ── Top bar ── */}
+      {/* ── Top bar (hidden in focus mode) ── */}
+      {!focus && (
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '10px 16px', flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <SmartiousCrest size={32} />
@@ -1695,6 +1699,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
           </div>
         </div>
       </div>
+      )}
 
       {mediaNote && (
         <div style={{ background: '#78350F', color: '#FDE68A', fontSize: 12, padding: '7px 16px', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
@@ -1711,10 +1716,10 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       )}
 
       {/* ── Main area ── */}
-      <div style={{ flex: 1, display: 'flex', minHeight: 0, position: 'relative', gap: 10, padding: '2px 10px 10px' }}>
+      <div style={{ flex: 1, display: 'flex', minHeight: 0, position: 'relative', gap: 10, padding: focus ? 0 : '2px 10px 10px' }}>
 
         {/* Video column (desktop) */}
-        {!narrow && (
+        {!narrow && !focus && (
           <div style={{ width: 268, flexShrink: 0, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
             {tiles}
           </div>
@@ -1722,7 +1727,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
 
         {/* Board / presentation card */}
         <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {narrow && !tilesHidden && (
+          {narrow && !tilesHidden && !focus && (
             <div style={{ display: 'flex', gap: 8, overflowX: 'auto', alignItems: 'center', flexShrink: 0 }}>
               <Btn onClick={() => setTilesHidden(true)} style={{ padding: '4px 8px', fontSize: 10.5, flexShrink: 0 }}>Hide</Btn>
               <div style={{ width: 108, flexShrink: 0 }}>
@@ -1736,13 +1741,13 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
               ))}
             </div>
           )}
-          {narrow && tilesHidden && (
+          {narrow && tilesHidden && !focus && (
             <Btn onClick={() => setTilesHidden(false)} style={{ padding: '4px 12px', fontSize: 11, alignSelf: 'center' }}>
               Show videos ({roster.length})
             </Btn>
           )}
 
-          <div style={{ flex: 1, minHeight: 0, background: '#FFFFFF', borderRadius: 16, display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 10px 34px rgba(0,0,0,.35)' }}>
+          <div style={{ flex: 1, minHeight: 0, background: '#FFFFFF', borderRadius: focus ? 0 : 16, display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: focus ? 'none' : '0 10px 34px rgba(0,0,0,.35)' }}>
             {boardHeader}
             <div style={{ flex: 1, minHeight: 0, display: 'flex' }}>
             {openBook && mainView === 'board' && (
@@ -1782,7 +1787,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
           </div>
         </div>
 
-        {panelCard}
+        {!focus && panelCard}
       </div>
 
       {showLibPicker && (
@@ -1797,7 +1802,21 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
         />
       )}
 
-      {/* ── Bottom control bar ── */}
+      {/* ── Bottom control bar (hidden in focus; mini pill instead) ── */}
+      {focus && (
+        <div style={{ position: 'fixed', bottom: 14, left: '50%', transform: 'translateX(-50%)', zIndex: 50, display: 'flex', alignItems: 'center', gap: 4, background: '#1D1D25', borderRadius: 99, padding: '6px 10px', boxShadow: '0 10px 30px rgba(0,0,0,.5)' }}>
+          <button onClick={toggleMic} title={micOn ? 'Mute' : 'Unmute'} style={{ background: 'transparent', border: 'none', color: micOn ? 'rgba(255,255,255,.85)' : '#F87171', cursor: 'pointer', padding: 7, display: 'flex' }}>
+            <Ic d={ICONS[micOn ? 'mic' : 'micOff']} size={17} />
+          </button>
+          <button onClick={toggleCam} title={camOn ? 'Stop video' : 'Start video'} style={{ background: 'transparent', border: 'none', color: camOn ? 'rgba(255,255,255,.85)' : '#F87171', cursor: 'pointer', padding: 7, display: 'flex' }}>
+            <Ic d={ICONS[camOn ? 'cam' : 'camOff']} size={17} />
+          </button>
+          <button onClick={() => setFocus(false)} title="Exit the full board" style={{ background: '#F2C230', border: 'none', color: '#111', cursor: 'pointer', padding: '7px 14px', borderRadius: 99, fontSize: 11.5, fontWeight: 800 }}>
+            Exit board
+          </button>
+        </div>
+      )}
+      {!focus && (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: narrow ? 0 : 6, padding: '8px 10px 12px', flexWrap: 'wrap' }}>
         <CtlBtn icon={micOn ? 'mic' : 'micOff'} label={micOn ? 'Mute' : 'Unmute'} danger={!micOn} onClick={toggleMic} />
         <CtlBtn icon={camOn ? 'cam' : 'camOff'} label={camOn ? 'Stop Video' : 'Start Video'} danger={!camOn} onClick={toggleCam} />
@@ -1813,6 +1832,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
           borderRadius: 12, padding: '11px 22px', fontSize: 13.5, fontWeight: 800, cursor: 'pointer', marginLeft: narrow ? 6 : 16,
         }}><Ic d={ICONS.phone} size={16} /> Leave</button>
       </div>
+      )}
     </div>
   )
 }
@@ -1875,7 +1895,11 @@ function LibraryPagePicker({ onClose, onOpenBook }) {
             <div style={{ color: '#F87171', fontSize: 12.5, padding: 16, textAlign: 'center' }}>{err}</div>
           ) : books.length === 0 ? (
             <div style={{ color: 'rgba(255,255,255,.5)', fontSize: 12.5, padding: 16, textAlign: 'center' }}>No books found.</div>
-          ) : books.slice(0, 30).map(b => (
+          ) : (<>
+          <div style={{ color: 'rgba(255,255,255,.4)', fontSize: 10.5, padding: '0 2px 4px' }}>
+            {books.length} book{books.length === 1 ? '' : 's'} available
+          </div>
+          {books.map(b => (
             <div key={b._id} onClick={() => onOpenBook(b)}
               style={{ padding: '10px 12px', borderRadius: 9, cursor: 'pointer', background: 'rgba(255,255,255,.05)' }}>
               <div style={{ color: '#fff', fontSize: 12.5, fontWeight: 700 }}>{b.title}</div>
@@ -1884,6 +1908,7 @@ function LibraryPagePicker({ onClose, onOpenBook }) {
               </div>
             </div>
           ))}
+          </>)}
         </div>
       </div>
     </div>
