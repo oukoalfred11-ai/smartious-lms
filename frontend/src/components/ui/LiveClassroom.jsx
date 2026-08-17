@@ -317,6 +317,52 @@ function drawDiagram(ctx, op) {
   }
 }
 
+// ── Practical simulations catalog ──────────────────────────
+// PhET (University of Colorado) interactive HTML5 labs, free and
+// openly licensed for embedding, plus Smartious-built native sims.
+// Each participant runs their OWN copy (hands-on practice); the
+// teacher demonstrates by screen sharing, which is also what the
+// lesson recorder captures.
+const phet = (id, title) => ({
+  id: 'phet:' + id, title,
+  url: 'https://phet.colorado.edu/sims/html/' + id + '/latest/' + id + '_all.html',
+})
+const SIM_CATALOG = [
+  { subject: 'Smartious Labs', sims: [
+    { id: 'sm:vernier', title: 'Vernier callipers — reading practice' },
+  ]},
+  { subject: 'Physics', sims: [
+    phet('projectile-motion', 'Projectile motion'),
+    phet('pendulum-lab', 'Pendulum lab'),
+    phet('forces-and-motion-basics', 'Forces and motion'),
+    phet('circuit-construction-kit-dc', 'Circuit construction kit (DC)'),
+    phet('ohms-law', 'Ohm\u2019s law'),
+    phet('wave-on-a-string', 'Waves on a string'),
+    phet('masses-and-springs', 'Masses and springs'),
+    phet('energy-skate-park-basics', 'Energy skate park'),
+    phet('gravity-and-orbits', 'Gravity and orbits'),
+    phet('balancing-act', 'Moments: balancing act'),
+  ]},
+  { subject: 'Chemistry', sims: [
+    phet('ph-scale', 'pH scale'),
+    phet('acid-base-solutions', 'Acid-base solutions'),
+    phet('concentration', 'Concentration'),
+    phet('states-of-matter-basics', 'States of matter'),
+    phet('balancing-chemical-equations', 'Balancing equations'),
+    phet('molecule-shapes', 'Molecule shapes'),
+  ]},
+  { subject: 'Biology', sims: [
+    phet('natural-selection', 'Natural selection'),
+    phet('neuron', 'Neuron'),
+    phet('gene-expression-essentials', 'Gene expression'),
+  ]},
+  { subject: 'Mathematics', sims: [
+    phet('graphing-lines', 'Graphing straight lines'),
+    phet('graphing-quadratics', 'Graphing quadratics'),
+    phet('trig-tour', 'Trigonometry tour'),
+  ]},
+]
+
 const DIAGRAMS = [
   ['numberline', 'Number line'],
   ['axes', 'Cartesian axes'],
@@ -367,6 +413,7 @@ const ICONS = {
   ruler: 'M3 17L17 3l4 4L7 21z M7.5 12.5l2 2 M10.5 9.5l2 2 M13.5 6.5l2 2',
   prot: 'M4 16a8 8 0 0 1 16 0z M12 16v-5 M8 16v-2 M16 16v-2',
   comp: 'M12 4a2 2 0 1 0 .001 0z M12 6l-5 13 M12 6l5 13 M6 17c3 2 9 2 12 0',
+  flask: 'M10 3h4 M10 3v6l-5.5 9a2 2 0 0 0 1.7 3h11.6a2 2 0 0 0 1.7-3L14 9V3 M7.5 15h9',
 }
 
 // Bottom control: icon over a small label, mockup style.
@@ -469,6 +516,8 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   // Open coursebook: shown split-screen beside the whiteboard, the
   // teacher turns pages and every student's copy follows.
   const [openBook, setOpenBook] = useState(null)   // { id, title, page }
+  const [openSim, setOpenSim] = useState(null)     // { id, title, url }
+  const [showSimPicker, setShowSimPicker] = useState(false)
   const [mainView, setMainView] = useState('board')   // 'board' | 'screen'
   const camTrackRef = useRef(null)
   const [showLibPicker, setShowLibPicker] = useState(false)
@@ -784,7 +833,13 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       redrawRef.current()
       return
     }
-    if (op.kind === 'book') { setOpenBook(op.id ? { id: op.id, title: op.title || 'Coursebook', page: op.page || 1 } : null); return }
+    if (op.kind === 'book') { setOpenBook(op.bookId ? { id: op.bookId, title: op.title || 'Coursebook', page: op.page || 1 } : null); return }
+    if (op.kind === 'sim') {
+      const sim = op.simId ? { id: op.simId, title: op.title || 'Practical', url: op.url || null } : null
+      setOpenSim(sim)
+      setMainView(sim ? 'sim' : 'board')
+      return
+    }
     opsRef.current.push(op)
     const ink = inkRef.current
     if (!ink) { redrawRef.current(); return }
@@ -977,7 +1032,12 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
               opsRef.current.push(op)
             }
             else if (op.kind === 'book') {
-              setOpenBook(op.id ? { id: op.id, title: op.title || 'Coursebook', page: op.page || 1 } : null)
+              setOpenBook(op.bookId ? { id: op.bookId, title: op.title || 'Coursebook', page: op.page || 1 } : null)
+            }
+            else if (op.kind === 'sim') {
+              const sim = op.simId ? { id: op.simId, title: op.title || 'Practical', url: op.url || null } : null
+              setOpenSim(sim)
+              if (sim) setMainView('sim')
             }
             else opsRef.current.push(op)
           }
@@ -1902,8 +1962,16 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   const boardHeader = (
     <div style={{ display: 'flex', alignItems: 'center', gap: 2, padding: '10px 14px', borderBottom: '1px solid rgba(0,0,0,.07)' }}>
       <span style={{ fontSize: 14, fontWeight: 800, color: '#2A2A2E', marginRight: 'auto' }}>
-        {mainView === 'screen' ? (sharing ? 'Your screen' : (sharingPeer?.name || 'Teacher') + "'s screen") : 'Whiteboard'}
+        {mainView === 'sim' && openSim ? openSim.title
+          : mainView === 'screen' ? (sharing ? 'Your screen' : (sharingPeer?.name || 'Teacher') + "'s screen")
+          : 'Whiteboard'}
       </span>
+      {openSim && (
+        <button onClick={() => setMainView(v => v === 'board' ? 'sim' : 'board')} style={{
+          background: 'rgba(242,194,48,.15)', color: '#8a6a00', border: 'none', borderRadius: 7,
+          fontSize: 11.5, fontWeight: 700, padding: '5px 12px', cursor: 'pointer', marginRight: 6,
+        }}>{mainView === 'sim' ? 'View board' : 'View practical'}</button>
+      )}
       {(sharing || sharingPeer) && (
         <button onClick={() => setMainView(v => v === 'board' ? 'screen' : 'board')} style={{
           background: 'rgba(242,194,48,.15)', color: '#8a6a00', border: 'none', borderRadius: 7,
@@ -1977,6 +2045,10 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
           }} />
         <IconBtn icon="image" title="Put a picture on the board" onClick={() => imgInputRef.current?.click()} />
         <IconBtn icon="book" title="Put a Library page on the board" onClick={() => setShowLibPicker(true)} />
+        <IconBtn icon="flask" title="Open a practical simulation for the class" active={!!openSim}
+          onClick={() => openSim
+            ? (setOpenSim(null), setMainView('board'), sendOpLive({ kind: 'sim', simId: null }))
+            : setShowSimPicker(true)} />
         <IconBtn icon={boardLocked ? 'lockC' : 'lockO'} active={!boardLocked}
           title={boardLocked ? 'Students cannot draw. Click to allow.' : 'Students can draw. Click to lock.'}
           onClick={toggleBoardLock} />
@@ -2194,8 +2266,8 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
               <BookReader
                 book={openBook}
                 canControl={isTeacher}
-                onPage={(pg) => { setOpenBook(b => b && { ...b, page: pg }); sendOpLive({ kind: 'book', id: openBook.id, title: openBook.title, page: pg }) }}
-                onClose={() => { setOpenBook(null); sendOpLive({ kind: 'book', id: null }) }}
+                onPage={(pg) => { setOpenBook(b => b && { ...b, page: pg }); sendOpLive({ kind: 'book', bookId: openBook.id, title: openBook.title, page: pg }) }}
+                onClose={() => { setOpenBook(null); sendOpLive({ kind: 'book', bookId: null }) }}
                 onStamp={(dataUrl, w, h) => placeImageOp(dataUrl, w, h)}
               />
             )}
@@ -2203,6 +2275,9 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
               {toolPill}
               {mainView === 'screen' && (sharing || sharingPeer) && (
                 <ScreenView stream={sharing ? localStream : streams[sharingPeer?.socketId]} muted={sharing} />
+              )}
+              {mainView === 'sim' && openSim && (
+                <SimPanel sim={openSim} />
               )}
               <canvas ref={canvasRef}
                 onPointerDown={(e) => {
@@ -2230,13 +2305,24 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
         {!focus && panelCard}
       </div>
 
+      {showSimPicker && (
+        <SimPicker
+          onClose={() => setShowSimPicker(false)}
+          onPick={(sim) => {
+            setShowSimPicker(false)
+            setOpenSim(sim)
+            setMainView('sim')
+            sendOpLive({ kind: 'sim', simId: sim.id, title: sim.title, url: sim.url || null })
+          }}
+        />
+      )}
       {showLibPicker && (
         <LibraryPagePicker
           onClose={() => setShowLibPicker(false)}
           onOpenBook={(b) => {
             const nb = { id: b._id, title: b.title || 'Coursebook', page: 1 }
             setOpenBook(nb)
-            sendOpLive({ kind: 'book', id: nb.id, title: nb.title, page: 1 })
+            sendOpLive({ kind: 'book', bookId: nb.id, title: nb.title, page: 1 })
             setShowLibPicker(false)
           }}
         />
@@ -2488,6 +2574,173 @@ function LobbyPreview({ stream }) {
   useEffect(() => { if (ref.current && stream) ref.current.srcObject = stream }, [stream])
   return <video ref={ref} autoPlay playsInline muted
     style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }} />
+}
+
+// ── Practical simulation surface ───────────────────────────
+// PhET sims run in an iframe; Smartious-native sims render directly.
+// Every participant interacts with their OWN copy (hands-on), and a
+// teacher demonstrating should Share Screen so all eyes and the
+// lesson recording follow the same instance.
+function SimPanel({ sim }) {
+  if (sim.id === 'sm:vernier') return <VernierSim />
+  return (
+    <div style={{ position: 'absolute', inset: 0, background: '#fff', zIndex: 2, display: 'flex', flexDirection: 'column' }}>
+      <iframe src={sim.url} title={sim.title} allowFullScreen
+        style={{ flex: 1, border: 'none', width: '100%' }} />
+      <div style={{ fontSize: 10, color: '#8A8A92', padding: '3px 10px', background: '#F4F2ED' }}>
+        Interactive simulation by PhET, University of Colorado Boulder — each person controls their own copy.
+      </div>
+    </div>
+  )
+}
+
+function SimPicker({ onClose, onPick }) {
+  return (
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', zIndex: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: '#141419', border: '1px solid rgba(255,255,255,.1)', borderRadius: 16, width: '100%', maxWidth: 520, maxHeight: '82vh', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ padding: '14px 18px', borderBottom: '1px solid rgba(255,255,255,.08)', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <SmartiousCrest size={24} />
+          <div style={{ color: '#fff', fontWeight: 800, fontSize: 14, flex: 1 }}>Open a practical for the class</div>
+          <Btn onClick={onClose} style={{ padding: '5px 10px' }}>Close</Btn>
+        </div>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '10px 18px 16px' }}>
+          {SIM_CATALOG.map(group => (
+            <div key={group.subject} style={{ marginBottom: 14 }}>
+              <div style={{ color: '#F2C230', fontSize: 11, fontWeight: 800, letterSpacing: '.08em', textTransform: 'uppercase', margin: '8px 0 6px' }}>
+                {group.subject}
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+                {group.sims.map(s => (
+                  <div key={s.id} onClick={() => onPick(s)}
+                    style={{ padding: '9px 11px', borderRadius: 9, cursor: 'pointer', background: 'rgba(255,255,255,.05)', color: '#fff', fontSize: 12, fontWeight: 600 }}>
+                    {s.title}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+          <div style={{ color: 'rgba(255,255,255,.35)', fontSize: 10.5, marginTop: 4 }}>
+            Everyone in the class is taken to the same practical. Each person controls their own copy — Share Screen to demonstrate yours.
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Smartious native sim: vernier calliper reading practice ──
+// A randomised object is measured by the calliper; the student reads
+// the main scale + vernier coincidence and checks their answer.
+// Directly examinable KCSE/IGCSE practical skill.
+function VernierSim() {
+  const cvRef = useRef(null)
+  const [reading, setReading] = useState(() => +(Math.random() * 74 + 13).toFixed(1))
+  const [answer, setAnswer] = useState('')
+  const [feedback, setFeedback] = useState(null)   // { ok, text }
+  const [showAns, setShowAns] = useState(false)
+  const [tries, setTries] = useState(0)
+
+  useEffect(() => {
+    const cv = cvRef.current
+    if (!cv) return
+    const wrap = cv.parentElement
+    const W = Math.min(wrap.clientWidth - 20, 760)
+    cv.width = W * (window.devicePixelRatio || 1)
+    cv.height = 240 * (window.devicePixelRatio || 1)
+    cv.style.width = W + 'px'; cv.style.height = '240px'
+    const ctx = cv.getContext('2d')
+    ctx.setTransform(window.devicePixelRatio || 1, 0, 0, window.devicePixelRatio || 1, 0, 0)
+    const mmPx = (W - 50) / 100
+    const x0 = 25, yMain = 95
+    ctx.clearRect(0, 0, W, 240)
+    // frame beam
+    ctx.fillStyle = '#E8E4DA'
+    ctx.fillRect(x0 - 12, yMain - 40, 100 * mmPx + 40, 44)
+    ctx.strokeStyle = '#8B857A'; ctx.lineWidth = 1.2
+    ctx.strokeRect(x0 - 12, yMain - 40, 100 * mmPx + 40, 44)
+    // main scale ticks (mm), cm labels
+    ctx.fillStyle = '#2A2A2E'; ctx.font = '11px Arial'
+    for (let mm = 0; mm <= 100; mm++) {
+      const x = x0 + mm * mmPx
+      const tall = mm % 10 === 0 ? 16 : mm % 5 === 0 ? 11 : 7
+      ctx.beginPath(); ctx.moveTo(x, yMain); ctx.lineTo(x, yMain - tall)
+      ctx.strokeStyle = '#2A2A2E'; ctx.lineWidth = mm % 10 === 0 ? 1.4 : 0.8; ctx.stroke()
+      if (mm % 10 === 0) ctx.fillText(String(mm / 10), x - 3, yMain - 22)
+    }
+    ctx.font = '10px Arial'; ctx.fillStyle = '#6B6B6B'
+    ctx.fillText('cm', x0 + 100 * mmPx + 14, yMain - 22)
+    // fixed jaw
+    ctx.fillStyle = '#5A6470'
+    ctx.fillRect(x0 - 6, yMain, 6, 90)
+    // object being measured
+    const jawX = x0 + reading * mmPx
+    ctx.fillStyle = '#B8552F'
+    ctx.fillRect(x0, yMain + 22, reading * mmPx, 46)
+    ctx.strokeStyle = '#7D3A1E'; ctx.strokeRect(x0, yMain + 22, reading * mmPx, 46)
+    // moving jaw + vernier scale (10 divisions across 9 mm)
+    ctx.fillStyle = '#5A6470'
+    ctx.fillRect(jawX, yMain, 4, 90)
+    ctx.fillStyle = '#EFEAE0'
+    ctx.fillRect(jawX, yMain, 9 * mmPx + 14, 26)
+    ctx.strokeStyle = '#8B857A'; ctx.strokeRect(jawX, yMain, 9 * mmPx + 14, 26)
+    ctx.fillStyle = '#7D1025'; ctx.font = '10px Arial'
+    for (let v = 0; v <= 10; v++) {
+      const x = jawX + v * 0.9 * mmPx
+      ctx.beginPath(); ctx.moveTo(x, yMain); ctx.lineTo(x, yMain + (v % 5 === 0 ? 13 : 9))
+      ctx.strokeStyle = '#7D1025'; ctx.lineWidth = 0.9; ctx.stroke()
+      if (v % 5 === 0) ctx.fillText(String(v), x - 2, yMain + 24)
+    }
+    if (showAns) {
+      ctx.fillStyle = '#15803D'; ctx.font = 'bold 13px Arial'
+      const cm = Math.floor(reading / 10)
+      const mmPart = Math.floor(reading % 10)
+      const vern = Math.round((reading * 10) % 10)
+      ctx.fillText('Reading: ' + (reading / 10).toFixed(2) + ' cm   (' + cm + ' cm + ' + mmPart + ' mm on the main scale, vernier line ' + vern + ' coincides)', x0, 215)
+    }
+  }, [reading, showAns])
+
+  const check = () => {
+    const val = parseFloat(answer)
+    if (!Number.isFinite(val)) { setFeedback({ ok: false, text: 'Type your reading in cm, e.g. 3.47' }); return }
+    const correct = +(reading / 10).toFixed(2)
+    if (Math.abs(val - correct) < 0.005) {
+      setFeedback({ ok: true, text: 'Correct: ' + correct.toFixed(2) + ' cm. Well read.' })
+      setShowAns(true)
+    } else if (Math.abs(val - correct) <= 0.01) {
+      setFeedback({ ok: false, text: 'Almost — check the vernier coincidence line again.' })
+      setTries(t => t + 1)
+    } else {
+      setFeedback({ ok: false, text: 'Not yet. Main scale first (whole mm before the vernier zero), then the coinciding vernier line adds the decimal.' })
+      setTries(t => t + 1)
+    }
+  }
+  const next = () => {
+    setReading(+(Math.random() * 74 + 13).toFixed(1))
+    setAnswer(''); setFeedback(null); setShowAns(false); setTries(0)
+  }
+
+  return (
+    <div style={{ position: 'absolute', inset: 0, background: '#FBFAF5', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto', padding: '14px 10px' }}>
+      <div style={{ fontSize: 14, fontWeight: 800, color: '#2A2A2E', marginBottom: 2 }}>Vernier callipers — read the measurement</div>
+      <div style={{ fontSize: 11.5, color: '#6B6B6B', marginBottom: 8 }}>Main scale in cm and mm; the vernier gives the extra 0.01 cm. Answer in cm to 2 decimal places.</div>
+      <canvas ref={cvRef} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, flexWrap: 'wrap', justifyContent: 'center' }}>
+        <input value={answer} onChange={e => setAnswer(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter') check() }}
+          placeholder="e.g. 3.47" inputMode="decimal"
+          style={{ width: 110, textAlign: 'center', border: '1.5px solid #C9C2B0', borderRadius: 9, padding: '9px 10px', fontSize: 14, fontWeight: 700, outline: 'none' }} />
+        <span style={{ fontSize: 13, fontWeight: 700, color: '#4B4B55' }}>cm</span>
+        <button onClick={check} style={{ background: '#7D1025', color: '#fff', border: 'none', borderRadius: 9, padding: '10px 18px', fontSize: 12.5, fontWeight: 800, cursor: 'pointer' }}>Check</button>
+        <button onClick={next} style={{ background: 'rgba(125,16,37,.08)', color: '#7D1025', border: 'none', borderRadius: 9, padding: '10px 16px', fontSize: 12.5, fontWeight: 800, cursor: 'pointer' }}>New object</button>
+        {tries >= 2 && !showAns && (
+          <button onClick={() => setShowAns(true)} style={{ background: 'transparent', color: '#B45309', border: '1px solid #E8D58F', borderRadius: 9, padding: '10px 14px', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>Show answer</button>
+        )}
+      </div>
+      {feedback && (
+        <div style={{ marginTop: 10, fontSize: 12.5, fontWeight: 700, color: feedback.ok ? '#15803D' : '#B45309' }}>{feedback.text}</div>
+      )}
+    </div>
+  )
 }
 
 // Translate getUserMedia failures into the exact fix for THIS device.
