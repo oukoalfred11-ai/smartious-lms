@@ -96,6 +96,88 @@ const SmartiousCrest = ({ size = 30 }) => (
   </svg>
 )
 
+// ── Demonstration instruments: ruler, protractor, compass ──
+// Drawn ABOVE the ink as overlays (never erased, never part of the
+// drawing). World-coordinate positions sync to every screen, so the
+// class watches the teacher measure exactly as on a real board.
+function drawInstruments(ctx, insts, z) {
+  const lw = (n) => Math.max(n / z, n * 0.5)
+  ctx.save()
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round'
+
+  const R = insts.ruler
+  if (R && R.visible) {
+    ctx.save()
+    ctx.translate(R.x, R.y); ctx.rotate(R.rot || 0)
+    const L = 10 * 40, H = 44
+    ctx.fillStyle = 'rgba(242,194,48,.16)'
+    ctx.strokeStyle = 'rgba(140,100,10,.85)'
+    ctx.lineWidth = lw(1.4)
+    ctx.fillRect(0, 0, L, H); ctx.strokeRect(0, 0, L, H)
+    ctx.font = '11px Arial'; ctx.fillStyle = 'rgba(90,60,0,.9)'
+    for (let u = 0; u <= 10; u++) {
+      const x = u * 40
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 14); ctx.stroke()
+      if (u < 10) { ctx.beginPath(); ctx.moveTo(x + 20, 0); ctx.lineTo(x + 20, 8); ctx.stroke() }
+      ctx.fillText(String(u), x + 3, 26)
+    }
+    // rotate handle
+    ctx.beginPath(); ctx.arc(L, H / 2, 8, 0, Math.PI * 2)
+    ctx.fillStyle = '#F2C230'; ctx.fill(); ctx.stroke()
+    ctx.restore()
+  }
+
+  const P = insts.prot
+  if (P && P.visible) {
+    ctx.save()
+    ctx.translate(P.x, P.y); ctx.rotate(P.rot || 0)
+    const r = 3.4 * 40
+    ctx.fillStyle = 'rgba(96,165,250,.13)'
+    ctx.strokeStyle = 'rgba(30,80,160,.85)'
+    ctx.lineWidth = lw(1.4)
+    ctx.beginPath(); ctx.arc(0, 0, r, Math.PI, 0); ctx.lineTo(-r, 0); ctx.closePath()
+    ctx.fill(); ctx.stroke()
+    ctx.font = '10px Arial'; ctx.fillStyle = 'rgba(20,60,130,.9)'
+    for (let d = 0; d <= 180; d += 10) {
+      const a = Math.PI + (d * Math.PI / 180)
+      const len = d % 30 === 0 ? 14 : 8
+      ctx.beginPath()
+      ctx.moveTo((r - len) * Math.cos(a), (r - len) * Math.sin(a))
+      ctx.lineTo(r * Math.cos(a), r * Math.sin(a))
+      ctx.stroke()
+      if (d % 30 === 0) {
+        ctx.fillText(String(d), (r - 27) * Math.cos(a) - 7, (r - 27) * Math.sin(a) + 4)
+      }
+    }
+    // centre crosshair + baseline
+    ctx.beginPath(); ctx.moveTo(-r, 0); ctx.lineTo(r, 0); ctx.stroke()
+    ctx.beginPath(); ctx.moveTo(0, -7); ctx.lineTo(0, 7); ctx.stroke()
+    // rotate handle at the top of the arc
+    ctx.beginPath(); ctx.arc(0, -r, 8, 0, Math.PI * 2)
+    ctx.fillStyle = '#60A5FA'; ctx.fill(); ctx.stroke()
+    ctx.restore()
+  }
+
+  const Cm = insts.comp
+  if (Cm && Cm.visible) {
+    ctx.strokeStyle = 'rgba(180,40,60,.9)'
+    ctx.lineWidth = lw(1.4)
+    ctx.setLineDash([6, 6])
+    ctx.beginPath(); ctx.arc(Cm.cx, Cm.cy, Cm.r, 0, Math.PI * 2); ctx.stroke()
+    ctx.setLineDash([])
+    // centre + radius arm + handle
+    ctx.beginPath(); ctx.moveTo(Cm.cx - 7, Cm.cy); ctx.lineTo(Cm.cx + 7, Cm.cy)
+    ctx.moveTo(Cm.cx, Cm.cy - 7); ctx.lineTo(Cm.cx, Cm.cy + 7); ctx.stroke()
+    const hx = Cm.cx + Cm.r * Math.cos(Cm.ha || 0), hy = Cm.cy + Cm.r * Math.sin(Cm.ha || 0)
+    ctx.beginPath(); ctx.moveTo(Cm.cx, Cm.cy); ctx.lineTo(hx, hy); ctx.stroke()
+    ctx.beginPath(); ctx.arc(hx, hy, 8, 0, Math.PI * 2)
+    ctx.fillStyle = '#E24B4A'; ctx.fill(); ctx.stroke()
+    ctx.font = '12px Arial'; ctx.fillStyle = 'rgba(150,20,40,.95)'
+    ctx.fillText('r = ' + (Cm.r / 40).toFixed(1) + ' u', Cm.cx + 10, Cm.cy - 10)
+  }
+  ctx.restore()
+}
+
 // ── Teaching diagram templates ─────────────────────────────
 // Each is a single board op {kind:'diagram', name, x1, y1, color, w}
 // drawn procedurally around its centre — synced, replayable,
@@ -204,6 +286,9 @@ const ICONS = {
   angle: 'M4 20L20 20 M4 20L16 6 M11 20a8 8 0 0 0-2.5-5.5',
   shapes: 'M4 4h7v7H4z M17.5 13a4.5 4.5 0 1 0 .001 0z M13 4l4 7h-8z',
   select: 'M5 3l14 8-6.5 1.5L16 19l-3 1.5-3.5-6.5L5 17z',
+  ruler: 'M3 17L17 3l4 4L7 21z M7.5 12.5l2 2 M10.5 9.5l2 2 M13.5 6.5l2 2',
+  prot: 'M4 16a8 8 0 0 1 16 0z M12 16v-5 M8 16v-2 M16 16v-2',
+  comp: 'M12 4a2 2 0 1 0 .001 0z M12 6l-5 13 M12 6l5 13 M6 17c3 2 9 2 12 0',
 }
 
 // Bottom control: icon over a small label, mockup style.
@@ -474,6 +559,10 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   }, [])
 
   const inkRef = useRef(null)   // offscreen transparent ink layer
+  // Instruments live OUTSIDE the op log: one state per instrument,
+  // last update wins, drawn above the ink in composite().
+  const instRef = useRef({ ruler: null, prot: null, comp: null })
+  const instThrottleRef = useRef(0)
 
   // Paint background + graph grid + the ink layer onto the screen.
   const composite = useCallback(() => {
@@ -506,6 +595,8 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       ctx.setTransform(1, 0, 0, 1, 0, 0)
       ctx.drawImage(ink, 0, 0)
     }
+    ctx.setTransform(z, 0, 0, z, o.x, o.y)
+    drawInstruments(ctx, instRef.current, z)
   }, [])
 
   const redraw = useCallback(() => {
@@ -568,6 +659,11 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       redrawRef.current()
       return
     }
+    if (op.kind === 'inst') {
+      instRef.current[op.name] = op.st || null
+      composite()
+      return
+    }
     if (op.kind === 'book') { setOpenBook(op.id ? { id: op.id, title: op.title || 'Coursebook', page: op.page || 1 } : null); return }
     opsRef.current.push(op)
     const ink = inkRef.current
@@ -625,6 +721,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
     const ops = opsRef.current
     for (let i = ops.length - 1; i >= 0; i--) {
       if (ops[i].by === byId) {
+        if (ops[i].kind === 'inst') continue
         const removed = ops.splice(i, 1)[0]
         // Undoing a MOVE puts the target back where it came from.
         if (removed.kind === 'move') {
@@ -636,6 +733,15 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
     }
     redrawRef.current()
   }, [])
+
+  const sendInst = (name, st, final) => {
+    instRef.current[name] = st
+    composite()
+    const now = Date.now()
+    if (!final && now - instThrottleRef.current < 140) return
+    instThrottleRef.current = now
+    socketRef.current?.emit('board:op', { kind: 'inst', name, st, by: myIdRef.current, id: 'inst-' + name })
+  }
 
   const newOpId = () => 'op-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7)
 
@@ -733,6 +839,9 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
               if (target) translateOp(target, op.dx, op.dy)
               opsRef.current.push(op)
             }
+            else if (op.kind === 'inst') {
+              instRef.current[op.name] = op.st || null
+            }
             else if (op.kind === 'book') {
               setOpenBook(op.id ? { id: op.id, title: op.title || 'Coursebook', page: op.page || 1 } : null)
             }
@@ -808,6 +917,19 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
     return { x: (e.clientX - rect.left - o.x) / z, y: (e.clientY - rect.top - o.y) / z }
   }
 
+  const rulerSnap = (p) => {
+    const R = instRef.current.ruler
+    if (!R || !R.visible) return p
+    const rot = R.rot || 0
+    const lx = (p.x - R.x) * Math.cos(-rot) - (p.y - R.y) * Math.sin(-rot)
+    const ly = (p.x - R.x) * Math.sin(-rot) + (p.y - R.y) * Math.cos(-rot)
+    // Within 16 world-units above the top edge, along its length
+    if (lx >= -8 && lx <= 10 * 40 + 8 && ly > -18 && ly < 10) {
+      return { x: R.x + lx * Math.cos(rot), y: R.y + lx * Math.sin(rot) }
+    }
+    return p
+  }
+
   const snap15 = (p0, p1) => {
     const ang = Math.atan2(p1.y - p0.y, p1.x - p0.x)
     const s = Math.round(ang / (Math.PI / 12)) * (Math.PI / 12)
@@ -851,6 +973,37 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
     }
     const p = toWorld(e)
 
+    // Instruments (teacher): grab a handle or body before any tool
+    // logic — the ruler, protractor, and compass float above the ink.
+    if (isTeacher) {
+      const I = instRef.current
+      const near = (x, y, r) => Math.hypot(p.x - x, p.y - y) < r
+      if (I.comp && I.comp.visible) {
+        const hx = I.comp.cx + I.comp.r * Math.cos(I.comp.ha || 0)
+        const hy = I.comp.cy + I.comp.r * Math.sin(I.comp.ha || 0)
+        if (near(hx, hy, 16)) { d.active = 'inst'; d.inst = ['comp', 'radius']; return }
+        if (near(I.comp.cx, I.comp.cy, 16)) { d.active = 'inst'; d.inst = ['comp', 'body']; d.last = p; return }
+      }
+      if (I.prot && I.prot.visible) {
+        const rot = I.prot.rot || 0, r = 3.4 * 40
+        const hx = I.prot.x + r * Math.sin(rot) * -1 * 0 + (-r) * Math.sin(rot)
+        const hy = I.prot.y + (-r) * Math.cos(rot)
+        if (near(I.prot.x - r * Math.sin(rot), I.prot.y - r * Math.cos(rot), 16)) { d.active = 'inst'; d.inst = ['prot', 'rot']; return }
+        const lx = (p.x - I.prot.x) * Math.cos(-rot) - (p.y - I.prot.y) * Math.sin(-rot)
+        const ly = (p.x - I.prot.x) * Math.sin(-rot) + (p.y - I.prot.y) * Math.cos(-rot)
+        if (ly <= 6 && ly > -r && Math.hypot(lx, ly) <= r) { d.active = 'inst'; d.inst = ['prot', 'body']; d.last = p; return }
+      }
+      if (I.ruler && I.ruler.visible) {
+        const rot = I.ruler.rot || 0
+        const hx = I.ruler.x + 10 * 40 * Math.cos(rot) - 22 * Math.sin(rot)
+        const hy = I.ruler.y + 10 * 40 * Math.sin(rot) + 22 * Math.cos(rot)
+        if (near(hx, hy, 16)) { d.active = 'inst'; d.inst = ['ruler', 'rot']; return }
+        const lx = (p.x - I.ruler.x) * Math.cos(-rot) - (p.y - I.ruler.y) * Math.sin(-rot)
+        const ly = (p.x - I.ruler.x) * Math.sin(-rot) + (p.y - I.ruler.y) * Math.cos(-rot)
+        if (lx >= 0 && lx <= 10 * 40 && ly >= 0 && ly <= 44) { d.active = 'inst'; d.inst = ['ruler', 'body']; d.last = p; return }
+      }
+    }
+
     // Select tool: grab whatever is under the cursor and drag it.
     if (tool === 'select') {
       const hit = hitTest(p)
@@ -888,9 +1041,10 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       if (text && text.trim()) sendOp({ kind: 'text', x1: p.x, y1: p.y, text: text.trim(), color: colour, size: 12 + lineW * 3 })
       return
     }
+    const ps = (tool === 'pen' || tool === 'line') ? rulerSnap(p) : p
     d.active = tool
-    d.start = p
-    d.pts = [p]
+    d.start = ps
+    d.pts = [ps]
   }
 
   const onMove = (e) => {
@@ -933,7 +1087,26 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       redraw()
       return
     }
-    const p = toWorld(e)
+    if (d.active === 'inst') {
+      const p = toWorld(e)
+      const [name, part] = d.inst
+      const I = { ...instRef.current[name] }
+      if (part === 'body') {
+        const dx = p.x - d.last.x, dy = p.y - d.last.y
+        if (name === 'comp') { I.cx += dx; I.cy += dy } else { I.x += dx; I.y += dy }
+        d.last = p
+      } else if (part === 'rot') {
+        if (name === 'ruler') I.rot = Math.atan2(p.y - I.y, p.x - I.x)
+        if (name === 'prot') I.rot = Math.atan2(p.x - I.x, -(p.y - I.y)) * -1
+      } else if (part === 'radius') {
+        I.r = Math.max(20, Math.hypot(p.x - I.cx, p.y - I.cy))
+        I.ha = Math.atan2(p.y - I.cy, p.x - I.cx)
+      }
+      sendInst(name, I, false)
+      return
+    }
+    let p = toWorld(e)
+    if (d.active === 'pen' || d.active === 'line') p = rulerSnap(p)
     const cv = canvasRef.current, ctx = cv.getContext('2d')
     const { zoom: z, offset: o } = viewRef.current
     if (d.active === 'pen' || d.active === 'eraser') {
@@ -975,6 +1148,12 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
     const d = drawRef.current
     if (!d.active) return
     if (d.active === 'pan') { d.active = false; return }
+    if (d.active === 'inst') {
+      const [name] = d.inst
+      sendInst(name, instRef.current[name], true)
+      d.active = false; d.inst = null
+      return
+    }
     if (d.active === 'move') {
       if (d.moveTarget && (Math.abs(d.moveAcc.x) > 0.5 || Math.abs(d.moveAcc.y) > 0.5)) {
         // One op for the whole drag: everyone's copy jumps to the
@@ -1533,6 +1712,36 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
             </div>
           )}
         </div>
+        <IconBtn icon="ruler" title="Ruler: drag to move, gold handle rotates, pen snaps to its edge" active={!!instRef.current.ruler?.visible}
+          onClick={() => {
+            const cur = instRef.current.ruler
+            if (cur && cur.visible) sendInst('ruler', null, true)
+            else {
+              const cv = canvasRef.current, { zoom: z, offset: o } = viewRef.current
+              sendInst('ruler', { visible: true, rot: 0,
+                x: ((cv?.width || 900) / 2 - o.x) / z - 200, y: ((cv?.height || 500) / 2 - o.y) / z }, true)
+            }
+          }} />
+        <IconBtn icon="prot" title="Protractor: drag to move, blue handle rotates" active={!!instRef.current.prot?.visible}
+          onClick={() => {
+            const cur = instRef.current.prot
+            if (cur && cur.visible) sendInst('prot', null, true)
+            else {
+              const cv = canvasRef.current, { zoom: z, offset: o } = viewRef.current
+              sendInst('prot', { visible: true, rot: 0,
+                x: ((cv?.width || 900) / 2 - o.x) / z, y: ((cv?.height || 500) / 2 - o.y) / z }, true)
+            }
+          }} />
+        <IconBtn icon="comp" title="Compass: drag the centre, red handle sets the radius, then use the Circle tool from its centre to draw" active={!!instRef.current.comp?.visible}
+          onClick={() => {
+            const cur = instRef.current.comp
+            if (cur && cur.visible) sendInst('comp', null, true)
+            else {
+              const cv = canvasRef.current, { zoom: z, offset: o } = viewRef.current
+              sendInst('comp', { visible: true, r: 2 * 40, ha: -0.6,
+                cx: ((cv?.width || 900) / 2 - o.x) / z, cy: ((cv?.height || 500) / 2 - o.y) / z }, true)
+            }
+          }} />
         <IconBtn icon="grid" title={grid ? 'Plain board' : 'Graph paper for everyone'} active={grid}
           onClick={() => { const g = !grid; setGrid(g); sendOpLive({ kind: 'bg', grid: g }) }} />
         <IconBtn icon="image" title="Put a picture on the board" onClick={() => imgInputRef.current?.click()} />
