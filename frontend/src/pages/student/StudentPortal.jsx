@@ -4571,7 +4571,15 @@ function LiveClassCard({ lc, subjectColour, fmtDateTime, countdownText, canJoin,
             Join class
           </button>
         ) : isEnded ? (
+          (lc.recordings && lc.recordings.length > 0) ? (
+            <button className="btn btn-p"
+              style={{ width:'100%', justifyContent:'center', background:col, borderColor:col }}
+              onClick={() => window.open(lc.recordings[lc.recordings.length - 1].url, '_blank', 'noopener')}>
+              Watch recording
+            </button>
+          ) : (
           <div style={{ fontSize:12, color:'var(--s500)', textAlign:'center' }}>This class has ended</div>
+          )
         ) : lc.preparationLessonId ? (
           <button className="btn btn-s" style={{ width:'100%', justifyContent:'center' }} onClick={onPrepare}>
             Prepare for this class
