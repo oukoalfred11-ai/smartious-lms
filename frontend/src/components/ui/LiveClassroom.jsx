@@ -68,6 +68,34 @@ const Btn = ({ children, active, danger, onClick, title, disabled, style = {} })
   )
 }
 
+// The official Smartious crest — crimson shield, gold star, open
+// book — identical to the login page mark so the classroom feels
+// like the same house, not a third-party room.
+const SmartiousCrest = ({ size = 30 }) => (
+  <svg width={size} height={size} viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Smartious">
+    <defs>
+      <linearGradient id="cls-grad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor="#A8203A"/>
+        <stop offset="100%" stopColor="#7A1026"/>
+      </linearGradient>
+    </defs>
+    <path d="M40 6 L68 14 Q70 14 70 17 L70 44 Q70 60 40 74 Q10 60 10 44 L10 17 Q10 14 12 14 Z"
+      fill="url(#cls-grad)" stroke="#6A0E20" strokeWidth="0.6"/>
+    <path d="M40 10 L64 17 Q65.5 17 65.5 19 L65.5 44 Q65.5 57 40 69 Q14.5 57 14.5 44 L14.5 19 Q14.5 17 16 17 Z"
+      fill="none" stroke="rgba(255,255,255,.14)" strokeWidth="0.8"/>
+    <polygon points="40,19 42.2,26 49.5,26 43.7,30.4 45.9,37.5 40,33 34.1,37.5 36.3,30.4 30.5,26 37.8,26"
+      fill="#C9973A" stroke="#C89A28" strokeWidth="0.4"/>
+    <g transform="translate(40 52)">
+      <path d="M-14 -4 L-14 8 L-1 9 L-1 -3 Q-8 -5 -14 -4 Z" fill="#FFFFFF" stroke="#FDFAF4" strokeWidth=".4"/>
+      <path d="M14 -4 L14 8 L1 9 L1 -3 Q8 -5 14 -4 Z" fill="#FFFFFF" stroke="#FDFAF4" strokeWidth=".4"/>
+      <line x1="-10" y1="-0.5" x2="-4" y2="-0.5" stroke="#A8203A" strokeWidth=".5" strokeLinecap="round"/>
+      <line x1="-10" y1="2" x2="-4" y2="2" stroke="#A8203A" strokeWidth=".5" strokeLinecap="round"/>
+      <line x1="4" y1="-0.5" x2="10" y2="-0.5" stroke="#A8203A" strokeWidth=".5" strokeLinecap="round"/>
+      <line x1="4" y1="2" x2="10" y2="2" stroke="#A8203A" strokeWidth=".5" strokeLinecap="round"/>
+    </g>
+  </svg>
+)
+
 // Minimal stroke icons (no icon font needed; multi-subpath in one d).
 const Ic = ({ d, size = 18 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -188,6 +216,9 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   const [tilesHidden, setTilesHidden] = useState(false)
   const [moreOpen, setMoreOpen] = useState(false)
   const [swatchOpen, setSwatchOpen] = useState(false)
+  // Open coursebook: shown split-screen beside the whiteboard, the
+  // teacher turns pages and every student's copy follows.
+  const [openBook, setOpenBook] = useState(null)   // { id, title, page }
   const [mainView, setMainView] = useState('board')   // 'board' | 'screen'
   const camTrackRef = useRef(null)
   const [showLibPicker, setShowLibPicker] = useState(false)
@@ -406,6 +437,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
     if (op.kind === 'lock') { setBoardLocked(!!op.locked); return }
     if (op.kind === 'bg') { setGrid(op.grid === true); return }
     if (op.kind === 'undo') { applyUndo(op.by); return }
+    if (op.kind === 'book') { setOpenBook(op.id ? { id: op.id, title: op.title || 'Coursebook', page: op.page || 1 } : null); return }
     opsRef.current.push(op)
     const ink = inkRef.current
     if (!ink) { redrawRef.current(); return }
@@ -513,6 +545,9 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
               for (let i = ops.length - 1; i >= 0; i--) {
                 if (ops[i].by === op.by) { ops.splice(i, 1); break }
               }
+            }
+            else if (op.kind === 'book') {
+              setOpenBook(op.id ? { id: op.id, title: op.title || 'Coursebook', page: op.page || 1 } : null)
             }
             else opsRef.current.push(op)
           }
@@ -1283,11 +1318,18 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
 
       {/* ── Top bar ── */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '10px 16px', flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-          <span style={{ background: '#FDFAF4', borderRadius: 8, padding: '4px 9px', fontSize: 14, fontWeight: 900, letterSpacing: '.02em' }}>
-            <span style={{ color: '#080C14' }}>SMART</span><span style={{ color: C.gold }}>IOUS</span>
-          </span>
-          {!narrow && <span style={{ color: C.text, fontSize: 14.5, fontWeight: 700 }}>Live Classroom</span>}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <SmartiousCrest size={32} />
+          <div style={{ lineHeight: 1.1 }}>
+            <div style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: 17, fontWeight: 700, color: '#FFFFFF' }}>
+              Smart<em style={{ fontStyle: 'italic', color: '#C9973A', fontWeight: 500 }}>ious</em>
+            </div>
+            {!narrow && (
+              <div style={{ fontSize: 8.5, fontWeight: 600, letterSpacing: '.16em', color: 'rgba(247,243,237,.45)', textTransform: 'uppercase', marginTop: 1 }}>
+                Live Classroom
+              </div>
+            )}
+          </div>
         </div>
         <div style={{ width: 1, height: 22, background: C.border }} />
         <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -1378,6 +1420,16 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
 
           <div style={{ flex: 1, minHeight: 0, background: '#FFFFFF', borderRadius: 16, display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 10px 34px rgba(0,0,0,.35)' }}>
             {boardHeader}
+            <div style={{ flex: 1, minHeight: 0, display: 'flex' }}>
+            {openBook && mainView === 'board' && (
+              <BookReader
+                book={openBook}
+                canControl={isTeacher}
+                onPage={(pg) => { setOpenBook(b => b && { ...b, page: pg }); sendOpLive({ kind: 'book', id: openBook.id, title: openBook.title, page: pg }) }}
+                onClose={() => { setOpenBook(null); sendOpLive({ kind: 'book', id: null }) }}
+                onStamp={(dataUrl, w, h) => placeImageOp(dataUrl, w, h)}
+              />
+            )}
             <div ref={wrapRef} style={{ flex: 1, position: 'relative', minHeight: 0, background: T.board }}>
               {toolPill}
               {mainView === 'screen' && (sharing || sharingPeer) && (
@@ -1402,6 +1454,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
                 </div>
               )}
             </div>
+            </div>
           </div>
         </div>
 
@@ -1409,7 +1462,15 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       </div>
 
       {showLibPicker && (
-        <LibraryPagePicker onClose={() => setShowLibPicker(false)} onPlace={placeImageOp} />
+        <LibraryPagePicker
+          onClose={() => setShowLibPicker(false)}
+          onOpenBook={(b) => {
+            const nb = { id: b._id, title: b.title || 'Coursebook', page: 1 }
+            setOpenBook(nb)
+            sendOpLive({ kind: 'book', id: nb.id, title: nb.title, page: 1 })
+            setShowLibPicker(false)
+          }}
+        />
       )}
 
       {/* ── Bottom control bar ── */}
@@ -1448,17 +1509,14 @@ function ScreenView({ stream, muted }) {
   )
 }
 
-// ── Library PDF page picker (teacher) ──────────────────────
-// Search the Library, choose a book and a page, and the page is
-// rendered client-side with the bundled pdf.js, compressed, and
-// pushed onto the shared board as an image op.
-function LibraryPagePicker({ onClose, onPlace }) {
+// ── Library book picker (teacher) ──────────────────────────
+// Search the Library and open a coursebook INSIDE the classroom —
+// it appears split-screen beside the whiteboard on every student's
+// screen, with the teacher turning the pages for the whole class.
+function LibraryPagePicker({ onClose, onOpenBook }) {
   const [q, setQ] = useState('')
   const [books, setBooks] = useState([])
   const [loading, setLoading] = useState(true)
-  const [book, setBook] = useState(null)
-  const [page, setPage] = useState(1)
-  const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
 
   useEffect(() => {
@@ -1473,63 +1531,29 @@ function LibraryPagePicker({ onClose, onPlace }) {
     return () => { alive = false; clearTimeout(t) }
   }, [q])
 
-  const addPage = async () => {
-    if (!book) return
-    setBusy(true); setErr('')
-    try {
-      // Runtime-only import: pdf.js ships as a static asset in
-      // /public/pdfjs, not as a bundled dependency. The URL is built
-      // at runtime so Vite/Rollup does not try to resolve it at
-      // build time (a literal string here fails the Netlify build).
-      const pdfjsUrl = new URL('/pdfjs/pdf.min.mjs', window.location.origin).href
-      const pdfjs = await import(/* @vite-ignore */ pdfjsUrl)
-      pdfjs.GlobalWorkerOptions.workerSrc = '/pdfjs/pdf.worker.min.mjs'
-      const token = localStorage.getItem('sm_token') || ''
-      const base = (api?.defaults?.baseURL || '')
-      const doc = await pdfjs.getDocument({
-        url: base + '/library/' + book._id + '/stream',
-        httpHeaders: { Authorization: 'Bearer ' + token },
-        rangeChunkSize: 1048576,
-      }).promise
-      const n = Math.min(Math.max(1, Number(page) || 1), doc.numPages)
-      const pdfPage = await doc.getPage(n)
-      const viewport = pdfPage.getViewport({ scale: 1.6 })
-      const c = document.createElement('canvas')
-      c.width = viewport.width; c.height = viewport.height
-      await pdfPage.render({ canvasContext: c.getContext('2d'), viewport }).promise
-      onPlace(c.toDataURL('image/jpeg', 0.82), c.width, c.height)
-      doc.destroy()
-      onClose()
-    } catch (e) {
-      console.error('[lib picker]', e)
-      setErr('Could not render that page. Try another page or book.')
-    } finally { setBusy(false) }
-  }
-
   return (
     <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', zIndex: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
-      <div onClick={e => e.stopPropagation()} style={{ background: '#131A26', border: '1px solid rgba(255,255,255,.1)', borderRadius: 14, width: '100%', maxWidth: 460, maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ padding: '14px 18px', borderBottom: '1px solid rgba(255,255,255,.08)', display: 'flex', alignItems: 'center' }}>
-          <div style={{ color: '#fff', fontWeight: 800, fontSize: 14, flex: 1 }}>Add a Library page to the board</div>
+      <div onClick={e => e.stopPropagation()} style={{ background: '#141419', border: '1px solid rgba(255,255,255,.1)', borderRadius: 16, width: '100%', maxWidth: 460, maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ padding: '14px 18px', borderBottom: '1px solid rgba(255,255,255,.08)', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <SmartiousCrest size={24} />
+          <div style={{ color: '#fff', fontWeight: 800, fontSize: 14, flex: 1 }}>Open a coursebook in class</div>
           <Btn onClick={onClose} style={{ padding: '5px 10px' }}>Close</Btn>
         </div>
         <div style={{ padding: '12px 18px' }}>
-          <input value={q} onChange={e => { setQ(e.target.value); setBook(null) }}
+          <input value={q} onChange={e => setQ(e.target.value)}
             placeholder="Search books by title or subject"
             style={{ width: '100%', boxSizing: 'border-box', background: 'rgba(255,255,255,.08)', border: 'none', borderRadius: 8, padding: '10px 12px', color: '#fff', fontSize: 12.5, outline: 'none' }} />
         </div>
-        <div style={{ flex: 1, overflowY: 'auto', padding: '0 18px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '0 18px 14px', display: 'flex', flexDirection: 'column', gap: 6 }}>
           {loading ? (
             <div style={{ color: 'rgba(255,255,255,.5)', fontSize: 12.5, padding: 16, textAlign: 'center' }}>Loading...</div>
+          ) : err ? (
+            <div style={{ color: '#F87171', fontSize: 12.5, padding: 16, textAlign: 'center' }}>{err}</div>
           ) : books.length === 0 ? (
             <div style={{ color: 'rgba(255,255,255,.5)', fontSize: 12.5, padding: 16, textAlign: 'center' }}>No books found.</div>
           ) : books.slice(0, 30).map(b => (
-            <div key={b._id} onClick={() => setBook(b)}
-              style={{
-                padding: '9px 12px', borderRadius: 8, cursor: 'pointer',
-                background: book?._id === b._id ? 'rgba(96,165,250,.25)' : 'rgba(255,255,255,.05)',
-                border: book?._id === b._id ? '1px solid rgba(96,165,250,.6)' : '1px solid transparent',
-              }}>
+            <div key={b._id} onClick={() => onOpenBook(b)}
+              style={{ padding: '10px 12px', borderRadius: 9, cursor: 'pointer', background: 'rgba(255,255,255,.05)' }}>
               <div style={{ color: '#fff', fontSize: 12.5, fontWeight: 700 }}>{b.title}</div>
               <div style={{ color: 'rgba(255,255,255,.45)', fontSize: 10.5, marginTop: 2 }}>
                 {[b.subjectName, b.grade, b.curriculum].filter(Boolean).join(' \u00b7 ')}
@@ -1537,30 +1561,120 @@ function LibraryPagePicker({ onClose, onPlace }) {
             </div>
           ))}
         </div>
-        <div style={{ padding: '12px 18px', borderTop: '1px solid rgba(255,255,255,.08)', display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ color: 'rgba(255,255,255,.6)', fontSize: 12 }}>Page</span>
-          <input type="number" min="1" value={page} onChange={e => setPage(e.target.value)}
-            style={{ width: 64, background: 'rgba(255,255,255,.08)', border: 'none', borderRadius: 7, padding: '8px 10px', color: '#fff', fontSize: 12.5, outline: 'none' }} />
-          <div style={{ flex: 1, color: '#F87171', fontSize: 11 }}>{err}</div>
-          <Btn onClick={addPage} disabled={!book || busy}
-            style={{ background: '#C9A030', color: '#7D1025', fontWeight: 800 }}>
-            {busy ? 'Rendering...' : 'Add to board'}
-          </Btn>
-        </div>
       </div>
     </div>
   )
 }
 
+// ── In-class book reader ───────────────────────────────────
+// Progressive pdf.js reader (range requests — first page in seconds
+// even on 80 MB books) shown beside the whiteboard. The teacher
+// turns pages; students follow. "To board" stamps the current page
+// onto the whiteboard for annotation.
+function BookReader({ book, canControl, onPage, onClose, onStamp }) {
+  const canvasRef = useRef(null)
+  const docRef = useRef(null)
+  const [numPages, setNumPages] = useState(0)
+  const [status, setStatus] = useState('Opening book...')
+  const renderTaskRef = useRef(null)
 
-// Mirrored self-preview for the lobby.
-function LobbyPreview({ stream }) {
-  const ref = useRef(null)
-  useEffect(() => { if (ref.current && stream) ref.current.srcObject = stream }, [stream])
-  return <video ref={ref} autoPlay playsInline muted
-    style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }} />
+  useEffect(() => {
+    let dead = false
+    ;(async () => {
+      try {
+        const pdfjsUrl = new URL('/pdfjs/pdf.min.mjs', window.location.origin).href
+        const pdfjs = await import(/* @vite-ignore */ pdfjsUrl)
+        pdfjs.GlobalWorkerOptions.workerSrc = new URL('/pdfjs/pdf.worker.min.mjs', window.location.origin).href
+        const token = localStorage.getItem('sm_token') || ''
+        const base = (api?.defaults?.baseURL || '')
+        const doc = await pdfjs.getDocument({
+          url: base + '/library/' + book.id + '/stream',
+          httpHeaders: { Authorization: 'Bearer ' + token },
+          rangeChunkSize: 1048576,
+        }).promise
+        if (dead) { doc.destroy(); return }
+        docRef.current = doc
+        setNumPages(doc.numPages)
+        setStatus('')
+      } catch (e) {
+        console.error('[book reader]', e)
+        if (!dead) setStatus('Could not open this book.')
+      }
+    })()
+    return () => { dead = true; try { docRef.current?.destroy() } catch (e) { /* noop */ } docRef.current = null }
+  }, [book.id])
+
+  useEffect(() => {
+    const doc = docRef.current
+    if (!doc || !numPages) return
+    let dead = false
+    ;(async () => {
+      try {
+        try { renderTaskRef.current?.cancel() } catch (e) { /* noop */ }
+        const n = Math.min(Math.max(1, book.page || 1), doc.numPages)
+        const page = await doc.getPage(n)
+        if (dead) return
+        const cv = canvasRef.current
+        if (!cv) return
+        const holder = cv.parentElement
+        const scale = Math.min(
+          (holder.clientWidth - 8) / page.getViewport({ scale: 1 }).width,
+          2
+        ) * (window.devicePixelRatio || 1)
+        const vp = page.getViewport({ scale: Math.max(scale, 0.5) })
+        cv.width = vp.width; cv.height = vp.height
+        cv.style.width = (vp.width / (window.devicePixelRatio || 1)) + 'px'
+        renderTaskRef.current = page.render({ canvasContext: cv.getContext('2d'), viewport: vp })
+        await renderTaskRef.current.promise
+      } catch (e) { /* cancelled renders are normal on fast page turns */ }
+    })()
+    return () => { dead = true }
+  }, [book.page, numPages])
+
+  const stamp = () => {
+    const cv = canvasRef.current
+    if (!cv || !cv.width) return
+    onStamp(cv.toDataURL('image/jpeg', 0.82), cv.width, cv.height)
+  }
+
+  return (
+    <div style={{ flex: '0 0 44%', minWidth: 260, maxWidth: 560, display: 'flex', flexDirection: 'column', borderRight: '1px solid rgba(0,0,0,.1)', background: '#F4F2ED' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 10px', borderBottom: '1px solid rgba(0,0,0,.08)' }}>
+        <span style={{ fontSize: 12, fontWeight: 800, color: '#2A2A2E', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{book.title}</span>
+        {canControl && (
+          <button onClick={stamp} title="Stamp this page onto the whiteboard to annotate it"
+            style={{ background: 'rgba(125,16,37,.1)', color: '#7D1025', border: 'none', borderRadius: 7, fontSize: 10.5, fontWeight: 800, padding: '5px 10px', cursor: 'pointer' }}>
+            To board
+          </button>
+        )}
+        {canControl && (
+          <button onClick={onClose} title="Close the book for everyone"
+            style={{ background: 'transparent', border: 'none', color: '#6B6B6B', fontSize: 17, cursor: 'pointer', padding: '0 4px' }}>&times;</button>
+        )}
+      </div>
+      <div style={{ flex: 1, overflow: 'auto', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: 6 }}>
+        {status
+          ? <div style={{ color: '#6B6B6B', fontSize: 12.5, padding: 24 }}>{status}</div>
+          : <canvas ref={canvasRef} style={{ boxShadow: '0 4px 18px rgba(0,0,0,.18)', borderRadius: 4 }} />}
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '7px 10px', borderTop: '1px solid rgba(0,0,0,.08)' }}>
+        {canControl ? (<>
+          <button onClick={() => onPage(Math.max(1, (book.page || 1) - 1))} disabled={(book.page || 1) <= 1}
+            style={{ background: 'rgba(0,0,0,.06)', border: 'none', borderRadius: 7, padding: '5px 14px', fontSize: 12, fontWeight: 800, cursor: 'pointer', color: '#2A2A2E' }}>Prev</button>
+          <span style={{ fontSize: 11.5, fontWeight: 700, color: '#4B4B55' }}>
+            Page {book.page || 1}{numPages ? ' / ' + numPages : ''}
+          </span>
+          <button onClick={() => onPage(Math.min(numPages || 9999, (book.page || 1) + 1))} disabled={numPages > 0 && (book.page || 1) >= numPages}
+            style={{ background: 'rgba(0,0,0,.06)', border: 'none', borderRadius: 7, padding: '5px 14px', fontSize: 12, fontWeight: 800, cursor: 'pointer', color: '#2A2A2E' }}>Next</button>
+        </>) : (
+          <span style={{ fontSize: 11.5, fontWeight: 700, color: '#4B4B55' }}>
+            Page {book.page || 1}{numPages ? ' / ' + numPages : ''} — the teacher turns the pages
+          </span>
+        )}
+      </div>
+    </div>
+  )
 }
-
 
 // Translate getUserMedia failures into the exact fix for THIS device.
 // The error name tells us which layer blocked it.
