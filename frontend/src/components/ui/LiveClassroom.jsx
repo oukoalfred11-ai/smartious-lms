@@ -41,12 +41,13 @@ const Btn = ({ children, active, danger, onClick, title, disabled, style = {} })
 )
 
 // One video tile. Self tile is muted (never hear yourself).
-function Tile({ stream, name, role, self, micOn, camOn, hand }) {
+function Tile({ stream, name, role, self, micOn, camOn, hand, quality, small }) {
   const ref = useRef(null)
   useEffect(() => { if (ref.current && stream) ref.current.srcObject = stream }, [stream])
+  const qColor = { good: '#22C55E', fair: '#F59E0B', poor: '#EF4444', down: '#6B7280' }[quality]
   return (
     <div style={{
-      position: 'relative', width: 150, height: 100, borderRadius: 10, overflow: 'hidden',
+      position: 'relative', width: small ? 108 : 150, height: small ? 72 : 100, borderRadius: 10, overflow: 'hidden',
       background: '#1B2230', border: hand ? '2px solid #F59E0B' : '1px solid rgba(255,255,255,.12)',
       flexShrink: 0,
     }}>
@@ -62,6 +63,12 @@ function Tile({ stream, name, role, self, micOn, camOn, hand }) {
             color: '#fff', fontWeight: 800, fontSize: 15,
           }}>{(name || '?').split(' ').map(w => w[0]).slice(0, 2).join('')}</div>
         </div>
+      )}
+      {qColor && (
+        <div title={'Connection: ' + quality} style={{
+          position: 'absolute', top: 5, right: 5, width: 9, height: 9, borderRadius: '50%',
+          background: qColor, border: '1.5px solid rgba(0,0,0,.4)',
+        }} />
       )}
       <div style={{
         position: 'absolute', left: 0, right: 0, bottom: 0, padding: '3px 8px',
@@ -113,6 +120,19 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   const [boardLocked, setBoardLocked] = useState(true)
   const viewRef = useRef({ zoom: 1, offset: { x: 0, y: 0 } })
   viewRef.current = { zoom, offset }
+
+  // ── layout / resilience ──
+  const [narrow, setNarrow] = useState(typeof window !== 'undefined' && window.innerWidth < 760)
+  const [panelOpen, setPanelOpen] = useState(typeof window === 'undefined' || window.innerWidth >= 760)
+  const [quality, setQuality] = useState({})       // socketId -> good|fair|poor|down
+  const [reconnecting, setReconnecting] = useState(false)
+  const hadConnectedRef = useRef(false)
+
+  useEffect(() => {
+    const onR = () => setNarrow(window.innerWidth < 760)
+    window.addEventListener('resize', onR)
+    return () => window.removeEventListener('resize', onR)
+  }, [])
 
   // ── chat / panel ──
   const [panel, setPanel] = useState('chat')
@@ -286,7 +306,20 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
           setPhase('live')
         })
 
-        socket.on('connect', joinRoom)   // also covers reconnects
+        socket.on('connect', () => {
+          // A reconnect issues a NEW socket id, so every peer must be
+          // renegotiated from the fresh roster: drop the stale mesh
+          // first, then rejoin. First connect just joins.
+          if (hadConnectedRef.current) {
+            engine.reset()
+            setStreams({})
+          }
+          hadConnectedRef.current = true
+          setReconnecting(false)
+          joinRoom()
+        })
+        socket.on('disconnect', () => setReconnecting(true))
+        socket.io.on('reconnect_attempt', () => setReconnecting(true))
         socket.on('connect_error', () => {
           if (!cancelled) { setPhase(p => p === 'live' ? p : 'error'); setErrMsg('Could not reach the classroom server.') }
         })
@@ -321,7 +354,11 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   useEffect(() => {
     if (phase !== 'live') return
     const t = setInterval(() => setElapsed(s => s + 1), 1000)
-    return () => clearInterval(t)
+    const q = setInterval(async () => {
+      const eng = engineRef.current
+      if (eng) setQuality(await eng.getQuality())
+    }, 4000)
+    return () => { clearInterval(t); clearInterval(q) }
   }, [phase])
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [chat, panel])
@@ -662,21 +699,26 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       {mediaNote && (
         <div style={{ background: '#78350F', color: '#FDE68A', fontSize: 12, padding: '7px 16px' }}>{mediaNote}</div>
       )}
+      {reconnecting && phase === 'live' && (
+        <div style={{ background: '#7C2D12', color: '#FED7AA', fontSize: 12, padding: '7px 16px', fontWeight: 700 }}>
+          Connection lost — reconnecting automatically...
+        </div>
+      )}
 
       {/* ── Video strip ── */}
       <div style={{ display: 'flex', gap: 8, padding: '10px 14px', overflowX: 'auto', background: '#0E141F', borderBottom: '1px solid rgba(255,255,255,.06)' }}>
         <Tile stream={localStream} name={user?.firstName ? `${user.firstName} ${user.lastName || ''}` : 'You'}
-          role={myRole} self micOn={micOn} camOn={camOn} hand={handUp} />
+          role={myRole} self micOn={micOn} camOn={camOn} hand={handUp} small={narrow} />
         {others.map(p => (
           <Tile key={p.socketId} stream={streams[p.socketId]} name={p.name} role={p.role}
-            micOn={p.micOn} camOn={p.camOn} hand={p.hand} />
+            micOn={p.micOn} camOn={p.camOn} hand={p.hand} quality={quality[p.socketId]} small={narrow} />
         ))}
       </div>
 
       {/* ── Main area ── */}
-      <div style={{ flex: 1, display: 'flex', minHeight: 0 }}>
+      <div style={{ flex: 1, display: 'flex', minHeight: 0, position: 'relative' }}>
         {/* Toolbar */}
-        <div style={{ width: 56, background: '#131A26', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '12px 0', borderRight: '1px solid rgba(255,255,255,.06)' }}>
+        <div style={{ width: narrow ? 48 : 56, background: '#131A26', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '12px 0', borderRight: '1px solid rgba(255,255,255,.06)', overflowY: 'auto' }}>
           {[['pen', 'Pen'], ['eraser', 'Erase'], ['line', 'Line'], ['rect', 'Rect'], ['circle', 'Circ'], ['text', 'Text'], ['pan', 'Pan']].map(([t, l]) => (
             <Btn key={t} active={tool === t} onClick={() => setTool(t)} title={l}
               disabled={!canDraw && t !== 'pan'} style={{ width: 42, padding: '8px 0' }}>{l}</Btn>
@@ -714,7 +756,10 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
             />
           )}
           <canvas ref={canvasRef}
-            onMouseDown={onDown} onMouseMove={onMove} onMouseUp={onUp} onMouseLeave={onUp} onWheel={onWheel}
+            onPointerDown={(e) => { e.currentTarget.setPointerCapture?.(e.pointerId); onDown(e) }}
+            onPointerMove={onMove}
+            onPointerUp={onUp} onPointerCancel={onUp} onPointerLeave={onUp}
+            onWheel={onWheel}
             style={{ display: 'block', cursor: tool === 'pan' || !canDraw ? 'grab' : 'crosshair', touchAction: 'none',
               visibility: mainView === 'screen' ? 'hidden' : 'visible' }} />
           {!canDraw && (
@@ -727,8 +772,18 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
           </div>
         </div>
 
-        {/* Right panel */}
-        <div style={{ width: 280, background: '#131A26', display: 'flex', flexDirection: 'column', borderLeft: '1px solid rgba(255,255,255,.06)' }}>
+        {/* Right panel: fixed sidebar on desktop, slide-over on phones */}
+        {(!narrow || panelOpen) && (
+        <div style={narrow ? {
+          position: 'absolute', top: 0, right: 0, bottom: 0, width: 'min(85vw, 300px)', zIndex: 20,
+          background: '#131A26', display: 'flex', flexDirection: 'column',
+          borderLeft: '1px solid rgba(255,255,255,.12)', boxShadow: '-12px 0 32px rgba(0,0,0,.5)',
+        } : { width: 280, background: '#131A26', display: 'flex', flexDirection: 'column', borderLeft: '1px solid rgba(255,255,255,.06)' }}>
+          {narrow && (
+            <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '8px 10px 0' }}>
+              <Btn onClick={() => setPanelOpen(false)} style={{ padding: '5px 12px' }}>Close</Btn>
+            </div>
+          )}
           <div style={{ display: 'flex', gap: 6, padding: '10px 12px' }}>
             {[['chat', 'Chat'], ['people', `People (${roster.length})`]].map(([id, l]) => (
               <Btn key={id} active={panel === id} onClick={() => setPanel(id)} style={{ flex: 1 }}>{l}</Btn>
@@ -776,6 +831,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
             </div>
           )}
         </div>
+        )}
       </div>
 
       {showLibPicker && (
@@ -799,6 +855,11 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
           </Btn>
         )}
         {!isTeacher && <Btn active={handUp} onClick={toggleHand}>{handUp ? 'Lower hand' : 'Raise hand'}</Btn>}
+        {narrow && (
+          <Btn active={panelOpen} onClick={() => setPanelOpen(o => !o)}>
+            Chat ({roster.length})
+          </Btn>
+        )}
       </div>
     </div>
   )
