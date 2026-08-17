@@ -109,20 +109,26 @@ function drawInstruments(ctx, insts, z) {
   if (R && R.visible) {
     ctx.save()
     ctx.translate(R.x, R.y); ctx.rotate(R.rot || 0)
-    const L = 10 * 40, H = 44
+    const L = R.len || 10 * 40, H = 44
+    const units = L / 40
     ctx.fillStyle = 'rgba(242,194,48,.16)'
     ctx.strokeStyle = 'rgba(140,100,10,.85)'
     ctx.lineWidth = lw(1.4)
     ctx.fillRect(0, 0, L, H); ctx.strokeRect(0, 0, L, H)
     ctx.font = '11px Arial'; ctx.fillStyle = 'rgba(90,60,0,.9)'
-    for (let u = 0; u <= 10; u++) {
+    for (let u = 0; u <= Math.floor(units); u++) {
       const x = u * 40
       ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 14); ctx.stroke()
-      if (u < 10) { ctx.beginPath(); ctx.moveTo(x + 20, 0); ctx.lineTo(x + 20, 8); ctx.stroke() }
+      if (u < units) { ctx.beginPath(); ctx.moveTo(x + 20, 0); ctx.lineTo(x + 20, 8); ctx.stroke() }
       ctx.fillText(String(u), x + 3, 26)
     }
-    // rotate handle
-    ctx.beginPath(); ctx.arc(L, H / 2, 8, 0, Math.PI * 2)
+    ctx.fillText((units).toFixed(1).replace(/\.0$/, '') + ' units long', 6, H - 6)
+    // stretch handle: orange square flush on the end edge
+    ctx.fillStyle = '#F97316'
+    ctx.fillRect(L - 6, H / 2 - 8, 12, 16)
+    ctx.strokeRect(L - 6, H / 2 - 8, 12, 16)
+    // rotate handle: gold circle floating beyond the end
+    ctx.beginPath(); ctx.arc(L + 26, H / 2, 8, 0, Math.PI * 2)
     ctx.fillStyle = '#F2C230'; ctx.fill(); ctx.stroke()
     ctx.restore()
   }
@@ -160,20 +166,49 @@ function drawInstruments(ctx, insts, z) {
 
   const Cm = insts.comp
   if (Cm && Cm.visible) {
-    ctx.strokeStyle = 'rgba(180,40,60,.9)'
-    ctx.lineWidth = lw(1.4)
+    const ha = Cm.ha || 0
+    const px = Cm.cx + Cm.r * Math.cos(ha), py = Cm.cy + Cm.r * Math.sin(ha)
+    // Dashed guide circle the pencil would trace
+    ctx.strokeStyle = 'rgba(180,40,60,.55)'
+    ctx.lineWidth = lw(1.2)
     ctx.setLineDash([6, 6])
     ctx.beginPath(); ctx.arc(Cm.cx, Cm.cy, Cm.r, 0, Math.PI * 2); ctx.stroke()
     ctx.setLineDash([])
-    // centre + radius arm + handle
-    ctx.beginPath(); ctx.moveTo(Cm.cx - 7, Cm.cy); ctx.lineTo(Cm.cx + 7, Cm.cy)
-    ctx.moveTo(Cm.cx, Cm.cy - 7); ctx.lineTo(Cm.cx, Cm.cy + 7); ctx.stroke()
-    const hx = Cm.cx + Cm.r * Math.cos(Cm.ha || 0), hy = Cm.cy + Cm.r * Math.sin(Cm.ha || 0)
-    ctx.beginPath(); ctx.moveTo(Cm.cx, Cm.cy); ctx.lineTo(hx, hy); ctx.stroke()
-    ctx.beginPath(); ctx.arc(hx, hy, 8, 0, Math.PI * 2)
-    ctx.fillStyle = '#E24B4A'; ctx.fill(); ctx.stroke()
+    // The instrument: hinge above the midpoint, two legs down to the
+    // needle (centre) and the pencil (circumference).
+    const mx = (Cm.cx + px) / 2, my = (Cm.cy + py) / 2
+    let nxp = -(py - Cm.cy), nyp = (px - Cm.cx)
+    const nl = Math.hypot(nxp, nyp) || 1
+    nxp /= nl; nyp /= nl
+    if (nyp > 0) { nxp = -nxp; nyp = -nyp }   // hinge opens upward
+    const h = Math.max(55, Math.min(150, Cm.r * 0.75))
+    const ax = mx + nxp * h, ay = my + nyp * h
+    ctx.strokeStyle = 'rgba(90,90,100,.95)'
+    ctx.lineWidth = lw(4)
+    ctx.beginPath(); ctx.moveTo(Cm.cx, Cm.cy); ctx.lineTo(ax, ay); ctx.stroke()   // needle leg
+    ctx.strokeStyle = 'rgba(180,40,60,.95)'
+    ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(ax, ay); ctx.stroke()          // pencil leg
+    // hinge head
+    ctx.beginPath(); ctx.arc(ax, ay, 7, 0, Math.PI * 2)
+    ctx.fillStyle = '#6B7280'; ctx.fill()
+    ctx.strokeStyle = 'rgba(60,60,70,.9)'; ctx.lineWidth = lw(1.4); ctx.stroke()
+    ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(ax + nxp * 16, ay + nyp * 16); ctx.stroke()  // grip stem
+    // needle point at the centre
+    ctx.fillStyle = '#374151'
+    ctx.beginPath(); ctx.moveTo(Cm.cx, Cm.cy)
+    const na = Math.atan2(ay - Cm.cy, ax - Cm.cx)
+    ctx.lineTo(Cm.cx + 9 * Math.cos(na + 0.28), Cm.cy + 9 * Math.sin(na + 0.28))
+    ctx.lineTo(Cm.cx + 9 * Math.cos(na - 0.28), Cm.cy + 9 * Math.sin(na - 0.28))
+    ctx.closePath(); ctx.fill()
+    // pencil tip at the circumference (drag me = radius)
+    const pa = Math.atan2(ay - py, ax - px)
+    ctx.fillStyle = '#E24B4A'
+    ctx.beginPath(); ctx.moveTo(px, py)
+    ctx.lineTo(px + 12 * Math.cos(pa + 0.3), py + 12 * Math.sin(pa + 0.3))
+    ctx.lineTo(px + 12 * Math.cos(pa - 0.3), py + 12 * Math.sin(pa - 0.3))
+    ctx.closePath(); ctx.fill()
     ctx.font = '12px Arial'; ctx.fillStyle = 'rgba(150,20,40,.95)'
-    ctx.fillText('r = ' + (Cm.r / 40).toFixed(1) + ' u', Cm.cx + 10, Cm.cy - 10)
+    ctx.fillText('r = ' + (Cm.r / 40).toFixed(1) + ' u', mx + 12, my)
   }
   ctx.restore()
 }
@@ -924,7 +959,8 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
     const lx = (p.x - R.x) * Math.cos(-rot) - (p.y - R.y) * Math.sin(-rot)
     const ly = (p.x - R.x) * Math.sin(-rot) + (p.y - R.y) * Math.cos(-rot)
     // Within 16 world-units above the top edge, along its length
-    if (lx >= -8 && lx <= 10 * 40 + 8 && ly > -18 && ly < 10) {
+    const L = R.len || 10 * 40
+    if (lx >= -8 && lx <= L + 8 && ly > -18 && ly < 10) {
       return { x: R.x + lx * Math.cos(rot), y: R.y + lx * Math.sin(rot) }
     }
     return p
@@ -981,8 +1017,11 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       if (I.comp && I.comp.visible) {
         const hx = I.comp.cx + I.comp.r * Math.cos(I.comp.ha || 0)
         const hy = I.comp.cy + I.comp.r * Math.sin(I.comp.ha || 0)
-        if (near(hx, hy, 16)) { d.active = 'inst'; d.inst = ['comp', 'radius']; return }
-        if (near(I.comp.cx, I.comp.cy, 16)) { d.active = 'inst'; d.inst = ['comp', 'body']; d.last = p; return }
+        if (near(hx, hy, 18)) { d.active = 'inst'; d.inst = ['comp', 'radius']; return }
+        // grab anywhere on the needle point or the hinge area to move
+        if (near(I.comp.cx, I.comp.cy, 18)) { d.active = 'inst'; d.inst = ['comp', 'body']; d.last = p; return }
+        const mx = (I.comp.cx + hx) / 2, my = (I.comp.cy + hy) / 2
+        if (near(mx, my, Math.max(30, I.comp.r * 0.5))) { d.active = 'inst'; d.inst = ['comp', 'body']; d.last = p; return }
       }
       if (I.prot && I.prot.visible) {
         const rot = I.prot.rot || 0, r = 3.4 * 40
@@ -995,12 +1034,14 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       }
       if (I.ruler && I.ruler.visible) {
         const rot = I.ruler.rot || 0
-        const hx = I.ruler.x + 10 * 40 * Math.cos(rot) - 22 * Math.sin(rot)
-        const hy = I.ruler.y + 10 * 40 * Math.sin(rot) + 22 * Math.cos(rot)
-        if (near(hx, hy, 16)) { d.active = 'inst'; d.inst = ['ruler', 'rot']; return }
+        const L = I.ruler.len || 10 * 40
         const lx = (p.x - I.ruler.x) * Math.cos(-rot) - (p.y - I.ruler.y) * Math.sin(-rot)
         const ly = (p.x - I.ruler.x) * Math.sin(-rot) + (p.y - I.ruler.y) * Math.cos(-rot)
-        if (lx >= 0 && lx <= 10 * 40 && ly >= 0 && ly <= 44) { d.active = 'inst'; d.inst = ['ruler', 'body']; d.last = p; return }
+        // gold circle beyond the end: rotate
+        if (Math.hypot(lx - (L + 26), ly - 22) < 16) { d.active = 'inst'; d.inst = ['ruler', 'rot']; return }
+        // orange square on the end edge: stretch
+        if (Math.abs(lx - L) < 14 && Math.abs(ly - 22) < 18) { d.active = 'inst'; d.inst = ['ruler', 'len']; return }
+        if (lx >= 0 && lx <= L && ly >= 0 && ly <= 44) { d.active = 'inst'; d.inst = ['ruler', 'body']; d.last = p; return }
       }
     }
 
@@ -1101,6 +1142,10 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       } else if (part === 'radius') {
         I.r = Math.max(20, Math.hypot(p.x - I.cx, p.y - I.cy))
         I.ha = Math.atan2(p.y - I.cy, p.x - I.cx)
+      } else if (part === 'len') {
+        const rot = I.rot || 0
+        const lx = (p.x - I.x) * Math.cos(-rot) - (p.y - I.y) * Math.sin(-rot)
+        I.len = Math.min(30 * 40, Math.max(2 * 40, lx))
       }
       sendInst(name, I, false)
       return
@@ -1718,7 +1763,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
             if (cur && cur.visible) sendInst('ruler', null, true)
             else {
               const cv = canvasRef.current, { zoom: z, offset: o } = viewRef.current
-              sendInst('ruler', { visible: true, rot: 0,
+              sendInst('ruler', { visible: true, rot: 0, len: 10 * 40,
                 x: ((cv?.width || 900) / 2 - o.x) / z - 200, y: ((cv?.height || 500) / 2 - o.y) / z }, true)
             }
           }} />
