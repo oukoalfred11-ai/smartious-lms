@@ -152,7 +152,12 @@ router.get('/ice', auth, (req, res) => {
     const credential = crypto
       .createHmac('sha1', process.env.TURN_SECRET)
       .update(username).digest('base64');
-    iceServers.push({ urls: process.env.TURN_URL, username, credential });
+    // Plain TURN (UDP 3478) plus, when configured, TURN-over-TLS on
+    // 443 — indistinguishable from HTTPS traffic, so it works on
+    // school and office networks that block everything else.
+    const urls = [process.env.TURN_URL];
+    if (process.env.TURNS_URL) urls.push(process.env.TURNS_URL);
+    iceServers.push({ urls, username, credential });
   }
 
   res.json({ success: true, data: { iceServers } });
