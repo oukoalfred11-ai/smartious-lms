@@ -11887,12 +11887,18 @@ function TeacherClassCard({ lc, onEdit, onDelete, onStart, onEnd, toast }) {
             {formatDate(lc.scheduledAt)} &middot; {lc.durationMins} min &middot; {studentCount} student{studentCount === 1 ? '' : 's'}
           </div>
           {lc.classroomMode === 'native' ? (
-            <div style={{ marginTop: 5 }}>
+            <div style={{ marginTop: 5, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
               <span style={{
                 background: '#FDF4F1', border: '1px solid #E8C4BC', color: '#7D1025',
                 fontSize: 10.5, fontWeight: 800, padding: '3px 10px', borderRadius: 99,
                 letterSpacing: '.05em',
               }}>SMARTIOUS CLASSROOM</span>
+              {(lc.recordings || []).map((r, i) => (
+                <a key={i} href={r.url} target="_blank" rel="noopener noreferrer"
+                  style={{ fontSize: 11, color: '#7D1025', fontWeight: 700 }}>
+                  Recording {i + 1}{r.durationSec ? ' (' + Math.round(r.durationSec / 60) + ' min)' : ''}
+                </a>
+              ))}
             </div>
           ) : lc.meetingLink && (
             <div style={{ fontSize: 11.5, color: '#6B6B6B', marginTop: 4, wordBreak: 'break-all' }}>
