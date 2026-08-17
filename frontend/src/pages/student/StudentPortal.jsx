@@ -4522,6 +4522,13 @@ function LiveClassCard({ lc, subjectColour, fmtDateTime, countdownText, canJoin,
     : 'Your teacher'
 
   const onJoin = () => {
+    // Native classes open the built-in Smartious Classroom in this tab
+    // (mobile friendly; leaving returns to the portal). Link classes
+    // open the external meeting in a new tab, exactly as before.
+    if (lc.classroomMode === 'native') {
+      window.location.assign('/classroom/' + lc._id)
+      return
+    }
     if (!lc.meetingLink) {
       toast?.error?.('No meeting link set for this class.')
       return
