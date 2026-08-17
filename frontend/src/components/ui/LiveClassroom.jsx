@@ -588,6 +588,10 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       const mid = a1 + sweep / 2
       ctx.font = '13px Arial, sans-serif'
       ctx.fillText(deg.toFixed(1) + '\u00b0', V.x + (r + 14) * Math.cos(mid) - 12, V.y + (r + 14) * Math.sin(mid) + 4)
+    } else if (op.kind === 'arc') {
+      ctx.beginPath()
+      ctx.arc(op.cx, op.cy, op.r, op.a0, op.a1, op.a1 < op.a0)
+      ctx.stroke()
     } else if (op.kind === 'diagram') {
       drawDiagram(ctx, op)
     }
@@ -720,6 +724,8 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
     if (typeof op.y1 === 'number') op.y1 += dy
     if (typeof op.x2 === 'number') op.x2 += dx
     if (typeof op.y2 === 'number') op.y2 += dy
+    if (typeof op.cx === 'number') op.cx += dx
+    if (typeof op.cy === 'number') op.cy += dy
   }
 
   const opBounds = (op) => {
@@ -727,6 +733,9 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
     if (op.kind === 'image') return { x: op.x1, y: op.y1, w: op.w, h: op.h }
     if (op.kind === 'diagram') return { x: op.x1 - 240, y: op.y1 - 240, w: 480, h: 480 }
     if (op.kind === 'text') return { x: op.x1 - 4, y: op.y1 - (op.size || 18), w: (op.text || '').length * (op.size || 18) * 0.6 + 8, h: (op.size || 18) + 8 }
+    if (op.kind === 'arc') {
+      return { x: op.cx - op.r - pad, y: op.cy - op.r - pad, w: 2 * (op.r + pad), h: 2 * (op.r + pad) }
+    }
     if (op.kind === 'circle') {
       const r = Math.hypot((op.x2 ?? op.x1) - op.x1, (op.y2 ?? op.y1) - op.y1)
       return { x: op.x1 - r - pad, y: op.y1 - r - pad, w: 2 * (r + pad), h: 2 * (r + pad) }
@@ -740,7 +749,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
     return { x, y, w: Math.max(...xs) - x + pad * 2, h: Math.max(...ys) - y + pad * 2 }
   }
 
-  const MOVABLE = ['stroke', 'line', 'rect', 'circle', 'text', 'arrow', 'tri', 'poly', 'angle', 'image', 'diagram']
+  const MOVABLE = ['stroke', 'line', 'rect', 'circle', 'text', 'arrow', 'tri', 'poly', 'angle', 'image', 'diagram', 'arc']
   const hitTest = (p) => {
     const ops = opsRef.current
     for (let i = ops.length - 1; i >= 0; i--) {
@@ -1015,13 +1024,26 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       const I = instRef.current
       const near = (x, y, r) => Math.hypot(p.x - x, p.y - y) < r
       if (I.comp && I.comp.visible) {
-        const hx = I.comp.cx + I.comp.r * Math.cos(I.comp.ha || 0)
-        const hy = I.comp.cy + I.comp.r * Math.sin(I.comp.ha || 0)
-        if (near(hx, hy, 18)) { d.active = 'inst'; d.inst = ['comp', 'radius']; return }
-        // grab anywhere on the needle point or the hinge area to move
-        if (near(I.comp.cx, I.comp.cy, 18)) { d.active = 'inst'; d.inst = ['comp', 'body']; d.last = p; return }
+        const ha0 = I.comp.ha || 0
+        const hx = I.comp.cx + I.comp.r * Math.cos(ha0)
+        const hy = I.comp.cy + I.comp.r * Math.sin(ha0)
+        // pencil tip: SWEEP an arc onto the board (real ink)
+        if (near(hx, hy, 20)) {
+          d.active = 'inst'; d.inst = ['comp', 'sweep']
+          d.sweep = { a0: ha0, aCur: ha0, last: ha0 }
+          return
+        }
+        // hinge head: open/close the legs (set the radius)
         const mx = (I.comp.cx + hx) / 2, my = (I.comp.cy + hy) / 2
-        if (near(mx, my, Math.max(30, I.comp.r * 0.5))) { d.active = 'inst'; d.inst = ['comp', 'body']; d.last = p; return }
+        let nx = -(hy - I.comp.cy), ny = (hx - I.comp.cx)
+        const nl = Math.hypot(nx, ny) || 1; nx /= nl; ny /= nl
+        if (ny > 0) { nx = -nx; ny = -ny }
+        const hh = Math.max(55, Math.min(150, I.comp.r * 0.75))
+        if (near(mx + nx * hh, my + ny * hh, 20)) { d.active = 'inst'; d.inst = ['comp', 'radius']; return }
+        // needle point or between the legs: move the instrument
+        if (near(I.comp.cx, I.comp.cy, 18) || near(mx, my, Math.max(26, I.comp.r * 0.4))) {
+          d.active = 'inst'; d.inst = ['comp', 'body']; d.last = p; return
+        }
       }
       if (I.prot && I.prot.visible) {
         const rot = I.prot.rot || 0, r = 3.4 * 40
@@ -1141,7 +1163,22 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
         if (name === 'prot') I.rot = Math.atan2(p.x - I.x, -(p.y - I.y)) * -1
       } else if (part === 'radius') {
         I.r = Math.max(20, Math.hypot(p.x - I.cx, p.y - I.cy))
-        I.ha = Math.atan2(p.y - I.cy, p.x - I.cx)
+      } else if (part === 'sweep') {
+        const ang = Math.atan2(p.y - I.cy, p.x - I.cx)
+        let delta = ang - d.sweep.last
+        while (delta > Math.PI) delta -= 2 * Math.PI
+        while (delta < -Math.PI) delta += 2 * Math.PI
+        d.sweep.aCur += delta
+        d.sweep.last = ang
+        I.ha = d.sweep.aCur
+        sendInst('comp', I, false)
+        // ghost the arc being swept
+        const cv = canvasRef.current, ctx = cv.getContext('2d')
+        const { zoom: z, offset: o } = viewRef.current
+        ctx.setTransform(z, 0, 0, z, o.x, o.y)
+        drawOp(ctx, { kind: 'arc', cx: I.cx, cy: I.cy, r: I.r, a0: d.sweep.a0, a1: d.sweep.aCur, color: colour, w: lineW })
+        ctx.globalCompositeOperation = 'source-over'
+        return
       } else if (part === 'len') {
         const rot = I.rot || 0
         const lx = (p.x - I.x) * Math.cos(-rot) - (p.y - I.y) * Math.sin(-rot)
@@ -1194,9 +1231,13 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
     if (!d.active) return
     if (d.active === 'pan') { d.active = false; return }
     if (d.active === 'inst') {
-      const [name] = d.inst
+      const [name, part] = d.inst
+      if (part === 'sweep' && d.sweep && Math.abs(d.sweep.aCur - d.sweep.a0) > 0.04) {
+        const I = instRef.current.comp
+        sendOp({ kind: 'arc', cx: I.cx, cy: I.cy, r: I.r, a0: d.sweep.a0, a1: d.sweep.aCur, color: colour, w: lineW })
+      }
       sendInst(name, instRef.current[name], true)
-      d.active = false; d.inst = null
+      d.active = false; d.inst = null; d.sweep = null
       return
     }
     if (d.active === 'move') {
@@ -1777,7 +1818,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
                 x: ((cv?.width || 900) / 2 - o.x) / z, y: ((cv?.height || 500) / 2 - o.y) / z }, true)
             }
           }} />
-        <IconBtn icon="comp" title="Compass: drag the centre, red handle sets the radius, then use the Circle tool from its centre to draw" active={!!instRef.current.comp?.visible}
+        <IconBtn icon="comp" title="Compass: drag the needle to place it, the hinge to open the legs (radius), then drag the pencil tip to sweep a real arc" active={!!instRef.current.comp?.visible}
           onClick={() => {
             const cur = instRef.current.comp
             if (cur && cur.visible) sendInst('comp', null, true)
