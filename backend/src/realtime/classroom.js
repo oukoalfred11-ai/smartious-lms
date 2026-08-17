@@ -102,6 +102,7 @@ function publicRoster(room) {
     hand: !!p.hand,
     micOn: p.micOn !== false,
     camOn: p.camOn !== false,
+    sharing: !!p.sharing,
   }));  // activeSince is intentionally excluded
 }
 
@@ -121,7 +122,9 @@ function roomStatus(liveClassId) {
 function attachClassroom(httpServer, allowedOrigins) {
   const io = new Server(httpServer, {
     cors: { origin: allowedOrigins, credentials: true },
-    // Signaling messages are tiny; keep the default payload limits.
+    // Signaling messages are tiny, but board image ops (compressed
+    // JPEG data URLs of PDF pages and pictures) can reach ~1 MB.
+    maxHttpBufferSize: 5e6,
   });
 
   const nsp = io.of('/classroom');
@@ -262,8 +265,9 @@ function attachClassroom(httpServer, allowedOrigins) {
       if (typeof patch.hand === 'boolean') peer.hand = patch.hand;
       if (typeof patch.micOn === 'boolean') peer.micOn = patch.micOn;
       if (typeof patch.camOn === 'boolean') peer.camOn = patch.camOn;
+      if (typeof patch.sharing === 'boolean') peer.sharing = patch.sharing;
       nsp.to(socket.data.roomId).emit('peer:state', {
-        socketId: socket.id, hand: peer.hand, micOn: peer.micOn, camOn: peer.camOn,
+        socketId: socket.id, hand: peer.hand, micOn: peer.micOn, camOn: peer.camOn, sharing: !!peer.sharing,
       });
     });
 
