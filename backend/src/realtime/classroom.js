@@ -31,6 +31,68 @@ const rooms = new Map();
 
 const roomOf = (liveClassId) => 'class:' + liveClassId;
 
+// ── Attendance recording (fire-and-forget, never blocks the class) ──
+async function recordJoin(liveClassId, peer) {
+  try {
+    const ClassroomSession = require('../models/ClassroomSession');
+    await ClassroomSession.updateOne(
+      { liveClassId, userId: peer.userId },
+      {
+        $setOnInsert: { firstJoinedAt: new Date(), name: peer.name, role: peer.role },
+        $inc: { joinCount: 1 },
+      },
+      { upsert: true }
+    );
+  } catch (e) { console.error('[classroom attendance join]', e.message); }
+}
+
+async function recordLeave(liveClassId, peer) {
+  try {
+    if (!peer.activeSince) return;
+    const ClassroomSession = require('../models/ClassroomSession');
+    const now = new Date();
+    const ms = Math.max(0, now - peer.activeSince);
+    await ClassroomSession.updateOne(
+      { liveClassId, userId: peer.userId },
+      { $inc: { durationMs: ms }, $set: { lastLeftAt: now } }
+    );
+
+    // Roll a meaningful attendance (5+ minutes connected) into the
+    // daily register — but NEVER overwrite an existing record, so a
+    // teacher's manual mark always wins.
+    if (peer.role !== 'student') return;
+    const session = await ClassroomSession.findOne({ liveClassId, userId: peer.userId })
+      .select('durationMs firstJoinedAt').lean();
+    if (!session || session.durationMs < 5 * 60 * 1000) return;
+
+    const LiveClass = require('../models/LiveClass');
+    const lc = await LiveClass.findById(liveClassId)
+      .select('scheduledAt teacherId curriculum').lean();
+    if (!lc) return;
+
+    const day = new Date(session.firstJoinedAt);
+    day.setUTCHours(0, 0, 0, 0);
+    const lateByMs = session.firstJoinedAt - new Date(lc.scheduledAt);
+    const status = lateByMs > 10 * 60 * 1000 ? 'late' : 'present';
+
+    const Attendance = require('../models/Attendance');
+    const existing = await Attendance.findOne({ studentId: peer.userId, date: day }).lean();
+    if (existing) return;
+    await Attendance.create({
+      studentId: peer.userId,
+      date: day,
+      status,
+      lateTime: status === 'late' ? Math.round(lateByMs / 60000) + ' min' : '',
+      markedBy: lc.teacherId,
+      curriculum: lc.curriculum || '',
+      reason: '',
+    });
+  } catch (e) {
+    // Duplicate-key races (two classes same day) are expected and fine.
+    if (e.code !== 11000) console.error('[classroom attendance leave]', e.message);
+  }
+}
+
 function publicRoster(room) {
   return [...room.peers.values()].map(p => ({
     socketId: p.socketId,
@@ -40,7 +102,7 @@ function publicRoster(room) {
     hand: !!p.hand,
     micOn: p.micOn !== false,
     camOn: p.camOn !== false,
-  }));
+  }));  // activeSince is intentionally excluded
 }
 
 /** Snapshot used by the REST status endpoint. */
@@ -113,11 +175,14 @@ function attachClassroom(httpServer, allowedOrigins) {
 
         socket.data.roomId = rid;
         socket.data.liveClassId = String(liveClassId);
-        room.peers.set(socket.id, {
+        const peerInfo = {
           socketId: socket.id, userId: me.id, name: me.name,
           role: isTeacher ? 'teacher' : me.role, hand: false, micOn: true, camOn: true,
-        });
+          activeSince: new Date(),
+        };
+        room.peers.set(socket.id, peerInfo);
         socket.join(rid);
+        recordJoin(socket.data.liveClassId, peerInfo);
 
         // Existing peers initiate offers TOWARD the newcomer (impolite
         // side); the newcomer answers. One initiator per pair avoids glare.
@@ -208,6 +273,8 @@ function attachClassroom(httpServer, allowedOrigins) {
       if (!rid) return;
       const room = rooms.get(rid);
       if (room) {
+        const peer = room.peers.get(socket.id);
+        if (peer) recordLeave(socket.data.liveClassId, peer);
         room.peers.delete(socket.id);
         socket.to(rid).emit('peer:left', { socketId: socket.id });
         if (room.peers.size === 0) rooms.delete(rid);  // free board + chat
