@@ -138,6 +138,42 @@ export class MeshEngine {
     this.onPeerClosed(remoteId);
   }
 
+  /**
+   * Per-peer connection quality from WebRTC stats.
+   * Returns { [socketId]: 'good' | 'fair' | 'poor' | 'down' }.
+   * fair: RTT > 300ms or loss > 3%; poor: RTT > 600ms or loss > 8%.
+   */
+  async getQuality() {
+    const out = {};
+    for (const [id, { pc }] of this.peers) {
+      if (['failed', 'closed', 'disconnected'].includes(pc.connectionState)) { out[id] = 'down'; continue }
+      try {
+        const stats = await pc.getStats();
+        let rtt = 0, lost = 0, recv = 0;
+        stats.forEach(s => {
+          if (s.type === 'candidate-pair' && s.state === 'succeeded' && s.currentRoundTripTime)
+            rtt = Math.max(rtt, s.currentRoundTripTime * 1000);
+          if (s.type === 'inbound-rtp' && !s.isRemote) {
+            lost += s.packetsLost || 0; recv += s.packetsReceived || 0;
+          }
+        });
+        const lossPct = recv > 0 ? (lost / (lost + recv)) * 100 : 0;
+        out[id] = (rtt > 600 || lossPct > 8) ? 'poor'
+                : (rtt > 300 || lossPct > 3) ? 'fair' : 'good';
+      } catch (e) { out[id] = 'fair' }
+    }
+    return out;
+  }
+
+  /**
+   * Drop every peer connection without stopping local media — used
+   * when the signaling socket reconnects with a new id and the whole
+   * mesh must be renegotiated from the fresh roster.
+   */
+  reset() {
+    for (const id of [...this.peers.keys()]) this.close(id);
+  }
+
   destroy() {
     this.socket.off('signal', this._onSignal);
     for (const id of [...this.peers.keys()]) this.close(id);
