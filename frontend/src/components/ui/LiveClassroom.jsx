@@ -131,6 +131,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   const [camOn, setCamOn] = useState(true)
   const [handUp, setHandUp] = useState(false)
   const [sharing, setSharing] = useState(false)
+  const [tilesHidden, setTilesHidden] = useState(false)
   const [mainView, setMainView] = useState('board')   // 'board' | 'screen'
   const camTrackRef = useRef(null)
   const [showLibPicker, setShowLibPicker] = useState(false)
@@ -164,6 +165,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   const rootRef = useRef(null)
   const [isFull, setIsFull] = useState(false)
   const pointersRef = useRef(new Map())   // two-finger pan / pinch zoom
+  const penSeenRef = useRef(false)        // stylus detected -> palm rejection
 
   const cycleTheme = () => {
     const next = THEME_ORDER[(THEME_ORDER.indexOf(themeId) + 1) % THEME_ORDER.length]
@@ -232,7 +234,13 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       }
       return
     }
-    ctx.strokeStyle = op.tool === 'eraser' ? themeRef.current.board : (op.color || '#fff')
+    if (op.tool === 'eraser') {
+      ctx.globalCompositeOperation = 'destination-out'
+      ctx.strokeStyle = 'rgba(0,0,0,1)'
+    } else {
+      ctx.globalCompositeOperation = 'source-over'
+      ctx.strokeStyle = op.color || '#fff'
+    }
     ctx.fillStyle = op.color || '#fff'
     ctx.lineWidth = (op.tool === 'eraser' ? (op.w || 3) * 6 : (op.w || 3))
     ctx.lineCap = 'round'; ctx.lineJoin = 'round'
@@ -240,6 +248,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       ctx.beginPath(); ctx.moveTo(op.pts[0].x, op.pts[0].y)
       for (let i = 1; i < op.pts.length; i++) ctx.lineTo(op.pts[i].x, op.pts[i].y)
       ctx.stroke()
+      ctx.globalCompositeOperation = 'source-over'
     } else if (op.kind === 'line') {
       ctx.beginPath(); ctx.moveTo(op.x1, op.y1); ctx.lineTo(op.x2, op.y2); ctx.stroke()
     } else if (op.kind === 'rect') {
@@ -253,17 +262,20 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
     }
   }, [])
 
-  const redraw = useCallback(() => {
-    const cv = canvasRef.current
+  const inkRef = useRef(null)   // offscreen transparent ink layer
+
+  // Paint background + graph grid + the ink layer onto the screen.
+  const composite = useCallback(() => {
+    const cv = canvasRef.current, ink = inkRef.current
     if (!cv) return
     const ctx = cv.getContext('2d')
     const { zoom: z, offset: o } = viewRef.current
     ctx.setTransform(1, 0, 0, 1, 0, 0)
     ctx.fillStyle = themeRef.current.board
     ctx.fillRect(0, 0, cv.width, cv.height)
-    // Graph paper: a 40-world-unit grid drawn only across the visible
-    // window, so the board stays infinite in every direction. Every
-    // fifth line is bolder, like real graph paper.
+    // Graph paper: 40-world-unit grid across the visible window only,
+    // so the board stays infinite. Every fifth line is bolder. Because
+    // it lives UNDER the ink layer, erasing ink never touches it.
     if (gridRef.current) {
       const S = 40
       const x0 = Math.floor((-o.x / z) / S) * S, x1 = (cv.width - o.x) / z
@@ -279,9 +291,27 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
         ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1 + S, y); ctx.stroke()
       }
     }
-    ctx.setTransform(z, 0, 0, z, o.x, o.y)
-    for (const op of opsRef.current) drawOp(ctx, op)
-  }, [drawOp])
+    if (ink) {
+      ctx.setTransform(1, 0, 0, 1, 0, 0)
+      ctx.drawImage(ink, 0, 0)
+    }
+  }, [])
+
+  const redraw = useCallback(() => {
+    const cv = canvasRef.current
+    if (!cv) return
+    if (!inkRef.current) inkRef.current = document.createElement('canvas')
+    const ink = inkRef.current
+    if (ink.width !== cv.width || ink.height !== cv.height) { ink.width = cv.width; ink.height = cv.height }
+    const ictx = ink.getContext('2d')
+    const { zoom: z, offset: o } = viewRef.current
+    ictx.setTransform(1, 0, 0, 1, 0, 0)
+    ictx.clearRect(0, 0, ink.width, ink.height)
+    ictx.setTransform(z, 0, 0, z, o.x, o.y)
+    for (const op of opsRef.current) drawOp(ictx, op)
+    ictx.globalCompositeOperation = 'source-over'
+    composite()
+  }, [drawOp, composite])
   redrawRef.current = redraw
 
   useEffect(() => { redraw() }, [zoom, offset, redraw, themeId, grid])
@@ -302,13 +332,15 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
     if (op.kind === 'lock') { setBoardLocked(!!op.locked); return }
     if (op.kind === 'bg') { setGrid(op.grid === true); return }
     opsRef.current.push(op)
-    const cv = canvasRef.current
-    if (!cv) return
-    const ctx = cv.getContext('2d')
+    const ink = inkRef.current
+    if (!ink) { redrawRef.current(); return }
+    const ictx = ink.getContext('2d')
     const { zoom: z, offset: o } = viewRef.current
-    ctx.setTransform(z, 0, 0, z, o.x, o.y)
-    drawOp(ctx, op)
-  }, [drawOp])
+    ictx.setTransform(z, 0, 0, z, o.x, o.y)
+    drawOp(ictx, op)
+    ictx.globalCompositeOperation = 'source-over'
+    composite()
+  }, [drawOp, composite])
 
   const sendOp = useCallback((op) => {
     applyOp(op)
@@ -444,7 +476,13 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   const onDown = (e) => {
     if (phase !== 'live') return
     const d = drawRef.current
-    if (tool === 'pan' || e.button === 1 || !canDraw) {
+    // Palm rejection: the moment a stylus touches the board, fingers
+    // stop drawing for the rest of the session — a finger (or resting
+    // palm) pans and scrolls instead, and only the pen writes. This
+    // is how writing on a tablet stays clean.
+    if (e.pointerType === 'pen') penSeenRef.current = true
+    const fingerWhilePenMode = e.pointerType === 'touch' && penSeenRef.current
+    if (tool === 'pan' || e.button === 1 || !canDraw || fingerWhilePenMode) {
       d.active = 'pan'
       d.start = { x: e.clientX, y: e.clientY, ox: offset.x, oy: offset.y }
       return
@@ -471,19 +509,27 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
     const cv = canvasRef.current, ctx = cv.getContext('2d')
     const { zoom: z, offset: o } = viewRef.current
     if (d.active === 'pen' || d.active === 'eraser') {
-      // Incremental segment locally; flushed to peers in chunks
-      ctx.setTransform(z, 0, 0, z, o.x, o.y)
-      drawOp(ctx, { kind: 'stroke', tool: d.active, color: colour, w: lineW, pts: [d.pts[d.pts.length - 1], p] })
+      // Incremental segment onto the ink layer, composite to screen;
+      // flushed to peers in chunks.
+      const ink = inkRef.current
+      if (ink) {
+        const ictx = ink.getContext('2d')
+        ictx.setTransform(z, 0, 0, z, o.x, o.y)
+        drawOp(ictx, { kind: 'stroke', tool: d.active, color: colour, w: lineW, pts: [d.pts[d.pts.length - 1], p] })
+        ictx.globalCompositeOperation = 'source-over'
+        composite()
+      }
       d.pts.push(p)
       if (d.pts.length >= 24) {
         sendOpLive({ kind: 'stroke', tool: d.active, color: colour, w: lineW, pts: d.pts })
         d.pts = [p]
       }
     } else {
-      // Shape preview: redraw board, then ghost the shape
+      // Shape preview: full redraw, then ghost the shape on screen only
       redraw()
       ctx.setTransform(z, 0, 0, z, o.x, o.y)
       drawOp(ctx, { kind: d.active, x1: d.start.x, y1: d.start.y, x2: p.x, y2: p.y, color: colour, w: lineW })
+      ctx.globalCompositeOperation = 'source-over'
       d.pts = [p]
     }
   }
@@ -651,7 +697,14 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       }
     }
   }
-  const lobbyJoin = () => setPhase('connecting')
+  const lobbyJoin = () => {
+    // The Join click is a user gesture, so we can take the whole
+    // screen right here — browser tabs and address bar disappear.
+    // Best effort: iPhones do not allow it for pages; everyone else
+    // gets a true full-screen classroom. Esc or Exit full leaves.
+    try { rootRef.current?.requestFullscreen?.().catch(() => {}) } catch (e) { /* unsupported */ }
+    setPhase('connecting')
+  }
 
   // ═══ MEDIA RETRY ═══════════════════════════════════════════
   // Browsers never let a site force camera/mic access, but if the
@@ -932,8 +985,19 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
         </div>
       )}
 
-      {/* ── Video strip ── */}
-      <div style={{ display: 'flex', gap: 8, padding: '10px 14px', overflowX: 'auto', background: T.strip, borderBottom: '1px solid ' + T.border }}>
+      {/* ── Video strip (collapsible: more room to write) ── */}
+      {tilesHidden ? (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '3px 0', background: T.strip, borderBottom: '1px solid ' + T.border }}>
+          <Btn onClick={() => setTilesHidden(false)} style={{ padding: '4px 14px', fontSize: 11 }}>
+            Show videos ({roster.length})
+          </Btn>
+        </div>
+      ) : (
+      <div style={{ display: 'flex', gap: 8, padding: narrow ? '6px 10px' : '8px 14px', overflowX: 'auto', background: T.strip, borderBottom: '1px solid ' + T.border, alignItems: 'center' }}>
+        <Btn onClick={() => setTilesHidden(true)} title="Hide videos for a bigger board"
+          style={{ padding: '4px 8px', fontSize: 10.5, flexShrink: 0, writingMode: 'vertical-rl', height: narrow ? 72 : 100 }}>
+          Hide
+        </Btn>
         <Tile stream={localStream} name={user?.firstName ? `${user.firstName} ${user.lastName || ''}` : 'You'}
           role={myRole} self micOn={micOn} camOn={camOn} hand={handUp} small={narrow} />
         {others.map(p => (
@@ -941,6 +1005,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
             micOn={p.micOn} camOn={p.camOn} hand={p.hand} quality={quality[p.socketId]} small={narrow} />
         ))}
       </div>
+      )}
 
       {/* ── Main area ── */}
       <div style={{ flex: 1, display: 'flex', minHeight: 0, position: 'relative' }}>
