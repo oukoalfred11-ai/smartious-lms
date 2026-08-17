@@ -203,6 +203,7 @@ const ICONS = {
   poly: 'M12 3l8 6-3 10H7L4 9z',
   angle: 'M4 20L20 20 M4 20L16 6 M11 20a8 8 0 0 0-2.5-5.5',
   shapes: 'M4 4h7v7H4z M17.5 13a4.5 4.5 0 1 0 .001 0z M13 4l4 7h-8z',
+  select: 'M5 3l14 8-6.5 1.5L16 19l-3 1.5-3.5-6.5L5 17z',
 }
 
 // Bottom control: icon over a small label, mockup style.
@@ -559,6 +560,13 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
     if (op.kind === 'lock') { setBoardLocked(!!op.locked); return }
     if (op.kind === 'bg') { setGrid(op.grid === true); return }
     if (op.kind === 'undo') { applyUndo(op.by); return }
+    if (op.kind === 'move') {
+      const target = opsRef.current.find(o => o.id === op.target)
+      if (target) translateOp(target, op.dx, op.dy)
+      opsRef.current.push(op)
+      redrawRef.current()
+      return
+    }
     if (op.kind === 'book') { setOpenBook(op.id ? { id: op.id, title: op.title || 'Coursebook', page: op.page || 1 } : null); return }
     opsRef.current.push(op)
     const ink = inkRef.current
@@ -573,16 +581,66 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
 
   const myIdRef = useRef('')
 
+  const translateOp = (op, dx, dy) => {
+    if (!op) return
+    if (Array.isArray(op.pts)) for (const pt of op.pts) { pt.x += dx; pt.y += dy }
+    if (typeof op.x1 === 'number') op.x1 += dx
+    if (typeof op.y1 === 'number') op.y1 += dy
+    if (typeof op.x2 === 'number') op.x2 += dx
+    if (typeof op.y2 === 'number') op.y2 += dy
+  }
+
+  const opBounds = (op) => {
+    const pad = (op.w || 3) + 6
+    if (op.kind === 'image') return { x: op.x1, y: op.y1, w: op.w, h: op.h }
+    if (op.kind === 'diagram') return { x: op.x1 - 240, y: op.y1 - 240, w: 480, h: 480 }
+    if (op.kind === 'text') return { x: op.x1 - 4, y: op.y1 - (op.size || 18), w: (op.text || '').length * (op.size || 18) * 0.6 + 8, h: (op.size || 18) + 8 }
+    if (op.kind === 'circle') {
+      const r = Math.hypot((op.x2 ?? op.x1) - op.x1, (op.y2 ?? op.y1) - op.y1)
+      return { x: op.x1 - r - pad, y: op.y1 - r - pad, w: 2 * (r + pad), h: 2 * (r + pad) }
+    }
+    let xs = [], ys = []
+    if (Array.isArray(op.pts)) { xs = op.pts.map(q => q.x); ys = op.pts.map(q => q.y) }
+    if (typeof op.x1 === 'number') { xs.push(op.x1); ys.push(op.y1) }
+    if (typeof op.x2 === 'number') { xs.push(op.x2); ys.push(op.y2) }
+    if (!xs.length) return null
+    const x = Math.min(...xs) - pad, y = Math.min(...ys) - pad
+    return { x, y, w: Math.max(...xs) - x + pad * 2, h: Math.max(...ys) - y + pad * 2 }
+  }
+
+  const MOVABLE = ['stroke', 'line', 'rect', 'circle', 'text', 'arrow', 'tri', 'poly', 'angle', 'image', 'diagram']
+  const hitTest = (p) => {
+    const ops = opsRef.current
+    for (let i = ops.length - 1; i >= 0; i--) {
+      const op = ops[i]
+      if (!MOVABLE.includes(op.kind) || op.tool === 'eraser') continue
+      const b = opBounds(op)
+      if (b && p.x >= b.x && p.x <= b.x + b.w && p.y >= b.y && p.y <= b.y + b.h) return op
+    }
+    return null
+  }
+
   const applyUndo = useCallback((byId) => {
     const ops = opsRef.current
     for (let i = ops.length - 1; i >= 0; i--) {
-      if (ops[i].by === byId) { ops.splice(i, 1); break }
+      if (ops[i].by === byId) {
+        const removed = ops.splice(i, 1)[0]
+        // Undoing a MOVE puts the target back where it came from.
+        if (removed.kind === 'move') {
+          const target = ops.find(o => o.id === removed.target)
+          if (target) translateOp(target, -removed.dx, -removed.dy)
+        }
+        break
+      }
     }
     redrawRef.current()
   }, [])
 
+  const newOpId = () => 'op-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7)
+
   const sendOp = useCallback((op) => {
     op.by = myIdRef.current
+    if (!op.id) op.id = newOpId()
     applyOp(op)
     socketRef.current?.emit('board:op', op)
   }, [applyOp])
@@ -590,6 +648,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   // Live-flushed stroke chunks bypass local re-draw (already on canvas)
   const sendOpLive = (op) => {
     op.by = myIdRef.current
+    if (!op.id) op.id = newOpId()
     if (op.kind === 'stroke') opsRef.current.push(op)
     socketRef.current?.emit('board:op', op)
   }
@@ -667,6 +726,11 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
               for (let i = ops.length - 1; i >= 0; i--) {
                 if (ops[i].by === op.by) { ops.splice(i, 1); break }
               }
+            }
+            else if (op.kind === 'move') {
+              const target = opsRef.current.find(o => o.id === op.target)
+              if (target) translateOp(target, op.dx, op.dy)
+              opsRef.current.push(op)
             }
             else if (op.kind === 'book') {
               setOpenBook(op.id ? { id: op.id, title: op.title || 'Coursebook', page: op.page || 1 } : null)
@@ -786,6 +850,21 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
     }
     const p = toWorld(e)
 
+    // Select tool: grab whatever is under the cursor and drag it.
+    if (tool === 'select') {
+      const hit = hitTest(p)
+      if (hit) {
+        d.active = 'move'
+        d.moveTarget = hit
+        d.moveAcc = { x: 0, y: 0 }
+        d.last = p
+      } else {
+        d.active = 'pan'
+        d.start = { x: e.clientX, y: e.clientY, ox: offset.x, oy: offset.y }
+      }
+      return
+    }
+
     // Click-accumulating tools: polygon and angle.
     if (tool === 'poly' || tool === 'angle') {
       if (!d.multi || d.multi.tool !== tool) d.multi = { tool, pts: [] }
@@ -833,8 +912,24 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       return
     }
     if (!d.active) return
+    if (d.active !== 'pan' && e.buttons === 0 && e.pointerType !== 'touch') {
+      // Stylus hover after a missed pointerup: commit the shape now,
+      // otherwise the ghost preview follows the hovering pen and
+      // "moves" lines that were already drawn.
+      onUp(e)
+      return
+    }
     if (d.active === 'pan') {
       setOffset({ x: d.start.ox + (e.clientX - d.start.x), y: d.start.oy + (e.clientY - d.start.y) })
+      return
+    }
+    if (d.active === 'move') {
+      const p = toWorld(e)
+      const dx = p.x - d.last.x, dy = p.y - d.last.y
+      translateOp(d.moveTarget, dx, dy)
+      d.moveAcc.x += dx; d.moveAcc.y += dy
+      d.last = p
+      redraw()
       return
     }
     const p = toWorld(e)
@@ -879,6 +974,17 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
     const d = drawRef.current
     if (!d.active) return
     if (d.active === 'pan') { d.active = false; return }
+    if (d.active === 'move') {
+      if (d.moveTarget && (Math.abs(d.moveAcc.x) > 0.5 || Math.abs(d.moveAcc.y) > 0.5)) {
+        // One op for the whole drag: everyone's copy jumps to the
+        // final spot, late joiners replay it, and undo reverses it.
+        const op = { kind: 'move', target: d.moveTarget.id, dx: d.moveAcc.x, dy: d.moveAcc.y, by: myIdRef.current, id: newOpId() }
+        opsRef.current.push(op)
+        socketRef.current?.emit('board:op', op)
+      }
+      d.active = false; d.moveTarget = null
+      return
+    }
     if (d.active === 'pen' || d.active === 'eraser') {
       if (d.pts.length > 1) sendOpLive({ kind: 'stroke', tool: d.active, color: colour, w: lineW, pts: d.pts })
     } else {
@@ -1353,7 +1459,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       background: C.pill, borderRadius: 14, padding: '10px 7px', display: 'flex', flexDirection: 'column',
       alignItems: 'center', gap: 4, boxShadow: '0 8px 28px rgba(0,0,0,.45)',
     }}>
-      {[['pen', 'Pen'], ['eraser', 'Eraser'], ['line', 'Line (Shift snaps the angle)'], ['arrow', 'Arrow'], ['rect', 'Rectangle'], ['circle', 'Circle'], ['tri', 'Triangle'], ['poly', 'Polygon: click the corners, click the first point or press Enter to close'], ['angle', 'Angle: click a point, the vertex, then a second point'], ['text', 'Text'], ['hand', 'Move the board']].map(([t, l]) => {
+      {[['select', 'Select and move a drawing or diagram'], ['pen', 'Pen'], ['eraser', 'Eraser'], ['line', 'Line (Shift snaps the angle)'], ['arrow', 'Arrow'], ['rect', 'Rectangle'], ['circle', 'Circle'], ['tri', 'Triangle'], ['poly', 'Polygon: click the corners, click the first point or press Enter to close'], ['angle', 'Angle: click a point, the vertex, then a second point'], ['text', 'Text'], ['hand', 'Move the board']].map(([t, l]) => {
         const id = t === 'hand' ? 'pan' : t
         return (
           <button key={t} onClick={() => setTool(id)} title={l} style={{
@@ -1664,7 +1770,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
                 onPointerCancel={(e) => { onPointerEnd(e); onUp(e) }}
                 onPointerLeave={(e) => { onPointerEnd(e); onUp(e) }}
                 onWheel={onWheel}
-                style={{ display: 'block', cursor: tool === 'pan' || !canDraw ? 'grab' : 'crosshair', touchAction: 'none',
+                style={{ display: 'block', cursor: tool === 'pan' || !canDraw ? 'grab' : tool === 'select' ? 'default' : 'crosshair', touchAction: 'none',
                   visibility: mainView === 'screen' ? 'hidden' : 'visible' }} />
               {!canDraw && mainView === 'board' && (
                 <div style={{ position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)', background: 'rgba(0,0,0,.5)', color: 'rgba(255,255,255,.85)', fontSize: 11.5, padding: '5px 14px', borderRadius: 99 }}>
