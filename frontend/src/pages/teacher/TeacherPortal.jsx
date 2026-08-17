@@ -11731,7 +11731,93 @@ function LiveSessionsTab({ user, toast }) {
 // ─────────────────────────────────────────────────────────
 // TeacherClassCard — one card per class in the scheduler list
 // ─────────────────────────────────────────────────────────
+// ── Native-class attendance modal ────────────────────────
+// Shows the automatically captured register for a Smartious Classroom
+// session: join time, minutes connected, reconnects, late/absent.
+function ClassroomAttendanceModal({ lc, onClose, toast }) {
+  const [loading, setLoading] = useState(true)
+  const [report, setReport] = useState(null)
+  useEffect(() => {
+    let alive = true
+    api.get('/classroom/' + lc._id + '/attendance')
+      .then(({ data }) => { if (alive && data?.success) setReport(data.data) })
+      .catch(() => toast?.error?.('Could not load attendance.'))
+      .finally(() => { if (alive) setLoading(false) })
+    return () => { alive = false }
+  }, [lc._id])
+
+  const badge = (status) => {
+    const map = {
+      present: { bg: '#DCFCE7', fg: '#15803D', label: 'Present' },
+      late:    { bg: '#FEF3C7', fg: '#B45309', label: 'Late' },
+      absent:  { bg: '#FEE2E2', fg: '#B91C1C', label: 'Absent' },
+    }
+    const s = map[status] || map.absent
+    return (
+      <span style={{ background: s.bg, color: s.fg, fontSize: 10.5, fontWeight: 800, padding: '3px 10px', borderRadius: 99 }}>
+        {s.label}
+      </span>
+    )
+  }
+
+  return (
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(8,12,20,.55)', zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 14, width: '100%', maxWidth: 560, maxHeight: '82vh', overflowY: 'auto', boxShadow: '0 24px 64px rgba(0,0,0,.25)' }}>
+        <div style={{ padding: '16px 22px', borderBottom: '1px solid #EEE8DA', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 800, color: '#2B2B2B' }}>Classroom attendance</div>
+            <div style={{ fontSize: 12, color: '#6B6B6B', marginTop: 2 }}>
+              {lc.title} &middot; captured automatically
+            </div>
+          </div>
+          <button onClick={onClose} style={{ background: 'transparent', border: 'none', fontSize: 20, cursor: 'pointer', color: '#6B6B6B' }}>&times;</button>
+        </div>
+        <div style={{ padding: '14px 22px 20px' }}>
+          {loading ? (
+            <div style={{ padding: 30, textAlign: 'center', color: '#6B6B6B', fontSize: 13 }}>Loading register...</div>
+          ) : !report ? (
+            <div style={{ padding: 30, textAlign: 'center', color: '#6B6B6B', fontSize: 13 }}>No attendance data available.</div>
+          ) : (
+            <>
+              {report.teacher && (
+                <div style={{ fontSize: 12, color: '#6B6B6B', marginBottom: 12 }}>
+                  You joined at {new Date(report.teacher.joinedAt).toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' })} and taught for {report.teacher.minutes} min.
+                </div>
+              )}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {report.students.map(s => (
+                  <div key={s.userId} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', background: '#FBFAF5', border: '1px solid #EEE8DA', borderRadius: 9 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: '#2B2B2B' }}>{s.name || 'Student'}</div>
+                      <div style={{ fontSize: 11, color: '#6B6B6B', marginTop: 2 }}>
+                        {s.status === 'absent'
+                          ? 'Never joined'
+                          : 'Joined ' + new Date(s.joinedAt).toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' })
+                            + (s.lateByMin > 0 ? ' (' + s.lateByMin + ' min late)' : '')
+                            + ' \u00b7 ' + s.minutes + ' min connected'
+                            + (s.joinCount > 1 ? ' \u00b7 ' + s.joinCount + ' connections' : '')}
+                      </div>
+                    </div>
+                    {badge(s.status)}
+                  </div>
+                ))}
+                {report.students.length === 0 && (
+                  <div style={{ padding: 20, textAlign: 'center', color: '#6B6B6B', fontSize: 12.5 }}>No students assigned to this class.</div>
+                )}
+              </div>
+              <div style={{ fontSize: 11, color: '#9A9484', marginTop: 12, lineHeight: 1.5 }}>
+                Students connected for 5+ minutes are also marked in the daily attendance register automatically (your manual marks are never overwritten).
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function TeacherClassCard({ lc, onEdit, onDelete, onStart, onEnd, toast }) {
+  const [showAttendance, setShowAttendance] = useState(false)
   const status = lc.computedStatus
   const [showMarkPanel, setShowMarkPanel] = useState(false)
   const subjCol = ({
@@ -11852,6 +11938,7 @@ function TeacherClassCard({ lc, onEdit, onDelete, onStart, onEnd, toast }) {
           {status === 'live' && (
             <>
               {lc.classroomMode === 'native' ? (
+                <>
                 <button onClick={() => window.open('/classroom/' + lc._id, '_blank', 'noopener')}
                   style={{
                     background: '#7D1025', color: '#fff', border: 'none',
@@ -11860,6 +11947,15 @@ function TeacherClassCard({ lc, onEdit, onDelete, onStart, onEnd, toast }) {
                   }}>
                   Enter Classroom
                 </button>
+                <button onClick={() => setShowAttendance(true)}
+                  style={{
+                    background: 'transparent', border: '1px solid #C9A030',
+                    color: '#7D1025', padding: '8px 14px', borderRadius: 6,
+                    fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                  }}>
+                  Attendance
+                </button>
+                </>
               ) : (
               <a href={lc.meetingLink} target="_blank" rel="noopener noreferrer"
                 style={{
@@ -11882,6 +11978,16 @@ function TeacherClassCard({ lc, onEdit, onDelete, onStart, onEnd, toast }) {
           )}
           {status === 'ended' && (
             <>
+              {lc.classroomMode === 'native' && (
+                <button onClick={() => setShowAttendance(true)}
+                  style={{
+                    background: '#7D1025', color: '#fff', border: 'none',
+                    padding: '8px 14px', borderRadius: 6,
+                    fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                  }}>
+                  Attendance
+                </button>
+              )}
               {lc.syllabusSubtopicName && (
                 <button onClick={() => setShowMarkPanel(s => !s)}
                   style={{
@@ -11910,6 +12016,10 @@ function TeacherClassCard({ lc, onEdit, onDelete, onStart, onEnd, toast }) {
       {/* Mark-progress inline panel (only when 'ended' AND spine-linked AND opened) */}
       {status === 'ended' && lc.syllabusSubtopicName && showMarkPanel && (
         <MarkProgressPanel lc={lc} onClose={() => setShowMarkPanel(false)} toast={toast} />
+      )}
+
+      {showAttendance && (
+        <ClassroomAttendanceModal lc={lc} onClose={() => setShowAttendance(false)} toast={toast} />
       )}
     </div>
   )
