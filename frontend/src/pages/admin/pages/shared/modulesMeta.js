@@ -35,6 +35,7 @@ export const MODULES = {
   feecollection:  { label: 'Fee Collection',   accent: TOKENS.accentEmerald, icon: 'billing' },
   cooreports:     { label: 'Report Overview',  accent: TOKENS.accentAmber,   icon: 'reports' },
   teacherratings: { label: 'Teacher Ratings',  accent: TOKENS.accentAmber,   icon: 'payroll' },
+  studio:      { label: 'Studio',       accent: TOKENS.gold,        icon: 'website' },
   website:     { label: 'Website',      accent: TOKENS.accentNavy,  icon: 'website' },
   settings:    { label: 'Settings',     accent: TOKENS.s500,        icon: 'settings' },
   ai:          { label: 'Mshauri AI',   accent: TOKENS.crimson,     icon: 'ai' },
