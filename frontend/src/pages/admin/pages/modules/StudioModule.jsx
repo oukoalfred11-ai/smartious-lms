@@ -111,6 +111,188 @@ function drawLines(ctx, lines, x, y, lh, align = 'left', w = 0) {
 
 // Ease helpers for motion scenes
 const easeOut = (t) => 1 - Math.pow(1 - Math.min(1, Math.max(0, t)), 3)
+const clamp01 = (t) => Math.min(1, Math.max(0, t))
+
+// Draw a line of text word by word, each word rising and fading in,
+// staggered left to right. p covers THIS line's reveal window.
+function drawWordsRise(ctx, text, x, y, p, gap = 0.12) {
+  const words = String(text || '').split(' ')
+  let cx = x
+  words.forEach((w, i) => {
+    const wp = easeOut((p - i * gap) / (1 - Math.min(0.9, i * gap)))
+    if (wp > 0) {
+      ctx.save()
+      ctx.globalAlpha *= clamp01(wp)
+      ctx.fillText(w, cx, y + (1 - clamp01(wp)) * 26)
+      ctx.restore()
+    }
+    cx += ctx.measureText(w + ' ').width
+  })
+}
+
+// Typewriter: characters appear in sequence with a gold caret.
+function drawTypewriter(ctx, text, x, y, p) {
+  const s = String(text || '')
+  const n = Math.floor(clamp01(p) * s.length + 0.999)
+  const shown = s.slice(0, n)
+  ctx.fillText(shown, x, y)
+  if (n < s.length) {
+    const w = ctx.measureText(shown).width
+    const fs = parseFloat(ctx.font) || 40
+    ctx.save()
+    ctx.fillStyle = GOLD
+    ctx.fillRect(x + w + fs * 0.08, y - fs * 0.78, fs * 0.09, fs * 0.9)
+    ctx.restore()
+  }
+}
+
+// Animated version of renderCard: p 0..1 across the card's screen
+// time; all text has revealed by p ~ 0.55 and holds to the end.
+function renderCardMotion(ctx, W, H, card, media, p, fx = 'rise') {
+  // Static base: background, photo + tint, header, footer
+  renderCardBase(ctx, W, H, card, media)
+  const dark = isDark(card.bg)
+  const onImg = card.useImage && media
+  const fg = onImg || dark ? '#FFFFFF' : INK
+  const subC = onImg || dark ? 'rgba(255,255,255,.86)' : 'rgba(8,12,20,.65)'
+  const M = W * 0.085
+  let y = H * (card.template === 'stat' ? 0.3 : 0.28)
+
+  // Kicker
+  if (card.kicker) {
+    const kp = easeOut(p / 0.14)
+    if (kp > 0) {
+      ctx.globalAlpha = clamp01(kp)
+      ctx.fillStyle = GOLD
+      ctx.font = `800 ${W * 0.028}px Arial`
+      ctx.fillText(String(card.kicker).toUpperCase(), M, y + (1 - clamp01(kp)) * 20)
+      ctx.globalAlpha = 1
+    }
+    y += W * 0.055
+  }
+  const hp = clamp01((p - 0.08) / 0.4)   // headline window
+  const bp = clamp01((p - 0.3) / 0.35)   // body window
+
+  if (card.template === 'stat') {
+    const statFg = onImg || dark ? '#FFFFFF' : CRIMSON
+    // Number pops with a scale settle
+    if (hp > 0) {
+      const sc = 0.7 + 0.3 * easeOut(hp)
+      ctx.save()
+      ctx.globalAlpha = clamp01(hp * 1.6)
+      ctx.translate(M, y + W * 0.17)
+      ctx.scale(sc, sc)
+      ctx.fillStyle = statFg
+      ctx.font = `900 ${W * 0.19}px Georgia, serif`
+      ctx.fillText(card.headline || '250+', 0, 0)
+      ctx.restore()
+    }
+    y += W * 0.22
+    if (bp > 0) {
+      ctx.fillStyle = subC
+      ctx.font = `600 ${W * 0.042}px Arial`
+      const lines = wrapText(ctx, card.body, W - 2 * M)
+      lines.forEach((ln, i) => drawWordsRise(ctx, ln, M, y + W * 0.02 + i * W * 0.058, clamp01(bp - i * 0.12) , 0.06))
+    }
+  } else if (card.template === 'quote') {
+    ctx.globalAlpha = clamp01(hp * 2)
+    ctx.fillStyle = GOLD
+    ctx.font = `900 ${W * 0.16}px Georgia, serif`
+    ctx.fillText('\u201C', M - W * 0.01, y + W * 0.1)
+    ctx.globalAlpha = 1
+    ctx.fillStyle = fg
+    ctx.font = `italic 600 ${W * 0.052}px Georgia, serif`
+    const lines = wrapText(ctx, card.headline, W - 2 * M)
+    let qy = y + W * 0.15
+    lines.forEach((ln, i) => {
+      if (fx === 'type') {
+        const share = 1 / lines.length
+        drawTypewriter(ctx, ln, M, qy, (hp - i * share) / share)
+      } else {
+        drawWordsRise(ctx, ln, M, qy, clamp01(hp - i * 0.14), 0.1)
+      }
+      qy += W * 0.072
+    })
+    if (card.body && bp > 0) {
+      ctx.globalAlpha = clamp01(bp)
+      ctx.fillStyle = GOLD
+      ctx.font = `700 ${W * 0.034}px Arial`
+      ctx.fillText('\u2014 ' + card.body, M, qy + W * 0.05)
+      ctx.globalAlpha = 1
+    }
+  } else {
+    // Idea / announcement
+    ctx.fillStyle = fg
+    ctx.font = `800 ${W * 0.064}px Georgia, serif`
+    const lines = wrapText(ctx, card.headline, W - 2 * M)
+    let hy = y + W * 0.06
+    lines.forEach((ln, i) => {
+      if (fx === 'type') {
+        const share = 1 / lines.length
+        drawTypewriter(ctx, ln, M, hy, (hp - i * share) / share)
+      } else {
+        drawWordsRise(ctx, ln, M, hy, clamp01(hp - i * 0.14), 0.1)
+      }
+      hy += W * 0.082
+    })
+    // Gold underline draws after the headline
+    const up = clamp01((p - 0.32) / 0.15)
+    ctx.fillStyle = GOLD
+    ctx.fillRect(M, hy - W * 0.028, W * 0.14 * easeOut(up), W * 0.009)
+    if (card.body && bp > 0) {
+      ctx.fillStyle = subC
+      ctx.font = `500 ${W * 0.038}px Arial`
+      const bl = wrapText(ctx, card.body, W - 2 * M)
+      bl.forEach((ln, i) => drawWordsRise(ctx, ln, M, hy + W * 0.035 + i * W * 0.056, clamp01(bp - i * 0.12), 0.05))
+    }
+  }
+}
+
+// The non-text parts of a card, shared by static and motion renders.
+function renderCardBase(ctx, W, H, card, media) {
+  bgById(card.bg).paint(ctx, W, H)
+  const dark = isDark(card.bg)
+  const M = W * 0.085
+  if (card.useImage && media) {
+    const iw = media.videoWidth || media.width, ih = media.videoHeight || media.height
+    if (iw && ih) {
+      const scale = Math.max(W / iw, H / ih)
+      ctx.drawImage(media, (W - iw * scale) / 2, (H - ih * scale) / 2, iw * scale, ih * scale)
+      const tint = ctx.createLinearGradient(0, 0, 0, H)
+      if (card.tint === 'crimson') { tint.addColorStop(0, 'rgba(139,26,46,.55)'); tint.addColorStop(1, 'rgba(60,8,18,.85)') }
+      else if (card.tint === 'gold') { tint.addColorStop(0, 'rgba(30,20,4,.45)'); tint.addColorStop(1, 'rgba(140,100,20,.72)') }
+      else { tint.addColorStop(0, 'rgba(8,12,20,.42)'); tint.addColorStop(1, 'rgba(8,12,20,.85)') }
+      ctx.fillStyle = tint; ctx.fillRect(0, 0, W, H)
+    }
+  }
+  const crest = W * 0.075
+  drawCrest(ctx, M, M * 0.8, crest)
+  ctx.fillStyle = card.useImage || dark ? '#FFFFFF' : INK
+  ctx.font = `700 ${W * 0.036}px Georgia, serif`
+  ctx.fillText('Smart', M + crest + W * 0.018, M * 0.8 + crest * 0.62)
+  const smW = ctx.measureText('Smart').width
+  ctx.fillStyle = GOLD
+  ctx.font = `italic 500 ${W * 0.036}px Georgia, serif`
+  ctx.fillText('ious', M + crest + W * 0.018 + smW * 1.18, M * 0.8 + crest * 0.62)
+  if (card.seriesTotal > 1) {
+    const chipTxt = card.seriesNo + ' / ' + card.seriesTotal
+    ctx.font = `800 ${W * 0.03}px Arial`
+    const cw = ctx.measureText(chipTxt).width + W * 0.045
+    ctx.fillStyle = GOLD
+    ctx.beginPath()
+    ctx.roundRect ? ctx.roundRect(W - M - cw, M * 0.78, cw, W * 0.055, W * 0.028) : ctx.rect(W - M - cw, M * 0.78, cw, W * 0.055)
+    ctx.fill()
+    ctx.fillStyle = INK
+    ctx.textAlign = 'center'
+    ctx.fillText(chipTxt, W - M - cw / 2, M * 0.78 + W * 0.038)
+    ctx.textAlign = 'left'
+  }
+  ctx.fillStyle = card.useImage || dark ? 'rgba(255,255,255,.55)' : 'rgba(8,12,20,.5)'
+  ctx.font = `700 ${W * 0.026}px Arial`
+  ctx.fillText((card.footer || 'smartioushomeschool.com').toUpperCase(), M, H - M * 0.7)
+  ctx.fillStyle = GOLD
+  ctx.fillRect(M, H - M * 0.7 + W * 0.014, W * 0.055, W * 0.006)
+}
 
 // ═══════════════════════════════════════════════════════════
 // FLYER CARD RENDERER
@@ -334,42 +516,178 @@ const newCard = (i, total) => ({
   footer: 'smartioushomeschool.com', seriesNo: i + 1, seriesTotal: total,
 })
 
+const TRANSITIONS = [
+  ['morph', 'Morph (zoom-fade)'],
+  ['push', 'Push (slide)'],
+  ['wipe', 'Gold wipe'],
+]
+
 function CardMaker({ toast }) {
   const [format, setFormat] = useState('square')   // square | story
   const [cards, setCards] = useState([newCard(0, 1)])
   const [cur, setCur] = useState(0)
-  const [mediaEl, setMediaEl] = useState(null)
+  const [medias, setMedias] = useState({})         // card index -> Image
   const cvRef = useRef(null)
+  const rafRef = useRef(null)
+  const [textFx, setTextFx] = useState('rise')     // rise | type
+  const [transition, setTransition] = useState('morph')
+  const [cardDur, setCardDur] = useState(4)
+  const [playing, setPlaying] = useState(false)
+  const [rendering, setRendering] = useState(false)
+  const [progress, setProgress] = useState(0)
   const W = 1080, H = format === 'story' ? 1920 : 1080
   const card = cards[cur]
+  const mediaEl = medias[cur]
 
   const upd = (patch) => setCards(cs => cs.map((c, i) => i === cur ? { ...c, ...patch } : c))
 
   useEffect(() => {
+    if (playing || rendering) return
     const cv = cvRef.current
     if (!cv) return
     cv.width = W; cv.height = H
     renderCard(cv.getContext('2d'), W, H, card, mediaEl, 1)
-  }, [cards, cur, format, mediaEl])
+  }, [cards, cur, format, medias, playing, rendering])
 
   const onImage = (e) => {
     const f = e.target.files?.[0]
     if (!f) return
-    const img = new Image()
-    img.onload = () => { setMediaEl(img); upd({ useImage: true }) }
-    img.src = URL.createObjectURL(f)
+    const url = URL.createObjectURL(f)
+    if (f.type.startsWith('video/')) {
+      // Short clip as the card background: loops muted under the
+      // brand tint; the motion export records it playing.
+      const v = document.createElement('video')
+      v.src = url; v.muted = true; v.loop = true; v.playsInline = true
+      v.onloadeddata = () => {
+        v.currentTime = 0.1   // land on a real frame for the still preview
+        setMedias(m => ({ ...m, [cur]: v }))
+        upd({ useImage: true })
+      }
+      v.onseeked = () => setMedias(m => ({ ...m }))   // repaint preview with the frame
+    } else {
+      const img = new Image()
+      img.onload = () => { setMedias(m => ({ ...m, [cur]: img })); upd({ useImage: true }) }
+      img.src = url
+    }
   }
 
   const download = (idx) => {
     const off = document.createElement('canvas')
     off.width = W; off.height = H
-    renderCard(off.getContext('2d'), W, H, { ...cards[idx], seriesTotal: cards.length, seriesNo: idx + 1 }, mediaEl, 1)
+    renderCard(off.getContext('2d'), W, H, { ...cards[idx], seriesTotal: cards.length, seriesNo: idx + 1 }, medias[idx], 1)
     const a = document.createElement('a')
     a.download = 'smartious-card-' + (idx + 1) + '.png'
     a.href = off.toDataURL('image/png')
     a.click()
   }
   const downloadAll = () => { cards.forEach((_, i) => setTimeout(() => download(i), i * 350)); toast?.('Downloading ' + cards.length + ' card(s)...') }
+
+  // ── Motion export: each card animates in, then hands over via the
+  // chosen transition. Prev/next are composited from offscreen
+  // canvases so morphs and wipes stay pixel-clean.
+  const TRANS_DUR = 0.7
+  const offA = useRef(null), offB = useRef(null)
+  const getOff = (ref) => {
+    if (!ref.current) ref.current = document.createElement('canvas')
+    ref.current.width = W; ref.current.height = H
+    return ref.current
+  }
+
+  const drawTimeline = (ctx, t) => {
+    const n = cards.length
+    const seg = cardDur
+    const total = n * seg
+    const i = Math.min(n - 1, Math.floor(t / seg))
+    const local = t - i * seg
+    const cardAt = (idx) => ({ ...cards[idx], seriesTotal: n, seriesNo: idx + 1 })
+    const inTransition = i < n - 1 && local > seg - TRANS_DUR
+    if (!inTransition) {
+      renderCardMotion(ctx, W, H, cardAt(i), medias[i], clamp01(local / (seg * 0.75)), textFx)
+    } else {
+      const q = easeOut((local - (seg - TRANS_DUR)) / TRANS_DUR)
+      const A = getOff(offA), B = getOff(offB)
+      renderCardMotion(A.getContext('2d'), W, H, cardAt(i), medias[i], 1, textFx)
+      // The next card's intro starts DURING the handover so text is
+      // already moving as it arrives.
+      renderCardMotion(B.getContext('2d'), W, H, cardAt(i + 1), medias[i + 1], q * (TRANS_DUR / (seg * 0.75)), textFx)
+      ctx.clearRect(0, 0, W, H)
+      if (transition === 'push') {
+        ctx.drawImage(A, -q * W, 0)
+        ctx.drawImage(B, (1 - q) * W, 0)
+      } else if (transition === 'wipe') {
+        ctx.drawImage(A, 0, 0)
+        const wx = q * (W + 60)
+        ctx.save()
+        ctx.beginPath(); ctx.rect(0, 0, wx, H); ctx.clip()
+        ctx.drawImage(B, 0, 0)
+        ctx.restore()
+        ctx.fillStyle = GOLD
+        ctx.fillRect(wx - 14, 0, 14, H)
+      } else {
+        // morph: incoming settles down from a slight zoom while the
+        // outgoing enlarges and dissolves through it
+        ctx.save()
+        const sB = 1.08 - 0.08 * q
+        ctx.translate(W / 2, H / 2); ctx.scale(sB, sB); ctx.translate(-W / 2, -H / 2)
+        ctx.drawImage(B, 0, 0)
+        ctx.restore()
+        ctx.save()
+        ctx.globalAlpha = 1 - q
+        const sA = 1 + 0.1 * q
+        ctx.translate(W / 2, H / 2); ctx.scale(sA, sA); ctx.translate(-W / 2, -H / 2)
+        ctx.drawImage(A, 0, 0)
+        ctx.restore()
+      }
+    }
+    return t < total
+  }
+
+  const runCards = (record) => new Promise((resolve) => {
+    const cv = cvRef.current
+    cv.width = W; cv.height = H
+    const ctx = cv.getContext('2d')
+    let recorder = null, chunks = []
+    if (record) {
+      const stream = cv.captureStream(30)
+      const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm'
+      recorder = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 6_000_000 })
+      recorder.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data) }
+      recorder.start(500)
+    }
+    // Start every video background rolling; stop them at the end.
+    Object.values(medias).forEach(m => { if (m && m.play) { m.currentTime = 0; m.play().catch(() => {}) } })
+    const total = cards.length * cardDur
+    const t0 = performance.now()
+    const step = (now) => {
+      const t = (now - t0) / 1000
+      setProgress(Math.min(1, t / total))
+      if (drawTimeline(ctx, t)) { rafRef.current = requestAnimationFrame(step); return }
+      Object.values(medias).forEach(m => { if (m && m.pause) m.pause() })
+      if (recorder) { recorder.onstop = () => resolve(new Blob(chunks, { type: 'video/webm' })); recorder.stop() }
+      else resolve(null)
+    }
+    rafRef.current = requestAnimationFrame(step)
+  })
+
+  const previewMotion = async () => {
+    if (playing || rendering) return
+    setPlaying(true); await runCards(false); setPlaying(false); setProgress(0)
+  }
+  const exportMotion = async () => {
+    if (playing || rendering) return
+    if (typeof MediaRecorder === 'undefined') { toast?.('This browser cannot record video — use Chrome on a computer.'); return }
+    setRendering(true)
+    toast?.('Rendering ' + Math.round(cards.length * cardDur) + 's card video...')
+    const blob = await runCards(true)
+    setRendering(false); setProgress(0)
+    if (blob) {
+      const a = document.createElement('a')
+      a.download = 'smartious-cards.webm'
+      a.href = URL.createObjectURL(blob)
+      a.click()
+      toast?.('Card video downloaded — posts directly to Reels, TikTok, YouTube and Facebook.')
+    }
+  }
 
   return (
     <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap' }}>
@@ -412,14 +730,14 @@ function CardMaker({ toast }) {
 
         <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
           <label style={{ ...btn(card.useImage), display: 'inline-block' }}>
-            Photo background
-            <input type="file" accept="image/*" onChange={onImage} style={{ display: 'none' }} />
+            Photo / video background
+            <input type="file" accept="image/*,video/*" onChange={onImage} style={{ display: 'none' }} />
           </label>
           {card.useImage && (<>
             {[['crimson', 'Crimson tint'], ['ink', 'Dark tint'], ['gold', 'Gold tint']].map(([k, l]) => (
               <button key={k} onClick={() => upd({ tint: k })} style={{ ...btn(card.tint === k), padding: '7px 11px', fontSize: 11.5 }}>{l}</button>
             ))}
-            <button onClick={() => upd({ useImage: false })} style={{ ...btn(false), fontSize: 11.5, padding: '7px 11px' }}>Remove photo</button>
+            <button onClick={() => { upd({ useImage: false }); setMedias(m => { const n = { ...m }; const old = n[cur]; if (old && old.pause) old.pause(); delete n[cur]; return n }) }} style={{ ...btn(false), fontSize: 11.5, padding: '7px 11px' }}>Remove</button>
           </>)}
         </div>
 
@@ -433,11 +751,42 @@ function CardMaker({ toast }) {
           <button onClick={() => download(cur)} style={btn(true)}>Download this card</button>
           {cards.length > 1 && <button onClick={downloadAll} style={btn(false)}>Download all {cards.length}</button>}
         </div>
+
+        {/* ── Motion export ── */}
+        <div style={{ borderTop: '1.5px solid ' + TOKENS.line, paddingTop: 12, display: 'flex', flexDirection: 'column', gap: 9 }}>
+          <div style={{ fontSize: 12, fontWeight: 800, color: TOKENS.crimson }}>Export the series as a VIDEO</div>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {TRANSITIONS.map(([k, l]) => (
+              <button key={k} onClick={() => setTransition(k)} style={{ ...btn(transition === k), padding: '7px 11px', fontSize: 11.5 }}>{l}</button>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: 6 }}>
+            {[['rise', 'Words rise in'], ['type', 'Typewriter']].map(([k, l]) => (
+              <button key={k} onClick={() => setTextFx(k)} style={{ ...btn(textFx === k), padding: '7px 11px', fontSize: 11.5 }}>{l}</button>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <label style={{ fontSize: 12, fontWeight: 700, color: TOKENS.s600 }}>Seconds per card</label>
+            <input type="range" min="3" max="8" value={cardDur} onChange={e => setCardDur(+e.target.value)} style={{ flex: 1 }} />
+            <span style={{ fontSize: 12, fontWeight: 800, width: 26 }}>{cardDur}s</span>
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button onClick={previewMotion} disabled={playing || rendering} style={btn(false)}>{playing ? 'Playing...' : 'Preview motion'}</button>
+            <button onClick={exportMotion} disabled={playing || rendering} style={btn(true)}>
+              {rendering ? 'Rendering ' + Math.round(progress * 100) + '%' : 'Export video (' + Math.round(cards.length * cardDur) + 's)'}
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Preview */}
       <div style={{ flex: '1 1 340px', minWidth: 280 }}>
         <canvas ref={cvRef} style={{ width: '100%', maxWidth: format === 'story' ? 320 : 480, borderRadius: 14, boxShadow: '0 10px 30px rgba(0,0,0,.15)', display: 'block' }} />
+        {(playing || rendering) && (
+          <div style={{ marginTop: 8, height: 5, background: 'rgba(0,0,0,.08)', borderRadius: 99, maxWidth: format === 'story' ? 320 : 480 }}>
+            <div style={{ width: (progress * 100) + '%', height: '100%', background: GOLD, borderRadius: 99 }} />
+          </div>
+        )}
       </div>
     </div>
   )
