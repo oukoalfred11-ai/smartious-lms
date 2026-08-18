@@ -30,11 +30,17 @@ const fail = (res, code, msg) => res.status(code).json({ success:false, message:
 // Supports spine filters: topicRef (SyllabusTopic id) and subtopic.
 async function fetchQuizQuestions({ subject, topic, subtopic, topicRef, curriculum, difficulty, grade, count }) {
   const n = Math.min(parseInt(count,10)||10, 50)
+  const esc = subject ? subject.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') : ''
   const base = { isActive:{ $ne:false }, type:'mcq' }
-  if (subject)  base.subject = new RegExp('^'+subject.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'$','i')
+  if (subject)  base.subject = new RegExp('^'+esc+'$','i')
   if (topic)    base.topic   = new RegExp(topic,'i')
   if (subtopic) base.subtopic= new RegExp(subtopic,'i')
   if (topicRef) base.topicRef= topicRef
+  // Loose name: "English" reaches an "English Language" bank, "Science"
+  // reaches "Combined Science" — enrolment wording and import wording
+  // rarely agree perfectly, and a naming gap must not kill the quiz.
+  const baseLoose = { ...base }
+  if (subject) baseLoose.subject = new RegExp(esc,'i')
 
   // Filter attempts from strictest to loosest
   const attempts = [
@@ -43,6 +49,9 @@ async function fetchQuizQuestions({ subject, topic, subtopic, topicRef, curricul
     { ...base, curriculum },
     { ...base, difficulty },
     { ...base },
+    { ...baseLoose, curriculum, grade },
+    { ...baseLoose, curriculum },
+    { ...baseLoose },
   ]
 
   for (const raw of attempts) {
