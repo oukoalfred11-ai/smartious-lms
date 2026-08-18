@@ -1,3 +1,4 @@
+import './lib/storageShim.js'   // MUST stay first: keeps the app booting when a browser blocks localStorage (WhatsApp/Instagram in-app browsers, blocked-cookies settings)
 import React from 'react'
 import { createRoot, hydrateRoot } from 'react-dom/client'
 import App from './App.jsx'
