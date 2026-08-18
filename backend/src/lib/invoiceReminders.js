@@ -312,6 +312,20 @@ async function runDueReminders({ dryRun = false } = {}) {
 
   for (const inv of candidates) {
     summary.scanned++
+
+    // Self-heal: if the money already covers the invoice but the status
+    // was never flipped (payment recorded elsewhere, or the old UI bug
+    // that hid Mark Paid on overdue invoices), close it here instead of
+    // chasing a parent who has paid.
+    const outstanding = Number(inv.totalDue || 0) - Number(inv.paidAmount || 0)
+    if (Number(inv.totalDue || 0) > 0 && outstanding <= 0) {
+      inv.status = 'paid'
+      if (!inv.paidAt) inv.paidAt = new Date()
+      if (!dryRun) await inv.save()
+      summary.details.push({ invoiceNo: inv.invoiceNo, action: 'healed', reason: 'paid amount covers total; status corrected to paid' })
+      continue
+    }
+
     const kind = reminderKindFor(inv, now)
     if (!kind) continue
 
