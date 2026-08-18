@@ -12990,8 +12990,14 @@ function QuizGameLauncher({ user, toast, setPage }) {
   const [spineLoading, setSpineLoading] = useState(false)
 
   useEffect(() => {
-    const s = (user?.subjects||[]).filter(x=>typeof x==='string' && x.trim())
-    const list = s.length > 0 ? s : ['Mathematics','Physics','Chemistry','Biology','English Language','Business Studies','Computer Science','Economics']
+    // Enrolments store subjects either as plain names or as objects
+    // ({ subjectName } / { name }) depending on when the student was
+    // enrolled — accept every shape, or the launcher silently shows a
+    // generic list that may not match the question bank at all.
+    const s = (user?.subjects||[])
+      .map(x => typeof x==='string' ? x : (x?.subjectName || x?.name || ''))
+      .filter(x => typeof x==='string' && x.trim())
+    const list = s.length > 0 ? [...new Set(s)] : ['Mathematics','Physics','Chemistry','Biology','English Language','Business Studies','Computer Science','Economics']
     setSubjects(list)
     setConfig(c=>({ ...c, subject:list[0]||'' }))
   }, [user])
