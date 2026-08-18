@@ -336,6 +336,7 @@ const SIM_CATALOG = [
     { id: 'sm:foodtests', title: 'Food tests — iodine, Benedict\u2019s, Biuret, emulsion' },
     { id: 'sm:titration', title: 'Acid-base titration — full Paper 3 practical' },
     { id: 'sm:electric', title: 'Electricity — I-V readings & wire resistance (KCSE/IGCSE)' },
+    { id: 'sm:circuitlab', title: 'Circuit builder — drag apparatus, make your own connections' },
   ]},
   { subject: 'Physics', sims: [
     phet('projectile-motion', 'Projectile motion'),
@@ -2604,6 +2605,7 @@ function SimPanel({ sim }) {
   if (sim.id === 'sm:foodtests') return <FoodTestSim />
   if (sim.id === 'sm:titration') return <TitrationSim />
   if (sim.id === 'sm:electric') return <ElectricSim />
+  if (sim.id === 'sm:circuitlab') return <CircuitLab />
   return (
     <div style={{ position: 'absolute', inset: 0, background: '#fff', zIndex: 2, display: 'flex', flexDirection: 'column' }}>
       <div style={{ flex: 1, position: 'relative', minHeight: 0 }}>
@@ -3251,6 +3253,373 @@ const smAudio = {
     try { this._hum.g.gain.value = 0; this._hum.o1.stop(); this._hum.o2.stop() } catch (e) { /* noop */ }
     this._hum = null
   },
+}
+
+// ── Circuit solver: pure nodal analysis with Norton sources ──
+// Wires merge terminals into nodes (union-find); every component is
+// a conductance between two nodes; each dry cell is a Norton pair
+// (current injection E/r + conductance 1/r). One Gaussian solve
+// gives every node voltage, hence every reading, brightness, and
+// short-circuit — whatever topology the student wires.
+function smSolveCircuit(comps, wires) {
+  const pr = {}
+  const find = (x) => { while (pr[x] !== x) { pr[x] = pr[pr[x]]; x = pr[x] } return x }
+  const uni = (a, b) => { const ra = find(a), rb = find(b); if (ra !== rb) pr[ra] = rb }
+  for (const c of comps) { pr[c.id + ':0'] = c.id + ':0'; pr[c.id + ':1'] = c.id + ':1' }
+  for (const w of wires) { if (pr[w.a] && pr[w.b]) uni(w.a, w.b) }
+  const roots = [...new Set(comps.flatMap(c => [find(c.id + ':0'), find(c.id + ':1')]))]
+  const idx = Object.fromEntries(roots.map((r, i) => [r, i]))
+  const n = roots.length
+  const out = {}
+  if (!n) return { out }
+  const G = Array.from({ length: n }, () => new Float64Array(n))
+  const Inj = new Float64Array(n)
+  for (let i = 0; i < n; i++) G[i][i] += 1e-9
+  const stamp = (a, b, g) => { G[a][a] += g; G[b][b] += g; G[a][b] -= g; G[b][a] -= g }
+  const meta = []
+  for (const c of comps) {
+    const a = idx[find(c.id + ':0')], b = idx[find(c.id + ':1')]
+    if (c.type === 'cell') {
+      const r = 0.3, E = 1.5
+      stamp(a, b, 1 / r)
+      Inj[b] += E / r; Inj[a] -= E / r
+      meta.push({ c, a, b, cell: { r, E } })
+      continue
+    }
+    let R = null
+    if (c.type === 'resistor') R = c.value
+    else if (c.type === 'bulb') R = 5
+    else if (c.type === 'ammeter') R = 0.01
+    else if (c.type === 'voltmeter') R = 1e6
+    else if (c.type === 'switch') R = c.closed ? 0.01 : null
+    if (R != null) { stamp(a, b, 1 / R); meta.push({ c, a, b, R }) }
+    else meta.push({ c, a, b, open: true })
+  }
+  // Solve with node 0 as reference
+  const m = n - 1
+  const v = new Float64Array(n)
+  if (m > 0) {
+    const A = Array.from({ length: m }, (_, i) => Float64Array.from(G[i + 1].slice(1)))
+    const B = Float64Array.from(Inj.slice(1))
+    for (let col = 0; col < m; col++) {
+      let piv = col
+      for (let r2 = col + 1; r2 < m; r2++) if (Math.abs(A[r2][col]) > Math.abs(A[piv][col])) piv = r2
+      if (Math.abs(A[piv][col]) < 1e-12) continue
+      ;[A[col], A[piv]] = [A[piv], A[col]]
+      ;[B[col], B[piv]] = [B[piv], B[col]]
+      for (let r2 = 0; r2 < m; r2++) {
+        if (r2 === col) continue
+        const f = A[r2][col] / A[col][col]
+        if (!f) continue
+        for (let c2 = col; c2 < m; c2++) A[r2][c2] -= f * A[col][c2]
+        B[r2] -= f * B[col]
+      }
+    }
+    for (let i = 0; i < m; i++) v[i + 1] = Math.abs(A[i][i]) > 1e-12 ? B[i] / A[i][i] : 0
+  }
+  for (const mt of meta) {
+    const vA = v[mt.a], vB = v[mt.b], dV = vA - vB
+    let I = 0
+    if (mt.cell) I = (mt.cell.E - (vB - vA)) / mt.cell.r     // delivered from + (terminal 1)
+    else if (!mt.open) I = dV / mt.R
+    out[mt.c.id] = { vA, vB, dV, I }
+  }
+  return { out }
+}
+
+// ── Smartious native sim: circuit builder workbench ────────
+// Students drag apparatus from the tray, tap terminal-to-terminal to
+// connect, and the live solver animates whatever they build — the
+// connection SKILL itself, series and parallel, taught by doing.
+const CL_TRAY = [
+  ['cell', 'Dry cell 1.5 V'], ['resistor', 'Resistor'], ['bulb', 'Bulb'],
+  ['switch', 'Switch'], ['ammeter', 'Ammeter'], ['voltmeter', 'Voltmeter'],
+]
+const CL_RVALUES = [1, 2, 4.7, 10, 22]
+
+function CircuitLab() {
+  const [comps, setComps] = useState([])
+  const [wires, setWires] = useState([])
+  const [selTerm, setSelTerm] = useState(null)   // 'id:0'
+  const [selComp, setSelComp] = useState(null)
+  const nextId = useRef(1)
+  const dragRef = useRef(null)
+
+  const solved = smSolveCircuit(comps, wires).out
+
+  // Hum follows total cell current; ding on new challenge completion
+  const totalCellI = comps.filter(c => c.type === 'cell')
+    .reduce((s, c) => s + Math.max(0, solved[c.id]?.I || 0), 0)
+  useEffect(() => {
+    if (totalCellI > 0.02) { smAudio.humStart(); smAudio.humLevel(totalCellI / 2) }
+    else smAudio.humStop()
+  }, [totalCellI])
+  useEffect(() => () => smAudio.humStop(), [])
+
+  const addComp = (type) => {
+    const id = 'c' + (nextId.current++)
+    setComps(cs => [...cs, {
+      id, type,
+      x: 150 + (cs.length % 4) * 170, y: 110 + Math.floor(cs.length / 4) * 90,
+      value: 2, closed: false,
+    }])
+    smAudio.click()
+  }
+  const removeComp = (id) => {
+    setComps(cs => cs.filter(c => c.id !== id))
+    setWires(ws => ws.filter(w => !w.a.startsWith(id + ':') && !w.b.startsWith(id + ':')))
+    setSelComp(null); setSelTerm(null)
+  }
+  const termPos = (c, t) => ({ x: c.x + (t === 0 ? -34 : 34), y: c.y })
+  const termPosById = (tid) => {
+    const [id, t] = tid.split(':')
+    const c = comps.find(x => x.id === id)
+    return c ? termPos(c, +t) : { x: 0, y: 0 }
+  }
+  const tapTerm = (tid) => {
+    if (!selTerm) { setSelTerm(tid); return }
+    if (selTerm === tid) { setSelTerm(null); return }
+    if (!wires.some(w => (w.a === selTerm && w.b === tid) || (w.a === tid && w.b === selTerm)))
+      setWires(ws => [...ws, { a: selTerm, b: tid }])
+    smAudio.click()
+    setSelTerm(null)
+  }
+
+  // Challenges auto-detected from the live solution
+  const bulbs = comps.filter(c => c.type === 'bulb')
+  const lit = bulbs.some(c => { const s = solved[c.id]; return s && (s.dV * s.dV) / 5 > 0.05 })
+  const ammSeries = comps.some(c => c.type === 'ammeter' && Math.abs(solved[c.id]?.I || 0) > 0.05) && lit
+  const voltAcross = comps.some(c => c.type === 'voltmeter' && Math.abs(solved[c.id]?.dV || 0) > 0.5) && lit
+  const resOn = comps.filter(c => c.type === 'resistor').map(c => solved[c.id]).filter(s => s && Math.abs(s.I) > 0.02)
+  const seriesDone = resOn.length >= 2 && (() => {
+    const [a, b] = resOn
+    return Math.abs(Math.abs(a.I) - Math.abs(b.I)) / Math.max(Math.abs(a.I), Math.abs(b.I)) < 0.04
+      && Math.abs(Math.abs(a.dV) - Math.abs(b.dV)) > 0.05
+  })()
+  const parallelDone = resOn.length >= 2 && (() => {
+    const [a, b] = resOn
+    return Math.abs(Math.abs(a.dV) - Math.abs(b.dV)) / Math.max(Math.abs(a.dV), Math.abs(b.dV), 0.01) < 0.04
+  })()
+  const CHALLENGES = [
+    ['Light the bulb (cell, switch, bulb in a loop)', lit],
+    ['Measure the current: ammeter IN SERIES in the loop', ammSeries],
+    ['Measure the bulb voltage: voltmeter ACROSS it (parallel)', voltAcross],
+    ['Connect two resistors in SERIES (same current through both)', seriesDone],
+    ['Connect the two resistors in PARALLEL (same voltage across both)', parallelDone],
+  ]
+  const doneCount = useRef(0)
+  useEffect(() => {
+    const d = CHALLENGES.filter(x => x[1]).length
+    if (d > doneCount.current) smAudio.ding()
+    doneCount.current = d
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lit, ammSeries, voltAcross, seriesDone, parallelDone])
+
+  // ── Component renderers (3-D styled) ──
+  const Comp = ({ c }) => {
+    const s = solved[c.id] || { dV: 0, I: 0 }
+    const glow = c.type === 'bulb' ? Math.min(1, (s.dV * s.dV) / 5 / 0.45) : 0
+    const sel = selComp === c.id
+    return (
+      <g transform={'translate(' + c.x + ',' + c.y + ')'}
+        onPointerDown={(e) => {
+          e.stopPropagation()
+          dragRef.current = { id: c.id, sx: e.clientX, sy: e.clientY, ox: c.x, oy: c.y, moved: false }
+          e.currentTarget.ownerSVGElement.setPointerCapture?.(e.pointerId)
+        }}
+        style={{ cursor: 'grab' }}>
+        {/* leads */}
+        <line x1="-34" y1="0" x2="-16" y2="0" stroke="#7C828C" strokeWidth="2.5" />
+        <line x1="16" y1="0" x2="34" y2="0" stroke="#7C828C" strokeWidth="2.5" />
+
+        {c.type === 'cell' && (<g>
+          <ellipse cx="0" cy="16" rx="22" ry="3.5" fill="rgba(0,0,0,.14)" />
+          <rect x="-18" y="-12" width="36" height="24" rx="4" fill="url(#clCellBody)" stroke="#5E4A12" strokeWidth="0.8" />
+          <rect x="-18" y="-12" width="36" height="7" rx="3" fill="rgba(255,255,255,.25)" />
+          <rect x="-18" y="-3" width="36" height="9" fill="url(#clCellBand)" />
+          <rect x="14" y="-5" width="6" height="10" rx="1.5" fill="url(#clMetal)" stroke="#4E545E" strokeWidth="0.6" />
+          <rect x="-20" y="-8" width="4" height="16" rx="1" fill="url(#clMetal)" stroke="#4E545E" strokeWidth="0.6" />
+          <text x="6" y="-16" fontSize="10" fontWeight="800" fill="#2A2A2E">+</text>
+          <text x="-12" y="-16" fontSize="10" fontWeight="800" fill="#2A2A2E">-</text>
+          <text x="0" y="4" fontSize="7.5" fontWeight="800" fill="#FDFAF4" textAnchor="middle">SMARTIOUS 1.5V</text>
+        </g>)}
+
+        {c.type === 'resistor' && (<g>
+          <ellipse cx="0" cy="12" rx="20" ry="3" fill="rgba(0,0,0,.12)" />
+          <rect x="-16" y="-8" width="32" height="16" rx="7" fill="url(#clResBody)" stroke="#7A5A2E" strokeWidth="0.7" />
+          {[-9, -3, 3, 9].map((bx, i) => (
+            <rect key={i} x={bx - 1.5} y="-8" width="3" height="16" fill={['#7D1025', '#C9973A', '#2A2A2E', '#B45309'][i]} opacity="0.85" />
+          ))}
+          <text x="0" y="-13" fontSize="9" fontWeight="800" fill="#2A2A2E" textAnchor="middle">{c.value} \u03a9</text>
+        </g>)}
+
+        {c.type === 'bulb' && (<g>
+          {glow > 0.02 && <circle cx="0" cy="-4" r={14 + glow * 16} style={{ fill: 'rgba(255,196,64,' + (glow * 0.45) + ')', filter: 'blur(4px)' }} />}
+          <circle cx="0" cy="-4" r="12" fill={glow > 0.02 ? 'rgba(255,222,120,' + (0.35 + glow * 0.6) + ')' : 'rgba(235,238,244,.85)'} stroke="#7C828C" strokeWidth="1.2" />
+          <path d="M-5 -8 L5 0 M5 -8 L-5 0" stroke={glow > 0.4 ? '#B45309' : '#7C828C'} strokeWidth="1.4" />
+          <rect x="-6" y="6" width="12" height="7" rx="2" fill="url(#clMetal)" stroke="#4E545E" strokeWidth="0.6" />
+        </g>)}
+
+        {c.type === 'switch' && (<g onPointerDown={(e) => { e.stopPropagation(); setComps(cs => cs.map(x => x.id === c.id ? { ...x, closed: !x.closed } : x)); smAudio.click() }} style={{ cursor: 'pointer' }}>
+          <ellipse cx="0" cy="12" rx="20" ry="3" fill="rgba(0,0,0,.12)" />
+          <circle cx="-14" cy="0" r="4" fill="url(#clKnob)" />
+          <circle cx="14" cy="0" r="4" fill="url(#clKnob)" />
+          <line x1="-14" y1="0" x2={c.closed ? 14 : 8} y2={c.closed ? 0 : -16}
+            stroke="#3A3F47" strokeWidth="3.5" strokeLinecap="round" style={{ transition: 'all .18s' }} />
+          <text x="0" y="24" fontSize="8" fill="#6B6B6B" textAnchor="middle">{c.closed ? 'ON' : 'OFF (tap)'}</text>
+        </g>)}
+
+        {(c.type === 'ammeter' || c.type === 'voltmeter') && (<g>
+          <ellipse cx="0" cy="18" rx="18" ry="3" fill="rgba(0,0,0,.12)" />
+          <circle cx="0" cy="0" r="17" fill="url(#clMeterFace)" stroke="url(#clMetal)" strokeWidth="3" />
+          <text x="0" y="-4" fontSize="9" fontWeight="800" fill={c.type === 'ammeter' ? '#7D1025' : '#1E5AA8'} textAnchor="middle">
+            {c.type === 'ammeter' ? 'A' : 'V'}
+          </text>
+          <g style={{ transform: 'rotate(' + Math.max(-55, Math.min(55, (c.type === 'ammeter' ? Math.abs(s.I) / 2 : Math.abs(s.dV) / 3) * 110 - 55)) + 'deg)', transformOrigin: '0px 8px', transition: 'transform .5s cubic-bezier(.3,1.5,.5,1)' }}>
+            <line x1="0" y1="8" x2="0" y2="-11" stroke="#B4232A" strokeWidth="1.6" />
+          </g>
+          <text x="0" y="28" fontSize="8.5" fontWeight="800" fill="#2A2A2E" textAnchor="middle">
+            {c.type === 'ammeter' ? Math.abs(s.I).toFixed(2) + ' A' : Math.abs(s.dV).toFixed(2) + ' V'}
+          </text>
+        </g>)}
+
+        {/* terminals */}
+        {[0, 1].map(t => (
+          <circle key={t} cx={t === 0 ? -34 : 34} cy="0" r="5.5"
+            fill={selTerm === c.id + ':' + t ? '#F2C230' : '#2A2A2E'}
+            stroke={selTerm === c.id + ':' + t ? '#8A6A00' : '#6B7280'} strokeWidth="1.5"
+            onPointerDown={(e) => { e.stopPropagation(); tapTerm(c.id + ':' + t) }}
+            style={{ cursor: 'pointer' }} />
+        ))}
+
+        {/* selection controls */}
+        {sel && (<g>
+          <g onPointerDown={(e) => { e.stopPropagation(); removeComp(c.id) }} style={{ cursor: 'pointer' }}>
+            <circle cx="0" cy="-34" r="9" fill="#B91C1C" />
+            <path d="M-3.5 -37.5 L3.5 -30.5 M3.5 -37.5 L-3.5 -30.5" stroke="#fff" strokeWidth="1.8" />
+          </g>
+          {c.type === 'resistor' && (
+            <g onPointerDown={(e) => {
+              e.stopPropagation()
+              setComps(cs => cs.map(x => x.id === c.id
+                ? { ...x, value: CL_RVALUES[(CL_RVALUES.indexOf(x.value) + 1) % CL_RVALUES.length] }
+                : x))
+            }} style={{ cursor: 'pointer' }}>
+              <rect x="14" y="-42" width="34" height="17" rx="8" fill="#7D1025" />
+              <text x="31" y="-30" fontSize="9" fontWeight="800" fill="#fff" textAnchor="middle">value</text>
+            </g>
+          )}
+        </g>)}
+      </g>
+    )
+  }
+
+  return (
+    <div style={{ position: 'absolute', inset: 0, background: '#FBFAF5', zIndex: 2, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      {/* Tray */}
+      <div style={{ display: 'flex', gap: 6, padding: '8px 10px', flexWrap: 'wrap', borderBottom: '1px solid rgba(0,0,0,.08)', background: '#F4F2ED', alignItems: 'center' }}>
+        <span style={{ fontSize: 11, fontWeight: 800, color: '#7D1025', marginRight: 2 }}>APPARATUS:</span>
+        {CL_TRAY.map(([type, label]) => (
+          <button key={type} onClick={() => addComp(type)}
+            style={{ background: '#fff', border: '1.5px solid #C9C2B0', borderRadius: 9, padding: '6px 11px', fontSize: 11.5, fontWeight: 700, color: '#2A2A2E', cursor: 'pointer' }}>
+            + {label}
+          </button>
+        ))}
+        <button onClick={() => { setComps([]); setWires([]); setSelTerm(null); setSelComp(null) }}
+          style={{ marginLeft: 'auto', background: 'rgba(185,28,28,.08)', border: 'none', borderRadius: 9, padding: '6px 11px', fontSize: 11.5, fontWeight: 800, color: '#B91C1C', cursor: 'pointer' }}>
+          Clear bench
+        </button>
+      </div>
+
+      <div style={{ flex: 1, display: 'flex', minHeight: 0 }}>
+        {/* Bench */}
+        <svg viewBox="0 0 720 420" style={{ flex: 1, minWidth: 0, touchAction: 'none' }}
+          onPointerMove={(e) => {
+            const d = dragRef.current
+            if (!d) return
+            const svg = e.currentTarget
+            const sc = 720 / svg.getBoundingClientRect().width
+            const nx = d.ox + (e.clientX - d.sx) * sc
+            const ny = d.oy + (e.clientY - d.sy) * sc
+            if (Math.abs(e.clientX - d.sx) + Math.abs(e.clientY - d.sy) > 4) d.moved = true
+            setComps(cs => cs.map(c => c.id === d.id
+              ? { ...c, x: Math.max(50, Math.min(670, nx)), y: Math.max(40, Math.min(390, ny)) }
+              : c))
+          }}
+          onPointerUp={() => {
+            const d = dragRef.current
+            if (d && !d.moved) setSelComp(s => s === d.id ? null : d.id)
+            dragRef.current = null
+          }}
+          onPointerDown={() => { setSelTerm(null); setSelComp(null) }}>
+          <defs>
+            <linearGradient id="clCellBody" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#E8B93A" /><stop offset="55%" stopColor="#C9973A" /><stop offset="100%" stopColor="#7A5A16" />
+            </linearGradient>
+            <linearGradient id="clCellBand" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#A8203A" /><stop offset="100%" stopColor="#6E0F22" />
+            </linearGradient>
+            <linearGradient id="clMetal" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#EDEFF2" /><stop offset="50%" stopColor="#AEB4BE" /><stop offset="100%" stopColor="#6E747E" />
+            </linearGradient>
+            <linearGradient id="clResBody" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#F2E3C4" /><stop offset="100%" stopColor="#CBA96A" />
+            </linearGradient>
+            <radialGradient id="clKnob" cx="35%" cy="30%">
+              <stop offset="0%" stopColor="#FFF" /><stop offset="60%" stopColor="#B4232A" /><stop offset="100%" stopColor="#6E1116" />
+            </radialGradient>
+            <radialGradient id="clMeterFace" cx="35%" cy="30%">
+              <stop offset="0%" stopColor="#FFFFFF" /><stop offset="85%" stopColor="#EDEBE2" /><stop offset="100%" stopColor="#D5D1C2" />
+            </radialGradient>
+          </defs>
+
+          {/* wires */}
+          {wires.map((w, i) => {
+            const A = termPosById(w.a), B = termPosById(w.b)
+            const mx = (A.x + B.x) / 2, my = Math.max(A.y, B.y) + 26
+            return (
+              <g key={i} onPointerDown={(e) => { e.stopPropagation(); setWires(ws => ws.filter((_, j) => j !== i)); smAudio.click() }} style={{ cursor: 'pointer' }}>
+                <path d={'M' + A.x + ' ' + A.y + ' Q ' + mx + ' ' + my + ' ' + B.x + ' ' + B.y}
+                  fill="none" stroke="transparent" strokeWidth="14" />
+                <path d={'M' + A.x + ' ' + A.y + ' Q ' + mx + ' ' + my + ' ' + B.x + ' ' + B.y}
+                  fill="none" stroke="#B4232A" strokeWidth="2.6" strokeLinecap="round" />
+              </g>
+            )
+          })}
+          {/* pending connection hint */}
+          {selTerm && (
+            <text x="360" y="408" fontSize="11" fontWeight="700" fill="#8A6A00" textAnchor="middle">
+              Now tap the terminal you want to connect it to (tap again to cancel)
+            </text>
+          )}
+          {comps.map(c => <Comp key={c.id} c={c} />)}
+          {comps.length === 0 && (
+            <text x="360" y="200" fontSize="13" fill="#8A8A82" textAnchor="middle">
+              Add apparatus from the tray, drag it into place, then tap two terminals to wire them.
+            </text>
+          )}
+        </svg>
+
+        {/* Challenges */}
+        <div style={{ width: 230, flexShrink: 0, borderLeft: '1px solid rgba(0,0,0,.08)', background: '#F4F2ED', padding: '12px 12px', overflowY: 'auto' }}>
+          <div style={{ fontSize: 12, fontWeight: 800, color: '#2A2A2E', marginBottom: 8 }}>Connection challenges</div>
+          {CHALLENGES.map(([label, done], i) => (
+            <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: 9 }}>
+              <div style={{
+                width: 17, height: 17, borderRadius: 5, flexShrink: 0, marginTop: 1,
+                background: done ? '#15803D' : '#fff', border: '1.5px solid ' + (done ? '#15803D' : '#C9C2B0'),
+                display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 11, fontWeight: 900,
+              }}>{done ? '\u2713' : ''}</div>
+              <div style={{ fontSize: 11, color: done ? '#15803D' : '#4B4B55', fontWeight: done ? 800 : 600, lineHeight: 1.45 }}>{label}</div>
+            </div>
+          ))}
+          <div style={{ fontSize: 10, color: '#8A8A82', lineHeight: 1.5, marginTop: 10 }}>
+            Tap a terminal, then another, to wire them. Tap a wire to remove it. Tap apparatus to select: remove it or change a resistor value. Cells: + is the button end.
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 // ── Smartious native sim: electricity practical (KCSE / IGCSE) ──
