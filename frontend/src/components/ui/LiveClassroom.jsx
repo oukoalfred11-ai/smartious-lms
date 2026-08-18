@@ -335,8 +335,7 @@ const SIM_CATALOG = [
     { id: 'sm:vernier', title: 'Vernier callipers — reading practice' },
     { id: 'sm:foodtests', title: 'Food tests — iodine, Benedict\u2019s, Biuret, emulsion' },
     { id: 'sm:titration', title: 'Acid-base titration — full Paper 3 practical' },
-    { id: 'sm:electric', title: 'Electricity — I-V readings & wire resistance (KCSE/IGCSE)' },
-    { id: 'sm:circuitlab', title: 'Circuit builder — drag apparatus, make your own connections' },
+    { id: 'sm:electric', title: 'Electricity practical — build the circuit, take the readings' },
   ]},
   { subject: 'Physics', sims: [
     phet('projectile-motion', 'Projectile motion'),
@@ -2604,8 +2603,7 @@ function SimPanel({ sim }) {
   if (sim.id === 'sm:vernier') return <VernierSim />
   if (sim.id === 'sm:foodtests') return <FoodTestSim />
   if (sim.id === 'sm:titration') return <TitrationSim />
-  if (sim.id === 'sm:electric') return <ElectricSim />
-  if (sim.id === 'sm:circuitlab') return <CircuitLab />
+  if (sim.id === 'sm:electric') return <CircuitLab />
   return (
     <div style={{ position: 'absolute', inset: 0, background: '#fff', zIndex: 2, display: 'flex', flexDirection: 'column' }}>
       <div style={{ flex: 1, position: 'relative', minHeight: 0 }}>
@@ -3288,6 +3286,7 @@ function smSolveCircuit(comps, wires) {
     }
     let R = null
     if (c.type === 'resistor') R = c.value
+    else if (c.type === 'wirerule') R = Math.max(0.2, (c.k || 0.06) * (c.L || 50))
     else if (c.type === 'bulb') R = 5
     else if (c.type === 'ammeter') R = 0.01
     else if (c.type === 'voltmeter') R = 1e6
@@ -3332,8 +3331,8 @@ function smSolveCircuit(comps, wires) {
 // connect, and the live solver animates whatever they build — the
 // connection SKILL itself, series and parallel, taught by doing.
 const CL_TRAY = [
-  ['cell', 'Dry cell 1.5 V'], ['resistor', 'Resistor'], ['bulb', 'Bulb'],
-  ['switch', 'Switch'], ['ammeter', 'Ammeter'], ['voltmeter', 'Voltmeter'],
+  ['cell', 'Dry cell 1.5 V'], ['switch', 'Switch'], ['ammeter', 'Ammeter'], ['voltmeter', 'Voltmeter'],
+  ['resistor', 'Resistor'], ['bulb', 'Bulb'], ['wirerule', 'Resistance wire on metre rule'],
 ]
 const CL_RVALUES = [1, 2, 4.7, 10, 22]
 
@@ -3360,8 +3359,11 @@ function CircuitLab() {
     const id = 'c' + (nextId.current++)
     setComps(cs => [...cs, {
       id, type,
-      x: 150 + (cs.length % 4) * 170, y: 110 + Math.floor(cs.length / 4) * 90,
+      x: type === 'wirerule' ? 360 : 150 + (cs.length % 4) * 170,
+      y: 110 + Math.floor(cs.length / 4) * 90,
       value: 2, closed: false,
+      k: type === 'wirerule' ? +(0.05 + Math.random() * 0.02).toFixed(4) : undefined,
+      L: type === 'wirerule' ? 50 : undefined,
     }])
     smAudio.click()
   }
@@ -3370,7 +3372,11 @@ function CircuitLab() {
     setWires(ws => ws.filter(w => !w.a.startsWith(id + ':') && !w.b.startsWith(id + ':')))
     setSelComp(null); setSelTerm(null)
   }
-  const termPos = (c, t) => ({ x: c.x + (t === 0 ? -34 : 34), y: c.y })
+  const termPos = (c, t) => {
+    if (c.type === 'wirerule')
+      return t === 0 ? { x: c.x - 110, y: c.y - 8 } : { x: c.x - 110 + (c.L || 50) * 2.2, y: c.y - 26 }
+    return { x: c.x + (t === 0 ? -34 : 34), y: c.y }
+  }
   const termPosById = (tid) => {
     const [id, t] = tid.split(':')
     const c = comps.find(x => x.id === id)
@@ -3400,13 +3406,60 @@ function CircuitLab() {
     const [a, b] = resOn
     return Math.abs(Math.abs(a.dV) - Math.abs(b.dV)) / Math.max(Math.abs(a.dV), Math.abs(b.dV), 0.01) < 0.04
   })()
+  // The KCSE/IGCSE wire experiment, detected from the live solution:
+  // current through the wire, an ammeter in series with it, and a
+  // voltmeter across it.
+  const wireComp = comps.find(c => c.type === 'wirerule')
+  const wireS = wireComp && solved[wireComp.id]
+  const wireLive = !!(wireS && Math.abs(wireS.I) > 0.03)
+  const wireAmm = wireLive && comps.some(c => c.type === 'ammeter' &&
+    Math.abs(Math.abs(solved[c.id]?.I || 0) - Math.abs(wireS.I)) / Math.abs(wireS.I) < 0.06)
+  const wireVolt = wireLive && comps.some(c => c.type === 'voltmeter' &&
+    Math.abs(Math.abs(solved[c.id]?.dV || 0) - Math.abs(wireS.dV)) < 0.08)
+  const experimentReady = wireLive && wireAmm && wireVolt
+
   const CHALLENGES = [
     ['Light the bulb (cell, switch, bulb in a loop)', lit],
     ['Measure the current: ammeter IN SERIES in the loop', ammSeries],
     ['Measure the bulb voltage: voltmeter ACROSS it (parallel)', voltAcross],
     ['Connect two resistors in SERIES (same current through both)', seriesDone],
     ['Connect the two resistors in PARALLEL (same voltage across both)', parallelDone],
+    ['THE EXPERIMENT: cell + switch + ammeter in series with the resistance wire, voltmeter across it', experimentReady],
   ]
+  const [rows, setRows] = useState([])
+  const [Iin, setIin] = useState(''), [Vin, setVin] = useState('')
+  const [fb, setFb] = useState(null)
+  const [finalIn, setFinalIn] = useState('')
+  const [finalFb, setFinalFb] = useState(null)
+  const [finalTries, setFinalTries] = useState(0)
+  const [showAns, setShowAns] = useState(false)
+
+  const recordRow = () => {
+    if (!experimentReady) { setFb({ ok: false, text: 'Build the experiment circuit first — see the last challenge.' }); return }
+    const iv = parseFloat(Iin), vv = parseFloat(Vin)
+    const L = wireComp.L || 50
+    if (!Number.isFinite(iv) || !Number.isFinite(vv)) { setFb({ ok: false, text: 'Read BOTH meters and enter the values.' }); return }
+    if (rows.some(r => r.L === L)) { setFb({ ok: false, text: 'You already recorded ' + L + ' cm — slide the jockey to a new length.' }); return }
+    if (Math.abs(iv - Math.abs(wireS.I)) > 0.04) { setFb({ ok: false, text: 'Check the AMMETER — each small division is 0.05 A.' }); smAudio.buzz(); return }
+    if (Math.abs(vv - Math.abs(wireS.dV)) > 0.06) { setFb({ ok: false, text: 'Check the VOLTMETER — each small division is 0.1 V.' }); smAudio.buzz(); return }
+    setRows(rs => [...rs, { L, I: iv, V: vv, R: +(vv / iv).toFixed(2) }].sort((a, b) => a.L - b.L))
+    setIin(''); setVin(''); setFb({ ok: true, text: 'Recorded. Open the switch between readings — the boards award that.' })
+    smAudio.click()
+  }
+  const checkFinal = () => {
+    const val = parseFloat(finalIn)
+    if (!Number.isFinite(val) || !wireComp) { setFinalFb({ ok: false, text: 'Enter the resistance of ONE METRE of the wire, in ohms.' }); return }
+    const correct = wireComp.k * 100
+    if (Math.abs(val - correct) / correct < 0.06) {
+      setFinalFb({ ok: true, text: 'Correct: about ' + correct.toFixed(1) + ' \u03a9 per metre.' })
+      smAudio.ding()
+    } else {
+      setFinalFb({ ok: false, text: 'Not yet. Each row: R = V/I. R \u00f7 L is the \u03a9 per cm; times 100 gives the metre.' })
+      setFinalTries(t => t + 1)
+      smAudio.buzz()
+    }
+  }
+
   const doneCount = useRef(0)
   useEffect(() => {
     const d = CHALLENGES.filter(x => x[1]).length
@@ -3429,8 +3482,10 @@ function CircuitLab() {
         }}
         style={{ cursor: 'grab' }}>
         {/* leads */}
-        <line x1="-34" y1="0" x2="-16" y2="0" stroke="#7C828C" strokeWidth="2.5" />
-        <line x1="16" y1="0" x2="34" y2="0" stroke="#7C828C" strokeWidth="2.5" />
+        {c.type !== 'wirerule' && (<g>
+          <line x1="-34" y1="0" x2="-16" y2="0" stroke="#7C828C" strokeWidth="2.5" />
+          <line x1="16" y1="0" x2="34" y2="0" stroke="#7C828C" strokeWidth="2.5" />
+        </g>)}
 
         {c.type === 'cell' && (<g>
           <ellipse cx="0" cy="16" rx="22" ry="3.5" fill="rgba(0,0,0,.14)" />
@@ -3469,23 +3524,102 @@ function CircuitLab() {
           <text x="0" y="24" fontSize="8" fill="#6B6B6B" textAnchor="middle">{c.closed ? 'ON' : 'OFF (tap)'}</text>
         </g>)}
 
-        {(c.type === 'ammeter' || c.type === 'voltmeter') && (<g>
-          <ellipse cx="0" cy="18" rx="18" ry="3" fill="rgba(0,0,0,.12)" />
-          <circle cx="0" cy="0" r="17" fill="url(#clMeterFace)" stroke="url(#clMetal)" strokeWidth="3" />
-          <text x="0" y="-4" fontSize="9" fontWeight="800" fill={c.type === 'ammeter' ? '#7D1025' : '#1E5AA8'} textAnchor="middle">
-            {c.type === 'ammeter' ? 'A' : 'V'}
-          </text>
-          <g style={{ transform: 'rotate(' + Math.max(-55, Math.min(55, (c.type === 'ammeter' ? Math.abs(s.I) / 2 : Math.abs(s.dV) / 3) * 110 - 55)) + 'deg)', transformOrigin: '0px 8px', transition: 'transform .5s cubic-bezier(.3,1.5,.5,1)' }}>
-            <line x1="0" y1="8" x2="0" y2="-11" stroke="#B4232A" strokeWidth="1.6" />
+        {(c.type === 'ammeter' || c.type === 'voltmeter') && (() => {
+          const isA = c.type === 'ammeter'
+          const max = isA ? 2 : 3
+          const val = Math.min(max, isA ? Math.abs(s.I) : Math.abs(s.dV))
+          const ang = -48 + (val / max) * 96
+          const majors = isA ? [0, 0.5, 1, 1.5, 2] : [0, 1, 2, 3]
+          const minorsN = isA ? 40 : 30
+          const P = { x: 0, y: 22 }              // needle pivot
+          const tick = (frac, len, wgt) => {
+            const a = (-48 + frac * 96) * Math.PI / 180
+            const r1 = 40 - len, r2 = 40
+            return (
+              <line key={'tk' + frac + len}
+                x1={P.x + r1 * Math.sin(a)} y1={P.y - r1 * Math.cos(a)}
+                x2={P.x + r2 * Math.sin(a)} y2={P.y - r2 * Math.cos(a)}
+                stroke="#1E1E22" strokeWidth={wgt} />
+            )
+          }
+          return (<g>
+            <ellipse cx="0" cy="34" rx="42" ry="4.5" fill="rgba(0,0,0,.16)" />
+            {/* bakelite case + corner screws */}
+            <rect x="-46" y="-30" width="92" height="60" rx="7" fill="url(#clBakelite)" stroke="#0E0E11" strokeWidth="0.8" />
+            {[[-39, -23], [39, -23], [-39, 23], [39, 23]].map(([sx, sy], i) => (
+              <g key={i}>
+                <circle cx={sx} cy={sy} r="2.6" fill="url(#clMetal)" stroke="#3A3F47" strokeWidth="0.5" />
+                <line x1={sx - 1.6} y1={sy} x2={sx + 1.6} y2={sy} stroke="#3A3F47" strokeWidth="0.7" transform={'rotate(' + (i * 47) + ' ' + sx + ' ' + sy + ')'} />
+              </g>
+            ))}
+            {/* dial face */}
+            <rect x="-40" y="-25" width="80" height="46" rx="4" fill="url(#clDial)" stroke="#8B857A" strokeWidth="0.6" />
+            {/* mirror strip under the scale (parallax aid on real meters) */}
+            <path d={'M ' + (P.x - 33 * Math.sin(48 * Math.PI / 180)) + ' ' + (P.y - 33 * Math.cos(48 * Math.PI / 180)) +
+              ' A 33 33 0 0 1 ' + (P.x + 33 * Math.sin(48 * Math.PI / 180)) + ' ' + (P.y - 33 * Math.cos(48 * Math.PI / 180))}
+              fill="none" stroke="#C7D3DC" strokeWidth="4" opacity="0.8" />
+            {/* scale arc */}
+            <path d={'M ' + (P.x - 40 * Math.sin(48 * Math.PI / 180)) + ' ' + (P.y - 40 * Math.cos(48 * Math.PI / 180)) +
+              ' A 40 40 0 0 1 ' + (P.x + 40 * Math.sin(48 * Math.PI / 180)) + ' ' + (P.y - 40 * Math.cos(48 * Math.PI / 180))}
+              fill="none" stroke="#1E1E22" strokeWidth="1.1" />
+            {Array.from({ length: minorsN + 1 }, (_, i) => tick(i / minorsN, i % (minorsN / (majors.length - 1)) === 0 ? 7 : 3.5, i % (minorsN / (majors.length - 1)) === 0 ? 1.2 : 0.6))}
+            {majors.map(mv => {
+              const a = (-48 + (mv / max) * 96) * Math.PI / 180
+              return (
+                <text key={'m' + mv} x={P.x + 48 * Math.sin(a)} y={P.y - 48 * Math.cos(a) + 3}
+                  fontSize="6.5" fontWeight="700" fill="#1E1E22" textAnchor="middle">{mv}</text>
+              )
+            })}
+            <text x="0" y="-13" fontSize="8.5" fontWeight="900" fill={isA ? '#7D1025' : '#1E5AA8'} textAnchor="middle" fontStyle="italic">
+              {isA ? 'A' : 'V'}
+            </text>
+            <text x="0" y="16" fontSize="4.2" fontWeight="700" fill="#8A8A82" textAnchor="middle" letterSpacing="1">SMARTIOUS</text>
+            {/* knife needle + counterweight, with its shadow */}
+            <g style={{ transform: 'rotate(' + ang + 'deg)', transformOrigin: '0px 22px', transition: 'transform .55s cubic-bezier(.3,1.55,.5,1)' }}>
+              <polygon points="0,-16 1,20 -1,20" fill="rgba(0,0,0,.2)" transform="translate(1.2,1)" />
+              <polygon points="0,-16 1.1,22 -1.1,22" fill="#14161A" />
+              <circle cx="0" cy="27" r="2.6" fill="#14161A" />
+            </g>
+            <circle cx={P.x} cy={P.y} r="3" fill="url(#clMetal)" stroke="#2A2A2E" strokeWidth="0.7" />
+            {/* glass with diagonal glare */}
+            <rect x="-40" y="-25" width="80" height="46" rx="4" fill="none" stroke="rgba(255,255,255,.25)" strokeWidth="1" />
+            <polygon points="-40,-25 -6,-25 -28,21 -40,21" fill="rgba(255,255,255,.10)" />
+            {/* brass terminal posts */}
+            <circle cx="-30" cy="27" r="3" fill="url(#clCellBody)" stroke="#5E4A12" strokeWidth="0.6" />
+            <circle cx="30" cy="27" r="3" fill="url(#clCellBody)" stroke="#5E4A12" strokeWidth="0.6" />
+          </g>)
+        })()}
+
+        {c.type === 'wirerule' && (<g>
+          <ellipse cx="0" cy="14" rx="118" ry="4" fill="rgba(0,0,0,.12)" />
+          <rect x="-112" y="-4" width="224" height="16" rx="2.5" fill="url(#clResBody)" stroke="#8A6A3A" strokeWidth="0.7" />
+          {Array.from({ length: 11 }, (_, i) => (
+            <g key={i}>
+              <line x1={-110 + i * 22} y1="-4" x2={-110 + i * 22} y2="2" stroke="#4A3A20" strokeWidth="0.8" />
+              <text x={-110 + i * 22} y="9.5" fontSize="5.5" fill="#4A3A20" textAnchor="middle">{i * 10}</text>
+            </g>
+          ))}
+          <line x1="-110" y1="-8" x2="110" y2="-8" stroke="url(#clMetal)" strokeWidth="2.5" />
+          {/* jockey: drag along the wire */}
+          <g transform={'translate(' + (-110 + (c.L || 50) * 2.2) + ',0)'}
+            onPointerDown={(e) => {
+              e.stopPropagation()
+              dragRef.current = { id: c.id, jockey: true, ox: c.x }
+              e.currentTarget.ownerSVGElement.setPointerCapture?.(e.pointerId)
+            }}
+            style={{ cursor: 'ew-resize' }}>
+            <line x1="0" y1="-26" x2="0" y2="-8" stroke="#3A3F47" strokeWidth="2.5" />
+            <circle cx="0" cy="-30" r="6.5" fill="url(#clKnob)" stroke="#4E1013" strokeWidth="0.7" />
+            <path d="M-3 -10 L3 -10 L0 -5 Z" fill="#3A3F47" />
           </g>
-          <text x="0" y="28" fontSize="8.5" fontWeight="800" fill="#2A2A2E" textAnchor="middle">
-            {c.type === 'ammeter' ? Math.abs(s.I).toFixed(2) + ' A' : Math.abs(s.dV).toFixed(2) + ' V'}
-          </text>
+          <text x={-110 + (c.L || 50) * 2.2} y="24" fontSize="8.5" fontWeight="800" fill="#7D1025" textAnchor="middle">L = {c.L || 50} cm</text>
         </g>)}
 
         {/* terminals */}
-        {[0, 1].map(t => (
-          <circle key={t} cx={t === 0 ? -34 : 34} cy="0" r="5.5"
+        {(c.type === 'wirerule' ? [0, 1] : [0, 1]).map(t => (
+          <circle key={t}
+            cx={c.type === 'wirerule' ? (t === 0 ? -110 : -110 + (c.L || 50) * 2.2) : (t === 0 ? -34 : 34)}
+            cy={c.type === 'wirerule' ? (t === 0 ? -8 : -26) : 0} r="5.5"
             fill={selTerm === c.id + ':' + t ? '#F2C230' : '#2A2A2E'}
             stroke={selTerm === c.id + ':' + t ? '#8A6A00' : '#6B7280'} strokeWidth="1.5"
             onPointerDown={(e) => { e.stopPropagation(); tapTerm(c.id + ':' + t) }}
@@ -3538,7 +3672,18 @@ function CircuitLab() {
             const d = dragRef.current
             if (!d) return
             const svg = e.currentTarget
-            const sc = 720 / svg.getBoundingClientRect().width
+            const rect = svg.getBoundingClientRect()
+            const sc = 720 / rect.width
+            if (d.jockey) {
+              const wx = (e.clientX - rect.left) * sc
+              setComps(cs => cs.map(c => {
+                if (c.id !== d.id) return c
+                const newL = Math.round(Math.min(100, Math.max(5, (wx - (c.x - 110)) / 2.2)))
+                if (newL !== c.L) smAudio.scrape()
+                return { ...c, L: newL }
+              }))
+              return
+            }
             const nx = d.ox + (e.clientX - d.sx) * sc
             const ny = d.oy + (e.clientY - d.sy) * sc
             if (Math.abs(e.clientX - d.sx) + Math.abs(e.clientY - d.sy) > 4) d.moved = true
@@ -3570,6 +3715,12 @@ function CircuitLab() {
             </radialGradient>
             <radialGradient id="clMeterFace" cx="35%" cy="30%">
               <stop offset="0%" stopColor="#FFFFFF" /><stop offset="85%" stopColor="#EDEBE2" /><stop offset="100%" stopColor="#D5D1C2" />
+            </radialGradient>
+            <linearGradient id="clBakelite" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#3A3A40" /><stop offset="45%" stopColor="#232327" /><stop offset="100%" stopColor="#121215" />
+            </linearGradient>
+            <radialGradient id="clDial" cx="40%" cy="25%">
+              <stop offset="0%" stopColor="#FFFEF8" /><stop offset="80%" stopColor="#F2EFE3" /><stop offset="100%" stopColor="#DDD8C6" />
             </radialGradient>
           </defs>
 
@@ -3614,288 +3765,57 @@ function CircuitLab() {
             </div>
           ))}
           <div style={{ fontSize: 10, color: '#8A8A82', lineHeight: 1.5, marginTop: 10 }}>
-            Tap a terminal, then another, to wire them. Tap a wire to remove it. Tap apparatus to select: remove it or change a resistor value. Cells: + is the button end.
+            Tap a terminal, then another, to wire them. Tap a wire to remove it. Tap apparatus to select: remove it or change a resistor value. Cells: + is the button end. On the rule, drag the red jockey to change L.
           </div>
-        </div>
-      </div>
-    </div>
-  )
-}
 
-// ── Smartious native sim: electricity practical (KCSE / IGCSE) ──
-// The shared classic of KCSE Paper 3 and IGCSE Paper 5/6: a cell
-// pack drives current through L cm of nichrome wire on a metre rule;
-// the student slides the jockey, closes the switch, READS the
-// analogue ammeter and voltmeter, records an I-V table, and finds
-// the wire's resistance per metre. Leaving the switch closed heats
-// the wire and drifts the readings — the precaution both boards ask
-// for, made visible.
-function ElectricSim() {
-  const [k] = useState(() => 0.05 + Math.random() * 0.02)   // ohm per cm (the unknown)
-  const [rInt] = useState(() => 0.8 + Math.random() * 0.4)  // cell + connections
-  const EMF = 3.0
-  const [L, setL] = useState(60)
-  const [on, setOn] = useState(false)
-  const [heatFactor, setHeatFactor] = useState(1)
-  const heatTimer = useRef(null)
-  const [rows, setRows] = useState([])
-  const [Iin, setIin] = useState(''), [Vin, setVin] = useState('')
-  const [fb, setFb] = useState(null)
-  const [finalIn, setFinalIn] = useState('')
-  const [finalFb, setFinalFb] = useState(null)
-  const [finalTries, setFinalTries] = useState(0)
-  const [showAns, setShowAns] = useState(false)
-  const draggingRef = useRef(false)
-
-  const kEff = k * heatFactor
-  const I = on ? EMF / (rInt + kEff * L) : 0
-  const V = on ? I * kEff * L : 0
-
-  // Heating: after 12 s closed, the wire warms and resistance climbs
-  useEffect(() => {
-    if (on) {
-      smAudio.humStart()
-      heatTimer.current = setTimeout(() => {
-        setHeatFactor(1.06)
-        setTimeout(() => setHeatFactor(f => (f > 1 ? 1.1 : f)), 8000)
-      }, 12000)
-    } else {
-      smAudio.humStop()
-      clearTimeout(heatTimer.current)
-      setHeatFactor(1)
-    }
-    return () => { clearTimeout(heatTimer.current); smAudio.humStop() }
-  }, [on])
-  useEffect(() => { smAudio.humLevel(I) }, [I])
-  useEffect(() => () => smAudio.humStop(), [])
-
-  const heated = heatFactor > 1
-
-  const jockeyDrag = (e) => {
-    const svg = e.currentTarget
-    const rect = svg.getBoundingClientRect()
-    const x = ((e.clientX - rect.left) / rect.width) * 460
-    const newL = Math.round(Math.min(100, Math.max(10, (x - 30) / 4)))
-    if (newL !== L) { setL(newL); smAudio.scrape() }
-  }
-
-  const recordRow = () => {
-    if (!on) { setFb({ ok: false, text: 'Close the switch first, then read the meters.' }); return }
-    const iv = parseFloat(Iin), vv = parseFloat(Vin)
-    if (!Number.isFinite(iv) || !Number.isFinite(vv)) { setFb({ ok: false, text: 'Read BOTH meters and enter the values.' }); return }
-    if (rows.some(r => r.L === L)) { setFb({ ok: false, text: 'You already have a reading at ' + L + ' cm — move the jockey to a new length.' }); return }
-    if (Math.abs(iv - I) > 0.04) { setFb({ ok: false, text: 'Check the AMMETER again — each small division is 0.05 A.' }); smAudio.buzz(); return }
-    if (Math.abs(vv - V) > 0.06) { setFb({ ok: false, text: 'Check the VOLTMETER again — each small division is 0.1 V.' }); smAudio.buzz(); return }
-    const R = +(vv / iv).toFixed(2)
-    setRows(rs => [...rs, { L, I: iv, V: vv, R, heated }].sort((a, b) => a.L - b.L))
-    setIin(''); setVin(''); setFb({ ok: true, text: 'Recorded. Switch OFF between readings — good practice both KCSE and IGCSE award.' })
-    setOn(false)
-    smAudio.click()
-  }
-
-  const checkFinal = () => {
-    const val = parseFloat(finalIn)
-    if (!Number.isFinite(val)) { setFinalFb({ ok: false, text: 'Enter the resistance of ONE METRE of this wire, in ohms.' }); return }
-    const correct = k * 100
-    if (Math.abs(val - correct) / correct < 0.06) {
-      setFinalFb({ ok: true, text: 'Correct: about ' + correct.toFixed(1) + ' \u03a9 per metre. Gradient of R against L gives \u03a9/cm; times 100 for the metre.' })
-      smAudio.ding()
-    } else {
-      setFinalFb({ ok: false, text: 'Not yet. For each row R = V/I; plot or tabulate R against L — the gradient is the resistance per cm.' })
-      setFinalTries(t => t + 1)
-      smAudio.buzz()
-    }
-  }
-
-  // Analogue meter as a 3-D dial
-  const Meter = ({ label, value, max, minor, majorEvery, unit, colour }) => {
-    const frac = Math.min(1, Math.max(0, value / max))
-    const ang = -60 + frac * 120
-    const ticks = []
-    const n = Math.round(max / minor)
-    for (let i = 0; i <= n; i++) {
-      const a = (-60 + (i / n) * 120) * Math.PI / 180
-      const major = i % majorEvery === 0
-      const r1 = major ? 54 : 60, r2 = 66
-      ticks.push(
-        <line key={i} x1={80 + r1 * Math.sin(a)} y1={86 - r1 * Math.cos(a)}
-          x2={80 + r2 * Math.sin(a)} y2={86 - r2 * Math.cos(a)}
-          stroke="#2A2A2E" strokeWidth={major ? 1.6 : 0.8} />
-      )
-      if (major) ticks.push(
-        <text key={'t' + i} x={80 + 45 * Math.sin(a)} y={86 - 45 * Math.cos(a) + 3}
-          fontSize="8.5" fill="#2A2A2E" textAnchor="middle">{(i * minor).toFixed(1)}</text>
-      )
-    }
-    return (
-      <svg width="160" height="118" style={{ flexShrink: 0 }}>
-        <defs>
-          <radialGradient id={'mf' + label} cx="35%" cy="30%">
-            <stop offset="0%" stopColor="#FFFFFF" /><stop offset="80%" stopColor="#EDEBE2" /><stop offset="100%" stopColor="#D8D4C6" />
-          </radialGradient>
-          <linearGradient id={'mb' + label} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#B9BEC7" /><stop offset="50%" stopColor="#7C828C" /><stop offset="100%" stopColor="#4E545E" />
-          </linearGradient>
-        </defs>
-        <ellipse cx="82" cy="112" rx="60" ry="5" fill="rgba(0,0,0,.12)" />
-        <rect x="8" y="6" width="144" height="102" rx="14" fill={'url(#mb' + label + ')'} />
-        <rect x="14" y="12" width="132" height="90" rx="10" fill={'url(#mf' + label + ')'} stroke="#8B857A" strokeWidth="0.8" />
-        {ticks}
-        <text x="80" y="34" fontSize="10" fontWeight="800" fill={colour} textAnchor="middle">{label}</text>
-        <g style={{ transform: 'rotate(' + ang + 'deg)', transformOrigin: '80px 86px', transition: 'transform .6s cubic-bezier(.3,1.5,.5,1)' }}>
-          <line x1="80" y1="86" x2="80" y2="26" stroke="#B4232A" strokeWidth="2" />
-          <line x1="80" y1="86" x2="80" y2="26" stroke="rgba(0,0,0,.15)" strokeWidth="4" transform="translate(1.5,1.5)" />
-        </g>
-        <circle cx="80" cy="86" r="6" fill={'url(#mb' + label + ')'} stroke="#3A3F47" strokeWidth="0.8" />
-        <text x="80" y="102" fontSize="8.5" fill="#6B6B6B" textAnchor="middle">{unit}</text>
-      </svg>
-    )
-  }
-
-  const btnE = (label, props, primary) => (
-    <button {...props} style={{
-      background: primary ? '#7D1025' : 'rgba(125,16,37,.08)', color: primary ? '#fff' : '#7D1025',
-      border: 'none', borderRadius: 9, padding: '9px 14px', fontSize: 12, fontWeight: 800,
-      cursor: 'pointer', userSelect: 'none', ...(props.style || {}),
-    }}>{label}</button>
-  )
-
-  return (
-    <div style={{ position: 'absolute', inset: 0, background: '#FBFAF5', zIndex: 2, display: 'flex', overflowY: 'auto', flexWrap: 'wrap' }}>
-      <div style={{ flex: '1 1 460px', minWidth: 320, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '12px 8px', borderRight: '1px solid rgba(0,0,0,.08)' }}>
-        <div style={{ fontSize: 13.5, fontWeight: 800, color: '#2A2A2E' }}>Resistance of a wire — I-V practical</div>
-        <div style={{ fontSize: 11, color: '#6B6B6B', margin: '2px 0 6px', textAlign: 'center', maxWidth: 420 }}>
-          3.0 V cell pack in series with the ammeter and L cm of nichrome wire; voltmeter across the wire. Slide the jockey, close the switch, read both meters.
-        </div>
-
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center' }}>
-          <Meter label="AMMETER" value={I} max={2} minor={0.05} majorEvery={10} unit="amperes (A)" colour="#7D1025" />
-          <Meter label="VOLTMETER" value={V} max={3} minor={0.1} majorEvery={5} unit="volts (V)" colour="#1E5AA8" />
-        </div>
-
-        {/* Circuit: cells, switch, ruler + wire + jockey */}
-        <svg width="100%" viewBox="0 0 460 150" style={{ maxWidth: 500, touchAction: 'none', cursor: 'ew-resize' }}
-          onPointerDown={(e) => { draggingRef.current = true; e.currentTarget.setPointerCapture?.(e.pointerId); jockeyDrag(e) }}
-          onPointerMove={(e) => { if (draggingRef.current) jockeyDrag(e) }}
-          onPointerUp={() => { draggingRef.current = false }}
-          onPointerCancel={() => { draggingRef.current = false }}>
-          <defs>
-            <linearGradient id="cellG" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#F2C230" /><stop offset="55%" stopColor="#C9973A" /><stop offset="100%" stopColor="#8A6A1E" />
-            </linearGradient>
-            <linearGradient id="woodG" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#E8C78F" /><stop offset="100%" stopColor="#B98B4E" />
-            </linearGradient>
-            <linearGradient id="wireG" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#C8CCD4" /><stop offset="50%" stopColor="#8F95A0" /><stop offset="100%" stopColor="#C8CCD4" />
-            </linearGradient>
-            <radialGradient id="knobG" cx="35%" cy="30%">
-              <stop offset="0%" stopColor="#FFF" /><stop offset="60%" stopColor="#B4232A" /><stop offset="100%" stopColor="#6E1116" />
-            </radialGradient>
-          </defs>
-          {/* cell pack */}
-          <ellipse cx="60" cy="40" rx="34" ry="4" fill="rgba(0,0,0,.12)" />
-          <rect x="28" y="12" width="30" height="26" rx="4" fill="url(#cellG)" stroke="#6E5514" />
-          <rect x="62" y="12" width="30" height="26" rx="4" fill="url(#cellG)" stroke="#6E5514" />
-          <rect x="56" y="20" width="8" height="10" fill="#3A3F47" />
-          <text x="60" y="52" fontSize="9" fill="#6B6B6B" textAnchor="middle">3.0 V</text>
-          {/* switch */}
-          <g onClick={(e) => { e.stopPropagation(); setOn(o => !o); smAudio.click() }} style={{ cursor: 'pointer' }}>
-            <ellipse cx="160" cy="42" rx="26" ry="3.5" fill="rgba(0,0,0,.12)" />
-            <circle cx="140" cy="30" r="5" fill="url(#knobG)" />
-            <circle cx="180" cy="30" r="5" fill="url(#knobG)" />
-            <line x1="140" y1="30" x2={on ? 180 : 172} y2={on ? 30 : 10}
-              stroke="#3A3F47" strokeWidth="4" strokeLinecap="round"
-              style={{ transition: 'all .2s' }} />
-            <text x="160" y="52" fontSize="9" fill="#6B6B6B" textAnchor="middle">{on ? 'switch: ON' : 'switch: OFF (tap)'}</text>
-          </g>
-          {/* metre rule + wire */}
-          <ellipse cx="245" cy="120" rx="200" ry="5" fill="rgba(0,0,0,.1)" />
-          <rect x="30" y="92" width="400" height="22" rx="3" fill="url(#woodG)" stroke="#8A6A3A" />
-          {Array.from({ length: 11 }, (_, i) => (
-            <g key={i}>
-              <line x1={30 + i * 40} y1="92" x2={30 + i * 40} y2="101" stroke="#4A3A20" strokeWidth="1" />
-              <text x={30 + i * 40} y="111" fontSize="7.5" fill="#4A3A20" textAnchor="middle">{i * 10}</text>
-            </g>
-          ))}
-          <line x1="30" y1="88" x2="430" y2="88" stroke="url(#wireG)" strokeWidth="3.5" />
-          {heated && <line x1="30" y1="88" x2={30 + L * 4} y2="88" stroke="rgba(242,120,40,.75)" strokeWidth="5" style={{ filter: 'blur(1.5px)' }} />}
-          {/* live section highlight when on */}
-          {on && <line x1="30" y1="88" x2={30 + L * 4} y2="88" stroke="rgba(242,194,48,.5)" strokeWidth="6" />}
-          {/* jockey */}
-          <g style={{ transform: 'translateX(' + (30 + L * 4) + 'px)', transition: draggingRef.current ? 'none' : 'transform .15s' }}>
-            <line x1="0" y1="60" x2="0" y2="88" stroke="#3A3F47" strokeWidth="3" />
-            <circle cx="0" cy="56" r="9" fill="url(#knobG)" stroke="#4E1013" />
-            <path d="M-4 84 L4 84 L0 92 Z" fill="#3A3F47" />
-          </g>
-          <text x={30 + L * 4} y="140" fontSize="11" fontWeight="800" fill="#7D1025" textAnchor="middle">L = {L} cm</text>
-        </svg>
-        {heated && (
-          <div style={{ fontSize: 11, fontWeight: 800, color: '#C2410C', marginTop: 2 }}>
-            Wire heating — resistance rising and readings drifting. Switch OFF between readings.
-          </div>
-        )}
-      </div>
-
-      {/* Table + analysis */}
-      <div style={{ flex: '1 1 280px', minWidth: 260, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <div style={{ fontSize: 12.5, fontWeight: 800, color: '#2A2A2E' }}>Results table (record 5 lengths)</div>
-        <table style={{ borderCollapse: 'collapse', fontSize: 12 }}>
-          <thead><tr>
-            {['L (cm)', 'I (A)', 'V (V)', 'R = V/I (\u03a9)'].map(h =>
-              <th key={h} style={{ border: '1px solid #C9C2B0', padding: '5px 8px', background: '#F4F2ED', fontWeight: 800 }}>{h}</th>)}
-          </tr></thead>
-          <tbody>
-            {rows.map(r => (
-              <tr key={r.L}>
-                <td style={{ border: '1px solid #C9C2B0', padding: '5px 8px', textAlign: 'center' }}>{r.L}</td>
-                <td style={{ border: '1px solid #C9C2B0', padding: '5px 8px', textAlign: 'center' }}>{r.I.toFixed(2)}</td>
-                <td style={{ border: '1px solid #C9C2B0', padding: '5px 8px', textAlign: 'center' }}>{r.V.toFixed(2)}</td>
-                <td style={{ border: '1px solid #C9C2B0', padding: '5px 8px', textAlign: 'center', color: r.heated ? '#C2410C' : '#2A2A2E' }}>{r.R.toFixed(2)}{r.heated ? ' *' : ''}</td>
-              </tr>
-            ))}
-            {rows.length === 0 && (
-              <tr><td colSpan="4" style={{ border: '1px solid #C9C2B0', padding: '8px', fontSize: 11, color: '#8A8A82', textAlign: 'center' }}>
-                Slide the jockey, close the switch, read the meters, record.
-              </td></tr>
-            )}
-          </tbody>
-        </table>
-        {rows.some(r => r.heated) && <div style={{ fontSize: 10, color: '#C2410C' }}>* taken while the wire was hot — expect it off the trend line</div>}
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 7, background: '#fff', borderRadius: 10, padding: '10px 12px', border: '1px solid #E6E0D2' }}>
-          <div style={{ fontSize: 11.5, fontWeight: 800, color: '#7D1025' }}>Record a reading at L = {L} cm</div>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-            <label style={{ fontSize: 11.5 }}>I:</label>
-            <input value={Iin} onChange={e => setIin(e.target.value)} placeholder="0.65" inputMode="decimal"
-              style={{ width: 58, textAlign: 'center', border: '1.5px solid #C9C2B0', borderRadius: 8, padding: '7px 5px', fontSize: 12.5, fontWeight: 700 }} />
-            <label style={{ fontSize: 11.5 }}>V:</label>
-            <input value={Vin} onChange={e => setVin(e.target.value)} placeholder="2.10" inputMode="decimal"
-              style={{ width: 58, textAlign: 'center', border: '1.5px solid #C9C2B0', borderRadius: 8, padding: '7px 5px', fontSize: 12.5, fontWeight: 700 }} />
-            {btnE('Record', { onClick: recordRow }, true)}
-          </div>
-          {fb && <div style={{ fontSize: 11.5, fontWeight: 700, color: fb.ok ? '#15803D' : '#B45309' }}>{fb.text}</div>}
-        </div>
-
-        {rows.length >= 4 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, background: '#fff', borderRadius: 10, padding: '10px 12px', border: '1px solid #E6E0D2' }}>
-            <div style={{ fontSize: 12, fontWeight: 800 }}>From your table: the resistance of 1 metre of this wire is... (\u03a9)</div>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <input value={finalIn} onChange={e => setFinalIn(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') checkFinal() }}
-                placeholder="e.g. 6.0" inputMode="decimal"
-                style={{ width: 80, textAlign: 'center', border: '1.5px solid #C9C2B0', borderRadius: 8, padding: '8px 6px', fontSize: 13, fontWeight: 700 }} />
-              {btnE('Check', { onClick: checkFinal }, true)}
-              {finalTries >= 2 && !showAns && btnE('Show method', { onClick: () => setShowAns(true) })}
+          {experimentReady && (<>
+            <div style={{ fontSize: 12, fontWeight: 800, color: '#2A2A2E', margin: '12px 0 6px' }}>Readings (record 4+ lengths)</div>
+            <table style={{ borderCollapse: 'collapse', fontSize: 10.5, width: '100%' }}>
+              <thead><tr>
+                {['L', 'I (A)', 'V (V)', 'R (\u03a9)'].map(h =>
+                  <th key={h} style={{ border: '1px solid #C9C2B0', padding: '3px 4px', background: '#fff', fontWeight: 800 }}>{h}</th>)}
+              </tr></thead>
+              <tbody>
+                {rows.map(r => (
+                  <tr key={r.L}>
+                    <td style={{ border: '1px solid #C9C2B0', padding: '3px 4px', textAlign: 'center' }}>{r.L}</td>
+                    <td style={{ border: '1px solid #C9C2B0', padding: '3px 4px', textAlign: 'center' }}>{r.I.toFixed(2)}</td>
+                    <td style={{ border: '1px solid #C9C2B0', padding: '3px 4px', textAlign: 'center' }}>{r.V.toFixed(2)}</td>
+                    <td style={{ border: '1px solid #C9C2B0', padding: '3px 4px', textAlign: 'center' }}>{r.R.toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div style={{ display: 'flex', gap: 4, alignItems: 'center', marginTop: 6, flexWrap: 'wrap' }}>
+              <input value={Iin} onChange={e => setIin(e.target.value)} placeholder="I" inputMode="decimal"
+                style={{ width: 44, textAlign: 'center', border: '1.5px solid #C9C2B0', borderRadius: 7, padding: '5px 3px', fontSize: 11, fontWeight: 700 }} />
+              <input value={Vin} onChange={e => setVin(e.target.value)} placeholder="V" inputMode="decimal"
+                style={{ width: 44, textAlign: 'center', border: '1.5px solid #C9C2B0', borderRadius: 7, padding: '5px 3px', fontSize: 11, fontWeight: 700 }} />
+              <button onClick={recordRow} style={{ background: '#7D1025', color: '#fff', border: 'none', borderRadius: 7, padding: '6px 10px', fontSize: 10.5, fontWeight: 800, cursor: 'pointer' }}>
+                Record L = {wireComp?.L || '?'}
+              </button>
             </div>
-            {finalFb && <div style={{ fontSize: 12, fontWeight: 700, color: finalFb.ok ? '#15803D' : '#B45309' }}>{finalFb.text}</div>}
-            {showAns && (
-              <div style={{ fontSize: 11.5, color: '#4B4B55', lineHeight: 1.6 }}>
-                Each row: R = V/I. R grows in a straight line with L, so R \u00f7 L is the same for every good row — that is the \u03a9 per cm. Multiply by 100 for \u03a9 per metre. Rows marked * were taken hot; leave them out.
+            {fb && <div style={{ fontSize: 10.5, fontWeight: 700, marginTop: 4, color: fb.ok ? '#15803D' : '#B45309' }}>{fb.text}</div>}
+            {rows.length >= 4 && (<>
+              <div style={{ fontSize: 11.5, fontWeight: 800, marginTop: 8 }}>Resistance of 1 m of the wire (\u03a9):</div>
+              <div style={{ display: 'flex', gap: 4, alignItems: 'center', marginTop: 4 }}>
+                <input value={finalIn} onChange={e => setFinalIn(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') checkFinal() }} placeholder="6.0" inputMode="decimal"
+                  style={{ width: 54, textAlign: 'center', border: '1.5px solid #C9C2B0', borderRadius: 7, padding: '5px 3px', fontSize: 11.5, fontWeight: 700 }} />
+                <button onClick={checkFinal} style={{ background: '#7D1025', color: '#fff', border: 'none', borderRadius: 7, padding: '6px 10px', fontSize: 10.5, fontWeight: 800, cursor: 'pointer' }}>Check</button>
+                {finalTries >= 2 && !showAns && (
+                  <button onClick={() => setShowAns(true)} style={{ background: 'rgba(125,16,37,.08)', color: '#7D1025', border: 'none', borderRadius: 7, padding: '6px 8px', fontSize: 10, fontWeight: 800, cursor: 'pointer' }}>Method</button>
+                )}
               </div>
-            )}
-          </div>
-        )}
+              {finalFb && <div style={{ fontSize: 10.5, fontWeight: 700, marginTop: 4, color: finalFb.ok ? '#15803D' : '#B45309' }}>{finalFb.text}</div>}
+              {showAns && (
+                <div style={{ fontSize: 10.5, color: '#4B4B55', lineHeight: 1.55, marginTop: 4 }}>
+                  Each row: R = V/I. R grows in a straight line with L, so R \u00f7 L is constant — the \u03a9 per cm. Multiply by 100.
+                </div>
+              )}
+            </>)}
+          </>)}
+        </div>
       </div>
     </div>
   )
