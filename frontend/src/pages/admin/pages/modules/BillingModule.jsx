@@ -486,7 +486,12 @@ function InvoicesTab({ toast, refreshKey }) {
                   </td>
                   <td style={{ padding:'11px 14px' }}>
                     <div style={{ display:'flex', gap:5, flexWrap:'wrap' }}>
-                      {inv.status === 'sent' && (
+                      {/* An unpaid invoice must be closeable at ANY stage — the
+                          cron flips sent -> overdue when it chases, and gating
+                          this button on 'sent' made overdue invoices impossible
+                          to mark paid, so reminders kept going to parents who
+                          had already settled. */}
+                      {['sent', 'overdue', 'draft'].includes(inv.status) && (
                         <button onClick={() => openMarkPaid(inv)} style={{ fontSize:11, background:'#D1FAE5', color:'#065F46', border:'none', padding:'4px 8px', borderRadius:5, cursor:'pointer', fontWeight:700 }}>Mark paid</button>
                       )}
                       {inv.status === 'paid' && (
