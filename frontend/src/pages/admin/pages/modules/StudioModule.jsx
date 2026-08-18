@@ -22,7 +22,7 @@
  */
 import React, { useEffect, useRef, useState } from 'react'
 import { TOKENS } from '../shared/tokens.js'
-import { Muxer, ArrayBufferTarget } from 'mp4-muxer'
+import { Muxer, ArrayBufferTarget } from '../../../../lib/mp4muxer.js'
 
 // ── Brand ────────────────────────────────────────────────
 const CRIMSON = '#8B1A2E'
