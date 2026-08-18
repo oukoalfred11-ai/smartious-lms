@@ -478,6 +478,216 @@ function renderScene(ctx, W, H, scene, media, p) {
   }
 }
 
+// ═══════════════════════════════════════════════════════════
+// SOUND ENGINE
+// Music + narration are mixed with Web Audio and recorded INTO the
+// exported video. The built-in track is a soft ambient pad composed
+// right here (warm chords, gentle plucks) so there is always
+// royalty-free music available with zero uploads.
+// ═══════════════════════════════════════════════════════════
+async function makeBuiltinMusic() {
+  const DUR = 16, SR = 44100
+  const oac = new OfflineAudioContext(2, SR * DUR, SR)
+  const master = oac.createGain(); master.gain.value = 0.5; master.connect(oac.destination)
+  const lp = oac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1400; lp.connect(master)
+  const CHORDS = [
+    [261.63, 329.63, 392.0, 493.88],   // Cmaj7
+    [220.0, 261.63, 329.63, 392.0],    // Am7
+    [174.61, 220.0, 261.63, 329.63],   // Fmaj7
+    [196.0, 246.94, 293.66, 349.23],   // G7-ish
+  ]
+  CHORDS.forEach((chord, ci) => {
+    const t0 = ci * 4
+    chord.forEach(f => {
+      for (const det of [-2, 2]) {
+        const o = oac.createOscillator(); o.type = 'sine'; o.frequency.value = f; o.detune.value = det
+        const g = oac.createGain()
+        g.gain.setValueAtTime(0.0001, t0)
+        g.gain.linearRampToValueAtTime(0.045, t0 + 1.4)
+        g.gain.setValueAtTime(0.045, t0 + 2.8)
+        g.gain.linearRampToValueAtTime(0.0001, t0 + 4.1)
+        o.connect(g); g.connect(lp)
+        o.start(t0); o.stop(t0 + 4.2)
+      }
+    })
+    // Gentle pluck on beats 1 and 3, up an octave, pentatonic-safe
+    ;[0, 2].forEach((beat, bi) => {
+      const f = chord[(ci + bi) % chord.length] * 2
+      const o = oac.createOscillator(); o.type = 'triangle'; o.frequency.value = f
+      const g = oac.createGain()
+      const tp = t0 + beat + 0.5
+      g.gain.setValueAtTime(0.0001, tp)
+      g.gain.linearRampToValueAtTime(0.05, tp + 0.02)
+      g.gain.exponentialRampToValueAtTime(0.0001, tp + 1.6)
+      o.connect(g); g.connect(lp)
+      o.start(tp); o.stop(tp + 1.7)
+    })
+  })
+  return oac.startRendering()
+}
+
+// Builds the full audio graph for a render/preview run.
+// Returns { audioTracks, start, stop } — tracks go into the
+// MediaRecorder stream; sound is also monitored on the speakers.
+function createMixer({ totalDur, musicBuffer, musicVol, voBuffer, voVol, record }) {
+  const AC = window.AudioContext || window.webkitAudioContext
+  if (!AC || (!musicBuffer && !voBuffer)) return { audioTracks: [], start: () => {}, stop: () => {} }
+  const ac = new AC()
+  const dest = record ? ac.createMediaStreamDestination() : null
+  const master = ac.createGain(); master.gain.value = 1
+  master.connect(ac.destination)
+  if (dest) master.connect(dest)
+  const sources = []
+  if (musicBuffer) {
+    const s = ac.createBufferSource()
+    s.buffer = musicBuffer; s.loop = true
+    const g = ac.createGain()
+    // Duck the music under the narration
+    const level = (voBuffer ? 0.35 : 1) * (musicVol ?? 0.6)
+    g.gain.setValueAtTime(0.0001, ac.currentTime)
+    g.gain.linearRampToValueAtTime(level, ac.currentTime + 1.2)
+    // Fade out over the last 1.6 s
+    g.gain.setValueAtTime(level, ac.currentTime + Math.max(1.3, totalDur - 1.6))
+    g.gain.linearRampToValueAtTime(0.0001, ac.currentTime + totalDur)
+    s.connect(g); g.connect(master)
+    sources.push(s)
+  }
+  if (voBuffer) {
+    const s = ac.createBufferSource()
+    s.buffer = voBuffer
+    const g = ac.createGain(); g.gain.value = voVol ?? 1
+    s.connect(g); g.connect(master)
+    sources.push({ src: s, at: 0.5 })
+  }
+  return {
+    audioTracks: dest ? dest.stream.getAudioTracks() : [],
+    start: () => sources.forEach(s => s.at != null ? s.src.start(ac.currentTime + s.at) : s.start()),
+    stop: () => { try { ac.close() } catch (e) { /* closed */ } },
+  }
+}
+
+// Narrator script: turns each card's text into worry -> solution
+// narration a parent actually hears themselves in.
+function buildNarration(cards) {
+  const lines = []
+  lines.push("As a parent, you want to be certain before you trust anyone with your child's education. So let us answer the questions you are really asking.")
+  cards.forEach((c, i) => {
+    const head = (c.headline || '').trim()
+    const body = (c.body || '').trim()
+    if (!head && !body) return
+    if (i === cards.length - 1) {
+      lines.push(`${head}. ${body}. Smartious Homeschool — the school that travels with your family.`)
+    } else if (c.template === 'stat') {
+      lines.push(`The numbers speak for themselves: ${head}. ${body}`)
+    } else if (c.template === 'quote') {
+      lines.push(`One of our parents put it best: ${head} — ${body}.`)
+    } else {
+      lines.push(`Maybe you have wondered: ${head.replace(/[.?!]$/, '')}? Here is the honest answer. ${body}`)
+    }
+  })
+  return lines.join('\n\n')
+}
+
+// ── Shared sound panel used by both tabs ──
+function SoundPanel({ sound, setSound, cards, toast }) {
+  const [voices, setVoices] = useState([])
+  const [voiceIdx, setVoiceIdx] = useState(0)
+  const [speaking, setSpeaking] = useState(false)
+  useEffect(() => {
+    const load = () => {
+      const v = (window.speechSynthesis?.getVoices() || []).filter(x => x.lang.startsWith('en'))
+      if (v.length) setVoices(v)
+    }
+    load()
+    window.speechSynthesis?.addEventListener?.('voiceschanged', load)
+    return () => window.speechSynthesis?.removeEventListener?.('voiceschanged', load)
+  }, [])
+
+  const decodeFile = (file, key) => {
+    const AC = window.AudioContext || window.webkitAudioContext
+    const ac = new AC()
+    file.arrayBuffer().then(ab => ac.decodeAudioData(ab)).then(buf => {
+      setSound(s => ({ ...s, [key]: buf }))
+      toast?.((key === 'voBuffer' ? 'Narration' : 'Music') + ' loaded: ' + Math.round(buf.duration) + 's')
+      ac.close()
+    }).catch(() => toast?.('Could not read that audio file.'))
+  }
+
+  const listen = () => {
+    const synth = window.speechSynthesis
+    if (!synth) { toast?.('This browser has no preview voices.'); return }
+    if (speaking) { synth.cancel(); setSpeaking(false); return }
+    const u = new SpeechSynthesisUtterance(sound.script || '')
+    if (voices[voiceIdx]) u.voice = voices[voiceIdx]
+    u.rate = 0.96; u.pitch = 1
+    u.onend = () => setSpeaking(false)
+    setSpeaking(true)
+    synth.speak(u)
+  }
+
+  return (
+    <div style={{ borderTop: '1.5px solid ' + TOKENS.line, paddingTop: 12, display: 'flex', flexDirection: 'column', gap: 9 }}>
+      <div style={{ fontSize: 12, fontWeight: 800, color: TOKENS.crimson }}>Sound: music + narrator</div>
+
+      {/* Music */}
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+        <button onClick={async () => {
+          if (sound.musicBuffer && sound.musicMode === 'builtin') { setSound(s => ({ ...s, musicBuffer: null, musicMode: 'none' })); return }
+          toast?.('Composing the Smartious pad...')
+          const buf = await makeBuiltinMusic()
+          setSound(s => ({ ...s, musicBuffer: buf, musicMode: 'builtin' }))
+        }} style={{ ...btn(sound.musicMode === 'builtin'), fontSize: 11.5, padding: '7px 11px' }}>
+          Soft Smartious music (built in)
+        </button>
+        <label style={{ ...btn(sound.musicMode === 'upload'), fontSize: 11.5, padding: '7px 11px', display: 'inline-block' }}>
+          Upload music
+          <input type="file" accept="audio/*" style={{ display: 'none' }}
+            onChange={e => { const f = e.target.files?.[0]; if (f) { decodeFile(f, 'musicBuffer'); setSound(s => ({ ...s, musicMode: 'upload' })) } }} />
+        </label>
+        {sound.musicBuffer && (
+          <input type="range" min="0" max="1" step="0.05" value={sound.musicVol}
+            onChange={e => setSound(s => ({ ...s, musicVol: +e.target.value }))}
+            title="Music volume" style={{ width: 90 }} />
+        )}
+      </div>
+
+      {/* Narration */}
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+        <button onClick={() => setSound(s => ({ ...s, script: buildNarration(cards) }))}
+          style={{ ...btn(false), fontSize: 11.5, padding: '7px 11px' }}>
+          Write narrator script from my cards
+        </button>
+        {voices.length > 0 && (
+          <select value={voiceIdx} onChange={e => setVoiceIdx(+e.target.value)} style={{ ...inputStyle, width: 'auto', padding: '7px 9px', fontSize: 11.5 }}>
+            {voices.map((v, i) => <option key={i} value={i}>{v.name}</option>)}
+          </select>
+        )}
+        <button onClick={listen} disabled={!sound.script} style={{ ...btn(false), fontSize: 11.5, padding: '7px 11px', opacity: sound.script ? 1 : 0.5 }}>
+          {speaking ? 'Stop' : 'Listen (preview)'}
+        </button>
+      </div>
+      {sound.script != null && (
+        <textarea value={sound.script} onChange={e => setSound(s => ({ ...s, script: e.target.value }))} rows={5}
+          style={{ ...inputStyle, resize: 'vertical', fontSize: 12, lineHeight: 1.6 }} />
+      )}
+
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+        <label style={{ ...btn(!!sound.voBuffer), fontSize: 11.5, padding: '7px 11px', display: 'inline-block' }}>
+          {sound.voBuffer ? 'Narration loaded — replace' : 'Upload narration recording'}
+          <input type="file" accept="audio/*" style={{ display: 'none' }}
+            onChange={e => { const f = e.target.files?.[0]; if (f) decodeFile(f, 'voBuffer') }} />
+        </label>
+        {sound.voBuffer && (
+          <button onClick={() => setSound(s => ({ ...s, voBuffer: null }))} style={{ ...btn(false), fontSize: 11.5, padding: '7px 11px', color: '#B91C1C' }}>Remove</button>
+        )}
+      </div>
+      <div style={{ fontSize: 10.5, color: TOKENS.s500, lineHeight: 1.55 }}>
+        Browsers cannot record their preview voices into the file — that is a platform limit, not a missing button. Two real routes: read the script yourself on your phone in a quiet room (parents trust the founder's voice most), or paste the script into a free AI voice site, download the MP3, and upload it here. Music ducks automatically under the narration.
+      </div>
+    </div>
+  )
+}
+
 const SCENE_TYPES = [
   ['title', 'Title sting (crest)'],
   ['text', 'Text over colour / photo / video'],
@@ -535,6 +745,7 @@ function CardMaker({ toast }) {
   const [playing, setPlaying] = useState(false)
   const [rendering, setRendering] = useState(false)
   const [progress, setProgress] = useState(0)
+  const [sound, setSound] = useState({ musicMode: 'none', musicBuffer: null, musicVol: 0.6, voBuffer: null, voVol: 1, script: null })
   const W = 1080, H = format === 'story' ? 1920 : 1080
   const card = cards[cur]
   const mediaEl = medias[cur]
@@ -646,14 +857,18 @@ function CardMaker({ toast }) {
     const cv = cvRef.current
     cv.width = W; cv.height = H
     const ctx = cv.getContext('2d')
+    const totalD = cards.length * cardDur
+    const mixer = createMixer({ totalDur: totalD, musicBuffer: sound.musicBuffer, musicVol: sound.musicVol, voBuffer: sound.voBuffer, voVol: sound.voVol, record })
     let recorder = null, chunks = []
     if (record) {
       const stream = cv.captureStream(30)
+      const combined = new MediaStream([...stream.getVideoTracks(), ...mixer.audioTracks])
       const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm'
-      recorder = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 6_000_000 })
+      recorder = new MediaRecorder(combined, { mimeType: mime, videoBitsPerSecond: 6_000_000 })
       recorder.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data) }
       recorder.start(500)
     }
+    mixer.start()
     // Start every video background rolling; stop them at the end.
     Object.values(medias).forEach(m => { if (m && m.play) { m.currentTime = 0; m.play().catch(() => {}) } })
     const total = cards.length * cardDur
@@ -663,6 +878,7 @@ function CardMaker({ toast }) {
       setProgress(Math.min(1, t / total))
       if (drawTimeline(ctx, t)) { rafRef.current = requestAnimationFrame(step); return }
       Object.values(medias).forEach(m => { if (m && m.pause) m.pause() })
+      mixer.stop()
       if (recorder) { recorder.onstop = () => resolve(new Blob(chunks, { type: 'video/webm' })); recorder.stop() }
       else resolve(null)
     }
@@ -776,6 +992,7 @@ function CardMaker({ toast }) {
               {rendering ? 'Rendering ' + Math.round(progress * 100) + '%' : 'Export video (' + Math.round(cards.length * cardDur) + 's)'}
             </button>
           </div>
+          <SoundPanel sound={sound} setSound={setSound} cards={cards} toast={toast} />
         </div>
       </div>
 
@@ -812,6 +1029,7 @@ function VideoMaker({ toast }) {
   const [playing, setPlaying] = useState(false)
   const [rendering, setRendering] = useState(false)
   const [progress, setProgress] = useState(0)
+  const [sound, setSound] = useState({ musicMode: 'none', musicBuffer: null, musicVol: 0.6, voBuffer: null, voVol: 1, script: null })
   const cvRef = useRef(null)
   const rafRef = useRef(null)
   const W = 1080, H = format === 'story' ? 1920 : 1080
@@ -850,14 +1068,17 @@ function VideoMaker({ toast }) {
     const cv = cvRef.current
     cv.width = W; cv.height = H
     const ctx = cv.getContext('2d')
+    const mixer = createMixer({ totalDur, musicBuffer: sound.musicBuffer, musicVol: sound.musicVol, voBuffer: sound.voBuffer, voVol: sound.voVol, record })
     let recorder = null, chunks = []
     if (record) {
       const stream = cv.captureStream(30)
+      const combined = new MediaStream([...stream.getVideoTracks(), ...mixer.audioTracks])
       const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm'
-      recorder = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 6_000_000 })
+      recorder = new MediaRecorder(combined, { mimeType: mime, videoBitsPerSecond: 6_000_000 })
       recorder.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data) }
       recorder.start(500)
     }
+    mixer.start()
     // start any video backgrounds
     Object.values(medias).forEach(m => { if (m && m.play) { m.currentTime = 0; m.play().catch(() => {}) } })
 
@@ -878,6 +1099,7 @@ function VideoMaker({ toast }) {
       if (!drawn) {
         // finished
         Object.values(medias).forEach(m => { if (m && m.pause) m.pause() })
+        mixer.stop()
         if (recorder) {
           recorder.onstop = () => resolve(new Blob(chunks, { type: 'video/webm' }))
           recorder.stop()
@@ -982,6 +1204,9 @@ function VideoMaker({ toast }) {
         <div style={{ fontSize: 10.5, color: TOKENS.s500, lineHeight: 1.55 }}>
           The export downloads a video file rendered on this computer — nothing is uploaded anywhere. It posts directly to YouTube, Facebook, Instagram and TikTok; for WhatsApp status convert to MP4 with any free converter.
         </div>
+        <SoundPanel sound={sound} setSound={setSound}
+          cards={scenes.map(s => ({ template: s.type === 'stat' ? 'stat' : 'idea', headline: s.headline, body: s.body }))}
+          toast={toast} />
       </div>
 
       {/* Preview */}
