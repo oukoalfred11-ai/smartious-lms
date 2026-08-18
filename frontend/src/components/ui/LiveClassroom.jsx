@@ -334,6 +334,7 @@ const SIM_CATALOG = [
   { subject: 'Smartious Labs', sims: [
     { id: 'sm:vernier', title: 'Vernier callipers — reading practice' },
     { id: 'sm:foodtests', title: 'Food tests — iodine, Benedict\u2019s, Biuret, emulsion' },
+    { id: 'sm:titration', title: 'Acid-base titration — full Paper 3 practical' },
   ]},
   { subject: 'Physics', sims: [
     phet('projectile-motion', 'Projectile motion'),
@@ -2600,6 +2601,7 @@ function SimPanel({ sim }) {
 
   if (sim.id === 'sm:vernier') return <VernierSim />
   if (sim.id === 'sm:foodtests') return <FoodTestSim />
+  if (sim.id === 'sm:titration') return <TitrationSim />
   return (
     <div style={{ position: 'absolute', inset: 0, background: '#fff', zIndex: 2, display: 'flex', flexDirection: 'column' }}>
       <div style={{ flex: 1, position: 'relative', minHeight: 0 }}>
@@ -2980,6 +2982,226 @@ function FoodTestSim() {
             <div style={{ fontSize: 12, fontWeight: 800, color: verdict.ok ? '#15803D' : '#B45309' }}>{verdict.text}</div>
           )}
         </>)}
+      </div>
+    </div>
+  )
+}
+
+// ── Smartious native sim: acid-base titration (KCSE Paper 3) ──
+// Solution B (0.100 M NaOH, 25.0 cm3, phenolphthalein) in the flask;
+// solution A (HCl of unknown molarity) in the burette. The student
+// runs the tap, drops near the endpoint, reads the burette to 0.05,
+// records three titres, averages the consistent ones, and computes
+// the molarity — the complete practical, marked as the paper would.
+function TitrationSim() {
+  // The unknown for this session
+  const [M] = useState(() => +(0.08 + Math.random() * 0.06).toFixed(3))
+  const endpointBase = 2.5 / M   // cm3 of A to neutralise 25.0 of 0.1M B
+
+  const [run, setRun] = useState(1)              // 1..3
+  const [r0] = useState(() => [0, 1, 2].map(() => +(Math.random() * 1.5).toFixed(2)))
+  const [jitter] = useState(() => [0, 1, 2].map(() => +((Math.random() - 0.5) * 0.1).toFixed(2)))
+  const [disp, setDisp] = useState(0)            // cm3 dispensed this run
+  const [rows, setRows] = useState([{}, {}, {}]) // { init, fin, titre, ok }
+  const [phase, setPhase] = useState('titrate')  // titrate | record | calc | done
+  const [calcAns, setCalcAns] = useState('')
+  const [calcFb, setCalcFb] = useState(null)
+  const runInt = useRef(null)
+
+  const idx = run - 1
+  const endpoint = endpointBase + jitter[idx]
+  const reading = r0[idx] + disp
+  const past = disp - endpoint
+  const overshot = past > 0.25
+
+  // Flask colour: pink in base, fades over the last 0.5 cm3, then clear
+  const flaskColour = past >= 0 ? '#F4F2E9'
+    : past > -0.5 ? `rgba(242,107,175,${(-past / 0.5) * 0.85 + 0.1})`
+    : '#F26BAF'
+
+  const dispense = (amt) => setDisp(d => Math.min(48 - r0[idx], +(d + amt).toFixed(2)))
+  const startTap = () => {
+    if (runInt.current) return
+    runInt.current = setInterval(() => dispense(0.25), 100)
+  }
+  const stopTap = () => { clearInterval(runInt.current); runInt.current = null }
+  useEffect(() => () => clearInterval(runInt.current), [])
+
+  const [initIn, setInitIn] = useState('')
+  const [finIn, setFinIn] = useState('')
+  const [recFb, setRecFb] = useState(null)
+
+  const recordRun = () => {
+    const iv = parseFloat(initIn), fv = parseFloat(finIn)
+    if (!Number.isFinite(iv) || !Number.isFinite(fv)) { setRecFb('Enter both burette readings in cm\u00b3.'); return }
+    if (Math.abs(iv - r0[idx]) > 0.055) { setRecFb('Check the INITIAL reading again — read the bottom of the meniscus before you opened the tap.'); return }
+    if (Math.abs(fv - reading) > 0.055) { setRecFb('Check the FINAL reading — the zoom panel shows the meniscus to 0.05 cm\u00b3.'); return }
+    const titre = +(fv - iv).toFixed(2)
+    const nr = rows.slice()
+    nr[idx] = { init: iv, fin: fv, titre, over: overshot }
+    setRows(nr)
+    setRecFb(null); setInitIn(''); setFinIn('')
+    if (run < 3) { setRun(run + 1); setDisp(0); setPhase('titrate') }
+    else setPhase('calc')
+  }
+
+  const goodTitres = rows.filter(r => r.titre != null && !r.over)
+  const consistent = (() => {
+    const t = goodTitres.map(r => r.titre)
+    if (t.length < 2) return t
+    // keep titres within 0.1 of the median
+    const sorted = t.slice().sort((a, b) => a - b)
+    const med = sorted[Math.floor(sorted.length / 2)]
+    return t.filter(v => Math.abs(v - med) <= 0.1)
+  })()
+  const avg = consistent.length ? consistent.reduce((a, b) => a + b, 0) / consistent.length : 0
+
+  const checkCalc = () => {
+    const val = parseFloat(calcAns)
+    if (!Number.isFinite(val)) { setCalcFb({ ok: false, text: 'Enter the molarity of A in mol/dm\u00b3.' }); return }
+    const correct = (0.1 * 25.0) / avg
+    if (Math.abs(val - correct) < 0.003) {
+      setCalcFb({ ok: true, text: 'Correct: M\u2090 = (0.100 \u00d7 25.0) / ' + avg.toFixed(2) + ' = ' + correct.toFixed(3) + ' mol/dm\u00b3. The unknown was ' + M.toFixed(3) + '.' })
+      setPhase('done')
+    } else {
+      setCalcFb({ ok: false, text: 'Not yet. Moles of B = 0.100 \u00d7 25.0/1000; at neutralisation moles A = moles B; divide by your average titre in dm\u00b3.' })
+    }
+  }
+
+  // Burette geometry: 50 cm3 over 300 px, scale grows downward
+  const bTop = 20, bH = 300
+  const yOf = (cm3) => bTop + (cm3 / 50) * bH
+  const level = yOf(reading)
+
+  const btnS = (label, props, primary) => (
+    <button {...props} style={{
+      background: primary ? '#7D1025' : 'rgba(125,16,37,.08)', color: primary ? '#fff' : '#7D1025',
+      border: 'none', borderRadius: 9, padding: '9px 14px', fontSize: 12, fontWeight: 800,
+      cursor: 'pointer', touchAction: 'none', userSelect: 'none', ...(props.style || {}),
+    }}>{label}</button>
+  )
+
+  return (
+    <div style={{ position: 'absolute', inset: 0, background: '#FBFAF5', zIndex: 2, display: 'flex', overflowY: 'auto' }}>
+      {/* Apparatus */}
+      <div style={{ flex: '0 0 46%', minWidth: 300, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '12px 8px', borderRight: '1px solid rgba(0,0,0,.08)' }}>
+        <div style={{ fontSize: 13.5, fontWeight: 800, color: '#2A2A2E' }}>Titration — run {run} of 3</div>
+        <div style={{ fontSize: 11, color: '#6B6B6B', marginBottom: 6, textAlign: 'center' }}>
+          Flask: 25.0 cm\u00b3 of 0.100 M NaOH + phenolphthalein. Burette: acid A (unknown M).
+        </div>
+        <div style={{ display: 'flex', gap: 18, alignItems: 'flex-start' }}>
+          {/* Burette */}
+          <svg width="86" height="380" style={{ flexShrink: 0 }}>
+            <rect x="34" y={bTop} width="16" height={bH} fill="#FFFFFF" stroke="#7C828C" strokeWidth="1.6" />
+            <rect x="35.5" y={level} width="13" height={bTop + bH - level} fill="#DCE9F7" />
+            <line x1="35.5" x2="48.5" y1={level} y2={level} stroke="#3B6FB5" strokeWidth="2" />
+            {Array.from({ length: 11 }, (_, i) => (
+              <g key={i}>
+                <line x1="50" x2="58" y1={yOf(i * 5)} y2={yOf(i * 5)} stroke="#2A2A2E" strokeWidth="1.2" />
+                <text x="61" y={yOf(i * 5) + 4} fontSize="9.5" fill="#2A2A2E">{i * 5}</text>
+              </g>
+            ))}
+            {/* tap + tip */}
+            <rect x="30" y={bTop + bH} width="24" height="10" fill="#8A8F98" rx="2" />
+            <path d={'M40 ' + (bTop + bH + 10) + ' L44 ' + (bTop + bH + 10) + ' L42 ' + (bTop + bH + 28) + ' Z'} fill="#7C828C" />
+            {runInt.current && <circle cx="42" cy={bTop + bH + 34} r="2.5" fill="#3B6FB5" />}
+          </svg>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+            {/* Meniscus zoom */}
+            <div style={{ border: '1.5px solid #C9C2B0', borderRadius: 10, background: '#fff', padding: '6px 10px', width: 120 }}>
+              <div style={{ fontSize: 9.5, color: '#8A8A82', fontWeight: 700, textAlign: 'center' }}>MENISCUS ZOOM</div>
+              <svg width="100" height="96">
+                {Array.from({ length: 21 }, (_, i) => {
+                  const v = Math.floor(reading * 10) / 10 - 1 + i * 0.1
+                  if (v < 0) return null
+                  const y = 48 + (v - reading) * 80
+                  if (y < 4 || y > 92) return null
+                  const major = Math.abs(v * 10 % 10) < 0.01 || Math.abs(v * 10 % 10 - 10) < 0.01
+                  return (
+                    <g key={i}>
+                      <line x1="18" x2={major ? 44 : 32} y1={y} y2={y} stroke="#2A2A2E" strokeWidth={major ? 1.4 : 0.8} />
+                      {major && <text x="48" y={y + 3.5} fontSize="10" fill="#2A2A2E">{v.toFixed(0)}</text>}
+                    </g>
+                  )
+                })}
+                <path d={'M18 48 Q 40 55 62 48'} fill="none" stroke="#3B6FB5" strokeWidth="2" />
+                <rect x="18" y="48" width="44" height="44" fill="rgba(220,233,247,.5)" />
+              </svg>
+            </div>
+            {/* Flask */}
+            <svg width="110" height="110">
+              <path d="M45 8 h20 v30 l24 52 a8 8 0 0 1 -7 12 h-54 a8 8 0 0 1 -7 -12 l24 -52 z"
+                fill="rgba(255,255,255,.5)" stroke="#7C828C" strokeWidth="1.6" />
+              <path d="M32 72 l-6 18 a8 8 0 0 0 7 12 h44 a8 8 0 0 0 7 -12 l-6 -18 z"
+                fill={flaskColour} style={{ transition: 'fill .5s' }} />
+            </svg>
+            {overshot && <div style={{ fontSize: 10.5, fontWeight: 800, color: '#B91C1C' }}>OVERSHOT — this titre is rough only</div>}
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: 8, marginTop: 4, flexWrap: 'wrap', justifyContent: 'center' }}>
+          {btnS('Hold to run tap', { onPointerDown: startTap, onPointerUp: stopTap, onPointerLeave: stopTap, onPointerCancel: stopTap }, true)}
+          {btnS('Add one drop (0.05)', { onClick: () => dispense(0.05) })}
+          {btnS('Swirl flask', { onClick: () => {} })}
+        </div>
+      </div>
+
+      {/* Recording + calculation */}
+      <div style={{ flex: 1, minWidth: 240, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div style={{ fontSize: 12.5, fontWeight: 800, color: '#2A2A2E' }}>Burette readings (cm\u00b3, to 0.05)</div>
+        <table style={{ borderCollapse: 'collapse', fontSize: 12 }}>
+          <thead><tr>
+            {['', 'Run 1', 'Run 2', 'Run 3'].map(h => <th key={h} style={{ border: '1px solid #C9C2B0', padding: '5px 9px', background: '#F4F2ED', fontWeight: 800 }}>{h}</th>)}
+          </tr></thead>
+          <tbody>
+            {[['Final', 'fin'], ['Initial', 'init'], ['Titre', 'titre']].map(([label, k]) => (
+              <tr key={k}>
+                <td style={{ border: '1px solid #C9C2B0', padding: '5px 9px', fontWeight: 700 }}>{label}</td>
+                {rows.map((r, i) => (
+                  <td key={i} style={{ border: '1px solid #C9C2B0', padding: '5px 9px', textAlign: 'center',
+                    color: k === 'titre' && r.over ? '#B91C1C' : '#2A2A2E' }}>
+                    {r[k] != null ? r[k].toFixed(2) : '\u2014'}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {phase !== 'calc' && phase !== 'done' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 7, background: '#fff', borderRadius: 10, padding: '10px 12px', border: '1px solid #E6E0D2' }}>
+            <div style={{ fontSize: 11.5, fontWeight: 800, color: '#7D1025' }}>Record run {run}</div>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+              <label style={{ fontSize: 11.5 }}>Initial:</label>
+              <input value={initIn} onChange={e => setInitIn(e.target.value)} placeholder="0.00" inputMode="decimal"
+                style={{ width: 62, textAlign: 'center', border: '1.5px solid #C9C2B0', borderRadius: 8, padding: '7px 6px', fontSize: 12.5, fontWeight: 700 }} />
+              <label style={{ fontSize: 11.5 }}>Final:</label>
+              <input value={finIn} onChange={e => setFinIn(e.target.value)} placeholder="24.60" inputMode="decimal"
+                style={{ width: 62, textAlign: 'center', border: '1.5px solid #C9C2B0', borderRadius: 8, padding: '7px 6px', fontSize: 12.5, fontWeight: 700 }} />
+              {btnS('Record titre', { onClick: recordRun }, true)}
+            </div>
+            {recFb && <div style={{ fontSize: 11.5, fontWeight: 700, color: '#B45309' }}>{recFb}</div>}
+            <div style={{ fontSize: 10.5, color: '#8A8A82' }}>
+              Tip: run the tap to within ~1 cm\u00b3 of the endpoint, then add single drops until ONE drop turns the pink permanently colourless.
+            </div>
+          </div>
+        )}
+
+        {(phase === 'calc' || phase === 'done') && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, background: '#fff', borderRadius: 10, padding: '10px 12px', border: '1px solid #E6E0D2' }}>
+            <div style={{ fontSize: 11.5, fontWeight: 800, color: '#7D1025' }}>
+              Average of consistent titres: {avg ? avg.toFixed(2) + ' cm\u00b3' : '\u2014'} ({consistent.length} used)
+            </div>
+            <div style={{ fontSize: 12 }}>Calculate the molarity of acid A (mol/dm\u00b3):</div>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <input value={calcAns} onChange={e => setCalcAns(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') checkCalc() }}
+                placeholder="e.g. 0.104" inputMode="decimal"
+                style={{ width: 90, textAlign: 'center', border: '1.5px solid #C9C2B0', borderRadius: 8, padding: '8px 6px', fontSize: 13, fontWeight: 700 }} />
+              {btnS('Check', { onClick: checkCalc }, true)}
+            </div>
+            {calcFb && <div style={{ fontSize: 12, fontWeight: 700, color: calcFb.ok ? '#15803D' : '#B45309' }}>{calcFb.text}</div>}
+          </div>
+        )}
       </div>
     </div>
   )
