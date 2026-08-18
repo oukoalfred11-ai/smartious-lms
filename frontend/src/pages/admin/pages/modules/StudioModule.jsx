@@ -22,6 +22,7 @@
  */
 import React, { useEffect, useRef, useState } from 'react'
 import { TOKENS } from '../shared/tokens.js'
+import { Muxer, ArrayBufferTarget } from 'mp4-muxer'
 
 // ── Brand ────────────────────────────────────────────────
 const CRIMSON = '#8B1A2E'
@@ -566,6 +567,131 @@ function createMixer({ totalDur, musicBuffer, musicVol, voBuffer, voVol, record 
   }
 }
 
+// ═══════════════════════════════════════════════════════════
+// FAST EXPORT — offline rendering.
+// The realtime recorder is bound to the wall clock: a 50 s video
+// costs 50 s. This path instead feeds frames to the browser's
+// hardware encoder (WebCodecs) as fast as they can be drawn and
+// muxes a real MP4 — typically 3-8x faster, and the MP4 posts
+// straight to WhatsApp with no conversion.
+// ═══════════════════════════════════════════════════════════
+
+// Render the entire soundtrack (music loop + ducking + fades + the
+// narration) offline into one stereo buffer.
+async function renderMixOffline({ totalDur, musicBuffer, musicVol, voBuffer, voVol }) {
+  if (!musicBuffer && !voBuffer) return null
+  const SR = 44100
+  const oac = new OfflineAudioContext(2, Math.ceil(SR * totalDur), SR)
+  const master = oac.createGain(); master.gain.value = 1; master.connect(oac.destination)
+  if (musicBuffer) {
+    const s = oac.createBufferSource(); s.buffer = musicBuffer; s.loop = true
+    const g = oac.createGain()
+    const level = (voBuffer ? 0.35 : 1) * (musicVol ?? 0.6)
+    g.gain.setValueAtTime(0.0001, 0)
+    g.gain.linearRampToValueAtTime(level, 1.2)
+    g.gain.setValueAtTime(level, Math.max(1.3, totalDur - 1.6))
+    g.gain.linearRampToValueAtTime(0.0001, totalDur)
+    s.connect(g); g.connect(master)
+    s.start(0)
+  }
+  if (voBuffer) {
+    const s = oac.createBufferSource(); s.buffer = voBuffer
+    const g = oac.createGain(); g.gain.value = voVol ?? 1
+    s.connect(g); g.connect(master)
+    s.start(0.5)
+  }
+  return oac.startRendering()
+}
+
+// Seek a background <video> to an exact time and wait for the frame.
+const seekVideo = (v, t) => new Promise((res) => {
+  const target = (v.duration && isFinite(v.duration)) ? t % v.duration : t
+  if (Math.abs(v.currentTime - target) < 0.001) return res()
+  const done = () => { v.removeEventListener('seeked', done); res() }
+  v.addEventListener('seeked', done)
+  try { v.currentTime = target } catch (e) { res() }
+  setTimeout(done, 400)   // never wedge on a stubborn seek
+})
+
+// drawFrame(ctx, t) draws one timeline frame; mediaAt(t) returns the
+// video elements that must show the correct frame at time t.
+async function exportMp4Fast({ canvas, W, H, totalDur, drawFrame, mediaAt, sound, onProgress }) {
+  if (typeof VideoEncoder === 'undefined') return null   // caller falls back to realtime
+  const FPS = 30
+  const audioBuf = await renderMixOffline({ totalDur, ...sound })
+
+  const muxer = new Muxer({
+    target: new ArrayBufferTarget(),
+    video: { codec: 'avc', width: W, height: H },
+    ...(audioBuf ? { audio: { codec: 'aac', sampleRate: 44100, numberOfChannels: 2 } } : {}),
+    fastStart: 'in-memory',
+  })
+
+  let vErr = null
+  const vEnc = new VideoEncoder({
+    output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
+    error: (e) => { vErr = e },
+  })
+  const vConfig = { codec: 'avc1.640028', width: W, height: H, bitrate: 7_000_000, framerate: FPS }
+  const support = await VideoEncoder.isConfigSupported(vConfig).catch(() => null)
+  if (!support?.supported) return null
+  vEnc.configure(vConfig)
+
+  let aEnc = null
+  if (audioBuf) {
+    const aConfig = { codec: 'mp4a.40.2', sampleRate: 44100, numberOfChannels: 2, bitrate: 128_000 }
+    const aSupport = typeof AudioEncoder !== 'undefined'
+      ? await AudioEncoder.isConfigSupported(aConfig).catch(() => null) : null
+    if (aSupport?.supported) {
+      aEnc = new AudioEncoder({
+        output: (chunk, meta) => muxer.addAudioChunk(chunk, meta),
+        error: (e) => { vErr = e },
+      })
+      aEnc.configure(aConfig)
+    }
+  }
+
+  const ctx = canvas.getContext('2d')
+  const totalFrames = Math.ceil(totalDur * FPS)
+  for (let f = 0; f < totalFrames; f++) {
+    const t = f / FPS
+    const vids = mediaAt ? mediaAt(t) : []
+    for (const v of vids) if (v && v.play) await seekVideo(v, t)
+    drawFrame(ctx, t)
+    const frame = new VideoFrame(canvas, { timestamp: Math.round(t * 1e6), duration: Math.round(1e6 / FPS) })
+    vEnc.encode(frame, { keyFrame: f % 60 === 0 })
+    frame.close()
+    while (vEnc.encodeQueueSize > 6) await new Promise(r => setTimeout(r, 2))
+    if (f % 12 === 0) { onProgress?.(f / totalFrames); await new Promise(r => setTimeout(r, 0)) }
+    if (vErr) throw vErr
+  }
+
+  if (aEnc && audioBuf) {
+    // Interleave the offline mix into planar AudioData chunks.
+    const CH = 2, CHUNK = 4096
+    const L = audioBuf.getChannelData(0)
+    const R = audioBuf.numberOfChannels > 1 ? audioBuf.getChannelData(1) : L
+    for (let off = 0; off < L.length; off += CHUNK) {
+      const n = Math.min(CHUNK, L.length - off)
+      const data = new Float32Array(n * CH)
+      data.set(L.subarray(off, off + n), 0)
+      data.set(R.subarray(off, off + n), n)
+      const ad = new AudioData({
+        format: 'f32-planar', sampleRate: 44100, numberOfFrames: n,
+        numberOfChannels: CH, timestamp: Math.round((off / 44100) * 1e6), data,
+      })
+      aEnc.encode(ad)
+      ad.close()
+      while (aEnc.encodeQueueSize > 8) await new Promise(r => setTimeout(r, 2))
+    }
+    await aEnc.flush()
+  }
+  await vEnc.flush()
+  muxer.finalize()
+  onProgress?.(1)
+  return new Blob([muxer.target.buffer], { type: 'video/mp4' })
+}
+
 // Narrator script: turns each card's text into worry -> solution
 // narration a parent actually hears themselves in.
 function buildNarration(cards) {
@@ -891,9 +1017,35 @@ function CardMaker({ toast }) {
   }
   const exportMotion = async () => {
     if (playing || rendering) return
-    if (typeof MediaRecorder === 'undefined') { toast?.('This browser cannot record video — use Chrome on a computer.'); return }
     setRendering(true)
-    toast?.('Rendering ' + Math.round(cards.length * cardDur) + 's card video...')
+    const totalD = cards.length * cardDur
+    const t0 = performance.now()
+    // Fast path: offline WebCodecs encode straight to MP4 — renders
+    // as fast as the machine can draw, not at playback speed.
+    try {
+      const mediaAt = (t) => {
+        const i = Math.min(cards.length - 1, Math.floor(t / cardDur))
+        return [medias[i], medias[i + 1]].filter(Boolean)
+      }
+      const blob = await exportMp4Fast({
+        canvas: cvRef.current, W, H, totalDur: totalD,
+        drawFrame: (ctx, t) => drawTimeline(ctx, t),
+        mediaAt, sound, onProgress: setProgress,
+      })
+      if (blob) {
+        setRendering(false); setProgress(0)
+        const a = document.createElement('a')
+        a.download = 'smartious-cards.mp4'
+        a.href = URL.createObjectURL(blob)
+        a.click()
+        const speed = totalD / ((performance.now() - t0) / 1000)
+        toast?.('MP4 ready in ' + Math.round((performance.now() - t0) / 1000) + 's (' + speed.toFixed(1) + 'x speed) — posts straight to WhatsApp, Reels, TikTok and YouTube.')
+        return
+      }
+    } catch (e) { console.error('[fast export]', e) }
+    // Fallback: realtime WebM recording (older browsers).
+    if (typeof MediaRecorder === 'undefined') { setRendering(false); toast?.('This browser cannot export video — use Chrome on a computer.'); return }
+    toast?.('Fast export unavailable here — rendering in real time (' + Math.round(totalD) + 's)...')
     const blob = await runCards(true)
     setRendering(false); setProgress(0)
     if (blob) {
@@ -901,7 +1053,7 @@ function CardMaker({ toast }) {
       a.download = 'smartious-cards.webm'
       a.href = URL.createObjectURL(blob)
       a.click()
-      toast?.('Card video downloaded — posts directly to Reels, TikTok, YouTube and Facebook.')
+      toast?.('Video downloaded (WebM) — for WhatsApp, convert to MP4 first.')
     }
   }
 
@@ -1118,11 +1270,49 @@ function VideoMaker({ toast }) {
     setPlaying(false)
   }
 
+  const drawSceneAt = (ctx, t) => {
+    let acc = 0
+    for (let i = 0; i < scenes.length; i++) {
+      const d = +scenes[i].duration || 4
+      if (t < acc + d || i === scenes.length - 1) {
+        renderScene(ctx, W, H, scenes[i], medias[i], Math.min(1, (t - acc) / d))
+        return
+      }
+      acc += d
+    }
+  }
+  const sceneMediaAt = (t) => {
+    let acc = 0
+    for (let i = 0; i < scenes.length; i++) {
+      const d = +scenes[i].duration || 4
+      if (t < acc + d) return [medias[i]].filter(Boolean)
+      acc += d
+    }
+    return []
+  }
+
   const exportVideo = async () => {
     if (playing || rendering) return
-    if (typeof MediaRecorder === 'undefined') { toast?.('This browser cannot record video — use Chrome on a computer.'); return }
     setRendering(true)
-    toast?.('Rendering ' + Math.round(totalDur) + 's video — keep this tab open...')
+    const t0 = performance.now()
+    try {
+      const blob = await exportMp4Fast({
+        canvas: cvRef.current, W, H, totalDur,
+        drawFrame: drawSceneAt, mediaAt: sceneMediaAt, sound, onProgress: setProgress,
+      })
+      if (blob) {
+        setRendering(false); setProgress(0)
+        const a = document.createElement('a')
+        a.download = 'smartious-video.mp4'
+        a.href = URL.createObjectURL(blob)
+        a.click()
+        const secs = Math.round((performance.now() - t0) / 1000)
+        toast?.('MP4 ready in ' + secs + 's (' + (totalDur / Math.max(1, secs)).toFixed(1) + 'x speed) — posts straight to WhatsApp, Reels, TikTok and YouTube.')
+        return
+      }
+    } catch (e) { console.error('[fast export]', e) }
+    if (typeof MediaRecorder === 'undefined') { setRendering(false); toast?.('This browser cannot export video — use Chrome on a computer.'); return }
+    toast?.('Fast export unavailable here — rendering in real time (' + Math.round(totalDur) + 's)...')
     const blob = await runSequence(true)
     setRendering(false)
     setProgress(0)
@@ -1131,7 +1321,7 @@ function VideoMaker({ toast }) {
       a.download = 'smartious-video.webm'
       a.href = URL.createObjectURL(blob)
       a.click()
-      toast?.('Video downloaded. It uploads directly to YouTube, Facebook and Instagram; for WhatsApp status, convert to MP4 first (any free converter).')
+      toast?.('Video downloaded (WebM) — for WhatsApp, convert to MP4 first.')
     }
   }
 
