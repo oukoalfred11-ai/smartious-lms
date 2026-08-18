@@ -78,9 +78,28 @@ router.get('/spine', auth, async (req, res) => {
     const SyllabusTopic = require('../models/SyllabusTopic')
     const { subject, curriculum } = req.query
     if (!subject) return ok(res, { topics: [] })
-    const subjFilter = { subjectName: new RegExp('^'+subject.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'$','i') }
-    if (curriculum) subjFilter.curriculum = curriculum
-    const subjectDoc = await Subject.findOne(subjFilter).lean()
+    const esc = subject.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')
+    const exact = new RegExp('^'+esc+'$','i')
+    const loose = new RegExp(esc,'i')
+    // Try from strictest to loosest so a naming or curriculum mismatch
+    // between the student's enrolment and the Subject record does not
+    // strand the quiz with an empty spine:
+    //   1. exact name + their curriculum
+    //   2. loose name  + their curriculum   (e.g. "English" -> "English Language")
+    //   3. exact name, any curriculum
+    //   4. loose name,  any curriculum
+    const tries = []
+    if (curriculum) {
+      tries.push({ subjectName: exact, curriculum })
+      tries.push({ subjectName: loose, curriculum })
+    }
+    tries.push({ subjectName: exact })
+    tries.push({ subjectName: loose })
+    let subjectDoc = null
+    for (const f of tries) {
+      subjectDoc = await Subject.findOne({ ...f, isActive: { $ne: false } }).lean()
+      if (subjectDoc) break
+    }
     if (!subjectDoc) return ok(res, { topics: [] })
     const topics = await SyllabusTopic.find({ subjectId: subjectDoc._id, isActive: { $ne: false } })
       .sort({ topicOrder: 1 })
