@@ -56,35 +56,48 @@ const bgById = (id) => BACKGROUNDS.find(b => b.id === id) || BACKGROUNDS[0]
 const isDark = (id) => id !== 'bone'
 
 // ── Shared canvas helpers ────────────────────────────────
+// The EXACT crest from LoginPage.jsx, rasterized once at high
+// resolution and drawn as an image — identical to the site's mark,
+// including the three book lines and inner shield stroke the old
+// hand-drawn approximation missed.
+const CREST_SVG = `<svg width="480" height="480" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="stu-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#A8203A"/>
+      <stop offset="100%" stop-color="#7A1026"/>
+    </linearGradient>
+  </defs>
+  <path d="M40 6 L68 14 Q70 14 70 17 L70 44 Q70 60 40 74 Q10 60 10 44 L10 17 Q10 14 12 14 Z"
+        fill="url(#stu-grad)" stroke="#6A0E20" stroke-width="0.6"/>
+  <path d="M40 10 L64 17 Q65.5 17 65.5 19 L65.5 44 Q65.5 57 40 69 Q14.5 57 14.5 44 L14.5 19 Q14.5 17 16 17 Z"
+        fill="none" stroke="rgba(255,255,255,.14)" stroke-width="0.8"/>
+  <polygon points="40,19 42.2,26 49.5,26 43.7,30.4 45.9,37.5 40,33 34.1,37.5 36.3,30.4 30.5,26 37.8,26"
+           fill="#C9973A" stroke="#C89A28" stroke-width="0.4"/>
+  <g transform="translate(40 52)">
+    <path d="M-14 -4 L-14 8 L-1 9 L-1 -3 Q-8 -5 -14 -4 Z" fill="#FFFFFF" stroke="#FDFAF4" stroke-width=".4"/>
+    <path d="M14 -4 L14 8 L1 9 L1 -3 Q8 -5 14 -4 Z" fill="#FFFFFF" stroke="#FDFAF4" stroke-width=".4"/>
+    <line x1="-10" y1="-0.5" x2="-4" y2="-0.5" stroke="#A8203A" stroke-width=".5" stroke-linecap="round"/>
+    <line x1="-10" y1="2" x2="-4" y2="2" stroke="#A8203A" stroke-width=".5" stroke-linecap="round"/>
+    <line x1="-10" y1="4.5" x2="-4" y2="4.5" stroke="#A8203A" stroke-width=".5" stroke-linecap="round"/>
+    <line x1="4" y1="-0.5" x2="10" y2="-0.5" stroke="#A8203A" stroke-width=".5" stroke-linecap="round"/>
+    <line x1="4" y1="2" x2="10" y2="2" stroke="#A8203A" stroke-width=".5" stroke-linecap="round"/>
+    <line x1="4" y1="4.5" x2="10" y2="4.5" stroke="#A8203A" stroke-width=".5" stroke-linecap="round"/>
+  </g>
+</svg>`
+
+let _crestImg = null
+function ensureCrest() {
+  if (_crestImg) return Promise.resolve(_crestImg)
+  return new Promise((res) => {
+    const img = new Image()
+    img.onload = () => { _crestImg = img; res(img) }
+    img.onerror = () => res(null)
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(CREST_SVG)
+  })
+}
+
 function drawCrest(ctx, x, y, size) {
-  const s = size / 80
-  ctx.save()
-  ctx.translate(x, y)
-  ctx.scale(s, s)
-  const g = ctx.createLinearGradient(0, 6, 0, 74)
-  g.addColorStop(0, '#A8203A'); g.addColorStop(1, '#7A1026')
-  ctx.fillStyle = g
-  ctx.beginPath()
-  ctx.moveTo(40, 6); ctx.lineTo(68, 14)
-  ctx.quadraticCurveTo(70, 14, 70, 17); ctx.lineTo(70, 44)
-  ctx.quadraticCurveTo(70, 60, 40, 74)
-  ctx.quadraticCurveTo(10, 60, 10, 44); ctx.lineTo(10, 17)
-  ctx.quadraticCurveTo(10, 14, 12, 14); ctx.closePath(); ctx.fill()
-  // star
-  ctx.fillStyle = GOLD
-  ctx.beginPath()
-  const pts = [[40,19],[42.2,26],[49.5,26],[43.7,30.4],[45.9,37.5],[40,33],[34.1,37.5],[36.3,30.4],[30.5,26],[37.8,26]]
-  pts.forEach(([px, py], i) => i ? ctx.lineTo(px, py) : ctx.moveTo(px, py))
-  ctx.closePath(); ctx.fill()
-  // open book
-  ctx.fillStyle = '#FFFFFF'
-  ctx.beginPath()
-  ctx.moveTo(26, 48); ctx.lineTo(26, 60); ctx.lineTo(39, 61); ctx.lineTo(39, 49)
-  ctx.quadraticCurveTo(32, 47, 26, 48); ctx.closePath(); ctx.fill()
-  ctx.beginPath()
-  ctx.moveTo(54, 48); ctx.lineTo(54, 60); ctx.lineTo(41, 61); ctx.lineTo(41, 49)
-  ctx.quadraticCurveTo(48, 47, 54, 48); ctx.closePath(); ctx.fill()
-  ctx.restore()
+  if (_crestImg) ctx.drawImage(_crestImg, x, y, size, size)
 }
 
 function wrapText(ctx, text, maxWidth) {
@@ -828,6 +841,9 @@ const btn = (primary) => ({ background: primary ? TOKENS.crimson : '#fff', color
 // ═══════════════════════════════════════════════════════════
 export default function StudioModule({ toast }) {
   const [tab, setTab] = useState('cards')
+  const [crestReady, setCrestReady] = useState(!!_crestImg)
+  useEffect(() => { ensureCrest().then(() => setCrestReady(true)) }, [])
+  if (!crestReady) return null
   return (
     <div>
       <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
@@ -872,6 +888,7 @@ function CardMaker({ toast }) {
   const [rendering, setRendering] = useState(false)
   const [progress, setProgress] = useState(0)
   const [sound, setSound] = useState({ musicMode: 'none', musicBuffer: null, musicVol: 0.6, voBuffer: null, voVol: 1, script: null })
+  const [showNumbers, setShowNumbers] = useState(false)   // "2 / 5" chip: off unless asked for
   const W = 1080, H = format === 'story' ? 1920 : 1080
   const card = cards[cur]
   const mediaEl = medias[cur]
@@ -883,8 +900,8 @@ function CardMaker({ toast }) {
     const cv = cvRef.current
     if (!cv) return
     cv.width = W; cv.height = H
-    renderCard(cv.getContext('2d'), W, H, card, mediaEl, 1)
-  }, [cards, cur, format, medias, playing, rendering])
+    renderCard(cv.getContext('2d'), W, H, { ...card, seriesTotal: showNumbers ? cards.length : 0 }, mediaEl, 1)
+  }, [cards, cur, format, medias, playing, rendering, showNumbers])
 
   const onImage = (e) => {
     const f = e.target.files?.[0]
@@ -911,7 +928,7 @@ function CardMaker({ toast }) {
   const download = (idx) => {
     const off = document.createElement('canvas')
     off.width = W; off.height = H
-    renderCard(off.getContext('2d'), W, H, { ...cards[idx], seriesTotal: cards.length, seriesNo: idx + 1 }, medias[idx], 1)
+    renderCard(off.getContext('2d'), W, H, { ...cards[idx], seriesTotal: showNumbers ? cards.length : 0, seriesNo: idx + 1 }, medias[idx], 1)
     const a = document.createElement('a')
     a.download = 'smartious-card-' + (idx + 1) + '.png'
     a.href = off.toDataURL('image/png')
@@ -936,7 +953,7 @@ function CardMaker({ toast }) {
     const total = n * seg
     const i = Math.min(n - 1, Math.floor(t / seg))
     const local = t - i * seg
-    const cardAt = (idx) => ({ ...cards[idx], seriesTotal: n, seriesNo: idx + 1 })
+    const cardAt = (idx) => ({ ...cards[idx], seriesTotal: showNumbers ? n : 0, seriesNo: idx + 1 })
     const inTransition = i < n - 1 && local > seg - TRANS_DUR
     if (!inTransition) {
       renderCardMotion(ctx, W, H, cardAt(i), medias[i], clamp01(local / (seg * 0.75)), textFx)
@@ -1079,6 +1096,12 @@ function CardMaker({ toast }) {
           {cards.length > 1 && (
             <button onClick={() => { const nc = cards.filter((_, i) => i !== cur).map((c, i, arr) => ({ ...c, seriesNo: i + 1, seriesTotal: arr.length })); setCards(nc); setCur(Math.max(0, cur - 1)) }}
               style={{ ...btn(false), color: '#B91C1C', borderRadius: 99, padding: '7px 13px' }}>Remove</button>
+          )}
+          {cards.length > 1 && (
+            <button onClick={() => setShowNumbers(v => !v)} title="Show the small 2 / 5 chip on each card"
+              style={{ ...btn(showNumbers), borderRadius: 99, padding: '7px 13px', fontSize: 11.5 }}>
+              {showNumbers ? 'Numbered' : 'No numbers'}
+            </button>
           )}
         </div>
 
