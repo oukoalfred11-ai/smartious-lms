@@ -777,11 +777,11 @@ function scheduleMusicGain(g, level, windows, totalDur) {
 // voClips: [{ buffer, at }] — scene-by-scene voice, placed on the
 // timeline. A single full-video narration (voBuffer) still works and
 // simply becomes one long clip at 0.5s.
-async function renderMixOffline({ totalDur, musicBuffer, musicVol, voBuffer, voVol, voClips }) {
+async function renderMixOffline({ totalDur, musicBuffer, musicVol, voBuffer, voVol, voClips, sampleRate }) {
   const clips = [...(voClips || [])]
   if (voBuffer) clips.push({ buffer: voBuffer, at: 0.5 })
   if (!musicBuffer && clips.length === 0) return null
-  const SR = 44100
+  const SR = sampleRate || 44100
   const oac = new OfflineAudioContext(2, Math.ceil(SR * totalDur), SR)
   const master = oac.createGain(); master.gain.value = 1; master.connect(oac.destination)
   if (musicBuffer) {
@@ -817,26 +817,49 @@ const seekVideo = (v, t) => new Promise((res) => {
 async function exportMp4Fast({ canvas, W, H, totalDur, drawFrame, mediaAt, sound, onProgress }) {
   if (typeof VideoEncoder === 'undefined') return null   // caller falls back to realtime
   const FPS = 30
-  const audioBuf = await renderMixOffline({ totalDur, ...sound })
+
+  // ── Decide the AUDIO codec BEFORE building the container. Chrome
+  // cannot AAC-encode on every machine; declaring an AAC track and
+  // then writing zero samples produces an MP4 most players reject —
+  // that was the broken-file bug. Ladder: AAC 44.1k -> Opus 48k ->
+  // no audio track at all (video-only MP4 plays everywhere).
+  const wantsAudio = !!(sound && (sound.musicBuffer || sound.voBuffer || (sound.voClips && sound.voClips.length)))
+  let audioPlan = null
+  if (wantsAudio && typeof AudioEncoder !== 'undefined') {
+    const aacCfg = { codec: 'mp4a.40.2', sampleRate: 44100, numberOfChannels: 2, bitrate: 128_000, aac: { format: 'aac' } }
+    const aacOk = await AudioEncoder.isConfigSupported(aacCfg).catch(() => null)
+    if (aacOk?.supported) audioPlan = { mux: 'aac', cfg: aacCfg, sr: 44100 }
+    else {
+      const opusCfg = { codec: 'opus', sampleRate: 48000, numberOfChannels: 2, bitrate: 128_000 }
+      const opusOk = await AudioEncoder.isConfigSupported(opusCfg).catch(() => null)
+      if (opusOk?.supported) audioPlan = { mux: 'opus', cfg: opusCfg, sr: 48000 }
+    }
+  }
+  const audioBuf = audioPlan ? await renderMixOffline({ totalDur, ...sound, sampleRate: audioPlan.sr }) : null
+  if (!audioBuf) audioPlan = null
 
   const muxer = new Muxer({
     target: new ArrayBufferTarget(),
     video: { codec: 'avc', width: W, height: H },
-    ...(audioBuf ? { audio: { codec: 'aac', sampleRate: 44100, numberOfChannels: 2 } } : {}),
+    ...(audioPlan ? { audio: { codec: audioPlan.mux, sampleRate: audioPlan.sr, numberOfChannels: 2 } } : {}),
     fastStart: 'in-memory',
   })
 
+  // ── Video encoder with an avcC safety net: if the first chunk
+  // arrives without a decoder description, the file would be
+  // unplayable — abort so the caller falls back instead.
   let vErr = null
+  let sawDescription = false
   const vEnc = new VideoEncoder({
-    output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
+    output: (chunk, meta) => {
+      if (!sawDescription) {
+        if (meta?.decoderConfig?.description) sawDescription = true
+        else { vErr = new Error('encoder produced no avcC description'); return }
+      }
+      muxer.addVideoChunk(chunk, meta)
+    },
     error: (e) => { vErr = e },
   })
-  // 4K needs High Level 5.1; 1080p keeps Level 4.0.
-  // CRITICAL: avc format 'avc' (not Annex B) — without the codec
-  // description an MP4 has no avcC box and no player will open it.
-  // Bitrates are sized for animated graphics + text, which compress
-  // extremely well: 14 Mbps at 4K is visually clean at a quarter of
-  // camera-footage rates.
   const px = W * H
   const bitrate = px >= 3840 * 2160 ? 14_000_000 : px >= 2160 * 2160 ? 10_000_000 : 6_000_000
   let vConfig = null
@@ -854,17 +877,12 @@ async function exportMp4Fast({ canvas, W, H, totalDur, drawFrame, mediaAt, sound
   vEnc.configure(vConfig)
 
   let aEnc = null
-  if (audioBuf) {
-    const aConfig = { codec: 'mp4a.40.2', sampleRate: 44100, numberOfChannels: 2, bitrate: 128_000, aac: { format: 'aac' } }
-    const aSupport = typeof AudioEncoder !== 'undefined'
-      ? await AudioEncoder.isConfigSupported(aConfig).catch(() => null) : null
-    if (aSupport?.supported) {
-      aEnc = new AudioEncoder({
-        output: (chunk, meta) => muxer.addAudioChunk(chunk, meta),
-        error: (e) => { vErr = e },
-      })
-      aEnc.configure(aConfig)
-    }
+  if (audioPlan) {
+    aEnc = new AudioEncoder({
+      output: (chunk, meta) => muxer.addAudioChunk(chunk, meta),
+      error: (e) => { vErr = e },
+    })
+    aEnc.configure(audioPlan.cfg)
   }
 
   const ctx = canvas.getContext('2d')
@@ -883,8 +901,7 @@ async function exportMp4Fast({ canvas, W, H, totalDur, drawFrame, mediaAt, sound
   }
 
   if (aEnc && audioBuf) {
-    // Interleave the offline mix into planar AudioData chunks.
-    const CH = 2, CHUNK = 4096
+    const SR = audioPlan.sr, CH = 2, CHUNK = 4800
     const L = audioBuf.getChannelData(0)
     const R = audioBuf.numberOfChannels > 1 ? audioBuf.getChannelData(1) : L
     for (let off = 0; off < L.length; off += CHUNK) {
@@ -893,19 +910,21 @@ async function exportMp4Fast({ canvas, W, H, totalDur, drawFrame, mediaAt, sound
       data.set(L.subarray(off, off + n), 0)
       data.set(R.subarray(off, off + n), n)
       const ad = new AudioData({
-        format: 'f32-planar', sampleRate: 44100, numberOfFrames: n,
-        numberOfChannels: CH, timestamp: Math.round((off / 44100) * 1e6), data,
+        format: 'f32-planar', sampleRate: SR, numberOfFrames: n,
+        numberOfChannels: CH, timestamp: Math.round((off / SR) * 1e6), data,
       })
       aEnc.encode(ad)
       ad.close()
       while (aEnc.encodeQueueSize > 8) await new Promise(r => setTimeout(r, 2))
+      if (vErr) throw vErr
     }
     await aEnc.flush()
   }
   await vEnc.flush()
+  if (vErr) throw vErr
   muxer.finalize()
   onProgress?.(1)
-  return new Blob([muxer.target.buffer], { type: 'video/mp4' })
+  return { blob: new Blob([muxer.target.buffer], { type: 'video/mp4' }), audioNote: wantsAudio && !audioPlan ? 'silent' : audioPlan?.mux === 'opus' ? 'opus' : null }
 }
 
 // Narrator script: turns each card's text into worry -> solution
@@ -949,7 +968,7 @@ function SoundPanel({ sound, setSound, cards, toast }) {
     const AC = window.AudioContext || window.webkitAudioContext
     const ac = new AC()
     file.arrayBuffer().then(ab => ac.decodeAudioData(ab)).then(buf => {
-      setSound(s => ({ ...s, [key]: buf }))
+      setSound(s => ({ ...s, [key]: buf, [key === 'voBuffer' ? 'voBlob' : 'musicBlob']: file }))
       toast?.((key === 'voBuffer' ? 'Narration' : 'Music') + ' loaded: ' + Math.round(buf.duration) + 's')
       ac.close()
     }).catch(() => toast?.('Could not read that audio file.'))
@@ -974,7 +993,7 @@ function SoundPanel({ sound, setSound, cards, toast }) {
       {/* Music */}
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
         <button onClick={async () => {
-          if (sound.musicBuffer && sound.musicMode === 'builtin') { setSound(s => ({ ...s, musicBuffer: null, musicMode: 'none' })); return }
+          if (sound.musicBuffer && sound.musicMode === 'builtin') { setSound(s => ({ ...s, musicBuffer: null, musicBlob: null, musicMode: 'none' })); return }
           toast?.('Composing the Smartious pad...')
           const buf = await makeBuiltinMusic()
           setSound(s => ({ ...s, musicBuffer: buf, musicMode: 'builtin' }))
@@ -1020,7 +1039,7 @@ function SoundPanel({ sound, setSound, cards, toast }) {
             onChange={e => { const f = e.target.files?.[0]; if (f) decodeFile(f, 'voBuffer') }} />
         </label>
         {sound.voBuffer && (
-          <button onClick={() => setSound(s => ({ ...s, voBuffer: null }))} style={{ ...btn(false), fontSize: 11.5, padding: '7px 11px', color: '#B91C1C' }}>Remove</button>
+          <button onClick={() => setSound(s => ({ ...s, voBuffer: null, voBlob: null }))} style={{ ...btn(false), fontSize: 11.5, padding: '7px 11px', color: '#B91C1C' }}>Remove</button>
         )}
       </div>
       <div style={{ fontSize: 10.5, color: TOKENS.s500, lineHeight: 1.55 }}>
@@ -1029,6 +1048,124 @@ function SoundPanel({ sound, setSound, cards, toast }) {
     </div>
   )
 }
+
+// ═══════════════════════════════════════════════════════════
+// AUTOSAVE — the whole project (text, settings, and the actual
+// photo/video/voice files) persists to IndexedDB on every change,
+// and restores when Studio reopens. Navigating modules or a page
+// refresh no longer loses work.
+// ═══════════════════════════════════════════════════════════
+function idbOpen() {
+  return new Promise((res, rej) => {
+    const rq = indexedDB.open('smartious-studio', 1)
+    rq.onupgradeneeded = () => rq.result.createObjectStore('projects')
+    rq.onsuccess = () => res(rq.result)
+    rq.onerror = () => rej(rq.error)
+  })
+}
+async function idbSet(key, value) {
+  const db = await idbOpen()
+  return new Promise((res, rej) => {
+    const tx = db.transaction('projects', 'readwrite')
+    tx.objectStore('projects').put(value, key)
+    tx.oncomplete = () => { db.close(); res() }
+    tx.onerror = () => { db.close(); rej(tx.error) }
+  })
+}
+async function idbGet(key) {
+  const db = await idbOpen()
+  return new Promise((res, rej) => {
+    const tx = db.transaction('projects', 'readonly')
+    const rq = tx.objectStore('projects').get(key)
+    rq.onsuccess = () => { db.close(); res(rq.result) }
+    rq.onerror = () => { db.close(); rej(rq.error) }
+  })
+}
+async function idbDel(key) {
+  const db = await idbOpen()
+  return new Promise((res) => {
+    const tx = db.transaction('projects', 'readwrite')
+    tx.objectStore('projects').delete(key)
+    tx.oncomplete = () => { db.close(); res() }
+    tx.onerror = () => { db.close(); res() }
+  })
+}
+
+// Rebuild a drawable element from a stored file
+const blobToMedia = (rec) => new Promise((res) => {
+  if (!rec || !rec.blob) return res(null)
+  const url = URL.createObjectURL(rec.blob)
+  if (rec.kind === 'video') {
+    const v = document.createElement('video')
+    v.src = url; v.muted = true; v.loop = true; v.playsInline = true
+    v.onloadeddata = () => { try { v.currentTime = 0.1 } catch (e) { /* fine */ } res(v) }
+    v.onerror = () => res(null)
+  } else {
+    const im = new Image()
+    im.onload = () => res(im)
+    im.onerror = () => res(null)
+    im.src = url
+  }
+})
+async function blobToAudio(blob) {
+  if (!blob) return null
+  const AC = window.AudioContext || window.webkitAudioContext
+  const ac = new AC()
+  try { return await ac.decodeAudioData(await blob.arrayBuffer()) }
+  catch (e) { return null }
+  finally { try { ac.close() } catch (e) { /* closed */ } }
+}
+const restoreSoundBuffers = async (savedSound) => {
+  const s = { musicMode: 'none', musicBuffer: null, musicVol: 0.6, voBuffer: null, voVol: 1, script: null, ...savedSound }
+  if (s.musicMode === 'builtin') s.musicBuffer = await makeBuiltinMusic()
+  else if (s.musicBlob) s.musicBuffer = await blobToAudio(s.musicBlob)
+  if (s.voBlob) s.voBuffer = await blobToAudio(s.voBlob)
+  return s
+}
+const restoreMaps = async (mediaBlobs, voBlobs) => {
+  const medias = {}, voMap = {}
+  for (const [k, rec] of Object.entries(mediaBlobs || {})) {
+    const el = await blobToMedia(rec)
+    if (el) medias[k] = el
+  }
+  for (const [k, blob] of Object.entries(voBlobs || {})) {
+    const buf = await blobToAudio(blob)
+    if (buf) voMap[k] = buf
+  }
+  return { medias, voMap }
+}
+// A live miniature of a card/scene: the strip shows real frames, and
+// the selected one doubles as the video's preview (thumbnail) source.
+function Thumb({ draw, w, h, active, onClick, label }) {
+  const ref = useRef(null)
+  useEffect(() => {
+    const cv = ref.current
+    if (!cv) return
+    cv.width = w * 2; cv.height = h * 2   // 2x for crispness
+    try { draw(cv.getContext('2d'), w * 2, h * 2) } catch (e) { /* not ready yet */ }
+  })
+  return (
+    <button onClick={onClick} style={{
+      padding: 2, background: '#fff', cursor: 'pointer', borderRadius: 8,
+      border: active ? '2.5px solid ' + TOKENS.crimson : '1.5px solid ' + TOKENS.line,
+    }}>
+      <canvas ref={ref} style={{ width: w, height: h, display: 'block', borderRadius: 5, background: '#0B0E16' }} />
+      <div style={{ fontSize: 9, fontWeight: 800, color: TOKENS.s500, marginTop: 2, maxWidth: w, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</div>
+    </button>
+  )
+}
+const thumbSize = (format) => format === 'story' ? { w: 36, h: 64 } : format === 'youtube' ? { w: 96, h: 54 } : { w: 52, h: 52 }
+
+const SavedChip = ({ savedAt, onNew }) => (
+  <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginLeft: 'auto' }}>
+    <span style={{ fontSize: 10.5, fontWeight: 700, color: savedAt ? '#15803D' : TOKENS.s500 }}>
+      {savedAt ? 'Saved' : 'Autosaves as you work'}
+    </span>
+    <button onClick={onNew} style={{ background: '#fff', color: '#B91C1C', border: '1.5px solid ' + TOKENS.line, borderRadius: 99, padding: '6px 12px', fontSize: 11, fontWeight: 800, cursor: 'pointer' }}>
+      New project
+    </button>
+  </div>
+)
 
 const SCENE_TYPES = [
   ['title', 'Title sting (crest)'],
@@ -1102,6 +1239,10 @@ function CardMaker({ toast }) {
   const [progress, setProgress] = useState(0)
   const [sound, setSound] = useState({ musicMode: 'none', musicBuffer: null, musicVol: 0.6, voBuffer: null, voVol: 1, script: null })
   const [voMap, setVoMap] = useState({})                   // card index -> voice clip
+  const [mediaBlobs, setMediaBlobs] = useState({})         // card index -> {blob, kind} for autosave
+  const [voBlobs, setVoBlobs] = useState({})               // card index -> voice file for autosave
+  const [loaded, setLoaded] = useState(false)
+  const [savedAt, setSavedAt] = useState(0)
   const [showNumbers, setShowNumbers] = useState(false)   // "2 / 5" chip: off unless asked for
   const [fontId, setFontId] = useState(0)                  // Montserrat default: bold
   const [brandMode, setBrandMode] = useState('word')       // word | crest | none
@@ -1123,9 +1264,58 @@ function CardMaker({ toast }) {
     const ac = new AC()
     f.arrayBuffer().then(ab => ac.decodeAudioData(ab)).then(buf => {
       setVoMap(m => ({ ...m, [cur]: buf }))
+      setVoBlobs(m => ({ ...m, [cur]: f }))
       toast?.('Voice for card ' + (cur + 1) + ' loaded: ' + buf.duration.toFixed(1) + 's')
       ac.close()
     }).catch(() => toast?.('Could not read that audio file.'))
+  }
+
+  // ── Restore the saved project on open ──
+  useEffect(() => {
+    (async () => {
+      try {
+        const pj = await idbGet('cards-project')
+        if (pj && pj.cards?.length) {
+          setFormat(pj.format || 'square')
+          setCards(pj.cards)
+          setTextFx(pj.textFx || 'rise')
+          setTransition(pj.transition || 'morph')
+          setCardDur(pj.cardDur || 4)
+          setShowNumbers(!!pj.showNumbers)
+          setFontId(pj.fontId || 0)
+          setBrandMode(pj.brandMode || 'word')
+          setMediaBlobs(pj.mediaBlobs || {})
+          setVoBlobs(pj.voBlobs || {})
+          const { medias: md, voMap: vm } = await restoreMaps(pj.mediaBlobs, pj.voBlobs)
+          setMedias(md); setVoMap(vm)
+          setSound(await restoreSoundBuffers(pj.sound))
+          setSavedAt(Date.now())
+        }
+      } catch (e) { console.warn('[studio restore]', e) }
+      setLoaded(true)
+    })()
+  }, [])
+
+  // ── Autosave (debounced) on any change ──
+  useEffect(() => {
+    if (!loaded) return
+    const t = setTimeout(() => {
+      idbSet('cards-project', {
+        v: 1, format, cards, textFx, transition, cardDur, showNumbers, fontId, brandMode,
+        mediaBlobs, voBlobs,
+        sound: { musicMode: sound.musicMode, musicVol: sound.musicVol, voVol: sound.voVol, script: sound.script, musicBlob: sound.musicBlob || null, voBlob: sound.voBlob || null },
+      }).then(() => setSavedAt(Date.now())).catch(() => {})
+    }, 800)
+    return () => clearTimeout(t)
+  }, [loaded, format, cards, textFx, transition, cardDur, showNumbers, fontId, brandMode, mediaBlobs, voBlobs, sound.musicMode, sound.musicVol, sound.voVol, sound.script, sound.musicBlob, sound.voBlob])
+
+  const newProject = async () => {
+    await idbDel('cards-project')
+    setCards([newCard(0, 1)]); setCur(0)
+    setMedias({}); setMediaBlobs({}); setVoMap({}); setVoBlobs({})
+    setSound({ musicMode: 'none', musicBuffer: null, musicVol: 0.6, voBuffer: null, voVol: 1, script: null })
+    setSavedAt(0)
+    toast?.('Fresh card project started.')
   }
 
   useEffect(() => {
@@ -1148,12 +1338,17 @@ function CardMaker({ toast }) {
       v.onloadeddata = () => {
         v.currentTime = 0.1   // land on a real frame for the still preview
         setMedias(m => ({ ...m, [cur]: v }))
+        setMediaBlobs(m => ({ ...m, [cur]: { blob: f, kind: 'video' } }))
         upd({ useImage: true })
       }
       v.onseeked = () => setMedias(m => ({ ...m }))   // repaint preview with the frame
     } else {
       const img = new Image()
-      img.onload = () => { setMedias(m => ({ ...m, [cur]: img })); upd({ useImage: true }) }
+      img.onload = () => {
+        setMedias(m => ({ ...m, [cur]: img }))
+        setMediaBlobs(m => ({ ...m, [cur]: { blob: f, kind: 'image' } }))
+        upd({ useImage: true })
+      }
       img.src = url
     }
   }
@@ -1277,19 +1472,22 @@ function CardMaker({ toast }) {
         const i = Math.min(cards.length - 1, Math.floor(t / cardDur))
         return [medias[i], medias[i + 1]].filter(Boolean)
       }
-      const blob = await exportMp4Fast({
+      const out = await exportMp4Fast({
         canvas: cvRef.current, W, H, totalDur: totalD,
         drawFrame: (ctx, t) => drawTimeline(ctx, t),
         mediaAt, sound: { ...sound, voClips: buildVoClips() }, onProgress: setProgress,
       })
-      if (blob) {
+      if (out?.blob) {
         setRendering(false); setProgress(0)
         const a = document.createElement('a')
         a.download = 'smartious-cards.mp4'
-        a.href = URL.createObjectURL(blob)
+        a.href = URL.createObjectURL(out.blob)
         a.click()
         const speed = totalD / ((performance.now() - t0) / 1000)
-        toast?.('MP4 ready: ' + (blob.size / 1048576).toFixed(1) + ' MB in ' + Math.round((performance.now() - t0) / 1000) + 's (' + speed.toFixed(1) + 'x) — plays everywhere: WhatsApp, Reels, TikTok, YouTube.')
+        const note = out.audioNote === 'silent' ? ' NOTE: this computer cannot encode MP4 audio, so the file is silent.'
+          : out.audioNote === 'opus' ? ' Audio uses Opus: fine for YouTube and Android; if WhatsApp plays it silent, tell me.'
+          : ''
+        toast?.('MP4 ready: ' + (out.blob.size / 1048576).toFixed(1) + ' MB in ' + Math.round((performance.now() - t0) / 1000) + 's (' + speed.toFixed(1) + 'x).' + note)
         return
       }
     } catch (e) { console.error('[fast export]', e) }
@@ -1311,10 +1509,11 @@ function CardMaker({ toast }) {
     <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap' }}>
       {/* Controls */}
       <div style={{ flex: '1 1 320px', minWidth: 300, maxWidth: 430, display: 'flex', flexDirection: 'column', gap: 11 }}>
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
           {Object.entries(FORMATS).map(([k, f]) => (
             <button key={k} onClick={() => setFormat(k)} style={{ ...btn(format === k), fontSize: 11.5, padding: '7px 11px' }}>{f.label}</button>
           ))}
+          <SavedChip savedAt={savedAt} onNew={newProject} />
         </div>
 
         {/* Typography + branding */}
@@ -1327,12 +1526,12 @@ function CardMaker({ toast }) {
           ))}
         </div>
 
-        {/* Series strip */}
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
-          {cards.map((_, i) => (
-            <button key={i} onClick={() => setCur(i)} style={{
-              ...btn(cur === i), padding: '7px 13px', borderRadius: 99,
-            }}>{i + 1}</button>
+        {/* Series strip: live miniatures of every card */}
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+          {cards.map((c, i) => (
+            <Thumb key={i} {...thumbSize(format)} active={cur === i} onClick={() => setCur(i)}
+              label={'Card ' + (i + 1)}
+              draw={(tc, tw, th) => renderCard(tc, tw, th, deck(c, { seriesTotal: showNumbers ? cards.length : 0, seriesNo: i + 1 }), medias[i], 1)} />
           ))}
           <button onClick={() => { setCards(cs => [...cs.map(c => ({ ...c, seriesTotal: cs.length + 1 })), newCard(cards.length, cards.length + 1)]); setCur(cards.length) }}
             style={{ ...btn(false), borderRadius: 99, padding: '7px 13px' }}>+ Add card</button>
@@ -1340,7 +1539,7 @@ function CardMaker({ toast }) {
             <button onClick={() => {
               const reindex = (m) => { const n = {}; Object.keys(m).forEach(k => { const ki = +k; if (ki < cur) n[ki] = m[k]; else if (ki > cur) n[ki - 1] = m[k] }); return n }
               const nc = cards.filter((_, i) => i !== cur).map((c, i, arr) => ({ ...c, seriesNo: i + 1, seriesTotal: arr.length }))
-              setCards(nc); setMedias(reindex); setVoMap(reindex); setCur(Math.max(0, cur - 1))
+              setCards(nc); setMedias(reindex); setVoMap(reindex); setMediaBlobs(reindex); setVoBlobs(reindex); setCur(Math.max(0, cur - 1))
             }} style={{ ...btn(false), color: '#B91C1C', borderRadius: 99, padding: '7px 13px' }}>Remove</button>
           )}
           {cards.length > 1 && (
@@ -1387,7 +1586,7 @@ function CardMaker({ toast }) {
             {GRADES.map(([k, l]) => (
               <button key={k} onClick={() => upd({ grade: k })} style={{ ...btn((card.grade || 'none') === k), padding: '7px 10px', fontSize: 11 }}>{l}</button>
             ))}
-            <button onClick={() => { upd({ useImage: false }); setMedias(m => { const n = { ...m }; const old = n[cur]; if (old && old.pause) old.pause(); delete n[cur]; return n }) }} style={{ ...btn(false), fontSize: 11.5, padding: '7px 11px' }}>Remove</button>
+            <button onClick={() => { upd({ useImage: false }); setMedias(m => { const n = { ...m }; const old = n[cur]; if (old && old.pause) old.pause(); delete n[cur]; return n }); setMediaBlobs(m => { const n = { ...m }; delete n[cur]; return n }) }} style={{ ...btn(false), fontSize: 11.5, padding: '7px 11px' }}>Remove</button>
           </>)}
         </div>
 
@@ -1426,7 +1625,7 @@ function CardMaker({ toast }) {
               <input type="file" accept="audio/*" style={{ display: 'none' }} onChange={onCardVoice} />
             </label>
             {voMap[cur] && (
-              <button onClick={() => setVoMap(m => { const n = { ...m }; delete n[cur]; return n })}
+              <button onClick={() => { setVoMap(m => { const n = { ...m }; delete n[cur]; return n }); setVoBlobs(m => { const n = { ...m }; delete n[cur]; return n }) }}
                 style={{ ...btn(false), fontSize: 11.5, padding: '7px 11px', color: '#B91C1C' }}>Remove</button>
             )}
             {voMap[cur] && voMap[cur].duration > cardDur && (
@@ -1480,6 +1679,10 @@ function VideoMaker({ toast }) {
   const [progress, setProgress] = useState(0)
   const [sound, setSound] = useState({ musicMode: 'none', musicBuffer: null, musicVol: 0.6, voBuffer: null, voVol: 1, script: null })
   const [voMap, setVoMap] = useState({})           // scene index -> decoded voice clip
+  const [mediaBlobs, setMediaBlobs] = useState({})
+  const [voBlobs, setVoBlobs] = useState({})
+  const [loaded, setLoaded] = useState(false)
+  const [savedAt, setSavedAt] = useState(0)
   const [fontId, setFontId] = useState(0)
   const [brandMode, setBrandMode] = useState('word')
   const cvRef = useRef(null)
@@ -1504,9 +1707,52 @@ function VideoMaker({ toast }) {
     const ac = new AC()
     f.arrayBuffer().then(ab => ac.decodeAudioData(ab)).then(buf => {
       setVoMap(m => ({ ...m, [cur]: buf }))
+      setVoBlobs(m => ({ ...m, [cur]: f }))
       toast?.('Voice for scene ' + (cur + 1) + ' loaded: ' + buf.duration.toFixed(1) + 's')
       ac.close()
     }).catch(() => toast?.('Could not read that audio file.'))
+  }
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const pj = await idbGet('video-project')
+        if (pj && pj.scenes?.length) {
+          setFormat(pj.format || 'youtube')
+          setScenes(pj.scenes)
+          setFontId(pj.fontId || 0)
+          setBrandMode(pj.brandMode || 'word')
+          setMediaBlobs(pj.mediaBlobs || {})
+          setVoBlobs(pj.voBlobs || {})
+          const { medias: md, voMap: vm } = await restoreMaps(pj.mediaBlobs, pj.voBlobs)
+          setMedias(md); setVoMap(vm)
+          setSound(await restoreSoundBuffers(pj.sound))
+          setSavedAt(Date.now())
+        }
+      } catch (e) { console.warn('[studio restore]', e) }
+      setLoaded(true)
+    })()
+  }, [])
+
+  useEffect(() => {
+    if (!loaded) return
+    const t = setTimeout(() => {
+      idbSet('video-project', {
+        v: 1, format, scenes, fontId, brandMode, mediaBlobs, voBlobs,
+        sound: { musicMode: sound.musicMode, musicVol: sound.musicVol, voVol: sound.voVol, script: sound.script, musicBlob: sound.musicBlob || null, voBlob: sound.voBlob || null },
+      }).then(() => setSavedAt(Date.now())).catch(() => {})
+    }, 800)
+    return () => clearTimeout(t)
+  }, [loaded, format, scenes, fontId, brandMode, mediaBlobs, voBlobs, sound.musicMode, sound.musicVol, sound.voVol, sound.script, sound.musicBlob, sound.voBlob])
+
+  const newProject = async () => {
+    await idbDel('video-project')
+    setScenes([newScene('title'), newScene('text'), newScene('bullets'), newScene('outro')])
+    setCur(0)
+    setMedias({}); setMediaBlobs({}); setVoMap({}); setVoBlobs({})
+    setSound({ musicMode: 'none', musicBuffer: null, musicVol: 0.6, voBuffer: null, voVol: 1, script: null })
+    setSavedAt(0)
+    toast?.('Fresh video project started.')
   }
 
   // Static preview of the current scene at its final frame
@@ -1525,10 +1771,10 @@ function VideoMaker({ toast }) {
     if (f.type.startsWith('video/')) {
       const v = document.createElement('video')
       v.src = url; v.muted = true; v.loop = true; v.playsInline = true
-      v.onloadeddata = () => { setMedias(m => ({ ...m, [cur]: v })); upd({ useImage: true }) }
+      v.onloadeddata = () => { setMedias(m => ({ ...m, [cur]: v })); setMediaBlobs(m => ({ ...m, [cur]: { blob: f, kind: 'video' } })); upd({ useImage: true }) }
     } else {
       const img = new Image()
-      img.onload = () => { setMedias(m => ({ ...m, [cur]: img })); upd({ useImage: true }) }
+      img.onload = () => { setMedias(m => ({ ...m, [cur]: img })); setMediaBlobs(m => ({ ...m, [cur]: { blob: f, kind: 'image' } })); upd({ useImage: true }) }
       img.src = url
     }
   }
@@ -1615,19 +1861,22 @@ function VideoMaker({ toast }) {
     setRendering(true)
     const t0 = performance.now()
     try {
-      const blob = await exportMp4Fast({
+      const out = await exportMp4Fast({
         canvas: cvRef.current, W, H, totalDur,
         drawFrame: drawSceneAt, mediaAt: sceneMediaAt,
         sound: { ...sound, voClips: buildVoClips() }, onProgress: setProgress,
       })
-      if (blob) {
+      if (out?.blob) {
         setRendering(false); setProgress(0)
         const a = document.createElement('a')
         a.download = 'smartious-video.mp4'
-        a.href = URL.createObjectURL(blob)
+        a.href = URL.createObjectURL(out.blob)
         a.click()
         const secs = Math.round((performance.now() - t0) / 1000)
-        toast?.('MP4 ready: ' + (blob.size / 1048576).toFixed(1) + ' MB in ' + secs + 's (' + (totalDur / Math.max(1, secs)).toFixed(1) + 'x) — plays everywhere: WhatsApp, Reels, TikTok, YouTube.')
+        const note = out.audioNote === 'silent' ? ' NOTE: this computer cannot encode MP4 audio, so the file is silent.'
+          : out.audioNote === 'opus' ? ' Audio uses Opus: fine for YouTube and Android; if WhatsApp plays it silent, tell me.'
+          : ''
+        toast?.('MP4 ready: ' + (out.blob.size / 1048576).toFixed(1) + ' MB in ' + secs + 's (' + (totalDur / Math.max(1, secs)).toFixed(1) + 'x).' + note)
         return
       }
     } catch (e) { console.error('[fast export]', e) }
@@ -1652,7 +1901,8 @@ function VideoMaker({ toast }) {
           {Object.entries(FORMATS).map(([k, f]) => (
             <button key={k} onClick={() => setFormat(k)} style={{ ...btn(format === k), fontSize: 11.5, padding: '7px 11px' }}>{f.label}</button>
           ))}
-          <span style={{ fontSize: 11.5, color: TOKENS.s500, fontWeight: 700, marginLeft: 'auto' }}>{Math.round(totalDur)}s total</span>
+          <span style={{ fontSize: 11.5, color: TOKENS.s500, fontWeight: 700 }}>{Math.round(totalDur)}s total</span>
+          <SavedChip savedAt={savedAt} onNew={newProject} />
         </div>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
           <select value={fontId} onChange={e => setFontId(+e.target.value)} style={{ ...inputStyle, width: 'auto', padding: '7px 9px', fontSize: 11.5 }}>
@@ -1663,12 +1913,12 @@ function VideoMaker({ toast }) {
           ))}
         </div>
 
-        {/* Scene strip */}
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+        {/* Scene strip: live miniatures of every scene */}
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'flex-start' }}>
           {scenes.map((s, i) => (
-            <button key={i} onClick={() => setCur(i)} title={SCENE_TYPES.find(t => t[0] === s.type)?.[1]} style={{
-              ...btn(cur === i), padding: '7px 12px', borderRadius: 99, fontSize: 11.5,
-            }}>{(i + 1) + ' \u00b7 ' + s.type}</button>
+            <Thumb key={i} {...thumbSize(format)} active={cur === i} onClick={() => setCur(i)}
+              label={(i + 1) + ' \u00b7 ' + s.type}
+              draw={(tc, tw, th) => renderScene(tc, tw, th, deck(s), medias[i], 1)} />
           ))}
         </div>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
@@ -1682,6 +1932,8 @@ function VideoMaker({ toast }) {
               setScenes(ss => ss.filter((_, i) => i !== cur))
               setMedias(reindex)
               setVoMap(reindex)
+              setMediaBlobs(reindex)
+              setVoBlobs(reindex)
               setCur(Math.max(0, cur - 1))
             }} style={{ ...btn(false), color: '#B91C1C' }}>Remove scene</button>
           )}
@@ -1703,7 +1955,7 @@ function VideoMaker({ toast }) {
           {voMap[cur] && (<>
             <button onClick={() => upd({ duration: Math.min(20, Math.max(2, Math.ceil(voMap[cur].duration + 0.8))) })}
               style={{ ...btn(false), fontSize: 11.5, padding: '7px 11px' }}>Match length to voice</button>
-            <button onClick={() => setVoMap(m => { const n = { ...m }; delete n[cur]; return n })}
+            <button onClick={() => { setVoMap(m => { const n = { ...m }; delete n[cur]; return n }); setVoBlobs(m => { const n = { ...m }; delete n[cur]; return n }) }}
               style={{ ...btn(false), fontSize: 11.5, padding: '7px 11px', color: '#B91C1C' }}>Remove</button>
           </>)}
           {voMap[cur] && voMap[cur].duration > (+scene.duration || 4) && (
@@ -1749,9 +2001,27 @@ function VideoMaker({ toast }) {
           placeholder={scene.type === 'bullets' ? 'One bullet per line (up to 5)' : scene.type === 'outro' ? 'CTA line, e.g. smartioushomeschool.com' : 'Supporting sentence'}
           style={{ ...inputStyle, resize: 'vertical' }} />
 
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
           <button onClick={preview} disabled={playing || rendering} style={btn(false)}>{playing ? 'Playing...' : 'Preview all'}</button>
           <button onClick={exportVideo} disabled={playing || rendering} style={btn(true)}>{rendering ? 'Rendering ' + Math.round(progress * 100) + '%' : 'Export video'}</button>
+          <button onClick={() => {
+            // Render THIS scene's final frame at full resolution, then
+            // scale to YouTube's preview spec: 1280 wide JPEG.
+            const full = document.createElement('canvas')
+            full.width = W; full.height = H
+            renderScene(full.getContext('2d'), W, H, deck(scene), medias[cur], 1)
+            const tw = 1280, th = Math.round(1280 * H / W)
+            const out = document.createElement('canvas')
+            out.width = tw; out.height = th
+            const octx = out.getContext('2d')
+            octx.imageSmoothingEnabled = true; octx.imageSmoothingQuality = 'high'
+            octx.drawImage(full, 0, 0, tw, th)
+            const a = document.createElement('a')
+            a.download = 'smartious-thumbnail.jpg'
+            a.href = out.toDataURL('image/jpeg', 0.92)
+            a.click()
+            toast?.('Thumbnail saved — upload it as the video preview when posting to YouTube.')
+          }} disabled={playing || rendering} style={btn(false)}>Use scene as thumbnail</button>
         </div>
         <div style={{ fontSize: 10.5, color: TOKENS.s500, lineHeight: 1.55 }}>
           The export downloads a video file rendered on this computer — nothing is uploaded anywhere. It posts directly to YouTube, Facebook, Instagram and TikTok; for WhatsApp status convert to MP4 with any free converter.
