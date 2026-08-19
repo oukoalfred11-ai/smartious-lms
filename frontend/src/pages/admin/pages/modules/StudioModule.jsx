@@ -325,7 +325,14 @@ function renderCardMotion(ctx, W, H, card, media, p, fx = 'rise') {
   const subC = onImg || dark ? 'rgba(255,255,255,.86)' : 'rgba(8,12,20,.65)'
   const fam = card.font || 'Montserrat'
   const M = W * 0.085
-  let y = H * (card.template === 'stat' ? 0.3 : 0.28)
+  // Text block position varies card to card so a series never reads
+  // as the same frame repeated: top / middle / lower / center.
+  const layout = card.layout || 'top'
+  const yBase = { top: 0.28, middle: 0.4, lower: 0.53, center: 0.36 }[layout] ?? 0.28
+  const centered = layout === 'center'
+  // Centered layouts start each line at its measured midpoint
+  const xFor = (line) => centered ? Math.max(M, (W - ctx.measureText(line).width) / 2) : M
+  let y = H * (card.template === 'stat' ? Math.min(yBase + 0.02, 0.6) : yBase)
 
   const drawHeadLine = (ln, x, yy, pp, lines) => {
     if (fx === 'type') drawTypewriter(ctx, ln.text, x, yy, ln.share ? (pp - ln.i * ln.share) / ln.share : pp)
@@ -339,7 +346,8 @@ function renderCardMotion(ctx, W, H, card, media, p, fx = 'rise') {
       ctx.globalAlpha = clamp01(kp)
       ctx.fillStyle = GOLD
       ctx.font = `800 ${B * 0.028}px Montserrat, Arial, sans-serif`
-      ctx.fillText(String(card.kicker).toUpperCase(), M, y + (1 - clamp01(kp)) * 20)
+      const kTxt = String(card.kicker).toUpperCase()
+      ctx.fillText(kTxt, xFor(kTxt), y + (1 - clamp01(kp)) * 20)
       ctx.globalAlpha = 1
     }
     y += B * 0.055
@@ -351,13 +359,14 @@ function renderCardMotion(ctx, W, H, card, media, p, fx = 'rise') {
     const statFg = onImg || dark ? '#FFFFFF' : '#5A1424'
     if (hp > 0) {
       const sc = 0.7 + 0.3 * easeOut(hp)
+      ctx.font = headlineFont(B * 0.19, fam)
+      const numTxt = headlineText(card.headline || '250+', fam)
       ctx.save()
       ctx.globalAlpha = clamp01(hp * 1.6)
-      ctx.translate(M, y + B * 0.17)
+      ctx.translate(xFor(numTxt), y + B * 0.17)
       ctx.scale(sc, sc)
       ctx.fillStyle = statFg
-      ctx.font = headlineFont(B * 0.19, fam)
-      ctx.fillText(headlineText(card.headline || '250+', fam), 0, 0)
+      ctx.fillText(numTxt, 0, 0)
       ctx.restore()
     }
     y += B * 0.22
@@ -365,7 +374,7 @@ function renderCardMotion(ctx, W, H, card, media, p, fx = 'rise') {
       ctx.fillStyle = subC
       ctx.font = `600 ${B * 0.042}px Arial`
       const lines = wrapText(ctx, card.body, W - 2 * M)
-      lines.forEach((ln, i) => drawWordsRise(ctx, ln, M, y + B * 0.02 + i * B * 0.058, clamp01(bp - i * 0.12), 0.06))
+      lines.forEach((ln, i) => drawWordsRise(ctx, ln, xFor(ln), y + B * 0.02 + i * B * 0.058, clamp01(bp - i * 0.12), 0.06))
     }
   } else if (card.template === 'quote') {
     ctx.globalAlpha = clamp01(hp * 2)
@@ -381,14 +390,15 @@ function renderCardMotion(ctx, W, H, card, media, p, fx = 'rise') {
     const lines = wrapText(ctx, headlineText(card.headline, fam), W - 2 * M)
     let qy = y + B * 0.15
     lines.forEach((ln, i) => {
-      drawHeadLine({ text: ln, i, share: fx === 'type' ? 1 / lines.length : 0 }, M, qy, hp, lines)
+      drawHeadLine({ text: ln, i, share: fx === 'type' ? 1 / lines.length : 0 }, xFor(ln), qy, hp, lines)
       qy += qSize * 1.38
     })
     if (card.body && bp > 0) {
       ctx.globalAlpha = clamp01(bp)
       ctx.fillStyle = GOLD
       ctx.font = `700 ${B * 0.034}px Arial`
-      ctx.fillText('\u2014 ' + card.body, M, qy + B * 0.05)
+      const att = '\u2014 ' + card.body
+      ctx.fillText(att, xFor(att), qy + B * 0.05)
       ctx.globalAlpha = 1
     }
   } else {
@@ -398,17 +408,14 @@ function renderCardMotion(ctx, W, H, card, media, p, fx = 'rise') {
     const lines = wrapText(ctx, headlineText(card.headline, fam), W - 2 * M)
     let hy = y + B * 0.06
     lines.forEach((ln, i) => {
-      drawHeadLine({ text: ln, i, share: fx === 'type' ? 1 / lines.length : 0 }, M, hy, hp, lines)
+      drawHeadLine({ text: ln, i, share: fx === 'type' ? 1 / lines.length : 0 }, xFor(ln), hy, hp, lines)
       hy += hSize * 1.28
     })
-    const up = clamp01((p - 0.32) / 0.15)
-    ctx.fillStyle = GOLD
-    ctx.fillRect(M, hy - B * 0.02, B * 0.14 * easeOut(up), B * 0.009)
     if (card.body && bp > 0) {
       ctx.fillStyle = subC
       ctx.font = `500 ${B * 0.038}px Arial`
       const bl = wrapText(ctx, card.body, W - 2 * M)
-      bl.forEach((ln, i) => drawWordsRise(ctx, ln, M, hy + B * 0.045 + i * B * 0.056, clamp01(bp - i * 0.12), 0.05))
+      bl.forEach((ln, i) => drawWordsRise(ctx, ln, xFor(ln), hy + B * 0.03 + i * B * 0.056, clamp01(bp - i * 0.12), 0.05))
     }
   }
 }
@@ -505,9 +512,14 @@ function renderCardBase(ctx, W, H, card, media, pAnim = 1) {
   }
   ctx.fillStyle = onDark ? 'rgba(255,255,255,.55)' : 'rgba(8,12,20,.5)'
   ctx.font = `700 ${B * 0.026}px Arial`
-  ctx.fillText((card.footer || 'smartioushomeschool.com').toUpperCase(), M, H - M * 0.7)
-  ctx.fillStyle = GOLD
-  ctx.fillRect(M, H - M * 0.7 + B * 0.014, B * 0.055, B * 0.006)
+  const ft = (card.footer || 'smartioushomeschool.com').toUpperCase()
+  if (card.layout === 'center') {
+    ctx.textAlign = 'center'
+    ctx.fillText(ft, W / 2, H - M * 0.7)
+    ctx.textAlign = 'left'
+  } else {
+    ctx.fillText(ft, M, H - M * 0.7)
+  }
 }
 
 // Static card render: the motion renderer at its final frame — one
@@ -552,9 +564,6 @@ function renderScene(ctx, W, H, scene, media, p) {
         ctx.fillText(String(scene.headline || 'HOMESCHOOL GLOBAL').toUpperCase(), W / 2, H * 0.44 + B * 0.072)
         ctx.textAlign = 'left'
         ctx.globalAlpha = 1
-        ctx.fillStyle = GOLD
-        const uw = B * 0.24 * easeOut((p - 0.4) * 2)
-        ctx.fillRect(W / 2 - uw / 2, H * 0.44 + B * 0.1, uw, B * 0.007)
       }
     } else {
       const cs = B * 0.24
@@ -572,9 +581,6 @@ function renderScene(ctx, W, H, scene, media, p) {
         ctx.fillText(scene.headline || 'Homeschool Global', W / 2, H * 0.28 + cs + B * 0.155)
         ctx.textAlign = 'left'
         ctx.globalAlpha = 1
-        ctx.fillStyle = GOLD
-        const uw = B * 0.24 * easeOut((p - 0.4) * 2)
-        ctx.fillRect(W / 2 - uw / 2, H * 0.28 + cs + B * 0.185, uw, B * 0.008)
       }
     }
     ctx.globalAlpha = 1
@@ -1058,9 +1064,12 @@ export default function StudioModule({ toast }) {
 // ═══════════════════════════════════════════════════════════
 // FLYER CARD MAKER
 // ═══════════════════════════════════════════════════════════
+const LAYOUTS = [['top', 'Top'], ['middle', 'Middle'], ['lower', 'Lower'], ['center', 'Centered']]
+
 const newCard = (i, total) => ({
   template: 'idea', bg: 'crimson', tint: 'crimson', useImage: false,
   fitMode: 'cover', grade: 'cinema', popCorner: i % 4, textFx: 'rise',
+  layout: ['top', 'center', 'middle', 'lower'][i % 4],
   kicker: 'Study tip ' + (i + 1), headline: 'Your idea headline here',
   body: 'Explain the idea in one or two clear sentences. Keep it short — the card does the talking.',
   footer: 'smartioushomeschool.com', seriesNo: i + 1, seriesTotal: total,
@@ -1348,6 +1357,13 @@ function CardMaker({ toast }) {
           <option value="quote">Quote card</option>
         </select>
 
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+          <span style={{ fontSize: 11, fontWeight: 800, color: TOKENS.s500 }}>Text position</span>
+          {LAYOUTS.map(([k, l]) => (
+            <button key={k} onClick={() => upd({ layout: k })} style={{ ...btn((card.layout || 'top') === k), padding: '7px 10px', fontSize: 11 }}>{l}</button>
+          ))}
+        </div>
+
         <div style={{ display: 'flex', gap: 6 }}>
           {BACKGROUNDS.map(b => (
             <button key={b.id} onClick={() => upd({ bg: b.id, useImage: false })} style={{
@@ -1447,6 +1463,7 @@ const newScene = (type = 'text') => ({
   type, bg: type === 'title' ? 'crimson' : 'mesh', tint: 'crimson',
   useImage: false, duration: type === 'title' ? 3 : 5,
   fitMode: 'cover', grade: 'cinema', popCorner: Math.floor(Math.random() * 4), textFx: 'rise',
+  layout: ['top', 'center', 'middle', 'lower'][Math.floor(Math.random() * 4)],
   kicker: type === 'bullets' ? 'Why Smartious' : 'Smartious Homeschool',
   headline: type === 'title' ? 'Homeschool Global' : type === 'outro' ? 'Enrol for 2026' : type === 'stat' ? '250+' : 'Your message here',
   body: type === 'bullets' ? 'Cambridge, IGCSE, IB and CBC\nLive classes with real teachers\nLearn from anywhere in the world' : type === 'outro' ? 'smartioushomeschool.com' : 'One clear supporting sentence goes here.',
@@ -1716,6 +1733,9 @@ function VideoMaker({ toast }) {
             ))}
             {(scene.type === 'text' || scene.type === 'stat') && [['rise', 'Rise'], ['pop', 'Pop'], ['type', 'Type']].map(([k, l]) => (
               <button key={k} onClick={() => upd({ textFx: k })} style={{ ...btn((scene.textFx || 'rise') === k), padding: '7px 10px', fontSize: 11 }}>{l}</button>
+            ))}
+            {(scene.type === 'text' || scene.type === 'stat') && LAYOUTS.map(([k, l]) => (
+              <button key={k} onClick={() => upd({ layout: k })} style={{ ...btn((scene.layout || 'top') === k), padding: '7px 10px', fontSize: 11 }}>{l}</button>
             ))}
           </div>
         )}
