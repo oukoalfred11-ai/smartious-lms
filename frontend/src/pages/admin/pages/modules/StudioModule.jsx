@@ -31,27 +31,158 @@ const GOLD = '#C9973A'
 const INK = '#080C14'
 const BONE = '#FDFAF4'
 
+// Pre-rendered film grain (cheap even at 4K: tiled pattern)
+let _grain = null
+function grainPattern(ctx) {
+  if (!_grain) {
+    const c = document.createElement('canvas')
+    c.width = 256; c.height = 256
+    const g = c.getContext('2d')
+    const img = g.createImageData(256, 256)
+    for (let i = 0; i < img.data.length; i += 4) {
+      const v = 118 + Math.random() * 20
+      img.data[i] = v; img.data[i + 1] = v; img.data[i + 2] = v
+      img.data[i + 3] = Math.random() * 26
+    }
+    g.putImageData(img, 0, 0)
+    _grain = c
+  }
+  return ctx.createPattern(_grain, 'repeat')
+}
+const vignette = (ctx, w, h, strength = 0.5) => {
+  const g = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.42, w / 2, h / 2, Math.max(w, h) * 0.78)
+  g.addColorStop(0, 'rgba(0,0,0,0)')
+  g.addColorStop(1, 'rgba(0,0,0,' + strength + ')')
+  ctx.fillStyle = g; ctx.fillRect(0, 0, w, h)
+}
+const blob = (ctx, x, y, r, colour) => {
+  const g = ctx.createRadialGradient(x, y, 0, x, y, r)
+  g.addColorStop(0, colour); g.addColorStop(1, 'rgba(0,0,0,0)')
+  ctx.fillStyle = g
+  ctx.fillRect(x - r, y - r, r * 2, r * 2)
+}
+
 const BACKGROUNDS = [
-  { id: 'crimson', label: 'Crimson', paint: (ctx, w, h) => {
-    const g = ctx.createLinearGradient(0, 0, w, h)
-    g.addColorStop(0, '#A8203A'); g.addColorStop(1, CRIMSON_DK)
+  // Deep, desaturated crimson: premium instead of shouting
+  { id: 'crimson', label: 'Deep crimson', paint: (ctx, w, h) => {
+    const g = ctx.createLinearGradient(0, 0, w * 0.4, h)
+    g.addColorStop(0, '#5A1424'); g.addColorStop(0.55, '#3D0D19'); g.addColorStop(1, '#22070E')
     ctx.fillStyle = g; ctx.fillRect(0, 0, w, h)
+    blob(ctx, w * 0.85, h * 0.12, Math.min(w, h) * 0.55, 'rgba(201,151,58,.10)')
+    vignette(ctx, w, h, 0.45)
+    ctx.fillStyle = grainPattern(ctx); ctx.fillRect(0, 0, w, h)
   }},
   { id: 'ink', label: 'Ink', paint: (ctx, w, h) => {
     const g = ctx.createLinearGradient(0, 0, 0, h)
-    g.addColorStop(0, '#141B2B'); g.addColorStop(1, INK)
+    g.addColorStop(0, '#10182B'); g.addColorStop(1, '#05070D')
     ctx.fillStyle = g; ctx.fillRect(0, 0, w, h)
+    blob(ctx, w * 0.15, h * 0.9, Math.min(w, h) * 0.6, 'rgba(139,26,46,.14)')
+    vignette(ctx, w, h, 0.35)
+    ctx.fillStyle = grainPattern(ctx); ctx.fillRect(0, 0, w, h)
+  }},
+  { id: 'mesh', label: 'Mesh dark', paint: (ctx, w, h) => {
+    ctx.fillStyle = '#0B0E16'; ctx.fillRect(0, 0, w, h)
+    const m = Math.min(w, h)
+    blob(ctx, w * 0.2, h * 0.18, m * 0.7, 'rgba(139,26,46,.5)')
+    blob(ctx, w * 0.85, h * 0.35, m * 0.65, 'rgba(201,151,58,.28)')
+    blob(ctx, w * 0.55, h * 0.9, m * 0.8, 'rgba(46,26,80,.45)')
+    blob(ctx, w * 0.1, h * 0.75, m * 0.5, 'rgba(20,60,90,.4)')
+    vignette(ctx, w, h, 0.4)
+    ctx.fillStyle = grainPattern(ctx); ctx.fillRect(0, 0, w, h)
+  }},
+  { id: 'waves', label: 'Waves', paint: (ctx, w, h) => {
+    const g = ctx.createLinearGradient(0, 0, 0, h)
+    g.addColorStop(0, '#191227'); g.addColorStop(1, '#070510')
+    ctx.fillStyle = g; ctx.fillRect(0, 0, w, h)
+    const cols = ['rgba(139,26,46,.35)', 'rgba(201,151,58,.22)', 'rgba(90,60,140,.25)', 'rgba(139,26,46,.18)']
+    cols.forEach((c, i) => {
+      const y0 = h * (0.45 + i * 0.14)
+      ctx.fillStyle = c
+      ctx.beginPath()
+      ctx.moveTo(0, y0)
+      ctx.bezierCurveTo(w * 0.3, y0 - h * 0.12, w * 0.6, y0 + h * 0.1, w, y0 - h * 0.06)
+      ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath(); ctx.fill()
+    })
+    vignette(ctx, w, h, 0.3)
+    ctx.fillStyle = grainPattern(ctx); ctx.fillRect(0, 0, w, h)
+  }},
+  { id: 'geo', label: 'Geometric', paint: (ctx, w, h) => {
+    ctx.fillStyle = '#0D1017'; ctx.fillRect(0, 0, w, h)
+    const m = Math.min(w, h)
+    ctx.save()
+    ctx.translate(w * 0.78, h * 0.2); ctx.rotate(0.5)
+    ctx.strokeStyle = 'rgba(201,151,58,.28)'; ctx.lineWidth = m * 0.004
+    for (let i = 0; i < 4; i++) ctx.strokeRect(-m * (0.14 + i * 0.09), -m * (0.14 + i * 0.09), m * (0.28 + i * 0.18), m * (0.28 + i * 0.18))
+    ctx.restore()
+    ctx.save()
+    ctx.translate(w * 0.12, h * 0.85); ctx.rotate(-0.35)
+    ctx.strokeStyle = 'rgba(139,26,46,.4)'
+    for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.arc(0, 0, m * (0.12 + i * 0.09), 0, Math.PI * 2); ctx.stroke() }
+    ctx.restore()
+    vignette(ctx, w, h, 0.35)
+    ctx.fillStyle = grainPattern(ctx); ctx.fillRect(0, 0, w, h)
   }},
   { id: 'bone', label: 'Bone', paint: (ctx, w, h) => {
     ctx.fillStyle = BONE; ctx.fillRect(0, 0, w, h)
+    blob(ctx, w * 0.9, h * 0.1, Math.min(w, h) * 0.5, 'rgba(201,151,58,.14)')
+    blob(ctx, w * 0.08, h * 0.92, Math.min(w, h) * 0.45, 'rgba(139,26,46,.08)')
   }},
   { id: 'gold', label: 'Gold band', paint: (ctx, w, h) => {
-    ctx.fillStyle = INK; ctx.fillRect(0, 0, w, h)
+    const g0 = ctx.createLinearGradient(0, 0, 0, h)
+    g0.addColorStop(0, '#10131C'); g0.addColorStop(1, '#07090F')
+    ctx.fillStyle = g0; ctx.fillRect(0, 0, w, h)
     const g = ctx.createLinearGradient(0, h * 0.62, 0, h)
-    g.addColorStop(0, GOLD); g.addColorStop(1, '#8A6A1E')
+    g.addColorStop(0, '#B0842E'); g.addColorStop(1, '#6E5418')
     ctx.fillStyle = g; ctx.fillRect(0, h * 0.66, w, h * 0.34)
+    vignette(ctx, w, h, 0.3)
+    ctx.fillStyle = grainPattern(ctx); ctx.fillRect(0, 0, w, h)
   }},
 ]
+
+// Typography: real display fonts, loaded once from Google Fonts.
+const FONTS = [
+  ['Montserrat', 'Bold modern'],
+  ['Bebas Neue', 'Poster caps'],
+  ['Playfair Display', 'Elegant serif'],
+  ['Georgia', 'Classic serif'],
+]
+let _fontsLoaded = false
+async function loadBrandFonts() {
+  if (_fontsLoaded) return
+  if (!document.getElementById('sm-studio-fonts')) {
+    const l = document.createElement('link')
+    l.id = 'sm-studio-fonts'; l.rel = 'stylesheet'
+    l.href = 'https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&family=Bebas+Neue&family=Playfair+Display:wght@700;800&display=swap'
+    document.head.appendChild(l)
+  }
+  try {
+    await Promise.all([
+      document.fonts.load('900 64px Montserrat'),
+      document.fonts.load('400 64px "Bebas Neue"'),
+      document.fonts.load('800 64px "Playfair Display"'),
+      document.fonts.ready,
+    ])
+  } catch (e) { /* system fallbacks still work */ }
+  _fontsLoaded = true
+}
+const headlineFont = (px, family) => {
+  if (family === 'Bebas Neue') return `400 ${px * 1.14}px "Bebas Neue", Impact, sans-serif`
+  if (family === 'Montserrat') return `900 ${px}px Montserrat, Arial, sans-serif`
+  if (family === 'Playfair Display') return `800 ${px}px "Playfair Display", Georgia, serif`
+  return `800 ${px}px Georgia, serif`
+}
+const headlineText = (t, family) => family === 'Bebas Neue' ? String(t || '').toUpperCase() : t
+
+// Colour grades applied to photo/video backgrounds
+const GRADES = [
+  ['none', 'None', ''],
+  ['cinema', 'Cinematic', 'contrast(1.12) saturate(1.22) brightness(0.98)'],
+  ['warm', 'Warm', 'sepia(0.22) saturate(1.18) contrast(1.06)'],
+  ['cool', 'Cool', 'saturate(1.05) hue-rotate(-10deg) contrast(1.08) brightness(1.02)'],
+  ['noir', 'Noir', 'grayscale(1) contrast(1.2) brightness(0.98)'],
+]
+const gradeFilter = (id) => (GRADES.find(g => g[0] === id) || GRADES[0])[2]
+
 const bgById = (id) => BACKGROUNDS.find(b => b.id === id) || BACKGROUNDS[0]
 const isDark = (id) => id !== 'bone'
 
@@ -160,335 +291,343 @@ function drawTypewriter(ctx, text, x, y, p) {
   }
 }
 
+// Word-pop: each word scales in from small with alternating corner
+// drift — the "pop from different corners" text energy.
+function drawWordsPop(ctx, text, x, y, p, gap = 0.1) {
+  const words = String(text || '').split(' ')
+  let cx = x
+  const fs = parseFloat(ctx.font) || 40
+  words.forEach((w, i) => {
+    const wp = easeOut(clamp01((p - i * gap) / Math.max(0.15, 1 - i * gap)))
+    const ww = ctx.measureText(w + ' ').width
+    if (wp > 0) {
+      const dx = (i % 2 ? 1 : -1) * (1 - wp) * fs * 0.7
+      const dy = ((i % 3) - 1) * (1 - wp) * fs * 0.55
+      ctx.save()
+      ctx.globalAlpha *= wp
+      ctx.translate(cx + ww / 2 + dx, y - fs * 0.35 + dy)
+      ctx.scale(0.4 + 0.6 * wp, 0.4 + 0.6 * wp)
+      ctx.fillText(w, -ww / 2, fs * 0.35)
+      ctx.restore()
+    }
+    cx += ww
+  })
+}
+
 // Animated version of renderCard: p 0..1 across the card's screen
 // time; all text has revealed by p ~ 0.55 and holds to the end.
 function renderCardMotion(ctx, W, H, card, media, p, fx = 'rise') {
-  // Static base: background, photo + tint, header, footer
-  renderCardBase(ctx, W, H, card, media)
+  renderCardBase(ctx, W, H, card, media, p)
+  const B = Math.min(W, H)
   const dark = isDark(card.bg)
   const onImg = card.useImage && media
   const fg = onImg || dark ? '#FFFFFF' : INK
   const subC = onImg || dark ? 'rgba(255,255,255,.86)' : 'rgba(8,12,20,.65)'
+  const fam = card.font || 'Montserrat'
   const M = W * 0.085
   let y = H * (card.template === 'stat' ? 0.3 : 0.28)
 
-  // Kicker
+  const drawHeadLine = (ln, x, yy, pp, lines) => {
+    if (fx === 'type') drawTypewriter(ctx, ln.text, x, yy, ln.share ? (pp - ln.i * ln.share) / ln.share : pp)
+    else if (fx === 'pop') drawWordsPop(ctx, ln.text, x, yy, clamp01(pp - ln.i * 0.14))
+    else drawWordsRise(ctx, ln.text, x, yy, clamp01(pp - ln.i * 0.14), 0.1)
+  }
+
   if (card.kicker) {
     const kp = easeOut(p / 0.14)
     if (kp > 0) {
       ctx.globalAlpha = clamp01(kp)
       ctx.fillStyle = GOLD
-      ctx.font = `800 ${W * 0.028}px Arial`
+      ctx.font = `800 ${B * 0.028}px Montserrat, Arial, sans-serif`
       ctx.fillText(String(card.kicker).toUpperCase(), M, y + (1 - clamp01(kp)) * 20)
       ctx.globalAlpha = 1
     }
-    y += W * 0.055
+    y += B * 0.055
   }
-  const hp = clamp01((p - 0.08) / 0.4)   // headline window
-  const bp = clamp01((p - 0.3) / 0.35)   // body window
+  const hp = clamp01((p - 0.08) / 0.4)
+  const bp = clamp01((p - 0.3) / 0.35)
 
   if (card.template === 'stat') {
-    const statFg = onImg || dark ? '#FFFFFF' : CRIMSON
-    // Number pops with a scale settle
+    const statFg = onImg || dark ? '#FFFFFF' : '#5A1424'
     if (hp > 0) {
       const sc = 0.7 + 0.3 * easeOut(hp)
       ctx.save()
       ctx.globalAlpha = clamp01(hp * 1.6)
-      ctx.translate(M, y + W * 0.17)
+      ctx.translate(M, y + B * 0.17)
       ctx.scale(sc, sc)
       ctx.fillStyle = statFg
-      ctx.font = `900 ${W * 0.19}px Georgia, serif`
-      ctx.fillText(card.headline || '250+', 0, 0)
+      ctx.font = headlineFont(B * 0.19, fam)
+      ctx.fillText(headlineText(card.headline || '250+', fam), 0, 0)
       ctx.restore()
     }
-    y += W * 0.22
+    y += B * 0.22
     if (bp > 0) {
       ctx.fillStyle = subC
-      ctx.font = `600 ${W * 0.042}px Arial`
+      ctx.font = `600 ${B * 0.042}px Arial`
       const lines = wrapText(ctx, card.body, W - 2 * M)
-      lines.forEach((ln, i) => drawWordsRise(ctx, ln, M, y + W * 0.02 + i * W * 0.058, clamp01(bp - i * 0.12) , 0.06))
+      lines.forEach((ln, i) => drawWordsRise(ctx, ln, M, y + B * 0.02 + i * B * 0.058, clamp01(bp - i * 0.12), 0.06))
     }
   } else if (card.template === 'quote') {
     ctx.globalAlpha = clamp01(hp * 2)
     ctx.fillStyle = GOLD
-    ctx.font = `900 ${W * 0.16}px Georgia, serif`
-    ctx.fillText('\u201C', M - W * 0.01, y + W * 0.1)
+    ctx.font = `900 ${B * 0.16}px Georgia, serif`
+    ctx.fillText('\u201C', M - B * 0.01, y + B * 0.1)
     ctx.globalAlpha = 1
     ctx.fillStyle = fg
-    ctx.font = `italic 600 ${W * 0.052}px Georgia, serif`
-    const lines = wrapText(ctx, card.headline, W - 2 * M)
-    let qy = y + W * 0.15
+    const qSize = fx === 'type' ? B * 0.044 : B * 0.052
+    ctx.font = fam === 'Playfair Display' || fam === 'Georgia'
+      ? `italic 700 ${qSize}px ${fam === 'Georgia' ? 'Georgia' : '"Playfair Display", Georgia'}, serif`
+      : headlineFont(qSize, fam)
+    const lines = wrapText(ctx, headlineText(card.headline, fam), W - 2 * M)
+    let qy = y + B * 0.15
     lines.forEach((ln, i) => {
-      if (fx === 'type') {
-        const share = 1 / lines.length
-        drawTypewriter(ctx, ln, M, qy, (hp - i * share) / share)
-      } else {
-        drawWordsRise(ctx, ln, M, qy, clamp01(hp - i * 0.14), 0.1)
-      }
-      qy += W * 0.072
+      drawHeadLine({ text: ln, i, share: fx === 'type' ? 1 / lines.length : 0 }, M, qy, hp, lines)
+      qy += qSize * 1.38
     })
     if (card.body && bp > 0) {
       ctx.globalAlpha = clamp01(bp)
       ctx.fillStyle = GOLD
-      ctx.font = `700 ${W * 0.034}px Arial`
-      ctx.fillText('\u2014 ' + card.body, M, qy + W * 0.05)
+      ctx.font = `700 ${B * 0.034}px Arial`
+      ctx.fillText('\u2014 ' + card.body, M, qy + B * 0.05)
       ctx.globalAlpha = 1
     }
   } else {
-    // Idea / announcement
     ctx.fillStyle = fg
-    ctx.font = `800 ${W * 0.064}px Georgia, serif`
-    const lines = wrapText(ctx, card.headline, W - 2 * M)
-    let hy = y + W * 0.06
+    const hSize = fx === 'type' ? B * 0.05 : B * 0.064
+    ctx.font = headlineFont(hSize, fam)
+    const lines = wrapText(ctx, headlineText(card.headline, fam), W - 2 * M)
+    let hy = y + B * 0.06
     lines.forEach((ln, i) => {
-      if (fx === 'type') {
-        const share = 1 / lines.length
-        drawTypewriter(ctx, ln, M, hy, (hp - i * share) / share)
-      } else {
-        drawWordsRise(ctx, ln, M, hy, clamp01(hp - i * 0.14), 0.1)
-      }
-      hy += W * 0.082
+      drawHeadLine({ text: ln, i, share: fx === 'type' ? 1 / lines.length : 0 }, M, hy, hp, lines)
+      hy += hSize * 1.28
     })
-    // Gold underline draws after the headline
     const up = clamp01((p - 0.32) / 0.15)
     ctx.fillStyle = GOLD
-    ctx.fillRect(M, hy - W * 0.028, W * 0.14 * easeOut(up), W * 0.009)
+    ctx.fillRect(M, hy - B * 0.02, B * 0.14 * easeOut(up), B * 0.009)
     if (card.body && bp > 0) {
       ctx.fillStyle = subC
-      ctx.font = `500 ${W * 0.038}px Arial`
+      ctx.font = `500 ${B * 0.038}px Arial`
       const bl = wrapText(ctx, card.body, W - 2 * M)
-      bl.forEach((ln, i) => drawWordsRise(ctx, ln, M, hy + W * 0.035 + i * W * 0.056, clamp01(bp - i * 0.12), 0.05))
+      bl.forEach((ln, i) => drawWordsRise(ctx, ln, M, hy + B * 0.045 + i * B * 0.056, clamp01(bp - i * 0.12), 0.05))
     }
   }
 }
 
 // The non-text parts of a card, shared by static and motion renders.
-function renderCardBase(ctx, W, H, card, media) {
+// pAnim (0..1) drives the media corner-pop entrance; static callers
+// pass 1. Type sizes scale from B = min(W, H) so 4K landscape and
+// portrait both set correctly.
+function renderCardBase(ctx, W, H, card, media, pAnim = 1) {
+  const B = Math.min(W, H)
   bgById(card.bg).paint(ctx, W, H)
   const dark = isDark(card.bg)
   const M = W * 0.085
+  ctx.imageSmoothingEnabled = true
+  ctx.imageSmoothingQuality = 'high'
+
   if (card.useImage && media) {
     const iw = media.videoWidth || media.width, ih = media.videoHeight || media.height
     if (iw && ih) {
-      const scale = Math.max(W / iw, H / ih)
-      ctx.drawImage(media, (W - iw * scale) / 2, (H - ih * scale) / 2, iw * scale, ih * scale)
+      // Corner-pop entrance: the picture arrives from one corner,
+      // settling from a slight over-zoom.
+      const ep = easeOut(Math.min(1, pAnim / 0.28))
+      const corner = card.popCorner || 0
+      const cdx = [ -1, 1, -1, 1 ][corner], cdy = [ -1, -1, 1, 1 ][corner]
+      const ox = (1 - ep) * cdx * W * 0.1
+      const oy = (1 - ep) * cdy * H * 0.1
+      const zoom = 1 + (1 - ep) * 0.12
+
+      ctx.save()
+      ctx.globalAlpha = Math.min(1, ep * 1.6)
+      const filt = gradeFilter(card.grade)
+      if (card.fitMode === 'fit') {
+        // Sharp contained picture over a blurred cover backdrop —
+        // small phone videos keep their true resolution instead of
+        // being blown up and smeared.
+        const cover = Math.max(W / iw, H / ih)
+        try { ctx.filter = (filt ? filt + ' ' : '') + 'blur(' + Math.round(B * 0.03) + 'px) brightness(0.6)' } catch (e) { /* old browser */ }
+        ctx.drawImage(media, (W - iw * cover) / 2, (H - ih * cover) / 2, iw * cover, ih * cover)
+        ctx.filter = filt || 'none'
+        const fit = Math.min(W / iw, H / ih)
+        ctx.translate(ox, oy)
+        ctx.drawImage(media, (W - iw * fit * zoom) / 2, (H - ih * fit * zoom) / 2, iw * fit * zoom, ih * fit * zoom)
+      } else {
+        ctx.filter = filt || 'none'
+        const scale = Math.max(W / iw, H / ih) * zoom
+        ctx.drawImage(media, (W - iw * scale) / 2 + ox, (H - ih * scale) / 2 + oy, iw * scale, ih * scale)
+      }
+      ctx.filter = 'none'
+      ctx.restore()
+
       const tint = ctx.createLinearGradient(0, 0, 0, H)
-      if (card.tint === 'crimson') { tint.addColorStop(0, 'rgba(139,26,46,.55)'); tint.addColorStop(1, 'rgba(60,8,18,.85)') }
-      else if (card.tint === 'gold') { tint.addColorStop(0, 'rgba(30,20,4,.45)'); tint.addColorStop(1, 'rgba(140,100,20,.72)') }
-      else { tint.addColorStop(0, 'rgba(8,12,20,.42)'); tint.addColorStop(1, 'rgba(8,12,20,.85)') }
+      if (card.tint === 'crimson') { tint.addColorStop(0, 'rgba(90,20,36,.5)'); tint.addColorStop(1, 'rgba(34,7,14,.85)') }
+      else if (card.tint === 'gold') { tint.addColorStop(0, 'rgba(30,20,4,.42)'); tint.addColorStop(1, 'rgba(120,88,24,.7)') }
+      else { tint.addColorStop(0, 'rgba(8,12,20,.4)'); tint.addColorStop(1, 'rgba(5,7,13,.85)') }
       ctx.fillStyle = tint; ctx.fillRect(0, 0, W, H)
+      if (card.grade === 'cinema') vignette(ctx, W, H, 0.4)
     }
   }
-  const crest = W * 0.075
-  drawCrest(ctx, M, M * 0.8, crest)
-  ctx.fillStyle = card.useImage || dark ? '#FFFFFF' : INK
-  ctx.font = `700 ${W * 0.036}px Georgia, serif`
-  ctx.fillText('Smart', M + crest + W * 0.018, M * 0.8 + crest * 0.62)
-  const smW = ctx.measureText('Smart').width
-  ctx.fillStyle = GOLD
-  ctx.font = `italic 500 ${W * 0.036}px Georgia, serif`
-  ctx.fillText('ious', M + crest + W * 0.018 + smW * 1.18, M * 0.8 + crest * 0.62)
+
+  // Branding header: crest lockup, bold wordmark, or clean
+  const onDark = card.useImage || dark
+  if (card.brand !== 'none') {
+    if (card.brand === 'word') {
+      ctx.fillStyle = onDark ? '#FFFFFF' : INK
+      ctx.font = `900 ${B * 0.034}px Montserrat, Arial, sans-serif`
+      ctx.fillText('SMARTIOUS', M, M * 0.8 + B * 0.03)
+      const ww = ctx.measureText('SMARTIOUS').width
+      ctx.fillStyle = GOLD
+      ctx.fillRect(M + ww + B * 0.014, M * 0.8 + B * 0.006, B * 0.016, B * 0.016)
+    } else {
+      const crest = B * 0.075
+      drawCrest(ctx, M, M * 0.8, crest)
+      ctx.fillStyle = onDark ? '#FFFFFF' : INK
+      ctx.font = `700 ${B * 0.036}px Georgia, serif`
+      ctx.fillText('Smart', M + crest + B * 0.018, M * 0.8 + crest * 0.62)
+      const smW = ctx.measureText('Smart').width
+      ctx.fillStyle = GOLD
+      ctx.font = `italic 500 ${B * 0.036}px Georgia, serif`
+      ctx.fillText('ious', M + crest + B * 0.018 + smW, M * 0.8 + crest * 0.62)
+    }
+  }
   if (card.seriesTotal > 1) {
     const chipTxt = card.seriesNo + ' / ' + card.seriesTotal
-    ctx.font = `800 ${W * 0.03}px Arial`
-    const cw = ctx.measureText(chipTxt).width + W * 0.045
+    ctx.font = `800 ${B * 0.03}px Arial`
+    const cw = ctx.measureText(chipTxt).width + B * 0.045
     ctx.fillStyle = GOLD
     ctx.beginPath()
-    ctx.roundRect ? ctx.roundRect(W - M - cw, M * 0.78, cw, W * 0.055, W * 0.028) : ctx.rect(W - M - cw, M * 0.78, cw, W * 0.055)
+    ctx.roundRect ? ctx.roundRect(W - M - cw, M * 0.78, cw, B * 0.055, B * 0.028) : ctx.rect(W - M - cw, M * 0.78, cw, B * 0.055)
     ctx.fill()
     ctx.fillStyle = INK
     ctx.textAlign = 'center'
-    ctx.fillText(chipTxt, W - M - cw / 2, M * 0.78 + W * 0.038)
+    ctx.fillText(chipTxt, W - M - cw / 2, M * 0.78 + B * 0.038)
     ctx.textAlign = 'left'
   }
-  ctx.fillStyle = card.useImage || dark ? 'rgba(255,255,255,.55)' : 'rgba(8,12,20,.5)'
-  ctx.font = `700 ${W * 0.026}px Arial`
+  ctx.fillStyle = onDark ? 'rgba(255,255,255,.55)' : 'rgba(8,12,20,.5)'
+  ctx.font = `700 ${B * 0.026}px Arial`
   ctx.fillText((card.footer || 'smartioushomeschool.com').toUpperCase(), M, H - M * 0.7)
   ctx.fillStyle = GOLD
-  ctx.fillRect(M, H - M * 0.7 + W * 0.014, W * 0.055, W * 0.006)
+  ctx.fillRect(M, H - M * 0.7 + B * 0.014, B * 0.055, B * 0.006)
 }
 
-// ═══════════════════════════════════════════════════════════
-// FLYER CARD RENDERER
-// One card definition -> canvas. p (0..1) is unused for flyers
-// but shared with video scenes so templates can animate.
-// ═══════════════════════════════════════════════════════════
+// Static card render: the motion renderer at its final frame — one
+// code path, so fonts, grading and fit look identical in PNG and video.
 function renderCard(ctx, W, H, card, media, p = 1) {
-  const bg = bgById(card.bg)
-  bg.paint(ctx, W, H)
-  const dark = isDark(card.bg)
-  const fg = dark ? '#FFFFFF' : INK
-  const sub = dark ? 'rgba(255,255,255,.72)' : 'rgba(8,12,20,.65)'
-  const M = W * 0.085
-
-  // Optional uploaded image with brand tint (the "colour layer")
-  if (card.useImage && media) {
-    const iw = media.videoWidth || media.width, ih = media.videoHeight || media.height
-    if (iw && ih) {
-      const scale = Math.max(W / iw, H / ih)
-      ctx.drawImage(media, (W - iw * scale) / 2, (H - ih * scale) / 2, iw * scale, ih * scale)
-      const tint = ctx.createLinearGradient(0, 0, 0, H)
-      if (card.tint === 'crimson') { tint.addColorStop(0, 'rgba(139,26,46,.55)'); tint.addColorStop(1, 'rgba(60,8,18,.85)') }
-      else if (card.tint === 'gold') { tint.addColorStop(0, 'rgba(30,20,4,.45)'); tint.addColorStop(1, 'rgba(140,100,20,.72)') }
-      else { tint.addColorStop(0, 'rgba(8,12,20,.42)'); tint.addColorStop(1, 'rgba(8,12,20,.85)') }
-      ctx.fillStyle = tint; ctx.fillRect(0, 0, W, H)
-    }
-  }
-
-  const slide = (1 - easeOut(p)) * 60
-
-  // Header row: crest + wordmark
-  const crest = W * 0.075
-  drawCrest(ctx, M, M * 0.8, crest)
-  ctx.fillStyle = card.useImage || dark ? '#FFFFFF' : INK
-  ctx.font = `700 ${W * 0.036}px Georgia, serif`
-  ctx.fillText('Smart', M + crest + W * 0.018, M * 0.8 + crest * 0.62)
-  ctx.fillStyle = GOLD
-  ctx.font = `italic 500 ${W * 0.036}px Georgia, serif`
-  ctx.fillText('ious', M + crest + W * 0.018 + ctx.measureText('Smart').width * 1.18, M * 0.8 + crest * 0.62)
-
-  // Series chip "2 / 5"
-  if (card.seriesTotal > 1) {
-    const chipTxt = card.seriesNo + ' / ' + card.seriesTotal
-    ctx.font = `800 ${W * 0.03}px Arial`
-    const cw = ctx.measureText(chipTxt).width + W * 0.045
-    ctx.fillStyle = GOLD
-    ctx.beginPath()
-    ctx.roundRect ? ctx.roundRect(W - M - cw, M * 0.78, cw, W * 0.055, W * 0.028) : ctx.rect(W - M - cw, M * 0.78, cw, W * 0.055)
-    ctx.fill()
-    ctx.fillStyle = INK
-    ctx.textAlign = 'center'
-    ctx.fillText(chipTxt, W - M - cw / 2, M * 0.78 + W * 0.038)
-    ctx.textAlign = 'left'
-  }
-
-  // Kicker
-  let y = H * (card.template === 'stat' ? 0.3 : 0.28)
-  ctx.globalAlpha = p
-  if (card.kicker) {
-    ctx.fillStyle = GOLD
-    ctx.font = `800 ${W * 0.028}px Arial`
-    ctx.fillText(String(card.kicker).toUpperCase(), M, y + slide)
-    y += W * 0.055
-  }
-
-  if (card.template === 'stat') {
-    // Big number template
-    const statFg = card.useImage || dark ? '#FFFFFF' : CRIMSON
-    ctx.fillStyle = statFg
-    ctx.font = `900 ${W * 0.19}px Georgia, serif`
-    ctx.fillText(card.headline || '250+', M, y + W * 0.17 + slide)
-    y += W * 0.22
-    ctx.fillStyle = card.useImage || dark ? 'rgba(255,255,255,.85)' : sub
-    ctx.font = `600 ${W * 0.042}px Arial`
-    y = drawLines(ctx, wrapText(ctx, card.body, W - 2 * M), M, y + W * 0.02 + slide, W * 0.058)
-  } else if (card.template === 'quote') {
-    ctx.fillStyle = GOLD
-    ctx.font = `900 ${W * 0.16}px Georgia, serif`
-    ctx.fillText('\u201C', M - W * 0.01, y + W * 0.1 + slide)
-    ctx.fillStyle = card.useImage || dark ? '#FFFFFF' : INK
-    ctx.font = `italic 600 ${W * 0.052}px Georgia, serif`
-    y = drawLines(ctx, wrapText(ctx, card.headline, W - 2 * M), M, y + W * 0.15 + slide, W * 0.072)
-    if (card.body) {
-      ctx.fillStyle = GOLD
-      ctx.font = `700 ${W * 0.034}px Arial`
-      ctx.fillText('\u2014 ' + card.body, M, y + W * 0.05 + slide)
-    }
-  } else {
-    // Idea / announcement: headline + body
-    ctx.fillStyle = card.useImage || dark ? '#FFFFFF' : INK
-    ctx.font = `800 ${W * 0.064}px Georgia, serif`
-    y = drawLines(ctx, wrapText(ctx, card.headline, W - 2 * M), M, y + W * 0.06 + slide, W * 0.082)
-    // gold underline
-    ctx.fillStyle = GOLD
-    ctx.fillRect(M, y - W * 0.028, W * 0.14 * easeOut(p), W * 0.009)
-    if (card.body) {
-      ctx.fillStyle = card.useImage || dark ? 'rgba(255,255,255,.86)' : sub
-      ctx.font = `500 ${W * 0.038}px Arial`
-      drawLines(ctx, wrapText(ctx, card.body, W - 2 * M), M, y + W * 0.035 + slide, W * 0.056)
-    }
-  }
-  ctx.globalAlpha = 1
-
-  // Footer
-  ctx.fillStyle = card.useImage || dark ? 'rgba(255,255,255,.55)' : 'rgba(8,12,20,.5)'
-  ctx.font = `700 ${W * 0.026}px Arial`
-  ctx.fillText((card.footer || 'smartioushomeschool.com').toUpperCase(), M, H - M * 0.7)
-  ctx.fillStyle = GOLD
-  ctx.fillRect(M, H - M * 0.7 + W * 0.014, W * 0.055, W * 0.006)
+  renderCardMotion(ctx, W, H, card, media, p >= 1 ? 1 : p, card.textFx || 'rise')
 }
 
 // ═══════════════════════════════════════════════════════════
 // MOTION SCENE RENDERER — p runs 0..1 over the scene duration.
 // ═══════════════════════════════════════════════════════════
 function renderScene(ctx, W, H, scene, media, p) {
+  const B = Math.min(W, H)
   if (scene.type === 'title') {
     bgById(scene.bg || 'crimson').paint(ctx, W, H)
-    const cs = W * 0.24
     const cp = easeOut(p * 1.6)
-    ctx.globalAlpha = cp
-    drawCrest(ctx, W / 2 - cs / 2, H * 0.28 - (1 - cp) * 40, cs)
-    ctx.globalAlpha = 1
     const tp = easeOut((p - 0.25) * 2)
-    if (tp > 0) {
-      ctx.globalAlpha = tp
-      ctx.textAlign = 'center'
-      ctx.fillStyle = '#FFFFFF'
-      ctx.font = `700 ${W * 0.085}px Georgia, serif`
-      ctx.fillText('Smartious', W / 2 - W * 0.028, H * 0.28 + cs + W * 0.09)
-      ctx.fillStyle = GOLD
-      ctx.font = `italic 500 ${W * 0.05}px Georgia, serif`
-      ctx.fillText(scene.headline || 'Homeschool Global', W / 2, H * 0.28 + cs + W * 0.155)
-      ctx.textAlign = 'left'
+    if (scene.brand === 'word') {
+      // Bold wordmark sting: SMARTIOUS settles in from a slam
+      if (cp > 0) {
+        ctx.save()
+        ctx.globalAlpha = clamp01(cp)
+        ctx.textAlign = 'center'
+        const sc = 1.25 - 0.25 * cp
+        ctx.translate(W / 2, H * 0.44)
+        ctx.scale(sc, sc)
+        ctx.fillStyle = '#FFFFFF'
+        ctx.font = `900 ${B * 0.105}px Montserrat, Arial, sans-serif`
+        ctx.fillText('SMARTIOUS', 0, 0)
+        ctx.restore()
+        ctx.textAlign = 'left'
+        if (cp > 0.85) {
+          ctx.fillStyle = GOLD
+          ctx.fillRect(W / 2 + B * 0.29, H * 0.44 - B * 0.032, B * 0.032, B * 0.032)
+        }
+      }
+      if (tp > 0) {
+        ctx.globalAlpha = clamp01(tp)
+        ctx.textAlign = 'center'
+        ctx.fillStyle = 'rgba(255,255,255,.78)'
+        ctx.font = `800 ${B * 0.03}px Montserrat, Arial, sans-serif`
+        ctx.fillText(String(scene.headline || 'HOMESCHOOL GLOBAL').toUpperCase(), W / 2, H * 0.44 + B * 0.072)
+        ctx.textAlign = 'left'
+        ctx.globalAlpha = 1
+        ctx.fillStyle = GOLD
+        const uw = B * 0.24 * easeOut((p - 0.4) * 2)
+        ctx.fillRect(W / 2 - uw / 2, H * 0.44 + B * 0.1, uw, B * 0.007)
+      }
+    } else {
+      const cs = B * 0.24
+      ctx.globalAlpha = cp
+      drawCrest(ctx, W / 2 - cs / 2, H * 0.28 - (1 - cp) * 40, cs)
       ctx.globalAlpha = 1
-      ctx.fillStyle = GOLD
-      const uw = W * 0.24 * easeOut((p - 0.4) * 2)
-      ctx.fillRect(W / 2 - uw / 2, H * 0.28 + cs + W * 0.185, uw, W * 0.008)
+      if (tp > 0) {
+        ctx.globalAlpha = tp
+        ctx.textAlign = 'center'
+        ctx.fillStyle = '#FFFFFF'
+        ctx.font = `700 ${B * 0.085}px Georgia, serif`
+        ctx.fillText('Smartious', W / 2 - B * 0.028, H * 0.28 + cs + B * 0.09)
+        ctx.fillStyle = GOLD
+        ctx.font = `italic 500 ${B * 0.05}px Georgia, serif`
+        ctx.fillText(scene.headline || 'Homeschool Global', W / 2, H * 0.28 + cs + B * 0.155)
+        ctx.textAlign = 'left'
+        ctx.globalAlpha = 1
+        ctx.fillStyle = GOLD
+        const uw = B * 0.24 * easeOut((p - 0.4) * 2)
+        ctx.fillRect(W / 2 - uw / 2, H * 0.28 + cs + B * 0.185, uw, B * 0.008)
+      }
     }
     ctx.globalAlpha = 1
   } else if (scene.type === 'outro') {
     bgById(scene.bg || 'ink').paint(ctx, W, H)
-    const cs = W * 0.17
-    drawCrest(ctx, W / 2 - cs / 2, H * 0.3, cs)
+    const cs = B * 0.17
+    if (scene.brand === 'word') {
+      ctx.textAlign = 'center'
+      ctx.fillStyle = '#FFFFFF'
+      ctx.font = `900 ${B * 0.06}px Montserrat, Arial, sans-serif`
+      ctx.fillText('SMARTIOUS', W / 2, H * 0.34)
+      ctx.textAlign = 'left'
+    } else {
+      drawCrest(ctx, W / 2 - cs / 2, H * 0.3, cs)
+    }
     ctx.textAlign = 'center'
     ctx.globalAlpha = easeOut(p * 2)
     ctx.fillStyle = '#FFFFFF'
-    ctx.font = `800 ${W * 0.06}px Georgia, serif`
-    const lines = wrapText(ctx, scene.headline || 'Enrol today', W * 0.8)
-    drawLines(ctx, lines, W * 0.1, H * 0.3 + cs + W * 0.1, W * 0.078, 'center', W * 0.8)
+    ctx.font = headlineFont(B * 0.06, scene.font || 'Montserrat')
+    const lines = wrapText(ctx, headlineText(scene.headline || 'Enrol today', scene.font), W * 0.8)
+    drawLines(ctx, lines, W * 0.1, H * 0.3 + cs + B * 0.1, B * 0.078, 'center', W * 0.8)
     ctx.fillStyle = GOLD
-    ctx.font = `700 ${W * 0.042}px Arial`
-    ctx.fillText(scene.body || 'smartioushomeschool.com', W / 2, H * 0.3 + cs + W * 0.1 + lines.length * W * 0.078 + W * 0.04)
+    ctx.font = `700 ${B * 0.042}px Arial`
+    ctx.fillText(scene.body || 'smartioushomeschool.com', W / 2, H * 0.3 + cs + B * 0.1 + lines.length * B * 0.078 + B * 0.04)
     ctx.textAlign = 'left'
     ctx.globalAlpha = 1
   } else if (scene.type === 'bullets') {
     bgById(scene.bg || 'ink').paint(ctx, W, H)
     const M = W * 0.09
     ctx.fillStyle = GOLD
-    ctx.font = `800 ${W * 0.03}px Arial`
+    ctx.font = `800 ${B * 0.03}px Montserrat, Arial, sans-serif`
     ctx.fillText((scene.kicker || 'WHY SMARTIOUS').toUpperCase(), M, H * 0.16)
     ctx.fillStyle = '#FFFFFF'
-    ctx.font = `800 ${W * 0.058}px Georgia, serif`
-    let y = drawLines(ctx, wrapText(ctx, scene.headline, W - 2 * M), M, H * 0.16 + W * 0.075, W * 0.075)
+    ctx.font = headlineFont(B * 0.058, scene.font || 'Montserrat')
+    let y = drawLines(ctx, wrapText(ctx, headlineText(scene.headline, scene.font), W - 2 * M), M, H * 0.16 + B * 0.075, B * 0.075)
     const items = String(scene.body || '').split('\n').filter(Boolean).slice(0, 5)
     items.forEach((it, i) => {
       const ip = easeOut((p - 0.15 - i * 0.14) * 4)
       if (ip <= 0) return
       ctx.globalAlpha = ip
-      const iy = y + W * 0.05 + i * W * 0.095 - (1 - ip) * 30
+      const iy = y + B * 0.05 + i * B * 0.095 - (1 - ip) * 30
       ctx.fillStyle = GOLD
-      ctx.beginPath(); ctx.arc(M + W * 0.014, iy - W * 0.014, W * 0.014, 0, Math.PI * 2); ctx.fill()
+      ctx.beginPath(); ctx.arc(M + B * 0.014, iy - B * 0.014, B * 0.014, 0, Math.PI * 2); ctx.fill()
       ctx.fillStyle = 'rgba(255,255,255,.92)'
-      ctx.font = `600 ${W * 0.04}px Arial`
-      const ls = wrapText(ctx, it, W - 2 * M - W * 0.06)
-      drawLines(ctx, ls, M + W * 0.05, iy, W * 0.052)
+      ctx.font = `600 ${B * 0.04}px Arial`
+      const ls = wrapText(ctx, it, W - 2 * M - B * 0.06)
+      drawLines(ctx, ls, M + B * 0.05, iy, B * 0.052)
       ctx.globalAlpha = 1
     })
   } else if (scene.type === 'stat') {
-    renderCard(ctx, W, H, { ...scene, template: 'stat', seriesTotal: 0 }, media, Math.min(1, p * 2.2))
+    renderCardMotion(ctx, W, H, { ...scene, template: 'stat', seriesTotal: 0 }, media, Math.min(1, p * 1.4), scene.textFx || 'rise')
   } else {
-    // 'text' — text over colour, or over uploaded image/video with tint
-    renderCard(ctx, W, H, { ...scene, template: 'idea', seriesTotal: 0 }, media, Math.min(1, p * 2.2))
+    renderCardMotion(ctx, W, H, { ...scene, template: 'idea', seriesTotal: 0 }, media, Math.min(1, p * 1.4), scene.textFx || 'rise')
   }
 }
 
@@ -645,9 +784,16 @@ async function exportMp4Fast({ canvas, W, H, totalDur, drawFrame, mediaAt, sound
     output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
     error: (e) => { vErr = e },
   })
-  const vConfig = { codec: 'avc1.640028', width: W, height: H, bitrate: 7_000_000, framerate: FPS }
-  const support = await VideoEncoder.isConfigSupported(vConfig).catch(() => null)
-  if (!support?.supported) return null
+  // 4K needs High Level 5.1 and real bitrate; 1080p keeps Level 4.0.
+  const px = W * H
+  const bitrate = px >= 3840 * 2160 ? 34_000_000 : px >= 2160 * 2160 ? 24_000_000 : 8_000_000
+  let vConfig = null
+  for (const codec of (px > 1920 * 1080 ? ['avc1.640033', 'avc1.640032', 'avc1.640028'] : ['avc1.640028'])) {
+    const c = { codec, width: W, height: H, bitrate, framerate: FPS }
+    const s = await VideoEncoder.isConfigSupported(c).catch(() => null)
+    if (s?.supported) { vConfig = c; break }
+  }
+  if (!vConfig) return null
   vEnc.configure(vConfig)
 
   let aEnc = null
@@ -842,7 +988,7 @@ const btn = (primary) => ({ background: primary ? TOKENS.crimson : '#fff', color
 export default function StudioModule({ toast }) {
   const [tab, setTab] = useState('cards')
   const [crestReady, setCrestReady] = useState(!!_crestImg)
-  useEffect(() => { ensureCrest().then(() => setCrestReady(true)) }, [])
+  useEffect(() => { Promise.all([ensureCrest(), loadBrandFonts()]).then(() => setCrestReady(true)) }, [])
   if (!crestReady) return null
   return (
     <div>
@@ -863,6 +1009,7 @@ export default function StudioModule({ toast }) {
 // ═══════════════════════════════════════════════════════════
 const newCard = (i, total) => ({
   template: 'idea', bg: 'crimson', tint: 'crimson', useImage: false,
+  fitMode: 'cover', grade: 'cinema', popCorner: i % 4, textFx: 'rise',
   kicker: 'Study tip ' + (i + 1), headline: 'Your idea headline here',
   body: 'Explain the idea in one or two clear sentences. Keep it short — the card does the talking.',
   footer: 'smartioushomeschool.com', seriesNo: i + 1, seriesTotal: total,
@@ -874,8 +1021,14 @@ const TRANSITIONS = [
   ['wipe', 'Gold wipe'],
 ]
 
+const FORMATS = {
+  story: { W: 2160, H: 3840, label: 'Story 4K 9:16' },
+  square: { W: 2160, H: 2160, label: 'Square 4K 1:1' },
+  youtube: { W: 3840, H: 2160, label: 'YouTube 4K 16:9' },
+}
+
 function CardMaker({ toast }) {
-  const [format, setFormat] = useState('square')   // square | story
+  const [format, setFormat] = useState('square')   // square | story | youtube
   const [cards, setCards] = useState([newCard(0, 1)])
   const [cur, setCur] = useState(0)
   const [medias, setMedias] = useState({})         // card index -> Image
@@ -889,19 +1042,24 @@ function CardMaker({ toast }) {
   const [progress, setProgress] = useState(0)
   const [sound, setSound] = useState({ musicMode: 'none', musicBuffer: null, musicVol: 0.6, voBuffer: null, voVol: 1, script: null })
   const [showNumbers, setShowNumbers] = useState(false)   // "2 / 5" chip: off unless asked for
-  const W = 1080, H = format === 'story' ? 1920 : 1080
+  const [fontId, setFontId] = useState(0)                  // Montserrat default: bold
+  const [brandMode, setBrandMode] = useState('word')       // word | crest | none
+  const { W, H } = FORMATS[format] || FORMATS.square
   const card = cards[cur]
   const mediaEl = medias[cur]
 
   const upd = (patch) => setCards(cs => cs.map((c, i) => i === cur ? { ...c, ...patch } : c))
+  // Everything project-wide (font, branding) merges into each card at
+  // render time so PNG, preview and video all agree.
+  const deck = (c, extra = {}) => ({ ...c, font: FONTS[fontId][0], brand: brandMode, ...extra })
 
   useEffect(() => {
     if (playing || rendering) return
     const cv = cvRef.current
     if (!cv) return
     cv.width = W; cv.height = H
-    renderCard(cv.getContext('2d'), W, H, { ...card, seriesTotal: showNumbers ? cards.length : 0 }, mediaEl, 1)
-  }, [cards, cur, format, medias, playing, rendering, showNumbers])
+    renderCard(cv.getContext('2d'), W, H, deck(card, { seriesTotal: showNumbers ? cards.length : 0 }), mediaEl, 1)
+  }, [cards, cur, format, medias, playing, rendering, showNumbers, fontId, brandMode])
 
   const onImage = (e) => {
     const f = e.target.files?.[0]
@@ -928,7 +1086,7 @@ function CardMaker({ toast }) {
   const download = (idx) => {
     const off = document.createElement('canvas')
     off.width = W; off.height = H
-    renderCard(off.getContext('2d'), W, H, { ...cards[idx], seriesTotal: showNumbers ? cards.length : 0, seriesNo: idx + 1 }, medias[idx], 1)
+    renderCard(off.getContext('2d'), W, H, deck(cards[idx], { seriesTotal: showNumbers ? cards.length : 0, seriesNo: idx + 1 }), medias[idx], 1)
     const a = document.createElement('a')
     a.download = 'smartious-card-' + (idx + 1) + '.png'
     a.href = off.toDataURL('image/png')
@@ -953,7 +1111,7 @@ function CardMaker({ toast }) {
     const total = n * seg
     const i = Math.min(n - 1, Math.floor(t / seg))
     const local = t - i * seg
-    const cardAt = (idx) => ({ ...cards[idx], seriesTotal: showNumbers ? n : 0, seriesNo: idx + 1 })
+    const cardAt = (idx) => deck(cards[idx], { seriesTotal: showNumbers ? n : 0, seriesNo: idx + 1 })
     const inTransition = i < n - 1 && local > seg - TRANS_DUR
     if (!inTransition) {
       renderCardMotion(ctx, W, H, cardAt(i), medias[i], clamp01(local / (seg * 0.75)), textFx)
@@ -1007,7 +1165,7 @@ function CardMaker({ toast }) {
       const stream = cv.captureStream(30)
       const combined = new MediaStream([...stream.getVideoTracks(), ...mixer.audioTracks])
       const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm'
-      recorder = new MediaRecorder(combined, { mimeType: mime, videoBitsPerSecond: 6_000_000 })
+      recorder = new MediaRecorder(combined, { mimeType: mime, videoBitsPerSecond: W * H >= 3840 * 2160 ? 30_000_000 : W * H >= 2160 * 2160 ? 20_000_000 : 8_000_000 })
       recorder.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data) }
       recorder.start(500)
     }
@@ -1078,9 +1236,19 @@ function CardMaker({ toast }) {
     <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap' }}>
       {/* Controls */}
       <div style={{ flex: '1 1 320px', minWidth: 300, maxWidth: 430, display: 'flex', flexDirection: 'column', gap: 11 }}>
-        <div style={{ display: 'flex', gap: 6 }}>
-          {[['square', 'Square 1080'], ['story', 'Story 1080\u00d71920']].map(([k, l]) => (
-            <button key={k} onClick={() => setFormat(k)} style={btn(format === k)}>{l}</button>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {Object.entries(FORMATS).map(([k, f]) => (
+            <button key={k} onClick={() => setFormat(k)} style={{ ...btn(format === k), fontSize: 11.5, padding: '7px 11px' }}>{f.label}</button>
+          ))}
+        </div>
+
+        {/* Typography + branding */}
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+          <select value={fontId} onChange={e => setFontId(+e.target.value)} style={{ ...inputStyle, width: 'auto', padding: '7px 9px', fontSize: 11.5 }}>
+            {FONTS.map((f, i) => <option key={f[0]} value={i}>{f[1]} ({f[0]})</option>)}
+          </select>
+          {[['word', 'Bold wordmark'], ['crest', 'Crest'], ['none', 'No logo']].map(([k, l]) => (
+            <button key={k} onClick={() => setBrandMode(k)} style={{ ...btn(brandMode === k), padding: '7px 10px', fontSize: 11.5 }}>{l}</button>
           ))}
         </div>
 
@@ -1128,6 +1296,12 @@ function CardMaker({ toast }) {
             {[['crimson', 'Crimson tint'], ['ink', 'Dark tint'], ['gold', 'Gold tint']].map(([k, l]) => (
               <button key={k} onClick={() => upd({ tint: k })} style={{ ...btn(card.tint === k), padding: '7px 11px', fontSize: 11.5 }}>{l}</button>
             ))}
+            {[['cover', 'Fill'], ['fit', 'Fit (no zoom blur)']].map(([k, l]) => (
+              <button key={k} onClick={() => upd({ fitMode: k })} style={{ ...btn((card.fitMode || 'cover') === k), padding: '7px 11px', fontSize: 11.5 }}>{l}</button>
+            ))}
+            {GRADES.map(([k, l]) => (
+              <button key={k} onClick={() => upd({ grade: k })} style={{ ...btn((card.grade || 'none') === k), padding: '7px 10px', fontSize: 11 }}>{l}</button>
+            ))}
             <button onClick={() => { upd({ useImage: false }); setMedias(m => { const n = { ...m }; const old = n[cur]; if (old && old.pause) old.pause(); delete n[cur]; return n }) }} style={{ ...btn(false), fontSize: 11.5, padding: '7px 11px' }}>Remove</button>
           </>)}
         </div>
@@ -1152,7 +1326,7 @@ function CardMaker({ toast }) {
             ))}
           </div>
           <div style={{ display: 'flex', gap: 6 }}>
-            {[['rise', 'Words rise in'], ['type', 'Typewriter']].map(([k, l]) => (
+            {[['rise', 'Words rise in'], ['pop', 'Corner pop'], ['type', 'Typewriter']].map(([k, l]) => (
               <button key={k} onClick={() => setTextFx(k)} style={{ ...btn(textFx === k), padding: '7px 11px', fontSize: 11.5 }}>{l}</button>
             ))}
           </div>
@@ -1188,8 +1362,9 @@ function CardMaker({ toast }) {
 // MOTION VIDEO MAKER
 // ═══════════════════════════════════════════════════════════
 const newScene = (type = 'text') => ({
-  type, bg: type === 'title' ? 'crimson' : 'ink', tint: 'crimson',
+  type, bg: type === 'title' ? 'crimson' : 'mesh', tint: 'crimson',
   useImage: false, duration: type === 'title' ? 3 : 5,
+  fitMode: 'cover', grade: 'cinema', popCorner: Math.floor(Math.random() * 4), textFx: 'rise',
   kicker: type === 'bullets' ? 'Why Smartious' : 'Smartious Homeschool',
   headline: type === 'title' ? 'Homeschool Global' : type === 'outro' ? 'Enrol for 2026' : type === 'stat' ? '250+' : 'Your message here',
   body: type === 'bullets' ? 'Cambridge, IGCSE, IB and CBC\nLive classes with real teachers\nLearn from anywhere in the world' : type === 'outro' ? 'smartioushomeschool.com' : 'One clear supporting sentence goes here.',
@@ -1197,7 +1372,7 @@ const newScene = (type = 'text') => ({
 })
 
 function VideoMaker({ toast }) {
-  const [format, setFormat] = useState('story')    // story 1080x1920 | square
+  const [format, setFormat] = useState('youtube')  // story | square | youtube
   const [scenes, setScenes] = useState([newScene('title'), newScene('text'), newScene('bullets'), newScene('outro')])
   const [cur, setCur] = useState(0)
   const [medias, setMedias] = useState({})         // sceneIndex -> Image|HTMLVideoElement
@@ -1205,13 +1380,16 @@ function VideoMaker({ toast }) {
   const [rendering, setRendering] = useState(false)
   const [progress, setProgress] = useState(0)
   const [sound, setSound] = useState({ musicMode: 'none', musicBuffer: null, musicVol: 0.6, voBuffer: null, voVol: 1, script: null })
+  const [fontId, setFontId] = useState(0)
+  const [brandMode, setBrandMode] = useState('word')
   const cvRef = useRef(null)
   const rafRef = useRef(null)
-  const W = 1080, H = format === 'story' ? 1920 : 1080
+  const { W, H } = FORMATS[format] || FORMATS.youtube
   const scene = scenes[cur]
   const totalDur = scenes.reduce((s, x) => s + (+x.duration || 4), 0)
 
   const upd = (patch) => setScenes(ss => ss.map((s, i) => i === cur ? { ...s, ...patch } : s))
+  const deck = (s) => ({ ...s, font: FONTS[fontId][0], brand: brandMode })
 
   // Static preview of the current scene at its final frame
   useEffect(() => {
@@ -1219,8 +1397,8 @@ function VideoMaker({ toast }) {
     const cv = cvRef.current
     if (!cv) return
     cv.width = W; cv.height = H
-    renderScene(cv.getContext('2d'), W, H, scene, medias[cur], 1)
-  }, [scenes, cur, format, medias, playing, rendering])
+    renderScene(cv.getContext('2d'), W, H, deck(scene), medias[cur], 1)
+  }, [scenes, cur, format, medias, playing, rendering, fontId, brandMode])
 
   const onMedia = (e) => {
     const f = e.target.files?.[0]
@@ -1249,7 +1427,7 @@ function VideoMaker({ toast }) {
       const stream = cv.captureStream(30)
       const combined = new MediaStream([...stream.getVideoTracks(), ...mixer.audioTracks])
       const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm'
-      recorder = new MediaRecorder(combined, { mimeType: mime, videoBitsPerSecond: 6_000_000 })
+      recorder = new MediaRecorder(combined, { mimeType: mime, videoBitsPerSecond: W * H >= 3840 * 2160 ? 30_000_000 : W * H >= 2160 * 2160 ? 20_000_000 : 8_000_000 })
       recorder.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data) }
       recorder.start(500)
     }
@@ -1264,7 +1442,7 @@ function VideoMaker({ toast }) {
       for (let i = 0; i < scenes.length; i++) {
         const d = +scenes[i].duration || 4
         if (t < acc + d) {
-          renderScene(ctx, W, H, scenes[i], medias[i], (t - acc) / d)
+          renderScene(ctx, W, H, deck(scenes[i]), medias[i], (t - acc) / d)
           setProgress(t / totalDur)
           drawn = true
           break
@@ -1298,7 +1476,7 @@ function VideoMaker({ toast }) {
     for (let i = 0; i < scenes.length; i++) {
       const d = +scenes[i].duration || 4
       if (t < acc + d || i === scenes.length - 1) {
-        renderScene(ctx, W, H, scenes[i], medias[i], Math.min(1, (t - acc) / d))
+        renderScene(ctx, W, H, deck(scenes[i]), medias[i], Math.min(1, (t - acc) / d))
         return
       }
       acc += d
@@ -1351,11 +1529,19 @@ function VideoMaker({ toast }) {
   return (
     <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap' }}>
       <div style={{ flex: '1 1 320px', minWidth: 300, maxWidth: 430, display: 'flex', flexDirection: 'column', gap: 11 }}>
-        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-          {[['story', 'Vertical 9:16'], ['square', 'Square 1:1']].map(([k, l]) => (
-            <button key={k} onClick={() => setFormat(k)} style={btn(format === k)}>{l}</button>
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+          {Object.entries(FORMATS).map(([k, f]) => (
+            <button key={k} onClick={() => setFormat(k)} style={{ ...btn(format === k), fontSize: 11.5, padding: '7px 11px' }}>{f.label}</button>
           ))}
           <span style={{ fontSize: 11.5, color: TOKENS.s500, fontWeight: 700, marginLeft: 'auto' }}>{Math.round(totalDur)}s total</span>
+        </div>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+          <select value={fontId} onChange={e => setFontId(+e.target.value)} style={{ ...inputStyle, width: 'auto', padding: '7px 9px', fontSize: 11.5 }}>
+            {FONTS.map((f, i) => <option key={f[0]} value={i}>{f[1]} ({f[0]})</option>)}
+          </select>
+          {[['word', 'Bold wordmark'], ['crest', 'Crest'], ['none', 'No logo']].map(([k, l]) => (
+            <button key={k} onClick={() => setBrandMode(k)} style={{ ...btn(brandMode === k), padding: '7px 10px', fontSize: 11.5 }}>{l}</button>
+          ))}
         </div>
 
         {/* Scene strip */}
@@ -1397,6 +1583,15 @@ function VideoMaker({ toast }) {
             )}
             {scene.useImage && [['crimson', 'Crimson tint'], ['ink', 'Dark tint'], ['gold', 'Gold tint']].map(([k, l]) => (
               <button key={k} onClick={() => upd({ tint: k })} style={{ ...btn(scene.tint === k), padding: '7px 11px', fontSize: 11.5 }}>{l}</button>
+            ))}
+            {scene.useImage && [['cover', 'Fill'], ['fit', 'Fit (no zoom blur)']].map(([k, l]) => (
+              <button key={k} onClick={() => upd({ fitMode: k })} style={{ ...btn((scene.fitMode || 'cover') === k), padding: '7px 11px', fontSize: 11.5 }}>{l}</button>
+            ))}
+            {scene.useImage && GRADES.map(([k, l]) => (
+              <button key={k} onClick={() => upd({ grade: k })} style={{ ...btn((scene.grade || 'none') === k), padding: '7px 10px', fontSize: 11 }}>{l}</button>
+            ))}
+            {(scene.type === 'text' || scene.type === 'stat') && [['rise', 'Rise'], ['pop', 'Pop'], ['type', 'Type']].map(([k, l]) => (
+              <button key={k} onClick={() => upd({ textFx: k })} style={{ ...btn((scene.textFx || 'rise') === k), padding: '7px 10px', fontSize: 11 }}>{l}</button>
             ))}
           </div>
         )}
