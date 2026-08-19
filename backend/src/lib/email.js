@@ -481,9 +481,109 @@ const testConnection = async () => {
   }
 }
 
+// ─────────────────────────────────────────────────────────
+// Exam scheduled / rescheduled notification
+// Sent to each assigned student AND their parent, so nobody
+// discovers an exam by logging in the day after it ran.
+// ─────────────────────────────────────────────────────────
+const NAIROBI_FMT = new Intl.DateTimeFormat('en-KE', {
+  weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+  hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Africa/Nairobi',
+})
+
+const buildExamHTML = (p) => `
+<div style="margin:0;padding:24px;background:#F4F1EA;font-family:Georgia,serif;">
+  <div style="max-width:560px;margin:0 auto;background:#FFFFFF;border-radius:12px;overflow:hidden;border:1px solid #E5DFD2;">
+    <div style="background:#8B1A2E;padding:22px 28px;">
+      <span style="color:#FFFFFF;font-size:20px;font-weight:700;">Smart</span><span style="color:#C9973A;font-size:20px;font-style:italic;">ious</span>
+      <div style="color:rgba(255,255,255,.85);font-size:12px;letter-spacing:2px;margin-top:2px;">HOMESCHOOL</div>
+    </div>
+    <div style="padding:28px;">
+      <p style="font-size:15px;color:#080C14;margin:0 0 14px;">Dear ${p.recipientName},</p>
+      <p style="font-size:14px;color:#3A3A40;line-height:1.65;margin:0 0 18px;">
+        ${p.isUpdate
+          ? (p.isParent
+            ? `The schedule for <strong>${p.studentName}</strong>'s examination has been <strong>updated</strong>. Please note the new details below.`
+            : `The schedule for your examination has been <strong>updated</strong>. Please note the new details below.`)
+          : (p.isParent
+            ? `An examination has been scheduled for <strong>${p.studentName}</strong>. The details are below so you can help them prepare.`
+            : `An examination has been scheduled for you. The details are below — good luck with your preparation.`)}
+      </p>
+      <table style="width:100%;border-collapse:collapse;font-size:13.5px;color:#080C14;">
+        ${[
+          ['Examination', p.examTitle + (p.paperNumber ? ' — ' + p.paperNumber : '')],
+          ['Subject', p.subject + (p.grade ? ' (' + p.grade + ')' : '')],
+          ['Date & time', NAIROBI_FMT.format(new Date(p.startAt)) + ' (Nairobi time)'],
+          ['Duration', p.durationMins + ' minutes'],
+          ['Set by', p.teacherName || 'Smartious Academics'],
+        ].map(([k, v]) => `
+          <tr>
+            <td style="padding:9px 0;border-bottom:1px solid #EFEAE0;color:#8B1A2E;font-weight:700;width:130px;vertical-align:top;">${k}</td>
+            <td style="padding:9px 0;border-bottom:1px solid #EFEAE0;">${v}</td>
+          </tr>`).join('')}
+      </table>
+      <p style="font-size:13.5px;color:#3A3A40;line-height:1.65;margin:18px 0 22px;">
+        ${p.isParent
+          ? 'Your child sits this examination in the Student Portal. Kindly ensure a quiet space, a charged device and a stable connection at the scheduled time.'
+          : 'You will sit this examination in your Student Portal. Be logged in a few minutes early, in a quiet space, with a stable connection.'}
+      </p>
+      <a href="${p.portalUrl}" style="display:inline-block;background:#8B1A2E;color:#FFFFFF;text-decoration:none;padding:12px 26px;border-radius:8px;font-size:14px;font-weight:700;">Open the ${p.isParent ? 'Parent' : 'Student'} Portal</a>
+    </div>
+    <div style="padding:16px 28px;background:#FDFAF4;border-top:1px solid #EFEAE0;font-size:11.5px;color:#8A8A82;">
+      Smartious Homeschool · smartioushomeschool.com · +254 745 021 212
+    </div>
+  </div>
+</div>`
+
+const buildExamText = (p) => [
+  `Dear ${p.recipientName},`,
+  '',
+  p.isUpdate
+    ? `The examination schedule ${p.isParent ? 'for ' + p.studentName + ' ' : ''}has been UPDATED:`
+    : `An examination has been scheduled${p.isParent ? ' for ' + p.studentName : ''}:`,
+  '',
+  `Examination: ${p.examTitle}${p.paperNumber ? ' - ' + p.paperNumber : ''}`,
+  `Subject: ${p.subject}${p.grade ? ' (' + p.grade + ')' : ''}`,
+  `Date & time: ${NAIROBI_FMT.format(new Date(p.startAt))} (Nairobi time)`,
+  `Duration: ${p.durationMins} minutes`,
+  `Set by: ${p.teacherName || 'Smartious Academics'}`,
+  '',
+  p.isParent
+    ? 'Your child sits this examination in the Student Portal.'
+    : 'You will sit this examination in your Student Portal.',
+  p.portalUrl,
+  '',
+  'Smartious Homeschool',
+].join('\n')
+
+const sendExamScheduledEmail = async (params) => {
+  const t = getTransporter()
+  if (!t) {
+    console.error('[email] No transporter — exam email not sent to', params.to)
+    return { success: false, message: 'Email service not configured' }
+  }
+  const from = process.env.EMAIL_FROM || 'Smartious E-School <hellosmartious@gmail.com>'
+  const portalUrl = (process.env.CLIENT_URL || 'https://smartioushomeschool.com') + (params.isParent ? '/parent' : '/student')
+  const p = { ...params, portalUrl }
+  const subjectLine = (p.isUpdate ? 'Updated: ' : 'Exam scheduled: ') +
+    p.examTitle + ' — ' + NAIROBI_FMT.format(new Date(p.startAt))
+  try {
+    const info = await t.sendMail({
+      from, to: p.to, subject: subjectLine,
+      text: buildExamText(p),
+      html: buildExamHTML(p),
+    })
+    return { success: true, messageId: info.messageId }
+  } catch (err) {
+    console.error(`[email] Failed exam email to ${p.to}:`, err.message)
+    return { success: false, message: err.message }
+  }
+}
+
 module.exports = {
   sendWelcomeEmail,
   sendLiveClassEmail,
   sendLiveClassEmailBatch,
+  sendExamScheduledEmail,
   testConnection,
 }
