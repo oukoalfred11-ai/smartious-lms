@@ -682,39 +682,49 @@ async function makeBuiltinMusic() {
 // Builds the full audio graph for a render/preview run.
 // Returns { audioTracks, start, stop } — tracks go into the
 // MediaRecorder stream; sound is also monitored on the speakers.
-function createMixer({ totalDur, musicBuffer, musicVol, voBuffer, voVol, record }) {
+function createMixer({ totalDur, musicBuffer, musicVol, voBuffer, voVol, voClips, record }) {
   const AC = window.AudioContext || window.webkitAudioContext
-  if (!AC || (!musicBuffer && !voBuffer)) return { audioTracks: [], start: () => {}, stop: () => {} }
+  const clips = [...(voClips || [])]
+  if (voBuffer) clips.push({ buffer: voBuffer, at: 0.5 })
+  if (!AC || (!musicBuffer && clips.length === 0)) return { audioTracks: [], start: () => {}, stop: () => {} }
   const ac = new AC()
   const dest = record ? ac.createMediaStreamDestination() : null
   const master = ac.createGain(); master.gain.value = 1
   master.connect(ac.destination)
   if (dest) master.connect(dest)
-  const sources = []
+  const starters = []
   if (musicBuffer) {
     const s = ac.createBufferSource()
     s.buffer = musicBuffer; s.loop = true
     const g = ac.createGain()
-    // Duck the music under the narration
-    const level = (voBuffer ? 0.35 : 1) * (musicVol ?? 0.6)
-    g.gain.setValueAtTime(0.0001, ac.currentTime)
-    g.gain.linearRampToValueAtTime(level, ac.currentTime + 1.2)
-    // Fade out over the last 1.6 s
-    g.gain.setValueAtTime(level, ac.currentTime + Math.max(1.3, totalDur - 1.6))
-    g.gain.linearRampToValueAtTime(0.0001, ac.currentTime + totalDur)
     s.connect(g); g.connect(master)
-    sources.push(s)
+    starters.push((t0) => {
+      const level = musicVol ?? 0.6
+      const windows = mergeWindows(clips.map(c => [c.at, Math.min(totalDur, c.at + c.buffer.duration)]))
+      // Same envelope as the offline mix, shifted to the start time
+      const DUCK = level * 0.3
+      g.gain.setValueAtTime(0.0001, t0)
+      g.gain.linearRampToValueAtTime(level, t0 + Math.min(1.2, totalDur * 0.2))
+      for (const [ws, we] of windows) {
+        g.gain.setValueAtTime(level, t0 + Math.max(0.01, ws - 0.301))
+        g.gain.linearRampToValueAtTime(DUCK, t0 + Math.max(0.02, ws))
+        g.gain.setValueAtTime(DUCK, t0 + Math.min(totalDur, we))
+        g.gain.linearRampToValueAtTime(level, t0 + Math.min(totalDur, we + 0.6))
+      }
+      g.gain.setValueAtTime(g.gain.value, t0 + Math.max(0.1, totalDur - 1.6))
+      g.gain.linearRampToValueAtTime(0.0001, t0 + totalDur)
+      s.start(t0)
+    })
   }
-  if (voBuffer) {
-    const s = ac.createBufferSource()
-    s.buffer = voBuffer
+  for (const c of clips) {
+    const s = ac.createBufferSource(); s.buffer = c.buffer
     const g = ac.createGain(); g.gain.value = voVol ?? 1
     s.connect(g); g.connect(master)
-    sources.push({ src: s, at: 0.5 })
+    starters.push((t0) => s.start(t0 + Math.max(0, c.at)))
   }
   return {
     audioTracks: dest ? dest.stream.getAudioTracks() : [],
-    start: () => sources.forEach(s => s.at != null ? s.src.start(ac.currentTime + s.at) : s.start()),
+    start: () => { const t0 = ac.currentTime + 0.05; starters.forEach(fn => fn(t0)) },
     stop: () => { try { ac.close() } catch (e) { /* closed */ } },
   }
 }
@@ -730,27 +740,58 @@ function createMixer({ totalDur, musicBuffer, musicVol, voBuffer, voVol, record 
 
 // Render the entire soundtrack (music loop + ducking + fades + the
 // narration) offline into one stereo buffer.
-async function renderMixOffline({ totalDur, musicBuffer, musicVol, voBuffer, voVol }) {
-  if (!musicBuffer && !voBuffer) return null
+// Merge overlapping time windows for music ducking
+function mergeWindows(ws) {
+  const s = ws.slice().sort((a, b) => a[0] - b[0])
+  const out = []
+  for (const w of s) {
+    if (out.length && w[0] <= out[out.length - 1][1] + 0.3) out[out.length - 1][1] = Math.max(out[out.length - 1][1], w[1])
+    else out.push([w[0], w[1]])
+  }
+  return out
+}
+
+// Music gain envelope: fade in, duck under every voice window, swell
+// back between them, fade out at the end.
+function scheduleMusicGain(g, level, windows, totalDur) {
+  const DUCK = level * 0.3
+  g.gain.setValueAtTime(0.0001, 0)
+  g.gain.linearRampToValueAtTime(level, Math.min(1.2, totalDur * 0.2))
+  for (const [ws, we] of windows) {
+    const a = Math.max(0, ws - 0.3), b = Math.min(totalDur, we + 0.15)
+    g.gain.setValueAtTime(level, Math.max(0.01, a - 0.001))
+    g.gain.linearRampToValueAtTime(DUCK, Math.max(0.02, ws))
+    g.gain.setValueAtTime(DUCK, Math.min(totalDur, we))
+    g.gain.linearRampToValueAtTime(level, Math.min(totalDur, b + 0.45))
+  }
+  g.gain.setValueAtTime(g.gain.value, Math.max(0.1, totalDur - 1.6))
+  g.gain.linearRampToValueAtTime(0.0001, totalDur)
+}
+
+// voClips: [{ buffer, at }] — scene-by-scene voice, placed on the
+// timeline. A single full-video narration (voBuffer) still works and
+// simply becomes one long clip at 0.5s.
+async function renderMixOffline({ totalDur, musicBuffer, musicVol, voBuffer, voVol, voClips }) {
+  const clips = [...(voClips || [])]
+  if (voBuffer) clips.push({ buffer: voBuffer, at: 0.5 })
+  if (!musicBuffer && clips.length === 0) return null
   const SR = 44100
   const oac = new OfflineAudioContext(2, Math.ceil(SR * totalDur), SR)
   const master = oac.createGain(); master.gain.value = 1; master.connect(oac.destination)
   if (musicBuffer) {
     const s = oac.createBufferSource(); s.buffer = musicBuffer; s.loop = true
     const g = oac.createGain()
-    const level = (voBuffer ? 0.35 : 1) * (musicVol ?? 0.6)
-    g.gain.setValueAtTime(0.0001, 0)
-    g.gain.linearRampToValueAtTime(level, 1.2)
-    g.gain.setValueAtTime(level, Math.max(1.3, totalDur - 1.6))
-    g.gain.linearRampToValueAtTime(0.0001, totalDur)
+    const level = musicVol ?? 0.6
+    const windows = mergeWindows(clips.map(c => [c.at, Math.min(totalDur, c.at + c.buffer.duration)]))
+    scheduleMusicGain(g, level, windows, totalDur)
     s.connect(g); g.connect(master)
     s.start(0)
   }
-  if (voBuffer) {
-    const s = oac.createBufferSource(); s.buffer = voBuffer
+  for (const c of clips) {
+    const s = oac.createBufferSource(); s.buffer = c.buffer
     const g = oac.createGain(); g.gain.value = voVol ?? 1
     s.connect(g); g.connect(master)
-    s.start(0.5)
+    s.start(Math.max(0, c.at))
   }
   return oac.startRendering()
 }
@@ -784,12 +825,22 @@ async function exportMp4Fast({ canvas, W, H, totalDur, drawFrame, mediaAt, sound
     output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
     error: (e) => { vErr = e },
   })
-  // 4K needs High Level 5.1 and real bitrate; 1080p keeps Level 4.0.
+  // 4K needs High Level 5.1; 1080p keeps Level 4.0.
+  // CRITICAL: avc format 'avc' (not Annex B) — without the codec
+  // description an MP4 has no avcC box and no player will open it.
+  // Bitrates are sized for animated graphics + text, which compress
+  // extremely well: 14 Mbps at 4K is visually clean at a quarter of
+  // camera-footage rates.
   const px = W * H
-  const bitrate = px >= 3840 * 2160 ? 34_000_000 : px >= 2160 * 2160 ? 24_000_000 : 8_000_000
+  const bitrate = px >= 3840 * 2160 ? 14_000_000 : px >= 2160 * 2160 ? 10_000_000 : 6_000_000
   let vConfig = null
   for (const codec of (px > 1920 * 1080 ? ['avc1.640033', 'avc1.640032', 'avc1.640028'] : ['avc1.640028'])) {
-    const c = { codec, width: W, height: H, bitrate, framerate: FPS }
+    const c = {
+      codec, width: W, height: H, bitrate, framerate: FPS,
+      avc: { format: 'avc' },
+      bitrateMode: 'variable',
+      latencyMode: 'quality',
+    }
     const s = await VideoEncoder.isConfigSupported(c).catch(() => null)
     if (s?.supported) { vConfig = c; break }
   }
@@ -798,7 +849,7 @@ async function exportMp4Fast({ canvas, W, H, totalDur, drawFrame, mediaAt, sound
 
   let aEnc = null
   if (audioBuf) {
-    const aConfig = { codec: 'mp4a.40.2', sampleRate: 44100, numberOfChannels: 2, bitrate: 128_000 }
+    const aConfig = { codec: 'mp4a.40.2', sampleRate: 44100, numberOfChannels: 2, bitrate: 128_000, aac: { format: 'aac' } }
     const aSupport = typeof AudioEncoder !== 'undefined'
       ? await AudioEncoder.isConfigSupported(aConfig).catch(() => null) : null
     if (aSupport?.supported) {
@@ -1041,6 +1092,7 @@ function CardMaker({ toast }) {
   const [rendering, setRendering] = useState(false)
   const [progress, setProgress] = useState(0)
   const [sound, setSound] = useState({ musicMode: 'none', musicBuffer: null, musicVol: 0.6, voBuffer: null, voVol: 1, script: null })
+  const [voMap, setVoMap] = useState({})                   // card index -> voice clip
   const [showNumbers, setShowNumbers] = useState(false)   // "2 / 5" chip: off unless asked for
   const [fontId, setFontId] = useState(0)                  // Montserrat default: bold
   const [brandMode, setBrandMode] = useState('word')       // word | crest | none
@@ -1052,6 +1104,20 @@ function CardMaker({ toast }) {
   // Everything project-wide (font, branding) merges into each card at
   // render time so PNG, preview and video all agree.
   const deck = (c, extra = {}) => ({ ...c, font: FONTS[fontId][0], brand: brandMode, ...extra })
+  const buildVoClips = () => Object.entries(voMap)
+    .filter(([i, b]) => b && cards[i])
+    .map(([i, b]) => ({ buffer: b, at: (+i) * cardDur + 0.25 }))
+  const onCardVoice = (e) => {
+    const f = e.target.files?.[0]
+    if (!f) return
+    const AC = window.AudioContext || window.webkitAudioContext
+    const ac = new AC()
+    f.arrayBuffer().then(ab => ac.decodeAudioData(ab)).then(buf => {
+      setVoMap(m => ({ ...m, [cur]: buf }))
+      toast?.('Voice for card ' + (cur + 1) + ' loaded: ' + buf.duration.toFixed(1) + 's')
+      ac.close()
+    }).catch(() => toast?.('Could not read that audio file.'))
+  }
 
   useEffect(() => {
     if (playing || rendering) return
@@ -1159,13 +1225,13 @@ function CardMaker({ toast }) {
     cv.width = W; cv.height = H
     const ctx = cv.getContext('2d')
     const totalD = cards.length * cardDur
-    const mixer = createMixer({ totalDur: totalD, musicBuffer: sound.musicBuffer, musicVol: sound.musicVol, voBuffer: sound.voBuffer, voVol: sound.voVol, record })
+    const mixer = createMixer({ totalDur: totalD, musicBuffer: sound.musicBuffer, musicVol: sound.musicVol, voBuffer: sound.voBuffer, voVol: sound.voVol, voClips: buildVoClips(), record })
     let recorder = null, chunks = []
     if (record) {
       const stream = cv.captureStream(30)
       const combined = new MediaStream([...stream.getVideoTracks(), ...mixer.audioTracks])
       const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm'
-      recorder = new MediaRecorder(combined, { mimeType: mime, videoBitsPerSecond: W * H >= 3840 * 2160 ? 30_000_000 : W * H >= 2160 * 2160 ? 20_000_000 : 8_000_000 })
+      recorder = new MediaRecorder(combined, { mimeType: mime, videoBitsPerSecond: W * H >= 3840 * 2160 ? 14_000_000 : W * H >= 2160 * 2160 ? 10_000_000 : 6_000_000 })
       recorder.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data) }
       recorder.start(500)
     }
@@ -1205,7 +1271,7 @@ function CardMaker({ toast }) {
       const blob = await exportMp4Fast({
         canvas: cvRef.current, W, H, totalDur: totalD,
         drawFrame: (ctx, t) => drawTimeline(ctx, t),
-        mediaAt, sound, onProgress: setProgress,
+        mediaAt, sound: { ...sound, voClips: buildVoClips() }, onProgress: setProgress,
       })
       if (blob) {
         setRendering(false); setProgress(0)
@@ -1214,7 +1280,7 @@ function CardMaker({ toast }) {
         a.href = URL.createObjectURL(blob)
         a.click()
         const speed = totalD / ((performance.now() - t0) / 1000)
-        toast?.('MP4 ready in ' + Math.round((performance.now() - t0) / 1000) + 's (' + speed.toFixed(1) + 'x speed) — posts straight to WhatsApp, Reels, TikTok and YouTube.')
+        toast?.('MP4 ready: ' + (blob.size / 1048576).toFixed(1) + ' MB in ' + Math.round((performance.now() - t0) / 1000) + 's (' + speed.toFixed(1) + 'x) — plays everywhere: WhatsApp, Reels, TikTok, YouTube.')
         return
       }
     } catch (e) { console.error('[fast export]', e) }
@@ -1262,8 +1328,11 @@ function CardMaker({ toast }) {
           <button onClick={() => { setCards(cs => [...cs.map(c => ({ ...c, seriesTotal: cs.length + 1 })), newCard(cards.length, cards.length + 1)]); setCur(cards.length) }}
             style={{ ...btn(false), borderRadius: 99, padding: '7px 13px' }}>+ Add card</button>
           {cards.length > 1 && (
-            <button onClick={() => { const nc = cards.filter((_, i) => i !== cur).map((c, i, arr) => ({ ...c, seriesNo: i + 1, seriesTotal: arr.length })); setCards(nc); setCur(Math.max(0, cur - 1)) }}
-              style={{ ...btn(false), color: '#B91C1C', borderRadius: 99, padding: '7px 13px' }}>Remove</button>
+            <button onClick={() => {
+              const reindex = (m) => { const n = {}; Object.keys(m).forEach(k => { const ki = +k; if (ki < cur) n[ki] = m[k]; else if (ki > cur) n[ki - 1] = m[k] }); return n }
+              const nc = cards.filter((_, i) => i !== cur).map((c, i, arr) => ({ ...c, seriesNo: i + 1, seriesTotal: arr.length }))
+              setCards(nc); setMedias(reindex); setVoMap(reindex); setCur(Math.max(0, cur - 1))
+            }} style={{ ...btn(false), color: '#B91C1C', borderRadius: 99, padding: '7px 13px' }}>Remove</button>
           )}
           {cards.length > 1 && (
             <button onClick={() => setShowNumbers(v => !v)} title="Show the small 2 / 5 chip on each card"
@@ -1332,8 +1401,21 @@ function CardMaker({ toast }) {
           </div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <label style={{ fontSize: 12, fontWeight: 700, color: TOKENS.s600 }}>Seconds per card</label>
-            <input type="range" min="3" max="8" value={cardDur} onChange={e => setCardDur(+e.target.value)} style={{ flex: 1 }} />
+            <input type="range" min="3" max="12" value={cardDur} onChange={e => setCardDur(+e.target.value)} style={{ flex: 1 }} />
             <span style={{ fontSize: 12, fontWeight: 800, width: 26 }}>{cardDur}s</span>
+          </div>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+            <label style={{ ...btn(!!voMap[cur]), fontSize: 11.5, padding: '7px 11px', display: 'inline-block' }}>
+              {voMap[cur] ? 'Card ' + (cur + 1) + ' voice ' + voMap[cur].duration.toFixed(1) + 's — replace' : 'Upload voice for card ' + (cur + 1)}
+              <input type="file" accept="audio/*" style={{ display: 'none' }} onChange={onCardVoice} />
+            </label>
+            {voMap[cur] && (
+              <button onClick={() => setVoMap(m => { const n = { ...m }; delete n[cur]; return n })}
+                style={{ ...btn(false), fontSize: 11.5, padding: '7px 11px', color: '#B91C1C' }}>Remove</button>
+            )}
+            {voMap[cur] && voMap[cur].duration > cardDur && (
+              <span style={{ fontSize: 10.5, fontWeight: 700, color: '#B45309' }}>Longer than {cardDur}s — raise seconds per card or it runs into the next</span>
+            )}
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <button onClick={previewMotion} disabled={playing || rendering} style={btn(false)}>{playing ? 'Playing...' : 'Preview motion'}</button>
@@ -1380,6 +1462,7 @@ function VideoMaker({ toast }) {
   const [rendering, setRendering] = useState(false)
   const [progress, setProgress] = useState(0)
   const [sound, setSound] = useState({ musicMode: 'none', musicBuffer: null, musicVol: 0.6, voBuffer: null, voVol: 1, script: null })
+  const [voMap, setVoMap] = useState({})           // scene index -> decoded voice clip
   const [fontId, setFontId] = useState(0)
   const [brandMode, setBrandMode] = useState('word')
   const cvRef = useRef(null)
@@ -1390,6 +1473,24 @@ function VideoMaker({ toast }) {
 
   const upd = (patch) => setScenes(ss => ss.map((s, i) => i === cur ? { ...s, ...patch } : s))
   const deck = (s) => ({ ...s, font: FONTS[fontId][0], brand: brandMode })
+  const sceneStart = (idx) => scenes.slice(0, idx).reduce((s, x) => s + (+x.duration || 4), 0)
+  // Scene voices land 0.25s after their scene begins; music ducks
+  // under each and swells back between scenes.
+  const buildVoClips = () => Object.entries(voMap)
+    .filter(([i, b]) => b && scenes[i])
+    .map(([i, b]) => ({ buffer: b, at: sceneStart(+i) + 0.25 }))
+
+  const onSceneVoice = (e) => {
+    const f = e.target.files?.[0]
+    if (!f) return
+    const AC = window.AudioContext || window.webkitAudioContext
+    const ac = new AC()
+    f.arrayBuffer().then(ab => ac.decodeAudioData(ab)).then(buf => {
+      setVoMap(m => ({ ...m, [cur]: buf }))
+      toast?.('Voice for scene ' + (cur + 1) + ' loaded: ' + buf.duration.toFixed(1) + 's')
+      ac.close()
+    }).catch(() => toast?.('Could not read that audio file.'))
+  }
 
   // Static preview of the current scene at its final frame
   useEffect(() => {
@@ -1421,13 +1522,13 @@ function VideoMaker({ toast }) {
     const cv = cvRef.current
     cv.width = W; cv.height = H
     const ctx = cv.getContext('2d')
-    const mixer = createMixer({ totalDur, musicBuffer: sound.musicBuffer, musicVol: sound.musicVol, voBuffer: sound.voBuffer, voVol: sound.voVol, record })
+    const mixer = createMixer({ totalDur, musicBuffer: sound.musicBuffer, musicVol: sound.musicVol, voBuffer: sound.voBuffer, voVol: sound.voVol, voClips: buildVoClips(), record })
     let recorder = null, chunks = []
     if (record) {
       const stream = cv.captureStream(30)
       const combined = new MediaStream([...stream.getVideoTracks(), ...mixer.audioTracks])
       const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm'
-      recorder = new MediaRecorder(combined, { mimeType: mime, videoBitsPerSecond: W * H >= 3840 * 2160 ? 30_000_000 : W * H >= 2160 * 2160 ? 20_000_000 : 8_000_000 })
+      recorder = new MediaRecorder(combined, { mimeType: mime, videoBitsPerSecond: W * H >= 3840 * 2160 ? 14_000_000 : W * H >= 2160 * 2160 ? 10_000_000 : 6_000_000 })
       recorder.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data) }
       recorder.start(500)
     }
@@ -1499,7 +1600,8 @@ function VideoMaker({ toast }) {
     try {
       const blob = await exportMp4Fast({
         canvas: cvRef.current, W, H, totalDur,
-        drawFrame: drawSceneAt, mediaAt: sceneMediaAt, sound, onProgress: setProgress,
+        drawFrame: drawSceneAt, mediaAt: sceneMediaAt,
+        sound: { ...sound, voClips: buildVoClips() }, onProgress: setProgress,
       })
       if (blob) {
         setRendering(false); setProgress(0)
@@ -1508,7 +1610,7 @@ function VideoMaker({ toast }) {
         a.href = URL.createObjectURL(blob)
         a.click()
         const secs = Math.round((performance.now() - t0) / 1000)
-        toast?.('MP4 ready in ' + secs + 's (' + (totalDur / Math.max(1, secs)).toFixed(1) + 'x speed) — posts straight to WhatsApp, Reels, TikTok and YouTube.')
+        toast?.('MP4 ready: ' + (blob.size / 1048576).toFixed(1) + ' MB in ' + secs + 's (' + (totalDur / Math.max(1, secs)).toFixed(1) + 'x) — plays everywhere: WhatsApp, Reels, TikTok, YouTube.')
         return
       }
     } catch (e) { console.error('[fast export]', e) }
@@ -1558,16 +1660,38 @@ function VideoMaker({ toast }) {
             {SCENE_TYPES.map(([k, l]) => <option key={k} value={k}>{l}</option>)}
           </select>
           {scenes.length > 1 && (
-            <button onClick={() => { setScenes(ss => ss.filter((_, i) => i !== cur)); setMedias(m => { const n = { ...m }; delete n[cur]; return n }); setCur(Math.max(0, cur - 1)) }}
-              style={{ ...btn(false), color: '#B91C1C' }}>Remove scene</button>
+            <button onClick={() => {
+              const reindex = (m) => { const n = {}; Object.keys(m).forEach(k => { const ki = +k; if (ki < cur) n[ki] = m[k]; else if (ki > cur) n[ki - 1] = m[k] }); return n }
+              setScenes(ss => ss.filter((_, i) => i !== cur))
+              setMedias(reindex)
+              setVoMap(reindex)
+              setCur(Math.max(0, cur - 1))
+            }} style={{ ...btn(false), color: '#B91C1C' }}>Remove scene</button>
           )}
         </div>
 
         {/* Scene editor */}
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <label style={{ fontSize: 12, fontWeight: 700, color: TOKENS.s600 }}>Duration</label>
-          <input type="range" min="2" max="12" value={scene.duration} onChange={e => upd({ duration: +e.target.value })} style={{ flex: 1 }} />
+          <input type="range" min="2" max="20" value={scene.duration} onChange={e => upd({ duration: +e.target.value })} style={{ flex: 1 }} />
           <span style={{ fontSize: 12, fontWeight: 800, width: 30 }}>{scene.duration}s</span>
+        </div>
+
+        {/* Scene voice: its own clip; the music bed ducks under it */}
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+          <label style={{ ...btn(!!voMap[cur]), fontSize: 11.5, padding: '7px 11px', display: 'inline-block' }}>
+            {voMap[cur] ? 'Scene voice ' + voMap[cur].duration.toFixed(1) + 's — replace' : 'Upload voice for THIS scene'}
+            <input type="file" accept="audio/*" style={{ display: 'none' }} onChange={onSceneVoice} />
+          </label>
+          {voMap[cur] && (<>
+            <button onClick={() => upd({ duration: Math.min(20, Math.max(2, Math.ceil(voMap[cur].duration + 0.8))) })}
+              style={{ ...btn(false), fontSize: 11.5, padding: '7px 11px' }}>Match length to voice</button>
+            <button onClick={() => setVoMap(m => { const n = { ...m }; delete n[cur]; return n })}
+              style={{ ...btn(false), fontSize: 11.5, padding: '7px 11px', color: '#B91C1C' }}>Remove</button>
+          </>)}
+          {voMap[cur] && voMap[cur].duration > (+scene.duration || 4) && (
+            <span style={{ fontSize: 10.5, fontWeight: 700, color: '#B45309' }}>Voice is longer than the scene — it will run into the next one</span>
+          )}
         </div>
 
         {scene.type !== 'title' && scene.type !== 'outro' && (
