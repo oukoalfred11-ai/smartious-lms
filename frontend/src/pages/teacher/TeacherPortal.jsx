@@ -4953,22 +4953,43 @@ function ExamsTab({ user, store, setPage, toast }) {
                       their whole subject bank first. */}
                   <div style={{ display:'flex', gap:8, flexWrap:'wrap', alignItems:'center', marginBottom:10 }}>
                     <span style={{ fontSize:11, fontWeight:700, color:'var(--muted)', letterSpacing:.3 }}>BANK SCOPE</span>
-                    <select value={bankCurriculum} onChange={e => setBankCurriculum(e.target.value)}
+                    {/* One-tap scope: jump the bank straight to the class this
+                        exam is being set for — the fastest route to (e.g.)
+                        Year 5 Cambridge Primary questions. */}
+                    {formCurriculum && formYear && (
+                      <button type="button" onClick={() => { setBankCurriculum(formCurriculum); setBankGrade(formYear) }}
+                        style={{
+                          padding:'6px 12px', borderRadius:99, fontSize:11.5, fontWeight:700, cursor:'pointer',
+                          border: bankCurriculum === formCurriculum && bankGrade === formYear ? '1.5px solid #8B1A2E' : '1px solid var(--border)',
+                          background: bankCurriculum === formCurriculum && bankGrade === formYear ? 'rgba(139,26,46,.08)' : '#fff',
+                          color:'#8B1A2E',
+                        }}>
+                        This exam: {(QB_CURRICULA[formCurriculum]?.label || formCurriculum)} · {formYear}
+                      </button>
+                    )}
+                    {/* Options come from QB_CURRICULA — the same source the
+                        exam form itself uses — instead of a second hardcoded
+                        list that had already drifted (it was missing KCSE and
+                        Edexcel iPrimary entirely). */}
+                    <select value={bankCurriculum} onChange={e => {
+                      const next = e.target.value
+                      setBankCurriculum(next)
+                      // Keep the grade valid for the newly chosen curriculum.
+                      if (next !== 'all' && bankGrade !== 'all' && !(QB_CURRICULA[next]?.years || []).includes(bankGrade)) setBankGrade('all')
+                    }}
                       style={{ padding:'6px 10px', borderRadius:6, border:'1px solid var(--border)', fontSize:12, background:'#fff' }}>
                       <option value="all">All curricula</option>
-                      {['CambridgePrimary','CambridgeLowerSec','CambridgeIGCSE','CambridgeALevel',
-                        'EdexcelLowerSec','EdexcelIGCSE','EdexcelALevel','AQALowerSec','AQAGCSE','AQAALevel',
-                        'IBPYP','IBMYP','IBDP','BNC','American','Canadian','KenyaCBE'].map(c => (
-                        <option key={c} value={c}>{c.replace(/([a-z])([A-Z])/g,'$1 $2')}</option>
+                      {Object.entries(QB_CURRICULA).map(([id, info]) => (
+                        <option key={id} value={id}>{info.label}</option>
                       ))}
                     </select>
                     <select value={bankGrade} onChange={e => setBankGrade(e.target.value)}
                       style={{ padding:'6px 10px', borderRadius:6, border:'1px solid var(--border)', fontSize:12, background:'#fff' }}>
                       <option value="all">All year groups</option>
-                      {['Year 1','Year 2','Year 3','Year 4','Year 5','Year 6','Year 7','Year 8','Year 9',
-                        'Year 10','Year 11','Year 12','Year 13','Grade 1','Grade 2','Grade 3','Grade 4',
-                        'Grade 5','Grade 6','Grade 7','Grade 8','Grade 9','Grade 10','Grade 11','Grade 12',
-                        'K','Form 1','Form 2','Form 3','Form 4'].map(g => <option key={g} value={g}>{g}</option>)}
+                      {(bankCurriculum !== 'all'
+                        ? (QB_CURRICULA[bankCurriculum]?.years || [])
+                        : [...new Set(Object.values(QB_CURRICULA).flatMap(c => c.years))]
+                      ).map(g => <option key={g} value={g}>{g}</option>)}
                     </select>
                     <span style={{ fontSize:11.5, color:'var(--muted)', marginLeft:'auto' }}>
                       {bankLoading ? 'Loading\u2026'
