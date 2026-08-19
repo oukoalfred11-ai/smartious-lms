@@ -265,6 +265,13 @@ const ROUTES_TO_PRERENDER = [
   '/blog/best-online-virtual-homeschool-europe',
   '/blog/best-online-virtual-homeschool-americas',
   '/blog/smartious-homeschool-global',
+  // USA, Canada and UK cluster (2026 guides + deep articles)
+  '/blog/homeschooling-usa-2026-guide',
+  '/blog/homeschooling-canada-2026-guide',
+  '/blog/homeschooling-uk-2026-guide',
+  '/blog/childrens-wellbeing-schools-act-2026-home-education',
+  '/blog/african-parents-uk-online-school',
+  '/blog/ossd-homeschool-ontario-university',
   '/homeschool', '/tuition', '/tuition-nairobi', '/tuition-uae',
   '/tuition-uk',
   '/iufp', '/pre-university',
