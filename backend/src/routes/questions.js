@@ -234,12 +234,27 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
 router.get('/', auth, async (req, res) => {
   try {
     const filter = { isActive: true };
+    const esc = (s) => String(s).trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     if (req.query.curriculum) filter.$and = [...(filter.$and || []),
       { $or: [{ curriculum: req.query.curriculum }, { curricula: req.query.curriculum }] }];
-    if (req.query.subject)    filter.subject    = req.query.subject;
-    // Match the question's own grade or any grade it is shared with.
-    if (req.query.grade) filter.$and = [...(filter.$and || []),
-      { $or: [{ grade: req.query.grade }, { gradeLevels: req.query.grade }] }];
+    // Subject: exact name, case-insensitive — "mathematics" must find
+    // "Mathematics", or a teacher concludes the bank is empty.
+    if (req.query.subject) filter.subject = new RegExp('^' + esc(req.query.subject) + '$', 'i');
+    // Grade: label-tolerant. Import batches and enrolment screens have
+    // written the same year as "Year 5", "Grade 5", "Stage 5", "year5"
+    // or plain "5"; an exact string match hid all of them from the exam
+    // builder. Any request naming a number matches every family label
+    // carrying that number (Form is deliberately excluded — Form 5 is a
+    // different age than Year 5).
+    if (req.query.grade) {
+      const g = String(req.query.grade).trim();
+      const num = g.match(/(\d{1,2})/);
+      const rx = num
+        ? new RegExp('^\\s*(?:year|grade|stage|class)?\\s*' + num[1] + '\\s*$', 'i')
+        : new RegExp('^\\s*' + esc(g) + '\\s*$', 'i');
+      filter.$and = [...(filter.$and || []),
+        { $or: [{ grade: rx }, { gradeLevels: rx }] }];
+    }
     if (req.query.topic)      filter.topic      = req.query.topic;
     if (req.query.type)       filter.type       = req.query.type;
     if (req.query.createdBy === 'me') {
