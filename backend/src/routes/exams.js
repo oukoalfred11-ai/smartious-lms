@@ -95,6 +95,68 @@ function withComputedStatus(examOrArray) {
 // TEACHER ROUTES
 // ═══════════════════════════════════════════════════════════
 
+// ═══════════════════════════════════════════════════════════
+// Notify every assigned student AND their parent by email when an
+// exam is scheduled or its time changes. Recipients mirror exactly
+// who sees the exam in /student/list: direct assignees plus members
+// of the assigned group rooms. Fire-and-forget so scheduling never
+// waits on the mail server.
+// ═══════════════════════════════════════════════════════════
+async function notifyExamRecipients(exam, { isUpdate = false } = {}) {
+  try {
+    const { sendExamScheduledEmail } = require('../lib/email');
+    const User = require('../models/User');
+
+    const ids = new Set((exam.assignedStudents || []).map(String));
+    if (exam.groupRoomIds?.length) {
+      try {
+        const GroupRoom = require('../models/GroupRoom');
+        const rooms = await GroupRoom.find({ _id: { $in: exam.groupRoomIds } }).select('students').lean();
+        rooms.forEach(r => (r.students || []).forEach(s => ids.add(String(s))));
+      } catch (e) { console.error('[exam notify] group resolve:', e.message); }
+    }
+    if (!ids.size) return;
+
+    const students = await User.find({ _id: { $in: [...ids] }, isActive: { $ne: false } })
+      .select('firstName lastName email parentId').lean();
+
+    let teacherName = '';
+    try {
+      const t = await User.findById(exam.teacherId).select('firstName lastName').lean();
+      if (t) teacherName = [t.firstName, t.lastName].filter(Boolean).join(' ');
+    } catch {}
+
+    const base = {
+      examTitle: exam.title, paperNumber: exam.paperNumber, subject: exam.subject,
+      grade: exam.grade, startAt: exam.startAt, durationMins: exam.durationMins,
+      teacherName, isUpdate,
+    };
+
+    const parentIds = [...new Set(students.map(s => s.parentId && String(s.parentId)).filter(Boolean))];
+    const parents = parentIds.length
+      ? await User.find({ _id: { $in: parentIds }, isActive: { $ne: false } }).select('firstName lastName email').lean()
+      : [];
+    const parentById = Object.fromEntries(parents.map(pu => [String(pu._id), pu]));
+
+    let sent = 0;
+    for (const s of students) {
+      const studentName = [s.firstName, s.lastName].filter(Boolean).join(' ') || 'Student';
+      if (s.email) {
+        await sendExamScheduledEmail({ ...base, to: s.email, recipientName: s.firstName || 'Student', studentName, isParent: false });
+        sent++;
+      }
+      const pu = s.parentId && parentById[String(s.parentId)];
+      if (pu?.email) {
+        await sendExamScheduledEmail({ ...base, to: pu.email, recipientName: pu.firstName || 'Parent', studentName, isParent: true });
+        sent++;
+      }
+    }
+    console.log(`[exam notify] "${exam.title}" ${isUpdate ? 'update' : 'scheduled'}: ${sent} email(s) for ${students.length} student(s).`);
+  } catch (e) {
+    console.error('[exam notify] failed:', e.message);
+  }
+}
+
 router.post('/', auth, requireRole('teacher','admin', 'dos'), async (req, res) => {
   try {
     const {
@@ -142,7 +204,10 @@ router.post('/', auth, requireRole('teacher','admin', 'dos'), async (req, res) =
     await recomputeAggregates(exam);
     await exam.save();
 
-    res.status(201).json({ success:true, message:'Exam scheduled.', data: { exam } });
+    // Emails go out in the background; scheduling never waits on SMTP.
+    notifyExamRecipients(exam).catch(() => {});
+
+    res.status(201).json({ success:true, message:'Exam scheduled. Students and parents are being notified by email.', data: { exam } });
   } catch (e) {
     console.error('[exams POST] failed:', e.message);
     res.status(500).json({ success:false, message:'Failed to create exam.' });
@@ -212,6 +277,8 @@ router.put('/:id', auth, requireRole('teacher','admin', 'dos'), async (req, res)
     if (req.user.role !== 'admin' && String(exam.teacherId) !== String(req.user._id))
       return res.status(403).json({ success:false, message:'Not your exam.' });
 
+    const prevStartAt = exam.startAt ? new Date(exam.startAt).getTime() : 0;
+
     const editable = ['title','instructions','subject','curriculum','grade','startAt','durationMins',
                       'paperNumber','syllabusRef',
                       'questionIds','customQuestions','assignedStudents','groupRoomIds','status'];
@@ -219,7 +286,13 @@ router.put('/:id', auth, requireRole('teacher','admin', 'dos'), async (req, res)
 
     await recomputeAggregates(exam);
     await exam.save();
-    res.json({ success:true, message:'Exam updated.', data: { exam } });
+
+    // A changed sitting time is the one update families MUST hear about.
+    const newStartAt = exam.startAt ? new Date(exam.startAt).getTime() : 0;
+    const rescheduled = 'startAt' in req.body && newStartAt !== prevStartAt;
+    if (rescheduled) notifyExamRecipients(exam, { isUpdate: true }).catch(() => {});
+
+    res.json({ success:true, message: rescheduled ? 'Exam updated. Students and parents are being notified of the new time.' : 'Exam updated.', data: { exam } });
   } catch (e) {
     console.error('[exams PUT] failed:', e.message);
     res.status(500).json({ success:false, message:'Failed to update exam.' });
