@@ -1012,6 +1012,32 @@ const styles = `
   }
 `
 
+// ═══════════════════════════════════════════════════════════
+// GuideCrossLinks — every US state, US city, Canadian province and
+// city, and UK city page links UP to its country's 2026 guide and
+// hub. Paired with the guides' own auto generated page grids, this
+// closes the internal linking mesh in both directions.
+// ═══════════════════════════════════════════════════════════
+function GuideCrossLinks({ guideSlug, guideName, hubHref, hubName }) {
+  const card = {display:'block',background:'#FFFFFF',border:'1px solid #E7E1D4',borderRadius:12,padding:'16px 18px',textDecoration:'none',color:'inherit'}
+  const kicker = {fontSize:11,fontWeight:800,letterSpacing:1.2,color:'#8B1A2E',marginBottom:6,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif"}
+  const title = {fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.08rem',color:'#080C14',lineHeight:1.35}
+  return (
+    <section style={{maxWidth:1080,margin:'0 auto',padding:'8px 24px 56px'}}>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:12}}>
+        <a href={'/blog/' + guideSlug} style={card}>
+          <div style={kicker}>READ THE FULL GUIDE</div>
+          <div style={title}>{guideName}</div>
+        </a>
+        <a href={hubHref} style={card}>
+          <div style={kicker}>COUNTRY HUB</div>
+          <div style={title}>{hubName}</div>
+        </a>
+      </div>
+    </section>
+  )
+}
+
 const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','tuition-uk','uk-area','homeschooling-kenya','kenya-city','virtual-school-kenya','virtual-school-ukraine','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschooling-malaysia','malaysia-city','homeschooling-turkey','turkey-city','homeschooling-kuwait','kuwait-city','homeschooling-oman','oman-city','homeschooling-taiwan','taiwan-city','homeschooling-ireland','ireland-city','homeschooling-united-kingdom','uk-city','homeschooling-india','india-city','homeschooling-germany','germany-city','homeschooling-romania','romania-city','homeschooling-ukraine','ukraine-city','homeschooling-spain','spain-city','homeschooling-denmark','denmark-city','homeschooling-france','france-city','homeschooling-italy','italy-city','homeschooling-poland','poland-city','homeschooling-portugal','portugal-city','homeschooling-czech-republic','czech-city','homeschooling-belgium','belgium-city','homeschooling-sweden','sweden-city','homeschooling-netherlands','netherlands-city','homeschooling-norway','norway-city','homeschooling-new-zealand','new-zealand-city','homeschooling-austria','austria-city','homeschooling-hungary','hungary-city','homeschooling-finland','finland-city','homeschooling-greece','greece-city','homeschooling-azerbaijan','azerbaijan-city','homeschooling-georgia','georgia-city','homeschooling-pakistan','pakistan-city','homeschooling-australia','australia-city','homeschooling-luxembourg','luxembourg-city-page','homeschooling-switzerland','switzerland-city','homeschooling-slovakia','slovakia-city','homeschooling-slovenia','slovenia-city','homeschooling-croatia','croatia-city','homeschooling-serbia','serbia-city','homeschooling-bulgaria','bulgaria-city','homeschooling-albania','albania-city','homeschooling-north-macedonia','north-macedonia-city','homeschooling-montenegro','montenegro-city','homeschooling-bosnia','bosnia-city','homeschooling-kosovo','kosovo-city','homeschooling-zambia','zambia-city','homeschooling-zimbabwe','zimbabwe-city','homeschooling-botswana','botswana-city','homeschooling-namibia','namibia-city','homeschooling-algeria','algeria-city','homeschooling-tunisia','tunisia-city','homeschooling-mauritius','mauritius-city','homeschooling-ghana','ghana-city','homeschooling-angola','angola-city','homeschooling-drc','drc-city','homeschooling-mexico','mexico-city-page','homeschooling-brazil','brazil-city','homeschooling-colombia','colombia-city','homeschooling-argentina','argentina-city','homeschooling-chile','chile-city','homeschooling-peru','peru-city','homeschooling-ecuador','ecuador-city','homeschooling-panama','panama-city-page','homeschooling-costa-rica','costa-rica-city','homeschooling-dominican-republic','dominican-city','homeschooling-uruguay','uruguay-city','homeschooling-guatemala','guatemala-city-page','homeschooling-paraguay','paraguay-city','homeschooling-bolivia','bolivia-city','homeschooling-venezuela','venezuela-city','homeschooling-puerto-rico','puerto-rico-city','homeschooling-israel','israel-city','homeschooling-jordan','jordan-city','homeschooling-iraq','iraq-city','homeschooling-cyprus','cyprus-city','homeschooling-lebanon','lebanon-city','homeschooling-myanmar','myanmar-city','homeschooling-maldives','maldives-city','homeschooling-china','china-city','homeschooling-bangladesh','bangladesh-city','homeschooling-nepal','nepal-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','assessment','contact','privacy','terms','cookies','gdpr','article']
 
 // ─────────────────────────────────────────────────────────────────
@@ -4025,7 +4051,7 @@ export default function LandingPage() {
     metaDesc  = c.metaDesc || (c.pitch || '').slice(0, 158)
   } else if (page === 'ca-families') {
     metaTitle = 'Online School, Virtual School & Homeschool for Canadian Families — Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Canadian families. UofT, Waterloo, McGill, UBC, McMaster pipeline. Provincial homeschool compliance support. From $245 CAD/month.'
+    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Canadian families. UofT, Waterloo, McGill, UBC, McMaster pipeline. Provincial homeschool compliance support. From USD 400 per month.'
   } else if (page === 'homeschooling-ethiopia') {
     metaTitle = 'Online School, Virtual School & Homeschool for Ethiopian Families — Cambridge IGCSE & A-Level | Smartious'
     metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Ethiopian families across Addis Ababa, Dire Dawa, Mekelle, Hawassa, Bahir Dar. ICS Addis / Sandford alternative. From USD 400/month.'
@@ -10833,7 +10859,7 @@ export default function LandingPage() {
                   Real college pathways.
                 </h1>
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,maxWidth:760,marginBottom:30}}>
-                  Tired of recorded-video curricula where your child is essentially alone all day? Worried about how Acellus or BJU Press lessons compare to what students in top-tier private schools are doing? Smartious delivers <strong>Cambridge IGCSE, Pearson Edexcel, A-Level and IB Diploma</strong> programmes — taught live by qualified teachers — to American homeschool families from $180/month.
+                  Tired of recorded-video curricula where your child is essentially alone all day? Worried about how Acellus or BJU Press lessons compare to what students in top-tier private schools are doing? Smartious delivers <strong>Cambridge IGCSE, Pearson Edexcel, A-Level and IB Diploma</strong> programmes — taught live by qualified teachers — to American homeschool families from USD 400 per month.
                 </p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
                   <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
@@ -10852,7 +10878,7 @@ export default function LandingPage() {
                     ['78+','Qualified teachers'],
                     ['14','Countries served'],
                     ['8 yrs','Of teaching'],
-                    ['$180/mo','Starting price'],
+                    ['From $400/mo','Starting price'],
                   ].map(([n,l]) => (
                     <div key={l}>
                       <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',color:V.gold3,lineHeight:1}}>{n}</div>
@@ -10930,7 +10956,7 @@ export default function LandingPage() {
                         ['Religious neutrality','✓ Secular default','◐ Some objections','✗ Explicitly Christian','✓ Secular'],
                         ['College application support included','✓ UCAS + Common App','✗ Not included','◐ Transcript only','◐ Limited'],
                         ['AI tutor 24/7','✓ Mshauri AI Pro','✗','✗','✗'],
-                        ['Starting price (per month)','$180 (Basic Online)','$99-249','$150-300','Free (state-funded) - $300'],
+                        ['Starting price (per month)','From $400','$99-249','$150-300','Free (state-funded) - $300'],
                         ['Sibling discount','✓ 15-25% off','✗','◐ Curriculum sharing','✗'],
                         ['Need-based bursary','✓ Up to 50% off','◐ Roger Billings only','✗','State-dependent'],
                         ['Customer service track record','Direct founder access','BBB complaints filed','Established 50+ years','Mixed state-by-state'],
@@ -11057,7 +11083,7 @@ export default function LandingPage() {
 
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:16}}>
                   {[
-                    {tier:'Basic Online',price:'$180',sub:'per month',desc:'Self-paced curriculum + Mshauri AI Pro + digital library. Best for older self-driven students.',cta:'enroll'},
+                    {tier:'Basic Online',price:'From $400',sub:'per month',desc:'Self-paced curriculum + Mshauri AI Pro + digital library. Best for older self-driven students.',cta:'enroll'},
                     {tier:'Premium Online',price:'$260',sub:'per month',desc:'Everything in Basic + weekly live group classes + bi-weekly 1-on-1 tutor consultations. Best for most families.',cta:'enroll',popular:true},
                     {tier:'IGCSE Full Pack',price:'$360',sub:'per month',desc:'Daily live classes + dedicated IGCSE exam preparation. Year 9-11 students aiming for top universities.',cta:'enroll'},
                   ].map(t => (
@@ -11268,7 +11294,7 @@ export default function LandingPage() {
                   Real college pathways.
                 </h1>
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,maxWidth:760,marginBottom:30}}>
-                  Tired of recorded-video curricula where your child is essentially alone all day? Worried about how Acellus, Time4Learning, or local board homeschool packages lessons compare to what students in top-tier private schools are doing? Smartious delivers <strong>Cambridge IGCSE, Pearson Edexcel, A-Level and IB Diploma</strong> programmes — taught live by qualified teachers — to Canadian homeschool families from $245 CAD/month ($180 USD).
+                  Tired of recorded-video curricula where your child is essentially alone all day? Worried about how Acellus, Time4Learning, or local board homeschool packages lessons compare to what students in top-tier private schools are doing? Smartious delivers <strong>Cambridge IGCSE, Pearson Edexcel, A-Level and IB Diploma</strong> programmes — taught live by qualified teachers — to Canadian homeschool families from USD 400 per month.
                 </p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
                   <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
@@ -11287,7 +11313,7 @@ export default function LandingPage() {
                     ['78+','Qualified teachers'],
                     ['14','Countries served'],
                     ['8 yrs','Of teaching'],
-                    ['$245 CAD/mo','Starting price'],
+                    ['From $400/mo','Starting price'],
                   ].map(([n,l]) => (
                     <div key={l}>
                       <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',color:V.gold3,lineHeight:1}}>{n}</div>
@@ -11365,7 +11391,7 @@ export default function LandingPage() {
                         ['Religious neutrality','✓ Secular default','◐ Some objections','✗ Explicitly Christian','✓ Secular'],
                         ['College application support included','✓ UCAS + Common App','✗ Not included','◐ Transcript only','◐ Limited'],
                         ['AI tutor 24/7','✓ Mshauri AI Pro','✗','✗','✗'],
-                        ['Starting price (per month)','$180 (Basic Online)','$99-249','$150-300','Free (state-funded) - $300'],
+                        ['Starting price (per month)','From $400','$99-249','$150-300','Free (state-funded) - $300'],
                         ['Sibling discount','✓ 15-25% off','✗','◐ Curriculum sharing','✗'],
                         ['Need-based bursary','✓ Up to 50% off','◐ Roger Billings only','✗','State-dependent'],
                         ['Customer service track record','Direct founder access','BBB complaints filed','Established 50+ years','Mixed state-by-state'],
@@ -11492,7 +11518,7 @@ export default function LandingPage() {
 
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:16}}>
                   {[
-                    {tier:'Basic Online',price:'$180',sub:'per month',desc:'Self-paced curriculum + Mshauri AI Pro + digital library. Best for older self-driven students.',cta:'enroll'},
+                    {tier:'Basic Online',price:'From $400',sub:'per month',desc:'Self-paced curriculum + Mshauri AI Pro + digital library. Best for older self-driven students.',cta:'enroll'},
                     {tier:'Premium Online',price:'$260',sub:'per month',desc:'Everything in Basic + weekly live group classes + bi-weekly 1-on-1 tutor consultations. Best for most families.',cta:'enroll',popular:true},
                     {tier:'IGCSE Full Pack',price:'$360',sub:'per month',desc:'Daily live classes + dedicated IGCSE exam preparation. Year 9-11 students aiming for top universities.',cta:'enroll'},
                   ].map(t => (
@@ -11840,7 +11866,7 @@ export default function LandingPage() {
                     <div style={{fontSize:13,color:V.sl,marginBottom:14}}>per child / year via {s.voucher.org}</div>
                     {s.voucher.smartiousEligible && (
                       <div style={{padding:'10px 12px',background:V.white,border:'1px dashed '+V.gold3,borderRadius:8,fontSize:12.5,color:V.ink,lineHeight:1.5}}>
-                        ✓ Smartious tuition is voucher-eligible — your $7,000+ voucher fully covers our $180/month live online programmes.
+                        ✓ Smartious tuition is voucher-eligible — your $7,000+ voucher covers a large share of our live online programmes, which start from USD 400 per month.
                       </div>
                     )}
                   </div>
@@ -11859,9 +11885,9 @@ export default function LandingPage() {
               </div>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:18,maxWidth:1000,margin:'0 auto'}}>
                 {[
-                  {name:'Online',price:'$180',sub:'/month USD',desc:'Live group classes (4–6 students), recorded for review, Mshauri AI included.',popular:false},
-                  {name:'Online Plus',price:'$295',sub:'/month USD · most popular',desc:'Live group + 1-on-1 tutoring, exam prep, free college application support.',popular:true},
-                  {name:'Premium 1-on-1',price:'$540',sub:'/month USD',desc:'Pure one-on-one with a dedicated PGCE-trained teacher. For Ivy League / Oxbridge tracks.',popular:false},
+                  {name:'Online',price:'From $400',sub:'/month USD',desc:'Live group classes (4–6 students), recorded for review, Mshauri AI included.',popular:false},
+                  {name:'Online Plus',price:'Enquire',sub:'most popular · tailored quote',desc:'Live group + 1-on-1 tutoring, exam prep, free college application support.',popular:true},
+                  {name:'Premium 1-on-1',price:'Enquire',sub:'tailored quote',desc:'Pure one-on-one with a dedicated PGCE-trained teacher. For Ivy League / Oxbridge tracks.',popular:false},
                 ].map((t,i)=>(
                   <div key={i} style={{background:V.white,border: t.popular ? '2px solid '+V.gold3 : '1px solid '+V.bone3,borderRadius:14,padding:24,position:'relative'}}>
                     {t.popular && <div style={{position:'absolute',top:-12,left:24,background:V.gold3,color:V.ink,fontSize:10,fontWeight:800,letterSpacing:'.1em',padding:'4px 10px',borderRadius:99,textTransform:'uppercase'}}>Most popular</div>}
@@ -12021,6 +12047,7 @@ export default function LandingPage() {
 </div>
             </div>
           </section>
+          <GuideCrossLinks guideSlug="homeschooling-usa-2026-guide" guideName="Homeschooling in the USA: The Complete 2026 Guide" hubHref="/online-school/usa" hubName="Smartious in the United States"/>
           <Footer P={P}/>
         </>
         )
@@ -12148,7 +12175,7 @@ export default function LandingPage() {
                     <div style={{fontSize:13,color:V.sl,marginBottom:14}}>per child / year via {s.voucher.org}</div>
                     {s.voucher.smartiousEligible && (
                       <div style={{padding:'10px 12px',background:V.white,border:'1px dashed '+V.gold3,borderRadius:8,fontSize:12.5,color:V.ink,lineHeight:1.5}}>
-                        ✓ Smartious tuition is funding-eligible — your {s.voucher.amount} provincial funding contributes meaningfully to our $245 CAD/month live online programmes.
+                        ✓ Smartious tuition is funding-eligible — your {s.voucher.amount} provincial funding contributes meaningfully to our live online programmes, which start from USD 400 per month.
                       </div>
                     )}
                     {/* Deep-dive funding pages for provinces with documented programmes */}
@@ -12188,9 +12215,9 @@ export default function LandingPage() {
               </div>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:18,maxWidth:1000,margin:'0 auto'}}>
                 {[
-                  {name:'Online',price:'$245',sub:'CAD /month · $180 USD',desc:'Live group classes (4–6 students), recorded for review, Mshauri AI included.',popular:false},
-                  {name:'Online Plus',price:'$400',sub:'CAD /month · most popular · $295 USD',desc:'Live group + 1-on-1 tutoring, exam prep, free college application support.',popular:true},
-                  {name:'Premium 1-on-1',price:'$735',sub:'CAD /month · $540 USD',desc:'Pure one-on-one with a dedicated PGCE-trained teacher. For Ivy League / Oxbridge tracks.',popular:false},
+                  {name:'Online',price:'From $400',sub:'USD /month',desc:'Live group classes (4–6 students), recorded for review, Mshauri AI included.',popular:false},
+                  {name:'Online Plus',price:'Enquire',sub:'most popular · tailored quote',desc:'Live group + 1-on-1 tutoring, exam prep, free college application support.',popular:true},
+                  {name:'Premium 1-on-1',price:'Enquire',sub:'tailored quote',desc:'Pure one-on-one with a dedicated PGCE-trained teacher. For Ivy League / Oxbridge tracks.',popular:false},
                 ].map((t,i)=>(
                   <div key={i} style={{background:V.white,border: t.popular ? '2px solid '+V.gold3 : '1px solid '+V.bone3,borderRadius:14,padding:24,position:'relative'}}>
                     {t.popular && <div style={{position:'absolute',top:-12,left:24,background:V.gold3,color:V.ink,fontSize:10,fontWeight:800,letterSpacing:'.1em',padding:'4px 10px',borderRadius:99,textTransform:'uppercase'}}>Most popular</div>}
@@ -12350,6 +12377,7 @@ export default function LandingPage() {
 </div>
             </div>
           </section>
+          <GuideCrossLinks guideSlug="homeschooling-canada-2026-guide" guideName="Homeschooling in Canada: The Complete 2026 Guide" hubHref="/online-school/canada" hubName="Smartious in Canada"/>
           <Footer P={P}/>
         </>
         )
@@ -12471,9 +12499,9 @@ export default function LandingPage() {
               </div>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:18,maxWidth:1000,margin:'0 auto'}}>
                 {[
-                  {name:'Online',price:'$180',sub:'/month USD',desc:'Live group classes (4–6 students), recorded for review, Mshauri AI included.',popular:false},
-                  {name:'Online Plus',price:'$295',sub:'/month USD · most popular',desc:'Live group + 1-on-1 tutoring, exam prep, free college application support.',popular:true},
-                  {name:'Premium 1-on-1',price:'$540',sub:'/month USD',desc:'Pure one-on-one with a dedicated PGCE-trained teacher. For Ivy League / Oxbridge tracks.',popular:false},
+                  {name:'Online',price:'From $400',sub:'/month USD',desc:'Live group classes (4–6 students), recorded for review, Mshauri AI included.',popular:false},
+                  {name:'Online Plus',price:'Enquire',sub:'most popular · tailored quote',desc:'Live group + 1-on-1 tutoring, exam prep, free college application support.',popular:true},
+                  {name:'Premium 1-on-1',price:'Enquire',sub:'tailored quote',desc:'Pure one-on-one with a dedicated PGCE-trained teacher. For Ivy League / Oxbridge tracks.',popular:false},
                 ].map((t,i)=>(
                   <div key={i} style={{background:V.white,border: t.popular ? '2px solid '+V.gold3 : '1px solid '+V.bone3,borderRadius:14,padding:24,position:'relative'}}>
                     {t.popular && <div style={{position:'absolute',top:-12,left:24,background:V.gold3,color:V.ink,fontSize:10,fontWeight:800,letterSpacing:'.1em',padding:'4px 10px',borderRadius:99,textTransform:'uppercase'}}>Most popular</div>}
@@ -12582,6 +12610,7 @@ export default function LandingPage() {
 </div>
             </div>
           </section>
+          <GuideCrossLinks guideSlug="homeschooling-usa-2026-guide" guideName="Homeschooling in the USA: The Complete 2026 Guide" hubHref="/online-school/usa" hubName="Smartious in the United States"/>
           <Footer P={P}/>
         </>
         )
@@ -12650,7 +12679,7 @@ export default function LandingPage() {
                 <div style={{background:'#fff',padding:'24px 26px',borderRadius:10,borderLeft:`4px solid ${V.cr}`}}>
                   <div style={{fontSize:13,color:V.cr,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',marginBottom:6}}>Step 2</div>
                   <h3 style={{fontFamily:'DM Serif Display, serif',fontSize:22,color:V.ink,margin:'0 0 10px'}}>Spend on eligible educational expenses — including Smartious tuition</h3>
-                  <p style={{color:V.sl,fontSize:15,lineHeight:1.65,margin:0}}>Alberta Education guidelines specify eligible categories: curriculum and instructional materials, tutoring and lessons, educational supplies, exam fees (including Cambridge IGCSE &amp; A-Level series), and technology with clear educational purpose. Smartious live Cambridge instruction is classed as curriculum + tutoring — every monthly invoice ($245 / $400 / $735 CAD) qualifies.</p>
+                  <p style={{color:V.sl,fontSize:15,lineHeight:1.65,margin:0}}>Alberta Education guidelines specify eligible categories: curriculum and instructional materials, tutoring and lessons, educational supplies, exam fees (including Cambridge IGCSE &amp; A-Level series), and technology with clear educational purpose. Smartious live Cambridge instruction is classed as curriculum + tutoring — every monthly invoice qualifies, whichever programme tier you choose.</p>
                 </div>
 
                 <div style={{background:'#fff',padding:'24px 26px',borderRadius:10,borderLeft:`4px solid ${V.cr}`}}>
@@ -12679,23 +12708,11 @@ export default function LandingPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    <tr style={{borderBottom:`1px solid ${V.bone2}`}}>
-                      <td style={{padding:'14px 16px',color:V.ink,fontWeight:600}}>Online ($245/mo)</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.sl}}>$2,940</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.cr,fontWeight:600}}>−$850</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink,fontWeight:600}}>$2,090 net</td>
-                    </tr>
-                    <tr style={{borderBottom:`1px solid ${V.bone2}`}}>
-                      <td style={{padding:'14px 16px',color:V.ink,fontWeight:600}}>Online Plus ($400/mo)</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.sl}}>$4,800</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.cr,fontWeight:600}}>−$850</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink,fontWeight:600}}>$3,950 net</td>
-                    </tr>
                     <tr>
-                      <td style={{padding:'14px 16px',color:V.ink,fontWeight:600}}>Premium 1-on-1 ($735/mo)</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.sl}}>$8,820</td>
+                      <td style={{padding:'14px 16px',color:V.ink,fontWeight:600}}>Smartious tuition (from $400 USD/mo)</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.sl}}>from ~$6,530</td>
                       <td style={{padding:'14px 16px',textAlign:'right',color:V.cr,fontWeight:600}}>−$850</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink,fontWeight:600}}>$7,970 net</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink,fontWeight:600}}>from ~$5,680 net</td>
                     </tr>
                   </tbody>
                 </table>
@@ -12862,23 +12879,11 @@ export default function LandingPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    <tr style={{borderBottom:`1px solid ${V.bone2}`}}>
-                      <td style={{padding:'14px 16px',color:V.ink,fontWeight:600}}>Online ($245/mo)</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.sl}}>$2,940</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.cr,fontWeight:600}}>−$500</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink,fontWeight:600}}>$2,440 net</td>
-                    </tr>
-                    <tr style={{borderBottom:`1px solid ${V.bone2}`}}>
-                      <td style={{padding:'14px 16px',color:V.ink,fontWeight:600}}>Online Plus ($400/mo)</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.sl}}>$4,800</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.cr,fontWeight:600}}>−$500</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink,fontWeight:600}}>$4,300 net</td>
-                    </tr>
                     <tr>
-                      <td style={{padding:'14px 16px',color:V.ink,fontWeight:600}}>Premium 1-on-1 ($735/mo)</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.sl}}>$8,820</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.cr,fontWeight:600}}>−$500</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink,fontWeight:600}}>$8,320 net</td>
+                      <td style={{padding:'14px 16px',color:V.ink,fontWeight:600}}>Smartious tuition (from $400 USD/mo)</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.sl}}>from ~$6,530</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.cr,fontWeight:600}}>−$500 to $1,500</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink,fontWeight:600}}>from ~$5,030 net</td>
                     </tr>
                   </tbody>
                 </table>
@@ -13010,34 +13015,30 @@ export default function LandingPage() {
                   <thead>
                     <tr style={{background:V.ink,color:'#fff'}}>
                       <th style={{padding:'14px 16px',textAlign:'left',fontWeight:600}}>Division funding level</th>
-                      <th style={{padding:'14px 16px',textAlign:'right',fontWeight:600}}>Online tier net</th>
-                      <th style={{padding:'14px 16px',textAlign:'right',fontWeight:600}}>Online Plus net</th>
-                      <th style={{padding:'14px 16px',textAlign:'right',fontWeight:600}}>Premium net</th>
+                      <th style={{padding:'14px 16px',textAlign:'right',fontWeight:600}}>Smartious tuition (from $400 USD/mo)</th>
+                      <th style={{padding:'14px 16px',textAlign:'right',fontWeight:600}}>Your net (from)</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr style={{borderBottom:`1px solid ${V.bone2}`}}>
                       <td style={{padding:'14px 16px',color:V.ink,fontWeight:600}}>Lower band ($500/yr)</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink}}>$2,440</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink}}>$4,300</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink}}>$8,320</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.sl}}>from ~$6,530 CAD/yr</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink,fontWeight:600}}>from ~$6,030</td>
                     </tr>
                     <tr style={{borderBottom:`1px solid ${V.bone2}`}}>
                       <td style={{padding:'14px 16px',color:V.ink,fontWeight:600}}>Mid band ($1,000/yr)</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink}}>$1,940</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink}}>$3,800</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink}}>$7,820</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.sl}}>from ~$6,530 CAD/yr</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink,fontWeight:600}}>from ~$5,530</td>
                     </tr>
                     <tr>
                       <td style={{padding:'14px 16px',color:V.ink,fontWeight:600}}>Upper band ($1,500/yr)</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink}}>$1,440</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink}}>$3,300</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink}}>$7,320</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.sl}}>from ~$6,530 CAD/yr</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink,fontWeight:600}}>from ~$5,030</td>
                     </tr>
                   </tbody>
                 </table>
               </div>
-              <p style={{fontSize:13,color:V.sl,marginTop:16,fontStyle:'italic'}}>Smartious tiers gross-of-funding: Online $2,940 CAD/yr · Online Plus $4,800 CAD/yr · Premium 1-on-1 $8,820 CAD/yr.</p>
+              <p style={{fontSize:13,color:V.sl,marginTop:16,fontStyle:'italic'}}>Smartious tuition starts from USD 400 per month, roughly $6,530 CAD per year at current exchange. Request pricing for your exact programme figure gross of funding.</p>
             </div>
           </section>
 
@@ -13188,9 +13189,9 @@ export default function LandingPage() {
               </div>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:18,maxWidth:1000,margin:'0 auto'}}>
                 {[
-                  {name:'Online',price:'$245',sub:'CAD /month · $180 USD',desc:'Live group classes (4–6 students), recorded for review, Mshauri AI included.',popular:false},
-                  {name:'Online Plus',price:'$400',sub:'CAD /month · most popular · $295 USD',desc:'Live group + 1-on-1 tutoring, exam prep, free college application support.',popular:true},
-                  {name:'Premium 1-on-1',price:'$735',sub:'CAD /month · $540 USD',desc:'Pure one-on-one with a dedicated PGCE-trained teacher. For Ivy League / Oxbridge tracks.',popular:false},
+                  {name:'Online',price:'From $400',sub:'USD /month',desc:'Live group classes (4–6 students), recorded for review, Mshauri AI included.',popular:false},
+                  {name:'Online Plus',price:'Enquire',sub:'most popular · tailored quote',desc:'Live group + 1-on-1 tutoring, exam prep, free college application support.',popular:true},
+                  {name:'Premium 1-on-1',price:'Enquire',sub:'tailored quote',desc:'Pure one-on-one with a dedicated PGCE-trained teacher. For Ivy League / Oxbridge tracks.',popular:false},
                 ].map((t,i)=>(
                   <div key={i} style={{background:V.white,border: t.popular ? '2px solid '+V.gold3 : '1px solid '+V.bone3,borderRadius:14,padding:24,position:'relative'}}>
                     {t.popular && <div style={{position:'absolute',top:-12,left:24,background:V.gold3,color:V.ink,fontSize:10,fontWeight:800,letterSpacing:'.1em',padding:'4px 10px',borderRadius:99,textTransform:'uppercase'}}>Most popular</div>}
@@ -13299,6 +13300,7 @@ export default function LandingPage() {
 </div>
             </div>
           </section>
+          <GuideCrossLinks guideSlug="homeschooling-canada-2026-guide" guideName="Homeschooling in Canada: The Complete 2026 Guide" hubHref="/online-school/canada" hubName="Smartious in Canada"/>
           <Footer P={P}/>
         </>
         )
@@ -23145,6 +23147,7 @@ export default function LandingPage() {
               <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
             </div>
           </div></section>
+          <GuideCrossLinks guideSlug="homeschooling-uk-2026-guide" guideName="Homeschooling in the UK: The Complete 2026 Guide" hubHref="/online-school/uk" hubName="Smartious in the United Kingdom"/>
           <Footer P={P}/>
         </>
       )}
@@ -23431,6 +23434,30 @@ export default function LandingPage() {
                           onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)' }}>
                           <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',color:V.ink,marginBottom:5,lineHeight:1.3}}>{al.name}</div>
                           <p style={{fontSize:13.5,color:V.sl,lineHeight:1.6,margin:0}}>{al.note}</p>
+                        </a>
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {/* Page links — raw hrefs for state/province/city pages. Real <a> tags. */}
+                {a.pageLinks && a.pageLinks.length > 0 && (
+                  <section style={{marginBottom:44}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginBottom:8,letterSpacing:'-.01em',position:'relative',paddingLeft:18}}>
+                      <span style={{position:'absolute',left:0,top:14,width:8,height:8,borderRadius:'50%',background:V.cr}}/>
+                      {a.pageLinksHeading || 'Explore every page in this region'}
+                    </h2>
+                    {a.pageLinksIntro && (
+                      <p style={{fontSize:16.5,color:V.ink2,lineHeight:1.85,marginBottom:22,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif"}}>{a.pageLinksIntro}</p>
+                    )}
+                    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:12}}>
+                      {a.pageLinks.map(pl => (
+                        <a key={pl.href} href={pl.href}
+                          style={{display:'block',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'14px 16px',textDecoration:'none',color:'inherit',transition:'all .2s'}}
+                          onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)' }}
+                          onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)' }}>
+                          <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.ink,marginBottom:4,lineHeight:1.3}}>{pl.name}</div>
+                          {pl.note && <p style={{fontSize:13,color:V.sl,lineHeight:1.55,margin:0}}>{pl.note}</p>}
                         </a>
                       ))}
                     </div>
