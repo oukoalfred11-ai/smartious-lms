@@ -101,12 +101,15 @@
   let directUrl = ''
   const streamUrl = `${apiBase}/library/${bookId}/stream`
 
-  // Fetch the book's metadata in the background for the fallback
-  // "Open directly" link. Never blocks the reader.
-  fetch(`${apiBase}/library/${bookId}`, { headers: { Authorization: `Bearer ${token}` } })
-    .then(r => r.ok ? r.json() : null)
-    .then(j => { directUrl = j?.data?.book?.url || '' })
-    .catch(() => {})
+  // Fetch the book record up front: it carries the PUBLIC R2 URL.
+  // Reading straight from R2 puts Cloudflare's edge (with a node in
+  // Nairobi) between the student and the file, instead of routing
+  // every chunk through the Render server and its database.
+  try {
+    const metaRes = await fetch(`${apiBase}/library/${bookId}`, { headers: { Authorization: `Bearer ${token}` } })
+    if (metaRes.ok) { const j = await metaRes.json(); directUrl = j?.data?.book?.url || '' }
+  } catch {}
+
 
   // ── FULL-DOWNLOAD FALLBACK ─────────────────────────────
   // Only used when range-based loading fails (older browsers,
@@ -237,25 +240,53 @@
   // keeps downloading in the background while the student reads;
   // jumping ahead range-fetches just the pages needed. The backend
   // /stream route forwards Range headers to R2 and answers 206.
-  try {
-    const loadingTask = pdfjsLib.getDocument({
-      url: streamUrl,
-      httpHeaders: { Authorization: `Bearer ${token}` },
-      rangeChunkSize: 1048576,        // 1 MB chunks
-      cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/cmaps/',         // fonts: without these, any book
-      cMapPacked: true,               // using CID fonts fails page by page
-      standardFontDataUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/standard_fonts/',   // with blank grey
+  const FONTS = {
+    cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/cmaps/',
+    cMapPacked: true,
+    standardFontDataUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/standard_fonts/',
+  }
+  async function openFrom(url, withAuth) {
+    const task = pdfjsLib.getDocument({
+      url,
+      ...(withAuth ? { httpHeaders: { Authorization: `Bearer ${token}` } } : {}),
+      rangeChunkSize: 2097152,      // 2 MB chunks: fewer round trips
+      disableAutoFetch: true,       // bandwidth goes to visible pages,
+      ...FONTS,                     // not a hidden 80 MB background pull
     })
-    loadingTask.onProgress = ({ loaded, total }) => {
-      if (total) {
-        document.getElementById('loading-text').textContent =
-          'Opening book... ' + Math.min(99, Math.round((loaded / total) * 100)) + '%'
-      } else if (loaded) {
-        document.getElementById('loading-text').textContent =
-          'Opening book... ' + (loaded / 1048576).toFixed(1) + ' MB'
+    task.onProgress = ({ loaded, total }) => {
+      if (total) document.getElementById('loading-text').textContent =
+        'Opening book... ' + Math.min(99, Math.round((loaded / total) * 100)) + '%'
+    }
+    return await task.promise
+  }
+  try {
+    if (directUrl) {
+      try {
+        pdfDoc = await openFrom(directUrl, false)
+      } catch (eDirect) {
+        console.warn('[viewer] direct R2 blocked (CORS not set on bucket?), using backend stream:', eDirect?.message)
+        pdfDoc = null
       }
     }
-    pdfDoc   = await loadingTask.promise
+    const loadingTask = pdfDoc ? null : pdfjsLib.getDocument({
+      url: streamUrl,
+      httpHeaders: { Authorization: `Bearer ${token}` },
+      rangeChunkSize: 2097152,
+      disableAutoFetch: true,
+      ...FONTS,
+    })
+    if (loadingTask) {
+      loadingTask.onProgress = ({ loaded, total }) => {
+        if (total) {
+          document.getElementById('loading-text').textContent =
+            'Opening book... ' + Math.min(99, Math.round((loaded / total) * 100)) + '%'
+        } else if (loaded) {
+          document.getElementById('loading-text').textContent =
+            'Opening book... ' + (loaded / 1048576).toFixed(1) + ' MB'
+        }
+      }
+      pdfDoc = await loadingTask.promise
+    }
     numPages = pdfDoc.numPages
     await buildViewer()
   } catch (err) {
