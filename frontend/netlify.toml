@@ -26,9 +26,3 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy        = "strict-origin-when-cross-origin"
     Permissions-Policy     = "camera=(self), microphone=(self), display-capture=(self), fullscreen=(self), geolocation=()"
-
-# Allow /pdfjs/index.html to be loaded in an iframe (same origin)
-[[headers]]
-  for = "/pdfjs/*"
-  [headers.values]
-    X-Frame-Options = "SAMEORIGIN"
