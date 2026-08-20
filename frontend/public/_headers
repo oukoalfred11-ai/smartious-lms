@@ -58,13 +58,16 @@
 # NOTE: camera=() [empty] blocks EVERYONE INCLUDING OUR OWN SITE and
 # silently kills getUserMedia with no prompt — that value was the
 # root cause of the classroom never getting camera access.
+# X-Frame-Options SAMEORIGIN (not DENY): other sites still cannot
+# frame Smartious pages (clickjacking protection intact), but OUR OWN
+# same-origin iframes keep working — the library's pdf.js book viewer
+# loads /pdfjs/index.html in an iframe. DENY here blocked it, because
+# Netlify merges every matching _headers rule and sends ALL values;
+# a per-path SAMEORIGIN "override" below cannot cancel a global DENY,
+# the browser just receives both and refuses to frame.
 /*
-  X-Frame-Options: DENY
+  X-Frame-Options: SAMEORIGIN
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(self), microphone=(self), display-capture=(self), fullscreen=(self), geolocation=()
 
-# The bundled pdf.js viewer is embedded by LibraryViewer in a
-# same-origin iframe, so it must not inherit the global DENY.
-/pdfjs/*
-  X-Frame-Options: SAMEORIGIN
