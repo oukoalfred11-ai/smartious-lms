@@ -27,7 +27,10 @@
       display: flex; flex-direction: column; align-items: center;
       padding: 20px 16px; gap: 10px;
     }
-    .page-wrapper { box-shadow: 0 4px 24px rgba(0,0,0,.5); border-radius: 2px; overflow: hidden; background: #fff; }
+    /* flex-shrink:0 is load-bearing: the container is a column flex
+       box, and without it flexbox compresses all pages to fit the
+       screen, collapsing the whole book into invisible slivers. */
+    .page-wrapper { flex-shrink: 0; box-shadow: 0 4px 24px rgba(0,0,0,.5); border-radius: 2px; overflow: hidden; background: #fff; }
     .page-wrapper canvas { display: block; }
     #loading {
       position: fixed; inset: 52px 0 0 0;
@@ -163,7 +166,8 @@
   async function renderPage(p) {
     if (!pdfDoc) return
     try {
-      const page = await pdfDoc.getPage(p)
+      const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('page ' + p + ' timed out')), 20000))
+      const page = await Promise.race([pdfDoc.getPage(p), timeout])
       const vp   = page.getViewport({ scale })
       const wrap = document.getElementById('page-' + p)
       if (!wrap) return
@@ -172,7 +176,8 @@
       wrap.style.width = vp.width + 'px'; wrap.style.height = vp.height + 'px'
       cv.width = vp.width; cv.height = vp.height
       cv.style.width = vp.width + 'px'; cv.style.height = vp.height + 'px'
-      await page.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise
+      const rTimeout = new Promise((_, rej) => setTimeout(() => rej(new Error('render ' + p + ' timed out')), 20000))
+      await Promise.race([page.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise, rTimeout])
     } catch(e) {
       console.error('render error p' + p, e)
       renderFails++
@@ -194,7 +199,10 @@
           numPages = pdfDoc.numPages
           renderFails = 0
           await buildViewer()
-        } catch (e2) { console.error('[viewer] rescue failed', e2) }
+        } catch (e2) {
+          console.error('[viewer] rescue failed', e2)
+          showError((e2 && e2.message) || 'The book could not be displayed.', directUrl)
+        }
       }
     }
   }
