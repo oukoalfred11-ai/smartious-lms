@@ -480,15 +480,17 @@ router.get('/:id/stream', auth, async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id))
       return fail(res, 400, 'Invalid id.');
 
-    const book = await LibraryBook.findById(req.params.id).lean();
-    if (!book || !book.isActive) return fail(res, 404, 'Book not found.');
-
+    // ONE combined query instead of three: pdf.js range mode calls
+    // this route once per chunk, so per request cost is page speed.
     const filter = await visibilityFilterFor(req.user);
-    const allowed = await LibraryBook.exists({ _id: book._id, ...filter });
-    if (!allowed) return fail(res, 403, 'Access denied.');
+    const book = await LibraryBook.findOne({ _id: req.params.id, isActive: true, ...filter }).lean();
+    if (!book) return fail(res, 404, 'Book not found.');
 
-    // Bump view counter (non-blocking)
-    LibraryBook.updateOne({ _id: book._id }, { $inc: { viewCount: 1 } }).catch(() => {});
+    // Count a view only on the opening request, not on every chunk,
+    // otherwise one student reading one book counts as fifty views.
+    if (!req.headers.range) {
+      LibraryBook.updateOne({ _id: book._id }, { $inc: { viewCount: 1 } }).catch(() => {});
+    }
 
     // Fetch from R2 and pipe to client, forwarding Range header if present
     const fetchHeaders = { 'Accept': 'application/pdf' };
