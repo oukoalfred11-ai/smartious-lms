@@ -47,7 +47,7 @@
 </head>
 <body>
 <div id="toolbar">
-  <div id="title"><h1 id="book-title">Loading...</h1><p id="book-meta"></p></div>
+  <div id="title" style="display:none"><h1 id="book-title">Loading...</h1><p id="book-meta"></p></div>
   <button class="tb-btn" id="btn-zoom-out">−</button>
   <span id="zoom-info">90%</span>
   <button class="tb-btn" id="btn-zoom-in">+</button>
@@ -158,6 +158,8 @@
     btnNext.disabled = currentPage >= numPages
   }
 
+  let renderFails = 0
+  let rescuing = false
   async function renderPage(p) {
     if (!pdfDoc) return
     try {
@@ -171,7 +173,30 @@
       cv.width = vp.width; cv.height = vp.height
       cv.style.width = vp.width + 'px'; cv.style.height = vp.height + 'px'
       await page.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise
-    } catch(e) { console.error('render error p' + p, e) }
+    } catch(e) {
+      console.error('render error p' + p, e)
+      renderFails++
+      // Pages failing while the document opened means the range
+      // transport handed pdf.js bad slices (a proxy or cache along
+      // the way). Rescue once: throw the ranged document away and
+      // rebuild from one clean full download.
+      if (renderFails >= 2 && !rescuing) {
+        rescuing = true
+        try {
+          document.getElementById('loading').style.display = ''
+          const buf = await fetchPdfAsBlob()
+          document.getElementById('loading-text').textContent = 'Rendering...'
+          pdfDoc = await pdfjsLib.getDocument({
+            data: buf,
+            cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/cmaps/', cMapPacked: true,
+            standardFontDataUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/standard_fonts/',
+          }).promise
+          numPages = pdfDoc.numPages
+          renderFails = 0
+          await buildViewer()
+        } catch (e2) { console.error('[viewer] rescue failed', e2) }
+      }
+    }
   }
 
   async function buildViewer() {
@@ -209,6 +234,9 @@
       url: streamUrl,
       httpHeaders: { Authorization: `Bearer ${token}` },
       rangeChunkSize: 1048576,        // 1 MB chunks
+      cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/cmaps/',         // fonts: without these, any book
+      cMapPacked: true,               // using CID fonts fails page by page
+      standardFontDataUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/standard_fonts/',   // with blank grey
     })
     loadingTask.onProgress = ({ loaded, total }) => {
       if (total) {
@@ -227,7 +255,11 @@
     try {
       const buf = await fetchPdfAsBlob()
       document.getElementById('loading-text').textContent = 'Rendering...'
-      pdfDoc   = await pdfjsLib.getDocument({ data: buf }).promise
+      pdfDoc   = await pdfjsLib.getDocument({
+        data: buf,
+        cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/cmaps/', cMapPacked: true,
+        standardFontDataUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/standard_fonts/',
+      }).promise
       numPages = pdfDoc.numPages
       await buildViewer()
     } catch (err2) {
