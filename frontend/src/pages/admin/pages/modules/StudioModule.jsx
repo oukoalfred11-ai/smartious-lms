@@ -20,7 +20,7 @@
  * No backend, no uploads to the server: everything renders and
  * exports locally.
  */
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { TOKENS } from '../shared/tokens.js'
 import { Muxer, ArrayBufferTarget } from '../../../../lib/mp4muxer.js'
 
@@ -804,13 +804,134 @@ async function renderMixOffline({ totalDur, musicBuffer, musicVol, voBuffer, voV
 
 // Seek a background <video> to an exact time and wait for the frame.
 const seekVideo = (v, t) => new Promise((res) => {
-  const target = (v.duration && isFinite(v.duration)) ? t % v.duration : t
+  // Film clips set an exact target (trim offset applied); looping
+  // backgrounds keep the modulo behaviour.
+  const want = (v.__filmTarget !== undefined) ? v.__filmTarget : t
+  const target = (v.__filmTarget !== undefined) ? Math.min(want, (v.duration || want) - 0.05)
+    : (v.duration && isFinite(v.duration)) ? want % v.duration : want
   if (Math.abs(v.currentTime - target) < 0.001) return res()
   const done = () => { v.removeEventListener('seeked', done); res() }
   v.addEventListener('seeked', done)
   try { v.currentTime = target } catch (e) { res() }
   setTimeout(done, 400)   // never wedge on a stubborn seek
 })
+
+// ═══ FILM AUDIO TOOLS ═══════════════════════════════════
+// Slice a clip's decoded audio to its trim window, with gain.
+function sliceAudio(buf, from, to, gain = 1) {
+  const sr = buf.sampleRate
+  const a = Math.max(0, Math.floor(from * sr))
+  const b = Math.min(buf.length, Math.floor(to * sr))
+  const len = Math.max(1, b - a)
+  const out = new AudioBuffer({ length: len, sampleRate: sr, numberOfChannels: buf.numberOfChannels })
+  for (let ch = 0; ch < buf.numberOfChannels; ch++) {
+    const s = buf.getChannelData(ch), d = out.getChannelData(ch)
+    for (let i = 0; i < len; i++) d[i] = s[a + i] * gain
+  }
+  return out
+}
+
+// Practical noise cleanup, no external models: a rumble filter, a
+// hiss filter, then a gentle gate that pulls the floor down between
+// words. Honest about what it is: it removes hum, hiss and room
+// noise between speech; it is not studio grade AI separation.
+async function cleanNoise(buf) {
+  const off = new OfflineAudioContext(buf.numberOfChannels, buf.length, buf.sampleRate)
+  const srcN = off.createBufferSource(); srcN.buffer = buf
+  const hp = off.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 90; hp.Q.value = 0.707
+  const lp = off.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 14000
+  srcN.connect(hp); hp.connect(lp); lp.connect(off.destination)
+  srcN.start()
+  const filtered = await off.startRendering()
+  // Downward gate from the measured noise floor
+  const sr = filtered.sampleRate
+  const frame = Math.max(64, Math.round(sr * 0.01))
+  const ch0 = filtered.getChannelData(0)
+  const nFrames = Math.ceil(ch0.length / frame)
+  const env = new Float32Array(nFrames)
+  for (let f = 0; f < nFrames; f++) {
+    let s = 0; const st = f * frame, en = Math.min(ch0.length, st + frame)
+    for (let i = st; i < en; i++) s += ch0[i] * ch0[i]
+    env[f] = Math.sqrt(s / Math.max(1, en - st))
+  }
+  const sorted = [...env].sort((x, y) => x - y)
+  const floor = sorted[Math.floor(sorted.length * 0.15)] || 0
+  const thr = Math.max(floor * 3, 0.0035)
+  const gains = new Float32Array(nFrames)
+  let g = 1
+  for (let f = 0; f < nFrames; f++) {
+    const target = env[f] >= thr ? 1 : Math.max(0.07, (env[f] / thr) * 0.4)
+    g += (target - g) * (target > g ? 0.5 : 0.08)   // fast open, slow close
+    gains[f] = g
+  }
+  for (let ch = 0; ch < filtered.numberOfChannels; ch++) {
+    const d = filtered.getChannelData(ch)
+    for (let i = 0; i < d.length; i++) {
+      const f = Math.min(nFrames - 1, Math.floor(i / frame))
+      const f2 = Math.min(nFrames - 1, f + 1)
+      const mix = (i % frame) / frame
+      d[i] *= gains[f] * (1 - mix) + gains[f2] * mix
+    }
+  }
+  return filtered
+}
+
+// Auto timed captions: distribute typed words across the clip by
+// word weight, grouped into short lines.
+function captionTrack(text, dur) {
+  const words = String(text || '').trim().split(/\s+/).filter(Boolean)
+  if (!words.length || !dur) return []
+  const weights = words.map(w => w.length + 0.8)
+  const total = weights.reduce((a, b) => a + b, 0)
+  const out = []
+  let t = 0, line = [], lineStart = 0, lineChars = 0
+  const flush = (end) => {
+    if (!line.length) return
+    out.push({ t0: lineStart, t1: Math.max(end, lineStart + 0.6), text: line.join(' ') })
+    line = []; lineChars = 0
+  }
+  for (let i = 0; i < words.length; i++) {
+    if (!line.length) lineStart = t
+    line.push(words[i]); lineChars += words[i].length + 1
+    t += (weights[i] / total) * dur
+    if (lineChars >= 30 || /[.!?]$/.test(words[i])) flush(t)
+  }
+  flush(dur)
+  return out
+}
+
+function drawCaptionLine(ctx, W, H, entry) {
+  const B = Math.min(W, H)
+  const fs = Math.round(B * 0.040)
+  ctx.save()
+  ctx.font = '800 ' + fs + 'px ' + '"Montserrat", Arial, sans-serif'
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  const maxW = W * 0.86
+  // wrap to at most two lines
+  const words = entry.text.split(' ')
+  const lines = ['']
+  for (const w of words) {
+    const test = (lines[lines.length - 1] + ' ' + w).trim()
+    if (ctx.measureText(test).width > maxW && lines[lines.length - 1]) lines.push(w)
+    else lines[lines.length - 1] = test
+  }
+  const shown = lines.slice(0, 2)
+  const lh = fs * 1.32
+  const baseY = H - B * 0.085 - (shown.length - 1) * lh
+  shown.forEach((ln, i) => {
+    const y = baseY + i * lh
+    const tw = ctx.measureText(ln).width
+    const padX = fs * 0.55, padY = fs * 0.34
+    ctx.fillStyle = 'rgba(5,8,14,0.78)'
+    const rx = W / 2 - tw / 2 - padX, ry = y - fs / 2 - padY, rw = tw + padX * 2, rh = fs + padY * 2, rr = fs * 0.35
+    ctx.beginPath()
+    ctx.moveTo(rx + rr, ry); ctx.arcTo(rx + rw, ry, rx + rw, ry + rh, rr); ctx.arcTo(rx + rw, ry + rh, rx, ry + rh, rr); ctx.arcTo(rx, ry + rh, rx, ry, rr); ctx.arcTo(rx, ry, rx + rw, ry, rr); ctx.closePath(); ctx.fill()
+    ctx.fillStyle = '#FFFFFF'
+    ctx.fillText(ln, W / 2, y)
+  })
+  ctx.restore()
+}
 
 // drawFrame(ctx, t) draws one timeline frame; mediaAt(t) returns the
 // video elements that must show the correct frame at time t.
@@ -1187,13 +1308,13 @@ export default function StudioModule({ toast }) {
   return (
     <div>
       <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-        {[['cards', 'Flyer cards'], ['video', 'Motion video']].map(([k, l]) => (
+        {[['cards', 'Flyer cards'], ['video', 'Motion video'], ['film', 'Film editor']].map(([k, l]) => (
           <button key={k} onClick={() => setTab(k)} style={{
             ...btn(tab === k), borderRadius: 99, padding: '9px 20px',
           }}>{l}</button>
         ))}
       </div>
-      {tab === 'cards' ? <CardMaker toast={toast} /> : <VideoMaker toast={toast} />}
+      {tab === 'cards' ? <CardMaker toast={toast} /> : tab === 'video' ? <VideoMaker toast={toast} /> : <FilmMaker toast={toast} />}
     </div>
   )
 }
@@ -2042,4 +2163,416 @@ function VideoMaker({ toast }) {
       </div>
     </div>
   )
+}
+
+
+// ═══════════════════════════════════════════════════════════
+// FILM EDITOR — stitch uploaded clips into one film, keeping
+// each clip's own sound. Trim, per clip colour grade, volume,
+// noise cleanup, auto timed burned captions, optional music bed
+// under everything, and the same 4K MP4 exporter as the rest of
+// the Studio. Autosaves like the other tabs.
+// ═══════════════════════════════════════════════════════════
+function FilmMaker({ toast }) {
+  const [format, setFormat] = useState('youtube')
+  const [clips, setClips] = useState([])
+  const [cur, setCur] = useState(0)
+  const [media, setMedia] = useState({})
+  const [blobs, setBlobs] = useState({})
+  const [audioBufs, setAudioBufs] = useState({})
+  const [capsOn, setCapsOn] = useState(true)
+  const [sound, setSound] = useState({ musicMode: 'none', musicBuffer: null, musicVol: 0.5, voBuffer: null, voVol: 1, script: null })
+  const [loaded, setLoaded] = useState(false)
+  const [savedAt, setSavedAt] = useState(0)
+  const [playing, setPlaying] = useState(false)
+  const [rendering, setRendering] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const cvRef = useRef(null)
+  const rafRef = useRef(0)
+  const cleanCache = useRef({})
+
+  const { W, H } = FORMATS[format]
+  const clip = clips[cur]
+
+  const timeline = () => {
+    let acc = 0
+    const starts = clips.map(c => { const s = acc; acc += Math.max(0.2, (c.out - c.in)); return s })
+    return { starts, total: acc }
+  }
+  const activeAt = (t) => {
+    const { starts, total } = timeline()
+    if (t >= total) return null
+    for (let i = clips.length - 1; i >= 0; i--) if (t >= starts[i]) return { idx: i, start: starts[i] }
+    return null
+  }
+
+  // Absolute caption entries, rebuilt when clips change
+  const capsAbs = useMemo(() => {
+    const { starts } = timeline()
+    const out = []
+    clips.forEach((c, i) => {
+      captionTrack(c.captions, Math.max(0.2, c.out - c.in)).forEach(e =>
+        out.push({ t0: e.t0 + starts[i], t1: e.t1 + starts[i], text: e.text }))
+    })
+    return out
+  }, [clips])
+
+  const drawFilm = (ctx, t) => {
+    ctx.fillStyle = '#000'
+    ctx.fillRect(0, 0, W, H)
+    const a = activeAt(t)
+    if (a) {
+      const c = clips[a.idx]
+      const v = media[a.idx]
+      if (v && v.videoWidth) {
+        ctx.save()
+        ctx.filter = gradeFilter(c.grade) || 'none'
+        const vw = v.videoWidth, vh = v.videoHeight
+        if (c.fit === 'fit') {
+          const cover = Math.max(W / vw, H / vh)
+          ctx.save(); ctx.filter = (gradeFilter(c.grade) || '') + ' blur(28px) brightness(0.6)'
+          ctx.drawImage(v, W / 2 - vw * cover / 2, H / 2 - vh * cover / 2, vw * cover, vh * cover)
+          ctx.restore()
+          const fit = Math.min(W / vw, H / vh)
+          ctx.drawImage(v, W / 2 - vw * fit / 2, H / 2 - vh * fit / 2, vw * fit, vh * fit)
+        } else {
+          const cover = Math.max(W / vw, H / vh)
+          ctx.drawImage(v, W / 2 - vw * cover / 2, H / 2 - vh * cover / 2, vw * cover, vh * cover)
+        }
+        ctx.restore()
+      }
+    }
+    if (capsOn) {
+      const e = capsAbs.find(x => t >= x.t0 && t < x.t1)
+      if (e) drawCaptionLine(ctx, W, H, e)
+    }
+  }
+
+  const mediaAtFilm = (t) => {
+    const a = activeAt(t)
+    if (!a) return []
+    const v = media[a.idx]
+    if (!v) return []
+    v.__filmTarget = clips[a.idx].in + (t - a.start)
+    return [v]
+  }
+
+  const buildFilmAudio = async () => {
+    const { starts } = timeline()
+    const out = []
+    for (let i = 0; i < clips.length; i++) {
+      const c = clips[i]
+      const base = audioBufs[i]
+      if (!base) continue
+      let seg = sliceAudio(base, c.in, c.out, c.vol)
+      if (c.clean) {
+        const key = i + '|' + c.in.toFixed(2) + '|' + c.out.toFixed(2) + '|' + c.vol
+        if (!cleanCache.current[key]) cleanCache.current[key] = await cleanNoise(seg)
+        seg = cleanCache.current[key]
+      }
+      out.push({ buffer: seg, at: starts[i] })
+    }
+    return out
+  }
+
+  const onAddClips = (e) => {
+    const files = [...(e.target.files || [])]
+    if (!files.length) return
+    let idx = clips.length
+    files.forEach((f) => {
+      const my = idx++
+      const url = URL.createObjectURL(f)
+      const v = document.createElement('video')
+      v.src = url; v.muted = true; v.playsInline = true; v.preload = 'auto'
+      v.onloadeddata = () => {
+        const dur = (isFinite(v.duration) && v.duration) || 5
+        setClips(cs => {
+          const n = [...cs]
+          n[my] = { name: f.name.replace(/\.[^.]+$/, ''), dur, in: 0, out: dur, grade: 'none', fit: 'cover', vol: 1, clean: false, captions: '' }
+          return n
+        })
+        setMedia(m => ({ ...m, [my]: v }))
+        setBlobs(b => ({ ...b, [my]: { blob: f, kind: 'video' } }))
+        setCur(my)
+      }
+      // placeholder so ordering is stable while metadata loads
+      setClips(cs => { const n = [...cs]; n[my] = n[my] || { name: f.name, dur: 5, in: 0, out: 5, grade: 'none', fit: 'cover', vol: 1, clean: false, captions: '' }; return n })
+      decodeClipAudioFile(f).then(buf => {
+        setAudioBufs(a => ({ ...a, [my]: buf }))
+        if (!buf) toast?.('"' + f.name + '": video loaded, but its sound could not be read. The clip will play silent.')
+      })
+    })
+    e.target.value = ''
+  }
+
+  const upd = (patch) => setClips(cs => cs.map((c, i) => i === cur ? { ...c, ...patch } : c))
+  const reindex = (m) => { const n = {}; Object.keys(m).forEach(k => { const ki = +k; if (ki < cur) n[ki] = m[k]; else if (ki > cur) n[ki - 1] = m[k] }); return n }
+  const removeClip = () => {
+    if (!clips.length) return
+    const v = media[cur]; if (v && v.pause) v.pause()
+    setClips(cs => cs.filter((_, i) => i !== cur))
+    setMedia(reindex); setBlobs(reindex); setAudioBufs(reindex)
+    cleanCache.current = {}
+    setCur(c => Math.max(0, c - 1))
+  }
+  const move = (dir) => {
+    const j = cur + dir
+    if (j < 0 || j >= clips.length) return
+    const swap = (m) => { const n = { ...m }; const a = n[cur]; n[cur] = n[j]; n[j] = a; return n }
+    setClips(cs => { const n = [...cs]; const a = n[cur]; n[cur] = n[j]; n[j] = a; return n })
+    setMedia(swap); setBlobs(swap); setAudioBufs(swap)
+    cleanCache.current = {}
+    setCur(j)
+  }
+
+  // ── Preview with live sound ──
+  const stopRef = useRef(null)
+  const stop = () => { if (stopRef.current) stopRef.current(); }
+  const preview = async () => {
+    if (!clips.length) return toast?.('Add clips first.')
+    setPlaying(true)
+    const { total } = timeline()
+    const voClips = await buildFilmAudio()
+    const cv = cvRef.current
+    cv.width = W; cv.height = H
+    const ctx = cv.getContext('2d')
+    const mixer = createMixer({ totalDur: total, musicBuffer: sound.musicBuffer, musicVol: sound.musicVol, voBuffer: sound.voBuffer, voVol: sound.voVol, voClips, record: false })
+    mixer.start()
+    let lastIdx = -1
+    const t0 = performance.now()
+    const step = (now) => {
+      const t = (now - t0) / 1000
+      const a = activeAt(t)
+      if (!a) { finish(); return }
+      const v = media[a.idx]
+      const local = clips[a.idx].in + (t - a.start)
+      if (v) {
+        if (a.idx !== lastIdx) {
+          if (lastIdx >= 0 && media[lastIdx]?.pause) media[lastIdx].pause()
+          try { v.currentTime = local } catch (er) {}
+          v.play().catch(() => {})
+          lastIdx = a.idx
+        } else if (Math.abs(v.currentTime - local) > 0.3) {
+          try { v.currentTime = local } catch (er) {}
+        }
+      }
+      drawFilm(ctx, t)
+      setProgress(t / total)
+      rafRef.current = requestAnimationFrame(step)
+    }
+    const finish = () => {
+      cancelAnimationFrame(rafRef.current)
+      Object.values(media).forEach(m => { if (m && m.pause) m.pause() })
+      mixer.stop()
+      setPlaying(false); setProgress(0)
+      stopRef.current = null
+    }
+    stopRef.current = finish
+    rafRef.current = requestAnimationFrame(step)
+  }
+
+  // ── Export: fast 4K MP4 with the shared ladder ──
+  const exportFilm = async () => {
+    if (!clips.length) return toast?.('Add clips first.')
+    setRendering(true); setProgress(0)
+    const t0 = performance.now()
+    const { total } = timeline()
+    try {
+      const voClips = await buildFilmAudio()
+      const cv = cvRef.current
+      cv.width = W; cv.height = H
+      const out = await exportMp4Fast({
+        canvas: cv, W, H, totalDur: total,
+        drawFrame: (ctx, t) => drawFilm(ctx, t),
+        mediaAt: mediaAtFilm,
+        sound: { musicBuffer: sound.musicBuffer, musicVol: sound.musicVol, voBuffer: sound.voBuffer, voVol: sound.voVol, voClips },
+        onProgress: setProgress,
+      })
+      setRendering(false); setProgress(0)
+      Object.values(media).forEach(m => { if (m) m.__filmTarget = undefined })
+      if (out?.blob) {
+        const a = document.createElement('a')
+        a.download = 'smartious-film.mp4'
+        a.href = URL.createObjectURL(out.blob)
+        a.click()
+        const secs = Math.round((performance.now() - t0) / 1000)
+        const note = out.audioNote === 'silent' ? ' NOTE: this computer cannot encode MP4 audio, so the file is silent.'
+          : out.audioNote === 'opus' ? ' Audio uses Opus: fine for YouTube and Android; if WhatsApp plays it silent, tell me.'
+          : ''
+        toast?.('Film ready: ' + (out.blob.size / 1048576).toFixed(1) + ' MB in ' + secs + 's.' + note)
+      } else {
+        toast?.('Fast export is not available in this browser. Use current Chrome or Edge for the film exporter.')
+      }
+    } catch (e) {
+      console.error(e)
+      setRendering(false); setProgress(0)
+      toast?.('Export failed: ' + (e?.message || 'unknown error'))
+    }
+  }
+
+  // ── Autosave ──
+  useEffect(() => {
+    (async () => {
+      try {
+        const pj = await idbGet('film-project')
+        if (pj && pj.clips?.length) {
+          setFormat(pj.format || 'youtube')
+          setClips(pj.clips)
+          setCapsOn(pj.capsOn !== false)
+          setBlobs(pj.blobs || {})
+          const md = {}
+          for (const [k, rec] of Object.entries(pj.blobs || {})) {
+            const el = await blobToMedia(rec)
+            if (el) { el.loop = false; md[k] = el }
+          }
+          setMedia(md)
+          const ab = {}
+          for (const [k, rec] of Object.entries(pj.blobs || {})) {
+            ab[k] = rec?.blob ? await decodeClipAudioFile(rec.blob) : null
+          }
+          setAudioBufs(ab)
+          setSound(await restoreSoundBuffers(pj.sound))
+          setSavedAt(Date.now())
+        }
+      } catch (e) { console.warn('[film restore]', e) }
+      setLoaded(true)
+    })()
+  }, [])
+
+  useEffect(() => {
+    if (!loaded) return
+    const t = setTimeout(() => {
+      idbSet('film-project', {
+        v: 1, format, clips, capsOn, blobs,
+        sound: { musicMode: sound.musicMode, musicVol: sound.musicVol, voVol: sound.voVol, script: sound.script, musicBlob: sound.musicBlob || null, voBlob: sound.voBlob || null },
+      }).then(() => setSavedAt(Date.now())).catch(() => {})
+    }, 800)
+    return () => clearTimeout(t)
+  }, [loaded, format, clips, capsOn, blobs, sound.musicMode, sound.musicVol, sound.voVol, sound.script, sound.musicBlob, sound.voBlob])
+
+  const newProject = async () => {
+    await idbDel('film-project')
+    Object.values(media).forEach(m => { if (m && m.pause) m.pause() })
+    setClips([]); setMedia({}); setBlobs({}); setAudioBufs({}); setCur(0)
+    cleanCache.current = {}
+    setSound({ musicMode: 'none', musicBuffer: null, musicVol: 0.5, voBuffer: null, voVol: 1, script: null })
+    setSavedAt(0)
+    toast?.('Fresh film started.')
+  }
+
+  const { total } = timeline()
+  return (
+    <div style={{ display: 'grid', gap: 14 }}>
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+        {Object.entries(FORMATS).map(([k, f]) => (
+          <button key={k} onClick={() => setFormat(k)} style={{ ...btn(format === k), fontSize: 11.5, padding: '7px 11px' }}>{f.label}</button>
+        ))}
+        <span style={{ fontSize: 11.5, color: TOKENS.s500, fontWeight: 700 }}>{Math.round(total)}s total</span>
+        <SavedChip savedAt={savedAt} onNew={newProject} />
+      </div>
+
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+        <label style={{ ...btn(true), cursor: 'pointer' }}>
+          Add clips
+          <input type="file" accept="video/*" multiple onChange={onAddClips} style={{ display: 'none' }} />
+        </label>
+        <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 11.5, fontWeight: 700, color: TOKENS.s600 }}>
+          <input type="checkbox" checked={capsOn} onChange={e => setCapsOn(e.target.checked)} /> Burn captions
+        </label>
+      </div>
+
+      {clips.length > 0 && (
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+          {clips.map((c, i) => (
+            <Thumb key={i} {...thumbSize(format)} active={cur === i} onClick={() => setCur(i)}
+              label={(i + 1) + ' \u00b7 ' + (c.name || 'clip')}
+              draw={(tc, tw, th) => {
+                tc.fillStyle = '#000'; tc.fillRect(0, 0, tw, th)
+                const v = media[i]
+                if (v && v.videoWidth) {
+                  tc.filter = gradeFilter(c.grade) || 'none'
+                  const cover = Math.max(tw / v.videoWidth, th / v.videoHeight)
+                  tc.drawImage(v, tw / 2 - v.videoWidth * cover / 2, th / 2 - v.videoHeight * cover / 2, v.videoWidth * cover, v.videoHeight * cover)
+                  tc.filter = 'none'
+                }
+              }} />
+          ))}
+        </div>
+      )}
+
+      {clip && (
+        <div style={{ background: '#fff', border: '1.5px solid ' + TOKENS.line, borderRadius: 12, padding: 14, display: 'grid', gap: 10 }}>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+            <strong style={{ fontSize: 12.5 }}>{clip.name}</strong>
+            <span style={{ fontSize: 11, color: TOKENS.s500 }}>{(clip.out - clip.in).toFixed(1)}s of {clip.dur.toFixed(1)}s</span>
+            <span style={{ marginLeft: 'auto', display: 'flex', gap: 6 }}>
+              <button onClick={() => move(-1)} style={{ ...btn(false), padding: '5px 10px' }}>{'\u25C0'}</button>
+              <button onClick={() => move(1)} style={{ ...btn(false), padding: '5px 10px' }}>{'\u25B6'}</button>
+              <button onClick={removeClip} style={{ ...btn(false), padding: '5px 10px', color: '#B91C1C' }}>Remove</button>
+            </span>
+          </div>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+            <label style={{ fontSize: 11.5, fontWeight: 700, color: TOKENS.s600 }}>Start s
+              <input type="number" step="0.1" min={0} max={clip.out - 0.2} value={clip.in}
+                onChange={e => upd({ in: Math.max(0, Math.min(+e.target.value || 0, clip.out - 0.2)) })}
+                style={{ width: 70, marginLeft: 6, padding: '5px 7px', border: '1.5px solid ' + TOKENS.line, borderRadius: 7 }} />
+            </label>
+            <label style={{ fontSize: 11.5, fontWeight: 700, color: TOKENS.s600 }}>End s
+              <input type="number" step="0.1" min={clip.in + 0.2} max={clip.dur} value={clip.out}
+                onChange={e => upd({ out: Math.min(clip.dur, Math.max(+e.target.value || clip.dur, clip.in + 0.2)) })}
+                style={{ width: 70, marginLeft: 6, padding: '5px 7px', border: '1.5px solid ' + TOKENS.line, borderRadius: 7 }} />
+            </label>
+            <label style={{ fontSize: 11.5, fontWeight: 700, color: TOKENS.s600 }}>Volume
+              <input type="range" min="0" max="1.5" step="0.05" value={clip.vol} onChange={e => upd({ vol: +e.target.value })} style={{ verticalAlign: 'middle', marginLeft: 6 }} />
+            </label>
+            <label style={{ fontSize: 11.5, fontWeight: 700, color: TOKENS.s600, display: 'flex', gap: 5, alignItems: 'center' }}>
+              <input type="checkbox" checked={clip.clean} onChange={e => upd({ clean: e.target.checked })} /> Clean noise
+            </label>
+            <button onClick={() => upd({ fit: clip.fit === 'cover' ? 'fit' : 'cover' })} style={{ ...btn(false), fontSize: 11, padding: '5px 10px' }}>
+              {clip.fit === 'cover' ? 'Fill frame' : 'Fit whole clip'}
+            </button>
+          </div>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: TOKENS.s500 }}>GRADE</span>
+            {GRADES.map(([id, label]) => (
+              <button key={id} onClick={() => upd({ grade: id })} style={{ ...btn(clip.grade === id), fontSize: 11, padding: '5px 10px' }}>{label}</button>
+            ))}
+          </div>
+          <label style={{ fontSize: 11.5, fontWeight: 700, color: TOKENS.s600 }}>
+            Captions for this clip (typed words are timed automatically and burned in)
+            <textarea value={clip.captions} onChange={e => upd({ captions: e.target.value })} rows={2}
+              placeholder="Type what is said in this clip..."
+              style={{ width: '100%', marginTop: 5, padding: '8px 10px', border: '1.5px solid ' + TOKENS.line, borderRadius: 8, fontSize: 12, fontFamily: 'inherit', resize: 'vertical' }} />
+          </label>
+        </div>
+      )}
+
+      <canvas ref={cvRef} style={{ width: '100%', maxWidth: 560, background: '#000', borderRadius: 12, border: '1.5px solid ' + TOKENS.line, justifySelf: 'start' }} />
+
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+        {!playing
+          ? <button onClick={preview} disabled={rendering} style={btn(false)}>Preview with sound</button>
+          : <button onClick={stop} style={btn(false)}>Stop</button>}
+        <button onClick={exportFilm} disabled={playing || rendering} style={btn(true)}>
+          {rendering ? 'Rendering ' + Math.round(progress * 100) + '%' : 'Export film'}
+        </button>
+        {(playing || rendering) && <span style={{ fontSize: 11.5, color: TOKENS.s500, fontWeight: 700 }}>{Math.round(progress * 100)}%</span>}
+      </div>
+
+      <SoundPanel sound={sound} setSound={setSound} cards={[]} toast={toast} />
+      <div style={{ fontSize: 10.5, color: TOKENS.s500, lineHeight: 1.55 }}>
+        Each clip keeps its own sound; music ducks underneath it automatically. Clean noise removes hum, hiss and room noise between speech. Captions burn into the picture so they show on every platform.
+      </div>
+    </div>
+  )
+}
+
+async function decodeClipAudioFile(file) {
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext
+    const ac = new AC()
+    const buf = await ac.decodeAudioData(await file.arrayBuffer())
+    ac.close()
+    return buf
+  } catch (e) { return null }
 }
