@@ -439,7 +439,50 @@ const CtlBtn = ({ icon, label, active, danger, badge, onClick, title }) => (
   </button>
 )
 
-// One video tile. Self tile is muted (never hear yourself).
+// ═══ AUDIO RAIL ═══════════════════════════════════════════
+// ALL remote audio plays through these permanently mounted, hidden
+// elements — never through the visible tiles. Layout changes, view
+// switches (whiteboard/screen/practical), fullscreen toggles and
+// tile unmounts therefore CANNOT interrupt sound: what you hear no
+// longer depends on what happens to be on screen. Every visible
+// <video> below is muted; the rail is the single source of audio,
+// so double audio is impossible by construction.
+function RailAudio({ stream }) {
+  const ref = useRef(null)
+  useEffect(() => {
+    const el = ref.current
+    if (!el || !stream) return
+    if (el.srcObject !== stream) el.srcObject = stream
+    const tryPlay = () => { el.play?.().catch(() => {}) }
+    tryPlay()
+    // If the browser ever pauses us (autoplay policy, fullscreen
+    // transitions, tab juggling), come straight back.
+    el.addEventListener('pause', tryPlay)
+    document.addEventListener('fullscreenchange', tryPlay)
+    document.addEventListener('visibilitychange', tryPlay)
+    const gesture = () => tryPlay()
+    document.addEventListener('click', gesture)
+    const iv = setInterval(() => { if (el.paused) tryPlay() }, 3000)
+    return () => {
+      el.removeEventListener('pause', tryPlay)
+      document.removeEventListener('fullscreenchange', tryPlay)
+      document.removeEventListener('visibilitychange', tryPlay)
+      document.removeEventListener('click', gesture)
+      clearInterval(iv)
+    }
+  }, [stream])
+  return <audio ref={ref} autoPlay style={{ display: 'none' }} />
+}
+function AudioRail({ streams }) {
+  return (
+    <div style={{ display: 'none' }}>
+      {Object.entries(streams).map(([id, s]) => <RailAudio key={id} stream={s} />)}
+    </div>
+  )
+}
+
+// One video tile. Visible tiles are ALWAYS muted — audio comes from
+// the AudioRail above, so unmounting a tile can't silence anyone.
 function Tile({ stream, name, role, self, micOn, camOn, hand, quality, small, big }) {
   // Callback ref, NOT an effect: toggling the camera swaps between a
   // <video> and a hidden <audio> element, and each swap mounts a
@@ -464,11 +507,11 @@ function Tile({ stream, name, role, self, micOn, camOn, hand, quality, small, bi
       flexShrink: 0,
     }}>
       {stream && camOn !== false ? (
-        <video ref={attach} autoPlay playsInline muted={self}
+        <video ref={attach} autoPlay playsInline muted
           style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       ) : (
         <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          {stream && <audio ref={attach} autoPlay muted={self} style={{ display: 'none' }} />}
+
           <div style={{
             width: 42, height: 42, borderRadius: '50%', background: role === 'teacher' ? '#7D1025' : '#1E3A8A',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -2142,6 +2185,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
 
   const tiles = (
     <>
+      <AudioRail streams={streams} />
       {(featured.self || featured.peer) && (
         featured.self
           ? <Tile big stream={localStream} name={user?.firstName ? user.firstName + ' ' + (user.lastName || '') : 'You'} role={myRole} self micOn={micOn} camOn={camOn} hand={handUp} />
@@ -2378,7 +2422,7 @@ function ScreenView({ stream, muted }) {
   return (
     <div style={{ position: 'absolute', inset: 0, background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2 }}>
       {stream ? (
-        <video ref={ref} autoPlay playsInline muted={muted}
+        <video ref={ref} autoPlay playsInline muted
           style={{ maxWidth: '100%', maxHeight: '100%' }} />
       ) : (
         <div style={{ color: 'rgba(255,255,255,.5)', fontSize: 13 }}>Waiting for the shared screen...</div>
