@@ -377,7 +377,7 @@ router.post('/', auth, ALLOWED, async (req, res) => {
     if (sendEmail && billedToEmail) {
       const t = getTransporter()
       if (t) {
-        const from = process.env.EMAIL_FROM||'Smartious Billing <hellosmartious@gmail.com>'
+        const from = process.env.EMAIL_FROM||'Smartious Billing <hello@smartioushomeschool.com>'
         ;(async () => {
           let attachments = []
           try {
@@ -421,7 +421,7 @@ router.patch('/:id/status', auth, ALLOWED, async (req, res) => {
             const pdf = await buildReceiptPdfBuffer(inv, receiptNo)
             attachments = [{ filename: `${receiptNo}.pdf`, content: pdf, contentType: 'application/pdf' }]
           } catch (e) { console.error('[receipt pdf]', e.message) }
-          await t.sendMail({ from:process.env.EMAIL_FROM||'Smartious Billing <hellosmartious@gmail.com>',
+          await t.sendMail({ from:process.env.EMAIL_FROM||'Smartious Billing <hello@smartioushomeschool.com>',
             to:inv.billedToEmail,
             subject:`Payment receipt ${receiptNo} — Smartious Homeschool Global`,
             html:buildReceiptEmailHTML(inv, receiptNo),
@@ -531,7 +531,7 @@ router.post('/:id/resend', auth, ALLOWED, async (req, res) => {
         attachments.push({ filename: `${receiptNo}.pdf`, content: rpdf, contentType: 'application/pdf' })
       }
     } catch (e) { console.error('[resend pdf]', e.message) }
-    await t.sendMail({ from:process.env.EMAIL_FROM||'Smartious Billing <hellosmartious@gmail.com>',
+    await t.sendMail({ from:process.env.EMAIL_FROM||'Smartious Billing <hello@smartioushomeschool.com>',
       to:email, subject:`Invoice ${inv.invoiceNo} — Smartious Homeschool Global`,
       html:buildInvoiceEmailHTML(inv),
       attachments,
@@ -626,7 +626,7 @@ function buildReceiptEmailHTML(inv, receiptNo) {
       </table>
     </td></tr>
   </table>
-  <p style="font-size:12px;color:#6B6B6B;margin:0;">Questions? hellosmartious@gmail.com</p>
+  <p style="font-size:12px;color:#6B6B6B;margin:0;">Questions? hello@smartioushomeschool.com</p>
 </td></tr>
 <tr><td style="background:#F0FDF4;padding:16px 32px;border-top:1px solid #D1FAE5;">
   <p style="font-size:11px;color:#999;margin:0;">© ${new Date().getFullYear()} Smartious Homeschool Global</p>
@@ -691,7 +691,7 @@ function buildReceiptHTML(inv) {
   </div>
 </div>
 <div class="body">
-  <div class="addr">Smartious Homeschool Global · Diamond Plaza, 4th Avenue, Parklands, Nairobi · hellosmartious@gmail.com · +254 745 021 212</div>
+  <div class="addr">Smartious Homeschool Global · Diamond Plaza, 4th Avenue, Parklands, Nairobi · hello@smartioushomeschool.com · +254 745 021 212</div>
   <div class="br">
     <div><div class="bl">Received From</div><div class="bn2">${esc(inv.billedToName)}</div>${inv.billedToAddress?`<div class="bs">${esc(inv.billedToAddress)}</div>`:''}</div>
     ${inv.studentName?`<div><div class="bl">Student</div><div class="bn2">${esc(inv.studentName)}</div><div class="bs">${[inv.studentGrade,inv.subject].filter(Boolean).map(s=>esc(s)).join(' · ')}</div></div>`:''}
@@ -710,7 +710,7 @@ function buildReceiptHTML(inv) {
   </div>
   <div class="ty">Thank you for choosing Smartious Homeschool Global${inv.studentName?' for '+esc(inv.studentName)+"'s education":''}. This receipt confirms full payment. Please retain for your records.</div>
 </div>
-<div class="ft"><span>smartioushomeschool.com · hellosmartious@gmail.com · +254 745 021 212</span><span>Official Receipt</span></div>
+<div class="ft"><span>smartioushomeschool.com · hello@smartioushomeschool.com · +254 745 021 212</span><span>Official Receipt</span></div>
 </div></body></html>`
 }
 
