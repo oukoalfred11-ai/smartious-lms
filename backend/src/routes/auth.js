@@ -96,7 +96,7 @@ router.post('/forgot-password', async (req, res) => {
     await user.save();
 
     const resetUrl = `${CLIENT_URL}/forgot-password/reset?token=${rawToken}&email=${encodeURIComponent(user.email)}`;
-    const from     = process.env.EMAIL_FROM || 'Smartious E-School <hellosmartious@gmail.com>';
+    const from     = process.env.EMAIL_FROM || 'Smartious Homeschool <hello@smartioushomeschool.com>';
 
     const t = getTransporter();
     if (t) {
@@ -246,7 +246,7 @@ router.post('/send-otp', async (req, res) => {
     const t = getTransporter()
     if (t) {
       await t.sendMail({
-        from: process.env.EMAIL_FROM || 'Smartious <hellosmartious@gmail.com>',
+        from: process.env.EMAIL_FROM || 'Smartious <hello@smartioushomeschool.com>',
         to: user.email,
         subject: 'Your Smartious verification code',
         html: `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
