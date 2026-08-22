@@ -107,7 +107,7 @@ async function runShowCauseCheck() {
 
       try {
         await t.sendMail({
-          from: process.env.EMAIL_FROM||'Smartious COO <hellosmartious@gmail.com>',
+          from: process.env.EMAIL_FROM||'Smartious COO <hello@smartioushomeschool.com>',
           to: teacher.email,
           subject: `SHOW CAUSE NOTICE — Weekly reports not submitted — Smartious`,
           html: `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
