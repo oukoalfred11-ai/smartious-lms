@@ -380,7 +380,7 @@ function shell({ eyebrow, heading, sub, body }) {
 </td></tr>
 <tr><td style="padding:28px 32px;">${body}</td></tr>
 <tr><td style="background:#FDFAF4;padding:14px 32px;border-top:1px solid #E8E2D6;">
-  <p style="font-size:11px;color:#999;margin:0;">&copy; ${new Date().getFullYear()} Smartious Homeschool Global &middot; hellosmartious@gmail.com &middot; +254 745 021 212</p>
+  <p style="font-size:11px;color:#999;margin:0;">&copy; ${new Date().getFullYear()} Smartious Homeschool Global &middot; hello@smartioushomeschool.com &middot; +254 745 021 212</p>
 </td></tr></table></td></tr></table></body></html>`
 }
 
@@ -426,7 +426,7 @@ async function notifyStudent(studentId, hw, lc, lessonKey) {
     // Never send the student version to a parent address
     const studentEmail = student.email && !parentEmails.has(student.email) ? student.email : null
 
-    const from = process.env.EMAIL_FROM || 'Smartious <hellosmartious@gmail.com>'
+    const from = process.env.EMAIL_FROM || 'Smartious <hello@smartioushomeschool.com>'
     let sent = 0
 
     // ── STUDENT ──
