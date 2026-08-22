@@ -2262,11 +2262,20 @@ function FilmMaker({ toast }) {
     const out = []
     for (let i = 0; i < clips.length; i++) {
       const c = clips[i]
-      const base = audioBufs[i]
+      // A clip can borrow another clip's sound track. When it does,
+      // its OWN audio is cancelled automatically: only one segment is
+      // ever produced per clip, and it comes from the donor.
+      const srcIdx = (c.audioFrom !== undefined && c.audioFrom !== null && clips[c.audioFrom]) ? c.audioFrom : i
+      const donor = clips[srcIdx]
+      const base = audioBufs[srcIdx]
       if (!base) continue
-      let seg = sliceAudio(base, c.in, c.out, c.vol)
+      const myLen = Math.max(0.2, c.out - c.in)
+      // Donor audio starts at the donor's own trim-in and runs for
+      // this clip's length (silence if the donor runs out).
+      const from = srcIdx === i ? c.in : donor.in
+      let seg = sliceAudio(base, from, from + myLen, c.vol)
       if (c.clean) {
-        const key = i + '|' + c.in.toFixed(2) + '|' + c.out.toFixed(2) + '|' + c.vol
+        const key = srcIdx + '>' + i + '|' + from.toFixed(2) + '|' + myLen.toFixed(2) + '|' + c.vol
         if (!cleanCache.current[key]) cleanCache.current[key] = await cleanNoise(seg)
         seg = cleanCache.current[key]
       }
@@ -2310,7 +2319,12 @@ function FilmMaker({ toast }) {
   const removeClip = () => {
     if (!clips.length) return
     const v = media[cur]; if (v && v.pause) v.pause()
-    setClips(cs => cs.filter((_, i) => i !== cur))
+    setClips(cs => cs.filter((_, i) => i !== cur).map(c => {
+      if (c.audioFrom === undefined || c.audioFrom === null) return c
+      if (c.audioFrom === cur) return { ...c, audioFrom: null }   // donor gone: own sound returns
+      if (c.audioFrom > cur) return { ...c, audioFrom: c.audioFrom - 1 }
+      return c
+    }))
     setMedia(reindex); setBlobs(reindex); setAudioBufs(reindex)
     cleanCache.current = {}
     setCur(c => Math.max(0, c - 1))
@@ -2319,7 +2333,14 @@ function FilmMaker({ toast }) {
     const j = cur + dir
     if (j < 0 || j >= clips.length) return
     const swap = (m) => { const n = { ...m }; const a = n[cur]; n[cur] = n[j]; n[j] = a; return n }
-    setClips(cs => { const n = [...cs]; const a = n[cur]; n[cur] = n[j]; n[j] = a; return n })
+    setClips(cs => {
+      const n = [...cs]; const a = n[cur]; n[cur] = n[j]; n[j] = a
+      return n.map(c => {
+        if (c.audioFrom === cur) return { ...c, audioFrom: j }
+        if (c.audioFrom === j) return { ...c, audioFrom: cur }
+        return c
+      })
+    })
     setMedia(swap); setBlobs(swap); setAudioBufs(swap)
     cleanCache.current = {}
     setCur(j)
@@ -2531,6 +2552,20 @@ function FilmMaker({ toast }) {
             <button onClick={() => upd({ fit: clip.fit === 'cover' ? 'fit' : 'cover' })} style={{ ...btn(false), fontSize: 11, padding: '5px 10px' }}>
               {clip.fit === 'cover' ? 'Fill frame' : 'Fit whole clip'}
             </button>
+            <label style={{ fontSize: 11.5, fontWeight: 700, color: TOKENS.s600 }}>Sound
+              <select value={clip.audioFrom ?? ''} onChange={e => upd({ audioFrom: e.target.value === '' ? null : +e.target.value })}
+                style={{ marginLeft: 6, padding: '5px 8px', border: '1.5px solid ' + TOKENS.line, borderRadius: 7, fontSize: 11.5, background: '#fff' }}>
+                <option value="">This clip's own</option>
+                {clips.map((c2, i2) => i2 !== cur && (
+                  <option key={i2} value={i2}>From clip {i2 + 1}{c2.name ? ' · ' + c2.name : ''}</option>
+                ))}
+              </select>
+            </label>
+            {clip.audioFrom !== undefined && clip.audioFrom !== null && (
+              <span style={{ fontSize: 10.5, color: '#8B1A2E', fontWeight: 700 }}>
+                Own sound is off; using clip {clip.audioFrom + 1}'s audio.
+              </span>
+            )}
           </div>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
             <span style={{ fontSize: 11, fontWeight: 700, color: TOKENS.s500 }}>GRADE</span>
