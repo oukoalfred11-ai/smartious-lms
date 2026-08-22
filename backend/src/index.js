@@ -1,4 +1,8 @@
 require('dotenv').config();
+// Mail policy must load before any module that creates a transporter:
+// it gives EVERY outgoing email the school reply address and the
+// permanent outbox copy. See src/lib/mailPolicy.js.
+require('./lib/mailPolicy');
 const express    = require('express');
 const cors       = require('cors');
 const helmet     = require('helmet');
