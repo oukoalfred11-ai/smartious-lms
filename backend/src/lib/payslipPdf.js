@@ -116,7 +116,7 @@ function buildPayslipPdfBuffer(r) {
     y = 92
     doc.font('Helvetica').fontSize(7.8).fillColor(GREY)
        .text('Diamond Plaza, Parklands, Nairobi   \u00B7   Karen Hardy, Nairobi', M, y)
-       .text('hellosmartious@gmail.com   \u00B7   +254 745 021 212   \u00B7   smartioushomeschool.com', M, y + 10)
+       .text('hello@smartioushomeschool.com   \u00B7   +254 745 021 212   \u00B7   smartioushomeschool.com', M, y + 10)
 
     y += 30
     doc.moveTo(M, y).lineTo(M + W, y).lineWidth(1.4).strokeColor(GREEN).stroke()
