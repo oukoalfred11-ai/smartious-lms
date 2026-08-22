@@ -30,7 +30,7 @@ function getTransporter() {
   return transporter
 }
 
-const FROM = () => process.env.EMAIL_FROM || 'Smartious Homeschool Global <hellosmartious@gmail.com>'
+const FROM = () => process.env.EMAIL_FROM || 'Smartious Homeschool Global <hello@smartioushomeschool.com>'
 
 const fmtDate = d => {
   if (!d) return null
@@ -53,7 +53,7 @@ function brandWrap(title, bodyHtml) {
       </div>
       <div style="background:#FDFAF4;border-top:1px solid #E8E2D6;padding:16px 32px;font-size:12px;color:#6B7280;line-height:1.6;">
         Smartious Homeschool Global &middot; Diamond Plaza Parklands and Karen Hardy, Nairobi<br/>
-        hellosmartious@gmail.com &middot; +254 745 021 212 &middot; smartioushomeschool.com
+        hello@smartioushomeschool.com &middot; +254 745 021 212 &middot; smartioushomeschool.com
       </div>
     </div>
   </div>
