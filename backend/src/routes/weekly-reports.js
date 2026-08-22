@@ -335,7 +335,7 @@ async function sendParentNotification(report, emails, isPublished) {
   <a href="https://smartioushomeschool.com/parent" style="display:block;background:#7D1025;color:#fff;text-align:center;padding:13px;border-radius:8px;font-weight:700;font-size:14px;text-decoration:none;">View full report in parent portal →</a>
 </td></tr>
 <tr><td style="background:#FDFAF4;padding:14px 32px;border-top:1px solid #E8E2D6;">
-  <p style="font-size:11px;color:#999;margin:0;">© ${new Date().getFullYear()} Smartious Homeschool Global · hellosmartious@gmail.com · +254 745 021 212</p>
+  <p style="font-size:11px;color:#999;margin:0;">© ${new Date().getFullYear()} Smartious Homeschool Global · hello@smartioushomeschool.com · +254 745 021 212</p>
 </td></tr>
 </table></td></tr></table></body></html>`
 
@@ -345,7 +345,7 @@ async function sendParentNotification(report, emails, isPublished) {
   // email between them, not one each with the other invisible.
   try {
     await t.sendMail({
-      from: process.env.EMAIL_FROM||'Smartious <hellosmartious@gmail.com>',
+      from: process.env.EMAIL_FROM||'Smartious <hello@smartioushomeschool.com>',
       to:   emails.join(', '),
       subject: `${isPublished?'Weekly report published':'Report update'} — ${report.studentName} · ${report.subject} · Smartious`,
       html,
@@ -423,7 +423,7 @@ function buildReportHTML(r) {
     ${section('Teacher remarks', r.remarks?`<p style="font-size:14px;color:#564844;line-height:1.7;margin:0">${r.remarks}</p>`:'')}
 
     <div style="margin-top:32px;padding-top:20px;border-top:1.5px solid #E8E2D6;text-align:center;font-size:11px;color:#9A9A9A">
-      Smartious Homeschool Global · Generated ${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})} · hellosmartious@gmail.com
+      Smartious Homeschool Global · Generated ${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})} · hello@smartioushomeschool.com
     </div>
   </div>
 </div>
