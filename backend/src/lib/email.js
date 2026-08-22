@@ -6,9 +6,9 @@
 // ENV VARS required (set on Render):
 //   EMAIL_HOST     = smtp.gmail.com
 //   EMAIL_PORT     = 587
-//   EMAIL_USER     = hellosmartious@gmail.com
+//   EMAIL_USER     = hello@smartioushomeschool.com
 //   EMAIL_PASSWORD = <Gmail app password, 16 chars>
-//   EMAIL_FROM     = Smartious E-School <hellosmartious@gmail.com>
+//   EMAIL_FROM     = Smartious Homeschool <hello@smartioushomeschool.com>
 
 const nodemailer = require('nodemailer')
 
@@ -45,7 +45,7 @@ const emailFooter = () => `
   <tr><td style="background: #FBFAF5; padding: 22px 36px; border-top: 1px solid #f0e8e8;">
     <p style="font-size: 12px; line-height: 1.55; color: #6b6b6b; margin: 0 0 8px;">
       Questions? Contact us at
-      <a href="mailto:hellosmartious@gmail.com" style="color: #7D1025;">hellosmartious@gmail.com</a>
+      <a href="mailto:hello@smartioushomeschool.com" style="color: #7D1025;">hello@smartioushomeschool.com</a>
       or call +254 745 021 212.
     </p>
     <p style="font-size: 11px; color: #999; margin: 0;">
@@ -171,7 +171,7 @@ const buildWelcomeText = ({ name, role, username, tempPassword, admissionNumber,
   lines.push('')
   lines.push('Log in at: ' + loginUrl)
   lines.push('')
-  lines.push('If you have any questions, reply to this email or contact hellosmartious@gmail.com.')
+  lines.push('If you have any questions, reply to this email or contact hello@smartioushomeschool.com.')
   lines.push('')
   lines.push('— Smartious E-School')
   return lines.join('\n')
@@ -184,7 +184,7 @@ const sendWelcomeEmail = async ({ to, name, role, username, tempPassword, admiss
     return { success: false, message: 'Email service not configured' }
   }
 
-  const from = process.env.EMAIL_FROM || 'Smartious E-School <hellosmartious@gmail.com>'
+  const from = process.env.EMAIL_FROM || 'Smartious Homeschool <hello@smartioushomeschool.com>'
   const finalLoginUrl = loginUrl || 'https://smartioushomeschool.com/login'
 
   const mailOptions = {
@@ -421,7 +421,7 @@ const sendLiveClassEmail = async ({
     return { success: false, message: 'Email service not configured' }
   }
 
-  const from = process.env.EMAIL_FROM || 'Smartious E-School <hellosmartious@gmail.com>'
+  const from = process.env.EMAIL_FROM || 'Smartious Homeschool <hello@smartioushomeschool.com>'
   const portalUrl = (process.env.CLIENT_URL || 'https://smartioushomeschool.com') + '/student'
   const subjectLine = isUpdate
     ? `Updated meeting link — ${title}`
@@ -562,7 +562,7 @@ const sendExamScheduledEmail = async (params) => {
     console.error('[email] No transporter — exam email not sent to', params.to)
     return { success: false, message: 'Email service not configured' }
   }
-  const from = process.env.EMAIL_FROM || 'Smartious E-School <hellosmartious@gmail.com>'
+  const from = process.env.EMAIL_FROM || 'Smartious Homeschool <hello@smartioushomeschool.com>'
   const portalUrl = (process.env.CLIENT_URL || 'https://smartioushomeschool.com') + (params.isParent ? '/parent' : '/student')
   const p = { ...params, portalUrl }
   const subjectLine = (p.isUpdate ? 'Updated: ' : 'Exam scheduled: ') +
