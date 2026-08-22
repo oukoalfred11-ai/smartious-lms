@@ -1862,12 +1862,12 @@ const PRIVACY_POLICY = [
   {h:'5. Who we share your data with',p:'We share data only with parties essential to service delivery: (i) our assigned tutors and assessment teachers, who see only the data needed to teach your child; (ii) Paystack (Paystack Payments Limited, Lagos & Nairobi) for payment processing; (iii) Google (Firebase, Gmail, Drive) for our backend infrastructure, subject to Google\'s Cloud Data Processing Addendum; (iv) FormSubmit.co for form delivery; (v) MongoDB Atlas for database hosting; (vi) Netlify and Render for website and API hosting. All processors are bound by data processing agreements. We require them to meet or exceed our own data protection standards.'},
   {h:'6. International transfers',p:'Some of our processors (Google, MongoDB Atlas, Netlify, Render) store data in the US or EU. Where data is transferred outside Kenya or the European Economic Area, we rely on appropriate safeguards — Standard Contractual Clauses approved by the European Commission, or equivalent mechanisms under the Kenya DPA — to ensure your data receives equivalent protection.'},
   {h:'7. How long we keep your data',p:'We keep data only as long as needed: (a) active student records — for the duration of enrolment plus 7 years after the last lesson, to comply with Kenyan tax law and academic record-keeping standards; (b) enquiry and consultation records — 24 months from last contact; (c) marketing subscribers — until you unsubscribe; (d) website analytics — 26 months (Google Analytics default). After these periods, data is securely deleted or anonymised.'},
-  {h:'8. Your rights',p:'Both the Kenya Data Protection Act and the GDPR give you the following rights: (i) Access — request a copy of all personal data we hold about you; (ii) Rectification — correct inaccurate data; (iii) Erasure — request deletion of your data, subject to our legal retention obligations; (iv) Restriction — limit how we process your data; (v) Portability — receive your data in a machine-readable format; (vi) Objection — object to specific types of processing, especially marketing; (vii) Withdraw consent at any time. To exercise any right, email hellosmartious@gmail.com. We respond within 30 days as required by law.'},
+  {h:'8. Your rights',p:'Both the Kenya Data Protection Act and the GDPR give you the following rights: (i) Access — request a copy of all personal data we hold about you; (ii) Rectification — correct inaccurate data; (iii) Erasure — request deletion of your data, subject to our legal retention obligations; (iv) Restriction — limit how we process your data; (v) Portability — receive your data in a machine-readable format; (vi) Objection — object to specific types of processing, especially marketing; (vii) Withdraw consent at any time. To exercise any right, email hello@smartioushomeschool.com. We respond within 30 days as required by law.'},
   {h:'9. Data of minors',p:'Because many of our students are under 18, parental consent is required before any child is enrolled or assessed. The parent is the primary account holder and the primary contact. We do not knowingly collect personal data directly from children under 13 without parental involvement. If you believe we have done so inadvertently, contact us and we will delete the data immediately.'},
   {h:'10. Security',p:'We use industry-standard safeguards: HTTPS (TLS 1.3) across the entire site, password hashing (bcrypt) for all accounts, role-based access control in our backend, encrypted database backups, and quarterly security reviews. Paystack handles payment data to PCI-DSS Level 1 standards — we never see or store full card details. No system is perfectly secure, but we work continuously to reduce risk.'},
   {h:'11. Breach notification',p:'In the unlikely event of a personal data breach affecting your rights, we will notify the Office of the Data Protection Commissioner (Kenya) within 72 hours as required by Section 43 of the Kenya DPA, and the affected individuals without undue delay, describing what happened, what data was affected, and the steps we are taking.'},
   {h:'12. Changes to this policy',p:'We may update this policy to reflect changes in law, our services, or our processors. When we make material changes we will notify active students and parents by email and update the "Effective" date at the top of this page. The most current version is always the one published here.'},
-  {h:'13. Contact & complaints',p:'For any privacy question, data subject request, or complaint, email our Data Protection point of contact: hellosmartious@gmail.com, phone +254 745 021 212, or write to Smartious E-School Ltd, Diamond Plaza I, Parklands, Nairobi, Kenya. You also have the right to lodge a complaint with the Office of the Data Protection Commissioner of Kenya (odpc.go.ke) or, if you are in the EU, with your national data protection authority.'},
+  {h:'13. Contact & complaints',p:'For any privacy question, data subject request, or complaint, email our Data Protection point of contact: hello@smartioushomeschool.com, phone +254 745 021 212, or write to Smartious E-School Ltd, Diamond Plaza I, Parklands, Nairobi, Kenya. You also have the right to lodge a complaint with the Office of the Data Protection Commissioner of Kenya (odpc.go.ke) or, if you are in the EU, with your national data protection authority.'},
 ]
 
 const TERMS_OF_SERVICE = [
@@ -1884,7 +1884,7 @@ const TERMS_OF_SERVICE = [
   {h:'11. Limitation of liability',p:'To the maximum extent permitted by Kenyan law, Smartious is not liable for: (i) exam results or university admissions — our role is to teach and prepare; outcomes depend on many factors including the student\'s effort and the decisions of exam boards and universities; (ii) indirect, consequential, or punitive damages; (iii) delays or outages caused by third-party services (Paystack, Google, Netlify). Our total liability for any claim is limited to the fees you have paid us in the 12 months preceding the claim.'},
   {h:'12. Governing law',p:'These Terms are governed by the laws of Kenya. Any dispute arising from these Terms or our services will be resolved first by good-faith negotiation, then by mediation in Nairobi under the Mediation (Court-Annexed) Rules, and only then by the courts of Kenya, which have exclusive jurisdiction.'},
   {h:'13. Changes to these terms',p:'We may update these Terms from time to time. Material changes will be communicated to active students and parents at least 30 days in advance by email. Minor clarifications (typos, reformatting) may be made without notice. The current version is always published here with its effective date.'},
-  {h:'14. Contact',p:'Questions about these Terms: hellosmartious@gmail.com, +254 745 021 212, or Diamond Plaza I, Parklands, Nairobi, Kenya.'},
+  {h:'14. Contact',p:'Questions about these Terms: hello@smartioushomeschool.com, +254 745 021 212, or Diamond Plaza I, Parklands, Nairobi, Kenya.'},
 ]
 
 const COOKIE_POLICY = [
@@ -1894,19 +1894,19 @@ const COOKIE_POLICY = [
   {h:'4. Your choices',p:'You can control cookies three ways: (i) in your browser settings — most browsers let you block all cookies, block third-party cookies, or delete cookies on exit; (ii) through our cookie banner (for EU/UK visitors) — you can accept all, accept only essential, or customise by category; (iii) by opting out of Google Analytics at tools.google.com/dlpage/gaoptout. Blocking strictly necessary cookies will prevent you from logging into the portal or completing enrolment.'},
   {h:'5. Do Not Track',p:'Our site respects the "Do Not Track" browser signal for analytics cookies. If your browser sends a DNT signal, Google Analytics does not fire.'},
   {h:'6. Changes to this policy',p:'If we add or remove cookies, we will update this page and, for EU/UK visitors, re-request consent via our cookie banner. The effective date at the top of this page reflects the most recent revision.'},
-  {h:'7. Questions',p:'For any cookie-related question, email hellosmartious@gmail.com.'},
+  {h:'7. Questions',p:'For any cookie-related question, email hello@smartioushomeschool.com.'},
 ]
 
 const GDPR_COMPLIANCE = [
   {h:'1. GDPR in plain English',p:'The EU General Data Protection Regulation (GDPR) is the world\'s strictest privacy law. It applies to Smartious whenever we process personal data of people in the European Union — for example, a family who moves to Germany while their child is enrolled with us, or a parent in France enquiring about IUFP. Kenya\'s own Data Protection Act, 2019 is closely modelled on the GDPR, so the rights described here apply to all our students regardless of country.'},
   {h:'2. Your rights under GDPR',p:'As a data subject, you have eight specific rights: (i) the right to be informed — which is what this page is for; (ii) the right of access — you can request a copy of everything we hold about you; (iii) the right to rectification — correct inaccurate data; (iv) the right to erasure ("right to be forgotten") — ask us to delete your data, subject to legal retention obligations like tax records; (v) the right to restrict processing — pause our use of your data while a dispute is resolved; (vi) the right to data portability — receive your data in a machine-readable format to transfer to another provider; (vii) the right to object — to direct marketing or to processing based on legitimate interests; (viii) rights related to automated decision-making — we do not make any decision about your child based solely on automated processing, so this right does not currently come into play.'},
   {h:'3. Our lawful bases',p:'We process personal data on one of four lawful bases under Article 6 GDPR: (a) Contract — processing necessary to deliver the educational services you have enrolled in; (b) Consent — for optional marketing emails and analytics cookies, which you can withdraw at any time; (c) Legitimate interests — for preventing fraud, securing our systems, and improving our services, where our interests do not override your rights; (d) Legal obligation — for tax and regulatory record-keeping.'},
-  {h:'4. Data Protection Officer',p:'Because Smartious is not a large-scale processor of special-category data, we are not legally required to appoint a formal Data Protection Officer. We have instead designated a Data Protection Point of Contact: Alfred Ouko (Founder), reachable at hellosmartious@gmail.com or +254 745 021 212. All data subject requests are handled by this contact.'},
+  {h:'4. Data Protection Officer',p:'Because Smartious is not a large-scale processor of special-category data, we are not legally required to appoint a formal Data Protection Officer. We have instead designated a Data Protection Point of Contact: Alfred Ouko (Founder), reachable at hello@smartioushomeschool.com or +254 745 021 212. All data subject requests are handled by this contact.'},
   {h:'5. Transfers outside the EEA',p:'We are based in Kenya. Data you share with us crosses the EU–Kenya border. Kenya does not yet have a formal adequacy decision from the European Commission. We rely on the European Commission\'s Standard Contractual Clauses (SCCs) as the lawful safeguard for transfers. Our third-party processors (Google, MongoDB, Netlify, Render, Paystack) are all bound by SCCs or equivalent frameworks and meet or exceed EU data protection standards.'},
   {h:'6. Data minimisation',p:'We collect the minimum data necessary for each purpose. For example, we ask for a student\'s date of birth to assign the correct academic level, but we do not ask for national ID numbers or passport details unless required for university applications. We routinely delete data we no longer need.'},
   {h:'7. Breach notification',p:'Under Article 33 GDPR, we will notify the competent supervisory authority of a personal data breach within 72 hours of becoming aware of it, unless the breach is unlikely to result in a risk to the rights and freedoms of individuals. Under Article 34, we will notify affected individuals without undue delay if the breach is likely to result in a high risk. We will describe what happened, what data was affected, the likely consequences, and the steps we are taking.'},
-  {h:'8. Exercising your rights',p:'To exercise any GDPR right — access, rectification, erasure, restriction, portability, objection — email hellosmartious@gmail.com. Include: (a) the right you wish to exercise; (b) enough information for us to verify your identity (email associated with your Smartious account, plus one recent transaction reference if applicable); (c) any specific details about the request. We respond within 30 days. This service is free unless requests are manifestly unfounded or excessive, in which case we may charge a reasonable fee or refuse to act.'},
-  {h:'9. Complaints',p:'If you believe we have not handled your personal data properly, we want to hear first and put it right. Email hellosmartious@gmail.com. If you remain dissatisfied, you have the right to lodge a complaint with: (i) the Office of the Data Protection Commissioner of Kenya at odpc.go.ke; (ii) the data protection authority of your EU country of residence — a list is maintained at edpb.europa.eu/about-edpb/board/members.'},
+  {h:'8. Exercising your rights',p:'To exercise any GDPR right — access, rectification, erasure, restriction, portability, objection — email hello@smartioushomeschool.com. Include: (a) the right you wish to exercise; (b) enough information for us to verify your identity (email associated with your Smartious account, plus one recent transaction reference if applicable); (c) any specific details about the request. We respond within 30 days. This service is free unless requests are manifestly unfounded or excessive, in which case we may charge a reasonable fee or refuse to act.'},
+  {h:'9. Complaints',p:'If you believe we have not handled your personal data properly, we want to hear first and put it right. Email hello@smartioushomeschool.com. If you remain dissatisfied, you have the right to lodge a complaint with: (i) the Office of the Data Protection Commissioner of Kenya at odpc.go.ke; (ii) the data protection authority of your EU country of residence — a list is maintained at edpb.europa.eu/about-edpb/board/members.'},
   {h:'10. Effective date & reviews',p:'This page was last reviewed on 20 April 2026. We review our GDPR compliance at least once every 12 months and whenever we materially change how we process data.'},
 ]
 
@@ -2062,7 +2062,7 @@ function LegalPage({ P, title, em, subtitle, effective, sections }) {
             </div>
             <div style={{display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
               <button className="btn-p" onClick={() => P('contact')}>Contact Us</button>
-              <a className="btn-o" href="mailto:hellosmartious@gmail.com" style={{textDecoration:'none'}}>Email Privacy Team</a>
+              <a className="btn-o" href="mailto:hello@smartioushomeschool.com" style={{textDecoration:'none'}}>Email Privacy Team</a>
             </div>
           </div>
         </div>
@@ -2603,7 +2603,7 @@ export default function LandingPage() {
     }
   }
 
-  // Submit enrollment to hellosmartious@gmail.com via FormSubmit
+  // Submit enrollment to hello@smartioushomeschool.com via FormSubmit
   const submitEnrollment = async () => {
     setEnrollSending(true)
     setEnrollError('')
@@ -2675,7 +2675,7 @@ export default function LandingPage() {
       'Submitted At': new Date().toLocaleString('en-GB', {timeZone:'Africa/Nairobi'}) + ' EAT',
     }
     // Submit. The Front Desk database is the primary store; the
-    // formsubmit.co email is a secondary copy. The enrolment
+    // The CRM endpoint is a secondary copy. The enrolment
     // succeeds as long as the Front Desk capture goes through.
     let frontDeskOk = false
     try {
@@ -2708,13 +2708,24 @@ export default function LandingPage() {
       console.error('[enroll] front desk capture failed:', e?.message)
     }
 
-    // Secondary: email copy via formsubmit.co — best-effort, never blocks
+    // Secondary: our own CRM endpoint — records the enquiry in the
+    // pipeline AND emails admissions@, through our own mail system.
     let emailOk = false
     try {
-      const res = await fetch('https://formsubmit.co/ajax/hellosmartious@gmail.com', {
+      const res = await fetch(((import.meta.env?.VITE_API_URL || 'https://smartious-backend.onrender.com').replace(/\/$/, '')) + '/api/inquiries/public', {
         method: 'POST',
         headers: {'Content-Type':'application/json','Accept':'application/json'},
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          parentName: `${enrollForm.firstName || ''} ${enrollForm.lastName || ''}`.trim(),
+          parentEmail: enrollForm.parentEmail,
+          parentPhone: enrollForm.whatsapp,
+          studentGrade: enrollForm.grade || '',
+          curriculum: enrollForm.curriculum || '',
+          country: enrollForm.country || '',
+          sourcePage: 'enrolment-wizard',
+          campaignTag: 'enrolment-wizard',
+          message: 'Enrolment wizard submission.',
+        }),
       })
       emailOk = res.ok
     } catch (e) {
@@ -6775,7 +6786,7 @@ export default function LandingPage() {
                 If your family has used Smartious — for full homeschool, 1-on-1 tuition, IGCSE/IB/A-Level preparation, or anything else — we'd love to feature your story here (with your permission). Real testimonials from real families build trust for parents considering Smartious for their own children.
               </p>
               <div style={{display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                <a href="mailto:hellosmartious@gmail.com?subject=Smartious%20story%20to%20share"
+                <a href="mailto:hello@smartioushomeschool.com?subject=Smartious%20story%20to%20share"
                   style={{background:V.cr,color:'#fff',textDecoration:'none',padding:'11px 22px',borderRadius:6,fontSize:13,fontWeight:700,display:'inline-flex',alignItems:'center',gap:6}}>
                   Email your story
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -6818,7 +6829,7 @@ export default function LandingPage() {
                   Smartious supports families relocating between countries needing curriculum continuity, athletes and performers balancing serious training with academic ambition, gifted students whose schools move too slowly, students struggling at school due to oversized classrooms or bullying, IGCSE and A-Level candidates preparing for external examinations, IB Diploma students needing specialist HL subject support, and students with learning differences benefiting from 1-on-1 personal attention. Pricing starts at USD 8/hour for 1-on-1 tuition (KSh 1,300/hour for Kenya-based families) and USD 423/month for full online homeschool programmes — meaningfully below typical premium international school fees while delivering equivalent qualifications.
                 </p>
                 <p style={{fontSize:12.5,lineHeight:1.7,marginTop:18,color:'rgba(247,243,237,.55)'}}>
-                  Contact Smartious: <a href="mailto:hellosmartious@gmail.com" style={{color:V.gold3,textDecoration:'none'}}>hellosmartious@gmail.com</a> · WhatsApp· Diamond Plaza, Parklands, Nairobi, Kenya · M-Pesa Paybill 247247, Account 745021 (Smartious Edtech).
+                  Contact Smartious: <a href="mailto:hello@smartioushomeschool.com" style={{color:V.gold3,textDecoration:'none'}}>hello@smartioushomeschool.com</a> · WhatsApp· Diamond Plaza, Parklands, Nairobi, Kenya · M-Pesa Paybill 247247, Account 745021 (Smartious Edtech).
                 </p>
               </div>
             </div>
@@ -7168,7 +7179,7 @@ export default function LandingPage() {
                   'description': 'Accredited international homeschool and online school based in Nairobi, Kenya. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel, American curriculum and Kenya CBC. Founded 2019. Serving students across 14 countries.',
                   'foundingDate': '2018',
                   'telephone': '+254745021212',
-                  'email': 'hellosmartious@gmail.com',
+                  'email': 'hello@smartioushomeschool.com',
                   'address': {
                     '@type': 'PostalAddress',
                     'streetAddress': 'Diamond Plaza I Annex, 3rd Floor, Office 20, Fourth Parklands Avenue',
@@ -13956,7 +13967,7 @@ export default function LandingPage() {
             'description': 'Home tuition and online tutoring across Nairobi. Qualified teachers for CBC, IGCSE, A-Level, IB Diploma and American curricula.',
             'url': 'https://smartioushomeschool.com/tuition-nairobi',
             'telephone': '+254745021212',
-            'email': 'hellosmartious@gmail.com',
+            'email': 'hello@smartioushomeschool.com',
             'address': { '@type': 'PostalAddress', 'streetAddress': 'Diamond Plaza, Parklands', 'addressLocality': 'Nairobi', 'addressRegion': 'Nairobi', 'addressCountry': 'KE' },
             'areaServed': NAIROBI_AREAS.map(a => ({ '@type': 'Place', 'name': a.name + ', Nairobi' })),
             'priceRange': 'USD 8/hour online · From KSh 1,500/hour home tuition',
@@ -14256,7 +14267,7 @@ export default function LandingPage() {
                 style={{background:V.gold3,color:V.ink,border:'none',padding:'13px 28px',borderRadius:8,fontSize:14,fontWeight:800,letterSpacing:'.02em',cursor:'pointer'}}>Book assessment</button>
 </div>
             <div style={{marginTop:30,paddingTop:24,borderTop:'1px solid rgba(255,255,255,.15)',fontSize:12,color:'rgba(255,255,255,.6)',letterSpacing:'.04em'}}>
-              Phone: +254 745 021 212 · Email: hellosmartious@gmail.com · Office: Diamond Plaza, Parklands, Nairobi
+              Phone: +254 745 021 212 · Email: hello@smartioushomeschool.com · Office: Diamond Plaza, Parklands, Nairobi
             </div>
           </div></section>
         </>
@@ -14286,7 +14297,7 @@ export default function LandingPage() {
               'description': area.seoDesc,
               'url':'https://smartioushomeschool.com/tuition/' + area.slug,
               'telephone':'+254745021212',
-              'email':'hellosmartious@gmail.com',
+              'email':'hello@smartioushomeschool.com',
               'areaServed':{'@type':'Place','name': area.name + ', Nairobi'},
               'address':{'@type':'PostalAddress','addressLocality': area.name,'addressRegion':'Nairobi','addressCountry':'KE'},
               'priceRange':'From USD 8/hour',
@@ -18737,7 +18748,7 @@ export default function LandingPage() {
               <div style={{maxWidth:720,margin:'0 auto',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,padding:'28px 32px',textAlign:'center'}}>
                 <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:10,lineHeight:1.3,fontWeight:400}}>Share your Smartious story</h3>
                 <p style={{fontSize:14,color:V.sl,lineHeight:1.7,marginBottom:16}}>
-                  If your {city.name} family has used Smartious, we'd love to feature your story (with your permission). Email us at <a href="mailto:hellosmartious@gmail.com" style={{color:V.cr,fontWeight:700,textDecoration:'none'}}>hellosmartious@gmail.com</a> or WhatsApp us at.
+                  If your {city.name} family has used Smartious, we'd love to feature your story (with your permission). Email us at <a href="mailto:hello@smartioushomeschool.com" style={{color:V.cr,fontWeight:700,textDecoration:'none'}}>hello@smartioushomeschool.com</a> or WhatsApp us at.
                 </p>
               </div>
             </div></section>
@@ -19899,7 +19910,7 @@ export default function LandingPage() {
               'description': area.seoDesc,
               'url':'https://smartioushomeschool.com/tuition-uk/' + area.slug,
               'telephone':'+254745021212',
-              'email':'hellosmartious@gmail.com',
+              'email':'hello@smartioushomeschool.com',
               'areaServed':{'@type':'Place','name': area.name + ', ' + area.city + ', UK'},
               'address':{'@type':'PostalAddress','addressLocality': area.name,'addressRegion': area.city,'addressCountry':'GB'},
               'priceRange':'From USD 8/hour',
@@ -20784,7 +20795,7 @@ export default function LandingPage() {
                 const hubFaqs = [
                   { q:'Is Smartious Study Abroad really free?', a:'Yes — completely free for students. There are no consultation fees, no application processing fees, no document handling fees and no hidden charges at any stage. From your first consultation through to your destination country arrival, Smartious provides full study abroad support at zero cost to you or your family.' },
                   { q:'Which destinations do you support?', a:'Currently 10 destinations: United Kingdom, USA, Canada, Australia, Germany, Netherlands, Ireland, China, Turkey and UAE. These cover the highest-demand destinations for Kenyan and African students seeking quality higher education with clear post-study pathways. We can also advise on additional destinations on a case-by-case basis (Hungary, India, South Africa, Malaysia, others).' },
-                  { q:'How do I start?', a:'Book an assessment via the button on this page, WhatsApp us on +254 745 021 212, or email hellosmartious@gmail.com. Initial consultation is a 30-60 minute conversation to understand your goals, profile and constraints, after which we propose a personalised plan.' },
+                  { q:'How do I start?', a:'Book an assessment via the button on this page, WhatsApp us on +254 745 021 212, or email hello@smartioushomeschool.com. Initial consultation is a 30-60 minute conversation to understand your goals, profile and constraints, after which we propose a personalised plan.' },
                   { q:'How long does the study abroad process take?', a:'Typical timeline is 12-18 months from first consultation to destination arrival. For students with English tests done and clear university preferences, 6-9 months. Compressed timelines work for some destinations and intake windows. Specific timelines depend on destination, programme level and scholarship strategy.' },
                   { q:'What costs are involved?', a:'Smartious services are free. Costs paid directly by students/families: university application fees (varies $50-150 per university), English tests (IELTS ~$220, TOEFL ~$220, SAT ~$93), visa fees (varies), tuition and living costs after admission. Scholarships can cover much or all of tuition and living costs.' },
                   { q:'What if I don\'t have strong KCSE grades?', a:'Different destinations have different entry thresholds, and many pathways exist for students with KCSE B (Plain) or lower — foundation years, pathway programmes, applied universities, community college transfer routes. We work with realistic profiles, not just the top tier. Honest assessment in the first consultation is the starting point.' },
@@ -22496,30 +22507,25 @@ export default function LandingPage() {
                       if (malaysiaTripSubmitting) return
                       setMalaysiaTripSubmitting(true)
 
-                      // POST to FormSubmit — delivers email to hellosmartious@gmail.com
+                      // POST to FormSubmit — delivers email to hello@smartioushomeschool.com
                       // First-ever submission triggers a one-time confirmation email
-                      // from FormSubmit to hellosmartious@gmail.com. Click the link
+                      // from FormSubmit to hello@smartioushomeschool.com. Click the link
                       // in that email once to activate. Every submission after that
                       // arrives directly in your inbox.
                       try {
-                        const payload = new FormData()
-                        payload.append('_subject', `Malaysia Trip 2026 — Application from ${malaysiaTripForm.parentName}`)
-                        payload.append('_template', 'table')
-                        payload.append('_captcha', 'false')
-                        payload.append('_replyto', malaysiaTripForm.parentEmail)
-                        payload.append('Student Name', malaysiaTripForm.studentName)
-                        payload.append('Student Age', malaysiaTripForm.studentAge)
-                        payload.append('Parent / Guardian Name', malaysiaTripForm.parentName)
-                        payload.append('Parent Email', malaysiaTripForm.parentEmail)
-                        payload.append('Parent WhatsApp', malaysiaTripForm.parentPhone)
-                        payload.append('City / Country', malaysiaTripForm.city || '—')
-                        payload.append('Notes', malaysiaTripForm.notes || '—')
-                        payload.append('Submitted from', 'smartioushomeschool.com/activities')
-
-                        const resp = await fetch('https://formsubmit.co/ajax/hellosmartious@gmail.com', {
+                        const resp = await fetch(((import.meta.env?.VITE_API_URL || 'https://smartious-backend.onrender.com').replace(/\/$/, '')) + '/api/inquiries/public', {
                           method: 'POST',
-                          headers: { 'Accept': 'application/json' },
-                          body: payload,
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            parentName: malaysiaTripForm.parentName,
+                            parentPhone: malaysiaTripForm.parentPhone,
+                            parentEmail: malaysiaTripForm.parentEmail,
+                            studentName: malaysiaTripForm.studentName,
+                            studentGrade: malaysiaTripForm.studentAge ? 'Age ' + malaysiaTripForm.studentAge : '',
+                            sourcePage: 'malaysia-trip-2026',
+                            campaignTag: 'malaysia-trip-2026',
+                            message: 'Malaysia Trip 2026 application. Notes: ' + (malaysiaTripForm.notes || 'none'),
+                          }),
                         })
 
                         if (resp.ok) {
@@ -22592,7 +22598,7 @@ export default function LandingPage() {
                     Thank you, {malaysiaTripForm.parentName}. Our trips team will contact you on {malaysiaTripForm.parentPhone} within one working day to confirm availability and walk you through the next steps.
                   </p>
                   <p style={{fontSize:13,color:V.sl3,marginTop:16}}>
-                    Any urgent questions? WhatsApp us ator email <a href="mailto:hellosmartious@gmail.com" style={{color:V.cr,fontWeight:700}}>hellosmartious@gmail.com</a>.
+                    Any urgent questions? WhatsApp us ator email <a href="mailto:hello@smartioushomeschool.com" style={{color:V.cr,fontWeight:700}}>hello@smartioushomeschool.com</a>.
                   </p>
                 </div>
               )}
@@ -23838,13 +23844,13 @@ export default function LandingPage() {
                   {/* Alternative — manual payment */}
                   <div style={{marginTop:24,padding:'18px 20px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,fontSize:13,color:V.sl,lineHeight:1.7}}>
                     <strong style={{color:V.ink,fontSize:13.5,display:'block',marginBottom:8}}>Prefer to pay manually?</strong>
-                    M-Pesa Paybill <strong style={{color:V.ink}}>247247</strong>, Account No. <strong style={{color:V.ink}}>745021</strong>, Account name <strong style={{color:V.ink}}>Smartious Edtech</strong>. After paying, email the M-Pesa confirmation to <strong style={{color:V.cr}}>hellosmartious@gmail.com</strong> with your child's name and chosen curriculum.
+                    M-Pesa Paybill <strong style={{color:V.ink}}>247247</strong>, Account No. <strong style={{color:V.ink}}>745021</strong>, Account name <strong style={{color:V.ink}}>Smartious Edtech</strong>. After paying, email the M-Pesa confirmation to <strong style={{color:V.cr}}>hello@smartioushomeschool.com</strong> with your child's name and chosen curriculum.
                   </div>
 
                   {/* Declaration form download */}
                   <div style={{marginTop:14,padding:'18px 20px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,fontSize:13,color:V.sl,lineHeight:1.7}}>
                     <strong style={{color:V.ink,fontSize:13.5,display:'block',marginBottom:8}}>Declaration Form</strong>
-                    Once we receive your application fee, we'll email you the Homeschool Declaration Form for your signature. You can also request it ahead of time by contacting <strong style={{color:V.cr}}>hellosmartious@gmail.com</strong> or WhatsApp <strong style={{color:V.cr}}>+254 745 021 212</strong>.
+                    Once we receive your application fee, we'll email you the Homeschool Declaration Form for your signature. You can also request it ahead of time by contacting <strong style={{color:V.cr}}>hello@smartioushomeschool.com</strong> or WhatsApp <strong style={{color:V.cr}}>+254 745 021 212</strong>.
                   </div>
                 </div>
               </div></section>
@@ -23908,8 +23914,9 @@ export default function LandingPage() {
               <div className="contact-info-card">
                 <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',color:'#FFFFFF',marginBottom:8}}>Our <em style={{color:'#C9973A',fontStyle:'italic'}}>Details</em></div>
                 {[
-                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#C9973A" strokeWidth="2" strokeLinecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>, label:'Email', value:'hellosmartious@gmail.com', sub:'Response within 2 hours', href:'mailto:hellosmartious@gmail.com'},
-                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#C9973A" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42C1.6 2.34 2.33 1.4 3.41 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.81-.81a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>, label:'Phone', value:'+254 745 021 212', sub:'Mon–Fri, 8am–6pm EAT', href:'tel:+254745021212'},
+                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#C9973A" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42C1.6 2.34 2.33 1.4 3.41 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.81-.81a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>, label:'Admissions', value:'+254 745 021 212', sub:'admissions@smartioushomeschool.com · Call or WhatsApp', href:'mailto:admissions@smartioushomeschool.com'},
+                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#C9973A" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42C1.6 2.34 2.33 1.4 3.41 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.81-.81a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>, label:'Academics', value:'+254 182 071920', sub:'academics@smartioushomeschool.com · Head of Academics', href:'mailto:academics@smartioushomeschool.com'},
+                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#C9973A" strokeWidth="2" strokeLinecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>, label:'Administration', value:'hello@smartioushomeschool.com', sub:'Accounts, support and general matters', href:'mailto:hello@smartioushomeschool.com'},
 {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#C9973A" strokeWidth="2" strokeLinecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>, label:'Office', value:'Diamond Plaza I, Parklands', sub:'Nairobi, Kenya · 4th Avenue', href:'https://maps.google.com/?q=Diamond+Plaza+Parklands+Nairobi'},
                 ].map(({icon,label,value,sub,href}) => (
                   <a key={label} href={href} target="_blank" rel="noreferrer" style={{textDecoration:'none'}} className="contact-method">
@@ -24048,7 +24055,7 @@ export default function LandingPage() {
               </button>
 <a
                 className="fab-opt"
-                href="mailto:hellosmartious@gmail.com?subject=Smartious%20Enquiry"
+                href="mailto:hello@smartioushomeschool.com?subject=Smartious%20Enquiry"
                 onClick={() => setFabOpen(false)}
                 style={{textDecoration:'none'}}
               >
@@ -24200,7 +24207,7 @@ function ConsultForm({ P }) {
       console.error('[consult] front desk capture failed:', e?.message)
     }
     try {
-      const res = await fetch(`https://formsubmit.co/ajax/hellosmartious@gmail.com`, {
+      const res = await fetch(((import.meta.env?.VITE_API_URL || 'https://smartious-backend.onrender.com').replace(/\/$/, '')) + '/api/inquiries/public', {
         method:'POST',
         headers:{'Content-Type':'application/json','Accept':'application/json'},
         body: JSON.stringify({
@@ -24399,7 +24406,7 @@ function ContactForm() {
       console.error('[contact] front desk capture failed:', e?.message)
     }
     try {
-      const res = await fetch(`https://formsubmit.co/ajax/hellosmartious@gmail.com`, {
+      const res = await fetch(((import.meta.env?.VITE_API_URL || 'https://smartious-backend.onrender.com').replace(/\/$/, '')) + '/api/inquiries/public', {
         method:'POST',
         headers:{'Content-Type':'application/json','Accept':'application/json'},
         body: JSON.stringify({
@@ -24426,7 +24433,7 @@ function ContactForm() {
         console.error('[gtag] conversion event failed:', e?.message)
       }
     } else {
-      setErr('Could not send your message. Please check your connection and try again, or email hellosmartious@gmail.com directly.')
+      setErr('Could not send your message. Please check your connection and try again, or email hello@smartioushomeschool.com directly.')
     }
     setSending(false)
   }
@@ -24497,9 +24504,9 @@ function Footer({ P }) {
           <div>
             <div className="ft-ch">Contact</div>
             <div className="ft-ct">
-              <a href="mailto:hellosmartious@gmail.com" style={{color:'inherit',textDecoration:'none',display:'flex',alignItems:'center',gap:7,transition:'color .2s'}} onMouseEnter={e=>e.currentTarget.style.color='#C9973A'} onMouseLeave={e=>e.currentTarget.style.color='inherit'}>
+              <a href="mailto:hello@smartioushomeschool.com" style={{color:'inherit',textDecoration:'none',display:'flex',alignItems:'center',gap:7,transition:'color .2s'}} onMouseEnter={e=>e.currentTarget.style.color='#C9973A'} onMouseLeave={e=>e.currentTarget.style.color='inherit'}>
                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                hellosmartious@gmail.com
+                hello@smartioushomeschool.com
               </a>
               <a href="tel:+254745021212" style={{color:'inherit',textDecoration:'none',display:'flex',alignItems:'center',gap:7,transition:'color .2s'}} onMouseEnter={e=>e.currentTarget.style.color='#C9973A'} onMouseLeave={e=>e.currentTarget.style.color='inherit'}>
                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42C1.6 2.34 2.33 1.4 3.41 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.81-.81a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
