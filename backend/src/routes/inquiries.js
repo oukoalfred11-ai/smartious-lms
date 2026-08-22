@@ -309,6 +309,41 @@ router.post('/public', async (req, res) => {
     })
 
     console.log('[inquiries/public] New inquiry from', parentName, '| source:', crmSource)
+
+    // Email the admissions desk immediately — fire and forget so the
+    // visitor never waits on SMTP. mailPolicy adds the outbox copy;
+    // replyTo is the parent, so staff answer with one click of Reply.
+    ;(async () => {
+      try {
+        const nodemailer = require('nodemailer')
+        const t = nodemailer.createTransport({
+          host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+          port: parseInt(process.env.EMAIL_PORT || '587', 10),
+          secure: parseInt(process.env.EMAIL_PORT || '587', 10) === 465,
+          auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASSWORD },
+        })
+        const rows = [
+          ['Name', parentName], ['Phone', parentPhone], ['Email', parentEmail],
+          ['Country', country], ['City', city], ['Student', studentName],
+          ['Grade', studentGrade], ['Curriculum', curriculum],
+          ['Source', crmSource], ['Page', sourcePage || campaignTag],
+          ['Message', message],
+        ].filter(([, v]) => v && String(v).trim())
+        await t.sendMail({
+          from: process.env.EMAIL_FROM || 'Smartious Homeschool <hello@smartioushomeschool.com>',
+          to: 'admissions@smartioushomeschool.com',
+          replyTo: parentEmail?.trim() || undefined,
+          subject: 'New website enquiry — ' + parentName + (sourcePage ? ' (' + sourcePage + ')' : ''),
+          text: rows.map(([k, v]) => k + ': ' + v).join('\n'),
+          html: '<div style="font-family:Georgia,serif;max-width:560px">' +
+            '<h2 style="color:#8B1A2E;margin:0 0 12px">New website enquiry</h2>' +
+            '<table style="border-collapse:collapse;font-size:14px">' +
+            rows.map(([k, v]) => '<tr><td style="padding:6px 14px 6px 0;color:#8B1A2E;font-weight:700;vertical-align:top">' + k + '</td><td style="padding:6px 0">' + String(v).replace(/</g, '&lt;') + '</td></tr>').join('') +
+            '</table><p style="color:#5A5A62;font-size:12px;margin-top:14px">Also recorded in the CRM pipeline. Reply to this email to answer the family directly.</p></div>',
+        })
+      } catch (e) { console.error('[inquiries/public] notify email failed:', e.message) }
+    })()
+
     return res.json({ success: true, inquiryId: inq._id })
   } catch (e) {
     console.error('[inquiries/public]', e.message)
