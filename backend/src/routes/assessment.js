@@ -9,7 +9,7 @@
  *   - persists an AssessmentRequest document with
  *     status='awaiting_review' (no payment collected here)
  *   - sends two emails in parallel:
- *       A. admin notification → hellosmartious@gmail.com
+ *       A. admin notification → hello@smartioushomeschool.com
  *       B. parent confirmation → form.parent1Email
  *   - rate limited to 5 submissions / IP / hour
  *
@@ -48,7 +48,7 @@ const assessmentLimiter = rateLimit({
   max: 5,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { ok: false, error: 'Too many assessment requests from this device. Please try again in an hour, or email hellosmartious@gmail.com directly.' },
+  message: { ok: false, error: 'Too many assessment requests from this device. Please try again in an hour, or email hello@smartioushomeschool.com directly.' },
 });
 
 // ─────────────────────────────────────────────────────────
@@ -76,7 +76,7 @@ function getTransporter() {
   return transporter;
 }
 
-const ADMIN_NOTIFY_EMAIL = 'hellosmartious@gmail.com';
+const ADMIN_NOTIFY_EMAIL = 'hello@smartioushomeschool.com';
 const ASSESSMENT_FEE_USD = 45;
 const ASSESSMENT_FEE_KES = 5800;
 
@@ -311,7 +311,7 @@ function buildParentEmailHTML(r) {
         </td></tr>
 
         <tr><td style="background:#FDFAF4;padding:22px 36px;border-top:1px solid #f0e8e8;">
-          <p style="font-size:12px;line-height:1.55;color:#6b6b6b;margin:0 0 8px;">Questions in the meantime? Reply to this email or contact <a href="mailto:hellosmartious@gmail.com" style="color:#8B1A2E;">hellosmartious@gmail.com</a>.</p>
+          <p style="font-size:12px;line-height:1.55;color:#6b6b6b;margin:0 0 8px;">Questions in the meantime? Reply to this email or contact <a href="mailto:hello@smartioushomeschool.com" style="color:#8B1A2E;">hello@smartioushomeschool.com</a>.</p>
           <p style="font-size:11px;color:#999;margin:0;">© ${new Date().getFullYear()} Smartious Homeschool and eSchool · Nairobi, Kenya · <a href="https://smartioushomeschool.com" style="color:#999;">smartioushomeschool.com</a></p>
         </td></tr>
 
@@ -344,7 +344,7 @@ function buildParentEmailText(r) {
     'Founder & Head of Academics',
     'Smartious Homeschool and eSchool',
     '',
-    'Questions? Reply to this email or contact hellosmartious@gmail.com',
+    'Questions? Reply to this email or contact hello@smartioushomeschool.com',
   ];
   return lines.join('\n');
 }
@@ -417,7 +417,7 @@ router.post('/request', assessmentLimiter, async (req, res) => {
 
     // ── Send both emails in parallel ─────────────────────
     const t = getTransporter();
-    const from = process.env.EMAIL_FROM || 'Smartious E-School <hellosmartious@gmail.com>';
+    const from = process.env.EMAIL_FROM || 'Smartious Homeschool <hello@smartioushomeschool.com>';
 
     const emailResults = await Promise.allSettled([
       t ? t.sendMail({
@@ -459,7 +459,7 @@ router.post('/request', assessmentLimiter, async (req, res) => {
       return res.status(500).json({ ok: false, error: 'Could not generate a unique reference. Please try submitting again.' });
     }
 
-    return res.status(500).json({ ok: false, error: 'Something went wrong while submitting your request. Please try again or email hellosmartious@gmail.com directly.' });
+    return res.status(500).json({ ok: false, error: 'Something went wrong while submitting your request. Please try again or email hello@smartioushomeschool.com directly.' });
   }
 });
 
@@ -655,7 +655,7 @@ function buildAcceptedHTML(r, invoice) {
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FDFAF4;border-left:3px solid #C9973A;border-radius:4px;margin-bottom:24px;">
             <tr><td style="padding:12px 16px;">
               <p style="margin:0;font-size:12.5px;color:#2c2c2c;line-height:1.6;">
-                Please quote <strong>${invoice.invoiceNo}</strong> as the payment reference, and send the confirmation message to <a href="mailto:hellosmartious@gmail.com" style="color:#8B1A2E;">hellosmartious@gmail.com</a> so we can allocate it promptly.
+                Please quote <strong>${invoice.invoiceNo}</strong> as the payment reference, and send the confirmation message to <a href="mailto:hello@smartioushomeschool.com" style="color:#8B1A2E;">hello@smartioushomeschool.com</a> so we can allocate it promptly.
               </p>
             </td></tr>
           </table>
@@ -669,7 +669,7 @@ function buildAcceptedHTML(r, invoice) {
           </p>
         </td></tr>
         <tr><td style="background:#FDFAF4;padding:22px 36px;border-top:1px solid #f0e8e8;">
-          <p style="font-size:11px;color:#999;margin:0;">Questions? Reply to this email or contact <a href="mailto:hellosmartious@gmail.com" style="color:#8B1A2E;">hellosmartious@gmail.com</a></p>
+          <p style="font-size:11px;color:#999;margin:0;">Questions? Reply to this email or contact <a href="mailto:hello@smartioushomeschool.com" style="color:#8B1A2E;">hello@smartioushomeschool.com</a></p>
         </td></tr>
       </table>
     </td></tr>
@@ -695,7 +695,7 @@ function buildAcceptedText(r, invoice) {
     '  Account: 0910186607556',
     '  SWIFT:   EQBLKENA',
     '',
-    `Please quote ${invoice.invoiceNo} as the payment reference and send the confirmation to hellosmartious@gmail.com.`,
+    `Please quote ${invoice.invoiceNo} as the payment reference and send the confirmation to hello@smartioushomeschool.com.`,
     '',
     'This covers:',
     '- Structured diagnostic across English, Mathematics and Science (~90 minutes)',
@@ -833,7 +833,7 @@ router.patch('/requests/:id', auth, requireRole('admin', 'ops_manager', 'sales')
     // Fire appropriate email on status transition
     if (statusChanged) {
       const t = getTransporter();
-      const from = process.env.EMAIL_FROM || 'Smartious E-School <hellosmartious@gmail.com>';
+      const from = process.env.EMAIL_FROM || 'Smartious Homeschool <hello@smartioushomeschool.com>';
 
       if (status === 'accepted') {
         // ── Issue an assessment fee invoice ───────────────────
@@ -978,7 +978,7 @@ router.get('/payment-callback', async (req, res) => {
 
       // Notify admin
       const t = getTransporter();
-      const from = process.env.EMAIL_FROM || 'Smartious E-School <hellosmartious@gmail.com>';
+      const from = process.env.EMAIL_FROM || 'Smartious Homeschool <hello@smartioushomeschool.com>';
       if (t) {
         t.sendMail({
           from,
