@@ -454,7 +454,7 @@ async function sendClassReminders() {
       // per address, so parent and student see the same thread.
       try {
         await t.sendMail({
-          from:    process.env.EMAIL_FROM || 'Smartious <hellosmartious@gmail.com>',
+          from:    process.env.EMAIL_FROM || 'Smartious <hello@smartioushomeschool.com>',
           to:      resolved.to.join(', '),
           subject: `Class reminder — ${entry.subject} starts in 30 minutes`,
           html:    buildClassReminderEmail(student, entry),
