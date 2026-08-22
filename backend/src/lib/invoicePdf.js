@@ -67,7 +67,7 @@ function header(doc, titleText, refNo, dateLabel, dateValue, accent = CRIMSON) {
     doc.image(LOGO_PATH, 48, 24, { width: 200 })
     doc.fillColor(GREY).font('Helvetica').fontSize(8.5)
       .text('Diamond Plaza Parklands, Nairobi  \u00B7  Karen Hardy, Nairobi', 48, 98)
-      .text('hellosmartious@gmail.com  \u00B7  +254 745 021 212  \u00B7  smartioushomeschool.com', 48, 110)
+      .text('hello@smartioushomeschool.com  \u00B7  +254 745 021 212  \u00B7  smartioushomeschool.com', 48, 110)
   } else {
     doc.fillColor(CRIMSON).font('Times-Bold').fontSize(24)
       .text('Smartious', 48, 34, { continued: true })
@@ -75,7 +75,7 @@ function header(doc, titleText, refNo, dateLabel, dateValue, accent = CRIMSON) {
       .text(' Homeschool Global')
     doc.fillColor(GREY).font('Helvetica').fontSize(8.5)
       .text('Diamond Plaza Parklands, Nairobi  \u00B7  Karen Hardy, Nairobi', 48, 62)
-      .text('hellosmartious@gmail.com  \u00B7  +254 745 021 212  \u00B7  smartioushomeschool.com', 48, 74)
+      .text('hello@smartioushomeschool.com  \u00B7  +254 745 021 212  \u00B7  smartioushomeschool.com', 48, 74)
   }
 
   doc.fillColor(accent === CRIMSON ? INK : accent).font('Times-Bold').fontSize(20)
