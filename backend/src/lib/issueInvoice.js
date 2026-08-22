@@ -119,7 +119,7 @@ function buildInvoiceEmailHTML(inv) {
       <div style="font-size:12px;color:#6B6B6B;">Smartious Edtech</div>
     </td></tr>
   </table>
-  <p style="font-size:12px;color:#6B6B6B;margin:0;">Questions about this invoice? Contact hellosmartious@gmail.com</p>
+  <p style="font-size:12px;color:#6B6B6B;margin:0;">Questions about this invoice? Contact hello@smartioushomeschool.com</p>
 </td></tr>
 <tr><td style="background:#FDFAF4;padding:16px 32px;border-top:1px solid #f0e8e8;">
   <p style="font-size:11px;color:#999;margin:0;">© ${new Date().getFullYear()} Smartious Homeschool Global</p>
@@ -195,7 +195,7 @@ async function issueInvoice(opts = {}) {
   if (sendEmail && inv.billedToEmail) {
     const t = getTransporter()
     if (t) {
-      const from = process.env.EMAIL_FROM || 'Smartious Billing <hellosmartious@gmail.com>'
+      const from = process.env.EMAIL_FROM || 'Smartious Billing <hello@smartioushomeschool.com>'
       // Sent in the background so the caller is not blocked by SMTP.
       ;(async () => {
         let attachments = []
