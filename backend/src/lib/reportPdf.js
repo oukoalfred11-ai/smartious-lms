@@ -59,7 +59,7 @@ function finishPages(doc) {
     doc.rect(0, 6, PW, 2).fill(GOLD)
     doc.rect(0, doc.page.height - 8, PW, 8).fill(CRIMSON)
     doc.fillColor(GREY).font('Helvetica').fontSize(7)
-      .text('Smartious Homeschool Global  \u00B7  hellosmartious@gmail.com  \u00B7  +254 745 021 212  \u00B7  Page ' + (i - range.start + 1) + ' of ' + range.count,
+      .text('Smartious Homeschool Global  \u00B7  hello@smartioushomeschool.com  \u00B7  +254 745 021 212  \u00B7  Page ' + (i - range.start + 1) + ' of ' + range.count,
         M, doc.page.height - 26, { width: PW - 2 * M, align: 'center', lineBreak: false })
     doc.page.margins.bottom = oldBottom
   }
