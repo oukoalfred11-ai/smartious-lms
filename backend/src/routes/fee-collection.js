@@ -291,7 +291,7 @@ async function sendReminder(student) {
   const failures = []
   for (const email of recipients) {
     try {
-      await t.sendMail({ from: process.env.EMAIL_FROM || 'Smartious Finance <hellosmartious@gmail.com>', to: email, subject, html })
+      await t.sendMail({ from: process.env.EMAIL_FROM || 'Smartious Finance <hello@smartioushomeschool.com>', to: email, subject, html })
       sent++
     } catch(e) {
       failures.push(email)
@@ -362,7 +362,7 @@ function buildReminderEmail(student, dueLabel, amtLabel, days) {
     ${student.billingNote ? `<br><br><em>Note: ${student.billingNote}</em>` : ''}
   </p>
   <div style="background:#F9F2F3;border-radius:8px;padding:14px 18px;font-size:12px;color:#7D1025;font-style:italic;border-left:3px solid #7D1025;">
-    For payment enquiries, please contact us at hellosmartious@gmail.com or call +254 745 021 212.
+    For payment enquiries, please contact us at hello@smartioushomeschool.com or call +254 745 021 212.
   </div>
 </td></tr>
 <tr><td style="background:#FDFAF4;padding:14px 32px;border-top:1px solid #E8E2D6;">
