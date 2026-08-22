@@ -246,7 +246,7 @@ async function sendDailyReminders() {
   for (const user of pending) {
     try {
       await t.sendMail({
-        from: process.env.EMAIL_FROM || 'Smartious <hellosmartious@gmail.com>',
+        from: process.env.EMAIL_FROM || 'Smartious <hello@smartioushomeschool.com>',
         to:   user.email,
         subject: 'Daily check-in reminder — Smartious',
         html: buildReminderEmail(user),
