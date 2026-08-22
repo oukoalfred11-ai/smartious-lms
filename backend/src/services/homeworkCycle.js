@@ -29,7 +29,7 @@ const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
 const WARN_HOURS = Number(process.env.HOMEWORK_WARN_HOURS || 2)
 const EAT_OFFSET_MIN = 3 * 60          // East Africa Time, no daylight saving
 
-const FROM = () => process.env.EMAIL_FROM || 'Smartious <hellosmartious@gmail.com>'
+const FROM = () => process.env.EMAIL_FROM || 'Smartious <hello@smartioushomeschool.com>'
 
 /** Current wall-clock time in Nairobi, expressed as a Date in UTC terms. */
 function nowEAT(now = new Date()) {
@@ -89,7 +89,7 @@ const shell = (accent, eyebrow, heading, body) => `<!DOCTYPE html><html><head><m
   </td></tr>
   <tr><td style="padding:24px 30px;">${body}</td></tr>
   <tr><td style="background:#FDFAF4;padding:15px 30px;border-top:1px solid #ECE4D4;">
-    <p style="font-size:11px;color:#999;margin:0;">Smartious Homeschool &amp; eSchool &nbsp;·&nbsp; hellosmartious@gmail.com</p>
+    <p style="font-size:11px;color:#999;margin:0;">Smartious Homeschool &amp; eSchool &nbsp;·&nbsp; hello@smartioushomeschool.com</p>
   </td></tr>
 </table></td></tr></table></body></html>`
 
