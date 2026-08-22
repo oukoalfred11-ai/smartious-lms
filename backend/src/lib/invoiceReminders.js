@@ -194,7 +194,7 @@ function buildReminderHTML(inv, kind) {
   </td></tr>
 
   <tr><td style="background:#FDFAF4;padding:18px 32px;border-top:1px solid #f0e8e8;">
-    <p style="font-size:11px;color:#999;margin:0;">Questions? Reply to this email or contact hellosmartious@gmail.com</p>
+    <p style="font-size:11px;color:#999;margin:0;">Questions? Reply to this email or contact hello@smartioushomeschool.com</p>
   </td></tr>
 </table></td></tr></table></body></html>`
 }
@@ -268,7 +268,7 @@ async function sendReminder(invoice, { kind = 'manual', sentBy = null, automatic
   const { to, sources } = await resolveInvoiceRecipients(invoice)
   if (!to.length) throw new Error('No valid email address for this invoice, its student, or their parents.')
 
-  const from = process.env.EMAIL_FROM || 'Smartious Billing <hellosmartious@gmail.com>'
+  const from = process.env.EMAIL_FROM || 'Smartious Billing <hello@smartioushomeschool.com>'
   const subjectPrefix = kind === 'overdue' ? 'Overdue: ' : kind === 'upcoming' ? 'Reminder: ' : ''
 
   // One message addressed to everyone, so parent and student see the
