@@ -486,10 +486,10 @@ router.post('/', auth, requireRole('admin', 'ops_manager'), async (req, res) => 
               const to = process.env.SCHEDULING_ALERT_EMAIL
                       || process.env.OPS_EMAIL
                       || process.env.EMAIL_FROM
-                      || 'hellosmartious@gmail.com';
+                      || 'hello@smartioushomeschool.com';
               if (t) {
                 await t.sendMail({
-                  from: process.env.EMAIL_FROM || 'Smartious <hellosmartious@gmail.com>',
+                  from: process.env.EMAIL_FROM || 'Smartious <hello@smartioushomeschool.com>',
                   to,
                   subject: `Timetable needs manual scheduling — ${student.firstName} ${student.lastName}, ${subject.subjectName}`,
                   html: `<p>An allocation was created but no timetable slot could be found.</p>
