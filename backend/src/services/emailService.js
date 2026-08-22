@@ -819,7 +819,7 @@ async function sendCommunityEmail(opts) {
       </div>
       <div style="padding:14px 32px;background:#FBF6E3;text-align:center;">
         <p style="margin:0;font-size:11px;color:#8A6D1F;font-family:Arial,sans-serif;">
-          Smartious Homeschool &amp; eSchool · hellosmartious@gmail.com
+          Smartious Homeschool &amp; eSchool · hello@smartioushomeschool.com
         </p>
       </div>
     </div>
