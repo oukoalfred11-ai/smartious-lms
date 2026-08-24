@@ -24,6 +24,7 @@ const SPINES = [
   {
     curriculum: 'EdexcelIGCSE',
     subjectName: 'Global Citizenship',
+    category: 'Humanities',
     grade: 'Year 10',
     sourceSyllabus: 'Pearson Edexcel International GCSE (9-1) Global Citizenship 4GL1',
     topics: [
@@ -91,6 +92,7 @@ const SPINES = [
   {
     curriculum: ITALIAN_CURRICULUM,
     subjectName: 'Italian',
+    category: 'Languages',
     grade: 'Year 10',
     sourceSyllabus: 'Cambridge IGCSE Italian Foreign Language 0535 (topic areas A to E)',
     topics: [
@@ -212,6 +214,7 @@ const SPINES = [
       subject = await Subject.create({
         curriculum: spec.curriculum,
         subjectName: spec.subjectName,
+        category: spec.category,
         grade: spec.grade,
         isActive: true,
       });
