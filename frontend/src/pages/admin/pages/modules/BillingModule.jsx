@@ -188,6 +188,7 @@ function InvoicesTab({ toast, refreshKey }) {
   }
 
   if (view === 'create') return <InvoiceGenerator toast={toast} onBack={() => { setView('list'); load() }}/>
+  if (view === 'paystack') return <CardPayments toast={toast} onBack={() => setView('list')}/>
 
   // KPI strip from stats
   const byCurrency = stats.byCurrency || []
@@ -441,6 +442,9 @@ function InvoicesTab({ toast, refreshKey }) {
           <option value="all">All statuses</option>
           {Object.keys(STATUS_COLOURS).map(s=><option key={s} value={s}>{s.charAt(0).toUpperCase()+s.slice(1)}</option>)}
         </select>
+        <button onClick={() => setView('paystack')} style={{ background:'#fff', color:TOKENS.crimson, border:'1.5px solid '+TOKENS.crimson, padding:'9px 16px', borderRadius:7, fontSize:12.5, fontWeight:700, cursor:'pointer', whiteSpace:'nowrap' }}>
+          Card payment
+        </button>
         <button onClick={() => setView('create')} style={{ background:TOKENS.crimson, color:'#fff', border:'none', padding:'9px 18px', borderRadius:7, fontSize:12.5, fontWeight:700, cursor:'pointer', whiteSpace:'nowrap' }}>
           + New invoice
         </button>
@@ -1375,3 +1379,141 @@ function BillingModule({ refreshKey, toast }) {
 }
 
 export default BillingModule
+
+
+// ═══════════════════════════════════════════════════════════
+// CARD PAYMENTS (Paystack) — the quick lane. Enter an email and
+// an amount; the parent receives a branded Pay Now email and pays
+// by card. Fully separate from the invoice system.
+// ═══════════════════════════════════════════════════════════
+function CardPayments({ toast, onBack }) {
+  const [f, setF] = React.useState({ payerName: '', email: '', amount: '', currency: 'KES', description: 'School fees' })
+  const [sending, setSending] = React.useState(false)
+  const [rows, setRows] = React.useState([])
+  const [lastLink, setLastLink] = React.useState('')
+  const [checking, setChecking] = React.useState('')
+
+  const load = () => api.get('/paystack/requests')
+    .then(r => setRows(r.data?.data?.requests || []))
+    .catch(() => {})
+  React.useEffect(() => { load() }, [])
+
+  const set = (k) => (e) => setF(p => ({ ...p, [k]: e.target.value }))
+
+  const send = async () => {
+    if (!f.email || !/.+@.+\..+/.test(f.email)) return toast?.error?.('Enter a valid parent email.')
+    if (!Number(f.amount) || Number(f.amount) <= 0) return toast?.error?.('Enter an amount greater than zero.')
+    setSending(true)
+    try {
+      const r = await api.post('/paystack/request', { ...f, amount: Number(f.amount) })
+      const doc = r.data?.data?.request
+      setLastLink(doc?.authorizationUrl || '')
+      toast?.ok?.('Payment request emailed to ' + f.email)
+      setF(p => ({ ...p, payerName: '', email: '', amount: '' }))
+      load()
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Could not create the payment link.')
+    }
+    setSending(false)
+  }
+
+  const verify = async (ref) => {
+    setChecking(ref)
+    try {
+      const r = await api.get('/paystack/verify/' + ref)
+      const st = r.data?.data?.request?.status
+      toast?.ok?.(st === 'paid' ? 'Confirmed PAID by Paystack.' : 'Status from Paystack: ' + st)
+      load()
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Could not verify.')
+    }
+    setChecking('')
+  }
+
+  const STATUS = { pending: '#B45309', paid: '#166534', failed: '#B91C1C', abandoned: '#5A5A62' }
+  const inp = { width: '100%', padding: '9px 11px', border: '1.5px solid ' + TOKENS.line, borderRadius: 8, fontSize: 12.5 }
+  const lbl = { fontSize: 11.5, fontWeight: 700, color: TOKENS.s600, display: 'block', marginBottom: 4 }
+
+  return (
+    <div style={{ display: 'grid', gap: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <button onClick={onBack} style={{ background: 'none', border: 'none', color: TOKENS.crimson, fontSize: 12.5, fontWeight: 700, cursor: 'pointer', padding: 0 }}>{'\u2190'} Back to invoices</button>
+      </div>
+
+      <div style={{ background: '#fff', border: '1.5px solid ' + TOKENS.line, borderRadius: 12, padding: 18 }}>
+        <div style={{ fontSize: 14, fontWeight: 800, color: TOKENS.s900, marginBottom: 2 }}>Request a card payment</div>
+        <div style={{ fontSize: 11.5, color: TOKENS.s500, marginBottom: 14 }}>
+          The parent receives a branded email with a secure Pay Now button. Payment is processed by Paystack and does not touch the invoice books.
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
+          <div><label style={lbl}>Parent name</label><input value={f.payerName} onChange={set('payerName')} placeholder="Optional" style={inp}/></div>
+          <div><label style={lbl}>Parent email *</label><input value={f.email} onChange={set('email')} placeholder="parent@email.com" style={inp}/></div>
+          <div><label style={lbl}>Amount *</label><input type="number" min="1" value={f.amount} onChange={set('amount')} placeholder="e.g. 40000" style={inp}/></div>
+          <div><label style={lbl}>Currency</label>
+            <select value={f.currency} onChange={set('currency')} style={{ ...inp, background: '#fff' }}>
+              {['KES', 'USD', 'NGN', 'GHS', 'ZAR'].map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+          <div style={{ gridColumn: '1 / -1' }}><label style={lbl}>What is this payment for</label>
+            <input value={f.description} onChange={set('description')} placeholder="e.g. Tuition fees, September 2026" style={inp}/>
+          </div>
+        </div>
+        <div style={{ marginTop: 14, display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+          <button onClick={send} disabled={sending}
+            style={{ background: TOKENS.crimson, color: '#fff', border: 'none', padding: '10px 20px', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+            {sending ? 'Creating link...' : 'Create link and email parent'}
+          </button>
+          {lastLink && (
+            <button onClick={() => { navigator.clipboard?.writeText(lastLink); toast?.ok?.('Link copied. You can also share it on WhatsApp.') }}
+              style={{ background: '#fff', color: TOKENS.crimson, border: '1.5px solid ' + TOKENS.crimson, padding: '10px 16px', borderRadius: 8, fontSize: 12.5, fontWeight: 700, cursor: 'pointer' }}>
+              Copy last payment link
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div style={{ background: '#fff', border: '1.5px solid ' + TOKENS.line, borderRadius: 12, padding: 18 }}>
+        <div style={{ fontSize: 13.5, fontWeight: 800, color: TOKENS.s900, marginBottom: 10 }}>Recent card payment requests</div>
+        {rows.length === 0 ? (
+          <div style={{ fontSize: 12.5, color: TOKENS.s500 }}>No requests yet.</div>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12.5 }}>
+              <thead><tr style={{ textAlign: 'left', color: TOKENS.s500 }}>
+                {['Date', 'Payer', 'Amount', 'For', 'Status', ''].map(h => <th key={h} style={{ padding: '6px 8px', borderBottom: '1.5px solid ' + TOKENS.line, fontSize: 11, fontWeight: 700 }}>{h}</th>)}
+              </tr></thead>
+              <tbody>
+                {rows.map(r => (
+                  <tr key={r.reference}>
+                    <td style={{ padding: '8px', borderBottom: '1px solid ' + TOKENS.line, whiteSpace: 'nowrap' }}>{new Date(r.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</td>
+                    <td style={{ padding: '8px', borderBottom: '1px solid ' + TOKENS.line }}>
+                      <div style={{ fontWeight: 700 }}>{r.payerName || '\u2014'}</div>
+                      <div style={{ fontSize: 11, color: TOKENS.s500 }}>{r.email}</div>
+                    </td>
+                    <td style={{ padding: '8px', borderBottom: '1px solid ' + TOKENS.line, fontWeight: 700, whiteSpace: 'nowrap' }}>{r.currency} {Number(r.amount).toLocaleString()}</td>
+                    <td style={{ padding: '8px', borderBottom: '1px solid ' + TOKENS.line, maxWidth: 180 }}>{r.description}</td>
+                    <td style={{ padding: '8px', borderBottom: '1px solid ' + TOKENS.line }}>
+                      <span style={{ color: STATUS[r.status] || TOKENS.s500, fontWeight: 800, fontSize: 11.5, textTransform: 'uppercase' }}>{r.status}</span>
+                      {r.channel ? <span style={{ fontSize: 10.5, color: TOKENS.s500 }}> \u00b7 {r.channel}</span> : null}
+                    </td>
+                    <td style={{ padding: '8px', borderBottom: '1px solid ' + TOKENS.line, whiteSpace: 'nowrap' }}>
+                      {r.status !== 'paid' && (
+                        <button onClick={() => verify(r.reference)} disabled={checking === r.reference}
+                          style={{ background: '#fff', color: TOKENS.crimson, border: '1.5px solid ' + TOKENS.line, padding: '5px 10px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>
+                          {checking === r.reference ? 'Checking...' : 'Check status'}
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+        <div style={{ fontSize: 10.5, color: TOKENS.s500, marginTop: 10, lineHeight: 1.5 }}>
+          Check status asks Paystack directly, so a payment shows as PAID only when Paystack confirms the money. When a request turns PAID, accounts@ receives a confirmation email automatically.
+        </div>
+      </div>
+    </div>
+  )
+}
