@@ -145,7 +145,16 @@ const { startHomeworkCycle } = require('./services/homeworkCycle');
 const { startTimetableConfirm } = require('./services/timetableConfirm');
 const { promoteUpcomingSessions } = require('./services/timetableSync');
 
+// ── AUTO TIMETABLE KILL SWITCH ──────────────────────────
+// The auto timetable (promotion of pending sessions into live
+// classes, and slot confirmation from taught lessons) is OFF by
+// default after it created night-time classes from a timezone bug.
+// The underlying fix is in place; re-enable deliberately by setting
+// AUTO_TIMETABLE=on in the environment when ready to trust it again.
+const AUTO_TIMETABLE_ON = String(process.env.AUTO_TIMETABLE || '').toLowerCase() === 'on';
+
 const runTimetablePromotion = () => {
+  if (!AUTO_TIMETABLE_ON) return;
   promoteUpcomingSessions(14)
     .then(r => console.log('[timetable promotion]', JSON.stringify(r)))
     .catch(e => console.error('[timetable promotion] failed:', e.message));
@@ -202,7 +211,11 @@ mongoose.connect(MONGODB_URI)
 
     // Confirms provisional timetable slots from lessons actually taught,
     // and keeps each entry's title pointing at the next lesson.
-    startTimetableConfirm();
+    if (AUTO_TIMETABLE_ON) {
+      startTimetableConfirm();
+    } else {
+      console.log('[timetable] AUTO TIMETABLE IS OFF — timetables and classes are manual only. Set AUTO_TIMETABLE=on to re-enable.');
+    }
 
     // Start the timetable promotion job: first run 60s after boot
     // (let the DB settle), then every 24 hours.
