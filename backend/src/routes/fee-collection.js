@@ -69,6 +69,49 @@ function billingStatus(student) {
 
 // ── GET /api/fees ─────────────────────────────────────────
 // List all active students with billing info + last invoice status
+// ── GET /api/fees/billing-directory ──────────────────────
+// Lightweight student directory for the invoice quick picker:
+// every active student with their resolved parent contact, agreed
+// fee and currency, so one click prefills a whole invoice.
+router.get('/billing-directory', auth, ALLOWED, async (req, res) => {
+  try {
+    const students = await User.find({ role: 'student', isActive: true })
+      .select('firstName lastName email admissionNo admissionNumber curriculum gradeLevel programme agreedFee feeCurrency parentEmail parentId linkedParents')
+      .sort({ firstName: 1 })
+      .lean()
+
+    // Resolve linked parent accounts in one query
+    const parentIds = new Set()
+    for (const s of students) {
+      if (s.parentId) parentIds.add(String(s.parentId))
+      for (const lp of (s.linkedParents || [])) if (lp) parentIds.add(String(lp))
+    }
+    const parents = parentIds.size
+      ? await User.find({ _id: { $in: [...parentIds] } }).select('firstName lastName email').lean()
+      : []
+    const byId = Object.fromEntries(parents.map(p => [String(p._id), p]))
+
+    const rows = students.map(s => {
+      const linked = s.parentId ? byId[String(s.parentId)]
+        : (s.linkedParents || []).map(id => byId[String(id)]).find(Boolean)
+      const parentName  = linked ? `${linked.firstName || ''} ${linked.lastName || ''}`.trim() : ''
+      const parentEmail = (s.parentEmail || linked?.email || '').toLowerCase()
+      return {
+        _id: s._id,
+        studentName: `${s.firstName || ''} ${s.lastName || ''}`.trim(),
+        admission: s.admissionNo || s.admissionNumber || '',
+        grade: s.gradeLevel || '', curriculum: s.curriculum || '', programme: s.programme || '',
+        agreedFee: s.agreedFee || 0, feeCurrency: s.feeCurrency || 'USD',
+        parentName, parentEmail,
+        studentEmail: (s.email || '').toLowerCase(),
+      }
+    })
+    return res.json({ success: true, data: { students: rows } })
+  } catch (e) {
+    return res.status(500).json({ success: false, message: e.message })
+  }
+})
+
 router.get('/', auth, ALLOWED, async (req, res) => {
   try {
     const { search, status, currency, page = 1, limit = 50 } = req.query
