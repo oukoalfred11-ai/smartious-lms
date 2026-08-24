@@ -5491,9 +5491,8 @@ export default function LandingPage() {
           ═══════════════════════════════════════════ */}
           <section className="sec" style={{background:V.white}}><div className="wrap">
             <div className="sec-hd reveal" style={{textAlign:'center'}}>
-              <div className="eyebrow" style={{justifyContent:'center'}}>Is Smartious right for your family?</div>
-              <h2 className="display">We <em>specialise</em> in helping families like yours</h2>
-              <p className="lead" style={{marginTop:14,maxWidth:680,margin:'14px auto 0'}}>If any of these describe your situation, Smartious is built for you.</p>
+              <h2 className="display">Built around <em>families like yours</em></h2>
+              <p className="lead" style={{marginTop:14,maxWidth:680,margin:'14px auto 0'}}>Families come to Smartious from every part of the world, each for their own reason. These are the stories we know best.</p>
             </div>
             <div style={{
               display:'grid',
@@ -5504,14 +5503,14 @@ export default function LandingPage() {
               margin:'36px auto 0',
             }}>
               {[
-                ['Relocating families','Diplomats, oil &amp; gas, NGO, banking — families moving between countries every 2-4 years need an education that comes with them.'],
-                ['Athletes &amp; performers','Eldoret runners, swimmers, gymnasts, musicians — students whose training schedules don\'t fit a school day.'],
-                ['Gifted students','Children whose current school moves too slowly. We accelerate while preserving depth.'],
-                ['Students struggling at school','Bullying, anxiety, oversized classes, behind in core subjects — situations where school is making things worse.'],
-                ['IGCSE / A-Level prep','Form 3 and Form 4 students preparing for Cambridge or Edexcel external examinations, needing structured 1-on-1 specialist support.'],
-                ['IB Diploma candidates','MYP and DP students at IB World Schools needing supplementary HL Mathematics, Physics, Chemistry, Biology specialists.'],
-                ['Expat &amp; diaspora families','Kenyan families in the UAE, UK, Canada, USA, Australia wanting curriculum continuity with home.'],
-                ['Children needing 1-on-1','Students with dyslexia, ADHD, autism considerations, or any child who learns better with personal attention.'],
+                ['Families on the move','Diplomatic, corporate and mission families who change countries every few years and want school to move with the child rather than start again in every city.'],
+                ['Athletes and performers','Young athletes, dancers and musicians whose training deserves a timetable that bends around it without ever lowering the academic bar.'],
+                ['Gifted students','Children who have outgrown the pace of their class. We let them move faster while keeping real depth and rigour.'],
+                ['Children who need a fresh start','When crowded classrooms, bullying or anxiety have turned school into a struggle, a calm class with teachers who truly notice changes everything.'],
+                ['Cambridge and Edexcel candidates','Students preparing for IGCSE and A Level examinations who want structured teaching and close personal support from specialists in their exact papers.'],
+                ['IB students seeking depth','Diploma and MYP students at IB World Schools who want specialist support in Higher Level Mathematics and the sciences.'],
+                ['Diaspora families','Kenyan and African families in the UAE, the UK, Canada, the USA and Australia who want their children educated to the standard of home.'],
+                ['Children who thrive one to one','Some children simply learn best with a teacher of their own. Ours adapt to each child, whatever their pace and learning style.'],
               ].map(([h, p]) => (
                 <div key={h} className="reveal" style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'18px 20px',display:'flex',gap:12}}>
                   <div style={{flexShrink:0,width:28,height:28,borderRadius:'50%',background:`rgba(201,151,58,.15)`,color:V.gold2,display:'flex',alignItems:'center',justifyContent:'center'}}>
