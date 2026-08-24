@@ -102,6 +102,7 @@ app.use('/api/frontdesk', require('./routes/frontdesk'));
 app.use('/api/library', require('./routes/library'));
 app.use('/api/leave-requests', require('./routes/status-management'));
 app.use('/api/invoices',   require('./routes/invoices'));
+app.use('/api/paystack',   require('./routes/paystack'));
 app.use('/api/inquiries',  require('./routes/inquiries'));
 app.use('/api/assessment', require('./routes/assessment'));
 app.use('/api/reports',    require('./routes/reports'));
