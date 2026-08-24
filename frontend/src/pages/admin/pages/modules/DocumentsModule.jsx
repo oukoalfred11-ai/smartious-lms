@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useAuth, api } from '../../../../context/ctx.jsx'
 import { TOKENS } from '../shared/tokens.js'
 import { fmtDate } from '../shared/helpers.js'
@@ -78,6 +78,52 @@ export function InvoiceGenerator({ toast, onBack }) {
   })
   const [saving, setSaving]   = useState(false)
   const [saved,  setSaved]    = useState(null)  // saved invoice doc
+
+  // ── Quick pick: bill a student in three clicks ──────────
+  // Directory of active students with resolved parent contacts.
+  const [directory, setDirectory] = useState([])
+  const [pickQuery, setPickQuery] = useState('')
+  const [pickOpen,  setPickOpen]  = useState(false)
+  const [picked,    setPicked]    = useState(null)
+  useEffect(() => {
+    api.get('/fees/billing-directory')
+      .then(r => setDirectory(r.data?.data?.students || []))
+      .catch(() => {})
+  }, [])
+  const pickMatches = useMemo(() => {
+    const q = pickQuery.trim().toLowerCase()
+    if (!q) return directory.slice(0, 8)
+    return directory.filter(s =>
+      s.studentName.toLowerCase().includes(q) ||
+      (s.admission || '').toLowerCase().includes(q) ||
+      (s.parentName || '').toLowerCase().includes(q) ||
+      (s.parentEmail || '').includes(q)
+    ).slice(0, 8)
+  }, [directory, pickQuery])
+
+  const pickStudent = (s) => {
+    const monthLabel = new Date().toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
+    const email = s.parentEmail || s.studentEmail || ''
+    setPicked(s)
+    setPickOpen(false)
+    setPickQuery(s.studentName)
+    setF(p => ({
+      ...p,
+      billedToName: s.parentName || ('Parent/Guardian of ' + s.studentName),
+      billedToEmail: email,
+      studentName: s.studentName,
+      studentGrade: s.grade || '',
+      programmeLabel: p.programmeLabel || [s.curriculum, s.programme].filter(Boolean).join(' \u00b7 '),
+      currency: s.feeCurrency || p.currency,
+      items: [{
+        description: 'Tuition fees \u2014 ' + monthLabel,
+        sessions: '', duration: '', ratePerHr: '',
+        amount: s.agreedFee ? String(s.agreedFee) : '',
+      }],
+      sendEmail: true,
+    }))
+    if (!email) toast?.error?.('No parent email on file for ' + s.studentName + '. The invoice can be saved but not emailed until an email is added.')
+  }
 
   const set = (k,v) => setF(p => ({...p,[k]:v}))
   const itemSet = (i,k,v) => setF(p => ({...p, items:p.items.map((r,idx)=>idx===i?{...r,[k]:v}:r)}))
@@ -182,6 +228,51 @@ export function InvoiceGenerator({ toast, onBack }) {
           </div>
           <div><label style={lbl}>Programme label</label><input value={f.programmeLabel} onChange={e=>set('programmeLabel',e.target.value)} placeholder="e.g. HOME TUITION PROGRAMME · 13 July – 21 August 2026" style={inp}/></div>
         </div>
+      </div>
+
+      {/* Quick pick: bill a student */}
+      <div style={{ ...card, marginBottom:14, borderColor:TOKENS.crimson+'55' }}>
+        <div style={{ fontSize:12, fontWeight:800, color:TOKENS.s900, marginBottom:4 }}>Bill a student</div>
+        <div style={{ fontSize:11.5, color:TOKENS.s500, marginBottom:10 }}>
+          Search a student to fill the parent, amount and details automatically. The agreed monthly fee is prefilled and everything stays editable below.
+        </div>
+        <div style={{ position:'relative', maxWidth:420 }}>
+          <input
+            value={pickQuery}
+            onChange={e => { setPickQuery(e.target.value); setPickOpen(true); setPicked(null) }}
+            onFocus={() => setPickOpen(true)}
+            placeholder="Type a student name, admission number or parent..."
+            style={inp}
+          />
+          {pickOpen && pickMatches.length > 0 && (
+            <div style={{ position:'absolute', top:'100%', left:0, right:0, zIndex:30, background:'#fff',
+              border:'1.5px solid '+TOKENS.line, borderRadius:8, marginTop:4, boxShadow:'0 8px 24px rgba(8,12,20,.12)', overflow:'hidden' }}>
+              {pickMatches.map(s => (
+                <div key={s._id} onMouseDown={() => pickStudent(s)}
+                  style={{ padding:'9px 12px', cursor:'pointer', borderBottom:'1px solid '+TOKENS.line }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#FBF7EE'}
+                  onMouseLeave={e => e.currentTarget.style.background = '#fff'}>
+                  <div style={{ fontSize:12.5, fontWeight:700, color:TOKENS.s900 }}>
+                    {s.studentName}
+                    {s.admission ? <span style={{ fontWeight:400, color:TOKENS.s500 }}> · {s.admission}</span> : null}
+                  </div>
+                  <div style={{ fontSize:11, color:TOKENS.s500 }}>
+                    {[s.grade, s.curriculum].filter(Boolean).join(' · ')}
+                    {s.agreedFee ? ' · ' + s.feeCurrency + ' ' + s.agreedFee : ''}
+                    {s.parentEmail ? ' · ' + s.parentEmail : ' · no parent email on file'}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        {picked && (
+          <div style={{ marginTop:8, fontSize:11.5, fontWeight:700, color: picked.parentEmail ? '#166534' : '#B45309' }}>
+            {picked.parentEmail
+              ? 'Ready: saving this invoice will email it to ' + picked.parentEmail + ' with the PDF attached.'
+              : 'This student has no parent email on file. Add one below to send the invoice.'}
+          </div>
+        )}
       </div>
 
       {/* Bill To + Student */}
