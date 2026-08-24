@@ -428,7 +428,6 @@ const styles = `
   .lp .sec{padding:96px 0}
   .lp .wrap{max-width:1440px;margin:0 auto;padding:0 48px}
   .lp .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:'Fira Code',monospace;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:${V.gold3};margin-bottom:14px;font-weight:600}
-  .lp .eyebrow::before{content:'';width:24px;height:1px;background:${V.gold3};flex-shrink:0}
   .lp .display{font-family:'DM Serif Display',Georgia,serif;font-size:clamp(2.4rem,4vw,4rem);font-weight:400;line-height:1.08;letter-spacing:-.02em;color:${V.ink}}
   .lp .display em{color:${V.cr};font-style:italic}
   .lp .lead{font-size:17px;color:${V.sl};line-height:1.8;max-width:520px}
@@ -2078,7 +2077,6 @@ function LegalPage({ P, title, em, subtitle, effective, sections }) {
           ))}
         </div>
       </section>
-      <Footer P={P}/>
     </>
   )
 }
@@ -5533,9 +5531,9 @@ export default function LandingPage() {
           ═══════════════════════════════════════════ */}
           <section className="sec" style={{background:V.bone}}><div className="wrap">
             <div className="sec-hd reveal" style={{textAlign:'center'}}>
-              <div className="eyebrow" style={{justifyContent:'center'}}>The real reasons families leave traditional schools</div>
+              <div className="eyebrow" style={{justifyContent:'center'}}>The real reasons families change schools</div>
               <h2 className="display">Why parents come to <em>Smartious</em></h2>
-              <p className="lead" style={{marginTop:14,maxWidth:680,margin:'14px auto 0'}}>The patterns we hear from families across Kenya, the UAE and beyond.</p>
+              <p className="lead" style={{marginTop:14,maxWidth:680,margin:'14px auto 0'}}>The same stories reach us from every part of the world. If one of them is yours, you are in the right place.</p>
             </div>
             <div style={{
               display:'grid',
@@ -5546,14 +5544,14 @@ export default function LandingPage() {
               margin:'36px auto 0',
             }}>
               {[
-                ['Bullying','Persistent bullying that the current school cannot resolve — leaving your child anxious, withdrawn, or refusing to attend.'],
-                ['Long commutes','2-hour daily commutes on Thika Road, Mombasa Road or Sheikh Zayed Road — stealing 4+ hours of rest and study time every day.'],
-                ['Overcrowded classes','Classrooms of 40-60 students where individual attention is impossible and your child is falling between the cracks.'],
-                ['Frequent relocation','Expat or diplomatic postings that move your family every 2-3 years, disrupting your child\'s schooling each time.'],
-                ['Special learning needs','Dyslexia, ADHD, autism, gifted profiles that standard classrooms can\'t accommodate well.'],
-                ['Underperforming grades','School reports trending downward despite effort, with no clear path to recovery.'],
-                ['Sports &amp; arts schedules','Serious training schedules that incompatibly clash with a 7am-3pm school day.'],
-                ['Cost of international schools','International school fees of KSh 1.5-3 million/year that have become unsustainable for your family.'],
+                ['Bullying','A child who was once eager now dreads the school gate, and the school has run out of answers. Safety comes first, and it should never be negotiable.'],
+                ['Long commutes','Hours lost in traffic every single day, in Nairobi, Dubai or London alike. That time belongs to rest, family and proper study.'],
+                ['Overcrowded classes','In a class of fifty, even a devoted teacher cannot see every child. Quiet students disappear, and gaps grow in silence.'],
+                ['Frequent relocation','A posting abroad every few years should not mean a new school, a new syllabus and a new start for your child each time.'],
+                ['A child who learns differently','Some children need more pace, some need more patience, and most schools are built for neither. Ours adapts to the child in front of us.'],
+                ['Falling grades','Reports trending downward despite real effort, with nobody able to explain why or show the way back.'],
+                ['Sport and the arts','Serious training and rehearsal deserve a school day that bends around them without lowering a single academic standard.'],
+                ['The cost of international schools','In many cities, day school fees now rival university tuition. Families deserve the same standard of education at a price that makes sense.'],
               ].map(([h, p]) => (
                 <div key={h} className="reveal" style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'16px 18px'}}>
                   <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:8}}>
@@ -5574,9 +5572,9 @@ export default function LandingPage() {
           ═══════════════════════════════════════════ */}
           <section className="sec" style={{background:V.white}}><div className="wrap">
             <div className="sec-hd reveal" style={{textAlign:'center'}}>
-              <div className="eyebrow" style={{justifyContent:'center'}}>How we teach</div>
-              <h2 className="display">Three Ways to Learn. <em>One Standard</em> of Quality.</h2>
-              <p className="lead" style={{marginTop:14,maxWidth:680,margin:'14px auto 0'}}>Same qualified teachers. Same curriculum standards. Same internationally recognised qualifications — delivered the way that fits your family.</p>
+              <div className="eyebrow" style={{justifyContent:'center'}}>Learn your way</div>
+              <h2 className="display">One school. <em>Three ways</em> to learn.</h2>
+              <p className="lead" style={{marginTop:14,maxWidth:680,margin:'14px auto 0'}}>The same qualified teachers, the same standards and the same recognised qualifications, delivered the way that fits your family best.</p>
             </div>
             <div style={{
               display:'grid',
@@ -5588,11 +5586,11 @@ export default function LandingPage() {
             }}>
               {[
                 {
-                  tag:'Online · Live',
-                  title:'Online / Virtual',
+                  tag:'Learn From Anywhere',
+                  title:'Global Online School',
                   img:'/online-virtual-school.png',
                   alt:'Smartious online virtual school — live interactive whiteboard teaching Differentiation by First Principle (A-Level Mathematics)',
-                  desc:'Live 1-on-1 or small-group classes via the Smartious LMS interactive whiteboard. Same qualified teachers, real-time delivery, from anywhere in the world.',
+                  desc:'Live classes for students anywhere in the world, one to one or in small groups, taught in real time on the Smartious interactive whiteboard by expert teachers.',
                   bullets:[
                     'Interactive whiteboard with multi-colour annotation',
                     'Every session recorded for review',
@@ -5604,15 +5602,15 @@ export default function LandingPage() {
                   pricing:'From USD 8/hour',
                 },
                 {
-                  tag:'In-Centre',
-                  title:'In-Centre',
+                  tag:'Learn In Person',
+                  title:'Smartious Learning Centres',
                   img:'https://res.cloudinary.com/dae99gz1m/image/upload/v1780593515/photo_2026-06-04_20-09-57_ujfvdf.jpg',
                   alt:'Smartious learning centre Nairobi — Diamond Plaza Parklands and Karen Hardy',
-                  desc:'In-person learning at our Diamond Plaza Parklands HQ and Karen Hardy Centre — premium tutoring halls, IGCSE/A-Level intensive prep, supervised study.',
+                  desc:'Face to face learning at our Nairobi centres in Diamond Plaza Parklands and Karen, with premium tutoring halls, intensive examination preparation and supervised study.',
                   bullets:[
                     'Diamond Plaza Parklands (HQ)',
                     'Karen Hardy Centre',
-                    'Group classes &amp; small cohorts',
+                    'Small classes and study cohorts',
                     'Quiet study areas, supervised',
                   ],
                   cta:'Visit a Smartious centre',
@@ -5620,16 +5618,16 @@ export default function LandingPage() {
                   pricing:'From KSh 1,500/hour',
                 },
                 {
-                  tag:'In-Home · Nairobi',
-                  title:'Home Tutoring',
+                  tag:'Personalised Tuition',
+                  title:'Private Learning Support',
                   img:'https://res.cloudinary.com/dae99gz1m/image/upload/v1780594208/photo_2026-06-04_20-29-50_mxbh0c.jpg',
                   alt:'Smartious home tutor delivering 1-on-1 in-person tuition in Nairobi',
-                  desc:'A vetted Smartious tutor visits your Nairobi home or estate. Across 21 areas — Karen, Kilimani, Lavington, Westlands, Runda and more.',
+                  desc:'Personal one to one academic support built around your child, online anywhere in the world, and in person across Nairobi from Karen and Kilimani to Westlands and Runda.',
                   bullets:[
                     'Tutor comes to your home',
                     'Across 21 Nairobi areas',
                     'Scheduled around your family',
-                    'Same-day matching available',
+                    'Matched with a tutor within a day',
                   ],
                   cta:'Find tutors in your area',
                   ctaPage:'tuition-nairobi',
@@ -5800,7 +5798,7 @@ export default function LandingPage() {
             <div className="sec-hd reveal" style={{textAlign:'center'}}>
               <div className="eyebrow" style={{justifyContent:'center'}}>Built for global families</div>
               <h2 className="display">An Online School That <em>Travels With You</em></h2>
-              <p className="lead" style={{marginTop:14,maxWidth:680,margin:'14px auto 0'}}>Same curriculum, same teachers, same friends — wherever life takes you. Click your country for local exam centres, fee guidance and regulatory information.</p>
+              <p className="lead" style={{marginTop:14,maxWidth:680,margin:'14px auto 0'}}>Wherever your family goes, your child's education goes with you. The same teachers, the same classmates and the same timetable in every time zone. Choose your country for exam centres, fees and local guidance.</p>
             </div>
             <div style={{
               display:'grid',
@@ -6058,11 +6056,11 @@ export default function LandingPage() {
               margin:'36px auto 0',
             }}>
               {[
-                {label:'Cambridge International', detail:'IGCSE · AS · A-Level', from:'Live small-group classes', monthly:'From USD 400/mo · Personalized'},
-                {label:'Pearson Edexcel', detail:'IGCSE · International A-Level', from:'Live small-group classes', monthly:'From USD 400/mo · Personalized'},
-                {label:'International Baccalaureate', detail:'PYP · MYP · Diploma (HL/SL)', from:'Live small-group classes', monthly:'Personalized pricing on request'},
-                {label:'Kenya CBC', detail:'KICD-aligned · KCSE-eligible', from:'Live small-group classes', monthly:'Personalized pricing on request'},
-                {label:'American Curriculum', detail:'Elementary · Middle · High · AP', from:'Live small-group classes', monthly:'From USD 400/mo · Personalized'},
+                {label:'Cambridge International', detail:'IGCSE · AS · A-Level', from:'Live small-group classes', monthly:'From USD 400/mo · Personalised'},
+                {label:'Pearson Edexcel', detail:'IGCSE · International A-Level', from:'Live small-group classes', monthly:'From USD 400/mo · Personalised'},
+                {label:'International Baccalaureate', detail:'Diploma and MYP subject support (HL/SL)', from:'Live small-group classes', monthly:'Personalised pricing on request'},
+                {label:'American Curriculum', detail:'Elementary · Middle · High · AP', from:'Live small-group classes', monthly:'From USD 400/mo · Personalised'},
+                {label:'Kenya Pathway (CBC)', detail:'KICD aligned · KCSE eligible', from:'Live small-group classes', monthly:'Personalised pricing on request'},
               ].map(c => (
                 <div key={c.label} className="reveal" style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',cursor:'pointer',transition:'all .2s'}}
                   onClick={() => P('curricula')}
@@ -6252,12 +6250,12 @@ export default function LandingPage() {
               relevance for Google. Curricula + locations
               naturally woven together.
           ═══════════════════════════════════════════ */}
-          <section style={{background:V.ink2,color:'rgba(247,243,237,.75)',padding:'48px 0',borderTop:'1px solid rgba(247,243,237,.06)'}}>
+          <section style={{background:V.bone,color:V.sl,padding:'48px 0',borderTop:`1px solid ${V.bone3}`}}>
             <div className="wrap">
               <div style={{maxWidth:1000,margin:'0 auto'}}>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',fontWeight:400,color:'#fff',marginBottom:16,lineHeight:1.3}}>International Homeschooling &amp; Online School</h2>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',fontWeight:400,color:V.ink,marginBottom:16,lineHeight:1.3}}>International Homeschooling &amp; Online School</h2>
                 <p style={{fontSize:13.5,lineHeight:1.75,marginBottom:18}}>
-                  Smartious Homeschool &amp; eSchool is a Nairobi-based international online school serving families across Kenya and 13 other countries since 2019. We provide live, internationally accredited education for students preparing for <strong style={{color:'#fff'}}>Cambridge IGCSE</strong>, <strong style={{color:'#fff'}}>Cambridge International A-Level</strong>, <strong style={{color:'#fff'}}>Pearson Edexcel International GCSE and A-Level</strong>, the <strong style={{color:'#fff'}}>International Baccalaureate Diploma Programme (IB DP)</strong>, <strong style={{color:'#fff'}}>Kenya CBC</strong> (KICD-aligned, KCSE-eligible), and the <strong style={{color:'#fff'}}>American High School Curriculum</strong> with Advanced Placement (AP) coursework.
+                  Smartious Homeschool &amp; eSchool is a global online school founded in Kenya in 2019, serving students and families across 14 countries. We provide live, internationally accredited education for students preparing for <strong style={{color:V.ink}}>Cambridge IGCSE</strong>, <strong style={{color:V.ink}}>Cambridge International A-Level</strong>, <strong style={{color:V.ink}}>Pearson Edexcel International GCSE and A-Level</strong>, the <strong style={{color:V.ink}}>International Baccalaureate Diploma Programme (IB DP)</strong>, <strong style={{color:V.ink}}>Kenya CBC</strong> (KICD-aligned, KCSE-eligible), and the <strong style={{color:V.ink}}>American High School Curriculum</strong> with Advanced Placement (AP) coursework.
                 </p>
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:24,marginTop:24}}>
                   <div>
@@ -6296,13 +6294,12 @@ export default function LandingPage() {
                     </ul>
                   </div>
                 </div>
-                <p style={{fontSize:12.5,lineHeight:1.7,marginTop:24,color:'rgba(247,243,237,.55)'}}>
+                <p style={{fontSize:12.5,lineHeight:1.7,marginTop:24,color:V.sl}}>
                   Smartious supports homeschooling, 1-on-1 home tuition, online learning, university admissions (UCAS for UK, Common App for US, KUCCPS for Kenyan state universities, plus Canadian, Australian, UAE branch campus pathways), academic assessments, and personalised learning plans for gifted students, students with learning differences, athletes balancing training with academics, and diaspora families needing curriculum continuity across relocation.
                 </p>
               </div>
             </div>
           </section>
-          <Footer P={P}/>
         </>
       )}
 
@@ -6833,7 +6830,6 @@ export default function LandingPage() {
               </div>
             </div>
           </section>
-          <Footer P={P}/>
         </>
       )}
 
@@ -6936,7 +6932,6 @@ export default function LandingPage() {
             </p>
           </div></section>
 
-          <Footer P={P}/>
         </>
       )}
 
@@ -6953,8 +6948,7 @@ export default function LandingPage() {
                 <p className="pg-sub" style={{marginTop:12}}>This curriculum page could not be found.</p>
                 <button className="btn-p" style={{marginTop:24}} onClick={() => P('curricula')}>← All Curricula</button>
               </div></div>
-              <Footer P={P}/>
-            </>
+                </>
           )
         }
         const d = c.detail
@@ -7029,8 +7023,7 @@ export default function LandingPage() {
                 <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
               </div>
             </div></section>
-            <Footer P={P}/>
-          </>
+            </>
         )
       })()}
 
@@ -7059,7 +7052,6 @@ export default function LandingPage() {
               <button className="btn-o lt" onClick={() => P('pricing')}>Compare Prices</button>
             </div>
           </div></section>
-          <Footer P={P}/>
         </>
       )}
 
@@ -7076,8 +7068,7 @@ export default function LandingPage() {
                 <p className="pg-sub" style={{marginTop:12}}>This service page could not be found.</p>
                 <button className="btn-p" style={{marginTop:24}} onClick={() => P('services')}>← All Services</button>
               </div></div>
-              <Footer P={P}/>
-            </>
+                </>
           )
         }
         const d = s.detail
@@ -7135,8 +7126,7 @@ export default function LandingPage() {
                 <button className="btn-o" onClick={() => P('pricing')}>View Pricing</button>
               </div>
             </div></section>
-            <Footer P={P}/>
-          </>
+            </>
         )
       })()}
 
@@ -10409,8 +10399,7 @@ export default function LandingPage() {
 </div>
             </div></section>
 
-            <Footer P={P}/>
-          </>
+            </>
         )
       })()}
 
@@ -10637,8 +10626,7 @@ export default function LandingPage() {
 </div>
             </div></section>
 
-            <Footer P={P}/>
-          </>
+            </>
         )
       })()}
 
@@ -11274,7 +11262,6 @@ export default function LandingPage() {
               </div>
             </div>
           </section>
-          <Footer P={P}/>
         </>
       )}
 
@@ -11751,7 +11738,6 @@ export default function LandingPage() {
               </div>
             </div>
           </section>
-          <Footer P={P}/>
         </>
       )}
 
@@ -12058,7 +12044,6 @@ export default function LandingPage() {
             </div>
           </section>
           <GuideCrossLinks guideSlug="homeschooling-usa-2026-guide" guideName="Homeschooling in the USA: The Complete 2026 Guide" hubHref="/online-school/usa" hubName="Smartious in the United States"/>
-          <Footer P={P}/>
         </>
         )
       })()}
@@ -12388,7 +12373,6 @@ export default function LandingPage() {
             </div>
           </section>
           <GuideCrossLinks guideSlug="homeschooling-canada-2026-guide" guideName="Homeschooling in Canada: The Complete 2026 Guide" hubHref="/online-school/canada" hubName="Smartious in Canada"/>
-          <Footer P={P}/>
         </>
         )
       })()}
@@ -12621,7 +12605,6 @@ export default function LandingPage() {
             </div>
           </section>
           <GuideCrossLinks guideSlug="homeschooling-usa-2026-guide" guideName="Homeschooling in the USA: The Complete 2026 Guide" hubHref="/online-school/usa" hubName="Smartious in the United States"/>
-          <Footer P={P}/>
         </>
         )
       })()}
@@ -12786,7 +12769,6 @@ export default function LandingPage() {
               </div>
             </div>
           </section>
-          <Footer P={P}/>
         </>
       )}
 
@@ -12934,7 +12916,6 @@ export default function LandingPage() {
               </div>
             </div>
           </section>
-          <Footer P={P}/>
         </>
       )}
 
@@ -13084,7 +13065,6 @@ export default function LandingPage() {
               </div>
             </div>
           </section>
-          <Footer P={P}/>
         </>
       )}
 
@@ -13311,7 +13291,6 @@ export default function LandingPage() {
             </div>
           </section>
           <GuideCrossLinks guideSlug="homeschooling-canada-2026-guide" guideName="Homeschooling in Canada: The Complete 2026 Guide" hubHref="/online-school/canada" hubName="Smartious in Canada"/>
-          <Footer P={P}/>
         </>
         )
       })()}
@@ -13946,7 +13925,6 @@ export default function LandingPage() {
               </div>
             </div>
           </div></section>
-          <Footer P={P}/>
         </>
       )}
 
@@ -23153,7 +23131,6 @@ export default function LandingPage() {
             </div>
           </div></section>
           <GuideCrossLinks guideSlug="homeschooling-uk-2026-guide" guideName="Homeschooling in the UK: The Complete 2026 Guide" hubHref="/online-school/uk" hubName="Smartious in the United Kingdom"/>
-          <Footer P={P}/>
         </>
       )}
 
@@ -23190,7 +23167,6 @@ export default function LandingPage() {
               </div>
             </div>
           </div></section>
-          <Footer P={P}/>
         </>
       )}
 
@@ -23313,7 +23289,6 @@ export default function LandingPage() {
               </div>
             </div>
           </div></section>
-          <Footer P={P}/>
         </>
       )}
 
@@ -23331,8 +23306,7 @@ export default function LandingPage() {
                 <p className="pg-sub" style={{marginTop:12}}>The article you're looking for may have been moved. Browse all our articles below.</p>
                 <button className="btn-p" style={{marginTop:24}} onClick={() => P('blog')}>← Back to Blog</button>
               </div></div>
-              <Footer P={P}/>
-            </>
+                </>
           )
         }
         const related = Object.entries(FULL_ARTICLES).filter(([s, x]) => s !== currentArticle && x.cat === a.cat).slice(0, 3)
@@ -23556,8 +23530,7 @@ export default function LandingPage() {
                 )}
               </div>
             </article>
-            <Footer P={P}/>
-          </>
+            </>
         )
       })()}
 
@@ -23886,7 +23859,6 @@ export default function LandingPage() {
           <section className="sec"><div className="wrap"><div className="consult-wrap">
             <ConsultForm P={P} />
           </div></div></section>
-          <Footer P={P}/>
         </div>
       )}
 
@@ -23936,7 +23908,6 @@ export default function LandingPage() {
               </div>
             </div>
           </div></section>
-          <Footer P={P}/>
         </div>
       )}
 
@@ -24082,6 +24053,9 @@ export default function LandingPage() {
           </div>
         </div>
       )}
+
+      {/* ── FOOTER — one footer, every page, always the same ── */}
+      <Footer P={P}/>
 
       {/* ── TOAST ── */}
       {toast && (
@@ -24488,7 +24462,7 @@ function Footer({ P }) {
         <div className="ft-grid">
           <div>
             <div style={{marginBottom:18}}><SmartiousLogo size={44} withText={true} tone="light"/></div>
-            <div className="ft-d">Kenya's leading homeschool education provider. IGCSE, Cambridge, IB, British, American and CBC curricula. Expert tutors. AI-powered. 12+ countries.</div>
+            <div className="ft-d">A global online school founded in Kenya. Cambridge, Pearson Edexcel, American and Kenyan pathways with IB subject support, taught live by expert teachers to families in 14 countries.</div>
           </div>
           <div>
             <div className="ft-ch">Programmes</div>
@@ -24513,7 +24487,7 @@ function Footer({ P }) {
               </a>
 <div style={{display:'flex',alignItems:'center',gap:7}}>
                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                Diamond Plaza I, Parklands, Nairobi, Kenya
+                Diamond Plaza Parklands and Karen, Nairobi, Kenya
               </div>
             </div>
           </div>
