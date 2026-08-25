@@ -2181,6 +2181,17 @@ function FilmMaker({ toast }) {
   const [blobs, setBlobs] = useState({})
   const [audioBufs, setAudioBufs] = useState({})
   const [capsOn, setCapsOn] = useState(true)
+  // Brand logo overlay: the real Smartious logo (transparent PNG at
+  // /brand/logo.png), stamped onto preview and export alike.
+  const [logo, setLogo] = useState({ on: true, pos: 'tr', size: 0.16, halo: true })
+  const logoImgRef = useRef(null)
+  const [logoReady, setLogoReady] = useState(false)
+  useEffect(() => {
+    const im = new Image()
+    im.onload = () => { logoImgRef.current = im; setLogoReady(true) }
+    im.onerror = () => { logoImgRef.current = null; setLogoReady(false) }
+    im.src = '/brand/logo.png'
+  }, [])
   const [sound, setSound] = useState({ musicMode: 'none', musicBuffer: null, musicVol: 0.5, voBuffer: null, voVol: 1, script: null })
   const [loaded, setLoaded] = useState(false)
   const [savedAt, setSavedAt] = useState(0)
@@ -2245,6 +2256,25 @@ function FilmMaker({ toast }) {
     if (capsOn) {
       const e = capsAbs.find(x => t >= x.t0 && t < x.t1)
       if (e) drawCaptionLine(ctx, W, H, e)
+    }
+    // Brand logo, top layer
+    const im = logoImgRef.current
+    if (logo.on && im && im.naturalWidth) {
+      const lw = W * logo.size
+      const lh = lw * (im.naturalHeight / im.naturalWidth)
+      const m = Math.min(W, H) * 0.035
+      const x = logo.pos.includes('l') ? m : W - lw - m
+      const y = logo.pos.includes('t') ? m : H - lh - m
+      ctx.save()
+      ctx.globalAlpha = 0.94
+      if (logo.halo) {
+        // Soft light halo keeps the dark wordmark readable on dark
+        // footage without touching the logo itself.
+        ctx.shadowColor = 'rgba(255,255,255,0.85)'
+        ctx.shadowBlur = Math.max(6, lw * 0.05)
+      }
+      ctx.drawImage(im, x, y, lw, lh)
+      ctx.restore()
     }
   }
 
@@ -2440,6 +2470,7 @@ function FilmMaker({ toast }) {
           setFormat(pj.format || 'youtube')
           setClips(pj.clips)
           setCapsOn(pj.capsOn !== false)
+          if (pj.logo) setLogo(l => ({ ...l, ...pj.logo }))
           setBlobs(pj.blobs || {})
           const md = {}
           for (const [k, rec] of Object.entries(pj.blobs || {})) {
@@ -2464,12 +2495,12 @@ function FilmMaker({ toast }) {
     if (!loaded) return
     const t = setTimeout(() => {
       idbSet('film-project', {
-        v: 1, format, clips, capsOn, blobs,
+        v: 1, format, clips, capsOn, logo, blobs,
         sound: { musicMode: sound.musicMode, musicVol: sound.musicVol, voVol: sound.voVol, script: sound.script, musicBlob: sound.musicBlob || null, voBlob: sound.voBlob || null },
       }).then(() => setSavedAt(Date.now())).catch(() => {})
     }, 800)
     return () => clearTimeout(t)
-  }, [loaded, format, clips, capsOn, blobs, sound.musicMode, sound.musicVol, sound.voVol, sound.script, sound.musicBlob, sound.voBlob])
+  }, [loaded, format, clips, capsOn, logo, blobs, sound.musicMode, sound.musicVol, sound.voVol, sound.script, sound.musicBlob, sound.voBlob])
 
   const newProject = async () => {
     await idbDel('film-project')
@@ -2500,6 +2531,28 @@ function FilmMaker({ toast }) {
         <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 11.5, fontWeight: 700, color: TOKENS.s600 }}>
           <input type="checkbox" checked={capsOn} onChange={e => setCapsOn(e.target.checked)} /> Burn captions
         </label>
+        <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 11.5, fontWeight: 700, color: TOKENS.s600 }}>
+          <input type="checkbox" checked={logo.on} onChange={e => setLogo(l => ({ ...l, on: e.target.checked }))} /> Logo
+        </label>
+        {logo.on && (
+          <>
+            <select value={logo.pos} onChange={e => setLogo(l => ({ ...l, pos: e.target.value }))}
+              style={{ padding: '5px 8px', border: '1.5px solid ' + TOKENS.line, borderRadius: 7, fontSize: 11.5, background: '#fff' }}>
+              <option value="tr">Top right</option>
+              <option value="tl">Top left</option>
+              <option value="br">Bottom right</option>
+              <option value="bl">Bottom left</option>
+            </select>
+            <label style={{ fontSize: 11.5, fontWeight: 700, color: TOKENS.s600 }}>Size
+              <input type="range" min="0.08" max="0.30" step="0.01" value={logo.size}
+                onChange={e => setLogo(l => ({ ...l, size: +e.target.value }))} style={{ verticalAlign: 'middle', marginLeft: 6 }} />
+            </label>
+            <label style={{ display: 'flex', gap: 5, alignItems: 'center', fontSize: 11.5, fontWeight: 700, color: TOKENS.s600 }}>
+              <input type="checkbox" checked={logo.halo} onChange={e => setLogo(l => ({ ...l, halo: e.target.checked }))} /> Halo
+            </label>
+            {!logoReady && <span style={{ fontSize: 10.5, color: '#B45309', fontWeight: 700 }}>Logo file missing: upload frontend/public/brand/logo.png</span>}
+          </>
+        )}
       </div>
 
       {clips.length > 0 && (
