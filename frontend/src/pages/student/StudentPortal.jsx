@@ -4122,6 +4122,52 @@ function ExamsTab({ user, toast, goTo, store }) {
 // ═══════════════════════════════════════════════════════════
  
 // Parse a schedule string like "Mon/Wed 9:00–10:00 AM"
+// ═══ STUDENT TIMEZONE ENGINE ═══════════════════════════════
+// Class schedules are written by the school in Nairobi time (EAT,
+// UTC+3, no daylight saving). Students sit in Dubai, Lagos, London,
+// Toronto. Everything the student sees is converted to THEIR zone:
+// 'auto' follows the device (right answer for travelling families),
+// or an explicit zone chosen in Profile settings.
+let ACTIVE_TZ = 'auto'
+const setActiveTz = (tz) => { ACTIVE_TZ = tz || 'auto' }
+const effectiveTz = () => {
+  if (ACTIVE_TZ && ACTIVE_TZ !== 'auto') return ACTIVE_TZ
+  try { return Intl.DateTimeFormat().resolvedOptions().timeZone || 'Africa/Nairobi' }
+  catch { return 'Africa/Nairobi' }
+}
+const tzOpt = () => {
+  const tz = ACTIVE_TZ === 'auto' ? null : ACTIVE_TZ
+  return tz ? { timeZone: tz } : {}
+}
+// Minutes a zone is ahead of UTC right now (handles DST correctly)
+const tzOffsetMins = (tz) => {
+  try {
+    const now = new Date()
+    const parts = Object.fromEntries(
+      new Intl.DateTimeFormat('en-US', { timeZone: tz, hour12: false,
+        year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+        .formatToParts(now).map(x => [x.type, x.value]))
+    const asUTC = Date.UTC(+parts.year, +parts.month - 1, +parts.day,
+      parts.hour === '24' ? 0 : +parts.hour, +parts.minute)
+    return Math.round((asUTC - now.getTime()) / 60000)
+  } catch { return 180 }
+}
+// Shift a parsed EAT schedule into the student's zone, rolling
+// weekdays across midnight when the offset demands it.
+const shiftScheduleTz = (parsed) => {
+  if (!parsed) return parsed
+  const shift = tzOffsetMins(effectiveTz()) - 180   // vs EAT (+3, no DST)
+  if (!shift) return parsed
+  let s = parsed.startMins + shift
+  let e = parsed.endMins + shift
+  let dayDelta = 0
+  if (s < 0) { dayDelta = -1; s += 1440; e += 1440 }
+  else if (s >= 1440) { dayDelta = 1; s -= 1440; e -= 1440 }
+  if (e > 1439) e = 1439                             // clamp midnight crossers
+  const days = parsed.days.map(d => (d + dayDelta + 7) % 7)
+  return { days, startMins: s, endMins: e }
+}
+
 const parseScheduleString = (scheduleStr) => {
   if (!scheduleStr || typeof scheduleStr !== 'string') return null
   const dayMap = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 }
@@ -4154,11 +4200,17 @@ const parseScheduleString = (scheduleStr) => {
   startH = to24(startH, startMer)
   endH = to24(endH, endMer)
  
-  return {
+  return shiftScheduleTz({
     days,
     startMins: startH * 60 + startM,
     endMins:   endH * 60 + endM,
-  }
+  })
+}
+// A schedule label rebuilt in the student's own zone
+const localScheduleLabel = (scheduleStr) => {
+  const p = parseScheduleString(scheduleStr)
+  if (!p) return scheduleStr || ''
+  return p.days.map(dayName).join(' ') + ' ' + formatMins(p.startMins) + ' to ' + formatMins(p.endMins)
 }
  
 const formatMins = (mins) => {
@@ -4198,7 +4250,7 @@ const computeStatus = (room, now) => {
     return {
       kind: 'no-schedule',
       label: 'No schedule set',
-      sublabel: room.schedule || 'Ask your teacher about class times',
+      sublabel: localScheduleLabel(room.schedule) || 'Ask your teacher about class times',
       canJoin: false,
     }
   }
@@ -4259,7 +4311,7 @@ const computeStatus = (room, now) => {
     }
   }
  
-  return { kind: 'no-schedule', label: 'No upcoming sessions', sublabel: room.schedule || '', canJoin: false }
+  return { kind: 'no-schedule', label: 'No upcoming sessions', sublabel: localScheduleLabel(room.schedule) || '', canJoin: false }
 }
  
 const teacherDisplayName = (teacher) => {
@@ -9802,7 +9854,15 @@ const PROFILE_DISPLAY_KEY  = 'sm_profile_display_name'
  
 const loadProfilePrefs = () => {
   try {
-    return JSON.parse(localStorage.getItem(PROFILE_PREFS_KEY) || 'null') || {
+    const stored = JSON.parse(localStorage.getItem(PROFILE_PREFS_KEY) || 'null')
+    if (stored) {
+      // The old default was Africa/Nairobi but was never actually
+      // applied to any display, so nobody chose it on purpose.
+      // Migrate it to auto; explicit choices of other zones stay.
+      if (!stored.timezone || stored.timezone === 'Africa/Nairobi') stored.timezone = 'auto'
+      return stored
+    }
+    return {
       notifyEmail: true,
       notifyDailyDigest: true,
       notifyHomework: true,
@@ -9810,7 +9870,7 @@ const loadProfilePrefs = () => {
       notifyLiveClass: true,
       shareProgressWithParent: true,
       preferredContactMethod: 'email',
-      timezone: 'Africa/Nairobi',
+      timezone: 'auto',
       preferredLanguage: 'en',
     }
   } catch {
@@ -10305,6 +10365,7 @@ function ProfileTab({ user, toast }) {
   const [bio, setBio] = useState(user?.bio || localStorage.getItem(PROFILE_BIO_KEY) || '')
   const [avatar, setAvatar] = useState(user?.avatar || localStorage.getItem(PROFILE_AVATAR_KEY) || null)
   const [prefs, setPrefs] = useState(() => loadProfilePrefs())
+  useEffect(() => { setActiveTz(prefs.timezone) }, [prefs.timezone])
   const [saving, setSaving] = useState(false)
 
   // Refetch on mount
@@ -11014,7 +11075,7 @@ function ProfileTab({ user, toast }) {
               Timezone
             </label>
             <div style={{ fontSize: 12.5, color: 'var(--s500)', marginBottom: 10 }}>
-              Class times and reminders are shown in this timezone.
+              Class times are shown in this timezone. Right now you are seeing times in {effectiveTz().replace(/_/g, ' ')}.
             </div>
             <select
               value={prefs.timezone}
@@ -11026,6 +11087,7 @@ function ProfileTab({ user, toast }) {
                 minWidth: 200,
               }}
             >
+              <option value="auto">My device time (recommended)</option>
               <option value="Africa/Nairobi">Nairobi (EAT, UTC+3)</option>
               <option value="Asia/Dubai">Dubai (GST, UTC+4)</option>
               <option value="Europe/London">London (GMT/BST)</option>
@@ -12712,7 +12774,7 @@ function StudentAttendancePage({ user, toast }) {
               <div>
                 <div style={{fontSize:15,fontWeight:800,color:todaySS.fg}}>{todaySS.label} today</div>
                 <div style={{fontSize:12.5,color:'#857973',marginTop:2}}>
-                  {ciStatus.record?.checkInTime ? 'Checked in at '+new Date(ciStatus.record.checkInTime).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : ''}
+                  {ciStatus.record?.checkInTime ? 'Checked in at '+new Date(ciStatus.record.checkInTime).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',...tzOpt()}) : ''}
                   {ciStatus.checkInStatus==='late'&&ciStatus.record?.lateTime ? ' · Arrived: '+ciStatus.record.lateTime : ''}
                   {ciStatus.checkInStatus==='absent'&&ciStatus.record?.reason ? ' · '+ciStatus.record.reason : ''}
                 </div>
@@ -12865,7 +12927,7 @@ function StudentCheckInTab({ user, toast }) {
   }
 
   const fmtDate = d=>d?new Date(d).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}):'—'
-  const fmtTime = d=>d?new Date(d).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}):'—'
+  const fmtTime = d=>d?new Date(d).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',...tzOpt()}):'—'
   const SS = { present:{bg:'#D1FAE5',fg:'#065F46',label:'Present'}, late:{bg:'#FEF3C7',fg:'#D97706',label:'Late'}, absent:{bg:'#FEE2E2',fg:'#991B1B',label:'Absent'} }
 
   if(!loading&&status?.onBreak) return (
