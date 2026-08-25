@@ -401,6 +401,7 @@ const NAV_SECTIONS = [
   { label:'Tools', items:[
     { id:'tutor',        label:'Mshauri AI',      icon:'tutor',        svg:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>' },
     { id:'communication', label:'Communication',  icon:'communication', svg:'<path d="M4 4h16v12H5.17L4 17.17V4z"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="12" x2="13" y2="12"/>' },
+    { id:'community',    label:'Community',       icon:'community',    svg:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>' },
   ]},
   { label:'Account', items:[
     { id:'profile',      label:'Profile',         icon:'profile',      svg:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>' },
@@ -2197,6 +2198,7 @@ export default function StudentPortal() {
           ════════════════════════════════════════════ */}
           {page === 'profile' && <ProfileTab user={user} toast={toast} />}
           {page === 'communication' && <StudentCommunicationTab user={user} toast={toast} />}
+          {page === 'community' && <CommunityTab user={user} toast={toast} />}
 
         </div>
       </main>
@@ -13911,6 +13913,293 @@ function TeacherProfilePreview({ teacher, onClose }) {
           </button>
         </div>
       </div>
+    </div>
+  )
+}
+
+
+// ═══════════════════════════════════════════════════════════
+// COMMUNITY — the whole school in one room. One public feed,
+// monitored and moderated; no private messages by design.
+// ═══════════════════════════════════════════════════════════
+const CT_KINDS = [
+  { id: 'post',        label: 'Post',        hint: "What's on your mind?" },
+  { id: 'question',    label: 'Question',    hint: 'Ask the whole school...' },
+  { id: 'tip',         label: 'Study Tip',   hint: 'Share something that works for you...' },
+  { id: 'achievement', label: 'Achievement', hint: 'Celebrate a win, big or small...' },
+  { id: 'poll',        label: 'Poll',        hint: 'Ask a question with options...' },
+]
+const CT_FILTERS = [
+  { id: '',            label: 'All Posts' },
+  { id: 'question',    label: 'Questions' },
+  { id: 'tip',         label: 'Study Tips' },
+  { id: 'achievement', label: 'Achievements' },
+  { id: 'poll',        label: 'Polls' },
+]
+const ctAgo = (d) => {
+  const s = Math.floor((Date.now() - new Date(d).getTime()) / 1000)
+  if (s < 60) return 'just now'
+  if (s < 3600) return Math.floor(s / 60) + 'm ago'
+  if (s < 86400) return Math.floor(s / 3600) + 'h ago'
+  if (s < 7 * 86400) return Math.floor(s / 86400) + 'd ago'
+  return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+}
+const ctName = (a) => a ? `${a.firstName || ''} ${a.lastName || ''}`.trim() || 'Student' : 'Student'
+const ctInitials = (a) => (ctName(a).split(/\s+/).map(w => w[0]).join('').slice(0, 2) || 'S').toUpperCase()
+const CT_KIND_BADGE = {
+  question:    { bg: '#EEF2FF', fg: '#4338CA', label: 'Question' },
+  tip:         { bg: '#ECFDF5', fg: '#047857', label: 'Study Tip' },
+  achievement: { bg: '#FEF3C7', fg: '#B45309', label: 'Achievement' },
+  poll:        { bg: '#FCE7F3', fg: '#BE185D', label: 'Poll' },
+}
+
+function CommunityTab({ user, toast }) {
+  const [posts, setPosts] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [filter, setFilter] = useState('')
+  const [hasMore, setHasMore] = useState(false)
+
+  const [kind, setKind] = useState('post')
+  const [body, setBody] = useState('')
+  const [pollOpts, setPollOpts] = useState(['', ''])
+  const [posting, setPosting] = useState(false)
+  const [composeErr, setComposeErr] = useState('')
+
+  const [openComments, setOpenComments] = useState({})
+  const [commentDrafts, setCommentDrafts] = useState({})
+
+  const load = useCallback((f = filter) => {
+    setLoading(true)
+    api.get('/community/posts' + (f ? '?kind=' + f : ''))
+      .then(r => {
+        const rows = r.data?.data?.posts || []
+        setPosts(rows); setHasMore(rows.length === 20)
+      })
+      .catch(() => toast?.error?.('Could not load the community feed.'))
+      .finally(() => setLoading(false))
+  }, [filter])
+  useEffect(() => { load(filter) }, [filter])
+
+  const loadMore = () => {
+    const last = posts[posts.length - 1]
+    if (!last) return
+    api.get('/community/posts?before=' + encodeURIComponent(last.createdAt) + (filter ? '&kind=' + filter : ''))
+      .then(r => {
+        const rows = r.data?.data?.posts || []
+        setPosts(p => [...p, ...rows]); setHasMore(rows.length === 20)
+      }).catch(() => {})
+  }
+
+  const submit = async () => {
+    setComposeErr('')
+    const payload = { kind, body: body.trim() }
+    if (kind === 'poll') payload.pollOptions = pollOpts.map(t => t.trim()).filter(Boolean)
+    if (!payload.body) return setComposeErr('Write something first.')
+    if (kind === 'poll' && payload.pollOptions.length < 2) return setComposeErr('A poll needs at least two options.')
+    setPosting(true)
+    try {
+      const r = await api.post('/community/posts', payload)
+      setPosts(p => [r.data.data.post, ...p])
+      setBody(''); setPollOpts(['', '']); setKind('post')
+      toast?.ok?.('Posted to the whole school.')
+    } catch (e) {
+      setComposeErr(e?.response?.data?.message || 'Could not post. Try again.')
+    }
+    setPosting(false)
+  }
+
+  const like = (id) => {
+    api.post('/community/posts/' + id + '/like').then(r => {
+      setPosts(p => p.map(x => x._id === id ? { ...x, likeCount: r.data.data.likeCount, liked: r.data.data.liked } : x))
+    }).catch(() => {})
+  }
+  const vote = (id, idx) => {
+    api.post('/community/posts/' + id + '/vote', { optionIndex: idx }).then(r => {
+      setPosts(p => p.map(x => x._id === id ? { ...x, pollOptions: r.data.data.pollOptions } : x))
+    }).catch(() => {})
+  }
+  const report = (id) => {
+    const reason = window.prompt('Why are you reporting this post? (optional)') 
+    if (reason === null) return
+    api.post('/community/posts/' + id + '/report', { reason }).then(r => {
+      toast?.ok?.(r.data?.data?.message || 'Reported. A moderator will review it.')
+    }).catch(() => {})
+  }
+  const addComment = async (id) => {
+    const text = (commentDrafts[id] || '').trim()
+    if (!text) return
+    try {
+      const r = await api.post('/community/posts/' + id + '/comments', { body: text })
+      setPosts(p => p.map(x => x._id === id ? { ...x, comments: [...x.comments, r.data.data.comment] } : x))
+      setCommentDrafts(d => ({ ...d, [id]: '' }))
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Could not comment.')
+    }
+  }
+
+  const card = { background: 'var(--white)', border: '1.5px solid var(--border)', borderRadius: 'var(--rlg)', padding: 18 }
+  const chip = (active) => ({
+    padding: '7px 14px', borderRadius: 999, fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+    border: '1.5px solid ' + (active ? 'var(--crimson)' : 'var(--border)'),
+    background: active ? 'var(--crimson)' : 'var(--white)', color: active ? '#fff' : 'var(--s600)',
+  })
+
+  return (
+    <div style={{ display: 'grid', gap: 16, maxWidth: 760 }}>
+      {/* Banner */}
+      <div style={{ background: 'linear-gradient(120deg, #6E1524, #8B1A2E 60%, #A32438)', borderRadius: 'var(--rlg)', padding: '22px 24px', color: '#fff' }}>
+        <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 4 }}>Smartious Community</div>
+        <div style={{ fontSize: 13, opacity: .92, lineHeight: 1.55 }}>
+          One school, many countries, one conversation. Ask, share and celebrate together.
+          Every post is visible to the whole school and our teachers keep this space safe.
+        </div>
+      </div>
+
+      {/* Composer */}
+      <div style={card}>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
+          {CT_KINDS.map(k => (
+            <button key={k.id} onClick={() => setKind(k.id)} style={chip(kind === k.id)}>{k.label}</button>
+          ))}
+        </div>
+        <textarea
+          value={body} onChange={e => setBody(e.target.value)}
+          placeholder={CT_KINDS.find(k => k.id === kind)?.hint}
+          rows={3} maxLength={2000}
+          style={{ width: '100%', padding: '11px 13px', border: '1.5px solid var(--border)', borderRadius: 'var(--rmd)', fontSize: 13.5, fontFamily: 'inherit', resize: 'vertical' }}
+        />
+        {kind === 'poll' && (
+          <div style={{ display: 'grid', gap: 8, marginTop: 8 }}>
+            {pollOpts.map((o, i) => (
+              <input key={i} value={o} placeholder={'Option ' + (i + 1)} maxLength={120}
+                onChange={e => setPollOpts(p => p.map((x, j) => j === i ? e.target.value : x))}
+                style={{ padding: '9px 12px', border: '1.5px solid var(--border)', borderRadius: 'var(--rmd)', fontSize: 13 }} />
+            ))}
+            {pollOpts.length < 5 && (
+              <button onClick={() => setPollOpts(p => [...p, ''])}
+                style={{ justifySelf: 'start', background: 'none', border: 'none', color: 'var(--crimson)', fontSize: 12.5, fontWeight: 700, cursor: 'pointer', padding: 0 }}>
+                + Add option
+              </button>
+            )}
+          </div>
+        )}
+        {composeErr && <div style={{ marginTop: 8, fontSize: 12.5, fontWeight: 700, color: '#B45309' }}>{composeErr}</div>}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
+          <div style={{ fontSize: 11, color: 'var(--s500)' }}>
+            Be kind. No phone numbers, links or social media — conversations stay here where everyone is safe.
+          </div>
+          <button onClick={submit} disabled={posting}
+            style={{ background: 'var(--crimson)', color: '#fff', border: 'none', padding: '9px 22px', borderRadius: 'var(--rmd)', fontSize: 13, fontWeight: 800, cursor: 'pointer' }}>
+            {posting ? 'Posting...' : 'Post'}
+          </button>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        {CT_FILTERS.map(f => (
+          <button key={f.id} onClick={() => setFilter(f.id)} style={chip(filter === f.id)}>{f.label}</button>
+        ))}
+      </div>
+
+      {/* Feed */}
+      {loading ? (
+        <div style={{ ...card, textAlign: 'center', color: 'var(--s500)', fontSize: 13 }}>Loading the conversation...</div>
+      ) : posts.length === 0 ? (
+        <div style={{ ...card, textAlign: 'center', color: 'var(--s500)', fontSize: 13 }}>
+          Nothing here yet. Be the first to say hello to the whole school.
+        </div>
+      ) : posts.map(p => {
+        const badge = CT_KIND_BADGE[p.kind]
+        const totalVotes = (p.pollOptions || []).reduce((a, o) => a + o.count, 0)
+        return (
+          <div key={p._id} style={card}>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+              <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--crimson)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14, flexShrink: 0, overflow: 'hidden' }}>
+                {p.author?.avatar ? <img src={p.author.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : ctInitials(p.author)}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <span style={{ fontWeight: 800, fontSize: 13.5, color: 'var(--s900)' }}>{ctName(p.author)}</span>
+                  {p.author?.role === 'teacher' && <span style={{ fontSize: 10, fontWeight: 800, color: '#fff', background: 'var(--crimson)', padding: '2px 8px', borderRadius: 999 }}>TEACHER</span>}
+                  {p.author?.gradeLevel && <span style={{ fontSize: 11, color: 'var(--s500)' }}>{p.author.gradeLevel}</span>}
+                  <span style={{ fontSize: 11, color: 'var(--s500)' }}>{ctAgo(p.createdAt)}</span>
+                  {p.pinned && <span style={{ fontSize: 10, fontWeight: 800, color: '#B45309', background: '#FEF3C7', padding: '2px 8px', borderRadius: 999 }}>PINNED</span>}
+                  {badge && <span style={{ fontSize: 10, fontWeight: 800, color: badge.fg, background: badge.bg, padding: '2px 8px', borderRadius: 999 }}>{badge.label}</span>}
+                </div>
+                <div style={{ fontSize: 13.5, color: 'var(--s700)', lineHeight: 1.6, marginTop: 6, whiteSpace: 'pre-wrap', overflowWrap: 'break-word' }}>{p.body}</div>
+
+                {p.kind === 'poll' && (p.pollOptions || []).length > 0 && (
+                  <div style={{ display: 'grid', gap: 6, marginTop: 10 }}>
+                    {p.pollOptions.map(o => {
+                      const pct = totalVotes ? Math.round(100 * o.count / totalVotes) : 0
+                      return (
+                        <button key={o.index} onClick={() => vote(p._id, o.index)}
+                          style={{ position: 'relative', textAlign: 'left', padding: '9px 12px', borderRadius: 'var(--rmd)', border: '1.5px solid ' + (o.mine ? 'var(--crimson)' : 'var(--border)'), background: 'var(--white)', cursor: 'pointer', overflow: 'hidden' }}>
+                          <div style={{ position: 'absolute', inset: 0, width: pct + '%', background: o.mine ? 'rgba(139,26,46,.12)' : 'rgba(90,90,98,.08)' }} />
+                          <div style={{ position: 'relative', display: 'flex', justifyContent: 'space-between', fontSize: 12.5, fontWeight: o.mine ? 800 : 600, color: 'var(--s700)' }}>
+                            <span>{o.text}</span><span>{pct}%</span>
+                          </div>
+                        </button>
+                      )
+                    })}
+                    <div style={{ fontSize: 11, color: 'var(--s500)' }}>{totalVotes} vote{totalVotes === 1 ? '' : 's'}</div>
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', gap: 16, marginTop: 10, alignItems: 'center' }}>
+                  <button onClick={() => like(p._id)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12.5, fontWeight: 700, color: p.liked ? 'var(--crimson)' : 'var(--s500)', padding: 0 }}>
+                    {p.liked ? '\u2665' : '\u2661'} {p.likeCount || 0}
+                  </button>
+                  <button onClick={() => setOpenComments(c => ({ ...c, [p._id]: !c[p._id] }))} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12.5, fontWeight: 700, color: 'var(--s500)', padding: 0 }}>
+                    Comments ({(p.comments || []).length})
+                  </button>
+                  <button onClick={() => report(p._id)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 700, color: 'var(--s500)', padding: 0, marginLeft: 'auto' }}>
+                    Report
+                  </button>
+                </div>
+
+                {openComments[p._id] && (
+                  <div style={{ marginTop: 10, borderTop: '1px solid var(--border)', paddingTop: 10, display: 'grid', gap: 10 }}>
+                    {(p.comments || []).map(c => (
+                      <div key={c._id} style={{ display: 'flex', gap: 8 }}>
+                        <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--s200, #E7E1D4)', color: 'var(--s700)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 10.5, flexShrink: 0 }}>
+                          {ctInitials(c.author)}
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <span style={{ fontWeight: 800, fontSize: 12, color: 'var(--s900)' }}>{ctName(c.author)}</span>
+                          <span style={{ fontSize: 10.5, color: 'var(--s500)', marginLeft: 6 }}>{ctAgo(c.createdAt)}</span>
+                          <div style={{ fontSize: 12.5, color: 'var(--s700)', lineHeight: 1.55, overflowWrap: 'break-word' }}>{c.body}</div>
+                        </div>
+                      </div>
+                    ))}
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <input
+                        value={commentDrafts[p._id] || ''}
+                        onChange={e => setCommentDrafts(d => ({ ...d, [p._id]: e.target.value }))}
+                        onKeyDown={e => { if (e.key === 'Enter') addComment(p._id) }}
+                        placeholder="Write a comment..." maxLength={600}
+                        style={{ flex: 1, padding: '8px 12px', border: '1.5px solid var(--border)', borderRadius: 999, fontSize: 12.5 }}
+                      />
+                      <button onClick={() => addComment(p._id)}
+                        style={{ background: 'var(--crimson)', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: 999, fontSize: 12, fontWeight: 800, cursor: 'pointer' }}>
+                        Send
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )
+      })}
+
+      {hasMore && !loading && (
+        <button onClick={loadMore}
+          style={{ background: 'var(--white)', border: '1.5px solid var(--border)', padding: '11px', borderRadius: 'var(--rmd)', fontSize: 13, fontWeight: 700, color: 'var(--s600)', cursor: 'pointer' }}>
+          Load older posts
+        </button>
+      )}
     </div>
   )
 }
