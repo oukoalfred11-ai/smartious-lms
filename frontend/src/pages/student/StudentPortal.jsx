@@ -9,7 +9,7 @@
  ommends exactly what to study next
  *  - Study plan is personalised per student
  */
-import { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import BirthdayBanner from '../../components/BirthdayBanner.jsx'
 import SuggestionBox from '../../components/SuggestionBox.jsx'
 import { useAuth, useToast, api } from '../../context/ctx.jsx'
@@ -13953,7 +13953,7 @@ const CT_KIND_BADGE = {
   poll:        { bg: '#FCE7F3', fg: '#BE185D', label: 'Poll' },
 }
 
-function CommunityTab({ user, toast }) {
+function CommunityFeedView({ user, toast }) {
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('')
@@ -14200,6 +14200,257 @@ function CommunityTab({ user, toast }) {
           Load older posts
         </button>
       )}
+    </div>
+  )
+}
+
+
+// ═══════════════════════════════════════════════════════════
+// COMMUNITY CHAT — the whole school in one live room, WhatsApp
+// style. Every student is in automatically. Channels organize
+// the room; announcements are staff only; no private messages.
+// ═══════════════════════════════════════════════════════════
+const CH_CHANNELS = [
+  { id: '',              label: 'All' },
+  { id: 'general',       label: 'General' },
+  { id: 'announcements', label: 'Announcements' },
+  { id: 'questions',     label: 'Ask a Question' },
+  { id: 'resources',     label: 'Resources' },
+  { id: 'wins',          label: 'Wins & Shoutouts' },
+]
+const CH_EMOJIS = ['\ud83d\udc4d', '\u2764\ufe0f', '\ud83c\udf89', '\ud83d\ude4c']
+const chTime = d => new Date(d).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+const chDay = d => {
+  const dt = new Date(d), now = new Date()
+  if (dt.toDateString() === now.toDateString()) return 'Today'
+  const yd = new Date(now.getTime() - 86400000)
+  if (dt.toDateString() === yd.toDateString()) return 'Yesterday'
+  return dt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+}
+
+function CommunityChatView({ user, toast }) {
+  const [msgs, setMsgs] = useState([])
+  const [pinnedMsg, setPinnedMsg] = useState(null)
+  const [members, setMembers] = useState(0)
+  const [channel, setChannel] = useState('')
+  const [draft, setDraft] = useState('')
+  const [sendErr, setSendErr] = useState('')
+  const [replyTo, setReplyTo] = useState(null)
+  const [sending, setSending] = useState(false)
+  const [pickerFor, setPickerFor] = useState(null)
+  const boxRef = useRef(null)
+  const stickRef = useRef(true)
+
+  const load = useCallback((ch = channel) => {
+    api.get('/community-chat/messages' + (ch ? '?channel=' + ch : ''))
+      .then(r => {
+        const d = r.data?.data || {}
+        setMsgs(d.messages || []); setPinnedMsg(d.pinned || null); setMembers(d.memberCount || 0)
+      }).catch(() => {})
+  }, [channel])
+
+  useEffect(() => { load(channel) }, [channel])
+  useEffect(() => {
+    const t = setInterval(() => { if (!document.hidden) load(channel) }, 4000)
+    return () => clearInterval(t)
+  }, [channel, load])
+  useEffect(() => {
+    if (stickRef.current && boxRef.current) boxRef.current.scrollTop = boxRef.current.scrollHeight
+  }, [msgs.length])
+
+  const onScroll = () => {
+    const el = boxRef.current
+    if (el) stickRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 120
+  }
+
+  const send = async () => {
+    const text = draft.trim()
+    if (!text || sending) return
+    setSendErr(''); setSending(true)
+    try {
+      const r = await api.post('/community-chat/messages', {
+        body: text, channel: channel || 'general', replyTo: replyTo?._id || null,
+      })
+      setMsgs(m => [...m, r.data.data.message])
+      setDraft(''); setReplyTo(null); stickRef.current = true
+    } catch (e) {
+      setSendErr(e?.response?.data?.message || 'Could not send. Try again.')
+    }
+    setSending(false)
+  }
+
+  const react = (id, emoji) => {
+    setPickerFor(null)
+    api.post('/community-chat/messages/' + id + '/react', { emoji })
+      .then(r => setMsgs(m => m.map(x => x._id === id ? r.data.data.message : x)))
+      .catch(() => {})
+  }
+  const report = (id) => {
+    const reason = window.prompt('Why are you reporting this message? (optional)')
+    if (reason === null) return
+    api.post('/community-chat/messages/' + id + '/report', { reason })
+      .then(r => toast?.ok?.(r.data?.data?.message || 'Reported.')).catch(() => {})
+  }
+
+  const mine = (m) => String(m.author?._id || m.author) === String(user?._id || user?.id)
+  const chName = (a) => a ? `${a.firstName || ''} ${a.lastName || ''}`.trim() || 'Student' : 'Student'
+  const chInit = (a) => (chName(a).split(/\s+/).map(w => w[0]).join('').slice(0, 2) || 'S').toUpperCase()
+  const chip = (active) => ({
+    padding: '6px 12px', borderRadius: 999, fontSize: 11.5, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap',
+    border: '1.5px solid ' + (active ? 'var(--crimson)' : 'var(--border)'),
+    background: active ? 'var(--crimson)' : 'var(--white)', color: active ? '#fff' : 'var(--s600)',
+  })
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 210px)', minHeight: 460, maxWidth: 820 }}>
+      {/* Room header */}
+      <div style={{ background: 'linear-gradient(120deg, #6E1524, #8B1A2E)', borderRadius: 'var(--rlg) var(--rlg) 0 0', padding: '12px 16px', color: '#fff', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#fff', color: 'var(--crimson)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 15 }}>S</div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontWeight: 800, fontSize: 14 }}>Smartious Student Community</div>
+          <div style={{ fontSize: 11, opacity: .85 }}>{members} members \u00b7 one school, one conversation \u00b7 moderated by teachers</div>
+        </div>
+      </div>
+
+      {/* Pinned */}
+      {pinnedMsg && (
+        <div style={{ background: '#FBF3E2', borderLeft: '3px solid var(--crimson)', padding: '8px 14px', fontSize: 12 }}>
+          <span style={{ fontWeight: 800, color: 'var(--crimson)' }}>\ud83d\udccc Pinned \u00b7 {chName(pinnedMsg.author)}: </span>
+          <span style={{ color: 'var(--s700)' }}>{pinnedMsg.body}</span>
+        </div>
+      )}
+
+      {/* Channels */}
+      <div style={{ display: 'flex', gap: 6, padding: '8px 10px', overflowX: 'auto', background: 'var(--white)', borderBottom: '1.5px solid var(--border)' }}>
+        {CH_CHANNELS.map(ch => (
+          <button key={ch.id} onClick={() => setChannel(ch.id)} style={chip(channel === ch.id)}>{ch.label}</button>
+        ))}
+      </div>
+
+      {/* Messages */}
+      <div ref={boxRef} onScroll={onScroll}
+        style={{ flex: 1, overflowY: 'auto', background: 'var(--cream, #FBF7EF)', padding: '14px 12px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <button onClick={() => {
+          const first = msgs[0]
+          if (!first) return
+          api.get('/community-chat/messages?before=' + encodeURIComponent(first.createdAt) + (channel ? '&channel=' + channel : ''))
+            .then(r => { stickRef.current = false; setMsgs(m => [...(r.data?.data?.messages || []), ...m]) }).catch(() => {})
+        }} style={{ alignSelf: 'center', background: 'var(--white)', border: '1.5px solid var(--border)', borderRadius: 999, padding: '5px 14px', fontSize: 11, fontWeight: 700, color: 'var(--s500)', cursor: 'pointer' }}>
+          Load earlier messages
+        </button>
+        {msgs.map((m, i) => {
+          const own = mine(m)
+          const newDay = i === 0 || chDay(m.createdAt) !== chDay(msgs[i-1].createdAt)
+          return (
+            <React.Fragment key={m._id}>
+              {newDay && <div style={{ alignSelf: 'center', fontSize: 10.5, fontWeight: 800, color: 'var(--s500)', background: 'var(--white)', borderRadius: 999, padding: '3px 12px' }}>{chDay(m.createdAt)}</div>}
+              <div style={{ display: 'flex', gap: 8, flexDirection: own ? 'row-reverse' : 'row', alignItems: 'flex-end' }}>
+                {!own && (
+                  <div style={{ width: 30, height: 30, borderRadius: '50%', background: m.author?.role !== 'student' ? 'var(--crimson)' : '#C8B58E', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 11, flexShrink: 0, overflow: 'hidden' }}>
+                    {m.author?.avatar ? <img src={m.author.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : chInit(m.author)}
+                  </div>
+                )}
+                <div style={{ maxWidth: '76%' }}>
+                  <div style={{
+                    background: own ? 'var(--crimson)' : 'var(--white)', color: own ? '#fff' : 'var(--s700)',
+                    border: own ? 'none' : '1.5px solid var(--border)',
+                    borderRadius: own ? '14px 14px 4px 14px' : '14px 14px 14px 4px',
+                    padding: '8px 12px', position: 'relative',
+                  }}>
+                    {!own && (
+                      <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 2 }}>
+                        <span style={{ fontWeight: 800, fontSize: 11.5, color: 'var(--crimson)' }}>{chName(m.author)}</span>
+                        {m.author?.role && m.author.role !== 'student' && (
+                          <span style={{ fontSize: 8.5, fontWeight: 800, color: '#fff', background: 'var(--crimson)', padding: '1px 6px', borderRadius: 999 }}>{m.author.role === 'teacher' ? 'TEACHER' : 'STAFF'}</span>
+                        )}
+                      </div>
+                    )}
+                    {m.replyToExcerpt && (
+                      <div style={{ borderLeft: '2.5px solid ' + (own ? 'rgba(255,255,255,.6)' : 'var(--crimson)'), padding: '3px 8px', marginBottom: 5, fontSize: 11, opacity: .85, background: own ? 'rgba(255,255,255,.12)' : 'var(--cream, #FBF7EF)', borderRadius: 4 }}>
+                        <div style={{ fontWeight: 800 }}>{m.replyToAuthor}</div>
+                        <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.replyToExcerpt}</div>
+                      </div>
+                    )}
+                    <div style={{ fontSize: 13, lineHeight: 1.5, whiteSpace: 'pre-wrap', overflowWrap: 'break-word' }}>{m.body}</div>
+                    <div style={{ fontSize: 9.5, opacity: .65, textAlign: 'right', marginTop: 3 }}>{chTime(m.createdAt)}</div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 3, justifyContent: own ? 'flex-end' : 'flex-start', flexWrap: 'wrap' }}>
+                    {(m.reactions || []).map(r => (
+                      <button key={r.emoji} onClick={() => react(m._id, r.emoji)}
+                        style={{ background: r.mine ? '#FBE9EC' : 'var(--white)', border: '1px solid ' + (r.mine ? 'var(--crimson)' : 'var(--border)'), borderRadius: 999, padding: '1px 8px', fontSize: 11, cursor: 'pointer' }}>
+                        {r.emoji} {r.count}
+                      </button>
+                    ))}
+                    <button onClick={() => setPickerFor(pickerFor === m._id ? null : m._id)} style={{ background: 'none', border: 'none', fontSize: 11, color: 'var(--s500)', cursor: 'pointer', fontWeight: 800, padding: 0 }}>+</button>
+                    <button onClick={() => setReplyTo(m)} style={{ background: 'none', border: 'none', fontSize: 10.5, color: 'var(--s500)', cursor: 'pointer', fontWeight: 700, padding: 0 }}>Reply</button>
+                    {!own && <button onClick={() => report(m._id)} style={{ background: 'none', border: 'none', fontSize: 10.5, color: 'var(--s500)', cursor: 'pointer', padding: 0 }}>Report</button>}
+                  </div>
+                  {pickerFor === m._id && (
+                    <div style={{ display: 'flex', gap: 6, marginTop: 4, background: 'var(--white)', border: '1.5px solid var(--border)', borderRadius: 999, padding: '4px 10px', width: 'fit-content' }}>
+                      {CH_EMOJIS.map(e => <button key={e} onClick={() => react(m._id, e)} style={{ background: 'none', border: 'none', fontSize: 16, cursor: 'pointer', padding: 0 }}>{e}</button>)}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </React.Fragment>
+          )
+        })}
+        {msgs.length === 0 && (
+          <div style={{ alignSelf: 'center', marginTop: 40, textAlign: 'center', color: 'var(--s500)', fontSize: 13 }}>
+            The room is quiet. Say hello to the whole school.
+          </div>
+        )}
+      </div>
+
+      {/* Composer */}
+      <div style={{ background: 'var(--white)', borderTop: '1.5px solid var(--border)', borderRadius: '0 0 var(--rlg) var(--rlg)', padding: '10px 12px' }}>
+        {replyTo && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--cream, #FBF7EF)', borderLeft: '2.5px solid var(--crimson)', borderRadius: 6, padding: '5px 10px', marginBottom: 7, fontSize: 11.5 }}>
+            <div style={{ minWidth: 0 }}>
+              <span style={{ fontWeight: 800, color: 'var(--crimson)' }}>Replying to {chName(replyTo.author)}: </span>
+              <span style={{ color: 'var(--s500)' }}>{String(replyTo.body).slice(0, 80)}</span>
+            </div>
+            <button onClick={() => setReplyTo(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontWeight: 800, color: 'var(--s500)' }}>\u00d7</button>
+          </div>
+        )}
+        {sendErr && <div style={{ fontSize: 11.5, fontWeight: 700, color: '#B45309', marginBottom: 6 }}>{sendErr}</div>}
+        {channel === 'announcements' && (
+          <div style={{ fontSize: 10.5, color: 'var(--s500)', marginBottom: 6 }}>Announcements are posted by teachers and staff. Reply in General or Questions.</div>
+        )}
+        <div style={{ display: 'flex', gap: 8 }}>
+          <input
+            value={draft} onChange={e => setDraft(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } }}
+            placeholder="Type a message..." maxLength={800}
+            style={{ flex: 1, padding: '11px 15px', border: '1.5px solid var(--border)', borderRadius: 999, fontSize: 13.5 }}
+          />
+          <button onClick={send} disabled={sending}
+            style={{ background: 'var(--crimson)', color: '#fff', border: 'none', width: 44, height: 44, borderRadius: '50%', fontSize: 17, fontWeight: 900, cursor: 'pointer' }}>
+            {'\u27a4'}
+          </button>
+        </div>
+        <div style={{ fontSize: 10, color: 'var(--s500)', marginTop: 6 }}>
+          Be kind and have fun. No phone numbers, links or social media. Teachers see everything, and that is what keeps this room safe.
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function CommunityTab({ user, toast }) {
+  const [mode, setMode] = useState('chat')
+  const seg = (active) => ({
+    padding: '7px 18px', borderRadius: 999, fontSize: 12.5, fontWeight: 800, cursor: 'pointer',
+    border: '1.5px solid ' + (active ? 'var(--crimson)' : 'var(--border)'),
+    background: active ? 'var(--crimson)' : 'var(--white)', color: active ? '#fff' : 'var(--s600)',
+  })
+  return (
+    <div style={{ display: 'grid', gap: 12, maxWidth: 820 }}>
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button style={seg(mode === 'chat')} onClick={() => setMode('chat')}>Chat</button>
+        <button style={seg(mode === 'feed')} onClick={() => setMode('feed')}>Feed</button>
+      </div>
+      {mode === 'chat' ? <CommunityChatView user={user} toast={toast}/> : <CommunityFeedView user={user} toast={toast}/>}
     </div>
   )
 }
