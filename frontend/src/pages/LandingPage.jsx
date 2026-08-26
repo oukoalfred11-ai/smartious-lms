@@ -1389,7 +1389,7 @@ const COMPARES = [
     competitorSummary: 'Wolsey Hall Oxford is a UK-based distance learning school founded in 1894. They are Cambridge-approved and serve students worldwide with self-paced courseware, tutor feedback by email, and a 1:1 assigned-tutor model. Their alumni include Nelson Mandela. They state on their own website that they have no live lessons, no set timetables, and no fixed classroom sessions — their pupil-led approach is designed around complete student-set scheduling.',
     keyDifference: 'Wolsey Hall is self-paced. Smartious is live. Both models work — for different children, different family situations, and different learning styles.',
     table: [
-      { feature: 'Founded',           wolsey: '1894',                                        smartious: '2019' },
+      { feature: 'Founded',           wolsey: '1894',                                        smartious: '2018' },
       { feature: 'Headquarters',      wolsey: 'Oxford, UK',                                  smartious: 'Nairobi, Kenya' },
       { feature: 'Learning model',    wolsey: 'Self-paced courseware',                       smartious: 'Live daily classes' },
       { feature: 'Live lessons',      wolsey: 'No',                                          smartious: 'Yes — every school day' },
@@ -5368,7 +5368,7 @@ export default function LandingPage() {
                 <span>for <em>IGCSE, A-Level,</em></span>
                 <span><em>IB, American &amp; CBC</em> Students</span>
               </h1>
-              <p className="h-sub">Live classes. Qualified teachers. Internationally recognised qualifications. Smartious is an accredited online school and homeschool provider delivering Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, Kenya CBC and American Curriculum — taught online by specialists serving families across Kenya, the UAE, UK, Canada and 10+ other countries. <strong style={{color:V.gold3}}>From USD 8/hour</strong> for 1-on-1 tuition · <strong style={{color:V.gold3}}>from USD 423/month</strong> for full homeschool programmes.</p>
+              <p className="h-sub">Live classes. Qualified teachers. Internationally recognised qualifications. Smartious is an accredited online school and homeschool provider delivering Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, Kenya CBC and American Curriculum — taught online by specialists serving families across Kenya, the UAE, UK, Canada and more than 40 countries worldwide. <strong style={{color:V.gold3}}>From USD 8/hour</strong> for 1-on-1 tuition · <strong style={{color:V.gold3}}>from USD 423/month</strong> for full homeschool programmes.</p>
               <div className="h-act">
                 <button className="btn-p" onClick={() => nav('/assessment')}
                   style={{padding:'18px 36px',fontSize:16,fontWeight:800,borderRadius:10,boxShadow:'0 8px 24px rgba(201,151,58,.35)',transition:'all .18s ease'}}
@@ -5388,7 +5388,7 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="h-stats">
-              {[['7 years','Of online teaching'],['78+','Qualified tutors'],['5','Curricula'],['14','Countries served']].map(([n,l]) => (
+              {[['8 years','Of online teaching'],['78+','Qualified tutors'],['5','Curricula'],['40+','Countries served']].map(([n,l]) => (
                 <div key={l} className="hs">
                   <div className="hs-n"><em>{n}</em></div>
                   <div className="hs-l">{l}</div>
@@ -5400,7 +5400,7 @@ export default function LandingPage() {
           {/* Mobile-only stats strip — sits below the hero so it doesn't block the video */}
           <div className="h-stats-strip">
             <div className="h-stats-strip-grid">
-              {[['7','Years'],['78+','Tutors'],['5','Curricula'],['14','Countries']].map(([n,l]) => (
+              {[['8','Years'],['78+','Tutors'],['5','Curricula'],['40+','Countries']].map(([n,l]) => (
                 <div key={l} className="hms">
                   <div className="hms-n">{n.includes('+')?<>{n.replace('+','')}<em>+</em></>:n}</div>
                   <div className="hms-l">{l}</div>
@@ -6171,10 +6171,10 @@ export default function LandingPage() {
               </div>
               <div className="hl-grid">
                 {[
-                  {n:'7 yrs',h:'About Us',p:'Founded 2019 · Nairobi-based · Our story & team',pg:'about',svg:'<circle cx="12" cy="8" r="4"/><path d="M6 21v-1a6 6 0 0 1 12 0v1"/>'},
+                  {n:'8 yrs',h:'About Us',p:'Founded 2018 · Nairobi-based · Our story & team',pg:'about',svg:'<circle cx="12" cy="8" r="4"/><path d="M6 21v-1a6 6 0 0 1 12 0v1"/>'},
                   {n:'5',h:'Curricula',p:'Cambridge · IB · Edexcel · CBC · American',pg:'curricula',svg:'<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>'},
                   {n:'6',h:'Services',p:'Homeschool · Tuition · Online · Mshauri AI',pg:'services',svg:'<rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/>'},
-                  {n:'14',h:'Countries',p:'Kenya · UAE · UK · USA · Canada · Australia · +8 more',pg:'home',svg:'<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>'},
+                  {n:'40+',h:'Countries',p:'Kenya · UAE · UK · USA · Canada · Australia · and many more',pg:'home',svg:'<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>'},
                   {n:'$8/hr',h:'Pricing',p:'Transparent USD pricing · From $8 hourly tuition · No contracts',pg:'pricing',svg:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
                   {n:'78+',h:'Tutors',p:'Qualified specialists · BEd, MEd, PhD profiles',pg:'teachers',svg:'<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>'},
                   {n:'10',h:'FAQ',p:'Enrolment, exams, pricing & Mshauri AI answered',pg:'faq',svg:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
@@ -6508,7 +6508,7 @@ export default function LandingPage() {
               {[
                 ['8','Years of teaching\nsince founding in 2018'],
                 ['78+','Qualified tutors\non Smartious LMS'],
-                ['14','Countries served\nacross 5 continents'],
+                ['40+','Countries served\nacross 5 continents'],
                 ['5','Curricula delivered\nCambridge · IB · Edexcel · CBC · American'],
                 ['54','Areas covered\nNairobi 21 · UAE 27 · Kenya cities 6'],
                 ['$8/hr','Starting tuition rate\ntransparent pricing'],
@@ -7165,7 +7165,7 @@ export default function LandingPage() {
                   'url': 'https://smartioushomeschool.com/online-school/kenya',
                   'logo': 'https://smartioushomeschool.com/logo.png',
                   'image': 'https://smartioushomeschool.com/og-kenya.jpg',
-                  'description': 'Accredited international homeschool and online school based in Nairobi, Kenya. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel, American curriculum and Kenya CBC. Founded 2019. Serving students across 40+ countries.',
+                  'description': 'Accredited international homeschool and online school based in Nairobi, Kenya. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel, American curriculum and Kenya CBC. Founded 2018. Serving students across 40+ countries.',
                   'foundingDate': '2018',
                   'telephone': '+254745021212',
                   'email': 'hello@smartioushomeschool.com',
@@ -10874,7 +10874,7 @@ export default function LandingPage() {
                 <div style={{display:'flex',gap:32,flexWrap:'wrap',marginTop:40,paddingTop:30,borderTop:'1px solid rgba(255,255,255,.1)'}}>
                   {[
                     ['78+','Qualified teachers'],
-                    ['14','Countries served'],
+                    ['40+','Countries served'],
                     ['8 yrs','Of teaching'],
                     ['From $400/mo','Starting price'],
                   ].map(([n,l]) => (
@@ -11308,7 +11308,7 @@ export default function LandingPage() {
                 <div style={{display:'flex',gap:32,flexWrap:'wrap',marginTop:40,paddingTop:30,borderTop:'1px solid rgba(255,255,255,.1)'}}>
                   {[
                     ['78+','Qualified teachers'],
-                    ['14','Countries served'],
+                    ['40+','Countries served'],
                     ['8 yrs','Of teaching'],
                     ['From $400/mo','Starting price'],
                   ].map(([n,l]) => (
@@ -13306,7 +13306,7 @@ export default function LandingPage() {
           {/* HERO */}
           <section className="sec" style={{position:'relative',background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,color:'#fff',padding:'80px 0 64px',overflow:'hidden'}}>
             <div className="wrap" style={{maxWidth:1080,margin:'0 auto',position:'relative',zIndex:2}}>
-              <div className="eyebrow" style={{color:V.gold3,marginBottom:12,letterSpacing:'.14em'}}>Kenya's leading virtual school &middot; Online school &middot; Since 2019</div>
+              <div className="eyebrow" style={{color:V.gold3,marginBottom:12,letterSpacing:'.14em'}}>Kenya's leading virtual school &middot; Online school &middot; Since 2018</div>
               <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.4rem, 5vw, 3.6rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:22,letterSpacing:'-.01em',maxWidth:920}}>
                 Smartious &mdash; Leading <em style={{color:V.gold3,fontStyle:'italic'}}>Online &amp; Virtual School</em> for <em style={{color:V.gold3,fontStyle:'italic'}}>IB, IGCSE, Cambridge &amp; Edexcel</em>
               </h1>
@@ -13352,7 +13352,7 @@ export default function LandingPage() {
                   {n:'04',h:'Kenya CBC available',p:'Smartious offers full Kenya CBC (Grade 1-12, KICD-aligned, KCSE-eligible) alongside international curricula. NO UK, US, or NZ virtual school offers CBC. Kenya-domestic by definition.'},
                   {n:'05',h:'Six curricula, one provider',p:'Cambridge IGCSE + A-Level, Pearson Edexcel International, IB Diploma, American AP, Ontario Secondary School Diploma (via CCIS), plus CBC. Multi-curriculum families (CBC + Cambridge) welcome.'},
                   {n:'06',h:'Two Nairobi physical centres',p:'Diamond Plaza Parklands (HQ, Est. 2022) and Karen Hardy (Est. 2023). In-person supplementation, examination invigilation, holiday intensives. UK/US/NZ competitors have zero Kenya physical presence.'},
-                  {n:'07',h:'Kenya founder, Kenya operations',p:'Founded 2019 by Alfred Ouko, BEd Mathematics &amp; Physics UoN 2022. Local admissions team, local support. Understanding of Kenya families\' needs, not a distant UK head office.'},
+                  {n:'07',h:'Kenya founder, Kenya operations',p:'Founded 2018 by Alfred Ouko, BEd Mathematics &amp; Physics UoN 2022. Local admissions team, local support. Understanding of Kenya families\' needs, not a distant UK head office.'},
                   {n:'08',h:'Kenya examination centres handled',p:'Cambridge exam registration at British Council Nairobi, Braeburn Group centres, Peponi, Brookhouse, ISK, plus Mombasa/Kisumu/Nakuru. Edexcel three series per year. IB Diploma via authorised centres. All logistics managed by Smartious.'},
                   {n:'09',h:'Sibling discounts 15-25%',p:'Families with multiple children get meaningful sibling discounts. Not available at CHS Online, Crimson, King\'s InterHigh — Smartious specifically designs for Kenyan family sizes.'},
                   {n:'10',h:'Personalized pricing (fair-play)',p:'Every family gets a quote calibrated to grade level, curriculum choice, enrolment period, and specific needs. No one-size-fits-all pricing. Free consultation call included. Response within 24 hours.'},
