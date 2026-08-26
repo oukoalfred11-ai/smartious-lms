@@ -33,6 +33,8 @@ const KIND_BADGE = {
 
 export default function CommunityModule({ toast }) {
   const [tab, setTab] = useState('queue')
+  const [chatQueue, setChatQueue] = useState([])
+  const [chatRemoved, setChatRemoved] = useState([])
   const [queue, setQueue] = useState([])
   const [removed, setRemoved] = useState([])
   const [feed, setFeed] = useState([])
@@ -45,10 +47,13 @@ export default function CommunityModule({ toast }) {
     Promise.all([
       api.get('/community/moderation/queue'),
       api.get('/community/posts'),
-    ]).then(([q, f]) => {
+      api.get('/community-chat/moderation/queue'),
+    ]).then(([q, f, cq]) => {
       setQueue(q.data?.data?.queue || [])
       setRemoved(q.data?.data?.recentRemoved || [])
       setFeed(f.data?.data?.posts || [])
+      setChatQueue(cq.data?.data?.queue || [])
+      setChatRemoved(cq.data?.data?.removed || [])
     }).catch(() => toast?.error?.('Could not load the community.'))
       .finally(() => setLoading(false))
   }, [])
@@ -175,13 +180,50 @@ export default function CommunityModule({ toast }) {
       </div>
 
       <div style={{ display: 'flex', gap: 6, background: TOKENS.cream, padding: 5, borderRadius: 10, width: 'fit-content' }}>
-        {tabBtn('queue', 'Review queue', queue.length)}
+        {tabBtn('chatqueue', 'Chat reports', chatQueue.length)}
+        {tabBtn('queue', 'Feed queue', queue.length)}
         {tabBtn('feed', 'Live feed', feed.length)}
-        {tabBtn('removed', 'Removed', removed.length)}
+        {tabBtn('removed', 'Removed', removed.length + chatRemoved.length)}
       </div>
 
       {loading ? (
         <div style={{ ...card, textAlign: 'center', color: TOKENS.s500, fontSize: 13 }}>Loading...</div>
+      ) : tab === 'chatqueue' ? (
+        chatQueue.length === 0
+          ? <div style={{ ...card, textAlign: 'center', color: '#166534', fontSize: 13, fontWeight: 700 }}>No reported chat messages. The room is healthy.</div>
+          : chatQueue.map(m => (
+            <div key={m._id} style={{ ...card, borderColor: '#F59E0B' }}>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginBottom: 6 }}>
+                <span style={{ fontWeight: 800, fontSize: 13, color: TOKENS.s900 }}>{name(m.author)}</span>
+                <span style={{ fontSize: 10, fontWeight: 800, color: TOKENS.s500, textTransform: 'uppercase' }}>{m.channel}</span>
+                <span style={{ fontSize: 11, color: TOKENS.s500 }}>{ago(m.createdAt)}</span>
+                {m.status === 'pending_review' && <span style={{ fontSize: 9.5, fontWeight: 800, color: '#fff', background: '#F59E0B', padding: '2px 7px', borderRadius: 999 }}>AUTO HIDDEN</span>}
+              </div>
+              <div style={{ fontSize: 13, color: TOKENS.s700, lineHeight: 1.55, whiteSpace: 'pre-wrap', overflowWrap: 'break-word' }}>{m.body}</div>
+              {(m.reports || []).length > 0 && (
+                <div style={{ marginTop: 8, background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 8, padding: '7px 11px' }}>
+                  {m.reports.map((r, i) => (
+                    <div key={i} style={{ fontSize: 11.5, color: '#78350F' }}>{name(r.by)}{r.reason ? ': "' + r.reason + '"' : ' (no reason)'}</div>
+                  ))}
+                </div>
+              )}
+              <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                <button style={btn('danger')} onClick={async () => {
+                  const reason = window.prompt('Reason (kept on record):'); if (reason === null) return
+                  await api.post('/community-chat/messages/' + m._id + '/moderate', { action: 'remove', reason }).catch(() => {})
+                  toast?.ok?.('Message removed.'); load()
+                }}>Remove</button>
+                {m.status === 'pending_review' && <button style={btn('primary')} onClick={async () => {
+                  await api.post('/community-chat/messages/' + m._id + '/moderate', { action: 'restore' }).catch(() => {})
+                  toast?.ok?.('Restored.'); load()
+                }}>Restore</button>}
+                <button style={btn()} onClick={async () => {
+                  await api.post('/community-chat/messages/' + m._id + '/moderate', { action: 'dismiss_reports' }).catch(() => {})
+                  toast?.ok?.('Dismissed.'); load()
+                }}>Dismiss reports</button>
+              </div>
+            </div>
+          ))
       ) : tab === 'queue' ? (
         queue.length === 0
           ? <div style={{ ...card, textAlign: 'center', color: '#166534', fontSize: 13, fontWeight: 700 }}>The queue is clear. Nothing needs review.</div>
