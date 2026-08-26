@@ -4900,7 +4900,7 @@ export default function LandingPage() {
                 ['★','Internationally Accredited — IGCSE · Cambridge · IB · Edexcel · CBC'],
                 ['◆','Expert Tutors — Hand-picked, degree-qualified, exam specialists'],
                 ['●','Mshauri AI Tutor — 24/7 personalised learning support'],
-                ['◆','Serving 780,000+ Students across 120+ Countries'],
+                ['◆','Over 3,421 students educated in more than 40 countries since 2018'],
                 ['★','Flexible Learning — Home visits, learning centre, or 100% online'],
                 ['●','University Placement — 200+ partner universities worldwide'],
                 ['◆','From $8/hour tuition · $38 application fee · First lesson within 48 hours'],
@@ -5439,7 +5439,7 @@ export default function LandingPage() {
             '@type': 'FAQPage',
             'mainEntity': [
               { '@type': 'Question', 'name': 'What is Smartious Homeschool?',
-                'acceptedAnswer': { '@type': 'Answer', 'text': 'Smartious Homeschool & eSchool is an accredited international online school founded in Nairobi in 2019. We deliver Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and American High School curricula to students across Kenya, the UAE, UK, USA, Canada, Australia, Nigeria, South Africa, Qatar and 4 other countries. All classes are taught live by degree-qualified specialists.' } },
+                'acceptedAnswer': { '@type': 'Answer', 'text': 'Smartious Homeschool & eSchool is an accredited international online school founded in Nairobi in 2018. We deliver Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and American High School curricula to students across Kenya, the UAE, UK, USA, Canada, Australia, Nigeria, South Africa, Qatar and 4 other countries. All classes are taught live by degree-qualified specialists.' } },
               { '@type': 'Question', 'name': 'How much does Smartious cost?',
                 'acceptedAnswer': { '@type': 'Answer', 'text': 'Smartious 1-on-1 tuition starts from USD 8 per hour (primary level), up to USD 15 per hour for A-Level and IB Diploma. Full homeschool programmes range from USD 423 per month (Primary) to USD 923 per month (IB Diploma). Annual plans save approximately 20 percent versus monthly billing. A non-refundable USD 38 application fee covers the placement test and is deducted from your first tuition invoice. 10 percent sibling discount on every additional child.' } },
               { '@type': 'Question', 'name': 'Which countries does Smartious serve?',
@@ -5467,11 +5467,11 @@ export default function LandingPage() {
                 textAlign:'center',
               }}>
                 {[
-                  ['Since 2019', 'Online school & homeschool'],
+                  ['Since 2018', 'Online school & homeschool'],
                   ['Cambridge & Edexcel', 'IGCSE & A-Level prep'],
                   ['IB Diploma', 'Live virtual classes'],
                   ['Kenya CBC', 'KICD-aligned, KCSE-eligible'],
-                  ['14 countries', 'Homeschool families served'],
+                  ['40+ countries', 'Homeschool families served'],
                 ].map(([h, sub]) => (
                   <div key={h}>
                     <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,lineHeight:1.25}}>{h}</div>
@@ -6129,7 +6129,7 @@ export default function LandingPage() {
             </div>
             <div style={{maxWidth:780, margin:'36px auto 0'}}>
               {[
-                ['What is Smartious Homeschool?', 'Smartious Homeschool & eSchool is an international online school founded in Nairobi in 2019. We deliver Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel, Kenya CBC and American Curriculum to students across 14 countries. All classes are live, taught by degree-qualified specialists.'],
+                ['What is Smartious Homeschool?', 'Smartious Homeschool & eSchool is an international online school founded in Nairobi in 2018. We deliver Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel, Kenya CBC and American Curriculum to students across 40+ countries. All classes are live, taught by degree-qualified specialists.'],
                 ['How much does Smartious cost?', '1-on-1 tuition from USD 8/hour. Full homeschool programmes from USD 423/month (Primary) to USD 923/month (IB Diploma). Annual plans save ~20%. USD 38 application fee. 10% sibling discount.'],
                 ['Will my child get a real qualification?', 'Yes. Students sit official Cambridge International, Pearson Edexcel, IB Diploma or American High School Diploma exams at British Council and Cambridge centres worldwide. Qualifications are identical to those from any other school.'],
                 ['Which countries do you serve?', 'Dedicated country pages and support for the UAE, UK, USA, Canada, Australia, Nigeria, South Africa, Qatar, Egypt and Kenya. Live classes scheduled across time zones with recordings for asynchronous catch-up.'],
@@ -6167,7 +6167,7 @@ export default function LandingPage() {
               <div className="sec-hd reveal">
                 <div className="eyebrow">Everything You Need</div>
                 <h2 className="display">Explore <em>Smartious</em></h2>
-                <p className="lead" style={{marginTop:14}}>A world-class education platform for ambitious families across 12+ countries. Tap any card to explore in full.</p>
+                <p className="lead" style={{marginTop:14}}>A world-class education platform for ambitious families across 40+ countries. Tap any card to explore in full.</p>
               </div>
               <div className="hl-grid">
                 {[
@@ -6255,7 +6255,7 @@ export default function LandingPage() {
               <div style={{maxWidth:1000,margin:'0 auto'}}>
                 <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',fontWeight:400,color:V.ink,marginBottom:16,lineHeight:1.3}}>International Homeschooling &amp; Online School</h2>
                 <p style={{fontSize:13.5,lineHeight:1.75,marginBottom:18}}>
-                  Smartious Homeschool &amp; eSchool is a global online school founded in Kenya in 2019, serving students and families across 14 countries. We provide live, internationally accredited education for students preparing for <strong style={{color:V.ink}}>Cambridge IGCSE</strong>, <strong style={{color:V.ink}}>Cambridge International A-Level</strong>, <strong style={{color:V.ink}}>Pearson Edexcel International GCSE and A-Level</strong>, the <strong style={{color:V.ink}}>International Baccalaureate Diploma Programme (IB DP)</strong>, <strong style={{color:V.ink}}>Kenya CBC</strong> (KICD-aligned, KCSE-eligible), and the <strong style={{color:V.ink}}>American High School Curriculum</strong> with Advanced Placement (AP) coursework.
+                  Smartious Homeschool &amp; eSchool is a global online school founded in Kenya in 2018, serving students and families across 40+ countries. We provide live, internationally accredited education for students preparing for <strong style={{color:V.ink}}>Cambridge IGCSE</strong>, <strong style={{color:V.ink}}>Cambridge International A-Level</strong>, <strong style={{color:V.ink}}>Pearson Edexcel International GCSE and A-Level</strong>, the <strong style={{color:V.ink}}>International Baccalaureate Diploma Programme (IB DP)</strong>, <strong style={{color:V.ink}}>Kenya CBC</strong> (KICD-aligned, KCSE-eligible), and the <strong style={{color:V.ink}}>American High School Curriculum</strong> with Advanced Placement (AP) coursework.
                 </p>
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:24,marginTop:24}}>
                   <div>
@@ -6382,7 +6382,7 @@ export default function LandingPage() {
 
                     <p>When I started Smartious in 2018, I was a young mathematics and physics teacher visiting Nairobi homes one at a time. The families I met all wanted the same thing: an excellent education for their child, delivered with care, on their own terms.</p>
 
-                    <p>What began as one tutor in Parklands has grown into a network of <strong style={{color:V.ink}}>78 qualified teachers across 14 countries</strong>. We deliver five international curricula — Cambridge IGCSE, Pearson Edexcel, Cambridge A-Level, IB Diploma and the American curriculum — alongside our own Smartious Blended programme. We have two physical centres in Nairobi (Diamond Plaza Parklands and Karen Hardy) and serve families online from London, Dubai, Toronto, Riyadh and everywhere in between.</p>
+                    <p>What began as one tutor in Parklands has grown into a network of <strong style={{color:V.ink}}>78+ qualified teachers across 40+ countries</strong>. We deliver five international curricula — Cambridge IGCSE, Pearson Edexcel, Cambridge A-Level, IB Diploma and the American curriculum — alongside our own Smartious Blended programme. We have two physical centres in Nairobi (Diamond Plaza Parklands and Karen Hardy) and serve families online from London, Dubai, Toronto, Riyadh and everywhere in between.</p>
 
                     <p>But the heart of Smartious has never been the curricula or the technology, important as both are. The heart of Smartious is a simple promise: <strong style={{color:V.cr}}>your child will be known.</strong> Known by name. Known for what excites them. Known for what they struggle with. Known well enough that we can meet them where they are and walk with them to where they want to go.</p>
 
@@ -6457,7 +6457,7 @@ export default function LandingPage() {
                 {year:'Growth phase', h:'Curriculum expansion', p:'Smartious adds dedicated programmes for Cambridge IGCSE and International A-Level, IB Primary Years, Middle Years and Diploma, Pearson Edexcel International GCSE and A-Level, Kenya CBC (KICD-aligned) and American Curriculum with Advanced Placement. Subject and curriculum specialists are recruited specifically for each pathway.'},
                 {year:'LMS launch', h:'Smartious Learning Platform', p:'The Smartious Learning Management System launches with three portals — Admin, Teacher and Student. Features include live session delivery, recorded session libraries, assignment and assessment workflows, automated billing, integrated Paystack payments and the Mshauri AI tutor for 24/7 student support.'},
                 {year:'International', h:'Diaspora expansion', p:'Kenyan and African diaspora families in the UAE, UK, USA, Canada, Australia, Qatar, Bahrain and other countries begin enrolling — using Smartious to maintain Cambridge, IB or CBC curriculum continuity through international relocations. Country-specific pages launch for 14 territories.'},
-                {year:'2026', h:'Where we are now', p:'78+ qualified tutors. 14 countries served. 5 curricula delivered. 21 Nairobi area pages, 27 UAE area pages and 6 Kenya city pages live. Two permanent centres: Diamond Plaza Parklands (HQ) and Karen Hardy.'},
+                {year:'2026', h:'Where we are now', p:'More than 78 qualified tutors. Families served in over 40 countries. Five curricula delivered. 21 Nairobi area pages, 27 UAE area pages and 6 Kenya city pages live. Two permanent centres: Diamond Plaza Parklands (HQ) and Karen Hardy.'},
               ].map((m, i) => (
                 <div key={i} className="reveal" style={{
                   position:'relative',
@@ -6677,7 +6677,7 @@ export default function LandingPage() {
           <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
             <div className="sec-hd reveal" style={{textAlign:'center'}}>
               <div className="eyebrow" style={{justifyContent:'center'}}>Global reach</div>
-              <h2 className="display">Families we serve across <em>14 countries</em></h2>
+              <h2 className="display">Families we serve across <em>40+ countries</em></h2>
               <p className="lead" style={{marginTop:14,maxWidth:680,margin:'14px auto 0'}}>The same Smartious teachers, same curriculum standards, same qualifications — delivered to families wherever life has taken them.</p>
             </div>
             <div style={{
@@ -6816,7 +6816,7 @@ export default function LandingPage() {
               <div style={{maxWidth:1000,margin:'0 auto'}}>
                 <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',fontWeight:400,color:'#fff',marginBottom:16,lineHeight:1.3}}>About Smartious Homeschool</h2>
                 <p style={{fontSize:13.5,lineHeight:1.75,marginBottom:14}}>
-                  Smartious Homeschool &amp; eSchool is an international online school founded in Nairobi, Kenya in 2019 by Alfred Ouko, a Mathematics and Physics teacher educated at the University of Nairobi (BEd Science, 2022). We provide live, internationally recognised education for students preparing for <strong style={{color:'#fff'}}>Cambridge IGCSE</strong>, <strong style={{color:'#fff'}}>Cambridge International A-Level</strong>, <strong style={{color:'#fff'}}>Pearson Edexcel International GCSE and A-Level</strong>, the <strong style={{color:'#fff'}}>International Baccalaureate Diploma Programme</strong>, <strong style={{color:'#fff'}}>Kenya CBC</strong> (KICD-aligned, KCSE-eligible) and the <strong style={{color:'#fff'}}>American High School Curriculum</strong> with Advanced Placement (AP).
+                  Smartious Homeschool &amp; eSchool is an international online school founded in Nairobi, Kenya in 2018 by Alfred Ouko, a Mathematics and Physics teacher educated at the University of Nairobi (BEd Science, 2022). We provide live, internationally recognised education for students preparing for <strong style={{color:'#fff'}}>Cambridge IGCSE</strong>, <strong style={{color:'#fff'}}>Cambridge International A-Level</strong>, <strong style={{color:'#fff'}}>Pearson Edexcel International GCSE and A-Level</strong>, the <strong style={{color:'#fff'}}>International Baccalaureate Diploma Programme</strong>, <strong style={{color:'#fff'}}>Kenya CBC</strong> (KICD-aligned, KCSE-eligible) and the <strong style={{color:'#fff'}}>American High School Curriculum</strong> with Advanced Placement (AP).
                 </p>
                 <p style={{fontSize:13.5,lineHeight:1.75,marginBottom:14}}>
                   We serve families in Kenya (Nairobi, Mombasa, Kisumu, Nakuru, Eldoret, Thika, Kiambu and across the country), the UAE (Dubai, Abu Dhabi, Sharjah and 27 emirate areas), the UK, USA, Canada, Australia, Qatar, Bahrain, Nigeria, South Africa, Uganda, Tanzania, Somalia and Pakistan. Our delivery is primarily online through the Smartious Learning Management System (LMS), with in-person tuition available at our Diamond Plaza Parklands HQ and our Karen Hardy Centre in Nairobi.
@@ -7165,7 +7165,7 @@ export default function LandingPage() {
                   'url': 'https://smartioushomeschool.com/online-school/kenya',
                   'logo': 'https://smartioushomeschool.com/logo.png',
                   'image': 'https://smartioushomeschool.com/og-kenya.jpg',
-                  'description': 'Accredited international homeschool and online school based in Nairobi, Kenya. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel, American curriculum and Kenya CBC. Founded 2019. Serving students across 14 countries.',
+                  'description': 'Accredited international homeschool and online school based in Nairobi, Kenya. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel, American curriculum and Kenya CBC. Founded 2019. Serving students across 40+ countries.',
                   'foundingDate': '2018',
                   'telephone': '+254745021212',
                   'email': 'hello@smartioushomeschool.com',
@@ -13330,7 +13330,7 @@ export default function LandingPage() {
                 </button>
               </div>
               <div style={{fontSize:13,color:'rgba(255,255,255,.7)',letterSpacing:'.02em'}}>
-                Est. 2019 &middot; 780,000+ students in 120+ countries &middot; Two Nairobi centres (Diamond Plaza Parklands &amp; Karen Hardy) &middot; From USD 400/month personalized
+                Established in 2018 &middot; Over 3,421 students educated &middot; Families in more than 40 countries &middot; Two Nairobi centres (Diamond Plaza Parklands &amp; Karen Hardy) &middot; From USD 400/month personalized
               </div>
             </div>
           </section>
@@ -13426,16 +13426,16 @@ export default function LandingPage() {
           {/* SOCIAL PROOF */}
           <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
             <div style={{maxWidth:920,margin:'0 auto',textAlign:'center'}}>
-              <div className="eyebrow" style={{color:V.cr,marginBottom:10}}>Trusted by 400+ families in 22 countries</div>
+              <div className="eyebrow" style={{color:V.cr,marginBottom:10}}>Trusted by more than 650 families in over 40 countries</div>
               <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginBottom:24,letterSpacing:'-.01em'}}>
                 Real results from real families
               </h2>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:20,marginTop:32}}>
                 {[
-                  {n:'400+', l:'Active students across 22 countries'},
+                  {n:'650+', l:'Active learners in more than 40 countries'},
                   {n:'96%',  l:'Cambridge IGCSE pass rate (2024/25)'},
                   {n:'78+',  l:'Qualified subject specialist teachers'},
-                  {n:'7 yr', l:'Teaching since 2019 &middot; Nairobi HQ 2022'},
+                  {n:'8 yr', l:'Teaching since 2018 &middot; Nairobi HQ 2022'},
                 ].map(s => (
                   <div key={s.n} style={{background:'#fff',border:`1px solid ${V.bone3}`,borderRadius:12,padding:'28px 20px'}}>
                     <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2.4rem',color:V.cr,lineHeight:1,marginBottom:10,fontWeight:400}}>{s.n}</div>
@@ -14065,7 +14065,7 @@ export default function LandingPage() {
                 {h:'Home visits across Nairobi', p:'Our tutors travel to families in 20 Nairobi neighbourhoods — Karen, Lavington, Kilimani, Westlands, Parklands, Runda, Muthaiga and beyond. Transport contribution applies for more distant estates.'},
                 {h:'Online tuition for everyone', p:'Live, interactive online tuition delivered via our learning platform. The same 1-on-1 attention as a home visit, with no commute risk and faster scheduling. Recommended for distant estates and diaspora families.'},
                 {h:'Transparent USD pricing', p:'USD 8 per hour for online tuition. KSh 1,500–2,500 per session for home tuition depending on location. No hidden fees. No long contracts. Pay per session or in 10-hour blocks.'},
-                {h:'7 curricula covered', p:'CBC (Kenyan), Cambridge IGCSE, Cambridge A-Level, IB MYP, IB Diploma, Pearson Edexcel International and American Curriculum (including AP). KCSE revision and university admissions (UCAS, Common App, SAT) also available.'},
+                {h:'Five curricula, seven programmes', p:'CBC (Kenyan), Cambridge IGCSE, Cambridge A-Level, IB MYP, IB Diploma, Pearson Edexcel International and American Curriculum (including AP). KCSE revision and university admissions (UCAS, Common App, SAT) also available.'},
               ].map(item => (
                 <div key={item.h} style={{
                   background:V.bone,border:'1px solid '+V.line,borderRadius:14,
@@ -15160,7 +15160,7 @@ export default function LandingPage() {
                     {h:'Founder-led education company', p:'Founded 2022 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
                     {h:'Two physical Nairobi centres', p:'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
                     {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
-                    {h:'14+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
+                    {h:'40+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
                     {h:'5 international curricula', p:'Cambridge IGCSE & A-Level (primary offering), Pearson Edexcel International GCSE & A-Level, IB Diploma Programme, American Curriculum with AP, Kenya CBC. Multiple credential pathways per family.'},
                     {h:'Live class transparency', p:'Every class is live with recorded sessions for review. Parents can audit class quality directly. This is materially different from pre-recorded video courses with light tutor support.'},
                   ].map((t, i) => (
@@ -16800,7 +16800,7 @@ export default function LandingPage() {
                     {h:'Founder-led education company', p:'Founded 2022 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
                     {h:'Two physical Nairobi centres', p:'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
                     {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
-                    {h:'14+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
+                    {h:'40+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
                     {h:'5 international curricula', p:'Cambridge IGCSE & A-Level (primary offering), Pearson Edexcel International GCSE & A-Level, IB Diploma Programme, American Curriculum with AP, Kenya CBC. Multiple credential pathways per family.'},
                     {h:'Live class transparency', p:'Every class is live with recorded sessions for review. Parents can audit class quality directly. This is materially different from pre-recorded video courses with light tutor support.'},
                   ].map((t, i) => (
@@ -17120,7 +17120,7 @@ export default function LandingPage() {
                     {h:'Founder-led education company', p:'Founded 2022 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
                     {h:'Two physical Nairobi centres', p:'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
                     {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
-                    {h:'14+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
+                    {h:'40+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
                     {h:'5 international curricula', p:'Cambridge IGCSE & A-Level (primary offering), Pearson Edexcel International GCSE & A-Level, IB Diploma Programme, American Curriculum with AP, Kenya CBC. Multiple credential pathways per family.'},
                     {h:'Live class transparency', p:'Every class is live with recorded sessions for review. Parents can audit class quality directly. This is materially different from pre-recorded video courses with light tutor support.'},
                   ].map((t, i) => (
@@ -17440,7 +17440,7 @@ export default function LandingPage() {
                     {h:'Founder-led education company', p:'Founded 2022 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
                     {h:'Two physical Nairobi centres', p:'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
                     {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
-                    {h:'14+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
+                    {h:'40+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
                     {h:'5 international curricula', p:'Cambridge IGCSE & A-Level (primary offering), Pearson Edexcel International GCSE & A-Level, IB Diploma Programme, American Curriculum with AP, Kenya CBC. Multiple credential pathways per family.'},
                     {h:'Live class transparency', p:'Every class is live with recorded sessions for review. Parents can audit class quality directly. This is materially different from pre-recorded video courses with light tutor support.'},
                   ].map((t, i) => (
@@ -17760,7 +17760,7 @@ export default function LandingPage() {
                     {h:'Founder-led education company', p:'Founded 2022 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
                     {h:'Two physical Nairobi centres', p:'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
                     {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
-                    {h:'14+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
+                    {h:'40+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
                     {h:'5 international curricula', p:'Cambridge IGCSE & A-Level (primary offering), Pearson Edexcel International GCSE & A-Level, IB Diploma Programme, American Curriculum with AP, Kenya CBC. Multiple credential pathways per family.'},
                     {h:'Live class transparency', p:'Every class is live with recorded sessions for review. Parents can audit class quality directly. This is materially different from pre-recorded video courses with light tutor support.'},
                   ].map((t, i) => (
@@ -18080,7 +18080,7 @@ export default function LandingPage() {
                     {h:'Founder-led education company', p:'Founded 2022 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
                     {h:'Two physical Nairobi centres', p:'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
                     {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
-                    {h:'14+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
+                    {h:'40+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
                     {h:'5 international curricula', p:'Cambridge IGCSE & A-Level (primary offering), Pearson Edexcel International GCSE & A-Level, IB Diploma Programme, American Curriculum with AP, Kenya CBC. Multiple credential pathways per family.'},
                     {h:'Live class transparency', p:'Every class is live with recorded sessions for review. Parents can audit class quality directly. This is materially different from pre-recorded video courses with light tutor support.'},
                   ].map((t, i) => (
@@ -18399,7 +18399,7 @@ export default function LandingPage() {
                     {h:'Founder-led education company', p:'Founded 2022 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
                     {h:'Two physical Nairobi centres', p:'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
                     {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
-                    {h:'14+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
+                    {h:'40+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
                     {h:'5 international curricula', p:'Cambridge IGCSE & A-Level (primary offering), Pearson Edexcel International GCSE & A-Level, IB Diploma Programme, American Curriculum with AP, Kenya CBC. Multiple credential pathways per family.'},
                     {h:'Live class transparency', p:'Every class is live with recorded sessions for review. Parents can audit class quality directly. This is materially different from pre-recorded video courses with light tutor support.'},
                   ].map((t, i) => (
@@ -19464,7 +19464,7 @@ export default function LandingPage() {
             '@context':'https://schema.org','@type':'EducationalOrganization',
             'name':'Smartious Homeschool Global',
             'url':'https://smartioushomeschool.com/homeschool',
-            'description':'Premium homeschooling worldwide. Cambridge IGCSE, A-Level, IB, American, Kenya CBC curricula. Online, in-centre and home tutoring delivery across Kenya, UAE and 14 countries.',
+            'description':'Premium homeschooling worldwide. Cambridge IGCSE, A-Level, IB, American, Kenya CBC curricula. Online, in-centre and home tutoring delivery across Kenya, UAE and 40+ countries.',
           })}}/>
 
           {/* HERO */}
@@ -19479,7 +19479,7 @@ export default function LandingPage() {
                 Premium <em style={{color:V.gold3,fontStyle:'italic'}}>homeschooling</em> worldwide
               </h1>
               <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:24,maxWidth:780}}>
-                Full curriculum delivery for K-12 students across 5 curricula and 14 countries. Live 1-on-1 lessons with qualified teachers, structured progress tracking and university-pathway planning — built for families serious about their child's academic future.
+                Full curriculum delivery for K-12 students across 5 curricula and 40+ countries. Live 1-on-1 lessons with qualified teachers, structured progress tracking and university-pathway planning — built for families serious about their child's academic future.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
                 <button onClick={() => nav('/assessment')}
@@ -19550,7 +19550,7 @@ export default function LandingPage() {
               <div style={{textAlign:'center',marginBottom:36}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>Countries we serve</div>
                 <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
-                  Dedicated homeschool pages for <em style={{color:V.cr,fontStyle:'italic'}}>16 countries</em>
+                  Dedicated homeschool guides for <em style={{color:V.cr,fontStyle:'italic'}}>16 destinations</em>
                 </h2>
                 <p style={{fontSize:14,color:V.sl,maxWidth:680,margin:'14px auto 0',lineHeight:1.6}}>
                   Each country has its own dedicated homeschool page — local context, country-specific curricula advice, exam pathways and pricing in local currency where relevant.
@@ -19634,7 +19634,7 @@ export default function LandingPage() {
                   onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
                   <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>All countries overview</h3>
-                  <p style={{fontSize:12.5,color:V.sl,lineHeight:1.6,marginBottom:14}}>Comprehensive global view across all 16 countries — useful for diaspora families wanting to compare contexts and pathways.</p>
+                  <p style={{fontSize:12.5,color:V.sl,lineHeight:1.6,marginBottom:14}}>Comprehensive global view across all 16 destination guides — useful for diaspora families wanting to compare contexts and pathways.</p>
                   <div style={{fontSize:12,fontWeight:700,color:V.cr}}>View all countries →</div>
                 </div>
               </div>
@@ -19682,7 +19682,7 @@ export default function LandingPage() {
               {(() => {
                 const hsFaqs = [
                   { q:'What curricula do you offer?', a:'Five core curricula: Cambridge IGCSE (and Edexcel), Cambridge A-Level, International Baccalaureate (IB), American Curriculum (with SAT/AP integration), and Kenya CBC. All are delivered by qualified teachers with curriculum-specific experience.' },
-                  { q:'Where can we homeschool with Smartious?', a:'Online globally (anywhere with internet), in-centre at our Nairobi Parklands or Karen Hardy locations, or home tutoring in 21 Nairobi areas, 27 UAE areas, 6 Kenya cities. We serve diaspora families in 14 countries primarily online.' },
+                  { q:'Where can we homeschool with Smartious?', a:'Online globally (anywhere with internet), in-centre at our Nairobi Parklands or Karen Hardy locations, or home tutoring in 21 Nairobi areas, 27 UAE areas, 6 Kenya cities. We serve diaspora families in 40+ countries primarily online.' },
                   { q:'How much does homeschooling with Smartious cost?', a:'Pricing depends on curriculum, year level and delivery mode. We work with families across multiple budgets — premium full-day programmes at one end and focused subject-only support at the other. Book an assessment to receive personalised pricing recommendations.' },
                   { q:'Are your teachers qualified?', a:'Yes — all Smartious teachers hold relevant academic qualifications (Bachelor\'s or higher in their teaching subject area), with verified teaching experience. Many hold curriculum-specific certifications from Cambridge, IB or local boards.' },
                   { q:'How do we track our child\'s progress?', a:'Through the Smartious LMS — parents see live attendance, assignment submissions, grades, teacher feedback and progress reports. Weekly summaries and monthly progress reports keep families fully informed.' },
@@ -20110,7 +20110,7 @@ export default function LandingPage() {
             '@context':'https://schema.org','@type':'EducationalOrganization',
             'name':'Smartious Tuition Global',
             'url':'https://smartioushomeschool.com/tuition',
-            'description':'Premium 1-on-1 tuition worldwide. Mathematics, Sciences, English, Languages and exam preparation. Online, in-centre, and home tutoring across Kenya, UAE and 14 countries.',
+            'description':'Premium 1-on-1 tuition worldwide. Mathematics, Sciences, English, Languages and exam preparation. Online, in-centre, and home tutoring across Kenya, UAE and 40+ countries.',
           })}}/>
 
           {/* HERO */}
@@ -20202,7 +20202,7 @@ export default function LandingPage() {
                 {[
                   { h:'Nairobi (21 areas)', d:'Karen, Westlands, Lavington, Kileleshwa, Runda, Muthaiga, Parklands and more — home tutoring delivered to your door', id:'tuition-nairobi', cta:'View Nairobi tuition →' },
                   { h:'UAE (27 areas)', d:'Downtown Dubai, Business Bay, JBR, Palm Jumeirah, Abu Dhabi, Sharjah, Al Ain and more', id:'tuition-uae', cta:'View UAE tuition →' },
-                  { h:'Online — 14 countries', d:'Live 1-on-1 sessions to any timezone. UK, USA, Canada, Qatar, South Africa, Nigeria and more', id:'home', cta:'View all countries →' },
+                  { h:'Online — 40+ countries', d:'Live 1-on-1 sessions to any timezone. UK, USA, Canada, Qatar, South Africa, Nigeria and more', id:'home', cta:'View all countries →' },
                 ].map(r => (
                   <div key={r.h}
                     onClick={() => P(r.id)}
@@ -23141,7 +23141,7 @@ export default function LandingPage() {
             <div className="faq-list">
               {[
                 ['Is Smartious recognised internationally?','Yes. We deliver Cambridge International (CIE), IB, Pearson Edexcel and American College Board curricula — all globally recognised. Students sit exams at registered centres in their country of residence.'],
-                ['Where do students sit their exams?','Students sit official Cambridge, IB or Edexcel examinations at accredited examination centres in their home country. We maintain a directory of approved centres across all 12+ countries and assist families with registration typically 6 months before the exam window.'],
+                ['Where do students sit their exams?','Students sit official Cambridge, IB or Edexcel examinations at accredited examination centres in their home country. We maintain a directory of approved centres across all 40+ countries and assist families with registration typically 6 months before the exam window.'],
                 ['How does virtual school work outside Kenya?','Our virtual school is fully online and timezone-flexible. Live classes are scheduled around your timezone, all sessions are recorded for catch-up, and Mshauri AI is available 24/7. All you need is a reliable internet connection and a laptop or tablet.'],
                 ['What is the USD 38 / KSh 5,000 application fee for?','The USD 38 / KSh 5,000 fee covers your child\'s diagnostic placement test, a written curriculum alignment report and the initial tutor matching process. It is a one-time, non-refundable charge that counts towards your first month\'s tuition.'],
                 ['Can I switch curricula mid-year?','Yes. We conduct a fresh placement assessment at no additional cost, prepare a topic bridge plan and assign a tutor with dual-curriculum expertise.'],
@@ -24462,7 +24462,7 @@ function Footer({ P }) {
         <div className="ft-grid">
           <div>
             <div style={{marginBottom:18}}><SmartiousLogo size={44} withText={true} tone="light"/></div>
-            <div className="ft-d">A global online school founded in Kenya. Cambridge, Pearson Edexcel, American and Kenyan pathways with IB subject support, taught live by expert teachers to families in 14 countries.</div>
+            <div className="ft-d">A global online school founded in Kenya. Cambridge, Pearson Edexcel, American and Kenyan pathways with IB subject support, taught live by expert teachers to families in 40+ countries.</div>
           </div>
           <div>
             <div className="ft-ch">Programmes</div>
