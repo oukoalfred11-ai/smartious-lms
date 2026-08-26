@@ -9,14 +9,29 @@ const { auth, requireRole } = require('../middleware/auth');
 // admins can see and reactivate them).
 router.get('/', async (req, res) => {
   try {
-    const { curriculum, includeInactive } = req.query;
+    const { curriculum, includeInactive, grade } = req.query;
     const filter = {};
     if (curriculum) filter.curriculum = curriculum;
     if (includeInactive !== 'true') filter.isActive = true;
 
-    const subjects = await Subject.find(filter)
-      .sort('subjectName')
-      .lean();
+    // ── Grade scoping with a safe fallback ────────────────
+    // When a grade is given AND graded subjects exist for it,
+    // return only those (a Grade 7 American class should offer
+    // the four Grade 7 subjects, not every AP course). When no
+    // subject carries that grade — true for legacy curricula
+    // whose subjects were seeded ungraded — fall back to the
+    // full curriculum list so nothing ever comes back empty.
+    let subjects;
+    if (grade) {
+      subjects = await Subject.find({ ...filter, grade })
+        .sort('subjectName')
+        .lean();
+      if (!subjects.length) {
+        subjects = await Subject.find(filter).sort('subjectName').lean();
+      }
+    } else {
+      subjects = await Subject.find(filter).sort('subjectName').lean();
+    }
 
     res.json({ success: true, subjects });
   } catch (e) {
