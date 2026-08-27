@@ -287,6 +287,57 @@ function ParentLinkSection({ studentId, toast }) {
   )
 }
 
+// Profile image: pick a file, we upload it and store the returned URL.
+// No pasting. Falls back gracefully and shows a live preview.
+function AvatarUpload({ value, onChange, toast }) {
+  const [busy, setBusy] = useState(false)
+  const inputRef = React.useRef(null)
+
+  const pick = () => inputRef.current && inputRef.current.click()
+  const onFile = async (e) => {
+    const file = e.target.files && e.target.files[0]
+    e.target.value = ''
+    if (!file) return
+    if (!/^image\//.test(file.type)) { toast?.error?.('Please choose an image file.'); return }
+    if (file.size > 5 * 1024 * 1024) { toast?.error?.('Image must be under 5 MB.'); return }
+    setBusy(true)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      const { data } = await api.post('/users/avatar', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+      if (data?.success && data?.data?.avatar) { onChange(data.data.avatar); toast?.ok?.('Photo uploaded.') }
+      else toast?.error?.(data?.message || 'Upload failed.')
+    } catch (err) {
+      toast?.error?.(err?.response?.data?.message || 'Upload failed. Try again.')
+    }
+    setBusy(false)
+  }
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      <div style={{ width: 54, height: 54, borderRadius: '50%', overflow: 'hidden', flexShrink: 0,
+        background: '#F0EDE6', border: '1.5px solid #E2DACB', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {value
+          ? <img src={value} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.target.style.display = 'none' }} />
+          : <span style={{ fontSize: 20, color: '#B7AE9E' }}>{'\u{1F464}'}</span>}
+      </div>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+        <input ref={inputRef} type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={onFile} style={{ display: 'none' }} />
+        <button type="button" onClick={pick} disabled={busy}
+          style={{ padding: '7px 15px', borderRadius: 8, border: '1.5px solid var(--crimson, #8B1A2E)', background: busy ? '#EDE7DD' : 'var(--crimson, #8B1A2E)', color: busy ? '#8B857C' : '#fff', fontSize: 12.5, fontWeight: 700, cursor: busy ? 'default' : 'pointer' }}>
+          {busy ? 'Uploading...' : value ? 'Change photo' : 'Upload photo'}
+        </button>
+        {value && !busy && (
+          <button type="button" onClick={() => onChange('')}
+            style={{ padding: '7px 12px', borderRadius: 8, border: '1.5px solid #E2DACB', background: '#fff', color: '#8B857C', fontSize: 12.5, fontWeight: 700, cursor: 'pointer' }}>
+            Remove
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
+
 export function UserFormFields({ userForm, setUserForm, toast }) {
   const upd = (k, v) => setUserForm(f => ({ ...f, [k]: v }))
 
@@ -577,8 +628,8 @@ export function UserFormFields({ userForm, setUserForm, toast }) {
                 <input className="fi" type="date" value={userForm.dateOfBirth ? userForm.dateOfBirth.slice(0, 10) : ''} onChange={e => upd('dateOfBirth', e.target.value)} />
               </div>
               <div className="fg">
-                <label className="fl">Photo URL (optional)</label>
-                <input className="fi" value={userForm.avatar || ''} onChange={e => upd('avatar', e.target.value)} placeholder="https://..." />
+                <label className="fl">Profile photo (optional)</label>
+                <AvatarUpload value={userForm.avatar} onChange={v => upd('avatar', v)} toast={toast} />
               </div>
             </div>
             <div className="fg">
@@ -700,8 +751,8 @@ export function UserFormFields({ userForm, setUserForm, toast }) {
                 <input className="fi" type="number" min="0" max="70" value={userForm.yearsOfExperience || 0} onChange={e => upd('yearsOfExperience', parseInt(e.target.value) || 0)} />
               </div>
               <div className="fg">
-                <label className="fl">Photo URL (optional)</label>
-                <input className="fi" value={userForm.avatar || ''} onChange={e => upd('avatar', e.target.value)} placeholder="https://..." />
+                <label className="fl">Profile photo (optional)</label>
+                <AvatarUpload value={userForm.avatar} onChange={v => upd('avatar', v)} toast={toast} />
               </div>
             </div>
             <div className="fg">
@@ -766,8 +817,8 @@ export function UserFormFields({ userForm, setUserForm, toast }) {
           </div>
 
           <div className="fg">
-            <label className="fl">Photo URL (optional)</label>
-            <input className="fi" value={userForm.avatar || ''} onChange={e => upd('avatar', e.target.value)} placeholder="https://..." />
+            <label className="fl">Profile photo (optional)</label>
+            <AvatarUpload value={userForm.avatar} onChange={v => upd('avatar', v)} toast={toast} />
           </div>
 
           <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid ' + TOKENS.s100 }}>
