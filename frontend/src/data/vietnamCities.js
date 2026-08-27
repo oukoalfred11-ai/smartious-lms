@@ -519,7 +519,7 @@ export const VIETNAM_COUNTRY = {
   citiesSectionBody: 'Six Vietnamese cities. Each page covers local international school landscape, capacity constraints, family situations and answers specific to your area — from Ho Chi Minh City District 2 Thao Dien / District 7 Phu My Hung Korean expat families to Hanoi Tay Ho West Lake diplomatic families to Da Nang FPT IT outsourcing and tourism families to Bac Ninh Samsung Vietnam Korean expat manufacturing community to Binh Duong multinational manufacturing executives to Vung Tau international oil & gas industry families.',
 
   trustSignals: [
-    { metric: 'Established', value: '2019', sub: 'Nairobi-based · serving Vietnamese families' },
+    { metric: 'Established', value: '2018', sub: 'Nairobi-based · serving Vietnamese families' },
     { metric: 'Curricula', value: '5', sub: 'Cambridge · Edexcel · IB · American AP · CBC' },
     { metric: 'Subject specialists', value: 'PGCE-trained', sub: 'Degree-qualified · many TSC-registered' },
     { metric: 'Countries served', value: '14+', sub: 'Asia · Africa · Gulf · Europe · Americas' },
