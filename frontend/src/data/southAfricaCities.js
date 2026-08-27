@@ -441,7 +441,7 @@ export const SOUTH_AFRICA_COUNTRY = {
   citiesSectionBody: 'Six major South African urban areas. Each page covers local private school alternatives, BELA Act 2024 compliance, family situations and answers — from Johannesburg Sandton financial families to Cape Town City Bowl households to Stellenbosch Cape Winelands wine estate communities.',
 
   trustSignals: [
-    { metric: 'Established', value: '2022', sub: 'Nairobi-based' },
+    { metric: 'Established', value: '2018', sub: 'Nairobi-based' },
     { metric: 'Curricula', value: '5', sub: 'Cambridge · Edexcel · IB · American AP · CBC' },
     { metric: 'Tutors', value: '78+', sub: 'PGCE-qualified subject specialists' },
     { metric: 'Countries served', value: '14+', sub: 'Africa · Gulf · Europe · Americas' },
