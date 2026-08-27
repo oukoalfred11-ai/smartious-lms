@@ -532,7 +532,7 @@ export const THAILAND_COUNTRY = {
   citiesSectionBody: 'Six Thai cities. Each page covers local international school landscape, capacity constraints, family situations and answers specific to your area — from Bangkok Sukhumvit expat belt and embassy diplomatic families to Chiang Mai Nimmanhaemin digital nomads and retiree expats to Phuket Bang Tao marine industry and tourism executives to Pattaya/Sriracha Eastern Seaboard Japanese manufacturing community to Hua Hin Royal Coast retiree and Bangkok elite second-home families to Khon Kaen Isaan academic and medical professional families.',
 
   trustSignals: [
-    { metric: 'Established', value: '2019', sub: 'Nairobi-based · serving Thai families' },
+    { metric: 'Established', value: '2018', sub: 'Nairobi-based · serving Thai families' },
     { metric: 'Curricula', value: '5', sub: 'Cambridge · Edexcel · IB · American AP · CBC' },
     { metric: 'Subject specialists', value: 'PGCE-trained', sub: 'Degree-qualified · many TSC-registered' },
     { metric: 'Countries served', value: '14+', sub: 'Asia · Africa · Gulf · Europe · Americas' },
