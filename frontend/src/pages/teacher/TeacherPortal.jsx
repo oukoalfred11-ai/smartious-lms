@@ -1496,6 +1496,8 @@ function QuestionBankTab({ user, store, setPage, toast }) {
   const [filterSubject, setFilterSubject] = useState('')
   const [filterGrade, setFilterGrade] = useState('')
   const [filterType, setFilterType] = useState('')
+  const [filterSpecial, setFilterSpecial] = useState('')       // '' | needsArtwork | draftScheme | noScheme | unused | inactive
+  const [attnCounts, setAttnCounts] = useState(null)           // {needsArtwork, draftScheme, noScheme}
   const [searchQ, setSearchQ] = useState('')
   const [showOnlyMine, setShowOnlyMine] = useState(false)
  
@@ -1568,6 +1570,7 @@ function QuestionBankTab({ user, store, setPage, toast }) {
         if (filterSubject) params.append('subject', filterSubject)
         if (filterGrade) params.append('grade', filterGrade)
         if (filterType) params.append('type', filterType)
+        if (filterSpecial) params.append('special', filterSpecial)
         if (searchQ.trim()) params.append('q', searchQ.trim())
         if (showOnlyMine) params.append('createdBy', 'me')
         params.append('limit', '100')
@@ -1586,7 +1589,14 @@ function QuestionBankTab({ user, store, setPage, toast }) {
     }
     const handle = setTimeout(loadQuestions, 250)
     return () => clearTimeout(handle)
-  }, [filterCurriculum, filterSubject, filterGrade, filterType, searchQ, showOnlyMine])
+  }, [filterCurriculum, filterSubject, filterGrade, filterType, filterSpecial, searchQ, showOnlyMine])
+
+  // Badge counts for the attention chips
+  useEffect(() => {
+    api.get('/questions/attention/counts')
+      .then(r => setAttnCounts(r.data?.data || null))
+      .catch(() => setAttnCounts(null))
+  }, [questions.length])
  
   // Available subjects/grades for filter dropdowns
   const subjectsForFilter = filterCurriculum
@@ -1666,7 +1676,7 @@ function QuestionBankTab({ user, store, setPage, toast }) {
     setFilterType(''); setSearchQ(''); setShowOnlyMine(false)
   }
  
-  const hasActiveFilters = !!(filterCurriculum || filterSubject || filterGrade || filterType || searchQ.trim() || showOnlyMine)
+  const hasActiveFilters = !!(filterCurriculum || filterSubject || filterGrade || filterType || filterSpecial || searchQ.trim() || showOnlyMine)
  
   // ── CREATE MODAL handlers ──
   const openCreate = () => {
@@ -2067,6 +2077,29 @@ function QuestionBankTab({ user, store, setPage, toast }) {
             </select>
           </div>
         </div>
+        {/* Attention chips: the views that used to return nothing because
+            plain listing pins isActive and these questions are held as
+            inactive drafts until artwork / a scheme arrives. */}
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginBottom: 10 }}>
+          {[
+            ['', 'All questions', null],
+            ['needsArtwork', 'Needs artwork', attnCounts?.needsArtwork],
+            ['draftScheme', 'Schemes to approve', attnCounts?.draftScheme],
+            ['noScheme', 'No mark scheme', attnCounts?.noScheme],
+            ['unused', 'Never used in an exam', null],
+            ['inactive', 'Inactive / drafts', null],
+          ].map(([val, label, count]) => (
+            <button key={val || 'all'} type="button" onClick={() => setFilterSpecial(val)}
+              style={{
+                padding: '6px 12px', borderRadius: 99, fontSize: 11.5, fontWeight: 700, cursor: 'pointer',
+                border: filterSpecial === val ? '1.5px solid #7D1025' : '1px solid var(--border)',
+                background: filterSpecial === val ? 'rgba(125,16,37,.08)' : '#fff',
+                color: filterSpecial === val ? '#7D1025' : 'var(--s600)',
+              }}>
+              {label}{typeof count === 'number' && count > 0 ? ' (' + count + ')' : ''}
+            </button>
+          ))}
+        </div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
           <input className="fi" value={searchQ} onChange={e => setSearchQ(e.target.value)} placeholder="Search question text..." style={{ flex: 1, minWidth: 200 }}/>
           <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--s700)', cursor: 'pointer', whiteSpace: 'nowrap' }}>
@@ -2119,6 +2152,9 @@ function QuestionBankTab({ user, store, setPage, toast }) {
                   : 'Unknown')
               : 'Unknown'
             const hasAttachments = (q.attachments || []).length > 0
+            const qNeedsArt = (q.artwork?.required && q.artwork?.status !== 'uploaded') || (q.imageNeeded && q.artwork?.status !== 'uploaded')
+            const qDraftScheme = !!(q.draftMarkScheme?.modelAnswer && !q.draftMarkScheme?.approved)
+            const qNoScheme = q.type !== 'mcq' && !(q.markScheme?.modelAnswer) && !(q.markScheme?.points?.length) && !qDraftScheme
             return (
               <div key={q._id} className="card" onClick={() => setDetailQ(q)}
                 style={{ padding: 14, cursor: 'pointer', display: 'flex', alignItems: 'flex-start', gap: 12, transition: 'all .15s',
@@ -2133,6 +2169,10 @@ function QuestionBankTab({ user, store, setPage, toast }) {
                     {q.topic && <span>· {q.topic}</span>}
                     <span style={{ background: diffMeta.bg, color: diffMeta.color, padding: '1px 7px', borderRadius: 99, fontSize: 10, fontWeight: 700 }}>{diffMeta.label}</span>
                     <span style={{ background: 'var(--s100)', color: 'var(--s600)', padding: '1px 7px', borderRadius: 99, fontSize: 10, fontWeight: 700 }}>{typeMeta.label}</span>
+                    {q.isActive === false && <span style={{ background: '#F3F4F6', color: '#6B7280', padding: '1px 7px', borderRadius: 99, fontSize: 10, fontWeight: 700 }}>Inactive draft</span>}
+                    {qNeedsArt && <span style={{ background: '#FEF3C7', color: '#92400E', padding: '1px 7px', borderRadius: 99, fontSize: 10, fontWeight: 700 }}>Needs artwork</span>}
+                    {qDraftScheme && <span style={{ background: '#DBEAFE', color: '#1D4ED8', padding: '1px 7px', borderRadius: 99, fontSize: 10, fontWeight: 700 }}>Scheme to approve</span>}
+                    {qNoScheme && <span style={{ background: '#FEE2E2', color: '#B91C1C', padding: '1px 7px', borderRadius: 99, fontSize: 10, fontWeight: 700 }}>No mark scheme</span>}
                     {hasAttachments && (
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, color: 'var(--s500)' }}>
                         <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -3883,6 +3923,33 @@ function ExamsTab({ user, store, setPage, toast }) {
   const [formSelectedStudents, setFormSelectedStudents] = useState([])
   const [bankFilter, setBankFilter] = useState({ subject: 'all', difficulty: 'all', search: '' })
 
+  // Subject options for the exam, driven by the DATABASE for the
+  // chosen curriculum + grade — not a hardcoded list. This is why
+  // American Grade 7 subjects (e.g. Science) were missing before:
+  // the dropdown showed a fixed set of 11 generic names. We fetch
+  // the real subjects and fall back to the static list only if the
+  // lookup returns nothing, so legacy curricula keep working.
+  const [examSubjectOpts, setExamSubjectOpts] = useState(QB_SUBJECTS)
+  useEffect(() => {
+    let alive = true
+    const params = { curriculum: formCurriculum }
+    if (formYear) params.grade = formYear
+    api.get('/subjects', { params })
+      .then(r => {
+        if (!alive) return
+        const names = (r.data?.data || r.data?.subjects || r.data || [])
+          .map(s => s.subjectName || s.name).filter(Boolean)
+        const uniq = [...new Set(names)]
+        setExamSubjectOpts(uniq.length ? uniq : QB_SUBJECTS)
+        // If the current pick is not offered for this curriculum+grade,
+        // snap to the first real option so the exam is never tagged with
+        // a subject that has no questions.
+        if (uniq.length && !uniq.includes(formSubject)) setFormSubject(uniq[0])
+      })
+      .catch(() => { if (alive) setExamSubjectOpts(QB_SUBJECTS) })
+    return () => { alive = false }
+  }, [formCurriculum, formYear])  // eslint-disable-line react-hooks/exhaustive-deps
+
   // ── Bank questions — loaded from /questions API ──
   // Mirrors HomeworkTab pattern: filters drive a debounced GET /questions,
   // results held in state, no localStorage at all.
@@ -4752,7 +4819,7 @@ function ExamsTab({ user, store, setPage, toast }) {
               <div className="fg" style={{ marginBottom: 0 }}>
                 <label className="fl">Subject</label>
                 <select className="fsel" value={formSubject} onChange={e => setFormSubject(e.target.value)}>
-                  {QB_SUBJECTS.map(s => <option key={s}>{s}</option>)}
+                  {examSubjectOpts.map(s => <option key={s}>{s}</option>)}
                 </select>
               </div>
               <div className="fg" style={{ marginBottom: 0 }}>
@@ -4903,7 +4970,7 @@ function ExamsTab({ user, store, setPage, toast }) {
                   onChange={e => setBankFilter({ ...bankFilter, subject: e.target.value })}
                   style={{ minWidth: 140 }}>
                   <option value="all">All Subjects</option>
-                  {QB_SUBJECTS.map(s => <option key={s}>{s}</option>)}
+                  {examSubjectOpts.map(s => <option key={s}>{s}</option>)}
                 </select>
                 <select className="fsel" value={bankFilter.difficulty}
                   onChange={e => setBankFilter({ ...bankFilter, difficulty: e.target.value })}
@@ -11160,7 +11227,7 @@ function LiveSessionsTab({ user, toast }) {
     let cancelled = false
     ;(async () => {
       try {
-        const { data } = await api.get('/subjects', { params: { curriculum: form.curriculum } })
+        const { data } = await api.get('/subjects', { params: { curriculum: form.curriculum, grade: form.grade || undefined } })
         if (cancelled) return
         const list = (data?.subjects || []).filter(s => s.isActive !== false)
         setDbSubjects(list)
@@ -11169,7 +11236,7 @@ function LiveSessionsTab({ user, toast }) {
       }
     })()
     return () => { cancelled = true }
-  }, [form.curriculum])
+  }, [form.curriculum, form.grade])
   // Fallback: if the currently-saved subject isn't in the fetched list
   // (e.g. an old class with a slightly different name), still show it
   // so the form doesn't appear broken.
