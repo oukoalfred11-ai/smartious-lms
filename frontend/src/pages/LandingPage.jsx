@@ -1037,7 +1037,7 @@ function GuideCrossLinks({ guideSlug, guideName, hubHref, hubName }) {
   )
 }
 
-const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','tuition-uk','uk-area','homeschooling-kenya','kenya-city','virtual-school-kenya','virtual-school-ukraine','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschooling-malaysia','malaysia-city','homeschooling-turkey','turkey-city','homeschooling-kuwait','kuwait-city','homeschooling-oman','oman-city','homeschooling-taiwan','taiwan-city','homeschooling-ireland','ireland-city','homeschooling-united-kingdom','uk-city','homeschooling-india','india-city','homeschooling-germany','germany-city','homeschooling-romania','romania-city','homeschooling-ukraine','ukraine-city','homeschooling-spain','spain-city','homeschooling-denmark','denmark-city','homeschooling-france','france-city','homeschooling-italy','italy-city','homeschooling-poland','poland-city','homeschooling-portugal','portugal-city','homeschooling-czech-republic','czech-city','homeschooling-belgium','belgium-city','homeschooling-sweden','sweden-city','homeschooling-netherlands','netherlands-city','homeschooling-norway','norway-city','homeschooling-new-zealand','new-zealand-city','homeschooling-austria','austria-city','homeschooling-hungary','hungary-city','homeschooling-finland','finland-city','homeschooling-greece','greece-city','homeschooling-azerbaijan','azerbaijan-city','homeschooling-georgia','georgia-city','homeschooling-pakistan','pakistan-city','homeschooling-australia','australia-city','homeschooling-luxembourg','luxembourg-city-page','homeschooling-switzerland','switzerland-city','homeschooling-slovakia','slovakia-city','homeschooling-slovenia','slovenia-city','homeschooling-croatia','croatia-city','homeschooling-serbia','serbia-city','homeschooling-bulgaria','bulgaria-city','homeschooling-albania','albania-city','homeschooling-north-macedonia','north-macedonia-city','homeschooling-montenegro','montenegro-city','homeschooling-bosnia','bosnia-city','homeschooling-kosovo','kosovo-city','homeschooling-zambia','zambia-city','homeschooling-zimbabwe','zimbabwe-city','homeschooling-botswana','botswana-city','homeschooling-namibia','namibia-city','homeschooling-algeria','algeria-city','homeschooling-tunisia','tunisia-city','homeschooling-mauritius','mauritius-city','homeschooling-ghana','ghana-city','homeschooling-angola','angola-city','homeschooling-drc','drc-city','homeschooling-mexico','mexico-city-page','homeschooling-brazil','brazil-city','homeschooling-colombia','colombia-city','homeschooling-argentina','argentina-city','homeschooling-chile','chile-city','homeschooling-peru','peru-city','homeschooling-ecuador','ecuador-city','homeschooling-panama','panama-city-page','homeschooling-costa-rica','costa-rica-city','homeschooling-dominican-republic','dominican-city','homeschooling-uruguay','uruguay-city','homeschooling-guatemala','guatemala-city-page','homeschooling-paraguay','paraguay-city','homeschooling-bolivia','bolivia-city','homeschooling-venezuela','venezuela-city','homeschooling-puerto-rico','puerto-rico-city','homeschooling-israel','israel-city','homeschooling-jordan','jordan-city','homeschooling-iraq','iraq-city','homeschooling-cyprus','cyprus-city','homeschooling-lebanon','lebanon-city','homeschooling-myanmar','myanmar-city','homeschooling-maldives','maldives-city','homeschooling-china','china-city','homeschooling-bangladesh','bangladesh-city','homeschooling-nepal','nepal-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','assessment','contact','privacy','terms','cookies','gdpr','article']
+const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','tuition-uk','uk-area','homeschooling-kenya','kenya-city','virtual-school-kenya','virtual-school-ukraine','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschooling-malaysia','malaysia-city','homeschooling-turkey','turkey-city','homeschooling-kuwait','kuwait-city','homeschooling-oman','oman-city','homeschooling-taiwan','taiwan-city','homeschooling-ireland','ireland-city','homeschooling-united-kingdom','uk-city','homeschooling-india','india-city','homeschooling-germany','germany-city','homeschooling-romania','romania-city','homeschooling-ukraine','ukraine-city','homeschooling-spain','spain-city','homeschooling-denmark','denmark-city','homeschooling-france','france-city','homeschooling-italy','italy-city','homeschooling-poland','poland-city','homeschooling-portugal','portugal-city','homeschooling-czech-republic','czech-city','homeschooling-belgium','belgium-city','homeschooling-sweden','sweden-city','homeschooling-netherlands','netherlands-city','homeschooling-norway','norway-city','homeschooling-new-zealand','new-zealand-city','homeschooling-austria','austria-city','homeschooling-hungary','hungary-city','homeschooling-finland','finland-city','homeschooling-greece','greece-city','homeschooling-azerbaijan','azerbaijan-city','homeschooling-georgia','georgia-city','homeschooling-pakistan','pakistan-city','homeschooling-australia','australia-city','homeschooling-luxembourg','luxembourg-city-page','homeschooling-switzerland','switzerland-city','homeschooling-slovakia','slovakia-city','homeschooling-slovenia','slovenia-city','homeschooling-croatia','croatia-city','homeschooling-serbia','serbia-city','homeschooling-bulgaria','bulgaria-city','homeschooling-albania','albania-city','homeschooling-north-macedonia','north-macedonia-city','homeschooling-montenegro','montenegro-city','homeschooling-bosnia','bosnia-city','homeschooling-kosovo','kosovo-city','homeschooling-zambia','zambia-city','homeschooling-zimbabwe','zimbabwe-city','homeschooling-botswana','botswana-city','homeschooling-namibia','namibia-city','homeschooling-algeria','algeria-city','homeschooling-tunisia','tunisia-city','homeschooling-mauritius','mauritius-city','homeschooling-ghana','ghana-city','homeschooling-angola','angola-city','homeschooling-drc','drc-city','homeschooling-mexico','mexico-city-page','homeschooling-brazil','brazil-city','homeschooling-colombia','colombia-city','homeschooling-argentina','argentina-city','homeschooling-chile','chile-city','homeschooling-peru','peru-city','homeschooling-ecuador','ecuador-city','homeschooling-panama','panama-city-page','homeschooling-costa-rica','costa-rica-city','homeschooling-dominican-republic','dominican-city','homeschooling-uruguay','uruguay-city','homeschooling-guatemala','guatemala-city-page','homeschooling-paraguay','paraguay-city','homeschooling-bolivia','bolivia-city','homeschooling-venezuela','venezuela-city','homeschooling-puerto-rico','puerto-rico-city','homeschooling-israel','israel-city','homeschooling-jordan','jordan-city','homeschooling-iraq','iraq-city','homeschooling-cyprus','cyprus-city','homeschooling-lebanon','lebanon-city','homeschooling-myanmar','myanmar-city','homeschooling-maldives','maldives-city','homeschooling-china','china-city','homeschooling-bangladesh','bangladesh-city','homeschooling-nepal','nepal-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','assessment','contact','privacy','terms','cookies','gdpr','child-protection','article']
 
 // ─────────────────────────────────────────────────────────────────
 // Google Business Profile reviews — Smartious Homeschool & Tuition
@@ -1054,6 +1054,94 @@ const SMARTIOUS_REVIEWS = [
 const GOOGLE_REVIEWS_URL = 'https://search.google.com/local/reviews?placeid=ChIJM59xkrsXLxgRNJot8ptZ1l8'
 const LEAVE_REVIEW_URL = 'https://g.page/r/CTSaLfKbWdZfEAE/review'
 const SMARTIOUS_RATING = { stars: 4.9, count: 123 }
+
+// ═══════════════════════════════════════════════════════════
+// PARENT VIDEO TESTIMONIAL
+// Best playback = self-hosted on Cloudinary (same account as the
+// hero video), which streams from a CDN with adaptive quality and
+// a poster frame. To switch from the YouTube fallback to the
+// premium Cloudinary player, download the video from YouTube, upload
+// it to Cloudinary, and paste the delivery URL into `cloudinary`
+// below (and optionally a poster still). While `cloudinary` is empty
+// the component embeds YouTube so the page still works.
+//
+// Cloudinary URL shape (mirrors the hero):
+//   https://res.cloudinary.com/dae99gz1m/video/upload/f_auto,q_auto:good,w_1280,vc_auto/<public_id>.mp4
+// Poster shape:
+//   https://res.cloudinary.com/dae99gz1m/video/upload/f_webp,q_auto:good,w_1280,so_0/<public_id>.jpg
+// ═══════════════════════════════════════════════════════════
+const PARENT_VIDEO = {
+  cloudinary: '',                                   // paste Cloudinary delivery URL here to upgrade playback
+  cloudinaryPoster: '',                             // optional Cloudinary poster still
+  youtubeId: 'zCCLOprlMpQ',                         // fallback while Cloudinary is empty
+  title: 'A Smartious parent shares their experience',
+  caption: 'A Smartious parent on why they chose us for their child.',
+}
+
+function ParentVideo({ V, video = PARENT_VIDEO }) {
+  const [playing, setPlaying] = useState(false)
+  const useCloud = !!video.cloudinary
+  const ytPoster = `https://i.ytimg.com/vi/${video.youtubeId}/maxresdefault.jpg`
+  const poster = video.cloudinaryPoster || ytPoster
+
+  return (
+    <div style={{maxWidth:720,margin:'0 auto 8px'}}>
+      <div style={{
+        position:'relative',
+        width:'100%',
+        aspectRatio:'16/9',
+        borderRadius:14,
+        overflow:'hidden',
+        background:V.ink2 || '#12131a',
+        boxShadow:'0 20px 60px rgba(8,12,20,.18)',
+        border:`1px solid ${V.bone3}`,
+      }}>
+        {useCloud ? (
+          // Premium path: native Cloudinary video player
+          <video
+            controls
+            preload="metadata"
+            poster={poster}
+            playsInline
+            style={{width:'100%',height:'100%',objectFit:'cover',display:'block',background:'#000'}}
+          >
+            <source src={video.cloudinary} type="video/mp4" />
+          </video>
+        ) : playing ? (
+          // YouTube fallback, only loaded after the user clicks (no
+          // tracking cookies or heavy iframe until then)
+          <iframe
+            src={`https://www.youtube-nocookie.com/embed/${video.youtubeId}?autoplay=1&rel=0&modestbranding=1`}
+            title={video.title}
+            allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            style={{position:'absolute',inset:0,width:'100%',height:'100%',border:0}}
+          />
+        ) : (
+          // Lightweight click-to-play cover: poster + play button.
+          <button
+            onClick={() => setPlaying(true)}
+            aria-label="Play parent testimonial video"
+            style={{position:'absolute',inset:0,width:'100%',height:'100%',border:0,padding:0,cursor:'pointer',background:`center/cover no-repeat url(${poster})`}}
+          >
+            <span style={{position:'absolute',inset:0,background:'linear-gradient(180deg, rgba(8,12,20,.05), rgba(8,12,20,.45))'}}/>
+            <span style={{
+              position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',
+              width:74,height:74,borderRadius:'50%',
+              background:V.cr,boxShadow:'0 8px 30px rgba(122,22,38,.5)',
+              display:'flex',alignItems:'center',justifyContent:'center',
+            }}>
+              <span style={{color:'#fff',fontSize:26,marginLeft:5}}>{'\u25b6'}</span>
+            </span>
+          </button>
+        )}
+      </div>
+      {video.caption && (
+        <div style={{textAlign:'center',fontSize:12.5,color:V.sl,marginTop:12,fontStyle:'italic'}}>{video.caption}</div>
+      )}
+    </div>
+  )
+}
 
 const Stars = () => (
   <div style={{display:'flex',gap:2,marginBottom:16}}>
@@ -1855,15 +1943,15 @@ const PAGE_META = {
 // ═══════════════════════════════════════════════════════════
 const PRIVACY_POLICY = [
   {h:'1. Who we are',p:'Smartious E-School Ltd ("Smartious", "we", "us", "our") is a private limited company registered in Kenya, with its principal place of business at Diamond Plaza I, Parklands, Nairobi. We operate the website smartioushomeschool.com and deliver homeschool, online and private tuition services to students worldwide. For the purposes of Kenya\'s Data Protection Act, 2019 and the EU General Data Protection Regulation (GDPR), Smartious is the Data Controller of the personal data you share with us.'},
-  {h:'2. What personal data we collect',p:'We collect only the data we genuinely need to deliver education and communicate with families. This includes: (a) contact and identification data — student and parent names, email addresses, WhatsApp numbers, student date of birth, country of residence; (b) academic data — curriculum selection, current school, grade level, placement assessment answers and scores, progress reports; (c) payment data — we do not store full card numbers; Paystack processes all payments and we receive only the transaction reference and amount; (d) technical data — IP address, browser type, device type, pages visited, collected via cookies and analytics; (e) communication records — messages you send us by email, WhatsApp, contact form, or during consultation calls.'},
-  {h:'3. How we use your data',p:'We use personal data only for: (i) delivering the programme you have enrolled in — matching tutors, scheduling lessons, issuing progress reports, sitting exams; (ii) communicating with you about your account, lessons, payments, and service updates; (iii) processing payments via Paystack; (iv) improving our website and teaching methods through anonymised analytics; (v) complying with Kenyan tax, education, and regulatory obligations. We do not sell personal data to third parties. Ever.'},
-  {h:'4. Lawful basis for processing',p:'Under Article 6 of the GDPR and Section 30 of the Kenya Data Protection Act, we process your data on one of the following lawful bases: (a) Contract — to deliver the services you have enrolled in; (b) Consent — for marketing communications, which you can withdraw at any time; (c) Legitimate interests — for securing our systems, preventing fraud, and improving our services; (d) Legal obligation — for tax records, accounting, and regulatory compliance.'},
+  {h:'2. What personal data we collect',p:'We collect only the data we genuinely need to deliver education and communicate with families. This includes: (a) contact and identification data: student and parent names, email addresses, WhatsApp numbers, student date of birth, country of residence; (b) academic data: curriculum selection, current school, grade level, placement assessment answers and scores, progress reports; (c) payment data: we do not store full card numbers; Paystack processes all payments and we receive only the transaction reference and amount; (d) technical data: IP address, browser type, device type, pages visited, collected via cookies and analytics; (e) communication records: messages you send us by email, WhatsApp, contact form, or during consultation calls.'},
+  {h:'3. How we use your data',p:'We use personal data only for: (i) delivering the programme you have enrolled in, matching tutors, scheduling lessons, issuing progress reports, sitting exams; (ii) communicating with you about your account, lessons, payments, and service updates; (iii) processing payments via Paystack; (iv) improving our website and teaching methods through anonymised analytics; (v) complying with Kenyan tax, education, and regulatory obligations. We do not sell personal data to third parties. Ever.'},
+  {h:'4. Lawful basis for processing',p:'Under Article 6 of the GDPR and Section 30 of the Kenya Data Protection Act, we process your data on one of the following lawful bases: (a) Contract: to deliver the services you have enrolled in; (b) Consent: for marketing communications, which you can withdraw at any time; (c) Legitimate interests: for securing our systems, preventing fraud, and improving our services; (d) Legal obligation: for tax records, accounting, and regulatory compliance.'},
   {h:'5. Who we share your data with',p:'We share data only with parties essential to service delivery: (i) our assigned tutors and assessment teachers, who see only the data needed to teach your child; (ii) Paystack (Paystack Payments Limited, Lagos & Nairobi) for payment processing; (iii) Google (Firebase, Gmail, Drive) for our backend infrastructure, subject to Google\'s Cloud Data Processing Addendum; (iv) FormSubmit.co for form delivery; (v) MongoDB Atlas for database hosting; (vi) Netlify and Render for website and API hosting. All processors are bound by data processing agreements. We require them to meet or exceed our own data protection standards.'},
-  {h:'6. International transfers',p:'Some of our processors (Google, MongoDB Atlas, Netlify, Render) store data in the US or EU. Where data is transferred outside Kenya or the European Economic Area, we rely on appropriate safeguards — Standard Contractual Clauses approved by the European Commission, or equivalent mechanisms under the Kenya DPA — to ensure your data receives equivalent protection.'},
-  {h:'7. How long we keep your data',p:'We keep data only as long as needed: (a) active student records — for the duration of enrolment plus 7 years after the last lesson, to comply with Kenyan tax law and academic record-keeping standards; (b) enquiry and consultation records — 24 months from last contact; (c) marketing subscribers — until you unsubscribe; (d) website analytics — 26 months (Google Analytics default). After these periods, data is securely deleted or anonymised.'},
-  {h:'8. Your rights',p:'Both the Kenya Data Protection Act and the GDPR give you the following rights: (i) Access — request a copy of all personal data we hold about you; (ii) Rectification — correct inaccurate data; (iii) Erasure — request deletion of your data, subject to our legal retention obligations; (iv) Restriction — limit how we process your data; (v) Portability — receive your data in a machine-readable format; (vi) Objection — object to specific types of processing, especially marketing; (vii) Withdraw consent at any time. To exercise any right, email hello@smartioushomeschool.com. We respond within 30 days as required by law.'},
+  {h:'6. International transfers',p:'Some of our processors (Google, MongoDB Atlas, Netlify, Render) store data in the US or EU. Where data is transferred outside Kenya or the European Economic Area, we rely on appropriate safeguards , Standard Contractual Clauses approved by the European Commission, or equivalent mechanisms under the Kenya DPA , to ensure your data receives equivalent protection.'},
+  {h:'7. How long we keep your data',p:'We keep data only as long as needed: (a) active student records: for the duration of enrolment plus 7 years after the last lesson, to comply with Kenyan tax law and academic record-keeping standards; (b) enquiry and consultation records: 24 months from last contact; (c) marketing subscribers: until you unsubscribe; (d) website analytics: 26 months (Google Analytics default). After these periods, data is securely deleted or anonymised.'},
+  {h:'8. Your rights',p:'Both the Kenya Data Protection Act and the GDPR give you the following rights: (i) Access: request a copy of all personal data we hold about you; (ii) Rectification: correct inaccurate data; (iii) Erasure: request deletion of your data, subject to our legal retention obligations; (iv) Restriction: limit how we process your data; (v) Portability: receive your data in a machine-readable format; (vi) Objection: object to specific types of processing, especially marketing; (vii) Withdraw consent at any time. To exercise any right, email hello@smartioushomeschool.com. We respond within 30 days as required by law.'},
   {h:'9. Data of minors',p:'Because many of our students are under 18, parental consent is required before any child is enrolled or assessed. The parent is the primary account holder and the primary contact. We do not knowingly collect personal data directly from children under 13 without parental involvement. If you believe we have done so inadvertently, contact us and we will delete the data immediately.'},
-  {h:'10. Security',p:'We use industry-standard safeguards: HTTPS (TLS 1.3) across the entire site, password hashing (bcrypt) for all accounts, role-based access control in our backend, encrypted database backups, and quarterly security reviews. Paystack handles payment data to PCI-DSS Level 1 standards — we never see or store full card details. No system is perfectly secure, but we work continuously to reduce risk.'},
+  {h:'10. Security',p:'We use industry-standard safeguards: HTTPS (TLS 1.3) across the entire site, password hashing (bcrypt) for all accounts, role-based access control in our backend, encrypted database backups, and quarterly security reviews. Paystack handles payment data to PCI-DSS Level 1 standards , we never see or store full card details. No system is perfectly secure, but we work continuously to reduce risk.'},
   {h:'11. Breach notification',p:'In the unlikely event of a personal data breach affecting your rights, we will notify the Office of the Data Protection Commissioner (Kenya) within 72 hours as required by Section 43 of the Kenya DPA, and the affected individuals without undue delay, describing what happened, what data was affected, and the steps we are taking.'},
   {h:'12. Changes to this policy',p:'We may update this policy to reflect changes in law, our services, or our processors. When we make material changes we will notify active students and parents by email and update the "Effective" date at the top of this page. The most current version is always the one published here.'},
   {h:'13. Contact & complaints',p:'For any privacy question, data subject request, or complaint, email our Data Protection point of contact: hello@smartioushomeschool.com, phone +254 745 021 212, or write to Smartious E-School Ltd, Diamond Plaza I, Parklands, Nairobi, Kenya. You also have the right to lodge a complaint with the Office of the Data Protection Commissioner of Kenya (odpc.go.ke) or, if you are in the EU, with your national data protection authority.'},
@@ -1873,14 +1961,14 @@ const TERMS_OF_SERVICE = [
   {h:'1. About these terms',p:'These Terms of Service ("Terms") govern your use of smartioushomeschool.com and any educational services provided by Smartious E-School Ltd ("Smartious"). By enrolling a student, creating an account, or using any part of our website or services, you agree to these Terms. If you do not agree, please do not use our services.'},
   {h:'2. Eligibility',p:'To enrol a student, you must be the student\'s parent or legal guardian and at least 18 years old. Students under 18 cannot create an account without parental consent. We reserve the right to verify identity at any stage, particularly before releasing academic records or issuing predicted grades.'},
   {h:'3. Enrolment and assessment',p:'Enrolment begins when you submit the enrolment form and pay the USD 38 (KSh 5,000) application fee. The assessment fee is non-refundable once the placement test has been served, but counts towards your first month of tuition if you proceed to enrol. We aim to match a tutor within 48 working hours of a completed assessment.'},
-  {h:'4. Fees and payment',p:'All fees are stated in US Dollars. Local currency equivalents (e.g. KES for Kenyan families) are shown for convenience but the dollar price is the contractual amount. Fees are payable in advance — monthly, termly, or annually as selected. Termly payments attract a 5% discount; annual payments attract a 12% discount. Payments are processed via Paystack. We accept M-Pesa, Visa, Mastercard, bank transfer, and Apple Pay.'},
+  {h:'4. Fees and payment',p:'All fees are stated in US Dollars. Local currency equivalents (e.g. KES for Kenyan families) are shown for convenience but the dollar price is the contractual amount. Fees are payable in advance , monthly, termly, or annually as selected. Termly payments attract a 5% discount; annual payments attract a 12% discount. Payments are processed via Paystack. We accept M-Pesa, Visa, Mastercard, bank transfer, and Apple Pay.'},
   {h:'5. Cancellation and refunds',p:'You may cancel your enrolment with 30 days\' written notice. Within the first 14 days of enrolment, you may cancel for any reason and receive a full refund of any unused tuition. After 14 days, refunds are prorated to the next billing period minus any assessment or setup fees already delivered. Termly and annual payments are refunded for the unused balance only. The USD 38 / KSh 5,000 application fee is not refundable once the assessment has been served.'},
   {h:'6. Your obligations',p:'You agree to: (i) provide accurate information when enrolling; (ii) ensure your child attends scheduled lessons or gives reasonable notice for cancellations; (iii) provide a safe, supervised environment for home-visit tuition in Nairobi; (iv) treat Smartious staff, tutors, and our digital platforms with respect; (v) not share your portal login credentials with anyone outside your household; (vi) not record, reproduce, or redistribute our teaching materials or live lessons without written permission.'},
   {h:'7. Our obligations',p:'Smartious will: (i) deliver lessons, materials, and assessments as described in your enrolment package; (ii) provide qualified, background-checked tutors; (iii) keep academic records for at least 7 years; (iv) issue progress reports as specified in your plan; (v) communicate any material changes at least 30 days in advance; (vi) act in the student\'s best academic interests at all times.'},
-  {h:'8. Intellectual property',p:'All content published by Smartious — teaching materials, lesson recordings, assessment banks, software, the Mshauri AI tutor, and the website itself — is the intellectual property of Smartious E-School Ltd or our licensors. You may use this content only within your own household for the enrolled student\'s education. Commercial use, redistribution, or resale is strictly prohibited and may result in termination of services and legal action. Past papers and marking schemes are the property of their respective exam boards (Cambridge, Edexcel, IB) and are reproduced under licence or fair-dealing provisions.'},
+  {h:'8. Intellectual property',p:'All content published by Smartious , teaching materials, lesson recordings, assessment banks, software, the Mshauri AI tutor, and the website itself , is the intellectual property of Smartious E-School Ltd or our licensors. You may use this content only within your own household for the enrolled student\'s education. Commercial use, redistribution, or resale is strictly prohibited and may result in termination of services and legal action. Past papers and marking schemes are the property of their respective exam boards (Cambridge, Edexcel, IB) and are reproduced under licence or fair-dealing provisions.'},
   {h:'9. Tutor availability and substitution',p:'We strive to match each student to the same dedicated tutor for the duration of enrolment. Where a tutor becomes unavailable (illness, relocation, resignation), we will provide a qualified substitute and notify you as soon as reasonably possible. No refunds are issued for minor, temporary substitutions; extended changes may entitle you to a prorated refund or free rematching.'},
-  {h:'10. Code of conduct',p:'We reserve the right to suspend or terminate services — without refund — if a parent or student engages in abusive, discriminatory, or harassing behaviour towards our staff or tutors; attempts to defraud or deceive Smartious; or repeatedly breaches these Terms after written warning. This is rare, but necessary to protect our team.'},
-  {h:'11. Limitation of liability',p:'To the maximum extent permitted by Kenyan law, Smartious is not liable for: (i) exam results or university admissions — our role is to teach and prepare; outcomes depend on many factors including the student\'s effort and the decisions of exam boards and universities; (ii) indirect, consequential, or punitive damages; (iii) delays or outages caused by third-party services (Paystack, Google, Netlify). Our total liability for any claim is limited to the fees you have paid us in the 12 months preceding the claim.'},
+  {h:'10. Code of conduct',p:'We reserve the right to suspend or terminate services , without refund , if a parent or student engages in abusive, discriminatory, or harassing behaviour towards our staff or tutors; attempts to defraud or deceive Smartious; or repeatedly breaches these Terms after written warning. This is rare, but necessary to protect our team.'},
+  {h:'11. Limitation of liability',p:'To the maximum extent permitted by Kenyan law, Smartious is not liable for: (i) exam results or university admissions: our role is to teach and prepare; outcomes depend on many factors including the student\'s effort and the decisions of exam boards and universities; (ii) indirect, consequential, or punitive damages; (iii) delays or outages caused by third-party services (Paystack, Google, Netlify). Our total liability for any claim is limited to the fees you have paid us in the 12 months preceding the claim.'},
   {h:'12. Governing law',p:'These Terms are governed by the laws of Kenya. Any dispute arising from these Terms or our services will be resolved first by good-faith negotiation, then by mediation in Nairobi under the Mediation (Court-Annexed) Rules, and only then by the courts of Kenya, which have exclusive jurisdiction.'},
   {h:'13. Changes to these terms',p:'We may update these Terms from time to time. Material changes will be communicated to active students and parents at least 30 days in advance by email. Minor clarifications (typos, reformatting) may be made without notice. The current version is always published here with its effective date.'},
   {h:'14. Contact',p:'Questions about these Terms: hello@smartioushomeschool.com, +254 745 021 212, or Diamond Plaza I, Parklands, Nairobi, Kenya.'},
@@ -1888,28 +1976,43 @@ const TERMS_OF_SERVICE = [
 
 const COOKIE_POLICY = [
   {h:'1. What are cookies?',p:'Cookies are small text files placed on your device when you visit a website. They allow the site to remember actions and preferences (such as login, language, font size, and other display preferences) over time, so you don\'t have to re-enter them every time you return. Cookies may be "session" cookies (deleted when you close your browser) or "persistent" cookies (stored until they expire or you delete them).'},
-  {h:'2. Cookies we use',p:'Smartious uses a small number of carefully chosen cookies in four categories: (a) strictly necessary — authentication tokens, CSRF protection, session state. These cannot be switched off as the site will not work without them; (b) functional — remembers your preferences such as billing cycle selection, blog category filters; (c) analytics — Google Analytics 4 collects anonymous, aggregated data about how visitors use the site so we can improve it. We have IP anonymisation enabled; (d) payment — Paystack sets cookies during checkout to prevent fraud and maintain the payment session. These are set only on the payment step.'},
-  {h:'3. Third-party cookies',p:'When you load pages that embed third-party content — the Paystack checkout iframe, a YouTube video on the blog, a Google Map of our Nairobi centre — those third parties may set their own cookies. We do not control these. You can review their policies at paystack.com/privacy, policies.google.com, and similar.'},
-  {h:'4. Your choices',p:'You can control cookies three ways: (i) in your browser settings — most browsers let you block all cookies, block third-party cookies, or delete cookies on exit; (ii) through our cookie banner (for EU/UK visitors) — you can accept all, accept only essential, or customise by category; (iii) by opting out of Google Analytics at tools.google.com/dlpage/gaoptout. Blocking strictly necessary cookies will prevent you from logging into the portal or completing enrolment.'},
+  {h:'2. Cookies we use',p:'Smartious uses a small number of carefully chosen cookies in four categories: (a) strictly necessary: authentication tokens, CSRF protection, session state. These cannot be switched off as the site will not work without them; (b) functional: remembers your preferences such as billing cycle selection, blog category filters; (c) analytics: Google Analytics 4 collects anonymous, aggregated data about how visitors use the site so we can improve it. We have IP anonymisation enabled; (d) payment: Paystack sets cookies during checkout to prevent fraud and maintain the payment session. These are set only on the payment step.'},
+  {h:'3. Third-party cookies',p:'When you load pages that embed third-party content , the Paystack checkout iframe, a YouTube video on the blog, a Google Map of our Nairobi centre , those third parties may set their own cookies. We do not control these. You can review their policies at paystack.com/privacy, policies.google.com, and similar.'},
+  {h:'4. Your choices',p:'You can control cookies three ways: (i) in your browser settings: most browsers let you block all cookies, block third-party cookies, or delete cookies on exit; (ii) through our cookie banner (for EU/UK visitors) , you can accept all, accept only essential, or customise by category; (iii) by opting out of Google Analytics at tools.google.com/dlpage/gaoptout. Blocking strictly necessary cookies will prevent you from logging into the portal or completing enrolment.'},
   {h:'5. Do Not Track',p:'Our site respects the "Do Not Track" browser signal for analytics cookies. If your browser sends a DNT signal, Google Analytics does not fire.'},
   {h:'6. Changes to this policy',p:'If we add or remove cookies, we will update this page and, for EU/UK visitors, re-request consent via our cookie banner. The effective date at the top of this page reflects the most recent revision.'},
   {h:'7. Questions',p:'For any cookie-related question, email hello@smartioushomeschool.com.'},
 ]
 
 const GDPR_COMPLIANCE = [
-  {h:'1. GDPR in plain English',p:'The EU General Data Protection Regulation (GDPR) is the world\'s strictest privacy law. It applies to Smartious whenever we process personal data of people in the European Union — for example, a family who moves to Germany while their child is enrolled with us, or a parent in France enquiring about IUFP. Kenya\'s own Data Protection Act, 2019 is closely modelled on the GDPR, so the rights described here apply to all our students regardless of country.'},
-  {h:'2. Your rights under GDPR',p:'As a data subject, you have eight specific rights: (i) the right to be informed — which is what this page is for; (ii) the right of access — you can request a copy of everything we hold about you; (iii) the right to rectification — correct inaccurate data; (iv) the right to erasure ("right to be forgotten") — ask us to delete your data, subject to legal retention obligations like tax records; (v) the right to restrict processing — pause our use of your data while a dispute is resolved; (vi) the right to data portability — receive your data in a machine-readable format to transfer to another provider; (vii) the right to object — to direct marketing or to processing based on legitimate interests; (viii) rights related to automated decision-making — we do not make any decision about your child based solely on automated processing, so this right does not currently come into play.'},
-  {h:'3. Our lawful bases',p:'We process personal data on one of four lawful bases under Article 6 GDPR: (a) Contract — processing necessary to deliver the educational services you have enrolled in; (b) Consent — for optional marketing emails and analytics cookies, which you can withdraw at any time; (c) Legitimate interests — for preventing fraud, securing our systems, and improving our services, where our interests do not override your rights; (d) Legal obligation — for tax and regulatory record-keeping.'},
+  {h:'1. GDPR in plain English',p:'The EU General Data Protection Regulation (GDPR) is the world\'s strictest privacy law. It applies to Smartious whenever we process personal data of people in the European Union , for example, a family who moves to Germany while their child is enrolled with us, or a parent in France enquiring about IUFP. Kenya\'s own Data Protection Act, 2019 is closely modelled on the GDPR, so the rights described here apply to all our students regardless of country.'},
+  {h:'2. Your rights under GDPR',p:'As a data subject, you have eight specific rights: (i) the right to be informed: which is what this page is for; (ii) the right of access: you can request a copy of everything we hold about you; (iii) the right to rectification: correct inaccurate data; (iv) the right to erasure ("right to be forgotten") , ask us to delete your data, subject to legal retention obligations like tax records; (v) the right to restrict processing: pause our use of your data while a dispute is resolved; (vi) the right to data portability: receive your data in a machine-readable format to transfer to another provider; (vii) the right to object: to direct marketing or to processing based on legitimate interests; (viii) rights related to automated decision-making, we do not make any decision about your child based solely on automated processing, so this right does not currently come into play.'},
+  {h:'3. Our lawful bases',p:'We process personal data on one of four lawful bases under Article 6 GDPR: (a) Contract: processing necessary to deliver the educational services you have enrolled in; (b) Consent: for optional marketing emails and analytics cookies, which you can withdraw at any time; (c) Legitimate interests: for preventing fraud, securing our systems, and improving our services, where our interests do not override your rights; (d) Legal obligation: for tax and regulatory record-keeping.'},
   {h:'4. Data Protection Officer',p:'Because Smartious is not a large-scale processor of special-category data, we are not legally required to appoint a formal Data Protection Officer. We have instead designated a Data Protection Point of Contact: Alfred Ouko (Founder), reachable at hello@smartioushomeschool.com or +254 745 021 212. All data subject requests are handled by this contact.'},
-  {h:'5. Transfers outside the EEA',p:'We are based in Kenya. Data you share with us crosses the EU–Kenya border. Kenya does not yet have a formal adequacy decision from the European Commission. We rely on the European Commission\'s Standard Contractual Clauses (SCCs) as the lawful safeguard for transfers. Our third-party processors (Google, MongoDB, Netlify, Render, Paystack) are all bound by SCCs or equivalent frameworks and meet or exceed EU data protection standards.'},
+  {h:'5. Transfers outside the EEA',p:'We are based in Kenya. Data you share with us crosses the EU and Kenya border. Kenya does not yet have a formal adequacy decision from the European Commission. We rely on the European Commission\'s Standard Contractual Clauses (SCCs) as the lawful safeguard for transfers. Our third-party processors (Google, MongoDB, Netlify, Render, Paystack) are all bound by SCCs or equivalent frameworks and meet or exceed EU data protection standards.'},
   {h:'6. Data minimisation',p:'We collect the minimum data necessary for each purpose. For example, we ask for a student\'s date of birth to assign the correct academic level, but we do not ask for national ID numbers or passport details unless required for university applications. We routinely delete data we no longer need.'},
   {h:'7. Breach notification',p:'Under Article 33 GDPR, we will notify the competent supervisory authority of a personal data breach within 72 hours of becoming aware of it, unless the breach is unlikely to result in a risk to the rights and freedoms of individuals. Under Article 34, we will notify affected individuals without undue delay if the breach is likely to result in a high risk. We will describe what happened, what data was affected, the likely consequences, and the steps we are taking.'},
-  {h:'8. Exercising your rights',p:'To exercise any GDPR right — access, rectification, erasure, restriction, portability, objection — email hello@smartioushomeschool.com. Include: (a) the right you wish to exercise; (b) enough information for us to verify your identity (email associated with your Smartious account, plus one recent transaction reference if applicable); (c) any specific details about the request. We respond within 30 days. This service is free unless requests are manifestly unfounded or excessive, in which case we may charge a reasonable fee or refuse to act.'},
-  {h:'9. Complaints',p:'If you believe we have not handled your personal data properly, we want to hear first and put it right. Email hello@smartioushomeschool.com. If you remain dissatisfied, you have the right to lodge a complaint with: (i) the Office of the Data Protection Commissioner of Kenya at odpc.go.ke; (ii) the data protection authority of your EU country of residence — a list is maintained at edpb.europa.eu/about-edpb/board/members.'},
+  {h:'8. Exercising your rights',p:'To exercise any GDPR right , access, rectification, erasure, restriction, portability, objection , email hello@smartioushomeschool.com. Include: (a) the right you wish to exercise; (b) enough information for us to verify your identity (email associated with your Smartious account, plus one recent transaction reference if applicable); (c) any specific details about the request. We respond within 30 days. This service is free unless requests are manifestly unfounded or excessive, in which case we may charge a reasonable fee or refuse to act.'},
+  {h:'9. Complaints',p:'If you believe we have not handled your personal data properly, we want to hear first and put it right. Email hello@smartioushomeschool.com. If you remain dissatisfied, you have the right to lodge a complaint with: (i) the Office of the Data Protection Commissioner of Kenya at odpc.go.ke; (ii) the data protection authority of your EU country of residence , a list is maintained at edpb.europa.eu/about-edpb/board/members.'},
   {h:'10. Effective date & reviews',p:'This page was last reviewed on 20 April 2026. We review our GDPR compliance at least once every 12 months and whenever we materially change how we process data.'},
 ]
 
-// Reusable legal page shell — consistent design, readable typography, back button
+// Reusable legal page shell - consistent design, readable typography, back button
+const CHILD_PROTECTION_POLICY = [
+  {h:'1. Our commitment',p:'Smartious E-School Ltd teaches children every day, in their homes and online, across many countries. Their safety comes before everything else we do. This Child Protection and Safeguarding Policy sets out how we keep every student safe, what we expect of our staff and tutors, and how anyone can raise a concern. It applies to every person who works with or on behalf of Smartious, whether teaching in person in Nairobi or online anywhere in the world.'},
+  {h:'2. Who this protects',p:'This policy protects every student under the age of 18, and any student aged 18 or over who is considered a vulnerable adult. Because our classrooms are often virtual and our families are spread across continents, we hold ourselves to the safeguarding standards of the strongest jurisdictions we serve, including Kenya, the United Kingdom and the United Arab Emirates, rather than the weakest.'},
+  {h:'3. Safer recruitment',p:'Every tutor and member of staff is interviewed in person or by video, provides references that we contact directly, and confirms their identity and qualifications before they ever meet a child. Where the law of a tutor\'s country allows it, we require a criminal record check such as a Kenyan Police Clearance Certificate or an equivalent background check. No adult works unsupervised with a child until these checks are complete.'},
+  {h:'4. Safe online teaching',p:'Our live classes and one to one lessons follow clear rules that protect both the child and the teacher. Lessons happen on Smartious platforms, never on a tutor\'s personal account. Tutors do not contact students through personal phone numbers, personal email, or private social media. A parent is always able to see the schedule and join a lesson. Group lessons and recordings are logged. These rules exist so that every interaction is visible and accountable.'},
+  {h:'5. The student community',p:'Our student community space is one monitored room for the whole school. It is designed for safety by default: there are no private messages between students, students cannot create hidden groups, and teachers are present and visible. Every message passes an automatic filter that blocks the sharing of phone numbers, email addresses, links and social media handles, so that no one can move a child off our safe platform. Any student or teacher can report a message, and repeated reports hide it automatically until a moderator reviews it. Removed messages are kept on record. Teachers and administrators moderate the space every day.'},
+  {h:'6. What we consider abuse',p:'We take seriously every form of harm to a child: physical abuse, emotional abuse, sexual abuse, neglect, bullying and online harms such as grooming, harassment and exposure to harmful content. Our staff are trained to recognise the signs, to take any disclosure seriously, and never to promise a child that they will keep a safeguarding concern secret.'},
+  {h:'7. How to raise a concern',p:'If you are worried about the safety of any child connected to Smartious, tell us at once. Email our Designated Safeguarding Lead at safeguarding@smartioushomeschool.com or call +254 745 021 212 and ask for the safeguarding lead. If a child is in immediate danger, contact your local emergency services first, then tell us. Concerns can be raised by a parent, a student, a member of staff, or a member of the public. You do not need proof to raise a concern; a genuine worry is enough.'},
+  {h:'8. How we respond',p:'Every concern is recorded and reviewed by our Designated Safeguarding Lead within one working day, and urgent concerns immediately. We act in the best interests of the child at all times. Where we believe a child is at risk of harm, we will report to the relevant authorities, which may include the Directorate of Children\'s Services in Kenya or the equivalent child protection agency in the child\'s country. We cooperate fully with any investigation.'},
+  {h:'9. Staff conduct and training',p:'Every member of staff agrees to a code of conduct that governs how they communicate with children, maintains professional boundaries, and requires them to report any concern. Safeguarding is part of induction for every new tutor, and we refresh this training regularly. A member of staff who breaches this policy faces disciplinary action up to and including dismissal and referral to the authorities.'},
+  {h:'10. Working with parents',p:'Parents are our partners in safeguarding. The parent is the primary account holder, sees the lesson schedule, and can raise a concern at any time. We encourage families to talk with their children about online safety, to know who is teaching their child, and to contact us the moment anything feels wrong.'},
+  {h:'11. Our safeguarding lead',p:'Our Designated Safeguarding Lead is responsible for handling concerns, keeping records, liaising with authorities, and reviewing this policy. Reach the safeguarding lead at safeguarding@smartioushomeschool.com or +254 745 021 212. In the lead\'s absence, the Founder, Alfred Ouko, acts as deputy.'},
+  {h:'12. Review',p:'We review this policy at least once every 12 months, and immediately after any safeguarding incident or any change in the law of the countries we serve. This page shows the date it was last reviewed. Keeping children safe is never finished, and we improve our practice continuously.'},
+]
+
 // ═══════════════════════════════════════════════════════════
 // COUNTRY DIALLING CODES (for phone / WhatsApp input)
 // Kenya first (default), then the markets we serve most, then the rest alphabetical.
@@ -2068,7 +2171,7 @@ function LegalPage({ P, title, em, subtitle, effective, sections }) {
 
         {/* Other legal pages navigation */}
         <div style={{maxWidth:820,margin:'32px auto 0',display:'flex',gap:8,justifyContent:'center',flexWrap:'wrap'}}>
-          {[['privacy','Privacy Policy'],['terms','Terms of Service'],['cookies','Cookie Policy'],['gdpr','GDPR']].map(([id,lbl]) => (
+          {[['privacy','Privacy Policy'],['terms','Terms of Service'],['cookies','Cookie Policy'],['gdpr','GDPR'],['child-protection','Child Protection']].map(([id,lbl]) => (
             <button key={id} onClick={() => P(id)} style={{padding:'8px 16px',border:'1px solid #F0E8D4',background:'#FFFFFF',color:'#121928',fontSize:12.5,fontWeight:600,borderRadius:20,cursor:'pointer',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",transition:'all .2s'}}
               onMouseEnter={e=>{e.currentTarget.style.borderColor='#8B1A2E';e.currentTarget.style.color='#8B1A2E'}}
               onMouseLeave={e=>{e.currentTarget.style.borderColor='#F0E8D4';e.currentTarget.style.color='#121928'}}>
@@ -6559,6 +6662,75 @@ export default function LandingPage() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div></section>
+
+          {/* ═══════════════════════════════════════════
+              SAFEGUARDING - trust closer before the CTA.
+              Links to the full Child Protection policy page.
+          ═══════════════════════════════════════════ */}
+          <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64}}><div className="wrap">
+            <div style={{maxWidth:1000,margin:'0 auto'}}>
+              <div style={{
+                display:'grid',
+                gridTemplateColumns:'minmax(260px, 360px) 1fr',
+                gap:44,
+                alignItems:'center',
+              }} className="safeguard-grid">
+                <style>{`
+                  @media (max-width: 768px) {
+                    .safeguard-grid { grid-template-columns: 1fr !important; gap: 24px !important; }
+                  }
+                `}</style>
+                <div className="reveal">
+                  <div className="eyebrow" style={{marginBottom:12}}>Safeguarding</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.7rem, 3.5vw, 2.2rem)',fontWeight:400,color:V.ink,lineHeight:1.2,marginBottom:14,letterSpacing:'-.01em'}}>
+                    A child\u2019s safety comes <em style={{color:V.cr,fontStyle:'italic'}}>before everything.</em>
+                  </h2>
+                  <div style={{width:60,height:2,background:V.cr,marginBottom:20}}/>
+                  <p style={{fontSize:14.5,color:V.sl,lineHeight:1.75}}>
+                    We teach children every day, in their homes and online across many countries. Every tutor is vetted and background checked. Our student community is one monitored space with no private messaging, where teachers are always present. And our safeguarding lead is one email away for any concern, from any parent, at any time.
+                  </p>
+                </div>
+                <div className="reveal">
+                  <div style={{
+                    background:V.bone,
+                    border:`1px solid ${V.bone3}`,
+                    borderRadius:14,
+                    padding:'28px 30px',
+                  }}>
+                    <div style={{display:'flex',flexDirection:'column',gap:16}}>
+                      {[
+                        ['Vetted teachers','Every tutor is interviewed, reference checked, and background checked before meeting a child.'],
+                        ['Safe by design','No private student messaging. Lessons stay on Smartious platforms, never personal accounts.'],
+                        ['Always a way to speak up','Any concern reaches our safeguarding lead directly, and we act within one working day.'],
+                      ].map(([t,d]) => (
+                        <div key={t} style={{display:'flex',gap:12,alignItems:'flex-start'}}>
+                          <div style={{width:8,height:8,borderRadius:'50%',background:V.cr,marginTop:7,flexShrink:0}}/>
+                          <div>
+                            <div style={{fontWeight:700,color:V.ink,fontSize:14,marginBottom:2}}>{t}</div>
+                            <div style={{fontSize:13,color:V.sl,lineHeight:1.6}}>{d}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{marginTop:22,paddingTop:20,borderTop:`1px solid ${V.bone3}`}}>
+                      <div onClick={() => P('child-protection')} style={{
+                        cursor:'pointer',
+                        display:'inline-flex',
+                        alignItems:'center',
+                        gap:8,
+                        color:V.cr,
+                        fontWeight:700,
+                        fontSize:14,
+                      }}>
+                        Read our Child Protection and Safeguarding Policy
+                        <span style={{fontSize:16}}>{'\u2192'}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div></section>
 
@@ -18423,6 +18595,11 @@ export default function LandingPage() {
                       <span>{SMARTIOUS_RATING.count}+ Google reviews</span>
                     </div>
                   </div>
+                  {country.slug === 'kenya' && (
+                    <div style={{marginBottom:28}}>
+                      <ParentVideo V={V} />
+                    </div>
+                  )}
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:16,marginBottom:24}}>
                     {(() => { const o = country.slug.split('').reduce((a,c)=>a+c.charCodeAt(0),0) % SMARTIOUS_REVIEWS.length; return [...SMARTIOUS_REVIEWS.slice(o), ...SMARTIOUS_REVIEWS.slice(0,o)].slice(0,3) })().map((r, i) => (
                       <div key={i} style={{padding:'20px 22px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,display:'flex',flexDirection:'column',gap:10}}>
@@ -23541,6 +23718,7 @@ export default function LandingPage() {
       {page === 'terms'   && <LegalPage P={P} title="Terms" em="of Service"  subtitle="The agreement between you and Smartious E-School Ltd when you use our website, portals, and services." effective="20 April 2026" sections={TERMS_OF_SERVICE}/>}
       {page === 'cookies' && <LegalPage P={P} title="Cookie" em="Policy" subtitle="How we use cookies and similar technologies on smartioushomeschool.com." effective="20 April 2026" sections={COOKIE_POLICY}/>}
       {page === 'gdpr'    && <LegalPage P={P} title="GDPR" em="Compliance" subtitle="Your rights under the EU General Data Protection Regulation and Kenya's Data Protection Act, 2019." effective="20 April 2026" sections={GDPR_COMPLIANCE}/>}
+      {page === 'child-protection' && <LegalPage P={P} title="Child Protection" em="& Safeguarding" subtitle="How Smartious keeps every child safe, in person and online, and how to raise a concern." effective="27 August 2026" sections={CHILD_PROTECTION_POLICY}/>}
 
       {/* ══════════════════════════════════════════
           ENROLL
@@ -24495,7 +24673,7 @@ function Footer({ P }) {
         <div className="ft-bot">
           <div className="ft-copy">{cfg.footerCopy || '© 2026 Smartious E-School Ltd. Nairobi, Kenya. All rights reserved.'}</div>
           <div className="ft-acs">
-            {[['privacy','Privacy Policy'],['terms','Terms of Service'],['cookies','Cookie Policy'],['gdpr','GDPR']].map(([id, l]) => (
+            {[['privacy','Privacy Policy'],['terms','Terms of Service'],['cookies','Cookie Policy'],['gdpr','GDPR'],['child-protection','Child Protection']].map(([id, l]) => (
               <div key={id} className="ft-ac" onClick={() => P(id)} style={{cursor:'pointer'}}>{l}</div>
             ))}
             <div
