@@ -297,7 +297,7 @@ export const RWANDA_COUNTRY = {
   citiesSectionBody: 'Four Rwandan cities. Each page covers local international school options, family situations, and answers specific to your area — from Kigali Smart City professionals to Musanze Volcanoes National Park NGO households.',
 
   trustSignals: [
-    { metric: 'Established', value: '2022', sub: 'Nairobi-based' },
+    { metric: 'Established', value: '2018', sub: 'Nairobi-based' },
     { metric: 'Curricula', value: '5', sub: 'Cambridge · Edexcel · IB · American AP · CBC' },
     { metric: 'Tutors', value: '78+', sub: 'PGCE-qualified subject specialists' },
     { metric: 'Countries served', value: '14+', sub: 'Africa · Gulf · Europe · Americas' },
