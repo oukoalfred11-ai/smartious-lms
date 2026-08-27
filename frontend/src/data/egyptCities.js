@@ -503,7 +503,7 @@ export const EGYPT_COUNTRY = {
   citiesSectionBody: 'Six Egyptian cities. Each page covers local international school landscape, capacity constraints, family situations and answers specific to your area — from Cairo Maadi US Embassy families to New Cairo AUC faculty households to Sheikh Zayed Smart Village corporate transfers to Alexandria Western Desert oil & gas families to NAC government ministry relocations to Sharm El Sheikh hotel and dive industry households.',
 
   trustSignals: [
-    { metric: 'Established', value: '2022', sub: 'Nairobi-based · serving Egyptian families' },
+    { metric: 'Established', value: '2018', sub: 'Nairobi-based · serving Egyptian families' },
     { metric: 'Curricula', value: '5', sub: 'Cambridge · Edexcel · IB · American AP · CBC' },
     { metric: 'Tutors', value: '78+', sub: 'PGCE-qualified subject specialists' },
     { metric: 'Countries served', value: '14+', sub: 'Africa · Gulf · Europe · Americas' },
