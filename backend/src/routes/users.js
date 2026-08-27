@@ -7,40 +7,51 @@ const jwt = require('jsonwebtoken');
 const { sendVerificationEmail, sendTeacherMemoEmail } = require('../services/emailService');
 const { sendWelcomeEmail } = require('../lib/email');
 
-// ── Cloudinary avatar upload setup ────────────────────────
-// Wrapped defensively: if multer / multer-storage-cloudinary are not
-// installed, we must NOT throw at module load — that would crash the
-// entire server (index.js requires this file at boot). Instead the
-// avatar endpoint degrades to a clear 503 and every other /api/users
-// route keeps working.
+// ── Avatar upload setup ───────────────────────────────────
+// Uses in-memory multer + Cloudflare R2 (same proven path as
+// communication attachments), NOT Cloudinary — that module is not
+// installed on the server and made this endpoint 503. Wrapped
+// defensively so a missing multer never crashes the server at boot:
+// the endpoint degrades to a clear message and every other
+// /api/users route keeps working.
 let uploadAvatar = null;
 let avatarUploadError = null;
 try {
   const multer = require('multer');
-  const cloudinary = require('cloudinary').v2;
-  const { CloudinaryStorage } = require('multer-storage-cloudinary');
-
-  cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key:    process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-  });
-
-  const avatarStorage = new CloudinaryStorage({
-    cloudinary,
-    params: {
-      folder: 'smartious/avatars',
-      allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
-      transformation: [{ width: 400, height: 400, crop: 'fill', gravity: 'face' }],
-    },
-  });
   uploadAvatar = multer({
-    storage: avatarStorage,
+    storage: multer.memoryStorage(),
     limits: { fileSize: 5 * 1024 * 1024 },   // 5 MB cap
+    fileFilter: (req, file, cb) => {
+      if (/^image\/(jpe?g|png|webp|gif)$/i.test(file.mimetype)) return cb(null, true);
+      cb(new Error('Please choose a JPG, PNG, WEBP or GIF image.'));
+    },
   });
 } catch (e) {
   avatarUploadError = e.message;
   console.error('[users] avatar upload disabled —', e.message);
+}
+
+// Push an image buffer to R2, returning a public URL. Falls back to
+// a base64 data URL if R2 is not configured, so uploads still work
+// in every environment (the avatar field simply stores the data URL).
+async function storeAvatarBuffer(file) {
+  try {
+    const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+    const { v4: uuid } = require('uuid');
+    if (!process.env.R2_ACCOUNT_ID || !process.env.R2_BUCKET_NAME) throw new Error('R2 not configured');
+    const s3 = new S3Client({
+      region: 'auto',
+      endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+      credentials: { accessKeyId: process.env.R2_ACCESS_KEY_ID, secretAccessKey: process.env.R2_SECRET_ACCESS_KEY },
+    });
+    const ext = (file.originalname || 'img').split('.').pop().toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+    const key = `avatars/${Date.now()}-${uuid()}.${ext}`;
+    await s3.send(new PutObjectCommand({ Bucket: process.env.R2_BUCKET_NAME, Key: key, Body: file.buffer, ContentType: file.mimetype }));
+    return `${(process.env.R2_PUBLIC_URL || '').replace(/\/+$/, '')}/${key}`;
+  } catch (e) {
+    console.warn('[users avatar] R2 unavailable, using data URL:', e.message);
+    return `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
+  }
 }
 
 // ─────────────────────────────────────────────────────────
@@ -216,41 +227,44 @@ router.get('/teachers/list', auth, requireRole('admin', 'ops_manager'), async (r
   }
 });
 
-// POST /api/users/:id/avatar — admin uploads a profile image
-// for any user. Returns the Cloudinary URL and also saves it to
-// the user's avatar field.
-router.post('/:id/avatar', auth, requireRole('admin', 'ops_manager'), (req, res) => {
+// POST /api/users/avatar — upload a profile image and get a URL back
+// WITHOUT needing a user to exist yet. This is what the create form
+// uses: admin picks a file, we return the URL, the form includes it
+// in the create payload. No pasting required.
+router.post('/avatar', auth, requireRole('admin', 'ops_manager'), (req, res) => {
   if (!uploadAvatar) {
-    return res.status(503).json({
-      success: false,
-      message: 'Image upload is unavailable on the server: ' + (avatarUploadError || 'upload module not installed.'),
-    });
+    return res.status(503).json({ success: false, message: 'Image upload is unavailable on the server: ' + (avatarUploadError || 'upload module not installed.') });
   }
   uploadAvatar.single('file')(req, res, async (err) => {
-    if (err) {
-      console.error('[users avatar upload]', err.message);
-      return res.status(400).json({ success: false, message: err.message || 'Upload failed.' });
-    }
-    if (!req.file)
-      return res.status(400).json({ success: false, message: 'No file uploaded.' });
-
+    if (err) return res.status(400).json({ success: false, message: err.message || 'Upload failed.' });
+    if (!req.file) return res.status(400).json({ success: false, message: 'No file received.' });
     try {
-      const user = await User.findByIdAndUpdate(
-        req.params.id,
-        { $set: { avatar: req.file.path } },
-        { new: true }
-      ).select('-password');
-      if (!user)
-        return res.status(404).json({ success: false, message: 'User not found.' });
+      const url = await storeAvatarBuffer(req.file);
+      return res.json({ success: true, message: 'Image uploaded.', data: { avatar: url, url } });
+    } catch (e) {
+      console.error('[users avatar upload]', e.message);
+      return res.status(500).json({ success: false, message: 'Could not process the image. Try again.' });
+    }
+  });
+});
 
-      res.json({
-        success: true,
-        message: 'Avatar updated.',
-        data: { avatar: req.file.path },
-      });
+// POST /api/users/:id/avatar — upload a profile image for an existing
+// user and save it to their record in one step (used when editing).
+router.post('/:id/avatar', auth, requireRole('admin', 'ops_manager'), (req, res) => {
+  if (!uploadAvatar) {
+    return res.status(503).json({ success: false, message: 'Image upload is unavailable on the server: ' + (avatarUploadError || 'upload module not installed.') });
+  }
+  uploadAvatar.single('file')(req, res, async (err) => {
+    if (err) return res.status(400).json({ success: false, message: err.message || 'Upload failed.' });
+    if (!req.file) return res.status(400).json({ success: false, message: 'No file received.' });
+    try {
+      const avatar = await storeAvatarBuffer(req.file);
+      const user = await User.findByIdAndUpdate(req.params.id, { $set: { avatar } }, { new: true }).select('-password');
+      if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
+      return res.json({ success: true, message: 'Avatar updated.', data: { avatar } });
     } catch (e) {
       console.error('[users avatar save]', e.message);
-      res.status(500).json({ success: false, message: 'Failed to save avatar.' });
+      return res.status(500).json({ success: false, message: 'Failed to save avatar.' });
     }
   });
 });
