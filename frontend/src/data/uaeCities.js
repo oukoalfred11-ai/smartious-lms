@@ -387,7 +387,7 @@ export const UAE_COUNTRY = {
 
   // ─── Trust signals (factual, no fabricated metrics) ───
   trustSignals: [
-    { metric: 'Established', value: '2022', sub: 'Nairobi-based' },
+    { metric: 'Established', value: '2018', sub: 'Nairobi-based' },
     { metric: 'Curricula', value: '5', sub: 'Cambridge · Edexcel · IB · American AP · CBC' },
     { metric: 'Tutors', value: '78+', sub: 'PGCE-qualified subject specialists' },
     { metric: 'Countries served', value: '14+', sub: 'Africa · Gulf · Europe · Americas' },
