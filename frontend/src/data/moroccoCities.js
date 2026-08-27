@@ -512,7 +512,7 @@ export const MOROCCO_COUNTRY = {
   citiesSectionBody: 'Six Moroccan cities. Each page covers local international school landscape, capacity constraints, family situations and answers specific to your area — from Casablanca Finance City corporate transfers to Rabat diplomatic missions to Marrakech tourism and lifestyle families to Tangier automotive industry executives to Fes university faculty households to Agadir Atlantic coast tourism and agribusiness families.',
 
   trustSignals: [
-    { metric: 'Established', value: '2019', sub: 'Nairobi-based · serving Moroccan families' },
+    { metric: 'Established', value: '2018', sub: 'Nairobi-based · serving Moroccan families' },
     { metric: 'Curricula', value: '5', sub: 'Cambridge · Edexcel · IB · American AP · CBC' },
     { metric: 'Subject specialists', value: 'PGCE-trained', sub: 'Degree-qualified · many TSC-registered' },
     { metric: 'Countries served', value: '14+', sub: 'Africa · Gulf · Europe · Americas' },
