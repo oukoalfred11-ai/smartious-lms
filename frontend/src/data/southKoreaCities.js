@@ -499,7 +499,7 @@ export const SOUTH_KOREA_COUNTRY = {
   citiesSectionBody: 'Six Korean cities. Each page covers local international school landscape, capacity constraints, family situations and answers specific to your area — from Seoul Gangnam-gu hagwon-replacement families to Songdo IBD multinational corporate transfers to Busan maritime industry executives to Pyeongtaek USAG Camp Humphreys US military families to Daejeon KAIST and Daedeok Innopolis research households to Jeju Global Education City relocation alternative-seekers.',
 
   trustSignals: [
-    { metric: 'Established', value: '2019', sub: 'Nairobi-based · serving Korean families' },
+    { metric: 'Established', value: '2018', sub: 'Nairobi-based · serving Korean families' },
     { metric: 'Curricula', value: '5', sub: 'Cambridge · Edexcel · IB · American AP · CBC' },
     { metric: 'Subject specialists', value: 'PGCE-trained', sub: 'Degree-qualified · many TSC-registered' },
     { metric: 'Countries served', value: '14+', sub: 'Asia · Africa · Gulf · Europe · Americas' },
