@@ -356,7 +356,7 @@ export const ETHIOPIA_COUNTRY = {
   citiesSectionBody: 'Five Ethiopian cities. Each page covers local international school options, family situations, and answers specific to your area — from Addis Ababa diplomatic households to Mekelle regional families to Bahir Dar academic communities.',
 
   trustSignals: [
-    { metric: 'Established', value: '2022', sub: 'Nairobi-based' },
+    { metric: 'Established', value: '2018', sub: 'Nairobi-based' },
     { metric: 'Curricula', value: '5', sub: 'Cambridge · Edexcel · IB · American AP · CBC' },
     { metric: 'Tutors', value: '78+', sub: 'PGCE-qualified subject specialists' },
     { metric: 'Countries served', value: '14+', sub: 'Africa · Gulf · Europe · Americas' },
