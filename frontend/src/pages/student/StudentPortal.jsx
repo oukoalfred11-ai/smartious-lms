@@ -14206,19 +14206,26 @@ function CommunityFeedView({ user, toast }) {
 
 
 // ═══════════════════════════════════════════════════════════
-// COMMUNITY CHAT — the whole school in one live room, WhatsApp
-// style. Every student is in automatically. Channels organize
-// the room; announcements are staff only; no private messages.
+// COMMUNITY CHAT — the whole school in one live room. A dark
+// theatre inside the light portal: colored student names, gold
+// teachers, crimson for your own voice. WhatsApp familiar,
+// Smartious to the bone. No private messages exist.
 // ═══════════════════════════════════════════════════════════
 const CH_CHANNELS = [
-  { id: '',              label: 'All' },
-  { id: 'general',       label: 'General' },
-  { id: 'announcements', label: 'Announcements' },
-  { id: 'questions',     label: 'Ask a Question' },
-  { id: 'resources',     label: 'Resources' },
-  { id: 'wins',          label: 'Wins & Shoutouts' },
+  { id: '',              label: 'All',                icon: '\u2726' },
+  { id: 'general',       label: 'General',            icon: '\ud83d\udcac' },
+  { id: 'announcements', label: 'Announcements',      icon: '\ud83d\udce2' },
+  { id: 'questions',     label: 'Ask a Question',     icon: '\u2753' },
+  { id: 'resources',     label: 'Resources',          icon: '\ud83d\udcda' },
+  { id: 'wins',          label: 'Wins & Shoutouts',   icon: '\ud83c\udf89' },
 ]
 const CH_EMOJIS = ['\ud83d\udc4d', '\u2764\ufe0f', '\ud83c\udf89', '\ud83d\ude4c']
+const CH_NAME_COLORS = ['#7FD1AE', '#8FB8FF', '#F0A6C0', '#C9A8FF', '#FFC98F', '#7FD8E8', '#B8E986', '#FF9E9E']
+const chColor = (a) => {
+  const s = String(a?._id || a || '')
+  let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0
+  return CH_NAME_COLORS[h % CH_NAME_COLORS.length]
+}
 const chTime = d => new Date(d).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
 const chDay = d => {
   const dt = new Date(d), now = new Date()
@@ -14227,10 +14234,21 @@ const chDay = d => {
   if (dt.toDateString() === yd.toDateString()) return 'Yesterday'
   return dt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
 }
+const CH_CSS = `
+@keyframes chPop { from { opacity: 0; transform: translateY(7px) } to { opacity: 1; transform: none } }
+.ch-msg { animation: chPop .18s ease-out }
+@media (prefers-reduced-motion: reduce) { .ch-msg { animation: none } }
+.ch-scroll::-webkit-scrollbar { width: 8px }
+.ch-scroll::-webkit-scrollbar-thumb { background: #2A3346; border-radius: 8px }
+.ch-scroll::-webkit-scrollbar-track { background: transparent }
+.ch-chips::-webkit-scrollbar { height: 0 }
+.ch-input::placeholder { color: #6B7484 }
+`
 
 function CommunityChatView({ user, toast }) {
   const [msgs, setMsgs] = useState([])
   const [pinnedMsg, setPinnedMsg] = useState(null)
+  const [pinHidden, setPinHidden] = useState(false)
   const [members, setMembers] = useState(0)
   const [channel, setChannel] = useState('')
   const [draft, setDraft] = useState('')
@@ -14257,7 +14275,6 @@ function CommunityChatView({ user, toast }) {
   useEffect(() => {
     if (stickRef.current && boxRef.current) boxRef.current.scrollTop = boxRef.current.scrollHeight
   }, [msgs.length])
-
   const onScroll = () => {
     const el = boxRef.current
     if (el) stickRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 120
@@ -14273,12 +14290,9 @@ function CommunityChatView({ user, toast }) {
       })
       setMsgs(m => [...m, r.data.data.message])
       setDraft(''); setReplyTo(null); stickRef.current = true
-    } catch (e) {
-      setSendErr(e?.response?.data?.message || 'Could not send. Try again.')
-    }
+    } catch (e) { setSendErr(e?.response?.data?.message || 'Could not send. Try again.') }
     setSending(false)
   }
-
   const react = (id, emoji) => {
     setPickerFor(null)
     api.post('/community-chat/messages/' + id + '/react', { emoji })
@@ -14295,99 +14309,135 @@ function CommunityChatView({ user, toast }) {
   const mine = (m) => String(m.author?._id || m.author) === String(user?._id || user?.id)
   const chName = (a) => a ? `${a.firstName || ''} ${a.lastName || ''}`.trim() || 'Student' : 'Student'
   const chInit = (a) => (chName(a).split(/\s+/).map(w => w[0]).join('').slice(0, 2) || 'S').toUpperCase()
+  const isStaff = (a) => a?.role && a.role !== 'student'
+
   const chip = (active) => ({
-    padding: '6px 12px', borderRadius: 999, fontSize: 11.5, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap',
-    border: '1.5px solid ' + (active ? 'var(--crimson)' : 'var(--border)'),
-    background: active ? 'var(--crimson)' : 'var(--white)', color: active ? '#fff' : 'var(--s600)',
+    display: 'flex', alignItems: 'center', gap: 5,
+    padding: '6px 13px', borderRadius: 999, fontSize: 11.5, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap',
+    border: '1px solid ' + (active ? 'transparent' : '#2A3346'),
+    background: active ? 'linear-gradient(120deg, #8B1A2E, #A32438)' : '#1B2231',
+    color: active ? '#fff' : '#A9B1C2',
+    boxShadow: active ? '0 2px 10px rgba(139,26,46,.45)' : 'none',
   })
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 210px)', minHeight: 460, maxWidth: 820 }}>
+    <div style={{
+      display: 'flex', flexDirection: 'column', height: 'calc(100vh - 205px)', minHeight: 480, maxWidth: 840,
+      background: '#0F131C', borderRadius: 18, overflow: 'hidden',
+      boxShadow: '0 18px 50px rgba(10,12,20,.45), 0 2px 8px rgba(10,12,20,.3)',
+      border: '1px solid #1E2536',
+    }}>
+      <style>{CH_CSS}</style>
+
       {/* Room header */}
-      <div style={{ background: 'linear-gradient(120deg, #6E1524, #8B1A2E)', borderRadius: 'var(--rlg) var(--rlg) 0 0', padding: '12px 16px', color: '#fff', display: 'flex', alignItems: 'center', gap: 10 }}>
-        <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#fff', color: 'var(--crimson)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 15 }}>S</div>
+      <div style={{ background: 'linear-gradient(120deg, #12060B, #2A0A13 55%, #3A0E1A)', padding: '13px 18px', display: 'flex', alignItems: 'center', gap: 12, borderBottom: '1px solid rgba(228,198,137,.18)' }}>
+        <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg, #8B1A2E, #A32438)', border: '2px solid #E4C689', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 17, flexShrink: 0 }}>S</div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontWeight: 800, fontSize: 14 }}>Smartious Student Community</div>
-          <div style={{ fontSize: 11, opacity: .85 }}>{members} members \u00b7 one school, one conversation \u00b7 moderated by teachers</div>
+          <div style={{ fontWeight: 800, fontSize: 14.5, color: '#F3EFE6' }}>Smartious Student Community</div>
+          <div style={{ fontSize: 11, color: '#B9AB8C', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#5AD48F', boxShadow: '0 0 6px #5AD48F', display: 'inline-block' }} />
+            {members} members \u00b7 one school, many countries, one conversation
+          </div>
         </div>
+        <div style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: '.08em', color: '#E4C689', border: '1px solid rgba(228,198,137,.4)', borderRadius: 999, padding: '3px 10px' }}>MODERATED</div>
       </div>
 
       {/* Pinned */}
-      {pinnedMsg && (
-        <div style={{ background: '#FBF3E2', borderLeft: '3px solid var(--crimson)', padding: '8px 14px', fontSize: 12 }}>
-          <span style={{ fontWeight: 800, color: 'var(--crimson)' }}>\ud83d\udccc Pinned \u00b7 {chName(pinnedMsg.author)}: </span>
-          <span style={{ color: 'var(--s700)' }}>{pinnedMsg.body}</span>
+      {pinnedMsg && !pinHidden && (
+        <div style={{ background: 'rgba(228,198,137,.09)', borderBottom: '1px solid rgba(228,198,137,.16)', padding: '8px 16px', fontSize: 12, display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+          <span>\ud83d\udccc</span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <span style={{ fontWeight: 800, color: '#E4C689' }}>Pinned by {chName(pinnedMsg.author)}  </span>
+            <span style={{ color: '#C9CFDA' }}>{pinnedMsg.body}</span>
+          </div>
+          <button onClick={() => setPinHidden(true)} style={{ background: 'none', border: 'none', color: '#6B7484', cursor: 'pointer', fontWeight: 800, fontSize: 13, padding: 0 }}>\u00d7</button>
         </div>
       )}
 
       {/* Channels */}
-      <div style={{ display: 'flex', gap: 6, padding: '8px 10px', overflowX: 'auto', background: 'var(--white)', borderBottom: '1.5px solid var(--border)' }}>
+      <div className="ch-chips" style={{ display: 'flex', gap: 7, padding: '9px 14px', overflowX: 'auto', background: '#121724', borderBottom: '1px solid #1E2536' }}>
         {CH_CHANNELS.map(ch => (
-          <button key={ch.id} onClick={() => setChannel(ch.id)} style={chip(channel === ch.id)}>{ch.label}</button>
+          <button key={ch.id} onClick={() => setChannel(ch.id)} style={chip(channel === ch.id)}>
+            <span style={{ fontSize: 12 }}>{ch.icon}</span>{ch.label}
+          </button>
         ))}
       </div>
 
       {/* Messages */}
-      <div ref={boxRef} onScroll={onScroll}
-        style={{ flex: 1, overflowY: 'auto', background: 'var(--cream, #FBF7EF)', padding: '14px 12px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div ref={boxRef} onScroll={onScroll} className="ch-scroll"
+        style={{
+          flex: 1, overflowY: 'auto', padding: '16px 14px', display: 'flex', flexDirection: 'column', gap: 11,
+          background: 'radial-gradient(ellipse 90% 60% at 20% 0%, rgba(139,26,46,.10), transparent 55%), radial-gradient(ellipse 80% 55% at 90% 100%, rgba(228,198,137,.05), transparent 60%), repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(255,255,255,.014) 27px, rgba(255,255,255,.014) 28px), #0F131C',
+        }}>
         <button onClick={() => {
           const first = msgs[0]
           if (!first) return
           api.get('/community-chat/messages?before=' + encodeURIComponent(first.createdAt) + (channel ? '&channel=' + channel : ''))
             .then(r => { stickRef.current = false; setMsgs(m => [...(r.data?.data?.messages || []), ...m]) }).catch(() => {})
-        }} style={{ alignSelf: 'center', background: 'var(--white)', border: '1.5px solid var(--border)', borderRadius: 999, padding: '5px 14px', fontSize: 11, fontWeight: 700, color: 'var(--s500)', cursor: 'pointer' }}>
+        }} style={{ alignSelf: 'center', background: '#1B2231', border: '1px solid #2A3346', borderRadius: 999, padding: '5px 16px', fontSize: 11, fontWeight: 700, color: '#8B93A3', cursor: 'pointer' }}>
           Load earlier messages
         </button>
+
         {msgs.map((m, i) => {
           const own = mine(m)
           const newDay = i === 0 || chDay(m.createdAt) !== chDay(msgs[i-1].createdAt)
+          if (m.system) return (
+            <React.Fragment key={m._id}>
+              {newDay && <div style={{ alignSelf: 'center', fontSize: 10.5, fontWeight: 800, color: '#8B93A3', background: '#1B2231', borderRadius: 999, padding: '3px 14px' }}>{chDay(m.createdAt)}</div>}
+              <div className="ch-msg" style={{ alignSelf: 'center', background: 'rgba(90,212,143,.12)', border: '1px solid rgba(90,212,143,.3)', color: '#9FE7BE', borderRadius: 12, padding: '7px 16px', fontSize: 12, maxWidth: '80%', textAlign: 'center' }}>
+                {m.body}
+              </div>
+            </React.Fragment>
+          )
           return (
             <React.Fragment key={m._id}>
-              {newDay && <div style={{ alignSelf: 'center', fontSize: 10.5, fontWeight: 800, color: 'var(--s500)', background: 'var(--white)', borderRadius: 999, padding: '3px 12px' }}>{chDay(m.createdAt)}</div>}
-              <div style={{ display: 'flex', gap: 8, flexDirection: own ? 'row-reverse' : 'row', alignItems: 'flex-end' }}>
+              {newDay && <div style={{ alignSelf: 'center', fontSize: 10.5, fontWeight: 800, color: '#8B93A3', background: '#1B2231', borderRadius: 999, padding: '3px 14px' }}>{chDay(m.createdAt)}</div>}
+              <div className="ch-msg" style={{ display: 'flex', gap: 9, flexDirection: own ? 'row-reverse' : 'row', alignItems: 'flex-end' }}>
                 {!own && (
-                  <div style={{ width: 30, height: 30, borderRadius: '50%', background: m.author?.role !== 'student' ? 'var(--crimson)' : '#C8B58E', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 11, flexShrink: 0, overflow: 'hidden' }}>
+                  <div style={{ width: 32, height: 32, borderRadius: '50%', background: isStaff(m.author) ? 'linear-gradient(135deg, #8B1A2E, #A32438)' : '#242C3D', border: isStaff(m.author) ? '1.5px solid #E4C689' : '1.5px solid #2E3850', color: isStaff(m.author) ? '#fff' : chColor(m.author), display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 11, flexShrink: 0, overflow: 'hidden' }}>
                     {m.author?.avatar ? <img src={m.author.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : chInit(m.author)}
                   </div>
                 )}
                 <div style={{ maxWidth: '76%' }}>
                   <div style={{
-                    background: own ? 'var(--crimson)' : 'var(--white)', color: own ? '#fff' : 'var(--s700)',
-                    border: own ? 'none' : '1.5px solid var(--border)',
-                    borderRadius: own ? '14px 14px 4px 14px' : '14px 14px 14px 4px',
-                    padding: '8px 12px', position: 'relative',
+                    background: own ? 'linear-gradient(130deg, #8B1A2E, #A32438)' : '#1B2231',
+                    color: own ? '#FBEDEF' : '#D9DEE8',
+                    border: own ? 'none' : '1px solid #252E42',
+                    borderRadius: own ? '15px 15px 5px 15px' : '15px 15px 15px 5px',
+                    padding: '8px 13px',
+                    boxShadow: own ? '0 3px 14px rgba(139,26,46,.35)' : '0 2px 8px rgba(8,10,16,.35)',
                   }}>
                     {!own && (
-                      <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 2 }}>
-                        <span style={{ fontWeight: 800, fontSize: 11.5, color: 'var(--crimson)' }}>{chName(m.author)}</span>
-                        {m.author?.role && m.author.role !== 'student' && (
-                          <span style={{ fontSize: 8.5, fontWeight: 800, color: '#fff', background: 'var(--crimson)', padding: '1px 6px', borderRadius: 999 }}>{m.author.role === 'teacher' ? 'TEACHER' : 'STAFF'}</span>
+                      <div style={{ display: 'flex', gap: 7, alignItems: 'center', marginBottom: 2 }}>
+                        <span style={{ fontWeight: 800, fontSize: 11.5, color: isStaff(m.author) ? '#E4C689' : chColor(m.author) }}>{chName(m.author)}</span>
+                        {isStaff(m.author) && (
+                          <span style={{ fontSize: 8, fontWeight: 900, letterSpacing: '.06em', color: '#12060B', background: '#E4C689', padding: '1px 7px', borderRadius: 999 }}>{m.author.role === 'teacher' ? 'TEACHER' : 'STAFF'}</span>
                         )}
                       </div>
                     )}
                     {m.replyToExcerpt && (
-                      <div style={{ borderLeft: '2.5px solid ' + (own ? 'rgba(255,255,255,.6)' : 'var(--crimson)'), padding: '3px 8px', marginBottom: 5, fontSize: 11, opacity: .85, background: own ? 'rgba(255,255,255,.12)' : 'var(--cream, #FBF7EF)', borderRadius: 4 }}>
-                        <div style={{ fontWeight: 800 }}>{m.replyToAuthor}</div>
-                        <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.replyToExcerpt}</div>
+                      <div style={{ borderLeft: '2.5px solid ' + (own ? 'rgba(255,255,255,.55)' : '#E4C689'), padding: '4px 9px', marginBottom: 6, fontSize: 11, background: own ? 'rgba(255,255,255,.1)' : 'rgba(255,255,255,.04)', borderRadius: 5 }}>
+                        <div style={{ fontWeight: 800, color: own ? '#FBD9DE' : '#E4C689' }}>{m.replyToAuthor}</div>
+                        <div style={{ opacity: .8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.replyToExcerpt}</div>
                       </div>
                     )}
-                    <div style={{ fontSize: 13, lineHeight: 1.5, whiteSpace: 'pre-wrap', overflowWrap: 'break-word' }}>{m.body}</div>
-                    <div style={{ fontSize: 9.5, opacity: .65, textAlign: 'right', marginTop: 3 }}>{chTime(m.createdAt)}</div>
+                    <div style={{ fontSize: 13.5, lineHeight: 1.52, whiteSpace: 'pre-wrap', overflowWrap: 'break-word' }}>{m.body}</div>
+                    <div style={{ fontSize: 9.5, color: own ? 'rgba(255,255,255,.55)' : '#6B7484', textAlign: 'right', marginTop: 3 }}>{chTime(m.createdAt)}</div>
                   </div>
-                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 3, justifyContent: own ? 'flex-end' : 'flex-start', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', gap: 9, alignItems: 'center', marginTop: 4, justifyContent: own ? 'flex-end' : 'flex-start', flexWrap: 'wrap' }}>
                     {(m.reactions || []).map(r => (
                       <button key={r.emoji} onClick={() => react(m._id, r.emoji)}
-                        style={{ background: r.mine ? '#FBE9EC' : 'var(--white)', border: '1px solid ' + (r.mine ? 'var(--crimson)' : 'var(--border)'), borderRadius: 999, padding: '1px 8px', fontSize: 11, cursor: 'pointer' }}>
+                        style={{ background: r.mine ? 'rgba(139,26,46,.35)' : '#1B2231', border: '1px solid ' + (r.mine ? '#A3243880' : '#2A3346'), borderRadius: 999, padding: '1px 9px', fontSize: 11.5, cursor: 'pointer', color: '#D9DEE8', boxShadow: r.mine ? '0 0 8px rgba(163,36,56,.4)' : 'none' }}>
                         {r.emoji} {r.count}
                       </button>
                     ))}
-                    <button onClick={() => setPickerFor(pickerFor === m._id ? null : m._id)} style={{ background: 'none', border: 'none', fontSize: 11, color: 'var(--s500)', cursor: 'pointer', fontWeight: 800, padding: 0 }}>+</button>
-                    <button onClick={() => setReplyTo(m)} style={{ background: 'none', border: 'none', fontSize: 10.5, color: 'var(--s500)', cursor: 'pointer', fontWeight: 700, padding: 0 }}>Reply</button>
-                    {!own && <button onClick={() => report(m._id)} style={{ background: 'none', border: 'none', fontSize: 10.5, color: 'var(--s500)', cursor: 'pointer', padding: 0 }}>Report</button>}
+                    <button onClick={() => setPickerFor(pickerFor === m._id ? null : m._id)} style={{ background: 'none', border: 'none', fontSize: 12, color: '#6B7484', cursor: 'pointer', fontWeight: 800, padding: 0 }}>+</button>
+                    <button onClick={() => setReplyTo(m)} style={{ background: 'none', border: 'none', fontSize: 10.5, color: '#6B7484', cursor: 'pointer', fontWeight: 700, padding: 0 }}>Reply</button>
+                    {!own && <button onClick={() => report(m._id)} style={{ background: 'none', border: 'none', fontSize: 10.5, color: '#525A69', cursor: 'pointer', padding: 0 }}>Report</button>}
                   </div>
                   {pickerFor === m._id && (
-                    <div style={{ display: 'flex', gap: 6, marginTop: 4, background: 'var(--white)', border: '1.5px solid var(--border)', borderRadius: 999, padding: '4px 10px', width: 'fit-content' }}>
-                      {CH_EMOJIS.map(e => <button key={e} onClick={() => react(m._id, e)} style={{ background: 'none', border: 'none', fontSize: 16, cursor: 'pointer', padding: 0 }}>{e}</button>)}
+                    <div className="ch-msg" style={{ display: 'flex', gap: 9, marginTop: 5, background: '#1B2231', border: '1px solid #2A3346', borderRadius: 999, padding: '5px 13px', width: 'fit-content', boxShadow: '0 4px 14px rgba(8,10,16,.5)' }}>
+                      {CH_EMOJIS.map(e => <button key={e} onClick={() => react(m._id, e)} style={{ background: 'none', border: 'none', fontSize: 17, cursor: 'pointer', padding: 0 }}>{e}</button>)}
                     </div>
                   )}
                 </div>
@@ -14396,40 +14446,40 @@ function CommunityChatView({ user, toast }) {
           )
         })}
         {msgs.length === 0 && (
-          <div style={{ alignSelf: 'center', marginTop: 40, textAlign: 'center', color: 'var(--s500)', fontSize: 13 }}>
-            The room is quiet. Say hello to the whole school.
+          <div style={{ alignSelf: 'center', marginTop: 50, textAlign: 'center', color: '#6B7484', fontSize: 13 }}>
+            The room is quiet.<br/>Say hello to the whole school.
           </div>
         )}
       </div>
 
       {/* Composer */}
-      <div style={{ background: 'var(--white)', borderTop: '1.5px solid var(--border)', borderRadius: '0 0 var(--rlg) var(--rlg)', padding: '10px 12px' }}>
+      <div style={{ background: '#121724', borderTop: '1px solid #1E2536', padding: '10px 14px' }}>
         {replyTo && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--cream, #FBF7EF)', borderLeft: '2.5px solid var(--crimson)', borderRadius: 6, padding: '5px 10px', marginBottom: 7, fontSize: 11.5 }}>
-            <div style={{ minWidth: 0 }}>
-              <span style={{ fontWeight: 800, color: 'var(--crimson)' }}>Replying to {chName(replyTo.author)}: </span>
-              <span style={{ color: 'var(--s500)' }}>{String(replyTo.body).slice(0, 80)}</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#1B2231', borderLeft: '2.5px solid #E4C689', borderRadius: 7, padding: '6px 11px', marginBottom: 8, fontSize: 11.5 }}>
+            <div style={{ minWidth: 0, color: '#8B93A3' }}>
+              <span style={{ fontWeight: 800, color: '#E4C689' }}>Replying to {chName(replyTo.author)}: </span>
+              {String(replyTo.body).slice(0, 80)}
             </div>
-            <button onClick={() => setReplyTo(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontWeight: 800, color: 'var(--s500)' }}>\u00d7</button>
+            <button onClick={() => setReplyTo(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontWeight: 800, color: '#6B7484', fontSize: 13 }}>\u00d7</button>
           </div>
         )}
-        {sendErr && <div style={{ fontSize: 11.5, fontWeight: 700, color: '#B45309', marginBottom: 6 }}>{sendErr}</div>}
+        {sendErr && <div style={{ fontSize: 11.5, fontWeight: 700, color: '#F0B45B', marginBottom: 7 }}>{sendErr}</div>}
         {channel === 'announcements' && (
-          <div style={{ fontSize: 10.5, color: 'var(--s500)', marginBottom: 6 }}>Announcements are posted by teachers and staff. Reply in General or Questions.</div>
+          <div style={{ fontSize: 10.5, color: '#8B93A3', marginBottom: 7 }}>Announcements are posted by teachers and staff. Reply in General or Ask a Question.</div>
         )}
-        <div style={{ display: 'flex', gap: 8 }}>
-          <input
+        <div style={{ display: 'flex', gap: 9, alignItems: 'center' }}>
+          <input className="ch-input"
             value={draft} onChange={e => setDraft(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } }}
             placeholder="Type a message..." maxLength={800}
-            style={{ flex: 1, padding: '11px 15px', border: '1.5px solid var(--border)', borderRadius: 999, fontSize: 13.5 }}
+            style={{ flex: 1, padding: '12px 17px', border: '1px solid #2A3346', borderRadius: 999, fontSize: 13.5, background: '#1B2231', color: '#E8EBF1', outline: 'none' }}
           />
           <button onClick={send} disabled={sending}
-            style={{ background: 'var(--crimson)', color: '#fff', border: 'none', width: 44, height: 44, borderRadius: '50%', fontSize: 17, fontWeight: 900, cursor: 'pointer' }}>
+            style={{ background: 'linear-gradient(135deg, #8B1A2E, #C9973A)', color: '#fff', border: 'none', width: 46, height: 46, borderRadius: '50%', fontSize: 17, fontWeight: 900, cursor: 'pointer', flexShrink: 0, boxShadow: '0 4px 16px rgba(163,36,56,.5)' }}>
             {'\u27a4'}
           </button>
         </div>
-        <div style={{ fontSize: 10, color: 'var(--s500)', marginTop: 6 }}>
+        <div style={{ fontSize: 10, color: '#525A69', marginTop: 7 }}>
           Be kind and have fun. No phone numbers, links or social media. Teachers see everything, and that is what keeps this room safe.
         </div>
       </div>
