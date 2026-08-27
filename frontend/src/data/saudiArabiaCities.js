@@ -378,7 +378,7 @@ export const SAUDI_ARABIA_COUNTRY = {
   citiesSectionBody: 'Five major Saudi urban areas. Each page covers local international schools, capacity constraints, family situations and answers specific to your city — from Riyadh KAFD financial families to Dhahran Saudi Aramco compound households to NEOM Vision 2030 mega-project executives.',
 
   trustSignals: [
-    { metric: 'Established', value: '2022', sub: 'Nairobi-based' },
+    { metric: 'Established', value: '2018', sub: 'Nairobi-based' },
     { metric: 'Curricula', value: '5', sub: 'Cambridge · Edexcel · IB · American AP · CBC' },
     { metric: 'Tutors', value: '78+', sub: 'PGCE-qualified subject specialists' },
     { metric: 'Countries served', value: '14+', sub: 'Africa · Gulf · Europe · Americas' },
