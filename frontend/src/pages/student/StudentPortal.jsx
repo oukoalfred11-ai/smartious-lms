@@ -12,6 +12,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import BirthdayBanner from '../../components/BirthdayBanner.jsx'
 import SuggestionBox from '../../components/SuggestionBox.jsx'
+import AnnouncementsStrip from '../../components/AnnouncementsStrip.jsx'
 import { useAuth, useToast, api } from '../../context/ctx.jsx'
 import { useStore } from '../../context/ctx.jsx'
 import Modal from '../../components/ui/Modal.jsx'
@@ -11548,6 +11549,9 @@ function DashboardTab({ user, store, setPage, toast }) {
           </div>
         </div>
       </div>
+
+      {/* ── Announcements broadcast ── */}
+      <AnnouncementsStrip />
 
       {/* ── KPI strip ── */}
       <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12, marginBottom:20 }}>
