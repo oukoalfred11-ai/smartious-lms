@@ -40,7 +40,7 @@ const DIST = join(ROOT, 'dist')
 const PORT = 5051
 
 const CONCURRENCY = 2
-const PAGE_TIMEOUT_MS = 15_000
+const PAGE_TIMEOUT_MS = 25_000
 const WAIT_AFTER_MOUNT_MS = 250
 const MAX_URLS = 300
 
