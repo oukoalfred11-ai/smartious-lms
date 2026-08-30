@@ -1,21 +1,22 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, ToastProvider, StoreProvider, useAuth } from './context/ctx.jsx'
 import LandingPage       from './pages/LandingPage.jsx'
 import LoginPage         from './pages/LoginPage.jsx'
 import PausedScreen from './components/PausedScreen.jsx'
-import ClassroomPage from './pages/ClassroomPage.jsx'
+const ClassroomPage = lazy(() => import('./pages/ClassroomPage.jsx'))
 import AdminLoginPage    from './pages/AdminLoginPage.jsx'
 import VerifyEmailPage   from './pages/VerifyEmailPage.jsx'
 import ResetPasswordPage from './pages/ResetPasswordPage.jsx'
-import AdminPortal       from './pages/admin/AdminPortal.jsx'
-import OpsPortal         from './pages/admin/OpsPortal.jsx'
-import DOSPortal         from './pages/admin/DOSPortal.jsx'
-import AccountsPortal    from './pages/admin/AccountsPortal.jsx'
-import SalesPortal       from './pages/admin/SalesPortal.jsx'
-import TeacherPortal     from './pages/teacher/TeacherPortal.jsx'
-import StudentPortal     from './pages/student/StudentPortal.jsx'
-import ParentPortal      from './pages/parent/ParentPortal.jsx'
-import DemoPortal        from './pages/demo/DemoPortal.jsx'
+const AdminPortal       = lazy(() => import('./pages/admin/AdminPortal.jsx'))
+const OpsPortal         = lazy(() => import('./pages/admin/OpsPortal.jsx'))
+const DOSPortal         = lazy(() => import('./pages/admin/DOSPortal.jsx'))
+const AccountsPortal    = lazy(() => import('./pages/admin/AccountsPortal.jsx'))
+const SalesPortal       = lazy(() => import('./pages/admin/SalesPortal.jsx'))
+const TeacherPortal     = lazy(() => import('./pages/teacher/TeacherPortal.jsx'))
+const StudentPortal     = lazy(() => import('./pages/student/StudentPortal.jsx'))
+const ParentPortal      = lazy(() => import('./pages/parent/ParentPortal.jsx'))
+const DemoPortal        = lazy(() => import('./pages/demo/DemoPortal.jsx'))
 
 /**
  * App router.
@@ -65,7 +66,7 @@ export default function App() {
       <AuthProvider>
         <ToastProvider>
           <BrowserRouter>
-            <Routes>
+            <Suspense fallback={null}><Routes>
               <Route path="/login"          element={<LoginPage />} />
               <Route path="/admin-login"    element={<AdminLoginPage />} />
               <Route path="/verify-email"   element={<VerifyEmailPage />} />
@@ -84,7 +85,7 @@ export default function App() {
               <Route path="/demo/*"         element={<Guard roles={['demo']}><DemoPortal /></Guard>} />
               {/* Catch-all → LandingPage (handles /, /us-families, /about, /pricing, /blog/*, etc.) */}
               <Route path="*"               element={<LandingPage />} />
-            </Routes>
+            </Routes></Suspense>
           </BrowserRouter>
         </ToastProvider>
       </AuthProvider>
