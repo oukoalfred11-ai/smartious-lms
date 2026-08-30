@@ -24,6 +24,8 @@ import PayrollModule from './modules/PayrollModule.jsx'
 import StudentSessionsModule from './modules/StudentSessionsModule.jsx'
 import CurriculumModule from './modules/CurriculumModule.jsx'
 import BillingModule, { FeeCollectionModule } from './modules/BillingModule.jsx'
+import CommunityModule from './modules/CommunityModule.jsx'
+import AnnouncementsModule from './modules/AnnouncementsModule.jsx'
 import StudioModule from './modules/StudioModule.jsx'
 import SettingsModule from './modules/SettingsModule.jsx'
 import { LeaveModule, ProgrammesModule, LiveLessonsModule, GroupRoomsModule, WebsiteModule, MshauriModule, SuggestionsModule } from './modules/MiscModules.jsx'
@@ -70,7 +72,7 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
   const ROLE_SECTIONS = {
     admin: [
       { label: 'Overview',    items: ['dashboard', 'analytics'] },
-      { label: 'People',      items: ['users', 'teachers', 'allocations', 'sessions', 'communication'] },
+      { label: 'People',      items: ['users', 'teachers', 'allocations', 'sessions', 'communication', 'community', 'announcements'] },
       { label: 'Reports',     items: ['reports'] },
       { label: 'Operations',  items: ['frontdesk', 'assessment', 'documents', 'payroll', 'leave', 'programmes'] },
       { label: 'Teaching',    items: ['livelessons', 'grouprooms', 'curriculum'] },
@@ -365,7 +367,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
   const role = auth?.user?.role || 'admin'
   const ROLE_SECTIONS_MAIN = {
     admin:       [
-      { items: ['dashboard','analytics','users','teachers','allocations','sessions','communication','reports','frontdesk','documents','assessment','payroll','leave','programmes','livelessons','grouprooms','curriculum','questionbank','markingreview','cooreports','teacherratings','feecollection','crm','billing','studio','website','settings','ai','suggestions'] },
+      { items: ['dashboard','analytics','users','teachers','allocations','sessions','communication','announcements','reports','frontdesk','documents','assessment','payroll','leave','programmes','livelessons','grouprooms','curriculum','questionbank','markingreview','cooreports','teacherratings','feecollection','crm','billing','studio','website','settings','ai','suggestions','community'] },
     ],
     accountant:  [{ items: ['checkin','dashboard','analytics','feecollection','billing','sessions','payroll','settings'] }],
     sales:       [{ items: ['checkin','dashboard','salesperf','crm','assessment','frontdesk','communication','documents','settings'] }],
@@ -398,6 +400,8 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         {safePage === 'teachers'    && <TeachersModule   refreshKey={refreshKey} toast={toast} openAddUser={openAddUser} />}
         {safePage === 'allocations' && <StudentsManagementModule refreshKey={refreshKey} toast={toast} />}
         {safePage === 'communication' && <CommunicationModule refreshKey={refreshKey} toast={toast} />}
+        {safePage === 'community' && <CommunityModule refreshKey={refreshKey} toast={toast} />}
+        {safePage === 'announcements' && <AnnouncementsModule toast={toast} />}
         {safePage === 'frontdesk' && <FrontDeskModule refreshKey={refreshKey} toast={toast} />}
         {safePage === 'documents' && <DocumentsModule toast={toast} />}
         {safePage === 'assessment' && <AssessmentModule refreshKey={refreshKey} toast={toast} />}
