@@ -20,6 +20,7 @@ export class MeshEngine {
     this.onTrack = onTrack || (() => {});
     this.onPeerClosed = onPeerClosed || (() => {});
     this.peers = new Map();   // socketId -> { pc, makingOffer, polite, stream }
+    this.extraTracks = [];    // [{ track, stream }] active beyond mic/camera (e.g. screen audio)
 
     this._onSignal = (msg) => this._handleSignal(msg);
     socket.on('signal', this._onSignal);
@@ -39,6 +40,11 @@ export class MeshEngine {
     for (const track of this.localStream.getTracks())
       pc.addTrack(track, this.localStream);
 
+    // Late joiners must also receive any active extra track (e.g. the
+    // system audio of a screen share already in progress), or they
+    // would see the shared video with no sound.
+    for (const { track, stream } of this.extraTracks)
+      pc.addTrack(track, stream || this.localStream);
     pc.onicecandidate = ({ candidate }) => {
       if (candidate) this.socket.emit('signal', { to: remoteId, candidate });
     };
@@ -124,10 +130,46 @@ export class MeshEngine {
       this.localStream.addTrack(newTrack);
   }
 
-  /** Toggle a local track kind on/off for every peer at once. */
+  /** Toggle a local track kind on/off for every peer at once.
+   *  Skips tracks tagged _isScreenAudio so muting the mic never
+   *  silences a shared video's audio (both are 'audio' tracks). */
   setTrackEnabled(kind, enabled) {
     for (const track of this.localStream.getTracks())
-      if (track.kind === kind) track.enabled = enabled;
+      if (track.kind === kind && !track._isScreenAudio) track.enabled = enabled;
+  }
+
+  /**
+   * Add an EXTRA track (beyond mic/camera) to every peer, e.g. the
+   * system audio captured while sharing a screen that is playing a
+   * video. This is a second audio track, kept separate from the mic
+   * so the two never interfere. Perfect negotiation renegotiates
+   * automatically when the sender is added. Returns the RTCRtpSenders
+   * created, so the caller can remove exactly these later.
+   */
+  addExtraTrack(track, stream) {
+    const senders = [];
+    for (const { pc } of this.peers.values()) {
+      senders.push(pc.addTrack(track, stream || this.localStream));
+    }
+    this.extraTracks.push({ track, stream: stream || this.localStream });
+    return senders;
+  }
+
+  /**
+   * Remove a set of senders previously returned by addExtraTrack
+   * (screen-audio share ended). Renegotiation happens automatically.
+   */
+  removeSenders(senders, track) {
+    if (track) this.extraTracks = this.extraTracks.filter(x => x.track !== track);
+    if (!senders || !senders.length) return;
+    const set = new Set(senders);
+    for (const { pc } of this.peers.values()) {
+      for (const sender of pc.getSenders()) {
+        if (set.has(sender)) {
+          try { pc.removeTrack(sender); } catch (e) { /* peer may have closed */ }
+        }
+      }
+    }
   }
 
   close(remoteId) {
