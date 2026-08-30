@@ -609,7 +609,6 @@ function BulkImportModal({ onClose, onDone, toast, subjects, curricula }) {
 function QuestionEditorModal({ q, onClose, onSave, subjects, curricula }) {
   const [form, setForm] = useState(() => ({
     type:'mcq', options:['','','',''],
-    markScheme:{ modelAnswer:'', points:[], acceptableAnswers:[], commonErrors:[] },
     ...q,
     markScheme: { modelAnswer:'', points:[], acceptableAnswers:[], commonErrors:[], ...(q.markScheme||{}) },
   }))
