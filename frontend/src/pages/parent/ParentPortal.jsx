@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import BirthdayBanner from '../../components/BirthdayBanner.jsx'
 import SuggestionBox from '../../components/SuggestionBox.jsx'
+import AnnouncementsStrip from '../../components/AnnouncementsStrip.jsx'
 import { api } from '../../context/ctx.jsx'
 
 // ── Tokens matching admin/student/teacher portals ──────────
@@ -571,6 +572,9 @@ function ParentDashboard({ child, showToast }) {
           ) : null}
         </div>
       </div>
+
+      {/* Announcements broadcast */}
+      <AnnouncementsStrip />
 
       {/* KPIs */}
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(160px,1fr))', gap:12, marginBottom:20 }}>
