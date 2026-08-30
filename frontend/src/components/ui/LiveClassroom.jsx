@@ -571,6 +571,9 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   const [showSimPicker, setShowSimPicker] = useState(false)
   const [mainView, setMainView] = useState('board')   // 'board' | 'screen'
   const camTrackRef = useRef(null)
+  const screenAudioTrackRef = useRef(null)      // system audio captured while screen sharing
+  const screenAudioSendersRef = useRef([])      // its per-peer senders, for clean removal
+  const [shareHasAudio, setShareHasAudio] = useState(false)
   const [showLibPicker, setShowLibPicker] = useState(false)
   const imgInputRef = useRef(null)
   const [recording, setRecording] = useState(false)
@@ -1645,6 +1648,15 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   const stopShare = useCallback(async () => {
     const screenTrack = localStream?.getVideoTracks()[0]
     if (screenTrack && screenTrack !== camTrackRef.current) screenTrack.stop()
+    // Tear down the shared system-audio track and its senders.
+    if (screenAudioTrackRef.current) {
+      try { localStream?.removeTrack(screenAudioTrackRef.current) } catch (e) { /* ok */ }
+      try { screenAudioTrackRef.current.stop() } catch (e) { /* already stopped */ }
+      engineRef.current?.removeSenders(screenAudioSendersRef.current, screenAudioTrackRef.current)
+      screenAudioSendersRef.current = []
+      screenAudioTrackRef.current = null
+    }
+    setShareHasAudio(false)
     await engineRef.current?.replaceVideoTrack(camTrackRef.current || null)
     camTrackRef.current = null
     setSharing(false)
@@ -1654,12 +1666,49 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
 
   const startShare = async () => {
     try {
+      // Request system/tab audio too, so that when the teacher shares
+      // a screen playing a video, students hear it. audio:true asks
+      // the browser to include it; the teacher ticks "Share tab audio"
+      // (Chrome/Edge) or "Share system audio" in the picker. If they
+      // decline or the browser can't, we simply share video only.
       const display = await navigator.mediaDevices.getDisplayMedia({
-        video: { frameRate: { ideal: 10 } }, audio: false,
+        video: { frameRate: { ideal: 15 } },
+        audio: {
+          echoCancellation: false,   // it is media playback, not a mic
+          noiseSuppression: false,
+          autoGainControl: false,
+        },
       })
       const screenTrack = display.getVideoTracks()[0]
+      const screenAudio = display.getAudioTracks()[0] || null
       camTrackRef.current = localStream?.getVideoTracks()[0] || null
       await engineRef.current?.replaceVideoTrack(screenTrack)
+
+      // Send the captured system audio as a SECOND audio track,
+      // separate from the mic, so both reach students at once. We
+      // attach it to the SAME stream as the mic/camera (localStream),
+      // so on the student side it arrives grouped with the teacher's
+      // existing audio and the audio rail plays it with no extra
+      // wiring, rather than as an orphan stream with no <audio> bound.
+      if (screenAudio) {
+        try { screenAudio._isScreenAudio = true } catch (e) { /* ok */ }
+        screenAudioTrackRef.current = screenAudio
+        screenAudioSendersRef.current = engineRef.current?.addExtraTrack(screenAudio, engineRef.current.localStream) || []
+        localStream?.addTrack(screenAudio)   // keep localStream coherent for self-view logic
+        // If the tab/system audio track ends on its own, clean it up.
+        screenAudio.onended = () => {
+          try { localStream?.removeTrack(screenAudio) } catch (e) { /* ok */ }
+          engineRef.current?.removeSenders(screenAudioSendersRef.current, screenAudioTrackRef.current)
+          screenAudioSendersRef.current = []
+          screenAudioTrackRef.current = null
+        }
+      }
+      setShareHasAudio(!!screenAudio)
+      if (!screenAudio) {
+        setMediaNote('Sharing video sound? Stop sharing and start again, and tick "Share tab audio" (Chrome or Edge) or "Share system audio" in the picker so students hear it.')
+        setTimeout(() => setMediaNote(''), 9000)
+      }
+
       screenTrack.onended = () => stopShare()   // browser "Stop sharing" bar
       setSharing(true)
       setMainView('screen')
@@ -2185,7 +2234,6 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
 
   const tiles = (
     <>
-      <AudioRail streams={streams} />
       {(featured.self || featured.peer) && (
         featured.self
           ? <Tile big stream={localStream} name={user?.firstName ? user.firstName + ' ' + (user.lastName || '') : 'You'} role={myRole} self micOn={micOn} camOn={camOn} hand={handUp} />
@@ -2206,6 +2254,13 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
 
   return (
     <div ref={rootRef} style={{ position: 'fixed', inset: 0, background: C.bg, display: 'flex', flexDirection: 'column', zIndex: 500, fontFamily: 'Inter, Arial, sans-serif' }}>
+      {/* Audio rail lives at the ROOT of the classroom, mounted for the
+          whole session and NEVER inside a conditional layout branch. The
+          video column unmounts in focus mode and on narrow screens, so an
+          audio element placed there is destroyed the moment the teacher
+          maximises the whiteboard, which silenced every student. Mounted
+          here, sound survives every view switch and fullscreen toggle. */}
+      <AudioRail streams={streams} />
 
       {/* ── Top bar (hidden in focus mode) ── */}
       {!focus && (
