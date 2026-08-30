@@ -466,8 +466,7 @@ function SyllabusSpineTab({ toast }) {
     if (!subjectId) { toast?.error?.('Pick a subject first.'); return }
     const entry = LOWER_SEC_LIBRARY.find(e => e.match.test(subjectName))
     if (!entry) {
-      toast?.error?.('No Lower Secondary spine matches "' + subjectName + '". Available: '
-        + LOWER_SEC_LIBRARY.map(e => (e.source || '').replace('Cambridge Lower Secondary ', '').split(' \u2014 ')[0]).join(', '))
+      toast?.error?.('No Lower Secondary spine matches "' + subjectName + '". Expected one of: Mathematics, English, Science, Computing, Global Perspectives.')
       return
     }
     if (topics.length > 0 && !window.confirm('This REPLACES the entire existing spine for this subject. Continue?')) return
@@ -1024,7 +1023,7 @@ function CurriculumModule({ refreshKey, toast }) {
 
   const tabBtn = (id, label) => (
     <button onClick={() => setTab(id)} style={{
-      padding: '9px 18px', border: 'none', borderRadius: 8,
+      padding: '9px 18px', borderRadius: 8,
       background: tab === id ? TOKENS.crimson : '#fff',
       color: tab === id ? '#fff' : TOKENS.s700,
       border: '1.5px solid ' + (tab === id ? TOKENS.crimson : TOKENS.line),
