@@ -39,7 +39,7 @@ const ROOT = join(__dirname, '..')
 const DIST = join(ROOT, 'dist')
 const PORT = 5051
 
-const CONCURRENCY = 2
+const CONCURRENCY = 1
 const PAGE_TIMEOUT_MS = 25_000
 const WAIT_AFTER_MOUNT_MS = 250
 const MAX_URLS = 300
