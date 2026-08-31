@@ -673,7 +673,7 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;font-size:11px;color:#1A1A1A;
 <div style="font-size:8px;color:#777;font-style:italic;margin-top:2mm">Grade boundaries follow the conventions of the student's curriculum (Cambridge/Edexcel letter grades, IB 1–7, CBC performance levels, American GPA); the scale above is the Smartious common reference. Weekly assessment marks are drawn from the LMS gradebook across the term.</div>
 </div>
 
-<div class="ft">Smartious Homeschool &amp; eSchool · Diamond Plaza, 4th Avenue Parklands · Karen Hardy Centre · Nairobi · smartioushomeschool.com · +254 745 021 212 &nbsp;&nbsp;<strong>1</strong></div>
+<div class="ft">Smartious Homeschool &amp; eSchool · Diamond Plaza, 4th Avenue Parklands · Karen Centre · Nairobi · smartioushomeschool.com · +254 745 021 212 &nbsp;&nbsp;<strong>1</strong></div>
 </div></div><!-- end page 1 -->
 
 <!-- PAGE 2 -->
@@ -760,7 +760,7 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;font-size:11px;color:#1A1A1A;
   This report is an official document of Smartious Homeschool &amp; eSchool and is invalid without the official stamp. Queries: hello@smartioushomeschool.com · +254 745 021 212 · Verification letters available per the published Fee Structure. Full mark breakdowns, examination scripts and learning plans are available in the Parent Portal.
 </div>
 
-<div class="ft">Smartious Homeschool &amp; eSchool · Diamond Plaza, 4th Avenue Parklands · Karen Hardy Centre · Nairobi · smartioushomeschool.com · +254 745 021 212 &nbsp;&nbsp;<strong>2</strong></div>
+<div class="ft">Smartious Homeschool &amp; eSchool · Diamond Plaza, 4th Avenue Parklands · Karen Centre · Nairobi · smartioushomeschool.com · +254 745 021 212 &nbsp;&nbsp;<strong>2</strong></div>
 </div></div><!-- end page 2 -->
 
 </body></html>`
