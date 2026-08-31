@@ -317,20 +317,63 @@ router.get('/recordings/library', auth, async (req, res) => {
   }
 });
 
-// PATCH /api/classroom/:liveClassId/recordings/:recId  admin: feature/rename
+// PATCH /api/classroom/:liveClassId/recordings/:recId  admin: feature/rename.
+// Featuring a recording ATTACHES it as a video on the matching lesson, so it
+// appears in the Lesson Player (which already supports multiple videos per
+// lesson). Unfeaturing detaches it. No separate library screen: the lesson
+// player IS the library.
 router.patch('/:liveClassId/recordings/:recId', auth, requireRole(...ADMIN), async (req, res) => {
   try {
     const LiveClass = require('../models/LiveClass');
-    const set = {};
-    if (typeof req.body.featured === 'boolean') set['recordings.$.featured'] = req.body.featured;
-    if (typeof req.body.title === 'string') set['recordings.$.title'] = req.body.title.trim().slice(0, 200);
-    set['recordings.$.reviewedBy'] = req.user._id;
-    const r = await LiveClass.updateOne(
-      { _id: req.params.liveClassId, 'recordings._id': req.params.recId },
-      { $set: set }
-    );
-    if (!r.matchedCount) return res.status(404).json({ success: false, message: 'Recording not found.' });
-    res.json({ success: true });
+    const Lesson = require('../models/Lesson');
+    const cls = await LiveClass.findById(req.params.liveClassId);
+    if (!cls) return res.status(404).json({ success: false, message: 'Class not found.' });
+    const rec = cls.recordings.id(req.params.recId);
+    if (!rec) return res.status(404).json({ success: false, message: 'Recording not found.' });
+
+    if (typeof req.body.title === 'string') rec.title = req.body.title.trim().slice(0, 200);
+    rec.reviewedBy = req.user._id;
+
+    // Find the lesson this class belongs to: direct link first, then subtopic match.
+    const findLesson = async () => {
+      if (cls.preparationLessonId) {
+        const l = await Lesson.findById(cls.preparationLessonId);
+        if (l) return l;
+      }
+      if (cls.subjectId && cls.syllabusSubtopicName) {
+        return Lesson.findOne({ subjectId: cls.subjectId, subtopicName: cls.syllabusSubtopicName });
+      }
+      return null;
+    };
+
+    if (typeof req.body.featured === 'boolean') {
+      rec.featured = req.body.featured;
+      const lesson = await findLesson();
+      if (lesson) {
+        const already = (lesson.videos || []).find(v => v.source === 'recording' && v.r2Url === rec.url);
+        if (req.body.featured && !already) {
+          // Attach as a video on the lesson.
+          lesson.videos.push({
+            source: 'recording',
+            title: rec.title || cls.title || 'Recorded class',
+            r2Url: rec.url,
+            r2Key: rec.key || '',
+            durationMins: Math.round((rec.durationSec || 0) / 60),
+            liveClassId: cls._id,
+            recordedAt: rec.recordedAt,
+            createdBy: req.user._id,
+          });
+          await lesson.save();
+        } else if (!req.body.featured && already) {
+          // Detach it.
+          lesson.videos = lesson.videos.filter(v => !(v.source === 'recording' && v.r2Url === rec.url));
+          await lesson.save();
+        }
+      }
+    }
+
+    await cls.save();
+    res.json({ success: true, data: { attachedToLesson: !!(await findLesson()) } });
   } catch (e) {
     console.error('[recordings patch]', e.message);
     res.status(500).json({ success: false, message: e.message });
@@ -349,6 +392,14 @@ router.delete('/:liveClassId/recordings/:recId', auth, requireRole(...ADMIN), as
     if (r2 && rec.key) {
       try { await r2.send(new DeleteObjectCommand({ Bucket: process.env.R2_BUCKET_NAME, Key: rec.key })); }
       catch (e) { console.warn('[recordings delete] R2 remove failed:', e.message); }
+    }
+    // If this recording was featured onto a lesson, detach it there too.
+    if (rec.url) {
+      const Lesson = require('../models/Lesson');
+      await Lesson.updateMany(
+        { 'videos.r2Url': rec.url },
+        { $pull: { videos: { source: 'recording', r2Url: rec.url } } }
+      );
     }
     rec.deleteOne();
     await cls.save();
