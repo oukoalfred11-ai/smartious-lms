@@ -551,7 +551,7 @@ function LessonDetailView({ lesson, subject, teacher, mastered, onBack, lessons 
   // legacy single video (videoEmbedId) with the videos[] array, and
   // de-duplicate so an old lesson whose primary video is also in the
   // array is not shown twice.
-  const videoList = React.useMemo(() => {
+  const videoList = useMemo(() => {
     const out = []
     const seen = new Set()
     if (lesson.videoEmbedId) {
