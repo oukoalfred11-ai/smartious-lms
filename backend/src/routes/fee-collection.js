@@ -409,7 +409,7 @@ function buildReminderEmail(student, dueLabel, amtLabel, days) {
   </div>
 </td></tr>
 <tr><td style="background:#FDFAF4;padding:14px 32px;border-top:1px solid #E8E2D6;">
-  <p style="font-size:11px;color:#999;margin:0;">© ${new Date().getFullYear()} Smartious Homeschool Global · Diamond Plaza Parklands & Karen Hardy, Nairobi</p>
+  <p style="font-size:11px;color:#999;margin:0;">© ${new Date().getFullYear()} Smartious Homeschool Global · Diamond Plaza Parklands & Karen, Nairobi</p>
 </td></tr>
 </table></td></tr></table></body></html>`
 }
