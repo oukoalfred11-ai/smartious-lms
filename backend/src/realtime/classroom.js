@@ -140,12 +140,17 @@ function attachClassroom(httpServer, allowedOrigins) {
       const decoded = jwt.verify(token, JWT_SECRET);
       const User = require('../models/User');
       const user = await User.findById(decoded.id)
-        .select('firstName lastName role isActive').lean();
+        .select('firstName lastName role isActive linkedStudents children').lean();
       if (!user || !user.isActive) return next(new Error('Invalid token.'));
       socket.data.user = {
         id: String(user._id),
         name: [user.firstName, user.lastName].filter(Boolean).join(' ') || 'User',
         role: user.role,
+        // For parents: the ids of their children, so join can verify the
+        // child is assigned to the class they want to monitor.
+        childIds: user.role === 'parent'
+          ? [...new Set([...(user.linkedStudents || []), ...(user.children || [])].map(String))]
+          : [],
       };
       next();
     } catch (e) {
@@ -169,7 +174,10 @@ function attachClassroom(httpServer, allowedOrigins) {
         const isTeacher = String(lc.teacherId) === me.id;
         const isStaff = ['admin', 'dos', 'ops_manager'].includes(me.role);
         const isAssigned = (lc.assignedStudents || []).some(s => String(s) === me.id);
-        if (!isTeacher && !isStaff && !isAssigned)
+        // A parent may join to monitor if one of their children is in the class.
+        const isParentOfAssigned = me.role === 'parent' &&
+          (lc.assignedStudents || []).some(s => (me.childIds || []).includes(String(s)));
+        if (!isTeacher && !isStaff && !isAssigned && !isParentOfAssigned)
           return ack && ack({ ok: false, message: 'You are not assigned to this class.' });
 
         const rid = roomOf(liveClassId);
