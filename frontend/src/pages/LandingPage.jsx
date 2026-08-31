@@ -24232,6 +24232,41 @@ export default function LandingPage() {
         </div>
       )}
 
+      {/* ── VISIT US — our two physical Nairobi locations ── */}
+      <section style={{background:V.bone2,borderTop:`1px solid ${V.bone3}`,padding:'46px 0'}}>
+        <div className="wrap">
+          <div style={{textAlign:'center',marginBottom:30}}>
+            <div style={{fontSize:11,fontWeight:800,letterSpacing:'.16em',color:V.gold3,textTransform:'uppercase',marginBottom:8}}>Visit Us</div>
+            <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.5rem, 3vw, 2rem)',fontWeight:400,color:V.ink,margin:0}}>
+              Two learning centres in <em style={{color:V.cr,fontStyle:'italic'}}>Nairobi</em>
+            </h2>
+          </div>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:20,maxWidth:820,margin:'0 auto'}}>
+            {[
+              {name:'Diamond Plaza Parklands',est:'Head Office',addr:'Diamond Plaza Parklands, Annex, 3rd Floor',area:'Parklands, Nairobi'},
+              {name:'Karen Centre',est:'Second Centre',addr:'Mokoyeti West Road, off Langata Road, near Galleria Mall',area:'Karen, Nairobi'},
+            ].map(loc => (
+              <div key={loc.name} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,padding:'24px 26px',borderTop:`3px solid ${V.cr}`}}>
+                <div style={{display:'flex',alignItems:'flex-start',gap:12}}>
+                  <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke={V.cr} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0,marginTop:2}}>
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+                  </svg>
+                  <div style={{minWidth:0}}>
+                    <div style={{fontSize:10.5,fontWeight:800,letterSpacing:'.1em',color:V.gold3,textTransform:'uppercase',marginBottom:4}}>{loc.est}</div>
+                    <div style={{fontWeight:800,fontSize:17,color:V.ink,marginBottom:6}}>{loc.name}</div>
+                    <div style={{fontSize:13.5,color:V.sl,lineHeight:1.6}}>{loc.addr}</div>
+                    <div style={{fontSize:12.5,color:V.gold3,fontWeight:700,marginTop:6}}>{loc.area}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl}}>
+            Prefer to learn from home or abroad? We teach live online to families in more than 40 countries.
+          </div>
+        </div>
+      </section>
+
       {/* ── FOOTER — one footer, every page, always the same ── */}
       <Footer P={P}/>
 
