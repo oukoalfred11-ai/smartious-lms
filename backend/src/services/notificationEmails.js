@@ -52,7 +52,7 @@ function brandWrap(title, bodyHtml) {
         ${bodyHtml}
       </div>
       <div style="background:#FDFAF4;border-top:1px solid #E8E2D6;padding:16px 32px;font-size:12px;color:#6B7280;line-height:1.6;">
-        Smartious Homeschool Global &middot; Diamond Plaza Parklands and Karen Hardy, Nairobi<br/>
+        Smartious Homeschool Global &middot; Diamond Plaza Parklands and Karen, Nairobi<br/>
         hello@smartioushomeschool.com &middot; +254 745 021 212 &middot; smartioushomeschool.com
       </div>
     </div>
