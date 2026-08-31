@@ -38,7 +38,7 @@ const BRAND = {
   white:     '#fff',
 }
 
-export default function LessonPlayerTab({ user, toast }) {
+export default function LessonPlayerTab({ user, toast, setPage }) {
   // ── DATA ──
   const [subjects, setSubjects]   = useState([])
   const [subjectsLoading, setSubjectsLoading] = useState(true)
@@ -120,6 +120,7 @@ export default function LessonPlayerTab({ user, toast }) {
         lessons={lessons}
         progressMap={progressMap}
         onSelectLesson={setSelectedLesson}
+        onOpenLibrary={() => setPage && setPage('library')}
       />
     )
   }
@@ -516,44 +517,13 @@ const fmtDur = (mins) => {
   return h ? `${h}:${String(m % 60).padStart(2, '0')}:00` : `${m}:00`
 }
 
-function RailButton({ icon, label, active, disabled, onClick }) {
-  return (
-    <button onClick={onClick} disabled={disabled} title={disabled ? `${label} — not available for this lesson` : label}
-      style={{
-        display: 'flex', alignItems: 'center', gap: 12,
-        width: '100%', padding: '13px 18px',
-        background: active ? 'linear-gradient(90deg, rgba(193,18,31,.20), rgba(193,18,31,.04))' : 'transparent',
-        border: 'none', borderLeftStyle: 'solid', borderLeftWidth: 3,
-        borderLeftColor: active ? PLAYER.gold : 'transparent',
-        color: disabled ? 'rgba(154,160,173,.4)' : active ? PLAYER.text : PLAYER.mute,
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        fontSize: 13.5, fontWeight: active ? 700 : 600, textAlign: 'left',
-        transition: 'background .18s, color .18s',
-      }}>
-      <span style={{
-        width: 32, height: 32, borderRadius: 9, flexShrink: 0,
-        background: active ? 'linear-gradient(135deg, #8B1A2E, #C9973A)' : 'rgba(255,255,255,.05)',
-        color: active ? '#fff' : PLAYER.mute,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        boxShadow: active ? '0 3px 10px rgba(139,26,46,.45)' : 'none',
-      }}>{icon}</span>
-      <span className="lp-rail-label">{label}</span>
-    </button>
-  )
-}
-
-function LessonDetailView({ lesson, subject, teacher, mastered, onBack, lessons = [], progressMap = {}, onSelectLesson }) {
+function LessonDetailView({ lesson, subject, teacher, mastered, onBack, lessons = [], progressMap = {}, onSelectLesson, onOpenLibrary }) {
   const [pane, setPane] = useState('video')
+  const [listOpen, setListOpen] = useState(false)   // mobile lesson drawer
 
-  // The playlist panel (right side) shows every lesson in this subject.
   const playlist = (lessons && lessons.length) ? lessons : [lesson]
 
-  // Normalize every video for this lesson into one list. A lesson can be
-  // taught several times to different students, so it can carry several
-  // recordings, plus any manually added YouTube video. We merge the
-  // legacy single video (videoEmbedId) with the videos[] array, and
-  // de-duplicate so an old lesson whose primary video is also in the
-  // array is not shown twice.
+  // Merge the legacy single video with the videos[] array, de-duplicated.
   const videoList = useMemo(() => {
     const out = []
     const seen = new Set()
@@ -577,140 +547,217 @@ function LessonDetailView({ lesson, subject, teacher, mastered, onBack, lessons 
   const hasVideo = videoList.length > 0
   const hasNotes = !!lesson.notesPdfUrl
 
-  useEffect(() => { setPane(hasVideo ? 'video' : hasNotes ? 'notes' : 'progress') },
-    [lesson._id, hasVideo, hasNotes])
-
-  const I = {
-    video:    <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/></svg>,
-    notes:    <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="14" y2="17"/></svg>,
-    library:  <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>,
-    progress: <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="6" y1="20" x2="6" y2="14"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="18" y1="20" x2="18" y2="10"/></svg>,
-  }
+  useEffect(() => {
+    setPane(hasVideo ? 'video' : hasNotes ? 'notes' : 'progress')
+  }, [lesson._id, hasVideo, hasNotes])
 
   const doneCount = playlist.filter(l => progressMap[l._id]).length
+  const pct = playlist.length ? Math.round((doneCount / playlist.length) * 100) : 0
+  const lessonIndex = playlist.findIndex(l => String(l._id) === String(lesson._id))
+
+  // SVG icons
+  const Ico = {
+    play:     <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>,
+    notes:    <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>,
+    library:  <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>,
+    progress: <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M22 12A10 10 0 1 1 12 2"/><polyline points="22 4 12 14.01 9 11.01"/></svg>,
+    back:     <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>,
+    check:    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
+    list:     <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>,
+    clock:    <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+    dot:      <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="12"/></svg>,
+    close:    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
+  }
+
+  const G = PLAYER.gold, GD = PLAYER.goldD, CR = PLAYER.accent
+
+  // A tab in the top segmented control
+  const Tab = ({ id, icon, label, disabled, onClick }) => {
+    const on = pane === id
+    return (
+      <button
+        onClick={onClick || (() => !disabled && setPane(id))}
+        disabled={disabled}
+        style={{
+          display: 'flex', alignItems: 'center', gap: 8, padding: '9px 18px',
+          borderRadius: 10, border: 'none', cursor: disabled ? 'not-allowed' : 'pointer',
+          background: on ? 'linear-gradient(120deg, #8B1A2E, #A32438)' : 'transparent',
+          color: disabled ? 'rgba(154,160,173,.35)' : on ? '#fff' : PLAYER.mute,
+          fontSize: 13, fontWeight: 700, whiteSpace: 'nowrap',
+          boxShadow: on ? '0 4px 14px rgba(139,26,46,.4)' : 'none',
+          transition: 'background .18s, color .18s',
+        }}>
+        <span style={{ color: on ? G : 'inherit', display: 'flex' }}>{icon}</span>
+        {label}
+      </button>
+    )
+  }
+
+  // The lesson list (used both as sidebar and mobile drawer)
+  const LessonList = () => (
+    <>
+      <div style={{ padding: '18px 20px 14px', borderBottom: `1px solid ${PLAYER.line}` }}>
+        <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.12em', color: G, textTransform: 'uppercase', marginBottom: 8 }}>
+          {subject.subjectName}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ flex: 1, height: 6, borderRadius: 99, background: 'rgba(255,255,255,.08)', overflow: 'hidden' }}>
+            <div style={{ width: pct + '%', height: '100%', background: `linear-gradient(90deg, ${CR}, ${GD})`, borderRadius: 99 }} />
+          </div>
+          <span style={{ fontSize: 11.5, fontWeight: 700, color: PLAYER.mute }}>{doneCount}/{playlist.length}</span>
+        </div>
+      </div>
+      <div style={{ flex: 1, overflowY: 'auto' }} className="lp-list-scroll">
+        {playlist.map((l, i) => {
+          const on = String(l._id) === String(lesson._id)
+          const done = !!progressMap[l._id]
+          const vids = 1 + (l.videos ? l.videos.length : 0) - (l.videoEmbedId && (l.videos||[]).some(v=>v.embedId===l.videoEmbedId) ? 1 : 0)
+          return (
+            <button key={l._id}
+              onClick={() => { if (!on && onSelectLesson) { onSelectLesson(l); setListOpen(false) } }}
+              style={{
+                display: 'flex', gap: 12, width: '100%', textAlign: 'left',
+                padding: '13px 18px', border: 'none', cursor: on ? 'default' : 'pointer',
+                background: on ? 'linear-gradient(90deg, rgba(193,18,31,.22), transparent)' : 'transparent',
+                borderLeft: `3px solid ${on ? G : 'transparent'}`,
+                alignItems: 'flex-start',
+                transition: 'background .15s',
+              }}
+              onMouseEnter={e => { if (!on) e.currentTarget.style.background = 'rgba(255,255,255,.035)' }}
+              onMouseLeave={e => { if (!on) e.currentTarget.style.background = 'transparent' }}>
+              <div style={{
+                width: 26, height: 26, borderRadius: '50%', flexShrink: 0, marginTop: 1,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 11.5, fontWeight: 800,
+                background: done ? `linear-gradient(135deg, ${CR}, ${GD})` : on ? 'rgba(228,198,137,.15)' : 'rgba(255,255,255,.06)',
+                color: done ? '#fff' : on ? G : PLAYER.mute,
+                border: on && !done ? `1px solid ${G}` : 'none',
+              }}>
+                {done ? Ico.check : (i + 1)}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 13, fontWeight: on ? 700 : 600, color: on ? PLAYER.text : '#C9CBD1', lineHeight: 1.4 }}>
+                  {l.title}
+                </div>
+                <div style={{ display: 'flex', gap: 10, marginTop: 4, fontSize: 10.5, color: PLAYER.mute, alignItems: 'center' }}>
+                  <span>Lesson {l.order}</span>
+                  {l.durationMins > 0 && <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>{Ico.clock}{l.durationMins}m</span>}
+                  {(l.videoEmbedId || (l.videos && l.videos.length > 0)) && (
+                    <span style={{ color: G, display: 'flex', alignItems: 'center', gap: 3 }}>{Ico.play}</span>
+                  )}
+                </div>
+              </div>
+            </button>
+          )
+        })}
+      </div>
+    </>
+  )
 
   return (
     <div>
       <style>{`
-        @media (max-width: 900px) {
-          .lp-shell { grid-template-columns: 1fr !important; }
-          .lp-rail  { flex-direction: row !important; overflow-x: auto; }
-          .lp-rail-label { display: none; }
-          .lp-list  { max-height: 320px; }
+        .lp-list-scroll::-webkit-scrollbar { width: 7px }
+        .lp-list-scroll::-webkit-scrollbar-thumb { background: #2A3346; border-radius: 7px }
+        .lp-list-scroll::-webkit-scrollbar-track { background: transparent }
+        @media (max-width: 920px) {
+          .lp-grid { grid-template-columns: 1fr !important; }
+          .lp-sidebar-desktop { display: none !important; }
+          .lp-listbtn-mobile { display: inline-flex !important; }
         }
+        @keyframes lpFade { from { opacity: 0 } to { opacity: 1 } }
       `}</style>
 
-      <button onClick={onBack}
-        style={{
-          background: 'transparent', border: 'none', color: BRAND.crimson,
-          fontSize: 13, fontWeight: 700, cursor: 'pointer',
-          padding: '6px 0', marginBottom: 12,
-          display: 'flex', alignItems: 'center', gap: 6,
-        }}>
-        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
-        </svg>
-        Back to lessons
-      </button>
+      {/* Top bar: back + lesson title + tabs */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 14, flexWrap: 'wrap' }}>
+        <button onClick={onBack}
+          style={{ display: 'flex', alignItems: 'center', gap: 7, background: 'transparent', border: 'none', color: BRAND.crimson, fontSize: 13, fontWeight: 700, cursor: 'pointer', padding: 0 }}>
+          {Ico.back} All subjects
+        </button>
+        <div style={{ flex: 1 }} />
+        <button className="lp-listbtn-mobile" onClick={() => setListOpen(true)}
+          style={{ display: 'none', alignItems: 'center', gap: 7, background: BRAND.white, border: `1px solid ${BRAND.line}`, borderRadius: 9, color: BRAND.ink, fontSize: 12.5, fontWeight: 700, cursor: 'pointer', padding: '7px 13px' }}>
+          {Ico.list} Lessons
+        </button>
+      </div>
 
-      <div className="lp-shell" style={{
-        display: 'grid',
-        gridTemplateColumns: 'minmax(170px, 200px) minmax(0, 1fr) minmax(240px, 320px)',
-        background: PLAYER.shell,
-        borderRadius: 18,
-        overflow: 'hidden',
-        boxShadow: '0 24px 70px rgba(8,10,20,.5)', border: '1px solid rgba(228,198,137,.12)',
-        minHeight: 520,
-      }}>
-
-        {/* ── LEFT RAIL ─────────────────────────────────────── */}
-        <div className="lp-rail" style={{
-          background: PLAYER.panel, borderRight: `1px solid ${PLAYER.line}`,
-          display: 'flex', flexDirection: 'column', paddingTop: 4,
-        }}>
-          <div style={{ padding: '20px 18px 18px', borderBottom: `1px solid ${PLAYER.line}` }}>
-            <div style={{ fontFamily: "'Instrument Serif',serif", fontSize: 19, color: PLAYER.text, lineHeight: 1 }}>
-              Smartious
-            </div>
-            <div style={{ fontSize: 9.5, letterSpacing: '.22em', color: PLAYER.gold, fontWeight: 700, marginTop: 3 }}>
-              eSCHOOL
-            </div>
-          </div>
-          <div style={{ paddingTop: 10, display: 'flex', flexDirection: 'column' }}>
-            <RailButton icon={I.video}    label="Video"    active={pane==='video'}    disabled={!hasVideo} onClick={() => setPane('video')} />
-            <RailButton icon={I.notes}    label="Notes"    active={pane==='notes'}    disabled={!hasNotes} onClick={() => setPane('notes')} />
-            <RailButton icon={I.library}  label="Library"  active={pane==='library'}  onClick={() => setPane('library')} />
-            <RailButton icon={I.progress} label="Progress" active={pane==='progress'} onClick={() => setPane('progress')} />
-          </div>
+      {/* Lesson heading */}
+      <div style={{ marginBottom: 14 }}>
+        <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.1em', color: BRAND.inkMute, textTransform: 'uppercase', marginBottom: 4 }}>
+          {subject.subjectName} &middot; Term {lesson.termIndex} &middot; Lesson {lesson.order}
+          {mastered && (
+            <span style={{ marginLeft: 10, color: '#15803D', display: 'inline-flex', alignItems: 'center', gap: 3, verticalAlign: 'middle' }}>
+              {Ico.check} Mastered
+            </span>
+          )}
         </div>
+        <h1 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 'clamp(1.4rem, 3vw, 2rem)', fontWeight: 400, color: BRAND.ink, lineHeight: 1.2, margin: 0 }}>
+          {lesson.title}
+        </h1>
+      </div>
 
-        {/* ── CENTRE STAGE ──────────────────────────────────── */}
-        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-          <div style={{ background: pane === 'notes' ? '#525659' : '#000', position: 'relative', ...(pane === 'notes' ? { height: 620, display: 'flex' } : { aspectRatio: '16 / 9' }), width: '100%' }}>
+      {/* Tabs */}
+      <div style={{ display: 'flex', gap: 6, marginBottom: 14, background: PLAYER.panel, padding: 6, borderRadius: 13, width: 'fit-content', maxWidth: '100%', overflowX: 'auto' }}>
+        <Tab id="video"    icon={Ico.play}     label="Lesson"   disabled={!hasVideo} />
+        <Tab id="notes"    icon={Ico.notes}    label="Notes"    disabled={!hasNotes} />
+        <Tab id="progress" icon={Ico.progress} label="Progress" />
+        <Tab id="library"  icon={Ico.library}  label="Library"  onClick={() => onOpenLibrary && onOpenLibrary()} />
+      </div>
+
+      {/* Main grid: big stage + lesson sidebar */}
+      <div className="lp-grid" style={{
+        display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 320px', gap: 16, alignItems: 'start',
+      }}>
+        {/* STAGE */}
+        <div style={{
+          background: PLAYER.shell, borderRadius: 18, overflow: 'hidden',
+          border: '1px solid rgba(228,198,137,.12)',
+          boxShadow: '0 24px 60px rgba(8,10,20,.28)',
+          animation: 'lpFade .25s ease-out',
+        }}>
+          {/* The viewing area — large */}
+          <div style={{
+            width: '100%',
+            ...(pane === 'notes' ? { height: 'min(74vh, 780px)', background: '#525659', display: 'flex' } : { aspectRatio: '16 / 9', background: '#000' }),
+          }}>
             {pane === 'video' && hasVideo && activeVideo && activeVideo.source === 'recording' && (
-              <video
-                key={activeVideo.r2Url}
-                src={activeVideo.r2Url}
-                poster={activeVideo.posterUrl || undefined}
-                controls
-                controlsList="nodownload"
-                onContextMenu={e => e.preventDefault()}
-                playsInline
-                style={{ width: '100%', height: '100%', display: 'block', background: '#000', objectFit: 'contain' }}
-              />
+              <video key={activeVideo.r2Url} src={activeVideo.r2Url} poster={activeVideo.posterUrl || undefined}
+                controls controlsList="nodownload" onContextMenu={e => e.preventDefault()} playsInline
+                style={{ width: '100%', height: '100%', display: 'block', background: '#000', objectFit: 'contain' }} />
             )}
             {pane === 'video' && hasVideo && activeVideo && activeVideo.source !== 'recording' && (
-              <iframe
-                key={activeVideo.embedId}
+              <iframe key={activeVideo.embedId}
                 src={`https://www.youtube-nocookie.com/embed/${activeVideo.embedId}?rel=0&modestbranding=1`}
-                title={lesson.title}
+                title={lesson.title} allowFullScreen
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
-              />
+                style={{ width: '100%', height: '100%', border: 'none', display: 'block' }} />
             )}
-
-            {pane === 'notes' && hasNotes && (
-              <NotesPdfViewer url={lesson.notesPdfUrl} />
+            {pane === 'video' && !hasVideo && (
+              <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: PLAYER.mute, gap: 10 }}>
+                <span style={{ color: 'rgba(228,198,137,.5)' }}>{Ico.play}</span>
+                <span style={{ fontSize: 13 }}>No video for this lesson yet.</span>
+              </div>
             )}
+            {pane === 'notes' && hasNotes && <NotesPdfViewer url={lesson.notesPdfUrl} />}
             {pane === 'notes' && !hasNotes && (
               <div style={{ height: '100%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: PLAYER.mute, fontSize: 13 }}>
                 No notes for this lesson yet.
               </div>
             )}
-            {pane === 'library' && (
-              <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            flexDirection: 'column', gap: 10, color: PLAYER.mute, padding: 30, textAlign: 'center' }}>
-                <span style={{ color: PLAYER.accent }}>{I.library}</span>
-                <div style={{ fontSize: 14, fontWeight: 700, color: PLAYER.text }}>Subject library</div>
-                <div style={{ fontSize: 12.5, maxWidth: 340, lineHeight: 1.6 }}>
-                  Coursebooks and reading for {subject.subjectName} live in the Library tab.
-                </div>
-              </div>
-            )}
             {pane === 'progress' && (
-              <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            flexDirection: 'column', gap: 14, color: PLAYER.mute, padding: 30 }}>
-                <ProgressRing percentage={playlist.length ? Math.round((doneCount / playlist.length) * 100) : 0}
-                  size={92} color={PLAYER.accent} trackColor="rgba(255,255,255,.10)" />
-                <div style={{ fontSize: 13.5, color: PLAYER.text, fontWeight: 700 }}>
-                  {doneCount} of {playlist.length} lessons mastered
+              <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, padding: 30, color: PLAYER.mute }}>
+                <ProgressRing percentage={pct} size={104} color={G} trackColor="rgba(255,255,255,.10)" />
+                <div style={{ fontSize: 15, color: PLAYER.text, fontWeight: 700 }}>{doneCount} of {playlist.length} lessons mastered</div>
+                <div style={{ fontSize: 12.5, textAlign: 'center', maxWidth: 340, lineHeight: 1.6 }}>
+                  A lesson counts as mastered once you pass its practice questions. Keep going.
                 </div>
-                <div style={{ fontSize: 12, textAlign: 'center', maxWidth: 320, lineHeight: 1.6 }}>
-                  A lesson counts as mastered once you pass its practice questions.
-                </div>
-              </div>
-            )}
-            {(pane === 'video' && !hasVideo) && (
-              <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            color: PLAYER.mute, fontSize: 13 }}>
-                No video for this lesson yet.
               </div>
             )}
           </div>
 
+          {/* Video chooser (only when several videos) */}
           {pane === 'video' && videoList.length > 1 && (
-            <div style={{ display: 'flex', gap: 8, padding: '12px 18px', overflowX: 'auto', borderTop: `1px solid ${PLAYER.line}`, background: PLAYER.panel }}>
+            <div style={{ display: 'flex', gap: 8, padding: '12px 16px', overflowX: 'auto', borderTop: `1px solid ${PLAYER.line}` }}>
               {videoList.map((v, i) => {
                 const on = i === activeVideoIdx
                 const label = v.source === 'recording'
@@ -719,17 +766,14 @@ function LessonDetailView({ lesson, subject, teacher, mastered, onBack, lessons 
                 return (
                   <button key={i} onClick={() => setActiveVideoIdx(i)}
                     style={{
-                      flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8,
-                      padding: '8px 14px', borderRadius: 10, cursor: 'pointer', whiteSpace: 'nowrap',
+                      flexShrink: 0, display: 'flex', alignItems: 'center', gap: 7, padding: '8px 14px', borderRadius: 10,
+                      cursor: 'pointer', whiteSpace: 'nowrap', fontSize: 12, fontWeight: 700,
                       border: on ? 'none' : `1px solid ${PLAYER.line}`,
                       background: on ? 'linear-gradient(120deg, #8B1A2E, #A32438)' : PLAYER.raised,
                       color: on ? '#fff' : PLAYER.mute,
-                      fontSize: 12, fontWeight: 700,
                       boxShadow: on ? '0 3px 12px rgba(139,26,46,.4)' : 'none',
                     }}>
-                    <span style={{ color: on ? PLAYER.gold : PLAYER.mute, fontSize: 11 }}>
-                      {v.source === 'recording' ? '\u25cf REC' : '\u25b6'}
-                    </span>
+                    <span style={{ color: on ? G : (v.source === 'recording' ? CR : PLAYER.mute), fontSize: 8, display: 'flex' }}>{Ico.dot}</span>
                     {label}
                   </button>
                 )
@@ -737,101 +781,41 @@ function LessonDetailView({ lesson, subject, teacher, mastered, onBack, lessons 
             </div>
           )}
 
-          <div style={{ padding: '18px 24px', borderTop: `1px solid ${PLAYER.line}` }}>
-            <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase',
-                          color: PLAYER.mute, marginBottom: 5 }}>
-              {subject.subjectName} &middot; Term {lesson.termIndex} &middot; Lesson {lesson.order}
+          {/* Description strip */}
+          {lesson.description && (
+            <div style={{ padding: '16px 22px', borderTop: `1px solid ${PLAYER.line}`, color: '#B8BBC4', fontSize: 13, lineHeight: 1.7 }}>
+              {lesson.description}
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-              <h1 style={{ fontFamily: "'Instrument Serif',serif", fontSize: 24, fontWeight: 400,
-                           margin: 0, lineHeight: 1.2, color: PLAYER.text, flex: 1, minWidth: 220 }}>
-                {lesson.title}
-              </h1>
-              {mastered && (
-                <span style={{
-                  background: 'rgba(34,197,94,.15)', color: '#4ADE80',
-                  fontSize: 10, fontWeight: 800, letterSpacing: '.08em',
-                  padding: '5px 12px', borderRadius: 99, textTransform: 'uppercase',
-                }}>Mastered</span>
-              )}
-            </div>
-            {lesson.description && (
-              <div style={{ fontSize: 13, color: PLAYER.mute, marginTop: 8, lineHeight: 1.6, maxWidth: 640 }}>
-                {lesson.description}
-              </div>
-            )}
-          </div>
+          )}
         </div>
 
-        {/* ── RIGHT PLAYLIST ────────────────────────────────── */}
-        <div style={{ background: PLAYER.panel, borderLeft: `1px solid ${PLAYER.line}`, display: 'flex', flexDirection: 'column' }}>
-          <div style={{ padding: '20px 20px 16px', borderBottom: `1px solid ${PLAYER.line}` }}>
-            <div style={{ fontSize: 15.5, fontWeight: 700, color: PLAYER.text, lineHeight: 1.3 }}>
-              {subject.subjectName}
-            </div>
-            <div style={{ fontSize: 12, color: PLAYER.mute, marginTop: 3 }}>
-              {playlist.length} lesson{playlist.length === 1 ? '' : 's'}
-              {doneCount > 0 && <> &middot; {doneCount} mastered</>}
-            </div>
-          </div>
-
-          <div className="lp-list" style={{ overflowY: 'auto', flex: 1, maxHeight: 560 }}>
-            {playlist.map((l, i) => {
-              const active = String(l._id) === String(lesson._id)
-              const done = !!progressMap[l._id]
-              const thumb = thumbFor(l.videoEmbedId)
-              return (
-                <div key={l._id}
-                  onClick={() => { if (!active && onSelectLesson) onSelectLesson(l) }}
-                  style={{
-                    display: 'flex', gap: 11, padding: '11px 16px',
-                    background: active ? 'linear-gradient(90deg, rgba(193,18,31,.22), rgba(193,18,31,.05))' : 'transparent',
-                    borderLeft: `3px solid ${active ? PLAYER.gold : 'transparent'}`,
-                    cursor: active ? 'default' : 'pointer',
-                    alignItems: 'flex-start',
-                    transition: 'background .18s',
-                  }}
-                  onMouseEnter={e => { if (!active) e.currentTarget.style.background = 'rgba(255,255,255,.04)' }}
-                  onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent' }}>
-                  <div style={{
-                    width: 62, height: 38, borderRadius: 5, flexShrink: 0, overflow: 'hidden',
-                    background: PLAYER.raised, position: 'relative',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    {thumb
-                      ? <img src={thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                          onError={e => { e.currentTarget.style.display = 'none' }} />
-                      : <span style={{ color: PLAYER.mute, fontSize: 15 }}>{I.notes}</span>}
-                    {active && (
-                      <span style={{
-                        position: 'absolute', inset: 0, background: 'rgba(139,26,46,.45)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', color: PLAYER.gold,
-                      }}>
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                      </span>
-                    )}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{
-                      fontSize: 12.5, fontWeight: active ? 700 : 500,
-                      color: active ? '#fff' : PLAYER.text, lineHeight: 1.35,
-                    }}>
-                      {i + 1}. {l.title}
-                    </div>
-                    <div style={{ fontSize: 11, color: PLAYER.mute, marginTop: 3, display: 'flex', gap: 7, alignItems: 'center' }}>
-                      {fmtDur(l.durationMins) && <span>{fmtDur(l.durationMins)}</span>}
-                      {done && <span style={{ color: '#4ADE80', fontWeight: 700 }}>&#10003;</span>}
-                    </div>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
+        {/* SIDEBAR — lesson list (desktop) */}
+        <div className="lp-sidebar-desktop" style={{
+          background: PLAYER.panel, borderRadius: 18, overflow: 'hidden',
+          border: `1px solid ${PLAYER.line}`, display: 'flex', flexDirection: 'column',
+          maxHeight: 'min(74vh, 780px)',
+        }}>
+          <LessonList />
         </div>
       </div>
+
+      {/* Mobile lesson drawer */}
+      {listOpen && (
+        <div onClick={() => setListOpen(false)}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', zIndex: 60, animation: 'lpFade .2s' }}>
+          <div onClick={e => e.stopPropagation()}
+            style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: 'min(340px, 88vw)', background: PLAYER.panel, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', padding: 12 }}>
+              <button onClick={() => setListOpen(false)} style={{ background: 'transparent', border: 'none', color: PLAYER.mute, cursor: 'pointer' }}>{Ico.close}</button>
+            </div>
+            <LessonList />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
+
 
 // ═══════════════════════════════════════════════════════════
 // PDF VIEWER — react-pdf with download/right-click disabled
