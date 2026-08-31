@@ -3,8 +3,8 @@ import { api } from '../../../../context/ctx.jsx'
 import { TOKENS } from '../shared/tokens.js'
 
 // Some token keys vary across the codebase; fall back safely.
-const LINE = LINE || '#EAE4DC'
-const S600 = S600 || '#6B5D57'
+const LINE = TOKENS.line || '#EAE4DC'
+const S600 = TOKENS.s600 || '#6B5D57'
 
 // Category styling — mirrors the dashboard cards students and parents see.
 const CATEGORIES = [
