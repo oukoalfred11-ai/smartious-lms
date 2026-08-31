@@ -8,6 +8,7 @@ export const MODULES = {
   allocations: { label: 'Manage Students',  accent: TOKENS.accentAmber, icon: 'allocations' },
   communication: { label: 'Communication', accent: TOKENS.crimson, icon: 'mail' },
   community:     { label: 'Community',     accent: TOKENS.crimson, icon: 'users' },
+  liveclasses:   { label: 'Live Classes',   accent: TOKENS.crimson, icon: 'video' },
   announcements: { label: 'Announcements', accent: TOKENS.crimson, icon: 'mail' },
   frontdesk:   { label: 'Front Desk',   accent: TOKENS.accentAmber, icon: 'frontdesk' },
   payroll:     { label: 'Payroll',      accent: TOKENS.accentEmerald, icon: 'payroll' },
