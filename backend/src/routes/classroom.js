@@ -23,11 +23,11 @@ const os = require('os');
 const path = require('path');
 const express = require('express');
 const mongoose = require('mongoose');
-const { auth } = require('../middleware/auth');
+const { auth, requireRole } = require('../middleware/auth');
 const { roomStatus } = require('../realtime/classroom');
 
 // ── R2 client (same env vars as the Library) ───────────────
-const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+const { S3Client, PutObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
 const R2_READY = !!(process.env.R2_ACCOUNT_ID && process.env.R2_ACCESS_KEY_ID &&
   process.env.R2_SECRET_ACCESS_KEY && process.env.R2_BUCKET_NAME && process.env.R2_PUBLIC_URL);
 const r2 = R2_READY ? new S3Client({
@@ -126,7 +126,7 @@ router.post('/:liveClassId/recording/:recId/finish', auth, async (req, res) => {
     await LiveClass.updateOne(
       { _id: rec.classId },
       { $push: { recordings: {
-        url, sizeBytes: rec.bytes,
+        url, key, sizeBytes: rec.bytes,
         durationSec: Math.round((Date.now() - rec.startedAt) / 1000),
         recordedAt: new Date(rec.startedAt),
       } } }
@@ -237,5 +237,159 @@ router.get('/:liveClassId/status', auth, (req, res) => {
     return res.status(400).json({ success: false, message: 'Invalid id.' });
   res.json({ success: true, data: roomStatus(req.params.liveClassId) });
 });
+
+
+// ════════════════════════════════════════════════════════════
+// RECORDINGS LIBRARY  admin oversight + student public library
+// Every class auto-records; admins browse, play, delete the weak
+// ones, and mark the good ones 'featured' to enter the public
+// student library. Over years this becomes the school's best asset.
+// ════════════════════════════════════════════════════════════
+const ADMIN = ['admin', 'ops_manager', 'dos'];
+
+// GET /api/classroom/recordings  admin: every recording across all classes
+router.get('/recordings/all', auth, requireRole(...ADMIN), async (req, res) => {
+  try {
+    const LiveClass = require('../models/LiveClass');
+    const classes = await LiveClass.find({ 'recordings.0': { $exists: true } })
+      .populate('teacherId', 'firstName lastName')
+      .populate('subjectId', 'subjectName curriculum')
+      .sort({ scheduledAt: -1 })
+      .limit(500)
+      .lean();
+    const rows = [];
+    for (const c of classes) {
+      (c.recordings || []).forEach((r, idx) => {
+        rows.push({
+          liveClassId: c._id,
+          recIndex: idx,
+          recId: r._id,
+          url: r.url,
+          title: r.title || c.title || 'Untitled class',
+          classTitle: c.title || '',
+          subject: c.subjectId?.subjectName || '',
+          curriculum: c.subjectId?.curriculum || '',
+          teacher: c.teacherId ? `${c.teacherId.firstName || ''} ${c.teacherId.lastName || ''}`.trim() : '',
+          durationSec: r.durationSec || 0,
+          sizeBytes: r.sizeBytes || 0,
+          recordedAt: r.recordedAt,
+          featured: !!r.featured,
+        });
+      });
+    }
+    res.json({ success: true, data: { recordings: rows, count: rows.length } });
+  } catch (e) {
+    console.error('[recordings/all]', e.message);
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// GET /api/classroom/recordings/library  students: featured recordings only
+// (visible to any student, even for a class that was not theirs).
+router.get('/recordings/library', auth, async (req, res) => {
+  try {
+    const LiveClass = require('../models/LiveClass');
+    const classes = await LiveClass.find({ 'recordings.featured': true })
+      .populate('teacherId', 'firstName lastName')
+      .populate('subjectId', 'subjectName curriculum')
+      .sort({ scheduledAt: -1 })
+      .limit(500)
+      .lean();
+    const rows = [];
+    for (const c of classes) {
+      (c.recordings || []).filter(r => r.featured).forEach((r) => {
+        rows.push({
+          recId: r._id,
+          url: r.url,
+          title: r.title || c.title || 'Recorded class',
+          subject: c.subjectId?.subjectName || '',
+          curriculum: c.subjectId?.curriculum || '',
+          teacher: c.teacherId ? `${c.teacherId.firstName || ''} ${c.teacherId.lastName || ''}`.trim() : '',
+          durationSec: r.durationSec || 0,
+          recordedAt: r.recordedAt,
+        });
+      });
+    }
+    res.json({ success: true, data: { recordings: rows, count: rows.length } });
+  } catch (e) {
+    console.error('[recordings/library]', e.message);
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// PATCH /api/classroom/:liveClassId/recordings/:recId  admin: feature/rename
+router.patch('/:liveClassId/recordings/:recId', auth, requireRole(...ADMIN), async (req, res) => {
+  try {
+    const LiveClass = require('../models/LiveClass');
+    const set = {};
+    if (typeof req.body.featured === 'boolean') set['recordings.$.featured'] = req.body.featured;
+    if (typeof req.body.title === 'string') set['recordings.$.title'] = req.body.title.trim().slice(0, 200);
+    set['recordings.$.reviewedBy'] = req.user._id;
+    const r = await LiveClass.updateOne(
+      { _id: req.params.liveClassId, 'recordings._id': req.params.recId },
+      { $set: set }
+    );
+    if (!r.matchedCount) return res.status(404).json({ success: false, message: 'Recording not found.' });
+    res.json({ success: true });
+  } catch (e) {
+    console.error('[recordings patch]', e.message);
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// DELETE /api/classroom/:liveClassId/recordings/:recId  admin: remove a weak class
+router.delete('/:liveClassId/recordings/:recId', auth, requireRole(...ADMIN), async (req, res) => {
+  try {
+    const LiveClass = require('../models/LiveClass');
+    const cls = await LiveClass.findById(req.params.liveClassId).select('recordings');
+    if (!cls) return res.status(404).json({ success: false, message: 'Class not found.' });
+    const rec = cls.recordings.id(req.params.recId);
+    if (!rec) return res.status(404).json({ success: false, message: 'Recording not found.' });
+    // Best-effort delete the object from R2 (never block on it).
+    if (r2 && rec.key) {
+      try { await r2.send(new DeleteObjectCommand({ Bucket: process.env.R2_BUCKET_NAME, Key: rec.key })); }
+      catch (e) { console.warn('[recordings delete] R2 remove failed:', e.message); }
+    }
+    rec.deleteOne();
+    await cls.save();
+    res.json({ success: true });
+  } catch (e) {
+    console.error('[recordings delete]', e.message);
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// GET /api/classroom/live/all  admin: every live/scheduled class to join or watch
+router.get('/live/all', auth, requireRole(...ADMIN), async (req, res) => {
+  try {
+    const LiveClass = require('../models/LiveClass');
+    const now = new Date();
+    const classes = await LiveClass.find({
+      $or: [
+        { status: 'live' },
+        { scheduledAt: { $gte: new Date(now.getTime() - 6 * 3600 * 1000) } },
+      ],
+    })
+      .populate('teacherId', 'firstName lastName')
+      .populate('subjectId', 'subjectName curriculum')
+      .sort({ scheduledAt: -1 })
+      .limit(200)
+      .lean();
+    const rows = classes.map(c => ({
+      _id: c._id,
+      title: c.title,
+      subject: c.subjectId?.subjectName || '',
+      teacher: c.teacherId ? `${c.teacherId.firstName || ''} ${c.teacherId.lastName || ''}`.trim() : '',
+      status: c.status,
+      scheduledAt: c.scheduledAt,
+      recordingCount: (c.recordings || []).length,
+    }));
+    res.json({ success: true, data: { classes: rows } });
+  } catch (e) {
+    console.error('[live/all]', e.message);
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
 
 module.exports = router;
