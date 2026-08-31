@@ -83,7 +83,7 @@ function logoHeader(doc, title, subtitle) {
   doc.fillColor(CRIMSON).font('Helvetica-Bold').fontSize(9.5)
     .text(subtitle, 250, 50, { width: PW - 250 - M, align: 'right' })
   doc.fillColor(GREY).font('Helvetica').fontSize(8)
-    .text('Diamond Plaza Parklands \u00B7 Karen Hardy, Nairobi \u00B7 smartioushomeschool.com', 250, 64, { width: PW - 250 - M, align: 'right' })
+    .text('Diamond Plaza Parklands \u00B7 Karen, Nairobi \u00B7 smartioushomeschool.com', 250, 64, { width: PW - 250 - M, align: 'right' })
   doc.moveTo(M, 92).lineTo(PW - M, 92).lineWidth(1).strokeColor(GOLD).stroke()
   return 102
 }
