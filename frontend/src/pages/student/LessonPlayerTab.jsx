@@ -545,6 +545,9 @@ function RailButton({ icon, label, active, disabled, onClick }) {
 function LessonDetailView({ lesson, subject, teacher, mastered, onBack, lessons = [], progressMap = {}, onSelectLesson }) {
   const [pane, setPane] = useState('video')
 
+  // The playlist panel (right side) shows every lesson in this subject.
+  const playlist = (lessons && lessons.length) ? lessons : [lesson]
+
   // Normalize every video for this lesson into one list. A lesson can be
   // taught several times to different students, so it can carry several
   // recordings, plus any manually added YouTube video. We merge the
