@@ -37,7 +37,8 @@ export default defineConfig({
   plugins: [react(), copyPdfjsViewer()],
   build: {
     outDir: 'dist',
-    sourcemap: false,
+    sourcemap: true,
+    minify: false,
     rollupOptions: {
       output: {
         manualChunks: {
