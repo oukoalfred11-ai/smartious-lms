@@ -37,7 +37,7 @@ export default function LiveClassesModule({ toast }) {
     try {
       await api.patch(`/classroom/${rec.liveClassId}/recordings/${rec.recId}`, { featured: !rec.featured })
       setRecordings(rs => rs.map(x => x.recId === rec.recId ? { ...x, featured: !x.featured } : x))
-      toast?.ok?.(rec.featured ? 'Removed from student library.' : 'Added to student library.')
+      toast?.ok?.(rec.featured ? 'Removed from the lesson player.' : 'Added to the lesson player. Students see it on that lesson.')
     } catch { toast?.error?.('Could not update.') }
   }
   const rename = async (rec) => {
@@ -85,7 +85,7 @@ export default function LiveClassesModule({ toast }) {
       <div>
         <h2 style={{ fontSize: 21, fontWeight: 800, color: TOKENS.s900, margin: 0 }}>Live Classes & Recordings</h2>
         <p style={{ fontSize: 13, color: TOKENS.s500, margin: '4px 0 0' }}>
-          Every class records automatically. Review recordings, delete weak ones, and feature the best into the student library.
+          Every class records automatically. Review recordings, delete weak ones, and add the best onto their lesson in the player.
         </p>
       </div>
 
@@ -125,7 +125,7 @@ export default function LiveClassesModule({ toast }) {
                     <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginBottom: 5 }}>
                       <span style={{ fontWeight: 800, fontSize: 15, color: TOKENS.s900 }}>{rec.title}</span>
                       {rec.featured && (
-                        <span style={{ fontSize: 9.5, fontWeight: 800, color: '#12060B', background: '#E4C689', padding: '2px 8px', borderRadius: 999 }}>IN LIBRARY</span>
+                        <span style={{ fontSize: 9.5, fontWeight: 800, color: '#12060B', background: '#E4C689', padding: '2px 8px', borderRadius: 999 }}>ON LESSON</span>
                       )}
                     </div>
                     <div style={{ fontSize: 12.5, color: S600, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
@@ -139,7 +139,7 @@ export default function LiveClassesModule({ toast }) {
                   </div>
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                     <button style={btn('primary')} onClick={() => setPlaying(rec)}>Play</button>
-                    <button style={btn()} onClick={() => toggleFeature(rec)}>{rec.featured ? 'Unfeature' : 'Feature'}</button>
+                    <button style={btn()} onClick={() => toggleFeature(rec)}>{rec.featured ? 'Remove from lesson' : 'Add to lesson'}</button>
                     <button style={btn()} onClick={() => rename(rec)}>Rename</button>
                     <button style={{ ...btn(), color: '#B91C1C', borderColor: '#FCA5A5' }} onClick={() => remove(rec)}>Delete</button>
                   </div>
