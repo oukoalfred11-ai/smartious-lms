@@ -2115,7 +2115,7 @@ export default function StudentPortal() {
           {/* ════════════════════════════════════════════
               LESSONS — player with adaptive flashcards
           ════════════════════════════════════════════ */}
-          {page === 'lessons' && <LessonPlayerTab user={user} toast={toast} />}
+          {page === 'lessons' && <LessonPlayerTab user={user} toast={toast} setPage={setPage} />}
         {page === 'quiz' && <QuizGameLauncher user={user} toast={toast} setPage={setPage}/>}
 
           {/* ════════════════════════════════════════════
