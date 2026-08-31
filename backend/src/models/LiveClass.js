@@ -107,9 +107,16 @@ const liveClassSchema = new mongoose.Schema({
   // url points at the public R2 object (WebM video).
   recordings: [{
     url:        { type: String, required: true },
+    key:        { type: String, default: '' },     // R2 object key, for deletion
     sizeBytes:  { type: Number, default: 0 },
     durationSec:{ type: Number, default: 0 },
     recordedAt: { type: Date, default: Date.now },
+    // Curation. A recording is private by default; admin reviews it and
+    // marks the good ones 'featured', which is what makes it visible to
+    // students beyond the class it came from (the growing public library).
+    featured:   { type: Boolean, default: false },
+    title:      { type: String, trim: true, default: '' },   // admin-set label for the library
+    reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
   }],
 
   // ── Lifecycle ───────────────────────────────────
