@@ -66,7 +66,7 @@ function header(doc, titleText, refNo, dateLabel, dateValue, accent = CRIMSON) {
   if (fs.existsSync(LOGO_PATH)) {
     doc.image(LOGO_PATH, 48, 24, { width: 200 })
     doc.fillColor(GREY).font('Helvetica').fontSize(8.5)
-      .text('Diamond Plaza Parklands, Nairobi  \u00B7  Karen Hardy, Nairobi', 48, 98)
+      .text('Diamond Plaza Parklands, Nairobi  \u00B7  Karen, Nairobi', 48, 98)
       .text('hello@smartioushomeschool.com  \u00B7  +254 745 021 212  \u00B7  smartioushomeschool.com', 48, 110)
   } else {
     doc.fillColor(CRIMSON).font('Times-Bold').fontSize(24)
@@ -74,7 +74,7 @@ function header(doc, titleText, refNo, dateLabel, dateValue, accent = CRIMSON) {
     doc.fillColor(GOLD).font('Times-BoldItalic')
       .text(' Homeschool Global')
     doc.fillColor(GREY).font('Helvetica').fontSize(8.5)
-      .text('Diamond Plaza Parklands, Nairobi  \u00B7  Karen Hardy, Nairobi', 48, 62)
+      .text('Diamond Plaza Parklands, Nairobi  \u00B7  Karen, Nairobi', 48, 62)
       .text('hello@smartioushomeschool.com  \u00B7  +254 745 021 212  \u00B7  smartioushomeschool.com', 48, 74)
   }
 
