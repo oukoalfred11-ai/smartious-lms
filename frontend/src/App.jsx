@@ -72,7 +72,7 @@ export default function App() {
               <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/portal"         element={<RoleRedirect />} />
               <Route path="/paused"         element={<PausedScreen />} />
-              <Route path="/classroom/:liveClassId" element={<Guard roles={['teacher','student','admin','dos','ops_manager']}><ClassroomPage /></Guard>} />
+              <Route path="/classroom/:liveClassId" element={<Guard roles={['teacher','student','admin','dos','ops_manager','parent']}><ClassroomPage /></Guard>} />
               <Route path="/admin/*"        element={<Guard roles={['admin']}><AdminPortal /></Guard>} />
               <Route path="/ops/*"          element={<Guard roles={['ops_manager','admin']}><OpsPortal /></Guard>} />
               <Route path="/dos/*"          element={<Guard roles={['dos','admin']}><DOSPortal /></Guard>} />
