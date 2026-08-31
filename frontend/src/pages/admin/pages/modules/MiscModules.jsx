@@ -110,24 +110,6 @@ export function ProgrammesModule({ refreshKey, toast }) {
   )
 }
 
-export function LiveLessonsModule({ refreshKey, toast }) {
-  return (
-    <>
-      <PSection tag="Real-Time Teaching" title="Live" em="Lessons" sub="Monitor active classroom sessions across the platform"/>
-      <div style={{ display: 'flex', gap: 14, marginBottom: 28, flexWrap: 'wrap' }}>
-        <PKpi label="Live Now" value="0"/>
-        <PKpi label="Today's Classes" value="12"/>
-        <PKpi label="Sessions (Month)" value="847"/>
-        <PKpi label="Uptime" value="99.4%"/>
-      </div>
-      <PCard><div style={{ padding: 48, textAlign: 'center' }}>
-        <div style={{ fontSize: 15, fontWeight: 600, color: TOKENS.s700, marginBottom: 6 }}>No live sessions right now</div>
-        <div style={{ fontSize: 13, color: TOKENS.s500 }}>Active classes appear here in real time as teachers go live</div>
-      </div></PCard>
-    </>
-  )
-}
-
 export function GroupRoomsModule({ refreshKey, toast }) {
   const store = useStore()
   const [backendRooms, setBackendRooms] = useState([])
