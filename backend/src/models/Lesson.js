@@ -90,6 +90,28 @@ const lessonSchema = new mongoose.Schema({
   videoUrl:     { type: String, default: '' },
   videoEmbedId: { type: String, default: '' },
 
+  // Multiple videos per lesson. A lesson can be taught several times to
+  // different students, so it can hold several recordings, plus any
+  // manually added YouTube videos. The single videoUrl/videoEmbedId
+  // above is kept for backward compatibility (older lessons and the
+  // "primary" video); videos[] is the full list shown in the player.
+  //   source: 'youtube' (embedId set) | 'recording' (r2Url set)
+  videos: [{
+    source:    { type: String, enum: ['youtube', 'recording'], default: 'youtube' },
+    title:     { type: String, trim: true, maxlength: 200, default: '' },
+    embedId:   { type: String, default: '' },    // youtube video id
+    r2Url:     { type: String, default: '' },     // direct playback url for a recording
+    r2Key:     { type: String, default: '' },     // object key, for cleanup
+    posterUrl: { type: String, default: '' },     // optional thumbnail
+    durationMins: { type: Number, default: 0, min: 0 },
+    // Provenance for auto-saved recordings, so we can show "recorded on"
+    // and tie a recording back to the live class it came from.
+    liveClassId:  { type: mongoose.Schema.Types.ObjectId, ref: 'LiveClass', default: null },
+    recordedAt:   { type: Date, default: null },
+    createdBy:    { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+    createdAt:    { type: Date, default: Date.now },
+  }],
+
   durationMins: { type: Number, default: 0, min: 0 },
 
   // ── Status ──
