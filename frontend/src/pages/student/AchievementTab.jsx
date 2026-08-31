@@ -116,7 +116,7 @@ export default function AchievementTab({ user }) {
       <div style={{ display:'flex', gap:8, marginBottom:20 }}>
         {['overview','badges','leaderboard','history'].map(t=>(
           <button key={t} onClick={()=>setTab(t)} style={{
-            padding:'8px 18px', borderRadius:99, border:'none', cursor:'pointer', fontSize:13, fontWeight:600,
+            padding:'8px 18px', borderRadius:99, cursor:'pointer', fontSize:13, fontWeight:600,
             background:tab===t?C.crimson:'#fff', color:tab===t?'#fff':C.s700,
             border:`1px solid ${tab===t?C.crimson:C.s100}`,
           }}>{t.charAt(0).toUpperCase()+t.slice(1)}</button>
