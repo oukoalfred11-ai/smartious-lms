@@ -1909,6 +1909,26 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   // Leaving the page ends the recording cleanly.
   useEffect(() => () => { if (recRef.current) stopRecording() }, [])
 
+  // AUTO RECORD. Every class is recorded automatically, so teachers
+  // never have to remember and the school builds a library over time.
+  // We start once, shortly after the teacher's class is live and the
+  // stream is stable. Admins joining also record if the teacher hasn't
+  // (belt and braces), but we never double-record: recRef guards it.
+  const autoRecTried = useRef(false)
+  useEffect(() => {
+    if (phase !== 'live') return
+    if (!isTeacher) return                 // only a teacher/admin browser records
+    if (autoRecTried.current) return       // once per session
+    if (recRef.current) return             // already recording
+    if (!liveClassId) return
+    autoRecTried.current = true
+    // small delay so camera/mic tracks are settled before capture starts
+    const t = setTimeout(() => {
+      if (!recRef.current) startRecording().catch(() => {})
+    }, 2500)
+    return () => clearTimeout(t)
+  }, [phase, isTeacher, liveClassId])   // eslint-disable-line react-hooks/exhaustive-deps
+
   // ═══ PUSH CONTENT TO BOARD (teacher) ═══════════════════════
   // Places the image at the centre of the teacher's current view in
   // world coordinates, so it lands where they are looking.
