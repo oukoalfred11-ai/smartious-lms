@@ -492,14 +492,16 @@ function StudentLessonRow({ lesson, mastered, masteredAt, onOpen }) {
  * A custom bar would need the YouTube IFrame API and is a separate job.
  */
 const PLAYER = {
-  shell:   '#0E0E0F',
-  panel:   '#151517',
-  raised:  '#1C1C1F',
-  line:    'rgba(255,255,255,.07)',
-  text:    '#F2F2F3',
-  mute:    '#8B8B92',
+  shell:   '#0F1117',
+  panel:   '#151822',
+  raised:  '#1B1F2B',
+  line:    'rgba(255,255,255,.06)',
+  text:    '#F3EFE6',
+  mute:    '#9AA0AD',
   accent:  '#C1121F',
   accentD: '#7D1025',
+  gold:    '#E4C689',
+  goldD:   '#C9973A',
 }
 
 // YouTube serves a thumbnail for any video id, so the playlist gets
@@ -520,19 +522,20 @@ function RailButton({ icon, label, active, disabled, onClick }) {
       style={{
         display: 'flex', alignItems: 'center', gap: 12,
         width: '100%', padding: '13px 18px',
-        background: active ? 'rgba(193,18,31,.13)' : 'transparent',
-        borderLeft: `3px solid ${active ? PLAYER.accent : 'transparent'}`,
+        background: active ? 'linear-gradient(90deg, rgba(193,18,31,.20), rgba(193,18,31,.04))' : 'transparent',
         border: 'none', borderLeftStyle: 'solid', borderLeftWidth: 3,
-        borderLeftColor: active ? PLAYER.accent : 'transparent',
-        color: disabled ? 'rgba(139,139,146,.4)' : active ? '#F05A63' : PLAYER.mute,
+        borderLeftColor: active ? PLAYER.gold : 'transparent',
+        color: disabled ? 'rgba(154,160,173,.4)' : active ? PLAYER.text : PLAYER.mute,
         cursor: disabled ? 'not-allowed' : 'pointer',
-        fontSize: 13.5, fontWeight: 600, textAlign: 'left',
+        fontSize: 13.5, fontWeight: active ? 700 : 600, textAlign: 'left',
         transition: 'background .18s, color .18s',
       }}>
       <span style={{
-        width: 30, height: 30, borderRadius: 8, flexShrink: 0,
-        background: active ? 'rgba(193,18,31,.22)' : 'rgba(255,255,255,.05)',
+        width: 32, height: 32, borderRadius: 9, flexShrink: 0,
+        background: active ? 'linear-gradient(135deg, #8B1A2E, #C9973A)' : 'rgba(255,255,255,.05)',
+        color: active ? '#fff' : PLAYER.mute,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
+        boxShadow: active ? '0 3px 10px rgba(139,26,46,.45)' : 'none',
       }}>{icon}</span>
       <span className="lp-rail-label">{label}</span>
     </button>
@@ -587,7 +590,7 @@ function LessonDetailView({ lesson, subject, teacher, mastered, onBack, lessons 
         background: PLAYER.shell,
         borderRadius: 18,
         overflow: 'hidden',
-        boxShadow: '0 24px 70px rgba(0,0,0,.42)',
+        boxShadow: '0 24px 70px rgba(8,10,20,.5)', border: '1px solid rgba(228,198,137,.12)',
         minHeight: 520,
       }}>
 
@@ -600,7 +603,7 @@ function LessonDetailView({ lesson, subject, teacher, mastered, onBack, lessons 
             <div style={{ fontFamily: "'Instrument Serif',serif", fontSize: 19, color: PLAYER.text, lineHeight: 1 }}>
               Smartious
             </div>
-            <div style={{ fontSize: 9.5, letterSpacing: '.22em', color: PLAYER.accent, fontWeight: 700, marginTop: 3 }}>
+            <div style={{ fontSize: 9.5, letterSpacing: '.22em', color: PLAYER.gold, fontWeight: 700, marginTop: 3 }}>
               eSCHOOL
             </div>
           </div>
@@ -712,8 +715,8 @@ function LessonDetailView({ lesson, subject, teacher, mastered, onBack, lessons 
                   onClick={() => { if (!active && onSelectLesson) onSelectLesson(l) }}
                   style={{
                     display: 'flex', gap: 11, padding: '11px 16px',
-                    background: active ? 'rgba(193,18,31,.18)' : 'transparent',
-                    borderLeft: `3px solid ${active ? PLAYER.accent : 'transparent'}`,
+                    background: active ? 'linear-gradient(90deg, rgba(193,18,31,.22), rgba(193,18,31,.05))' : 'transparent',
+                    borderLeft: `3px solid ${active ? PLAYER.gold : 'transparent'}`,
                     cursor: active ? 'default' : 'pointer',
                     alignItems: 'flex-start',
                     transition: 'background .18s',
@@ -731,8 +734,8 @@ function LessonDetailView({ lesson, subject, teacher, mastered, onBack, lessons 
                       : <span style={{ color: PLAYER.mute, fontSize: 15 }}>{I.notes}</span>}
                     {active && (
                       <span style={{
-                        position: 'absolute', inset: 0, background: 'rgba(0,0,0,.35)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff',
+                        position: 'absolute', inset: 0, background: 'rgba(139,26,46,.45)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', color: PLAYER.gold,
                       }}>
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                       </span>
