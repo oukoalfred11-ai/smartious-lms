@@ -29,7 +29,6 @@ export const MODULES = {
   suggestions:  { label: 'Suggestions',            accent: TOKENS.gold,          icon: 'mail' },
   dostimetable: { label: 'Timetables',             accent: TOKENS.accentNavy, icon: 'rooms' },
   salesperf:   { label: 'My Performance', accent: TOKENS.gold,      icon: 'frontdesk' },
-  livelessons: { label: 'Live Classes', accent: TOKENS.accentRose,  icon: 'live' },
   grouprooms:  { label: 'Group Rooms',  accent: TOKENS.accentOcean, icon: 'rooms' },
   curriculum:  { label: 'Curriculum',   accent: TOKENS.gold,        icon: 'curriculum' },
   billing:      { label: 'Billing',          accent: TOKENS.accentEmerald, icon: 'billing' },
