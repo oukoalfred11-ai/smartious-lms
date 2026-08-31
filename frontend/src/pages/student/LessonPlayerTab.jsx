@@ -614,7 +614,7 @@ function LessonDetailView({ lesson, subject, teacher, mastered, onBack, lessons 
 
         {/* ── CENTRE STAGE ──────────────────────────────────── */}
         <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-          <div style={{ background: '#000', position: 'relative', aspectRatio: '16 / 9', width: '100%' }}>
+          <div style={{ background: pane === 'notes' ? '#525659' : '#000', position: 'relative', ...(pane === 'notes' ? { height: 620, display: 'flex' } : { aspectRatio: '16 / 9' }), width: '100%' }}>
             {pane === 'video' && hasVideo && (
               <iframe
                 src={`https://www.youtube-nocookie.com/embed/${lesson.videoEmbedId}?rel=0&modestbranding=1`}
@@ -624,9 +624,14 @@ function LessonDetailView({ lesson, subject, teacher, mastered, onBack, lessons 
                 style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
               />
             )}
+
             {pane === 'notes' && hasNotes && (
-              <iframe src={lesson.notesPdfUrl} title={`${lesson.title} notes`}
-                style={{ width: '100%', height: '100%', border: 'none', background: '#fff' }} />
+              <NotesPdfViewer url={lesson.notesPdfUrl} />
+            )}
+            {pane === 'notes' && !hasNotes && (
+              <div style={{ height: '100%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: PLAYER.mute, fontSize: 13 }}>
+                No notes for this lesson yet.
+              </div>
             )}
             {pane === 'library' && (
               <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -651,10 +656,10 @@ function LessonDetailView({ lesson, subject, teacher, mastered, onBack, lessons 
                 </div>
               </div>
             )}
-            {((pane === 'video' && !hasVideo) || (pane === 'notes' && !hasNotes)) && (
+            {(pane === 'video' && !hasVideo) && (
               <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
                             color: PLAYER.mute, fontSize: 13 }}>
-                No {pane} for this lesson yet.
+                No video for this lesson yet.
               </div>
             )}
           </div>
