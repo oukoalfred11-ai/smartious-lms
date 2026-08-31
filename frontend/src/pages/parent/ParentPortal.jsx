@@ -347,7 +347,7 @@ export default function ParentPortal() {
             </div>
             {children.length>1?(
               <select value={selectedChild?._id||''} onChange={e=>setSelectedChild(children.find(c=>String(c._id)===e.target.value))}
-                style={{ width:'100%', padding:'7px 9px', borderRadius:8, border:`1px solid ${C.line}`, fontSize:13, fontFamily:'inherit', fontWeight:600, color:C.s900, background:'#fff', color:C.ink }}>
+                style={{ width:'100%', padding:'7px 9px', borderRadius:8, border:`1px solid ${C.line}`, fontSize:13, fontFamily:'inherit', fontWeight:600, background:'#fff', color:C.ink }}>
                 {children.map(c=><option key={c._id} value={c._id}>{c.firstName} {c.lastName}</option>)}
               </select>
             ):(
