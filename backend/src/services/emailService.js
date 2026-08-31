@@ -82,7 +82,7 @@ async function sendTeacherAllocationNotification(options) {
       : 'General Tutoring';
 
     const mailOptions = {
-      from: process.env.EMAIL_FROM || 'noreply@smartious.ac.ke',
+      from: process.env.EMAIL_FROM || 'hello@smartioushomeschool.com',
       to: teacherEmail,
       subject: `New Student Allocation: ${studentName}`,
       html: `
@@ -108,14 +108,14 @@ async function sendTeacherAllocationNotification(options) {
             <p>This is a high-quality match based on your teaching expertise and the student's curriculum requirements.</p>
             
             <div style="text-align: center; margin: 24px 0;">
-              <a href="${process.env.CLIENT_URL || 'https://smartious.ac.ke'}/dashboard/allocations/${allocationId}" style="background: #667eea; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block; font-weight: bold;">View Allocation</a>
+              <a href="${process.env.CLIENT_URL || 'https://smartioushomeschool.com'}/dashboard/allocations/${allocationId}" style="background: #667eea; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block; font-weight: bold;">View Allocation</a>
             </div>
             
             <hr style="border: none; border-top: 1px solid #ddd; margin: 24px 0;">
             
             <p style="font-size: 12px; color: #666;">
               This is an automated message from Smartious E-School. Please do not reply to this email.<br>
-              For support, contact: support@smartious.ac.ke
+              For support, contact: hello@smartioushomeschool.com
             </p>
           </div>
         </div>
@@ -154,7 +154,7 @@ async function sendStudentAllocationNotification(options) {
       : 'General Tutoring';
 
     const mailOptions = {
-      from: process.env.EMAIL_FROM || 'noreply@smartious.ac.ke',
+      from: process.env.EMAIL_FROM || 'hello@smartioushomeschool.com',
       to: studentEmail,
       subject: `Exciting News! You Have Been Assigned a Tutor`,
       html: `
@@ -179,14 +179,14 @@ async function sendStudentAllocationNotification(options) {
             <p>Your tutor has been carefully matched based on your curriculum and subject requirements. You're all set to start your learning journey!</p>
             
             <div style="text-align: center; margin: 24px 0;">
-              <a href="${process.env.CLIENT_URL || 'https://smartious.ac.ke'}/dashboard/sessions" style="background: #f5576c; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block; font-weight: bold;">View Your Sessions</a>
+              <a href="${process.env.CLIENT_URL || 'https://smartioushomeschool.com'}/dashboard/sessions" style="background: #f5576c; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block; font-weight: bold;">View Your Sessions</a>
             </div>
             
             <hr style="border: none; border-top: 1px solid #ddd; margin: 24px 0;">
             
             <p style="font-size: 12px; color: #666;">
               This is an automated message from Smartious E-School. Please do not reply to this email.<br>
-              For support, contact: support@smartious.ac.ke
+              For support, contact: hello@smartioushomeschool.com
             </p>
           </div>
         </div>
@@ -220,7 +220,7 @@ async function sendAdminNotification(options) {
     const transporterInstance = transporter || await initializeTransporter();
 
     const mailOptions = {
-      from: process.env.EMAIL_FROM || 'noreply@smartious.ac.ke',
+      from: process.env.EMAIL_FROM || 'hello@smartioushomeschool.com',
       to: adminEmail,
       subject: `[ADMIN] New Allocation: ${studentName} → ${teacherName}`,
       html: `
@@ -241,7 +241,7 @@ async function sendAdminNotification(options) {
             </div>
             
             <div style="text-align: center;">
-              <a href="${process.env.CLIENT_URL || 'https://smartious.ac.ke'}/admin/allocations/${allocationId}" style="background: #2c3e50; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block; font-weight: bold;">Review Allocation</a>
+              <a href="${process.env.CLIENT_URL || 'https://smartioushomeschool.com'}/admin/allocations/${allocationId}" style="background: #2c3e50; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block; font-weight: bold;">Review Allocation</a>
             </div>
           </div>
         </div>
@@ -268,7 +268,7 @@ async function sendVerificationEmail(options) {
     const transporterInstance = transporter || await initializeTransporter();
 
     const mailOptions = {
-      from: process.env.EMAIL_FROM || 'noreply@smartious.ac.ke',
+      from: process.env.EMAIL_FROM || 'hello@smartioushomeschool.com',
       to: email,
       subject: 'Verify Your Email - Smartious Portal',
       html: `
@@ -326,7 +326,7 @@ async function sendTeacherCredentialsEmail(options) {
     }
 
     const mailOptions = {
-      from: process.env.EMAIL_FROM || 'noreply@smartious.ac.ke',
+      from: process.env.EMAIL_FROM || 'hello@smartioushomeschool.com',
       to: teacherEmail,
       subject: 'Your Smartious Teacher Account - Login Credentials',
       html: `
@@ -373,7 +373,7 @@ async function sendTeacherCredentialsEmail(options) {
             <hr style="border: none; border-top: 1px solid #ddd; margin: 24px 0;">
             
             <p style="font-size: 12px; color: #666;">
-              <strong>Security Reminder:</strong> Never share your login credentials. If you did not create this account or have concerns, please contact: support@smartious.ac.ke<br>
+              <strong>Security Reminder:</strong> Never share your login credentials. If you did not create this account or have concerns, please contact: hello@smartioushomeschool.com<br>
               This is an automated message from Smartious E-School. Please do not reply to this email.
             </p>
           </div>
@@ -414,7 +414,7 @@ async function sendAdminLeaveRequestNotification(options) {
     const dayCount = Math.ceil((new Date(leaveEndDate) - new Date(leaveStartDate)) / (1000 * 60 * 60 * 24)) + 1;
 
     const mailOptions = {
-      from: process.env.EMAIL_FROM || 'noreply@smartious.ac.ke',
+      from: process.env.EMAIL_FROM || 'hello@smartioushomeschool.com',
       to: adminEmail,
       subject: `New Leave Request from ${teacherName}`,
       html: `
@@ -443,7 +443,7 @@ async function sendAdminLeaveRequestNotification(options) {
             </div>
 
             <div style="text-align: center; margin: 24px 0;">
-              <a href="${process.env.CLIENT_URL || 'https://smartious.ac.ke'}/admin?page=leave" style="background: #d97706; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block; font-weight: bold;">Review Leave Request</a>
+              <a href="${process.env.CLIENT_URL || 'https://smartioushomeschool.com'}/admin?page=leave" style="background: #d97706; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block; font-weight: bold;">Review Leave Request</a>
             </div>
 
             <hr style="border: none; border-top: 1px solid #ddd; margin: 24px 0;">
@@ -486,7 +486,7 @@ async function sendLeaveRequestApprovedEmail(options) {
     const endDate = new Date(leaveEndDate).toLocaleDateString('en-GB', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
 
     const mailOptions = {
-      from: process.env.EMAIL_FROM || 'noreply@smartious.ac.ke',
+      from: process.env.EMAIL_FROM || 'hello@smartioushomeschool.com',
       to: teacherEmail,
       subject: `✓ Your Leave Request Has Been Approved`,
       html: `
@@ -515,7 +515,7 @@ async function sendLeaveRequestApprovedEmail(options) {
             <hr style="border: none; border-top: 1px solid #ddd; margin: 24px 0;">
             
             <p style="font-size: 12px; color: #666;">
-              If you have any questions, please contact support@smartious.ac.ke<br>
+              If you have any questions, please contact hello@smartioushomeschool.com<br>
               This is an automated message from Smartious E-School.
             </p>
           </div>
@@ -552,7 +552,7 @@ async function sendLeaveRequestRejectedEmail(options) {
     const endDate = new Date(leaveEndDate).toLocaleDateString('en-GB', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
 
     const mailOptions = {
-      from: process.env.EMAIL_FROM || 'noreply@smartious.ac.ke',
+      from: process.env.EMAIL_FROM || 'hello@smartioushomeschool.com',
       to: teacherEmail,
       subject: `Your Leave Request Has Been Rejected`,
       html: `
@@ -584,7 +584,7 @@ async function sendLeaveRequestRejectedEmail(options) {
             <hr style="border: none; border-top: 1px solid #ddd; margin: 24px 0;">
             
             <p style="font-size: 12px; color: #666;">
-              If you have questions about this decision, please contact support@smartious.ac.ke<br>
+              If you have questions about this decision, please contact hello@smartioushomeschool.com<br>
               This is an automated message from Smartious E-School.
             </p>
           </div>
@@ -622,7 +622,7 @@ async function sendLeaveRequestSubmittedEmail(options) {
     const dayCount = Math.ceil((new Date(leaveEndDate) - new Date(leaveStartDate)) / (1000 * 60 * 60 * 24)) + 1;
 
     const mailOptions = {
-      from: process.env.EMAIL_FROM || 'noreply@smartious.ac.ke',
+      from: process.env.EMAIL_FROM || 'hello@smartioushomeschool.com',
       to: teacherEmail,
       subject: `▤ Your Leave Request Has Been Submitted for Review`,
       html: `
@@ -753,7 +753,7 @@ async function sendTeacherMemoEmail(options) {
     `;
 
     const mailOptions = {
-      from: process.env.EMAIL_FROM || 'noreply@smartious.ac.ke',
+      from: process.env.EMAIL_FROM || 'hello@smartioushomeschool.com',
       to,
       subject,
       html,
@@ -832,7 +832,7 @@ async function sendCommunityEmail(opts) {
 
   try {
     const info = await transporterInstance.sendMail({
-      from: process.env.EMAIL_FROM || 'noreply@smartious.ac.ke',
+      from: process.env.EMAIL_FROM || 'hello@smartioushomeschool.com',
       to,
       subject,
       html,
