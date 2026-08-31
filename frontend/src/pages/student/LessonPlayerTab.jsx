@@ -544,9 +544,35 @@ function RailButton({ icon, label, active, disabled, onClick }) {
 
 function LessonDetailView({ lesson, subject, teacher, mastered, onBack, lessons = [], progressMap = {}, onSelectLesson }) {
   const [pane, setPane] = useState('video')
-  const hasVideo = !!lesson.videoEmbedId
+
+  // Normalize every video for this lesson into one list. A lesson can be
+  // taught several times to different students, so it can carry several
+  // recordings, plus any manually added YouTube video. We merge the
+  // legacy single video (videoEmbedId) with the videos[] array, and
+  // de-duplicate so an old lesson whose primary video is also in the
+  // array is not shown twice.
+  const videoList = React.useMemo(() => {
+    const out = []
+    const seen = new Set()
+    if (lesson.videoEmbedId) {
+      out.push({ source: 'youtube', embedId: lesson.videoEmbedId, title: 'Lesson video' })
+      seen.add('yt:' + lesson.videoEmbedId)
+    }
+    for (const v of (lesson.videos || [])) {
+      const key = v.source === 'recording' ? 'r2:' + (v.r2Url || v.r2Key) : 'yt:' + v.embedId
+      if (seen.has(key)) continue
+      seen.add(key)
+      out.push(v)
+    }
+    return out
+  }, [lesson._id, lesson.videoEmbedId, lesson.videos])
+
+  const [activeVideoIdx, setActiveVideoIdx] = useState(0)
+  useEffect(() => { setActiveVideoIdx(0) }, [lesson._id])
+  const activeVideo = videoList[activeVideoIdx] || null
+
+  const hasVideo = videoList.length > 0
   const hasNotes = !!lesson.notesPdfUrl
-  const playlist = (lessons && lessons.length) ? lessons : [lesson]
 
   useEffect(() => { setPane(hasVideo ? 'video' : hasNotes ? 'notes' : 'progress') },
     [lesson._id, hasVideo, hasNotes])
@@ -618,9 +644,22 @@ function LessonDetailView({ lesson, subject, teacher, mastered, onBack, lessons 
         {/* ── CENTRE STAGE ──────────────────────────────────── */}
         <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
           <div style={{ background: pane === 'notes' ? '#525659' : '#000', position: 'relative', ...(pane === 'notes' ? { height: 620, display: 'flex' } : { aspectRatio: '16 / 9' }), width: '100%' }}>
-            {pane === 'video' && hasVideo && (
+            {pane === 'video' && hasVideo && activeVideo && activeVideo.source === 'recording' && (
+              <video
+                key={activeVideo.r2Url}
+                src={activeVideo.r2Url}
+                poster={activeVideo.posterUrl || undefined}
+                controls
+                controlsList="nodownload"
+                onContextMenu={e => e.preventDefault()}
+                playsInline
+                style={{ width: '100%', height: '100%', display: 'block', background: '#000', objectFit: 'contain' }}
+              />
+            )}
+            {pane === 'video' && hasVideo && activeVideo && activeVideo.source !== 'recording' && (
               <iframe
-                src={`https://www.youtube-nocookie.com/embed/${lesson.videoEmbedId}?rel=0&modestbranding=1`}
+                key={activeVideo.embedId}
+                src={`https://www.youtube-nocookie.com/embed/${activeVideo.embedId}?rel=0&modestbranding=1`}
                 title={lesson.title}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
@@ -666,6 +705,34 @@ function LessonDetailView({ lesson, subject, teacher, mastered, onBack, lessons 
               </div>
             )}
           </div>
+
+          {pane === 'video' && videoList.length > 1 && (
+            <div style={{ display: 'flex', gap: 8, padding: '12px 18px', overflowX: 'auto', borderTop: `1px solid ${PLAYER.line}`, background: PLAYER.panel }}>
+              {videoList.map((v, i) => {
+                const on = i === activeVideoIdx
+                const label = v.source === 'recording'
+                  ? (v.recordedAt ? 'Recorded ' + new Date(v.recordedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : (v.title || 'Recording ' + (i + 1)))
+                  : (v.title || 'Video ' + (i + 1))
+                return (
+                  <button key={i} onClick={() => setActiveVideoIdx(i)}
+                    style={{
+                      flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8,
+                      padding: '8px 14px', borderRadius: 10, cursor: 'pointer', whiteSpace: 'nowrap',
+                      border: on ? 'none' : `1px solid ${PLAYER.line}`,
+                      background: on ? 'linear-gradient(120deg, #8B1A2E, #A32438)' : PLAYER.raised,
+                      color: on ? '#fff' : PLAYER.mute,
+                      fontSize: 12, fontWeight: 700,
+                      boxShadow: on ? '0 3px 12px rgba(139,26,46,.4)' : 'none',
+                    }}>
+                    <span style={{ color: on ? PLAYER.gold : PLAYER.mute, fontSize: 11 }}>
+                      {v.source === 'recording' ? '\u25cf REC' : '\u25b6'}
+                    </span>
+                    {label}
+                  </button>
+                )
+              })}
+            </div>
+          )}
 
           <div style={{ padding: '18px 24px', borderTop: `1px solid ${PLAYER.line}` }}>
             <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase',
