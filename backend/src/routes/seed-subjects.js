@@ -428,6 +428,7 @@ const ALL_SUBJECTS = [
 router.post('/', auth, requireRole('admin','ops_manager'), async (req, res) => {
   try {
     let inserted = 0, skipped = 0, errors = [], reactivationsAvoided = 0
+    const created = [], inactive = []
 
     for (const s of ALL_SUBJECTS) {
       try {
@@ -442,7 +443,7 @@ router.post('/', auth, requireRole('admin','ops_manager'), async (req, res) => {
         // school's choice and the seeder must not overrule it.
         const before = await Subject.findOne({
           curriculum: s.curriculum, subjectName: s.subjectName,
-        }).select('_id').lean()
+        }).select('_id isActive').lean()
 
         await Subject.findOneAndUpdate(
           { curriculum: s.curriculum, subjectName: s.subjectName },
@@ -452,7 +453,12 @@ router.post('/', auth, requireRole('admin','ops_manager'), async (req, res) => {
           },
           { upsert: true, new: true }
         )
-        if (before) reactivationsAvoided++
+        if (before) {
+          reactivationsAvoided++
+          if (before.isActive === false) inactive.push(`${s.subjectName} (${s.curriculum})`)
+        } else {
+          created.push(`${s.subjectName} (${s.curriculum})`)
+        }
         inserted++
       } catch(e) {
         if (e.code === 11000) { skipped++; continue }
@@ -460,11 +466,14 @@ router.post('/', auth, requireRole('admin','ops_manager'), async (req, res) => {
       }
     }
 
+    const parts = []
+    parts.push(created.length ? `Created ${created.length}: ${created.join(', ')}.` : 'No new subjects were needed.')
+    if (inactive.length) parts.push(`${inactive.length} exist but are INACTIVE and were left off on purpose: ${inactive.join(', ')}. Reactivate them from the subject list if you want to offer them.`)
+    if (errors.length) parts.push(`${errors.length} error(s).`)
     return res.json({
       success: true,
-      message: `Seeded ${inserted} subject(s). ${reactivationsAvoided} already existed and kept `
-             + `their current active/inactive state. ${skipped} skipped, ${errors.length} error(s).`,
-      data: { inserted, skipped, existing: reactivationsAvoided, errors: errors.slice(0, 10) }
+      message: parts.join(' '),
+      data: { inserted, skipped, existing: reactivationsAvoided, created, inactive, errors: errors.slice(0, 10) }
     })
   } catch(e) {
     return res.status(500).json({ success: false, message: e.message })
