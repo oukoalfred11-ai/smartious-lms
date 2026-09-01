@@ -181,4 +181,54 @@ async function sendBirthdayLetterEmail({ celebrant, fromName, message }) {
   return safeSend(celebrant.email, subject, brandWrap('A birthday letter', body))
 }
 
-module.exports = { sendPauseNotice, sendReportBackNotice, sendBirthdayEmail, sendBirthdayLetterEmail }
+
+//  Announcement broadcast
+const esc = (x) => String(x || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+const CATEGORY_LABEL = {
+  general: 'Announcement', event: 'Event', academic: 'Academic notice',
+  holiday: 'Holiday notice', achievement: 'Celebration', reminder: 'Reminder',
+}
+
+/**
+ * Send one announcement to a list of addresses. Recipients go in BCC in
+ * batches so nobody sees the whole school's address list. Returns the
+ * number of addresses the mail was accepted for.
+ */
+async function sendAnnouncementEmail({ announcement, recipients }) {
+  const t = getTransporter()
+  const list = dedupeEmails(recipients)
+  if (!t) { console.warn('[notify] Email not configured; announcement not emailed:', announcement.title); return 0 }
+  if (!list.length) return 0
+
+  const a = announcement
+  const label = CATEGORY_LABEL[a.category] || 'Announcement'
+  const portal = (process.env.CLIENT_URL || 'https://smartioushomeschool.com').replace(/\/$/, '')
+  const cta = a.ctaUrl
+    ? `<p style="margin:22px 0 6px;"><a href="${esc(a.ctaUrl)}" style="display:inline-block;background:${CRIMSON};color:#fff;text-decoration:none;font-weight:bold;padding:11px 22px;border-radius:8px;">${esc(a.ctaLabel || 'Open')}</a></p>`
+    : ''
+  const html = brandWrap(esc(a.title), `
+    <div style="font-size:11px;letter-spacing:2px;color:${GOLD};font-weight:bold;margin-bottom:10px;">${esc(label).toUpperCase()}</div>
+    <div style="white-space:pre-wrap;">${esc(a.body)}</div>
+    ${cta}
+    <p style="margin-top:22px;font-size:12.5px;color:#6B7280;">
+      Posted by ${esc(a.authorName || 'Smartious Homeschool')}.
+      You can also see this on your <a href="${portal}" style="color:${CRIMSON};">Smartious portal</a>.
+    </p>
+  `)
+  const subject = `${label}: ${a.title}`
+
+  let sent = 0
+  const BATCH = 60
+  for (let i = 0; i < list.length; i += BATCH) {
+    const bcc = list.slice(i, i + BATCH)
+    try {
+      await t.sendMail({ from: FROM(), to: FROM(), bcc, subject, html })
+      sent += bcc.length
+    } catch (e) {
+      console.error('[notify] Announcement batch failed:', e.message)
+    }
+  }
+  return sent
+}
+
+module.exports = { sendPauseNotice, sendReportBackNotice, sendBirthdayEmail, sendBirthdayLetterEmail, sendAnnouncementEmail }
