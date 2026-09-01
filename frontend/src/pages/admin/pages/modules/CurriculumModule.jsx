@@ -58,6 +58,22 @@ function SubjectsTab({ toast }) {
       .finally(() => setLoading(false))
   }, [filterCurriculum, toast])
 
+  // Applies the built-in subject catalogue to the database (idempotent:
+  // existing subjects are left exactly as they are, only missing ones
+  // are created). This is how newly added subjects such as Art & Design,
+  // French and Arabic become available for allocation.
+  const syncCatalogue = async () => {
+    if (!window.confirm('Add any missing subjects from the built-in catalogue? Existing subjects are not changed.')) return
+    setBusy(true)
+    try {
+      const { data } = await api.post('/seed-subjects')
+      toast?.ok?.(data?.message || 'Subject catalogue synced.')
+      load()
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Could not sync the catalogue.')
+    } finally { setBusy(false) }
+  }
+
   useEffect(() => { load() }, [load])
 
   const filtered = search
@@ -95,6 +111,10 @@ function SubjectsTab({ toast }) {
           <input type="text" value={search} onChange={e => setSearch(e.target.value)}
             placeholder="e.g. Mathematics" style={inp}/>
         </div>
+        <button onClick={syncCatalogue} disabled={busy} title="Create any subjects from the built-in catalogue that are not in the database yet" style={{
+          background: '#fff', color: TOKENS.crimson, border: '1.5px solid ' + TOKENS.crimson, borderRadius: 8,
+          padding: '10px 16px', fontSize: 13, fontWeight: 700, cursor: 'pointer', height: 38, opacity: busy ? .6 : 1,
+        }}>{busy ? 'Syncing...' : 'Sync catalogue'}</button>
         <button onClick={() => setCreating(true)} style={{
           background: TOKENS.crimson, color: '#fff', border: 'none', borderRadius: 8,
           padding: '10px 18px', fontSize: 13, fontWeight: 700, cursor: 'pointer', height: 38,
