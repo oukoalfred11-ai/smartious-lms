@@ -251,6 +251,11 @@ export default function AnnouncementsModule({ toast }) {
                     {a.showFrom && <span>From {fmtDate(a.showFrom)}</span>}
                     {a.showUntil && <span>Until {fmtDate(a.showUntil)}</span>}
                     {a.authorName && <span>By {a.authorName}</span>}
+                    {a.emailSentAt
+                      ? <span style={{ color: '#166534', fontWeight: 700 }}>Emailed to {a.emailCount || 0} {a.emailCount === 1 ? 'person' : 'people'}</span>
+                      : a.published
+                        ? <span style={{ color: '#92400E', fontWeight: 700 }}>{a.scheduled ? 'Email goes out when it goes live' : 'Email sending...'}</span>
+                        : <span>Draft, not emailed</span>}
                   </div>
                   <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
                     <button style={{ ...btn(), padding: '6px 13px', fontSize: 12 }} onClick={() => openEdit(a)}>Edit</button>
