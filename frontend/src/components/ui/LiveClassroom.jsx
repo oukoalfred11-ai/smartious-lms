@@ -1060,6 +1060,10 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
           if (!ack?.ok) { setPhase('error'); setErrMsg(ack?.message || 'Could not join.'); return }
           setMyRole(ack.self.role)
           setClassInfo(ack.classInfo || {})
+          // Club meetings, competitions and events open as a conference
+          // (participant grid) rather than the whiteboard. The board is
+          // one click away on the toolbar.
+          if (ack.classInfo && ack.classInfo.kind && ack.classInfo.kind !== 'lesson') setMainView('meeting')
           setRoster(ack.roster || [])
           setChat(ack.chat || [])
           opsRef.current = []
@@ -2084,6 +2088,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       <span style={{ fontSize: 14, fontWeight: 800, color: '#2A2A2E', marginRight: 'auto' }}>
         {mainView === 'sim' && openSim ? openSim.title
           : mainView === 'screen' ? (sharing ? 'Your screen' : (sharingPeer?.name || 'Teacher') + "'s screen")
+          : mainView === 'meeting' ? 'Meeting'
           : 'Whiteboard'}
       </span>
       {openSim && (
@@ -2358,7 +2363,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       <div style={{ flex: 1, display: 'flex', minHeight: 0, position: 'relative', gap: 10, padding: focus ? 0 : '2px 10px 10px' }}>
 
         {/* Video column (desktop) */}
-        {!narrow && !focus && (
+        {!narrow && !focus && mainView !== 'meeting' && (
           <div style={{ width: 268, flexShrink: 0, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
             {tiles}
           </div>
@@ -2402,6 +2407,13 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
               {toolPill}
               {mainView === 'screen' && (sharing || sharingPeer) && (
                 <ScreenView stream={sharing ? localStream : streams[sharingPeer?.socketId]} muted={sharing} />
+              )}
+              {mainView === 'meeting' && (
+                <MeetingView
+                  self={{ stream: localStream, name: user?.firstName ? user.firstName + ' ' + (user.lastName || '') : 'You', role: myRole, micOn, camOn, hand: handUp }}
+                  peers={others} streams={streams} quality={quality}
+                  sharing={sharing ? localStream : (sharingPeer ? streams[sharingPeer.socketId] : null)}
+                />
               )}
               {mainView === 'sim' && openSim && (
                 <SimPanel sim={openSim} />
@@ -2475,6 +2487,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
         <CtlBtn icon={camOn ? 'cam' : 'camOff'} label={camOn ? 'Stop Video' : 'Start Video'} danger={!camOn} onClick={toggleCam} />
         {isTeacher && <CtlBtn icon="share" label={sharing ? 'Stop Share' : 'Share Screen'} active={sharing} onClick={sharing ? stopShare : startShare} />}
         <CtlBtn icon="pen" label="Whiteboard" active={mainView === 'board'} onClick={() => setMainView('board')} />
+        <CtlBtn icon="grid" label="Meeting" active={mainView === 'meeting'} onClick={() => setMainView('meeting')} />
         {!isTeacher && <CtlBtn icon="raise" label={handUp ? 'Lower Hand' : 'Raise Hand'} active={handUp} onClick={toggleHand} />}
         <CtlBtn icon="chat" label="Chat" active={panelOpen && panel === 'chat'}
           onClick={() => { setPanel('chat'); setPanelOpen(o => !(o && panel === 'chat')) }} />
@@ -2491,6 +2504,37 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
 }
 
 // ── Full-pane presentation surface ─────────────────────────
+/**
+ * MeetingView: conference layout. Every participant in an auto-fitting
+ * grid filling the stage, the way a video meeting looks, for club
+ * meetings, competitions and events. If someone is sharing a screen it
+ * takes the top half and the grid sits below it.
+ */
+function MeetingView({ self, peers, streams, quality, sharing }) {
+  const all = [{ key: 'self', self: true, ...self }, ...peers.map(p => ({ key: p.socketId, ...p, stream: streams[p.socketId], quality: quality[p.socketId] }))]
+  const n = all.length
+  const cols = n <= 1 ? 1 : n <= 4 ? 2 : n <= 9 ? 3 : n <= 16 ? 4 : 5
+  return (
+    <div style={{ position: 'absolute', inset: 0, background: '#0F131C', display: 'flex', flexDirection: 'column', gap: 8, padding: 10 }}>
+      {sharing && (
+        <div style={{ flex: '0 0 46%', minHeight: 0, borderRadius: 12, overflow: 'hidden', background: '#000', position: 'relative' }}>
+          <ScreenView stream={sharing} muted />
+        </div>
+      )}
+      <div style={{ flex: 1, minHeight: 0, display: 'grid', gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, gridAutoRows: 'minmax(0, 1fr)', gap: 8, alignContent: 'stretch' }}>
+        {all.map(p => (
+          <div key={p.key} style={{ minHeight: 0, minWidth: 0, display: 'flex' }}>
+            <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+              <Tile big stream={p.stream} name={p.name} role={p.role} self={p.self}
+                micOn={p.micOn} camOn={p.camOn} hand={p.hand} quality={p.quality} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function ScreenView({ stream, muted }) {
   const ref = useRef(null)
   useEffect(() => { if (ref.current && stream) ref.current.srcObject = stream }, [stream])
