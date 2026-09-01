@@ -49,9 +49,35 @@ const paceOk = (userId) => {
   return true;
 };
 
+// ── Attachments: R2 upload (same env vars as the Library) ──
+const multer = require('multer');
+const { v4: uuidv4 } = require('uuid');
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+const R2_READY = !!(process.env.R2_ACCOUNT_ID && process.env.R2_ACCESS_KEY_ID &&
+  process.env.R2_SECRET_ACCESS_KEY && process.env.R2_BUCKET_NAME && process.env.R2_PUBLIC_URL);
+const r2 = R2_READY ? new S3Client({
+  region: 'auto',
+  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  credentials: {
+    accessKeyId: process.env.R2_ACCESS_KEY_ID,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+  },
+}) : null;
+const chatUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 60 * 1024 * 1024 } });
+
+// What we accept, and how each renders in the chat.
+const kindOfMime = (mime = '') => {
+  if (/^image\/(png|jpe?g|webp|gif)$/i.test(mime)) return 'image';
+  if (/^audio\/(webm|ogg|mpeg|mp4|aac|x-m4a|wav)/i.test(mime)) return 'audio';
+  if (/^video\/(mp4|webm|quicktime)$/i.test(mime)) return 'video';
+  if (/^(application\/(pdf|msword|vnd\.openxmlformats-officedocument\.[\w.]+|vnd\.ms-excel|vnd\.ms-powerpoint|zip)|text\/plain)$/i.test(mime)) return 'file';
+  return null;
+};
+
 const AUTHOR = 'firstName lastName role gradeLevel avatar';
 const shape = (m, uid) => ({
   _id: m._id, channel: m.channel, body: m.body, author: m.author,
+  attachment: (m.attachment && m.attachment.kind) ? m.attachment : null,
   replyToAuthor: m.replyToAuthor, replyToExcerpt: m.replyToExcerpt,
   pinned: !!m.pinned, system: !!m.system, createdAt: m.createdAt, status: m.status,
   reactions: EMOJIS.map(e => {
@@ -84,15 +110,33 @@ router.get('/messages', auth, async (req, res) => {
 // ── Say something ─────────────────────────────────────────
 router.post('/messages', auth, asPoster, async (req, res) => {
   try {
-    const { body = '', channel = 'general', replyTo = null } = req.body || {};
+    const { body = '', channel = 'general', replyTo = null, attachment = null } = req.body || {};
     const text = String(body).trim();
-    if (!text) return res.status(400).json({ success: false, message: 'Write something first.' });
+
+    // A message needs text, an attachment, or both.
+    let att = null;
+    if (attachment && attachment.url && attachment.kind) {
+      const base = (process.env.R2_PUBLIC_URL || '').replace(/\/$/, '');
+      // Only accept files that actually came through our own uploader.
+      if (!base || !String(attachment.url).startsWith(base + '/community/')) {
+        return res.status(400).json({ success: false, message: 'Invalid attachment.' });
+      }
+      att = {
+        kind: ['file','image','audio','video'].includes(attachment.kind) ? attachment.kind : 'file',
+        url: String(attachment.url), key: String(attachment.key || ''),
+        name: String(attachment.name || '').slice(0, 200),
+        mime: String(attachment.mime || ''),
+        sizeBytes: Number(attachment.sizeBytes) || 0,
+        durationSec: Number(attachment.durationSec) || 0,
+      };
+    }
+    if (!text && !att) return res.status(400).json({ success: false, message: 'Write something first.' });
     if (text.length > 800) return res.status(400).json({ success: false, message: 'Messages are limited to 800 characters.' });
     const ch = CHANNELS.includes(channel) ? channel : 'general';
     if (ch === 'announcements' && !STAFF.includes(req.user.role)) {
       return res.status(403).json({ success: false, message: 'Only teachers and staff post announcements. Try General or Questions.' });
     }
-    const why = contactViolation(text);
+    const why = text ? contactViolation(text) : null;
     if (why) return res.status(422).json({ success: false, message: 'To keep everyone safe, messages cannot contain ' + why + '. Please reword and send again.' });
     if (!paceOk(req.user._id)) return res.status(429).json({ success: false, message: 'Slow down a little. Give the room three seconds between messages.' });
 
@@ -108,6 +152,7 @@ router.post('/messages', auth, asPoster, async (req, res) => {
     const doc = await CommunityMessage.create({
       author: req.user._id, channel: ch, body: text,
       replyTo: replyId, replyToAuthor, replyToExcerpt,
+      ...(att ? { attachment: att } : {}),
     });
     const full = await CommunityMessage.findById(doc._id).populate('author', AUTHOR);
     return res.json({ success: true, data: { message: shape(full, req.user._id) } });
@@ -183,6 +228,43 @@ router.post('/messages/:id/moderate', auth, asModerator, async (req, res) => {
     await m.save();
     console.log('[chat] ' + req.user.role + ' -> ' + action + ' on message ' + m._id);
     return res.json({ success: true });
+  } catch (e) { return res.status(500).json({ success: false, message: e.message }); }
+});
+
+// ── Upload a chat attachment (doc, image, voice note, video) ──
+router.post('/upload', auth, asPoster, chatUpload.single('file'), async (req, res) => {
+  try {
+    if (!R2_READY) return res.status(503).json({ success: false, message: 'File storage is not configured.' });
+    if (!req.file) return res.status(400).json({ success: false, message: 'No file received.' });
+    const kind = kindOfMime(req.file.mimetype);
+    if (!kind) return res.status(415).json({ success: false, message: 'That file type is not allowed in the chat.' });
+    if (!paceOk(req.user._id)) return res.status(429).json({ success: false, message: 'Slow down a little.' });
+
+    const safe = String(req.file.originalname || 'file').replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 120);
+    const key = `community/${uuidv4()}_${safe}`;
+    await r2.send(new PutObjectCommand({
+      Bucket: process.env.R2_BUCKET_NAME, Key: key,
+      Body: req.file.buffer, ContentType: req.file.mimetype,
+    }));
+    const url = `${process.env.R2_PUBLIC_URL.replace(/\/$/, '')}/${key}`;
+    return res.json({ success: true, data: {
+      kind, url, key, name: req.file.originalname, mime: req.file.mimetype, sizeBytes: req.file.size,
+    }});
+  } catch (e) { return res.status(500).json({ success: false, message: e.message }); }
+});
+
+// ── Community members: everyone in the room, with their pictures ──
+router.get('/members', auth, async (req, res) => {
+  try {
+    const rows = await User.find({ role: { $in: ['student', 'teacher', 'admin', 'dos', 'ops_manager'] }, isActive: true })
+      .select('firstName lastName role gradeLevel avatar')
+      .sort({ role: 1, firstName: 1 })
+      .limit(500).lean();
+    return res.json({ success: true, data: { members: rows.map(u => ({
+      _id: u._id,
+      name: [u.firstName, u.lastName].filter(Boolean).join(' ') || 'Member',
+      role: u.role, gradeLevel: u.gradeLevel || '', avatar: u.avatar || '',
+    })), count: rows.length }});
   } catch (e) { return res.status(500).json({ success: false, message: e.message }); }
 });
 
