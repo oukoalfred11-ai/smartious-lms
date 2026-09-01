@@ -105,6 +105,7 @@ app.use('/api/invoices',   require('./routes/invoices'));
 app.use('/api/paystack',   require('./routes/paystack'));
 app.use('/api/community',  require('./routes/community'));
 app.use('/api/announcements', require('./routes/announcements'));
+app.use('/api/clubs', require('./routes/clubs'));
 app.use('/api/community-chat', require('./routes/communityChat'));
 app.use('/api/inquiries',  require('./routes/inquiries'));
 app.use('/api/assessment', require('./routes/assessment'));
