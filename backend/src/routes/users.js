@@ -227,6 +227,26 @@ router.get('/teachers/list', auth, requireRole('admin', 'ops_manager'), async (r
   }
 });
 
+// POST /api/users/me/avatar  any signed-in user sets their OWN profile photo.
+// Students use this so the community shows their real picture.
+router.post('/me/avatar', auth, (req, res) => {
+  if (!uploadAvatar) {
+    return res.status(503).json({ success: false, message: 'Image upload is unavailable on the server.' });
+  }
+  uploadAvatar.single('file')(req, res, async (err) => {
+    if (err) return res.status(400).json({ success: false, message: err.message || 'Upload failed.' });
+    if (!req.file) return res.status(400).json({ success: false, message: 'No file received.' });
+    try {
+      const url = await storeAvatarBuffer(req.file);
+      await User.findByIdAndUpdate(req.user._id, { $set: { avatar: url } });
+      return res.json({ success: true, message: 'Profile photo updated.', data: { avatar: url } });
+    } catch (e) {
+      console.error('[users me/avatar]', e.message);
+      return res.status(500).json({ success: false, message: 'Could not process the image. Try again.' });
+    }
+  });
+});
+
 // POST /api/users/avatar — upload a profile image and get a URL back
 // WITHOUT needing a user to exist yet. This is what the create form
 // uses: admin picks a file, we return the URL, the form includes it
