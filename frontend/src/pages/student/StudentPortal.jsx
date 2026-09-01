@@ -27,6 +27,7 @@ import {
 } from '../../components/exam/NestedQuestion.jsx'
 import LessonPlayerTab from './LessonPlayerTab.jsx'
 import CommunityChatView from '../../components/CommunityChat.jsx'
+import ClubsHub from '../../components/ClubsHub.jsx'
 import QuizGame from './QuizGame.jsx'
 import AchievementTab from './AchievementTab.jsx'
 import SubjectProgressCard from '../../components/SubjectProgressCard.jsx'
@@ -360,6 +361,15 @@ const NavIcon = ({ name, active }) => {
             <path d="M12 14v4M9 21h6M9.5 18h5l.5 3h-6l.5-3z" fill="#fff"/>
           </g>
         )
+      case 'clubs': // three people, clubs
+        return (
+          <g fill="#fff">
+            <circle cx="9" cy="8" r="3.2"/>
+            <circle cx="16.5" cy="9" r="2.4" fillOpacity=".8"/>
+            <path d="M3 19a6 6 0 0 1 12 0v1H3z"/>
+            <path d="M16.5 13.5c2.5 0 4.5 1.9 4.5 4.3V20h-4v-1a8 8 0 0 0-2.2-5.3z" fillOpacity=".8"/>
+          </g>
+        )
       default:
         return <circle cx="12" cy="12" r="4" fill="#fff"/>
     }
@@ -391,6 +401,7 @@ const NAV_SECTIONS = [
     { id:'dashboard',    label:'Dashboard',       icon:'dashboard',    svg:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>' },
     { id:'curriculum',   label:'My Curriculum',   icon:'curriculum',   svg:'<path d="M4 19V6a2 2 0 0 1 2-2h13a1 1 0 0 1 1 1v13"/><path d="M4 19a2 2 0 0 0 2 2h14"/><path d="M8 10h8M8 14h6"/>' },
     { id:'lessons',      label:'Lesson Player',   icon:'lessons',      svg:'<polygon points="5 3 19 12 5 21 5 3"/>' },
+    { id:'clubs',        label:'Clubs',           icon:'clubs',        svg:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>' },
     { id:'quiz',         label:'Quiz Game',       icon:'quiz',         svg:'<path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>'},
     { id:'homework',     label:'Homework',        icon:'homework',     svg:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>' },
     { id:'exams',        label:'Exams',           icon:'exams',        svg:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',  badge:'1' },
@@ -1069,6 +1080,7 @@ export default function StudentPortal() {
     page === 'studyplan'    ? 'My Personalised Study Plan' :
     page === 'curriculum'   ? 'My Curriculum' :
     page === 'lessons'      ? 'Lesson Player' :
+    page === 'clubs'        ? 'Clubs' :
     page === 'exams'        ? 'Exams' :
     page === 'results'      ? 'My Results' :
     page === 'live'         ? 'Live Classes' :
@@ -1095,6 +1107,7 @@ export default function StudentPortal() {
     page === 'studyplan'    ? 'Personalised plan' :
     page === 'curriculum'   ? 'Programme map' :
     page === 'lessons'      ? 'Recorded lessons' :
+    page === 'clubs'        ? 'Explore. Learn. Lead. Beyond academics' :
     page === 'exams'        ? 'Assessments' :
     page === 'results'      ? 'Grades & feedback' :
     page === 'live'         ? 'Scheduled sessions' :
@@ -2117,6 +2130,7 @@ export default function StudentPortal() {
               LESSONS — player with adaptive flashcards
           ════════════════════════════════════════════ */}
           {page === 'lessons' && <LessonPlayerTab user={user} toast={toast} setPage={setPage} />}
+          {page === 'clubs' && <ClubsHub user={user} toast={toast} />}
         {page === 'quiz' && <QuizGameLauncher user={user} toast={toast} setPage={setPage}/>}
 
           {/* ════════════════════════════════════════════
