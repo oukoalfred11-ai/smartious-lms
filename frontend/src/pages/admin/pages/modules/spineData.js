@@ -9427,6 +9427,207 @@ const LOWERSEC_ART_DESIGN = [
   ]},
 ];
 
+// ═══════════════════════════════════════════════════════════════════
+// CAMBRIDGE LOWER SECONDARY FRENCH (Foreign Language, Stages 7-9)
+// CEFR A1 (Stage 7) to A2+ (Stage 9), building the four skills and
+// the grammar base for IGCSE French 0520. Stage 9 is the full scheme.
+// ═══════════════════════════════════════════════════════════════════
+const LOWERSEC_FRENCH = [
+  // ── STAGE 7 (A1) ──
+  { topic: 'S7 \u00b7 Moi et ma famille', code: 'S7-MF', subtopics: [
+    { name: 'Greetings, Introductions and the Alphabet', code: 'S7-001', suggestedLessons: 1 },
+    { name: 'Numbers 0-100, Age and Birthdays', code: 'S7-002', suggestedLessons: 1 },
+    { name: 'Family Members and Pets (avoir, etre)', code: 'S7-003', suggestedLessons: 1 },
+    { name: 'Describing People: Adjectives and Agreement', code: 'S7-004', suggestedLessons: 1 },
+  ]},
+  { topic: 'S7 \u00b7 Mon ecole et ma journee', code: 'S7-EJ', subtopics: [
+    { name: 'School Subjects, Opinions and Reasons', code: 'S7-005', suggestedLessons: 1 },
+    { name: 'Telling the Time and the Timetable', code: 'S7-006', suggestedLessons: 1 },
+    { name: 'Regular -er Verbs in the Present Tense', code: 'S7-007', suggestedLessons: 1 },
+    { name: 'Daily Routine and Reflexive Verbs', code: 'S7-008', suggestedLessons: 1 },
+  ]},
+  { topic: 'S7 \u00b7 Mon monde', code: 'S7-MM', subtopics: [
+    { name: 'Hobbies and Free Time (jouer, faire)', code: 'S7-009', suggestedLessons: 1 },
+    { name: 'My Home and My Town: Prepositions of Place', code: 'S7-010', suggestedLessons: 1 },
+    { name: 'Food, Drink and Ordering in a Cafe', code: 'S7-011', suggestedLessons: 1 },
+    { name: 'Colours, Clothes and Shopping', code: 'S7-012', suggestedLessons: 1 },
+  ]},
+
+  // ── STAGE 8 (A1+ / A2) ──
+  { topic: 'S8 \u00b7 La vie quotidienne', code: 'S8-VQ', subtopics: [
+    { name: 'Near Future (aller + infinitive) and Plans', code: 'S8-001', suggestedLessons: 1 },
+    { name: 'The Perfect Tense with avoir', code: 'S8-002', suggestedLessons: 1 },
+    { name: 'The Perfect Tense with etre and Agreement', code: 'S8-003', suggestedLessons: 1 },
+    { name: 'Talking about Last Weekend and Holidays', code: 'S8-004', suggestedLessons: 1 },
+  ]},
+  { topic: 'S8 \u00b7 Ma ville et mon pays', code: 'S8-VP', subtopics: [
+    { name: 'Directions, Transport and Getting Around', code: 'S8-005', suggestedLessons: 1 },
+    { name: 'Weather, Seasons and the Calendar', code: 'S8-006', suggestedLessons: 1 },
+    { name: 'Countries, Nationalities and Francophone Africa', code: 'S8-007', suggestedLessons: 1 },
+    { name: 'Comparatives and Superlatives', code: 'S8-008', suggestedLessons: 1 },
+  ]},
+  { topic: 'S8 \u00b7 La sante et le sport', code: 'S8-SS', subtopics: [
+    { name: 'The Body, Illness and at the Doctor', code: 'S8-009', suggestedLessons: 1 },
+    { name: 'Healthy Eating and Quantities (du, de la, des)', code: 'S8-010', suggestedLessons: 1 },
+    { name: 'Sport, Fitness and Frequency Expressions', code: 'S8-011', suggestedLessons: 1 },
+    { name: 'Giving Advice: il faut, devoir, pouvoir', code: 'S8-012', suggestedLessons: 1 },
+  ]},
+
+  // ── STAGE 9 (YEAR 9, A2+): FULL SCHEME ──
+  { topic: 'S9 \u00b7 Grammar Foundations for IGCSE', code: 'S9-GR', subtopics: [
+    { name: 'Present Tense Review: Regular, Irregular and Reflexive Verbs', code: 'S9-001', suggestedLessons: 1 },
+    { name: 'Perfect Tense Mastery: avoir, etre and Irregular Participles', code: 'S9-002', suggestedLessons: 1 },
+    { name: 'The Imperfect Tense: Description and Habit in the Past', code: 'S9-003', suggestedLessons: 1 },
+    { name: 'Perfect vs Imperfect: Narrating a Story', code: 'S9-004', suggestedLessons: 1 },
+    { name: 'The Simple Future Tense', code: 'S9-005', suggestedLessons: 1 },
+    { name: 'The Conditional: Wishes and Politeness', code: 'S9-006', suggestedLessons: 1 },
+    { name: 'Direct and Indirect Object Pronouns (le, la, les, lui, leur, y, en)', code: 'S9-007', suggestedLessons: 1 },
+    { name: 'Negatives (ne...jamais, rien, personne, plus) and Questions', code: 'S9-008', suggestedLessons: 1 },
+  ]},
+  { topic: 'S9 \u00b7 Moi, ma famille et mes amis', code: 'S9-FA', subtopics: [
+    { name: 'Personality, Relationships and Getting On with People', code: 'S9-009', suggestedLessons: 1 },
+    { name: 'Role Models and Describing Someone You Admire', code: 'S9-010', suggestedLessons: 1 },
+    { name: 'Childhood Memories (Imperfect in Use)', code: 'S9-011', suggestedLessons: 1 },
+  ]},
+  { topic: 'S9 \u00b7 La maison, la ville et l\u2019environnement', code: 'S9-MV', subtopics: [
+    { name: 'Home, Chores and Where I Live', code: 'S9-012', suggestedLessons: 1 },
+    { name: 'Town vs Countryside: Advantages and Disadvantages', code: 'S9-013', suggestedLessons: 1 },
+    { name: 'The Environment: Problems and Solutions', code: 'S9-014', suggestedLessons: 1 },
+    { name: 'Recycling and Being an Eco-Citizen', code: 'S9-015', suggestedLessons: 1 },
+  ]},
+  { topic: 'S9 \u00b7 L\u2019ecole et le travail', code: 'S9-ET', subtopics: [
+    { name: 'School Life, Rules and Uniform: Opinions and Justification', code: 'S9-016', suggestedLessons: 1 },
+    { name: 'Comparing School Systems in France, Kenya and Beyond', code: 'S9-017', suggestedLessons: 1 },
+    { name: 'Jobs, Ambitions and Future Plans (Future and Conditional)', code: 'S9-018', suggestedLessons: 1 },
+    { name: 'Part-Time Work, Money and Pocket Money', code: 'S9-019', suggestedLessons: 1 },
+  ]},
+  { topic: 'S9 \u00b7 Les loisirs et les medias', code: 'S9-LM', subtopics: [
+    { name: 'Music, Film and Television: Preferences and Reviews', code: 'S9-020', suggestedLessons: 1 },
+    { name: 'Technology, Social Media and Screen Time', code: 'S9-021', suggestedLessons: 1 },
+    { name: 'Reading, Books and French-Language Songs', code: 'S9-022', suggestedLessons: 1 },
+  ]},
+  { topic: 'S9 \u00b7 Les voyages et les vacances', code: 'S9-VV', subtopics: [
+    { name: 'Planning a Trip: Booking, Hotel and Campsite', code: 'S9-023', suggestedLessons: 1 },
+    { name: 'At the Airport, Station and Tourist Office', code: 'S9-024', suggestedLessons: 1 },
+    { name: 'Describing a Past Holiday and Problems on Holiday', code: 'S9-025', suggestedLessons: 1 },
+    { name: 'Festivals and Celebrations in the Francophone World', code: 'S9-026', suggestedLessons: 1 },
+  ]},
+  { topic: 'S9 \u00b7 La sante et le bien-etre', code: 'S9-SB', subtopics: [
+    { name: 'Healthy Lifestyle: Diet, Sleep and Exercise', code: 'S9-027', suggestedLessons: 1 },
+    { name: 'Smoking, Alcohol and Peer Pressure: Giving Advice', code: 'S9-028', suggestedLessons: 1 },
+    { name: 'At the Pharmacy and Describing Symptoms', code: 'S9-029', suggestedLessons: 1 },
+  ]},
+  { topic: 'S9 \u00b7 Skills for IGCSE', code: 'S9-SK', subtopics: [
+    { name: 'Listening: Gist, Detail and Transcript Techniques', code: 'S9-030', suggestedLessons: 1 },
+    { name: 'Reading: Authentic Texts, Cognates and Inference', code: 'S9-031', suggestedLessons: 1 },
+    { name: 'Speaking: Role Play and Conversation Practice', code: 'S9-032', suggestedLessons: 2 },
+    { name: 'Writing: Emails, Postcards and 100-Word Responses', code: 'S9-033', suggestedLessons: 2 },
+    { name: 'Extending Sentences: Connectives, Opinions and Three Tenses', code: 'S9-034', suggestedLessons: 1 },
+    { name: 'End of Year Assessment and Bridge to IGCSE 0520', code: 'S9-035', suggestedLessons: 1 },
+  ]},
+];
+
+// ═══════════════════════════════════════════════════════════════════
+// CAMBRIDGE LOWER SECONDARY ARABIC (Foreign Language, Stages 7-9)
+// Modern Standard Arabic from script and sounds (Stage 7) to CEFR A2+
+// (Stage 9), preparing for IGCSE Arabic as a Foreign Language 0544.
+// Stage 9 is the full scheme.
+// ═══════════════════════════════════════════════════════════════════
+const LOWERSEC_ARABIC = [
+  // ── STAGE 7 (Script and A1) ──
+  { topic: 'S7 \u00b7 The Arabic Script', code: 'S7-SC', subtopics: [
+    { name: 'The Alphabet: Letters, Sounds and Letter Forms', code: 'S7-001', suggestedLessons: 2 },
+    { name: 'Joining Letters, Short Vowels (Harakat) and Long Vowels', code: 'S7-002', suggestedLessons: 1 },
+    { name: 'Reading and Writing Simple Words: Sun and Moon Letters', code: 'S7-003', suggestedLessons: 1 },
+    { name: 'Numbers 1-100, Days and Months', code: 'S7-004', suggestedLessons: 1 },
+  ]},
+  { topic: 'S7 \u00b7 Ana wa Usrati (Me and My Family)', code: 'S7-AU', subtopics: [
+    { name: 'Greetings, Introductions and Politeness', code: 'S7-005', suggestedLessons: 1 },
+    { name: 'Family, Nationality and Where I Live', code: 'S7-006', suggestedLessons: 1 },
+    { name: 'Nominal Sentences, Gender and Attached Pronouns', code: 'S7-007', suggestedLessons: 1 },
+    { name: 'Describing People: Adjectives and Agreement', code: 'S7-008', suggestedLessons: 1 },
+  ]},
+  { topic: 'S7 \u00b7 Madrasati wa Yawmi (School and My Day)', code: 'S7-MY', subtopics: [
+    { name: 'School Subjects, the Classroom and Opinions', code: 'S7-009', suggestedLessons: 1 },
+    { name: 'Telling the Time and Daily Routine (Present Tense)', code: 'S7-010', suggestedLessons: 1 },
+    { name: 'Food, Drink and at the Market', code: 'S7-011', suggestedLessons: 1 },
+    { name: 'Colours, Clothes and the Dual and Plural', code: 'S7-012', suggestedLessons: 1 },
+  ]},
+
+  // ── STAGE 8 (A1+ / A2) ──
+  { topic: 'S8 \u00b7 Al-Hayat al-Yawmiyya (Daily Life)', code: 'S8-HY', subtopics: [
+    { name: 'Hobbies, Free Time and Weekend Plans', code: 'S8-001', suggestedLessons: 1 },
+    { name: 'The Past Tense (Al-Madi): Regular Verbs', code: 'S8-002', suggestedLessons: 1 },
+    { name: 'Talking about Yesterday and Last Holiday', code: 'S8-003', suggestedLessons: 1 },
+    { name: 'The Future with Sa- and Sawfa', code: 'S8-004', suggestedLessons: 1 },
+  ]},
+  { topic: 'S8 \u00b7 Madinati wa Baladi (My Town and Country)', code: 'S8-MB', subtopics: [
+    { name: 'Places in Town, Directions and Transport', code: 'S8-005', suggestedLessons: 1 },
+    { name: 'Weather, Seasons and the Arab World Map', code: 'S8-006', suggestedLessons: 1 },
+    { name: 'Idafa (Possessive Construction) and Prepositions', code: 'S8-007', suggestedLessons: 1 },
+    { name: 'Comparatives and Superlatives (Af\u2019al Form)', code: 'S8-008', suggestedLessons: 1 },
+  ]},
+  { topic: 'S8 \u00b7 As-Sihha wa ar-Riyada (Health and Sport)', code: 'S8-SR', subtopics: [
+    { name: 'The Body, Illness and at the Doctor', code: 'S8-009', suggestedLessons: 1 },
+    { name: 'Healthy Food and Quantities', code: 'S8-010', suggestedLessons: 1 },
+    { name: 'Sport and Frequency Expressions', code: 'S8-011', suggestedLessons: 1 },
+    { name: 'Giving Advice: Yajib an, Yumkin an', code: 'S8-012', suggestedLessons: 1 },
+  ]},
+
+  // ── STAGE 9 (YEAR 9, A2+): FULL SCHEME ──
+  { topic: 'S9 \u00b7 Grammar Foundations for IGCSE', code: 'S9-GR', subtopics: [
+    { name: 'Present Tense Review (Al-Mudari): All Persons and Weak Verbs', code: 'S9-001', suggestedLessons: 1 },
+    { name: 'Past Tense Mastery: Hollow, Doubled and Weak Verbs', code: 'S9-002', suggestedLessons: 1 },
+    { name: 'Kana and Its Sisters: Describing the Past', code: 'S9-003', suggestedLessons: 1 },
+    { name: 'Narrating a Story: Sequencing the Past and Present', code: 'S9-004', suggestedLessons: 1 },
+    { name: 'Inna and Its Sisters; Nominal vs Verbal Sentences', code: 'S9-005', suggestedLessons: 1 },
+    { name: 'Verb Forms II-X: Recognising Patterns and Meaning', code: 'S9-006', suggestedLessons: 1 },
+    { name: 'The Imperative and Prohibition (Lam and La)', code: 'S9-007', suggestedLessons: 1 },
+    { name: 'Relative Pronouns, Question Words and Negation (Lam, Lan, Ma, Laysa)', code: 'S9-008', suggestedLessons: 1 },
+  ]},
+  { topic: 'S9 \u00b7 Ana, Usrati wa Asdiqa\u2019i (Me, Family and Friends)', code: 'S9-UA', subtopics: [
+    { name: 'Personality, Relationships and Getting On with People', code: 'S9-009', suggestedLessons: 1 },
+    { name: 'Role Models and Someone I Admire', code: 'S9-010', suggestedLessons: 1 },
+    { name: 'Childhood Memories (Kana + Present)', code: 'S9-011', suggestedLessons: 1 },
+  ]},
+  { topic: 'S9 \u00b7 Al-Bayt, al-Madina wa al-Bi\u2019a (Home, Town, Environment)', code: 'S9-BM', subtopics: [
+    { name: 'Home, Chores and Where I Live', code: 'S9-012', suggestedLessons: 1 },
+    { name: 'City vs Village: Advantages and Disadvantages', code: 'S9-013', suggestedLessons: 1 },
+    { name: 'The Environment: Pollution, Water and Solutions', code: 'S9-014', suggestedLessons: 1 },
+    { name: 'Recycling and Protecting Nature', code: 'S9-015', suggestedLessons: 1 },
+  ]},
+  { topic: 'S9 \u00b7 Al-Madrasa wa al-Amal (School and Work)', code: 'S9-MA', subtopics: [
+    { name: 'School Life, Rules and Opinions with Justification', code: 'S9-016', suggestedLessons: 1 },
+    { name: 'Education in the Arab World, Kenya and Beyond', code: 'S9-017', suggestedLessons: 1 },
+    { name: 'Jobs, Ambitions and Future Plans', code: 'S9-018', suggestedLessons: 1 },
+    { name: 'Money, Pocket Money and Part-Time Work', code: 'S9-019', suggestedLessons: 1 },
+  ]},
+  { topic: 'S9 \u00b7 Al-Hiwayat wa al-I\u2019lam (Leisure and Media)', code: 'S9-HI', subtopics: [
+    { name: 'Music, Film and Television: Preferences and Reviews', code: 'S9-020', suggestedLessons: 1 },
+    { name: 'Technology, Social Media and Screen Time', code: 'S9-021', suggestedLessons: 1 },
+    { name: 'Reading, Poetry and Arabic Songs', code: 'S9-022', suggestedLessons: 1 },
+  ]},
+  { topic: 'S9 \u00b7 As-Safar wa al-Utla (Travel and Holidays)', code: 'S9-SU', subtopics: [
+    { name: 'Planning a Trip: Booking, Hotel and Transport', code: 'S9-023', suggestedLessons: 1 },
+    { name: 'At the Airport, Station and Tourist Office', code: 'S9-024', suggestedLessons: 1 },
+    { name: 'Describing a Past Holiday and Problems on Holiday', code: 'S9-025', suggestedLessons: 1 },
+    { name: 'Festivals, Ramadan, Eid and Culture across the Arab World', code: 'S9-026', suggestedLessons: 1 },
+  ]},
+  { topic: 'S9 \u00b7 As-Sihha wa al-Ghidha\u2019 (Health and Food)', code: 'S9-SG', subtopics: [
+    { name: 'Healthy Lifestyle: Diet, Sleep and Exercise', code: 'S9-027', suggestedLessons: 1 },
+    { name: 'Arabic Cuisine, Recipes and Hospitality', code: 'S9-028', suggestedLessons: 1 },
+    { name: 'At the Pharmacy and Describing Symptoms', code: 'S9-029', suggestedLessons: 1 },
+  ]},
+  { topic: 'S9 \u00b7 Skills for IGCSE', code: 'S9-SK', subtopics: [
+    { name: 'Listening: Gist, Detail and Note-Taking', code: 'S9-030', suggestedLessons: 1 },
+    { name: 'Reading: Signs, Adverts, Articles and Inference', code: 'S9-031', suggestedLessons: 1 },
+    { name: 'Speaking: Role Play and Conversation Practice', code: 'S9-032', suggestedLessons: 2 },
+    { name: 'Writing: Messages, Emails and 100-Word Responses', code: 'S9-033', suggestedLessons: 2 },
+    { name: 'Extending Sentences: Connectives, Opinions and Three Tenses', code: 'S9-034', suggestedLessons: 1 },
+    { name: 'End of Year Assessment and Bridge to IGCSE 0544', code: 'S9-035', suggestedLessons: 1 },
+  ]},
+];
+
 export const LOWER_SEC_LIBRARY = [
   // Cambridge Lower Secondary — Stages 7-9, rebuilt at lesson level.
   // The previous spines were far too thin (27 lessons for three years of
@@ -9447,6 +9648,10 @@ export const LOWER_SEC_LIBRARY = [
     source: 'Cambridge Lower Secondary Global Perspectives 1129 \u2014 41-lesson scheme (Stages 7-9)' },
   { match: /\bart\b/i,                    const_: LOWERSEC_ART_DESIGN,
     source: 'Cambridge Lower Secondary Art & Design \u2014 72-lesson scheme (Stages 7-9, Year 9 in full)' },
+  { match: /\bfrench\b/i,                 const_: LOWERSEC_FRENCH,
+    source: 'Cambridge Lower Secondary French (Foreign Language) \u2014 61-lesson scheme (Stages 7-9, Year 9 in full)' },
+  { match: /\barabic\b/i,                 const_: LOWERSEC_ARABIC,
+    source: 'Cambridge Lower Secondary Arabic (Foreign Language) \u2014 62-lesson scheme (Stages 7-9, Year 9 in full)' },
 ]
 
 // Edexcel International Lower Secondary — Years 7-9. Separate library
