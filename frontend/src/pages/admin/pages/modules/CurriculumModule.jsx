@@ -447,7 +447,7 @@ function SyllabusSpineTab({ toast }) {
     if (!subjectId) { toast?.error?.('Pick a subject first.'); return }
     const entry = PRIMARY_LIBRARY.find(e => e.match.test(subjectName))
     if (!entry) {
-      toast?.error?.('No Primary spine matches "' + subjectName + '". Expected one of: Mathematics, English, Science, Computing, Geography, History, Global Perspectives, Art & Design.')
+      toast?.error?.('No Primary spine matches "' + subjectName + '". Expected one of: Mathematics, English, Science, Computing, Geography, History, Global Perspectives, Art & Design, French, Arabic.')
       return
     }
     if (topics.length > 0 && !window.confirm('This REPLACES the entire existing spine for this subject. Continue?')) return
@@ -466,7 +466,7 @@ function SyllabusSpineTab({ toast }) {
     if (!subjectId) { toast?.error?.('Pick a subject first.'); return }
     const entry = LOWER_SEC_LIBRARY.find(e => e.match.test(subjectName))
     if (!entry) {
-      toast?.error?.('No Lower Secondary spine matches "' + subjectName + '". Expected one of: Mathematics, English, Science, Computing, Geography, History, Global Perspectives, Art & Design.')
+      toast?.error?.('No Lower Secondary spine matches "' + subjectName + '". Expected one of: Mathematics, English, Science, Computing, Geography, History, Global Perspectives, Art & Design, French, Arabic.')
       return
     }
     if (topics.length > 0 && !window.confirm('This REPLACES the entire existing spine for this subject. Continue?')) return
