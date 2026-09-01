@@ -37,6 +37,11 @@ const announcementSchema = new mongoose.Schema({
 
   pinned:    { type: Boolean, default: false },   // floats to the top
   published: { type: Boolean, default: true, index: true },
+  // Email broadcast. Set once the announcement has been emailed to its
+  // audience, so a scheduled announcement mails exactly once when it
+  // goes live and an edit never re-sends.
+  emailSentAt:   { type: Date, default: null },
+  emailCount:    { type: Number, default: 0 },
 
   author:     { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   authorName: { type: String, default: '' },      // snapshot so it survives staff changes
