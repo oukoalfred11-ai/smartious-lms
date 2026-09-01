@@ -168,7 +168,7 @@ function attachClassroom(httpServer, allowedOrigins) {
 
         const LiveClass = require('../models/LiveClass');
         const lc = await LiveClass.findById(liveClassId)
-          .select('title subject teacherId assignedStudents status').lean();
+          .select('title subject teacherId assignedStudents status clubId kind').lean();
         if (!lc) return ack && ack({ ok: false, message: 'Class not found.' });
 
         const isTeacher = String(lc.teacherId) === me.id;
@@ -177,7 +177,15 @@ function attachClassroom(httpServer, allowedOrigins) {
         // A parent may join to monitor if one of their children is in the class.
         const isParentOfAssigned = me.role === 'parent' &&
           (lc.assignedStudents || []).some(s => (me.childIds || []).includes(String(s)));
-        if (!isTeacher && !isStaff && !isAssigned && !isParentOfAssigned)
+        // Club meetings: any current member or leader of the club may join,
+        // even if they joined the club after the meeting was scheduled.
+        let isClubMember = false;
+        if (lc.clubId && (me.role === 'student' || me.role === 'teacher')) {
+          const Club = require('../models/Club');
+          const club = await Club.findById(lc.clubId).select('members leaders').lean();
+          if (club) isClubMember = [...(club.members || []), ...(club.leaders || [])].some(id => String(id) === me.id);
+        }
+        if (!isTeacher && !isStaff && !isAssigned && !isParentOfAssigned && !isClubMember)
           return ack && ack({ ok: false, message: 'You are not assigned to this class.' });
 
         const rid = roomOf(liveClassId);
@@ -205,7 +213,7 @@ function attachClassroom(httpServer, allowedOrigins) {
         ack && ack({
           ok: true,
           self: { socketId: socket.id, role: room.peers.get(socket.id).role },
-          classInfo: { title: lc.title, subject: lc.subject },
+          classInfo: { title: lc.title, subject: lc.subject, kind: lc.kind || 'lesson', clubId: lc.clubId || null },
           roster: publicRoster(room),
           boardOps: room.boardOps,
           chat: room.chat.slice(-100),
