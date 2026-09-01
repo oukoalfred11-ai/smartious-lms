@@ -11,7 +11,19 @@ const mongoose = require('mongoose');
 const communityMessageSchema = new mongoose.Schema({
   author:  { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
   channel: { type: String, enum: ['general', 'announcements', 'questions', 'resources', 'wins'], default: 'general', index: true },
-  body:    { type: String, required: true, trim: true, maxlength: 800 },
+  body:    { type: String, trim: true, maxlength: 800, default: '' },
+
+  // One attachment per message: a document, an image, a voice note, or a
+  // video. Stored on R2; the message renders a matching inline player/card.
+  attachment: {
+    kind:      { type: String, enum: ['', 'file', 'image', 'audio', 'video'], default: '' },
+    url:       { type: String, default: '' },
+    key:       { type: String, default: '' },
+    name:      { type: String, default: '', maxlength: 200 },
+    mime:      { type: String, default: '' },
+    sizeBytes: { type: Number, default: 0 },
+    durationSec: { type: Number, default: 0 },   // voice notes / video, if known
+  },
 
   // Light reply threading: snapshot the quoted line so rendering
   // never needs a second lookup and survives later removals.
