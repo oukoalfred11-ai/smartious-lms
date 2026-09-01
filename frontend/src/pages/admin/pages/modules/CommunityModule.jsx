@@ -14,6 +14,8 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { api } from '../../../../context/ctx.jsx'
 import { TOKENS } from '../shared/tokens.js'
+import { useAuth } from '../../../../context/ctx.jsx'
+import CommunityChatView from '../../../../components/CommunityChat.jsx'
 
 const ago = (d) => {
   const s = Math.floor((Date.now() - new Date(d).getTime()) / 1000)
@@ -33,6 +35,7 @@ const KIND_BADGE = {
 
 export default function CommunityModule({ toast }) {
   const [tab, setTab] = useState('queue')
+  const { user } = useAuth()
   const [chatQueue, setChatQueue] = useState([])
   const [chatRemoved, setChatRemoved] = useState([])
   const [queue, setQueue] = useState([])
@@ -180,6 +183,7 @@ export default function CommunityModule({ toast }) {
       </div>
 
       <div style={{ display: 'flex', gap: 6, background: TOKENS.cream, padding: 5, borderRadius: 10, width: 'fit-content' }}>
+        {tabBtn('chat', 'Community chat')}
         {tabBtn('chatqueue', 'Chat reports', chatQueue.length)}
         {tabBtn('queue', 'Feed queue', queue.length)}
         {tabBtn('feed', 'Live feed', feed.length)}
@@ -188,6 +192,8 @@ export default function CommunityModule({ toast }) {
 
       {loading ? (
         <div style={{ ...card, textAlign: 'center', color: TOKENS.s500, fontSize: 13 }}>Loading...</div>
+      ) : tab === 'chat' ? (
+        <CommunityChatView user={user} toast={toast} />
       ) : tab === 'chatqueue' ? (
         chatQueue.length === 0
           ? <div style={{ ...card, textAlign: 'center', color: '#166534', fontSize: 13, fontWeight: 700 }}>No reported chat messages. The room is healthy.</div>
