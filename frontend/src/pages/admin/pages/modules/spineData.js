@@ -9309,6 +9309,124 @@ const ILOWERSEC_HISTORY = [
     ] },
 ]
 
+// ═══════════════════════════════════════════════════════════════════
+// CAMBRIDGE LOWER SECONDARY ART & DESIGN (Stages 7-9)
+// Built on the four Cambridge strands: Experiencing, Making,
+// Reflecting, and Thinking & Working Artistically. Stage 9 (Year 9)
+// is the full scheme; Stages 7 and 8 give the foundation units so a
+// Year 7 or Year 8 subject still has a usable spine.
+// ═══════════════════════════════════════════════════════════════════
+const LOWERSEC_ART_DESIGN = [
+  // ── STAGE 7 ──
+  { topic: 'S7 \u00b7 Foundations of Drawing', code: 'S7-DR', subtopics: [
+    { name: 'The Sketchbook: Recording, Annotating and Experimenting', code: 'S7-001', suggestedLessons: 1 },
+    { name: 'Line, Tone and Mark-Making with Pencil and Pen', code: 'S7-002', suggestedLessons: 1 },
+    { name: 'Observational Drawing of Natural Forms', code: 'S7-003', suggestedLessons: 1 },
+    { name: 'Shape, Proportion and Measuring by Eye', code: 'S7-004', suggestedLessons: 1 },
+  ]},
+  { topic: 'S7 \u00b7 Colour and Paint', code: 'S7-CP', subtopics: [
+    { name: 'The Colour Wheel: Primary, Secondary and Tertiary Colours', code: 'S7-005', suggestedLessons: 1 },
+    { name: 'Mixing Tints, Tones and Shades', code: 'S7-006', suggestedLessons: 1 },
+    { name: 'Warm, Cool and Complementary Colour Schemes', code: 'S7-007', suggestedLessons: 1 },
+    { name: 'Painting a Still Life in Acrylic or Gouache', code: 'S7-008', suggestedLessons: 1 },
+  ]},
+  { topic: 'S7 \u00b7 Pattern, Print and Texture', code: 'S7-PT', subtopics: [
+    { name: 'Repeat Patterns from Nature and Culture', code: 'S7-009', suggestedLessons: 1 },
+    { name: 'Relief Printing with Found Objects and Polystyrene Tiles', code: 'S7-010', suggestedLessons: 1 },
+    { name: 'Collage and Mixed-Media Texture Studies', code: 'S7-011', suggestedLessons: 1 },
+  ]},
+  { topic: 'S7 \u00b7 Looking at Artists', code: 'S7-LA', subtopics: [
+    { name: 'Describing Artworks: Subject, Materials, Mood', code: 'S7-012', suggestedLessons: 1 },
+    { name: 'African Pattern and Textile Traditions (Kente, Adinkra, Kitenge)', code: 'S7-013', suggestedLessons: 1 },
+    { name: 'Presenting and Evaluating a Finished Piece', code: 'S7-014', suggestedLessons: 1 },
+  ]},
+
+  // ── STAGE 8 ──
+  { topic: 'S8 \u00b7 Developing Drawing', code: 'S8-DR', subtopics: [
+    { name: 'Tonal Drawing: Light, Shadow and Form', code: 'S8-001', suggestedLessons: 1 },
+    { name: 'Perspective: One-Point and Two-Point Drawing', code: 'S8-002', suggestedLessons: 1 },
+    { name: 'Figure Drawing: Proportion and Gesture', code: 'S8-003', suggestedLessons: 1 },
+    { name: 'Drawing with Charcoal, Chalk and Ink Wash', code: 'S8-004', suggestedLessons: 1 },
+  ]},
+  { topic: 'S8 \u00b7 Painting and Composition', code: 'S8-PC', subtopics: [
+    { name: 'Composition: Rule of Thirds, Focal Points and Balance', code: 'S8-005', suggestedLessons: 1 },
+    { name: 'Landscape Painting: Atmosphere and Distance', code: 'S8-006', suggestedLessons: 1 },
+    { name: 'Expressive Colour: Fauvism and Expressionism', code: 'S8-007', suggestedLessons: 1 },
+  ]},
+  { topic: 'S8 \u00b7 Three-Dimensional Work', code: 'S8-3D', subtopics: [
+    { name: 'Clay: Pinch, Coil and Slab Techniques', code: 'S8-008', suggestedLessons: 1 },
+    { name: 'Card and Wire Construction: Form and Structure', code: 'S8-009', suggestedLessons: 1 },
+    { name: 'Making a Mask: Cultural Sources and Design', code: 'S8-010', suggestedLessons: 1 },
+  ]},
+  { topic: 'S8 \u00b7 Design and Communication', code: 'S8-DC', subtopics: [
+    { name: 'Lettering, Logos and Visual Identity', code: 'S8-011', suggestedLessons: 1 },
+    { name: 'Poster Design: Message, Image and Layout', code: 'S8-012', suggestedLessons: 1 },
+    { name: 'Comparing Artists: Similarities, Differences and Influence', code: 'S8-013', suggestedLessons: 1 },
+    { name: 'Group Critique: Giving and Receiving Feedback', code: 'S8-014', suggestedLessons: 1 },
+  ]},
+
+  // ── STAGE 9 (YEAR 9): FULL SCHEME ──
+  { topic: 'S9 \u00b7 Thinking and Working Artistically', code: 'S9-TW', subtopics: [
+    { name: 'What Art Is For: Purpose, Audience and Intention', code: 'S9-001', suggestedLessons: 1 },
+    { name: 'The Creative Process: Research, Develop, Refine, Resolve', code: 'S9-002', suggestedLessons: 1 },
+    { name: 'The Sketchbook as a Visual Journal: Annotation and Reflection', code: 'S9-003', suggestedLessons: 1 },
+    { name: 'Visual Language: Formal Elements and Principles of Design', code: 'S9-004', suggestedLessons: 1 },
+  ]},
+  { topic: 'S9 \u00b7 Advanced Drawing', code: 'S9-DR', subtopics: [
+    { name: 'Sustained Observational Study: Complex Objects and Reflections', code: 'S9-005', suggestedLessons: 1 },
+    { name: 'The Portrait: Facial Proportion, Features and Likeness', code: 'S9-006', suggestedLessons: 2 },
+    { name: 'Self-Portrait: Identity, Expression and Symbolism', code: 'S9-007', suggestedLessons: 1 },
+    { name: 'Expressive Drawing: Scale, Energy and Unconventional Tools', code: 'S9-008', suggestedLessons: 1 },
+    { name: 'Drawing from the Environment: Urban and Architectural Studies', code: 'S9-009', suggestedLessons: 1 },
+  ]},
+  { topic: 'S9 \u00b7 Painting: Technique and Meaning', code: 'S9-PA', subtopics: [
+    { name: 'Colour Theory in Depth: Harmony, Contrast and Emotion', code: 'S9-010', suggestedLessons: 1 },
+    { name: 'Watercolour: Washes, Layering and Control', code: 'S9-011', suggestedLessons: 1 },
+    { name: 'Acrylic: Impasto, Glazing and Surface', code: 'S9-012', suggestedLessons: 1 },
+    { name: 'Abstraction: From Observation to Non-Representation', code: 'S9-013', suggestedLessons: 1 },
+    { name: 'Narrative Painting: Telling a Story in One Image', code: 'S9-014', suggestedLessons: 1 },
+  ]},
+  { topic: 'S9 \u00b7 Printmaking', code: 'S9-PR', subtopics: [
+    { name: 'Lino Cut: Design, Cutting and Single-Colour Printing', code: 'S9-015', suggestedLessons: 1 },
+    { name: 'Reduction Print: Multi-Colour Lino', code: 'S9-016', suggestedLessons: 1 },
+    { name: 'Monoprint and Drypoint: Line and Spontaneity', code: 'S9-017', suggestedLessons: 1 },
+    { name: 'Stencil and Screen Print: Street Art and Graphic Image', code: 'S9-018', suggestedLessons: 1 },
+  ]},
+  { topic: 'S9 \u00b7 Sculpture and 3D Design', code: 'S9-3D', subtopics: [
+    { name: 'Sculptural Form: Mass, Space and Viewpoint', code: 'S9-019', suggestedLessons: 1 },
+    { name: 'Modelling and Carving: Clay, Plaster and Soap', code: 'S9-020', suggestedLessons: 1 },
+    { name: 'Assemblage and Recycled Materials: Sustainability in Art', code: 'S9-021', suggestedLessons: 1 },
+    { name: 'Relief and Installation: Site, Scale and Audience', code: 'S9-022', suggestedLessons: 1 },
+  ]},
+  { topic: 'S9 \u00b7 Photography and Digital Art', code: 'S9-DG', subtopics: [
+    { name: 'Photographic Composition: Framing, Light and Viewpoint', code: 'S9-023', suggestedLessons: 1 },
+    { name: 'Digital Editing: Layers, Adjustments and Manipulation', code: 'S9-024', suggestedLessons: 1 },
+    { name: 'Digital Illustration and Vector Design', code: 'S9-025', suggestedLessons: 1 },
+    { name: 'Animation and Moving Image: Storyboard to Sequence', code: 'S9-026', suggestedLessons: 1 },
+  ]},
+  { topic: 'S9 \u00b7 Textiles and Surface Design', code: 'S9-TX', subtopics: [
+    { name: 'Batik, Tie-Dye and Resist Techniques', code: 'S9-027', suggestedLessons: 1 },
+    { name: 'Weaving, Stitch and Applique', code: 'S9-028', suggestedLessons: 1 },
+    { name: 'Fashion and Costume: Designing for the Body', code: 'S9-029', suggestedLessons: 1 },
+  ]},
+  { topic: 'S9 \u00b7 Art in Context: Critical Studies', code: 'S9-CS', subtopics: [
+    { name: 'Analysing Art: Content, Form, Process, Mood', code: 'S9-030', suggestedLessons: 1 },
+    { name: 'Movements: Impressionism to Cubism', code: 'S9-031', suggestedLessons: 1 },
+    { name: 'Movements: Surrealism, Pop Art and Contemporary Practice', code: 'S9-032', suggestedLessons: 1 },
+    { name: 'African and East African Art: Makonde, Tingatinga and Contemporary Kenyan Artists', code: 'S9-033', suggestedLessons: 1 },
+    { name: 'Art from Asia, the Americas and the Middle East', code: 'S9-034', suggestedLessons: 1 },
+    { name: 'Art, Society and Identity: Public Art, Protest and Culture', code: 'S9-035', suggestedLessons: 1 },
+  ]},
+  { topic: 'S9 \u00b7 Personal Project and Portfolio', code: 'S9-PP', subtopics: [
+    { name: 'Choosing a Theme: Mind Maps, Mood Boards and Starting Points', code: 'S9-036', suggestedLessons: 1 },
+    { name: 'Artist Research: Analysing and Responding to Influences', code: 'S9-037', suggestedLessons: 1 },
+    { name: 'Developing Ideas: Experiments, Samples and Refinement', code: 'S9-038', suggestedLessons: 2 },
+    { name: 'The Final Piece: Planning, Producing and Resolving', code: 'S9-039', suggestedLessons: 2 },
+    { name: 'Presenting the Portfolio: Curation, Mounting and Display', code: 'S9-040', suggestedLessons: 1 },
+    { name: 'Written Evaluation and Preparing for IGCSE Art & Design', code: 'S9-041', suggestedLessons: 1 },
+  ]},
+];
+
 export const LOWER_SEC_LIBRARY = [
   // Cambridge Lower Secondary — Stages 7-9, rebuilt at lesson level.
   // The previous spines were far too thin (27 lessons for three years of
@@ -9327,6 +9445,8 @@ export const LOWER_SEC_LIBRARY = [
     source: 'Cambridge Lower Secondary History \u2014 50-lesson scheme (Stages 7-9)' },
   { match: /\bglobal\s*perspective/i,     const_: LOWERSEC_GLOBAL_1129,
     source: 'Cambridge Lower Secondary Global Perspectives 1129 \u2014 41-lesson scheme (Stages 7-9)' },
+  { match: /\bart\b/i,                    const_: LOWERSEC_ART_DESIGN,
+    source: 'Cambridge Lower Secondary Art & Design \u2014 72-lesson scheme (Stages 7-9, Year 9 in full)' },
 ]
 
 // Edexcel International Lower Secondary — Years 7-9. Separate library
