@@ -195,6 +195,8 @@ const SUBJECTS = [
   // Cambridge only — Edexcel iLowerSecondary has no equivalent.
   { id: 'ls_global_persp',      name: 'Global Perspectives', category: 'Humanities',  availableIn: ['CambridgeLowerSec'] },
   { id: 'ls_art_design',        name: 'Art & Design',        category: 'Creative Arts', availableIn: ['CambridgeLowerSec'] },
+  { id: 'ls_french',            name: 'French',              category: 'Modern Languages', availableIn: ['CambridgeLowerSec', 'EdexcelLowerSec'] },
+  { id: 'ls_arabic',            name: 'Arabic',              category: 'Modern Languages', availableIn: ['CambridgeLowerSec', 'EdexcelLowerSec'] },
 
   // ── CAMBRIDGE PRIMARY (Year 1–6) ──────────────────────
   // Primary has its own deliberate, age-appropriate subject
