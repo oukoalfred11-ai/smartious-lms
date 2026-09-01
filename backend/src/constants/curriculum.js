@@ -194,6 +194,7 @@ const SUBJECTS = [
   { id: 'ls_history',           name: 'History',             category: 'Humanities',  availableIn: ['CambridgeLowerSec', 'EdexcelLowerSec'] },
   // Cambridge only — Edexcel iLowerSecondary has no equivalent.
   { id: 'ls_global_persp',      name: 'Global Perspectives', category: 'Humanities',  availableIn: ['CambridgeLowerSec'] },
+  { id: 'ls_art_design',        name: 'Art & Design',        category: 'Creative Arts', availableIn: ['CambridgeLowerSec'] },
 
   // ── CAMBRIDGE PRIMARY (Year 1–6) ──────────────────────
   // Primary has its own deliberate, age-appropriate subject
