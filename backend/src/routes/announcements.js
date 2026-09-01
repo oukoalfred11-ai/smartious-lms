@@ -9,6 +9,7 @@
  * appears and disappears on its own.
  */
 const express = require('express');
+const { dispatchSoon } = require('../services/announcementMailer');
 const router = express.Router();
 const { auth, requireRole } = require('../middleware/auth');
 const Announcement = require('../models/Announcement');
@@ -96,6 +97,9 @@ router.post('/', auth, requireRole(...STAFF), async (req, res) => {
     data.author = req.user._id;
     data.authorName = `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim() || 'Smartious';
     const doc = await Announcement.create(data);
+    // Email the audience now if it is live; a scheduled one is picked up
+    // by the mailer when its showFrom time arrives.
+    if (doc.published) dispatchSoon();
     return res.json({ success: true, data: { announcement: doc } });
   } catch (e) {
     return res.status(500).json({ success: false, message: e.message });
@@ -108,6 +112,9 @@ router.patch('/:id', auth, requireRole(...STAFF), async (req, res) => {
     const data = sanitize(req.body);
     const doc = await Announcement.findByIdAndUpdate(req.params.id, { $set: data }, { new: true });
     if (!doc) return res.status(404).json({ success: false, message: 'Announcement not found.' });
+    // Publishing a draft (or moving showFrom into the present) sends it;
+    // an already-emailed announcement is never re-sent (emailSentAt guard).
+    if (doc.published && !doc.emailSentAt) dispatchSoon();
     return res.json({ success: true, data: { announcement: doc } });
   } catch (e) {
     return res.status(500).json({ success: false, message: e.message });
