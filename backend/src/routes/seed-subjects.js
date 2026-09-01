@@ -153,6 +153,8 @@ const ALL_SUBJECTS = [
   { curriculum:'CambridgeLowerSec', subjectName:'Music',              category:'Arts' },
   { curriculum:'CambridgeLowerSec', subjectName:'Physical Education', category:'Physical Education' },
   { curriculum:'CambridgeLowerSec', subjectName:'Global Perspectives',category:'Humanities' },
+  { curriculum:'CambridgeLowerSec', subjectName:'French',             category:'Languages' },
+  { curriculum:'CambridgeLowerSec', subjectName:'Arabic',             category:'Languages' },
 
   // ── EdexcelLowerSec ──────────────────────────────────────
   { curriculum:'EdexcelLowerSec', subjectName:'Mathematics',          category:'Mathematics' },
@@ -162,6 +164,8 @@ const ALL_SUBJECTS = [
   { curriculum:'EdexcelLowerSec', subjectName:'Geography',            category:'Humanities' },
   { curriculum:'EdexcelLowerSec', subjectName:'Computer Science',     category:'Technology' },
   { curriculum:'EdexcelLowerSec', subjectName:'Art & Design',         category:'Arts' },
+  { curriculum:'EdexcelLowerSec', subjectName:'French',               category:'Languages' },
+  { curriculum:'EdexcelLowerSec', subjectName:'Arabic',               category:'Languages' },
   { curriculum:'EdexcelLowerSec', subjectName:'Physical Education',   category:'Physical Education' },
 
   // ── CambridgePrimary ─────────────────────────────────────
