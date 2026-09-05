@@ -19,6 +19,9 @@ export default function LiveClassesModule({ toast }) {
   const [liveClasses, setLiveClasses] = useState([])
   const [loading, setLoading] = useState(true)
   const [playing, setPlaying] = useState(null)   // the recording being played
+  const [past, setPast] = useState([])
+  const [editCls, setEditCls] = useState(null)   // { _id, title, when, mins }
+  const [savingEdit, setSavingEdit] = useState(false)
   const [autoInfo, setAutoInfo] = useState(null) // { count, sample } of auto-scheduled classes
   const [purging, setPurging] = useState(false)
   const [filter, setFilter] = useState('')
@@ -37,6 +40,7 @@ export default function LiveClassesModule({ toast }) {
     ]).then(([r, l]) => {
       setRecordings(r.data?.data?.recordings || [])
       setLiveClasses(l.data?.data?.classes || [])
+      setPast(l.data?.data?.past || [])
     }).finally(() => setLoading(false))
   }, [])
   useEffect(() => { load(); loadAuto() }, [load, loadAuto])
@@ -100,6 +104,7 @@ export default function LiveClassesModule({ toast }) {
       <div style={{ display: 'flex', gap: 6, background: TOKENS.cream, padding: 5, borderRadius: 10, width: 'fit-content' }}>
         {tabBtn('recordings', 'Recordings', recordings.length)}
         {tabBtn('live', 'Live now / upcoming', liveClasses.length)}
+        {tabBtn('past', 'Past classes', past.length)}
       </div>
 
       {/* Auto-scheduled cleanup: classes the old auto-timetable created,
@@ -209,10 +214,78 @@ export default function LiveClassesModule({ toast }) {
                 <button style={btn('primary')} onClick={() => joinClass(c._id)}>
                   {c.status === 'live' ? 'Join now' : 'Open'}
                 </button>
+                {c.status === 'scheduled' && (
+                  <>
+                    <button style={btn('ghost')} onClick={() => setEditCls({ _id: c._id, title: c.title || '', when: c.scheduledAt ? new Date(new Date(c.scheduledAt).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '', mins: c.durationMins || 60 })}>Edit</button>
+                    <button style={{ ...btn('ghost'), color: '#B91C1C', borderColor: '#FCA5A5' }} onClick={async () => {
+                      if (!window.confirm(`Delete "${c.title}"? Assigned students will no longer see it.`)) return
+                      try { await api.delete('/liveclasses/' + c._id); toast?.ok?.('Class deleted.'); load() }
+                      catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not delete.') }
+                    }}>Delete</button>
+                  </>
+                )}
               </div>
             ))}
           </div>
         )
+      )}
+
+      {/* Past classes: what has actually been taught */}
+      {tab === 'past' && (
+        past.length === 0 ? (
+          <div style={{ ...card, textAlign: 'center', color: S600, fontSize: 13.5 }}>No classes ended in the last 30 days.</div>
+        ) : (
+          <div style={{ display: 'grid', gap: 10 }}>
+            {past.map(c => (
+              <div key={c._id} style={{ ...card, display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
+                <div style={{ flex: 1, minWidth: 220 }}>
+                  <div style={{ fontWeight: 800, fontSize: 14.5, color: TOKENS.s900 }}>{c.title}
+                    {c.kind !== 'lesson' && <span style={{ marginLeft: 8, fontSize: 10, fontWeight: 800, color: '#92400E', background: '#FEF3C7', padding: '2px 8px', borderRadius: 999, textTransform: 'uppercase' }}>{c.kind}</span>}
+                  </div>
+                  <div style={{ fontSize: 12.5, color: S600, display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 4 }}>
+                    {c.subject && <span>{c.subject}{c.grade ? ` · ${c.grade}` : ''}</span>}
+                    {c.teacher && <span>{c.teacher}</span>}
+                    <span>{fmtDate(c.scheduledAt)}</span>
+                    <span>{c.assigned} assigned</span>
+                  </div>
+                </div>
+                {c.recordings > 0
+                  ? <span style={{ fontSize: 12, fontWeight: 800, color: '#15803D' }}>{c.recordings} recording{c.recordings > 1 ? 's' : ''} ✓</span>
+                  : <span style={{ fontSize: 12, fontWeight: 700, color: '#B45309' }}>no recording</span>}
+              </div>
+            ))}
+          </div>
+        )
+      )}
+
+      {/* Edit upcoming class */}
+      {editCls && (
+        <div onClick={() => setEditCls(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 90, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 14 }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 14, width: 'min(440px,100%)', padding: 22, display: 'grid', gap: 12 }}>
+            <b style={{ fontSize: 16, color: TOKENS.s900 }}>Edit class</b>
+            <input value={editCls.title} onChange={e => setEditCls(x => ({ ...x, title: e.target.value }))} placeholder="Class title"
+              style={{ padding: '10px 12px', border: `1.5px solid ${TOKENS.line}`, borderRadius: 9, fontSize: 13.5, fontWeight: 700 }} />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 110px', gap: 10 }}>
+              <input type="datetime-local" value={editCls.when} onChange={e => setEditCls(x => ({ ...x, when: e.target.value }))}
+                style={{ padding: '10px 12px', border: `1.5px solid ${TOKENS.line}`, borderRadius: 9, fontSize: 13 }} />
+              <input type="number" min={15} max={240} value={editCls.mins} onChange={e => setEditCls(x => ({ ...x, mins: Number(e.target.value) }))}
+                style={{ padding: '10px 12px', border: `1.5px solid ${TOKENS.line}`, borderRadius: 9, fontSize: 13 }} />
+            </div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button style={btn('ghost')} onClick={() => setEditCls(null)}>Cancel</button>
+              <button style={btn('primary')} disabled={savingEdit} onClick={async () => {
+                if (!editCls.title.trim() || !editCls.when) return toast?.error?.('Title and time are required.')
+                setSavingEdit(true)
+                try {
+                  await api.patch('/liveclasses/' + editCls._id, { title: editCls.title.trim(), scheduledAt: new Date(editCls.when).toISOString(), durationMins: editCls.mins })
+                  toast?.ok?.('Class updated. Students see the new details immediately.')
+                  setEditCls(null); load()
+                } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not update.') }
+                finally { setSavingEdit(false) }
+              }}>{savingEdit ? 'Saving...' : 'Save changes'}</button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
