@@ -95,8 +95,9 @@ export default function ClubsHub({ user, toast, readOnly = false }) {
     <div style={{ background: '#fff', borderRadius: 16, overflow: 'hidden', border: `1px solid ${LINE}`, boxShadow: '0 6px 20px rgba(26,26,26,.06)', display: 'flex', flexDirection: 'column', transition: 'transform .15s, box-shadow .15s' }}
       onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 14px 30px rgba(26,26,26,.12)' }}
       onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(26,26,26,.06)' }}>
-      <div onClick={() => openClub(c)} style={{ position: 'relative', aspectRatio: '16/10', cursor: 'pointer', background: c.coverImage ? `url(${c.coverImage}) center/cover` : `linear-gradient(135deg, ${c.color}, #1A1A1A)` }}>
+      <div onClick={() => openClub(c)} style={{ position: 'relative', aspectRatio: '16/10', cursor: 'pointer', background: c.coverImage ? `url(${c.coverImage}) center/cover no-repeat, linear-gradient(135deg, ${c.color}, #1A1A1A)` : `linear-gradient(135deg, ${c.color}, #1A1A1A)` }}>
         {!c.coverImage && <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: .18 }}><Ico k={c.icon} c="#fff" s={110} /></div>}
+        {c.coverImage && <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(0,0,0,0) 55%, rgba(0,0,0,.35))' }} />}
         <div style={{ position: 'absolute', left: '50%', bottom: -26, transform: 'translateX(-50%)', width: 56, height: 56, borderRadius: '50%', background: c.color, border: '4px solid #fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(0,0,0,.2)' }}>
           <Ico k={c.icon} c="#fff" s={26} />
         </div>
@@ -253,7 +254,7 @@ export default function ClubsHub({ user, toast, readOnly = false }) {
       {open && (
         <div onClick={() => setOpen(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', zIndex: 120, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
           <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 18, width: 'min(720px, 100%)', maxHeight: '90vh', overflowY: 'auto' }}>
-            <div style={{ height: 150, background: open.coverImage ? `url(${open.coverImage}) center/cover` : `linear-gradient(135deg, ${open.color}, #1A1A1A)`, position: 'relative' }}>
+            <div style={{ height: 150, background: open.coverImage ? `url(${open.coverImage}) center/cover no-repeat, linear-gradient(135deg, ${open.color}, #1A1A1A)` : `linear-gradient(135deg, ${open.color}, #1A1A1A)`, position: 'relative' }}>
               <div style={{ position: 'absolute', left: 24, bottom: -26, width: 60, height: 60, borderRadius: '50%', background: open.color, border: '4px solid #fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Ico k={open.icon} c="#fff" s={28} /></div>
               <button onClick={() => setOpen(null)} style={{ position: 'absolute', top: 12, right: 12, background: 'rgba(0,0,0,.4)', color: '#fff', border: 'none', borderRadius: 999, width: 30, height: 30, cursor: 'pointer', fontWeight: 800 }}>&times;</button>
             </div>
