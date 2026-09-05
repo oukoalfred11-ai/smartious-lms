@@ -32,6 +32,8 @@ export default function DOSPerformanceModule({ toast }) {
   const [teachers, setTeachers] = useState([])
   const [risk, setRisk] = useState(null)
   const [gradeOpen, setGradeOpen] = useState(null)   // { grade, rows }
+  const [qb, setQb] = useState(null)
+  const [qbTarget, setQbTarget] = useState(() => { try { return Number(localStorage.getItem('sm_qb_target')) || 10 } catch (e) { return 10 } })
   const [loading, setLoading] = useState(true)
 
   const load = useCallback(() => {
@@ -41,7 +43,9 @@ export default function DOSPerformanceModule({ toast }) {
       api.get('/dos-reports/school', { params }),
       api.get('/dos-reports/teachers', { params }),
       api.get('/mastery/overview'),
-    ]).then(([s, t, m]) => {
+      api.get('/dos-reports/question-bank'),
+    ]).then(([s, t, m, q]) => {
+      setQb(q.data?.data || null)
       setSchool(s.data?.data || null)
       setTeachers(t.data?.data?.rows || [])
       const rows = m.data?.data?.rows || []
@@ -50,6 +54,8 @@ export default function DOSPerformanceModule({ toast }) {
       .finally(() => setLoading(false))
   }, [from, to])
   useEffect(() => { load() }, [load])
+
+  useEffect(() => { try { localStorage.setItem('sm_qb_target', String(qbTarget)) } catch (e) { /* noop */ } }, [qbTarget])
 
   const openGrade = async (g) => {
     try { const r = await api.get('/dos-reports/grade/' + encodeURIComponent(g), { params: { from, to } }); setGradeOpen(r.data?.data) }
@@ -87,6 +93,12 @@ export default function DOSPerformanceModule({ toast }) {
         school.subjects.map(s => row([s.subject, s.examAvg !== null ? s.examAvg + '%' : null, s.examN, s.sessionsHeld])))}
       ${table('Teacher accountability', ['Teacher', 'Lessons held', 'Class attendance', 'Exam avg', 'Exams', 'Marking (days)', 'Rating'],
         teachers.map(t => row([t.name, t.sessionsHeld, t.classAttendancePct !== null ? t.classAttendancePct + '%' : null, t.examAvg !== null ? t.examAvg + '%' : null, t.examN, t.markingDays, t.rating !== null ? t.rating + '/5 (' + t.ratingN + ')' : null])))}
+      ${qb ? table('Question bank: teacher output (weekly target ' + qbTarget + ')', ['Teacher', 'This week', 'Weekly avg (8w)', 'Total (8w)', 'vs target'],
+        qb.teachers.map(t => row([t.name, t.thisWeek, t.weeklyAvg, t.total8w, t.thisWeek >= qbTarget ? 'On target' : (qbTarget - t.thisWeek) + ' short']))) : ''}
+      ${qb ? table('Question bank: debts', ['Category', 'Subject', 'Count'],
+        [...qb.pendingArtwork.map(r => row(['Pending artwork', r.subject, r.n])),
+         ...qb.missingScheme.map(r => row(['Missing marking scheme', r.subject, r.n])),
+         ...qb.subjectCounts.slice(0, 10).map(r => row(['Thinnest subjects', r.subject, r.n]))]) : ''}
       ${gradeOpen ? table('Grade detail: ' + gradeOpen.grade, ['Student', 'Attended/Scheduled', 'Attendance', 'Exam avg', 'Exams', 'Quiz acc.'],
         gradeOpen.rows.map(s => row([s.name, `${s.attended}/${s.scheduled}`, s.attendancePct !== null ? s.attendancePct + '%' : null, s.examAvg !== null ? s.examAvg + '%' : null, s.examN, s.quizAcc !== null ? s.quizAcc + '%' : null]))) : ''}
       <div class="method"><b>Method.</b> ${school.method} Teacher metrics: ${'sessions and class attendance from the teacher\'s own ended lesson classes; exam average and marking turnaround from exams they set; ratings all-time.'} Smartious Homeschool &middot; Est. 2018 &middot; smartioushomeschool.com</div>
@@ -220,6 +232,55 @@ export default function DOSPerformanceModule({ toast }) {
             </tr>))}</tbody>
         </table>
       </div>
+
+      {/* Question bank analysis */}
+      {qb && (
+        <>
+          {secHead('Question bank: teacher output', <>
+            <span style={{ fontSize: 11.5, color: TOKENS.s500, fontWeight: 700 }}>Weekly target</span>
+            <input type="number" min={1} max={200} value={qbTarget} onChange={e => setQbTarget(Math.max(1, Number(e.target.value) || 1))}
+              style={{ width: 64, padding: '5px 8px', border: `1.5px solid ${TOKENS.line}`, borderRadius: 8, fontSize: 12, fontWeight: 800 }} />
+            {csvBtn(() => download('question-bank-teachers.csv', toCSV(
+              ['Teacher', 'This week', 'Weekly average (8w)', 'Total (8w)', 'Weekly target', 'On target'],
+              qb.teachers.map(t => [t.name, t.thisWeek, t.weeklyAvg, t.total8w, qbTarget, t.thisWeek >= qbTarget ? 'yes' : 'no']))))}
+          </>)}
+          <div style={card}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 640 }}>
+              <thead><tr>{['Teacher', 'This week', 'Weekly avg (8w)', 'Total (8w)', 'vs target'].map(h => <th key={h} style={th}>{h}</th>)}</tr></thead>
+              <tbody>{qb.teachers.map(t => (
+                <tr key={t._id}>
+                  <td style={{ ...td, fontWeight: 700 }}>{t.name}</td>
+                  <td style={{ ...td, fontWeight: 800 }}>{t.thisWeek}</td>
+                  <td style={td}>{t.weeklyAvg}</td>
+                  <td style={td}>{t.total8w}</td>
+                  <td style={td}><span style={{ padding: '3px 10px', borderRadius: 999, fontSize: 11, fontWeight: 800, background: t.thisWeek >= qbTarget ? '#DCFCE7' : '#FEE2E2', color: t.thisWeek >= qbTarget ? '#15803D' : '#B91C1C' }}>{t.thisWeek >= qbTarget ? 'On target' : `${qbTarget - t.thisWeek} short`}</span></td>
+                </tr>))}</tbody>
+            </table>
+          </div>
+
+          {secHead('Question bank: debts and thin subjects', csvBtn(() => download('question-bank-debts.csv', toCSV(
+            ['Category', 'Subject', 'Count'],
+            [...qb.pendingArtwork.map(r => ['Pending artwork', r.subject, r.n]),
+             ...qb.missingScheme.map(r => ['Missing marking scheme', r.subject, r.n]),
+             ...qb.subjectCounts.map(r => ['Questions in subject', r.subject, r.n])]))))}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 12 }}>
+            <div style={{ ...card, padding: 14, overflow: 'visible' }}>
+              <b style={{ fontSize: 13, color: '#B45309' }}>Pending artwork ({qb.pendingArtworkTotal})</b>
+              {qb.pendingArtwork.length === 0 ? <div style={{ fontSize: 12, color: TOKENS.s400, marginTop: 6 }}>None. Clean.</div>
+                : qb.pendingArtwork.slice(0, 8).map(r => <div key={r.subject} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12.5, padding: '5px 0', borderBottom: `1px solid ${TOKENS.line}` }}><span>{r.subject}</span><b>{r.n}</b></div>)}
+            </div>
+            <div style={{ ...card, padding: 14, overflow: 'visible' }}>
+              <b style={{ fontSize: 13, color: '#B91C1C' }}>Missing marking scheme ({qb.missingSchemeTotal})</b>
+              {qb.missingScheme.length === 0 ? <div style={{ fontSize: 12, color: TOKENS.s400, marginTop: 6 }}>None. Clean.</div>
+                : qb.missingScheme.slice(0, 8).map(r => <div key={r.subject} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12.5, padding: '5px 0', borderBottom: `1px solid ${TOKENS.line}` }}><span>{r.subject}</span><b>{r.n}</b></div>)}
+            </div>
+            <div style={{ ...card, padding: 14, overflow: 'visible' }}>
+              <b style={{ fontSize: 13, color: TOKENS.s900 }}>Thinnest subjects</b>
+              {qb.subjectCounts.slice(0, 8).map(r => <div key={r.subject} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12.5, padding: '5px 0', borderBottom: `1px solid ${TOKENS.line}` }}><span>{r.subject}</span><b style={{ color: r.n < 50 ? '#B91C1C' : TOKENS.s900 }}>{r.n}</b></div>)}
+            </div>
+          </div>
+        </>
+      )}
 
       <div style={{ fontSize: 11.5, color: TOKENS.s500, lineHeight: 1.7 }}>
         <b>Method.</b> {school.method} Per-student drill-downs with topic strengths and weaknesses live in Mastery & Early Warning.
