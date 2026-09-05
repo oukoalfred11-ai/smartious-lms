@@ -19,7 +19,15 @@ export default function LiveClassesModule({ toast }) {
   const [liveClasses, setLiveClasses] = useState([])
   const [loading, setLoading] = useState(true)
   const [playing, setPlaying] = useState(null)   // the recording being played
+  const [autoInfo, setAutoInfo] = useState(null) // { count, sample } of auto-scheduled classes
+  const [purging, setPurging] = useState(false)
   const [filter, setFilter] = useState('')
+
+  const loadAuto = useCallback(() => {
+    api.get('/liveclasses/auto/count')
+      .then(r => setAutoInfo(r.data?.data || null))
+      .catch(() => setAutoInfo(null))
+  }, [])
 
   const load = useCallback(() => {
     setLoading(true)
@@ -31,7 +39,7 @@ export default function LiveClassesModule({ toast }) {
       setLiveClasses(l.data?.data?.classes || [])
     }).finally(() => setLoading(false))
   }, [])
-  useEffect(() => { load() }, [load])
+  useEffect(() => { load(); loadAuto() }, [load, loadAuto])
 
   const toggleFeature = async (rec) => {
     try {
@@ -93,6 +101,33 @@ export default function LiveClassesModule({ toast }) {
         {tabBtn('recordings', 'Recordings', recordings.length)}
         {tabBtn('live', 'Live now / upcoming', liveClasses.length)}
       </div>
+
+      {/* Auto-scheduled cleanup: classes the old auto-timetable created,
+          which teachers never scheduled and reminders kept announcing. */}
+      {autoInfo && autoInfo.count > 0 && (
+        <div style={{ background: '#FEF3C7', border: '1.5px solid #F59E0B', borderRadius: 12, padding: '14px 18px', display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
+          <div style={{ flex: 1, minWidth: 240 }}>
+            <div style={{ fontWeight: 800, fontSize: 13.5, color: '#92400E' }}>{autoInfo.count} auto-scheduled class{autoInfo.count === 1 ? '' : 'es'} found</div>
+            <div style={{ fontSize: 12, color: '#92400E', marginTop: 3, lineHeight: 1.5 }}>
+              Created by the old auto-timetable, not by teachers, and reminders are going out for them.
+              {autoInfo.sample?.length > 0 && <> Next: {autoInfo.sample.slice(0, 3).map(x => `${x.title || x.subject} (${new Date(x.scheduledAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })})`).join(', ')}.</>}
+              {' '}Removing them stops the reminders. Classes already taught or recorded are not touched.
+            </div>
+          </div>
+          <button disabled={purging} onClick={async () => {
+            if (!window.confirm(`Remove all ${autoInfo.count} auto-scheduled classes? Teachers' own classes are not affected.`)) return
+            setPurging(true)
+            try {
+              const r = await api.delete('/liveclasses/auto/purge')
+              toast?.ok?.(r.data?.message || 'Removed.')
+              setAutoInfo({ count: 0, sample: [] }); load()
+            } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not remove them.') }
+            finally { setPurging(false) }
+          }} style={{ background: '#B45309', color: '#fff', border: 'none', borderRadius: 9, padding: '10px 16px', fontSize: 12.5, fontWeight: 800, cursor: 'pointer', opacity: purging ? .6 : 1 }}>
+            {purging ? 'Removing...' : 'Remove them all'}
+          </button>
+        </div>
+      )}
 
       {/* Player */}
       {playing && (
