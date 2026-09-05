@@ -420,6 +420,7 @@ router.get('/live/all', auth, requireRole(...ADMIN), async (req, res) => {
         { status: 'live' },
         { scheduledAt: { $gte: new Date(now.getTime() - 6 * 3600 * 1000) } },
       ],
+      status: { $ne: 'cancelled' },
     })
       .populate('teacherId', 'firstName lastName')
       .populate('subjectId', 'subjectName curriculum')
