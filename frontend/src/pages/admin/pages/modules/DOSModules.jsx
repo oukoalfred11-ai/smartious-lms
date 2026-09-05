@@ -465,7 +465,120 @@ const BREAK_TYPES = ['mid_term_break','end_term_break','summer_break','public_ho
 
 const BREAK_LABELS = { mid_term_break:'Mid-term break', end_term_break:'End-term break', summer_break:'Summer break', public_holiday:'Public holiday', sick_leave:'Sick leave' }
 
+/** MarkRegister: the DOS marks the day's attendance directly.
+ *  Class joins auto-mark students present (source chip 'class'); the DOS
+ *  fills in the rest here. Absent requires a reason, as the model demands. */
+function MarkRegister({ toast }) {
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0])
+  const [students, setStudents] = useState([])
+  const [recs, setRecs] = useState({})          // studentId -> saved record
+  const [edits, setEdits] = useState({})        // studentId -> { status, reason }
+  const [gradeF, setGradeF] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+
+  const load = useCallback(() => {
+    setLoading(true)
+    Promise.all([
+      api.get('/mastery/overview'),
+      api.get('/attendance/day', { params: { date } }),
+    ]).then(([o, d]) => {
+      setStudents((o.data?.data?.rows || []).map(r => ({ _id: r._id, name: r.name, grade: r.grade })))
+      const map = {}
+      ;(d.data?.data?.items || d.data?.items || []).forEach(rec => {
+        const sid = String(rec.studentId?._id || rec.studentId)
+        map[sid] = rec
+      })
+      setRecs(map); setEdits({})
+    }).catch(() => toast?.error?.('Could not load the register.'))
+      .finally(() => setLoading(false))
+  }, [date])
+  useEffect(() => { load() }, [load])
+
+  const setMark = (sid, status) => setEdits(e => ({ ...e, [sid]: { status, reason: e[sid]?.reason || '' } }))
+  const stateOf = (sid) => edits[sid]?.status || recs[sid]?.status || ''
+  const changed = Object.keys(edits).filter(sid => edits[sid].status && edits[sid].status !== recs[sid]?.status)
+
+  const save = async () => {
+    const absentMissing = changed.filter(sid => edits[sid].status === 'absent' && !edits[sid].reason.trim())
+    if (absentMissing.length) return toast?.error?.('Every absent mark needs a reason.')
+    setSaving(true)
+    try {
+      for (const st of ['present', 'late', 'half_day']) {
+        const ids = changed.filter(sid => edits[sid].status === st)
+        if (ids.length) await api.post('/attendance/bulk', { studentIds: ids, date, status: st })
+      }
+      for (const sid of changed.filter(x => edits[x].status === 'absent')) {
+        await api.post('/attendance', { studentId: sid, date, status: 'absent', reason: edits[sid].reason.trim() })
+      }
+      toast?.ok?.(`Register saved: ${changed.length} student(s) marked.`)
+      load()
+    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not save the register.') }
+    finally { setSaving(false) }
+  }
+
+  const grades = [...new Set(students.map(s => s.grade).filter(Boolean))].sort()
+  const list = students.filter(s => !gradeF || s.grade === gradeF)
+  const SRC = { class: { t: 'from class', c: '#1E40AF', b: '#DBEAFE' }, self: { t: 'self', c: '#6B21A8', b: '#F3E8FF' }, staff: { t: 'marked', c: '#92400E', b: '#FEF3C7' } }
+  const BTN = { present: '#15803D', late: '#D97706', half_day: '#7C3AED', absent: '#B91C1C' }
+  const unmarked = list.filter(s => !stateOf(String(s._id))).length
+
+  return (
+    <div style={{ display: 'grid', gap: 14 }}>
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+        <input type="date" value={date} onChange={e => setDate(e.target.value)} style={{ padding: '8px 12px', border: '1.5px solid ' + TOKENS.line, borderRadius: 9, fontSize: 13 }} />
+        <select value={gradeF} onChange={e => setGradeF(e.target.value)} style={{ padding: '8px 12px', border: '1.5px solid ' + TOKENS.line, borderRadius: 9, fontSize: 13 }}>
+          <option value="">All grades</option>
+          {grades.map(g => <option key={g} value={g}>{g}</option>)}
+        </select>
+        <button onClick={() => { const upd = {}; list.forEach(s => { const sid = String(s._id); if (!stateOf(sid)) upd[sid] = { status: 'present', reason: '' } }); setEdits(e => ({ ...e, ...upd })) }}
+          style={{ padding: '8px 14px', borderRadius: 9, border: '1.5px solid #15803D', background: '#fff', color: '#15803D', fontSize: 12, fontWeight: 800, cursor: 'pointer' }}>
+          Mark unmarked present ({unmarked})
+        </button>
+        {changed.length > 0 && (
+          <button onClick={save} disabled={saving} style={{ marginLeft: 'auto', padding: '9px 18px', borderRadius: 9, border: 'none', background: TOKENS.crimson, color: '#fff', fontSize: 12.5, fontWeight: 800, cursor: 'pointer', opacity: saving ? .6 : 1 }}>
+            {saving ? 'Saving...' : `Save register (${changed.length})`}
+          </button>
+        )}
+      </div>
+
+      {loading ? <div style={{ padding: 30, textAlign: 'center', color: TOKENS.s500, fontSize: 13 }}>Loading register...</div> : (
+        <div style={{ background: '#fff', border: '1px solid ' + TOKENS.line, borderRadius: 12, overflow: 'hidden' }}>
+          {list.map(st => {
+            const sid = String(st._id)
+            const cur = stateOf(sid)
+            const rec = recs[sid]
+            const src = rec && !edits[sid] ? SRC[rec.source] || SRC.staff : null
+            return (
+              <div key={sid} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 14px', borderBottom: '1px solid ' + TOKENS.line, flexWrap: 'wrap' }}>
+                <div style={{ flex: 1, minWidth: 160 }}>
+                  <b style={{ fontSize: 13, color: TOKENS.s900 }}>{st.name}</b>
+                  <span style={{ fontSize: 11.5, color: TOKENS.s400 }}> {st.grade}</span>
+                  {src && <span style={{ marginLeft: 8, padding: '2px 8px', borderRadius: 999, background: src.b, color: src.c, fontSize: 10, fontWeight: 800 }}>{src.t}</span>}
+                </div>
+                {['present', 'late', 'half_day', 'absent'].map(k => (
+                  <button key={k} onClick={() => setMark(sid, k)}
+                    style={{ padding: '5px 11px', borderRadius: 999, fontSize: 11, fontWeight: 800, cursor: 'pointer', border: '1.5px solid ' + (cur === k ? BTN[k] : TOKENS.line), background: cur === k ? BTN[k] : '#fff', color: cur === k ? '#fff' : TOKENS.s500 }}>
+                    {k === 'half_day' ? 'Half day' : k[0].toUpperCase() + k.slice(1)}
+                  </button>
+                ))}
+                {cur === 'absent' && edits[sid] && (
+                  <input value={edits[sid].reason} onChange={e => setEdits(ed => ({ ...ed, [sid]: { ...ed[sid], reason: e.target.value } }))}
+                    placeholder="Reason (required)" style={{ padding: '6px 10px', border: '1.5px solid #FCA5A5', borderRadius: 8, fontSize: 12, minWidth: 170 }} />
+                )}
+              </div>
+            )
+          })}
+          {list.length === 0 && <div style={{ padding: 24, textAlign: 'center', color: TOKENS.s500, fontSize: 13 }}>No students found.</div>}
+        </div>
+      )}
+      <div style={{ fontSize: 11.5, color: TOKENS.s500 }}>Joining a live class marks a student present automatically (chip: from class). The register fills the gaps; self check-in remains as a fallback.</div>
+    </div>
+  )
+}
+
 export function DOSAttendanceModule({ toast, refreshKey }) {
+  const [view,    setView]    = useState('checkins')   // checkins | register
   const [data,    setData]    = useState(null)
   const [loading, setLoading] = useState(true)
   const [roleF,   setRoleF]   = useState('all')
@@ -531,6 +644,16 @@ export function DOSAttendanceModule({ toast, refreshKey }) {
     <>
       <PSection tag="Dean of Studies" title="Attendance" em="Analytics"
         sub="Daily check-in overview. Students and staff self-report. Use Manage Breaks to deactivate accounts."/>
+
+      {/* View toggle: check-in analytics vs marking the register */}
+      <div style={{ display:'flex', gap:6, background:TOKENS.cream, padding:5, borderRadius:10, width:'fit-content', marginBottom:16 }}>
+        {[['checkins','Check-ins'],['register','Mark register']].map(([id,label]) => (
+          <button key={id} onClick={() => setView(id)} style={{ padding:'7px 16px', borderRadius:8, border:'none', cursor:'pointer', fontSize:12.5, fontWeight:800, background:view===id?TOKENS.crimson:'transparent', color:view===id?'#fff':TOKENS.s500 }}>{label}</button>
+        ))}
+      </div>
+
+      {view === 'register' ? <MarkRegister toast={toast} /> : (
+      <>
 
       {/* Controls */}
       <div style={{ display:'flex', gap:10, marginBottom:18, flexWrap:'wrap', alignItems:'center' }}>
@@ -650,6 +773,8 @@ export function DOSAttendanceModule({ toast, refreshKey }) {
             ))
           )}
         </>
+      )}
+      </>
       )}
     </>
   )
