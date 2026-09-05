@@ -3603,6 +3603,10 @@ function ExamsTab({ user, toast, goTo, store }) {
 
     return (
       <div>
+        {/* Integrity disclosure: tracking is only fair when announced. */}
+        <div style={{ background:'#FEF3C7', border:'1px solid #F59E0B', borderRadius:10, padding:'8px 12px', fontSize:11.5, color:'#92400E', marginBottom:10, lineHeight:1.5 }}>
+          <b>Integrity note:</b> during this exam, leaving this tab or window and copy/paste attempts are counted and shared with your teacher alongside your submission. Nothing else is monitored: no camera, no microphone, no screen recording.
+        </div>
         {/* ── Exam header, in the house card format ──────────────
             Ported from the practice-exam layout: a bordered card with
             the subject-coloured pill timer, rather than the raw amber
