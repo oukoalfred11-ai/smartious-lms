@@ -112,9 +112,10 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
       { label: 'People',      items: ['users', 'teachers', 'allocations', 'sessions', 'communication'] },
       { label: 'Reports',     items: ['cooreports', 'reports'] },
       { label: 'Performance', items: ['teacherratings'] },
-      { label: 'Operations',  items: ['crm', 'frontdesk', 'assessment', 'documents', 'leave', 'programmes'] },
-      // Curriculum and Question Bank moved to the Admin Portal.
-      { label: 'Teaching',    items: ['liveclasses', 'clubs', 'grouprooms'] },
+      { label: 'Operations',  items: ['documents', 'leave', 'programmes'] },
+      // CRM, Front Desk and Group Rooms removed from Operations per policy;
+      // academic assessments (schedule, mark, publish) live under Teaching.
+      { label: 'Teaching',    items: ['liveclasses', 'clubs', 'exams'] },
       { label: 'System',      items: ['settings', 'ai'] },
     ],
   }
@@ -374,7 +375,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
     accountant:  [{ items: ['checkin','dashboard','analytics','feecollection','billing','sessions','payroll','settings'] }],
     sales:       [{ items: ['checkin','dashboard','salesperf','crm','assessment','frontdesk','communication','documents','settings'] }],
     dos:         [{ items: ['checkin','dosanalytics','exams','doshomework','dosattend','sessions','dosbreaks','dostimetable','questionbank','markingreview','reports','settings'] }],
-    ops_manager: [{ items: ['checkin','dashboard','analytics','users','teachers','allocations','sessions','communication','cooreports','reports','teacherratings','crm','frontdesk','assessment','documents','leave','programmes','liveclasses','clubs','grouprooms','settings','ai'] }],
+    ops_manager: [{ items: ['checkin','dashboard','analytics','users','teachers','allocations','sessions','communication','cooreports','reports','teacherratings','exams','documents','leave','programmes','liveclasses','clubs','settings','ai'] }],
   }
   const allowedPages = (ROLE_SECTIONS_MAIN[role] || ROLE_SECTIONS_MAIN.admin).flatMap(s => s.items)
   const safePage = allowedPages.includes(page) ? page : 'dashboard'
