@@ -174,6 +174,8 @@ export default function QuizGame({ subject, topic, subtopic, curriculum, grade, 
   // Quiz state
   const [session,  setSession] = useState(null)
   const [questions,setQns]     = useState([])
+  const loadingMoreRef = useRef(false)   // one refill at a time
+  const endlessRef     = useRef(false)   // solo play never runs out
   const [qIndex,   setQIndex]  = useState(0)
   const [answers,  setAnswers] = useState({})   // {qId: answer}
   const [score,    setScore]   = useState(0)
@@ -233,6 +235,7 @@ export default function QuizGame({ subject, topic, subtopic, curriculum, grade, 
         setSession(res.data?.data?.session)
         setQns(res.data?.data?.questions || [])
       }
+      endlessRef.current = (mode === 'solo')
       setQIndex(0); setAnswers({}); setScore(0); setStreak(0); setXp(0)
       setPhase('playing'); setTimerOn(true)
     } catch(e) {
@@ -276,13 +279,55 @@ export default function QuizGame({ subject, topic, subtopic, curriculum, grade, 
       } catch {}
     }
 
+    // Endless: top up before the list runs dry.
+    if (endlessRef.current && qIndex >= questions.length - 3) loadMore()
+
     // Auto-advance after 2.5s
     setTimeout(() => advance(), 2500)
   }
 
+  // Endless play: quietly top up the question list so the game never
+  // runs out. New batches come from the server; questions already seen
+  // in this run are dropped, and if the whole pool has been seen the
+  // seen questions are reshuffled back in, so play truly never stops.
+  const loadMore = async () => {
+    if (loadingMoreRef.current) return
+    loadingMoreRef.current = true
+    try {
+      const res = await api.post('/quiz/session', { subject, topic, subtopic, curriculum, grade, difficulty:selDiff, count:qCount })
+      const fresh = res.data?.data?.questions || []
+      setQns(prev => {
+        const seen = new Set(prev.map(q => String(q._id)))
+        let add = fresh.filter(q => !seen.has(String(q._id)))
+        if (!add.length && prev.length) {
+          // Small pool: recycle, reshuffled, so the game keeps going.
+          add = [...prev].sort(() => Math.random() - .5).slice(0, Math.min(prev.length, 10))
+            .map(q => ({ ...q, _id: q._id + '~r' + prev.length }))
+        }
+        return add.length ? [...prev, ...add] : prev
+      })
+    } catch { /* keep playing with what we have */ }
+    loadingMoreRef.current = false
+  }
+
   const advance = () => {
     if (qIndex + 1 >= questions.length) {
-      finishQuiz()
+      if (endlessRef.current) {
+        // The refill should already be here; if the network was slow,
+        // try once more and end gracefully only if nothing can load.
+        loadMore().then(() => {
+          setQns(prev => {
+            if (qIndex + 1 < prev.length) {
+              setQIndex(i => i+1); setSelected(null); setRevealed(false)
+            } else {
+              finishQuiz()
+            }
+            return prev
+          })
+        })
+      } else {
+        finishQuiz()
+      }
     } else {
       setQIndex(i => i+1)
       setSelected(null)
@@ -310,7 +355,8 @@ export default function QuizGame({ subject, topic, subtopic, curriculum, grade, 
     } catch {}
   }
 
-  const pct     = questions.length ? Math.round((score / questions.length) * 100) : 0
+  const answeredN = Object.keys(answers).length
+  const pct     = answeredN ? Math.round((score / answeredN) * 100) : 0
   const grade_l = pct >= 90 ? 'A*' : pct >= 80 ? 'A' : pct >= 70 ? 'B' : pct >= 60 ? 'C' : pct >= 50 ? 'D' : 'E'
   const gradeColor = pct >= 70 ? C.green : pct >= 50 ? '#F59E0B' : C.red
 
@@ -421,11 +467,16 @@ export default function QuizGame({ subject, topic, subtopic, curriculum, grade, 
               </div>
             </div>
           </div>
-          <TimerRing total={30} left={timeLeft}/>
+          <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+            {endlessRef.current && (
+              <button onClick={() => finishQuiz()} style={{ background:'rgba(255,255,255,.1)', color:'#fff', border:'1px solid rgba(255,255,255,.25)', borderRadius:8, padding:'7px 12px', fontSize:11.5, fontWeight:800, cursor:'pointer' }}>End game</button>
+            )}
+            <TimerRing total={30} left={timeLeft}/>
+          </div>
           <div style={{ textAlign:'right' }}>
-            <div style={{ fontSize:11, color:'rgba(255,255,255,.5)' }}>Q {qIndex+1}/{questions.length}</div>
+            <div style={{ fontSize:11, color:'rgba(255,255,255,.5)' }}>{endlessRef.current ? `Q ${qIndex+1} \u00b7 endless` : `Q ${qIndex+1}/${questions.length}`}</div>
             <div style={{ fontSize:10, marginTop:3 }}>
-              {Array.from({length:questions.length}).map((_,i)=>(
+              {(endlessRef.current ? Array.from({length:10}).map((_,k)=>Math.max(0,qIndex-9)+k).filter(i=>i<questions.length) : Array.from({length:questions.length}).map((_,i)=>i)).map((i)=>(
                 <span key={i} style={{ display:'inline-block', width:8, height:8, borderRadius:'50%', margin:'0 1px',
                   background: i<qIndex ? (answers[questions[i]._id]===questions[i].correctAnswer?C.green:C.red)
                     : i===qIndex ? C.gold : 'rgba(255,255,255,.2)'
@@ -437,7 +488,7 @@ export default function QuizGame({ subject, topic, subtopic, curriculum, grade, 
 
         {/* Progress bar */}
         <div style={{ height:4, background:C.s100, flexShrink:0 }}>
-          <div style={{ height:'100%', background:C.gold, width:`${((qIndex)/questions.length)*100}%`, transition:'width .4s' }}/>
+          <div style={{ height:'100%', background:C.gold, width:`${endlessRef.current ? ((qIndex % 10)/10)*100 : ((qIndex)/questions.length)*100}%`, transition:'width .4s' }}/>
         </div>
 
         {/* Question */}
@@ -562,7 +613,7 @@ export default function QuizGame({ subject, topic, subtopic, curriculum, grade, 
               {pct>=90?'Outstanding!':pct>=70?'Great Job!':pct>=50?'Well Done!':'Keep Practising!'}
             </div>
             <div style={{ fontSize:64, fontWeight:900, color:C.gold, margin:'8px 0', letterSpacing:'.02em' }}>{pct}%</div>
-            <div style={{ fontSize:20, color:'rgba(255,255,255,.8)' }}>{score} / {questions.length} correct</div>
+            <div style={{ fontSize:20, color:'rgba(255,255,255,.8)' }}>{score} / {Object.keys(answers).length} correct</div>
             <div style={{ display:'inline-block', background:gradeColor, color:'#fff', fontWeight:900, fontSize:18, padding:'6px 20px', borderRadius:99, marginTop:12 }}>
               Grade {grade_l}
             </div>
