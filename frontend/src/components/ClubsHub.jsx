@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { api } from '../context/ctx.jsx'
 
 /**
@@ -50,6 +50,7 @@ export default function ClubsHub({ user, toast, readOnly = false }) {
   const [detail, setDetail] = useState(null)
   const [playing, setPlaying] = useState(null)
   const [busy, setBusy] = useState('')
+  const [modalTab, setModalTab] = useState('about')   // about | projects
 
   const load = useCallback(() => {
     setLoading(true)
@@ -64,7 +65,7 @@ export default function ClubsHub({ user, toast, readOnly = false }) {
   useEffect(() => { load() }, [load])
 
   const openClub = async (c) => {
-    setOpen(c); setDetail(null)
+    setOpen(c); setDetail(null); setModalTab('about')
     try { const r = await api.get('/clubs/' + c._id); setDetail(r.data?.data || null) } catch { /* noop */ }
   }
   const toggleJoin = async (c) => {
@@ -268,6 +269,16 @@ export default function ClubsHub({ user, toast, readOnly = false }) {
                   <button onClick={() => toggleJoin(open)} style={{ padding: '10px 18px', borderRadius: 9, border: 'none', cursor: 'pointer', fontWeight: 800, color: '#fff', background: open.isMember ? '#6B7280' : open.color }}>{open.isMember ? 'Leave club' : 'Join Club'}</button>
                 )}
               </div>
+              <div style={{ display: 'flex', gap: 6, marginTop: 16, background: CREAM, borderRadius: 10, padding: 4, width: 'fit-content' }}>
+                {[['about', 'About & sessions'], ['projects', 'Projects & awards']].map(([id, label]) => (
+                  <button key={id} onClick={() => setModalTab(id)} style={{ padding: '7px 14px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 12.5, fontWeight: 800, background: modalTab === id ? open.color : 'transparent', color: modalTab === id ? '#fff' : MUTE }}>{label}</button>
+                ))}
+              </div>
+
+              {modalTab === 'projects' ? (
+                <ClubProjects club={open} user={user} toast={toast} readOnly={readOnly} />
+              ) : (
+              <>
               {open.description && <p style={{ fontSize: 13.5, color: INK, lineHeight: 1.7, marginTop: 14 }}>{open.description}</p>}
               <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', fontSize: 12.5, color: MUTE, marginTop: 10 }}>
                 {open.leaders?.length > 0 && <span>Led by <b style={{ color: INK }}>{open.leaders.map(l => l.name).join(', ')}</b></span>}
@@ -293,7 +304,244 @@ export default function ClubsHub({ user, toast, readOnly = false }) {
                     style={{ background: open.color, color: '#fff', border: 'none', borderRadius: 7, padding: '6px 12px', fontSize: 11.5, fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}><Ico k="play" c="#fff" s={12} /> Watch</button>
                 </div>
               ))}
+              </>
+              )}
             </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/**
+ * ClubProjects: the club's project gallery and annual awards. Members
+ * upload their work (a build, an initiative, writing, an app, a video),
+ * fellow members discuss each project and suggest improvements, and cast
+ * one award vote per club per year, movable until the awards.
+ */
+function ClubProjects({ club, user, toast, readOnly }) {
+  const [projects, setProjects] = useState([])
+  const [top3, setTop3] = useState([])
+  const [year] = useState(new Date().getFullYear())
+  const [loading, setLoading] = useState(true)
+  const [share, setShare] = useState(null)          // { title, description, attachments }
+  const [uploading, setUploading] = useState(false)
+  const [posting, setPosting] = useState(false)
+  const [openProj, setOpenProj] = useState(null)    // { project, comments }
+  const [comment, setComment] = useState('')
+  const [sending, setSending] = useState(false)
+  const fileRef = useRef(null)
+
+  const load = useCallback(() => {
+    setLoading(true)
+    api.get(`/clubs/${club._id}/projects`, { params: { year } })
+      .then(r => { setProjects(r.data?.data?.projects || []); setTop3(r.data?.data?.top3 || []) })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [club._id, year])
+  useEffect(() => { load() }, [load])
+
+  const openProject = async (p) => {
+    try { const r = await api.get(`/clubs/${club._id}/projects/${p._id}`); setOpenProj(r.data?.data); setComment('') }
+    catch { toast?.error?.('Could not open the project.') }
+  }
+  const addFile = async (file) => {
+    if (!file || !share) return
+    if (share.attachments.length >= 4) return toast?.error?.('Up to 4 files per project.')
+    setUploading(true)
+    try {
+      const fd = new FormData(); fd.append('file', file)
+      const r = await api.post(`/clubs/${club._id}/upload`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+      const a = r.data?.data?.attachment
+      if (a) setShare(sh => ({ ...sh, attachments: [...sh.attachments, a] }))
+    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Upload failed.') }
+    finally { setUploading(false) }
+  }
+  const publish = async () => {
+    if (!share.title.trim()) return toast?.error?.('Give your project a title.')
+    setPosting(true)
+    try {
+      await api.post(`/clubs/${club._id}/projects`, share)
+      toast?.ok?.('Project published to the club.')
+      setShare(null); load()
+    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not publish.') }
+    finally { setPosting(false) }
+  }
+  const vote = async (p) => {
+    try {
+      const r = await api.post(`/clubs/${club._id}/projects/${p._id}/vote`)
+      toast?.ok?.(r.data?.message)
+      load()
+      if (openProj?.project?._id === p._id) openProject(p)
+    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not vote.') }
+  }
+  const sendComment = async () => {
+    const body = comment.trim()
+    if (!body || sending) return
+    setSending(true)
+    try {
+      await api.post(`/clubs/${club._id}/projects/${openProj.project._id}/comments`, { body })
+      setComment('')
+      openProject(openProj.project)
+      setProjects(ps => ps.map(x => x._id === openProj.project._id ? { ...x, commentCount: x.commentCount + 1 } : x))
+    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not comment.') }
+    finally { setSending(false) }
+  }
+  const removeProject = async (p) => {
+    if (!window.confirm('Take this project down?')) return
+    try { await api.delete(`/clubs/${club._id}/projects/${p._id}`); setOpenProj(null); load() }
+    catch { toast?.error?.('Could not remove it.') }
+  }
+
+  const medal = ['#F2C230', '#C0C7D1', '#C88A5B']
+  const rankOf = (id) => top3.indexOf(id)
+  const canAct = !readOnly && (club.isMember || club.isLeader)
+  const fmt = (d) => new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+  const AvatarDot = ({ a, size = 26 }) => a?.avatar
+    ? <img src={a.avatar} alt="" style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover' }} />
+    : <span style={{ width: size, height: size, borderRadius: '50%', background: club.color, color: '#fff', fontSize: size * .42, fontWeight: 800, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>{(a?.name || '?')[0]}</span>
+
+  const Thumb = ({ a }) => {
+    if (a.kind === 'image') return <img src={a.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+    if (a.kind === 'video') return <video src={a.url} muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', background: '#000' }} />
+    return <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: `${club.color}18` }}><Ico k="book" c={club.color} s={28} /></div>
+  }
+
+  return (
+    <div style={{ marginTop: 16 }}>
+      {/* Awards banner */}
+      <div style={{ background: 'linear-gradient(135deg, #FDF6E3, #FBF1F1)', border: `1px solid ${LINE}`, borderRadius: 12, padding: '12px 16px', display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+        <Ico k="trophy" c={GOLD} s={30} />
+        <div style={{ flex: 1, minWidth: 200, fontSize: 12.5, color: INK, lineHeight: 1.5 }}>
+          <b>{year} Club Awards.</b> Share your project, discuss and improve each other's work, and cast your award vote. One vote per member, and you can move it any time before the awards.
+        </div>
+        {canAct && <button onClick={() => setShare({ title: '', description: '', attachments: [] })} style={{ background: club.color, color: '#fff', border: 'none', borderRadius: 9, padding: '10px 16px', fontSize: 12.5, fontWeight: 800, cursor: 'pointer' }}>+ Share a project</button>}
+      </div>
+
+      {/* Share form */}
+      {share && (
+        <div style={{ border: `1.5px solid ${club.color}55`, borderRadius: 12, padding: 16, marginTop: 12, background: '#fff' }}>
+          <input value={share.title} onChange={e => setShare(sh => ({ ...sh, title: e.target.value }))} placeholder="Project title (e.g. Water filter from local materials)" maxLength={140}
+            style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', border: `1.5px solid ${LINE}`, borderRadius: 9, fontSize: 14, fontWeight: 700 }} />
+          <textarea value={share.description} onChange={e => setShare(sh => ({ ...sh, description: e.target.value }))} placeholder="Tell the club about it: what it is, how you built it, what you'd like feedback on..." maxLength={3000}
+            style={{ width: '100%', boxSizing: 'border-box', minHeight: 90, marginTop: 8, padding: '10px 12px', border: `1.5px solid ${LINE}`, borderRadius: 9, fontSize: 13, lineHeight: 1.5, fontFamily: 'inherit' }} />
+          {share.attachments.length > 0 && (
+            <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+              {share.attachments.map((a, i) => (
+                <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 10px', borderRadius: 999, background: CREAM, border: `1px solid ${LINE}`, fontSize: 11.5, color: INK }}>
+                  {a.name || a.kind}
+                  <button onClick={() => setShare(sh => ({ ...sh, attachments: sh.attachments.filter((_, j) => j !== i) }))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: MUTE, fontWeight: 800 }}>&times;</button>
+                </span>
+              ))}
+            </div>
+          )}
+          <input ref={fileRef} type="file" hidden accept="image/png,image/jpeg,image/webp,image/gif,video/mp4,video/webm,video/quicktime,application/pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.zip,.txt" onChange={e => { addFile(e.target.files?.[0]); e.target.value = '' }} />
+          <div style={{ display: 'flex', gap: 8, marginTop: 12, alignItems: 'center' }}>
+            <button onClick={() => fileRef.current?.click()} disabled={uploading} style={{ padding: '8px 14px', borderRadius: 8, border: `1.5px solid ${LINE}`, background: '#fff', color: INK, fontSize: 12, fontWeight: 700, cursor: 'pointer', opacity: uploading ? .5 : 1 }}>{uploading ? 'Uploading...' : 'Add photo / video / file'}</button>
+            <span style={{ flex: 1, fontSize: 11, color: MUTE }}>Up to 4 files, 80MB each.</span>
+            <button onClick={() => setShare(null)} style={{ padding: '8px 14px', borderRadius: 8, border: `1.5px solid ${LINE}`, background: '#fff', color: MUTE, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>Cancel</button>
+            <button onClick={publish} disabled={posting || uploading} style={{ padding: '9px 18px', borderRadius: 8, border: 'none', background: club.color, color: '#fff', fontSize: 12.5, fontWeight: 800, cursor: 'pointer', opacity: posting ? .6 : 1 }}>{posting ? 'Publishing...' : 'Publish to club'}</button>
+          </div>
+        </div>
+      )}
+
+      {/* Gallery */}
+      {loading ? <div style={{ padding: 30, textAlign: 'center', color: MUTE, fontSize: 13 }}>Loading projects...</div>
+        : projects.length === 0 ? (
+          <div style={{ padding: 30, textAlign: 'center', color: MUTE, fontSize: 13 }}>No projects shared yet this year. {canAct ? 'Be the first: your work could win the club award.' : ''}</div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 14, marginTop: 14 }}>
+            {projects.map(p => {
+              const rk = rankOf(p._id)
+              return (
+                <div key={p._id} onClick={() => openProject(p)} style={{ border: `1px solid ${LINE}`, borderRadius: 12, overflow: 'hidden', cursor: 'pointer', background: '#fff', position: 'relative' }}>
+                  {rk > -1 && p.votes > 0 && (
+                    <span style={{ position: 'absolute', top: 8, left: 8, zIndex: 2, width: 26, height: 26, borderRadius: '50%', background: medal[rk], color: '#3A2A00', fontSize: 12, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(0,0,0,.25)' }}>{rk + 1}</span>
+                  )}
+                  <div style={{ aspectRatio: '16/10', background: CREAM }}>
+                    {p.attachments[0] ? <Thumb a={p.attachments[0]} /> : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Ico k={club.icon} c={club.color} s={38} /></div>}
+                  </div>
+                  <div style={{ padding: '10px 12px' }}>
+                    <div style={{ fontWeight: 800, fontSize: 13, color: INK, lineHeight: 1.35 }}>{p.title}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginTop: 7 }}>
+                      <AvatarDot a={p.author} size={22} />
+                      <span style={{ flex: 1, fontSize: 11.5, color: MUTE, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.author?.name}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 8, fontSize: 11.5, color: MUTE }}>
+                      <span style={{ fontWeight: 800, color: p.myVote ? club.color : MUTE }}>{'\u2605'} {p.votes}</span>
+                      <span>{'\ud83d\udcac'.length ? '' : ''}{p.commentCount} comment{p.commentCount === 1 ? '' : 's'}</span>
+                      <span style={{ marginLeft: 'auto' }}>{fmt(p.createdAt)}</span>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+
+      {/* Project detail + discussion */}
+      {openProj && (
+        <div onClick={() => setOpenProj(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', zIndex: 140, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 14 }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 16, width: 'min(680px, 100%)', maxHeight: '92vh', overflowY: 'auto', padding: 22 }}>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: 900, fontSize: 18, color: INK, lineHeight: 1.3 }}>{openProj.project.title}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
+                  <AvatarDot a={openProj.project.author} />
+                  <span style={{ fontSize: 12.5, color: MUTE }}>{openProj.project.author?.name}{openProj.project.author?.gradeLevel ? ` \u00b7 ${openProj.project.author.gradeLevel}` : ''} \u00b7 {fmt(openProj.project.createdAt)}</span>
+                </div>
+              </div>
+              {(openProj.project.mine || club.isLeader) && (
+                <button onClick={() => removeProject(openProj.project)} style={{ background: '#fff', border: `1px solid #FCA5A5`, color: '#B91C1C', borderRadius: 8, padding: '6px 12px', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }}>Take down</button>
+              )}
+              <button onClick={() => setOpenProj(null)} style={{ background: CREAM, border: 'none', borderRadius: 999, width: 30, height: 30, cursor: 'pointer', fontWeight: 800, color: MUTE }}>&times;</button>
+            </div>
+
+            {openProj.project.description && <p style={{ fontSize: 13.5, color: INK, lineHeight: 1.7, marginTop: 12, whiteSpace: 'pre-wrap' }}>{openProj.project.description}</p>}
+
+            {openProj.project.attachments.length > 0 && (
+              <div style={{ display: 'grid', gap: 10, marginTop: 12 }}>
+                {openProj.project.attachments.map((a, i) => (
+                  a.kind === 'image' ? <img key={i} src={a.url} alt="" style={{ width: '100%', borderRadius: 10, display: 'block' }} />
+                  : a.kind === 'video' ? <video key={i} src={a.url} controls playsInline style={{ width: '100%', borderRadius: 10, background: '#000', display: 'block' }} />
+                  : a.kind === 'audio' ? <audio key={i} src={a.url} controls style={{ width: '100%' }} />
+                  : <a key={i} href={a.url} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', border: `1px solid ${LINE}`, borderRadius: 10, textDecoration: 'none', color: INK, fontSize: 13, fontWeight: 700 }}><Ico k="book" c={club.color} s={20} />{a.name || 'Attachment'}<span style={{ marginLeft: 'auto', fontSize: 11, color: MUTE }}>Open</span></a>
+                ))}
+              </div>
+            )}
+
+            {/* Vote */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 16, padding: '12px 14px', borderRadius: 12, background: 'linear-gradient(135deg, #FDF6E3, #FBF1F1)', border: `1px solid ${LINE}` }}>
+              <Ico k="trophy" c={GOLD} s={24} />
+              <span style={{ flex: 1, fontSize: 12.5, color: INK }}><b>{openProj.project.votes}</b> award vote{openProj.project.votes === 1 ? '' : 's'} this year</span>
+              {canAct && !openProj.project.mine && (
+                <button onClick={() => vote(openProj.project)} style={{ background: openProj.project.myVote ? '#6B7280' : club.color, color: '#fff', border: 'none', borderRadius: 9, padding: '9px 16px', fontSize: 12.5, fontWeight: 800, cursor: 'pointer' }}>
+                  {openProj.project.myVote ? 'Withdraw my vote' : '\u2605 Vote for the award'}
+                </button>
+              )}
+              {openProj.project.mine && <span style={{ fontSize: 11.5, color: MUTE }}>Your project. Members vote, you campaign.</span>}
+            </div>
+
+            {/* Discussion */}
+            <div style={{ marginTop: 18, fontSize: 11, fontWeight: 800, letterSpacing: '.12em', color: GOLD, textTransform: 'uppercase' }}>Discussion ({openProj.comments.length})</div>
+            {openProj.comments.length === 0 && <div style={{ fontSize: 12.5, color: MUTE, padding: '10px 0' }}>No comments yet. Start the discussion: what works, what could be better?</div>}
+            {openProj.comments.map(c => (
+              <div key={c._id} style={{ display: 'flex', gap: 10, padding: '10px 0', borderBottom: `1px solid ${LINE}` }}>
+                <AvatarDot a={c.author} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: INK }}>{c.author?.name}{['teacher', 'admin', 'dos', 'ops_manager'].includes(c.author?.role) && <span style={{ fontSize: 9.5, fontWeight: 800, color: '#12060B', background: GOLD, padding: '1px 6px', borderRadius: 999, marginLeft: 6 }}>TEACHER</span>} <span style={{ fontWeight: 400, color: MUTE, fontSize: 11 }}>{fmt(c.createdAt)}</span></div>
+                  <div style={{ fontSize: 13, color: INK, lineHeight: 1.55, marginTop: 3, whiteSpace: 'pre-wrap' }}>{c.body}</div>
+                </div>
+              </div>
+            ))}
+            {canAct && (
+              <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                <input value={comment} onChange={e => setComment(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') sendComment() }} maxLength={1000}
+                  placeholder="Comment or suggest an improvement..." style={{ flex: 1, minWidth: 0, padding: '10px 13px', border: `1.5px solid ${LINE}`, borderRadius: 10, fontSize: 13 }} />
+                <button onClick={sendComment} disabled={sending || !comment.trim()} style={{ background: comment.trim() ? club.color : CREAM, color: comment.trim() ? '#fff' : MUTE, border: 'none', borderRadius: 10, padding: '10px 18px', fontSize: 12.5, fontWeight: 800, cursor: 'pointer' }}>Send</button>
+              </div>
+            )}
           </div>
         </div>
       )}
