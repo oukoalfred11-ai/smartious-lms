@@ -51,6 +51,10 @@ const attendanceSchema = new mongoose.Schema({
   },
 
   // ── Audit ───────────────────────────────────────
+  // Where the record came from: a student self check-in, a staff member
+  // marking the register, or an automatic mark from joining a live class.
+  source: { type: String, enum: ['self', 'staff', 'class'], default: 'staff' },
+
   markedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
