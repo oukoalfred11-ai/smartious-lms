@@ -195,6 +195,9 @@ router.post('/:id/meetings', auth, requireRole('teacher', ...ADMIN), async (req,
       assignedStudents: c.members || [],
       clubId: c._id, kind: ['club', 'competition', 'event'].includes(kind) ? kind : 'club',
       status: 'scheduled',
+      // Club sessions always run in the Smartious room (native classroom):
+      // no external link needed, auto-recording, meeting view by default.
+      classroomMode: 'native', deliveryMode: 'virtual', meetingLink: '',
     });
     res.json({ success: true, data: { meeting: lc } });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
