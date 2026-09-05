@@ -9,6 +9,7 @@ export const MODULES = {
   communication: { label: 'Communication', accent: TOKENS.crimson, icon: 'mail' },
   community:     { label: 'Community',     accent: TOKENS.crimson, icon: 'users' },
   liveclasses:   { label: 'Live Classes',   accent: TOKENS.crimson, icon: 'video' },
+  clubs:         { label: 'Clubs',          accent: TOKENS.crimson, icon: 'users' },
   announcements: { label: 'Announcements', accent: TOKENS.crimson, icon: 'mail' },
   frontdesk:   { label: 'Front Desk',   accent: TOKENS.accentAmber, icon: 'frontdesk' },
   payroll:     { label: 'Payroll',      accent: TOKENS.accentEmerald, icon: 'payroll' },
