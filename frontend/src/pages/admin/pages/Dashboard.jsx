@@ -92,6 +92,7 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
     ],
     dos: [
       { label: 'Overview',      items: ['checkin', 'dosanalytics'] },
+      { label: 'Teaching',      items: ['liveclasses'] },
       { label: 'Exams',         items: ['exams'] },
       { label: 'Homework',      items: ['doshomework'] },
       { label: 'Attendance',    items: ['dosattend'] },
