@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { api } from '../../../../context/ctx.jsx'
 import { TOKENS } from '../shared/tokens.js'
 
@@ -20,6 +20,8 @@ export default function ClubsModule({ toast }) {
   const [meeting, setMeeting] = useState(null)  // schedule form for a club
   const [busy, setBusy] = useState(false)
   const [playing, setPlaying] = useState(null)
+  const [coverBusy, setCoverBusy] = useState(false)
+  const coverRef = useRef(null)
 
   const load = useCallback(() => {
     setLoading(true)
@@ -125,7 +127,29 @@ export default function ClubsModule({ toast }) {
                 <input style={input} placeholder="Category (Arts, STEM, Leadership...)" value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} />
                 <input style={input} placeholder="Meets (e.g. Fridays 4:00 PM EAT)" value={form.meetingSchedule} onChange={e => setForm(f => ({ ...f, meetingSchedule: e.target.value }))} />
               </div>
-              <input style={input} placeholder="Cover image URL (optional; leave blank for a colour cover)" value={form.coverImage} onChange={e => setForm(f => ({ ...f, coverImage: e.target.value }))} />
+              <div>
+                <div style={{ fontSize: 11.5, fontWeight: 700, color: S600, marginBottom: 6 }}>Cover photo</div>
+                <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                  <div style={{ width: 128, height: 72, borderRadius: 10, flexShrink: 0, border: `1.5px solid ${LINE}`, background: form.coverImage ? `url(${form.coverImage}) center/cover no-repeat, linear-gradient(135deg, ${form.color}, #1A1A1A)` : `linear-gradient(135deg, ${form.color}, #1A1A1A)` }} />
+                  <input ref={coverRef} type="file" hidden accept="image/png,image/jpeg,image/webp" onChange={async e => {
+                    const file = e.target.files?.[0]; e.target.value = ''
+                    if (!file) return
+                    setCoverBusy(true)
+                    try {
+                      const fd = new FormData(); fd.append('file', file)
+                      const r = await api.post('/clubs/upload-cover', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+                      const url = r.data?.data?.url
+                      if (url) { setForm(f => ({ ...f, coverImage: url })); toast?.ok?.('Cover uploaded.') }
+                    } catch (err) { toast?.error?.(err?.response?.data?.message || 'Could not upload the image.') }
+                    finally { setCoverBusy(false) }
+                  }} />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <button onClick={() => coverRef.current?.click()} disabled={coverBusy} style={{ padding: '8px 14px', borderRadius: 8, border: `1.5px solid ${TOKENS.crimson}`, background: '#fff', color: TOKENS.crimson, fontSize: 12.5, fontWeight: 700, cursor: 'pointer', opacity: coverBusy ? .6 : 1 }}>{coverBusy ? 'Uploading...' : form.coverImage ? 'Replace photo' : 'Upload photo'}</button>
+                    {form.coverImage && <button onClick={() => setForm(f => ({ ...f, coverImage: '' }))} style={{ padding: '6px 14px', borderRadius: 8, border: `1.5px solid ${LINE}`, background: '#fff', color: S600, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>Remove (use colour cover)</button>}
+                  </div>
+                </div>
+                <div style={{ fontSize: 11, color: TOKENS.s500, marginTop: 6 }}>PNG, JPG or WebP, up to 8MB. Landscape around 16:10 looks best on the cards.</div>
+              </div>
               <div>
                 <div style={{ fontSize: 11.5, fontWeight: 700, color: S600, marginBottom: 6 }}>Icon</div>
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
