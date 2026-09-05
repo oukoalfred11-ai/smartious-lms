@@ -195,6 +195,13 @@ async function syncTimetablesForSubject(subjectId) {
 // has had its date shifted (by auto-sync), the LiveClass's
 // scheduledAt is updated to match.
 async function promoteUpcomingSessions(windowDays = 14) {
+  // RULE: auto-created classes caused confusion (teachers received
+  // reminders for classes they never scheduled). This function now
+  // refuses to create anything unless AUTO_TIMETABLE=on is set
+  // explicitly in the environment, no matter who calls it.
+  if (String(process.env.AUTO_TIMETABLE || '').toLowerCase() !== 'on') {
+    return { skipped: true, reason: 'AUTO_TIMETABLE is off; classes are scheduled manually only.' };
+  }
   const LiveClass = require('../models/LiveClass');
   const User = require('../models/User');
   const Lesson = require('../models/Lesson');
