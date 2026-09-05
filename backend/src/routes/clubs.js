@@ -222,29 +222,53 @@ router.get('/admin/teachers', auth, requireRole(...ADMIN), async (req, res) => {
 
 // POST /api/clubs/admin/seed   create the starter set (skips any that exist)
 const STARTER = [
-  { name: 'Debate & MUN',          icon: 'debate',    color: '#1E3A8A', category: 'Leadership',  tagline: 'Build confidence, critical thinking and leadership through debates and Model UN sessions.' },
-  { name: 'Coding & AI',           icon: 'code',      color: '#6D28D9', category: 'Technology',  tagline: 'Explore programming, artificial intelligence and build real-world tech projects.' },
-  { name: 'Science & Innovation',  icon: 'science',   color: '#3F6212', category: 'STEM',        tagline: 'Experiment, discover and innovate through fun science projects and challenges.' },
-  { name: 'Creative Arts',         icon: 'art',       color: '#BE185D', category: 'Arts',        tagline: 'Express yourself through drawing, painting, digital art, photography and design.' },
-  { name: 'Entrepreneurship',      icon: 'rocket',    color: '#C2410C', category: 'Business',    tagline: 'Develop business ideas, problem solving and financial literacy skills.' },
-  { name: 'Chess Club',            icon: 'chess',     color: '#78350F', category: 'Strategy',    tagline: 'Sharpen your strategy, focus and analytical skills in friendly competitions.' },
-  { name: 'Public Speaking',       icon: 'mic',       color: '#0E7490', category: 'Leadership',  tagline: 'Improve your speaking skills and present with clarity and confidence.' },
-  { name: 'Writing & Literature',  icon: 'book',      color: '#1D4ED8', category: 'Arts',        tagline: 'Unlock your creativity with storytelling, poetry and creative writing challenges.' },
-  { name: 'Music Club',            icon: 'music',     color: '#5B21B6', category: 'Arts',        tagline: 'Share your talent, learn new skills and create beautiful music together.' },
-  { name: 'Drama & Theatre',       icon: 'theatre',   color: '#B91C1C', category: 'Arts',        tagline: 'Act, perform and bring stories to life on our virtual theatre stage.' },
-  { name: 'Sports & Wellness',     icon: 'sports',    color: '#0F766E', category: 'Wellbeing',   tagline: 'Stay active, healthy and motivated through fitness challenges and sports activities.' },
-  { name: 'Community Service',     icon: 'heart',     color: '#2563EB', category: 'Service',     tagline: 'Make a difference through service projects and acts of kindness.' },
+  { name: 'Debate & MUN',          icon: 'debate',    color: '#1E3A8A',
+    coverImage: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=900&q=60', category: 'Leadership',  tagline: 'Build confidence, critical thinking and leadership through debates and Model UN sessions.' },
+  { name: 'Coding & AI',           icon: 'code',      color: '#6D28D9',
+    coverImage: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=900&q=60', category: 'Technology',  tagline: 'Explore programming, artificial intelligence and build real-world tech projects.' },
+  { name: 'Science & Innovation',  icon: 'science',   color: '#3F6212',
+    coverImage: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=900&q=60', category: 'STEM',        tagline: 'Experiment, discover and innovate through fun science projects and challenges.' },
+  { name: 'Creative Arts',         icon: 'art',       color: '#BE185D',
+    coverImage: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=900&q=60', category: 'Arts',        tagline: 'Express yourself through drawing, painting, digital art, photography and design.' },
+  { name: 'Entrepreneurship',      icon: 'rocket',    color: '#C2410C',
+    coverImage: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=900&q=60', category: 'Business',    tagline: 'Develop business ideas, problem solving and financial literacy skills.' },
+  { name: 'Chess Club',            icon: 'chess',     color: '#78350F',
+    coverImage: 'https://images.unsplash.com/photo-1529699211952-734e80c4d42b?auto=format&fit=crop&w=900&q=60', category: 'Strategy',    tagline: 'Sharpen your strategy, focus and analytical skills in friendly competitions.' },
+  { name: 'Public Speaking',       icon: 'mic',       color: '#0E7490',
+    coverImage: 'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?auto=format&fit=crop&w=900&q=60', category: 'Leadership',  tagline: 'Improve your speaking skills and present with clarity and confidence.' },
+  { name: 'Writing & Literature',  icon: 'book',      color: '#1D4ED8',
+    coverImage: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=900&q=60', category: 'Arts',        tagline: 'Unlock your creativity with storytelling, poetry and creative writing challenges.' },
+  { name: 'Music Club',            icon: 'music',     color: '#5B21B6',
+    coverImage: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=900&q=60', category: 'Arts',        tagline: 'Share your talent, learn new skills and create beautiful music together.' },
+  { name: 'Drama & Theatre',       icon: 'theatre',   color: '#B91C1C',
+    coverImage: 'https://images.unsplash.com/photo-1507924538820-ede94a04019d?auto=format&fit=crop&w=900&q=60', category: 'Arts',        tagline: 'Act, perform and bring stories to life on our virtual theatre stage.' },
+  { name: 'Sports & Wellness',     icon: 'sports',    color: '#0F766E',
+    coverImage: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=900&q=60', category: 'Wellbeing',   tagline: 'Stay active, healthy and motivated through fitness challenges and sports activities.' },
+  { name: 'Community Service',     icon: 'heart',     color: '#2563EB',
+    coverImage: 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?auto=format&fit=crop&w=900&q=60', category: 'Service',     tagline: 'Make a difference through service projects and acts of kindness.' },
 ];
 router.post('/admin/seed', auth, requireRole(...ADMIN), async (req, res) => {
   try {
-    let created = 0;
+    let created = 0, updated = 0;
     for (let i = 0; i < STARTER.length; i++) {
       const s = STARTER[i]; const slug = slugify(s.name);
-      if (await Club.findOne({ slug })) continue;
+      const existing = await Club.findOne({ slug }).select('coverImage').lean();
+      if (existing) {
+        // Backfill the cover photo onto an existing club that has none;
+        // a cover the school set itself is never overwritten.
+        if (!existing.coverImage && s.coverImage) {
+          await Club.updateOne({ _id: existing._id }, { $set: { coverImage: s.coverImage } });
+          updated++;
+        }
+        continue;
+      }
       await Club.create({ ...s, slug, sortOrder: i, createdBy: req.user._id, meetingSchedule: '' });
       created++;
     }
-    res.json({ success: true, message: created ? `Created ${created} starter club(s).` : 'All starter clubs already exist.' });
+    const bits = [];
+    if (created) bits.push(`Created ${created} starter club(s)`);
+    if (updated) bits.push(`added cover photos to ${updated} existing club(s)`);
+    res.json({ success: true, message: bits.length ? bits.join('; ') + '.' : 'All starter clubs already exist, with covers in place.' });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
 
