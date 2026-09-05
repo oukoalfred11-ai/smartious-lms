@@ -597,6 +597,21 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   const [themeId, setThemeId] = useState(() => localStorage.getItem('sm_class_theme') || 'light')
   const T = THEMES[themeId] || THEMES.dark
   const themeRef = useRef(T)
+  // Live mirrors for the recorder's paint loop: a recording can run for an
+  // hour while people join, leave, share and switch views, and the loop
+  // must always see the CURRENT room, not the room as it was at start.
+  const streamsRef = useRef({})
+  const rosterRef = useRef([])
+  const localStreamRef = useRef(null)
+  const sharingLiveRef = useRef(false)
+  const mainViewRef = useRef('board')
+  const camOnRef = useRef(true)
+  useEffect(() => { streamsRef.current = streams }, [streams])
+  useEffect(() => { rosterRef.current = roster }, [roster])
+  useEffect(() => { localStreamRef.current = localStream }, [localStream])
+  useEffect(() => { sharingLiveRef.current = sharing }, [sharing])
+  useEffect(() => { mainViewRef.current = mainView }, [mainView])
+  useEffect(() => { camOnRef.current = camOn }, [camOn])
   themeRef.current = T
   themeTokensRef.current = T
   const [grid, setGrid] = useState(false)
@@ -1812,26 +1827,132 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       comp.width = 1280; comp.height = 720
       const cctx = comp.getContext('2d')
 
-      // Hidden video element mirrors whichever screen is presenting.
-      const videoEl = document.createElement('video')
-      videoEl.muted = true; videoEl.playsInline = true
+      // One hidden <video> per stream so every camera and screen can be
+      // drawn onto the recording canvas. Created on demand, reused.
+      const vids = new Map()
+      const videoOf = (stream) => {
+        if (!stream) return null
+        let v = vids.get(stream.id)
+        if (!v) {
+          v = document.createElement('video')
+          v.muted = true; v.playsInline = true
+          v.srcObject = stream
+          v.play().catch(() => {})
+          vids.set(stream.id, v)
+        }
+        return v
+      }
+      const hasLiveVideo = (stream) =>
+        !!stream && stream.getVideoTracks().some(t => t.readyState === 'live' && t.enabled)
+
+      // Cover-draw a video into a rect (crop to fill, like object-fit: cover)
+      const drawCover = (v, x, y, w, h) => {
+        if (!v || !v.videoWidth) return false
+        const s = Math.max(w / v.videoWidth, h / v.videoHeight)
+        const sw = w / s, sh = h / s
+        cctx.drawImage(v, (v.videoWidth - sw) / 2, (v.videoHeight - sh) / 2, sw, sh, x, y, w, h)
+        return true
+      }
+      const drawTile = (part, x, y, w, h) => {
+        cctx.save()
+        cctx.beginPath(); cctx.rect(x, y, w, h); cctx.clip()
+        cctx.fillStyle = '#1B2231'; cctx.fillRect(x, y, w, h)
+        const v = videoOf(part.stream)
+        const drew = hasLiveVideo(part.stream) && drawCover(v, x, y, w, h)
+        if (!drew) {
+          // Camera off: coloured initial disc, like the live tiles.
+          const initial = (part.name || '?')[0].toUpperCase()
+          cctx.fillStyle = part.role === 'teacher' ? '#8B1A2E' : '#3D4A63'
+          cctx.beginPath(); cctx.arc(x + w / 2, y + h / 2 - 6, Math.min(w, h) * .22, 0, Math.PI * 2); cctx.fill()
+          cctx.fillStyle = '#fff'; cctx.font = `800 ${Math.round(Math.min(w, h) * .2)}px system-ui`
+          cctx.textAlign = 'center'; cctx.textBaseline = 'middle'
+          cctx.fillText(initial, x + w / 2, y + h / 2 - 6)
+        }
+        // Name bar
+        cctx.fillStyle = 'rgba(10,13,20,.72)'
+        cctx.fillRect(x, y + h - 22, w, 22)
+        cctx.fillStyle = '#F3EFE6'; cctx.font = '700 12px system-ui'
+        cctx.textAlign = 'left'; cctx.textBaseline = 'middle'
+        cctx.fillText((part.self ? 'You' : part.name || 'Member').slice(0, 24), x + 8, y + h - 11)
+        cctx.restore()
+      }
 
       const paint = () => {
-        cctx.fillStyle = themeRef.current.board
-        cctx.fillRect(0, 0, comp.width, comp.height)
-        const screenStream = sharing ? localStream
-          : (() => { const sp = roster.find(x => x.sharing); return sp ? streams[sp.socketId] : null })()
-        if (screenStream && screenStream.getVideoTracks().length) {
-          if (videoEl.srcObject !== screenStream) { videoEl.srcObject = screenStream; videoEl.play().catch(() => {}) }
-          if (videoEl.videoWidth) {
-            const s = Math.min(comp.width / videoEl.videoWidth, comp.height / videoEl.videoHeight)
-            const w = videoEl.videoWidth * s, h = videoEl.videoHeight * s
-            cctx.drawImage(videoEl, (comp.width - w) / 2, (comp.height - h) / 2, w, h)
+        const W = comp.width, H = comp.height
+        cctx.fillStyle = '#0F131C'; cctx.fillRect(0, 0, W, H)
+
+        const st = streamsRef.current, ros = rosterRef.current, ls = localStreamRef.current
+
+        // Late joiners: fold any new audio into the mix every frame.
+        connect(ls)
+        Object.values(st).forEach(connect)
+
+        // Everyone in the room, self first.
+        const parts = [
+          { self: true, name: 'You', role: myRole, stream: ls },
+          ...ros.filter(r => !r.self).map(r => ({ name: r.name, role: r.role, stream: st[r.socketId] })),
+        ]
+
+        // What is being presented on stage?
+        const sharerPeer = ros.find(x => x.sharing && !x.self)
+        const screenStream = sharingLiveRef.current ? ls : (sharerPeer ? st[sharerPeer.socketId] : null)
+        const meetingMode = mainViewRef.current === 'meeting'
+
+        if (meetingMode) {
+          // Conference layout: (screen on top half if sharing) + full camera grid.
+          let gy = 0, gh = H
+          if (screenStream && screenStream.getVideoTracks().length) {
+            const v = videoOf(screenStream)
+            cctx.fillStyle = '#000'; cctx.fillRect(0, 0, W, H * .46)
+            if (v && v.videoWidth) {
+              const sc = Math.min(W / v.videoWidth, (H * .46) / v.videoHeight)
+              const w = v.videoWidth * sc, h = v.videoHeight * sc
+              cctx.drawImage(v, (W - w) / 2, (H * .46 - h) / 2, w, h)
+            }
+            gy = H * .46 + 6; gh = H - gy
           }
-        } else if (canvasRef.current) {
-          const bc = canvasRef.current
-          const s = Math.min(comp.width / bc.width, comp.height / bc.height)
-          cctx.drawImage(bc, 0, 0, bc.width * s, bc.height * s)
+          const n = Math.min(parts.length, 20)
+          const cols = n <= 1 ? 1 : n <= 4 ? 2 : n <= 9 ? 3 : n <= 16 ? 4 : 5
+          const rows = Math.ceil(n / cols)
+          const tw = (W - (cols + 1) * 6) / cols, th = (gh - (rows + 1) * 6) / rows
+          for (let i = 0; i < n; i++) {
+            const cx = 6 + (i % cols) * (tw + 6)
+            const cy = gy + 6 + Math.floor(i / cols) * (th + 6)
+            drawTile(parts[i], cx, cy, tw, th)
+          }
+        } else {
+          // Lesson layout: stage (screen share or whiteboard) + camera rail,
+          // so the recording holds the whole room, not just the board.
+          const railW = 224, gap = 6
+          const stageW = W - railW - gap * 3
+          // Stage
+          cctx.save(); cctx.beginPath(); cctx.rect(gap, gap, stageW, H - gap * 2); cctx.clip()
+          if (screenStream && screenStream.getVideoTracks().length) {
+            cctx.fillStyle = '#000'; cctx.fillRect(gap, gap, stageW, H - gap * 2)
+            const v = videoOf(screenStream)
+            if (v && v.videoWidth) {
+              const sc = Math.min(stageW / v.videoWidth, (H - gap * 2) / v.videoHeight)
+              const w = v.videoWidth * sc, h = v.videoHeight * sc
+              cctx.drawImage(v, gap + (stageW - w) / 2, gap + (H - gap * 2 - h) / 2, w, h)
+            }
+          } else if (canvasRef.current) {
+            cctx.fillStyle = themeRef.current.board
+            cctx.fillRect(gap, gap, stageW, H - gap * 2)
+            const bc = canvasRef.current
+            const sc = Math.min(stageW / bc.width, (H - gap * 2) / bc.height)
+            cctx.drawImage(bc, gap, gap, bc.width * sc, bc.height * sc)
+          }
+          cctx.restore()
+          // Camera rail: up to 5 tiles, teacher/self first.
+          const railX = gap * 2 + stageW
+          const tileH = 126
+          const visible = parts.slice(0, 5)
+          visible.forEach((part, i) => drawTile(part, railX, gap + i * (tileH + gap), railW, tileH))
+          if (parts.length > 5) {
+            cctx.fillStyle = 'rgba(255,255,255,.55)'; cctx.font = '700 12px system-ui'
+            cctx.textAlign = 'center'
+            cctx.fillText('+' + (parts.length - 5) + ' more in the room', railX + railW / 2, gap + 5 * (tileH + gap) + 16)
+          }
         }
         rec.rafId = requestAnimationFrame(paint)
       }
@@ -1854,10 +1975,10 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')
         ? 'video/webm;codecs=vp8,opus' : 'video/webm'
       const recorder = new MediaRecorder(mixed, {
-        mimeType: mime, videoBitsPerSecond: 700000, audioBitsPerSecond: 64000,
+        mimeType: mime, videoBitsPerSecond: 1000000, audioBitsPerSecond: 64000,
       })
 
-      const rec = { recorder, recId, audioCtx, rafId: 0, uploadChain: Promise.resolve(), videoEl, connect }
+      const rec = { recorder, recId, audioCtx, rafId: 0, uploadChain: Promise.resolve(), vids, connect }
       recRef.current = rec
 
       recorder.ondataavailable = (ev) => {
@@ -1872,6 +1993,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       }
       recorder.onstop = async () => {
         cancelAnimationFrame(rec.rafId)
+        try { rec.vids.forEach(v => { v.srcObject = null }) } catch (e) { /* noop */ }
         try { await rec.uploadChain } catch (e) { /* logged above */ }
         try { audioCtx.close() } catch (e) { /* noop */ }
         try {
