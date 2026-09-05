@@ -413,51 +413,66 @@ router.delete('/:liveClassId/recordings/:recId', auth, requireRole(...ADMIN), as
 // GET /api/classroom/live/all  admin: every live/scheduled class to join or watch
 router.get('/live/all', auth, requireRole(...ADMIN), async (req, res) => {
   try {
-    const LiveClass = require('../models/LiveClass');
     const now = new Date();
-    const classes = await LiveClass.find({
-      $or: [
-        { status: 'live' },
-        { scheduledAt: { $gte: new Date(now.getTime() - 6 * 3600 * 1000) } },
-      ],
+    // Statuses in the DB go stale: most teachers never press "end", so a
+    // taught class can sit at 'scheduled' forever. Truth is DERIVED from
+    // time: a class is over once scheduledAt + duration has passed, unless
+    // explicitly cancelled. This is the same rule computeStatus() applies
+    // in the teacher list, applied here so nothing can hide.
+    const all = await LiveClass.find({
       status: { $ne: 'cancelled' },
+      $or: [
+        { scheduledAt: { $gte: new Date(now.getTime() - 30 * 24 * 3600 * 1000) } },
+        { status: 'live' },
+      ],
     })
       .populate('teacherId', 'firstName lastName')
-      .populate('subjectId', 'subjectName curriculum')
       .sort({ scheduledAt: -1 })
-      .limit(200)
+      .limit(400)
+      .select('title subject grade kind scheduledAt durationMins status endedAt recordings assignedStudents teacherId')
       .lean();
-    const rows = classes.map(c => ({
-      _id: c._id,
-      title: c.title,
-      subject: c.subjectId?.subjectName || '',
+
+    const effective = (c) => {
+      if (c.status === 'ended') return 'ended';
+      const start = new Date(c.scheduledAt).getTime();
+      const end = start + (c.durationMins || 60) * 60000;
+      if (c.status === 'live') return now.getTime() - end > 6 * 3600 * 1000 ? 'ended' : 'live';
+      if (now.getTime() < start) return 'scheduled';
+      if (now.getTime() <= end) return 'live';
+      return 'ended';
+    };
+
+    const shape = (c, eff) => ({
+      _id: c._id, title: c.title, subject: c.subject, grade: c.grade,
+      kind: c.kind || 'lesson', status: eff, storedStatus: c.status,
       teacher: c.teacherId ? `${c.teacherId.firstName || ''} ${c.teacherId.lastName || ''}`.trim() : '',
-      status: c.status,
-      scheduledAt: c.scheduledAt,
+      scheduledAt: c.scheduledAt, durationMins: c.durationMins || 60,
+      endedAt: c.endedAt || null,
       recordingCount: (c.recordings || []).length,
-    }));
-    // Past classes (last 30 days, newest first) so academic staff can
-    // monitor what has actually been taught, not only what is coming.
-    const past = await LiveClass.find({
-      status: 'ended',
-      scheduledAt: { $gte: new Date(now.getTime() - 30 * 24 * 3600 * 1000) },
-    })
-      .populate('teacherId', 'firstName lastName')
-      .sort({ scheduledAt: -1 })
-      .limit(120)
-      .select('title subject grade kind scheduledAt endedAt recordings assignedStudents teacherId')
-      .lean();
-    const pastRows = past.map(c => ({
-      _id: c._id, title: c.title, subject: c.subject, grade: c.grade, kind: c.kind || 'lesson',
-      teacher: c.teacherId ? `${c.teacherId.firstName || ''} ${c.teacherId.lastName || ''}`.trim() : '',
-      scheduledAt: c.scheduledAt, endedAt: c.endedAt || null,
-      recordings: (c.recordings || []).length,
       assigned: (c.assignedStudents || []).length,
-    }));
+    });
+
+    const rows = [], pastRows = [];
+    all.forEach((c) => {
+      const eff = effective(c);
+      if (eff === 'ended') pastRows.push(shape(c, eff));
+      else rows.push(shape(c, eff));
+    });
+    rows.sort((a, b) => new Date(a.scheduledAt) - new Date(b.scheduledAt));
+
+    // Did anyone actually attend the past ones? Join data tells the DOS
+    // whether a class ran, ran unrecorded, or silently did not happen.
+    const ClassroomSession = require('../models/ClassroomSession');
+    const pastIds = pastRows.map((r) => r._id);
+    const joins = pastIds.length ? await ClassroomSession.aggregate([
+      { $match: { liveClassId: { $in: pastIds }, joinCount: { $gt: 0 } } },
+      { $group: { _id: '$liveClassId', n: { $sum: 1 } } },
+    ]) : [];
+    const joinMap = Object.fromEntries(joins.map((r) => [String(r._id), r.n]));
+    pastRows.forEach((r) => { r.joined = joinMap[String(r._id)] || 0; });
 
     res.json({ success: true, data: { classes: rows, past: pastRows } });
   } catch (e) {
-    console.error('[live/all]', e.message);
     res.status(500).json({ success: false, message: e.message });
   }
 });
