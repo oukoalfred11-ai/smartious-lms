@@ -27,6 +27,7 @@ import BillingModule, { FeeCollectionModule } from './modules/BillingModule.jsx'
 import CommunityModule from './modules/CommunityModule.jsx'
 import LiveClassesModule from './modules/LiveClassesModule.jsx'
 import MasteryModule from './modules/MasteryModule.jsx'
+import DOSPerformanceModule from './modules/DOSPerformanceModule.jsx'
 import ClubsModule from './modules/ClubsModule.jsx'
 import AnnouncementsModule from './modules/AnnouncementsModule.jsx'
 import StudioModule from './modules/StudioModule.jsx'
@@ -76,7 +77,7 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
     admin: [
       { label: 'Overview',    items: ['dashboard', 'analytics'] },
       { label: 'People',      items: ['users', 'teachers', 'allocations', 'sessions', 'communication', 'community', 'announcements'] },
-      { label: 'Reports',     items: ['reports', 'mastery'] },
+      { label: 'Reports',     items: ['reports', 'dosperformance', 'mastery'] },
       { label: 'Operations',  items: ['frontdesk', 'assessment', 'documents', 'payroll', 'leave', 'programmes'] },
       { label: 'Teaching',    items: ['liveclasses', 'clubs', 'grouprooms', 'curriculum'] },
       { label: 'Question Bank', items: ['questionbank', 'markingreview'] },
@@ -98,7 +99,7 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
       { label: 'Breaks',        items: ['dosbreaks'] },
       { label: 'Timetables',    items: ['dostimetable'] },
       { label: 'Question Bank', items: ['questionbank', 'markingreview'] },
-      { label: 'Reports',       items: ['reports', 'mastery'] },
+      { label: 'Reports',       items: ['reports', 'dosperformance', 'mastery'] },
       { label: 'System',        items: ['settings'] },
     ],
     sales: [
@@ -111,7 +112,7 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
     ops_manager: [
       { label: 'Overview',    items: ['checkin', 'dashboard', 'analytics'] },
       { label: 'People',      items: ['users', 'teachers', 'allocations', 'sessions', 'communication'] },
-      { label: 'Reports',     items: ['cooreports', 'reports', 'mastery'] },
+      { label: 'Reports',     items: ['cooreports', 'reports', 'dosperformance', 'mastery'] },
       { label: 'Performance', items: ['teacherratings'] },
       { label: 'Operations',  items: ['documents', 'leave', 'programmes'] },
       // CRM, Front Desk and Group Rooms removed from Operations per policy;
@@ -375,8 +376,8 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
     ],
     accountant:  [{ items: ['checkin','dashboard','analytics','feecollection','billing','sessions','payroll','settings'] }],
     sales:       [{ items: ['checkin','dashboard','salesperf','crm','assessment','frontdesk','communication','documents','settings'] }],
-    dos:         [{ items: ['checkin','dosanalytics','exams','doshomework','dosattend','sessions','dosbreaks','dostimetable','questionbank','markingreview','reports','mastery','settings'] }],
-    ops_manager: [{ items: ['checkin','dashboard','analytics','users','teachers','allocations','sessions','communication','cooreports','reports','mastery','teacherratings','exams','documents','leave','programmes','liveclasses','clubs','settings','ai'] }],
+    dos:         [{ items: ['checkin','dosperformance','dosanalytics','exams','doshomework','dosattend','sessions','dosbreaks','dostimetable','questionbank','markingreview','reports','mastery','settings'] }],
+    ops_manager: [{ items: ['checkin','dashboard','analytics','users','teachers','allocations','sessions','communication','cooreports','reports','dosperformance','mastery','teacherratings','exams','documents','leave','programmes','liveclasses','clubs','settings','ai'] }],
   }
   const allowedPages = (ROLE_SECTIONS_MAIN[role] || ROLE_SECTIONS_MAIN.admin).flatMap(s => s.items)
   const safePage = allowedPages.includes(page) ? page : 'dashboard'
@@ -407,6 +408,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         {safePage === 'community' && <CommunityModule refreshKey={refreshKey} toast={toast} />}
         {safePage === 'liveclasses' && <LiveClassesModule toast={toast} />}
         {safePage === 'mastery' && <MasteryModule toast={toast} refreshKey={refreshKey} />}
+        {safePage === 'dosperformance' && <DOSPerformanceModule toast={toast} />}
         {safePage === 'clubs' && <ClubsModule toast={toast} />}
         {safePage === 'announcements' && <AnnouncementsModule toast={toast} />}
         {safePage === 'frontdesk' && <FrontDeskModule refreshKey={refreshKey} toast={toast} />}
