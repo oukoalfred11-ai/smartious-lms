@@ -436,7 +436,26 @@ router.get('/live/all', auth, requireRole(...ADMIN), async (req, res) => {
       scheduledAt: c.scheduledAt,
       recordingCount: (c.recordings || []).length,
     }));
-    res.json({ success: true, data: { classes: rows } });
+    // Past classes (last 30 days, newest first) so academic staff can
+    // monitor what has actually been taught, not only what is coming.
+    const past = await LiveClass.find({
+      status: 'ended',
+      scheduledAt: { $gte: new Date(now.getTime() - 30 * 24 * 3600 * 1000) },
+    })
+      .populate('teacherId', 'firstName lastName')
+      .sort({ scheduledAt: -1 })
+      .limit(120)
+      .select('title subject grade kind scheduledAt endedAt recordings assignedStudents teacherId')
+      .lean();
+    const pastRows = past.map(c => ({
+      _id: c._id, title: c.title, subject: c.subject, grade: c.grade, kind: c.kind || 'lesson',
+      teacher: c.teacherId ? `${c.teacherId.firstName || ''} ${c.teacherId.lastName || ''}`.trim() : '',
+      scheduledAt: c.scheduledAt, endedAt: c.endedAt || null,
+      recordings: (c.recordings || []).length,
+      assigned: (c.assignedStudents || []).length,
+    }));
+
+    res.json({ success: true, data: { classes: rows, past: pastRows } });
   } catch (e) {
     console.error('[live/all]', e.message);
     res.status(500).json({ success: false, message: e.message });
