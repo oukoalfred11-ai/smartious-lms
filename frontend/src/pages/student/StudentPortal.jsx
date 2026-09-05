@@ -186,6 +186,9 @@ const NAV_ICON_PALETTE = {
   resources:    ['#6366F1', '#4338CA'], // indigo
   profile:      ['#64748B', '#334155'], // slate
   achievements: ['#F59E0B', '#D97706'], // gold/amber
+  clubs:        ['#FB923C', '#EA580C'], // vivid orange
+  quiz:         ['#A78BFA', '#7C3AED'], // game violet
+  community:    ['#22D3EE', '#0E7490'], // cyan
   subscription: ['#10B981', '#047857'], // emerald
 }
 
@@ -361,13 +364,33 @@ const NavIcon = ({ name, active }) => {
             <path d="M12 14v4M9 21h6M9.5 18h5l.5 3h-6l.5-3z" fill="#fff"/>
           </g>
         )
-      case 'clubs': // three people, clubs
+      case 'clubs': // pennant flag over two people, club spirit
         return (
           <g fill="#fff">
-            <circle cx="9" cy="8" r="3.2"/>
-            <circle cx="16.5" cy="9" r="2.4" fillOpacity=".8"/>
-            <path d="M3 19a6 6 0 0 1 12 0v1H3z"/>
-            <path d="M16.5 13.5c2.5 0 4.5 1.9 4.5 4.3V20h-4v-1a8 8 0 0 0-2.2-5.3z" fillOpacity=".8"/>
+            <path d="M11 3h8l-2.4 2.5L19 8h-8z" fillOpacity=".95"/>
+            <rect x="10.2" y="3" width="1.6" height="9" rx=".8"/>
+            <circle cx="8" cy="13.2" r="2.6"/>
+            <circle cx="15" cy="13.8" r="2.1" fillOpacity=".8"/>
+            <path d="M3.5 20.5a4.5 4.5 0 0 1 9 0v.5h-9z"/>
+            <path d="M13.4 21v-.4c0-1.5-.5-2.9-1.3-4a4.2 4.2 0 0 1 8.4 3.9v.5z" fillOpacity=".8"/>
+          </g>
+        )
+      case 'quiz': // game controller
+        return (
+          <g fill="#fff">
+            <path d="M7.2 7h9.6a5.2 5.2 0 0 1 5.1 6.3l-.9 4.2a2.6 2.6 0 0 1-4.6 1L14.6 16H9.4l-1.8 2.5a2.6 2.6 0 0 1-4.6-1l-.9-4.2A5.2 5.2 0 0 1 7.2 7z"/>
+            <rect x="6.1" y="10" width="4" height="1.7" rx=".85" fill="#7C3AED"/>
+            <rect x="7.25" y="8.85" width="1.7" height="4" rx=".85" fill="#7C3AED"/>
+            <circle cx="16" cy="10" r="1.05" fill="#7C3AED"/>
+            <circle cx="18.2" cy="12.2" r="1.05" fill="#7C3AED"/>
+          </g>
+        )
+      case 'community': // two chat bubbles with a heart
+        return (
+          <g fill="#fff">
+            <path d="M3 4.5h11a2 2 0 0 1 2 2V12a2 2 0 0 1-2 2H8l-4 3.4V6.5a2 2 0 0 1 1-2z" fillOpacity=".95"/>
+            <path d="M17.5 8H20a2 2 0 0 1 2 2v9.6L18.6 17H12a2 2 0 0 1-2-2v-.5h4a3.5 3.5 0 0 0 3.5-3.5z" fillOpacity=".65"/>
+            <path d="M9.5 7.2c.8-.9 2.2-.6 2.6.4.4-1 1.8-1.3 2.6-.4.7.8.5 2-.4 2.8L12 12l-2.3-2c-.9-.8-1-2-.2-2.8z" fill="#0E7490"/>
           </g>
         )
       default:
