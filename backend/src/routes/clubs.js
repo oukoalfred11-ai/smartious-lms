@@ -14,6 +14,41 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const { auth, requireRole } = require('../middleware/auth');
 const Club = require('../models/Club');
+const ClubProject = require('../models/ClubProject');
+const multer = require('multer');
+const { v4: uuidv4 } = require('uuid');
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+
+// R2 storage for club cover photos and project uploads (same bucket the
+// library and community chat use).
+const R2_READY = !!(process.env.R2_ACCOUNT_ID && process.env.R2_ACCESS_KEY_ID &&
+  process.env.R2_SECRET_ACCESS_KEY && process.env.R2_BUCKET_NAME && process.env.R2_PUBLIC_URL);
+const r2 = R2_READY ? new S3Client({
+  region: 'auto',
+  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  credentials: {
+    accessKeyId: process.env.R2_ACCESS_KEY_ID,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+  },
+}) : null;
+const clubUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 80 * 1024 * 1024 } });
+
+const KIND_OF = (mime) =>
+  /^image\//.test(mime) ? 'image' : /^video\//.test(mime) ? 'video' : /^audio\//.test(mime) ? 'audio' : 'file';
+const UPLOAD_OK = /^(image\/(png|jpe?g|webp|gif)|video\/(mp4|webm|quicktime)|audio\/(webm|mpeg|mp4|ogg)|application\/(pdf|zip|msword|vnd\.openxmlformats-officedocument\.(wordprocessingml\.document|presentationml\.presentation|spreadsheetml\.sheet))|text\/plain)$/;
+
+async function putToR2(folder, file) {
+  const ext = (file.originalname.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 6);
+  const key = `${folder}/${new Date().toISOString().slice(0, 10)}/${uuidv4()}.${ext}`;
+  await r2.send(new PutObjectCommand({
+    Bucket: process.env.R2_BUCKET_NAME, Key: key, Body: file.buffer, ContentType: file.mimetype,
+  }));
+  return {
+    kind: KIND_OF(file.mimetype),
+    url: `${process.env.R2_PUBLIC_URL.replace(/\/$/, '')}/${key}`,
+    key, name: file.originalname.slice(0, 140), mime: file.mimetype, sizeBytes: file.size,
+  };
+}
 const User = require('../models/User');
 const LiveClass = require('../models/LiveClass');
 
@@ -170,6 +205,164 @@ router.delete('/:id/meetings/:meetingId', auth, requireRole('teacher', ...ADMIN)
     if (!c) return res.status(404).json({ success: false, message: 'Club not found.' });
     if (!ADMIN.includes(req.user.role) && !isLeaderOf(c, req.user._id)) return res.status(403).json({ success: false, message: 'Not allowed.' });
     await LiveClass.updateOne({ _id: req.params.meetingId, clubId: c._id }, { $set: { status: 'cancelled' } });
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+// ── Uploads ─────────────────────────────────────────────────────────
+// POST /api/clubs/upload-cover — a club's cover photo (admin or any leader).
+router.post('/upload-cover', auth, requireRole('teacher', ...ADMIN), (req, res) => {
+  if (!R2_READY) return res.status(503).json({ success: false, message: 'Image storage is not configured on the server.' });
+  clubUpload.single('file')(req, res, async (err) => {
+    if (err) return res.status(400).json({ success: false, message: err.message || 'Upload failed.' });
+    if (!req.file) return res.status(400).json({ success: false, message: 'No file received.' });
+    if (!/^image\/(png|jpe?g|webp)$/.test(req.file.mimetype)) return res.status(400).json({ success: false, message: 'Covers must be PNG, JPG or WebP images.' });
+    if (req.file.size > 8 * 1024 * 1024) return res.status(400).json({ success: false, message: 'Cover images: 8MB max.' });
+    try {
+      const a = await putToR2('clubs/covers', req.file);
+      res.json({ success: true, data: { url: a.url } });
+    } catch (e) { res.status(500).json({ success: false, message: 'Could not store the image.' }); }
+  });
+});
+
+// POST /api/clubs/:id/upload — a project attachment (club members and leaders).
+router.post('/:id/upload', auth, (req, res) => {
+  if (!R2_READY) return res.status(503).json({ success: false, message: 'File storage is not configured on the server.' });
+  clubUpload.single('file')(req, res, async (err) => {
+    if (err) return res.status(400).json({ success: false, message: err.message || 'Upload failed.' });
+    if (!req.file) return res.status(400).json({ success: false, message: 'No file received.' });
+    if (!UPLOAD_OK.test(req.file.mimetype)) return res.status(400).json({ success: false, message: 'That file type is not supported.' });
+    try {
+      const club = await Club.findById(req.params.id).select('members leaders').lean();
+      if (!club) return res.status(404).json({ success: false, message: 'Club not found.' });
+      const inClub = [...(club.members || []), ...(club.leaders || [])].some(x => String(x) === String(req.user._id)) || ADMIN.includes(req.user.role);
+      if (!inClub) return res.status(403).json({ success: false, message: 'Join the club to upload a project.' });
+      const a = await putToR2('clubs/projects', req.file);
+      res.json({ success: true, data: { attachment: a } });
+    } catch (e) { res.status(500).json({ success: false, message: 'Could not store the file.' }); }
+  });
+});
+
+// ── Projects: upload, discuss, vote for annual awards ───────────────
+const shapeProject = (pr, userId) => ({
+  _id: pr._id, clubId: pr.clubId, title: pr.title, description: pr.description,
+  attachments: pr.attachments || [], year: pr.year, createdAt: pr.createdAt,
+  author: pr.studentId && pr.studentId.firstName !== undefined
+    ? { _id: pr.studentId._id, name: [pr.studentId.firstName, pr.studentId.lastName].filter(Boolean).join(' '), avatar: pr.studentId.avatar || '', gradeLevel: pr.studentId.gradeLevel || '' }
+    : { _id: pr.studentId },
+  votes: (pr.votes || []).length,
+  myVote: !!userId && (pr.votes || []).some(v => String(v) === String(userId)),
+  commentCount: (pr.comments || []).length,
+  mine: !!userId && String(pr.studentId?._id || pr.studentId) === String(userId),
+});
+
+const memberOf = async (clubId, user) => {
+  const club = await Club.findById(clubId).select('members leaders name').lean();
+  if (!club) return { club: null, ok: false, leader: false };
+  const leader = (club.leaders || []).some(x => String(x) === String(user._id));
+  const ok = leader || ADMIN.includes(user.role) ||
+    (club.members || []).some(x => String(x) === String(user._id));
+  return { club, ok, leader };
+};
+
+// GET /api/clubs/:id/projects?year= — the club's project gallery
+router.get('/:id/projects', auth, async (req, res) => {
+  try {
+    const year = parseInt(req.query.year, 10) || new Date().getFullYear();
+    const rows = await ClubProject.find({ clubId: req.params.id, isActive: true, year })
+      .populate('studentId', 'firstName lastName avatar gradeLevel')
+      .sort({ createdAt: -1 }).limit(200).lean();
+    const shaped = rows.map(r => shapeProject(r, req.user._id));
+    // Award standing: most votes first for the awards strip.
+    const standings = [...shaped].sort((a, b) => b.votes - a.votes).slice(0, 3).map(p => p._id);
+    res.json({ success: true, data: { projects: shaped, top3: standings, year } });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+// GET /api/clubs/:id/projects/:pid — one project with its discussion
+router.get('/:id/projects/:pid', auth, async (req, res) => {
+  try {
+    const pr = await ClubProject.findOne({ _id: req.params.pid, clubId: req.params.id, isActive: true })
+      .populate('studentId', 'firstName lastName avatar gradeLevel')
+      .populate('comments.authorId', 'firstName lastName avatar role').lean();
+    if (!pr) return res.status(404).json({ success: false, message: 'Project not found.' });
+    const comments = (pr.comments || []).map(c => ({
+      _id: c._id, body: c.body, createdAt: c.createdAt,
+      author: c.authorId && c.authorId.firstName !== undefined
+        ? { _id: c.authorId._id, name: [c.authorId.firstName, c.authorId.lastName].filter(Boolean).join(' '), avatar: c.authorId.avatar || '', role: c.authorId.role }
+        : { _id: c.authorId },
+    }));
+    res.json({ success: true, data: { project: shapeProject(pr, req.user._id), comments } });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+// POST /api/clubs/:id/projects — publish a project (members)
+router.post('/:id/projects', auth, async (req, res) => {
+  try {
+    const { ok } = await memberOf(req.params.id, req.user);
+    if (!ok) return res.status(403).json({ success: false, message: 'Join the club to share a project.' });
+    const { title, description, attachments } = req.body || {};
+    if (!title || !String(title).trim()) return res.status(400).json({ success: false, message: 'Give your project a title.' });
+    const atts = (Array.isArray(attachments) ? attachments : []).slice(0, 4).filter(a =>
+      a && typeof a.url === 'string' && a.url.startsWith(String(process.env.R2_PUBLIC_URL || '\u0000').replace(/\/$/, '') + '/clubs/'));
+    const pr = await ClubProject.create({
+      clubId: req.params.id, studentId: req.user._id,
+      title: String(title).trim().slice(0, 140),
+      description: String(description || '').trim().slice(0, 3000),
+      attachments: atts, year: new Date().getFullYear(),
+    });
+    res.json({ success: true, message: 'Project published to the club.', data: { project: shapeProject(pr.toObject(), req.user._id) } });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+// POST /api/clubs/:id/projects/:pid/comments — discuss and suggest
+router.post('/:id/projects/:pid/comments', auth, async (req, res) => {
+  try {
+    const { ok } = await memberOf(req.params.id, req.user);
+    if (!ok) return res.status(403).json({ success: false, message: 'Join the club to comment.' });
+    const body = String(req.body?.body || '').trim();
+    if (!body) return res.status(400).json({ success: false, message: 'Write a comment first.' });
+    const pr = await ClubProject.findOneAndUpdate(
+      { _id: req.params.pid, clubId: req.params.id, isActive: true },
+      { $push: { comments: { authorId: req.user._id, body: body.slice(0, 1000) } } },
+      { new: true });
+    if (!pr) return res.status(404).json({ success: false, message: 'Project not found.' });
+    res.json({ success: true, data: { commentCount: pr.comments.length } });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+// POST /api/clubs/:id/projects/:pid/vote — annual-award ballot.
+// One vote per member per club per year: voting here moves your vote off
+// any other project in the same club and year. Voting again on the same
+// project withdraws it. You cannot vote for your own project.
+router.post('/:id/projects/:pid/vote', auth, async (req, res) => {
+  try {
+    const { ok } = await memberOf(req.params.id, req.user);
+    if (!ok) return res.status(403).json({ success: false, message: 'Join the club to vote.' });
+    const pr = await ClubProject.findOne({ _id: req.params.pid, clubId: req.params.id, isActive: true });
+    if (!pr) return res.status(404).json({ success: false, message: 'Project not found.' });
+    if (String(pr.studentId) === String(req.user._id)) return res.status(400).json({ success: false, message: 'You cannot vote for your own project.' });
+    const had = pr.votes.some(v => String(v) === String(req.user._id));
+    if (had) {
+      await ClubProject.updateOne({ _id: pr._id }, { $pull: { votes: req.user._id } });
+      return res.json({ success: true, message: 'Vote withdrawn.', data: { voted: false } });
+    }
+    // Move the ballot: remove my vote from every other project in this club+year.
+    await ClubProject.updateMany({ clubId: pr.clubId, year: pr.year }, { $pull: { votes: req.user._id } });
+    await ClubProject.updateOne({ _id: pr._id }, { $addToSet: { votes: req.user._id } });
+    res.json({ success: true, message: 'Your award vote is on this project. You can move it any time before the awards.', data: { voted: true } });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+// DELETE /api/clubs/:id/projects/:pid — owner takes it down, or a leader/admin moderates
+router.delete('/:id/projects/:pid', auth, async (req, res) => {
+  try {
+    const { ok, leader } = await memberOf(req.params.id, req.user);
+    const pr = await ClubProject.findOne({ _id: req.params.pid, clubId: req.params.id });
+    if (!pr) return res.status(404).json({ success: false, message: 'Project not found.' });
+    const mine = String(pr.studentId) === String(req.user._id);
+    if (!mine && !leader && !ADMIN.includes(req.user.role)) return res.status(403).json({ success: false, message: 'Not allowed.' });
+    await ClubProject.updateOne({ _id: pr._id }, { $set: { isActive: false, removedBy: req.user._id } });
     res.json({ success: true });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
