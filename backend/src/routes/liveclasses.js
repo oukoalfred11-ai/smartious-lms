@@ -265,7 +265,7 @@ router.get('/:id', auth, async (req, res) => {
 // EDIT
 // Re-emails students if meetingLink changed.
 // ═══════════════════════════════════════════════════════════
-router.patch('/:id', auth, requireRole('teacher', 'admin'), async (req, res) => {
+router.patch('/:id', auth, requireRole('teacher', 'admin', 'dos', 'ops_manager'), async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success:false, message:'Invalid class id.' });
@@ -273,7 +273,7 @@ router.patch('/:id', auth, requireRole('teacher', 'admin'), async (req, res) => 
     const lc = await LiveClass.findById(req.params.id);
     if (!lc) return res.status(404).json({ success:false, message:'Class not found.' });
 
-    if (req.user.role !== 'admin' && String(lc.teacherId) !== String(req.user._id))
+    if (!['admin', 'dos', 'ops_manager'].includes(req.user.role) && String(lc.teacherId) !== String(req.user._id))
       return res.status(403).json({ success:false, message:'Not your class.' });
 
     // Capture old link before any updates so we can detect a change
@@ -334,14 +334,14 @@ router.patch('/:id', auth, requireRole('teacher', 'admin'), async (req, res) => 
 // ═══════════════════════════════════════════════════════════
 // DELETE
 // ═══════════════════════════════════════════════════════════
-router.delete('/:id', auth, requireRole('teacher', 'admin'), async (req, res) => {
+router.delete('/:id', auth, requireRole('teacher', 'admin', 'dos', 'ops_manager'), async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success:false, message:'Invalid class id.' });
 
     const lc = await LiveClass.findById(req.params.id);
     if (!lc) return res.status(404).json({ success:false, message:'Class not found.' });
-    if (req.user.role !== 'admin' && String(lc.teacherId) !== String(req.user._id))
+    if (!['admin', 'dos', 'ops_manager'].includes(req.user.role) && String(lc.teacherId) !== String(req.user._id))
       return res.status(403).json({ success:false, message:'Not your class.' });
 
     await lc.deleteOne();
@@ -359,7 +359,7 @@ router.post('/:id/start', auth, requireRole('teacher', 'admin'), async (req, res
   try {
     const lc = await LiveClass.findById(req.params.id);
     if (!lc) return res.status(404).json({ success:false, message:'Class not found.' });
-    if (req.user.role !== 'admin' && String(lc.teacherId) !== String(req.user._id))
+    if (!['admin', 'dos', 'ops_manager'].includes(req.user.role) && String(lc.teacherId) !== String(req.user._id))
       return res.status(403).json({ success:false, message:'Not your class.' });
 
     lc.status = 'live';
@@ -379,7 +379,7 @@ router.post('/:id/end', auth, requireRole('teacher', 'admin'), async (req, res) 
   try {
     const lc = await LiveClass.findById(req.params.id);
     if (!lc) return res.status(404).json({ success:false, message:'Class not found.' });
-    if (req.user.role !== 'admin' && String(lc.teacherId) !== String(req.user._id))
+    if (!['admin', 'dos', 'ops_manager'].includes(req.user.role) && String(lc.teacherId) !== String(req.user._id))
       return res.status(403).json({ success:false, message:'Not your class.' });
 
     lc.status = 'ended';
@@ -399,7 +399,7 @@ router.post('/:id/cancel', auth, requireRole('teacher', 'admin'), async (req, re
   try {
     const lc = await LiveClass.findById(req.params.id);
     if (!lc) return res.status(404).json({ success:false, message:'Class not found.' });
-    if (req.user.role !== 'admin' && String(lc.teacherId) !== String(req.user._id))
+    if (!['admin', 'dos', 'ops_manager'].includes(req.user.role) && String(lc.teacherId) !== String(req.user._id))
       return res.status(403).json({ success:false, message:'Not your class.' });
 
     lc.status = 'cancelled';
