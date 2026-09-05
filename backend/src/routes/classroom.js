@@ -411,6 +411,7 @@ router.delete('/:liveClassId/recordings/:recId', auth, requireRole(...ADMIN), as
 // GET /api/classroom/live/all  admin: every live/scheduled class to join or watch
 router.get('/live/all', auth, requireRole(...ADMIN), async (req, res) => {
   try {
+    const LiveClass = require('../models/LiveClass');
     const now = new Date();
     // Statuses in the DB go stale: most teachers never press "end", so a
     // taught class can sit at 'scheduled' forever. Truth is DERIVED from
