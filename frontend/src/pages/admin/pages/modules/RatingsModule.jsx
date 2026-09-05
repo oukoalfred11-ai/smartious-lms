@@ -66,6 +66,17 @@ export function COOReportOverviewModule({ toast, refreshKey }) {
     finally { setSending(null) }
   }
 
+  const resetRatings = async (r) => {
+    if (!window.confirm(`Reset all ratings for ${r.name}? ${r.ratingCount || 0} rating(s) will be removed and their score starts afresh. This cannot be undone.`)) return
+    setSending(r.name)
+    try {
+      const res = await api.delete('/ratings/teacher/' + r._id + '/reset')
+      toast?.ok?.(res.data?.message || 'Ratings reset.')
+      load()
+    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not reset ratings.') }
+    finally { setSending(null) }
+  }
+
   const filtered = rows.filter(r => {
     const matchSearch = !search || r.name.toLowerCase().includes(search.toLowerCase()) || r.subjects.some(s=>s.toLowerCase().includes(search.toLowerCase()))
     const matchFilter = filter==='all' || (filter==='issued'&&r.hasReport) || (filter==='missing'&&!r.hasReport)
@@ -155,6 +166,14 @@ export function COOReportOverviewModule({ toast, refreshKey }) {
                     )}
                   </td>
                   <td style={{ padding:'10px 14px' }}>
+                    {(r.ratingCount || 0) > 0 && (
+                      <button disabled={sending===r.name}
+                        title="Remove all of this teacher's ratings so their score starts afresh"
+                        style={{ padding:'5px 10px', borderRadius:6, border:'1px solid '+TOKENS.line, background:'#fff', color:TOKENS.s700, fontSize:11.5, fontWeight:700, cursor:'pointer', marginRight:6 }}
+                        onClick={()=>resetRatings(r)}>
+                        Reset ratings
+                      </button>
+                    )}
                     {!r.hasReport && (
                       <button disabled={sending===r.name}
                         style={{ padding:'5px 10px', borderRadius:6, border:`1px solid #FCA5A5`, background:'#fff', color:'#991B1B', fontSize:11.5, fontWeight:700, cursor:'pointer' }}
