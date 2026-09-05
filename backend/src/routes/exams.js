@@ -157,7 +157,7 @@ async function notifyExamRecipients(exam, { isUpdate = false } = {}) {
   }
 }
 
-router.post('/', auth, requireRole('teacher','admin', 'dos'), async (req, res) => {
+router.post('/', auth, requireRole('teacher','admin', 'dos', 'ops_manager'), async (req, res) => {
   try {
     const {
       title, instructions, subject, curriculum, grade,
@@ -215,7 +215,7 @@ router.post('/', auth, requireRole('teacher','admin', 'dos'), async (req, res) =
 });
 
 
-router.get('/all', auth, requireRole('admin', 'dos'), async (req, res) => {
+router.get('/all', auth, requireRole('admin', 'dos', 'ops_manager'), async (req, res) => {
   try {
     const filter = {}
     if (req.query.subject)    filter.subject    = req.query.subject
@@ -232,7 +232,7 @@ router.get('/all', auth, requireRole('admin', 'dos'), async (req, res) => {
   }
 })
 
-router.get('/teacher/list', auth, requireRole('teacher','admin', 'dos'), async (req, res) => {
+router.get('/teacher/list', auth, requireRole('teacher','admin', 'dos', 'ops_manager'), async (req, res) => {
   try {
     const exams = await Exam.find({ teacherId: req.user._id })
       .sort({ startAt: -1 }).lean();
@@ -267,7 +267,7 @@ router.get('/teacher/list', auth, requireRole('teacher','admin', 'dos'), async (
   }
 });
 
-router.put('/:id', auth, requireRole('teacher','admin', 'dos'), async (req, res) => {
+router.put('/:id', auth, requireRole('teacher','admin', 'dos', 'ops_manager'), async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success:false, message:'Invalid exam id.' });
@@ -299,7 +299,7 @@ router.put('/:id', auth, requireRole('teacher','admin', 'dos'), async (req, res)
   }
 });
 
-router.delete('/:id', auth, requireRole('teacher','admin', 'dos'), async (req, res) => {
+router.delete('/:id', auth, requireRole('teacher','admin', 'dos', 'ops_manager'), async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success:false, message:'Invalid exam id.' });
@@ -327,7 +327,7 @@ router.delete('/:id', auth, requireRole('teacher','admin', 'dos'), async (req, r
 // oldest first. The teacher should not have to remember which exam
 // has work waiting — the work comes to them.
 // ═══════════════════════════════════════════════════════════
-router.get('/teacher/marking-queue', auth, requireRole('teacher','admin','dos'), async (req, res) => {
+router.get('/teacher/marking-queue', auth, requireRole('teacher','admin','dos','ops_manager'), async (req, res) => {
   try {
     const examFilter = req.user.role === 'admin' ? {} : { teacherId: req.user._id };
     const exams = await Exam.find(examFilter).select('title subject curriculum grade totalMarks startAt').lean();
@@ -382,7 +382,7 @@ router.get('/teacher/marking-queue', auth, requireRole('teacher','admin','dos'),
   }
 });
 
-router.get('/:id/submissions', auth, requireRole('teacher','admin', 'dos'), async (req, res) => {
+router.get('/:id/submissions', auth, requireRole('teacher','admin', 'dos', 'ops_manager'), async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success:false, message:'Invalid exam id.' });
@@ -794,7 +794,7 @@ router.post('/:id/submit', auth, async (req, res) => {
   }
 });
 
-router.post('/submissions/:subId/grade', auth, requireRole('teacher','admin', 'dos'), async (req, res) => {
+router.post('/submissions/:subId/grade', auth, requireRole('teacher','admin', 'dos', 'ops_manager'), async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.subId))
       return res.status(400).json({ success:false, message:'Invalid submission id.' });
