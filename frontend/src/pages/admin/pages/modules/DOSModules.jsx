@@ -269,7 +269,7 @@ export function DOSExamsModule({ toast, refreshKey }) {
           <div style={{ padding:'12px 16px', borderBottom:'1px solid '+TOKENS.line, fontWeight:800, fontSize:13, color:TOKENS.s900 }}>Student Results ({scores.length})</div>
           {subLoading?<div style={{ padding:30,textAlign:'center',color:TOKENS.s400 }}>Loading...</div>:scores.length===0?<div style={{ padding:30,textAlign:'center',color:TOKENS.s400 }}>No graded submissions yet.</div>:(
             <table className="tbl" style={{ width:'100%', borderCollapse:'collapse' }}>
-              <thead><tr>{['Rank','Student','Score','%','Grade'].map(h=><th key={h} style={{ padding:'8px 12px', textAlign:'left', fontSize:10.5 }}>{h}</th>)}</tr></thead>
+              <thead><tr>{['Rank','Student','Score','%','Grade','Focus'].map(h=><th key={h} style={{ padding:'8px 12px', textAlign:'left', fontSize:10.5 }}>{h}</th>)}</tr></thead>
               <tbody>
                 {scores.map((s,i)=>(
                   <tr key={String(s._id)} style={{ borderTop:'1px solid '+TOKENS.line }}>
@@ -278,6 +278,10 @@ export function DOSExamsModule({ toast, refreshKey }) {
                     <td style={{ padding:'9px 12px', fontWeight:700 }}>{s.awarded}/{selected.totalMarks}</td>
                     <td style={{ padding:'9px 12px', fontWeight:800, fontSize:15, color:gc(s.pct) }}>{s.pct}%</td>
                     <td style={{ padding:'9px 12px' }}><span style={{ padding:'2px 8px', borderRadius:99, fontSize:11, fontWeight:800, background:gc(s.pct)+'18', color:gc(s.pct) }}>{gl(s.pct)}</span></td>
+                    <td style={{ padding:'9px 12px', fontSize:11.5, color: (s.tabSwitches||0)+(s.copyPasteAttempts||0) > 0 ? '#B45309' : TOKENS.s400 }}
+                      title="Counted during the sitting and disclosed to the student. Context matters: a switch can be a dropped connection.">
+                      {(s.tabSwitches||0)+(s.copyPasteAttempts||0) === 0 ? 'clean' : `${s.tabSwitches||0} away · ${s.copyPasteAttempts||0} paste`}
+                    </td>
                   </tr>
                 ))}
               </tbody>
