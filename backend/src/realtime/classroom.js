@@ -46,6 +46,18 @@ async function recordJoin(liveClassId, peer) {
       },
       { upsert: true }
     );
+    // Students joining a live class are present, in the register sense:
+    // a class join is harder evidence than a morning button tap. Never
+    // downgrades anything; upgrades an earlier 'absent' to present.
+    if (peer.role === 'student') {
+      const Attendance = require('../models/Attendance');
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      await Attendance.findOneAndUpdate(
+        { studentId: peer.userId, date: today },
+        { $set: { status: 'present', source: 'class', reason: '' } },
+        { upsert: true, setDefaultsOnInsert: true }
+      );
+    }
   } catch (e) { console.error('[classroom attendance join]', e.message); }
 }
 
