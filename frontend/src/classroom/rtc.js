@@ -185,6 +185,39 @@ export class MeshEngine {
    * Returns { [socketId]: 'good' | 'fair' | 'poor' | 'down' }.
    * fair: RTT > 300ms or loss > 3%; poor: RTT > 600ms or loss > 8%.
    */
+  /**
+   * Bandwidth governor. In a mesh, every camera is uploaded once per peer,
+   * so upload cost grows with room size. This caps each outgoing video
+   * sender's bitrate and resolution according to room size, and supports a
+   * "data saver" mode for low-bandwidth homes:
+   *   auto  : <=3 peers 650kbps, <=6 peers 350kbps/half-res, more 180kbps/third-res
+   *   saver : 120kbps at quarter resolution regardless of room size
+   * Audio is never touched: voice always gets priority.
+   */
+  async applyVideoPolicy({ dataSaver = false } = {}) {
+    const n = this.peers ? this.peers.size : 0;
+    let maxBitrate, scale;
+    if (dataSaver) { maxBitrate = 120000; scale = 4; }
+    else if (n <= 3) { maxBitrate = 650000; scale = 1; }
+    else if (n <= 6) { maxBitrate = 350000; scale = 2; }
+    else { maxBitrate = 180000; scale = 3; }
+    const jobs = [];
+    this.peers.forEach((entry) => {
+      const pc = entry && entry.pc;
+      if (!pc) return;
+      pc.getSenders().forEach((sender) => {
+        if (!sender.track || sender.track.kind !== 'video') return;
+        const params = sender.getParameters();
+        if (!params.encodings || !params.encodings.length) params.encodings = [{}];
+        params.encodings[0].maxBitrate = maxBitrate;
+        params.encodings[0].scaleResolutionDownBy = scale;
+        jobs.push(sender.setParameters(params).catch(() => {}));
+      });
+    });
+    await Promise.all(jobs);
+    return { peers: n, maxBitrate, scale, dataSaver };
+  }
+
   async getQuality() {
     const out = {};
     for (const [id, { pc }] of this.peers) {
