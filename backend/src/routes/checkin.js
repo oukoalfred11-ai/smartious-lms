@@ -82,6 +82,7 @@ router.post('/', auth, async (req, res) => {
           curriculum: Array.isArray(user.curriculum) ? user.curriculum.join(', ') : (user.curriculum || ''),
           // Extra fields for check-in
           checkedIn:     true,
+          source:        'self',
           checkInStatus: status,        // 'present'|'absent'|'late'
           lateTime:      status==='late' ? lateTime.trim() : '',
           checkInTime:   new Date(),
@@ -237,7 +238,7 @@ async function sendDailyReminders() {
     email:    { $exists:true, $ne:'' },
   }).select('firstName lastName email role').lean()
 
-  const records = await Attendance.find({ date:today, checkedIn:true }).select('studentId').lean()
+  const records = await Attendance.find({ date:today }).select('studentId').lean()
   const checkedInIds = new Set(records.map(r=>String(r.studentId)))
 
   const pending = users.filter(u => !checkedInIds.has(String(u._id)))
