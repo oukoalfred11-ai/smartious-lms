@@ -11,6 +11,48 @@ const C = {
   s500:'#857973',s700:'#564844',s900:'#261A17',green:'#059669',greenL:'#D1FAE5',
 }
 
+
+// ── Coloured SVG badge medals ──────────────────────────────────────
+// Each badge is a gradient medal with a white pictogram, drawn in SVG
+// so it renders identically on every device (no OS emoji).
+const BADGE_ART = {
+  first_quiz:   { c:['#14B8A6','#0F766E'], g:<path d="M7 3h2v18H7zm3 1h8l-2.2 3L18 10h-8z"/> },
+  streak_3:     { c:['#FB923C','#EA580C'], g:<path d="M12 2c1 3-2 4.5-2 7a2 2 0 0 0 4 .2C15.5 8 17 6.5 17 4c2.5 2 4 5 4 8a9 9 0 1 1-18 0c0-2.5 1-4.8 2.6-6.4C6.4 8 8 9 9 8.6 8.4 6 10 3.4 12 2z"/> },
+  streak_5:     { c:['#EF4444','#B91C1C'], g:<path d="M13 2 4.5 13.5H10L8.5 22 19 10h-6z"/> },
+  perfect_10:   { c:['#8B5CF6','#6D28D9'], g:<path d="M12 2l6 6-6 14L6 8zm-3.6 6L12 5l3.6 3L12 17.5z"/> },
+  century:      { c:['#F59E0B','#B45309'], g:<g><circle cx="12" cy="10" r="6"/><path d="M8.5 15.5 7 22l5-2.6L17 22l-1.5-6.5a7.5 7.5 0 0 1-7 0z"/><text x="12" y="12.6" textAnchor="middle" fontSize="6.5" fontWeight="900" fill="#B45309">100</text></g> },
+  math_master:  { c:['#3B82F6','#1D4ED8'], g:<g><path d="M5 5h14v2.5H9.5c2 2 3 4 3 6.5a5.5 5.5 0 0 1-9.4 3.9l1.7-1.7A3.1 3.1 0 0 0 10 14c0-2.4-1.4-4.5-4-6.5V5z"/></g> },
+  science_star: { c:['#22C55E','#15803D'], g:<path d="M10 2h4v2h-.5v5l4.8 8.1A2 2 0 0 1 16.6 20H7.4a2 2 0 0 1-1.7-2.9L10.5 9V4H10zm2.5 8.5-1.8 3h3.6z"/> },
+  speed_demon:  { c:['#EAB308','#A16207'], g:<g><circle cx="12" cy="13" r="8" fillOpacity=".35"/><path d="M12 7v6l4.2 2.5-1 1.7L10 14V7zM9 2h6v2H9z"/></g> },
+  xp_1000:      { c:['#C9A030','#7D1025'], g:<path d="M12 2l2.7 6 6.3.7-4.7 4.3 1.3 6.3L12 16l-5.6 3.3L7.7 13 3 8.7 9.3 8z"/> },
+  level_5:      { c:['#EC4899','#BE185D'], g:<path d="M4 20 10 14l3 3 7-8v5h2V5h-9v2h5l-5.5 6.3-3-3L2 18.6z"/> },
+  level_10:     { c:['#A855F7','#7E22CE'], g:<path d="M3 8l4.5 3L12 4l4.5 7L21 8l-1.5 10h-15zM5.5 20h13v2h-13z"/> },
+  consistent:   { c:['#10B981','#047857'], g:<g><path d="M7 2h2v2h6V2h2v2h3v18H4V4h3zm-1 7v11h12V9z"/><path d="M8.6 14.4 11 16.8l4.4-4.4 1.4 1.4-5.8 5.8-3.8-3.8z"/></g> },
+}
+function BadgeIcon({ id, size = 64, dim = false }) {
+  const a = BADGE_ART[id] || { c:[C.gold, C.crimson], g:<circle cx="12" cy="12" r="6"/> }
+  const [c1, c2] = a.c
+  const gid = 'bg_' + id
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" style={{ filter: dim ? 'grayscale(100%) opacity(.55)' : 'drop-shadow(0 3px 6px rgba(26,15,14,.18))' }}>
+      <defs><linearGradient id={gid} x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor={c1}/><stop offset="1" stopColor={c2}/></linearGradient></defs>
+      <circle cx="12" cy="12" r="11" fill={'url(#' + gid + ')'} />
+      <circle cx="12" cy="12" r="11" fill="none" stroke="rgba(255,255,255,.5)" strokeWidth=".8" />
+      <g transform="translate(4.8 4.8) scale(.6)" fill="#fff">{a.g}</g>
+    </svg>
+  )
+}
+const STAT_ART = {
+  quizzes:  { c:'#7C3AED', g:<path d="M7.2 7h9.6a5.2 5.2 0 0 1 5.1 6.3l-.9 4.2a2.6 2.6 0 0 1-4.6 1L14.6 16H9.4l-1.8 2.5a2.6 2.6 0 0 1-4.6-1l-.9-4.2A5.2 5.2 0 0 1 7.2 7z"/> },
+  correct:  { c:'#22C55E', g:<path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-1.8 14.4-4-4 1.6-1.6 2.4 2.4 6-6 1.6 1.6z"/> },
+  streak:   { c:'#F97316', g:<path d="M12 2c1 3-2 4.5-2 7a2 2 0 0 0 4 .2C15.5 8 17 6.5 17 4c2.5 2 4 5 4 8a9 9 0 1 1-18 0c0-2.5 1-4.8 2.6-6.4C6.4 8 8 9 9 8.6 8.4 6 10 3.4 12 2z"/> },
+  rank:     { c:'#F2C230', g:<path d="M7 2h10v2h3a1 1 0 0 1 1 1c0 3.3-2 5.7-4.7 6.5A5 5 0 0 1 13 14.9V17h3v2H8v-2h3v-2.1a5 5 0 0 1-3.3-3.4C5 10.7 3 8.3 3 5a1 1 0 0 1 1-1h3z"/> },
+}
+const StatIcon = ({ k, size = 26 }) => {
+  const a = STAT_ART[k] || STAT_ART.rank
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill={a.c}>{a.g}</svg>
+}
+
 const BADGES = [
   { id:'first_quiz',    name:'First Step',      icon:'◎', desc:'Completed your first quiz' },
   { id:'streak_3',      name:'On Fire',          icon:'▲', desc:'3 correct answers in a row' },
@@ -98,13 +140,13 @@ export default function AchievementTab({ user }) {
         {/* Stats row */}
         <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12, marginTop:20 }}>
           {[
-            { label:'Quizzes', val:ach?.quizzesTaken||0, icon:'▶' },
-            { label:'Correct', val:ach?.totalCorrect||0, icon:'✓' },
-            { label:'Best Streak', val:ach?.bestStreak||0, icon:'▲' },
-            { label:'Rank', val:myRank>=0 ? '#'+(myRank+1) : '—', icon:'✦' },
+            { label:'Quizzes', val:ach?.quizzesTaken||0, icon:'quizzes' },
+            { label:'Correct', val:ach?.totalCorrect||0, icon:'correct' },
+            { label:'Best Streak', val:ach?.bestStreak||0, icon:'streak' },
+            { label:'Rank', val:myRank>=0 ? '#'+(myRank+1) : '\u2014', icon:'rank' },
           ].map(s=>(
             <div key={s.label} style={{ textAlign:'center', background:'rgba(255,255,255,.12)', borderRadius:10, padding:'10px 8px' }}>
-              <div style={{ fontSize:22 }}>{s.icon}</div>
+              <div style={{ display:'flex', justifyContent:'center', marginBottom:4 }}><StatIcon k={s.icon} /></div>
               <div style={{ fontSize:20, fontWeight:900, color:C.gold }}>{s.val}</div>
               <div style={{ fontSize:10, fontWeight:700, color:'rgba(255,255,255,.6)', textTransform:'uppercase', letterSpacing:'.06em' }}>{s.label}</div>
             </div>
@@ -157,8 +199,8 @@ export default function AchievementTab({ user }) {
               {(ach?.badges||[]).slice(0,8).map(b => {
                 const def = BADGES.find(x=>x.id===b.id)||{ icon:'✦', name:b.id, desc:'' }
                 return (
-                  <div key={b.id} title={def.desc} style={{ width:52, height:52, borderRadius:12, background:`linear-gradient(135deg,${C.gold}30,${C.gold}15)`, border:`2px solid ${C.gold}`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:26, cursor:'default' }}>
-                    {def.icon}
+                  <div key={b.id} title={def.desc + ' \u2014 ' + def.name}>
+                    <BadgeIcon id={b.id} size={52} />
                   </div>
                 )
               })}
@@ -182,7 +224,7 @@ export default function AchievementTab({ user }) {
                 padding:'20px 16px', textAlign:'center', opacity:earned?1:0.55,
                 transition:'all .2s',
               }}>
-                <div style={{ fontSize:40, marginBottom:8, filter:earned?'none':'grayscale(100%)' }}>{b.icon}</div>
+                <div style={{ display:'flex', justifyContent:'center', marginBottom:10 }}><BadgeIcon id={b.id} size={80} dim={!earned} /></div>
                 <div style={{ fontSize:14, fontWeight:800, color:earned?C.crimson:C.s500, marginBottom:4 }}>{b.name}</div>
                 <div style={{ fontSize:12, color:C.s400, lineHeight:1.5 }}>{b.desc}</div>
                 {earned && <div style={{ marginTop:8, fontSize:11, fontWeight:700, color:C.gold, textTransform:'uppercase', letterSpacing:'.08em' }}>✓ Earned</div>}
