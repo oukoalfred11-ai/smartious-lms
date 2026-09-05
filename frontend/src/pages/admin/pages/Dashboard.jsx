@@ -376,7 +376,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
     ],
     accountant:  [{ items: ['checkin','dashboard','analytics','feecollection','billing','sessions','payroll','settings'] }],
     sales:       [{ items: ['checkin','dashboard','salesperf','crm','assessment','frontdesk','communication','documents','settings'] }],
-    dos:         [{ items: ['checkin','dosperformance','dosanalytics','exams','doshomework','dosattend','sessions','dosbreaks','dostimetable','questionbank','markingreview','reports','mastery','settings'] }],
+    dos:         [{ items: ['checkin','dosperformance','liveclasses','dosanalytics','exams','doshomework','dosattend','sessions','dosbreaks','dostimetable','questionbank','markingreview','reports','mastery','settings'] }],
     ops_manager: [{ items: ['checkin','dashboard','analytics','users','teachers','allocations','sessions','communication','cooreports','reports','dosperformance','mastery','teacherratings','exams','documents','leave','programmes','liveclasses','clubs','settings','ai'] }],
   }
   const allowedPages = (ROLE_SECTIONS_MAIN[role] || ROLE_SECTIONS_MAIN.admin).flatMap(s => s.items)
