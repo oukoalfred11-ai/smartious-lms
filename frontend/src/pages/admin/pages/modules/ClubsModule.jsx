@@ -88,7 +88,9 @@ export default function ClubsModule({ toast }) {
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 14 }}>
           {clubs.map(c => (
-            <div key={c._id} style={{ ...card, borderTop: `4px solid ${c.color}`, opacity: c.isActive ? 1 : .6 }}>
+            <div key={c._id} style={{ ...card, padding: 0, overflow: 'hidden', borderTop: `4px solid ${c.color}`, opacity: c.isActive ? 1 : .6 }}>
+              <div style={{ height: 84, background: c.coverImage ? `url(${c.coverImage}) center/cover no-repeat, linear-gradient(135deg, ${c.color}, #1A1A1A)` : `linear-gradient(135deg, ${c.color}, #1A1A1A)` }} />
+              <div style={{ padding: 18 }}>
               <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
                 <span style={{ width: 42, height: 42, borderRadius: '50%', background: c.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#fff', fontWeight: 800 }}>{c.name[0]}</span>
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -103,6 +105,7 @@ export default function ClubsModule({ toast }) {
                 <button style={btn(true, c.color)} onClick={() => setMeeting({ clubId: c._id, clubName: c.name, title: `${c.name} meeting`, scheduledAt: '', durationMins: c.durationMins || 60, kind: 'club', teacherId: c.leaders[0]?._id || '' })}>Schedule session</button>
                 <button style={btn(false)} onClick={() => openDetail(c)}>Members & sessions</button>
                 <button style={btn(false)} onClick={() => setForm({ ...EMPTY, ...c, leaders: c.leaders.map(l => l._id) })}>Edit</button>
+              </div>
               </div>
             </div>
           ))}
