@@ -1,228 +1,281 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+require('dotenv').config();
+// Mail policy must load before any module that creates a transporter:
+// it gives EVERY outgoing email the school reply address and the
+// permanent outbox copy. See src/lib/mailPolicy.js.
+require('./lib/mailPolicy');
+const express    = require('express');
+const cors       = require('cors');
+const helmet     = require('helmet');
+const rateLimit  = require('express-rate-limit');
+const mongoose   = require('mongoose');
 
-  <!-- Google Tag Manager (GTM-55SRQS2G) -->
-  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-  })(window,document,'script','dataLayer','GTM-55SRQS2G');</script>
-  <!-- End Google Tag Manager -->
+const app = express();
 
-  <!-- Search engine ownership verification -->
-  <meta name="google-site-verification" content="eiGdv2Lik2kFbA9m2DXHDBdfbI6WYQzWtBQXOPZU5TY"/>
-  <meta name="msvalidate.01" content="C0FEDFD7BDC2F88456F9DED6DFC17126"/>
+// Render runs the app behind a reverse proxy; without this, every
+// request appears to come from the proxy's IP and express-rate-limit
+// throws ERR_ERL_UNEXPECTED_X_FORWARDED_FOR while rate-limiting all
+// users as one. Trust exactly one proxy hop.
+app.set('trust proxy', 1);
 
-  <!-- Performance: preconnect + preload -->
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link rel="preconnect" href="https://res.cloudinary.com" crossorigin/>
-  <link rel="preconnect" href="https://images.unsplash.com" crossorigin/>
-  <link rel="preconnect" href="https://www.googletagmanager.com"/>
+// ── Security headers ─────────────────────────────────────
+// Disable CSP in development — Vite uses inline scripts for HMR
+app.use(helmet({
+  contentSecurityPolicy: process.env.NODE_ENV === 'production',
+}));
 
-  <link rel="preload" as="image" href="/hero-learning-centre.jpg" fetchpriority="high"/>
-  <!-- The Playfair Display preload pointed at a hardcoded Google Fonts
-       version hash (v37). Google rotates those, so the file 404'd and the
-       browser warned about an unused preload on every page load. The
-       stylesheet below already fetches the current version; preloading a
-       specific file is not worth breaking each time Google republishes. -->
+// ── CORS ─────────────────────────────────────────────────
+const ALLOWED_ORIGINS = [
+  'https://smartioushomeschool.com',
+  'https://www.smartioushomeschool.com',
+  process.env.CLIENT_URL,           // set in .env for each environment
+].filter(Boolean);
 
-  <link rel="dns-prefetch" href="https://smartious-backend.onrender.com"/>
-  <link rel="dns-prefetch" href="https://formsubmit.co"/>
+app.use(cors({
+  origin: (origin, cb) => {
+    // Allow requests with no origin (mobile apps, curl, Render health checks)
+    if (!origin) return cb(null, true);
+    if (ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
+    cb(new Error(`CORS blocked: ${origin}`));
+  },
+  credentials: true,
+}));
 
-  <!-- Google Ads conversion tracking (AW-17733479094). Used directly by
-       trackConversion() in LandingPage.jsx for the 4 wired conversion events
-       on /us-families (Consult Booked, Enrol Started, WhatsApp Click, Phone
-       Click). Do NOT also configure these same conversion actions inside GTM
-       or events double-count. GTM is reserved for future tags (GA4, Pixel). -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17733479094"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'AW-17733479094');
-  </script>
+// ── Body parsing ─────────────────────────────────────────
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true }));
 
-  <!-- Permissions Policy: allow camera, microphone, screen-share for Live Classes -->
-  <meta http-equiv="Permissions-Policy" content="camera=(self), microphone=(self), display-capture=(self), autoplay=(self)"/>
-  <meta http-equiv="Feature-Policy" content="camera 'self'; microphone 'self'; display-capture 'self'"/>
+// ── Rate limiting ─────────────────────────────────────────
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: { success: false, message: 'Too many login attempts — please wait 15 minutes.' },
+});
 
-  <!-- Primary page title and description. Generic homepage-friendly defaults.
-       Overridden per-route at runtime by usePageMeta() in LandingPage.jsx,
-       and baked into prerendered HTML for each route by scripts/prerender.js. -->
-  <title>Online Homeschool | IGCSE, A-Level, IB & American — Smartious</title>
-  <meta name="description" content="Accredited online homeschool serving UAE, UK, Canada, Australia, Nigeria and Kenya. Cambridge IGCSE, A-Level, IB Diploma, Edexcel and American curricula. Live classes, qualified teachers, from USD 85/month."/>
-  <meta name="keywords" content="online homeschool, homeschooling Kenya, IGCSE online school, Cambridge IGCSE, A-Level online, IB Diploma, online school UAE, homeschool Canada, homeschool Australia, homeschool Nigeria, homeschool South Africa, Smartious"/>
-  <meta name="author" content="Smartious Homeschool"/>
-  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1"/>
+// Global limiter: 1000 req / 15 min per IP
+app.use(rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 1000,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many requests — please try again later.' },
+}));
 
-  <!-- IMPORTANT: NO static canonical or og:url tag here. usePageMeta()
-       sets per-route canonicals at runtime, and scripts/prerender.js bakes
-       the correct canonical into each route at build time. A static
-       homepage canonical here would tell Googlebot every URL is a duplicate
-       of the homepage. Do not re-add either tag in this file. -->
+// ── Routes ────────────────────────────────────────────────
+app.use('/api/auth',           authLimiter, require('./routes/auth'));
+app.use('/api/users',          require('./routes/users'));
+app.use('/api/communication', require('./routes/communication'));
+app.use('/api/payments', require('./routes/paymentRoutes'))
+app.use('/api/teachers',       require('./routes/teachers'));
+app.use('/api/teacher-profile', require('./routes/teacher-profile'));
+app.use('/api/allocations',    require('./routes/allocations'));
+app.use('/api/subjects',       require('./routes/subjects'));
+app.use('/api/lessons', require('./routes/lessons'));
+app.use('/api/attendance', require('./routes/attendance'));
+app.use('/api/syllabus-progress', require('./routes/syllabus-progress'));
+app.use('/api/lesson-progress', require('./routes/lesson-progress'));
+app.use('/api/curriculum',     require('./routes/curriculum'));
+app.use('/api/timetables', require('./routes/timetables'));
+app.use('/api/syllabus', require('./routes/syllabus'));
+app.use('/api/classroom', require('./routes/classroom'));
+app.use('/api/timetable', require('./routes/timetable'));
+app.use('/api/student-profile', require('./routes/student-profile'));
+app.use('/api/students',       require('./routes/students'));
+app.use('/api/student-sessions', require('./routes/student-sessions'));
+app.use('/api/birthdays', require('./routes/birthdays'));
+app.use('/api/suggestions', require('./routes/suggestions'));
+app.use('/api/parents', require('./routes/parents'));
+app.use('/api/dashboard',      require('./routes/dashboard'));
+app.use('/api/grouprooms',     require('./routes/grouprooms'));
+app.use('/api/liveclasses', require('./routes/liveclasses'));
+// question-bank MUST be mounted before routes/questions.js: that file
+// has GET /:id, which would otherwise capture named routes such as
+// /selftest and /spine and fail with "Invalid question ID".
+app.use('/api/questions', require('./routes/question-bank'));
+app.use('/api/questions', require('./routes/questions'));
 
-  <!-- Favicons -->
-  <link rel="icon"           type="image/x-icon"  href="/favicon.ico"/>
-  <link rel="icon"           type="image/svg+xml" href="/favicon.svg"/>
-  <link rel="icon"           type="image/png"     href="/favicon-32x32.png" sizes="32x32"/>
-  <link rel="icon"           type="image/png"     href="/favicon-16x16.png" sizes="16x16"/>
-  <link rel="icon"           type="image/png"     href="/favicon-192x192.png" sizes="192x192"/>
-  <link rel="apple-touch-icon" sizes="180x180"   href="/apple-touch-icon.png"/>
-  <link rel="manifest" href="/site.webmanifest"/>
-  <meta name="theme-color" content="#8B1A2E"/>
-  <meta name="msapplication-TileColor" content="#8B1A2E"/>
-  <meta name="msapplication-TileImage" content="/favicon-192x192.png"/>
+app.use('/api/ai-review', require('./routes/ai-review'));
+app.use('/api/homework', require('./routes/homework'));
+app.use('/api/curriculum', require('./routes/curriculum'));
+app.use('/api/exams', require('./routes/exams'));
+app.use('/api/status',         require('./routes/status-management'));
+app.use('/api/frontdesk', require('./routes/frontdesk'));
+app.use('/api/library', require('./routes/library'));
+app.use('/api/leave-requests', require('./routes/status-management'));
+app.use('/api/invoices',   require('./routes/invoices'));
+app.use('/api/paystack',   require('./routes/paystack'));
+app.use('/api/community',  require('./routes/community'));
+app.use('/api/announcements', require('./routes/announcements'));
+app.use('/api/clubs', require('./routes/clubs'));
+app.use('/api/mastery', require('./routes/mastery'));
+app.use('/api/livekit', require('./routes/livekit'));
+app.use('/api/community-chat', require('./routes/communityChat'));
+app.use('/api/inquiries',  require('./routes/inquiries'));
+app.use('/api/assessment', require('./routes/assessment'));
+app.use('/api/reports',    require('./routes/reports'));
+app.use('/api/dos',        require('./routes/dos-analytics'));
+app.use('/api/fees',       require('./routes/fee-collection'));
+app.use('/api/payroll',    require('./routes/payroll'));
+app.use('/api/parent',     require('./routes/parent-portal'));
+app.use('/api/ratings',        require('./routes/ratings'));
+app.use('/api/weekly-reports', require('./routes/weekly-reports'));
+app.use('/api/seed-subjects',  require('./routes/seed-subjects'));
+app.use('/api/quiz',           require('./routes/quiz'));
+app.use('/api/checkin',    require('./routes/checkin'));
 
-  <!-- Open Graph (Facebook, LinkedIn, WhatsApp). og:url set dynamically per route. -->
-  <meta property="og:type" content="website"/>
-  <meta property="og:site_name" content="Smartious Homeschool"/>
-  <meta property="og:title" content="Online Homeschool | IGCSE, A-Level, IB & American — Smartious"/>
-  <meta property="og:description" content="Accredited online homeschool serving UAE, UK, Canada, Australia, Nigeria and Kenya. Cambridge IGCSE, A-Level, IB Diploma, Edexcel and American curricula."/>
-  <meta property="og:image" content="https://smartioushomeschool.com/favicon-512x512.png"/>
-  <meta property="og:image:width" content="512"/>
-  <meta property="og:image:height" content="512"/>
-  <meta property="og:image:alt" content="Smartious Homeschool logo"/>
-  <meta property="og:locale" content="en_US"/>
+// ── Health check ──────────────────────────────────────────
+app.get('/api/health', (_, res) =>
+  res.json({ status: 'ok', env: process.env.NODE_ENV, ts: new Date().toISOString() })
+);
 
-  <!-- Twitter / X card -->
-  <meta name="twitter:card" content="summary"/>
-  <meta name="twitter:title" content="Online Homeschool | IGCSE, A-Level, IB & American — Smartious"/>
-  <meta name="twitter:description" content="Accredited online homeschool serving UAE, UK, Canada, Australia, Nigeria and Kenya."/>
-  <meta name="twitter:image" content="https://smartioushomeschool.com/favicon-512x512.png"/>
+// ── 404 ───────────────────────────────────────────────────
+app.use((req, res) =>
+  res.status(404).json({ success: false, message: `Route not found: ${req.method} ${req.path}` })
+);
 
-  <!-- Fonts (non-blocking) -->
-  <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Fira+Code:wght@400;500;600&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Syne:wght@400..800&family=Syne+Mono&display=swap"
-        media="print"
-        onload="this.media='all'"/>
-  <noscript>
-    <link rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Fira+Code:wght@400;500;600&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Syne:wght@400..800&family=Syne+Mono&display=swap"/>
-  </noscript>
+// ── Error handler ─────────────────────────────────────────
+app.use((err, req, res, next) => {   // eslint-disable-line no-unused-vars
+  console.error('[ERROR]', err.message);
+  res.status(err.status || 500).json({
+    success: false,
+    message: process.env.NODE_ENV === 'production' ? 'Server error' : err.message,
+  });
+});
 
-  <!-- Structured data: EducationalOrganization (with OSSD + American as 5 credentials, foundingDate 2019) -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "EducationalOrganization",
-    "@id": "https://smartioushomeschool.com/#organization",
-    "name": "Smartious Homeschool & eSchool",
-    "alternateName": ["Smartious", "Smartious Homeschool", "Smartious eSchool"],
-    "url": "https://smartioushomeschool.com/",
-    "logo": "https://smartioushomeschool.com/favicon-512x512.png",
-    "image": "https://smartioushomeschool.com/favicon-512x512.png",
-    "description": "Smartious Homeschool & eSchool is an accredited international online and home-based school. We deliver Cambridge IGCSE, Cambridge A-Level, IB Diploma, Pearson Edexcel and the British and American curricula to students across Kenya, the diaspora and worldwide. Live classes, qualified specialists, and full university-application support.",
-    "foundingDate": "2019",
-    "foundingLocation": {
-      "@type": "Place",
-      "name": "Nairobi, Kenya"
-    },
-    "email": "hellosmartious@gmail.com",
-    "telephone": "+254745021212",
-    "address": {
-      "@type": "PostalAddress",
-      "streetAddress": "Diamond Plaza I Annex, 3rd Floor, Office 20, Fourth Parklands Avenue",
-      "addressLocality": "Parklands",
-      "addressRegion": "Nairobi County",
-      "postalCode": "00100",
-      "addressCountry": "KE"
-    },
-    "geo": {
-      "@type": "GeoCoordinates",
-      "latitude": -1.2573424,
-      "longitude": 36.8182174
-    },
-    "contactPoint": [{
-      "@type": "ContactPoint",
-      "telephone": "+254-745-021212",
-      "contactType": "admissions",
-      "areaServed": ["KE", "AE", "GB", "US", "CA", "AU", "NG", "ZA", "QA", "EG"],
-      "availableLanguage": ["English"]
-    }],
-    "areaServed": [
-      { "@type": "Country", "name": "Kenya" },
-      { "@type": "Country", "name": "United Arab Emirates" },
-      { "@type": "Country", "name": "United Kingdom" },
-      { "@type": "Country", "name": "United States" },
-      { "@type": "Country", "name": "Canada" },
-      { "@type": "Country", "name": "Australia" },
-      { "@type": "Country", "name": "Nigeria" },
-      { "@type": "Country", "name": "South Africa" },
-      { "@type": "Country", "name": "Qatar" },
-      { "@type": "Country", "name": "Egypt" }
-    ],
-    "sameAs": [
-      "https://www.facebook.com/smartioushomeschool",
-      "https://www.instagram.com/smartioushomeschool",
-      "https://www.linkedin.com/company/smartious-homeschool",
-      "https://www.tiktok.com/@smartioushomeschool",
-      "https://wa.me/254745021212"
-    ],
-    "hasCredential": [
-      {
-        "@type": "EducationalOccupationalCredential",
-        "credentialCategory": "certification",
-        "name": "Cambridge International Examinations (IGCSE & A-Level)"
-      },
-      {
-        "@type": "EducationalOccupationalCredential",
-        "credentialCategory": "certification",
-        "name": "International Baccalaureate (IB) Diploma Programme"
-      },
-      {
-        "@type": "EducationalOccupationalCredential",
-        "credentialCategory": "certification",
-        "name": "Pearson Edexcel International"
-      },
-      {
-        "@type": "EducationalOccupationalCredential",
-        "credentialCategory": "certification",
-        "name": "American Curriculum with Advanced Placement (AP)",
-        "recognizedBy": {
-          "@type": "Organization",
-          "name": "The College Board",
-          "url": "https://www.collegeboard.org/"
-        }
-      },
-      {
-        "@type": "EducationalOccupationalCredential",
-        "credentialCategory": "degree",
-        "name": "Ontario Secondary School Diploma (OSSD)",
-        "educationalLevel": "high school diploma",
-        "recognizedBy": {
-          "@type": "Organization",
-          "name": "Ontario Ministry of Education",
-          "url": "https://www.ontario.ca/page/ministry-education"
-        },
-        "description": "Smartious students complete the Ontario Secondary School Diploma through partnership with Canadian Cross International School, an Ontario-inspected private secondary school. The OSSD is recognised by Canadian universities (OUAC), US universities (Common Application), UK universities (UCAS) and globally."
-      }
-    ]
-  }
-  </script>
-  <!-- KaTeX renders mathematics typed as $…$ in questions and mark schemes.
-       Deferred, so it never blocks first paint; MathField falls back to a
-       Unicode approximation if it has not loaded. -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
-</head>
-<body>
-  <!-- Google Tag Manager noscript fallback -->
-  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-55SRQS2G"
-    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+// ── Timetable roll-forward promotion job ──────────────────
+// Promotes near-term timetable sessions into LiveClass records.
+// Best-effort daily interval (not a precise cron). On Render's
+// free tier the timer pauses while the instance sleeps and
+// catches up on wake — the 14-day window absorbs that lag.
+const { startReminderScheduler } = require('./lib/reminderScheduler');
+const { startHomeworkCycle } = require('./services/homeworkCycle');
+const { startTimetableConfirm } = require('./services/timetableConfirm');
+const { promoteUpcomingSessions } = require('./services/timetableSync');
 
-  <div id="root"></div>
-  <script type="module" src="/src/main.jsx"></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function () {
-        navigator.serviceWorker.register('/sw.js').catch(function () {});
-      });
+// ── AUTO TIMETABLE KILL SWITCH ──────────────────────────
+// The auto timetable (promotion of pending sessions into live
+// classes, and slot confirmation from taught lessons) is OFF by
+// default after it created night-time classes from a timezone bug.
+// The underlying fix is in place; re-enable deliberately by setting
+// AUTO_TIMETABLE=on in the environment when ready to trust it again.
+const AUTO_TIMETABLE_ON = String(process.env.AUTO_TIMETABLE || '').toLowerCase() === 'on';
+
+const runTimetablePromotion = () => {
+  if (!AUTO_TIMETABLE_ON) return;
+  promoteUpcomingSessions(14)
+    .then(r => console.log('[timetable promotion]', JSON.stringify(r)))
+    .catch(e => console.error('[timetable promotion] failed:', e.message));
+};
+
+// ── Daily 7 AM check-in reminder ─────────────────────────────
+// Fires every weekday at 07:00 school local time (EAT = UTC+3).
+// Sends email to every active user who hasn't checked in yet.
+const { sendDailyReminders } = require('./routes/checkin');
+const { sendDueReminders  } = require('./routes/fee-collection');
+const { sendClassReminders } = require('./routes/parent-portal');
+const { scheduleShowCauseCron } = require('./services/showCauseCron');
+try { require('./services/autoHomeworkCron').start(); } catch (e) { console.error('[auto-homework] start failed:', e.message); }
+try { require('./services/pauseAutoResume').startPauseAutoResumeCron(); } catch (e) { console.error('[pause-cron] start failed:', e.message); }
+try { require('./services/birthdayCron').startBirthdayCron(); } catch (e) { console.error('[birthday-cron] start failed:', e.message); }
+try { require('./services/announcementMailer').startAnnouncementMailer(); } catch (e) { console.error('[announcement-mailer] failed to start:', e.message); }
+try { require('./services/aiMarking').logStartupState(); } catch (e) { /* service optional */ }
+
+const runCheckinReminder = () => {
+  const now = new Date();
+  const eat = new Date(now.getTime() + 3*60*60*1000); // UTC+3
+  if (eat.getDay() === 0 || eat.getDay() === 6) return; // skip weekends
+  sendDailyReminders()
+    .then(n => console.log('[checkin reminder] Sent', n, 'reminders'))
+    .catch(e => console.error('[checkin reminder] Error:', e.message));
+};
+
+// ── Database + start ──────────────────────────────────────
+const PORT        = process.env.PORT || 5000;
+const MONGODB_URI = process.env.MONGODB_URI;
+
+if (!MONGODB_URI) {
+  console.error('[ERROR] MONGODB_URI is not set. Exiting.');
+  process.exit(1);
+}
+
+mongoose.connect(MONGODB_URI)
+  .then(() => {
+    console.log('[OK] MongoDB connected');
+    // Socket.IO needs the raw http server (WebSocket upgrade requests
+    // never reach Express routes), so wrap the app before listening.
+    const httpServer = require('http').createServer(app);
+    require('./realtime/classroom').attachClassroom(httpServer, ALLOWED_ORIGINS);
+    httpServer.listen(PORT, () =>
+      console.log(`API running on port ${PORT} [${process.env.NODE_ENV || 'development'}]`)
+    );
+
+    // Invoice reminder scheduler: chases unpaid invoices three days
+    // before each service period ends, skipping students on a break.
+    startReminderScheduler();
+
+    // Homework must be submitted, marked, reviewed and released before
+    // the next lesson. This warns whoever is holding that up.
+    startHomeworkCycle();
+
+    // Confirms provisional timetable slots from lessons actually taught,
+    // and keeps each entry's title pointing at the next lesson.
+    if (AUTO_TIMETABLE_ON) {
+      startTimetableConfirm();
+    } else {
+      console.log('[timetable] AUTO TIMETABLE IS OFF — timetables and classes are manual only. Set AUTO_TIMETABLE=on to re-enable.');
     }
-  </script>
-</body>
-</html>
+
+    // Start the timetable promotion job: first run 60s after boot
+    // (let the DB settle), then every 24 hours.
+    setTimeout(runTimetablePromotion, 60 * 1000);
+    setInterval(runTimetablePromotion, 24 * 60 * 60 * 1000);
+
+    // Schedule daily 7 AM EAT reminder
+    const scheduleReminder = () => {
+      const now = new Date();
+      const eat = new Date(now.getTime() + 3*60*60*1000);
+      const next7am = new Date(eat);
+      next7am.setHours(7, 0, 0, 0);
+      if (next7am <= eat) next7am.setDate(next7am.getDate() + 1);
+      const msUntil = next7am.getTime() - eat.getTime();
+      console.log('[checkin] Next reminder in', Math.round(msUntil/60000), 'minutes');
+      setTimeout(() => { runCheckinReminder(); setInterval(runCheckinReminder, 24*60*60*1000); }, msUntil);
+    };
+    scheduleReminder();
+
+    // Fee payment reminders — daily at 8 AM EAT
+    const scheduleFeeReminder = () => {
+      const now = new Date();
+      const eat = new Date(now.getTime() + 3*60*60*1000);
+      const next8am = new Date(eat);
+      next8am.setHours(8, 0, 0, 0);
+      if (next8am <= eat) next8am.setDate(next8am.getDate() + 1);
+      const ms = next8am.getTime() - eat.getTime();
+      console.log('[fees] Next fee reminder in', Math.round(ms/60000), 'minutes');
+      setTimeout(() => {
+        sendDueReminders()
+          .then(r => console.log('[fees] Auto-reminders sent:', r.sent, 'skipped:', r.skipped))
+          .catch(e => console.error('[fees] Cron error:', e.message));
+        setInterval(() => {
+          sendDueReminders()
+            .then(r => console.log('[fees] Auto-reminders sent:', r.sent))
+            .catch(e => console.error('[fees] Cron error:', e.message));
+        }, 24*60*60*1000);
+      }, ms);
+    };
+    scheduleFeeReminder();
+
+    // Class reminders — runs every minute, sends email 30min before class starts
+    setInterval(() => {
+      sendClassReminders().catch(e => console.error('[class reminder]', e.message));
+    }, 60 * 1000);
+    console.log('[class reminder] Cron started — checks every minute');
+
+    // Show-cause cron — runs every Friday at 5PM EAT
+    scheduleShowCauseCron();
+  })
+  .catch(err => {
+    console.error('[ERROR] MongoDB connection error:', err.message);
+    process.exit(1);
+  });
+
+module.exports = app;
