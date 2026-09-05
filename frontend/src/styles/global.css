@@ -680,12 +680,6 @@ img { display: block; max-width: 100% }
   align-items: center;
   gap: 8px;
 }
-.sec-tag::before {
-  content: '';
-  width: 18px; height: 2px;
-  background: linear-gradient(90deg, var(--gold3), transparent);
-  border-radius: 2px;
-}
 
 /* ── KPI CARDS ───────────────────────────────────────────── */
 .kpi-row, .kpi-grid {
