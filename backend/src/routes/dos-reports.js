@@ -253,4 +253,73 @@ router.get('/grade/:grade', auth, requireRole(...STAFF), async (req, res) => {
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
 
+// ── Question bank analysis ───────────────────────────────────────────
+// The DOS's tool for pushing teachers to build the bank: weekly output
+// per teacher, artwork debt, marking-scheme debt, and thin subjects.
+const Question = require('../models/Question');
+
+router.get('/question-bank', auth, requireRole(...STAFF), async (req, res) => {
+  try {
+    const weeks = 8;
+    const since = new Date(Date.now() - weeks * 7 * 24 * 3600 * 1000);
+    since.setHours(0, 0, 0, 0);
+
+    const [weekly, pendingArt, missingScheme, subjectCounts, teachers] = await Promise.all([
+      Question.aggregate([
+        { $match: { isActive: { $ne: false }, createdAt: { $gte: since } } },
+        { $group: {
+          _id: { teacher: '$createdBy', week: { $isoWeek: '$createdAt' }, year: { $isoWeekYear: '$createdAt' } },
+          n: { $sum: 1 },
+        } },
+      ]),
+      Question.aggregate([
+        { $match: { isActive: { $ne: false }, 'artwork.required': true, 'artwork.status': 'pending' } },
+        { $group: { _id: '$subject', n: { $sum: 1 } } }, { $sort: { n: -1 } },
+      ]),
+      Question.aggregate([
+        { $match: { isActive: { $ne: false }, type: { $ne: 'mcq' },
+          $and: [
+            { $or: [{ 'markScheme.modelAnswer': '' }, { 'markScheme.modelAnswer': null }] },
+            { $or: [{ 'markScheme.points': { $size: 0 } }, { 'markScheme.points': null }] },
+          ] } },
+        { $group: { _id: '$subject', n: { $sum: 1 } } }, { $sort: { n: -1 } },
+      ]),
+      Question.aggregate([
+        { $match: { isActive: { $ne: false } } },
+        { $group: { _id: '$subject', n: { $sum: 1 } } }, { $sort: { n: 1 } },
+      ]),
+      User.find({ role: 'teacher', isActive: { $ne: false } }).select('firstName lastName').lean(),
+    ]);
+
+    // Reshape weekly into per-teacher series.
+    const perTeacher = {};
+    weekly.forEach(w => {
+      const tid = String(w._id.teacher || 'unknown');
+      perTeacher[tid] = perTeacher[tid] || {};
+      perTeacher[tid][`${w._id.year}-${String(w._id.week).padStart(2, '0')}`] = w.n;
+    });
+    // Ordered list of the last `weeks` ISO week keys via aggregation keys seen + fill
+    const allKeys = [...new Set(weekly.map(w => `${w._id.year}-${String(w._id.week).padStart(2, '0')}`))].sort();
+    const rows = teachers.map(t => {
+      const tid = String(t._id);
+      const series = allKeys.map(k => perTeacher[tid]?.[k] || 0);
+      const total = series.reduce((a, b) => a + b, 0);
+      const thisWeek = series.length ? series[series.length - 1] : 0;
+      const avg = series.length ? Math.round((total / Math.max(series.length, 1)) * 10) / 10 : 0;
+      return { _id: t._id, name: [t.firstName, t.lastName].filter(Boolean).join(' '), thisWeek, weeklyAvg: avg, total8w: total };
+    }).sort((a, b) => b.total8w - a.total8w);
+
+    res.json({ success: true, data: {
+      weeks, weekKeys: allKeys,
+      teachers: rows,
+      pendingArtwork: pendingArt.map(r => ({ subject: r._id || 'Unknown', n: r.n })),
+      pendingArtworkTotal: pendingArt.reduce((t, r) => t + r.n, 0),
+      missingScheme: missingScheme.map(r => ({ subject: r._id || 'Unknown', n: r.n })),
+      missingSchemeTotal: missingScheme.reduce((t, r) => t + r.n, 0),
+      subjectCounts: subjectCounts.map(r => ({ subject: r._id || 'Unknown', n: r.n })),
+      method: 'Weekly counts by ISO week from active questions created in the last 8 weeks, attributed to the creating teacher. Artwork debt: active questions with artwork required and status pending. Marking-scheme debt: active non-MCQ questions with no model answer and no marking points. Subject depth: active questions per subject, thinnest first.',
+    } });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
 module.exports = router;
