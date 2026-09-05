@@ -26,6 +26,7 @@ import CurriculumModule from './modules/CurriculumModule.jsx'
 import BillingModule, { FeeCollectionModule } from './modules/BillingModule.jsx'
 import CommunityModule from './modules/CommunityModule.jsx'
 import LiveClassesModule from './modules/LiveClassesModule.jsx'
+import ClubsModule from './modules/ClubsModule.jsx'
 import AnnouncementsModule from './modules/AnnouncementsModule.jsx'
 import StudioModule from './modules/StudioModule.jsx'
 import SettingsModule from './modules/SettingsModule.jsx'
@@ -76,7 +77,7 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
       { label: 'People',      items: ['users', 'teachers', 'allocations', 'sessions', 'communication', 'community', 'announcements'] },
       { label: 'Reports',     items: ['reports'] },
       { label: 'Operations',  items: ['frontdesk', 'assessment', 'documents', 'payroll', 'leave', 'programmes'] },
-      { label: 'Teaching',    items: ['liveclasses', 'grouprooms', 'curriculum'] },
+      { label: 'Teaching',    items: ['liveclasses', 'clubs', 'grouprooms', 'curriculum'] },
       { label: 'Question Bank', items: ['questionbank', 'markingreview'] },
       { label: 'Marketing',   items: ['studio'] },
       { label: 'System',      items: ['billing', 'website', 'settings', 'ai', 'suggestions'] },
@@ -113,7 +114,7 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
       { label: 'Performance', items: ['teacherratings'] },
       { label: 'Operations',  items: ['crm', 'frontdesk', 'assessment', 'documents', 'leave', 'programmes'] },
       // Curriculum and Question Bank moved to the Admin Portal.
-      { label: 'Teaching',    items: ['liveclasses', 'grouprooms'] },
+      { label: 'Teaching',    items: ['liveclasses', 'clubs', 'grouprooms'] },
       { label: 'System',      items: ['settings', 'ai'] },
     ],
   }
@@ -368,12 +369,12 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
   const role = auth?.user?.role || 'admin'
   const ROLE_SECTIONS_MAIN = {
     admin:       [
-      { items: ['dashboard','analytics','users','teachers','allocations','sessions','communication','announcements','liveclasses','reports','frontdesk','documents','assessment','payroll','leave','programmes','grouprooms','curriculum','questionbank','markingreview','cooreports','teacherratings','feecollection','crm','billing','studio','website','settings','ai','suggestions','community'] },
+      { items: ['dashboard','analytics','users','teachers','allocations','sessions','communication','announcements','liveclasses','clubs','reports','frontdesk','documents','assessment','payroll','leave','programmes','grouprooms','curriculum','questionbank','markingreview','cooreports','teacherratings','feecollection','crm','billing','studio','website','settings','ai','suggestions','community'] },
     ],
     accountant:  [{ items: ['checkin','dashboard','analytics','feecollection','billing','sessions','payroll','settings'] }],
     sales:       [{ items: ['checkin','dashboard','salesperf','crm','assessment','frontdesk','communication','documents','settings'] }],
     dos:         [{ items: ['checkin','dosanalytics','exams','doshomework','dosattend','sessions','dosbreaks','dostimetable','questionbank','markingreview','reports','settings'] }],
-    ops_manager: [{ items: ['checkin','dashboard','analytics','users','teachers','allocations','sessions','communication','cooreports','reports','teacherratings','crm','frontdesk','assessment','documents','leave','programmes','liveclasses','grouprooms','settings','ai'] }],
+    ops_manager: [{ items: ['checkin','dashboard','analytics','users','teachers','allocations','sessions','communication','cooreports','reports','teacherratings','crm','frontdesk','assessment','documents','leave','programmes','liveclasses','clubs','grouprooms','settings','ai'] }],
   }
   const allowedPages = (ROLE_SECTIONS_MAIN[role] || ROLE_SECTIONS_MAIN.admin).flatMap(s => s.items)
   const safePage = allowedPages.includes(page) ? page : 'dashboard'
@@ -403,6 +404,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         {safePage === 'communication' && <CommunicationModule refreshKey={refreshKey} toast={toast} />}
         {safePage === 'community' && <CommunityModule refreshKey={refreshKey} toast={toast} />}
         {safePage === 'liveclasses' && <LiveClassesModule toast={toast} />}
+        {safePage === 'clubs' && <ClubsModule toast={toast} />}
         {safePage === 'announcements' && <AnnouncementsModule toast={toast} />}
         {safePage === 'frontdesk' && <FrontDeskModule refreshKey={refreshKey} toast={toast} />}
         {safePage === 'documents' && <DocumentsModule toast={toast} />}
