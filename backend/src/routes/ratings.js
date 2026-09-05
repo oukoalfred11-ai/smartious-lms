@@ -95,6 +95,24 @@ router.get('/teacher/:id', auth, requireRole('admin','ops_manager','dos','teache
 
 // ── POST /api/ratings/show-cause/:teacherId ───────────────
 // COO/admin applies a show-cause deduction to a teacher's rating
+// DELETE /api/ratings/teacher/:id/reset — wipe a teacher's ratings so
+// their score starts afresh (used after coaching, a role change, or a
+// review period). Admin and the Operations Manager only. The ratings
+// are deleted outright; students simply rate again going forward.
+router.delete('/teacher/:id/reset', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
+  try {
+    const teacher = await User.findById(req.params.id).select('firstName lastName role').lean()
+    if (!teacher || teacher.role !== 'teacher') {
+      return res.status(404).json({ success: false, message: 'Teacher not found.' })
+    }
+    const r = await TeacherRating.deleteMany({ teacherId: req.params.id })
+    console.log(`[ratings] reset for ${teacher.firstName} ${teacher.lastName}: ${r.deletedCount} rating(s) removed by ${req.user.email}`)
+    return res.json({ success: true, message: `Ratings reset for ${teacher.firstName} ${teacher.lastName} (${r.deletedCount} removed). Their score starts afresh.`, data: { removed: r.deletedCount } })
+  } catch (e) {
+    return res.status(500).json({ success: false, message: e.message })
+  }
+})
+
 router.post('/show-cause/:teacherId', auth, requireRole('admin','ops_manager'), async (req, res) => {
   try {
     const { reason, amount = 0.3 } = req.body
