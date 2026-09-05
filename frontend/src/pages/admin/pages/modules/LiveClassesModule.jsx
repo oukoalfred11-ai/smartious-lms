@@ -188,7 +188,7 @@ export default function LiveClassesModule({ toast }) {
             </div>
           )}
         </>
-      ) : (
+      ) : tab === 'live' ? (
         liveClasses.length === 0 ? (
           <div style={{ ...card, textAlign: 'center', color: TOKENS.s500 }}>No live or upcoming classes right now.</div>
         ) : (
@@ -228,7 +228,7 @@ export default function LiveClassesModule({ toast }) {
             ))}
           </div>
         )
-      )}
+      ) : null}
 
       {/* Past classes: what has actually been taught */}
       {tab === 'past' && (
@@ -249,9 +249,11 @@ export default function LiveClassesModule({ toast }) {
                     <span>{c.assigned} assigned</span>
                   </div>
                 </div>
-                {c.recordings > 0
-                  ? <span style={{ fontSize: 12, fontWeight: 800, color: '#15803D' }}>{c.recordings} recording{c.recordings > 1 ? 's' : ''} ✓</span>
-                  : <span style={{ fontSize: 12, fontWeight: 700, color: '#B45309' }}>no recording</span>}
+                                {c.joined === 0
+                  ? <span style={{ fontSize: 11.5, fontWeight: 800, color: '#B91C1C', background: '#FEE2E2', padding: '3px 10px', borderRadius: 999 }}>DID NOT RUN</span>
+                  : c.recordingCount > 0
+                    ? <span style={{ fontSize: 12, fontWeight: 800, color: '#15803D' }}>{c.joined} attended \u00b7 {c.recordingCount} recording{c.recordingCount > 1 ? 's' : ''}</span>
+                    : <span style={{ fontSize: 12, fontWeight: 700, color: '#B45309' }}>{c.joined} attended \u00b7 no recording</span>}
               </div>
             ))}
           </div>
