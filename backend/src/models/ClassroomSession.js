@@ -43,6 +43,12 @@ const classroomSessionSchema = new mongoose.Schema({
 
   // How many times they connected (1 = stayed the whole time;
   // higher numbers usually mean network drops).
+  // Teacher's register verdict. A session doc existing means the student
+  // joined; present:false lets the teacher discount a token join, and a
+  // doc created by a teacher with joinCount 0 records off-platform presence.
+  present:  { type: Boolean, default: true },
+  markedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+
   joinCount: { type: Number, default: 0, min: 0 },
 }, { timestamps: true });
 
