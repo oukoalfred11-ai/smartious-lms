@@ -44,11 +44,18 @@ function range(req) {
 
 /** Core: scheduled vs attended per student, plus per-class join stats. */
 async function sessionFacts(from, to) {
-  const classes = await LiveClass.find({
-    status: 'ended',
+  // A lesson counts as held once its scheduled time plus duration has
+  // passed (or it was explicitly ended). Stored status is unreliable:
+  // most teachers never press "end", so filtering on status 'ended'
+  // would silently drop most of the school's teaching.
+  const cutoff = Math.min(to.getTime(), Date.now());
+  const raw = await LiveClass.find({
+    status: { $nin: ['cancelled'] },
     kind: { $in: ['lesson', null] },
-    scheduledAt: { $gte: from, $lte: to },
-  }).select('subject grade teacherId assignedStudents scheduledAt').limit(1500).lean();
+    scheduledAt: { $gte: from, $lte: new Date(cutoff) },
+  }).select('subject grade teacherId assignedStudents scheduledAt durationMins status').limit(1500).lean();
+  const classes = raw.filter(c => c.status === 'ended' ||
+    new Date(c.scheduledAt).getTime() + (c.durationMins || 60) * 60000 < cutoff);
   const ids = classes.map(c => c._id);
   const sessions = ids.length ? await ClassroomSession.find({ liveClassId: { $in: ids } })
     .select('liveClassId userId present joinCount').lean() : [];
