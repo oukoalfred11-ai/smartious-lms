@@ -396,6 +396,7 @@ const ICONS = {
   image: 'M3 5h18v14H3z M8.5 10a1.5 1.5 0 1 0 .001 0z M3 16l5-4 4 3 4-4 5 5',
   book: 'M4 19.5A2.5 2.5 0 0 1 6.5 17H20 M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z',
   grid: 'M3 3h18v18H3z M9 3v18 M15 3v18 M3 9h18 M3 15h18',
+  saver: 'M12 3v10 M8 9l4 4 4-4 M4 17c2.5 2.7 13.5 2.7 16 0',
   lockC: 'M5 11h14v10H5z M8 11V7a4 4 0 0 1 8 0v4',
   lockO: 'M5 11h14v10H5z M8 11V7a4 4 0 0 1 7.5-2',
   undo: 'M3 7v6h6 M3.5 13a9 9 0 1 0 2.5-7.5L3 8',
@@ -612,6 +613,16 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   useEffect(() => { sharingLiveRef.current = sharing }, [sharing])
   useEffect(() => { mainViewRef.current = mainView }, [mainView])
   useEffect(() => { camOnRef.current = camOn }, [camOn])
+  // Data saver: caps outgoing video bitrate and resolution for
+  // low-bandwidth homes. Voice is never reduced. The governor also
+  // auto-tiers by room size so mesh rooms degrade gracefully.
+  const [dataSaver, setDataSaver] = useState(() => {
+    try { return localStorage.getItem('sm_data_saver') === '1' } catch (e) { return false }
+  })
+  useEffect(() => {
+    try { localStorage.setItem('sm_data_saver', dataSaver ? '1' : '0') } catch (e) { /* noop */ }
+    engineRef.current?.applyVideoPolicy?.({ dataSaver })
+  }, [dataSaver, roster.length])
   themeRef.current = T
   themeTokensRef.current = T
   const [grid, setGrid] = useState(false)
@@ -2610,6 +2621,8 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
         {isTeacher && <CtlBtn icon="share" label={sharing ? 'Stop Share' : 'Share Screen'} active={sharing} onClick={sharing ? stopShare : startShare} />}
         <CtlBtn icon="pen" label="Whiteboard" active={mainView === 'board'} onClick={() => setMainView('board')} />
         <CtlBtn icon="grid" label="Meeting" active={mainView === 'meeting'} onClick={() => setMainView('meeting')} />
+        <CtlBtn icon="saver" label={dataSaver ? 'Saver On' : 'Data Saver'} active={dataSaver}
+          onClick={() => { setDataSaver(v => !v); }} />
         {!isTeacher && <CtlBtn icon="raise" label={handUp ? 'Lower Hand' : 'Raise Hand'} active={handUp} onClick={toggleHand} />}
         <CtlBtn icon="chat" label="Chat" active={panelOpen && panel === 'chat'}
           onClick={() => { setPanel('chat'); setPanelOpen(o => !(o && panel === 'chat')) }} />
