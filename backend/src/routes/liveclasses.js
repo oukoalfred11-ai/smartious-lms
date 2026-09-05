@@ -199,6 +199,43 @@ router.get('/student/list', auth, async (req, res) => {
 // ═══════════════════════════════════════════════════════════
 // SINGLE CLASS
 // ═══════════════════════════════════════════════════════════
+// ── Auto-scheduled class cleanup ────────────────────────────────────
+// Classes created by the old auto-timetable promotion confused teachers:
+// reminders went out for classes nobody had scheduled. These endpoints
+// find and remove the future ones. Classes already taught (ended, or
+// with recordings) are never touched, so no history is lost.
+
+// GET /api/liveclasses/auto/count — how many future auto classes exist
+router.get('/auto/count', auth, requireRole('admin', 'ops_manager', 'dos'), async (req, res) => {
+  try {
+    const filter = {
+      fromTimetable: true,
+      status: 'scheduled',
+      scheduledAt: { $gte: new Date() },
+      'recordings.0': { $exists: false },
+    };
+    const count = await LiveClass.countDocuments(filter);
+    const sample = await LiveClass.find(filter).sort({ scheduledAt: 1 }).limit(5)
+      .select('title subject grade scheduledAt').lean();
+    res.json({ success: true, data: { count, sample } });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+// DELETE /api/liveclasses/auto/purge — remove them
+router.delete('/auto/purge', auth, requireRole('admin', 'ops_manager', 'dos'), async (req, res) => {
+  try {
+    const filter = {
+      fromTimetable: true,
+      status: 'scheduled',
+      scheduledAt: { $gte: new Date() },
+      'recordings.0': { $exists: false },
+    };
+    const r = await LiveClass.deleteMany(filter);
+    console.log(`[liveclasses] purge-auto: removed ${r.deletedCount} auto-scheduled classes (by ${req.user.email})`);
+    res.json({ success: true, message: `Removed ${r.deletedCount} auto-scheduled class(es). Reminders for them stop immediately.`, data: { removed: r.deletedCount } });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
 router.get('/:id', auth, async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
