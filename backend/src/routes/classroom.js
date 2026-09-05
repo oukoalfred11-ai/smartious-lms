@@ -253,7 +253,6 @@ router.get('/recordings/all', auth, requireRole(...ADMIN), async (req, res) => {
     const LiveClass = require('../models/LiveClass');
     const classes = await LiveClass.find({ 'recordings.0': { $exists: true } })
       .populate('teacherId', 'firstName lastName')
-      .populate('subjectId', 'subjectName curriculum')
       .sort({ scheduledAt: -1 })
       .limit(500)
       .lean();
@@ -267,8 +266,8 @@ router.get('/recordings/all', auth, requireRole(...ADMIN), async (req, res) => {
           url: r.url,
           title: r.title || c.title || 'Untitled class',
           classTitle: c.title || '',
-          subject: c.subjectId?.subjectName || '',
-          curriculum: c.subjectId?.curriculum || '',
+          subject: c.subject || c.subjectId?.subjectName || '',
+          curriculum: c.curriculum || c.subjectId?.curriculum || '',
           teacher: c.teacherId ? `${c.teacherId.firstName || ''} ${c.teacherId.lastName || ''}`.trim() : '',
           durationSec: r.durationSec || 0,
           sizeBytes: r.sizeBytes || 0,
@@ -291,7 +290,6 @@ router.get('/recordings/library', auth, async (req, res) => {
     const LiveClass = require('../models/LiveClass');
     const classes = await LiveClass.find({ 'recordings.featured': true })
       .populate('teacherId', 'firstName lastName')
-      .populate('subjectId', 'subjectName curriculum')
       .sort({ scheduledAt: -1 })
       .limit(500)
       .lean();
@@ -302,8 +300,8 @@ router.get('/recordings/library', auth, async (req, res) => {
           recId: r._id,
           url: r.url,
           title: r.title || c.title || 'Recorded class',
-          subject: c.subjectId?.subjectName || '',
-          curriculum: c.subjectId?.curriculum || '',
+          subject: c.subject || c.subjectId?.subjectName || '',
+          curriculum: c.curriculum || c.subjectId?.curriculum || '',
           teacher: c.teacherId ? `${c.teacherId.firstName || ''} ${c.teacherId.lastName || ''}`.trim() : '',
           durationSec: r.durationSec || 0,
           recordedAt: r.recordedAt,
