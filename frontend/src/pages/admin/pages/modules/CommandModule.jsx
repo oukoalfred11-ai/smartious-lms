@@ -58,6 +58,55 @@ export default function CommandModule({ toast, role = 'dos' }) {
     }
   }, [isOps])
 
+  const printBoardPack = async () => {
+    try {
+      const [sch, tch] = await Promise.all([
+        api.get('/dos-reports/school', { params: {} }),
+        api.get('/dos-reports/teachers', { params: {} }),
+      ])
+      const S = sch.data?.data, T = tch.data?.data?.rows || []
+      const k = S?.kpis || {}
+      const row = (cells) => '<tr>' + cells.map(c => `<td>${c ?? '&ndash;'}</td>`).join('') + '</tr>'
+      const table = (title, heads, rows) => `<h2>${title}</h2><table><thead><tr>${heads.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table>`
+      const money = (n) => fmtMoney(n)
+      const html = `<!doctype html><html><head><title>Smartious Board Pack</title><style>
+        body{font-family:Georgia,serif;color:#1a1a1a;margin:40px;line-height:1.5}
+        h1{font-size:24px;margin:0;color:#7D1025}.sub{color:#666;font-size:12px;margin-bottom:20px}
+        h2{font-size:15px;margin:24px 0 8px;color:#7D1025;border-bottom:2px solid #C9A030;padding-bottom:4px}
+        table{width:100%;border-collapse:collapse;font-size:11.5px}
+        th{text-align:left;background:#F7F2EA;padding:6px 8px;border:1px solid #ddd}td{padding:5px 8px;border:1px solid #ddd}
+        .k{display:flex;gap:26px;margin:14px 0}.k b{font-size:19px;display:block}
+        .method{font-size:10px;color:#777;margin-top:18px;border-top:1px solid #ddd;padding-top:8px}
+        @media print{body{margin:16px}}
+      </style></head><body>
+        <h1>Smartious Homeschool: Leadership Board Pack</h1>
+        <div class="sub">Generated ${new Date().toDateString()} &middot; Academic window: last 90 days &middot; Financial: current month</div>
+        <div class="k">
+          <div><b>${k.students ?? '&ndash;'}</b>Active students</div>
+          <div><b>${k.attendancePct ?? '&ndash;'}%</b>Attendance (${k.attended}/${k.scheduled})</div>
+          <div><b>${k.examAvg ?? '&ndash;'}%</b>Exam average (${k.examsGraded})</div>
+          <div><b>${mastery?.high ?? 0}</b>Students at risk</div>
+          ${revenue ? `<div><b>${money(revenue.collected)}</b>Collected of ${money(revenue.issued)}</div><div><b>${money(revenue.expectedMonthly)}</b>Expected monthly</div>` : ''}
+          ${churn ? `<div><b>${churn.high}</b>Families at leaving risk</div>` : ''}
+        </div>
+        ${table('Performance by grade', ['Grade','Students','Attendance','Exam avg','HW subs'],
+          (S?.grades || []).map(g => row([g.grade, g.students, g.attendancePct !== null ? g.attendancePct + '%' : null, g.examAvg !== null ? g.examAvg + '%' : null, g.hwSubmissions])))}
+        ${table('Teacher accountability', ['Teacher','Lessons','Class attendance','Exam avg','Marking (days)','Rating'],
+          T.map(t => row([t.name, t.sessionsHeld, t.classAttendancePct !== null ? t.classAttendancePct + '%' : null, t.examAvg !== null ? t.examAvg + '%' : null, t.markingDays, t.rating !== null ? t.rating + '/5' : null])))}
+        ${funnel ? table('Enrollment funnel (90d)', ['Stage','Count'],
+          ['new','contacted','interested','proposal_sent','assessment_req','enrolled','lost'].map(st => row([st.replace('_',' '), funnel.counts[st]]))) : ''}
+        ${revenue ? table('Unpaid invoice aging', ['Bucket','Invoices','Amount'],
+          revenue.aging.map(a => row([a.bucket, a.n, money(a.amount)]))) : ''}
+        ${churn && churn.rows.length ? table('Families at leaving risk', ['Student','Grade','Signals','Score'],
+          churn.rows.slice(0, 12).map(r => row([r.name, r.grade, r.signals.join('; '), r.score]))) : ''}
+        <div class="method"><b>Method.</b> ${S?.method || ''} ${revenue?.method || ''} ${churn?.method || ''} Smartious Homeschool &middot; Est. 2018 &middot; smartioushomeschool.com</div>
+      <script>window.onload = () => window.print()</` + `script></body></html>`
+      const w = window.open('', '_blank')
+      if (!w) return toast?.error?.('Allow pop-ups to print the board pack.')
+      w.document.write(html); w.document.close()
+    } catch (e) { toast?.error?.('Could not assemble the board pack.') }
+  }
+
   const dueIvs = ivs.filter(i => new Date(i.dueDate) <= new Date())
   const card = (label, value, sub, arrow) => (
     <div key={label} style={{ background: '#fff', border: `1px solid ${TOKENS.line}`, borderRadius: 12, padding: '14px 16px' }}>
@@ -80,9 +129,12 @@ export default function CommandModule({ toast, role = 'dos' }) {
 
   return (
     <div style={{ display: 'grid', gap: 18, maxWidth: 1100 }}>
-      <div>
-        <h2 style={{ fontSize: 21, fontWeight: 800, color: TOKENS.s900, margin: 0 }}>Command</h2>
-        <p style={{ fontSize: 13, color: TOKENS.s500, margin: '4px 0 0' }}>How the school is doing this week, and what needs you today.</p>
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
+        <div style={{ flex: 1, minWidth: 240 }}>
+          <h2 style={{ fontSize: 21, fontWeight: 800, color: TOKENS.s900, margin: 0 }}>Command</h2>
+          <p style={{ fontSize: 13, color: TOKENS.s500, margin: '4px 0 0' }}>How the school is doing this week, and what needs you today.</p>
+        </div>
+        <button onClick={printBoardPack} style={{ padding: '9px 18px', borderRadius: 9, border: 'none', background: TOKENS.crimson, color: '#fff', fontSize: 12.5, fontWeight: 800, cursor: 'pointer' }}>Print board pack</button>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12 }}>
