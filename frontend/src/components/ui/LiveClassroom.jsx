@@ -25,6 +25,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { io } from 'socket.io-client'
 import { api } from '../../context/ctx.jsx'
 import { MeshEngine } from '../../classroom/rtc.js'
+import { SfuEngine } from '../../classroom/sfu.js'
 
 const BASE = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/api\/?$/, '')
 
@@ -609,6 +610,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   const camOnRef = useRef(true)
   useEffect(() => { streamsRef.current = streams }, [streams])
   useEffect(() => { rosterRef.current = roster }, [roster])
+  useEffect(() => { engineRef.current?.refreshMappings?.() }, [roster])
   useEffect(() => { localStreamRef.current = localStream }, [localStream])
   useEffect(() => { sharingLiveRef.current = sharing }, [sharing])
   useEffect(() => { mainViewRef.current = mainView }, [mainView])
@@ -1072,12 +1074,35 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
         })
         socketRef.current = socket
 
-        // 4. Mesh engine
+        // 4. Media engine. SFU (LiveKit) when the backend has it
+        // configured: one upload per person, 20+ cameras routine (clubs,
+        // events). Mesh otherwise, exactly as before. Roster, chat and
+        // whiteboard ride socket.io in both modes.
+        let sfuCfg = null
+        try {
+          const cfgR = await api.get('/livekit/config')
+          if (cfgR.data?.data?.engine === 'sfu') {
+            const tkR = await api.post('/livekit/token/' + liveClassId)
+            if (tkR.data?.success) sfuCfg = tkR.data.data
+          }
+        } catch (e) { /* mesh fallback */ }
+        if (cancelled) { stream.getTracks().forEach(t => t.stop()); return }
+
+        if (sfuCfg) {
+          engine = new SfuEngine({
+            url: sfuCfg.url, token: sfuCfg.token, localStream: stream,
+            onTrack: (id, s) => setStreams(prev => ({ ...prev, [id]: s })),
+            onPeerClosed: (id) => setStreams(prev => { const n = { ...prev }; delete n[id]; return n }),
+            resolveSocketId: (uid) => rosterRef.current?.find(r => String(r.userId) === String(uid))?.socketId || null,
+          })
+          await engine.start()
+        } else {
         engine = new MeshEngine({
           socket, localStream: stream, iceServers,
           onTrack: (id, s) => setStreams(prev => ({ ...prev, [id]: s })),
           onPeerClosed: (id) => setStreams(prev => { const n = { ...prev }; delete n[id]; return n }),
         })
+        }
         engineRef.current = engine
 
         myIdRef.current = String(user?._id || user?.id || '')
