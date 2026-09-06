@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { api } from '../../../../context/ctx.jsx'
+import { AnalyticsStrip } from '../shared/charts.jsx'
 import { TOKENS } from '../shared/tokens.js'
 
 const LINE = TOKENS.line || '#EAE4DC'
@@ -229,6 +230,8 @@ export default function LiveClassesModule({ toast }) {
           </div>
         )
       ) : null}
+
+      {tab === 'past' && <AnalyticsStrip scope="school" days={30} title="Teaching delivered: last 30 days" show={['sessions', 'attendance']} />}
 
       {/* Past classes: what has actually been taught */}
       {tab === 'past' && (
