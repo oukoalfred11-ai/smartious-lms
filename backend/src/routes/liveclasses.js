@@ -81,6 +81,7 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
       scheduledAt, durationMins = 60,
       meetingLink,
       classroomMode = 'link',
+      kind = 'lesson',
       assignedStudents = [],
       preparationLessonId = null,
       notes = '',
@@ -121,6 +122,7 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
       return res.status(400).json({ success:false, message:'One or more assigned users are not students.' });
 
     const liveClass = await LiveClass.create({
+      kind: ['lesson','club','competition','event','assembly'].includes(kind) ? kind : 'lesson',
       title: title.trim(),
       description: description.trim(),
       subject, curriculum, grade,
