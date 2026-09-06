@@ -7,6 +7,7 @@ const router   = express.Router()
 const nodemailer = require('nodemailer')
 const { auth, requireRole } = require('../middleware/auth')
 const Invoice  = require('../models/Invoice')
+const User     = require('../models/User')
 // Invoice creation, numbering, signatories and the email template all
 // live in one place so the billing screen and the assessment workflow
 // issue identical invoices.
@@ -411,6 +412,30 @@ router.patch('/:id/status', auth, ALLOWED, async (req, res) => {
     if (status==='paid') { upd.paidAt=paidAt||new Date(); upd.paidAmount=paidAmount||0 }
     const inv = await Invoice.findByIdAndUpdate(req.params.id,{ $set:upd },{ new:true })
     if (!inv) return res.status(404).json({ success:false, message:'Invoice not found.' })
+
+    // Paying an invoice must also advance the STUDENT's billing clock.
+    // Fee reminders are driven by User.nextDueDate, entirely separate
+    // from invoice documents, so without this a parent who has paid
+    // keeps receiving "fees due" nags until the next cycle rolls over
+    // by itself. One payment = one cycle forward, reminder flag reset.
+    if (status === 'paid' && inv.studentId) {
+      try {
+        const student = await User.findById(inv.studentId).select('nextDueDate billingDay')
+        if (student) {
+          const now = new Date()
+          // Base the roll-forward on the cycle being settled: the current
+          // due date if it is recent, otherwise today (very stale clocks
+          // jump straight to next month rather than replaying the past).
+          const base = student.nextDueDate && (now - new Date(student.nextDueDate)) < 45 * 24 * 3600 * 1000 && new Date(student.nextDueDate) > new Date(now.getTime() - 45 * 24 * 3600 * 1000)
+            ? new Date(student.nextDueDate) : now
+          const next = new Date(base)
+          next.setMonth(next.getMonth() + 1)
+          if (student.billingDay >= 1 && student.billingDay <= 28) next.setDate(student.billingDay)
+          await User.updateOne({ _id: inv.studentId }, { $set: { nextDueDate: next, feeReminderSent: null } })
+          console.log(`[invoices] ${inv.invoiceNo} paid; ${inv.studentName || inv.studentId} billing clock advanced to ${next.toDateString()}`)
+        }
+      } catch (e) { console.error('[invoices] clock advance failed:', e.message) }
+    }
     if (status==='paid' && inv.billedToEmail) {
       const t = getTransporter()
       if (t) {
