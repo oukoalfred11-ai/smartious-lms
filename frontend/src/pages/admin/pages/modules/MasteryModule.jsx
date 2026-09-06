@@ -23,6 +23,14 @@ export default function MasteryModule({ toast }) {
   const [search, setSearch] = useState('')
   const [open, setOpen] = useState(null)      // drill-down payload
   const [openBusy, setOpenBusy] = useState(false)
+  const [ivTab, setIvTab] = useState(false)         // false = cohort, true = interventions
+  const [ivRows, setIvRows] = useState([])
+  const [logFor, setLogFor] = useState(null)         // { studentId, name, flags, metric }
+  const [ivForm, setIvForm] = useState({ flag: '', action: '', dueDate: '' })
+
+  const loadInterventions = () => api.get('/snapshots/interventions')
+    .then(r => setIvRows(r.data?.data?.rows || [])).catch(() => setIvRows([]))
+  useEffect(() => { loadInterventions() }, [])
 
   const load = useCallback(() => {
     setLoading(true)
@@ -75,7 +83,7 @@ export default function MasteryModule({ toast }) {
           <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 760 }}>
             <thead><tr>
               <th style={th}>Student</th><th style={th}>Exam avg</th><th style={th}>Quiz acc.</th>
-              <th style={th}>Attend. 30d</th><th style={th}>Last active</th><th style={th}>Flags</th><th style={th}>Status</th>
+              <th style={th}>Attend. 30d</th><th style={th}>Last active</th><th style={th}>Flags</th><th style={th}>Status</th><th style={th}></th>
             </tr></thead>
             <tbody>
               {filtered.map(r => (
@@ -88,9 +96,10 @@ export default function MasteryModule({ toast }) {
                   <td style={td}>{fmtDate(r.lastActive)}</td>
                   <td style={td}>{r.flags.map(f => <span key={f.code} title={f.rule} style={{ display: 'inline-block', padding: '2px 8px', marginRight: 4, borderRadius: 999, background: '#FEF3C7', color: '#92400E', fontSize: 10.5, fontWeight: 800 }}>{f.code}</span>)}</td>
                   <td style={td}><span style={{ padding: '3px 10px', borderRadius: 999, background: RISK[r.risk].bg, color: RISK[r.risk].fg, fontSize: 11.5, fontWeight: 800 }}>{RISK[r.risk].label}</span></td>
+                  <td style={td}><button onClick={(e) => { e.stopPropagation(); setLogFor({ studentId: r._id, name: r.name, flags: r.flags, metric: 'attendance ' + (r.attendance30 ?? '?') + '% / exam ' + (r.examAvg ?? '?') + '%' }); setIvForm({ flag: r.flags[0]?.code || 'OTHER', action: '', dueDate: new Date(Date.now() + 14 * 864e5).toISOString().split('T')[0] }) }} style={{ padding: '4px 10px', borderRadius: 7, border: `1px solid ${TOKENS.line}`, background: '#fff', fontSize: 10.5, fontWeight: 800, cursor: 'pointer', color: TOKENS.crimson }}>Act</button></td>
                 </tr>
               ))}
-              {filtered.length === 0 && <tr><td style={td} colSpan={7}>No students match.</td></tr>}
+              {filtered.length === 0 && <tr><td style={td} colSpan={8}>No students match.</td></tr>}
             </tbody>
           </table>
         </div>
@@ -159,6 +168,73 @@ export default function MasteryModule({ toast }) {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Intervention register: the act-and-verify half of early warning */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 6 }}>
+        <b style={{ fontSize: 14.5, color: TOKENS.s900 }}>Interventions</b>
+        <span style={{ fontSize: 11.5, color: TOKENS.s500 }}>what we did about each flag, and whether it worked</span>
+        <span style={{ flex: 1 }} />
+        <button onClick={() => setIvTab(v => !v)} style={{ padding: '5px 12px', borderRadius: 8, border: `1.5px solid ${TOKENS.line}`, background: '#fff', color: TOKENS.s600, fontSize: 11, fontWeight: 800, cursor: 'pointer' }}>{ivTab ? 'Hide' : `Show (${ivRows.filter(r => r.status === 'open').length} open)`}</button>
+      </div>
+      {ivTab && (
+        <div style={{ background: '#fff', border: `1px solid ${TOKENS.line}`, borderRadius: 12, overflow: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 680 }}>
+            <thead><tr>{['Student', 'Flag', 'Action', 'Owner', 'Review by', 'Status', ''].map(h => <th key={h} style={th}>{h}</th>)}</tr></thead>
+            <tbody>{ivRows.map(iv => {
+              const overdue = iv.status === 'open' && new Date(iv.dueDate) < new Date()
+              return (
+                <tr key={iv._id}>
+                  <td style={{ ...td, fontWeight: 700 }}>{iv.studentId ? `${iv.studentId.firstName || ''} ${iv.studentId.lastName || ''}` : '?'}</td>
+                  <td style={td}>{iv.flag}</td>
+                  <td style={{ ...td, maxWidth: 260 }}>{iv.action}<div style={{ fontSize: 10.5, color: TOKENS.s400 }}>{iv.metricAtStart}</div></td>
+                  <td style={td}>{iv.owner ? `${iv.owner.firstName || ''} ${iv.owner.lastName || ''}` : ''}</td>
+                  <td style={{ ...td, fontWeight: 700, color: overdue ? '#B91C1C' : TOKENS.s800 }}>{new Date(iv.dueDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}{overdue ? ' · overdue' : ''}</td>
+                  <td style={td}>{iv.status === 'closed'
+                    ? <span style={{ padding: '3px 10px', borderRadius: 999, fontSize: 10.5, fontWeight: 800, background: iv.outcome === 'improved' ? '#DCFCE7' : iv.outcome === 'worse' ? '#FEE2E2' : '#F3F4F6', color: iv.outcome === 'improved' ? '#15803D' : iv.outcome === 'worse' ? '#B91C1C' : TOKENS.s600 }}>{iv.outcome === 'no_change' ? 'no change' : iv.outcome}</span>
+                    : <span style={{ padding: '3px 10px', borderRadius: 999, fontSize: 10.5, fontWeight: 800, background: '#FEF3C7', color: '#92400E' }}>open</span>}</td>
+                  <td style={td}>{iv.status === 'open' && ['improved', 'no_change', 'worse'].map(o => (
+                    <button key={o} onClick={async () => {
+                      try { await api.patch(`/snapshots/interventions/${iv._id}/close`, { outcome: o }); toast?.ok?.('Closed: ' + o); loadInterventions() }
+                      catch (e) { toast?.error?.('Could not close.') }
+                    }} style={{ padding: '3px 8px', marginRight: 4, borderRadius: 6, border: `1px solid ${TOKENS.line}`, background: '#fff', fontSize: 9.5, fontWeight: 800, cursor: 'pointer', color: o === 'improved' ? '#15803D' : o === 'worse' ? '#B91C1C' : TOKENS.s600 }}>{o === 'no_change' ? 'same' : o}</button>
+                  ))}</td>
+                </tr>
+              )
+            })}
+            {ivRows.length === 0 && <tr><td style={td} colSpan={7}>No interventions logged yet. Press Act on a flagged student to start the loop.</td></tr>}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Log intervention modal */}
+      {logFor && (
+        <div onClick={() => setLogFor(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 90, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 14 }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 14, width: 'min(460px,100%)', padding: 22, display: 'grid', gap: 11 }}>
+            <b style={{ fontSize: 16, color: TOKENS.s900 }}>Intervention for {logFor.name}</b>
+            <div style={{ fontSize: 11.5, color: TOKENS.s500 }}>Baseline: {logFor.metric}</div>
+            <select value={ivForm.flag} onChange={e => setIvForm(f => ({ ...f, flag: e.target.value }))} style={{ padding: '9px 11px', border: `1.5px solid ${TOKENS.line}`, borderRadius: 9, fontSize: 13 }}>
+              {[...new Set([...(logFor.flags || []).map(f => f.code), 'OTHER'])].map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+            <textarea value={ivForm.action} onChange={e => setIvForm(f => ({ ...f, action: e.target.value }))} rows={3} placeholder="What are we doing about it? e.g. Parent call + extra maths session Tuesdays; teacher to report weekly."
+              style={{ padding: '9px 11px', border: `1.5px solid ${TOKENS.line}`, borderRadius: 9, fontSize: 13, resize: 'vertical' }} />
+            <label style={{ fontSize: 11.5, color: TOKENS.s500, fontWeight: 700 }}>Review date (when we check it worked)
+              <input type="date" value={ivForm.dueDate} onChange={e => setIvForm(f => ({ ...f, dueDate: e.target.value }))} style={{ display: 'block', marginTop: 4, padding: '9px 11px', border: `1.5px solid ${TOKENS.line}`, borderRadius: 9, fontSize: 13, width: '100%' }} />
+            </label>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={() => setLogFor(null)} style={{ padding: '8px 16px', borderRadius: 9, border: `1.5px solid ${TOKENS.line}`, background: '#fff', color: TOKENS.s600, fontSize: 12.5, fontWeight: 800, cursor: 'pointer' }}>Cancel</button>
+              <button onClick={async () => {
+                if (!ivForm.action.trim() || !ivForm.dueDate) return toast?.error?.('Action and review date are required.')
+                try {
+                  await api.post('/snapshots/interventions', { studentId: logFor.studentId, flag: ivForm.flag, action: ivForm.action.trim(), dueDate: ivForm.dueDate, metricAtStart: logFor.metric })
+                  toast?.ok?.('Intervention logged. It will appear in the register and the weekly digest.')
+                  setLogFor(null); setIvTab(true); loadInterventions()
+                } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not log it.') }
+              }} style={{ padding: '8px 18px', borderRadius: 9, border: 'none', background: TOKENS.crimson, color: '#fff', fontSize: 12.5, fontWeight: 800, cursor: 'pointer' }}>Log intervention</button>
+            </div>
           </div>
         </div>
       )}
