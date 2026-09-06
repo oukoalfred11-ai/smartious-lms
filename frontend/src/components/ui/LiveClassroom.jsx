@@ -1708,6 +1708,12 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
           noiseSuppression: false,
           autoGainControl: false,
         },
+        // Clean recordings: steer sharing toward a tab or app window so
+        // browser chrome and tab strips never enter the lesson recording.
+        // Chrome honours these hints; other browsers ignore them.
+        selfBrowserSurface: 'exclude',
+        monitorTypeSurfaces: 'exclude',
+        surfaceSwitching: 'include',
       })
       const screenTrack = display.getVideoTracks()[0]
       const screenAudio = display.getAudioTracks()[0] || null
@@ -1898,11 +1904,26 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
         connect(ls)
         Object.values(st).forEach(connect)
 
-        // Everyone in the room, self first.
-        const parts = [
+        // Everyone in the room. The recording alternates its framing every
+        // five minutes: teacher side first, then student side, cycling so
+        // that over a long lesson every student's camera gets screen time
+        // in the rail even in big rooms.
+        const everyone = [
           { self: true, name: 'You', role: myRole, stream: ls },
           ...ros.filter(r => !r.self).map(r => ({ name: r.name, role: r.role, stream: st[r.socketId] })),
         ]
+        const STAFFY = ['teacher', 'admin', 'dos', 'ops_manager']
+        const staffSide = everyone.filter(p => STAFFY.includes(p.role))
+        const studentSide = everyone.filter(p => STAFFY.includes(p.role) === false)
+        const cycle = Math.floor((Date.now() - rec.startedAt) / 300000)
+        let parts
+        if (cycle % 2 === 1 && studentSide.length > 0) {
+          const rot = Math.floor(cycle / 2) % studentSide.length
+          parts = [...studentSide.slice(rot), ...studentSide.slice(0, rot), ...staffSide]
+        } else {
+          parts = [...staffSide, ...studentSide]
+        }
+        if (parts.length === 0) parts = everyone
 
         // What is being presented on stage?
         const sharerPeer = ros.find(x => x.sharing && !x.self)
@@ -1972,9 +1993,23 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)()
       const dest = audioCtx.createMediaStreamDestination()
       const connected = new Set()
+      // Audio is connected PER TRACK, not per stream: when someone plugs
+      // in headphones or switches microphone, the browser replaces the
+      // audio track inside the same stream object. A source created from
+      // the stream keeps reading the dead track, silencing that person
+      // for the rest of the recording. Track-level sources plus the
+      // every-frame connect() sweep mean a device switch is picked up
+      // within one frame.
       const connect = (stream) => {
-        if (!stream || connected.has(stream) || !stream.getAudioTracks().length) return
-        try { audioCtx.createMediaStreamSource(stream).connect(dest); connected.add(stream) } catch (e) { /* noop */ }
+        if (!stream) return
+        stream.getAudioTracks().forEach((track) => {
+          if (track.readyState !== 'live' || connected.has(track.id)) return
+          try {
+            audioCtx.createMediaStreamSource(new MediaStream([track])).connect(dest)
+            connected.add(track.id)
+          } catch (e) { /* noop */ }
+        })
+        if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {})
       }
       connect(localStream)
       Object.values(streams).forEach(connect)
@@ -1989,7 +2024,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
         mimeType: mime, videoBitsPerSecond: 1000000, audioBitsPerSecond: 64000,
       })
 
-      const rec = { recorder, recId, audioCtx, rafId: 0, uploadChain: Promise.resolve(), vids, connect }
+      const rec = { recorder, recId, audioCtx, rafId: 0, startedAt: Date.now(), uploadChain: Promise.resolve(), vids, connect }
       recRef.current = rec
 
       recorder.ondataavailable = (ev) => {
