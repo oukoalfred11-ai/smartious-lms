@@ -189,6 +189,9 @@ function attachClassroom(httpServer, allowedOrigins) {
         // A parent may join to monitor if one of their children is in the class.
         const isParentOfAssigned = me.role === 'parent' &&
           (lc.assignedStudents || []).some(s => (me.childIds || []).includes(String(s)));
+        // Assemblies are whole-school: every active user may join.
+        const isAssembly = lc.kind === 'assembly';
+
         // Club meetings: any current member or leader of the club may join,
         // even if they joined the club after the meeting was scheduled.
         let isClubMember = false;
@@ -197,7 +200,7 @@ function attachClassroom(httpServer, allowedOrigins) {
           const club = await Club.findById(lc.clubId).select('members leaders').lean();
           if (club) isClubMember = [...(club.members || []), ...(club.leaders || [])].some(id => String(id) === me.id);
         }
-        if (!isTeacher && !isStaff && !isAssigned && !isParentOfAssigned && !isClubMember)
+        if (!isAssembly && !isTeacher && !isStaff && !isAssigned && !isParentOfAssigned && !isClubMember)
           return ack && ack({ ok: false, message: 'You are not assigned to this class.' });
 
         const rid = roomOf(liveClassId);
