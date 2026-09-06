@@ -33,6 +33,9 @@ export default function DOSPerformanceModule({ toast }) {
   const [teachers, setTeachers] = useState([])
   const [risk, setRisk] = useState(null)
   const [gradeOpen, setGradeOpen] = useState(null)   // { grade, rows }
+  const [obs, setObs] = useState({})                 // teacherId -> {avg, n}
+  const [obsFor, setObsFor] = useState(null)         // teacher row being observed
+  const [obsForm, setObsForm] = useState({ objectives: 3, engagement: 3, pacing: 3, boardUse: 3, checksForUnderstanding: 3, note: '' })
   const [qb, setQb] = useState(null)
   const [qbTarget, setQbTarget] = useState(() => { try { return Number(localStorage.getItem('sm_qb_target')) || 10 } catch (e) { return 10 } })
   const [loading, setLoading] = useState(true)
@@ -45,7 +48,9 @@ export default function DOSPerformanceModule({ toast }) {
       api.get('/dos-reports/teachers', { params }),
       api.get('/mastery/overview'),
       api.get('/dos-reports/question-bank'),
-    ]).then(([s, t, m, q]) => {
+      api.get('/observations/summary'),
+    ]).then(([s, t, m, q, ob]) => {
+      setObs(Object.fromEntries((ob.data?.data?.rows || []).map(r => [String(r.teacherId), r])))
       setQb(q.data?.data || null)
       setSchool(s.data?.data || null)
       setTeachers(t.data?.data?.rows || [])
@@ -145,8 +150,8 @@ export default function DOSPerformanceModule({ toast }) {
       {/* KPI strip */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12 }}>
         {[['Active students', k.students, ''], ['Lessons held', k.sessionsHeld, ''],
-          ['Attendance', k.attendancePct ?? '\u2013', k.attendancePct !== null ? `% (${k.attended} of ${k.scheduled})` : ''],
-          ['Exam average', k.examAvg ?? '\u2013', k.examAvg !== null ? `% (${k.examsGraded} graded)` : ''],
+          ['Attendance', k.attendancePct ?? '–', k.attendancePct !== null ? `% (${k.attended} of ${k.scheduled})` : ''],
+          ['Exam average', k.examAvg ?? '–', k.examAvg !== null ? `% (${k.examsGraded} graded)` : ''],
           ['At risk', risk?.high ?? 0, ` students (${risk?.watch ?? 0} on watch)`]].map(([l, v, s]) => (
           <div key={l} style={{ background: '#fff', border: `1px solid ${TOKENS.line}`, borderRadius: 12, padding: '14px 16px' }}>
             <div style={{ fontSize: 22, fontWeight: 900, color: TOKENS.s900 }}>{v}<span style={{ fontSize: 12, fontWeight: 700, color: TOKENS.s500 }}>{s}</span></div>
@@ -223,7 +228,7 @@ export default function DOSPerformanceModule({ toast }) {
         teachers.map(t => [t.name, t.sessionsHeld, t.classAttendancePct, t.examAvg, t.examN, t.markingDays, t.rating, t.ratingN])))))}
       <div style={card}>
         <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 760 }}>
-          <thead><tr>{['Teacher', 'Lessons held', 'Class attendance', 'Exam avg', 'Marking (days)', 'Rating'].map(h => <th key={h} style={th}>{h}</th>)}</tr></thead>
+          <thead><tr>{['Teacher', 'Lessons held', 'Class attendance', 'Exam avg', 'Marking (days)', 'Rating', 'Observed', ''].map(h => <th key={h} style={th}>{h}</th>)}</tr></thead>
           <tbody>{teachers.map(t => (
             <tr key={t._id}>
               <td style={{ ...td, fontWeight: 700 }}>{t.name}</td>
@@ -231,7 +236,9 @@ export default function DOSPerformanceModule({ toast }) {
               <td style={{ ...td, fontWeight: 800, color: attCol(t.classAttendancePct) }}><V v={t.classAttendancePct} /></td>
               <td style={td}><V v={t.examAvg} /> <span style={{ fontSize: 11, color: TOKENS.s400 }}>({t.examN})</span></td>
               <td style={td}><V v={t.markingDays} s="" /></td>
-              <td style={td}>{t.rating !== null ? `${t.rating}/5` : '\u2013'} <span style={{ fontSize: 11, color: TOKENS.s400 }}>({t.ratingN})</span></td>
+              <td style={td}>{t.rating !== null ? `${t.rating}/5` : '–'} <span style={{ fontSize: 11, color: TOKENS.s400 }}>({t.ratingN})</span></td>
+              <td style={td}>{obs[String(t._id)] ? <b>{obs[String(t._id)].avg}/5 <span style={{ fontWeight: 400, fontSize: 11, color: TOKENS.s400 }}>({obs[String(t._id)].n})</span></b> : <span style={{ color: TOKENS.s400 }}>–</span>}</td>
+              <td style={td}><button onClick={() => { setObsFor(t); setObsForm({ objectives: 3, engagement: 3, pacing: 3, boardUse: 3, checksForUnderstanding: 3, note: '' }) }} style={{ padding: '4px 10px', borderRadius: 7, border: `1px solid ${TOKENS.line}`, background: '#fff', fontSize: 10.5, fontWeight: 800, cursor: 'pointer', color: TOKENS.crimson }}>Observe</button></td>
             </tr>))}</tbody>
         </table>
       </div>
@@ -283,6 +290,38 @@ export default function DOSPerformanceModule({ toast }) {
             </div>
           </div>
         </>
+      )}
+
+      {/* Lesson observation modal: score against a recording */}
+      {obsFor && (
+        <div onClick={() => setObsFor(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 90, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 14 }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 14, width: 'min(480px,100%)', padding: 22, display: 'grid', gap: 10 }}>
+            <b style={{ fontSize: 16, color: TOKENS.s900 }}>Observe {obsFor.name}</b>
+            <div style={{ fontSize: 11.5, color: TOKENS.s500 }}>Score against a recording (Live Classes {'→'} Recordings) or a live visit. The note is shared with the teacher.</div>
+            {[['objectives', 'Objectives clear and met'], ['engagement', 'Student engagement'], ['pacing', 'Pacing and time use'], ['boardUse', 'Board and materials'], ['checksForUnderstanding', 'Checks for understanding']].map(([k, label]) => (
+              <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ flex: 1, fontSize: 12.5, color: TOKENS.s800 }}>{label}</span>
+                {[1, 2, 3, 4, 5].map(v => (
+                  <button key={v} onClick={() => setObsForm(f => ({ ...f, [k]: v }))}
+                    style={{ width: 30, height: 30, borderRadius: 8, border: `1.5px solid ${obsForm[k] === v ? TOKENS.crimson : TOKENS.line}`, background: obsForm[k] === v ? TOKENS.crimson : '#fff', color: obsForm[k] === v ? '#fff' : TOKENS.s600, fontSize: 12.5, fontWeight: 800, cursor: 'pointer' }}>{v}</button>
+                ))}
+              </div>
+            ))}
+            <textarea value={obsForm.note} onChange={e => setObsForm(f => ({ ...f, note: e.target.value }))} rows={3}
+              placeholder="Strengths and one improvement target, e.g. Excellent questioning; work on wait time after questions."
+              style={{ padding: '9px 11px', border: `1.5px solid ${TOKENS.line}`, borderRadius: 9, fontSize: 13, resize: 'vertical' }} />
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={() => setObsFor(null)} style={{ padding: '8px 16px', borderRadius: 9, border: `1.5px solid ${TOKENS.line}`, background: '#fff', color: TOKENS.s600, fontSize: 12.5, fontWeight: 800, cursor: 'pointer' }}>Cancel</button>
+              <button onClick={async () => {
+                try {
+                  await api.post('/observations', { teacherId: obsFor._id, scores: obsForm, note: obsForm.note })
+                  toast?.ok?.('Observation recorded and added to the league.')
+                  setObsFor(null); load()
+                } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not save.') }
+              }} style={{ padding: '8px 18px', borderRadius: 9, border: 'none', background: TOKENS.crimson, color: '#fff', fontSize: 12.5, fontWeight: 800, cursor: 'pointer' }}>Save observation</button>
+            </div>
+          </div>
+        </div>
       )}
 
       <div style={{ fontSize: 11.5, color: TOKENS.s500, lineHeight: 1.7 }}>
