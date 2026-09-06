@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { api } from '../../../../context/ctx.jsx'
 import { TOKENS } from '../shared/tokens.js'
+import { AnalyticsStrip } from '../shared/charts.jsx'
 
 /**
  * DOSPerformanceModule: the DOS's evidence room.
@@ -138,6 +139,8 @@ export default function DOSPerformanceModule({ toast }) {
         <input type="date" value={to} onChange={e => setTo(e.target.value)} style={{ padding: '8px 10px', border: `1.5px solid ${TOKENS.line}`, borderRadius: 9, fontSize: 12.5 }} />
         <button onClick={printReport} style={{ padding: '9px 18px', borderRadius: 9, border: 'none', background: TOKENS.crimson, color: '#fff', fontSize: 12.5, fontWeight: 800, cursor: 'pointer' }}>Print full report</button>
       </div>
+
+      <AnalyticsStrip scope="school" days={30} title="School trend: last 30 days" show={['attendance', 'exams', 'sessions', 'qb']} />
 
       {/* KPI strip */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12 }}>
