@@ -618,6 +618,9 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   // Data saver: caps outgoing video bitrate and resolution for
   // low-bandwidth homes. Voice is never reduced. The governor also
   // auto-tiers by room size so mesh rooms degrade gracefully.
+  // Assembly stage-and-audience: viewers join without publishing until
+  // staff invite them to speak.
+  const [audience, setAudience] = useState(false)
   const [dataSaver, setDataSaver] = useState(() => {
     try { return localStorage.getItem('sm_data_saver') === '1' } catch (e) { return false }
   })
@@ -673,7 +676,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   const engineRef = useRef(null)
   const drawRef = useRef({ active: false, pts: [], start: null })
 
-  const isTeacher = myRole === 'teacher' || myRole === 'admin'
+  const isTeacher = myRole === 'teacher' || myRole === 'admin' || myRole === 'dos' || myRole === 'ops_manager'
   const canDraw = isTeacher || !boardLocked
 
   // ═══ BOARD RENDERING ═══════════════════════════════════════
@@ -1089,8 +1092,21 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
         if (cancelled) { stream.getTracks().forEach(t => t.stop()); return }
 
         if (sfuCfg) {
+          if (sfuCfg.canPublish === false) setAudience(true)
+          if (sfuCfg.kind === 'assembly') setMainView('meeting')
           engine = new SfuEngine({
             url: sfuCfg.url, token: sfuCfg.token, localStream: stream,
+            publish: sfuCfg.canPublish !== false,
+            onCanPublishChanged: (can) => {
+              setAudience(!can)
+              if (can) {
+                engineRef.current?.setPublishing?.(true)
+                toast?.ok?.("You have been invited to the stage. Your mic and camera are now live.")
+              } else {
+                engineRef.current?.setPublishing?.(false)
+                toast?.ok?.('You are back in the audience.')
+              }
+            },
             onTrack: (id, s) => setStreams(prev => ({ ...prev, [id]: s })),
             onPeerClosed: (id) => setStreams(prev => { const n = { ...prev }; delete n[id]; return n }),
             resolveSocketId: (uid) => rosterRef.current?.find(r => String(r.userId) === String(uid))?.socketId || null,
@@ -2442,6 +2458,17 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
                 <div style={{ color: C.sub, fontSize: 10.5 }}>{p.role}</div>
               </div>
               {p.hand && <span style={{ color: C.gold }}><Ic d={ICONS.raise} size={15} /></span>}
+              {classInfo?.kind === 'assembly' && isTeacher && p.userId && p.socketId !== socketRef.current?.id && p.role === 'student' && (
+                <button onClick={async () => {
+                  const onStage = !!streams[p.socketId]
+                  try {
+                    const r = await api.post('/livekit/stage/' + liveClassId, { userId: p.userId, allow: !onStage })
+                    toast?.ok?.(r.data?.message)
+                  } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not update the stage.') }
+                }} style={{ background: streams[p.socketId] ? '#6B7280' : C.gold, color: '#12060B', border: 'none', borderRadius: 7, padding: '4px 9px', fontSize: 10, fontWeight: 800, cursor: 'pointer' }}>
+                  {streams[p.socketId] ? 'Off stage' : 'To stage'}
+                </button>
+              )}
               {p.micOn === false && <span style={{ color: '#F87171' }}><Ic d={ICONS.micOff} size={15} /></span>}
             </div>
           ))}
@@ -2538,6 +2565,11 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       </div>
       )}
 
+      {audience && (
+        <div style={{ position: 'fixed', top: 10, left: '50%', transform: 'translateX(-50%)', zIndex: 60, background: 'rgba(20,24,34,.92)', color: '#F3EFE6', borderRadius: 999, padding: '8px 18px', fontSize: 12.5, fontWeight: 700, border: '1px solid rgba(255,255,255,.15)' }}>
+          Assembly: you are in the audience. Raise your hand to ask to speak.
+        </div>
+      )}
       {mediaNote && (
         <div style={{ background: '#78350F', color: '#FDE68A', fontSize: 12, padding: '7px 16px', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
           <span style={{ flex: 1, minWidth: 200 }}>{mediaNote}</span>
