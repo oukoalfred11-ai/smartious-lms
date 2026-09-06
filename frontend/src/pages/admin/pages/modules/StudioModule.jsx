@@ -900,6 +900,61 @@ function captionTrack(text, dur) {
   return out
 }
 
+/**
+ * News-bulletin lower third: gold kicker tab over a crimson headline bar,
+ * optional dark sub-strip beneath. Slides in over ~0.45s, sits above the
+ * captions layer and below the logo. Burned into preview and export alike.
+ */
+function drawBulletin(ctx, W, H, b, tin) {
+  const B = Math.min(W, H)
+  const ease = 1 - Math.pow(1 - Math.min(1, tin / 0.45), 3)
+  const barH = Math.round(B * 0.082)
+  const subOn = !!(b.sub && b.sub.trim())
+  const subH = subOn ? Math.round(B * 0.05) : 0
+  const yBar = H - Math.round(B * 0.09) - barH - subH
+  const x = Math.round(W * 0.055) - (1 - ease) * W * 0.3
+  ctx.save()
+  ctx.globalAlpha = ease
+  ctx.textBaseline = 'middle'
+  ctx.textAlign = 'left'
+  // Kicker tab
+  const kFs = Math.round(barH * 0.34)
+  ctx.font = '900 ' + kFs + 'px "Montserrat", Arial, sans-serif'
+  const kText = (b.kicker || 'SMARTIOUS BULLETIN').toUpperCase()
+  const kH = Math.round(barH * 0.48)
+  const kW = Math.round(ctx.measureText(kText).width + barH * 0.6)
+  ctx.fillStyle = '#C9973A'
+  ctx.fillRect(x, yBar - kH, kW, kH)
+  ctx.fillStyle = '#12060B'
+  ctx.fillText(kText, x + barH * 0.3, yBar - kH / 2 + kFs * 0.06)
+  // Headline bar
+  const hFs = Math.round(barH * 0.46)
+  ctx.font = '800 ' + hFs + 'px "Montserrat", Arial, sans-serif'
+  const head = b.headline || ''
+  const hW = Math.min(W * 0.86 - x, ctx.measureText(head).width + barH * 0.8)
+  ctx.fillStyle = 'rgba(125, 16, 37, 0.96)'
+  ctx.fillRect(x, yBar, Math.max(hW, kW), barH)
+  ctx.fillStyle = '#FDFAF4'
+  ctx.save()
+  ctx.beginPath(); ctx.rect(x, yBar, Math.max(hW, kW) - barH * 0.2, barH); ctx.clip()
+  ctx.fillText(head, x + barH * 0.4, yBar + barH / 2 + hFs * 0.05)
+  ctx.restore()
+  // Sub strip
+  if (subOn) {
+    const sFs = Math.round(subH * 0.5)
+    ctx.font = '700 ' + sFs + 'px "Montserrat", Arial, sans-serif'
+    const sW = Math.min(W * 0.86 - x, ctx.measureText(b.sub).width + barH * 0.8)
+    ctx.fillStyle = 'rgba(8, 12, 20, 0.92)'
+    ctx.fillRect(x, yBar + barH, Math.max(sW, kW * 0.7), subH)
+    ctx.fillStyle = '#C9973A'
+    ctx.save()
+    ctx.beginPath(); ctx.rect(x, yBar + barH, Math.max(sW, kW * 0.7) - barH * 0.2, subH); ctx.clip()
+    ctx.fillText(b.sub, x + barH * 0.4, yBar + barH + subH / 2 + sFs * 0.05)
+    ctx.restore()
+  }
+  ctx.restore()
+}
+
 function drawCaptionLine(ctx, W, H, entry) {
   const B = Math.min(W, H)
   const fs = Math.round(B * 0.040)
@@ -2181,6 +2236,7 @@ function FilmMaker({ toast }) {
   const [blobs, setBlobs] = useState({})
   const [audioBufs, setAudioBufs] = useState({})
   const [capsOn, setCapsOn] = useState(true)
+  const [bulletin, setBulletin] = useState({ on: false, kicker: 'SMARTIOUS BULLETIN', headline: '', sub: '', from: 0, to: 999 })
   // Brand logo overlay: the real Smartious logo (transparent PNG at
   // /brand/logo.png), stamped onto preview and export alike.
   const [logo, setLogo] = useState({ on: true, pos: 'tr', size: 0.16, halo: true })
@@ -2256,6 +2312,9 @@ function FilmMaker({ toast }) {
     if (capsOn) {
       const e = capsAbs.find(x => t >= x.t0 && t < x.t1)
       if (e) drawCaptionLine(ctx, W, H, e)
+    }
+    if (bulletin.on && bulletin.headline.trim() && t >= (Number(bulletin.from) || 0) && t <= (Number(bulletin.to) || 999)) {
+      drawBulletin(ctx, W, H, bulletin, t - (Number(bulletin.from) || 0))
     }
     // Brand logo, top layer
     const im = logoImgRef.current
@@ -2470,6 +2529,7 @@ function FilmMaker({ toast }) {
           setFormat(pj.format || 'youtube')
           setClips(pj.clips)
           setCapsOn(pj.capsOn !== false)
+          if (pj.bulletin) setBulletin(b => ({ ...b, ...pj.bulletin }))
           if (pj.logo) setLogo(l => ({ ...l, ...pj.logo }))
           setBlobs(pj.blobs || {})
           const md = {}
@@ -2495,12 +2555,12 @@ function FilmMaker({ toast }) {
     if (!loaded) return
     const t = setTimeout(() => {
       idbSet('film-project', {
-        v: 1, format, clips, capsOn, logo, blobs,
+        v: 1, format, clips, capsOn, logo, bulletin, blobs,
         sound: { musicMode: sound.musicMode, musicVol: sound.musicVol, voVol: sound.voVol, script: sound.script, musicBlob: sound.musicBlob || null, voBlob: sound.voBlob || null },
       }).then(() => setSavedAt(Date.now())).catch(() => {})
     }, 800)
     return () => clearTimeout(t)
-  }, [loaded, format, clips, capsOn, logo, blobs, sound.musicMode, sound.musicVol, sound.voVol, sound.script, sound.musicBlob, sound.voBlob])
+  }, [loaded, format, clips, capsOn, logo, bulletin, blobs, sound.musicMode, sound.musicVol, sound.voVol, sound.script, sound.musicBlob, sound.voBlob])
 
   const newProject = async () => {
     await idbDel('film-project')
@@ -2534,6 +2594,25 @@ function FilmMaker({ toast }) {
         <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 11.5, fontWeight: 700, color: TOKENS.s600 }}>
           <input type="checkbox" checked={logo.on} onChange={e => setLogo(l => ({ ...l, on: e.target.checked }))} /> Logo
         </label>
+        <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }}>
+          <input type="checkbox" checked={bulletin.on} onChange={e => setBulletin(b => ({ ...b, on: e.target.checked }))} /> News bulletin
+        </label>
+        {bulletin.on && (
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', width: '100%', padding: '8px 10px', background: '#FBF8F3', borderRadius: 9 }}>
+            <input value={bulletin.kicker} onChange={e => setBulletin(b => ({ ...b, kicker: e.target.value }))} placeholder="Kicker (gold tab)"
+              style={{ width: 170, padding: '7px 9px', border: '1.5px solid #E5DFD3', borderRadius: 8, fontSize: 12 }} />
+            <input value={bulletin.headline} onChange={e => setBulletin(b => ({ ...b, headline: e.target.value }))} placeholder="Headline, e.g. Admissions open for January intake"
+              style={{ flex: 1, minWidth: 220, padding: '7px 9px', border: '1.5px solid #E5DFD3', borderRadius: 8, fontSize: 12, fontWeight: 700 }} />
+            <input value={bulletin.sub} onChange={e => setBulletin(b => ({ ...b, sub: e.target.value }))} placeholder="Sub line (optional)"
+              style={{ flex: 1, minWidth: 180, padding: '7px 9px', border: '1.5px solid #E5DFD3', borderRadius: 8, fontSize: 12 }} />
+            <label style={{ fontSize: 10.5, color: '#6B6B6B', fontWeight: 700 }}>from s
+              <input type="number" min={0} value={bulletin.from} onChange={e => setBulletin(b => ({ ...b, from: e.target.value }))} style={{ width: 58, marginLeft: 4, padding: '6px 7px', border: '1.5px solid #E5DFD3', borderRadius: 7, fontSize: 12 }} />
+            </label>
+            <label style={{ fontSize: 10.5, color: '#6B6B6B', fontWeight: 700 }}>to s
+              <input type="number" min={0} value={bulletin.to} onChange={e => setBulletin(b => ({ ...b, to: e.target.value }))} style={{ width: 58, marginLeft: 4, padding: '6px 7px', border: '1.5px solid #E5DFD3', borderRadius: 7, fontSize: 12 }} />
+            </label>
+          </div>
+        )}
         {logo.on && (
           <>
             <select value={logo.pos} onChange={e => setLogo(l => ({ ...l, pos: e.target.value }))}
