@@ -16,13 +16,15 @@
  * otherwise the classroom builds MeshEngine exactly as before.
  */
 export class SfuEngine {
-  constructor({ url, token, localStream, onTrack, onPeerClosed, resolveSocketId }) {
+  constructor({ url, token, localStream, onTrack, onPeerClosed, resolveSocketId, publish = true, onCanPublishChanged }) {
     this.url = url;
     this.token = token;
     this.localStream = localStream;
     this.onTrack = onTrack || (() => {});
     this.onPeerClosed = onPeerClosed || (() => {});
     this.resolveSocketId = resolveSocketId || ((id) => id);
+    this.publish = publish !== false;
+    this.onCanPublishChanged = onCanPublishChanged || (() => {});
     this.room = null;
     this.camPub = null;
     this.micPub = null;
@@ -54,10 +56,36 @@ export class SfuEngine {
       if (key) this.onPeerClosed(key);
     });
 
+    // Assemblies: the stage publishes, the audience only watches. When
+    // staff invite a viewer to speak, LiveKit flips their permissions and
+    // this event fires on their client; the classroom then publishes.
+    this.room.on(RoomEvent.ParticipantPermissionsChanged, (_prev, participant) => {
+      if (participant === this.room.localParticipant) {
+        this.onCanPublishChanged(!!participant.permissions?.canPublish);
+      }
+    });
+
     await this.room.connect(this.url, this.token);
-    for (const t of this.localStream ? this.localStream.getTracks() : []) {
-      const pub = await this.room.localParticipant.publishTrack(t);
-      if (t.kind === 'video') this.camPub = pub; else this.micPub = pub;
+    if (this.publish) await this.setPublishing(true);
+  }
+
+  /** Publish (or stop publishing) the local mic and camera. Used at join
+   *  for normal classes, and on stage-invite for assembly viewers. */
+  async setPublishing(on) {
+    if (on) {
+      for (const t of this.localStream ? this.localStream.getTracks() : []) {
+        if ((t.kind === 'video' && this.camPub) || (t.kind === 'audio' && this.micPub)) continue;
+        try {
+          const pub = await this.room.localParticipant.publishTrack(t);
+          if (t.kind === 'video') this.camPub = pub; else this.micPub = pub;
+        } catch (e) { console.error('[sfu] publish:', e.message); }
+      }
+      this.publish = true;
+    } else {
+      for (const pub of [this.camPub, this.micPub]) {
+        if (pub && pub.track) { try { await this.room.localParticipant.unpublishTrack(pub.track, false); } catch (e) { /* noop */ } }
+      }
+      this.camPub = null; this.micPub = null; this.publish = false;
     }
   }
 
