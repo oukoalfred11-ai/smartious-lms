@@ -91,7 +91,7 @@ const liveClassSchema = new mongoose.Schema({
   // the classroom's meeting (conference) view instead of the whiteboard,
   // and its recording becomes part of the club's archive.
   clubId: { type: mongoose.Schema.Types.ObjectId, ref: 'Club', default: null, index: true },
-  kind:   { type: String, enum: ['lesson', 'club', 'competition', 'event'], default: 'lesson' },
+  kind:   { type: String, enum: ['lesson', 'club', 'competition', 'event', 'assembly'], default: 'lesson' },
 
   // ── Ownership ───────────────────────────────────
   teacherId: {
