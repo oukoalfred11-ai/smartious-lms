@@ -110,6 +110,7 @@ app.use('/api/mastery', require('./routes/mastery'));
 app.use('/api/livekit', require('./routes/livekit'));
 app.use('/api/dos-reports', require('./routes/dos-reports'));
 app.use('/api/class-register', require('./routes/class-register'));
+app.use('/api/snapshots', require('./routes/snapshots'));
 app.use('/api/community-chat', require('./routes/communityChat'));
 app.use('/api/inquiries',  require('./routes/inquiries'));
 app.use('/api/assessment', require('./routes/assessment'));
@@ -177,6 +178,7 @@ const { sendClassReminders } = require('./routes/parent-portal');
 const { scheduleShowCauseCron } = require('./services/showCauseCron');
 try { require('./services/autoHomeworkCron').start(); } catch (e) { console.error('[auto-homework] start failed:', e.message); }
 try { require('./services/pauseAutoResume').startPauseAutoResumeCron(); } catch (e) { console.error('[pause-cron] start failed:', e.message); }
+try { require('./lib/snapshots').startSnapshotJobs(); } catch (e) { console.error('[snapshots]', e.message); }
 try { require('./services/birthdayCron').startBirthdayCron(); } catch (e) { console.error('[birthday-cron] start failed:', e.message); }
 try { require('./services/announcementMailer').startAnnouncementMailer(); } catch (e) { console.error('[announcement-mailer] failed to start:', e.message); }
 try { require('./services/aiMarking').logStartupState(); } catch (e) { /* service optional */ }
