@@ -112,6 +112,7 @@ app.use('/api/dos-reports', require('./routes/dos-reports'));
 app.use('/api/class-register', require('./routes/class-register'));
 app.use('/api/snapshots', require('./routes/snapshots'));
 app.use('/api/ops-reports', require('./routes/ops-reports'));
+app.use('/api/observations', require('./routes/observations'));
 app.use('/api/community-chat', require('./routes/communityChat'));
 app.use('/api/inquiries',  require('./routes/inquiries'));
 app.use('/api/assessment', require('./routes/assessment'));
