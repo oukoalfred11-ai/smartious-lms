@@ -121,6 +121,18 @@ export class SfuEngine {
     if (t) t.enabled = enabled;
   }
 
+  /** Hot-add or swap the local microphone after joining (the Enable
+   *  camera-and-mic flow). Publishes the fresh track to the room. */
+  async addLocalAudioTrack(track) {
+    try {
+      if (this.micPub && this.micPub.track) {
+        await this.room.localParticipant.unpublishTrack(this.micPub.track, false);
+        this.micPub = null;
+      }
+      this.micPub = await this.room.localParticipant.publishTrack(track);
+    } catch (e) { console.error('[sfu] audio hot-add:', e.message); }
+  }
+
   addExtraTrack(track) {
     const handle = { pub: null };
     this.room.localParticipant.publishTrack(track)
