@@ -178,4 +178,89 @@ router.get('/revenue', auth, requireRole('admin', 'ops_manager'), async (req, re
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
 
+// ── Weekly sales report ──────────────────────────────────────────────
+// The salesperson's Monday-meeting document. Best-practice weekly sales
+// reporting shows movement, not snapshots: what came in, what was done,
+// what converted, what is going stale, and what follow-ups are due.
+//   GET /api/ops-reports/sales-week
+router.get('/sales-week', auth, requireRole('admin', 'ops_manager', 'sales'), async (req, res) => {
+  try {
+    const now = new Date();
+    const wkStart = new Date(now.getTime() - 7 * 864e5);
+    const prevStart = new Date(now.getTime() - 14 * 864e5);
+    const AssessmentRequest = require('../models/AssessmentRequest');
+    const ACTIVE = ['new', 'contacted', 'interested', 'proposal_sent', 'assessment_req'];
+
+    const [inqAll, newPrev, assessNew, assessAccepted] = await Promise.all([
+      Inquiry.find({ $or: [
+        { createdAt: { $gte: prevStart } },
+        { status: { $in: ACTIVE } },
+        { status: { $in: ['enrolled', 'lost'] }, updatedAt: { $gte: prevStart } },
+      ] }).populate('assignedTo', 'firstName lastName').lean(),
+      Inquiry.countDocuments({ createdAt: { $gte: prevStart, $lt: wkStart } }),
+      AssessmentRequest.countDocuments({ createdAt: { $gte: wkStart } }),
+      AssessmentRequest.countDocuments({ status: { $in: ['accepted', 'payment_pending', 'payment_received'] }, updatedAt: { $gte: wkStart } }),
+    ]);
+
+    const inWk = (d) => d && new Date(d) >= wkStart;
+    const newThis = inqAll.filter(i => inWk(i.createdAt));
+    const enrolled = inqAll.filter(i => i.status === 'enrolled' && inWk(i.updatedAt));
+    const lost = inqAll.filter(i => i.status === 'lost' && inWk(i.updatedAt));
+
+    // Activity: every logged interaction this week, by type and by person.
+    const acts = { call: 0, whatsapp: 0, email: 0, meeting: 0, other: 0 };
+    const byPerson = {};
+    inqAll.forEach(i => (i.notes || []).forEach(n => {
+      if (!inWk(n.date)) return;
+      const t = acts[n.type] !== undefined ? n.type : 'other';
+      acts[t] += 1;
+      const k = String(n.recordedBy || 'unknown');
+      byPerson[k] = (byPerson[k] || 0) + 1;
+    }));
+
+    // Pipeline now + staleness (no touch in 7 days) + callbacks due.
+    const pipeline = {};
+    ACTIVE.forEach(st => { pipeline[st] = 0; });
+    const stale = [];
+    const callbacks = [];
+    inqAll.forEach(i => {
+      if (ACTIVE.includes(i.status)) {
+        pipeline[i.status] += 1;
+        const touches = (i.notes || []).map(n => new Date(n.date).getTime());
+        const last = Math.max(new Date(i.updatedAt).getTime(), ...(touches.length ? touches : [0]));
+        const days = Math.floor((now.getTime() - last) / 864e5);
+        if (days >= 7) stale.push({ name: i.parentName, child: i.childName || '', stage: i.status, days,
+          owner: i.assignedTo ? `${i.assignedTo.firstName || ''} ${i.assignedTo.lastName || ''}`.trim() : '' });
+        (i.notes || []).forEach(n => {
+          if (n.callbackDate && !n.callbackDone && new Date(n.callbackDate) <= new Date(now.getTime() + 7 * 864e5)) {
+            callbacks.push({ name: i.parentName, stage: i.status, due: n.callbackDate,
+              overdue: new Date(n.callbackDate) < now, note: (n.summary || '').slice(0, 80) });
+          }
+        });
+      }
+    });
+    stale.sort((a, b) => b.days - a.days);
+    callbacks.sort((a, b) => new Date(a.due) - new Date(b.due));
+
+    const bySource = {};
+    newThis.forEach(i => { const src = i.source || 'unknown'; bySource[src] = (bySource[src] || 0) + 1; });
+
+    res.json({ success: true, data: {
+      window: { from: wkStart, to: now },
+      week: {
+        newInquiries: newThis.length, newPrevWeek: newPrev,
+        enrolled: enrolled.length, enrolledNames: enrolled.map(i => i.parentName + (i.childName ? ` (${i.childName})` : '')),
+        lost: lost.length, lostNames: lost.map(i => i.parentName),
+        assessmentsBooked: assessNew, assessmentsAccepted: assessAccepted,
+        activities: acts, activityTotal: Object.values(acts).reduce((a, b) => a + b, 0),
+      },
+      bySource: Object.entries(bySource).map(([source, n]) => ({ source, n })).sort((a, b) => b.n - a.n),
+      pipeline, pipelineTotal: Object.values(pipeline).reduce((a, b) => a + b, 0),
+      stale: stale.slice(0, 20),
+      callbacks: callbacks.slice(0, 20),
+      method: 'Window: last 7 days vs the 7 before. New inquiries by creation date; enrollments and losses by the date the record reached that status; activity from logged interaction notes (calls, WhatsApp, email, meetings); stale = active leads with no logged touch or update for 7+ days; callbacks from note follow-up dates not yet marked done.',
+    } });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
 module.exports = router;
