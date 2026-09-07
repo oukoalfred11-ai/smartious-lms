@@ -1092,6 +1092,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
         if (cancelled) { stream.getTracks().forEach(t => t.stop()); return }
 
         if (sfuCfg) {
+          try {
           if (sfuCfg.canPublish === false) setAudience(true)
           if (sfuCfg.kind === 'assembly') setMainView('meeting')
           engine = new SfuEngine({
@@ -1112,7 +1113,18 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
             resolveSocketId: (uid) => rosterRef.current?.find(r => String(r.userId) === String(uid))?.socketId || null,
           })
           await engine.start()
-        } else {
+          } catch (sfuErr) {
+            // SFU must never take the classroom down with it. Any failure
+            // here (client library missing from the build, media server
+            // unreachable, token rejected) falls back to the mesh engine
+            // and the class proceeds exactly as before SFU existed.
+            console.error('[classroom] SFU failed, falling back to mesh:', (sfuErr && sfuErr.message) || sfuErr)
+            try { if (engine) engine.destroy() } catch (e2) { /* noop */ }
+            engine = null
+            setAudience(false)
+          }
+        }
+        if (!engine) {
         engine = new MeshEngine({
           socket, localStream: stream, iceServers,
           onTrack: (id, s) => setStreams(prev => ({ ...prev, [id]: s })),
