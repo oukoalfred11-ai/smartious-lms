@@ -1002,4 +1002,51 @@ router.get('/payment-callback', async (req, res) => {
   }
 });
 
+// ── Resend the acceptance + invoice email ────────────────────────────
+// Parents sometimes never receive the one-shot acceptance email (spam,
+// typo, full inbox). Staff can resend it here, optionally to a corrected
+// address, with the invoice PDF re-attached. Only for accepted requests
+// that already have their invoice.
+router.post('/requests/:id/resend-acceptance', auth, requireRole('admin', 'ops_manager', 'sales_marketing', 'accountant', 'dos'), async (req, res) => {
+  try {
+    const doc = await AssessmentRequest.findById(req.params.id);
+    if (!doc) return res.status(404).json({ success: false, message: 'Request not found.' });
+    if (doc.status !== 'accepted') return res.status(400).json({ success: false, message: 'Only accepted requests have an acceptance email to resend.' });
+    if (!doc.invoiceId) return res.status(400).json({ success: false, message: 'No invoice is linked to this acceptance yet.' });
+
+    const Invoice = require('../models/Invoice');
+    const invoice = await Invoice.findById(doc.invoiceId);
+    if (!invoice) return res.status(404).json({ success: false, message: 'The linked invoice no longer exists.' });
+
+    const t = getTransporter();
+    if (!t) return res.status(503).json({ success: false, message: 'Email is not configured on the server.' });
+    const from = process.env.EMAIL_FROM || 'Smartious Homeschool <no-reply@smartioushomeschool.com>';
+
+    const overrideEmail = String(req.body?.email || '').trim();
+    const to = overrideEmail || doc.parent1Email;
+    if (!to) return res.status(400).json({ success: false, message: 'No parent email on file - provide one in the request body.' });
+
+    let attachments = [];
+    try {
+      const { buildInvoicePdfBuffer } = require('../lib/invoicePdf');
+      const pdf = await buildInvoicePdfBuffer(invoice);
+      attachments = [{ filename: `${invoice.invoiceNo}.pdf`, content: pdf, contentType: 'application/pdf' }];
+    } catch (pdfErr) {
+      console.error('[assessment] resend: invoice PDF failed:', pdfErr.message);
+    }
+
+    await t.sendMail({
+      from, to,
+      subject: `Your Smartious assessment request is accepted - invoice ${invoice.invoiceNo}`,
+      html: buildAcceptedHTML(doc, invoice),
+      text: buildAcceptedText(doc, invoice),
+      attachments,
+    });
+    console.log(`[assessment] Resent acceptance+invoice email for ${doc.requestNo || doc._id} to ${to}`);
+    res.json({ success: true, message: `Acceptance email resent to ${to}.` });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
 module.exports = router;
