@@ -1694,10 +1694,16 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
         await eng.replaceVideoTrack(track)
       } else {
         eng.localStream.addTrack(track)
-        for (const { pc } of eng.peers.values()) {
-          const sender = pc.getSenders().find(s => s.track && s.track.kind === 'audio')
-          if (sender) await sender.replaceTrack(track).catch(() => {})
-          else pc.addTrack(track, eng.localStream)
+        if (typeof eng.addLocalAudioTrack === 'function') {
+          // SFU: publish the fresh microphone to the room.
+          await eng.addLocalAudioTrack(track)
+        } else if (eng.peers) {
+          // Mesh: swap or add the track on every peer connection.
+          for (const { pc } of eng.peers.values()) {
+            const sender = pc.getSenders().find(s => s.track && s.track.kind === 'audio')
+            if (sender) await sender.replaceTrack(track).catch(() => {})
+            else pc.addTrack(track, eng.localStream)
+          }
         }
       }
       setLocalStream(eng.localStream)
