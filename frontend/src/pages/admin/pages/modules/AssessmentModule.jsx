@@ -433,6 +433,28 @@ function AssessmentRequestDetail({ id, toast, onBack }) {
                   }}>
                   Accept & send invoice
                 </button>
+                {['accepted', 'payment_pending', 'payment_received'].includes(req.status) && (
+                  <button
+                    onClick={async () => {
+                      const alt = window.prompt(
+                        'Resend the acceptance + invoice email.\n\nLeave blank to use the address on file (' + (req.parent1Email || 'none') + '), or type a corrected email:',
+                        ''
+                      )
+                      if (alt === null) return
+                      try {
+                        const r = await api.post('/assessment/requests/' + req._id + '/resend-acceptance', alt.trim() ? { email: alt.trim() } : {})
+                        toast?.ok?.(r.data?.message || 'Acceptance email resent.')
+                      } catch (e) {
+                        toast?.error?.(e?.response?.data?.message || 'Could not resend.')
+                      }
+                    }}
+                    style={{
+                      background: '#fff', color: '#059669', border: '1.5px solid #059669',
+                      padding: '9px 0', borderRadius: 7, fontSize: 12, fontWeight: 800, cursor: 'pointer',
+                    }}>
+                    Resend acceptance email
+                  </button>
+                )}
                 <div style={{ fontSize: 10.5, color: TOKENS.s500, lineHeight: 1.4, marginTop: -4, marginBottom: 2 }}>
                   Generates a Paystack payment link and emails the family.
                 </div>
