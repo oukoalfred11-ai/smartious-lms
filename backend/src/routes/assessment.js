@@ -1007,7 +1007,7 @@ router.get('/payment-callback', async (req, res) => {
 // typo, full inbox). Staff can resend it here, optionally to a corrected
 // address, with the invoice PDF re-attached. Only for accepted requests
 // that already have their invoice.
-router.post('/requests/:id/resend-acceptance', auth, requireRole('admin', 'ops_manager', 'sales_marketing', 'accountant', 'dos'), async (req, res) => {
+router.post('/requests/:id/resend-acceptance', auth, requireRole('admin', 'ops_manager', 'sales', 'accountant', 'dos'), async (req, res) => {
   try {
     const doc = await AssessmentRequest.findById(req.params.id);
     if (!doc) return res.status(404).json({ success: false, message: 'Request not found.' });
