@@ -1011,7 +1011,11 @@ router.post('/requests/:id/resend-acceptance', auth, requireRole('admin', 'ops_m
   try {
     const doc = await AssessmentRequest.findById(req.params.id);
     if (!doc) return res.status(404).json({ success: false, message: 'Request not found.' });
-    if (doc.status !== 'accepted') return res.status(400).json({ success: false, message: 'Only accepted requests have an acceptance email to resend.' });
+    // Acceptance moves through payment statuses (Paystack), so any
+    // post-acceptance state qualifies for a resend.
+    const POST_ACCEPT = ['accepted', 'payment_pending', 'payment_received'];
+    if (POST_ACCEPT.includes(doc.status) === false)
+      return res.status(400).json({ success: false, message: 'This request has not been accepted yet, so there is no acceptance email to resend.' });
     if (!doc.invoiceId) return res.status(400).json({ success: false, message: 'No invoice is linked to this acceptance yet.' });
 
     const Invoice = require('../models/Invoice');
