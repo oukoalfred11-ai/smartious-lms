@@ -1077,61 +1077,75 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
         })
         socketRef.current = socket
 
-        // 4. Media engine. SFU (LiveKit) when the backend has it
-        // configured: one upload per person, 20+ cameras routine (clubs,
-        // events). Mesh otherwise, exactly as before. Roster, chat and
-        // whiteboard ride socket.io in both modes.
-        let sfuCfg = null
-        try {
-          const cfgR = await api.get('/livekit/config')
-          if (cfgR.data?.data?.engine === 'sfu') {
-            const tkR = await api.post('/livekit/token/' + liveClassId)
-            if (tkR.data?.success) sfuCfg = tkR.data.data
+        // 4. Media engine, initialized IN PARALLEL with the socket join.
+        // The room must come alive (roster, role, chat, board) the moment
+        // the socket connects; media transport attaches when it is ready.
+        // SFU gets a hard 8-second budget, then mesh takes over. Peers who
+        // arrive before the engine exists are queued and connected after.
+        const pendingConnects = []
+        const wireEngine = (eng) => {
+          engine = eng
+          engineRef.current = eng
+          while (pendingConnects.length) {
+            const id = pendingConnects.shift()
+            try { eng.connectTo(id) } catch (e) { /* noop */ }
           }
-        } catch (e) { /* mesh fallback */ }
-        if (cancelled) { stream.getTracks().forEach(t => t.stop()); return }
-
-        if (sfuCfg) {
+        }
+        const initEngine = async () => {
+          let sfuCfg = null
           try {
-          if (sfuCfg.canPublish === false) setAudience(true)
-          if (sfuCfg.kind === 'assembly') setMainView('meeting')
-          engine = new SfuEngine({
-            url: sfuCfg.url, token: sfuCfg.token, localStream: stream,
-            publish: sfuCfg.canPublish !== false,
-            onCanPublishChanged: (can) => {
-              setAudience(!can)
-              if (can) {
-                engineRef.current?.setPublishing?.(true)
-                toast?.ok?.("You have been invited to the stage. Your mic and camera are now live.")
-              } else {
-                engineRef.current?.setPublishing?.(false)
-                toast?.ok?.('You are back in the audience.')
-              }
-            },
-            onTrack: (id, s) => setStreams(prev => ({ ...prev, [id]: s })),
-            onPeerClosed: (id) => setStreams(prev => { const n = { ...prev }; delete n[id]; return n }),
-            resolveSocketId: (uid) => rosterRef.current?.find(r => String(r.userId) === String(uid))?.socketId || null,
-          })
-          await engine.start()
-          } catch (sfuErr) {
-            // SFU must never take the classroom down with it. Any failure
-            // here (client library missing from the build, media server
-            // unreachable, token rejected) falls back to the mesh engine
-            // and the class proceeds exactly as before SFU existed.
-            console.error('[classroom] SFU failed, falling back to mesh:', (sfuErr && sfuErr.message) || sfuErr)
-            try { if (engine) engine.destroy() } catch (e2) { /* noop */ }
-            engine = null
-            setAudience(false)
+            const cfgR = await api.get('/livekit/config')
+            if (cfgR.data?.data?.engine === 'sfu') {
+              const tkR = await api.post('/livekit/token/' + liveClassId)
+              if (tkR.data?.success) sfuCfg = tkR.data.data
+            }
+          } catch (e) { /* mesh fallback */ }
+          if (cancelled) return
+
+          if (sfuCfg) {
+            let sfuEngine = null
+            try {
+              if (sfuCfg.canPublish === false) setAudience(true)
+              if (sfuCfg.kind === 'assembly') setMainView('meeting')
+              sfuEngine = new SfuEngine({
+                url: sfuCfg.url, token: sfuCfg.token, localStream: stream,
+                publish: sfuCfg.canPublish !== false,
+                onCanPublishChanged: (can) => {
+                  setAudience(!can)
+                  if (can) {
+                    engineRef.current?.setPublishing?.(true)
+                    toast?.ok?.("You have been invited to the stage. Your mic and camera are now live.")
+                  } else {
+                    engineRef.current?.setPublishing?.(false)
+                    toast?.ok?.('You are back in the audience.')
+                  }
+                },
+                onTrack: (id, s2) => setStreams(prev => ({ ...prev, [id]: s2 })),
+                onPeerClosed: (id) => setStreams(prev => { const n = { ...prev }; delete n[id]; return n }),
+                resolveSocketId: (uid) => rosterRef.current?.find(r => String(r.userId) === String(uid))?.socketId || null,
+              })
+              await Promise.race([
+                sfuEngine.start(),
+                new Promise((_, rej) => setTimeout(() => rej(new Error('SFU connect timed out after 8s')), 8000)),
+              ])
+              if (cancelled) { try { sfuEngine.destroy() } catch (e) { /* noop */ } return }
+              wireEngine(sfuEngine)
+              return
+            } catch (sfuErr) {
+              console.error('[classroom] SFU unavailable, using mesh:', (sfuErr && sfuErr.message) || sfuErr)
+              try { if (sfuEngine) sfuEngine.destroy() } catch (e2) { /* noop */ }
+              setAudience(false)
+            }
           }
+          if (cancelled) return
+          wireEngine(new MeshEngine({
+            socket, localStream: stream, iceServers,
+            onTrack: (id, s2) => setStreams(prev => ({ ...prev, [id]: s2 })),
+            onPeerClosed: (id) => setStreams(prev => { const n = { ...prev }; delete n[id]; return n }),
+          }))
         }
-        if (!engine) {
-        engine = new MeshEngine({
-          socket, localStream: stream, iceServers,
-          onTrack: (id, s) => setStreams(prev => ({ ...prev, [id]: s })),
-          onPeerClosed: (id) => setStreams(prev => { const n = { ...prev }; delete n[id]; return n }),
-        })
-        }
-        engineRef.current = engine
+        initEngine()
+
 
         myIdRef.current = String(user?._id || user?.id || '')
         const joinRoom = () => socket.emit('join', { liveClassId }, (ack) => {
@@ -1180,7 +1194,10 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
           }
           redraw()
           // Initiate toward every peer already present (they answer).
-          for (const p of (ack.roster || [])) if (p.socketId !== socket.id) engine.connectTo(p.socketId)
+          for (const p of (ack.roster || [])) if (p.socketId !== socket.id) {
+            if (engineRef.current) { try { engineRef.current.connectTo(p.socketId) } catch (e) { /* noop */ } }
+            else pendingConnects.push(p.socketId)
+          }
           setPhase('live')
         })
 
@@ -1189,7 +1206,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
           // renegotiated from the fresh roster: drop the stale mesh
           // first, then rejoin. First connect just joins.
           if (hadConnectedRef.current) {
-            engine.reset()
+            engineRef.current?.reset?.()
             setStreams({})
           }
           hadConnectedRef.current = true
@@ -1203,11 +1220,12 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
         })
         socket.on('peer:joined', (p) => {
           setRoster(prev => [...prev.filter(x => x.socketId !== p.socketId), p])
-          engine.connectTo(p.socketId)
+          if (engineRef.current) { try { engineRef.current.connectTo(p.socketId) } catch (e) { /* noop */ } }
+          else pendingConnects.push(p.socketId)
         })
         socket.on('peer:left', ({ socketId }) => {
           setRoster(prev => prev.filter(x => x.socketId !== socketId))
-          engine.close(socketId)
+          engineRef.current?.close?.(socketId)
         })
         socket.on('peer:state', (s) => {
           setRoster(prev => prev.map(p => p.socketId === s.socketId ? { ...p, ...s } : p))
