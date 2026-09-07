@@ -550,6 +550,59 @@ function CRMForm({ toast, onBack, onSaved }) {
 }
 
 export function SalesPerformanceModule({ toast, refreshKey }) {
+  const printWeeklyReport = async () => {
+    try {
+      const r = await api.get('/ops-reports/sales-week')
+      const D = r.data?.data
+      if (!D) return toast?.error?.('Could not load the weekly numbers.')
+      const wk = D.week
+      const fmtD = (d) => new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+      const row = (cells) => '<tr>' + cells.map(c => `<td>${c ?? '&ndash;'}</td>`).join('') + '</tr>'
+      const table = (title, heads, rows, note) => rows.length
+        ? `<h2>${title}</h2><table><thead><tr>${heads.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table>`
+        : `<h2>${title}</h2><p class="empty">${note || 'Nothing this week.'}</p>`
+      const delta = wk.newInquiries - wk.newPrevWeek
+      const html = `<!doctype html><html><head><title>Smartious Weekly Sales Report</title><style>
+        body{font-family:Georgia,serif;color:#1a1a1a;margin:40px;line-height:1.5}
+        h1{font-size:23px;margin:0;color:#7D1025}.sub{color:#666;font-size:12px;margin-bottom:18px}
+        h2{font-size:14.5px;margin:22px 0 8px;color:#7D1025;border-bottom:2px solid #C9A030;padding-bottom:4px}
+        table{width:100%;border-collapse:collapse;font-size:11.5px}
+        th{text-align:left;background:#F7F2EA;padding:6px 8px;border:1px solid #ddd}td{padding:5px 8px;border:1px solid #ddd}
+        .k{display:flex;gap:24px;margin:14px 0;flex-wrap:wrap}.k b{font-size:19px;display:block}
+        .empty{font-size:12px;color:#777;font-style:italic}.red{color:#B91C1C;font-weight:700}
+        .method{font-size:10px;color:#777;margin-top:18px;border-top:1px solid #ddd;padding-top:8px}
+        @media print{body{margin:16px}}
+      </style></head><body>
+        <h1>Smartious Homeschool: Weekly Sales Report</h1>
+        <div class="sub">${fmtD(D.window.from)} to ${fmtD(D.window.to)} &middot; generated ${new Date().toDateString()}</div>
+        <div class="k">
+          <div><b>${wk.newInquiries}</b>New inquiries <span style="font-size:11px">(${delta >= 0 ? '+' : ''}${delta} vs last wk)</span></div>
+          <div><b>${wk.activityTotal}</b>Interactions logged</div>
+          <div><b>${wk.assessmentsBooked}</b>Assessments booked</div>
+          <div><b>${wk.assessmentsAccepted}</b>Acceptances sent</div>
+          <div><b>${wk.enrolled}</b>Enrolled</div>
+          <div><b>${wk.lost}</b>Lost</div>
+          <div><b>${D.pipelineTotal}</b>Active pipeline</div>
+        </div>
+        ${table('Wins this week', ['Family enrolled'], wk.enrolledNames.map(n => row([n])), 'No enrollments closed this week.')}
+        ${table('This week\'s activity', ['Calls', 'WhatsApp', 'Email', 'Meetings', 'Other'],
+          [row([wk.activities.call, wk.activities.whatsapp, wk.activities.email, wk.activities.meeting, wk.activities.other])])}
+        ${table('New inquiries by source', ['Source', 'Count'], D.bySource.map(x => row([x.source, x.n])), 'No new inquiries this week.')}
+        ${table('Pipeline right now', ['Stage', 'Leads'],
+          Object.entries(D.pipeline).map(([st, n]) => row([st.replace('_', ' '), n])))}
+        ${table('Follow-ups due this week', ['Family', 'Stage', 'Due', 'About'],
+          D.callbacks.map(c => row([c.name, c.stage.replace('_', ' '), (c.overdue ? '<span class="red">' + fmtD(c.due) + ' overdue</span>' : fmtD(c.due)), c.note])), 'No callbacks scheduled.')}
+        ${table('Going stale (no touch 7+ days)', ['Family', 'Child', 'Stage', 'Days quiet', 'Owner'],
+          D.stale.map(x => row([x.name, x.child, x.stage.replace('_', ' '), '<span class="red">' + x.days + '</span>', x.owner])), 'Nothing stale. Clean pipeline.')}
+        ${wk.lostNames.length ? table('Lost this week', ['Family'], wk.lostNames.map(n => row([n]))) : ''}
+        <div class="method"><b>Method.</b> ${D.method} Smartious Homeschool &middot; Est. 2018 &middot; smartioushomeschool.com</div>
+      <script>window.onload = () => window.print()</` + `script></body></html>`
+      const w = window.open('', '_blank')
+      if (!w) return toast?.error?.('Allow pop-ups to print the report.')
+      w.document.write(html); w.document.close()
+    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not build the weekly report.') }
+  }
+
   const { user } = useAuth()
   const [data,    setData]    = useState(null)
   const [loading, setLoading] = useState(true)
@@ -614,6 +667,7 @@ export function SalesPerformanceModule({ toast, refreshKey }) {
 
       {/* Cycle picker */}
       <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:20,flexWrap:'wrap'}}>
+        <button onClick={printWeeklyReport} style={{ padding: '9px 16px', borderRadius: 9, border: 'none', background: TOKENS.crimson, color: '#fff', fontSize: 12, fontWeight: 800, cursor: 'pointer' }}>Print weekly report</button>
         <div style={{fontSize:12.5,fontWeight:700,color:TOKENS.s700}}>Billing cycle:</div>
         <select value={cycle} onChange={e=>setCycle(e.target.value)}
           style={{padding:'8px 12px',borderRadius:7,border:'1.5px solid '+TOKENS.line,fontSize:13,background:'#fff',minWidth:280}}>
