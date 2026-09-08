@@ -115,82 +115,67 @@ router.get('/subjects/:curriculumId', auth, async (req, res) => {
   res.json({ success: true, subjects: flat })
 })
 
-// ── Student lesson-plan progress ─────────────────────────────────────
-// For each of the student's spine-linked timetable slots: the full
-// ordered lesson plan, with each lesson's real status - attended,
-// held-but-missed, scheduled (materialized, real date), or projected
-// (dated forward by the slot's weekly cadence, possible because the
-// timetable is permanent).
-//   GET /api/curriculum/progress
-router.get('/progress', auth, async (req, res) => {
+// ── Student lesson-plan progress (spine-first) ───────────────────────
+// The plan is the SPINE itself: every lesson in order. Coverage comes
+// from any of the student's classes that taught a spine lesson
+// (timetable-born or manual); attendance from their join records;
+// future dates from materialized classes, then projected weekly.
+//   GET /api/curriculum/progress/subject?subjectId=...
+router.get('/progress/subject', auth, async (req, res) => {
   try {
-    const TimetableEntry = require('../models/TimetableEntry');
     const Lesson = require('../models/Lesson');
     const LiveClass = require('../models/LiveClass');
     const ClassroomSession = require('../models/ClassroomSession');
+    const TimetableEntry = require('../models/TimetableEntry');
+    const mongooseX = require('mongoose');
+    const sid = String(req.query.subjectId || '');
+    if (!mongooseX.isValidObjectId(sid)) return res.status(400).json({ success: false, message: 'subjectId required.' });
     const now = new Date();
-    const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    const EAT = 3 * 3600 * 1000;
 
-    const entries = await TimetableEntry.find({
-      assignedStudents: req.user._id, isActive: true, subjectId: { $ne: null },
-    }).populate('teacherId', 'firstName lastName').lean();
+    const lessons = await Lesson.find({ subjectId: sid, isActive: { $ne: false } })
+      .sort({ order: 1 }).select('title topicName subtopicName').lean();
+    if (!lessons.length) return res.json({ success: true, data: null });
+    const lessonIds = lessons.map(l => l._id);
 
-    const subjects = [];
-    for (const entry of entries) {
-      const lessons = await Lesson.find({ subjectId: entry.subjectId, isActive: { $ne: false } })
-        .sort({ order: 1 }).select('title topicName subtopicName order').lean();
-      if (!lessons.length) continue;
+    const classes = await LiveClass.find({
+      assignedStudents: req.user._id,
+      preparationLessonId: { $in: lessonIds },
+    }).select('preparationLessonId scheduledAt status').sort({ scheduledAt: 1 }).lean();
+    const pastIds = classes.filter(c => new Date(c.scheduledAt) <= now && c.status !== 'cancelled').map(c => c._id);
+    const joined = pastIds.length
+      ? await ClassroomSession.distinct('liveClassId', { liveClassId: { $in: pastIds }, userId: req.user._id, joinCount: { $gt: 0 } })
+      : [];
+    const joinedSet = new Set(joined.map(String));
+    const byLesson = {};
+    classes.forEach(c => { if (!byLesson[String(c.preparationLessonId)]) byLesson[String(c.preparationLessonId)] = c; });
 
-      const classes = await LiveClass.find({ timetableEntryId: entry._id, preparationLessonId: { $ne: null } })
-        .select('preparationLessonId scheduledAt status').sort({ scheduledAt: 1 }).lean();
-      const pastIds = classes.filter(c => new Date(c.scheduledAt) <= now && c.status !== 'cancelled').map(c => c._id);
-      const joined = pastIds.length
-        ? await ClassroomSession.distinct('liveClassId', { liveClassId: { $in: pastIds }, userId: req.user._id, joinCount: { $gt: 0 } })
-        : [];
-      const joinedSet = new Set(joined.map(String));
-      const byLesson = {};
-      classes.forEach(c => { if (!byLesson[String(c.preparationLessonId)]) byLesson[String(c.preparationLessonId)] = c; });
+    // Weekly cadence for projection: the student's slot on this spine
+    // if one exists, else a plain 7-day rhythm from the last known date.
+    const entry = await TimetableEntry.find({ assignedStudents: req.user._id, isActive: true, subjectId: sid })
+      .select('dayOfWeek startTime').limit(1).lean();
+    const slot = entry.length ? `${entry[0].dayOfWeek} ${entry[0].startTime}` : '';
+    let cursor = classes.length
+      ? new Date(Math.max(...classes.map(c => new Date(c.scheduledAt).getTime())))
+      : now;
 
-      // Projection cursor: continue weekly from the latest known class,
-      // or from the slot's next occurrence if nothing is materialized.
-      let cursor;
-      if (classes.length) cursor = new Date(Math.max(...classes.map(c => new Date(c.scheduledAt).getTime())));
-      else {
-        const [h, m] = String(entry.startTime || '9:0').split(':').map(Number);
-        cursor = null;
-        for (let d = 0; d <= 7 && !cursor; d++) {
-          const eat = new Date(now.getTime() + EAT + d * 864e5);
-          if (DAYS[eat.getUTCDay()] === entry.dayOfWeek) {
-            const t = new Date(Date.UTC(eat.getUTCFullYear(), eat.getUTCMonth(), eat.getUTCDate(), h || 9, m || 0) - EAT);
-            cursor = t > now ? new Date(t.getTime() - 7 * 864e5) : t;
-          }
-        }
-        if (!cursor) cursor = now;
+    let attended = 0, missed = 0;
+    const plan = lessons.map(l => {
+      const cls = byLesson[String(l._id)];
+      if (cls) {
+        const past = new Date(cls.scheduledAt) <= now && cls.status !== 'cancelled';
+        const status = cls.status === 'cancelled' ? 'cancelled' : past ? (joinedSet.has(String(cls._id)) ? 'attended' : 'missed') : 'scheduled';
+        if (status === 'attended') attended++; else if (status === 'missed') missed++;
+        return { title: l.title, topic: l.topicName || '', subtopic: l.subtopicName || '', status, date: cls.scheduledAt };
       }
+      cursor = new Date(cursor.getTime() + 7 * 864e5);
+      return { title: l.title, topic: l.topicName || '', subtopic: l.subtopicName || '', status: 'projected', date: cursor };
+    });
 
-      let attended = 0, missed = 0, upcoming = 0;
-      const plan = lessons.map(l => {
-        const cls = byLesson[String(l._id)];
-        if (cls) {
-          const past = new Date(cls.scheduledAt) <= now && cls.status !== 'cancelled';
-          const status = cls.status === 'cancelled' ? 'cancelled' : past ? (joinedSet.has(String(cls._id)) ? 'attended' : 'missed') : 'scheduled';
-          if (status === 'attended') attended++; else if (status === 'missed') missed++; else if (status === 'scheduled') upcoming++;
-          return { title: l.title, topic: l.topicName || '', subtopic: l.subtopicName || '', status, date: cls.scheduledAt };
-        }
-        cursor = new Date(cursor.getTime() + 7 * 864e5);
-        return { title: l.title, topic: l.topicName || '', subtopic: l.subtopicName || '', status: 'projected', date: cursor };
-      });
-
-      subjects.push({
-        subject: entry.subject, title: entry.title || entry.subject,
-        teacher: entry.teacherId ? [entry.teacherId.firstName, entry.teacherId.lastName].filter(Boolean).join(' ') : '',
-        slot: `${entry.dayOfWeek} ${entry.startTime}`,
-        counts: { total: plan.length, covered: attended + missed, attended, missed, upcoming },
-        plan,
-      });
-    }
-    res.json({ success: true, data: { subjects } });
+    res.json({ success: true, data: {
+      slot,
+      counts: { total: plan.length, covered: attended + missed, attended, missed },
+      plan,
+    } });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
 
