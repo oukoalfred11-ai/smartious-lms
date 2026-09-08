@@ -665,6 +665,41 @@ export function DOSAttendanceModule({ toast, refreshKey }) {
       <PSection tag="Dean of Studies" title="Attendance" em="Analytics"
         sub="Daily check-in overview. Students and staff self-report. Use Manage Breaks to deactivate accounts."/>
 
+      {/* ── Attendance records: pull a range, download clean CSVs ── */}
+      <div style={{ background: '#fff', border: `1px solid ${TOKENS.line}`, borderRadius: 12, padding: 16, marginBottom: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
+          <b style={{ fontSize: 14, color: TOKENS.s900 }}>Attendance records</b>
+          <span style={{ flex: 1 }} />
+          <input type="date" value={recRange.from} onChange={e => setRecRange(r => ({ ...r, from: e.target.value }))} style={{ padding: '7px 9px', border: `1.5px solid ${TOKENS.line}`, borderRadius: 8, fontSize: 12 }} />
+          <span style={{ fontSize: 11, color: TOKENS.s400 }}>to</span>
+          <input type="date" value={recRange.to} onChange={e => setRecRange(r => ({ ...r, to: e.target.value }))} style={{ padding: '7px 9px', border: `1.5px solid ${TOKENS.line}`, borderRadius: 8, fontSize: 12 }} />
+          <button onClick={loadRecords} style={{ padding: '8px 16px', borderRadius: 8, border: 'none', background: TOKENS.crimson, color: '#fff', fontSize: 11.5, fontWeight: 800, cursor: 'pointer' }}>{recLoading ? 'Loading...' : 'Pull records'}</button>
+        </div>
+        {rec && (
+          <div style={{ display: 'grid', gap: 10 }}>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 12.5, fontWeight: 800, color: TOKENS.s800 }}>Lesson attendance: {rec.lessonRows.length} record(s)</span>
+              <button onClick={() => dlCSV(rec.lessonRows, [['Date', r => fmtD(r.date)], ['Class', 'class'], ['Subject', 'subject'], ['Teacher', 'teacher'], ['Student', 'student'], ['Grade', 'studentGrade'], ['Joined', 'joined'], ['Register', 'present']], `lesson-attendance-${recRange.from}-to-${recRange.to}.csv`)}
+                style={{ padding: '5px 12px', borderRadius: 7, border: `1.5px solid ${TOKENS.crimson}`, background: '#fff', color: TOKENS.crimson, fontSize: 10.5, fontWeight: 800, cursor: 'pointer' }}>Download CSV</button>
+              <span style={{ fontSize: 12.5, fontWeight: 800, color: TOKENS.s800, marginLeft: 16 }}>Daily attendance: {rec.dailyRows.length} record(s)</span>
+              <button onClick={() => dlCSV(rec.dailyRows, [['Date', r => fmtD(r.date)], ['Student', 'student'], ['Grade', 'grade'], ['Status', 'status']], `daily-attendance-${recRange.from}-to-${recRange.to}.csv`)}
+                style={{ padding: '5px 12px', borderRadius: 7, border: `1.5px solid ${TOKENS.crimson}`, background: '#fff', color: TOKENS.crimson, fontSize: 10.5, fontWeight: 800, cursor: 'pointer' }}>Download CSV</button>
+            </div>
+            <div style={{ maxHeight: 220, overflow: 'auto', border: `1px solid ${TOKENS.line}`, borderRadius: 9 }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+                <thead><tr>{['Date', 'Class', 'Teacher', 'Student', 'Joined', 'Register'].map(h => <th key={h} style={{ position: 'sticky', top: 0, textAlign: 'left', padding: '5px 8px', background: '#F7F2EA', borderBottom: `1px solid ${TOKENS.line}` }}>{h}</th>)}</tr></thead>
+                <tbody>{rec.lessonRows.slice(0, 200).map((r, i) => (
+                  <tr key={i}><td style={{ padding: '4px 8px' }}>{fmtD(r.date)}</td><td style={{ padding: '4px 8px' }}>{r.class}</td><td style={{ padding: '4px 8px' }}>{r.teacher}</td><td style={{ padding: '4px 8px' }}>{r.student}</td>
+                    <td style={{ padding: '4px 8px', color: r.joined === 'yes' ? '#15803D' : '#B91C1C', fontWeight: 700 }}>{r.joined}</td>
+                    <td style={{ padding: '4px 8px' }}>{r.present}</td></tr>
+                ))}</tbody>
+              </table>
+            </div>
+            {rec.lessonRows.length > 200 && <div style={{ fontSize: 10.5, color: TOKENS.s400 }}>Preview shows 200 of {rec.lessonRows.length} - the CSV contains everything.</div>}
+            <div style={{ fontSize: 10.5, color: TOKENS.s400 }}>{rec.method}</div>
+          </div>
+        )}
+      </div>
       {/* View toggle: check-in analytics vs marking the register */}
       <div style={{ display:'flex', gap:6, background:TOKENS.cream, padding:5, borderRadius:10, width:'fit-content', marginBottom:16 }}>
         {[['checkins','Check-ins'],['register','Mark register']].map(([id,label]) => (
@@ -974,41 +1009,6 @@ export function DOSTimetableModule({ toast, refreshKey }) {
 
   return (
     <div>
-      {/* ── Attendance records: pull a range, download clean CSVs ── */}
-      <div style={{ background: '#fff', border: `1px solid ${TOKENS.line}`, borderRadius: 12, padding: 16, marginBottom: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
-          <b style={{ fontSize: 14, color: TOKENS.s900 }}>Attendance records</b>
-          <span style={{ flex: 1 }} />
-          <input type="date" value={recRange.from} onChange={e => setRecRange(r => ({ ...r, from: e.target.value }))} style={{ padding: '7px 9px', border: `1.5px solid ${TOKENS.line}`, borderRadius: 8, fontSize: 12 }} />
-          <span style={{ fontSize: 11, color: TOKENS.s400 }}>to</span>
-          <input type="date" value={recRange.to} onChange={e => setRecRange(r => ({ ...r, to: e.target.value }))} style={{ padding: '7px 9px', border: `1.5px solid ${TOKENS.line}`, borderRadius: 8, fontSize: 12 }} />
-          <button onClick={loadRecords} style={{ padding: '8px 16px', borderRadius: 8, border: 'none', background: TOKENS.crimson, color: '#fff', fontSize: 11.5, fontWeight: 800, cursor: 'pointer' }}>{recLoading ? 'Loading...' : 'Pull records'}</button>
-        </div>
-        {rec && (
-          <div style={{ display: 'grid', gap: 10 }}>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: 12.5, fontWeight: 800, color: TOKENS.s800 }}>Lesson attendance: {rec.lessonRows.length} record(s)</span>
-              <button onClick={() => dlCSV(rec.lessonRows, [['Date', r => fmtD(r.date)], ['Class', 'class'], ['Subject', 'subject'], ['Teacher', 'teacher'], ['Student', 'student'], ['Grade', 'studentGrade'], ['Joined', 'joined'], ['Register', 'present']], `lesson-attendance-${recRange.from}-to-${recRange.to}.csv`)}
-                style={{ padding: '5px 12px', borderRadius: 7, border: `1.5px solid ${TOKENS.crimson}`, background: '#fff', color: TOKENS.crimson, fontSize: 10.5, fontWeight: 800, cursor: 'pointer' }}>Download CSV</button>
-              <span style={{ fontSize: 12.5, fontWeight: 800, color: TOKENS.s800, marginLeft: 16 }}>Daily attendance: {rec.dailyRows.length} record(s)</span>
-              <button onClick={() => dlCSV(rec.dailyRows, [['Date', r => fmtD(r.date)], ['Student', 'student'], ['Grade', 'grade'], ['Status', 'status']], `daily-attendance-${recRange.from}-to-${recRange.to}.csv`)}
-                style={{ padding: '5px 12px', borderRadius: 7, border: `1.5px solid ${TOKENS.crimson}`, background: '#fff', color: TOKENS.crimson, fontSize: 10.5, fontWeight: 800, cursor: 'pointer' }}>Download CSV</button>
-            </div>
-            <div style={{ maxHeight: 220, overflow: 'auto', border: `1px solid ${TOKENS.line}`, borderRadius: 9 }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
-                <thead><tr>{['Date', 'Class', 'Teacher', 'Student', 'Joined', 'Register'].map(h => <th key={h} style={{ position: 'sticky', top: 0, textAlign: 'left', padding: '5px 8px', background: '#F7F2EA', borderBottom: `1px solid ${TOKENS.line}` }}>{h}</th>)}</tr></thead>
-                <tbody>{rec.lessonRows.slice(0, 200).map((r, i) => (
-                  <tr key={i}><td style={{ padding: '4px 8px' }}>{fmtD(r.date)}</td><td style={{ padding: '4px 8px' }}>{r.class}</td><td style={{ padding: '4px 8px' }}>{r.teacher}</td><td style={{ padding: '4px 8px' }}>{r.student}</td>
-                    <td style={{ padding: '4px 8px', color: r.joined === 'yes' ? '#15803D' : '#B91C1C', fontWeight: 700 }}>{r.joined}</td>
-                    <td style={{ padding: '4px 8px' }}>{r.present}</td></tr>
-                ))}</tbody>
-              </table>
-            </div>
-            {rec.lessonRows.length > 200 && <div style={{ fontSize: 10.5, color: TOKENS.s400 }}>Preview shows 200 of {rec.lessonRows.length} - the CSV contains everything.</div>}
-            <div style={{ fontSize: 10.5, color: TOKENS.s400 }}>{rec.method}</div>
-          </div>
-        )}
-      </div>
       <PSection tag="Dean of Studies" title="Timetable" em="Manager"
         sub="The timetable dictates classes: every slot here creates the real lessons for the coming week, automatically, until edited." />
 
