@@ -173,6 +173,12 @@ router.post('/', auth, requireRole('teacher', 'admin', 'dos'), async (req, res) 
       return fail(res, 403, 'Teachers can only create timetable entries for themselves.');
     }
 
+    // School policy: no weekend teaching. Weekend entries silently
+    // generated ghost reminder emails for months; the door is now shut.
+    const WEEKEND = [0, 6, 'Sunday', 'Saturday', 'sunday', 'saturday', 'Sun', 'Sat'];
+    if (WEEKEND.includes(req.body.dayOfWeek))
+      return fail(res, 400, 'Weekend classes are not scheduled at Smartious. Timetable entries must be Monday to Friday.');
+
     const entry = await TimetableEntry.create({
       title:        b.title,
       description:  b.description || '',
@@ -197,6 +203,7 @@ router.post('/', auth, requireRole('teacher', 'admin', 'dos'), async (req, res) 
       audienceGrade:      b.audienceGrade || '',
       createdBy: req.user._id,
     });
+    require('../lib/timetableMaterializer').reconcile().catch(() => {});
 
     return ok(res, { entry }, 'Timetable entry created.');
   } catch (err) {
@@ -238,6 +245,7 @@ router.patch('/:id', auth, requireRole('teacher', 'admin', 'dos'), async (req, r
     if ('subjectId'     in b) entry.subjectId     = mongoose.isValidObjectId(b.subjectId) ? b.subjectId : null;
 
     await entry.save();
+    require('../lib/timetableMaterializer').reconcile().catch(() => {});
     return ok(res, { entry }, 'Entry updated.');
   } catch (err) {
     console.error('[timetable PATCH /:id]', err.message);
@@ -262,6 +270,7 @@ router.delete('/:id', auth, requireRole('teacher', 'admin', 'dos'), async (req, 
     }
 
     await entry.deleteOne();
+    require('../lib/timetableMaterializer').reconcile().catch(() => {});
     return ok(res, { deleted: true }, 'Entry deleted.');
   } catch (err) {
     console.error('[timetable DELETE /:id]', err.message);
