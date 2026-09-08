@@ -929,9 +929,7 @@ export function DOSTimetableModule({ toast, refreshKey }) {
 
   if (!ov) return <DOSSpinner />
   const teachers = ov.teachers.filter(t => t.name.toLowerCase().includes(tSearch.toLowerCase()))
-  const students = sSearch.trim()
-    ? ov.students.filter(st => (st.name + ' ' + st.admissionNo).toLowerCase().includes(sSearch.toLowerCase())).slice(0, 8)
-    : []
+  const students = ov.students.filter(st => !sSearch.trim() || (st.name + ' ' + st.admissionNo + ' ' + st.grade).toLowerCase().includes(sSearch.toLowerCase()))
   const pickable = form ? ov.students.filter(st => !form.pickGrade || st.grade === form.pickGrade) : []
   const grades = [...new Set(ov.students.map(st => st.grade).filter(Boolean))].sort()
 
@@ -977,10 +975,10 @@ export function DOSTimetableModule({ toast, refreshKey }) {
             </div>
           </div>
           <div style={{ ...card, padding: 12 }}>
-            <b style={{ fontSize: 13, color: TOKENS.s900 }}>Student schedules</b>
-            <input value={sSearch} onChange={e => setSSearch(e.target.value)} placeholder="Search name or admission no..."
+            <b style={{ fontSize: 13, color: TOKENS.s900 }}>Student schedules <span style={{ fontWeight: 600, fontSize: 11, color: TOKENS.s400 }}>({ov.students.length})</span></b>
+            <input value={sSearch} onChange={e => setSSearch(e.target.value)} placeholder="Filter by name, admission no or grade..."
               style={{ ...inp, width: '100%', margin: '8px 0' }} />
-            <div style={{ display: 'grid', gap: 4 }}>
+            <div style={{ maxHeight: 300, overflow: 'auto', display: 'grid', gap: 4 }}>
               {students.map(st => (
                 <button key={st._id} onClick={() => openPerson('student', st)}
                   style={{ display: 'flex', gap: 8, padding: '7px 10px', borderRadius: 8, border: 'none', cursor: 'pointer', textAlign: 'left',
