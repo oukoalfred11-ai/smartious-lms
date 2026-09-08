@@ -53,6 +53,8 @@ export default function SubjectProgressCard({
   api,
   compact = false,
 }) {
+  const [state, setState] = useState({ status: 'loading', data: null, error: null })
+  const [resolvedSubjectId, setResolvedSubjectId] = useState(subjectIdProp || null)
   const [plan, setPlan] = useState(null)
   const [planOpen, setPlanOpen] = useState(true)   // complete list by default
   useEffect(() => {
@@ -63,8 +65,6 @@ export default function SubjectProgressCard({
       .catch(() => {})
     return () => { on = false }
   }, [api, resolvedSubjectId])
-  const [state, setState] = useState({ status: 'loading', data: null, error: null })
-  const [resolvedSubjectId, setResolvedSubjectId] = useState(subjectIdProp || null)
 
   // ── If we don't have a direct subjectId, resolve it from name + curriculum ──
   useEffect(() => {
