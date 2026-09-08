@@ -45,16 +45,6 @@ const TOKENS = {
   goldInk: '#7D5A0F',
 }
 
-// One fetch shared by every card on the page.
-let _planPromise = null
-function fetchLessonPlans(api) {
-  if (!_planPromise) _planPromise = api.get('/curriculum/progress')
-    .then(r => r.data?.data?.subjects || [])
-    .catch(() => [])
-  return _planPromise
-}
-const _norm = (x) => String(x || '').toLowerCase().replace(/[^a-z0-9]/g, '')
-
 export default function SubjectProgressCard({
   studentId,
   subjectId: subjectIdProp,
@@ -64,15 +54,15 @@ export default function SubjectProgressCard({
   compact = false,
 }) {
   const [plan, setPlan] = useState(null)
-  const [planOpen, setPlanOpen] = useState(false)
+  const [planOpen, setPlanOpen] = useState(true)   // complete list by default
   useEffect(() => {
+    if (!api || !resolvedSubjectId) return
     let on = true
-    if (!api) return
-    fetchLessonPlans(api).then(list => {
-      if (on) { const hit = list.find(x => _norm(x.subject) === _norm(subjectName)); if (hit) setPlan(hit) }
-    })
+    api.get('/curriculum/progress/subject', { params: { subjectId: resolvedSubjectId } })
+      .then(r => { if (on && r.data?.data) setPlan(r.data.data) })
+      .catch(() => {})
     return () => { on = false }
-  }, [subjectName, api])
+  }, [api, resolvedSubjectId])
   const [state, setState] = useState({ status: 'loading', data: null, error: null })
   const [resolvedSubjectId, setResolvedSubjectId] = useState(subjectIdProp || null)
 
@@ -242,7 +232,7 @@ export default function SubjectProgressCard({
     const pct = plan.counts.total ? Math.round(plan.counts.covered / plan.counts.total * 100) : 0
     const fmt = (d) => new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
     const nextIdx = plan.plan.findIndex(l => l.status === 'scheduled' || l.status === 'projected')
-    const visible = planOpen ? plan.plan : plan.plan.slice(Math.max(0, (nextIdx === -1 ? plan.plan.length : nextIdx) - 1), (nextIdx === -1 ? plan.plan.length : nextIdx) + 3)
+    const visible = planOpen ? plan.plan : plan.plan.slice(Math.max(0, (nextIdx === -1 ? plan.plan.length : nextIdx) - 2), (nextIdx === -1 ? plan.plan.length : nextIdx) + 4)
     const mark = (st) => st === 'attended'
       ? <span style={{ width: 15, height: 15, borderRadius: '50%', background: GOLD, color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 900, flexShrink: 0 }}>{'\u2713'}</span>
       : st === 'missed'
@@ -267,7 +257,7 @@ export default function SubjectProgressCard({
             <div style={{ fontSize: 10, color: MUT, marginTop: 2 }}>every {plan.slot}{plan.teacher ? ' \u00b7 ' + plan.teacher : ''}</div>
           </div>
         </div>
-        <div style={{ marginTop: 8, display: 'grid', gap: 4 }}>
+        <div style={{ marginTop: 8, display: 'grid', gap: 4, maxHeight: planOpen ? 340 : undefined, overflow: planOpen ? 'auto' : undefined, paddingRight: 4 }}>
           {visible.map((l, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 6px', borderRadius: 7, background: l.status === 'scheduled' ? '#FBF3F5' : 'transparent', opacity: l.status === 'projected' ? 0.8 : 1 }}>
               {mark(l.status)}
@@ -278,7 +268,7 @@ export default function SubjectProgressCard({
         </div>
         <button onClick={() => setPlanOpen(o => !o)}
           style={{ marginTop: 6, padding: '4px 12px', borderRadius: 7, border: `1px solid ${TRACK}`, background: '#fff', color: CRIM, fontSize: 10, fontWeight: 800, cursor: 'pointer' }}>
-          {planOpen ? 'Show around today' : `All ${plan.plan.length} lessons`}
+          {planOpen ? 'Focus around today' : `Show all ${plan.plan.length} lessons`}
         </button>
       </div>
     )
