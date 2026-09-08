@@ -293,7 +293,7 @@ router.get('/overview', auth, requireRole('admin', 'ops_manager', 'dos', 'teache
     const counts = Object.fromEntries(perTeacher.map(r => [String(r._id), r.n]));
     const tRows = teachers.map(t => ({ _id: t._id, name: [t.firstName, t.lastName].filter(Boolean).join(' '), slots: counts[String(t._id)] || 0 }));
     return ok(res, {
-      subjects: subjects.map(x => ({ _id: x._id, name: x.subjectName + (x.curriculum ? ' (' + x.curriculum + ')' : '') })),
+      subjects: subjects.map(x => ({ _id: x._id, name: x.subjectName + (x.curriculum ? ' (' + x.curriculum + ')' : ''), subjectName: x.subjectName, curriculum: x.curriculum || '' })),
       teachers: tRows,
       students: students.map(st => ({ _id: st._id, name: [st.firstName, st.lastName].filter(Boolean).join(' '), grade: st.gradeLevel || '', admissionNo: st.admissionNo || '' })),
       stats: {
