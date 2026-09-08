@@ -16604,13 +16604,13 @@ function TeacherTimetableTab({ user, toast }) {
   const inp = { padding: '8px 10px', border: `1.5px solid ${C.line}`, borderRadius: 8, fontSize: 12.5 }
   const chip = (bg, fg, t) => <span style={{ padding: '2px 8px', borderRadius: 999, fontSize: 9.5, fontWeight: 800, background: bg, color: fg, whiteSpace: 'nowrap' }}>{t}</span>
 
-  const blank = () => ({ title: '', subject: '', curriculum: '', grade: '', dayOfWeek: 'Mon', startTime: '09:00', endTime: '10:00', assignedStudents: [], pickGrade: '', subjectId: '', autoTitle: true })
+  const blank = () => ({ title: '', subject: '', curriculum: '', grade: '', dayOfWeek: 'Mon', startTime: '09:00', endTime: '10:00', assignedStudents: [], pickGrade: '', subjectId: '', autoTitle: true, customCur: false, customSub: false })
   const openAdd = () => { setForm(blank()); setModal({ entry: null }) }
   const openEdit = (e) => {
     setForm({ title: e.title || '', subject: e.subject || '', curriculum: e.curriculum || '', grade: e.grade || '',
       dayOfWeek: e.dayOfWeek, startTime: e.startTime, endTime: e.endTime,
       assignedStudents: (e.assignedStudents || []).map(x => String(x?._id || x)),
-      pickGrade: e.grade || '', subjectId: e.subjectId ? String(e.subjectId?._id || e.subjectId) : '', autoTitle: false })
+      pickGrade: e.grade || '', subjectId: e.subjectId ? String(e.subjectId?._id || e.subjectId) : '', autoTitle: false, customCur: false, customSub: false })
     setModal({ entry: e })
   }
   const overlapNote = () => {
@@ -16671,6 +16671,8 @@ function TeacherTimetableTab({ user, toast }) {
 
   const pickable = form ? ov.students.filter(st => !form.pickGrade || st.grade === form.pickGrade) : []
   const grades = [...new Set(ov.students.map(st => st.grade).filter(Boolean))].sort()
+  const curricula = [...new Set(ov.subjects.map(x => x.curriculum).filter(Boolean))].sort()
+  const subjectOpts = ov.subjects.filter(x => x.curriculum === form?.curriculum)
   const fmtDay = (d) => new Date(d).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
   const fmtTime = (d) => new Date(d).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
 
@@ -16761,41 +16763,53 @@ function TeacherTimetableTab({ user, toast }) {
         <div onClick={() => setModal(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 90, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 14 }}>
           <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 14, width: 'min(540px,100%)', maxHeight: '92vh', overflow: 'auto', padding: 20, display: 'grid', gap: 10 }}>
             <b style={{ fontSize: 15.5, color: C.ink }}>{modal.entry ? 'Edit weekly slot' : 'New weekly slot'}</b>
-            {/* Pick the subject from your spines: subject, curriculum and
-                the syllabus link are set in one stroke, and the title
-                composes itself from grade + subject (still editable). */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-              <select value={form.subjectId || (form.subject ? '__custom' : '')} onChange={e => {
+            {/* Narrowing pickers: 1 Curriculum -> 2 Class/Level -> 3 Subject.
+                Each step filters the next, so no dropdown is ever a long
+                flat list. The title composes itself and stays editable. */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+              <select value={form.customCur ? '__other' : form.curriculum} onChange={e => {
                 const v = e.target.value
-                if (v === '__custom' || v === '') { setForm(f => ({ ...f, subjectId: '' })); return }
-                const sub = ov.subjects.find(x => String(x._id) === v)
-                if (!sub) return
-                setForm(f => {
-                  const subject = sub.subjectName || sub.name
-                  const title = f.autoTitle ? `${f.grade ? f.grade + ' ' : ''}${subject}`.trim() : f.title
-                  return { ...f, subjectId: v, subject, curriculum: sub.curriculum || f.curriculum || '', title }
-                })
+                setForm(f => ({ ...f,
+                  customCur: v === '__other',
+                  curriculum: v === '__other' ? '' : v,
+                  subjectId: '', subject: '', customSub: false,
+                  title: f.autoTitle ? (f.grade || '') : f.title,
+                }))
               }} style={inp}>
-                <option value="">Pick subject (from your spines)...</option>
-                {ov.subjects.map(sub => <option key={sub._id} value={sub._id}>{sub.name}</option>)}
-                <option value="__custom">Other subject (type below)</option>
+                <option value="">1. Curriculum...</option>
+                {curricula.map(c => <option key={c} value={c}>{c}</option>)}
+                <option value="__other">Other...</option>
               </select>
               <select value={form.grade} onChange={e => setForm(f => {
                 const grade = e.target.value
-                const title = f.autoTitle ? `${grade ? grade + ' ' : ''}${f.subject}`.trim() : f.title
-                return { ...f, grade, title }
+                return { ...f, grade, title: f.autoTitle ? `${grade ? grade + ' ' : ''}${f.subject}`.trim() : f.title }
               })} style={inp}>
-                <option value="">Pick grade / year...</option>
+                <option value="">2. Class / level...</option>
                 {grades.map(g => <option key={g} value={g}>{g}</option>)}
               </select>
+              <select disabled={!form.curriculum && !form.customCur}
+                value={form.customSub ? '__other' : (form.subjectId || '')} onChange={e => {
+                const v = e.target.value
+                if (v === '__other') { setForm(f => ({ ...f, customSub: true, subjectId: '', subject: '' })); return }
+                const sub = subjectOpts.find(x => String(x._id) === v)
+                setForm(f => {
+                  const subject = sub ? (sub.subjectName || sub.name) : ''
+                  return { ...f, customSub: false, subjectId: v, subject,
+                    title: f.autoTitle ? `${f.grade ? f.grade + ' ' : ''}${subject}`.trim() : f.title }
+                })
+              }} style={{ ...inp, opacity: (!form.curriculum && !form.customCur) ? 0.5 : 1 }}>
+                <option value="">3. Subject...</option>
+                {subjectOpts.map(sub => <option key={sub._id} value={sub._id}>{sub.subjectName || sub.name}</option>)}
+                <option value="__other">Other subject...</option>
+              </select>
             </div>
-            {(!form.subjectId || !form.curriculum.trim()) && (
+            {(form.customCur || form.customSub) && (
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                {!form.subjectId && <input value={form.subject} onChange={e => setForm(f => ({ ...f, subject: e.target.value, title: f.autoTitle ? `${f.grade ? f.grade + ' ' : ''}${e.target.value}`.trim() : f.title }))} placeholder="Subject name" style={inp} />}
-                <input value={form.curriculum} onChange={e => setForm(f => ({ ...f, curriculum: e.target.value }))} placeholder="Curriculum, e.g. Cambridge" style={inp} />
+                {form.customCur && <input value={form.curriculum} onChange={e => setForm(f => ({ ...f, curriculum: e.target.value }))} placeholder="Curriculum, e.g. Cambridge" style={inp} />}
+                {(form.customSub || form.customCur) && <input value={form.subjectId ? '' : form.subject} onChange={e => setForm(f => ({ ...f, subject: e.target.value, subjectId: '', title: f.autoTitle ? `${f.grade ? f.grade + ' ' : ''}${e.target.value}`.trim() : f.title }))} placeholder="Subject name" style={inp} />}
               </div>
             )}
-            <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value, autoTitle: false }))} placeholder="Title (fills itself from grade + subject)" style={{ ...inp, fontWeight: 700 }} />
+            <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value, autoTitle: false }))} placeholder="Title (fills itself from class + subject)" style={{ ...inp, fontWeight: 700 }} />
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
               <select value={form.dayOfWeek} onChange={e => setForm(f => ({ ...f, dayOfWeek: e.target.value }))} style={inp}>
                 {DAYS.map(d => <option key={d} value={d}>{d}</option>)}
