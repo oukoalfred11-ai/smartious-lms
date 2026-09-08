@@ -134,7 +134,38 @@ router.get('/progress/subject', auth, async (req, res) => {
 
     const lessons = await Lesson.find({ subjectId: sid, isActive: { $ne: false } })
       .sort({ order: 1 }).select('title topicName subtopicName').lean();
-    if (!lessons.length) return res.json({ success: true, data: null });
+
+    if (!lessons.length) {
+      // Subtopic mode: most spines carry their plan as topics with
+      // subtopics (the same tree the 0-of-285 metric counts). The plan
+      // is that tree in display order, ticked from the student's
+      // syllabus-progress records.
+      const SyllabusTopic = require('../models/SyllabusTopic');
+      const StudentSyllabusProgress = require('../models/StudentSyllabusProgress');
+      const topics = await SyllabusTopic.find({ subjectId: sid }).sort({ topicOrder: 1 }).lean();
+      if (!topics.length) return res.json({ success: true, data: null });
+      const done = await StudentSyllabusProgress.find({ studentId: req.user._id, subjectId: sid }).lean();
+      const doneMap = {};
+      done.forEach(d => { doneMap[`${d.syllabusTopicName || ''}||${d.syllabusSubtopicName}`] = d.updatedAt || d.createdAt || null; });
+      let total = 0, covered = 0;
+      const groups = topics.map(t => ({
+        topic: t.topic,
+        items: (t.subtopics || []).map(st => {
+          total += 1;
+          const key = `${t.topic}||${st.name}`;
+          const key2 = `||${st.name}`;
+          const when = doneMap[key] !== undefined ? doneMap[key] : doneMap[key2];
+          const isDone = when !== undefined;
+          if (isDone) covered += 1;
+          return { name: st.name, done: isDone, date: when || null };
+        }),
+      })).filter(g => g.items.length);
+      return res.json({ success: true, data: {
+        mode: 'subtopics', slot: '',
+        counts: { total, covered, attended: covered, missed: 0 },
+        groups,
+      } });
+    }
     const lessonIds = lessons.map(l => l._id);
 
     const classes = await LiveClass.find({
