@@ -16682,8 +16682,9 @@ function TeacherTimetableTab({ user, toast }) {
     if (/ALevel|A-Level/i.test(c)) return ['Year 12 (AS)', 'Year 13 (A2)']
     if (/MYP/i.test(c)) return yrs(6, 10, 'MYP Grade ')
     if (/IBDP|DP/i.test(c)) return ['DP Year 1', 'DP Year 2']
-    if (/American|US/i.test(c)) return ['Kindergarten', ...yrs(1, 12, 'Grade ')]
-    if (/CBC/i.test(c)) return ['PP1', 'PP2', ...yrs(1, 12, 'Grade ')]
+    if (/American|US|Canadian/i.test(c)) return ['Kindergarten', ...yrs(1, 12, 'Grade ')]
+    if (/CBC|CBE/i.test(c)) return ['PP1', 'PP2', ...yrs(1, 12, 'Grade ')]
+    if (/BNC|British/i.test(c)) return yrs(1, 13)
     if (/KCSE|8-4-4|844/i.test(c)) return yrs(1, 4, 'Form ')
     // Unknown curriculum: full Year ladder plus any grades already in use.
     return [...new Set([...yrs(1, 13), ...grades])]
