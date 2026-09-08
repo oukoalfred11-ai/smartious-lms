@@ -1058,6 +1058,7 @@ function ParentLessons({ child }) {
     <div key={c._id} style={{ display:'flex', alignItems:'center', gap:14, padding:'12px 18px', borderBottom:`1px solid ${C.line}` }}>
       <div style={{ flex:1, minWidth:0 }}>
         <div style={{ fontWeight:700, fontSize:13.5, color:C.ink }}>{c.title||c.subject}</div>
+        {c.syllabusTopicName && <div style={{ fontSize:11, color:'#B45309', fontWeight:700, marginTop:1 }}>{c.syllabusTopicName}{c.syllabusSubtopicName ? ': ' + c.syllabusSubtopicName : ''}</div>}
         <div style={{ fontSize:11.5, color:C.s500, marginTop:2 }}>{c.subject} \u00B7 {c.teacherId ? c.teacherId.firstName+' '+c.teacherId.lastName : ''} \u00B7 {fmt(c)}</div>
       </div>
       {!done && (
