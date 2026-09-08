@@ -276,7 +276,7 @@ router.delete('/:id', auth, requireRole('teacher', 'admin', 'dos'), async (req, 
 // One call powering the console: every teacher with their active slot
 // count (zero = the migration chase-list), every student for search and
 // slot assignment, and headline stats.
-router.get('/overview', auth, requireRole('admin', 'ops_manager', 'dos'), async (req, res) => {
+router.get('/overview', auth, requireRole('admin', 'ops_manager', 'dos', 'teacher'), async (req, res) => {
   try {
     const User = require('../models/User');
     const Subject = require('../models/Subject');
