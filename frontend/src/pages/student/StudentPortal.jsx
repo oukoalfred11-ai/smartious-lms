@@ -4652,7 +4652,7 @@ function LiveClassCard({ lc, subjectColour, fmtDateTime, countdownText, canJoin,
                   { label:'UPCOMING', bg:'#FEF3C7', fg:'#92400E' },
       ]}
       title={lc.title || lc.topic || `${lc.subject} class`}
-      eyebrow={lc.subject}
+      eyebrow={lc.syllabusTopicName ? `${lc.subject} \u2014 ${lc.syllabusTopicName}${lc.syllabusSubtopicName ? ': ' + lc.syllabusSubtopicName : ''}` : lc.subject}
       tiles={[
         ['When',     fmtDateTime(lc.startAt)],
         ['Duration', lc.durationMins ? `${lc.durationMins} min` : '\u2014'],
