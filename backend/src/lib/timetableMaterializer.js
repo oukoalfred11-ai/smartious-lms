@@ -116,11 +116,34 @@ async function reconcile() {
       }
     }
 
+    // Spine progression: if the entry is linked to a subject spine, each
+    // newly materialized instance carries the NEXT lesson in spine order
+    // that this slot has not yet used - the scheme of work advances
+    // automatically, and reminders can announce the topic.
+    let spineQueue = [];
+    if (entry.subjectId) {
+      try {
+        const Lesson = require('../models/Lesson');
+        const used = await LiveClass.distinct('preparationLessonId', {
+          timetableEntryId: entry._id, preparationLessonId: { $ne: null },
+        });
+        spineQueue = await Lesson.find({
+          subjectId: entry.subjectId,
+          _id: { $nin: used },
+          isActive: { $ne: false },
+        }).sort({ order: 1 }).limit(10).select('title topicName subtopicName').lean();
+      } catch (e) { /* spine optional */ }
+    }
+
     // Missing instances: create them.
     for (const when of desired) {
       if (existing.some(x => match(x.scheduledAt, when))) continue;
       if (exceptions.some(x => sameEATDay(x.scheduledAt, when))) continue;
+      const nextLesson = spineQueue.shift() || null;
       await LiveClass.create({
+        preparationLessonId: nextLesson ? nextLesson._id : null,
+        syllabusTopicName: nextLesson ? (nextLesson.topicName || nextLesson.title || '') : '',
+        syllabusSubtopicName: nextLesson ? (nextLesson.subtopicName || '') : '',
         title: entry.title || `${entry.subject} — ${entry.grade || ''}`.trim(),
         description: entry.description || '',
         subject: entry.subject,
