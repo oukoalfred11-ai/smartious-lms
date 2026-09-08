@@ -54,15 +54,6 @@ async function notifyStudents(studentIds, classParams, isUpdate = false) {
 // don't get virtuals, so we re-derive in JS).
 // ─────────────────────────────────────────────────────────
 
-// School policy: no weekend lessons. Nairobi calendar. Clubs, events and
-// assemblies are exempt (none currently scheduled on weekends either).
-function isWeekendEAT(dateLike) {
-  const d = new Date(dateLike);
-  if (isNaN(d)) return false;
-  const dow = new Date(d.toLocaleString('en-US', { timeZone: 'Africa/Nairobi' })).getDay();
-  return dow === 0 || dow === 6;
-}
-
 const computeStatus = (lc) => {
   if (!lc) return 'scheduled';
   if (lc.status === 'cancelled' || lc.status === 'ended') return lc.status;
@@ -141,8 +132,6 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
         message: 'Lessons are created from the timetable. Add or edit your timetable slot and the class will appear automatically for the coming week.',
       });
     }
-    if (wantedKind === 'lesson' && isWeekendEAT(req.body.scheduledAt))
-      return res.status(400).json({ success: false, message: 'Weekend lessons are not scheduled at Smartious. Pick a Monday-to-Friday time.' });
     const liveClass = await LiveClass.create({
       kind: ['lesson','club','competition','event','assembly'].includes(kind) ? kind : 'lesson',
       title: title.trim(),
@@ -302,9 +291,6 @@ router.patch('/:id', auth, requireRole('teacher', 'admin', 'dos', 'ops_manager')
 
     // Capture old link before any updates so we can detect a change
     const oldMeetingLink = lc.meetingLink;
-
-    if (req.body.scheduledAt && (lc.kind === 'lesson' || !lc.kind) && isWeekendEAT(req.body.scheduledAt))
-      return res.status(400).json({ success: false, message: 'Weekend lessons are not scheduled at Smartious. Pick a Monday-to-Friday time.' });
 
     // One-off change to a timetable-born class: detach it so the
     // reconciler treats it as an exception rather than reverting it.
