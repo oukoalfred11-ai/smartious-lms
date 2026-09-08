@@ -140,25 +140,33 @@ async function reconcile() {
       if (existing.some(x => match(x.scheduledAt, when))) continue;
       if (exceptions.some(x => sameEATDay(x.scheduledAt, when))) continue;
       const nextLesson = spineQueue.shift() || null;
-      await LiveClass.create({
-        preparationLessonId: nextLesson ? nextLesson._id : null,
-        syllabusTopicName: nextLesson ? (nextLesson.topicName || nextLesson.title || '') : '',
-        syllabusSubtopicName: nextLesson ? (nextLesson.subtopicName || '') : '',
-        title: entry.title || `${entry.subject} — ${entry.grade || ''}`.trim(),
-        description: entry.description || '',
-        subject: entry.subject,
-        grade: entry.grade || '',
-        teacherId: entry.teacherId,
-        assignedStudents: entry.assignedStudents || [],
-        scheduledAt: when,
-        durationMins: durationOf(entry),
-        classroomMode: 'native',
-        kind: 'lesson',
-        status: 'scheduled',
-        fromTimetable: true,
-        timetableEntryId: entry._id,
-      });
-      created += 1;
+      try {
+        await LiveClass.create({
+          preparationLessonId: nextLesson ? nextLesson._id : null,
+          syllabusTopicName: nextLesson ? (nextLesson.topicName || nextLesson.title || '') : '',
+          syllabusSubtopicName: nextLesson ? (nextLesson.subtopicName || '') : '',
+          title: entry.title || `${entry.subject} — ${entry.grade || 'class'}`.trim(),
+          description: entry.description || '',
+          subject: entry.subject || 'Class',
+          // curriculum and grade are REQUIRED by the LiveClass model and
+          // empty strings fail validation - always send substance.
+          curriculum: entry.curriculum || 'General',
+          grade: entry.grade || 'All grades',
+          teacherId: entry.teacherId,
+          assignedStudents: entry.assignedStudents || [],
+          scheduledAt: when,
+          durationMins: durationOf(entry),
+          classroomMode: 'native',
+          kind: 'lesson',
+          status: 'scheduled',
+          fromTimetable: true,
+          timetableEntryId: entry._id,
+        });
+        created += 1;
+      } catch (createErr) {
+        // One malformed entry must never zero the whole run.
+        console.error(`[timetable] could not materialize "${entry.title || entry.subject}" (${entry.dayOfWeek} ${entry.startTime}):`, createErr.message);
+      }
     }
   }
 
