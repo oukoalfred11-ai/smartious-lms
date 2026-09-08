@@ -826,6 +826,63 @@ export function DOSTimetableModule({ toast, refreshKey }) {
   }
   const reloadSel = () => { if (sel) openPerson(sel.kind, { _id: sel._id, name: sel.name }); loadOverview() }
 
+  // ── Printable timetables: school-wide, all students, or one person ──
+  const DAY_ORDER = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+  const printDoc = (title, bodyHtml) => {
+    const html = `<!doctype html><html><head><title>${title}</title><style>
+      body{font-family:Georgia,serif;color:#1a1a1a;margin:36px;line-height:1.45}
+      h1{font-size:21px;margin:0;color:#7D1025}.sub{color:#666;font-size:11.5px;margin-bottom:16px}
+      h2{font-size:13.5px;margin:18px 0 6px;color:#7D1025;border-bottom:2px solid #C9A030;padding-bottom:3px;page-break-after:avoid}
+      table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:6px}
+      th{text-align:left;background:#F7F2EA;padding:5px 7px;border:1px solid #ddd}td{padding:4px 7px;border:1px solid #ddd}
+      .sec{page-break-inside:avoid}.foot{font-size:9.5px;color:#777;margin-top:16px;border-top:1px solid #ddd;padding-top:6px}
+      @media print{body{margin:14px}}
+    </style></head><body>
+      <h1>Smartious Homeschool \u2014 ${title}</h1>
+      <div class="sub">Generated ${new Date().toDateString()} \u00b7 weekly pattern; classes are created automatically from these slots</div>
+      ${bodyHtml}
+      <div class="foot">Smartious Homeschool \u00b7 Est. 2018 \u00b7 smartioushomeschool.com</div>
+    <script>window.onload = () => window.print()</` + `script></body></html>`
+    const w = window.open('', '_blank')
+    if (!w) return toast?.error?.('Allow pop-ups to print timetables.')
+    w.document.write(html); w.document.close()
+  }
+  const entryRows = (list, cols) => {
+    const sorted = [...list].sort((a, b) => DAY_ORDER.indexOf(a.dayOfWeek) - DAY_ORDER.indexOf(b.dayOfWeek) || (a.startTime < b.startTime ? -1 : 1))
+    return sorted.map(e => '<tr>' + cols(e).map(c => `<td>${c ?? ''}</td>`).join('') + '</tr>').join('')
+  }
+  const printSchool = () => {
+    const byTeacher = {}
+    ;(ov.entries || []).forEach(e => { (byTeacher[e.teacher] = byTeacher[e.teacher] || []).push(e) })
+    const body = Object.keys(byTeacher).sort().map(t => `<div class="sec"><h2>${t}</h2>
+      <table><thead><tr><th>Day</th><th>Time</th><th>Class</th><th>Subject</th><th>Grade</th><th>Students</th></tr></thead>
+      <tbody>${entryRows(byTeacher[t], e => [e.dayOfWeek, e.startTime + '-' + e.endTime, e.title, e.subject, e.grade, e.students.length])}</tbody></table></div>`).join('')
+    printDoc('School Timetable (all teachers)', body || '<p>No active slots.</p>')
+  }
+  const printAllStudents = () => {
+    const byStudent = {}
+    ;(ov.entries || []).forEach(e => e.students.forEach(st => {
+      const k = st.name + (st.grade ? ' (' + st.grade + ')' : '')
+      ;(byStudent[k] = byStudent[k] || []).push(e)
+    }))
+    const keys = Object.keys(byStudent).sort()
+    const body = keys.map(k => `<div class="sec"><h2>${k}</h2>
+      <table><thead><tr><th>Day</th><th>Time</th><th>Subject</th><th>Class</th><th>Teacher</th></tr></thead>
+      <tbody>${entryRows(byStudent[k], e => [e.dayOfWeek, e.startTime + '-' + e.endTime, e.subject, e.title, e.teacher])}</tbody></table></div>`).join('')
+    printDoc('Student Timetables (all students)', body || '<p>No students are assigned to any slot yet.</p>')
+  }
+  const printSelected = () => {
+    if (!sel) return
+    const cols = sel.kind === 'teacher'
+      ? (e) => [e.dayOfWeek, e.startTime + '-' + e.endTime, e.title || e.subject, e.subject, e.grade, Array.isArray(e.assignedStudents) ? e.assignedStudents.length : '']
+      : (e) => [e.dayOfWeek, e.startTime + '-' + e.endTime, e.subject, e.title || '', e.teacherId ? [e.teacherId.firstName, e.teacherId.lastName].filter(Boolean).join(' ') : '']
+    const heads = sel.kind === 'teacher' ? ['Day', 'Time', 'Class', 'Subject', 'Grade', 'Students'] : ['Day', 'Time', 'Subject', 'Class', 'Teacher']
+    const body = `<div class="sec"><h2>${sel.name}</h2>
+      <table><thead><tr>${heads.map(h => '<th>' + h + '</th>').join('')}</tr></thead>
+      <tbody>${entryRows(entries, cols)}</tbody></table></div>`
+    printDoc((sel.kind === 'teacher' ? 'Teacher' : 'Student') + ' Timetable \u2014 ' + sel.name, entries.length ? body : '<p>No active slots for ' + sel.name + '.</p>')
+  }
+
   const blank = () => ({ title: '', subject: '', curriculum: 'Cambridge', grade: '', dayOfWeek: 'Mon', startTime: '09:00', endTime: '10:00', assignedStudents: [], pickGrade: '', subjectId: '' })
   const openAdd = () => { setForm(blank()); setModal({ entry: null }) }
   const openEdit = (e) => {
@@ -884,7 +941,12 @@ export function DOSTimetableModule({ toast, refreshKey }) {
         sub="The timetable dictates classes: every slot here creates the real lessons for the coming week, automatically, until edited." />
 
       {/* Stats */}
-      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', margin: '14px 0' }}>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', margin: '10px 0 4px' }}>
+        <button onClick={printSchool} style={{ padding: '8px 14px', borderRadius: 8, border: 'none', background: TOKENS.crimson, color: '#fff', fontSize: 11.5, fontWeight: 800, cursor: 'pointer' }}>Print school timetable</button>
+        <button onClick={printAllStudents} style={{ padding: '8px 14px', borderRadius: 8, border: `1.5px solid ${TOKENS.crimson}`, background: '#fff', color: TOKENS.crimson, fontSize: 11.5, fontWeight: 800, cursor: 'pointer' }}>Print all student timetables</button>
+        {sel && <button onClick={printSelected} style={{ padding: '8px 14px', borderRadius: 8, border: `1.5px solid ${TOKENS.line}`, background: '#fff', color: TOKENS.s700, fontSize: 11.5, fontWeight: 800, cursor: 'pointer' }}>Print {sel.name}'s timetable</button>}
+      </div>
+      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', margin: '10px 0 14px' }}>
         {[['Active weekly slots', ov.stats.activeSlots, TOKENS.s900],
           ['Teachers without a timetable', ov.stats.teachersWithout, ov.stats.teachersWithout ? '#B91C1C' : '#15803D'],
           ['Weekend slots', ov.stats.weekendSlots, ov.stats.weekendSlots ? '#B45309' : TOKENS.s500]].map(([l, v, c]) => (
