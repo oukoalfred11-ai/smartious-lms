@@ -86,6 +86,14 @@ const liveClassSchema = new mongoose.Schema({
   // Set when this class was auto-created by the timetable
   // roll-forward promotion (vs. manually scheduled).
   fromTimetable: { type: Boolean, default: false },
+  // The weekly timetable entry this instance was materialized from.
+  // The reconciler (lib/timetableMaterializer.js) keys on this to keep
+  // future instances in step with the teacher's timetable edits.
+  timetableEntryId: { type: mongoose.Schema.Types.ObjectId, ref: 'TimetableEntry', default: null, index: true },
+  // A materialized instance that was individually edited or cancelled.
+  // Detached instances are EXCEPTIONS: the reconciler never deletes,
+  // moves, or recreates over them - one-off changes survive the series.
+  detached: { type: Boolean, default: false },
 
   // Clubs. A club meeting is a live class with clubId set; it opens in
   // the classroom's meeting (conference) view instead of the whiteboard,
