@@ -47,6 +47,40 @@ function StudentSessionsModule({ toast, refreshKey }) {
   const [search, setSearch] = useState('')
   const [statusF, setStatusF] = useState('all')
   const [saving, setSaving] = useState(null)
+  const [yearsData, setYearsData] = useState(null)   // { cohorts, retention, method }
+  const [exiting, setExiting] = useState(null)       // student being exited: { s, kind, reason }
+  const loadYears = useCallback(() => {
+    api.get('/student-sessions/years').then(r => setYearsData(r.data?.data || null)).catch(() => {})
+  }, [])
+  useEffect(() => { loadYears() }, [loadYears])
+
+  const currentYearGuess = () => {
+    const now = new Date(); const y = now.getFullYear()
+    return now.getMonth() >= 8 ? `${y}/${y + 1}` : `${y - 1}/${y}`
+  }
+  const initYear = async () => {
+    const year = window.prompt('Initialize which academic year? (every active student is enrolled at their current grade)', currentYearGuess())
+    if (!year) return
+    try { const r = await api.post('/student-sessions/years/init', { academicYear: year.trim() }); toast?.ok?.(r.data?.message); loadYears() }
+    catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not initialize the year.') }
+  }
+  const promoteYear = async () => {
+    const from = window.prompt('Promote FROM which academic year?', currentYearGuess())
+    if (!from) return
+    const [a, b] = from.trim().split('/').map(Number)
+    const to = window.prompt('Promote INTO which academic year?', `${a + 1}/${b + 1}`)
+    if (!to) return
+    if (!window.confirm(`Promote ${from.trim()} into ${to.trim()}?\n\nEvery continuing student moves up one grade, terminal grades (Year 13, Grade 12, Form 4, DP Year 2) GRADUATE, and ${from.trim()} closes. This is the end-of-year operation - run it once.`)) return
+    try { const r = await api.post('/student-sessions/years/promote', { fromYear: from.trim(), toYear: to.trim(), confirm: true }); toast?.ok?.(r.data?.message); loadYears(); load() }
+    catch (e) { toast?.error?.(e?.response?.data?.message || 'Promotion failed.') }
+  }
+  const doExit = async () => {
+    if (!exiting?.s) return
+    try {
+      const r = await api.patch('/student-sessions/exit/' + exiting.s._id, { kind: exiting.kind, reason: exiting.reason })
+      toast?.ok?.(r.data?.message); setExiting(null); load(); loadYears()
+    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not update the student.') }
+  }
   const [pauseModal, setPauseModal] = useState(null)     // student being paused
   const [form, setForm] = useState({ type: 'holiday', note: '', expectedEnd: '', blockAccess: false })
   const [historyModal, setHistoryModal] = useState(null) // { student, history }
@@ -117,6 +151,57 @@ function StudentSessionsModule({ toast, refreshKey }) {
 
   return (
     <div>
+      {/* ── Academic years, cohorts and retention ── */}
+      <div style={{ background: '#fff', border: `1px solid ${TOKENS.line}`, borderRadius: 12, padding: 16, marginBottom: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 10 }}>
+          <b style={{ fontSize: 14.5, color: TOKENS.s900 }}>Academic years</b>
+          <span style={{ fontSize: 11.5, color: TOKENS.s500 }}>cohorts like 2026/2027 Year 7, and the retention they produce</span>
+          <span style={{ flex: 1 }} />
+          <button onClick={initYear} style={{ padding: '7px 14px', borderRadius: 8, border: `1.5px solid ${TOKENS.crimson}`, background: '#fff', color: TOKENS.crimson, fontSize: 11.5, fontWeight: 800, cursor: 'pointer' }}>Initialize year</button>
+          <button onClick={promoteYear} style={{ padding: '7px 14px', borderRadius: 8, border: 'none', background: TOKENS.crimson, color: '#fff', fontSize: 11.5, fontWeight: 800, cursor: 'pointer' }}>Promote year (end of year)</button>
+        </div>
+        {yearsData && yearsData.retention?.length > 0 && (
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 12 }}>
+            {yearsData.retention.map(r => (
+              <div key={r.from} style={{ background: '#FBF8F3', borderRadius: 10, padding: '10px 16px' }}>
+                <div style={{ fontSize: 20, fontWeight: 900, color: r.pct === null ? TOKENS.s400 : r.pct >= 85 ? '#15803D' : r.pct >= 70 ? '#B45309' : '#B91C1C' }}>{r.pct === null ? '\u2013' : r.pct + '%'}</div>
+                <div style={{ fontSize: 10.5, color: TOKENS.s500, fontWeight: 700 }}>Retention {r.from} \u2192 {r.to}</div>
+                <div style={{ fontSize: 10, color: TOKENS.s400 }}>{r.retained} of {r.eligible} continued</div>
+              </div>
+            ))}
+          </div>
+        )}
+        {yearsData && yearsData.cohorts?.length > 0 ? yearsData.cohorts.map(c => (
+          <details key={c.academicYear} style={{ marginBottom: 6 }}>
+            <summary style={{ fontSize: 12.5, fontWeight: 800, color: TOKENS.s800, cursor: 'pointer' }}>{c.academicYear} \u00b7 {c.total} student(s)</summary>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11.5, marginTop: 6 }}>
+              <thead><tr>{['Grade', 'Total', 'Active', 'On break', 'Withdrawn', 'Graduated', 'Completed'].map(h => <th key={h} style={{ textAlign: 'left', padding: '5px 8px', background: '#F7F2EA', border: `1px solid ${TOKENS.line}` }}>{h}</th>)}</tr></thead>
+              <tbody>{c.grades.map(g => <tr key={g.grade}>{[g.grade, g.total, g.active || 0, g.break || 0, g.withdrawn || 0, g.graduated || 0, g.completed || 0].map((v, i) => <td key={i} style={{ padding: '4px 8px', border: `1px solid ${TOKENS.line}` }}>{v}</td>)}</tr>)}</tbody>
+            </table>
+          </details>
+        )) : (
+          <div style={{ fontSize: 12, color: TOKENS.s500 }}>
+            No academic years yet. Press <b>Initialize year</b> to enroll every active student into the current year at their grade \u2014 cohorts and retention start from that snapshot.
+          </div>
+        )}
+      </div>
+
+      {/* ── Exit modal: left or graduated ── */}
+      {exiting && (
+        <div onClick={() => setExiting(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 90, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 14 }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 14, width: 'min(430px,100%)', padding: 20, display: 'grid', gap: 10 }}>
+            <b style={{ fontSize: 15, color: TOKENS.s900 }}>{exiting.kind === 'graduated' ? 'Mark graduated' : 'Mark as left'} \u00b7 {exiting.s.firstName} {exiting.s.lastName}</b>
+            <div style={{ fontSize: 11.5, color: TOKENS.s500 }}>Closes their enrollment record and account together: they leave rosters, timetables and portals, their history stays, and retention data records the exit.</div>
+            <textarea value={exiting.reason} onChange={e => setExiting(x => ({ ...x, reason: e.target.value }))} rows={2}
+              placeholder={exiting.kind === 'graduated' ? 'e.g. Completed Year 13, June 2027' : 'Reason, e.g. relocated, moved schools, fees'}
+              style={{ padding: '8px 10px', border: `1.5px solid ${TOKENS.line}`, borderRadius: 8, fontSize: 12.5, resize: 'vertical' }} />
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={() => setExiting(null)} style={{ padding: '8px 14px', borderRadius: 8, border: `1.5px solid ${TOKENS.line}`, background: '#fff', color: TOKENS.s600, fontSize: 12, fontWeight: 800, cursor: 'pointer' }}>Cancel</button>
+              <button onClick={doExit} style={{ padding: '8px 16px', borderRadius: 8, border: 'none', background: exiting.kind === 'graduated' ? '#15803D' : '#B91C1C', color: '#fff', fontSize: 12, fontWeight: 800, cursor: 'pointer' }}>{exiting.kind === 'graduated' ? 'Graduate student' : 'Confirm left'}</button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* KPI strip */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginBottom: 16 }}>
         {[
@@ -199,6 +284,10 @@ function StudentSessionsModule({ toast, refreshKey }) {
                           <button disabled={saving === s._id} onClick={() => openPause(s)} style={btn(TOKENS.crimson, '#fff')}>Pause</button>
                         )}
                         <button onClick={() => openHistory(s)} style={btn(TOKENS.cream || '#FDFAF4', TOKENS.crimson, { border: '1px solid ' + TOKENS.line })}>History</button>
+              <button onClick={() => setExiting({ s, kind: 'withdrawn', reason: '' })}
+                style={{ padding: '5px 10px', borderRadius: 7, border: '1px solid #FCA5A5', background: '#fff', fontSize: 10.5, fontWeight: 800, cursor: 'pointer', color: '#B91C1C' }}>Left</button>
+              <button onClick={() => setExiting({ s, kind: 'graduated', reason: '' })}
+                style={{ padding: '5px 10px', borderRadius: 7, border: '1px solid #86EFAC', background: '#fff', fontSize: 10.5, fontWeight: 800, cursor: 'pointer', color: '#15803D' }}>Graduate</button>
                       </div>
                     </td>
                   </tr>
