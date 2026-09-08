@@ -16689,12 +16689,30 @@ function TeacherTimetableTab({ user, toast }) {
     return [...new Set([...yrs(1, 13), ...grades])]
   }
   const gradeOpts = ladderFor(form?.curriculum)
-  // Curriculum ids and spine labels drift ('CambridgeIGCSE' vs
-  // 'Cambridge IGCSE'), so match on normalized text; and if the chosen
-  // curriculum matches no spines, offer ALL spines rather than none.
+  // Spines store curriculum loosely ('Cambridge' family vs stage ids)
+  // and often carry the grade inside the subject name ('Cambridge Y9
+  // Art'). Narrow in layers: exact curriculum, else curriculum FAMILY
+  // (first word: cambridge, edexcel, ib...), then by the chosen grade's
+  // number when subject names encode one. Only fall all the way open
+  // when nothing narrower exists.
   const normCur = (x) => String(x || '').toLowerCase().replace(/[^a-z0-9]/g, '')
-  const matched = ov.subjects.filter(x => normCur(x.curriculum) === normCur(form?.curriculum))
-  const subjectOpts = matched.length ? matched : ov.subjects
+  const family = (x) => (String(x || '').toLowerCase().match(/[a-z]+/) || [''])[0]
+  const chosenN = normCur(form?.curriculum)
+  const chosenFam = family(form?.curriculum)
+  const exact = ov.subjects.filter(x => normCur(x.curriculum) === chosenN)
+  const famMatch = exact.length ? exact : ov.subjects.filter(x => chosenFam && family(x.curriculum) === chosenFam)
+  const gradeNum = (String(form?.grade || '').match(/\d+/) || [null])[0]
+  const nameHasGrade = (nm) => {
+    const m = String(nm || '').match(/(?:year|grade|form|y|g)\s*-?\s*(\d+)/i)
+    return m ? m[1] : null
+  }
+  const pool = famMatch.length ? famMatch : ov.subjects
+  const anyGraded = pool.some(x => nameHasGrade(x.subjectName || x.name))
+  const gradeMatch = (gradeNum && anyGraded)
+    ? pool.filter(x => { const g = nameHasGrade(x.subjectName || x.name); return g === null || g === gradeNum })
+    : pool
+  const matched = famMatch
+  const subjectOpts = gradeMatch.length ? gradeMatch : pool
   const fmtDay = (d) => new Date(d).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
   const fmtTime = (d) => new Date(d).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
 
