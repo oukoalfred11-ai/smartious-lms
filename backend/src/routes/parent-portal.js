@@ -420,6 +420,20 @@ async function sendClassReminders() {
 
   let sent = 0
   for (const entry of upcoming) {
+    // Exception check: if this occurrence was cancelled (a materialized
+    // instance with status cancelled exists for this entry today), the
+    // family must NOT get a reminder for a class that will not happen.
+    try {
+      const LiveClassX = require('../models/LiveClass')
+      const [oh, om] = String(entry.startTime).split(':').map(Number)
+      const occ = new Date(Date.UTC(eat.getUTCFullYear(), eat.getUTCMonth(), eat.getUTCDate(), oh, om) - 3 * 3600 * 1000)
+      const cancelled = await LiveClassX.findOne({
+        timetableEntryId: entry._id, status: 'cancelled',
+        scheduledAt: { $gte: new Date(occ.getTime() - 5 * 60000), $lte: new Date(occ.getTime() + 5 * 60000) },
+      }).select('_id').lean()
+      if (cancelled) continue
+    } catch (e) { /* reminder proceeds if the check itself fails */ }
+
     // The same student can appear twice on one entry if the timetable was
     // edited; without this the family would receive the reminder twice.
     const seenStudents = new Set()
