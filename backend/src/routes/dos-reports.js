@@ -329,4 +329,43 @@ router.get('/question-bank', auth, requireRole(...STAFF), async (req, res) => {
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
 
+// ── Downloadable attendance records ──────────────────────────────────
+// Two clean record sets for a date range: per-LESSON attendance (from
+// classroom session registers) and DAILY attendance (from check-ins).
+//   GET /api/dos-reports/attendance-records?from=YYYY-MM-DD&to=YYYY-MM-DD
+router.get('/attendance-records', auth, requireRole('admin', 'ops_manager', 'dos'), async (req, res) => {
+  try {
+    const ClassroomSession = require('../models/ClassroomSession');
+    const Attendance = require('../models/Attendance');
+    const to = req.query.to ? new Date(req.query.to + 'T23:59:59Z') : new Date();
+    const from = req.query.from ? new Date(req.query.from + 'T00:00:00Z') : new Date(to.getTime() - 30 * 864e5);
+    if (to - from > 100 * 864e5) return res.status(400).json({ success: false, message: 'Range too large - 100 days maximum.' });
+
+    const sessions = await ClassroomSession.find({ createdAt: { $gte: from, $lte: to } })
+      .populate({ path: 'liveClassId', select: 'title subject grade scheduledAt teacherId', populate: { path: 'teacherId', select: 'firstName lastName' } })
+      .populate('studentId', 'firstName lastName gradeLevel')
+      .sort({ createdAt: 1 }).limit(8000).lean();
+    const lessonRows = sessions.filter(x => x.liveClassId && x.studentId).map(x => ({
+      date: x.liveClassId.scheduledAt, class: x.liveClassId.title || x.liveClassId.subject,
+      subject: x.liveClassId.subject || '', grade: x.liveClassId.grade || '',
+      teacher: x.liveClassId.teacherId ? [x.liveClassId.teacherId.firstName, x.liveClassId.teacherId.lastName].filter(Boolean).join(' ') : '',
+      student: [x.studentId.firstName, x.studentId.lastName].filter(Boolean).join(' '),
+      studentGrade: x.studentId.gradeLevel || '',
+      joined: (x.joinCount || 0) > 0 ? 'yes' : 'no',
+      present: x.present === true ? 'present' : x.present === false ? 'absent' : ((x.joinCount || 0) > 0 ? 'present' : ''),
+    }));
+
+    const daily = await Attendance.find({ date: { $gte: from, $lte: to } })
+      .populate('studentId', 'firstName lastName gradeLevel')
+      .sort({ date: 1 }).limit(8000).lean();
+    const dailyRows = daily.filter(x => x.studentId).map(x => ({
+      date: x.date, student: [x.studentId.firstName, x.studentId.lastName].filter(Boolean).join(' '),
+      grade: x.studentId.gradeLevel || '', status: x.status || '',
+    }));
+
+    res.json({ success: true, data: { from, to, lessonRows, dailyRows,
+      method: 'Lesson attendance from classroom session registers: joined = the student entered the live room; present = the teacher\u2019s register mark, falling back to joined when unmarked. Daily attendance from check-in records.' } });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
 module.exports = router;
