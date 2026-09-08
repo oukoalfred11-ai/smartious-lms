@@ -16604,13 +16604,13 @@ function TeacherTimetableTab({ user, toast }) {
   const inp = { padding: '8px 10px', border: `1.5px solid ${C.line}`, borderRadius: 8, fontSize: 12.5 }
   const chip = (bg, fg, t) => <span style={{ padding: '2px 8px', borderRadius: 999, fontSize: 9.5, fontWeight: 800, background: bg, color: fg, whiteSpace: 'nowrap' }}>{t}</span>
 
-  const blank = () => ({ title: '', subject: '', curriculum: 'Cambridge', grade: '', dayOfWeek: 'Mon', startTime: '09:00', endTime: '10:00', assignedStudents: [], pickGrade: '', subjectId: '' })
+  const blank = () => ({ title: '', subject: '', curriculum: '', grade: '', dayOfWeek: 'Mon', startTime: '09:00', endTime: '10:00', assignedStudents: [], pickGrade: '', subjectId: '', autoTitle: true })
   const openAdd = () => { setForm(blank()); setModal({ entry: null }) }
   const openEdit = (e) => {
     setForm({ title: e.title || '', subject: e.subject || '', curriculum: e.curriculum || '', grade: e.grade || '',
       dayOfWeek: e.dayOfWeek, startTime: e.startTime, endTime: e.endTime,
       assignedStudents: (e.assignedStudents || []).map(x => String(x?._id || x)),
-      pickGrade: e.grade || '', subjectId: e.subjectId ? String(e.subjectId?._id || e.subjectId) : '' })
+      pickGrade: e.grade || '', subjectId: e.subjectId ? String(e.subjectId?._id || e.subjectId) : '', autoTitle: false })
     setModal({ entry: e })
   }
   const overlapNote = () => {
@@ -16759,12 +16759,41 @@ function TeacherTimetableTab({ user, toast }) {
         <div onClick={() => setModal(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 90, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 14 }}>
           <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 14, width: 'min(540px,100%)', maxHeight: '92vh', overflow: 'auto', padding: 20, display: 'grid', gap: 10 }}>
             <b style={{ fontSize: 15.5, color: C.ink }}>{modal.entry ? 'Edit weekly slot' : 'New weekly slot'}</b>
-            <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Title, e.g. Year 10 Biology" style={{ ...inp, fontWeight: 700 }} />
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
-              <input value={form.subject} onChange={e => setForm(f => ({ ...f, subject: e.target.value }))} placeholder="Subject" style={inp} />
-              <input value={form.curriculum} onChange={e => setForm(f => ({ ...f, curriculum: e.target.value }))} placeholder="Curriculum" style={inp} />
-              <input value={form.grade} onChange={e => setForm(f => ({ ...f, grade: e.target.value }))} placeholder="Grade / Year" style={inp} />
+            {/* Pick the subject from your spines: subject, curriculum and
+                the syllabus link are set in one stroke, and the title
+                composes itself from grade + subject (still editable). */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              <select value={form.subjectId || (form.subject ? '__custom' : '')} onChange={e => {
+                const v = e.target.value
+                if (v === '__custom' || v === '') { setForm(f => ({ ...f, subjectId: '' })); return }
+                const sub = ov.subjects.find(x => String(x._id) === v)
+                if (!sub) return
+                setForm(f => {
+                  const subject = sub.subjectName || sub.name
+                  const title = f.autoTitle ? `${f.grade ? f.grade + ' ' : ''}${subject}`.trim() : f.title
+                  return { ...f, subjectId: v, subject, curriculum: sub.curriculum || f.curriculum, title }
+                })
+              }} style={inp}>
+                <option value="">Pick subject (from your spines)...</option>
+                {ov.subjects.map(sub => <option key={sub._id} value={sub._id}>{sub.name}</option>)}
+                <option value="__custom">Other subject (type below)</option>
+              </select>
+              <select value={form.grade} onChange={e => setForm(f => {
+                const grade = e.target.value
+                const title = f.autoTitle ? `${grade ? grade + ' ' : ''}${f.subject}`.trim() : f.title
+                return { ...f, grade, title }
+              })} style={inp}>
+                <option value="">Pick grade / year...</option>
+                {grades.map(g => <option key={g} value={g}>{g}</option>)}
+              </select>
             </div>
+            {!form.subjectId && (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                <input value={form.subject} onChange={e => setForm(f => ({ ...f, subject: e.target.value, title: f.autoTitle ? `${f.grade ? f.grade + ' ' : ''}${e.target.value}`.trim() : f.title }))} placeholder="Subject name" style={inp} />
+                <input value={form.curriculum} onChange={e => setForm(f => ({ ...f, curriculum: e.target.value }))} placeholder="Curriculum, e.g. Cambridge" style={inp} />
+              </div>
+            )}
+            <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value, autoTitle: false }))} placeholder="Title (fills itself from grade + subject)" style={{ ...inp, fontWeight: 700 }} />
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
               <select value={form.dayOfWeek} onChange={e => setForm(f => ({ ...f, dayOfWeek: e.target.value }))} style={inp}>
                 {DAYS.map(d => <option key={d} value={d}>{d}</option>)}
@@ -16772,12 +16801,6 @@ function TeacherTimetableTab({ user, toast }) {
               <input type="time" value={form.startTime} onChange={e => setForm(f => ({ ...f, startTime: e.target.value }))} style={inp} />
               <input type="time" value={form.endTime} onChange={e => setForm(f => ({ ...f, endTime: e.target.value }))} style={inp} />
             </div>
-            {ov.subjects.length > 0 && (
-              <select value={form.subjectId} onChange={e => setForm(f => ({ ...f, subjectId: e.target.value }))} style={inp}>
-                <option value="">Link syllabus spine (optional) \u2014 classes then advance topic by topic</option>
-                {ov.subjects.map(sub => <option key={sub._id} value={sub._id}>{sub.name}</option>)}
-              </select>
-            )}
             {overlapNote() && <div style={{ fontSize: 11.5, fontWeight: 700, color: '#B45309', background: '#FEF3C7', borderRadius: 8, padding: '7px 10px' }}>{overlapNote()}</div>}
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
