@@ -146,7 +146,8 @@ const userSchema = new mongoose.Schema({
   },
   statusChangedAt: Date,
   statusChangedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Admin who made the change
-  statusReason: String, // Reason for status change (graduation, parent removal, fee default, etc.)
+  statusReason: String,
+  academicYear: { type: String, default: '' },   // current cohort, e.g. '2026/2027' // Reason for status change (graduation, parent removal, fee default, etc.)
   
   // TEACHER STATUS & LEAVE MANAGEMENT
   teacherStatus: {
