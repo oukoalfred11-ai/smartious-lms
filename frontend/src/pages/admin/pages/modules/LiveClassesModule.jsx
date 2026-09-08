@@ -67,6 +67,8 @@ export default function LiveClassesModule({ toast }) {
       await api.delete(`/classroom/${rec.liveClassId}/recordings/${rec.recId}`)
       setRecordings(rs => rs.filter(x => x.recId !== rec.recId))
       if (playing?.recId === rec.recId) setPlaying(null)
+            {playing?.url && <a href={playing.url} download target="_blank" rel="noopener noreferrer"
+              style={{ position: 'absolute', top: 10, right: 54, padding: '6px 14px', borderRadius: 8, background: 'rgba(255,255,255,.92)', color: '#7D1025', fontSize: 12, fontWeight: 800, textDecoration: 'none' }}>Download</a>}
       toast?.ok?.('Recording deleted.')
     } catch { toast?.error?.('Could not delete.') }
   }
@@ -180,6 +182,8 @@ export default function LiveClassesModule({ toast }) {
                   </div>
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                     <button style={btn('primary')} onClick={() => setPlaying(rec)}>Play</button>
+                  {rec.url && <a href={rec.url} download target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
+                    style={{ padding: '5px 12px', borderRadius: 7, border: '1px solid #E5DFD3', background: '#fff', color: '#7D1025', fontSize: 10.5, fontWeight: 800, textDecoration: 'none' }}>Download</a>}
                     <button style={btn()} onClick={() => toggleFeature(rec)}>{rec.featured ? 'Remove from lesson' : 'Add to lesson'}</button>
                     <button style={btn()} onClick={() => rename(rec)}>Rename</button>
                     <button style={{ ...btn(), color: '#B91C1C', borderColor: '#FCA5A5' }} onClick={() => remove(rec)}>Delete</button>
