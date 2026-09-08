@@ -208,6 +208,17 @@ function attachClassroom(httpServer, allowedOrigins) {
         if (!room) {
           room = { peers: new Map(), boardOps: [], chat: [], startedAt: new Date() };
           rooms.set(rid, room);
+          // Durable board: the room is a cache; MongoDB is the truth.
+          // Reload every op ever drawn for this class so a momentary
+          // empty room, a deploy, or a restart never clears the board.
+          try {
+            const Whiteboard = require('../models/Whiteboard');
+            const doc = await Whiteboard.findOne({ liveClassId }).lean();
+            if (doc && Array.isArray(doc.ops) && doc.ops.length) {
+              room.boardOps = doc.ops;
+              room.boardBytes = doc.ops.reduce((a, o) => a + opBytes(o), 0);
+            }
+          } catch (e) { /* board persistence is best-effort */ }
         }
 
         socket.data.roomId = rid;
@@ -261,6 +272,15 @@ function attachClassroom(httpServer, allowedOrigins) {
       // the lock itself is a board op so late joiners replay it.
       op.by = peer.userId;
       room.boardOps.push(op);
+      // Persist: capped push mirrors the in-memory cap, replay order kept.
+      try {
+        const Whiteboard = require('../models/Whiteboard');
+        Whiteboard.updateOne(
+          { liveClassId: socket.data.liveClassId },
+          { $push: { ops: { $each: [op], $slice: -BOARD_OP_CAP } } },
+          { upsert: true }
+        ).catch(() => {});
+      } catch (e) { /* best-effort */ }
       room.boardBytes = (room.boardBytes || 0) + opBytes(op);
       if (room.boardOps.length > BOARD_OP_CAP) {
         const dropped = room.boardOps.splice(0, room.boardOps.length - BOARD_OP_CAP);
@@ -284,6 +304,15 @@ function attachClassroom(httpServer, allowedOrigins) {
       const peer = room.peers.get(socket.id);
       if (!peer || (peer.role !== 'teacher' && peer.role !== 'admin')) return;
       room.boardOps = [];
+      room.boardBytes = 0;
+      try {
+        const Whiteboard = require('../models/Whiteboard');
+        Whiteboard.updateOne(
+          { liveClassId: socket.data.liveClassId },
+          { $set: { ops: [] } },
+          { upsert: true }
+        ).catch(() => {});
+      } catch (e) { /* best-effort */ }
       nsp.to(socket.data.roomId).emit('board:clear');
     });
 
