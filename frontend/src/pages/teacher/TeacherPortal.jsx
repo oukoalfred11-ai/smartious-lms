@@ -16620,12 +16620,14 @@ function TeacherTimetableTab({ user, toast }) {
     return clash ? `Overlaps your ${clash.subject || clash.title} (${clash.startTime}-${clash.endTime}).` : null
   }
   const saveSlot = async () => {
-    if (!form.title.trim() || !form.subject.trim() || !form.curriculum.trim())
-      return toast?.error?.('Title, subject and curriculum are required.')
+    const autoT = `${form.grade ? form.grade + ' ' : ''}${form.subject}`.trim()
+    const finalTitle = form.title.trim() || autoT
+    if (!form.subject.trim()) return toast?.error?.('Pick or type a subject first.')
+    if (!form.curriculum.trim()) return toast?.error?.('Add the curriculum (e.g. Cambridge) in the field shown.')
     if (!(form.startTime < form.endTime)) return toast?.error?.('End time must be after start time.')
     setSaving(true)
     try {
-      const body = { title: form.title.trim(), subject: form.subject.trim(), curriculum: form.curriculum.trim(),
+      const body = { title: finalTitle, subject: form.subject.trim(), curriculum: form.curriculum.trim(),
         grade: form.grade.trim(), dayOfWeek: form.dayOfWeek, startTime: form.startTime, endTime: form.endTime,
         assignedStudents: form.assignedStudents, subjectId: form.subjectId || null }
       if (modal.entry) await api.patch('/timetable/' + modal.entry._id, body)
@@ -16771,7 +16773,7 @@ function TeacherTimetableTab({ user, toast }) {
                 setForm(f => {
                   const subject = sub.subjectName || sub.name
                   const title = f.autoTitle ? `${f.grade ? f.grade + ' ' : ''}${subject}`.trim() : f.title
-                  return { ...f, subjectId: v, subject, curriculum: sub.curriculum || f.curriculum, title }
+                  return { ...f, subjectId: v, subject, curriculum: sub.curriculum || f.curriculum || '', title }
                 })
               }} style={inp}>
                 <option value="">Pick subject (from your spines)...</option>
@@ -16787,9 +16789,9 @@ function TeacherTimetableTab({ user, toast }) {
                 {grades.map(g => <option key={g} value={g}>{g}</option>)}
               </select>
             </div>
-            {!form.subjectId && (
+            {(!form.subjectId || !form.curriculum.trim()) && (
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                <input value={form.subject} onChange={e => setForm(f => ({ ...f, subject: e.target.value, title: f.autoTitle ? `${f.grade ? f.grade + ' ' : ''}${e.target.value}`.trim() : f.title }))} placeholder="Subject name" style={inp} />
+                {!form.subjectId && <input value={form.subject} onChange={e => setForm(f => ({ ...f, subject: e.target.value, title: f.autoTitle ? `${f.grade ? f.grade + ' ' : ''}${e.target.value}`.trim() : f.title }))} placeholder="Subject name" style={inp} />}
                 <input value={form.curriculum} onChange={e => setForm(f => ({ ...f, curriculum: e.target.value }))} placeholder="Curriculum, e.g. Cambridge" style={inp} />
               </div>
             )}
