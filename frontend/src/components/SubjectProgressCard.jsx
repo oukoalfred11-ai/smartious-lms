@@ -224,6 +224,47 @@ export default function SubjectProgressCard({
   // Timetable-linked subjects get the upgraded progress: donut + dated
   // lesson plan, in the same spot the subtopics strip occupied. The
   // legacy strip below remains the fallback for unlinked subjects.
+  if (plan && plan.mode === 'subtopics') {
+    const GOLD = '#C9973A', CRIM = '#7D1025', TRACK = '#F1EAD9', MUT = '#8A8378'
+    const R = 26, C = 2 * Math.PI * R
+    const frac = plan.counts.total ? plan.counts.covered / plan.counts.total : 0
+    const pct = Math.round(frac * 100)
+    const fmt = (d) => d ? new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : ''
+    return (
+      <div style={{ background: TOKENS.cream, border: '1px solid ' + TOKENS.s100, borderRadius: 8, padding: 12 }}>
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          <svg width="66" height="66" viewBox="0 0 66 66">
+            <circle cx="33" cy="33" r={R} fill="none" stroke={TRACK} strokeWidth="8" />
+            <circle cx="33" cy="33" r={R} fill="none" stroke={GOLD} strokeWidth="8" strokeLinecap="round" strokeDasharray={`${frac * C} ${C}`} transform="rotate(-90 33 33)" />
+            <text x="33" y="37" textAnchor="middle" style={{ font: '800 13px Montserrat, Arial', fill: CRIM }}>{pct}%</text>
+          </svg>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.1em', color: MUT, textTransform: 'uppercase' }}>Lesson plan progress</div>
+            <div style={{ fontSize: 11.5, color: '#231715', marginTop: 3 }}>
+              <b style={{ color: GOLD }}>{plan.counts.covered}</b> covered {'\u00b7'} <b style={{ color: CRIM }}>{plan.counts.total - plan.counts.covered}</b> to go
+            </div>
+            <div style={{ fontSize: 10, color: MUT, marginTop: 2 }}>{plan.groups.length} topic(s) {'\u00b7'} {plan.counts.total} subtopics</div>
+          </div>
+        </div>
+        <div style={{ marginTop: 8, maxHeight: 340, overflow: 'auto', paddingRight: 4, display: 'grid', gap: 2 }}>
+          {plan.groups.map((g, gi) => (
+            <div key={gi}>
+              <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: '.08em', color: CRIM, textTransform: 'uppercase', padding: '7px 4px 3px' }}>{g.topic}</div>
+              {g.items.map((it, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '3px 6px', borderRadius: 6 }}>
+                  {it.done
+                    ? <span style={{ width: 15, height: 15, borderRadius: '50%', background: GOLD, color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 900, flexShrink: 0 }}>{'\u2713'}</span>
+                    : <span style={{ width: 15, height: 15, borderRadius: '50%', border: `2px solid ${TRACK}`, display: 'inline-block', flexShrink: 0 }} />}
+                  <span style={{ flex: 1, fontSize: 11, fontWeight: 600, color: it.done ? '#231715' : MUT, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{it.name}</span>
+                  {it.done && it.date && <span style={{ fontSize: 9.5, fontWeight: 800, color: GOLD, whiteSpace: 'nowrap' }}>{fmt(it.date)}</span>}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
   if (plan) {
     const GOLD = '#C9973A', CRIM = '#7D1025', TRACK = '#F1EAD9', MUT = '#8A8378'
     const R = 26, C = 2 * Math.PI * R
