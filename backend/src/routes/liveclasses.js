@@ -198,6 +198,9 @@ router.get('/student/list', auth, async (req, res) => {
   try {
     const classes = await LiveClass.find({
       assignedStudents: req.user._id,
+      // Cancelled occurrences are exceptions the family should never
+      // see as joinable classes.
+      status: { $ne: 'cancelled' },
     })
       .sort({ scheduledAt: 1 })
       .populate('teacherId', 'firstName lastName')
