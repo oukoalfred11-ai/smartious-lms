@@ -599,6 +599,68 @@ export function DOSAttendanceModule({ toast, refreshKey }) {
     a.download = name; a.click(); URL.revokeObjectURL(a.href)
   }
   const fmtD = (d) => new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+
+  // Per-person aggregates, computed from the pulled rows.
+  const teacherSummary = () => {
+    const by = {}
+    ;(rec?.lessonRows || []).forEach(r => {
+      const t = r.teacher || 'Unassigned'
+      by[t] = by[t] || { name: t, lessons: new Set(), rows: 0, present: 0 }
+      by[t].lessons.add(r.class + '|' + r.date)
+      by[t].rows += 1
+      if (r.present === 'present') by[t].present += 1
+    })
+    return Object.values(by).map(x => ({ name: x.name, lessons: x.lessons.size, rows: x.rows, pct: x.rows ? Math.round(x.present / x.rows * 100) : 0 })).sort((a, b) => b.lessons - a.lessons)
+  }
+  const studentSummary = () => {
+    const by = {}
+    ;(rec?.lessonRows || []).forEach(r => {
+      by[r.student] = by[r.student] || { name: r.student, grade: r.studentGrade, sched: 0, joined: 0, present: 0, days: 0, daysPresent: 0 }
+      by[r.student].sched += 1
+      if (r.joined === 'yes') by[r.student].joined += 1
+      if (r.present === 'present') by[r.student].present += 1
+    })
+    ;(rec?.dailyRows || []).forEach(r => {
+      by[r.student] = by[r.student] || { name: r.student, grade: r.grade, sched: 0, joined: 0, present: 0, days: 0, daysPresent: 0 }
+      by[r.student].days += 1
+      if (r.status === 'present' || r.status === 'half_day') by[r.student].daysPresent += 1
+    })
+    return Object.values(by).map(x => ({ ...x, pct: x.sched ? Math.round(x.present / x.sched * 100) : null })).sort((a, b) => a.name.localeCompare(b.name))
+  }
+  const printRecord = (kind, name) => {
+    const lessons = (rec?.lessonRows || []).filter(r => (kind === 'teacher' ? r.teacher : r.student) === name)
+    const daily = kind === 'student' ? (rec?.dailyRows || []).filter(r => r.student === name) : []
+    const sum = kind === 'teacher' ? teacherSummary().find(x => x.name === name) : studentSummary().find(x => x.name === name)
+    const row = (cells) => '<tr>' + cells.map(c => `<td>${c ?? ''}</td>`).join('') + '</tr>'
+    const table = (heads, rows) => `<table><thead><tr>${heads.map(h => '<th>' + h + '</th>').join('')}</tr></thead><tbody>${rows.join('')}</tbody></table>`
+    const kpis = kind === 'teacher'
+      ? `<div class="k"><div><b>${sum?.lessons ?? 0}</b>Lessons held</div><div><b>${sum?.rows ?? 0}</b>Student attendances</div><div><b>${sum?.pct ?? 0}%</b>Present rate</div></div>`
+      : `<div class="k"><div><b>${sum?.sched ?? 0}</b>Lessons scheduled</div><div><b>${sum?.joined ?? 0}</b>Joined</div><div><b>${sum?.pct ?? '\u2013'}${sum?.pct !== null ? '%' : ''}</b>Lesson attendance</div><div><b>${sum?.daysPresent ?? 0}/${sum?.days ?? 0}</b>Days present (check-in)</div></div>`
+    const lessonTable = kind === 'teacher'
+      ? table(['Date', 'Class', 'Student', 'Grade', 'Joined', 'Register'], lessons.map(r => row([fmtD(r.date), r.class, r.student, r.studentGrade, r.joined, r.present])))
+      : table(['Date', 'Class', 'Subject', 'Teacher', 'Joined', 'Register'], lessons.map(r => row([fmtD(r.date), r.class, r.subject, r.teacher, r.joined, r.present])))
+    const dailyTable = kind === 'student' && daily.length
+      ? `<h2>Daily attendance (check-in)</h2>` + table(['Date', 'Status'], daily.map(r => row([fmtD(r.date), r.status])))
+      : ''
+    const html = `<!doctype html><html><head><title>Attendance Record - ${name}</title><style>
+      body{font-family:Georgia,serif;color:#1a1a1a;margin:36px;line-height:1.45}
+      h1{font-size:20px;margin:0;color:#7D1025}.sub{color:#666;font-size:11.5px;margin-bottom:14px}
+      h2{font-size:13px;margin:16px 0 6px;color:#7D1025;border-bottom:2px solid #C9A030;padding-bottom:3px}
+      table{width:100%;border-collapse:collapse;font-size:10.5px}
+      th{text-align:left;background:#F7F2EA;padding:5px 7px;border:1px solid #ddd}td{padding:4px 7px;border:1px solid #ddd}
+      .k{display:flex;gap:24px;margin:12px 0}.k b{font-size:18px;display:block}
+      .foot{font-size:9.5px;color:#777;margin-top:14px;border-top:1px solid #ddd;padding-top:6px}
+      @media print{body{margin:14px}}
+    </style></head><body>
+      <h1>${kind === 'teacher' ? 'Teacher' : 'Student'} Attendance Record \u2014 ${name}</h1>
+      <div class="sub">${fmtD(rec.from)} to ${fmtD(rec.to)} \u00b7 generated ${new Date().toDateString()}</div>
+      ${kpis}<h2>${kind === 'teacher' ? 'Lessons held' : 'Lesson attendance'}</h2>${lessonTable}${dailyTable}
+      <div class="foot"><b>Method.</b> ${rec.method} Smartious Homeschool \u00b7 Est. 2018 \u00b7 smartioushomeschool.com</div>
+    <script>window.onload = () => window.print()</` + `script></body></html>`
+    const w = window.open('', '_blank')
+    if (!w) return toast?.error?.('Allow pop-ups to print records.')
+    w.document.write(html); w.document.close()
+  }
   const [data,    setData]    = useState(null)
   const [loading, setLoading] = useState(true)
   const [roleF,   setRoleF]   = useState('all')
@@ -696,6 +758,42 @@ export function DOSAttendanceModule({ toast, refreshKey }) {
               </table>
             </div>
             {rec.lessonRows.length > 200 && <div style={{ fontSize: 10.5, color: TOKENS.s400 }}>Preview shows 200 of {rec.lessonRows.length} - the CSV contains everything.</div>}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 12 }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '4px 0 6px' }}>
+                  <b style={{ fontSize: 12.5, color: TOKENS.s900 }}>Teachers ({teacherSummary().length})</b>
+                  <button onClick={() => dlCSV(teacherSummary(), [['Teacher', 'name'], ['Lessons', 'lessons'], ['Student attendances', 'rows'], ['Present %', 'pct']], `teacher-records-${recRange.from}-to-${recRange.to}.csv`)}
+                    style={{ padding: '3px 10px', borderRadius: 6, border: `1px solid ${TOKENS.line}`, background: '#fff', fontSize: 9.5, fontWeight: 800, cursor: 'pointer', color: TOKENS.s600 }}>CSV</button>
+                </div>
+                <div style={{ maxHeight: 200, overflow: 'auto', border: `1px solid ${TOKENS.line}`, borderRadius: 9 }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+                    <thead><tr>{['Teacher', 'Lessons', 'Present %', ''].map(h => <th key={h} style={{ position: 'sticky', top: 0, textAlign: 'left', padding: '4px 8px', background: '#F7F2EA' }}>{h}</th>)}</tr></thead>
+                    <tbody>{teacherSummary().map(t => (
+                      <tr key={t.name}><td style={{ padding: '4px 8px' }}>{t.name}</td><td style={{ padding: '4px 8px' }}>{t.lessons}</td><td style={{ padding: '4px 8px' }}>{t.pct}%</td>
+                        <td style={{ padding: '3px 6px' }}><button onClick={() => printRecord('teacher', t.name)} style={{ padding: '3px 10px', borderRadius: 6, border: 'none', background: TOKENS.crimson, color: '#fff', fontSize: 9.5, fontWeight: 800, cursor: 'pointer' }}>Print</button></td></tr>
+                    ))}</tbody>
+                  </table>
+                </div>
+              </div>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '4px 0 6px' }}>
+                  <b style={{ fontSize: 12.5, color: TOKENS.s900 }}>Students ({studentSummary().length})</b>
+                  <button onClick={() => dlCSV(studentSummary(), [['Student', 'name'], ['Grade', 'grade'], ['Lessons scheduled', 'sched'], ['Joined', 'joined'], ['Lesson %', r => r.pct ?? ''], ['Days present', r => `${r.daysPresent}/${r.days}`]], `student-records-${recRange.from}-to-${recRange.to}.csv`)}
+                    style={{ padding: '3px 10px', borderRadius: 6, border: `1px solid ${TOKENS.line}`, background: '#fff', fontSize: 9.5, fontWeight: 800, cursor: 'pointer', color: TOKENS.s600 }}>CSV</button>
+                </div>
+                <div style={{ maxHeight: 200, overflow: 'auto', border: `1px solid ${TOKENS.line}`, borderRadius: 9 }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+                    <thead><tr>{['Student', 'Grade', 'Lesson %', 'Days', ''].map(h => <th key={h} style={{ position: 'sticky', top: 0, textAlign: 'left', padding: '4px 8px', background: '#F7F2EA' }}>{h}</th>)}</tr></thead>
+                    <tbody>{studentSummary().map(st => (
+                      <tr key={st.name}><td style={{ padding: '4px 8px' }}>{st.name}</td><td style={{ padding: '4px 8px' }}>{st.grade}</td>
+                        <td style={{ padding: '4px 8px', fontWeight: 700, color: st.pct === null ? TOKENS.s400 : st.pct >= 80 ? '#15803D' : st.pct >= 60 ? '#B45309' : '#B91C1C' }}>{st.pct === null ? '\u2013' : st.pct + '%'}</td>
+                        <td style={{ padding: '4px 8px' }}>{st.daysPresent}/{st.days}</td>
+                        <td style={{ padding: '3px 6px' }}><button onClick={() => printRecord('student', st.name)} style={{ padding: '3px 10px', borderRadius: 6, border: 'none', background: TOKENS.crimson, color: '#fff', fontSize: 9.5, fontWeight: 800, cursor: 'pointer' }}>Print</button></td></tr>
+                    ))}</tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
             <div style={{ fontSize: 10.5, color: TOKENS.s400 }}>{rec.method}</div>
           </div>
         )}
