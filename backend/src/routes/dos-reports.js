@@ -343,14 +343,14 @@ router.get('/attendance-records', auth, requireRole('admin', 'ops_manager', 'dos
 
     const sessions = await ClassroomSession.find({ createdAt: { $gte: from, $lte: to } })
       .populate({ path: 'liveClassId', select: 'title subject grade scheduledAt teacherId', populate: { path: 'teacherId', select: 'firstName lastName' } })
-      .populate('studentId', 'firstName lastName gradeLevel')
+      .populate('userId', 'firstName lastName gradeLevel role')
       .sort({ createdAt: 1 }).limit(8000).lean();
-    const lessonRows = sessions.filter(x => x.liveClassId && x.studentId).map(x => ({
+    const lessonRows = sessions.filter(x => x.liveClassId && x.userId && (x.role === 'student' || x.userId.role === 'student')).map(x => ({
       date: x.liveClassId.scheduledAt, class: x.liveClassId.title || x.liveClassId.subject,
       subject: x.liveClassId.subject || '', grade: x.liveClassId.grade || '',
       teacher: x.liveClassId.teacherId ? [x.liveClassId.teacherId.firstName, x.liveClassId.teacherId.lastName].filter(Boolean).join(' ') : '',
-      student: [x.studentId.firstName, x.studentId.lastName].filter(Boolean).join(' '),
-      studentGrade: x.studentId.gradeLevel || '',
+      student: [x.userId.firstName, x.userId.lastName].filter(Boolean).join(' '),
+      studentGrade: x.userId.gradeLevel || '',
       joined: (x.joinCount || 0) > 0 ? 'yes' : 'no',
       present: x.present === true ? 'present' : x.present === false ? 'absent' : ((x.joinCount || 0) > 0 ? 'present' : ''),
     }));
