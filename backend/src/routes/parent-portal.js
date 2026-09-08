@@ -237,7 +237,7 @@ router.get('/children/:id/liveclasses', auth, async (req, res) => {
     if (!student) return fail(res,404,'Student not found.')
     await assertAccess(req.user, student)
     const LiveClass = require('../models/LiveClass')
-    const classes = await LiveClass.find({ assignedStudents: req.params.id })
+    const classes = await LiveClass.find({ assignedStudents: req.params.id, status: { $ne: 'cancelled' } })
       .populate('teacherId','firstName lastName')
       .sort({ startAt: -1, scheduledAt: -1, createdAt: -1 }).limit(120).lean()
     const now = new Date()
