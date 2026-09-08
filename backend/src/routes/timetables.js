@@ -1,234 +1,308 @@
-const router = require('express').Router();
+/**
+ * routes/timetable.js
+ * ============================================================
+ * Weekly timetable management. Mounted at /api/timetable.
+ *
+ * Endpoints:
+ *   GET    /me         — Current user's own timetable (student or teacher)
+ *   GET    /student/:id — Specific student's timetable (teacher/admin only,
+ *                         or the student themself)
+ *   GET    /teacher/:id — Specific teacher's timetable (admin or self)
+ *   POST   /            — Create a slot (teacher/admin)
+ *   PATCH  /:id         — Edit a slot (creator/admin)
+ *   DELETE /:id         — Delete a slot (creator/admin)
+ *
+ * For students:
+ *   The /me endpoint returns all entries where the student is in
+ *   `assignedStudents` OR where the entry's audience
+ *   curriculum+grade matches the student's curriculum+grade.
+ *   Each entry is populated with teacher basic info (name,
+ *   avatar, role, jobTitle, bio) — NOT phone or email — so
+ *   students can preview their teacher without bypassing the
+ *   school's communication channels.
+ *
+ * For teachers:
+ *   The /me endpoint returns all entries where the teacher is
+ *   `teacherId`, sorted by day-of-week then time.
+ */
+
+const express = require('express');
+const router = express.Router();
 const mongoose = require('mongoose');
-const Timetable = require('../models/Timetable');
-const Subject = require('../models/Subject');
+
+const TimetableEntry = require('../models/TimetableEntry');
 const User = require('../models/User');
 const { auth, requireRole } = require('../middleware/auth');
-const {
-  orderedLessons,
-  generateSessions,
-  syncTimetablesForSubject,
-} = require('../services/timetableSync');
+
+const ok   = (res, data, message) => res.json({ success: true, data, message });
+const fail = (res, status, message) => res.status(status).json({ success: false, message });
+
+// Fields safe to send to STUDENTS about their teachers.
+// No phone, no email — students must use the Communication
+// module if they want to reach a teacher.
+const TEACHER_PUBLIC_FIELDS = '_id firstName lastName avatar role jobTitle bio qualifications specializations yearsOfExperience';
+
+// Compute the visibility filter for a student-facing query.
+// Returns a Mongo $or clause matching either assignment OR audience.
+function studentVisibilityFilter(student) {
+  const clauses = [
+    { assignedStudents: student._id },
+  ];
+  const curriculum = typeof student.curriculum === 'string' ? student.curriculum : '';
+  const grade = typeof student.grade === 'string' ? student.grade : '';
+  if (curriculum && grade) {
+    clauses.push({
+      audienceCurriculum: curriculum,
+      audienceGrade: grade,
+    });
+  }
+  return { isActive: true, $or: clauses };
+}
+
+// Sort entries by day-of-week then start time
+const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+function sortBySlot(a, b) {
+  const da = DAYS.indexOf(a.dayOfWeek);
+  const db = DAYS.indexOf(b.dayOfWeek);
+  if (da !== db) return da - db;
+  return String(a.startTime).localeCompare(String(b.startTime));
+}
 
 // ═══════════════════════════════════════════════════════════
-// TIMETABLE ROUTES  —  /api/timetables
-// Recurring weekly timetable per student per subject.
-// Teacher-created. Sessions are generated upfront from the
-// subject's lesson list.
+// GET /me — Current user's timetable
+// Routes to student-view or teacher-view based on role.
 // ═══════════════════════════════════════════════════════════
-
-// ── GET /api/timetables/student/:studentId ─────────────────
-// All timetables for a student (any authenticated user).
-router.get('/student/:studentId', auth, async (req, res) => {
+router.get('/me', auth, async (req, res) => {
   try {
-    const tts = await Timetable.find({ studentId: req.params.studentId, isActive: true })
-      .sort({ subjectName: 1 })
-      .lean({ virtuals: true });
-    res.json({ success: true, data: { timetables: tts } });
-  } catch (e) {
-    console.error('[timetables GET student]', e.message);
-    res.status(500).json({ success: false, message: e.message });
+    if (req.user.role === 'student') {
+      const filter = studentVisibilityFilter(req.user);
+      const entries = await TimetableEntry.find(filter)
+        .populate('teacherId', TEACHER_PUBLIC_FIELDS)
+        .lean();
+      entries.sort(sortBySlot);
+      return ok(res, { entries, count: entries.length }, `${entries.length} entries.`);
+    }
+    if (req.user.role === 'teacher' || req.user.role === 'admin') {
+      const entries = await TimetableEntry.find({ teacherId: req.user._id, isActive: true })
+        .populate('teacherId', TEACHER_PUBLIC_FIELDS)
+        .lean();
+      entries.sort(sortBySlot);
+      return ok(res, { entries, count: entries.length }, `${entries.length} entries.`);
+    }
+    return ok(res, { entries: [], count: 0 }, 'No entries for this role.');
+  } catch (err) {
+    console.error('[timetable GET /me]', err.message);
+    return fail(res, 500, err.message || 'Failed to load timetable.');
   }
 });
 
-// ── GET /api/timetables/mine ───────────────────────────────
-// Timetables created by the logged-in teacher.
-router.get('/mine', auth, requireRole('teacher', 'admin', 'dos'), async (req, res) => {
+// ═══════════════════════════════════════════════════════════
+// GET /student/:id — Specific student's timetable
+// Allowed if the requester is the student themself, or any
+// teacher/admin (parent links could be added later).
+// ═══════════════════════════════════════════════════════════
+router.get('/student/:id', auth, async (req, res) => {
   try {
-    const tts = await Timetable.find({ teacherId: req.user._id, isActive: true })
-      .sort({ updatedAt: -1 })
-      .lean({ virtuals: true });
-    res.json({ success: true, data: { timetables: tts } });
-  } catch (e) {
-    res.status(500).json({ success: false, message: e.message });
+    if (!mongoose.isValidObjectId(req.params.id)) return fail(res, 400, 'Invalid studentId.');
+
+    const isOwn = String(req.user._id) === String(req.params.id);
+    if (!isOwn && !['teacher', 'admin', 'dos'].includes(req.user.role)) {
+      return fail(res, 403, 'Not allowed.');
+    }
+
+    const student = await User.findById(req.params.id)
+      .select('_id role curriculum grade firstName lastName')
+      .lean();
+    if (!student) return fail(res, 404, 'Student not found.');
+    if (student.role !== 'student') return fail(res, 400, 'User is not a student.');
+
+    const filter = studentVisibilityFilter(student);
+    const entries = await TimetableEntry.find(filter)
+      .populate('teacherId', TEACHER_PUBLIC_FIELDS)
+      .lean();
+    entries.sort(sortBySlot);
+
+    return ok(res, { entries, count: entries.length, student }, `${entries.length} entries.`);
+  } catch (err) {
+    console.error('[timetable GET /student/:id]', err.message);
+    return fail(res, 500, err.message || 'Failed to load.');
   }
 });
 
-// ── GET /api/timetables/:id ────────────────────────────────
-router.get('/:id', auth, async (req, res) => {
+// ═══════════════════════════════════════════════════════════
+// GET /teacher/:id — Specific teacher's timetable
+// Admin or the teacher themself.
+// ═══════════════════════════════════════════════════════════
+router.get('/teacher/:id', auth, async (req, res) => {
   try {
-    const tt = await Timetable.findById(req.params.id).lean({ virtuals: true });
-    if (!tt) return res.status(404).json({ success: false, message: 'Timetable not found.' });
-    res.json({ success: true, data: { timetable: tt } });
-  } catch (e) {
-    res.status(500).json({ success: false, message: e.message });
+    if (!mongoose.isValidObjectId(req.params.id)) return fail(res, 400, 'Invalid teacherId.');
+
+    const isOwn = String(req.user._id) === String(req.params.id);
+    if (!isOwn && !['admin','dos'].includes(req.user.role)) {
+      return fail(res, 403, 'Not allowed.');
+    }
+
+    const entries = await TimetableEntry.find({ teacherId: req.params.id, isActive: true })
+      .populate('teacherId', TEACHER_PUBLIC_FIELDS)
+      .lean();
+    entries.sort(sortBySlot);
+
+    return ok(res, { entries, count: entries.length }, `${entries.length} entries.`);
+  } catch (err) {
+    console.error('[timetable GET /teacher/:id]', err.message);
+    return fail(res, 500, err.message || 'Failed to load.');
   }
 });
 
-// ── POST /api/timetables ───────────────────────────────────
-// Create a timetable and generate its sessions upfront.
-// Body: { studentId, subjectId, weeklySlots:[{dayOfWeek,time}], startDate }
+// ═══════════════════════════════════════════════════════════
+// POST / — Create a timetable slot
+// Body: title, subject, curriculum, grade, dayOfWeek, startTime,
+// endTime, teacherId (optional, defaults to self), assignedStudents[],
+// audienceCurriculum, audienceGrade, deliveryMode, meetingLink,
+// location, description
+// ═══════════════════════════════════════════════════════════
 router.post('/', auth, requireRole('teacher', 'admin', 'dos'), async (req, res) => {
   try {
-    const { studentId, subjectId, weeklySlots, startDate } = req.body;
+    const b = req.body || {};
+    const teacherId = b.teacherId && mongoose.isValidObjectId(b.teacherId)
+      ? b.teacherId
+      : req.user._id;
 
-    if (!studentId || !mongoose.isValidObjectId(studentId))
-      return res.status(400).json({ success: false, message: 'Valid studentId required.' });
-    if (!subjectId || !mongoose.isValidObjectId(subjectId))
-      return res.status(400).json({ success: false, message: 'Valid subjectId required.' });
-    if (!Array.isArray(weeklySlots) || weeklySlots.length === 0)
-      return res.status(400).json({ success: false, message: 'At least one weekly slot is required.' });
-    if (!startDate)
-      return res.status(400).json({ success: false, message: 'A start date is required.' });
+    // Admins can create for any teacher; teachers can only create for themselves
+    if (req.user.role === 'teacher' && String(teacherId) !== String(req.user._id)) {
+      return fail(res, 403, 'Teachers can only create timetable entries for themselves.');
+    }
 
-    const [student, subject] = await Promise.all([
-      User.findById(studentId).lean(),
-      Subject.findById(subjectId).lean(),
-    ]);
-    if (!student) return res.status(404).json({ success: false, message: 'Student not found.' });
-    if (!subject) return res.status(404).json({ success: false, message: 'Subject not found.' });
-
-    const lessons = await orderedLessons(subjectId);
-    if (lessons.length === 0)
-      return res.status(400).json({ success: false, message: 'This subject has no lessons yet — add lessons before building a timetable.' });
-
-    const sessions = generateSessions(lessons, weeklySlots, startDate);
-
-    const tt = await Timetable.create({
-      studentId,
-      studentName: `${student.firstName || ''} ${student.lastName || ''}`.trim(),
-      subjectId,
-      subjectName: subject.subjectName || subject.name || '',
-      curriculum: subject.curriculum || '',
-      teacherId: req.user._id,
-      weeklySlots,
-      startDate: new Date(startDate),
-      sessions,
-      lessonCountAtGen: lessons.length,
+    const entry = await TimetableEntry.create({
+      title:        b.title,
+      description:  b.description || '',
+      subject:      b.subject,
+      curriculum:   b.curriculum,
+      grade:        b.grade || '',
+      subjectId:    mongoose.isValidObjectId(b.subjectId) ? b.subjectId : null,
+      dayOfWeek:    b.dayOfWeek,
+      startTime:    b.startTime,
+      endTime:      b.endTime,
+      timezone:     b.timezone || 'Africa/Nairobi',
+      effectiveFrom: b.effectiveFrom ? new Date(b.effectiveFrom) : null,
+      effectiveTo:   b.effectiveTo   ? new Date(b.effectiveTo)   : null,
+      deliveryMode: b.deliveryMode || 'virtual',
+      meetingLink:  b.meetingLink || '',
+      location:     b.location || '',
+      teacherId,
+      assignedStudents: Array.isArray(b.assignedStudents)
+        ? b.assignedStudents.filter(id => mongoose.isValidObjectId(id))
+        : [],
+      audienceCurriculum: b.audienceCurriculum || '',
+      audienceGrade:      b.audienceGrade || '',
+      createdBy: req.user._id,
     });
+    require('../lib/timetableMaterializer').reconcile().catch(() => {});
 
-    res.status(201).json({ success: true, message: 'Timetable created.', data: { timetable: tt } });
-  } catch (e) {
-    console.error('[timetables POST]', e.message);
-    res.status(500).json({ success: false, message: e.message });
+    return ok(res, { entry }, 'Timetable entry created.');
+  } catch (err) {
+    console.error('[timetable POST /]', err.message);
+    return fail(res, 400, err.message || 'Failed to create entry.');
   }
 });
 
-// ── PATCH /api/timetables/:id ──────────────────────────────
-// Update slots / startDate and regenerate; or update a session's
-// status (deliver / cancel). Body may contain:
-//   weeklySlots, startDate         → regenerate
-//   sessionUpdate:{sessionId,status} → mark one session
+// ═══════════════════════════════════════════════════════════
+// PATCH /:id — Edit a timetable slot
+// Allowed for the creator or an admin.
+// ═══════════════════════════════════════════════════════════
 router.patch('/:id', auth, requireRole('teacher', 'admin', 'dos'), async (req, res) => {
   try {
-    const tt = await Timetable.findById(req.params.id);
-    if (!tt) return res.status(404).json({ success: false, message: 'Timetable not found.' });
+    if (!mongoose.isValidObjectId(req.params.id)) return fail(res, 400, 'Invalid entry id.');
+    const entry = await TimetableEntry.findById(req.params.id);
+    if (!entry) return fail(res, 404, 'Entry not found.');
 
-    // Session update — status and/or delivery mode for one session
-    if (req.body.sessionUpdate) {
-      const { sessionId, status, deliveryMode } = req.body.sessionUpdate;
-      const sess = tt.sessions.id(sessionId);
-      if (!sess) return res.status(404).json({ success: false, message: 'Session not found.' });
-      if (status !== undefined) {
-        if (!['pending', 'delivered', 'cancelled'].includes(status))
-          return res.status(400).json({ success: false, message: 'Invalid session status.' });
-        sess.status = status;
-      }
-      if (deliveryMode !== undefined) {
-        if (!['virtual', 'physical'].includes(deliveryMode))
-          return res.status(400).json({ success: false, message: 'Invalid delivery mode.' });
-        sess.deliveryMode = deliveryMode;
-        // If a live class already exists for this session, keep its mode in step
-        if (sess.liveClassId) {
-          try {
-            const LiveClass = require('../models/LiveClass');
-            await LiveClass.findByIdAndUpdate(sess.liveClassId, { deliveryMode });
-          } catch { /* non-fatal */ }
-        }
-      }
-      await tt.save();
-      return res.json({ success: true, message: 'Session updated.', data: { timetable: tt } });
+    const isCreator = String(entry.createdBy || '') === String(req.user._id);
+    const isOwner   = String(entry.teacherId) === String(req.user._id);
+    if (req.user.role !== 'admin' && !isCreator && !isOwner) {
+      return fail(res, 403, 'You can only edit entries you created or teach.');
     }
 
-    // Recurrence change → regenerate (preserving delivered sessions)
-    let changed = false;
-    if (Array.isArray(req.body.weeklySlots) && req.body.weeklySlots.length) {
-      tt.weeklySlots = req.body.weeklySlots; changed = true;
+    const b = req.body || {};
+    const editable = [
+      'title', 'description', 'subject', 'curriculum', 'grade',
+      'dayOfWeek', 'startTime', 'endTime', 'timezone',
+      'deliveryMode', 'meetingLink', 'location',
+      'audienceCurriculum', 'audienceGrade',
+      'isActive',
+    ];
+    for (const k of editable) if (k in b) entry[k] = b[k];
+    if ('assignedStudents' in b && Array.isArray(b.assignedStudents)) {
+      entry.assignedStudents = b.assignedStudents.filter(id => mongoose.isValidObjectId(id));
     }
-    if (req.body.startDate) {
-      tt.startDate = new Date(req.body.startDate); changed = true;
-    }
-    if (changed) {
-      const lessons = await orderedLessons(tt.subjectId);
-      const { recomputeTimetable } = require('../services/timetableSync');
-      tt.sessions = recomputeTimetable(tt, lessons);
-      tt.lessonCountAtGen = lessons.length;
-    }
-    await tt.save();
-    res.json({ success: true, message: 'Timetable updated.', data: { timetable: tt } });
-  } catch (e) {
-    console.error('[timetables PATCH]', e.message);
-    res.status(500).json({ success: false, message: e.message });
+    if ('effectiveFrom' in b) entry.effectiveFrom = b.effectiveFrom ? new Date(b.effectiveFrom) : null;
+    if ('effectiveTo'   in b) entry.effectiveTo   = b.effectiveTo   ? new Date(b.effectiveTo)   : null;
+    if ('subjectId'     in b) entry.subjectId     = mongoose.isValidObjectId(b.subjectId) ? b.subjectId : null;
+
+    await entry.save();
+    require('../lib/timetableMaterializer').reconcile().catch(() => {});
+    return ok(res, { entry }, 'Entry updated.');
+  } catch (err) {
+    console.error('[timetable PATCH /:id]', err.message);
+    return fail(res, 400, err.message || 'Failed to update.');
   }
 });
 
-// ── POST /api/timetables/:id/regenerate ────────────────────
-// Manually recompute from the current lesson list.
-router.post('/:id/regenerate', auth, requireRole('teacher', 'admin', 'dos'), async (req, res) => {
-  try {
-    const tt = await Timetable.findById(req.params.id);
-    if (!tt) return res.status(404).json({ success: false, message: 'Timetable not found.' });
-    const lessons = await orderedLessons(tt.subjectId);
-    const { recomputeTimetable } = require('../services/timetableSync');
-    tt.sessions = recomputeTimetable(tt, lessons);
-    tt.lessonCountAtGen = lessons.length;
-    await tt.save();
-    res.json({ success: true, message: 'Timetable regenerated.', data: { timetable: tt } });
-  } catch (e) {
-    res.status(500).json({ success: false, message: e.message });
-  }
-});
-
-// ── POST /api/timetables/:id/promote-session ───────────────
-// Manually turn one timetable session into a LiveClass now,
-// without waiting for the roll-forward window. Body: { sessionId }
-router.post('/:id/promote-session', auth, requireRole('teacher', 'admin', 'dos'), async (req, res) => {
-  try {
-    const tt = await Timetable.findById(req.params.id);
-    if (!tt) return res.status(404).json({ success: false, message: 'Timetable not found.' });
-    const sess = tt.sessions.id(req.body.sessionId);
-    if (!sess) return res.status(404).json({ success: false, message: 'Session not found.' });
-    if (sess.liveClassId)
-      return res.status(409).json({ success: false, message: 'A live class already exists for this session.' });
-
-    const LiveClass = require('../models/LiveClass');
-    const teacher = await User.findById(tt.teacherId).lean();
-    const link = (teacher && teacher.defaultMeetingLink) || '';
-    const meetingLink = link
-      || (sess.deliveryMode === 'physical' ? 'In-person class' : 'Link to be added');
-
-    const lc = await LiveClass.create({
-      title: sess.lessonTitle || ('Lesson ' + (sess.lessonNumber || '')),
-      subject: tt.subjectName || 'Subject',
-      curriculum: tt.curriculum || '',
-      grade: '',
-      preparationLessonId: sess.lessonId || null,
-      scheduledAt: new Date(sess.date),
-      durationMins: 60,
-      meetingLink,
-      deliveryMode: sess.deliveryMode || 'virtual',
-      fromTimetable: true,
-      teacherId: tt.teacherId,
-      assignedStudents: tt.studentId ? [tt.studentId] : [],
-    });
-    sess.liveClassId = lc._id;
-    await tt.save();
-    res.json({ success: true, message: 'Live class created for this session.', data: { timetable: tt } });
-  } catch (e) {
-    console.error('[timetables promote-session]', e.message);
-    res.status(500).json({ success: false, message: e.message });
-  }
-});
-
-// ── DELETE /api/timetables/:id ─────────────────────────────
+// ═══════════════════════════════════════════════════════════
+// DELETE /:id — Delete a timetable slot
+// Allowed for the creator or an admin.
+// ═══════════════════════════════════════════════════════════
 router.delete('/:id', auth, requireRole('teacher', 'admin', 'dos'), async (req, res) => {
   try {
-    const tt = await Timetable.findByIdAndDelete(req.params.id);
-    if (!tt) return res.status(404).json({ success: false, message: 'Timetable not found.' });
-    res.json({ success: true, message: 'Timetable deleted.' });
-  } catch (e) {
-    res.status(500).json({ success: false, message: e.message });
+    if (!mongoose.isValidObjectId(req.params.id)) return fail(res, 400, 'Invalid entry id.');
+    const entry = await TimetableEntry.findById(req.params.id);
+    if (!entry) return fail(res, 404, 'Entry not found.');
+
+    const isCreator = String(entry.createdBy || '') === String(req.user._id);
+    const isOwner   = String(entry.teacherId) === String(req.user._id);
+    if (req.user.role !== 'admin' && !isCreator && !isOwner) {
+      return fail(res, 403, 'You can only delete entries you created or teach.');
+    }
+
+    await entry.deleteOne();
+    require('../lib/timetableMaterializer').reconcile().catch(() => {});
+    return ok(res, { deleted: true }, 'Entry deleted.');
+  } catch (err) {
+    console.error('[timetable DELETE /:id]', err.message);
+    return fail(res, 500, err.message || 'Failed to delete.');
   }
+});
+
+// ── School-wide overview for the DOS Timetable Manager ───────────────
+// One call powering the console: every teacher with their active slot
+// count (zero = the migration chase-list), every student for search and
+// slot assignment, and headline stats.
+router.get('/overview', auth, requireRole('admin', 'ops_manager', 'dos', 'teacher'), async (req, res) => {
+  try {
+    const User = require('../models/User');
+    const Subject = require('../models/Subject');
+    const [teachers, students, perTeacher, weekendCount, subjects] = await Promise.all([
+      User.find({ role: 'teacher', isActive: { $ne: false } }).select('firstName lastName').sort({ firstName: 1 }).lean(),
+      User.find({ role: 'student', isActive: { $ne: false } }).select('firstName lastName gradeLevel admissionNo').sort({ firstName: 1 }).lean(),
+      TimetableEntry.aggregate([
+        { $match: { isActive: true } },
+        { $group: { _id: '$teacherId', n: { $sum: 1 } } },
+      ]),
+      TimetableEntry.countDocuments({ isActive: true, dayOfWeek: { $in: ['Sat', 'Sun'] } }),
+      Subject.find({ isActive: { $ne: false } }).select('subjectName curriculum').sort({ subjectName: 1 }).lean(),
+    ]);
+    const counts = Object.fromEntries(perTeacher.map(r => [String(r._id), r.n]));
+    const tRows = teachers.map(t => ({ _id: t._id, name: [t.firstName, t.lastName].filter(Boolean).join(' '), slots: counts[String(t._id)] || 0 }));
+    return ok(res, {
+      subjects: subjects.map(x => ({ _id: x._id, name: x.subjectName + (x.curriculum ? ' (' + x.curriculum + ')' : ''), subjectName: x.subjectName, curriculum: x.curriculum || '' })),
+      teachers: tRows,
+      students: students.map(st => ({ _id: st._id, name: [st.firstName, st.lastName].filter(Boolean).join(' '), grade: st.gradeLevel || '', admissionNo: st.admissionNo || '' })),
+      stats: {
+        activeSlots: perTeacher.reduce((a, r) => a + r.n, 0),
+        teachersWithout: tRows.filter(t => t.slots === 0).length,
+        weekendSlots: weekendCount,
+      },
+    });
+  } catch (e) { return fail(res, 500, e.message); }
 });
 
 module.exports = router;
