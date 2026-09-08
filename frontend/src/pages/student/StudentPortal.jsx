@@ -2148,6 +2148,7 @@ export default function StudentPortal() {
               </div>
             )
           })()}
+          {page === 'curriculum' && <StudentLessonPlan />}
 
           {/* ════════════════════════════════════════════
               LESSONS — player with adaptive flashcards
@@ -14321,6 +14322,101 @@ function CommunityTab({ user, toast }) {
         <button style={seg(mode === 'feed')} onClick={() => setMode('feed')}>Feed</button>
       </div>
       {mode === 'chat' ? <CommunityChatView user={user} toast={toast}/> : <CommunityFeedView user={user} toast={toast}/>}
+    </div>
+  )
+}
+
+
+/* ── My Lesson Plan: spine progress with a premium gold/crimson donut ──
+   What is done (attended in gold, held-but-missed in crimson), what is
+   scheduled with real dates, and what is projected forward - possible
+   because the timetable is permanent and lessons advance weekly. */
+function StudentLessonPlan() {
+  const [data, setData] = useState(null)
+  const [open, setOpen] = useState({})
+  useEffect(() => {
+    api.get('/curriculum/progress').then(r => setData(r.data?.data || { subjects: [] })).catch(() => setData({ subjects: [] }))
+  }, [])
+  if (!data) return null
+  if (!data.subjects.length) return null
+
+  const GOLD = '#C9973A', CRIMSON = '#7D1025', TRACK = '#F1EAD9', INK = '#231715', MUT = '#8A8378'
+  const fmt = (d) => new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+
+  const Donut = ({ attended, missed, total }) => {
+    const R = 34, C = 2 * Math.PI * R
+    const aFrac = total ? attended / total : 0
+    const mFrac = total ? missed / total : 0
+    const pct = total ? Math.round((attended + missed) / total * 100) : 0
+    return (
+      <svg width="92" height="92" viewBox="0 0 92 92">
+        <circle cx="46" cy="46" r={R} fill="none" stroke={TRACK} strokeWidth="11" />
+        <circle cx="46" cy="46" r={R} fill="none" stroke={GOLD} strokeWidth="11" strokeLinecap="round"
+          strokeDasharray={`${aFrac * C} ${C}`} transform="rotate(-90 46 46)" />
+        <circle cx="46" cy="46" r={R} fill="none" stroke={CRIMSON} strokeWidth="11" strokeLinecap="round"
+          strokeDasharray={`${mFrac * C} ${C}`} strokeDashoffset={-(aFrac * C)} transform="rotate(-90 46 46)" />
+        <text x="46" y="43" textAnchor="middle" style={{ font: '800 17px Montserrat, Arial', fill: CRIMSON }}>{pct}%</text>
+        <text x="46" y="57" textAnchor="middle" style={{ font: '700 8px Montserrat, Arial', fill: MUT, letterSpacing: '.08em' }}>COVERED</text>
+      </svg>
+    )
+  }
+  const mark = (st) => st === 'attended'
+    ? <span style={{ width: 18, height: 18, borderRadius: '50%', background: GOLD, color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 900, flexShrink: 0 }}>{'\u2713'}</span>
+    : st === 'missed'
+      ? <span style={{ width: 18, height: 18, borderRadius: '50%', background: CRIMSON, color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 900, flexShrink: 0 }}>{'\u2713'}</span>
+      : st === 'scheduled'
+        ? <span style={{ width: 18, height: 18, borderRadius: '50%', border: `2px solid ${CRIMSON}`, display: 'inline-block', flexShrink: 0 }} />
+        : <span style={{ width: 18, height: 18, borderRadius: '50%', border: `2px dashed ${TRACK}`, display: 'inline-block', flexShrink: 0 }} />
+
+  return (
+    <div style={{ display: 'grid', gap: 16, marginTop: 18 }}>
+      <div>
+        <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.14em', color: GOLD }}>LESSON PLAN</div>
+        <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 24, fontWeight: 400, color: INK, margin: '2px 0 0' }}>My progress, lesson by lesson</h2>
+        <div style={{ fontSize: 12, color: MUT, marginTop: 2 }}>Gold {'\u2713'} attended \u00b7 crimson {'\u2713'} held (catch up with the recording) \u00b7 outlined = scheduled \u00b7 dashed = expected date from your weekly timetable</div>
+      </div>
+      {data.subjects.map((sub, si) => {
+        const done = sub.counts.attended + sub.counts.missed
+        const showAll = open[si]
+        const nextIdx = sub.plan.findIndex(l => l.status === 'scheduled' || l.status === 'projected')
+        const visible = showAll ? sub.plan : sub.plan.slice(Math.max(0, (nextIdx === -1 ? sub.plan.length : nextIdx) - 2), (nextIdx === -1 ? sub.plan.length : nextIdx) + 4)
+        return (
+          <div key={si} className="card" style={{ padding: 18 }}>
+            <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
+              <Donut attended={sub.counts.attended} missed={sub.counts.missed} total={sub.counts.total} />
+              <div style={{ flex: 1, minWidth: 180 }}>
+                <div style={{ fontWeight: 800, fontSize: 16, color: INK }}>{sub.subject}</div>
+                <div style={{ fontSize: 11.5, color: MUT, marginTop: 2 }}>{sub.teacher} \u00b7 every {sub.slot}</div>
+                <div style={{ fontSize: 12, color: INK, marginTop: 6 }}>
+                  <b style={{ color: GOLD }}>{sub.counts.attended}</b> attended \u00b7 <b style={{ color: CRIMSON }}>{sub.counts.missed}</b> to catch up \u00b7 <b>{sub.counts.total - done}</b> ahead of you
+                </div>
+              </div>
+            </div>
+            <div style={{ marginTop: 12, display: 'grid', gap: 6 }}>
+              {visible.map((l, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 10px', borderRadius: 9,
+                  background: l.status === 'scheduled' ? '#FBF3F5' : 'transparent', opacity: l.status === 'projected' ? 0.8 : 1 }}>
+                  {mark(l.status)}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 12.5, fontWeight: 700, color: INK, textDecoration: 'none' }}>{l.title}</div>
+                    {(l.topic || l.subtopic) && <div style={{ fontSize: 10.5, color: MUT }}>{l.topic}{l.subtopic ? ': ' + l.subtopic : ''}</div>}
+                  </div>
+                  <div style={{ fontSize: 10.5, fontWeight: 800, whiteSpace: 'nowrap',
+                    color: l.status === 'attended' ? GOLD : l.status === 'missed' ? CRIMSON : l.status === 'scheduled' ? CRIMSON : MUT }}>
+                    {l.status === 'projected' ? '~' + fmt(l.date) : fmt(l.date)}
+                  </div>
+                </div>
+              ))}
+            </div>
+            {sub.plan.length > visible.length && (
+              <button onClick={() => setOpen(o => ({ ...o, [si]: !o[si] }))}
+                style={{ marginTop: 8, padding: '6px 14px', borderRadius: 8, border: `1.5px solid ${TRACK}`, background: '#fff', color: CRIMSON, fontSize: 11, fontWeight: 800, cursor: 'pointer' }}>
+                {showAll ? 'Show around today only' : `Show all ${sub.plan.length} lessons`}
+              </button>
+            )}
+          </div>
+        )
+      })}
     </div>
   )
 }
