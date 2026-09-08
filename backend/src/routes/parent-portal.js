@@ -423,15 +423,24 @@ async function sendClassReminders() {
     // Exception check: if this occurrence was cancelled (a materialized
     // instance with status cancelled exists for this entry today), the
     // family must NOT get a reminder for a class that will not happen.
+    let entryForEmail = entry
     try {
       const LiveClassX = require('../models/LiveClass')
       const [oh, om] = String(entry.startTime).split(':').map(Number)
       const occ = new Date(Date.UTC(eat.getUTCFullYear(), eat.getUTCMonth(), eat.getUTCDate(), oh, om) - 3 * 3600 * 1000)
-      const cancelled = await LiveClassX.findOne({
-        timetableEntryId: entry._id, status: 'cancelled',
+      const inst = await LiveClassX.findOne({
+        timetableEntryId: entry._id,
         scheduledAt: { $gte: new Date(occ.getTime() - 5 * 60000), $lte: new Date(occ.getTime() + 5 * 60000) },
-      }).select('_id').lean()
-      if (cancelled) continue
+      }).select('status syllabusTopicName syllabusSubtopicName').lean()
+      // A cancelled occurrence must not be announced.
+      if (inst && inst.status === 'cancelled') continue
+      // Topic-bearing reminders: today's materialized instance knows
+      // which spine lesson this class covers - announce it, as the old
+      // per-class scheduling always did.
+      if (inst && inst.syllabusTopicName) {
+        const topic = inst.syllabusTopicName + (inst.syllabusSubtopicName ? ': ' + inst.syllabusSubtopicName : '')
+        entryForEmail = { ...entry, subject: entry.subject + ' — ' + topic }
+      }
     } catch (e) { /* reminder proceeds if the check itself fails */ }
 
     // The same student can appear twice on one entry if the timetable was
@@ -470,8 +479,8 @@ async function sendClassReminders() {
         await t.sendMail({
           from:    process.env.EMAIL_FROM || 'Smartious <hello@smartioushomeschool.com>',
           to:      resolved.to.join(', '),
-          subject: `Class reminder — ${entry.subject} starts in 30 minutes`,
-          html:    buildClassReminderEmail(student, entry),
+          subject: `Class reminder — ${entryForEmail.subject} starts in 30 minutes`,
+          html:    buildClassReminderEmail(student, entryForEmail),
         })
         remindedOccurrences.set(occurrenceKey, Date.now())
         sent++
