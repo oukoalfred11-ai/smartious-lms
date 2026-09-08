@@ -290,12 +290,23 @@ router.get('/overview', auth, requireRole('admin', 'ops_manager', 'dos', 'teache
       TimetableEntry.countDocuments({ isActive: true, dayOfWeek: { $in: ['Sat', 'Sun'] } }),
       Subject.find({ isActive: { $ne: false } }).select('subjectName curriculum').sort({ subjectName: 1 }).lean(),
     ]);
+    // Full active entry set for printable timetables (school / per person).
+    const allEntries = await TimetableEntry.find({ isActive: true })
+      .populate('teacherId', 'firstName lastName')
+      .populate('assignedStudents', 'firstName lastName gradeLevel')
+      .lean();
     const counts = Object.fromEntries(perTeacher.map(r => [String(r._id), r.n]));
     const tRows = teachers.map(t => ({ _id: t._id, name: [t.firstName, t.lastName].filter(Boolean).join(' '), slots: counts[String(t._id)] || 0 }));
     return ok(res, {
       subjects: subjects.map(x => ({ _id: x._id, name: x.subjectName + (x.curriculum ? ' (' + x.curriculum + ')' : ''), subjectName: x.subjectName, curriculum: x.curriculum || '' })),
       teachers: tRows,
       students: students.map(st => ({ _id: st._id, name: [st.firstName, st.lastName].filter(Boolean).join(' '), grade: st.gradeLevel || '', admissionNo: st.admissionNo || '' })),
+      entries: allEntries.map(e => ({
+        _id: e._id, title: e.title, subject: e.subject, curriculum: e.curriculum, grade: e.grade,
+        dayOfWeek: e.dayOfWeek, startTime: e.startTime, endTime: e.endTime,
+        teacher: e.teacherId ? [e.teacherId.firstName, e.teacherId.lastName].filter(Boolean).join(' ') : 'Unassigned',
+        students: (e.assignedStudents || []).map(x => ({ name: [x.firstName, x.lastName].filter(Boolean).join(' '), grade: x.gradeLevel || '' })),
+      })),
       stats: {
         activeSlots: perTeacher.reduce((a, r) => a + r.n, 0),
         teachersWithout: tRows.filter(t => t.slots === 0).length,
