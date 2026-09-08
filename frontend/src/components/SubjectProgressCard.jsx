@@ -45,6 +45,16 @@ const TOKENS = {
   goldInk: '#7D5A0F',
 }
 
+// One fetch shared by every card on the page.
+let _planPromise = null
+function fetchLessonPlans(api) {
+  if (!_planPromise) _planPromise = api.get('/curriculum/progress')
+    .then(r => r.data?.data?.subjects || [])
+    .catch(() => [])
+  return _planPromise
+}
+const _norm = (x) => String(x || '').toLowerCase().replace(/[^a-z0-9]/g, '')
+
 export default function SubjectProgressCard({
   studentId,
   subjectId: subjectIdProp,
@@ -53,6 +63,16 @@ export default function SubjectProgressCard({
   api,
   compact = false,
 }) {
+  const [plan, setPlan] = useState(null)
+  const [planOpen, setPlanOpen] = useState(false)
+  useEffect(() => {
+    let on = true
+    if (!api) return
+    fetchLessonPlans(api).then(list => {
+      if (on) { const hit = list.find(x => _norm(x.subject) === _norm(subjectName)); if (hit) setPlan(hit) }
+    })
+    return () => { on = false }
+  }, [subjectName, api])
   const [state, setState] = useState({ status: 'loading', data: null, error: null })
   const [resolvedSubjectId, setResolvedSubjectId] = useState(subjectIdProp || null)
 
@@ -210,6 +230,59 @@ export default function SubjectProgressCard({
 
   // ── OK ──
   const remainingPct = Math.max(0, 100 - percent)
+
+  // Timetable-linked subjects get the upgraded progress: donut + dated
+  // lesson plan, in the same spot the subtopics strip occupied. The
+  // legacy strip below remains the fallback for unlinked subjects.
+  if (plan) {
+    const GOLD = '#C9973A', CRIM = '#7D1025', TRACK = '#F1EAD9', MUT = '#8A8378'
+    const R = 26, C = 2 * Math.PI * R
+    const aF = plan.counts.total ? plan.counts.attended / plan.counts.total : 0
+    const mF = plan.counts.total ? plan.counts.missed / plan.counts.total : 0
+    const pct = plan.counts.total ? Math.round(plan.counts.covered / plan.counts.total * 100) : 0
+    const fmt = (d) => new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+    const nextIdx = plan.plan.findIndex(l => l.status === 'scheduled' || l.status === 'projected')
+    const visible = planOpen ? plan.plan : plan.plan.slice(Math.max(0, (nextIdx === -1 ? plan.plan.length : nextIdx) - 1), (nextIdx === -1 ? plan.plan.length : nextIdx) + 3)
+    const mark = (st) => st === 'attended'
+      ? <span style={{ width: 15, height: 15, borderRadius: '50%', background: GOLD, color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 900, flexShrink: 0 }}>{'\u2713'}</span>
+      : st === 'missed'
+        ? <span style={{ width: 15, height: 15, borderRadius: '50%', background: CRIM, color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 900, flexShrink: 0 }}>{'\u2713'}</span>
+        : st === 'scheduled'
+          ? <span style={{ width: 15, height: 15, borderRadius: '50%', border: `2px solid ${CRIM}`, display: 'inline-block', flexShrink: 0 }} />
+          : <span style={{ width: 15, height: 15, borderRadius: '50%', border: `2px dashed ${TRACK}`, display: 'inline-block', flexShrink: 0 }} />
+    return (
+      <div style={{ background: TOKENS.cream, border: '1px solid ' + TOKENS.s100, borderRadius: 8, padding: 12 }}>
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          <svg width="66" height="66" viewBox="0 0 66 66">
+            <circle cx="33" cy="33" r={R} fill="none" stroke={TRACK} strokeWidth="8" />
+            <circle cx="33" cy="33" r={R} fill="none" stroke={GOLD} strokeWidth="8" strokeLinecap="round" strokeDasharray={`${aF * C} ${C}`} transform="rotate(-90 33 33)" />
+            <circle cx="33" cy="33" r={R} fill="none" stroke={CRIM} strokeWidth="8" strokeLinecap="round" strokeDasharray={`${mF * C} ${C}`} strokeDashoffset={-(aF * C)} transform="rotate(-90 33 33)" />
+            <text x="33" y="37" textAnchor="middle" style={{ font: '800 13px Montserrat, Arial', fill: CRIM }}>{pct}%</text>
+          </svg>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.1em', color: MUT, textTransform: 'uppercase' }}>Lesson plan progress</div>
+            <div style={{ fontSize: 11.5, color: '#231715', marginTop: 3 }}>
+              <b style={{ color: GOLD }}>{plan.counts.attended}</b> attended {'\u00b7'} <b style={{ color: CRIM }}>{plan.counts.missed}</b> to catch up {'\u00b7'} <b>{plan.counts.total - plan.counts.covered}</b> ahead
+            </div>
+            <div style={{ fontSize: 10, color: MUT, marginTop: 2 }}>every {plan.slot}{plan.teacher ? ' \u00b7 ' + plan.teacher : ''}</div>
+          </div>
+        </div>
+        <div style={{ marginTop: 8, display: 'grid', gap: 4 }}>
+          {visible.map((l, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 6px', borderRadius: 7, background: l.status === 'scheduled' ? '#FBF3F5' : 'transparent', opacity: l.status === 'projected' ? 0.8 : 1 }}>
+              {mark(l.status)}
+              <span style={{ flex: 1, fontSize: 11, fontWeight: 600, color: '#231715', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.title}</span>
+              <span style={{ fontSize: 9.5, fontWeight: 800, whiteSpace: 'nowrap', color: l.status === 'attended' ? GOLD : l.status === 'projected' ? MUT : CRIM }}>{l.status === 'projected' ? '~' + fmt(l.date) : fmt(l.date)}</span>
+            </div>
+          ))}
+        </div>
+        <button onClick={() => setPlanOpen(o => !o)}
+          style={{ marginTop: 6, padding: '4px 12px', borderRadius: 7, border: `1px solid ${TRACK}`, background: '#fff', color: CRIM, fontSize: 10, fontWeight: 800, cursor: 'pointer' }}>
+          {planOpen ? 'Show around today' : `All ${plan.plan.length} lessons`}
+        </button>
+      </div>
+    )
+  }
 
   return (
     <div style={{
