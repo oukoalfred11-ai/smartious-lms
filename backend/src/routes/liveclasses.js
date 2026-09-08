@@ -53,6 +53,16 @@ async function notifyStudents(studentIds, classParams, isUpdate = false) {
 // Helper: compute status fresh on a plain doc (lean queries
 // don't get virtuals, so we re-derive in JS).
 // ─────────────────────────────────────────────────────────
+
+// School policy: no weekend lessons. Nairobi calendar. Clubs, events and
+// assemblies are exempt (none currently scheduled on weekends either).
+function isWeekendEAT(dateLike) {
+  const d = new Date(dateLike);
+  if (isNaN(d)) return false;
+  const dow = new Date(d.toLocaleString('en-US', { timeZone: 'Africa/Nairobi' })).getDay();
+  return dow === 0 || dow === 6;
+}
+
 const computeStatus = (lc) => {
   if (!lc) return 'scheduled';
   if (lc.status === 'cancelled' || lc.status === 'ended') return lc.status;
@@ -121,6 +131,18 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
     if (studentCount !== validStudentIds.length)
       return res.status(400).json({ success:false, message:'One or more assigned users are not students.' });
 
+    const wantedKind = ['lesson','club','competition','event','assembly'].includes(kind) ? kind : 'lesson';
+    // ONE SYSTEM: the timetable dictates classes. Lessons are
+    // materialized from timetable entries by the reconciler and cannot
+    // be slotted directly. Clubs, events and assemblies remain manual.
+    if (wantedKind === 'lesson') {
+      return res.status(400).json({
+        success: false,
+        message: 'Lessons are created from the timetable. Add or edit your timetable slot and the class will appear automatically for the coming week.',
+      });
+    }
+    if (wantedKind === 'lesson' && isWeekendEAT(req.body.scheduledAt))
+      return res.status(400).json({ success: false, message: 'Weekend lessons are not scheduled at Smartious. Pick a Monday-to-Friday time.' });
     const liveClass = await LiveClass.create({
       kind: ['lesson','club','competition','event','assembly'].includes(kind) ? kind : 'lesson',
       title: title.trim(),
@@ -281,6 +303,13 @@ router.patch('/:id', auth, requireRole('teacher', 'admin', 'dos', 'ops_manager')
     // Capture old link before any updates so we can detect a change
     const oldMeetingLink = lc.meetingLink;
 
+    if (req.body.scheduledAt && (lc.kind === 'lesson' || !lc.kind) && isWeekendEAT(req.body.scheduledAt))
+      return res.status(400).json({ success: false, message: 'Weekend lessons are not scheduled at Smartious. Pick a Monday-to-Friday time.' });
+
+    // One-off change to a timetable-born class: detach it so the
+    // reconciler treats it as an exception rather than reverting it.
+    if (lc.timetableEntryId && (req.body.scheduledAt || req.body.durationMins)) lc.detached = true;
+
     const allowed = [
       'title','description','subject','curriculum','grade',
       'scheduledAt','durationMins','meetingLink','classroomMode',
@@ -346,6 +375,16 @@ router.delete('/:id', auth, requireRole('teacher', 'admin', 'dos', 'ops_manager'
     if (!['admin', 'dos', 'ops_manager'].includes(req.user.role) && String(lc.teacherId) !== String(req.user._id))
       return res.status(403).json({ success:false, message:'Not your class.' });
 
+    if (lc.timetableEntryId) {
+      // Deleting a timetable-born class must MEAN something durable:
+      // a hard delete would be re-materialized within hours. Cancel it
+      // as a persistent exception instead - this occurrence is off, the
+      // weekly slot continues next week.
+      lc.status = 'cancelled';
+      lc.detached = true;
+      await lc.save();
+      return res.json({ success: true, message: 'This occurrence is cancelled. The weekly timetable slot continues from next week.' });
+    }
     await lc.deleteOne();
     res.json({ success:true, message:'Class deleted.' });
   } catch (e) {
