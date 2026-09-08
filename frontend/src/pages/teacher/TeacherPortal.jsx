@@ -16689,7 +16689,12 @@ function TeacherTimetableTab({ user, toast }) {
     return [...new Set([...yrs(1, 13), ...grades])]
   }
   const gradeOpts = ladderFor(form?.curriculum)
-  const subjectOpts = ov.subjects.filter(x => x.curriculum === form?.curriculum)
+  // Curriculum ids and spine labels drift ('CambridgeIGCSE' vs
+  // 'Cambridge IGCSE'), so match on normalized text; and if the chosen
+  // curriculum matches no spines, offer ALL spines rather than none.
+  const normCur = (x) => String(x || '').toLowerCase().replace(/[^a-z0-9]/g, '')
+  const matched = ov.subjects.filter(x => normCur(x.curriculum) === normCur(form?.curriculum))
+  const subjectOpts = matched.length ? matched : ov.subjects
   const fmtDay = (d) => new Date(d).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
   const fmtTime = (d) => new Date(d).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
 
@@ -16816,7 +16821,8 @@ function TeacherTimetableTab({ user, toast }) {
                 })
               }} style={{ ...inp, opacity: (!form.curriculum && !form.customCur) ? 0.5 : 1 }}>
                 <option value="">3. Subject...</option>
-                {subjectOpts.map(sub => <option key={sub._id} value={sub._id}>{sub.subjectName || sub.name}</option>)}
+                {subjectOpts.length === 0 && <option value="" disabled>No syllabus spines loaded yet - use Other subject below</option>}
+                {subjectOpts.map(sub => <option key={sub._id} value={sub._id}>{sub.subjectName || sub.name}{matched.length ? '' : (sub.curriculum ? ' (' + sub.curriculum + ')' : '')}</option>)}
                 <option value="__other">Other subject...</option>
               </select>
             </div>
