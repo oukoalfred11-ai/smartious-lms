@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import ClubsHub from '../../components/ClubsHub.jsx'
-import { FALLBACK_CURRICULA } from '../../data/curriculumList.js'
+import { FALLBACK_CURRICULA, fetchCurricula } from '../../data/curriculumList.js'
 import BirthdayBanner from '../../components/BirthdayBanner.jsx'
 import SuggestionBox from '../../components/SuggestionBox.jsx'
 import { useToast, api } from '../../context/ctx.jsx'
@@ -16570,6 +16570,7 @@ function TeacherTimetableTab({ user, toast }) {
   const [entries, setEntries] = useState([])
   const [classes, setClasses] = useState([])
   const [ov, setOv] = useState({ subjects: [], students: [] })
+  const [curList, setCurList] = useState(FALLBACK_CURRICULA)
   const [loading, setLoading] = useState(true)
   const [modal, setModal] = useState(null)          // { entry|null }
   const [form, setForm] = useState(null)
@@ -16588,6 +16589,7 @@ function TeacherTimetableTab({ user, toast }) {
       setClasses(Array.isArray(d) ? d : (d?.classes || d?.rows || d?.liveClasses || []))
       const o = c.data?.data
       if (o) setOv({ subjects: o.subjects || [], students: o.students || [] })
+      fetchCurricula(api).then(list => { if (Array.isArray(list) && list.length) setCurList(list) }).catch(() => {})
     }).catch(() => toast?.error?.('Could not load your timetable.'))
       .finally(() => setLoading(false))
   }, [])
@@ -16671,7 +16673,22 @@ function TeacherTimetableTab({ user, toast }) {
 
   const pickable = form ? ov.students.filter(st => !form.pickGrade || st.grade === form.pickGrade) : []
   const grades = [...new Set(ov.students.map(st => st.grade).filter(Boolean))].sort()
-  const curricula = [...new Set(ov.subjects.map(x => x.curriculum).filter(Boolean))].sort()
+  const ladderFor = (cur) => {
+    const c = String(cur || '')
+    const yrs = (a, b, pre = 'Year ') => Array.from({ length: b - a + 1 }, (_, i) => pre + (a + i))
+    if (/Primary/i.test(c) || /PYP/i.test(c)) return yrs(1, 6)
+    if (/LowerSec/i.test(c)) return yrs(7, 9)
+    if (/IGCSE|GCSE/i.test(c)) return yrs(10, 11)
+    if (/ALevel|A-Level/i.test(c)) return ['Year 12 (AS)', 'Year 13 (A2)']
+    if (/MYP/i.test(c)) return yrs(6, 10, 'MYP Grade ')
+    if (/IBDP|DP/i.test(c)) return ['DP Year 1', 'DP Year 2']
+    if (/American|US/i.test(c)) return ['Kindergarten', ...yrs(1, 12, 'Grade ')]
+    if (/CBC/i.test(c)) return ['PP1', 'PP2', ...yrs(1, 12, 'Grade ')]
+    if (/KCSE|8-4-4|844/i.test(c)) return yrs(1, 4, 'Form ')
+    // Unknown curriculum: full Year ladder plus any grades already in use.
+    return [...new Set([...yrs(1, 13), ...grades])]
+  }
+  const gradeOpts = ladderFor(form?.curriculum)
   const subjectOpts = ov.subjects.filter(x => x.curriculum === form?.curriculum)
   const fmtDay = (d) => new Date(d).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
   const fmtTime = (d) => new Date(d).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
@@ -16777,15 +16794,15 @@ function TeacherTimetableTab({ user, toast }) {
                 }))
               }} style={inp}>
                 <option value="">1. Curriculum...</option>
-                {curricula.map(c => <option key={c} value={c}>{c}</option>)}
+                {curList.map(c => <option key={c.id || c.name || c} value={c.id || c.name || c}>{c.name || c.id || c}</option>)}
                 <option value="__other">Other...</option>
               </select>
-              <select value={form.grade} onChange={e => setForm(f => {
+              <select disabled={!form.curriculum && !form.customCur} value={form.grade} onChange={e => setForm(f => {
                 const grade = e.target.value
                 return { ...f, grade, title: f.autoTitle ? `${grade ? grade + ' ' : ''}${f.subject}`.trim() : f.title }
-              })} style={inp}>
+              })} style={{ ...inp, opacity: (!form.curriculum && !form.customCur) ? 0.5 : 1 }}>
                 <option value="">2. Class / level...</option>
-                {grades.map(g => <option key={g} value={g}>{g}</option>)}
+                {gradeOpts.map(g => <option key={g} value={g}>{g}</option>)}
               </select>
               <select disabled={!form.curriculum && !form.customCur}
                 value={form.customSub ? '__other' : (form.subjectId || '')} onChange={e => {
