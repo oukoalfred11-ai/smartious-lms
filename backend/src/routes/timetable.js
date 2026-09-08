@@ -173,12 +173,6 @@ router.post('/', auth, requireRole('teacher', 'admin', 'dos'), async (req, res) 
       return fail(res, 403, 'Teachers can only create timetable entries for themselves.');
     }
 
-    // School policy: no weekend teaching. Weekend entries silently
-    // generated ghost reminder emails for months; the door is now shut.
-    const WEEKEND = [0, 6, 'Sunday', 'Saturday', 'sunday', 'saturday', 'Sun', 'Sat'];
-    if (WEEKEND.includes(req.body.dayOfWeek))
-      return fail(res, 400, 'Weekend classes are not scheduled at Smartious. Timetable entries must be Monday to Friday.');
-
     const entry = await TimetableEntry.create({
       title:        b.title,
       description:  b.description || '',
@@ -276,6 +270,36 @@ router.delete('/:id', auth, requireRole('teacher', 'admin', 'dos'), async (req, 
     console.error('[timetable DELETE /:id]', err.message);
     return fail(res, 500, err.message || 'Failed to delete.');
   }
+});
+
+// ── School-wide overview for the DOS Timetable Manager ───────────────
+// One call powering the console: every teacher with their active slot
+// count (zero = the migration chase-list), every student for search and
+// slot assignment, and headline stats.
+router.get('/overview', auth, requireRole('admin', 'ops_manager', 'dos'), async (req, res) => {
+  try {
+    const User = require('../models/User');
+    const [teachers, students, perTeacher, weekendCount] = await Promise.all([
+      User.find({ role: 'teacher', isActive: { $ne: false } }).select('firstName lastName').sort({ firstName: 1 }).lean(),
+      User.find({ role: 'student', isActive: { $ne: false } }).select('firstName lastName gradeLevel admissionNo').sort({ firstName: 1 }).lean(),
+      TimetableEntry.aggregate([
+        { $match: { isActive: true } },
+        { $group: { _id: '$teacherId', n: { $sum: 1 } } },
+      ]),
+      TimetableEntry.countDocuments({ isActive: true, dayOfWeek: { $in: ['Sat', 'Sun'] } }),
+    ]);
+    const counts = Object.fromEntries(perTeacher.map(r => [String(r._id), r.n]));
+    const tRows = teachers.map(t => ({ _id: t._id, name: [t.firstName, t.lastName].filter(Boolean).join(' '), slots: counts[String(t._id)] || 0 }));
+    return ok(res, {
+      teachers: tRows,
+      students: students.map(st => ({ _id: st._id, name: [st.firstName, st.lastName].filter(Boolean).join(' '), grade: st.gradeLevel || '', admissionNo: st.admissionNo || '' })),
+      stats: {
+        activeSlots: perTeacher.reduce((a, r) => a + r.n, 0),
+        teachersWithout: tRows.filter(t => t.slots === 0).length,
+        weekendSlots: weekendCount,
+      },
+    });
+  } catch (e) { return fail(res, 500, e.message); }
 });
 
 module.exports = router;
