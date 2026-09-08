@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
+import ClubsHub from '../../components/ClubsHub.jsx'
 import { FALLBACK_CURRICULA } from '../../data/curriculumList.js'
 import BirthdayBanner from '../../components/BirthdayBanner.jsx'
 import SuggestionBox from '../../components/SuggestionBox.jsx'
@@ -250,6 +251,7 @@ const NAV_ICON_PALETTE = {
   dashboard:     ['#FF6B6B', '#EE5253'], // coral red
   students:      ['#0EA5E9', '#0369A1'], // sky blue
   liveclass:     ['#EF4444', '#B91C1C'], // signal red
+  clubs:         ['#FB923C', '#EA580C'], // club orange
   questionbank:  ['#5E8CFF', '#3D6FE8'], // bright blue
   exambuilder:   ['#D97706', '#B45309'], // amber
   marking:       ['#22C55E', '#15803D'], // green
@@ -929,6 +931,7 @@ export default function TeacherPortal() {
   const pageTitles = {
     dashboard: 'Dashboard',
     students: 'My Students',
+    clubs: 'My Clubs',
     liveclass: 'Live Classes',
     classroom: 'Live Studio',
     questionbank: 'Question Bank',
@@ -956,6 +959,7 @@ export default function TeacherPortal() {
       {id:'attendance',    label:'Attendance & Check-in',       iconName:'attendance',    icon:'rect:5:4:14:17:2|rect:9:2:6:3:1|M8.5 12.5l2 2 4-4.5'},
       {id:'library',       label:'Library',          iconName:'library',       icon:'M4 19.5A2.5 2.5 0 0 1 6.5 17H20|M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'},
       {id:'scheduleclasses', label:'Schedule Classes', iconName:'scheduleclasses', icon:'rect:3:4:18:18:2|line:16:2:16:6|line:8:2:8:6|line:3:10:21:10'},
+      {id:'clubs',         label:'My Clubs',         iconName:'clubs',         icon:'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2|circle:9:7:4|M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75' },
       {id:'myratings',     label:'My Ratings',         iconName:'ratings',       icon:'M12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2'},
       {id:'earnings',      label:'My Earnings',       iconName:'earnings',      icon:'M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6'},
       {id:'timetable',     label:'Timetable',        iconName:'timetable',     icon:'rect:3:4:18:18:2|line:8:2:8:6|line:16:2:16:6|line:3:10:21:10'},
@@ -1012,6 +1016,7 @@ export default function TeacherPortal() {
           {page==='attendance' && <AttendanceTab           user={currentUser} toast={toast}/>}
           {page==='reports'    && <WeeklyReportGenerator   user={currentUser} toast={toast}/>}
           {page==='dashboard'  && <TeacherDashboardTab     user={currentUser} toast={toast} setPage={setPage}/>}
+          {page==='clubs'      && <ClubsHub               user={currentUser} toast={toast}/>}
           {page==='students'   && <StudentsTab             user={currentUser} toast={toast} setPage={setPage}/>}
           {page==='homework'   && <HomeworkTab             user={currentUser} toast={toast}/>}
           {page==='timetable'  && <TeacherTimetableTab     user={currentUser} toast={toast}/>}
@@ -1212,6 +1217,7 @@ export default function TeacherPortal() {
 
           {/* ── DASHBOARD ── */}
           {page === 'dashboard' && <TeacherDashboardTab user={currentUser} store={store} setPage={setPage} toast={toast} setMsgModal={setMsgModal} setUploadModal={setUploadModal} />}
+          {page === 'clubs' && <ClubsHub user={currentUser} toast={toast} />}
 
 
           {/* ── LIVE CLASSROOM (PRO) ── */}
@@ -10504,12 +10510,10 @@ function ScheduleClassesTab({ user, toast }) {
 
   return (
     <div>
-      <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
-        {tabBtn('live', 'Live Sessions')}
-        {tabBtn('timetable', 'Weekly Timetable')}
+      <div style={{ background: '#FBF3E6', border: '1px solid #E8D9BC', borderRadius: 10, padding: '10px 14px', marginBottom: 16, fontSize: 12.5, color: '#7A5B18', fontWeight: 600 }}>
+        Weekly teaching times now live in the <b>Timetable</b> module (left menu): slot a time once and the classes are created automatically every week. This page is for one-off sessions only.
       </div>
-      {tab === 'live' && <LiveSessionsTab user={user} toast={toast} />}
-      {tab === 'timetable' && <WeeklyTimetableTab user={user} toast={toast} />}
+      <LiveSessionsTab user={user} toast={toast} />
     </div>
   )
 }
@@ -16556,585 +16560,273 @@ function BookCard({ book, onView, onDelete, onEdit, canDelete }) {
 // The Student Portal reads from the same source.
 // ═══════════════════════════════════════════════════════════
 function TeacherTimetableTab({ user, toast }) {
+  // The teacher's scheduling home under the one-system rule: the weekly
+  // timetable below IS the class schedule. Slot a time once and the real
+  // classes materialize for every coming week until the slot is edited.
+  // One-off changes (cancel or move a single occurrence) are made on the
+  // class itself and never disturb the weekly pattern.
+  const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+  const C = { crimson: '#7D1025', gold: '#C9973A', line: '#E5DFD3', ink: '#1F2937', mut: '#6B7280', bg: '#FBF8F3', red: '#B91C1C', green: '#15803D' }
   const [entries, setEntries] = useState([])
+  const [classes, setClasses] = useState([])
+  const [ov, setOv] = useState({ subjects: [], students: [] })
   const [loading, setLoading] = useState(true)
-  const [showForm, setShowForm] = useState(false)
-  const [editingId, setEditingId] = useState(null)   // null = create mode
+  const [modal, setModal] = useState(null)          // { entry|null }
+  const [form, setForm] = useState(null)
+  const [resched, setResched] = useState(null)      // { cls, when, mins }
   const [saving, setSaving] = useState(false)
 
-  // Form state
-  const [fTitle, setFTitle]               = useState('')
-  const [fSubject, setFSubject]           = useState('')
-  const [fSubjectId, setFSubjectId]       = useState('')
-  const [fCurriculum, setFCurriculum]     = useState('')
-  const [fGrade, setFGrade]               = useState('')
-  const [fDay, setFDay]                   = useState('Mon')
-  const [fStart, setFStart]               = useState('09:00')
-  const [fEnd, setFEnd]                   = useState('10:00')
-  const [fMode, setFMode]                 = useState('virtual')
-  const [fMeetingLink, setFMeetingLink]   = useState('')
-  const [fLocation, setFLocation]         = useState('')
-  const [fAudienceType, setFAudienceType] = useState('students')  // 'students' | 'broadcast'
-  const [fPickedStudents, setFPickedStudents] = useState([])      // array of {_id, name}
-  const [fAudienceCurriculum, setFAudienceCurriculum] = useState('')
-  const [fAudienceGrade, setFAudienceGrade]           = useState('')
-
-  // Subject catalog for the form
-  const [subjects, setSubjects] = useState([])
-  const [students, setStudents] = useState([])   // teacher's allocated students
-
-  const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-  const DAYS_LONG = { Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday', Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday', Sun: 'Sunday' }
-
-  // Canonical curricula — mirrors SCHOOL_CURRICULA used in admin portal
-  const CURRICULA = FALLBACK_CURRICULA
-
-  // ── Loaders ──
-  const loadEntries = async () => {
+  const load = useCallback(() => {
     setLoading(true)
-    try {
-      const { data } = await api.get('/timetable/me')
-      setEntries(data?.data?.entries || [])
-    } catch (e) {
-      toast?.error?.('Failed to load timetable: ' + (e?.response?.data?.message || e.message))
-    } finally {
-      setLoading(false)
-    }
-  }
-  useEffect(() => { loadEntries() // eslint-disable-next-line
+    Promise.all([
+      api.get('/timetable/me'),
+      api.get('/liveclasses/teacher/list').catch(() => ({ data: {} })),
+      api.get('/timetable/overview').catch(() => ({ data: {} })),
+    ]).then(([a, b, c]) => {
+      setEntries(a.data?.data?.entries || [])
+      const d = b.data?.data
+      setClasses(Array.isArray(d) ? d : (d?.classes || d?.rows || d?.liveClasses || []))
+      const o = c.data?.data
+      if (o) setOv({ subjects: o.subjects || [], students: o.students || [] })
+    }).catch(() => toast?.error?.('Could not load your timetable.'))
+      .finally(() => setLoading(false))
   }, [])
+  useEffect(() => { load() }, [load])
 
-  // Subjects (full catalog — admins may have allocated subjects outside teachingSpecialties)
-  useEffect(() => {
-    let cancelled = false
-    api.get('/subjects')
-      .then(res => {
-        if (cancelled) return
-        const list = (res.data?.subjects || []).filter(s => s.isActive !== false)
-        list.sort((a, b) => {
-          const c = String(a.curriculum || '').localeCompare(String(b.curriculum || ''))
-          if (c !== 0) return c
-          return String(a.subjectName || '').localeCompare(String(b.subjectName || ''))
-        })
-        setSubjects(list)
-      })
-      .catch(() => {})
-    return () => { cancelled = true }
-  }, [])
+  const now = Date.now()
+  const week = classes
+    .filter(x => {
+      const t = new Date(x.scheduledAt).getTime()
+      return t > now - 3600e3 && t < now + 7 * 864e5 && (x.kind === 'lesson' || !x.kind)
+    })
+    .sort((a, b) => new Date(a.scheduledAt) - new Date(b.scheduledAt))
 
-  // Students this teacher can pick from — pull from allocations
-  useEffect(() => {
-    let cancelled = false
-    api.get('/allocations/teacher')
-      .then(res => {
-        if (cancelled) return
-        const allocs = res.data?.allocations || res.data?.data?.allocations || []
-        // De-dupe by student
-        const map = {}
-        for (const a of allocs) {
-          if (!a.studentId) continue
-          const id = a.studentId._id || a.studentId
-          if (!map[id]) {
-            const s = a.studentId
-            const name = typeof s === 'object'
-              ? `${s.firstName || ''} ${s.lastName || ''}`.trim() || s.email
-              : 'Student ' + String(id).slice(-4)
-            map[id] = { _id: id, name }
-          }
-        }
-        setStudents(Object.values(map).sort((a, b) => a.name.localeCompare(b.name)))
-      })
-      .catch(() => {})
-    return () => { cancelled = true }
-  }, [])
+  const inp = { padding: '8px 10px', border: `1.5px solid ${C.line}`, borderRadius: 8, fontSize: 12.5 }
+  const chip = (bg, fg, t) => <span style={{ padding: '2px 8px', borderRadius: 999, fontSize: 9.5, fontWeight: 800, background: bg, color: fg, whiteSpace: 'nowrap' }}>{t}</span>
 
-  // ── Form helpers ──
-  const resetForm = () => {
-    setEditingId(null)
-    setFTitle(''); setFSubject(''); setFSubjectId(''); setFCurriculum('')
-    setFGrade(''); setFDay('Mon'); setFStart('09:00'); setFEnd('10:00')
-    setFMode('virtual'); setFMeetingLink(''); setFLocation('')
-    setFAudienceType('students')
-    setFPickedStudents([])
-    setFAudienceCurriculum(''); setFAudienceGrade('')
+  const blank = () => ({ title: '', subject: '', curriculum: 'Cambridge', grade: '', dayOfWeek: 'Mon', startTime: '09:00', endTime: '10:00', assignedStudents: [], pickGrade: '', subjectId: '' })
+  const openAdd = () => { setForm(blank()); setModal({ entry: null }) }
+  const openEdit = (e) => {
+    setForm({ title: e.title || '', subject: e.subject || '', curriculum: e.curriculum || '', grade: e.grade || '',
+      dayOfWeek: e.dayOfWeek, startTime: e.startTime, endTime: e.endTime,
+      assignedStudents: (e.assignedStudents || []).map(x => String(x?._id || x)),
+      pickGrade: e.grade || '', subjectId: e.subjectId ? String(e.subjectId?._id || e.subjectId) : '' })
+    setModal({ entry: e })
   }
-
-  const beginEdit = (entry) => {
-    setEditingId(entry._id)
-    setFTitle(entry.title || '')
-    setFSubject(entry.subject || '')
-    setFSubjectId(entry.subjectId || '')
-    setFCurriculum(entry.curriculum || '')
-    setFGrade(entry.grade || '')
-    setFDay(entry.dayOfWeek || 'Mon')
-    setFStart(entry.startTime || '09:00')
-    setFEnd(entry.endTime || '10:00')
-    setFMode(entry.deliveryMode || 'virtual')
-    setFMeetingLink(entry.meetingLink || '')
-    setFLocation(entry.location || '')
-    // Audience: was it broadcast or explicit?
-    const hasBroadcast = !!(entry.audienceCurriculum && entry.audienceGrade)
-    const hasStudents = Array.isArray(entry.assignedStudents) && entry.assignedStudents.length > 0
-    setFAudienceType(hasBroadcast && !hasStudents ? 'broadcast' : 'students')
-    setFAudienceCurriculum(entry.audienceCurriculum || '')
-    setFAudienceGrade(entry.audienceGrade || '')
-    // Map the assignedStudents to {_id, name} (will refresh after students load)
-    setFPickedStudents(
-      (entry.assignedStudents || []).map(id => {
-        const found = students.find(s => s._id === id || s._id === String(id))
-        return found || { _id: id, name: 'Student ' + String(id).slice(-4) }
-      })
-    )
-    setShowForm(true)
-    // Scroll the form into view
-    setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: 'smooth' })
-    }, 50)
+  const overlapNote = () => {
+    if (!form) return null
+    const clash = entries.find(e => (!modal?.entry || String(e._id) !== String(modal.entry._id)) &&
+      e.dayOfWeek === form.dayOfWeek && form.startTime < e.endTime && e.startTime < form.endTime)
+    return clash ? `Overlaps your ${clash.subject || clash.title} (${clash.startTime}-${clash.endTime}).` : null
   }
-
-  const cancelForm = () => {
-    resetForm()
-    setShowForm(false)
-  }
-
-  // When subject is picked from the dropdown, auto-fill curriculum
-  const onSubjectChange = (subjectId) => {
-    const s = subjects.find(x => x._id === subjectId)
-    setFSubjectId(subjectId)
-    if (s) {
-      setFSubject(s.subjectName || '')
-      setFCurriculum(s.curriculum || '')
-    } else {
-      setFSubject('')
-    }
-  }
-
-  const togglePickedStudent = (s) => {
-    if (fPickedStudents.some(p => p._id === s._id)) {
-      setFPickedStudents(fPickedStudents.filter(p => p._id !== s._id))
-    } else {
-      setFPickedStudents([...fPickedStudents, s])
-    }
-  }
-
-  // ── Save (create or update) ──
-  const save = async () => {
-    if (!fTitle.trim())      { toast?.error?.('Title is required.'); return }
-    if (!fSubject.trim())    { toast?.error?.('Pick a subject.'); return }
-    if (!fCurriculum)        { toast?.error?.('Curriculum is required.'); return }
-    if (!fDay)               { toast?.error?.('Pick a day.'); return }
-    if (!fStart || !fEnd)    { toast?.error?.('Start and end time are required.'); return }
-    if (fStart >= fEnd)      { toast?.error?.('End time must be after start time.'); return }
-
-    // Audience validation
-    if (fAudienceType === 'students' && fPickedStudents.length === 0) {
-      toast?.error?.('Pick at least one student, or switch to broadcast mode.')
-      return
-    }
-    if (fAudienceType === 'broadcast' && (!fAudienceCurriculum || !fAudienceGrade)) {
-      toast?.error?.('Broadcast mode needs both a curriculum and a grade.')
-      return
-    }
-
-    const payload = {
-      title: fTitle.trim(),
-      subject: fSubject.trim(),
-      subjectId: fSubjectId || null,
-      curriculum: fCurriculum,
-      grade: fGrade.trim(),
-      dayOfWeek: fDay,
-      startTime: fStart,
-      endTime: fEnd,
-      deliveryMode: fMode,
-      meetingLink: fMode === 'virtual' ? fMeetingLink.trim() : '',
-      location:    fMode === 'physical' ? fLocation.trim()   : '',
-      assignedStudents: fAudienceType === 'students' ? fPickedStudents.map(s => s._id) : [],
-      audienceCurriculum: fAudienceType === 'broadcast' ? fAudienceCurriculum : '',
-      audienceGrade:      fAudienceType === 'broadcast' ? fAudienceGrade      : '',
-    }
-
+  const saveSlot = async () => {
+    if (!form.title.trim() || !form.subject.trim() || !form.curriculum.trim())
+      return toast?.error?.('Title, subject and curriculum are required.')
+    if (!(form.startTime < form.endTime)) return toast?.error?.('End time must be after start time.')
     setSaving(true)
     try {
-      if (editingId) {
-        const { data } = await api.patch('/timetable/' + editingId, payload)
-        if (data?.success) {
-          toast?.ok?.('Slot updated.')
-          resetForm()
-          setShowForm(false)
-          loadEntries()
-        } else {
-          toast?.error?.(data?.message || 'Update failed.')
-        }
-      } else {
-        const { data } = await api.post('/timetable', payload)
-        if (data?.success) {
-          toast?.ok?.('Slot created.')
-          resetForm()
-          setShowForm(false)
-          loadEntries()
-        } else {
-          toast?.error?.(data?.message || 'Create failed.')
-        }
-      }
-    } catch (e) {
-      toast?.error?.(e?.response?.data?.message || 'Save failed.')
-    } finally {
-      setSaving(false)
-    }
+      const body = { title: form.title.trim(), subject: form.subject.trim(), curriculum: form.curriculum.trim(),
+        grade: form.grade.trim(), dayOfWeek: form.dayOfWeek, startTime: form.startTime, endTime: form.endTime,
+        assignedStudents: form.assignedStudents, subjectId: form.subjectId || null }
+      if (modal.entry) await api.patch('/timetable/' + modal.entry._id, body)
+      else await api.post('/timetable', body)
+      toast?.ok?.(modal.entry ? 'Slot updated. Future classes follow it immediately.' : 'Slot added. This week\u2019s classes are being created now.')
+      setModal(null); load()
+    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not save the slot.') }
+    finally { setSaving(false) }
+  }
+  const removeSlot = async (e) => {
+    if (!window.confirm(`Remove your weekly slot "${e.title || e.subject}" (${e.dayOfWeek} ${e.startTime})? Untaught future classes from it are cleaned up; taught history stays.`)) return
+    try { await api.delete('/timetable/' + e._id); toast?.ok?.('Slot removed.'); load() }
+    catch (err) { toast?.error?.(err?.response?.data?.message || 'Could not remove it.') }
   }
 
-  const remove = async (entry) => {
-    if (!window.confirm(`Delete the slot "${entry.title}"? This affects all students assigned to it.`)) return
+  const cancelOccurrence = async (cls) => {
+    if (!window.confirm(`Cancel "${cls.title || cls.subject}" on ${new Date(cls.scheduledAt).toDateString()}? Students will not see it or be reminded. Your weekly slot continues next week as normal.`)) return
     try {
-      const { data } = await api.delete('/timetable/' + entry._id)
-      if (data?.success) {
-        toast?.ok?.('Slot deleted.')
-        loadEntries()
-      } else {
-        toast?.error?.(data?.message || 'Delete failed.')
-      }
-    } catch (e) {
-      toast?.error?.(e?.response?.data?.message || 'Delete failed.')
-    }
+      const r = await api.delete('/liveclasses/' + cls._id)
+      toast?.ok?.(r.data?.message || 'Occurrence cancelled.')
+      load()
+    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not cancel it.') }
+  }
+  const openResched = (cls) => {
+    const d = new Date(cls.scheduledAt)
+    const pad = (n) => String(n).padStart(2, '0')
+    setResched({ cls, mins: cls.durationMins || 60,
+      when: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}` })
+  }
+  const saveResched = async () => {
+    const when = new Date(resched.when)
+    if (isNaN(when)) return toast?.error?.('Pick a valid date and time.')
+    setSaving(true)
+    try {
+      await api.patch('/liveclasses/' + resched.cls._id, { scheduledAt: when.toISOString(), durationMins: Number(resched.mins) || 60 })
+      toast?.ok?.('Moved. This is a one-off change; your weekly slot is unchanged.')
+      setResched(null); load()
+    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not move it.') }
+    finally { setSaving(false) }
   }
 
-  // ── Display helpers ──
-  const fmt = (hhmm) => {
-    if (!hhmm) return ''
-    const [h, m] = hhmm.split(':').map(Number)
-    const mer = h >= 12 ? 'PM' : 'AM'
-    let hr = h % 12
-    if (hr === 0) hr = 12
-    return `${hr}${m === 0 ? '' : ':' + String(m).padStart(2, '0')} ${mer}`
-  }
+  const pickable = form ? ov.students.filter(st => !form.pickGrade || st.grade === form.pickGrade) : []
+  const grades = [...new Set(ov.students.map(st => st.grade).filter(Boolean))].sort()
+  const fmtDay = (d) => new Date(d).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
+  const fmtTime = (d) => new Date(d).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
 
-  // Group entries by day for the grid view
-  const byDay = {}
-  for (const d of DAYS) byDay[d] = []
-  for (const e of entries) {
-    if (byDay[e.dayOfWeek]) byDay[e.dayOfWeek].push(e)
-  }
-  for (const d of DAYS) {
-    byDay[d].sort((a, b) => String(a.startTime).localeCompare(String(b.startTime)))
-  }
+  if (loading) return <div style={{ padding: 40, textAlign: 'center', color: C.mut, fontSize: 13 }}>Loading your timetable...</div>
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, gap: 14, flexWrap: 'wrap' }}>
-        <div>
-          <div className="sec-tag">Recurring weekly slots</div>
-          <h2 className="serif" style={{ fontSize: 26, color: 'var(--s900)', margin: '6px 0 4px' }}>
-            Timetable
-          </h2>
-          <div style={{ fontSize: 13, color: '#6B6B6B', maxWidth: 560 }}>
-            Build a weekly schedule for your classes. Each slot repeats every week —
-            students see it automatically. Use Schedule Classes for one-off sessions instead.
-          </div>
+    <div style={{ display: 'grid', gap: 16 }}>
+      <div>
+        <h2 style={{ fontSize: 19, fontWeight: 800, color: C.ink, margin: 0 }}>My timetable</h2>
+        <p style={{ fontSize: 12.5, color: C.mut, margin: '4px 0 0' }}>
+          Slot a time once and it repeats weekly \u2014 the real classes are created automatically for every coming week.
+          Need a one-off change? Cancel or move the class below without touching your weekly pattern.
+        </p>
+      </div>
+
+      {/* ── Weekly pattern ── */}
+      <div style={{ background: '#fff', border: `1px solid ${C.line}`, borderRadius: 12, padding: 14 }}>
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 10 }}>
+          <b style={{ fontSize: 14, color: C.ink }}>Weekly slots</b>
+          <span style={{ flex: 1 }} />
+          <button onClick={openAdd} style={{ padding: '8px 16px', borderRadius: 9, border: 'none', background: C.crimson, color: '#fff', fontSize: 12, fontWeight: 800, cursor: 'pointer' }}>Add weekly slot</button>
         </div>
-        {!showForm && (
-          <button onClick={() => { resetForm(); setShowForm(true) }}
-            style={{
-              background: '#7D1025', color: '#fff', border: 'none',
-              padding: '10px 18px', borderRadius: 8,
-              fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
-              flexShrink: 0,
-            }}>
-            + Add slot
-          </button>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 8 }}>
+          {DAYS.map(d => {
+            const dayEntries = entries.filter(e => e.dayOfWeek === d).sort((a, b) => a.startTime < b.startTime ? -1 : 1)
+            return (
+              <div key={d} style={{ background: C.bg, borderRadius: 10, padding: 8, minHeight: 90 }}>
+                <div style={{ fontSize: 10, fontWeight: 900, color: ['Sat', 'Sun'].includes(d) ? '#B45309' : C.mut, letterSpacing: '.06em', marginBottom: 6 }}>{d.toUpperCase()}</div>
+                {dayEntries.map(e => (
+                  <div key={e._id} style={{ background: '#fff', border: `1px solid ${C.line}`, borderRadius: 8, padding: '6px 8px', marginBottom: 6 }}>
+                    <div style={{ fontSize: 10.5, fontWeight: 800, color: C.crimson }}>{e.startTime}-{e.endTime}</div>
+                    <div style={{ fontSize: 11.5, fontWeight: 700, color: C.ink }}>{e.subject}</div>
+                    <div style={{ fontSize: 9.5, color: C.mut }}>{e.grade || e.curriculum}{Array.isArray(e.assignedStudents) ? ` \u00b7 ${e.assignedStudents.length} student(s)` : ''}</div>
+                    <div style={{ display: 'flex', gap: 5, marginTop: 5 }}>
+                      <button onClick={() => openEdit(e)} style={{ flex: 1, padding: '3px 0', borderRadius: 6, border: `1px solid ${C.line}`, background: '#fff', fontSize: 9, fontWeight: 800, cursor: 'pointer', color: C.mut }}>Edit</button>
+                      <button onClick={() => removeSlot(e)} style={{ flex: 1, padding: '3px 0', borderRadius: 6, border: '1px solid #FCA5A5', background: '#fff', fontSize: 9, fontWeight: 800, cursor: 'pointer', color: C.red }}>Remove</button>
+                    </div>
+                  </div>
+                ))}
+                {dayEntries.length === 0 && <div style={{ fontSize: 9.5, color: '#B9B3A6' }}>free</div>}
+              </div>
+            )
+          })}
+        </div>
+        {entries.length === 0 && (
+          <div style={{ marginTop: 10, fontSize: 12, color: C.red, fontWeight: 700 }}>
+            You have no weekly slots yet \u2014 which means no classes are being created for your students. Add your teaching times above.
+          </div>
         )}
       </div>
 
-      {/* ── FORM (create / edit) ── */}
-      {showForm && (
-        <div className="card" style={{ padding: 22, marginBottom: 22, border: '1.5px solid #C9A030' }}>
-          <div style={{
-            fontSize: 11, fontWeight: 700, color: '#7D5A0F',
-            letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 16,
-          }}>
-            {editingId ? 'Edit slot' : 'New slot'}
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
-            <div>
-              <label className="fl">Title *</label>
-              <input className="finput" value={fTitle}
-                onChange={e => setFTitle(e.target.value)}
-                placeholder="e.g. IGCSE Maths — Year 11"
-                disabled={saving}/>
-            </div>
-            <div>
-              <label className="fl">Subject *</label>
-              <select className="fsel" value={fSubjectId}
-                onChange={e => onSubjectChange(e.target.value)}
-                disabled={saving}>
-                <option value="">Select subject...</option>
-                {subjects.map(s => (
-                  <option key={s._id} value={s._id}>
-                    {s.subjectName} · {s.curriculum}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14, marginBottom: 14 }}>
-            <div>
-              <label className="fl">Curriculum *</label>
-              <select className="fsel" value={fCurriculum}
-                onChange={e => setFCurriculum(e.target.value)}
-                disabled={saving}>
-                <option value="">Select...</option>
-                {CURRICULA.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="fl">Grade (optional)</label>
-              <input className="finput" value={fGrade}
-                onChange={e => setFGrade(e.target.value)}
-                placeholder="e.g. Year 11"
-                disabled={saving}/>
-            </div>
-            <div>
-              <label className="fl">Day of week *</label>
-              <select className="fsel" value={fDay}
-                onChange={e => setFDay(e.target.value)}
-                disabled={saving}>
-                {DAYS.map(d => <option key={d} value={d}>{DAYS_LONG[d]}</option>)}
-              </select>
-            </div>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14, marginBottom: 14 }}>
-            <div>
-              <label className="fl">Start time *</label>
-              <input className="finput" type="time" value={fStart}
-                onChange={e => setFStart(e.target.value)}
-                disabled={saving}/>
-            </div>
-            <div>
-              <label className="fl">End time *</label>
-              <input className="finput" type="time" value={fEnd}
-                onChange={e => setFEnd(e.target.value)}
-                disabled={saving}/>
-            </div>
-            <div>
-              <label className="fl">Delivery</label>
-              <select className="fsel" value={fMode}
-                onChange={e => setFMode(e.target.value)}
-                disabled={saving}>
-                <option value="virtual">Virtual (online)</option>
-                <option value="physical">Physical (in person)</option>
-              </select>
-            </div>
-          </div>
-
-          {fMode === 'virtual' ? (
-            <div style={{ marginBottom: 14 }}>
-              <label className="fl">Meeting link (optional)</label>
-              <input className="finput" value={fMeetingLink}
-                onChange={e => setFMeetingLink(e.target.value)}
-                placeholder="https://meet.google.com/..."
-                disabled={saving}/>
-            </div>
-          ) : (
-            <div style={{ marginBottom: 14 }}>
-              <label className="fl">Location (optional)</label>
-              <input className="finput" value={fLocation}
-                onChange={e => setFLocation(e.target.value)}
-                placeholder="e.g. Room 12B"
-                disabled={saving}/>
-            </div>
-          )}
-
-          {/* Audience: students OR broadcast */}
-          <div style={{ marginBottom: 14 }}>
-            <label className="fl">Audience *</label>
-            <div style={{ display: 'flex', gap: 16, marginTop: 4, marginBottom: 10 }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: 13 }}>
-                <input type="radio" name="audtype" value="students"
-                  checked={fAudienceType === 'students'}
-                  onChange={() => setFAudienceType('students')}
-                  disabled={saving}/>
-                Pick specific students
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: 13 }}>
-                <input type="radio" name="audtype" value="broadcast"
-                  checked={fAudienceType === 'broadcast'}
-                  onChange={() => setFAudienceType('broadcast')}
-                  disabled={saving}/>
-                Broadcast to a whole grade
-              </label>
-            </div>
-
-            {fAudienceType === 'students' && (
-              <div>
-                {students.length === 0 ? (
-                  <div style={{ fontSize: 12, color: '#9A9A9A', fontStyle: 'italic', padding: 10 }}>
-                    No students are allocated to you yet. Ask your admin to allocate students,
-                    or use broadcast mode below.
-                  </div>
-                ) : (
-                  <div style={{
-                    display: 'flex', flexWrap: 'wrap', gap: 6,
-                    padding: 10, background: '#FBFAF5',
-                    border: '1px solid #E8E2D6', borderRadius: 7,
-                    maxHeight: 200, overflowY: 'auto',
-                  }}>
-                    {students.map(s => {
-                      const on = fPickedStudents.some(p => p._id === s._id)
-                      return (
-                        <button key={s._id} onClick={() => togglePickedStudent(s)} type="button"
-                          disabled={saving}
-                          style={{
-                            background: on ? '#7D1025' : '#fff',
-                            color: on ? '#fff' : '#564844',
-                            border: '1.5px solid ' + (on ? '#7D1025' : '#E8E2D6'),
-                            padding: '5px 12px', borderRadius: 99,
-                            fontSize: 12, fontWeight: 600, cursor: 'pointer',
-                          }}>
-                          {on ? 'on · ' : ''}{s.name}
-                        </button>
-                      )
-                    })}
-                  </div>
-                )}
-                {fPickedStudents.length > 0 && (
-                  <div style={{ fontSize: 11.5, color: '#7D5A0F', marginTop: 6 }}>
-                    {fPickedStudents.length} student{fPickedStudents.length === 1 ? '' : 's'} selected
-                  </div>
-                )}
-              </div>
-            )}
-
-            {fAudienceType === 'broadcast' && (
-              <div style={{
-                display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12,
-                padding: 12, background: '#FDF7E2',
-                border: '1px solid #E8D58F', borderRadius: 7,
-              }}>
-                <div>
-                  <label className="fl">Audience curriculum *</label>
-                  <select className="fsel" value={fAudienceCurriculum}
-                    onChange={e => setFAudienceCurriculum(e.target.value)}
-                    disabled={saving}>
-                    <option value="">Select...</option>
-                    {CURRICULA.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                  </select>
+      {/* ── This week's classes (occurrences) ── */}
+      <div style={{ background: '#fff', border: `1px solid ${C.line}`, borderRadius: 12, padding: 14 }}>
+        <b style={{ fontSize: 14, color: C.ink }}>This week\u2019s classes</b>
+        <div style={{ fontSize: 11, color: C.mut, margin: '2px 0 10px' }}>Created from your timetable (plus any older manual classes). Cancel or move a single class here \u2014 the weekly slot is never affected.</div>
+        <div style={{ display: 'grid', gap: 8 }}>
+          {week.map(cls => {
+            const cancelled = cls.status === 'cancelled'
+            return (
+              <div key={cls._id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', border: `1px solid ${C.line}`, borderRadius: 10, background: cancelled ? '#FAFAF8' : '#fff', opacity: cancelled ? 0.75 : 1, flexWrap: 'wrap' }}>
+                <div style={{ minWidth: 86 }}>
+                  <div style={{ fontSize: 11.5, fontWeight: 800, color: C.ink }}>{fmtDay(cls.scheduledAt)}</div>
+                  <div style={{ fontSize: 11, color: C.crimson, fontWeight: 800 }}>{fmtTime(cls.scheduledAt)} \u00b7 {cls.durationMins || 60}m</div>
                 </div>
-                <div>
-                  <label className="fl">Audience grade *</label>
-                  <input className="finput" value={fAudienceGrade}
-                    onChange={e => setFAudienceGrade(e.target.value)}
-                    placeholder="e.g. Year 11"
-                    disabled={saving}/>
+                <div style={{ flex: 1, minWidth: 150 }}>
+                  <div style={{ fontSize: 12.5, fontWeight: 700, color: C.ink }}>{cls.title || cls.subject}</div>
+                  {cls.syllabusTopicName && <div style={{ fontSize: 10.5, color: C.gold, fontWeight: 700 }}>{cls.syllabusTopicName}{cls.syllabusSubtopicName ? `: ${cls.syllabusSubtopicName}` : ''}</div>}
+                  <div style={{ fontSize: 10, color: C.mut }}>{(cls.assignedStudents || []).length} student(s)</div>
                 </div>
+                {cancelled ? chip('#F3F4F6', C.mut, 'cancelled \u00b7 slot continues next week')
+                  : (
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                      {cls.detached && chip('#FEF3C7', '#B45309', 'moved')}
+                      {cls.timetableEntryId && !cls.detached && chip('#EFF6EF', C.green, 'from timetable')}
+                      <button onClick={() => openResched(cls)} style={{ padding: '6px 12px', borderRadius: 7, border: `1px solid ${C.line}`, background: '#fff', fontSize: 10.5, fontWeight: 800, cursor: 'pointer', color: C.ink }}>Move</button>
+                      <button onClick={() => cancelOccurrence(cls)} style={{ padding: '6px 12px', borderRadius: 7, border: '1px solid #FCA5A5', background: '#fff', fontSize: 10.5, fontWeight: 800, cursor: 'pointer', color: C.red }}>Cancel</button>
+                    </div>
+                  )}
               </div>
-            )}
-          </div>
+            )
+          })}
+          {week.length === 0 && <div style={{ fontSize: 12, color: C.mut, padding: '14px 0' }}>No classes in the coming week. Add a weekly slot above and they will appear here.</div>}
+        </div>
+      </div>
 
-          <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
-            <button onClick={save} disabled={saving}
-              style={{
-                background: '#7D1025', color: '#fff', border: 'none',
-                padding: '10px 22px', borderRadius: 7,
-                fontSize: 13, fontWeight: 700,
-                cursor: saving ? 'not-allowed' : 'pointer',
-                opacity: saving ? 0.5 : 1,
-              }}>
-              {saving ? 'Saving...' : editingId ? 'Save changes' : 'Create slot'}
-            </button>
-            <button onClick={cancelForm} disabled={saving}
-              style={{
-                background: 'transparent', color: '#564844',
-                border: '1.5px solid #E8E2D6',
-                padding: '10px 20px', borderRadius: 7,
-                fontSize: 13, fontWeight: 700,
-                cursor: saving ? 'not-allowed' : 'pointer',
-              }}>
-              Cancel
-            </button>
+      {/* ── Slot modal ── */}
+      {modal && form && (
+        <div onClick={() => setModal(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 90, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 14 }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 14, width: 'min(540px,100%)', maxHeight: '92vh', overflow: 'auto', padding: 20, display: 'grid', gap: 10 }}>
+            <b style={{ fontSize: 15.5, color: C.ink }}>{modal.entry ? 'Edit weekly slot' : 'New weekly slot'}</b>
+            <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Title, e.g. Year 10 Biology" style={{ ...inp, fontWeight: 700 }} />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+              <input value={form.subject} onChange={e => setForm(f => ({ ...f, subject: e.target.value }))} placeholder="Subject" style={inp} />
+              <input value={form.curriculum} onChange={e => setForm(f => ({ ...f, curriculum: e.target.value }))} placeholder="Curriculum" style={inp} />
+              <input value={form.grade} onChange={e => setForm(f => ({ ...f, grade: e.target.value }))} placeholder="Grade / Year" style={inp} />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+              <select value={form.dayOfWeek} onChange={e => setForm(f => ({ ...f, dayOfWeek: e.target.value }))} style={inp}>
+                {DAYS.map(d => <option key={d} value={d}>{d}</option>)}
+              </select>
+              <input type="time" value={form.startTime} onChange={e => setForm(f => ({ ...f, startTime: e.target.value }))} style={inp} />
+              <input type="time" value={form.endTime} onChange={e => setForm(f => ({ ...f, endTime: e.target.value }))} style={inp} />
+            </div>
+            {ov.subjects.length > 0 && (
+              <select value={form.subjectId} onChange={e => setForm(f => ({ ...f, subjectId: e.target.value }))} style={inp}>
+                <option value="">Link syllabus spine (optional) \u2014 classes then advance topic by topic</option>
+                {ov.subjects.map(sub => <option key={sub._id} value={sub._id}>{sub.name}</option>)}
+              </select>
+            )}
+            {overlapNote() && <div style={{ fontSize: 11.5, fontWeight: 700, color: '#B45309', background: '#FEF3C7', borderRadius: 8, padding: '7px 10px' }}>{overlapNote()}</div>}
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <b style={{ fontSize: 12, color: C.ink }}>Students ({form.assignedStudents.length})</b>
+                <span style={{ flex: 1 }} />
+                <select value={form.pickGrade} onChange={e => setForm(f => ({ ...f, pickGrade: e.target.value }))} style={{ ...inp, padding: '5px 8px', fontSize: 11 }}>
+                  <option value="">All grades</option>
+                  {grades.map(g => <option key={g} value={g}>{g}</option>)}
+                </select>
+              </div>
+              <div style={{ maxHeight: 150, overflow: 'auto', border: `1px solid ${C.line}`, borderRadius: 9, padding: 8, marginTop: 6, display: 'grid', gap: 2 }}>
+                {pickable.map(st => {
+                  const on = form.assignedStudents.includes(String(st._id))
+                  return (
+                    <label key={st._id} style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 12, padding: '3px 6px', borderRadius: 6, cursor: 'pointer', background: on ? '#FBF3F5' : 'transparent' }}>
+                      <input type="checkbox" checked={on} onChange={() => setForm(f => ({ ...f,
+                        assignedStudents: on ? f.assignedStudents.filter(x => x !== String(st._id)) : [...f.assignedStudents, String(st._id)] }))} />
+                      <span style={{ flex: 1, fontWeight: 600, color: C.ink }}>{st.name}</span>
+                      <span style={{ fontSize: 10, color: C.mut }}>{st.grade}</span>
+                    </label>
+                  )
+                })}
+                {pickable.length === 0 && <div style={{ fontSize: 11, color: C.mut }}>No students in this filter.</div>}
+              </div>
+              {form.assignedStudents.length === 0 && <div style={{ fontSize: 10.5, color: C.red, fontWeight: 700, marginTop: 4 }}>No students selected: the class will exist but nobody will see or join it.</div>}
+            </div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={() => setModal(null)} style={{ padding: '9px 16px', borderRadius: 9, border: `1.5px solid ${C.line}`, background: '#fff', color: C.mut, fontSize: 12.5, fontWeight: 800, cursor: 'pointer' }}>Cancel</button>
+              <button disabled={saving} onClick={saveSlot} style={{ padding: '9px 18px', borderRadius: 9, border: 'none', background: C.crimson, color: '#fff', fontSize: 12.5, fontWeight: 800, cursor: 'pointer' }}>{saving ? 'Saving...' : modal.entry ? 'Save changes' : 'Add slot'}</button>
+            </div>
           </div>
         </div>
       )}
 
-      {/* ── EXISTING SLOTS ── */}
-      {loading ? (
-        <div style={{ padding: '40px 20px', textAlign: 'center', color: '#9A9A9A', fontSize: 13 }}>
-          Loading timetable...
-        </div>
-      ) : entries.length === 0 ? (
-        <div className="card" style={{ padding: 30, textAlign: 'center' }}>
-          <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 20, color: '#1A0F0E', marginBottom: 6 }}>
-            No slots yet
+      {/* ── Reschedule modal ── */}
+      {resched && (
+        <div onClick={() => setResched(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 90, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 14 }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 14, width: 'min(420px,100%)', padding: 20, display: 'grid', gap: 10 }}>
+            <b style={{ fontSize: 15, color: C.ink }}>Move this class</b>
+            <div style={{ fontSize: 11.5, color: C.mut }}>{resched.cls.title || resched.cls.subject}: a one-off move for this occurrence only. Your weekly slot stays exactly as it is.</div>
+            <input type="datetime-local" value={resched.when} onChange={e => setResched(r => ({ ...r, when: e.target.value }))} style={inp} />
+            <label style={{ fontSize: 11.5, color: C.mut, fontWeight: 700 }}>Duration (minutes)
+              <input type="number" min={5} max={240} value={resched.mins} onChange={e => setResched(r => ({ ...r, mins: e.target.value }))} style={{ ...inp, width: 90, marginLeft: 8 }} />
+            </label>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={() => setResched(null)} style={{ padding: '9px 16px', borderRadius: 9, border: `1.5px solid ${C.line}`, background: '#fff', color: C.mut, fontSize: 12.5, fontWeight: 800, cursor: 'pointer' }}>Cancel</button>
+              <button disabled={saving} onClick={saveResched} style={{ padding: '9px 18px', borderRadius: 9, border: 'none', background: C.crimson, color: '#fff', fontSize: 12.5, fontWeight: 800, cursor: 'pointer' }}>{saving ? 'Moving...' : 'Move class'}</button>
+            </div>
           </div>
-          <div style={{ fontSize: 13, color: '#857973', maxWidth: 460, margin: '0 auto' }}>
-            Add your first recurring weekly class slot. Once you do, every student assigned
-            (or matching the broadcast grade) will see it in their timetable automatically.
-          </div>
-        </div>
-      ) : (
-        <div>
-          {DAYS.map(d => {
-            const items = byDay[d]
-            if (items.length === 0) return null
-            return (
-              <div key={'day-' + d} style={{ marginBottom: 18 }}>
-                <div style={{
-                  fontSize: 11, fontWeight: 800, color: '#7D1025',
-                  letterSpacing: '.1em', textTransform: 'uppercase',
-                  marginBottom: 8, paddingBottom: 6,
-                  borderBottom: '1px solid #F4EFEB',
-                }}>
-                  {DAYS_LONG[d]}
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 10 }}>
-                  {items.map(entry => (
-                    <div key={entry._id} style={{
-                      background: '#fff',
-                      border: '1px solid #E8E2D6',
-                      borderLeft: '4px solid #7D1025',
-                      borderRadius: 8, padding: 14,
-                    }}>
-                      <div style={{ fontSize: 14, fontWeight: 700, color: '#1A0F0E', marginBottom: 4 }}>
-                        {entry.title}
-                      </div>
-                      <div style={{ fontSize: 12, color: '#857973', marginBottom: 6 }}>
-                        {entry.subject} · {entry.curriculum}
-                        {entry.grade ? ' · ' + entry.grade : ''}
-                      </div>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: '#7D5A0F', marginBottom: 8 }}>
-                        {fmt(entry.startTime)} – {fmt(entry.endTime)}
-                      </div>
-                      <div style={{ fontSize: 11, color: '#857973', marginBottom: 10 }}>
-                        {entry.assignedStudents?.length > 0
-                          ? `${entry.assignedStudents.length} student${entry.assignedStudents.length === 1 ? '' : 's'}`
-                          : entry.audienceCurriculum && entry.audienceGrade
-                          ? `Broadcast: ${entry.audienceGrade}`
-                          : 'No audience'}
-                        {entry.deliveryMode && ' · ' + entry.deliveryMode}
-                      </div>
-                      <div style={{ display: 'flex', gap: 6 }}>
-                        <button onClick={() => beginEdit(entry)}
-                          style={{
-                            background: 'transparent', color: '#7D1025',
-                            border: '1px solid #E8E2D6',
-                            padding: '6px 12px', borderRadius: 6,
-                            fontSize: 11.5, fontWeight: 700, cursor: 'pointer',
-                          }}>Edit</button>
-                        <button onClick={() => remove(entry)}
-                          style={{
-                            background: 'transparent', color: '#9A2434',
-                            border: '1px solid #E8E2D6',
-                            padding: '6px 12px', borderRadius: 6,
-                            fontSize: 11.5, fontWeight: 700, cursor: 'pointer',
-                          }}>Delete</button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )
-          })}
         </div>
       )}
     </div>
