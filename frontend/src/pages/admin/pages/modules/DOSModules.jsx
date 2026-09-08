@@ -836,6 +836,11 @@ export function DOSTimetableModule({ toast, refreshKey }) {
       table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:6px}
       th{text-align:left;background:#F7F2EA;padding:5px 7px;border:1px solid #ddd}td{padding:4px 7px;border:1px solid #ddd}
       .sec{page-break-inside:avoid}.foot{font-size:9.5px;color:#777;margin-top:16px;border-top:1px solid #ddd;padding-top:6px}
+      .mx{table-layout:fixed}.mx th{background:#7D1025;color:#fff;text-align:center;padding:6px 4px;font-size:11px}
+      .mx td{vertical-align:top;min-height:34px;padding:4px}.mx .tcol{width:52px;background:#F7F2EA;color:#7D1025;font-weight:700;text-align:center;font-size:10.5px}
+      .lsn{background:#FBF8F3;border:1px solid #E5DFD3;border-radius:6px;padding:4px 6px;margin-bottom:4px}
+      .lsn b{display:block;font-size:10.5px;color:#1a1a1a}.lsn span{display:block;font-size:9px;color:#6B7280}
+      .none{font-size:11px;color:#777;font-style:italic}
       @media print{body{margin:14px}}
     </style></head><body>
       <h1>Smartious Homeschool \u2014 ${title}</h1>
@@ -859,16 +864,29 @@ export function DOSTimetableModule({ toast, refreshKey }) {
       <tbody>${entryRows(byTeacher[t], e => [e.dayOfWeek, e.startTime + '-' + e.endTime, e.title, e.subject, e.grade, e.students.length])}</tbody></table></div>`).join('')
     printDoc('School Timetable (all teachers)', body || '<p>No active slots.</p>')
   }
+  // The student-portal shape: a weekly matrix - time rows down the
+  // left, day columns across the top, each lesson a card in its cell.
+  const matrixHTML = (list, teacherField) => {
+    const base = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
+    const days = DAY_ORDER.filter(d => base.includes(d) || list.some(e => e.dayOfWeek === d))
+    const times = [...new Set(list.map(e => e.startTime))].sort()
+    if (!times.length) return '<p class="none">No lessons scheduled.</p>'
+    const head = '<tr><th class="tcol"></th>' + days.map(d => `<th>${d}</th>`).join('') + '</tr>'
+    const rows = times.map(t => '<tr><td class="tcol">' + t + '</td>' + days.map(d => {
+      const cell = list.filter(e => e.dayOfWeek === d && e.startTime === t)
+        .map(e => `<div class="lsn"><b>${e.subject}</b><span>${e.startTime}-${e.endTime}</span><span>${teacherField(e)}</span></div>`).join('')
+      return `<td>${cell}</td>`
+    }).join('') + '</tr>').join('')
+    return `<table class="mx"><thead>${head}</thead><tbody>${rows}</tbody></table>`
+  }
   const printAllStudents = () => {
     const byStudent = {}
     ;(ov.entries || []).forEach(e => e.students.forEach(st => {
-      const k = st.name + (st.grade ? ' (' + st.grade + ')' : '')
+      const k = st.name + (st.grade ? ' \u00b7 ' + st.grade : '')
       ;(byStudent[k] = byStudent[k] || []).push(e)
     }))
     const keys = Object.keys(byStudent).sort()
-    const body = keys.map(k => `<div class="sec"><h2>${k}</h2>
-      <table><thead><tr><th>Day</th><th>Time</th><th>Subject</th><th>Class</th><th>Teacher</th></tr></thead>
-      <tbody>${entryRows(byStudent[k], e => [e.dayOfWeek, e.startTime + '-' + e.endTime, e.subject, e.title, e.teacher])}</tbody></table></div>`).join('')
+    const body = keys.map(k => `<div class="sec"><h2>${k}</h2>${matrixHTML(byStudent[k], e => e.teacher)}</div>`).join('')
     printDoc('Student Timetables (all students)', body || '<p>No students are assigned to any slot yet.</p>')
   }
   const printSelected = () => {
@@ -877,9 +895,10 @@ export function DOSTimetableModule({ toast, refreshKey }) {
       ? (e) => [e.dayOfWeek, e.startTime + '-' + e.endTime, e.title || e.subject, e.subject, e.grade, Array.isArray(e.assignedStudents) ? e.assignedStudents.length : '']
       : (e) => [e.dayOfWeek, e.startTime + '-' + e.endTime, e.subject, e.title || '', e.teacherId ? [e.teacherId.firstName, e.teacherId.lastName].filter(Boolean).join(' ') : '']
     const heads = sel.kind === 'teacher' ? ['Day', 'Time', 'Class', 'Subject', 'Grade', 'Students'] : ['Day', 'Time', 'Subject', 'Class', 'Teacher']
-    const body = `<div class="sec"><h2>${sel.name}</h2>
-      <table><thead><tr>${heads.map(h => '<th>' + h + '</th>').join('')}</tr></thead>
-      <tbody>${entryRows(entries, cols)}</tbody></table></div>`
+    const tf = (e) => sel.kind === 'teacher'
+      ? (Array.isArray(e.assignedStudents) ? e.assignedStudents.length + ' student(s)' : '')
+      : (e.teacherId ? [e.teacherId.firstName, e.teacherId.lastName].filter(Boolean).join(' ') : '')
+    const body = `<div class="sec"><h2>${sel.name}</h2>${matrixHTML(entries, tf)}</div>`
     printDoc((sel.kind === 'teacher' ? 'Teacher' : 'Student') + ' Timetable \u2014 ' + sel.name, entries.length ? body : '<p>No active slots for ' + sel.name + '.</p>')
   }
 
