@@ -416,6 +416,12 @@ router.get('/:id/lesson-plan', auth, async (req, res) => {
     if (!entry || entry.isActive === false) return res.status(404).json({ success: false, message: 'Slot not found.' });
     if (!canManage(req, entry)) return res.status(403).json({ success: false, message: 'Not your slot.' });
     if (!entry.subjectId) return res.json({ success: true, data: { linked: false } });
+    // Align upcoming classes to the saved order on every view, so the
+    // teacher always sees the exact lesson each class will teach.
+    {
+      const pre = await loadPlan(entry);
+      if (pre.mode !== 'none' && pre.queue.length) await restampFuture(entry);
+    }
     const { mode, taught, queue, members } = await loadPlan(entry);
     const lessonName = {};
     [...taught, ...queue].forEach(l => { if (l._id) lessonName[String(l._id)] = l.title; });
