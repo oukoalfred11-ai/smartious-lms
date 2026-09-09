@@ -316,4 +316,87 @@ router.get('/overview', auth, requireRole('admin', 'ops_manager', 'dos', 'teache
   } catch (e) { return fail(res, 500, e.message); }
 });
 
+// ── Per-slot lesson-plan management ──────────────────────────────────
+// The teacher's control over WHAT gets taught in a slot, while WHEN
+// stays fixed by the timetable. Only slotted classes are manageable.
+const Lesson = require('../models/Lesson');
+const LiveClass = require('../models/LiveClass');
+
+async function loadPlan(entry) {
+  const lessons = await Lesson.find({ subjectId: entry.subjectId, isActive: { $ne: false } })
+    .sort({ order: 1 }).select('title topicName subtopicName').lean();
+  const usedIds = await LiveClass.distinct('preparationLessonId', {
+    timetableEntryId: entry._id, preparationLessonId: { $ne: null },
+    status: { $ne: 'cancelled' }, scheduledAt: { $lte: new Date() },
+  });
+  const usedSet = new Set(usedIds.map(String));
+  const rank = {};
+  (entry.lessonOrder || []).forEach((id, ix) => { rank[String(id)] = ix; });
+  const ordered = [...lessons].sort((a, b) => (rank[String(a._id)] ?? 1e9) - (rank[String(b._id)] ?? 1e9));
+  // Taught lessons first (history), then the teachable queue.
+  const taught = ordered.filter(l => usedSet.has(String(l._id)));
+  const queue = ordered.filter(l => !usedSet.has(String(l._id)));
+  return { taught, queue };
+}
+
+// Re-stamp future materialized instances to follow the (new) queue.
+async function restampFuture(entry) {
+  const { queue } = await loadPlan(entry);
+  const future = await LiveClass.find({
+    timetableEntryId: entry._id, fromTimetable: true,
+    detached: { $ne: true }, status: { $nin: ['cancelled', 'completed'] },
+    scheduledAt: { $gt: new Date() },
+  }).sort({ scheduledAt: 1 });
+  let i = 0;
+  for (const cls of future) {
+    const l = queue[i++] || null;
+    cls.preparationLessonId = l ? l._id : null;
+    cls.syllabusTopicName = l ? (l.topicName || l.title || '') : '';
+    cls.syllabusSubtopicName = l ? (l.subtopicName || '') : '';
+    await cls.save();
+  }
+  return future.length;
+}
+
+function canManage(req, entry) {
+  const role = req.user.role;
+  if (['admin', 'ops_manager', 'dos'].includes(role)) return true;
+  return String(entry.teacherId) === String(req.user._id);
+}
+
+// GET /timetable/:id/lesson-plan
+router.get('/:id/lesson-plan', auth, async (req, res) => {
+  try {
+    const entry = await TimetableEntry.findById(req.params.id).lean();
+    if (!entry || entry.isActive === false) return res.status(404).json({ success: false, message: 'Slot not found.' });
+    if (!canManage(req, entry)) return res.status(403).json({ success: false, message: 'Not your slot.' });
+    if (!entry.subjectId) return res.json({ success: true, data: { linked: false } });
+    const { taught, queue } = await loadPlan(entry);
+    const upcoming = await LiveClass.find({
+      timetableEntryId: entry._id, fromTimetable: true, detached: { $ne: true },
+      status: { $nin: ['cancelled', 'completed'] }, scheduledAt: { $gt: new Date() },
+    }).sort({ scheduledAt: 1 }).limit(4).select('scheduledAt').lean();
+    res.json({ success: true, data: { linked: true, taught, queue, upcomingDates: upcoming.map(x => x.scheduledAt) } });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+// PATCH /timetable/:id/lesson-plan  { queueOrder: [lessonIds] }
+// The remaining (unteught) lessons, in the teacher's chosen order.
+router.patch('/:id/lesson-plan', auth, async (req, res) => {
+  try {
+    const entry = await TimetableEntry.findById(req.params.id);
+    if (!entry || entry.isActive === false) return res.status(404).json({ success: false, message: 'Slot not found.' });
+    if (!canManage(req, entry)) return res.status(403).json({ success: false, message: 'Not your slot.' });
+    if (!entry.subjectId) return res.status(400).json({ success: false, message: 'This slot is not linked to a syllabus.' });
+    const ids = Array.isArray(req.body?.queueOrder) ? req.body.queueOrder.filter(x => x) : [];
+    if (!ids.length) return res.status(400).json({ success: false, message: 'queueOrder required.' });
+    const valid = await Lesson.countDocuments({ _id: { $in: ids }, subjectId: entry.subjectId });
+    if (valid !== ids.length) return res.status(400).json({ success: false, message: 'Order contains lessons outside this syllabus.' });
+    entry.lessonOrder = ids;
+    await entry.save();
+    const restamped = await restampFuture(entry);
+    res.json({ success: true, message: `Order saved. ${restamped} upcoming class(es) updated to follow it.` });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
 module.exports = router;
