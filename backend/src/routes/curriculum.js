@@ -160,9 +160,22 @@ router.get('/progress/subject', auth, async (req, res) => {
           return { name: st.name, done: isDone, date: when || null };
         }),
       })).filter(g => g.items.length);
+      // Pace: observed velocity from the done-records' timestamps,
+      // else 3 subtopics per weekly slot as a planning heuristic.
+      const slots = await TimetableEntry.countDocuments({ assignedStudents: req.user._id, isActive: true, subjectId: sid });
+      let perWeek = 0;
+      const stamps = done.map(d => new Date(d.updatedAt || d.createdAt || 0).getTime()).filter(t => t > 0).sort();
+      if (stamps.length >= 2) {
+        const weeks = Math.max((stamps[stamps.length - 1] - stamps[0]) / (7 * 864e5), 1);
+        perWeek = covered / weeks;
+      }
+      if (!perWeek) perWeek = slots * 3;
+      const remaining = total - covered;
+      const est = perWeek > 0 && remaining > 0 ? new Date(Date.now() + (remaining / perWeek) * 7 * 864e5) : null;
       return res.json({ success: true, data: {
         mode: 'subtopics', slot: '',
         counts: { total, covered, attended: covered, missed: 0 },
+        pace: { perWeek: Math.round(perWeek * 10) / 10, slotsPerWeek: slots, estCompletionDate: est },
         groups,
       } });
     }
@@ -202,9 +215,11 @@ router.get('/progress/subject', auth, async (req, res) => {
       return { title: l.title, topic: l.topicName || '', subtopic: l.subtopicName || '', status: 'projected', date: cursor };
     });
 
+    const slotsPerWeek = await TimetableEntry.countDocuments({ assignedStudents: req.user._id, isActive: true, subjectId: sid });
     res.json({ success: true, data: {
-      slot,
+      mode: 'lessons', slot,
       counts: { total: plan.length, covered: attended + missed, attended, missed },
+      pace: { slotsPerWeek, estCompletionDate: plan.length ? plan[plan.length - 1].date : null },
       plan,
     } });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
