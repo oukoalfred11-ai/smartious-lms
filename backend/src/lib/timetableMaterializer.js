@@ -162,6 +162,30 @@ async function reconcile() {
         orderSource.lessonOrder.forEach((id, ix) => { rank[String(id)] = ix; });
         spineQueue.sort((a, b) => (rank[String(a._id)] ?? 1e9) - (rank[String(b._id)] ?? 1e9));
       }
+      if (!spineQueue.length) {
+        // Subtopic dialect: the spine's plan lives as topics/subtopics.
+        const SyllabusTopic = require('../models/SyllabusTopic');
+        const topics = await SyllabusTopic.find({ subjectId: lead.subjectId }).sort({ topicOrder: 1 }).lean();
+        if (topics.length) {
+          const stampedPairs = await LiveClass.find({
+            timetableEntryId: { $in: members.map(m => m._id) },
+            syllabusSubtopicName: { $nin: [null, ''] },
+          }).select('syllabusTopicName syllabusSubtopicName').lean();
+          const usedKeys = new Set(stampedPairs.map(x => `${x.syllabusTopicName || ''}||${x.syllabusSubtopicName}`));
+          let items = [];
+          topics.forEach(tp => (tp.subtopics || []).forEach(st => {
+            const k = `${tp.topic}||${st.name}`;
+            if (!usedKeys.has(k)) items.push({ sub: true, key: k, topicName: tp.topic, name: st.name });
+          }));
+          const os = members.find(m => Array.isArray(m.topicPlanOrder) && m.topicPlanOrder.length);
+          if (os) {
+            const rank = {};
+            os.topicPlanOrder.forEach((k, ix) => { rank[k] = ix; });
+            items.sort((a, b) => (rank[a.key] ?? 1e9) - (rank[b.key] ?? 1e9));
+          }
+          spineQueue = items.slice(0, 60);
+        }
+      }
       queues[key] = spineQueue;
     } catch (e) { queues[key] = []; }
   }
@@ -170,9 +194,9 @@ async function reconcile() {
     const nextLesson = (queues[groupKey(entry)] || []).shift() || null;
     try {
       await LiveClass.create({
-        preparationLessonId: nextLesson ? nextLesson._id : null,
+        preparationLessonId: nextLesson && !nextLesson.sub ? nextLesson._id : null,
         syllabusTopicName: nextLesson ? (nextLesson.topicName || nextLesson.title || '') : '',
-        syllabusSubtopicName: nextLesson ? (nextLesson.subtopicName || '') : '',
+        syllabusSubtopicName: nextLesson ? (nextLesson.sub ? nextLesson.name : (nextLesson.subtopicName || '')) : '',
         title: entry.title || `${entry.subject} \u2014 ${entry.grade || 'class'}`.trim(),
         description: entry.description || '',
         subject: entry.subject || 'Class',
