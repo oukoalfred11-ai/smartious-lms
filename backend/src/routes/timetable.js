@@ -322,11 +322,21 @@ router.get('/overview', auth, requireRole('admin', 'ops_manager', 'dos', 'teache
 const Lesson = require('../models/Lesson');
 const LiveClass = require('../models/LiveClass');
 
+async function groupEntries(entry) {
+  if (!entry.subjectId) return [entry];
+  const key = (e) => (e.assignedStudents || []).map(String).sort().join(',');
+  const siblings = await TimetableEntry.find({
+    teacherId: entry.teacherId, subjectId: entry.subjectId, isActive: true,
+  }).lean();
+  return siblings.filter(e => key(e) === key(entry));
+}
+
 async function loadPlan(entry) {
   const lessons = await Lesson.find({ subjectId: entry.subjectId, isActive: { $ne: false } })
     .sort({ order: 1 }).select('title topicName subtopicName').lean();
+  const members = await groupEntries(entry);
   const usedIds = await LiveClass.distinct('preparationLessonId', {
-    timetableEntryId: entry._id, preparationLessonId: { $ne: null },
+    timetableEntryId: { $in: members.map(m => m._id) }, preparationLessonId: { $ne: null },
     status: { $ne: 'cancelled' }, scheduledAt: { $lte: new Date() },
   });
   const usedSet = new Set(usedIds.map(String));
@@ -336,26 +346,28 @@ async function loadPlan(entry) {
   // Taught lessons first (history), then the teachable queue.
   const taught = ordered.filter(l => usedSet.has(String(l._id)));
   const queue = ordered.filter(l => !usedSet.has(String(l._id)));
-  return { taught, queue };
+  return { taught, queue, members };
 }
 
 // Re-stamp future materialized instances to follow the (new) queue.
 async function restampFuture(entry) {
-  const { queue } = await loadPlan(entry);
+  const { queue, members } = await loadPlan(entry);
   const future = await LiveClass.find({
-    timetableEntryId: entry._id, fromTimetable: true,
+    timetableEntryId: { $in: members.map(m => m._id) }, fromTimetable: true,
     detached: { $ne: true }, status: { $nin: ['cancelled', 'completed'] },
     scheduledAt: { $gt: new Date() },
   }).sort({ scheduledAt: 1 });
-  let i = 0;
+  let i = 0, stamped = 0;
   for (const cls of future) {
+    if (cls.lessonPinned) continue;   // teacher pinned this class - keep it
     const l = queue[i++] || null;
     cls.preparationLessonId = l ? l._id : null;
     cls.syllabusTopicName = l ? (l.topicName || l.title || '') : '';
     cls.syllabusSubtopicName = l ? (l.subtopicName || '') : '';
     await cls.save();
+    stamped += 1;
   }
-  return future.length;
+  return stamped;
 }
 
 function canManage(req, entry) {
@@ -371,12 +383,21 @@ router.get('/:id/lesson-plan', auth, async (req, res) => {
     if (!entry || entry.isActive === false) return res.status(404).json({ success: false, message: 'Slot not found.' });
     if (!canManage(req, entry)) return res.status(403).json({ success: false, message: 'Not your slot.' });
     if (!entry.subjectId) return res.json({ success: true, data: { linked: false } });
-    const { taught, queue } = await loadPlan(entry);
+    const { taught, queue, members } = await loadPlan(entry);
+    const lessonName = {};
+    [...taught, ...queue].forEach(l => { lessonName[String(l._id)] = l.title; });
     const upcoming = await LiveClass.find({
-      timetableEntryId: entry._id, fromTimetable: true, detached: { $ne: true },
+      timetableEntryId: { $in: members.map(m => m._id) }, fromTimetable: true, detached: { $ne: true },
       status: { $nin: ['cancelled', 'completed'] }, scheduledAt: { $gt: new Date() },
-    }).sort({ scheduledAt: 1 }).limit(4).select('scheduledAt').lean();
-    res.json({ success: true, data: { linked: true, taught, queue, upcomingDates: upcoming.map(x => x.scheduledAt) } });
+    }).sort({ scheduledAt: 1 }).limit(10).select('scheduledAt preparationLessonId lessonPinned').lean();
+    res.json({ success: true, data: {
+      linked: true, taught, queue,
+      slots: members.map(m => ({ _id: m._id, dayOfWeek: m.dayOfWeek, startTime: m.startTime, endTime: m.endTime })),
+      upcoming: upcoming.map(x => ({
+        _id: x._id, scheduledAt: x.scheduledAt, pinned: !!x.lessonPinned,
+        lessonTitle: x.preparationLessonId ? (lessonName[String(x.preparationLessonId)] || 'Assigned lesson') : '',
+      })),
+    } });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
 
@@ -392,8 +413,8 @@ router.patch('/:id/lesson-plan', auth, async (req, res) => {
     if (!ids.length) return res.status(400).json({ success: false, message: 'queueOrder required.' });
     const valid = await Lesson.countDocuments({ _id: { $in: ids }, subjectId: entry.subjectId });
     if (valid !== ids.length) return res.status(400).json({ success: false, message: 'Order contains lessons outside this syllabus.' });
-    entry.lessonOrder = ids;
-    await entry.save();
+    const members = await groupEntries(entry);
+    await TimetableEntry.updateMany({ _id: { $in: members.map(m => m._id) } }, { $set: { lessonOrder: ids } });
     const restamped = await restampFuture(entry);
     res.json({ success: true, message: `Order saved. ${restamped} upcoming class(es) updated to follow it.` });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
