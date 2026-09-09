@@ -85,6 +85,9 @@ const liveClassSchema = new mongoose.Schema({
 
   // Set when this class was auto-created by the timetable
   // roll-forward promotion (vs. manually scheduled).
+  // Teacher pinned a specific lesson to THIS class; subject-level
+  // reorders and restamps must not overwrite it.
+  lessonPinned: { type: Boolean, default: false },
   fromTimetable: { type: Boolean, default: false },
   // The weekly timetable entry this instance was materialized from.
   // The reconciler (lib/timetableMaterializer.js) keys on this to keep
