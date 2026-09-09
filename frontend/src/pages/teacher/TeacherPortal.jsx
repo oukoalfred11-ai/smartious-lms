@@ -10730,7 +10730,8 @@ function ScheduleClassesTab({ user, toast }) {
               <div style={{ display: 'grid', gap: 6, marginTop: 10 }}>
                 {(plan.upcoming || []).length === 0 && <div style={{ fontSize: 12, color: MUT }}>No classes scheduled yet - the scheduler creates them from your timetable within a few hours.</div>}
                 {(() => { let qi = 0; return (plan.upcoming || []).map(c => {
-                  const shown = c.pinned ? c.lessonTitle : (queue[qi++]?.title || c.lessonTitle || '')
+                  const isPastOrLive = c.status === 'live' || new Date(c.scheduledAt) <= Date.now()
+                  const shown = (c.pinned || isPastOrLive) ? c.lessonTitle : (queue[qi++]?.title || c.lessonTitle || '')
                   return (
                   <div key={c._id} style={{ display: 'grid', gap: 8, padding: '10px 12px', borderRadius: 10,
                     background: c.status === 'live' ? GREEN_BG : '#FDFCF9',
