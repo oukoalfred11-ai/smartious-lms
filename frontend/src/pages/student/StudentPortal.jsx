@@ -14225,7 +14225,7 @@ function SubjectFullAnalysis({ subjectName, curriculum, grade, api, onBack }) {
     const norm = (x) => String(x || '').toLowerCase().replace(/[^a-z0-9]/g, '')
     api.get('/subjects', { params: { curriculum } })
       .then(r => {
-        const list = r.data?.data?.subjects || r.data?.data || []
+        const list = r.data?.subjects || r.data?.data?.subjects || []
         const hit = list.find(x => norm(x.subjectName) === norm(subjectName))
           || list.find(x => norm(x.subjectName).includes(norm(subjectName)) || norm(subjectName).includes(norm(x.subjectName)))
         if (!hit) { if (on) setData(null); return }
