@@ -131,7 +131,15 @@ async function reconcile() {
           subjectId: entry.subjectId,
           _id: { $nin: used },
           isActive: { $ne: false },
-        }).sort({ order: 1 }).limit(10).select('title topicName subtopicName').lean();
+        }).sort({ order: 1 }).limit(50).select('title topicName subtopicName').lean();
+        // Teacher's custom sequence for this slot outranks spine order.
+        if (Array.isArray(entry.lessonOrder) && entry.lessonOrder.length) {
+          const rank = {};
+          entry.lessonOrder.forEach((id, ix) => { rank[String(id)] = ix; });
+          spineQueue.sort((a, b) =>
+            (rank[String(a._id)] ?? 1e9) - (rank[String(b._id)] ?? 1e9));
+        }
+        spineQueue = spineQueue.slice(0, 10);
       } catch (e) { /* spine optional */ }
     }
 
