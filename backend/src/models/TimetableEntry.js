@@ -128,6 +128,9 @@ const timetableEntrySchema = new mongoose.Schema({
   // how a tuition student gets a specific topic next while the
   // timetable itself stays fixed.
   lessonOrder: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Lesson' }],
+  // Same idea for spines that carry their plan as topics/subtopics
+  // instead of Lesson docs: keys of "Topic||Subtopic" in teach order.
+  topicPlanOrder: [{ type: String }],
   assignedStudents: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
