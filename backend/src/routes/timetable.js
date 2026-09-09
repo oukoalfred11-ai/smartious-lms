@@ -425,10 +425,14 @@ router.get('/:id/lesson-plan', auth, async (req, res) => {
     const { mode, taught, queue, members } = await loadPlan(entry);
     const lessonName = {};
     [...taught, ...queue].forEach(l => { if (l._id) lessonName[String(l._id)] = l.title; });
+    // From the start of TODAY (EAT), not strictly future - a teacher
+    // must see this morning's classes and the one running right now.
+    const eatNow = new Date(Date.now() + 3 * 3600 * 1000);
+    const todayStart = new Date(Date.UTC(eatNow.getUTCFullYear(), eatNow.getUTCMonth(), eatNow.getUTCDate()) - 3 * 3600 * 1000);
     const upcoming = await LiveClass.find({
       timetableEntryId: { $in: members.map(m => m._id) }, fromTimetable: true, detached: { $ne: true },
-      status: { $nin: ['cancelled', 'completed'] }, scheduledAt: { $gt: new Date() },
-    }).sort({ scheduledAt: 1 }).limit(12).select('scheduledAt preparationLessonId lessonPinned status syllabusTopicName syllabusSubtopicName').lean();
+      status: { $nin: ['cancelled', 'completed'] }, scheduledAt: { $gte: todayStart },
+    }).sort({ scheduledAt: 1 }).limit(14).select('scheduledAt preparationLessonId lessonPinned status syllabusTopicName syllabusSubtopicName').lean();
     const User = require('../models/User');
     const studentIds = [...new Set(members.flatMap(m => (m.assignedStudents || []).map(String)))];
     const students = await User.find({ _id: { $in: studentIds } }).select('firstName lastName gradeLevel').lean();
