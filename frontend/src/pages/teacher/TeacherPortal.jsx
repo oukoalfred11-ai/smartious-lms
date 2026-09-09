@@ -10494,1335 +10494,182 @@ function TeacherLiveClassesTab({ user, toast }) {
 // SCHEDULE CLASSES — shell with two tabs:
 //   • Live Sessions   — one-off scheduled live classes
 //   • Weekly Timetable — recurring per-student timetable
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
+// LESSON PLAN MANAGER (the restructured Schedule Classes)
+// The timetable fixes WHEN; this module manages WHAT. The teacher
+// picks one of their slotted classes and rearranges the remaining
+// lessons - drag to reorder, or one tap to teach a topic next - and
+// the auto-scheduler follows that order for every future class.
+// Slots without a timetable cannot be managed: set the timetable
+// first in the Timetable tab.
+// ═══════════════════════════════════════════════════════════════════
 function ScheduleClassesTab({ user, toast }) {
-  const [tab, setTab] = useState('live')
+  const GOLD = '#C9973A', CRIM = '#7D1025', TRACK = '#E5DFD3', INK = '#1a1a1a', MUT = '#8A8378'
+  const [entries, setEntries] = useState(null)
+  const [sel, setSel] = useState(null)            // selected entry
+  const [plan, setPlan] = useState(undefined)     // { taught, queue, upcomingDates } | { linked:false }
+  const [queue, setQueue] = useState([])          // editable order
+  const [dirty, setDirty] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const dragIx = useRef(null)
 
-  const tabBtn = (id, label) => (
-    <button onClick={() => setTab(id)} style={{
-      padding: '9px 18px', borderRadius: 8, cursor: 'pointer',
-      fontWeight: 700, fontSize: 13,
-      background: tab === id ? '#7D1025' : '#fff',
-      color: tab === id ? '#fff' : '#5A5048',
-      border: '1.5px solid ' + (tab === id ? '#7D1025' : '#E8E2D6'),
-    }}>{label}</button>
-  )
-
-  return (
-    <div>
-      <div style={{ background: '#FBF3E6', border: '1px solid #E8D9BC', borderRadius: 10, padding: '10px 14px', marginBottom: 16, fontSize: 12.5, color: '#7A5B18', fontWeight: 600 }}>
-        Weekly teaching times now live in the <b>Timetable</b> module (left menu): slot a time once and the classes are created automatically every week. This page is for one-off sessions only.
-      </div>
-      <LiveSessionsTab user={user} toast={toast} />
-    </div>
-  )
-}
-
-// ── WEEKLY TIMETABLE — recurring per-student schedule ──────
-const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-const DAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-
-function WeeklyTimetableTab({ user, toast }) {
-  const [view, setView] = useState('list')        // 'list' | 'create' | 'detail'
-  const [timetables, setTimetables] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [active, setActive] = useState(null)      // timetable being viewed
-
-  // builder data
-  const [students, setStudents] = useState([])
-  const [curricula] = useState([
-    'CambridgePrimary', 'CambridgeLowerSec', 'CambridgeIGCSE', 'CambridgeALevel',
-    'EdexcelLowerSec', 'EdexcelIGCSE', 'EdexcelALevel',
-    'AQALowerSec', 'AQAGCSE', 'AQAALevel',
-    'IBPYP', 'IBMYP', 'IBDP', 'BNC', 'American', 'Canadian', 'KenyaCBE',
-  ])
-
-  const loadMine = useCallback(() => {
-    setLoading(true)
-    api.get('/timetables/mine')
-      .then(r => setTimetables(r.data?.data?.timetables || []))
-      .catch(() => toast?.error?.('Failed to load timetables.'))
-      .finally(() => setLoading(false))
-  }, [toast])
-
-  useEffect(() => { loadMine() }, [loadMine])
   useEffect(() => {
-    api.get('/users?role=student')
-      .then(r => setStudents(r.data?.data?.users || r.data?.users || []))
-      .catch(() => {})
+    api.get('/timetable/me')
+      .then(r => setEntries(r.data?.data || r.data?.entries || []))
+      .catch(() => setEntries([]))
   }, [])
 
-  // ── LIST VIEW ──
-  if (view === 'list') {
-    return (
-      <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18, flexWrap: 'wrap', gap: 10 }}>
-          <div>
-            <h2 style={{ fontSize: 20, fontWeight: 800, color: '#231715', margin: 0 }}>Weekly Timetables</h2>
-            <div style={{ fontSize: 12.5, color: '#857973' }}>Recurring per-student schedules — generated from the subject's lessons.</div>
-          </div>
-          <button onClick={() => setView('create')} style={{
-            background: '#7D1025', color: '#fff', border: 'none', borderRadius: 8,
-            padding: '10px 18px', fontSize: 13, fontWeight: 700, cursor: 'pointer',
-          }}>+ New Timetable</button>
-        </div>
-
-        {loading ? (
-          <div style={{ textAlign: 'center', padding: 40, color: '#857973', fontSize: 13 }}>Loading…</div>
-        ) : timetables.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: 50, color: '#857973', fontSize: 13, border: '1px dashed #E8E2D6', borderRadius: 12 }}>
-            No timetables yet. Click “New Timetable” to build one.
-          </div>
-        ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>
-            {timetables.map(tt => {
-              const delivered = (tt.sessions || []).filter(s => s.status === 'delivered').length
-              const total = (tt.sessions || []).length
-              const end = tt.sessions && tt.sessions.length ? tt.sessions[tt.sessions.length - 1].date : null
-              return (
-                <div key={tt._id} onClick={() => { setActive(tt); setView('detail') }} style={{
-                  background: '#fff', border: '1px solid #E8E2D6', borderRadius: 12,
-                  padding: 16, cursor: 'pointer',
-                }}>
-                  <div style={{ fontWeight: 800, fontSize: 15, color: '#231715' }}>{tt.studentName || 'Student'}</div>
-                  <div style={{ fontSize: 13, color: '#7D1025', fontWeight: 700, marginTop: 2 }}>{tt.subjectName}</div>
-                  <div style={{ fontSize: 11.5, color: '#857973', marginTop: 8 }}>
-                    {(tt.weeklySlots || []).map(s => DAY_SHORT[s.dayOfWeek] + ' ' + s.time).join('  ·  ')}
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 10, fontSize: 11.5, color: '#857973' }}>
-                    <span><b style={{ color: '#231715' }}>{delivered}</b> / {total} delivered</span>
-                    {end && <span>ends {new Date(end).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</span>}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        )}
-      </div>
-    )
+  const openSlot = (e) => {
+    setSel(e); setPlan(undefined); setDirty(false)
+    api.get(`/timetable/${e._id}/lesson-plan`)
+      .then(r => {
+        const d = r.data?.data
+        setPlan(d || { linked: false })
+        setQueue(d?.queue ? [...d.queue] : [])
+      })
+      .catch(() => setPlan({ linked: false }))
   }
 
-  // ── CREATE VIEW ──
-  if (view === 'create') {
-    return <TimetableBuilder
-      students={students} curricula={curricula} toast={toast}
-      onBack={() => setView('list')}
-      onCreated={() => { setView('list'); loadMine() }}
-    />
+  const move = (from, to) => {
+    if (to < 0 || to >= queue.length || from === to) return
+    setQueue(q => { const n = [...q]; const [it] = n.splice(from, 1); n.splice(to, 0, it); return n })
+    setDirty(true)
   }
+  const teachNext = (ix) => move(ix, 0)
 
-  // ── DETAIL VIEW ──
-  if (view === 'detail' && active) {
-    return <TimetableDetail
-      timetable={active} toast={toast}
-      onBack={() => { setActive(null); setView('list') }}
-      onChanged={(updated) => setActive(updated)}
-      onDeleted={() => { setActive(null); setView('list'); loadMine() }}
-    />
-  }
-  return null
-}
-
-// ── TIMETABLE BUILDER ──────────────────────────────────────
-function TimetableBuilder({ students, curricula, toast, onBack, onCreated }) {
-  const [studentId, setStudentId] = useState('')
-  const [curriculum, setCurriculum] = useState('CambridgeIGCSE')
-  const [subjects, setSubjects] = useState([])
-  const [subjectId, setSubjectId] = useState('')
-  const [startDate, setStartDate] = useState(() => {
-    const d = new Date(); d.setDate(d.getDate() + 1)
-    return d.toISOString().slice(0, 10)
-  })
-  const [slots, setSlots] = useState([{ dayOfWeek: 1, time: '10:00' }])
-  const [saving, setSaving] = useState(false)
-
-  useEffect(() => {
-    api.get('/subjects', { params: { curriculum } })
-      .then(r => { setSubjects(r.data?.subjects || []); setSubjectId('') })
-      .catch(() => setSubjects([]))
-  }, [curriculum])
-
-  const addSlot = () => setSlots(s => [...s, { dayOfWeek: 1, time: '10:00' }])
-  const setSlot = (i, k, v) => setSlots(s => s.map((x, idx) => idx === i ? { ...x, [k]: v } : x))
-  const delSlot = (i) => setSlots(s => s.filter((_, idx) => idx !== i).length ? s.filter((_, idx) => idx !== i) : s)
-
-  const create = async () => {
-    if (!studentId) { toast?.error?.('Pick a student.'); return }
-    if (!subjectId) { toast?.error?.('Pick a subject.'); return }
-    if (!slots.length) { toast?.error?.('Add at least one weekly slot.'); return }
+  const save = async () => {
+    if (!sel || !queue.length) return
     setSaving(true)
     try {
-      const { data } = await api.post('/timetables', {
-        studentId, subjectId, weeklySlots: slots, startDate,
-      })
-      if (data?.success) { toast?.ok?.('Timetable created.'); onCreated?.() }
-      else toast?.error?.(data?.message || 'Failed.')
-    } catch (e) {
-      toast?.error?.(e?.response?.data?.message || 'Failed to create timetable.')
-    } finally { setSaving(false) }
+      const r = await api.patch(`/timetable/${sel._id}/lesson-plan`, { queueOrder: queue.map(l => l._id) })
+      toast?.ok?.(r.data?.message || 'Order saved.')
+      setDirty(false)
+      openSlot(sel)
+    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not save the order.') }
+    finally { setSaving(false) }
   }
 
-  const lbl = { display: 'block', fontSize: 11, fontWeight: 700, letterSpacing: '.04em',
-    textTransform: 'uppercase', color: '#7D1025', marginBottom: 5 }
-  const inp = { width: '100%', boxSizing: 'border-box', padding: '8px 11px',
-    borderRadius: 7, border: '1.5px solid #E8E2D6', fontSize: 13, fontFamily: 'inherit', background: '#fff' }
-  const card = { background: '#fff', border: '1px solid #E8E2D6', borderRadius: 12, padding: 18, marginBottom: 14 }
+  const fmtD = (d) => new Date(d).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
+  const slotLabel = (e) => `${e.dayOfWeek} ${e.startTime}\u2013${e.endTime}`
 
-  return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
-        <button onClick={onBack} style={{
-          background: '#fff', border: '1.5px solid #E8E2D6', borderRadius: 8,
-          padding: '7px 13px', fontSize: 12, fontWeight: 700, cursor: 'pointer', color: '#7D1025',
-        }}>← Timetables</button>
-        <h2 style={{ fontSize: 20, fontWeight: 800, color: '#231715', margin: 0 }}>New Weekly Timetable</h2>
-      </div>
-
-      <div style={card}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
-          <div><label style={lbl}>Student *</label>
-            <select value={studentId} onChange={e => setStudentId(e.target.value)} style={inp}>
-              <option value="">— Select student —</option>
-              {students.map(s => (
-                <option key={s._id} value={s._id}>
-                  {`${s.firstName || ''} ${s.lastName || ''}`.trim() || s.email}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div><label style={lbl}>Curriculum</label>
-            <select value={curriculum} onChange={e => setCurriculum(e.target.value)} style={inp}>
-              {curricula.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-          </div>
-          <div><label style={lbl}>Subject *</label>
-            <select value={subjectId} onChange={e => setSubjectId(e.target.value)} style={inp}>
-              <option value="">— Select subject —</option>
-              {subjects.map(s => <option key={s._id} value={s._id}>{s.subjectName}</option>)}
-            </select>
-          </div>
-          <div><label style={lbl}>Start Date *</label>
-            <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={inp}/>
-          </div>
+  // ── Slot list (the doorway: no slot, no management) ──
+  if (!sel) return (
+    <div style={{ display: 'grid', gap: 14 }}>
+      <div>
+        <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.14em', color: GOLD }}>LESSON PLANS</div>
+        <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 26, fontWeight: 400, color: INK, margin: '2px 0 0' }}>What each class learns next</h2>
+        <div style={{ fontSize: 12.5, color: MUT, marginTop: 3 }}>
+          Pick a slotted class to rearrange its lessons or choose the next topic. The timetable stays fixed - your order decides what the auto-scheduled classes teach.
         </div>
       </div>
-
-      <div style={card}>
-        <label style={lbl}>Weekly Slots</label>
-        <div style={{ fontSize: 11.5, color: '#857973', marginBottom: 8 }}>
-          The recurring days &amp; times. One session per lesson is generated across these slots until the subject's lessons run out.
+      {entries === null && <div style={{ color: MUT, fontSize: 13 }}>Loading your slots...</div>}
+      {entries && entries.length === 0 && (
+        <div style={{ background: '#FBF8F3', border: `1.5px dashed ${TRACK}`, borderRadius: 12, padding: 22, textAlign: 'center' }}>
+          <div style={{ fontWeight: 800, fontSize: 14.5, color: INK }}>No timetable slots yet</div>
+          <div style={{ fontSize: 12.5, color: MUT, marginTop: 4 }}>
+            Lesson plans are managed per slotted class. Set your weekly timetable first in the <b>Timetable</b> tab - then come back here to arrange what each class learns.
+          </div>
         </div>
-        {slots.map((s, i) => (
-          <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 6, alignItems: 'center' }}>
-            <select value={s.dayOfWeek} onChange={e => setSlot(i, 'dayOfWeek', Number(e.target.value))}
-              style={{ ...inp, flex: '1 1 140px' }}>
-              {DAY_NAMES.map((d, di) => <option key={di} value={di}>{d}</option>)}
-            </select>
-            <input type="time" value={s.time} onChange={e => setSlot(i, 'time', e.target.value)}
-              style={{ ...inp, flex: '0 0 130px' }}/>
-            <button onClick={() => delSlot(i)} style={{
-              background: 'transparent', border: 'none', color: '#B91C1C',
-              cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: '0 4px',
-            }}>×</button>
+      )}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 10 }}>
+        {(entries || []).map(e => (
+          <div key={e._id} onClick={() => openSlot(e)}
+            style={{ background: '#fff', border: `1.5px solid ${TRACK}`, borderRadius: 12, padding: 14, cursor: 'pointer' }}>
+            <div style={{ fontWeight: 800, fontSize: 14, color: INK }}>{e.subject}</div>
+            <div style={{ fontSize: 11.5, color: CRIM, fontWeight: 700, marginTop: 2 }}>{slotLabel(e)}</div>
+            <div style={{ fontSize: 11, color: MUT, marginTop: 4 }}>
+              {(e.assignedStudents || []).length} student(s){e.curriculum ? ' \u00b7 ' + e.curriculum : ''}{e.grade ? ' \u00b7 ' + e.grade : ''}
+            </div>
+            {!e.subjectId && <div style={{ fontSize: 10, color: '#B45309', fontWeight: 700, marginTop: 6 }}>Not linked to a syllabus - link it in the Timetable tab to manage lessons</div>}
           </div>
         ))}
-        <button onClick={addSlot} style={{
-          background: 'transparent', border: '1.5px dashed #C9A030', color: '#9A7B16',
-          borderRadius: 7, padding: '6px 12px', fontSize: 12, fontWeight: 700, cursor: 'pointer', marginTop: 4,
-        }}>+ Add Slot</button>
-      </div>
-
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 30 }}>
-        <button onClick={create} disabled={saving} style={{
-          background: saving ? '#9CA3AF' : '#7D1025', color: '#fff', border: 'none', borderRadius: 8,
-          padding: '12px 26px', fontSize: 14, fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer',
-        }}>{saving ? 'Generating…' : 'Generate Timetable'}</button>
       </div>
     </div>
   )
-}
 
-// ── TIMETABLE DETAIL — the generated calendar ──────────────
-function TimetableDetail({ timetable, toast, onBack, onChanged, onDeleted }) {
-  const [tt, setTt] = useState(timetable)
-  const [busy, setBusy] = useState(false)
-
-  const refresh = (updated) => { setTt(updated); onChanged?.(updated) }
-
-  const setSessionStatus = async (sessionId, status) => {
-    setBusy(true)
-    try {
-      const { data } = await api.patch('/timetables/' + tt._id, {
-        sessionUpdate: { sessionId, status },
-      })
-      if (data?.success) refresh(data.data.timetable)
-    } catch (e) { toast?.error?.('Failed to update session.') }
-    finally { setBusy(false) }
-  }
-
-  const setDeliveryMode = async (sessionId, deliveryMode) => {
-    setBusy(true)
-    try {
-      const { data } = await api.patch('/timetables/' + tt._id, {
-        sessionUpdate: { sessionId, deliveryMode },
-      })
-      if (data?.success) refresh(data.data.timetable)
-    } catch (e) { toast?.error?.('Failed to update delivery mode.') }
-    finally { setBusy(false) }
-  }
-
-  const promoteSession = async (sessionId) => {
-    setBusy(true)
-    try {
-      const { data } = await api.post('/timetables/' + tt._id + '/promote-session', { sessionId })
-      if (data?.success) { refresh(data.data.timetable); toast?.ok?.('Live class created for this session.') }
-      else toast?.error?.(data?.message || 'Failed.')
-    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Failed to create live class.') }
-    finally { setBusy(false) }
-  }
-
-  const regenerate = async () => {
-    if (!window.confirm('Regenerate this timetable from the current lesson list? Delivered sessions are kept; pending ones are recomputed.')) return
-    setBusy(true)
-    try {
-      const { data } = await api.post('/timetables/' + tt._id + '/regenerate')
-      if (data?.success) { refresh(data.data.timetable); toast?.ok?.('Regenerated.') }
-    } catch (e) { toast?.error?.('Failed to regenerate.') }
-    finally { setBusy(false) }
-  }
-
-  const remove = async () => {
-    if (!window.confirm('Delete this timetable? This cannot be undone.')) return
-    setBusy(true)
-    try {
-      await api.delete('/timetables/' + tt._id)
-      toast?.ok?.('Timetable deleted.'); onDeleted?.()
-    } catch (e) { toast?.error?.('Failed to delete.'); setBusy(false) }
-  }
-
-  const sessions = tt.sessions || []
-  const delivered = sessions.filter(s => s.status === 'delivered').length
-  const fmtDate = (d) => new Date(d).toLocaleDateString('en-GB', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' })
-
-  const stChip = (status) => {
-    const map = {
-      delivered: { bg: '#DCFCE7', fg: '#15803D', label: 'Delivered' },
-      cancelled: { bg: '#FEE2E2', fg: '#B91C1C', label: 'Cancelled' },
-      pending:   { bg: '#FEF3C7', fg: '#B45309', label: 'Pending' },
-    }
-    const c = map[status] || map.pending
-    return <span style={{ background: c.bg, color: c.fg, fontSize: 10.5, fontWeight: 700, padding: '2px 8px', borderRadius: 20 }}>{c.label}</span>
-  }
-
+  // ── Plan editor for the selected slot ──
   return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
-        <button onClick={onBack} style={{
-          background: '#fff', border: '1.5px solid #E8E2D6', borderRadius: 8,
-          padding: '7px 13px', fontSize: 12, fontWeight: 700, cursor: 'pointer', color: '#7D1025',
-        }}>← Timetables</button>
+    <div style={{ display: 'grid', gap: 14 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+        <button onClick={() => { setSel(null); setPlan(undefined) }}
+          style={{ padding: '7px 14px', borderRadius: 9, border: `1.5px solid ${TRACK}`, background: '#fff', color: CRIM, fontSize: 12, fontWeight: 800, cursor: 'pointer' }}>{'\u2190'} All classes</button>
         <div style={{ flex: 1 }}>
-          <h2 style={{ fontSize: 19, fontWeight: 800, color: '#231715', margin: 0 }}>
-            {tt.studentName} · {tt.subjectName}
-          </h2>
-          <div style={{ fontSize: 12, color: '#857973' }}>
-            {(tt.weeklySlots || []).map(s => DAY_SHORT[s.dayOfWeek] + ' ' + s.time).join('  ·  ')}
-            {'   —   '}{delivered} of {sessions.length} delivered
-          </div>
+          <b style={{ fontSize: 15.5, color: INK }}>{sel.subject}</b>
+          <span style={{ fontSize: 12, color: CRIM, fontWeight: 700, marginLeft: 8 }}>{slotLabel(sel)}</span>
+          <span style={{ fontSize: 11.5, color: MUT, marginLeft: 8 }}>{(sel.assignedStudents || []).length} student(s)</span>
         </div>
-        <button onClick={regenerate} disabled={busy} style={{
-          background: '#fff', border: '1.5px solid #C9A030', color: '#9A7B16',
-          borderRadius: 7, padding: '8px 14px', fontSize: 12, fontWeight: 700, cursor: 'pointer',
-        }}>Regenerate</button>
-        <button onClick={remove} disabled={busy} style={{
-          background: '#fff', border: '1.5px solid #E8E2D6', color: '#B91C1C',
-          borderRadius: 7, padding: '8px 14px', fontSize: 12, fontWeight: 700, cursor: 'pointer',
-        }}>Delete</button>
+        {dirty && <button onClick={save} disabled={saving}
+          style={{ padding: '9px 20px', borderRadius: 9, border: 'none', background: CRIM, color: '#fff', fontSize: 12.5, fontWeight: 800, cursor: 'pointer' }}>
+          {saving ? 'Saving...' : 'Save order'}</button>}
       </div>
 
-      {sessions.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: 40, color: '#857973', fontSize: 13 }}>
-          No sessions generated.
-        </div>
-      ) : (
-        <div style={{ border: '1px solid #E8E2D6', borderRadius: 12, overflow: 'hidden' }}>
-          {sessions.map((s, i) => (
-            <div key={s._id || i} style={{
-              display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px',
-              borderBottom: i < sessions.length - 1 ? '1px solid #F1ECE0' : 'none',
-              background: s.status === 'delivered' ? '#FAFCFA' : '#fff',
-            }}>
-              <div style={{
-                width: 30, height: 30, borderRadius: '50%', flexShrink: 0,
-                background: '#FBFAF5', border: '1px solid #E8E2D6',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 11, fontWeight: 800, color: '#7D1025',
-              }}>{s.lessonNumber || i + 1}</div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: '#231715', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {s.lessonTitle || 'Lesson ' + (s.lessonNumber || i + 1)}
-                </div>
-                <div style={{ fontSize: 11.5, color: '#857973' }}>
-                  {fmtDate(s.date)}{s.time ? ' · ' + s.time : ''}
-                </div>
-              </div>
-              {stChip(s.status)}
-              <select value={s.deliveryMode || 'virtual'} disabled={busy}
-                onChange={e => setDeliveryMode(s._id, e.target.value)}
-                title="Delivery mode"
-                style={{
-                  border: '1.5px solid #E8E2D6', borderRadius: 6, padding: '4px 8px',
-                  fontSize: 11.5, fontFamily: 'inherit', background: '#fff', cursor: 'pointer',
-                }}>
-                <option value="virtual">Virtual</option>
-                <option value="physical">Physical</option>
-              </select>
-              {s.liveClassId ? (
-                <span style={{
-                  fontSize: 10.5, fontWeight: 700, color: '#15803D',
-                  background: '#DCFCE7', padding: '4px 9px', borderRadius: 20, whiteSpace: 'nowrap',
-                }}>✓ Live class</span>
-              ) : (
-                <button onClick={() => promoteSession(s._id)} disabled={busy}
-                  title="Create a live class for this session now"
-                  style={{
-                    border: '1.5px solid #C9A030', background: '#fff', color: '#9A7B16',
-                    borderRadius: 6, padding: '4px 9px', fontSize: 11, fontWeight: 700,
-                    cursor: 'pointer', whiteSpace: 'nowrap',
-                  }}>+ Live class</button>
-              )}
-              <select value={s.status} disabled={busy}
-                onChange={e => setSessionStatus(s._id, e.target.value)}
-                style={{
-                  border: '1.5px solid #E8E2D6', borderRadius: 6, padding: '4px 8px',
-                  fontSize: 11.5, fontFamily: 'inherit', background: '#fff', cursor: 'pointer',
-                }}>
-                <option value="pending">Pending</option>
-                <option value="delivered">Delivered</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
-            </div>
-          ))}
+      {plan === undefined && <div style={{ color: MUT, fontSize: 13 }}>Loading the lesson plan...</div>}
+      {plan && plan.linked === false && (
+        <div style={{ background: '#FFF8EB', border: '1.5px solid #F1E4C8', borderRadius: 12, padding: 18, fontSize: 12.5, color: '#7A5A17' }}>
+          This slot is not linked to a syllabus, so there is no lesson plan to manage. Edit the slot in the <b>Timetable</b> tab and pick its subject from the syllabus list.
         </div>
       )}
-    </div>
-  )
-}
 
-// ── LIVE SESSIONS — one-off scheduled live classes ─────────
-// (Previously "ScheduleClassesTab" — now the Live Sessions tab
-// inside the Schedule Classes shell. Logic unchanged.)
-function LiveSessionsTab({ user, toast }) {
-  const [classes, setClasses] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [view, setView] = useState('list') // 'list' | 'create' | 'edit'
-  const [filter, setFilter] = useState('all') // 'all' | 'scheduled' | 'live' | 'ended'
-  const [searchQ, setSearchQ] = useState('')
-  const [editing, setEditing] = useState(null) // class being edited
-
-  // Default-meeting-link settings modal
-  const [showSettings, setShowSettings] = useState(false)
-  const [defaultLinkInput, setDefaultLinkInput] = useState(user?.defaultMeetingLink || '')
-  const [savingSettings, setSavingSettings] = useState(false)
-  const [currentDefaultLink, setCurrentDefaultLink] = useState(user?.defaultMeetingLink || '')
-
-  // Catalog of curriculum/subjects/grades
-  const [catalog, setCatalog] = useState({ curricula: [], gradesByCurriculum: {}, subjects: [] })
-  // Eligible students for the chosen curriculum+grade
-  const [eligibleStudents, setEligibleStudents] = useState([])
-
-  // Form state
-  const initialForm = () => ({
-    title: '',
-    description: '',
-    subject: '',
-    curriculum: '',
-    grade: '',
-    scheduledAt: defaultScheduleDate(),
-    durationMins: 60,
-    classroomMode: 'link',   // 'link' = external Zoom/Meet, 'native' = built-in Smartious Classroom
-    meetingLink: currentDefaultLink || '',
-    assignedStudents: [], // array of student _ids
-    notes: '',
-    // Spine linkage (optional — picked when subject has a loaded spine)
-    syllabusTopicName: '',
-    syllabusSubtopicName: '',
-  })
-  const [form, setForm] = useState(initialForm())
-  const [saving, setSaving] = useState(false)
-
-  // ── Curriculum-spine integration ───────────────────────
-  // When the chosen subject has a loaded syllabus spine, show
-  // Topic + Subtopic dropdowns. Both optional. Subjects without
-  // a spine show the dropdowns empty (or hidden). Mirrors the
-  // pattern used by the question-bank form.
-  // Resolves the real Subject._id by matching subject name within
-  // the chosen curriculum, then fetches the spine for that id.
-  const [spineTopics, setSpineTopics] = useState([])
-  const [spineLoading, setSpineLoading] = useState(false)
-
-  useEffect(() => {
-    if (!form.curriculum || !form.subject) { setSpineTopics([]); return }
-    let cancelled = false
-    setSpineLoading(true)
-    setSpineTopics([])
-    ;(async () => {
-      try {
-        const subjRes = await api.get('/subjects', { params: { curriculum: form.curriculum } })
-        const dbSubjects = subjRes.data?.subjects || []
-        const norm = (s) => String(s || '').trim().toLowerCase()
-        const want = norm(form.subject)
-        let match = dbSubjects.find(s => norm(s.subjectName) === want)
-        if (!match) {
-          match = dbSubjects.find(s => {
-            const have = norm(s.subjectName)
-            return have && want && (have.includes(want) || want.includes(have))
-          })
-        }
-        if (!match) { if (!cancelled) setSpineTopics([]); return }
-        const spineRes = await api.get('/syllabus/subject/' + match._id)
-        if (!cancelled) setSpineTopics(spineRes.data?.data?.topics || [])
-      } catch (e) {
-        if (!cancelled) setSpineTopics([])
-      } finally {
-        if (!cancelled) setSpineLoading(false)
-      }
-    })()
-    return () => { cancelled = true }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.subject, form.curriculum])
-
-  const hasSpine = spineTopics.length > 0
-  const spineSelectedTopic = spineTopics.find(t => t.topic === form.syllabusTopicName)
-
-  // ── helpers ──
-  function defaultScheduleDate() {
-    // Round to next hour, default to tomorrow at 9am
-    const d = new Date()
-    d.setDate(d.getDate() + 1)
-    d.setHours(9, 0, 0, 0)
-    return d.toISOString().slice(0, 16) // YYYY-MM-DDTHH:MM
-  }
-
-  // ── Load all classes + catalog on mount ──
-  useEffect(() => {
-    let cancelled = false
-    const loadAll = async () => {
-      setLoading(true)
-      try {
-        const [classesRes, catalogRes] = await Promise.all([
-          api.get('/liveclasses/teacher/list'),
-          api.get('/curriculum/options'),
-        ])
-        if (cancelled) return
-        if (classesRes.data?.success) {
-          setClasses(classesRes.data.data?.classes || [])
-        }
-        if (catalogRes.data?.success) {
-          setCatalog({
-            curricula: catalogRes.data.curricula || [],
-            gradesByCurriculum: catalogRes.data.gradesByCurriculum || {},
-            subjects: catalogRes.data.subjects || [],
-          })
-        }
-      } catch (e) {
-        if (cancelled) return
-        console.error('[scheduleclasses] load failed:', e?.response?.data?.message || e.message)
-        toast?.error?.('Failed to load classes.')
-      } finally {
-        if (!cancelled) setLoading(false)
-      }
-    }
-    loadAll()
-    return () => { cancelled = true }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  // ── Reload eligible students when curriculum+grade changes ──
-  useEffect(() => {
-    if (!form.curriculum || !form.grade) { setEligibleStudents([]); return }
-    let cancelled = false
-    const loadStudents = async () => {
-      try {
-        const { data } = await api.get('/users', {
-          params: { role: 'student', curriculum: form.curriculum, gradeLevel: form.grade },
-        })
-        if (cancelled) return
-        const list = data?.users || data?.data?.users || []
-        setEligibleStudents(list.filter(u => u.isActive !== false))
-      } catch (e) {
-        if (cancelled) return
-        setEligibleStudents([])
-      }
-    }
-    loadStudents()
-    return () => { cancelled = true }
-  }, [form.curriculum, form.grade])
-
-  // ── form helpers ──
-  const setF = (k, v) => setForm(f => ({ ...f, [k]: v }))
-  const toggleStudent = (sid) => setForm(f => ({
-    ...f,
-    assignedStudents: f.assignedStudents.includes(sid)
-      ? f.assignedStudents.filter(id => id !== sid)
-      : [...f.assignedStudents, sid],
-  }))
-
-  const openCreate = () => {
-    setEditing(null)
-    setForm(initialForm())
-    setView('create')
-  }
-  const openEdit = (lc) => {
-    setEditing(lc)
-    setForm({
-      title: lc.title,
-      description: lc.description || '',
-      subject: lc.subject,
-      curriculum: lc.curriculum,
-      grade: lc.grade,
-      scheduledAt: new Date(lc.scheduledAt).toISOString().slice(0, 16),
-      durationMins: lc.durationMins,
-      classroomMode: lc.classroomMode || 'link',
-      meetingLink: lc.meetingLink,
-      assignedStudents: (lc.assignedStudents || []).map(s => s._id || s),
-      notes: lc.notes || '',
-      syllabusTopicName:    lc.syllabusTopicName || '',
-      syllabusSubtopicName: lc.syllabusSubtopicName || '',
-    })
-    setView('edit')
-  }
-  const cancelForm = () => { setView('list'); setEditing(null); setForm(initialForm()) }
-
-  // ── Save (create or edit) ──
-  const saveForm = async () => {
-    if (!form.title.trim()) { toast?.error?.('Title is required.'); return }
-    if (!form.subject || !form.curriculum || !form.grade) {
-      toast?.error?.('Subject, curriculum and grade are required.'); return
-    }
-    if (!form.scheduledAt) { toast?.error?.('Scheduled time is required.'); return }
-    if (form.classroomMode !== 'native' && !form.meetingLink.trim()) { toast?.error?.('Meeting link is required.'); return }
-    if (form.assignedStudents.length === 0) {
-      if (!window.confirm('No students selected. Save anyway? (You can add students later.)')) return
-    }
-
-    setSaving(true)
-    try {
-      const payload = {
-        title: form.title.trim(),
-        description: form.description.trim(),
-        subject: form.subject,
-        curriculum: form.curriculum,
-        grade: form.grade,
-        scheduledAt: new Date(form.scheduledAt).toISOString(),
-        durationMins: Number(form.durationMins),
-        classroomMode: form.classroomMode,
-        meetingLink: form.classroomMode === 'native' ? '' : form.meetingLink.trim(),
-        assignedStudents: form.assignedStudents,
-        notes: form.notes.trim(),
-        // Spine linkage (null when not picked)
-        syllabusTopicName:    form.syllabusTopicName?.trim() || null,
-        syllabusSubtopicName: form.syllabusSubtopicName?.trim() || null,
-      }
-      const { data } = editing
-        ? await api.put('/liveclasses/' + editing._id, payload)
-        : await api.post('/liveclasses', payload)
-      if (data?.success) {
-        toast?.ok?.(editing ? 'Class updated.' : 'Class scheduled.')
-        // Reload list
-        const reload = await api.get('/liveclasses/teacher/list')
-        if (reload.data?.success) setClasses(reload.data.data?.classes || [])
-        cancelForm()
-      } else {
-        toast?.error?.(data?.message || 'Save failed.')
-      }
-    } catch (e) {
-      toast?.error?.(e?.response?.data?.message || 'Save failed: ' + e.message)
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const deleteClass = async (lc) => {
-    if (!window.confirm(`Delete "${lc.title}"? This cannot be undone.`)) return
-    try {
-      const { data } = await api.delete('/liveclasses/' + lc._id)
-      if (data?.success) {
-        toast?.ok?.('Class deleted.')
-        setClasses(cs => cs.filter(c => c._id !== lc._id))
-      } else {
-        toast?.error?.(data?.message || 'Delete failed.')
-      }
-    } catch (e) {
-      toast?.error?.('Delete failed: ' + e.message)
-    }
-  }
-
-  const startClass = async (lc) => {
-    try {
-      const { data } = await api.post('/liveclasses/' + lc._id + '/start')
-      if (data?.success) {
-        toast?.ok?.('Class is now live.')
-        setClasses(cs => cs.map(c => c._id === lc._id ? { ...c, ...data.data.liveClass } : c))
-      }
-    } catch (e) {
-      toast?.error?.('Failed to start.')
-    }
-  }
-  const endClass = async (lc) => {
-    if (!window.confirm('End this class now?')) return
-    try {
-      const { data } = await api.post('/liveclasses/' + lc._id + '/end')
-      if (data?.success) {
-        toast?.ok?.('Class ended.')
-        setClasses(cs => cs.map(c => c._id === lc._id ? { ...c, ...data.data.liveClass } : c))
-      }
-    } catch (e) {
-      toast?.error?.('Failed to end.')
-    }
-  }
-
-  // ── Save default meeting link to teacher's profile ──
-  const saveDefaultLink = async () => {
-    setSavingSettings(true)
-    try {
-      const { data } = await api.patch('/auth/me', { defaultMeetingLink: defaultLinkInput.trim() })
-      if (data?.success) {
-        setCurrentDefaultLink(data.user?.defaultMeetingLink || '')
-        toast?.ok?.('Default meeting link saved.')
-        setShowSettings(false)
-      } else {
-        toast?.error?.(data?.message || 'Failed to save link.')
-      }
-    } catch (e) {
-      toast?.error?.(e?.response?.data?.message || 'Failed to save link.')
-    } finally {
-      setSavingSettings(false)
-    }
-  }
-
-  // ── Filter and search ──
-  const filtered = classes.filter(c => {
-    if (filter !== 'all' && c.computedStatus !== filter) return false
-    if (searchQ.trim()) {
-      const q = searchQ.toLowerCase()
-      return (c.title || '').toLowerCase().includes(q)
-        || (c.subject || '').toLowerCase().includes(q)
-    }
-    return true
-  })
-
-  const stats = {
-    total: classes.length,
-    scheduled: classes.filter(c => c.computedStatus === 'scheduled').length,
-    live: classes.filter(c => c.computedStatus === 'live').length,
-    ended: classes.filter(c => c.computedStatus === 'ended').length,
-  }
-
-  // ── Form-derived ──
-  const formGrades = form.curriculum ? (catalog.gradesByCurriculum[form.curriculum] || []) : []
-  // Subject list is scoped to the chosen curriculum via a DB-backed
-  // fetch (not the static catalog). DB Subjects are tightly scoped
-  // by curriculum at creation time; this prevents IGCSE subjects
-  // from appearing under Lower Secondary etc.
-  const [dbSubjects, setDbSubjects] = useState([])
-  useEffect(() => {
-    if (!form.curriculum) { setDbSubjects([]); return }
-    let cancelled = false
-    ;(async () => {
-      try {
-        const { data } = await api.get('/subjects', { params: { curriculum: form.curriculum, grade: form.grade || undefined } })
-        if (cancelled) return
-        const list = (data?.subjects || []).filter(s => s.isActive !== false)
-        setDbSubjects(list)
-      } catch (e) {
-        if (!cancelled) setDbSubjects([])
-      }
-    })()
-    return () => { cancelled = true }
-  }, [form.curriculum, form.grade])
-  // Fallback: if the currently-saved subject isn't in the fetched list
-  // (e.g. an old class with a slightly different name), still show it
-  // so the form doesn't appear broken.
-  const formSubjects = form.curriculum
-    ? (() => {
-        const names = new Set(dbSubjects.map(s => s.subjectName))
-        const arr = dbSubjects.map(s => ({ id: s._id, name: s.subjectName }))
-        if (form.subject && !names.has(form.subject)) {
-          arr.unshift({ id: 'legacy', name: form.subject })
-        }
-        return arr
-      })()
-    : []
-
-  // ─────────────────────────────────────────────────────
-  // CREATE / EDIT FORM
-  // ─────────────────────────────────────────────────────
-  if (view === 'create' || view === 'edit') {
-    return (
-      <div>
-        <button onClick={cancelForm}
-          style={{
-            background: 'transparent', border: 'none', color: '#7D1025',
-            fontSize: 13, fontWeight: 700, cursor: 'pointer',
-            padding: '6px 0', marginBottom: 14,
-            display: 'flex', alignItems: 'center', gap: 6,
-          }}>
-          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
-          </svg>
-          Back to Schedule
-        </button>
-
-        <div className="card" style={{
-          padding: 0, marginBottom: 18, overflow: 'hidden',
-          background: 'linear-gradient(135deg, #7D1025 0%, #5A0B1B 100%)',
-          color: '#FBFAF5',
-        }}>
-          <div style={{ padding: '24px 30px' }}>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: '#F0CC5A', marginBottom: 6 }}>
-              {editing ? 'Edit Live Class' : 'New Live Class'}
+      {plan && plan.linked && (
+        <>
+          {plan.upcomingDates?.length > 0 && (
+            <div style={{ fontSize: 11.5, color: MUT }}>
+              Next classes: {plan.upcomingDates.map(fmtD).join(' \u00b7 ')} - saving a new order updates them instantly.
             </div>
-            <h1 className="serif" style={{ fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
-              {editing ? form.title : 'Schedule a Live Class'}
-            </h1>
-            <div style={{ fontSize: 13, opacity: .85, marginTop: 4 }}>
-              Set the time, topic, and which students to invite. The meeting link can be your Zoom personal room.
-            </div>
-          </div>
-        </div>
+          )}
 
-        <div className="card" style={{ padding: 22 }}>
-          {/* Basic info */}
-          <div className="fg">
-            <label className="fl">Lesson title *</label>
-            <input className="fi"
-              placeholder="e.g. Quadratic Equations Recap"
-              value={form.title} onChange={e => setF('title', e.target.value)}
-              autoFocus
-            />
-          </div>
-          <div className="fg">
-            <label className="fl">Description (optional)</label>
-            <textarea className="fi" rows={2}
-              placeholder="What students should expect"
-              value={form.description} onChange={e => setF('description', e.target.value)}
-              style={{ resize: 'vertical' }}
-            />
-          </div>
-
-          {/* Academic context */}
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            <div className="fg" style={{ flex: 1, minWidth: 180 }}>
-              <label className="fl">Curriculum *</label>
-              <select className="fsel" value={form.curriculum}
-                onChange={e => { setF('curriculum', e.target.value); setF('grade', ''); setF('subject', '') }}
-              >
-                <option value="">Select curriculum...</option>
-                {catalog.curricula.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
-            </div>
-            <div className="fg" style={{ flex: 1, minWidth: 180 }}>
-              <label className="fl">Grade *</label>
-              <select className="fsel" value={form.grade}
-                onChange={e => setF('grade', e.target.value)}
-                disabled={!form.curriculum}
-              >
-                <option value="">{form.curriculum ? 'Select grade...' : 'Pick curriculum first'}</option>
-                {formGrades.map(g => <option key={g} value={g}>{g}</option>)}
-              </select>
-            </div>
-            <div className="fg" style={{ flex: 1, minWidth: 180 }}>
-              <label className="fl">Subject *</label>
-              <select className="fsel" value={form.subject}
-                onChange={e => { setF('subject', e.target.value); setF('syllabusTopicName', ''); setF('syllabusSubtopicName', '') }}
-                disabled={!form.curriculum}
-              >
-                <option value="">{form.curriculum ? 'Select subject...' : 'Pick curriculum first'}</option>
-                {formSubjects.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
-              </select>
-            </div>
-          </div>
-
-          {/* Syllabus spine: Topic + Subtopic dropdowns. Only shows when
-              the chosen subject has a loaded spine. Both optional. */}
-          {form.subject && (hasSpine || spineLoading) && (
-            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-              <div className="fg" style={{ flex: 1, minWidth: 240 }}>
-                <label className="fl">Syllabus topic (optional)</label>
-                <select className="fsel" value={form.syllabusTopicName}
-                  onChange={e => { setF('syllabusTopicName', e.target.value); setF('syllabusSubtopicName', '') }}
-                  disabled={spineLoading || !hasSpine}
-                >
-                  <option value="">{spineLoading ? 'Loading syllabus...' : (hasSpine ? 'Select topic...' : 'No spine loaded')}</option>
-                  {spineTopics.map(t => (
-                    <option key={t._id} value={t.topic}>{t.code ? t.code + '. ' : ''}{t.topic}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="fg" style={{ flex: 1, minWidth: 240 }}>
-                <label className="fl">Subtopic (optional)</label>
-                <select className="fsel" value={form.syllabusSubtopicName}
-                  onChange={e => {
-                    const picked = e.target.value
-                    setF('syllabusSubtopicName', picked)
-                    // Auto-fill title with the subtopic name, but only if
-                    // title is empty OR title matches a previously-picked
-                    // subtopic name (i.e. the teacher hasn't typed a custom
-                    // title). This way custom titles are preserved.
-                    if (picked) {
-                      setForm(f => {
-                        const titleIsCustom = f.title && f.title !== f.syllabusSubtopicName
-                        return titleIsCustom ? { ...f, syllabusSubtopicName: picked } : { ...f, syllabusSubtopicName: picked, title: picked }
-                      })
-                    }
-                  }}
-                  disabled={!spineSelectedTopic}
-                >
-                  <option value="">{spineSelectedTopic ? 'Select subtopic...' : 'Pick a topic first'}</option>
-                  {(spineSelectedTopic?.subtopics || []).map(st => (
-                    <option key={st._id || st.name} value={st.name}>{st.code ? st.code + ': ' : ''}{st.name}</option>
-                  ))}
-                </select>
+          {plan.taught.length > 0 && (
+            <div style={{ background: '#FBF8F3', borderRadius: 12, padding: 12 }}>
+              <div style={{ fontSize: 10.5, fontWeight: 900, letterSpacing: '.1em', color: GOLD, marginBottom: 6 }}>TAUGHT ({plan.taught.length})</div>
+              <div style={{ display: 'grid', gap: 3, maxHeight: 150, overflow: 'auto' }}>
+                {plan.taught.map((l, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 6px' }}>
+                    <span style={{ width: 16, height: 16, borderRadius: '50%', background: GOLD, color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 900 }}>{'\u2713'}</span>
+                    <span style={{ fontSize: 11.5, color: MUT }}>{l.title}</span>
+                  </div>
+                ))}
               </div>
             </div>
           )}
 
-          {/* Time + duration */}
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            <div className="fg" style={{ flex: 1, minWidth: 240 }}>
-              <label className="fl">Date &amp; Time *</label>
-              <input className="fi" type="datetime-local"
-                value={form.scheduledAt}
-                onChange={e => setF('scheduledAt', e.target.value)}
-              />
+          <div style={{ background: '#fff', border: `1.5px solid ${TRACK}`, borderRadius: 12, padding: 14 }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 8 }}>
+              <div style={{ fontSize: 10.5, fontWeight: 900, letterSpacing: '.1em', color: CRIM }}>UP NEXT ({queue.length})</div>
+              <div style={{ fontSize: 10.5, color: MUT }}>drag to reorder, or send any topic to the top - your classes will teach in this exact order</div>
             </div>
-            <div className="fg" style={{ minWidth: 140 }}>
-              <label className="fl">Duration (min) *</label>
-              <input className="fi" type="number" min={5} max={240} step={5}
-                value={form.durationMins}
-                onChange={e => setF('durationMins', e.target.value)}
-              />
-            </div>
-          </div>
-
-          {/* Classroom mode: built-in Smartious Classroom or external link */}
-          <div className="fg">
-            <label className="fl">How will this class run?</label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-              {[
-                { id: 'native', name: 'Smartious Classroom', desc: 'Built-in video + shared whiteboard. No external link needed.', badge: 'BETA' },
-                { id: 'link',   name: 'External link',       desc: 'Zoom, Google Meet, or any other meeting link.', badge: null },
-              ].map(m => (
-                <div key={m.id} onClick={() => setF('classroomMode', m.id)}
-                  style={{
-                    border: form.classroomMode === m.id ? '2px solid #7D1025' : '1.5px solid #E0DACB',
-                    background: form.classroomMode === m.id ? '#FDF4F1' : '#fff',
-                    borderRadius: 10, padding: '12px 14px', cursor: 'pointer',
-                  }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div style={{
-                      width: 15, height: 15, borderRadius: '50%', flexShrink: 0,
-                      border: form.classroomMode === m.id ? '5px solid #7D1025' : '2px solid #C9C2B0',
-                    }} />
-                    <span style={{ fontSize: 13, fontWeight: 800, color: '#2B2B2B' }}>{m.name}</span>
-                    {m.badge && (
-                      <span style={{ background: '#C9A030', color: '#7D1025', fontSize: 9, fontWeight: 800, padding: '2px 7px', borderRadius: 99, letterSpacing: '.08em' }}>{m.badge}</span>
-                    )}
+            <div style={{ display: 'grid', gap: 4 }}>
+              {queue.map((l, ix) => (
+                <div key={l._id} draggable
+                  onDragStart={() => { dragIx.current = ix }}
+                  onDragOver={ev => ev.preventDefault()}
+                  onDrop={() => { move(dragIx.current, ix); dragIx.current = null }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 9, cursor: 'grab',
+                    background: ix === 0 ? '#FBF3F5' : '#FDFCF9', border: `1px solid ${ix === 0 ? '#EFC6CF' : TRACK}` }}>
+                  <span style={{ fontSize: 11, fontWeight: 900, color: ix === 0 ? CRIM : MUT, width: 22, textAlign: 'center' }}>{ix + 1}</span>
+                  <span style={{ color: MUT, fontSize: 13, cursor: 'grab' }}>{'\u2261'}</span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 12.5, fontWeight: 700, color: INK }}>{l.title}</div>
+                    {(l.topicName || l.subtopicName) && <div style={{ fontSize: 10, color: MUT }}>{l.topicName}{l.subtopicName ? ': ' + l.subtopicName : ''}</div>}
                   </div>
-                  <div style={{ fontSize: 11.5, color: '#6B6B6B', marginTop: 5, lineHeight: 1.45 }}>{m.desc}</div>
+                  {ix === 0
+                    ? <span style={{ fontSize: 9.5, fontWeight: 900, color: CRIM }}>NEXT</span>
+                    : <button onClick={() => teachNext(ix)}
+                        style={{ padding: '4px 10px', borderRadius: 7, border: `1px solid ${CRIM}`, background: '#fff', color: CRIM, fontSize: 10, fontWeight: 800, cursor: 'pointer' }}>Teach next</button>}
+                  <div style={{ display: 'grid', gap: 2 }}>
+                    <button onClick={() => move(ix, ix - 1)} style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: 9, color: MUT, padding: 0 }}>{'\u25b2'}</button>
+                    <button onClick={() => move(ix, ix + 1)} style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: 9, color: MUT, padding: 0 }}>{'\u25bc'}</button>
+                  </div>
                 </div>
               ))}
             </div>
+            {dirty && <div style={{ marginTop: 10, fontSize: 11.5, color: CRIM, fontWeight: 700 }}>Unsaved order - press Save order to apply it to your upcoming classes.</div>}
           </div>
-
-          {/* Meeting link — only for external-link classes */}
-          {form.classroomMode !== 'native' ? (
-            <div className="fg">
-              <label className="fl">
-                Meeting link *
-                {currentDefaultLink && form.meetingLink === currentDefaultLink && (
-                  <span style={{ marginLeft: 8, fontSize: 11, color: '#15803D', fontWeight: 700, fontStyle: 'italic' }}>
-                    (pre-filled from your default)
-                  </span>
-                )}
-              </label>
-              <input className="fi"
-                type="url"
-                placeholder="https://us02web.zoom.us/j/XXXXXXX"
-                value={form.meetingLink} onChange={e => setF('meetingLink', e.target.value)}
-              />
-              <div style={{ fontSize: 11.5, color: '#6B6B6B', marginTop: 4 }}>
-                Students see a "Join Class" button that opens this link 10 minutes before the start time.
-              </div>
-            </div>
-          ) : (
-            <div className="fg">
-              <div style={{
-                background: '#FDF7E2', border: '1px solid #E8D58F', borderRadius: 9,
-                padding: '11px 14px', fontSize: 12, color: '#7D5A0F', lineHeight: 1.55,
-              }}>
-                Students join the built-in classroom from their portal with one tap — live video,
-                voice, and a shared whiteboard, all inside Smartious. You will see an
-                Enter Classroom button on the class card once you press Start.
-              </div>
-            </div>
-          )}
-
-          {/* Student selection */}
-          <div className="fg">
-            <label className="fl">
-              Assign students
-              <span style={{ marginLeft: 8, fontSize: 11, color: '#6B6B6B', fontWeight: 600 }}>
-                ({form.assignedStudents.length} selected)
-              </span>
-            </label>
-            {!form.curriculum || !form.grade ? (
-              <div style={{
-                padding: '12px 14px', background: '#FBFAF5',
-                border: '1px dashed #E8E2D6', borderRadius: 6,
-                fontSize: 12.5, color: '#6B6B6B', textAlign: 'center',
-              }}>
-                Pick a curriculum and grade first to see eligible students.
-              </div>
-            ) : eligibleStudents.length === 0 ? (
-              <div style={{
-                padding: '12px 14px', background: '#FEF3C7',
-                border: '1px solid #FCD34D', borderRadius: 6,
-                fontSize: 12.5, color: '#92400E',
-              }}>
-                No active students found for {form.curriculum} {form.grade}.
-              </div>
-            ) : (
-              <div style={{
-                maxHeight: 240, overflowY: 'auto',
-                border: '1px solid #E8E2D6', borderRadius: 6,
-                background: '#fff',
-              }}>
-                {eligibleStudents.map(s => {
-                  const isSelected = form.assignedStudents.includes(s._id)
-                  return (
-                    <label key={s._id}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 10,
-                        padding: '8px 12px', cursor: 'pointer',
-                        background: isSelected ? '#FBF6E3' : 'transparent',
-                        borderBottom: '1px solid #F4EFE5',
-                        fontSize: 13,
-                      }}
-                    >
-                      <input type="checkbox" checked={isSelected}
-                        onChange={() => toggleStudent(s._id)}
-                        style={{ width: 16, height: 16 }}
-                      />
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 600, color: '#1A1A1A' }}>
-                          {s.firstName} {s.lastName}
-                        </div>
-                        <div style={{ fontSize: 11, color: '#6B6B6B' }}>
-                          {s.admissionNumber || s.email} &middot; {s.gradeLevel || form.grade}
-                        </div>
-                      </div>
-                    </label>
-                  )
-                })}
-              </div>
-            )}
-            {eligibleStudents.length > 0 && (
-              <div style={{ marginTop: 6, display: 'flex', gap: 6 }}>
-                <button type="button"
-                  onClick={() => setF('assignedStudents', eligibleStudents.map(s => s._id))}
-                  style={{
-                    background: 'transparent', border: '1px solid #7D1025',
-                    color: '#7D1025', padding: '4px 12px', borderRadius: 4,
-                    fontSize: 11.5, fontWeight: 700, cursor: 'pointer',
-                  }}>
-                  Select All
-                </button>
-                <button type="button"
-                  onClick={() => setF('assignedStudents', [])}
-                  style={{
-                    background: 'transparent', border: '1px solid #E8E2D6',
-                    color: '#6B6B6B', padding: '4px 12px', borderRadius: 4,
-                    fontSize: 11.5, fontWeight: 600, cursor: 'pointer',
-                  }}>
-                  Clear
-                </button>
-              </div>
-            )}
-          </div>
-
-          <div className="fg">
-            <label className="fl">Notes for students (optional)</label>
-            <textarea className="fi" rows={2}
-              placeholder="What to bring, what to revise, etc."
-              value={form.notes} onChange={e => setF('notes', e.target.value)}
-              style={{ resize: 'vertical' }}
-            />
-          </div>
-
-          {/* Save / cancel */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 }}>
-            <button onClick={cancelForm} disabled={saving}
-              style={{
-                background: 'transparent', border: '1.5px solid #E8E2D6',
-                color: '#1A1A1A', padding: '10px 20px', borderRadius: 6,
-                fontSize: 13, fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer',
-              }}>Cancel</button>
-            <button onClick={saveForm} disabled={saving}
-              style={{
-                background: saving ? '#9CA3AF' : '#7D1025',
-                color: '#fff', border: 'none',
-                padding: '10px 22px', borderRadius: 6,
-                fontSize: 13, fontWeight: 700,
-                cursor: saving ? 'not-allowed' : 'pointer',
-              }}>
-              {saving ? 'Saving...' : (editing ? 'Save Changes' : 'Schedule Class')}
-            </button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // ─────────────────────────────────────────────────────
-  // LIST VIEW
-  // ─────────────────────────────────────────────────────
-  return (
-    <div>
-      {/* HERO */}
-      <div className="card" style={{
-        padding: 0, marginBottom: 18, overflow: 'hidden',
-        background: 'linear-gradient(135deg, #7D1025 0%, #5A0B1B 100%)',
-        color: '#FBFAF5',
-      }}>
-        <div style={{
-          padding: '24px 30px',
-          backgroundImage: 'radial-gradient(circle at 95% 50%, rgba(201,160,48,.18) 0%, transparent 50%)',
-          display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap',
-        }}>
-          <div style={{ flex: 1, minWidth: 220 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: '#F0CC5A', marginBottom: 6 }}>
-              Live Class Scheduler
-            </div>
-            <h1 className="serif" style={{ fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
-              Schedule and run live sessions
-            </h1>
-            <div style={{ fontSize: 13, opacity: .85, marginTop: 4 }}>
-              Create one-off lessons, assign students, share your Zoom link.
-            </div>
-          </div>
-          <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
-            <button onClick={() => { setDefaultLinkInput(currentDefaultLink); setShowSettings(true) }}
-              title="Set default meeting link"
-              style={{
-                background: 'rgba(0,0,0,.15)', color: '#FBFAF5',
-                border: '1px solid rgba(251,250,245,.25)',
-                padding: '12px 14px', borderRadius: 8,
-                cursor: 'pointer', fontSize: 13, fontWeight: 700,
-                display: 'flex', alignItems: 'center', gap: 6,
-              }}>
-              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="3"/>
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-              </svg>
-              Default Link
-            </button>
-            <button onClick={openCreate}
-              style={{
-                background: '#C9A030', color: '#7D1025', border: 'none',
-                padding: '12px 22px', borderRadius: 8,
-                cursor: 'pointer', fontSize: 14, fontWeight: 700,
-                display: 'flex', alignItems: 'center', gap: 8,
-                boxShadow: '0 4px 14px rgba(201,160,48,.35)',
-              }}>
-              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                <line x1="12" y1="5" x2="12" y2="19"/>
-                <line x1="5" y1="12" x2="19" y2="12"/>
-              </svg>
-              Schedule Class
-            </button>
-          </div>
-        </div>
-        {/* Stats strip */}
-        <div style={{
-          display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))',
-          background: 'rgba(0,0,0,.18)',
-        }}>
-          {[
-            ['Total', stats.total, '#FBFAF5'],
-            ['Scheduled', stats.scheduled, '#F0CC5A'],
-            ['Live Now', stats.live, '#FCA5A5'],
-            ['Ended', stats.ended, '#FBFAF5'],
-          ].map(([label, value, color]) => (
-            <div key={label} style={{
-              padding: '12px 18px',
-              borderRight: '1px solid rgba(251,250,245,.08)',
-            }}>
-              <div style={{
-                fontSize: 10, fontWeight: 700, letterSpacing: '.1em',
-                textTransform: 'uppercase', opacity: .7, color: '#F0CC5A',
-                marginBottom: 2,
-              }}>{label}</div>
-              <div className="mono" style={{ fontSize: 16, fontWeight: 700, color }}>
-                {value}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Filters */}
-      <div className="card" style={{ marginBottom: 14, padding: 14 }}>
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-end' }}>
-          <div style={{ flex: 1, minWidth: 200 }}>
-            <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#7D1025', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '.06em' }}>
-              Search
-            </label>
-            <input className="fi" placeholder="Search by title or subject..."
-              value={searchQ} onChange={e => setSearchQ(e.target.value)}
-              style={{ width: '100%' }}
-            />
-          </div>
-          <div style={{ minWidth: 160 }}>
-            <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#7D1025', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '.06em' }}>
-              Status
-            </label>
-            <select className="fsel" value={filter} onChange={e => setFilter(e.target.value)} style={{ width: '100%' }}>
-              <option value="all">All</option>
-              <option value="scheduled">Scheduled</option>
-              <option value="live">Live Now</option>
-              <option value="ended">Ended</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      {/* List */}
-      {loading ? (
-        <div className="card" style={{ padding: 40, textAlign: 'center' }}>
-          <div className="mono" style={{ fontSize: 13, color: 'var(--s400)', letterSpacing: '.1em' }}>
-            LOADING CLASSES...
-          </div>
-        </div>
-      ) : filtered.length === 0 ? (
-        <div className="card" style={{ padding: '40px 32px', textAlign: 'center' }}>
-          <div className="serif" style={{ fontSize: 20, color: '#1A1A1A', marginBottom: 6 }}>
-            {classes.length === 0 ? 'No classes yet' : 'No classes match your filters'}
-          </div>
-          <div style={{ fontSize: 13, color: '#6B6B6B', marginBottom: 16 }}>
-            {classes.length === 0
-              ? 'Schedule your first live class to get started.'
-              : 'Try clearing search or filters.'}
-          </div>
-          {classes.length === 0 && (
-            <button onClick={openCreate}
-              style={{
-                background: '#7D1025', color: '#fff', border: 'none',
-                padding: '10px 22px', borderRadius: 6,
-                fontSize: 13, fontWeight: 700, cursor: 'pointer',
-              }}>Schedule Class</button>
-          )}
-        </div>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {filtered.map(lc => (
-            <TeacherClassCard key={lc._id} lc={lc}
-              onEdit={() => openEdit(lc)}
-              onDelete={() => deleteClass(lc)}
-              onStart={() => startClass(lc)}
-              onEnd={() => endClass(lc)}
-              toast={toast}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* ─── Default meeting link settings modal ─── */}
-      {showSettings && (
-        <div style={{
-          position:'fixed', inset:0, zIndex:100,
-          background:'rgba(0,0,0,.6)',
-          display:'flex', alignItems:'center', justifyContent:'center',
-          padding:20,
-        }}
-          onClick={(e) => { if (e.target === e.currentTarget) setShowSettings(false) }}
-        >
-          <div style={{
-            background:'#fff', borderRadius:12,
-            maxWidth:540, width:'100%', overflow:'hidden',
-            boxShadow:'0 24px 64px rgba(0,0,0,.4)',
-          }}>
-            <div style={{
-              padding:'18px 24px',
-              background:'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)',
-              color:'#FBFAF5',
-            }}>
-              <div style={{ fontSize:10.5, fontWeight:700, letterSpacing:'.12em', textTransform:'uppercase', color:'#F0CC5A' }}>
-                Settings
-              </div>
-              <div style={{ fontFamily:"'Instrument Serif',serif", fontSize:22, marginTop:2 }}>
-                Default Meeting Link
-              </div>
-            </div>
-            <div style={{ padding:'22px 24px' }}>
-              <p style={{ fontSize:13, color:'#3F3F3F', margin:'0 0 14px', lineHeight:1.55 }}>
-                When you schedule a new live class, this link will be pre-filled in the meeting URL field.
-                You can override it per class if needed.
-              </p>
-              <label style={{ fontSize:11, fontWeight:700, letterSpacing:'.06em', textTransform:'uppercase', color:'#7D1025' }}>
-                Your Zoom personal room (or any video meeting URL)
-              </label>
-              <input
-                value={defaultLinkInput}
-                onChange={e => setDefaultLinkInput(e.target.value)}
-                placeholder="https://us02web.zoom.us/j/1234567890"
-                style={{
-                  width:'100%', boxSizing:'border-box', marginTop:6,
-                  padding:'10px 12px', borderRadius:6,
-                  border:'1.5px solid #E8E2D6',
-                  fontSize:13, fontFamily:'inherit',
-                }}
-              />
-              <div style={{ fontSize:11, color:'#6B6B6B', marginTop:8 }}>
-                Saved to your teacher profile. Visible only to you.
-              </div>
-            </div>
-            <div style={{
-              padding:'14px 24px',
-              background:'#FBFAF5', borderTop:'1px solid #E8E2D6',
-              display:'flex', justifyContent:'flex-end', gap:8,
-            }}>
-              <button onClick={() => setShowSettings(false)} disabled={savingSettings}
-                style={{
-                  background:'#fff', color:'#7D1025',
-                  border:'1.5px solid #E8E2D6',
-                  padding:'9px 18px', borderRadius:6,
-                  cursor:'pointer', fontSize:13, fontWeight:700,
-                }}>
-                Cancel
-              </button>
-              <button onClick={saveDefaultLink} disabled={savingSettings}
-                style={{
-                  background: savingSettings ? '#9CA3AF' : '#7D1025',
-                  color:'#fff', border:'none',
-                  padding:'9px 20px', borderRadius:6,
-                  cursor: savingSettings ? 'not-allowed' : 'pointer',
-                  fontSize:13, fontWeight:700,
-                }}>
-                {savingSettings ? 'Saving...' : 'Save'}
-              </button>
-            </div>
-          </div>
-        </div>
+        </>
       )}
     </div>
   )
 }
 
-// ─────────────────────────────────────────────────────────
-// TeacherClassCard — one card per class in the scheduler list
-// ─────────────────────────────────────────────────────────
 // ── Native-class attendance modal ────────────────────────
 // Shows the automatically captured register for a Smartious Classroom
 // session: join time, minutes connected, reconnects, late/absent.
