@@ -10527,7 +10527,7 @@ function ScheduleClassesTab({ user, toast }) {
         setPlan(d || { linked: false })
         setQueue(d?.queue ? [...d.queue] : [])
       })
-      .catch(() => setPlan({ linked: false }))
+      .catch(err => setPlan({ error: err?.response?.status === 404 ? 'The lesson-plan service is not deployed yet - update the backend and try again.' : (err?.response?.data?.message || 'Could not load the lesson plan.') }))
   }
 
   const move = (from, to) => {
@@ -10536,6 +10536,14 @@ function ScheduleClassesTab({ user, toast }) {
     setDirty(true)
   }
   const teachNext = (ix) => move(ix, 0)
+
+  const pinLesson = async (classId, lessonId) => {
+    try {
+      const r = await api.patch(`/liveclasses/${classId}/lesson`, { lessonId })
+      toast?.ok?.(r.data?.message || 'Lesson pinned.')
+      openSlot(sel)
+    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not pin the lesson.') }
+  }
 
   const save = async () => {
     if (!sel || !queue.length) return
@@ -10571,18 +10579,37 @@ function ScheduleClassesTab({ user, toast }) {
           </div>
         </div>
       )}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 10 }}>
-        {(entries || []).map(e => (
-          <div key={e._id} onClick={() => openSlot(e)}
-            style={{ background: '#fff', border: `1.5px solid ${TRACK}`, borderRadius: 12, padding: 14, cursor: 'pointer' }}>
-            <div style={{ fontWeight: 800, fontSize: 14, color: INK }}>{e.subject}</div>
-            <div style={{ fontSize: 11.5, color: CRIM, fontWeight: 700, marginTop: 2 }}>{slotLabel(e)}</div>
-            <div style={{ fontSize: 11, color: MUT, marginTop: 4 }}>
-              {(e.assignedStudents || []).length} student(s){e.curriculum ? ' \u00b7 ' + e.curriculum : ''}{e.grade ? ' \u00b7 ' + e.grade : ''}
-            </div>
-            {!e.subjectId && <div style={{ fontSize: 10, color: '#B45309', fontWeight: 700, marginTop: 6 }}>Not linked to a syllabus - link it in the Timetable tab to manage lessons</div>}
-          </div>
-        ))}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 10 }}>
+        {(() => {
+          const groups = {}
+          ;(entries || []).forEach(e => {
+            const key = e.subjectId
+              ? String(e.subjectId) + '|' + (e.assignedStudents || []).map(String).sort().join(',')
+              : 'solo|' + e._id
+            ;(groups[key] = groups[key] || []).push(e)
+          })
+          return Object.values(groups).map(g => {
+            const lead = g[0]
+            return (
+              <div key={lead._id} onClick={() => openSlot(lead)}
+                style={{ background: '#fff', border: `1.5px solid ${TRACK}`, borderRadius: 12, padding: 14, cursor: 'pointer' }}>
+                <div style={{ fontWeight: 800, fontSize: 14, color: INK }}>{lead.subject}</div>
+                <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 5 }}>
+                  {g.map(e => (
+                    <span key={e._id} style={{ fontSize: 10, fontWeight: 800, color: CRIM, background: '#FBF3F5', borderRadius: 999, padding: '3px 9px' }}>
+                      {e.dayOfWeek} {e.startTime}
+                    </span>
+                  ))}
+                </div>
+                <div style={{ fontSize: 11, color: MUT, marginTop: 6 }}>
+                  {(lead.assignedStudents || []).length} student(s){lead.curriculum ? ' \u00b7 ' + lead.curriculum : ''}{lead.grade ? ' \u00b7 ' + lead.grade : ''}
+                  {g.length > 1 ? ` \u00b7 ${g.length} weekly slots share one lesson plan` : ''}
+                </div>
+                {!lead.subjectId && <div style={{ fontSize: 10, color: '#B45309', fontWeight: 700, marginTop: 6 }}>Not linked to a syllabus - link it in the Timetable tab to manage lessons</div>}
+              </div>
+            )
+          })
+        })()}
       </div>
     </div>
   )
@@ -10604,6 +10631,11 @@ function ScheduleClassesTab({ user, toast }) {
       </div>
 
       {plan === undefined && <div style={{ color: MUT, fontSize: 13 }}>Loading the lesson plan...</div>}
+      {plan && plan.error && (
+        <div style={{ background: '#FDF1F1', border: '1.5px solid #F0C9C9', borderRadius: 12, padding: 16, fontSize: 12.5, color: '#8A1F1F' }}>
+          {plan.error} <button onClick={() => openSlot(sel)} style={{ marginLeft: 8, padding: '4px 12px', borderRadius: 7, border: '1px solid #8A1F1F', background: '#fff', color: '#8A1F1F', fontSize: 11, fontWeight: 800, cursor: 'pointer' }}>Retry</button>
+        </div>
+      )}
       {plan && plan.linked === false && (
         <div style={{ background: '#FFF8EB', border: '1.5px solid #F1E4C8', borderRadius: 12, padding: 18, fontSize: 12.5, color: '#7A5A17' }}>
           This slot is not linked to a syllabus, so there is no lesson plan to manage. Edit the slot in the <b>Timetable</b> tab and pick its subject from the syllabus list.
@@ -10612,9 +10644,35 @@ function ScheduleClassesTab({ user, toast }) {
 
       {plan && plan.linked && (
         <>
-          {plan.upcomingDates?.length > 0 && (
-            <div style={{ fontSize: 11.5, color: MUT }}>
-              Next classes: {plan.upcomingDates.map(fmtD).join(' \u00b7 ')} - saving a new order updates them instantly.
+          {plan.slots?.length > 1 && (
+            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+              {plan.slots.map(sl => (
+                <span key={sl._id} style={{ fontSize: 10.5, fontWeight: 800, color: CRIM, background: '#FBF3F5', borderRadius: 999, padding: '4px 10px' }}>{sl.dayOfWeek} {sl.startTime}</span>
+              ))}
+              <span style={{ fontSize: 10.5, color: MUT, alignSelf: 'center' }}>one lesson plan across all these slots</span>
+            </div>
+          )}
+
+          {plan.upcoming?.length > 0 && (
+            <div style={{ background: '#fff', border: `1.5px solid ${TRACK}`, borderRadius: 12, padding: 14 }}>
+              <div style={{ fontSize: 10.5, fontWeight: 900, letterSpacing: '.1em', color: INK, marginBottom: 2 }}>UPCOMING CLASSES</div>
+              <div style={{ fontSize: 10.5, color: MUT, marginBottom: 8 }}>each class and its lesson - pin a different topic to any single class without touching the rest of the plan</div>
+              <div style={{ display: 'grid', gap: 4 }}>
+                {plan.upcoming.map(c => (
+                  <div key={c._id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 8px', borderRadius: 8, background: '#FDFCF9' }}>
+                    <span style={{ fontSize: 11.5, fontWeight: 800, color: CRIM, whiteSpace: 'nowrap' }}>{fmtD(c.scheduledAt)}</span>
+                    <span style={{ flex: 1, fontSize: 12, color: INK, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {c.lessonTitle || <i style={{ color: MUT }}>no lesson assigned</i>}
+                      {c.pinned && <span style={{ fontSize: 9, fontWeight: 900, color: '#B45309', marginLeft: 6 }}>PINNED</span>}
+                    </span>
+                    <select defaultValue="" onChange={ev => { if (ev.target.value) pinLesson(c._id, ev.target.value) }}
+                      style={{ padding: '4px 8px', border: `1px solid ${TRACK}`, borderRadius: 7, fontSize: 10.5, maxWidth: 170 }}>
+                      <option value="">Pin a lesson...</option>
+                      {queue.map(l => <option key={l._id} value={l._id}>{l.title}</option>)}
+                    </select>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
