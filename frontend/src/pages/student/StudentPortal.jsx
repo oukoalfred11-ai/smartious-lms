@@ -30,7 +30,6 @@ import CommunityChatView from '../../components/CommunityChat.jsx'
 import ClubsHub from '../../components/ClubsHub.jsx'
 import QuizGame from './QuizGame.jsx'
 import AchievementTab from './AchievementTab.jsx'
-import SubjectProgressCard from '../../components/SubjectProgressCard.jsx'
 import LibraryViewer from '../../components/LibraryViewer.jsx'
 
 // ── SVG icon helper ───────────────────────────────────────
@@ -1752,6 +1751,17 @@ export default function StudentPortal() {
           ════════════════════════════════════════════ */}
           {page === 'curriculum' && (() => {
             // ── 1. Read real enrolment from the user record ──
+            if (curriculumExpandedSubject) {
+              return (
+                <SubjectFullAnalysis
+                  subjectName={curriculumExpandedSubject}
+                  curriculum={user?.curriculum}
+                  grade={user?.gradeLevel || user?.grade || ''}
+                  api={api}
+                  onBack={() => setCurriculumExpandedSubject(null)}
+                />
+              )
+            }
             const enrolledCurriculum = user?.curriculum || ''
             const enrolledGrade      = user?.gradeLevel || user?.grade || ''
             // user.subjects is the canonical source per the User model
@@ -2015,47 +2025,6 @@ export default function StudentPortal() {
                               </div>
                             </div>
 
-                            {/* Stats strip */}
-                            <div style={{
-                              padding:'12px 16px',
-                              display:'flex', gap:14, alignItems:'center',
-                              borderBottom: isOpen ? '1px solid #F0EBE0' : 'none',
-                            }}>
-                              <div style={{ display:'flex', alignItems:'center', gap:6 }}>
-                                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#6B6B6B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                  <polygon points="5 3 19 12 5 21 5 3"/>
-                                </svg>
-                                <span style={{ fontSize:12, color:'#3F3F3F', fontWeight:600 }}>{lessonCt} lessons</span>
-                              </div>
-                              <div style={{ width:1, height:14, background:'#E8E2D6' }}/>
-                              <div style={{ display:'flex', alignItems:'center', gap:6 }}>
-                                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#6B6B6B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                                  <polyline points="14 2 14 8 20 8"/>
-                                </svg>
-                                <span style={{ fontSize:12, color:'#3F3F3F', fontWeight:600 }}>{hwCt} homework</span>
-                              </div>
-                              <div style={{ marginLeft:'auto' }}>
-                                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke={isOpen ? '#7D1025' : '#6B6B6B'} strokeWidth="2.5" strokeLinecap="round" style={{ transform: isOpen ? 'rotate(180deg)' : 'none', transition:'transform .2s' }}>
-                                  <polyline points="6 9 12 15 18 9"/>
-                                </svg>
-                              </div>
-                            </div>
-
-                            {/* Drawer */}
-                            {isOpen && (
-                              <div style={{ padding:'14px 16px 16px', background:'#FBFAF5' }}>
-                                {/* Quick actions */}
-                                <div style={{ marginTop: 14 }}>
-                                  <SubjectProgressCard
-                                    studentId={user?._id}
-                                    subjectName={subjectName}
-                                    curriculum={user?.curriculum}
-                                    api={api}
-                                  />
-                                </div>
-                              </div>
-                            )}
                           </div>
                         )
                       })}
@@ -14238,6 +14207,182 @@ function CommunityTab({ user, toast }) {
         <button style={seg(mode === 'feed')} onClick={() => setMode('feed')}>Feed</button>
       </div>
       {mode === 'chat' ? <CommunityChatView user={user} toast={toast}/> : <CommunityFeedView user={user} toast={toast}/>}
+    </div>
+  )
+}
+
+
+
+/* ── SubjectFullAnalysis: the full-page lesson-plan analysis ──────────
+   Opened from a subject plate. What is done, what is not, what is
+   next, and the estimated completion date paced from the timetable.
+   Handles both plan dialects: dated lessons and topic/subtopic trees. */
+function SubjectFullAnalysis({ subjectName, curriculum, grade, api, onBack }) {
+  const GOLD = '#C9973A', CRIM = '#7D1025', TRACK = '#F1EAD9', INK = '#231715', MUT = '#8A8378', CREAM = '#FCFAF5'
+  const [data, setData] = useState(undefined)   // undefined = loading, null = no spine
+  useEffect(() => {
+    let on = true
+    const norm = (x) => String(x || '').toLowerCase().replace(/[^a-z0-9]/g, '')
+    api.get('/subjects', { params: { curriculum } })
+      .then(r => {
+        const list = r.data?.data?.subjects || r.data?.data || []
+        const hit = list.find(x => norm(x.subjectName) === norm(subjectName))
+          || list.find(x => norm(x.subjectName).includes(norm(subjectName)) || norm(subjectName).includes(norm(x.subjectName)))
+        if (!hit) { if (on) setData(null); return }
+        return api.get('/curriculum/progress/subject', { params: { subjectId: hit._id } })
+          .then(r2 => { if (on) setData(r2.data?.data || null) })
+      })
+      .catch(() => { if (on) setData(null) })
+    return () => { on = false }
+  }, [subjectName, curriculum, api])
+
+  const fmt = (d) => d ? new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : ''
+  const fmtS = (d) => d ? new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : ''
+
+  const Back = () => (
+    <button onClick={onBack} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 9, border: `1.5px solid ${TRACK}`, background: '#fff', color: CRIM, fontSize: 12.5, fontWeight: 800, cursor: 'pointer' }}>
+      {'\u2190'} My subjects
+    </button>
+  )
+  const Tick = ({ on, next }) => on
+    ? <span style={{ width: 17, height: 17, borderRadius: '50%', background: GOLD, color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 900, flexShrink: 0 }}>{'\u2713'}</span>
+    : <span style={{ width: 17, height: 17, borderRadius: '50%', border: `2px ${next ? 'solid ' + CRIM : 'solid ' + TRACK}`, display: 'inline-block', flexShrink: 0 }} />
+
+  if (data === undefined) return <div style={{ padding: 40, textAlign: 'center', color: MUT, fontSize: 13 }}><Back /><div style={{ marginTop: 20 }}>Loading your lesson plan...</div></div>
+  if (data === null) return (
+    <div style={{ padding: 20 }}>
+      <Back />
+      <div className="card" style={{ padding: 24, marginTop: 16, fontSize: 13, color: MUT }}>
+        No syllabus is loaded for {subjectName} yet - your lesson plan will appear here once the school adds it.
+      </div>
+    </div>
+  )
+
+  const total = data.counts.total, covered = data.counts.covered
+  const pct = total ? Math.round(covered / total * 100) : 0
+  const R = 48, CIRC = 2 * Math.PI * R
+  const aF = total ? (data.counts.attended || covered) / total : 0
+  const mF = total ? (data.counts.missed || 0) / total : 0
+
+  // Flatten to find "next up" in either dialect.
+  let nextItem = null
+  if (data.mode === 'subtopics') {
+    outer: for (const g of data.groups) for (const it of g.items) if (!it.done) { nextItem = { name: it.name, topic: g.topic, date: null }; break outer }
+  } else {
+    const n = (data.plan || []).find(l => l.status === 'scheduled' || l.status === 'projected')
+    if (n) nextItem = { name: n.title, topic: n.topic, date: n.date, projected: n.status === 'projected' }
+  }
+
+  const stat = (label, value, color) => (
+    <div style={{ background: CREAM, border: `1px solid ${TRACK}`, borderRadius: 12, padding: '12px 18px', minWidth: 110 }}>
+      <div style={{ fontSize: 20, fontWeight: 900, color: color || INK }}>{value}</div>
+      <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.08em', color: MUT, textTransform: 'uppercase' }}>{label}</div>
+    </div>
+  )
+
+  return (
+    <div style={{ display: 'grid', gap: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        <Back />
+        <div style={{ flex: 1 }} />
+        {data.slot && <span style={{ fontSize: 11.5, fontWeight: 800, color: CRIM, background: '#FBF3F5', padding: '6px 14px', borderRadius: 999 }}>every {data.slot}</span>}
+      </div>
+
+      <div>
+        <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.14em', color: GOLD }}>LESSON PLAN ANALYSIS</div>
+        <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 30, fontWeight: 400, color: INK, margin: '2px 0 0' }}>{subjectName}</h2>
+        <div style={{ fontSize: 12.5, color: MUT, marginTop: 2 }}>{curriculum}{grade ? ' \u00b7 ' + grade : ''}</div>
+      </div>
+
+      {/* Hero: donut + stats + estimated completion */}
+      <div className="card" style={{ padding: 20, display: 'flex', gap: 20, alignItems: 'center', flexWrap: 'wrap' }}>
+        <svg width="118" height="118" viewBox="0 0 118 118">
+          <circle cx="59" cy="59" r={R} fill="none" stroke={TRACK} strokeWidth="13" />
+          <circle cx="59" cy="59" r={R} fill="none" stroke={GOLD} strokeWidth="13" strokeLinecap="round" strokeDasharray={`${aF * CIRC} ${CIRC}`} transform="rotate(-90 59 59)" />
+          {mF > 0 && <circle cx="59" cy="59" r={R} fill="none" stroke={CRIM} strokeWidth="13" strokeLinecap="round" strokeDasharray={`${mF * CIRC} ${CIRC}`} strokeDashoffset={-(aF * CIRC)} transform="rotate(-90 59 59)" />}
+          <text x="59" y="56" textAnchor="middle" style={{ font: '800 21px Montserrat, Arial', fill: CRIM }}>{pct}%</text>
+          <text x="59" y="72" textAnchor="middle" style={{ font: '700 9px Montserrat, Arial', fill: MUT, letterSpacing: '.1em' }}>COVERED</text>
+        </svg>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', flex: 1 }}>
+          {stat('Covered', `${covered}/${total}`, GOLD)}
+          {data.mode === 'lessons' && stat('Attended', data.counts.attended, GOLD)}
+          {data.mode === 'lessons' && data.counts.missed > 0 && stat('To catch up', data.counts.missed, CRIM)}
+          {stat('Remaining', total - covered, INK)}
+          {data.pace?.estCompletionDate && (
+            <div style={{ background: CRIM, borderRadius: 12, padding: '12px 18px', minWidth: 150 }}>
+              <div style={{ fontSize: 16, fontWeight: 900, color: '#FDF6E3' }}>{fmt(data.pace.estCompletionDate)}</div>
+              <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.08em', color: GOLD, textTransform: 'uppercase' }}>Est. completion{data.pace.perWeek ? ` \u00b7 ~${data.pace.perWeek}/wk` : ''}</div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Next up */}
+      {nextItem && (
+        <div className="card" style={{ padding: 16, borderLeft: `4px solid ${CRIM}` }}>
+          <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: '.12em', color: CRIM }}>NEXT UP</div>
+          <div style={{ fontSize: 16, fontWeight: 800, color: INK, marginTop: 3 }}>{nextItem.name}</div>
+          <div style={{ fontSize: 11.5, color: MUT, marginTop: 2 }}>
+            {nextItem.topic}{nextItem.date ? ` \u00b7 ${nextItem.projected ? 'expected ~' : ''}${fmtS(nextItem.date)}` : ''}
+          </div>
+        </div>
+      )}
+
+      {/* The full plan */}
+      {data.mode === 'subtopics' ? (
+        <div style={{ display: 'grid', gap: 12 }}>
+          {data.groups.map((g, gi) => {
+            const gDone = g.items.filter(x => x.done).length
+            const gPct = g.items.length ? Math.round(gDone / g.items.length * 100) : 0
+            let nextFound = false
+            return (
+              <div key={gi} className="card" style={{ padding: 16 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                  <div style={{ fontSize: 12.5, fontWeight: 900, color: INK, flex: 1 }}>{g.topic}</div>
+                  <span style={{ fontSize: 10.5, fontWeight: 800, color: gPct === 100 ? GOLD : MUT }}>{gDone}/{g.items.length}</span>
+                </div>
+                <div style={{ height: 5, borderRadius: 999, background: TRACK, marginBottom: 10 }}>
+                  <div style={{ width: gPct + '%', height: '100%', borderRadius: 999, background: GOLD }} />
+                </div>
+                <div style={{ display: 'grid', gap: 3 }}>
+                  {g.items.map((it, i) => {
+                    const isNext = !it.done && !nextFound && nextItem && nextItem.name === it.name && nextItem.topic === g.topic
+                    if (isNext) nextFound = true
+                    return (
+                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '5px 8px', borderRadius: 8, background: isNext ? '#FBF3F5' : 'transparent' }}>
+                        <Tick on={it.done} next={isNext} />
+                        <span style={{ flex: 1, fontSize: 12, fontWeight: 600, color: it.done ? INK : MUT }}>{it.name}</span>
+                        {it.done && it.date && <span style={{ fontSize: 10, fontWeight: 800, color: GOLD }}>{fmtS(it.date)}</span>}
+                        {isNext && <span style={{ fontSize: 9.5, fontWeight: 900, color: CRIM }}>NEXT</span>}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      ) : (
+        <div className="card" style={{ padding: 16, display: 'grid', gap: 4 }}>
+          {(data.plan || []).map((l, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '6px 8px', borderRadius: 8, background: l.status === 'scheduled' ? '#FBF3F5' : 'transparent', opacity: l.status === 'projected' ? 0.85 : 1 }}>
+              {l.status === 'attended' ? <Tick on /> : l.status === 'missed'
+                ? <span style={{ width: 17, height: 17, borderRadius: '50%', background: CRIM, color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 900, flexShrink: 0 }}>{'\u2713'}</span>
+                : <Tick next={l.status === 'scheduled'} />}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 12.5, fontWeight: 700, color: (l.status === 'attended' || l.status === 'missed') ? INK : MUT }}>{l.title}</div>
+                {(l.topic || l.subtopic) && <div style={{ fontSize: 10, color: MUT }}>{l.topic}{l.subtopic ? ': ' + l.subtopic : ''}</div>}
+              </div>
+              <span style={{ fontSize: 10.5, fontWeight: 800, whiteSpace: 'nowrap', color: l.status === 'attended' ? GOLD : l.status === 'missed' ? CRIM : l.status === 'scheduled' ? CRIM : MUT }}>
+                {l.status === 'projected' ? '~' + fmtS(l.date) : fmtS(l.date)}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+      <div style={{ fontSize: 10.5, color: MUT }}>
+        Gold {'\u2713'} covered {'\u00b7'} crimson {'\u2713'} class held, catch up with the recording {'\u00b7'} outlined = next or scheduled {'\u00b7'} dates on upcoming items are estimated from your weekly timetable pace.
+      </div>
     </div>
   )
 }
