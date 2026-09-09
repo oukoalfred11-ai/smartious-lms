@@ -10726,9 +10726,12 @@ function ScheduleClassesTab({ user, toast }) {
             <div style={{ ...card, padding: 18 }}>
               <div style={{ ...kicker, color: GREEN }}>Live lessons</div>
               <div style={{ fontSize: 11, color: MUT, marginTop: 2 }}>your scheduled classes for this subject - live ones glow green</div>
+              {dirty && <div style={{ fontSize: 10.5, color: CRIM, fontWeight: 800, marginTop: 6 }}>Previewing your unsaved order - press Save order to apply it.</div>}
               <div style={{ display: 'grid', gap: 6, marginTop: 10 }}>
                 {(plan.upcoming || []).length === 0 && <div style={{ fontSize: 12, color: MUT }}>No classes scheduled yet - the scheduler creates them from your timetable within a few hours.</div>}
-                {(plan.upcoming || []).map(c => (
+                {(() => { let qi = 0; return (plan.upcoming || []).map(c => {
+                  const shown = c.pinned ? c.lessonTitle : (queue[qi++]?.title || c.lessonTitle || '')
+                  return (
                   <div key={c._id} style={{ display: 'grid', gap: 8, padding: '10px 12px', borderRadius: 10,
                     background: c.status === 'live' ? GREEN_BG : '#FDFCF9',
                     border: `1px solid ${c.status === 'live' ? '#BFE3C6' : TRACK}`,
@@ -10737,8 +10740,8 @@ function ScheduleClassesTab({ user, toast }) {
                       <span style={{ fontSize: 11.5, fontWeight: 800, color: c.status === 'live' ? GREEN : CRIM, whiteSpace: 'nowrap' }}>
                         {c.status === 'live' ? 'LIVE NOW' : fmtDT(c.scheduledAt)}
                       </span>
-                      <span style={{ flex: 1, fontSize: 12, color: INK, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {c.lessonTitle || <i style={{ color: MUT }}>topic follows your plan</i>}
+                      <span style={{ flex: 1, fontSize: 12, fontWeight: 700, color: INK, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {shown || <i style={{ color: MUT, fontWeight: 400 }}>end of plan reached</i>}
                         {c.pinned && <span style={{ fontSize: 9, fontWeight: 900, color: '#B45309', marginLeft: 6 }}>PINNED</span>}
                       </span>
                       {joinBtn(c)}
@@ -10749,7 +10752,7 @@ function ScheduleClassesTab({ user, toast }) {
                       {queue.map(l => <option key={l.id} value={l.id}>{l.title}</option>)}
                     </select>
                   </div>
-                ))}
+                )})})()}
               </div>
             </div>
 
