@@ -456,6 +456,15 @@ router.patch('/:id/lesson', auth, async (req, res) => {
     const isStaff = ['admin', 'ops_manager', 'dos'].includes(req.user.role);
     if (!isStaff && String(cls.teacherId) !== String(req.user._id)) return res.status(403).json({ success: false, message: 'Not your class.' });
     if (new Date(cls.scheduledAt) <= new Date()) return res.status(400).json({ success: false, message: 'This class is in the past.' });
+    // Subtopic-dialect pin: { topicName, subtopicName }
+    if (!req.body?.lessonId && req.body?.subtopicName) {
+      cls.preparationLessonId = null;
+      cls.syllabusTopicName = String(req.body.topicName || '');
+      cls.syllabusSubtopicName = String(req.body.subtopicName);
+      cls.lessonPinned = true;
+      await cls.save();
+      return res.json({ success: true, message: `Pinned "${cls.syllabusSubtopicName}" to this class.` });
+    }
     const lesson = await Lesson.findById(req.body?.lessonId).lean();
     if (!lesson) return res.status(400).json({ success: false, message: 'lessonId required.' });
     if (cls.timetableEntryId) {
