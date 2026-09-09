@@ -10525,7 +10525,7 @@ function ScheduleClassesTab({ user, toast }) {
       .then(r => {
         const d = r.data?.data
         setPlan(d || { linked: false })
-        setQueue(d?.queue ? [...d.queue] : [])
+        setQueue(d?.queue ? d.queue.map(l => ({ id: l._id || l.key, title: l.title, sub: l.topicName || l.subtopicName || '' })) : [])
       })
       .catch(err => setPlan({ error: err?.response?.status === 404 ? 'The lesson-plan service is not deployed yet - update the backend and try again.' : (err?.response?.data?.message || 'Could not load the lesson plan.') }))
   }
@@ -10537,9 +10537,12 @@ function ScheduleClassesTab({ user, toast }) {
   }
   const teachNext = (ix) => move(ix, 0)
 
-  const pinLesson = async (classId, lessonId) => {
+  const pinLesson = async (classId, idOrKey) => {
     try {
-      const r = await api.patch(`/liveclasses/${classId}/lesson`, { lessonId })
+      const body = String(idOrKey).includes('||')
+        ? { topicName: idOrKey.split('||')[0], subtopicName: idOrKey.split('||')[1] }
+        : { lessonId: idOrKey }
+      const r = await api.patch(`/liveclasses/${classId}/lesson`, body)
       toast?.ok?.(r.data?.message || 'Lesson pinned.')
       openSlot(sel)
     } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not pin the lesson.') }
@@ -10549,7 +10552,7 @@ function ScheduleClassesTab({ user, toast }) {
     if (!sel || !queue.length) return
     setSaving(true)
     try {
-      const r = await api.patch(`/timetable/${sel._id}/lesson-plan`, { queueOrder: queue.map(l => l._id) })
+      const r = await api.patch(`/timetable/${sel._id}/lesson-plan`, { queueOrder: queue.map(l => l.id) })
       toast?.ok?.(r.data?.message || 'Order saved.')
       setDirty(false)
       openSlot(sel)
@@ -10653,6 +10656,17 @@ function ScheduleClassesTab({ user, toast }) {
             </div>
           )}
 
+          {plan.students?.length > 0 && (
+            <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', alignItems: 'center' }}>
+              <span style={{ fontSize: 10.5, fontWeight: 900, letterSpacing: '.1em', color: INK }}>STUDENTS ({plan.students.length})</span>
+              {plan.students.map(st => (
+                <span key={st._id} style={{ fontSize: 10.5, fontWeight: 700, color: INK, background: '#FBF8F3', border: `1px solid ${TRACK}`, borderRadius: 999, padding: '4px 11px' }}>
+                  {st.name}{st.grade ? ' \u00b7 ' + st.grade : ''}
+                </span>
+              ))}
+            </div>
+          )}
+
           {plan.upcoming?.length > 0 && (
             <div style={{ background: '#fff', border: `1.5px solid ${TRACK}`, borderRadius: 12, padding: 14 }}>
               <div style={{ fontSize: 10.5, fontWeight: 900, letterSpacing: '.1em', color: INK, marginBottom: 2 }}>UPCOMING CLASSES</div>
@@ -10665,10 +10679,26 @@ function ScheduleClassesTab({ user, toast }) {
                       {c.lessonTitle || <i style={{ color: MUT }}>no lesson assigned</i>}
                       {c.pinned && <span style={{ fontSize: 9, fontWeight: 900, color: '#B45309', marginLeft: 6 }}>PINNED</span>}
                     </span>
+                    {(() => {
+                      const start = new Date(c.scheduledAt)
+                      const isToday = start.toDateString() === new Date().toDateString()
+                      if (c.status === 'live') return (
+                        <button onClick={() => window.open('/classroom/' + c._id, '_blank')}
+                          style={{ padding: '5px 13px', borderRadius: 7, border: 'none', background: '#15803D', color: '#fff', fontSize: 10.5, fontWeight: 800, cursor: 'pointer' }}>Join live</button>
+                      )
+                      if (isToday) return (
+                        <button onClick={() => window.open('/classroom/' + c._id, '_blank')}
+                          style={{ padding: '5px 13px', borderRadius: 7, border: 'none', background: CRIM, color: '#fff', fontSize: 10.5, fontWeight: 800, cursor: 'pointer' }}>Start class</button>
+                      )
+                      return (
+                        <button onClick={() => window.open('/classroom/' + c._id, '_blank')}
+                          style={{ padding: '5px 13px', borderRadius: 7, border: `1px solid ${TRACK}`, background: '#fff', color: MUT, fontSize: 10.5, fontWeight: 800, cursor: 'pointer' }}>Open room</button>
+                      )
+                    })()}
                     <select defaultValue="" onChange={ev => { if (ev.target.value) pinLesson(c._id, ev.target.value) }}
-                      style={{ padding: '4px 8px', border: `1px solid ${TRACK}`, borderRadius: 7, fontSize: 10.5, maxWidth: 170 }}>
-                      <option value="">Pin a lesson...</option>
-                      {queue.map(l => <option key={l._id} value={l._id}>{l.title}</option>)}
+                      style={{ padding: '4px 8px', border: `1px solid ${TRACK}`, borderRadius: 7, fontSize: 10.5, maxWidth: 160 }}>
+                      <option value="">Pin a topic...</option>
+                      {queue.map(l => <option key={l.id} value={l.id}>{l.title}</option>)}
                     </select>
                   </div>
                 ))}
@@ -10697,7 +10727,7 @@ function ScheduleClassesTab({ user, toast }) {
             </div>
             <div style={{ display: 'grid', gap: 4 }}>
               {queue.map((l, ix) => (
-                <div key={l._id} draggable
+                <div key={l.id} draggable
                   onDragStart={() => { dragIx.current = ix }}
                   onDragOver={ev => ev.preventDefault()}
                   onDrop={() => { move(dragIx.current, ix); dragIx.current = null }}
@@ -10707,7 +10737,7 @@ function ScheduleClassesTab({ user, toast }) {
                   <span style={{ color: MUT, fontSize: 13, cursor: 'grab' }}>{'\u2261'}</span>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 12.5, fontWeight: 700, color: INK }}>{l.title}</div>
-                    {(l.topicName || l.subtopicName) && <div style={{ fontSize: 10, color: MUT }}>{l.topicName}{l.subtopicName ? ': ' + l.subtopicName : ''}</div>}
+                    {l.sub && <div style={{ fontSize: 10, color: MUT }}>{l.sub}</div>}
                   </div>
                   {ix === 0
                     ? <span style={{ fontSize: 9.5, fontWeight: 900, color: CRIM }}>NEXT</span>
@@ -10813,227 +10843,6 @@ function ClassroomAttendanceModal({ lc, onClose, toast }) {
   )
 }
 
-function TeacherClassCard({ lc, onEdit, onDelete, onStart, onEnd, toast }) {
-  const [showAttendance, setShowAttendance] = useState(false)
-  const status = lc.computedStatus
-  const [showMarkPanel, setShowMarkPanel] = useState(false)
-  const subjCol = ({
-    Mathematics: '#7D1025', Maths: '#7D1025',
-    English: '#0F766E', Physics: '#1E40AF',
-    Chemistry: '#7C3AED', Biology: '#15803D',
-    'Computer Science': '#0369A1', ICT: '#0369A1',
-    Business: '#92400E', Economics: '#92400E',
-    History: '#A16207', Geography: '#A16207',
-  })[lc.subject] || '#7D1025'
-
-  const statusBadge = status === 'scheduled'
-    ? { bg: '#FEF3C7', color: '#92400E', label: 'SCHEDULED' }
-    : status === 'live'
-    ? { bg: '#FEE2E2', color: '#B91C1C', label: 'LIVE NOW' }
-    : { bg: '#F1F5F9', color: '#64748B', label: 'ENDED' }
-
-  const formatDate = (iso) => new Date(iso).toLocaleString('en-GB', {
-    weekday: 'short', day: 'numeric', month: 'short',
-    hour: '2-digit', minute: '2-digit',
-  })
-
-  const studentCount = (lc.assignedStudents || []).length
-
-  return (
-    <div className="card" style={{
-      padding: 14, borderLeft: '4px solid ' + subjCol,
-    }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, flexWrap: 'wrap' }}>
-        <div style={{ flex: 1, minWidth: 240 }}>
-          <div style={{ display: 'flex', gap: 6, marginBottom: 4, flexWrap: 'wrap', alignItems: 'center' }}>
-            <span style={{
-              background: statusBadge.bg, color: statusBadge.color,
-              fontSize: 9.5, fontWeight: 800, letterSpacing: '.08em',
-              padding: '2px 8px', borderRadius: 99,
-            }}>{statusBadge.label}</span>
-            {status === 'live' && (
-              <span style={{
-                width: 7, height: 7, borderRadius: '50%',
-                background: '#B91C1C', animation: 'pulse 1.5s infinite',
-              }}/>
-            )}
-            <span style={{
-              fontSize: 11, fontWeight: 700, color: subjCol,
-              letterSpacing: '.06em', textTransform: 'uppercase',
-            }}>{lc.subject}</span>
-            <span style={{ fontSize: 11, color: '#6B6B6B' }}>
-              {lc.curriculum} {lc.grade}
-            </span>
-          </div>
-          <div style={{ fontWeight: 700, fontSize: 15, color: '#1A1A1A', marginBottom: 4 }}>
-            {lc.title}
-          </div>
-          {lc.syllabusSubtopicName && (
-            <div style={{
-              display: 'inline-block',
-              background: '#FDF7E2', color: '#7D5A0F',
-              fontSize: 10.5, fontWeight: 700,
-              padding: '2px 8px', borderRadius: 5,
-              marginBottom: 4,
-              border: '1px solid #E8D58F',
-            }}>
-              {lc.syllabusTopicName ? lc.syllabusTopicName + ' → ' : ''}{lc.syllabusSubtopicName}
-            </div>
-          )}
-          <div style={{ fontSize: 12, color: '#6B6B6B' }}>
-            {formatDate(lc.scheduledAt)} &middot; {lc.durationMins} min &middot; {studentCount} student{studentCount === 1 ? '' : 's'}
-          </div>
-          {lc.classroomMode === 'native' ? (
-            <div style={{ marginTop: 5, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-              <span style={{
-                background: '#FDF4F1', border: '1px solid #E8C4BC', color: '#7D1025',
-                fontSize: 10.5, fontWeight: 800, padding: '3px 10px', borderRadius: 99,
-                letterSpacing: '.05em',
-              }}>SMARTIOUS CLASSROOM</span>
-              {(lc.recordings || []).map((r, i) => (
-                <a key={i} href={r.url} target="_blank" rel="noopener noreferrer"
-                  style={{ fontSize: 11, color: '#7D1025', fontWeight: 700 }}>
-                  Recording {i + 1}{r.durationSec ? ' (' + Math.round(r.durationSec / 60) + ' min)' : ''}
-                </a>
-              ))}
-            </div>
-          ) : lc.meetingLink && (
-            <div style={{ fontSize: 11.5, color: '#6B6B6B', marginTop: 4, wordBreak: 'break-all' }}>
-              <strong style={{ color: '#7D1025' }}>Link:</strong>{' '}
-              <a href={lc.meetingLink} target="_blank" rel="noopener noreferrer"
-                style={{ color: '#7D1025' }}>
-                {lc.meetingLink.length > 60 ? lc.meetingLink.slice(0, 60) + '...' : lc.meetingLink}
-              </a>
-            </div>
-          )}
-        </div>
-
-        {/* Actions */}
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          {status === 'scheduled' && (
-            <>
-              <button onClick={onStart}
-                style={{
-                  background: '#15803D', color: '#fff', border: 'none',
-                  padding: '8px 14px', borderRadius: 6,
-                  fontSize: 12, fontWeight: 700, cursor: 'pointer',
-                }}>
-                Start
-              </button>
-              <button onClick={onEdit}
-                style={{
-                  background: 'transparent', border: '1px solid #C9A030',
-                  color: '#7D1025', padding: '8px 14px', borderRadius: 6,
-                  fontSize: 12, fontWeight: 700, cursor: 'pointer',
-                }}>
-                Edit
-              </button>
-              <button onClick={onDelete}
-                style={{
-                  background: 'transparent', border: '1px solid #FCA5A5',
-                  color: '#B91C1C', padding: '8px 14px', borderRadius: 6,
-                  fontSize: 12, fontWeight: 700, cursor: 'pointer',
-                }}>
-                Delete
-              </button>
-            </>
-          )}
-          {status === 'live' && (
-            <>
-              {lc.classroomMode === 'native' ? (
-                <>
-                <button onClick={() => window.open('/classroom/' + lc._id, '_blank', 'noopener')}
-                  style={{
-                    background: '#7D1025', color: '#fff', border: 'none',
-                    padding: '8px 14px', borderRadius: 6,
-                    fontSize: 12, fontWeight: 700, cursor: 'pointer',
-                  }}>
-                  Enter Classroom
-                </button>
-                <button onClick={() => setShowAttendance(true)}
-                  style={{
-                    background: 'transparent', border: '1px solid #C9A030',
-                    color: '#7D1025', padding: '8px 14px', borderRadius: 6,
-                    fontSize: 12, fontWeight: 700, cursor: 'pointer',
-                  }}>
-                  Attendance
-                </button>
-                </>
-              ) : (
-              <a href={lc.meetingLink} target="_blank" rel="noopener noreferrer"
-                style={{
-                  background: '#7D1025', color: '#fff',
-                  padding: '8px 14px', borderRadius: 6,
-                  fontSize: 12, fontWeight: 700, textDecoration: 'none',
-                }}>
-                Join Zoom
-              </a>
-              )}
-              <button onClick={onEnd}
-                style={{
-                  background: 'transparent', border: '1px solid #B91C1C',
-                  color: '#B91C1C', padding: '8px 14px', borderRadius: 6,
-                  fontSize: 12, fontWeight: 700, cursor: 'pointer',
-                }}>
-                End Class
-              </button>
-            </>
-          )}
-          {status === 'ended' && (
-            <>
-              {lc.classroomMode === 'native' && (
-                <button onClick={() => setShowAttendance(true)}
-                  style={{
-                    background: '#7D1025', color: '#fff', border: 'none',
-                    padding: '8px 14px', borderRadius: 6,
-                    fontSize: 12, fontWeight: 700, cursor: 'pointer',
-                  }}>
-                  Attendance
-                </button>
-              )}
-              {lc.syllabusSubtopicName && (
-                <button onClick={() => setShowMarkPanel(s => !s)}
-                  style={{
-                    background: showMarkPanel ? '#7D5A0F' : '#FDF7E2',
-                    color: showMarkPanel ? '#fff' : '#7D5A0F',
-                    border: '1px solid #E8D58F',
-                    padding: '8px 14px', borderRadius: 6,
-                    fontSize: 12, fontWeight: 700, cursor: 'pointer',
-                  }}>
-                  {showMarkPanel ? 'Close' : 'Mark progress'}
-                </button>
-              )}
-              <button onClick={onDelete}
-                style={{
-                  background: 'transparent', border: '1px solid #E8E2D6',
-                  color: '#6B6B6B', padding: '8px 14px', borderRadius: 6,
-                  fontSize: 12, fontWeight: 700, cursor: 'pointer',
-                }}>
-                Delete
-              </button>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Mark-progress inline panel (only when 'ended' AND spine-linked AND opened) */}
-      {status === 'ended' && lc.syllabusSubtopicName && showMarkPanel && (
-        <MarkProgressPanel lc={lc} onClose={() => setShowMarkPanel(false)} toast={toast} />
-      )}
-
-      {showAttendance && (
-        <ClassroomAttendanceModal lc={lc} onClose={() => setShowAttendance(false)} toast={toast} />
-      )}
-    </div>
-  )
-}
-
-// ─────────────────────────────────────────────────────────
-// MarkProgressPanel
-// Inline panel on a live class card. Lets teacher select which
-// students to mark as having completed the linked syllabus subtopic.
-// Calls POST /api/syllabus-progress/bulk on submit.
-// ─────────────────────────────────────────────────────────
 function MarkProgressPanel({ lc, onClose, toast }) {
   // assignedStudents may be populated User objects OR raw ObjectIds.
   // Normalise to { _id, firstName, lastName, fullName } objects.
@@ -15693,6 +15502,18 @@ function TeacherTimetableTab({ user, toast }) {
                     <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                       {cls.detached && chip('#FEF3C7', '#B45309', 'moved')}
                       {cls.timetableEntryId && !cls.detached && chip('#EFF6EF', C.green, 'from timetable')}
+                      {(() => {
+                        const start = new Date(cls.scheduledAt)
+                        const isToday = start.toDateString() === new Date().toDateString()
+                        const soonOrLive = cls.status === 'live' || (isToday && start - Date.now() < 6 * 3600e3)
+                        if (cls.status === 'cancelled' || !soonOrLive) return null
+                        return (
+                          <button onClick={() => window.open('/classroom/' + cls._id, '_blank')}
+                            style={{ padding: '5px 12px', borderRadius: 7, border: 'none', background: cls.status === 'live' ? '#15803D' : '#7D1025', color: '#fff', fontSize: 10.5, fontWeight: 800, cursor: 'pointer' }}>
+                            {cls.status === 'live' ? 'Join live' : 'Start class'}
+                          </button>
+                        )
+                      })()}
                       <button onClick={() => openResched(cls)} style={{ padding: '6px 12px', borderRadius: 7, border: `1px solid ${C.line}`, background: '#fff', fontSize: 10.5, fontWeight: 800, cursor: 'pointer', color: C.ink }}>Move</button>
                       <button onClick={() => cancelOccurrence(cls)} style={{ padding: '6px 12px', borderRadius: 7, border: '1px solid #FCA5A5', background: '#fff', fontSize: 10.5, fontWeight: 800, cursor: 'pointer', color: C.red }}>Cancel</button>
                     </div>
