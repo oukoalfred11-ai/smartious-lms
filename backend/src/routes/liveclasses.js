@@ -443,4 +443,34 @@ router.post('/:id/cancel', auth, requireRole('teacher', 'admin'), async (req, re
   }
 });
 
+// ── Pin a specific lesson to ONE class ───────────────────────────────
+// The deepest management level: a teacher overrides what a single
+// upcoming class teaches. Pinned classes are skipped by subject-level
+// reorders and restamps.
+router.patch('/:id/lesson', auth, async (req, res) => {
+  try {
+    const Lesson = require('../models/Lesson');
+    const TimetableEntry = require('../models/TimetableEntry');
+    const cls = await LiveClass.findById(req.params.id);
+    if (!cls) return res.status(404).json({ success: false, message: 'Class not found.' });
+    const isStaff = ['admin', 'ops_manager', 'dos'].includes(req.user.role);
+    if (!isStaff && String(cls.teacherId) !== String(req.user._id)) return res.status(403).json({ success: false, message: 'Not your class.' });
+    if (new Date(cls.scheduledAt) <= new Date()) return res.status(400).json({ success: false, message: 'This class is in the past.' });
+    const lesson = await Lesson.findById(req.body?.lessonId).lean();
+    if (!lesson) return res.status(400).json({ success: false, message: 'lessonId required.' });
+    if (cls.timetableEntryId) {
+      const entry = await TimetableEntry.findById(cls.timetableEntryId).select('subjectId').lean();
+      if (entry?.subjectId && String(entry.subjectId) !== String(lesson.subjectId)) {
+        return res.status(400).json({ success: false, message: 'That lesson belongs to a different syllabus.' });
+      }
+    }
+    cls.preparationLessonId = lesson._id;
+    cls.syllabusTopicName = lesson.topicName || lesson.title || '';
+    cls.syllabusSubtopicName = lesson.subtopicName || '';
+    cls.lessonPinned = true;
+    await cls.save();
+    res.json({ success: true, message: `Pinned "${lesson.title}" to this class.` });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
 module.exports = router;
