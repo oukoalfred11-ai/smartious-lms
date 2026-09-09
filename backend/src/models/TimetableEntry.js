@@ -123,6 +123,11 @@ const timetableEntrySchema = new mongoose.Schema({
   // Either explicit students OR broadcast by grade. At
   // least one must be set; the visibility filter in the
   // route OR's them together.
+  // Teacher-managed lesson sequence for this slot. When set, the
+  // materializer teaches in THIS order instead of the spine's default -
+  // how a tuition student gets a specific topic next while the
+  // timetable itself stays fixed.
+  lessonOrder: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Lesson' }],
   assignedStudents: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
