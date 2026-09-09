@@ -334,6 +334,7 @@ async function groupEntries(entry) {
 async function loadPlan(entry) {
   const lessons = await Lesson.find({ subjectId: entry.subjectId, isActive: { $ne: false } })
     .sort({ order: 1 }).select('title topicName subtopicName').lean();
+  if (!lessons.length) return loadSubtopicPlan(entry);
   const members = await groupEntries(entry);
   const usedIds = await LiveClass.distinct('preparationLessonId', {
     timetableEntryId: { $in: members.map(m => m._id) }, preparationLessonId: { $ne: null },
@@ -346,7 +347,39 @@ async function loadPlan(entry) {
   // Taught lessons first (history), then the teachable queue.
   const taught = ordered.filter(l => usedSet.has(String(l._id)));
   const queue = ordered.filter(l => !usedSet.has(String(l._id)));
-  return { taught, queue, members };
+  return { mode: 'lessons', taught, queue, members };
+}
+
+// Subtopic dialect: the plan is the SyllabusTopic tree; "taught" is
+// what the group's past classes have stamped.
+async function loadSubtopicPlan(entry) {
+  const SyllabusTopic = require('../models/SyllabusTopic');
+  const members = await groupEntries(entry);
+  const topics = await SyllabusTopic.find({ subjectId: entry.subjectId }).sort({ topicOrder: 1 }).lean();
+  if (!topics.length) return { mode: 'none', taught: [], queue: [], members };
+  const stamped = await LiveClass.find({
+    timetableEntryId: { $in: members.map(m => m._id) },
+    syllabusSubtopicName: { $nin: [null, ''] },
+    status: { $ne: 'cancelled' }, scheduledAt: { $lte: new Date() },
+  }).select('syllabusTopicName syllabusSubtopicName').lean();
+  const usedKeys = new Set(stamped.map(x => `${x.syllabusTopicName || ''}||${x.syllabusSubtopicName}`));
+  const all = [];
+  topics.forEach(tp => (tp.subtopics || []).forEach(st => all.push({
+    key: `${tp.topic}||${st.name}`, title: st.name, topicName: tp.topic,
+  })));
+  const os = members.find(m => Array.isArray(m.topicPlanOrder) && m.topicPlanOrder.length);
+  const ordered = [...all];
+  if (os) {
+    const rank = {};
+    os.topicPlanOrder.forEach((k, ix) => { rank[k] = ix; });
+    ordered.sort((a, b) => (rank[a.key] ?? 1e9) - (rank[b.key] ?? 1e9));
+  }
+  return {
+    mode: 'subtopics',
+    taught: ordered.filter(x => usedKeys.has(x.key)),
+    queue: ordered.filter(x => !usedKeys.has(x.key)),
+    members,
+  };
 }
 
 // Re-stamp future materialized instances to follow the (new) queue.
@@ -361,9 +394,9 @@ async function restampFuture(entry) {
   for (const cls of future) {
     if (cls.lessonPinned) continue;   // teacher pinned this class - keep it
     const l = queue[i++] || null;
-    cls.preparationLessonId = l ? l._id : null;
+    cls.preparationLessonId = l && l._id ? l._id : null;
     cls.syllabusTopicName = l ? (l.topicName || l.title || '') : '';
-    cls.syllabusSubtopicName = l ? (l.subtopicName || '') : '';
+    cls.syllabusSubtopicName = l ? (l.key ? l.title : (l.subtopicName || '')) : '';
     await cls.save();
     stamped += 1;
   }
@@ -383,19 +416,25 @@ router.get('/:id/lesson-plan', auth, async (req, res) => {
     if (!entry || entry.isActive === false) return res.status(404).json({ success: false, message: 'Slot not found.' });
     if (!canManage(req, entry)) return res.status(403).json({ success: false, message: 'Not your slot.' });
     if (!entry.subjectId) return res.json({ success: true, data: { linked: false } });
-    const { taught, queue, members } = await loadPlan(entry);
+    const { mode, taught, queue, members } = await loadPlan(entry);
     const lessonName = {};
-    [...taught, ...queue].forEach(l => { lessonName[String(l._id)] = l.title; });
+    [...taught, ...queue].forEach(l => { if (l._id) lessonName[String(l._id)] = l.title; });
     const upcoming = await LiveClass.find({
       timetableEntryId: { $in: members.map(m => m._id) }, fromTimetable: true, detached: { $ne: true },
       status: { $nin: ['cancelled', 'completed'] }, scheduledAt: { $gt: new Date() },
-    }).sort({ scheduledAt: 1 }).limit(10).select('scheduledAt preparationLessonId lessonPinned').lean();
+    }).sort({ scheduledAt: 1 }).limit(12).select('scheduledAt preparationLessonId lessonPinned status syllabusTopicName syllabusSubtopicName').lean();
+    const User = require('../models/User');
+    const studentIds = [...new Set(members.flatMap(m => (m.assignedStudents || []).map(String)))];
+    const students = await User.find({ _id: { $in: studentIds } }).select('firstName lastName gradeLevel').lean();
     res.json({ success: true, data: {
-      linked: true, taught, queue,
+      linked: mode !== 'none', mode, taught, queue,
       slots: members.map(m => ({ _id: m._id, dayOfWeek: m.dayOfWeek, startTime: m.startTime, endTime: m.endTime })),
+      students: students.map(st => ({ _id: st._id, name: [st.firstName, st.lastName].filter(Boolean).join(' '), grade: st.gradeLevel || '' })),
       upcoming: upcoming.map(x => ({
-        _id: x._id, scheduledAt: x.scheduledAt, pinned: !!x.lessonPinned,
-        lessonTitle: x.preparationLessonId ? (lessonName[String(x.preparationLessonId)] || 'Assigned lesson') : '',
+        _id: x._id, scheduledAt: x.scheduledAt, pinned: !!x.lessonPinned, status: x.status,
+        lessonTitle: x.preparationLessonId
+          ? (lessonName[String(x.preparationLessonId)] || 'Assigned lesson')
+          : (x.syllabusSubtopicName ? `${x.syllabusTopicName ? x.syllabusTopicName + ': ' : ''}${x.syllabusSubtopicName}` : ''),
       })),
     } });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
@@ -411,10 +450,21 @@ router.patch('/:id/lesson-plan', auth, async (req, res) => {
     if (!entry.subjectId) return res.status(400).json({ success: false, message: 'This slot is not linked to a syllabus.' });
     const ids = Array.isArray(req.body?.queueOrder) ? req.body.queueOrder.filter(x => x) : [];
     if (!ids.length) return res.status(400).json({ success: false, message: 'queueOrder required.' });
-    const valid = await Lesson.countDocuments({ _id: { $in: ids }, subjectId: entry.subjectId });
-    if (valid !== ids.length) return res.status(400).json({ success: false, message: 'Order contains lessons outside this syllabus.' });
     const members = await groupEntries(entry);
-    await TimetableEntry.updateMany({ _id: { $in: members.map(m => m._id) } }, { $set: { lessonOrder: ids } });
+    const lessonCount = await Lesson.countDocuments({ subjectId: entry.subjectId, isActive: { $ne: false } });
+    if (lessonCount > 0) {
+      const valid = await Lesson.countDocuments({ _id: { $in: ids }, subjectId: entry.subjectId });
+      if (valid !== ids.length) return res.status(400).json({ success: false, message: 'Order contains lessons outside this syllabus.' });
+      await TimetableEntry.updateMany({ _id: { $in: members.map(m => m._id) } }, { $set: { lessonOrder: ids } });
+    } else {
+      // Subtopic dialect: keys of "Topic||Subtopic".
+      const SyllabusTopic = require('../models/SyllabusTopic');
+      const topics = await SyllabusTopic.find({ subjectId: entry.subjectId }).lean();
+      const validKeys = new Set();
+      topics.forEach(tp => (tp.subtopics || []).forEach(st => validKeys.add(`${tp.topic}||${st.name}`)));
+      if (!ids.every(k => validKeys.has(k))) return res.status(400).json({ success: false, message: 'Order contains topics outside this syllabus.' });
+      await TimetableEntry.updateMany({ _id: { $in: members.map(m => m._id) } }, { $set: { topicPlanOrder: ids } });
+    }
     const restamped = await restampFuture(entry);
     res.json({ success: true, message: `Order saved. ${restamped} upcoming class(es) updated to follow it.` });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
