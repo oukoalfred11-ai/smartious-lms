@@ -10515,7 +10515,7 @@ function ScheduleClassesTab({ user, toast }) {
 
   useEffect(() => {
     api.get('/timetable/me')
-      .then(r => setEntries(r.data?.data || r.data?.entries || []))
+      .then(r => setEntries(r.data?.data?.entries || r.data?.entries || []))
       .catch(() => setEntries([]))
   }, [])
 
