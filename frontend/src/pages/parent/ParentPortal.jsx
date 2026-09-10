@@ -961,87 +961,76 @@ function ParentFees({ child, showToast }) {
 
 // ── Parent Timetable ──────────────────────────────────────
 function ParentTimetable({ child }) {
-  const [entries,  setEntries]  = useState([])
-  const [loading,  setLoading]  = useState(true)
+  const [entries, setEntries] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  useEffect(()=>{
+  useEffect(() => {
     if (!child?._id) return
-    api.get('/parent/children/'+child._id+'/timetable')
-      .then(r=>setEntries(r.data?.data?.entries||[]))
-      .catch(()=>{})
-      .finally(()=>setLoading(false))
-  },[child?._id])
+    api.get('/parent/children/' + child._id + '/timetable')
+      .then(r => setEntries(r.data?.data?.entries || []))
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [child?._id])
 
-  const DAYS  = ['Mon','Tue','Wed','Thu','Fri']
-  const DAY_L = { Mon:'Monday', Tue:'Tuesday', Wed:'Wednesday', Thu:'Thursday', Fri:'Friday' }
-  const SLOTS = [
-    { label:'9 AM',  s:'09:00', e:'10:00' },{ label:'10 AM', s:'10:00', e:'11:00' },
-    { label:'11 AM', s:'11:00', e:'12:00' },{ label:'12 PM', s:'12:00', e:'13:00' },
-    { label:'Lunch', s:'13:00', e:'14:00', isBreak:true },
-    { label:'2 PM',  s:'14:00', e:'15:00' },
-  ]
-  const toMins = h => { const[hh,mm]=h.split(':').map(Number); return hh*60+mm }
-  const SUBJ_COLS={'Mathematics':'#8B1A2E','Maths':'#8B1A2E','Physics':'#1E3A8A','Chemistry':'#166534','Biology':'#7C2D12','English':'#6B21A8','English Language':'#6B21A8','History':'#92400E','Geography':'#0F766E','Computer Science':'#1F2937','Business Studies':'#7E22CE','Economics':'#9F1239'}
-  const colFor=s=>SUBJ_COLS[s]||'#8B1A2E'
-  const FRI_COL='#6D28D9'
-
-  const byDay={}
-  DAYS.forEach(d=>{byDay[d]=[]})
-  entries.forEach(e=>{if(byDay[e.dayOfWeek])byDay[e.dayOfWeek].push(e)})
-  const entryForSlot=(day,slot)=>byDay[day].filter(e=>toMins(e.startTime)>=toMins(slot.s)&&toMins(e.startTime)<toMins(slot.e))
+  // The student portal matrix shape: time rows down the left from the
+  // child's REAL slot times, day columns across the top, weekend
+  // columns only when the child actually has weekend lessons.
+  const DAY_ORDER = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+  const base = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
+  const days = DAY_ORDER.filter(d => base.includes(d) || entries.some(e => e.dayOfWeek === d))
+  const times = [...new Set(entries.map(e => e.startTime))].sort()
+  const SUBJ_COLS = { 'Mathematics': '#8B1A2E', 'Maths': '#8B1A2E', 'Physics': '#1E3A8A', 'Chemistry': '#065F46', 'Biology': '#7C2D12', 'English': '#6D28D9' }
+  const colFor = (s) => SUBJ_COLS[s] || '#8B1A2E'
+  const tName = (e) => e.teacherId ? [e.teacherId.firstName, e.teacherId.lastName].filter(Boolean).join(' ') : ''
 
   if (loading) return <Spinner/>
 
   return (
     <>
-      <PSection tag="Parent Portal" title={`${child.firstName}'s`} em="Timetable" sub="School hours 9 AM–3 PM · Lunch 1–2 PM · Monday–Thursday: Lessons · Friday: Assessment & Activities"/>
-      <div style={{ background:'#fff', border:`1px solid ${C.line}`, borderRadius:12, overflow:'hidden', boxShadow:'0 2px 12px rgba(0,0,0,.06)' }}>
-        <table style={{ width:'100%', borderCollapse:'collapse' }}>
-          <thead><tr>
-            <th style={{ width:64, padding:'10px 12px', background:'#1A0F0E', fontSize:10.5, fontWeight:700, color:'rgba(255,255,255,.5)', textAlign:'center', borderRight:'1px solid rgba(255,255,255,.1)' }}>Time</th>
-            {DAYS.map(d=>(
-              <th key={d} style={{ padding:'10px 12px', background:d==='Fri'?'#3D0A4A':'#1A0F0E', fontSize:11, fontWeight:800, color:'rgba(255,255,255,.85)', textAlign:'center', borderRight:'1px solid rgba(255,255,255,.08)', letterSpacing:'.05em' }}>
-                <div>{DAY_L[d]}</div>
-                <div style={{ fontSize:9, fontWeight:500, color:d==='Fri'?'rgba(180,150,220,.7)':'rgba(255,255,255,.4)', marginTop:2 }}>{d==='Fri'?'Assessment':'Lessons'}</div>
-              </th>
-            ))}
-          </tr></thead>
-          <tbody>
-            {SLOTS.map(slot=>(
-              <tr key={slot.label} style={{ borderBottom:`1px solid ${C.s100}` }}>
-                <td style={{ padding:'6px 10px', textAlign:'center', background:slot.isBreak?'#FFFBF0':C.cream, borderRight:`1px solid ${C.line}`, fontSize:11, fontWeight:700, color:slot.isBreak?'#D97706':C.s500, whiteSpace:'nowrap' }}>
-                  {slot.isBreak?<div><div style={{ fontSize:9.5, color:'#D97706' }}>LUNCH</div><div style={{ fontSize:9, opacity:.7 }}>1–2 PM</div></div>:slot.label}
-                </td>
-                {DAYS.map(day=>{
-                  if (slot.isBreak) return <td key={day} style={{ background:'#FFFBF0', borderRight:`1px solid ${C.s100}`, textAlign:'center' }}><span style={{ fontSize:9.5, color:'#D97706', fontWeight:600 }}>Lunch</span></td>
-                  const cells = entryForSlot(day, slot)
-                  const isFri = day==='Fri'
-                  return (
-                    <td key={day} style={{ padding:4, verticalAlign:'top', background:isFri?'#FAF5FF':'#fff', borderRight:`1px solid ${C.s100}`, minWidth:100 }}>
-                      {cells.map(e=>{
-                        const col=isFri?FRI_COL:colFor(e.subject)
-                        return (
-                          <div key={e._id} style={{ background:col+'12', border:`1.5px solid ${col}30`, borderLeft:`3px solid ${col}`, borderRadius:7, padding:'6px 8px', marginBottom:3 }}>
-                            <div style={{ fontSize:11.5, fontWeight:700, color:col, lineHeight:1.25, marginBottom:2 }}>{e.subject}</div>
-                            <div style={{ fontSize:10, color:col+'90' }}>{fmtT(e.startTime)}–{fmtT(e.endTime)}</div>
-                            {e.teacherId&&<div style={{ fontSize:9.5, color:col+'70', marginTop:1 }}>{e.teacherId.firstName} {(e.teacherId.lastName||'')[0]}.</div>}
-                          </div>
-                        )
-                      })}
-                      {!cells.length&&<div style={{ fontSize:10, color:C.s200, textAlign:'center', paddingTop:8 }}>—</div>}
-                    </td>
-                  )
-                })}
+      <PSection tag="Parent Portal" title={`${child.firstName}'s`} em="Timetable" sub="The weekly pattern from the school timetable. Classes are scheduled automatically from these slots, and topics follow the teacher's lesson plan." />
+      {entries.length === 0 ? (
+        <div style={{ background: '#fff', border: `1px solid ${C.line}`, borderRadius: 12, padding: 26, textAlign: 'center', fontSize: 13, color: C.s500 }}>
+          No timetable slots yet. Once teachers slot {child.firstName}'s weekly classes, the timetable appears here.
+        </div>
+      ) : (
+        <div style={{ background: '#fff', border: `1px solid ${C.line}`, borderRadius: 12, overflow: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 640 }}>
+            <thead>
+              <tr>
+                <th style={{ width: 62, background: '#F7F2EA', padding: '9px 6px' }}></th>
+                {days.map(d => (
+                  <th key={d} style={{ background: '#7D1025', color: '#fff', padding: '9px 6px', fontSize: 12, fontWeight: 800 }}>{d}</th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {times.map(t => (
+                <tr key={t}>
+                  <td style={{ background: '#F7F2EA', color: '#7D1025', fontWeight: 800, fontSize: 11, textAlign: 'center', padding: '6px 4px', borderTop: `1px solid ${C.line}` }}>{t}</td>
+                  {days.map(d => {
+                    const cell = entries.filter(e => e.dayOfWeek === d && e.startTime === t)
+                    return (
+                      <td key={d} style={{ verticalAlign: 'top', padding: 5, borderTop: `1px solid ${C.line}`, borderLeft: `1px solid ${C.line}` }}>
+                        {cell.map((e, i) => (
+                          <div key={i} style={{ background: '#FBF8F3', borderLeft: `3px solid ${colFor(e.subject)}`, borderRadius: 7, padding: '6px 8px', marginBottom: 4 }}>
+                            <div style={{ fontSize: 11.5, fontWeight: 800, color: '#231715' }}>{e.subject}</div>
+                            <div style={{ fontSize: 9.5, color: C.s500 }}>{e.startTime}–{e.endTime}</div>
+                            {tName(e) && <div style={{ fontSize: 9.5, color: C.s500 }}>{tName(e)}</div>}
+                          </div>
+                        ))}
+                      </td>
+                    )
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </>
   )
 }
 
-// ── Stub pages (kept from original) ──────────────────────
 function ParentLessons({ child }) {
   const [data, setData] = useState(null)
   useEffect(() => {
