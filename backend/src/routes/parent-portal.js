@@ -122,27 +122,34 @@ router.get('/children/:id/reports', auth, async (req, res) => {
 
     let examResults = []
     if (ExamSubmission && Exam) {
+      // Schema-true fields: the submission stores studentId and examId
+      // (an older schema used student/exam; querying those matched
+      // nothing and the populate threw, which is why parents saw no
+      // marked work). Graded and returned papers are both visible.
       const subs = await ExamSubmission.find({
-        student: req.params.id,
-        status: 'graded',
+        studentId: req.params.id,
+        status: { $in: ['graded', 'returned'] },
         ...(Object.keys(dateFilter).length ? { submittedAt: dateFilter } : {})
-      }).populate('exam','title subject curriculum totalMarks startAt').lean()
+      }).populate('examId','title subject curriculum totalMarks startAt').lean()
 
       examResults = subs.map(s => {
-        const awarded = (s.answers||[]).reduce((t,a)=>t+(a.marksAwarded||0),0)
-        const pct = s.exam?.totalMarks>0 ? Math.round((awarded/s.exam.totalMarks)*100) : 0
-        const isEndTerm = /end.?term|final|terminal/i.test(s.exam?.title||'')
+        const ex = s.examId || {}
+        const awarded = (s.totalScore != null && s.totalScore > 0)
+          ? s.totalScore
+          : (s.answers||[]).reduce((t,a)=>t+(a.marksAwarded||0),0)
+        const pct = ex.totalMarks>0 ? Math.round((awarded/ex.totalMarks)*100) : 0
+        const isEndTerm = /end.?term|final|terminal/i.test(ex.title||'')
         return {
           _id:        s._id,
-          examId:     s.exam?._id,
-          title:      s.exam?.title,
-          subject:    s.exam?.subject,
-          curriculum: s.exam?.curriculum,
+          examId:     ex._id,
+          title:      ex.title,
+          subject:    ex.subject,
+          curriculum: ex.curriculum,
           type:       isEndTerm ? 'end-term' : 'weekly',
           score:      pct,
           awarded,
-          totalMarks: s.exam?.totalMarks,
-          date:       s.exam?.startAt || s.submittedAt,
+          totalMarks: ex.totalMarks,
+          date:       ex.startAt || s.submittedAt,
           grade:      pct>=80?'A*':pct>=70?'B':pct>=60?'C':pct>=50?'D':pct>=40?'E':'U',
         }
       }).sort((a,b)=>new Date(b.date)-new Date(a.date))
@@ -287,7 +294,7 @@ router.get('/children/:id/attendance', auth, async (req, res) => {
 })
 
 // ── GET /api/parent/children/:id/results ──────────────
-// Recent assessment results drawn from published weekly reports
+// ── GET /api/parent/children/:id/exam-results ───
 // plus the latest term report summary.
 router.get('/children/:id/results', auth, async (req, res) => {
   try {
