@@ -688,7 +688,7 @@ async function makeBuiltinMusic() {
 // Builds the full audio graph for a render/preview run.
 // Returns { audioTracks, start, stop } — tracks go into the
 // MediaRecorder stream; sound is also monitored on the speakers.
-function createMixer({ totalDur, musicBuffer, musicVol, voBuffer, voVol, voClips, record }) {
+function createMixer({ totalDur, musicBuffer, musicVol, musicDuck, voBuffer, voVol, voClips, record }) {
   const AC = window.AudioContext || window.webkitAudioContext
   const clips = [...(voClips || [])]
   if (voBuffer) clips.push({ buffer: voBuffer, at: 0.5 })
@@ -706,9 +706,9 @@ function createMixer({ totalDur, musicBuffer, musicVol, voBuffer, voVol, voClips
     s.connect(g); g.connect(master)
     starters.push((t0) => {
       const level = musicVol ?? 0.6
-      const windows = mergeWindows(clips.map(c => [c.at, Math.min(totalDur, c.at + c.buffer.duration)]))
+      const windows = (musicDuck === false) ? [] : mergeWindows(clips.map(c => [c.at, Math.min(totalDur, c.at + c.buffer.duration)]))
       // Same envelope as the offline mix, shifted to the start time
-      const DUCK = level * 0.3
+      const DUCK = level * 0.45
       g.gain.setValueAtTime(0.0001, t0)
       g.gain.linearRampToValueAtTime(level, t0 + Math.min(1.2, totalDur * 0.2))
       for (const [ws, we] of windows) {
@@ -760,7 +760,11 @@ function mergeWindows(ws) {
 // Music gain envelope: fade in, duck under every voice window, swell
 // back between them, fade out at the end.
 function scheduleMusicGain(g, level, windows, totalDur) {
-  const DUCK = level * 0.3
+  // Ducked music sits at 45 percent of its set volume — audible as a
+  // bed under clip sound, not gone. The end-of-film fade anchors on
+  // the ACTUAL last envelope value (the old code read a stale 0.0001
+  // and could kill the tail early).
+  const DUCK = level * 0.45
   g.gain.setValueAtTime(0.0001, 0)
   g.gain.linearRampToValueAtTime(level, Math.min(1.2, totalDur * 0.2))
   for (const [ws, we] of windows) {
@@ -770,14 +774,16 @@ function scheduleMusicGain(g, level, windows, totalDur) {
     g.gain.setValueAtTime(DUCK, Math.min(totalDur, we))
     g.gain.linearRampToValueAtTime(level, Math.min(totalDur, b + 0.45))
   }
-  g.gain.setValueAtTime(g.gain.value, Math.max(0.1, totalDur - 1.6))
+  const lastW = windows.length ? windows[windows.length - 1] : null
+  const endVal = lastW && lastW[1] >= totalDur - 0.5 ? DUCK : level
+  g.gain.setValueAtTime(endVal, Math.max(0.1, totalDur - 1.2))
   g.gain.linearRampToValueAtTime(0.0001, totalDur)
 }
 
 // voClips: [{ buffer, at }] — scene-by-scene voice, placed on the
 // timeline. A single full-video narration (voBuffer) still works and
 // simply becomes one long clip at 0.5s.
-async function renderMixOffline({ totalDur, musicBuffer, musicVol, voBuffer, voVol, voClips, sampleRate }) {
+async function renderMixOffline({ totalDur, musicBuffer, musicVol, musicDuck, voBuffer, voVol, voClips, sampleRate }) {
   const clips = [...(voClips || [])]
   if (voBuffer) clips.push({ buffer: voBuffer, at: 0.5 })
   if (!musicBuffer && clips.length === 0) return null
@@ -788,7 +794,7 @@ async function renderMixOffline({ totalDur, musicBuffer, musicVol, voBuffer, voV
     const s = oac.createBufferSource(); s.buffer = musicBuffer; s.loop = true
     const g = oac.createGain()
     const level = musicVol ?? 0.6
-    const windows = mergeWindows(clips.map(c => [c.at, Math.min(totalDur, c.at + c.buffer.duration)]))
+    const windows = (musicDuck === false) ? [] : mergeWindows(clips.map(c => [c.at, Math.min(totalDur, c.at + c.buffer.duration)]))
     scheduleMusicGain(g, level, windows, totalDur)
     s.connect(g); g.connect(master)
     s.start(0)
@@ -2626,7 +2632,7 @@ function FilmMaker({ toast }) {
     im.onerror = () => { logoImgRef.current = null; setLogoReady(false) }
     im.src = '/brand/logo.png'
   }, [])
-  const [sound, setSound] = useState({ musicMode: 'none', musicBuffer: null, musicVol: 0.5, voBuffer: null, voVol: 1, script: null })
+  const [sound, setSound] = useState({ musicMode: 'none', musicBuffer: null, musicVol: 0.5, musicDuck: true, voBuffer: null, voVol: 1, script: null })
   const [loaded, setLoaded] = useState(false)
   const [savedAt, setSavedAt] = useState(0)
   const [playing, setPlaying] = useState(false)
@@ -3022,7 +3028,7 @@ function FilmMaker({ toast }) {
       if (cancelled) return
       const voClips = await buildFilmAudio(bufs)
       if (cancelled) return
-      const mixer = createMixer({ totalDur: total, musicBuffer: sound.musicBuffer, musicVol: sound.musicVol, voBuffer: sound.voBuffer, voVol: sound.voVol, voClips, record: false })
+      const mixer = createMixer({ totalDur: total, musicBuffer: sound.musicBuffer, musicVol: sound.musicVol, musicDuck: sound.musicDuck !== false, voBuffer: sound.voBuffer, voVol: sound.voVol, voClips, record: false })
       runPreview({ segs, total, ctx, mixer })
     } catch (e) {
       console.error('[preview]', e)
@@ -3175,7 +3181,7 @@ function FilmMaker({ toast }) {
           drawFrame: (ctx, t) => drawFilm(ctx, t),
           advance,
           fps: exportFps,
-          sound: { musicBuffer: sound.musicBuffer, musicVol: sound.musicVol, voBuffer: sound.voBuffer, voVol: sound.voVol, voClips },
+          sound: { musicBuffer: sound.musicBuffer, musicVol: sound.musicVol, musicDuck: sound.musicDuck !== false, voBuffer: sound.voBuffer, voVol: sound.voVol, voClips },
           onProgress: setProgress,
         })
       } finally {
@@ -3203,6 +3209,7 @@ function FilmMaker({ toast }) {
           fps: exportFps + ' fps (clips: ' + (Object.entries(srcFps).map(([i, f]) => 'clip ' + (Number(i) + 1) + ' ' + f.toFixed(1)).join(', ') || 'unknown, library file not loaded') + ')',
           engine: decodedAll ? 'frame exact' : 'classic seek',
           audio: out.audioNote === 'aac' ? 'AAC' : out.audioNote === 'opus' ? 'Opus (some players mute it)' : out.audioNote === 'none' ? 'no sound found' : 'silent (no encoder)',
+          music: sound.musicBuffer ? ('loaded, volume ' + Math.round((sound.musicVol ?? 0.5) * 100) + '%, ' + (sound.musicDuck !== false ? 'dips under clip sound' : 'constant volume')) : 'none loaded at export time',
         })
       } else {
         toast?.('Fast export is not available in this browser. Use current Chrome or Edge for the film exporter.')
@@ -3254,7 +3261,7 @@ function FilmMaker({ toast }) {
       }).then(() => setSavedAt(Date.now())).catch(() => {})
     }, 800)
     return () => clearTimeout(t)
-  }, [loaded, format, clips, capsOn, logo, bulletin, blobs, sound.musicMode, sound.musicVol, sound.voVol, sound.script, sound.musicBlob, sound.voBlob])
+  }, [loaded, format, clips, capsOn, logo, bulletin, blobs, sound.musicMode, sound.musicVol, sound.musicDuck, sound.voVol, sound.script, sound.musicBlob, sound.voBlob])
 
   const newProject = async () => {
     await idbDel('film-project')
@@ -3443,6 +3450,7 @@ function FilmMaker({ toast }) {
             <div style={{ fontSize: 11, color: TOKENS.s600 }}>Size: {exportReport.size} | Render: {exportReport.time}</div>
             <div style={{ fontSize: 11, color: TOKENS.s600 }}>Frame rate: {exportReport.fps}</div>
             <div style={{ fontSize: 11, color: TOKENS.s600 }}>Engine: {exportReport.engine} | Audio: {exportReport.audio}</div>
+            <div style={{ fontSize: 11, color: TOKENS.s600 }}>Music: {exportReport.music}</div>
             <div style={{ fontSize: 10, color: TOKENS.s500 }}>If a download misbehaves, send these lines exactly.</div>
             <button onClick={() => setExportReport(null)} style={{ position: 'absolute', top: 6, right: 8, background: 'none', border: 'none', cursor: 'pointer', color: TOKENS.s500, fontSize: 13, fontWeight: 800 }}>{'\u2715'}</button>
           </div>
@@ -3451,8 +3459,16 @@ function FilmMaker({ toast }) {
       </div>
 
       <SoundPanel sound={sound} setSound={setSound} cards={[]} toast={toast} />
+      {sound.musicBuffer && (
+        <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11.5, color: TOKENS.s600, fontWeight: 700, cursor: 'pointer' }}>
+          <input type="checkbox" checked={sound.musicDuck !== false}
+            onChange={e => setSound(s => ({ ...s, musicDuck: e.target.checked }))} />
+          Lower music under clip sound
+          <span style={{ fontWeight: 400, color: TOKENS.s500 }}>(unticked: music stays at its set volume for the whole film)</span>
+        </label>
+      )}
       <div style={{ fontSize: 10.5, color: TOKENS.s500, lineHeight: 1.55 }}>
-        Drag on a clip's cut bar to select a bad section and delete it; the film plays straight over the gap and the sound follows. Each clip keeps its own sound; music ducks underneath it automatically. Clean noise removes hum, hiss and room noise between speech. Captions burn into the picture so they show on every platform.
+        Drag on a clip's cut bar to select a bad section and delete it; the film plays straight over the gap and the sound follows. Each clip keeps its own sound; music sits underneath it, and the tick above controls whether it dips under clip sound or holds its volume. Clean noise removes hum, hiss and room noise between speech. Captions burn into the picture so they show on every platform.
       </div>
     </div>
   )
