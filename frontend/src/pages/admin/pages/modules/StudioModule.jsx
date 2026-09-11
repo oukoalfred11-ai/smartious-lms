@@ -812,35 +812,38 @@ const seekVideo = (v, t) => new Promise((res) => {
   if (Math.abs(v.currentTime - target) < 0.0005) return res()
   let settled = false
   let hard = 0
+  let grace = 0
   const finish = () => {
     if (settled) return
     settled = true
     clearTimeout(hard)
+    clearTimeout(grace)
     v.removeEventListener('seeked', onSeeked)
     res()
   }
-  const onSeeked = () => {
-    // 'seeked' alone is not enough: the browser can still be holding
-    // the PREVIOUS frame when the canvas grabs the picture, which
-    // exported as duplicated frames (visible stutter). Wait for the
-    // frame to actually be presented — but ADAPTIVELY: on machines
-    // where the presentation callback reliably fires it costs almost
-    // nothing, and on machines where it never fires (a dozen misses
-    // in a row, zero hits) we stop paying the wait per frame, since
-    // those machines were only ever getting the 'seeked' frame.
-    if (v.requestVideoFrameCallback && !(seekVideo._miss > 12 && !seekVideo._hit)) {
-      let fired = false
-      let done = false
-      const go = () => {
-        if (done) return
-        done = true
-        if (fired) { seekVideo._hit = (seekVideo._hit || 0) + 1 }
-        else { seekVideo._miss = (seekVideo._miss || 0) + 1 }
+  // Two signals race IN PARALLEL — nothing waits behind anything:
+  //  1. The presentation callback is armed BEFORE the seek starts, so
+  //     it fires the instant the seeked frame is actually on screen.
+  //     That is the anti-stutter guarantee, at zero added latency.
+  //  2. 'seeked' finishes immediately on machines whose presentation
+  //     callback is dead (a dozen misses, zero hits ever) — those
+  //     machines run at the plain seek speed they always had.
+  //     Otherwise 'seeked' grants presentation a tiny grace window
+  //     and counts a miss if it never comes.
+  const rvfcDead = !v.requestVideoFrameCallback || (seekVideo._miss > 12 && !seekVideo._hit)
+  let presented = false
+  if (!rvfcDead) {
+    try {
+      v.requestVideoFrameCallback(() => {
+        presented = true
+        seekVideo._hit = (seekVideo._hit || 0) + 1
         finish()
-      }
-      try { v.requestVideoFrameCallback(() => { fired = true; go() }) } catch (e) { return go() }
-      setTimeout(go, seekVideo._hit ? 50 : 30)
-    } else finish()
+      })
+    } catch (e) { presented = true }
+  }
+  const onSeeked = () => {
+    if (rvfcDead || presented) return finish()
+    grace = setTimeout(() => { seekVideo._miss = (seekVideo._miss || 0) + 1; finish() }, 20)
   }
   v.addEventListener('seeked', onSeeked)
   try { v.currentTime = target } catch (e) { finish() }
@@ -1070,24 +1073,15 @@ async function exportMp4Fast({ canvas, W, H, totalDur, drawFrame, mediaAt, sound
   const px = W * H
   const bitrate = px >= 3840 * 2160 ? 14_000_000 : px >= 2160 * 2160 ? 10_000_000 : 6_000_000
   let vConfig = null
-  const codecList = px > 1920 * 1080 ? ['avc1.640033', 'avc1.640032', 'avc1.640028'] : ['avc1.640028']
-  // Hardware encoding first: on machines with a capable GPU encoder
-  // this is the single biggest speedup available. If the browser
-  // cannot promise hardware for this codec and size, fall back to
-  // its own choice exactly as before.
-  outer:
-  for (const hw of ['prefer-hardware', 'no-preference']) {
-    for (const codec of codecList) {
-      const c = {
-        codec, width: W, height: H, bitrate, framerate: FPS,
-        avc: { format: 'avc' },
-        bitrateMode: 'variable',
-        latencyMode: 'quality',
-        hardwareAcceleration: hw,
-      }
-      const s = await VideoEncoder.isConfigSupported(c).catch(() => null)
-      if (s?.supported) { vConfig = c; break outer }
+  for (const codec of (px > 1920 * 1080 ? ['avc1.640033', 'avc1.640032', 'avc1.640028'] : ['avc1.640028'])) {
+    const c = {
+      codec, width: W, height: H, bitrate, framerate: FPS,
+      avc: { format: 'avc' },
+      bitrateMode: 'variable',
+      latencyMode: 'quality',
     }
+    const s = await VideoEncoder.isConfigSupported(c).catch(() => null)
+    if (s?.supported) { vConfig = c; break }
   }
   if (!vConfig) return null
   vEnc.configure(vConfig)
@@ -1111,7 +1105,7 @@ async function exportMp4Fast({ canvas, W, H, totalDur, drawFrame, mediaAt, sound
     const frame = new VideoFrame(canvas, { timestamp: Math.round(t * 1e6), duration: Math.round(1e6 / FPS) })
     vEnc.encode(frame, { keyFrame: f % 60 === 0 })
     frame.close()
-    while (vEnc.encodeQueueSize > 14) await new Promise(r => setTimeout(r, 0))
+    while (vEnc.encodeQueueSize > 8) await new Promise(r => setTimeout(r, 0))
     if (f % 12 === 0) { onProgress?.(f / totalFrames); await new Promise(r => setTimeout(r, 0)) }
     if (vErr) throw vErr
   }
