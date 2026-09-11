@@ -23,7 +23,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { TOKENS } from '../shared/tokens.js'
 import { Muxer, ArrayBufferTarget } from '../../../../lib/mp4muxer.js'
-import * as _MP4NS from 'mp4box'
+import * as _MP4NS from '../../../../lib/mp4box.esm.js'
 const MP4BOX = _MP4NS.default || _MP4NS
 
 // ── Brand ────────────────────────────────────────────────
