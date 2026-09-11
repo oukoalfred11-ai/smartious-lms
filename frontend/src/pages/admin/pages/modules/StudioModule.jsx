@@ -2537,8 +2537,12 @@ function FilmMaker({ toast }) {
   }, [clips])
 
   const drawFilm = (ctx, t) => {
+    // Draw at whatever size THIS canvas is: preview hands in a
+    // screen-sized canvas, export hands in the full 4K one. Same
+    // picture, wildly different per-frame cost.
+    const SW = ctx.canvas.width, SH = ctx.canvas.height
     ctx.fillStyle = '#000'
-    ctx.fillRect(0, 0, W, H)
+    ctx.fillRect(0, 0, SW, SH)
     const a = activeAt(t)
     if (a) {
       const c = clips[a.idx]
@@ -2549,34 +2553,35 @@ function FilmMaker({ toast }) {
         ctx.filter = gradeFilter(c.grade) || 'none'
         const vw = v.videoWidth, vh = v.videoHeight
         if (c.fit === 'fit') {
-          const cover = Math.max(W / vw, H / vh)
-          ctx.save(); ctx.filter = (gradeFilter(c.grade) || '') + ' blur(28px) brightness(0.6)'
-          ctx.drawImage(v, W / 2 - vw * cover / 2, H / 2 - vh * cover / 2, vw * cover, vh * cover)
+          const cover = Math.max(SW / vw, SH / vh)
+          const blurPx = Math.max(6, Math.round(28 * SW / W))
+          ctx.save(); ctx.filter = (gradeFilter(c.grade) || '') + ' blur(' + blurPx + 'px) brightness(0.6)'
+          ctx.drawImage(v, SW / 2 - vw * cover / 2, SH / 2 - vh * cover / 2, vw * cover, vh * cover)
           ctx.restore()
-          const fit = Math.min(W / vw, H / vh)
-          ctx.drawImage(v, W / 2 - vw * fit / 2, H / 2 - vh * fit / 2, vw * fit, vh * fit)
+          const fit = Math.min(SW / vw, SH / vh)
+          ctx.drawImage(v, SW / 2 - vw * fit / 2, SH / 2 - vh * fit / 2, vw * fit, vh * fit)
         } else {
-          const cover = Math.max(W / vw, H / vh)
-          ctx.drawImage(v, W / 2 - vw * cover / 2, H / 2 - vh * cover / 2, vw * cover, vh * cover)
+          const cover = Math.max(SW / vw, SH / vh)
+          ctx.drawImage(v, SW / 2 - vw * cover / 2, SH / 2 - vh * cover / 2, vw * cover, vh * cover)
         }
         ctx.restore()
       }
     }
     if (capsOn) {
       const e = capsAbs.find(x => t >= x.t0 && t < x.t1)
-      if (e) drawCaptionLine(ctx, W, H, e)
+      if (e) drawCaptionLine(ctx, SW, SH, e)
     }
     if (bulletin.on && bulletin.headline.trim() && t >= (Number(bulletin.from) || 0) && t <= (Number(bulletin.to) || 999)) {
-      drawBulletin(ctx, W, H, bulletin, t - (Number(bulletin.from) || 0))
+      drawBulletin(ctx, SW, SH, bulletin, t - (Number(bulletin.from) || 0))
     }
     // Brand logo, top layer
     const im = logoImgRef.current
     if (logo.on && im && im.naturalWidth) {
-      const lw = W * logo.size
+      const lw = SW * logo.size
       const lh = lw * (im.naturalHeight / im.naturalWidth)
-      const m = Math.min(W, H) * 0.035
-      const x = logo.pos.includes('l') ? m : W - lw - m
-      const y = logo.pos.includes('t') ? m : H - lh - m
+      const m = Math.min(SW, SH) * 0.035
+      const x = logo.pos.includes('l') ? m : SW - lw - m
+      const y = logo.pos.includes('t') ? m : SH - lh - m
       ctx.save()
       ctx.globalAlpha = 0.94
       if (logo.halo) {
@@ -2799,7 +2804,13 @@ function FilmMaker({ toast }) {
       const { segs, total } = filmSegments()
       if (!segs.length) { setStarting(false); stopRef.current = null; return }
       const cv = cvRef.current
-      cv.width = W; cv.height = H
+      // Preview renders at screen resolution: the picture on a 560px
+      // wide preview cannot show 4K detail, but a 4K canvas plus a
+      // CPU colour grade per frame is exactly what made graded
+      // playback sluggish. Export still renders at the full size.
+      const pScale = Math.min(1, 1280 / Math.max(W, H))
+      cv.width = Math.max(2, Math.round(W * pScale / 2) * 2)
+      cv.height = Math.max(2, Math.round(H * pScale / 2) * 2)
       const ctx = cv.getContext('2d')
       const first = media[segs[0].idx]
       if (first) { try { first.pause(); first.currentTime = segs[0].from } catch (er) {} }
@@ -2844,6 +2855,7 @@ function FilmMaker({ toast }) {
     setPlaying(true)
     mixer.start()
     const t0 = performance.now()
+    let lastProg = -1
     const step = (now) => {
       const t = (now - t0) / 1000
       if (t >= total) { finish(); return }
@@ -2866,7 +2878,9 @@ function FilmMaker({ toast }) {
       }
       liveElRef.current = { idx: s.idx, el: curEl }
       drawFilm(ctx, t)
-      setProgress(t / total)
+      // React state 60 times a second re-renders the whole tab per
+      // frame; 5 times a second reads the same to a human.
+      if (t - lastProg > 0.2) { lastProg = t; setProgress(t / total) }
       rafRef.current = requestAnimationFrame(step)
     }
     const finish = () => {
