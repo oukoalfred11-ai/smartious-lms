@@ -1036,10 +1036,14 @@ async function exportMp4Fast({ canvas, W, H, totalDur, drawFrame, mediaAt, sound
   const wantsAudio = !!(sound && (sound.musicBuffer || sound.voBuffer || (sound.voClips && sound.voClips.length)))
   let audioPlan = null
   if (wantsAudio && typeof AudioEncoder !== 'undefined') {
-    const aacCfg = { codec: 'mp4a.40.2', sampleRate: 44100, numberOfChannels: 2, bitrate: 128_000, aac: { format: 'aac' } }
-    const aacOk = await AudioEncoder.isConfigSupported(aacCfg).catch(() => null)
-    if (aacOk?.supported) audioPlan = { mux: 'aac', cfg: aacCfg, sr: 44100 }
-    else {
+    // AAC is the codec every phone and player understands, so try it
+    // at both common sample rates before conceding to Opus.
+    for (const sr of [44100, 48000]) {
+      const aacCfg = { codec: 'mp4a.40.2', sampleRate: sr, numberOfChannels: 2, bitrate: 128_000, aac: { format: 'aac' } }
+      const aacOk = await AudioEncoder.isConfigSupported(aacCfg).catch(() => null)
+      if (aacOk?.supported) { audioPlan = { mux: 'aac', cfg: aacCfg, sr }; break }
+    }
+    if (!audioPlan) {
       const opusCfg = { codec: 'opus', sampleRate: 48000, numberOfChannels: 2, bitrate: 128_000 }
       const opusOk = await AudioEncoder.isConfigSupported(opusCfg).catch(() => null)
       if (opusOk?.supported) audioPlan = { mux: 'opus', cfg: opusCfg, sr: 48000 }
@@ -1097,6 +1101,39 @@ async function exportMp4Fast({ canvas, W, H, totalDur, drawFrame, mediaAt, sound
 
   const ctx = canvas.getContext('2d')
   const totalFrames = Math.ceil(totalDur * FPS)
+
+  // Audio is fed to its encoder IN STEP with the video frames, so
+  // the finished file interleaves sound and picture in time order.
+  // The previous layout (all video, then all audio appended at the
+  // end) is a file many phone and desktop decoders stall on partway
+  // through playback, because the audio for a given moment lives
+  // megabytes away at the back of the file.
+  let aL = null, aR = null, aOff = 0
+  if (aEnc && audioBuf) {
+    aL = audioBuf.getChannelData(0)
+    aR = audioBuf.numberOfChannels > 1 ? audioBuf.getChannelData(1) : aL
+  }
+  const pushAudioUpTo = async (tSec) => {
+    if (!aEnc || !aL) return
+    const SR = audioPlan.sr, CH = 2, CHUNK = 4800
+    const limit = Math.min(aL.length, Math.max(0, Math.ceil(tSec * SR)))
+    while (aOff < limit) {
+      const n = Math.min(CHUNK, aL.length - aOff)
+      const data = new Float32Array(n * CH)
+      data.set(aL.subarray(aOff, aOff + n), 0)
+      data.set(aR.subarray(aOff, aOff + n), n)
+      const ad = new AudioData({
+        format: 'f32-planar', sampleRate: SR, numberOfFrames: n,
+        numberOfChannels: CH, timestamp: Math.round((aOff / SR) * 1e6), data,
+      })
+      aEnc.encode(ad)
+      ad.close()
+      aOff += n
+      while (aEnc.encodeQueueSize > 8) await new Promise(r => setTimeout(r, 0))
+      if (vErr) throw vErr
+    }
+  }
+
   for (let f = 0; f < totalFrames; f++) {
     const t = f / FPS
     const vids = mediaAt ? mediaAt(t) : []
@@ -1106,35 +1143,20 @@ async function exportMp4Fast({ canvas, W, H, totalDur, drawFrame, mediaAt, sound
     vEnc.encode(frame, { keyFrame: f % 60 === 0 })
     frame.close()
     while (vEnc.encodeQueueSize > 8) await new Promise(r => setTimeout(r, 0))
+    await pushAudioUpTo(t)
     if (f % 12 === 0) { onProgress?.(f / totalFrames); await new Promise(r => setTimeout(r, 0)) }
     if (vErr) throw vErr
   }
 
-  if (aEnc && audioBuf) {
-    const SR = audioPlan.sr, CH = 2, CHUNK = 4800
-    const L = audioBuf.getChannelData(0)
-    const R = audioBuf.numberOfChannels > 1 ? audioBuf.getChannelData(1) : L
-    for (let off = 0; off < L.length; off += CHUNK) {
-      const n = Math.min(CHUNK, L.length - off)
-      const data = new Float32Array(n * CH)
-      data.set(L.subarray(off, off + n), 0)
-      data.set(R.subarray(off, off + n), n)
-      const ad = new AudioData({
-        format: 'f32-planar', sampleRate: SR, numberOfFrames: n,
-        numberOfChannels: CH, timestamp: Math.round((off / SR) * 1e6), data,
-      })
-      aEnc.encode(ad)
-      ad.close()
-      while (aEnc.encodeQueueSize > 8) await new Promise(r => setTimeout(r, 2))
-      if (vErr) throw vErr
-    }
+  if (aEnc && aL) {
+    await pushAudioUpTo(totalDur + 1)
     await aEnc.flush()
   }
   await vEnc.flush()
   if (vErr) throw vErr
   muxer.finalize()
   onProgress?.(1)
-  return { blob: new Blob([muxer.target.buffer], { type: 'video/mp4' }), audioNote: wantsAudio && !audioPlan ? 'silent' : audioPlan?.mux === 'opus' ? 'opus' : null }
+  return { blob: new Blob([muxer.target.buffer], { type: 'video/mp4' }), audioNote: !wantsAudio ? 'none' : !audioPlan ? 'silent' : audioPlan.mux }
 }
 
 // Narrator script: turns each card's text into worry -> solution
@@ -2617,7 +2639,28 @@ function FilmMaker({ toast }) {
     return [v]
   }
 
-  const buildFilmAudio = async () => {
+  // Some clips' decoded audio can be lost along the way (a failed
+  // decode on restore, memory pressure). Rebuild any missing decode
+  // from the stored blob so the soundtrack never quietly comes out
+  // empty; report the clips whose sound genuinely cannot be read.
+  const ensureAudioBufs = async () => {
+    const bufs = { ...audioBufs }
+    let changed = false
+    const dead = []
+    for (let i = 0; i < clips.length; i++) {
+      if (!bufs[i] && blobs[i]?.blob) {
+        const buf = await decodeClipAudioFile(blobs[i].blob)
+        if (buf) { bufs[i] = buf; changed = true }
+        else dead.push(i + 1)
+      } else if (!bufs[i] && !blobs[i]?.blob) dead.push(i + 1)
+    }
+    if (changed) setAudioBufs(bufs)
+    if (dead.length) toast?.('No readable sound in clip ' + dead.join(', ') + ' — those parts will be silent.')
+    return bufs
+  }
+
+  const buildFilmAudio = async (bufs) => {
+    const abufs = bufs || audioBufs
     const { starts } = timeline()
     const out = []
     for (let i = 0; i < clips.length; i++) {
@@ -2627,7 +2670,7 @@ function FilmMaker({ toast }) {
       // ever produced per clip, and it comes from the donor.
       const srcIdx = (c.audioFrom !== undefined && c.audioFrom !== null && clips[c.audioFrom]) ? c.audioFrom : i
       const donor = clips[srcIdx]
-      const base = audioBufs[srcIdx]
+      const base = abufs[srcIdx]
       if (!base) continue
       const myLen = clipLenOf(c)
       // Own sound follows the picture exactly: each kept section's
@@ -2834,7 +2877,9 @@ function FilmMaker({ toast }) {
         if (segs[j].idx === segs[j - 1].idx) await twinFor(segs[j].idx)
         if (cancelled) return
       }
-      const voClips = await buildFilmAudio()
+      const bufs = await ensureAudioBufs()
+      if (cancelled) return
+      const voClips = await buildFilmAudio(bufs)
       if (cancelled) return
       const mixer = createMixer({ totalDur: total, musicBuffer: sound.musicBuffer, musicVol: sound.musicVol, voBuffer: sound.voBuffer, voVol: sound.voVol, voClips, record: false })
       runPreview({ segs, total, ctx, mixer })
@@ -2918,7 +2963,11 @@ function FilmMaker({ toast }) {
     const t0 = performance.now()
     const { total } = timeline()
     try {
-      const voClips = await buildFilmAudio()
+      const bufs = await ensureAudioBufs()
+      const voClips = await buildFilmAudio(bufs)
+      if (!voClips.length && !sound.musicBuffer && !sound.voBuffer) {
+        toast?.('Heads up: no sound was found in the clips, so this export will be silent.')
+      }
       const cv = cvRef.current
       cv.width = W; cv.height = H
       const out = await exportMp4Fast({
@@ -2937,7 +2986,9 @@ function FilmMaker({ toast }) {
         a.click()
         const secs = Math.round((performance.now() - t0) / 1000)
         const note = out.audioNote === 'silent' ? ' NOTE: this computer cannot encode MP4 audio, so the file is silent.'
-          : out.audioNote === 'opus' ? ' Audio uses Opus: fine for YouTube and Android; if WhatsApp plays it silent, tell me.'
+          : out.audioNote === 'opus' ? ' Audio uses Opus: fine for YouTube and Android; some players (WhatsApp, Windows players) play Opus as SILENT — tell me if yours does.'
+          : out.audioNote === 'none' ? ' NOTE: no sound was found in this film, so the file has no audio track.'
+          : out.audioNote === 'aac' ? ' Audio: AAC.'
           : ''
         toast?.('Film ready: ' + (out.blob.size / 1048576).toFixed(1) + ' MB in ' + secs + 's.' + note)
       } else {
