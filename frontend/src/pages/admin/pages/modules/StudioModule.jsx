@@ -2682,22 +2682,87 @@ function FilmMaker({ toast }) {
     mediaBRef.current = {}
     setCur(c => Math.max(0, c - 1))
   }
-  const move = (dir) => {
-    const j = cur + dir
-    if (j < 0 || j >= clips.length) return
-    const swap = (m) => { const n = { ...m }; const a = n[cur]; n[cur] = n[j]; n[j] = a; return n }
-    setClips(cs => {
-      const n = [...cs]; const a = n[cur]; n[cur] = n[j]; n[j] = a
-      return n.map(c => {
-        if (c.audioFrom === cur) return { ...c, audioFrom: j }
-        if (c.audioFrom === j) return { ...c, audioFrom: cur }
-        return c
-      })
-    })
-    setMedia(swap); setBlobs(swap); setAudioBufs(swap)
+  // Move a clip to ANY position, keeping everything attached to it:
+  // its cuts and captions travel with it (they live on the clip),
+  // every "Sound from clip N" reference is remapped so it still
+  // points at the same actual clip, and the media, blobs and decoded
+  // audio follow their clip to its new index.
+  const reorder = (from, to) => {
+    const n = clips.length
+    if (n < 2) return
+    if (from === to || from < 0 || from >= n || to < 0 || to >= n) return
+    const order = clips.map((_, i) => i)
+    order.splice(from, 1)
+    order.splice(to, 0, from)
+    const mapNew = {}
+    order.forEach((oi, ni) => { mapNew[oi] = ni })
+    setClips(cs => order.map(oi => {
+      const c = cs[oi]
+      if (c.audioFrom === undefined || c.audioFrom === null) return c
+      return { ...c, audioFrom: mapNew[c.audioFrom] }
+    }))
+    const remap = (m) => { const o = {}; order.forEach((oi, ni) => { if (m[oi] !== undefined) o[ni] = m[oi] }); return o }
+    setMedia(remap); setBlobs(remap); setAudioBufs(remap)
     cleanCache.current = {}
+    Object.values(mediaBRef.current).forEach(m => { if (m && m.pause) m.pause() })
     mediaBRef.current = {}
-    setCur(j)
+    setCur(to)
+  }
+  const move = (dir) => reorder(cur, cur + dir)
+
+  // Drag and drop on the thumbnail strip. Pointer based, so it works
+  // with mouse and touch alike. A press that barely moves is a normal
+  // tap (select the clip); once it travels, it becomes a drag and the
+  // crimson bar shows where the clip will land.
+  const thumbRefs = useRef([])
+  const [drag, setDrag] = useState(null)
+  const dragInfo = useRef(null)
+  const suppressClickRef = useRef(false)
+  const insertionAt = (x, y) => {
+    let best = { i: 0, before: true, d: Infinity }
+    thumbRefs.current.forEach((el, i) => {
+      if (!el || !clips[i]) return
+      const r = el.getBoundingClientRect()
+      const cx = r.left + r.width / 2, cy = r.top + r.height / 2
+      const dist = Math.abs(y - cy) * 3 + Math.abs(x - cx)
+      if (dist < best.d) best = { i, before: x < cx, d: dist }
+    })
+    return best
+  }
+  const thumbDown = (e, i) => {
+    if (playing || rendering || starting || clips.length < 2) return
+    dragInfo.current = { i, x0: e.clientX, y0: e.clientY, active: false }
+    suppressClickRef.current = false
+    const onMove = (ev) => {
+      const d = dragInfo.current
+      if (!d) return
+      if (!d.active) {
+        if (Math.abs(ev.clientX - d.x0) + Math.abs(ev.clientY - d.y0) < 8) return
+        d.active = true
+        suppressClickRef.current = true
+      }
+      ev.preventDefault()
+      const tgt = insertionAt(ev.clientX, ev.clientY)
+      setDrag({ from: d.i, to: tgt.i, before: tgt.before })
+    }
+    const onUp = (ev) => {
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+      window.removeEventListener('pointercancel', onUp)
+      const d = dragInfo.current
+      dragInfo.current = null
+      setDrag(null)
+      if (d && d.active) {
+        const tgt = insertionAt(ev.clientX, ev.clientY)
+        let ins = tgt.i + (tgt.before ? 0 : 1)
+        if (ins > d.i) ins -= 1
+        reorder(d.i, Math.max(0, Math.min(clips.length - 1, ins)))
+        setTimeout(() => { suppressClickRef.current = false }, 60)
+      }
+    }
+    window.addEventListener('pointermove', onMove, { passive: false })
+    window.addEventListener('pointerup', onUp)
+    window.addEventListener('pointercancel', onUp)
   }
 
   // ── Preview with live sound ──
@@ -2975,21 +3040,36 @@ function FilmMaker({ toast }) {
       </div>
 
       {clips.length > 0 && (
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-          {clips.map((c, i) => (
-            <Thumb key={i} {...thumbSize(format)} active={cur === i} onClick={() => setCur(i)}
-              label={(i + 1) + ' \u00b7 ' + (c.name || 'clip')}
-              draw={(tc, tw, th) => {
-                tc.fillStyle = '#000'; tc.fillRect(0, 0, tw, th)
-                const v = media[i]
-                if (v && v.videoWidth) {
-                  tc.filter = gradeFilter(c.grade) || 'none'
-                  const cover = Math.max(tw / v.videoWidth, th / v.videoHeight)
-                  tc.drawImage(v, tw / 2 - v.videoWidth * cover / 2, th / 2 - v.videoHeight * cover / 2, v.videoWidth * cover, v.videoHeight * cover)
-                  tc.filter = 'none'
-                }
-              }} />
-          ))}
+        <div style={{ display: 'grid', gap: 5 }}>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+            {clips.map((c, i) => (
+              <div key={i} ref={el => { thumbRefs.current[i] = el }} onPointerDown={e => thumbDown(e, i)}
+                style={{
+                  touchAction: 'none',
+                  cursor: clips.length > 1 ? 'grab' : 'pointer',
+                  opacity: drag && drag.from === i ? 0.35 : 1,
+                  borderLeft: drag && drag.to === i && drag.before ? '3px solid #8B1A2E' : '3px solid transparent',
+                  borderRight: drag && drag.to === i && !drag.before ? '3px solid #8B1A2E' : '3px solid transparent',
+                  borderRadius: 4,
+                }}>
+                <Thumb {...thumbSize(format)} active={cur === i} onClick={() => { if (!suppressClickRef.current) setCur(i) }}
+                  label={(i + 1) + ' \u00b7 ' + (c.name || 'clip')}
+                  draw={(tc, tw, th) => {
+                    tc.fillStyle = '#000'; tc.fillRect(0, 0, tw, th)
+                    const v = media[i]
+                    if (v && v.videoWidth) {
+                      tc.filter = gradeFilter(c.grade) || 'none'
+                      const cover = Math.max(tw / v.videoWidth, th / v.videoHeight)
+                      tc.drawImage(v, tw / 2 - v.videoWidth * cover / 2, th / 2 - v.videoHeight * cover / 2, v.videoWidth * cover, v.videoHeight * cover)
+                      tc.filter = 'none'
+                    }
+                  }} />
+              </div>
+            ))}
+          </div>
+          {clips.length > 1 && (
+            <div style={{ fontSize: 10, color: TOKENS.s500 }}>Drag a clip to reorder the film, or use To start / To end on the clip below.</div>
+          )}
         </div>
       )}
 
@@ -2998,9 +3078,11 @@ function FilmMaker({ toast }) {
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
             <strong style={{ fontSize: 12.5 }}>{clip.name}</strong>
             <span style={{ fontSize: 11, color: TOKENS.s500 }}>{clipLenOf(clip).toFixed(1)}s of {clip.dur.toFixed(1)}s{(clip.cuts || []).length ? ' \u00b7 ' + clip.cuts.length + ' cut' + (clip.cuts.length > 1 ? 's' : '') : ''}</span>
-            <span style={{ marginLeft: 'auto', display: 'flex', gap: 6 }}>
+            <span style={{ marginLeft: 'auto', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              <button onClick={() => reorder(cur, 0)} disabled={cur === 0} style={{ ...btn(false), padding: '5px 10px', fontSize: 11, opacity: cur === 0 ? 0.4 : 1 }}>To start</button>
               <button onClick={() => move(-1)} style={{ ...btn(false), padding: '5px 10px' }}>{'\u25C0'}</button>
               <button onClick={() => move(1)} style={{ ...btn(false), padding: '5px 10px' }}>{'\u25B6'}</button>
+              <button onClick={() => reorder(cur, clips.length - 1)} disabled={cur === clips.length - 1} style={{ ...btn(false), padding: '5px 10px', fontSize: 11, opacity: cur === clips.length - 1 ? 0.4 : 1 }}>To end</button>
               <button onClick={removeClip} style={{ ...btn(false), padding: '5px 10px', color: '#B91C1C' }}>Remove</button>
             </span>
           </div>
