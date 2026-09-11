@@ -23,6 +23,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { TOKENS } from '../shared/tokens.js'
 import { Muxer, ArrayBufferTarget } from '../../../../lib/mp4muxer.js'
+import * as _MP4NS from 'mp4box'
+const MP4BOX = _MP4NS.default || _MP4NS
 
 // ── Brand ────────────────────────────────────────────────
 const CRIMSON = '#8B1A2E'
@@ -803,6 +805,155 @@ async function renderMixOffline({ totalDur, musicBuffer, musicVol, voBuffer, voV
 }
 
 // Seek a background <video> to an exact time and wait for the frame.
+// ═══════════════════════════════════════════════════════════
+// FRAME-EXACT DECODE ENGINE for export.
+// Reads a clip's MP4 sample table with mp4box and decodes frames
+// directly with VideoDecoder: every frame delivered exactly once,
+// in order, deterministically. No <video> element, no seeking, no
+// presentation races — the permanent fix for frozen or duplicated
+// frames in exports. Any clip this cannot handle (unusual codec or
+// container) automatically falls back to the classic seek path.
+// ═══════════════════════════════════════════════════════════
+async function parseClipSamples(blob) {
+  try {
+    const buf = await blob.arrayBuffer()
+    return await new Promise((resolve) => {
+      const mp4 = MP4BOX.createFile()
+      let settled = false
+      const fail = () => { if (!settled) { settled = true; resolve(null) } }
+      const guard = setTimeout(fail, 12000)
+      const samples = []
+      let meta = null
+      mp4.onError = fail
+      mp4.onReady = (info) => {
+        try {
+          const track = info.videoTracks && info.videoTracks[0]
+          if (!track) return fail()
+          let description = null
+          const trak = mp4.getTrackById(track.id)
+          for (const entry of trak.mdia.minf.stbl.stsd.entries) {
+            const box = entry.avcC || entry.hvcC || entry.vpcC || entry.av1C
+            if (box) {
+              const ds = new MP4BOX.DataStream(undefined, 0, MP4BOX.DataStream.BIG_ENDIAN)
+              box.write(ds)
+              description = new Uint8Array(ds.buffer, 8)
+              break
+            }
+          }
+          meta = { codec: track.codec, description, nb: track.nb_samples }
+          mp4.onSamples = (id, user, arr) => { for (const s of arr) samples.push(s) }
+          mp4.setExtractionOptions(track.id, null, { nbSamples: 100000 })
+          mp4.start()
+          const poll = setInterval(() => {
+            if (settled) return clearInterval(poll)
+            if (samples.length >= meta.nb || samples.length > 0 && Date.now() - t0 > 4000) {
+              clearInterval(poll); clearTimeout(guard); settled = true
+              if (!samples.length) return resolve(null)
+              let tsOffset = Infinity
+              for (const s of samples) tsOffset = Math.min(tsOffset, s.cts)
+              resolve({ ...meta, samples, tsOffset })
+            }
+          }, 40)
+          const t0 = Date.now()
+        } catch (e) { fail() }
+      }
+      buf.fileStart = 0
+      mp4.appendBuffer(buf)
+      mp4.flush()
+    })
+  } catch (e) { return null }
+}
+
+class ClipFrameSource {
+  constructor(parsed) {
+    this.codec = parsed.codec
+    this.description = parsed.description
+    this.samples = parsed.samples
+    this.tsOffset = parsed.tsOffset
+    this.q = []
+    this.cur = null
+    this.dec = null
+    this.feedIdx = 0
+    this.eos = false
+    this.err = null
+    this.lastT = undefined
+  }
+  static async supported(parsed) {
+    if (typeof VideoDecoder === 'undefined') return false
+    const cfg = { codec: parsed.codec }
+    if (parsed.description) cfg.description = parsed.description
+    const s = await VideoDecoder.isConfigSupported(cfg).catch(() => null)
+    return !!(s && s.supported)
+  }
+  _ts(s) { return (s.cts - this.tsOffset) / s.timescale }
+  _init() {
+    this.dec = new VideoDecoder({ output: f => { this.q.push(f) }, error: e => { this.err = e } })
+    const cfg = { codec: this.codec, optimizeForLatency: false }
+    if (this.description) cfg.description = this.description
+    this.dec.configure(cfg)
+  }
+  _syncBefore(t) {
+    let k = 0
+    for (let i = 0; i < this.samples.length; i++) {
+      const s = this.samples[i]
+      if (s.is_sync && this._ts(s) <= t + 0.001) k = i
+      if (this._ts(s) > t + 4) break
+    }
+    return k
+  }
+  async _reset(t) {
+    if (this.dec) { try { this.dec.close() } catch (e) {} }
+    for (const f of this.q) f.close()
+    this.q = []
+    if (this.cur) { this.cur.close(); this.cur = null }
+    this.err = null
+    this.eos = false
+    this._init()
+    this.feedIdx = this._syncBefore(t)
+  }
+  _feed() {
+    let n = 16
+    while (n-- > 0 && this.feedIdx < this.samples.length && this.dec.decodeQueueSize < 20 && this.q.length < 12) {
+      const s = this.samples[this.feedIdx++]
+      this.dec.decode(new EncodedVideoChunk({
+        type: s.is_sync ? 'key' : 'delta',
+        timestamp: Math.round(this._ts(s) * 1e6),
+        duration: Math.max(1, Math.round((s.duration / s.timescale) * 1e6)),
+        data: s.data,
+      }))
+    }
+    if (this.feedIdx >= this.samples.length && !this.eos) {
+      this.eos = true
+      this.dec.flush().catch(() => {})
+    }
+  }
+  // Latest decoded frame at or before t (seconds in clip time).
+  async frameAt(t) {
+    if (this.err || this.lastT === undefined || t < this.lastT - 0.001 || !this.dec || this.dec.state === 'closed') await this._reset(t)
+    this.lastT = t
+    const tUs = t * 1e6 + 1
+    const started = Date.now()
+    for (;;) {
+      while (this.q.length && this.q[0].timestamp <= tUs) {
+        if (this.cur) this.cur.close()
+        this.cur = this.q.shift()
+      }
+      if (this.q.length && this.q[0].timestamp > tUs) return this.cur
+      if (this.eos && this.dec.decodeQueueSize === 0 && !this.q.length) return this.cur
+      if (this.err) { const e = this.err; this.err = null; throw e }
+      if (Date.now() - started > 4000) return this.cur
+      this._feed()
+      await new Promise(r => setTimeout(r, 0))
+    }
+  }
+  destroy() {
+    try { if (this.dec) this.dec.close() } catch (e) {}
+    for (const f of this.q) f.close()
+    this.q = []
+    if (this.cur) { this.cur.close(); this.cur = null }
+  }
+}
+
 const seekVideo = (v, t) => new Promise((res) => {
   // Film clips set an exact target (trim offset applied); looping
   // backgrounds keep the modulo behaviour.
@@ -1024,7 +1175,7 @@ function drawCaptionLine(ctx, W, H, entry) {
 
 // drawFrame(ctx, t) draws one timeline frame; mediaAt(t) returns the
 // video elements that must show the correct frame at time t.
-async function exportMp4Fast({ canvas, W, H, totalDur, drawFrame, mediaAt, sound, onProgress }) {
+async function exportMp4Fast({ canvas, W, H, totalDur, drawFrame, mediaAt, advance, sound, onProgress }) {
   if (typeof VideoEncoder === 'undefined') return null   // caller falls back to realtime
   const FPS = 30
 
@@ -1136,8 +1287,12 @@ async function exportMp4Fast({ canvas, W, H, totalDur, drawFrame, mediaAt, sound
 
   for (let f = 0; f < totalFrames; f++) {
     const t = f / FPS
-    const vids = mediaAt ? mediaAt(t) : []
-    for (const v of vids) if (v && v.play) await seekVideo(v, t)
+    if (advance) {
+      await advance(t)
+    } else {
+      const vids = mediaAt ? mediaAt(t) : []
+      for (const v of vids) if (v && v.play) await seekVideo(v, t)
+    }
     drawFrame(ctx, t)
     const frame = new VideoFrame(canvas, { timestamp: Math.round(t * 1e6), duration: Math.round(1e6 / FPS) })
     vEnc.encode(frame, { keyFrame: f % 60 === 0 })
@@ -2583,10 +2738,12 @@ function FilmMaker({ toast }) {
       const c = clips[a.idx]
       const live = liveElRef.current
       const v = (live && live.idx === a.idx && live.el) ? live.el : media[a.idx]
-      if (v && v.videoWidth) {
+      const vw0 = v ? (v.videoWidth || v.displayWidth) : 0
+      const vh0 = v ? (v.videoHeight || v.displayHeight) : 0
+      if (v && vw0) {
         ctx.save()
         ctx.filter = gradeFilter(c.grade) || 'none'
-        const vw = v.videoWidth, vh = v.videoHeight
+        const vw = vw0, vh = vh0
         if (c.fit === 'fit') {
           const cover = Math.max(SW / vw, SH / vh)
           const blurPx = Math.max(6, Math.round(28 * SW / W))
@@ -2970,15 +3127,59 @@ function FilmMaker({ toast }) {
       }
       const cv = cvRef.current
       cv.width = W; cv.height = H
-      const out = await exportMp4Fast({
-        canvas: cv, W, H, totalDur: total,
-        drawFrame: (ctx, t) => drawFilm(ctx, t),
-        mediaAt: mediaAtFilm,
-        sound: { musicBuffer: sound.musicBuffer, musicVol: sound.musicVol, voBuffer: sound.voBuffer, voVol: sound.voVol, voClips },
-        onProgress: setProgress,
-      })
+
+      // Frame-exact engine: build a direct decoder per clip. A clip
+      // whose codec or container cannot be decoded this way simply
+      // is not in the map and uses the classic element-seek path.
+      const { segs } = filmSegments()
+      const decoders = {}
+      for (const s of segs) {
+        const i = s.idx
+        if (decoders[i] !== undefined) continue
+        decoders[i] = null
+        const blob = blobs[i]?.blob
+        if (!blob) continue
+        try {
+          const parsed = await parseClipSamples(blob)
+          if (parsed && await ClipFrameSource.supported(parsed)) decoders[i] = new ClipFrameSource(parsed)
+        } catch (er) { decoders[i] = null }
+      }
+      const decodedAll = segs.every(s => decoders[s.idx])
+      let segPtr = 0
+      const advance = async (t) => {
+        while (segPtr < segs.length - 1 && t >= segs[segPtr + 1].at) segPtr++
+        while (segPtr > 0 && t < segs[segPtr].at) segPtr--
+        const s = segs[segPtr]
+        const local = s.from + Math.min(Math.max(0, t - s.at), Math.max(0, s.to - s.from))
+        const dec = decoders[s.idx]
+        if (dec) {
+          const frame = await dec.frameAt(local)
+          if (frame) { liveElRef.current = { idx: s.idx, el: frame }; return }
+        }
+        const v = media[s.idx]
+        if (v) {
+          v.__filmTarget = local
+          await seekVideo(v, t)
+          liveElRef.current = { idx: s.idx, el: v }
+        }
+      }
+
+      let out = null
+      try {
+        out = await exportMp4Fast({
+          canvas: cv, W, H, totalDur: total,
+          drawFrame: (ctx, t) => drawFilm(ctx, t),
+          advance,
+          sound: { musicBuffer: sound.musicBuffer, musicVol: sound.musicVol, voBuffer: sound.voBuffer, voVol: sound.voVol, voClips },
+          onProgress: setProgress,
+        })
+      } finally {
+        Object.values(decoders).forEach(d => { if (d) d.destroy() })
+        liveElRef.current = null
+      }
       setRendering(false); setProgress(0)
       Object.values(media).forEach(m => { if (m) m.__filmTarget = undefined })
+      if (out?.blob) out.engineNote = decodedAll ? ' Engine: frame exact.' : ' Engine: classic (one or more clips could not be direct decoded).'
       if (out?.blob) {
         const a = document.createElement('a')
         a.download = 'smartious-film.mp4'
@@ -2990,7 +3191,7 @@ function FilmMaker({ toast }) {
           : out.audioNote === 'none' ? ' NOTE: no sound was found in this film, so the file has no audio track.'
           : out.audioNote === 'aac' ? ' Audio: AAC.'
           : ''
-        toast?.('Film ready: ' + (out.blob.size / 1048576).toFixed(1) + ' MB in ' + secs + 's.' + note)
+        toast?.('Film ready: ' + (out.blob.size / 1048576).toFixed(1) + ' MB in ' + secs + 's.' + note + (out.engineNote || ''))
       } else {
         toast?.('Fast export is not available in this browser. Use current Chrome or Edge for the film exporter.')
       }
