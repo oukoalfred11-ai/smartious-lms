@@ -809,11 +809,32 @@ const seekVideo = (v, t) => new Promise((res) => {
   const want = (v.__filmTarget !== undefined) ? v.__filmTarget : t
   const target = (v.__filmTarget !== undefined) ? Math.min(want, (v.duration || want) - 0.05)
     : (v.duration && isFinite(v.duration)) ? want % v.duration : want
-  if (Math.abs(v.currentTime - target) < 0.001) return res()
-  const done = () => { v.removeEventListener('seeked', done); res() }
-  v.addEventListener('seeked', done)
-  try { v.currentTime = target } catch (e) { res() }
-  setTimeout(done, 400)   // never wedge on a stubborn seek
+  if (Math.abs(v.currentTime - target) < 0.0005) return res()
+  let settled = false
+  let hard = 0
+  const finish = () => {
+    if (settled) return
+    settled = true
+    clearTimeout(hard)
+    v.removeEventListener('seeked', onSeeked)
+    res()
+  }
+  const onSeeked = () => {
+    // 'seeked' alone is not enough: the browser can still be holding
+    // the PREVIOUS frame when the canvas grabs the picture, which
+    // exported as duplicated frames (visible stutter). Wait for the
+    // frame to actually be presented, with a short cap so a quiet
+    // callback can never stall the render.
+    if (v.requestVideoFrameCallback) {
+      let done = false
+      const go = () => { if (!done) { done = true; finish() } }
+      try { v.requestVideoFrameCallback(() => go()) } catch (e) { return go() }
+      setTimeout(go, 80)
+    } else finish()
+  }
+  v.addEventListener('seeked', onSeeked)
+  try { v.currentTime = target } catch (e) { finish() }
+  hard = setTimeout(finish, 1500)   // never wedge, but give slow 4K seeks real time
 })
 
 // ═══ FILM AUDIO TOOLS ═══════════════════════════════════
@@ -2282,7 +2303,41 @@ function concatAudioBuffers(parts) {
     }
     at += p.length
   }
+  // 6ms equal fades either side of every internal join: a hard
+  // sample jump at a cut point is an audible click; this removes it.
+  const F = Math.min(1024, Math.round(sr * 0.006))
+  let edge = 0
+  for (let p = 0; p < list.length - 1; p++) {
+    edge += list[p].length
+    for (let ch = 0; ch < nCh; ch++) {
+      const d = out.getChannelData(ch)
+      for (let i = 0; i < F; i++) {
+        const g = i / F
+        const a = edge - F + i; if (a >= 0) d[a] *= 1 - g
+        const b = edge + i; if (b < d.length) d[b] *= g
+      }
+    }
+  }
   return out
+}
+
+// Gentle 5ms fade at a buffer's first and last samples so clip-to-
+// clip joins never click. Guarded so cached buffers are not faded
+// twice.
+function fadeEdges(buf, sec = 0.005) {
+  if (!buf || buf.__faded) return buf
+  const F = Math.min(2048, Math.round(buf.sampleRate * sec))
+  for (let ch = 0; ch < buf.numberOfChannels; ch++) {
+    const d = buf.getChannelData(ch)
+    const n = d.length
+    for (let i = 0; i < Math.min(F, n); i++) {
+      const g = i / F
+      d[i] *= g
+      d[n - 1 - i] *= g
+    }
+  }
+  buf.__faded = true
+  return buf
 }
 
 // The cut bar: the clip's full source length drawn as a strip.
@@ -2402,6 +2457,7 @@ function FilmMaker({ toast }) {
   const [loaded, setLoaded] = useState(false)
   const [savedAt, setSavedAt] = useState(0)
   const [playing, setPlaying] = useState(false)
+  const [starting, setStarting] = useState(false)
   const [rendering, setRendering] = useState(false)
   const [progress, setProgress] = useState(0)
   const cvRef = useRef(null)
@@ -2410,6 +2466,10 @@ function FilmMaker({ toast }) {
   // Cut tool: the currently dragged selection on the active clip's bar
   const [cutSel, setCutSel] = useState(null)
   useEffect(() => { setCutSel(null) }, [cur])
+  // Which element is on screen during preview (drawFilm reads it),
+  // and the pool of hidden twin elements used for same-clip joins.
+  const liveElRef = useRef(null)
+  const mediaBRef = useRef({})
 
   const { W, H } = FORMATS[format]
   const clip = clips[cur]
@@ -2449,6 +2509,21 @@ function FilmMaker({ toast }) {
     for (let i = clips.length - 1; i >= 0; i--) if (t >= starts[i]) return { idx: i, start: starts[i] }
     return null
   }
+  // The whole film as one flat list of kept segments. Every join —
+  // clip to clip, or across a cut — is simply a segment boundary,
+  // which is what lets playback prepare the next one in advance.
+  const filmSegments = () => {
+    const out = []
+    let acc = 0
+    clips.forEach((c, i) => {
+      keptSegments(c).forEach(s => {
+        const L = Math.max(0.05, s.to - s.from)
+        out.push({ idx: i, from: s.from, to: s.to, at: acc })
+        acc += L
+      })
+    })
+    return { segs: out, total: Math.max(acc, 0.001) }
+  }
 
   // Absolute caption entries, rebuilt when clips change
   const capsAbs = useMemo(() => {
@@ -2467,7 +2542,8 @@ function FilmMaker({ toast }) {
     const a = activeAt(t)
     if (a) {
       const c = clips[a.idx]
-      const v = media[a.idx]
+      const live = liveElRef.current
+      const v = (live && live.idx === a.idx && live.el) ? live.el : media[a.idx]
       if (v && v.videoWidth) {
         ctx.save()
         ctx.filter = gradeFilter(c.grade) || 'none'
@@ -2553,6 +2629,7 @@ function FilmMaker({ toast }) {
         if (!cleanCache.current[key]) cleanCache.current[key] = await cleanNoise(seg)
         seg = cleanCache.current[key]
       }
+      seg = fadeEdges(seg)
       out.push({ buffer: seg, at: starts[i] })
     }
     return out
@@ -2601,6 +2678,8 @@ function FilmMaker({ toast }) {
     }))
     setMedia(reindex); setBlobs(reindex); setAudioBufs(reindex)
     cleanCache.current = {}
+    Object.values(mediaBRef.current).forEach(m => { if (m && m.pause) m.pause() })
+    mediaBRef.current = {}
     setCur(c => Math.max(0, c - 1))
   }
   const move = (dir) => {
@@ -2617,40 +2696,110 @@ function FilmMaker({ toast }) {
     })
     setMedia(swap); setBlobs(swap); setAudioBufs(swap)
     cleanCache.current = {}
+    mediaBRef.current = {}
     setCur(j)
   }
 
   // ── Preview with live sound ──
+  // Smooth joins: playback runs on the flat segment list. While one
+  // segment plays, the NEXT segment's element is already seeked and
+  // waiting — the primary element of the next clip, or a hidden twin
+  // of the SAME clip when the join is a cut — so the swap at the
+  // boundary is instant. No live seek on the playing element, no
+  // frozen frames.
   const stopRef = useRef(null)
   const stop = () => { if (stopRef.current) stopRef.current(); }
+  const twinFor = async (idx) => {
+    if (mediaBRef.current[idx]) return mediaBRef.current[idx]
+    const rec = blobs[idx]
+    if (!rec || !rec.blob) return null
+    const el = document.createElement('video')
+    el.muted = true; el.playsInline = true; el.preload = 'auto'
+    el.src = URL.createObjectURL(rec.blob)
+    await new Promise(r => { el.onloadeddata = () => r(); setTimeout(r, 1500) })
+    mediaBRef.current[idx] = el
+    return el
+  }
   const preview = async () => {
+    if (playing || starting) return
     if (!clips.length) return toast?.('Add clips first.')
+    // The first tap answers IMMEDIATELY: the button flips to
+    // "Preparing", the film's first frame is drawn, and Stop works
+    // even while the soundtrack is still being built. Extra taps
+    // during preparation are ignored instead of queueing.
+    setStarting(true)
+    let cancelled = false
+    stopRef.current = () => { cancelled = true; setStarting(false); setPlaying(false); stopRef.current = null }
+    try {
+      const { segs, total } = filmSegments()
+      if (!segs.length) { setStarting(false); stopRef.current = null; return }
+      const cv = cvRef.current
+      cv.width = W; cv.height = H
+      const ctx = cv.getContext('2d')
+      const first = media[segs[0].idx]
+      if (first) { try { first.pause(); first.currentTime = segs[0].from } catch (er) {} }
+      drawFilm(ctx, 0)
+      // Pre-warm the twin elements every cut join will need, so the
+      // first playthrough is as smooth as the second.
+      for (let j = 1; j < segs.length; j++) {
+        if (segs[j].idx === segs[j - 1].idx) await twinFor(segs[j].idx)
+        if (cancelled) return
+      }
+      const voClips = await buildFilmAudio()
+      if (cancelled) return
+      const mixer = createMixer({ totalDur: total, musicBuffer: sound.musicBuffer, musicVol: sound.musicVol, voBuffer: sound.voBuffer, voVol: sound.voVol, voClips, record: false })
+      runPreview({ segs, total, ctx, mixer })
+    } catch (e) {
+      console.error('[preview]', e)
+      setStarting(false); setPlaying(false); stopRef.current = null
+      toast?.('Preview could not start: ' + (e?.message || 'unknown error'))
+    }
+  }
+
+  const runPreview = ({ segs, total, ctx, mixer }) => {
+    let k = 0
+    let curEl = media[segs[0].idx] || null
+    const prepared = { j: -1, el: null }
+    const prepare = async (j) => {
+      prepared.j = -1; prepared.el = null
+      if (j >= segs.length) return
+      const s = segs[j]
+      let el = media[s.idx] || null
+      if (curEl && el === curEl) el = await twinFor(s.idx)
+      if (!el) return
+      try { el.pause(); el.currentTime = s.from } catch (er) {}
+      prepared.j = j; prepared.el = el
+    }
+    if (curEl) {
+      try { curEl.currentTime = segs[0].from } catch (er) {}
+      curEl.play().catch(() => {})
+    }
+    prepare(1)
+    setStarting(false)
     setPlaying(true)
-    const { total } = timeline()
-    const voClips = await buildFilmAudio()
-    const cv = cvRef.current
-    cv.width = W; cv.height = H
-    const ctx = cv.getContext('2d')
-    const mixer = createMixer({ totalDur: total, musicBuffer: sound.musicBuffer, musicVol: sound.musicVol, voBuffer: sound.voBuffer, voVol: sound.voVol, voClips, record: false })
     mixer.start()
-    let lastIdx = -1
     const t0 = performance.now()
     const step = (now) => {
       const t = (now - t0) / 1000
-      const a = activeAt(t)
-      if (!a) { finish(); return }
-      const v = media[a.idx]
-      const local = localTimeOf(clips[a.idx], t - a.start)
-      if (v) {
-        if (a.idx !== lastIdx) {
-          if (lastIdx >= 0 && media[lastIdx]?.pause) media[lastIdx].pause()
-          try { v.currentTime = local } catch (er) {}
-          v.play().catch(() => {})
-          lastIdx = a.idx
-        } else if (Math.abs(v.currentTime - local) > 0.3) {
-          try { v.currentTime = local } catch (er) {}
+      if (t >= total) { finish(); return }
+      while (k < segs.length - 1 && t >= segs[k + 1].at) {
+        const prev = curEl
+        k++
+        const el = (prepared.j === k && prepared.el) ? prepared.el : media[segs[k].idx]
+        curEl = el || prev
+        if (curEl) {
+          if (prepared.j !== k) { try { curEl.currentTime = segs[k].from + (t - segs[k].at) } catch (er) {} }
+          curEl.play().catch(() => {})
         }
+        if (prev && prev !== curEl && prev.pause) prev.pause()
+        prepare(k + 1)
       }
+      const s = segs[k]
+      const local = s.from + Math.min(t - s.at, Math.max(0, s.to - s.from))
+      if (curEl && Math.abs(curEl.currentTime - local) > 0.3) {
+        try { curEl.currentTime = local } catch (er) {}
+      }
+      liveElRef.current = { idx: s.idx, el: curEl }
       drawFilm(ctx, t)
       setProgress(t / total)
       rafRef.current = requestAnimationFrame(step)
@@ -2658,7 +2807,9 @@ function FilmMaker({ toast }) {
     const finish = () => {
       cancelAnimationFrame(rafRef.current)
       Object.values(media).forEach(m => { if (m && m.pause) m.pause() })
+      Object.values(mediaBRef.current).forEach(m => { if (m && m.pause) m.pause() })
       mixer.stop()
+      liveElRef.current = null
       setPlaying(false); setProgress(0)
       stopRef.current = null
     }
@@ -2669,6 +2820,8 @@ function FilmMaker({ toast }) {
   // ── Export: fast 4K MP4 with the shared ladder ──
   const exportFilm = async () => {
     if (!clips.length) return toast?.('Add clips first.')
+    liveElRef.current = null
+    Object.values(media).forEach(m => { if (m && m.pause) m.pause() })
     setRendering(true); setProgress(0)
     const t0 = performance.now()
     const { total } = timeline()
@@ -2752,6 +2905,8 @@ function FilmMaker({ toast }) {
     Object.values(media).forEach(m => { if (m && m.pause) m.pause() })
     setClips([]); setMedia({}); setBlobs({}); setAudioBufs({}); setCur(0)
     cleanCache.current = {}
+    mediaBRef.current = {}
+    liveElRef.current = null
     setSound({ musicMode: 'none', musicBuffer: null, musicVol: 0.5, voBuffer: null, voVol: 1, script: null })
     setSavedAt(0)
     toast?.('Fresh film started.')
@@ -2903,10 +3058,10 @@ function FilmMaker({ toast }) {
       <canvas ref={cvRef} style={{ width: '100%', maxWidth: 560, background: '#000', borderRadius: 12, border: '1.5px solid ' + TOKENS.line, justifySelf: 'start' }} />
 
       <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-        {!playing
+        {!playing && !starting
           ? <button onClick={preview} disabled={rendering} style={btn(false)}>Preview with sound</button>
-          : <button onClick={stop} style={btn(false)}>Stop</button>}
-        <button onClick={exportFilm} disabled={playing || rendering} style={btn(true)}>
+          : <button onClick={stop} style={btn(false)}>{starting ? 'Preparing... tap to cancel' : 'Stop'}</button>}
+        <button onClick={exportFilm} disabled={playing || starting || rendering} style={btn(true)}>
           {rendering ? 'Rendering ' + Math.round(progress * 100) + '%' : 'Export film'}
         </button>
         {(playing || rendering) && <span style={{ fontSize: 11.5, color: TOKENS.s500, fontWeight: 700 }}>{Math.round(progress * 100)}%</span>}
