@@ -970,49 +970,17 @@ class ClipFrameSource {
 
 const seekVideo = (v, t) => new Promise((res) => {
   // Film clips set an exact target (trim offset applied); looping
-  // backgrounds keep the modulo behaviour.
+  // backgrounds keep the modulo behaviour. This is the original
+  // simple seek: no presentation callbacks, no adaptive logic —
+  // the baseline exporter's speed.
   const want = (v.__filmTarget !== undefined) ? v.__filmTarget : t
   const target = (v.__filmTarget !== undefined) ? Math.min(want, (v.duration || want) - 0.05)
     : (v.duration && isFinite(v.duration)) ? want % v.duration : want
-  if (Math.abs(v.currentTime - target) < 0.0005) return res()
-  let settled = false
-  let hard = 0
-  let grace = 0
-  const finish = () => {
-    if (settled) return
-    settled = true
-    clearTimeout(hard)
-    clearTimeout(grace)
-    v.removeEventListener('seeked', onSeeked)
-    res()
-  }
-  // Two signals race IN PARALLEL — nothing waits behind anything:
-  //  1. The presentation callback is armed BEFORE the seek starts, so
-  //     it fires the instant the seeked frame is actually on screen.
-  //     That is the anti-stutter guarantee, at zero added latency.
-  //  2. 'seeked' finishes immediately on machines whose presentation
-  //     callback is dead (a dozen misses, zero hits ever) — those
-  //     machines run at the plain seek speed they always had.
-  //     Otherwise 'seeked' grants presentation a tiny grace window
-  //     and counts a miss if it never comes.
-  const rvfcDead = !v.requestVideoFrameCallback || (seekVideo._miss > 12 && !seekVideo._hit)
-  let presented = false
-  if (!rvfcDead) {
-    try {
-      v.requestVideoFrameCallback(() => {
-        presented = true
-        seekVideo._hit = (seekVideo._hit || 0) + 1
-        finish()
-      })
-    } catch (e) { presented = true }
-  }
-  const onSeeked = () => {
-    if (rvfcDead || presented) return finish()
-    grace = setTimeout(() => { seekVideo._miss = (seekVideo._miss || 0) + 1; finish() }, 20)
-  }
-  v.addEventListener('seeked', onSeeked)
-  try { v.currentTime = target } catch (e) { finish() }
-  hard = setTimeout(finish, 1500)   // never wedge, but give slow 4K seeks real time
+  if (Math.abs(v.currentTime - target) < 0.001) return res()
+  const done = () => { v.removeEventListener('seeked', done); res() }
+  v.addEventListener('seeked', done)
+  try { v.currentTime = target } catch (e) { res() }
+  setTimeout(done, 800)   // never wedge on a stubborn seek
 })
 
 // ═══ FILM AUDIO TOOLS ═══════════════════════════════════
