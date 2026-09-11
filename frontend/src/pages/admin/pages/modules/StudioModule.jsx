@@ -1157,9 +1157,9 @@ function drawCaptionLine(ctx, W, H, entry) {
 
 // drawFrame(ctx, t) draws one timeline frame; mediaAt(t) returns the
 // video elements that must show the correct frame at time t.
-async function exportMp4Fast({ canvas, W, H, totalDur, drawFrame, mediaAt, advance, sound, onProgress }) {
+async function exportMp4Fast({ canvas, W, H, totalDur, drawFrame, mediaAt, advance, sound, onProgress, fps }) {
   if (typeof VideoEncoder === 'undefined') return null   // caller falls back to realtime
-  const FPS = 30
+  const FPS = fps && fps >= 10 && fps <= 120 ? fps : 30
 
   // ── Decide the AUDIO codec BEFORE building the container. Chrome
   // cannot AAC-encode on every machine; declaring an AAC track and
@@ -1208,7 +1208,8 @@ async function exportMp4Fast({ canvas, W, H, totalDur, drawFrame, mediaAt, advan
     error: (e) => { vErr = e },
   })
   const px = W * H
-  const bitrate = px >= 3840 * 2160 ? 14_000_000 : px >= 2160 * 2160 ? 10_000_000 : 6_000_000
+  let bitrate = px >= 3840 * 2160 ? 14_000_000 : px >= 2160 * 2160 ? 10_000_000 : 6_000_000
+  if (FPS >= 48) bitrate = Math.round(bitrate * 1.5)
   let vConfig = null
   for (const codec of (px > 1920 * 1080 ? ['avc1.640033', 'avc1.640032', 'avc1.640028'] : ['avc1.640028'])) {
     const c = {
@@ -1277,7 +1278,7 @@ async function exportMp4Fast({ canvas, W, H, totalDur, drawFrame, mediaAt, advan
     }
     drawFrame(ctx, t)
     const frame = new VideoFrame(canvas, { timestamp: Math.round(t * 1e6), duration: Math.round(1e6 / FPS) })
-    vEnc.encode(frame, { keyFrame: f % 60 === 0 })
+    vEnc.encode(frame, { keyFrame: f % (FPS * 2) === 0 })
     frame.close()
     while (vEnc.encodeQueueSize > 8) await new Promise(r => setTimeout(r, 0))
     await pushAudioUpTo(t)
@@ -2631,6 +2632,7 @@ function FilmMaker({ toast }) {
   const [playing, setPlaying] = useState(false)
   const [starting, setStarting] = useState(false)
   const [rendering, setRendering] = useState(false)
+  const [exportReport, setExportReport] = useState(null)
   const [progress, setProgress] = useState(0)
   const cvRef = useRef(null)
   const rafRef = useRef(0)
@@ -3115,6 +3117,14 @@ function FilmMaker({ toast }) {
       // is not in the map and uses the classic element-seek path.
       const { segs } = filmSegments()
       const decoders = {}
+      const srcFps = {}
+      const fpsOf = (parsed) => {
+        if (!parsed || !parsed.samples || !parsed.samples.length) return null
+        const ds = parsed.samples.slice(0, 240).map(x => x.duration / x.timescale).filter(d => d > 0).sort((a, b) => a - b)
+        if (!ds.length) return null
+        const med = ds[Math.floor(ds.length / 2)]
+        return Math.min(120, Math.max(10, 1 / med))
+      }
       for (const s of segs) {
         const i = s.idx
         if (decoders[i] !== undefined) continue
@@ -3123,10 +3133,22 @@ function FilmMaker({ toast }) {
         if (!blob) continue
         try {
           const parsed = await parseClipSamples(blob)
+          const f = fpsOf(parsed)
+          if (f) srcFps[i] = f
           if (parsed && await ClipFrameSource.supported(parsed)) decoders[i] = new ClipFrameSource(parsed)
         } catch (er) { decoders[i] = null }
       }
       const decodedAll = segs.every(s => decoders[s.idx])
+      // Export at the film's native rate: the highest clip rate,
+      // snapped to a standard value so players and platforms are
+      // happy. Unknown rates (library missing) keep the old 30.
+      const rates = Object.values(srcFps)
+      let exportFps = 30
+      if (rates.length) {
+        const peak = Math.max(...rates)
+        const std = [24, 25, 30, 50, 60]
+        exportFps = std.reduce((best, r) => Math.abs(r - peak) < Math.abs(best - peak) ? r : best, 30)
+      }
       let segPtr = 0
       const advance = async (t) => {
         while (segPtr < segs.length - 1 && t >= segs[segPtr + 1].at) segPtr++
@@ -3152,6 +3174,7 @@ function FilmMaker({ toast }) {
           canvas: cv, W, H, totalDur: total,
           drawFrame: (ctx, t) => drawFilm(ctx, t),
           advance,
+          fps: exportFps,
           sound: { musicBuffer: sound.musicBuffer, musicVol: sound.musicVol, voBuffer: sound.voBuffer, voVol: sound.voVol, voClips },
           onProgress: setProgress,
         })
@@ -3164,7 +3187,7 @@ function FilmMaker({ toast }) {
       if (out?.blob) out.engineNote = decodedAll ? ' Engine: frame exact.' : ' Engine: classic (one or more clips could not be direct decoded).'
       if (out?.blob) {
         const a = document.createElement('a')
-        a.download = 'smartious-film.mp4'
+        a.download = 'smartious-film-' + H + 'p-' + exportFps + 'fps-' + (decodedAll ? 'exact' : 'classic') + '.mp4'
         a.href = URL.createObjectURL(out.blob)
         a.click()
         const secs = Math.round((performance.now() - t0) / 1000)
@@ -3174,6 +3197,13 @@ function FilmMaker({ toast }) {
           : out.audioNote === 'aac' ? ' Audio: AAC.'
           : ''
         toast?.('Film ready: ' + (out.blob.size / 1048576).toFixed(1) + ' MB in ' + secs + 's.' + note + (out.engineNote || ''))
+        setExportReport({
+          size: (out.blob.size / 1048576).toFixed(1) + ' MB',
+          time: secs + 's for ' + Math.round(total) + 's of film',
+          fps: exportFps + ' fps (clips: ' + (Object.entries(srcFps).map(([i, f]) => 'clip ' + (Number(i) + 1) + ' ' + f.toFixed(1)).join(', ') || 'unknown, library file not loaded') + ')',
+          engine: decodedAll ? 'frame exact' : 'classic seek',
+          audio: out.audioNote === 'aac' ? 'AAC' : out.audioNote === 'opus' ? 'Opus (some players mute it)' : out.audioNote === 'none' ? 'no sound found' : 'silent (no encoder)',
+        })
       } else {
         toast?.('Fast export is not available in this browser. Use current Chrome or Edge for the film exporter.')
       }
@@ -3407,6 +3437,16 @@ function FilmMaker({ toast }) {
         <button onClick={exportFilm} disabled={playing || starting || rendering} style={btn(true)}>
           {rendering ? 'Rendering ' + Math.round(progress * 100) + '%' : 'Export film'}
         </button>
+        {exportReport && (
+          <div style={{ flexBasis: '100%', background: '#F9F6EE', border: '1.5px solid ' + TOKENS.line, borderRadius: 10, padding: '10px 12px', display: 'grid', gap: 3, position: 'relative' }}>
+            <div style={{ fontSize: 11.5, fontWeight: 800, color: TOKENS.crimson }}>Export report</div>
+            <div style={{ fontSize: 11, color: TOKENS.s600 }}>Size: {exportReport.size} | Render: {exportReport.time}</div>
+            <div style={{ fontSize: 11, color: TOKENS.s600 }}>Frame rate: {exportReport.fps}</div>
+            <div style={{ fontSize: 11, color: TOKENS.s600 }}>Engine: {exportReport.engine} | Audio: {exportReport.audio}</div>
+            <div style={{ fontSize: 10, color: TOKENS.s500 }}>If a download misbehaves, send these lines exactly.</div>
+            <button onClick={() => setExportReport(null)} style={{ position: 'absolute', top: 6, right: 8, background: 'none', border: 'none', cursor: 'pointer', color: TOKENS.s500, fontSize: 13, fontWeight: 800 }}>{'\u2715'}</button>
+          </div>
+        )}
         {(playing || rendering) && <span style={{ fontSize: 11.5, color: TOKENS.s500, fontWeight: 700 }}>{Math.round(progress * 100)}%</span>}
       </div>
 
