@@ -2222,6 +2222,156 @@ function VideoMaker({ toast }) {
 
 
 // ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+// FILM CUTS — remove unwanted middle sections from a clip.
+// A clip's kept material is its trim window [in, out] minus its
+// list of cuts. Everything downstream (timeline, preview seeking,
+// audio build, captions, export) reads through these helpers, so
+// a cut behaves identically everywhere.
+// ═══════════════════════════════════════════════════════════
+function keptSegments(c) {
+  const raw = (c.cuts || [])
+    .map(x => ({ from: Math.max(c.in, Math.min(x.from, x.to)), to: Math.min(c.out, Math.max(x.from, x.to)) }))
+    .filter(x => x.to - x.from > 0.01)
+    .sort((a, b) => a.from - b.from)
+  const merged = []
+  for (const x of raw) {
+    const last = merged[merged.length - 1]
+    if (last && x.from <= last.to + 0.001) last.to = Math.max(last.to, x.to)
+    else merged.push({ ...x })
+  }
+  const segs = []
+  let pos = c.in
+  for (const m of merged) {
+    if (m.from > pos + 0.01) segs.push({ from: pos, to: m.from })
+    pos = Math.max(pos, m.to)
+  }
+  if (c.out > pos + 0.01) segs.push({ from: pos, to: c.out })
+  if (!segs.length) segs.push({ from: c.in, to: Math.min(c.dur || c.out, c.in + 0.2) })
+  return segs
+}
+const clipLenOf = (c) => Math.max(0.2, keptSegments(c).reduce((s, x) => s + (x.to - x.from), 0))
+// Map an offset in EDITED clip time to a time in the SOURCE video,
+// skipping over the cut sections.
+function localTimeOf(c, off) {
+  const segs = keptSegments(c)
+  let rem = Math.max(0, off)
+  for (const s of segs) {
+    const L = s.to - s.from
+    if (rem < L) return s.from + rem
+    rem -= L
+  }
+  return Math.max(segs[0].from, segs[segs.length - 1].to - 0.01)
+}
+const cutsSig = (c) => keptSegments(c).map(s => s.from.toFixed(2) + '-' + s.to.toFixed(2)).join(',')
+// Stitch several audio slices into one continuous buffer.
+function concatAudioBuffers(parts) {
+  const list = parts.filter(Boolean)
+  if (!list.length) return null
+  if (list.length === 1) return list[0]
+  const sr = list[0].sampleRate
+  const nCh = Math.max(...list.map(p => p.numberOfChannels))
+  const total = list.reduce((s, p) => s + p.length, 0)
+  const out = new AudioBuffer({ length: Math.max(1, total), sampleRate: sr, numberOfChannels: nCh })
+  let at = 0
+  for (const p of list) {
+    for (let ch = 0; ch < nCh; ch++) {
+      const d = out.getChannelData(ch)
+      const s = p.getChannelData(Math.min(ch, p.numberOfChannels - 1))
+      d.set(s, at)
+    }
+    at += p.length
+  }
+  return out
+}
+
+// The cut bar: the clip's full source length drawn as a strip.
+// Drag across the unwanted part to select it (crimson), press
+// "Delete selected part" and it is removed; each removed section
+// shows as a chip that can restore it. Grey ends are the Start/End
+// trim; gold is what plays.
+function CutBar({ clip, sel, setSel, onDelete, onRestore }) {
+  const barRef = useRef(null)
+  const dragRef = useRef(null)
+  const dur = Math.max(0.2, clip.dur || clip.out || 0.2)
+  const pct = (t) => (Math.max(0, Math.min(dur, t)) / dur * 100) + '%'
+  const timeAt = (clientX) => {
+    const r = barRef.current.getBoundingClientRect()
+    const f = Math.max(0, Math.min(1, (clientX - r.left) / Math.max(1, r.width)))
+    return f * dur
+  }
+  const down = (e) => {
+    e.preventDefault()
+    try { e.currentTarget.setPointerCapture(e.pointerId) } catch (er) {}
+    const t = timeAt(e.clientX)
+    dragRef.current = t
+    setSel({ from: t, to: t })
+  }
+  const moveP = (e) => {
+    if (dragRef.current === null || dragRef.current === undefined) return
+    const t = timeAt(e.clientX)
+    setSel({ from: Math.min(dragRef.current, t), to: Math.max(dragRef.current, t) })
+  }
+  const up = () => { dragRef.current = null }
+  const cuts = (clip.cuts || [])
+  const segs = keptSegments(clip)
+  const selLen = sel ? Math.max(0, sel.to - sel.from) : 0
+  return (
+    <div style={{ display: 'grid', gap: 7 }}>
+      <div style={{ fontSize: 11.5, fontWeight: 700, color: TOKENS.s600 }}>
+        Cut out unwanted parts
+        <span style={{ fontWeight: 400, color: TOKENS.s500 }}> — drag across the bad section, then delete it. Gold plays; crimson is removed.</span>
+      </div>
+      <div ref={barRef} onPointerDown={down} onPointerMove={moveP} onPointerUp={up} onPointerCancel={up}
+        style={{ position: 'relative', height: 36, borderRadius: 8, background: '#D8D2C6', border: '1.5px solid ' + TOKENS.line, cursor: 'crosshair', touchAction: 'none', overflow: 'hidden', userSelect: 'none' }}>
+        {segs.map((s, i) => (
+          <div key={'k' + i} style={{ position: 'absolute', top: 0, bottom: 0, left: pct(s.from), width: ((s.to - s.from) / dur * 100) + '%', background: '#C9973A' }} />
+        ))}
+        {cuts.map((x, i) => {
+          const from = Math.max(clip.in, Math.min(x.from, x.to)), to = Math.min(clip.out, Math.max(x.from, x.to))
+          if (to - from <= 0.01) return null
+          return (
+            <div key={'c' + i} style={{ position: 'absolute', top: 0, bottom: 0, left: pct(from), width: ((to - from) / dur * 100) + '%', background: '#8B1A2E', opacity: 0.85 }}>
+              <span style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FDFAF4', fontSize: 9.5, fontWeight: 800, overflow: 'hidden' }}>CUT</span>
+            </div>
+          )
+        })}
+        {sel && selLen > 0.02 && (
+          <div style={{ position: 'absolute', top: 0, bottom: 0, left: pct(sel.from), width: (selLen / dur * 100) + '%', background: 'rgba(139,26,46,0.35)', border: '2px solid #8B1A2E', borderRadius: 4, boxSizing: 'border-box' }} />
+        )}
+      </div>
+      <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+        <span style={{ fontSize: 10.5, color: TOKENS.s500, fontWeight: 700 }}>
+          {sel && selLen > 0.05
+            ? 'Selected ' + sel.from.toFixed(1) + 's to ' + sel.to.toFixed(1) + 's (' + selLen.toFixed(1) + 's)'
+            : '0s'}
+        </span>
+        <span style={{ fontSize: 10.5, color: TOKENS.s500, fontWeight: 700, marginLeft: 'auto' }}>{dur.toFixed(1)}s</span>
+        <button onClick={onDelete} disabled={!sel || selLen < 0.05}
+          style={{ ...btn(true), padding: '6px 12px', fontSize: 11.5, opacity: (!sel || selLen < 0.05) ? 0.45 : 1 }}>
+          Delete selected part
+        </button>
+        {sel && <button onClick={() => setSel(null)} style={{ ...btn(false), padding: '6px 12px', fontSize: 11.5 }}>Clear selection</button>}
+      </div>
+      {cuts.length > 0 && (
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+          {cuts.map((x, i) => {
+            const from = Math.min(x.from, x.to), to = Math.max(x.from, x.to)
+            return (
+              <button key={i} onClick={() => onRestore(i)} title="Click to restore this section"
+                style={{ ...btn(false), padding: '5px 10px', fontSize: 10.5, color: '#8B1A2E', borderColor: '#E3C9CE' }}>
+                Removed {from.toFixed(1)}s to {to.toFixed(1)}s  {'\u2715'}
+              </button>
+            )
+          })}
+          <span style={{ fontSize: 10, color: TOKENS.s500 }}>Click a removed section to bring it back.</span>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════
 // FILM EDITOR — stitch uploaded clips into one film, keeping
 // each clip's own sound. Trim, per clip colour grade, volume,
 // noise cleanup, auto timed burned captions, optional music bed
@@ -2257,13 +2407,40 @@ function FilmMaker({ toast }) {
   const cvRef = useRef(null)
   const rafRef = useRef(0)
   const cleanCache = useRef({})
+  // Cut tool: the currently dragged selection on the active clip's bar
+  const [cutSel, setCutSel] = useState(null)
+  useEffect(() => { setCutSel(null) }, [cur])
 
   const { W, H } = FORMATS[format]
   const clip = clips[cur]
 
+  // Delete the selected section: it joins the clip's cut list and the
+  // film simply plays over it. Guard: at least 0.2s of the clip must
+  // remain, and a selection must be a real section, not a click.
+  const deleteSelected = () => {
+    if (!clip || !cutSel) return
+    const from = Math.max(clip.in, Math.min(cutSel.from, cutSel.to))
+    const to = Math.min(clip.out, Math.max(cutSel.from, cutSel.to))
+    if (to - from < 0.05) return
+    const next = [...(clip.cuts || []), { from, to }]
+    if (clipLenOf({ ...clip, cuts: next }) < 0.2) {
+      toast?.('That cut would remove the whole clip. Use Remove to delete the clip instead.')
+      return
+    }
+    upd({ cuts: next })
+    cleanCache.current = {}
+    setCutSel(null)
+    toast?.('Cut ' + (to - from).toFixed(1) + 's out. Click the removed chip to bring it back.')
+  }
+  const restoreCut = (i) => {
+    if (!clip) return
+    upd({ cuts: (clip.cuts || []).filter((_, j) => j !== i) })
+    cleanCache.current = {}
+  }
+
   const timeline = () => {
     let acc = 0
-    const starts = clips.map(c => { const s = acc; acc += Math.max(0.2, (c.out - c.in)); return s })
+    const starts = clips.map(c => { const s = acc; acc += clipLenOf(c); return s })
     return { starts, total: acc }
   }
   const activeAt = (t) => {
@@ -2278,7 +2455,7 @@ function FilmMaker({ toast }) {
     const { starts } = timeline()
     const out = []
     clips.forEach((c, i) => {
-      captionTrack(c.captions, Math.max(0.2, c.out - c.in)).forEach(e =>
+      captionTrack(c.captions, clipLenOf(c)).forEach(e =>
         out.push({ t0: e.t0 + starts[i], t1: e.t1 + starts[i], text: e.text }))
     })
     return out
@@ -2342,7 +2519,7 @@ function FilmMaker({ toast }) {
     if (!a) return []
     const v = media[a.idx]
     if (!v) return []
-    v.__filmTarget = clips[a.idx].in + (t - a.start)
+    v.__filmTarget = localTimeOf(clips[a.idx], t - a.start)
     return [v]
   }
 
@@ -2358,13 +2535,21 @@ function FilmMaker({ toast }) {
       const donor = clips[srcIdx]
       const base = audioBufs[srcIdx]
       if (!base) continue
-      const myLen = Math.max(0.2, c.out - c.in)
-      // Donor audio starts at the donor's own trim-in and runs for
-      // this clip's length (silence if the donor runs out).
-      const from = srcIdx === i ? c.in : donor.in
-      let seg = sliceAudio(base, from, from + myLen, c.vol)
+      const myLen = clipLenOf(c)
+      // Own sound follows the picture exactly: each kept section's
+      // audio is sliced and stitched, so a cut removes its sound too.
+      // Borrowed donor audio stays CONTINUOUS from the donor's trim-in
+      // for this clip's edited length (a voiceover should not jump
+      // when the visuals are cut).
+      let seg
+      if (srcIdx === i) {
+        seg = concatAudioBuffers(keptSegments(c).map(s => sliceAudio(base, s.from, s.to, c.vol)))
+      } else {
+        seg = sliceAudio(base, donor.in, donor.in + myLen, c.vol)
+      }
+      if (!seg) continue
       if (c.clean) {
-        const key = srcIdx + '>' + i + '|' + from.toFixed(2) + '|' + myLen.toFixed(2) + '|' + c.vol
+        const key = srcIdx + '>' + i + '|' + cutsSig(c) + '|' + (srcIdx === i ? 'own' : 'don' + donor.in.toFixed(2)) + '|' + myLen.toFixed(2) + '|' + c.vol
         if (!cleanCache.current[key]) cleanCache.current[key] = await cleanNoise(seg)
         seg = cleanCache.current[key]
       }
@@ -2455,7 +2640,7 @@ function FilmMaker({ toast }) {
       const a = activeAt(t)
       if (!a) { finish(); return }
       const v = media[a.idx]
-      const local = clips[a.idx].in + (t - a.start)
+      const local = localTimeOf(clips[a.idx], t - a.start)
       if (v) {
         if (a.idx !== lastIdx) {
           if (lastIdx >= 0 && media[lastIdx]?.pause) media[lastIdx].pause()
@@ -2657,7 +2842,7 @@ function FilmMaker({ toast }) {
         <div style={{ background: '#fff', border: '1.5px solid ' + TOKENS.line, borderRadius: 12, padding: 14, display: 'grid', gap: 10 }}>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
             <strong style={{ fontSize: 12.5 }}>{clip.name}</strong>
-            <span style={{ fontSize: 11, color: TOKENS.s500 }}>{(clip.out - clip.in).toFixed(1)}s of {clip.dur.toFixed(1)}s</span>
+            <span style={{ fontSize: 11, color: TOKENS.s500 }}>{clipLenOf(clip).toFixed(1)}s of {clip.dur.toFixed(1)}s{(clip.cuts || []).length ? ' \u00b7 ' + clip.cuts.length + ' cut' + (clip.cuts.length > 1 ? 's' : '') : ''}</span>
             <span style={{ marginLeft: 'auto', display: 'flex', gap: 6 }}>
               <button onClick={() => move(-1)} style={{ ...btn(false), padding: '5px 10px' }}>{'\u25C0'}</button>
               <button onClick={() => move(1)} style={{ ...btn(false), padding: '5px 10px' }}>{'\u25B6'}</button>
@@ -2699,6 +2884,7 @@ function FilmMaker({ toast }) {
               </span>
             )}
           </div>
+          <CutBar clip={clip} sel={cutSel} setSel={setCutSel} onDelete={deleteSelected} onRestore={restoreCut} />
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
             <span style={{ fontSize: 11, fontWeight: 700, color: TOKENS.s500 }}>GRADE</span>
             {GRADES.map(([id, label]) => (
@@ -2728,7 +2914,7 @@ function FilmMaker({ toast }) {
 
       <SoundPanel sound={sound} setSound={setSound} cards={[]} toast={toast} />
       <div style={{ fontSize: 10.5, color: TOKENS.s500, lineHeight: 1.55 }}>
-        Each clip keeps its own sound; music ducks underneath it automatically. Clean noise removes hum, hiss and room noise between speech. Captions burn into the picture so they show on every platform.
+        Drag on a clip's cut bar to select a bad section and delete it; the film plays straight over the gap and the sound follows. Each clip keeps its own sound; music ducks underneath it automatically. Clean noise removes hum, hiss and room noise between speech. Captions burn into the picture so they show on every platform.
       </div>
     </div>
   )
