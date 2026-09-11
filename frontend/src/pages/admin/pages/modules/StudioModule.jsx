@@ -23,8 +23,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { TOKENS } from '../shared/tokens.js'
 import { Muxer, ArrayBufferTarget } from '../../../../lib/mp4muxer.js'
-import * as _MP4NS from '../../../../lib/mp4box.esm.js'
-const MP4BOX = _MP4NS.default || _MP4NS
 
 // ── Brand ────────────────────────────────────────────────
 const CRIMSON = '#8B1A2E'
@@ -814,8 +812,24 @@ async function renderMixOffline({ totalDur, musicBuffer, musicVol, voBuffer, voV
 // frames in exports. Any clip this cannot handle (unusual codec or
 // container) automatically falls back to the classic seek path.
 // ═══════════════════════════════════════════════════════════
+let _mp4boxPromise = null
+function loadMP4Box() {
+  if (!_mp4boxPromise) {
+    const url = new URL('/mp4box.esm.js', window.location.origin).href
+    _mp4boxPromise = import(/* @vite-ignore */ url)
+      .then(NS => {
+        const M = (NS && (NS.default || NS)) || null
+        return (M && typeof M.createFile === 'function') ? M : null
+      })
+      .catch(() => null)
+  }
+  return _mp4boxPromise
+}
+
 async function parseClipSamples(blob) {
   try {
+    const MP4BOX = await loadMP4Box()
+    if (!MP4BOX) return null
     const buf = await blob.arrayBuffer()
     return await new Promise((resolve) => {
       const mp4 = MP4BOX.createFile()
