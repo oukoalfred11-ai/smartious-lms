@@ -7,6 +7,7 @@
  */
 const User          = require('../models/User')
 const Report        = require('../models/Report')
+const WeeklyReport  = require('../models/WeeklyReport')
 const TeacherRating = require('../models/TeacherRating')
 const TimetableEntry = require('../models/TimetableEntry')
 
@@ -61,15 +62,31 @@ async function runShowCauseCheck() {
     const missingStudents = []
 
     for (const studentId of students) {
-      // Check if teacher has published a report this week for this student
-      const report = await Report.findOne({
+      // Hardened check. Teachers publish WeeklyReport documents, so
+      // that collection is the primary evidence (the old check looked
+      // only at term Reports and show-caused teachers who HAD
+      // published). The window starts two days before Monday so a
+      // weekend-early publish counts, and has no upper bound: anything
+      // published up to the moment this cron runs clears the teacher.
+      const grace = new Date(monday.getTime() - 2 * 864e5)
+      const weekly = await WeeklyReport.findOne({
         teacherId,
         studentId,
         status: 'published',
-        updatedAt: { $gte: monday, $lte: friday },
+        updatedAt: { $gte: grace },
       }).lean()
 
-      if (!report) {
+      // A term Report published in the last fourteen days also clears:
+      // a teacher who just delivered the big report is not chased for
+      // the week around it.
+      const term = weekly ? null : await Report.findOne({
+        teacherId,
+        studentId,
+        status: 'published',
+        updatedAt: { $gte: new Date(Date.now() - 14 * 864e5) },
+      }).lean()
+
+      if (!weekly && !term) {
         const student = await User.findById(studentId).select('firstName lastName onBreak').lean()
         if (student && !student.onBreak) missingStudents.push(student)
       }
