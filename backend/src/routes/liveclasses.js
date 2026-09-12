@@ -334,7 +334,10 @@ router.patch('/:id', auth, requireRole('teacher', 'admin', 'dos', 'ops_manager')
 
     if (linkChanged && lc.assignedStudents && lc.assignedStudents.length > 0) {
       const teacherName = `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim() || 'Your Teacher';
-      notifyStudents(lc.assignedStudents, {
+      // Auto scheduled classes (materialized from the timetable) send no
+      // creation or update emails to anyone; the timetable is the promise
+      // and the 30 minute reminder is the announcement.
+      if (!lc.fromTimetable) notifyStudents(lc.assignedStudents, {
         teacherName,
         title:        lc.title,
         subject:      lc.subject,
