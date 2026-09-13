@@ -42,6 +42,7 @@ const NAV_SECTIONS = [
     { id:'timetable',  label:'Timetable',         icon:'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z' },
     { id:'lessons',    label:'Live Lessons',      icon:'M15 10l4.553-2.276A1 1 0 0 1 21 8.618v6.764a1 1 0 0 1-1.447.894L15 14M3 8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8z', live:true },
     { id:'messages',   label:'Messages',          icon:'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z' },
+    { id:'settings',   label:'Settings',          icon:'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' },
     { id:'community',  label:'Community',         icon:'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75' },
   ]},
   { section:'Finance', items:[
@@ -436,6 +437,10 @@ export default function ParentPortal() {
               {page==='fees'       && <ParentFees         child={selectedChild} showToast={showToast}/>}
               {page==='lessons'    && <ParentLessons      child={selectedChild}/>}
               {page==='messages'   && <ParentMessages     user={user} showToast={showToast}/>}
+              {page==='settings'   && (<>
+                <PSection tag="Parent Portal" title="Notification" em="Settings" sub="Choose which emails Smartious sends you. Changes apply immediately." />
+                <EmailPrefsCard />
+              </>)}
               {page==='community'  && <CommunityChatView  user={user} toast={{ ok: m => showToast(m,'ok'), error: m => showToast(m,'error') }}/>}
               {page==='programme'  && <ParentProgramme    child={selectedChild}/>}
               {page==='tutor'      && <ParentTutor        child={selectedChild}/>}
@@ -1369,5 +1374,66 @@ function ParentAttendance({ child, showToast }) {
         })}
       </div>
     </>
+  )
+}
+
+
+/* ── Email notification preferences ──────────────────────────────────
+   Self contained: loads its own state from /auth/me, saves each
+   toggle instantly, reverts on failure. Operational mail (billing,
+   welcome, accountability) is never optional and is not listed. */
+function EmailPrefsCard() {
+  const CRIM = '#7D1025', TRACK = '#E5DFD3', INK = '#231715', MUT = '#8A8378'
+  const ROWS = [
+    ['classReminders', 'Class reminders', 'A reminder 30 minutes before each class, with the topic'],
+    ['classUpdates', 'Class updates', 'When a class, club or event is created or changed'],
+    ['examNotices', 'Exam notices', 'When an examination is scheduled'],
+    ['resultsEmails', 'Results emails', 'Marked results and report digests'],
+  ]
+  const [prefs, setPrefs] = useState(null)
+  const [busy, setBusy] = useState('')
+
+  useEffect(() => {
+    api.get('/auth/me')
+      .then(r => {
+        const u = r.data?.data?.user || r.data?.user || r.data?.data || {}
+        const base = {}
+        ROWS.forEach(([k]) => { base[k] = u.emailPrefs?.[k] !== false })
+        setPrefs(base)
+      })
+      .catch(() => setPrefs(null))
+  }, [])
+
+  const toggle = async (k) => {
+    if (!prefs || busy) return
+    const next = !prefs[k]
+    setPrefs(p => ({ ...p, [k]: next }))
+    setBusy(k)
+    try { await api.patch('/auth/me/email-prefs', { [k]: next }) }
+    catch (e) { setPrefs(p => ({ ...p, [k]: !next })) }
+    finally { setBusy('') }
+  }
+
+  if (!prefs) return null
+  return (
+    <div style={{ background: '#fff', border: `1px solid ${TRACK}`, borderRadius: 14, padding: 18, marginTop: 16 }}>
+      <div style={{ fontSize: 10.5, fontWeight: 900, letterSpacing: '.12em', color: '#C9A030', textTransform: 'uppercase' }}>Email notifications</div>
+      <div style={{ fontSize: 12, color: MUT, marginTop: 3, marginBottom: 12 }}>Choose which emails you receive. Changes apply immediately.</div>
+      <div style={{ display: 'grid', gap: 10 }}>
+        {ROWS.map(([k, label, desc]) => (
+          <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: INK }}>{label}</div>
+              <div style={{ fontSize: 11, color: MUT }}>{desc}</div>
+            </div>
+            <button onClick={() => toggle(k)} disabled={busy === k} aria-label={label}
+              style={{ width: 46, height: 26, borderRadius: 999, border: 'none', cursor: 'pointer', position: 'relative', flexShrink: 0,
+                background: prefs[k] ? CRIM : '#D6D0C4', transition: 'background 160ms', opacity: busy === k ? 0.6 : 1 }}>
+              <span style={{ position: 'absolute', top: 3, left: prefs[k] ? 23 : 3, width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'left 160ms', boxShadow: '0 1px 3px rgba(0,0,0,.25)' }} />
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
   )
 }
