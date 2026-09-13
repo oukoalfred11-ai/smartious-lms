@@ -231,6 +231,37 @@ function drawCrest(ctx, x, y, size) {
   if (_crestImg) ctx.drawImage(_crestImg, x, y, size, size)
 }
 
+// The real school logo (/brand/logo.png) - the same asset the film
+// editor stamps. Cards use it too, so every Studio product carries
+// one identity. Falls back to the Smart+ious text lockup if the
+// asset is missing.
+let _logoImg = null, _logoTried = false
+function loadLogoAsset(onReady) {
+  if (_logoImg) { onReady && onReady(); return }
+  if (_logoTried) return
+  _logoTried = true
+  const im = new Image()
+  im.onload = () => { _logoImg = im; onReady && onReady() }
+  im.onerror = () => { _logoImg = null }
+  im.src = '/brand/logo.png'
+}
+function drawLogoAsset(ctx, x, y, h, onDark, fallbackFont) {
+  if (_logoImg) {
+    const w = h * (_logoImg.naturalWidth / Math.max(_logoImg.naturalHeight, 1))
+    ctx.drawImage(_logoImg, x, y, w, h)
+    return
+  }
+  // Text lockup fallback: dark Smart + gold italic ious, no crest.
+  ctx.fillStyle = onDark ? '#FFFFFF' : '#231715'
+  ctx.font = `700 ${h * 0.72}px Georgia, serif`
+  ctx.fillText('Smart', x, y + h * 0.72)
+  const smW = ctx.measureText('Smart').width
+  ctx.fillStyle = '#C9973A'
+  ctx.font = `italic 500 ${h * 0.72}px Georgia, serif`
+  ctx.fillText('ious', x + smW, y + h * 0.72)
+}
+
+
 function wrapText(ctx, text, maxWidth) {
   const words = String(text || '').split(/\s+/).filter(Boolean)
   const lines = []
@@ -486,15 +517,8 @@ function renderCardBase(ctx, W, H, card, media, pAnim = 1) {
       ctx.fillStyle = GOLD
       ctx.fillRect(M + ww + B * 0.014, M * 0.8 + B * 0.006, B * 0.016, B * 0.016)
     } else {
-      const crest = B * 0.075
-      drawCrest(ctx, M, M * 0.8, crest)
-      ctx.fillStyle = onDark ? '#FFFFFF' : INK
-      ctx.font = `700 ${B * 0.036}px Georgia, serif`
-      ctx.fillText('Smart', M + crest + B * 0.018, M * 0.8 + crest * 0.62)
-      const smW = ctx.measureText('Smart').width
-      ctx.fillStyle = GOLD
-      ctx.font = `italic 500 ${B * 0.036}px Georgia, serif`
-      ctx.fillText('ious', M + crest + B * 0.018 + smW, M * 0.8 + crest * 0.62)
+      // The school logo - same asset the film editor uses.
+      drawLogoAsset(ctx, M, M * 0.78, B * 0.062, onDark)
     }
   }
   if (card.seriesTotal > 1) {
@@ -688,7 +712,7 @@ async function makeBuiltinMusic() {
 // Builds the full audio graph for a render/preview run.
 // Returns { audioTracks, start, stop } — tracks go into the
 // MediaRecorder stream; sound is also monitored on the speakers.
-function createMixer({ totalDur, musicBuffer, musicVol, musicDuck, voBuffer, voVol, voClips, record }) {
+function createMixer({ totalDur, musicBuffer, musicVol, voBuffer, voVol, voClips, record }) {
   const AC = window.AudioContext || window.webkitAudioContext
   const clips = [...(voClips || [])]
   if (voBuffer) clips.push({ buffer: voBuffer, at: 0.5 })
@@ -706,9 +730,9 @@ function createMixer({ totalDur, musicBuffer, musicVol, musicDuck, voBuffer, voV
     s.connect(g); g.connect(master)
     starters.push((t0) => {
       const level = musicVol ?? 0.6
-      const windows = (musicDuck === false) ? [] : mergeWindows(clips.map(c => [c.at, Math.min(totalDur, c.at + c.buffer.duration)]))
+      const windows = mergeWindows(clips.map(c => [c.at, Math.min(totalDur, c.at + c.buffer.duration)]))
       // Same envelope as the offline mix, shifted to the start time
-      const DUCK = level * 0.45
+      const DUCK = level * 0.3
       g.gain.setValueAtTime(0.0001, t0)
       g.gain.linearRampToValueAtTime(level, t0 + Math.min(1.2, totalDur * 0.2))
       for (const [ws, we] of windows) {
@@ -760,11 +784,7 @@ function mergeWindows(ws) {
 // Music gain envelope: fade in, duck under every voice window, swell
 // back between them, fade out at the end.
 function scheduleMusicGain(g, level, windows, totalDur) {
-  // Ducked music sits at 45 percent of its set volume — audible as a
-  // bed under clip sound, not gone. The end-of-film fade anchors on
-  // the ACTUAL last envelope value (the old code read a stale 0.0001
-  // and could kill the tail early).
-  const DUCK = level * 0.45
+  const DUCK = level * 0.3
   g.gain.setValueAtTime(0.0001, 0)
   g.gain.linearRampToValueAtTime(level, Math.min(1.2, totalDur * 0.2))
   for (const [ws, we] of windows) {
@@ -774,16 +794,14 @@ function scheduleMusicGain(g, level, windows, totalDur) {
     g.gain.setValueAtTime(DUCK, Math.min(totalDur, we))
     g.gain.linearRampToValueAtTime(level, Math.min(totalDur, b + 0.45))
   }
-  const lastW = windows.length ? windows[windows.length - 1] : null
-  const endVal = lastW && lastW[1] >= totalDur - 0.5 ? DUCK : level
-  g.gain.setValueAtTime(endVal, Math.max(0.1, totalDur - 1.2))
+  g.gain.setValueAtTime(g.gain.value, Math.max(0.1, totalDur - 1.6))
   g.gain.linearRampToValueAtTime(0.0001, totalDur)
 }
 
 // voClips: [{ buffer, at }] — scene-by-scene voice, placed on the
 // timeline. A single full-video narration (voBuffer) still works and
 // simply becomes one long clip at 0.5s.
-async function renderMixOffline({ totalDur, musicBuffer, musicVol, musicDuck, voBuffer, voVol, voClips, sampleRate }) {
+async function renderMixOffline({ totalDur, musicBuffer, musicVol, voBuffer, voVol, voClips, sampleRate }) {
   const clips = [...(voClips || [])]
   if (voBuffer) clips.push({ buffer: voBuffer, at: 0.5 })
   if (!musicBuffer && clips.length === 0) return null
@@ -794,7 +812,7 @@ async function renderMixOffline({ totalDur, musicBuffer, musicVol, musicDuck, vo
     const s = oac.createBufferSource(); s.buffer = musicBuffer; s.loop = true
     const g = oac.createGain()
     const level = musicVol ?? 0.6
-    const windows = (musicDuck === false) ? [] : mergeWindows(clips.map(c => [c.at, Math.min(totalDur, c.at + c.buffer.duration)]))
+    const windows = mergeWindows(clips.map(c => [c.at, Math.min(totalDur, c.at + c.buffer.duration)]))
     scheduleMusicGain(g, level, windows, totalDur)
     s.connect(g); g.connect(master)
     s.start(0)
@@ -809,176 +827,9 @@ async function renderMixOffline({ totalDur, musicBuffer, musicVol, musicDuck, vo
 }
 
 // Seek a background <video> to an exact time and wait for the frame.
-// ═══════════════════════════════════════════════════════════
-// FRAME-EXACT DECODE ENGINE for export.
-// Reads a clip's MP4 sample table with mp4box and decodes frames
-// directly with VideoDecoder: every frame delivered exactly once,
-// in order, deterministically. No <video> element, no seeking, no
-// presentation races — the permanent fix for frozen or duplicated
-// frames in exports. Any clip this cannot handle (unusual codec or
-// container) automatically falls back to the classic seek path.
-// ═══════════════════════════════════════════════════════════
-let _mp4boxPromise = null
-function loadMP4Box() {
-  if (!_mp4boxPromise) {
-    const url = new URL('/mp4box.esm.js', window.location.origin).href
-    _mp4boxPromise = import(/* @vite-ignore */ url)
-      .then(NS => {
-        const M = (NS && (NS.default || NS)) || null
-        return (M && typeof M.createFile === 'function') ? M : null
-      })
-      .catch(() => null)
-  }
-  return _mp4boxPromise
-}
-
-async function parseClipSamples(blob) {
-  try {
-    const MP4BOX = await loadMP4Box()
-    if (!MP4BOX) return null
-    const buf = await blob.arrayBuffer()
-    return await new Promise((resolve) => {
-      const mp4 = MP4BOX.createFile()
-      let settled = false
-      const fail = () => { if (!settled) { settled = true; resolve(null) } }
-      const guard = setTimeout(fail, 12000)
-      const samples = []
-      let meta = null
-      mp4.onError = fail
-      mp4.onReady = (info) => {
-        try {
-          const track = info.videoTracks && info.videoTracks[0]
-          if (!track) return fail()
-          let description = null
-          const trak = mp4.getTrackById(track.id)
-          for (const entry of trak.mdia.minf.stbl.stsd.entries) {
-            const box = entry.avcC || entry.hvcC || entry.vpcC || entry.av1C
-            if (box) {
-              const ds = new MP4BOX.DataStream(undefined, 0, MP4BOX.DataStream.BIG_ENDIAN)
-              box.write(ds)
-              description = new Uint8Array(ds.buffer, 8)
-              break
-            }
-          }
-          meta = { codec: track.codec, description, nb: track.nb_samples }
-          mp4.onSamples = (id, user, arr) => { for (const s of arr) samples.push(s) }
-          mp4.setExtractionOptions(track.id, null, { nbSamples: 100000 })
-          mp4.start()
-          const poll = setInterval(() => {
-            if (settled) return clearInterval(poll)
-            if (samples.length >= meta.nb || samples.length > 0 && Date.now() - t0 > 4000) {
-              clearInterval(poll); clearTimeout(guard); settled = true
-              if (!samples.length) return resolve(null)
-              let tsOffset = Infinity
-              for (const s of samples) tsOffset = Math.min(tsOffset, s.cts)
-              resolve({ ...meta, samples, tsOffset })
-            }
-          }, 40)
-          const t0 = Date.now()
-        } catch (e) { fail() }
-      }
-      buf.fileStart = 0
-      mp4.appendBuffer(buf)
-      mp4.flush()
-    })
-  } catch (e) { return null }
-}
-
-class ClipFrameSource {
-  constructor(parsed) {
-    this.codec = parsed.codec
-    this.description = parsed.description
-    this.samples = parsed.samples
-    this.tsOffset = parsed.tsOffset
-    this.q = []
-    this.cur = null
-    this.dec = null
-    this.feedIdx = 0
-    this.eos = false
-    this.err = null
-    this.lastT = undefined
-  }
-  static async supported(parsed) {
-    if (typeof VideoDecoder === 'undefined') return false
-    const cfg = { codec: parsed.codec }
-    if (parsed.description) cfg.description = parsed.description
-    const s = await VideoDecoder.isConfigSupported(cfg).catch(() => null)
-    return !!(s && s.supported)
-  }
-  _ts(s) { return (s.cts - this.tsOffset) / s.timescale }
-  _init() {
-    this.dec = new VideoDecoder({ output: f => { this.q.push(f) }, error: e => { this.err = e } })
-    const cfg = { codec: this.codec, optimizeForLatency: false }
-    if (this.description) cfg.description = this.description
-    this.dec.configure(cfg)
-  }
-  _syncBefore(t) {
-    let k = 0
-    for (let i = 0; i < this.samples.length; i++) {
-      const s = this.samples[i]
-      if (s.is_sync && this._ts(s) <= t + 0.001) k = i
-      if (this._ts(s) > t + 4) break
-    }
-    return k
-  }
-  async _reset(t) {
-    if (this.dec) { try { this.dec.close() } catch (e) {} }
-    for (const f of this.q) f.close()
-    this.q = []
-    if (this.cur) { this.cur.close(); this.cur = null }
-    this.err = null
-    this.eos = false
-    this._init()
-    this.feedIdx = this._syncBefore(t)
-  }
-  _feed() {
-    let n = 16
-    while (n-- > 0 && this.feedIdx < this.samples.length && this.dec.decodeQueueSize < 20 && this.q.length < 12) {
-      const s = this.samples[this.feedIdx++]
-      this.dec.decode(new EncodedVideoChunk({
-        type: s.is_sync ? 'key' : 'delta',
-        timestamp: Math.round(this._ts(s) * 1e6),
-        duration: Math.max(1, Math.round((s.duration / s.timescale) * 1e6)),
-        data: s.data,
-      }))
-    }
-    if (this.feedIdx >= this.samples.length && !this.eos) {
-      this.eos = true
-      this.dec.flush().catch(() => {})
-    }
-  }
-  // Latest decoded frame at or before t (seconds in clip time).
-  async frameAt(t) {
-    if (this.err || this.lastT === undefined || t < this.lastT - 0.001 || !this.dec || this.dec.state === 'closed') await this._reset(t)
-    this.lastT = t
-    const tUs = t * 1e6 + 1
-    const started = Date.now()
-    for (;;) {
-      while (this.q.length && this.q[0].timestamp <= tUs) {
-        if (this.cur) this.cur.close()
-        this.cur = this.q.shift()
-      }
-      if (this.q.length && this.q[0].timestamp > tUs) return this.cur
-      if (this.eos && this.dec.decodeQueueSize === 0 && !this.q.length) return this.cur
-      if (this.err) { const e = this.err; this.err = null; throw e }
-      if (Date.now() - started > 4000) return this.cur
-      this._feed()
-      await new Promise(r => setTimeout(r, 0))
-    }
-  }
-  destroy() {
-    try { if (this.dec) this.dec.close() } catch (e) {}
-    for (const f of this.q) f.close()
-    this.q = []
-    if (this.cur) { this.cur.close(); this.cur = null }
-  }
-}
-
 const seekVideo = (v, t) => new Promise((res) => {
   // Film clips set an exact target (trim offset applied); looping
-  // backgrounds keep the modulo behaviour. This is the original
-  // simple seek: no presentation callbacks, no adaptive logic —
-  // the baseline exporter's speed.
+  // backgrounds keep the modulo behaviour.
   const want = (v.__filmTarget !== undefined) ? v.__filmTarget : t
   const target = (v.__filmTarget !== undefined) ? Math.min(want, (v.duration || want) - 0.05)
     : (v.duration && isFinite(v.duration)) ? want % v.duration : want
@@ -986,7 +837,7 @@ const seekVideo = (v, t) => new Promise((res) => {
   const done = () => { v.removeEventListener('seeked', done); res() }
   v.addEventListener('seeked', done)
   try { v.currentTime = target } catch (e) { res() }
-  setTimeout(done, 800)   // never wedge on a stubborn seek
+  setTimeout(done, 400)   // never wedge on a stubborn seek
 })
 
 // ═══ FILM AUDIO TOOLS ═══════════════════════════════════
@@ -1163,9 +1014,9 @@ function drawCaptionLine(ctx, W, H, entry) {
 
 // drawFrame(ctx, t) draws one timeline frame; mediaAt(t) returns the
 // video elements that must show the correct frame at time t.
-async function exportMp4Fast({ canvas, W, H, totalDur, drawFrame, mediaAt, advance, sound, onProgress, fps }) {
+async function exportMp4Fast({ canvas, W, H, totalDur, drawFrame, mediaAt, sound, onProgress }) {
   if (typeof VideoEncoder === 'undefined') return null   // caller falls back to realtime
-  const FPS = fps && fps >= 10 && fps <= 120 ? fps : 30
+  const FPS = 30
 
   // ── Decide the AUDIO codec BEFORE building the container. Chrome
   // cannot AAC-encode on every machine; declaring an AAC track and
@@ -1175,14 +1026,10 @@ async function exportMp4Fast({ canvas, W, H, totalDur, drawFrame, mediaAt, advan
   const wantsAudio = !!(sound && (sound.musicBuffer || sound.voBuffer || (sound.voClips && sound.voClips.length)))
   let audioPlan = null
   if (wantsAudio && typeof AudioEncoder !== 'undefined') {
-    // AAC is the codec every phone and player understands, so try it
-    // at both common sample rates before conceding to Opus.
-    for (const sr of [44100, 48000]) {
-      const aacCfg = { codec: 'mp4a.40.2', sampleRate: sr, numberOfChannels: 2, bitrate: 128_000, aac: { format: 'aac' } }
-      const aacOk = await AudioEncoder.isConfigSupported(aacCfg).catch(() => null)
-      if (aacOk?.supported) { audioPlan = { mux: 'aac', cfg: aacCfg, sr }; break }
-    }
-    if (!audioPlan) {
+    const aacCfg = { codec: 'mp4a.40.2', sampleRate: 44100, numberOfChannels: 2, bitrate: 128_000, aac: { format: 'aac' } }
+    const aacOk = await AudioEncoder.isConfigSupported(aacCfg).catch(() => null)
+    if (aacOk?.supported) audioPlan = { mux: 'aac', cfg: aacCfg, sr: 44100 }
+    else {
       const opusCfg = { codec: 'opus', sampleRate: 48000, numberOfChannels: 2, bitrate: 128_000 }
       const opusOk = await AudioEncoder.isConfigSupported(opusCfg).catch(() => null)
       if (opusOk?.supported) audioPlan = { mux: 'opus', cfg: opusCfg, sr: 48000 }
@@ -1214,8 +1061,7 @@ async function exportMp4Fast({ canvas, W, H, totalDur, drawFrame, mediaAt, advan
     error: (e) => { vErr = e },
   })
   const px = W * H
-  let bitrate = px >= 3840 * 2160 ? 14_000_000 : px >= 2160 * 2160 ? 10_000_000 : 6_000_000
-  if (FPS >= 48) bitrate = Math.round(bitrate * 1.5)
+  const bitrate = px >= 3840 * 2160 ? 14_000_000 : px >= 2160 * 2160 ? 10_000_000 : 6_000_000
   let vConfig = null
   for (const codec of (px > 1920 * 1080 ? ['avc1.640033', 'avc1.640032', 'avc1.640028'] : ['avc1.640028'])) {
     const c = {
@@ -1241,66 +1087,44 @@ async function exportMp4Fast({ canvas, W, H, totalDur, drawFrame, mediaAt, advan
 
   const ctx = canvas.getContext('2d')
   const totalFrames = Math.ceil(totalDur * FPS)
-
-  // Audio is fed to its encoder IN STEP with the video frames, so
-  // the finished file interleaves sound and picture in time order.
-  // The previous layout (all video, then all audio appended at the
-  // end) is a file many phone and desktop decoders stall on partway
-  // through playback, because the audio for a given moment lives
-  // megabytes away at the back of the file.
-  let aL = null, aR = null, aOff = 0
-  if (aEnc && audioBuf) {
-    aL = audioBuf.getChannelData(0)
-    aR = audioBuf.numberOfChannels > 1 ? audioBuf.getChannelData(1) : aL
-  }
-  const pushAudioUpTo = async (tSec) => {
-    if (!aEnc || !aL) return
-    const SR = audioPlan.sr, CH = 2, CHUNK = 4800
-    const limit = Math.min(aL.length, Math.max(0, Math.ceil(tSec * SR)))
-    while (aOff < limit) {
-      const n = Math.min(CHUNK, aL.length - aOff)
-      const data = new Float32Array(n * CH)
-      data.set(aL.subarray(aOff, aOff + n), 0)
-      data.set(aR.subarray(aOff, aOff + n), n)
-      const ad = new AudioData({
-        format: 'f32-planar', sampleRate: SR, numberOfFrames: n,
-        numberOfChannels: CH, timestamp: Math.round((aOff / SR) * 1e6), data,
-      })
-      aEnc.encode(ad)
-      ad.close()
-      aOff += n
-      while (aEnc.encodeQueueSize > 8) await new Promise(r => setTimeout(r, 0))
-      if (vErr) throw vErr
-    }
-  }
-
   for (let f = 0; f < totalFrames; f++) {
     const t = f / FPS
-    if (advance) {
-      await advance(t)
-    } else {
-      const vids = mediaAt ? mediaAt(t) : []
-      for (const v of vids) if (v && v.play) await seekVideo(v, t)
-    }
+    const vids = mediaAt ? mediaAt(t) : []
+    for (const v of vids) if (v && v.play) await seekVideo(v, t)
     drawFrame(ctx, t)
     const frame = new VideoFrame(canvas, { timestamp: Math.round(t * 1e6), duration: Math.round(1e6 / FPS) })
-    vEnc.encode(frame, { keyFrame: f % (FPS * 2) === 0 })
+    vEnc.encode(frame, { keyFrame: f % 60 === 0 })
     frame.close()
-    while (vEnc.encodeQueueSize > 8) await new Promise(r => setTimeout(r, 0))
-    await pushAudioUpTo(t)
+    while (vEnc.encodeQueueSize > 6) await new Promise(r => setTimeout(r, 2))
     if (f % 12 === 0) { onProgress?.(f / totalFrames); await new Promise(r => setTimeout(r, 0)) }
     if (vErr) throw vErr
   }
 
-  if (aEnc && aL) {
-    await pushAudioUpTo(totalDur + 1)
+  if (aEnc && audioBuf) {
+    const SR = audioPlan.sr, CH = 2, CHUNK = 4800
+    const L = audioBuf.getChannelData(0)
+    const R = audioBuf.numberOfChannels > 1 ? audioBuf.getChannelData(1) : L
+    for (let off = 0; off < L.length; off += CHUNK) {
+      const n = Math.min(CHUNK, L.length - off)
+      const data = new Float32Array(n * CH)
+      data.set(L.subarray(off, off + n), 0)
+      data.set(R.subarray(off, off + n), n)
+      const ad = new AudioData({
+        format: 'f32-planar', sampleRate: SR, numberOfFrames: n,
+        numberOfChannels: CH, timestamp: Math.round((off / SR) * 1e6), data,
+      })
+      aEnc.encode(ad)
+      ad.close()
+      while (aEnc.encodeQueueSize > 8) await new Promise(r => setTimeout(r, 2))
+      if (vErr) throw vErr
+    }
     await aEnc.flush()
   }
   await vEnc.flush()
   if (vErr) throw vErr
   muxer.finalize()
   onProgress?.(1)
-  return { blob: new Blob([muxer.target.buffer], { type: 'video/mp4' }), audioNote: !wantsAudio ? 'none' : !audioPlan ? 'silent' : audioPlan.mux }
+  return { blob: new Blob([muxer.target.buffer], { type: 'video/mp4' }), audioNote: wantsAudio && !audioPlan ? 'silent' : audioPlan?.mux === 'opus' ? 'opus' : null }
 }
 
 // Narrator script: turns each card's text into worry -> solution
@@ -1621,7 +1445,8 @@ function CardMaker({ toast }) {
   const [savedAt, setSavedAt] = useState(0)
   const [showNumbers, setShowNumbers] = useState(false)   // "2 / 5" chip: off unless asked for
   const [fontId, setFontId] = useState(0)                  // Montserrat default: bold
-  const [brandMode, setBrandMode] = useState('word')       // word | crest | none
+  const [brandMode, setBrandMode] = useState('logo')       // logo | word | none
+  const [, setTick] = useState(0)   // bumps when the logo asset loads so the canvas redraws
   const { W, H } = FORMATS[format] || FORMATS.square
   const card = cards[cur]
   const mediaEl = medias[cur]
@@ -1647,6 +1472,7 @@ function CardMaker({ toast }) {
   }
 
   // ── Restore the saved project on open ──
+  useEffect(() => { loadLogoAsset(() => setTick(t => t + 1)) }, [])
   useEffect(() => {
     (async () => {
       try {
@@ -1897,7 +1723,7 @@ function CardMaker({ toast }) {
           <select value={fontId} onChange={e => setFontId(+e.target.value)} style={{ ...inputStyle, width: 'auto', padding: '7px 9px', fontSize: 11.5 }}>
             {FONTS.map((f, i) => <option key={f[0]} value={i}>{f[1]} ({f[0]})</option>)}
           </select>
-          {[['word', 'Bold wordmark'], ['crest', 'Crest'], ['none', 'No logo']].map(([k, l]) => (
+          {[['logo', 'School logo'], ['word', 'Bold wordmark'], ['none', 'No logo']].map(([k, l]) => (
             <button key={k} onClick={() => setBrandMode(k)} style={{ ...btn(brandMode === k), padding: '7px 10px', fontSize: 11.5 }}>{l}</button>
           ))}
         </div>
@@ -2422,190 +2248,6 @@ function VideoMaker({ toast }) {
 
 
 // ═══════════════════════════════════════════════════════════
-// ═══════════════════════════════════════════════════════════
-// FILM CUTS — remove unwanted middle sections from a clip.
-// A clip's kept material is its trim window [in, out] minus its
-// list of cuts. Everything downstream (timeline, preview seeking,
-// audio build, captions, export) reads through these helpers, so
-// a cut behaves identically everywhere.
-// ═══════════════════════════════════════════════════════════
-function keptSegments(c) {
-  const raw = (c.cuts || [])
-    .map(x => ({ from: Math.max(c.in, Math.min(x.from, x.to)), to: Math.min(c.out, Math.max(x.from, x.to)) }))
-    .filter(x => x.to - x.from > 0.01)
-    .sort((a, b) => a.from - b.from)
-  const merged = []
-  for (const x of raw) {
-    const last = merged[merged.length - 1]
-    if (last && x.from <= last.to + 0.001) last.to = Math.max(last.to, x.to)
-    else merged.push({ ...x })
-  }
-  const segs = []
-  let pos = c.in
-  for (const m of merged) {
-    if (m.from > pos + 0.01) segs.push({ from: pos, to: m.from })
-    pos = Math.max(pos, m.to)
-  }
-  if (c.out > pos + 0.01) segs.push({ from: pos, to: c.out })
-  if (!segs.length) segs.push({ from: c.in, to: Math.min(c.dur || c.out, c.in + 0.2) })
-  return segs
-}
-const clipLenOf = (c) => Math.max(0.2, keptSegments(c).reduce((s, x) => s + (x.to - x.from), 0))
-// Map an offset in EDITED clip time to a time in the SOURCE video,
-// skipping over the cut sections.
-function localTimeOf(c, off) {
-  const segs = keptSegments(c)
-  let rem = Math.max(0, off)
-  for (const s of segs) {
-    const L = s.to - s.from
-    if (rem < L) return s.from + rem
-    rem -= L
-  }
-  return Math.max(segs[0].from, segs[segs.length - 1].to - 0.01)
-}
-const cutsSig = (c) => keptSegments(c).map(s => s.from.toFixed(2) + '-' + s.to.toFixed(2)).join(',')
-// Stitch several audio slices into one continuous buffer.
-function concatAudioBuffers(parts) {
-  const list = parts.filter(Boolean)
-  if (!list.length) return null
-  if (list.length === 1) return list[0]
-  const sr = list[0].sampleRate
-  const nCh = Math.max(...list.map(p => p.numberOfChannels))
-  const total = list.reduce((s, p) => s + p.length, 0)
-  const out = new AudioBuffer({ length: Math.max(1, total), sampleRate: sr, numberOfChannels: nCh })
-  let at = 0
-  for (const p of list) {
-    for (let ch = 0; ch < nCh; ch++) {
-      const d = out.getChannelData(ch)
-      const s = p.getChannelData(Math.min(ch, p.numberOfChannels - 1))
-      d.set(s, at)
-    }
-    at += p.length
-  }
-  // 6ms equal fades either side of every internal join: a hard
-  // sample jump at a cut point is an audible click; this removes it.
-  const F = Math.min(1024, Math.round(sr * 0.006))
-  let edge = 0
-  for (let p = 0; p < list.length - 1; p++) {
-    edge += list[p].length
-    for (let ch = 0; ch < nCh; ch++) {
-      const d = out.getChannelData(ch)
-      for (let i = 0; i < F; i++) {
-        const g = i / F
-        const a = edge - F + i; if (a >= 0) d[a] *= 1 - g
-        const b = edge + i; if (b < d.length) d[b] *= g
-      }
-    }
-  }
-  return out
-}
-
-// Gentle 5ms fade at a buffer's first and last samples so clip-to-
-// clip joins never click. Guarded so cached buffers are not faded
-// twice.
-function fadeEdges(buf, sec = 0.005) {
-  if (!buf || buf.__faded) return buf
-  const F = Math.min(2048, Math.round(buf.sampleRate * sec))
-  for (let ch = 0; ch < buf.numberOfChannels; ch++) {
-    const d = buf.getChannelData(ch)
-    const n = d.length
-    for (let i = 0; i < Math.min(F, n); i++) {
-      const g = i / F
-      d[i] *= g
-      d[n - 1 - i] *= g
-    }
-  }
-  buf.__faded = true
-  return buf
-}
-
-// The cut bar: the clip's full source length drawn as a strip.
-// Drag across the unwanted part to select it (crimson), press
-// "Delete selected part" and it is removed; each removed section
-// shows as a chip that can restore it. Grey ends are the Start/End
-// trim; gold is what plays.
-function CutBar({ clip, sel, setSel, onDelete, onRestore }) {
-  const barRef = useRef(null)
-  const dragRef = useRef(null)
-  const dur = Math.max(0.2, clip.dur || clip.out || 0.2)
-  const pct = (t) => (Math.max(0, Math.min(dur, t)) / dur * 100) + '%'
-  const timeAt = (clientX) => {
-    const r = barRef.current.getBoundingClientRect()
-    const f = Math.max(0, Math.min(1, (clientX - r.left) / Math.max(1, r.width)))
-    return f * dur
-  }
-  const down = (e) => {
-    e.preventDefault()
-    try { e.currentTarget.setPointerCapture(e.pointerId) } catch (er) {}
-    const t = timeAt(e.clientX)
-    dragRef.current = t
-    setSel({ from: t, to: t })
-  }
-  const moveP = (e) => {
-    if (dragRef.current === null || dragRef.current === undefined) return
-    const t = timeAt(e.clientX)
-    setSel({ from: Math.min(dragRef.current, t), to: Math.max(dragRef.current, t) })
-  }
-  const up = () => { dragRef.current = null }
-  const cuts = (clip.cuts || [])
-  const segs = keptSegments(clip)
-  const selLen = sel ? Math.max(0, sel.to - sel.from) : 0
-  return (
-    <div style={{ display: 'grid', gap: 7 }}>
-      <div style={{ fontSize: 11.5, fontWeight: 700, color: TOKENS.s600 }}>
-        Cut out unwanted parts
-        <span style={{ fontWeight: 400, color: TOKENS.s500 }}> — drag across the bad section, then delete it. Gold plays; crimson is removed.</span>
-      </div>
-      <div ref={barRef} onPointerDown={down} onPointerMove={moveP} onPointerUp={up} onPointerCancel={up}
-        style={{ position: 'relative', height: 36, borderRadius: 8, background: '#D8D2C6', border: '1.5px solid ' + TOKENS.line, cursor: 'crosshair', touchAction: 'none', overflow: 'hidden', userSelect: 'none' }}>
-        {segs.map((s, i) => (
-          <div key={'k' + i} style={{ position: 'absolute', top: 0, bottom: 0, left: pct(s.from), width: ((s.to - s.from) / dur * 100) + '%', background: '#C9973A' }} />
-        ))}
-        {cuts.map((x, i) => {
-          const from = Math.max(clip.in, Math.min(x.from, x.to)), to = Math.min(clip.out, Math.max(x.from, x.to))
-          if (to - from <= 0.01) return null
-          return (
-            <div key={'c' + i} style={{ position: 'absolute', top: 0, bottom: 0, left: pct(from), width: ((to - from) / dur * 100) + '%', background: '#8B1A2E', opacity: 0.85 }}>
-              <span style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FDFAF4', fontSize: 9.5, fontWeight: 800, overflow: 'hidden' }}>CUT</span>
-            </div>
-          )
-        })}
-        {sel && selLen > 0.02 && (
-          <div style={{ position: 'absolute', top: 0, bottom: 0, left: pct(sel.from), width: (selLen / dur * 100) + '%', background: 'rgba(139,26,46,0.35)', border: '2px solid #8B1A2E', borderRadius: 4, boxSizing: 'border-box' }} />
-        )}
-      </div>
-      <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
-        <span style={{ fontSize: 10.5, color: TOKENS.s500, fontWeight: 700 }}>
-          {sel && selLen > 0.05
-            ? 'Selected ' + sel.from.toFixed(1) + 's to ' + sel.to.toFixed(1) + 's (' + selLen.toFixed(1) + 's)'
-            : '0s'}
-        </span>
-        <span style={{ fontSize: 10.5, color: TOKENS.s500, fontWeight: 700, marginLeft: 'auto' }}>{dur.toFixed(1)}s</span>
-        <button onClick={onDelete} disabled={!sel || selLen < 0.05}
-          style={{ ...btn(true), padding: '6px 12px', fontSize: 11.5, opacity: (!sel || selLen < 0.05) ? 0.45 : 1 }}>
-          Delete selected part
-        </button>
-        {sel && <button onClick={() => setSel(null)} style={{ ...btn(false), padding: '6px 12px', fontSize: 11.5 }}>Clear selection</button>}
-      </div>
-      {cuts.length > 0 && (
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
-          {cuts.map((x, i) => {
-            const from = Math.min(x.from, x.to), to = Math.max(x.from, x.to)
-            return (
-              <button key={i} onClick={() => onRestore(i)} title="Click to restore this section"
-                style={{ ...btn(false), padding: '5px 10px', fontSize: 10.5, color: '#8B1A2E', borderColor: '#E3C9CE' }}>
-                Removed {from.toFixed(1)}s to {to.toFixed(1)}s  {'\u2715'}
-              </button>
-            )
-          })}
-          <span style={{ fontSize: 10, color: TOKENS.s500 }}>Click a removed section to bring it back.</span>
-        </div>
-      )}
-    </div>
-  )
-}
-
-// ═══════════════════════════════════════════════════════════
 // FILM EDITOR — stitch uploaded clips into one film, keeping
 // each clip's own sound. Trim, per clip colour grade, volume,
 // noise cleanup, auto timed burned captions, optional music bed
@@ -2632,55 +2274,22 @@ function FilmMaker({ toast }) {
     im.onerror = () => { logoImgRef.current = null; setLogoReady(false) }
     im.src = '/brand/logo.png'
   }, [])
-  const [sound, setSound] = useState({ musicMode: 'none', musicBuffer: null, musicVol: 0.5, musicDuck: true, voBuffer: null, voVol: 1, script: null })
+  const [sound, setSound] = useState({ musicMode: 'none', musicBuffer: null, musicVol: 0.5, voBuffer: null, voVol: 1, script: null })
   const [loaded, setLoaded] = useState(false)
   const [savedAt, setSavedAt] = useState(0)
   const [playing, setPlaying] = useState(false)
-  const [starting, setStarting] = useState(false)
   const [rendering, setRendering] = useState(false)
-  const [exportReport, setExportReport] = useState(null)
   const [progress, setProgress] = useState(0)
   const cvRef = useRef(null)
   const rafRef = useRef(0)
   const cleanCache = useRef({})
-  // Cut tool: the currently dragged selection on the active clip's bar
-  const [cutSel, setCutSel] = useState(null)
-  useEffect(() => { setCutSel(null) }, [cur])
-  // Which element is on screen during preview (drawFilm reads it),
-  // and the pool of hidden twin elements used for same-clip joins.
-  const liveElRef = useRef(null)
-  const mediaBRef = useRef({})
 
   const { W, H } = FORMATS[format]
   const clip = clips[cur]
 
-  // Delete the selected section: it joins the clip's cut list and the
-  // film simply plays over it. Guard: at least 0.2s of the clip must
-  // remain, and a selection must be a real section, not a click.
-  const deleteSelected = () => {
-    if (!clip || !cutSel) return
-    const from = Math.max(clip.in, Math.min(cutSel.from, cutSel.to))
-    const to = Math.min(clip.out, Math.max(cutSel.from, cutSel.to))
-    if (to - from < 0.05) return
-    const next = [...(clip.cuts || []), { from, to }]
-    if (clipLenOf({ ...clip, cuts: next }) < 0.2) {
-      toast?.('That cut would remove the whole clip. Use Remove to delete the clip instead.')
-      return
-    }
-    upd({ cuts: next })
-    cleanCache.current = {}
-    setCutSel(null)
-    toast?.('Cut ' + (to - from).toFixed(1) + 's out. Click the removed chip to bring it back.')
-  }
-  const restoreCut = (i) => {
-    if (!clip) return
-    upd({ cuts: (clip.cuts || []).filter((_, j) => j !== i) })
-    cleanCache.current = {}
-  }
-
   const timeline = () => {
     let acc = 0
-    const starts = clips.map(c => { const s = acc; acc += clipLenOf(c); return s })
+    const starts = clips.map(c => { const s = acc; acc += Math.max(0.2, (c.out - c.in)); return s })
     return { starts, total: acc }
   }
   const activeAt = (t) => {
@@ -2689,81 +2298,58 @@ function FilmMaker({ toast }) {
     for (let i = clips.length - 1; i >= 0; i--) if (t >= starts[i]) return { idx: i, start: starts[i] }
     return null
   }
-  // The whole film as one flat list of kept segments. Every join —
-  // clip to clip, or across a cut — is simply a segment boundary,
-  // which is what lets playback prepare the next one in advance.
-  const filmSegments = () => {
-    const out = []
-    let acc = 0
-    clips.forEach((c, i) => {
-      keptSegments(c).forEach(s => {
-        const L = Math.max(0.05, s.to - s.from)
-        out.push({ idx: i, from: s.from, to: s.to, at: acc })
-        acc += L
-      })
-    })
-    return { segs: out, total: Math.max(acc, 0.001) }
-  }
 
   // Absolute caption entries, rebuilt when clips change
   const capsAbs = useMemo(() => {
     const { starts } = timeline()
     const out = []
     clips.forEach((c, i) => {
-      captionTrack(c.captions, clipLenOf(c)).forEach(e =>
+      captionTrack(c.captions, Math.max(0.2, c.out - c.in)).forEach(e =>
         out.push({ t0: e.t0 + starts[i], t1: e.t1 + starts[i], text: e.text }))
     })
     return out
   }, [clips])
 
   const drawFilm = (ctx, t) => {
-    // Draw at whatever size THIS canvas is: preview hands in a
-    // screen-sized canvas, export hands in the full 4K one. Same
-    // picture, wildly different per-frame cost.
-    const SW = ctx.canvas.width, SH = ctx.canvas.height
     ctx.fillStyle = '#000'
-    ctx.fillRect(0, 0, SW, SH)
+    ctx.fillRect(0, 0, W, H)
     const a = activeAt(t)
     if (a) {
       const c = clips[a.idx]
-      const live = liveElRef.current
-      const v = (live && live.idx === a.idx && live.el) ? live.el : media[a.idx]
-      const vw0 = v ? (v.videoWidth || v.displayWidth) : 0
-      const vh0 = v ? (v.videoHeight || v.displayHeight) : 0
-      if (v && vw0) {
+      const v = media[a.idx]
+      if (v && v.videoWidth) {
         ctx.save()
         ctx.filter = gradeFilter(c.grade) || 'none'
-        const vw = vw0, vh = vh0
+        const vw = v.videoWidth, vh = v.videoHeight
         if (c.fit === 'fit') {
-          const cover = Math.max(SW / vw, SH / vh)
-          const blurPx = Math.max(6, Math.round(28 * SW / W))
-          ctx.save(); ctx.filter = (gradeFilter(c.grade) || '') + ' blur(' + blurPx + 'px) brightness(0.6)'
-          ctx.drawImage(v, SW / 2 - vw * cover / 2, SH / 2 - vh * cover / 2, vw * cover, vh * cover)
+          const cover = Math.max(W / vw, H / vh)
+          ctx.save(); ctx.filter = (gradeFilter(c.grade) || '') + ' blur(28px) brightness(0.6)'
+          ctx.drawImage(v, W / 2 - vw * cover / 2, H / 2 - vh * cover / 2, vw * cover, vh * cover)
           ctx.restore()
-          const fit = Math.min(SW / vw, SH / vh)
-          ctx.drawImage(v, SW / 2 - vw * fit / 2, SH / 2 - vh * fit / 2, vw * fit, vh * fit)
+          const fit = Math.min(W / vw, H / vh)
+          ctx.drawImage(v, W / 2 - vw * fit / 2, H / 2 - vh * fit / 2, vw * fit, vh * fit)
         } else {
-          const cover = Math.max(SW / vw, SH / vh)
-          ctx.drawImage(v, SW / 2 - vw * cover / 2, SH / 2 - vh * cover / 2, vw * cover, vh * cover)
+          const cover = Math.max(W / vw, H / vh)
+          ctx.drawImage(v, W / 2 - vw * cover / 2, H / 2 - vh * cover / 2, vw * cover, vh * cover)
         }
         ctx.restore()
       }
     }
     if (capsOn) {
       const e = capsAbs.find(x => t >= x.t0 && t < x.t1)
-      if (e) drawCaptionLine(ctx, SW, SH, e)
+      if (e) drawCaptionLine(ctx, W, H, e)
     }
     if (bulletin.on && bulletin.headline.trim() && t >= (Number(bulletin.from) || 0) && t <= (Number(bulletin.to) || 999)) {
-      drawBulletin(ctx, SW, SH, bulletin, t - (Number(bulletin.from) || 0))
+      drawBulletin(ctx, W, H, bulletin, t - (Number(bulletin.from) || 0))
     }
     // Brand logo, top layer
     const im = logoImgRef.current
     if (logo.on && im && im.naturalWidth) {
-      const lw = SW * logo.size
+      const lw = W * logo.size
       const lh = lw * (im.naturalHeight / im.naturalWidth)
-      const m = Math.min(SW, SH) * 0.035
-      const x = logo.pos.includes('l') ? m : SW - lw - m
-      const y = logo.pos.includes('t') ? m : SH - lh - m
+      const m = Math.min(W, H) * 0.035
+      const x = logo.pos.includes('l') ? m : W - lw - m
+      const y = logo.pos.includes('t') ? m : H - lh - m
       ctx.save()
       ctx.globalAlpha = 0.94
       if (logo.halo) {
@@ -2782,32 +2368,11 @@ function FilmMaker({ toast }) {
     if (!a) return []
     const v = media[a.idx]
     if (!v) return []
-    v.__filmTarget = localTimeOf(clips[a.idx], t - a.start)
+    v.__filmTarget = clips[a.idx].in + (t - a.start)
     return [v]
   }
 
-  // Some clips' decoded audio can be lost along the way (a failed
-  // decode on restore, memory pressure). Rebuild any missing decode
-  // from the stored blob so the soundtrack never quietly comes out
-  // empty; report the clips whose sound genuinely cannot be read.
-  const ensureAudioBufs = async () => {
-    const bufs = { ...audioBufs }
-    let changed = false
-    const dead = []
-    for (let i = 0; i < clips.length; i++) {
-      if (!bufs[i] && blobs[i]?.blob) {
-        const buf = await decodeClipAudioFile(blobs[i].blob)
-        if (buf) { bufs[i] = buf; changed = true }
-        else dead.push(i + 1)
-      } else if (!bufs[i] && !blobs[i]?.blob) dead.push(i + 1)
-    }
-    if (changed) setAudioBufs(bufs)
-    if (dead.length) toast?.('No readable sound in clip ' + dead.join(', ') + ' — those parts will be silent.')
-    return bufs
-  }
-
-  const buildFilmAudio = async (bufs) => {
-    const abufs = bufs || audioBufs
+  const buildFilmAudio = async () => {
     const { starts } = timeline()
     const out = []
     for (let i = 0; i < clips.length; i++) {
@@ -2817,27 +2382,18 @@ function FilmMaker({ toast }) {
       // ever produced per clip, and it comes from the donor.
       const srcIdx = (c.audioFrom !== undefined && c.audioFrom !== null && clips[c.audioFrom]) ? c.audioFrom : i
       const donor = clips[srcIdx]
-      const base = abufs[srcIdx]
+      const base = audioBufs[srcIdx]
       if (!base) continue
-      const myLen = clipLenOf(c)
-      // Own sound follows the picture exactly: each kept section's
-      // audio is sliced and stitched, so a cut removes its sound too.
-      // Borrowed donor audio stays CONTINUOUS from the donor's trim-in
-      // for this clip's edited length (a voiceover should not jump
-      // when the visuals are cut).
-      let seg
-      if (srcIdx === i) {
-        seg = concatAudioBuffers(keptSegments(c).map(s => sliceAudio(base, s.from, s.to, c.vol)))
-      } else {
-        seg = sliceAudio(base, donor.in, donor.in + myLen, c.vol)
-      }
-      if (!seg) continue
+      const myLen = Math.max(0.2, c.out - c.in)
+      // Donor audio starts at the donor's own trim-in and runs for
+      // this clip's length (silence if the donor runs out).
+      const from = srcIdx === i ? c.in : donor.in
+      let seg = sliceAudio(base, from, from + myLen, c.vol)
       if (c.clean) {
-        const key = srcIdx + '>' + i + '|' + cutsSig(c) + '|' + (srcIdx === i ? 'own' : 'don' + donor.in.toFixed(2)) + '|' + myLen.toFixed(2) + '|' + c.vol
+        const key = srcIdx + '>' + i + '|' + from.toFixed(2) + '|' + myLen.toFixed(2) + '|' + c.vol
         if (!cleanCache.current[key]) cleanCache.current[key] = await cleanNoise(seg)
         seg = cleanCache.current[key]
       }
-      seg = fadeEdges(seg)
       out.push({ buffer: seg, at: starts[i] })
     }
     return out
@@ -2886,214 +2442,64 @@ function FilmMaker({ toast }) {
     }))
     setMedia(reindex); setBlobs(reindex); setAudioBufs(reindex)
     cleanCache.current = {}
-    Object.values(mediaBRef.current).forEach(m => { if (m && m.pause) m.pause() })
-    mediaBRef.current = {}
     setCur(c => Math.max(0, c - 1))
   }
-  // Move a clip to ANY position, keeping everything attached to it:
-  // its cuts and captions travel with it (they live on the clip),
-  // every "Sound from clip N" reference is remapped so it still
-  // points at the same actual clip, and the media, blobs and decoded
-  // audio follow their clip to its new index.
-  const reorder = (from, to) => {
-    const n = clips.length
-    if (n < 2) return
-    if (from === to || from < 0 || from >= n || to < 0 || to >= n) return
-    const order = clips.map((_, i) => i)
-    order.splice(from, 1)
-    order.splice(to, 0, from)
-    const mapNew = {}
-    order.forEach((oi, ni) => { mapNew[oi] = ni })
-    setClips(cs => order.map(oi => {
-      const c = cs[oi]
-      if (c.audioFrom === undefined || c.audioFrom === null) return c
-      return { ...c, audioFrom: mapNew[c.audioFrom] }
-    }))
-    const remap = (m) => { const o = {}; order.forEach((oi, ni) => { if (m[oi] !== undefined) o[ni] = m[oi] }); return o }
-    setMedia(remap); setBlobs(remap); setAudioBufs(remap)
-    cleanCache.current = {}
-    Object.values(mediaBRef.current).forEach(m => { if (m && m.pause) m.pause() })
-    mediaBRef.current = {}
-    setCur(to)
-  }
-  const move = (dir) => reorder(cur, cur + dir)
-
-  // Drag and drop on the thumbnail strip. Pointer based, so it works
-  // with mouse and touch alike. A press that barely moves is a normal
-  // tap (select the clip); once it travels, it becomes a drag and the
-  // crimson bar shows where the clip will land.
-  const thumbRefs = useRef([])
-  const [drag, setDrag] = useState(null)
-  const dragInfo = useRef(null)
-  const suppressClickRef = useRef(false)
-  const insertionAt = (x, y) => {
-    let best = { i: 0, before: true, d: Infinity }
-    thumbRefs.current.forEach((el, i) => {
-      if (!el || !clips[i]) return
-      const r = el.getBoundingClientRect()
-      const cx = r.left + r.width / 2, cy = r.top + r.height / 2
-      const dist = Math.abs(y - cy) * 3 + Math.abs(x - cx)
-      if (dist < best.d) best = { i, before: x < cx, d: dist }
+  const move = (dir) => {
+    const j = cur + dir
+    if (j < 0 || j >= clips.length) return
+    const swap = (m) => { const n = { ...m }; const a = n[cur]; n[cur] = n[j]; n[j] = a; return n }
+    setClips(cs => {
+      const n = [...cs]; const a = n[cur]; n[cur] = n[j]; n[j] = a
+      return n.map(c => {
+        if (c.audioFrom === cur) return { ...c, audioFrom: j }
+        if (c.audioFrom === j) return { ...c, audioFrom: cur }
+        return c
+      })
     })
-    return best
-  }
-  const thumbDown = (e, i) => {
-    if (playing || rendering || starting || clips.length < 2) return
-    dragInfo.current = { i, x0: e.clientX, y0: e.clientY, active: false }
-    suppressClickRef.current = false
-    const onMove = (ev) => {
-      const d = dragInfo.current
-      if (!d) return
-      if (!d.active) {
-        if (Math.abs(ev.clientX - d.x0) + Math.abs(ev.clientY - d.y0) < 8) return
-        d.active = true
-        suppressClickRef.current = true
-      }
-      ev.preventDefault()
-      const tgt = insertionAt(ev.clientX, ev.clientY)
-      setDrag({ from: d.i, to: tgt.i, before: tgt.before })
-    }
-    const onUp = (ev) => {
-      window.removeEventListener('pointermove', onMove)
-      window.removeEventListener('pointerup', onUp)
-      window.removeEventListener('pointercancel', onUp)
-      const d = dragInfo.current
-      dragInfo.current = null
-      setDrag(null)
-      if (d && d.active) {
-        const tgt = insertionAt(ev.clientX, ev.clientY)
-        let ins = tgt.i + (tgt.before ? 0 : 1)
-        if (ins > d.i) ins -= 1
-        reorder(d.i, Math.max(0, Math.min(clips.length - 1, ins)))
-        setTimeout(() => { suppressClickRef.current = false }, 60)
-      }
-    }
-    window.addEventListener('pointermove', onMove, { passive: false })
-    window.addEventListener('pointerup', onUp)
-    window.addEventListener('pointercancel', onUp)
+    setMedia(swap); setBlobs(swap); setAudioBufs(swap)
+    cleanCache.current = {}
+    setCur(j)
   }
 
   // ── Preview with live sound ──
-  // Smooth joins: playback runs on the flat segment list. While one
-  // segment plays, the NEXT segment's element is already seeked and
-  // waiting — the primary element of the next clip, or a hidden twin
-  // of the SAME clip when the join is a cut — so the swap at the
-  // boundary is instant. No live seek on the playing element, no
-  // frozen frames.
   const stopRef = useRef(null)
   const stop = () => { if (stopRef.current) stopRef.current(); }
-  const twinFor = async (idx) => {
-    if (mediaBRef.current[idx]) return mediaBRef.current[idx]
-    const rec = blobs[idx]
-    if (!rec || !rec.blob) return null
-    const el = document.createElement('video')
-    el.muted = true; el.playsInline = true; el.preload = 'auto'
-    el.src = URL.createObjectURL(rec.blob)
-    await new Promise(r => { el.onloadeddata = () => r(); setTimeout(r, 1500) })
-    mediaBRef.current[idx] = el
-    return el
-  }
   const preview = async () => {
-    if (playing || starting) return
     if (!clips.length) return toast?.('Add clips first.')
-    // The first tap answers IMMEDIATELY: the button flips to
-    // "Preparing", the film's first frame is drawn, and Stop works
-    // even while the soundtrack is still being built. Extra taps
-    // during preparation are ignored instead of queueing.
-    setStarting(true)
-    let cancelled = false
-    stopRef.current = () => { cancelled = true; setStarting(false); setPlaying(false); stopRef.current = null }
-    try {
-      const { segs, total } = filmSegments()
-      if (!segs.length) { setStarting(false); stopRef.current = null; return }
-      const cv = cvRef.current
-      // Preview renders at screen resolution: the picture on a 560px
-      // wide preview cannot show 4K detail, but a 4K canvas plus a
-      // CPU colour grade per frame is exactly what made graded
-      // playback sluggish. Export still renders at the full size.
-      const pScale = Math.min(1, 1280 / Math.max(W, H))
-      cv.width = Math.max(2, Math.round(W * pScale / 2) * 2)
-      cv.height = Math.max(2, Math.round(H * pScale / 2) * 2)
-      const ctx = cv.getContext('2d')
-      const first = media[segs[0].idx]
-      if (first) { try { first.pause(); first.currentTime = segs[0].from } catch (er) {} }
-      drawFilm(ctx, 0)
-      // Pre-warm the twin elements every cut join will need, so the
-      // first playthrough is as smooth as the second.
-      for (let j = 1; j < segs.length; j++) {
-        if (segs[j].idx === segs[j - 1].idx) await twinFor(segs[j].idx)
-        if (cancelled) return
-      }
-      const bufs = await ensureAudioBufs()
-      if (cancelled) return
-      const voClips = await buildFilmAudio(bufs)
-      if (cancelled) return
-      const mixer = createMixer({ totalDur: total, musicBuffer: sound.musicBuffer, musicVol: sound.musicVol, musicDuck: sound.musicDuck !== false, voBuffer: sound.voBuffer, voVol: sound.voVol, voClips, record: false })
-      runPreview({ segs, total, ctx, mixer })
-    } catch (e) {
-      console.error('[preview]', e)
-      setStarting(false); setPlaying(false); stopRef.current = null
-      toast?.('Preview could not start: ' + (e?.message || 'unknown error'))
-    }
-  }
-
-  const runPreview = ({ segs, total, ctx, mixer }) => {
-    let k = 0
-    let curEl = media[segs[0].idx] || null
-    const prepared = { j: -1, el: null }
-    const prepare = async (j) => {
-      prepared.j = -1; prepared.el = null
-      if (j >= segs.length) return
-      const s = segs[j]
-      let el = media[s.idx] || null
-      if (curEl && el === curEl) el = await twinFor(s.idx)
-      if (!el) return
-      try { el.pause(); el.currentTime = s.from } catch (er) {}
-      prepared.j = j; prepared.el = el
-    }
-    if (curEl) {
-      try { curEl.currentTime = segs[0].from } catch (er) {}
-      curEl.play().catch(() => {})
-    }
-    prepare(1)
-    setStarting(false)
     setPlaying(true)
+    const { total } = timeline()
+    const voClips = await buildFilmAudio()
+    const cv = cvRef.current
+    cv.width = W; cv.height = H
+    const ctx = cv.getContext('2d')
+    const mixer = createMixer({ totalDur: total, musicBuffer: sound.musicBuffer, musicVol: sound.musicVol, voBuffer: sound.voBuffer, voVol: sound.voVol, voClips, record: false })
     mixer.start()
+    let lastIdx = -1
     const t0 = performance.now()
-    let lastProg = -1
     const step = (now) => {
       const t = (now - t0) / 1000
-      if (t >= total) { finish(); return }
-      while (k < segs.length - 1 && t >= segs[k + 1].at) {
-        const prev = curEl
-        k++
-        const el = (prepared.j === k && prepared.el) ? prepared.el : media[segs[k].idx]
-        curEl = el || prev
-        if (curEl) {
-          if (prepared.j !== k) { try { curEl.currentTime = segs[k].from + (t - segs[k].at) } catch (er) {} }
-          curEl.play().catch(() => {})
+      const a = activeAt(t)
+      if (!a) { finish(); return }
+      const v = media[a.idx]
+      const local = clips[a.idx].in + (t - a.start)
+      if (v) {
+        if (a.idx !== lastIdx) {
+          if (lastIdx >= 0 && media[lastIdx]?.pause) media[lastIdx].pause()
+          try { v.currentTime = local } catch (er) {}
+          v.play().catch(() => {})
+          lastIdx = a.idx
+        } else if (Math.abs(v.currentTime - local) > 0.3) {
+          try { v.currentTime = local } catch (er) {}
         }
-        if (prev && prev !== curEl && prev.pause) prev.pause()
-        prepare(k + 1)
       }
-      const s = segs[k]
-      const local = s.from + Math.min(t - s.at, Math.max(0, s.to - s.from))
-      if (curEl && Math.abs(curEl.currentTime - local) > 0.3) {
-        try { curEl.currentTime = local } catch (er) {}
-      }
-      liveElRef.current = { idx: s.idx, el: curEl }
       drawFilm(ctx, t)
-      // React state 60 times a second re-renders the whole tab per
-      // frame; 5 times a second reads the same to a human.
-      if (t - lastProg > 0.2) { lastProg = t; setProgress(t / total) }
+      setProgress(t / total)
       rafRef.current = requestAnimationFrame(step)
     }
     const finish = () => {
       cancelAnimationFrame(rafRef.current)
       Object.values(media).forEach(m => { if (m && m.pause) m.pause() })
-      Object.values(mediaBRef.current).forEach(m => { if (m && m.pause) m.pause() })
       mixer.stop()
-      liveElRef.current = null
       setPlaying(false); setProgress(0)
       stopRef.current = null
     }
@@ -3104,113 +2510,32 @@ function FilmMaker({ toast }) {
   // ── Export: fast 4K MP4 with the shared ladder ──
   const exportFilm = async () => {
     if (!clips.length) return toast?.('Add clips first.')
-    liveElRef.current = null
-    Object.values(media).forEach(m => { if (m && m.pause) m.pause() })
     setRendering(true); setProgress(0)
     const t0 = performance.now()
     const { total } = timeline()
     try {
-      const bufs = await ensureAudioBufs()
-      const voClips = await buildFilmAudio(bufs)
-      if (!voClips.length && !sound.musicBuffer && !sound.voBuffer) {
-        toast?.('Heads up: no sound was found in the clips, so this export will be silent.')
-      }
+      const voClips = await buildFilmAudio()
       const cv = cvRef.current
       cv.width = W; cv.height = H
-
-      // Frame-exact engine: build a direct decoder per clip. A clip
-      // whose codec or container cannot be decoded this way simply
-      // is not in the map and uses the classic element-seek path.
-      const { segs } = filmSegments()
-      const decoders = {}
-      const srcFps = {}
-      const fpsOf = (parsed) => {
-        if (!parsed || !parsed.samples || !parsed.samples.length) return null
-        const ds = parsed.samples.slice(0, 240).map(x => x.duration / x.timescale).filter(d => d > 0).sort((a, b) => a - b)
-        if (!ds.length) return null
-        const med = ds[Math.floor(ds.length / 2)]
-        return Math.min(120, Math.max(10, 1 / med))
-      }
-      for (const s of segs) {
-        const i = s.idx
-        if (decoders[i] !== undefined) continue
-        decoders[i] = null
-        const blob = blobs[i]?.blob
-        if (!blob) continue
-        try {
-          const parsed = await parseClipSamples(blob)
-          const f = fpsOf(parsed)
-          if (f) srcFps[i] = f
-          if (parsed && await ClipFrameSource.supported(parsed)) decoders[i] = new ClipFrameSource(parsed)
-        } catch (er) { decoders[i] = null }
-      }
-      const decodedAll = segs.every(s => decoders[s.idx])
-      // Export at the film's native rate: the highest clip rate,
-      // snapped to a standard value so players and platforms are
-      // happy. Unknown rates (library missing) keep the old 30.
-      const rates = Object.values(srcFps)
-      let exportFps = 30
-      if (rates.length) {
-        const peak = Math.max(...rates)
-        const std = [24, 25, 30, 50, 60]
-        exportFps = std.reduce((best, r) => Math.abs(r - peak) < Math.abs(best - peak) ? r : best, 30)
-      }
-      let segPtr = 0
-      const advance = async (t) => {
-        while (segPtr < segs.length - 1 && t >= segs[segPtr + 1].at) segPtr++
-        while (segPtr > 0 && t < segs[segPtr].at) segPtr--
-        const s = segs[segPtr]
-        const local = s.from + Math.min(Math.max(0, t - s.at), Math.max(0, s.to - s.from))
-        const dec = decoders[s.idx]
-        if (dec) {
-          const frame = await dec.frameAt(local)
-          if (frame) { liveElRef.current = { idx: s.idx, el: frame }; return }
-        }
-        const v = media[s.idx]
-        if (v) {
-          v.__filmTarget = local
-          await seekVideo(v, t)
-          liveElRef.current = { idx: s.idx, el: v }
-        }
-      }
-
-      let out = null
-      try {
-        out = await exportMp4Fast({
-          canvas: cv, W, H, totalDur: total,
-          drawFrame: (ctx, t) => drawFilm(ctx, t),
-          advance,
-          fps: exportFps,
-          sound: { musicBuffer: sound.musicBuffer, musicVol: sound.musicVol, musicDuck: sound.musicDuck !== false, voBuffer: sound.voBuffer, voVol: sound.voVol, voClips },
-          onProgress: setProgress,
-        })
-      } finally {
-        Object.values(decoders).forEach(d => { if (d) d.destroy() })
-        liveElRef.current = null
-      }
+      const out = await exportMp4Fast({
+        canvas: cv, W, H, totalDur: total,
+        drawFrame: (ctx, t) => drawFilm(ctx, t),
+        mediaAt: mediaAtFilm,
+        sound: { musicBuffer: sound.musicBuffer, musicVol: sound.musicVol, voBuffer: sound.voBuffer, voVol: sound.voVol, voClips },
+        onProgress: setProgress,
+      })
       setRendering(false); setProgress(0)
       Object.values(media).forEach(m => { if (m) m.__filmTarget = undefined })
-      if (out?.blob) out.engineNote = decodedAll ? ' Engine: frame exact.' : ' Engine: classic (one or more clips could not be direct decoded).'
       if (out?.blob) {
         const a = document.createElement('a')
-        a.download = 'smartious-film-' + H + 'p-' + exportFps + 'fps-' + (decodedAll ? 'exact' : 'classic') + '.mp4'
+        a.download = 'smartious-film.mp4'
         a.href = URL.createObjectURL(out.blob)
         a.click()
         const secs = Math.round((performance.now() - t0) / 1000)
         const note = out.audioNote === 'silent' ? ' NOTE: this computer cannot encode MP4 audio, so the file is silent.'
-          : out.audioNote === 'opus' ? ' Audio uses Opus: fine for YouTube and Android; some players (WhatsApp, Windows players) play Opus as SILENT — tell me if yours does.'
-          : out.audioNote === 'none' ? ' NOTE: no sound was found in this film, so the file has no audio track.'
-          : out.audioNote === 'aac' ? ' Audio: AAC.'
+          : out.audioNote === 'opus' ? ' Audio uses Opus: fine for YouTube and Android; if WhatsApp plays it silent, tell me.'
           : ''
-        toast?.('Film ready: ' + (out.blob.size / 1048576).toFixed(1) + ' MB in ' + secs + 's.' + note + (out.engineNote || ''))
-        setExportReport({
-          size: (out.blob.size / 1048576).toFixed(1) + ' MB',
-          time: secs + 's for ' + Math.round(total) + 's of film',
-          fps: exportFps + ' fps (clips: ' + (Object.entries(srcFps).map(([i, f]) => 'clip ' + (Number(i) + 1) + ' ' + f.toFixed(1)).join(', ') || 'unknown, library file not loaded') + ')',
-          engine: decodedAll ? 'frame exact' : 'classic seek',
-          audio: out.audioNote === 'aac' ? 'AAC' : out.audioNote === 'opus' ? 'Opus (some players mute it)' : out.audioNote === 'none' ? 'no sound found' : 'silent (no encoder)',
-          music: sound.musicBuffer ? ('loaded, volume ' + Math.round((sound.musicVol ?? 0.5) * 100) + '%, ' + (sound.musicDuck !== false ? 'dips under clip sound' : 'constant volume')) : 'none loaded at export time',
-        })
+        toast?.('Film ready: ' + (out.blob.size / 1048576).toFixed(1) + ' MB in ' + secs + 's.' + note)
       } else {
         toast?.('Fast export is not available in this browser. Use current Chrome or Edge for the film exporter.')
       }
@@ -3261,15 +2586,13 @@ function FilmMaker({ toast }) {
       }).then(() => setSavedAt(Date.now())).catch(() => {})
     }, 800)
     return () => clearTimeout(t)
-  }, [loaded, format, clips, capsOn, logo, bulletin, blobs, sound.musicMode, sound.musicVol, sound.musicDuck, sound.voVol, sound.script, sound.musicBlob, sound.voBlob])
+  }, [loaded, format, clips, capsOn, logo, bulletin, blobs, sound.musicMode, sound.musicVol, sound.voVol, sound.script, sound.musicBlob, sound.voBlob])
 
   const newProject = async () => {
     await idbDel('film-project')
     Object.values(media).forEach(m => { if (m && m.pause) m.pause() })
     setClips([]); setMedia({}); setBlobs({}); setAudioBufs({}); setCur(0)
     cleanCache.current = {}
-    mediaBRef.current = {}
-    liveElRef.current = null
     setSound({ musicMode: 'none', musicBuffer: null, musicVol: 0.5, voBuffer: null, voVol: 1, script: null })
     setSavedAt(0)
     toast?.('Fresh film started.')
@@ -3338,36 +2661,21 @@ function FilmMaker({ toast }) {
       </div>
 
       {clips.length > 0 && (
-        <div style={{ display: 'grid', gap: 5 }}>
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-            {clips.map((c, i) => (
-              <div key={i} ref={el => { thumbRefs.current[i] = el }} onPointerDown={e => thumbDown(e, i)}
-                style={{
-                  touchAction: 'none',
-                  cursor: clips.length > 1 ? 'grab' : 'pointer',
-                  opacity: drag && drag.from === i ? 0.35 : 1,
-                  borderLeft: drag && drag.to === i && drag.before ? '3px solid #8B1A2E' : '3px solid transparent',
-                  borderRight: drag && drag.to === i && !drag.before ? '3px solid #8B1A2E' : '3px solid transparent',
-                  borderRadius: 4,
-                }}>
-                <Thumb {...thumbSize(format)} active={cur === i} onClick={() => { if (!suppressClickRef.current) setCur(i) }}
-                  label={(i + 1) + ' \u00b7 ' + (c.name || 'clip')}
-                  draw={(tc, tw, th) => {
-                    tc.fillStyle = '#000'; tc.fillRect(0, 0, tw, th)
-                    const v = media[i]
-                    if (v && v.videoWidth) {
-                      tc.filter = gradeFilter(c.grade) || 'none'
-                      const cover = Math.max(tw / v.videoWidth, th / v.videoHeight)
-                      tc.drawImage(v, tw / 2 - v.videoWidth * cover / 2, th / 2 - v.videoHeight * cover / 2, v.videoWidth * cover, v.videoHeight * cover)
-                      tc.filter = 'none'
-                    }
-                  }} />
-              </div>
-            ))}
-          </div>
-          {clips.length > 1 && (
-            <div style={{ fontSize: 10, color: TOKENS.s500 }}>Drag a clip to reorder the film, or use To start / To end on the clip below.</div>
-          )}
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+          {clips.map((c, i) => (
+            <Thumb key={i} {...thumbSize(format)} active={cur === i} onClick={() => setCur(i)}
+              label={(i + 1) + ' \u00b7 ' + (c.name || 'clip')}
+              draw={(tc, tw, th) => {
+                tc.fillStyle = '#000'; tc.fillRect(0, 0, tw, th)
+                const v = media[i]
+                if (v && v.videoWidth) {
+                  tc.filter = gradeFilter(c.grade) || 'none'
+                  const cover = Math.max(tw / v.videoWidth, th / v.videoHeight)
+                  tc.drawImage(v, tw / 2 - v.videoWidth * cover / 2, th / 2 - v.videoHeight * cover / 2, v.videoWidth * cover, v.videoHeight * cover)
+                  tc.filter = 'none'
+                }
+              }} />
+          ))}
         </div>
       )}
 
@@ -3375,12 +2683,10 @@ function FilmMaker({ toast }) {
         <div style={{ background: '#fff', border: '1.5px solid ' + TOKENS.line, borderRadius: 12, padding: 14, display: 'grid', gap: 10 }}>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
             <strong style={{ fontSize: 12.5 }}>{clip.name}</strong>
-            <span style={{ fontSize: 11, color: TOKENS.s500 }}>{clipLenOf(clip).toFixed(1)}s of {clip.dur.toFixed(1)}s{(clip.cuts || []).length ? ' \u00b7 ' + clip.cuts.length + ' cut' + (clip.cuts.length > 1 ? 's' : '') : ''}</span>
-            <span style={{ marginLeft: 'auto', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              <button onClick={() => reorder(cur, 0)} disabled={cur === 0} style={{ ...btn(false), padding: '5px 10px', fontSize: 11, opacity: cur === 0 ? 0.4 : 1 }}>To start</button>
+            <span style={{ fontSize: 11, color: TOKENS.s500 }}>{(clip.out - clip.in).toFixed(1)}s of {clip.dur.toFixed(1)}s</span>
+            <span style={{ marginLeft: 'auto', display: 'flex', gap: 6 }}>
               <button onClick={() => move(-1)} style={{ ...btn(false), padding: '5px 10px' }}>{'\u25C0'}</button>
               <button onClick={() => move(1)} style={{ ...btn(false), padding: '5px 10px' }}>{'\u25B6'}</button>
-              <button onClick={() => reorder(cur, clips.length - 1)} disabled={cur === clips.length - 1} style={{ ...btn(false), padding: '5px 10px', fontSize: 11, opacity: cur === clips.length - 1 ? 0.4 : 1 }}>To end</button>
               <button onClick={removeClip} style={{ ...btn(false), padding: '5px 10px', color: '#B91C1C' }}>Remove</button>
             </span>
           </div>
@@ -3419,7 +2725,6 @@ function FilmMaker({ toast }) {
               </span>
             )}
           </div>
-          <CutBar clip={clip} sel={cutSel} setSel={setCutSel} onDelete={deleteSelected} onRestore={restoreCut} />
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
             <span style={{ fontSize: 11, fontWeight: 700, color: TOKENS.s500 }}>GRADE</span>
             {GRADES.map(([id, label]) => (
@@ -3438,37 +2743,18 @@ function FilmMaker({ toast }) {
       <canvas ref={cvRef} style={{ width: '100%', maxWidth: 560, background: '#000', borderRadius: 12, border: '1.5px solid ' + TOKENS.line, justifySelf: 'start' }} />
 
       <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-        {!playing && !starting
+        {!playing
           ? <button onClick={preview} disabled={rendering} style={btn(false)}>Preview with sound</button>
-          : <button onClick={stop} style={btn(false)}>{starting ? 'Preparing... tap to cancel' : 'Stop'}</button>}
-        <button onClick={exportFilm} disabled={playing || starting || rendering} style={btn(true)}>
+          : <button onClick={stop} style={btn(false)}>Stop</button>}
+        <button onClick={exportFilm} disabled={playing || rendering} style={btn(true)}>
           {rendering ? 'Rendering ' + Math.round(progress * 100) + '%' : 'Export film'}
         </button>
-        {exportReport && (
-          <div style={{ flexBasis: '100%', background: '#F9F6EE', border: '1.5px solid ' + TOKENS.line, borderRadius: 10, padding: '10px 12px', display: 'grid', gap: 3, position: 'relative' }}>
-            <div style={{ fontSize: 11.5, fontWeight: 800, color: TOKENS.crimson }}>Export report</div>
-            <div style={{ fontSize: 11, color: TOKENS.s600 }}>Size: {exportReport.size} | Render: {exportReport.time}</div>
-            <div style={{ fontSize: 11, color: TOKENS.s600 }}>Frame rate: {exportReport.fps}</div>
-            <div style={{ fontSize: 11, color: TOKENS.s600 }}>Engine: {exportReport.engine} | Audio: {exportReport.audio}</div>
-            <div style={{ fontSize: 11, color: TOKENS.s600 }}>Music: {exportReport.music}</div>
-            <div style={{ fontSize: 10, color: TOKENS.s500 }}>If a download misbehaves, send these lines exactly.</div>
-            <button onClick={() => setExportReport(null)} style={{ position: 'absolute', top: 6, right: 8, background: 'none', border: 'none', cursor: 'pointer', color: TOKENS.s500, fontSize: 13, fontWeight: 800 }}>{'\u2715'}</button>
-          </div>
-        )}
         {(playing || rendering) && <span style={{ fontSize: 11.5, color: TOKENS.s500, fontWeight: 700 }}>{Math.round(progress * 100)}%</span>}
       </div>
 
       <SoundPanel sound={sound} setSound={setSound} cards={[]} toast={toast} />
-      {sound.musicBuffer && (
-        <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11.5, color: TOKENS.s600, fontWeight: 700, cursor: 'pointer' }}>
-          <input type="checkbox" checked={sound.musicDuck !== false}
-            onChange={e => setSound(s => ({ ...s, musicDuck: e.target.checked }))} />
-          Lower music under clip sound
-          <span style={{ fontWeight: 400, color: TOKENS.s500 }}>(unticked: music stays at its set volume for the whole film)</span>
-        </label>
-      )}
       <div style={{ fontSize: 10.5, color: TOKENS.s500, lineHeight: 1.55 }}>
-        Drag on a clip's cut bar to select a bad section and delete it; the film plays straight over the gap and the sound follows. Each clip keeps its own sound; music sits underneath it, and the tick above controls whether it dips under clip sound or holds its volume. Clean noise removes hum, hiss and room noise between speech. Captions burn into the picture so they show on every platform.
+        Each clip keeps its own sound; music ducks underneath it automatically. Clean noise removes hum, hiss and room noise between speech. Captions burn into the picture so they show on every platform.
       </div>
     </div>
   )
