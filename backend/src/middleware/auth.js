@@ -13,6 +13,15 @@ const auth = async (req, res, next) => {
     const decoded = jwt.verify(token, JWT_SECRET);
 
     const user = await User.findById(decoded.id).select('-password');
+
+    // Presence: stamp lastActive at most once per five minutes per
+    // user - powers the "online now" view without write storms.
+    try {
+      if (user && (!user.lastActive || Date.now() - new Date(user.lastActive).getTime() > 5 * 60 * 1000)) {
+        User.updateOne({ _id: user._id }, { $set: { lastActive: new Date() } }).catch(() => {});
+        user.lastActive = new Date();
+      }
+    } catch (e) { /* presence is best effort */ }
     if (!user)
       return res.status(401).json({ success: false, message: 'Token is no longer valid.' });
     if (!user.isActive)
