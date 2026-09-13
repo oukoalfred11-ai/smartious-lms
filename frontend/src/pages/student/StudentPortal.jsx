@@ -11498,7 +11498,10 @@ function DashboardTab({ user, store, setPage, toast }) {
       </div>
 
       {/* ── Announcements broadcast ── */}
-      <AnnouncementsStrip />
+      <AnnouncementsStrip onNavigate={(mod) => {
+        const map = { timetable: 'timetable', lessons: 'lessons', homework: 'homework', exams: 'exams', results: 'results', curriculum: 'curriculum', clubs: 'clubs', library: 'library', communication: 'communication', messages: 'communication', profile: 'profile', attendance: 'attendance' }
+        if (map[mod]) setPage(map[mod])
+      }} />
 
       {/* ── KPI strip ── */}
       <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12, marginBottom:20 }}>
