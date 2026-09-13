@@ -38,6 +38,28 @@ function getTransporter() {
 // POST /api/auth/login
 // Body: { email, password }
 // ─────────────────────────────────────────────────────────
+
+// Fire and forget login event recording - analytics must never slow
+// or break sign in.
+function recordLogin(req, { user = null, email = '', success = true } = {}) {
+  try {
+    const LoginEvent = require('../models/LoginEvent');
+    const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.ip || '';
+    LoginEvent.create({
+      userId: user ? user._id : null,
+      email: (user ? user.email : email) || '',
+      role: user ? user.role : '',
+      success,
+      ip: String(ip).slice(0, 60),
+      userAgent: String(req.headers['user-agent'] || '').slice(0, 160),
+    }).catch(() => {});
+    if (user && success) {
+      const User = require('../models/User');
+      User.updateOne({ _id: user._id }, { $set: { lastLogin: new Date(), lastActive: new Date() } }).catch(() => {});
+    }
+  } catch (e) { /* never propagate */ }
+}
+
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body || {};
@@ -52,6 +74,7 @@ router.post('/login', async (req, res) => {
       return res.status(403).json({ success: false, message: 'Your account has been deactivated. Contact admin.' });
 
     const match = await bcrypt.compare(password, user.password);
+    if (!match) { recordLogin(req, { user, success: false }); }
     if (!match)
       return res.status(401).json({ success: false, message: 'Invalid email or password.' });
 
@@ -62,6 +85,7 @@ router.post('/login', async (req, res) => {
     delete userOut.passwordResetToken;
     delete userOut.passwordResetExpires;
 
+    recordLogin(req, { user, success: true });
     console.log('[auth] Login:', user.email, '| role:', user.role);
     return res.json({ success: true, token, user: userOut });
   } catch (err) {
