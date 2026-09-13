@@ -106,6 +106,8 @@ app.use('/api/paystack',   require('./routes/paystack'));
 app.use('/api/community',  require('./routes/community'));
 app.use('/api/announcements', require('./routes/announcements'));
 app.use('/api/user-logs', require('./routes/user-logs'));
+app.use('/api/support', require('./routes/support'));
+app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/clubs', require('./routes/clubs'));
 app.use('/api/mastery', require('./routes/mastery'));
 app.use('/api/livekit', require('./routes/livekit'));
