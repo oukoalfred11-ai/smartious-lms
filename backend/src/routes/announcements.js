@@ -77,6 +77,13 @@ const sanitize = (b = {}) => {
   if (['all', 'students', 'parents'].includes(b.audience)) out.audience = b.audience;
   if (typeof b.ctaLabel === 'string') out.ctaLabel = b.ctaLabel.trim().slice(0, 40);
   if (typeof b.ctaUrl === 'string') out.ctaUrl = b.ctaUrl.trim().slice(0, 500);
+  const MODULES = ['timetable', 'lessons', 'homework', 'exams', 'results', 'curriculum', 'clubs', 'library', 'communication', 'profile', 'settings', 'reports', 'attendance', 'messages'];
+  if (typeof b.ctaModule === 'string') out.ctaModule = MODULES.includes(b.ctaModule) ? b.ctaModule : '';
+  if (typeof b.imageData === 'string') {
+    // Empty clears; otherwise it must be an image data URL under ~2MB.
+    if (!b.imageData) out.imageData = '';
+    else if (b.imageData.startsWith('data:image/') && b.imageData.length <= 2_800_000) out.imageData = b.imageData;
+  }
   if (typeof b.pinned === 'boolean') out.pinned = b.pinned;
   if (typeof b.published === 'boolean') out.published = b.published;
   if (b.showFrom) { const d = new Date(b.showFrom); if (!isNaN(d)) out.showFrom = d; }
