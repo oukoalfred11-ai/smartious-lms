@@ -534,15 +534,19 @@ function renderCardBase(ctx, W, H, card, media, pAnim = 1) {
     ctx.fillText(chipTxt, W - M - cw / 2, M * 0.78 + B * 0.038)
     ctx.textAlign = 'left'
   }
-  ctx.fillStyle = onDark ? 'rgba(255,255,255,.55)' : 'rgba(8,12,20,.5)'
-  ctx.font = `700 ${B * 0.026}px Arial`
-  const ft = (card.footer || 'smartioushomeschool.com').toUpperCase()
-  if (card.layout === 'center') {
-    ctx.textAlign = 'center'
-    ctx.fillText(ft, W / 2, H - M * 0.7)
-    ctx.textAlign = 'left'
-  } else {
-    ctx.fillText(ft, M, H - M * 0.7)
+  // Footer renders only when the field has content - clearing it
+  // means no footer, no forced fallback.
+  if (card.footer && card.footer.trim()) {
+    ctx.fillStyle = onDark ? 'rgba(255,255,255,.55)' : 'rgba(8,12,20,.5)'
+    ctx.font = `700 ${B * 0.026}px Arial`
+    const ft = card.footer.trim().toUpperCase()
+    if (card.layout === 'center') {
+      ctx.textAlign = 'center'
+      ctx.fillText(ft, W / 2, H - M * 0.7)
+      ctx.textAlign = 'left'
+    } else {
+      ctx.fillText(ft, M, H - M * 0.7)
+    }
   }
 }
 
