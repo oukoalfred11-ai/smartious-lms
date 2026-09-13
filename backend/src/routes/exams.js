@@ -118,7 +118,7 @@ async function notifyExamRecipients(exam, { isUpdate = false } = {}) {
     if (!ids.size) return;
 
     const students = await User.find({ _id: { $in: [...ids] }, isActive: { $ne: false } })
-      .select('firstName lastName email parentId').lean();
+      .select('firstName lastName email parentId emailPrefs').lean();
 
     let teacherName = '';
     try {
@@ -134,7 +134,7 @@ async function notifyExamRecipients(exam, { isUpdate = false } = {}) {
 
     const parentIds = [...new Set(students.map(s => s.parentId && String(s.parentId)).filter(Boolean))];
     const parents = parentIds.length
-      ? await User.find({ _id: { $in: parentIds }, isActive: { $ne: false } }).select('firstName lastName email').lean()
+      ? await User.find({ _id: { $in: parentIds }, isActive: { $ne: false } }).select('firstName lastName email emailPrefs').lean()
       : [];
     const parentById = Object.fromEntries(parents.map(pu => [String(pu._id), pu]));
 
@@ -142,11 +142,13 @@ async function notifyExamRecipients(exam, { isUpdate = false } = {}) {
     for (const s of students) {
       const studentName = [s.firstName, s.lastName].filter(Boolean).join(' ') || 'Student';
       if (s.email) {
+        if (s.emailPrefs?.examNotices === false) continue;
         await sendExamScheduledEmail({ ...base, to: s.email, recipientName: s.firstName || 'Student', studentName, isParent: false });
         sent++;
       }
       const pu = s.parentId && parentById[String(s.parentId)];
       if (pu?.email) {
+        if (pu.emailPrefs?.examNotices === false) continue;
         await sendExamScheduledEmail({ ...base, to: pu.email, recipientName: pu.firstName || 'Parent', studentName, isParent: true });
         sent++;
       }
