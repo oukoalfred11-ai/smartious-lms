@@ -148,6 +148,16 @@ const userSchema = new mongoose.Schema({
   statusChangedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Admin who made the change
   statusReason: String,
   academicYear: { type: String, default: '' },   // current cohort, e.g. '2026/2027' // Reason for status change (graduation, parent removal, fee default, etc.)
+
+  // Per-user email notification preferences, managed from the profile.
+  // Every send site checks these; operational mail (welcome, billing,
+  // show cause, password) is never optional.
+  emailPrefs: {
+    classReminders: { type: Boolean, default: true },   // 30 minute class reminders
+    classUpdates:   { type: Boolean, default: true },   // manual class created or changed
+    examNotices:    { type: Boolean, default: true },   // exam scheduled notices
+    resultsEmails:  { type: Boolean, default: true },   // results and report digests
+  },
   
   // TEACHER STATUS & LEAVE MANAGEMENT
   teacherStatus: {
