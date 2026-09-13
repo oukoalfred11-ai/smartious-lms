@@ -424,4 +424,24 @@ router.post('/change-password', async (req, res) => {
   }
 })
 
+// ── Email notification preferences ──────────────────────────────────
+// Any signed in user manages their own. Keys are fixed; values are
+// booleans; anything else is rejected so the switch always means what
+// it says.
+router.patch('/me/email-prefs', authMiddleware, async (req, res) => {
+  try {
+    const ALLOWED = ['classReminders', 'classUpdates', 'examNotices', 'resultsEmails'];
+    const sets = {};
+    for (const k of Object.keys(req.body || {})) {
+      if (!ALLOWED.includes(k)) return res.status(400).json({ success: false, message: `Unknown preference: ${k}` });
+      if (typeof req.body[k] !== 'boolean') return res.status(400).json({ success: false, message: `${k} must be true or false` });
+      sets['emailPrefs.' + k] = req.body[k];
+    }
+    if (!Object.keys(sets).length) return res.status(400).json({ success: false, message: 'Nothing to update.' });
+    const User = require('../models/User');
+    const u = await User.findByIdAndUpdate(req.user._id, { $set: sets }, { new: true }).select('emailPrefs').lean();
+    res.json({ success: true, data: { emailPrefs: u.emailPrefs } });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
 module.exports = router;
