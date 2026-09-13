@@ -473,7 +473,7 @@ async function sendClassReminders() {
       // undefined values, which is what produced the empty sends.
       // resolveStudentRecipients validates each address and de-duplicates
       // case-insensitively before anything is sent.
-      const resolved = await resolveStudentRecipients(student, { includeStudent: true })
+      const resolved = await resolveStudentRecipients(student, { includeStudent: true, category: 'classReminders' })
       if (!resolved.to.length) {
         console.warn(`[class reminder] ${student.firstName} ${student.lastName}: ` +
                      'no valid email address on file — skipped')
