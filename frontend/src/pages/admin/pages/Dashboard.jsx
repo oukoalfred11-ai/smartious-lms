@@ -23,6 +23,8 @@ import { COOReportOverviewModule, TeacherRatingsModule } from './modules/Ratings
 import PayrollModule from './modules/PayrollModule.jsx'
 import StudentSessionsModule from './modules/StudentSessionsModule.jsx'
 import UsersLogsModule from './modules/UsersLogsModule.jsx'
+import SupportModule from './modules/SupportModule.jsx'
+import NotificationsBell from '../../../components/NotificationsBell.jsx'
 import CurriculumModule from './modules/CurriculumModule.jsx'
 import BillingModule, { FeeCollectionModule } from './modules/BillingModule.jsx'
 import CommunityModule from './modules/CommunityModule.jsx'
@@ -67,13 +69,13 @@ const resetForm = () => ({ ...DEFAULT_USER_FORM })
 const NAV_SECTIONS = {
   admin: [
     { label: 'Overview',    items: ['command', 'dashboard', 'analytics'] },
-    { label: 'People',      items: ['users', 'teachers', 'allocations', 'sessions', 'communication', 'community', 'announcements'] },
+    { label: 'People',      items: ['users', 'teachers', 'allocations', 'sessions', 'communication', 'support', 'community', 'announcements'] },
     { label: 'Reports',     items: ['reports', 'dosperformance', 'mastery'] },
     { label: 'Operations',  items: ['frontdesk', 'assessment', 'documents', 'payroll', 'leave', 'programmes'] },
     { label: 'Teaching',    items: ['liveclasses', 'clubs', 'grouprooms', 'curriculum'] },
     { label: 'Question Bank', items: ['questionbank', 'markingreview'] },
     { label: 'Marketing',   items: ['studio'] },
-    { label: 'System',      items: ['billing', 'website', 'settings', 'ai', 'suggestions'] },
+    { label: 'System',      items: ['userlogs', 'billing', 'website', 'settings', 'ai', 'suggestions'] },
   ],
   accountant: [
     { label: 'Overview',    items: ['checkin', 'dashboard', 'analytics'] },
@@ -103,6 +105,7 @@ const NAV_SECTIONS = {
   ],
   ops_manager: [
     { label: 'Overview',    items: ['command', 'checkin', 'dashboard', 'analytics'] },
+    { label: 'Support',       items: ['support'] },
     { label: 'People',      items: ['users', 'teachers', 'allocations', 'sessions', 'communication'] },
     { label: 'Reports',     items: ['cooreports', 'reports', 'dosperformance', 'mastery'] },
     { label: 'Performance', items: ['teacherratings'] },
@@ -215,6 +218,7 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
                 }[role] || 'Administrator'}
               </div>
             </div>
+            <NotificationsBell onNavigate={(mod) => { const map = { support: 'support', userlogs: 'userlogs' }; if (map[mod]) setPage(map[mod]) }} />
             <button onClick={onLogout} title="Sign out" style={{
               width: 36, height: 36, borderRadius: 10,
               background: TOKENS.s50, border: '1px solid ' + TOKENS.s200,
@@ -444,6 +448,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         {safePage === 'website'     && <WebsiteModule    refreshKey={refreshKey} toast={toast} />}
         {safePage === 'settings'    && <SettingsModule   refreshKey={refreshKey} toast={toast} />}
         {safePage === 'userlogs' && <UsersLogsModule toast={toast} />}
+        {safePage === 'support' && <SupportModule toast={toast} />}
         {safePage === 'ai'          && <MshauriModule    refreshKey={refreshKey} toast={toast} />}
       </div>
 
