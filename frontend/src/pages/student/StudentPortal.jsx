@@ -13,6 +13,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'
 import BirthdayBanner from '../../components/BirthdayBanner.jsx'
 import SuggestionBox from '../../components/SuggestionBox.jsx'
 import AnnouncementsStrip from '../../components/AnnouncementsStrip.jsx'
+import SupportCard from '../../components/SupportCard.jsx'
+import { playChime } from '../../components/NotificationsBell.jsx'
 import { useAuth, useToast, api } from '../../context/ctx.jsx'
 import { useStore } from '../../context/ctx.jsx'
 import Modal from '../../components/ui/Modal.jsx'
@@ -879,6 +881,22 @@ export default function StudentPortal() {
   // feed from upcoming live classes, pending homework, recent results
   // and recent communication. Frontend-only — no backend changes.
   const loadNotifications = async () => {
+    // Server notifications (Support Desk and future emitters) lead
+    // the list; a soft chime announces unread ones.
+    let serverItems = []
+    try {
+      const nr = await api.get('/notifications/mine')
+      const nd = nr.data?.data || {}
+      serverItems = (nd.items || []).slice(0, 10).map(n => ({
+        id: 'srv-' + n._id,
+        icon: '\ud83d\udce8',
+        title: n.title,
+        subtitle: n.body || '',
+        ts: new Date(n.createdAt).getTime(),
+        unread: !n.readAt,
+      }))
+      if ((nd.unread || 0) > 0) playChime()
+    } catch (e) { /* bell still works without the server */ }
     const items = []
     const now = Date.now()
     const dayMs = 86400000
@@ -957,7 +975,7 @@ export default function StudentPortal() {
       return aFut ? a.ts - b.ts : b.ts - a.ts
     })
 
-    setNotifsList(items.slice(0, 8))
+    setNotifsList([...serverItems, ...items].slice(0, 12))
   }
 
   // ── LOAD ADAPTIVE PRACTICE ───────────────────────────
@@ -1533,6 +1551,7 @@ export default function StudentPortal() {
               <button
                 onClick={() => {
                   setNotifsOpen(v => !v)
+                  api.patch('/notifications/read-all').catch(() => {})
                   // Mark as seen when opened
                   if (!notifsOpen) {
                     const stamp = Date.now()
@@ -2125,8 +2144,10 @@ export default function StudentPortal() {
             <ProfileTab user={user} toast={toast} />
             <EmailPrefsCard />
           </>)}
-          {page === 'communication' && <StudentCommunicationTab user={user} toast={toast} />}
-          {page === 'community' && <CommunityTab user={user} toast={toast} />}
+          {page === 'communication' && (<>
+            <SupportCard />
+            <StudentCommunicationTab user={user} toast={toast} />
+          </>)}          {page === 'community' && <CommunityTab user={user} toast={toast} />}
 
         </div>
       </main>
