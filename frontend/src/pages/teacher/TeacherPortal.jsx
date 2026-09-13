@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import SupportCard from '../../components/SupportCard.jsx'
+import MessagesHub from '../../components/MessagesHub.jsx'
 import NotificationsBell from '../../components/NotificationsBell.jsx'
 import ClubsHub from '../../components/ClubsHub.jsx'
 import { FALLBACK_CURRICULA, fetchCurricula } from '../../data/curriculumList.js'
@@ -1275,7 +1275,7 @@ export default function TeacherPortal() {
 
            {/* ── COMMUNICATION ── */}
            {page === 'communication' && (<>
-             <SupportCard />
+             <MessagesHub meId={currentUser?._id} role="teacher" />
              <CommunicationTab user={currentUser} store={store} setPage={setPage} toast={toast} />
            </>)}           {page === 'documents' && <DocumentsTab user={currentUser} store={store} setPage={setPage} toast={toast} />}
 
