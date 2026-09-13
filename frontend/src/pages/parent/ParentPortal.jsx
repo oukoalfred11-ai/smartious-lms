@@ -3,7 +3,7 @@ import CommunityChatView from '../../components/CommunityChat.jsx'
 import BirthdayBanner from '../../components/BirthdayBanner.jsx'
 import SuggestionBox from '../../components/SuggestionBox.jsx'
 import AnnouncementsStrip from '../../components/AnnouncementsStrip.jsx'
-import SupportCard from '../../components/SupportCard.jsx'
+import MessagesHub from '../../components/MessagesHub.jsx'
 import NotificationsBell from '../../components/NotificationsBell.jsx'
 import { api } from '../../context/ctx.jsx'
 
@@ -442,7 +442,7 @@ export default function ParentPortal() {
               {page==='fees'       && <ParentFees         child={selectedChild} showToast={showToast}/>}
               {page==='lessons'    && <ParentLessons      child={selectedChild}/>}
               {page==='messages' && (<>
-                <SupportCard />
+                <MessagesHub meId={user?._id} role="parent" />
                 <ParentMessages     user={user} showToast={showToast}/>
               </>)}              {page==='settings'   && (<>
                 <PSection tag="Parent Portal" title="Notification" em="Settings" sub="Choose which emails Smartious sends you. Changes apply immediately." />
