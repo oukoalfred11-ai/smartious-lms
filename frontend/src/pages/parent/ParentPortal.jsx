@@ -3,6 +3,8 @@ import CommunityChatView from '../../components/CommunityChat.jsx'
 import BirthdayBanner from '../../components/BirthdayBanner.jsx'
 import SuggestionBox from '../../components/SuggestionBox.jsx'
 import AnnouncementsStrip from '../../components/AnnouncementsStrip.jsx'
+import SupportCard from '../../components/SupportCard.jsx'
+import NotificationsBell from '../../components/NotificationsBell.jsx'
 import { api } from '../../context/ctx.jsx'
 
 // ── Tokens matching admin/student/teacher portals ──────────
@@ -182,6 +184,9 @@ function MobileDrawer({ open, onClose, sections, page, setPage, portalLabel, use
               <div style={{ fontSize:13, fontWeight:700, color:'#1A0F0E' }}>{user?.firstName} {user?.lastName}</div>
               <div style={{ fontSize:11, color:'#857973' }}>{portalLabel?.replace(' Portal','')}</div>
             </div>
+          </div>
+          <div style={{ display:'flex', justifyContent:'flex-end', marginBottom:8 }}>
+            <NotificationsBell onNavigate={(mod) => { const map = { support: 'messages', messages: 'messages', settings: 'settings', results: 'results', timetable: 'timetable' }; if (map[mod]) setPage(map[mod]) }} />
           </div>
           <button onClick={onLogout} style={{ width:'100%', padding:'10px', borderRadius:8, border:'1px solid #E8E2D6', background:'transparent', color:'#564844', fontSize:13, fontWeight:600, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:8 }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -436,8 +441,10 @@ export default function ParentPortal() {
               {page==='rateteacher'&& <ParentRateTeachers child={selectedChild} showToast={showToast}/>}
               {page==='fees'       && <ParentFees         child={selectedChild} showToast={showToast}/>}
               {page==='lessons'    && <ParentLessons      child={selectedChild}/>}
-              {page==='messages'   && <ParentMessages     user={user} showToast={showToast}/>}
-              {page==='settings'   && (<>
+              {page==='messages' && (<>
+                <SupportCard />
+                <ParentMessages     user={user} showToast={showToast}/>
+              </>)}              {page==='settings'   && (<>
                 <PSection tag="Parent Portal" title="Notification" em="Settings" sub="Choose which emails Smartious sends you. Changes apply immediately." />
                 <EmailPrefsCard />
               </>)}
