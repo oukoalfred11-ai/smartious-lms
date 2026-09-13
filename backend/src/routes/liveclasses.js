@@ -40,9 +40,11 @@ async function notifyStudents(studentIds, classParams, isUpdate = false) {
     const students = await User.find({
       _id: { $in: studentIds },
       role: 'student',
-    }).select('firstName email').lean();
-    if (students.length === 0) return;
-    await sendLiveClassEmailBatch(students, { ...classParams, isUpdate });
+    }).select('firstName email emailPrefs').lean();
+    // Respect each student's classUpdates preference.
+    const willing = students.filter(st => st.emailPrefs?.classUpdates !== false);
+    if (willing.length === 0) return;
+    await sendLiveClassEmailBatch(willing, { ...classParams, isUpdate });
   } catch (err) {
     // Log but never propagate — email failure must not affect the API response
     console.error('[liveclasses] notifyStudents error:', err.message);
