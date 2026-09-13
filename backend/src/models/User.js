@@ -201,6 +201,7 @@ const userSchema = new mongoose.Schema({
   xp: { type: Number, default: 0 },
   streak: { type: Number, default: 0 },
   lastActive: Date,
+  lastLogin:  Date,
   verificationToken: { type: String },
   verificationTokenExpiry: { type: Date },
   isEmailVerified: { type: Boolean, default: false },
