@@ -20,6 +20,13 @@ const announcementSchema = new mongoose.Schema({
 
   // Optional call to action button (like the mockup cards).
   ctaLabel: { type: String, trim: true, maxlength: 40, default: '' },
+  // In app destination: when set, portals navigate to this module
+  // instead of opening a web link. Keys are portal agnostic; each
+  // portal maps them to its own pages and ignores ones it lacks.
+  ctaModule: { type: String, trim: true, default: '' },
+  // Optional picture, stored as a data URL (validated and size capped
+  // in the route), rendered as the card banner in the portals.
+  imageData: { type: String, default: '' },
   ctaUrl:   { type: String, trim: true, maxlength: 500, default: '' },
 
   // Who sees it. 'all' covers students and parents; the others narrow it.
