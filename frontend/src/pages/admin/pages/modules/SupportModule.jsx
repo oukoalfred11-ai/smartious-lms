@@ -8,6 +8,11 @@ import { api } from '../../../../context/ctx.jsx'
 import { PSection } from '../shared/ui.jsx'
 
 const CRIM = '#7D1025', GOLD = '#C9973A', INK = '#231715', MUT = '#8A8378', LINE = '#E5DFD3', GREEN = '#15803D', RED = '#B91C1C'
+const TEAL = '#0F766E'
+const LANE = {
+  guidance: { label: 'Guidance', color: TEAL, bg: '#E6F4F2' },
+  general: { label: 'Support', color: '#B07A18', bg: '#FBF4E4' },
+}
 const STATUS = {
   open: { label: 'Open', color: '#B07A18', bg: '#FBF4E4' },
   awaiting_user: { label: 'Awaiting user', color: GREEN, bg: '#EDF7EF' },
@@ -27,6 +32,7 @@ export default function SupportModule({ toast }) {
   const [data, setData] = useState(null)
   const [openId, setOpenId] = useState(null)
   const [filter, setFilter] = useState('active')
+  const [laneF, setLaneF] = useState('all')
   const [msg, setMsg] = useState('')
   const [busy, setBusy] = useState(false)
 
@@ -51,6 +57,7 @@ export default function SupportModule({ toast }) {
   if (!data) return <div style={{ padding: 30, color: MUT, fontSize: 13 }}>Loading the Support Desk...</div>
 
   const rows = data.rows
+    .filter(r => laneF === 'all' ? true : (r.category || 'general') === laneF)
     .filter(r => filter === 'all' ? true : filter === 'resolved' ? r.status === 'resolved' : r.status !== 'resolved')
     .sort((a, b) => (b.waitingMins - a.waitingMins) || (new Date(b.updatedAt) - new Date(a.updatedAt)))
   const open = data.rows.find(r => r._id === openId)
@@ -79,6 +86,11 @@ export default function SupportModule({ toast }) {
         {/* List */}
         <div style={card}>
           <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+            {[['all', 'All lanes'], ['guidance', 'Guidance'], ['general', 'Support']].map(([k, l]) => (
+              <button key={'lane' + k} onClick={() => setLaneF(k)}
+                style={{ padding: '5px 13px', borderRadius: 999, border: `1.5px solid ${laneF === k ? TEAL : LINE}`, background: laneF === k ? TEAL : '#fff', color: laneF === k ? '#fff' : MUT, fontSize: 11, fontWeight: 800, cursor: 'pointer' }}>{l}</button>
+            ))}
+            <span style={{ flex: 1 }} />
             {[['active', 'Active'], ['resolved', 'Resolved'], ['all', 'All']].map(([k, l]) => (
               <button key={k} onClick={() => setFilter(k)}
                 style={{ padding: '5px 13px', borderRadius: 999, border: `1.5px solid ${filter === k ? CRIM : LINE}`, background: filter === k ? CRIM : '#fff', color: filter === k ? '#fff' : MUT, fontSize: 11, fontWeight: 800, cursor: 'pointer' }}>{l}</button>
@@ -94,6 +106,7 @@ export default function SupportModule({ toast }) {
                   style={{ textAlign: 'left', padding: '10px 12px', borderRadius: 10, cursor: 'pointer', background: openId === r._id ? '#FBF4E4' : '#FBF9F5', border: `1px solid ${late ? '#F0C9C9' : openId === r._id ? GOLD : LINE}` }}>
                   <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                     <b style={{ flex: 1, fontSize: 12.5, color: INK, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.subject}</b>
+                    {(r.category || 'general') === 'guidance' && <span style={{ fontSize: 9, fontWeight: 800, color: LANE.guidance.color, background: LANE.guidance.bg, borderRadius: 999, padding: '2px 9px', whiteSpace: 'nowrap' }}>Guidance</span>}
                     <span style={{ fontSize: 9, fontWeight: 800, color: st.color, background: st.bg, borderRadius: 999, padding: '2px 9px', whiteSpace: 'nowrap' }}>{st.label}</span>
                   </div>
                   <div style={{ display: 'flex', gap: 8, fontSize: 10.5, color: MUT, marginTop: 3 }}>
@@ -116,7 +129,7 @@ export default function SupportModule({ toast }) {
             <>
               <div style={{ display: 'flex', gap: 10, alignItems: 'center', borderBottom: `1px solid ${LINE}`, paddingBottom: 10, marginBottom: 10 }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <b style={{ fontSize: 13.5, color: INK }}>{open.subject}</b>
+                  <b style={{ fontSize: 13.5, color: INK }}>{open.subject} {(open.category || 'general') === 'guidance' && <span style={{ fontSize: 9.5, fontWeight: 800, color: LANE.guidance.color, background: LANE.guidance.bg, borderRadius: 999, padding: '2px 10px', verticalAlign: 'middle' }}>Guidance and Counselling</span>}</b>
                   <div style={{ fontSize: 11, color: MUT }}>{open.userName} {'\u00b7'} {open.userRole} {'\u00b7'} {open.userEmail}</div>
                 </div>
                 {open.status !== 'resolved'
