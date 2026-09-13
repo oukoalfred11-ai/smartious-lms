@@ -24,7 +24,7 @@ const AUDIENCES = [
 
 const EMPTY = {
   title: '', body: '', category: 'general', audience: 'all',
-  ctaLabel: '', ctaUrl: '', pinned: false, published: true,
+  ctaLabel: '', ctaUrl: '', ctaModule: '', imageData: '', pinned: false, published: true,
   showFrom: '', showUntil: '',
 }
 
@@ -171,6 +171,33 @@ export default function AnnouncementsModule({ toast }) {
               <label style={fieldLabel}>Button link (optional)</label>
               <input style={input} value={form.ctaUrl} maxLength={500}
                 onChange={e => upd('ctaUrl', e.target.value)} placeholder="https://..." />
+
+              <div style={{ display: 'grid', gap: 6, marginTop: 8 }}>
+                <label style={{ fontSize: 11.5, fontWeight: 800, color: '#7D1025' }}>Or open a module inside the portal</label>
+                <select value={form.ctaModule || ''} onChange={e => setForm(f => ({ ...f, ctaModule: e.target.value }))}
+                  style={{ padding: '8px 10px', border: '1.5px solid #E5DFD3', borderRadius: 8, fontSize: 12.5 }}>
+                  <option value="">No module link</option>
+                  {[['timetable', 'Timetable'], ['lessons', 'Live Lessons'], ['homework', 'Homework'], ['exams', 'Exams'], ['results', 'Results'], ['curriculum', 'Curriculum'], ['clubs', 'Clubs'], ['library', 'Library'], ['communication', 'Messages'], ['attendance', 'Attendance'], ['reports', 'Academic Reports'], ['settings', 'Settings'], ['profile', 'Profile']].map(([v2, l]) => <option key={v2} value={v2}>{l}</option>)}
+                </select>
+                <div style={{ fontSize: 10.5, color: '#8A8378' }}>When set, tapping the announcement takes the user straight to that module in their own portal. It overrides the web link. Portals without the module simply show the announcement.</div>
+              </div>
+              <div style={{ display: 'grid', gap: 6, marginTop: 8 }}>
+                <label style={{ fontSize: 11.5, fontWeight: 800, color: '#7D1025' }}>Picture (optional, up to 2MB)</label>
+                {form.imageData
+                  ? (<div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                      <img src={form.imageData} alt="" style={{ width: 120, height: 68, objectFit: 'cover', borderRadius: 8, border: '1px solid #E5DFD3' }} />
+                      <button type="button" onClick={() => setForm(f => ({ ...f, imageData: '' }))}
+                        style={{ padding: '6px 12px', borderRadius: 7, border: '1px solid #FCA5A5', background: '#fff', color: '#B91C1C', fontSize: 11, fontWeight: 800, cursor: 'pointer' }}>Remove picture</button>
+                    </div>)
+                  : (<input type="file" accept="image/*" style={{ fontSize: 12 }} onChange={e => {
+                      const f0 = e.target.files && e.target.files[0]
+                      if (!f0) return
+                      if (f0.size > 2 * 1024 * 1024) { toast?.error?.('Picture must be 2MB or smaller.'); e.target.value = ''; return }
+                      const rd = new FileReader()
+                      rd.onload = () => setForm(f => ({ ...f, imageData: rd.result }))
+                      rd.readAsDataURL(f0)
+                    }} />)}
+              </div>
             </div>
           </div>
 
