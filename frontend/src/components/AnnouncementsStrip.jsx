@@ -26,7 +26,7 @@ const fmtDate = (from, until) => {
  * which the backend already scopes to this user and to what is live
  * right now, so scheduling and audience are handled server side.
  */
-export default function AnnouncementsStrip() {
+export default function AnnouncementsStrip({ onNavigate } = {}) {
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -58,8 +58,12 @@ export default function AnnouncementsStrip() {
       }}>
         {items.map(a => {
           const c = catOf(a.category)
-          const clickable = !!a.ctaUrl
-          const open = () => { if (a.ctaUrl) window.open(a.ctaUrl, '_blank', 'noopener,noreferrer') }
+          const goesToModule = !!(a.ctaModule && onNavigate)
+          const clickable = goesToModule || !!a.ctaUrl
+          const open = () => {
+            if (goesToModule) { onNavigate(a.ctaModule); return }
+            if (a.ctaUrl) window.open(a.ctaUrl, '_blank', 'noopener,noreferrer')
+          }
           return (
             <div key={a._id} onClick={clickable ? open : undefined}
               style={{
@@ -69,6 +73,9 @@ export default function AnnouncementsStrip() {
                 cursor: clickable ? 'pointer' : 'default',
                 display: 'flex', flexDirection: 'column', minHeight: 128,
               }}>
+              {a.imageData && (
+                <img src={a.imageData} alt="" style={{ width: 'calc(100% + 36px)', margin: '-16px -18px 12px', maxHeight: 130, objectFit: 'cover', borderRadius: '14px 14px 0 0', display: 'block' }} />
+              )}
               <div style={{ display: 'flex', gap: 11, alignItems: 'flex-start' }}>
                 <div style={{ fontSize: 26, lineHeight: 1 }}>{c.emoji}</div>
                 <div style={{ minWidth: 0, flex: 1 }}>
@@ -82,9 +89,9 @@ export default function AnnouncementsStrip() {
                   <div style={{ fontSize: 12.5, color: '#564844', marginTop: 6, lineHeight: 1.5 }}>{a.body}</div>
                 </div>
               </div>
-              {a.ctaLabel && (
+              {(a.ctaLabel || goesToModule) && (
                 <div style={{ marginTop: 'auto', paddingTop: 10, fontSize: 12.5, fontWeight: 800, color: c.bar }}>
-                  {a.ctaLabel} {'\u2192'}
+                  {a.ctaLabel || 'Open'} {'\u2192'}
                 </div>
               )}
             </div>
