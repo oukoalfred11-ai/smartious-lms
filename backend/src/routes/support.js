@@ -56,6 +56,7 @@ router.post('/', auth, async (req, res) => {
     const subject = String(req.body.subject || '').trim().slice(0, 140);
     const body = String(req.body.body || '').trim().slice(0, 3000);
     if (!subject || !body) return res.status(400).json({ success: false, message: 'A subject and a message are required.' });
+    const category = req.body.category === 'guidance' ? 'guidance' : 'general';
 
     const name = [req.user.firstName, req.user.lastName].filter(Boolean).join(' ') || req.user.email;
     const t = await SupportTicket.create({
@@ -64,14 +65,16 @@ router.post('/', auth, async (req, res) => {
       userRole: req.user.role,
       userEmail: req.user.email,
       subject,
+      category,
       messages: [{ senderId: req.user._id, senderName: name, staff: false, body }],
       lastUserMessageAt: new Date(),
     });
 
     User.find({ role: { $in: STAFF_ROLES }, isActive: { $ne: false } }).select('_id').lean()
-      .then(staff => notify(staff.map(x => x._id), { title: 'New support request', body: name + ': ' + subject, module: 'support' })).catch(() => {});
-    notifyStaff('New support request \u00b7 ' + subject, wrap(
-      '<p style="font-size:14px"><b>' + esc(name) + '</b> (' + esc(req.user.role) + ') opened a support request.</p>'
+      .then(staff => notify(staff.map(x => x._id), { title: category === 'guidance' ? 'New Guidance and Counselling request' : 'New support request', body: name + ': ' + subject, module: 'support' })).catch(() => {});
+    const lane = category === 'guidance' ? 'Guidance and Counselling' : 'support';
+    notifyStaff((category === 'guidance' ? 'New Guidance and Counselling request \u00b7 ' : 'New support request \u00b7 ') + subject, wrap(
+      '<p style="font-size:14px"><b>' + esc(name) + '</b> (' + esc(req.user.role) + ') opened a ' + lane + ' request.' + (category === 'guidance' ? ' Handle with care and confidentiality.' : '') + '</p>'
       + '<p style="font-size:13px;background:#FBF8F3;border-left:3px solid #C9973A;padding:10px 12px"><b>' + esc(subject) + '</b><br>' + esc(body).slice(0, 400) + '</p>'
       + '<p style="font-size:13px">Reply from the Support Desk in the admin portal. The response clock is running.</p>'
     )).catch(() => {});
