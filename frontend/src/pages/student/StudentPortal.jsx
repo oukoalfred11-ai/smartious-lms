@@ -13,7 +13,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'
 import BirthdayBanner from '../../components/BirthdayBanner.jsx'
 import SuggestionBox from '../../components/SuggestionBox.jsx'
 import AnnouncementsStrip from '../../components/AnnouncementsStrip.jsx'
-import SupportCard from '../../components/SupportCard.jsx'
+import MessagesHub from '../../components/MessagesHub.jsx'
 import { playChime } from '../../components/NotificationsBell.jsx'
 import { useAuth, useToast, api } from '../../context/ctx.jsx'
 import { useStore } from '../../context/ctx.jsx'
@@ -2145,7 +2145,7 @@ export default function StudentPortal() {
             <EmailPrefsCard />
           </>)}
           {page === 'communication' && (<>
-            <SupportCard />
+            <MessagesHub meId={user?._id} role="student" />
             <StudentCommunicationTab user={user} toast={toast} />
           </>)}          {page === 'community' && <CommunityTab user={user} toast={toast} />}
 
