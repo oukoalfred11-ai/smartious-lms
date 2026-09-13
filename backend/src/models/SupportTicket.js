@@ -11,6 +11,9 @@ const supportTicketSchema = new mongoose.Schema({
   userRole: { type: String, default: '' },
   userEmail: { type: String, default: '' },
   subject: { type: String, required: true, trim: true, maxlength: 140 },
+  // 'general' support, or 'guidance' - Guidance and Counselling,
+  // shown distinctly to staff and handled with a confidential tone.
+  category: { type: String, enum: ['general', 'guidance'], default: 'general', index: true },
   status: { type: String, enum: ['open', 'awaiting_user', 'resolved'], default: 'open', index: true },
   messages: [{
     senderId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
