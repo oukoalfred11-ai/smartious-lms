@@ -22,6 +22,7 @@ import MarkingReviewModule from './modules/MarkingReviewModule.jsx'
 import { COOReportOverviewModule, TeacherRatingsModule } from './modules/RatingsModule.jsx'
 import PayrollModule from './modules/PayrollModule.jsx'
 import StudentSessionsModule from './modules/StudentSessionsModule.jsx'
+import UsersLogsModule from './modules/UsersLogsModule.jsx'
 import CurriculumModule from './modules/CurriculumModule.jsx'
 import BillingModule, { FeeCollectionModule } from './modules/BillingModule.jsx'
 import CommunityModule from './modules/CommunityModule.jsx'
@@ -109,7 +110,7 @@ const NAV_SECTIONS = {
     // CRM, Front Desk and Group Rooms removed from Operations per policy;
     // academic assessments (schedule, mark, publish) live under Teaching.
     { label: 'Teaching',    items: ['liveclasses', 'clubs', 'exams'] },
-    { label: 'System',      items: ['settings', 'ai'] },
+    { label: 'System',      items: ['userlogs', 'settings', 'ai'] },
   ],
 }
 
@@ -442,6 +443,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         {safePage === 'feecollection' && <FeeCollectionModule refreshKey={refreshKey} toast={toast}/>}
         {safePage === 'website'     && <WebsiteModule    refreshKey={refreshKey} toast={toast} />}
         {safePage === 'settings'    && <SettingsModule   refreshKey={refreshKey} toast={toast} />}
+        {safePage === 'userlogs' && <UsersLogsModule toast={toast} />}
         {safePage === 'ai'          && <MshauriModule    refreshKey={refreshKey} toast={toast} />}
       </div>
 
