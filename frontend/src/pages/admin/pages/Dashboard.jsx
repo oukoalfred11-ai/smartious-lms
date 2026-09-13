@@ -24,6 +24,7 @@ import PayrollModule from './modules/PayrollModule.jsx'
 import StudentSessionsModule from './modules/StudentSessionsModule.jsx'
 import UsersLogsModule from './modules/UsersLogsModule.jsx'
 import SupportModule from './modules/SupportModule.jsx'
+import MessagesOversightModule from './modules/MessagesOversightModule.jsx'
 import NotificationsBell from '../../../components/NotificationsBell.jsx'
 import CurriculumModule from './modules/CurriculumModule.jsx'
 import BillingModule, { FeeCollectionModule } from './modules/BillingModule.jsx'
@@ -69,7 +70,7 @@ const resetForm = () => ({ ...DEFAULT_USER_FORM })
 const NAV_SECTIONS = {
   admin: [
     { label: 'Overview',    items: ['command', 'dashboard', 'analytics'] },
-    { label: 'People',      items: ['users', 'teachers', 'allocations', 'sessions', 'communication', 'support', 'community', 'announcements'] },
+    { label: 'People',      items: ['users', 'teachers', 'allocations', 'sessions', 'communication', 'support', 'dmoversight', 'community', 'announcements'] },
     { label: 'Reports',     items: ['reports', 'dosperformance', 'mastery'] },
     { label: 'Operations',  items: ['frontdesk', 'assessment', 'documents', 'payroll', 'leave', 'programmes'] },
     { label: 'Teaching',    items: ['liveclasses', 'clubs', 'grouprooms', 'curriculum'] },
@@ -105,7 +106,7 @@ const NAV_SECTIONS = {
   ],
   ops_manager: [
     { label: 'Overview',    items: ['command', 'checkin', 'dashboard', 'analytics'] },
-    { label: 'Support',       items: ['support'] },
+    { label: 'Support',       items: ['support', 'dmoversight'] },
     { label: 'People',      items: ['users', 'teachers', 'allocations', 'sessions', 'communication'] },
     { label: 'Reports',     items: ['cooreports', 'reports', 'dosperformance', 'mastery'] },
     { label: 'Performance', items: ['teacherratings'] },
@@ -449,6 +450,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         {safePage === 'settings'    && <SettingsModule   refreshKey={refreshKey} toast={toast} />}
         {safePage === 'userlogs' && <UsersLogsModule toast={toast} />}
         {safePage === 'support' && <SupportModule toast={toast} />}
+        {safePage === 'dmoversight' && <MessagesOversightModule toast={toast} />}
         {safePage === 'ai'          && <MshauriModule    refreshKey={refreshKey} toast={toast} />}
       </div>
 
