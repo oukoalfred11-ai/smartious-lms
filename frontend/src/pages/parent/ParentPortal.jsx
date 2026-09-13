@@ -582,7 +582,10 @@ function ParentDashboard({ child, showToast }) {
       </div>
 
       {/* Announcements broadcast */}
-      <AnnouncementsStrip />
+      <AnnouncementsStrip onNavigate={(mod) => {
+        const map = { timetable: 'timetable', lessons: 'lessons', homework: 'homework', results: 'results', reports: 'reports', attendance: 'attendance', messages: 'messages', settings: 'settings', exams: 'results', curriculum: 'reports' }
+        if (map[mod]) setPage(map[mod])
+      }} />
 
       {/* KPIs */}
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(160px,1fr))', gap:12, marginBottom:20 }}>
