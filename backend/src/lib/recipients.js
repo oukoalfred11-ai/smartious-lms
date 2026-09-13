@@ -28,7 +28,15 @@ const isEmail = e => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean(e))
  * @param {Boolean} opts.includeStudent  include the student's own address
  * @returns {Promise<{ to: String[], sources: Object, student: Object|null }>}
  */
-async function resolveStudentRecipients(studentOrId, { includeStudent = true } = {}) {
+// A user allows a category unless they explicitly turned it off.
+// Addresses without an account (the free text parentEmail field)
+// cannot hold preferences and are always included.
+function prefAllows(userDoc, category) {
+  if (!category) return true
+  return userDoc?.emailPrefs?.[category] !== false
+}
+
+async function resolveStudentRecipients(studentOrId, { includeStudent = true, category = null } = {}) {
   let student = studentOrId
 
   // Accept an id, or a lean document that may be missing the link fields.
@@ -41,7 +49,7 @@ async function resolveStudentRecipients(studentOrId, { includeStudent = true } =
     const id = typeof studentOrId === 'string' ? studentOrId : studentOrId?._id
     if (!id) return { to: [], sources: {}, student: null }
     student = await User.findById(id)
-      .select('firstName lastName email parentEmail parentName parentId linkedParents onBreak')
+      .select('firstName lastName email parentEmail parentName parentId linkedParents emailPrefs onBreak')
       .lean()
   }
   if (!student) return { to: [], sources: {}, student: null }
@@ -54,7 +62,7 @@ async function resolveStudentRecipients(studentOrId, { includeStudent = true } =
     if (!sources[e].includes(source)) sources[e].push(source)
   }
 
-  if (includeStudent) add(student.email, 'student')
+  if (includeStudent && prefAllows(student, category)) add(student.email, 'student')
   add(student.parentEmail, 'parentEmail field')
 
   // Collect ids from both single and multiple linkage, then load in one query.
@@ -66,9 +74,9 @@ async function resolveStudentRecipients(studentOrId, { includeStudent = true } =
     const unique = [...new Set(parentIds.map(String))]
     try {
       const parents = await User.find({ _id: { $in: unique } })
-        .select('email firstName lastName')
+        .select('email firstName lastName emailPrefs')
         .lean()
-      parents.forEach(p => add(p.email, 'linked parent account'))
+      parents.forEach(p => { if (prefAllows(p, category)) add(p.email, 'linked parent account') })
     } catch (e) {
       console.error('[recipients] could not load linked parents:', e.message)
     }
