@@ -56,6 +56,63 @@ const DEFAULT_USER_FORM = {
 
 const resetForm = () => ({ ...DEFAULT_USER_FORM })
 
+// ─────────────────────────────────────────────────────────────────────
+// THE single source of navigation truth. The sidebar renders from it
+// and every dashboard guard derives its allowed pages from it, so a
+// module shown is always a module that opens. (Two hand maintained
+// copies of this list drifted once - modules appeared in the sidebar
+// that the guard bounced back to the dashboard. Never again.)
+// ─────────────────────────────────────────────────────────────────────
+const NAV_SECTIONS = {
+  admin: [
+    { label: 'Overview',    items: ['command', 'dashboard', 'analytics'] },
+    { label: 'People',      items: ['users', 'teachers', 'allocations', 'sessions', 'communication', 'community', 'announcements'] },
+    { label: 'Reports',     items: ['reports', 'dosperformance', 'mastery'] },
+    { label: 'Operations',  items: ['frontdesk', 'assessment', 'documents', 'payroll', 'leave', 'programmes'] },
+    { label: 'Teaching',    items: ['liveclasses', 'clubs', 'grouprooms', 'curriculum'] },
+    { label: 'Question Bank', items: ['questionbank', 'markingreview'] },
+    { label: 'Marketing',   items: ['studio'] },
+    { label: 'System',      items: ['billing', 'website', 'settings', 'ai', 'suggestions'] },
+  ],
+  accountant: [
+    { label: 'Overview',    items: ['checkin', 'dashboard', 'analytics'] },
+    { label: 'Fee Management', items: ['feecollection', 'billing', 'sessions'] },
+    { label: 'Finance',     items: ['payroll'] },
+    { label: 'System',      items: ['settings'] },
+  ],
+  dos: [
+    { label: 'Overview',      items: ['command', 'checkin', 'dosanalytics'] },
+    { label: 'Teaching',      items: ['liveclasses'] },
+    { label: 'Exams',         items: ['exams'] },
+    { label: 'Homework',      items: ['doshomework'] },
+    { label: 'Attendance',    items: ['dosattend'] },
+    { label: 'Student Sessions', items: ['sessions'] },
+    { label: 'Breaks',        items: ['dosbreaks'] },
+    { label: 'Timetables',    items: ['dostimetable'] },
+    { label: 'Question Bank', items: ['questionbank', 'markingreview'] },
+    { label: 'Reports',       items: ['reports', 'dosperformance', 'mastery'] },
+    { label: 'System',        items: ['settings'] },
+  ],
+  sales: [
+    { label: 'Overview',    items: ['checkin', 'dashboard', 'salesperf'] },
+    { label: 'CRM',         items: ['crm'] },
+    { label: 'Admissions',  items: ['assessment', 'frontdesk', 'communication'] },
+    { label: 'Content',     items: ['documents'] },
+    { label: 'System',      items: ['settings'] },
+  ],
+  ops_manager: [
+    { label: 'Overview',    items: ['command', 'checkin', 'dashboard', 'analytics'] },
+    { label: 'People',      items: ['users', 'teachers', 'allocations', 'sessions', 'communication'] },
+    { label: 'Reports',     items: ['cooreports', 'reports', 'dosperformance', 'mastery'] },
+    { label: 'Performance', items: ['teacherratings'] },
+    { label: 'Operations',  items: ['documents', 'leave', 'programmes'] },
+    // CRM, Front Desk and Group Rooms removed from Operations per policy;
+    // academic assessments (schedule, mark, publish) live under Teaching.
+    { label: 'Teaching',    items: ['liveclasses', 'clubs', 'exams'] },
+    { label: 'System',      items: ['settings', 'ai'] },
+  ],
+}
+
 function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
   const [railOpen, setRailOpen] = useState(true)
   const auth = useAuth()
@@ -74,59 +131,10 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
   }
   const portalMeta = PORTAL_META[role] || PORTAL_META.admin
 
-  const ROLE_SECTIONS = {
-    admin: [
-      { label: 'Overview',    items: ['command', 'dashboard', 'analytics'] },
-      { label: 'People',      items: ['users', 'teachers', 'allocations', 'sessions', 'communication', 'community', 'announcements'] },
-      { label: 'Reports',     items: ['reports', 'dosperformance', 'mastery'] },
-      { label: 'Operations',  items: ['frontdesk', 'assessment', 'documents', 'payroll', 'leave', 'programmes'] },
-      { label: 'Teaching',    items: ['liveclasses', 'clubs', 'grouprooms', 'curriculum'] },
-      { label: 'Question Bank', items: ['questionbank', 'markingreview'] },
-      { label: 'Marketing',   items: ['studio'] },
-      { label: 'System',      items: ['billing', 'website', 'settings', 'ai', 'suggestions'] },
-    ],
-    accountant: [
-      { label: 'Overview',    items: ['checkin', 'dashboard', 'analytics'] },
-      { label: 'Fee Management', items: ['feecollection', 'billing', 'sessions'] },
-      { label: 'Finance',     items: ['payroll'] },
-      { label: 'System',      items: ['settings'] },
-    ],
-    dos: [
-      { label: 'Overview',      items: ['command', 'checkin', 'dosanalytics'] },
-      { label: 'Teaching',      items: ['liveclasses'] },
-      { label: 'Exams',         items: ['exams'] },
-      { label: 'Homework',      items: ['doshomework'] },
-      { label: 'Attendance',    items: ['dosattend'] },
-      { label: 'Student Sessions', items: ['sessions'] },
-      { label: 'Breaks',        items: ['dosbreaks'] },
-      { label: 'Timetables',    items: ['dostimetable'] },
-      { label: 'Question Bank', items: ['questionbank', 'markingreview'] },
-      { label: 'Reports',       items: ['reports', 'dosperformance', 'mastery'] },
-      { label: 'System',        items: ['settings'] },
-    ],
-    sales: [
-      { label: 'Overview',    items: ['checkin', 'dashboard', 'salesperf'] },
-      { label: 'CRM',         items: ['crm'] },
-      { label: 'Admissions',  items: ['assessment', 'frontdesk', 'communication'] },
-      { label: 'Content',     items: ['documents'] },
-      { label: 'System',      items: ['settings'] },
-    ],
-    ops_manager: [
-      { label: 'Overview',    items: ['command', 'checkin', 'dashboard', 'analytics'] },
-      { label: 'People',      items: ['users', 'teachers', 'allocations', 'sessions', 'communication'] },
-      { label: 'Reports',     items: ['cooreports', 'reports', 'dosperformance', 'mastery'] },
-      { label: 'Performance', items: ['teacherratings'] },
-      { label: 'Operations',  items: ['documents', 'leave', 'programmes'] },
-      // CRM, Front Desk and Group Rooms removed from Operations per policy;
-      // academic assessments (schedule, mark, publish) live under Teaching.
-      { label: 'Teaching',    items: ['liveclasses', 'clubs', 'exams'] },
-      { label: 'System',      items: ['settings', 'ai'] },
-    ],
-  }
-  const SECTIONS = ROLE_SECTIONS[role] || ROLE_SECTIONS.admin
+  const SECTIONS = NAV_SECTIONS[role] || NAV_SECTIONS.admin
 
   // Guard: if the current page is not in this role's allowed modules, fall back to dashboard
-  const allowedPages = (ROLE_SECTIONS[role] || ROLE_SECTIONS.admin).flatMap(s => s.items)
+  const allowedPages = (NAV_SECTIONS[role] || NAV_SECTIONS.admin).flatMap(s => s.items)
   const safePage = allowedPages.includes(page) ? page : 'dashboard'
   const currentMod = MODULES[safePage] || MODULES.dashboard
 
@@ -372,16 +380,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
 
   // Role-based page access — mirrors the logic inside PNavigation
   const role = auth?.user?.role || 'admin'
-  const ROLE_SECTIONS_MAIN = {
-    admin:       [
-      { items: ['dashboard','analytics','users','teachers','allocations','sessions','communication','announcements','liveclasses','clubs','reports','frontdesk','documents','assessment','payroll','leave','programmes','grouprooms','curriculum','questionbank','markingreview','cooreports','teacherratings','feecollection','crm','billing','studio','website','settings','ai','suggestions','community'] },
-    ],
-    accountant:  [{ items: ['checkin','dashboard','analytics','feecollection','billing','sessions','payroll','settings'] }],
-    sales:       [{ items: ['checkin','dashboard','salesperf','crm','assessment','frontdesk','communication','documents','settings'] }],
-    dos:         [{ items: ['command','checkin','dosperformance','liveclasses','dosanalytics','exams','doshomework','dosattend','sessions','dosbreaks','dostimetable','questionbank','markingreview','reports','mastery','settings'] }],
-    ops_manager: [{ items: ['command','checkin','dashboard','analytics','users','teachers','allocations','sessions','communication','cooreports','reports','dosperformance','mastery','teacherratings','exams','documents','leave','programmes','liveclasses','clubs','settings','ai'] }],
-  }
-  const allowedPages = (ROLE_SECTIONS_MAIN[role] || ROLE_SECTIONS_MAIN.admin).flatMap(s => s.items)
+  const allowedPages = (NAV_SECTIONS[role] || NAV_SECTIONS.admin).flatMap(sec => sec.items).concat('dashboard')
   const safePage = allowedPages.includes(page) ? page : 'dashboard'
 
   return (
