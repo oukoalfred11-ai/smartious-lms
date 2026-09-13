@@ -28,6 +28,7 @@ export const MODULES = {
   dosanalytics: { label: 'Performance Analytics', accent: TOKENS.crimson,    icon: 'chart' },
   userlogs:     { label: 'Users Logs',            accent: TOKENS.crimson,    icon: 'chart' },
   support:      { label: 'Support Desk',          accent: TOKENS.crimson,    icon: 'chart' },
+  dmoversight:  { label: 'Messages Oversight',    accent: TOKENS.crimson,    icon: 'chart' },
   dosattend:    { label: 'Attendance Analytics',   accent: TOKENS.accentTeal,    icon: 'frontdesk' },
   checkin:      { label: 'Check In',              accent: TOKENS.accentEmerald||'#065F46', icon: 'frontdesk' },
   dosbreaks:    { label: 'Staff Breaks',           accent: TOKENS.crimson,       icon: 'frontdesk' },
