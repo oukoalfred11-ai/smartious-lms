@@ -248,6 +248,20 @@ router.post('/confirm', auth, requireRole('teacher', 'admin'), async (req, res) 
     if (!title || !String(title).trim())
       return fail(res, 400, 'Title is required.');
 
+    // One library, one copy: the same title cannot be uploaded twice.
+    // Matching is normalized (case, spacing, punctuation) so "The
+    // River And The Source" and "the river and the source" are the
+    // same book.
+    const normTitle = String(title).toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]/g, '');
+    const existingBooks = await LibraryBook.find({}).select('title uploadedByName').lean();
+    const dup = existingBooks.find(b => String(b.title).toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]/g, '') === normTitle);
+    if (dup) {
+      return res.status(409).json({
+        success: false,
+        message: 'This book is already in the library as "' + dup.title + '"' + (dup.uploadedByName ? ' (uploaded by ' + dup.uploadedByName + ')' : '') + '. One library, one copy - open it from the Library instead.',
+      });
+    }
+
     // Verify the r2Key starts with 'library/' — simple guard against
     // confirming an upload to an arbitrary bucket key
     if (!r2Key.startsWith('library/'))
