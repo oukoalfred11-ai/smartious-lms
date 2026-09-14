@@ -9056,6 +9056,11 @@ function TeacherDashboardTab({ user, store, setPage, toast, setMsgModal, setUplo
         </div>
       </div>
 
+      {/* MY CONTRIBUTIONS: the teacher's footprint */}
+
+      <TeacherContributions />
+
+
       {/* ── ATTENTION BANNER — only when something genuinely needs action ── */}
       {(rightNowItem.urgency === 'live' || rightNowItem.urgency === 'soon' ||
         (rightNowItem.type === 'grading')) && (
@@ -15720,6 +15725,34 @@ function EmailPrefsCard() {
           </div>
         ))}
       </div>
+    </div>
+  )
+}
+
+
+/* My contributions: lessons published, Question Bank questions,
+   library books - the teacher's footprint, counted live. */
+function TeacherContributions() {
+  const [c, setC] = useState(null)
+  useEffect(() => {
+    api.get('/teacher-profile/my-contributions')
+      .then(r => setC(r.data?.data || null))
+      .catch(() => setC(null))
+  }, [])
+  if (!c) return null
+  const cells = [
+    ['Lessons published', c.lessonsPublished, '#7D1025'],
+    ['Questions in the bank', c.questionsAdded, '#C9973A'],
+    ['Books in the library', c.booksUploaded, '#0F766E'],
+  ]
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 10, marginBottom: 16 }}>
+      {cells.map(([label, n, color]) => (
+        <div key={label} style={{ background: '#fff', border: '1px solid #E8E2D6', borderRadius: 14, padding: '13px 16px' }}>
+          <div style={{ fontSize: 24, fontWeight: 900, color }}>{n}</div>
+          <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '.07em', color: '#8A8378', textTransform: 'uppercase' }}>{label}</div>
+        </div>
+      ))}
     </div>
   )
 }
