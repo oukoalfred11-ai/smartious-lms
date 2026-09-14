@@ -41,4 +41,11 @@ function effectiveGrade(user) {
   return (user && (user.gradeLevel || user.grade)) || '';
 }
 
-module.exports = { canonCurriculum, aliasSet, effectiveGrade };
+// Normalized subject name matching: spelling variants (colons,
+// ampersands, parentheses, spacing) must never be treated as
+// different subjects.
+function normName(v) {
+  return String(v || '').toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]/g, '');
+}
+
+module.exports = { canonCurriculum, aliasSet, effectiveGrade, normName };
