@@ -141,7 +141,7 @@ router.get('/stats', auth, requireRole('admin', 'ops_manager', 'dos', 'accountan
     const totalUsers = await User.countDocuments();
     res.json({ success: true, totalUsers });
   } catch (e) {
-    res.status(500).json({ success: false, message: e.message });
+    res.status(e.status || 500).json({ success: false, message: e.message });
   }
 });
 
@@ -176,7 +176,7 @@ router.get('/', auth, requireRole('admin', 'ops_manager', 'teacher'), async (req
 
     res.json({ success: true, users });
   } catch (e) {
-    res.status(500).json({ success: false, message: e.message });
+    res.status(e.status || 500).json({ success: false, message: e.message });
   }
 });
 
@@ -197,7 +197,7 @@ router.get('/students/by-admission/:admissionNumber', auth, requireRole('admin',
     }
     res.json({ success: true, student });
   } catch (e) {
-    res.status(500).json({ success: false, message: e.message });
+    res.status(e.status || 500).json({ success: false, message: e.message });
   }
 });
 
@@ -210,7 +210,7 @@ router.get('/students/list', auth, requireRole('admin', 'ops_manager'), async (r
       .limit(500);
     res.json({ success: true, students });
   } catch (e) {
-    res.status(500).json({ success: false, message: e.message });
+    res.status(e.status || 500).json({ success: false, message: e.message });
   }
 });
 
@@ -223,28 +223,8 @@ router.get('/teachers/list', auth, requireRole('admin', 'ops_manager'), async (r
       .limit(500);
     res.json({ success: true, teachers });
   } catch (e) {
-    res.status(500).json({ success: false, message: e.message });
+    res.status(e.status || 500).json({ success: false, message: e.message });
   }
-});
-
-// POST /api/users/me/avatar  any signed-in user sets their OWN profile photo.
-// Students use this so the community shows their real picture.
-router.post('/me/avatar', auth, (req, res) => {
-  if (!uploadAvatar) {
-    return res.status(503).json({ success: false, message: 'Image upload is unavailable on the server.' });
-  }
-  uploadAvatar.single('file')(req, res, async (err) => {
-    if (err) return res.status(400).json({ success: false, message: err.message || 'Upload failed.' });
-    if (!req.file) return res.status(400).json({ success: false, message: 'No file received.' });
-    try {
-      const url = await storeAvatarBuffer(req.file);
-      await User.findByIdAndUpdate(req.user._id, { $set: { avatar: url } });
-      return res.json({ success: true, message: 'Profile photo updated.', data: { avatar: url } });
-    } catch (e) {
-      console.error('[users me/avatar]', e.message);
-      return res.status(500).json({ success: false, message: 'Could not process the image. Try again.' });
-    }
-  });
 });
 
 // POST /api/users/avatar — upload a profile image and get a URL back
@@ -319,7 +299,7 @@ router.get('/teachers/qualified', auth, requireRole('admin', 'ops_manager'), asy
     res.json({ success: true, teachers });
   } catch (e) {
     console.error('[users teachers/qualified]', e.message);
-    res.status(500).json({ success: false, message: e.message });
+    res.status(e.status || 500).json({ success: false, message: e.message });
   }
 });
 
@@ -378,9 +358,30 @@ router.patch('/teachers/:id/specialties', auth, requireRole('admin', 'ops_manage
     });
   } catch (e) {
     console.error('[users teachers/:id/specialties]', e.message);
-    res.status(500).json({ success: false, message: e.message });
+    res.status(e.status || 500).json({ success: false, message: e.message });
   }
 });
+
+
+// A student can only be assigned subjects that exist in their own
+// curriculum (and grade, where the catalog is graded). Anything else
+// is rejected by name so the mistake is visible, not silent.
+async function assertSubjectsMatch(curriculum, gradeLevel, subjectNames) {
+  if (!Array.isArray(subjectNames) || !subjectNames.length) return;
+  const { aliasSet } = require('../lib/academic');
+  const Subject = require('../models/Subject');
+  if (!curriculum) throw new Error('Set the student\u2019s curriculum before assigning subjects.');
+  const curFilter = { curriculum: { $in: aliasSet(curriculum) }, isActive: true };
+  let catalog = gradeLevel ? await Subject.find({ ...curFilter, grade: gradeLevel }).select('subjectName').lean() : [];
+  if (!catalog.length) catalog = await Subject.find(curFilter).select('subjectName').lean();
+  const names = new Set(catalog.map(x => x.subjectName));
+  const bad = subjectNames.filter(n => !names.has(n));
+  if (bad.length) {
+    const err = new Error('Cannot assign: ' + bad.join(', ') + ' - not offered in ' + curriculum + (gradeLevel ? ' ' + gradeLevel : '') + '.');
+    err.status = 400;
+    throw err;
+  }
+}
 
 // CREATE user (admin only) with role-specific logic and auto-generated temp password
 router.post('/', auth, requireRole('admin','ops_manager'), async (req, res) => {
@@ -399,6 +400,9 @@ router.post('/', auth, requireRole('admin','ops_manager'), async (req, res) => {
     req.body.isActive = true;
     req.body.mustChangePassword = true;
 
+    if (req.body.role === 'student') {
+      await assertSubjectsMatch(req.body.curriculum, req.body.gradeLevel || req.body.grade, req.body.subjects);
+    }
     const user = await User.create(req.body);
 
     // Generate verification JWT
@@ -600,7 +604,7 @@ router.post('/:id/link-parent', auth, requireRole('admin', 'ops_manager'), async
     });
   } catch (e) {
     console.error('[users link-parent]', e.message);
-    res.status(500).json({ success: false, message: e.message });
+    res.status(e.status || 500).json({ success: false, message: e.message });
   }
 });
 
@@ -688,7 +692,7 @@ router.post('/:id/create-and-link-parent', auth, requireRole('admin', 'ops_manag
     });
   } catch (e) {
     console.error('[users create-and-link-parent]', e.message);
-    res.status(500).json({ success: false, message: e.message });
+    res.status(e.status || 500).json({ success: false, message: e.message });
   }
 });
 
@@ -713,7 +717,7 @@ router.delete('/:id/parent', auth, requireRole('admin', 'ops_manager'), async (r
     res.json({ success: true, message: 'Parent unlinked.' });
   } catch (e) {
     console.error('[users unlink-parent]', e.message);
-    res.status(500).json({ success: false, message: e.message });
+    res.status(e.status || 500).json({ success: false, message: e.message });
   }
 });
 
@@ -764,7 +768,7 @@ router.get('/me/availability', auth, async (req, res) => {
   try {
     const me = await User.findById(req.user._id).select('availability').lean();
     return res.json({ success: true, data: { availability: me?.availability || [] } });
-  } catch (e) { return res.status(500).json({ success: false, message: e.message }); }
+  } catch (e) { return res.status(e.status || 500).json({ success: false, message: e.message }); }
 });
 
 // ── PATCH /api/users/me/availability ───────────────────────
@@ -787,7 +791,7 @@ router.patch('/me/availability', auth, async (req, res) => {
         ? `Saved ${value.length} window${value.length === 1 ? '' : 's'}, ${hours} hours a week.`
         : 'Availability cleared. Scheduling will fall back to default hours.',
     });
-  } catch (e) { return res.status(500).json({ success: false, message: e.message }); }
+  } catch (e) { return res.status(e.status || 500).json({ success: false, message: e.message }); }
 });
 
 // ── PATCH /api/users/:id/availability ──────────────────────
@@ -806,7 +810,7 @@ router.patch('/:id/availability', auth, requireRole('admin','ops_manager','dos')
       success: true, data: { availability: target.availability },
       message: `Availability saved for ${target.firstName} ${target.lastName}.`,
     });
-  } catch (e) { return res.status(500).json({ success: false, message: e.message }); }
+  } catch (e) { return res.status(e.status || 500).json({ success: false, message: e.message }); }
 });
 
 // ── GET /api/users/availability-gaps ───────────────────────
@@ -824,11 +828,20 @@ router.get('/availability-gaps', auth, requireRole('admin','ops_manager','dos'),
       message: rows.length
         ? `${rows.length} people have no availability set, so their timetable slots are guesses.`
         : 'Everyone has declared their availability.' });
-  } catch (e) { return res.status(500).json({ success: false, message: e.message }); }
+  } catch (e) { return res.status(e.status || 500).json({ success: false, message: e.message }); }
 });
 
 router.patch('/:id', auth, requireRole('admin','ops_manager'), async (req, res) => {
   try {
+    if (req.body.subjects !== undefined || req.body.curriculum !== undefined || req.body.gradeLevel !== undefined) {
+      const target = await User.findById(req.params.id).select('role curriculum gradeLevel grade subjects').lean();
+      if (target && target.role === 'student') {
+        const cur = req.body.curriculum !== undefined ? req.body.curriculum : target.curriculum;
+        const gl = req.body.gradeLevel !== undefined ? req.body.gradeLevel : (target.gradeLevel || target.grade);
+        const subj = req.body.subjects !== undefined ? req.body.subjects : target.subjects;
+        await assertSubjectsMatch(cur, gl, subj);
+      }
+    }
     const target = await User.findById(req.params.id);
     if (!target) return res.status(404).json({ success: false, message: 'User not found' });
 
@@ -921,7 +934,7 @@ router.patch('/:id', auth, requireRole('admin','ops_manager'), async (req, res) 
 
     res.json({ success: true, user: safe });
   } catch (e) {
-    res.status(500).json({ success: false, message: e.message });
+    res.status(e.status || 500).json({ success: false, message: e.message });
   }
 });
 
@@ -957,7 +970,7 @@ router.patch('/:id/leave', auth, requireRole('admin', 'ops_manager'), async (req
       message: isOnLeave ? `${user.firstName} ${user.lastName} is now on leave` : `${user.firstName} ${user.lastName} has returned from leave`
     });
   } catch (e) {
-    res.status(500).json({ success: false, message: e.message });
+    res.status(e.status || 500).json({ success: false, message: e.message });
   }
 });
 
@@ -1015,7 +1028,7 @@ router.post('/:id/send-email', auth, requireRole('admin', 'ops_manager'), async 
     });
   } catch (e) {
     console.error('[users send-email]', e.message);
-    res.status(500).json({ success: false, message: e.message });
+    res.status(e.status || 500).json({ success: false, message: e.message });
   }
 });
 
@@ -1049,7 +1062,7 @@ router.get('/:id/delete-impact', auth, requireRole('admin', 'ops_manager'), asyn
     });
   } catch (e) {
     console.error('[users delete-impact]', e.message);
-    res.status(500).json({ success: false, message: e.message });
+    res.status(e.status || 500).json({ success: false, message: e.message });
   }
 });
 
@@ -1104,7 +1117,7 @@ router.delete('/:id', auth, requireRole('admin', 'ops_manager'), async (req, res
     });
   } catch (e) {
     console.error('[users delete]', e.message);
-    res.status(500).json({ success: false, message: e.message });
+    res.status(e.status || 500).json({ success: false, message: e.message });
   }
 });
 
@@ -1143,7 +1156,7 @@ router.get('/public-teachers', async (req, res) => {
     res.json({ success: true, data: { teachers: publicTeachers } });
   } catch (e) {
     console.error('[users public-teachers]', e.message);
-    res.status(500).json({ success: false, message: e.message });
+    res.status(e.status || 500).json({ success: false, message: e.message });
   }
 });
 
@@ -1176,7 +1189,7 @@ router.get('/:id', auth, requireRole('admin', 'ops_manager', 'dos'), async (req,
     res.json({ success: true, user });
   } catch (e) {
     console.error('[users get by id]', e.message);
-    res.status(500).json({ success: false, message: e.message });
+    res.status(e.status || 500).json({ success: false, message: e.message });
   }
 });
 
