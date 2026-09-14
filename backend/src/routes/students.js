@@ -1,134 +1,487 @@
-/**
- * STUDENT SELF-SERVICE ROUTES
- * ============================================================
- * Endpoints a logged-in student can call about their OWN data.
- *   GET   /api/students/my-profile  -> fetch own profile
- *   PATCH /api/students/my-profile  -> update own editable fields
- *
- * Security:
- *  - All routes require valid JWT (auth middleware)
- *  - Role check: only `student` users can access
- *  - User can only modify their own record (uses req.user._id)
- *  - Whitelist of editable fields - students CANNOT change role,
- *    plan, isActive, mustChangePassword, email, password, etc.
- */
-const express = require('express');
-const router = express.Router();
-const User = require('../models/User');
+const router = require('express').Router();
+const Subject = require('../models/Subject');
 const { auth, requireRole } = require('../middleware/auth');
 
-// DEBUG: minimal route with no auth, no DB, no dependencies
-router.get('/ping', (req, res) => {
-  res.json({ success: true, message: 'students router is alive', timestamp: Date.now() });
-});
-
-// Fields the student is allowed to update on their own profile.
-// Anything outside this list is silently ignored.
-const ALLOWED_PROFILE_FIELDS = [
-  'firstName',
-  'lastName',
-  'phone',
-  'bio',
-  'avatar',
-  'grade',
-];
-
-// --------------------------------------------------------------
-// GET /api/students/my-profile
-// --------------------------------------------------------------
-router.get('/my-profile', auth, requireRole('student'), async (req, res) => {
+// GET all subjects, optionally filtered by curriculum.
+// By default returns only Active subjects (correct for student/teacher
+// dropdowns and lesson/question forms). Pass ?includeInactive=true to
+// also return deactivated subjects (used by the admin Subjects UI so
+// admins can see and reactivate them).
+router.get('/', auth, async (req, res) => {
   try {
-    const user = await User.findById(req.user._id)
-      .select('-password -verificationToken -verificationTokenExpiry')
-      .lean();
+    const { aliasSet, canonCurriculum, effectiveGrade } = require('../lib/academic');
+    let { curriculum, includeInactive, grade } = req.query;
 
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'Profile not found.',
-      });
+    // Students are hard scoped to their own curriculum and grade -
+    // whatever the client asks for, a student only ever sees the
+    // subjects of the class they are enrolled in.
+    if (req.user && req.user.role === 'student') {
+      curriculum = canonCurriculum(req.user.curriculum);
+      grade = effectiveGrade(req.user);
+      if (!curriculum) return res.json({ success: true, subjects: [] });
     }
 
-    return res.json({
-      success: true,
-      profile: user,
-    });
+    const filter = {};
+    if (curriculum) filter.curriculum = { $in: aliasSet(curriculum) };
+    if (includeInactive !== 'true') filter.isActive = true;
+
+    // ── Grade scoping with a safe fallback ────────────────
+    // When a grade is given AND graded subjects exist for it,
+    // return only those (a Grade 7 American class should offer
+    // the four Grade 7 subjects, not every AP course). When no
+    // subject carries that grade — true for legacy curricula
+    // whose subjects were seeded ungraded — fall back to the
+    // full curriculum list so nothing ever comes back empty.
+    let subjects;
+    if (grade) {
+      subjects = await Subject.find({ ...filter, grade })
+        .sort('subjectName')
+        .lean();
+      if (!subjects.length) {
+        subjects = await Subject.find(filter).sort('subjectName').lean();
+      }
+    } else {
+      subjects = await Subject.find(filter).sort('subjectName').lean();
+    }
+
+    // Self healing: a student's enrolled subject names must all exist
+    // in their curriculum's catalog; anything else is stale and is
+    // removed from the record.
+    if (req.user && req.user.role === 'student' && Array.isArray(req.user.subjects) && req.user.subjects.length) {
+      try {
+        const Subject2 = require('../models/Subject');
+        const catalog = await Subject2.find({ curriculum: filter.curriculum, isActive: true }).select('subjectName').lean();
+        const names = new Set(catalog.map(x => x.subjectName));
+        const stale = req.user.subjects.filter(n => !names.has(n));
+        if (stale.length) {
+          const User2 = require('../models/User');
+          User2.updateOne({ _id: req.user._id }, { $pull: { subjects: { $in: stale } } }).catch(() => {});
+        }
+      } catch (e) { /* pruning is best effort */ }
+    }
+    res.json({ success: true, subjects });
   } catch (e) {
-    console.error('[students/my-profile GET]', e.message);
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to load profile.',
-    });
+    res.status(500).json({ success: false, message: e.message });
   }
 });
 
-// --------------------------------------------------------------
-// PATCH /api/students/my-profile
-// --------------------------------------------------------------
-router.patch('/my-profile', auth, requireRole('student'), async (req, res) => {
+// GET subjects grouped by curriculum (for dropdowns)
+router.get('/by-curriculum', async (req, res) => {
   try {
-    // Whitelist filter - quietly drop any field the student isn't
-    // allowed to change.
-    const updates = {};
-    for (const key of ALLOWED_PROFILE_FIELDS) {
-      if (key in req.body) {
-        updates[key] = typeof req.body[key] === 'string'
-          ? req.body[key].trim()
-          : req.body[key];
+    const subjects = await Subject.find({ isActive: true })
+      .select('curriculum subjectName category code')
+      .lean();
+    
+    // Group by curriculum
+    const grouped = {};
+    subjects.forEach(subject => {
+      if (!grouped[subject.curriculum]) {
+        grouped[subject.curriculum] = [];
       }
-    }
+      grouped[subject.curriculum].push(subject);
+    });
+    
+    res.json({ success: true, subjectsByProgramme: grouped });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
 
-    // Validation
-    if (updates.firstName === '' || updates.lastName === '') {
+// GET subjects for a specific curriculum
+router.get('/curriculum/:curriculum', async (req, res) => {
+  try {
+    const { curriculum } = req.params;
+    
+    const subjects = await Subject.find({
+      curriculum: { $regex: new RegExp(`^${curriculum}$`, 'i') },
+      isActive: true
+    })
+      .select('_id subjectName category code')
+      .sort('subjectName')
+      .lean();
+    
+    res.json({ success: true, subjects, curriculum });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// CREATE new subject (admin only) — "Quick Add" feature
+router.post('/', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
+  try {
+    const { curriculum, subjectName, category, code } = req.body;
+    
+    // Validate required fields
+    if (!curriculum || !subjectName || !category) {
       return res.status(400).json({
         success: false,
-        message: 'First name and last name cannot be empty.',
+        message: 'curriculum, subjectName, and category are required'
       });
     }
-
-    if (updates.bio && updates.bio.length > 500) {
-      return res.status(400).json({
+    
+    // Check if subject already exists for this curriculum
+    const existing = await Subject.findOne({
+      curriculum,
+      subjectName: { $regex: new RegExp(`^${subjectName}$`, 'i') }
+    });
+    
+    if (existing) {
+      return res.status(409).json({
         success: false,
-        message: 'Bio is too long (max 500 characters).',
+        message: `Subject "${subjectName}" already exists for ${curriculum}`
       });
     }
+    
+    // Create new subject
+    const subject = await Subject.create({
+      curriculum,
+      subjectName: subjectName.trim(),
+      category: category.trim(),
+      code: code ? code.trim() : undefined,
+      isActive: true
+    });
+    
+    console.log(`✓ Subject created: ${subjectName} (${curriculum})`);
+    res.status(201).json({ success: true, subject });
+  } catch (e) {
+    res.status(400).json({ success: false, message: e.message });
+  }
+});
 
-    if (updates.avatar && updates.avatar.length > 0) {
-      if (!/^https?:\/\//i.test(updates.avatar)) {
-        return res.status(400).json({
-          success: false,
-          message: 'Photo URL must start with http:// or https://',
-        });
-      }
+// UPDATE subject (admin only)
+router.patch('/:id', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
+  try {
+    // Only apply the fields actually sent. Passing the whole object meant
+    // a request carrying just { isActive:false } also wrote subjectName,
+    // category and code as undefined — deactivating a subject wiped its
+    // name.
+    const patch = {};
+    ['subjectName', 'category', 'code', 'isActive'].forEach(k => {
+      if (k in req.body) patch[k] = req.body[k];
+    });
+    if (!Object.keys(patch).length) {
+      return res.status(400).json({ success: false, message: 'Nothing to update.' });
     }
 
-    const updated = await User.findByIdAndUpdate(
-      req.user._id,
-      { $set: updates },
+    const subject = await Subject.findByIdAndUpdate(
+      req.params.id,
+      { $set: patch },
       { new: true, runValidators: true }
-    )
-      .select('-password -verificationToken -verificationTokenExpiry')
-      .lean();
+    );
+    
+    if (!subject) {
+      return res.status(404).json({ success: false, message: 'Subject not found' });
+    }
+    
+    console.log(`✓ Subject updated: ${subject.subjectName}`);
+    res.json({ success: true, subject });
+  } catch (e) {
+    res.status(400).json({ success: false, message: e.message });
+  }
+});
 
-    if (!updated) {
-      return res.status(404).json({
-        success: false,
-        message: 'Profile not found.',
+// ═══════════════════════════════════════════════════════════
+// DUPLICATE SUBJECT CLEANUP
+//
+// The catalogue accumulated the same subject twice under one
+// curriculum — "Primary Mathematics" alongside "Mathematics",
+// "Art & Design" alongside "Art and Design", and so on. Only one of
+// each pair carries the syllabus spine, so the teacher-facing
+// "does this subject have a spine?" check can resolve to the empty
+// twin and report a loaded subject as unavailable.
+//
+// Nothing is hard-deleted. A duplicate is DEACTIVATED (isActive:false),
+// which hides it everywhere and is reversible with one PATCH. A record
+// with any dependent data is never touched, whatever the caller asks.
+// ═══════════════════════════════════════════════════════════
+
+/**
+ * Normalise a subject name for duplicate detection.
+ * "Primary Mathematics", "Mathematics" and "MATHEMATICS " all collapse
+ * to the same key; so do "Art & Design" and "Art and Design".
+ */
+function dupKey(name) {
+  // Parentheses are NOT stripped.
+  //
+  // An earlier version dropped them, which collapsed
+  //   "Language Acquisition (French)" / "(Mandarin)" / "(Spanish)"
+  // into one key and wrongly deactivated two real subjects. The same
+  // fault would have merged "Arts (Drama)" with "Arts (Music)". A
+  // parenthetical almost always DISTINGUISHES a subject rather than
+  // decorating it, so it is now part of the identity.
+  //
+  // Only the level prefix and the &/and spelling are normalised —
+  // both are genuine spelling variants of one subject.
+  return String(name || '')
+    .toLowerCase()
+    .replace(/^primary\s+/, '')
+    .replace(/^lower\s+secondary\s+/, '')
+    .replace(/\s*&\s*/g, ' and ')
+    .replace(/[^a-z0-9()]+/g, ' ')
+    .trim();
+}
+
+/** Count every record that depends on a Subject. */
+async function subjectUsage(subject) {
+  const id = subject._id;
+  const name = subject.subjectName;
+  const safe = async (fn) => { try { return await fn(); } catch { return 0; } };
+
+  const [topics, lessons, allocations, timetable, books, progress, sProgress, questions, users] =
+    await Promise.all([
+      safe(() => require('../models/SyllabusTopic').countDocuments({ subjectId: id })),
+      safe(() => require('../models/Lesson').countDocuments({ subjectId: id })),
+      safe(() => require('../models/Allocation').countDocuments({ subjectId: id })),
+      safe(() => require('../models/TimetableEntry').countDocuments({ subjectId: id })),
+      safe(() => require('../models/LibraryBook').countDocuments({ subjectId: id })),
+      safe(() => require('../models/LessonProgress').countDocuments({ subjectId: id })),
+      safe(() => require('../models/StudentSyllabusProgress').countDocuments({ subjectId: id })),
+      // Question stores the subject NAME, not an id, so it is matched
+      // by name and curriculum rather than by reference.
+      safe(() => require('../models/Question').countDocuments({
+        subject: name, curriculum: subject.curriculum,
+      })),
+      safe(() => require('../models/User').countDocuments({
+        'teachingSpecialties.subjectId': id,
+      })),
+    ]);
+
+  const total = topics + lessons + allocations + timetable + books + progress + sProgress + questions + users;
+  return { topics, lessons, allocations, timetable, books, progress, sProgress, questions, users, total };
+}
+
+// ── GET /api/subjects/duplicates — dry run, changes nothing ──
+router.get('/duplicates', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
+  try {
+    const subjects = await Subject.find({ isActive: { $ne: false } })
+      .select('subjectName curriculum').lean();
+
+    const groups = {};
+    subjects.forEach(s => {
+      const k = s.curriculum + '::' + dupKey(s.subjectName);
+      (groups[k] = groups[k] || []).push(s);
+    });
+
+    const dupes = Object.entries(groups).filter(([, arr]) => arr.length > 1);
+    const report = [];
+
+    for (const [key, arr] of dupes) {
+      const withUsage = [];
+      for (const s of arr) withUsage.push({ ...s, usage: await subjectUsage(s) });
+      // Keep the one carrying the most data; if tied, the longest name,
+      // which is the more specific ("Primary Mathematics" over "Mathematics").
+      // Survivor choice, in order:
+      //   1. most data  — never strand records that are in use
+      //   2. in the CATALOGUE — the name the enrolment form offers is what
+      //      teachers and students actually see
+      //   3. SHORTER name — "Science" over "Lower Secondary Science"
+      //
+      // The old tiebreak preferred the LONGER name, which is how
+      // "Lower Secondary Science" survived and the catalogue-standard
+      // "Science" was deactivated. Length is not evidence of correctness.
+      withUsage.sort((a, b) =>
+        b.usage.total - a.usage.total ||
+        (catalogueHas(b) ? 1 : 0) - (catalogueHas(a) ? 1 : 0) ||
+        a.subjectName.length - b.subjectName.length);
+      const [keep, ...rest] = withUsage;
+      report.push({
+        curriculum: key.split('::')[0],
+        key: key.split('::')[1],
+        keep: { _id: keep._id, subjectName: keep.subjectName, usage: keep.usage },
+        deactivate: rest.map(r => ({
+          _id: r._id,
+          subjectName: r.subjectName,
+          usage: r.usage,
+          safe: r.usage.total === 0,
+        })),
       });
     }
 
+    const canDeactivate = report.reduce((n, g) => n + g.deactivate.filter(d => d.safe).length, 0);
+    const blocked = report.reduce((n, g) => n + g.deactivate.filter(d => !d.safe).length, 0);
+
     return res.json({
       success: true,
-      profile: updated,
-      message: 'Profile updated successfully.',
+      data: { groups: report, groupCount: report.length, canDeactivate, blocked },
+      message: `${report.length} duplicate group(s). ${canDeactivate} empty duplicate(s) can be `
+             + `deactivated safely; ${blocked} hold data and will be left alone.`,
     });
   } catch (e) {
-    console.error('[students/my-profile PATCH]', e.message);
-    return res.status(400).json({
-      success: false,
-      message: e.message,
-    });
+    console.error('[subjects/duplicates]', e.message);
+    return res.status(500).json({ success: false, message: e.message });
   }
+});
+
+/**
+ * Is this subject name offered by the curriculum catalogue?
+ *
+ * When two records hold the same subject, the one the enrolment form
+ * offers should survive — that is the name a student is registered under
+ * and a teacher sees on their timetable.
+ *
+ * Returns false if the catalogue cannot be read, so the sort degrades to
+ * the shorter-name rule rather than throwing mid-resolve.
+ */
+function catalogueHas(subject) {
+  try {
+    const { SUBJECTS } = require('./curriculum');
+    if (!Array.isArray(SUBJECTS)) return false;
+    const name = String(subject.subjectName || '').trim().toLowerCase();
+    return SUBJECTS.some(c =>
+      String(c.name || '').trim().toLowerCase() === name &&
+      (c.availableIn === 'all' ||
+       (Array.isArray(c.availableIn) && c.availableIn.includes(subject.curriculum))));
+  } catch (e) {
+    return false;
+  }
+}
+
+// ── POST /api/subjects/duplicates/resolve — deactivates the empty ones ──
+router.post('/duplicates/resolve', auth, requireRole('admin'), async (req, res) => {
+  try {
+    if (req.body?.confirm !== true) {
+      return res.status(400).json({
+        success: false,
+        message: 'Send { "confirm": true } to proceed. Run GET /api/subjects/duplicates first.',
+      });
+    }
+
+    const subjects = await Subject.find({ isActive: { $ne: false } })
+      .select('subjectName curriculum').lean();
+    const groups = {};
+    subjects.forEach(s => {
+      const k = s.curriculum + '::' + dupKey(s.subjectName);
+      (groups[k] = groups[k] || []).push(s);
+    });
+
+    const deactivated = [], skipped = [];
+    for (const [, arr] of Object.entries(groups).filter(([, a]) => a.length > 1)) {
+      const withUsage = [];
+      for (const s of arr) withUsage.push({ ...s, usage: await subjectUsage(s) });
+      // Survivor choice, in order:
+      //   1. most data  — never strand records that are in use
+      //   2. in the CATALOGUE — the name the enrolment form offers is what
+      //      teachers and students actually see
+      //   3. SHORTER name — "Science" over "Lower Secondary Science"
+      //
+      // The old tiebreak preferred the LONGER name, which is how
+      // "Lower Secondary Science" survived and the catalogue-standard
+      // "Science" was deactivated. Length is not evidence of correctness.
+      withUsage.sort((a, b) =>
+        b.usage.total - a.usage.total ||
+        (catalogueHas(b) ? 1 : 0) - (catalogueHas(a) ? 1 : 0) ||
+        a.subjectName.length - b.subjectName.length);
+      const [, ...rest] = withUsage;
+      for (const r of rest) {
+        if (r.usage.total > 0) {
+          // Never touch a record with data, whatever was asked.
+          skipped.push({ subjectName: r.subjectName, curriculum: r.curriculum, usage: r.usage });
+          continue;
+        }
+        await Subject.findByIdAndUpdate(r._id, { $set: { isActive: false } });
+        deactivated.push({ _id: r._id, subjectName: r.subjectName, curriculum: r.curriculum });
+      }
+    }
+
+    console.log(`[subjects] deactivated ${deactivated.length} duplicate(s) by ${req.user.email}`);
+    return res.json({
+      success: true,
+      data: { deactivated, skipped },
+      message: `Deactivated ${deactivated.length} empty duplicate(s). `
+             + `${skipped.length} left alone because they hold data. `
+             + `Reversible: PATCH the subject with { "isActive": true }.`,
+    });
+  } catch (e) {
+    console.error('[subjects/duplicates/resolve]', e.message);
+    return res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+// POST /api/subjects/merge
+// Move everything from one Subject onto another, then deactivate the
+// source. Needed where BOTH records hold data and neither can simply
+// be switched off — for example Cambridge Primary, where the syllabus
+// spine sits on "Primary Mathematics" while 1,098 questions are filed
+// under "Mathematics". Split like that, questions cannot be placed on
+// a lesson and the subject reads as having no spine.
+//
+// Body: { fromId, toId, confirm: true }
+// ═══════════════════════════════════════════════════════════
+router.post('/merge', auth, requireRole('admin'), async (req, res) => {
+  try {
+    const { fromId, toId, confirm } = req.body || {};
+    if (confirm !== true)
+      return res.status(400).json({ success:false, message:'Send { "confirm": true } to proceed.' });
+    if (!fromId || !toId || String(fromId) === String(toId))
+      return res.status(400).json({ success:false, message:'fromId and toId must both be given and differ.' });
+
+    const [from, to] = await Promise.all([Subject.findById(fromId), Subject.findById(toId)]);
+    if (!from || !to) return res.status(404).json({ success:false, message:'Subject not found.' });
+    if (from.curriculum !== to.curriculum)
+      return res.status(400).json({
+        success:false,
+        message:`Refusing to merge across curricula (${from.curriculum} into ${to.curriculum}).`,
+      });
+
+    const moved = {};
+    const move = async (modelName, filter, update, opts) => {
+      try {
+        const M = require('../models/' + modelName);
+        const r = await M.updateMany(filter, update, opts || {});
+        moved[modelName] = r.modifiedCount ?? r.nModified ?? 0;
+      } catch (err) {
+        console.error(`[subjects/merge] ${modelName}:`, err.message);
+        moved[modelName] = 0;
+      }
+    };
+
+    // Records that reference the Subject by id.
+    for (const m of ['SyllabusTopic','Lesson','Allocation','TimetableEntry',
+                     'LibraryBook','LessonProgress','StudentSyllabusProgress']) {
+      await move(m, { subjectId: from._id }, { $set: { subjectId: to._id } });
+    }
+
+    // Question stores the subject NAME, so it is re-tagged by name.
+    await move('Question',
+      { subject: from.subjectName, curriculum: from.curriculum },
+      { $set: { subject: to.subjectName } });
+
+    // Teachers' specialties point at the id.
+    // The positional filtered operator needs arrayFilters, or Mongo
+    // rejects the update outright.
+    await move('User',
+      { 'teachingSpecialties.subjectId': from._id },
+      { $set: { 'teachingSpecialties.$[el].subjectId': to._id } },
+      { arrayFilters: [{ 'el.subjectId': from._id }] });
+
+    from.isActive = false;
+    await from.save();
+
+    const total = Object.values(moved).reduce((a, b) => a + b, 0);
+    console.log(`[subjects] merged "${from.subjectName}" into "${to.subjectName}" `
+              + `(${total} records) by ${req.user.email}`);
+
+    return res.json({
+      success: true,
+      data: { from: from.subjectName, to: to.subjectName, moved, total },
+      message: `Moved ${total} record(s) from "${from.subjectName}" to "${to.subjectName}" `
+             + `and deactivated the source. Reload the spine check to confirm.`,
+    });
+  } catch (e) {
+    console.error('[subjects/merge]', e.message);
+    return res.status(500).json({ success:false, message:e.message });
+  }
+});
+
+// DELETE subject (admin only)
+router.delete('/:id', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
+  res.status(403).json({
+    success: false,
+    message: 'Subject deletion is disabled. Use PATCH with isActive: false to deactivate. ' +
+             'Hard-deleting a Subject would orphan Lesson, SyllabusTopic, Allocation, and ' +
+             'Question records that reference it.'
+  });
 });
 
 module.exports = router;
