@@ -355,6 +355,20 @@ router.post('/verify-otp', async (req, res) => {
  * The password hash and reset fields are excluded.
  */
 router.get('/me', authMiddleware, async (req, res) => {
+  // Self healing academic identity: resolve legacy curriculum names
+  // and lift a legacy grade into gradeLevel, so the portal always
+  // reads the exact curriculum and grade the student is enrolled in.
+  try {
+    if (req.user && req.user.role === 'student') {
+      const { canonCurriculum } = require('../lib/academic');
+      const User = require('../models/User');
+      const sets = {};
+      const canon = canonCurriculum(req.user.curriculum);
+      if (canon && req.user.curriculum !== canon) { sets.curriculum = canon; req.user.curriculum = canon; }
+      if (!req.user.gradeLevel && req.user.grade) { sets.gradeLevel = req.user.grade; req.user.gradeLevel = req.user.grade; }
+      if (Object.keys(sets).length) User.updateOne({ _id: req.user._id }, { $set: sets }).catch(() => {});
+    }
+  } catch (e) { /* identity healing is best effort */ }
   try {
     const user = await User.findById(req.user._id)
       .select('-password -resetToken -resetTokenExpiry -otp -otpExpiry')
