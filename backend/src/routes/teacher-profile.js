@@ -139,4 +139,22 @@ router.patch('/me', auth, requireRole('teacher', 'admin'), async (req, res) => {
   }
 });
 
+// ── GET /api/teacher-profile/my-contributions ──
+// The teacher's footprint in the school: lessons published, questions
+// added to the Question Bank, and books uploaded to the library.
+router.get('/my-contributions', auth, requireRole('teacher', 'admin'), async (req, res) => {
+  try {
+    const Lesson = require('../models/Lesson');
+    const Question = require('../models/Question');
+    const LibraryBook = require('../models/LibraryBook');
+    const me = req.user._id;
+    const [lessonsPublished, questionsAdded, booksUploaded] = await Promise.all([
+      Lesson.countDocuments({ teacherId: me, status: 'published' }),
+      Question.countDocuments({ createdBy: me }),
+      LibraryBook.countDocuments({ uploadedBy: me }),
+    ]);
+    res.json({ success: true, data: { lessonsPublished, questionsAdded, booksUploaded } });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
 module.exports = router;
