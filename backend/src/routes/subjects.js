@@ -7,11 +7,22 @@ const { auth, requireRole } = require('../middleware/auth');
 // dropdowns and lesson/question forms). Pass ?includeInactive=true to
 // also return deactivated subjects (used by the admin Subjects UI so
 // admins can see and reactivate them).
-router.get('/', async (req, res) => {
+router.get('/', auth, async (req, res) => {
   try {
-    const { curriculum, includeInactive, grade } = req.query;
+    const { aliasSet, canonCurriculum, effectiveGrade } = require('../lib/academic');
+    let { curriculum, includeInactive, grade } = req.query;
+
+    // Students are hard scoped to their own curriculum and grade -
+    // whatever the client asks for, a student only ever sees the
+    // subjects of the class they are enrolled in.
+    if (req.user && req.user.role === 'student') {
+      curriculum = canonCurriculum(req.user.curriculum);
+      grade = effectiveGrade(req.user);
+      if (!curriculum) return res.json({ success: true, subjects: [] });
+    }
+
     const filter = {};
-    if (curriculum) filter.curriculum = curriculum;
+    if (curriculum) filter.curriculum = { $in: aliasSet(curriculum) };
     if (includeInactive !== 'true') filter.isActive = true;
 
     // ── Grade scoping with a safe fallback ────────────────
@@ -33,6 +44,12 @@ router.get('/', async (req, res) => {
       subjects = await Subject.find(filter).sort('subjectName').lean();
     }
 
+    // Display scoping above and the assignment guard in users.js are
+    // the safety layers here. Destructive cleanup of a student's
+    // enrolled subjects is never done silently on a page load; it
+    // runs only through fix-academic.cjs under human review, because
+    // a name that does not match the catalog is more often a spelling
+    // variant or a mis-set curriculum field than a subject to delete.
     res.json({ success: true, subjects });
   } catch (e) {
     res.status(500).json({ success: false, message: e.message });
