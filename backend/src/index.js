@@ -109,6 +109,7 @@ app.use('/api/user-logs', require('./routes/user-logs'));
 app.use('/api/support', require('./routes/support'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/dm', require('./routes/dm'));
+app.use('/api/inventory', require('./routes/inventory'));
 app.use('/api/clubs', require('./routes/clubs'));
 app.use('/api/mastery', require('./routes/mastery'));
 app.use('/api/livekit', require('./routes/livekit'));
