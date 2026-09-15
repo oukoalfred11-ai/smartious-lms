@@ -168,6 +168,44 @@ router.post('/:id/leave', auth, requireRole('student'), async (req, res) => {
   try {
     await Club.updateOne({ _id: req.params.id }, { $pull: { members: req.user._id } });
     await LiveClass.updateMany({ clubId: req.params.id, scheduledAt: { $gte: new Date() } }, { $pull: { assignedStudents: req.user._id } });
+
+// ── Leadership: teachers take and hand back activities ──
+// Joining as staff means LEADING, never sitting in the members list:
+// a leader can schedule meetings, run sessions, and manage the roster.
+// POST /api/clubs/:id/lead
+router.post('/:id/lead', auth, requireRole('teacher', ...ADMIN), async (req, res) => {
+  try {
+    const c = await Club.findById(req.params.id);
+    if (!c || !c.isActive) return res.status(404).json({ success: false, message: 'Club not found.' });
+    if (isLeaderOf(c, req.user._id)) return res.json({ success: true, message: 'You already lead ' + c.name + '.' });
+    await Club.updateOne({ _id: c._id }, { $addToSet: { leaders: req.user._id }, $pull: { members: req.user._id } });
+    res.json({ success: true, message: 'You now lead ' + c.name + '.' });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+// POST /api/clubs/:id/unlead — step down from leading this activity.
+router.post('/:id/unlead', auth, requireRole('teacher', ...ADMIN), async (req, res) => {
+  try {
+    await Club.updateOne({ _id: req.params.id }, { $pull: { leaders: req.user._id } });
+    res.json({ success: true, message: 'You have stepped down from this activity.' });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+// POST /api/clubs/:id/members/:memberId/remove — a leader of THIS club
+// (or admin) removes a member; mirrors /leave including upcoming
+// meetings, and the movement is visible in the member count at once.
+router.post('/:id/members/:memberId/remove', auth, requireRole('teacher', ...ADMIN), async (req, res) => {
+  try {
+    const c = await Club.findById(req.params.id);
+    if (!c) return res.status(404).json({ success: false, message: 'Club not found.' });
+    if (!ADMIN.includes(req.user.role) && !isLeaderOf(c, req.user._id))
+      return res.status(403).json({ success: false, message: 'Only a leader of this activity can manage its members.' });
+    await Club.updateOne({ _id: c._id }, { $pull: { members: req.params.memberId } });
+    await LiveClass.updateMany({ clubId: c._id, scheduledAt: { $gte: new Date() } }, { $pull: { assignedStudents: req.params.memberId } });
+    res.json({ success: true, message: 'Member removed from the activity.' });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
     res.json({ success: true });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
