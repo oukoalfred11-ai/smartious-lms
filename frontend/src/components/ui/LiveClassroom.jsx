@@ -1122,7 +1122,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
                 },
                 onTrack: (id, s2) => setStreams(prev => ({ ...prev, [id]: s2 })),
                 onPeerClosed: (id) => setStreams(prev => { const n = { ...prev }; delete n[id]; return n }),
-                resolveSocketId: (uid) => rosterRef.current?.find(r => String(r.userId) === String(uid))?.socketId || null,
+                resolveSocketId: (uid) => { const bare = String(uid).split('#')[0]; return rosterRef.current?.find(r => String(r.userId) === bare)?.socketId || null },
               })
               await Promise.race([
                 sfuEngine.start(),
