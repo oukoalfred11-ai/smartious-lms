@@ -33,7 +33,7 @@ const ICON = {
 }
 const Ico = ({ k, c = '#fff', s = 20 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill={c}>{ICON[k] || ICON.star}</svg>
 
-const CR = '#8B1A2E', GOLD = '#C9A030', INK = '#1A1A1A', MUTE = '#6B6B6B', LINE = '#E8E2D6', CREAM = '#FBFAF5'
+const CR = '#7D1025', GOLD = '#C9973A', INK = '#1A1A1A', MUTE = '#6B6B6B', LINE = '#E8E2D6', CREAM = '#FBFAF5'
 
 const fmtWhen = (d) => new Date(d).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
 const fmtDay = (d) => ({ d: new Date(d).toLocaleDateString('en-GB', { day: '2-digit' }), m: new Date(d).toLocaleDateString('en-GB', { month: 'short' }).toUpperCase() })
@@ -68,20 +68,77 @@ export default function ClubsHub({ user, toast, readOnly = false }) {
     setOpen(c); setDetail(null); setModalTab('about')
     try { const r = await api.get('/clubs/' + c._id); setDetail(r.data?.data || null) } catch { /* noop */ }
   }
+  const STAFF = ['teacher', 'admin', 'ops_manager', 'dos']
+  const isStaff = STAFF.includes(user?.role)
+
+  // Students join and leave as members. Staff never do: joining as
+  // staff means taking LEADERSHIP of the activity.
   const toggleJoin = async (c) => {
     if (readOnly) return
     setBusy(c._id)
     try {
-      const r = await api.post(`/clubs/${c._id}/${c.isMember ? 'leave' : 'join'}`)
+      const action = isStaff ? 'lead' : (c.isMember ? 'leave' : 'join')
+      const r = await api.post(`/clubs/${c._id}/${action}`)
       toast?.ok?.(r.data?.message || (c.isMember ? `Left ${c.name}.` : `Welcome to ${c.name}.`))
-      setClubs(cs => cs.map(x => x._id === c._id ? { ...x, isMember: !c.isMember, memberCount: x.memberCount + (c.isMember ? -1 : 1) } : x))
-      if (open && open._id === c._id) setOpen(o => ({ ...o, isMember: !c.isMember }))
+      if (isStaff) {
+        setClubs(cs => cs.map(x => x._id === c._id ? { ...x, isLeader: true, isMember: false } : x))
+        if (open && open._id === c._id) { setOpen(o => ({ ...o, isLeader: true, isMember: false })); setModalTab('manage'); refreshDetail(c._id) }
+      } else {
+        setClubs(cs => cs.map(x => x._id === c._id ? { ...x, isMember: !c.isMember, memberCount: x.memberCount + (c.isMember ? -1 : 1) } : x))
+        if (open && open._id === c._id) setOpen(o => ({ ...o, isMember: !c.isMember }))
+      }
     } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not update membership.') }
     finally { setBusy('') }
+  }
+
+  const stepDown = async (c) => {
+    if (!window.confirm('Step down from leading ' + c.name + '?')) return
+    try {
+      await api.post(`/clubs/${c._id}/unlead`)
+      toast?.ok?.('You have stepped down from ' + c.name + '.')
+      setClubs(cs => cs.map(x => x._id === c._id ? { ...x, isLeader: false } : x))
+      if (open && open._id === c._id) { setOpen(o => ({ ...o, isLeader: false })); setModalTab('about') }
+    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not step down.') }
+  }
+
+  const removeMember = async (clubId, m) => {
+    if (!window.confirm('Remove ' + m.name + ' from this activity?')) return
+    try {
+      await api.post(`/clubs/${clubId}/members/${m._id}/remove`)
+      toast?.ok?.(m.name + ' removed.')
+      refreshDetail(clubId)
+      setClubs(cs => cs.map(x => x._id === clubId ? { ...x, memberCount: Math.max(0, x.memberCount - 1) } : x))
+    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not remove the member.') }
+  }
+
+  const refreshDetail = async (id) => {
+    try { const r = await api.get('/clubs/' + id); setDetail(r.data?.data || null) } catch (e) {}
+  }
+
+  const scheduleMeeting = async (clubId, form) => {
+    try {
+      await api.post(`/clubs/${clubId}/meetings`, form)
+      toast?.ok?.('Session scheduled. Members will find it in Events.')
+      refreshDetail(clubId); load()
+    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not schedule.') }
   }
   const joinMeeting = (id) => window.open('/classroom/' + id, '_blank', 'noopener')
 
   const mine = clubs.filter(c => c.isMember || c.isLeader)
+  const led = clubs.filter(c => c.isLeader)
+  const ledIds = new Set(led.map(c => String(c._id)))
+  const ledMembers = led.reduce((n, c) => n + (c.memberCount || 0), 0)
+  const myUpcoming = (events || []).filter(e => ledIds.has(String(e.clubId || e.club?._id || ''))).length
+  const StaffKpis = () => !isStaff ? null : (
+    <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}>
+      {[['Activities I lead', led.length, CR], ['Members across mine', ledMembers, GOLD], ['My upcoming sessions', myUpcoming, '#0F766E']].map(([label, n, color]) => (
+        <div key={label} style={{ background: '#fff', border: '1px solid #E8E2D6', borderRadius: 14, padding: '12px 18px', minWidth: 140 }}>
+          <div style={{ fontSize: 22, fontWeight: 900, color }}>{n}</div>
+          <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.07em', color: MUTE, textTransform: 'uppercase' }}>{label}</div>
+        </div>
+      ))}
+    </div>
+  )
   const sideTab = (id, label, k) => {
     const on = tab === id
     return (
@@ -108,10 +165,16 @@ export default function ClubsHub({ user, toast, readOnly = false }) {
         <div style={{ fontSize: 12.5, color: MUTE, lineHeight: 1.5, margin: '8px 0 14px', flex: 1 }}>{c.tagline}</div>
         <div style={{ fontSize: 11, color: MUTE, marginBottom: 10 }}>{c.memberCount} member{c.memberCount === 1 ? '' : 's'}{c.leaders?.length ? ` \u00b7 ${c.leaders.map(l => l.name).join(', ')}` : ''}</div>
         {!readOnly && (
-          <button onClick={() => toggleJoin(c)} disabled={busy === c._id} style={{
-            padding: '9px 0', borderRadius: 8, border: 'none', cursor: 'pointer', fontWeight: 800, fontSize: 13, color: '#fff',
-            background: c.isMember ? '#15803D' : c.color, opacity: busy === c._id ? .6 : 1,
-          }}>{c.isLeader ? 'You lead this club' : c.isMember ? 'Joined' : 'Join Club'}</button>
+          c.isLeader ? (
+            <button onClick={() => { openClub(c); setModalTab('manage') }} style={{
+              padding: '9px 0', borderRadius: 8, border: 'none', cursor: 'pointer', fontWeight: 800, fontSize: 13, color: '#fff', background: GOLD,
+            }}>You lead {'\u00b7'} Manage</button>
+          ) : (
+            <button onClick={() => toggleJoin(c)} disabled={busy === c._id} style={{
+              padding: '9px 0', borderRadius: 8, border: 'none', cursor: 'pointer', fontWeight: 800, fontSize: 13, color: '#fff',
+              background: isStaff ? CR : (c.isMember ? '#15803D' : c.color), opacity: busy === c._id ? .6 : 1,
+            }}>{isStaff ? 'Lead this activity' : c.isMember ? 'Joined' : 'Join Club'}</button>
+          )
         )}
       </div>
     </div>
@@ -160,6 +223,7 @@ export default function ClubsHub({ user, toast, readOnly = false }) {
           <>
             {tab === 'overview' && (
               <>
+            <StaffKpis />
                 {clubs.length === 0 ? <div style={{ padding: 40, textAlign: 'center', color: MUTE, background: '#fff', borderRadius: 16, border: `1px solid ${LINE}` }}>Clubs are being set up. Check back soon.</div> : grid(clubs)}
 
                 {/* Why join + events + compete */}
@@ -266,16 +330,22 @@ export default function ClubsHub({ user, toast, readOnly = false }) {
                   <div style={{ fontSize: 13, color: MUTE, marginTop: 4 }}>{open.tagline}</div>
                 </div>
                 {!readOnly && !open.isLeader && (
-                  <button onClick={() => toggleJoin(open)} style={{ padding: '10px 18px', borderRadius: 9, border: 'none', cursor: 'pointer', fontWeight: 800, color: '#fff', background: open.isMember ? '#6B7280' : open.color }}>{open.isMember ? 'Leave club' : 'Join Club'}</button>
+                  <button onClick={() => toggleJoin(open)} style={{ padding: '10px 18px', borderRadius: 9, border: 'none', cursor: 'pointer', fontWeight: 800, color: '#fff', background: isStaff ? CR : (open.isMember ? '#6B7280' : open.color) }}>{isStaff ? 'Lead this activity' : open.isMember ? 'Leave club' : 'Join Club'}</button>
+                )}
+                {!readOnly && open.isLeader && (
+                  <span style={{ padding: '8px 14px', borderRadius: 999, fontWeight: 800, fontSize: 11.5, color: GOLD, background: '#FBF4E4', border: `1px solid ${GOLD}` }}>Activity leader</span>
                 )}
               </div>
               <div style={{ display: 'flex', gap: 6, marginTop: 16, background: CREAM, borderRadius: 10, padding: 4, width: 'fit-content' }}>
-                {[['about', 'About & sessions'], ['projects', 'Projects & awards']].map(([id, label]) => (
+                {[['about', 'About & sessions'], ['projects', 'Projects & awards'], ...(open.isLeader && !readOnly ? [['manage', 'Manage']] : [])].map(([id, label]) => (
                   <button key={id} onClick={() => setModalTab(id)} style={{ padding: '7px 14px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 12.5, fontWeight: 800, background: modalTab === id ? open.color : 'transparent', color: modalTab === id ? '#fff' : MUTE }}>{label}</button>
                 ))}
               </div>
 
-              {modalTab === 'projects' ? (
+              {modalTab === 'manage' && open.isLeader && !readOnly ? (
+                <ManagePanel club={open} detail={detail} onRemove={(m) => removeMember(open._id, m)}
+                  onSchedule={(f) => scheduleMeeting(open._id, f)} onStepDown={() => stepDown(open)} onStart={joinMeeting} />
+              ) : modalTab === 'projects' ? (
                 <ClubProjects club={open} user={user} toast={toast} readOnly={readOnly} />
               ) : (
               <>
@@ -320,6 +390,52 @@ export default function ClubsHub({ user, toast, readOnly = false }) {
  * fellow members discuss each project and suggest improvements, and cast
  * one award vote per club per year, movable until the awards.
  */
+function ManagePanel({ club, detail, onRemove, onSchedule, onStepDown, onStart }) {
+  const [mf, setMf] = useState({ title: '', scheduledAt: '', durationMins: 60 })
+  const members = detail?.members || []
+  const upcoming = detail?.upcoming || []
+  const input = { padding: '8px 10px', border: '1.5px solid #E5DFD3', borderRadius: 9, fontSize: 12.5 }
+  const label = (t) => <div style={{ fontSize: 10.5, fontWeight: 900, letterSpacing: '.09em', color: '#C9973A', textTransform: 'uppercase', margin: '14px 0 8px' }}>{t}</div>
+  return (
+    <div style={{ paddingTop: 6 }}>
+      {label('Schedule a session')}
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+        <input value={mf.title} onChange={e => setMf(f => ({ ...f, title: e.target.value }))} placeholder="Session title" style={{ ...input, flex: 1, minWidth: 160 }} />
+        <input type="datetime-local" value={mf.scheduledAt} onChange={e => setMf(f => ({ ...f, scheduledAt: e.target.value }))} style={input} />
+        <input type="number" min="15" step="15" value={mf.durationMins} onChange={e => setMf(f => ({ ...f, durationMins: Number(e.target.value) || 60 }))} style={{ ...input, width: 80 }} title="Minutes" />
+        <button onClick={() => { if (!mf.title.trim() || !mf.scheduledAt) return; onSchedule({ title: mf.title.trim(), scheduledAt: mf.scheduledAt, durationMins: mf.durationMins }); setMf({ title: '', scheduledAt: '', durationMins: 60 }) }}
+          style={{ padding: '9px 16px', borderRadius: 9, border: 'none', background: '#7D1025', color: '#fff', fontWeight: 800, fontSize: 12, cursor: 'pointer' }}>Schedule</button>
+      </div>
+      {upcoming.length > 0 && <>
+        {label('Upcoming sessions')}
+        <div style={{ display: 'grid', gap: 6 }}>
+          {upcoming.map(m => (
+            <div key={m._id} style={{ display: 'flex', gap: 10, alignItems: 'center', fontSize: 12.5, background: '#FBF8F3', border: '1px solid #E5DFD3', borderRadius: 10, padding: '8px 12px' }}>
+              <b style={{ flex: 1, color: '#231715' }}>{m.title}</b>
+              <span style={{ color: '#8A8378', fontSize: 11.5 }}>{new Date(m.scheduledAt).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+              <button onClick={() => onStart(m._id)} style={{ padding: '6px 12px', borderRadius: 8, border: 'none', background: '#0F766E', color: '#fff', fontWeight: 800, fontSize: 11, cursor: 'pointer' }}>Open room</button>
+            </div>
+          ))}
+        </div>
+      </>}
+      {label('Members ' + (members.length ? '(' + members.length + ')' : ''))}
+      {!members.length ? <div style={{ fontSize: 12, color: '#8A8378' }}>No members yet. Students join from their portal; your activity appears in their Clubs page.</div> : (
+        <div style={{ display: 'grid', gap: 4, maxHeight: 220, overflow: 'auto' }}>
+          {members.map(m => (
+            <div key={m._id} style={{ display: 'flex', gap: 10, alignItems: 'center', fontSize: 12.5, borderBottom: '1px solid #F2EFE9', padding: '6px 2px' }}>
+              <span style={{ flex: 1, color: '#231715', fontWeight: 600 }}>{m.name}</span>
+              <button onClick={() => onRemove(m)} style={{ padding: '4px 10px', borderRadius: 7, border: '1.5px solid #E8B4B4', background: '#fff', color: '#B91C1C', fontWeight: 800, fontSize: 10.5, cursor: 'pointer' }}>Remove</button>
+            </div>
+          ))}
+        </div>
+      )}
+      <div style={{ marginTop: 18, borderTop: '1px solid #E5DFD3', paddingTop: 12 }}>
+        <button onClick={onStepDown} style={{ padding: '8px 14px', borderRadius: 9, border: '1.5px solid #E5DFD3', background: '#fff', color: '#8A8378', fontWeight: 800, fontSize: 11.5, cursor: 'pointer' }}>Step down as leader</button>
+      </div>
+    </div>
+  )
+}
+
 function ClubProjects({ club, user, toast, readOnly }) {
   const [projects, setProjects] = useState([])
   const [top3, setTop3] = useState([])
