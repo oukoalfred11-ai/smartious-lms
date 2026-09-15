@@ -150,33 +150,39 @@ export default function ClubsHub({ user, toast, readOnly = false }) {
   }
 
   const Card = ({ c }) => (
-    <div style={{ background: '#fff', borderRadius: 16, overflow: 'hidden', border: `1px solid ${LINE}`, boxShadow: '0 6px 20px rgba(26,26,26,.06)', display: 'flex', flexDirection: 'column', transition: 'transform .15s, box-shadow .15s' }}
-      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 14px 30px rgba(26,26,26,.12)' }}
-      onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(26,26,26,.06)' }}>
-      <div onClick={() => openClub(c)} style={{ position: 'relative', aspectRatio: '16/10', cursor: 'pointer', background: c.coverImage ? `url(${c.coverImage}) center/cover no-repeat, linear-gradient(135deg, ${c.color}, #1A1A1A)` : `linear-gradient(135deg, ${c.color}, #1A1A1A)` }}>
-        {!c.coverImage && <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: .18 }}><Ico k={c.icon} c="#fff" s={110} /></div>}
-        {c.coverImage && <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(0,0,0,0) 55%, rgba(0,0,0,.35))' }} />}
-        <div style={{ position: 'absolute', left: '50%', bottom: -26, transform: 'translateX(-50%)', width: 56, height: 56, borderRadius: '50%', background: c.color, border: '4px solid #fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(0,0,0,.2)' }}>
-          <Ico k={c.icon} c="#fff" s={26} />
+    <div style={{ background: '#fff', border: `1px solid ${LINE}`, borderRadius: 10, padding: 14, display: 'flex', flexDirection: 'column', transition: 'transform .15s, box-shadow .15s' }}
+      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 14px 30px rgba(26,26,26,.10)' }}
+      onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none' }}>
+      {c.coverImage ? (
+        <img src={c.coverImage} alt="" loading="lazy" onClick={() => openClub(c)} style={{
+          width: '100%', height: 150, borderRadius: 8, objectFit: 'cover', cursor: 'pointer',
+          marginBottom: 10, border: '1px solid #E8E2D6',
+        }} />
+      ) : (
+        <div onClick={() => openClub(c)} style={{
+          width: '100%', height: 150, borderRadius: 8, marginBottom: 10, cursor: 'pointer',
+          background: 'linear-gradient(150deg, #7D1025 0%, #5C0B1B 60%, #3E0712 100%)',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8,
+        }}>
+          <Ico k={c.icon} c={GOLD} s={44} />
+          <div style={{ color: GOLD, fontSize: 10, fontWeight: 800, letterSpacing: '.14em', textTransform: 'uppercase' }}>{c.category || 'Activity'}</div>
         </div>
-      </div>
-      <div style={{ padding: '36px 16px 16px', textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <div onClick={() => openClub(c)} style={{ fontWeight: 900, fontSize: 14.5, letterSpacing: '.03em', color: c.color, textTransform: 'uppercase', cursor: 'pointer' }}>{c.name}</div>
-        <div style={{ fontSize: 12.5, color: MUTE, lineHeight: 1.5, margin: '8px 0 14px', flex: 1 }}>{c.tagline}</div>
-        <div style={{ fontSize: 11, color: MUTE, marginBottom: 10 }}>{c.memberCount} member{c.memberCount === 1 ? '' : 's'}{c.leaders?.length ? ` \u00b7 ${c.leaders.map(l => l.name).join(', ')}` : ''}</div>
-        {!readOnly && (
-          c.isLeader ? (
-            <button onClick={() => { openClub(c); setModalTab('manage') }} style={{
-              padding: '9px 0', borderRadius: 8, border: 'none', cursor: 'pointer', fontWeight: 800, fontSize: 13, color: '#fff', background: GOLD,
-            }}>You lead {'\u00b7'} Manage</button>
-          ) : (
-            <button onClick={() => toggleJoin(c)} disabled={busy === c._id} style={{
-              padding: '9px 0', borderRadius: 8, border: 'none', cursor: 'pointer', fontWeight: 800, fontSize: 13, color: '#fff',
-              background: isStaff ? CR : (c.isMember ? '#15803D' : c.color), opacity: busy === c._id ? .6 : 1,
-            }}>{isStaff ? 'Lead this activity' : c.isMember ? 'Joined' : 'Join Club'}</button>
-          )
-        )}
-      </div>
+      )}
+      <div onClick={() => openClub(c)} style={{ fontWeight: 900, fontSize: 14.5, color: INK, cursor: 'pointer', lineHeight: 1.3 }}>{c.name}</div>
+      <div style={{ fontSize: 12.5, color: MUTE, lineHeight: 1.5, margin: '6px 0 10px', flex: 1 }}>{c.tagline}</div>
+      <div style={{ fontSize: 11, color: MUTE, marginBottom: 10 }}>{c.memberCount} member{c.memberCount === 1 ? '' : 's'}{c.leaders?.length ? ` \u00b7 ${c.leaders.map(l => l.name).join(', ')}` : ''}</div>
+      {!readOnly && (
+        c.isLeader ? (
+          <button onClick={() => { openClub(c); setModalTab('manage') }} style={{
+            padding: '9px 0', borderRadius: 8, border: 'none', cursor: 'pointer', fontWeight: 800, fontSize: 13, color: '#fff', background: GOLD,
+          }}>You lead {'\u00b7'} Manage</button>
+        ) : (
+          <button onClick={() => toggleJoin(c)} disabled={busy === c._id} style={{
+            padding: '9px 0', borderRadius: 8, border: 'none', cursor: 'pointer', fontWeight: 800, fontSize: 13, color: '#fff',
+            background: c.isMember ? '#15803D' : CR, opacity: busy === c._id ? .6 : 1,
+          }}>{isStaff ? 'Lead this activity' : c.isMember ? 'Joined' : 'Join Club'}</button>
+        )
+      )}
     </div>
   )
 
