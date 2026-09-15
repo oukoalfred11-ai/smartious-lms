@@ -25,6 +25,7 @@ import StudentSessionsModule from './modules/StudentSessionsModule.jsx'
 import UsersLogsModule from './modules/UsersLogsModule.jsx'
 import SupportModule from './modules/SupportModule.jsx'
 import MessagesOversightModule from './modules/MessagesOversightModule.jsx'
+import InventoryModule from './modules/InventoryModule.jsx'
 import NotificationsBell from '../../../components/NotificationsBell.jsx'
 import CurriculumModule from './modules/CurriculumModule.jsx'
 import BillingModule, { FeeCollectionModule } from './modules/BillingModule.jsx'
@@ -72,7 +73,7 @@ const NAV_SECTIONS = {
     { label: 'Overview',    items: ['command', 'dashboard', 'analytics'] },
     { label: 'People',      items: ['users', 'teachers', 'allocations', 'sessions', 'communication', 'support', 'dmoversight', 'community', 'announcements'] },
     { label: 'Reports',     items: ['reports', 'dosperformance', 'mastery'] },
-    { label: 'Operations',  items: ['frontdesk', 'assessment', 'documents', 'payroll', 'leave', 'programmes'] },
+    { label: 'Operations',  items: ['frontdesk', 'assessment', 'documents', 'payroll', 'leave', 'programmes', 'inventory'] },
     { label: 'Teaching',    items: ['liveclasses', 'clubs', 'grouprooms', 'curriculum'] },
     { label: 'Question Bank', items: ['questionbank', 'markingreview'] },
     { label: 'Marketing',   items: ['studio'] },
@@ -81,7 +82,7 @@ const NAV_SECTIONS = {
   accountant: [
     { label: 'Overview',    items: ['checkin', 'dashboard', 'analytics'] },
     { label: 'Fee Management', items: ['feecollection', 'billing', 'sessions'] },
-    { label: 'Finance',     items: ['payroll'] },
+    { label: 'Finance',     items: ['payroll', 'inventory'] },
     { label: 'System',      items: ['settings'] },
   ],
   dos: [
@@ -107,6 +108,7 @@ const NAV_SECTIONS = {
   ops_manager: [
     { label: 'Overview',    items: ['command', 'checkin', 'dashboard', 'analytics'] },
     { label: 'Support',       items: ['support', 'dmoversight'] },
+    { label: 'Inventory',     items: ['inventory'] },
     { label: 'People',      items: ['users', 'teachers', 'allocations', 'sessions', 'communication'] },
     { label: 'Reports',     items: ['cooreports', 'reports', 'dosperformance', 'mastery'] },
     { label: 'Performance', items: ['teacherratings'] },
@@ -451,6 +453,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         {safePage === 'userlogs' && <UsersLogsModule toast={toast} />}
         {safePage === 'support' && <SupportModule toast={toast} />}
         {safePage === 'dmoversight' && <MessagesOversightModule toast={toast} />}
+        {safePage === 'inventory' && <InventoryModule toast={toast} />}
         {safePage === 'ai'          && <MshauriModule    refreshKey={refreshKey} toast={toast} />}
       </div>
 
