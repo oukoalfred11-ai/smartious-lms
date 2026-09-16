@@ -231,4 +231,39 @@ async function sendAnnouncementEmail({ announcement, recipients }) {
   return sent
 }
 
-module.exports = { sendPauseNotice, sendReportBackNotice, sendBirthdayEmail, sendBirthdayLetterEmail, sendAnnouncementEmail }
+// ── Exam result release ─────────────────────────────────────
+// Sent the moment a teacher saves marks on a paper. One email to the
+// student and every attached parent (resolved by lib/recipients.js
+// with the resultsEmails preference), so a marked paper is never
+// silent. The result PDF stays behind login; the email carries the
+// headline figures and points at the portal.
+async function sendExamResultEmail({ student, recipients = [], exam = {}, submission = {}, markerName = '' }) {
+  const to = dedupeEmails(recipients)
+  if (!to.length) return false
+
+  const studentName = [student?.firstName, student?.lastName].filter(Boolean).join(' ') || 'your child'
+  const paper = exam.paperNumber ? ' ' + exam.paperNumber : ''
+  const title = (exam.subject || 'Exam') + paper + ' results released'
+  const portal = (process.env.CLIENT_URL || 'https://smartioushomeschool.com') + '/login'
+
+  const scoreLine = (submission.totalScore ?? 0) + ' / ' + (submission.maxScore ?? 0) +
+    ' (' + (submission.percentage ?? 0) + '%)' +
+    (submission.grade ? ' &middot; Grade ' + submission.grade : '')
+
+  const html = brandWrap(title, `
+    <p>The following paper for <strong>${studentName}</strong> has been marked and the result is now available in the portal.</p>
+    <table style="width:100%;border-collapse:collapse;margin:14px 0;">
+      <tr><td style="padding:6px 0;color:#6B7280;width:130px;">Assessment</td><td style="padding:6px 0;"><strong>${exam.title || 'Exam'}</strong></td></tr>
+      <tr><td style="padding:6px 0;color:#6B7280;">Subject</td><td style="padding:6px 0;">${exam.subject || ''}${paper}</td></tr>
+      <tr><td style="padding:6px 0;color:#6B7280;">Score</td><td style="padding:6px 0;"><strong style="color:${CRIMSON};">${scoreLine}</strong></td></tr>
+      ${markerName ? `<tr><td style="padding:6px 0;color:#6B7280;">Marked by</td><td style="padding:6px 0;">${markerName}</td></tr>` : ''}
+    </table>
+    ${submission.feedback ? `<p style="background:#FDFAF4;border-left:3px solid ${GOLD};padding:10px 14px;margin:14px 0;">${String(submission.feedback).slice(0, 800)}</p>` : ''}
+    <p>Log in to view the full paper, question by question marks and the downloadable result report.</p>
+    <p style="margin-top:18px;"><a href="${portal}" style="background:${CRIMSON};color:#ffffff;padding:11px 22px;text-decoration:none;border-radius:6px;font-weight:bold;">Open the Portal</a></p>
+  `)
+
+  return safeSend(to.join(', '), title + ' - ' + studentName, html)
+}
+
+module.exports = { sendPauseNotice, sendReportBackNotice, sendBirthdayEmail, sendBirthdayLetterEmail, sendAnnouncementEmail, sendExamResultEmail }
