@@ -835,7 +835,43 @@ router.post('/submissions/:subId/grade', auth, requireRole('teacher','admin', 'd
     submission.gradedBy = req.user._id;
     await submission.save();
 
-    res.json({ success:true, message:'Graded.', data: { submission } });
+    // ── Release notice: the moment marks are saved, the student and
+    //    every attached parent get the result by email, plus an in-app
+    //    notification. Fire and forget — a mail failure must never
+    //    make the marking itself fail.
+    (async () => {
+      try {
+        const exam = submission.examId || {};
+        const { notify } = require('../lib/notify');
+        const { resolveStudentRecipients } = require('../lib/recipients');
+        const { sendExamResultEmail } = require('../services/notificationEmails');
+
+        const paper = exam.paperNumber ? ' ' + exam.paperNumber : '';
+        await notify(submission.studentId, {
+          title: 'Results released: ' + (exam.subject || 'Exam') + paper,
+          body: (exam.title || 'Your exam') + ' has been marked. Score: '
+            + submission.totalScore + '/' + submission.maxScore
+            + ' (' + submission.percentage + '%'
+            + (submission.grade ? ', grade ' + submission.grade : '') + ').',
+          module: 'exams',
+        });
+
+        const { to, student } = await resolveStudentRecipients(submission.studentId, { includeStudent: true, category: 'resultsEmails' });
+        if (to.length) {
+          await sendExamResultEmail({
+            student,
+            recipients: to,
+            exam,
+            submission,
+            markerName: [req.user.firstName, req.user.lastName].filter(Boolean).join(' '),
+          });
+        }
+      } catch (e) {
+        console.error('[exams grade] result notice failed:', e.message);
+      }
+    })();
+
+    res.json({ success:true, message:'Graded. Result released to the student and parents.', data: { submission } });
   } catch (e) {
     console.error('[exams grade] failed:', e.message);
     res.status(500).json({ success:false, message:'Failed to grade.' });
