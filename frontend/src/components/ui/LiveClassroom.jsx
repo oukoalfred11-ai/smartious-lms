@@ -29,28 +29,24 @@ import { SfuEngine } from '../../classroom/sfu.js'
 
 const BASE = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/api\/?$/, '')
 
-// ── Classroom themes ───────────────────────────────────────
-// Applied per user (a student can read in light mode while the
-// teacher stays dark — every board op is colour-explicit, and eraser
-// strokes always paint the LOCAL background, so boards stay in sync
-// across themes).
+// ── Classroom theme ────────────────────────────────────────
+// ONE theme for everyone: dark. The classroom used to offer per user
+// dark, light and bone boards, but because pen strokes are colour
+// explicit and boards must stay in sync, a teacher writing with the
+// white pen on a dark board was invisible to any student reading in
+// light mode (white ink on a white board), and the reverse happened
+// with dark ink. A single shared dark board means what the teacher
+// sees is exactly what every student sees, and the default white pen
+// always reads.
 const THEMES = {
   dark:  { name: 'Dark',  app: '#0B0F17', panel: '#131A26', strip: '#0E141F', board: '#10151F',
            text: '#FFFFFF', sub: 'rgba(255,255,255,.5)', btn: 'rgba(255,255,255,.1)', btnText: 'rgba(255,255,255,.85)',
            border: 'rgba(255,255,255,.08)', field: 'rgba(255,255,255,.08)', grid: 'rgba(255,255,255,.07)', gridBold: 'rgba(255,255,255,.14)', defaultPen: '#FFFFFF' },
-  light: { name: 'Light', app: '#EDEDEF', panel: '#FFFFFF', strip: '#F4F4F6', board: '#FFFFFF',
-           text: '#1B1B1F', sub: 'rgba(0,0,0,.5)', btn: 'rgba(0,0,0,.07)', btnText: 'rgba(0,0,0,.75)',
-           border: 'rgba(0,0,0,.1)', field: 'rgba(0,0,0,.06)', grid: 'rgba(30,64,175,.12)', gridBold: 'rgba(30,64,175,.25)', defaultPen: '#1B1B1F' },
-  bone:  { name: 'Bone',  app: '#EFE9DC', panel: '#FDFAF4', strip: '#F5F0E4', board: '#FDFAF4',
-           text: '#2B2620', sub: 'rgba(43,38,32,.55)', btn: 'rgba(125,16,37,.08)', btnText: '#5A4634',
-           border: 'rgba(125,16,37,.14)', field: 'rgba(125,16,37,.06)', grid: 'rgba(125,16,37,.1)', gridBold: 'rgba(125,16,37,.2)', defaultPen: '#2B2620' },
 }
-const THEME_ORDER = ['dark', 'light', 'bone']
 
-// Quick pen swatches (theme-independent, chosen to read on all three
-// backgrounds except the matching-background ones, which is why both
-// white and near-black are offered).
-const PEN_COLOURS = ['#FFFFFF', '#1B1B1F', '#E24B4A', '#C9A030', '#60A5FA', '#4ADE80', '#F97316', '#C084FC']
+// Quick pen swatches. Near black was removed with the light themes:
+// on the one dark board it was the new invisible ink.
+const PEN_COLOURS = ['#FFFFFF', '#E24B4A', '#C9A030', '#60A5FA', '#4ADE80', '#F97316', '#C084FC']
 
 // Buttons read the active theme through this ref so the whole chrome
 // re-skins on a theme switch without threading a prop everywhere.
@@ -596,7 +592,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   viewRef.current = { zoom, offset }
 
   // ── layout / resilience ──
-  const [themeId, setThemeId] = useState(() => localStorage.getItem('sm_class_theme') || 'light')
+  const themeId = 'dark'   // single shared board style, see THEMES above
   const T = THEMES[themeId] || THEMES.dark
   const themeRef = useRef(T)
   // Live mirrors for the recorder's paint loop: a recording can run for an
@@ -638,11 +634,6 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   const pointersRef = useRef(new Map())   // two-finger pan / pinch zoom
   const penSeenRef = useRef(false)        // stylus detected -> palm rejection
 
-  const cycleTheme = () => {
-    const next = THEME_ORDER[(THEME_ORDER.indexOf(themeId) + 1) % THEME_ORDER.length]
-    setThemeId(next)
-    localStorage.setItem('sm_class_theme', next)
-  }
   const toggleFull = () => {
     if (document.fullscreenElement) document.exitFullscreen()
     else rootRef.current?.requestFullscreen?.()
@@ -2579,6 +2570,11 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
             display: 'flex', alignItems: 'center', gap: 7, background: C.card, color: C.text, border: '1px solid ' + C.border,
             borderRadius: 10, padding: '7px 13px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
           }}><Ic d={ICONS.view} size={14} /> View</button>
+          {/* The only item left in this menu is Record, so it is a
+              teacher control now — students no longer see the dots
+              (the Board style switcher that lived here was removed
+              with the single dark theme). */}
+          {isTeacher && (
           <div style={{ position: 'relative' }}>
             <button onClick={() => setMoreOpen(o => !o)} title="More" style={{
               background: C.card, color: C.text, border: '1px solid ' + C.border, borderRadius: 10,
@@ -2586,17 +2582,13 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
             }}><Ic d={ICONS.dots} size={16} /></button>
             {moreOpen && (
               <div style={{ position: 'absolute', right: 0, top: 40, background: C.pill, borderRadius: 12, padding: 6, zIndex: 40, boxShadow: '0 10px 32px rgba(0,0,0,.55)', minWidth: 190 }}>
-                {isTeacher && (
-                  <button onClick={() => { setMoreOpen(false); recording ? stopRecording() : startRecording() }} style={{ display: 'flex', alignItems: 'center', gap: 9, width: '100%', background: 'transparent', border: 'none', color: recording ? '#F87171' : C.text, fontSize: 12.5, fontWeight: 600, padding: '9px 11px', borderRadius: 8, cursor: 'pointer' }}>
-                    <Ic d={ICONS.record} size={15} /> {recording ? 'Stop recording' : 'Record the lesson'}
-                  </button>
-                )}
-                <button onClick={() => { setMoreOpen(false); cycleTheme() }} style={{ display: 'flex', alignItems: 'center', gap: 9, width: '100%', background: 'transparent', border: 'none', color: C.text, fontSize: 12.5, fontWeight: 600, padding: '9px 11px', borderRadius: 8, cursor: 'pointer' }}>
-                  <Ic d={ICONS.grid} size={15} /> Board style: {T.name}
+                <button onClick={() => { setMoreOpen(false); recording ? stopRecording() : startRecording() }} style={{ display: 'flex', alignItems: 'center', gap: 9, width: '100%', background: 'transparent', border: 'none', color: recording ? '#F87171' : C.text, fontSize: 12.5, fontWeight: 600, padding: '9px 11px', borderRadius: 8, cursor: 'pointer' }}>
+                  <Ic d={ICONS.record} size={15} /> {recording ? 'Stop recording' : 'Record the lesson'}
                 </button>
               </div>
             )}
           </div>
+          )}
         </div>
       </div>
       )}
