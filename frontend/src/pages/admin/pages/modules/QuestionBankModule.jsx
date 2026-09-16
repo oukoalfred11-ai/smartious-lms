@@ -15,7 +15,6 @@ function QuestionBankModule({ toast }) {
   const [bulkOpen,  setBulkOpen]  = useState(false)
   // Past-paper banks supply questions but no answers. Importing them
   // is allowed when this is ticked; they arrive held inactive.
-  const [allowNoScheme, setAllowNoScheme] = useState(false)
   const [artQueue,  setArtQueue]  = useState(null)
   const [importOpen,setImportOpen]= useState(false)
   const [diag,      setDiag]      = useState(null)
@@ -75,18 +74,13 @@ function QuestionBankModule({ toast }) {
   const runDiagnose = async () => {
     setDiagBusy(true)
     try {
-      const [selfRes, aiRes] = await Promise.allSettled([
-        api.get('/questions/selftest'),
-        api.get('/questions/ai-marking/status'),
-      ])
-      const base = selfRes.status==='fulfilled' ? (selfRes.value.data?.data||null) : null
-      const ai   = aiRes.status==='fulfilled'   ? (aiRes.value.data?.data||null)   : null
-      setDiag(base ? { ...base, aiMarking: ai } : (ai ? { checks:[], classes:[], aiMarking:ai } : null))
-      const r = { data: selfRes.status==='fulfilled' ? selfRes.value.data : {} }
+      const r = await api.get('/questions/homework-debug')
+      const d = r.data?.data || {}
+      setDiag({ checks: [], classes: d.classes || [] })
       toast?.ok?.(r.data?.message || 'Diagnosis complete.')
     } catch(e) {
       toast?.error?.(e?.response?.data?.message || 'Diagnose failed — is the backend deployed?')
-      setDiag({ checks:[{ name:'Endpoint reachable', pass:false, detail:'GET /api/questions/selftest failed — the updated question-bank.js route is not deployed.' }], classes:[] })
+      setDiag({ checks:[{ name:'Endpoint reachable', pass:false, detail:'GET /api/questions/homework-debug failed.' }], classes:[] })
     }
     setDiagBusy(false)
   }
@@ -114,7 +108,7 @@ function QuestionBankModule({ toast }) {
     } catch(e) { toast?.error?.('Invalid JSON: ' + e.message); return }
     setImporting(true)
     try {
-      const r = await api.post('/questions/bulk', { questions: payload, allowMissingScheme: allowNoScheme })
+      const r = await api.post('/questions/bulk', { questions: payload })
       toast?.ok?.(r.data?.message || 'Imported.')
       const errs = r.data?.data?.errors || []
       if (errs.length) console.warn('[import errors]', errs)
@@ -225,26 +219,6 @@ function QuestionBankModule({ toast }) {
               </div>
             </div>
           ))}
-
-          {diag.aiMarking && (
-            <div style={{ marginTop:14, padding:'11px 15px', borderRadius:8, display:'flex', alignItems:'center', gap:12,
-              background: diag.aiMarking.ready ? '#F0FDF4' : TOKENS.s100,
-              border:`1px solid ${diag.aiMarking.ready ? TOKENS.accentEmerald+'55' : TOKENS.line}` }}>
-              <div style={{ width:9, height:9, borderRadius:'50%', background: diag.aiMarking.ready?TOKENS.accentEmerald:TOKENS.s400, flexShrink:0 }}/>
-              <div style={{ flex:1 }}>
-                <div style={{ fontSize:12.5, fontWeight:800, color:TOKENS.ink }}>
-                  AI marking: {diag.aiMarking.ready ? 'ACTIVE' : 'OFF — teachers mark by hand'}
-                </div>
-                <div style={{ fontSize:11.5, color:TOKENS.s500, marginTop:1 }}>{diag.aiMarking.note}</div>
-              </div>
-              {diag.aiMarking.ready && (
-                <div style={{ textAlign:'right', flexShrink:0 }}>
-                  <div style={{ fontSize:14, fontWeight:900, color:TOKENS.crimson }}>${(diag.aiMarking.stats?.estCostUSD||0).toFixed(2)}</div>
-                  <div style={{ fontSize:10, color:TOKENS.s400 }}>{diag.aiMarking.usedToday||0} / {diag.aiMarking.dailyCap} today</div>
-                </div>
-              )}
-            </div>
-          )}
 
           {(diag.classes||[]).length>0 && (
             <div style={{ marginTop:16, borderTop:`1.5px solid ${TOKENS.line}`, paddingTop:14 }}>
@@ -386,18 +360,6 @@ function QuestionBankModule({ toast }) {
               <textarea value={importTxt} onChange={e=>setImportTxt(e.target.value)} rows={14}
                 placeholder='[ { "subject": "Biology", ... } ]'
                 style={{ width:'100%', padding:'12px 14px', borderRadius:8, border:`1.5px solid ${TOKENS.s100}`, fontSize:12.5, fontFamily:'ui-monospace,monospace', boxSizing:'border-box', resize:'vertical', color:TOKENS.ink }}/>
-              <label style={{ display:'flex', alignItems:'flex-start', gap:10, marginTop:14, padding:'12px 14px',
-                              background:allowNoScheme?'#FBF6EA':TOKENS.cream, borderRadius:8,
-                              border:`1px solid ${allowNoScheme?'#E8D9AE':TOKENS.s100}`, cursor:'pointer' }}>
-                <input type="checkbox" checked={allowNoScheme} onChange={e=>setAllowNoScheme(e.target.checked)}
-                  style={{ width:16, height:16, marginTop:2, accentColor:TOKENS.crimson, cursor:'pointer', flexShrink:0 }}/>
-                <span style={{ fontSize:12.5, color:TOKENS.s700, lineHeight:1.6 }}>
-                  <strong>Allow questions with no mark scheme</strong><br/>
-                  For past-paper banks that supply questions but no answers. They import but stay
-                  <strong> inactive</strong>, so a teacher can browse and assign them while auto-homework
-                  never serves them until a mark scheme is written. Leave unticked for normal imports.
-                </span>
-              </label>
               <div style={{ display:'flex', gap:12, justifyContent:'flex-end', marginTop:14 }}>
                 <button onClick={()=>setImportOpen(false)} style={{ padding:'10px 20px', borderRadius:8, border:`1px solid ${TOKENS.s100}`, background:'transparent', color:TOKENS.s700, fontWeight:600, cursor:'pointer' }}>Cancel</button>
                 <button onClick={runImport} disabled={importing||!importTxt.trim()} style={{ padding:'10px 24px', borderRadius:8, background:importing||!importTxt.trim()?TOKENS.s300:TOKENS.crimson, color:'#fff', border:'none', fontWeight:700, cursor:importing?'not-allowed':'pointer' }}>
