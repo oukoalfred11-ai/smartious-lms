@@ -106,7 +106,16 @@ async function priorLessonNames(lc) {
 }
 
 async function buildPaper(lc, priorNames, total) {
-  const base = { isActive: { $ne: false } }
+  // Active questions only, and never one whose required diagram has
+  // not been uploaded: "study the diagram below" with no diagram is
+  // unanswerable, and activation no longer guarantees artwork exists.
+  const base = {
+    isActive: { $ne: false },
+    $nor: [
+      { imageNeeded: true,        'artwork.status': { $ne: 'uploaded' } },
+      { 'artwork.required': true, 'artwork.status': { $ne: 'uploaded' } },
+    ],
+  }
   if (lc.subject)    base.subject    = new RegExp('^' + escapeRe(lc.subject) + '$', 'i')
   if (lc.curriculum) base.curriculum = lc.curriculum
 
@@ -146,7 +155,16 @@ async function buildPaper(lc, priorNames, total) {
 
 // Kept for the diagnostics endpoint: how big is the addressable pool?
 async function poolForClass(lc) {
-  const base = { isActive: { $ne: false } }
+  // Active questions only, and never one whose required diagram has
+  // not been uploaded: "study the diagram below" with no diagram is
+  // unanswerable, and activation no longer guarantees artwork exists.
+  const base = {
+    isActive: { $ne: false },
+    $nor: [
+      { imageNeeded: true,        'artwork.status': { $ne: 'uploaded' } },
+      { 'artwork.required': true, 'artwork.status': { $ne: 'uploaded' } },
+    ],
+  }
   if (lc.subject)    base.subject    = new RegExp('^' + escapeRe(lc.subject) + '$', 'i')
   if (lc.curriculum) base.curriculum = lc.curriculum
   const filter = lc.syllabusSubtopicName
