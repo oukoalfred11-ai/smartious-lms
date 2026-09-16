@@ -18,7 +18,6 @@ import ReportsModule from './modules/ReportsModule.jsx'
 import CommunicationModule from './modules/CommunicationModule.jsx'
 import StudentsManagementModule from './modules/AllocationsModule.jsx'
 import QuestionBankModule from './modules/QuestionBankModule.jsx'
-import MarkingReviewModule from './modules/MarkingReviewModule.jsx'
 import { COOReportOverviewModule, TeacherRatingsModule } from './modules/RatingsModule.jsx'
 import PayrollModule from './modules/PayrollModule.jsx'
 import StudentSessionsModule from './modules/StudentSessionsModule.jsx'
@@ -75,7 +74,7 @@ const NAV_SECTIONS = {
     { label: 'Reports',     items: ['reports', 'dosperformance', 'mastery'] },
     { label: 'Operations',  items: ['frontdesk', 'assessment', 'documents', 'payroll', 'leave', 'programmes', 'inventory'] },
     { label: 'Teaching',    items: ['liveclasses', 'clubs', 'grouprooms', 'curriculum'] },
-    { label: 'Question Bank', items: ['questionbank', 'markingreview'] },
+    { label: 'Question Bank', items: ['questionbank'] },
     { label: 'Marketing',   items: ['studio'] },
     { label: 'System',      items: ['userlogs', 'billing', 'website', 'settings', 'ai', 'suggestions'] },
   ],
@@ -94,7 +93,7 @@ const NAV_SECTIONS = {
     { label: 'Student Sessions', items: ['sessions'] },
     { label: 'Breaks',        items: ['dosbreaks'] },
     { label: 'Timetables',    items: ['dostimetable'] },
-    { label: 'Question Bank', items: ['questionbank', 'markingreview'] },
+    { label: 'Question Bank', items: ['questionbank'] },
     { label: 'Reports',       items: ['reports', 'dosperformance', 'mastery'] },
     { label: 'System',        items: ['settings'] },
   ],
@@ -444,7 +443,6 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         {safePage === 'programmes'  && <ProgrammesModule refreshKey={refreshKey} toast={toast} />}
         {safePage === 'grouprooms'  && <GroupRoomsModule refreshKey={refreshKey} toast={toast} />}
         {safePage === 'curriculum'  && <CurriculumModule refreshKey={refreshKey} toast={toast} />}
-        {safePage === 'markingreview' && <MarkingReviewModule toast={toast} />}
         {safePage === 'billing'        && <BillingModule       refreshKey={refreshKey} toast={toast}/>}
         {safePage === 'studio'         && <StudioModule        toast={toast}/>}
         {safePage === 'feecollection' && <FeeCollectionModule refreshKey={refreshKey} toast={toast}/>}
