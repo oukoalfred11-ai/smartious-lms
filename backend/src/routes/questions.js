@@ -147,31 +147,14 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
       console.error('[questions POST] spine check failed:', e.message);
     }
 
-    // ── A markable question needs a mark scheme ──────────────
-    // MCQs mark themselves. Everything else is marked by a teacher or
-    // by AI, and neither can mark to nothing. Accepted without one
-    // only if explicitly flagged, in which case it is held inactive.
-    const needsScheme = type && type !== 'mcq';
+    // ── AI marking removed ───────────────────────────────────
+    // Teachers mark every non-MCQ answer themselves, so a mark scheme
+    // is optional context rather than a requirement, and a question is
+    // ACTIVE the moment it is saved. If a scheme is sent it is kept.
     const ms = markScheme || {};
     const hasScheme = !!(ms.modelAnswer
       || (Array.isArray(ms.points) && ms.points.length)
       || (Array.isArray(ms.acceptableAnswers) && ms.acceptableAnswers.length));
-    if (needsScheme && !hasScheme && req.body.allowMissingScheme !== true) {
-      return res.status(400).json({
-        success: false,
-        message: 'A model answer or marking points are required so the question can be marked. '
-               + 'Tick "save without a mark scheme" to store it as a draft instead.',
-      });
-    }
-    if (needsScheme && hasScheme && Array.isArray(ms.points) && ms.points.length) {
-      const sum = ms.points.reduce((t, p) => t + (Number(p.marks) || 0), 0);
-      if (Number(marks) > 0 && sum !== Number(marks)) {
-        return res.status(400).json({
-          success: false,
-          message: `The marking points total ${sum} but the question is worth ${marks}. They must match.`,
-        });
-      }
-    }
     if (!questionText || !questionText.trim()) {
       return res.status(400).json({ success: false, message: 'questionText is required.' });
     }
@@ -211,8 +194,8 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
         acceptableAnswers: Array.isArray(ms.acceptableAnswers) ? ms.acceptableAnswers : [],
         commonErrors:      Array.isArray(ms.commonErrors) ? ms.commonErrors : [],
       } : undefined,
-      needsMarkScheme: needsScheme && !hasScheme,
-      isActive:     !(needsScheme && !hasScheme),
+      needsMarkScheme: false,
+      isActive:     true,
       lessonCode:   lessonCode || '',
       createdBy:    req.user._id,
     });
