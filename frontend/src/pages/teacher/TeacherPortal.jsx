@@ -1496,6 +1496,81 @@ const qbTypeMeta = {
   upload:      { letter: 'U', color: '#7D1025', label: 'Upload' },
 }
  
+// ── QUESTION VIEW ────────────────────────────────────────────
+// One clean rendering of a bank question, used by the detail modal.
+// Diagrams are first-class: every image attachment displays inline at
+// readable size, on the question itself and on every part. Explicit
+// light colours only — the teacher portal inverts the shared theme
+// tokens, which is what previously made question surfaces render dark.
+const QV = { ink: '#1B1B1F', sub: '#6B7280', line: '#E8E0D0', good: '#15803D', goodBg: '#F0FDF4' }
+function QvDiagrams({ list }) {
+  if (!Array.isArray(list) || !list.length) return null
+  return (
+    <div style={{ margin: '10px 0' }}>
+      {list.map((a, i) => a?.mimeType?.startsWith('image/')
+        ? <a key={i} href={a.url} target="_blank" rel="noopener noreferrer">
+            <img src={a.url} alt={a.filename || 'diagram'} style={{ display: 'block', maxWidth: '100%', width: 'auto', maxHeight: 380, margin: '8px 0', border: '1px solid ' + QV.line, borderRadius: 8, background: '#FFFFFF' }} />
+          </a>
+        : <a key={i} href={a.url} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', margin: '4px 8px 4px 0', padding: '7px 12px', border: '1px solid ' + QV.line, borderRadius: 6, fontSize: 12.5, color: QV.ink, textDecoration: 'none', background: '#FBFAF5' }}>{a.filename || 'File'}</a>)}
+    </div>
+  )
+}
+function QvOptions({ options, correct }) {
+  const opts = (options || []).filter(o => String(o ?? '').trim() !== '')
+  if (!opts.length) return null
+  return (
+    <div style={{ margin: '8px 0 2px' }}>
+      {opts.map((opt, i) => {
+        const isCorrect = correct === i || (typeof correct === 'string' && correct !== '' && correct === opt)
+        return (
+          <div key={i} style={{ display: 'flex', alignItems: 'baseline', gap: 10, padding: '7px 12px', borderRadius: 7, marginBottom: 4, background: isCorrect ? QV.goodBg : '#FFFFFF', border: '1px solid ' + (isCorrect ? '#86EFAC' : QV.line) }}>
+            <span style={{ fontWeight: 700, color: isCorrect ? QV.good : QV.sub, fontSize: 12.5, width: 16, flexShrink: 0 }}>{String.fromCharCode(65 + i)}</span>
+            <span style={{ color: isCorrect ? QV.good : QV.ink, fontSize: 13.5, lineHeight: 1.6, fontWeight: isCorrect ? 600 : 400 }}>{renderMath(String(opt))}</span>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+function QvParts({ parts, path = [] }) {
+  if (!Array.isArray(parts) || !parts.length) return null
+  return (
+    <div style={{ marginTop: 8 }}>
+      {parts.map((p, i) => {
+        const here = [...path, i]
+        const label = labelAt(here).split('.').pop()
+        const hasKids = Array.isArray(p.parts) && p.parts.length > 0
+        return (
+          <div key={i} style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 10 }}>
+            <span style={{ fontWeight: 700, color: QV.ink, minWidth: 22, flexShrink: 0, fontSize: 13.5 }}>({label})</span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+                <span style={{ color: QV.ink, fontSize: 13.5, lineHeight: 1.65, flex: 1 }}>{renderMath(p.text || '')}</span>
+                {!hasKids && (p.marks || p.marks === 0) && <span style={{ color: QV.sub, fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap' }}>{p.marks} mark{p.marks === 1 ? '' : 's'}</span>}
+              </div>
+              <QvDiagrams list={p.attachments} />
+              {p.type === 'mcq' && <QvOptions options={p.options} correct={p.correctAnswer} />}
+              {hasKids && <QvParts parts={p.parts} path={here} />}
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+function QuestionView({ q }) {
+  const nested = Array.isArray(q.parts) && q.parts.length > 0
+  const mcqCorrect = typeof q.correctIndex === 'number' ? q.correctIndex : q.correctAnswer
+  return (
+    <div style={{ background: '#FFFFFF', color: QV.ink, fontSize: 14.5, lineHeight: 1.65 }}>
+      <div>{renderMath(q.questionText || '')}</div>
+      <QvDiagrams list={q.attachments} />
+      {q.type === 'mcq' && !nested && <QvOptions options={q.options} correct={mcqCorrect} />}
+      {nested && <QvParts parts={q.parts} />}
+    </div>
+  )
+}
+
 function QuestionBankTab({ user, store, setPage, toast }) {
   // ── DATA ──
   const [catalog, setCatalog] = useState({ curricula: [], gradesByCurriculum: {}, subjects: [] })
@@ -1509,8 +1584,8 @@ function QuestionBankTab({ user, store, setPage, toast }) {
   const [filterSubject, setFilterSubject] = useState('')
   const [filterGrade, setFilterGrade] = useState('')
   const [filterType, setFilterType] = useState('')
-  const [filterSpecial, setFilterSpecial] = useState('')       // '' | needsArtwork | draftScheme | noScheme | unused | inactive
-  const [attnCounts, setAttnCounts] = useState(null)           // {needsArtwork, draftScheme, noScheme}
+  const [filterSpecial, setFilterSpecial] = useState('')       // '' | needsArtwork | unused | inactive
+  const [attnCounts, setAttnCounts] = useState(null)           // {needsArtwork}
   const [searchQ, setSearchQ] = useState('')
   const [showOnlyMine, setShowOnlyMine] = useState(false)
  
@@ -1550,11 +1625,6 @@ function QuestionBankTab({ user, store, setPage, toast }) {
     difficulty: 'medium',
     attachments: [],              // [{url, publicId, filename, mimeType, sizeBytes}]
     parts: [],                    // for NESTED questions — empty = flat question
-    // Mark scheme. The backend REJECTS any non-MCQ question without one
-    // — a marker cannot mark to nothing — but this form never collected
-    // it, so teachers could only ever save multiple choice.
-    markScheme: { modelAnswer: '', points: [], acceptableAnswers: [], commonErrors: [] },
-    allowMissingScheme: false,
   })
  
   // Load catalog once
@@ -1698,8 +1768,6 @@ function QuestionBankTab({ user, store, setPage, toast }) {
       curriculum: '', grade: '', subject: '', topic: '', subtopic: '', type: 'mcq',
       questionText: '', options: ['', '', '', ''],
       correctIndex: null, correctAnswer: '', explanation: '',
-      markScheme: { modelAnswer: '', points: [], acceptableAnswers: [], commonErrors: [] },
-      allowMissingScheme: false,
       marks: 1, difficulty: 'medium', attachments: [], parts: [],
     })
     setCreateOpen(true)
@@ -1872,8 +1940,6 @@ function QuestionBankTab({ user, store, setPage, toast }) {
       if (filledOptions.length < 2) return 'MCQ needs at least 2 options'
       if (form.correctIndex === null) return 'Mark which option is correct'
       if (!form.options[form.correctIndex]?.trim()) return 'Correct option must have text'
-    } else if (form.type === 'short' || form.type === 'long') {
-      if (!form.correctAnswer.trim()) return 'Model answer is required'
     }
     return null
   }
@@ -1911,15 +1977,6 @@ function QuestionBankTab({ user, store, setPage, toast }) {
         attachments: form.attachments,
         parts: Array.isArray(form.parts) ? form.parts : [],
         // MCQs mark themselves; everything else needs a scheme.
-        markScheme: form.type === 'mcq' ? undefined : {
-          modelAnswer:       (form.markScheme?.modelAnswer || '').trim(),
-          points:            (form.markScheme?.points || [])
-                               .filter(pt => (pt.text || '').trim())
-                               .map(pt => ({ text: pt.text.trim(), marks: Number(pt.marks) || 1 })),
-          acceptableAnswers: form.markScheme?.acceptableAnswers || [],
-          commonErrors:      form.markScheme?.commonErrors || [],
-        },
-        allowMissingScheme: !!form.allowMissingScheme,
       }
  
       const { data } = editingId
@@ -2097,8 +2154,6 @@ function QuestionBankTab({ user, store, setPage, toast }) {
           {[
             ['', 'All questions', null],
             ['needsArtwork', 'Needs artwork', attnCounts?.needsArtwork],
-            ['draftScheme', 'Schemes to approve', attnCounts?.draftScheme],
-            ['noScheme', 'No mark scheme', attnCounts?.noScheme],
             ['unused', 'Never used in an exam', null],
             ['inactive', 'Inactive / drafts', null],
           ].map(([val, label, count]) => (
@@ -2166,15 +2221,16 @@ function QuestionBankTab({ user, store, setPage, toast }) {
               : 'Unknown'
             const hasAttachments = (q.attachments || []).length > 0
             const qNeedsArt = (q.artwork?.required && q.artwork?.status !== 'uploaded') || (q.imageNeeded && q.artwork?.status !== 'uploaded')
-            const qDraftScheme = !!(q.draftMarkScheme?.modelAnswer && !q.draftMarkScheme?.approved)
-            const qNoScheme = q.type !== 'mcq' && !(q.markScheme?.modelAnswer) && !(q.markScheme?.points?.length) && !qDraftScheme
+            const firstImage = (q.attachments || []).find(x => x?.mimeType?.startsWith('image/'))
             return (
               <div key={q._id} className="card" onClick={() => setDetailQ(q)}
                 style={{ padding: 14, cursor: 'pointer', display: 'flex', alignItems: 'flex-start', gap: 12, transition: 'all .15s',
                          background: '#FFFFFF', color: '#0D1220' }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor = '#7D1025' }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)' }}>
-                <div style={{ width: 36, height: 36, borderRadius: 8, background: typeMeta.color + '15', color: typeMeta.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'JetBrains Mono, monospace', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>{typeMeta.letter}</div>
+                {firstImage
+                  ? <img src={firstImage.url} alt="diagram" style={{ width: 52, height: 52, borderRadius: 8, objectFit: 'cover', border: '1px solid #E8E0D0', background: '#FFFFFF', flexShrink: 0 }} />
+                  : <div style={{ width: 36, height: 36, borderRadius: 8, background: typeMeta.color + '15', color: typeMeta.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'JetBrains Mono, monospace', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>{typeMeta.letter}</div>}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 14, color: '#0D1220', marginBottom: 4, fontWeight: 500, lineHeight: 1.5 }}>{renderMath(q.questionText)}</div>
                   <div style={{ fontSize: 11.5, color: '#6B7280', display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -2184,8 +2240,6 @@ function QuestionBankTab({ user, store, setPage, toast }) {
                     <span style={{ background: 'var(--s100)', color: 'var(--s600)', padding: '1px 7px', borderRadius: 99, fontSize: 10, fontWeight: 700 }}>{typeMeta.label}</span>
                     {q.isActive === false && <span style={{ background: '#F3F4F6', color: '#6B7280', padding: '1px 7px', borderRadius: 99, fontSize: 10, fontWeight: 700 }}>Inactive draft</span>}
                     {qNeedsArt && <span style={{ background: '#FEF3C7', color: '#92400E', padding: '1px 7px', borderRadius: 99, fontSize: 10, fontWeight: 700 }}>Needs artwork</span>}
-                    {qDraftScheme && <span style={{ background: '#DBEAFE', color: '#1D4ED8', padding: '1px 7px', borderRadius: 99, fontSize: 10, fontWeight: 700 }}>Scheme to approve</span>}
-                    {qNoScheme && <span style={{ background: '#FEE2E2', color: '#B91C1C', padding: '1px 7px', borderRadius: 99, fontSize: 10, fontWeight: 700 }}>No mark scheme</span>}
                     {hasAttachments && (
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, color: 'var(--s500)' }}>
                         <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -2355,48 +2409,12 @@ function QuestionBankTab({ user, store, setPage, toast }) {
           <div onClick={e => e.stopPropagation()} style={{ background: '#FFF', borderRadius: 12, maxWidth: 720, width: '100%', maxHeight: '85vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,.3)' }}>
             <div style={{ padding: '20px 28px', background: 'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)', color: '#FBFAF5' }}>
               <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, color: '#F0CC5A', marginBottom: 4 }}>
-                {detailQ.curriculum} · {detailQ.subject} · {detailQ.grade}
+                {[detailQ.curriculum, detailQ.subject, detailQ.grade].filter(Boolean).join(' · ')}
               </div>
-              <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22 }}>{qbTypeMeta[detailQ.type]?.label || 'Question'}</div>
+              <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22 }}>{detailQ.topic || qbTypeMeta[detailQ.type]?.label || 'Question'}</div>
             </div>
-            <div style={{ padding: '20px 28px' }}>
-              <div style={{ fontSize: 15, color: '#0D1220', lineHeight: 1.6, marginBottom: 14 }}>{renderMath(detailQ.questionText)}</div>
-              {detailQ.attachments && detailQ.attachments.length > 0 && (
-                <div style={{ marginBottom: 14 }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--s500)', marginBottom: 6 }}>Attachments</div>
-                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    {detailQ.attachments.map((a, i) => (
-                      <a key={i} href={a.url} target="_blank" rel="noopener noreferrer">
-                        {a.mimeType?.startsWith('image/') ? (
-                          <img src={a.url} alt={a.filename || 'attachment'} style={{ maxWidth: 180, maxHeight: 120, borderRadius: 6, border: '1px solid var(--border)' }} />
-                        ) : (
-                          <div style={{ padding: '8px 12px', background: 'var(--s100)', borderRadius: 6, fontSize: 12 }}>{a.filename || 'File'}</div>
-                        )}
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {detailQ.type === 'mcq' && detailQ.options && detailQ.options.length > 0 && (
-                <div style={{ marginBottom: 14 }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--s500)', marginBottom: 6 }}>Options</div>
-                  {detailQ.options.map((opt, i) => {
-                    const isCorrect = (typeof detailQ.correctAnswer === 'number' && detailQ.correctAnswer === i) ||
-                                      (typeof detailQ.correctAnswer === 'string' && detailQ.correctAnswer === opt)
-                    return (
-                      <div key={i} style={{ padding: '8px 12px', borderRadius: 6, marginBottom: 4, background: isCorrect ? '#DCFCE7' : 'var(--bg)', border: '1px solid ' + (isCorrect ? '#86EFAC' : 'var(--border)'), fontSize: 13, color: isCorrect ? '#15803D' : 'var(--s700)', fontWeight: isCorrect ? 600 : 400, display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: isCorrect ? '#15803D' : 'var(--s400)' }}>{String.fromCharCode(65 + i)}</span>
-                        {opt}
-                        {isCorrect && (
-                          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#15803D" strokeWidth="3" strokeLinecap="round" style={{ marginLeft: 'auto' }}>
-                            <polyline points="20 6 9 17 4 12"/>
-                          </svg>
-                        )}
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
+            <div style={{ padding: '22px 28px', background: '#FFFFFF' }}>
+              <QuestionView q={detailQ} />
               {detailQ.type !== 'mcq' && detailQ.correctAnswer && (
                 <div style={{ marginBottom: 14 }}>
                   <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--s500)', marginBottom: 6 }}>Model Answer</div>
@@ -2594,104 +2612,6 @@ function QuestionBankTab({ user, store, setPage, toast }) {
                   marker, human or AI, cannot mark to nothing. This form
                   never collected it, so saving anything but multiple
                   choice failed with a 400 and no obvious cause. */}
-              {form.type !== 'mcq' && (
-                <div style={{
-                  background:'#FBF6E3', border:'1px solid #E8D58F',
-                  borderRadius:8, padding:'14px 16px', marginBottom:14,
-                }}>
-                  <div style={{ fontSize:11, fontWeight:800, letterSpacing:'.08em',
-                                textTransform:'uppercase', color:'#7D5A0F', marginBottom:10 }}>
-                    Mark scheme
-                  </div>
-
-                  <div className="fg">
-                    <label className="fl">Model answer</label>
-                    <textarea className="fi" rows={3}
-                      value={form.markScheme?.modelAnswer || ''}
-                      onChange={e => setF('markScheme', { ...form.markScheme, modelAnswer: e.target.value })}
-                      placeholder="The full-credit answer, as you would write it"
-                      style={{ resize:'vertical' }}/>
-                  </div>
-
-                  <div className="fg" style={{ marginBottom:8 }}>
-                    <label className="fl">
-                      Marking points
-                      {(form.markScheme?.points || []).length > 0 && (() => {
-                        const sum = (form.markScheme.points || []).reduce((t,p)=>t+(Number(p.marks)||0),0)
-                        const target = Number(form.marks) || 0
-                        return (
-                          <span style={{
-                            marginLeft:8, fontSize:11, fontWeight:700,
-                            color: sum === target ? 'var(--g600)' : '#B45309',
-                          }}>
-                            {sum} of {target} marks allocated
-                            {sum !== target ? ' — these must match' : ' \u2713'}
-                          </span>
-                        )
-                      })()}
-                    </label>
-                    {(form.markScheme?.points || []).map((pt, idx) => (
-                      <div key={idx} style={{ display:'flex', gap:8, marginBottom:6, alignItems:'center' }}>
-                        <input className="fi" value={pt.text || ''}
-                          onChange={e => {
-                            const pts = [...(form.markScheme.points || [])]
-                            pts[idx] = { ...pts[idx], text: e.target.value }
-                            setF('markScheme', { ...form.markScheme, points: pts })
-                          }}
-                          placeholder={'What earns mark ' + (idx + 1)}/>
-                        <input className="fi" type="number" min="1" style={{ width:70, flexShrink:0 }}
-                          value={pt.marks ?? 1}
-                          onChange={e => {
-                            const pts = [...(form.markScheme.points || [])]
-                            pts[idx] = { ...pts[idx], marks: parseInt(e.target.value) || 1 }
-                            setF('markScheme', { ...form.markScheme, points: pts })
-                          }}/>
-                        <button type="button" className="btn btn-s btn-sm" style={{ flexShrink:0 }}
-                          onClick={() => setF('markScheme', {
-                            ...form.markScheme,
-                            points: (form.markScheme.points || []).filter((_, x) => x !== idx),
-                          })}>&times;</button>
-                      </div>
-                    ))}
-                    <button type="button" className="btn btn-s btn-sm"
-                      onClick={() => setF('markScheme', {
-                        ...form.markScheme,
-                        points: [...(form.markScheme?.points || []), { text:'', marks:1 }],
-                      })}>+ Add marking point</button>
-                  </div>
-
-                  <div className="fg">
-                    <label className="fl">Also accept (optional, comma-separated)</label>
-                    <input className="fi"
-                      value={(form.markScheme?.acceptableAnswers || []).join(', ')}
-                      onChange={e => setF('markScheme', {
-                        ...form.markScheme,
-                        acceptableAnswers: e.target.value.split(',').map(x=>x.trim()).filter(Boolean),
-                      })}
-                      placeholder="e.g. 4800, 4 800, four thousand eight hundred"/>
-                  </div>
-
-                  <div className="fg" style={{ marginBottom:0 }}>
-                    <label className="fl">Common errors (optional, comma-separated)</label>
-                    <input className="fi"
-                      value={(form.markScheme?.commonErrors || []).join(', ')}
-                      onChange={e => setF('markScheme', {
-                        ...form.markScheme,
-                        commonErrors: e.target.value.split(',').map(x=>x.trim()).filter(Boolean),
-                      })}
-                      placeholder="e.g. 4700 (rounded down instead of up)"/>
-                  </div>
-
-                  <label style={{ display:'flex', alignItems:'center', gap:8, marginTop:12,
-                                  fontSize:12, color:'#7D5A0F', cursor:'pointer' }}>
-                    <input type="checkbox" checked={!!form.allowMissingScheme}
-                      onChange={e => setF('allowMissingScheme', e.target.checked)}/>
-                    Save without a mark scheme &mdash; stored as an inactive draft until one is added
-                  </label>
-                </div>
-              )}
-
- 
               {(form.type === 'drawing' || form.type === 'upload') && (
                 <div style={{ background: '#FBF6E3', borderLeft: '3px solid #C9A030', padding: '10px 14px', borderRadius: 6, fontSize: 12.5, color: 'var(--s700)', marginBottom: 14, lineHeight: 1.6 }}>
                   {form.type === 'drawing'
@@ -5149,7 +5069,7 @@ function ExamsTab({ user, store, setPage, toast }) {
                           <div style={{ fontSize: 13, color: 'var(--s900)', fontWeight: 600 }}>{q.questionText || q.question}</div>
                         </div>
                         <span style={{
-                          background: 'var(--bg)', color: 'var(--s700)',
+                          background: '#F4EFEB', color: 'var(--s700)',
                           padding: '4px 8px', borderRadius: 'var(--rsm)',
                           fontSize: 11, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace',
                           flexShrink: 0,
@@ -6685,7 +6605,7 @@ function HomeworkTab({ user, store, setPage, toast }) {
               {submissionsLoading && <div style={{ padding: 24, textAlign: 'center', color: 'var(--s500)' }}>Loading submissions...</div>}
 
               {!submissionsLoading && submissions.length === 0 && (
-                <div style={{ padding: 24, textAlign: 'center', color: 'var(--s500)', background: 'var(--bg)', borderRadius: 6 }}>
+                <div style={{ padding: 24, textAlign: 'center', color: 'var(--s500)', background: '#F4EFEB', borderRadius: 6 }}>
                   No submissions yet. Students will appear here once they submit.
                 </div>
               )}
@@ -6798,7 +6718,7 @@ function HomeworkTab({ user, store, setPage, toast }) {
                           <a key={i} href={att.url} target="_blank" rel="noopener noreferrer">
                             {att.mimeType?.startsWith('image/')
                               ? <img src={att.url} alt="" style={{ maxWidth: 150, maxHeight: 100, borderRadius: 4, border: '1px solid var(--border)' }}/>
-                              : <span style={{ fontSize: 12, padding: '4px 10px', background: 'var(--bg)', borderRadius: 4 }}>{att.filename || 'File'}</span>}
+                              : <span style={{ fontSize: 12, padding: '4px 10px', background: '#F4EFEB', borderRadius: 4 }}>{att.filename || 'File'}</span>}
                           </a>
                         ))}
                       </div>
