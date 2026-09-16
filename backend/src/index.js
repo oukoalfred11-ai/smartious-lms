@@ -74,7 +74,6 @@ app.use('/api/attendance', require('./routes/attendance'));
 app.use('/api/syllabus-progress', require('./routes/syllabus-progress'));
 app.use('/api/lesson-progress', require('./routes/lesson-progress'));
 app.use('/api/curriculum',     require('./routes/curriculum'));
-app.use('/api/timetables', require('./routes/timetables'));
 app.use('/api/syllabus', require('./routes/syllabus'));
 app.use('/api/classroom', require('./routes/classroom'));
 app.use('/api/timetable', require('./routes/timetable'));
@@ -93,9 +92,7 @@ app.use('/api/liveclasses', require('./routes/liveclasses'));
 app.use('/api/questions', require('./routes/question-bank'));
 app.use('/api/questions', require('./routes/questions'));
 
-app.use('/api/ai-review', require('./routes/ai-review'));
 app.use('/api/homework', require('./routes/homework'));
-app.use('/api/curriculum', require('./routes/curriculum'));
 app.use('/api/exams', require('./routes/exams'));
 app.use('/api/status',         require('./routes/status-management'));
 app.use('/api/frontdesk', require('./routes/frontdesk'));
@@ -189,7 +186,6 @@ try { require('./lib/snapshots').startSnapshotJobs(); } catch (e) { console.erro
 try { require('./lib/timetableMaterializer').startTimetableMaterializer(); } catch (e) { console.error('[timetable]', e.message); }
 try { require('./services/birthdayCron').startBirthdayCron(); } catch (e) { console.error('[birthday-cron] start failed:', e.message); }
 try { require('./services/announcementMailer').startAnnouncementMailer(); } catch (e) { console.error('[announcement-mailer] failed to start:', e.message); }
-try { require('./services/aiMarking').logStartupState(); } catch (e) { /* service optional */ }
 
 const runCheckinReminder = () => {
   const now = new Date();
