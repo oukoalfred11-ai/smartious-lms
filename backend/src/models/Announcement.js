@@ -27,6 +27,12 @@ const announcementSchema = new mongoose.Schema({
   // Optional picture, stored as a data URL (validated and size capped
   // in the route), rendered as the card banner in the portals.
   imageData: { type: String, default: '' },
+  // Optional video (mp4/webm on R2, uploaded presigned). Rendered as
+  // the card banner in the portals, playing continuously (muted loop).
+  videoUrl:  { type: String, trim: true, maxlength: 600, default: '' },
+  // When true, this announcement's video also plays as the student
+  // dashboard hero banner (latest live one wins).
+  heroBanner: { type: Boolean, default: false },
   ctaUrl:   { type: String, trim: true, maxlength: 500, default: '' },
 
   // Who sees it. 'all' covers students and parents; the others narrow it.
