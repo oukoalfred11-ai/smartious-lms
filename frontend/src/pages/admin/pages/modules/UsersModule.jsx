@@ -502,6 +502,7 @@ export function UserFormFields({ userForm, setUserForm, toast }) {
           <optgroup label="Staff Portals">
             <option value="admin">Administrator</option>
             <option value="dos">Dean of Studies (DOS)</option>
+            <option value="qa">Quality Assurance (QA)</option>
             <option value="ops_manager">Operations Manager / COO</option>
             <option value="accountant">Accountant</option>
             <option value="sales">Sales / Front Desk</option>
@@ -888,7 +889,7 @@ function UsersModule({ refreshKey, toast, setUserForm, setUserModal, openAddUser
     students: users.filter(u => u.role === 'student').length,
     teachers: users.filter(u => u.role === 'teacher').length,
     parents: users.filter(u => u.role === 'parent').length,
-    admins: users.filter(u => ['admin','accountant','sales','ops_manager','dos'].includes(u.role)).length,
+    admins: users.filter(u => ['admin','accountant','sales','ops_manager','dos','qa'].includes(u.role)).length,
     pending: users.filter(u => u.mustChangePassword).length,
   }
 
