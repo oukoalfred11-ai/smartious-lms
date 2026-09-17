@@ -648,6 +648,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   const [panelOpen, setPanelOpen] = useState(typeof window === 'undefined' || window.innerWidth >= 760)
   const [quality, setQuality] = useState({})       // socketId -> good|fair|poor|down
   const [reconnecting, setReconnecting] = useState(false)
+  const [audioBlocked, setAudioBlocked] = useState(false)  // browser autoplay refused audio until a tap
   const hadConnectedRef = useRef(false)
 
   useEffect(() => {
@@ -1114,6 +1115,13 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
                 onTrack: (id, s2) => setStreams(prev => ({ ...prev, [id]: s2 })),
                 onPeerClosed: (id) => setStreams(prev => { const n = { ...prev }; delete n[id]; return n }),
                 resolveSocketId: (uid) => { const bare = String(uid).split('#')[0]; return rosterRef.current?.find(r => String(r.userId) === bare)?.socketId || null },
+                // Fresh token for a full media rejoin — the join token expires.
+                getToken: async () => {
+                  try { const r = await api.post('/livekit/token/' + liveClassId); return r.data?.data?.token || null }
+                  catch (e) { return null }
+                },
+                onMediaState: (st) => setReconnecting(st === 'reconnecting'),
+                onAudioBlocked: (blocked) => setAudioBlocked(!!blocked),
               })
               await Promise.race([
                 sfuEngine.start(),
@@ -2509,13 +2517,13 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
     <>
       {(featured.self || featured.peer) && (
         featured.self
-          ? <Tile big stream={localStream} name={user?.firstName ? user.firstName + ' ' + (user.lastName || '') : 'You'} role={myRole} self micOn={micOn} camOn={camOn} hand={handUp} />
+          ? <Tile big stream={localStream} name={user?.firstName ? user.firstName + ' ' + (user.lastName || '') : 'You'} role={myRole} self micOn={micOn} camOn={camOn} hand={handUp} quality={quality.self} />
           : <Tile big stream={streams[featured.peer.socketId]} name={featured.peer.name} role={featured.peer.role}
               micOn={featured.peer.micOn} camOn={featured.peer.camOn} hand={featured.peer.hand} quality={quality[featured.peer.socketId]} />
       )}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
         {!featured.self && (
-          <Tile stream={localStream} name={'You'} role={myRole} self micOn={micOn} camOn={camOn} hand={handUp} />
+          <Tile stream={localStream} name={'You'} role={myRole} self micOn={micOn} camOn={camOn} hand={handUp} quality={quality.self} />
         )}
         {gridPeers.map(p => (
           <Tile key={p.socketId} stream={streams[p.socketId]} name={p.name} role={p.role}
@@ -2609,7 +2617,33 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       )}
       {reconnecting && phase === 'live' && (
         <div style={{ background: '#7C2D12', color: '#FED7AA', fontSize: 12, padding: '7px 16px', fontWeight: 700 }}>
-          Connection lost — reconnecting automatically...
+          Connection lost — reconnecting your audio and video automatically... stay on this page.
+        </div>
+      )}
+      {!reconnecting && phase === 'live' && (() => {
+        // Name who has slow internet, so nobody wonders whose side it is.
+        const slow = []
+        if (quality.self === 'poor' || quality.self === 'down') slow.push('You')
+        for (const p of roster) {
+          const q2 = quality[p.socketId]
+          if (q2 === 'poor' || q2 === 'down') slow.push(p.name?.split(' ')[0] || 'A participant')
+        }
+        if (!slow.length) return null
+        return (
+          <div style={{ background: '#78350F', color: '#FDE68A', fontSize: 12, padding: '6px 16px', fontWeight: 700 }}>
+            Slow internet: {slow.join(', ')} — audio is prioritised, video may pause.
+          </div>
+        )
+      })()}
+      {audioBlocked && phase === 'live' && (
+        <div style={{ position: 'fixed', bottom: 96, left: '50%', transform: 'translateX(-50%)', zIndex: 80 }}>
+          <button onClick={() => engineRef.current?.startAudio?.()} style={{
+            background: '#C9A030', color: '#1A0F0E', border: 'none', borderRadius: 99,
+            padding: '13px 26px', fontSize: 14, fontWeight: 800, cursor: 'pointer',
+            boxShadow: '0 10px 30px rgba(0,0,0,.5)',
+          }}>
+            Tap to enable class audio
+          </button>
         </div>
       )}
 
@@ -2629,7 +2663,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
             <div style={{ display: 'flex', gap: 8, overflowX: 'auto', alignItems: 'center', flexShrink: 0 }}>
               <Btn onClick={() => setTilesHidden(true)} style={{ padding: '4px 8px', fontSize: 10.5, flexShrink: 0 }}>Hide</Btn>
               <div style={{ width: 108, flexShrink: 0 }}>
-                <Tile small stream={localStream} name={'You'} role={myRole} self micOn={micOn} camOn={camOn} hand={handUp} />
+                <Tile small stream={localStream} name={'You'} role={myRole} self micOn={micOn} camOn={camOn} hand={handUp} quality={quality.self} />
               </div>
               {others.map(p => (
                 <div key={p.socketId} style={{ width: 108, flexShrink: 0 }}>
