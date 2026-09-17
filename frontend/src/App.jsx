@@ -10,6 +10,7 @@ import ResetPasswordPage from './pages/ResetPasswordPage.jsx'
 import AdminPortal       from './pages/admin/AdminPortal.jsx'
 import OpsPortal         from './pages/admin/OpsPortal.jsx'
 import DOSPortal         from './pages/admin/DOSPortal.jsx'
+import QAPortal          from './pages/admin/QAPortal.jsx'
 import AccountsPortal    from './pages/admin/AccountsPortal.jsx'
 import SalesPortal       from './pages/admin/SalesPortal.jsx'
 import TeacherPortal     from './pages/teacher/TeacherPortal.jsx'
@@ -49,6 +50,7 @@ function RoleRedirect() {
     admin:       '/admin',
     ops_manager: '/ops',
     dos:         '/dos',
+    qa:          '/qa',
     accountant:  '/accounts',
     sales:       '/sales',
     teacher:     '/teacher',
@@ -76,6 +78,7 @@ export default function App() {
               <Route path="/admin/*"        element={<Guard roles={['admin']}><AdminPortal /></Guard>} />
               <Route path="/ops/*"          element={<Guard roles={['ops_manager','admin']}><OpsPortal /></Guard>} />
               <Route path="/dos/*"          element={<Guard roles={['dos','admin']}><DOSPortal /></Guard>} />
+              <Route path="/qa/*"           element={<Guard roles={['qa','admin']}><QAPortal /></Guard>} />
               <Route path="/accounts/*"     element={<Guard roles={['accountant','admin']}><AccountsPortal /></Guard>} />
               <Route path="/sales/*"        element={<Guard roles={['sales','admin']}><SalesPortal /></Guard>} />
               <Route path="/teacher/*"      element={<Guard roles={['teacher','admin']}><TeacherPortal /></Guard>} />
