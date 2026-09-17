@@ -24,7 +24,7 @@ const AUDIENCES = [
 
 const EMPTY = {
   title: '', body: '', category: 'general', audience: 'all',
-  ctaLabel: '', ctaUrl: '', ctaModule: '', imageData: '', pinned: false, published: true,
+  ctaLabel: '', ctaUrl: '', ctaModule: '', imageData: '', videoUrl: '', heroBanner: false, pinned: false, published: true,
   showFrom: '', showUntil: '',
 }
 
@@ -43,6 +43,34 @@ export default function AnnouncementsModule({ toast }) {
   const [editing, setEditing] = useState(null)   // id being edited, or 'new', or null
   const [form, setForm] = useState(EMPTY)
   const [saving, setSaving] = useState(false)
+  const [vidBusy, setVidBusy] = useState(false)
+  const [vidPct, setVidPct] = useState(0)
+
+  // Presigned video upload: browser straight to R2, then the public
+  // URL lands in the form. MP4 or WebM, up to 200 MB.
+  const uploadVideo = async (file) => {
+    if (!file) return
+    if (!['video/mp4', 'video/webm'].includes(file.type)) { toast?.error?.('Only MP4 and WebM videos are accepted.'); return }
+    if (file.size > 200 * 1024 * 1024) { toast?.error?.('Videos must be 200 MB or smaller.'); return }
+    setVidBusy(true); setVidPct(0)
+    try {
+      const pr = await api.post('/announcements/video-presign', { fileName: file.name, mimeType: file.type, fileSize: file.size })
+      const pd = pr.data?.data || pr.data
+      if (!pd?.uploadUrl) throw new Error(pd?.message || 'Could not prepare the upload.')
+      await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest()
+        xhr.open('PUT', pd.uploadUrl)
+        xhr.setRequestHeader('Content-Type', file.type)
+        xhr.upload.onprogress = evt => { if (evt.total) setVidPct(Math.round((evt.loaded / evt.total) * 100)) }
+        xhr.onload = () => (xhr.status >= 200 && xhr.status < 300) ? resolve() : reject(new Error('Upload failed (' + xhr.status + ').'))
+        xhr.onerror = () => reject(new Error('Upload failed. Check your connection.'))
+        xhr.send(file)
+      })
+      setForm(f => ({ ...f, videoUrl: pd.publicUrl }))
+      toast?.ok?.('Video uploaded.')
+    } catch (e) { toast?.error?.(e.message || 'Video upload failed.') }
+    finally { setVidBusy(false); setVidPct(0) }
+  }
 
   const load = useCallback(() => {
     setLoading(true)
@@ -59,6 +87,8 @@ export default function AnnouncementsModule({ toast }) {
     setForm({
       title: a.title || '', body: a.body || '', category: a.category || 'general',
       audience: a.audience || 'all', ctaLabel: a.ctaLabel || '', ctaUrl: a.ctaUrl || '',
+      ctaModule: a.ctaModule || '', imageData: a.imageData || '',
+      videoUrl: a.videoUrl || '', heroBanner: !!a.heroBanner,
       pinned: !!a.pinned, published: a.published !== false,
       showFrom: toLocalInput(a.showFrom), showUntil: toLocalInput(a.showUntil),
     })
@@ -197,6 +227,32 @@ export default function AnnouncementsModule({ toast }) {
                       rd.onload = () => setForm(f => ({ ...f, imageData: rd.result }))
                       rd.readAsDataURL(f0)
                     }} />)}
+              </div>
+              <div style={{ display: 'grid', gap: 6, marginTop: 8 }}>
+                <label style={{ fontSize: 11.5, fontWeight: 800, color: '#7D1025' }}>Video (optional, MP4 or WebM up to 200MB)</label>
+                {form.videoUrl
+                  ? (<div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+                      <video src={form.videoUrl} muted controls style={{ width: 220, borderRadius: 8, border: '1px solid #E5DFD3', background: '#000' }} />
+                      <button type="button" onClick={() => setForm(f => ({ ...f, videoUrl: '', heroBanner: false }))}
+                        style={{ padding: '6px 12px', borderRadius: 7, border: '1px solid #FCA5A5', background: '#fff', color: '#B91C1C', fontSize: 11, fontWeight: 800, cursor: 'pointer' }}>Remove video</button>
+                    </div>)
+                  : (<input type="file" accept="video/mp4,video/webm" disabled={vidBusy} style={{ fontSize: 12 }}
+                      onChange={e => { const f0 = e.target.files && e.target.files[0]; e.target.value = ''; uploadVideo(f0) }} />)}
+                {vidBusy && (
+                  <div>
+                    <div style={{ height: 7, background: '#F4EFEB', borderRadius: 99, overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: vidPct + '%', background: '#7D1025', transition: 'width .2s' }} />
+                    </div>
+                    <div style={{ fontSize: 10.5, color: '#8A8378', marginTop: 3 }}>Uploading... {vidPct}%</div>
+                  </div>
+                )}
+                <div style={{ fontSize: 10.5, color: '#8A8378' }}>The video shows at the top of the announcement card and plays continuously on students' and parents' dashboards.</div>
+                {form.videoUrl && (
+                  <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 12, color: '#3A2E2A', cursor: 'pointer', marginTop: 2 }}>
+                    <input type="checkbox" checked={!!form.heroBanner} onChange={e => setForm(f => ({ ...f, heroBanner: e.target.checked }))} style={{ marginTop: 2 }} />
+                    <span><b>Play as the student dashboard banner.</b> The video fills the greeting banner and plays continuously; the student's own details pop in at the start and again after the first play through.</span>
+                  </label>
+                )}
               </div>
             </div>
           </div>
