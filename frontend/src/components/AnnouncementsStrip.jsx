@@ -73,7 +73,11 @@ export default function AnnouncementsStrip({ onNavigate } = {}) {
                 cursor: clickable ? 'pointer' : 'default',
                 display: 'flex', flexDirection: 'column', minHeight: 128,
               }}>
-              {a.imageData && (
+              {a.videoUrl && (
+                <video src={a.videoUrl} autoPlay muted loop playsInline controls
+                  style={{ width: 'calc(100% + 36px)', margin: '-16px -18px 12px', maxHeight: 200, objectFit: 'cover', borderRadius: '14px 14px 0 0', display: 'block', background: '#000' }} />
+              )}
+              {!a.videoUrl && a.imageData && (
                 <img src={a.imageData} alt="" style={{ width: 'calc(100% + 36px)', margin: '-16px -18px 12px', maxHeight: 130, objectFit: 'cover', borderRadius: '14px 14px 0 0', display: 'block' }} />
               )}
               <div style={{ display: 'flex', gap: 11, alignItems: 'flex-start' }}>
