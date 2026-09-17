@@ -2113,6 +2113,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
         try {
           const { data: fin } = await api.post('/classroom/' + liveClassId + '/recording/' + recId + '/finish')
           if (fin?.success && !fin.data?.discarded) window.alert('Recording saved. Students can watch it from the class card.')
+          else if (fin?.data?.reason === 'short') window.alert('This recording was under 20 minutes, so it was not saved. Only lessons of 20 minutes or more are kept.')
         } catch (e) { window.alert('The recording could not be saved.') }
       }
 
