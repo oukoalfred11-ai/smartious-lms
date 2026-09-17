@@ -1426,6 +1426,11 @@ const FORMATS = {
   story: { W: 2160, H: 3840, label: 'Story 4K 9:16' },
   square: { W: 2160, H: 2160, label: 'Square 4K 1:1' },
   youtube: { W: 3840, H: 2160, label: 'YouTube 4K 16:9' },
+  // Matches the student dashboard hero banner (about 15:4 — the
+  // greeting card is ~1478x395). Exported at 4K width so it stays
+  // crisp at any screen size; the hero's cover fit then shows the
+  // whole frame instead of cropping a 1:1 or 16:9 video down.
+  banner: { W: 3840, H: 1024, label: 'Dashboard Banner 15:4' },
 }
 
 function CardMaker({ toast }) {
