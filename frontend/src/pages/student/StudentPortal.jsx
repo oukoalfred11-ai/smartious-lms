@@ -11429,6 +11429,34 @@ function DashboardTab({ user, store, setPage, toast }) {
   const greeting = now.getHours()<12?'Good morning':now.getHours()<17?'Good afternoon':'Good evening'
   const dayLabel = now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})
 
+  // ── Hero banner video ──
+  // Admins can flag an announcement video as the dashboard banner.
+  // The video fills this section and plays continuously; the student's
+  // details pop in at the beginning, step aside while the video plays,
+  // and pop back for good once it has played through once.
+  const [heroVideo, setHeroVideo] = useState('')
+  const [heroDetails, setHeroDetails] = useState(true)
+  const heroPlayedRef = useRef(false)
+  useEffect(() => {
+    let gone = false
+    api.get('/announcements/hero-video')
+      .then(r => { if (!gone && r.data?.success && r.data.data.videoUrl) setHeroVideo(r.data.data.videoUrl) })
+      .catch(() => {})
+    return () => { gone = true }
+  }, [])
+  useEffect(() => {
+    if (!heroVideo) return
+    const t = setTimeout(() => { if (!heroPlayedRef.current) setHeroDetails(false) }, 5000)
+    return () => clearTimeout(t)
+  }, [heroVideo])
+  const onHeroTime = (e) => {
+    const v = e.target
+    if (!heroPlayedRef.current && v.duration && v.currentTime >= v.duration - 0.5) {
+      heroPlayedRef.current = true
+      setHeroDetails(true)
+    }
+  }
+
   // KPI data
   const kpis = [
     { label:'XP Earned',    val:xp.toLocaleString(),              color:TOKENS.gold,         sub:'all time' },
@@ -11448,8 +11476,19 @@ function DashboardTab({ user, store, setPage, toast }) {
         background:'linear-gradient(135deg,#7D1025 0%,#5A0B1B 55%,#3D0712 100%)',
         borderRadius:16, overflow:'hidden', marginBottom:20,
         boxShadow:'0 8px 32px rgba(125,16,37,.2)',
+        position:'relative', minHeight: heroVideo ? 200 : undefined,
       }}>
-        <div style={{ display:'flex', alignItems:'stretch' }}>
+        {heroVideo && (
+          <>
+            <video src={heroVideo} autoPlay muted loop playsInline onTimeUpdate={onHeroTime}
+              style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover' }} />
+            <div style={{ position:'absolute', inset:0, background: heroDetails ? 'linear-gradient(90deg, rgba(61,7,18,.82) 0%, rgba(61,7,18,.55) 55%, rgba(61,7,18,.25) 100%)' : 'transparent', transition:'background .6s ease' }} />
+          </>
+        )}
+        <div style={{ display:'flex', alignItems:'stretch', position:'relative',
+          opacity: heroVideo && !heroDetails ? 0 : 1,
+          pointerEvents: heroVideo && !heroDetails ? 'none' : 'auto',
+          transition:'opacity .6s ease' }}>
           {/* Avatar panel */}
           <div style={{ width:130, flexShrink:0, position:'relative', overflow:'hidden' }}>
             {avatar
