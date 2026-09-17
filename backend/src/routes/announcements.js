@@ -13,6 +13,18 @@ const { dispatchSoon } = require('../services/announcementMailer');
 const router = express.Router();
 const { auth, requireRole } = require('../middleware/auth');
 const Announcement = require('../models/Announcement');
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
+const { v4: uuidv4 } = require('uuid');
+
+// R2, for announcement videos (same store the library uses).
+const R2_READY = !!(process.env.R2_ACCOUNT_ID && process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY && process.env.R2_BUCKET_NAME && process.env.R2_PUBLIC_URL);
+const r2 = R2_READY ? new S3Client({
+  region: 'auto',
+  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  credentials: { accessKeyId: process.env.R2_ACCESS_KEY_ID, secretAccessKey: process.env.R2_SECRET_ACCESS_KEY },
+}) : null;
+const R2_PUBLIC = (process.env.R2_PUBLIC_URL || '').replace(/\/$/, '');
 
 const STAFF = ['admin', 'ops_manager', 'dos', 'teacher'];
 
@@ -84,6 +96,13 @@ const sanitize = (b = {}) => {
     if (!b.imageData) out.imageData = '';
     else if (b.imageData.startsWith('data:image/') && b.imageData.length <= 2_800_000) out.imageData = b.imageData;
   }
+  if (typeof b.videoUrl === 'string') {
+    // Empty clears; otherwise it must be a video we hosted on R2.
+    const v = b.videoUrl.trim().slice(0, 600);
+    if (!v) out.videoUrl = '';
+    else if (R2_PUBLIC && v.startsWith(R2_PUBLIC + '/announcements/')) out.videoUrl = v;
+  }
+  if (typeof b.heroBanner === 'boolean') out.heroBanner = b.heroBanner;
   if (typeof b.pinned === 'boolean') out.pinned = b.pinned;
   if (typeof b.published === 'boolean') out.published = b.published;
   if (b.showFrom) { const d = new Date(b.showFrom); if (!isNaN(d)) out.showFrom = d; }
@@ -93,6 +112,47 @@ const sanitize = (b = {}) => {
   }
   return out;
 };
+
+// POST /api/announcements/video-presign — staff upload a banner video.
+// Presigned like the library: the file goes browser to R2 directly.
+router.post('/video-presign', auth, requireRole(...STAFF), async (req, res) => {
+  try {
+    if (!R2_READY) return res.status(503).json({ success: false, message: 'Video storage (R2) is not configured on the server.' });
+    const { fileName, mimeType, fileSize } = req.body || {};
+    if (!fileName) return res.status(400).json({ success: false, message: 'fileName is required.' });
+    if (!['video/mp4', 'video/webm'].includes(mimeType))
+      return res.status(400).json({ success: false, message: 'Only MP4 and WebM videos are accepted.' });
+    const size = Number(fileSize) || 0;
+    if (size <= 0 || size > 200 * 1024 * 1024)
+      return res.status(400).json({ success: false, message: 'Videos must be between 1 byte and 200 MB.' });
+    const safeName = String(fileName).replace(/[^\w.\- ]+/g, '_').slice(0, 120);
+    const r2Key = `announcements/videos/${uuidv4()}-${safeName}`;
+    const uploadUrl = await getSignedUrl(r2, new PutObjectCommand({
+      Bucket: process.env.R2_BUCKET_NAME, Key: r2Key, ContentType: mimeType,
+    }), { expiresIn: 30 * 60 });
+    return res.json({ success: true, data: { uploadUrl, r2Key, publicUrl: `${R2_PUBLIC}/${r2Key}` } });
+  } catch (e) {
+    console.error('[announcements video-presign]', e.message);
+    return res.status(500).json({ success: false, message: 'Could not prepare the upload.' });
+  }
+});
+
+// GET /api/announcements/hero-video — the video the student dashboard
+// hero should play right now: the newest live, published announcement
+// flagged as a hero banner that carries a video.
+router.get('/hero-video', auth, async (req, res) => {
+  try {
+    const now = new Date();
+    const doc = await Announcement.findOne({
+      published: true, heroBanner: true, videoUrl: { $ne: '' },
+      showFrom: { $lte: now },
+      $or: [{ showUntil: null }, { showUntil: { $gte: now } }],
+    }).sort({ showFrom: -1 }).select('videoUrl title').lean();
+    return res.json({ success: true, data: { videoUrl: doc?.videoUrl || '', title: doc?.title || '' } });
+  } catch (e) {
+    return res.status(500).json({ success: false, message: e.message });
+  }
+});
 
 // POST /api/announcements — create
 router.post('/', auth, requireRole(...STAFF), async (req, res) => {
