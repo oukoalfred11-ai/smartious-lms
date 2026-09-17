@@ -111,6 +111,22 @@ router.post('/:liveClassId/recording/:recId/finish', auth, async (req, res) => {
     activeRecordings.delete(req.params.recId);
     if (rec.bytes === 0) { fs.unlinkSync(rec.path); return res.json({ success: true, data: { discarded: true } }); }
 
+    // ── 20 minute minimum ────────────────────────────────────
+    // Anything shorter is a false start, a tech check or a session
+    // that fizzled: it is discarded here, never uploaded to R2 and
+    // never attached to the class. Duration is measured on this
+    // server from the moment recording started, so a client cannot
+    // claim a longer lesson than it had.
+    const MIN_RECORDING_SEC = 20 * 60;
+    const durationSec = Math.round((Date.now() - rec.startedAt) / 1000);
+    if (durationSec < MIN_RECORDING_SEC) {
+      fs.unlink(rec.path, () => {});
+      return res.json({ success: true, data: {
+        discarded: true, reason: 'short',
+        durationSec, minimumSec: MIN_RECORDING_SEC,
+      } });
+    }
+
     const key = `recordings/${rec.classId}/${req.params.recId}.webm`;
     await r2.send(new PutObjectCommand({
       Bucket: process.env.R2_BUCKET_NAME,
@@ -127,7 +143,7 @@ router.post('/:liveClassId/recording/:recId/finish', auth, async (req, res) => {
       { _id: rec.classId },
       { $push: { recordings: {
         url, key, sizeBytes: rec.bytes,
-        durationSec: Math.round((Date.now() - rec.startedAt) / 1000),
+        durationSec,
         recordedAt: new Date(rec.startedAt),
       } } }
     );
