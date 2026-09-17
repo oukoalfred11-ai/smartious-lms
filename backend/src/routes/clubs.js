@@ -169,6 +169,11 @@ router.post('/:id/leave', auth, requireRole('student'), async (req, res) => {
     await Club.updateOne({ _id: req.params.id }, { $pull: { members: req.user._id } });
     await LiveClass.updateMany({ clubId: req.params.id, scheduledAt: { $gte: new Date() } }, { $pull: { assignedStudents: req.user._id } });
 
+
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
 // ── Leadership: teachers take and hand back activities ──
 // Joining as staff means LEADING, never sitting in the members list:
 // a leader can schedule meetings, run sessions, and manage the roster.
@@ -203,10 +208,6 @@ router.post('/:id/members/:memberId/remove', auth, requireRole('teacher', ...ADM
     await Club.updateOne({ _id: c._id }, { $pull: { members: req.params.memberId } });
     await LiveClass.updateMany({ clubId: c._id, scheduledAt: { $gte: new Date() } }, { $pull: { assignedStudents: req.params.memberId } });
     res.json({ success: true, message: 'Member removed from the activity.' });
-  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
-});
-
-    res.json({ success: true });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
 
