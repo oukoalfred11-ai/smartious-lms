@@ -16,7 +16,7 @@
  * otherwise the classroom builds MeshEngine exactly as before.
  */
 export class SfuEngine {
-  constructor({ url, token, localStream, onTrack, onPeerClosed, resolveSocketId, publish = true, onCanPublishChanged }) {
+  constructor({ url, token, localStream, onTrack, onPeerClosed, resolveSocketId, publish = true, onCanPublishChanged, getToken, onMediaState, onAudioBlocked }) {
     this.url = url;
     this.token = token;
     this.localStream = localStream;
@@ -30,6 +30,18 @@ export class SfuEngine {
     this.micPub = null;
     this._streams = new Map(); // identity -> MediaStream
     this._emittedKey = new Map(); // identity -> socketId the stream was emitted under
+    // ── Resilience ──
+    // getToken mints a FRESH LiveKit token for a full rejoin (the one we
+    // joined with expires); onMediaState reports 'reconnecting'/'connected'
+    // so the classroom can show its banner; onAudioBlocked reports the
+    // browser refusing to play audio until a tap (autoplay policy) — the
+    // classic "students cannot hear the teacher" failure.
+    this.getToken = getToken || null;
+    this.onMediaState = onMediaState || (() => {});
+    this.onAudioBlocked = onAudioBlocked || (() => {});
+    this._quality = new Map(); // identity ('__local' for self) -> good|fair|poor|down
+    this._closed = false;
+    this._rejoining = false;
   }
 
   async start() {
@@ -65,8 +77,81 @@ export class SfuEngine {
       }
     });
 
+    // ── Who has slow internet ──
+    // LiveKit scores every participant's link (excellent/good/poor/lost)
+    // and tells every client, so each tile can carry an honest indicator
+    // and the classroom can NAME who is struggling.
+    this.room.on(RoomEvent.ConnectionQualityChanged, (q, participant) => {
+      const mapped = { excellent: 'good', good: 'fair', poor: 'poor', lost: 'down' }[q];
+      const key = participant === this.room.localParticipant ? '__local' : participant.identity;
+      if (mapped) this._quality.set(key, mapped); else this._quality.delete(key);
+    });
+
+    // ── Media auto-reconnect ──
+    // LiveKit retries transparently on short blips (Reconnecting →
+    // Reconnected). If it gives up entirely (Disconnected), we rebuild the
+    // whole media session ourselves with a fresh token and keep retrying —
+    // slow internet must mean a wait, never a dead, silent classroom.
+    this.room.on(RoomEvent.Reconnecting, () => this.onMediaState('reconnecting'));
+    this.room.on(RoomEvent.Reconnected, () => this.onMediaState('connected'));
+    this.room.on(RoomEvent.Disconnected, () => {
+      if (this._closed) return;
+      this.onMediaState('reconnecting');
+      this._rejoin();
+    });
+
+    // ── Audio unlock ──
+    // Browsers refuse to PLAY audio until the person has interacted with
+    // the page. When that happens, tracks flow but the room is silent —
+    // the classroom shows a tap-to-enable button wired to startAudio().
+    this.room.on(RoomEvent.AudioPlaybackStatusChanged, () => {
+      this.onAudioBlocked(!this.room.canPlaybackAudio);
+    });
+
     await this.room.connect(this.url, this.token);
     if (this.publish) await this.setPublishing(true);
+    this.onMediaState('connected');
+    if (!this.room.canPlaybackAudio) this.onAudioBlocked(true);
+  }
+
+  /** The person tapped the enable-audio button. */
+  async startAudio() {
+    try { await this.room.startAudio(); this.onAudioBlocked(!this.room.canPlaybackAudio); }
+    catch (e) { console.error('[sfu] startAudio:', e.message); }
+  }
+
+  /** Full media rejoin with a fresh token and capped backoff. Runs until
+   *  it succeeds or the engine is destroyed; each failure waits a little
+   *  longer (2s up to 10s) so a flaky connection is retried gently. */
+  async _rejoin() {
+    if (this._rejoining || this._closed) return;
+    this._rejoining = true;
+    // Stale streams would freeze tiles; clear them so resubscription
+    // repopulates cleanly when the room comes back.
+    for (const [, key] of this._emittedKey) { try { this.onPeerClosed(key); } catch (e) { /* noop */ } }
+    this._streams.clear(); this._emittedKey.clear();
+    let attempt = 0;
+    while (!this._closed) {
+      attempt += 1;
+      const wait = Math.min(2000 * attempt, 10000);
+      await new Promise(r => setTimeout(r, wait));
+      if (this._closed) break;
+      try {
+        if (this.getToken) {
+          const fresh = await this.getToken();
+          if (fresh) this.token = fresh;
+        }
+        this.camPub = null; this.micPub = null;
+        await this.room.connect(this.url, this.token);
+        if (this.publish) await this.setPublishing(true);
+        this.onMediaState('connected');
+        if (!this.room.canPlaybackAudio) this.onAudioBlocked(true);
+        break;
+      } catch (e) {
+        console.error('[sfu] rejoin attempt ' + attempt + ':', e.message);
+      }
+    }
+    this._rejoining = false;
   }
 
   /** Publish (or stop publishing) the local mic and camera. Used at join
@@ -150,9 +235,19 @@ export class SfuEngine {
 
   /** SFU manages per-subscriber quality server-side (dynacast/adaptive). */
   async applyVideoPolicy() { return { sfu: true }; }
-  async getQuality() { return {}; }
+  /** Same shape the mesh engine returns — socketId -> good|fair|poor|down —
+   *  plus 'self' for the local link, fed by ConnectionQualityChanged. */
+  async getQuality() {
+    const out = {};
+    for (const [id, q] of this._quality) {
+      if (id === '__local') { out.self = q; continue; }
+      const key = this.resolveSocketId(id) || id;
+      if (key) out[key] = q;
+    }
+    return out;
+  }
   connectTo() { /* media comes from the SFU, not per-peer offers */ }
   close() { /* per-peer teardown handled by ParticipantDisconnected */ }
-  reset() { try { this.room && this.room.disconnect(); } catch (e) { /* noop */ } this._streams.clear(); this._emittedKey.clear(); }
-  destroy() { this.reset(); this.room = null; }
+  reset() { try { this.room && this.room.disconnect(); } catch (e) { /* noop */ } this._streams.clear(); this._emittedKey.clear(); this._quality.clear(); }
+  destroy() { this._closed = true; this.reset(); this.room = null; }
 }
