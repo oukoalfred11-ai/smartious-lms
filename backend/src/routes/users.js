@@ -136,7 +136,7 @@ function validateRoleFields(user, role) {
 }
 
 // GET /stats — Get total user count for sidebar badge
-router.get('/stats', auth, requireRole('admin', 'ops_manager', 'dos', 'accountant', 'sales'), async (req, res) => {
+router.get('/stats', auth, requireRole('admin', 'ops_manager', 'dos', 'accountant', 'sales', 'qa'), async (req, res) => {
   try {
     const totalUsers = await User.countDocuments();
     res.json({ success: true, totalUsers });
