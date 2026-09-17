@@ -91,7 +91,7 @@ export default function AdminLoginPage() {
       // in that case it already redirected to /reset-password, so just stop here.
       if (!user) { setLoading(false); return }
 
-      const STAFF_ROLES = ['admin','teacher','ops_manager','accountant','sales','dos']
+      const STAFF_ROLES = ['admin','teacher','ops_manager','accountant','sales','dos','qa']
       if (!STAFF_ROLES.includes(user.role)) {
         setErr('This login is for staff only. Students and parents please use the main portal.')
         setLoading(false)
@@ -105,6 +105,7 @@ export default function AdminLoginPage() {
         accountant:  '/accounts',
         sales:       '/sales',
         dos:         '/dos',
+        qa:          '/qa',
       }
       nav(ROLE_PATHS[user.role] || '/admin')
     } catch (e) {
