@@ -2743,7 +2743,9 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
                     setAnnotate={setSimAnnotate}
                     color={simInkColor}
                     setColor={setSimInkColor}
-                    onOp={(op) => { applySimInk(op); sendOpLive({ kind: 'simink', ...op }) }}
+                    applyLocal={applySimInk}
+                    send={(op) => sendOpLive({ kind: 'simink', ...op })}
+                    onBoard={() => setMainView('board')}
                   />
                 </>
               )}
@@ -4605,15 +4607,35 @@ function EconGraphSim() {
 }
 
 // ── Lab ink layer ────────────────────────────────────────────
-// A transparent canvas above an open practical. With the pen OFF it
-// lets every click and drag through to the practical; with the pen
-// ON (staff only) it captures the pointer and streams strokes to the
-// whole class in normalised coordinates, so the ink lands on the
-// same spot of the practical on every screen size.
-function SimInkLayer({ strokes, tick, canDraw, annotate, setAnnotate, color, setColor, onOp }) {
+// A transparent canvas above an open practical. Pen OFF: every
+// click, drag and scroll goes straight to the practical. Pen ON
+// (staff only): the pointer inks INSTANTLY — every sampled point,
+// including the browser's coalesced high-frequency samples, is
+// painted the moment it happens as a smoothed quadratic curve, while
+// the network send runs on its own batch timer behind the scenes.
+// The scroll wheel is forwarded to whatever scrolls underneath, so a
+// scrollable bench still scrolls with the pen in hand.
+function smoothInkPath(ctx, pts, w, h) {
+  if (!pts || pts.length === 0) return
+  ctx.beginPath()
+  const px = i => pts[i][0] * w, py = i => pts[i][1] * h
+  if (pts.length < 3) {
+    ctx.moveTo(px(0), py(0))
+    for (let i = 1; i < pts.length; i++) ctx.lineTo(px(i), py(i))
+    if (pts.length === 1) ctx.lineTo(px(0) + 0.01, py(0) + 0.01)
+  } else {
+    ctx.moveTo(px(0), py(0))
+    for (let i = 1; i < pts.length - 1; i++) {
+      ctx.quadraticCurveTo(px(i), py(i), (px(i) + px(i + 1)) / 2, (py(i) + py(i + 1)) / 2)
+    }
+    ctx.lineTo(px(pts.length - 1), py(pts.length - 1))
+  }
+  ctx.stroke()
+}
+function SimInkLayer({ strokes, tick, canDraw, annotate, setAnnotate, color, setColor, applyLocal, send, onBoard }) {
   const cvRef = useRef(null)
   const boxRef = useRef(null)
-  const drawingRef = useRef(null)   // { id, pending: [] }
+  const drawingRef = useRef(null)   // { id, pending: [] } pending = points not yet SENT
   const flushT = useRef(null)
 
   const redraw = () => {
@@ -4630,42 +4652,48 @@ function SimInkLayer({ strokes, tick, canDraw, annotate, setAnnotate, color, set
     ctx.clearRect(0, 0, r.width, r.height)
     ctx.lineCap = 'round'; ctx.lineJoin = 'round'
     for (const st of strokes) {
-      if (!st.pts || st.pts.length < 2) continue
       ctx.strokeStyle = st.color; ctx.lineWidth = st.size || 3
-      ctx.beginPath()
-      ctx.moveTo(st.pts[0][0] * r.width, st.pts[0][1] * r.height)
-      for (let i = 1; i < st.pts.length; i++) ctx.lineTo(st.pts[i][0] * r.width, st.pts[i][1] * r.height)
-      ctx.stroke()
+      smoothInkPath(ctx, st.pts, r.width, r.height)
     }
   }
   useEffect(redraw, [tick])
   useEffect(() => {
     const onR = () => redraw()
     window.addEventListener('resize', onR)
-    const iv = setInterval(onR, 1200)   // sims resize with the panel; keep in step
+    const iv = setInterval(onR, 1500)   // sims resize with the panel; keep in step
     return () => { window.removeEventListener('resize', onR); clearInterval(iv) }
   }, [])
 
-  const norm = (e) => {
+  const norm = (cx, cy) => {
     const r = boxRef.current.getBoundingClientRect()
-    return [Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), Math.min(1, Math.max(0, (e.clientY - r.top) / r.height))]
+    return [Math.min(1, Math.max(0, (cx - r.left) / r.width)), Math.min(1, Math.max(0, (cy - r.top) / r.height))]
+  }
+  const inkPoints = (pts) => {
+    // Paint NOW (instant feedback), queue for the batched network send.
+    applyLocal({ op: 'seg', id: drawingRef.current.id, color, size: 3, pts })
+    drawingRef.current.pending.push(...pts)
   }
   const flush = () => {
     const d = drawingRef.current
     if (!d || !d.pending.length) return
-    onOp({ op: 'seg', id: d.id, color, size: 3, pts: d.pending.splice(0) })
+    send({ op: 'seg', id: d.id, color, size: 3, pts: d.pending.splice(0) })
   }
   const down = (e) => {
     if (!annotate || !canDraw) return
     e.preventDefault()
     e.currentTarget.setPointerCapture?.(e.pointerId)
-    drawingRef.current = { id: 'ink' + Date.now() + Math.random().toString(36).slice(2, 6), pending: [norm(e)] }
-    flush()
-    flushT.current = setInterval(flush, 70)
+    drawingRef.current = { id: 'ink' + Date.now() + Math.random().toString(36).slice(2, 6), pending: [] }
+    inkPoints([norm(e.clientX, e.clientY)])
+    flushT.current = setInterval(flush, 60)
   }
   const move = (e) => {
     if (!drawingRef.current) return
-    drawingRef.current.pending.push(norm(e))
+    // Coalesced events carry every high-frequency sample between two
+    // React pointermoves — the difference between chunky and smooth
+    // ink on a stylus, trackpad or fast mouse.
+    const evs = (e.nativeEvent && e.nativeEvent.getCoalescedEvents && e.nativeEvent.getCoalescedEvents()) || []
+    const pts = evs.length ? evs.map(ev => norm(ev.clientX, ev.clientY)) : [norm(e.clientX, e.clientY)]
+    inkPoints(pts)
   }
   const up = () => {
     if (!drawingRef.current) return
@@ -4673,19 +4701,37 @@ function SimInkLayer({ strokes, tick, canDraw, annotate, setAnnotate, color, set
     clearInterval(flushT.current)
     drawingRef.current = null
   }
+  const forwardWheel = (e) => {
+    // Let the wheel scroll whatever scrollable sits under the pen —
+    // the pen never freezes a scrolling bench.
+    const cv = cvRef.current
+    if (!cv) return
+    cv.style.pointerEvents = 'none'
+    let el = document.elementFromPoint(e.clientX, e.clientY)
+    cv.style.pointerEvents = 'auto'
+    while (el && el !== document.body) {
+      const st = window.getComputedStyle(el)
+      if ((st.overflowY === 'auto' || st.overflowY === 'scroll') && el.scrollHeight > el.clientHeight) {
+        el.scrollTop += e.deltaY
+        return
+      }
+      el = el.parentElement
+    }
+  }
 
   const COLOURS = ['#7D1025', '#1D4ED8', '#15803D', '#C9A030', '#1B1B1F']
   return (
     <div ref={boxRef} style={{ position: 'absolute', inset: 0, zIndex: 3, pointerEvents: 'none' }}>
       <canvas ref={cvRef}
         onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up} onPointerLeave={up}
+        onWheel={forwardWheel}
         style={{ position: 'absolute', inset: 0, pointerEvents: annotate && canDraw ? 'auto' : 'none', touchAction: 'none', cursor: 'crosshair' }} />
       {canDraw && (
         <div style={{ position: 'absolute', top: 8, left: '50%', transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(20,20,25,.88)', borderRadius: 99, padding: '6px 10px', pointerEvents: 'auto', boxShadow: '0 6px 20px rgba(0,0,0,.35)' }}>
           <button onClick={() => setAnnotate(a => !a)} style={{
             background: annotate ? '#C9A030' : 'rgba(255,255,255,.12)', color: annotate ? '#1A0F0E' : '#FFFFFF',
             border: 'none', borderRadius: 99, padding: '6px 14px', fontSize: 12, fontWeight: 800, cursor: 'pointer',
-          }}>{annotate ? 'Pen ON — draw over the lab' : 'Pen'}</button>
+          }}>{annotate ? 'Pen ON' : 'Pen'}</button>
           {annotate && (<>
             {COLOURS.map(c => (
               <button key={c} onClick={() => setColor(c)} title={c} style={{
@@ -4693,9 +4739,10 @@ function SimInkLayer({ strokes, tick, canDraw, annotate, setAnnotate, color, set
                 border: color === c ? '2.5px solid #FFFFFF' : '2px solid rgba(255,255,255,.25)',
               }} />
             ))}
-            <button onClick={() => onOp({ op: 'undo' })} style={{ background: 'rgba(255,255,255,.12)', color: '#FFFFFF', border: 'none', borderRadius: 99, padding: '6px 11px', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }}>Undo</button>
-            <button onClick={() => onOp({ op: 'clear' })} style={{ background: 'rgba(255,255,255,.12)', color: '#F8B4B4', border: 'none', borderRadius: 99, padding: '6px 11px', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }}>Clear</button>
+            <button onClick={() => { applyLocal({ op: 'undo' }); send({ op: 'undo' }) }} style={{ background: 'rgba(255,255,255,.12)', color: '#FFFFFF', border: 'none', borderRadius: 99, padding: '6px 11px', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }}>Undo</button>
+            <button onClick={() => { applyLocal({ op: 'clear' }); send({ op: 'clear' }) }} style={{ background: 'rgba(255,255,255,.12)', color: '#F8B4B4', border: 'none', borderRadius: 99, padding: '6px 11px', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }}>Clear</button>
           </>)}
+          <button onClick={onBoard} style={{ background: 'rgba(255,255,255,.12)', color: '#FFFFFF', border: 'none', borderRadius: 99, padding: '6px 12px', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }}>Whiteboard</button>
         </div>
       )}
     </div>
