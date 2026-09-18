@@ -336,6 +336,7 @@ const SIM_CATALOG = [
   ]},
   { subject: 'Physics', sims: [
     phet('projectile-motion', 'Projectile motion'),
+    phet('friction', 'Friction'),
     phet('pendulum-lab', 'Pendulum lab'),
     phet('forces-and-motion-basics', 'Forces and motion'),
     phet('circuit-construction-kit-dc', 'Circuit construction kit (DC)'),
@@ -347,6 +348,7 @@ const SIM_CATALOG = [
     phet('balancing-act', 'Moments: balancing act'),
   ]},
   { subject: 'Chemistry', sims: [
+    { id: 'sm:apparatus', title: 'Apparatus and chemicals bench' },
     phet('ph-scale', 'pH scale'),
     phet('acid-base-solutions', 'Acid-base solutions'),
     phet('concentration', 'Concentration'),
@@ -356,10 +358,14 @@ const SIM_CATALOG = [
     phet('gas-properties', 'Gas properties'),
   ]},
   { subject: 'Biology', sims: [
+    { id: 'sm:anatomy', title: 'Human anatomy — organs and systems' },
     phet('natural-selection', 'Natural selection'),
     phet('neuron', 'Neuron'),
     phet('gene-expression-essentials', 'Gene expression'),
     phet('diffusion', 'Diffusion (membrane transport)'),
+  ]},
+  { subject: 'Economics', sims: [
+    { id: 'sm:econgraphs', title: 'Supply and demand — interactive graph' },
   ]},
   { subject: 'Mathematics', sims: [
     phet('graphing-lines', 'Graphing straight lines'),
@@ -3057,6 +3063,9 @@ function SimPanel({ sim }) {
   if (sim.id === 'sm:foodtests') return <FoodTestSim />
   if (sim.id === 'sm:titration') return <TitrationSim />
   if (sim.id === 'sm:electric') return <CircuitLab />
+  if (sim.id === 'sm:anatomy') return <AnatomySim />
+  if (sim.id === 'sm:apparatus') return <ApparatusSim />
+  if (sim.id === 'sm:econgraphs') return <EconGraphSim />
   return (
     <div style={{ position: 'absolute', inset: 0, background: '#fff', zIndex: 2, display: 'flex', flexDirection: 'column' }}>
       <div style={{ flex: 1, position: 'relative', minHeight: 0 }}>
@@ -4297,4 +4306,264 @@ function diagnoseMediaError(err, cameraOnly) {
     default:
       return 'Could not access the ' + what + ' (' + (err && err.name || 'unknown') + '). Restart the browser and try again; if it persists, test the machine at webrtc.github.io/samples.'
   }
+}
+
+// ── Smartious native sim: human anatomy ──────────────────────
+// A body map for Biology demonstrations: organs drawn in place,
+// filterable by system, click an organ for its name and function.
+// Labels can be hidden for a naming drill during a live class.
+const ANATOMY_ORGANS = [
+  { id: 'brain',     name: 'Brain',            system: 'nervous',     fn: 'Control centre of the body; coordinates senses, movement, memory and homeostasis.', shape: 'M100,26 a16,13 0 1,0 0.1,0', color: '#E8A0B4' },
+  { id: 'trachea',   name: 'Trachea',          system: 'respiratory', fn: 'Windpipe; carries air between the larynx and the bronchi, held open by C-shaped cartilage rings.', shape: 'M97,52 h6 v22 h-6 z', color: '#F2D6A0' },
+  { id: 'lungL',     name: 'Left lung',        system: 'respiratory', fn: 'Gas exchange: oxygen diffuses into the blood and carbon dioxide out at the alveoli.', shape: 'M106,76 q22,4 22,34 q0,26 -18,26 q-8,0 -8,-12 z', color: '#F0B6A8' },
+  { id: 'lungR',     name: 'Right lung',       system: 'respiratory', fn: 'Gas exchange: oxygen diffuses into the blood and carbon dioxide out at the alveoli.', shape: 'M94,76 q-22,4 -22,34 q0,26 18,26 q8,0 8,-12 z', color: '#F0B6A8' },
+  { id: 'heart',     name: 'Heart',            system: 'circulatory', fn: 'Muscular double pump; the right side sends blood to the lungs, the left to the whole body.', shape: 'M100,92 q10,-8 16,2 q4,8 -14,24 q-18,-16 -14,-24 q6,-10 12,-2 z', color: '#C0392B' },
+  { id: 'liver',     name: 'Liver',            system: 'digestive',   fn: 'Makes bile, stores glycogen, breaks down toxins and old red blood cells.', shape: 'M72,140 q30,-10 54,2 q2,12 -20,14 q-32,2 -34,-16 z', color: '#8E4B3A' },
+  { id: 'stomach',   name: 'Stomach',          system: 'digestive',   fn: 'Churns food with acid and pepsin; begins protein digestion.', shape: 'M104,150 q22,0 22,16 q0,14 -18,14 q-14,0 -14,-12 q0,-18 10,-18 z', color: '#E2A25E' },
+  { id: 'kidneyL',   name: 'Left kidney',      system: 'excretory',   fn: 'Filters the blood; removes urea and controls water and salt balance.', shape: 'M124,180 a8,12 0 1,0 0.1,0', color: '#7A4A5A' },
+  { id: 'kidneyR',   name: 'Right kidney',     system: 'excretory',   fn: 'Filters the blood; removes urea and controls water and salt balance.', shape: 'M68,180 a8,12 0 1,0 0.1,0', color: '#7A4A5A' },
+  { id: 'intestineS',name: 'Small intestine',  system: 'digestive',   fn: 'Main site of digestion and absorption; villi absorb nutrients into the blood.', shape: 'M84,196 q16,-6 32,0 q10,6 -2,12 q-14,6 -28,0 q-10,-6 -2,-12 z', color: '#E8B08A' },
+  { id: 'intestineL',name: 'Large intestine',  system: 'digestive',   fn: 'Absorbs water from undigested food and forms faeces.', shape: 'M74,192 v28 q0,8 12,8 h28 q12,0 12,-8 v-28 h-8 v24 h-36 v-24 z', color: '#C98B5E' },
+  { id: 'bladder',   name: 'Bladder',          system: 'excretory',   fn: 'Stores urine before it is released from the body.', shape: 'M100,236 a10,8 0 1,0 0.1,0', color: '#D9C06A' },
+]
+const ANATOMY_SYSTEMS = [
+  ['all', 'All systems'], ['circulatory', 'Circulatory'], ['respiratory', 'Respiratory'],
+  ['digestive', 'Digestive'], ['excretory', 'Excretory'], ['nervous', 'Nervous'],
+]
+function AnatomySim() {
+  const [system, setSystem] = useState('all')
+  const [sel, setSel] = useState(null)
+  const [labels, setLabels] = useState(true)
+  const shown = ANATOMY_ORGANS.filter(o => system === 'all' || o.system === system)
+  const selected = ANATOMY_ORGANS.find(o => o.id === sel) || null
+  return (
+    <div style={{ position: 'absolute', inset: 0, background: '#FBFAF5', zIndex: 2, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 14px', borderBottom: '1px solid #E8E0D0', flexWrap: 'wrap' }}>
+        {ANATOMY_SYSTEMS.map(([id, label]) => (
+          <button key={id} onClick={() => { setSystem(id); setSel(null) }} style={{
+            background: system === id ? '#7D1025' : '#FFFFFF', color: system === id ? '#FBFAF5' : '#3A2E2A',
+            border: '1px solid ' + (system === id ? '#7D1025' : '#E8E0D0'), borderRadius: 99,
+            padding: '6px 12px', fontSize: 11.5, fontWeight: 700, cursor: 'pointer',
+          }}>{label}</button>
+        ))}
+        <div style={{ flex: 1 }} />
+        <button onClick={() => setLabels(l => !l)} style={{
+          background: labels ? '#FFFFFF' : '#C9A030', color: labels ? '#3A2E2A' : '#1A0F0E',
+          border: '1px solid ' + (labels ? '#E8E0D0' : '#C9A030'), borderRadius: 99,
+          padding: '6px 12px', fontSize: 11.5, fontWeight: 800, cursor: 'pointer',
+        }}>{labels ? 'Hide labels (naming drill)' : 'Show labels'}</button>
+      </div>
+      <div style={{ flex: 1, display: 'flex', minHeight: 0 }}>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 0 }}>
+          <svg viewBox="0 0 200 280" style={{ height: '96%', maxWidth: '100%' }}>
+            <path d="M100,12 a17,17 0 1,0 0.1,0 M83,44 q-28,8 -30,42 v70 q0,10 8,12 v66 q0,10 10,10 h14 v-58 h30 v58 h14 q10,0 10,-10 v-66 q8,-2 8,-12 v-70 q-2,-34 -30,-42 z"
+              fill="#F5E9DC" stroke="#C9B8A2" strokeWidth="1.5" />
+            {shown.map(o => (
+              <path key={o.id} d={o.shape} fill={o.color} stroke={sel === o.id ? '#7D1025' : 'rgba(0,0,0,.25)'}
+                strokeWidth={sel === o.id ? 2.5 : 0.8} opacity={sel && sel !== o.id ? 0.45 : 0.95}
+                style={{ cursor: 'pointer' }} onClick={() => setSel(o.id === sel ? null : o.id)} />
+            ))}
+            {labels && shown.map((o, i) => {
+              const left = i % 2 === 0
+              const m = /([0-9.]+),([0-9.]+)/.exec(o.shape)
+              const ox = Number(m[1]), oy = Number(m[2])
+              const tx = left ? 8 : 192, ty = 24 + (i * 252) / Math.max(1, shown.length)
+              return (
+                <g key={'lb' + o.id} style={{ pointerEvents: 'none' }}>
+                  <line x1={tx + (left ? 26 : -26)} y1={ty - 3} x2={ox} y2={oy} stroke="#8A8378" strokeWidth="0.6" strokeDasharray="2 2" />
+                  <text x={tx} y={ty} textAnchor={left ? 'start' : 'end'} fontSize="7.5" fontWeight="700" fill="#3A2E2A">{o.name}</text>
+                </g>
+              )
+            })}
+          </svg>
+        </div>
+        <div style={{ width: 250, borderLeft: '1px solid #E8E0D0', padding: 16, overflowY: 'auto', background: '#FFFFFF' }}>
+          {selected ? (
+            <>
+              <div style={{ fontSize: 16, fontWeight: 800, color: '#7D1025' }}>{selected.name}</div>
+              <div style={{ fontSize: 10.5, fontWeight: 800, color: '#C9A030', letterSpacing: '.08em', textTransform: 'uppercase', margin: '4px 0 10px' }}>{selected.system} system</div>
+              <div style={{ fontSize: 13, color: '#3A2E2A', lineHeight: 1.6 }}>{selected.fn}</div>
+            </>
+          ) : (
+            <div style={{ fontSize: 12.5, color: '#8A8378', lineHeight: 1.6 }}>
+              Click an organ on the body to see its name and function. Filter by system above, or hide the labels to run a naming drill with the class.
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Smartious native sim: chemistry apparatus and chemicals ──
+// The lab bench for demonstrations: every common apparatus drawn
+// and named with its use, and a reagent shelf with appearance,
+// use and hazard. A drill mode hides names for class questioning.
+const CHEM_APPARATUS = [
+  { id: 'beaker',   name: 'Beaker',             use: 'Holding, mixing and heating liquids; approximate volumes only.', draw: c => <g stroke={c} strokeWidth="2.4" fill="none"><path d="M14,10 v34 q0,6 6,6 h24 q6,0 6,-6 v-34" /><line x1="10" y1="10" x2="54" y2="10" /><line x1="18" y1="34" x2="46" y2="34" strokeWidth="1.4" opacity=".5" /></g> },
+  { id: 'conical',  name: 'Conical flask',      use: 'Swirling and titrating; the narrow neck stops splashes.', draw: c => <g stroke={c} strokeWidth="2.4" fill="none"><path d="M27,8 v14 L14,48 q-2,4 4,4 h28 q6,0 4,-4 L37,22 v-14" /><line x1="23" y1="8" x2="41" y2="8" /></g> },
+  { id: 'testtube', name: 'Test tube',          use: 'Small-scale reactions and food tests.', draw: c => <g stroke={c} strokeWidth="2.4" fill="none"><path d="M27,8 v34 a5,5 0 0 0 10,0 v-34" /><line x1="23" y1="8" x2="41" y2="8" /></g> },
+  { id: 'cylinder', name: 'Measuring cylinder', use: 'Measuring liquid volumes accurately; read at eye level from the bottom of the meniscus.', draw: c => <g stroke={c} strokeWidth="2.4" fill="none"><path d="M25,8 v42 h14 v-42" /><line x1="21" y1="8" x2="43" y2="8" />{[16,22,28,34,40].map(y => <line key={y} x1="27" y1={y} x2="34" y2={y} strokeWidth="1.2" />)}<path d="M20,54 h24" /></g> },
+  { id: 'burette',  name: 'Burette',            use: 'Delivering a variable, precisely measured volume in titrations, via the tap.', draw: c => <g stroke={c} strokeWidth="2.2" fill="none"><path d="M30,6 v36 l3,4 l3,-4 v-2" /><path d="M30,6 h6 M33,46 v8" />{[12,18,24,30,36].map(y => <line key={y} x1="30" y1={y} x2="34" y2={y} strokeWidth="1.1" />)}<line x1="28" y1="44" x2="38" y2="42" strokeWidth="1.6" /></g> },
+  { id: 'pipette',  name: 'Pipette',            use: 'Delivering one fixed, accurate volume (commonly 25.0 cm3) — filled with a pipette filler.', draw: c => <g stroke={c} strokeWidth="2.2" fill="none"><path d="M32,6 v14 q-6,4 -6,10 q0,6 6,10 v14 M32,6 h0 M32,54 l0,0" /><path d="M32,20 q6,4 6,10 q0,6 -6,10" /><line x1="29" y1="10" x2="35" y2="10" strokeWidth="1.4" /></g> },
+  { id: 'funnel',   name: 'Filter funnel',      use: 'Filtration with filter paper: separating an insoluble solid from a liquid.', draw: c => <g stroke={c} strokeWidth="2.4" fill="none"><path d="M14,10 h36 L36,30 v18 h-8 v-18 z" /></g> },
+  { id: 'bunsen',   name: 'Bunsen burner',      use: 'Heating; the air hole open gives the hot, roaring blue flame.', draw: c => <g stroke={c} strokeWidth="2.4" fill="none"><path d="M30,10 v22 M26,10 h8" /><path d="M30,16 q8,-8 6,-14" strokeWidth="1.6" /><circle cx="30" cy="36" r="4" /><path d="M14,52 h32 M22,52 v-8 h16 v8" /></g> },
+  { id: 'tripod',   name: 'Tripod and gauze',   use: 'Supports a beaker above the Bunsen; the gauze spreads the heat.', draw: c => <g stroke={c} strokeWidth="2.4" fill="none"><line x1="12" y1="18" x2="52" y2="18" /><line x1="16" y1="18" x2="12" y2="52" /><line x1="48" y1="18" x2="52" y2="52" /><line x1="32" y1="18" x2="32" y2="52" />{[20,26,32,38,44].map(x => <line key={x} x1={x} y1="14" x2={x+6} y2="18" strokeWidth="1" opacity=".6" />)}</g> },
+  { id: 'evapdish', name: 'Evaporating dish',   use: 'Evaporating a solution to crystallise or recover the dissolved solid.', draw: c => <g stroke={c} strokeWidth="2.4" fill="none"><path d="M12,26 q20,26 40,0" /><line x1="10" y1="26" x2="54" y2="26" strokeWidth="1.6" /></g> },
+  { id: 'thermo',   name: 'Thermometer',        use: 'Measuring temperature, commonly -10 to 110 Celsius in school work.', draw: c => <g stroke={c} strokeWidth="2.2" fill="none"><path d="M32,8 v34" /><circle cx="32" cy="48" r="5" fill={c} />{[14,20,26,32,38].map(y => <line key={y} x1="32" y1={y} x2="37" y2={y} strokeWidth="1.1" />)}</g> },
+  { id: 'washbot',  name: 'Wash bottle',        use: 'Rinsing apparatus and making up to the mark with distilled water.', draw: c => <g stroke={c} strokeWidth="2.4" fill="none"><path d="M20,20 h24 v28 q0,4 -4,4 h-16 q-4,0 -4,-4 z" /><path d="M28,20 v-6 h8 v6 M36,14 q10,-2 10,6" strokeWidth="1.8" /></g> },
+]
+const CHEM_REAGENTS = [
+  { name: 'Dilute hydrochloric acid', look: 'Colourless solution', use: 'Reacting with metals, carbonates and bases; testing for carbonates.', hazard: 'Irritant', color: '#E8F4F8' },
+  { name: 'Dilute sulfuric acid', look: 'Colourless solution', use: 'Acid reactions and preparing salts.', hazard: 'Corrosive', color: '#E8F4F8' },
+  { name: 'Sodium hydroxide solution', look: 'Colourless solution', use: 'Testing for metal ions (precipitate colours) and neutralisation.', hazard: 'Corrosive', color: '#EDF8E8' },
+  { name: 'Limewater', look: 'Colourless solution', use: 'Test for carbon dioxide: turns milky.', hazard: 'Irritant', color: '#F4F8F0' },
+  { name: 'Universal indicator', look: 'Green liquid', use: 'Estimating pH across the full 1 to 14 range by colour.', hazard: 'Flammable', color: '#BDE3A8' },
+  { name: 'Litmus solution', look: 'Purple liquid', use: 'Acid or alkali: red in acid, blue in alkali.', hazard: 'Low hazard', color: '#C9B0D8' },
+  { name: "Benedict's solution", look: 'Blue solution', use: 'Test for reducing sugars: brick-red on warming.', hazard: 'Low hazard', color: '#9CC4E4' },
+  { name: 'Iodine solution', look: 'Brown solution', use: 'Test for starch: turns blue-black.', hazard: 'Irritant', color: '#B08050' },
+  { name: 'Biuret reagent', look: 'Blue solution', use: 'Test for protein: turns purple.', hazard: 'Corrosive', color: '#A0B8E0' },
+  { name: 'Copper(II) sulfate solution', look: 'Blue solution', use: 'Displacement reactions and crystallisation practicals.', hazard: 'Harmful', color: '#6FA8DC' },
+  { name: 'Ethanol', look: 'Colourless liquid', use: 'Emulsion test for lipids; a common solvent.', hazard: 'Flammable', color: '#F5F2E8' },
+  { name: 'Distilled water', look: 'Colourless liquid', use: 'Making up solutions and rinsing; no dissolved ions.', hazard: 'None', color: '#EAF4F8' },
+]
+function ApparatusSim() {
+  const [tab, setTab] = useState('apparatus')
+  const [sel, setSel] = useState(null)
+  const [drill, setDrill] = useState(false)
+  const [revealed, setRevealed] = useState({})
+  const chip = (on) => ({ background: on ? '#7D1025' : '#FFFFFF', color: on ? '#FBFAF5' : '#3A2E2A', border: '1px solid ' + (on ? '#7D1025' : '#E8E0D0'), borderRadius: 99, padding: '6px 14px', fontSize: 12, fontWeight: 800, cursor: 'pointer' })
+  const hazColor = h => h === 'Corrosive' ? '#B91C1C' : h === 'Flammable' ? '#C2410C' : h === 'Irritant' || h === 'Harmful' ? '#A16207' : '#15803D'
+  return (
+    <div style={{ position: 'absolute', inset: 0, background: '#FBFAF5', zIndex: 2, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderBottom: '1px solid #E8E0D0', flexWrap: 'wrap' }}>
+        <button onClick={() => { setTab('apparatus'); setSel(null) }} style={chip(tab === 'apparatus')}>Apparatus</button>
+        <button onClick={() => { setTab('reagents'); setSel(null) }} style={chip(tab === 'reagents')}>Chemicals</button>
+        <div style={{ flex: 1 }} />
+        <button onClick={() => { setDrill(d => !d); setRevealed({}) }} style={{ ...chip(drill), background: drill ? '#C9A030' : '#FFFFFF', color: drill ? '#1A0F0E' : '#3A2E2A', borderColor: drill ? '#C9A030' : '#E8E0D0' }}>
+          {drill ? 'Drill mode ON — names hidden' : 'Name drill'}
+        </button>
+      </div>
+      <div style={{ flex: 1, overflowY: 'auto', padding: 16 }}>
+        {tab === 'apparatus' ? (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 12 }}>
+            {CHEM_APPARATUS.map(a2 => (
+              <div key={a2.id} onClick={() => setSel(sel === a2.id ? null : a2.id)} style={{ background: '#FFFFFF', border: '1.5px solid ' + (sel === a2.id ? '#7D1025' : '#E8E2D6'), borderRadius: 12, padding: 12, cursor: 'pointer', textAlign: 'center' }}>
+                <svg viewBox="0 0 64 60" style={{ width: 74, height: 70 }}>{a2.draw(sel === a2.id ? '#7D1025' : '#3A2E2A')}</svg>
+                <div style={{ fontSize: 12.5, fontWeight: 800, color: '#1A0F0E', minHeight: 18 }}>
+                  {drill && !revealed[a2.id]
+                    ? <button onClick={e => { e.stopPropagation(); setRevealed(r => ({ ...r, [a2.id]: true })) }} style={{ background: 'rgba(125,16,37,.08)', color: '#7D1025', border: 'none', borderRadius: 6, padding: '3px 10px', fontSize: 11, fontWeight: 800, cursor: 'pointer' }}>Reveal</button>
+                    : a2.name}
+                </div>
+                {sel === a2.id && (!drill || revealed[a2.id]) && (
+                  <div style={{ fontSize: 11.5, color: '#5A5248', lineHeight: 1.5, marginTop: 6, textAlign: 'left' }}>{a2.use}</div>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))', gap: 12 }}>
+            {CHEM_REAGENTS.map((r, i) => (
+              <div key={i} onClick={() => setSel(sel === i ? null : i)} style={{ background: '#FFFFFF', border: '1.5px solid ' + (sel === i ? '#7D1025' : '#E8E2D6'), borderRadius: 12, padding: 12, cursor: 'pointer' }}>
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                  <svg viewBox="0 0 30 40" style={{ width: 30, height: 40, flexShrink: 0 }}>
+                    <path d="M10,3 h10 v6 l4,6 v20 q0,3 -3,3 h-12 q-3,0 -3,-3 v-20 l4,-6 z" fill={r.color} stroke="#8A8378" strokeWidth="1.2" />
+                    <rect x="8" y="18" width="14" height="10" rx="1" fill="#FFFFFF" stroke="#C9B8A2" strokeWidth="0.8" />
+                  </svg>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: 12.5, fontWeight: 800, color: '#1A0F0E', lineHeight: 1.3 }}>
+                      {drill && !revealed['r' + i]
+                        ? <button onClick={e => { e.stopPropagation(); setRevealed(v => ({ ...v, ['r' + i]: true })) }} style={{ background: 'rgba(125,16,37,.08)', color: '#7D1025', border: 'none', borderRadius: 6, padding: '3px 10px', fontSize: 11, fontWeight: 800, cursor: 'pointer' }}>Reveal</button>
+                        : r.name}
+                    </div>
+                    <span style={{ fontSize: 10, fontWeight: 800, color: hazColor(r.hazard) }}>{r.hazard}</span>
+                  </div>
+                </div>
+                {sel === i && (!drill || revealed['r' + i]) && (
+                  <div style={{ fontSize: 11.5, color: '#5A5248', lineHeight: 1.5, marginTop: 8 }}>
+                    <b>Appearance:</b> {r.look}<br /><b>Use:</b> {r.use}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ── Smartious native sim: economics supply and demand ────────
+// Interactive market graph for Economics demonstrations: shift and
+// tilt each curve, watch equilibrium move, with the original curves
+// ghosted so the class sees exactly what changed.
+function EconGraphSim() {
+  const [dShift, setDShift] = useState(0)   // demand shift, -30..30
+  const [sShift, setSShift] = useState(0)   // supply shift, -30..30
+  const [dSlope, setDSlope] = useState(1)   // demand steepness 0.5..2
+  const [sSlope, setSSlope] = useState(1)
+  // Model: P = a - b Q (demand), P = c + d Q (supply) on a 0..100 grid.
+  const W = 460, H = 340, L = 52, B = 296, T = 24, R = 436
+  const X = q => L + (q / 100) * (R - L)
+  const Y = p => B - (p / 100) * (B - T)
+  const dP = (q, shift, slope) => 90 + shift - slope * 0.8 * q
+  const sP = (q, shift, slope) => 10 - shift + slope * 0.8 * q
+  const eq = (ds, ss, dsl, ssl) => {
+    const q = (80 + ds + ss) / (0.8 * (dsl + ssl))
+    return { q, p: dP(q, ds, dsl) }
+  }
+  const e0 = eq(0, 0, 1, 1)
+  const e1 = eq(dShift, sShift, dSlope, sSlope)
+  const line = (fn, shift, slope) => `M${X(0)},${Y(fn(0, shift, slope))} L${X(100)},${Y(fn(100, shift, slope))}`
+  const changed = dShift !== 0 || sShift !== 0 || dSlope !== 1 || sSlope !== 1
+  const slider = (label, val, set, min, max, step) => (
+    <label style={{ display: 'grid', gap: 3, fontSize: 11.5, fontWeight: 700, color: '#3A2E2A' }}>
+      {label}
+      <input type="range" min={min} max={max} step={step} value={val} onChange={e => set(Number(e.target.value))} style={{ accentColor: '#7D1025' }} />
+    </label>
+  )
+  const preset = (label, fn) => (
+    <button onClick={fn} style={{ background: '#FFFFFF', border: '1px solid #E8E0D0', borderRadius: 8, padding: '7px 10px', fontSize: 11, fontWeight: 700, color: '#3A2E2A', cursor: 'pointer', textAlign: 'left' }}>{label}</button>
+  )
+  return (
+    <div style={{ position: 'absolute', inset: 0, background: '#FBFAF5', zIndex: 2, display: 'flex', minHeight: 0 }}>
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 0, padding: 8 }}>
+        <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', maxHeight: '100%' }}>
+          <line x1={L} y1={T - 8} x2={L} y2={B} stroke="#3A2E2A" strokeWidth="1.6" />
+          <line x1={L} y1={B} x2={R + 8} y2={B} stroke="#3A2E2A" strokeWidth="1.6" />
+          <text x={L - 8} y={T} textAnchor="end" fontSize="12" fontWeight="800" fill="#3A2E2A">P</text>
+          <text x={R + 4} y={B + 16} fontSize="12" fontWeight="800" fill="#3A2E2A">Q</text>
+          {changed && (<>
+            <path d={line(dP, 0, 1)} stroke="#B0A695" strokeWidth="1.6" strokeDasharray="5 5" fill="none" />
+            <path d={line(sP, 0, 1)} stroke="#B0A695" strokeWidth="1.6" strokeDasharray="5 5" fill="none" />
+            <circle cx={X(e0.q)} cy={Y(e0.p)} r="4" fill="#B0A695" />
+          </>)}
+          <path d={line(dP, dShift, dSlope)} stroke="#7D1025" strokeWidth="2.6" fill="none" />
+          <path d={line(sP, sShift, sSlope)} stroke="#1D4ED8" strokeWidth="2.6" fill="none" />
+          <text x={X(97)} y={Y(dP(97, dShift, dSlope)) - 6} fontSize="12" fontWeight="800" fill="#7D1025">D{changed ? '1' : ''}</text>
+          <text x={X(97)} y={Y(sP(97, sShift, sSlope)) - 6} fontSize="12" fontWeight="800" fill="#1D4ED8">S{changed ? '1' : ''}</text>
+          <line x1={L} y1={Y(e1.p)} x2={X(e1.q)} y2={Y(e1.p)} stroke="#C9A030" strokeWidth="1.2" strokeDasharray="4 3" />
+          <line x1={X(e1.q)} y1={B} x2={X(e1.q)} y2={Y(e1.p)} stroke="#C9A030" strokeWidth="1.2" strokeDasharray="4 3" />
+          <circle cx={X(e1.q)} cy={Y(e1.p)} r="5" fill="#C9A030" stroke="#7D1025" strokeWidth="1.6" />
+          <text x={L - 6} y={Y(e1.p) + 4} textAnchor="end" fontSize="11" fontWeight="800" fill="#3A2E2A">P*={Math.round(e1.p)}</text>
+          <text x={X(e1.q)} y={B + 16} textAnchor="middle" fontSize="11" fontWeight="800" fill="#3A2E2A">Q*={Math.round(e1.q)}</text>
+        </svg>
+      </div>
+      <div style={{ width: 240, borderLeft: '1px solid #E8E0D0', background: '#FFFFFF', padding: 14, overflowY: 'auto', display: 'grid', gap: 12, alignContent: 'start' }}>
+        {slider('Demand shift (D)', dShift, setDShift, -30, 30, 1)}
+        {slider('Supply shift (S)', sShift, setSShift, -30, 30, 1)}
+        {slider('Demand steepness (elasticity)', dSlope, setDSlope, 0.5, 2, 0.05)}
+        {slider('Supply steepness (elasticity)', sSlope, setSSlope, 0.5, 2, 0.05)}
+        <div style={{ fontSize: 10.5, fontWeight: 800, color: '#C9A030', letterSpacing: '.08em', textTransform: 'uppercase', marginTop: 2 }}>Scenarios</div>
+        {preset('Incomes rise — demand shifts right', () => { setDShift(20); setSShift(0); setDSlope(1); setSSlope(1) })}
+        {preset('Input costs rise — supply shifts left', () => { setDShift(0); setSShift(-18); setDSlope(1); setSSlope(1) })}
+        {preset('Good harvest — supply shifts right', () => { setDShift(0); setSShift(20); setDSlope(1); setSSlope(1) })}
+        {preset('Substitute gets cheaper — demand shifts left', () => { setDShift(-18); setSShift(0); setDSlope(1); setSSlope(1) })}
+        {preset('Reset to the original market', () => { setDShift(0); setSShift(0); setDSlope(1); setSSlope(1) })}
+        <div style={{ fontSize: 11, color: '#8A8378', lineHeight: 1.55 }}>
+          The dashed grey lines are the original curves; the gold point is the new equilibrium. Share Screen to demonstrate your copy to the class.
+        </div>
+      </div>
+    </div>
+  )
 }
