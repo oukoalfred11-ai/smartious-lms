@@ -572,6 +572,25 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   // teacher turns pages and every student's copy follows.
   const [openBook, setOpenBook] = useState(null)   // { id, title, page }
   const [openSim, setOpenSim] = useState(null)     // { id, title, url }
+  // ── Lab ink: annotation over an open practical ──
+  // Strokes live in normalised 0..1 coordinates of the practical
+  // panel, so every screen size renders the teacher's marks in the
+  // right place. Streamed point-by-point while drawing, cleared
+  // whenever the practical changes.
+  const simInkRef = useRef([])                     // [{ id, color, size, pts: [[x,y],...] }]
+  const [simInkTick, setSimInkTick] = useState(0)
+  const [simAnnotate, setSimAnnotate] = useState(false)
+  const [simInkColor, setSimInkColor] = useState('#7D1025')
+  const applySimInk = (op) => {
+    if (op.op === 'clear') { simInkRef.current = [] }
+    else if (op.op === 'undo') { simInkRef.current.pop() }
+    else if (op.op === 'seg' && op.id) {
+      let st = simInkRef.current.find(x => x.id === op.id)
+      if (!st) { st = { id: op.id, color: op.color || '#7D1025', size: op.size || 3, pts: [] }; simInkRef.current.push(st) }
+      for (const pt of (op.pts || [])) st.pts.push(pt)
+    }
+    setSimInkTick(t => t + 1)
+  }
   const [showSimPicker, setShowSimPicker] = useState(false)
   const [mainView, setMainView] = useState('board')   // 'board' | 'screen'
   const camTrackRef = useRef(null)
@@ -919,10 +938,12 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
     if (op.kind === 'book') { setOpenBook(op.bookId ? { id: op.bookId, title: op.title || 'Coursebook', page: op.page || 1 } : null); return }
     if (op.kind === 'sim') {
       const sim = op.simId ? { id: op.simId, title: op.title || 'Practical', url: op.url || null } : null
+      simInkRef.current = []; setSimInkTick(t => t + 1)
       setOpenSim(sim)
       setMainView(sim ? 'sim' : 'board')
       return
     }
+    if (op.kind === 'simink') { applySimInk(op); return }
     opsRef.current.push(op)
     const ink = inkRef.current
     if (!ink) { redrawRef.current(); return }
@@ -1192,9 +1213,11 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
             }
             else if (op.kind === 'sim') {
               const sim = op.simId ? { id: op.simId, title: op.title || 'Practical', url: op.url || null } : null
+              simInkRef.current = []; setSimInkTick(t => t + 1)
               setOpenSim(sim)
               if (sim) setMainView('sim')
             }
+            else if (op.kind === 'simink') { applySimInk(op) }
             else opsRef.current.push(op)
           }
           redraw()
@@ -2423,7 +2446,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
         <IconBtn icon="book" title="Put a Library page on the board" onClick={() => setShowLibPicker(true)} />
         <IconBtn icon="flask" title="Open a practical simulation for the class" active={!!openSim}
           onClick={() => openSim
-            ? (setOpenSim(null), setMainView('board'), sendOpLive({ kind: 'sim', simId: null }))
+            ? (simInkRef.current = [], setSimInkTick(t => t + 1), setSimAnnotate(false), setOpenSim(null), setMainView('board'), sendOpLive({ kind: 'sim', simId: null }))
             : setShowSimPicker(true)} />
         <IconBtn icon={boardLocked ? 'lockC' : 'lockO'} active={!boardLocked}
           title={boardLocked ? 'Students cannot draw. Click to allow.' : 'Students can draw. Click to lock.'}
@@ -2710,7 +2733,19 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
                 />
               )}
               {mainView === 'sim' && openSim && (
-                <SimPanel sim={openSim} />
+                <>
+                  <SimPanel sim={openSim} />
+                  <SimInkLayer
+                    strokes={simInkRef.current}
+                    tick={simInkTick}
+                    canDraw={isTeacher}
+                    annotate={simAnnotate}
+                    setAnnotate={setSimAnnotate}
+                    color={simInkColor}
+                    setColor={setSimInkColor}
+                    onOp={(op) => { applySimInk(op); sendOpLive({ kind: 'simink', ...op }) }}
+                  />
+                </>
               )}
               <canvas ref={canvasRef}
                 onPointerDown={(e) => {
@@ -2743,6 +2778,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
           onClose={() => setShowSimPicker(false)}
           onPick={(sim) => {
             setShowSimPicker(false)
+            simInkRef.current = []; setSimInkTick(t => t + 1)
             setOpenSim(sim)
             setMainView('sim')
             sendOpLive({ kind: 'sim', simId: sim.id, title: sim.title, url: sim.url || null })
@@ -4564,6 +4600,104 @@ function EconGraphSim() {
           The dashed grey lines are the original curves; the gold point is the new equilibrium. Share Screen to demonstrate your copy to the class.
         </div>
       </div>
+    </div>
+  )
+}
+
+// ── Lab ink layer ────────────────────────────────────────────
+// A transparent canvas above an open practical. With the pen OFF it
+// lets every click and drag through to the practical; with the pen
+// ON (staff only) it captures the pointer and streams strokes to the
+// whole class in normalised coordinates, so the ink lands on the
+// same spot of the practical on every screen size.
+function SimInkLayer({ strokes, tick, canDraw, annotate, setAnnotate, color, setColor, onOp }) {
+  const cvRef = useRef(null)
+  const boxRef = useRef(null)
+  const drawingRef = useRef(null)   // { id, pending: [] }
+  const flushT = useRef(null)
+
+  const redraw = () => {
+    const cv = cvRef.current, box = boxRef.current
+    if (!cv || !box) return
+    const r = box.getBoundingClientRect()
+    const dpr = window.devicePixelRatio || 1
+    if (cv.width !== Math.round(r.width * dpr) || cv.height !== Math.round(r.height * dpr)) {
+      cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr)
+      cv.style.width = r.width + 'px'; cv.style.height = r.height + 'px'
+    }
+    const ctx = cv.getContext('2d')
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+    ctx.clearRect(0, 0, r.width, r.height)
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round'
+    for (const st of strokes) {
+      if (!st.pts || st.pts.length < 2) continue
+      ctx.strokeStyle = st.color; ctx.lineWidth = st.size || 3
+      ctx.beginPath()
+      ctx.moveTo(st.pts[0][0] * r.width, st.pts[0][1] * r.height)
+      for (let i = 1; i < st.pts.length; i++) ctx.lineTo(st.pts[i][0] * r.width, st.pts[i][1] * r.height)
+      ctx.stroke()
+    }
+  }
+  useEffect(redraw, [tick])
+  useEffect(() => {
+    const onR = () => redraw()
+    window.addEventListener('resize', onR)
+    const iv = setInterval(onR, 1200)   // sims resize with the panel; keep in step
+    return () => { window.removeEventListener('resize', onR); clearInterval(iv) }
+  }, [])
+
+  const norm = (e) => {
+    const r = boxRef.current.getBoundingClientRect()
+    return [Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), Math.min(1, Math.max(0, (e.clientY - r.top) / r.height))]
+  }
+  const flush = () => {
+    const d = drawingRef.current
+    if (!d || !d.pending.length) return
+    onOp({ op: 'seg', id: d.id, color, size: 3, pts: d.pending.splice(0) })
+  }
+  const down = (e) => {
+    if (!annotate || !canDraw) return
+    e.preventDefault()
+    e.currentTarget.setPointerCapture?.(e.pointerId)
+    drawingRef.current = { id: 'ink' + Date.now() + Math.random().toString(36).slice(2, 6), pending: [norm(e)] }
+    flush()
+    flushT.current = setInterval(flush, 70)
+  }
+  const move = (e) => {
+    if (!drawingRef.current) return
+    drawingRef.current.pending.push(norm(e))
+  }
+  const up = () => {
+    if (!drawingRef.current) return
+    flush()
+    clearInterval(flushT.current)
+    drawingRef.current = null
+  }
+
+  const COLOURS = ['#7D1025', '#1D4ED8', '#15803D', '#C9A030', '#1B1B1F']
+  return (
+    <div ref={boxRef} style={{ position: 'absolute', inset: 0, zIndex: 3, pointerEvents: 'none' }}>
+      <canvas ref={cvRef}
+        onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up} onPointerLeave={up}
+        style={{ position: 'absolute', inset: 0, pointerEvents: annotate && canDraw ? 'auto' : 'none', touchAction: 'none', cursor: 'crosshair' }} />
+      {canDraw && (
+        <div style={{ position: 'absolute', top: 8, left: '50%', transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(20,20,25,.88)', borderRadius: 99, padding: '6px 10px', pointerEvents: 'auto', boxShadow: '0 6px 20px rgba(0,0,0,.35)' }}>
+          <button onClick={() => setAnnotate(a => !a)} style={{
+            background: annotate ? '#C9A030' : 'rgba(255,255,255,.12)', color: annotate ? '#1A0F0E' : '#FFFFFF',
+            border: 'none', borderRadius: 99, padding: '6px 14px', fontSize: 12, fontWeight: 800, cursor: 'pointer',
+          }}>{annotate ? 'Pen ON — draw over the lab' : 'Pen'}</button>
+          {annotate && (<>
+            {COLOURS.map(c => (
+              <button key={c} onClick={() => setColor(c)} title={c} style={{
+                width: 20, height: 20, borderRadius: 99, background: c, cursor: 'pointer',
+                border: color === c ? '2.5px solid #FFFFFF' : '2px solid rgba(255,255,255,.25)',
+              }} />
+            ))}
+            <button onClick={() => onOp({ op: 'undo' })} style={{ background: 'rgba(255,255,255,.12)', color: '#FFFFFF', border: 'none', borderRadius: 99, padding: '6px 11px', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }}>Undo</button>
+            <button onClick={() => onOp({ op: 'clear' })} style={{ background: 'rgba(255,255,255,.12)', color: '#F8B4B4', border: 'none', borderRadius: 99, padding: '6px 11px', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }}>Clear</button>
+          </>)}
+        </div>
+      )}
     </div>
   )
 }
