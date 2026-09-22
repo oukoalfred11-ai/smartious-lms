@@ -128,7 +128,9 @@ router.post('/video-presign', auth, requireRole(...STAFF), async (req, res) => {
     const size = Number(fileSize) || 0;
     if (size <= 0 || size > 200 * 1024 * 1024)
       return res.status(400).json({ success: false, message: 'Videos must be between 1 byte and 200 MB.' });
-    const safeName = String(fileName).replace(/[^\w.\- ]+/g, '_').slice(0, 120);
+    // Spaces are banned from storage keys: a raw space in a media URL
+    // breaks unpredictably between browsers, encoders and the bucket.
+    const safeName = String(fileName).replace(/[^\w.\-]+/g, '_').slice(0, 120);
     const r2Key = `announcements/videos/${uuidv4()}-${safeName}`;
     const uploadUrl = await getSignedUrl(r2, new PutObjectCommand({
       Bucket: process.env.R2_BUCKET_NAME, Key: r2Key, ContentType: mimeType,
