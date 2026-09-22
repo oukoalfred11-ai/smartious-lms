@@ -11471,69 +11471,87 @@ function DashboardTab({ user, store, setPage, toast }) {
   return (
     <div style={{ animation:'fadeIn .3s ease' }}>
 
-      {/* ── Hero banner ── */}
+      {/* ── Hero banner ──
+          Same shape language as the Results hero: one tall rounded
+          panel, the student's photo bleeding through the middle band
+          under soft fades, display typography left with the gold
+          accent bar, the day's feature column right, dotted accent in
+          the corner — but in the dashboard's dark crimson. A flagged
+          announcement video fills the whole panel; the details pop in
+          at the start, step aside while it plays, and return after the
+          first play-through. */}
       <div style={{
-        background:'linear-gradient(135deg,#7D1025 0%,#5A0B1B 55%,#3D0712 100%)',
-        borderRadius:16, overflow:'hidden', marginBottom:20,
+        position:'relative',
+        background:'linear-gradient(100deg,#7D1025 0%,#5A0B1B 52%,#3D0712 100%)',
+        borderRadius:20, overflow:'hidden', marginBottom:20, minHeight:280,
         boxShadow:'0 8px 32px rgba(125,16,37,.2)',
-        position:'relative', minHeight: heroVideo ? 200 : undefined,
       }}>
+        <svg width="120" height="80" style={{ position:'absolute', top:18, right:26, opacity:.35, zIndex:1, pointerEvents:'none' }}>
+          <defs><pattern id="heroDots" width="20" height="20" patternUnits="userSpaceOnUse">
+            <circle cx="3" cy="3" r="3" fill="#C9A030"/></pattern></defs>
+          <rect width="120" height="80" fill="url(#heroDots)"/>
+        </svg>
+
+        {!heroVideo && avatar && (
+          <div style={{ position:'absolute', top:0, bottom:0, left:'34%', width:'40%', zIndex:0, pointerEvents:'none' }}>
+            <img src={avatar} alt=""
+              onError={e => { e.currentTarget.parentNode.style.display = 'none' }}
+              style={{
+                width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center', opacity:.92,
+                WebkitMaskImage:'linear-gradient(to right, transparent 0%, #000 22%, #000 78%, transparent 100%)',
+                maskImage:'linear-gradient(to right, transparent 0%, #000 22%, #000 78%, transparent 100%)',
+              }}/>
+          </div>
+        )}
+
         {heroVideo && (
           <>
             <video src={heroVideo} autoPlay muted loop playsInline onTimeUpdate={onHeroTime}
-              style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover' }} />
-            <div style={{ position:'absolute', inset:0, background: heroDetails ? 'linear-gradient(90deg, rgba(61,7,18,.82) 0%, rgba(61,7,18,.55) 55%, rgba(61,7,18,.25) 100%)' : 'transparent', transition:'background .6s ease' }} />
+              style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover', zIndex:0 }} />
+            <div style={{ position:'absolute', inset:0, zIndex:0, background: heroDetails ? 'linear-gradient(100deg, rgba(61,7,18,.85) 0%, rgba(61,7,18,.55) 52%, rgba(61,7,18,.2) 100%)' : 'transparent', transition:'background .6s ease' }} />
           </>
         )}
-        <div style={{ display:'flex', alignItems:'stretch', position:'relative',
+
+        <div style={{ position:'relative', zIndex:2, minHeight:280, boxSizing:'border-box',
+          display:'flex', alignItems:'center', justifyContent:'space-between',
+          gap:24, padding:'36px 42px', flexWrap:'wrap',
           opacity: heroVideo && !heroDetails ? 0 : 1,
           pointerEvents: heroVideo && !heroDetails ? 'none' : 'auto',
           transition:'opacity .6s ease' }}>
-          {/* Avatar panel */}
-          <div style={{ width:130, flexShrink:0, position:'relative', overflow:'hidden' }}>
-            {avatar
-              ? <img src={avatar} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', minHeight:140, display:'block' }}/>
-              : <div style={{ width:'100%', minHeight:140, display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(255,255,255,.08)' }}>
-                  <div style={{ width:56, height:56, borderRadius:'50%', background:'rgba(201,160,48,.15)', border:'2px solid rgba(201,160,48,.4)', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:"'Instrument Serif',serif", fontSize:22, fontWeight:400, color:'#C9A030' }}>
-                    {initials}
-                  </div>
-                </div>
-            }
-            <div style={{ position:'absolute', inset:0, background:'linear-gradient(to right, transparent 50%, #7D1025)' }}/>
-          </div>
 
-          {/* Info */}
-          <div style={{ flex:1, padding:'22px 24px', display:'flex', flexDirection:'column', justifyContent:'center' }}>
-            <div style={{ fontSize:10, fontWeight:700, letterSpacing:'.18em', textTransform:'uppercase', color:'#C9A030', marginBottom:6 }}>
+          {/* Display block, left */}
+          <div style={{ maxWidth:470, minWidth:250 }}>
+            <div style={{ fontSize:10.5, fontWeight:700, letterSpacing:'.2em', textTransform:'uppercase', color:'#C9A030', marginBottom:10 }}>
               {dayLabel}
             </div>
-            <h2 style={{ fontFamily:"'Instrument Serif',Georgia,serif", fontSize:26, fontWeight:400, color:'#fff', margin:'0 0 5px', letterSpacing:'-.3px' }}>
+            <h2 style={{ fontFamily:"'Instrument Serif',Georgia,serif", fontSize:38, fontWeight:400, color:'#fff', margin:'0 0 10px', letterSpacing:'-.5px', lineHeight:1.08 }}>
               {greeting}, <em style={{ fontStyle:'italic', color:'#F0CC5A' }}>{firstName}</em>
             </h2>
-            <div style={{ display:'flex', gap:14, flexWrap:'wrap', marginBottom:10 }}>
-              <span style={{ fontSize:12, fontWeight:700, color:'rgba(255,255,255,.7)', textTransform:'uppercase', letterSpacing:'.08em' }}>{curriculum}</span>
-              {gradeLabel && <span style={{ fontSize:12, color:'rgba(255,255,255,.5)' }}>{gradeLabel}</span>}
-              <span style={{ fontSize:12, color:'rgba(255,255,255,.4)', textTransform:'capitalize' }}>{programme}</span>
+            <div style={{ display:'flex', gap:14, flexWrap:'wrap', marginBottom:12 }}>
+              <span style={{ fontSize:12.5, fontWeight:700, color:'rgba(255,255,255,.75)', textTransform:'uppercase', letterSpacing:'.08em' }}>{curriculum}</span>
+              {gradeLabel && <span style={{ fontSize:12.5, color:'rgba(255,255,255,.55)' }}>{gradeLabel}</span>}
+              <span style={{ fontSize:12.5, color:'rgba(255,255,255,.45)', textTransform:'capitalize' }}>{programme}</span>
             </div>
-            {/* Check-in status */}
             {ciStatus && (
               <div style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'5px 12px', borderRadius:99, background:ciStatus.checkedIn?'rgba(21,128,61,.25)':ciStatus.onBreak?'rgba(107,33,168,.25)':'rgba(255,255,255,.1)', border:'1px solid '+(ciStatus.checkedIn?'rgba(21,128,61,.4)':ciStatus.onBreak?'rgba(107,33,168,.4)':'rgba(255,255,255,.2)'), width:'fit-content' }}>
                 <div style={{ width:6, height:6, borderRadius:'50%', background:ciStatus.checkedIn?'#4ADE80':ciStatus.onBreak?'#C084FC':'#9CA3AF', flexShrink:0 }}/>
                 <span style={{ fontSize:11, fontWeight:600, color:ciStatus.checkedIn?'#4ADE80':ciStatus.onBreak?'#C084FC':'rgba(255,255,255,.6)' }}>
-                  {ciStatus.onBreak?'On break':ciStatus.checkedIn?'Checked in · '+(ciStatus.checkInStatus||'present'):'Not checked in today'}
+                  {ciStatus.onBreak?'On break':ciStatus.checkedIn?'Checked in \u00b7 '+(ciStatus.checkInStatus||'present'):'Not checked in today'}
                 </span>
                 {!ciStatus.checkedIn&&!ciStatus.onBreak&&<button onClick={()=>setPage('attendance')} style={{ fontSize:10, fontWeight:700, color:'#C9A030', background:'transparent', border:'none', cursor:'pointer', padding:0, textDecoration:'underline' }}>Check in</button>}
               </div>
             )}
+            <div style={{ width:66, height:5, background:'#C9A030', borderRadius:3, marginTop:18 }}/>
           </div>
 
-          {/* Today at a glance */}
-          <div style={{ width:160, flexShrink:0, borderLeft:'1px solid rgba(255,255,255,.1)', padding:'20px 18px', display:'flex', flexDirection:'column', justifyContent:'center', gap:12 }}>
+          {/* Today at a glance, right */}
+          <div style={{ width:170, flexShrink:0, display:'flex', flexDirection:'column', justifyContent:'center', gap:12,
+            background:'rgba(0,0,0,.18)', border:'1px solid rgba(255,255,255,.08)', borderRadius:14, padding:'18px 16px' }}>
             {liveNow ? (
               <div style={{ textAlign:'center' }}>
                 <div style={{ fontSize:9.5, fontWeight:700, letterSpacing:'.12em', textTransform:'uppercase', color:'rgba(255,255,255,.45)', marginBottom:4 }}>Live now</div>
                 <div style={{ fontSize:13, fontWeight:800, color:'#4ADE80' }}>{liveNow.subject}</div>
-                <div style={{ fontSize:10.5, color:'rgba(255,255,255,.4)', marginTop:3 }}>{fmt(liveNow.startTime)}–{fmt(liveNow.endTime)}</div>
+                <div style={{ fontSize:10.5, color:'rgba(255,255,255,.4)', marginTop:3 }}>{fmt(liveNow.startTime)}\u2013{fmt(liveNow.endTime)}</div>
                 <button onClick={()=>setPage('live')} style={{ marginTop:8, fontSize:10.5, fontWeight:700, background:'#22C55E', color:'#fff', border:'none', borderRadius:6, padding:'4px 12px', cursor:'pointer' }}>Join</button>
               </div>
             ) : nextClass ? (
