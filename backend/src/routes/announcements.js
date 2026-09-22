@@ -51,7 +51,10 @@ router.get('/', auth, async (req, res) => {
       .sort({ pinned: -1, showFrom: -1, createdAt: -1 })
       .limit(40)
       .lean();
-    return res.json({ success: true, data: { announcements: rows } });
+    // A banner carrier with nothing written is not a notice — it
+    // feeds the dashboard hero only, never the announcements feed.
+    const feed = rows.filter(r => !(r.heroBanner && r.videoUrl && !(r.body || '').trim() && (!r.title || r.title === 'Dashboard banner video')));
+    return res.json({ success: true, data: { announcements: feed } });
   } catch (e) {
     return res.status(500).json({ success: false, message: e.message });
   }
@@ -160,7 +163,17 @@ router.post('/', auth, requireRole(...STAFF), async (req, res) => {
   try {
     const data = sanitize(req.body);
     if (!data.title || !data.body) {
-      return res.status(400).json({ success: false, message: 'A title and message are both required.' });
+      {
+        // A pure banner carrier — a video flagged for the dashboard
+        // with nothing written — is legitimate: it is just uploading
+        // a video, not publishing a notice. Title it internally so
+        // the admin list stays readable; everything else may be empty.
+        const bannerOnly = !!(data.videoUrl && data.heroBanner);
+        if (!bannerOnly)
+          return res.status(400).json({ success: false, message: 'A title and message are both required (only a dashboard banner video can be saved without them).' });
+        if (!data.title) data.title = 'Dashboard banner video';
+        if (!data.body) data.body = '';
+      }
     }
     data.author = req.user._id;
     data.authorName = `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim() || 'Smartious';
