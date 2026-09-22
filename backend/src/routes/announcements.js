@@ -138,16 +138,17 @@ router.post('/video-presign', auth, requireRole(...STAFF), async (req, res) => {
 });
 
 // GET /api/announcements/hero-video — the video the student dashboard
-// hero should play right now: the newest live, published announcement
-// flagged as a hero banner that carries a video.
+// hero should play right now. The banner is a standing fixture, not a
+// dated notice: it deliberately IGNORES the announcement's display
+// window (showFrom/showUntil govern the card, never the banner). The
+// most recently updated published banner wins, and it plays until the
+// flag is unticked, the video removed, or the announcement deleted or
+// unpublished.
 router.get('/hero-video', auth, async (req, res) => {
   try {
-    const now = new Date();
     const doc = await Announcement.findOne({
       published: true, heroBanner: true, videoUrl: { $ne: '' },
-      showFrom: { $lte: now },
-      $or: [{ showUntil: null }, { showUntil: { $gte: now } }],
-    }).sort({ showFrom: -1 }).select('videoUrl title').lean();
+    }).sort({ updatedAt: -1 }).select('videoUrl title').lean();
     return res.json({ success: true, data: { videoUrl: doc?.videoUrl || '', title: doc?.title || '' } });
   } catch (e) {
     return res.status(500).json({ success: false, message: e.message });
