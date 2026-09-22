@@ -38,6 +38,7 @@ app.use(cors({
     cb(new Error(`CORS blocked: ${origin}`));
   },
   credentials: true,
+  exposedHeaders: ['x-renew-token'],
 }));
 
 // ── Body parsing ─────────────────────────────────────────
