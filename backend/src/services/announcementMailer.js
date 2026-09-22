@@ -54,6 +54,9 @@ async function dispatchDueAnnouncements() {
   try {
     const now = new Date();
     const due = await Announcement.find({
+      // A pure dashboard banner carrier (video flagged for the hero,
+      // nothing written) is not a notice: it must NEVER be emailed.
+      $nor: [{ heroBanner: true, body: { $in: ['', null] } }],
       published: true,
       emailSentAt: null,
       showFrom: { $lte: now },
