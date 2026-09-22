@@ -11436,6 +11436,7 @@ function DashboardTab({ user, store, setPage, toast }) {
   // and pop back for good once it has played through once.
   const [heroVideo, setHeroVideo] = useState('')
   const [heroDetails, setHeroDetails] = useState(true)
+  const [heroPlaying, setHeroPlaying] = useState(false)
   const heroPlayedRef = useRef(false)
   useEffect(() => {
     let gone = false
@@ -11444,11 +11445,15 @@ function DashboardTab({ user, store, setPage, toast }) {
       .catch(() => {})
     return () => { gone = true }
   }, [])
+  // The details step aside only once the video is genuinely rendering
+  // frames. A video that is still buffering keeps the details up, and
+  // one that fails entirely drops the hero back to the normal banner —
+  // the panel can never sit empty.
   useEffect(() => {
-    if (!heroVideo) return
+    if (!heroVideo || !heroPlaying) return
     const t = setTimeout(() => { if (!heroPlayedRef.current) setHeroDetails(false) }, 5000)
     return () => clearTimeout(t)
-  }, [heroVideo])
+  }, [heroVideo, heroPlaying])
   const onHeroTime = (e) => {
     const v = e.target
     if (!heroPlayedRef.current && v.duration && v.currentTime >= v.duration - 0.5) {
@@ -11506,7 +11511,9 @@ function DashboardTab({ user, store, setPage, toast }) {
 
         {heroVideo && (
           <>
-            <video src={heroVideo} autoPlay muted loop playsInline onTimeUpdate={onHeroTime}
+            <video src={heroVideo} autoPlay muted loop playsInline preload="auto" onTimeUpdate={onHeroTime}
+              onPlaying={() => setHeroPlaying(true)}
+              onError={() => { setHeroVideo(''); setHeroPlaying(false); setHeroDetails(true) }}
               style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover', zIndex:0 }} />
             <div style={{ position:'absolute', inset:0, zIndex:0, background: heroDetails ? 'linear-gradient(100deg, rgba(61,7,18,.85) 0%, rgba(61,7,18,.55) 52%, rgba(61,7,18,.2) 100%)' : 'transparent', transition:'background .6s ease' }} />
           </>
