@@ -977,6 +977,7 @@ export default function TeacherPortal() {
     ]},
     { section:'Documents', items:[
       {id:'documents',     label:'Reports & Documents', iconName:'documents',  icon:'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z|M14 2v6h6|line:16:13:8:13|line:16:17:8:17|line:10:9:8:9'},
+      {id:'mydocs',        label:'My Documents',       iconName:'documents',  icon:'M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z'},
     ]},
     { section:'Communication', items:[
       {id:'communication', label:'Messages',         iconName:'communication', icon:'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'},
@@ -1278,6 +1279,7 @@ export default function TeacherPortal() {
              <MessagesHub meId={currentUser?._id} role="teacher" />
              <CommunicationTab user={currentUser} store={store} setPage={setPage} toast={toast} />
            </>)}           {page === 'documents' && <DocumentsTab user={currentUser} store={store} setPage={setPage} toast={toast} />}
+           {page === 'mydocs' && <TeacherDocsLibrary user={currentUser} toast={toast} onBack={null} />}
 
            {/* ── MSHAURI AI ── */}
            {page === 'mshauri' && <MshauriAITab user={currentUser} store={store} setPage={setPage} toast={toast} />}
@@ -7513,10 +7515,13 @@ const cmSeedSample = (teacherName) => {
 // generates the branded report and opens it for PDF download.
 // ═══════════════════════════════════════════════════════════
 function DocumentsTab({ user, store, setPage, toast }) {
-  const [docType, setDocType] = useState(null)   // null = picker; 'weekly' = weekly report
+  const [docType, setDocType] = useState(null)   // null = picker; 'weekly' = weekly report; 'library' = my documents
 
   if (docType === 'weekly') {
     return <WeeklyReportGenerator user={user} toast={toast} onBack={() => setDocType(null)} />
+  }
+  if (docType === 'library') {
+    return <TeacherDocsLibrary user={user} toast={toast} onBack={() => setDocType(null)} />
   }
 
   // Document picker
@@ -7536,6 +7541,21 @@ function DocumentsTab({ user, store, setPage, toast }) {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 14 }}>
+        <div style={cardStyle} onClick={() => setDocType('library')}>
+          <div style={{
+            width: 42, height: 42, borderRadius: 10, background: 'rgba(125,16,37,.08)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12,
+          }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7D1025" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+            </svg>
+          </div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: '#1A1A1A' }}>My Documents</div>
+          <div style={{ fontSize: 12, color: '#6B6B6B', marginTop: 4, lineHeight: 1.5 }}>
+            File your schemes of work, lesson plans, records of work, assessment records and resources by category.
+          </div>
+        </div>
+
         <div style={cardStyle} onClick={() => setDocType('weekly')}>
           <div style={{
             width: 42, height: 42, borderRadius: 10, background: 'rgba(125,16,37,.08)',
@@ -7583,6 +7603,214 @@ function DocumentsTab({ user, store, setPage, toast }) {
 }
 
 // ── WEEKLY REPORT GENERATOR ────────────────────────────────
+// ── MY DOCUMENTS ─────────────────────────────────────────────
+// The teacher's own document file, organised by the categories a
+// school inspection expects: schemes of work, lesson plans, records
+// of work, assessment records, teaching resources, reports, other.
+// Files go straight from the browser to R2 (presigned), so uploads
+// are fast and never load the API server.
+const TDOC_CATEGORIES = [
+  ['scheme_of_work',    'Schemes of Work'],
+  ['lesson_plan',       'Lesson Plans'],
+  ['record_of_work',    'Records of Work'],
+  ['assessment_record', 'Assessment Records'],
+  ['teaching_resource', 'Teaching Resources'],
+  ['report',            'Reports'],
+  ['other',             'Other'],
+]
+const TDOC_LABEL = Object.fromEntries(TDOC_CATEGORIES)
+function tdocSize(b) {
+  if (!b) return ''
+  if (b < 1024 * 1024) return Math.max(1, Math.round(b / 1024)) + ' KB'
+  return (b / (1024 * 1024)).toFixed(1) + ' MB'
+}
+function TeacherDocsLibrary({ user, toast, onBack }) {
+  const [docs, setDocs] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [catFilter, setCatFilter] = useState('')
+  const [upOpen, setUpOpen] = useState(false)
+  const [upBusy, setUpBusy] = useState(false)
+  const [upPct, setUpPct] = useState(0)
+  const [up, setUp] = useState({ category: 'scheme_of_work', title: '', subject: '', description: '', file: null })
+
+  const load = async () => {
+    try {
+      const { data } = await api.get('/teacher-documents/mine')
+      if (data?.success) setDocs(data.data.documents || [])
+    } catch (e) { toast?.error?.('Could not load your documents.') }
+    finally { setLoading(false) }
+  }
+  useEffect(() => { load() }, [])
+
+  const doUpload = async () => {
+    if (!up.file) return toast?.error?.('Choose a file first.')
+    if (!up.title.trim()) return toast?.error?.('Give the document a title.')
+    setUpBusy(true); setUpPct(0)
+    try {
+      const pr = await api.post('/teacher-documents/presign', {
+        fileName: up.file.name, mimeType: up.file.type || 'application/octet-stream', fileSize: up.file.size,
+      })
+      const pd = pr.data?.data || pr.data
+      if (!pd?.uploadUrl) throw new Error(pd?.message || 'Could not prepare the upload.')
+
+      await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest()
+        xhr.open('PUT', pd.uploadUrl)
+        xhr.setRequestHeader('Content-Type', up.file.type || 'application/octet-stream')
+        xhr.upload.onprogress = evt => { if (evt.total) setUpPct(Math.round((evt.loaded / evt.total) * 100)) }
+        xhr.onload = () => (xhr.status >= 200 && xhr.status < 300) ? resolve() : reject(new Error('Upload failed (' + xhr.status + ').'))
+        xhr.onerror = () => reject(new Error('Upload failed. Check your connection.'))
+        xhr.send(up.file)
+      })
+
+      const { data } = await api.post('/teacher-documents/confirm', {
+        r2Key: pd.r2Key, category: up.category, title: up.title, subject: up.subject,
+        description: up.description, fileName: up.file.name,
+        mimeType: up.file.type || '', fileSize: up.file.size,
+      })
+      if (!data?.success) throw new Error(data?.message || 'Could not save the document.')
+      toast?.ok?.('Document filed under ' + TDOC_LABEL[up.category] + '.')
+      setUpOpen(false)
+      setUp({ category: up.category, title: '', subject: '', description: '', file: null })
+      load()
+    } catch (e) { toast?.error?.(e.message || 'Upload failed.') }
+    finally { setUpBusy(false); setUpPct(0) }
+  }
+
+  const doDelete = async (d) => {
+    if (!window.confirm('Delete "' + d.title + '"? This cannot be undone.')) return
+    try {
+      const { data } = await api.delete('/teacher-documents/' + d._id)
+      if (data?.success) { toast?.ok?.('Deleted.'); setDocs(list => list.filter(x => x._id !== d._id)) }
+      else toast?.error?.(data?.message || 'Delete failed.')
+    } catch (e) { toast?.error?.('Delete failed.') }
+  }
+
+  const shown = catFilter ? docs.filter(d => d.category === catFilter) : docs
+  const groups = TDOC_CATEGORIES
+    .map(([id, label]) => [id, label, shown.filter(d => d.category === id)])
+    .filter(([, , list]) => list.length > 0)
+
+  const inputStyle = { width: '100%', padding: '10px 12px', border: '1.5px solid #E8E0D0', borderRadius: 8, fontSize: 13.5, background: '#FFFFFF', color: '#1A1A1A', outline: 'none', boxSizing: 'border-box' }
+  const labelStyle = { fontSize: 11.5, fontWeight: 700, color: '#6B6B6B', letterSpacing: '.05em', textTransform: 'uppercase', marginBottom: 6, display: 'block' }
+
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 18, flexWrap: 'wrap' }}>
+        <div>
+          {onBack && <button onClick={onBack} style={{ background: 'transparent', border: 'none', color: '#7D1025', fontSize: 12.5, fontWeight: 700, cursor: 'pointer', padding: 0, marginBottom: 6 }}>&larr; Reports &amp; Documents</button>}
+          <h1 style={{ fontSize: 24, fontWeight: 800, color: '#1A1A1A', margin: 0 }}>My Documents</h1>
+          <div style={{ fontSize: 13, color: '#6B6B6B', marginTop: 2 }}>Your teaching file, organised by category.</div>
+        </div>
+        <button onClick={() => setUpOpen(true)} style={{ background: '#7D1025', color: '#FBFAF5', border: 'none', borderRadius: 10, padding: '11px 20px', fontSize: 13.5, fontWeight: 700, cursor: 'pointer' }}>
+          + Add Document
+        </button>
+      </div>
+
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 18 }}>
+        <button onClick={() => setCatFilter('')} style={{ background: catFilter === '' ? '#7D1025' : '#FFFFFF', color: catFilter === '' ? '#FBFAF5' : '#3A2E2A', border: '1px solid ' + (catFilter === '' ? '#7D1025' : '#E8E0D0'), borderRadius: 99, padding: '7px 14px', fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>
+          All ({docs.length})
+        </button>
+        {TDOC_CATEGORIES.map(([id, label]) => {
+          const n = docs.filter(d => d.category === id).length
+          const active = catFilter === id
+          return (
+            <button key={id} onClick={() => setCatFilter(active ? '' : id)} style={{ background: active ? '#7D1025' : '#FFFFFF', color: active ? '#FBFAF5' : '#3A2E2A', border: '1px solid ' + (active ? '#7D1025' : '#E8E0D0'), borderRadius: 99, padding: '7px 14px', fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>
+              {label}{n > 0 ? ' (' + n + ')' : ''}
+            </button>
+          )
+        })}
+      </div>
+
+      {loading ? (
+        <div style={{ padding: 40, textAlign: 'center', color: '#6B6B6B', fontSize: 13.5 }}>Loading your documents...</div>
+      ) : shown.length === 0 ? (
+        <div style={{ padding: '48px 24px', textAlign: 'center', background: '#FFFFFF', border: '1px dashed #D4C9B2', borderRadius: 14 }}>
+          <div style={{ fontSize: 15, fontWeight: 700, color: '#1A1A1A' }}>{catFilter ? 'Nothing filed under ' + TDOC_LABEL[catFilter] + ' yet' : 'No documents yet'}</div>
+          <div style={{ fontSize: 12.5, color: '#6B6B6B', marginTop: 6 }}>Use Add Document to file your first one.</div>
+        </div>
+      ) : groups.map(([id, label, list]) => (
+        <div key={id} style={{ marginBottom: 22 }}>
+          <div style={{ fontSize: 13, fontWeight: 800, color: '#7D1025', letterSpacing: '.04em', textTransform: 'uppercase', marginBottom: 10 }}>{label} ({list.length})</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 }}>
+            {list.map(d => (
+              <div key={d._id} style={{ background: '#FFFFFF', border: '1px solid #E8E2D6', borderRadius: 12, padding: 16 }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(125,16,37,.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7D1025" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>
+                    </svg>
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: '#1A1A1A', lineHeight: 1.35 }}>{d.title}</div>
+                    <div style={{ fontSize: 11.5, color: '#6B6B6B', marginTop: 3 }}>
+                      {[d.subject, tdocSize(d.file?.sizeBytes), new Date(d.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })].filter(Boolean).join(' · ')}
+                    </div>
+                    {d.description && <div style={{ fontSize: 12, color: '#3A2E2A', marginTop: 6, lineHeight: 1.5 }}>{d.description}</div>}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                  <a href={d.file?.url} target="_blank" rel="noopener noreferrer" style={{ flex: 1, textAlign: 'center', background: 'rgba(125,16,37,.07)', color: '#7D1025', borderRadius: 8, padding: '8px 0', fontSize: 12.5, fontWeight: 700, textDecoration: 'none' }}>Open</a>
+                  <button onClick={() => doDelete(d)} style={{ background: '#FFFFFF', color: '#B91C1C', border: '1px solid #FECACA', borderRadius: 8, padding: '8px 14px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer' }}>Delete</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+
+      {upOpen && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(20,10,8,.55)', zIndex: 90, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }} onClick={() => !upBusy && setUpOpen(false)}>
+          <div style={{ background: '#FFFFFF', borderRadius: 16, width: '100%', maxWidth: 520, maxHeight: '92vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
+            <div style={{ padding: '18px 24px', background: 'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)', color: '#FBFAF5' }}>
+              <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 21 }}>Add a Document</div>
+            </div>
+            <div style={{ padding: '20px 24px' }}>
+              <div style={{ marginBottom: 14 }}>
+                <label style={labelStyle}>Category</label>
+                <select value={up.category} onChange={e => setUp(f => ({ ...f, category: e.target.value }))} style={inputStyle}>
+                  {TDOC_CATEGORIES.map(([id, label]) => <option key={id} value={id}>{label}</option>)}
+                </select>
+              </div>
+              <div style={{ marginBottom: 14 }}>
+                <label style={labelStyle}>Title</label>
+                <input value={up.title} onChange={e => setUp(f => ({ ...f, title: e.target.value }))} placeholder="e.g. IGCSE Physics Scheme of Work Term 1" style={inputStyle} />
+              </div>
+              <div style={{ marginBottom: 14 }}>
+                <label style={labelStyle}>Subject (optional)</label>
+                <input value={up.subject} onChange={e => setUp(f => ({ ...f, subject: e.target.value }))} placeholder="e.g. Physics" style={inputStyle} />
+              </div>
+              <div style={{ marginBottom: 14 }}>
+                <label style={labelStyle}>Notes (optional)</label>
+                <textarea value={up.description} onChange={e => setUp(f => ({ ...f, description: e.target.value }))} rows={2} placeholder="Anything worth noting about this document" style={{ ...inputStyle, resize: 'vertical' }} />
+              </div>
+              <div style={{ marginBottom: 18 }}>
+                <label style={labelStyle}>File (PDF, Word, Excel, PowerPoint, image — up to 50 MB)</label>
+                <input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.png,.jpg,.jpeg,.webp,.txt,.csv" onChange={e => setUp(f => ({ ...f, file: e.target.files?.[0] || null }))} style={{ fontSize: 13 }} />
+                {up.file && <div style={{ fontSize: 12, color: '#6B6B6B', marginTop: 6 }}>{up.file.name} · {tdocSize(up.file.size)}</div>}
+              </div>
+              {upBusy && (
+                <div style={{ marginBottom: 14 }}>
+                  <div style={{ height: 8, background: '#F4EFEB', borderRadius: 99, overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: upPct + '%', background: '#7D1025', transition: 'width .2s' }} />
+                  </div>
+                  <div style={{ fontSize: 11.5, color: '#6B6B6B', marginTop: 4 }}>Uploading... {upPct}%</div>
+                </div>
+              )}
+              <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+                <button disabled={upBusy} onClick={() => setUpOpen(false)} style={{ background: '#FFFFFF', color: '#3A2E2A', border: '1.5px solid #E8E0D0', borderRadius: 9, padding: '10px 18px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>Cancel</button>
+                <button disabled={upBusy} onClick={doUpload} style={{ background: '#7D1025', color: '#FBFAF5', border: 'none', borderRadius: 9, padding: '10px 22px', fontSize: 13, fontWeight: 700, cursor: upBusy ? 'wait' : 'pointer', opacity: upBusy ? .7 : 1 }}>
+                  {upBusy ? 'Uploading...' : 'Save Document'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function WeeklyReportGenerator({ user, toast, onBack }) {
   const teacherName = `${user?.firstName||''} ${user?.lastName||''}`.trim()||'Teacher'
   const today = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'})
