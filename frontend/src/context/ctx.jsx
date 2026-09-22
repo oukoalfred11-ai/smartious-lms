@@ -40,7 +40,16 @@ api.interceptors.request.use(cfg => {
   return cfg
 })
 
-api.interceptors.response.use(r => r, err => {
+api.interceptors.response.use(r => {
+  // Sliding session: the backend sends a fresh token when the current
+  // one nears expiry. Swap it in silently so active users never hit
+  // the 7-day cliff (which used to log teachers out mid-class).
+  try {
+    const renewed = r.headers && r.headers['x-renew-token']
+    if (renewed) localStorage.setItem('sm_token', renewed)
+  } catch (e) { /* best effort */ }
+  return r
+}, err => {
   const status = err.response?.status
   const url = err.config?.url || ''
   // ── Paused account gate ──────────────────────────────────
