@@ -180,7 +180,8 @@ router.post('/', auth, requireRole(...STAFF), async (req, res) => {
     const doc = await Announcement.create(data);
     // Email the audience now if it is live; a scheduled one is picked up
     // by the mailer when its showFrom time arrives.
-    if (doc.published) dispatchSoon();
+    const isBannerCarrier = doc.heroBanner && !(doc.body || '').trim();
+    if (doc.published && !isBannerCarrier) dispatchSoon();
     return res.json({ success: true, data: { announcement: doc } });
   } catch (e) {
     return res.status(500).json({ success: false, message: e.message });
@@ -195,7 +196,8 @@ router.patch('/:id', auth, requireRole(...STAFF), async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'Announcement not found.' });
     // Publishing a draft (or moving showFrom into the present) sends it;
     // an already-emailed announcement is never re-sent (emailSentAt guard).
-    if (doc.published && !doc.emailSentAt) dispatchSoon();
+    const isBannerCarrier2 = doc.heroBanner && !(doc.body || '').trim();
+    if (doc.published && !doc.emailSentAt && !isBannerCarrier2) dispatchSoon();
     return res.json({ success: true, data: { announcement: doc } });
   } catch (e) {
     return res.status(500).json({ success: false, message: e.message });
