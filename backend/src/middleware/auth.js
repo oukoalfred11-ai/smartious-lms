@@ -12,6 +12,21 @@ const auth = async (req, res, next) => {
     const token = header.split(' ')[1];
     const decoded = jwt.verify(token, JWT_SECRET);
 
+    // ── Sliding session ──────────────────────────────────────
+    // Tokens expire after 7 days, but nobody active should ever
+    // meet that cliff (it used to log teachers out mid-class and
+    // kill classroom media rejoins). Whenever a valid token is in
+    // its last 3 days, a fresh one rides back on this header; the
+    // frontend swaps it in silently. Only a person idle for a full
+    // week re-logs in, and they meet it at the login screen.
+    try {
+      if (decoded.exp && decoded.exp * 1000 - Date.now() < 3 * 24 * 60 * 60 * 1000) {
+        const fresh = jwt.sign({ id: decoded.id, role: decoded.role }, JWT_SECRET,
+          { expiresIn: process.env.JWT_EXPIRES_IN || '7d' });
+        res.set('x-renew-token', fresh);
+      }
+    } catch (e) { /* renewal is best effort */ }
+
     const user = await User.findById(decoded.id).select('-password');
 
     // Presence: stamp lastActive at most once per five minutes per
