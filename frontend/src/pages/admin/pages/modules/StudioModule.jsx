@@ -1065,7 +1065,7 @@ async function exportMp4Fast({ canvas, W, H, totalDur, drawFrame, mediaAt, sound
     error: (e) => { vErr = e },
   })
   const px = W * H
-  const bitrate = px >= 3840 * 2160 ? 14_000_000 : px >= 2160 * 2160 ? 10_000_000 : 6_000_000
+  const bitrate = px >= 3840 * 2160 ? 14_000_000 : px >= 2160 * 2160 ? 10_000_000 : px <= 1_100_000 ? 3_500_000 : 6_000_000
   let vConfig = null
   for (const codec of (px > 1920 * 1080 ? ['avc1.640033', 'avc1.640032', 'avc1.640028'] : ['avc1.640028'])) {
     const c = {
@@ -1430,7 +1430,12 @@ const FORMATS = {
   // greeting card is ~1478x395). Exported at 4K width so it stays
   // crisp at any screen size; the hero's cover fit then shows the
   // whole frame instead of cropping a 1:1 or 16:9 video down.
-  banner: { W: 3840, H: 1024, label: 'Dashboard Banner 15:4' },
+  banner: { W: 3840, H: 1024, label: 'Dashboard Banner 15:4 (4K, large file)' },
+  // Same 15:4 shape at HD width: the dashboard renders the banner at
+  // about 1100 to 1400 CSS pixels wide, so 1920 stays crisp in motion
+  // while the file (quarter the pixels, lower bitrate tier) lands
+  // several times smaller and uploads several times faster.
+  bannerhd: { W: 1920, H: 512, label: 'Dashboard Banner 15:4 HD (small file, recommended)' },
 }
 
 function CardMaker({ toast }) {
@@ -1646,7 +1651,7 @@ function CardMaker({ toast }) {
       const stream = cv.captureStream(30)
       const combined = new MediaStream([...stream.getVideoTracks(), ...mixer.audioTracks])
       const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm'
-      recorder = new MediaRecorder(combined, { mimeType: mime, videoBitsPerSecond: W * H >= 3840 * 2160 ? 14_000_000 : W * H >= 2160 * 2160 ? 10_000_000 : 6_000_000 })
+      recorder = new MediaRecorder(combined, { mimeType: mime, videoBitsPerSecond: W * H >= 3840 * 2160 ? 14_000_000 : W * H >= 2160 * 2160 ? 10_000_000 : W * H <= 1_100_000 ? 3_500_000 : 6_000_000 })
       recorder.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data) }
       recorder.start(500)
     }
@@ -2002,7 +2007,7 @@ function VideoMaker({ toast }) {
       const stream = cv.captureStream(30)
       const combined = new MediaStream([...stream.getVideoTracks(), ...mixer.audioTracks])
       const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm'
-      recorder = new MediaRecorder(combined, { mimeType: mime, videoBitsPerSecond: W * H >= 3840 * 2160 ? 14_000_000 : W * H >= 2160 * 2160 ? 10_000_000 : 6_000_000 })
+      recorder = new MediaRecorder(combined, { mimeType: mime, videoBitsPerSecond: W * H >= 3840 * 2160 ? 14_000_000 : W * H >= 2160 * 2160 ? 10_000_000 : W * H <= 1_100_000 ? 3_500_000 : 6_000_000 })
       recorder.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data) }
       recorder.start(500)
     }
