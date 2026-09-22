@@ -247,12 +247,10 @@ export default function AnnouncementsModule({ toast }) {
                   </div>
                 )}
                 <div style={{ fontSize: 10.5, color: '#8A8378' }}>The video shows at the top of the announcement card and plays continuously on students' and parents' dashboards.</div>
-                {form.videoUrl && (
-                  <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 12, color: '#3A2E2A', cursor: 'pointer', marginTop: 2 }}>
-                    <input type="checkbox" checked={!!form.heroBanner} onChange={e => setForm(f => ({ ...f, heroBanner: e.target.checked }))} style={{ marginTop: 2 }} />
-                    <span><b>Play as the student dashboard banner.</b> The video fills the greeting banner and plays continuously; the student's own details pop in at the start and again after the first play through.</span>
-                  </label>
-                )}
+                <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 12, color: form.videoUrl ? '#3A2E2A' : '#A8A093', cursor: form.videoUrl ? 'pointer' : 'not-allowed', marginTop: 2, background: form.heroBanner ? 'rgba(201,160,48,.12)' : 'rgba(125,16,37,.04)', border: '1px dashed ' + (form.heroBanner ? '#C9A030' : '#E0D6C4'), borderRadius: 8, padding: '8px 10px' }}>
+                  <input type="checkbox" disabled={!form.videoUrl} checked={!!form.heroBanner} onChange={e => setForm(f => ({ ...f, heroBanner: e.target.checked }))} style={{ marginTop: 2 }} />
+                  <span><b>Play as the student dashboard banner.</b> The video fills the greeting banner on every student's dashboard and plays continuously; the student's own details pop in at the start and again after the first play through.{!form.videoUrl && <em style={{ display: 'block', marginTop: 3, fontStyle: 'normal', fontWeight: 700, color: '#7D1025' }}>Upload a video above first, then tick this.</em>}</span>
+                </label>
               </div>
             </div>
           </div>
