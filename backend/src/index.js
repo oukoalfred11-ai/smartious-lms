@@ -97,6 +97,7 @@ app.use('/api/exams', require('./routes/exams'));
 app.use('/api/status',         require('./routes/status-management'));
 app.use('/api/frontdesk', require('./routes/frontdesk'));
 app.use('/api/library', require('./routes/library'));
+app.use('/api/teacher-documents', require('./routes/teacher-documents'));
 app.use('/api/leave-requests', require('./routes/status-management'));
 app.use('/api/invoices',   require('./routes/invoices'));
 app.use('/api/paystack',   require('./routes/paystack'));
