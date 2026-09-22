@@ -45,6 +45,7 @@ export default function AnnouncementsModule({ toast }) {
   const [saving, setSaving] = useState(false)
   const [vidBusy, setVidBusy] = useState(false)
   const [vidPct, setVidPct] = useState(0)
+  const [vidNote, setVidNote] = useState('')   // size + speed readout while uploading
 
   // Presigned video upload: browser straight to R2, then the public
   // URL lands in the form. MP4 or WebM, up to 200 MB.
@@ -53,6 +54,9 @@ export default function AnnouncementsModule({ toast }) {
     if (!['video/mp4', 'video/webm'].includes(file.type)) { toast?.error?.('Only MP4 and WebM videos are accepted.'); return }
     if (file.size > 200 * 1024 * 1024) { toast?.error?.('Videos must be 200 MB or smaller.'); return }
     setVidBusy(true); setVidPct(0)
+    const mb = (file.size / (1024 * 1024)).toFixed(1)
+    setVidNote('Preparing upload of ' + mb + ' MB...')
+    const t0 = Date.now()
     try {
       const pr = await api.post('/announcements/video-presign', { fileName: file.name, mimeType: file.type, fileSize: file.size })
       const pd = pr.data?.data || pr.data
@@ -61,7 +65,14 @@ export default function AnnouncementsModule({ toast }) {
         const xhr = new XMLHttpRequest()
         xhr.open('PUT', pd.uploadUrl)
         xhr.setRequestHeader('Content-Type', file.type)
-        xhr.upload.onprogress = evt => { if (evt.total) setVidPct(Math.round((evt.loaded / evt.total) * 100)) }
+        xhr.upload.onprogress = evt => {
+          if (!evt.total) return
+          setVidPct(Math.round((evt.loaded / evt.total) * 100))
+          const secs = (Date.now() - t0) / 1000
+          const speed = evt.loaded / Math.max(1, secs)              // bytes per second
+          const left = speed > 0 ? Math.ceil((evt.total - evt.loaded) / speed) : 0
+          setVidNote((evt.loaded / (1024 * 1024)).toFixed(1) + ' of ' + mb + ' MB at ' + (speed * 8 / 1_000_000).toFixed(1) + ' Mbps' + (left > 0 ? ' \u00b7 about ' + (left > 90 ? Math.ceil(left / 60) + ' min' : left + 's') + ' left' : ''))
+        }
         xhr.onload = () => (xhr.status >= 200 && xhr.status < 300) ? resolve() : reject(new Error('Upload failed (' + xhr.status + ').'))
         xhr.onerror = () => reject(new Error('Upload failed. Check your connection.'))
         xhr.send(file)
@@ -69,7 +80,7 @@ export default function AnnouncementsModule({ toast }) {
       setForm(f => ({ ...f, videoUrl: pd.publicUrl }))
       toast?.ok?.('Video uploaded.')
     } catch (e) { toast?.error?.(e.message || 'Video upload failed.') }
-    finally { setVidBusy(false); setVidPct(0) }
+    finally { setVidBusy(false); setVidPct(0); setVidNote('') }
   }
 
   const load = useCallback(() => {
@@ -244,7 +255,7 @@ export default function AnnouncementsModule({ toast }) {
                     <div style={{ height: 7, background: '#F4EFEB', borderRadius: 99, overflow: 'hidden' }}>
                       <div style={{ height: '100%', width: vidPct + '%', background: '#7D1025', transition: 'width .2s' }} />
                     </div>
-                    <div style={{ fontSize: 10.5, color: '#8A8378', marginTop: 3 }}>Uploading... {vidPct}%</div>
+                    <div style={{ fontSize: 10.5, color: '#8A8378', marginTop: 3 }}>Uploading... {vidPct}% {vidNote && ('\u00b7 ' + vidNote)}</div>
                   </div>
                 )}
                 <div style={{ fontSize: 10.5, color: '#8A8378' }}>The video shows at the top of the announcement card and plays continuously on students' and parents' dashboards.</div>
