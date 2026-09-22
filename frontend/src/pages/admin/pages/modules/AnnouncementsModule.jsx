@@ -57,8 +57,12 @@ export default function AnnouncementsModule({ toast }) {
     const mb = (file.size / (1024 * 1024)).toFixed(1)
     setVidNote('Preparing upload of ' + mb + ' MB...')
     const t0 = Date.now()
+    const wakeT = setTimeout(() => {
+      setVidNote('Preparing upload of ' + mb + ' MB... the server is waking up, this first request can take up to a minute. The upload itself will be quick.')
+    }, 8000)
     try {
       const pr = await api.post('/announcements/video-presign', { fileName: file.name, mimeType: file.type, fileSize: file.size })
+      clearTimeout(wakeT)
       const pd = pr.data?.data || pr.data
       if (!pd?.uploadUrl) throw new Error(pd?.message || 'Could not prepare the upload.')
       await new Promise((resolve, reject) => {
@@ -80,7 +84,7 @@ export default function AnnouncementsModule({ toast }) {
       setForm(f => ({ ...f, videoUrl: pd.publicUrl }))
       toast?.ok?.('Video uploaded.')
     } catch (e) { toast?.error?.(e.message || 'Video upload failed.') }
-    finally { setVidBusy(false); setVidPct(0); setVidNote('') }
+    finally { clearTimeout(wakeT); setVidBusy(false); setVidPct(0); setVidNote('') }
   }
 
   const load = useCallback(() => {
