@@ -97,7 +97,8 @@ export default function AnnouncementsModule({ toast }) {
   const cancel = () => { setEditing(null); setForm(EMPTY) }
 
   const save = async () => {
-    if (!form.title.trim() || !form.body.trim()) { toast?.error?.('Add a title and a message.'); return }
+    const bannerOnly = !!(form.videoUrl && form.heroBanner)
+    if (!bannerOnly && (!form.title.trim() || !form.body.trim())) { toast?.error?.('Add a title and a message (only a dashboard banner video can be saved without them).'); return }
     setSaving(true)
     const payload = {
       ...form,
@@ -249,7 +250,7 @@ export default function AnnouncementsModule({ toast }) {
                 <div style={{ fontSize: 10.5, color: '#8A8378' }}>The video shows at the top of the announcement card and plays continuously on students' and parents' dashboards.</div>
                 <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 12, color: form.videoUrl ? '#3A2E2A' : '#A8A093', cursor: form.videoUrl ? 'pointer' : 'not-allowed', marginTop: 2, background: form.heroBanner ? 'rgba(201,160,48,.12)' : 'rgba(125,16,37,.04)', border: '1px dashed ' + (form.heroBanner ? '#C9A030' : '#E0D6C4'), borderRadius: 8, padding: '8px 10px' }}>
                   <input type="checkbox" disabled={!form.videoUrl} checked={!!form.heroBanner} onChange={e => setForm(f => ({ ...f, heroBanner: e.target.checked }))} style={{ marginTop: 2 }} />
-                  <span><b>Play as the student dashboard banner.</b> The video fills the greeting banner on every student's dashboard and plays continuously; the student's own details pop in at the start and again after the first play through. The display window dates above do NOT apply to the banner: it plays until you untick this, remove the video, or delete the announcement.{!form.videoUrl && <em style={{ display: 'block', marginTop: 3, fontStyle: 'normal', fontWeight: 700, color: '#7D1025' }}>Upload a video above first, then tick this.</em>}</span>
+                  <span><b>Play as the student dashboard banner.</b> The video fills the greeting banner on every student's dashboard and plays continuously; the student's own details pop in at the start and again after the first play through. The display window dates above do NOT apply to the banner: it plays until you untick this, remove the video, or delete the announcement. With this ticked you may save with no title or message at all: it is then just a banner upload and will not appear in the announcements feed.{!form.videoUrl && <em style={{ display: 'block', marginTop: 3, fontStyle: 'normal', fontWeight: 700, color: '#7D1025' }}>Upload a video above first, then tick this.</em>}</span>
                 </label>
               </div>
             </div>
