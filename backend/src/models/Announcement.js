@@ -9,7 +9,10 @@ const mongoose = require('mongoose');
 
 const announcementSchema = new mongoose.Schema({
   title:   { type: String, required: true, trim: true, maxlength: 120 },
-  body:    { type: String, required: true, trim: true, maxlength: 1000 },
+  // Not required at the schema level: a pure dashboard banner carrier
+  // (video + heroBanner, nothing written) legitimately has no body.
+  // The route still enforces title AND body for every real announcement.
+  body:    { type: String, default: '', trim: true, maxlength: 1000 },
 
   // Visual category — drives the icon and colour on the dashboard card.
   category: {
