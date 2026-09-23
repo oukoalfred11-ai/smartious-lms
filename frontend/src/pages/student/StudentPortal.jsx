@@ -703,6 +703,18 @@ export default function StudentPortal() {
 
   // ── Navigation ───────────────────────────────────────
   const [page,        setPage]        = useState('dashboard')
+  // ── Banner video, portal-wide ──
+  // The flagged dashboard banner film also crowns eight module pages
+  // (HeroVideoStrip). This is the MAIN component's own copy of the
+  // URL; the dashboard tab keeps its own for the hero choreography.
+  const [heroVideo, setHeroVideo] = useState('')
+  useEffect(() => {
+    let gone = false
+    api.get('/announcements/hero-video')
+      .then(r => { if (!gone && r.data?.success && r.data.data.videoUrl) setHeroVideo(r.data.data.videoUrl) })
+      .catch(() => {})
+    return () => { gone = true }
+  }, [])
   const [collapsed,   setCollapsed]   = useState(false)
 
   // ── Notifications dropdown (header bell) ─────────────
