@@ -16,6 +16,7 @@
  * Set up to disable text selection + right-click + download.
  */
 
+import HeroPanelVideo from '../../components/HeroPanelVideo.jsx'
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { api } from '../../context/ctx.jsx'
 import { imageForSubject, colorForSubject } from '../../utils/subjectImages.js'
@@ -248,9 +249,11 @@ export default function LessonPlayerTab({ user, toast, setPage }) {
       <div className="card" style={{
         padding: 0, marginBottom: 18, overflow: 'hidden',
         background: `linear-gradient(135deg, ${BRAND.crimson} 0%, ${BRAND.crimsonD} 100%)`,
+        position: 'relative', zIndex: 0, overflow: 'hidden',
         color: BRAND.cream,
         boxShadow: '0 12px 40px rgba(125,16,37,.20)',
       }}>
+        <HeroPanelVideo />
         <div style={{
           padding: '28px 32px',
           backgroundImage: 'radial-gradient(circle at 95% 50%, rgba(201,160,48,.18) 0%, transparent 50%)',
