@@ -1,7 +1,7 @@
 {
   "name": "smartious-api",
   "version": "1.0.0",
-  "description": "Smartious Homeschool LMS — Backend API",
+  "description": "Smartious Homeschool LMS \u2014 Backend API",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
@@ -24,7 +24,8 @@
     "nodemailer": "^6.9.14",
     "pdfkit": "^0.15.2",
     "socket.io": "^4.7.5",
-    "uuid": "^10.0.0"
+    "uuid": "^10.0.0",
+    "dejavu-fonts-ttf": "^2.37.3"
   },
   "devDependencies": {
     "nodemon": "^3.1.4"
