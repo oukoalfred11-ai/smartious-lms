@@ -111,6 +111,12 @@ async function buildPaper(lc, priorNames, total) {
   // unanswerable, and activation no longer guarantees artwork exists.
   const base = {
     isActive: { $ne: false },
+    // The homework player supports these types only. Anything else
+    // (e.g. 'nested' multi-part questions) makes the whole homework
+    // fail validation on save - the class then silently gets NOTHING
+    // (seen live: Year 10 Chemistry). Exclude at selection, exactly
+    // like the missing-diagram rule below.
+    type: { $in: ['mcq', 'short', 'long', 'drawing', 'handwriting', 'upload'] },
     $nor: [
       { imageNeeded: true,        'artwork.status': { $ne: 'uploaded' } },
       { 'artwork.required': true, 'artwork.status': { $ne: 'uploaded' } },
@@ -160,6 +166,12 @@ async function poolForClass(lc) {
   // unanswerable, and activation no longer guarantees artwork exists.
   const base = {
     isActive: { $ne: false },
+    // The homework player supports these types only. Anything else
+    // (e.g. 'nested' multi-part questions) makes the whole homework
+    // fail validation on save - the class then silently gets NOTHING
+    // (seen live: Year 10 Chemistry). Exclude at selection, exactly
+    // like the missing-diagram rule below.
+    type: { $in: ['mcq', 'short', 'long', 'drawing', 'handwriting', 'upload'] },
     $nor: [
       { imageNeeded: true,        'artwork.status': { $ne: 'uploaded' } },
       { 'artwork.required': true, 'artwork.status': { $ne: 'uploaded' } },
