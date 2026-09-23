@@ -6705,7 +6705,7 @@ function HomeworkTab({ user, store, setPage, toast }) {
                         flexShrink: 0,
                       }}>Q{idx + 1}</span>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--s900)', lineHeight: 1.5 }}>{q.questionText}</div>
+                        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--s900)', lineHeight: 1.5 }}>{renderMath(q.questionText)}</div>
                         <div style={{ fontSize: 11, color: 'var(--s500)', marginTop: 2 }}>
                           {meta.label} · max {q.marks} mark{q.marks === 1 ? '' : 's'}
                           {a.autoGraded && <span style={{ marginLeft: 8, color: '#1E3A8A', fontWeight: 700 }}>· auto-graded</span>}
@@ -6744,7 +6744,7 @@ function HomeworkTab({ user, store, setPage, toast }) {
                                 display: 'flex', alignItems: 'center', gap: 6,
                               }}>
                                 <span style={{ fontWeight: 700, fontFamily: 'JetBrains Mono, monospace', color: 'var(--s500)' }}>{String.fromCharCode(65 + optIdx)}</span>
-                                <span style={{ flex: 1 }}>{opt}</span>
+                                <span style={{ flex: 1 }}>{renderMath(String(opt))}</span>
                                 {wasSelected && <span style={{ fontSize: 10, fontWeight: 700, color: isCorrect ? '#15803D' : '#B91C1C' }}>STUDENT PICKED</span>}
                                 {isCorrect && <span style={{ fontSize: 10, fontWeight: 700, color: '#15803D' }}>CORRECT</span>}
                               </div>
@@ -7150,7 +7150,7 @@ function HomeworkTab({ user, store, setPage, toast }) {
                       </div>
                       <div style={{ width: 28, height: 28, borderRadius: 6, background: meta.color + '15', color: meta.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'JetBrains Mono, monospace', fontSize: 11, fontWeight: 700, flexShrink: 0 }}>{meta.letter}</div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 13, color: 'var(--s900)', marginBottom: 2 }}>{q.questionText}</div>
+                        <div style={{ fontSize: 13, color: 'var(--s900)', marginBottom: 2 }}>{renderMath(q.questionText)}</div>
                         <div style={{ fontSize: 11, color: 'var(--s500)' }}>
                           {meta.label} · {q.marks} mark{q.marks === 1 ? '' : 's'} · {q.difficulty}
                           {q.questionId ? ' · from bank' : (q.saveToBank ? ' · custom (will save to bank)' : ' · custom')}
@@ -7221,7 +7221,7 @@ function HomeworkTab({ user, store, setPage, toast }) {
                       <div key={q._id} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', padding: 10, border: '1px solid var(--border)', borderRadius: 8, background: alreadyAdded ? 'var(--bg)' : '#FFF' }}>
                         <div style={{ width: 26, height: 26, borderRadius: 6, background: meta.color + '15', color: meta.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'JetBrains Mono, monospace', fontSize: 11, fontWeight: 700, flexShrink: 0 }}>{meta.letter}</div>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: 13, color: 'var(--s900)', marginBottom: 2 }}>{q.questionText}</div>
+                          <div style={{ fontSize: 13, color: 'var(--s900)', marginBottom: 2 }}>{renderMath(q.questionText)}</div>
                           <div style={{ fontSize: 11, color: 'var(--s500)' }}>{q.curriculum} · {q.subject} · {q.grade} · {meta.label} · {q.marks}m</div>
                         </div>
                         <button onClick={() => addBankQuestionToForm(q)} disabled={alreadyAdded} className="btn btn-p btn-sm" style={{ flexShrink: 0 }}>{alreadyAdded ? 'Added' : 'Add'}</button>
