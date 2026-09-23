@@ -29,6 +29,7 @@ import {
 } from '../../components/exam/NestedQuestion.jsx'
 import LessonPlayerTab from './LessonPlayerTab.jsx'
 import HeroPanelVideo from '../../components/HeroPanelVideo.jsx'
+import { renderMath } from '../../components/ui/MathField.jsx'
 import CommunityChatView from '../../components/CommunityChat.jsx'
 import ClubsHub from '../../components/ClubsHub.jsx'
 import QuizGame from './QuizGame.jsx'
@@ -2615,7 +2616,7 @@ function PracticeTab({ user, toast, goTo }) {
                   style={{ accentColor: col }}
                 />
                 <span style={{ fontSize: 14, color: answers[q.id] === opt ? col : 'var(--s700)', fontWeight: answers[q.id] === opt ? 600 : 400 }}>
-                  {opt}
+                  {renderMath(String(opt))}
                 </span>
               </label>
             ))}
@@ -3670,7 +3671,7 @@ function ExamsTab({ user, toast, goTo, store }) {
                     )}
                     {q.questionText && (
                       <div style={{ fontSize:15, fontWeight:500, color:'var(--s800)', lineHeight:1.5 }}>
-                        {q.questionText}
+                        {renderMath(q.questionText)}
                       </div>
                     )}
                     {Array.isArray(q.attachments) && q.attachments.length > 0 && (
@@ -8805,7 +8806,7 @@ function MyResultDetail({ subId, detail, loading, onBack, user, toast }) {
                     {fullLabel}
                   </div>
                   <div style={{ flex:1, minWidth:0, fontSize:13.5, color:'#1A1A1A', overflow:'hidden', textOverflow:'ellipsis', whiteSpace: isExpanded ? 'normal' : 'nowrap', lineHeight:1.4 }}>
-                    {questionText}
+                    {renderMath(questionText)}
                   </div>
                   <div style={{ display:'flex', alignItems:'center', gap:8, flexShrink:0 }}>
                     <div style={{
@@ -8841,7 +8842,7 @@ function MyResultDetail({ subId, detail, loading, onBack, user, toast }) {
                         fontSize:12, color:'#6B6B6B', fontStyle:'italic', lineHeight:1.55,
                       }}>
                         <strong style={{ color:'#7D1025', fontStyle:'normal' }}>Context: </strong>
-                        {question.questionText}
+                        {renderMath(question.questionText)}
                       </div>
                     )}
                     {leafPart && Array.isArray(leafPart.attachments) && leafPart.attachments.length > 0 && (
@@ -9471,7 +9472,7 @@ function HomeworkTab({ user, toast }) {
                         flexShrink: 0,
                       }}>Q{idx + 1}</span>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--s900)', lineHeight: 1.5 }}>{q.questionText}</div>
+                        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--s900)', lineHeight: 1.5 }}>{renderMath(q.questionText)}</div>
                         <div style={{ fontSize: 11, color: 'var(--s500)', marginTop: 2 }}>
                           {hwTypeLabel[q.type]} · {q.marks} mark{q.marks === 1 ? '' : 's'}
                         </div>
@@ -9515,7 +9516,7 @@ function HomeworkTab({ user, toast }) {
                                 disabled={isReadOnly}
                                 onChange={() => setAnswer(idx, optIdx)}
                               />
-                              <span style={{ fontSize: 13.5 }}>{String.fromCharCode(65 + optIdx)}. {opt}</span>
+                              <span style={{ fontSize: 13.5 }}>{String.fromCharCode(65 + optIdx)}. {renderMath(String(opt))}</span>
                             </label>
                           )
                         })}
@@ -12648,7 +12649,7 @@ function LessonPracticeTab({ subject, curriculum, topic, user, toast }) {
                     onChange={() => setAnswers({ ...answers, [q.qIndex]: opt })}
                     style={{ marginTop: 2, cursor: 'pointer' }}
                   />
-                  <span style={{ fontSize: 13, color: '#1A1A1A', lineHeight: 1.45 }}>{opt}</span>
+                  <span style={{ fontSize: 13, color: '#1A1A1A', lineHeight: 1.45 }}>{renderMath(String(opt))}</span>
                 </label>
               )
             })}
