@@ -37,6 +37,7 @@
  */
 
 const PDFDocument = require('pdfkit')
+const { mathToText } = require('./mathText');
 const path = require('path')
 const fs   = require('fs')
 
@@ -318,7 +319,7 @@ function renderParts(doc, parts, depth, x, width, scheme) {
     doc.y = labelY - doc.currentLineHeight()
 
     doc.fontSize(9.5).font('Helvetica').fillColor(INK)
-       .text(esc(p.text), x + 26, doc.y, { width: width - 26 - 34 })
+       .text(esc(mathToText(p.text)), x + 26, doc.y, { width: width - 26 - 34 })
 
     if (!hasChildren && marks > 0) {
       const my = doc.y - doc.currentLineHeight()
@@ -330,7 +331,7 @@ function renderParts(doc, parts, depth, x, width, scheme) {
     if (p.type === 'mcq' && Array.isArray(p.options) && p.options.length) {
       p.options.forEach((opt, oi) => {
         doc.fontSize(9).font('Helvetica').fillColor(INK)
-           .text(`${ALPHA[oi].toUpperCase()}   ${esc(opt)}`, x + 46, doc.y, { width: width - 80 })
+           .text(`${ALPHA[oi].toUpperCase()}   ${esc(mathToText(opt))}`, x + 46, doc.y, { width: width - 80 })
         doc.y += 2
       })
       doc.y += 4
@@ -408,7 +409,7 @@ function renderQuestion(doc, q, number, scheme) {
   doc.y = ny
 
   doc.fontSize(10).font('Helvetica').fillColor(INK)
-     .text(esc(q.questionText), x + 22, doc.y, { width: CW - 22 - 40 })
+     .text(esc(mathToText(q.questionText)), x + 22, doc.y, { width: CW - 22 - 40 })
   doc.y += 6
 
   if (q.imageCaption) {
@@ -422,7 +423,7 @@ function renderQuestion(doc, q, number, scheme) {
   if (!hasParts && q.type === 'mcq' && Array.isArray(q.options) && q.options.length) {
     q.options.forEach((opt, oi) => {
       doc.fontSize(9.5).font('Helvetica').fillColor(INK)
-         .text(`${ALPHA[oi].toUpperCase()}   ${esc(opt)}`, x + 40, doc.y, { width: CW - 80 })
+         .text(`${ALPHA[oi].toUpperCase()}   ${esc(mathToText(opt))}`, x + 40, doc.y, { width: CW - 80 })
       doc.y += 2
     })
     doc.y += 4
