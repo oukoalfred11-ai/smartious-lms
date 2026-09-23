@@ -2309,7 +2309,7 @@ function QuestionBankTab({ user, store, setPage, toast }) {
                         <div style={{ fontSize: 14, fontWeight: 600, color: '#0D1220', marginBottom: 3 }}>{q.artwork.title}</div>
                       )}
                       <div style={{ fontSize: 12.5, color: '#4B5563', lineHeight: 1.5 }}>
-                        {(q.questionText || '').slice(0, 160)}{(q.questionText || '').length > 160 ? '...' : ''}
+                        {renderMath((q.questionText || '').slice(0, 160))}{(q.questionText || '').length > 160 ? '...' : ''}
                       </div>
                     </div>
                     <button onClick={() => setArtworkBrief(q)}
@@ -2348,7 +2348,7 @@ function QuestionBankTab({ user, store, setPage, toast }) {
               <div style={{ marginBottom: 18 }}>
                 <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: '#8B1A2E', marginBottom: 6 }}>The question this illustrates</div>
                 <div style={{ fontSize: 13.5, color: '#0D1220', lineHeight: 1.6, background: '#FDFAF4', border: '1px solid #E8E0D0', borderRadius: 8, padding: '12px 14px' }}>
-                  {artworkBrief.questionText}
+                  {renderMath(artworkBrief.questionText)}
                 </div>
               </div>
 
@@ -4604,7 +4604,7 @@ function ExamsTab({ user, store, setPage, toast }) {
                     <div style={{
                       fontSize: 13, color: 'var(--s900)', fontWeight: 600,
                       marginBottom: 4, lineHeight: 1.5,
-                    }}>{q.questionText || q.question}</div>
+                    }}>{renderMath(q.questionText || q.question)}</div>
                     <div style={{ fontSize: 10.5, color: 'var(--s400)' }}>
                       {q.topic || '—'} | {q.difficulty || 'medium'} | {q.marks || 0} marks
                     </div>
@@ -5068,7 +5068,7 @@ function ExamsTab({ user, store, setPage, toast }) {
                               }}>Nested · {q.parts.length} part{q.parts.length===1?'':'s'}</span>
                             )}
                           </div>
-                          <div style={{ fontSize: 13, color: 'var(--s900)', fontWeight: 600 }}>{q.questionText || q.question}</div>
+                          <div style={{ fontSize: 13, color: 'var(--s900)', fontWeight: 600 }}>{renderMath(q.questionText || q.question)}</div>
                         </div>
                         <span style={{
                           background: '#F4EFEB', color: 'var(--s700)',
@@ -5508,11 +5508,11 @@ function ExamsTab({ user, store, setPage, toast }) {
                       fontSize: 11, fontWeight: 700, textAlign: 'center', flexShrink: 0,
                     }}>{fullLabel}</div>
                     <div style={{ flex: 1, fontSize: 13.5, color: 'var(--s900)', lineHeight: 1.5 }}>
-                      {questionText}
+                      {renderMath(questionText)}
                       {/* Show context stem for nested */}
                       {isNested && question?.questionText && (
                         <div style={{ fontSize: 11.5, color: 'var(--s500)', marginTop: 6, fontStyle: 'italic' }}>
-                          (Question {qLabel} stem: {question.questionText})
+                          (Question {qLabel} stem: {renderMath(question.questionText)})
                         </div>
                       )}
                       {/* Attachments */}
