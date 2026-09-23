@@ -1768,6 +1768,14 @@ export default function StudentPortal() {
               Each subject renders as an image card; click expands a
               drawer with per-subject lessons / homework / exam counts.
           ════════════════════════════════════════════ */}
+          {/* ── Banner video strip ──
+              The dashboard's flagged banner film also crowns these
+              module pages. Purely visual: each page's own content is
+              untouched, and with no banner video set (or a video that
+              fails) the strip does not exist at all. */}
+          {['curriculum', 'lessons', 'clubs', 'timetable', 'attendance', 'communication', 'community', 'achievements'].includes(page) && (
+            <HeroVideoStrip src={heroVideo} />
+          )}
           {page === 'curriculum' && (() => {
             // ── 1. Read real enrolment from the user record ──
             if (curriculumExpandedSubject) {
@@ -14535,6 +14543,22 @@ function EmailPrefsCard() {
           </div>
         ))}
       </div>
+    </div>
+  )
+}
+
+// ── Banner video strip ───────────────────────────────────────
+// The flagged dashboard banner film, as a slim cinematic band at the
+// top of a module page. Muted continuous loop, house-crimson tint for
+// cohesion, and it removes itself entirely if the video cannot play.
+function HeroVideoStrip({ src }) {
+  const [dead, setDead] = useState(false)
+  if (!src || dead) return null
+  return (
+    <div style={{ position: 'relative', borderRadius: 20, overflow: 'hidden', marginBottom: 18, height: 150, boxShadow: '0 8px 32px rgba(125,16,37,.18)', background: 'linear-gradient(100deg,#7D1025,#3D0712)' }}>
+      <video src={src} autoPlay muted loop playsInline preload="auto" onError={() => setDead(true)}
+        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(100deg, rgba(61,7,18,.35) 0%, rgba(61,7,18,.08) 60%, rgba(61,7,18,.25) 100%)' }} />
     </div>
   )
 }
