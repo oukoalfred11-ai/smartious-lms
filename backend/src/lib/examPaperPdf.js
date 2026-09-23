@@ -539,6 +539,19 @@ function render(exam, questions, opts, scheme) {
     try {
       const meta = buildMeta(exam, questions, opts)
       const doc = new PDFDocument({ size: 'A4', margin: M, bufferPages: true, autoFirstPage: false })
+      // The built-in Helvetica cannot draw mathematics: subscripts,
+      // root signs and Greek printed as stray bullets and quotes on
+      // real papers. Registering DejaVu under the SAME names swaps
+      // every text call to a full Unicode font with no other change.
+      // If the package is ever missing the paper still generates,
+      // just with the old font, rather than failing to download.
+      try {
+        const path = require('path')
+        const ttf = path.join(path.dirname(require.resolve('dejavu-fonts-ttf/package.json')), 'ttf')
+        doc.registerFont('Helvetica', path.join(ttf, 'DejaVuSans.ttf'))
+        doc.registerFont('Helvetica-Bold', path.join(ttf, 'DejaVuSans-Bold.ttf'))
+        doc.registerFont('Helvetica-Oblique', path.join(ttf, 'DejaVuSans-Oblique.ttf'))
+      } catch (e) { console.error('[exam paper pdf] Unicode font unavailable, using core font:', e.message) }
       const chunks = []
       doc.on('data', c => chunks.push(c))
       doc.on('end', () => resolve(Buffer.concat(chunks)))
