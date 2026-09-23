@@ -43,13 +43,17 @@ export default function HeroPanelVideo({ band = false }) {
     <>
       <video src={src} autoPlay muted loop playsInline preload="auto" onError={() => setDead(true)}
         style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', borderRadius: radius }} />
-      <div style={{ position: 'absolute', inset: 0, borderRadius: radius, background: 'linear-gradient(135deg, rgba(61,7,18,.82) 0%, rgba(90,11,27,.62) 55%, rgba(61,7,18,.5) 100%)' }} />
+      {/* Dye, not veil: a solid crimson multiplied into the footage
+          keeps the brand colour deep and vivid instead of the washed,
+          faded look a translucent overlay gives over bright video. */}
+      <div style={{ position: 'absolute', inset: 0, borderRadius: radius, background: '#7D1025', mixBlendMode: 'multiply', opacity: .82 }} />
+      <div style={{ position: 'absolute', inset: 0, borderRadius: radius, background: 'linear-gradient(100deg, rgba(20,2,6,.5) 0%, rgba(20,2,6,.15) 45%, rgba(20,2,6,.35) 100%)' }} />
     </>
   )
 
   if (band) {
     return (
-      <div style={{ position: 'relative', height: 140, borderRadius: 20, overflow: 'hidden', marginBottom: 18, background: 'linear-gradient(100deg,#7D1025,#3D0712)', boxShadow: '0 8px 32px rgba(125,16,37,.18)' }}>
+      <div style={{ position: 'relative', height: 230, borderRadius: 20, overflow: 'hidden', marginBottom: 18, background: 'linear-gradient(100deg,#7D1025,#3D0712)', boxShadow: '0 8px 32px rgba(125,16,37,.22)' }}>
         {media(0)}
       </div>
     )
