@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { api } from '../context/ctx.jsx'
+import HeroPanelVideo from './HeroPanelVideo.jsx'
 
 /**
  * ClubsHub: the Smartious Clubs experience for students (and parents, read
@@ -143,7 +144,7 @@ export default function ClubsHub({ user, toast, readOnly = false }) {
     const on = tab === id
     return (
       <button key={id} onClick={() => setTab(id)} style={{
-        display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '12px 14px', borderRadius: 12, border: 'none', cursor: 'pointer',
+        display: 'flex', alignItems: 'center', gap: 8, padding: '9px 14px', borderRadius: 99, border: 'none', cursor: 'pointer',
         background: on ? 'rgba(255,255,255,.14)' : 'transparent', color: '#fff', fontSize: 14, fontWeight: on ? 800 : 600, textAlign: 'left',
       }}><Ico k={k} c={on ? GOLD : 'rgba(255,255,255,.85)'} s={18} />{label}</button>
     )
@@ -193,17 +194,20 @@ export default function ClubsHub({ user, toast, readOnly = false }) {
   )
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '220px minmax(0,1fr)', gap: 22, alignItems: 'start' }} className="clubs-grid">
-      <style>{`@media (max-width: 900px) { .clubs-grid { grid-template-columns: 1fr !important } .clubs-side { flex-direction: row !important; overflow-x: auto } }`}</style>
-
-      {/* Sidebar */}
-      <div className="clubs-side" style={{ background: `linear-gradient(180deg, ${CR}, #5A0B1B)`, borderRadius: 18, padding: 14, display: 'flex', flexDirection: 'column', gap: 4, minHeight: 420 }}>
-        {sideTab('overview', 'Overview', 'home')}
-        {sideTab('mine', 'My Clubs', 'users')}
-        {sideTab('events', 'Events', 'cal')}
-        {sideTab('recordings', 'Recordings', 'play')}
-        <div style={{ marginTop: 'auto', padding: '18px 10px 6px', color: 'rgba(255,255,255,.85)', fontSize: 13.5, lineHeight: 1.6, fontStyle: 'italic' }}>
-          <span style={{ color: GOLD, fontSize: 22, lineHeight: 0 }}>&ldquo;</span> Discover your passion today, lead the world tomorrow.
+    <div>
+      {/* ── Crimson header: the banner film plays inside it, the
+          section tabs ride on top - one column like every other
+          module, no second sidebar. ── */}
+      <div style={{ background: `linear-gradient(135deg, ${CR} 0%, #5A0B1B 60%, #3D0712 100%)`, borderRadius: 18, padding: '18px 20px', marginBottom: 20, position: 'relative', zIndex: 0, overflow: 'hidden' }}>
+        <HeroPanelVideo />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          {sideTab('overview', 'Overview', 'home')}
+          {sideTab('mine', 'My Clubs', 'users')}
+          {sideTab('events', 'Events', 'cal')}
+          {sideTab('recordings', 'Recordings', 'play')}
+          <div style={{ marginLeft: 'auto', color: 'rgba(255,255,255,.85)', fontSize: 12.5, fontStyle: 'italic', minWidth: 0 }}>
+            <span style={{ color: GOLD, fontSize: 18, lineHeight: 0 }}>&ldquo;</span> Discover your passion today, lead the world tomorrow.
+          </div>
         </div>
       </div>
 
