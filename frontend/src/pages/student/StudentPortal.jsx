@@ -28,6 +28,7 @@ import {
   sumLeafMarks,
 } from '../../components/exam/NestedQuestion.jsx'
 import LessonPlayerTab from './LessonPlayerTab.jsx'
+import HeroPanelVideo from '../../components/HeroPanelVideo.jsx'
 import CommunityChatView from '../../components/CommunityChat.jsx'
 import ClubsHub from '../../components/ClubsHub.jsx'
 import QuizGame from './QuizGame.jsx'
@@ -703,18 +704,6 @@ export default function StudentPortal() {
 
   // ── Navigation ───────────────────────────────────────
   const [page,        setPage]        = useState('dashboard')
-  // ── Banner video, portal-wide ──
-  // The flagged dashboard banner film also crowns eight module pages
-  // (HeroVideoStrip). This is the MAIN component's own copy of the
-  // URL; the dashboard tab keeps its own for the hero choreography.
-  const [heroVideo, setHeroVideo] = useState('')
-  useEffect(() => {
-    let gone = false
-    api.get('/announcements/hero-video')
-      .then(r => { if (!gone && r.data?.success && r.data.data.videoUrl) setHeroVideo(r.data.data.videoUrl) })
-      .catch(() => {})
-    return () => { gone = true }
-  }, [])
   const [collapsed,   setCollapsed]   = useState(false)
 
   // ── Notifications dropdown (header bell) ─────────────
@@ -1780,13 +1769,13 @@ export default function StudentPortal() {
               Each subject renders as an image card; click expands a
               drawer with per-subject lessons / homework / exam counts.
           ════════════════════════════════════════════ */}
-          {/* ── Banner video strip ──
-              The dashboard's flagged banner film also crowns these
-              module pages. Purely visual: each page's own content is
-              untouched, and with no banner video set (or a video that
-              fails) the strip does not exist at all. */}
-          {['curriculum', 'lessons', 'clubs', 'timetable', 'attendance', 'communication', 'community', 'achievements'].includes(page) && (
-            <HeroVideoStrip src={heroVideo} />
+          {/* ── Banner video band ──
+              Pages WITHOUT a crimson header of their own get the
+              banner film as their crimson part. Pages that have one
+              (curriculum, lessons, clubs, timetable, attendance)
+              play the film INSIDE that header via HeroPanelVideo. */}
+          {['communication', 'community', 'achievements'].includes(page) && (
+            <HeroPanelVideo band />
           )}
           {page === 'curriculum' && (() => {
             // ── 1. Read real enrolment from the user record ──
@@ -1891,7 +1880,9 @@ export default function StudentPortal() {
                   padding: 0, marginBottom: 18, overflow: 'hidden',
                   background: 'linear-gradient(135deg, #7D1025 0%, #5A0B1B 100%)',
                   color: '#fff', border: 'none',
+                  position: 'relative', zIndex: 0,
                 }}>
+                  <HeroPanelVideo />
                   <div style={{ padding: '28px 32px 22px', display:'flex', alignItems:'flex-start', gap:24, flexWrap:'wrap' }}>
                     <div style={{ flex:1, minWidth:260 }}>
                       <div style={{
@@ -12808,7 +12799,8 @@ function StudentAttendancePage({ user, toast }) {
 
       {/* ── Daily check-in card ── */}
       <div style={{background:'#fff',border:'1px solid #E8E2D6',borderRadius:12,overflow:'hidden',marginBottom:20}}>
-        <div style={{background:'linear-gradient(135deg,#8B1A2E,#5A0B1B)',padding:'20px 24px',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+        <div style={{background:'linear-gradient(135deg,#7D1025,#5A0B1B)',padding:'20px 24px',display:'flex',justifyContent:'space-between',alignItems:'center',position:'relative',zIndex:0,overflow:'hidden'}}>
+          <HeroPanelVideo />
           <div>
             <div style={{fontSize:13,fontWeight:800,color:'#C9A030',letterSpacing:'.06em',textTransform:'uppercase',marginBottom:4}}>Daily check-in</div>
             <div style={{fontSize:16,fontWeight:700,color:'#fff'}}>
@@ -13519,7 +13511,9 @@ function RealTimetableTab({ user, setPage, toast }) {
         background: 'linear-gradient(135deg, #7D1025 0%, #5A0B1B 60%, #3D0712 100%)',
         borderRadius: 16, overflow: 'hidden', marginBottom: 24,
         boxShadow: '0 8px 32px rgba(125,16,37,.25)',
+        position: 'relative', zIndex: 0,
       }}>
+        <HeroPanelVideo />
         <div style={{ display:'flex', alignItems:'stretch', gap:0 }}>
           {/* Photo section */}
           <div style={{ width:160, flexShrink:0, position:'relative', overflow:'hidden' }}>
@@ -14555,22 +14549,6 @@ function EmailPrefsCard() {
           </div>
         ))}
       </div>
-    </div>
-  )
-}
-
-// ── Banner video strip ───────────────────────────────────────
-// The flagged dashboard banner film, as a slim cinematic band at the
-// top of a module page. Muted continuous loop, house-crimson tint for
-// cohesion, and it removes itself entirely if the video cannot play.
-function HeroVideoStrip({ src }) {
-  const [dead, setDead] = useState(false)
-  if (!src || dead) return null
-  return (
-    <div style={{ position: 'relative', borderRadius: 20, overflow: 'hidden', marginBottom: 18, height: 150, boxShadow: '0 8px 32px rgba(125,16,37,.18)', background: 'linear-gradient(100deg,#7D1025,#3D0712)' }}>
-      <video src={src} autoPlay muted loop playsInline preload="auto" onError={() => setDead(true)}
-        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
-      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(100deg, rgba(61,7,18,.35) 0%, rgba(61,7,18,.08) 60%, rgba(61,7,18,.25) 100%)' }} />
     </div>
   )
 }
