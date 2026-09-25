@@ -94,10 +94,29 @@ const auth = async (req, res, next) => {
   }
 };
 
+// Route families a QA reviewer never sees, even read only: money,
+// staff pay and admissions pipelines are outside an accreditor's
+// remit.
+const QA_BLOCKED_PATHS = ['/payroll', '/invoices', '/paystack', '/fee-collection', '/payments', '/inventory', '/crm', '/inquiries', '/frontdesk'];
+
 const requireRole = (...roles) => (req, res, next) => {
-  if (!req.user || !roles.includes(req.user.role))
-    return res.status(403).json({ success: false, message: 'Access denied.' });
-  next();
+  if (!req.user) return res.status(403).json({ success: false, message: 'Access denied.' });
+  if (roles.includes(req.user.role)) return next();
+
+  // QA (accreditation reviewer, e.g. Cognia or Cambridge): a
+  // read-only shadow of the staff surfaces. Any GET that an internal
+  // staff role may make, QA may make too; every write stays denied,
+  // structurally, and the finance families above are closed even to
+  // reads. One rule here beats a 'qa' edit in every route file, and
+  // new routes inherit it automatically.
+  if (
+    req.user.role === 'qa' &&
+    req.method === 'GET' &&
+    !QA_BLOCKED_PATHS.some(p => (req.baseUrl || '').includes(p)) &&
+    ['admin', 'dos', 'ops_manager', 'teacher', 'accountant'].some(r => roles.includes(r))
+  ) return next();
+
+  return res.status(403).json({ success: false, message: 'Access denied.' });
 };
 
 module.exports = { auth, requireRole };
