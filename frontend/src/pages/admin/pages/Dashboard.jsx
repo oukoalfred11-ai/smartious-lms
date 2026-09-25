@@ -17,8 +17,8 @@ import { DOSAnalyticsModule, DOSExamsModule, DOSHomeworkModule, DOSAttendanceMod
 import ReportsModule from './modules/ReportsModule.jsx'
 import CommunicationModule from './modules/CommunicationModule.jsx'
 import StudentsManagementModule from './modules/AllocationsModule.jsx'
-import TeacherDocsModule from './modules/TeacherDocsModule.jsx'
 import QuestionBankModule from './modules/QuestionBankModule.jsx'
+import MarkingReviewModule from './modules/MarkingReviewModule.jsx'
 import { COOReportOverviewModule, TeacherRatingsModule } from './modules/RatingsModule.jsx'
 import PayrollModule from './modules/PayrollModule.jsx'
 import StudentSessionsModule from './modules/StudentSessionsModule.jsx'
@@ -72,10 +72,10 @@ const NAV_SECTIONS = {
   admin: [
     { label: 'Overview',    items: ['command', 'dashboard', 'analytics'] },
     { label: 'People',      items: ['users', 'teachers', 'allocations', 'sessions', 'communication', 'support', 'dmoversight', 'community', 'announcements'] },
-    { label: 'Reports',     items: ['reports', 'dosperformance', 'mastery', 'teacherdocs'] },
+    { label: 'Reports',     items: ['reports', 'dosperformance', 'mastery'] },
     { label: 'Operations',  items: ['frontdesk', 'assessment', 'documents', 'payroll', 'leave', 'programmes', 'inventory'] },
     { label: 'Teaching',    items: ['liveclasses', 'clubs', 'grouprooms', 'curriculum'] },
-    { label: 'Question Bank', items: ['questionbank'] },
+    { label: 'Question Bank', items: ['questionbank', 'markingreview'] },
     { label: 'Marketing',   items: ['studio'] },
     { label: 'System',      items: ['userlogs', 'billing', 'website', 'settings', 'ai', 'suggestions'] },
   ],
@@ -94,21 +94,17 @@ const NAV_SECTIONS = {
     { label: 'Student Sessions', items: ['sessions'] },
     { label: 'Breaks',        items: ['dosbreaks'] },
     { label: 'Timetables',    items: ['dostimetable'] },
-    { label: 'Question Bank', items: ['questionbank'] },
+    { label: 'Question Bank', items: ['questionbank', 'markingreview'] },
     { label: 'Reports',       items: ['reports', 'dosperformance', 'mastery'] },
     { label: 'System',        items: ['settings'] },
   ],
   sales: [
     { label: 'Overview',    items: ['checkin', 'dashboard', 'salesperf'] },
     { label: 'CRM',         items: ['crm'] },
+    { label: 'Billing',     items: ['billing'] },
     { label: 'Admissions',  items: ['assessment', 'frontdesk', 'communication'] },
     { label: 'Content',     items: ['documents'] },
     { label: 'System',      items: ['settings'] },
-  ],
-  qa: [
-    { label: 'Overview',          items: ['checkin', 'dashboard'] },
-    { label: 'Quality Assurance', items: ['teacherdocs'] },
-    { label: 'System',            items: ['settings'] },
   ],
   ops_manager: [
     { label: 'Overview',    items: ['command', 'checkin', 'dashboard', 'analytics'] },
@@ -140,7 +136,6 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
     dos:         { label: 'Dean of Studies',    color: TOKENS.accentNavy },
     sales:       { label: 'Sales Portal',      color: TOKENS.accentNavy },
     ops_manager: { label: 'Operations Portal', color: TOKENS.accentAmber },
-    qa:          { label: 'QA Portal',         color: TOKENS.accentEmerald },
   }
   const portalMeta = PORTAL_META[role] || PORTAL_META.admin
 
@@ -224,7 +219,6 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
                   accountant:  'Accountant',
                   sales:       'Sales & Front Desk',
                   ops_manager: 'Operations Manager',
-                  qa:          'Quality Assurance',
                 }[role] || 'Administrator'}
               </div>
             </div>
@@ -368,7 +362,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         payload.linkedStudents = userForm.linkedStudents || []
         payload.plan = 'Basic'
         payload.avatar = userForm.avatar || ''
-      } else if (['admin','accountant','sales','ops_manager','dos','qa'].includes(userForm.role)) {
+      } else if (['admin','accountant','sales','ops_manager','dos'].includes(userForm.role)) {
         payload.plan = 'Staff'
       }
 
@@ -414,7 +408,6 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
       }}>
         <BirthdayBanner />
         <SuggestionBox />
-        {safePage === 'teacherdocs' && <TeacherDocsModule toast={toast} />}
         {safePage === 'dashboard'   && forcedRole && <RoleOverview role={forcedRole} setPage={setPage} userStats={userStats} pendingAllocations={pendingAllocations} auth={auth} />}
         {safePage === 'dashboard'   && !forcedRole && <DashboardModule  setPage={setPage} userStats={userStats} pendingAllocations={pendingAllocations} refreshKey={refreshKey} auth={auth} toast={toast} openAddUser={openAddUser} adminFirst={adminFirst} />}
         {safePage === 'analytics'   && <AnalyticsModule  setPage={setPage} refreshKey={refreshKey} toast={toast} />}
@@ -452,6 +445,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         {safePage === 'programmes'  && <ProgrammesModule refreshKey={refreshKey} toast={toast} />}
         {safePage === 'grouprooms'  && <GroupRoomsModule refreshKey={refreshKey} toast={toast} />}
         {safePage === 'curriculum'  && <CurriculumModule refreshKey={refreshKey} toast={toast} />}
+        {safePage === 'markingreview' && <MarkingReviewModule toast={toast} />}
         {safePage === 'billing'        && <BillingModule       refreshKey={refreshKey} toast={toast}/>}
         {safePage === 'studio'         && <StudioModule        toast={toast}/>}
         {safePage === 'feecollection' && <FeeCollectionModule refreshKey={refreshKey} toast={toast}/>}
@@ -529,8 +523,6 @@ function RoleOverview({ role, setPage, userStats, pendingAllocations, auth }) {
       tiles: [['dosanalytics','Performance Analytics','School-wide academic trends'],['exams','Exams','Set and track assessments'],['sessions','Student Sessions','Holidays, breaks and report-backs'],['reports','Reports','Generate and publish term reports']] },
     ops_manager: { title: 'Operations Overview', sub: 'People, allocations and day-to-day running.',
       tiles: [['users','Users','Manage students, parents and staff'],['allocations','Manage Students','Match students with teachers'],['sessions','Student Sessions','Pause and restore student accounts'],['leave','Leave','Approve staff leave requests']] },
-    qa: { title: 'Quality Assurance Overview', sub: 'Teacher documentation and teaching standards.',
-      tiles: [['teacherdocs','Teacher Documents','Every teacher\'s filing, by category'],['settings','Settings','Your account and preferences']] },
   }
   const meta = META[role] || META.ops_manager
   const kpis = [
