@@ -106,6 +106,12 @@ const NAV_SECTIONS = {
     { label: 'Content',     items: ['documents'] },
     { label: 'System',      items: ['settings'] },
   ],
+  qa: [
+    { label: 'Overview',  items: ['dashboard'] },
+    { label: 'Academics', items: ['curriculum', 'questionbank', 'exams'] },
+    { label: 'Quality & Reports', items: ['reports', 'dosperformance', 'mastery', 'dosattend'] },
+    { label: 'Documents', items: ['documents'] },
+  ],
   ops_manager: [
     { label: 'Overview',    items: ['command', 'checkin', 'dashboard', 'analytics'] },
     { label: 'Support',       items: ['support', 'dmoversight'] },
@@ -136,6 +142,7 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
     dos:         { label: 'Dean of Studies',    color: TOKENS.accentNavy },
     sales:       { label: 'Sales Portal',      color: TOKENS.accentNavy },
     ops_manager: { label: 'Operations Portal', color: TOKENS.accentAmber },
+    qa:          { label: 'QA Portal',         color: TOKENS.gold },
   }
   const portalMeta = PORTAL_META[role] || PORTAL_META.admin
 
