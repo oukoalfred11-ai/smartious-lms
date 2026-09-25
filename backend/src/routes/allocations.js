@@ -172,10 +172,17 @@ router.get('/pending-count', auth, requireRole('admin', 'ops_manager', 'dos', 'a
 router.get('/teacher', auth, requireRole('teacher'), async (req, res) => {
   try {
     const allocations = await Allocation.find({ teacherId: req.user._id })
-      .populate('studentId', 'firstName lastName email curriculum')
+      .populate({
+        path: 'studentId',
+        select: 'firstName lastName email curriculum',
+        // Paused, archived or deactivated students leave the
+        // teacher's allocation list until they are back; the
+        // allocation record itself is untouched.
+        match: { archived: { $ne: true }, onBreak: { $ne: true }, isActive: { $ne: false } },
+      })
       .populate('subjectId', 'subjectName curriculum')
       .sort('-createdAt');
-    res.json({ success: true, allocations });
+    res.json({ success: true, allocations: allocations.filter(a => a.studentId) });
   } catch (e) {
     console.error('[allocations teacher]', e.message);
     res.status(500).json({ success: false, message: e.message });
