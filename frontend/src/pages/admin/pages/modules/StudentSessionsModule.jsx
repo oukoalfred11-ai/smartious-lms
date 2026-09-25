@@ -81,6 +81,13 @@ function StudentSessionsModule({ toast, refreshKey }) {
       toast?.ok?.(r.data?.message); setExiting(null); load(); loadYears()
     } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not update the student.') }
   }
+  const doReinstate = async (s) => {
+    if (!window.confirm('Reinstate ' + s.firstName + ' ' + s.lastName + '? Their account and any archived parents come back with full history, and a welcome back email is sent.')) return
+    try {
+      const r = await api.patch('/student-sessions/reinstate/' + s._id)
+      toast?.ok?.(r.data?.message); load(); loadYears()
+    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not reinstate the student.') }
+  }
   const [pauseModal, setPauseModal] = useState(null)     // student being paused
   const [form, setForm] = useState({ type: 'holiday', note: '', expectedEnd: '', blockAccess: false })
   const [historyModal, setHistoryModal] = useState(null) // { student, history }
@@ -191,7 +198,7 @@ function StudentSessionsModule({ toast, refreshKey }) {
         <div onClick={() => setExiting(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 90, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 14 }}>
           <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 14, width: 'min(430px,100%)', padding: 20, display: 'grid', gap: 10 }}>
             <b style={{ fontSize: 15, color: TOKENS.s900 }}>{exiting.kind === 'graduated' ? 'Mark graduated' : 'Mark as left'} \u00b7 {exiting.s.firstName} {exiting.s.lastName}</b>
-            <div style={{ fontSize: 11.5, color: TOKENS.s500 }}>Closes their enrollment record and account together: they leave rosters, timetables and portals, their history stays, and retention data records the exit.</div>
+            <div style={{ fontSize: 11.5, color: TOKENS.s500 }}>Archives the student: they leave rosters, timetables, portals and the users list, every record stays, and an exit email goes to the student and their parents. Parents with no other active child are archived too. Reinstate any time from the Archived view.</div>
             <textarea value={exiting.reason} onChange={e => setExiting(x => ({ ...x, reason: e.target.value }))} rows={2}
               placeholder={exiting.kind === 'graduated' ? 'e.g. Completed Year 13, June 2027' : 'Reason, e.g. relocated, moved schools, fees'}
               style={{ padding: '8px 10px', border: `1.5px solid ${TOKENS.line}`, borderRadius: 8, fontSize: 12.5, resize: 'vertical' }} />
@@ -225,6 +232,7 @@ function StudentSessionsModule({ toast, refreshKey }) {
             <option value="all">All students</option>
             <option value="paused">Paused only</option>
             <option value="active">Active only</option>
+            <option value="archived">Archived (left / graduated)</option>
           </select>
           <div style={{ marginLeft: 'auto', fontSize: 12, color: TOKENS.s500 || '#6B7280' }}>
             Fee holds block portal access for student and parent; holidays and breaks keep access while pausing reminders and check-in.
@@ -278,16 +286,28 @@ function StudentSessionsModule({ toast, refreshKey }) {
                     </td>
                     <td style={{ padding: '11px 14px' }}>
                       <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
-                        {s.onBreak ? (
-                          <button disabled={saving === s._id} onClick={() => setConfirmBack(s)} style={btn('#065F46', '#fff')}>Report Back</button>
+                        {s.archived ? (
+                          <>
+                            <span style={{ padding: '5px 10px', borderRadius: 99, background: '#F3F4F6', color: '#6B7280', fontSize: 10.5, fontWeight: 800 }}>
+                              {s.studentStatus === 'Graduated' ? 'Graduated' : 'Left'}
+                            </span>
+                            <button onClick={() => doReinstate(s)} style={btn('#065F46', '#fff')}>Reinstate</button>
+                            <button onClick={() => openHistory(s)} style={btn(TOKENS.cream || '#FDFAF4', TOKENS.crimson, { border: '1px solid ' + TOKENS.line })}>History</button>
+                          </>
                         ) : (
-                          <button disabled={saving === s._id} onClick={() => openPause(s)} style={btn(TOKENS.crimson, '#fff')}>Pause</button>
+                          <>
+                            {s.onBreak ? (
+                              <button disabled={saving === s._id} onClick={() => setConfirmBack(s)} style={btn('#065F46', '#fff')}>Report Back</button>
+                            ) : (
+                              <button disabled={saving === s._id} onClick={() => openPause(s)} style={btn(TOKENS.crimson, '#fff')}>Pause</button>
+                            )}
+                            <button onClick={() => openHistory(s)} style={btn(TOKENS.cream || '#FDFAF4', TOKENS.crimson, { border: '1px solid ' + TOKENS.line })}>History</button>
+                            <button onClick={() => setExiting({ s, kind: 'withdrawn', reason: '' })}
+                              style={{ padding: '5px 10px', borderRadius: 7, border: '1px solid #FCA5A5', background: '#fff', fontSize: 10.5, fontWeight: 800, cursor: 'pointer', color: '#B91C1C' }}>Left</button>
+                            <button onClick={() => setExiting({ s, kind: 'graduated', reason: '' })}
+                              style={{ padding: '5px 10px', borderRadius: 7, border: '1px solid #86EFAC', background: '#fff', fontSize: 10.5, fontWeight: 800, cursor: 'pointer', color: '#15803D' }}>Graduate</button>
+                          </>
                         )}
-                        <button onClick={() => openHistory(s)} style={btn(TOKENS.cream || '#FDFAF4', TOKENS.crimson, { border: '1px solid ' + TOKENS.line })}>History</button>
-              <button onClick={() => setExiting({ s, kind: 'withdrawn', reason: '' })}
-                style={{ padding: '5px 10px', borderRadius: 7, border: '1px solid #FCA5A5', background: '#fff', fontSize: 10.5, fontWeight: 800, cursor: 'pointer', color: '#B91C1C' }}>Left</button>
-              <button onClick={() => setExiting({ s, kind: 'graduated', reason: '' })}
-                style={{ padding: '5px 10px', borderRadius: 7, border: '1px solid #86EFAC', background: '#fff', fontSize: 10.5, fontWeight: 800, cursor: 'pointer', color: '#15803D' }}>Graduate</button>
                       </div>
                     </td>
                   </tr>
