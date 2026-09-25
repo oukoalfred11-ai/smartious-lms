@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
   lastName: { type: String, required: true, trim: true },
   email: { type: String, required: true, unique: true, lowercase: true },
   password: { type: String, required: true },
-  role: { type: String, enum: ['admin','accountant','sales','ops_manager','dos','qa','teacher','student','parent','demo'], default: 'student' },
+  role: { type: String, enum: ['admin','accountant','sales','ops_manager','dos','teacher','student','parent','demo'], default: 'student' },
   grade: String,
 
   // ── PROGRAMME ENROLMENT (students) ──
@@ -147,6 +147,12 @@ const userSchema = new mongoose.Schema({
   statusChangedAt: Date,
   statusChangedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Admin who made the change
   statusReason: String,
+  // CLEAN ARCHIVE: set when a student is marked left or graduated,
+  // and on their parents once no active child remains. Archived
+  // accounts vanish from every active list but keep every record,
+  // and reinstatement clears the flag with history intact.
+  archived:   { type: Boolean, default: false, index: true },
+  archivedAt: Date,
   academicYear: { type: String, default: '' },   // current cohort, e.g. '2026/2027' // Reason for status change (graduation, parent removal, fee default, etc.)
 
   // Per-user email notification preferences, managed from the profile.
