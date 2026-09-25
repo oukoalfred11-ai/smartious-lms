@@ -169,6 +169,14 @@ router.get('/', auth, requireRole('admin', 'ops_manager', 'teacher'), async (req
       query.curriculum = curriculum;
     }
 
+    // Teachers see only workable accounts: paused (on break) and
+    // deactivated users stay off the teacher portal entirely.
+    // Admin and ops keep the full working list for management.
+    if (req.user.role === 'teacher') {
+      query.onBreak = { $ne: true };
+      query.isActive = { $ne: false };
+    }
+
     const users = await User.find(query)
       .select('-password')
       .populate('subjects', 'subjectName curriculum')
