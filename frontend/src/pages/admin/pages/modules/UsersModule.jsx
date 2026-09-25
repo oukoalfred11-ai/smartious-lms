@@ -502,7 +502,6 @@ export function UserFormFields({ userForm, setUserForm, toast }) {
           <optgroup label="Staff Portals">
             <option value="admin">Administrator</option>
             <option value="dos">Dean of Studies (DOS)</option>
-            <option value="qa">Quality Assurance (QA)</option>
             <option value="ops_manager">Operations Manager / COO</option>
             <option value="accountant">Accountant</option>
             <option value="sales">Sales / Front Desk</option>
@@ -873,14 +872,16 @@ function UsersModule({ refreshKey, toast, setUserForm, setUserModal, openAddUser
   const loadUsers = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await api.get('/users')
+      // The server keeps archived accounts out of the working list;
+      // the Archived filter asks for exactly them instead.
+      const res = await api.get('/users', { params: statusFilter === 'archived' ? { view: 'archived' } : {} })
       setUsers(res.data.users || [])
       setLoading(false)
     } catch (e) {
       setError(e.response?.data?.message || e.message || 'Failed to load')
       setLoading(false)
     }
-  }, [])
+  }, [statusFilter])
 
   useEffect(() => { loadUsers() }, [refreshKey, loadUsers])
 
@@ -889,7 +890,7 @@ function UsersModule({ refreshKey, toast, setUserForm, setUserModal, openAddUser
     students: users.filter(u => u.role === 'student').length,
     teachers: users.filter(u => u.role === 'teacher').length,
     parents: users.filter(u => u.role === 'parent').length,
-    admins: users.filter(u => ['admin','accountant','sales','ops_manager','dos','qa'].includes(u.role)).length,
+    admins: users.filter(u => ['admin','accountant','sales','ops_manager','dos'].includes(u.role)).length,
     pending: users.filter(u => u.mustChangePassword).length,
   }
 
@@ -907,6 +908,17 @@ function UsersModule({ refreshKey, toast, setUserForm, setUserModal, openAddUser
     if (statusFilter === 'suspended' && u.isActive !== false) return false
     return true
   })
+
+  const handleReinstate = async (u) => {
+    if (!window.confirm('Reinstate ' + (u.firstName || '') + ' ' + (u.lastName || '') + '? The student and any archived parents come back with full history, and a welcome back email is sent.')) return
+    try {
+      const res = await api.patch('/student-sessions/reinstate/' + u._id)
+      toast?.ok?.(res.data?.message || 'Reinstated.')
+      loadUsers()
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Could not reinstate.')
+    }
+  }
 
   const handleEdit = (u) => {
     setUserForm({
@@ -1008,6 +1020,7 @@ function UsersModule({ refreshKey, toast, setUserForm, setUserModal, openAddUser
             <option value="active">Active</option>
             <option value="pending">Pending Login</option>
             <option value="suspended">Suspended</option>
+            <option value="archived">Archived</option>
           </select>
           <input className="fi" placeholder="Search name, email, admission #..." value={search} onChange={e => setSearch(e.target.value)} style={{ width: 280, marginLeft: 'auto' }} />
         </div>
@@ -1061,13 +1074,17 @@ function UsersModule({ refreshKey, toast, setUserForm, setUserModal, openAddUser
                       </td>
                       <td style={{ padding: '14px 16px' }}><PlanBadge p={u.plan || 'Basic'} /></td>
                       <td style={{ padding: '14px 16px' }}>
-                        {u.isActive === false ? <span style={{ display: 'inline-block', padding: '3px 10px', background: '#FEE2E2', color: '#991B1B', border: '1px solid #FECACA', borderRadius: 99, fontSize: 11, fontWeight: 700 }}>Suspended</span> :
+                        {u.archived ? <span style={{ display: 'inline-block', padding: '3px 10px', background: '#F3F4F6', color: '#6B7280', border: '1px solid #E5E7EB', borderRadius: 99, fontSize: 11, fontWeight: 700 }}>Archived</span> :
+                          u.isActive === false ? <span style={{ display: 'inline-block', padding: '3px 10px', background: '#FEE2E2', color: '#991B1B', border: '1px solid #FECACA', borderRadius: 99, fontSize: 11, fontWeight: 700 }}>Suspended</span> :
                           u.mustChangePassword ? <span style={{ display: 'inline-block', padding: '3px 10px', background: '#FEF3C7', color: TOKENS.accentAmber, border: '1px solid #FDE68A', borderRadius: 99, fontSize: 11, fontWeight: 700 }}>Pending Login</span> :
                           <span style={{ display: 'inline-block', padding: '3px 10px', background: '#DCFCE7', color: TOKENS.accentEmerald, border: '1px solid #86EFAC', borderRadius: 99, fontSize: 11, fontWeight: 700 }}>Active</span>
                         }
                       </td>
                       <td style={{ padding: '14px 16px', textAlign: 'center' }}>
                         <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
+                          {u.archived && u.role === 'student' && (
+                            <button className="btn btn-sm" style={{ background: '#065F46', color: '#fff', border: 'none' }} onClick={() => handleReinstate(u)}>Reinstate</button>
+                          )}
                           <button className="btn btn-g btn-sm" onClick={() => handleEdit(u)}>Edit</button>
                           <button className="btn btn-d btn-sm" onClick={() => handleDelete(u)}>Delete</button>
                         </div>
