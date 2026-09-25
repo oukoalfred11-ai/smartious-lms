@@ -136,7 +136,7 @@ function validateRoleFields(user, role) {
 }
 
 // GET /stats — Get total user count for sidebar badge
-router.get('/stats', auth, requireRole('admin', 'ops_manager', 'dos', 'accountant', 'sales', 'qa'), async (req, res) => {
+router.get('/stats', auth, requireRole('admin', 'ops_manager', 'dos', 'accountant', 'sales'), async (req, res) => {
   try {
     const totalUsers = await User.countDocuments();
     res.json({ success: true, totalUsers });
@@ -148,8 +148,10 @@ router.get('/stats', auth, requireRole('admin', 'ops_manager', 'dos', 'accountan
 // GET all users (admin only) with advanced search and filtering
 router.get('/', auth, requireRole('admin', 'ops_manager', 'teacher'), async (req, res) => {
   try {
-    const { search, role, curriculum } = req.query;
-    let query = {};
+    const { search, role, curriculum, view } = req.query;
+    // Clean archive: the working list never shows archived accounts;
+    // view=archived returns exactly them for the Archived tab.
+    let query = view === 'archived' ? { archived: true } : { archived: { $ne: true } };
 
     if (search) {
       query.$or = [
@@ -204,7 +206,7 @@ router.get('/students/by-admission/:admissionNumber', auth, requireRole('admin',
 // GET all students (for parent selection)
 router.get('/students/list', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
-    const students = await User.find({ role: 'student' })
+    const students = await User.find({ role: 'student', archived: { $ne: true } })
       .select('_id firstName lastName email curriculum grade gradeLevel subjects admissionNumber programme deliveryMode isActive status')
       .sort('-createdAt')
       .limit(500);
