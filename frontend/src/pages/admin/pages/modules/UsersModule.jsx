@@ -505,6 +505,7 @@ export function UserFormFields({ userForm, setUserForm, toast }) {
             <option value="ops_manager">Operations Manager / COO</option>
             <option value="accountant">Accountant</option>
             <option value="sales">Sales / Front Desk</option>
+            <option value="qa">QA / Accreditor (read only)</option>
           </optgroup>
         </select>
       </div>
@@ -890,7 +891,7 @@ function UsersModule({ refreshKey, toast, setUserForm, setUserModal, openAddUser
     students: users.filter(u => u.role === 'student').length,
     teachers: users.filter(u => u.role === 'teacher').length,
     parents: users.filter(u => u.role === 'parent').length,
-    admins: users.filter(u => ['admin','accountant','sales','ops_manager','dos'].includes(u.role)).length,
+    admins: users.filter(u => ['admin','accountant','sales','ops_manager','dos','qa'].includes(u.role)).length,
     pending: users.filter(u => u.mustChangePassword).length,
   }
 
