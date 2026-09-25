@@ -37,6 +37,10 @@ router.get('/', auth, STAFF, async (req, res) => {
   try {
     const { search, status = 'all', type = 'all' } = req.query
     const filter = { role: 'student' }
+    // Archived students (left or graduated) stay out of the working
+    // list; the dedicated Archived view shows exactly them.
+    if (status === 'archived') filter.archived = true
+    else filter.archived = { $ne: true }
     if (status === 'paused') filter.onBreak = true
     if (status === 'active') filter.onBreak = { $ne: true }
     if (search) {
@@ -46,7 +50,7 @@ router.get('/', auth, STAFF, async (req, res) => {
     if (type !== 'all') filter.breakType = type
 
     const students = await User.find(filter)
-      .select('firstName lastName email admissionNumber curriculum gradeLevel programme onBreak breakType breakStart breakEnd breakNote breakBlocksAccess linkedParents parentName parentEmail')
+      .select('firstName lastName email admissionNumber curriculum gradeLevel programme onBreak breakType breakStart breakEnd breakNote breakBlocksAccess linkedParents parentName parentEmail archived archivedAt studentStatus statusReason statusChangedAt')
       .populate('linkedParents', 'firstName lastName email')
       .sort({ onBreak: -1, firstName: 1 })
       .limit(500)
@@ -328,8 +332,115 @@ router.patch('/exit/:studentId', auth, STAFF, async (req, res) => {
     student.statusChangedBy = req.user._id;
     student.statusReason = reason;
     student.isActive = false;
+    student.archived = true;
+    student.archivedAt = new Date();
     await student.save();
-    res.json({ success: true, message: `${student.firstName || 'Student'} marked ${kind === 'graduated' ? 'graduated' : 'as left'}. They no longer appear in rosters or timetables; their history is kept.` });
+
+    // ── Parents: every linked parent is told; a parent with no other
+    // active child is archived along with the student. Records are
+    // never deleted, and reinstatement reverses all of it. ──
+    const parentIds = new Set((student.linkedParents || []).map(String));
+    const byLink = await User.find({ role: 'parent', linkedStudents: student._id }).select('_id');
+    byLink.forEach(d => parentIds.add(String(d._id)));
+    const parents = parentIds.size
+      ? await User.find({ _id: { $in: [...parentIds] }, role: 'parent' })
+      : [];
+    let parentsArchived = 0;
+    for (const parent of parents) {
+      const otherActive = await User.countDocuments({
+        _id: { $in: parent.linkedStudents || [], $ne: student._id },
+        role: 'student',
+        archived: { $ne: true },
+        isActive: { $ne: false },
+      });
+      if (otherActive === 0) {
+        parent.isActive = false;
+        parent.archived = true;
+        parent.archivedAt = new Date();
+        await parent.save();
+        parentsArchived += 1;
+      }
+    }
+
+    // ── Exit emails, fire and forget: a slow SMTP must not hold the
+    // archive, and a failed email never undoes it. ──
+    try {
+      const { sendExitEmail } = require('../lib/exitEmail');
+      const studentName = [student.firstName, student.lastName].filter(Boolean).join(' ') || 'your student';
+      if (student.email) {
+        sendExitEmail({ to: student.email, recipientName: student.firstName, studentName, kind, forParent: false })
+          .catch(e => console.error('[exit] student email:', e.message));
+      }
+      parents.forEach(par => {
+        if (par.email) {
+          sendExitEmail({ to: par.email, recipientName: par.firstName, studentName, kind, forParent: true })
+            .catch(e => console.error('[exit] parent email:', e.message));
+        }
+      });
+    } catch (e) { console.error('[exit] email dispatch:', e.message); }
+
+    const label = kind === 'graduated' ? 'graduated' : 'as left';
+    const parentNote = parents.length
+      ? ` ${parents.length} linked parent(s) emailed${parentsArchived ? `, ${parentsArchived} archived with them` : ''}.`
+      : '';
+    res.json({ success: true, message: `${student.firstName || 'Student'} marked ${label} and archived. Exit email sent.${parentNote} Records are kept and they can be reinstated any time.` });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+// PATCH /reinstate/:studentId
+// The way back in: clears the archive on the student and on any of
+// their parents who were archived with them, reactivates the
+// accounts with history intact, and emails a welcome back. Class
+// and timetable placements are then arranged as usual.
+router.patch('/reinstate/:studentId', auth, STAFF, async (req, res) => {
+  try {
+    const student = await User.findById(req.params.studentId);
+    if (!student || student.role !== 'student') return res.status(404).json({ success: false, message: 'Student not found.' });
+    if (!student.archived && student.isActive !== false) {
+      return res.status(400).json({ success: false, message: 'This student is already active.' });
+    }
+    student.archived = false;
+    student.archivedAt = undefined;
+    student.isActive = true;
+    student.studentStatus = 'Active';
+    student.statusChangedAt = new Date();
+    student.statusChangedBy = req.user._id;
+    student.statusReason = 'Reinstated';
+    await student.save();
+
+    const parentIds = new Set((student.linkedParents || []).map(String));
+    const byLink = await User.find({ role: 'parent', linkedStudents: student._id }).select('_id');
+    byLink.forEach(d => parentIds.add(String(d._id)));
+    const parents = parentIds.size
+      ? await User.find({ _id: { $in: [...parentIds] }, role: 'parent' })
+      : [];
+    let parentsRestored = 0;
+    for (const parent of parents) {
+      if (parent.archived || parent.isActive === false) {
+        parent.archived = false;
+        parent.archivedAt = undefined;
+        parent.isActive = true;
+        await parent.save();
+        parentsRestored += 1;
+      }
+    }
+
+    try {
+      const { sendReinstateEmail } = require('../lib/exitEmail');
+      const studentName = [student.firstName, student.lastName].filter(Boolean).join(' ') || 'your student';
+      if (student.email) {
+        sendReinstateEmail({ to: student.email, recipientName: student.firstName, studentName, forParent: false })
+          .catch(e => console.error('[reinstate] student email:', e.message));
+      }
+      parents.forEach(par => {
+        if (par.email) {
+          sendReinstateEmail({ to: par.email, recipientName: par.firstName, studentName, forParent: true })
+            .catch(e => console.error('[reinstate] parent email:', e.message));
+        }
+      });
+    } catch (e) { console.error('[reinstate] email dispatch:', e.message); }
+
+    res.json({ success: true, message: `${student.firstName || 'Student'} reinstated with full history${parentsRestored ? `, ${parentsRestored} parent account(s) restored` : ''}. Welcome back email sent. Re-add them to classes and the timetable as needed.` });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
 
