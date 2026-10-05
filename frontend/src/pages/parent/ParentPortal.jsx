@@ -1079,6 +1079,18 @@ function ParentLessons({ child }) {
           {c.status==='live' ? 'Join now' : 'Join & monitor'}
         </button>
       )}
+      {done && Array.isArray(c.recordings) && c.recordings.length > 0 && (
+        <button onClick={() => window.open(c.recordings[c.recordings.length-1].url, '_blank', 'noopener')}
+          title="Watch the recording of this lesson"
+          style={{
+            display:'inline-flex', alignItems:'center', gap:6, padding:'7px 14px', borderRadius:9,
+            border:'none', cursor:'pointer', fontSize:12, fontWeight:800, whiteSpace:'nowrap',
+            background:'linear-gradient(120deg,#7D1025,#A32438)', color:'#fff',
+            boxShadow:'0 3px 12px rgba(125,16,37,.3)',
+          }}>
+          <span style={{ fontSize:10 }}>{'\u25B6'}</span> Watch recording
+        </button>
+      )}
       <span style={{ background:done?'#D1FAE5':'#FEF3C7', color:done?'#065F46':'#92400E', fontSize:11, fontWeight:700, padding:'3px 10px', borderRadius:999 }}>{done?'Completed':'Upcoming'}</span>
     </div>
   )
