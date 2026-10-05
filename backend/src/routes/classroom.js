@@ -103,6 +103,44 @@ router.post('/:liveClassId/recording/:recId/chunk', auth,
     }
   });
 
+// ── Auto publish ──────────────────────────────────────────
+// A finished recording used to wait for an admin to 'feature' it
+// before students or parents could see it. Now every saved
+// recording publishes itself: marked featured on the class (which
+// the parent portal reads) and attached as a video on the matching
+// lesson (which the student Lesson Player reads). The admin PATCH
+// below still works as the way to UNPUBLISH a weak recording.
+async function findLessonForClass(cls) {
+  const Lesson = require('../models/Lesson');
+  if (cls.preparationLessonId) {
+    const l = await Lesson.findById(cls.preparationLessonId);
+    if (l) return l;
+  }
+  if (cls.subjectId && cls.syllabusSubtopicName) {
+    return Lesson.findOne({ subjectId: cls.subjectId, subtopicName: cls.syllabusSubtopicName });
+  }
+  return null;
+}
+
+async function attachRecordingToLesson(cls, rec, userId) {
+  const lesson = await findLessonForClass(cls);
+  if (!lesson) return { attached: false, reason: 'no matching lesson' };
+  const already = (lesson.videos || []).find(v => v.source === 'recording' && v.r2Url === rec.url);
+  if (already) return { attached: true, reason: 'already attached' };
+  lesson.videos.push({
+    source: 'recording',
+    title: rec.title || cls.title || 'Recorded class',
+    r2Url: rec.url,
+    r2Key: rec.key || '',
+    durationMins: Math.round((rec.durationSec || 0) / 60),
+    liveClassId: cls._id,
+    recordedAt: rec.recordedAt,
+    createdBy: userId || null,
+  });
+  await lesson.save();
+  return { attached: true, lessonStatus: lesson.status };
+}
+
 router.post('/:liveClassId/recording/:recId/finish', auth, async (req, res) => {
   const rec = activeRecordings.get(req.params.recId);
   try {
@@ -139,15 +177,27 @@ router.post('/:liveClassId/recording/:recId/finish', auth, async (req, res) => {
 
     const url = `${process.env.R2_PUBLIC_URL.replace(/\/$/, '')}/${key}`;
     const LiveClass = require('../models/LiveClass');
-    await LiveClass.updateOne(
-      { _id: rec.classId },
-      { $push: { recordings: {
-        url, key, sizeBytes: rec.bytes,
-        durationSec,
-        recordedAt: new Date(rec.startedAt),
-      } } }
-    );
-    res.json({ success: true, data: { url } });
+    const cls = await LiveClass.findById(rec.classId);
+    if (!cls) return res.status(404).json({ success: false, message: 'Class not found.' });
+    const sub = {
+      url, key, sizeBytes: rec.bytes,
+      durationSec,
+      recordedAt: new Date(rec.startedAt),
+      // Published on arrival: visible to parents on the class and,
+      // via the attach below, to students in the Lesson Player.
+      featured: true,
+      title: cls.title || '',
+    };
+    cls.recordings.push(sub);
+    await cls.save();
+    // Best effort: a lesson-matching failure must never lose the
+    // upload - the recording is saved and parent-visible already.
+    try {
+      const out = await attachRecordingToLesson(cls, sub, rec.userId);
+      if (!out.attached) console.log('[recording finish] not attached to a lesson: ' + out.reason + ' (class ' + cls._id + ')');
+      else if (out.lessonStatus === 'draft') console.log('[recording finish] attached to a DRAFT lesson - students will see it when the lesson is published (class ' + cls._id + ')');
+    } catch (e) { console.error('[recording finish] lesson attach failed:', e.message); }
+    res.json({ success: true, data: { url, published: true } });
   } catch (e) {
     console.error('[recording finish]', e.message);
     if (rec) fs.unlink(rec.path, () => {});
