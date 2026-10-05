@@ -251,7 +251,16 @@ router.get('/children/:id/liveclasses', auth, async (req, res) => {
     const when = c => new Date(c.startAt || c.scheduledAt || c.date || c.createdAt)
     const past = classes.filter(c => when(c) < now || c.status === 'completed' || c.status === 'ended')
     const upcoming = classes.filter(c => !past.includes(c)).reverse()
-    return ok(res, { past, upcoming, doneCount: past.length, totalCount: classes.length })
+    // Published recordings ride along on covered classes, so the
+    // portal can offer Watch recording. Only featured ones show;
+    // an admin unpublishing a weak recording hides it here too.
+    const shape = c => ({
+      ...c,
+      recordings: (c.recordings || [])
+        .filter(r => r.featured)
+        .map(r => ({ url: r.url, title: r.title || c.title || '', durationSec: r.durationSec || 0, recordedAt: r.recordedAt })),
+    })
+    return ok(res, { past: past.map(shape), upcoming: upcoming.map(shape), doneCount: past.length, totalCount: classes.length })
   } catch(e) { return fail(res, e.status||500, e.message) }
 })
 
