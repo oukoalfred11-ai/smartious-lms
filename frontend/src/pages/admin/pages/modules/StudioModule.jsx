@@ -636,7 +636,21 @@ function renderScene(ctx, W, H, scene, media, p) {
     ctx.textAlign = 'left'
     ctx.globalAlpha = 1
   } else if (scene.type === 'bullets') {
-    bgById(scene.bg || 'ink').paint(ctx, W, H)
+    // Media background for bullet scenes: cover fill plus a dark
+    // tint so the white list stays readable over any footage.
+    const biw = media && (media.videoWidth || media.width)
+    if (scene.useImage && media && biw) {
+      const iw = media.videoWidth || media.width, ih = media.videoHeight || media.height
+      const scale = Math.max(W / iw, H / ih)
+      ctx.drawImage(media, (W - iw * scale) / 2, (H - ih * scale) / 2, iw * scale, ih * scale)
+      const tintG = ctx.createLinearGradient(0, 0, 0, H)
+      if (scene.tint === 'crimson') { tintG.addColorStop(0, 'rgba(90,20,36,.55)'); tintG.addColorStop(1, 'rgba(34,7,14,.88)') }
+      else if (scene.tint === 'gold') { tintG.addColorStop(0, 'rgba(30,20,4,.5)'); tintG.addColorStop(1, 'rgba(120,88,24,.75)') }
+      else { tintG.addColorStop(0, 'rgba(8,12,20,.5)'); tintG.addColorStop(1, 'rgba(5,7,13,.88)') }
+      ctx.fillStyle = tintG; ctx.fillRect(0, 0, W, H)
+    } else {
+      bgById(scene.bg || 'ink').paint(ctx, W, H)
+    }
     const M = W * 0.09
     ctx.fillStyle = GOLD
     ctx.font = `800 ${B * 0.03}px Montserrat, Arial, sans-serif`
@@ -2184,12 +2198,13 @@ function VideoMaker({ toast }) {
             {BACKGROUNDS.map(b => (
               <button key={b.id} onClick={() => upd({ bg: b.id, useImage: false })} style={{ ...btn(scene.bg === b.id && !scene.useImage), padding: '7px 11px', fontSize: 11.5 }}>{b.label}</button>
             ))}
-            {scene.type === 'text' && (
-              <label style={{ ...btn(scene.useImage), display: 'inline-block', fontSize: 11.5, padding: '7px 11px' }}>
-                Photo / video clip
-                <input type="file" accept="image/*,video/*" onChange={onMedia} style={{ display: 'none' }} />
-              </label>
-            )}
+            {/* Every content scene takes a photo or video background.
+                Only the title and outro stay brand-only (their row is
+                hidden above), so the film opens and closes on-brand. */}
+            <label style={{ ...btn(scene.useImage), display: 'inline-block', fontSize: 11.5, padding: '7px 11px' }}>
+              Photo / video clip
+              <input type="file" accept="image/*,video/*" onChange={onMedia} style={{ display: 'none' }} />
+            </label>
             {scene.useImage && [['crimson', 'Crimson tint'], ['ink', 'Dark tint'], ['gold', 'Gold tint']].map(([k, l]) => (
               <button key={k} onClick={() => upd({ tint: k })} style={{ ...btn(scene.tint === k), padding: '7px 11px', fontSize: 11.5 }}>{l}</button>
             ))}
