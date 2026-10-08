@@ -565,7 +565,25 @@ function renderScene(ctx, W, H, scene, media, p) {
     bgById(scene.bg || 'crimson').paint(ctx, W, H)
     const cp = easeOut(p * 1.6)
     const tp = easeOut((p - 0.25) * 2)
-    if (scene.brand === 'word') {
+    if (scene.brand === 'logo' && _logoImg) {
+      // The real school logo, centered, settling in from a slight
+      // over-zoom, with the sub line beneath.
+      let lh = B * 0.13 * (0.92 + 0.08 * clamp01(cp))
+      let lw = lh * (_logoImg.naturalWidth / Math.max(_logoImg.naturalHeight, 1))
+      if (lw > W * 0.86) { lh = lh * (W * 0.86) / lw; lw = W * 0.86 }
+      ctx.globalAlpha = clamp01(cp * 1.5)
+      ctx.drawImage(_logoImg, (W - lw) / 2, H * 0.4 - lh / 2, lw, lh)
+      ctx.globalAlpha = 1
+      if (tp > 0 && scene.headline) {
+        ctx.globalAlpha = clamp01(tp)
+        ctx.textAlign = 'center'
+        ctx.fillStyle = 'rgba(255,255,255,.88)'
+        ctx.font = `700 ${B * 0.032}px Montserrat, Arial, sans-serif`
+        ctx.fillText(String(scene.headline).toUpperCase(), W / 2, H * 0.4 + lh / 2 + B * 0.075)
+        ctx.textAlign = 'left'
+        ctx.globalAlpha = 1
+      }
+    } else if (scene.brand === 'word') {
       // Bold wordmark sting: SMARTIOUS settles in from a slam
       if (cp > 0) {
         ctx.save()
@@ -615,13 +633,17 @@ function renderScene(ctx, W, H, scene, media, p) {
   } else if (scene.type === 'outro') {
     bgById(scene.bg || 'ink').paint(ctx, W, H)
     const cs = B * 0.17
-    if (scene.brand === 'word') {
+    if (scene.brand === 'logo' && _logoImg) {
+      const lh = cs * 0.72
+      const lw = Math.min(lh * (_logoImg.naturalWidth / Math.max(_logoImg.naturalHeight, 1)), W * 0.8)
+      ctx.drawImage(_logoImg, (W - lw) / 2, H * 0.3 + (cs - lh) / 2, lw, lh)
+    } else if (scene.brand === 'word') {
       ctx.textAlign = 'center'
       ctx.fillStyle = '#FFFFFF'
       ctx.font = `900 ${B * 0.06}px Montserrat, Arial, sans-serif`
       ctx.fillText('SMARTIOUS', W / 2, H * 0.34)
       ctx.textAlign = 'left'
-    } else {
+    } else if (scene.brand !== 'none') {
       drawCrest(ctx, W / 2 - cs / 2, H * 0.3, cs)
     }
     ctx.textAlign = 'center'
@@ -632,7 +654,9 @@ function renderScene(ctx, W, H, scene, media, p) {
     drawLines(ctx, lines, W * 0.1, H * 0.3 + cs + B * 0.1, B * 0.078, 'center', W * 0.8)
     ctx.fillStyle = GOLD
     ctx.font = `700 ${B * 0.042}px Arial`
-    ctx.fillText(scene.body || 'smartioushomeschool.com', W / 2, H * 0.3 + cs + B * 0.1 + lines.length * B * 0.078 + B * 0.04)
+    if (scene.body && String(scene.body).trim()) {
+      ctx.fillText(scene.body, W / 2, H * 0.3 + cs + B * 0.1 + lines.length * B * 0.078 + B * 0.04)
+    }
     ctx.textAlign = 'left'
     ctx.globalAlpha = 1
   } else if (scene.type === 'bullets') {
@@ -1915,6 +1939,10 @@ function VideoMaker({ toast }) {
   const [savedAt, setSavedAt] = useState(0)
   const [fontId, setFontId] = useState(0)
   const [brandMode, setBrandMode] = useState('word')
+  // The real /brand/logo.png, same asset the film editor uses. The
+  // tick repaints the preview the moment the image arrives.
+  const [logoTick, setLogoTick] = useState(0)
+  useEffect(() => { loadLogoAsset(() => setLogoTick(t => t + 1)) }, [])
   const cvRef = useRef(null)
   const rafRef = useRef(null)
   const { W, H } = FORMATS[format] || FORMATS.youtube
@@ -1992,7 +2020,7 @@ function VideoMaker({ toast }) {
     if (!cv) return
     cv.width = W; cv.height = H
     renderScene(cv.getContext('2d'), W, H, deck(scene), medias[cur], 1)
-  }, [scenes, cur, format, medias, playing, rendering, fontId, brandMode])
+  }, [scenes, cur, format, medias, playing, rendering, fontId, brandMode, logoTick])
 
   const onMedia = (e) => {
     const f = e.target.files?.[0]
@@ -2138,7 +2166,7 @@ function VideoMaker({ toast }) {
           <select value={fontId} onChange={e => setFontId(+e.target.value)} style={{ ...inputStyle, width: 'auto', padding: '7px 9px', fontSize: 11.5 }}>
             {FONTS.map((f, i) => <option key={f[0]} value={i}>{f[1]} ({f[0]})</option>)}
           </select>
-          {[['word', 'Bold wordmark'], ['crest', 'Crest'], ['none', 'No logo']].map(([k, l]) => (
+          {[['logo', 'School logo'], ['word', 'Bold wordmark'], ['crest', 'Crest'], ['none', 'No logo']].map(([k, l]) => (
             <button key={k} onClick={() => setBrandMode(k)} style={{ ...btn(brandMode === k), padding: '7px 10px', fontSize: 11.5 }}>{l}</button>
           ))}
         </div>
@@ -2231,6 +2259,11 @@ function VideoMaker({ toast }) {
         <textarea value={scene.body} onChange={e => upd({ body: e.target.value })} rows={scene.type === 'bullets' ? 4 : 2}
           placeholder={scene.type === 'bullets' ? 'One bullet per line (up to 5)' : scene.type === 'outro' ? 'CTA line, e.g. smartioushomeschool.com' : 'Supporting sentence'}
           style={{ ...inputStyle, resize: 'vertical' }} />
+        {(scene.type === 'text' || scene.type === 'stat') && (
+          <input value={scene.footer ?? ''} onChange={e => upd({ footer: e.target.value })}
+            placeholder="Footer line, e.g. smartioushomeschool.com. Clear this to remove it from the scene"
+            style={inputStyle} />
+        )}
 
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
           <button onClick={preview} disabled={playing || rendering} style={btn(false)}>{playing ? 'Playing...' : 'Preview all'}</button>
