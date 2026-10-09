@@ -73,6 +73,7 @@ export default function ManageSubjectTab({ user, toast }) {
   const [subjectView, setSubjectView] = useState('lessons')   // lessons | mastery
 
   // Modals
+  const [previewLesson, setPreviewLesson] = useState(null)   // lesson shown exactly as students see it
   const [showSettings, setShowSettings] = useState(false)
   const [showAddLesson, setShowAddLesson] = useState(false)
   const [showBulkImport, setShowBulkImport] = useState(false)
@@ -430,12 +431,16 @@ export default function ManageSubjectTab({ user, toast }) {
                       onEdit={() => { setEditingLesson(l); setShowAddLesson(true) }}
                       onDelete={() => deleteLesson(l)}
                       onTogglePublish={() => togglePublish(l)}
+                      onPreview={() => setPreviewLesson(l)}
                     />
                   ))}
                 </div>
               </div>
             )
           })}
+          {previewLesson && (
+            <StudentPreviewModal lesson={previewLesson} subjectName={selectedSubject?.subjectName || ''} onClose={() => setPreviewLesson(null)} />
+          )}
         </div>
       ))}
 
@@ -559,7 +564,7 @@ function SubjectCard({ subject, onOpen }) {
 // ═══════════════════════════════════════════════════════════
 // LESSON ROW
 // ═══════════════════════════════════════════════════════════
-function LessonRow({ lesson, isAdmin, onEdit, onDelete, onTogglePublish }) {
+function LessonRow({ lesson, isAdmin, onEdit, onDelete, onTogglePublish, onPreview }) {
   const isPublished = lesson.status === 'published'
   return (
     <div className="card" style={{
@@ -616,6 +621,18 @@ function LessonRow({ lesson, isAdmin, onEdit, onDelete, onTogglePublish }) {
         {isPublished ? 'Published' : 'Draft'}
       </div>
       <div style={{ display: 'flex', gap: 6 }}>
+        <button onClick={onPreview} title="See this lesson exactly as students see it"
+          style={{
+            background: '#101420', color: '#E4C689',
+            border: '1px solid rgba(228,198,137,.35)',
+            padding: '6px 12px', borderRadius: 6, display: 'inline-flex', alignItems: 'center', gap: 6,
+            cursor: 'pointer', fontSize: 11.5, fontWeight: 700,
+          }}>
+          <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+          </svg>
+          Student view
+        </button>
         <button onClick={onTogglePublish}
           style={{
             background: 'transparent', color: BRAND.crimson,
@@ -1635,6 +1652,124 @@ function Field({ label, children, wrap }) {
         {label}
       </label>
       {children}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════
+// STUDENT VIEW PREVIEW
+// The lesson rendered the way the student Lesson Player shows it:
+// same dark stage, same video and notes panes, same chooser chips
+// and description strip, so what the teacher approves here is what
+// students get. Read only: nothing in it edits the lesson.
+// ═══════════════════════════════════════════════════════════
+function StudentPreviewModal({ lesson, subjectName, onClose }) {
+  const P = {
+    shell: '#0E1118', panel: '#161B26', raised: '#1D2330',
+    line: 'rgba(255,255,255,.08)', text: '#F2F3F6', mute: '#8E93A3', gold: '#E4C689',
+  }
+  const videoList = (() => {
+    const out = []
+    const seen = new Set()
+    if (lesson.videoEmbedId) { out.push({ source: 'youtube', embedId: lesson.videoEmbedId, title: 'Lesson video' }); seen.add('yt:' + lesson.videoEmbedId) }
+    for (const v of (lesson.videos || [])) {
+      const key = v.source === 'recording' ? 'r2:' + (v.r2Url || v.r2Key) : 'yt:' + v.embedId
+      if (seen.has(key)) continue
+      seen.add(key)
+      out.push(v)
+    }
+    return out
+  })()
+  const hasVideo = videoList.length > 0
+  const hasNotes = !!lesson.notesPdfUrl
+  const [pane, setPane] = useState(hasVideo ? 'video' : 'notes')
+  const [vIdx, setVIdx] = useState(0)
+  const active = videoList[vIdx] || null
+
+  const tab = (id, label, disabled) => (
+    <button key={id} disabled={disabled} onClick={() => setPane(id)}
+      style={{
+        padding: '8px 16px', borderRadius: 9, border: 'none', fontSize: 12.5, fontWeight: 700,
+        cursor: disabled ? 'default' : 'pointer', opacity: disabled ? 0.35 : 1,
+        background: pane === id ? 'linear-gradient(120deg, #8B1A2E, #A32438)' : 'transparent',
+        color: pane === id ? '#fff' : P.mute,
+      }}>{label}</button>
+  )
+
+  return (
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(5,7,12,.78)', zIndex: 120, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: P.shell, borderRadius: 18, width: 'min(960px, 100%)', maxHeight: '92vh', overflowY: 'auto', border: '1px solid rgba(228,198,137,.14)', boxShadow: '0 30px 80px rgba(0,0,0,.5)' }}>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 18px', borderBottom: `1px solid ${P.line}` }}>
+          <span style={{ background: 'rgba(228,198,137,.14)', color: P.gold, fontSize: 10, fontWeight: 800, letterSpacing: '.1em', textTransform: 'uppercase', padding: '4px 10px', borderRadius: 99 }}>Student view</span>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div style={{ color: P.text, fontWeight: 800, fontSize: 14.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{lesson.title}</div>
+            <div style={{ color: P.mute, fontSize: 11.5 }}>{subjectName}{lesson.subtopicName ? ' \u00B7 ' + lesson.subtopicName : ''}{lesson.status !== 'published' ? ' \u00B7 DRAFT, students cannot see this yet' : ''}</div>
+          </div>
+          <button onClick={onClose} style={{ background: P.raised, color: P.text, border: `1px solid ${P.line}`, borderRadius: 8, padding: '7px 14px', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>Close</button>
+        </div>
+
+        <div style={{ padding: 16 }}>
+          {/* Tabs, as the player shows them */}
+          <div style={{ display: 'flex', gap: 6, marginBottom: 12, background: P.panel, padding: 6, borderRadius: 13, width: 'fit-content' }}>
+            {tab('video', 'Lesson', !hasVideo)}
+            {tab('notes', 'Notes', !hasNotes)}
+          </div>
+
+          {/* Stage */}
+          <div style={{ borderRadius: 14, overflow: 'hidden', border: '1px solid rgba(228,198,137,.12)' }}>
+            <div style={{ width: '100%', ...(pane === 'notes' ? { height: 'min(68vh, 680px)', background: '#525659', display: 'flex' } : { aspectRatio: '16 / 9', background: '#000' }) }}>
+              {pane === 'video' && active && active.source === 'recording' && (
+                <video key={active.r2Url} src={active.r2Url} poster={active.posterUrl || undefined}
+                  controls controlsList="nodownload" playsInline
+                  style={{ width: '100%', height: '100%', display: 'block', background: '#000', objectFit: 'contain' }} />
+              )}
+              {pane === 'video' && active && active.source !== 'recording' && (
+                <iframe key={active.embedId}
+                  src={`https://www.youtube-nocookie.com/embed/${active.embedId}?rel=0&modestbranding=1`}
+                  title={lesson.title} allowFullScreen
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  style={{ width: '100%', height: '100%', border: 'none', display: 'block' }} />
+              )}
+              {pane === 'video' && !hasVideo && (
+                <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: P.mute, fontSize: 13 }}>No video for this lesson yet.</div>
+              )}
+              {pane === 'notes' && hasNotes && (
+                <iframe src={lesson.notesPdfUrl} title="Lesson notes" style={{ width: '100%', height: '100%', border: 'none' }} />
+              )}
+            </div>
+
+            {/* Video chooser, when several */}
+            {pane === 'video' && videoList.length > 1 && (
+              <div style={{ display: 'flex', gap: 8, padding: '10px 14px', overflowX: 'auto', borderTop: `1px solid ${P.line}`, background: P.shell }}>
+                {videoList.map((v, i) => {
+                  const on = i === vIdx
+                  const label = v.source === 'recording'
+                    ? (v.recordedAt ? 'Recorded ' + new Date(v.recordedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : (v.title || 'Recording ' + (i + 1)))
+                    : (v.title || 'Video ' + (i + 1))
+                  return (
+                    <button key={i} onClick={() => setVIdx(i)}
+                      style={{
+                        flexShrink: 0, padding: '7px 13px', borderRadius: 10, cursor: 'pointer', whiteSpace: 'nowrap',
+                        fontSize: 11.5, fontWeight: 700,
+                        border: on ? 'none' : `1px solid ${P.line}`,
+                        background: on ? 'linear-gradient(120deg, #8B1A2E, #A32438)' : P.raised,
+                        color: on ? '#fff' : P.mute,
+                      }}>{label}</button>
+                  )
+                })}
+              </div>
+            )}
+
+            {/* Description strip */}
+            {lesson.description && (
+              <div style={{ padding: '14px 18px', borderTop: `1px solid ${P.line}`, color: '#B8BBC4', fontSize: 13, lineHeight: 1.7, background: P.shell }}>
+                {lesson.description}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
