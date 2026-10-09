@@ -177,6 +177,7 @@ const headlineText = (t, family) => family === 'Bebas Neue' ? String(t || '').to
 const GRADES = [
   ['none', 'None', ''],
   ['cinema', 'Cinematic', 'contrast(1.12) saturate(1.22) brightness(0.98)'],
+  ['vivid', 'Ultra vivid', 'saturate(1.52) contrast(1.16) brightness(1.05)'],
   ['warm', 'Warm', 'sepia(0.22) saturate(1.18) contrast(1.06)'],
   ['cool', 'Cool', 'saturate(1.05) hue-rotate(-10deg) contrast(1.08) brightness(1.02)'],
   ['noir', 'Noir', 'grayscale(1) contrast(1.2) brightness(0.98)'],
