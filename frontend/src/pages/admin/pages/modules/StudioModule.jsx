@@ -2267,7 +2267,11 @@ function VideoMaker({ toast }) {
         <textarea value={scene.body} onChange={e => upd({ body: e.target.value })} rows={scene.type === 'bullets' ? 4 : 2}
           placeholder={scene.type === 'bullets' ? 'One bullet per line (up to 5)' : scene.type === 'outro' ? 'CTA line, e.g. smartioushomeschool.com' : 'Supporting sentence'}
           style={{ ...inputStyle, resize: 'vertical' }} />
-        {(scene.type === 'text' || scene.type === 'stat' || scene.type === 'bullets') && (
+        {/* Mirrors the renderer exactly: every scene type except
+            title and outro can print a footer (including legacy
+            scenes from older saved projects whose type names differ),
+            so every such scene gets the field to edit or clear it. */}
+        {scene.type !== 'title' && scene.type !== 'outro' && (
           <input value={scene.footer ?? ''} onChange={e => upd({ footer: e.target.value })}
             placeholder="Footer line, e.g. smartioushomeschool.com. Clear this to remove it from the scene"
             style={inputStyle} />
