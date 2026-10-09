@@ -22,6 +22,15 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { api } from '../../context/ctx.jsx'
+// Notes preview renders with the SAME engine as the student Lesson
+// Player (react-pdf / pdf.js, pages drawn to canvas), so the PDF
+// displays inline instead of triggering the file's download header.
+import { Document, Page, pdfjs } from 'react-pdf'
+import 'react-pdf/dist/Page/AnnotationLayer.css'
+import 'react-pdf/dist/Page/TextLayer.css'
+if (!pdfjs.GlobalWorkerOptions.workerSrc) {
+  pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`
+}
 import { imageForSubject, colorForSubject } from '../../utils/subjectImages.js'
 
 // Brand palette — kept locally so this file is self-contained
@@ -1735,7 +1744,7 @@ function StudentPreviewModal({ lesson, subjectName, onClose }) {
                 <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: P.mute, fontSize: 13 }}>No video for this lesson yet.</div>
               )}
               {pane === 'notes' && hasNotes && (
-                <iframe src={lesson.notesPdfUrl} title="Lesson notes" style={{ width: '100%', height: '100%', border: 'none' }} />
+                <PreviewNotesPdf url={lesson.notesPdfUrl} />
               )}
             </div>
 
@@ -1770,6 +1779,43 @@ function StudentPreviewModal({ lesson, subjectName, onClose }) {
           </div>
         </div>
       </div>
+    </div>
+  )
+}
+
+// Notes pane for the student view preview: pdf.js pages on canvas,
+// one page at a time with simple controls, exactly how the student
+// player presents notes. Falls back to a plain link if the PDF
+// cannot be parsed.
+function PreviewNotesPdf({ url }) {
+  const [numPages, setNumPages] = useState(0)
+  const [pageNum, setPageNum] = useState(1)
+  const [err, setErr] = useState(null)
+  return (
+    <div style={{ flex: 1, background: '#525659', overflow: 'auto', padding: 12, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      {err ? (
+        <div style={{ color: '#F5F1E8', textAlign: 'center', padding: 40, fontSize: 13 }}>
+          Could not display this PDF here.{' '}
+          <a href={url} target="_blank" rel="noreferrer" style={{ color: '#E4C689' }}>Open it in a new tab</a>
+        </div>
+      ) : (
+        <>
+          <Document file={url} loading={<div style={{ color: '#F5F1E8', padding: 40, fontSize: 13 }}>Loading notes...</div>}
+            onLoadSuccess={({ numPages: n }) => { setNumPages(n); setPageNum(1) }}
+            onLoadError={(e) => setErr(e?.message || 'load failed')}>
+            <Page pageNumber={pageNum} width={Math.min(window.innerWidth - 120, 860)} renderAnnotationLayer={false} renderTextLayer={false} />
+          </Document>
+          {numPages > 1 && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0 2px' }}>
+              <button disabled={pageNum <= 1} onClick={() => setPageNum(p => p - 1)}
+                style={{ background: '#1D2330', color: '#F2F3F6', border: '1px solid rgba(255,255,255,.14)', borderRadius: 8, padding: '6px 14px', fontSize: 12, fontWeight: 700, cursor: pageNum <= 1 ? 'default' : 'pointer', opacity: pageNum <= 1 ? 0.4 : 1 }}>Prev</button>
+              <span style={{ color: '#F5F1E8', fontSize: 12.5, fontWeight: 700 }}>{pageNum} / {numPages}</span>
+              <button disabled={pageNum >= numPages} onClick={() => setPageNum(p => p + 1)}
+                style={{ background: '#1D2330', color: '#F2F3F6', border: '1px solid rgba(255,255,255,.14)', borderRadius: 8, padding: '6px 14px', fontSize: 12, fontWeight: 700, cursor: pageNum >= numPages ? 'default' : 'pointer', opacity: pageNum >= numPages ? 0.4 : 1 }}>Next</button>
+            </div>
+          )}
+        </>
+      )}
     </div>
   )
 }
