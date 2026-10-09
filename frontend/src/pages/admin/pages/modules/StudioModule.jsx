@@ -697,6 +697,13 @@ function renderScene(ctx, W, H, scene, media, p) {
       drawLines(ctx, ls, M + B * 0.05, iy, B * 0.052)
       ctx.globalAlpha = 1
     })
+    // Footer line, same voice as the card scenes, so a film reads
+    // consistently from scene to scene.
+    if (scene.footer && String(scene.footer).trim()) {
+      ctx.fillStyle = 'rgba(255,255,255,.55)'
+      ctx.font = `700 ${B * 0.026}px Arial`
+      ctx.fillText(String(scene.footer).trim().toUpperCase(), M, H - W * 0.06)
+    }
   } else if (scene.type === 'stat') {
     renderCardMotion(ctx, W, H, { ...scene, template: 'stat', seriesTotal: 0 }, media, Math.min(1, p * 1.4), scene.textFx || 'rise')
   } else {
@@ -2260,7 +2267,7 @@ function VideoMaker({ toast }) {
         <textarea value={scene.body} onChange={e => upd({ body: e.target.value })} rows={scene.type === 'bullets' ? 4 : 2}
           placeholder={scene.type === 'bullets' ? 'One bullet per line (up to 5)' : scene.type === 'outro' ? 'CTA line, e.g. smartioushomeschool.com' : 'Supporting sentence'}
           style={{ ...inputStyle, resize: 'vertical' }} />
-        {(scene.type === 'text' || scene.type === 'stat') && (
+        {(scene.type === 'text' || scene.type === 'stat' || scene.type === 'bullets') && (
           <input value={scene.footer ?? ''} onChange={e => upd({ footer: e.target.value })}
             placeholder="Footer line, e.g. smartioushomeschool.com. Clear this to remove it from the scene"
             style={inputStyle} />
