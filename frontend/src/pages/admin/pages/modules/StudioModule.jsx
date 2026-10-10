@@ -184,6 +184,31 @@ const GRADES = [
 ]
 const gradeFilter = (id) => (GRADES.find(g => g[0] === id) || GRADES[0])[2]
 
+// Brand tints over photo/video backgrounds. 'none' (the default) leaves
+// the footage exactly as uploaded: no wash, no darkening. A tint is only
+// painted when the user picks one, same rule as the film editor grades.
+const TINTS = [['none', 'No tint'], ['crimson', 'Crimson tint'], ['ink', 'Dark tint'], ['gold', 'Gold tint']]
+const hasTint = (t) => !!t && t !== 'none'
+function paintTint(ctx, W, H, tint, heavy) {
+  if (!hasTint(tint)) return
+  const g = ctx.createLinearGradient(0, 0, 0, H)
+  if (tint === 'crimson') { g.addColorStop(0, heavy ? 'rgba(90,20,36,.55)' : 'rgba(90,20,36,.5)'); g.addColorStop(1, heavy ? 'rgba(34,7,14,.88)' : 'rgba(34,7,14,.85)') }
+  else if (tint === 'gold') { g.addColorStop(0, heavy ? 'rgba(30,20,4,.5)' : 'rgba(30,20,4,.42)'); g.addColorStop(1, heavy ? 'rgba(120,88,24,.75)' : 'rgba(120,88,24,.7)') }
+  else { g.addColorStop(0, heavy ? 'rgba(8,12,20,.5)' : 'rgba(8,12,20,.4)'); g.addColorStop(1, heavy ? 'rgba(5,7,13,.88)' : 'rgba(5,7,13,.85)') }
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H)
+}
+// With no tint, white text sits straight on the footage, so the text
+// (never the video) gets a soft shadow to stay readable.
+function textShadowOn(ctx, B) {
+  ctx.shadowColor = 'rgba(0,0,0,.6)'
+  ctx.shadowBlur = Math.round(B * 0.012)
+  ctx.shadowOffsetX = 0
+  ctx.shadowOffsetY = Math.round(B * 0.002)
+}
+function textShadowOff(ctx) {
+  ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0
+}
+
 const bgById = (id) => BACKGROUNDS.find(b => b.id === id) || BACKGROUNDS[0]
 const isDark = (id) => id !== 'bone'
 
@@ -351,8 +376,13 @@ function drawWordsPop(ctx, text, x, y, p, gap = 0.1) {
 function renderCardMotion(ctx, W, H, card, media, p, fx = 'rise') {
   renderCardBase(ctx, W, H, card, media, p)
   const B = Math.min(W, H)
-  const dark = isDark(card.bg)
   const onImg = card.useImage && media
+  if (onImg && !hasTint(card.tint)) textShadowOn(ctx, B)
+  try { renderCardText(ctx, W, H, card, media, p, fx, B, onImg) } finally { textShadowOff(ctx) }
+}
+
+function renderCardText(ctx, W, H, card, media, p, fx, B, onImg) {
+  const dark = isDark(card.bg)
   const fg = onImg || dark ? '#FFFFFF' : INK
   const subC = onImg || dark ? 'rgba(255,255,255,.86)' : 'rgba(8,12,20,.65)'
   const fam = card.font || 'Montserrat'
@@ -498,11 +528,7 @@ function renderCardBase(ctx, W, H, card, media, pAnim = 1) {
       ctx.filter = 'none'
       ctx.restore()
 
-      const tint = ctx.createLinearGradient(0, 0, 0, H)
-      if (card.tint === 'crimson') { tint.addColorStop(0, 'rgba(90,20,36,.5)'); tint.addColorStop(1, 'rgba(34,7,14,.85)') }
-      else if (card.tint === 'gold') { tint.addColorStop(0, 'rgba(30,20,4,.42)'); tint.addColorStop(1, 'rgba(120,88,24,.7)') }
-      else { tint.addColorStop(0, 'rgba(8,12,20,.4)'); tint.addColorStop(1, 'rgba(5,7,13,.85)') }
-      ctx.fillStyle = tint; ctx.fillRect(0, 0, W, H)
+      paintTint(ctx, W, H, card.tint, false)
       if (card.grade === 'cinema') vignette(ctx, W, H, 0.4)
     }
   }
@@ -667,12 +693,13 @@ function renderScene(ctx, W, H, scene, media, p) {
     if (scene.useImage && media && biw) {
       const iw = media.videoWidth || media.width, ih = media.videoHeight || media.height
       const scale = Math.max(W / iw, H / ih)
+      ctx.imageSmoothingEnabled = true
+      ctx.imageSmoothingQuality = 'high'
+      ctx.filter = gradeFilter(scene.grade) || 'none'
       ctx.drawImage(media, (W - iw * scale) / 2, (H - ih * scale) / 2, iw * scale, ih * scale)
-      const tintG = ctx.createLinearGradient(0, 0, 0, H)
-      if (scene.tint === 'crimson') { tintG.addColorStop(0, 'rgba(90,20,36,.55)'); tintG.addColorStop(1, 'rgba(34,7,14,.88)') }
-      else if (scene.tint === 'gold') { tintG.addColorStop(0, 'rgba(30,20,4,.5)'); tintG.addColorStop(1, 'rgba(120,88,24,.75)') }
-      else { tintG.addColorStop(0, 'rgba(8,12,20,.5)'); tintG.addColorStop(1, 'rgba(5,7,13,.88)') }
-      ctx.fillStyle = tintG; ctx.fillRect(0, 0, W, H)
+      ctx.filter = 'none'
+      paintTint(ctx, W, H, scene.tint, true)
+      if (!hasTint(scene.tint)) textShadowOn(ctx, B)
     } else {
       bgById(scene.bg || 'ink').paint(ctx, W, H)
     }
@@ -704,6 +731,7 @@ function renderScene(ctx, W, H, scene, media, p) {
       ctx.font = `700 ${B * 0.026}px Arial`
       ctx.fillText(String(scene.footer).trim().toUpperCase(), M, H - W * 0.06)
     }
+    textShadowOff(ctx)
   } else if (scene.type === 'stat') {
     renderCardMotion(ctx, W, H, { ...scene, template: 'stat', seriesTotal: 0 }, media, Math.min(1, p * 1.4), scene.textFx || 'rise')
   } else {
@@ -1839,8 +1867,8 @@ function CardMaker({ toast }) {
             <input type="file" accept="image/*,video/*" onChange={onImage} style={{ display: 'none' }} />
           </label>
           {card.useImage && (<>
-            {[['crimson', 'Crimson tint'], ['ink', 'Dark tint'], ['gold', 'Gold tint']].map(([k, l]) => (
-              <button key={k} onClick={() => upd({ tint: k })} style={{ ...btn(card.tint === k), padding: '7px 11px', fontSize: 11.5 }}>{l}</button>
+            {TINTS.map(([k, l]) => (
+              <button key={k} onClick={() => upd({ tint: k })} style={{ ...btn((card.tint || 'none') === k), padding: '7px 11px', fontSize: 11.5 }}>{l}</button>
             ))}
             {[['cover', 'Fill'], ['fit', 'Fit (no zoom blur)']].map(([k, l]) => (
               <button key={k} onClick={() => upd({ fitMode: k })} style={{ ...btn((card.fitMode || 'cover') === k), padding: '7px 11px', fontSize: 11.5 }}>{l}</button>
@@ -1921,9 +1949,9 @@ function CardMaker({ toast }) {
 // MOTION VIDEO MAKER
 // ═══════════════════════════════════════════════════════════
 const newScene = (type = 'text') => ({
-  type, bg: type === 'title' ? 'crimson' : 'mesh', tint: 'crimson',
+  type, bg: type === 'title' ? 'crimson' : 'mesh', tint: 'none',
   useImage: false, duration: type === 'title' ? 3 : 5,
-  fitMode: 'cover', grade: 'cinema', popCorner: Math.floor(Math.random() * 4), textFx: 'rise',
+  fitMode: 'cover', grade: 'none', popCorner: Math.floor(Math.random() * 4), textFx: 'rise',
   layout: ['top', 'center', 'middle', 'lower'][Math.floor(Math.random() * 4)],
   kicker: type === 'bullets' ? 'Why Smartious' : 'Smartious Homeschool',
   headline: type === 'title' ? 'Homeschool Global' : type === 'outro' ? 'Enrol for 2026' : type === 'stat' ? '250+' : 'Your message here',
@@ -1985,7 +2013,10 @@ function VideoMaker({ toast }) {
         const pj = await idbGet('video-project')
         if (pj && pj.scenes?.length) {
           setFormat(pj.format || 'youtube')
-          setScenes(pj.scenes)
+          // Projects saved before v2 carry the old automatic crimson
+          // tint + cinematic grade on every scene (they were defaults,
+          // not choices), which clouded uploaded clips. Clear them once.
+          setScenes((pj.v || 1) < 2 ? pj.scenes.map(s => ({ ...s, tint: s.tint === 'crimson' ? 'none' : (s.tint || 'none'), grade: s.grade === 'cinema' ? 'none' : (s.grade || 'none') })) : pj.scenes)
           setFontId(pj.fontId || 0)
           setBrandMode(pj.brandMode || 'word')
           setMediaBlobs(pj.mediaBlobs || {})
@@ -2004,7 +2035,7 @@ function VideoMaker({ toast }) {
     if (!loaded) return
     const t = setTimeout(() => {
       idbSet('video-project', {
-        v: 1, format, scenes, fontId, brandMode, mediaBlobs, voBlobs,
+        v: 2, format, scenes, fontId, brandMode, mediaBlobs, voBlobs,
         sound: { musicMode: sound.musicMode, musicVol: sound.musicVol, voVol: sound.voVol, script: sound.script, musicBlob: sound.musicBlob || null, voBlob: sound.voBlob || null },
       }).then(() => setSavedAt(Date.now())).catch(() => {})
     }, 800)
@@ -2241,8 +2272,8 @@ function VideoMaker({ toast }) {
               Photo / video clip
               <input type="file" accept="image/*,video/*" onChange={onMedia} style={{ display: 'none' }} />
             </label>
-            {scene.useImage && [['crimson', 'Crimson tint'], ['ink', 'Dark tint'], ['gold', 'Gold tint']].map(([k, l]) => (
-              <button key={k} onClick={() => upd({ tint: k })} style={{ ...btn(scene.tint === k), padding: '7px 11px', fontSize: 11.5 }}>{l}</button>
+            {scene.useImage && TINTS.map(([k, l]) => (
+              <button key={k} onClick={() => upd({ tint: k })} style={{ ...btn((scene.tint || 'none') === k), padding: '7px 11px', fontSize: 11.5 }}>{l}</button>
             ))}
             {scene.useImage && [['cover', 'Fill'], ['fit', 'Fit (no zoom blur)']].map(([k, l]) => (
               <button key={k} onClick={() => upd({ fitMode: k })} style={{ ...btn((scene.fitMode || 'cover') === k), padding: '7px 11px', fontSize: 11.5 }}>{l}</button>
