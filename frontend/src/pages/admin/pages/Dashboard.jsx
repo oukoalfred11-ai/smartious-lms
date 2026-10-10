@@ -10,6 +10,7 @@ import { DashboardModule, AnalyticsModule } from './modules/HomeModules.jsx'
 import UsersModule, { UserFormFields } from './modules/UsersModule.jsx'
 import TeachersModule from './modules/TeachersModule.jsx'
 import DocumentsModule from './modules/DocumentsModule.jsx'
+import { TeacherProfilesModule, TDPModule, AccreditationsModule } from './modules/QAModules.jsx'
 import FrontDeskModule from './modules/FrontDeskModule.jsx'
 import AssessmentModule from './modules/AssessmentModule.jsx'
 import CRMModule, { SalesPerformanceModule } from './modules/CRMModule.jsx'
@@ -76,6 +77,7 @@ const NAV_SECTIONS = {
     { label: 'Operations',  items: ['frontdesk', 'assessment', 'documents', 'payroll', 'leave', 'programmes', 'inventory'] },
     { label: 'Teaching',    items: ['liveclasses', 'clubs', 'grouprooms', 'curriculum'] },
     { label: 'Question Bank', items: ['questionbank', 'markingreview'] },
+    { label: 'Quality',     items: ['teacherprofiles', 'tdp', 'accreditations'] },
     { label: 'Marketing',   items: ['studio'] },
     { label: 'System',      items: ['userlogs', 'billing', 'website', 'settings', 'ai', 'suggestions'] },
   ],
@@ -108,6 +110,7 @@ const NAV_SECTIONS = {
   ],
   qa: [
     { label: 'Overview',  items: ['dashboard'] },
+    { label: 'Our School', items: ['teacherprofiles', 'tdp', 'accreditations'] },
     { label: 'Academics', items: ['curriculum', 'questionbank', 'exams'] },
     { label: 'Quality & Reports', items: ['reports', 'dosperformance', 'mastery', 'dosattend'] },
     { label: 'Documents', items: ['documents'] },
@@ -431,6 +434,9 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         {safePage === 'announcements' && <AnnouncementsModule toast={toast} />}
         {safePage === 'frontdesk' && <FrontDeskModule refreshKey={refreshKey} toast={toast} />}
         {safePage === 'documents' && <DocumentsModule toast={toast} />}
+        {safePage === 'teacherprofiles' && <TeacherProfilesModule toast={toast} />}
+        {safePage === 'tdp' && <TDPModule toast={toast} />}
+        {safePage === 'accreditations' && <AccreditationsModule toast={toast} />}
         {safePage === 'assessment' && <AssessmentModule refreshKey={refreshKey} toast={toast} />}
         {safePage === 'crm' && <CRMModule toast={toast} refreshKey={refreshKey}/>}
         {safePage === 'salesperf' && <SalesPerformanceModule toast={toast} refreshKey={refreshKey}/>}
