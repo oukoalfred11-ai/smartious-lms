@@ -8,9 +8,9 @@ import { CURRICULA } from '../data/curricula.js'
 import { SERVICES } from '../data/services.js'
 import { FULL_ARTICLES } from '../data/fullArticles.js'
 import { US_STATES, US_STATES_LIST } from '../data/usStates.js'
-import { US_CITIES, US_CITIES_LIST, US_CITIES_BY_STATE } from '../data/usCities.js'
+import { US_CITIES, US_CITIES_BY_STATE } from '../data/usCities.js'
 import { CA_PROVINCES, CA_PROVINCES_LIST } from '../data/caProvinces.js'
-import { CA_CITIES, CA_CITIES_LIST, CA_CITIES_BY_PROVINCE } from '../data/caCities.js'
+import { CA_CITIES, CA_CITIES_BY_PROVINCE } from '../data/caCities.js'
 import { NAIROBI_AREAS } from '../data/nairobiAreas.js'
 import { UAE_AREAS } from '../data/uaeAreas.js'
 import { UK_AREAS, UK_AREAS_BY_CITY } from '../data/ukAreas.js'
@@ -123,19 +123,6 @@ import { LANGUAGES } from '../data/languages.js'
  */
 const FRONTDESK_API = (import.meta.env?.VITE_API_URL || 'https://smartious-backend.onrender.com')
   .replace(/\/$/, '') + '/api/frontdesk/submit'
-
-async function captureFrontDesk(payload) {
-  try {
-    await fetch(FRONTDESK_API, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    })
-  } catch (e) {
-    // Non-fatal — the email send is the safety net.
-    console.error('[front desk capture] failed:', e?.message)
-  }
-}
 
 /* ── Google Ads conversion tracking ─────────────────────────
  * Fires conversion events for the /us-families paid traffic test.
@@ -1143,12 +1130,6 @@ function ParentVideo({ V, video = PARENT_VIDEO }) {
   )
 }
 
-const Stars = () => (
-  <div style={{display:'flex',gap:2,marginBottom:16}}>
-    {[...Array(5)].map((_,i) => <svg key={i} className="t-s" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>)}
-  </div>
-)
-
 // ─── Smartious Logo (redrawn in SVG so no white background, scales perfectly) ───
 // Crimson shield · gold star · white open-book device
 const SmartiousLogo = ({ size = 40, withText = false, tone = 'light' }) => {
@@ -1194,21 +1175,6 @@ const SmartiousLogo = ({ size = 40, withText = false, tone = 'light' }) => {
     </div>
   )
 }
-
-// ═══════════════════════════════════════════════════════════
-// PLACEMENT ASSESSMENT QUESTION BANK
-// Organised by academic level × subject. Questions are picked
-// randomly from the appropriate bucket so each student gets
-// a fresh assessment worth the USD 38 / KSh 5,000 fee.
-// ═══════════════════════════════════════════════════════════
-const LEVELS = [
-  {id:'primary-lower', label:'Primary Lower (Grade 1–3 · Year 2–4)'},
-  {id:'primary-upper', label:'Primary Upper (Grade 4–6 · Year 5–7)'},
-  {id:'lower-sec',     label:'Lower Secondary (Grade 7–8 · Year 8–9)'},
-  {id:'igcse',         label:'IGCSE / Grade 9–10 (Year 10–11)'},
-  {id:'upper-sec',     label:'A-Level / IB Diploma (Grade 11–12 · Year 12–13)'},
-  {id:'foundation',    label:'University Foundation (IUFP · Gap Year)'},
-]
 
 // Answer key: the CORRECT option is always the first item in `opts`.
 // We shuffle per-render so position carries no signal.
@@ -2087,7 +2053,6 @@ function PhoneInput({ value, onChange, placeholder = '7XX XXX XXX', tone = 'ligh
   const baseBg      = isLight ? '#FFFFFF' : 'rgba(255,255,255,.05)'
   const baseBorder  = isLight ? '#F0E8D4' : 'rgba(255,255,255,.1)'
   const textColor   = isLight ? '#080C14' : '#FFFFFF'
-  const placeColor  = isLight ? '#3D5066' : 'rgba(255,255,255,.4)'
   const baseSepBg   = isLight ? '#FDFAF4' : 'rgba(8,12,20,.3)'
 
   return (
@@ -2185,8 +2150,7 @@ function LegalPage({ P, title, em, subtitle, effective, sections }) {
 }
 
 export default function LandingPage() {
-  const store = useStore()
-  const cfg   = store.siteConfig  // live site config from admin editor
+  const store = useStore()  // live site config from admin editor
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [openCategory, setOpenCategory] = useState(null)
   const [programmesMenuOpen, setProgrammesMenuOpen] = useState(false)
@@ -2278,8 +2242,6 @@ export default function LandingPage() {
     }
   }, [page])
   const [faqOpen, setFaqOpen] = useState(null)
-  const [priceTabs, setPriceTab] = useState('inperson')
-  const [billingCycle, setBillingCycle] = useState('monthly')
   const [blogCat, setBlogCat] = useState('all')
   const [blogCountry, setBlogCountry] = useState('all')
   const [currentArticle, setCurrentArticle] = useState(null)
@@ -2450,7 +2412,6 @@ export default function LandingPage() {
   const [expandedTeacher, setExpandedTeacher] = useState(null)
   const [wizStep, setWizStep] = useState(1)
   const [currentProg, setCurrentProg] = useState('homeschool')
-  const [loginRole, setLoginRole] = useState('student')
   const [toast, setToast] = useState(null)
   const [wizDone, setWizDone] = useState(false)
 
@@ -2534,15 +2495,12 @@ export default function LandingPage() {
     assessmentMode: '',        // 'online' | 'centre' | 'home'
     assessmentAddress: '',     // only used when assessmentMode === 'home'
   })
-  const setEF = (k, v) => setEnrollForm(f => ({...f, [k]: v}))
-  const setAnswer = (qid, val) => setEnrollForm(f => ({...f, answers: {...f.answers, [qid]: val}}))
 
   // Placement assessment — built when user reaches Step 4, held in state so
   // answers persist if they navigate back/forward. Rebuilds if they change
   // their level/curriculum selections.
   const [assessment, setAssessment] = useState([])
   const [assessmentLevel, setAssessmentLevel] = useState('')
-  const [enrollSending, setEnrollSending] = useState(false)
   const [enrollError, setEnrollError] = useState('')
   const [fabOpen, setFabOpen] = useState(false)
 
@@ -2582,63 +2540,6 @@ export default function LandingPage() {
     s.onerror = () => reject(new Error('Failed to load Paystack'))
     document.body.appendChild(s)
   })
-
-  const payWithPaystack = async () => {
-    setPayError('')
-    if (!enrollForm.parentEmail) {
-      setPayError('Email is missing. Please go back to Your Details.')
-      return
-    }
-    setPayProcessing(true)
-    try {
-      const PaystackPop = await loadPaystack()
-      // Convert USD → KES. ~130 KES/USD as of Apr 2026. Paystack expects kobo (×100).
-      // $15 ≈ KES 1,950 → 195000 kobo
-      const amountKobo = 195000
-      const ref = `SMART-${Date.now()}-${Math.random().toString(36).slice(2,8).toUpperCase()}`
-
-      const handler = PaystackPop.setup({
-        key: PAYSTACK_PUBLIC_KEY,
-        email: enrollForm.parentEmail,
-        amount: amountKobo,
-        currency: 'KES',
-        ref,
-        firstname: enrollForm.firstName || 'Smartious',
-        lastname:  enrollForm.lastName  || 'Applicant',
-        metadata: {
-          custom_fields: [
-            { display_name: 'Student Name', variable_name: 'student_name',
-              value: `${enrollForm.firstName} ${enrollForm.lastName}`.trim() },
-            { display_name: 'WhatsApp', variable_name: 'whatsapp',
-              value: enrollForm.whatsapp || '—' },
-            { display_name: 'Programme', variable_name: 'programme',
-              value: currentProg },
-            { display_name: 'Curriculum', variable_name: 'curriculum',
-              value: enrollForm.curriculum || '—' },
-            { display_name: 'Country', variable_name: 'country',
-              value: enrollForm.country || '—' },
-          ]
-        },
-        callback: (response) => {
-          // Paystack returns from its own thread — use setTimeout to ensure state updates
-          setTimeout(() => {
-            setPaySuccess(response.reference)
-            setPayProcessing(false)
-          }, 0)
-        },
-        onClose: () => {
-          setTimeout(() => {
-            setPayProcessing(false)
-            if (!paySuccess) setPayError('Payment window was closed before completing payment. Please try again.')
-          }, 0)
-        },
-      })
-      handler.openIframe()
-    } catch (e) {
-      setPayError('Could not open Paystack. Please check your internet connection and try again.')
-      setPayProcessing(false)
-    }
-  }
 
   // Application Fee — single Paystack inline payment of USD 38 (KES 5,000).
   // Pattern mirrors the Malaysia trip handler but with a fixed amount and
@@ -2702,154 +2603,6 @@ export default function LandingPage() {
       alert('Could not open Paystack. Please check your internet connection and try again.')
       setEnrolAppFeeProcessing(false)
     }
-  }
-
-  // Submit enrollment to hello@smartioushomeschool.com via FormSubmit
-  const submitEnrollment = async () => {
-    setEnrollSending(true)
-    setEnrollError('')
-    const progLabel = {homeschool:'Homeschool & Tutoring',iufp:'IUFP — University Foundation',studyabroad:'Study Abroad Placement'}[currentProg] || currentProg
-    const levelLabel = (LEVELS.find(l => l.id === assessmentLevel) || {}).label || assessmentLevel || '—'
-
-    // Assessment mode — affects how the admin sees the result
-    const modeLabel = enrollForm.assessmentMode === 'online'
-      ? 'Online — completed here'
-      : enrollForm.assessmentMode === 'centre'
-        ? 'In-person at Smartious centre (Diamond Plaza I, Parklands, Nairobi)'
-        : enrollForm.assessmentMode === 'home'
-          ? `In-person home visit — ${enrollForm.assessmentAddress}`
-          : '— not chosen —'
-
-    const isOnline = enrollForm.assessmentMode === 'online'
-
-    // Assessment is no longer taken on the landing page — it is
-    // completed in the student portal after enrolment.
-    let correctCount = 0, mathCorrect = 0, mathTotal = 0, engCorrect = 0, engTotal = 0
-    let assessmentLines = '— Placement assessment to be completed in the student portal after enrolment —'
-    let scorePct = 0, scoreBand = 'Pending — student portal assessment'
-    if (isOnline && assessment.length > 0) {
-      assessmentLines = assessment.map((q, i) => {
-        const ans = enrollForm.answers[q.id] || '— not answered —'
-        const isCorrect = ans === q.correct
-        if (isCorrect) correctCount++
-        if (q.subject === 'Mathematics') { mathTotal++; if (isCorrect) mathCorrect++ }
-        else                             { engTotal++;  if (isCorrect) engCorrect++ }
-        return `Q${i+1} [${q.subject}] ${q.q}\n   Student answer: ${ans}\n   Correct answer: ${q.correct}\n   Result: ${isCorrect ? '✓ CORRECT' : '✗ Incorrect'}`
-      }).join('\n\n')
-      scorePct  = Math.round((correctCount / assessment.length) * 100)
-      scoreBand = scorePct >= 80 ? 'Strong' : scorePct >= 50 ? 'On track' : 'Needs support'
-    }
-
-    const scoreSummary = isOnline
-      ? `${correctCount}/${assessment.length} (${scorePct}%) — ${scoreBand}`
-      : 'To be scored after in-person assessment'
-
-    const payload = {
-      _subject: isOnline
-        ? `NEW ENROLMENT — ${enrollForm.firstName} ${enrollForm.lastName} (${progLabel}) — PAID — Score ${scorePct}%`
-        : `NEW ENROLMENT — ${enrollForm.firstName} ${enrollForm.lastName} (${progLabel}) — PAID — IN-PERSON ASSESSMENT`,
-      _template: 'table',
-      _captcha: 'false',
-      'Payment Status': paySuccess ? '✅ PAID — $15 via Paystack' : '⚠️ Not paid',
-      'Paystack Reference': paySuccess || '—',
-      'Assessment Mode': modeLabel,
-      'Assessment Score': scoreSummary,
-      'Maths Score': isOnline ? `${mathCorrect}/${mathTotal}` : '—',
-      'English Score': isOnline ? `${engCorrect}/${engTotal}` : '—',
-      'Assessment Level': levelLabel,
-      'Programme Selected': progLabel,
-      'Curriculum': enrollForm.curriculum || '—',
-      'Learning Mode': enrollForm.learningMode || '—',
-      'Academic Pathway': enrollForm.pathway || '—',
-      'Target Country': enrollForm.targetCountry || '—',
-      'Study Abroad Destination': enrollForm.destination || '—',
-      'Study Abroad Duration': enrollForm.duration || '—',
-      'Student First Name': enrollForm.firstName,
-      'Student Last Name': enrollForm.lastName,
-      'Parent/Guardian Email': enrollForm.parentEmail,
-      'WhatsApp Number': enrollForm.whatsapp,
-      'Date of Birth': enrollForm.dob,
-      'Country of Residence': enrollForm.country,
-      'Current School': enrollForm.currentSchool || '—',
-      'Heard From': enrollForm.heardFrom || '—',
-      'Full Assessment Transcript': assessmentLines,
-      'Submitted At': new Date().toLocaleString('en-GB', {timeZone:'Africa/Nairobi'}) + ' EAT',
-    }
-    // Submit. The Front Desk database is the primary store; the
-    // The CRM endpoint is a secondary copy. The enrolment
-    // succeeds as long as the Front Desk capture goes through.
-    let frontDeskOk = false
-    try {
-      const fdRes = await fetch(FRONTDESK_API, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'registration',
-          name: `${enrollForm.firstName || ''} ${enrollForm.lastName || ''}`.trim(),
-          email: enrollForm.parentEmail,
-          phone: enrollForm.whatsapp,
-          studentFirstName: enrollForm.firstName,
-          studentLastName: enrollForm.lastName,
-          studentDob: enrollForm.dob,
-          currentSchool: enrollForm.currentSchool,
-          country: enrollForm.country,
-          programme: enrollForm.learningMode,
-          curriculum: enrollForm.curriculum,
-          learningMode: enrollForm.learningMode,
-          pathway: enrollForm.pathway,
-          destination: enrollForm.destination,
-          duration: enrollForm.duration,
-          heardFrom: enrollForm.heardFrom,
-          sourcePage: 'enroll-wizard',
-          extra: { assessmentTranscript: assessmentLines },
-        }),
-      })
-      frontDeskOk = fdRes.ok
-    } catch (e) {
-      console.error('[enroll] front desk capture failed:', e?.message)
-    }
-
-    // Secondary: our own CRM endpoint — records the enquiry in the
-    // pipeline AND emails admissions@, through our own mail system.
-    let emailOk = false
-    try {
-      const res = await fetch(((import.meta.env?.VITE_API_URL || 'https://smartious-backend.onrender.com').replace(/\/$/, '')) + '/api/inquiries/public', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json','Accept':'application/json'},
-        body: JSON.stringify({
-          parentName: `${enrollForm.firstName || ''} ${enrollForm.lastName || ''}`.trim(),
-          parentEmail: enrollForm.parentEmail,
-          parentPhone: enrollForm.whatsapp,
-          studentGrade: enrollForm.grade || '',
-          curriculum: enrollForm.curriculum || '',
-          country: enrollForm.country || '',
-          sourcePage: 'enrolment-wizard',
-          campaignTag: 'enrolment-wizard',
-          message: 'Enrolment wizard submission.',
-        }),
-      })
-      emailOk = res.ok
-    } catch (e) {
-      console.error('[enroll] email copy failed:', e?.message)
-    }
-
-    if (frontDeskOk || emailOk) {
-      setWizStep(3); setWizDone(true)
-      // Google Ads conversion event — fires only on real lead
-      // submission so the campaign attribution is accurate. Safe
-      // no-op if gtag.js hasn't loaded.
-      try {
-        if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
-          window.gtag('event', 'ads_conversion_Submit_lead_form_1', {})
-        }
-      } catch (e) {
-        // Never let analytics break the user flow
-        console.error('[gtag] conversion event failed:', e?.message)
-      }
-    } else {
-      setEnrollError('Submission failed. Please check your connection and try again, or WhatsApp us at +254 745 021 212.')
-    }
-    setEnrollSending(false)
   }
 
   const nav = useNavigate()
@@ -4943,22 +4696,6 @@ export default function LandingPage() {
   const openUkArea = (slug) => {
     setPage('uk-area')
     nav('/tuition-uk/' + encodeURIComponent(slug))
-  }
-
-  // openKenyaCity(slug) — navigate to a Kenya city homeschooling page
-  const openKenyaCity = (slug) => {
-    if (!slug) return
-    nav('/homeschool-' + encodeURIComponent(slug))
-    window.scrollTo(0, 0)
-    topRef.current?.scrollIntoView()
-  }
-
-  // openCompare(slug) — navigate to a competitor-comparison page URL
-  const openCompare = (slug) => {
-    if (!slug) return
-    nav('/compare/' + encodeURIComponent(slug))
-    window.scrollTo(0, 0)
-    topRef.current?.scrollIntoView()
   }
 
   const showToast = (msg) => {
@@ -24279,73 +24016,6 @@ export default function LandingPage() {
 }
 
 // ── Price Card Component ──────────────────────────────────
-function PriceCard({ lbl, ti, base, am, pr, fs, gold, badge, cta = 'Enroll Now', P, cycle = 'monthly', kes, kesTerm, kesAnnual, term, annual, hourly }) {
-  // If old-style `am` was passed, use it as the base
-  const baseAmt = typeof base === 'number' ? base : Number(am) || 0
-  // For hourly pricing (private tuition per-hour rates), don't apply the cycle discount
-  let amt, periodLabel, kesShown
-  if (hourly) {
-    amt = baseAmt
-    periodLabel = pr  // e.g. "per hour · Any subject"
-    kesShown = kes
-  } else if (cycle === 'termly') {
-    // Use the explicit term price when supplied; otherwise fall back to a computed estimate
-    amt = (typeof term === 'number') ? term : Math.round(baseAmt * 3 * 0.95)
-    periodLabel = `per term · ${pr}`
-    kesShown = kesTerm
-  } else if (cycle === 'annually') {
-    amt = (typeof annual === 'number') ? annual : Math.round(baseAmt * 12 * 0.88)
-    periodLabel = `per year · ${pr}`
-    kesShown = kesAnnual
-  } else {
-    amt = baseAmt
-    periodLabel = `per month · ${pr}`
-    kesShown = kes
-  }
-  // Savings vs paying monthly across the same span
-  const savings = !hourly && cycle === 'termly' && typeof term === 'number'
-    ? Math.round(baseAmt * 3 - term)
-    : !hourly && cycle === 'annually' && typeof annual === 'number'
-      ? Math.round(baseAmt * 12 - annual)
-      : !hourly && cycle === 'termly'
-        ? Math.round(baseAmt * 3 - amt)
-        : !hourly && cycle === 'annually'
-          ? Math.round(baseAmt * 12 - amt)
-          : 0
-
-  return (
-    <div className={`pc${gold?' ft':''}`}>
-      {badge && <div className="pbadge">{badge}</div>}
-      <div className="p-lbl">{lbl}</div>
-      <div className="p-ti">{ti}</div>
-      <div className="p-am"><sup>$</sup>{amt.toLocaleString()}</div>
-      <div className="p-pr">{periodLabel}</div>
-      {kesShown && !hourly && (
-        <div style={{fontSize:'11.5px',color:gold?'rgba(247,243,237,.6)':'#3D5066',marginTop:2,marginBottom:6,fontStyle:'italic'}}>
-          ≈ KES {kesShown.toLocaleString()}
-        </div>
-      )}
-      {savings > 0 && (
-        <div style={{display:'inline-block',padding:'3px 9px',background:gold?'rgba(201,151,58,.18)':'rgba(139,26,46,.08)',color:gold?'#C9973A':'#8B1A2E',fontSize:10.5,fontWeight:700,letterSpacing:'.04em',borderRadius:20,marginTop:4,marginBottom:6}}>
-          You save ${savings.toLocaleString()}
-        </div>
-      )}
-      <ul className="p-fs">
-        {fs.map((f,i) => (
-          <li key={i} className="p-f">
-            <div className="p-ck">
-              <svg viewBox="0 0 12 12" fill="none">
-                <path d="M2 6l3 3 5-5" stroke={gold ? '#C9973A' : '#8B1A2E'} strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
-            </div>
-            {f}
-          </li>
-        ))}
-      </ul>
-      <button className={`p-btn ${gold?'p-gd':'p-ol'}`} onClick={() => nav('/assessment')}>Book assessment</button>
-    </div>
-  )
-}
 
 // ── Consultation Form ─────────────────────────────────────
 function ConsultForm({ P }) {
@@ -24824,52 +24494,6 @@ function CompareVideoEmbed({ videoId }) {
             Tap to play · Watch on YouTube
           </div>
         </button>
-      )}
-
-      {/* ══════════════════════════════════════════════════
-          FLOATING WHATSAPP BUTTON
-          Fixed bottom-right, visible on all pages except /consult.
-          Provides a quick-talk channel while keeping page CTAs
-          focused on Book Assessment and Book Free Consultation.
-      ══════════════════════════════════════════════════ */}
-      {page !== 'consult' && (
-        <a
-          href="https://wa.me/254745021212?text=Hi%2C%20I%20would%20like%20to%20enquire%20about%20Smartious"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Chat on WhatsApp"
-          title="Chat on WhatsApp"
-          style={{
-            position: 'fixed',
-            bottom: 24,
-            right: 24,
-            width: 60,
-            height: 60,
-            borderRadius: '50%',
-            background: '#25D366',
-            color: '#fff',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            textDecoration: 'none',
-            boxShadow: '0 6px 24px rgba(37,211,102,.45), 0 2px 8px rgba(0,0,0,.15)',
-            zIndex: 9999,
-            transition: 'transform .18s ease, box-shadow .18s ease',
-            cursor: 'pointer',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'scale(1.08)'
-            e.currentTarget.style.boxShadow = '0 10px 32px rgba(37,211,102,.6), 0 4px 12px rgba(0,0,0,.2)'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'scale(1)'
-            e.currentTarget.style.boxShadow = '0 6px 24px rgba(37,211,102,.45), 0 2px 8px rgba(0,0,0,.15)'
-          }}
-        >
-          <svg width="30" height="30" viewBox="0 0 24 24" fill="#fff" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-          </svg>
-        </a>
       )}
     </div>
   )

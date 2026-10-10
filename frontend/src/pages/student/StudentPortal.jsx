@@ -17,16 +17,7 @@ import MessagesHub from '../../components/MessagesHub.jsx'
 import { playChime } from '../../components/NotificationsBell.jsx'
 import { useAuth, useToast, api } from '../../context/ctx.jsx'
 import { useStore } from '../../context/ctx.jsx'
-import Modal from '../../components/ui/Modal.jsx'
-import {
-  NestedQuestionEditor,
-  NestedQuestionRenderer,
-  NestedAnswerCollector,
-  AttachmentList,
-  buildAnswersPayload,
-  labelAt,
-  sumLeafMarks,
-} from '../../components/exam/NestedQuestion.jsx'
+import { NestedAnswerCollector, AttachmentList, buildAnswersPayload, labelAt, sumLeafMarks } from '../../components/exam/NestedQuestion.jsx'
 import LessonPlayerTab from './LessonPlayerTab.jsx'
 import HeroPanelVideo from '../../components/HeroPanelVideo.jsx'
 import { renderMath } from '../../components/ui/MathField.jsx'
@@ -35,66 +26,6 @@ import ClubsHub from '../../components/ClubsHub.jsx'
 import QuizGame from './QuizGame.jsx'
 import AchievementTab from './AchievementTab.jsx'
 import LibraryViewer from '../../components/LibraryViewer.jsx'
-
-// ── SVG icon helper ───────────────────────────────────────
-const I = (d) => (
-  <svg width="18" height="18" fill="none" viewBox="0 0 24 24"
-    stroke="currentColor" strokeWidth="2" strokeLinecap="round"
-    dangerouslySetInnerHTML={{__html: d}}/>
-)
-
-// ── Avatar ────────────────────────────────────────────────
-function Av({init, col, size=36}) {
-  return (
-    <div style={{width:size,height:size,borderRadius:'50%',background:col+'20',color:col,
-      display:'flex',alignItems:'center',justifyContent:'center',
-      fontFamily:'JetBrains Mono,monospace',fontSize:Math.round(size*.32),
-      fontWeight:700,flexShrink:0}}>
-      {init}
-    </div>
-  )
-}
-
-// ── Mastery colour helper ─────────────────────────────────
-const masteryCol = (pct) =>
-  pct >= 80 ? 'var(--g600)' : pct >= 60 ? 'var(--b600)' : pct >= 40 ? 'var(--a600)' : 'var(--r500)'
-
-const masteryLabel = (pct) =>
-  pct >= 80 ? 'Mastered' : pct >= 60 ? 'Progressing' : pct >= 40 ? 'Building' : pct > 0 ? 'Needs Help' : 'Not Started'
-
-// ── YouTube URL normalizer ────────────────────────────────
-// Teachers paste any YouTube URL format. Convert to embed URL
-// so the iframe plays inline instead of opening the YouTube app.
-const toYouTubeEmbed = (url) => {
-  if (!url || typeof url !== 'string') return ''
-  const trimmed = url.trim()
-  if (!trimmed) return ''
-
-  // Already an embed URL
-  if (/^https?:\/\/(www\.)?youtube\.com\/embed\//i.test(trimmed)) return trimmed
-
-  let videoId = ''
-  let m
-
-  // youtu.be/VIDEOID
-  m = trimmed.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/)
-  if (m) videoId = m[1]
-
-  // youtube.com/watch?v=VIDEOID
-  if (!videoId) { m = trimmed.match(/[?&]v=([a-zA-Z0-9_-]{11})/); if (m) videoId = m[1] }
-
-  // youtube.com/shorts/VIDEOID
-  if (!videoId) { m = trimmed.match(/youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/); if (m) videoId = m[1] }
-
-  // youtube.com/live/VIDEOID
-  if (!videoId) { m = trimmed.match(/youtube\.com\/live\/([a-zA-Z0-9_-]{11})/); if (m) videoId = m[1] }
-
-  // Raw 11-char video ID
-  if (!videoId && /^[a-zA-Z0-9_-]{11}$/.test(trimmed)) videoId = trimmed
-
-  if (!videoId) return ''
-  return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`
-}
 // ── Badge icon SVGs ───────────────────────────────────────
 const BADGE_ICONS = {
   streak_7:    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#F97316" strokeWidth="2" strokeLinecap="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3z"/></svg>,
@@ -151,19 +82,6 @@ const TOKENS = {
   teal:        '#0E7C7B',
   indigo:      '#3730A3',
   brown:       '#92400E',
-}
-
-// ── Premium section header (mirrors admin portal PSection) ──
-function SSection({ tag, title, em, sub }) {
-  return (
-    <div style={{ marginBottom:20 }}>
-      {tag && <div className="sec-tag">{tag}</div>}
-      <h2 className="serif" style={{ fontSize:26, color:TOKENS.ink, margin:'4px 0 6px', lineHeight:1.15 }}>
-        {title}{em && <em style={{ fontStyle:'italic', color:TOKENS.crimson }}> {em}</em>}
-      </h2>
-      {sub && <div style={{ fontSize:13, color:TOKENS.s500, lineHeight:1.55 }}>{sub}</div>}
-    </div>
-  )
 }
 
 // ═════════════════════════════════════════════════════════
@@ -448,16 +366,6 @@ const NAV_SECTIONS = [
   ]},
 ]
 
-const TIMETABLE = [
-  {day:'Mon',subj:'Mathematics',teacher:'Mr. Muthomi',time:'9:00–10:00 AM',status:'completed'},
-  {day:'Mon',subj:'Biology',    teacher:'Dr. Ouma',   time:'2:00–3:00 PM', status:'completed'},
-  {day:'Tue',subj:'English',   teacher:'Ms. Wambua', time:'10:00–11:00 AM',status:'completed'},
-  {day:'Wed',subj:'Mathematics',teacher:'Mr. Muthomi',time:'9:00–10:00 AM',status:'live'},
-  {day:'Wed',subj:'Chemistry', teacher:'Dr. Ouma',   time:'1:00–2:00 PM', status:'upcoming'},
-  {day:'Thu',subj:'Physics',   teacher:'Mr. Njoroge',time:'11:00 AM–12 PM',status:'upcoming'},
-  {day:'Fri',subj:'English',   teacher:'Ms. Wambua', time:'9:00–10:00 AM', status:'upcoming'},
-]
-
 // ─────────────────────────────────────────────────────────
 // ── ADVISORY DASHBOARD ────────────────────────────────────
 // Shown to Study Abroad and Pre-University students. These are
@@ -518,171 +426,6 @@ function AdvisoryDashboard({ programme, deliveryMode, firstName }) {
       }}>
         Your full programme dashboard is being prepared and will appear here soon.
       </div>
-    </div>
-  )
-}
-
-// ═══════════════════════════════════════════════════════════
-// MOBILE SHELL — shared across Student, Teacher, Parent portals
-// On mobile (<768px): bottom tab bar + full-width content
-// On desktop: existing sidebar layout
-// ═══════════════════════════════════════════════════════════
-
-// Hook: detects mobile screen
-function useIsMobile() {
-  const [mobile, setMobile] = useState(
-    typeof window !== 'undefined' && window.innerWidth < 768
-  )
-  useEffect(() => {
-    const fn = () => setMobile(window.innerWidth < 768)
-    window.addEventListener('resize', fn)
-    return () => window.removeEventListener('resize', fn)
-  }, [])
-  return mobile
-}
-
-// Mobile top bar — shown instead of sidebar on mobile
-function MobileTopBar({ title, eyebrow, onMenuToggle, menuOpen, user, initials }) {
-  return (
-    <div style={{
-      position:'sticky', top:0, zIndex:100,
-      background:'rgba(251,250,245,.96)',
-      backdropFilter:'blur(16px)',
-      WebkitBackdropFilter:'blur(16px)',
-      borderBottom:'1px solid #F4EFEB',
-      display:'flex', alignItems:'center',
-      padding:'0 16px', height:56, gap:12,
-      flexShrink:0,
-    }}>
-      <button onClick={onMenuToggle} style={{
-        width:36, height:36, borderRadius:8,
-        background:menuOpen?'#FBF6E3':'transparent',
-        border:'none', cursor:'pointer',
-        display:'flex', alignItems:'center', justifyContent:'center',
-        flexShrink:0,
-      }}>
-        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke={menuOpen?'#7D1025':'#564844'} strokeWidth="2" strokeLinecap="round">
-          {menuOpen
-            ? <><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></>
-            : <><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></>
-          }
-        </svg>
-      </button>
-      <div style={{ flex:1, minWidth:0 }}>
-        {eyebrow&&<div style={{ fontSize:9, fontWeight:700, color:'#7D1025', textTransform:'uppercase', letterSpacing:'.12em' }}>{eyebrow}</div>}
-        <div style={{ fontFamily:"'Instrument Serif',Georgia,serif", fontSize:18, color:'#1A0F0E', lineHeight:1.2, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{title}</div>
-      </div>
-      <div style={{ width:34, height:34, borderRadius:'50%', background:'linear-gradient(135deg,#7D1025,#5A0B1B)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, border:'2px solid #C9A03030' }}>
-        <span style={{ color:'#F0CC5A', fontSize:11, fontWeight:700 }}>{initials}</span>
-      </div>
-    </div>
-  )
-}
-
-// Mobile drawer — slides in from left when menu is open
-function MobileDrawer({ open, onClose, sections, page, setPage, portalLabel, user, initials, onLogout, children }) {
-  if (!open) return null
-  return (
-    <>
-      {/* Backdrop */}
-      <div onClick={onClose} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.4)', zIndex:200 }}/>
-      {/* Drawer */}
-      <div style={{
-        position:'fixed', top:0, left:0, bottom:0, width:280,
-        background:'#FBFAF5', zIndex:201, display:'flex', flexDirection:'column',
-        overflowY:'auto', boxShadow:'4px 0 24px rgba(0,0,0,.12)',
-        animation:'slideInLeft .2s ease',
-      }}>
-        <style>{`@keyframes slideInLeft{from{transform:translateX(-100%)}to{transform:translateX(0)}}`}</style>
-        {/* Logo */}
-        <div style={{ padding:'20px 20px 16px', borderBottom:'1px solid #F4EFEB' }}>
-          <div style={{ fontFamily:"'Instrument Serif',Georgia,serif", fontSize:24, color:'#1A0F0E' }}>
-            Smart<em style={{ fontStyle:'italic', color:'#7D1025' }}>ious</em>
-          </div>
-          <div style={{ fontSize:9.5, color:'#7D1025', fontWeight:700, letterSpacing:'.14em', textTransform:'uppercase', marginTop:3 }}>{portalLabel}</div>
-        </div>
-
-        {/* Nav sections */}
-        <nav style={{ flex:1, padding:'12px 0' }}>
-          {sections.map((s, si) => (
-            <div key={si} style={{ marginBottom:16 }}>
-              {s.section&&<div style={{ fontSize:10, fontWeight:700, color:'#7D1025', textTransform:'uppercase', letterSpacing:'.12em', padding:'0 20px 6px' }}>{s.section}</div>}
-              {s.items.map(item => {
-                const active = page === item.id
-                return (
-                  <div key={item.id} onClick={() => { setPage(item.id); onClose() }}
-                    style={{ display:'flex', alignItems:'center', gap:14, padding:'11px 20px', cursor:'pointer', background:active?'#FBF6E3':'transparent', borderLeft:active?'3px solid #C9A030':'3px solid transparent', color:active?'#7D1025':'#564844', fontWeight:active?600:400, fontSize:15, transition:'all .15s' }}>
-                    <div style={{ width:28, height:28, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                      <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke={active?'#7D1025':'#857973'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                        <path d={item.icon||'M3 12h18M3 6h18M3 18h18'}/>
-                      </svg>
-                    </div>
-                    <span>{item.label}</span>
-                    {item.badge&&<span style={{ marginLeft:'auto', background:'#7D1025', color:'#fff', fontSize:10, fontWeight:700, padding:'2px 7px', borderRadius:99 }}>{item.badge}</span>}
-                  </div>
-                )
-              })}
-            </div>
-          ))}
-        </nav>
-
-        {/* Extra content (child selector etc) */}
-        {children}
-
-        {/* User card */}
-        <div style={{ padding:'12px 16px', borderTop:'1px solid #F4EFEB' }}>
-          <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10 }}>
-            <div style={{ width:38, height:38, borderRadius:'50%', background:'linear-gradient(135deg,#7D1025,#5A0B1B)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-              <span style={{ color:'#F0CC5A', fontSize:12, fontWeight:700 }}>{initials}</span>
-            </div>
-            <div>
-              <div style={{ fontSize:13, fontWeight:700, color:'#1A0F0E' }}>{user?.firstName} {user?.lastName}</div>
-              <div style={{ fontSize:11, color:'#857973' }}>{portalLabel?.replace(' Portal','')}</div>
-            </div>
-          </div>
-          <button onClick={onLogout} style={{ width:'100%', padding:'10px', borderRadius:8, border:'1px solid #E8E2D6', background:'transparent', color:'#564844', fontSize:13, fontWeight:600, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:8 }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            Log out
-          </button>
-        </div>
-      </div>
-    </>
-  )
-}
-
-// Mobile bottom tab bar — shows 4-5 most important tabs
-function MobileBottomTabs({ tabs, page, setPage }) {
-  return (
-    <div style={{
-      position:'fixed', bottom:0, left:0, right:0, zIndex:100,
-      background:'rgba(251,250,245,.97)',
-      backdropFilter:'blur(16px)',
-      WebkitBackdropFilter:'blur(16px)',
-      borderTop:'1px solid #E8E2D6',
-      display:'flex',
-      paddingBottom:'env(safe-area-inset-bottom)',
-    }}>
-      {tabs.map(tab => {
-        const active = page === tab.id
-        return (
-          <button key={tab.id} onClick={() => setPage(tab.id)} style={{
-            flex:1, border:'none', background:'transparent', cursor:'pointer',
-            padding:'8px 4px 10px', display:'flex', flexDirection:'column',
-            alignItems:'center', gap:3, transition:'all .15s',
-          }}>
-            <div style={{ width:24, height:24, display:'flex', alignItems:'center', justifyContent:'center' }}>
-              <svg width="22" height="22" fill={active?'#7D1025':'none'} viewBox="0 0 24 24"
-                stroke={active?'#7D1025':'#9A9A9A'} strokeWidth={active?2:1.8} strokeLinecap="round" strokeLinejoin="round">
-                <path d={tab.icon||'M3 12h18'}/>
-              </svg>
-            </div>
-            <span style={{ fontSize:9.5, fontWeight:active?700:500, color:active?'#7D1025':'#9A9A9A', letterSpacing:'.01em' }}>
-              {tab.shortLabel||tab.label}
-            </span>
-            {active&&<div style={{ width:4, height:4, borderRadius:'50%', background:'#C9A030', marginTop:-2 }}/>}
-          </button>
-        )
-      })}
     </div>
   )
 }
@@ -773,25 +516,6 @@ export default function StudentPortal() {
     }
   }, [isAdvisory, page])
 
-  // ── Mastery (from API) ───────────────────────────────
-  const [mastery,       setMastery]       = useState(null)
-  const [masteryLoading,setMasteryLoading] = useState(true)
-  const [nextRec,       setNextRec]       = useState(null)
-
-  // ── Adaptive practice (from API) ─────────────────────
-  const [practiceData,  setPracticeData]  = useState(null)
-  const [practiceLoading,setPracticeLoading] = useState(false)
-  const [practiceAnswers,setPracticeAnswers] = useState({})
-  const [practiceResult, setPracticeResult]  = useState(null)
-  const [submitting,    setSubmitting]    = useState(false)
-
-  // ── Lesson player ────────────────────────────────────
-  const [lessonTab,   setLessonTab]   = useState('video')
-  const [selectedSubj, setSelectedSubj] = useState(null)
-  const [fcIdx,       setFcIdx]       = useState(0)
-  const [fcFlipped,   setFcFlipped]   = useState(false)
-  const [flashcards,  setFlashcards]  = useState([])
-
   // ── Curriculum view ─────────────────────────────────
   // Which subject card is expanded in the curriculum drawer (null = all collapsed)
   const [curriculumExpandedSubject, setCurriculumExpandedSubject] = useState(null)
@@ -826,65 +550,17 @@ export default function StudentPortal() {
     return () => { cancelled = true }
   }, [page])
 
-  // ── Exams ────────────────────────────────────────────
-  const [examActive,  setExamActive]  = useState(false)
-  const [examAnswers, setExamAnswers] = useState({})
-  const [examResult,  setExamResult]  = useState(null)
-  const [examTime,    setExamTime]    = useState(3600)
-
-  // ── Mshauri (mastery-aware) ──────────────────────────
-  const [tutorMsgs,   setTutorMsgs]   = useState([
-    {role:'ai', text:"Habari! I'm Mshauri, your personalised AI tutor. I can see your exact mastery levels and I'll always guide you to what needs the most attention. What would you like to work on today?"}
-  ])
-  const [tutorInp,    setTutorInp]    = useState('')
-  const [aiLoading,   setAiLoading]   = useState(false)
-  const [masteryCtx,  setMasteryCtx]  = useState('')
-
-  // ── Study plan (from API) ────────────────────────────
-  const [studyPlan,   setStudyPlan]   = useState([])
-  const [planLoading, setPlanLoading] = useState(false)
-
-  const chatEndRef = useRef(null)
-
-  // ── LOAD MASTERY ON MOUNT ────────────────────────────
+  // ── Notifications (header bell) ─────────────────────
   useEffect(() => {
-    loadMastery()
-    loadMasteryContext()
     loadNotifications()
     // refresh notifications every 90s
     const id = setInterval(loadNotifications, 90000)
     return () => clearInterval(id)
   }, [])
 
-  const loadMastery = async () => {
-    try {
-      setMasteryLoading(true)
-      const { data } = await api.get('/mastery/me')
-      if (data.success) {
-        setMastery(data.mastery)
-        setNextRec(data.nextRecommended)
-      }
-    } catch (e) {
-      console.error('Mastery load error:', e.message)
-    } finally {
-      setMasteryLoading(false)
-    }
-  }
-
-  const loadMasteryContext = async () => {
-    try {
-      const { data } = await api.get('/adaptive/mshauri-context')
-      if (data.success) setMasteryCtx(data.context)
-    } catch {}
-  }
-
-  // Aggregate notifications from existing data sources. There's no
-  // dedicated /notifications endpoint, so we synthesize the bell's
-  // feed from upcoming live classes, pending homework, recent results
-  // and recent communication. Frontend-only — no backend changes.
+  // Server notifications lead the bell; upcoming live classes and
+  // homework deadlines are added from the student's own lists.
   const loadNotifications = async () => {
-    // Server notifications (Support Desk and future emitters) lead
-    // the list; a soft chime announces unread ones.
     let serverItems = []
     try {
       const nr = await api.get('/notifications/mine')
@@ -905,218 +581,55 @@ export default function StudentPortal() {
 
     // 1) Upcoming live classes (next 24h)
     try {
-      const { data } = await api.get('/liveclasses/student/upcoming')
-      const upcoming = data?.classes || data?.data?.classes || []
+      const { data } = await api.get('/liveclasses/student/list')
+      const upcoming = (data?.data?.classes || [])
+        .filter(c => new Date(c.scheduledAt).getTime() >= now)
       for (const c of upcoming.slice(0, 5)) {
-        const when = new Date(c.scheduledAt || c.startTime).getTime()
-        if (!Number.isFinite(when)) continue
-        if (when - now > dayMs) continue
+        const when = new Date(c.scheduledAt).getTime()
+        if (!Number.isFinite(when) || when - now > dayMs) continue
         items.push({
           id: 'live:' + c._id,
           ts: when,
           icon: 'live',
           title: c.title || 'Live class',
-          subtitle: c.subjectName
-            ? c.subjectName + ' · ' + timeUntil(when)
-            : timeUntil(when),
+          subtitle: c.subject ? c.subject + ' · ' + timeUntil(when) : timeUntil(when),
           page: 'live',
         })
       }
     } catch {}
 
-    // 2) Active homework with deadlines (next 7 days)
+    // 2) Homework due in the next 7 days and not yet submitted
     try {
-      const { data } = await api.get('/homework/student/me')
-      const hws = data?.homework || data?.data?.homework || []
-      for (const h of hws.slice(0, 6)) {
-        if (h.status !== 'published') continue
-        const due = h.dueDate ? new Date(h.dueDate).getTime() : null
-        if (due && due < now) continue           // skip overdue (separate concern)
-        if (due && due - now > 7 * dayMs) continue
+      const { data } = await api.get('/homework/student/list')
+      for (const h of (data?.homework || [])) {
+        if (h.locked || h.mySubmission) continue
+        const due = h.dueAt ? new Date(h.dueAt).getTime() : null
+        if (!due || due < now || due - now > 7 * dayMs) continue
         items.push({
           id: 'hw:' + h._id,
-          ts: due || (now + dayMs),               // sort by due date
+          ts: due,
           icon: 'homework',
           title: h.title || 'Homework',
-          subtitle: h.subjectName
-            ? h.subjectName + (due ? ' · due ' + timeUntil(due) : '')
-            : (due ? 'Due ' + timeUntil(due) : ''),
+          subtitle: (h.subject ? h.subject + ' · ' : '') + 'due ' + timeUntil(due),
           page: 'homework',
         })
       }
     } catch {}
 
-    // 3) Recently released results (last 7 days)
-    try {
-      const { data } = await api.get('/results/student/me')
-      const results = data?.results || data?.data?.results || []
-      for (const r of results.slice(0, 5)) {
-        const when = new Date(r.releasedAt || r.gradedAt || r.createdAt || 0).getTime()
-        if (!Number.isFinite(when) || when === 0) continue
-        if (now - when > 7 * dayMs) continue
-        items.push({
-          id: 'res:' + (r._id || r.homeworkId || r.examId),
-          ts: when,
-          icon: 'results',
-          title: r.title || (r.subjectName ? r.subjectName + ' result' : 'New result'),
-          subtitle: (r.score !== undefined && r.outOf !== undefined)
-            ? r.score + ' / ' + r.outOf + ' · ' + timeAgo(when)
-            : timeAgo(when),
-          page: 'results',
-        })
-      }
-    } catch {}
-
-    // Sort: most recent / soonest first
-    items.sort((a, b) => {
-      // Future events (live, homework due) ascending by ts
-      // Past events (results) descending by ts
-      const aFut = a.ts >= now
-      const bFut = b.ts >= now
-      if (aFut !== bFut) return aFut ? -1 : 1
-      return aFut ? a.ts - b.ts : b.ts - a.ts
-    })
-
+    items.sort((a, b) => a.ts - b.ts) // soonest first
     setNotifsList([...serverItems, ...items].slice(0, 12))
   }
 
-  // ── LOAD ADAPTIVE PRACTICE ───────────────────────────
-  const loadPractice = useCallback(async (subject, topic) => {
-    try {
-      setPracticeLoading(true)
-      setPracticeResult(null)
-      setPracticeAnswers({})
-      const params = new URLSearchParams({ count: 5 })
-      if (subject) params.set('subject', subject)
-      if (topic)   params.set('topic', topic)
-      const { data } = await api.get(`/adaptive/practice?${params}`)
-      if (data.success) setPracticeData(data.practice)
-    } catch (e) {
-      toast.error('Could not load practice questions.')
-    } finally {
-      setPracticeLoading(false)
-    }
-  }, [toast])
-
-  // ── LOAD FLASHCARDS ──────────────────────────────────
-  const loadFlashcards = useCallback(async (topic) => {
-    try {
-      const params = topic ? `?topic=${encodeURIComponent(topic)}` : ''
-      const { data } = await api.get(`/adaptive/flashcards${params}`)
-      if (data.success) {
-        setFlashcards(data.flashcards)
-        setFcIdx(0)
-        setFcFlipped(false)
-      }
-    } catch {}
-  }, [])
-
-  // ── LOAD STUDY PLAN ──────────────────────────────────
-  const loadStudyPlan = useCallback(async () => {
-    try {
-      setPlanLoading(true)
-      const { data } = await api.get('/adaptive/study-plan')
-      if (data.success) setStudyPlan(data.plan)
-    } catch {} finally {
-      setPlanLoading(false)
-    }
-  }, [])
-
-  // ── SUBMIT PRACTICE ──────────────────────────────────
-  const submitPractice = async () => {
-    if (!practiceData) return
-    setSubmitting(true)
-    const questions = practiceData.questions
-    let correct = 0
-    questions.forEach(q => {
-      if (practiceAnswers[q.id] === q.correct) correct++
-    })
-    const score = Math.round((correct / questions.length) * 100)
-    setPracticeResult({ correct, total: questions.length, score })
-
-    // Update mastery
-    try {
-      const { data } = await api.post('/mastery/update', {
-        subject:     practiceData.subject,
-        topic:       practiceData.topic,
-        score,
-        sessionType: 'practice',
-        timeMins:    8,
-      })
-      if (data.success) {
-        toast.ok(`+${data.xpEarned} XP earned! Mastery updated.`)
-        if (data.newBadges?.length) {
-          toast.ok(`New badge unlocked: ${data.newBadges[0].name}`)
-        }
-        // Refresh mastery data
-        loadMastery()
-        loadMasteryContext()
-      }
-    } catch {}
-    setSubmitting(false)
-  }
-
-  // ── EXAM (static bank, scores to API) ────────────────
-  const EXAM_QS = [
-    {id:1,q:'In a right-angled triangle with legs 3 cm and 4 cm, the hypotenuse is:',opts:['5 cm','7 cm','6 cm','4.5 cm'],ans:'5 cm',marks:5},
-    {id:2,q:'If c = 13 and a = 5 in a right-angled triangle, b equals:',opts:['12','10','8','11'],ans:'12',marks:5},
-    {id:3,q:'Which set forms a Pythagorean triple?',opts:['3,4,5','2,3,4','4,5,6','1,2,3'],ans:'3,4,5',marks:5},
-    {id:4,q:'The area of a right-angled triangle with legs 6 and 8 is:',opts:['24 cm²','48 cm²','14 cm²','28 cm²'],ans:'24 cm²',marks:5},
-  ]
-  useEffect(() => {
-    if (!examActive || examResult) return
-    const id = setInterval(() => setExamTime(t => { if(t<=1){clearInterval(id);return 0} return t-1 }), 1000)
-    return () => clearInterval(id)
-  }, [examActive, examResult])
-
-  const submitExam = async () => {
-    const correct = EXAM_QS.filter(q => examAnswers[q.id] === q.ans).length
-    const score   = Math.round((correct / EXAM_QS.length) * 100)
-    setExamResult({ correct, score, total: EXAM_QS.length * 5, pct: score })
-    try {
-      await api.post('/mastery/update', { subject:'Mathematics', topic:'Pythagoras & Geometry', score, sessionType:'exam', timeMins:20 })
-      loadMastery()
-    } catch {}
-  }
-  const fmtTime = s => `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`
-
-  // ── MSHAURI (mastery-aware) ──────────────────────────
-  const sendTutor = async () => {
-    if (!tutorInp.trim() || aiLoading) return
-    const q = tutorInp.trim()
-    setTutorInp('')
-    setAiLoading(true)
-    setTutorMsgs(m => [...m, {role:'user', text:q}])
-    try {
-      const { data } = await api.post('/auth/mshauri', {
-        message: q,
-        masteryContext: masteryCtx,
-      })
-      setTutorMsgs(m => [...m, {role:'ai', text: data.reply || 'Let me think about that...'}])
-    } catch {
-      setTutorMsgs(m => [...m, {role:'ai', text:"I'm having trouble connecting right now. Please try again in a moment."}])
-    }
-    setAiLoading(false)
-    setTimeout(() => chatEndRef.current?.scrollIntoView({behavior:'smooth'}), 80)
-  }
-
-  // ── Navigate and trigger loads ───────────────────────
-  const goTo = (id) => {
-    setPage(id)
-    if (id === 'practice' && !practiceData) loadPractice()
-    if (id === 'studyplan')                  loadStudyPlan()
-    if (id === 'lessons' && flashcards.length === 0) loadFlashcards(nextRec?.topic)
-  }
+  const goTo = (id) => setPage(id)
 
   const firstName = user?.firstName || 'Student'
   const initials  = user ? `${user.firstName[0]}${user.lastName[0]}` : 'ST'
-  const subjects  = mastery?.subjects || []
 
   // ─────────────────────────────────────────────────────
   // Title for the current page (used in top-bar)
   const pageTitle =
     page === 'dashboard'    ? `Welcome back, ${firstName}` :
-    page === 'practice'     ? (practiceData ? `Adaptive Practice — ${practiceData.topic}` : 'Adaptive Practice') :
+    page === 'practice'     ? 'Adaptive Practice' :
     page === 'homework'     ? 'Homework' :
     page === 'tutor'        ? 'Mshauri AI Tutor' :
     page === 'studyplan'    ? 'My Personalised Study Plan' :
@@ -1429,7 +942,7 @@ export default function StudentPortal() {
                   fontFamily:'JetBrains Mono,monospace',
                   marginTop:2,
                 }}>
-                  {user?.grade || 'IGCSE'} · {mastery ? mastery.xp.toLocaleString() + ' XP' : '...'}
+                  {user?.gradeLevel || user?.grade || user?.curriculum || 'Student'}
                 </div>
               </div>
             )}
@@ -1529,23 +1042,6 @@ export default function StudentPortal() {
           </div>
 
           <div style={{display:'flex', alignItems:'center', gap:10}}>
-            {nextRec && (
-              <div style={{
-                display:'inline-flex', alignItems:'center', gap:6,
-                padding:'7px 12px',
-                background:TOKENS.goldPale,
-                border:`1px solid ${TOKENS.gold}30`,
-                borderRadius:999,
-                fontSize:11.5, fontWeight:600,
-                color:TOKENS.crimsonDeep,
-              }}>
-                <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke={TOKENS.gold} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-                </svg>
-                <span style={{color:TOKENS.inkMute, fontWeight:500}}>Focus:</span>
-                <span>{nextRec.topic}</span>
-              </div>
-            )}
             {/* Notification bell — aggregates upcoming live classes,
                 homework deadlines, and recent results. Frontend-only
                 aggregation from existing endpoints. */}
@@ -2437,7 +1933,7 @@ function PracticeTab({ user, toast, goTo }) {
     setStage('pick')
     setSubject(null)
     setTopic(null)
-    setQuestions([])
+    setQs([])
     setAnswers({})
     setResult(null)
   }
@@ -2722,349 +2218,7 @@ function PracticeTab({ user, toast, goTo }) {
   }
  
   return null
-}
-          
- // ═══════════════════════════════════════════════════════════
-// ACHIEVEMENTS TAB — reads from PracticeTab's localStorage
-// ═══════════════════════════════════════════════════════════
-function AchievementsTab({ user }) {
-  // Read same keys that PracticeTab writes
-  const xp   = (() => { try { return parseInt(localStorage.getItem('sm_practice_xp') || '0', 10) || 0 } catch { return 0 } })()
-  const hist = (() => { try { return JSON.parse(localStorage.getItem('sm_practice_history') || '[]') } catch { return [] } })()
- 
-  // Calculate streaks from history dates
-  const calcStreak = (sessions) => {
-    if (sessions.length === 0) return 0
-    const days = new Set(sessions.map(s => new Date(s.date).toDateString()))
-    let streak = 0
-    let cursor = new Date()
-    // Look back day by day; allow today + consecutive prior days
-    // First check: did they practice today OR yesterday? (yesterday because they might
-    // not have practiced yet today but the streak isn't broken)
-    const today     = new Date().toDateString()
-    const yesterday = new Date(Date.now() - 86400000).toDateString()
-    if (!days.has(today) && !days.has(yesterday)) return 0
-    if (!days.has(today)) cursor = new Date(Date.now() - 86400000)
- 
-    while (days.has(cursor.toDateString())) {
-      streak++
-      cursor = new Date(cursor.getTime() - 86400000)
-    }
-    return streak
-  }
- 
-  const streak           = calcStreak(hist)
-  const sessionCount     = hist.length
-  const subjectsPracticed = [...new Set(hist.map(h => h.subject))]
-  const avgScore         = hist.length ? Math.round(hist.reduce((s, h) => s + h.score, 0) / hist.length) : 0
-  const bestScore        = hist.length ? Math.max(...hist.map(h => h.score)) : 0
-  const bestEver         = hist.find(h => h.score === bestScore)
- 
-  // Per-subject averages (for Subject Specialist badge)
-  const subjectAverages = {}
-  subjectsPracticed.forEach(subj => {
-    const subjSessions = hist.filter(h => h.subject === subj)
-    subjectAverages[subj] = Math.round(subjSessions.reduce((s, h) => s + h.score, 0) / subjSessions.length)
-  })
-  const hasSpecialty = Object.values(subjectAverages).some(avg => avg >= 80)
-  const specialtySubject = Object.entries(subjectAverages).find(([_, avg]) => avg >= 80)?.[0]
- 
-  // ── BADGES — earned conditions ───────────────────────────
-  const badges = [
-    { id:'first',       name:'First Steps',       desc:'Complete your first session',   tier:'bronze', earned: sessionCount >= 1 },
-    { id:'quick',       name:'Quick Learner',     desc:'Score 60%+ on a session',         tier:'bronze', earned: bestScore >= 60 },
-    { id:'high',        name:'High Achiever',     desc:'Score 80%+ on a session',         tier:'silver', earned: bestScore >= 80 },
-    { id:'perfect',     name:'Perfectionist',     desc:'Score 100% on a session',         tier:'gold',   earned: bestScore >= 100 },
-    { id:'dedicated',   name:'Dedicated',         desc:'Complete 5 sessions',             tier:'bronze', earned: sessionCount >= 5 },
-    { id:'committed',   name:'Committed',         desc:'Complete 25 sessions',            tier:'silver', earned: sessionCount >= 25 },
-    { id:'scholar',     name:'Scholar',           desc:'Complete 100 sessions',           tier:'gold',   earned: sessionCount >= 100 },
-    { id:'xp100',       name:'Centurion',         desc:'Earn 100 XP',                     tier:'bronze', earned: xp >= 100 },
-    { id:'xp500',       name:'Half Millennium',   desc:'Earn 500 XP',                     tier:'silver', earned: xp >= 500 },
-    { id:'xp1000',      name:'Millennium',        desc:'Earn 1,000 XP',                   tier:'gold',   earned: xp >= 1000 },
-    { id:'xp5000',      name:'Legend',            desc:'Earn 5,000 XP',                   tier:'platinum', earned: xp >= 5000 },
-    { id:'streak3',     name:'3-Day Streak',      desc:'Practice 3 days in a row',        tier:'bronze', earned: streak >= 3 },
-    { id:'streak7',     name:'Week Warrior',      desc:'Practice 7 days in a row',        tier:'silver', earned: streak >= 7 },
-    { id:'streak30',    name:'Monthly Master',    desc:'Practice 30 days in a row',       tier:'platinum', earned: streak >= 30 },
-    { id:'renaissance', name:'Renaissance',       desc:'Practice 3 different subjects',   tier:'silver', earned: subjectsPracticed.length >= 3 },
-    { id:'allrounder',  name:'All Rounder',       desc:'Practice all 5 subjects',         tier:'gold',   earned: subjectsPracticed.length >= 5 },
-    { id:'specialist',  name:'Subject Specialist',desc:'Average 80%+ in any subject',     tier:'gold',   earned: hasSpecialty },
-  ]
- 
-  const earnedBadges = badges.filter(b => b.earned)
-  const lockedBadges = badges.filter(b => !b.earned)
- 
-  // Tier styling
-  const tierStyles = {
-    bronze:   { bg:'#CD7F3220', border:'#CD7F32', icon:'#CD7F32' },
-    silver:   { bg:'#C0C0C020', border:'#9CA3AF', icon:'#6B7280' },
-    gold:     { bg:'#F0CC5A20', border:'#F0CC5A', icon:'#C9973A' },
-    platinum: { bg:'#E5E4E220', border:'#94A3B8', icon:'#475569' },
-  }
- 
-  // Next level XP target — 1,000 XP per level
-  const currentLevel    = Math.floor(xp / 1000) + 1
-  const xpThisLevel     = xp % 1000
-  const xpToNextLevel   = 1000 - xpThisLevel
-  const levelProgressPct = Math.round((xpThisLevel / 1000) * 100)
- 
-  // Top-3 milestone close to unlocking
-  const closeBadges = lockedBadges
-    .map(b => {
-      let progress = 0, target = 1
-      if (b.id === 'first')       { progress = sessionCount; target = 1 }
-      else if (b.id === 'quick')  { progress = bestScore; target = 60 }
-      else if (b.id === 'high')   { progress = bestScore; target = 80 }
-      else if (b.id === 'perfect'){ progress = bestScore; target = 100 }
-      else if (b.id === 'dedicated'){ progress = sessionCount; target = 5 }
-      else if (b.id === 'committed'){ progress = sessionCount; target = 25 }
-      else if (b.id === 'scholar'){ progress = sessionCount; target = 100 }
-      else if (b.id === 'xp100')  { progress = xp; target = 100 }
-      else if (b.id === 'xp500')  { progress = xp; target = 500 }
-      else if (b.id === 'xp1000') { progress = xp; target = 1000 }
-      else if (b.id === 'xp5000') { progress = xp; target = 5000 }
-      else if (b.id === 'streak3'){ progress = streak; target = 3 }
-      else if (b.id === 'streak7'){ progress = streak; target = 7 }
-      else if (b.id === 'streak30'){ progress = streak; target = 30 }
-      else if (b.id === 'renaissance'){ progress = subjectsPracticed.length; target = 3 }
-      else if (b.id === 'allrounder'){ progress = subjectsPracticed.length; target = 5 }
-      else if (b.id === 'specialist'){
-        const bestAvg = Math.max(0, ...Object.values(subjectAverages))
-        progress = bestAvg; target = 80
-      }
-      return { ...b, progress, target, pct: Math.min(100, Math.round((progress/target)*100)) }
-    })
-    .sort((a,b) => b.pct - a.pct)
-    .slice(0, 3)
- 
-  return (
-    <div>
-      {/* Hero */}
-      <div className="card" style={{
-        padding: 0, marginBottom: 18, overflow: 'hidden',
-        background: 'linear-gradient(135deg, #8B1A2E 0%, #6B0F1E 100%)',
-        color: '#fff',
-      }}>
-        <div style={{ padding: '28px 32px 22px', display: 'flex', alignItems: 'center', gap: 22, flexWrap: 'wrap' }}>
-          {/* Level badge */}
-          <div style={{
-            width: 88, height: 88, borderRadius: '50%',
-            background: 'rgba(240,204,90,.18)',
-            border: '3px solid #F0CC5A',
-            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-            flexShrink: 0,
-            boxShadow: '0 4px 16px rgba(0,0,0,.25)',
-          }}>
-            <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: '#F0CC5A', opacity: .85 }}>
-              Level
-            </div>
-            <div className="mono" style={{ fontSize: 28, fontWeight: 700, color: '#F0CC5A', lineHeight: 1 }}>
-              {currentLevel}
-            </div>
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .75, marginBottom: 4 }}>
-              Your Achievements
-            </div>
-            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
-              {earnedBadges.length === 0
-                ? 'Start practising to earn your first badge'
-                : earnedBadges.length < 5
-                ? "You're on your way"
-                : earnedBadges.length < 10
-                ? 'Strong progress, keep it up'
-                : 'You are an achiever'}
-            </h2>
-            <div style={{ fontSize: 13.5, opacity: .85, marginTop: 6 }}>
-              {earnedBadges.length} of {badges.length} badges earned · {xpToNextLevel.toLocaleString()} XP to Level {currentLevel + 1}
-            </div>
-          </div>
-        </div>
-        {/* XP progress bar inside hero */}
-        <div style={{ background: 'rgba(0,0,0,.2)', padding: '12px 32px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, opacity: .75, marginBottom: 5 }}>
-            <span>{xpThisLevel} / 1,000 XP</span>
-            <span className="mono">{levelProgressPct}%</span>
-          </div>
-          <div style={{ height: 8, background: 'rgba(255,255,255,.1)', borderRadius: 99, overflow: 'hidden' }}>
-            <div style={{
-              width: levelProgressPct + '%',
-              height: '100%',
-              background: 'linear-gradient(90deg, #F0CC5A, #C9973A)',
-              borderRadius: 99,
-              transition: 'width 1s ease',
-            }}/>
-          </div>
-        </div>
-        {/* Stat strip */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))' }}>
-          {[
-            ['Total XP',      xp.toLocaleString()],
-            ['Day Streak',    streak === 0 ? '0' : `${streak} day${streak === 1 ? '' : 's'}`],
-            ['Sessions',      sessionCount],
-            ['Best Score',    sessionCount ? `${bestScore}%` : '—'],
-            ['Avg Score',     sessionCount ? `${avgScore}%` : '—'],
-          ].map(([label, value]) => (
-            <div key={label} style={{ padding: '12px 18px', borderRight: '1px solid rgba(255,255,255,.08)', borderTop: '1px solid rgba(255,255,255,.08)' }}>
-              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .6, marginBottom: 3 }}>
-                {label}
-              </div>
-              <div style={{ fontSize: 14, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace' }}>{value}</div>
-            </div>
-          ))}
-        </div>
-      </div>
- 
-      {/* Empty state if no sessions yet */}
-      {sessionCount === 0 ? (
-        <div className="card" style={{ padding: 36, textAlign: 'center' }}>
-          <div style={{ width: 64, height: 64, margin: '0 auto 16px', borderRadius: '50%', background: 'var(--s100)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="30" height="30" fill="none" viewBox="0 0 24 24" stroke="var(--s400)" strokeWidth="1.5" strokeLinecap="round">
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-            </svg>
-          </div>
-          <h3 style={{ fontSize: 17, color: 'var(--s800)', marginBottom: 6 }}>Your achievements will appear here</h3>
-          <p style={{ fontSize: 13.5, color: 'var(--s500)', maxWidth: 380, margin: '0 auto' }}>
-            Complete your first practice session to start earning XP and unlocking badges.
-          </p>
-        </div>
-      ) : (
-        <>
-          {/* Almost-there badges */}
-          {closeBadges.length > 0 && (
-            <div className="card" style={{ marginBottom: 18 }}>
-              <div className="ctitle" style={{ marginBottom: 14 }}>Almost there</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                {closeBadges.map(b => {
-                  const tier = tierStyles[b.tier]
-                  return (
-                    <div key={b.id} style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
-                      <div style={{
-                        width: 44, height: 44, borderRadius: '50%',
-                        background: tier.bg, border: `2px solid ${tier.border}`,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        flexShrink: 0, opacity: .55, filter: 'grayscale(.4)',
-                      }}>
-                        <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke={tier.icon} strokeWidth="2" strokeLinecap="round">
-                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                        </svg>
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4, flexWrap: 'wrap', gap: 6 }}>
-                          <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--s800)' }}>{b.name}</div>
-                          <div className="mono" style={{ fontSize: 12, color: 'var(--s500)' }}>
-                            {b.progress} / {b.target}
-                          </div>
-                        </div>
-                        <div style={{ fontSize: 12, color: 'var(--s500)', marginBottom: 5 }}>{b.desc}</div>
-                        <div style={{ height: 5, background: 'var(--s100)', borderRadius: 99, overflow: 'hidden' }}>
-                          <div style={{ width: b.pct + '%', height: '100%', background: tier.icon, borderRadius: 99, transition: 'width 1s ease' }}/>
-                        </div>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )}
- 
-          {/* Earned badges */}
-          {earnedBadges.length > 0 && (
-            <div style={{ marginBottom: 24 }}>
-              <div style={{ marginBottom: 12 }}>
-                <div className="sec-tag">Earned · {earnedBadges.length}</div>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }}>
-                {earnedBadges.map(b => {
-                  const tier = tierStyles[b.tier]
-                  return (
-                    <div key={b.id} style={{
-                      background: '#fff',
-                      border: `2px solid ${tier.border}`,
-                      borderRadius: 'var(--rlg)',
-                      padding: '18px 14px',
-                      textAlign: 'center',
-                      position: 'relative',
-                      transition: 'all .2s',
-                      boxShadow: `0 4px 12px ${tier.bg}`,
-                    }}>
-                      {/* Tier ribbon */}
-                      <div style={{
-                        position: 'absolute', top: 8, right: 8,
-                        background: tier.icon, color: '#fff',
-                        fontSize: 9, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase',
-                        padding: '2px 7px', borderRadius: 99,
-                      }}>
-                        {b.tier}
-                      </div>
-                      <div style={{
-                        width: 56, height: 56, margin: '0 auto 10px', borderRadius: '50%',
-                        background: tier.bg, border: `2px solid ${tier.border}`,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      }}>
-                        <svg width="28" height="28" fill={tier.icon} stroke={tier.icon} strokeWidth="1" viewBox="0 0 24 24">
-                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                        </svg>
-                      </div>
-                      <div style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--s900)', marginBottom: 3 }}>{b.name}</div>
-                      <div style={{ fontSize: 11.5, color: 'var(--s500)' }}>{b.desc}</div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )}
- 
-          {/* Locked badges */}
-          {lockedBadges.length > 0 && (
-            <div>
-              <div style={{ marginBottom: 12 }}>
-                <div className="sec-tag">Locked · {lockedBadges.length}</div>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }}>
-                {lockedBadges.map(b => {
-                  const tier = tierStyles[b.tier]
-                  return (
-                    <div key={b.id} style={{
-                      background: 'var(--bg)',
-                      border: '1.5px solid var(--s200)',
-                      borderRadius: 'var(--rlg)',
-                      padding: '18px 14px',
-                      textAlign: 'center',
-                      opacity: .55,
-                      filter: 'grayscale(.5)',
-                      transition: 'all .2s',
-                    }}>
-                      <div style={{
-                        position: 'absolute', top: 0, right: 0,
-                      }}/>
-                      <div style={{
-                        width: 56, height: 56, margin: '0 auto 10px', borderRadius: '50%',
-                        background: 'var(--s100)', border: '2px solid var(--s200)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      }}>
-                        <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="var(--s400)" strokeWidth="2" strokeLinecap="round">
-                          <rect x="3" y="11" width="18" height="11" rx="2"/>
-                          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                        </svg>
-                      </div>
-                      <div style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--s700)', marginBottom: 3 }}>{b.name}</div>
-                      <div style={{ fontSize: 11.5, color: 'var(--s500)' }}>{b.desc}</div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-        </>
-      )}
-    </div>
-  )
-}
-
- // ═══════════════════════════════════════════════════════════
-// EXAMS TAB — uses QUESTION_BANK from PracticeTab paste
-// ═══════════════════════════════════════════════════════════
-const EXAM_DURATION_SECONDS = 60 * 60  // 60 minutes
+}  // 60 minutes
 // Demo exam-history helpers removed with the practice-exam path.
 // Results now come from the API rather than localStorage.
  
@@ -3164,12 +2318,6 @@ function ModuleCard({ accent, badges = [], eyebrow, title, tiles = [], meta, not
 
 /** Standard responsive grid for ModuleCard listings. */
 const MODULE_GRID = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 14 }
-
-const fmtExamTime = (s) => {
-  const m = Math.floor(s / 60)
-  const sec = s % 60
-  return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`
-}
  
 const gradeFor = (pct) => {
   if (pct >= 90) return { grade: 'A*', colour: 'var(--g600)', message: 'Outstanding!' }
@@ -3181,21 +2329,8 @@ const gradeFor = (pct) => {
   return         { grade: 'U',         colour: 'var(--r500)', message: 'Ungraded — review and retry.' }
 }
  
-const examShuffle = (arr) => {
-  const a = [...arr]
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[a[i], a[j]] = [a[j], a[i]]
-  }
-  return a
-}
- 
 function ExamsTab({ user, toast, goTo, store }) {
-  const [stage,    setStage]    = useState('list')   // 'list' | 'real-sitting' | 'real-result'
-  const [subject,  setSubject]  = useState(null)
-  const [answers,  setAnswers]  = useState({})
-  const [timeLeft, setTimeLeft] = useState(EXAM_DURATION_SECONDS)
-  const [result,   setResult]   = useState(null)
+  const [stage,    setStage]    = useState('list')
 
   // ── Real exams assigned by teachers (from backend) ──
   // Source: GET /api/exams/student/list. Refreshes whenever the student
@@ -4172,123 +3307,6 @@ const parseScheduleString = (scheduleStr) => {
     startMins: startH * 60 + startM,
     endMins:   endH * 60 + endM,
   })
-}
-// A schedule label rebuilt in the student's own zone
-const localScheduleLabel = (scheduleStr) => {
-  const p = parseScheduleString(scheduleStr)
-  if (!p) return scheduleStr || ''
-  return p.days.map(dayName).join(' ') + ' ' + formatMins(p.startMins) + ' to ' + formatMins(p.endMins)
-}
- 
-const formatMins = (mins) => {
-  let h = Math.floor(mins / 60)
-  const m = mins % 60
-  const mer = h >= 12 ? 'PM' : 'AM'
-  h = h % 12
-  if (h === 0) h = 12
-  return h + ':' + String(m).padStart(2, '0') + ' ' + mer
-}
- 
-const dayName = (dow) => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][dow]
-const fullDayName = (dow) => ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][dow]
- 
-// Compute the unified status for a room
-// Returns: { kind: 'live' | 'starting' | 'should-be-live' | 'finished' | 'today-later' | 'tomorrow' | 'upcoming' | 'no-schedule',
-//           label, sublabel, canJoin }
-const computeStatus = (room, now) => {
-  const parsed = parseScheduleString(room.schedule)
-  const todayDow = now.getDay()
-  const nowMins = now.getHours() * 60 + now.getMinutes()
- 
-  // Check if teacher has actually started Zoom (within last 3 hours)
-  const teacherStarted = !!(room.zoomLink && room.zoomStartedAt &&
-    (Date.now() - new Date(room.zoomStartedAt).getTime()) < 3 * 60 * 60 * 1000)
- 
-  if (teacherStarted) {
-    return {
-      kind: 'live',
-      label: 'LIVE NOW',
-      sublabel: 'Class in progress — join your teacher',
-      canJoin: true,
-    }
-  }
- 
-  if (!parsed) {
-    return {
-      kind: 'no-schedule',
-      label: 'No schedule set',
-      sublabel: localScheduleLabel(room.schedule) || 'Ask your teacher about class times',
-      canJoin: false,
-    }
-  }
- 
-  const isScheduledToday = parsed.days.includes(todayDow)
- 
-  // Today, currently within the time window but teacher hasn't started Zoom
-  if (isScheduledToday && nowMins >= parsed.startMins && nowMins < parsed.endMins) {
-    return {
-      kind: 'should-be-live',
-      label: 'WAITING FOR TEACHER',
-      sublabel: 'Scheduled now — teacher hasn\'t started yet',
-      canJoin: false,
-    }
-  }
- 
-  // Today, before the start time
-  if (isScheduledToday && nowMins < parsed.startMins) {
-    const minsAway = parsed.startMins - nowMins
-    return {
-      kind: 'starting',
-      label: 'STARTS LATER TODAY',
-      sublabel: minsAway < 60
-        ? 'Starts in ' + minsAway + ' min · ' + formatMins(parsed.startMins)
-        : 'Starts at ' + formatMins(parsed.startMins) + ' (in ' + Math.floor(minsAway / 60) + 'h ' + (minsAway % 60) + 'm)',
-      canJoin: false,
-    }
-  }
- 
-  // Today, after the end time
-  if (isScheduledToday && nowMins >= parsed.endMins) {
-    return {
-      kind: 'finished',
-      label: 'FINISHED FOR TODAY',
-      sublabel: 'Today\'s class ended at ' + formatMins(parsed.endMins),
-      canJoin: false,
-    }
-  }
- 
-  // Find the next upcoming day
-  for (let i = 1; i <= 7; i++) {
-    const checkDow = (todayDow + i) % 7
-    if (parsed.days.includes(checkDow)) {
-      if (i === 1) {
-        return {
-          kind: 'tomorrow',
-          label: 'TOMORROW',
-          sublabel: 'Tomorrow at ' + formatMins(parsed.startMins),
-          canJoin: false,
-        }
-      }
-      return {
-        kind: 'upcoming',
-        label: fullDayName(checkDow).toUpperCase(),
-        sublabel: dayName(checkDow) + ' at ' + formatMins(parsed.startMins),
-        canJoin: false,
-      }
-    }
-  }
- 
-  return { kind: 'no-schedule', label: 'No upcoming sessions', sublabel: localScheduleLabel(room.schedule) || '', canJoin: false }
-}
- 
-const teacherDisplayName = (teacher) => {
-  if (!teacher) return 'Teacher'
-  if (typeof teacher === 'string') return teacher
-  if (typeof teacher === 'object') {
-    const name = ((teacher.firstName || '') + ' ' + (teacher.lastName || '')).trim()
-    return name || teacher.email || 'Teacher'
-  }
-  return 'Teacher'
 }
  
 function LiveClassesTab({ user, toast, goTo }) {
@@ -5370,553 +4388,6 @@ function MshauriTab({ user }) {
 }
  
 // ═══════════════════════════════════════════════════════════
-// TIMETABLE TAB — week grid + list, real student schedule
-// ═══════════════════════════════════════════════════════════
-function TimetableTab({ user, store, setPage, toast }) {
-  const [view, setView]   = useState('grid')   // 'grid' | 'list'
-  const [tick, setTick]   = useState(0)
-  const [selected, setSelected] = useState(null)  // currently selected slot for action menu
- 
-  // Re-evaluate live status every 30 seconds
-  useEffect(() => {
-    const id = setInterval(() => setTick(t => t + 1), 30000)
-    return () => clearInterval(id)
-  }, [])
- 
-  // Find this student's enrolled rooms
-  const studentFullName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim()
-  const allRooms = store?.groupRooms || []
-  const myRooms = allRooms.filter(r =>
-    r.students?.some(s =>
-      s === studentFullName ||
-      s === user?.firstName ||
-      (user?.firstName && s.includes(user.firstName))
-    )
-  )
- 
-  // Build slot data — one slot per (room × day-it-recurs)
-  const slots = []
-  myRooms.forEach(room => {
-    const parsed = parseScheduleString(room.schedule)
-    if (!parsed) return
-    parsed.days.forEach(dow => {
-      slots.push({
-        roomId: room.id,
-        room,
-        dow,
-        startMins: parsed.startMins,
-        endMins: parsed.endMins,
-      })
-    })
-  })
- 
-  const subjColours = {
-    'Mathematics': '#8B1A2E', 'Physics': '#1E3A8A', 'Chemistry': '#166534',
-    'Biology': '#7C2D12', 'English': '#6B21A8', 'History': '#92400E',
-    'Geography': '#0F766E', 'Computer Science': '#1F2937',
-    'Business Studies': '#7E22CE', 'Economics': '#9F1239',
-  }
-  const colourFor = (s) => subjColours[s] || '#8B1A2E'
- 
-  const now = new Date()
-  const todayDow = now.getDay()
-  const nowMins = now.getHours() * 60 + now.getMinutes()
- 
-  const isLiveNow = (slot) =>
-    slot.dow === todayDow && nowMins >= slot.startMins && nowMins < slot.endMins
-  const isPastToday = (slot) =>
-    slot.dow === todayDow && nowMins >= slot.endMins
-  const isUpcomingToday = (slot) =>
-    slot.dow === todayDow && nowMins < slot.startMins
- 
-  // Determine which days to show (always Mon-Fri; add Sat/Sun if any class falls there)
-  const usedDays = new Set(slots.map(s => s.dow))
-  const showSat = usedDays.has(6)
-  const showSun = usedDays.has(0)
-  const dayList = []
-  if (showSun) dayList.push(0)
-  for (let d = 1; d <= 5; d++) dayList.push(d)
-  if (showSat) dayList.push(6)
-  const dayShortName = (d) => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d]
-  const dayLongName  = (d) => ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][d]
- 
-  // Time range to display — find earliest start, latest end across all slots
-  let earliestMins = 8 * 60   // default 8 AM
-  let latestMins   = 17 * 60  // default 5 PM
-  if (slots.length > 0) {
-    earliestMins = Math.min(...slots.map(s => s.startMins))
-    latestMins   = Math.max(...slots.map(s => s.endMins))
-    // Snap to nearest hour boundary
-    earliestMins = Math.floor(earliestMins / 60) * 60
-    latestMins   = Math.ceil(latestMins / 60) * 60
-    // Add small buffer
-    earliestMins = Math.max(7 * 60, earliestMins)
-    latestMins   = Math.min(20 * 60, latestMins + 30)
-  }
-  const totalMinsSpan = latestMins - earliestMins
- 
-  // Hour labels for the row headers
-  const hourLabels = []
-  for (let m = earliestMins; m <= latestMins; m += 60) {
-    let h = Math.floor(m / 60)
-    const mer = h >= 12 ? 'PM' : 'AM'
-    h = h % 12
-    if (h === 0) h = 12
-    hourLabels.push({ mins: m, label: `${h} ${mer}` })
-  }
- 
-  const formatTime = (mins) => {
-    let h = Math.floor(mins / 60)
-    const m = mins % 60
-    const mer = h >= 12 ? 'PM' : 'AM'
-    h = h % 12
-    if (h === 0) h = 12
-    return `${h}${m === 0 ? '' : ':' + String(m).padStart(2, '0')} ${mer}`
-  }
- 
-  // Stats
-  const liveCount      = slots.filter(isLiveNow).length
-  const todayCount     = slots.filter(s => s.dow === todayDow).length
-  const totalWeekly    = slots.length
-  const subjectCount   = new Set(slots.map(s => s.room.subject)).size
- 
-  // ── Action menu actions ─────────────────────────────────────
-  const handleAction = (action, slot) => {
-    setSelected(null)
-    if (action === 'join') {
-      setPage('live')
-    } else if (action === 'view-class') {
-      setPage('myroom')
-    } else if (action === 'add-cal') {
-      toast?.info?.(`Reminder set for ${slot.room.subject}`)
-    } else if (action === 'practice') {
-      setPage('practice')
-    }
-  }
- 
-  // ── EMPTY STATE ─────────────────────────────────────────────
-  if (myRooms.length === 0) {
-    return (
-      <div>
-        <div className="card" style={{
-          padding: 0, marginBottom: 18, overflow: 'hidden',
-          background: 'linear-gradient(135deg, #8B1A2E 0%, #6B0F1E 100%)',
-          color: '#fff',
-        }}>
-          <div style={{ padding: '24px 30px' }}>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .75, marginBottom: 6 }}>
-              Weekly Schedule
-            </div>
-            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0 }}>
-              Your Timetable
-            </h2>
-          </div>
-        </div>
-        <div className="card" style={{ padding: 36, textAlign: 'center' }}>
-          <div style={{ width: 64, height: 64, margin: '0 auto 16px', borderRadius: '50%', background: 'var(--s100)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="30" height="30" fill="none" viewBox="0 0 24 24" stroke="var(--s400)" strokeWidth="1.5" strokeLinecap="round">
-              <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-            </svg>
-          </div>
-          <h3 style={{ fontSize: 17, color: 'var(--s800)', marginBottom: 6 }}>Your timetable will appear here</h3>
-          <p style={{ fontSize: 13.5, color: 'var(--s500)', maxWidth: 380, margin: '0 auto' }}>
-            Once an admin enrols you in classes, your weekly schedule will be built automatically from your class times.
-          </p>
-        </div>
-      </div>
-    )
-  }
- 
-  return (
-    <div>
-      {/* Hero */}
-      <div className="card" style={{
-        padding: 0, marginBottom: 18, overflow: 'hidden',
-        background: 'linear-gradient(135deg, #8B1A2E 0%, #6B0F1E 100%)',
-        color: '#fff',
-      }}>
-        <div style={{ padding: '24px 30px', display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}>
-          <div style={{ flex: 1, minWidth: 200 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .75, marginBottom: 6 }}>
-              Weekly Schedule
-            </div>
-            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
-              Your Timetable
-            </h2>
-            <div style={{ fontSize: 13, opacity: .85, marginTop: 4 }}>
-              {dayLongName(todayDow)} · {now.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}
-            </div>
-          </div>
-          {/* View toggle */}
-          <div style={{
-            display: 'flex',
-            background: 'rgba(0,0,0,.2)',
-            borderRadius: 99,
-            padding: 3,
-            gap: 2,
-          }}>
-            {[['grid', 'Week'], ['list', 'List']].map(([id, label]) => (
-              <button
-                key={id}
-                onClick={() => setView(id)}
-                style={{
-                  background: view === id ? '#fff' : 'transparent',
-                  color: view === id ? '#8B1A2E' : 'rgba(255,255,255,.75)',
-                  border: 'none',
-                  padding: '6px 16px',
-                  borderRadius: 99,
-                  cursor: 'pointer',
-                  fontSize: 12.5,
-                  fontWeight: 600,
-                  transition: 'all .15s',
-                }}
-              >{label}</button>
-            ))}
-          </div>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', background: 'rgba(0,0,0,.18)' }}>
-          {[
-            ['Live Now',     liveCount],
-            ['Today',        todayCount],
-            ['This Week',    totalWeekly],
-            ['Subjects',     subjectCount],
-          ].map(([l, v]) => (
-            <div key={l} style={{ padding: '12px 18px', borderRight: '1px solid rgba(255,255,255,.08)' }}>
-              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .6, marginBottom: 2 }}>
-                {l}
-              </div>
-              <div style={{ fontSize: 14, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace' }}>{v}</div>
-            </div>
-          ))}
-        </div>
-      </div>
- 
-      {/* GRID VIEW */}
-      {view === 'grid' && (
-        <div className="card" style={{ padding: 0, overflow: 'auto' }}>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: `64px repeat(${dayList.length}, minmax(110px, 1fr))`,
-            minWidth: 64 + dayList.length * 110,
-          }}>
-            {/* Header row */}
-            <div style={{ background: 'var(--bg)', borderRight: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}/>
-            {dayList.map(d => {
-              const isToday = d === todayDow
-              return (
-                <div key={d} style={{
-                  background: isToday ? 'rgba(139,26,46,.06)' : 'var(--bg)',
-                  borderRight: '1px solid var(--border)',
-                  borderBottom: '1px solid var(--border)',
-                  padding: '12px 8px',
-                  textAlign: 'center',
-                  position: 'relative',
-                }}>
-                  <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: isToday ? '#8B1A2E' : 'var(--s400)' }}>
-                    {dayShortName(d)}
-                  </div>
-                  {isToday && (
-                    <div style={{ fontSize: 9, color: '#8B1A2E', fontWeight: 700, marginTop: 1 }}>Today</div>
-                  )}
-                </div>
-              )
-            })}
- 
-            {/* Body — one row per hour */}
-            {hourLabels.slice(0, -1).map((hour, hi) => (
-              <div key={hi} style={{ display: 'contents' }}>
-                {/* Time label */}
-                <div style={{
-                  background: 'var(--bg)',
-                  borderRight: '1px solid var(--border)',
-                  borderBottom: '1px solid var(--border)',
-                  padding: '6px 6px 0',
-                  fontSize: 10,
-                  fontFamily: 'JetBrains Mono, monospace',
-                  fontWeight: 700,
-                  color: 'var(--s400)',
-                  textAlign: 'right',
-                  height: 60,
-                }}>
-                  {hour.label}
-                </div>
-                {/* Day cells for this hour - empty cells with grid lines */}
-                {dayList.map(d => {
-                  const isToday = d === todayDow
-                  return (
-                    <div key={d} style={{
-                      background: isToday ? 'rgba(139,26,46,.025)' : 'transparent',
-                      borderRight: '1px solid var(--border)',
-                      borderBottom: '1px solid var(--border)',
-                      height: 60,
-                      position: 'relative',
-                    }}/>
-                  )
-                })}
-              </div>
-            ))}
-          </div>
- 
-          {/* Overlay slots positioned absolutely on the grid */}
-          <div style={{ position: 'relative', marginTop: -((hourLabels.length - 1) * 60), pointerEvents: 'none' }}>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: `64px repeat(${dayList.length}, minmax(110px, 1fr))`,
-              minWidth: 64 + dayList.length * 110,
-            }}>
-              <div/>
-              {dayList.map(d => (
-                <div key={d} style={{ position: 'relative', minHeight: (hourLabels.length - 1) * 60 + 'px' }}>
-                  {slots.filter(s => s.dow === d).map((slot, si) => {
-                    const col = colourFor(slot.room.subject)
-                    const top = ((slot.startMins - earliestMins) / 60) * 60
-                    const height = Math.max(36, ((slot.endMins - slot.startMins) / 60) * 60 - 2)
-                    const live = isLiveNow(slot)
-                    const past = isPastToday(slot)
-                    return (
-                      <div
-                        key={si}
-                        onClick={() => setSelected(slot)}
-                        style={{
-                          position: 'absolute',
-                          top: top + 'px',
-                          left: 4,
-                          right: 4,
-                          height: height + 'px',
-                          background: live ? col : col + 'E0',
-                          color: '#fff',
-                          borderRadius: 'var(--rsm)',
-                          padding: '6px 8px',
-                          fontSize: 11,
-                          cursor: 'pointer',
-                          pointerEvents: 'auto',
-                          boxShadow: live ? `0 0 0 2px #fff, 0 0 0 4px ${col}` : '0 1px 3px rgba(0,0,0,.15)',
-                          opacity: past ? 0.55 : 1,
-                          overflow: 'hidden',
-                          transition: 'all .15s',
-                          zIndex: live ? 5 : 1,
-                        }}
-                        onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)' }}
-                        onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)' }}
-                        title={`${slot.room.subject} — ${slot.room.teacher}\n${formatTime(slot.startMins)} – ${formatTime(slot.endMins)}`}
-                      >
-                        {live && (
-                          <div style={{
-                            display: 'inline-block',
-                            background: '#fff',
-                            color: col,
-                            fontSize: 8.5,
-                            fontWeight: 800,
-                            letterSpacing: '.08em',
-                            padding: '1px 6px',
-                            borderRadius: 99,
-                            marginBottom: 2,
-                          }}>● LIVE</div>
-                        )}
-                        <div style={{ fontWeight: 700, fontSize: 12, lineHeight: 1.2, marginBottom: 2, textOverflow: 'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden' }}>
-                          {slot.room.subject}
-                        </div>
-                        <div style={{ fontSize: 10, opacity: .8, lineHeight: 1.2 }}>
-                          {formatTime(slot.startMins)}
-                        </div>
-                        {height > 50 && (
-                          <div style={{ fontSize: 10, opacity: .75, lineHeight: 1.2, marginTop: 1, textOverflow: 'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden' }}>
-                            {slot.room.teacher}
-                          </div>
-                        )}
-                      </div>
-                    )
-                  })}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
- 
-      {/* LIST VIEW */}
-      {view === 'list' && (
-        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-          <table className="tbl">
-            <thead>
-              <tr>
-                <th>Day</th>
-                <th>Time</th>
-                <th>Subject</th>
-                <th>Teacher</th>
-                <th>Status</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {[...slots].sort((a, b) => {
-                // Sort by day then time, with today first
-                const aDayOrder = a.dow === todayDow ? -1 : a.dow
-                const bDayOrder = b.dow === todayDow ? -1 : b.dow
-                if (aDayOrder !== bDayOrder) return aDayOrder - bDayOrder
-                return a.startMins - b.startMins
-              }).map((slot, i) => {
-                const col = colourFor(slot.room.subject)
-                const live = isLiveNow(slot)
-                const past = isPastToday(slot)
-                const upcomingToday = isUpcomingToday(slot)
-                const isToday = slot.dow === todayDow
- 
-                let statusBadge
-                if (live) statusBadge = <span className="badge badge-red" style={{ background: '#FEE2E2', color: '#991B1B' }}>● Live Now</span>
-                else if (past) statusBadge = <span className="badge badge-slate" style={{ background: 'var(--s100)', color: 'var(--s500)' }}>Done</span>
-                else if (upcomingToday) statusBadge = <span className="badge badge-amber">Today</span>
-                else statusBadge = <span className="badge badge-blue">Upcoming</span>
- 
-                return (
-                  <tr key={i} style={{ background: live ? '#FEF2F2' : isToday ? 'rgba(139,26,46,.025)' : 'transparent' }}>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <div style={{ width: 4, height: 24, borderRadius: 2, background: col, flexShrink: 0 }}/>
-                        <span className="mono" style={{ fontWeight: 700, color: isToday ? '#8B1A2E' : 'var(--s700)' }}>
-                          {dayShortName(slot.dow)}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="mono" style={{ fontSize: 13 }}>
-                      {formatTime(slot.startMins)} – {formatTime(slot.endMins)}
-                    </td>
-                    <td style={{ fontWeight: 600 }}>{slot.room.subject}</td>
-                    <td style={{ color: 'var(--s500)', fontSize: 13 }}>{slot.room.teacher}</td>
-                    <td>{statusBadge}</td>
-                    <td>
-                      {live && (
-                        <button className="btn btn-d btn-sm" onClick={() => setPage('live')}>
-                          Join
-                        </button>
-                      )}
-                      {!live && !past && (
-                        <button className="btn btn-s btn-sm" onClick={() => toast?.info?.(`Reminder set for ${slot.room.subject}`)}>
-                          Remind
-                        </button>
-                      )}
-                      {past && (
-                        <button className="btn btn-s btn-sm" onClick={() => setPage('practice')}>
-                          Practice
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
- 
-      {/* Action menu modal */}
-      {selected && (() => {
-        const live = isLiveNow(selected)
-        const past = isPastToday(selected)
-        return (
-          <div
-            onClick={() => setSelected(null)}
-            style={{
-              position: 'fixed', inset: 0,
-              background: 'rgba(15,23,42,.55)',
-              zIndex: 100,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              padding: 20,
-            }}
-          >
-            <div
-              onClick={e => e.stopPropagation()}
-              style={{
-                background: 'var(--white)',
-                borderRadius: 'var(--rxl)',
-                width: '100%', maxWidth: 420,
-                overflow: 'hidden',
-                boxShadow: '0 20px 60px rgba(0,0,0,.3)',
-              }}
-            >
-              {/* Header */}
-              <div style={{
-                padding: '20px 24px',
-                background: `linear-gradient(135deg, ${colourFor(selected.room.subject)} 0%, ${colourFor(selected.room.subject)}DD 100%)`,
-                color: '#fff',
-              }}>
-                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .8, marginBottom: 4 }}>
-                  {dayLongName(selected.dow)} · {formatTime(selected.startMins)} – {formatTime(selected.endMins)}
-                </div>
-                <h3 className="serif" style={{ fontSize: 22, margin: 0 }}>{selected.room.subject}</h3>
-                <div style={{ fontSize: 13, opacity: .85, marginTop: 4 }}>
-                  {selected.room.teacher} · {selected.room.curriculum} {selected.room.grade ? '· ' + selected.room.grade : ''}
-                </div>
-                {live && (
-                  <div style={{
-                    display: 'inline-block',
-                    background: '#fff', color: colourFor(selected.room.subject),
-                    fontSize: 10, fontWeight: 800, letterSpacing: '.1em',
-                    padding: '3px 10px', borderRadius: 99,
-                    marginTop: 10,
-                  }}>● LIVE NOW</div>
-                )}
-              </div>
- 
-              {/* Actions */}
-              <div style={{ padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {live && (
-                  <button
-                    className="btn btn-p"
-                    onClick={() => handleAction('join', selected)}
-                    style={{ background: colourFor(selected.room.subject), borderColor: colourFor(selected.room.subject), justifyContent: 'flex-start' }}
-                  >
-                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    Join Class Now
-                  </button>
-                )}
-                {!live && !past && (
-                  <button
-                    className="btn btn-s"
-                    onClick={() => handleAction('add-cal', selected)}
-                    style={{ justifyContent: 'flex-start' }}
-                  >
-                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                    Set Reminder
-                  </button>
-                )}
-                <button
-                  className="btn btn-s"
-                  onClick={() => handleAction('view-class', selected)}
-                  style={{ justifyContent: 'flex-start' }}
-                >
-                  <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-                  View Classmates
-                </button>
-                {past && (
-                  <button
-                    className="btn btn-s"
-                    onClick={() => handleAction('practice', selected)}
-                    style={{ justifyContent: 'flex-start' }}
-                  >
-                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1.5"/></svg>
-                    Practice This Subject
-                  </button>
-                )}
-                <button
-                  onClick={() => setSelected(null)}
-                  style={{
-                    background: 'transparent', border: 'none',
-                    color: 'var(--s500)', padding: '8px',
-                    fontSize: 13, cursor: 'pointer',
-                    textAlign: 'center', marginTop: 4,
-                  }}
-                >Close</button>
-              </div>
-            </div>
-          </div>
-        )
-      })()}
-    </div>
-  )
-}
- 
-// ═══════════════════════════════════════════════════════════
 // STUDY PLAN TAB — 7-day rolling plan, real data, mark-as-done
 // ═══════════════════════════════════════════════════════════
 const STUDY_PLAN_KEY = 'sm_study_plan'
@@ -6481,13 +4952,6 @@ function StudyPlanTab({ user, store, setPage, toast }) {
   )
 }
  
-// ═══════════════════════════════════════════════════════════
-// SUBSCRIPTION TAB — KES, enrolled-only, 3-day grace
-// ═══════════════════════════════════════════════════════════
- 
-// Paystack live key (your dashboard)
-const PAYSTACK_PUBLIC_KEY = 'pk_live_a1608f5c5f71946ca1357afa673cd53ce4057af8'
- 
 // ── Subscription module removed ──────────────────────────
 // Billing is handled outside the student portal. SubscriptionTab,
 // SubscriptionStatusBanner, the localStorage tier/payment keys and
@@ -6677,8 +5141,6 @@ function DrawingCanvas({ value, onSave, onClose, readOnly = false }) {
     const canvas = canvasRef.current
     if (!canvas) return
     const dpr = window.devicePixelRatio || 1
-    const cssW = canvas.width / dpr
-    const cssH = canvas.height / dpr
     const ctx = canvas.getContext('2d')
     ctx.setTransform(1, 0, 0, 1, 0, 0)
     ctx.fillStyle = '#FFFFFF'
@@ -8323,7 +6785,6 @@ function MyResultDetail({ subId, detail, loading, onBack, user, toast }) {
   const bank = detail.bankQuestions || []
   const subjCol = subjectColour(exam?.subject)
   const pct = sub.percentage || 0
-  const passed = pct >= 50
   const isGraded = sub.status === 'graded'
 
   // ── Derived values for the results screen ────────────────
@@ -11232,116 +9693,6 @@ function ProfileTab({ user, toast }) {
     </div>
   )
 }
- 
-
-// ═══════════════════════════════════════════════════════════
-// DASHBOARD — Unified Student Dashboard
-// ═══════════════════════════════════════════════════════════
-//
-// REPLACES the TWO existing dashboard blocks (lines 400-1408).
-// One unified component that adapts to learning mode.
-//
-// HOW TO APPLY:
-//
-// STEP 1: Find and select the entire individual+group dashboard block
-//
-//   START: line ~397 — the comment that says:
-//     {/* ════════════════════════════════════════════
-//         DASHBOARD — live mastery data
-//
-//   END: line ~1408 — the closing `)}` after the group dashboard
-//   (right before the SUBSCRIPTION comment block)
-//
-//   That's about 1008 lines of code. Select all of it.
-//
-// STEP 2: Delete the selection
-//
-// STEP 3: Paste this single line in its place:
-//
-//          {page === 'dashboard' && <DashboardTab user={user} store={store} setPage={setPage} setLearningMode={setLearningMode} learningMode={learningMode} toast={toast} />}
-//
-// STEP 4: Add the DashboardTab component at the bottom of the file
-//   at COLUMN 1 — paste everything below this line:
-
-
-// ═══════════════════════════════════════════════════════════
-// DASHBOARD TAB — unified for individual & group, real data
-// ═══════════════════════════════════════════════════════════
-
-const dashSubjColours = {
-  'Mathematics': '#8B1A2E', 'Physics': '#1E3A8A', 'Chemistry': '#166534',
-  'Biology': '#7C2D12', 'English': '#6B21A8', 'History': '#92400E',
-  'Geography': '#0F766E', 'Computer Science': '#1F2937',
-  'Business Studies': '#7E22CE', 'Economics': '#9F1239',
-}
-const dashSubjColour = (s) => dashSubjColours[s] || '#8B1A2E'
-
-// Daily affirmations — rotates by day-of-year, same quote for the whole day.
-// Mix of African voices, classic wisdom, education-focused, and Smartious originals.
-const DAILY_AFFIRMATIONS = [
-  { text: "Education is the most powerful weapon which you can use to change the world.", author: "Nelson Mandela" },
-  { text: "You are never too small to make a difference.", author: "Wangari Maathai" },
-  { text: "I have learned that to be with those I like is enough.", author: "Walt Whitman" },
-  { text: "Small daily steps compound into mastery.", author: null },
-  { text: "Once you stop learning, you start dying.", author: "Albert Einstein" },
-  { text: "The best way out is always through.", author: "Robert Frost" },
-  { text: "He who learns, teaches.", author: "Ethiopian proverb" },
-  { text: "Knowledge is like a garden; if it is not cultivated, it cannot be harvested.", author: "Guinean proverb" },
-  { text: "Mistakes are proof that you are trying.", author: null },
-  { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
-  { text: "A river cuts through rock not because of its power, but its persistence.", author: null },
-  { text: "When the deepest part of you becomes engaged in what you are doing, you have come home.", author: "Sarah Ban Breathnach" },
-  { text: "If you want to go fast, go alone. If you want to go far, go together.", author: "African proverb" },
-  { text: "Try to be a rainbow in someone's cloud.", author: "Maya Angelou" },
-  { text: "We are what we repeatedly do. Excellence, then, is not an act, but a habit.", author: "Aristotle" },
-  { text: "The expert in anything was once a beginner.", author: null },
-  { text: "Wisdom is like a baobab tree; no one individual can embrace it.", author: "Akan proverb" },
-  { text: "Do not wait for the light to appear at the end of the tunnel; stride down there and light it yourself.", author: "Sara Henderson" },
-  { text: "It always seems impossible until it's done.", author: "Nelson Mandela" },
-  { text: "There is no shame in not knowing; the shame lies in not finding out.", author: "Russian proverb" },
-  { text: "Don't watch the clock; do what it does. Keep going.", author: "Sam Levenson" },
-  { text: "The only way to learn mathematics is to do mathematics.", author: "Paul Halmos" },
-  { text: "I have not failed. I've just found 10,000 ways that won't work.", author: "Thomas Edison" },
-  { text: "If I have seen further it is by standing on the shoulders of giants.", author: "Isaac Newton" },
-  { text: "A goal without a plan is just a wish.", author: "Antoine de Saint-Exupery" },
-  { text: "Success is the sum of small efforts repeated day in and day out.", author: "Robert Collier" },
-  { text: "The mind is not a vessel to be filled, but a fire to be kindled.", author: "Plutarch" },
-  { text: "However difficult life may seem, there is always something you can do and succeed at.", author: "Stephen Hawking" },
-  { text: "Knowing yourself is the beginning of all wisdom.", author: "Aristotle" },
-  { text: "The roots of education are bitter, but the fruit is sweet.", author: "Aristotle" },
-]
-
-// Pick the affirmation for today — same for everyone on the same day, rotates daily
-const todaysAffirmation = () => {
-  const now = new Date()
-  const start = new Date(now.getFullYear(), 0, 0)
-  const diff = now - start
-  const dayOfYear = Math.floor(diff / 86400000)
-  return DAILY_AFFIRMATIONS[dayOfYear % DAILY_AFFIRMATIONS.length]
-}
-
-const greetingFor = () => {
-  const h = new Date().getHours()
-  if (h < 12) return 'Good morning'
-  if (h < 17) return 'Good afternoon'
-  if (h < 21) return 'Good evening'
-  return 'Working late'
-}
-
-
-// Simple format for "X hours ago" / "yesterday"
-const timeAgo = (iso) => {
-  const diff = Date.now() - new Date(iso).getTime()
-  const mins = Math.floor(diff / 60000)
-  const hours = Math.floor(diff / 3600000)
-  const days = Math.floor(diff / 86400000)
-  if (mins < 1) return 'just now'
-  if (mins < 60) return `${mins}m ago`
-  if (hours < 24) return `${hours}h ago`
-  if (days === 1) return 'yesterday'
-  if (days < 7) return `${days}d ago`
-  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
-}
 
 // For a future-dated value, returns "in 3h", "tomorrow", "in 5d", etc.
 const timeUntil = (iso) => {
@@ -11359,7 +9710,6 @@ const timeUntil = (iso) => {
 
 function DashboardTab({ user, store, setPage, toast }) {
   const [tick, setTick] = useState(0)
-  const [liveClasses,  setLiveClasses]  = useState([])
   const [hwPending,    setHwPending]    = useState([])
   const [recentExams,  setRecentExams]  = useState([])
   const [timetable,    setTimetable]    = useState([])
@@ -11829,17 +10179,6 @@ function DashboardTab({ user, store, setPage, toast }) {
       </div>
     </div>
   )
-}
-
-
-// Helper at module level — minutes since midnight to "9:00 AM"
-function formatMinsTime(mins) {
-  let h = Math.floor(mins / 60)
-  const m = mins % 60
-  const mer = h >= 12 ? 'PM' : 'AM'
-  h = h % 12
-  if (h === 0) h = 12
-  return `${h}${m === 0 ? '' : ':' + String(m).padStart(2, '0')} ${mer}`
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -12682,16 +11021,14 @@ export { LessonPracticeTab }
 //
 // Layout:
 //   1. Month navigator (prev / current / next, with this-month default)
-//   2. Summary KPIs — total marked days, present, absent, half-day,
-//      attendance percentage
-//   3. Calendar grid view — every day of the chosen month coloured
-//      by status. Weekends shown but un-coloured.
-//   4. Absence list — chronological list of absent days with reasons
+//   2. Summary KPIs — lessons attended of scheduled, late, missed, rate
+//   3. Calendar grid view — each day shows lessons attended / scheduled;
+//      legacy day-register records (before the cutover) as history
+//   4. Per-lesson list, then the legacy day records
 //
 // Endpoint: GET /api/attendance/student/:studentId?from=&to=
-//   - Backend already permits a student to read their own record
-//     (no role check needed when isOwn is true)
-//   - Returns `items` array sorted by date desc
+//   - A student may read their own record
+//   - Returns { summary, lessons, legacy } (per-lesson attendance)
 // ═══════════════════════════════════════════════════════════
 function StudentAttendancePage({ user, toast }) {
   const todayStr = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})
@@ -12709,7 +11046,7 @@ function StudentAttendancePage({ user, toast }) {
   const today = new Date()
   const [year,  setYear]  = useState(today.getFullYear())
   const [month, setMonth] = useState(today.getMonth())
-  const [records, setRecords] = useState([])
+  const [att,     setAtt]     = useState({})   // { lessons, legacy, summary }
   const [calLoad, setCalLoad] = useState(true)
   const [error,   setError]   = useState(null)
 
@@ -12727,7 +11064,7 @@ function StudentAttendancePage({ user, toast }) {
     if (!user?._id) return
     setCalLoad(true); setError(null)
     api.get(`/attendance/student/${user._id}`,{params:{from:fromKey,to:toKey}})
-      .then(r=>setRecords(r.data?.data?.items||[]))
+      .then(r=>setAtt(r.data?.data||{}))
       .catch(e=>setError(e?.response?.data?.message||'Failed.'))
       .finally(()=>setCalLoad(false))
   }
@@ -12753,17 +11090,24 @@ function StudentAttendancePage({ user, toast }) {
   const alreadyIn = !ciLoading&&ciStatus?.checkedIn
   const todaySS   = alreadyIn ? SS[ciStatus.checkInStatus]||SS.present : null
 
-  // Calendar helpers
-  const byDateKey = {}
-  records.forEach(r=>{
-    const d=new Date(r.date)
-    byDateKey[`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`]=r
-  })
-  const counts={present:0,absent:0,half_day:0,late:0}
-  records.forEach(r=>{if(counts[r.status]!==undefined)counts[r.status]++;else if(r.checkInStatus==='late')counts.late++})
-  const totalMarked = records.length
-  const attendedScore = counts.present + (counts.half_day||0)*0.5
-  const pct = totalMarked>0?Math.round((attendedScore/totalMarked)*100):null
+  // Calendar helpers. Attendance is per lesson: each day shows lessons
+  // attended / scheduled. Day-register records from before per-lesson
+  // attendance began are shown as history (P/L/A/H).
+  const lessons = att.lessons || []
+  const legacy  = att.legacy  || []
+  const sum     = att.summary || {}
+  const localKey = (x) => { const d=new Date(x); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` }
+  const lessonsByDay = {}
+  lessons.forEach(l=>{ const k=localKey(l.scheduledAt); (lessonsByDay[k]=lessonsByDay[k]||[]).push(l) })
+  const legacyByDay = {}
+  legacy.forEach(r=>{ legacyByDay[new Date(r.date).toISOString().slice(0,10)] = r })
+  const pct = sum.rate ?? null
+  const missed = Math.max(0,(sum.scheduled||0)-(sum.attended||0))
+  const DAYSS = {
+    all:  {bg:'#D1FAE5',fg:'#065F46',label:'All lessons attended'},
+    some: {bg:'#FEF3C7',fg:'#D97706',label:'Some lessons missed'},
+    none: {bg:'#FEE2E2',fg:'#991B1B',label:'Lessons missed'},
+  }
 
   const calDays=[]
   const startPad=(firstDay.getDay()+6)%7
@@ -12878,7 +11222,7 @@ function StudentAttendancePage({ user, toast }) {
             <button onClick={nextMonth} style={{background:'transparent',border:'1.5px solid #E8E2D6',borderRadius:7,padding:'5px 10px',cursor:'pointer',fontSize:14,fontWeight:700,color:'#564844'}}>›</button>
           </div>
           <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-            {[{label:'Present',val:counts.present,color:'#065F46',bg:'#D1FAE5'},{label:'Late',val:counts.late,color:'#D97706',bg:'#FEF3C7'},{label:'Absent',val:counts.absent,color:'#991B1B',bg:'#FEE2E2'},{label:'Rate',val:pct!==null?pct+'%':'—',color:'#1A0F0E',bg:'#FBFAF5'}].map(s=>(
+            {[{label:'Lessons attended',val:sum.lessonsScheduled?`${sum.lessonsAttended} of ${sum.lessonsScheduled}`:'—',color:'#065F46',bg:'#D1FAE5'},{label:'Late',val:sum.late||0,color:'#D97706',bg:'#FEF3C7'},{label:'Missed',val:missed,color:'#991B1B',bg:'#FEE2E2'},{label:'Rate',val:pct!==null?pct+'%':'—',color:'#1A0F0E',bg:'#FBFAF5'}].map(s=>(
               <div key={s.label} style={{padding:'6px 14px',borderRadius:8,background:s.bg,textAlign:'center'}}>
                 <div style={{fontSize:16,fontWeight:800,color:s.color}}>{s.val}</div>
                 <div style={{fontSize:10,color:s.color,fontWeight:600,marginTop:1}}>{s.label}</div>
@@ -12902,11 +11246,17 @@ function StudentAttendancePage({ user, toast }) {
                 {calDays.map((d,i)=>{
                   if(!d) return <div key={'pad-'+i}/>
                   const key=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
-                  const rec=byDateKey[key]
+                  const dayLessons=lessonsByDay[key]||[]
+                  const leg=legacyByDay[key]
+                  const nAtt=dayLessons.filter(l=>l.attended).length
+                  const rec=dayLessons.length||leg
                   const isToday=d===today.getDate()&&month===today.getMonth()&&year===today.getFullYear()
-                  const st=rec?SS[rec.checkInStatus||rec.status]:null
+                  const st=dayLessons.length ? (nAtt===dayLessons.length?DAYSS.all:nAtt>0?DAYSS.some:DAYSS.none) : leg ? SS[leg.status] : null
+                  const tip=dayLessons.length
+                    ? dayLessons.map(l=>`${l.subject||l.title}: ${l.attended?(l.late?'late':'attended'):'missed'}`).join('\n')
+                    : leg ? `Day register: ${SS[leg.status]?.label||leg.status}${leg.reason?' — '+leg.reason:''}` : ''
                   return (
-                    <div key={key} title={rec?`${st?.label||rec.status}${rec.reason?' — '+rec.reason:''}`:''} style={{
+                    <div key={key} title={tip} style={{
                       aspectRatio:'1',display:'flex',alignItems:'center',justifyContent:'center',
                       borderRadius:8,fontSize:12.5,fontWeight:isToday?800:500,
                       background:st?st.bg:isToday?'#FDF2F4':'#FBFAF5',
@@ -12916,164 +11266,41 @@ function StudentAttendancePage({ user, toast }) {
                       position:'relative',
                     }}>
                       {d}
-                      {rec&&<div style={{position:'absolute',bottom:3,left:'50%',transform:'translateX(-50%)',width:4,height:4,borderRadius:'50%',background:st?.fg||'#9A9A9A'}}/>}
+                      {dayLessons.length>0&&<div style={{position:'absolute',bottom:2,left:0,right:0,textAlign:'center',fontSize:8.5,fontWeight:800,color:st?.fg}}>{nAtt}/{dayLessons.length}</div>}
+                      {!dayLessons.length&&leg&&<div style={{position:'absolute',bottom:3,left:'50%',transform:'translateX(-50%)',width:4,height:4,borderRadius:'50%',background:st?.fg||'#9A9A9A'}}/>}
                     </div>
                   )
                 })}
               </div>
               <div style={{display:'flex',gap:12,marginTop:12,flexWrap:'wrap'}}>
-                {Object.entries(SS).map(([k,s])=>(
+                {Object.entries(DAYSS).map(([k,s])=>(
                   <div key={k} style={{display:'flex',alignItems:'center',gap:5,fontSize:11,color:'#857973'}}>
                     <div style={{width:10,height:10,borderRadius:2,background:s.bg,border:'1px solid '+s.fg+'40'}}/>
                     {s.label}
                   </div>
                 ))}
               </div>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
-  )
-}
 
-// ═══════════════════════════════════════════════════════════
-
-// ═══════════════════════════════════════════════════════════
-// StudentCheckInTab — self check-in for student portal
-// ═══════════════════════════════════════════════════════════
-function StudentCheckInTab({ user, toast }) {
-  const today = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})
-  const dayOfWeek = new Date().getDay()
-  const isWeekend = dayOfWeek===0||dayOfWeek===6
-
-  const [status,  setStatus]  = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [saving,  setSaving]  = useState(false)
-  const [history, setHistory] = useState([])
-  const [pick,    setPick]    = useState('present')
-  const [lateTime,setLateTime]= useState('')
-  const [reason,  setReason]  = useState('')
-
-  const load = () => {
-    setLoading(true)
-    api.get('/checkin/today')
-      .then(r=>setStatus(r.data?.data))
-      .catch(()=>{})
-      .finally(()=>setLoading(false))
-    api.get('/checkin/history')
-      .then(r=>setHistory(r.data?.data?.records||[]))
-      .catch(()=>{})
-  }
-
-  useEffect(()=>{load()},[])
-
-  const submit = async () => {
-    if(pick==='late'&&!lateTime.trim()){toast?.error?.('Enter your arrival time.');return}
-    if(pick==='absent'&&!reason.trim()){toast?.error?.('Enter a reason.');return}
-    setSaving(true)
-    try {
-      await api.post('/checkin',{status:pick,lateTime,reason})
-      toast?.ok?.('Check-in recorded.')
-      load()
-    } catch(e){toast?.error?.(e?.response?.data?.message||'Check-in failed.')}
-    finally{setSaving(false)}
-  }
-
-  const fmtDate = d=>d?new Date(d).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}):'—'
-  const fmtTime = d=>d?new Date(d).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',...tzOpt()}):'—'
-  const SS = { present:{bg:'#D1FAE5',fg:'#065F46',label:'Present'}, late:{bg:'#FEF3C7',fg:'#D97706',label:'Late'}, absent:{bg:'#FEE2E2',fg:'#991B1B',label:'Absent'} }
-
-  if(!loading&&status?.onBreak) return (
-    <div style={{padding:'40px 20px',textAlign:'center'}}>
-      <div style={{fontFamily:"'Instrument Serif',serif",fontSize:20,color:'#1A0F0E',marginBottom:8}}>You are on a break</div>
-      <div style={{fontSize:13,color:'#857973',lineHeight:1.65}}>Your account is temporarily paused. Contact your DOS or admin to return.</div>
-      {status.breakNote&&<div style={{fontSize:12.5,color:'#564844',background:'#FDFAF5',borderRadius:8,padding:'10px 14px',marginTop:12,display:'inline-block',fontStyle:'italic'}}>"{status.breakNote}"</div>}
-    </div>
-  )
-
-  const alreadyIn = !loading&&status?.checkedIn
-  const todaySS   = alreadyIn?SS[status.checkInStatus]||SS.present:null
-
-  return (
-    <div>
-      <div style={{marginBottom:20}}>
-        <div className="sec-tag">Daily attendance</div>
-        <h2 className="serif" style={{fontSize:26,color:'var(--s900)',margin:'6px 0 4px'}}>Check In</h2>
-        <div style={{fontSize:13,color:'#6B6B6B'}}>{today}</div>
-      </div>
-
-      <div style={{display:'grid',gridTemplateColumns:'1fr 360px',gap:20,alignItems:'start'}}>
-        <div style={{background:'#fff',border:'1px solid #E8E2D6',borderRadius:12,overflow:'hidden'}}>
-          <div style={{background:'linear-gradient(135deg,#8B1A2E,#5A0B1B)',padding:'22px 24px'}}>
-            <div style={{fontSize:20,fontWeight:800,color:'#fff',marginBottom:4}}>
-              Good {new Date().getHours()<12?'morning':new Date().getHours()<17?'afternoon':'evening'}, {user?.firstName}
-            </div>
-            <div style={{fontSize:13,color:'rgba(255,255,255,.6)'}}>
-              {alreadyIn?'You are checked in for today.':isWeekend?'No check-in on weekends.':'Please mark your attendance.'}
-            </div>
-          </div>
-          <div style={{padding:'24px'}}>
-            {loading?<div style={{textAlign:'center',color:'#9A9A9A',padding:'20px 0'}}>Loading...</div>
-            :isWeekend?<div style={{textAlign:'center',color:'#9A9A9A',padding:'20px 0'}}>Enjoy your weekend!</div>
-            :alreadyIn?(
-              <div style={{textAlign:'center'}}>
-                <div style={{width:68,height:68,borderRadius:'50%',background:todaySS.bg,display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 14px'}}>
-                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke={todaySS.fg} strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                </div>
-                <div style={{fontSize:22,fontWeight:800,color:todaySS.fg,marginBottom:4}}>{todaySS.label}</div>
-                <div style={{fontSize:13,color:'#857973'}}>Checked in at {fmtTime(status?.record?.checkInTime)}</div>
-                {status?.checkInStatus==='late'&&<div style={{fontSize:13,color:'#D97706',marginTop:8}}>Arrival: {status.record?.lateTime}</div>}
-                {status?.checkInStatus==='absent'&&<div style={{fontSize:13,color:'#991B1B',marginTop:8}}>{status.record?.reason}</div>}
-              </div>
-            ):(
-              <>
-                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10,marginBottom:18}}>
-                  {[{val:'present',label:'Present',bg:'#D1FAE5',fg:'#065F46',desc:'On time'},{val:'late',label:'Late',bg:'#FEF3C7',fg:'#D97706',desc:'Running late'},{val:'absent',label:'Absent',bg:'#FEE2E2',fg:'#991B1B',desc:'Not attending'}].map(opt=>(
-                    <button key={opt.val} onClick={()=>{setPick(opt.val);if(opt.val!=='late')setLateTime('');if(opt.val!=='absent')setReason('')}}
-                      style={{padding:'14px 10px',borderRadius:10,cursor:'pointer',textAlign:'center',border:'2px solid '+(pick===opt.val?opt.fg:'#E8E2D6'),background:pick===opt.val?opt.bg:'#fff'}}>
-                      <div style={{fontSize:13,fontWeight:800,color:pick===opt.val?opt.fg:'#564844',marginBottom:3}}>{opt.label}</div>
-                      <div style={{fontSize:11,color:pick===opt.val?opt.fg:'#9A9A9A'}}>{opt.desc}</div>
-                    </button>
-                  ))}
-                </div>
-                {pick==='late'&&<div style={{marginBottom:14}}>
-                  <label style={{fontSize:11,fontWeight:700,color:'#8B1A2E',textTransform:'uppercase',letterSpacing:'.05em',marginBottom:5,display:'block'}}>Arrival time</label>
-                  <input type="time" value={lateTime} onChange={e=>setLateTime(e.target.value)}
-                    style={{width:'100%',padding:'10px 12px',borderRadius:8,border:'1.5px solid #E8E2D6',fontSize:15,fontFamily:'inherit',boxSizing:'border-box'}}/>
-                </div>}
-                {pick==='absent'&&<div style={{marginBottom:14}}>
-                  <label style={{fontSize:11,fontWeight:700,color:'#8B1A2E',textTransform:'uppercase',letterSpacing:'.05em',marginBottom:5,display:'block'}}>Reason for absence</label>
-                  <textarea value={reason} onChange={e=>setReason(e.target.value)} rows={3} placeholder="Please explain your absence..."
-                    style={{width:'100%',padding:'10px 12px',borderRadius:8,border:'1.5px solid #E8E2D6',fontSize:13,fontFamily:'inherit',resize:'vertical',boxSizing:'border-box'}}/>
-                </div>}
-                <button onClick={submit} disabled={saving}
-                  style={{width:'100%',padding:'12px',borderRadius:9,background:saving?'#9A9A9A':pick==='absent'?'#991B1B':pick==='late'?'#D97706':'#065F46',color:'#fff',border:'none',fontSize:14,fontWeight:800,cursor:saving?'not-allowed':'pointer'}}>
-                  {saving?'Submitting...':'Mark myself as '+pick}
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* History */}
-        <div style={{background:'#fff',border:'1px solid #E8E2D6',borderRadius:12,overflow:'hidden'}}>
-          <div style={{padding:'12px 16px',borderBottom:'1px solid #E8E2D6',fontWeight:800,fontSize:13,color:'#1A0F0E'}}>My attendance (30 days)</div>
-          {history.length===0?<div style={{padding:24,textAlign:'center',color:'#9A9A9A',fontSize:13}}>No records yet.</div>:(
-            <div style={{maxHeight:400,overflowY:'auto'}}>
-              {[...history].sort((a,b)=>new Date(b.date)-new Date(a.date)).map((r,i)=>{
-                const s=SS[r.checkInStatus||r.status]||{bg:'#F3F4F6',fg:'#6B7280',label:r.status||'—'}
-                return(
-                  <div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'9px 14px',borderBottom:'1px solid #F4EFEB'}}>
-                    <div>
-                      <div style={{fontSize:12.5,fontWeight:600,color:'#1A0F0E'}}>{fmtDate(r.date)}</div>
-                      {(r.lateTime||r.reason)&&<div style={{fontSize:11,color:'#857973',marginTop:1}}>{r.lateTime?'Arrived: '+r.lateTime:r.reason}</div>}
-                    </div>
-                    <span style={{padding:'3px 10px',borderRadius:99,fontSize:11,fontWeight:700,background:s.bg,color:s.fg}}>{r.checkInStatus==='late'?'Late':s.label}</span>
+              {/* Per-lesson list */}
+              <div style={{marginTop:16,display:'grid',gap:6}}>
+                {lessons.length===0&&legacy.length===0&&<div style={{fontSize:12.5,color:'#9A9A9A'}}>No lessons scheduled this month yet.</div>}
+                {[...lessons].sort((x,y)=>new Date(y.scheduledAt)-new Date(x.scheduledAt)).map((l,i)=>(
+                  <div key={String(l.liveClassId)+i} style={{display:'flex',alignItems:'center',gap:10,padding:'8px 12px',border:'1px solid #E8E2D6',borderRadius:8,flexWrap:'wrap'}}>
+                    <div style={{minWidth:120,fontSize:12,fontWeight:700,color:'#1A0F0E'}}>{new Date(l.scheduledAt).toLocaleString('en-GB',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</div>
+                    <div style={{flex:1,minWidth:120,fontSize:12.5,color:'#564844'}}>{l.subject}{l.title&&l.title!==l.subject?' · '+l.title:''}</div>
+                    <span style={{fontSize:11,fontWeight:800,padding:'3px 10px',borderRadius:99,background:!l.attended?'#FEE2E2':l.late?'#FEF3C7':'#D1FAE5',color:!l.attended?'#991B1B':l.late?'#D97706':'#065F46'}}>{!l.attended?'Missed':l.late?'Late':'Attended'}</span>
                   </div>
-                )
-              })}
-            </div>
+                ))}
+                {legacy.length>0&&<div style={{fontSize:10.5,fontWeight:800,color:'#857973',textTransform:'uppercase',letterSpacing:'.06em',marginTop:6}}>Earlier day register (history)</div>}
+                {legacy.map((r,i)=>{ const s2=SS[r.status]||SS.absent; return (
+                  <div key={'lg'+i} style={{display:'flex',alignItems:'center',gap:10,padding:'7px 12px',border:'1px dashed #E8E2D6',borderRadius:8}}>
+                    <div style={{flex:1,fontSize:12,color:'#564844'}}>{new Date(r.date).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'})}{r.reason?' · '+r.reason:''}</div>
+                    <span style={{fontSize:11,fontWeight:800,padding:'3px 10px',borderRadius:99,background:s2.bg,color:s2.fg}}>{s2.label}</span>
+                  </div>
+                )})}
+              </div>
+              <div style={{fontSize:11,color:'#9A9A9A',marginTop:10}}>Your attendance is taken per lesson: joining a class marks you present, and your teacher confirms it. The daily check-in above is a separate log.</div>
+            </>
           )}
         </div>
       </div>
@@ -13314,123 +11541,6 @@ function QuizGameLauncher({ user, toast, setPage }) {
         </div>
         <div style={{ marginLeft:'auto', color:TOKENS.gold, fontWeight:800, fontSize:20 }}>→</div>
       </div>
-    </div>
-  )
-}
-
-function StudentRateTeacherTab({ user, toast }) {
-  const [entries,  setEntries]  = useState([])
-  const [loading,  setLoading]  = useState(true)
-  const [teachers, setTeachers] = useState([]) // unique teachers from timetable
-
-  useEffect(() => {
-    api.get('/timetable/student')
-      .then(r => {
-        const ents = r.data?.data?.entries || r.data?.entries || []
-        setEntries(ents)
-        // Extract unique teachers
-        const seen = {}
-        ents.forEach(e => {
-          if (e.teacherId && !seen[String(e.teacherId._id||e.teacherId)]) {
-            seen[String(e.teacherId._id||e.teacherId)] = e.teacherId
-          }
-        })
-        setTeachers(Object.values(seen))
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false))
-  }, [])
-
-  if (loading) return <div style={{ padding:'40px 0', textAlign:'center', color:TOKENS.s400, fontSize:13 }}>Loading...</div>
-
-  return (
-    <div>
-      <div style={{ marginBottom:20 }}>
-        <div className="sec-tag">Student Feedback</div>
-        <h2 className="serif" style={{ fontSize:26, color:TOKENS.ink, margin:'4px 0 6px' }}>Rate My <em style={{ fontStyle:'italic', color:TOKENS.crimson }}>Teachers</em></h2>
-        <div style={{ fontSize:13, color:TOKENS.s500 }}>Your feedback helps improve the quality of teaching at Smartious. Ratings are anonymous to teachers.</div>
-      </div>
-      {teachers.length === 0 ? (
-        <div style={{ padding:40, textAlign:'center', color:TOKENS.s400, fontSize:13 }}>No teachers assigned yet.</div>
-      ) : (
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(320px,1fr))', gap:16 }}>
-          {teachers.map(t => {
-            const tid = t._id||t
-            const tName = t.firstName ? t.firstName+' '+t.lastName : 'Teacher'
-            const subjects = entries.filter(e=>String(e.teacherId?._id||e.teacherId)===String(tid)).map(e=>e.subject).filter(Boolean)
-            const uniqueSubjects = [...new Set(subjects)]
-            return (
-              <div key={String(tid)} style={{ background:'#fff', border:`1px solid ${TOKENS.line}`, borderRadius:12, overflow:'hidden' }}>
-                <div style={{ padding:'14px 18px', borderBottom:`1px solid ${TOKENS.s100}`, display:'flex', alignItems:'center', gap:12 }}>
-                  <div style={{ width:40, height:40, borderRadius:'50%', background:`linear-gradient(135deg,${TOKENS.crimson},${TOKENS.crimsonDeep})`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                    <span style={{ color:'#F0CC5A', fontSize:12, fontWeight:700 }}>{tName.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase()}</span>
-                  </div>
-                  <div>
-                    <div style={{ fontSize:14, fontWeight:700, color:TOKENS.ink }}>{tName}</div>
-                    <div style={{ fontSize:12, color:TOKENS.s500 }}>{uniqueSubjects.join(', ')||'Teacher'}</div>
-                  </div>
-                </div>
-                <div style={{ padding:'14px 18px' }}>
-                  <RateTeacherWidget teacherId={String(tid)} teacherName={tName} userRole="student" toast={toast}/>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      )}
-    </div>
-  )
-}
-
-
-function RateTeacherWidget({ teacherId, teacherName, userRole, toast }) {
-  const [score,   setScore]   = useState(0)
-  const [hover,   setHover]   = useState(0)
-  const [comment, setComment] = useState('')
-  const [saving,  setSaving]  = useState(false)
-  const [done,    setDone]    = useState(false)
-
-  const submit = async () => {
-    if (!score) { toast?.error?.('Select a star rating.'); return }
-    setSaving(true)
-    try {
-      const r = await api.post('/ratings', { teacherId, score, comment })
-      toast?.ok?.(r.data?.message||'Rating submitted!')
-      setDone(true)
-    } catch(e) { toast?.error?.(e?.response?.data?.message||'Failed.') }
-    finally { setSaving(false) }
-  }
-
-  if (done) return (
-    <div style={{ padding:'14px 18px', background:'#D1FAE5', borderRadius:10, textAlign:'center', fontSize:13, fontWeight:700, color:'#065F46' }}>
-      ✓ Rating submitted for {teacherName}. Thank you!
-    </div>
-  )
-
-  return (
-    <div style={{ background:'#fff', border:'1px solid #E8E2D6', borderRadius:12, padding:'18px 20px' }}>
-      <div style={{ fontSize:13, fontWeight:700, color:TOKENS.s900, marginBottom:10 }}>Rate {teacherName}</div>
-      <div style={{ display:'flex', gap:4, marginBottom:12 }}>
-        {[1,2,3,4,5].map(s=>(
-          <svg key={s} width="28" height="28" viewBox="0 0 24 24"
-            fill={s<=(hover||score)?'#C9A030':'#E8E2D6'}
-            stroke={s<=(hover||score)?'#C9A030':'#CFC7C2'}
-            strokeWidth="1.5" style={{ cursor:'pointer', transition:'fill .1s' }}
-            onMouseEnter={()=>setHover(s)} onMouseLeave={()=>setHover(0)}
-            onClick={()=>setScore(s)}>
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-          </svg>
-        ))}
-        {score>0&&<span style={{ fontSize:13, fontWeight:700, color:TOKENS.s700, marginLeft:8, alignSelf:'center' }}>
-          {['','Poor','Fair','Good','Very Good','Excellent'][score]}
-        </span>}
-      </div>
-      <textarea value={comment} onChange={e=>setComment(e.target.value)} rows={2}
-        placeholder="Optional comment about this teacher..."
-        style={{ width:'100%', padding:'8px 10px', borderRadius:7, border:`1.5px solid ${TOKENS.line}`, fontSize:13, fontFamily:'inherit', boxSizing:'border-box', resize:'vertical', color:TOKENS.ink, marginBottom:10 }}/>
-      <button onClick={submit} disabled={saving||!score} style={{ background:saving||!score?TOKENS.s300:TOKENS.crimson, color:'#fff', border:'none', padding:'9px 20px', borderRadius:7, fontSize:13, fontWeight:700, cursor:saving||!score?'not-allowed':'pointer' }}>
-        {saving?'Submitting...':'Submit rating'}
-      </button>
     </div>
   )
 }
@@ -13806,173 +11916,6 @@ function RealTimetableTab({ user, setPage, toast }) {
 
 
 // ═══════════════════════════════════════════════════════════
-// TeacherProfilePreview
-// ═══════════════════════════════════════════════════════════
-// Click-to-view card showing the teacher's display picture and
-// basic info. Deliberately omits phone and email — students must
-// route their communication through the Communication module
-// (which goes through the school's email channel and is logged).
-// ═══════════════════════════════════════════════════════════
-function TeacherProfilePreview({ teacher, onClose }) {
-  if (!teacher) return null
-
-  const fullName = `${teacher.firstName || ''} ${teacher.lastName || ''}`.trim()
-  const initials = ((teacher.firstName?.[0] || '') + (teacher.lastName?.[0] || '')).toUpperCase()
-
-  return (
-    <div onClick={onClose}
-      style={{
-        position: 'fixed', inset: 0,
-        background: 'rgba(20,15,10,0.65)', zIndex: 99999,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: 20,
-      }}>
-      <div onClick={e => e.stopPropagation()}
-        style={{
-          background: '#fff',
-          borderRadius: 14,
-          maxWidth: 440, width: '100%',
-          boxShadow: '0 20px 60px rgba(0,0,0,.35)',
-          overflow: 'hidden',
-        }}>
-        {/* Crimson hero */}
-        <div style={{
-          background: 'linear-gradient(135deg, #8B1A2E 0%, #6B0F1E 100%)',
-          padding: '26px 28px',
-          color: '#fff',
-          display: 'flex', alignItems: 'center', gap: 18,
-        }}>
-          <div style={{
-            width: 84, height: 84, borderRadius: '50%',
-            background: teacher.avatar ? 'transparent' : 'rgba(240,204,90,.18)',
-            border: '3px solid #F0CC5A',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: '#F0CC5A',
-            fontSize: 30, fontWeight: 700,
-            fontFamily: "'Instrument Serif', serif",
-            flexShrink: 0, overflow: 'hidden',
-          }}>
-            {teacher.avatar
-              ? <img src={teacher.avatar} alt={fullName} style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
-              : (initials || 'T')}
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{
-              fontFamily: "'Instrument Serif', serif",
-              fontSize: 22, fontWeight: 400, lineHeight: 1.15,
-            }}>{fullName || 'Teacher'}</div>
-            {teacher.jobTitle && (
-              <div style={{
-                fontSize: 11.5, fontWeight: 700,
-                letterSpacing: '.08em', textTransform: 'uppercase',
-                color: '#F0CC5A', marginTop: 4,
-              }}>{teacher.jobTitle}</div>
-            )}
-            {!teacher.jobTitle && teacher.role && (
-              <div style={{
-                fontSize: 11.5, fontWeight: 700,
-                letterSpacing: '.08em', textTransform: 'uppercase',
-                color: '#F0CC5A', marginTop: 4,
-                opacity: .85,
-              }}>{teacher.role}</div>
-            )}
-          </div>
-        </div>
-
-        {/* Body */}
-        <div style={{ padding: '20px 28px' }}>
-          {teacher.bio && (
-            <div style={{ marginBottom: 16 }}>
-              <div style={{
-                fontSize: 10, fontWeight: 800, color: '#7D1025',
-                letterSpacing: '.12em', textTransform: 'uppercase',
-                marginBottom: 6,
-              }}>About</div>
-              <div style={{ fontSize: 13.5, color: '#564844', lineHeight: 1.55 }}>
-                {teacher.bio}
-              </div>
-            </div>
-          )}
-
-          {Array.isArray(teacher.qualifications) && teacher.qualifications.length > 0 && (
-            <div style={{ marginBottom: 14 }}>
-              <div style={{
-                fontSize: 10, fontWeight: 800, color: '#7D1025',
-                letterSpacing: '.12em', textTransform: 'uppercase',
-                marginBottom: 6,
-              }}>Qualifications</div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                {teacher.qualifications.map((q, i) => (
-                  <span key={i} style={{
-                    fontSize: 11, fontWeight: 600,
-                    color: '#7D5A0F',
-                    background: '#FDF7E2',
-                    border: '1px solid #E8D58F',
-                    padding: '4px 10px', borderRadius: 99,
-                  }}>{q}</span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {Array.isArray(teacher.specializations) && teacher.specializations.length > 0 && (
-            <div style={{ marginBottom: 14 }}>
-              <div style={{
-                fontSize: 10, fontWeight: 800, color: '#7D1025',
-                letterSpacing: '.12em', textTransform: 'uppercase',
-                marginBottom: 6,
-              }}>Specialisations</div>
-              <div style={{ fontSize: 12.5, color: '#564844' }}>
-                {teacher.specializations.join(' · ')}
-              </div>
-            </div>
-          )}
-
-          {typeof teacher.yearsOfExperience === 'number' && teacher.yearsOfExperience > 0 && (
-            <div style={{ marginBottom: 16 }}>
-              <div style={{
-                fontSize: 10, fontWeight: 800, color: '#7D1025',
-                letterSpacing: '.12em', textTransform: 'uppercase',
-                marginBottom: 6,
-              }}>Experience</div>
-              <div style={{ fontSize: 12.5, color: '#564844' }}>
-                {teacher.yearsOfExperience} {teacher.yearsOfExperience === 1 ? 'year' : 'years'} of teaching
-              </div>
-            </div>
-          )}
-
-          {/* Contact note — explicitly tells the student where to send messages */}
-          <div style={{
-            background: '#FBFAF5',
-            border: '1px solid #E8E2D6',
-            borderRadius: 7,
-            padding: '10px 12px',
-            fontSize: 11.5, color: '#857973', lineHeight: 1.5,
-            marginBottom: 14,
-          }}>
-            To message {teacher.firstName || 'this teacher'}, use the
-            <strong style={{ color: '#1A0F0E' }}> Communication </strong>
-            module from the sidebar. All messages go through the school's
-            email channel.
-          </div>
-
-          <button onClick={onClose}
-            style={{
-              background: '#7D1025', color: '#fff', border: 'none',
-              padding: '9px 20px', borderRadius: 7,
-              fontSize: 13, fontWeight: 700, cursor: 'pointer',
-              width: '100%',
-            }}>
-            Close
-          </button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-
-// ═══════════════════════════════════════════════════════════
 // COMMUNITY — the whole school in one room. One public feed,
 // monitored and moderated; no private messages by design.
 // ═══════════════════════════════════════════════════════════
@@ -14257,47 +12200,6 @@ function CommunityFeedView({ user, toast }) {
     </div>
   )
 }
-
-
-// ═══════════════════════════════════════════════════════════
-// COMMUNITY CHAT — the whole school in one live room. A dark
-// theatre inside the light portal: colored student names, gold
-// teachers, crimson for your own voice. WhatsApp familiar,
-// Smartious to the bone. No private messages exist.
-// ═══════════════════════════════════════════════════════════
-const CH_CHANNELS = [
-  { id: '',              label: 'All',                icon: '\u2726' },
-  { id: 'general',       label: 'General',            icon: '\ud83d\udcac' },
-  { id: 'announcements', label: 'Announcements',      icon: '\ud83d\udce2' },
-  { id: 'questions',     label: 'Ask a Question',     icon: '\u2753' },
-  { id: 'resources',     label: 'Resources',          icon: '\ud83d\udcda' },
-  { id: 'wins',          label: 'Wins & Shoutouts',   icon: '\ud83c\udf89' },
-]
-const CH_EMOJIS = ['\ud83d\udc4d', '\u2764\ufe0f', '\ud83c\udf89', '\ud83d\ude4c']
-const CH_NAME_COLORS = ['#7FD1AE', '#8FB8FF', '#F0A6C0', '#C9A8FF', '#FFC98F', '#7FD8E8', '#B8E986', '#FF9E9E']
-const chColor = (a) => {
-  const s = String(a?._id || a || '')
-  let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0
-  return CH_NAME_COLORS[h % CH_NAME_COLORS.length]
-}
-const chTime = d => new Date(d).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
-const chDay = d => {
-  const dt = new Date(d), now = new Date()
-  if (dt.toDateString() === now.toDateString()) return 'Today'
-  const yd = new Date(now.getTime() - 86400000)
-  if (dt.toDateString() === yd.toDateString()) return 'Yesterday'
-  return dt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
-}
-const CH_CSS = `
-@keyframes chPop { from { opacity: 0; transform: translateY(7px) } to { opacity: 1; transform: none } }
-.ch-msg { animation: chPop .18s ease-out }
-@media (prefers-reduced-motion: reduce) { .ch-msg { animation: none } }
-.ch-scroll::-webkit-scrollbar { width: 8px }
-.ch-scroll::-webkit-scrollbar-thumb { background: #2A3346; border-radius: 8px }
-.ch-scroll::-webkit-scrollbar-track { background: transparent }
-.ch-chips::-webkit-scrollbar { height: 0 }
-.ch-input::placeholder { color: #6B7484 }
-`
 
 function CommunityTab({ user, toast }) {
   const [mode, setMode] = useState('chat')

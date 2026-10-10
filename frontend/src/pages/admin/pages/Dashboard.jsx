@@ -19,7 +19,6 @@ import ReportsModule from './modules/ReportsModule.jsx'
 import CommunicationModule from './modules/CommunicationModule.jsx'
 import StudentsManagementModule from './modules/AllocationsModule.jsx'
 import QuestionBankModule from './modules/QuestionBankModule.jsx'
-import MarkingReviewModule from './modules/MarkingReviewModule.jsx'
 import { COOReportOverviewModule, TeacherRatingsModule } from './modules/RatingsModule.jsx'
 import PayrollModule from './modules/PayrollModule.jsx'
 import StudentSessionsModule from './modules/StudentSessionsModule.jsx'
@@ -76,7 +75,7 @@ const NAV_SECTIONS = {
     { label: 'Reports',     items: ['reports', 'dosperformance', 'mastery'] },
     { label: 'Operations',  items: ['frontdesk', 'assessment', 'documents', 'payroll', 'leave', 'programmes', 'inventory'] },
     { label: 'Teaching',    items: ['liveclasses', 'clubs', 'grouprooms', 'curriculum'] },
-    { label: 'Question Bank', items: ['questionbank', 'markingreview'] },
+    { label: 'Question Bank', items: ['questionbank'] },
     { label: 'Quality',     items: ['teacherprofiles', 'tdp', 'accreditations'] },
     { label: 'Marketing',   items: ['studio'] },
     { label: 'System',      items: ['userlogs', 'billing', 'website', 'settings', 'ai', 'suggestions'] },
@@ -96,7 +95,7 @@ const NAV_SECTIONS = {
     { label: 'Student Sessions', items: ['sessions'] },
     { label: 'Breaks',        items: ['dosbreaks'] },
     { label: 'Timetables',    items: ['dostimetable'] },
-    { label: 'Question Bank', items: ['questionbank', 'markingreview'] },
+    { label: 'Question Bank', items: ['questionbank'] },
     { label: 'Reports',       items: ['reports', 'dosperformance', 'mastery'] },
     { label: 'System',        items: ['settings'] },
   ],
@@ -229,6 +228,7 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
                   accountant:  'Accountant',
                   sales:       'Sales & Front Desk',
                   ops_manager: 'Operations Manager',
+                  qa:          'Quality Assurance',
                 }[role] || 'Administrator'}
               </div>
             </div>
@@ -398,7 +398,8 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
   const adminFirst = auth?.user?.firstName || 'Alfred'
 
   // Role-based page access — mirrors the logic inside PNavigation
-  const role = auth?.user?.role || 'admin'
+  // (an admin viewing a sub-portal gets that portal's pages)
+  const role = forcedRole || auth?.user?.role || 'admin'
   const allowedPages = (NAV_SECTIONS[role] || NAV_SECTIONS.admin).flatMap(sec => sec.items).concat('dashboard')
   const safePage = allowedPages.includes(page) ? page : 'dashboard'
 
@@ -429,7 +430,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         {safePage === 'liveclasses' && <LiveClassesModule toast={toast} />}
         {safePage === 'mastery' && <MasteryModule toast={toast} refreshKey={refreshKey} />}
         {safePage === 'dosperformance' && <DOSPerformanceModule toast={toast} />}
-        {safePage === 'command' && <CommandModule toast={toast} role={currentUser?.role} />}
+        {safePage === 'command' && <CommandModule toast={toast} role={role} />}
         {safePage === 'clubs' && <ClubsModule toast={toast} />}
         {safePage === 'announcements' && <AnnouncementsModule toast={toast} />}
         {safePage === 'frontdesk' && <FrontDeskModule refreshKey={refreshKey} toast={toast} />}
@@ -458,7 +459,6 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         {safePage === 'programmes'  && <ProgrammesModule refreshKey={refreshKey} toast={toast} />}
         {safePage === 'grouprooms'  && <GroupRoomsModule refreshKey={refreshKey} toast={toast} />}
         {safePage === 'curriculum'  && <CurriculumModule refreshKey={refreshKey} toast={toast} />}
-        {safePage === 'markingreview' && <MarkingReviewModule toast={toast} />}
         {safePage === 'billing'        && <BillingModule       refreshKey={refreshKey} toast={toast}/>}
         {safePage === 'studio'         && <StudioModule        toast={toast}/>}
         {safePage === 'feecollection' && <FeeCollectionModule refreshKey={refreshKey} toast={toast}/>}
@@ -536,6 +536,8 @@ function RoleOverview({ role, setPage, userStats, pendingAllocations, auth }) {
       tiles: [['dosanalytics','Performance Analytics','School-wide academic trends'],['exams','Exams','Set and track assessments'],['sessions','Student Sessions','Holidays, breaks and report-backs'],['reports','Reports','Generate and publish term reports']] },
     ops_manager: { title: 'Operations Overview', sub: 'People, allocations and day-to-day running.',
       tiles: [['users','Users','Manage students, parents and staff'],['allocations','Manage Students','Match students with teachers'],['sessions','Student Sessions','Pause and restore student accounts'],['leave','Leave','Approve staff leave requests']] },
+    qa: { title: 'Quality Overview', sub: 'Evidence of teaching quality, teacher development and accreditation.',
+      tiles: [['teacherprofiles','Teacher Profiles','Profiles and filed documents'],['tdp','Teacher Development','Trainings with photos and attendance'],['accreditations','Accreditations','Licenses and certificates'],['dosperformance','Performance','Academic performance reports']] },
   }
   const meta = META[role] || META.ops_manager
   const kpis = [

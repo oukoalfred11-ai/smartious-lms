@@ -5,7 +5,6 @@
  */
 import React, { useState, useEffect, useCallback } from 'react'
 import { api } from '../../../../context/ctx.jsx'
-import { TOKENS } from '../shared/tokens.js'
 import { PSection } from '../shared/ui.jsx'
 
 const GOLD = '#C9973A', CRIM = '#7D1025', INK = '#231715', MUT = '#8A8378', LINE = '#E5DFD3'

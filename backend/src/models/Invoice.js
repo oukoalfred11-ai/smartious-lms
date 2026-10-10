@@ -82,6 +82,14 @@ const invoiceSchema = new mongoose.Schema({
   },
   paidAt:     { type: Date, default: null },
   paidAmount: { type: Number, default: 0 },
+  // How the invoice came to be marked paid ('manual', 'paystack',
+  // 'paystack-legacy', 'fee-collection') and by whom. Absent on
+  // invoices paid before these fields existed.
+  paidSource:   { type: String, default: '' },
+  paidMarkedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+  // Set when the three-week rule (or a person) cancels an unpaid
+  // invoice. Cancelled invoices are kept as records, never deleted.
+  cancelledAt:  { type: Date, default: null },
 
   // ── Notes ────────────────────────────────────────────────
   paymentNote: { type: String, default: '' },

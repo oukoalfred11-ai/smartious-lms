@@ -12,7 +12,9 @@ const Report   = require('../models/Report')
 const User     = require('../models/User')
 const Exam     = require('../models/Exam')
 const ExamSubmission = require('../models/ExamSubmission')
-const Attendance = require('../models/Attendance')
+const attendanceFacts = require('../lib/attendanceFacts')
+// Term end dates arrive as YYYY-MM-DD (UTC midnight); lessons that day count.
+const endOfDay = (d) => (d.getUTCHours() === 0 && d.getUTCMinutes() === 0 ? new Date(d.getTime() + 864e5 - 1) : d)
 
 // ── Grading helper ──────────────────────────────────────────
 function toLetterGrade(score) {
@@ -189,14 +191,18 @@ router.get('/preview', auth, ALLOWED, async (req, res) => {
       }
     })
 
-    // Attendance
-    const attendance = await Attendance.find({ studentId, date:{ $gte:tStart, $lte:tEnd } }).lean()
-    const attended = attendance.filter(a=>a.status==='present').length
-    const halfDay  = attendance.filter(a=>a.status==='half_day').length
+    // Attendance: attended / scheduled lessons in the term (legacy day
+    // register for dates before the cutover).
+    const af = await attendanceFacts.oneStudent(studentId, tStart, endOfDay(tEnd), { lessons:false })
 
     return res.json({ success:true, data:{
       subjects,
-      attendance: { attended, halfDay, records: attendance.length },
+      attendance: {
+        attended: af.attended, scheduled: af.scheduled, late: af.late, rate: af.rate,
+        records: af.scheduled, halfDay: 0,
+        lessonsScheduled: af.lessonsScheduled, lessonsAttended: af.lessonsAttended,
+        legacyDays: af.legacyDays, legacyAttended: af.legacyAttended,
+      },
     }})
   } catch(e) {
     console.error('[reports/preview]', e.message)
@@ -240,16 +246,15 @@ router.post('/generate', auth, ALLOWED, async (req, res) => {
     const tEnd   = new Date(termEnd)
 
     // ── Attendance ───────────────────────────────────────────
-    const attendanceRecords = await Attendance.find({
-      studentId,
-      date: { $gte: tStart, $lte: tEnd },
-    }).lean()
-
-    const attendedDays   = attendanceRecords.filter(a => a.status === 'present').length
-    const halfDays       = attendanceRecords.filter(a => a.status === 'half_day').length
-    const totalAttended  = attendedDays + Math.round(halfDays / 2)
-    const absentDays     = (scheduledDays || 60) - totalAttended
-    const attendanceRate = scheduledDays ? Math.round((totalAttended / scheduledDays) * 100) : 0
+    // Attended / scheduled LESSONS in the term (legacy day register for
+    // dates before the cutover). Stored in the existing scheduledDays /
+    // attendedDays fields; already-stored reports are left untouched.
+    // The body's scheduledDays is only a fallback when nothing was scheduled.
+    const af = await attendanceFacts.oneStudent(studentId, tStart, endOfDay(tEnd), { lessons:false })
+    const scheduledCount = af.scheduled || Number(scheduledDays) || 0
+    const totalAttended  = af.attended
+    const absentDays     = scheduledCount - totalAttended
+    const attendanceRate = scheduledCount ? Math.round((totalAttended / scheduledCount) * 100) : 0
 
     // ── Exam scores per subject ──────────────────────────────
     // Find all exams for this student in the term date range
@@ -359,7 +364,7 @@ router.post('/generate', auth, ALLOWED, async (req, res) => {
         programme:    programme || student.programme || '—',
         classTeacher: classTeacher || '—',
         photoUrl:     student.avatar || '',
-        scheduledDays: scheduledDays || 60,
+        scheduledDays: scheduledCount,
         attendedDays:  totalAttended,
         absentDays:    Math.max(0, absentDays),
         punctualityPct: attendanceRate,
@@ -617,7 +622,7 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;font-size:11px;color:#1A1A1A;
 <!-- Attendance -->
 <div class="att-row">
   <div class="att-label">ATTENDANCE</div>
-  <div class="att-cell"><div class="att-k">Days scheduled (Mon–Fri)</div><div class="att-v">${r.scheduledDays||60}</div></div>
+  <div class="att-cell"><div class="att-k">Scheduled</div><div class="att-v">${r.scheduledDays||0}</div></div>
   <div class="att-cell"><div class="att-k">Attended</div><div class="att-v">${r.attendedDays}</div></div>
   <div class="att-cell"><div class="att-k">Absent</div><div class="att-v">${r.absentDays}</div></div>
   <div class="att-cell"><div class="att-k">Punctuality</div><div class="att-v">${r.punctualityPct}%</div></div>

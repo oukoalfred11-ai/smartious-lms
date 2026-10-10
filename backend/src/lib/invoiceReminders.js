@@ -303,31 +303,37 @@ async function sendReminder(invoice, { kind = 'manual', sentBy = null, automatic
  */
 async function runDueReminders({ dryRun = false } = {}) {
   const now = new Date()
-  const summary = { scanned: 0, sent: 0, skippedOnBreak: 0, skippedNoEmail: 0, failed: 0, expiredDeleted: 0, details: [] }
+  const summary = { scanned: 0, sent: 0, skippedOnBreak: 0, skippedNoEmail: 0, failed: 0, expiredCancelled: 0, details: [] }
 
   // ── The three week rule ──────────────────────────────────
   // An invoice still unpaid three weeks after it was issued is
-  // deleted outright, and with it every future reminder it would
-  // have sent. Runs before the reminder pass so an expired invoice
-  // never gets one last chase. Guarded so an invoice whose money
-  // already covers the total is NEVER deleted, even if its status
-  // was left unflipped — the self-heal below closes those as paid.
-  // Paid and cancelled invoices are permanent records: untouched.
+  // cancelled, and with it every future reminder it would have sent
+  // (only 'sent'/'overdue' invoices are chased). It is kept as a
+  // record, never deleted. Runs before the reminder pass so an expired
+  // invoice never gets one last chase. Guarded so an invoice whose
+  // money already covers the total is NEVER cancelled, even if its
+  // status was left unflipped — the self-heal below closes those as
+  // paid. Paid and cancelled invoices are permanent records: untouched.
   if (!dryRun) {
     const cutoff = new Date(now.getTime() - 21 * 24 * 3600 * 1000)
     try {
-      const expired = await Invoice.deleteMany({
+      const expired = await Invoice.updateMany({
         status: { $in: ['draft', 'sent', 'overdue'] },
         createdAt: { $lte: cutoff },
+        // Money already received on it (e.g. a card part payment) means
+        // it needs a person, not an automatic cancel.
+        $or: [{ paidAmount: null }, { paidAmount: { $lte: 0 } }],
         $expr: { $gt: [
           { $subtract: [{ $ifNull: ['$totalDue', 0] }, { $ifNull: ['$paidAmount', 0] }] }, 0,
         ] },
+      }, {
+        $set: { status: 'cancelled', cancelledAt: now },
       })
-      summary.expiredDeleted = expired.deletedCount || 0
-      if (summary.expiredDeleted > 0)
-        console.log(`[reminders] deleted ${summary.expiredDeleted} invoice(s) unpaid for over 3 weeks`)
+      summary.expiredCancelled = expired.modifiedCount || 0
+      if (summary.expiredCancelled > 0)
+        console.log(`[reminders] cancelled ${summary.expiredCancelled} invoice(s) unpaid for over 3 weeks`)
     } catch (e) {
-      console.error('[reminders] expiry purge failed:', e.message)
+      console.error('[reminders] expiry cancel failed:', e.message)
     }
   }
 

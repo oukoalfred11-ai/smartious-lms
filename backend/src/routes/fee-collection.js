@@ -21,6 +21,7 @@ const User         = require('../models/User')
 // account but no text entry still receives fee reminders.
 const { resolveStudentRecipients, describeRecipients } = require('../lib/recipients')
 const Invoice      = require('../models/Invoice')
+const { createInvoiceWithNumber } = require('../lib/issueInvoice')
 
 const ALLOWED = requireRole('admin', 'accountant', 'ops_manager')
 
@@ -265,20 +266,19 @@ router.post('/:studentId/record-payment', auth, ALLOWED, async (req, res) => {
     const cur      = currency || student.feeCurrency || 'USD'
     const amt      = parseFloat(amount) || student.agreedFee || 0
 
-    // Generate invoice number
+    // Born paid, so no receipt is emailed here (unchanged behaviour);
+    // the billing clock is moved below with this route's own rule.
+    // Numbered by the shared SM-INV-YYYY-MMDD-NN sequence, retrying
+    // past a concurrent issue, and linked to the student record.
     const today    = new Date()
-    const yyyymmdd = today.toISOString().slice(0,10).replace(/-/g,'')
-    const count    = await Invoice.countDocuments({ invoiceNo: { $regex: `^SM-INV-${yyyymmdd}` } })
-    const invoiceNo = `SM-INV-${yyyymmdd}-${String(count+1).padStart(2,'0')}`
-
-    const invoice = await Invoice.create({
-      invoiceNo,
+    const invoice = await createInvoiceWithNumber({
       issueDate:        today,
       dueDate:          paidDate,
       billedToName:     student.firstName + ' ' + student.lastName,
       billedToEmail:    student.email,
       studentName:      student.firstName + ' ' + student.lastName,
       studentGrade:     student.gradeLevel || '',
+      studentId:        student._id,
       programmeLabel:   periodLabel || student.programme || '',
       lineItems: [{
         description: `Tuition fee — ${periodLabel || today.toLocaleDateString('en-GB',{month:'long',year:'numeric'})}`,
@@ -290,6 +290,8 @@ router.post('/:studentId/record-payment', auth, ALLOWED, async (req, res) => {
       status:     'paid',
       paidAt:     paidDate,
       paidAmount: amt,
+      paidSource: 'fee-collection',
+      paidMarkedBy: req.user._id,
       paymentNote: [paymentMethod, note].filter(Boolean).join(' — '),
       issuedBy:    req.user._id,
     })

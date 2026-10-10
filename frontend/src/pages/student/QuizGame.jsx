@@ -3,7 +3,7 @@
  * Full-screen quiz game — solo + competition modes.
  * Wired into LessonPlayerTab and StudentPortal achievements.
  */
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { api } from '../../context/ctx.jsx'
 
 

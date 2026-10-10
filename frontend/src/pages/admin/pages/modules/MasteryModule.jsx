@@ -160,10 +160,10 @@ export default function MasteryModule({ toast }) {
 
             {open.attendance?.length > 0 && (
               <div style={{ marginTop: 16 }}>
-                <div style={{ fontSize: 11, fontWeight: 800, color: TOKENS.s500, textTransform: 'uppercase', letterSpacing: '.08em' }}>Attendance, last 60 days</div>
+                <div style={{ fontSize: 11, fontWeight: 800, color: TOKENS.s500, textTransform: 'uppercase', letterSpacing: '.08em' }}>Attendance by lesson, last 60 days{open.attendanceSummary?.scheduled ? ` \u00b7 attended ${open.attendanceSummary.attended} of ${open.attendanceSummary.scheduled}` : ''}</div>
                 <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap', marginTop: 8 }}>
                   {open.attendance.map((a, i) => (
-                    <span key={i} title={`${fmtDate(a.date)}: ${a.status}`} style={{ width: 12, height: 12, borderRadius: 3, background: a.status === 'present' ? '#15803D' : a.status === 'late' || a.status === 'half_day' ? '#D97706' : '#B91C1C', opacity: .85 }} />
+                    <span key={i} title={`${fmtDate(a.date)}${a.subject ? ' \u00b7 ' + a.subject : ''}: ${a.status}${a.source === 'legacy' ? ' (day register, before cutover)' : a.source === 'teacher' ? ' (teacher-marked)' : ''}`} style={{ width: 12, height: 12, borderRadius: a.source === 'legacy' ? 6 : 3, background: a.status === 'present' ? '#15803D' : a.status === 'late' || a.status === 'half_day' ? '#D97706' : '#B91C1C', opacity: .85 }} />
                   ))}
                 </div>
               </div>

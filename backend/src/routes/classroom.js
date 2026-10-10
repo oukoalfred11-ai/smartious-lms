@@ -259,18 +259,23 @@ router.get('/:liveClassId/attendance', auth, async (req, res) => {
     const scheduled = new Date(lc.scheduledAt);
     const students = (lc.assignedStudents || []).map(stu => {
       const s = byUser.get(String(stu._id));
+      // Teacher's register amendments win: present:false discounts a join,
+      // present:true with markedBy records off-platform presence.
+      const amended = !!s?.markedBy;
       if (!s || !s.firstJoinedAt) {
+        const markedPresent = !!s && s.present === true && amended;
         return {
           userId: stu._id,
           name: `${stu.firstName || ''} ${stu.lastName || ''}`.trim(),
-          status: 'absent', joinedAt: null, minutes: 0, joinCount: 0, lateByMin: 0,
+          status: markedPresent ? 'present' : 'absent', joinedAt: null, minutes: 0, joinCount: 0, lateByMin: 0, amended,
         };
       }
       const lateByMin = Math.max(0, Math.round((new Date(s.firstJoinedAt) - scheduled) / 60000));
       return {
         userId: stu._id,
         name: `${stu.firstName || ''} ${stu.lastName || ''}`.trim() || s.name,
-        status: lateByMin > 10 ? 'late' : 'present',
+        amended,
+        status: s.present === false ? 'absent' : lateByMin > 10 ? 'late' : 'present',
         joinedAt: s.firstJoinedAt,
         minutes: Math.round((s.durationMs || 0) / 60000),
         joinCount: s.joinCount || 0,

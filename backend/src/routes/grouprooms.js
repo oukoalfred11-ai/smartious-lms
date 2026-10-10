@@ -9,6 +9,9 @@
  *   POST   /api/grouprooms/sync         -> bulk-sync rooms from frontend
  *   GET    /api/grouprooms/:id/zoom     -> get zoom link for a room
  *   PATCH  /api/grouprooms/:id/zoom     -> teacher sets zoom link
+ *   POST   /api/grouprooms              -> admin creates a room
+ *   PATCH  /api/grouprooms/:id          -> admin edits a room
+ *   DELETE /api/grouprooms/:id          -> admin deactivates a room
  *
  * Security:
  *  - All routes require valid JWT (auth middleware)
@@ -220,6 +223,54 @@ router.patch('/:id/zoom', auth, async (req, res) => {
   } catch (e) {
     console.error('[grouprooms/zoom PATCH]', e.message);
     return res.status(500).json({ success: false, message: 'Failed to save zoom link.' });
+  }
+});
+
+// ─────────────────────────────────────────────────────────
+// Admin room management (Group Rooms module)
+// ─────────────────────────────────────────────────────────
+const ROOM_FIELDS = ['name', 'subject', 'curriculum', 'grade', 'capacity', 'schedule', 'status', 'teacher'];
+const pickRoom = (b = {}) => {
+  const out = {};
+  for (const k of ROOM_FIELDS) if (b[k] !== undefined) out[k] = b[k];
+  if (out.capacity !== undefined) out.capacity = Math.max(1, Math.min(500, parseInt(out.capacity, 10) || 10));
+  if (out.teacher === '') out.teacher = null;
+  if (out.status !== undefined && !['Active', 'Inactive'].includes(out.status)) delete out.status;
+  return out;
+};
+
+router.post('/', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
+  try {
+    const data = pickRoom(req.body);
+    if (!data.name || !data.subject) return res.status(400).json({ success: false, message: 'Name and subject are required.' });
+    const room = await GroupRoom.create(data);
+    return res.status(201).json({ success: true, room, message: 'Room created' });
+  } catch (e) {
+    console.error('[grouprooms POST]', e.message);
+    return res.status(400).json({ success: false, message: e.message });
+  }
+});
+
+router.patch('/:id', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
+  try {
+    const room = await GroupRoom.findByIdAndUpdate(req.params.id, { $set: pickRoom(req.body) }, { new: true, runValidators: true });
+    if (!room) return res.status(404).json({ success: false, message: 'Room not found.' });
+    return res.json({ success: true, room, message: 'Room updated' });
+  } catch (e) {
+    console.error('[grouprooms PATCH]', e.message);
+    return res.status(400).json({ success: false, message: e.message });
+  }
+});
+
+// Homework and exams reference rooms, so rooms are deactivated, not deleted.
+router.delete('/:id', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
+  try {
+    const room = await GroupRoom.findByIdAndUpdate(req.params.id, { $set: { status: 'Inactive' } }, { new: true });
+    if (!room) return res.status(404).json({ success: false, message: 'Room not found.' });
+    return res.json({ success: true, message: 'Room removed' });
+  } catch (e) {
+    console.error('[grouprooms DELETE]', e.message);
+    return res.status(500).json({ success: false, message: e.message });
   }
 });
 

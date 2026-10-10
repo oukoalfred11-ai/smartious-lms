@@ -16,38 +16,87 @@ const ok   = (res,data,msg) => res.json({ success:true, data, message:msg||'' })
 const fail = (res,code,msg) => res.status(code).json({ success:false, message:msg })
 
 // ── GET /api/questions ──────────────────────────────
+// The one list endpoint (routes/questions.js's copy was shadowed by this
+// mount and has been folded in here). Active questions only, unless a
+// teacher opens one of the attention views:
+//   special=needsArtwork  awaiting an image (artwork.required, pending)
+//   special=unused        active, never placed on an exam
+//   special=inactive      drafts / deactivated
+// Other filters: curriculum, subject (exact, any case), grade (label
+// tolerant: "Year 5" = "Grade 5" = "5"), topic, difficulty, type,
+// q|search, createdBy=me|<id>, page|skip, limit (max 200).
+// Same rule as the artwork queue (GET /api/questions/artwork/pending).
+const NEEDS_ARTWORK = { $or: [
+  { 'artwork.required': true, 'artwork.status': 'pending' },
+  { 'artwork.required': true, 'artwork.status': { $exists: false } },
+  { imageNeeded: true, 'artwork.status': { $ne: 'done' } },
+] }
+const escRx = (s) => String(s).trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 router.get('/', auth, async (req, res) => {
   try {
-    const { subject, topic, curriculum, difficulty, grade, type, search, page=1, limit=50 } = req.query
-    const filter = {}
-    if (subject)    filter.subject    = new RegExp(subject,'i')
-    if (topic)      filter.topic      = new RegExp(topic,'i')
+    const { subject, topic, curriculum, difficulty, grade, type, special } = req.query
+    const and = []
+    if (special === 'inactive') and.push({ isActive: false })
+    else if (special === 'needsArtwork') and.push(NEEDS_ARTWORK)
+    else and.push({ isActive: true })
+    if (special === 'unused') {
+      const Exam = require('../models/Exam')
+      const used = await Exam.distinct('questionIds')
+      and.push({ _id: { $nin: used } })
+    }
     // A question is valid for its own curriculum and for any listed in
     // curricula. An 8-4-4 physics question on refraction is equally an
     // IGCSE question, so it is shared rather than duplicated.
-    if (curriculum) filter.$and = [...(filter.$and || []),
-      { $or: [{ curriculum }, { curricula: curriculum }] }]
-    if (difficulty) filter.difficulty = difficulty
+    if (curriculum) and.push({ $or: [{ curriculum }, { curricula: curriculum }] })
+    if (subject) and.push({ subject: new RegExp('^' + escRx(subject) + '$', 'i') })
     // A question is visible to its own grade, and to any grade listed in
-    // gradeLevels. Kenya 8-4-4 needs this: Form 4 sits the whole syllabus,
-    // so it must see Form 1-3 content without the record being duplicated.
-    if (grade) filter.$and = [...(filter.$and || []),
-      { $or: [{ grade }, { gradeLevels: grade }] }]
-    if (type)       filter.type       = type
-    if (search)     filter.$or = [
-      { questionText: new RegExp(search,'i') },
-      { topic: new RegExp(search,'i') },
-    ]
-    const total = await Question.countDocuments(filter)
-    const questions = await Question.find(filter)
-      .sort({ subject:1, topic:1, difficulty:1 })
-      .skip((parseInt(page)-1)*parseInt(limit))
-      .limit(parseInt(limit))
-      .lean()
-    const payload = { questions, total, page: parseInt(page), pages: Math.ceil(total/parseInt(limit)) }
+    // gradeLevels (Kenya 8-4-4: Form 4 sits the whole syllabus). Labels
+    // vary by import ("Year 5", "Grade 5", "Stage 5", "5"); Form is kept
+    // apart because Form 5 is a different age than Year 5.
+    if (grade) {
+      const g = String(grade).trim()
+      const num = g.match(/(\d{1,2})/)
+      const rx = num
+        ? new RegExp('^\\s*(?:year|grade|stage|class)?\\s*' + num[1] + '\\s*$', 'i')
+        : new RegExp('^\\s*' + escRx(g) + '\\s*$', 'i')
+      and.push({ $or: [{ grade: rx }, { gradeLevels: rx }] })
+    }
+    if (topic)      and.push({ topic: new RegExp(escRx(topic), 'i') })
+    if (difficulty) and.push({ difficulty })
+    if (type)       and.push({ type })
+    if (req.query.createdBy === 'me') and.push({ createdBy: req.user._id })
+    else if (/^[a-f\d]{24}$/i.test(req.query.createdBy || '')) and.push({ createdBy: req.query.createdBy })
+    const search = req.query.q || req.query.search
+    if (search) {
+      const rx = new RegExp(escRx(search), 'i')
+      and.push({ $or: [{ questionText: rx }, { topic: rx }] })
+    }
+    const filter = { $and: and }
+
+    const limit = Math.min(Math.max(parseInt(req.query.limit) || 50, 1), 200)
+    const page  = Math.max(parseInt(req.query.page) || 1, 1)
+    const skip  = req.query.skip !== undefined ? Math.max(parseInt(req.query.skip) || 0, 0) : (page - 1) * limit
+
+    const [questions, total] = await Promise.all([
+      Question.find(filter)
+        .populate('createdBy', 'firstName lastName email')
+        .sort({ subject:1, topic:1, difficulty:1 })
+        .skip(skip).limit(limit).lean(),
+      Question.countDocuments(filter),
+    ])
+    const payload = { questions, total, page, pages: Math.ceil(total / limit) }
     // Dual shape: nested for the Question Bank UI, top-level for
-    // older callers that expect routes/questions.js's format.
-    return res.json({ success: true, ...payload, limit: parseInt(limit), data: payload })
+    // older callers.
+    return res.json({ success: true, ...payload, limit, skip, data: payload })
+  } catch(e) { return fail(res,500,e.message) }
+})
+
+// ── GET /api/questions/attention/counts ─────────────
+// Badge counts for the teacher bank's attention chips.
+router.get('/attention/counts', auth, async (req, res) => {
+  try {
+    const needsArtwork = await Question.countDocuments(NEEDS_ARTWORK)
+    return ok(res, { needsArtwork })
   } catch(e) { return fail(res,500,e.message) }
 })
 
@@ -246,8 +295,11 @@ router.patch('/:id/image', auth, requireRole('admin','ops_manager','dos','teache
           imageCaption: imageCaption || '',
           imageNeeded: false,       // artwork supplied — clears the queue flag
           isActive: true,           // safe to publish now
+          ...(await Question.exists({ _id: req.params.id, 'artwork.required': true }) ? { 'artwork.status': 'uploaded' } : {}),
       }},
-      { new: true }
+      // imageNeeded is a legacy import flag outside the schema; strict:false
+      // lets the update clear it so the question leaves the artwork queue.
+      { new: true, strict: false }
     ).select('subtopic lessonCode imageUrl imageCaption imageNeeded').lean()
     if (!q) return fail(res, 404, 'Question not found.')
     return ok(res, { question: q }, 'Artwork attached. This question can now be set as homework.')

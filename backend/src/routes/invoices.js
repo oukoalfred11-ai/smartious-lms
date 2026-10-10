@@ -12,10 +12,11 @@ const User     = require('../models/User')
 // live in one place so the billing screen and the assessment workflow
 // issue identical invoices.
 const {
-  issueInvoice, nextInvoiceNo, signatoryForRole, signatoryOf,
+  issueInvoice, nextInvoiceNo, createInvoiceWithNumber, signatoryForRole, signatoryOf,
   getTransporter, buildInvoiceEmailHTML,
 } = require('../lib/issueInvoice')
 const { sendReminder, reminderKindFor, runDueReminders, studentIsOnBreak } = require('../lib/invoiceReminders')
+const { markInvoicePaid } = require('../lib/markInvoicePaid')
 
 // Guarded require: if pdfkit is missing, emails still send without PDF
 // attachments instead of crashing the whole API on boot.
@@ -55,7 +56,11 @@ router.get('/stats', auth, ALLOWED, async (req, res) => {
     // ops, own invoices only for sales.
     const scope = ledgerScope(req.user)
     const [byCurrency, countByStatus, recentIssuers] = await Promise.all([
-      Invoice.aggregate([{ $match: scope }, { $group: { _id:'$currency', total:{ $sum:'$totalDue' }, paid:{ $sum:{ $cond:[{ $eq:['$status','paid'] },'$totalDue',0] } }, count:{ $sum:1 } } }]),
+      // Cancelled invoices are kept as records but are not money issued
+      // or owed, so they stay out of the currency totals. "paid" is the
+      // money actually received (paidAmount), falling back to totalDue
+      // for invoices marked paid before paidAmount was always recorded.
+      Invoice.aggregate([{ $match: { ...scope, status: { $ne: 'cancelled' } } }, { $group: { _id:'$currency', total:{ $sum:'$totalDue' }, paid:{ $sum:{ $cond:[{ $eq:['$status','paid'] },{ $cond:[{ $gt:[{ $ifNull:['$paidAmount',0] },0] },'$paidAmount','$totalDue'] },0] } }, count:{ $sum:1 } } }]),
       Invoice.aggregate([{ $match: scope }, { $group: { _id:'$status', count:{ $sum:1 } } }]),
       Invoice.aggregate([
         { $match: scope },
@@ -348,7 +353,7 @@ router.post('/', auth, ALLOWED, async (req, res) => {
     if (!billedToName?.trim()) return res.status(400).json({ success:false, message:'Billed-to name is required.' })
     if (!lineItems?.length)    return res.status(400).json({ success:false, message:'At least one line item is required.' })
 
-    const invNo    = provided?.trim() || await nextInvoiceNo()
+    const providedNo = provided?.trim() || ''
     const items    = lineItems.filter(it=>it.description?.trim())
     const subtotal = items.reduce((s,it)=>s+(parseFloat(it.amount)||0),0)
     const disc     = parseFloat(discount)||0
@@ -356,8 +361,8 @@ router.post('/', auth, ALLOWED, async (req, res) => {
     const vatAmt   = (subtotal-disc)*(vp/100)
     const total    = subtotal-disc+vatAmt
 
-    const inv = await Invoice.create({
-      invoiceNo:invNo, issueDate:issueDate||new Date(), dueDate:dueDate||null,
+    const fields = {
+      issueDate:issueDate||new Date(), dueDate:dueDate||null,
       billedToName:billedToName.trim(), billedToAddress:billedToAddress?.trim()||'',
       billedToEmail:billedToEmail?.trim()?.toLowerCase()||'',
       studentName:studentName?.trim()||'', studentGrade:studentGrade?.trim()||'',
@@ -373,7 +378,13 @@ router.post('/', auth, ALLOWED, async (req, res) => {
       servicePeriodStart: servicePeriodStart || null,
       servicePeriodEnd:   servicePeriodEnd || null,
       autoRemind: autoRemind !== undefined ? !!autoRemind : true,
-    })
+    }
+    // A hand-typed number is used as given (a clash is reported below);
+    // otherwise the shared numbering retries past concurrent issues.
+    const inv = providedNo
+      ? await Invoice.create({ ...fields, invoiceNo: providedNo })
+      : await createInvoiceWithNumber(fields)
+    const invNo = inv.invoiceNo
 
     if (sendEmail && billedToEmail) {
       const t = getTransporter()
@@ -403,58 +414,29 @@ router.post('/', auth, ALLOWED, async (req, res) => {
 })
 
 // ── PATCH /api/invoices/:id/status ────────────────────────
+// Marking paid goes through lib/markInvoicePaid, the same path a
+// confirmed Paystack card payment takes: billing clock advanced and a
+// receipt emailed, once. Marking an already-paid invoice paid again is
+// a no-op that returns the invoice as it stands.
 router.patch('/:id/status', auth, ALLOWED, async (req, res) => {
   try {
     const { status, paidAmount, paidAt } = req.body
     if (!['draft','sent','paid','overdue','cancelled'].includes(status))
       return res.status(400).json({ success:false, message:'Invalid status.' })
+
+    if (status === 'paid') {
+      const { invoice } = await markInvoicePaid(req.params.id, {
+        paidAmount: parseFloat(paidAmount) || 0,   // 0/missing = full balance
+        paidAt, source: 'manual', actorId: req.user._id,
+      })
+      if (!invoice) return res.status(404).json({ success:false, message:'Invoice not found.' })
+      return res.json({ success:true, data:{ invoice } })
+    }
+
     const upd = { status }
-    if (status==='paid') { upd.paidAt=paidAt||new Date(); upd.paidAmount=paidAmount||0 }
+    if (status === 'cancelled') upd.cancelledAt = new Date()
     const inv = await Invoice.findByIdAndUpdate(req.params.id,{ $set:upd },{ new:true })
     if (!inv) return res.status(404).json({ success:false, message:'Invoice not found.' })
-
-    // Paying an invoice must also advance the STUDENT's billing clock.
-    // Fee reminders are driven by User.nextDueDate, entirely separate
-    // from invoice documents, so without this a parent who has paid
-    // keeps receiving "fees due" nags until the next cycle rolls over
-    // by itself. One payment = one cycle forward, reminder flag reset.
-    if (status === 'paid' && inv.studentId) {
-      try {
-        const student = await User.findById(inv.studentId).select('nextDueDate billingDay')
-        if (student) {
-          const now = new Date()
-          // Base the roll-forward on the cycle being settled: the current
-          // due date if it is recent, otherwise today (very stale clocks
-          // jump straight to next month rather than replaying the past).
-          const base = student.nextDueDate && (now - new Date(student.nextDueDate)) < 45 * 24 * 3600 * 1000 && new Date(student.nextDueDate) > new Date(now.getTime() - 45 * 24 * 3600 * 1000)
-            ? new Date(student.nextDueDate) : now
-          const next = new Date(base)
-          next.setMonth(next.getMonth() + 1)
-          if (student.billingDay >= 1 && student.billingDay <= 28) next.setDate(student.billingDay)
-          await User.updateOne({ _id: inv.studentId }, { $set: { nextDueDate: next, feeReminderSent: null } })
-          console.log(`[invoices] ${inv.invoiceNo} paid; ${inv.studentName || inv.studentId} billing clock advanced to ${next.toDateString()}`)
-        }
-      } catch (e) { console.error('[invoices] clock advance failed:', e.message) }
-    }
-    if (status==='paid' && inv.billedToEmail) {
-      const t = getTransporter()
-      if (t) {
-        const receiptNo = 'SM-RCP-'+String(inv.invoiceNo).replace('SM-INV-','')
-        ;(async () => {
-          let attachments = []
-          try {
-            const pdf = await buildReceiptPdfBuffer(inv, receiptNo)
-            attachments = [{ filename: `${receiptNo}.pdf`, content: pdf, contentType: 'application/pdf' }]
-          } catch (e) { console.error('[receipt pdf]', e.message) }
-          await t.sendMail({ from:process.env.EMAIL_FROM||'Smartious Billing <hello@smartioushomeschool.com>',
-            to:inv.billedToEmail,
-            subject:`Payment receipt ${receiptNo} — Smartious Homeschool Global`,
-            html:buildReceiptEmailHTML(inv, receiptNo),
-            attachments,
-          })
-        })().catch(e=>console.error('[receipt email]',e.message))
-      }
-    }
     return res.json({ success:true, data:{ invoice:inv } })
   } catch(e) { return res.status(500).json({ success:false, message:e.message }) }
 })
@@ -624,40 +606,6 @@ router.delete('/:id', auth, CAN_DELETE, async (req, res) => {
 })
 
 // ── Email HTML helpers ─────────────────────────────────────
-
-function buildReceiptEmailHTML(inv, receiptNo) {
-  const m = n=>Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})
-  const fmtDate = d=>{ try{ return new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}) }catch{return ''} }
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
-<body style="margin:0;padding:0;background:#F0FDF4;font-family:sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="padding:32px 16px;background:#F0FDF4;">
-<tr><td align="center">
-<table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#fff;border-radius:12px;overflow:hidden;">
-<tr><td style="background:linear-gradient(135deg,#065F46,#047857);padding:24px 32px;">
-  <div style="font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#6EE7B7;margin-bottom:6px;">Payment Confirmed</div>
-  <div style="font-size:20px;font-weight:800;color:#fff;">Receipt ${receiptNo}</div>
-</td></tr>
-<tr><td style="padding:28px 32px;">
-  <p style="font-size:14px;color:#2c2c2c;margin:0 0 18px;">Dear ${inv.billedToName},</p>
-  <p style="font-size:14px;color:#2c2c2c;margin:0 0 20px;">
-    Thank you — we have received <strong>${inv.currency} ${m(inv.totalDue)}</strong> for invoice <strong>${inv.invoiceNo}</strong>${inv.studentName?' for '+inv.studentName+"'s tuition":''}.
-  </p>
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F0FDF4;border-radius:8px;border:1.5px solid #6EE7B7;margin-bottom:24px;">
-    <tr><td style="padding:14px 12px;">
-      <table width="100%" cellpadding="0" cellspacing="0" style="font-size:12.5px;color:#2c2c2c;">
-        <tr><td style="padding:3px 0;color:#6B6B6B">Receipt No.</td><td style="text-align:right;font-weight:700">${receiptNo}</td></tr>
-        <tr><td style="padding:3px 0;color:#6B6B6B">Paid on</td><td style="text-align:right;font-weight:700">${fmtDate(inv.paidAt||new Date())}</td></tr>
-        <tr><td style="padding:6px 0 0;font-weight:800;font-size:14px">Amount received</td><td style="text-align:right;font-weight:800;font-size:14px;color:#065F46">${inv.currency} ${m(inv.totalDue)}</td></tr>
-      </table>
-    </td></tr>
-  </table>
-  <p style="font-size:12px;color:#6B6B6B;margin:0;">Questions? hello@smartioushomeschool.com</p>
-</td></tr>
-<tr><td style="background:#F0FDF4;padding:16px 32px;border-top:1px solid #D1FAE5;">
-  <p style="font-size:11px;color:#999;margin:0;">© ${new Date().getFullYear()} Smartious Homeschool Global</p>
-</td></tr>
-</table></td></tr></table></body></html>`
-}
 
 function buildReceiptHTML(inv) {
   const esc  = s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')

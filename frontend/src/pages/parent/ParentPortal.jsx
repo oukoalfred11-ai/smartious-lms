@@ -1,10 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import CommunityChatView from '../../components/CommunityChat.jsx'
-import BirthdayBanner from '../../components/BirthdayBanner.jsx'
-import SuggestionBox from '../../components/SuggestionBox.jsx'
 import AnnouncementsStrip from '../../components/AnnouncementsStrip.jsx'
 import MessagesHub from '../../components/MessagesHub.jsx'
-import NotificationsBell from '../../components/NotificationsBell.jsx'
 import { api } from '../../context/ctx.jsx'
 
 // ── Tokens matching admin/student/teacher portals ──────────
@@ -18,7 +15,6 @@ const money  = (n,cur='USD') => ({USD:'$',KES:'KES ',GBP:'£',EUR:'€',AED:'AED
 const fmtD   = d => d?new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'—'
 const fmtT   = hhmm => { if(!hhmm)return ''; const[h,m]=hhmm.split(':').map(Number); const mer=h>=12?'PM':'AM'; let hr=h%12; if(!hr)hr=12; return `${hr}${m?':'+String(m).padStart(2,'0'):''} ${mer}` }
 const gc     = s => s>=80?'#065F46':s>=70?'#1E40AF':s>=60?'#92400E':s>=50?'#6B21A8':'#991B1B'
-const gl     = s => s>=80?'A*':s>=70?'B':s>=60?'C':s>=50?'D':s>=40?'E':'U'
 
 // ── Shared section header ──────────────────────────────────
 function PSection({ tag, title, em, sub }) {
@@ -85,160 +81,9 @@ function useIsMobile() {
   return mobile
 }
 
-// Mobile top bar — shown instead of sidebar on mobile
-function MobileTopBar({ title, eyebrow, onMenuToggle, menuOpen, user, initials }) {
-  return (
-    <div style={{
-      position:'sticky', top:0, zIndex:100,
-      background:'rgba(251,250,245,.96)',
-      backdropFilter:'blur(16px)',
-      WebkitBackdropFilter:'blur(16px)',
-      borderBottom:'1px solid #F4EFEB',
-      display:'flex', alignItems:'center',
-      padding:'0 16px', height:56, gap:12,
-      flexShrink:0,
-    }}>
-      <button onClick={onMenuToggle} style={{
-        width:36, height:36, borderRadius:8,
-        background:menuOpen?'#FBF6E3':'transparent',
-        border:'none', cursor:'pointer',
-        display:'flex', alignItems:'center', justifyContent:'center',
-        flexShrink:0,
-      }}>
-        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke={menuOpen?'#7D1025':'#564844'} strokeWidth="2" strokeLinecap="round">
-          {menuOpen
-            ? <><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></>
-            : <><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></>
-          }
-        </svg>
-      </button>
-      <div style={{ flex:1, minWidth:0 }}>
-        <div style={{ padding:'16px 20px 0' }}><BirthdayBanner /><SuggestionBox /></div>
-        {eyebrow&&<div style={{ fontSize:9, fontWeight:700, color:'#7D1025', textTransform:'uppercase', letterSpacing:'.12em' }}>{eyebrow}</div>}
-        <div style={{ fontFamily:"'Instrument Serif',Georgia,serif", fontSize:18, color:'#1A0F0E', lineHeight:1.2, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{title}</div>
-      </div>
-      <div style={{ width:34, height:34, borderRadius:'50%', background:'linear-gradient(135deg,#7D1025,#5A0B1B)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, border:'2px solid #C9A03030' }}>
-        <span style={{ color:'#F0CC5A', fontSize:11, fontWeight:700 }}>{initials}</span>
-      </div>
-    </div>
-  )
-}
-
-// Mobile drawer — slides in from left when menu is open
-function MobileDrawer({ open, onClose, sections, page, setPage, portalLabel, user, initials, onLogout, children }) {
-  if (!open) return null
-  return (
-    <>
-      {/* Backdrop */}
-      <div onClick={onClose} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.4)', zIndex:200 }}/>
-      {/* Drawer */}
-      <div style={{
-        position:'fixed', top:0, left:0, bottom:0, width:280,
-        background:'#FBFAF5', zIndex:201, display:'flex', flexDirection:'column',
-        overflowY:'auto', boxShadow:'4px 0 24px rgba(0,0,0,.12)',
-        animation:'slideInLeft .2s ease',
-      }}>
-        <style>{`@keyframes slideInLeft{from{transform:translateX(-100%)}to{transform:translateX(0)}}`}</style>
-        {/* Logo */}
-        <div style={{ padding:'20px 20px 16px', borderBottom:'1px solid #F4EFEB' }}>
-          <div style={{ fontFamily:"'Instrument Serif',Georgia,serif", fontSize:24, color:'#1A0F0E' }}>
-            Smart<em style={{ fontStyle:'italic', color:'#7D1025' }}>ious</em>
-          </div>
-          <div style={{ fontSize:9.5, color:'#7D1025', fontWeight:700, letterSpacing:'.14em', textTransform:'uppercase', marginTop:3 }}>{portalLabel}</div>
-        </div>
-
-        {/* Nav sections */}
-        <nav style={{ flex:1, padding:'12px 0' }}>
-          {sections.map((s, si) => (
-            <div key={si} style={{ marginBottom:16 }}>
-              {s.section&&<div style={{ fontSize:10, fontWeight:700, color:'#7D1025', textTransform:'uppercase', letterSpacing:'.12em', padding:'0 20px 6px' }}>{s.section}</div>}
-              {s.items.map(item => {
-                const active = page === item.id
-                return (
-                  <div key={item.id} onClick={() => { setPage(item.id); onClose() }}
-                    style={{ display:'flex', alignItems:'center', gap:14, padding:'11px 20px', cursor:'pointer', background:active?'#FBF6E3':'transparent', borderLeft:active?'3px solid #C9A030':'3px solid transparent', color:active?'#7D1025':'#564844', fontWeight:active?600:400, fontSize:15, transition:'all .15s' }}>
-                    <div style={{ width:28, height:28, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                      <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke={active?'#7D1025':'#857973'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                        <path d={item.icon||'M3 12h18M3 6h18M3 18h18'}/>
-                      </svg>
-                    </div>
-                    <span>{item.label}</span>
-                    {item.badge&&<span style={{ marginLeft:'auto', background:'#7D1025', color:'#fff', fontSize:10, fontWeight:700, padding:'2px 7px', borderRadius:99 }}>{item.badge}</span>}
-                  </div>
-                )
-              })}
-            </div>
-          ))}
-        </nav>
-
-        {/* Extra content (child selector etc) */}
-        {children}
-
-        {/* User card */}
-        <div style={{ padding:'12px 16px', borderTop:'1px solid #F4EFEB' }}>
-          <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10 }}>
-            <div style={{ width:38, height:38, borderRadius:'50%', background:'linear-gradient(135deg,#7D1025,#5A0B1B)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-              <span style={{ color:'#F0CC5A', fontSize:12, fontWeight:700 }}>{initials}</span>
-            </div>
-            <div>
-              <div style={{ fontSize:13, fontWeight:700, color:'#1A0F0E' }}>{user?.firstName} {user?.lastName}</div>
-              <div style={{ fontSize:11, color:'#857973' }}>{portalLabel?.replace(' Portal','')}</div>
-            </div>
-          </div>
-          <div style={{ display:'flex', justifyContent:'flex-end', marginBottom:8 }}>
-            <NotificationsBell onNavigate={(mod) => { const map = { support: 'messages', messages: 'messages', settings: 'settings', results: 'results', timetable: 'timetable' }; if (map[mod]) setPage(map[mod]) }} />
-          </div>
-          <button onClick={onLogout} style={{ width:'100%', padding:'10px', borderRadius:8, border:'1px solid #E8E2D6', background:'transparent', color:'#564844', fontSize:13, fontWeight:600, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:8 }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            Log out
-          </button>
-        </div>
-      </div>
-    </>
-  )
-}
-
-// Mobile bottom tab bar — shows 4-5 most important tabs
-function MobileBottomTabs({ tabs, page, setPage }) {
-  return (
-    <div style={{
-      position:'fixed', bottom:0, left:0, right:0, zIndex:100,
-      background:'rgba(251,250,245,.97)',
-      backdropFilter:'blur(16px)',
-      WebkitBackdropFilter:'blur(16px)',
-      borderTop:'1px solid #E8E2D6',
-      display:'flex',
-      paddingBottom:'env(safe-area-inset-bottom)',
-    }}>
-      {tabs.map(tab => {
-        const active = page === tab.id
-        return (
-          <button key={tab.id} onClick={() => setPage(tab.id)} style={{
-            flex:1, border:'none', background:'transparent', cursor:'pointer',
-            padding:'8px 4px 10px', display:'flex', flexDirection:'column',
-            alignItems:'center', gap:3, transition:'all .15s',
-          }}>
-            <div style={{ width:24, height:24, display:'flex', alignItems:'center', justifyContent:'center' }}>
-              <svg width="22" height="22" fill={active?'#7D1025':'none'} viewBox="0 0 24 24"
-                stroke={active?'#7D1025':'#9A9A9A'} strokeWidth={active?2:1.8} strokeLinecap="round" strokeLinejoin="round">
-                <path d={tab.icon||'M3 12h18'}/>
-              </svg>
-            </div>
-            <span style={{ fontSize:9.5, fontWeight:active?700:500, color:active?'#7D1025':'#9A9A9A', letterSpacing:'.01em' }}>
-              {tab.shortLabel||tab.label}
-            </span>
-            {active&&<div style={{ width:4, height:4, borderRadius:'50%', background:'#C9A030', marginTop:-2 }}/>}
-          </button>
-        )
-      })}
-    </div>
-  )
-}
-
 
 export default function ParentPortal() {
   const isMobile = useIsMobile()
-  const [menuOpen, setMenuOpen] = useState(false)
   const [page,            setPage]            = useState('dashboard')
   const [user,            setUser]            = useState(null)
   const [children,        setChildren]        = useState([])
@@ -432,7 +277,7 @@ export default function ParentPortal() {
             <NoChildLinked onLink={()=>setLinkModal(true)}/>
           ) : (
             <>
-              {page==='dashboard'  && <ParentDashboard   child={selectedChild} showToast={showToast}/>}
+              {page==='dashboard'  && <ParentDashboard   child={selectedChild} showToast={showToast} setPage={setPage}/>}
               {page==='reports'    && <ParentReports      child={selectedChild} showToast={showToast}/>}
               {page==='homework'   && <ParentHomework     child={selectedChild} showToast={showToast}/>}
               {page==='results'    && <ParentResults      child={selectedChild} showToast={showToast}/>}
@@ -521,7 +366,7 @@ async function openPdfBlob(path, showToast, failMsg) {
 }
 
 // ── Parent Dashboard ──────────────────────────────────────
-function ParentDashboard({ child, showToast }) {
+function ParentDashboard({ child, showToast, setPage }) {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
 
@@ -598,7 +443,7 @@ function ParentDashboard({ child, showToast }) {
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(160px,1fr))', gap:12, marginBottom:20 }}>
         {[
           { label:'Overall average', val:overall!==null?overall+'%':'—', color:overall!==null?gc(overall):C.s400 },
-          { label:'Attendance rate', val:att?.rate!==null?att.rate+'%':'—', color:att?.rate>=80?'#065F46':att?.rate>=60?'#D97706':'#991B1B' },
+          { label:'Attendance rate', val:att?.rate!=null?att.rate+'%':'—', sub: att?.scheduled ? `attended ${att.attended} of ${att.scheduled} lessons` : undefined, color:att?.rate>=80?'#065F46':att?.rate>=60?'#D97706':'#991B1B' },
           { label:'Exams completed', val:data.rep?.examResults?.length||0, color:C.s900 },
           { label:'Homework pending', val:(data.hw||[]).filter(h=>!h.submission||h.submission.status==='in_progress').length, color:C.crimson },
           { label:'Classes today',   val:todayClasses.length, color:C.crimson },
@@ -608,6 +453,7 @@ function ParentDashboard({ child, showToast }) {
           <div key={k.label} className="kpi">
             <div style={{ fontSize:10, fontWeight:700, color:C.s400, textTransform:'uppercase', letterSpacing:'.07em', marginBottom:5 }}>{k.label}</div>
             <div style={{ fontSize:22, fontWeight:800, color:k.color, lineHeight:1 }}>{k.val}</div>
+            {k.sub && <div style={{ fontSize:11, color:C.s500, marginTop:5 }}>{k.sub}</div>}
           </div>
         ))}
       </div>
@@ -728,9 +574,9 @@ function ParentReports({ child, showToast }) {
         {[
           { label:'Overall avg',    val:overall!==null?overall+'%':'—',  color:overall!==null?gc(overall):C.s400 },
           { label:'Exams done',     val:data.examResults?.length||0,      color:C.s900 },
-          { label:'Attendance',     val:att?.rate!==null?att.rate+'%':'—', color:att?.rate>=80?'#065F46':att?.rate>=60?'#D97706':'#991B1B' },
-          { label:'Present',        val:att?.present||0,                   color:'#065F46' },
-          { label:'Absent',         val:att?.absent||0,                    color:att?.absent>0?'#991B1B':C.s400 },
+          { label:'Attendance',     val:att?.rate!=null?att.rate+'%':'—', color:att?.rate>=80?'#065F46':att?.rate>=60?'#D97706':'#991B1B' },
+          { label:'Lessons attended', val:att?.scheduled ? `${att.attended||0} of ${att.scheduled}` : '—', color:'#065F46' },
+          { label:'Lessons missed', val:att?.absent||0,                    color:att?.absent>0?'#991B1B':C.s400 },
           { label:'Formal reports', val:data.formalReports?.length||0,     color:C.crimson },
         ].map(k=>(
           <div key={k.label} className="kpi">
@@ -1350,6 +1196,9 @@ function ParentResults({ child, showToast }) {
 }
 
 // ── Parent Attendance ──────────────────────────────
+// Per-lesson attendance: attended X of Y scheduled lessons, one row per
+// lesson. Day-register records from before the switch to per-lesson
+// attendance are shown underneath as history.
 function ParentAttendance({ child, showToast }) {
   const [data, setData] = useState(null)
   useEffect(() => {
@@ -1359,42 +1208,71 @@ function ParentAttendance({ child, showToast }) {
       .catch(() => { showToast('Failed to load attendance.','err'); setData({}) })
   }, [child?._id])
   if (data === null) return <Spinner/>
-  const { records=[], counts={} } = data
-  const total = records.length || 1
-  const present = (counts.present||0)+(counts.late||0)
-  const rate = records.length ? Math.round(present/total*100) : null
-  const stMeta = s2 => s2==='present' ? ['#D1FAE5','#065F46','Present'] : s2==='late' ? ['#FEF3C7','#92400E','Late'] : s2==='excused' ? ['#E0E7FF','#3730A3','Excused'] : ['#FEE2E2','#991B1B','Absent']
+  const { lessons=[], legacy=[], summary={}, cutover } = data
+  const rate = summary.rate ?? null
+  const cutLabel = cutover ? new Date(cutover).toLocaleDateString('en-GB',{ day:'numeric', month:'long', year:'numeric' }) : ''
+  const legacyMeta = s2 => s2==='present' ? ['#D1FAE5','#065F46','Present'] : s2==='late' ? ['#FEF3C7','#92400E','Late'] : s2==='half_day' ? ['#FEF3C7','#92400E','Half day'] : ['#FEE2E2','#991B1B','Absent']
+  const lessonMeta = l => !l.attended ? ['#FEE2E2','#991B1B','Missed'] : l.late ? ['#FEF3C7','#92400E','Late'] : ['#D1FAE5','#065F46','Attended']
 
   return (
     <>
       <PSection tag="Parent Portal" title="Attendance" em="Record"
-        sub={`${child.firstName}'s attendance over the last 90 days of scheduled learning.`}/>
+        sub={`${child.firstName}'s attendance at scheduled lessons over the last 90 days.`}/>
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(150px,1fr))', gap:12, marginBottom:18 }}>
         {[['Attendance rate', rate!=null?rate+'%':'—', rate>=80?'#065F46':rate>=60?'#B45309':'#991B1B'],
-          ['Present', counts.present||0, '#065F46'],
-          ['Late', counts.late||0, '#B45309'],
-          ['Absent', counts.absent||0, '#991B1B']].map(([l,v,col]) => (
+          ['Lessons attended', summary.lessonsScheduled ? `${summary.lessonsAttended||0} of ${summary.lessonsScheduled}` : '—', '#065F46'],
+          ['Late', summary.late||0, '#B45309'],
+          ['Missed', Math.max(0,(summary.scheduled||0)-(summary.attended||0)), '#991B1B']].map(([l,v,col]) => (
           <div key={l} style={{ background:'#fff', border:`1px solid ${C.line}`, borderRadius:12, padding:'14px 16px' }}>
             <div style={{ fontSize:10.5, fontWeight:700, color:C.s500, textTransform:'uppercase', letterSpacing:'.06em' }}>{l}</div>
             <div style={{ fontSize:22, fontWeight:800, color:col, marginTop:4 }}>{v}</div>
           </div>
         ))}
       </div>
+      {summary.legacyDays > 0 && (
+        <div style={{ fontSize:12, color:C.s500, marginBottom:12 }}>
+          The rate also counts {summary.legacyAttended} of {summary.legacyDays} day-register records from before {cutLabel || 'the switch to per-lesson attendance'}.
+        </div>
+      )}
       <div style={{ background:'#fff', border:`1px solid ${C.line}`, borderRadius:14, overflow:'hidden' }}>
-        {records.length===0 ? <div style={{ padding:36, textAlign:'center', color:C.s400, fontSize:13.5 }}>No attendance records in this period.</div> :
-        records.map((r2,i) => {
-          const [bg,col,label] = stMeta(r2.status)
+        {lessons.length===0 ? <div style={{ padding:36, textAlign:'center', color:C.s400, fontSize:13.5 }}>No scheduled lessons in this period yet.</div> :
+        lessons.map((l,i) => {
+          const [bg,col,label] = lessonMeta(l)
           return (
-            <div key={i} style={{ display:'flex', alignItems:'center', gap:14, padding:'11px 18px', borderBottom:`1px solid ${C.line}` }}>
-              <div style={{ flex:1, fontSize:13, fontWeight:600, color:C.ink }}>
-                {new Date(r2.date).toLocaleDateString('en-GB',{ weekday:'short', day:'numeric', month:'long', year:'numeric' })}
+            <div key={String(l.liveClassId)+i} style={{ display:'flex', alignItems:'center', gap:14, padding:'11px 18px', borderBottom:`1px solid ${C.line}`, flexWrap:'wrap' }}>
+              <div style={{ flex:1, minWidth:180 }}>
+                <div style={{ fontSize:13, fontWeight:600, color:C.ink }}>{l.subject}{l.title && l.title!==l.subject ? ' · '+l.title : ''}</div>
+                <div style={{ fontSize:11.5, color:C.s500 }}>
+                  {new Date(l.scheduledAt).toLocaleString('en-GB',{ weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' })}
+                  {l.source==='teacher' ? ' · confirmed by teacher' : ''}
+                </div>
               </div>
-              {r2.reason && <div style={{ fontSize:11.5, color:C.s500 }}>{r2.reason}</div>}
               <span style={{ background:bg, color:col, fontSize:11, fontWeight:700, padding:'3px 10px', borderRadius:999 }}>{label}</span>
             </div>
           )
         })}
       </div>
+      {legacy.length > 0 && (
+        <>
+          <div style={{ fontSize:11, fontWeight:700, color:C.s500, textTransform:'uppercase', letterSpacing:'.06em', margin:'20px 0 8px' }}>
+            Earlier day register{cutLabel ? ` (before ${cutLabel})` : ''}
+          </div>
+          <div style={{ background:'#fff', border:`1px solid ${C.line}`, borderRadius:14, overflow:'hidden' }}>
+            {legacy.map((r2,i) => {
+              const [bg,col,label] = legacyMeta(r2.status)
+              return (
+                <div key={i} style={{ display:'flex', alignItems:'center', gap:14, padding:'11px 18px', borderBottom:`1px solid ${C.line}` }}>
+                  <div style={{ flex:1, fontSize:13, fontWeight:600, color:C.ink }}>
+                    {new Date(r2.date).toLocaleDateString('en-GB',{ weekday:'short', day:'numeric', month:'long', year:'numeric' })}
+                  </div>
+                  {r2.reason && <div style={{ fontSize:11.5, color:C.s500 }}>{r2.reason}</div>}
+                  <span style={{ background:bg, color:col, fontSize:11, fontWeight:700, padding:'3px 10px', borderRadius:999 }}>{label}</span>
+                </div>
+              )
+            })}
+          </div>
+        </>
+      )}
     </>
   )
 }

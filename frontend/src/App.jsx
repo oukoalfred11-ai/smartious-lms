@@ -1,11 +1,11 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { AuthProvider, ToastProvider, StoreProvider, useAuth } from './context/ctx.jsx'
 import LandingPage       from './pages/LandingPage.jsx'
 import LoginPage         from './pages/LoginPage.jsx'
 import PausedScreen from './components/PausedScreen.jsx'
 import ClassroomPage from './pages/ClassroomPage.jsx'
+import AssessmentPaymentResult from './components/AssessmentPaymentResult.jsx'
 import AdminLoginPage    from './pages/AdminLoginPage.jsx'
-import VerifyEmailPage   from './pages/VerifyEmailPage.jsx'
 import ResetPasswordPage from './pages/ResetPasswordPage.jsx'
 import AdminPortal       from './pages/admin/AdminPortal.jsx'
 import OpsPortal         from './pages/admin/OpsPortal.jsx'
@@ -27,7 +27,7 @@ import DemoPortal        from './pages/demo/DemoPortal.jsx'
  * pathname-reading useEffect.
  *
  * LMS portal routes (/admin, /teacher, /student, /parent, /demo) and
- * auth pages (/login, /admin-login, /verify-email, /reset-password)
+ * auth pages (/login, /admin-login, /reset-password)
  * take precedence over the catch-all.
  */
 
@@ -39,8 +39,17 @@ function Guard({ children, roles }) {
     </div>
   )
   if (!user) return <Navigate to="/login" replace />
-  if (roles && !roles.includes(user.role)) return <Navigate to={`/${user.role}`} replace />
+  // Wrong portal for this role: let RoleRedirect pick the right one
+  // (ops_manager lives at /ops and accountant at /accounts, not /<role>).
+  if (roles && !roles.includes(user.role)) return <Navigate to="/portal" replace />
   return children
+}
+
+// Paystack sends parents back here after an assessment payment
+// (backend routes/assessment.js payment-callback).
+function AssessmentPaymentResultPage() {
+  const navigate = useNavigate()
+  return <AssessmentPaymentResult nav={(to) => navigate(to)} />
 }
 
 function RoleRedirect() {
@@ -70,10 +79,10 @@ export default function App() {
             <Routes>
               <Route path="/login"          element={<LoginPage />} />
               <Route path="/admin-login"    element={<AdminLoginPage />} />
-              <Route path="/verify-email"   element={<VerifyEmailPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/portal"         element={<RoleRedirect />} />
               <Route path="/paused"         element={<PausedScreen />} />
+              <Route path="/assessment/payment-result" element={<AssessmentPaymentResultPage />} />
               <Route path="/classroom/:liveClassId" element={<Guard roles={['teacher','student','admin','dos','ops_manager','parent']}><ClassroomPage /></Guard>} />
               <Route path="/admin/*"        element={<Guard roles={['admin']}><AdminPortal /></Guard>} />
               <Route path="/ops/*"          element={<Guard roles={['ops_manager','admin']}><OpsPortal /></Guard>} />

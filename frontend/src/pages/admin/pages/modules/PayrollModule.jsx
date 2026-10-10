@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { api } from '../../../../context/ctx.jsx'
 import { TOKENS } from '../shared/tokens.js'
-import { fmtDate } from '../shared/helpers.js'
 import { PSection } from '../shared/ui.jsx'
 
 function PayrollModule({ refreshKey, toast }) {
@@ -126,8 +125,6 @@ function PayrollModule({ refreshKey, toast }) {
       const w = window.open('','_blank'); w.document.write(r.data?.data?.html||''); w.document.close()
     } catch(e) { toast?.error?.('Could not load payslip.') }
   }
-
-  const inp = { padding:'9px 11px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:13, fontFamily:'inherit', width:'100%', boxSizing:'border-box' }
 
   // Pending extras across all records
   const allPendingExtras = records.flatMap(r => (r.tuitionExtras||[]).filter(e=>e.status==='pending').map(e=>({...e, _recordId:r._id, _teacherName:r.teacherName, _period:r.periodLabel})))

@@ -211,61 +211,8 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
   }
 });
 
-// ─────────────────────────────────────────────────────────
-// GET /api/questions  — list with filters
-// ─────────────────────────────────────────────────────────
-router.get('/', auth, async (req, res) => {
-  try {
-    const filter = { isActive: true };
-    const esc = (s) => String(s).trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    if (req.query.curriculum) filter.$and = [...(filter.$and || []),
-      { $or: [{ curriculum: req.query.curriculum }, { curricula: req.query.curriculum }] }];
-    // Subject: exact name, case-insensitive — "mathematics" must find
-    // "Mathematics", or a teacher concludes the bank is empty.
-    if (req.query.subject) filter.subject = new RegExp('^' + esc(req.query.subject) + '$', 'i');
-    // Grade: label-tolerant. Import batches and enrolment screens have
-    // written the same year as "Year 5", "Grade 5", "Stage 5", "year5"
-    // or plain "5"; an exact string match hid all of them from the exam
-    // builder. Any request naming a number matches every family label
-    // carrying that number (Form is deliberately excluded — Form 5 is a
-    // different age than Year 5).
-    if (req.query.grade) {
-      const g = String(req.query.grade).trim();
-      const num = g.match(/(\d{1,2})/);
-      const rx = num
-        ? new RegExp('^\\s*(?:year|grade|stage|class)?\\s*' + num[1] + '\\s*$', 'i')
-        : new RegExp('^\\s*' + esc(g) + '\\s*$', 'i');
-      filter.$and = [...(filter.$and || []),
-        { $or: [{ grade: rx }, { gradeLevels: rx }] }];
-    }
-    if (req.query.topic)      filter.topic      = req.query.topic;
-    if (req.query.type)       filter.type       = req.query.type;
-    if (req.query.createdBy === 'me') {
-      filter.createdBy = req.user._id;
-    } else if (req.query.createdBy && /^[a-f\d]{24}$/i.test(req.query.createdBy)) {
-      filter.createdBy = req.query.createdBy;
-    }
-    if (req.query.q) {
-      filter.questionText = { $regex: req.query.q, $options: 'i' };
-    }
-
-    const limit = Math.min(parseInt(req.query.limit) || 50, 200);
-    const skip  = parseInt(req.query.skip) || 0;
-
-    const [questions, total] = await Promise.all([
-      Question.find(filter)
-        .populate('createdBy', 'firstName lastName email')
-        .sort({ createdAt: -1 })
-        .skip(skip).limit(limit).lean(),
-      Question.countDocuments(filter),
-    ]);
-
-    return res.json({ success: true, questions, total, limit, skip });
-  } catch (e) {
-    console.error('[questions GET]', e.message);
-    return res.status(500).json({ success: false, message: 'Failed to load questions.' });
-  }
-});
+// GET /api/questions (the list) lives in routes/question-bank.js, which
+// is mounted first on the same path.
 
 // ─────────────────────────────────────────────────────────
 // GET /api/questions/:id

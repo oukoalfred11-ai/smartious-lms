@@ -1203,4 +1203,29 @@ router.get('/:id', auth, requireRole('admin', 'ops_manager', 'dos'), async (req,
   }
 });
 
+// POST /api/users/change-password — any signed-in user changes their own
+// password (staff Settings). Body: { currentPassword, newPassword }
+router.post('/change-password', auth, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body || {};
+    if (!currentPassword || typeof currentPassword !== 'string')
+      return res.status(400).json({ success: false, message: 'Current password is required.' });
+    if (!newPassword || typeof newPassword !== 'string' || newPassword.length < 8)
+      return res.status(400).json({ success: false, message: 'New password must be at least 8 characters.' });
+    if (newPassword === currentPassword)
+      return res.status(400).json({ success: false, message: 'New password must differ from the current one.' });
+    const user = await User.findById(req.user._id).select('+password');
+    if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
+    if (!(await user.comparePassword(currentPassword)))
+      return res.status(401).json({ success: false, message: 'Current password is incorrect.' });
+    user.password = newPassword; // hashed by the User pre-save hook
+    user.mustChangePassword = false;
+    await user.save();
+    return res.json({ success: true, message: 'Password changed.' });
+  } catch (e) {
+    console.error('[users change-password]', e.message);
+    return res.status(500).json({ success: false, message: 'Could not change password.' });
+  }
+});
+
 module.exports = router;

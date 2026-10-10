@@ -20,7 +20,7 @@ const User           = require('../models/User')
 // methods, validating and de-duplicating the addresses.
 const { resolveStudentRecipients, describeRecipients } = require('../lib/recipients')
 const TimetableEntry = require('../models/TimetableEntry')
-const Attendance     = require('../models/Attendance')
+const attendanceFacts = require('../lib/attendanceFacts')
 const Invoice        = require('../models/Invoice')
 const Payroll        = require('../models/Payroll')
 
@@ -168,16 +168,22 @@ router.get('/children/:id/reports', auth, async (req, res) => {
       })).sort((a,b)=>new Date(b.submittedAt)-new Date(a.submittedAt))
     }
 
-    // Attendance summary
-    const attFilter = { studentId:req.params.id }
-    if (Object.keys(dateFilter).length) attFilter.date = dateFilter
-    const attRecords = await Attendance.find(attFilter).lean()
+    // Attendance summary — per lesson (attended X of Y scheduled lessons);
+    // legacy day-register records count for dates before the cutover.
+    // Default window: the last 365 days.
+    const attTo   = to ? new Date(to) : new Date()
+    const attFrom = from ? new Date(from) : new Date(attTo.getTime() - 365*864e5)
+    const af = await attendanceFacts.oneStudent(req.params.id, attFrom, attTo, { lessons:false })
     const attSummary = {
-      total:   attRecords.length,
-      present: attRecords.filter(r=>r.status==='present').length,
-      absent:  attRecords.filter(r=>r.status==='absent').length,
-      late:    attRecords.filter(r=>r.checkInStatus==='late').length,
-      rate:    attRecords.length ? Math.round((attRecords.filter(r=>r.status==='present').length/attRecords.length)*100) : null,
+      total:     af.scheduled,
+      scheduled: af.scheduled,
+      attended:  af.attended,
+      present:   af.attended,
+      absent:    af.scheduled - af.attended,
+      late:      af.late,
+      rate:      af.rate,
+      lessonsScheduled: af.lessonsScheduled, lessonsAttended: af.lessonsAttended,
+      legacyDays: af.legacyDays, legacyAttended: af.legacyAttended,
     }
 
     // End-of-term formal reports
@@ -292,13 +298,21 @@ router.get('/children/:id/attendance', auth, async (req, res) => {
     if (!student) return fail(res,404,'Student not found.')
     await assertAccess(req.user, student)
 
-    const Attendance = require('../models/Attendance')
+    // Per-lesson attendance over the last 90 days; dates before the
+    // cutover come from the legacy day register, returned as history.
     const since = new Date(Date.now() - 90 * 24 * 3600 * 1000)
-    const records = await Attendance.find({ studentId: req.params.id, date: { $gte: since } })
-      .select('date status reason').sort({ date: -1 }).limit(60).lean()
-    const counts = {}
-    records.forEach(r2 => { counts[r2.status] = (counts[r2.status] || 0) + 1 })
-    return ok(res, { records, counts, since })
+    const f = await attendanceFacts.oneStudent(req.params.id, since, new Date())
+    const lessons = [...f.lessons].sort((a, b) => new Date(b.scheduledAt) - new Date(a.scheduledAt))
+    const legacy = [...f.legacyRecords].sort((a, b) => new Date(b.date) - new Date(a.date))
+    const counts = { attended: f.attended, missed: f.scheduled - f.attended, late: f.late }
+    return ok(res, {
+      summary: {
+        scheduled: f.scheduled, attended: f.attended, late: f.late, rate: f.rate,
+        lessonsScheduled: f.lessonsScheduled, lessonsAttended: f.lessonsAttended,
+        legacyDays: f.legacyDays, legacyAttended: f.legacyAttended,
+      },
+      lessons, legacy, records: legacy, counts, since, cutover: attendanceFacts.cutoverDate(),
+    })
   } catch(e) { return fail(res, e.status||500, e.message) }
 })
 
@@ -341,8 +355,12 @@ router.get('/children/:id/fees', auth, async (req, res) => {
     if (!student) return fail(res,404,'Student not found.')
     await assertAccess(req.user, student)
 
-    // All invoices for this student
-    const invoices = await Invoice.find({ billedToEmail: student.email })
+    // All invoices for this student: linked by studentId, or (older
+    // invoices) billed to the student's email. Cancelled invoices are
+    // kept on record but are not owed, so parents don't see them.
+    const or = [{ studentId: student._id }]
+    if (student.email) or.push({ billedToEmail: String(student.email).toLowerCase() })
+    const invoices = await Invoice.find({ $or: or, status: { $ne: 'cancelled' } })
       .sort({ createdAt:-1 })
       .lean()
 

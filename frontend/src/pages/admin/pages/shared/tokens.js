@@ -3,6 +3,7 @@ export const TOKENS = {
   crimson: '#7D1025',
   crimsonDeep: '#5A0B1B',
   crimsonLight: '#A51C2E',
+  crimsonD: '#5A0B1B',      // alias of crimsonDeep used by some modules
   gold: '#C9A030',
   goldLight: '#F0CC5A',
   goldPale: '#FBF6E3',
@@ -18,8 +19,12 @@ export const TOKENS = {
   accentOcean: '#0369A1',
   // Neutrals
   ink: '#1A0F0E',
+  inkSoft: '#564844',
+  inkMute: '#857973',
   s900: '#231715',
+  s800: '#3D2E2B',
   s700: '#564844',
+  s600: '#6E605B',
   s500: '#857973',
   s400: '#A89E99',
   s300: '#CFC7C2',
@@ -27,6 +32,10 @@ export const TOKENS = {
   s100: '#F4EFEB',
   s50: '#FAF7F4',
   white: '#FFFFFF',
+  bg: '#FBFAF5',
+  // Hairlines for card borders and dividers
+  line: '#E8E1DC',
+  lineSoft: '#F4EFEB',
   // Spacing scale (premium = generous)
   spacing: { xs: 4, sm: 8, md: 14, lg: 22, xl: 32, xxl: 48 },
 }

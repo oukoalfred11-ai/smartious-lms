@@ -42,11 +42,44 @@ function getTransporter() {
   })
 }
 
+function invoicePrefixFor(d = new Date()) {
+  return `SM-INV-${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`
+}
+
+// Next free number for today: one past the highest sequence already
+// used, rather than a count of today's invoices (a count reuses a
+// number whenever an invoice was removed or numbered by hand).
 async function nextInvoiceNo() {
-  const now = new Date()
-  const prefix = `SM-INV-${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`
-  const count = await Invoice.countDocuments({ invoiceNo: { $regex: `^${prefix}` } })
-  return `${prefix}-${String(count+1).padStart(2,'0')}`
+  const prefix = invoicePrefixFor(new Date())
+  const rows = await Invoice.find({ invoiceNo: { $regex: `^${prefix}-\\d+$` } }).select('invoiceNo').lean()
+  let max = 0
+  for (const r of rows) {
+    const n = parseInt(String(r.invoiceNo).slice(prefix.length + 1), 10)
+    if (Number.isFinite(n) && n > max) max = n
+  }
+  return `${prefix}-${String(max+1).padStart(2,'0')}`
+}
+
+function isDuplicateInvoiceNo(e) {
+  return e && e.code === 11000 &&
+    ((e.keyPattern && e.keyPattern.invoiceNo) || (e.keyValue && 'invoiceNo' in e.keyValue) || /invoiceNo/.test(String(e.message || '')))
+}
+
+/**
+ * Create an invoice under the next free number. Two invoices issued
+ * at the same moment can both be handed the same number; the unique
+ * index rejects the second, which then retries with a fresh number.
+ */
+async function createInvoiceWithNumber(fields, { attempts = 5 } = {}) {
+  for (let i = 0; ; i++) {
+    const invoiceNo = await nextInvoiceNo()
+    try {
+      return await Invoice.create({ ...fields, invoiceNo })
+    } catch (e) {
+      if (isDuplicateInvoiceNo(e) && i < attempts - 1) continue
+      throw e
+    }
+  }
 }
 
 function buildInvoiceEmailHTML(inv) {
@@ -152,7 +185,7 @@ async function issueInvoice(opts = {}) {
   const items = lineItems.filter(it => it && String(it.description || '').trim())
   if (!items.length) throw new Error('At least one line item is required.')
 
-  const invNo    = String(provided || '').trim() || await nextInvoiceNo()
+  const providedNo = String(provided || '').trim()
   const subtotal = items.reduce((s, it) => s + (parseFloat(it.amount) || 0), 0)
   const disc     = parseFloat(discount) || 0
   const vp       = parseFloat(vatPct) || 0
@@ -160,8 +193,7 @@ async function issueInvoice(opts = {}) {
   const total    = subtotal - disc + vatAmt
   const sig      = signatoryForRole(issuedByRole)
 
-  const inv = await Invoice.create({
-    invoiceNo: invNo,
+  const fields = {
     issueDate: issueDate || new Date(),
     dueDate:   dueDate || null,
     billedToName:    String(billedToName).trim(),
@@ -190,7 +222,11 @@ async function issueInvoice(opts = {}) {
     issuedBy: issuedBy || null,
     issuedByName:  sig.name,
     issuedByTitle: sig.title,
-  })
+  }
+  const inv = providedNo
+    ? await Invoice.create({ ...fields, invoiceNo: providedNo })
+    : await createInvoiceWithNumber(fields)
+  const invNo = inv.invoiceNo
 
   if (sendEmail && inv.billedToEmail) {
     const t = getTransporter()
@@ -221,6 +257,8 @@ async function issueInvoice(opts = {}) {
 module.exports = {
   issueInvoice,
   nextInvoiceNo,
+  createInvoiceWithNumber,
+  isDuplicateInvoiceNo,
   signatoryForRole,
   signatoryOf,
   getTransporter,

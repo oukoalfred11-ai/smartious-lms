@@ -23,10 +23,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { TOKENS } from '../shared/tokens.js'
 import { Muxer, ArrayBufferTarget } from '../../../../lib/mp4muxer.js'
-
-// ── Brand ────────────────────────────────────────────────
-const CRIMSON = '#8B1A2E'
-const CRIMSON_DK = '#5E0F1F'
 const GOLD = '#C9973A'
 const INK = '#080C14'
 const BONE = '#FDFAF4'

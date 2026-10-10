@@ -127,7 +127,7 @@ router.post('/change-password', auth, requireRole('student', 'admin'), async (re
     const valid = await bcrypt.compare(currentPassword, user.password);
     if (!valid) return fail(res, 401, 'Current password is incorrect.');
 
-    user.password = await bcrypt.hash(newPassword, 10);
+    user.password = newPassword; // hashed by the User pre-save hook
     await user.save();
 
     return ok(res, { changed: true }, 'Password changed.');

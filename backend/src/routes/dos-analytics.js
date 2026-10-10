@@ -9,6 +9,7 @@ const express  = require('express')
 const router   = express.Router()
 const mongoose = require('mongoose')
 const { auth, requireRole } = require('../middleware/auth')
+const attendanceFacts = require('../lib/attendanceFacts')
 
 const ALLOWED = requireRole('admin', 'dos')
 
@@ -27,7 +28,6 @@ router.get('/overview', auth, ALLOWED, async (req, res) => {
     const ExamSubmission = m('ExamSubmission')
     const Homework = m('Homework')
     const HomeworkSubmission = m('HomeworkSubmission')
-    const Attendance = m('Attendance')
 
     const now   = new Date()
     const wkAgo = new Date(now - 7*24*60*60*1000)
@@ -46,7 +46,9 @@ router.get('/overview', auth, ALLOWED, async (req, res) => {
         .select('examId studentId answers').lean(),
       Homework.countDocuments({ createdAt:{ $gte:moAgo } }),
       HomeworkSubmission.countDocuments({ status:{ $in:['graded','released'] }, updatedAt:{ $gte:moAgo } }),
-      Attendance.find({ date:{ $gte:wkAgo } }).lean(),
+      // Students only: per-lesson attendance (legacy day register, student
+      // role only, for dates before the cutover). Staff check-ins excluded.
+      attendanceFacts.studentAttendance(wkAgo, new Date(), { lessons:false }),
     ])
 
     // Average exam score this month
@@ -70,8 +72,8 @@ router.get('/overview', auth, ALLOWED, async (req, res) => {
       : null
 
     // Attendance rate this week
-    const present = attThisWeek.filter(a=>a.status==='present').length
-    const total   = attThisWeek.length
+    let present = 0, total = 0
+    Object.values(attThisWeek).forEach(f => { present += f.attended; total += f.scheduled })
     const attendanceRate = total > 0 ? Math.round((present/total)*100) : null
 
     return res.json({ success:true, data:{
@@ -251,7 +253,7 @@ router.get('/student-trends', auth, ALLOWED, async (req, res) => {
   try {
     const { studentId, subject, curriculum, grade, termStart, termEnd } = req.query
     const User = m('User'), Exam = m('Exam'), ExamSubmission = m('ExamSubmission')
-    const Attendance = m('Attendance'), Homework = m('Homework')
+    const Homework = m('Homework')
     const HomeworkSubmission = m('HomeworkSubmission')
 
     // Get students
@@ -276,6 +278,12 @@ router.get('/student-trends', auth, ALLOWED, async (req, res) => {
       status: 'graded',
     }).lean()
 
+    // Per-lesson attendance for all these students in one pass
+    // (default window: last 365 days when no term is given).
+    const attTo   = termEnd ? new Date(termEnd) : new Date()
+    const attFrom = termStart ? new Date(termStart) : new Date(attTo.getTime() - 365*864e5)
+    const attBy = await attendanceFacts.studentAttendance(attFrom, attTo, { studentIds: students.map(st=>st._id), lessons:false })
+
     const results = []
     for (const student of students) {
       const studentSubs = allSubs.filter(s=>String(s.studentId)===String(student._id))
@@ -291,14 +299,8 @@ router.get('/student-trends', auth, ALLOWED, async (req, res) => {
       const scores = trend.filter(t=>!t.absent && t.score!==null).map(t=>t.score)
       const avg = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : null
 
-      // Attendance rate in period
-      const attFilter = { studentId:student._id }
-      if (termStart) attFilter.date = { ...attFilter.date, $gte: new Date(termStart) }
-      if (termEnd)   attFilter.date = { ...attFilter.date, $lte: new Date(termEnd) }
-      const attRecords = await Attendance.find(attFilter).select('status').lean()
-      const attRate = attRecords.length
-        ? Math.round((attRecords.filter(a=>a.status==='present').length/attRecords.length)*100)
-        : null
+      // Attendance rate in period: attended / scheduled lessons
+      const attRate = attBy[String(student._id)]?.rate ?? null
 
       // HW submission rate
       const hwSubs = await HomeworkSubmission.countDocuments({
@@ -395,7 +397,7 @@ router.get('/at-risk', auth, ALLOWED, async (req, res) => {
   try {
     const { termStart, termEnd } = req.query
     const User = m('User'), ExamSubmission = m('ExamSubmission')
-    const Exam = m('Exam'), Attendance = m('Attendance')
+    const Exam = m('Exam')
 
     const students = await User.find({ role:'student', isActive:true })
       .select('firstName lastName curriculum gradeLevel admissionNo').lean()
@@ -407,7 +409,7 @@ router.get('/at-risk', auth, ALLOWED, async (req, res) => {
     const exams = await Exam.find({ startAt:{ $gte:start, $lte:end }, status:{ $in:['ended','archived'] } }).lean()
     const examIds = exams.map(e=>e._id)
     const allSubs = await ExamSubmission.find({ examId:{ $in:examIds }, status:'graded' }).lean()
-    const allAtt  = await Attendance.find({ date:{ $gte:start, $lte:end } }).lean()
+    const attBy   = await attendanceFacts.studentAttendance(start, end, { studentIds: students.map(st=>st._id), lessons:false })
 
     const atRisk = []
     for (const student of students) {
@@ -419,8 +421,7 @@ router.get('/at-risk', auth, ALLOWED, async (req, res) => {
       })
       const avg = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : null
 
-      const stAtt   = allAtt.filter(a=>String(a.studentId)===String(student._id))
-      const attRate = stAtt.length ? Math.round((stAtt.filter(a=>a.status==='present').length/stAtt.length)*100) : null
+      const attRate = attBy[String(student._id)]?.rate ?? null
 
       const flags = []
       if (avg!==null && avg<50) flags.push({ type:'low_score', value:avg, msg:`Average score: ${avg}%` })

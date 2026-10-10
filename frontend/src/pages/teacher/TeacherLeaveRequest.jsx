@@ -2,23 +2,6 @@ import { useState, useEffect } from 'react'
 import { useToast, api } from '../../context/ctx.jsx'
 import Modal from '../../components/ui/Modal.jsx'
 
-const Av = ({ init, col, size = 36 }) => (
-  <div style={{ width: size, height: size, borderRadius: '50%', background: col + '20', color: col, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'JetBrains Mono,monospace', fontSize: Math.round(size * .32), fontWeight: 700, flexShrink: 0 }}>{init}</div>
-)
-
-const Ico = ({ d, w = 18, col = 'currentColor', sw = 2 }) => (
-  <svg width={w} height={w} fill="none" viewBox="0 0 24 24" stroke={col} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round">
-    {d.split('|').map((p, i) => {
-      if (p.startsWith('rect:')) { const [, x, y, W, H, rx] = p.split(':'); return <rect key={i} x={x} y={y} width={W} height={H} rx={rx || 0} /> }
-      if (p.startsWith('circle:')) { const [, cx, cy, r] = p.split(':'); return <circle key={i} cx={cx} cy={cy} r={r} /> }
-      if (p.startsWith('line:')) { const [, x1, y1, x2, y2] = p.split(':'); return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} /> }
-      if (p.startsWith('poly:')) { return <polygon key={i} points={p.slice(5)} /> }
-      if (p.startsWith('pline:')) { return <polyline key={i} points={p.slice(6)} /> }
-      return <path key={i} d={p} />
-    })}
-  </svg>
-)
-
 export default function TeacherLeaveRequest() {
   const toast = useToast()
   const [applyModal, setApplyModal] = useState(false)
@@ -30,7 +13,6 @@ export default function TeacherLeaveRequest() {
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [reason, setReason] = useState('')
-  const [selectedDates, setSelectedDates] = useState([])
   
   // Calendar state
   const [calendarMonth, setCalendarMonth] = useState(new Date())

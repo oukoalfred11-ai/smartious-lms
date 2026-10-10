@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { useStore, useAuth, api } from '../../../../context/ctx.jsx'
+import { useAuth, api } from '../../../../context/ctx.jsx'
 import { TOKENS } from '../shared/tokens.js'
-import { fmtDate, fmtKsh } from '../shared/helpers.js'
-import { PCard, PKpi, PSection } from '../shared/ui.jsx'
-import { InvoiceGenerator, buildInvoiceHTML } from './DocumentsModule.jsx'
-import { StatusBadge } from './CRMModule.jsx'
+import { PSection } from '../shared/ui.jsx'
+import { InvoiceGenerator } from './DocumentsModule.jsx'
 
 
 function InvoicesTab({ toast, refreshKey }) {
@@ -26,6 +24,8 @@ function InvoicesTab({ toast, refreshKey }) {
   const [paidAmount, setPaidAmount] = useState('')
   const [paidDate, setPaidDate]     = useState(new Date().toISOString().split('T')[0])
   const [markingPaid, setMarkingPaid] = useState(false)
+  // Invoice to pre-fill the card payment form with ("Card link" action).
+  const [cardInvoice, setCardInvoice] = useState(null)
 
   // ── COLLECTIONS + REMINDERS ──
   // invView: 'invoices' | 'unpaid' | 'reminders'
@@ -56,8 +56,6 @@ function InvoicesTab({ toast, refreshKey }) {
 
   useEffect(() => { load() }, [load, refreshKey])
   useEffect(() => { setPage(1) }, [statusF, search])
-
-  const money = (n, cur='USD') => Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ' + cur
 
   const loadCollections = useCallback(() => {
     setCollLoading(true)
@@ -188,7 +186,7 @@ function InvoicesTab({ toast, refreshKey }) {
   }
 
   if (view === 'create') return <InvoiceGenerator toast={toast} onBack={() => { setView('list'); load() }}/>
-  if (view === 'paystack') return <CardPayments toast={toast} onBack={() => setView('list')}/>
+  if (view === 'paystack') return <CardPayments toast={toast} prefillInvoice={cardInvoice} onBack={() => { setView('list'); setCardInvoice(null); load() }}/>
 
   // KPI strip from stats
   const byCurrency = stats.byCurrency || []
@@ -442,7 +440,7 @@ function InvoicesTab({ toast, refreshKey }) {
           <option value="all">All statuses</option>
           {Object.keys(STATUS_COLOURS).map(s=><option key={s} value={s}>{s.charAt(0).toUpperCase()+s.slice(1)}</option>)}
         </select>
-        <button onClick={() => setView('paystack')} style={{ background:'#fff', color:TOKENS.crimson, border:'1.5px solid '+TOKENS.crimson, padding:'9px 16px', borderRadius:7, fontSize:12.5, fontWeight:700, cursor:'pointer', whiteSpace:'nowrap' }}>
+        <button onClick={() => { setCardInvoice(null); setView('paystack') }} style={{ background:'#fff', color:TOKENS.crimson, border:'1.5px solid '+TOKENS.crimson, padding:'9px 16px', borderRadius:7, fontSize:12.5, fontWeight:700, cursor:'pointer', whiteSpace:'nowrap' }}>
           Card payment
         </button>
         <button onClick={() => setView('create')} style={{ background:TOKENS.crimson, color:'#fff', border:'none', padding:'9px 18px', borderRadius:7, fontSize:12.5, fontWeight:700, cursor:'pointer', whiteSpace:'nowrap' }}>
@@ -497,6 +495,10 @@ function InvoicesTab({ toast, refreshKey }) {
                           had already settled. */}
                       {['sent', 'overdue', 'draft'].includes(inv.status) && (
                         <button onClick={() => openMarkPaid(inv)} style={{ fontSize:11, background:'#D1FAE5', color:'#065F46', border:'none', padding:'4px 8px', borderRadius:5, cursor:'pointer', fontWeight:700 }}>Mark paid</button>
+                      )}
+                      {['sent', 'overdue', 'draft'].includes(inv.status) && CARD_CURRENCIES.includes(inv.currency) && (
+                        <button onClick={() => { setCardInvoice(inv); setView('paystack') }} title="Send a Paystack card payment link for this invoice"
+                          style={{ fontSize:11, background:'#fff', color:TOKENS.crimson, border:'1px solid '+TOKENS.crimson, padding:'4px 8px', borderRadius:5, cursor:'pointer', fontWeight:700 }}>Card link</button>
                       )}
                       {inv.status === 'paid' && (
                         <button onClick={() => viewReceipt(inv)} style={{ fontSize:11, background:'#065F46', color:'#fff', border:'none', padding:'4px 8px', borderRadius:5, cursor:'pointer', fontWeight:700 }}>▤ Receipt</button>
@@ -614,8 +616,7 @@ export function FeeCollectionModule({ toast, refreshKey }) {
 
   // Modals
   const [editModal,    setEditModal]    = useState(null)  // student being edited
-  const [payModal,     setPayModal]     = useState(null)  // student recording payment for
-  const [detailModal,  setDetailModal]  = useState(null)  // student detail view
+  const [payModal,     setPayModal]     = useState(null)  // student detail view
   const [editForm,     setEditForm]     = useState({})
   const [payForm,      setPayForm]      = useState({ amount:'', currency:'USD', paidAt:'', paymentMethod:'Bank transfer', note:'', periodLabel:'' })
   const [saving,       setSaving]       = useState(false)
@@ -716,8 +717,6 @@ export function FeeCollectionModule({ toast, refreshKey }) {
     } catch(e) { toast?.error?.('Failed.') }
     finally { setRemindingAll(false) }
   }
-
-  const inp = { width:'100%', padding:'9px 11px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:13, fontFamily:'inherit', boxSizing:'border-box' }
   const totalPages = Math.ceil(total/LIMIT)
 
   return (
@@ -1015,12 +1014,27 @@ export default BillingModule
 
 
 // ═══════════════════════════════════════════════════════════
-// CARD PAYMENTS (Paystack) — the quick lane. Enter an email and
-// an amount; the parent receives a branded Pay Now email and pays
-// by card. Fully separate from the invoice system.
+// CARD PAYMENTS (Paystack). Enter an email and an amount, or pick an
+// unpaid invoice; the parent receives a branded Pay Now email and pays
+// by card. A link tied to an invoice marks that invoice paid (receipt
+// emailed, billing clock advanced) once Paystack confirms the money.
 // ═══════════════════════════════════════════════════════════
-function CardPayments({ toast, onBack }) {
-  const [f, setF] = React.useState({ payerName: '', email: '', amount: '', currency: 'KES', description: 'School fees' })
+// Currencies Paystack can charge that invoices can also be raised in.
+const CARD_CURRENCIES = ['KES', 'USD']
+const invoiceBalance = (inv) => Math.max(0, Math.round((Number(inv.totalDue || 0) - Number(inv.paidAmount || 0)) * 100) / 100)
+const formFromInvoice = (inv) => ({
+  payerName: inv.billedToName || '',
+  email: inv.billedToEmail || '',
+  amount: String(invoiceBalance(inv) || ''),
+  currency: inv.currency,
+  description: 'Invoice ' + inv.invoiceNo + (inv.studentName ? ' \u2014 ' + inv.studentName : ''),
+})
+const BLANK_CARD_FORM = { payerName: '', email: '', amount: '', currency: 'KES', description: 'School fees' }
+
+function CardPayments({ toast, onBack, prefillInvoice = null }) {
+  const [f, setF] = React.useState(() => prefillInvoice ? formFromInvoice(prefillInvoice) : BLANK_CARD_FORM)
+  const [invoiceId, setInvoiceId] = React.useState(prefillInvoice?._id || '')
+  const [unpaid, setUnpaid] = React.useState(prefillInvoice ? [prefillInvoice] : [])
   const [sending, setSending] = React.useState(false)
   const [rows, setRows] = React.useState([])
   const [lastLink, setLastLink] = React.useState('')
@@ -1029,20 +1043,40 @@ function CardPayments({ toast, onBack }) {
   const load = () => api.get('/paystack/requests')
     .then(r => setRows(r.data?.data?.requests || []))
     .catch(() => {})
-  React.useEffect(() => { load() }, [])
+  // Unpaid invoices for the optional picker (same endpoint as the
+  // invoices table, so sales users see only their own).
+  const loadUnpaid = () => Promise.all(['sent', 'overdue', 'draft'].map(status =>
+    api.get('/invoices', { params: { status, limit: 100 } }).then(r => r.data?.data?.invoices || []).catch(() => [])
+  )).then(lists => {
+    const all = lists.flat().filter(i => CARD_CURRENCIES.includes(i.currency) && invoiceBalance(i) > 0)
+    if (prefillInvoice && !all.some(i => i._id === prefillInvoice._id)) all.unshift(prefillInvoice)
+    all.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    setUnpaid(all)
+  })
+  React.useEffect(() => { load(); loadUnpaid() }, [])
 
   const set = (k) => (e) => setF(p => ({ ...p, [k]: e.target.value }))
+
+  const pickInvoice = (id) => {
+    setInvoiceId(id)
+    const inv = unpaid.find(i => i._id === id)
+    setF(inv ? formFromInvoice(inv) : BLANK_CARD_FORM)
+  }
+  const linked = unpaid.find(i => i._id === invoiceId) || null
 
   const send = async () => {
     if (!f.email || !/.+@.+\..+/.test(f.email)) return toast?.error?.('Enter a valid parent email.')
     if (!Number(f.amount) || Number(f.amount) <= 0) return toast?.error?.('Enter an amount greater than zero.')
     setSending(true)
     try {
-      const r = await api.post('/paystack/request', { ...f, amount: Number(f.amount) })
+      const body = { ...f, amount: Number(f.amount) }
+      if (invoiceId) body.invoiceId = invoiceId
+      const r = await api.post('/paystack/request', body)
       const doc = r.data?.data?.request
       setLastLink(doc?.authorizationUrl || '')
-      toast?.ok?.('Payment request emailed to ' + f.email)
+      toast?.ok?.('Payment request emailed to ' + f.email + (doc?.invoiceNo ? ' for invoice ' + doc.invoiceNo : ''))
       setF(p => ({ ...p, payerName: '', email: '', amount: '' }))
+      if (invoiceId) { setInvoiceId(''); setF(BLANK_CARD_FORM) }
       load()
     } catch (e) {
       toast?.error?.(e?.response?.data?.message || 'Could not create the payment link.')
@@ -1055,8 +1089,11 @@ function CardPayments({ toast, onBack }) {
     try {
       const r = await api.get('/paystack/verify/' + ref)
       const st = r.data?.data?.request?.status
-      toast?.ok?.(st === 'paid' ? 'Confirmed PAID by Paystack.' : 'Status from Paystack: ' + st)
+      const outcome = r.data?.data?.request?.invoiceOutcome
+      const OUTCOME = { marked_paid: ' Invoice marked paid and receipt sent.', partial: ' Part payment recorded on the invoice; it stays open for review.', currency_mismatch: ' Currency differs from the invoice; review it manually.', already_paid: ' The invoice was already paid; check for a double payment.', invoice_missing: ' The linked invoice was not found.' }
+      toast?.ok?.((st === 'paid' ? 'Confirmed PAID by Paystack.' : 'Status from Paystack: ' + st) + (st === 'paid' && outcome ? OUTCOME[outcome] || '' : ''))
       load()
+      if (st === 'paid') loadUnpaid()
     } catch (e) {
       toast?.error?.(e?.response?.data?.message || 'Could not verify.')
     }
@@ -1076,14 +1113,30 @@ function CardPayments({ toast, onBack }) {
       <div style={{ background: '#fff', border: '1.5px solid ' + TOKENS.line, borderRadius: 12, padding: 18 }}>
         <div style={{ fontSize: 14, fontWeight: 800, color: TOKENS.s900, marginBottom: 2 }}>Request a card payment</div>
         <div style={{ fontSize: 11.5, color: TOKENS.s500, marginBottom: 14 }}>
-          The parent receives a branded email with a secure Pay Now button. Payment is processed by Paystack and does not touch the invoice books.
+          The parent receives a branded email with a secure Pay Now button. Payment is processed by Paystack. Pick an invoice to tie the link to it: when Paystack confirms the money, the invoice is marked paid and the receipt is emailed.
+        </div>
+        <div style={{ marginBottom: 12 }}>
+          <label style={lbl}>Invoice (optional)</label>
+          <select value={invoiceId} onChange={e => pickInvoice(e.target.value)} style={{ ...inp, background: '#fff' }}>
+            <option value="">No invoice: free amount</option>
+            {unpaid.map(i => (
+              <option key={i._id} value={i._id}>
+                {i.invoiceNo + ' \u00b7 ' + i.billedToName + (i.studentName ? ' (' + i.studentName + ')' : '') + ' \u00b7 ' + i.currency + ' '} {invoiceBalance(i).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+              </option>
+            ))}
+          </select>
+          {linked && (
+            <div style={{ fontSize: 11, color: TOKENS.s500, marginTop: 4 }}>
+              Balance {linked.currency} {invoiceBalance(linked).toLocaleString('en-US', { minimumFractionDigits: 2 })}. Currency is fixed to the invoice; a smaller amount is recorded as a part payment and the invoice stays open.
+            </div>
+          )}
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
           <div><label style={lbl}>Parent name</label><input value={f.payerName} onChange={set('payerName')} placeholder="Optional" style={inp}/></div>
           <div><label style={lbl}>Parent email *</label><input value={f.email} onChange={set('email')} placeholder="parent@email.com" style={inp}/></div>
           <div><label style={lbl}>Amount *</label><input type="number" min="1" value={f.amount} onChange={set('amount')} placeholder="e.g. 40000" style={inp}/></div>
           <div><label style={lbl}>Currency</label>
-            <select value={f.currency} onChange={set('currency')} style={{ ...inp, background: '#fff' }}>
+            <select value={f.currency} onChange={set('currency')} disabled={!!invoiceId} style={{ ...inp, background: invoiceId ? TOKENS.cream : '#fff' }}>
               {['KES', 'USD', 'NGN', 'GHS', 'ZAR'].map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
@@ -1124,10 +1177,13 @@ function CardPayments({ toast, onBack }) {
                       <div style={{ fontSize: 11, color: TOKENS.s500 }}>{r.email}</div>
                     </td>
                     <td style={{ padding: '8px', borderBottom: '1px solid ' + TOKENS.line, fontWeight: 700, whiteSpace: 'nowrap' }}>{r.currency} {Number(r.amount).toLocaleString()}</td>
-                    <td style={{ padding: '8px', borderBottom: '1px solid ' + TOKENS.line, maxWidth: 180 }}>{r.description}</td>
+                    <td style={{ padding: '8px', borderBottom: '1px solid ' + TOKENS.line, maxWidth: 180 }}>
+                      {r.description}
+                      {r.invoiceNo && <div style={{ fontSize: 11, fontFamily: 'monospace', fontWeight: 700, color: TOKENS.crimson }}>{r.invoiceNo}</div>}
+                    </td>
                     <td style={{ padding: '8px', borderBottom: '1px solid ' + TOKENS.line }}>
                       <span style={{ color: STATUS[r.status] || TOKENS.s500, fontWeight: 800, fontSize: 11.5, textTransform: 'uppercase' }}>{r.status}</span>
-                      {r.channel ? <span style={{ fontSize: 10.5, color: TOKENS.s500 }}> \u00b7 {r.channel}</span> : null}
+                      {r.channel ? <span style={{ fontSize: 10.5, color: TOKENS.s500 }}>{' \u00b7 '}{r.channel}</span> : null}
                     </td>
                     <td style={{ padding: '8px', borderBottom: '1px solid ' + TOKENS.line, whiteSpace: 'nowrap' }}>
                       {r.status !== 'paid' && (
@@ -1144,7 +1200,7 @@ function CardPayments({ toast, onBack }) {
           </div>
         )}
         <div style={{ fontSize: 10.5, color: TOKENS.s500, marginTop: 10, lineHeight: 1.5 }}>
-          Check status asks Paystack directly, so a payment shows as PAID only when Paystack confirms the money. When a request turns PAID, accounts@ receives a confirmation email automatically.
+          Check status asks Paystack directly, so a payment shows as PAID only when Paystack confirms the money. When a request turns PAID, accounts@ receives a confirmation email automatically, and a linked invoice is marked paid.
         </div>
       </div>
     </div>

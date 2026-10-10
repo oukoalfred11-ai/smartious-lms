@@ -508,18 +508,6 @@ const PLAYER = {
   goldD:   '#C9973A',
 }
 
-// YouTube serves a thumbnail for any video id, so the playlist gets
-// artwork without anyone having to upload one.
-const thumbFor = (embedId) =>
-  embedId ? `https://i.ytimg.com/vi/${embedId}/mqdefault.jpg` : ''
-
-const fmtDur = (mins) => {
-  const m = Number(mins) || 0
-  if (!m) return ''
-  const h = Math.floor(m / 60)
-  return h ? `${h}:${String(m % 60).padStart(2, '0')}:00` : `${m}:00`
-}
-
 function LessonDetailView({ lesson, subject, teacher, mastered, onBack, lessons = [], progressMap = {}, onSelectLesson, onOpenLibrary }) {
   const [pane, setPane] = useState('video')
   const [listOpen, setListOpen] = useState(false)   // mobile lesson drawer

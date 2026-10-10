@@ -20,6 +20,7 @@ const Inquiry = require('../models/Inquiry');
 const Invoice = require('../models/Invoice');
 const LiveClass = require('../models/LiveClass');
 const ClassroomSession = require('../models/ClassroomSession');
+const { sessionFacts } = require('../lib/attendanceFacts');
 
 const STAFF = ['admin', 'ops_manager', 'dos'];
 const r1 = (x) => Math.round(x * 10) / 10;
@@ -76,17 +77,7 @@ router.get('/churn', auth, requireRole('admin', 'ops_manager'), async (req, res)
 
     // Attendance: last 14d vs the 14d before, derived-status classes.
     const from28 = new Date(now - 28 * 864e5);
-    const raw = await LiveClass.find({
-      status: { $nin: ['cancelled'] }, kind: { $in: ['lesson', null] },
-      scheduledAt: { $gte: from28, $lte: new Date(now) },
-    }).select('assignedStudents scheduledAt durationMins status').lean();
-    const classes = raw.filter(c => c.status === 'ended' ||
-      new Date(c.scheduledAt).getTime() + (c.durationMins || 60) * 60000 < now);
-    const ids = classes.map(c => c._id);
-    const sess = ids.length ? await ClassroomSession.find({ liveClassId: { $in: ids } })
-      .select('liveClassId userId present joinCount').lean() : [];
-    const att = new Set();
-    sess.forEach(s => { if (((s.joinCount || 0) > 0 || s.present === true) && s.present !== false) att.add(String(s.liveClassId) + '|' + String(s.userId)); });
+    const { classes, attended: isAttended } = await sessionFacts(from28, new Date(now));
     const per = {}; // uid -> {recent:{a,s}, prior:{a,s}}
     classes.forEach(c => {
       const recent = new Date(c.scheduledAt).getTime() >= now - 14 * 864e5;
@@ -94,7 +85,7 @@ router.get('/churn', auth, requireRole('admin', 'ops_manager'), async (req, res)
         const uid = String(u);
         per[uid] = per[uid] || { recent: { a: 0, s: 0 }, prior: { a: 0, s: 0 } };
         const b = recent ? per[uid].recent : per[uid].prior;
-        b.s += 1; if (att.has(String(c._id) + '|' + uid)) b.a += 1;
+        b.s += 1; if (isAttended(c._id, uid)) b.a += 1;
       });
     });
 
@@ -145,10 +136,17 @@ router.get('/revenue', auth, requireRole('admin', 'ops_manager'), async (req, re
   try {
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    const [monthAgg, aging, arpu] = await Promise.all([
+    const [monthAgg, collectedAgg, aging, arpu] = await Promise.all([
       Invoice.aggregate([
         { $match: { createdAt: { $gte: monthStart } } },
         { $group: { _id: '$status', n: { $sum: 1 }, amount: { $sum: '$totalDue' } } },
+      ]),
+      // Collected = money received this month: invoices paid this month
+      // (by paidAt, whenever issued), summing paidAmount with totalDue as
+      // the fallback for older records where paidAmount was left at 0.
+      Invoice.aggregate([
+        { $match: { status: 'paid', paidAt: { $gte: monthStart } } },
+        { $group: { _id: null, n: { $sum: 1 }, amount: { $sum: { $cond: [{ $gt: [{ $ifNull: ['$paidAmount', 0] }, 0] }, '$paidAmount', '$totalDue'] } } } },
       ]),
       Invoice.aggregate([
         { $match: { status: { $in: ['sent', 'overdue'] } } },
@@ -163,8 +161,9 @@ router.get('/revenue', auth, requireRole('admin', 'ops_manager'), async (req, re
       ]),
     ]);
     const byStatus = Object.fromEntries(monthAgg.map(r => [r._id, { n: r.n, amount: r.amount }]));
-    const issued = monthAgg.reduce((t, r) => t + r.amount, 0);
-    const collected = byStatus.paid?.amount || 0;
+    // Cancelled invoices were never money owed, so they are not "issued".
+    const issued = monthAgg.filter(r => r._id !== 'cancelled').reduce((t, r) => t + r.amount, 0);
+    const collected = collectedAgg[0]?.amount || 0;
     const agingLabels = { 0: '0-14d', 15: '15-30d', 31: '31-60d', 61: '60d+' };
     res.json({ success: true, data: {
       month: monthStart.toISOString().slice(0, 7),
@@ -173,7 +172,7 @@ router.get('/revenue', auth, requireRole('admin', 'ops_manager'), async (req, re
       outstandingTotal: aging.reduce((t, b) => t + b.amount, 0),
       arpu: arpu.map(r => ({ curriculum: r._id || 'Unset', students: r.n, avgFee: r1(r.avgFee), monthlyValue: r.totalFee })),
       expectedMonthly: arpu.reduce((t, r) => t + r.totalFee, 0),
-      method: 'Issued/collected from invoices created this calendar month by status. Aging: unpaid invoices bucketed by days since issue. Expected monthly and ARPU from active students\' agreed fees by curriculum.',
+      method: 'Issued: invoices created this calendar month (excluding cancelled). Collected: invoices paid this calendar month by payment date, summing the amount received. Aging: unpaid invoices bucketed by days since issue. Expected monthly and ARPU from active students\' agreed fees by curriculum.',
     } });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });

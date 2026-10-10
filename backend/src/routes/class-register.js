@@ -18,12 +18,13 @@ const { auth, requireRole } = require('../middleware/auth');
 const LiveClass = require('../models/LiveClass');
 const ClassroomSession = require('../models/ClassroomSession');
 const User = require('../models/User');
+const { sessionAttended } = require('../lib/attendanceFacts');
 
 const STAFF = ['admin', 'ops_manager', 'dos'];
 
 async function loadClass(req, res) {
   const cls = await LiveClass.findById(req.params.liveClassId)
-    .select('title subject grade teacherId assignedStudents scheduledAt status kind').lean();
+    .select('title subject grade teacherId assignedStudents scheduledAt durationMins status kind').lean();
   if (!cls) { res.status(404).json({ success: false, message: 'Class not found.' }); return null; }
   const isTeacher = String(cls.teacherId) === String(req.user._id);
   if (!isTeacher && !STAFF.includes(req.user.role)) {
@@ -39,7 +40,7 @@ router.get('/:liveClassId', auth, requireRole('teacher', ...STAFF), async (req, 
     if (!cls) return;
     const [students, sessions] = await Promise.all([
       User.find({ _id: { $in: cls.assignedStudents || [] } }).select('firstName lastName gradeLevel').lean(),
-      ClassroomSession.find({ liveClassId: cls._id }).select('userId present joinCount firstJoinedAt markedBy').lean(),
+      ClassroomSession.find({ liveClassId: cls._id }).select('userId present joinCount firstJoinedAt durationMs markedBy').lean(),
     ]);
     const byUser = Object.fromEntries(sessions.map(s => [String(s.userId), s]));
     const rows = students.map(st => {
@@ -50,7 +51,9 @@ router.get('/:liveClassId', auth, requireRole('teacher', ...STAFF), async (req, 
         grade: st.gradeLevel || '',
         joined: !!s && (s.joinCount || 0) > 0,
         firstJoinedAt: s?.firstJoinedAt || null,
-        present: s ? s.present !== false : false,
+        minutes: Math.round((s?.durationMs || 0) / 60000),
+        lateByMin: s?.firstJoinedAt ? Math.max(0, Math.round((new Date(s.firstJoinedAt) - new Date(cls.scheduledAt)) / 60000)) : null,
+        present: sessionAttended(s),
         amended: !!s?.markedBy,
       };
     }).sort((a, b) => (a.name > b.name ? 1 : -1));
@@ -62,6 +65,10 @@ router.post('/:liveClassId', auth, requireRole('teacher', ...STAFF), async (req,
   try {
     const cls = await loadClass(req, res);
     if (!cls) return;
+    if (cls.status === 'cancelled')
+      return res.status(400).json({ success: false, message: 'This class was cancelled; there is no register to keep.' });
+    if (new Date(cls.scheduledAt).getTime() > Date.now())
+      return res.status(400).json({ success: false, message: 'The register opens once the class has started.' });
     const marks = Array.isArray(req.body?.marks) ? req.body.marks : [];
     if (!marks.length) return res.status(400).json({ success: false, message: 'No marks provided.' });
     const allowed = new Set((cls.assignedStudents || []).map(String));

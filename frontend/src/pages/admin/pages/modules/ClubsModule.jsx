@@ -9,7 +9,6 @@ const COLORS = ['#1E3A8A', '#6D28D9', '#3F6212', '#BE185D', '#C2410C', '#78350F'
 const EMPTY = { name: '', tagline: '', description: '', icon: 'star', color: '#7D1025', coverImage: '', category: 'General', meetingSchedule: '', durationMins: 60, capacity: 0, leaders: [], isActive: true, featured: false }
 
 const fmtWhen = (d) => new Date(d).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
-const toLocal = (d) => { const x = new Date(d); x.setMinutes(x.getMinutes() - x.getTimezoneOffset()); return x.toISOString().slice(0, 16) }
 
 export default function ClubsModule({ toast }) {
   const [clubs, setClubs] = useState([])
@@ -72,7 +71,6 @@ export default function ClubsModule({ toast }) {
   const card = { background: '#fff', border: `1.5px solid ${LINE}`, borderRadius: 14, padding: 18 }
   const input = { width: '100%', padding: '9px 12px', border: `1.5px solid ${LINE}`, borderRadius: 8, fontSize: 13.5, boxSizing: 'border-box' }
   const btn = (primary, color) => ({ padding: '8px 14px', borderRadius: 8, fontSize: 12.5, fontWeight: 700, cursor: 'pointer', border: `1.5px solid ${primary ? (color || TOKENS.crimson) : LINE}`, background: primary ? (color || TOKENS.crimson) : '#fff', color: primary ? '#fff' : S600 })
-  const Ico = ({ k, c, s = 18 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill={c}><circle cx="12" cy="12" r="10" opacity={k === 'star' ? .35 : .35} /><text x="12" y="16" textAnchor="middle" fontSize="11" fontWeight="800" fill="#fff">{(k || '?')[0].toUpperCase()}</text></svg>
 
   return (
     <div style={{ display: 'grid', gap: 18, maxWidth: 1040 }}>

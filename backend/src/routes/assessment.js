@@ -976,6 +976,26 @@ router.get('/payment-callback', async (req, res) => {
       await requestDoc.save();
       console.log(`[assessment] Payment received for ${requestDoc.requestRef}`);
 
+      // The invoice is the source of truth: if this request carries one,
+      // settle it through the shared path (receipt, billing clock).
+      // Idempotent, so a parent reloading the callback changes nothing.
+      // The legacy links charged the assessment fee itself, so a paid
+      // link settles the invoice in full; Paystack's amount/currency
+      // are recorded in the note for the accounts team.
+      if (requestDoc.invoiceId) {
+        try {
+          const { markInvoicePaid } = require('../lib/markInvoicePaid');
+          const cur = String(txn.currency || '').toUpperCase();
+          await markInvoicePaid(requestDoc.invoiceId, {
+            paidAt: txn.paid_at ? new Date(txn.paid_at) : new Date(),
+            note: `Paystack ${ref}: ${cur} ${Math.round(Number(txn.amount || 0)) / 100}`,
+            source: 'paystack-legacy',
+          });
+        } catch (e) {
+          console.error(`[assessment callback] invoice settle failed for ${requestDoc.requestRef}:`, e.message);
+        }
+      }
+
       // Notify admin
       const t = getTransporter();
       const from = process.env.EMAIL_FROM || 'Smartious Homeschool <hello@smartioushomeschool.com>';
