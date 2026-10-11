@@ -1243,10 +1243,17 @@ router.get('/public-teachers', async (req, res) => {
   // curricula and teaching specialities are internal (they drive
   // student and subject allocation) and are not published.
   try {
-    const { TEAM_ROLES, TEAM_GROUPS, teamTitle, teamGroup } = require('../constants/qa');
+    const { TEAM_ROLES, teamTitle, teamGroup } = require('../constants/qa');
     const people = await User.find({
       role: { $in: TEAM_ROLES }, isActive: { $ne: false }, isDemo: { $ne: true }, teacherStatus: { $ne: 'Left' },
-    }).select('firstName lastName role teacherCategory jobTitle bio avatar qualifications certifications yearsOfExperience').lean();
+    }).select('firstName lastName role teacherCategory additionalRoles jobTitle bio avatar qualifications certifications yearsOfExperience').lean();
+
+    // The website draws the team as a pyramid: Principal, management,
+    // teachers (incl. teachers in training), then support teachers.
+    const tierOf = (u) => u.role === 'admin' ? 'principal'
+      : u.role !== 'teacher' ? 'management'
+        : (u.teacherCategory || 'teacher') === 'support' ? 'support' : 'teachers';
+    const TIER_ORDER = { principal: 0, management: 1, teachers: 2, support: 3 };
 
     // Explicitly whitelist the public fields — nothing else leaves the server.
     const team = people.map(t => ({
@@ -1255,6 +1262,7 @@ router.get('/public-teachers', async (req, res) => {
       title: t.jobTitle || teamTitle(t),
       role: teamTitle(t),
       group: teamGroup(t.role),
+      tier: tierOf(t),
       principal: t.role === 'admin',
       bio: t.bio || '',
       avatar: t.avatar || '',
@@ -1264,8 +1272,7 @@ router.get('/public-teachers', async (req, res) => {
 
     // Principal first, then leadership, teaching, operations; within a
     // group the most experienced first.
-    const order = Object.fromEntries(TEAM_GROUPS.map((g, i) => [g.key, i]));
-    team.sort((a, b) => (b.principal - a.principal) || (order[a.group] - order[b.group])
+    team.sort((a, b) => (TIER_ORDER[a.tier] - TIER_ORDER[b.tier])
       || (b.yearsOfExperience - a.yearsOfExperience) || a.name.localeCompare(b.name));
 
     res.set('Cache-Control', 'public, max-age=300');

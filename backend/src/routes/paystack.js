@@ -39,7 +39,7 @@ const ALLOWED = (req, res, next) => {
   // 'accounts' was never a real role name (the system's role is
   // 'accountant'), so accounts staff were silently locked out.
   // Accounts and sales both send Paystack invoices now.
-  if (['admin', 'superadmin', 'accounts', 'accountant', 'sales', 'frontdesk', 'ops_manager'].includes(role)) return next();
+  if (['admin', 'superadmin', 'accounts', 'accountant', 'sales', 'frontdesk', 'ops_manager', 'dos'].includes(role)) return next();
   return res.status(403).json({ success: false, message: 'Not allowed.' });
 };
 

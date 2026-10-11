@@ -54,8 +54,9 @@ const TEAM_ROLES = ['admin', 'dos', 'ops_manager', 'qa', 'accountant', 'sales', 
 // The admin account is the school's Principal.
 const ROLE_TITLES = {
   admin: 'Principal',
-  dos: 'Dean of Studies',
-  ops_manager: 'Operations Manager',
+  // One merged role, shared by two people.
+  dos: 'Dean & Operations',
+  ops_manager: 'Dean & Operations',
   qa: 'Quality Assurance',
   accountant: 'Accountant',
   sales: 'Sales & Front Desk',
@@ -86,6 +87,8 @@ function teamTitle(u) {
     const c = TEACHER_CATEGORIES.find(x => x.key === (u.teacherCategory || 'teacher'));
     return c ? c.label : 'Teacher';
   }
+  if (['dos', 'ops_manager'].includes(u.role) && (u.additionalRoles || []).includes('qa'))
+    return 'Dean & Quality Assurance';
   return ROLE_TITLES[u.role] || 'Staff';
 }
 
