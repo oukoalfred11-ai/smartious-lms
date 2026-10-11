@@ -245,6 +245,98 @@ router.get('/teachers/list', auth, requireRole('admin', 'ops_manager'), async (r
   }
 });
 
+// ═════════════════════════════════════════════════════════
+// MY PROFILE — every member of staff edits their own profile.
+// The admin-only routes below (/:id, /:id/avatar) must not be used
+// for this: the Settings page used to call /users/me, which fell
+// through to /:id with id "me" and failed.
+// Registered before any /:id route so "me" is never read as an id.
+// ═════════════════════════════════════════════════════════
+const { TEAM_ROLES, teamTitle } = require('../constants/qa');
+const SELF_FIELDS = 'firstName lastName email phone avatar bio jobTitle role teacherCategory qualifications certifications specializations yearsOfExperience dateOfBirth homeAddress defaultMeetingLink emailPrefs createdAt lastLogin';
+const meView = (u) => ({ ...u, teamTitle: teamTitle(u) });
+
+router.get('/me', auth, requireRole(...TEAM_ROLES), async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select(SELF_FIELDS).lean();
+    if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
+    return res.json({ success: true, data: { user: meView(user) } });
+  } catch (e) {
+    console.error('[users me]', e.message);
+    return res.status(500).json({ success: false, message: 'Could not load your profile.' });
+  }
+});
+
+router.patch('/me', auth, requireRole(...TEAM_ROLES), async (req, res) => {
+  try {
+    const b = req.body || {};
+    const set = {};
+    const text = (v, max) => String(v ?? '').trim().slice(0, max);
+    const list = (v) => (Array.isArray(v) ? v : String(v || '').split('\n'))
+      .map(x => String(x).trim()).filter(Boolean).slice(0, 30).map(x => x.slice(0, 200));
+    if (b.firstName !== undefined) {
+      if (!text(b.firstName, 60)) return res.status(400).json({ success: false, message: 'First name is required.' });
+      set.firstName = text(b.firstName, 60);
+    }
+    if (b.lastName !== undefined) {
+      if (!text(b.lastName, 60)) return res.status(400).json({ success: false, message: 'Last name is required.' });
+      set.lastName = text(b.lastName, 60);
+    }
+    if (b.phone !== undefined) set.phone = text(b.phone, 40);
+    if (b.bio !== undefined) set.bio = text(b.bio, 1500);
+    if (b.jobTitle !== undefined) set.jobTitle = text(b.jobTitle, 80);
+    if (b.homeAddress !== undefined) set.homeAddress = text(b.homeAddress, 500);
+    if (b.qualifications !== undefined) set.qualifications = list(b.qualifications);
+    if (b.certifications !== undefined) set.certifications = list(b.certifications);
+    if (b.specializations !== undefined) set.specializations = list(b.specializations);
+    if (b.yearsOfExperience !== undefined) set.yearsOfExperience = Math.max(0, Math.min(70, parseInt(b.yearsOfExperience, 10) || 0));
+    if (b.dateOfBirth !== undefined) {
+      const d = b.dateOfBirth ? new Date(b.dateOfBirth) : null;
+      set.dateOfBirth = d && !isNaN(d.getTime()) ? d : null;
+    }
+    if (b.defaultMeetingLink !== undefined) {
+      const u = text(b.defaultMeetingLink, 500);
+      if (u && !/^https:\/\//i.test(u)) return res.status(400).json({ success: false, message: 'The meeting link must start with https://' });
+      set.defaultMeetingLink = u;
+    }
+    const user = await User.findByIdAndUpdate(req.user._id, { $set: set }, { new: true, runValidators: true }).select(SELF_FIELDS).lean();
+    return res.json({ success: true, message: 'Profile saved.', data: { user: meView(user) } });
+  } catch (e) {
+    console.error('[users me patch]', e.message);
+    return res.status(500).json({ success: false, message: 'Could not save your profile.' });
+  }
+});
+
+router.post('/me/avatar', auth, requireRole(...TEAM_ROLES), (req, res) => {
+  if (!uploadAvatar) {
+    return res.status(503).json({ success: false, message: 'Image upload is unavailable on the server: ' + (avatarUploadError || 'upload module not installed.') });
+  }
+  // Accept the image under "file" or "avatar".
+  uploadAvatar.any()(req, res, async (err) => {
+    if (err) return res.status(400).json({ success: false, message: err.message });
+    const file = (req.files || [])[0];
+    if (!file) return res.status(400).json({ success: false, message: 'Choose an image to upload.' });
+    try {
+      const avatar = await storeAvatarBuffer(file);
+      await User.updateOne({ _id: req.user._id }, { $set: { avatar } });
+      return res.json({ success: true, message: 'Profile photo updated.', data: { avatar, avatarUrl: avatar } });
+    } catch (e) {
+      console.error('[users me avatar]', e.message);
+      return res.status(500).json({ success: false, message: 'Could not save your photo.' });
+    }
+  });
+});
+
+router.delete('/me/avatar', auth, requireRole(...TEAM_ROLES), async (req, res) => {
+  try {
+    await User.updateOne({ _id: req.user._id }, { $set: { avatar: '' } });
+    return res.json({ success: true, message: 'Profile photo removed.' });
+  } catch (e) {
+    return res.status(500).json({ success: false, message: 'Could not remove your photo.' });
+  }
+});
+
+
 // POST /api/users/avatar — upload a profile image and get a URL back
 // WITHOUT needing a user to exist yet. This is what the create form
 // uses: admin picks a file, we return the URL, the form includes it

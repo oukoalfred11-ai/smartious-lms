@@ -12,6 +12,7 @@ import TeachersModule from './modules/TeachersModule.jsx'
 import DocumentsModule from './modules/DocumentsModule.jsx'
 import { QAOverviewModule, TeamProfilesModule, TDPModule, AccreditationsModule } from './modules/QAModules.jsx'
 import StaffFile from '../../../components/StaffFile.jsx'
+import MyProfileModule, { Avatar as ProfileAvatar } from './modules/MyProfileModule.jsx'
 import FrontDeskModule from './modules/FrontDeskModule.jsx'
 import AssessmentModule from './modules/AssessmentModule.jsx'
 import CRMModule, { SalesPerformanceModule } from './modules/CRMModule.jsx'
@@ -80,14 +81,14 @@ const NAV_SECTIONS = {
     { label: 'Quality',     items: ['qaoverview', 'teacherprofiles', 'tdp', 'accreditations'] },
     { label: 'Marketing',   items: ['studio'] },
     { label: 'System',      items: ['userlogs', 'billing', 'website', 'settings', 'ai', 'suggestions'] },
-    { label: 'Me',          items: ['mystafffile'] },
+    { label: 'Me',          items: ['myprofile', 'mystafffile'] },
   ],
   accountant: [
     { label: 'Overview',    items: ['checkin', 'dashboard', 'analytics'] },
     { label: 'Fee Management', items: ['feecollection', 'billing', 'sessions'] },
     { label: 'Finance',     items: ['payroll', 'inventory'] },
     { label: 'System',      items: ['settings'] },
-    { label: 'Me',          items: ['mystafffile'] },
+    { label: 'Me',          items: ['myprofile', 'mystafffile'] },
   ],
   dos: [
     { label: 'Overview',      items: ['command', 'checkin', 'dosanalytics'] },
@@ -101,7 +102,7 @@ const NAV_SECTIONS = {
     { label: 'Question Bank', items: ['questionbank'] },
     { label: 'Reports',       items: ['reports', 'dosperformance', 'mastery'] },
     { label: 'System',        items: ['settings'] },
-    { label: 'Me',          items: ['mystafffile'] },
+    { label: 'Me',          items: ['myprofile', 'mystafffile'] },
   ],
   sales: [
     { label: 'Overview',    items: ['checkin', 'dashboard', 'salesperf'] },
@@ -110,14 +111,14 @@ const NAV_SECTIONS = {
     { label: 'Admissions',  items: ['assessment', 'frontdesk', 'communication'] },
     { label: 'Content',     items: ['documents'] },
     { label: 'System',      items: ['settings'] },
-    { label: 'Me',          items: ['mystafffile'] },
+    { label: 'Me',          items: ['myprofile', 'mystafffile'] },
   ],
   qa: [
     { label: 'Overview',  items: ['dashboard'] },
     { label: 'Our School', items: ['teacherprofiles', 'tdp', 'accreditations'] },
     { label: 'Academics', items: ['curriculum', 'questionbank', 'exams'] },
     { label: 'Quality & Reports', items: ['reports', 'dosperformance', 'mastery', 'dosattend'] },
-    { label: 'Me',          items: ['mystafffile'] },
+    { label: 'Me',          items: ['myprofile', 'mystafffile'] },
   ],
   ops_manager: [
     { label: 'Overview',    items: ['command', 'checkin', 'dashboard', 'analytics'] },
@@ -131,7 +132,7 @@ const NAV_SECTIONS = {
     // academic assessments (schedule, mark, publish) live under Teaching.
     { label: 'Teaching',    items: ['liveclasses', 'clubs', 'exams'] },
     { label: 'System',      items: ['userlogs', 'settings', 'ai'] },
-    { label: 'Me',          items: ['mystafffile'] },
+    { label: 'Me',          items: ['myprofile', 'mystafffile'] },
   ],
 }
 
@@ -225,6 +226,8 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
 
           {/* Right: admin info + logout */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <button onClick={() => setPage('myprofile')} title="My profile"
+              style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontFamily: 'inherit' }}>
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontSize: 12, fontWeight: 600, color: TOKENS.s900 }}>{adminFirst}</div>
               <div style={{ fontSize: 10, color: TOKENS.s500, letterSpacing: '.06em', textTransform: 'uppercase' }}>
@@ -238,6 +241,8 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
                 }[role] || 'Principal'}
               </div>
             </div>
+            <ProfileAvatar user={auth?.user} size={34} />
+            </button>
             <NotificationsBell onNavigate={(mod) => { const map = { support: 'support', userlogs: 'userlogs' }; if (map[mod]) setPage(map[mod]) }} />
             <button onClick={onLogout} title="Sign out" style={{
               width: 36, height: 36, borderRadius: 10,
@@ -445,6 +450,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         {safePage === 'documents' && <DocumentsModule toast={toast} />}
         {safePage === 'teacherprofiles' && <TeamProfilesModule toast={toast} />}
         {safePage === 'mystafffile' && <StaffFile toast={toast} showTeaching={false} />}
+        {safePage === 'myprofile' && <MyProfileModule toast={toast} setPage={setPage} />}
         {safePage === 'tdp' && <TDPModule toast={toast} />}
         {safePage === 'accreditations' && <AccreditationsModule toast={toast} />}
         {safePage === 'assessment' && <AssessmentModule refreshKey={refreshKey} toast={toast} />}
