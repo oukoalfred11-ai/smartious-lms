@@ -41,14 +41,16 @@ const Accreditation   = require('../models/Accreditation');
 const TeacherDocument = require('../models/TeacherDocument');
 const User            = require('../models/User');
 const {
-  TEACHER_DOC_CATEGORIES, REQUIRED_PERSONNEL, EXPIRY_WARN_DAYS,
-  TRAINING_CATEGORIES, ACCREDITATION_TYPES,
+  TEACHER_DOC_CATEGORIES, REQUIRED_PERSONNEL, EXPIRY_WARN_DAYS, TRAINING_CATEGORIES, ACCREDITATION_TYPES,
+  TEAM_ROLES, TEAM_GROUPS, TEACHER_CATEGORIES, TEACHER_CATEGORY_KEYS, teamGroup, teamTitle, requiredFor,
 } = require('../constants/qa');
 const { auth, requireRole } = require('../middleware/auth');
 
 const READ_ROLES  = ['admin', 'ops_manager', 'dos', 'teacher', 'accountant', 'sales', 'qa'];
 const WRITE_ROLES = ['admin', 'ops_manager', 'dos', 'qa'];
 const OVERSIGHT_ROLES = ['admin', 'ops_manager', 'dos', 'qa'];
+// Who may change a person's teacher category or job title.
+const TEAM_EDIT_ROLES = ['admin', 'ops_manager', 'dos'];
 
 const R2_READY = !!(process.env.R2_ACCOUNT_ID && process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY && process.env.R2_BUCKET_NAME && process.env.R2_PUBLIC_URL);
 if (!R2_READY) console.warn('[qa] R2 storage NOT configured - evidence uploads will fail.');
@@ -121,7 +123,7 @@ const deleteObjects = async (items) => {
 const DAY = 86400000;
 const CAT_LABEL = Object.fromEntries(TEACHER_DOC_CATEGORIES.map(c => [c.key, c.label]));
 
-function fileStatus(docs, now = Date.now()) {
+function fileStatus(docs, required = REQUIRED_PERSONNEL, now = Date.now()) {
   const valid = new Set();
   const expired = [], expiring = [];
   for (const d of docs) {
@@ -134,14 +136,15 @@ function fileStatus(docs, now = Date.now()) {
     if (exp !== null && exp - now <= EXPIRY_WARN_DAYS * DAY)
       expiring.push({ _id: d._id, category: d.category, title: d.title, expiresAt: d.expiresAt });
   }
-  const have = REQUIRED_PERSONNEL.filter(k => valid.has(k));
+  const have = required.filter(k => valid.has(k));
   // Only report an expired category if no valid copy replaced it.
   const expiredOnly = expired.filter(e => !valid.has(e.category));
   return {
-    required: REQUIRED_PERSONNEL.length,
+    required: required.length,
+    requiredKeys: required,
     have: have.length,
-    pct: Math.round((have.length / REQUIRED_PERSONNEL.length) * 100),
-    missing: REQUIRED_PERSONNEL.filter(k => !valid.has(k)),
+    pct: Math.round((have.length / required.length) * 100),
+    missing: required.filter(k => !valid.has(k)),
     expired: expiredOnly,
     expiring,
     verified: docs.filter(d => d.verifiedAt).length,
@@ -149,8 +152,15 @@ function fileStatus(docs, now = Date.now()) {
   };
 }
 
-const TEACHER_FIELDS = 'firstName lastName email phone avatar bio jobTitle yearsOfExperience qualifications certifications specializations subjects teachingSpecialties teacherStatus isOnLeave isActive createdAt';
-const activeTeacherFilter = { role: 'teacher', isActive: { $ne: false }, teacherStatus: { $ne: 'Left' } };
+const TEAM_FIELDS = 'firstName lastName email phone avatar bio role teacherCategory jobTitle yearsOfExperience qualifications certifications specializations subjects teachingSpecialties teacherStatus isOnLeave isActive createdAt';
+// The whole staff team: the Principal, leadership, operations and every
+// kind of teacher. Demo accounts are not people.
+const activeTeamFilter = { role: { $in: TEAM_ROLES }, isActive: { $ne: false }, teacherStatus: { $ne: 'Left' }, isDemo: { $ne: true } };
+const ROLE_ORDER = Object.fromEntries(TEAM_ROLES.map((r, i) => [r, i]));
+const teamSort = (a, b) => (ROLE_ORDER[a.role] - ROLE_ORDER[b.role])
+  || [a.firstName, a.lastName].join(' ').localeCompare([b.firstName, b.lastName].join(' '));
+/** Title, group and required documents for one person. */
+const decorate = (u) => ({ ...u, teacherCategory: u.role === 'teacher' ? (u.teacherCategory || 'teacher') : undefined, teamTitle: teamTitle(u), group: teamGroup(u.role) });
 const DOC_FIELDS = 'teacherId category title subject description expiresAt verifiedAt verifiedByName uploadedBy uploadedByName file createdAt';
 
 // Trainings each teacher attended, as { [teacherId]: { count, hours, last } }.
@@ -177,8 +187,9 @@ router.get('/summary', auth, requireRole(...OVERSIGHT_ROLES), async (req, res) =
   try {
     const now = Date.now();
     const yearStart = new Date(new Date().getFullYear(), 0, 1);
-    const teachers = await User.find(activeTeacherFilter).select('firstName lastName avatar').lean();
-    const ids = teachers.map(t => t._id);
+    const team = await User.find(activeTeamFilter).select('firstName lastName avatar role teacherCategory').lean();
+    const teachers = team.filter(u => u.role === 'teacher');
+    const ids = team.map(t => t._id);
     const [docs, trainingsYear, recent, allTrainings, accs, byTeacher] = await Promise.all([
       TeacherDocument.find({ teacherId: { $in: ids } }).select(DOC_FIELDS).lean(),
       TeacherTraining.find({ trainingDate: { $gte: yearStart } }).select('durationHours attendees').lean(),
@@ -195,11 +206,11 @@ router.get('/summary', auth, requireRole(...OVERSIGHT_ROLES), async (req, res) =
     let pctSum = 0, complete = 0;
     const attention = [];
     const expiringDocs = [];
-    for (const t of teachers) {
-      const st = fileStatus(docsBy[String(t._id)] || [], now);
+    for (const t of team) {
+      const st = fileStatus(docsBy[String(t._id)] || [], requiredFor(t), now);
       pctSum += st.pct;
       if (st.have === st.required) complete += 1;
-      else attention.push({ _id: t._id, name: name(t), avatar: t.avatar || '', pct: st.pct, missing: st.missing.length });
+      else attention.push({ _id: t._id, name: name(t), avatar: t.avatar || '', title: teamTitle(t), pct: st.pct, missing: st.missing.length });
       for (const e of [...st.expired, ...st.expiring])
         expiringDocs.push({ teacherId: t._id, teacher: name(t), category: e.category, label: CAT_LABEL[e.category] || e.category, title: e.title, expiresAt: e.expiresAt, expired: new Date(e.expiresAt).getTime() < now });
     }
@@ -212,7 +223,8 @@ router.get('/summary', auth, requireRole(...OVERSIGHT_ROLES), async (req, res) =
       hoursYear += t.durationHours || 0;
       for (const a of t.attendees || []) reached.add(String(a));
     }
-    const idSet = new Set(ids.map(String));
+    // Training coverage is measured across the teaching staff.
+    const idSet = new Set(teachers.map(t => String(t._id)));
     const reachedActive = [...reached].filter(id => idSet.has(id)).length;
 
     const accCounts = { valid: 0, expiring: 0, expired: 0, permanent: 0 };
@@ -224,12 +236,14 @@ router.get('/summary', auth, requireRole(...OVERSIGHT_ROLES), async (req, res) =
       if (!(a.documents || []).length) accAlerts.push({ _id: a._id, name: a.name, body: a.body, type: a.type, status: 'no-certificate' });
     }
 
-    const hoursList = ids.map(id => byTeacher[String(id)]?.hours || 0);
+    const hoursList = teachers.map(t => byTeacher[String(t._id)]?.hours || 0);
     res.json({ success: true, data: {
-      teachers: {
-        total: teachers.length,
+      team: {
+        total: team.length,
+        teachers: teachers.length,
+        byCategory: Object.fromEntries(TEACHER_CATEGORIES.map(c => [c.key, teachers.filter(t => (t.teacherCategory || 'teacher') === c.key).length])),
         complete,
-        avgCompleteness: teachers.length ? Math.round(pctSum / teachers.length) : 0,
+        avgCompleteness: team.length ? Math.round(pctSum / team.length) : 0,
         attention: attention.slice(0, 8),
         requiredCategories: REQUIRED_PERSONNEL.map(k => ({ key: k, label: CAT_LABEL[k] })),
       },
@@ -257,15 +271,15 @@ router.get('/summary', auth, requireRole(...OVERSIGHT_ROLES), async (req, res) =
   }
 });
 
-// ── Teachers with file completeness ────────────────────────
-router.get('/teachers', auth, requireRole(...OVERSIGHT_ROLES), async (req, res) => {
+// ── The team with file completeness ────────────────────────
+async function listTeam(req, res) {
   try {
     const includeLeft = req.query.includeLeft === '1';
-    const filter = includeLeft ? { role: 'teacher' } : activeTeacherFilter;
-    const teachers = await User.find(filter).select(TEACHER_FIELDS)
-      .populate('teachingSpecialties.subjectId', 'subjectName curriculum')
-      .sort({ firstName: 1, lastName: 1 }).lean();
-    const ids = teachers.map(t => t._id);
+    const filter = includeLeft ? { role: { $in: TEAM_ROLES }, isDemo: { $ne: true } } : activeTeamFilter;
+    const people = await User.find(filter).select(TEAM_FIELDS)
+      .populate('teachingSpecialties.subjectId', 'subjectName curriculum').lean();
+    people.sort(teamSort);
+    const ids = people.map(t => t._id);
     const [docs, byTeacher] = await Promise.all([
       TeacherDocument.find({ teacherId: { $in: ids } }).select('teacherId category expiresAt verifiedAt').lean(),
       trainingByTeacher(ids),
@@ -273,39 +287,71 @@ router.get('/teachers', auth, requireRole(...OVERSIGHT_ROLES), async (req, res) 
     const docsBy = {};
     for (const d of docs) (docsBy[String(d.teacherId)] = docsBy[String(d.teacherId)] || []).push(d);
     const now = Date.now();
-    const rows = teachers.map(t => ({
-      ...t,
-      file: fileStatus(docsBy[String(t._id)] || [], now),
+    const rows = people.map(t => ({
+      ...decorate(t),
+      file: fileStatus(docsBy[String(t._id)] || [], requiredFor(t), now),
       training: byTeacher[String(t._id)] || { count: 0, hours: 0, last: null },
     }));
-    res.json({ success: true, data: { teachers: rows, categoryMeta: TEACHER_DOC_CATEGORIES, required: REQUIRED_PERSONNEL } });
+    res.json({ success: true, data: {
+      team: rows, teachers: rows,
+      categoryMeta: TEACHER_DOC_CATEGORIES, required: REQUIRED_PERSONNEL,
+      teacherCategories: TEACHER_CATEGORIES, groups: TEAM_GROUPS.map(({ key, label }) => ({ key, label })),
+    } });
   } catch (e) {
-    console.error('[qa teachers]', e.message);
+    console.error('[qa team]', e.message);
     res.status(500).json({ success: false, message: e.message });
   }
-});
+}
+router.get('/team', auth, requireRole(...OVERSIGHT_ROLES), listTeam);
+router.get('/teachers', auth, requireRole(...OVERSIGHT_ROLES), listTeam);   // older name
 
-// ── One teacher's full QA profile ──────────────────────────
-router.get('/teachers/:id', auth, requireRole(...OVERSIGHT_ROLES), async (req, res) => {
+// ── One person's full profile ──────────────────────────────
+async function getMember(req, res) {
   try {
     if (!mongoose.isValidObjectId(req.params.id)) return res.status(400).json({ success: false, message: 'Invalid id.' });
-    const teacher = await User.findOne({ _id: req.params.id, role: 'teacher' }).select(TEACHER_FIELDS)
+    const person = await User.findOne({ _id: req.params.id, role: { $in: TEAM_ROLES } }).select(TEAM_FIELDS)
       .populate('teachingSpecialties.subjectId', 'subjectName curriculum').lean();
-    if (!teacher) return res.status(404).json({ success: false, message: 'Teacher not found.' });
+    if (!person) return res.status(404).json({ success: false, message: 'Team member not found.' });
     const [documents, trainings] = await Promise.all([
-      TeacherDocument.find({ teacherId: teacher._id }).select(DOC_FIELDS).sort({ category: 1, createdAt: -1 }).lean(),
-      TeacherTraining.find({ attendees: teacher._id })
+      TeacherDocument.find({ teacherId: person._id }).select(DOC_FIELDS).sort({ category: 1, createdAt: -1 }).lean(),
+      TeacherTraining.find({ attendees: person._id })
         .select('title provider trainingDate durationHours mode category location photos files')
         .sort({ trainingDate: -1 }).lean(),
     ]);
+    const member = decorate(person);
     res.json({ success: true, data: {
-      teacher, documents, trainings,
-      file: fileStatus(documents),
+      member, teacher: member, documents, trainings,
+      file: fileStatus(documents, requiredFor(person)),
       trainingHours: trainings.reduce((s, t) => s + (t.durationHours || 0), 0),
-      categoryMeta: TEACHER_DOC_CATEGORIES, required: REQUIRED_PERSONNEL,
+      categoryMeta: TEACHER_DOC_CATEGORIES, required: requiredFor(person),
+      teacherCategories: TEACHER_CATEGORIES,
+      canEdit: TEAM_EDIT_ROLES.includes(req.user.role),
     } });
   } catch (e) {
-    console.error('[qa teacher]', e.message);
+    console.error('[qa member]', e.message);
+    res.status(500).json({ success: false, message: e.message });
+  }
+}
+router.get('/team/:id', auth, requireRole(...OVERSIGHT_ROLES), getMember);
+router.get('/teachers/:id', auth, requireRole(...OVERSIGHT_ROLES), getMember);   // older name
+
+// ── Set a teacher's category and anyone's job title ────────
+router.patch('/team/:id', auth, requireRole(...TEAM_EDIT_ROLES), async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) return res.status(400).json({ success: false, message: 'Invalid id.' });
+    const person = await User.findOne({ _id: req.params.id, role: { $in: TEAM_ROLES } });
+    if (!person) return res.status(404).json({ success: false, message: 'Team member not found.' });
+    const { teacherCategory, jobTitle } = req.body || {};
+    if (teacherCategory !== undefined) {
+      if (person.role !== 'teacher') return res.status(400).json({ success: false, message: 'Only teachers have a teacher category.' });
+      if (!TEACHER_CATEGORY_KEYS.includes(teacherCategory)) return res.status(400).json({ success: false, message: 'Unknown teacher category.' });
+      person.teacherCategory = teacherCategory;
+    }
+    if (jobTitle !== undefined) person.jobTitle = String(jobTitle || '').trim().slice(0, 80);
+    await person.save();
+    res.json({ success: true, message: `${person.firstName} is now ${teamTitle(person)}.`, data: { teacherCategory: person.teacherCategory, jobTitle: person.jobTitle, teamTitle: teamTitle(person) } });
+  } catch (e) {
+    console.error('[qa team patch]', e.message);
     res.status(500).json({ success: false, message: e.message });
   }
 });

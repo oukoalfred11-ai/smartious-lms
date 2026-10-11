@@ -2,6 +2,17 @@ import React, { useState, useEffect } from 'react'
 import { api } from '../../../../context/ctx.jsx'
 import { SCHOOL_CURRICULA, TOKENS } from '../shared/tokens.js'
 import { avColor, fmtDate, initials } from '../shared/helpers.js'
+
+// Kinds of teacher (backend constants/qa.js TEACHER_CATEGORIES).
+export const TEACHER_CATEGORIES = [
+  { key: 'teacher', label: 'Teacher', plural: 'Teachers', desc: 'Qualified, teaching classes', bg: '#FBF6E3', fg: '#92400E' },
+  { key: 'trainee', label: 'Teacher in training', plural: 'In training', desc: 'Being trained; teaches under supervision', bg: '#E0F2FE', fg: '#0369A1' },
+  { key: 'support', label: 'Support teacher', plural: 'Support teachers', desc: 'Lesson preparation, resources and marking', bg: '#EDE9FE', fg: '#5B21B6' },
+]
+export function CategoryBadge({ category }) {
+  const c = TEACHER_CATEGORIES.find(x => x.key === (category || 'teacher')) || TEACHER_CATEGORIES[0]
+  return <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 99, fontSize: 10.5, fontWeight: 800, background: c.bg, color: c.fg }}>{c.label}</span>
+}
 import { Av, PCard, PKpi, PSection } from '../shared/ui.jsx'
 
 function TeachersModule({ refreshKey, toast, openAddUser }) {
@@ -10,6 +21,7 @@ function TeachersModule({ refreshKey, toast, openAddUser }) {
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState(null)
   const [localRefresh, setLocalRefresh] = useState(0)
+  const [cat, setCat] = useState('all')
 
   const loadTeachers = () => {
     setLoading(true)
@@ -20,6 +32,7 @@ function TeachersModule({ refreshKey, toast, openAddUser }) {
   useEffect(() => { loadTeachers() }, [refreshKey, localRefresh])
 
   const filtered = teachers.filter(t => {
+    if (cat !== 'all' && (t.teacherCategory || 'teacher') !== cat) return false
     if (!search) return true
     const q = search.toLowerCase()
     return ((t.firstName || '') + ' ' + (t.lastName || '')).toLowerCase().includes(q) ||
@@ -48,7 +61,18 @@ function TeachersModule({ refreshKey, toast, openAddUser }) {
       </div>
 
       <PCard padding={16} style={{ marginBottom: 16 }}>
-        <input className="fi" placeholder="Search teachers by name, email, or title..." value={search} onChange={e => setSearch(e.target.value)} style={{ maxWidth: 420 }} />
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+          <input className="fi" placeholder="Search teachers by name, email, or title..." value={search} onChange={e => setSearch(e.target.value)} style={{ maxWidth: 420 }} />
+          {[['all', 'All'], ...TEACHER_CATEGORIES.map(c => [c.key, c.plural])].map(([k, l]) => {
+            const n = k === 'all' ? teachers.length : teachers.filter(t => (t.teacherCategory || 'teacher') === k).length
+            const on = cat === k
+            return (
+              <button key={k} onClick={() => setCat(k)} style={{ padding: '6px 12px', borderRadius: 99, fontSize: 12, fontWeight: 700, cursor: 'pointer', border: '1.5px solid ' + (on ? TOKENS.crimson : TOKENS.s200), background: on ? TOKENS.crimson : '#fff', color: on ? '#fff' : TOKENS.s700 }}>
+                {l} <span style={{ opacity: .7 }}>{n}</span>
+              </button>
+            )
+          })}
+        </div>
       </PCard>
 
       {loading ? (
@@ -76,11 +100,10 @@ function TeachersModule({ refreshKey, toast, openAddUser }) {
                       <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 17, color: TOKENS.s900, marginBottom: 2 }}>
                         {name || 'Unnamed'}
                       </div>
-                      {t.jobTitle && (
-                        <div style={{ fontSize: 11.5, color: TOKENS.crimson, fontWeight: 700, marginBottom: 2 }}>
-                          {t.jobTitle}
-                        </div>
-                      )}
+                      <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap', marginBottom: 2 }}>
+                        <CategoryBadge category={t.teacherCategory} />
+                        {t.jobTitle && <span style={{ fontSize: 11.5, color: TOKENS.crimson, fontWeight: 700 }}>{t.jobTitle}</span>}
+                      </div>
                       <div style={{ fontSize: 12, color: TOKENS.s500 }}>{t.email}</div>
                     </div>
                     {isDeactivated ? (
@@ -251,6 +274,7 @@ function TeacherProfileTab({ teacher, onSaved, toast }) {
     jobTitle:  teacher.jobTitle || '',
     bio:       teacher.bio || '',
     yearsOfExperience: teacher.yearsOfExperience || 0,
+    teacherCategory: teacher.teacherCategory || 'teacher',
   })
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -309,6 +333,7 @@ function TeacherProfileTab({ teacher, onSaved, toast }) {
         jobTitle:  form.jobTitle.trim(),
         bio:       form.bio.trim(),
         yearsOfExperience: Number(form.yearsOfExperience) || 0,
+        teacherCategory: form.teacherCategory,
       })
       if (data?.success || data?.user) {
         toast?.ok?.('Profile saved.')
@@ -387,6 +412,22 @@ function TeacherProfileTab({ teacher, onSaved, toast }) {
           <label style={lbl}>Years of Experience</label>
           <input type="number" min={0} max={70} value={form.yearsOfExperience}
             onChange={e => update('yearsOfExperience', e.target.value)} style={inp}/>
+        </div>
+      </div>
+
+      <div style={{ marginBottom: 12 }}>
+        <label style={lbl}>Teacher category</label>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 8 }}>
+          {TEACHER_CATEGORIES.map(c => {
+            const on = form.teacherCategory === c.key
+            return (
+              <button key={c.key} type="button" onClick={() => update('teacherCategory', c.key)}
+                style={{ textAlign: 'left', padding: '9px 11px', borderRadius: 9, cursor: 'pointer', border: '2px solid ' + (on ? TOKENS.crimson : '#E8E2D6'), background: on ? '#FDF2F4' : '#fff', fontFamily: 'inherit' }}>
+                <div style={{ fontSize: 12.5, fontWeight: 800, color: on ? TOKENS.crimson : TOKENS.s900 }}>{c.label}</div>
+                <div style={{ fontSize: 11, color: TOKENS.s500, marginTop: 2 }}>{c.desc}</div>
+              </button>
+            )
+          })}
         </div>
       </div>
 

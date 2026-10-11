@@ -36,7 +36,7 @@ const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 const { v4: uuidv4 } = require('uuid');
 
 const TeacherDocument = require('../models/TeacherDocument');
-const { TEACHER_DOC_CATEGORIES } = require('../constants/qa');
+const { TEACHER_DOC_CATEGORIES, TEAM_ROLES, requiredFor, teamTitle } = require('../constants/qa');
 const { auth, requireRole } = require('../middleware/auth');
 
 const R2_READY = !!(process.env.R2_ACCOUNT_ID && process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY && process.env.R2_BUCKET_NAME && process.env.R2_PUBLIC_URL);
@@ -68,7 +68,8 @@ const ALLOWED_MIME = [
   'text/plain', 'text/csv',
 ];
 
-const UPLOADER_ROLES = ['teacher', 'admin', 'dos', 'ops_manager', 'qa'];
+// Every member of the team keeps a staff file, not only teachers.
+const UPLOADER_ROLES = TEAM_ROLES;
 const OVERSIGHT_ROLES = ['admin', 'dos', 'ops_manager', 'qa'];
 
 // ── 1. Presign ─────────────────────────────────────────────
@@ -191,7 +192,11 @@ router.get('/mine', auth, requireRole(...UPLOADER_ROLES), async (req, res) => {
     if (req.query.category && TeacherDocument.CATEGORIES.includes(req.query.category))
       filter.category = req.query.category;
     const docs = await TeacherDocument.find(filter).sort({ createdAt: -1 }).limit(1000).lean();
-    return res.json({ success: true, data: { documents: docs, categories: TeacherDocument.CATEGORIES, categoryMeta: TEACHER_DOC_CATEGORIES } });
+    return res.json({ success: true, data: {
+      documents: docs, categories: TeacherDocument.CATEGORIES, categoryMeta: TEACHER_DOC_CATEGORIES,
+      // What THIS person's file must hold, and how the school titles them.
+      required: requiredFor(req.user), teamTitle: teamTitle(req.user),
+    } });
   } catch (e) {
     return res.status(500).json({ success: false, message: e.message });
   }

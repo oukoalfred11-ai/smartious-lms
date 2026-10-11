@@ -46,7 +46,65 @@ const TRAINING_CATEGORIES = [
 
 const ACCREDITATION_TYPES = ['Accreditation', 'License', 'Membership', 'Registration', 'Other'];
 
+// ── The team ───────────────────────────────────────────────
+// Every staff account is part of the team and keeps a staff file.
+// Students, parents and demo accounts are not staff.
+const TEAM_ROLES = ['admin', 'dos', 'ops_manager', 'qa', 'accountant', 'sales', 'teacher'];
+
+// The admin account is the school's Principal.
+const ROLE_TITLES = {
+  admin: 'Principal',
+  dos: 'Dean of Studies',
+  ops_manager: 'Operations Manager',
+  qa: 'Quality Assurance',
+  accountant: 'Accountant',
+  sales: 'Sales & Front Desk',
+  teacher: 'Teacher',
+};
+
+// Teachers come in three kinds. Set by the Principal (or the Dean or
+// Operations) on the teacher's profile; new teachers start as 'teacher'.
+const TEACHER_CATEGORIES = [
+  { key: 'teacher', label: 'Teacher', short: 'Teacher', desc: 'Qualified teacher, teaching classes' },
+  { key: 'trainee', label: 'Teacher in training', short: 'In training', desc: 'Being trained; teaches under supervision' },
+  { key: 'support', label: 'Support teacher', short: 'Support', desc: 'Helps with lesson preparation, resources and marking' },
+];
+const TEACHER_CATEGORY_KEYS = TEACHER_CATEGORIES.map(c => c.key);
+
+// Groups for filtering the team page.
+const TEAM_GROUPS = [
+  { key: 'leadership', label: 'Leadership', roles: ['admin', 'dos', 'ops_manager', 'qa'] },
+  { key: 'teaching', label: 'Teaching', roles: ['teacher'] },
+  { key: 'operations', label: 'Operations', roles: ['accountant', 'sales'] },
+];
+const teamGroup = (role) => (TEAM_GROUPS.find(g => g.roles.includes(role)) || {}).key || 'operations';
+
+/** "Principal", "Teacher in training", "Accountant"… */
+function teamTitle(u) {
+  if (!u) return ''
+  if (u.role === 'teacher') {
+    const c = TEACHER_CATEGORIES.find(x => x.key === (u.teacherCategory || 'teacher'));
+    return c ? c.label : 'Teacher';
+  }
+  return ROLE_TITLES[u.role] || 'Staff';
+}
+
+/**
+ * The documents a person's staff file must contain. Everyone working
+ * with children needs a CV, ID, police clearance, a contract,
+ * safeguarding training and their academic certificates; a qualified
+ * teacher also needs the teaching qualification and licence. Teachers
+ * in training and support teachers are not yet expected to hold those.
+ */
+const BASE_REQUIRED = ['cv', 'academic_certificate', 'identification', 'police_clearance', 'contract', 'safeguarding_certificate'];
+function requiredFor(u) {
+  if (u && u.role === 'teacher' && (u.teacherCategory || 'teacher') === 'teacher') return REQUIRED_PERSONNEL;
+  return BASE_REQUIRED;
+}
+
 module.exports = {
   TEACHER_DOC_CATEGORIES, CATEGORY_KEYS, REQUIRED_PERSONNEL, EXPIRY_WARN_DAYS,
   TRAINING_CATEGORIES, ACCREDITATION_TYPES,
+  TEAM_ROLES, ROLE_TITLES, TEACHER_CATEGORIES, TEACHER_CATEGORY_KEYS, TEAM_GROUPS,
+  teamGroup, teamTitle, requiredFor,
 };
