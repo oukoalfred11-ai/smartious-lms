@@ -1203,6 +1203,54 @@ async function exportMp4Fast({ canvas, W, H, totalDur, drawFrame, mediaAt, sound
   const audioBuf = audioPlan ? await renderMixOffline({ totalDur, ...sound, sampleRate: audioPlan.sr }) : null
   if (!audioBuf) audioPlan = null
 
+  // ── Encode the soundtrack FIRST, into memory, with a time limit. A
+  // hardware audio encoder that never finishes (seen with some Chrome
+  // and driver combinations) used to hang the export at 100% with no
+  // download. Now a stalled or failed sound encode drops the audio
+  // track (the video still exports, and the caller is told it's
+  // silent) and is decided before the container is built, so no empty
+  // audio track is ever declared.
+  const audioChunks = []
+  let audioFailed = false
+  if (audioPlan) {
+    let aErr = null
+    let aEnc = null
+    try {
+      aEnc = new AudioEncoder({
+        output: (chunk, meta) => audioChunks.push([chunk, meta]),
+        error: (e) => { aErr = e },
+      })
+      aEnc.configure(audioPlan.cfg)
+      const SR = audioPlan.sr, CH = 2, CHUNK = 4800
+      const L = audioBuf.getChannelData(0)
+      const R = audioBuf.numberOfChannels > 1 ? audioBuf.getChannelData(1) : L
+      for (let off = 0; off < L.length; off += CHUNK) {
+        const n = Math.min(CHUNK, L.length - off)
+        const data = new Float32Array(n * CH)
+        data.set(L.subarray(off, off + n), 0)
+        data.set(R.subarray(off, off + n), n)
+        const ad = new AudioData({
+          format: 'f32-planar', sampleRate: SR, numberOfFrames: n,
+          numberOfChannels: CH, timestamp: Math.round((off / SR) * 1e6), data,
+        })
+        aEnc.encode(ad)
+        ad.close()
+        await drainQueue(aEnc, 8, 'Sound encoder')
+        if (aErr) throw aErr
+      }
+      await withTimeout(aEnc.flush(), 30000, 'Sound encoder')
+      if (aErr) throw aErr
+      if (!audioChunks.length) throw new Error('Sound encoder produced no audio')
+    } catch (e) {
+      console.warn('[export] sound dropped:', e?.message || e)
+      audioFailed = true
+      audioPlan = null
+      audioChunks.length = 0
+    } finally {
+      try { aEnc && aEnc.state !== 'closed' && aEnc.close() } catch (e) { /* closed */ }
+    }
+  }
+
   const muxer = new Muxer({
     target: new ArrayBufferTarget(),
     video: { codec: 'avc', width: W, height: H },
@@ -1241,15 +1289,6 @@ async function exportMp4Fast({ canvas, W, H, totalDur, drawFrame, mediaAt, sound
   if (!vConfig) return null
   vEnc.configure(vConfig)
 
-  let aEnc = null
-  if (audioPlan) {
-    aEnc = new AudioEncoder({
-      output: (chunk, meta) => muxer.addAudioChunk(chunk, meta),
-      error: (e) => { vErr = e },
-    })
-    aEnc.configure(audioPlan.cfg)
-  }
-
   const ctx = canvas.getContext('2d')
   const totalFrames = Math.ceil(totalDur * FPS)
   const used = new Set()
@@ -1264,7 +1303,7 @@ async function exportMp4Fast({ canvas, W, H, totalDur, drawFrame, mediaAt, sound
       const frame = new VideoFrame(canvas, { timestamp: Math.round(t * 1e6), duration: Math.round(1e6 / FPS) })
       vEnc.encode(frame, { keyFrame: f % 60 === 0 })
       frame.close()
-      while (vEnc.encodeQueueSize > 6) await new Promise(r => setTimeout(r, 2))
+      await drainQueue(vEnc, 6, 'Video encoder')
       if (f % 12 === 0) { onProgress?.(f / totalFrames); await new Promise(r => setTimeout(r, 0)) }
       if (vErr) throw vErr
     }
@@ -1272,31 +1311,39 @@ async function exportMp4Fast({ canvas, W, H, totalDur, drawFrame, mediaAt, sound
     releaseVideos(used)
   }
 
-  if (aEnc && audioBuf) {
-    const SR = audioPlan.sr, CH = 2, CHUNK = 4800
-    const L = audioBuf.getChannelData(0)
-    const R = audioBuf.numberOfChannels > 1 ? audioBuf.getChannelData(1) : L
-    for (let off = 0; off < L.length; off += CHUNK) {
-      const n = Math.min(CHUNK, L.length - off)
-      const data = new Float32Array(n * CH)
-      data.set(L.subarray(off, off + n), 0)
-      data.set(R.subarray(off, off + n), n)
-      const ad = new AudioData({
-        format: 'f32-planar', sampleRate: SR, numberOfFrames: n,
-        numberOfChannels: CH, timestamp: Math.round((off / SR) * 1e6), data,
-      })
-      aEnc.encode(ad)
-      ad.close()
-      while (aEnc.encodeQueueSize > 8) await new Promise(r => setTimeout(r, 2))
-      if (vErr) throw vErr
-    }
-    await aEnc.flush()
+  // Finish the video. A hardware encoder that stops responding fails
+  // the export (the caller falls back to the realtime recorder) rather
+  // than leaving it stuck at 100%.
+  try {
+    await withTimeout(vEnc.flush(), 60000, 'Video encoder')
+  } finally {
+    try { if (vEnc.state !== 'closed') vEnc.close() } catch (e) { /* closed */ }
   }
-  await vEnc.flush()
   if (vErr) throw vErr
+  for (const [chunk, meta] of audioChunks) muxer.addAudioChunk(chunk, meta)
   muxer.finalize()
   onProgress?.(1)
-  return { blob: new Blob([muxer.target.buffer], { type: 'video/mp4' }), audioNote: wantsAudio && !audioPlan ? 'silent' : audioPlan?.mux === 'opus' ? 'opus' : null }
+  return { blob: new Blob([muxer.target.buffer], { type: 'video/mp4' }), audioNote: wantsAudio && (!audioPlan || audioFailed) ? 'silent' : audioPlan?.mux === 'opus' ? 'opus' : null }
+}
+
+// Reject if a promise does not settle in time.
+function withTimeout(p, ms, what) {
+  let tm = null
+  return Promise.race([
+    p.finally(() => clearTimeout(tm)),
+    new Promise((_, rej) => { tm = setTimeout(() => rej(new Error(what + ' stopped responding')), ms) }),
+  ])
+}
+
+// Wait for an encoder's queue to drain below `max`; fail if it makes no
+// progress for 20 s instead of waiting forever.
+async function drainQueue(enc, max, what) {
+  let last = enc.encodeQueueSize, since = performance.now()
+  while (enc.encodeQueueSize > max) {
+    await new Promise(r => setTimeout(r, 2))
+    if (enc.encodeQueueSize !== last) { last = enc.encodeQueueSize; since = performance.now() }
+    else if (performance.now() - since > 20000) throw new Error(what + ' stopped responding')
+  }
 }
 
 // Narrator script: turns each card's text into worry -> solution
@@ -1554,7 +1601,18 @@ const inputStyle = { width: '100%', boxSizing: 'border-box', border: '1.5px soli
 const btn = (primary) => ({ background: primary ? TOKENS.crimson : '#fff', color: primary ? '#fff' : TOKENS.s700, border: primary ? 'none' : '1.5px solid ' + TOKENS.line, borderRadius: 9, padding: '9px 15px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer' })
 
 // ═══════════════════════════════════════════════════════════
-export default function StudioModule({ toast }) {
+export default function StudioModule({ toast: toastProp }) {
+  // The Studio calls toast('message'); the dashboard passes the app's
+  // toast object ({ ok, error, info }). Calling the object threw, which
+  // left an export stuck at 100% whenever it needed to report anything.
+  const toast = useMemo(() => {
+    if (typeof toastProp === 'function') return toastProp
+    const say = (m) => toastProp?.info?.(m)
+    say.ok = (m) => toastProp?.ok?.(m)
+    say.error = (m) => toastProp?.error?.(m)
+    say.info = say
+    return say
+  }, [toastProp])
   const [tab, setTab] = useState('cards')
   const [crestReady, setCrestReady] = useState(!!_crestImg)
   useEffect(() => { Promise.all([ensureCrest(), loadBrandFonts()]).then(() => setCrestReady(true)) }, [])
@@ -1889,6 +1947,7 @@ function CardMaker({ toast }) {
     setRendering(true)
     const totalD = cards.length * cardDur
     const t0 = performance.now()
+    let fastErr = ''
     // Fast path: offline WebCodecs encode straight to MP4 — renders
     // as fast as the machine can draw, not at playback speed.
     try {
@@ -1915,18 +1974,25 @@ function CardMaker({ toast }) {
         toast?.('MP4 ready: ' + (out.blob.size / 1048576).toFixed(1) + ' MB in ' + Math.round((performance.now() - t0) / 1000) + 's (' + speed.toFixed(1) + 'x).' + note)
         return
       }
-    } catch (e) { console.error('[fast export]', e) }
-    // Fallback: realtime WebM recording (older browsers).
-    if (typeof MediaRecorder === 'undefined') { setRendering(false); toast?.('This browser cannot export video — use Chrome on a computer.'); return }
-    toast?.('Fast export unavailable here — rendering in real time (' + Math.round(totalD) + 's)...')
-    const blob = await runCards(true)
-    setRendering(false); setProgress(0)
-    if (blob) {
-      const a = document.createElement('a')
-      a.download = 'smartious-cards.webm'
-      a.href = URL.createObjectURL(blob)
-      a.click()
-      toast?.('Video downloaded (WebM) — for WhatsApp, convert to MP4 first.')
+    } catch (e) { console.error('[fast export]', e); fastErr = e?.message || String(e) }
+    // Fallback: realtime WebM recording (older browsers, or a fast
+    // export that failed). Rendering always ends, whatever happens.
+    try {
+      if (typeof MediaRecorder === 'undefined') { toast?.('This browser cannot export video — use Chrome on a computer.'); return }
+      toast?.((fastErr ? 'Fast export failed (' + fastErr + ')' : 'Fast export unavailable here') + ' — recording in real time instead (' + Math.round(totalD) + 's)...')
+      const blob = await runCards(true)
+      if (blob) {
+        const a = document.createElement('a')
+        a.download = 'smartious-cards.webm'
+        a.href = URL.createObjectURL(blob)
+        a.click()
+        toast?.('Video downloaded (WebM) — for WhatsApp, convert to MP4 first.')
+      }
+    } catch (e) {
+      console.error('[realtime export]', e)
+      toast?.('Export failed: ' + (e?.message || 'unknown error'))
+    } finally {
+      setRendering(false); setProgress(0)
     }
   }
 
@@ -2327,6 +2393,7 @@ function VideoMaker({ toast }) {
     if (playing || rendering) return
     setRendering(true)
     const t0 = performance.now()
+    let fastErr = ''
     // Exports render at full size; the preview canvas is smaller.
     cvRef.current.width = W; cvRef.current.height = H
     try {
@@ -2348,18 +2415,25 @@ function VideoMaker({ toast }) {
         toast?.('MP4 ready: ' + (out.blob.size / 1048576).toFixed(1) + ' MB in ' + secs + 's (' + (totalDur / Math.max(1, secs)).toFixed(1) + 'x).' + note)
         return
       }
-    } catch (e) { console.error('[fast export]', e) }
-    if (typeof MediaRecorder === 'undefined') { setRendering(false); toast?.('This browser cannot export video — use Chrome on a computer.'); return }
-    toast?.('Fast export unavailable here — rendering in real time (' + Math.round(totalDur) + 's)...')
-    const blob = await runSequence(true)
-    setRendering(false)
-    setProgress(0)
-    if (blob) {
-      const a = document.createElement('a')
-      a.download = 'smartious-video.webm'
-      a.href = URL.createObjectURL(blob)
-      a.click()
-      toast?.('Video downloaded (WebM) — for WhatsApp, convert to MP4 first.')
+    } catch (e) { console.error('[fast export]', e); fastErr = e?.message || String(e) }
+    // Fallback: realtime WebM recording. Rendering always ends.
+    try {
+      if (typeof MediaRecorder === 'undefined') { toast?.('This browser cannot export video — use Chrome on a computer.'); return }
+      toast?.((fastErr ? 'Fast export failed (' + fastErr + ')' : 'Fast export unavailable here') + ' — recording in real time instead (' + Math.round(totalDur) + 's)...')
+      const blob = await runSequence(true)
+      if (blob) {
+        const a = document.createElement('a')
+        a.download = 'smartious-video.webm'
+        a.href = URL.createObjectURL(blob)
+        a.click()
+        toast?.('Video downloaded (WebM) — for WhatsApp, convert to MP4 first.')
+      }
+    } catch (e) {
+      console.error('[realtime export]', e)
+      toast?.('Export failed: ' + (e?.message || 'unknown error'))
+    } finally {
+      setRendering(false)
+      setProgress(0)
     }
   }
 
