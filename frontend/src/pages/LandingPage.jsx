@@ -590,34 +590,35 @@ const styles = `
   .lp .ps:last-child .ps-arr{display:none}
   /* CURRICULA */
   .lp .cur-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:60px}
-  /* ── Meet Our Team grid ── */
-  .lp .team-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:48px}
-  .lp .tm-card{background:${V.white};border:1px solid ${V.bone3};border-radius:18px;overflow:hidden;cursor:pointer;transition:transform .25s,box-shadow .25s,border-color .25s;display:flex;flex-direction:column;position:relative}
-  .lp .tm-card:hover{transform:translateY(-4px);box-shadow:0 14px 38px rgba(8,12,20,.14);border-color:transparent}
-  .lp .tm-open{grid-column:1/-1}
-  .lp .tm-photo{position:relative;width:100%;aspect-ratio:1/1;background:linear-gradient(135deg,${V.cr},${V.cr2});overflow:hidden;flex-shrink:0}
-  .lp .tm-open .tm-photo{aspect-ratio:auto;height:240px;max-width:240px}
-  .lp .tm-img{width:100%;height:100%;object-fit:cover;display:block}
-  .lp .tm-initials{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',Georgia,serif;font-size:3.4rem;font-weight:700;color:${V.gold3}}
-  .lp .tm-scrim{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 55%,rgba(8,12,20,.55));pointer-events:none}
-  .lp .tm-plate{padding:14px 16px 8px;text-align:center}
-  .lp .tm-name{font-family:'DM Serif Display',Georgia,serif;font-size:1.05rem;font-weight:700;color:${V.ink};line-height:1.25}
-  .lp .tm-role{font-size:11.5px;color:${V.gold};font-weight:700;letter-spacing:.04em;margin-top:3px}
-  .lp .tm-hint{padding:0 16px 14px;text-align:center;font-size:10.5px;color:${V.sl3};font-weight:600;letter-spacing:.05em;text-transform:uppercase}
-  .lp .tm-detail{padding:4px 22px 18px;text-align:left}
-  .lp .tm-open{flex-direction:row;flex-wrap:wrap;align-items:flex-start}
-  .lp .tm-open .tm-plate{flex:0 0 240px;text-align:left;padding-left:0;padding-right:0}
-  .lp .tm-open .tm-detail{flex:1;min-width:280px}
-  .lp .tm-open .tm-hint{position:absolute;top:14px;right:18px;padding:0}
-  .lp .tm-exp{display:inline-block;background:rgba(184,150,12,.12);color:${V.gold};font-size:12px;font-weight:700;padding:5px 12px;border-radius:20px;margin-bottom:12px}
-  .lp .tm-exp strong{font-size:14px}
-  .lp .tm-bio{font-size:13.5px;color:${V.sl};line-height:1.75;margin:0 0 14px}
-  .lp .tm-block{margin-bottom:12px}
-  .lp .tm-lbl{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:${V.sl3};margin-bottom:6px}
-  .lp .tm-chips{display:flex;flex-wrap:wrap;gap:6px}
-  .lp .tm-chip{background:${V.bone};border:1px solid ${V.bone3};border-radius:20px;padding:4px 11px;font-size:11.5px;font-weight:600;color:${V.ink2}}
+  /* ── Meet Our Team ── */
+  .lp .tm-group{margin-top:44px}
+  .lp .tm-group:first-child{margin-top:8px}
+  .lp .tm-group-h{display:flex;align-items:center;gap:16px;margin-bottom:22px;font-family:'DM Serif Display',Georgia,serif;font-size:1.5rem;color:${V.ink}}
+  .lp .tm-group-h::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,${V.gold3},transparent)}
+  .lp .team-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px}
+  .lp .tm-card{background:${V.white};border:1px solid ${V.bone3};border-radius:22px;overflow:hidden;display:flex;flex-direction:column;transition:transform .3s,box-shadow .3s,border-color .3s}
+  .lp .tm-card:hover{transform:translateY(-5px);box-shadow:0 22px 50px rgba(8,12,20,.14);border-color:transparent}
+  .lp .tm-principal{border-color:${V.gold3};box-shadow:0 0 0 1px ${V.gold3}}
+  .lp .tm-photo{position:relative;width:100%;aspect-ratio:4/4.2;background:linear-gradient(135deg,${V.cr},${V.cr2});overflow:hidden;flex-shrink:0}
+  .lp .tm-img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s}
+  .lp .tm-card:hover .tm-img{transform:scale(1.04)}
+  .lp .tm-initials{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',Georgia,serif;font-size:4.2rem;font-weight:700;color:${V.gold3}}
+  .lp .tm-scrim{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 60%,rgba(8,12,20,.6));pointer-events:none}
+  .lp .tm-years{position:absolute;left:16px;bottom:14px;display:flex;align-items:baseline;gap:6px;color:#fff;background:rgba(8,12,20,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:6px 12px;border-radius:99px;border:1px solid rgba(255,255,255,.18)}
+  .lp .tm-years strong{font-family:'DM Serif Display',Georgia,serif;font-size:1.25rem;color:${V.gold3}}
+  .lp .tm-years span{font-size:11px;font-weight:600;letter-spacing:.03em}
+  .lp .tm-body{padding:20px 22px 22px;display:flex;flex-direction:column;flex:1}
+  .lp .tm-badge{align-self:flex-start;font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:${V.gold3};background:linear-gradient(135deg,${V.cr},${V.cr2});padding:4px 11px;border-radius:99px;margin-bottom:10px}
+  .lp .tm-name{font-family:'DM Serif Display',Georgia,serif;font-size:1.35rem;font-weight:700;color:${V.ink};line-height:1.2;margin:0}
+  .lp .tm-role{font-size:12px;color:${V.gold};font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin-top:5px}
+  .lp .tm-bio{font-size:13.5px;color:${V.sl};line-height:1.75;margin:14px 0 0}
+  .lp .tm-clamp{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+  .lp .tm-block{margin-top:14px;padding-top:14px;border-top:1px solid ${V.bone3}}
+  .lp .tm-lbl{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:${V.sl3};margin-bottom:6px}
   .lp .tm-list{margin:0;padding-left:18px}
-  .lp .tm-list li{font-size:12.5px;color:${V.sl};line-height:1.7}
+  .lp .tm-list li{font-size:12.5px;color:${V.ink2};line-height:1.7}
+  .lp .tm-more{margin-top:auto;padding-top:14px;align-self:flex-start;background:none;border:none;color:${V.cr};font-size:12.5px;font-weight:800;cursor:pointer;letter-spacing:.02em}
+  .lp .tm-more:hover{text-decoration:underline}
   .lp .cc{background:${V.white};border:1px solid ${V.bone3};border-radius:24px;overflow:hidden;transition:all .3s;display:flex;flex-direction:column}
   .lp .cc:hover{transform:translateY(-5px);box-shadow:0 12px 40px rgba(8,12,20,.14);border-color:transparent}
   .lp .cc-top{padding:24px 24px 0}
@@ -1886,7 +1887,7 @@ const PAGE_META = {
     desc: 'Expert articles from Smartious on homeschooling, choosing a curriculum, exam preparation and AI-supported learning for families in Kenya and worldwide.',
   },
   teachers: {
-    title: 'Meet Our Teachers | Qualified Homeschool Tutors — Smartious',
+    title: 'Meet Our Team | Qualified Homeschool Teachers & Leadership — Smartious',
     desc: 'Meet the Smartious teaching team — qualified, experienced subject specialists delivering Cambridge IGCSE, A-Level, IB and CBC education to students in Kenya and worldwide.',
   },
   enroll: {
@@ -4965,7 +4966,7 @@ export default function LandingPage() {
                 </div>
               )}
             </div>
-            {[['Teachers','teachers'],['FAQ','faq'],['Pricing','pricing']].map(([l,id]) => (
+            {[['Our Team','teachers'],['FAQ','faq'],['Pricing','pricing']].map(([l,id]) => (
               <div key={id} className={`nl${page===id?' on':''}`} onClick={() => P(id)}>{l}</div>
             ))}
           </div>
@@ -4997,7 +4998,7 @@ export default function LandingPage() {
             {[
               { cat:'About', items:[
                 ['Our Story','about'],
-                ['Teachers','teachers'],
+                ['Our Team','teachers'],
                 ['Contact','contact'],
               ]},
               { cat:'Curricula', items:[
@@ -22962,83 +22963,64 @@ export default function LandingPage() {
         <>
           <div className="pg-hero"><div className="wrap">
             <div className="eyebrow">Our People</div>
-            <h1 className="pg-h">Meet Our <em>Teachers</em></h1>
-            <p className="pg-sub" style={{marginTop:12}}>Qualified, experienced subject specialists — the people behind every Smartious lesson. Tap any teacher to read their full profile.</p>
+            <h1 className="pg-h">Meet Our <em>Team</em></h1>
+            <p className="pg-sub" style={{marginTop:12}}>The educators and leaders behind every Smartious lesson: qualified, experienced and dedicated to each learner.</p>
           </div></div>
           <section className="sec" style={{background:V.bone}}><div className="wrap">
             {teachersLoading ? (
-              <div style={{textAlign:'center',padding:'60px 0',color:V.sl2,fontSize:14}}>Loading our teaching team…</div>
+              <div style={{textAlign:'center',padding:'60px 0',color:V.sl2,fontSize:14}}>Loading our team…</div>
             ) : publicTeachers.length === 0 ? (
               <div style={{textAlign:'center',padding:'60px 0',color:V.sl2,fontSize:14}}>
-                Our teaching team will be listed here shortly.
+                Our team will be listed here shortly.
               </div>
             ) : (
-              <div className="team-grid">
-                {publicTeachers.map(t => {
-                  const open = expandedTeacher === t.id
-                  const initials = t.name.split(/\s+/).map(w => w[0]).filter(Boolean).slice(0,2).join('').toUpperCase()
-                  return (
-                    <div key={t.id} className={`tm-card${open?' tm-open':''}`}
-                      onClick={() => setExpandedTeacher(open ? null : t.id)}>
-                      {/* Portrait */}
-                      <div className="tm-photo">
-                        {t.avatar
-                          ? <img src={t.avatar} alt={t.name} className="tm-img" loading="lazy"/>
-                          : <div className="tm-initials">{initials || 'S'}</div>}
-                        <div className="tm-scrim"/>
-                      </div>
-                      {/* Name plate */}
-                      <div className="tm-plate">
-                        <div className="tm-name">{t.name}</div>
-                        <div className="tm-role">{t.jobTitle}</div>
-                      </div>
-                      {/* Expandable detail */}
-                      {open && (
-                        <div className="tm-detail" onClick={e => e.stopPropagation()}>
-                          {t.yearsOfExperience > 0 && (
-                            <div className="tm-exp">
-                              <strong>{t.yearsOfExperience}</strong> year{t.yearsOfExperience === 1 ? '' : 's'} of teaching experience
+              [['leadership', 'Leadership'], ['teaching', 'Our Teachers'], ['operations', 'Operations & Admissions']].map(([g, heading]) => {
+                const people = publicTeachers.filter(t => (t.group || 'teaching') === g)
+                if (!people.length) return null
+                return (
+                  <div key={g} className="tm-group">
+                    <div className="tm-group-h"><span>{heading}</span></div>
+                    <div className="team-grid">
+                      {people.map(t => {
+                        const open = expandedTeacher === t.id
+                        const initials = t.name.split(/\s+/).map(w => w[0]).filter(Boolean).slice(0,2).join('').toUpperCase()
+                        const quals = t.qualifications || []
+                        const long = (t.bio || '').length > 220 || quals.length > 3
+                        return (
+                          <article key={t.id} className={`tm-card${t.principal ? ' tm-principal' : ''}`}>
+                            <div className="tm-photo">
+                              {t.avatar
+                                ? <img src={t.avatar} alt={t.name} className="tm-img" loading="lazy"/>
+                                : <div className="tm-initials">{initials || 'S'}</div>}
+                              <div className="tm-scrim"/>
+                              {t.yearsOfExperience > 0 && (
+                                <div className="tm-years"><strong>{t.yearsOfExperience}</strong><span>yr{t.yearsOfExperience === 1 ? '' : 's'} experience</span></div>
+                              )}
                             </div>
-                          )}
-                          {t.bio && <p className="tm-bio">{t.bio}</p>}
-                          {t.subjects && t.subjects.length > 0 && (
-                            <div className="tm-block">
-                              <div className="tm-lbl">Subjects</div>
-                              <div className="tm-chips">{t.subjects.map((s,i) => <span key={i} className="tm-chip">{s}</span>)}</div>
+                            <div className="tm-body">
+                              {t.principal && <div className="tm-badge">★ Principal</div>}
+                              <h3 className="tm-name">{t.name}</h3>
+                              <div className="tm-role">{t.title}</div>
+                              {t.bio && <p className={`tm-bio${open ? '' : ' tm-clamp'}`}>{t.bio}</p>}
+                              {quals.length > 0 && (
+                                <div className="tm-block">
+                                  <div className="tm-lbl">Qualifications</div>
+                                  <ul className="tm-list">{(open ? quals : quals.slice(0, 3)).map((q,i) => <li key={i}>{q}</li>)}</ul>
+                                </div>
+                              )}
+                              {long && (
+                                <button className="tm-more" onClick={() => setExpandedTeacher(open ? null : t.id)}>
+                                  {open ? 'Show less' : 'Read full profile'}
+                                </button>
+                              )}
                             </div>
-                          )}
-                          {t.curriculum && t.curriculum.length > 0 && (
-                            <div className="tm-block">
-                              <div className="tm-lbl">Curricula</div>
-                              <div className="tm-chips">{t.curriculum.map((c,i) => <span key={i} className="tm-chip">{c}</span>)}</div>
-                            </div>
-                          )}
-                          {t.qualifications && t.qualifications.length > 0 && (
-                            <div className="tm-block">
-                              <div className="tm-lbl">Qualifications</div>
-                              <ul className="tm-list">{t.qualifications.map((q,i) => <li key={i}>{q}</li>)}</ul>
-                            </div>
-                          )}
-                          {t.certifications && t.certifications.length > 0 && (
-                            <div className="tm-block">
-                              <div className="tm-lbl">Certifications</div>
-                              <ul className="tm-list">{t.certifications.map((c,i) => <li key={i}>{c}</li>)}</ul>
-                            </div>
-                          )}
-                          {t.specializations && t.specializations.length > 0 && (
-                            <div className="tm-block">
-                              <div className="tm-lbl">Specialisations</div>
-                              <div className="tm-chips">{t.specializations.map((s,i) => <span key={i} className="tm-chip">{s}</span>)}</div>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                      {/* Tap hint */}
-                      <div className="tm-hint">{open ? 'Tap to close' : 'Tap for full profile'}</div>
+                          </article>
+                        )
+                      })}
                     </div>
-                  )
-                })}
-              </div>
+                  </div>
+                )
+              })
             )}
             <div style={{textAlign:'center',marginTop:48}}>
               <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>

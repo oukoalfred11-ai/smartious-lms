@@ -510,31 +510,40 @@ export function TeamProfilesModule({ toast }) {
         </select>
       </div>
       {loading ? <Loading /> : list.length === 0 ? <Empty>No one matches.</Empty> : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 14 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20 }}>
           {list.map(t => (
-            <PCard key={t._id} padding={0}>
-              <button onClick={() => setSelId(t._id)} style={{ display: 'block', width: '100%', textAlign: 'left', background: t.role === 'admin' ? 'linear-gradient(180deg,#FDF8EC,#FFFFFF 60%)' : 'none', border: 'none', borderRadius: 'inherit', padding: 16, cursor: 'pointer', fontFamily: 'inherit' }}>
-                <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                  <Avatar user={t} />
-                  <div style={{ minWidth: 0, flex: 1 }}>
-                    <div style={{ fontSize: 14, fontWeight: 800, color: TOKENS.s900, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{fullName(t)}</div>
-                    <div style={{ fontSize: 11.5, color: TOKENS.s500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {t.jobTitle && t.jobTitle !== titleOf(t) ? t.jobTitle : titleOf(t)}{t.yearsOfExperience ? ' · ' + t.yearsOfExperience + ' yrs' : ''}
-                    </div>
+            <button key={t._id} onClick={() => setSelId(t._id)} className="qa-team-card"
+              style={{ display: 'flex', flexDirection: 'column', textAlign: 'left', padding: 0, cursor: 'pointer', fontFamily: 'inherit', background: '#fff', borderRadius: 20, overflow: 'hidden', border: '1px solid ' + (t.role === 'admin' ? GOLD : LINE), boxShadow: t.role === 'admin' ? '0 0 0 1px ' + GOLD : '0 1px 3px rgba(26,15,14,.05)' }}>
+              <div style={{ position: 'relative', height: 210, background: `linear-gradient(135deg,${CR},#3D0712)` }}>
+                {t.avatar
+                  ? <img src={t.avatar} alt="" className="qa-team-img" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                  : <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: GOLD, fontFamily: "'Playfair Display', Georgia, serif", fontSize: 64 }}>{((t.firstName || '?')[0] || '') + ((t.lastName || '')[0] || '')}</div>}
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0) 45%, rgba(20,8,6,.78))' }} />
+                <div style={{ position: 'absolute', top: 12, right: 12, background: 'rgba(255,255,255,.94)', borderRadius: 99, padding: 3 }}><Ring pct={t.file.pct} size={44} stroke={5} /></div>
+                <div style={{ position: 'absolute', left: 16, right: 16, bottom: 14, color: '#fff' }}>
+                  <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 21, lineHeight: 1.15, textShadow: '0 1px 8px rgba(0,0,0,.35)' }}>{fullName(t)}</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: '#F0CC5A', marginTop: 3, letterSpacing: '.03em' }}>
+                    {t.jobTitle && t.jobTitle !== titleOf(t) ? t.jobTitle : titleOf(t)}
                   </div>
-                  <Ring pct={t.file.pct} />
                 </div>
-                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 12 }}>
+              </div>
+              <div style={{ padding: '14px 16px 16px', display: 'flex', flexDirection: 'column', gap: 10, flex: 1 }}>
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
                   <TitleChip u={t} />
+                  {t.yearsOfExperience ? <span style={chip(TOKENS.s50, TOKENS.s700)}>{t.yearsOfExperience} yrs experience</span> : null}
+                </div>
+                {t.bio && <div style={{ fontSize: 12.5, color: TOKENS.s600 || TOKENS.s700, lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{t.bio}</div>}
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 'auto' }}>
                   <span style={chip(TOKENS.s50, TOKENS.s700)}>File {t.file.have}/{t.file.required}</span>
                   {(t.training.hours || 0) > 0 && <span style={chip(TOKENS.goldPale, '#92400E')}>{t.training.hours}h training</span>}
                   {t.file.expired.length > 0 && <span style={chip('#FEE2E2', BAD)}>{t.file.expired.length} expired</span>}
                   {t.file.expiring.length > 0 && <span style={chip('#FEF3C7', WARN)}>{t.file.expiring.length} expiring</span>}
                   {t.isOnLeave && <span style={chip('#E0E7FF', '#3730A3')}>On leave</span>}
                 </div>
-              </button>
-            </PCard>
+              </div>
+            </button>
           ))}
+          <style>{`.qa-team-card{transition:transform .25s,box-shadow .25s}.qa-team-card:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(26,15,14,.14)!important}.qa-team-img{transition:transform .5s}.qa-team-card:hover .qa-team-img{transform:scale(1.04)}`}</style>
         </div>
       )}
     </>
@@ -601,7 +610,6 @@ function MemberProfile({ id, toast, onBack }) {
   for (const d of p.documents) (byCat[d.category] = byCat[d.category] || []).push(d)
   const personnel = meta.filter(c => c.group === 'personnel')
   const teaching = meta.filter(c => c.group === 'teaching' && byCat[c.key]?.length)
-  const specialties = (t.teachingSpecialties || []).map(s => [s.subjectId?.subjectName, s.curriculum || s.subjectId?.curriculum].filter(Boolean).join(' · ')).filter(Boolean)
 
   const DocRow = ({ d }) => {
     const st = docState(d)
@@ -631,42 +639,57 @@ function MemberProfile({ id, toast, onBack }) {
         <button style={btnP} onClick={() => setUpload({ category: p.file.missing[0] || 'cv' })}>+ Add document</button>
       </div>
 
-      <PCard padding={20}>
-        <div style={{ display: 'flex', gap: 18, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-          <Avatar user={t} size={92} radius={20} />
-          <div style={{ flex: 1, minWidth: 240 }}>
-            <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 24, color: TOKENS.s900 }}>{fullName(t)}</div>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginTop: 6 }}>
-              <TitleChip u={t} />
-              <span style={{ fontSize: 13, color: TOKENS.s500 }}>
-                {t.jobTitle && t.jobTitle !== titleOf(t) ? t.jobTitle : ''}{t.yearsOfExperience ? (t.jobTitle && t.jobTitle !== titleOf(t) ? ' · ' : '') + t.yearsOfExperience + ' years experience' : ''}{t.createdAt ? ' · with Smartious since ' + fmtD(t.createdAt) : ''}
-              </span>
-            </div>
-            <div style={{ fontSize: 12, color: TOKENS.s500, marginTop: 4 }}>{[t.email, t.phone].filter(Boolean).join(' · ')}</div>
-            {t.bio && <div style={{ fontSize: 13, color: TOKENS.s700, marginTop: 10, lineHeight: 1.65, maxWidth: 720 }}>{t.bio}</div>}
-            {specialties.length > 0 && (
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 12 }}>
-                {specialties.map((s, i) => <span key={i} style={chip('#FDF2F4', CR)}>{s}</span>)}
-              </div>
-            )}
+      {/* Subject and curriculum specialities are an internal allocation
+          tool (admin → Teachers); they are not part of the profile. */}
+      <div style={{ borderRadius: 22, overflow: 'hidden', border: '1px solid ' + (t.role === 'admin' ? GOLD : LINE), background: '#fff' }}>
+        <div style={{ height: 120, background: 'radial-gradient(circle at 15% 0%, #9A1B33, #6E1022 55%, #3E0712)' }} />
+        <div style={{ padding: '0 26px 24px', display: 'flex', gap: 22, alignItems: 'flex-end', flexWrap: 'wrap', marginTop: -78 }}>
+          <div style={{ borderRadius: 26, padding: 5, background: '#fff', boxShadow: '0 10px 30px rgba(26,15,14,.18)' }}>
+            <Avatar user={t} size={150} radius={22} />
           </div>
-          <div style={{ textAlign: 'center' }}>
-            <Ring pct={p.file.pct} size={84} stroke={8} />
-            <div style={{ fontSize: 11, color: TOKENS.s500, marginTop: 4 }}>Staff file {p.file.have}/{p.file.required}</div>
-            <div style={{ fontSize: 11, color: TOKENS.s500 }}>{p.trainingHours}h training</div>
+          <div style={{ flex: 1, minWidth: 240, paddingBottom: 4 }}>
+            <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 32, color: TOKENS.s900, lineHeight: 1.1 }}>{fullName(t)}</div>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginTop: 8 }}>
+              <TitleChip u={t} />
+              {t.jobTitle && t.jobTitle !== titleOf(t) && <span style={{ fontSize: 13.5, fontWeight: 700, color: CR }}>{t.jobTitle}</span>}
+            </div>
+            <div style={{ fontSize: 12.5, color: TOKENS.s500, marginTop: 6 }}>
+              {[t.yearsOfExperience ? t.yearsOfExperience + ' years experience' : '', t.createdAt ? 'with Smartious since ' + fmtD(t.createdAt) : '', t.email, t.phone].filter(Boolean).join(' · ')}
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 18, paddingBottom: 4 }}>
+            <div style={{ textAlign: 'center' }}>
+              <Ring pct={p.file.pct} size={86} stroke={8} />
+              <div style={{ fontSize: 11, color: TOKENS.s500, marginTop: 4 }}>Staff file {p.file.have}/{p.file.required}</div>
+            </div>
+            <div style={{ textAlign: 'center', alignSelf: 'center' }}>
+              <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 34, color: GOLD, lineHeight: 1 }}>{p.trainingHours}</div>
+              <div style={{ fontSize: 11, color: TOKENS.s500, marginTop: 4 }}>training hours</div>
+            </div>
           </div>
         </div>
-        {[['Qualifications', t.qualifications], ['Certifications', t.certifications], ['Specialisations', t.specializations]].some(([, v]) => v?.length) && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14, marginTop: 16, paddingTop: 14, borderTop: '1px solid ' + LINE }}>
-            {[['Qualifications', t.qualifications], ['Certifications', t.certifications], ['Specialisations', t.specializations]].map(([k, v]) => v?.length ? (
-              <div key={k}>
-                <div style={{ ...lbl, color: GOLD }}>{k}</div>
-                {v.map((q, i) => <div key={i} style={{ fontSize: 12.5, color: TOKENS.s700, padding: '2px 0' }}>{q}</div>)}
-              </div>
-            ) : null)}
+        {(t.bio || (t.qualifications || []).length || (t.certifications || []).length) ? (
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.4fr) minmax(0,1fr)', gap: 24, padding: '20px 26px 24px', borderTop: '1px solid ' + LINE }} className="qa-prof-grid">
+            <div>
+              <div style={{ ...lbl, color: GOLD }}>About</div>
+              <div style={{ fontSize: 14, color: TOKENS.s700, lineHeight: 1.75, whiteSpace: 'pre-wrap' }}>{t.bio || <span style={{ color: TOKENS.s400 }}>No bio yet.</span>}</div>
+            </div>
+            <div>
+              {[['Qualifications', t.qualifications], ['Certifications', t.certifications]].map(([k, v]) => v?.length ? (
+                <div key={k} style={{ marginBottom: 14 }}>
+                  <div style={{ ...lbl, color: GOLD }}>{k}</div>
+                  {v.map((q, i) => (
+                    <div key={i} style={{ display: 'flex', gap: 8, fontSize: 13, color: TOKENS.s700, padding: '3px 0' }}>
+                      <span style={{ color: GOLD }}>◆</span><span>{q}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : null)}
+            </div>
+            <style>{`@media (max-width: 760px){.qa-prof-grid{grid-template-columns:1fr!important}}`}</style>
           </div>
-        )}
-      </PCard>
+        ) : null}
+      </div>
 
       {p.canEdit && (
         <>
