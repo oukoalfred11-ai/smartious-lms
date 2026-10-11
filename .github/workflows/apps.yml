@@ -1,0 +1,188 @@
+# Builds the Smartious apps.
+#   Android  → installable APK (+ store-ready AAB when signing secrets are set)
+#   Windows  → Smartious-Setup.exe installer
+#   iOS      → simulator build to prove it compiles; a signed .ipa for
+#              TestFlight/App Store when the Apple signing secrets are set
+#   Web      → production build of the portal the apps load
+#
+# Runs on changes to the apps, by hand (Actions → Apps → Run workflow), and
+# on a tag like app-v1.0.0, which also publishes a GitHub Release with the
+# files attached for download.
+name: Apps
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['app-v*']
+    paths:
+      - 'apps/**'
+      - 'frontend/src/lib/appShell.js'
+      - 'frontend/src/styles/app.css'
+      - 'frontend/src/components/ui/MobileTabBar.jsx'
+      - '.github/workflows/apps.yml'
+  pull_request:
+    paths:
+      - 'apps/**'
+      - '.github/workflows/apps.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: apps-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  APP_VERSION_NAME: 1.0.${{ github.run_number }}
+  APP_VERSION_CODE: ${{ github.run_number }}
+
+jobs:
+  web:
+    name: Web portal build
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: frontend } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm install --no-audit --no-fund --ignore-scripts
+      - run: npm run build
+
+  android:
+    name: Android
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: apps/mobile } }
+    env:
+      KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 21 }
+      - run: npm install --no-audit --no-fund
+      - run: npx cap add android
+      - run: npm run native:android
+      - name: Build installable APK
+        working-directory: apps/mobile/android
+        run: ./gradlew --no-daemon assembleDebug
+      - name: Build signed release (APK + AAB for Google Play)
+        if: env.KEYSTORE_B64 != ''
+        working-directory: apps/mobile/android
+        env:
+          KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/release.jks"
+          ./gradlew --no-daemon assembleRelease bundleRelease \
+            -Pandroid.injected.signing.store.file="$RUNNER_TEMP/release.jks" \
+            -Pandroid.injected.signing.store.password="$KS_PASS" \
+            -Pandroid.injected.signing.key.alias="$KEY_ALIAS" \
+            -Pandroid.injected.signing.key.password="$KEY_PASS"
+      - name: Collect
+        run: |
+          mkdir -p out
+          cp android/app/build/outputs/apk/debug/app-debug.apk "out/Smartious-$APP_VERSION_NAME.apk"
+          if [ -f android/app/build/outputs/apk/release/app-release.apk ]; then
+            cp android/app/build/outputs/apk/release/app-release.apk "out/Smartious-$APP_VERSION_NAME-release.apk"
+            cp android/app/build/outputs/bundle/release/app-release.aab "out/Smartious-$APP_VERSION_NAME.aab"
+          fi
+          ls -la out
+      - uses: actions/upload-artifact@v4
+        with: { name: Smartious-Android, path: apps/mobile/out/*, if-no-files-found: error }
+
+  windows:
+    name: Windows
+    runs-on: windows-latest
+    defaults: { run: { working-directory: apps/desktop, shell: bash } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm install --no-audit --no-fund
+      - run: npm version "$APP_VERSION_NAME" --no-git-tag-version --allow-same-version
+      - run: npx electron-builder --win --publish never
+        env: { CSC_IDENTITY_AUTO_DISCOVERY: 'false' }
+      - uses: actions/upload-artifact@v4
+        with: { name: Smartious-Windows, path: apps/desktop/dist/*.exe, if-no-files-found: error }
+
+  ios:
+    name: iOS
+    runs-on: macos-15
+    defaults: { run: { working-directory: apps/mobile } }
+    env:
+      CERT_B64: ${{ secrets.IOS_CERT_P12_BASE64 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm install --no-audit --no-fund
+      - run: npx cap add ios
+      - run: npm run native:ios
+      - name: Compile for the simulator (no signing)
+        working-directory: apps/mobile/ios/App
+        run: |
+          if [ -d App.xcworkspace ]; then SRC="-workspace App.xcworkspace"; else SRC="-project App.xcodeproj"; fi
+          xcodebuild $SRC -scheme App -configuration Release -sdk iphonesimulator \
+            -derivedDataPath "$RUNNER_TEMP/dd" CODE_SIGNING_ALLOWED=NO build | tail -n 40
+          cd "$RUNNER_TEMP/dd/Build/Products/Release-iphonesimulator" && zip -qry "$GITHUB_WORKSPACE/apps/mobile/Smartious-simulator.zip" App.app
+      - name: Signed .ipa for TestFlight / App Store
+        if: env.CERT_B64 != ''
+        working-directory: apps/mobile/ios/App
+        env:
+          CERT_PASS: ${{ secrets.IOS_CERT_PASSWORD }}
+          PROFILE_B64: ${{ secrets.IOS_PROVISION_PROFILE_BASE64 }}
+          TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
+        run: |
+          KC="$RUNNER_TEMP/sign.keychain-db"; KCP="$(uuidgen)"
+          echo "$CERT_B64" | base64 -d > "$RUNNER_TEMP/cert.p12"
+          echo "$PROFILE_B64" | base64 -d > "$RUNNER_TEMP/app.mobileprovision"
+          security create-keychain -p "$KCP" "$KC"
+          security set-keychain-settings -lut 21600 "$KC"
+          security unlock-keychain -p "$KCP" "$KC"
+          security import "$RUNNER_TEMP/cert.p12" -P "$CERT_PASS" -A -t cert -f pkcs12 -k "$KC"
+          security set-key-partition-list -S apple-tool:,apple: -k "$KCP" "$KC"
+          security list-keychain -d user -s "$KC"
+          UUID=$(/usr/libexec/PlistBuddy -c "Print UUID" /dev/stdin <<< "$(security cms -D -i "$RUNNER_TEMP/app.mobileprovision")")
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp "$RUNNER_TEMP/app.mobileprovision" ~/Library/MobileDevice/Provisioning\ Profiles/$UUID.mobileprovision
+          if [ -d App.xcworkspace ]; then SRC="-workspace App.xcworkspace"; else SRC="-project App.xcodeproj"; fi
+          xcodebuild $SRC -scheme App -configuration Release -sdk iphoneos \
+            -archivePath "$RUNNER_TEMP/App.xcarchive" archive \
+            DEVELOPMENT_TEAM="$TEAM_ID" CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="Apple Distribution" PROVISIONING_PROFILE_SPECIFIER="$UUID" | tail -n 40
+          cat > "$RUNNER_TEMP/export.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>teamID</key><string>$TEAM_ID</string>
+            <key>signingStyle</key><string>manual</string>
+            <key>provisioningProfiles</key><dict><key>com.smartious.homeschool</key><string>$UUID</string></dict>
+          </dict></plist>
+          PLIST
+          xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/export.plist" -exportPath "$RUNNER_TEMP/ipa"
+          cp "$RUNNER_TEMP"/ipa/*.ipa "$GITHUB_WORKSPACE/apps/mobile/Smartious-$APP_VERSION_NAME.ipa"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Smartious-iOS
+          path: |
+            apps/mobile/Smartious-simulator.zip
+            apps/mobile/*.ipa
+          if-no-files-found: error
+
+  release:
+    name: Publish release
+    if: startsWith(github.ref, 'refs/tags/app-v')
+    needs: [android, windows, ios]
+    runs-on: ubuntu-latest
+    permissions: { contents: write }
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { path: out, merge-multiple: true }
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: out/*
+          generate_release_notes: true
