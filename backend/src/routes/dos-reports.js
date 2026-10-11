@@ -31,6 +31,7 @@ const ExamSubmission = require('../models/ExamSubmission');
 const HomeworkSubmission = require('../models/HomeworkSubmission');
 const QuizSession = require('../models/QuizSession');
 const TeacherRating = require('../models/TeacherRating');
+const attendanceFacts = require('../lib/attendanceFacts');
 
 const STAFF = ['admin', 'ops_manager', 'dos'];
 const r1 = (x) => (x === null || x === undefined ? null : Math.round(x * 10) / 10);
@@ -42,42 +43,9 @@ function range(req) {
   return { from, to };
 }
 
-/** Core: scheduled vs attended per student, plus per-class join stats. */
-async function sessionFacts(from, to) {
-  // A lesson counts as held once its scheduled time plus duration has
-  // passed (or it was explicitly ended). Stored status is unreliable:
-  // most teachers never press "end", so filtering on status 'ended'
-  // would silently drop most of the school's teaching.
-  const cutoff = Math.min(to.getTime(), Date.now());
-  const raw = await LiveClass.find({
-    status: { $nin: ['cancelled'] },
-    kind: { $in: ['lesson', null] },
-    scheduledAt: { $gte: from, $lte: new Date(cutoff) },
-  }).select('subject grade teacherId assignedStudents scheduledAt durationMins status').limit(1500).lean();
-  const classes = raw.filter(c => c.status === 'ended' ||
-    new Date(c.scheduledAt).getTime() + (c.durationMins || 60) * 60000 < cutoff);
-  const ids = classes.map(c => c._id);
-  const sessions = ids.length ? await ClassroomSession.find({ liveClassId: { $in: ids } })
-    .select('liveClassId userId present joinCount').lean() : [];
-  const attendedSet = new Set(); // `${classId}|${userId}` where counted present
-  sessions.forEach(s => {
-    const joinedOrMarked = (s.joinCount || 0) > 0 || s.present === true;
-    if (joinedOrMarked && s.present !== false) attendedSet.add(String(s.liveClassId) + '|' + String(s.userId));
-  });
-  const perStudent = {}; // userId -> { scheduled, attended }
-  const perClass = {};   // classId -> { assigned, attended }
-  classes.forEach(c => {
-    const cid = String(c._id);
-    perClass[cid] = { assigned: (c.assignedStudents || []).length, attended: 0 };
-    (c.assignedStudents || []).forEach(u => {
-      const uid = String(u);
-      perStudent[uid] = perStudent[uid] || { scheduled: 0, attended: 0 };
-      perStudent[uid].scheduled += 1;
-      if (attendedSet.has(cid + '|' + uid)) { perStudent[uid].attended += 1; perClass[cid].attended += 1; }
-    });
-  });
-  return { classes, perStudent, perClass };
-}
+/** Core: scheduled vs attended per student, plus per-class join stats.
+ *  Shared with snapshots/ops-reports/student views — see lib/attendanceFacts. */
+const sessionFacts = (from, to) => attendanceFacts.sessionFacts(from, to, { limit: 1500 });
 
 // ── Whole school ─────────────────────────────────────────────────────
 router.get('/school', auth, requireRole(...STAFF), async (req, res) => {
@@ -335,36 +303,47 @@ router.get('/question-bank', auth, requireRole(...STAFF), async (req, res) => {
 //   GET /api/dos-reports/attendance-records?from=YYYY-MM-DD&to=YYYY-MM-DD
 router.get('/attendance-records', auth, requireRole('admin', 'ops_manager', 'dos'), async (req, res) => {
   try {
-    const ClassroomSession = require('../models/ClassroomSession');
     const Attendance = require('../models/Attendance');
     const to = req.query.to ? new Date(req.query.to + 'T23:59:59Z') : new Date();
     const from = req.query.from ? new Date(req.query.from + 'T00:00:00Z') : new Date(to.getTime() - 30 * 864e5);
     if (to - from > 100 * 864e5) return res.status(400).json({ success: false, message: 'Range too large - 100 days maximum.' });
 
-    const sessions = await ClassroomSession.find({ createdAt: { $gte: from, $lte: to } })
-      .populate({ path: 'liveClassId', select: 'title subject grade scheduledAt teacherId', populate: { path: 'teacherId', select: 'firstName lastName' } })
-      .populate('userId', 'firstName lastName gradeLevel role')
-      .sort({ createdAt: 1 }).limit(8000).lean();
-    const lessonRows = sessions.filter(x => x.liveClassId && x.userId && (x.role === 'student' || x.userId.role === 'student')).map(x => ({
-      date: x.liveClassId.scheduledAt, class: x.liveClassId.title || x.liveClassId.subject,
-      subject: x.liveClassId.subject || '', grade: x.liveClassId.grade || '',
-      teacher: x.liveClassId.teacherId ? [x.liveClassId.teacherId.firstName, x.liveClassId.teacherId.lastName].filter(Boolean).join(' ') : '',
-      student: [x.userId.firstName, x.userId.lastName].filter(Boolean).join(' '),
-      studentGrade: x.userId.gradeLevel || '',
-      joined: (x.joinCount || 0) > 0 ? 'yes' : 'no',
-      present: x.present === true ? 'present' : x.present === false ? 'absent' : ((x.joinCount || 0) > 0 ? 'present' : ''),
+    // Every assigned student of every held lesson (so missed lessons show
+    // too), with the same attended rule used everywhere (lib/attendanceFacts).
+    const classes = (await attendanceFacts.heldLessons(from, to, { limit: 3000 }))
+      .sort((a, b) => new Date(a.scheduledAt) - new Date(b.scheduledAt));
+    const sess = await attendanceFacts.sessionsFor(classes);
+    const userIds = new Set();
+    classes.forEach(c => { userIds.add(String(c.teacherId)); (c.assignedStudents || []).forEach(u => userIds.add(String(u))); });
+    const users = userIds.size ? await User.find({ _id: { $in: [...userIds] } }).select('firstName lastName gradeLevel role').lean() : [];
+    const U = Object.fromEntries(users.map(u => [String(u._id), u]));
+    const nm = (u) => (u ? [u.firstName, u.lastName].filter(Boolean).join(' ') : '');
+    const lessonRows = [];
+    classes.forEach(c => (c.assignedStudents || []).forEach(sid => {
+      const st = U[String(sid)];
+      if (!st || st.role !== 'student' || lessonRows.length >= 8000) return;
+      const x = sess.get(String(c._id) + '|' + String(sid));
+      lessonRows.push({
+        date: c.scheduledAt, class: c.title || c.subject,
+        subject: c.subject || '', grade: c.grade || '',
+        teacher: nm(U[String(c.teacherId)]),
+        student: nm(st), studentGrade: st.gradeLevel || '',
+        joined: (x?.joinCount || 0) > 0 ? 'yes' : 'no',
+        present: attendanceFacts.sessionAttended(x) ? 'present' : 'absent',
+        source: x?.markedBy ? 'teacher' : 'session',
+      });
     }));
 
     const daily = await Attendance.find({ date: { $gte: from, $lte: to } })
-      .populate('studentId', 'firstName lastName gradeLevel')
+      .populate('studentId', 'firstName lastName gradeLevel role')
       .sort({ date: 1 }).limit(8000).lean();
-    const dailyRows = daily.filter(x => x.studentId).map(x => ({
+    const dailyRows = daily.filter(x => x.studentId && x.studentId.role === 'student').map(x => ({
       date: x.date, student: [x.studentId.firstName, x.studentId.lastName].filter(Boolean).join(' '),
       grade: x.studentId.gradeLevel || '', status: x.status || '',
     }));
 
     res.json({ success: true, data: { from, to, lessonRows, dailyRows,
-      method: 'Lesson attendance from classroom session registers: joined = the student entered the live room; present = the teacher\u2019s register mark, falling back to joined when unmarked. Daily attendance from check-in records.' } });
+      method: 'Lesson attendance: every assigned student of every held lesson (scheduled time passed, not cancelled). Joined = the student entered the live room; Register = present when joined or marked present by the class teacher, unless the teacher marked them absent. Daily rows are student check-ins (and, before the per-lesson cutover, the old day register) — history only, not the attendance metric.' } });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
 

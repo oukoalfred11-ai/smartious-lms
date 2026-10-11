@@ -10,6 +10,7 @@ import { DashboardModule, AnalyticsModule } from './modules/HomeModules.jsx'
 import UsersModule, { UserFormFields } from './modules/UsersModule.jsx'
 import TeachersModule from './modules/TeachersModule.jsx'
 import DocumentsModule from './modules/DocumentsModule.jsx'
+import { QAOverviewModule, TeacherProfilesModule, TDPModule, AccreditationsModule } from './modules/QAModules.jsx'
 import FrontDeskModule from './modules/FrontDeskModule.jsx'
 import AssessmentModule from './modules/AssessmentModule.jsx'
 import CRMModule, { SalesPerformanceModule } from './modules/CRMModule.jsx'
@@ -18,7 +19,6 @@ import ReportsModule from './modules/ReportsModule.jsx'
 import CommunicationModule from './modules/CommunicationModule.jsx'
 import StudentsManagementModule from './modules/AllocationsModule.jsx'
 import QuestionBankModule from './modules/QuestionBankModule.jsx'
-import MarkingReviewModule from './modules/MarkingReviewModule.jsx'
 import { COOReportOverviewModule, TeacherRatingsModule } from './modules/RatingsModule.jsx'
 import PayrollModule from './modules/PayrollModule.jsx'
 import StudentSessionsModule from './modules/StudentSessionsModule.jsx'
@@ -75,7 +75,8 @@ const NAV_SECTIONS = {
     { label: 'Reports',     items: ['reports', 'dosperformance', 'mastery'] },
     { label: 'Operations',  items: ['frontdesk', 'assessment', 'documents', 'payroll', 'leave', 'programmes', 'inventory'] },
     { label: 'Teaching',    items: ['liveclasses', 'clubs', 'grouprooms', 'curriculum'] },
-    { label: 'Question Bank', items: ['questionbank', 'markingreview'] },
+    { label: 'Question Bank', items: ['questionbank'] },
+    { label: 'Quality',     items: ['qaoverview', 'teacherprofiles', 'tdp', 'accreditations'] },
     { label: 'Marketing',   items: ['studio'] },
     { label: 'System',      items: ['userlogs', 'billing', 'website', 'settings', 'ai', 'suggestions'] },
   ],
@@ -94,7 +95,7 @@ const NAV_SECTIONS = {
     { label: 'Student Sessions', items: ['sessions'] },
     { label: 'Breaks',        items: ['dosbreaks'] },
     { label: 'Timetables',    items: ['dostimetable'] },
-    { label: 'Question Bank', items: ['questionbank', 'markingreview'] },
+    { label: 'Question Bank', items: ['questionbank'] },
     { label: 'Reports',       items: ['reports', 'dosperformance', 'mastery'] },
     { label: 'System',        items: ['settings'] },
   ],
@@ -108,9 +109,9 @@ const NAV_SECTIONS = {
   ],
   qa: [
     { label: 'Overview',  items: ['dashboard'] },
+    { label: 'Our School', items: ['teacherprofiles', 'tdp', 'accreditations'] },
     { label: 'Academics', items: ['curriculum', 'questionbank', 'exams'] },
     { label: 'Quality & Reports', items: ['reports', 'dosperformance', 'mastery', 'dosattend'] },
-    { label: 'Documents', items: ['documents'] },
   ],
   ops_manager: [
     { label: 'Overview',    items: ['command', 'checkin', 'dashboard', 'analytics'] },
@@ -226,6 +227,7 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
                   accountant:  'Accountant',
                   sales:       'Sales & Front Desk',
                   ops_manager: 'Operations Manager',
+                  qa:          'Quality Assurance',
                 }[role] || 'Administrator'}
               </div>
             </div>
@@ -395,7 +397,8 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
   const adminFirst = auth?.user?.firstName || 'Alfred'
 
   // Role-based page access — mirrors the logic inside PNavigation
-  const role = auth?.user?.role || 'admin'
+  // (an admin viewing a sub-portal gets that portal's pages)
+  const role = forcedRole || auth?.user?.role || 'admin'
   const allowedPages = (NAV_SECTIONS[role] || NAV_SECTIONS.admin).flatMap(sec => sec.items).concat('dashboard')
   const safePage = allowedPages.includes(page) ? page : 'dashboard'
 
@@ -415,7 +418,9 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
       }}>
         <BirthdayBanner />
         <SuggestionBox />
-        {safePage === 'dashboard'   && forcedRole && <RoleOverview role={forcedRole} setPage={setPage} userStats={userStats} pendingAllocations={pendingAllocations} auth={auth} />}
+        {safePage === 'dashboard'   && forcedRole === 'qa' && <QAOverviewModule toast={toast} setPage={setPage} />}
+        {safePage === 'dashboard'   && forcedRole && forcedRole !== 'qa' && <RoleOverview role={forcedRole} setPage={setPage} userStats={userStats} pendingAllocations={pendingAllocations} auth={auth} />}
+        {safePage === 'qaoverview'  && <QAOverviewModule toast={toast} setPage={setPage} />}
         {safePage === 'dashboard'   && !forcedRole && <DashboardModule  setPage={setPage} userStats={userStats} pendingAllocations={pendingAllocations} refreshKey={refreshKey} auth={auth} toast={toast} openAddUser={openAddUser} adminFirst={adminFirst} />}
         {safePage === 'analytics'   && <AnalyticsModule  setPage={setPage} refreshKey={refreshKey} toast={toast} />}
         {safePage === 'users'       && <UsersModule      refreshKey={refreshKey} toast={toast} setUserForm={setUserForm} setUserModal={setUserModal} openAddUser={openAddUser} />}
@@ -426,11 +431,14 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         {safePage === 'liveclasses' && <LiveClassesModule toast={toast} />}
         {safePage === 'mastery' && <MasteryModule toast={toast} refreshKey={refreshKey} />}
         {safePage === 'dosperformance' && <DOSPerformanceModule toast={toast} />}
-        {safePage === 'command' && <CommandModule toast={toast} role={currentUser?.role} />}
+        {safePage === 'command' && <CommandModule toast={toast} role={role} />}
         {safePage === 'clubs' && <ClubsModule toast={toast} />}
         {safePage === 'announcements' && <AnnouncementsModule toast={toast} />}
         {safePage === 'frontdesk' && <FrontDeskModule refreshKey={refreshKey} toast={toast} />}
         {safePage === 'documents' && <DocumentsModule toast={toast} />}
+        {safePage === 'teacherprofiles' && <TeacherProfilesModule toast={toast} />}
+        {safePage === 'tdp' && <TDPModule toast={toast} />}
+        {safePage === 'accreditations' && <AccreditationsModule toast={toast} />}
         {safePage === 'assessment' && <AssessmentModule refreshKey={refreshKey} toast={toast} />}
         {safePage === 'crm' && <CRMModule toast={toast} refreshKey={refreshKey}/>}
         {safePage === 'salesperf' && <SalesPerformanceModule toast={toast} refreshKey={refreshKey}/>}
@@ -452,7 +460,6 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         {safePage === 'programmes'  && <ProgrammesModule refreshKey={refreshKey} toast={toast} />}
         {safePage === 'grouprooms'  && <GroupRoomsModule refreshKey={refreshKey} toast={toast} />}
         {safePage === 'curriculum'  && <CurriculumModule refreshKey={refreshKey} toast={toast} />}
-        {safePage === 'markingreview' && <MarkingReviewModule toast={toast} />}
         {safePage === 'billing'        && <BillingModule       refreshKey={refreshKey} toast={toast}/>}
         {safePage === 'studio'         && <StudioModule        toast={toast}/>}
         {safePage === 'feecollection' && <FeeCollectionModule refreshKey={refreshKey} toast={toast}/>}

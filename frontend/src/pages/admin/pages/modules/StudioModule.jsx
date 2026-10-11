@@ -23,10 +23,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { TOKENS } from '../shared/tokens.js'
 import { Muxer, ArrayBufferTarget } from '../../../../lib/mp4muxer.js'
-
-// ── Brand ────────────────────────────────────────────────
-const CRIMSON = '#8B1A2E'
-const CRIMSON_DK = '#5E0F1F'
 const GOLD = '#C9973A'
 const INK = '#080C14'
 const BONE = '#FDFAF4'
@@ -794,7 +790,7 @@ function createMixer({ totalDur, musicBuffer, musicVol, voBuffer, voVol, voClips
   const AC = window.AudioContext || window.webkitAudioContext
   const clips = [...(voClips || [])]
   if (voBuffer) clips.push({ buffer: voBuffer, at: 0.5 })
-  if (!AC || (!musicBuffer && clips.length === 0)) return { audioTracks: [], start: () => {}, stop: () => {} }
+  if (!AC || (!musicBuffer && clips.length === 0)) return { audioTracks: [], start: () => {}, stop: () => {}, elapsed: null }
   const ac = new AC()
   const dest = record ? ac.createMediaStreamDestination() : null
   const master = ac.createGain(); master.gain.value = 1
@@ -830,10 +826,24 @@ function createMixer({ totalDur, musicBuffer, musicVol, voBuffer, voVol, voClips
     s.connect(g); g.connect(master)
     starters.push((t0) => s.start(t0 + Math.max(0, c.at)))
   }
+  let t0 = 0
   return {
     audioTracks: dest ? dest.stream.getAudioTracks() : [],
-    start: () => { const t0 = ac.currentTime + 0.05; starters.forEach(fn => fn(t0)) },
+    start: () => {
+      if (ac.state === 'suspended') ac.resume().catch(() => {})
+      t0 = ac.currentTime + 0.05
+      starters.forEach(fn => fn(t0))
+    },
     stop: () => { try { ac.close() } catch (e) { /* closed */ } },
+    // Seconds into the soundtrack, read from the audio clock so picture
+    // follows sound instead of drifting from it. null while the context
+    // is not running (the caller then uses the wall clock).
+    elapsed: (nowPerf) => {
+      if (ac.state !== 'running') return null
+      const ts = ac.getOutputTimestamp ? ac.getOutputTimestamp() : null
+      const ct = ts && ts.performanceTime ? ts.contextTime + (nowPerf - ts.performanceTime) / 1000 : ac.currentTime
+      return Math.max(0, ct - t0)
+    },
   }
 }
 
@@ -904,19 +914,96 @@ async function renderMixOffline({ totalDur, musicBuffer, musicVol, voBuffer, voV
   return oac.startRendering()
 }
 
-// Seek a background <video> to an exact time and wait for the frame.
-const seekVideo = (v, t) => new Promise((res) => {
-  // Film clips set an exact target (trim offset applied); looping
-  // backgrounds keep the modulo behaviour.
-  const want = (v.__filmTarget !== undefined) ? v.__filmTarget : t
-  const target = (v.__filmTarget !== undefined) ? Math.min(want, (v.duration || want) - 0.05)
-    : (v.duration && isFinite(v.duration)) ? want % v.duration : want
-  if (Math.abs(v.currentTime - target) < 0.001) return res()
-  const done = () => { v.removeEventListener('seeked', done); res() }
-  v.addEventListener('seeked', done)
-  try { v.currentTime = target } catch (e) { res() }
-  setTimeout(done, 400)   // never wedge on a stubborn seek
+// ═══ EXPORT FRAME SOURCE FOR VIDEO CLIPS ═════════════════
+// Seeking a clip for every exported frame made the browser decode from
+// the previous keyframe each time. On phone and 4K footage that often
+// took longer than the wait allowed, so the last frame was encoded
+// again and again: the exported video froze. Instead the clip now plays
+// continuously while frames are drawn; each export frame waits until
+// the clip has reached its time (or pauses the clip if it ran ahead).
+// Only real jumps (a new scene, a trim point, a loop) seek, and those
+// wait properly for the frame.
+const EXPORT_FRAME = 1 / 30
+
+// requestVideoFrameCallback tells us which frame is actually on show.
+function trackFrames(v) {
+  if (v.__track || !v.requestVideoFrameCallback) return
+  v.__track = true
+  const tick = (_, meta) => {
+    v.__mt = meta.mediaTime
+    const w = v.__waiters || []
+    v.__waiters = []
+    w.forEach(fn => fn())
+    if (v.__track) v.requestVideoFrameCallback(tick)
+  }
+  v.requestVideoFrameCallback(tick)
+}
+const shownTime = (v) => (v.__track && v.__mt !== undefined ? v.__mt : v.currentTime)
+const nextShownFrame = (v, ms) => new Promise((res) => {
+  const tm = setTimeout(res, ms)
+  ;(v.__waiters = v.__waiters || []).push(() => { clearTimeout(tm); res() })
 })
+
+// Bring a clip to time t for the frame about to be drawn.
+async function seekVideo(v, t) {
+  // Film clips set an exact target (trim offset applied); scene
+  // backgrounds set the time within their own scene (__sceneTarget);
+  // looping backgrounds keep the modulo behaviour.
+  const want = (v.__filmTarget !== undefined) ? v.__filmTarget
+    : (v.__sceneTarget !== undefined) ? v.__sceneTarget : t
+  const dur = (v.duration && isFinite(v.duration)) ? v.duration : null
+  const target = (v.__filmTarget !== undefined) ? Math.min(want, (dur || want) - 0.05)
+    : dur ? want % dur : want
+  trackFrames(v)
+  const ahead = target - shownTime(v)
+
+  // Rolling forward through the clip: let it play to this frame.
+  if (v.__rolling && ahead > -0.5 && ahead < 1.5) {
+    if (ahead > EXPORT_FRAME / 2) {
+      if (v.paused) v.play().catch(() => {})
+      const deadline = performance.now() + 2000
+      while (shownTime(v) < target - EXPORT_FRAME / 2 && !v.ended && performance.now() < deadline) {
+        await nextShownFrame(v, 120)
+      }
+    }
+    // The clip is ahead of the export (drawing is slower than real
+    // time): hold it here until the export catches up.
+    if (shownTime(v) > target + EXPORT_FRAME && !v.paused) v.pause()
+    return
+  }
+
+  // A jump: seek exactly, wait for that frame, then roll from there.
+  v.pause()
+  await new Promise((res) => {
+    let tm = null
+    const done = () => { v.removeEventListener('seeked', done); clearTimeout(tm); res() }
+    v.addEventListener('seeked', done)
+    tm = setTimeout(done, 5000)
+    try { v.currentTime = target } catch (e) { done() }
+  })
+  if (v.__track) await nextShownFrame(v, 300)
+  v.__mt = v.currentTime
+  v.__rolling = true
+  // Start rolling now: play() takes a moment to get going, and waiting
+  // for the next frame to call it held each clip's first frame.
+  v.play().catch(() => {})
+}
+
+// Stop rolling clips once an export ends. Scene and card backgrounds go
+// back to their opening frame so stills and thumbnails show the start.
+function releaseVideos(vids) {
+  for (const v of vids) {
+    try { v.pause() } catch (e) { /* gone */ }
+    if (v.__sceneTarget !== undefined) {
+      delete v.__sceneTarget
+      try { v.currentTime = 0.1 } catch (e) { /* fine */ }
+    }
+    v.__rolling = false
+    v.__track = false
+    v.__waiters = []
+    delete v.__mt
+  }
+}
 
 // ═══ FILM AUDIO TOOLS ═══════════════════════════════════
 // Slice a clip's decoded audio to its trim window, with gain.
@@ -1116,6 +1203,54 @@ async function exportMp4Fast({ canvas, W, H, totalDur, drawFrame, mediaAt, sound
   const audioBuf = audioPlan ? await renderMixOffline({ totalDur, ...sound, sampleRate: audioPlan.sr }) : null
   if (!audioBuf) audioPlan = null
 
+  // ── Encode the soundtrack FIRST, into memory, with a time limit. A
+  // hardware audio encoder that never finishes (seen with some Chrome
+  // and driver combinations) used to hang the export at 100% with no
+  // download. Now a stalled or failed sound encode drops the audio
+  // track (the video still exports, and the caller is told it's
+  // silent) and is decided before the container is built, so no empty
+  // audio track is ever declared.
+  const audioChunks = []
+  let audioFailed = false
+  if (audioPlan) {
+    let aErr = null
+    let aEnc = null
+    try {
+      aEnc = new AudioEncoder({
+        output: (chunk, meta) => audioChunks.push([chunk, meta]),
+        error: (e) => { aErr = e },
+      })
+      aEnc.configure(audioPlan.cfg)
+      const SR = audioPlan.sr, CH = 2, CHUNK = 4800
+      const L = audioBuf.getChannelData(0)
+      const R = audioBuf.numberOfChannels > 1 ? audioBuf.getChannelData(1) : L
+      for (let off = 0; off < L.length; off += CHUNK) {
+        const n = Math.min(CHUNK, L.length - off)
+        const data = new Float32Array(n * CH)
+        data.set(L.subarray(off, off + n), 0)
+        data.set(R.subarray(off, off + n), n)
+        const ad = new AudioData({
+          format: 'f32-planar', sampleRate: SR, numberOfFrames: n,
+          numberOfChannels: CH, timestamp: Math.round((off / SR) * 1e6), data,
+        })
+        aEnc.encode(ad)
+        ad.close()
+        await drainQueue(aEnc, 8, 'Sound encoder')
+        if (aErr) throw aErr
+      }
+      await withTimeout(aEnc.flush(), 30000, 'Sound encoder')
+      if (aErr) throw aErr
+      if (!audioChunks.length) throw new Error('Sound encoder produced no audio')
+    } catch (e) {
+      console.warn('[export] sound dropped:', e?.message || e)
+      audioFailed = true
+      audioPlan = null
+      audioChunks.length = 0
+    } finally {
+      try { aEnc && aEnc.state !== 'closed' && aEnc.close() } catch (e) { /* closed */ }
+    }
+  }
+
   const muxer = new Muxer({
     target: new ArrayBufferTarget(),
     video: { codec: 'avc', width: W, height: H },
@@ -1154,55 +1289,61 @@ async function exportMp4Fast({ canvas, W, H, totalDur, drawFrame, mediaAt, sound
   if (!vConfig) return null
   vEnc.configure(vConfig)
 
-  let aEnc = null
-  if (audioPlan) {
-    aEnc = new AudioEncoder({
-      output: (chunk, meta) => muxer.addAudioChunk(chunk, meta),
-      error: (e) => { vErr = e },
-    })
-    aEnc.configure(audioPlan.cfg)
-  }
-
   const ctx = canvas.getContext('2d')
   const totalFrames = Math.ceil(totalDur * FPS)
-  for (let f = 0; f < totalFrames; f++) {
-    const t = f / FPS
-    const vids = mediaAt ? mediaAt(t) : []
-    for (const v of vids) if (v && v.play) await seekVideo(v, t)
-    drawFrame(ctx, t)
-    const frame = new VideoFrame(canvas, { timestamp: Math.round(t * 1e6), duration: Math.round(1e6 / FPS) })
-    vEnc.encode(frame, { keyFrame: f % 60 === 0 })
-    frame.close()
-    while (vEnc.encodeQueueSize > 6) await new Promise(r => setTimeout(r, 2))
-    if (f % 12 === 0) { onProgress?.(f / totalFrames); await new Promise(r => setTimeout(r, 0)) }
-    if (vErr) throw vErr
-  }
-
-  if (aEnc && audioBuf) {
-    const SR = audioPlan.sr, CH = 2, CHUNK = 4800
-    const L = audioBuf.getChannelData(0)
-    const R = audioBuf.numberOfChannels > 1 ? audioBuf.getChannelData(1) : L
-    for (let off = 0; off < L.length; off += CHUNK) {
-      const n = Math.min(CHUNK, L.length - off)
-      const data = new Float32Array(n * CH)
-      data.set(L.subarray(off, off + n), 0)
-      data.set(R.subarray(off, off + n), n)
-      const ad = new AudioData({
-        format: 'f32-planar', sampleRate: SR, numberOfFrames: n,
-        numberOfChannels: CH, timestamp: Math.round((off / SR) * 1e6), data,
-      })
-      aEnc.encode(ad)
-      ad.close()
-      while (aEnc.encodeQueueSize > 8) await new Promise(r => setTimeout(r, 2))
+  const used = new Set()
+  try {
+    for (let f = 0; f < totalFrames; f++) {
+      const t = f / FPS
+      const vids = mediaAt ? mediaAt(t) : []
+      // Clips that leave the frame stop rolling until they are needed.
+      for (const v of used) if (!vids.includes(v) && !v.paused) { v.pause(); v.__rolling = false }
+      for (const v of vids) if (v && v.play) { used.add(v); await seekVideo(v, t) }
+      drawFrame(ctx, t)
+      const frame = new VideoFrame(canvas, { timestamp: Math.round(t * 1e6), duration: Math.round(1e6 / FPS) })
+      vEnc.encode(frame, { keyFrame: f % 60 === 0 })
+      frame.close()
+      await drainQueue(vEnc, 6, 'Video encoder')
+      if (f % 12 === 0) { onProgress?.(f / totalFrames); await new Promise(r => setTimeout(r, 0)) }
       if (vErr) throw vErr
     }
-    await aEnc.flush()
+  } finally {
+    releaseVideos(used)
   }
-  await vEnc.flush()
+
+  // Finish the video. A hardware encoder that stops responding fails
+  // the export (the caller falls back to the realtime recorder) rather
+  // than leaving it stuck at 100%.
+  try {
+    await withTimeout(vEnc.flush(), 60000, 'Video encoder')
+  } finally {
+    try { if (vEnc.state !== 'closed') vEnc.close() } catch (e) { /* closed */ }
+  }
   if (vErr) throw vErr
+  for (const [chunk, meta] of audioChunks) muxer.addAudioChunk(chunk, meta)
   muxer.finalize()
   onProgress?.(1)
-  return { blob: new Blob([muxer.target.buffer], { type: 'video/mp4' }), audioNote: wantsAudio && !audioPlan ? 'silent' : audioPlan?.mux === 'opus' ? 'opus' : null }
+  return { blob: new Blob([muxer.target.buffer], { type: 'video/mp4' }), audioNote: wantsAudio && (!audioPlan || audioFailed) ? 'silent' : audioPlan?.mux === 'opus' ? 'opus' : null }
+}
+
+// Reject if a promise does not settle in time.
+function withTimeout(p, ms, what) {
+  let tm = null
+  return Promise.race([
+    p.finally(() => clearTimeout(tm)),
+    new Promise((_, rej) => { tm = setTimeout(() => rej(new Error(what + ' stopped responding')), ms) }),
+  ])
+}
+
+// Wait for an encoder's queue to drain below `max`; fail if it makes no
+// progress for 20 s instead of waiting forever.
+async function drainQueue(enc, max, what) {
+  let last = enc.encodeQueueSize, since = performance.now()
+  while (enc.encodeQueueSize > max) {
+    await new Promise(r => setTimeout(r, 2))
+    if (enc.encodeQueueSize !== last) { last = enc.encodeQueueSize; since = performance.now() }
+    else if (performance.now() - since > 20000) throw new Error(what + ' stopped responding')
+  }
 }
 
 // Narrator script: turns each card's text into worry -> solution
@@ -1414,14 +1555,17 @@ const restoreMaps = async (mediaBlobs, voBlobs) => {
 }
 // A live miniature of a card/scene: the strip shows real frames, and
 // the selected one doubles as the video's preview (thumbnail) source.
-function Thumb({ draw, w, h, active, onClick, label }) {
+// `deps` lists what the drawing depends on; the miniature repaints only
+// when one changes (not on every parent render — during preview the
+// parent re-renders many times a second).
+function Thumb({ draw, deps, w, h, active, onClick, label }) {
   const ref = useRef(null)
   useEffect(() => {
     const cv = ref.current
     if (!cv) return
     cv.width = w * 2; cv.height = h * 2   // 2x for crispness
     try { draw(cv.getContext('2d'), w * 2, h * 2) } catch (e) { /* not ready yet */ }
-  })
+  }, deps ? [...deps, w, h] : undefined)
   return (
     <button onClick={onClick} style={{
       padding: 2, background: '#fff', cursor: 'pointer', borderRadius: 8,
@@ -1457,7 +1601,18 @@ const inputStyle = { width: '100%', boxSizing: 'border-box', border: '1.5px soli
 const btn = (primary) => ({ background: primary ? TOKENS.crimson : '#fff', color: primary ? '#fff' : TOKENS.s700, border: primary ? 'none' : '1.5px solid ' + TOKENS.line, borderRadius: 9, padding: '9px 15px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer' })
 
 // ═══════════════════════════════════════════════════════════
-export default function StudioModule({ toast }) {
+export default function StudioModule({ toast: toastProp }) {
+  // The Studio calls toast('message'); the dashboard passes the app's
+  // toast object ({ ok, error, info }). Calling the object threw, which
+  // left an export stuck at 100% whenever it needed to report anything.
+  const toast = useMemo(() => {
+    if (typeof toastProp === 'function') return toastProp
+    const say = (m) => toastProp?.info?.(m)
+    say.ok = (m) => toastProp?.ok?.(m)
+    say.error = (m) => toastProp?.error?.(m)
+    say.info = say
+    return say
+  }, [toastProp])
   const [tab, setTab] = useState('cards')
   const [crestReady, setCrestReady] = useState(!!_crestImg)
   useEffect(() => { Promise.all([ensureCrest(), loadBrandFonts()]).then(() => setCrestReady(true)) }, [])
@@ -1495,6 +1650,11 @@ const TRANSITIONS = [
   ['push', 'Push (slide)'],
   ['wipe', 'Gold wipe'],
 ]
+
+// Live previews are shown at most ~440 CSS px wide. Drawing them at the
+// 4K export size repainted about 8 million pixels a frame and froze
+// playback; previews draw at this long side, exports at full size.
+const PREVIEW_LONG = 960
 
 const FORMATS = {
   story: { W: 2160, H: 3840, label: 'Story 4K 9:16' },
@@ -1534,7 +1694,7 @@ function CardMaker({ toast }) {
   const [showNumbers, setShowNumbers] = useState(false)   // "2 / 5" chip: off unless asked for
   const [fontId, setFontId] = useState(0)                  // Montserrat default: bold
   const [brandMode, setBrandMode] = useState('logo')       // logo | word | none
-  const [, setTick] = useState(0)   // bumps when the logo asset loads so the canvas redraws
+  const [tick, setTick] = useState(0)   // bumps when the logo asset loads so the canvas redraws
   const { W, H } = FORMATS[format] || FORMATS.square
   const card = cards[cur]
   const mediaEl = medias[cur]
@@ -1665,6 +1825,19 @@ function CardMaker({ toast }) {
     return ref.current
   }
 
+  // Each card's clip starts from its beginning when the card first
+  // appears (the start of the transition into it; card 1 at 0) and keeps
+  // rolling through the handover out of it. Returns [[cardIdx, clipTime]]
+  // for the clips on screen at time t.
+  const clipStart = (idx) => idx === 0 ? 0 : Math.max(0, idx * cardDur - TRANS_DUR)
+  const clipsAt = (t) => {
+    const n = cards.length
+    const i = Math.min(n - 1, Math.floor(t / cardDur))
+    const out = [[i, Math.max(0, t - clipStart(i))]]
+    if (i < n - 1 && t - i * cardDur > cardDur - TRANS_DUR) out.push([i + 1, Math.max(0, t - clipStart(i + 1))])
+    return out
+  }
+
   const drawTimeline = (ctx, t) => {
     const n = cards.length
     const seg = cardDur
@@ -1730,15 +1903,34 @@ function CardMaker({ toast }) {
       recorder.start(500)
     }
     mixer.start()
-    // Start every video background rolling; stop them at the end.
-    Object.values(medias).forEach(m => { if (m && m.play) { m.currentTime = 0; m.play().catch(() => {}) } })
+    // Video backgrounds play only while their card is on screen, each
+    // from its own beginning (see clipsAt); stop them all at the end.
+    const vids = Object.values(medias).filter(m => m && m.play)
+    vids.forEach(m => m.pause())
+    const rolling = new Set()
     const total = cards.length * cardDur
     const t0 = performance.now()
+    let lastProg = 0
     const step = (now) => {
-      const t = (now - t0) / 1000
-      setProgress(Math.min(1, t / total))
+      // Audio clock when there is sound, so picture follows it.
+      const ta = mixer.elapsed ? mixer.elapsed(now) : null
+      const t = ta !== null ? ta : (now - t0) / 1000
+      // A few progress updates a second: each one re-renders the editor.
+      if (now - lastProg > 120) { setProgress(Math.min(1, t / total)); lastProg = now }
+      const live = new Set()
+      for (const [idx, ct] of clipsAt(t)) {
+        const v = medias[idx]
+        if (!v || !v.play) continue
+        live.add(v)
+        if (!rolling.has(v)) {
+          try { v.currentTime = (v.duration && isFinite(v.duration)) ? ct % v.duration : ct } catch (e) { /* not seekable yet */ }
+          v.play().catch(() => {})
+          rolling.add(v)
+        }
+      }
+      for (const v of rolling) if (!live.has(v)) { v.pause(); rolling.delete(v) }
       if (drawTimeline(ctx, t)) { rafRef.current = requestAnimationFrame(step); return }
-      Object.values(medias).forEach(m => { if (m && m.pause) m.pause() })
+      vids.forEach(m => { m.pause(); try { m.currentTime = 0.1 } catch (e) { /* fine */ } })
       mixer.stop()
       if (recorder) { recorder.onstop = () => resolve(new Blob(chunks, { type: 'video/webm' })); recorder.stop() }
       else resolve(null)
@@ -1755,13 +1947,15 @@ function CardMaker({ toast }) {
     setRendering(true)
     const totalD = cards.length * cardDur
     const t0 = performance.now()
+    let fastErr = ''
     // Fast path: offline WebCodecs encode straight to MP4 — renders
     // as fast as the machine can draw, not at playback speed.
     try {
-      const mediaAt = (t) => {
-        const i = Math.min(cards.length - 1, Math.floor(t / cardDur))
-        return [medias[i], medias[i + 1]].filter(Boolean)
-      }
+      const mediaAt = (t) => clipsAt(t).map(([idx, ct]) => {
+        const v = medias[idx]
+        if (v && v.play) v.__sceneTarget = ct
+        return v
+      }).filter(Boolean)
       const out = await exportMp4Fast({
         canvas: cvRef.current, W, H, totalDur: totalD,
         drawFrame: (ctx, t) => drawTimeline(ctx, t),
@@ -1780,18 +1974,25 @@ function CardMaker({ toast }) {
         toast?.('MP4 ready: ' + (out.blob.size / 1048576).toFixed(1) + ' MB in ' + Math.round((performance.now() - t0) / 1000) + 's (' + speed.toFixed(1) + 'x).' + note)
         return
       }
-    } catch (e) { console.error('[fast export]', e) }
-    // Fallback: realtime WebM recording (older browsers).
-    if (typeof MediaRecorder === 'undefined') { setRendering(false); toast?.('This browser cannot export video — use Chrome on a computer.'); return }
-    toast?.('Fast export unavailable here — rendering in real time (' + Math.round(totalD) + 's)...')
-    const blob = await runCards(true)
-    setRendering(false); setProgress(0)
-    if (blob) {
-      const a = document.createElement('a')
-      a.download = 'smartious-cards.webm'
-      a.href = URL.createObjectURL(blob)
-      a.click()
-      toast?.('Video downloaded (WebM) — for WhatsApp, convert to MP4 first.')
+    } catch (e) { console.error('[fast export]', e); fastErr = e?.message || String(e) }
+    // Fallback: realtime WebM recording (older browsers, or a fast
+    // export that failed). Rendering always ends, whatever happens.
+    try {
+      if (typeof MediaRecorder === 'undefined') { toast?.('This browser cannot export video — use Chrome on a computer.'); return }
+      toast?.((fastErr ? 'Fast export failed (' + fastErr + ')' : 'Fast export unavailable here') + ' — recording in real time instead (' + Math.round(totalD) + 's)...')
+      const blob = await runCards(true)
+      if (blob) {
+        const a = document.createElement('a')
+        a.download = 'smartious-cards.webm'
+        a.href = URL.createObjectURL(blob)
+        a.click()
+        toast?.('Video downloaded (WebM) — for WhatsApp, convert to MP4 first.')
+      }
+    } catch (e) {
+      console.error('[realtime export]', e)
+      toast?.('Export failed: ' + (e?.message || 'unknown error'))
+    } finally {
+      setRendering(false); setProgress(0)
     }
   }
 
@@ -1821,6 +2022,7 @@ function CardMaker({ toast }) {
           {cards.map((c, i) => (
             <Thumb key={i} {...thumbSize(format)} active={cur === i} onClick={() => setCur(i)}
               label={'Card ' + (i + 1)}
+              deps={[c, fontId, brandMode, showNumbers, cards.length, medias[i], tick]}
               draw={(tc, tw, th) => renderCard(tc, tw, th, deck(c, { seriesTotal: showNumbers ? cards.length : 0, seriesNo: i + 1 }), medias[i], 1)} />
           ))}
           <button onClick={() => { setCards(cs => [...cs.map(c => ({ ...c, seriesTotal: cs.length + 1 })), newCard(cards.length, cards.length + 1)]); setCur(cards.length) }}
@@ -1937,7 +2139,7 @@ function CardMaker({ toast }) {
         <canvas ref={cvRef} style={{ width: '100%', maxWidth: format === 'story' ? 320 : 480, borderRadius: 14, boxShadow: '0 10px 30px rgba(0,0,0,.15)', display: 'block' }} />
         {(playing || rendering) && (
           <div style={{ marginTop: 8, height: 5, background: 'rgba(0,0,0,.08)', borderRadius: 99, maxWidth: format === 'story' ? 320 : 480 }}>
-            <div style={{ width: (progress * 100) + '%', height: '100%', background: GOLD, borderRadius: 99 }} />
+            <div style={{ width: (progress * 100) + '%', height: '100%', background: GOLD, borderRadius: 99, transition: 'width .15s linear' }} />
           </div>
         )}
       </div>
@@ -1982,6 +2184,8 @@ function VideoMaker({ toast }) {
   const cvRef = useRef(null)
   const rafRef = useRef(null)
   const { W, H } = FORMATS[format] || FORMATS.youtube
+  const pScale = Math.min(1, PREVIEW_LONG / Math.max(W, H))
+  const PW = Math.round(W * pScale), PH = Math.round(H * pScale)
   const scene = scenes[cur]
   const totalDur = scenes.reduce((s, x) => s + (+x.duration || 4), 0)
 
@@ -2057,8 +2261,8 @@ function VideoMaker({ toast }) {
     if (playing || rendering) return
     const cv = cvRef.current
     if (!cv) return
-    cv.width = W; cv.height = H
-    renderScene(cv.getContext('2d'), W, H, deck(scene), medias[cur], 1)
+    cv.width = PW; cv.height = PH
+    renderScene(cv.getContext('2d'), PW, PH, deck(scene), medias[cur], 1)
   }, [scenes, cur, format, medias, playing, rendering, fontId, brandMode, logoTick])
 
   const onMedia = (e) => {
@@ -2078,9 +2282,18 @@ function VideoMaker({ toast }) {
 
   // Play the whole sequence on the preview canvas; when recording,
   // capture the canvas stream while the same loop runs.
+  //  - previews draw at preview size (PW x PH); recording at full size
+  //  - only the scene on screen plays its background video, from the
+  //    start of that scene
+  //  - time comes from the audio clock, so picture follows sound
+  //  - progress updates a few times a second, not every frame (each
+  //    update re-renders the whole editor)
+  const stopRef = useRef(null)
+  useEffect(() => () => { if (stopRef.current) stopRef.current() }, [])
   const runSequence = (record) => new Promise((resolve) => {
     const cv = cvRef.current
-    cv.width = W; cv.height = H
+    const RW = record ? W : PW, RH = record ? H : PH
+    cv.width = RW; cv.height = RH
     const ctx = cv.getContext('2d')
     const mixer = createMixer({ totalDur, musicBuffer: sound.musicBuffer, musicVol: sound.musicVol, voBuffer: sound.voBuffer, voVol: sound.voVol, voClips: buildVoClips(), record })
     let recorder = null, chunks = []
@@ -2092,34 +2305,48 @@ function VideoMaker({ toast }) {
       recorder.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data) }
       recorder.start(500)
     }
+    const vids = Object.values(medias).filter(m => m && m.play)
+    vids.forEach(m => m.pause())
     mixer.start()
-    // start any video backgrounds
-    Object.values(medias).forEach(m => { if (m && m.play) { m.currentTime = 0; m.play().catch(() => {}) } })
 
+    let lastIdx = -1, lastProg = 0, done = false
     const t0 = performance.now()
+    const finish = () => {
+      if (done) return
+      done = true
+      cancelAnimationFrame(rafRef.current)
+      // back to each clip's opening frame for the still preview
+      vids.forEach(m => { m.pause(); try { m.currentTime = 0.1 } catch (e) { /* fine */ } })
+      mixer.stop()
+      stopRef.current = null
+      if (recorder && recorder.state !== 'inactive') {
+        recorder.onstop = () => resolve(new Blob(chunks, { type: 'video/webm' }))
+        recorder.stop()
+      } else resolve(null)
+    }
+    stopRef.current = finish
+
     const step = (now) => {
-      const t = (now - t0) / 1000
-      let acc = 0, drawn = false
+      if (done) return
+      const ta = mixer.elapsed ? mixer.elapsed(now) : null
+      const t = ta !== null ? ta : (now - t0) / 1000
+      if (t >= totalDur) { finish(); return }
+      let acc = 0, idx = scenes.length - 1
       for (let i = 0; i < scenes.length; i++) {
         const d = +scenes[i].duration || 4
-        if (t < acc + d) {
-          renderScene(ctx, W, H, deck(scenes[i]), medias[i], (t - acc) / d)
-          setProgress(t / totalDur)
-          drawn = true
-          break
-        }
+        if (t < acc + d) { idx = i; break }
         acc += d
       }
-      if (!drawn) {
-        // finished
-        Object.values(medias).forEach(m => { if (m && m.pause) m.pause() })
-        mixer.stop()
-        if (recorder) {
-          recorder.onstop = () => resolve(new Blob(chunks, { type: 'video/webm' }))
-          recorder.stop()
-        } else resolve(null)
-        return
+      if (idx !== lastIdx) {
+        const prev = medias[lastIdx]
+        if (prev && prev.pause) prev.pause()
+        const v = medias[idx]
+        if (v && v.play) { try { v.currentTime = 0 } catch (e) { /* not seekable yet */ } v.play().catch(() => {}) }
+        lastIdx = idx
       }
+      const d = +scenes[idx].duration || 4
+      renderScene(ctx, RW, RH, deck(scenes[idx]), medias[idx], Math.min(1, Math.max(0, (t - acc) / d)))
+      if (now - lastProg > 120) { setProgress(t / totalDur); lastProg = now }
       rafRef.current = requestAnimationFrame(step)
     }
     rafRef.current = requestAnimationFrame(step)
@@ -2130,7 +2357,9 @@ function VideoMaker({ toast }) {
     setPlaying(true)
     await runSequence(false)
     setPlaying(false)
+    setProgress(0)
   }
+  const stopPreview = () => { if (stopRef.current) stopRef.current() }
 
   const drawSceneAt = (ctx, t) => {
     let acc = 0
@@ -2143,11 +2372,18 @@ function VideoMaker({ toast }) {
       acc += d
     }
   }
+  // The scene's background video at its own time (from the start of the
+  // scene), looping if the scene outlasts the clip.
   const sceneMediaAt = (t) => {
     let acc = 0
     for (let i = 0; i < scenes.length; i++) {
       const d = +scenes[i].duration || 4
-      if (t < acc + d) return [medias[i]].filter(Boolean)
+      if (t < acc + d) {
+        const v = medias[i]
+        if (!v) return []
+        if (v.play) v.__sceneTarget = t - acc
+        return [v]
+      }
       acc += d
     }
     return []
@@ -2157,6 +2393,9 @@ function VideoMaker({ toast }) {
     if (playing || rendering) return
     setRendering(true)
     const t0 = performance.now()
+    let fastErr = ''
+    // Exports render at full size; the preview canvas is smaller.
+    cvRef.current.width = W; cvRef.current.height = H
     try {
       const out = await exportMp4Fast({
         canvas: cvRef.current, W, H, totalDur,
@@ -2176,18 +2415,25 @@ function VideoMaker({ toast }) {
         toast?.('MP4 ready: ' + (out.blob.size / 1048576).toFixed(1) + ' MB in ' + secs + 's (' + (totalDur / Math.max(1, secs)).toFixed(1) + 'x).' + note)
         return
       }
-    } catch (e) { console.error('[fast export]', e) }
-    if (typeof MediaRecorder === 'undefined') { setRendering(false); toast?.('This browser cannot export video — use Chrome on a computer.'); return }
-    toast?.('Fast export unavailable here — rendering in real time (' + Math.round(totalDur) + 's)...')
-    const blob = await runSequence(true)
-    setRendering(false)
-    setProgress(0)
-    if (blob) {
-      const a = document.createElement('a')
-      a.download = 'smartious-video.webm'
-      a.href = URL.createObjectURL(blob)
-      a.click()
-      toast?.('Video downloaded (WebM) — for WhatsApp, convert to MP4 first.')
+    } catch (e) { console.error('[fast export]', e); fastErr = e?.message || String(e) }
+    // Fallback: realtime WebM recording. Rendering always ends.
+    try {
+      if (typeof MediaRecorder === 'undefined') { toast?.('This browser cannot export video — use Chrome on a computer.'); return }
+      toast?.((fastErr ? 'Fast export failed (' + fastErr + ')' : 'Fast export unavailable here') + ' — recording in real time instead (' + Math.round(totalDur) + 's)...')
+      const blob = await runSequence(true)
+      if (blob) {
+        const a = document.createElement('a')
+        a.download = 'smartious-video.webm'
+        a.href = URL.createObjectURL(blob)
+        a.click()
+        toast?.('Video downloaded (WebM) — for WhatsApp, convert to MP4 first.')
+      }
+    } catch (e) {
+      console.error('[realtime export]', e)
+      toast?.('Export failed: ' + (e?.message || 'unknown error'))
+    } finally {
+      setRendering(false)
+      setProgress(0)
     }
   }
 
@@ -2215,6 +2461,7 @@ function VideoMaker({ toast }) {
           {scenes.map((s, i) => (
             <Thumb key={i} {...thumbSize(format)} active={cur === i} onClick={() => setCur(i)}
               label={(i + 1) + ' \u00b7 ' + s.type}
+              deps={[s, fontId, brandMode, medias[i], logoTick]}
               draw={(tc, tw, th) => renderScene(tc, tw, th, deck(s), medias[i], 1)} />
           ))}
         </div>
@@ -2309,7 +2556,7 @@ function VideoMaker({ toast }) {
         )}
 
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-          <button onClick={preview} disabled={playing || rendering} style={btn(false)}>{playing ? 'Playing...' : 'Preview all'}</button>
+          <button onClick={playing ? stopPreview : preview} disabled={rendering} style={btn(playing)}>{playing ? 'Stop preview' : 'Preview all'}</button>
           <button onClick={exportVideo} disabled={playing || rendering} style={btn(true)}>{rendering ? 'Rendering ' + Math.round(progress * 100) + '%' : 'Export video'}</button>
           <button onClick={() => {
             // Render THIS scene's final frame at full resolution, then
@@ -2343,7 +2590,7 @@ function VideoMaker({ toast }) {
         <canvas ref={cvRef} style={{ width: '100%', maxWidth: format === 'story' ? 300 : 440, borderRadius: 14, boxShadow: '0 10px 30px rgba(0,0,0,.2)', display: 'block', background: '#000' }} />
         {(playing || rendering) && (
           <div style={{ marginTop: 8, height: 5, background: 'rgba(0,0,0,.08)', borderRadius: 99, maxWidth: format === 'story' ? 300 : 440 }}>
-            <div style={{ width: (progress * 100) + '%', height: '100%', background: GOLD, borderRadius: 99 }} />
+            <div style={{ width: (progress * 100) + '%', height: '100%', background: GOLD, borderRadius: 99, transition: 'width .15s linear' }} />
           </div>
         )}
       </div>
@@ -2579,10 +2826,11 @@ function FilmMaker({ toast }) {
     const ctx = cv.getContext('2d')
     const mixer = createMixer({ totalDur: total, musicBuffer: sound.musicBuffer, musicVol: sound.musicVol, voBuffer: sound.voBuffer, voVol: sound.voVol, voClips, record: false })
     mixer.start()
-    let lastIdx = -1
+    let lastIdx = -1, lastProg = 0
     const t0 = performance.now()
     const step = (now) => {
-      const t = (now - t0) / 1000
+      const ta = mixer.elapsed ? mixer.elapsed(now) : null
+      const t = ta !== null ? ta : (now - t0) / 1000
       const a = activeAt(t)
       if (!a) { finish(); return }
       const v = media[a.idx]
@@ -2598,7 +2846,7 @@ function FilmMaker({ toast }) {
         }
       }
       drawFilm(ctx, t)
-      setProgress(t / total)
+      if (now - lastProg > 120) { setProgress(t / total); lastProg = now }
       rafRef.current = requestAnimationFrame(step)
     }
     const finish = () => {

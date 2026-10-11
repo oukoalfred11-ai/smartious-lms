@@ -1,10 +1,13 @@
 /**
- * paystack.js — quick card payments, separate from the invoice system.
+ * paystack.js — card payments by Paystack checkout link.
  *
- * POST /api/paystack/request   { email, amount, currency, payerName, description }
+ * POST /api/paystack/request   { email, amount, currency, payerName, description, invoiceId? }
  *   → creates a Paystack checkout link, emails the parent a branded
  *     Pay Now button, records the request. Returns the link so the
- *     admin can also share it on WhatsApp.
+ *     admin can also share it on WhatsApp. With invoiceId, the link is
+ *     tied to that invoice: email, currency, payer and (unless given)
+ *     amount come from the invoice, and a confirmed payment marks the
+ *     invoice paid via lib/markInvoicePaid.
  *
  * GET  /api/paystack/requests  → recent requests with status.
  * GET  /api/paystack/verify/:reference
@@ -19,7 +22,14 @@ const express = require('express');
 const crypto = require('crypto');
 const router = express.Router();
 const { auth } = require('../middleware/auth');
+const mongoose = require('mongoose');
 const PaystackRequest = require('../models/PaystackRequest');
+const Invoice = require('../models/Invoice');
+const { markInvoicePaid } = require('../lib/markInvoicePaid');
+
+const PAYSTACK_CURRENCIES = ['KES', 'USD', 'NGN', 'GHS', 'ZAR'];
+const balanceOf = (inv) => Math.max(0, Number(inv.totalDue || 0) - Number(inv.paidAmount || 0));
+const round2 = (n) => Math.round(Number(n || 0) * 100) / 100;
 
 const PAYSTACK = 'https://api.paystack.co';
 const KEY = () => process.env.PAYSTACK_SECRET_KEY;
@@ -36,12 +46,89 @@ const ALLOWED = (req, res, next) => {
 const fmtAmount = (amount, currency) =>
   currency + ' ' + Number(amount).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 
+const OUTCOME_TEXT = {
+  marked_paid: 'marked paid, receipt sent',
+  already_paid: 'was already paid \u2014 check for a double payment',
+  partial: 'part payment recorded, invoice left open for review',
+  currency_mismatch: 'currency differs from the invoice \u2014 needs manual review',
+  invoice_missing: 'linked invoice not found',
+};
+
+/**
+ * Apply a confirmed Paystack payment to the invoice it is tied to.
+ * Uses the amount and currency Paystack reports, not what was asked.
+ *  - full balance covered  → markInvoicePaid (receipt, billing clock)
+ *  - less than the balance → paidAmount increased, note added, invoice
+ *    left open for the accounts team to review
+ *  - currency differs / invoice already paid → note only, for review
+ * Called once per request (after the atomic flip to paid).
+ */
+async function settleLinkedInvoice(doc, d) {
+  const inv = await Invoice.findById(doc.invoiceId).lean();
+  if (!inv) return 'invoice_missing';
+  const cur = String(d.currency || doc.currency || '').toUpperCase();
+  const received = round2(Number(d.amount || 0) / 100);
+  const tag = `Paystack ${doc.reference}: ${cur} ${received}`;
+  const addNote = (text) => Invoice.updateOne({ _id: inv._id }, {
+    $set: { paymentNote: [String(inv.paymentNote || '').trim(), text].filter(Boolean).join(' | ') },
+  });
+
+  if (inv.status === 'paid') {
+    await addNote(`${tag} received after the invoice was already paid \u2014 review`);
+    return 'already_paid';
+  }
+  if (cur !== inv.currency) {
+    await addNote(`${tag} (invoice is ${inv.currency}) \u2014 review`);
+    return 'currency_mismatch';
+  }
+  const total = round2(Number(inv.paidAmount || 0) + received);
+  if (total + 0.005 >= round2(inv.totalDue)) {
+    const { changed } = await markInvoicePaid(inv._id, {
+      paidAmount: total,
+      paidAt: doc.paidAt || new Date(),
+      note: tag,
+      source: 'paystack',
+      actorId: doc.createdBy || null,
+    });
+    return changed ? 'marked_paid' : 'already_paid';
+  }
+  // Part payment: record the money, keep the invoice open.
+  await Invoice.updateOne({ _id: inv._id, status: { $ne: 'paid' } }, {
+    $inc: { paidAmount: received },
+    $set: { paymentNote: [String(inv.paymentNote || '').trim(), `${tag} (part payment, balance ${inv.currency} ${round2(inv.totalDue - total)}) \u2014 review`].filter(Boolean).join(' | ') },
+  });
+  return 'partial';
+}
+
 // ── Create a payment request ──────────────────────────────
 router.post('/request', auth, ALLOWED, async (req, res) => {
   try {
     if (!KEY()) return res.status(500).json({ success: false, message: 'PAYSTACK_SECRET_KEY is not set on the server.' });
 
-    const { email, amount, currency = 'KES', payerName = '', description = 'School fees' } = req.body || {};
+    let { email, amount, currency = 'KES', payerName = '', description = 'School fees', invoiceId } = req.body || {};
+
+    // Tied to an invoice: the invoice decides who pays, in what
+    // currency, and (unless an amount is given) how much.
+    let inv = null;
+    if (invoiceId) {
+      if (!mongoose.isValidObjectId(String(invoiceId))) return res.status(400).json({ success: false, message: 'Invalid invoice.' });
+      inv = await Invoice.findById(invoiceId).lean();
+      if (!inv) return res.status(404).json({ success: false, message: 'Invoice not found.' });
+      if (inv.status === 'paid') return res.status(400).json({ success: false, message: `Invoice ${inv.invoiceNo} is already paid.` });
+      if (inv.status === 'cancelled') return res.status(400).json({ success: false, message: `Invoice ${inv.invoiceNo} is cancelled.` });
+      if (!PAYSTACK_CURRENCIES.includes(inv.currency))
+        return res.status(400).json({ success: false, message: `Invoice ${inv.invoiceNo} is in ${inv.currency}; card links support ${PAYSTACK_CURRENCIES.join(', ')} only.` });
+      const balance = round2(balanceOf(inv));
+      if (balance <= 0) return res.status(400).json({ success: false, message: `Invoice ${inv.invoiceNo} has no balance to pay.` });
+      currency = inv.currency;
+      email = String(email || '').trim() || inv.billedToEmail;
+      payerName = String(payerName || '').trim() || inv.billedToName || '';
+      if (!Number(amount)) amount = balance;
+      if (!String(description || '').trim() || description === 'School fees')
+        description = `Invoice ${inv.invoiceNo}` + (inv.studentName ? ` \u2014 ${inv.studentName}` : '');
+    }
+    if (!PAYSTACK_CURRENCIES.includes(currency)) return res.status(400).json({ success: false, message: 'Unsupported currency.' });
+
     const amt = Number(amount);
     if (!email || !/.+@.+\..+/.test(String(email))) return res.status(400).json({ success: false, message: 'A valid email is required.' });
     if (!amt || amt <= 0) return res.status(400).json({ success: false, message: 'Amount must be greater than zero.' });
@@ -58,6 +145,7 @@ router.post('/request', auth, ALLOWED, async (req, res) => {
         reference,
         metadata: {
           payerName, description,
+          ...(inv ? { invoiceNo: inv.invoiceNo } : {}),
           custom_fields: [
             { display_name: 'For', variable_name: 'description', value: description },
             { display_name: 'Payer', variable_name: 'payer', value: payerName || email },
@@ -75,6 +163,9 @@ router.post('/request', auth, ALLOWED, async (req, res) => {
       amount: amt, currency, description,
       reference, authorizationUrl: init.data.authorization_url,
       createdBy: req.user?._id || null,
+      invoiceId: inv ? inv._id : null,
+      invoiceNo: inv ? inv.invoiceNo : '',
+      studentId: inv ? (inv.studentId || null) : null,
     });
 
     // Email the parent their Pay Now button. Fire and forget; the
@@ -148,7 +239,7 @@ router.get('/requests', auth, ALLOWED, async (req, res) => {
 router.get('/verify/:reference', auth, ALLOWED, async (req, res) => {
   try {
     if (!KEY()) return res.status(500).json({ success: false, message: 'PAYSTACK_SECRET_KEY is not set on the server.' });
-    const doc = await PaystackRequest.findOne({ reference: req.params.reference });
+    let doc = await PaystackRequest.findOne({ reference: req.params.reference });
     if (!doc) return res.status(404).json({ success: false, message: 'Request not found.' });
 
     const vRes = await fetch(PAYSTACK + '/transaction/verify/' + encodeURIComponent(doc.reference), {
@@ -159,15 +250,39 @@ router.get('/verify/:reference', auth, ALLOWED, async (req, res) => {
     if (v.status && d) {
       const map = { success: 'paid', failed: 'failed', abandoned: 'abandoned' };
       const newStatus = map[d.status] || 'pending';
-      const wasPaid = doc.status === 'paid';
-      doc.status = newStatus;
-      doc.channel = d.channel || doc.channel;
-      doc.gatewayResponse = d.gateway_response || doc.gatewayResponse;
-      if (newStatus === 'paid' && d.paid_at) doc.paidAt = new Date(d.paid_at);
-      await doc.save();
+      const fields = {
+        channel: d.channel || doc.channel,
+        gatewayResponse: d.gateway_response || doc.gatewayResponse,
+      };
 
-      // First confirmation of payment: tell accounts once.
-      if (newStatus === 'paid' && !wasPaid) {
+      let firstPaid = false;
+      if (newStatus === 'paid') {
+        // Atomic flip: two "Check status" clicks at once must not both
+        // count as the first confirmation (double receipts, double notes).
+        const flipped = await PaystackRequest.findOneAndUpdate(
+          { _id: doc._id, status: { $ne: 'paid' } },
+          { $set: { ...fields, status: 'paid', paidAt: d.paid_at ? new Date(d.paid_at) : new Date() } },
+          { new: true }
+        );
+        if (flipped) { firstPaid = true; doc = flipped; }
+        else doc = await PaystackRequest.findById(doc._id);
+      } else if (doc.status !== 'paid') {
+        // A confirmed payment is never downgraded.
+        Object.assign(doc, fields, { status: newStatus });
+        await doc.save();
+      }
+
+      if (firstPaid) {
+        // Tied to an invoice: settle it through the shared path.
+        if (doc.invoiceId) {
+          try {
+            const outcome = await settleLinkedInvoice(doc, d);
+            doc = await PaystackRequest.findByIdAndUpdate(doc._id, { $set: { invoiceOutcome: outcome } }, { new: true });
+          } catch (e) { console.error('[paystack] invoice settle failed:', doc.reference, e.message); }
+        }
+
+        // First confirmation of payment: tell accounts once.
+        const paidDoc = doc;
         ;(async () => {
           try {
             const nodemailer = require('nodemailer');
@@ -180,10 +295,11 @@ router.get('/verify/:reference', auth, ALLOWED, async (req, res) => {
             await t.sendMail({
               from: process.env.EMAIL_FROM || 'Smartious Homeschool <hello@smartioushomeschool.com>',
               to: 'accounts@smartioushomeschool.com',
-              subject: 'PAID \u2014 ' + fmtAmount(doc.amount, doc.currency) + ' from ' + (doc.payerName || doc.email),
-              text: 'Card payment received.\n\nPayer: ' + (doc.payerName || '') + '\nEmail: ' + doc.email +
-                '\nAmount: ' + fmtAmount(doc.amount, doc.currency) + '\nFor: ' + doc.description +
-                '\nReference: ' + doc.reference + '\nChannel: ' + doc.channel + '\nPaid at: ' + doc.paidAt,
+              subject: 'PAID \u2014 ' + fmtAmount(paidDoc.amount, paidDoc.currency) + ' from ' + (paidDoc.payerName || paidDoc.email),
+              text: 'Card payment received.\n\nPayer: ' + (paidDoc.payerName || '') + '\nEmail: ' + paidDoc.email +
+                '\nAmount: ' + fmtAmount(paidDoc.amount, paidDoc.currency) + '\nFor: ' + paidDoc.description +
+                '\nReference: ' + paidDoc.reference + '\nChannel: ' + paidDoc.channel + '\nPaid at: ' + paidDoc.paidAt +
+                (paidDoc.invoiceNo ? '\nInvoice: ' + paidDoc.invoiceNo + ' (' + (OUTCOME_TEXT[paidDoc.invoiceOutcome] || paidDoc.invoiceOutcome || 'not updated') + ')' : ''),
             });
           } catch (e) { console.error('[paystack] paid notice failed:', e.message); }
         })();

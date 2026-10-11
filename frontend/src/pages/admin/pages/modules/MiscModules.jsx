@@ -8,18 +8,28 @@ import { ModuleIcon, PCard, PKpi, PSection } from '../shared/ui.jsx'
 export function LeaveModule({ refreshKey, toast }) {
   const [requests, setRequests] = useState([])
   const [loading, setLoading] = useState(true)
+  // Backend statuses are capitalised (Pending/Approved/Rejected/Cancelled)
+  const st = (r) => String(r.status || 'Pending').toLowerCase()
   useEffect(() => {
-    api.get('/leave-requests').then(r => { setRequests(r.data.requests || r.data || []); setLoading(false) }).catch(() => setLoading(false))
+    api.get('/leave-requests', { params: { status: 'all' } })
+      .then(r => { setRequests(r.data?.leaveRequests || []); setLoading(false) })
+      .catch(() => setLoading(false))
   }, [refreshKey])
 
-  const updateStatus = async (id, status) => {
+  const updateStatus = async (id, action) => {
+    let body = {}
+    if (action === 'reject') {
+      const reason = window.prompt('Reason for rejecting (shared with the teacher):', '')
+      if (reason === null) return
+      body = { rejectionReason: reason }
+    }
     try {
-      await api.patch('/leave-requests/' + id, { status })
-      setRequests(prev => prev.map(r => r._id === id ? { ...r, status } : r))
-      toast.ok('Marked as ' + status)
+      const { data } = await api.patch('/leave-requests/' + id + '/' + action, body)
+      setRequests(prev => prev.map(r => r._id === id ? { ...r, ...(data?.leaveRequest || {}), teacherId: r.teacherId } : r))
+      toast.ok(data?.message || (action === 'approve' ? 'Approved' : 'Rejected'))
     } catch (e) { toast.error('Update failed: ' + (e.response?.data?.message || e.message)) }
   }
-  const pending = requests.filter(r => r.status === 'pending' || !r.status).length
+  const pending = requests.filter(r => st(r) === 'pending').length
 
   return (
     <>
@@ -27,8 +37,8 @@ export function LeaveModule({ refreshKey, toast }) {
       <div style={{ display: 'flex', gap: 14, marginBottom: 28, flexWrap: 'wrap' }}>
         <PKpi label="Total" value={requests.length}/>
         <PKpi label="Pending" value={pending} deltaColor={pending > 0 ? TOKENS.accentAmber : TOKENS.accentEmerald}/>
-        <PKpi label="Approved" value={requests.filter(r => r.status === 'approved').length}/>
-        <PKpi label="Rejected" value={requests.filter(r => r.status === 'rejected').length}/>
+        <PKpi label="Approved" value={requests.filter(r => st(r) === 'approved').length}/>
+        <PKpi label="Rejected" value={requests.filter(r => st(r) === 'rejected').length}/>
       </div>
       {loading ? <PCard><div style={{ padding: 48, textAlign: 'center', color: TOKENS.s500 }}>Loading...</div></PCard> : requests.length === 0 ? (
         <PCard><div style={{ padding: 48, textAlign: 'center', color: TOKENS.s500 }}>No leave requests yet</div></PCard>
@@ -43,23 +53,24 @@ export function LeaveModule({ refreshKey, toast }) {
             <tbody>
               {requests.map(r => (
                 <tr key={r._id} style={{ borderBottom: '1px solid ' + TOKENS.s100 }}>
-                  <td style={{ padding: '14px 16px', fontWeight: 600 }}>{r.teacherId?.firstName} {r.teacherId?.lastName}</td>
-                  <td style={{ padding: '14px 16px' }}><span style={{ display: 'inline-block', padding: '3px 10px', background: TOKENS.s50, color: TOKENS.s700, border: '1px solid ' + TOKENS.s200, borderRadius: 99, fontSize: 11, fontWeight: 700 }}>{r.type || 'Annual'}</span></td>
-                  <td style={{ padding: '14px 16px', fontSize: 12 }}>{fmtDate(r.startDate)} → {fmtDate(r.endDate)}</td>
-                  <td style={{ padding: '14px 16px', fontSize: 12, color: TOKENS.s600 }}>{r.reason || '—'}</td>
+                  <td style={{ padding: '14px 16px', fontWeight: 600 }}>{r.teacherId?.firstName ? r.teacherId.firstName + ' ' + (r.teacherId.lastName || '') : r.teacherName}</td>
+                  <td style={{ padding: '14px 16px' }}><span style={{ display: 'inline-block', padding: '3px 10px', background: TOKENS.s50, color: TOKENS.s700, border: '1px solid ' + TOKENS.s200, borderRadius: 99, fontSize: 11, fontWeight: 700 }}>{r.leaveType || 'Personal'}</span></td>
+                  <td style={{ padding: '14px 16px', fontSize: 12 }}>{fmtDate(r.leaveStartDate)} → {fmtDate(r.leaveEndDate)}</td>
+                  <td style={{ padding: '14px 16px', fontSize: 12, color: TOKENS.s600 }}>{r.leaveReason || '—'}</td>
                   <td style={{ padding: '14px 16px' }}>
                     <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: 99, fontSize: 11, fontWeight: 700,
-                      ...(r.status === 'approved' ? { color: TOKENS.accentEmerald, background: '#DCFCE7', border: '1px solid #86EFAC' } :
-                         r.status === 'rejected' ? { color: '#991B1B', background: '#FEE2E2', border: '1px solid #FECACA' } :
+                      ...(st(r) === 'approved' ? { color: TOKENS.accentEmerald, background: '#DCFCE7', border: '1px solid #86EFAC' } :
+                         st(r) === 'rejected' ? { color: '#991B1B', background: '#FEE2E2', border: '1px solid #FECACA' } :
+                         st(r) === 'cancelled' ? { color: TOKENS.s700, background: TOKENS.s50, border: '1px solid ' + TOKENS.s200 } :
                          { color: TOKENS.accentAmber, background: '#FEF3C7', border: '1px solid #FDE68A' }) }}>
-                      {r.status || 'pending'}
+                      {st(r)}
                     </span>
                   </td>
                   <td style={{ padding: '14px 16px' }}>
-                    {(!r.status || r.status === 'pending') && (
+                    {st(r) === 'pending' && (
                       <div style={{ display: 'flex', gap: 4 }}>
-                        <button className="btn btn-ok btn-sm" onClick={() => updateStatus(r._id, 'approved')}>Approve</button>
-                        <button className="btn btn-d btn-sm" onClick={() => updateStatus(r._id, 'rejected')}>Reject</button>
+                        <button className="btn btn-ok btn-sm" onClick={() => updateStatus(r._id, 'approve')}>Approve</button>
+                        <button className="btn btn-d btn-sm" onClick={() => updateStatus(r._id, 'reject')}>Reject</button>
                       </div>
                     )}
                   </td>

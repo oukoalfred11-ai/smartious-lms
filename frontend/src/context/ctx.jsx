@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react'
 import axios from 'axios'
 // ── API ───────────────────────────────────────────────────
 const BASE = import.meta.env.VITE_API_URL 
@@ -222,7 +222,9 @@ export function ToastProvider({ children }) {
     setToasts(p => [...p, { id, msg, type }])
     setTimeout(() => setToasts(p => p.filter(t => t.id !== id)), dur)
   }, [])
-  const t = { ok: m => toast(m, 'ok'), error: m => toast(m, 'error'), info: m => toast(m, 'info') }
+  // Stable identity: components list `toast` in effect dependencies, and a
+  // fresh object on every toast show/hide would re-run those effects.
+  const t = useMemo(() => ({ ok: m => toast(m, 'ok'), error: m => toast(m, 'error'), info: m => toast(m, 'info') }), [toast])
   const dotCol = { ok: 'var(--g500)', error: 'var(--r500)', info: 'var(--crimson, #7D1025)' }
   return (
     <ToastCtx.Provider value={t}>

@@ -172,11 +172,24 @@ router.post('/', auth, requireRole('teacher'), async (req, res) => {
   }
 });
 
-// GET /api/leave-requests - Get all leave requests (admin only)
+// GET /api/leave-requests/my-requests - The signed-in teacher's own requests
+router.get('/my-requests', auth, requireRole('teacher'), async (req, res) => {
+  try {
+    const leaveRequests = await TeacherLeaveRequest.find({ teacherId: req.user._id })
+      .populate('approvedBy', 'firstName lastName')
+      .sort('-createdAt');
+    res.json({ success: true, count: leaveRequests.length, leaveRequests });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// GET /api/leave-requests - Get leave requests (admin only)
+// ?status=Pending (default) | Approved | Rejected | Cancelled | all
 router.get('/', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const status = req.query.status || 'Pending';
-    const leaveRequests = await TeacherLeaveRequest.find({ status })
+    const leaveRequests = await TeacherLeaveRequest.find(status === 'all' ? {} : { status })
       .populate('teacherId', 'firstName lastName email')
       .populate('approvedBy', 'firstName lastName')
       .sort('-createdAt');
@@ -321,11 +334,12 @@ router.patch('/:id/cancel', auth, async (req, res) => {
       return res.status(400).json({ success: false, message: 'Cannot cancel this request' });
     }
 
+    const wasApproved = leaveRequest.status === 'Approved';
     leaveRequest.status = 'Cancelled';
     await leaveRequest.save();
 
     // If was approved, revert teacher status
-    if (leaveRequest.status === 'Approved') {
+    if (wasApproved) {
       const teacher = await User.findById(leaveRequest.teacherId);
       teacher.teacherStatus = 'Active';
       teacher.isOnLeave = false;

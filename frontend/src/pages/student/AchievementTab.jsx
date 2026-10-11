@@ -108,7 +108,6 @@ export default function AchievementTab({ user }) {
   const ach    = data?.achievement
   const level  = ach?.level || 1
   const xp     = ach?.totalXP || 0
-  const xpNext = level * 200
   const xpThisLevel = xp - ((level-1)*200)
   const earnedBadges = new Set((ach?.badges||[]).map(b=>b.id))
 

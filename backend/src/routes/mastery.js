@@ -20,7 +20,7 @@ const User = require('../models/User');
 const ExamSubmission = require('../models/ExamSubmission');
 const HomeworkSubmission = require('../models/HomeworkSubmission');
 const QuizSession = require('../models/QuizSession');
-const Attendance = require('../models/Attendance');
+const attendanceFacts = require('../lib/attendanceFacts');
 
 const STAFF = ['admin', 'ops_manager', 'dos', 'teacher'];
 const days = (n) => new Date(Date.now() - n * 24 * 3600 * 1000);
@@ -28,7 +28,7 @@ const pct = (num, den) => (den > 0 ? Math.round((num / den) * 100) : null);
 
 /* Transparent flag rules. Shown to staff verbatim. */
 const RULES = {
-  ATTEND: 'Attendance below 70% over the last 30 days (6+ records)',
+  ATTEND: 'Attended below 70% of scheduled lessons over the last 30 days (6+ lessons; day-register records before the cutover)',
   EXAM: 'Exam average below 50% over the last 90 days (2+ exams)',
   QUIZ_DECLINE: 'Quiz accuracy fell 15+ points (last 20 answers vs previous 20)',
   HW_SILENT: 'No homework submitted in 21+ days (has submitted before)',
@@ -52,16 +52,22 @@ async function cohortMetrics(studentIds) {
       { $sort: { completedAt: 1 } },
       { $group: { _id: '$studentId', seq: { $push: '$answers.correct' }, last: { $max: '$completedAt' } } },
     ]),
-    Attendance.aggregate([
-      { $match: { studentId: { $in: ids }, date: { $gte: days(30) } } },
-      { $group: {
-        _id: '$studentId', n: { $sum: 1 }, last: { $max: '$date' },
-        present: { $sum: { $cond: [{ $in: ['$status', ['present', 'late', 'half_day']] }, 1, 0] } },
-      } },
-    ]),
+    attendanceFacts.studentAttendance(days(30), new Date(), { studentIds: ids }),
   ]);
   const by = (rows) => Object.fromEntries(rows.map((r) => [String(r._id), r]));
-  return { exams: by(exams), hw: by(hw), quiz: by(quiz), att: by(att) };
+  // Per-lesson attendance (legacy day register before the cutover):
+  // n = scheduled, present = attended, last = most recent attended date.
+  const attBy = {};
+  Object.entries(att).forEach(([sid, f]) => {
+    if (!f.scheduled) return;
+    const dates = [
+      ...f.lessons.filter((l) => l.attended).map((l) => new Date(l.joinedAt || l.scheduledAt)),
+      ...f.legacyRecords.filter((l) => l.attended).map((l) => new Date(l.date)),
+    ];
+    const last = dates.length ? new Date(Math.max(...dates.map((d) => d.getTime()))) : null;
+    attBy[sid] = { n: f.scheduled, present: f.attended, last };
+  });
+  return { exams: by(exams), hw: by(hw), quiz: by(quiz), att: attBy };
 }
 
 function evaluate(sid, m) {
@@ -82,7 +88,8 @@ function evaluate(sid, m) {
     }
   }
   if (h && h.n >= 1 && h.last < days(21)) flags.push({ code: 'HW_SILENT', rule: RULES.HW_SILENT });
-  const lastActive = [e?.last, h?.last, q?.last, a?.last].filter(Boolean).sort().pop() || null;
+  const lastActive = [e?.last, h?.last, q?.last, a?.last].filter(Boolean)
+    .map((d) => new Date(d)).sort((x, y) => x - y).pop() || null;
   if (lastActive && lastActive < days(14)) flags.push({ code: 'INACTIVE', rule: RULES.INACTIVE });
   const risk = flags.length >= 2 ? 'high' : flags.length === 1 ? 'watch' : 'ok';
   return { attendance30, examAvg, examCount: e?.n || 0, quizAcc, quizTrend, hwCount: h?.n || 0, lastActive, flags, risk };
@@ -138,7 +145,7 @@ router.get('/student/:id', auth, requireRole(...STAFF), async (req, res) => {
         } },
         { $match: { n: { $gte: 3 } } },
       ]),
-      Attendance.find({ studentId: sid, date: { $gte: days(60) } }).select('date status').sort({ date: 1 }).lean(),
+      attendanceFacts.oneStudent(sid, days(60), new Date()),
     ]);
     if (!student) return res.status(404).json({ success: false, message: 'Student not found.' });
 
@@ -165,7 +172,16 @@ router.get('/student/:id', auth, requireRole(...STAFF), async (req, res) => {
       student: { _id: student._id, name: [student.firstName, student.lastName].filter(Boolean).join(' '), grade: student.gradeLevel || '', avatar: student.avatar || '' },
       summary: evaluate(String(sid), m),
       subjects: Object.values(subjects).sort((a, b) => (a.subject > b.subject ? 1 : -1)),
-      attendance: attRows.map((a) => ({ date: a.date, status: a.status })),
+      // Per-lesson rows (status present/late/absent) plus legacy day-register
+      // records before the cutover (source 'legacy'), oldest first.
+      attendance: [
+        ...(attRows?.lessons || []).map((l) => ({
+          date: l.scheduledAt, status: l.attended ? (l.late ? 'late' : 'present') : 'absent',
+          subject: l.subject, title: l.title, source: l.source,
+        })),
+        ...(attRows?.legacyRecords || []).map((l) => ({ date: l.date, status: l.status, source: 'legacy' })),
+      ].sort((x, y) => new Date(x.date) - new Date(y.date)),
+      attendanceSummary: attRows ? { scheduled: attRows.scheduled, attended: attRows.attended, rate: attRows.rate } : null,
       rules: RULES,
     } });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }

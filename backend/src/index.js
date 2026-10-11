@@ -65,7 +65,6 @@ app.use(rateLimit({
 app.use('/api/auth',           authLimiter, require('./routes/auth'));
 app.use('/api/users',          require('./routes/users'));
 app.use('/api/communication', require('./routes/communication'));
-app.use('/api/payments', require('./routes/paymentRoutes'))
 app.use('/api/teachers',       require('./routes/teachers'));
 app.use('/api/teacher-profile', require('./routes/teacher-profile'));
 app.use('/api/allocations',    require('./routes/allocations'));
@@ -99,6 +98,7 @@ app.use('/api/status',         require('./routes/status-management'));
 app.use('/api/frontdesk', require('./routes/frontdesk'));
 app.use('/api/library', require('./routes/library'));
 app.use('/api/teacher-documents', require('./routes/teacher-documents'));
+app.use('/api/qa', require('./routes/qa'));
 app.use('/api/leave-requests', require('./routes/status-management'));
 app.use('/api/invoices',   require('./routes/invoices'));
 app.use('/api/paystack',   require('./routes/paystack'));
@@ -158,22 +158,13 @@ app.use((err, req, res, next) => {   // eslint-disable-line no-unused-vars
 const { startReminderScheduler } = require('./lib/reminderScheduler');
 const { startHomeworkCycle } = require('./services/homeworkCycle');
 const { startTimetableConfirm } = require('./services/timetableConfirm');
-const { promoteUpcomingSessions } = require('./services/timetableSync');
 
 // ── AUTO TIMETABLE KILL SWITCH ──────────────────────────
-// The auto timetable (promotion of pending sessions into live
-// classes, and slot confirmation from taught lessons) is OFF by
+// The auto timetable (slot confirmation from taught lessons) is OFF by
 // default after it created night-time classes from a timezone bug.
 // The underlying fix is in place; re-enable deliberately by setting
 // AUTO_TIMETABLE=on in the environment when ready to trust it again.
 const AUTO_TIMETABLE_ON = String(process.env.AUTO_TIMETABLE || '').toLowerCase() === 'on';
-
-const runTimetablePromotion = () => {
-  if (!AUTO_TIMETABLE_ON) return;
-  promoteUpcomingSessions(14)
-    .then(r => console.log('[timetable promotion]', JSON.stringify(r)))
-    .catch(e => console.error('[timetable promotion] failed:', e.message));
-};
 
 // ── Daily 7 AM check-in reminder ─────────────────────────────
 // Fires every weekday at 07:00 school local time (EAT = UTC+3).
@@ -233,11 +224,6 @@ mongoose.connect(MONGODB_URI)
     } else {
       console.log('[timetable] AUTO TIMETABLE IS OFF — timetables and classes are manual only. Set AUTO_TIMETABLE=on to re-enable.');
     }
-
-    // Start the timetable promotion job: first run 60s after boot
-    // (let the DB settle), then every 24 hours.
-    setTimeout(runTimetablePromotion, 60 * 1000);
-    setInterval(runTimetablePromotion, 24 * 60 * 60 * 1000);
 
     // Schedule daily 7 AM EAT reminder
     const scheduleReminder = () => {

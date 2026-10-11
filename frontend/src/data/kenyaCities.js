@@ -1,15 +1,4 @@
-// Smartious Homeschooling — Kenya City Pages
-// Six major cities beyond Nairobi: Mombasa, Kisumu, Nakuru, Eldoret, Thika, Kiambu
-//
-// Each page is online-first + remote homeschooling focused (in-person home tuition
-// outside Nairobi is operationally limited). Each has genuinely distinct local
-// content based on the city's demographics, schools and economic context — not
-// templated boilerplate.
-//
-// Routes: /homeschooling/{slug}
-// Hub: /homeschooling-kenya
 
-const HERO_LAPTOP     = 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1400&q=80&auto=format&fit=crop'
 const HERO_STUDY      = 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=1400&q=80&auto=format&fit=crop'
 const HERO_TUTOR      = 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1400&q=80&auto=format&fit=crop'
 const HERO_CLASSROOM  = 'https://images.unsplash.com/photo-1577896851231-70ef18881754?w=1400&q=80&auto=format&fit=crop'

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useAuth, api } from '../../../../context/ctx.jsx'
 import { TOKENS } from '../shared/tokens.js'
-import { fmtDate } from '../shared/helpers.js'
 import { PSection } from '../shared/ui.jsx'
 
 function CRMModule({ toast, refreshKey }) {
@@ -224,8 +223,6 @@ function CRMList({ toast, refreshKey, onOpen, onAdd }) {
 function CRMDetail({ toast, id, onBack }) {
   const [inq, setInq]           = useState(null)
   const [loading, setLoading]   = useState(true)
-  const [editing, setEditing]   = useState(false)
-  const [saving, setSaving]     = useState(false)
   const [noteForm, setNoteForm] = useState({ type:'call', summary:'', outcome:'', callbackDate:'' })
   const [addingNote, setAddingNote] = useState(false)
   const [showNoteForm, setShowNoteForm] = useState(false)

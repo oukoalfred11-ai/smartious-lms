@@ -126,6 +126,7 @@ router.get('/progress/subject', auth, async (req, res) => {
     const Lesson = require('../models/Lesson');
     const LiveClass = require('../models/LiveClass');
     const ClassroomSession = require('../models/ClassroomSession');
+    const { sessionAttended } = require('../lib/attendanceFacts');
     const TimetableEntry = require('../models/TimetableEntry');
     const mongooseX = require('mongoose');
     const sid = String(req.query.subjectId || '');
@@ -186,10 +187,13 @@ router.get('/progress/subject', auth, async (req, res) => {
       preparationLessonId: { $in: lessonIds },
     }).select('preparationLessonId scheduledAt status').sort({ scheduledAt: 1 }).lean();
     const pastIds = classes.filter(c => new Date(c.scheduledAt) <= now && c.status !== 'cancelled').map(c => c._id);
-    const joined = pastIds.length
-      ? await ClassroomSession.distinct('liveClassId', { liveClassId: { $in: pastIds }, userId: req.user._id, joinCount: { $gt: 0 } })
+    // Attended = joined or teacher-marked present, unless the class teacher
+    // discounted it (present:false) — same rule as lib/attendanceFacts.
+    const sess = pastIds.length
+      ? await ClassroomSession.find({ liveClassId: { $in: pastIds }, userId: req.user._id })
+        .select('liveClassId present joinCount').lean()
       : [];
-    const joinedSet = new Set(joined.map(String));
+    const joinedSet = new Set(sess.filter(sessionAttended).map(x => String(x.liveClassId)));
     const byLesson = {};
     classes.forEach(c => { if (!byLesson[String(c.preparationLessonId)]) byLesson[String(c.preparationLessonId)] = c; });
 

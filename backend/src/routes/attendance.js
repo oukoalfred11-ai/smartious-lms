@@ -3,19 +3,23 @@
  * ============================================================
  * /api/attendance
  *
- * Tracks daily attendance per student. One record per (studentId, date).
+ * STUDENT attendance is per lesson (ClassroomSession, see lib/attendanceFacts)
+ * and is amended by the class teacher via /api/class-register/:liveClassId.
+ * The day register (Attendance docs) is frozen for marking: it remains
+ * readable as history for dates before the cutover, and the collection
+ * continues as the self check-in log (routes/checkin.js).
  *
  * Routes:
- *   POST    /                       Mark/update one student's attendance for a date
- *   POST    /bulk                   Mark multiple students for the same date
- *   GET     /student/:studentId     List attendance for a student (?from=&to=)
+ *   POST    /                       410 — day-register marking is retired
+ *   POST    /bulk                   410 — day-register marking is retired
+ *   GET     /student/:studentId     Per-lesson attendance + legacy day history (?from=&to=)
  *   GET     /day                    List all attendance for a specific date (?date=YYYY-MM-DD)
  *   DELETE  /:attendanceId          Remove an attendance record (correction case)
  *
  * Authorization:
  *   - All routes require auth (token)
- *   - POST/DELETE: teacher or admin only
- *   - GET /student/:id: teacher/admin OR the student themselves
+ *   - DELETE: admin only (legacy-record corrections)
+ *   - GET /student/:id: teacher/admin/dos/ops_manager OR the student themselves
  *   - GET /day: teacher/admin only
  *
  * Date handling:
@@ -29,6 +33,7 @@ const mongoose = require('mongoose');
 const router = express.Router();
 
 const User = require('../models/User');
+const attendanceFacts = require('../lib/attendanceFacts');
 const { auth, requireRole } = require('../middleware/auth');
 
 // ─────────────────────────────────────────────────────────
@@ -99,127 +104,21 @@ function normaliseDate(input) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// POST / — Mark or update one student's attendance for a date
-// Body: { studentId, date, status, reason? }
+// POST / and POST /bulk — retired. Student attendance is recorded per
+// lesson; the class teacher confirms or amends it in the class register.
 // ═══════════════════════════════════════════════════════════
-router.post('/', auth, requireRole('teacher', 'admin', 'dos'), async (req, res) => {
-  try {
-    const { studentId, date, status, reason = '' } = req.body || {};
-
-    if (!studentId || !mongoose.isValidObjectId(studentId))
-      return fail(res, 400, 'Valid studentId required.');
-    if (!STATUS_VALUES.includes(status))
-      return fail(res, 400, 'status must be one of: ' + STATUS_VALUES.join(', '));
-
-    const dateNorm = normaliseDate(date);
-    if (!dateNorm) return fail(res, 400, 'Valid date required (YYYY-MM-DD or ISO).');
-
-    if (status === 'absent' && (!reason || !String(reason).trim()))
-      return fail(res, 400, 'Reason is required when status is absent.');
-
-    const student = await User.findById(studentId).select('role curriculum').lean();
-    if (!student) return fail(res, 404, 'Student not found.');
-    if (student.role !== 'student') return fail(res, 400, 'studentId is not a student.');
-
-    const doc = await Attendance.findOneAndUpdate(
-      { studentId, date: dateNorm },
-      {
-        $set: {
-          status,
-          reason: status === 'absent' ? String(reason).trim().slice(0, 500) : '',
-          markedBy: req.user._id,
-          markedAt: new Date(),
-          curriculum: student.curriculum || '',
-        },
-        $setOnInsert: { studentId, date: dateNorm },
-      },
-      { upsert: true, new: true, setDefaultsOnInsert: true, runValidators: true }
-    );
-
-    return ok(res, { attendance: doc }, 'Attendance saved.');
-  } catch (err) {
-    if (err && err.code === 11000) {
-      // Race on the unique index — fetch the winning record
-      const existing = await Attendance.findOne({
-        studentId: req.body.studentId,
-        date: normaliseDate(req.body.date),
-      });
-      return ok(res, { attendance: existing }, 'Already marked.');
-    }
-    console.error('[attendance POST]', err.message);
-    return fail(res, 500, err.message || 'Failed to save attendance.');
-  }
-});
+const RETIRED_MSG = 'The daily attendance register has been retired. Student attendance is now recorded per lesson: '
+  + 'joining a class marks the student present, and the class teacher confirms or amends it in the class register '
+  + '(Teacher portal > past classes > Register).';
+const retired = (req, res) => res.status(410).json({ success: false, retired: true, message: RETIRED_MSG, register: '/api/class-register/:liveClassId' });
+router.post('/', auth, retired);
+router.post('/bulk', auth, retired);
 
 // ═══════════════════════════════════════════════════════════
-// POST /bulk — Mark same status for multiple students on one date
-// Body: { studentIds: [...], date, status, reason? }
-// ═══════════════════════════════════════════════════════════
-router.post('/bulk', auth, requireRole('teacher', 'admin', 'dos'), async (req, res) => {
-  try {
-    const { studentIds, date, status, reason = '' } = req.body || {};
-
-    if (!Array.isArray(studentIds) || studentIds.length === 0)
-      return fail(res, 400, 'studentIds array required.');
-    if (!STATUS_VALUES.includes(status))
-      return fail(res, 400, 'status must be one of: ' + STATUS_VALUES.join(', '));
-
-    const dateNorm = normaliseDate(date);
-    if (!dateNorm) return fail(res, 400, 'Valid date required (YYYY-MM-DD or ISO).');
-
-    if (status === 'absent' && (!reason || !String(reason).trim()))
-      return fail(res, 400, 'Reason is required when status is absent.');
-
-    const validIds = studentIds.filter(id => mongoose.isValidObjectId(id));
-    if (validIds.length === 0) return fail(res, 400, 'No valid studentIds.');
-
-    // Fetch students to get curricula for denormalisation
-    const students = await User.find({ _id: { $in: validIds }, role: 'student' })
-      .select('_id curriculum')
-      .lean();
-    const byId = new Map(students.map(s => [String(s._id), s]));
-
-    const cleanReason = status === 'absent' ? String(reason).trim().slice(0, 500) : '';
-    const markedAt = new Date();
-
-    const ops = validIds
-      .filter(id => byId.has(String(id))) // only mark real students
-      .map(studentId => ({
-        updateOne: {
-          filter: { studentId, date: dateNorm },
-          update: {
-            $set: {
-              status,
-              reason: cleanReason,
-              markedBy: req.user._id,
-              markedAt,
-              curriculum: byId.get(String(studentId))?.curriculum || '',
-            },
-            $setOnInsert: { studentId, date: dateNorm },
-          },
-          upsert: true,
-        },
-      }));
-
-    if (ops.length === 0) return fail(res, 400, 'No valid students after filtering.');
-
-    const result = await Attendance.bulkWrite(ops, { ordered: false });
-
-    return ok(res, {
-      matched: result.matchedCount,
-      modified: result.modifiedCount,
-      upserted: result.upsertedCount,
-      total: ops.length,
-    }, `Attendance saved for ${ops.length} student(s).`);
-  } catch (err) {
-    console.error('[attendance POST /bulk]', err.message);
-    return fail(res, 500, err.message || 'Bulk save failed.');
-  }
-});
-
-// ═══════════════════════════════════════════════════════════
-// GET /student/:studentId — List attendance for one student
-// Query: ?from=YYYY-MM-DD&to=YYYY-MM-DD (both optional, inclusive)
+// GET /student/:studentId — Per-lesson attendance for one student
+// Query: ?from=YYYY-MM-DD&to=YYYY-MM-DD (both optional, inclusive;
+// default the last 90 days). Dates before the cutover come from the
+// legacy day register and are returned separately as `legacy`.
 // ═══════════════════════════════════════════════════════════
 router.get('/student/:studentId', auth, async (req, res) => {
   try {
@@ -227,28 +126,29 @@ router.get('/student/:studentId', auth, async (req, res) => {
     if (!mongoose.isValidObjectId(studentId)) return fail(res, 400, 'Invalid studentId.');
 
     const isOwn = String(req.user._id) === String(studentId);
-    if (!isOwn && !['teacher', 'admin'].includes(req.user.role))
+    if (!isOwn && !['teacher', 'admin', 'dos', 'ops_manager'].includes(req.user.role))
       return fail(res, 403, 'Not allowed.');
 
-    const filter = { studentId };
-    if (req.query.from || req.query.to) {
-      filter.date = {};
-      if (req.query.from) {
-        const d = normaliseDate(req.query.from);
-        if (d) filter.date.$gte = d;
-      }
-      if (req.query.to) {
-        const d = normaliseDate(req.query.to);
-        if (d) filter.date.$lte = d;
-      }
-    }
+    const toDay = normaliseDate(req.query.to);
+    const to = toDay ? new Date(toDay.getTime() + 864e5 - 1) : new Date();
+    const from = normaliseDate(req.query.from) || new Date(to.getTime() - 90 * 864e5);
 
-    const items = await Attendance.find(filter)
-      .sort({ date: -1 })
-      .populate('markedBy', 'firstName lastName')
-      .lean();
-
-    return ok(res, { items }, `${items.length} attendance records.`);
+    const f = await attendanceFacts.oneStudent(studentId, from, to);
+    const lessons = [...f.lessons].sort((x, y) => new Date(y.scheduledAt) - new Date(x.scheduledAt));
+    const legacy = [...f.legacyRecords].sort((x, y) => new Date(y.date) - new Date(x.date));
+    return ok(res, {
+      summary: {
+        scheduled: f.scheduled, attended: f.attended, late: f.late, rate: f.rate,
+        lessonsScheduled: f.lessonsScheduled, lessonsAttended: f.lessonsAttended,
+        legacyDays: f.legacyDays, legacyAttended: f.legacyAttended,
+      },
+      lessons,
+      legacy,
+      // Back-compat: older clients read `items` as day records.
+      items: legacy,
+      cutover: attendanceFacts.cutoverDate(),
+      from, to,
+    }, `${f.lessonsAttended} of ${f.lessonsScheduled} lessons attended.`);
   } catch (err) {
     console.error('[attendance GET /student]', err.message);
     return fail(res, 500, err.message || 'Failed to load.');
@@ -279,7 +179,7 @@ router.get('/day', auth, requireRole('teacher', 'admin', 'dos'), async (req, res
 // ═══════════════════════════════════════════════════════════
 // DELETE /:attendanceId — Remove an attendance record (correction)
 // ═══════════════════════════════════════════════════════════
-router.delete('/:attendanceId', auth, requireRole('teacher', 'admin', 'dos'), async (req, res) => {
+router.delete('/:attendanceId', auth, requireRole('admin'), async (req, res) => {
   try {
     const { attendanceId } = req.params;
     if (!mongoose.isValidObjectId(attendanceId))

@@ -35,6 +35,9 @@ const rooms = new Map();
 const roomOf = (liveClassId) => 'class:' + liveClassId;
 
 // ── Attendance recording (fire-and-forget, never blocks the class) ──
+// The per-lesson ClassroomSession is the single source of truth for
+// student attendance (lib/attendanceFacts). The day-register Attendance
+// collection is no longer written from here — it is the self check-in log.
 async function recordJoin(liveClassId, peer) {
   try {
     const ClassroomSession = require('../models/ClassroomSession');
@@ -46,18 +49,6 @@ async function recordJoin(liveClassId, peer) {
       },
       { upsert: true }
     );
-    // Students joining a live class are present, in the register sense:
-    // a class join is harder evidence than a morning button tap. Never
-    // downgrades anything; upgrades an earlier 'absent' to present.
-    if (peer.role === 'student') {
-      const Attendance = require('../models/Attendance');
-      const today = new Date(); today.setHours(0, 0, 0, 0);
-      await Attendance.findOneAndUpdate(
-        { studentId: peer.userId, date: today },
-        { $set: { status: 'present', source: 'class', reason: '' } },
-        { upsert: true, setDefaultsOnInsert: true }
-      );
-    }
   } catch (e) { console.error('[classroom attendance join]', e.message); }
 }
 
@@ -71,41 +62,7 @@ async function recordLeave(liveClassId, peer) {
       { liveClassId, userId: peer.userId },
       { $inc: { durationMs: ms }, $set: { lastLeftAt: now } }
     );
-
-    // Roll a meaningful attendance (5+ minutes connected) into the
-    // daily register — but NEVER overwrite an existing record, so a
-    // teacher's manual mark always wins.
-    if (peer.role !== 'student') return;
-    const session = await ClassroomSession.findOne({ liveClassId, userId: peer.userId })
-      .select('durationMs firstJoinedAt').lean();
-    if (!session || session.durationMs < 5 * 60 * 1000) return;
-
-    const LiveClass = require('../models/LiveClass');
-    const lc = await LiveClass.findById(liveClassId)
-      .select('scheduledAt teacherId curriculum').lean();
-    if (!lc) return;
-
-    const day = new Date(session.firstJoinedAt);
-    day.setUTCHours(0, 0, 0, 0);
-    const lateByMs = session.firstJoinedAt - new Date(lc.scheduledAt);
-    const status = lateByMs > 10 * 60 * 1000 ? 'late' : 'present';
-
-    const Attendance = require('../models/Attendance');
-    const existing = await Attendance.findOne({ studentId: peer.userId, date: day }).lean();
-    if (existing) return;
-    await Attendance.create({
-      studentId: peer.userId,
-      date: day,
-      status,
-      lateTime: status === 'late' ? Math.round(lateByMs / 60000) + ' min' : '',
-      markedBy: lc.teacherId,
-      curriculum: lc.curriculum || '',
-      reason: '',
-    });
-  } catch (e) {
-    // Duplicate-key races (two classes same day) are expected and fine.
-    if (e.code !== 11000) console.error('[classroom attendance leave]', e.message);
-  }
+  } catch (e) { console.error('[classroom attendance leave]', e.message); }
 }
 
 function publicRoster(room) {

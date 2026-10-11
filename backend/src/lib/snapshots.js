@@ -11,7 +11,7 @@
  * arrives beats the dashboard that must be visited.
  */
 const LiveClass = require('../models/LiveClass');
-const ClassroomSession = require('../models/ClassroomSession');
+const { sessionFacts } = require('./attendanceFacts');
 const ExamSubmission = require('../models/ExamSubmission');
 const QuizSession = require('../models/QuizSession');
 const HomeworkSubmission = require('../models/HomeworkSubmission');
@@ -25,25 +25,10 @@ const r1 = (x) => Math.round(x * 10) / 10;
 async function computeDay(date) {
   const from = new Date(dayKey(date) + 'T00:00:00Z');
   const to = new Date(dayKey(date) + 'T23:59:59Z');
-  const now = Date.now();
 
   // Classes held that day: derived status (scheduled time + duration past,
-  // not cancelled) — same rule as the DOS reports, so numbers agree.
-  const raw = await LiveClass.find({
-    status: { $nin: ['cancelled'] },
-    kind: { $in: ['lesson', null] },
-    scheduledAt: { $gte: from, $lte: to },
-  }).select('subject grade teacherId assignedStudents scheduledAt durationMins status').lean();
-  const classes = raw.filter(c => c.status === 'ended' ||
-    new Date(c.scheduledAt).getTime() + (c.durationMins || 60) * 60000 < now);
-  const ids = classes.map(c => c._id);
-  const sessions = ids.length ? await ClassroomSession.find({ liveClassId: { $in: ids } })
-    .select('liveClassId userId present joinCount').lean() : [];
-  const attendedSet = new Set();
-  sessions.forEach(s => {
-    if (((s.joinCount || 0) > 0 || s.present === true) && s.present !== false)
-      attendedSet.add(String(s.liveClassId) + '|' + String(s.userId));
-  });
+  // not cancelled) — same rule as the DOS reports (lib/attendanceFacts).
+  const { classes, attended: isAttended } = await sessionFacts(from, to, { heldBy: Date.now() });
 
   const studentGrade = {};
   const allStudents = new Set();
@@ -63,7 +48,7 @@ async function computeDay(date) {
     (c.assignedStudents || []).forEach(u => {
       const uid = String(u);
       const g = 'grade:' + (studentGrade[uid] || 'Unassigned');
-      const att = attendedSet.has(String(c._id) + '|' + uid) ? 1 : 0;
+      const att = isAttended(c._id, uid) ? 1 : 0;
       [['school'], [g], ['teacher:' + String(c.teacherId)]].forEach(([s]) => {
         bump(s, 'scheduled'); if (att) bump(s, 'attended');
       });

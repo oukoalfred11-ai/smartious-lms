@@ -97,7 +97,8 @@ const auth = async (req, res, next) => {
 // Route families a QA reviewer never sees, even read only: money,
 // staff pay and admissions pipelines are outside an accreditor's
 // remit.
-const QA_BLOCKED_PATHS = ['/payroll', '/invoices', '/paystack', '/fee-collection', '/payments', '/inventory', '/crm', '/inquiries', '/frontdesk'];
+// Matched against the mount path (req.baseUrl), e.g. fee collection is /api/fees.
+const QA_BLOCKED_PATHS = ['/payroll', '/invoices', '/paystack', '/fees', '/payments', '/inventory', '/crm', '/inquiries', '/frontdesk', '/assessment'];
 
 const requireRole = (...roles) => (req, res, next) => {
   if (!req.user) return res.status(403).json({ success: false, message: 'Access denied.' });

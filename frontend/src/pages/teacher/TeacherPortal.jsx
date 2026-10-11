@@ -9,15 +9,9 @@ import { useToast, api } from '../../context/ctx.jsx'
 import { useStore } from '../../context/ctx.jsx'
 import Modal from '../../components/ui/Modal.jsx'
 import MathField, { renderMath } from '../../components/ui/MathField.jsx'
-import {
-  NestedQuestionEditor,
-  NestedQuestionRenderer,
-  AttachmentList,
-  AnnotationCanvas,
-  sumLeafMarks,
-  labelAt,
-} from '../../components/exam/NestedQuestion.jsx'
+import { NestedQuestionEditor, AttachmentList, AnnotationCanvas, sumLeafMarks, labelAt } from '../../components/exam/NestedQuestion.jsx'
 import ManageSubjectTab from './ManageSubjectTab.jsx'
+import TeacherLeaveRequest from './TeacherLeaveRequest.jsx'
 import LibraryViewer from '../../components/LibraryViewer.jsx'
 
 // ──────────────────────────────────────────────────────
@@ -63,105 +57,6 @@ const TOKENS = {
 // Shared serif font stack (matches admin's Playfair Display
 // when available, falls back gracefully).
 const SERIF = "'Playfair Display', Georgia, serif"
-
-// ──────────────────────────────────────────────────────
-// SHARED UI PRIMITIVES — admin-portal style
-// Use these in new components for visual consistency.
-// ──────────────────────────────────────────────────────
-
-// Page header (sec-tag + serif title + subtitle). Use at the
-// top of any new tab/page to match admin's header treatment.
-function PageHeader({ tag, title, subtitle }) {
-  return (
-    <div style={{ marginBottom: 22 }}>
-      {tag && (
-        <div style={{
-          fontSize: 11, fontWeight: 700,
-          letterSpacing: '.12em', textTransform: 'uppercase',
-          color: TOKENS.crimson, marginBottom: 6,
-        }}>{tag}</div>
-      )}
-      <h2 style={{
-        fontFamily: SERIF, fontSize: 28, fontWeight: 500,
-        color: TOKENS.s900, margin: 0, letterSpacing: '-.01em',
-      }}>{title}</h2>
-      {subtitle && (
-        <div style={{ fontSize: 13, color: TOKENS.s500, marginTop: 4 }}>{subtitle}</div>
-      )}
-    </div>
-  )
-}
-
-// KPI card — small stat tile. Used in dashboards.
-function PKpi({ label, value, delta, accent = TOKENS.crimson, deltaColor }) {
-  return (
-    <div style={{
-      background: TOKENS.white,
-      borderRadius: 14,
-      padding: '18px 20px',
-      border: '1px solid ' + TOKENS.s100,
-      flex: 1, minWidth: 160,
-    }}>
-      <div style={{
-        fontSize: 11, fontWeight: 700,
-        letterSpacing: '.12em', textTransform: 'uppercase',
-        color: TOKENS.s500, marginBottom: 8,
-      }}>{label}</div>
-      <div style={{
-        fontFamily: SERIF, fontSize: 30, fontWeight: 500,
-        color: TOKENS.s900, lineHeight: 1, marginBottom: 4,
-        letterSpacing: '-.01em',
-      }}>{value}</div>
-      {delta && (
-        <div style={{ fontSize: 12, color: deltaColor || TOKENS.s500, fontWeight: 500 }}>{delta}</div>
-      )}
-    </div>
-  )
-}
-
-// Full-bleed white panel matching admin's content panels.
-function Panel({ children, padding = 22, style }) {
-  return (
-    <div style={{
-      background: TOKENS.white,
-      border: '1px solid ' + TOKENS.s100,
-      borderRadius: 14,
-      padding,
-      ...(style || {}),
-    }}>{children}</div>
-  )
-}
-
-// Primary button — crimson background, white text.
-function PrimaryBtn({ children, onClick, disabled, style, type = 'button' }) {
-  return (
-    <button type={type} onClick={onClick} disabled={disabled}
-      style={{
-        background: TOKENS.crimson, color: TOKENS.white,
-        border: 'none', padding: '10px 18px', borderRadius: 8,
-        fontSize: 13, fontWeight: 700,
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        opacity: disabled ? 0.5 : 1,
-        ...(style || {}),
-      }}>{children}</button>
-  )
-}
-
-// Secondary button — outlined, neutral.
-function SecondaryBtn({ children, onClick, disabled, style, type = 'button' }) {
-  return (
-    <button type={type} onClick={onClick} disabled={disabled}
-      style={{
-        background: 'transparent', color: TOKENS.s700,
-        border: '1.5px solid ' + TOKENS.s200,
-        padding: '10px 18px', borderRadius: 8,
-        fontSize: 13, fontWeight: 700,
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        opacity: disabled ? 0.5 : 1,
-        ...(style || {}),
-      }}>{children}</button>
-  )
-}
 
 // ──────────────────────────────────────────────────────
 // GoldenPie — branded gold percentage pie chart
@@ -445,65 +340,12 @@ const Av = ({ init, col, size = 36 }) => (
   <div style={{ width:size, height:size, borderRadius:'50%', background:col+'20', color:col, display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'JetBrains Mono,monospace', fontSize:Math.round(size*.32), fontWeight:700, flexShrink:0 }}>{init}</div>
 )
 
-const ScoreBar = ({ pct }) => {
-  const col = pct>=75?'var(--g600)':pct>=60?'var(--a600)':'var(--r500)'
-  return <div className="prog-bar"><div className="prog-fill" style={{ width:pct+'%', background:col }}/></div>
-}
-
-const STUDENTS = [
-  {name:'Amara Osei',   init:'AO',col:'#3B82F6',score:72,trend:'up',att:88,status:'Good'},
-  {name:'Kofi Mensah',  init:'KM',col:'#22C55E',score:88,trend:'up',att:96,status:'Excellent'},
-  {name:'Zara Kamau',   init:'ZK',col:'#8B5CF6',score:65,trend:'down',att:82,status:'Good'},
-  {name:'Brian Otieno', init:'BO',col:'#F59E0B',score:79,trend:'up',att:90,status:'Good'},
-  {name:'Faith Wanjiru',init:'FW',col:'#EC4899',score:91,trend:'up',att:98,status:'Excellent'},
-  {name:'David Mwangi', init:'DM',col:'#14B8A6',score:58,trend:'down',att:74,status:'At Risk'},
-  {name:'Lydia Achieng',init:'LA',col:'#F97316',score:76,trend:'up',att:85,status:'Good'},
-  {name:'Peter Kamau',  init:'PK',col:'#06B6D4',score:62,trend:'down',att:78,status:'At Risk'},
-]
-
-const RESOURCES = [
-  {t:'Pythagoras Theorem Worksheet',   type:'PDF',  sub:'Mathematics',cls:'Form 3',size:'1.2 MB', dl:34, colBg:'var(--r50)',colSt:'var(--r600)', ai:'Concise worksheet covering Pythagorean triples and word problems. 12 questions.'},
-  {t:'Trigonometry Lecture Slides',    type:'Slides',sub:'Mathematics',cls:'Form 3',size:'4.8 MB', dl:28, colBg:'var(--a50)',colSt:'var(--a600)', ai:'14-slide deck introducing SOHCAHTOA with worked examples.'},
-  {t:'Cambridge Past Papers 2018–2023',type:'PDF',  sub:'Mathematics',cls:'Form 4',size:'18.3 MB',dl:67, colBg:'var(--r50)',colSt:'var(--r600)', ai:'6 years of Cambridge IGCSE Maths Papers 1 & 2.'},
-  {t:'Algebra Video Lesson',           type:'Video',sub:'Mathematics',cls:'Form 2',size:'280 MB', dl:22, colBg:'var(--p50)',colSt:'var(--p600)', ai:'45-minute recorded lesson on factorisation.'},
-  {t:'Number Theory Reference Sheet',  type:'PDF',  sub:'Mathematics',cls:'Form 1',size:'0.8 MB', dl:41, colBg:'var(--r50)',colSt:'var(--r600)', ai:'Quick-reference for prime numbers, LCM, HCF.'},
-  {t:'Khan Academy — Pythagoras',      type:'Link', sub:'Mathematics',cls:'All',   size:'—',      dl:15, colBg:'var(--b50)',colSt:'var(--b600)', ai:'Curated external resource for interactive Pythagoras practice.'},
-]
-
 const EXAM_QS = [
   {type:'MCQ',text:'In a right-angled triangle with legs 3 cm and 4 cm, the hypotenuse is:',marks:5},
   {type:'MCQ',text:'If c = 13 and a = 5 in a right-angled triangle, then b equals:',marks:5},
   {type:'Short Answer',text:'A ladder is 10 m long and its base is 6 m from a wall. How high up the wall does it reach? Show all working.',marks:10},
   {type:'Essay',text:'Explain three real-world applications of Pythagoras Theorem and demonstrate each with a worked example.',marks:20},
   {type:'MCQ',text:'Which set of numbers forms a Pythagorean triple?',marks:5},
-]
-
-const MARK_STU = [
-  {name:'Amara Osei', init:'AO',col:'#3B82F6',scores:[18,15,8,16,10],ai:8, plag:3, copy:12},
-  {name:'Kofi Mensah', init:'KM',col:'#22C55E',scores:[20,18,10,18,12],ai:5, plag:1, copy:6},
-  {name:'Zara Kamau',  init:'ZK',col:'#8B5CF6',scores:[15,12,6,12,8], ai:6, plag:4, copy:9},
-  {name:'Faith Wanjiru',init:'FW',col:'#EC4899',scores:[20,19,10,20,14],ai:4,plag:0, copy:3},
-  {name:'David Mwangi',init:'DM',col:'#14B8A6',scores:[12,10,5,10,7], ai:15,plag:22,copy:38,flagged:true},
-]
-
-const ALLOCS = [
-  {student:'Amara Osei',  curriculum:'IGCSE',  subject:'Mathematics',slot:'Mon/Wed 10:00–11:00 AM', fee:'KES 1,500/session',status:'Active'},
-  {student:'Kofi Mensah', curriculum:'A-Level', subject:'Mathematics',slot:'Tue/Thu 2:00–3:00 PM',  fee:'KES 1,500/session',status:'Active'},
-  {student:'Zara Kamau',  curriculum:'IGCSE',  subject:'Mathematics',slot:'Mon/Fri 9:00–10:00 AM',  fee:'KES 1,500/session',status:'Active'},
-  {student:'Grace Mutua', curriculum:'British', subject:'Mathematics',slot:'Wed/Sat 11:00 AM–12 PM',fee:'KES 1,500/session',status:'Pending'},
-]
-
-const PAYSLIPS = [
-  {month:'January 2026',att:22,offhrs:8,reads:142,videos:3,gross:'KES 40,126',tax:'KES 4,013',net:'KES 36,113',status:'Paid'},
-  {month:'December 2025',att:20,offhrs:5,reads:89, videos:2,gross:'KES 34,267',tax:'KES 3,427',net:'KES 30,840',status:'Paid'},
-  {month:'November 2025',att:21,offhrs:11,reads:201,videos:4,gross:'KES 37,903',tax:'KES 3,790',net:'KES 34,113',status:'Paid'},
-]
-
-const BLOG_POSTS = [
-  {title:'5 Ways to Make Quadratic Equations Fun for IGCSE Students',reads:1847,earnings:'KES 5,541',date:'Feb 28',status:'Published'},
-  {title:'Why Pythagoras Theorem Appears in Every IGCSE Exam',reads:3204,earnings:'KES 9,612',date:'Feb 14',status:'Published'},
-  {title:'How I Use AI to Give Better Exam Feedback',reads:892,earnings:'KES 2,676',date:'Jan 30',status:'Published'},
-  {title:'Teaching Trigonometry: From SOHCAHTOA to Applications',reads:0,earnings:'KES 0',date:'Draft',status:'Draft'},
 ]
 
 // ═══════════════════════════════════════════════════════════
@@ -711,19 +553,6 @@ export default function TeacherPortal() {
   const [uploadModal, setUploadModal] = useState(false)
   const [uploadStep, setUploadStep] = useState(1)
   const [markDetail, setMarkDetail] = useState(null)
-  const [ebStep, setEbStep] = useState(1)
-  const [chatMsgs, setChatMsgs] = useState([
-    { role:'ai', text:'24 papers marked. Class average 73%. David Mwangi\'s paper requires review — 3 integrity flags detected.' }
-  ])
-  const [chatInp, setChatInp] = useState('')
-
-  // ── Blog editor state ────────────────────────────────
-  const [blogEditor, setBlogEditor] = useState(false)
-  const [blogTitle, setBlogTitle]   = useState('')
-  const [blogBody,  setBlogBody]    = useState('')
-  const [blogSubject, setBlogSubject] = useState('Mathematics')
-  const [blogCat,   setBlogCat]     = useState('igcse')
-  const [editingArticle, setEditingArticle] = useState(null)
 
   // ── Resource upload form state ───────────────────────
   const [uploadTitle,   setUploadTitle]   = useState('')
@@ -739,8 +568,6 @@ export default function TeacherPortal() {
   const [msgToRole,    setMsgToRole]    = useState('parent')
   const [msgSubject,   setMsgSubject]   = useState('')
   const [msgBody,      setMsgBody]      = useState('')
-  const [activeThread, setActiveThread] = useState(null)
-  const [replyText,    setReplyText]    = useState('')
 
   // ── Exam result post state ────────────────────────────
   const [resultModal,    setResultModal]    = useState(false)
@@ -769,52 +596,6 @@ export default function TeacherPortal() {
   const totalEarnings = myArticles.reduce((s, a) => s + (a.earnings || 0), 0)
   const myThreads  = store.getThreads('teacher', teacherName)
   const unreadCount = myThreads.reduce((s, t) => s + t.unread, 0)
-
-  // ── Blog publish ─────────────────────────────────────
-  const handlePublish = (asDraft) => {
-    if (!blogTitle.trim()) { toast.error('Title is required'); return }
-    if (!asDraft && !blogBody.trim()) { toast.error('Write something before publishing'); return }
-    const draft = {
-      title:      blogTitle,
-      body:       blogBody,
-      subject:    blogSubject,
-      cat:        blogCat,
-      author:     teacherName,
-      authorInit: ((currentUser?.firstName?.[0] || 'T') + (currentUser?.lastName?.[0] || '')).toUpperCase(),
-      authorCol:  '#3B82F6',
-      img:        blogCat === 'igcse' ? 'linear-gradient(135deg,#0D1525,#1B3060)' : 'linear-gradient(135deg,#0D1A0D,#1A3D1A)',
-    }
-    if (editingArticle) {
-      if (asDraft) {
-        store.updateArticle(editingArticle.id, { ...draft, status:'Draft', url:'', date:'Draft' })
-        toast.ok('Draft saved')
-      } else {
-        const slug = blogTitle.toLowerCase().replace(/[^a-z0-9\s-]/g,'').replace(/\s+/g,'-')
-        store.updateArticle(editingArticle.id, { ...draft, status:'Published', url:'/blog/'+slug,
-          date: new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),
-          reads: editingArticle.reads || 0, earnings: editingArticle.earnings || 0 })
-        toast.ok('Article updated and published!')
-      }
-    } else {
-      if (asDraft) {
-        store.saveDraft(draft)
-        toast.ok('Draft saved')
-      } else {
-        const art = store.publishArticle(draft)
-        toast.ok('Published! URL: ' + art.url)
-      }
-    }
-    setBlogEditor(false); setBlogTitle(''); setBlogBody(''); setEditingArticle(null)
-  }
-
-  const openEditor = (article) => {
-    setEditingArticle(article)
-    setBlogTitle(article.title)
-    setBlogBody(article.body || '')
-    setBlogSubject(article.subject || 'Mathematics')
-    setBlogCat(article.cat || 'igcse')
-    setBlogEditor(true)
-  }
 
   // ── Resource publish ─────────────────────────────────
   const handlePublishResource = () => {
@@ -869,24 +650,6 @@ export default function TeacherPortal() {
     setMsgModal(false); setMsgSubject(''); setMsgBody('')
   }
 
-  const handleReply = (thread) => {
-    if (!replyText.trim()) return
-    const last = thread.messages[0]
-    store.sendMessage({
-      from:     'Mr. James Muthomi',
-      fromRole: 'teacher',
-      to:       last.from === 'Mr. James Muthomi' ? last.to : last.from,
-      toRole:   last.from === 'Mr. James Muthomi' ? last.toRole : last.fromRole,
-      avatar:   'JM',
-      avatarCol:'#22C55E',
-      subject:  'Re: ' + (last.subject || '').replace(/^Re: /,''),
-      body:     replyText,
-      thread:   thread.id,
-    })
-    toast.ok('Reply sent')
-    setReplyText('')
-  }
-
   // ── Post exam result ─────────────────────────────────
   const handlePostResult = () => {
     if (!resultScore || !resultFeedback.trim()) { toast.error('Score and feedback are required'); return }
@@ -909,30 +672,6 @@ export default function TeacherPortal() {
     setResultModal(false); setResultScore(''); setResultFeedback('')
   }
 
-  // ── Mastery heatmap state ────────────────────────────
-  const [heatmapStudent, setHeatmapStudent] = useState(null)
-  const [heatmapData,    setHeatmapData]    = useState(null)
-  const [heatmapLoading, setHeatmapLoading] = useState(false)
-
-  const loadHeatmap = async (studentId, studentName) => {
-    if (!studentId) return
-    setHeatmapLoading(true)
-    setHeatmapStudent(studentName)
-    try {
-      const { data } = await api.get(`/mastery/heatmap/${studentId}`)
-      if (data.success) setHeatmapData(data.heatmap)
-    } catch { setHeatmapData(null) }
-    setHeatmapLoading(false)
-  }
-
-  // ── Mastery colour helper ──────────────────────────
-  const mCol = (pct) => pct >= 80 ? 'var(--g600)' : pct >= 60 ? 'var(--b600)' : pct >= 40 ? 'var(--a600)' : pct > 0 ? 'var(--r500)' : 'var(--s300)'
-  const mLabel = (pct) => pct >= 80 ? 'Mastered' : pct >= 60 ? 'Progressing' : pct >= 40 ? 'Building' : pct > 0 ? 'Needs Help' : 'Not Started'
-  const [wbColor, setWbColor] = useState('#fff')
-  const [wbTool, setWbTool] = useState('pen')
-  const canvasRef = useRef(null)
-  const drawingRef = useRef(false)
-
   const pageTitles = {
     dashboard: 'Dashboard',
     students: 'My Students',
@@ -945,16 +684,7 @@ export default function TeacherPortal() {
     communication: 'Messages',
     mshauri: 'Mshauri AI',
     profile: 'My Profile',
-  }
-
-  const sendChat = () => {
-    if (!chatInp.trim()) return
-    const q = chatInp
-    setChatInp('')
-    setChatMsgs(m => [...m, { role:'user', text:q }])
-    setTimeout(() => {
-      setChatMsgs(m => [...m, { role:'ai', text: q.toLowerCase().includes('david') ? 'David Mwangi shows 22% plagiarism and 38% unusual copy-paste patterns. Recommend 1-to-1 review before releasing marks.' : 'Class average is 73%, above school average of 69%. Faith Wanjiru leads with 91%. Additional support recommended for David Mwangi and Peter Kamau.' }])
-    }, 800)
+    leave: 'Leave Requests',
   }
 
   const nav = [
@@ -967,6 +697,7 @@ export default function TeacherPortal() {
       {id:'clubs',         label:'My Clubs',         iconName:'clubs',         icon:'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2|circle:9:7:4|M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75' },
       {id:'myratings',     label:'My Ratings',         iconName:'ratings',       icon:'M12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2'},
       {id:'earnings',      label:'My Earnings',       iconName:'earnings',      icon:'M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6'},
+      {id:'leave',         label:'Leave Requests',    iconName:'timetable',     icon:'rect:3:4:18:18:2|line:16:2:16:6|line:8:2:8:6|line:3:10:21:10'},
       {id:'timetable',     label:'Timetable',        iconName:'timetable',     icon:'rect:3:4:18:18:2|line:8:2:8:6|line:16:2:16:6|line:3:10:21:10'},
       {id:'managesubject',  label:'Manage My Subject', iconName:'managesubject', icon:'M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z|M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z'},
     ]},
@@ -1019,15 +750,16 @@ export default function TeacherPortal() {
         <div style={{ flex:1, overflowY:'auto', padding:'16px 16px 80px', animation:'fadeIn .2s ease' }}>
           {page==='myratings'  && <TeacherMyRatingsTab     user={currentUser} toast={toast}/>}
           {page==='earnings'   && <EarningsTab             user={currentUser} toast={toast}/>}
+          {page==='leave'      && <TeacherLeaveRequest/>}
           {page==='attendance' && <AttendanceTab           user={currentUser} toast={toast}/>}
           {page==='reports'    && <WeeklyReportGenerator   user={currentUser} toast={toast}/>}
           {page==='dashboard'  && <TeacherDashboardTab     user={currentUser} toast={toast} setPage={setPage}/>}
           {page==='clubs'      && <ClubsHub               user={currentUser} toast={toast}/>}
-          {page==='students'   && <StudentsTab             user={currentUser} toast={toast} setPage={setPage}/>}
+          {page==='students'   && <MyStudentsTab           user={currentUser} store={store} setPage={setPage} toast={toast} setMsgTo={setMsgTo} setMsgSubject={setMsgSubject} setMsgBody={setMsgBody} setMsgModal={setMsgModal}/>}
           {page==='homework'   && <HomeworkTab             user={currentUser} toast={toast}/>}
           {page==='timetable'  && <TeacherTimetableTab     user={currentUser} toast={toast}/>}
           {page==='exams'      && <ExamsTab                user={currentUser} toast={toast}/>}
-          {page==='library'    && <LibraryTab              user={currentUser} toast={toast}/>}
+          {page==='library'    && <TeacherLibraryTab       user={currentUser} toast={toast}/>}
           {page==='live'       && <TeacherLiveClassesTab   user={currentUser} toast={toast}/>}
           {page==='schedule'   && <ScheduleClassesTab      user={currentUser} toast={toast}/>}
           {page==='subjects'   && <ManageSubjectTab        user={currentUser} toast={toast}/>}
@@ -1240,6 +972,7 @@ export default function TeacherPortal() {
 
           {page === 'myratings' && <TeacherMyRatingsTab user={currentUser} toast={toast}/>}
           {page === 'earnings' && <EarningsTab user={currentUser} toast={toast}/>}
+          {page === 'leave' && <TeacherLeaveRequest/>}
           {page === 'attendance' && <AttendanceTab user={currentUser} toast={toast} />}
 
           {page === 'library' && <TeacherLibraryTab user={currentUser} toast={toast} />}
@@ -2740,7 +2473,6 @@ function QuestionBankTab({ user, store, setPage, toast }) {
 // Theme: Smartious crimson (#7D1025) + gold (#C9A030) + cream (#FBFAF5)
 
 const MS_NOTES_PREFIX = 'sm_teacher_notes_'
-const MS_FLAGS_KEY    = 'sm_student_flags'
 
 const msSubjColours = {
   'Mathematics': '#8B1A2E', 'Physics': '#1E3A8A', 'Chemistry': '#166534',
@@ -2778,11 +2510,6 @@ const msStatusStyle = (status) => {
     default:           return { color: '#64748B', bg: '#F1F5F9', label: status,        borderColor: '#CBD5E1' }
   }
 }
-
-// Load functions
-const msLoadStudents = () => {
-  try { return JSON.parse(localStorage.getItem('sm_teacher_students') || '[]') } catch { return [] }
-}
 const msSaveStudents = (students) => {
   try { localStorage.setItem('sm_teacher_students', JSON.stringify(students)) } catch {}
 }
@@ -2800,24 +2527,6 @@ const msLoadHomework = () => {
 }
 const msLoadClassHistory = () => {
   try { return JSON.parse(localStorage.getItem('sm_teacher_class_history') || '[]') } catch { return [] }
-}
-
-// Seed if dashboard hasn't been visited yet
-const msSeedIfEmpty = () => {
-  const existing = msLoadStudents()
-  if (existing.length > 0) return existing
-  const seeded = [
-    { id: 's1', name: 'Amara Osei',    initials: 'AO', curriculum: 'IGCSE',  year: 'Year 10', mastery: 72, lastActive: 1,   hwSubmitted: 3, hwTotal: 4, status: 'on-track',     attendance: 88, parentName: 'Janet Osei',     parentEmail: 'janet.osei@example.com',     phone: '+254 712 000 001' },
-    { id: 's2', name: 'Kofi Mensah',   initials: 'KM', curriculum: 'IGCSE',  year: 'Year 10', mastery: 88, lastActive: 0.5, hwSubmitted: 4, hwTotal: 4, status: 'excellent',    attendance: 96, parentName: 'Akua Mensah',    parentEmail: 'akua.mensah@example.com',    phone: '+254 712 000 002' },
-    { id: 's3', name: 'Zara Kamau',    initials: 'ZK', curriculum: 'IGCSE',  year: 'Year 10', mastery: 65, lastActive: 4,   hwSubmitted: 2, hwTotal: 4, status: 'on-track',     attendance: 82, parentName: 'Susan Kamau',    parentEmail: 'susan.kamau@example.com',    phone: '+254 712 000 003' },
-    { id: 's4', name: 'Brian Otieno',  initials: 'BO', curriculum: 'IGCSE',  year: 'Year 11', mastery: 79, lastActive: 1,   hwSubmitted: 3, hwTotal: 4, status: 'on-track',     attendance: 90, parentName: 'Peter Otieno',   parentEmail: 'peter.otieno@example.com',   phone: '+254 712 000 004' },
-    { id: 's5', name: 'Faith Wanjiru', initials: 'FW', curriculum: 'IGCSE',  year: 'Year 10', mastery: 91, lastActive: 0.2, hwSubmitted: 4, hwTotal: 4, status: 'excellent',    attendance: 98, parentName: 'Mary Wanjiru',   parentEmail: 'mary.wanjiru@example.com',   phone: '+254 712 000 005' },
-    { id: 's6', name: 'David Mwangi',  initials: 'DM', curriculum: 'IGCSE',  year: 'Year 10', mastery: 58, lastActive: 7,   hwSubmitted: 1, hwTotal: 4, status: 'at-risk',      attendance: 74, parentName: 'James Mwangi',   parentEmail: 'james.mwangi@example.com',   phone: '+254 712 000 006' },
-    { id: 's7', name: 'Lydia Achieng', initials: 'LA', curriculum: 'IGCSE',  year: 'Year 11', mastery: 76, lastActive: 2,   hwSubmitted: 3, hwTotal: 4, status: 'on-track',     attendance: 85, parentName: 'Grace Achieng',  parentEmail: 'grace.achieng@example.com',  phone: '+254 712 000 007' },
-    { id: 's8', name: 'Peter Kamau',   initials: 'PK', curriculum: 'IGCSE',  year: 'Year 11', mastery: 62, lastActive: 5,   hwSubmitted: 2, hwTotal: 4, status: 'needs-help',    attendance: 78, parentName: 'Eunice Kamau',   parentEmail: 'eunice.kamau@example.com',   phone: '+254 712 000 008' },
-  ]
-  msSaveStudents(seeded)
-  return seeded
 }
 
 function MyStudentsTab({ user, store, setPage, toast, setMsgTo, setMsgSubject, setMsgBody, setMsgModal }) {
@@ -3675,14 +3384,6 @@ function MyStudentsTab({ user, store, setPage, toast, setMsgTo, setMsgSubject, s
   )
 }
 
-// ═══════════════════════════════════════════════════════════
-// EXAMS — Schedule, lock until start time, deploy to students
-// ═══════════════════════════════════════════════════════════
-// Theme: Smartious crimson (#7D1025) + gold (#C9A030) + cream (#FBFAF5)
-
-const EX_ASSIGNMENTS_KEY = 'sm_exam_assignments'
-const EX_SUBMISSIONS_KEY = 'sm_exam_submissions'
-
 const exSubjColours = {
   'Mathematics': '#8B1A2E', 'Physics': '#1E3A8A', 'Chemistry': '#166534',
   'Biology': '#7C2D12', 'English': '#6B21A8', 'History': '#92400E',
@@ -3690,19 +3391,6 @@ const exSubjColours = {
   'Business Studies': '#7E22CE', 'Economics': '#9F1239',
 }
 const exSubjColour = (s) => exSubjColours[s] || '#7D1025'
-
-const exTimeAgo = (iso) => {
-  const diff = Date.now() - new Date(iso).getTime()
-  const mins = Math.floor(diff / 60000)
-  const hours = Math.floor(diff / 3600000)
-  const days = Math.floor(diff / 86400000)
-  if (mins < 1) return 'just now'
-  if (mins < 60) return mins + 'm ago'
-  if (hours < 24) return hours + 'h ago'
-  if (days === 1) return 'yesterday'
-  if (days < 7) return days + 'd ago'
-  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
-}
 
 const exTimeUntil = (iso) => {
   const diff = new Date(iso).getTime() - Date.now()
@@ -3732,20 +3420,6 @@ const exComputeStatus = (exam) => {
   if (now < end) return 'active'
   return 'ended'
 }
-
-const exLoadExams = () => {
-  try { return JSON.parse(localStorage.getItem(EX_ASSIGNMENTS_KEY) || '[]') } catch { return [] }
-}
-const exSaveExams = (exams) => {
-  try { localStorage.setItem(EX_ASSIGNMENTS_KEY, JSON.stringify(exams.slice(-200))) } catch {}
-}
-const exLoadStudents = () => {
-  try { return JSON.parse(localStorage.getItem('sm_teacher_students') || '[]') } catch { return [] }
-}
-const exLoadQuestionBank = () => {
-  try { return JSON.parse(localStorage.getItem('sm_question_bank_custom') || '[]') } catch { return [] }
-}
-const exGenerateId = () => 'exam-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6)
 
 // Default datetime-local 1 day from now at 09:00
 const exDefaultStartAt = () => {
@@ -7315,190 +6989,6 @@ function HomeworkTab({ user, store, setPage, toast }) {
     </div>
   )
 }
-// ═══════════════════════════════════════════════════════════
-// COMMUNICATION — Safety-filtered messaging with admin oversight
-// ═══════════════════════════════════════════════════════════
-// Theme: Smartious crimson (#7D1025) + gold (#C9A030) + cream (#FBFAF5)
-//
-// CHILD SAFETY DESIGN:
-// - All teacher-student messages auto-logged to admin audit (sm_messages_audit)
-// - Anti-grooming filter on outgoing messages (warns + flags suspicious phrases)
-// - Cannot edit or delete sent messages (immutable conversation log)
-// - "Visible to admin" indicator always shown on student channels
-// - Auto-flags suspicious patterns to sm_safety_flags
-
-const CM_MESSAGES_KEY      = 'sm_messages'
-const CM_AUDIT_KEY         = 'sm_messages_audit'
-const CM_FLAGS_KEY         = 'sm_safety_flags'
-const CM_SEEDED_KEY        = 'sm_messages_seeded'
-
-// Phrases that trigger child-safety warning when teacher messages a STUDENT
-// (these patterns are inappropriate for adult-to-minor communication on an education platform)
-const CM_RISKY_PATTERNS = [
-  { pattern: /\b(don'?t tell|keep this between|just between us|our secret|private chat|don'?t mention)\b/i, label: 'secrecy language', severity: 'high' },
-  { pattern: /\b(meet me|come to my|my house|my place|alone)\b/i, label: 'in-person meeting', severity: 'high' },
-  { pattern: /\b(text me|whatsapp me|call me|my phone|my number)\b/i, label: 'off-platform contact', severity: 'high' },
-  { pattern: /\b\d{3}[\s\-]?\d{3}[\s\-]?\d{4}\b|\b\+?\d{10,}\b/, label: 'phone number', severity: 'medium' },
-  { pattern: /\b(facebook|instagram|tiktok|snapchat|telegram|signal|discord)\b/i, label: 'social media platform', severity: 'medium' },
-  { pattern: /\b(gift|present|surprise|give you something)\b/i, label: 'gift offer', severity: 'medium' },
-  { pattern: /\b(beautiful|pretty|cute|attractive|handsome)\b/i, label: 'personal compliment', severity: 'medium' },
-  { pattern: /\b(home address|where do you live|your address)\b/i, label: 'address request', severity: 'high' },
-]
-
-const cmCheckMessage = (text) => {
-  const flags = []
-  for (const p of CM_RISKY_PATTERNS) {
-    if (p.pattern.test(text)) flags.push({ label: p.label, severity: p.severity })
-  }
-  return flags
-}
-
-const cmTimeAgo = (iso) => {
-  const diff = Date.now() - new Date(iso).getTime()
-  const mins = Math.floor(diff / 60000)
-  const hours = Math.floor(diff / 3600000)
-  const days = Math.floor(diff / 86400000)
-  if (mins < 1) return 'just now'
-  if (mins < 60) return mins + 'm ago'
-  if (hours < 24) return hours + 'h ago'
-  if (days === 1) return 'yesterday'
-  if (days < 7) return days + 'd ago'
-  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
-}
-
-const cmFormatTime = (iso) => {
-  const d = new Date(iso)
-  const today = new Date()
-  if (d.toDateString() === today.toDateString()) {
-    return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true })
-  }
-  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ', ' +
-    d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true })
-}
-
-const cmAvatarColor = (name) => {
-  const colors = ['#7D1025', '#8B1A2E', '#C9A030', '#1E3A8A', '#166534', '#7C2D12', '#6B21A8', '#92400E']
-  let hash = 0
-  for (let i = 0; i < name.length; i++) hash = ((hash << 5) - hash) + name.charCodeAt(i)
-  return colors[Math.abs(hash) % colors.length]
-}
-
-const cmInitials = (name) => {
-  return (name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]?.toUpperCase()).join('') || '?'
-}
-
-// Load/save
-const cmLoadMessages = () => {
-  try { return JSON.parse(localStorage.getItem(CM_MESSAGES_KEY) || '[]') } catch { return [] }
-}
-const cmSaveMessages = (msgs) => {
-  try { localStorage.setItem(CM_MESSAGES_KEY, JSON.stringify(msgs.slice(-500))) } catch {}
-}
-const cmLoadAudit = () => {
-  try { return JSON.parse(localStorage.getItem(CM_AUDIT_KEY) || '[]') } catch { return [] }
-}
-const cmAppendAudit = (entry) => {
-  try {
-    const existing = cmLoadAudit()
-    existing.push(entry)
-    localStorage.setItem(CM_AUDIT_KEY, JSON.stringify(existing.slice(-500)))
-  } catch {}
-}
-const cmAppendFlag = (entry) => {
-  try {
-    const existing = JSON.parse(localStorage.getItem(CM_FLAGS_KEY) || '[]')
-    existing.push(entry)
-    localStorage.setItem(CM_FLAGS_KEY, JSON.stringify(existing.slice(-200)))
-  } catch {}
-}
-const cmLoadStudents = () => {
-  try { return JSON.parse(localStorage.getItem('sm_teacher_students') || '[]') } catch { return [] }
-}
-const cmGenerateId = () => 'msg-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6)
-
-// Seed sample messages
-const cmSeedSample = (teacherName) => {
-  if (localStorage.getItem(CM_SEEDED_KEY)) return
-  const now = Date.now()
-  const samples = [
-    // Parent thread: Janet Osei (Amara's parent)
-    {
-      id: cmGenerateId(), threadId: 'th-parent-amara',
-      from: 'Janet Osei', fromRole: 'parent',
-      to: teacherName, toRole: 'teacher',
-      channel: 'parent',
-      subject: "Amara's progress in Algebra",
-      body: 'Hello, I noticed Amara has been struggling with quadratic equations at home. Could you give us a few extra practice resources for the weekend?',
-      sentAt: new Date(now - 2 * 86400000).toISOString(),
-      read: true, flags: [],
-    },
-    {
-      id: cmGenerateId(), threadId: 'th-parent-amara',
-      from: teacherName, fromRole: 'teacher',
-      to: 'Janet Osei', toRole: 'parent',
-      channel: 'parent',
-      subject: "Re: Amara's progress in Algebra",
-      body: "Thanks for letting me know. I'll send Amara a custom worksheet on Monday with worked examples. She should complete it by Friday.",
-      sentAt: new Date(now - 86400000).toISOString(),
-      read: true, flags: [],
-    },
-    {
-      id: cmGenerateId(), threadId: 'th-parent-amara',
-      from: 'Janet Osei', fromRole: 'parent',
-      to: teacherName, toRole: 'teacher',
-      channel: 'parent',
-      subject: "Re: Amara's progress in Algebra",
-      body: "Thank you so much. We'll make sure she completes it.",
-      sentAt: new Date(now - 3600000).toISOString(),
-      read: false, flags: [],
-    },
-    // Parent thread: David's parent (at-risk)
-    {
-      id: cmGenerateId(), threadId: 'th-parent-david',
-      from: teacherName, fromRole: 'teacher',
-      to: 'James Mwangi', toRole: 'parent',
-      channel: 'parent',
-      subject: "David's recent attendance",
-      body: "Mr. Mwangi, I wanted to reach out about David's attendance. He missed last week's class on Pythagoras. Could we set up a brief call to discuss?",
-      sentAt: new Date(now - 4 * 86400000).toISOString(),
-      read: true, flags: [],
-    },
-    {
-      id: cmGenerateId(), threadId: 'th-parent-david',
-      from: 'James Mwangi', fromRole: 'parent',
-      to: teacherName, toRole: 'teacher',
-      channel: 'parent',
-      subject: "Re: David's recent attendance",
-      body: "Thank you for noticing. He's been unwell. Can we connect next week?",
-      sentAt: new Date(now - 3 * 86400000).toISOString(),
-      read: true, flags: [],
-    },
-    // Student thread: Kofi (high performer asking for extension work)
-    {
-      id: cmGenerateId(), threadId: 'th-student-kofi',
-      from: 'Kofi Mensah', fromRole: 'student',
-      to: teacherName, toRole: 'teacher',
-      channel: 'student',
-      subject: 'Extension work request',
-      body: 'Hello sir, I finished the homework already. Can I get extra problems to work on this weekend?',
-      sentAt: new Date(now - 6 * 3600000).toISOString(),
-      read: false, flags: [], adminVisible: true,
-    },
-    // Admin thread
-    {
-      id: cmGenerateId(), threadId: 'th-admin-1',
-      from: 'School Admin', fromRole: 'admin',
-      to: teacherName, toRole: 'teacher',
-      channel: 'admin',
-      subject: 'Term 2 schedule confirmation',
-      body: 'Please confirm your availability for the Term 2 schedule. Live class slots are unchanged from Term 1.',
-      sentAt: new Date(now - 5 * 86400000).toISOString(),
-      read: true, flags: [],
-    },
-  ]
-  cmSaveMessages(samples)
-  localStorage.setItem(CM_SEEDED_KEY, '1')
-}
 
 // ═══════════════════════════════════════════════════════════
 // COMMUNICATION TAB — teacher emails to students, parents, staff
@@ -7604,12 +7094,30 @@ function DocumentsTab({ user, store, setPage, toast }) {
 
 // ── WEEKLY REPORT GENERATOR ────────────────────────────────
 // ── MY DOCUMENTS ─────────────────────────────────────────────
-// The teacher's own document file, organised by the categories a
-// school inspection expects: schemes of work, lesson plans, records
-// of work, assessment records, teaching resources, reports, other.
+// The teacher's own file, organised by the categories an accreditor
+// and a school inspection expect: the personnel file (CV, certificates,
+// ID, licence, police clearance, contract...) and teaching documents
+// (schemes of work, lesson plans, records of work...). Keys match
+// backend constants/qa.js; QA sees the same file in the QA portal.
 // Files go straight from the browser to R2 (presigned), so uploads
 // are fast and never load the API server.
-const TDOC_CATEGORIES = [
+const TDOC_PERSONNEL = [
+  ['cv',                       'CV / Résumé'],
+  ['academic_certificate',     'Academic certificates'],
+  ['professional_certificate', 'Teaching qualification'],
+  ['identification',           'National ID / Passport'],
+  ['teaching_license',         'Teaching licence / registration'],
+  ['police_clearance',         'Police clearance'],
+  ['contract',                 'Employment contract'],
+  ['safeguarding_certificate', 'Safeguarding / child protection'],
+  ['training_certificate',     'Training certificates'],
+  ['observation_report',       'Lesson observation reports'],
+  ['appraisal',                'Appraisals'],
+  ['reference',                'References'],
+]
+// Documents that lapse and so carry an expiry date.
+const TDOC_EXPIRES = new Set(['teaching_license', 'police_clearance', 'contract', 'safeguarding_certificate'])
+const TDOC_TEACHING = [
   ['scheme_of_work',    'Schemes of Work'],
   ['lesson_plan',       'Lesson Plans'],
   ['record_of_work',    'Records of Work'],
@@ -7618,6 +7126,7 @@ const TDOC_CATEGORIES = [
   ['report',            'Reports'],
   ['other',             'Other'],
 ]
+const TDOC_CATEGORIES = [...TDOC_PERSONNEL, ...TDOC_TEACHING]
 const TDOC_LABEL = Object.fromEntries(TDOC_CATEGORIES)
 function tdocSize(b) {
   if (!b) return ''
@@ -7631,7 +7140,7 @@ function TeacherDocsLibrary({ user, toast, onBack }) {
   const [upOpen, setUpOpen] = useState(false)
   const [upBusy, setUpBusy] = useState(false)
   const [upPct, setUpPct] = useState(0)
-  const [up, setUp] = useState({ category: 'scheme_of_work', title: '', subject: '', description: '', file: null })
+  const [up, setUp] = useState({ category: 'scheme_of_work', title: '', subject: '', description: '', expiresAt: '', file: null })
 
   const load = async () => {
     try {
@@ -7667,11 +7176,12 @@ function TeacherDocsLibrary({ user, toast, onBack }) {
         r2Key: pd.r2Key, category: up.category, title: up.title, subject: up.subject,
         description: up.description, fileName: up.file.name,
         mimeType: up.file.type || '', fileSize: up.file.size,
+        expiresAt: up.expiresAt || null,
       })
       if (!data?.success) throw new Error(data?.message || 'Could not save the document.')
       toast?.ok?.('Document filed under ' + TDOC_LABEL[up.category] + '.')
       setUpOpen(false)
-      setUp({ category: up.category, title: '', subject: '', description: '', file: null })
+      setUp({ category: up.category, title: '', subject: '', description: '', expiresAt: '', file: null })
       load()
     } catch (e) { toast?.error?.(e.message || 'Upload failed.') }
     finally { setUpBusy(false); setUpPct(0) }
@@ -7700,7 +7210,7 @@ function TeacherDocsLibrary({ user, toast, onBack }) {
         <div>
           {onBack && <button onClick={onBack} style={{ background: 'transparent', border: 'none', color: '#7D1025', fontSize: 12.5, fontWeight: 700, cursor: 'pointer', padding: 0, marginBottom: 6 }}>&larr; Reports &amp; Documents</button>}
           <h1 style={{ fontSize: 24, fontWeight: 800, color: '#1A1A1A', margin: 0 }}>My Documents</h1>
-          <div style={{ fontSize: 13, color: '#6B6B6B', marginTop: 2 }}>Your teaching file, organised by category.</div>
+          <div style={{ fontSize: 13, color: '#6B6B6B', marginTop: 2 }}>Your staff file and teaching documents. Quality Assurance reviews these for accreditation.</div>
         </div>
         <button onClick={() => setUpOpen(true)} style={{ background: '#7D1025', color: '#FBFAF5', border: 'none', borderRadius: 10, padding: '11px 20px', fontSize: 13.5, fontWeight: 700, cursor: 'pointer' }}>
           + Add Document
@@ -7711,7 +7221,7 @@ function TeacherDocsLibrary({ user, toast, onBack }) {
         <button onClick={() => setCatFilter('')} style={{ background: catFilter === '' ? '#7D1025' : '#FFFFFF', color: catFilter === '' ? '#FBFAF5' : '#3A2E2A', border: '1px solid ' + (catFilter === '' ? '#7D1025' : '#E8E0D0'), borderRadius: 99, padding: '7px 14px', fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>
           All ({docs.length})
         </button>
-        {TDOC_CATEGORIES.map(([id, label]) => {
+        {TDOC_CATEGORIES.filter(([id]) => catFilter === id || docs.some(d => d.category === id)).map(([id, label]) => {
           const n = docs.filter(d => d.category === id).length
           const active = catFilter === id
           return (
@@ -7747,6 +7257,17 @@ function TeacherDocsLibrary({ user, toast, onBack }) {
                       {[d.subject, tdocSize(d.file?.sizeBytes), new Date(d.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })].filter(Boolean).join(' · ')}
                     </div>
                     {d.description && <div style={{ fontSize: 12, color: '#3A2E2A', marginTop: 6, lineHeight: 1.5 }}>{d.description}</div>}
+                    {(d.expiresAt || d.verifiedAt) && (
+                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 8 }}>
+                        {d.expiresAt && (() => {
+                          const days = Math.ceil((new Date(d.expiresAt) - Date.now()) / 86400000)
+                          const [bg, fg, txt] = days < 0 ? ['#FEE2E2', '#B91C1C', 'Expired — please upload a renewal']
+                            : days <= 60 ? ['#FEF3C7', '#B45309', 'Expires in ' + days + ' days'] : ['#DCFCE7', '#15803D', 'Valid to ' + new Date(d.expiresAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })]
+                          return <span style={{ background: bg, color: fg, borderRadius: 99, padding: '3px 10px', fontSize: 11, fontWeight: 700 }}>{txt}</span>
+                        })()}
+                        {d.verifiedAt && <span style={{ background: '#DCFCE7', color: '#15803D', borderRadius: 99, padding: '3px 10px', fontSize: 11, fontWeight: 700 }}>✓ Verified by QA</span>}
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
@@ -7769,9 +7290,16 @@ function TeacherDocsLibrary({ user, toast, onBack }) {
               <div style={{ marginBottom: 14 }}>
                 <label style={labelStyle}>Category</label>
                 <select value={up.category} onChange={e => setUp(f => ({ ...f, category: e.target.value }))} style={inputStyle}>
-                  {TDOC_CATEGORIES.map(([id, label]) => <option key={id} value={id}>{label}</option>)}
+                  <optgroup label="Staff file">{TDOC_PERSONNEL.map(([id, label]) => <option key={id} value={id}>{label}</option>)}</optgroup>
+                  <optgroup label="Teaching documents">{TDOC_TEACHING.map(([id, label]) => <option key={id} value={id}>{label}</option>)}</optgroup>
                 </select>
               </div>
+              {TDOC_EXPIRES.has(up.category) && (
+                <div style={{ marginBottom: 14 }}>
+                  <label style={labelStyle}>Expiry date</label>
+                  <input type="date" value={up.expiresAt} onChange={e => setUp(f => ({ ...f, expiresAt: e.target.value }))} style={inputStyle} />
+                </div>
+              )}
               <div style={{ marginBottom: 14 }}>
                 <label style={labelStyle}>Title</label>
                 <input value={up.title} onChange={e => setUp(f => ({ ...f, title: e.target.value }))} placeholder="e.g. IGCSE Physics Scheme of Work Term 1" style={inputStyle} />
@@ -8868,16 +8396,6 @@ const dbGreeting = () => {
 
 const dbFormatTime = (d) => d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true })
 const dbFormatDate = (d) => d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })
-
-const dbSubjColor = (subject) => {
-  const map = {
-    'Mathematics': '#7D1025', 'Physics': '#1E3A8A', 'Chemistry': '#166534',
-    'Biology': '#7C2D12', 'English': '#6B21A8', 'History': '#92400E',
-    'Geography': '#0F766E', 'Computer Science': '#1F2937',
-    'Business Studies': '#7E22CE', 'Economics': '#9F1239',
-  }
-  return map[subject] || '#7D1025'
-}
 
 // Schedule string parser (same as live classes tab)
 const dbParseSchedule = (s) => {
@@ -10937,290 +10455,165 @@ function ScheduleClassesTab({ user, toast }) {
   )
 }
 
-function ClassroomAttendanceModal({ lc, onClose, toast }) {
+// ── Class register (per-lesson attendance) ─────────────────────────
+// Student attendance is per lesson. Joining the class marks a student
+// present automatically; the class teacher confirms or amends that here
+// (present/absent per assigned student). Saved to the lesson's
+// ClassroomSession via /api/class-register/:liveClassId.
+function ClassRegisterModal({ lc, onClose, toast, onSaved }) {
   const [loading, setLoading] = useState(true)
-  const [report, setReport] = useState(null)
-  useEffect(() => {
-    let alive = true
-    api.get('/classroom/' + lc._id + '/attendance')
-      .then(({ data }) => { if (alive && data?.success) setReport(data.data) })
-      .catch(() => toast?.error?.('Could not load attendance.'))
-      .finally(() => { if (alive) setLoading(false) })
-    return () => { alive = false }
-  }, [lc._id])
+  const [rows, setRows] = useState([])
+  const [marks, setMarks] = useState({})      // studentId -> present (bool), only edits
+  const [saving, setSaving] = useState(false)
 
-  const badge = (status) => {
-    const map = {
-      present: { bg: '#DCFCE7', fg: '#15803D', label: 'Present' },
-      late:    { bg: '#FEF3C7', fg: '#B45309', label: 'Late' },
-      absent:  { bg: '#FEE2E2', fg: '#B91C1C', label: 'Absent' },
-    }
-    const s = map[status] || map.absent
-    return (
-      <span style={{ background: s.bg, color: s.fg, fontSize: 10.5, fontWeight: 800, padding: '3px 10px', borderRadius: 99 }}>
-        {s.label}
-      </span>
-    )
+  const load = useCallback(() => {
+    setLoading(true)
+    api.get('/class-register/' + lc._id)
+      .then(({ data }) => { setRows(data?.data?.rows || []); setMarks({}) })
+      .catch(e => toast?.error?.(e?.response?.data?.message || 'Could not load the register.'))
+      .finally(() => setLoading(false))
+  }, [lc._id])
+  useEffect(() => { load() }, [load])
+
+  const isPresent = (r) => (marks[String(r.studentId)] !== undefined ? marks[String(r.studentId)] : r.present)
+  const setMark = (r, v) => setMarks(m => {
+    const n = { ...m }
+    if (v === r.present) delete n[String(r.studentId)]; else n[String(r.studentId)] = v
+    return n
+  })
+  const changed = Object.keys(marks)
+  const presentCount = rows.filter(isPresent).length
+
+  const save = async () => {
+    if (!changed.length) return
+    setSaving(true)
+    try {
+      const { data } = await api.post('/class-register/' + lc._id, { marks: changed.map(id => ({ studentId: id, present: marks[id] })) })
+      toast?.ok?.(data?.message || 'Register saved.')
+      onSaved?.()
+      load()
+    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not save the register.') }
+    finally { setSaving(false) }
   }
+
+  const when = new Date(lc.scheduledAt)
+  const tm = (d) => new Date(d).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
 
   return (
     <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(8,12,20,.55)', zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
-      <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 14, width: '100%', maxWidth: 560, maxHeight: '82vh', overflowY: 'auto', boxShadow: '0 24px 64px rgba(0,0,0,.25)' }}>
-        <div style={{ padding: '16px 22px', borderBottom: '1px solid #EEE8DA', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div>
-            <div style={{ fontSize: 15, fontWeight: 800, color: '#2B2B2B' }}>Classroom attendance</div>
+      <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 14, width: '100%', maxWidth: 580, maxHeight: '86vh', display: 'flex', flexDirection: 'column', boxShadow: '0 24px 64px rgba(0,0,0,.25)' }}>
+        <div style={{ padding: '16px 22px', borderBottom: '1px solid #EEE8DA', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: 15, fontWeight: 800, color: '#2B2B2B' }}>Class register</div>
             <div style={{ fontSize: 12, color: '#6B6B6B', marginTop: 2 }}>
-              {lc.title} &middot; captured automatically
+              {lc.title || lc.subject} &middot; {when.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })} {tm(when)}
             </div>
           </div>
           <button onClick={onClose} style={{ background: 'transparent', border: 'none', fontSize: 20, cursor: 'pointer', color: '#6B6B6B' }}>&times;</button>
         </div>
-        <div style={{ padding: '14px 22px 20px' }}>
+        <div style={{ padding: '12px 22px', overflowY: 'auto', flex: 1 }}>
           {loading ? (
             <div style={{ padding: 30, textAlign: 'center', color: '#6B6B6B', fontSize: 13 }}>Loading register...</div>
-          ) : !report ? (
-            <div style={{ padding: 30, textAlign: 'center', color: '#6B6B6B', fontSize: 13 }}>No attendance data available.</div>
+          ) : rows.length === 0 ? (
+            <div style={{ padding: 30, textAlign: 'center', color: '#6B6B6B', fontSize: 13 }}>No students are assigned to this class.</div>
           ) : (
             <>
-              {report.teacher && (
-                <div style={{ fontSize: 12, color: '#6B6B6B', marginBottom: 12 }}>
-                  You joined at {new Date(report.teacher.joinedAt).toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' })} and taught for {report.teacher.minutes} min.
-                </div>
-              )}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {report.students.map(s => (
-                  <div key={s.userId} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', background: '#FBFAF5', border: '1px solid #EEE8DA', borderRadius: 9 }}>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: '#2B2B2B' }}>{s.name || 'Student'}</div>
-                      <div style={{ fontSize: 11, color: '#6B6B6B', marginTop: 2 }}>
-                        {s.status === 'absent'
-                          ? 'Never joined'
-                          : 'Joined ' + new Date(s.joinedAt).toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' })
-                            + (s.lateByMin > 0 ? ' (' + s.lateByMin + ' min late)' : '')
-                            + ' \u00b7 ' + s.minutes + ' min connected'
-                            + (s.joinCount > 1 ? ' \u00b7 ' + s.joinCount + ' connections' : '')}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 12.5, fontWeight: 800, color: '#2B2B2B' }}>{presentCount} of {rows.length} present</span>
+                <span style={{ flex: 1 }} />
+                <button onClick={() => rows.forEach(r => setMark(r, true))} style={{ padding: '5px 12px', borderRadius: 7, border: '1.5px solid #15803D', background: '#fff', color: '#15803D', fontSize: 11, fontWeight: 800, cursor: 'pointer' }}>Mark all present</button>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                {rows.map(r => {
+                  const p = isPresent(r)
+                  const edited = marks[String(r.studentId)] !== undefined
+                  return (
+                    <div key={String(r.studentId)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', background: edited ? '#FFFBEB' : '#FBFAF5', border: '1px solid ' + (edited ? '#FCD34D' : '#EEE8DA'), borderRadius: 9, flexWrap: 'wrap' }}>
+                      <div style={{ flex: 1, minWidth: 150 }}>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: '#2B2B2B' }}>{r.name || 'Student'}{r.grade ? <span style={{ fontWeight: 500, color: '#9A9484', fontSize: 11 }}> {r.grade}</span> : null}</div>
+                        <div style={{ fontSize: 11, color: '#6B6B6B', marginTop: 2 }}>
+                          {r.joined
+                            ? 'Joined ' + (r.firstJoinedAt ? tm(r.firstJoinedAt) : '') + (r.lateByMin > 10 ? ' (' + r.lateByMin + ' min late)' : '') + (r.minutes ? ' · ' + r.minutes + ' min' : '')
+                            : 'Did not join online'}
+                          {r.amended ? ' · marked by teacher' : ''}
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', gap: 5 }}>
+                        <button onClick={() => setMark(r, true)} style={{ padding: '5px 12px', borderRadius: 99, fontSize: 11, fontWeight: 800, cursor: 'pointer', border: '1.5px solid ' + (p ? '#15803D' : '#E5DFD3'), background: p ? '#15803D' : '#fff', color: p ? '#fff' : '#6B6B6B' }}>Present</button>
+                        <button onClick={() => setMark(r, false)} style={{ padding: '5px 12px', borderRadius: 99, fontSize: 11, fontWeight: 800, cursor: 'pointer', border: '1.5px solid ' + (!p ? '#B91C1C' : '#E5DFD3'), background: !p ? '#B91C1C' : '#fff', color: !p ? '#fff' : '#6B6B6B' }}>Absent</button>
                       </div>
                     </div>
-                    {badge(s.status)}
-                  </div>
-                ))}
-                {report.students.length === 0 && (
-                  <div style={{ padding: 20, textAlign: 'center', color: '#6B6B6B', fontSize: 12.5 }}>No students assigned to this class.</div>
-                )}
-              </div>
-              <div style={{ fontSize: 11, color: '#9A9484', marginTop: 12, lineHeight: 1.5 }}>
-                Students connected for 5+ minutes are also marked in the daily attendance register automatically (your manual marks are never overwritten).
+                  )
+                })}
               </div>
             </>
           )}
+          <div style={{ fontSize: 11, color: '#9A9484', marginTop: 12, lineHeight: 1.5 }}>
+            Joining the class marks a student present automatically. Mark a student present if they attended another way, or absent to discount a token join. This register is the student&rsquo;s attendance record for this lesson.
+          </div>
+        </div>
+        <div style={{ padding: '12px 22px', borderTop: '1px solid #EEE8DA', display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+          <button onClick={onClose} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #E5DFD3', background: '#fff', fontSize: 12.5, fontWeight: 700, cursor: 'pointer', color: '#2B2B2B' }}>Close</button>
+          <button onClick={save} disabled={!changed.length || saving} style={{ padding: '8px 18px', borderRadius: 8, border: 'none', background: changed.length ? '#7D1025' : '#C9C2B4', color: '#fff', fontSize: 12.5, fontWeight: 800, cursor: changed.length && !saving ? 'pointer' : 'not-allowed' }}>
+            {saving ? 'Saving...' : changed.length ? `Save register (${changed.length})` : 'No changes'}
+          </button>
         </div>
       </div>
     </div>
   )
 }
 
-function MarkProgressPanel({ lc, onClose, toast }) {
-  // assignedStudents may be populated User objects OR raw ObjectIds.
-  // Normalise to { _id, firstName, lastName, fullName } objects.
-  const initialStudents = (lc.assignedStudents || []).map(s => {
-    if (typeof s === 'string') return { _id: s, firstName: '', lastName: '', fullName: '' }
-    const fn = s.firstName || ''
-    const ln = s.lastName || ''
-    return {
-      _id: s._id || s,
-      firstName: fn, lastName: ln,
-      fullName: (fn + ' ' + ln).trim() || s.username || s.email || '(student)',
-    }
-  })
-
-  const [students, setStudents] = useState(initialStudents)
-  const [picked, setPicked] = useState(() => new Set(initialStudents.map(s => s._id))) // default all
-  const [alreadyDone, setAlreadyDone] = useState(new Set())
-  const [saving, setSaving] = useState(false)
-  const [loadingNames, setLoadingNames] = useState(false)
-
-  // ── Resolve real subject._id by curriculum + name (same resolver
-  // used by the schedule form). Required for the progress POST.
-  const [subjectId, setSubjectId] = useState(null)
+// Recent classes that have started (last 21 days), each with a Register
+// button. Pass `classes` (from /liveclasses/teacher/list) to reuse an
+// already-loaded list; otherwise it loads its own.
+function RecentClassRegisters({ toast, classes: given }) {
+  const [own, setOwn] = useState(null)
+  const [open, setOpen] = useState(null)
+  const controlled = given !== undefined   // null = parent still loading
   useEffect(() => {
-    let cancelled = false
-    ;(async () => {
-      try {
-        const { data } = await api.get('/subjects', { params: { curriculum: lc.curriculum } })
-        if (cancelled) return
-        const list = data?.subjects || []
-        const norm = (s) => String(s || '').trim().toLowerCase()
-        const want = norm(lc.subject)
-        let match = list.find(s => norm(s.subjectName) === want)
-        if (!match) {
-          match = list.find(s => {
-            const have = norm(s.subjectName)
-            return have && want && (have.includes(want) || want.includes(have))
-          })
-        }
-        if (match) setSubjectId(match._id)
-      } catch (e) { /* leave subjectId null; save will warn */ }
-    })()
-    return () => { cancelled = true }
-  }, [lc.curriculum, lc.subject])
-
-  // ── Fetch student names if not already populated ──
-  useEffect(() => {
-    const missingNames = students.filter(s => !s.fullName).map(s => s._id)
-    if (missingNames.length === 0) return
-    let cancelled = false
-    setLoadingNames(true)
-    ;(async () => {
-      try {
-        const { data } = await api.get('/users', { params: { ids: missingNames.join(',') } })
-        if (cancelled) return
-        const users = data?.users || data?.data?.users || []
-        const byId = new Map(users.map(u => [String(u._id), u]))
-        setStudents(prev => prev.map(s => {
-          const u = byId.get(String(s._id))
-          if (!u) return s
-          const fn = u.firstName || ''
-          const ln = u.lastName || ''
-          return {
-            ...s,
-            firstName: fn, lastName: ln,
-            fullName: (fn + ' ' + ln).trim() || u.username || u.email || '(student)',
-          }
-        }))
-      } catch (e) { /* leave names blank; UI shows id */ }
-      finally { if (!cancelled) setLoadingNames(false) }
-    })()
-    return () => { cancelled = true }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  // ── Fetch existing "done" status for each student for this subtopic ──
-  // So teacher can see who's already been marked (and avoid double-marking).
-  useEffect(() => {
-    if (!subjectId) return
-    let cancelled = false
-    ;(async () => {
-      try {
-        const checks = await Promise.all(students.map(async (s) => {
-          try {
-            const { data } = await api.get(`/syllabus-progress/student/${s._id}`, { params: { subjectId } })
-            const items = data?.data?.items || []
-            return items.some(i => i.syllabusSubtopicName === lc.syllabusSubtopicName) ? s._id : null
-          } catch { return null }
-        }))
-        if (cancelled) return
-        setAlreadyDone(new Set(checks.filter(Boolean)))
-      } catch (e) { /* silent */ }
-    })()
-    return () => { cancelled = true }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [subjectId])
-
-  const togglePick = (sid) => setPicked(prev => {
-    const next = new Set(prev)
-    if (next.has(sid)) next.delete(sid); else next.add(sid)
-    return next
-  })
-
-  const saveProgress = async () => {
-    if (!subjectId) { toast?.error?.('Could not resolve subject. Try reloading.'); return }
-    if (picked.size === 0) { toast?.error?.('Pick at least one student.'); return }
-    setSaving(true)
-    try {
-      const { data } = await api.post('/syllabus-progress/bulk', {
-        studentIds: Array.from(picked),
-        subjectId,
-        syllabusTopicName: lc.syllabusTopicName || '',
-        syllabusSubtopicName: lc.syllabusSubtopicName,
-        linkedLiveClassId: lc._id,
-      })
-      if (data?.success) {
-        toast?.ok?.(data.message || 'Progress saved.')
-        // Update alreadyDone locally so the UI reflects the new state
-        setAlreadyDone(prev => {
-          const next = new Set(prev)
-          picked.forEach(id => next.add(id))
-          return next
-        })
-        onClose()
-      } else {
-        toast?.error?.(data?.message || 'Save failed.')
-      }
-    } catch (e) {
-      toast?.error?.(e?.response?.data?.message || 'Save failed: ' + e.message)
-    } finally {
-      setSaving(false)
-    }
-  }
+    if (controlled) return
+    api.get('/liveclasses/teacher/list')
+      .then(r => { const d = r.data?.data; setOwn(Array.isArray(d) ? d : (d?.classes || [])) })
+      .catch(() => setOwn([]))
+  }, [controlled])
+  const all = controlled ? given : own
+  const now = Date.now()
+  const list = (all || [])
+    .filter(c => {
+      const t = new Date(c.scheduledAt).getTime()
+      return c.status !== 'cancelled' && (c.kind === 'lesson' || !c.kind) && t <= now && t > now - 21 * 864e5
+    })
+    .sort((a, b) => new Date(b.scheduledAt) - new Date(a.scheduledAt))
+    .slice(0, 40)
 
   return (
-    <div style={{
-      marginTop: 14, paddingTop: 14,
-      borderTop: '1.5px dashed #E8D58F',
-    }}>
-      <div style={{ fontSize: 11, fontWeight: 700, color: '#7D5A0F', letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: 8 }}>
-        Mark students who completed this lesson
-      </div>
-      <div style={{ fontSize: 12, color: '#6B6B6B', marginBottom: 10 }}>
-        Subtopic: <strong>{lc.syllabusSubtopicName}</strong>
-        {loadingNames && <span style={{ marginLeft: 8, color: '#9A7B16' }}>(loading names...)</span>}
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 12 }}>
-        {students.map(s => {
-          const done = alreadyDone.has(s._id)
-          const isPicked = picked.has(s._id)
-          return (
-            <label key={s._id} style={{
-              display: 'flex', alignItems: 'center', gap: 10,
-              padding: '6px 10px', borderRadius: 6,
-              border: '1px solid ' + (isPicked ? '#C9A030' : '#E8E2D6'),
-              background: isPicked ? '#FDF7E2' : '#fff',
-              cursor: 'pointer', fontSize: 13,
-            }}>
-              <input type="checkbox"
-                checked={isPicked}
-                onChange={() => togglePick(s._id)}
-                style={{ cursor: 'pointer' }}
-              />
-              <span style={{ flex: 1 }}>{s.fullName || s._id}</span>
-              {done && (
-                <span style={{
-                  background: '#15803D', color: '#fff',
-                  fontSize: 10, fontWeight: 700,
-                  padding: '2px 7px', borderRadius: 99,
-                  letterSpacing: '.04em',
-                }}>ALREADY DONE</span>
-              )}
-            </label>
-          )
-        })}
-        {students.length === 0 && (
-          <div style={{ fontSize: 12, color: '#9A9A9A', fontStyle: 'italic', padding: '6px 10px' }}>
-            No students assigned to this class.
+    <div style={{ background: '#fff', border: '1px solid #E5DFD3', borderRadius: 12, padding: 14 }}>
+      <b style={{ fontSize: 14, color: '#1F2937' }}>Past classes — registers</b>
+      <div style={{ fontSize: 11, color: '#6B7280', margin: '2px 0 10px' }}>Attendance is taken per lesson. Students who joined are already marked present; open a register to confirm or correct it.</div>
+      {all === null ? <div style={{ fontSize: 12, color: '#6B7280', padding: '10px 0' }}>Loading classes...</div>
+        : list.length === 0 ? <div style={{ fontSize: 12, color: '#6B7280', padding: '10px 0' }}>No classes in the last three weeks.</div>
+        : (
+          <div style={{ display: 'grid', gap: 7 }}>
+            {list.map(c => {
+              const st = c.computedStatus || c.status
+              const ended = st === 'ended' || new Date(c.scheduledAt).getTime() + (c.durationMins || 60) * 60000 < now
+              return (
+                <div key={c._id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', border: '1px solid #E5DFD3', borderRadius: 10, flexWrap: 'wrap' }}>
+                  <div style={{ minWidth: 90 }}>
+                    <div style={{ fontSize: 11.5, fontWeight: 800, color: '#1F2937' }}>{new Date(c.scheduledAt).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })}</div>
+                    <div style={{ fontSize: 11, color: '#7D1025', fontWeight: 800 }}>{new Date(c.scheduledAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</div>
+                  </div>
+                  <div style={{ flex: 1, minWidth: 140 }}>
+                    <div style={{ fontSize: 12.5, fontWeight: 700, color: '#1F2937' }}>{c.title || c.subject}</div>
+                    <div style={{ fontSize: 10.5, color: '#6B7280' }}>{(c.assignedStudents || []).length} student(s){ended ? '' : ' · in progress'}</div>
+                  </div>
+                  <button onClick={() => setOpen(c)} style={{ padding: '6px 14px', borderRadius: 7, border: 'none', background: '#7D1025', color: '#fff', fontSize: 11, fontWeight: 800, cursor: 'pointer' }}>Register</button>
+                </div>
+              )
+            })}
           </div>
         )}
-      </div>
-      <div style={{ display: 'flex', gap: 8 }}>
-        <button onClick={saveProgress}
-          disabled={saving || picked.size === 0 || !subjectId}
-          style={{
-            background: '#7D5A0F', color: '#fff', border: 'none',
-            padding: '8px 16px', borderRadius: 6,
-            fontSize: 12, fontWeight: 700,
-            cursor: (saving || picked.size === 0 || !subjectId) ? 'not-allowed' : 'pointer',
-            opacity: (saving || picked.size === 0 || !subjectId) ? 0.5 : 1,
-          }}>
-          {saving ? 'Saving...' : `Mark ${picked.size} done`}
-        </button>
-        <button onClick={onClose}
-          style={{
-            background: 'transparent', border: '1px solid #E8E2D6',
-            color: '#6B6B6B', padding: '8px 16px', borderRadius: 6,
-            fontSize: 12, fontWeight: 700, cursor: 'pointer',
-          }}>
-          Cancel
-        </button>
-      </div>
+      {open && <ClassRegisterModal lc={open} onClose={() => setOpen(null)} toast={toast} />}
     </div>
   )
 }
@@ -11459,19 +10852,6 @@ function TeacherLiveStudio({ user, onLeave, toast }) {
     ctx.lineJoin = 'round'
     ctxRef.current = ctx
     return ctx
-  }
-
-  const repaintFromSnapshot = () => {
-    const canvas = canvasRef.current
-    const ctx = ctxRef.current
-    if (!canvas || !ctx) return
-    const rect = canvas.getBoundingClientRect()
-    ctx.clearRect(0, 0, rect.width, rect.height)
-    if (canvasSnapshotRef.current) {
-      try {
-        ctx.drawImage(canvasSnapshotRef.current, 0, 0, rect.width, rect.height)
-      } catch (e) { /* snapshot may be invalid after resize, ignore */ }
-    }
   }
 
   // Build snapshot from history (used on first load + after undo/clear)
@@ -14018,13 +13398,15 @@ function EarningsTab({ user, toast }) {
   )
 }
 
+// Read-only per-lesson attendance for one student, by month. Attendance
+// is recorded per lesson (class joins + the class teacher's register);
+// day-register records from before the cutover show as history.
 function StudentAttendanceDetail({ student, onBack, toast }) {
   const today = new Date()
   const [year,    setYear]    = useState(today.getFullYear())
   const [month,   setMonth]   = useState(today.getMonth())
-  const [records, setRecords] = useState([])
+  const [data,    setData]    = useState(null)
   const [loading, setLoading] = useState(true)
-  const [marking, setMarking] = useState({}) // date -> status being saved
 
   const firstDay = new Date(year, month, 1)
   const lastDay  = new Date(year, month+1, 0)
@@ -14035,39 +13417,32 @@ function StudentAttendanceDetail({ student, onBack, toast }) {
   useEffect(() => {
     setLoading(true)
     api.get(`/attendance/student/${student._id}`,{params:{from:fromKey,to:toKey}})
-      .then(r=>setRecords(r.data?.data?.items||[]))
-      .catch(()=>{})
+      .then(r=>setData(r.data?.data||{}))
+      .catch(e=>{ setData({}); toast?.error?.(e?.response?.data?.message||'Could not load attendance.') })
       .finally(()=>setLoading(false))
   }, [student._id, fromKey, toKey])
 
-  const markAttendance = async (date, status) => {
-    const key = date
-    setMarking(p=>({...p,[key]:status}))
-    try {
-      await api.post('/attendance',{studentId:student._id,date,status})
-      toast?.ok?.(`Marked ${status} for ${new Date(date).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}`)
-      // Refresh
-      const r = await api.get(`/attendance/student/${student._id}`,{params:{from:fromKey,to:toKey}})
-      setRecords(r.data?.data?.items||[])
-    } catch(e){toast?.error?.(e?.response?.data?.message||'Failed.')}
-    finally{setMarking(p=>{const n={...p};delete n[key];return n})}
+  const lessons = data?.lessons || []
+  const legacy  = data?.legacy  || []
+  const sum     = data?.summary || {}
+  const localKey = d => { const x=new Date(d); return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}` }
+
+  // Day cell colour from that day's lessons: all attended / some / none.
+  const byDay = {}
+  lessons.forEach(l => { const k=localKey(l.scheduledAt); (byDay[k]=byDay[k]||{n:0,a:0}); byDay[k].n++; if(l.attended) byDay[k].a++ })
+  const legacyByDay = {}
+  legacy.forEach(r => { legacyByDay[new Date(r.date).toISOString().slice(0,10)] = r })
+  const LEG = {present:{bg:'#D1FAE5',fg:'#065F46',label:'P'},late:{bg:'#FEF3C7',fg:'#D97706',label:'L'},absent:{bg:'#FEE2E2',fg:'#991B1B',label:'A'},half_day:{bg:'#DBEAFE',fg:'#1E40AF',label:'H'}}
+  const cellStyle = (k) => {
+    const d = byDay[k]
+    if (d) return d.a===d.n ? {bg:'#D1FAE5',fg:'#065F46',label:`${d.a}/${d.n}`} : d.a>0 ? {bg:'#FEF3C7',fg:'#B45309',label:`${d.a}/${d.n}`} : {bg:'#FEE2E2',fg:'#991B1B',label:`0/${d.n}`}
+    const lg = legacyByDay[k]
+    return lg ? LEG[lg.status] || null : null
   }
 
-  const byDate = {}
-  records.forEach(r=>{
-    const d=new Date(r.date)
-    byDate[`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`]=r
-  })
-
-  const present = records.filter(r=>r.status==='present').length
-  const absent  = records.filter(r=>r.status==='absent').length
-  const rate    = records.length?Math.round((present/records.length)*100):null
-
-  const SS={present:{bg:'#D1FAE5',fg:'#065F46',label:'P'},late:{bg:'#FEF3C7',fg:'#D97706',label:'L'},absent:{bg:'#FEE2E2',fg:'#991B1B',label:'A'},half_day:{bg:'#DBEAFE',fg:'#1E40AF',label:'H'}}
   const calDays=[]; const pad=(firstDay.getDay()+6)%7
   for(let i=0;i<pad;i++)calDays.push(null)
   for(let d=1;d<=lastDay.getDate();d++)calDays.push(d)
-
   const prevMonth=()=>{ if(month===0){setYear(y=>y-1);setMonth(11)}else setMonth(m=>m-1) }
   const nextMonth=()=>{ if(month===11){setYear(y=>y+1);setMonth(0)}else setMonth(m=>m+1) }
 
@@ -14075,13 +13450,13 @@ function StudentAttendanceDetail({ student, onBack, toast }) {
     <div>
       <button onClick={onBack} style={{background:'transparent',border:'none',cursor:'pointer',color:'#8B1A2E',fontSize:12.5,fontWeight:700,padding:0,marginBottom:16}}>← Back to students</button>
       <div style={{background:'#fff',border:'1px solid #E8DDD5',borderRadius:12,overflow:'hidden'}}>
-        <div style={{padding:'14px 20px',borderBottom:'1px solid #E8DDD5',display:'flex',justifyContent:'space-between',alignItems:'center',background:'#FBFAF5'}}>
+        <div style={{padding:'14px 20px',borderBottom:'1px solid #E8DDD5',display:'flex',justifyContent:'space-between',alignItems:'center',background:'#FBFAF5',flexWrap:'wrap',gap:10}}>
           <div>
             <div style={{fontSize:15,fontWeight:800,color:'#231715'}}>{student.firstName} {student.lastName}</div>
             <div style={{fontSize:12,color:'#7A6652'}}>{student.curriculum} · {student.gradeLevel} · {student.admissionNo||'—'}</div>
           </div>
           <div style={{display:'flex',gap:12}}>
-            {[{label:'Present',val:present,color:'#065F46',bg:'#D1FAE5'},{label:'Absent',val:absent,color:'#991B1B',bg:'#FEE2E2'},{label:'Rate',val:rate!==null?rate+'%':'—',color:'#1A0F0E',bg:'#FBFAF5'}].map(s=>(
+            {[{label:'Lessons attended',val:sum.lessonsScheduled?`${sum.lessonsAttended} of ${sum.lessonsScheduled}`:'—',color:'#065F46',bg:'#D1FAE5'},{label:'Late',val:sum.late||0,color:'#B45309',bg:'#FEF3C7'},{label:'Rate',val:sum.rate!=null?sum.rate+'%':'—',color:'#1A0F0E',bg:'#FBFAF5'}].map(s=>(
               <div key={s.label} style={{padding:'6px 12px',borderRadius:7,background:s.bg,textAlign:'center'}}>
                 <div style={{fontSize:16,fontWeight:800,color:s.color}}>{s.val}</div>
                 <div style={{fontSize:9.5,color:s.color,fontWeight:600}}>{s.label}</div>
@@ -14091,7 +13466,6 @@ function StudentAttendanceDetail({ student, onBack, toast }) {
         </div>
 
         <div style={{padding:'16px 20px'}}>
-          {/* Month nav */}
           <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}>
             <button onClick={prevMonth} style={{background:'transparent',border:'1.5px solid #E8DDD5',borderRadius:6,padding:'4px 10px',cursor:'pointer',fontSize:13,fontWeight:700}}>‹</button>
             <span style={{fontWeight:700,fontSize:14,color:'#231715',minWidth:150,textAlign:'center'}}>{monthLabel}</span>
@@ -14107,40 +13481,39 @@ function StudentAttendanceDetail({ student, onBack, toast }) {
                 {calDays.map((d,i)=>{
                   if(!d) return <div key={'p'+i}/>
                   const key=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
-                  const rec=byDate[key]; const st=rec?SS[rec.status]:null
+                  const st=cellStyle(key)
                   const isToday=d===today.getDate()&&month===today.getMonth()&&year===today.getFullYear()
-                  const isSaving=!!marking[key]
                   return(
-                    <div key={key} style={{position:'relative'}}>
-                      <div style={{aspectRatio:'1',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',borderRadius:7,background:st?st.bg:isToday?'#FDF2F4':'#FBFAF5',border:isToday?'2px solid #C9A030':'1px solid transparent',fontSize:11.5,fontWeight:700,color:st?st.fg:isToday?'#8B1A2E':'#564844'}}>
-                        {d}
-                        {st&&<div style={{fontSize:9,fontWeight:800,color:st.fg,lineHeight:1}}>{st.label}</div>}
-                      </div>
-                      {/* Mark buttons on hover */}
-                      {!isSaving&&(
-                        <div className="att-hover" style={{position:'absolute',inset:0,display:'none',flexDirection:'column',gap:1,padding:1,zIndex:10,background:'rgba(255,255,255,.95)',borderRadius:7,border:'1px solid #E8DDD5'}}>
-                          {Object.entries(SS).map(([s,sv])=>(
-                            <button key={s} onClick={()=>markAttendance(key,s)}
-                              style={{flex:1,background:sv.bg,color:sv.fg,border:'none',borderRadius:4,cursor:'pointer',fontSize:9,fontWeight:700,padding:0}}>
-                              {sv.label}
-                            </button>
-                          ))}
-                        </div>
-                      )}
+                    <div key={key} style={{aspectRatio:'1',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',borderRadius:7,background:st?st.bg:isToday?'#FDF2F4':'#FBFAF5',border:isToday?'2px solid #C9A030':'1px solid transparent',fontSize:11.5,fontWeight:700,color:st?st.fg:isToday?'#8B1A2E':'#564844'}}>
+                      {d}
+                      {st&&<div style={{fontSize:9,fontWeight:800,color:st.fg,lineHeight:1}}>{st.label}</div>}
                     </div>
                   )
                 })}
               </div>
-              <style>{'.att-hover:hover{display:flex!important}'}</style>
-              <div style={{display:'flex',gap:12,marginTop:10,flexWrap:'wrap'}}>
-                {Object.entries(SS).map(([k,s])=>(
-                  <div key={k} style={{display:'flex',alignItems:'center',gap:5,fontSize:11,color:'#7A6652'}}>
-                    <div style={{width:10,height:10,borderRadius:2,background:s.bg,border:'1px solid '+s.fg+'40'}}/>
-                    {s.label==='P'?'Present':s.label==='L'?'Late':s.label==='A'?'Absent':'Half day'}
+              <div style={{fontSize:11,color:'#9A9A9A',marginTop:10}}>
+                Cells show lessons attended / scheduled that day. Letters (P/L/A/H) are the old day register, kept as history for dates before per-lesson attendance began.
+              </div>
+
+              <div style={{marginTop:16,display:'grid',gap:6}}>
+                {lessons.length===0&&legacy.length===0&&<div style={{fontSize:12.5,color:'#9A9A9A'}}>No lessons scheduled this month.</div>}
+                {lessons.map((l,i)=>(
+                  <div key={String(l.liveClassId)+i} style={{display:'flex',alignItems:'center',gap:10,padding:'8px 12px',border:'1px solid #E8DDD5',borderRadius:8,flexWrap:'wrap'}}>
+                    <div style={{minWidth:120,fontSize:12,fontWeight:700,color:'#231715'}}>{new Date(l.scheduledAt).toLocaleString('en-GB',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</div>
+                    <div style={{flex:1,minWidth:120,fontSize:12.5,color:'#564844'}}>{l.subject}{l.title&&l.title!==l.subject?' · '+l.title:''}</div>
+                    {l.source==='teacher'&&<span style={{fontSize:10,fontWeight:800,color:'#92400E',background:'#FEF3C7',padding:'2px 8px',borderRadius:99}}>teacher-marked</span>}
+                    <span style={{fontSize:11,fontWeight:800,padding:'3px 10px',borderRadius:99,background:!l.attended?'#FEE2E2':l.late?'#FEF3C7':'#D1FAE5',color:!l.attended?'#991B1B':l.late?'#B45309':'#065F46'}}>{!l.attended?'Missed':l.late?'Late':'Attended'}</span>
                   </div>
                 ))}
-                <div style={{fontSize:11,color:'#9A9A9A'}}>Hover a cell to mark attendance</div>
+                {legacy.length>0&&<div style={{fontSize:10.5,fontWeight:800,color:'#7A6652',textTransform:'uppercase',letterSpacing:'.06em',marginTop:6}}>Day register (history)</div>}
+                {legacy.map((r,i)=>{ const s=LEG[r.status]||LEG.absent; return (
+                  <div key={'l'+i} style={{display:'flex',alignItems:'center',gap:10,padding:'7px 12px',border:'1px dashed #E8DDD5',borderRadius:8}}>
+                    <div style={{flex:1,fontSize:12,color:'#564844'}}>{new Date(r.date).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'})}{r.reason?' · '+r.reason:''}</div>
+                    <span style={{fontSize:11,fontWeight:800,padding:'3px 10px',borderRadius:99,background:s.bg,color:s.fg}}>{r.status==='half_day'?'Half day':r.status[0].toUpperCase()+r.status.slice(1)}</span>
+                  </div>
+                )})}
               </div>
+              <div style={{fontSize:11,color:'#9A9A9A',marginTop:12}}>Read only. To correct a lesson, open its class register from your past classes.</div>
             </>
           )}
         </div>
@@ -14270,9 +13643,15 @@ function AttendanceTab({ user, toast }) {
         </div>
       </div>
 
-      {/* ── Student attendance marking ── */}
+      {/* ── Class registers: per-lesson student attendance ── */}
+      <div style={{marginBottom:24}}>
+        <h3 style={{fontFamily:"'Instrument Serif',serif",fontSize:20,color:'#231715',margin:'0 0 12px'}}>Class Registers</h3>
+        <RecentClassRegisters toast={toast}/>
+      </div>
+
+      {/* ── Student attendance (read only, per lesson) ── */}
       <div>
-        <h3 style={{fontFamily:"'Instrument Serif',serif",fontSize:20,color:'#231715',margin:'0 0 12px'}}>Mark Student Attendance</h3>
+        <h3 style={{fontFamily:"'Instrument Serif',serif",fontSize:20,color:'#231715',margin:'0 0 12px'}}>Student Attendance</h3>
         {selectedStudent ? (
           <StudentAttendanceDetail student={selectedStudent} onBack={()=>setSelectedStudent(null)} toast={toast}/>
         ) : (
@@ -14306,252 +13685,6 @@ function AttendanceTab({ user, toast }) {
           </div>
         )}
       </div>
-    </div>
-  )
-}
-
-// ─────────────────────────────────────────────────────────
-// AttendanceGrid
-// Renders the last 30 days for a given student. Each day is a
-// row with status buttons (Present / Absent / Half day) and a
-// reason field that's required when status is Absent.
-// ─────────────────────────────────────────────────────────
-function AttendanceGrid({ student, markedByUser, toast }) {
-  const [records, setRecords] = useState({})  // map: 'YYYY-MM-DD' -> Attendance doc
-  const [loading, setLoading] = useState(false)
-  const [savingKey, setSavingKey] = useState(null)
-  // Drafts: per-day in-progress edits BEFORE save
-  const [drafts, setDrafts] = useState({})    // map: 'YYYY-MM-DD' -> { status, reason }
-
-  // Generate last 30 days (most recent first)
-  const days = (() => {
-    const out = []
-    const today = new Date()
-    today.setHours(0,0,0,0)
-    for (let i = 0; i < 30; i++) {
-      const d = new Date(today)
-      d.setDate(today.getDate() - i)
-      const key = d.toISOString().slice(0, 10)
-      out.push({ key, date: d })
-    }
-    return out
-  })()
-
-  // Fetch existing records for this student
-  useEffect(() => {
-    if (!student?._id) return
-    let cancelled = false
-    setLoading(true)
-    setRecords({})
-    setDrafts({})
-    ;(async () => {
-      try {
-        // Compute 30-day range
-        const to = new Date()
-        const from = new Date()
-        from.setDate(from.getDate() - 30)
-        const fromStr = from.toISOString().slice(0,10)
-        const toStr   = to.toISOString().slice(0,10)
-        const { data } = await api.get(`/attendance/student/${student._id}`, {
-          params: { from: fromStr, to: toStr },
-        })
-        if (cancelled) return
-        const items = data?.data?.items || []
-        const byKey = {}
-        for (const r of items) {
-          const k = new Date(r.date).toISOString().slice(0,10)
-          byKey[k] = r
-        }
-        setRecords(byKey)
-      } catch (e) {
-        if (!cancelled) toast?.error?.('Failed to load attendance: ' + (e?.response?.data?.message || e.message))
-      } finally {
-        if (!cancelled) setLoading(false)
-      }
-    })()
-    return () => { cancelled = true }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [student?._id])
-
-  // Get the displayed status for a day: draft if set, else record, else null
-  const statusFor = (key) => drafts[key]?.status ?? records[key]?.status ?? null
-  const reasonFor = (key) => drafts[key]?.reason ?? records[key]?.reason ?? ''
-
-  // Has the user changed anything from the saved record?
-  const isDirty = (key) => {
-    const d = drafts[key]
-    if (!d) return false
-    const r = records[key]
-    if (!r) return true
-    return d.status !== r.status || (d.reason || '') !== (r.reason || '')
-  }
-
-  const setDraft = (key, patch) => {
-    setDrafts(prev => {
-      const cur = prev[key] || {
-        status: records[key]?.status ?? null,
-        reason: records[key]?.reason ?? '',
-      }
-      return { ...prev, [key]: { ...cur, ...patch } }
-    })
-  }
-
-  const save = async (key, date) => {
-    const draft = drafts[key]
-    if (!draft || !draft.status) return
-    if (draft.status === 'absent' && !draft.reason?.trim()) {
-      toast?.error?.('Reason is required when marking absent.')
-      return
-    }
-    setSavingKey(key)
-    try {
-      const { data } = await api.post('/attendance', {
-        studentId: student._id,
-        date: key,                  // YYYY-MM-DD, server normalises
-        status: draft.status,
-        reason: draft.reason || '',
-      })
-      if (data?.success) {
-        const saved = data.data?.attendance
-        if (saved) {
-          setRecords(prev => ({ ...prev, [key]: saved }))
-        }
-        // Drop the draft now that it's saved
-        setDrafts(prev => {
-          const next = { ...prev }
-          delete next[key]
-          return next
-        })
-        toast?.ok?.('Attendance saved.')
-      } else {
-        toast?.error?.(data?.message || 'Save failed.')
-      }
-    } catch (e) {
-      toast?.error?.(e?.response?.data?.message || 'Save failed: ' + e.message)
-    } finally {
-      setSavingKey(null)
-    }
-  }
-
-  const formatDate = (d) => {
-    const wd = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]
-    const mo = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]
-    return `${wd}, ${d.getDate()} ${mo}`
-  }
-
-  const STATUS_BTNS = [
-    { key: 'present',  label: 'Present',   bg: '#15803D', bgLight: '#DCFCE7', text: '#15803D' },
-    { key: 'half_day', label: 'Half day',  bg: '#C9A030', bgLight: '#FDF7E2', text: '#7D5A0F' },
-    { key: 'absent',   label: 'Absent',    bg: '#7D1025', bgLight: '#FDE7EC', text: '#7D1025' },
-  ]
-
-  return (
-    <div className="card" style={{ padding: 18 }}>
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline', marginBottom: 14 }}>
-        <div>
-          <div style={{ fontWeight: 700, fontSize: 16, color: '#1A1A1A' }}>{student.fullName}</div>
-          <div style={{ fontSize: 11.5, color: '#6B6B6B', marginTop: 2 }}>
-            Showing last 30 days{student.curriculum ? ' · ' + student.curriculum : ''}
-          </div>
-        </div>
-      </div>
-
-      {loading ? (
-        <div style={{ fontSize: 13, color: '#9A9A9A', fontStyle: 'italic', padding: '12px 0' }}>
-          Loading attendance...
-        </div>
-      ) : (
-        <div style={{ display:'flex', flexDirection:'column', gap: 8 }}>
-          {days.map(({ key, date }) => {
-            const status = statusFor(key)
-            const reason = reasonFor(key)
-            const dirty  = isDirty(key)
-            const rec    = records[key]
-            const needsReason = status === 'absent'
-
-            return (
-              <div key={key} style={{
-                display: 'grid',
-                gridTemplateColumns: '150px 1fr auto',
-                alignItems: 'center', gap: 12,
-                padding: '10px 12px',
-                background: dirty ? '#FDF7E2' : '#FBFAF5',
-                border: '1px solid ' + (dirty ? '#C9A030' : '#E8E2D6'),
-                borderRadius: 8,
-              }}>
-                <div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: '#1A1A1A' }}>{formatDate(date)}</div>
-                  {rec && !dirty && (
-                    <div style={{ fontSize: 10.5, color: '#6B6B6B', marginTop: 2 }}>
-                      by {rec.markedBy?.firstName || ''} {rec.markedBy?.lastName || ''}
-                    </div>
-                  )}
-                </div>
-
-                <div style={{ display:'flex', flexDirection:'column', gap: 6 }}>
-                  <div style={{ display:'flex', gap: 6, flexWrap:'wrap' }}>
-                    {STATUS_BTNS.map(btn => {
-                      const active = status === btn.key
-                      return (
-                        <button key={btn.key}
-                          onClick={() => setDraft(key, { status: btn.key })}
-                          style={{
-                            padding: '6px 12px', borderRadius: 6,
-                            background: active ? btn.bg : btn.bgLight,
-                            color: active ? '#fff' : btn.text,
-                            border: '1px solid ' + (active ? btn.bg : btn.text + '44'),
-                            fontSize: 11.5, fontWeight: 700, cursor:'pointer',
-                            opacity: savingKey === key ? 0.5 : 1,
-                          }}
-                          disabled={savingKey === key}
-                        >
-                          {btn.label}
-                        </button>
-                      )
-                    })}
-                  </div>
-                  {needsReason && (
-                    <input
-                      type="text"
-                      value={reason}
-                      placeholder="Reason (required for absent)"
-                      onChange={e => setDraft(key, { reason: e.target.value })}
-                      style={{
-                        padding: '6px 10px', borderRadius: 6,
-                        border: '1px solid ' + ((!reason || !reason.trim()) ? '#7D1025' : '#E8E2D6'),
-                        fontSize: 12, background:'#fff',
-                      }}
-                      disabled={savingKey === key}
-                    />
-                  )}
-                </div>
-
-                <div>
-                  {dirty && (
-                    <button onClick={() => save(key, date)}
-                      disabled={savingKey === key || !status || (needsReason && !reason?.trim())}
-                      style={{
-                        padding: '7px 14px', borderRadius: 6,
-                        background: '#7D1025', color: '#fff', border: 'none',
-                        fontSize: 11.5, fontWeight: 700,
-                        cursor: (savingKey === key || !status || (needsReason && !reason?.trim())) ? 'not-allowed' : 'pointer',
-                        opacity: (savingKey === key || !status || (needsReason && !reason?.trim())) ? 0.5 : 1,
-                      }}>
-                      {savingKey === key ? 'Saving...' : 'Save'}
-                    </button>
-                  )}
-                  {!dirty && rec && (
-                    <div style={{
-                      fontSize: 10, fontWeight: 700, color: '#15803D',
-                      letterSpacing: '.06em', textTransform: 'uppercase',
-                    }}>Saved</div>
-                  )}
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      )}
     </div>
   )
 }
@@ -15699,6 +14832,11 @@ function TeacherTimetableTab({ user, toast }) {
           })}
           {week.length === 0 && <div style={{ fontSize: 12, color: C.mut, padding: '14px 0' }}>No classes in the coming week. Add a weekly slot above and they will appear here.</div>}
         </div>
+      </div>
+
+      {/* ── Past classes: per-lesson registers ── */}
+      <div style={{ marginTop: 14 }}>
+        <RecentClassRegisters toast={toast} classes={loading ? null : classes} />
       </div>
 
       {/* ── Slot modal ── */}

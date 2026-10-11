@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth, api } from '../../../../context/ctx.jsx'
 import { TOKENS } from '../shared/tokens.js'
-import { initials } from '../shared/helpers.js'
 import { PSection } from '../shared/ui.jsx'
 
 function SettingsModule({ refreshKey, toast }) {

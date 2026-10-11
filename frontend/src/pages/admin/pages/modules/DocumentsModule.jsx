@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useAuth, api } from '../../../../context/ctx.jsx'
 import { TOKENS } from '../shared/tokens.js'
-import { fmtDate } from '../shared/helpers.js'
 
 function DocumentsModule({ toast }) {
   const [docType, setDocType] = useState(null)
@@ -620,7 +619,6 @@ export function buildInvoiceHTML(f, t) {
   const esc   = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
   const money = n => Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})
   const cur   = esc(f.currency||'USD')
-  const isUSD = (f.currency||'USD') !== 'KES'
   const items = (f.items||[]).filter(it=>(it.description||'').trim())
   const totalHours = items.reduce((s,it)=>{const n=parseInt(String(it.sessions||'').match(/\d+/)?.[0]||'0');return s+n},0)
 

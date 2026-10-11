@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useAuth, api } from '../../../../context/ctx.jsx'
 import { TOKENS } from '../shared/tokens.js'
-import { fmtDate } from '../shared/helpers.js'
 import { DOSSpinner, PSection } from '../shared/ui.jsx'
 
 export function DOSAnalyticsModule({ toast, refreshKey }) {
@@ -461,67 +460,35 @@ export function DOSHomeworkModule({ toast, refreshKey }) {
   )
 }
 
-const BREAK_TYPES = ['mid_term_break','end_term_break','summer_break','public_holiday','sick_leave']
-
-const BREAK_LABELS = { mid_term_break:'Mid-term break', end_term_break:'End-term break', summer_break:'Summer break', public_holiday:'Public holiday', sick_leave:'Sick leave' }
-
-/** MarkRegister: the DOS marks the day's attendance directly.
- *  Class joins auto-mark students present (source chip 'class'); the DOS
- *  fills in the rest here. Absent requires a reason, as the model demands. */
-function MarkRegister({ toast }) {
+/** LessonRegister: read-only view of one day's per-lesson registers.
+ *  Student attendance is per lesson: joining a class marks the student
+ *  present and the class teacher confirms or amends it in the class
+ *  register (Teacher portal, past classes). The old day register is
+ *  retired, so this view does not mark anything. */
+function LessonRegister({ toast }) {
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
-  const [students, setStudents] = useState([])
-  const [recs, setRecs] = useState({})          // studentId -> saved record
-  const [edits, setEdits] = useState({})        // studentId -> { status, reason }
+  const [rows, setRows] = useState([])
   const [gradeF, setGradeF] = useState('')
   const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
 
-  const load = useCallback(() => {
+  useEffect(() => {
     setLoading(true)
-    Promise.all([
-      api.get('/mastery/overview'),
-      api.get('/attendance/day', { params: { date } }),
-    ]).then(([o, d]) => {
-      setStudents((o.data?.data?.rows || []).map(r => ({ _id: r._id, name: r.name, grade: r.grade })))
-      const map = {}
-      ;(d.data?.data?.items || d.data?.items || []).forEach(rec => {
-        const sid = String(rec.studentId?._id || rec.studentId)
-        map[sid] = rec
-      })
-      setRecs(map); setEdits({})
-    }).catch(() => toast?.error?.('Could not load the register.'))
+    api.get('/dos-reports/attendance-records', { params: { from: date, to: date } })
+      .then(r => setRows(r.data?.data?.lessonRows || []))
+      .catch(e => { setRows([]); toast?.error?.(e?.response?.data?.message || 'Could not load the lesson registers.') })
       .finally(() => setLoading(false))
   }, [date])
-  useEffect(() => { load() }, [load])
 
-  const setMark = (sid, status) => setEdits(e => ({ ...e, [sid]: { status, reason: e[sid]?.reason || '' } }))
-  const stateOf = (sid) => edits[sid]?.status || recs[sid]?.status || ''
-  const changed = Object.keys(edits).filter(sid => edits[sid].status && edits[sid].status !== recs[sid]?.status)
-
-  const save = async () => {
-    const absentMissing = changed.filter(sid => edits[sid].status === 'absent' && !edits[sid].reason.trim())
-    if (absentMissing.length) return toast?.error?.('Every absent mark needs a reason.')
-    setSaving(true)
-    try {
-      for (const st of ['present', 'late', 'half_day']) {
-        const ids = changed.filter(sid => edits[sid].status === st)
-        if (ids.length) await api.post('/attendance/bulk', { studentIds: ids, date, status: st })
-      }
-      for (const sid of changed.filter(x => edits[x].status === 'absent')) {
-        await api.post('/attendance', { studentId: sid, date, status: 'absent', reason: edits[sid].reason.trim() })
-      }
-      toast?.ok?.(`Register saved: ${changed.length} student(s) marked.`)
-      load()
-    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not save the register.') }
-    finally { setSaving(false) }
-  }
-
-  const grades = [...new Set(students.map(s => s.grade).filter(Boolean))].sort()
-  const list = students.filter(s => !gradeF || s.grade === gradeF)
-  const SRC = { class: { t: 'from class', c: '#1E40AF', b: '#DBEAFE' }, self: { t: 'self', c: '#6B21A8', b: '#F3E8FF' }, staff: { t: 'marked', c: '#92400E', b: '#FEF3C7' } }
-  const BTN = { present: '#15803D', late: '#D97706', half_day: '#7C3AED', absent: '#B91C1C' }
-  const unmarked = list.filter(s => !stateOf(String(s._id))).length
+  const grades = [...new Set(rows.map(r => r.studentGrade).filter(Boolean))].sort()
+  const list = rows.filter(r => !gradeF || r.studentGrade === gradeF)
+  const byClass = {}
+  list.forEach(r => {
+    const k = r.class + '|' + r.date + '|' + r.teacher
+    byClass[k] = byClass[k] || { title: r.class, subject: r.subject, teacher: r.teacher, date: r.date, rows: [] }
+    byClass[k].rows.push(r)
+  })
+  const groups = Object.values(byClass).sort((x, y) => new Date(x.date) - new Date(y.date))
+  const attended = list.filter(r => r.present === 'present').length
 
   return (
     <div style={{ display: 'grid', gap: 14 }}>
@@ -531,48 +498,47 @@ function MarkRegister({ toast }) {
           <option value="">All grades</option>
           {grades.map(g => <option key={g} value={g}>{g}</option>)}
         </select>
-        <button onClick={() => { const upd = {}; list.forEach(s => { const sid = String(s._id); if (!stateOf(sid)) upd[sid] = { status: 'present', reason: '' } }); setEdits(e => ({ ...e, ...upd })) }}
-          style={{ padding: '8px 14px', borderRadius: 9, border: '1.5px solid #15803D', background: '#fff', color: '#15803D', fontSize: 12, fontWeight: 800, cursor: 'pointer' }}>
-          Mark unmarked present ({unmarked})
-        </button>
-        {changed.length > 0 && (
-          <button onClick={save} disabled={saving} style={{ marginLeft: 'auto', padding: '9px 18px', borderRadius: 9, border: 'none', background: TOKENS.crimson, color: '#fff', fontSize: 12.5, fontWeight: 800, cursor: 'pointer', opacity: saving ? .6 : 1 }}>
-            {saving ? 'Saving...' : `Save register (${changed.length})`}
-          </button>
+        {!loading && list.length > 0 && (
+          <span style={{ marginLeft: 'auto', fontSize: 12.5, fontWeight: 800, color: TOKENS.s800 }}>
+            {attended} of {list.length} student-lessons attended ({Math.round(attended / list.length * 100)}%)
+          </span>
         )}
       </div>
 
-      {loading ? <div style={{ padding: 30, textAlign: 'center', color: TOKENS.s500, fontSize: 13 }}>Loading register...</div> : (
-        <div style={{ background: '#fff', border: '1px solid ' + TOKENS.line, borderRadius: 12, overflow: 'hidden' }}>
-          {list.map(st => {
-            const sid = String(st._id)
-            const cur = stateOf(sid)
-            const rec = recs[sid]
-            const src = rec && !edits[sid] ? SRC[rec.source] || SRC.staff : null
+      {loading ? <div style={{ padding: 30, textAlign: 'center', color: TOKENS.s500, fontSize: 13 }}>Loading lesson registers...</div> : (
+        groups.length === 0
+          ? <div style={{ background: '#fff', border: '1px solid ' + TOKENS.line, borderRadius: 12, padding: 24, textAlign: 'center', color: TOKENS.s500, fontSize: 13 }}>No lessons were held on this day.</div>
+          : groups.map(g => {
+            const n = g.rows.filter(r => r.present === 'present').length
             return (
-              <div key={sid} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 14px', borderBottom: '1px solid ' + TOKENS.line, flexWrap: 'wrap' }}>
-                <div style={{ flex: 1, minWidth: 160 }}>
-                  <b style={{ fontSize: 13, color: TOKENS.s900 }}>{st.name}</b>
-                  <span style={{ fontSize: 11.5, color: TOKENS.s400 }}> {st.grade}</span>
-                  {src && <span style={{ marginLeft: 8, padding: '2px 8px', borderRadius: 999, background: src.b, color: src.c, fontSize: 10, fontWeight: 800 }}>{src.t}</span>}
+              <div key={g.title + g.date + g.teacher} style={{ background: '#fff', border: '1px solid ' + TOKENS.line, borderRadius: 12, overflow: 'hidden' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: TOKENS.cream, flexWrap: 'wrap' }}>
+                  <b style={{ fontSize: 13, color: TOKENS.s900 }}>{g.title}</b>
+                  <span style={{ fontSize: 11.5, color: TOKENS.s500 }}>
+                    {new Date(g.date).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}{g.teacher ? ' \u00b7 ' + g.teacher : ''}
+                  </span>
+                  <span style={{ marginLeft: 'auto', fontSize: 12, fontWeight: 800, color: n === g.rows.length ? '#15803D' : '#B45309' }}>{n} of {g.rows.length} attended</span>
                 </div>
-                {['present', 'late', 'half_day', 'absent'].map(k => (
-                  <button key={k} onClick={() => setMark(sid, k)}
-                    style={{ padding: '5px 11px', borderRadius: 999, fontSize: 11, fontWeight: 800, cursor: 'pointer', border: '1.5px solid ' + (cur === k ? BTN[k] : TOKENS.line), background: cur === k ? BTN[k] : '#fff', color: cur === k ? '#fff' : TOKENS.s500 }}>
-                    {k === 'half_day' ? 'Half day' : k[0].toUpperCase() + k.slice(1)}
-                  </button>
+                {g.rows.map((r, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 14px', borderTop: '1px solid ' + TOKENS.line, flexWrap: 'wrap' }}>
+                    <div style={{ flex: 1, minWidth: 160, fontSize: 12.5 }}>
+                      <b style={{ color: TOKENS.s900 }}>{r.student}</b>
+                      <span style={{ color: TOKENS.s400 }}> {r.studentGrade}</span>
+                    </div>
+                    {r.source === 'teacher' && <span style={{ padding: '2px 8px', borderRadius: 999, background: '#FEF3C7', color: '#92400E', fontSize: 10, fontWeight: 800 }}>teacher-marked</span>}
+                    {r.joined === 'yes' && <span style={{ padding: '2px 8px', borderRadius: 999, background: '#DBEAFE', color: '#1E40AF', fontSize: 10, fontWeight: 800 }}>joined</span>}
+                    <span style={{ padding: '3px 10px', borderRadius: 999, fontSize: 11, fontWeight: 800, background: r.present === 'present' ? '#D1FAE5' : '#FEE2E2', color: r.present === 'present' ? '#065F46' : '#991B1B' }}>
+                      {r.present === 'present' ? 'Attended' : 'Missed'}
+                    </span>
+                  </div>
                 ))}
-                {cur === 'absent' && edits[sid] && (
-                  <input value={edits[sid].reason} onChange={e => setEdits(ed => ({ ...ed, [sid]: { ...ed[sid], reason: e.target.value } }))}
-                    placeholder="Reason (required)" style={{ padding: '6px 10px', border: '1.5px solid #FCA5A5', borderRadius: 8, fontSize: 12, minWidth: 170 }} />
-                )}
               </div>
             )
-          })}
-          {list.length === 0 && <div style={{ padding: 24, textAlign: 'center', color: TOKENS.s500, fontSize: 13 }}>No students found.</div>}
-        </div>
+          })
       )}
-      <div style={{ fontSize: 11.5, color: TOKENS.s500 }}>Joining a live class marks a student present automatically (chip: from class). The register fills the gaps; self check-in remains as a fallback.</div>
+      <div style={{ fontSize: 11.5, color: TOKENS.s500 }}>
+        Read only. Student attendance is recorded per lesson: joining the class marks a student present, and the class teacher confirms or amends it in the class register (Teacher portal → past classes → Register). The old daily register is retired; its records remain as history.
+      </div>
     </div>
   )
 }
@@ -798,14 +764,14 @@ export function DOSAttendanceModule({ toast, refreshKey }) {
           </div>
         )}
       </div>
-      {/* View toggle: check-in analytics vs marking the register */}
+      {/* View toggle: check-in analytics vs the (read-only) lesson registers */}
       <div style={{ display:'flex', gap:6, background:TOKENS.cream, padding:5, borderRadius:10, width:'fit-content', marginBottom:16 }}>
-        {[['checkins','Check-ins'],['register','Mark register']].map(([id,label]) => (
+        {[['checkins','Check-ins'],['register','Lesson registers']].map(([id,label]) => (
           <button key={id} onClick={() => setView(id)} style={{ padding:'7px 16px', borderRadius:8, border:'none', cursor:'pointer', fontSize:12.5, fontWeight:800, background:view===id?TOKENS.crimson:'transparent', color:view===id?'#fff':TOKENS.s500 }}>{label}</button>
         ))}
       </div>
 
-      {view === 'register' ? <MarkRegister toast={toast} /> : (
+      {view === 'register' ? <LessonRegister toast={toast} /> : (
       <>
 
       {/* Controls */}
@@ -933,19 +899,6 @@ export function DOSAttendanceModule({ toast, refreshKey }) {
   )
 }
 
-const SCHOOL_SLOTS = [
-  { time:'09:00-10:00', label:'09:00 – 10:00' },
-  { time:'10:00-11:00', label:'10:00 – 11:00' },
-  { time:'11:00-12:00', label:'11:00 – 12:00' },
-  { time:'12:00-13:00', label:'12:00 – 13:00' },
-  { time:'13:00-14:00', label:'LUNCH BREAK',    isBreak:true },
-  { time:'14:00-15:00', label:'14:00 – 15:00' },
-]
-
-const SCHOOL_DAYS = ['Mon','Tue','Wed','Thu','Fri']
-
-const DAY_TYPES   = { Mon:'Lessons', Tue:'Lessons', Wed:'Lessons', Thu:'Lessons', Fri:'Assessment / Activities' }
-
 export function DOSTimetableModule({ toast, refreshKey }) {
   // The school's master scheduling console. Under the one-system rule the
   // timetable IS the school: every slot here materializes real classes
@@ -1044,10 +997,6 @@ export function DOSTimetableModule({ toast, refreshKey }) {
   }
   const printSelected = () => {
     if (!sel) return
-    const cols = sel.kind === 'teacher'
-      ? (e) => [e.dayOfWeek, e.startTime + '-' + e.endTime, e.title || e.subject, e.subject, e.grade, Array.isArray(e.assignedStudents) ? e.assignedStudents.length : '']
-      : (e) => [e.dayOfWeek, e.startTime + '-' + e.endTime, e.subject, e.title || '', e.teacherId ? [e.teacherId.firstName, e.teacherId.lastName].filter(Boolean).join(' ') : '']
-    const heads = sel.kind === 'teacher' ? ['Day', 'Time', 'Class', 'Subject', 'Grade', 'Students'] : ['Day', 'Time', 'Subject', 'Class', 'Teacher']
     const tf = (e) => sel.kind === 'teacher'
       ? (Array.isArray(e.assignedStudents) ? e.assignedStudents.length + ' student(s)' : '')
       : (e.teacherId ? [e.teacherId.firstName, e.teacherId.lastName].filter(Boolean).join(' ') : '')

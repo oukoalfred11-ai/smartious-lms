@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import { api } from '../../../../context/ctx.jsx'
-import Modal from '../../../../components/ui/Modal.jsx'
 import { TOKENS } from '../shared/tokens.js'
 import { PCard } from '../shared/ui.jsx'
 
@@ -21,8 +20,6 @@ function QuestionBankModule({ toast }) {
   const [diagBusy,  setDiagBusy]  = useState(false)
   const [importTxt, setImportTxt] = useState('')
   const [importing, setImporting] = useState(false)
-  const [cov,       setCov]       = useState(null)
-  const [covSubj,   setCovSubj]   = useState({ subject:'Biology', curriculum:'EdexcelIGCSE' })
   const [filter,    setFilter]    = useState({ subject:'', curriculum:'', difficulty:'', search:'' })
 
   const SUBJECTS   = ['Mathematics','Physics','Chemistry','Biology','Business Studies','Computer Science','Economics','History','Geography','English Language','English Literature']
@@ -55,13 +52,6 @@ function QuestionBankModule({ toast }) {
       load(1)
     } catch(e) { toast?.error?.(e?.response?.data?.message||'Seed failed.') }
     setSeeding(false)
-  }
-
-  const loadCoverage = async () => {
-    try {
-      const r = await api.get('/questions/coverage', { params: covSubj })
-      setCov(r.data?.data||null)
-    } catch(e) { toast?.error?.('Could not load coverage.') }
   }
 
   const loadArtQueue = async () => {

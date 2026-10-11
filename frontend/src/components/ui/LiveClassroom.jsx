@@ -23,7 +23,7 @@
  */
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { io } from 'socket.io-client'
-import { api } from '../../context/ctx.jsx'
+import { api, useToast } from '../../context/ctx.jsx'
 import { MeshEngine } from '../../classroom/rtc.js'
 import { SfuEngine } from '../../classroom/sfu.js'
 
@@ -544,6 +544,7 @@ function Tile({ stream, name, role, self, micOn, camOn, hand, quality, small, bi
 }
 
 export default function LiveClassroom({ liveClassId, user, onLeave }) {
+  const toast = useToast()
   // ── connection state ──
   const [phase, setPhase] = useState('lobby')   // lobby | connecting | live | error
   const [joinNonce, setJoinNonce] = useState(0)  // bumped by the lobby Join click
