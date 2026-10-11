@@ -10,7 +10,8 @@ import { DashboardModule, AnalyticsModule } from './modules/HomeModules.jsx'
 import UsersModule, { UserFormFields } from './modules/UsersModule.jsx'
 import TeachersModule from './modules/TeachersModule.jsx'
 import DocumentsModule from './modules/DocumentsModule.jsx'
-import { QAOverviewModule, TeacherProfilesModule, TDPModule, AccreditationsModule } from './modules/QAModules.jsx'
+import { QAOverviewModule, TeamProfilesModule, TDPModule, AccreditationsModule } from './modules/QAModules.jsx'
+import StaffFile from '../../../components/StaffFile.jsx'
 import FrontDeskModule from './modules/FrontDeskModule.jsx'
 import AssessmentModule from './modules/AssessmentModule.jsx'
 import CRMModule, { SalesPerformanceModule } from './modules/CRMModule.jsx'
@@ -79,12 +80,14 @@ const NAV_SECTIONS = {
     { label: 'Quality',     items: ['qaoverview', 'teacherprofiles', 'tdp', 'accreditations'] },
     { label: 'Marketing',   items: ['studio'] },
     { label: 'System',      items: ['userlogs', 'billing', 'website', 'settings', 'ai', 'suggestions'] },
+    { label: 'Me',          items: ['mystafffile'] },
   ],
   accountant: [
     { label: 'Overview',    items: ['checkin', 'dashboard', 'analytics'] },
     { label: 'Fee Management', items: ['feecollection', 'billing', 'sessions'] },
     { label: 'Finance',     items: ['payroll', 'inventory'] },
     { label: 'System',      items: ['settings'] },
+    { label: 'Me',          items: ['mystafffile'] },
   ],
   dos: [
     { label: 'Overview',      items: ['command', 'checkin', 'dosanalytics'] },
@@ -98,6 +101,7 @@ const NAV_SECTIONS = {
     { label: 'Question Bank', items: ['questionbank'] },
     { label: 'Reports',       items: ['reports', 'dosperformance', 'mastery'] },
     { label: 'System',        items: ['settings'] },
+    { label: 'Me',          items: ['mystafffile'] },
   ],
   sales: [
     { label: 'Overview',    items: ['checkin', 'dashboard', 'salesperf'] },
@@ -106,12 +110,14 @@ const NAV_SECTIONS = {
     { label: 'Admissions',  items: ['assessment', 'frontdesk', 'communication'] },
     { label: 'Content',     items: ['documents'] },
     { label: 'System',      items: ['settings'] },
+    { label: 'Me',          items: ['mystafffile'] },
   ],
   qa: [
     { label: 'Overview',  items: ['dashboard'] },
     { label: 'Our School', items: ['teacherprofiles', 'tdp', 'accreditations'] },
     { label: 'Academics', items: ['curriculum', 'questionbank', 'exams'] },
     { label: 'Quality & Reports', items: ['reports', 'dosperformance', 'mastery', 'dosattend'] },
+    { label: 'Me',          items: ['mystafffile'] },
   ],
   ops_manager: [
     { label: 'Overview',    items: ['command', 'checkin', 'dashboard', 'analytics'] },
@@ -125,6 +131,7 @@ const NAV_SECTIONS = {
     // academic assessments (schedule, mark, publish) live under Teaching.
     { label: 'Teaching',    items: ['liveclasses', 'clubs', 'exams'] },
     { label: 'System',      items: ['userlogs', 'settings', 'ai'] },
+    { label: 'Me',          items: ['mystafffile'] },
   ],
 }
 
@@ -222,13 +229,13 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
               <div style={{ fontSize: 12, fontWeight: 600, color: TOKENS.s900 }}>{adminFirst}</div>
               <div style={{ fontSize: 10, color: TOKENS.s500, letterSpacing: '.06em', textTransform: 'uppercase' }}>
                 {{
-                  admin:       'Administrator',
+                  admin:       'Principal',
                   dos:         'Dean of Studies',
                   accountant:  'Accountant',
                   sales:       'Sales & Front Desk',
                   ops_manager: 'Operations Manager',
                   qa:          'Quality Assurance',
-                }[role] || 'Administrator'}
+                }[role] || 'Principal'}
               </div>
             </div>
             <NotificationsBell onNavigate={(mod) => { const map = { support: 'support', userlogs: 'userlogs' }; if (map[mod]) setPage(map[mod]) }} />
@@ -436,7 +443,8 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         {safePage === 'announcements' && <AnnouncementsModule toast={toast} />}
         {safePage === 'frontdesk' && <FrontDeskModule refreshKey={refreshKey} toast={toast} />}
         {safePage === 'documents' && <DocumentsModule toast={toast} />}
-        {safePage === 'teacherprofiles' && <TeacherProfilesModule toast={toast} />}
+        {safePage === 'teacherprofiles' && <TeamProfilesModule toast={toast} />}
+        {safePage === 'mystafffile' && <StaffFile toast={toast} showTeaching={false} />}
         {safePage === 'tdp' && <TDPModule toast={toast} />}
         {safePage === 'accreditations' && <AccreditationsModule toast={toast} />}
         {safePage === 'assessment' && <AssessmentModule refreshKey={refreshKey} toast={toast} />}

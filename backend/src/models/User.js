@@ -109,6 +109,9 @@ const userSchema = new mongoose.Schema({
   // permission level). e.g. "Senior Mathematics Teacher", "Head of Sciences",
   // "Lead Tutor". Free-text but admin picks from suggested presets in the UI.
   jobTitle: { type: String, trim: true, default: '' },
+  // Teachers only: 'teacher' (qualified), 'trainee' (in training) or
+  // 'support' (lesson preparation and resources). See constants/qa.js.
+  teacherCategory: { type: String, enum: ['teacher', 'trainee', 'support'], default: 'teacher' },
 
   // ── ADMIN → TEACHER EMAIL HISTORY ──
   // A record of branded emails an admin has sent this teacher from the

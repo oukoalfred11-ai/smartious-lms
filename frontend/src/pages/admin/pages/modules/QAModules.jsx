@@ -4,7 +4,9 @@
  *   QAOverviewModule      — the QA dashboard: staff-file completeness,
  *     expiring documents, training reach, accreditation health and a
  *     printable evidence pack for accreditation visits.
- *   TeacherProfilesModule — every teacher's profile, personnel file
+ *   TeamProfilesModule    — every staff member's profile (the Principal,
+ *                           leadership, operations and every kind of
+ *                           teacher), personnel file
  *     (required documents with expiry and QA verification), teaching
  *     documents and professional development, one click deep.
  *   TDPModule             — Teacher Development Programme: trainings
@@ -198,10 +200,10 @@ export async function printEvidencePack(toast) {
   w.document.write('<p style="font-family:sans-serif;padding:24px">Preparing the evidence pack...</p>')
   try {
     const [s, t, tr, ac] = await Promise.all([
-      api.get('/qa/summary'), api.get('/qa/teachers'), api.get('/qa/trainings'), api.get('/qa/accreditations'),
+      api.get('/qa/summary'), api.get('/qa/team'), api.get('/qa/trainings'), api.get('/qa/accreditations'),
     ])
     const sum = s.data?.data || {}
-    const teachers = t.data?.data?.teachers || []
+    const teachers = t.data?.data?.team || t.data?.data?.teachers || []
     const meta = t.data?.data?.categoryMeta || []
     const required = t.data?.data?.required || []
     const trainings = tr.data?.data?.trainings || []
@@ -223,8 +225,8 @@ export async function printEvidencePack(toast) {
 <h1>Quality Assurance Evidence Pack</h1>
 <div class="sub">Smartious Homeschool Global · generated ${esc(fmtD(new Date()))}</div>
 <div class="kpis">
-  <div class="kpi"><b>${esc(sum.teachers?.complete ?? 0)} / ${esc(sum.teachers?.total ?? 0)}</b>complete staff files</div>
-  <div class="kpi"><b>${esc(sum.teachers?.avgCompleteness ?? 0)}%</b>average file completeness</div>
+  <div class="kpi"><b>${esc(sum.team?.complete ?? 0)} / ${esc(sum.team?.total ?? 0)}</b>complete staff files</div>
+  <div class="kpi"><b>${esc(sum.team?.avgCompleteness ?? 0)}%</b>average file completeness</div>
   <div class="kpi"><b>${esc(trainings.length)}</b>trainings on record</div>
   <div class="kpi"><b>${esc(totalHours)}</b>training hours</div>
   <div class="kpi"><b>${esc(sum.training?.coveragePct ?? 0)}%</b>teachers trained this year</div>
@@ -237,8 +239,8 @@ ${accs.map(a => `<tr><td>${esc(a.name)}</td><td>${esc(a.type)}</td><td>${esc(a.b
 </table>
 
 <h2>2. Staff file register</h2>
-<table><tr><th>Teacher</th><th>Role</th><th>Experience</th>${required.map(k => `<th>${esc(label[k] || k)}</th>`).join('')}<th>Complete</th><th>Training hrs</th></tr>
-${teachers.map(x => `<tr><td>${esc(fullName(x))}</td><td>${esc(x.jobTitle || 'Teacher')}</td><td>${esc(x.yearsOfExperience ? x.yearsOfExperience + ' yrs' : '')}</td>${required.map(k => (x.file?.missing || []).includes(k) ? '<td class="bad">✕</td>' : '<td class="ok">✓</td>').join('')}<td>${esc(x.file?.pct ?? 0)}%</td><td>${esc(x.training?.hours ?? 0)}</td></tr>`).join('') || '<tr><td>No teachers.</td></tr>'}
+<table><tr><th>Name</th><th>Role</th><th>Experience</th>${required.map(k => `<th>${esc(label[k] || k)}</th>`).join('')}<th>Complete</th><th>Training hrs</th></tr>
+${teachers.map(x => `<tr><td>${esc(fullName(x))}</td><td>${esc(x.teamTitle || x.jobTitle || 'Teacher')}</td><td>${esc(x.yearsOfExperience ? x.yearsOfExperience + ' yrs' : '')}</td>${required.map(k => !(x.file?.requiredKeys || required).includes(k) ? '<td>n/a</td>' : (x.file?.missing || []).includes(k) ? '<td class="bad">✕</td>' : '<td class="ok">✓</td>').join('')}<td>${esc(x.file?.have ?? 0)}/${esc(x.file?.required ?? required.length)}</td><td>${esc(x.training?.hours || 0)}</td></tr>`).join('')}
 </table>
 
 <h2>3. Teacher Development Programme</h2>
@@ -257,8 +259,9 @@ ${trainings.map(x => `<tr><td>${esc(fmtD(x.trainingDate))}</td><td>${esc(x.title
 function printTeacherProfile(p) {
   const w = window.open('', '_blank')
   if (!w) return
-  const t = p.teacher
-  const meta = p.categoryMeta || []
+  const t = p.member || p.teacher
+  const req = new Set(p.required || p.file.requiredKeys || [])
+  const meta = (p.categoryMeta || []).map(c => ({ ...c, required: req.size ? req.has(c.key) : c.required }))
   const byCat = {}
   for (const d of p.documents) (byCat[d.category] = byCat[d.category] || []).push(d)
   const rows = meta.filter(c => c.group === 'personnel').map(c => {
@@ -268,13 +271,13 @@ function printTeacherProfile(p) {
     const detail = docs.map(d => esc(d.title) + (d.expiresAt ? ' (expires ' + esc(fmtD(d.expiresAt)) + ')' : '') + (d.verifiedAt ? ' ✓ verified ' + esc(fmtD(d.verifiedAt)) : '')).join('<br>')
     return `<tr><td>${esc(c.label)}${c.required ? ' *' : ''}</td><td>${status}</td><td>${detail}</td></tr>`
   }).join('')
-  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(fullName(t))} — Teacher profile</title>
+  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(fullName(t))} — Team profile</title>
 <style>body{font-family:Georgia,serif;color:#1A0F0E;margin:32px;font-size:12px}h1{color:#7D1025;margin:0;font-size:24px}
 h2{font-size:15px;color:#7D1025;border-bottom:2px solid #C9A030;padding-bottom:3px;margin:22px 0 8px}
 table{width:100%;border-collapse:collapse;font-family:sans-serif;font-size:11px}th,td{border:1px solid #E0D6CC;padding:5px 6px;text-align:left;vertical-align:top}th{background:#FBF6E3}
 .ok{color:#15803D;font-weight:700}.bad{color:#B91C1C;font-weight:700}.sub{font-family:sans-serif;color:#6B6B6B}</style></head><body>
 <h1>${esc(fullName(t))}</h1>
-<div class="sub">${esc(t.jobTitle || 'Teacher')}${t.yearsOfExperience ? ' · ' + esc(t.yearsOfExperience) + ' years experience' : ''} · ${esc([t.email, t.phone].filter(Boolean).join(' · '))}</div>
+<div class="sub">${esc(t.teamTitle || t.jobTitle || 'Teacher')}${t.jobTitle && t.jobTitle !== t.teamTitle ? ' · ' + esc(t.jobTitle) : ''}${t.yearsOfExperience ? ' · ' + esc(t.yearsOfExperience) + ' years experience' : ''} · ${esc([t.email, t.phone].filter(Boolean).join(' · '))}</div>
 ${t.bio ? `<p>${esc(t.bio)}</p>` : ''}
 ${(t.qualifications || []).length ? `<h2>Qualifications</h2>${t.qualifications.map(q => `<div>${esc(q)}</div>`).join('')}` : ''}
 ${(t.certifications || []).length ? `<h2>Certifications</h2>${t.certifications.map(q => `<div>${esc(q)}</div>`).join('')}` : ''}
@@ -303,7 +306,7 @@ export function QAOverviewModule({ toast, setPage }) {
   }, [])
 
   const go = (p) => setPage && setPage(p)
-  const t = s?.teachers, d = s?.documents, tr = s?.training, ac = s?.accreditations
+  const t = s?.team || s?.teachers, d = s?.documents, tr = s?.training, ac = s?.accreditations
 
   return (
     <>
@@ -317,7 +320,7 @@ export function QAOverviewModule({ toast, setPage }) {
           <Stat label="Complete staff files" value={`${t.complete}/${t.total}`} sub={`${t.avgCompleteness}% average completeness`} color={pctColor(t.avgCompleteness)} />
           <Stat label="Documents verified" value={`${d.verified}/${d.total}`} sub={d.expiringCount ? `${d.expiringCount} expired or expiring` : 'none expiring'} color={d.expiringCount ? WARN : TOKENS.s900} />
           <Stat label="Trainings this year" value={tr.thisYear} sub={`${tr.hoursThisYear} hours · ${tr.total} on record`} />
-          <Stat label="Teachers trained" value={`${tr.coveragePct}%`} sub={`${tr.teachersReachedThisYear} of ${t.total} this year`} color={pctColor(tr.coveragePct)} />
+          <Stat label="Teachers trained" value={`${tr.coveragePct}%`} sub={`${tr.teachersReachedThisYear} of ${t.teachers ?? t.total} this year`} color={pctColor(tr.coveragePct)} />
           <Stat label="Accreditations" value={`${ac.valid + ac.permanent}/${ac.total}`} sub={ac.expired ? `${ac.expired} expired` : ac.expiring ? `${ac.expiring} expiring soon` : 'all in date'} color={ac.expired ? BAD : ac.expiring ? WARN : OK} />
         </div>
 
@@ -325,14 +328,14 @@ export function QAOverviewModule({ toast, setPage }) {
           <PCard padding={18}>
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
               <h3 style={{ ...h3, margin: 0, flex: 1 }}>Staff files needing attention</h3>
-              <button style={btnS} onClick={() => go('teacherprofiles')}>All teachers</button>
+              <button style={btnS} onClick={() => go('teacherprofiles')}>Team profiles</button>
             </div>
-            {t.attention.length === 0 ? <div style={{ fontSize: 13, color: OK, fontWeight: 700 }}>Every teacher's file is complete.</div> :
+            {t.attention.length === 0 ? <div style={{ fontSize: 13, color: OK, fontWeight: 700 }}>Every staff file is complete.</div> :
               t.attention.map(x => (
                 <div key={x._id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 0', borderTop: '1px solid ' + TOKENS.s100 }}>
                   <Avatar user={{ avatar: x.avatar, firstName: x.name }} size={30} radius={8} />
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 12.5, fontWeight: 700, color: TOKENS.s900, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{x.name}</div>
+                    <div style={{ fontSize: 12.5, fontWeight: 700, color: TOKENS.s900, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{x.name}{x.title ? <span style={{ fontWeight: 500, color: TOKENS.s500 }}> · {x.title}</span> : null}</div>
                     <div style={{ height: 5, background: TOKENS.s100, borderRadius: 9, marginTop: 4 }}>
                       <div style={{ width: x.pct + '%', height: '100%', background: pctColor(x.pct), borderRadius: 9 }} />
                     </div>
@@ -414,77 +417,117 @@ export function QAOverviewModule({ toast, setPage }) {
 // ═══════════════════════════════════════════════════════════
 // 1. TEACHER PROFILES
 // ═══════════════════════════════════════════════════════════
-export function TeacherProfilesModule({ toast }) {
+const TEACHER_CATS = [
+  { key: 'teacher', label: 'Teacher', short: 'Teachers' },
+  { key: 'trainee', label: 'Teacher in training', short: 'In training' },
+  { key: 'support', label: 'Support teacher', short: 'Support teachers' },
+]
+const CAT_STYLE = {
+  teacher: [TOKENS.goldPale, '#92400E'],
+  trainee: ['#E0F2FE', '#0369A1'],
+  support: ['#EDE9FE', '#5B21B6'],
+}
+const titleOf = (u) => u.teamTitle || (u.role === 'teacher' ? 'Teacher' : u.role === 'admin' ? 'Principal' : 'Staff')
+const TitleChip = ({ u }) => {
+  if (u.role === 'admin') return <span style={{ ...chip('linear-gradient(135deg,#7D1025,#5A0B1B)', '#F0CC5A'), border: '1px solid #C9A030' }}>★ Principal</span>
+  if (u.role === 'teacher') { const [bg, fg] = CAT_STYLE[u.teacherCategory || 'teacher']; return <span style={chip(bg, fg)}>{titleOf(u)}</span> }
+  return <span style={chip(TOKENS.s50, TOKENS.s700)}>{titleOf(u)}</span>
+}
+
+export function TeamProfilesModule({ toast }) {
   const [rows, setRows] = useState([])
-  const [meta, setMeta] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
+  const [group, setGroup] = useState('all')     // all | leadership | teaching | teacher | trainee | support | operations
   const [show, setShow] = useState('all')       // all | incomplete | complete | attention
-  const [sort, setSort] = useState('name')      // name | file | training
+  const [sort, setSort] = useState('team')      // team | name | file | training
   const [selId, setSelId] = useState(null)
 
   const load = useCallback(() => {
     setLoading(true)
-    api.get('/qa/teachers')
-      .then(r => { setRows(r.data?.data?.teachers || []); setMeta(r.data?.data?.categoryMeta || []) })
-      .catch(e => toast?.error?.(errMsg(e, 'Could not load teachers.')))
+    api.get('/qa/team')
+      .then(r => setRows(r.data?.data?.team || r.data?.data?.teachers || []))
+      .catch(e => toast?.error?.(errMsg(e, 'Could not load the team.')))
       .finally(() => setLoading(false))
   }, [toast])
   useEffect(() => { load() }, [load])
 
+  const inGroup = (t) => group === 'all' ? true
+    : ['teacher', 'trainee', 'support'].includes(group) ? t.role === 'teacher' && (t.teacherCategory || 'teacher') === group
+      : t.group === group
+
   const list = useMemo(() => {
     const q = search.trim().toLowerCase()
-    let out = rows.filter(t => !q || (fullName(t) + ' ' + (t.jobTitle || '') + ' ' + (t.subjects || []).join(' ')).toLowerCase().includes(q))
+    let out = rows.filter(t => inGroup(t) && (!q || (fullName(t) + ' ' + titleOf(t) + ' ' + (t.jobTitle || '') + ' ' + (t.subjects || []).join(' ')).toLowerCase().includes(q)))
     if (show === 'incomplete') out = out.filter(t => t.file.have < t.file.required)
     if (show === 'complete') out = out.filter(t => t.file.have === t.file.required)
     if (show === 'attention') out = out.filter(t => t.file.expired.length || t.file.expiring.length)
+    if (sort === 'team') return out   // server order: Principal, leadership, teaching, operations
     const by = { name: (a, b) => fullName(a).localeCompare(fullName(b)), file: (a, b) => a.file.pct - b.file.pct, training: (a, b) => b.training.hours - a.training.hours }
     return [...out].sort(by[sort])
-  }, [rows, search, show, sort])
+  }, [rows, search, group, show, sort])   // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (selId) return <TeacherProfile id={selId} toast={toast} onBack={() => { setSelId(null); load() }} />
+  if (selId) return <MemberProfile id={selId} toast={toast} onBack={() => { setSelId(null); load() }} />
 
+  const teachers = rows.filter(t => t.role === 'teacher')
+  const count = (k) => teachers.filter(t => (t.teacherCategory || 'teacher') === k).length
   const complete = rows.filter(t => t.file.have === t.file.required).length
   const avg = rows.length ? Math.round(rows.reduce((s, t) => s + t.file.pct, 0) / rows.length) : 0
   const hours = rows.reduce((s, t) => s + (t.training.hours || 0), 0)
-  const verified = rows.reduce((s, t) => s + (t.file.verified || 0), 0)
+  const groups = [
+    ['all', 'Everyone', rows.length],
+    ['leadership', 'Leadership', rows.filter(t => t.group === 'leadership').length],
+    ['teaching', 'All teaching staff', teachers.length],
+    ...TEACHER_CATS.map(c => [c.key, c.short, count(c.key)]),
+    ['operations', 'Operations', rows.filter(t => t.group === 'operations').length],
+  ]
 
   return (
     <>
-      <PSection tag="QA Portal" title="Teacher" em="Profiles"
-        sub={`Every teacher's profile, personnel file and professional development. Required files: ${meta.filter(c => c.required).length || 8} documents each.`} />
+      <PSection tag="QA Portal" title="Team" em="Profiles"
+        sub="Everyone at Smartious: the Principal, leadership, operations and every teacher. Each profile holds the staff file their role requires and their professional development." />
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 16 }}>
-        <Stat label="Teachers" value={rows.length} />
+        <Stat label="Team members" value={rows.length} sub={`${teachers.length} teaching · ${rows.length - teachers.length} leadership & operations`} />
+        <Stat label="Teachers" value={count('teacher')} sub={`${count('trainee')} in training · ${count('support')} support`} />
         <Stat label="Complete files" value={`${complete}/${rows.length}`} color={pctColor(rows.length ? (complete / rows.length) * 100 : 0)} />
         <Stat label="Average completeness" value={avg + '%'} color={pctColor(avg)} />
-        <Stat label="Documents verified" value={verified} />
-        <Stat label="Training hours" value={hours} sub="all teachers, all time" />
+        <Stat label="Training hours" value={hours} sub="whole team, all time" />
+      </div>
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
+        {groups.map(([k, l, n]) => (
+          <button key={k} onClick={() => setGroup(k)} style={{ ...btnS, borderRadius: 99, ...(group === k ? { borderColor: CR, color: '#fff', background: CR } : {}) }}>
+            {l} <span style={{ opacity: .7, fontWeight: 600 }}>{n}</span>
+          </button>
+        ))}
       </div>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginBottom: 16 }}>
-        <input style={{ ...inp, maxWidth: 280 }} placeholder="Search name, role or subject..." value={search} onChange={e => setSearch(e.target.value)} />
-        {[['all', 'All'], ['incomplete', 'Incomplete files'], ['attention', 'Expired / expiring'], ['complete', 'Complete']].map(([k, l]) => (
+        <input style={{ ...inp, maxWidth: 280 }} placeholder="Search name, title or subject..." value={search} onChange={e => setSearch(e.target.value)} />
+        {[['all', 'All files'], ['incomplete', 'Incomplete'], ['attention', 'Expired / expiring'], ['complete', 'Complete']].map(([k, l]) => (
           <button key={k} onClick={() => setShow(k)} style={{ ...btnS, ...(show === k ? { borderColor: CR, color: CR, background: '#FDF2F4' } : {}) }}>{l}</button>
         ))}
         <select style={{ ...inp, width: 'auto' }} value={sort} onChange={e => setSort(e.target.value)} aria-label="Sort">
-          <option value="name">Sort: name</option><option value="file">Sort: least complete first</option><option value="training">Sort: most trained</option>
+          <option value="team">Sort: by role</option><option value="name">Sort: name</option><option value="file">Sort: least complete first</option><option value="training">Sort: most trained</option>
         </select>
       </div>
-      {loading ? <Loading /> : list.length === 0 ? <Empty>No teachers match.</Empty> : (
+      {loading ? <Loading /> : list.length === 0 ? <Empty>No one matches.</Empty> : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 14 }}>
           {list.map(t => (
             <PCard key={t._id} padding={0}>
-              <button onClick={() => setSelId(t._id)} style={{ display: 'block', width: '100%', textAlign: 'left', background: 'none', border: 'none', padding: 16, cursor: 'pointer', fontFamily: 'inherit' }}>
+              <button onClick={() => setSelId(t._id)} style={{ display: 'block', width: '100%', textAlign: 'left', background: t.role === 'admin' ? 'linear-gradient(180deg,#FDF8EC,#FFFFFF 60%)' : 'none', border: 'none', borderRadius: 'inherit', padding: 16, cursor: 'pointer', fontFamily: 'inherit' }}>
                 <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
                   <Avatar user={t} />
                   <div style={{ minWidth: 0, flex: 1 }}>
                     <div style={{ fontSize: 14, fontWeight: 800, color: TOKENS.s900, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{fullName(t)}</div>
-                    <div style={{ fontSize: 11.5, color: TOKENS.s500 }}>{t.jobTitle || 'Teacher'}{t.yearsOfExperience ? ' · ' + t.yearsOfExperience + ' yrs' : ''}</div>
+                    <div style={{ fontSize: 11.5, color: TOKENS.s500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {t.jobTitle && t.jobTitle !== titleOf(t) ? t.jobTitle : titleOf(t)}{t.yearsOfExperience ? ' · ' + t.yearsOfExperience + ' yrs' : ''}
+                    </div>
                   </div>
                   <Ring pct={t.file.pct} />
                 </div>
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 12 }}>
+                  <TitleChip u={t} />
                   <span style={chip(TOKENS.s50, TOKENS.s700)}>File {t.file.have}/{t.file.required}</span>
-                  <span style={chip(TOKENS.goldPale, '#92400E')}>{t.training.hours || 0}h training</span>
+                  {(t.training.hours || 0) > 0 && <span style={chip(TOKENS.goldPale, '#92400E')}>{t.training.hours}h training</span>}
                   {t.file.expired.length > 0 && <span style={chip('#FEE2E2', BAD)}>{t.file.expired.length} expired</span>}
                   {t.file.expiring.length > 0 && <span style={chip('#FEF3C7', WARN)}>{t.file.expiring.length} expiring</span>}
                   {t.isOnLeave && <span style={chip('#E0E7FF', '#3730A3')}>On leave</span>}
@@ -497,6 +540,8 @@ export function TeacherProfilesModule({ toast }) {
     </>
   )
 }
+// Older import name.
+export const TeacherProfilesModule = TeamProfilesModule
 
 function docState(d) {
   if (d.expiresAt) {
@@ -508,16 +553,26 @@ function docState(d) {
   return null
 }
 
-function TeacherProfile({ id, toast, onBack }) {
+function MemberProfile({ id, toast, onBack }) {
   const [p, setP] = useState(null)
   const [upload, setUpload] = useState(null)     // { category } when open
   const [busy, setBusy] = useState('')
+  const [titleDraft, setTitleDraft] = useState(null)
 
   const load = useCallback(() => {
-    api.get('/qa/teachers/' + id)
+    api.get('/qa/team/' + id)
       .then(r => setP(r.data?.data || null))
-      .catch(e => toast?.error?.(errMsg(e, 'Could not load this teacher.')))
+      .catch(e => toast?.error?.(errMsg(e, 'Could not load this profile.')))
   }, [id, toast])
+
+  const saveRole = async (patch) => {
+    setBusy('role')
+    try {
+      const { data } = await api.patch('/qa/team/' + id, patch)
+      toast?.ok?.(data?.message || 'Saved.'); setTitleDraft(null); load()
+    } catch (e) { toast?.error?.(errMsg(e, 'Could not save.')) }
+    setBusy('')
+  }
   useEffect(() => { load() }, [load])
 
   const verify = async (d) => {
@@ -529,17 +584,19 @@ function TeacherProfile({ id, toast, onBack }) {
     setBusy('')
   }
   const remove = async (d) => {
-    if (!window.confirm('Delete "' + d.title + '" from this teacher\'s file?')) return
+    if (!window.confirm('Delete "' + d.title + '" from this staff file?')) return
     setBusy(d._id)
     try { await api.delete('/teacher-documents/' + d._id); toast?.ok?.('Deleted.'); load() }
     catch (e) { toast?.error?.(errMsg(e, 'Could not delete. Only the uploader or an admin can delete.')) }
     setBusy('')
   }
 
-  if (!p) return (<><button onClick={onBack} style={{ ...btnG, marginBottom: 14 }}>← All teachers</button><Loading /></>)
+  if (!p) return (<><button onClick={onBack} style={{ ...btnG, marginBottom: 14 }}>← Team</button><Loading /></>)
 
-  const t = p.teacher
-  const meta = p.categoryMeta || []
+  const t = p.member || p.teacher
+  const isTeacher = t.role === 'teacher'
+  const req = new Set(p.required || p.file.requiredKeys || [])
+  const meta = (p.categoryMeta || []).map(c => ({ ...c, required: req.size ? req.has(c.key) : c.required }))
   const byCat = {}
   for (const d of p.documents) (byCat[d.category] = byCat[d.category] || []).push(d)
   const personnel = meta.filter(c => c.group === 'personnel')
@@ -568,7 +625,7 @@ function TeacherProfile({ id, toast, onBack }) {
   return (
     <>
       <div style={{ display: 'flex', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
-        <button onClick={onBack} style={btnG}>← All teachers</button>
+        <button onClick={onBack} style={btnG}>← Team</button>
         <span style={{ flex: 1 }} />
         <button style={btnG} onClick={() => printTeacherProfile(p)}>Print profile</button>
         <button style={btnP} onClick={() => setUpload({ category: p.file.missing[0] || 'cv' })}>+ Add document</button>
@@ -579,8 +636,11 @@ function TeacherProfile({ id, toast, onBack }) {
           <Avatar user={t} size={92} radius={20} />
           <div style={{ flex: 1, minWidth: 240 }}>
             <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 24, color: TOKENS.s900 }}>{fullName(t)}</div>
-            <div style={{ fontSize: 13, color: TOKENS.s500, marginTop: 2 }}>
-              {t.jobTitle || 'Teacher'}{t.yearsOfExperience ? ' · ' + t.yearsOfExperience + ' years experience' : ''}{t.createdAt ? ' · with Smartious since ' + fmtD(t.createdAt) : ''}
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginTop: 6 }}>
+              <TitleChip u={t} />
+              <span style={{ fontSize: 13, color: TOKENS.s500 }}>
+                {t.jobTitle && t.jobTitle !== titleOf(t) ? t.jobTitle : ''}{t.yearsOfExperience ? (t.jobTitle && t.jobTitle !== titleOf(t) ? ' · ' : '') + t.yearsOfExperience + ' years experience' : ''}{t.createdAt ? ' · with Smartious since ' + fmtD(t.createdAt) : ''}
+              </span>
             </div>
             <div style={{ fontSize: 12, color: TOKENS.s500, marginTop: 4 }}>{[t.email, t.phone].filter(Boolean).join(' · ')}</div>
             {t.bio && <div style={{ fontSize: 13, color: TOKENS.s700, marginTop: 10, lineHeight: 1.65, maxWidth: 720 }}>{t.bio}</div>}
@@ -607,6 +667,41 @@ function TeacherProfile({ id, toast, onBack }) {
           </div>
         )}
       </PCard>
+
+      {p.canEdit && (
+        <>
+          <div style={{ height: 14 }} />
+          <PCard padding={20}>
+            <h3 style={h3}>Role at Smartious</h3>
+            {isTeacher && (
+              <div style={{ marginBottom: 14 }}>
+                <div style={lbl}>Teacher category</div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 8 }}>
+                  {(p.teacherCategories || TEACHER_CATS).map(c => {
+                    const on = (t.teacherCategory || 'teacher') === c.key
+                    return (
+                      <button key={c.key} disabled={busy === 'role' || on} onClick={() => saveRole({ teacherCategory: c.key })}
+                        style={{ textAlign: 'left', padding: '10px 12px', borderRadius: 10, cursor: on ? 'default' : 'pointer', border: '2px solid ' + (on ? CR : LINE), background: on ? '#FDF2F4' : '#fff', fontFamily: 'inherit' }}>
+                        <div style={{ fontSize: 13, fontWeight: 800, color: on ? CR : TOKENS.s900 }}>{on ? '● ' : ''}{c.label}</div>
+                        {c.desc && <div style={{ fontSize: 11.5, color: TOKENS.s500, marginTop: 2 }}>{c.desc}</div>}
+                      </button>
+                    )
+                  })}
+                </div>
+                <div style={{ fontSize: 11.5, color: TOKENS.s500, marginTop: 6 }}>
+                  Qualified teachers need 8 documents on file, including the teaching qualification and licence; teachers in training and support teachers need 6.
+                </div>
+              </div>
+            )}
+            <div style={lbl}>Job title shown on the profile</div>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <input style={{ ...inp, maxWidth: 320 }} value={titleDraft ?? (t.jobTitle || '')} placeholder={titleOf(t)}
+                onChange={e => setTitleDraft(e.target.value)} />
+              <button style={btnP} disabled={busy === 'role' || titleDraft === null} onClick={() => saveRole({ jobTitle: titleDraft })}>Save title</button>
+            </div>
+          </PCard>
+        </>
+      )}
 
       <div style={{ height: 14 }} />
       <PCard padding={20}>
@@ -635,8 +730,8 @@ function TeacherProfile({ id, toast, onBack }) {
         </div>
       </PCard>
 
-      <div style={{ height: 14 }} />
-      <PCard padding={20}>
+      {isTeacher && <div style={{ height: 14 }} />}
+      {isTeacher && <PCard padding={20}>
         <h3 style={h3}>Teaching documents</h3>
         {teaching.length === 0 ? <div style={{ fontSize: 13, color: TOKENS.s500 }}>No schemes of work, lesson plans or records filed yet.</div> :
           teaching.map(c => (
@@ -645,12 +740,12 @@ function TeacherProfile({ id, toast, onBack }) {
               {byCat[c.key].map(d => <DocRow key={d._id} d={d} />)}
             </div>
           ))}
-      </PCard>
+      </PCard>}
 
       <div style={{ height: 14 }} />
       <PCard padding={20}>
         <h3 style={h3}>Professional development · {p.trainingHours} hours</h3>
-        {p.trainings.length === 0 ? <div style={{ fontSize: 13, color: TOKENS.s500 }}>No trainings recorded for this teacher yet.</div> : (
+        {p.trainings.length === 0 ? <div style={{ fontSize: 13, color: TOKENS.s500 }}>No trainings recorded yet.</div> : (
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12.5, minWidth: 520 }}>
               <thead><tr>{['Date', 'Training', 'Category', 'Provider', 'Hours'].map(h => <th key={h} style={{ textAlign: 'left', padding: '6px 8px', ...lbl, borderBottom: '1px solid ' + LINE }}>{h}</th>)}</tr></thead>

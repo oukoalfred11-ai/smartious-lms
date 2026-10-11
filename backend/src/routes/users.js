@@ -108,8 +108,16 @@ async function syncStudentEnrollments(studentId) {
 }
 
 // Validation helper for role-specific fields
-function validateRoleFields(user, role) {
+// Fill in defaults for a NEW account. On an update the body only holds
+// the fields being changed, so defaulting there wiped data: saving a
+// teacher's profile emptied their subjects, and editing a student
+// without sending the plan reset them to Basic.
+function validateRoleFields(user, role, { creating = true } = {}) {
   const errors = [];
+  if (!creating) {
+    if (user.subjects !== undefined && !Array.isArray(user.subjects)) user.subjects = [];
+    return errors;
+  }
 
   switch(role.toLowerCase()) {
     case 'student':
@@ -228,7 +236,7 @@ router.get('/students/list', auth, requireRole('admin', 'ops_manager'), async (r
 router.get('/teachers/list', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const teachers = await User.find({ role: 'teacher' })
-      .select('_id firstName lastName email phone curriculum subjects createdAt status isActive isOnLeave leaveStartDate leaveEndDate jobTitle avatar bio yearsOfExperience teachingSpecialties statusReason sentEmails')
+      .select('_id firstName lastName email phone curriculum subjects createdAt status isActive isOnLeave leaveStartDate leaveEndDate jobTitle teacherCategory avatar bio yearsOfExperience teachingSpecialties statusReason sentEmails')
       .sort('firstName')
       .limit(500);
     res.json({ success: true, teachers });
@@ -864,7 +872,7 @@ router.patch('/:id', auth, requireRole('admin','ops_manager'), async (req, res) 
     delete req.body.password;
 
     const newRole = req.body.role || target.role;
-    validateRoleFields(req.body, newRole);
+    validateRoleFields(req.body, newRole, { creating: false });
 
     // Handle parent-student linking on update
     if (req.body.linkedStudents && Array.isArray(req.body.linkedStudents)) {
