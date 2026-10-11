@@ -790,7 +790,7 @@ function createMixer({ totalDur, musicBuffer, musicVol, voBuffer, voVol, voClips
   const AC = window.AudioContext || window.webkitAudioContext
   const clips = [...(voClips || [])]
   if (voBuffer) clips.push({ buffer: voBuffer, at: 0.5 })
-  if (!AC || (!musicBuffer && clips.length === 0)) return { audioTracks: [], start: () => {}, stop: () => {} }
+  if (!AC || (!musicBuffer && clips.length === 0)) return { audioTracks: [], start: () => {}, stop: () => {}, elapsed: null }
   const ac = new AC()
   const dest = record ? ac.createMediaStreamDestination() : null
   const master = ac.createGain(); master.gain.value = 1
@@ -826,10 +826,24 @@ function createMixer({ totalDur, musicBuffer, musicVol, voBuffer, voVol, voClips
     s.connect(g); g.connect(master)
     starters.push((t0) => s.start(t0 + Math.max(0, c.at)))
   }
+  let t0 = 0
   return {
     audioTracks: dest ? dest.stream.getAudioTracks() : [],
-    start: () => { const t0 = ac.currentTime + 0.05; starters.forEach(fn => fn(t0)) },
+    start: () => {
+      if (ac.state === 'suspended') ac.resume().catch(() => {})
+      t0 = ac.currentTime + 0.05
+      starters.forEach(fn => fn(t0))
+    },
     stop: () => { try { ac.close() } catch (e) { /* closed */ } },
+    // Seconds into the soundtrack, read from the audio clock so picture
+    // follows sound instead of drifting from it. null while the context
+    // is not running (the caller then uses the wall clock).
+    elapsed: (nowPerf) => {
+      if (ac.state !== 'running') return null
+      const ts = ac.getOutputTimestamp ? ac.getOutputTimestamp() : null
+      const ct = ts && ts.performanceTime ? ts.contextTime + (nowPerf - ts.performanceTime) / 1000 : ac.currentTime
+      return Math.max(0, ct - t0)
+    },
   }
 }
 
@@ -902,9 +916,11 @@ async function renderMixOffline({ totalDur, musicBuffer, musicVol, voBuffer, voV
 
 // Seek a background <video> to an exact time and wait for the frame.
 const seekVideo = (v, t) => new Promise((res) => {
-  // Film clips set an exact target (trim offset applied); looping
-  // backgrounds keep the modulo behaviour.
-  const want = (v.__filmTarget !== undefined) ? v.__filmTarget : t
+  // Film clips set an exact target (trim offset applied); scene
+  // backgrounds set the time within their own scene (__sceneTarget);
+  // looping backgrounds keep the modulo behaviour.
+  const want = (v.__filmTarget !== undefined) ? v.__filmTarget
+    : (v.__sceneTarget !== undefined) ? v.__sceneTarget : t
   const target = (v.__filmTarget !== undefined) ? Math.min(want, (v.duration || want) - 0.05)
     : (v.duration && isFinite(v.duration)) ? want % v.duration : want
   if (Math.abs(v.currentTime - target) < 0.001) return res()
@@ -1410,14 +1426,17 @@ const restoreMaps = async (mediaBlobs, voBlobs) => {
 }
 // A live miniature of a card/scene: the strip shows real frames, and
 // the selected one doubles as the video's preview (thumbnail) source.
-function Thumb({ draw, w, h, active, onClick, label }) {
+// `deps` lists what the drawing depends on; the miniature repaints only
+// when one changes (not on every parent render — during preview the
+// parent re-renders many times a second).
+function Thumb({ draw, deps, w, h, active, onClick, label }) {
   const ref = useRef(null)
   useEffect(() => {
     const cv = ref.current
     if (!cv) return
     cv.width = w * 2; cv.height = h * 2   // 2x for crispness
     try { draw(cv.getContext('2d'), w * 2, h * 2) } catch (e) { /* not ready yet */ }
-  })
+  }, deps ? [...deps, w, h] : undefined)
   return (
     <button onClick={onClick} style={{
       padding: 2, background: '#fff', cursor: 'pointer', borderRadius: 8,
@@ -1492,6 +1511,11 @@ const TRANSITIONS = [
   ['wipe', 'Gold wipe'],
 ]
 
+// Live previews are shown at most ~440 CSS px wide. Drawing them at the
+// 4K export size repainted about 8 million pixels a frame and froze
+// playback; previews draw at this long side, exports at full size.
+const PREVIEW_LONG = 960
+
 const FORMATS = {
   story: { W: 2160, H: 3840, label: 'Story 4K 9:16' },
   square: { W: 2160, H: 2160, label: 'Square 4K 1:1' },
@@ -1530,7 +1554,7 @@ function CardMaker({ toast }) {
   const [showNumbers, setShowNumbers] = useState(false)   // "2 / 5" chip: off unless asked for
   const [fontId, setFontId] = useState(0)                  // Montserrat default: bold
   const [brandMode, setBrandMode] = useState('logo')       // logo | word | none
-  const [, setTick] = useState(0)   // bumps when the logo asset loads so the canvas redraws
+  const [tick, setTick] = useState(0)   // bumps when the logo asset loads so the canvas redraws
   const { W, H } = FORMATS[format] || FORMATS.square
   const card = cards[cur]
   const mediaEl = medias[cur]
@@ -1730,9 +1754,13 @@ function CardMaker({ toast }) {
     Object.values(medias).forEach(m => { if (m && m.play) { m.currentTime = 0; m.play().catch(() => {}) } })
     const total = cards.length * cardDur
     const t0 = performance.now()
+    let lastProg = 0
     const step = (now) => {
-      const t = (now - t0) / 1000
-      setProgress(Math.min(1, t / total))
+      // Audio clock when there is sound, so picture follows it.
+      const ta = mixer.elapsed ? mixer.elapsed(now) : null
+      const t = ta !== null ? ta : (now - t0) / 1000
+      // A few progress updates a second: each one re-renders the editor.
+      if (now - lastProg > 120) { setProgress(Math.min(1, t / total)); lastProg = now }
       if (drawTimeline(ctx, t)) { rafRef.current = requestAnimationFrame(step); return }
       Object.values(medias).forEach(m => { if (m && m.pause) m.pause() })
       mixer.stop()
@@ -1817,6 +1845,7 @@ function CardMaker({ toast }) {
           {cards.map((c, i) => (
             <Thumb key={i} {...thumbSize(format)} active={cur === i} onClick={() => setCur(i)}
               label={'Card ' + (i + 1)}
+              deps={[c, fontId, brandMode, showNumbers, cards.length, medias[i], tick]}
               draw={(tc, tw, th) => renderCard(tc, tw, th, deck(c, { seriesTotal: showNumbers ? cards.length : 0, seriesNo: i + 1 }), medias[i], 1)} />
           ))}
           <button onClick={() => { setCards(cs => [...cs.map(c => ({ ...c, seriesTotal: cs.length + 1 })), newCard(cards.length, cards.length + 1)]); setCur(cards.length) }}
@@ -1933,7 +1962,7 @@ function CardMaker({ toast }) {
         <canvas ref={cvRef} style={{ width: '100%', maxWidth: format === 'story' ? 320 : 480, borderRadius: 14, boxShadow: '0 10px 30px rgba(0,0,0,.15)', display: 'block' }} />
         {(playing || rendering) && (
           <div style={{ marginTop: 8, height: 5, background: 'rgba(0,0,0,.08)', borderRadius: 99, maxWidth: format === 'story' ? 320 : 480 }}>
-            <div style={{ width: (progress * 100) + '%', height: '100%', background: GOLD, borderRadius: 99 }} />
+            <div style={{ width: (progress * 100) + '%', height: '100%', background: GOLD, borderRadius: 99, transition: 'width .15s linear' }} />
           </div>
         )}
       </div>
@@ -1978,6 +2007,8 @@ function VideoMaker({ toast }) {
   const cvRef = useRef(null)
   const rafRef = useRef(null)
   const { W, H } = FORMATS[format] || FORMATS.youtube
+  const pScale = Math.min(1, PREVIEW_LONG / Math.max(W, H))
+  const PW = Math.round(W * pScale), PH = Math.round(H * pScale)
   const scene = scenes[cur]
   const totalDur = scenes.reduce((s, x) => s + (+x.duration || 4), 0)
 
@@ -2053,8 +2084,8 @@ function VideoMaker({ toast }) {
     if (playing || rendering) return
     const cv = cvRef.current
     if (!cv) return
-    cv.width = W; cv.height = H
-    renderScene(cv.getContext('2d'), W, H, deck(scene), medias[cur], 1)
+    cv.width = PW; cv.height = PH
+    renderScene(cv.getContext('2d'), PW, PH, deck(scene), medias[cur], 1)
   }, [scenes, cur, format, medias, playing, rendering, fontId, brandMode, logoTick])
 
   const onMedia = (e) => {
@@ -2074,9 +2105,18 @@ function VideoMaker({ toast }) {
 
   // Play the whole sequence on the preview canvas; when recording,
   // capture the canvas stream while the same loop runs.
+  //  - previews draw at preview size (PW x PH); recording at full size
+  //  - only the scene on screen plays its background video, from the
+  //    start of that scene
+  //  - time comes from the audio clock, so picture follows sound
+  //  - progress updates a few times a second, not every frame (each
+  //    update re-renders the whole editor)
+  const stopRef = useRef(null)
+  useEffect(() => () => { if (stopRef.current) stopRef.current() }, [])
   const runSequence = (record) => new Promise((resolve) => {
     const cv = cvRef.current
-    cv.width = W; cv.height = H
+    const RW = record ? W : PW, RH = record ? H : PH
+    cv.width = RW; cv.height = RH
     const ctx = cv.getContext('2d')
     const mixer = createMixer({ totalDur, musicBuffer: sound.musicBuffer, musicVol: sound.musicVol, voBuffer: sound.voBuffer, voVol: sound.voVol, voClips: buildVoClips(), record })
     let recorder = null, chunks = []
@@ -2088,34 +2128,47 @@ function VideoMaker({ toast }) {
       recorder.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data) }
       recorder.start(500)
     }
+    const vids = Object.values(medias).filter(m => m && m.play)
+    vids.forEach(m => m.pause())
     mixer.start()
-    // start any video backgrounds
-    Object.values(medias).forEach(m => { if (m && m.play) { m.currentTime = 0; m.play().catch(() => {}) } })
 
+    let lastIdx = -1, lastProg = 0, done = false
     const t0 = performance.now()
+    const finish = () => {
+      if (done) return
+      done = true
+      cancelAnimationFrame(rafRef.current)
+      vids.forEach(m => m.pause())
+      mixer.stop()
+      stopRef.current = null
+      if (recorder && recorder.state !== 'inactive') {
+        recorder.onstop = () => resolve(new Blob(chunks, { type: 'video/webm' }))
+        recorder.stop()
+      } else resolve(null)
+    }
+    stopRef.current = finish
+
     const step = (now) => {
-      const t = (now - t0) / 1000
-      let acc = 0, drawn = false
+      if (done) return
+      const ta = mixer.elapsed ? mixer.elapsed(now) : null
+      const t = ta !== null ? ta : (now - t0) / 1000
+      if (t >= totalDur) { finish(); return }
+      let acc = 0, idx = scenes.length - 1
       for (let i = 0; i < scenes.length; i++) {
         const d = +scenes[i].duration || 4
-        if (t < acc + d) {
-          renderScene(ctx, W, H, deck(scenes[i]), medias[i], (t - acc) / d)
-          setProgress(t / totalDur)
-          drawn = true
-          break
-        }
+        if (t < acc + d) { idx = i; break }
         acc += d
       }
-      if (!drawn) {
-        // finished
-        Object.values(medias).forEach(m => { if (m && m.pause) m.pause() })
-        mixer.stop()
-        if (recorder) {
-          recorder.onstop = () => resolve(new Blob(chunks, { type: 'video/webm' }))
-          recorder.stop()
-        } else resolve(null)
-        return
+      if (idx !== lastIdx) {
+        const prev = medias[lastIdx]
+        if (prev && prev.pause) prev.pause()
+        const v = medias[idx]
+        if (v && v.play) { try { v.currentTime = 0 } catch (e) { /* not seekable yet */ } v.play().catch(() => {}) }
+        lastIdx = idx
       }
+      const d = +scenes[idx].duration || 4
+      renderScene(ctx, RW, RH, deck(scenes[idx]), medias[idx], Math.min(1, Math.max(0, (t - acc) / d)))
+      if (now - lastProg > 120) { setProgress(t / totalDur); lastProg = now }
       rafRef.current = requestAnimationFrame(step)
     }
     rafRef.current = requestAnimationFrame(step)
@@ -2126,7 +2179,9 @@ function VideoMaker({ toast }) {
     setPlaying(true)
     await runSequence(false)
     setPlaying(false)
+    setProgress(0)
   }
+  const stopPreview = () => { if (stopRef.current) stopRef.current() }
 
   const drawSceneAt = (ctx, t) => {
     let acc = 0
@@ -2139,11 +2194,18 @@ function VideoMaker({ toast }) {
       acc += d
     }
   }
+  // The scene's background video at its own time (from the start of the
+  // scene), looping if the scene outlasts the clip.
   const sceneMediaAt = (t) => {
     let acc = 0
     for (let i = 0; i < scenes.length; i++) {
       const d = +scenes[i].duration || 4
-      if (t < acc + d) return [medias[i]].filter(Boolean)
+      if (t < acc + d) {
+        const v = medias[i]
+        if (!v) return []
+        if (v.play) v.__sceneTarget = t - acc
+        return [v]
+      }
       acc += d
     }
     return []
@@ -2153,6 +2215,8 @@ function VideoMaker({ toast }) {
     if (playing || rendering) return
     setRendering(true)
     const t0 = performance.now()
+    // Exports render at full size; the preview canvas is smaller.
+    cvRef.current.width = W; cvRef.current.height = H
     try {
       const out = await exportMp4Fast({
         canvas: cvRef.current, W, H, totalDur,
@@ -2211,6 +2275,7 @@ function VideoMaker({ toast }) {
           {scenes.map((s, i) => (
             <Thumb key={i} {...thumbSize(format)} active={cur === i} onClick={() => setCur(i)}
               label={(i + 1) + ' \u00b7 ' + s.type}
+              deps={[s, fontId, brandMode, medias[i], logoTick]}
               draw={(tc, tw, th) => renderScene(tc, tw, th, deck(s), medias[i], 1)} />
           ))}
         </div>
@@ -2305,7 +2370,7 @@ function VideoMaker({ toast }) {
         )}
 
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-          <button onClick={preview} disabled={playing || rendering} style={btn(false)}>{playing ? 'Playing...' : 'Preview all'}</button>
+          <button onClick={playing ? stopPreview : preview} disabled={rendering} style={btn(playing)}>{playing ? 'Stop preview' : 'Preview all'}</button>
           <button onClick={exportVideo} disabled={playing || rendering} style={btn(true)}>{rendering ? 'Rendering ' + Math.round(progress * 100) + '%' : 'Export video'}</button>
           <button onClick={() => {
             // Render THIS scene's final frame at full resolution, then
@@ -2339,7 +2404,7 @@ function VideoMaker({ toast }) {
         <canvas ref={cvRef} style={{ width: '100%', maxWidth: format === 'story' ? 300 : 440, borderRadius: 14, boxShadow: '0 10px 30px rgba(0,0,0,.2)', display: 'block', background: '#000' }} />
         {(playing || rendering) && (
           <div style={{ marginTop: 8, height: 5, background: 'rgba(0,0,0,.08)', borderRadius: 99, maxWidth: format === 'story' ? 300 : 440 }}>
-            <div style={{ width: (progress * 100) + '%', height: '100%', background: GOLD, borderRadius: 99 }} />
+            <div style={{ width: (progress * 100) + '%', height: '100%', background: GOLD, borderRadius: 99, transition: 'width .15s linear' }} />
           </div>
         )}
       </div>
@@ -2575,10 +2640,11 @@ function FilmMaker({ toast }) {
     const ctx = cv.getContext('2d')
     const mixer = createMixer({ totalDur: total, musicBuffer: sound.musicBuffer, musicVol: sound.musicVol, voBuffer: sound.voBuffer, voVol: sound.voVol, voClips, record: false })
     mixer.start()
-    let lastIdx = -1
+    let lastIdx = -1, lastProg = 0
     const t0 = performance.now()
     const step = (now) => {
-      const t = (now - t0) / 1000
+      const ta = mixer.elapsed ? mixer.elapsed(now) : null
+      const t = ta !== null ? ta : (now - t0) / 1000
       const a = activeAt(t)
       if (!a) { finish(); return }
       const v = media[a.idx]
@@ -2594,7 +2660,7 @@ function FilmMaker({ toast }) {
         }
       }
       drawFilm(ctx, t)
-      setProgress(t / total)
+      if (now - lastProg > 120) { setProgress(t / total); lastProg = now }
       rafRef.current = requestAnimationFrame(step)
     }
     const finish = () => {
