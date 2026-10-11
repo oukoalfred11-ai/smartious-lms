@@ -7,15 +7,20 @@
  * the QA portal as the formal evidence wall.
  */
 const mongoose = require('mongoose');
+const { ACCREDITATION_TYPES } = require('../constants/qa');
 
 const accreditationSchema = new mongoose.Schema({
   name:  { type: String, required: true, trim: true, maxlength: 200 },   // e.g. Cognia Accreditation
   body:  { type: String, default: '', trim: true, maxlength: 200 },      // issuing body
-  type:  { type: String, enum: ['Accreditation', 'License', 'Membership', 'Registration', 'Other'], default: 'Accreditation' },
+  type:  { type: String, enum: ACCREDITATION_TYPES, default: 'Accreditation' },
   certificateNumber: { type: String, default: '', trim: true, maxlength: 120 },
   issuedAt:  { type: Date, default: null },
   expiresAt: { type: Date, default: null },     // null = does not expire
   notes:     { type: String, default: '', trim: true, maxlength: 2000 },
+  // What it covers, e.g. ["Cambridge IGCSE", "Cambridge A Level"].
+  scope:     [{ type: String, trim: true, maxlength: 120 }],
+  // Public register / verification page for the certificate.
+  verifyUrl: { type: String, default: '', trim: true, maxlength: 500 },
 
   documents: [{
     url:  { type: String, required: true },

@@ -16,8 +16,16 @@
  * Reads:
  *   GET  /mine                 — the calling teacher's documents
  *   GET  /teacher/:teacherId   — a teacher's documents (staff oversight)
+ * Update:
+ *   PATCH  /:id                — title, description, category, expiry
+ *   PATCH  /:id/verify         — QA stamps (or clears) "checked against
+ *                                the original"; oversight roles only
  * Delete:
- *   DELETE /:id                — owner or admin; removes R2 object too
+ *   DELETE /:id                — owner, the staff member who filed it, or
+ *                                admin; removes R2 object too
+ *
+ * Categories (personnel file + teaching documents) are defined in
+ * constants/qa.js and returned with every list as `categoryMeta`.
  */
 
 const express  = require('express');
@@ -28,6 +36,7 @@ const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 const { v4: uuidv4 } = require('uuid');
 
 const TeacherDocument = require('../models/TeacherDocument');
+const { TEACHER_DOC_CATEGORIES } = require('../constants/qa');
 const { auth, requireRole } = require('../middleware/auth');
 
 const R2_READY = !!(process.env.R2_ACCOUNT_ID && process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY && process.env.R2_BUCKET_NAME && process.env.R2_PUBLIC_URL);
@@ -97,10 +106,16 @@ router.post('/presign', auth, requireRole(...UPLOADER_ROLES), r2Guard, async (re
   }
 });
 
+const parseDate = (v) => {
+  if (!v) return null;
+  const d = new Date(v);
+  return isNaN(d.getTime()) ? null : d;
+};
+
 // ── 2. Confirm ─────────────────────────────────────────────
 router.post('/confirm', auth, requireRole(...UPLOADER_ROLES), r2Guard, async (req, res) => {
   try {
-    const { r2Key, category, title, subject, description, fileName, mimeType, fileSize } = req.body || {};
+    const { r2Key, category, title, subject, description, fileName, mimeType, fileSize, expiresAt } = req.body || {};
     // The key's second segment is the teacher whose file this joins.
     const m = /^teacher-docs\/([a-f0-9]{24})\//.exec(String(r2Key || ''));
     if (!m) return res.status(400).json({ success: false, message: 'Invalid upload key.' });
@@ -118,6 +133,7 @@ router.post('/confirm', auth, requireRole(...UPLOADER_ROLES), r2Guard, async (re
       title:       String(title).trim(),
       subject:     String(subject || '').trim(),
       description: String(description || '').trim(),
+      expiresAt:   parseDate(expiresAt),
       uploadedBy:     req.user._id,
       uploadedByName: [req.user.firstName, req.user.lastName].filter(Boolean).join(' '),
       file: {
@@ -162,7 +178,7 @@ router.get('/overview', auth, requireRole(...OVERSIGHT_ROLES), async (req, res) 
       categories: byTeacher[String(t._id)]?.categories || {},
       latest: byTeacher[String(t._id)]?.latest || null,
     }));
-    return res.json({ success: true, data: { teachers: rows, categories: TeacherDocument.CATEGORIES } });
+    return res.json({ success: true, data: { teachers: rows, categories: TeacherDocument.CATEGORIES, categoryMeta: TEACHER_DOC_CATEGORIES } });
   } catch (e) {
     return res.status(500).json({ success: false, message: e.message });
   }
@@ -175,7 +191,7 @@ router.get('/mine', auth, requireRole(...UPLOADER_ROLES), async (req, res) => {
     if (req.query.category && TeacherDocument.CATEGORIES.includes(req.query.category))
       filter.category = req.query.category;
     const docs = await TeacherDocument.find(filter).sort({ createdAt: -1 }).limit(1000).lean();
-    return res.json({ success: true, data: { documents: docs, categories: TeacherDocument.CATEGORIES } });
+    return res.json({ success: true, data: { documents: docs, categories: TeacherDocument.CATEGORIES, categoryMeta: TEACHER_DOC_CATEGORIES } });
   } catch (e) {
     return res.status(500).json({ success: false, message: e.message });
   }
@@ -188,7 +204,54 @@ router.get('/teacher/:teacherId', auth, requireRole(...OVERSIGHT_ROLES), async (
       return res.status(400).json({ success: false, message: 'Invalid id.' });
     const docs = await TeacherDocument.find({ teacherId: req.params.teacherId })
       .sort({ category: 1, createdAt: -1 }).limit(1000).lean();
-    return res.json({ success: true, data: { documents: docs, categories: TeacherDocument.CATEGORIES } });
+    return res.json({ success: true, data: { documents: docs, categories: TeacherDocument.CATEGORIES, categoryMeta: TEACHER_DOC_CATEGORIES } });
+  } catch (e) {
+    return res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// ── Update details ─────────────────────────────────────────
+router.patch('/:id', auth, requireRole(...UPLOADER_ROLES), async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id))
+      return res.status(400).json({ success: false, message: 'Invalid id.' });
+    const doc = await TeacherDocument.findById(req.params.id);
+    if (!doc) return res.status(404).json({ success: false, message: 'Document not found.' });
+    const mine = String(doc.teacherId) === String(req.user._id);
+    if (!mine && !OVERSIGHT_ROLES.includes(req.user.role))
+      return res.status(403).json({ success: false, message: 'Not your document.' });
+    const b = req.body || {};
+    if (b.title !== undefined) {
+      if (!String(b.title).trim()) return res.status(400).json({ success: false, message: 'A title is required.' });
+      doc.title = String(b.title).trim().slice(0, 200);
+    }
+    if (b.description !== undefined) doc.description = String(b.description).trim().slice(0, 1000);
+    if (b.subject !== undefined) doc.subject = String(b.subject).trim().slice(0, 120);
+    if (b.category !== undefined) {
+      if (!TeacherDocument.CATEGORIES.includes(b.category))
+        return res.status(400).json({ success: false, message: 'Unknown category.' });
+      doc.category = b.category;
+    }
+    if (b.expiresAt !== undefined) doc.expiresAt = parseDate(b.expiresAt);
+    await doc.save();
+    return res.json({ success: true, data: { document: doc } });
+  } catch (e) {
+    return res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// ── QA verification: checked against the original ──────────
+router.patch('/:id/verify', auth, requireRole(...OVERSIGHT_ROLES), async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id))
+      return res.status(400).json({ success: false, message: 'Invalid id.' });
+    const verified = req.body?.verified !== false;
+    const set = verified
+      ? { verifiedBy: req.user._id, verifiedByName: [req.user.firstName, req.user.lastName].filter(Boolean).join(' '), verifiedAt: new Date() }
+      : { verifiedBy: null, verifiedByName: '', verifiedAt: null };
+    const doc = await TeacherDocument.findByIdAndUpdate(req.params.id, { $set: set }, { new: true });
+    if (!doc) return res.status(404).json({ success: false, message: 'Document not found.' });
+    return res.json({ success: true, data: { document: doc }, message: verified ? 'Marked as verified.' : 'Verification cleared.' });
   } catch (e) {
     return res.status(500).json({ success: false, message: e.message });
   }
@@ -202,7 +265,8 @@ router.delete('/:id', auth, requireRole(...UPLOADER_ROLES), async (req, res) => 
     const doc = await TeacherDocument.findById(req.params.id);
     if (!doc) return res.status(404).json({ success: false, message: 'Document not found.' });
     const mine = String(doc.teacherId) === String(req.user._id);
-    if (!mine && req.user.role !== 'admin')
+    const filedByMe = doc.uploadedBy && String(doc.uploadedBy) === String(req.user._id);
+    if (!mine && !filedByMe && req.user.role !== 'admin')
       return res.status(403).json({ success: false, message: 'Not your document.' });
 
     if (R2_READY && doc.file?.key) {

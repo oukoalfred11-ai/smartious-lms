@@ -19,6 +19,7 @@ export const MODULES = {
   leave:       { label: 'Leave',        accent: TOKENS.accentSlate, icon: 'leave' },
   programmes:  { label: 'Programmes',   accent: TOKENS.accentPurple, icon: 'programmes' },
   documents:   { label: 'Documents',    accent: TOKENS.gold,        icon: 'documents' },
+  qaoverview:      { label: 'QA Overview',      accent: TOKENS.gold,    icon: 'chart' },
   teacherprofiles: { label: 'Teacher Profiles', accent: TOKENS.crimson, icon: 'teacher' },
   tdp:             { label: 'Teacher Development', accent: TOKENS.gold, icon: 'teacher' },
   accreditations:  { label: 'Accreditations',   accent: TOKENS.gold,    icon: 'documents' },

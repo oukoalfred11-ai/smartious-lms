@@ -7094,12 +7094,30 @@ function DocumentsTab({ user, store, setPage, toast }) {
 
 // ── WEEKLY REPORT GENERATOR ────────────────────────────────
 // ── MY DOCUMENTS ─────────────────────────────────────────────
-// The teacher's own document file, organised by the categories a
-// school inspection expects: schemes of work, lesson plans, records
-// of work, assessment records, teaching resources, reports, other.
+// The teacher's own file, organised by the categories an accreditor
+// and a school inspection expect: the personnel file (CV, certificates,
+// ID, licence, police clearance, contract...) and teaching documents
+// (schemes of work, lesson plans, records of work...). Keys match
+// backend constants/qa.js; QA sees the same file in the QA portal.
 // Files go straight from the browser to R2 (presigned), so uploads
 // are fast and never load the API server.
-const TDOC_CATEGORIES = [
+const TDOC_PERSONNEL = [
+  ['cv',                       'CV / Résumé'],
+  ['academic_certificate',     'Academic certificates'],
+  ['professional_certificate', 'Teaching qualification'],
+  ['identification',           'National ID / Passport'],
+  ['teaching_license',         'Teaching licence / registration'],
+  ['police_clearance',         'Police clearance'],
+  ['contract',                 'Employment contract'],
+  ['safeguarding_certificate', 'Safeguarding / child protection'],
+  ['training_certificate',     'Training certificates'],
+  ['observation_report',       'Lesson observation reports'],
+  ['appraisal',                'Appraisals'],
+  ['reference',                'References'],
+]
+// Documents that lapse and so carry an expiry date.
+const TDOC_EXPIRES = new Set(['teaching_license', 'police_clearance', 'contract', 'safeguarding_certificate'])
+const TDOC_TEACHING = [
   ['scheme_of_work',    'Schemes of Work'],
   ['lesson_plan',       'Lesson Plans'],
   ['record_of_work',    'Records of Work'],
@@ -7108,6 +7126,7 @@ const TDOC_CATEGORIES = [
   ['report',            'Reports'],
   ['other',             'Other'],
 ]
+const TDOC_CATEGORIES = [...TDOC_PERSONNEL, ...TDOC_TEACHING]
 const TDOC_LABEL = Object.fromEntries(TDOC_CATEGORIES)
 function tdocSize(b) {
   if (!b) return ''
@@ -7121,7 +7140,7 @@ function TeacherDocsLibrary({ user, toast, onBack }) {
   const [upOpen, setUpOpen] = useState(false)
   const [upBusy, setUpBusy] = useState(false)
   const [upPct, setUpPct] = useState(0)
-  const [up, setUp] = useState({ category: 'scheme_of_work', title: '', subject: '', description: '', file: null })
+  const [up, setUp] = useState({ category: 'scheme_of_work', title: '', subject: '', description: '', expiresAt: '', file: null })
 
   const load = async () => {
     try {
@@ -7157,11 +7176,12 @@ function TeacherDocsLibrary({ user, toast, onBack }) {
         r2Key: pd.r2Key, category: up.category, title: up.title, subject: up.subject,
         description: up.description, fileName: up.file.name,
         mimeType: up.file.type || '', fileSize: up.file.size,
+        expiresAt: up.expiresAt || null,
       })
       if (!data?.success) throw new Error(data?.message || 'Could not save the document.')
       toast?.ok?.('Document filed under ' + TDOC_LABEL[up.category] + '.')
       setUpOpen(false)
-      setUp({ category: up.category, title: '', subject: '', description: '', file: null })
+      setUp({ category: up.category, title: '', subject: '', description: '', expiresAt: '', file: null })
       load()
     } catch (e) { toast?.error?.(e.message || 'Upload failed.') }
     finally { setUpBusy(false); setUpPct(0) }
@@ -7190,7 +7210,7 @@ function TeacherDocsLibrary({ user, toast, onBack }) {
         <div>
           {onBack && <button onClick={onBack} style={{ background: 'transparent', border: 'none', color: '#7D1025', fontSize: 12.5, fontWeight: 700, cursor: 'pointer', padding: 0, marginBottom: 6 }}>&larr; Reports &amp; Documents</button>}
           <h1 style={{ fontSize: 24, fontWeight: 800, color: '#1A1A1A', margin: 0 }}>My Documents</h1>
-          <div style={{ fontSize: 13, color: '#6B6B6B', marginTop: 2 }}>Your teaching file, organised by category.</div>
+          <div style={{ fontSize: 13, color: '#6B6B6B', marginTop: 2 }}>Your staff file and teaching documents. Quality Assurance reviews these for accreditation.</div>
         </div>
         <button onClick={() => setUpOpen(true)} style={{ background: '#7D1025', color: '#FBFAF5', border: 'none', borderRadius: 10, padding: '11px 20px', fontSize: 13.5, fontWeight: 700, cursor: 'pointer' }}>
           + Add Document
@@ -7201,7 +7221,7 @@ function TeacherDocsLibrary({ user, toast, onBack }) {
         <button onClick={() => setCatFilter('')} style={{ background: catFilter === '' ? '#7D1025' : '#FFFFFF', color: catFilter === '' ? '#FBFAF5' : '#3A2E2A', border: '1px solid ' + (catFilter === '' ? '#7D1025' : '#E8E0D0'), borderRadius: 99, padding: '7px 14px', fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>
           All ({docs.length})
         </button>
-        {TDOC_CATEGORIES.map(([id, label]) => {
+        {TDOC_CATEGORIES.filter(([id]) => catFilter === id || docs.some(d => d.category === id)).map(([id, label]) => {
           const n = docs.filter(d => d.category === id).length
           const active = catFilter === id
           return (
@@ -7237,6 +7257,17 @@ function TeacherDocsLibrary({ user, toast, onBack }) {
                       {[d.subject, tdocSize(d.file?.sizeBytes), new Date(d.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })].filter(Boolean).join(' · ')}
                     </div>
                     {d.description && <div style={{ fontSize: 12, color: '#3A2E2A', marginTop: 6, lineHeight: 1.5 }}>{d.description}</div>}
+                    {(d.expiresAt || d.verifiedAt) && (
+                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 8 }}>
+                        {d.expiresAt && (() => {
+                          const days = Math.ceil((new Date(d.expiresAt) - Date.now()) / 86400000)
+                          const [bg, fg, txt] = days < 0 ? ['#FEE2E2', '#B91C1C', 'Expired — please upload a renewal']
+                            : days <= 60 ? ['#FEF3C7', '#B45309', 'Expires in ' + days + ' days'] : ['#DCFCE7', '#15803D', 'Valid to ' + new Date(d.expiresAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })]
+                          return <span style={{ background: bg, color: fg, borderRadius: 99, padding: '3px 10px', fontSize: 11, fontWeight: 700 }}>{txt}</span>
+                        })()}
+                        {d.verifiedAt && <span style={{ background: '#DCFCE7', color: '#15803D', borderRadius: 99, padding: '3px 10px', fontSize: 11, fontWeight: 700 }}>✓ Verified by QA</span>}
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
@@ -7259,9 +7290,16 @@ function TeacherDocsLibrary({ user, toast, onBack }) {
               <div style={{ marginBottom: 14 }}>
                 <label style={labelStyle}>Category</label>
                 <select value={up.category} onChange={e => setUp(f => ({ ...f, category: e.target.value }))} style={inputStyle}>
-                  {TDOC_CATEGORIES.map(([id, label]) => <option key={id} value={id}>{label}</option>)}
+                  <optgroup label="Staff file">{TDOC_PERSONNEL.map(([id, label]) => <option key={id} value={id}>{label}</option>)}</optgroup>
+                  <optgroup label="Teaching documents">{TDOC_TEACHING.map(([id, label]) => <option key={id} value={id}>{label}</option>)}</optgroup>
                 </select>
               </div>
+              {TDOC_EXPIRES.has(up.category) && (
+                <div style={{ marginBottom: 14 }}>
+                  <label style={labelStyle}>Expiry date</label>
+                  <input type="date" value={up.expiresAt} onChange={e => setUp(f => ({ ...f, expiresAt: e.target.value }))} style={inputStyle} />
+                </div>
+              )}
               <div style={{ marginBottom: 14 }}>
                 <label style={labelStyle}>Title</label>
                 <input value={up.title} onChange={e => setUp(f => ({ ...f, title: e.target.value }))} placeholder="e.g. IGCSE Physics Scheme of Work Term 1" style={inputStyle} />

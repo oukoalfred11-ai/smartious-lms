@@ -1,147 +1,493 @@
 /**
- * QAModules.jsx — the QA portal's showcase modules.
+ * QAModules.jsx — the QA portal.
  * ============================================================
- *   TeacherProfilesModule — every teacher's profile and filed
- *     documents in one place, for accreditation reviewers.
- *   TDPModule — Teacher Development Programme: trainings run for
- *     teachers, with photos, details and attendance.
- *   AccreditationsModule — the school's accreditations and
- *     licenses, well arranged with uploaded certificates and
- *     validity status.
- * Reads work for QA, admin, ops, dos; adding and editing for
- * admin, ops, dos and qa (server enforced).
+ *   QAOverviewModule      — the QA dashboard: staff-file completeness,
+ *     expiring documents, training reach, accreditation health and a
+ *     printable evidence pack for accreditation visits.
+ *   TeacherProfilesModule — every teacher's profile, personnel file
+ *     (required documents with expiry and QA verification), teaching
+ *     documents and professional development, one click deep.
+ *   TDPModule             — Teacher Development Programme: trainings
+ *     with photos, outcomes and attendance; hours per teacher.
+ *   AccreditationsModule  — the school's accreditations, licences,
+ *     memberships and registrations with their certificates.
+ * Teacher files are oversight only (admin, ops, dos, qa); writes are
+ * enforced on the server.
  */
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { api } from '../../../../context/ctx.jsx'
 import { TOKENS } from '../shared/tokens.js'
 import { PCard, PSection } from '../shared/ui.jsx'
 
-const CR = TOKENS.crimson || '#7D1025'
-const GOLD = TOKENS.gold || '#C9A030'
-const LINE = TOKENS.line || '#E8E2D6'
+const CR = TOKENS.crimson
+const GOLD = TOKENS.gold
+const LINE = TOKENS.line
+const OK = '#15803D', WARN = '#B45309', BAD = '#B91C1C'
 
-const inp = { width: '100%', boxSizing: 'border-box', border: '1.5px solid ' + LINE, borderRadius: 8, padding: '9px 11px', fontSize: 12.5, outline: 'none', fontFamily: 'inherit' }
+const inp = { width: '100%', boxSizing: 'border-box', border: '1.5px solid ' + LINE, borderRadius: 8, padding: '9px 11px', fontSize: 12.5, outline: 'none', fontFamily: 'inherit', background: '#fff', color: TOKENS.ink }
 const btnP = { background: CR, color: '#fff', border: 'none', borderRadius: 9, padding: '9px 16px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer' }
-const btnG = { background: '#fff', color: TOKENS.s700 || '#374151', border: '1.5px solid ' + LINE, borderRadius: 9, padding: '9px 16px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer' }
-const chip = (bg, fg) => ({ display: 'inline-block', padding: '3px 10px', borderRadius: 99, fontSize: 10.5, fontWeight: 800, background: bg, color: fg, letterSpacing: '.04em' })
+const btnG = { background: '#fff', color: TOKENS.s700, border: '1.5px solid ' + LINE, borderRadius: 9, padding: '9px 16px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer', textDecoration: 'none', display: 'inline-block' }
+const btnS = { ...btnG, padding: '5px 11px', fontSize: 11.5 }
+const chip = (bg, fg) => ({ display: 'inline-block', padding: '3px 10px', borderRadius: 99, fontSize: 10.5, fontWeight: 800, background: bg, color: fg, letterSpacing: '.03em', whiteSpace: 'nowrap' })
+const lbl = { fontSize: 10.5, fontWeight: 800, color: TOKENS.s500, letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 6 }
+const h3 = { fontSize: 12.5, fontWeight: 800, color: CR, letterSpacing: '.1em', textTransform: 'uppercase', margin: '0 0 12px' }
 
+const DAY = 86400000
 const fmtD = (d) => d ? new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : ''
+const daysUntil = (d) => Math.ceil((new Date(d).getTime() - Date.now()) / DAY)
+const fullName = (u) => [u?.firstName, u?.lastName].filter(Boolean).join(' ')
+const isImage = (url = '', mime = '') => /^image\//.test(mime) || /\.(png|jpe?g|webp|gif)(\?|$)/i.test(url)
+const pctColor = (p) => p >= 100 ? OK : p >= 60 ? WARN : BAD
+const errMsg = (e, fallback) => e?.response?.data?.message || fallback
 
-// Shared evidence uploader: presign, PUT to R2, hand back the record.
+const TRAINING_CATEGORIES = ['Pedagogy', 'Curriculum', 'Assessment', 'Subject knowledge', 'ICT & digital', 'Safeguarding', 'Inclusion & SEN', 'Leadership', 'Wellbeing', 'Other']
+const ACC_TYPES = ['Accreditation', 'License', 'Membership', 'Registration', 'Other']
+
+// ── Uploads (presigned straight to R2) ─────────────────────
+async function putToR2(uploadUrl, file) {
+  const put = await fetch(uploadUrl, { method: 'PUT', headers: { 'Content-Type': file.type || 'application/octet-stream' }, body: file })
+  if (!put.ok) throw new Error('Upload failed (' + put.status + ').')
+}
+
+// TDP photos/files and accreditation certificates.
 async function uploadEvidence(file, kind, toast) {
   try {
-    const { data } = await api.post('/qa/uploads/presign', {
-      fileName: file.name, mimeType: file.type, fileSize: file.size, kind,
-    })
+    const { data } = await api.post('/qa/uploads/presign', { fileName: file.name, mimeType: file.type, fileSize: file.size, kind })
     if (!data?.success) { toast?.error?.(data?.message || 'Upload refused.'); return null }
-    const put = await fetch(data.data.uploadUrl, { method: 'PUT', headers: { 'Content-Type': file.type || 'application/octet-stream' }, body: file })
-    if (!put.ok) { toast?.error?.('Upload failed (' + put.status + ').'); return null }
+    await putToR2(data.data.uploadUrl, file)
     return { url: data.data.publicUrl, key: data.data.r2Key, name: file.name }
   } catch (e) {
-    toast?.error?.(e?.response?.data?.message || 'Upload failed.')
+    toast?.error?.(errMsg(e, e?.message || 'Upload failed.'))
     return null
   }
+}
+
+// A document filed into a teacher's file by QA / oversight staff.
+async function uploadTeacherDoc(teacherId, file, meta) {
+  const pre = await api.post('/teacher-documents/presign', { fileName: file.name, mimeType: file.type, fileSize: file.size, forTeacherId: teacherId })
+  if (!pre.data?.success) throw new Error(pre.data?.message || 'Upload refused.')
+  await putToR2(pre.data.data.uploadUrl, file)
+  const { data } = await api.post('/teacher-documents/confirm', {
+    r2Key: pre.data.data.r2Key, fileName: file.name, mimeType: file.type, fileSize: file.size, ...meta,
+  })
+  if (!data?.success) throw new Error(data?.message || 'Could not save the document.')
+  return data.data.document
+}
+
+// ── Small building blocks ──────────────────────────────────
+function Ring({ pct = 0, size = 46, stroke = 5 }) {
+  const r = (size - stroke) / 2
+  const c = 2 * Math.PI * r
+  const p = Math.max(0, Math.min(100, pct))
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ flexShrink: 0 }} aria-label={p + '% complete'}>
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={TOKENS.s100} strokeWidth={stroke} />
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={pctColor(p)} strokeWidth={stroke} strokeLinecap="round"
+        strokeDasharray={`${(p / 100) * c} ${c}`} transform={`rotate(-90 ${size / 2} ${size / 2})`} />
+      <text x="50%" y="50%" textAnchor="middle" dominantBaseline="central" fontSize={size * 0.26} fontWeight="800" fill={TOKENS.s900}>{p}%</text>
+    </svg>
+  )
+}
+
+function Avatar({ user, size = 52, radius = 13 }) {
+  return (
+    <div style={{ width: size, height: size, borderRadius: radius, overflow: 'hidden', background: `linear-gradient(135deg,${CR},#3D0712)`, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: GOLD, fontSize: size * 0.36, fontWeight: 800 }}>
+      {user?.avatar ? <img src={user.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : ((user?.firstName || '?')[0] || '?')}
+    </div>
+  )
+}
+
+function Stat({ label, value, sub, color = TOKENS.s900 }) {
+  return (
+    <div style={{ background: '#fff', border: '1px solid ' + TOKENS.s100, borderRadius: 14, padding: '14px 18px', flex: '1 1 160px', minWidth: 150 }}>
+      <div style={lbl}>{label}</div>
+      <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 28, fontWeight: 500, color, lineHeight: 1.05 }}>{value}</div>
+      {sub && <div style={{ fontSize: 11.5, color: TOKENS.s500, marginTop: 4 }}>{sub}</div>}
+    </div>
+  )
+}
+
+function Empty({ children }) {
+  return <PCard><div style={{ padding: 18, textAlign: 'center', color: TOKENS.s500, fontSize: 13 }}>{children}</div></PCard>
+}
+
+function Loading() {
+  return <div style={{ color: TOKENS.s500, fontSize: 13, padding: '12px 0' }}>Loading...</div>
+}
+
+function Modal({ title, onClose, width = 620, children, footer }) {
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+  return (
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 90, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 14 }}>
+      <div onClick={e => e.stopPropagation()} role="dialog" aria-label={title}
+        style={{ background: '#fff', borderRadius: 14, width: `min(${width}px,100%)`, maxHeight: '92vh', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ padding: '16px 20px', borderBottom: '1px solid ' + LINE, display: 'flex', alignItems: 'center', gap: 10 }}>
+          <b style={{ fontSize: 15, color: TOKENS.s900, flex: 1 }}>{title}</b>
+          <button onClick={onClose} aria-label="Close" style={{ ...btnS, padding: '3px 9px' }}>✕</button>
+        </div>
+        <div style={{ padding: 20, overflowY: 'auto', display: 'grid', gap: 12 }}>{children}</div>
+        {footer && <div style={{ padding: '12px 20px', borderTop: '1px solid ' + LINE, display: 'flex', gap: 8, justifyContent: 'flex-end' }}>{footer}</div>}
+      </div>
+    </div>
+  )
+}
+
+function Field({ label, children, hint }) {
+  return (
+    <label style={{ display: 'block' }}>
+      <div style={lbl}>{label}</div>
+      {children}
+      {hint && <div style={{ fontSize: 11, color: TOKENS.s500, marginTop: 4 }}>{hint}</div>}
+    </label>
+  )
+}
+
+// Full-screen photo viewer with captions and arrow-key navigation.
+function Lightbox({ items, index, onClose }) {
+  const [i, setI] = useState(index)
+  const n = items.length
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === 'Escape') onClose()
+      if (e.key === 'ArrowRight') setI(x => (x + 1) % n)
+      if (e.key === 'ArrowLeft') setI(x => (x - 1 + n) % n)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [n, onClose])
+  const it = items[i]
+  if (!it) return null
+  const nav = { position: 'absolute', top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,.15)', color: '#fff', border: 'none', borderRadius: 99, width: 44, height: 44, fontSize: 22, cursor: 'pointer' }
+  return (
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(10,6,6,.92)', zIndex: 100, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+      <img src={it.url} alt={it.caption || ''} onClick={e => e.stopPropagation()} style={{ maxWidth: '100%', maxHeight: '80vh', borderRadius: 10, objectFit: 'contain' }} />
+      <div style={{ color: '#fff', fontSize: 13, marginTop: 12, textAlign: 'center' }}>{it.caption || ''}{n > 1 ? `  ·  ${i + 1} / ${n}` : ''}</div>
+      {n > 1 && <>
+        <button aria-label="Previous" onClick={e => { e.stopPropagation(); setI((i - 1 + n) % n) }} style={{ ...nav, left: 16 }}>‹</button>
+        <button aria-label="Next" onClick={e => { e.stopPropagation(); setI((i + 1) % n) }} style={{ ...nav, right: 16 }}>›</button>
+      </>}
+    </div>
+  )
+}
+
+function FileTile({ url, name, mime, onClick }) {
+  if (isImage(url, mime)) {
+    return <img src={url} alt={name || ''} onClick={onClick} style={{ width: '100%', height: '100%', objectFit: 'cover', cursor: onClick ? 'zoom-in' : 'default' }} />
+  }
+  return (
+    <a href={url} target="_blank" rel="noreferrer" style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: TOKENS.goldPale, color: CR, textDecoration: 'none', gap: 4 }}>
+      <span style={{ fontSize: 20, fontWeight: 900 }}>{(String(name || url).split('.').pop() || 'FILE').slice(0, 4).toUpperCase()}</span>
+      <span style={{ fontSize: 10, fontWeight: 700, color: TOKENS.s700 }}>Open</span>
+    </a>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════
+// EVIDENCE PACK — a printable summary for accreditation visits
+// ═══════════════════════════════════════════════════════════
+const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
+
+export async function printEvidencePack(toast) {
+  // Open the window first: browsers block pop-ups opened after an await.
+  const w = window.open('', '_blank')
+  if (!w) { toast?.error?.('Allow pop-ups for this site to print the evidence pack.'); return }
+  w.document.write('<p style="font-family:sans-serif;padding:24px">Preparing the evidence pack...</p>')
+  try {
+    const [s, t, tr, ac] = await Promise.all([
+      api.get('/qa/summary'), api.get('/qa/teachers'), api.get('/qa/trainings'), api.get('/qa/accreditations'),
+    ])
+    const sum = s.data?.data || {}
+    const teachers = t.data?.data?.teachers || []
+    const meta = t.data?.data?.categoryMeta || []
+    const required = t.data?.data?.required || []
+    const trainings = tr.data?.data?.trainings || []
+    const accs = ac.data?.data?.accreditations || []
+    const label = Object.fromEntries(meta.map(c => [c.key, c.label]))
+    const accState = (a) => !a.expiresAt ? 'No expiry' : daysUntil(a.expiresAt) < 0 ? 'EXPIRED ' + fmtD(a.expiresAt) : 'Valid until ' + fmtD(a.expiresAt)
+    const totalHours = trainings.reduce((x, y) => x + (y.durationHours || 0), 0)
+
+    const html = `<!doctype html><html><head><meta charset="utf-8"><title>QA Evidence Pack — Smartious</title>
+<style>
+  body{font-family:Georgia,'Times New Roman',serif;color:#1A0F0E;margin:32px;font-size:12px}
+  h1{font-size:26px;margin:0;color:#7D1025} h2{font-size:16px;color:#7D1025;border-bottom:2px solid #C9A030;padding-bottom:4px;margin:28px 0 10px;page-break-after:avoid}
+  .sub{color:#6B6B6B;font-family:sans-serif;font-size:11px} table{width:100%;border-collapse:collapse;font-family:sans-serif;font-size:10.5px}
+  th,td{border:1px solid #E0D6CC;padding:5px 6px;text-align:left;vertical-align:top} th{background:#FBF6E3}
+  .ok{color:#15803D;font-weight:700} .bad{color:#B91C1C;font-weight:700} .kpis{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .kpi{border:1px solid #E0D6CC;border-radius:8px;padding:8px 12px;font-family:sans-serif;min-width:120px} .kpi b{display:block;font-size:18px}
+  @media print{body{margin:12mm}}
+</style></head><body>
+<h1>Quality Assurance Evidence Pack</h1>
+<div class="sub">Smartious Homeschool Global · generated ${esc(fmtD(new Date()))}</div>
+<div class="kpis">
+  <div class="kpi"><b>${esc(sum.teachers?.complete ?? 0)} / ${esc(sum.teachers?.total ?? 0)}</b>complete staff files</div>
+  <div class="kpi"><b>${esc(sum.teachers?.avgCompleteness ?? 0)}%</b>average file completeness</div>
+  <div class="kpi"><b>${esc(trainings.length)}</b>trainings on record</div>
+  <div class="kpi"><b>${esc(totalHours)}</b>training hours</div>
+  <div class="kpi"><b>${esc(sum.training?.coveragePct ?? 0)}%</b>teachers trained this year</div>
+  <div class="kpi"><b>${esc(accs.length)}</b>accreditations &amp; licences</div>
+</div>
+
+<h2>1. Accreditations, licences and registrations</h2>
+<table><tr><th>Name</th><th>Type</th><th>Issuing body</th><th>Certificate no.</th><th>Issued</th><th>Status</th><th>Scope</th><th>Certificates</th></tr>
+${accs.map(a => `<tr><td>${esc(a.name)}</td><td>${esc(a.type)}</td><td>${esc(a.body)}</td><td>${esc(a.certificateNumber)}</td><td>${esc(fmtD(a.issuedAt))}</td><td class="${a.expiresAt && daysUntil(a.expiresAt) < 0 ? 'bad' : 'ok'}">${esc(accState(a))}</td><td>${esc((a.scope || []).join(', '))}</td><td>${(a.documents || []).length ? (a.documents || []).map(d => `<a href="${esc(d.url)}">${esc(d.name || 'Certificate')}</a>`).join('<br>') : '<span class="bad">None uploaded</span>'}</td></tr>`).join('') || '<tr><td colspan="8">None recorded.</td></tr>'}
+</table>
+
+<h2>2. Staff file register</h2>
+<table><tr><th>Teacher</th><th>Role</th><th>Experience</th>${required.map(k => `<th>${esc(label[k] || k)}</th>`).join('')}<th>Complete</th><th>Training hrs</th></tr>
+${teachers.map(x => `<tr><td>${esc(fullName(x))}</td><td>${esc(x.jobTitle || 'Teacher')}</td><td>${esc(x.yearsOfExperience ? x.yearsOfExperience + ' yrs' : '')}</td>${required.map(k => (x.file?.missing || []).includes(k) ? '<td class="bad">✕</td>' : '<td class="ok">✓</td>').join('')}<td>${esc(x.file?.pct ?? 0)}%</td><td>${esc(x.training?.hours ?? 0)}</td></tr>`).join('') || '<tr><td>No teachers.</td></tr>'}
+</table>
+
+<h2>3. Teacher Development Programme</h2>
+<table><tr><th>Date</th><th>Training</th><th>Category</th><th>Provider</th><th>Mode</th><th>Hours</th><th>Attendees</th><th>Outcomes</th></tr>
+${trainings.map(x => `<tr><td>${esc(fmtD(x.trainingDate))}</td><td>${esc(x.title)}</td><td>${esc(x.category || '')}</td><td>${esc(x.provider)}</td><td>${esc(x.mode)}</td><td>${esc(x.durationHours || 0)}</td><td>${esc((x.attendees || []).map(fullName).join(', '))}</td><td>${esc(x.outcomes || x.description || '')}</td></tr>`).join('') || '<tr><td colspan="8">No trainings recorded.</td></tr>'}
+</table>
+<script>window.onload=function(){setTimeout(function(){window.print()},300)}</script>
+</body></html>`
+    w.document.open(); w.document.write(html); w.document.close()
+  } catch (e) {
+    w.document.body.innerHTML = '<p style="font-family:sans-serif;padding:24px;color:#B91C1C">Could not build the evidence pack: ' + esc(errMsg(e, e?.message || 'error')) + '</p>'
+  }
+}
+
+// One teacher's profile, staff file and training record.
+function printTeacherProfile(p) {
+  const w = window.open('', '_blank')
+  if (!w) return
+  const t = p.teacher
+  const meta = p.categoryMeta || []
+  const byCat = {}
+  for (const d of p.documents) (byCat[d.category] = byCat[d.category] || []).push(d)
+  const rows = meta.filter(c => c.group === 'personnel').map(c => {
+    const docs = byCat[c.key] || []
+    const missing = (p.file.missing || []).includes(c.key)
+    const status = docs.length === 0 ? (c.required ? '<span class="bad">Missing</span>' : '—') : missing ? '<span class="bad">Expired</span>' : '<span class="ok">On file</span>'
+    const detail = docs.map(d => esc(d.title) + (d.expiresAt ? ' (expires ' + esc(fmtD(d.expiresAt)) + ')' : '') + (d.verifiedAt ? ' ✓ verified ' + esc(fmtD(d.verifiedAt)) : '')).join('<br>')
+    return `<tr><td>${esc(c.label)}${c.required ? ' *' : ''}</td><td>${status}</td><td>${detail}</td></tr>`
+  }).join('')
+  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(fullName(t))} — Teacher profile</title>
+<style>body{font-family:Georgia,serif;color:#1A0F0E;margin:32px;font-size:12px}h1{color:#7D1025;margin:0;font-size:24px}
+h2{font-size:15px;color:#7D1025;border-bottom:2px solid #C9A030;padding-bottom:3px;margin:22px 0 8px}
+table{width:100%;border-collapse:collapse;font-family:sans-serif;font-size:11px}th,td{border:1px solid #E0D6CC;padding:5px 6px;text-align:left;vertical-align:top}th{background:#FBF6E3}
+.ok{color:#15803D;font-weight:700}.bad{color:#B91C1C;font-weight:700}.sub{font-family:sans-serif;color:#6B6B6B}</style></head><body>
+<h1>${esc(fullName(t))}</h1>
+<div class="sub">${esc(t.jobTitle || 'Teacher')}${t.yearsOfExperience ? ' · ' + esc(t.yearsOfExperience) + ' years experience' : ''} · ${esc([t.email, t.phone].filter(Boolean).join(' · '))}</div>
+${t.bio ? `<p>${esc(t.bio)}</p>` : ''}
+${(t.qualifications || []).length ? `<h2>Qualifications</h2>${t.qualifications.map(q => `<div>${esc(q)}</div>`).join('')}` : ''}
+${(t.certifications || []).length ? `<h2>Certifications</h2>${t.certifications.map(q => `<div>${esc(q)}</div>`).join('')}` : ''}
+<h2>Staff file — ${esc(p.file.have)}/${esc(p.file.required)} required documents (${esc(p.file.pct)}%)</h2>
+<table><tr><th>Document</th><th>Status</th><th>Detail</th></tr>${rows}</table>
+<h2>Professional development — ${esc(p.trainingHours)} hours</h2>
+<table><tr><th>Date</th><th>Training</th><th>Category</th><th>Provider</th><th>Hours</th></tr>
+${p.trainings.map(x => `<tr><td>${esc(fmtD(x.trainingDate))}</td><td>${esc(x.title)}</td><td>${esc(x.category || '')}</td><td>${esc(x.provider || '')}</td><td>${esc(x.durationHours || 0)}</td></tr>`).join('') || '<tr><td colspan="5">None recorded.</td></tr>'}</table>
+<p class="sub">Printed ${esc(fmtD(new Date()))} · Smartious Homeschool Global</p>
+<script>window.onload=function(){setTimeout(function(){window.print()},300)}</script></body></html>`)
+  w.document.close()
+}
+
+// ═══════════════════════════════════════════════════════════
+// 0. QA OVERVIEW (dashboard)
+// ═══════════════════════════════════════════════════════════
+export function QAOverviewModule({ toast, setPage }) {
+  const [s, setS] = useState(null)
+  const [err, setErr] = useState('')
+  const [lightbox, setLightbox] = useState(null)
+
+  useEffect(() => {
+    api.get('/qa/summary')
+      .then(r => setS(r.data?.data || null))
+      .catch(e => setErr(errMsg(e, 'Could not load the QA summary.')))
+  }, [])
+
+  const go = (p) => setPage && setPage(p)
+  const t = s?.teachers, d = s?.documents, tr = s?.training, ac = s?.accreditations
+
+  return (
+    <>
+      <PSection tag="QA Portal" title="Quality" em="Assurance"
+        sub="Staff files, teacher development and accreditation evidence — ready for any inspection."
+        action={<button style={btnP} onClick={() => printEvidencePack(toast)}>Print evidence pack</button>} />
+      {err && <Empty>{err}</Empty>}
+      {!s && !err && <Loading />}
+      {s && <>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 18 }}>
+          <Stat label="Complete staff files" value={`${t.complete}/${t.total}`} sub={`${t.avgCompleteness}% average completeness`} color={pctColor(t.avgCompleteness)} />
+          <Stat label="Documents verified" value={`${d.verified}/${d.total}`} sub={d.expiringCount ? `${d.expiringCount} expired or expiring` : 'none expiring'} color={d.expiringCount ? WARN : TOKENS.s900} />
+          <Stat label="Trainings this year" value={tr.thisYear} sub={`${tr.hoursThisYear} hours · ${tr.total} on record`} />
+          <Stat label="Teachers trained" value={`${tr.coveragePct}%`} sub={`${tr.teachersReachedThisYear} of ${t.total} this year`} color={pctColor(tr.coveragePct)} />
+          <Stat label="Accreditations" value={`${ac.valid + ac.permanent}/${ac.total}`} sub={ac.expired ? `${ac.expired} expired` : ac.expiring ? `${ac.expiring} expiring soon` : 'all in date'} color={ac.expired ? BAD : ac.expiring ? WARN : OK} />
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 14, marginBottom: 14 }}>
+          <PCard padding={18}>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
+              <h3 style={{ ...h3, margin: 0, flex: 1 }}>Staff files needing attention</h3>
+              <button style={btnS} onClick={() => go('teacherprofiles')}>All teachers</button>
+            </div>
+            {t.attention.length === 0 ? <div style={{ fontSize: 13, color: OK, fontWeight: 700 }}>Every teacher's file is complete.</div> :
+              t.attention.map(x => (
+                <div key={x._id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 0', borderTop: '1px solid ' + TOKENS.s100 }}>
+                  <Avatar user={{ avatar: x.avatar, firstName: x.name }} size={30} radius={8} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 12.5, fontWeight: 700, color: TOKENS.s900, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{x.name}</div>
+                    <div style={{ height: 5, background: TOKENS.s100, borderRadius: 9, marginTop: 4 }}>
+                      <div style={{ width: x.pct + '%', height: '100%', background: pctColor(x.pct), borderRadius: 9 }} />
+                    </div>
+                  </div>
+                  <span style={{ fontSize: 11, color: TOKENS.s500, whiteSpace: 'nowrap' }}>{x.missing} missing</span>
+                </div>
+              ))}
+          </PCard>
+
+          <PCard padding={18}>
+            <h3 style={h3}>Expired &amp; expiring documents</h3>
+            {d.expiring.length === 0 ? <div style={{ fontSize: 13, color: OK, fontWeight: 700 }}>Nothing expiring in the next 60 days.</div> :
+              d.expiring.map((x, i) => (
+                <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'center', padding: '7px 0', borderTop: '1px solid ' + TOKENS.s100 }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 12.5, fontWeight: 700, color: TOKENS.s900 }}>{x.teacher}</div>
+                    <div style={{ fontSize: 11.5, color: TOKENS.s500 }}>{x.label}</div>
+                  </div>
+                  <span style={chip(x.expired ? '#FEE2E2' : '#FEF3C7', x.expired ? BAD : WARN)}>
+                    {x.expired ? 'Expired ' + fmtD(x.expiresAt) : 'Expires in ' + daysUntil(x.expiresAt) + 'd'}
+                  </span>
+                </div>
+              ))}
+          </PCard>
+
+          <PCard padding={18}>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
+              <h3 style={{ ...h3, margin: 0, flex: 1 }}>Accreditation alerts</h3>
+              <button style={btnS} onClick={() => go('accreditations')}>Open</button>
+            </div>
+            {ac.total === 0 ? <div style={{ fontSize: 13, color: TOKENS.s500 }}>No accreditations recorded yet.</div> :
+              ac.alerts.length === 0 ? <div style={{ fontSize: 13, color: OK, fontWeight: 700 }}>All accreditations are in date with certificates on file.</div> :
+                ac.alerts.map((x, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'center', padding: '7px 0', borderTop: '1px solid ' + TOKENS.s100 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 12.5, fontWeight: 700, color: TOKENS.s900 }}>{x.name}</div>
+                      <div style={{ fontSize: 11.5, color: TOKENS.s500 }}>{x.body || x.type}</div>
+                    </div>
+                    <span style={chip(x.status === 'expired' ? '#FEE2E2' : '#FEF3C7', x.status === 'expired' ? BAD : WARN)}>
+                      {x.status === 'no-certificate' ? 'No certificate' : x.status === 'expired' ? 'Expired' : 'Expires in ' + daysUntil(x.expiresAt) + 'd'}
+                    </span>
+                  </div>
+                ))}
+          </PCard>
+        </div>
+
+        <PCard padding={18}>
+          <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
+            <h3 style={{ ...h3, margin: 0, flex: 1 }}>Recent teacher development</h3>
+            <button style={btnS} onClick={() => go('tdp')}>Teacher Development</button>
+          </div>
+          {tr.recent.length === 0 ? <div style={{ fontSize: 13, color: TOKENS.s500 }}>No trainings recorded yet.</div> : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
+              {tr.recent.map(x => (
+                <div key={x._id} style={{ border: '1px solid ' + LINE, borderRadius: 12, overflow: 'hidden' }}>
+                  <div style={{ height: 120, background: TOKENS.goldPale }}>
+                    {x.photos?.[0] ? <img src={x.photos[0].url} alt="" onClick={() => setLightbox({ items: x.photos, index: 0 })} style={{ width: '100%', height: '100%', objectFit: 'cover', cursor: 'zoom-in' }} />
+                      : <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: GOLD, fontWeight: 800, fontSize: 12 }}>No photos</div>}
+                  </div>
+                  <div style={{ padding: 10 }}>
+                    <div style={{ fontSize: 13, fontWeight: 800, color: TOKENS.s900 }}>{x.title}</div>
+                    <div style={{ fontSize: 11.5, color: TOKENS.s500, marginTop: 2 }}>{fmtD(x.trainingDate)} · {x.durationHours || 0}h · {(x.attendees || []).length} teachers</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </PCard>
+
+        <div style={{ fontSize: 11.5, color: TOKENS.s500, marginTop: 12 }}>
+          Required in every staff file: {t.requiredCategories.map(c => c.label).join(' · ')}.
+        </div>
+      </>}
+      {lightbox && <Lightbox items={lightbox.items} index={lightbox.index} onClose={() => setLightbox(null)} />}
+    </>
+  )
 }
 
 // ═══════════════════════════════════════════════════════════
 // 1. TEACHER PROFILES
 // ═══════════════════════════════════════════════════════════
 export function TeacherProfilesModule({ toast }) {
-  const [teachers, setTeachers] = useState([])
+  const [rows, setRows] = useState([])
+  const [meta, setMeta] = useState([])
   const [loading, setLoading] = useState(true)
-  const [sel, setSel] = useState(null)        // selected teacher
-  const [docs, setDocs] = useState(null)      // their documents
   const [search, setSearch] = useState('')
+  const [show, setShow] = useState('all')       // all | incomplete | complete | attention
+  const [sort, setSort] = useState('name')      // name | file | training
+  const [selId, setSelId] = useState(null)
 
-  useEffect(() => {
-    api.get('/users', { params: { role: 'teacher' } })
-      .then(r => setTeachers((r.data?.users || []).filter(u => u.role === 'teacher')))
-      .catch(() => toast?.error?.('Could not load teachers.'))
+  const load = useCallback(() => {
+    setLoading(true)
+    api.get('/qa/teachers')
+      .then(r => { setRows(r.data?.data?.teachers || []); setMeta(r.data?.data?.categoryMeta || []) })
+      .catch(e => toast?.error?.(errMsg(e, 'Could not load teachers.')))
       .finally(() => setLoading(false))
-  }, [])
+  }, [toast])
+  useEffect(() => { load() }, [load])
 
-  const open = async (t) => {
-    setSel(t); setDocs(null)
-    try {
-      const { data } = await api.get('/teacher-documents/teacher/' + t._id)
-      setDocs(data?.data?.documents || data?.documents || [])
-    } catch { setDocs([]) }
-  }
+  const list = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    let out = rows.filter(t => !q || (fullName(t) + ' ' + (t.jobTitle || '') + ' ' + (t.subjects || []).join(' ')).toLowerCase().includes(q))
+    if (show === 'incomplete') out = out.filter(t => t.file.have < t.file.required)
+    if (show === 'complete') out = out.filter(t => t.file.have === t.file.required)
+    if (show === 'attention') out = out.filter(t => t.file.expired.length || t.file.expiring.length)
+    const by = { name: (a, b) => fullName(a).localeCompare(fullName(b)), file: (a, b) => a.file.pct - b.file.pct, training: (a, b) => b.training.hours - a.training.hours }
+    return [...out].sort(by[sort])
+  }, [rows, search, show, sort])
 
-  const list = teachers.filter(t => !search || ((t.firstName || '') + ' ' + (t.lastName || '')).toLowerCase().includes(search.toLowerCase()))
+  if (selId) return <TeacherProfile id={selId} toast={toast} onBack={() => { setSelId(null); load() }} />
 
-  if (sel) {
-    const byCat = {}
-    for (const d of (docs || [])) { (byCat[d.category] = byCat[d.category] || []).push(d) }
-    return (
-      <>
-        <PSection tag="QA Portal" title="Teacher" em="Profile" sub="Profile, qualifications and the documents this teacher has filed."/>
-        <button onClick={() => { setSel(null); setDocs(null) }} style={{ ...btnG, marginBottom: 14 }}>Back to all teachers</button>
-        <PCard>
-          <div style={{ display: 'flex', gap: 18, padding: 18, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-            <div style={{ width: 86, height: 86, borderRadius: 18, overflow: 'hidden', background: 'linear-gradient(135deg,' + CR + ',#3D0712)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: GOLD, fontSize: 30, fontWeight: 800 }}>
-              {sel.avatar ? <img src={sel.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : ((sel.firstName || '?')[0] || '?')}
-            </div>
-            <div style={{ flex: 1, minWidth: 240 }}>
-              <div style={{ fontSize: 19, fontWeight: 800, color: TOKENS.s900 }}>{sel.firstName} {sel.lastName}</div>
-              <div style={{ fontSize: 12.5, color: TOKENS.s500, marginTop: 2 }}>{sel.jobTitle || 'Teacher'}{sel.yearsOfExperience ? ' · ' + sel.yearsOfExperience + ' years experience' : ''}</div>
-              {sel.bio && <div style={{ fontSize: 13, color: TOKENS.s700, marginTop: 10, lineHeight: 1.65, maxWidth: 640 }}>{sel.bio}</div>}
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 12 }}>
-                {(sel.teachingSpecialties || []).map((s, i) => (
-                  <span key={i} style={chip('#FDF2F4', CR)}>{s.subjectId?.subjectName || s.subjectName || s.curriculum || 'Specialty'}</span>
-                ))}
-              </div>
-              {(sel.qualifications || []).length > 0 && (
-                <div style={{ marginTop: 12 }}>
-                  <div style={{ fontSize: 10.5, fontWeight: 800, color: GOLD, letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 5 }}>Qualifications</div>
-                  {(sel.qualifications || []).map((q, i) => <div key={i} style={{ fontSize: 12.5, color: TOKENS.s700, padding: '2px 0' }}>{typeof q === 'string' ? q : (q.title || q.name || '')}</div>)}
-                </div>
-              )}
-            </div>
-          </div>
-        </PCard>
-        <div style={{ height: 14 }} />
-        <PCard>
-          <div style={{ padding: 18 }}>
-            <div style={{ fontSize: 13, fontWeight: 800, color: CR, marginBottom: 12, textTransform: 'uppercase', letterSpacing: '.08em' }}>Filed documents {docs ? '(' + docs.length + ')' : ''}</div>
-            {docs === null && <div style={{ color: TOKENS.s500, fontSize: 13 }}>Loading documents...</div>}
-            {docs !== null && docs.length === 0 && <div style={{ color: TOKENS.s500, fontSize: 13 }}>No documents filed yet.</div>}
-            {Object.entries(byCat).map(([cat, items]) => (
-              <div key={cat} style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 11.5, fontWeight: 800, color: TOKENS.s700, marginBottom: 6 }}>{cat} <span style={{ color: TOKENS.s400, fontWeight: 600 }}>({items.length})</span></div>
-                {items.map(d => (
-                  <div key={d._id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 10px', border: '1px solid ' + LINE, borderRadius: 9, marginBottom: 6 }}>
-                    <span style={{ flex: 1, fontSize: 12.5, color: TOKENS.s900, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.title || d.fileName}</span>
-                    {d.filedByStaff && <span style={chip(TOKENS.goldPale || '#FBF6E3', '#92400E')}>Filed by staff</span>}
-                    <span style={{ fontSize: 11, color: TOKENS.s400 }}>{fmtD(d.createdAt)}</span>
-                    <a href={d.fileUrl || d.url} target="_blank" rel="noreferrer" style={{ ...btnG, padding: '5px 12px', fontSize: 11.5, textDecoration: 'none' }}>Open</a>
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
-        </PCard>
-      </>
-    )
-  }
+  const complete = rows.filter(t => t.file.have === t.file.required).length
+  const avg = rows.length ? Math.round(rows.reduce((s, t) => s + t.file.pct, 0) / rows.length) : 0
+  const hours = rows.reduce((s, t) => s + (t.training.hours || 0), 0)
+  const verified = rows.reduce((s, t) => s + (t.file.verified || 0), 0)
 
   return (
     <>
-      <PSection tag="QA Portal" title="Teacher" em="Profiles" sub="Every teacher with their profile and filed documents, one click deep."/>
-      <input style={{ ...inp, maxWidth: 320, marginBottom: 16 }} placeholder="Search teachers..." value={search} onChange={e => setSearch(e.target.value)} />
-      {loading ? <div style={{ color: TOKENS.s500, fontSize: 13 }}>Loading teachers...</div> : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))', gap: 14 }}>
+      <PSection tag="QA Portal" title="Teacher" em="Profiles"
+        sub={`Every teacher's profile, personnel file and professional development. Required files: ${meta.filter(c => c.required).length || 8} documents each.`} />
+      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 16 }}>
+        <Stat label="Teachers" value={rows.length} />
+        <Stat label="Complete files" value={`${complete}/${rows.length}`} color={pctColor(rows.length ? (complete / rows.length) * 100 : 0)} />
+        <Stat label="Average completeness" value={avg + '%'} color={pctColor(avg)} />
+        <Stat label="Documents verified" value={verified} />
+        <Stat label="Training hours" value={hours} sub="all teachers, all time" />
+      </div>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginBottom: 16 }}>
+        <input style={{ ...inp, maxWidth: 280 }} placeholder="Search name, role or subject..." value={search} onChange={e => setSearch(e.target.value)} />
+        {[['all', 'All'], ['incomplete', 'Incomplete files'], ['attention', 'Expired / expiring'], ['complete', 'Complete']].map(([k, l]) => (
+          <button key={k} onClick={() => setShow(k)} style={{ ...btnS, ...(show === k ? { borderColor: CR, color: CR, background: '#FDF2F4' } : {}) }}>{l}</button>
+        ))}
+        <select style={{ ...inp, width: 'auto' }} value={sort} onChange={e => setSort(e.target.value)} aria-label="Sort">
+          <option value="name">Sort: name</option><option value="file">Sort: least complete first</option><option value="training">Sort: most trained</option>
+        </select>
+      </div>
+      {loading ? <Loading /> : list.length === 0 ? <Empty>No teachers match.</Empty> : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 14 }}>
           {list.map(t => (
-            <PCard key={t._id}>
-              <button onClick={() => open(t)} style={{ display: 'block', width: '100%', textAlign: 'left', background: 'none', border: 'none', padding: 16, cursor: 'pointer' }}>
+            <PCard key={t._id} padding={0}>
+              <button onClick={() => setSelId(t._id)} style={{ display: 'block', width: '100%', textAlign: 'left', background: 'none', border: 'none', padding: 16, cursor: 'pointer', fontFamily: 'inherit' }}>
                 <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                  <div style={{ width: 52, height: 52, borderRadius: 13, overflow: 'hidden', background: 'linear-gradient(135deg,' + CR + ',#3D0712)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: GOLD, fontSize: 19, fontWeight: 800 }}>
-                    {t.avatar ? <img src={t.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : ((t.firstName || '?')[0] || '?')}
+                  <Avatar user={t} />
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div style={{ fontSize: 14, fontWeight: 800, color: TOKENS.s900, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{fullName(t)}</div>
+                    <div style={{ fontSize: 11.5, color: TOKENS.s500 }}>{t.jobTitle || 'Teacher'}{t.yearsOfExperience ? ' · ' + t.yearsOfExperience + ' yrs' : ''}</div>
                   </div>
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: 14, fontWeight: 800, color: TOKENS.s900, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.firstName} {t.lastName}</div>
-                    <div style={{ fontSize: 11.5, color: TOKENS.s500 }}>{t.jobTitle || 'Teacher'}</div>
-                  </div>
+                  <Ring pct={t.file.pct} />
+                </div>
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 12 }}>
+                  <span style={chip(TOKENS.s50, TOKENS.s700)}>File {t.file.have}/{t.file.required}</span>
+                  <span style={chip(TOKENS.goldPale, '#92400E')}>{t.training.hours || 0}h training</span>
+                  {t.file.expired.length > 0 && <span style={chip('#FEE2E2', BAD)}>{t.file.expired.length} expired</span>}
+                  {t.file.expiring.length > 0 && <span style={chip('#FEF3C7', WARN)}>{t.file.expiring.length} expiring</span>}
+                  {t.isOnLeave && <span style={chip('#E0E7FF', '#3730A3')}>On leave</span>}
                 </div>
               </button>
             </PCard>
@@ -152,313 +498,717 @@ export function TeacherProfilesModule({ toast }) {
   )
 }
 
+function docState(d) {
+  if (d.expiresAt) {
+    const n = daysUntil(d.expiresAt)
+    if (n < 0) return { text: 'Expired ' + fmtD(d.expiresAt), bg: '#FEE2E2', fg: BAD }
+    if (n <= 60) return { text: 'Expires in ' + n + 'd', bg: '#FEF3C7', fg: WARN }
+    return { text: 'Valid to ' + fmtD(d.expiresAt), bg: '#DCFCE7', fg: OK }
+  }
+  return null
+}
+
+function TeacherProfile({ id, toast, onBack }) {
+  const [p, setP] = useState(null)
+  const [upload, setUpload] = useState(null)     // { category } when open
+  const [busy, setBusy] = useState('')
+
+  const load = useCallback(() => {
+    api.get('/qa/teachers/' + id)
+      .then(r => setP(r.data?.data || null))
+      .catch(e => toast?.error?.(errMsg(e, 'Could not load this teacher.')))
+  }, [id, toast])
+  useEffect(() => { load() }, [load])
+
+  const verify = async (d) => {
+    setBusy(d._id)
+    try {
+      const { data } = await api.patch('/teacher-documents/' + d._id + '/verify', { verified: !d.verifiedAt })
+      toast?.ok?.(data?.message || 'Updated.'); load()
+    } catch (e) { toast?.error?.(errMsg(e, 'Could not update verification.')) }
+    setBusy('')
+  }
+  const remove = async (d) => {
+    if (!window.confirm('Delete "' + d.title + '" from this teacher\'s file?')) return
+    setBusy(d._id)
+    try { await api.delete('/teacher-documents/' + d._id); toast?.ok?.('Deleted.'); load() }
+    catch (e) { toast?.error?.(errMsg(e, 'Could not delete. Only the uploader or an admin can delete.')) }
+    setBusy('')
+  }
+
+  if (!p) return (<><button onClick={onBack} style={{ ...btnG, marginBottom: 14 }}>← All teachers</button><Loading /></>)
+
+  const t = p.teacher
+  const meta = p.categoryMeta || []
+  const byCat = {}
+  for (const d of p.documents) (byCat[d.category] = byCat[d.category] || []).push(d)
+  const personnel = meta.filter(c => c.group === 'personnel')
+  const teaching = meta.filter(c => c.group === 'teaching' && byCat[c.key]?.length)
+  const specialties = (t.teachingSpecialties || []).map(s => [s.subjectId?.subjectName, s.curriculum || s.subjectId?.curriculum].filter(Boolean).join(' · ')).filter(Boolean)
+
+  const DocRow = ({ d }) => {
+    const st = docState(d)
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', border: '1px solid ' + LINE, borderRadius: 9, marginTop: 6, flexWrap: 'wrap' }}>
+        <div style={{ flex: '1 1 200px', minWidth: 0 }}>
+          <div style={{ fontSize: 12.5, fontWeight: 700, color: TOKENS.s900, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.title}</div>
+          <div style={{ fontSize: 11, color: TOKENS.s500 }}>
+            {fmtD(d.createdAt)}{d.uploadedBy && String(d.uploadedBy) !== String(t._id) && d.uploadedByName ? ' · filed by ' + d.uploadedByName : ''}
+          </div>
+        </div>
+        {st && <span style={chip(st.bg, st.fg)}>{st.text}</span>}
+        {d.verifiedAt && <span style={chip('#DCFCE7', OK)} title={'Verified by ' + (d.verifiedByName || 'QA') + ' on ' + fmtD(d.verifiedAt)}>✓ Verified</span>}
+        <a href={d.file?.url} target="_blank" rel="noreferrer" style={btnS}>Open</a>
+        <button style={btnS} disabled={busy === d._id} onClick={() => verify(d)}>{d.verifiedAt ? 'Unverify' : 'Verify'}</button>
+        <button style={{ ...btnS, color: BAD, borderColor: '#FCA5A5' }} disabled={busy === d._id} onClick={() => remove(d)}>Delete</button>
+      </div>
+    )
+  }
+
+  return (
+    <>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
+        <button onClick={onBack} style={btnG}>← All teachers</button>
+        <span style={{ flex: 1 }} />
+        <button style={btnG} onClick={() => printTeacherProfile(p)}>Print profile</button>
+        <button style={btnP} onClick={() => setUpload({ category: p.file.missing[0] || 'cv' })}>+ Add document</button>
+      </div>
+
+      <PCard padding={20}>
+        <div style={{ display: 'flex', gap: 18, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+          <Avatar user={t} size={92} radius={20} />
+          <div style={{ flex: 1, minWidth: 240 }}>
+            <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 24, color: TOKENS.s900 }}>{fullName(t)}</div>
+            <div style={{ fontSize: 13, color: TOKENS.s500, marginTop: 2 }}>
+              {t.jobTitle || 'Teacher'}{t.yearsOfExperience ? ' · ' + t.yearsOfExperience + ' years experience' : ''}{t.createdAt ? ' · with Smartious since ' + fmtD(t.createdAt) : ''}
+            </div>
+            <div style={{ fontSize: 12, color: TOKENS.s500, marginTop: 4 }}>{[t.email, t.phone].filter(Boolean).join(' · ')}</div>
+            {t.bio && <div style={{ fontSize: 13, color: TOKENS.s700, marginTop: 10, lineHeight: 1.65, maxWidth: 720 }}>{t.bio}</div>}
+            {specialties.length > 0 && (
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 12 }}>
+                {specialties.map((s, i) => <span key={i} style={chip('#FDF2F4', CR)}>{s}</span>)}
+              </div>
+            )}
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <Ring pct={p.file.pct} size={84} stroke={8} />
+            <div style={{ fontSize: 11, color: TOKENS.s500, marginTop: 4 }}>Staff file {p.file.have}/{p.file.required}</div>
+            <div style={{ fontSize: 11, color: TOKENS.s500 }}>{p.trainingHours}h training</div>
+          </div>
+        </div>
+        {[['Qualifications', t.qualifications], ['Certifications', t.certifications], ['Specialisations', t.specializations]].some(([, v]) => v?.length) && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14, marginTop: 16, paddingTop: 14, borderTop: '1px solid ' + LINE }}>
+            {[['Qualifications', t.qualifications], ['Certifications', t.certifications], ['Specialisations', t.specializations]].map(([k, v]) => v?.length ? (
+              <div key={k}>
+                <div style={{ ...lbl, color: GOLD }}>{k}</div>
+                {v.map((q, i) => <div key={i} style={{ fontSize: 12.5, color: TOKENS.s700, padding: '2px 0' }}>{q}</div>)}
+              </div>
+            ) : null)}
+          </div>
+        )}
+      </PCard>
+
+      <div style={{ height: 14 }} />
+      <PCard padding={20}>
+        <h3 style={h3}>Personnel file</h3>
+        <div style={{ display: 'grid', gap: 10 }}>
+          {personnel.map(c => {
+            const docs = byCat[c.key] || []
+            const missing = p.file.missing.includes(c.key)
+            const expired = docs.length > 0 && missing
+            const state = docs.length === 0
+              ? (c.required ? { t: 'Missing', bg: '#FEE2E2', fg: BAD } : { t: 'None', bg: TOKENS.s50, fg: TOKENS.s500 })
+              : expired ? { t: 'Expired', bg: '#FEE2E2', fg: BAD }
+                : docs.every(d => d.verifiedAt) ? { t: 'Verified', bg: '#DCFCE7', fg: OK }
+                  : { t: 'On file', bg: '#E0F2FE', fg: '#0369A1' }
+            return (
+              <div key={c.key} style={{ padding: '10px 12px', background: TOKENS.s50, borderRadius: 11 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 13, fontWeight: 800, color: TOKENS.s900, flex: 1 }}>{c.label}{c.required ? '' : <span style={{ fontWeight: 600, color: TOKENS.s500 }}> (optional)</span>}</span>
+                  <span style={chip(state.bg, state.fg)}>{state.t}</span>
+                  <button style={btnS} onClick={() => setUpload({ category: c.key })}>+ Upload</button>
+                </div>
+                {docs.map(d => <DocRow key={d._id} d={d} />)}
+              </div>
+            )
+          })}
+        </div>
+      </PCard>
+
+      <div style={{ height: 14 }} />
+      <PCard padding={20}>
+        <h3 style={h3}>Teaching documents</h3>
+        {teaching.length === 0 ? <div style={{ fontSize: 13, color: TOKENS.s500 }}>No schemes of work, lesson plans or records filed yet.</div> :
+          teaching.map(c => (
+            <div key={c.key} style={{ marginBottom: 12 }}>
+              <div style={{ fontSize: 12, fontWeight: 800, color: TOKENS.s700 }}>{c.label} <span style={{ color: TOKENS.s400, fontWeight: 600 }}>({byCat[c.key].length})</span></div>
+              {byCat[c.key].map(d => <DocRow key={d._id} d={d} />)}
+            </div>
+          ))}
+      </PCard>
+
+      <div style={{ height: 14 }} />
+      <PCard padding={20}>
+        <h3 style={h3}>Professional development · {p.trainingHours} hours</h3>
+        {p.trainings.length === 0 ? <div style={{ fontSize: 13, color: TOKENS.s500 }}>No trainings recorded for this teacher yet.</div> : (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12.5, minWidth: 520 }}>
+              <thead><tr>{['Date', 'Training', 'Category', 'Provider', 'Hours'].map(h => <th key={h} style={{ textAlign: 'left', padding: '6px 8px', ...lbl, borderBottom: '1px solid ' + LINE }}>{h}</th>)}</tr></thead>
+              <tbody>
+                {p.trainings.map(x => (
+                  <tr key={x._id} style={{ borderBottom: '1px solid ' + TOKENS.s100 }}>
+                    <td style={{ padding: '7px 8px', whiteSpace: 'nowrap' }}>{fmtD(x.trainingDate)}</td>
+                    <td style={{ padding: '7px 8px', fontWeight: 700 }}>{x.title}</td>
+                    <td style={{ padding: '7px 8px' }}>{x.category || ''}</td>
+                    <td style={{ padding: '7px 8px' }}>{x.provider || ''}</td>
+                    <td style={{ padding: '7px 8px' }}>{x.durationHours || 0}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </PCard>
+
+      {upload && <UploadDocModal teacher={t} meta={meta} initialCategory={upload.category} toast={toast}
+        onClose={() => setUpload(null)} onDone={() => { setUpload(null); load() }} />}
+    </>
+  )
+}
+
+function UploadDocModal({ teacher, meta, initialCategory, toast, onClose, onDone }) {
+  const [f, setF] = useState({ category: initialCategory, title: '', expiresAt: '', description: '', file: null })
+  const [busy, setBusy] = useState(false)
+  const cat = meta.find(c => c.key === f.category) || {}
+
+  const save = async () => {
+    if (!f.file) { toast?.error?.('Choose a file to upload.'); return }
+    const title = f.title.trim() || cat.label || f.file.name
+    setBusy(true)
+    try {
+      await uploadTeacherDoc(teacher._id, f.file, { category: f.category, title, description: f.description, expiresAt: f.expiresAt || null })
+      toast?.ok?.('Filed in ' + fullName(teacher) + "'s file.")
+      onDone()
+    } catch (e) { toast?.error?.(errMsg(e, e?.message || 'Upload failed.')) }
+    setBusy(false)
+  }
+
+  return (
+    <Modal title={'Add to ' + fullName(teacher) + "'s file"} onClose={onClose}
+      footer={<><button style={btnG} onClick={onClose}>Cancel</button><button style={btnP} disabled={busy} onClick={save}>{busy ? 'Uploading...' : 'Upload'}</button></>}>
+      <Field label="Category">
+        <select style={inp} value={f.category} onChange={e => setF(x => ({ ...x, category: e.target.value }))}>
+          <optgroup label="Personnel file">{meta.filter(c => c.group === 'personnel').map(c => <option key={c.key} value={c.key}>{c.label}{c.required ? ' *' : ''}</option>)}</optgroup>
+          <optgroup label="Teaching documents">{meta.filter(c => c.group === 'teaching').map(c => <option key={c.key} value={c.key}>{c.label}</option>)}</optgroup>
+        </select>
+      </Field>
+      <Field label="Title" hint="Leave blank to use the category name.">
+        <input style={inp} value={f.title} placeholder={cat.label || ''} onChange={e => setF(x => ({ ...x, title: e.target.value }))} />
+      </Field>
+      <Field label={cat.expires ? 'Expiry date' : 'Expiry date (if any)'} hint={cat.expires ? 'This document lapses; QA is alerted 60 days before.' : ''}>
+        <input style={inp} type="date" value={f.expiresAt} onChange={e => setF(x => ({ ...x, expiresAt: e.target.value }))} />
+      </Field>
+      <Field label="Notes">
+        <textarea style={{ ...inp, resize: 'vertical' }} rows={2} value={f.description} onChange={e => setF(x => ({ ...x, description: e.target.value }))} />
+      </Field>
+      <Field label="File" hint="PDF, Word, Excel, PowerPoint or image, up to 50 MB.">
+        <input type="file" accept="application/pdf,image/*,.doc,.docx,.xls,.xlsx,.ppt,.pptx" onChange={e => setF(x => ({ ...x, file: e.target.files?.[0] || null }))} />
+      </Field>
+    </Modal>
+  )
+}
+
 // ═══════════════════════════════════════════════════════════
 // 2. TEACHER DEVELOPMENT PROGRAMME (TDP)
 // ═══════════════════════════════════════════════════════════
-const emptyTraining = { title: '', provider: '', trainingDate: '', durationHours: '', mode: 'In person', description: '', attendees: [], photos: [], files: [] }
+const emptyTraining = { title: '', provider: '', trainingDate: '', durationHours: '', mode: 'In person', category: 'Pedagogy', location: '', description: '', outcomes: '', attendees: [], photos: [], files: [] }
 
 export function TDPModule({ toast }) {
   const [rows, setRows] = useState([])
   const [teachers, setTeachers] = useState([])
   const [loading, setLoading] = useState(true)
-  const [modal, setModal] = useState(null)       // training form state
-  const [saving, setSaving] = useState(false)
-  const [uploading, setUploading] = useState(false)
+  const [tab, setTab] = useState('trainings')   // trainings | hours
+  const [search, setSearch] = useState('')
+  const [year, setYear] = useState('')
+  const [cat, setCat] = useState('')
+  const [modal, setModal] = useState(null)
+  const [lightbox, setLightbox] = useState(null)
+  const [open, setOpen] = useState({})           // expanded outcome text per training
 
-  const load = () => api.get('/qa/trainings')
+  const load = useCallback(() => api.get('/qa/trainings')
     .then(r => setRows(r.data?.data?.trainings || []))
-    .catch(() => toast?.error?.('Could not load trainings.'))
-    .finally(() => setLoading(false))
+    .catch(e => toast?.error?.(errMsg(e, 'Could not load trainings.')))
+    .finally(() => setLoading(false)), [toast])
   useEffect(() => {
     load()
     api.get('/users', { params: { role: 'teacher' } })
-      .then(r => setTeachers((r.data?.users || []).filter(u => u.role === 'teacher')))
+      .then(r => setTeachers((r.data?.users || []).filter(u => u.role === 'teacher' && u.isActive !== false && u.teacherStatus !== 'Left')))
       .catch(() => {})
-  }, [])
-
-  const save = async () => {
-    if (!modal.title.trim() || !modal.trainingDate) { toast?.error?.('Title and date are required.'); return }
-    setSaving(true)
-    try {
-      const payload = { ...modal, durationHours: Number(modal.durationHours) || 0 }
-      const { data } = modal._id
-        ? await api.patch('/qa/trainings/' + modal._id, payload)
-        : await api.post('/qa/trainings', payload)
-      if (data?.success) { toast?.ok?.('Training saved.'); setModal(null); load() }
-      else toast?.error?.(data?.message || 'Save failed.')
-    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Save failed.') }
-    finally { setSaving(false) }
-  }
+  }, [load])
 
   const remove = async (t) => {
     if (!window.confirm('Delete the training "' + t.title + '" and its photos?')) return
     try { await api.delete('/qa/trainings/' + t._id); toast?.ok?.('Deleted.'); load() }
-    catch { toast?.error?.('Could not delete.') }
+    catch (e) { toast?.error?.(errMsg(e, 'Could not delete.')) }
   }
 
-  const addMedia = async (files, field) => {
-    setUploading(true)
-    for (const f of Array.from(files).slice(0, 10)) {
-      const rec = await uploadEvidence(f, 'training', toast)
-      if (rec) setModal(m => ({ ...m, [field]: [...m[field], field === 'photos' ? { url: rec.url, key: rec.key, caption: '' } : rec] }))
+  const years = useMemo(() => [...new Set(rows.map(r => new Date(r.trainingDate).getFullYear()))].sort((a, b) => b - a), [rows])
+  const list = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    return rows.filter(r =>
+      (!year || new Date(r.trainingDate).getFullYear() === Number(year)) &&
+      (!cat || r.category === cat) &&
+      (!q || [r.title, r.provider, r.location, r.description, ...(r.attendees || []).map(fullName)].join(' ').toLowerCase().includes(q)))
+  }, [rows, search, year, cat])
+
+  const stats = useMemo(() => {
+    const reached = new Set()
+    let hours = 0, photos = 0
+    for (const r of list) { hours += r.durationHours || 0; photos += (r.photos || []).length; (r.attendees || []).forEach(a => reached.add(String(a._id || a))) }
+    const active = new Set(teachers.map(t => String(t._id)))
+    const reachedActive = [...reached].filter(id => active.has(id)).length
+    return { hours, photos, reached: reached.size, coverage: active.size ? Math.round((reachedActive / active.size) * 100) : 0 }
+  }, [list, teachers])
+
+  const perTeacher = useMemo(() => {
+    const m = {}
+    for (const t of teachers) m[String(t._id)] = { t, count: 0, hours: 0, last: null }
+    for (const r of list) for (const a of r.attendees || []) {
+      const id = String(a._id || a)
+      if (!m[id]) m[id] = { t: a, count: 0, hours: 0, last: null }
+      m[id].count += 1; m[id].hours += r.durationHours || 0
+      if (!m[id].last || new Date(r.trainingDate) > new Date(m[id].last)) m[id].last = r.trainingDate
     }
-    setUploading(false)
-  }
-
-  const toggleAttendee = (id) => setModal(m => ({
-    ...m, attendees: m.attendees.includes(id) ? m.attendees.filter(x => x !== id) : [...m.attendees, id],
-  }))
+    return Object.values(m).sort((a, b) => b.hours - a.hours || fullName(a.t).localeCompare(fullName(b.t)))
+  }, [list, teachers])
 
   return (
     <>
-      <PSection tag="QA Portal" title="Teacher Development" em="Programme" sub="Every training delivered to our teachers, with photos, details and attendance."/>
-      <div style={{ display: 'flex', gap: 10, marginBottom: 16, alignItems: 'center' }}>
-        <button style={btnP} onClick={() => setModal({ ...emptyTraining })}>+ Record a training</button>
-        <span style={{ fontSize: 12, color: TOKENS.s500 }}>{rows.length} training{rows.length === 1 ? '' : 's'} on record</span>
+      <PSection tag="QA Portal" title="Teacher Development" em="Programme"
+        sub="Every training delivered to our teachers — photos, outcomes and attendance."
+        action={<button style={btnP} onClick={() => setModal({ ...emptyTraining })}>+ Record a training</button>} />
+
+      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 16 }}>
+        <Stat label="Trainings" value={list.length} sub={year ? 'in ' + year : 'all time'} />
+        <Stat label="Training hours" value={stats.hours} />
+        <Stat label="Teachers reached" value={stats.reached} sub={stats.coverage + '% of current teachers'} color={pctColor(stats.coverage)} />
+        <Stat label="Photos" value={stats.photos} />
       </div>
 
-      {loading ? <div style={{ color: TOKENS.s500, fontSize: 13 }}>Loading...</div> :
-        rows.length === 0 ? <PCard><div style={{ padding: 30, textAlign: 'center', color: TOKENS.s500, fontSize: 13 }}>No trainings recorded yet. Record the first one.</div></PCard> :
-        rows.map(t => (
-          <PCard key={t._id}>
-            <div style={{ padding: 16 }}>
-              <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-                <div style={{ flex: 1, minWidth: 260 }}>
-                  <div style={{ fontSize: 15, fontWeight: 800, color: TOKENS.s900 }}>{t.title}</div>
-                  <div style={{ fontSize: 12, color: TOKENS.s500, marginTop: 3 }}>
-                    {fmtD(t.trainingDate)}{t.provider ? ' · ' + t.provider : ''}{t.durationHours ? ' · ' + t.durationHours + ' hours' : ''} · {t.mode}
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginBottom: 16 }}>
+        {[['trainings', 'Trainings'], ['hours', 'Hours per teacher']].map(([k, l]) => (
+          <button key={k} onClick={() => setTab(k)} style={{ ...btnS, ...(tab === k ? { borderColor: CR, color: CR, background: '#FDF2F4' } : {}) }}>{l}</button>
+        ))}
+        <span style={{ width: 8 }} />
+        <input style={{ ...inp, maxWidth: 240 }} placeholder="Search trainings or teachers..." value={search} onChange={e => setSearch(e.target.value)} />
+        <select style={{ ...inp, width: 'auto' }} value={year} onChange={e => setYear(e.target.value)} aria-label="Year">
+          <option value="">All years</option>{years.map(y => <option key={y} value={y}>{y}</option>)}
+        </select>
+        <select style={{ ...inp, width: 'auto' }} value={cat} onChange={e => setCat(e.target.value)} aria-label="Category">
+          <option value="">All categories</option>{TRAINING_CATEGORIES.map(c => <option key={c}>{c}</option>)}
+        </select>
+      </div>
+
+      {loading ? <Loading /> : tab === 'hours' ? (
+        <PCard padding={0} style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12.5, minWidth: 520 }}>
+            <thead><tr>{['Teacher', 'Trainings', 'Hours', 'Last training'].map(h => <th key={h} style={{ textAlign: 'left', padding: '10px 14px', ...lbl, borderBottom: '1px solid ' + LINE }}>{h}</th>)}</tr></thead>
+            <tbody>
+              {perTeacher.map(({ t, count, hours, last }) => (
+                <tr key={String(t._id)} style={{ borderBottom: '1px solid ' + TOKENS.s100 }}>
+                  <td style={{ padding: '9px 14px' }}><div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><Avatar user={t} size={28} radius={7} /><b>{fullName(t)}</b></div></td>
+                  <td style={{ padding: '9px 14px' }}>{count}</td>
+                  <td style={{ padding: '9px 14px' }}>
+                    <span style={chip(hours ? TOKENS.goldPale : '#FEE2E2', hours ? '#92400E' : BAD)}>{hours}h</span>
+                  </td>
+                  <td style={{ padding: '9px 14px', color: TOKENS.s500 }}>{last ? fmtD(last) : 'None yet'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </PCard>
+      ) : list.length === 0 ? <Empty>{rows.length ? 'No trainings match these filters.' : 'No trainings recorded yet. Record the first one.'}</Empty> : (
+        <div style={{ display: 'grid', gap: 14 }}>
+          {list.map(t => (
+            <PCard key={t._id} padding={0} style={{ overflow: 'hidden' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+                <div style={{ flex: '0 0 260px', maxWidth: '100%', minHeight: 180, background: TOKENS.goldPale, position: 'relative' }}>
+                  {t.photos?.[0]
+                    ? <img src={t.photos[0].url} alt={t.photos[0].caption || t.title} onClick={() => setLightbox({ items: t.photos, index: 0 })} style={{ width: '100%', height: '100%', objectFit: 'cover', cursor: 'zoom-in', position: 'absolute', inset: 0 }} />
+                    : <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: GOLD, fontWeight: 800, fontSize: 12 }}>No photos yet</div>}
+                  {(t.photos || []).length > 1 && <span style={{ ...chip('rgba(0,0,0,.6)', '#fff'), position: 'absolute', right: 8, bottom: 8 }}>{t.photos.length} photos</span>}
+                </div>
+                <div style={{ flex: '1 1 320px', padding: 16, minWidth: 0 }}>
+                  <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                    <div style={{ flex: 1, minWidth: 220 }}>
+                      <div style={{ fontSize: 16, fontWeight: 800, color: TOKENS.s900 }}>{t.title}</div>
+                      <div style={{ fontSize: 12, color: TOKENS.s500, marginTop: 3 }}>
+                        {fmtD(t.trainingDate)}{t.provider ? ' · ' + t.provider : ''}{t.location ? ' · ' + t.location : ''}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      <button style={btnS} onClick={() => setModal({ ...emptyTraining, ...t, trainingDate: t.trainingDate ? String(t.trainingDate).slice(0, 10) : '', attendees: (t.attendees || []).map(a => a._id || a) })}>Edit</button>
+                      <button style={{ ...btnS, color: BAD, borderColor: '#FCA5A5' }} onClick={() => remove(t)}>Delete</button>
+                    </div>
                   </div>
-                  {t.description && <div style={{ fontSize: 12.5, color: TOKENS.s700, marginTop: 8, lineHeight: 1.6 }}>{t.description}</div>}
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 10 }}>
+                    {t.category && <span style={chip('#FDF2F4', CR)}>{t.category}</span>}
+                    <span style={chip(TOKENS.s50, TOKENS.s700)}>{t.mode}</span>
+                    <span style={chip(TOKENS.goldPale, '#92400E')}>{t.durationHours || 0} hours</span>
+                    <span style={chip(TOKENS.s50, TOKENS.s700)}>{(t.attendees || []).length} teachers</span>
+                  </div>
+                  {t.description && <div style={{ fontSize: 12.5, color: TOKENS.s700, marginTop: 10, lineHeight: 1.6 }}>{t.description}</div>}
+                  {t.outcomes && (
+                    <div style={{ marginTop: 10, padding: '10px 12px', background: TOKENS.s50, borderRadius: 9 }}>
+                      <div style={{ ...lbl, color: GOLD, marginBottom: 4 }}>Outcomes</div>
+                      <div style={{ fontSize: 12.5, color: TOKENS.s700, lineHeight: 1.6, whiteSpace: 'pre-wrap', ...(open[t._id] ? {} : { maxHeight: 64, overflow: 'hidden' }) }}>{t.outcomes}</div>
+                      {t.outcomes.length > 220 && <button style={{ ...btnS, marginTop: 6 }} onClick={() => setOpen(o => ({ ...o, [t._id]: !o[t._id] }))}>{open[t._id] ? 'Less' : 'More'}</button>}
+                    </div>
+                  )}
                   <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginTop: 10 }}>
-                    {(t.attendees || []).map(a => <span key={a._id} style={chip('#FDF2F4', CR)}>{a.firstName} {a.lastName}</span>)}
-                    {(t.attendees || []).length === 0 && <span style={{ fontSize: 11.5, color: TOKENS.s400 }}>No attendees tagged</span>}
+                    {(t.attendees || []).map(a => <span key={a._id || a} style={chip(TOKENS.s50, TOKENS.s700)}>{fullName(a) || 'Teacher'}</span>)}
                   </div>
                   {(t.files || []).length > 0 && (
                     <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 10 }}>
-                      {t.files.map((f, i) => <a key={i} href={f.url} target="_blank" rel="noreferrer" style={{ ...btnG, padding: '4px 11px', fontSize: 11, textDecoration: 'none' }}>{f.name || 'File ' + (i + 1)}</a>)}
+                      {t.files.map((f, i) => <a key={i} href={f.url} target="_blank" rel="noreferrer" style={btnS}>📎 {f.name || 'File ' + (i + 1)}</a>)}
+                    </div>
+                  )}
+                  {(t.photos || []).length > 1 && (
+                    <div style={{ display: 'flex', gap: 6, overflowX: 'auto', marginTop: 12 }}>
+                      {t.photos.map((ph, i) => (
+                        <img key={i} src={ph.url} alt={ph.caption || ''} title={ph.caption || ''} onClick={() => setLightbox({ items: t.photos, index: i })}
+                          style={{ width: 92, height: 66, objectFit: 'cover', borderRadius: 8, border: '1px solid ' + LINE, cursor: 'zoom-in', flexShrink: 0 }} />
+                      ))}
                     </div>
                   )}
                 </div>
-                <div style={{ display: 'flex', gap: 6 }}>
-                  <button style={btnG} onClick={() => setModal({ ...emptyTraining, ...t, trainingDate: t.trainingDate ? String(t.trainingDate).slice(0, 10) : '', attendees: (t.attendees || []).map(a => a._id || a) })}>Edit</button>
-                  <button style={{ ...btnG, color: '#B91C1C', borderColor: '#FCA5A5' }} onClick={() => remove(t)}>Delete</button>
-                </div>
               </div>
-              {(t.photos || []).length > 0 && (
-                <div style={{ display: 'flex', gap: 8, overflowX: 'auto', marginTop: 12 }}>
-                  {t.photos.map((p, i) => (
-                    <a key={i} href={p.url} target="_blank" rel="noreferrer" style={{ flexShrink: 0 }}>
-                      <img src={p.url} alt={p.caption || 'Training photo'} style={{ width: 120, height: 86, objectFit: 'cover', borderRadius: 10, border: '1px solid ' + LINE }} />
-                    </a>
-                  ))}
-                </div>
-              )}
-            </div>
-          </PCard>
-        ))}
-
-      {modal && (
-        <div onClick={() => setModal(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 90, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 14 }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 14, width: 'min(640px,100%)', maxHeight: '92vh', overflowY: 'auto', padding: 20, display: 'grid', gap: 10 }}>
-            <b style={{ fontSize: 15, color: TOKENS.s900 }}>{modal._id ? 'Edit training' : 'Record a training'}</b>
-            <input style={inp} placeholder="Training title *" value={modal.title} onChange={e => setModal(m => ({ ...m, title: e.target.value }))} />
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-              <input style={inp} placeholder="Provider / facilitator" value={modal.provider} onChange={e => setModal(m => ({ ...m, provider: e.target.value }))} />
-              <input style={inp} type="date" value={modal.trainingDate} onChange={e => setModal(m => ({ ...m, trainingDate: e.target.value }))} />
-              <input style={inp} type="number" min="0" placeholder="Duration (hours)" value={modal.durationHours} onChange={e => setModal(m => ({ ...m, durationHours: e.target.value }))} />
-              <select style={inp} value={modal.mode} onChange={e => setModal(m => ({ ...m, mode: e.target.value }))}>
-                <option>In person</option><option>Online</option><option>Blended</option>
-              </select>
-            </div>
-            <textarea style={{ ...inp, resize: 'vertical' }} rows={3} placeholder="What the training covered" value={modal.description} onChange={e => setModal(m => ({ ...m, description: e.target.value }))} />
-            <div>
-              <div style={{ fontSize: 11, fontWeight: 800, color: TOKENS.s500, textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 6 }}>Teachers who attended</div>
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', maxHeight: 130, overflowY: 'auto' }}>
-                {teachers.map(t => {
-                  const on = modal.attendees.includes(t._id)
-                  return (
-                    <button key={t._id} onClick={() => toggleAttendee(t._id)} style={{ ...chip(on ? CR : '#F3F4F6', on ? '#fff' : TOKENS.s700), border: 'none', cursor: 'pointer', padding: '6px 12px' }}>
-                      {t.firstName} {t.lastName}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-              <label style={{ ...btnG, display: 'inline-block' }}>
-                {uploading ? 'Uploading...' : '+ Photos'}
-                <input type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={e => { addMedia(e.target.files, 'photos'); e.target.value = '' }} />
-              </label>
-              <label style={{ ...btnG, display: 'inline-block' }}>
-                + Files (programme, certificates)
-                <input type="file" accept="application/pdf,image/*,.doc,.docx" multiple style={{ display: 'none' }} onChange={e => { addMedia(e.target.files, 'files'); e.target.value = '' }} />
-              </label>
-              <span style={{ fontSize: 11.5, color: TOKENS.s500 }}>{modal.photos.length} photo(s), {modal.files.length} file(s)</span>
-            </div>
-            {modal.photos.length > 0 && (
-              <div style={{ display: 'flex', gap: 6, overflowX: 'auto' }}>
-                {modal.photos.map((p, i) => (
-                  <div key={i} style={{ position: 'relative', flexShrink: 0 }}>
-                    <img src={p.url} alt="" style={{ width: 84, height: 60, objectFit: 'cover', borderRadius: 8, border: '1px solid ' + LINE }} />
-                    <button onClick={() => setModal(m => ({ ...m, photos: m.photos.filter((_, j) => j !== i) }))}
-                      style={{ position: 'absolute', top: -6, right: -6, width: 20, height: 20, borderRadius: '50%', border: 'none', background: '#B91C1C', color: '#fff', fontSize: 11, cursor: 'pointer', lineHeight: '20px', padding: 0 }}>x</button>
-                  </div>
-                ))}
-              </div>
-            )}
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button style={btnG} onClick={() => setModal(null)}>Cancel</button>
-              <button style={btnP} disabled={saving || uploading} onClick={save}>{saving ? 'Saving...' : 'Save training'}</button>
-            </div>
-          </div>
+            </PCard>
+          ))}
         </div>
       )}
+
+      {modal && <TrainingForm initial={modal} teachers={teachers} toast={toast} onClose={() => setModal(null)} onSaved={() => { setModal(null); load() }} />}
+      {lightbox && <Lightbox items={lightbox.items} index={lightbox.index} onClose={() => setLightbox(null)} />}
     </>
+  )
+}
+
+function TrainingForm({ initial, teachers, toast, onClose, onSaved }) {
+  const [m, setM] = useState(initial)
+  const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(0)
+  const [who, setWho] = useState('')
+  const set = (k, v) => setM(x => ({ ...x, [k]: v }))
+
+  const addMedia = async (files, field) => {
+    const list = Array.from(files).slice(0, 15)
+    setUploading(n => n + list.length)
+    for (const f of list) {
+      const rec = await uploadEvidence(f, 'training', toast)
+      if (rec) setM(x => ({ ...x, [field]: [...x[field], field === 'photos' ? { url: rec.url, key: rec.key, caption: '' } : rec] }))
+      setUploading(n => n - 1)
+    }
+  }
+
+  const save = async () => {
+    if (!m.title.trim() || !m.trainingDate) { toast?.error?.('Title and date are required.'); return }
+    setSaving(true)
+    try {
+      const payload = { ...m, durationHours: Number(m.durationHours) || 0 }
+      const { data } = m._id ? await api.patch('/qa/trainings/' + m._id, payload) : await api.post('/qa/trainings', payload)
+      if (data?.success) { toast?.ok?.('Training saved.'); onSaved() }
+      else toast?.error?.(data?.message || 'Save failed.')
+    } catch (e) { toast?.error?.(errMsg(e, 'Save failed.')) }
+    setSaving(false)
+  }
+
+  const shown = teachers.filter(t => !who.trim() || fullName(t).toLowerCase().includes(who.trim().toLowerCase()))
+  const toggle = (id) => set('attendees', m.attendees.includes(id) ? m.attendees.filter(x => x !== id) : [...m.attendees, id])
+
+  return (
+    <Modal title={m._id ? 'Edit training' : 'Record a training'} onClose={onClose} width={720}
+      footer={<><span style={{ flex: 1, fontSize: 11.5, color: TOKENS.s500 }}>{uploading ? `Uploading ${uploading}...` : `${m.photos.length} photo(s), ${m.files.length} file(s), ${m.attendees.length} teacher(s)`}</span>
+        <button style={btnG} onClick={onClose}>Cancel</button>
+        <button style={btnP} disabled={saving || uploading > 0} onClick={save}>{saving ? 'Saving...' : 'Save training'}</button></>}>
+      <Field label="Training title *"><input style={inp} value={m.title} onChange={e => set('title', e.target.value)} placeholder="e.g. Assessment for Learning workshop" /></Field>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 10 }}>
+        <Field label="Date *"><input style={inp} type="date" value={m.trainingDate} onChange={e => set('trainingDate', e.target.value)} /></Field>
+        <Field label="Duration (hours)"><input style={inp} type="number" min="0" step="0.5" value={m.durationHours} onChange={e => set('durationHours', e.target.value)} /></Field>
+        <Field label="Category"><select style={inp} value={m.category} onChange={e => set('category', e.target.value)}>{TRAINING_CATEGORIES.map(c => <option key={c}>{c}</option>)}</select></Field>
+        <Field label="Mode"><select style={inp} value={m.mode} onChange={e => set('mode', e.target.value)}><option>In person</option><option>Online</option><option>Blended</option></select></Field>
+        <Field label="Provider / facilitator"><input style={inp} value={m.provider} onChange={e => set('provider', e.target.value)} /></Field>
+        <Field label="Location"><input style={inp} value={m.location} onChange={e => set('location', e.target.value)} placeholder="Venue or platform" /></Field>
+      </div>
+      <Field label="What the training covered"><textarea style={{ ...inp, resize: 'vertical' }} rows={3} value={m.description} onChange={e => set('description', e.target.value)} /></Field>
+      <Field label="Outcomes" hint="What teachers took away and how classroom practice changes. Accreditors read this.">
+        <textarea style={{ ...inp, resize: 'vertical' }} rows={3} value={m.outcomes} onChange={e => set('outcomes', e.target.value)} />
+      </Field>
+
+      <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
+          <div style={{ ...lbl, marginBottom: 0, flex: 1 }}>Teachers who attended ({m.attendees.length})</div>
+          <input style={{ ...inp, width: 180, padding: '5px 9px' }} placeholder="Find teacher..." value={who} onChange={e => setWho(e.target.value)} />
+          <button type="button" style={btnS} onClick={() => set('attendees', [...new Set([...m.attendees, ...shown.map(t => t._id)])])}>Select shown</button>
+          <button type="button" style={btnS} onClick={() => set('attendees', [])}>Clear</button>
+        </div>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', maxHeight: 150, overflowY: 'auto', padding: 2 }}>
+          {shown.map(t => {
+            const on = m.attendees.includes(t._id)
+            return (
+              <button type="button" key={t._id} onClick={() => toggle(t._id)} aria-pressed={on}
+                style={{ ...chip(on ? CR : '#F3F4F6', on ? '#fff' : TOKENS.s700), border: 'none', cursor: 'pointer', padding: '6px 12px' }}>
+                {on ? '✓ ' : ''}{fullName(t)}
+              </button>
+            )
+          })}
+          {shown.length === 0 && <span style={{ fontSize: 12, color: TOKENS.s500 }}>No teachers match.</span>}
+        </div>
+      </div>
+
+      <div>
+        <div style={lbl}>Photos</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 8 }}>
+          {m.photos.map((p, i) => (
+            <div key={i} style={{ border: '1px solid ' + LINE, borderRadius: 9, overflow: 'hidden' }}>
+              <div style={{ position: 'relative', height: 90 }}>
+                <img src={p.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <button type="button" aria-label="Remove photo" onClick={() => set('photos', m.photos.filter((_, j) => j !== i))}
+                  style={{ position: 'absolute', top: 4, right: 4, width: 22, height: 22, borderRadius: '50%', border: 'none', background: BAD, color: '#fff', fontSize: 11, cursor: 'pointer', padding: 0 }}>✕</button>
+              </div>
+              <input style={{ ...inp, border: 'none', borderTop: '1px solid ' + LINE, borderRadius: 0, fontSize: 11.5 }} placeholder="Caption"
+                value={p.caption || ''} onChange={e => set('photos', m.photos.map((x, j) => j === i ? { ...x, caption: e.target.value } : x))} />
+            </div>
+          ))}
+          <label style={{ ...btnG, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 90, borderStyle: 'dashed' }}>
+            + Add photos
+            <input type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={e => { addMedia(e.target.files, 'photos'); e.target.value = '' }} />
+          </label>
+        </div>
+      </div>
+
+      <div>
+        <div style={lbl}>Files (programme, attendance register, certificates)</div>
+        {m.files.map((f, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, padding: '4px 0' }}>
+            <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>📎 {f.name}</span>
+            <button type="button" style={{ ...btnS, color: BAD }} onClick={() => set('files', m.files.filter((_, j) => j !== i))}>Remove</button>
+          </div>
+        ))}
+        <label style={{ ...btnS, display: 'inline-block', marginTop: 4 }}>
+          + Add files
+          <input type="file" accept="application/pdf,image/*,.doc,.docx" multiple style={{ display: 'none' }} onChange={e => { addMedia(e.target.files, 'files'); e.target.value = '' }} />
+        </label>
+      </div>
+    </Modal>
   )
 }
 
 // ═══════════════════════════════════════════════════════════
 // 3. SCHOOL ACCREDITATIONS
 // ═══════════════════════════════════════════════════════════
-const emptyAcc = { name: '', body: '', type: 'Accreditation', certificateNumber: '', issuedAt: '', expiresAt: '', notes: '', documents: [] }
+const emptyAcc = { name: '', body: '', type: 'Accreditation', certificateNumber: '', issuedAt: '', expiresAt: '', notes: '', scope: [], verifyUrl: '', documents: [] }
 
 const accStatus = (a) => {
-  if (!a.expiresAt) return { label: 'No expiry', bg: '#F3F4F6', fg: '#374151' }
-  const days = Math.ceil((new Date(a.expiresAt) - Date.now()) / 86400000)
-  if (days < 0) return { label: 'Expired ' + fmtD(a.expiresAt), bg: '#FEE2E2', fg: '#B91C1C' }
-  if (days <= 90) return { label: 'Expires in ' + days + ' days', bg: '#FEF3C7', fg: '#92400E' }
-  return { label: 'Valid until ' + fmtD(a.expiresAt), bg: '#DCFCE7', fg: '#15803D' }
+  if (!a.expiresAt) return { key: 'permanent', label: 'No expiry', bg: TOKENS.s50, fg: TOKENS.s700 }
+  const days = daysUntil(a.expiresAt)
+  if (days < 0) return { key: 'expired', label: 'Expired ' + fmtD(a.expiresAt), bg: '#FEE2E2', fg: BAD }
+  if (days <= 90) return { key: 'expiring', label: 'Expires in ' + days + ' days', bg: '#FEF3C7', fg: WARN }
+  return { key: 'valid', label: 'Valid until ' + fmtD(a.expiresAt), bg: '#DCFCE7', fg: OK }
+}
+
+function ValidityBar({ a }) {
+  if (!a.expiresAt || !a.issuedAt) return null
+  const start = new Date(a.issuedAt).getTime(), end = new Date(a.expiresAt).getTime()
+  if (!(end > start)) return null
+  const used = Math.max(0, Math.min(100, ((Date.now() - start) / (end - start)) * 100))
+  const st = accStatus(a)
+  return (
+    <div style={{ marginTop: 10 }} title={Math.round(used) + '% of the validity period used'}>
+      <div style={{ height: 6, background: TOKENS.s100, borderRadius: 9 }}>
+        <div style={{ width: used + '%', height: '100%', background: st.fg, borderRadius: 9 }} />
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10.5, color: TOKENS.s500, marginTop: 3 }}>
+        <span>{fmtD(a.issuedAt)}</span><span>{fmtD(a.expiresAt)}</span>
+      </div>
+    </div>
+  )
 }
 
 export function AccreditationsModule({ toast }) {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
   const [modal, setModal] = useState(null)
-  const [saving, setSaving] = useState(false)
-  const [uploading, setUploading] = useState(false)
+  const [search, setSearch] = useState('')
+  const [type, setType] = useState('')
+  const [lightbox, setLightbox] = useState(null)
 
-  const load = () => api.get('/qa/accreditations')
+  const load = useCallback(() => api.get('/qa/accreditations')
     .then(r => setRows(r.data?.data?.accreditations || []))
-    .catch(() => toast?.error?.('Could not load accreditations.'))
-    .finally(() => setLoading(false))
-  useEffect(() => { load() }, [])
-
-  const save = async () => {
-    if (!modal.name.trim()) { toast?.error?.('Name is required.'); return }
-    setSaving(true)
-    try {
-      const { data } = modal._id
-        ? await api.patch('/qa/accreditations/' + modal._id, modal)
-        : await api.post('/qa/accreditations', modal)
-      if (data?.success) { toast?.ok?.('Saved.'); setModal(null); load() }
-      else toast?.error?.(data?.message || 'Save failed.')
-    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Save failed.') }
-    finally { setSaving(false) }
-  }
+    .catch(e => toast?.error?.(errMsg(e, 'Could not load accreditations.')))
+    .finally(() => setLoading(false)), [toast])
+  useEffect(() => { load() }, [load])
 
   const remove = async (a) => {
     if (!window.confirm('Delete "' + a.name + '" and its certificate files?')) return
     try { await api.delete('/qa/accreditations/' + a._id); toast?.ok?.('Deleted.'); load() }
-    catch { toast?.error?.('Could not delete.') }
+    catch (e) { toast?.error?.(errMsg(e, 'Could not delete.')) }
   }
 
-  const addDocs = async (files) => {
-    setUploading(true)
-    for (const f of Array.from(files).slice(0, 10)) {
-      const rec = await uploadEvidence(f, 'accreditation', toast)
-      if (rec) setModal(m => ({ ...m, documents: [...m.documents, rec] }))
-    }
-    setUploading(false)
-  }
+  const counts = useMemo(() => {
+    const c = { valid: 0, expiring: 0, expired: 0, permanent: 0, noCert: 0 }
+    for (const a of rows) { c[accStatus(a).key] += 1; if (!(a.documents || []).length) c.noCert += 1 }
+    return c
+  }, [rows])
 
   const groups = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    const order = { expired: 0, expiring: 1, valid: 2, permanent: 3 }
     const g = {}
-    for (const a of rows) (g[a.type || 'Other'] = g[a.type || 'Other'] || []).push(a)
-    return g
-  }, [rows])
+    rows.filter(a => (!type || a.type === type) &&
+      (!q || [a.name, a.body, a.certificateNumber, ...(a.scope || [])].join(' ').toLowerCase().includes(q)))
+      .sort((a, b) => order[accStatus(a).key] - order[accStatus(b).key] || a.name.localeCompare(b.name))
+      .forEach(a => (g[a.type || 'Other'] = g[a.type || 'Other'] || []).push(a))
+    return ACC_TYPES.filter(t => g[t]).map(t => [t, g[t]])
+  }, [rows, search, type])
 
   return (
     <>
-      <PSection tag="QA Portal" title="School" em="Accreditations" sub="Our accreditations, licenses and registrations with their certificates, arranged for review."/>
-      <div style={{ display: 'flex', gap: 10, marginBottom: 16, alignItems: 'center' }}>
-        <button style={btnP} onClick={() => setModal({ ...emptyAcc })}>+ Add accreditation or license</button>
-        <span style={{ fontSize: 12, color: TOKENS.s500 }}>{rows.length} on record</span>
+      <PSection tag="QA Portal" title="School" em="Accreditations"
+        sub="Accreditations, licences, memberships and registrations with their certificates."
+        action={<button style={btnP} onClick={() => setModal({ ...emptyAcc })}>+ Add accreditation or licence</button>} />
+
+      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 16 }}>
+        <Stat label="On record" value={rows.length} />
+        <Stat label="In date" value={counts.valid + counts.permanent} color={OK} />
+        <Stat label="Expiring ≤ 90 days" value={counts.expiring} color={counts.expiring ? WARN : TOKENS.s900} />
+        <Stat label="Expired" value={counts.expired} color={counts.expired ? BAD : TOKENS.s900} />
+        <Stat label="Missing certificate" value={counts.noCert} color={counts.noCert ? WARN : TOKENS.s900} />
       </div>
 
-      {loading ? <div style={{ color: TOKENS.s500, fontSize: 13 }}>Loading...</div> :
-        rows.length === 0 ? <PCard><div style={{ padding: 30, textAlign: 'center', color: TOKENS.s500, fontSize: 13 }}>Nothing recorded yet. Add the first certificate.</div></PCard> :
-        Object.entries(groups).map(([type, items]) => (
-          <div key={type} style={{ marginBottom: 18 }}>
-            <div style={{ fontSize: 12, fontWeight: 800, color: CR, textTransform: 'uppercase', letterSpacing: '.1em', marginBottom: 8 }}>{type}s</div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 12 }}>
-              {items.map(a => {
-                const st = accStatus(a)
-                return (
-                  <PCard key={a._id}>
-                    <div style={{ padding: 16 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'flex-start' }}>
-                        <div style={{ fontSize: 14.5, fontWeight: 800, color: TOKENS.s900 }}>{a.name}</div>
-                        <span style={chip(st.bg, st.fg)}>{st.label}</span>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginBottom: 16 }}>
+        <input style={{ ...inp, maxWidth: 260 }} placeholder="Search name, body, number or scope..." value={search} onChange={e => setSearch(e.target.value)} />
+        {['', ...ACC_TYPES].map(t => (
+          <button key={t || 'all'} onClick={() => setType(t)} style={{ ...btnS, ...(type === t ? { borderColor: CR, color: CR, background: '#FDF2F4' } : {}) }}>{t ? t + 's' : 'All'}</button>
+        ))}
+      </div>
+
+      {loading ? <Loading /> : rows.length === 0 ? <Empty>Nothing recorded yet. Add the school's first accreditation or licence.</Empty> :
+        groups.length === 0 ? <Empty>Nothing matches.</Empty> :
+          groups.map(([t, items]) => (
+            <div key={t} style={{ marginBottom: 20 }}>
+              <div style={{ ...h3 }}>{t}s <span style={{ color: TOKENS.s400 }}>({items.length})</span></div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 14 }}>
+                {items.map(a => {
+                  const st = accStatus(a)
+                  const docs = a.documents || []
+                  const images = docs.filter(d => isImage(d.url)).map(d => ({ url: d.url, caption: d.name }))
+                  const cover = docs[0]
+                  return (
+                    <PCard key={a._id} padding={0} style={{ overflow: 'hidden', borderTop: '4px solid ' + st.fg }}>
+                      <div style={{ height: 150, background: TOKENS.goldPale }}>
+                        {cover ? <FileTile url={cover.url} name={cover.name} onClick={images.length ? () => setLightbox({ items: images, index: 0 }) : undefined} />
+                          : <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: WARN, fontWeight: 800, fontSize: 12 }}>No certificate uploaded</div>}
                       </div>
-                      <div style={{ fontSize: 12, color: TOKENS.s500, marginTop: 4 }}>
-                        {a.body || 'Issuing body not set'}{a.certificateNumber ? ' · No. ' + a.certificateNumber : ''}
+                      <div style={{ padding: 16 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'flex-start' }}>
+                          <div style={{ fontSize: 15, fontWeight: 800, color: TOKENS.s900 }}>{a.name}</div>
+                          <span style={chip(st.bg, st.fg)}>{st.label}</span>
+                        </div>
+                        <div style={{ fontSize: 12, color: TOKENS.s500, marginTop: 4 }}>
+                          {a.body || 'Issuing body not set'}{a.certificateNumber ? ' · No. ' + a.certificateNumber : ''}
+                        </div>
+                        {a.issuedAt && !a.expiresAt && <div style={{ fontSize: 11.5, color: TOKENS.s400, marginTop: 3 }}>Issued {fmtD(a.issuedAt)}</div>}
+                        <ValidityBar a={a} />
+                        {(a.scope || []).length > 0 && (
+                          <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginTop: 10 }}>
+                            {a.scope.map((s, i) => <span key={i} style={chip('#FDF2F4', CR)}>{s}</span>)}
+                          </div>
+                        )}
+                        {a.notes && <div style={{ fontSize: 12, color: TOKENS.s700, marginTop: 10, lineHeight: 1.55 }}>{a.notes}</div>}
+                        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 12 }}>
+                          {docs.map((d, i) => <a key={i} href={d.url} target="_blank" rel="noreferrer" style={btnS}>📄 {d.name || 'Certificate ' + (i + 1)}</a>)}
+                          {a.verifyUrl && <a href={a.verifyUrl} target="_blank" rel="noreferrer" style={{ ...btnS, color: OK, borderColor: '#86EFAC' }}>Verify online ↗</a>}
+                        </div>
+                        <div style={{ display: 'flex', gap: 6, marginTop: 12 }}>
+                          <button style={btnS} onClick={() => setModal({ ...emptyAcc, ...a, issuedAt: a.issuedAt ? String(a.issuedAt).slice(0, 10) : '', expiresAt: a.expiresAt ? String(a.expiresAt).slice(0, 10) : '', scope: a.scope || [] })}>Edit</button>
+                          <button style={{ ...btnS, color: BAD, borderColor: '#FCA5A5' }} onClick={() => remove(a)}>Delete</button>
+                        </div>
                       </div>
-                      {a.issuedAt && <div style={{ fontSize: 11.5, color: TOKENS.s400, marginTop: 3 }}>Issued {fmtD(a.issuedAt)}</div>}
-                      {a.notes && <div style={{ fontSize: 12, color: TOKENS.s700, marginTop: 8, lineHeight: 1.55 }}>{a.notes}</div>}
-                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 10 }}>
-                        {(a.documents || []).map((d, i) => (
-                          <a key={i} href={d.url} target="_blank" rel="noreferrer" style={{ ...btnG, padding: '4px 11px', fontSize: 11, textDecoration: 'none' }}>{d.name || 'Certificate ' + (i + 1)}</a>
-                        ))}
-                        {(a.documents || []).length === 0 && <span style={{ fontSize: 11.5, color: '#B45309', fontWeight: 700 }}>No certificate uploaded</span>}
-                      </div>
-                      <div style={{ display: 'flex', gap: 6, marginTop: 12 }}>
-                        <button style={{ ...btnG, padding: '5px 12px', fontSize: 11.5 }} onClick={() => setModal({ ...emptyAcc, ...a, issuedAt: a.issuedAt ? String(a.issuedAt).slice(0, 10) : '', expiresAt: a.expiresAt ? String(a.expiresAt).slice(0, 10) : '' })}>Edit</button>
-                        <button style={{ ...btnG, padding: '5px 12px', fontSize: 11.5, color: '#B91C1C', borderColor: '#FCA5A5' }} onClick={() => remove(a)}>Delete</button>
-                      </div>
-                    </div>
-                  </PCard>
-                )
-              })}
+                    </PCard>
+                  )
+                })}
+              </div>
             </div>
+          ))}
+
+      {modal && <AccreditationForm initial={modal} toast={toast} onClose={() => setModal(null)} onSaved={() => { setModal(null); load() }} />}
+      {lightbox && <Lightbox items={lightbox.items} index={lightbox.index} onClose={() => setLightbox(null)} />}
+    </>
+  )
+}
+
+function AccreditationForm({ initial, toast, onClose, onSaved }) {
+  const [m, setM] = useState({ ...initial, scopeText: (initial.scope || []).join(', ') })
+  const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(0)
+  const set = (k, v) => setM(x => ({ ...x, [k]: v }))
+
+  const addDocs = async (files) => {
+    const list = Array.from(files).slice(0, 10)
+    setUploading(n => n + list.length)
+    for (const f of list) {
+      const rec = await uploadEvidence(f, 'accreditation', toast)
+      if (rec) setM(x => ({ ...x, documents: [...x.documents, rec] }))
+      setUploading(n => n - 1)
+    }
+  }
+
+  const save = async () => {
+    if (!m.name.trim()) { toast?.error?.('Name is required.'); return }
+    if (m.issuedAt && m.expiresAt && m.expiresAt < m.issuedAt) { toast?.error?.('The expiry date is before the issue date.'); return }
+    setSaving(true)
+    try {
+      const { scopeText, ...rest } = m
+      const payload = { ...rest, scope: scopeText.split(',').map(s => s.trim()).filter(Boolean) }
+      const { data } = m._id ? await api.patch('/qa/accreditations/' + m._id, payload) : await api.post('/qa/accreditations', payload)
+      if (data?.success) { toast?.ok?.('Saved.'); onSaved() }
+      else toast?.error?.(data?.message || 'Save failed.')
+    } catch (e) { toast?.error?.(errMsg(e, 'Save failed.')) }
+    setSaving(false)
+  }
+
+  return (
+    <Modal title={(m._id ? 'Edit' : 'Add') + ' accreditation / licence'} onClose={onClose}
+      footer={<><span style={{ flex: 1, fontSize: 11.5, color: TOKENS.s500 }}>{uploading ? `Uploading ${uploading}...` : `${m.documents.length} file(s)`}</span>
+        <button style={btnG} onClick={onClose}>Cancel</button>
+        <button style={btnP} disabled={saving || uploading > 0} onClick={save}>{saving ? 'Saving...' : 'Save'}</button></>}>
+      <Field label="Name *"><input style={inp} placeholder="e.g. Cognia Accreditation" value={m.name} onChange={e => set('name', e.target.value)} /></Field>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 10 }}>
+        <Field label="Type"><select style={inp} value={m.type} onChange={e => set('type', e.target.value)}>{ACC_TYPES.map(t => <option key={t}>{t}</option>)}</select></Field>
+        <Field label="Issuing body"><input style={inp} value={m.body} onChange={e => set('body', e.target.value)} placeholder="e.g. Cognia, Cambridge International" /></Field>
+        <Field label="Certificate / registration no."><input style={inp} value={m.certificateNumber} onChange={e => set('certificateNumber', e.target.value)} /></Field>
+        <Field label="Verification link"><input style={inp} value={m.verifyUrl} onChange={e => set('verifyUrl', e.target.value)} placeholder="https://..." /></Field>
+        <Field label="Issued"><input style={inp} type="date" value={m.issuedAt} onChange={e => set('issuedAt', e.target.value)} /></Field>
+        <Field label="Expires" hint="Leave empty if permanent."><input style={inp} type="date" value={m.expiresAt} onChange={e => set('expiresAt', e.target.value)} /></Field>
+      </div>
+      <Field label="Scope" hint="Programmes or curricula it covers, separated by commas.">
+        <input style={inp} value={m.scopeText} onChange={e => set('scopeText', e.target.value)} placeholder="Cambridge IGCSE, Cambridge A Level" />
+      </Field>
+      <Field label="Notes"><textarea style={{ ...inp, resize: 'vertical' }} rows={2} value={m.notes} onChange={e => set('notes', e.target.value)} /></Field>
+      <div>
+        <div style={lbl}>Certificates / licence documents</div>
+        {m.documents.map((d, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, padding: '4px 0' }}>
+            <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>📄 {d.name}</span>
+            <button type="button" style={{ ...btnS, color: BAD }} onClick={() => set('documents', m.documents.filter((_, j) => j !== i))}>Remove</button>
           </div>
         ))}
-
-      {modal && (
-        <div onClick={() => setModal(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 90, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 14 }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 14, width: 'min(560px,100%)', maxHeight: '92vh', overflowY: 'auto', padding: 20, display: 'grid', gap: 10 }}>
-            <b style={{ fontSize: 15, color: TOKENS.s900 }}>{modal._id ? 'Edit' : 'Add'} accreditation / license</b>
-            <input style={inp} placeholder="Name, e.g. Cognia Accreditation *" value={modal.name} onChange={e => setModal(m => ({ ...m, name: e.target.value }))} />
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-              <input style={inp} placeholder="Issuing body" value={modal.body} onChange={e => setModal(m => ({ ...m, body: e.target.value }))} />
-              <select style={inp} value={modal.type} onChange={e => setModal(m => ({ ...m, type: e.target.value }))}>
-                <option>Accreditation</option><option>License</option><option>Membership</option><option>Registration</option><option>Other</option>
-              </select>
-              <input style={inp} placeholder="Certificate number" value={modal.certificateNumber} onChange={e => setModal(m => ({ ...m, certificateNumber: e.target.value }))} />
-              <span />
-              <label style={{ fontSize: 11, color: TOKENS.s500 }}>Issued<input style={inp} type="date" value={modal.issuedAt} onChange={e => setModal(m => ({ ...m, issuedAt: e.target.value }))} /></label>
-              <label style={{ fontSize: 11, color: TOKENS.s500 }}>Expires (leave empty if permanent)<input style={inp} type="date" value={modal.expiresAt} onChange={e => setModal(m => ({ ...m, expiresAt: e.target.value }))} /></label>
-            </div>
-            <textarea style={{ ...inp, resize: 'vertical' }} rows={2} placeholder="Notes" value={modal.notes} onChange={e => setModal(m => ({ ...m, notes: e.target.value }))} />
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-              <label style={{ ...btnG, display: 'inline-block' }}>
-                {uploading ? 'Uploading...' : '+ Upload certificate / license'}
-                <input type="file" accept="application/pdf,image/*" multiple style={{ display: 'none' }} onChange={e => { addDocs(e.target.files); e.target.value = '' }} />
-              </label>
-              <span style={{ fontSize: 11.5, color: TOKENS.s500 }}>{modal.documents.length} file(s)</span>
-            </div>
-            {modal.documents.length > 0 && modal.documents.map((d, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
-                <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.name}</span>
-                <button onClick={() => setModal(m => ({ ...m, documents: m.documents.filter((_, j) => j !== i) }))} style={{ ...btnG, padding: '3px 10px', fontSize: 11, color: '#B91C1C' }}>Remove</button>
-              </div>
-            ))}
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button style={btnG} onClick={() => setModal(null)}>Cancel</button>
-              <button style={btnP} disabled={saving || uploading} onClick={save}>{saving ? 'Saving...' : 'Save'}</button>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
+        <label style={{ ...btnS, display: 'inline-block', marginTop: 4 }}>
+          + Upload certificate / licence
+          <input type="file" accept="application/pdf,image/*" multiple style={{ display: 'none' }} onChange={e => { addDocs(e.target.files); e.target.value = '' }} />
+        </label>
+      </div>
+    </Modal>
   )
 }

@@ -7,6 +7,7 @@
  * accreditation reviews (Cognia, Cambridge) in the QA portal.
  */
 const mongoose = require('mongoose');
+const { TRAINING_CATEGORIES } = require('../constants/qa');
 
 const teacherTrainingSchema = new mongoose.Schema({
   title:        { type: String, required: true, trim: true, maxlength: 200 },
@@ -15,6 +16,11 @@ const teacherTrainingSchema = new mongoose.Schema({
   durationHours:{ type: Number, default: 0, min: 0, max: 500 },
   mode:         { type: String, enum: ['In person', 'Online', 'Blended'], default: 'In person' },
   description:  { type: String, default: '', trim: true, maxlength: 4000 },
+  category:     { type: String, enum: TRAINING_CATEGORIES, default: 'Pedagogy' },
+  location:     { type: String, default: '', trim: true, maxlength: 200 },
+  // What teachers took away / how practice changes — the part an
+  // accreditor reads.
+  outcomes:     { type: String, default: '', trim: true, maxlength: 4000 },
 
   attendees: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
 

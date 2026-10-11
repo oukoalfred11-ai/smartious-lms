@@ -2,6 +2,13 @@
  * qa.js — QA portal data: Teacher Development Programme and
  * School Accreditations.
  * ============================================================
+ *   GET    /summary              — QA dashboard: staff-file
+ *                                  completeness, expiring documents,
+ *                                  training reach, accreditation health
+ *   GET    /teachers             — every teacher with file
+ *                                  completeness and training hours
+ *   GET    /teachers/:id         — one teacher: profile, documents,
+ *                                  trainings attended, completeness
  *   POST   /uploads/presign      — presigned R2 upload (photos,
  *                                  certificates) for TDP and
  *                                  accreditation evidence
@@ -14,7 +21,9 @@
  *   PATCH  /accreditations/:id   — edit one
  *   DELETE /accreditations/:id   — remove one (R2 objects too)
  *
- * Reads are open to all staff plus the qa role; writes to admin,
+ * Teacher files (summary, teachers) are oversight only: admin, ops,
+ * dos and qa. Trainings and accreditations are open to all staff plus
+ * the qa role; writes to admin,
  * ops, dos and qa (qa files evidence during reviews, same as the
  * teacher-documents convention). The requireRole middleware's QA
  * read shadow covers GETs automatically, but roles are listed
@@ -29,10 +38,17 @@ const { v4: uuidv4 } = require('uuid');
 
 const TeacherTraining = require('../models/TeacherTraining');
 const Accreditation   = require('../models/Accreditation');
+const TeacherDocument = require('../models/TeacherDocument');
+const User            = require('../models/User');
+const {
+  TEACHER_DOC_CATEGORIES, REQUIRED_PERSONNEL, EXPIRY_WARN_DAYS,
+  TRAINING_CATEGORIES, ACCREDITATION_TYPES,
+} = require('../constants/qa');
 const { auth, requireRole } = require('../middleware/auth');
 
 const READ_ROLES  = ['admin', 'ops_manager', 'dos', 'teacher', 'accountant', 'sales', 'qa'];
 const WRITE_ROLES = ['admin', 'ops_manager', 'dos', 'qa'];
+const OVERSIGHT_ROLES = ['admin', 'ops_manager', 'dos', 'qa'];
 
 const R2_READY = !!(process.env.R2_ACCOUNT_ID && process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY && process.env.R2_BUCKET_NAME && process.env.R2_PUBLIC_URL);
 if (!R2_READY) console.warn('[qa] R2 storage NOT configured - evidence uploads will fail.');
@@ -82,6 +98,13 @@ const cleanMedia = (arr, withCaption) => (Array.isArray(arr) ? arr : [])
     ? ({ url: x.url, key: x.key || '', caption: String(x.caption || '').slice(0, 200) })
     : ({ url: x.url, key: x.key || '', name: String(x.name || '').slice(0, 200) }));
 
+const cleanScope = (v) => (Array.isArray(v) ? v : String(v || '').split(','))
+  .map(x => String(x).trim().slice(0, 120)).filter(Boolean).slice(0, 20);
+const cleanUrl = (v) => {
+  const u = String(v || '').trim().slice(0, 500);
+  return /^https?:\/\//i.test(u) ? u : '';
+};
+
 const deleteObjects = async (items) => {
   if (!r2) return;
   for (const it of items || []) {
@@ -90,6 +113,202 @@ const deleteObjects = async (items) => {
     catch (e) { console.warn('[qa] R2 delete failed:', e.message); }
   }
 };
+
+// ── Teacher files: completeness ────────────────────────────
+// A required personnel category is satisfied by at least one document
+// that has not expired. Expired and soon-to-expire documents are listed
+// so QA can chase renewals before an inspection.
+const DAY = 86400000;
+const CAT_LABEL = Object.fromEntries(TEACHER_DOC_CATEGORIES.map(c => [c.key, c.label]));
+
+function fileStatus(docs, now = Date.now()) {
+  const valid = new Set();
+  const expired = [], expiring = [];
+  for (const d of docs) {
+    const exp = d.expiresAt ? new Date(d.expiresAt).getTime() : null;
+    if (exp !== null && exp < now) {
+      expired.push({ _id: d._id, category: d.category, title: d.title, expiresAt: d.expiresAt });
+      continue;
+    }
+    valid.add(d.category);
+    if (exp !== null && exp - now <= EXPIRY_WARN_DAYS * DAY)
+      expiring.push({ _id: d._id, category: d.category, title: d.title, expiresAt: d.expiresAt });
+  }
+  const have = REQUIRED_PERSONNEL.filter(k => valid.has(k));
+  // Only report an expired category if no valid copy replaced it.
+  const expiredOnly = expired.filter(e => !valid.has(e.category));
+  return {
+    required: REQUIRED_PERSONNEL.length,
+    have: have.length,
+    pct: Math.round((have.length / REQUIRED_PERSONNEL.length) * 100),
+    missing: REQUIRED_PERSONNEL.filter(k => !valid.has(k)),
+    expired: expiredOnly,
+    expiring,
+    verified: docs.filter(d => d.verifiedAt).length,
+    total: docs.length,
+  };
+}
+
+const TEACHER_FIELDS = 'firstName lastName email phone avatar bio jobTitle yearsOfExperience qualifications certifications specializations subjects teachingSpecialties teacherStatus isOnLeave isActive createdAt';
+const activeTeacherFilter = { role: 'teacher', isActive: { $ne: false }, teacherStatus: { $ne: 'Left' } };
+const DOC_FIELDS = 'teacherId category title subject description expiresAt verifiedAt verifiedByName uploadedBy uploadedByName file createdAt';
+
+// Trainings each teacher attended, as { [teacherId]: { count, hours, last } }.
+async function trainingByTeacher(teacherIds) {
+  const rows = await TeacherTraining.aggregate([
+    { $match: { attendees: { $in: teacherIds } } },
+    { $unwind: '$attendees' },
+    { $match: { attendees: { $in: teacherIds } } },
+    { $group: { _id: '$attendees', count: { $sum: 1 }, hours: { $sum: '$durationHours' }, last: { $max: '$trainingDate' } } },
+  ]);
+  return Object.fromEntries(rows.map(r => [String(r._id), { count: r.count, hours: r.hours, last: r.last }]));
+}
+
+const accStatus = (a, now = Date.now()) => {
+  if (!a.expiresAt) return 'permanent';
+  const t = new Date(a.expiresAt).getTime();
+  if (t < now) return 'expired';
+  if (t - now <= 90 * DAY) return 'expiring';
+  return 'valid';
+};
+
+// ── QA dashboard summary ───────────────────────────────────
+router.get('/summary', auth, requireRole(...OVERSIGHT_ROLES), async (req, res) => {
+  try {
+    const now = Date.now();
+    const yearStart = new Date(new Date().getFullYear(), 0, 1);
+    const teachers = await User.find(activeTeacherFilter).select('firstName lastName avatar').lean();
+    const ids = teachers.map(t => t._id);
+    const [docs, trainingsYear, recent, allTrainings, accs, byTeacher] = await Promise.all([
+      TeacherDocument.find({ teacherId: { $in: ids } }).select(DOC_FIELDS).lean(),
+      TeacherTraining.find({ trainingDate: { $gte: yearStart } }).select('durationHours attendees').lean(),
+      TeacherTraining.find({}).sort({ trainingDate: -1 }).limit(4)
+        .select('title trainingDate provider durationHours mode category photos attendees').lean(),
+      TeacherTraining.countDocuments({}),
+      Accreditation.find({}).select('name body type expiresAt documents').lean(),
+      trainingByTeacher(ids),
+    ]);
+
+    const docsBy = {};
+    for (const d of docs) (docsBy[String(d.teacherId)] = docsBy[String(d.teacherId)] || []).push(d);
+    const name = (t) => [t.firstName, t.lastName].filter(Boolean).join(' ');
+    let pctSum = 0, complete = 0;
+    const attention = [];
+    const expiringDocs = [];
+    for (const t of teachers) {
+      const st = fileStatus(docsBy[String(t._id)] || [], now);
+      pctSum += st.pct;
+      if (st.have === st.required) complete += 1;
+      else attention.push({ _id: t._id, name: name(t), avatar: t.avatar || '', pct: st.pct, missing: st.missing.length });
+      for (const e of [...st.expired, ...st.expiring])
+        expiringDocs.push({ teacherId: t._id, teacher: name(t), category: e.category, label: CAT_LABEL[e.category] || e.category, title: e.title, expiresAt: e.expiresAt, expired: new Date(e.expiresAt).getTime() < now });
+    }
+    attention.sort((a, b) => a.pct - b.pct);
+    expiringDocs.sort((a, b) => new Date(a.expiresAt) - new Date(b.expiresAt));
+
+    const reached = new Set();
+    let hoursYear = 0;
+    for (const t of trainingsYear) {
+      hoursYear += t.durationHours || 0;
+      for (const a of t.attendees || []) reached.add(String(a));
+    }
+    const idSet = new Set(ids.map(String));
+    const reachedActive = [...reached].filter(id => idSet.has(id)).length;
+
+    const accCounts = { valid: 0, expiring: 0, expired: 0, permanent: 0 };
+    const accAlerts = [];
+    for (const a of accs) {
+      const st = accStatus(a, now);
+      accCounts[st] += 1;
+      if (st === 'expiring' || st === 'expired') accAlerts.push({ _id: a._id, name: a.name, body: a.body, type: a.type, expiresAt: a.expiresAt, status: st });
+      if (!(a.documents || []).length) accAlerts.push({ _id: a._id, name: a.name, body: a.body, type: a.type, status: 'no-certificate' });
+    }
+
+    const hoursList = ids.map(id => byTeacher[String(id)]?.hours || 0);
+    res.json({ success: true, data: {
+      teachers: {
+        total: teachers.length,
+        complete,
+        avgCompleteness: teachers.length ? Math.round(pctSum / teachers.length) : 0,
+        attention: attention.slice(0, 8),
+        requiredCategories: REQUIRED_PERSONNEL.map(k => ({ key: k, label: CAT_LABEL[k] })),
+      },
+      documents: {
+        total: docs.length,
+        verified: docs.filter(d => d.verifiedAt).length,
+        expiring: expiringDocs.slice(0, 12),
+        expiringCount: expiringDocs.length,
+      },
+      training: {
+        total: allTrainings,
+        thisYear: trainingsYear.length,
+        hoursThisYear: hoursYear,
+        teachersReachedThisYear: reachedActive,
+        coveragePct: teachers.length ? Math.round((reachedActive / teachers.length) * 100) : 0,
+        avgHoursPerTeacher: hoursList.length ? Math.round((hoursList.reduce((a, b) => a + b, 0) / hoursList.length) * 10) / 10 : 0,
+        recent,
+      },
+      accreditations: { total: accs.length, ...accCounts, alerts: accAlerts },
+      generatedAt: new Date(),
+    } });
+  } catch (e) {
+    console.error('[qa summary]', e.message);
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// ── Teachers with file completeness ────────────────────────
+router.get('/teachers', auth, requireRole(...OVERSIGHT_ROLES), async (req, res) => {
+  try {
+    const includeLeft = req.query.includeLeft === '1';
+    const filter = includeLeft ? { role: 'teacher' } : activeTeacherFilter;
+    const teachers = await User.find(filter).select(TEACHER_FIELDS)
+      .populate('teachingSpecialties.subjectId', 'subjectName curriculum')
+      .sort({ firstName: 1, lastName: 1 }).lean();
+    const ids = teachers.map(t => t._id);
+    const [docs, byTeacher] = await Promise.all([
+      TeacherDocument.find({ teacherId: { $in: ids } }).select('teacherId category expiresAt verifiedAt').lean(),
+      trainingByTeacher(ids),
+    ]);
+    const docsBy = {};
+    for (const d of docs) (docsBy[String(d.teacherId)] = docsBy[String(d.teacherId)] || []).push(d);
+    const now = Date.now();
+    const rows = teachers.map(t => ({
+      ...t,
+      file: fileStatus(docsBy[String(t._id)] || [], now),
+      training: byTeacher[String(t._id)] || { count: 0, hours: 0, last: null },
+    }));
+    res.json({ success: true, data: { teachers: rows, categoryMeta: TEACHER_DOC_CATEGORIES, required: REQUIRED_PERSONNEL } });
+  } catch (e) {
+    console.error('[qa teachers]', e.message);
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// ── One teacher's full QA profile ──────────────────────────
+router.get('/teachers/:id', auth, requireRole(...OVERSIGHT_ROLES), async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) return res.status(400).json({ success: false, message: 'Invalid id.' });
+    const teacher = await User.findOne({ _id: req.params.id, role: 'teacher' }).select(TEACHER_FIELDS)
+      .populate('teachingSpecialties.subjectId', 'subjectName curriculum').lean();
+    if (!teacher) return res.status(404).json({ success: false, message: 'Teacher not found.' });
+    const [documents, trainings] = await Promise.all([
+      TeacherDocument.find({ teacherId: teacher._id }).select(DOC_FIELDS).sort({ category: 1, createdAt: -1 }).lean(),
+      TeacherTraining.find({ attendees: teacher._id })
+        .select('title provider trainingDate durationHours mode category location photos files')
+        .sort({ trainingDate: -1 }).lean(),
+    ]);
+    res.json({ success: true, data: {
+      teacher, documents, trainings,
+      file: fileStatus(documents),
+      trainingHours: trainings.reduce((s, t) => s + (t.durationHours || 0), 0),
+      categoryMeta: TEACHER_DOC_CATEGORIES, required: REQUIRED_PERSONNEL,
+    } });
+  } catch (e) {
+    console.error('[qa teacher]', e.message);
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
 
 // ── Trainings (TDP) ────────────────────────────────────────
 router.get('/trainings', auth, requireRole(...READ_ROLES), async (req, res) => {
@@ -114,6 +333,9 @@ router.post('/trainings', auth, requireRole(...WRITE_ROLES), async (req, res) =>
       durationHours: Math.max(0, Math.min(500, Number(b.durationHours) || 0)),
       mode: ['In person', 'Online', 'Blended'].includes(b.mode) ? b.mode : 'In person',
       description: String(b.description || '').slice(0, 4000),
+      category: TRAINING_CATEGORIES.includes(b.category) ? b.category : 'Pedagogy',
+      location: String(b.location || '').slice(0, 200),
+      outcomes: String(b.outcomes || '').slice(0, 4000),
       attendees: (Array.isArray(b.attendees) ? b.attendees : []).filter(id => mongoose.isValidObjectId(id)).slice(0, 200),
       photos: cleanMedia(b.photos, true),
       files: cleanMedia(b.files, false),
@@ -134,6 +356,9 @@ router.patch('/trainings/:id', auth, requireRole(...WRITE_ROLES), async (req, re
     if (b.durationHours !== undefined) doc.durationHours = Math.max(0, Math.min(500, Number(b.durationHours) || 0));
     if (b.mode !== undefined && ['In person', 'Online', 'Blended'].includes(b.mode)) doc.mode = b.mode;
     if (b.description !== undefined) doc.description = String(b.description).slice(0, 4000);
+    if (b.category !== undefined && TRAINING_CATEGORIES.includes(b.category)) doc.category = b.category;
+    if (b.location !== undefined) doc.location = String(b.location).slice(0, 200);
+    if (b.outcomes !== undefined) doc.outcomes = String(b.outcomes).slice(0, 4000);
     if (b.attendees !== undefined) doc.attendees = (Array.isArray(b.attendees) ? b.attendees : []).filter(id => mongoose.isValidObjectId(id)).slice(0, 200);
     if (b.photos !== undefined) doc.photos = cleanMedia(b.photos, true);
     if (b.files !== undefined) doc.files = cleanMedia(b.files, false);
@@ -169,11 +394,13 @@ router.post('/accreditations', auth, requireRole(...WRITE_ROLES), async (req, re
     const doc = await Accreditation.create({
       name: String(b.name).slice(0, 200),
       body: String(b.body || '').slice(0, 200),
-      type: ['Accreditation', 'License', 'Membership', 'Registration', 'Other'].includes(b.type) ? b.type : 'Accreditation',
+      type: ACCREDITATION_TYPES.includes(b.type) ? b.type : 'Accreditation',
       certificateNumber: String(b.certificateNumber || '').slice(0, 120),
       issuedAt: b.issuedAt ? new Date(b.issuedAt) : null,
       expiresAt: b.expiresAt ? new Date(b.expiresAt) : null,
       notes: String(b.notes || '').slice(0, 2000),
+      scope: cleanScope(b.scope),
+      verifyUrl: cleanUrl(b.verifyUrl),
       documents: cleanMedia(b.documents, false),
       createdBy: req.user._id,
     });
@@ -188,7 +415,9 @@ router.patch('/accreditations/:id', auth, requireRole(...WRITE_ROLES), async (re
     const b = req.body || {};
     if (b.name !== undefined) doc.name = String(b.name).slice(0, 200);
     if (b.body !== undefined) doc.body = String(b.body).slice(0, 200);
-    if (b.type !== undefined && ['Accreditation', 'License', 'Membership', 'Registration', 'Other'].includes(b.type)) doc.type = b.type;
+    if (b.type !== undefined && ACCREDITATION_TYPES.includes(b.type)) doc.type = b.type;
+    if (b.scope !== undefined) doc.scope = cleanScope(b.scope);
+    if (b.verifyUrl !== undefined) doc.verifyUrl = cleanUrl(b.verifyUrl);
     if (b.certificateNumber !== undefined) doc.certificateNumber = String(b.certificateNumber).slice(0, 120);
     if (b.issuedAt !== undefined) doc.issuedAt = b.issuedAt ? new Date(b.issuedAt) : null;
     if (b.expiresAt !== undefined) doc.expiresAt = b.expiresAt ? new Date(b.expiresAt) : null;

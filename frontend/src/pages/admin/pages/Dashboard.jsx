@@ -10,7 +10,7 @@ import { DashboardModule, AnalyticsModule } from './modules/HomeModules.jsx'
 import UsersModule, { UserFormFields } from './modules/UsersModule.jsx'
 import TeachersModule from './modules/TeachersModule.jsx'
 import DocumentsModule from './modules/DocumentsModule.jsx'
-import { TeacherProfilesModule, TDPModule, AccreditationsModule } from './modules/QAModules.jsx'
+import { QAOverviewModule, TeacherProfilesModule, TDPModule, AccreditationsModule } from './modules/QAModules.jsx'
 import FrontDeskModule from './modules/FrontDeskModule.jsx'
 import AssessmentModule from './modules/AssessmentModule.jsx'
 import CRMModule, { SalesPerformanceModule } from './modules/CRMModule.jsx'
@@ -76,7 +76,7 @@ const NAV_SECTIONS = {
     { label: 'Operations',  items: ['frontdesk', 'assessment', 'documents', 'payroll', 'leave', 'programmes', 'inventory'] },
     { label: 'Teaching',    items: ['liveclasses', 'clubs', 'grouprooms', 'curriculum'] },
     { label: 'Question Bank', items: ['questionbank'] },
-    { label: 'Quality',     items: ['teacherprofiles', 'tdp', 'accreditations'] },
+    { label: 'Quality',     items: ['qaoverview', 'teacherprofiles', 'tdp', 'accreditations'] },
     { label: 'Marketing',   items: ['studio'] },
     { label: 'System',      items: ['userlogs', 'billing', 'website', 'settings', 'ai', 'suggestions'] },
   ],
@@ -112,7 +112,6 @@ const NAV_SECTIONS = {
     { label: 'Our School', items: ['teacherprofiles', 'tdp', 'accreditations'] },
     { label: 'Academics', items: ['curriculum', 'questionbank', 'exams'] },
     { label: 'Quality & Reports', items: ['reports', 'dosperformance', 'mastery', 'dosattend'] },
-    { label: 'Documents', items: ['documents'] },
   ],
   ops_manager: [
     { label: 'Overview',    items: ['command', 'checkin', 'dashboard', 'analytics'] },
@@ -419,7 +418,9 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
       }}>
         <BirthdayBanner />
         <SuggestionBox />
-        {safePage === 'dashboard'   && forcedRole && <RoleOverview role={forcedRole} setPage={setPage} userStats={userStats} pendingAllocations={pendingAllocations} auth={auth} />}
+        {safePage === 'dashboard'   && forcedRole === 'qa' && <QAOverviewModule toast={toast} setPage={setPage} />}
+        {safePage === 'dashboard'   && forcedRole && forcedRole !== 'qa' && <RoleOverview role={forcedRole} setPage={setPage} userStats={userStats} pendingAllocations={pendingAllocations} auth={auth} />}
+        {safePage === 'qaoverview'  && <QAOverviewModule toast={toast} setPage={setPage} />}
         {safePage === 'dashboard'   && !forcedRole && <DashboardModule  setPage={setPage} userStats={userStats} pendingAllocations={pendingAllocations} refreshKey={refreshKey} auth={auth} toast={toast} openAddUser={openAddUser} adminFirst={adminFirst} />}
         {safePage === 'analytics'   && <AnalyticsModule  setPage={setPage} refreshKey={refreshKey} toast={toast} />}
         {safePage === 'users'       && <UsersModule      refreshKey={refreshKey} toast={toast} setUserForm={setUserForm} setUserModal={setUserModal} openAddUser={openAddUser} />}
@@ -536,8 +537,6 @@ function RoleOverview({ role, setPage, userStats, pendingAllocations, auth }) {
       tiles: [['dosanalytics','Performance Analytics','School-wide academic trends'],['exams','Exams','Set and track assessments'],['sessions','Student Sessions','Holidays, breaks and report-backs'],['reports','Reports','Generate and publish term reports']] },
     ops_manager: { title: 'Operations Overview', sub: 'People, allocations and day-to-day running.',
       tiles: [['users','Users','Manage students, parents and staff'],['allocations','Manage Students','Match students with teachers'],['sessions','Student Sessions','Pause and restore student accounts'],['leave','Leave','Approve staff leave requests']] },
-    qa: { title: 'Quality Overview', sub: 'Evidence of teaching quality, teacher development and accreditation.',
-      tiles: [['teacherprofiles','Teacher Profiles','Profiles and filed documents'],['tdp','Teacher Development','Trainings with photos and attendance'],['accreditations','Accreditations','Licenses and certificates'],['dosperformance','Performance','Academic performance reports']] },
   }
   const meta = META[role] || META.ops_manager
   const kpis = [
