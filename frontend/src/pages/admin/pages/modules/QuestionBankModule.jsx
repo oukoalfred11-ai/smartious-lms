@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { api } from '../../../../context/ctx.jsx'
 import { TOKENS } from '../shared/tokens.js'
 import { PCard } from '../shared/ui.jsx'
+import { renderMath } from '../../../../components/ui/MathField.jsx'
 
 function QuestionBankModule({ toast }) {
   const [questions, setQuestions] = useState([])
@@ -285,7 +286,7 @@ function QuestionBankModule({ toast }) {
                   <td><span style={{ background:diffColor(q.difficulty)+'22', color:diffColor(q.difficulty), fontWeight:700, fontSize:11, padding:'3px 8px', borderRadius:99, textTransform:'capitalize' }}>{q.difficulty}</span></td>
                   <td style={{ textAlign:'center', fontWeight:700 }}>{q.marks}</td>
                   <td style={{ fontSize:12, color:TOKENS.s700, maxWidth:280 }}>
-                    <div style={{ overflow:'hidden', whiteSpace:'nowrap', textOverflow:'ellipsis' }}>{q.questionText}</div>
+                    <div style={{ overflow:'hidden', whiteSpace:'nowrap', textOverflow:'ellipsis' }}>{renderMath(q.questionText)}</div>
                   </td>
                   <td>
                     <div style={{ display:'flex', gap:8 }}>
@@ -417,7 +418,7 @@ function ArtworkRow({ q, toast, onDone }) {
         <span style={{ fontSize:12, fontWeight:700, color:TOKENS.ink }}>{q.subtopic || q.subject}</span>
         <span style={{ fontSize:11.5, color:TOKENS.s400 }}>{q.marks} marks</span>
       </div>
-      <div style={{ fontSize:13, color:TOKENS.s700, lineHeight:1.6, marginBottom:8 }}>{q.questionText}</div>
+      <div style={{ fontSize:13, color:TOKENS.s700, lineHeight:1.6, marginBottom:8 }}>{renderMath(q.questionText)}</div>
 
       {q.imageDescription && (
         <div style={{ background:'#fff', border:`1px dashed ${TOKENS.gold}`, borderRadius:7, padding:'10px 13px', marginBottom:10 }}>

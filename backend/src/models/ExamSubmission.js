@@ -36,8 +36,13 @@ const answerSchema = new mongoose.Schema({
   // The answer itself
   answerText:     { type: String, default: '' },
   selectedOption: { type: String, default: '' },
+  // Structured answers (select-all, blanks, matching, ordering) as an
+  // array; answerText then holds a readable summary of the same answer.
+  answerData:     { type: mongoose.Schema.Types.Mixed, default: null },
 
-  // Grading (always pending until teacher reviews — no auto-grade)
+  // Grading. Objective answers are pre-marked on submission as a
+  // suggestion (lib/answerTypes.js autoMark); the teacher confirms or
+  // changes every mark before results are released.
   isCorrect:      { type: Boolean, default: null },
   marksAwarded:   { type: Number,  default: 0 },
   teacherComment: { type: String,  default: '' },

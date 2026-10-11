@@ -11,10 +11,15 @@ const attachmentSchema = new mongoose.Schema({
 
 // ── Recursive part subdoc (mirrors Question.js) ─────
 const customPartSchema = new mongoose.Schema({
-  type:          { type: String, enum: ['mcq','short','long','drawing','handwriting','upload'], default: 'short' },
+  type:          { type: String, enum: ['mcq','multi','truefalse','numeric','math','fillblank','matching','ordering','short','long','essay','drawing','handwriting','upload'], default: 'short' },
   text:          { type: String, default: '', trim: true },
   options:       { type: [String], default: [] },
   correctAnswer: { type: mongoose.Schema.Types.Mixed, default: null },
+  // Answer-format fields (lib/answerTypes.js): numeric tolerance (±) and
+  // unit, and the pairs of a matching question.
+  tolerance:     { type: Number, default: null },
+  unit:          { type: String, default: '', trim: true },
+  pairs:         { type: [{ left: { type: String, default: '' }, right: { type: String, default: '' }, _id: false }], default: [] },
   explanation:   { type: String, default: '', trim: true },
   marks:         { type: Number, default: 1, min: 0 },
   attachments:   { type: [attachmentSchema], default: [] },
@@ -27,12 +32,17 @@ customPartSchema.add({ parts: { type: [customPartSchema], default: [] } });
 const customQuestionSchema = new mongoose.Schema({
   type: {
     type: String,
-    enum: ['mcq','short','long','drawing','handwriting','upload','nested'],
+    enum: ['mcq','multi','truefalse','numeric','math','fillblank','matching','ordering','short','long','essay','drawing','handwriting','upload','nested'],
     default: 'short',
   },
   questionText:  { type: String, required: true },
   options:       { type: [String], default: [] },
   correctAnswer: { type: mongoose.Schema.Types.Mixed, default: null },
+  // Answer-format fields (lib/answerTypes.js): numeric tolerance (±) and
+  // unit, and the pairs of a matching question.
+  tolerance:     { type: Number, default: null },
+  unit:          { type: String, default: '', trim: true },
+  pairs:         { type: [{ left: { type: String, default: '' }, right: { type: String, default: '' }, _id: false }], default: [] },
   marks:         { type: Number, default: 1, min: 0 },
   difficulty:    { type: String, enum: ['easy','medium','hard'], default: 'medium' },
   topic:         { type: String, default: '' },
