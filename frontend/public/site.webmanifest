@@ -1,13 +1,19 @@
 {
+  "id": "/portal",
   "name": "Smartious Homeschool",
   "short_name": "Smartious",
-  "description": "International online school and homeschool provider. Cambridge IGCSE, A-Level, IB, CBC, and American curricula for students across Kenya, the UK, UAE, Canada, USA and beyond.",
-  "start_url": "/",
+  "description": "Smartious Homeschool portal: live classes, homework, exams, results and messages for students, parents and teachers.",
+  "start_url": "/portal?source=pwa",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#FEFDFB",
-  "theme_color": "#8B1A2E",
+  "display_override": ["window-controls-overlay", "standalone"],
+  "orientation": "any",
+  "background_color": "#FBFAF5",
+  "theme_color": "#7D1025",
+  "categories": ["education"],
   "icons": [
-    { "src": "/favicon-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "/favicon-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }

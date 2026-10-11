@@ -1,0 +1,133 @@
+/* ══════════════════════════════════════════════════════════════
+   APP MODE — styling that only applies inside the Smartious apps
+   (iOS / Android / Windows) and the installed web app.
+   lib/appShell.js tags <html> with .sm-app; an ordinary browser tab
+   never matches anything below except the shared tab bar.
+   ══════════════════════════════════════════════════════════════ */
+
+/* Native feel: no grey tap flash, no rubber-band of the whole page,
+   no 300ms double-tap delay, no long-press callout on chrome. */
+html.sm-app {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  overscroll-behavior-y: none;
+}
+html.sm-app body { overscroll-behavior-y: none; }
+html.sm-app a,
+html.sm-app button,
+html.sm-app [role="button"],
+html.sm-app .nav-item {
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+}
+html.sm-app button,
+html.sm-app .nav-item,
+html.sm-app .sm-tab,
+html.sm-app nav {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Press feedback: controls give under the finger. Buttons that already
+   position themselves with a transform are left alone so they don't jump. */
+html.sm-app button:not([style*="transform"]),
+html.sm-app .nav-item,
+html.sm-app [role="button"]:not([style*="transform"]) {
+  transition: transform .12s cubic-bezier(.2,.8,.2,1), filter .12s;
+}
+html.sm-app button:not([style*="transform"]):not(:disabled):active,
+html.sm-app .nav-item:active,
+html.sm-app [role="button"]:not([style*="transform"]):active {
+  transform: scale(.965);
+  filter: brightness(.96);
+}
+
+/* Inputs stay at 16px in the apps so iOS never zooms the page on focus. */
+@media (max-width: 768px) {
+  html.sm-ios input,
+  html.sm-ios select,
+  html.sm-ios textarea { font-size: 16px !important; }
+}
+
+/* Slimmer, quieter scrollbars in the Windows app. */
+html.sm-desktop ::-webkit-scrollbar { width: 10px; height: 10px; }
+html.sm-desktop ::-webkit-scrollbar-thumb {
+  background: rgba(125,16,37,.18); border-radius: 10px;
+  border: 3px solid transparent; background-clip: content-box;
+}
+html.sm-desktop ::-webkit-scrollbar-thumb:hover { background-color: rgba(125,16,37,.32); }
+html.sm-desktop ::-webkit-scrollbar-track { background: transparent; }
+
+/* Offline pill (created by appShell.js). */
+.sm-offline-pill {
+  position: fixed; left: 50%; z-index: 9999;
+  top: calc(env(safe-area-inset-top) + 10px);
+  transform: translate(-50%, -160%);
+  padding: 8px 16px; border-radius: 999px;
+  background: #1A0F0E; color: #FBFAF5;
+  font: 600 12.5px/1.2 Inter, -apple-system, sans-serif;
+  box-shadow: 0 8px 24px rgba(0,0,0,.25);
+  transition: transform .35s cubic-bezier(.2,.8,.2,1);
+  pointer-events: none;
+}
+.sm-offline-pill.show { transform: translate(-50%, 0); }
+
+/* ── Shared mobile tab bar (components/ui/MobileTabBar.jsx) ── */
+.sm-tabbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 110;
+  display: flex; align-items: stretch;
+  padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
+  background: rgba(251,250,245,.86);
+  backdrop-filter: saturate(180%) blur(22px);
+  -webkit-backdrop-filter: saturate(180%) blur(22px);
+  border-top: 1px solid rgba(125,16,37,.08);
+  box-shadow: 0 -8px 30px rgba(26,15,14,.06);
+}
+.sm-tab {
+  flex: 1; min-width: 0; position: relative;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; padding: 4px 2px; min-height: 50px;
+  background: none; border: 0; cursor: pointer;
+  color: #8A7F79; font: 500 10.5px/1 Inter, -apple-system, sans-serif;
+  letter-spacing: .01em;
+  -webkit-tap-highlight-color: transparent;
+}
+.sm-tab-ico {
+  width: 52px; height: 30px; border-radius: 999px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .25s cubic-bezier(.2,.8,.2,1), transform .25s cubic-bezier(.2,.8,.2,1);
+}
+.sm-tab svg { width: 22px; height: 22px; transition: transform .25s cubic-bezier(.2,.8,.2,1); }
+.sm-tab.on { color: #7D1025; font-weight: 700; }
+.sm-tab.on .sm-tab-ico { background: rgba(125,16,37,.10); }
+.sm-tab.on svg { transform: translateY(-.5px) scale(1.06); }
+.sm-tab:active .sm-tab-ico { transform: scale(.9); }
+.sm-tab-badge {
+  position: absolute; top: 2px; left: calc(50% + 8px);
+  min-width: 16px; height: 16px; padding: 0 4px; border-radius: 99px;
+  background: #B91C1C; color: #fff; border: 2px solid #FBFAF5;
+  font: 800 9px/12px Inter, sans-serif; text-align: center; box-sizing: content-box;
+}
+.sm-tab-dot {
+  position: absolute; top: 6px; left: calc(50% + 10px);
+  width: 7px; height: 7px; border-radius: 50%; background: #22C55E;
+  box-shadow: 0 0 0 2px #FBFAF5;
+}
+
+/* Slide-in drawer + scrim used by the phone layouts. */
+.sm-scrim {
+  position: fixed; inset: 0; z-index: 115;
+  background: rgba(26,15,14,.38);
+  -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
+  animation: sm-fade .2s ease;
+}
+@keyframes sm-fade { from { opacity: 0 } to { opacity: 1 } }
+/* Opacity only: a transform here would become the containing block for
+   every position:fixed modal inside the page while it animates. */
+@keyframes sm-page-in { from { opacity: 0 } to { opacity: 1 } }
+.sm-page-in { animation: sm-page-in .28s cubic-bezier(.2,.8,.2,1); }
+
+@media (prefers-reduced-motion: reduce) {
+  .sm-page-in, .sm-scrim { animation: none; }
+  .sm-tab-ico, .sm-tab svg, .sm-offline-pill { transition: none; }
+}

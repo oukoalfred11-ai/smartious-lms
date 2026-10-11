@@ -26,6 +26,7 @@ import ClubsHub from '../../components/ClubsHub.jsx'
 import QuizGame from './QuizGame.jsx'
 import AchievementTab from './AchievementTab.jsx'
 import LibraryViewer from '../../components/LibraryViewer.jsx'
+import MobileTabBar, { MORE_TAB, useIsPhone, useBackHandler } from '../../components/ui/MobileTabBar.jsx'
 // ── Badge icon SVGs ───────────────────────────────────────
 const BADGE_ICONS = {
   streak_7:    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#F97316" strokeWidth="2" strokeLinecap="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3z"/></svg>,
@@ -366,6 +367,20 @@ const NAV_SECTIONS = [
   ]},
 ]
 
+// Phone layout: five tabs at the bottom, everything else behind "More".
+const STUDENT_TABS = [
+  { id:'dashboard', label:'Home',     icon:'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z' },
+  { id:'live',      label:'Live',     svg:'<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>', live:true },
+  { id:'homework',  label:'Homework', svg:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/>' },
+  { id:'exams',     label:'Exams',    svg:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>' },
+  MORE_TAB,
+]
+const ADVISORY_TABS = [
+  STUDENT_TABS[0],
+  { id:'profile', label:'Profile', svg:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>' },
+  MORE_TAB,
+]
+
 // ─────────────────────────────────────────────────────────
 // ── ADVISORY DASHBOARD ────────────────────────────────────
 // Shown to Study Abroad and Pre-University students. These are
@@ -448,7 +463,10 @@ export default function StudentPortal() {
 
   // ── Navigation ───────────────────────────────────────
   const [page,        setPage]        = useState('dashboard')
-  const [collapsed,   setCollapsed]   = useState(false)
+  const [collapsedRaw, setCollapsed]  = useState(false)
+  const isMobile  = useIsPhone()
+  const [drawer,  setDrawer]  = useState(false)
+  const collapsed = collapsedRaw && !isMobile
 
   // ── Notifications dropdown (header bell) ─────────────
   const [notifsOpen, setNotifsOpen] = useState(false)
@@ -620,7 +638,16 @@ export default function StudentPortal() {
     setNotifsList([...serverItems, ...items].slice(0, 12))
   }
 
-  const goTo = (id) => setPage(id)
+  const goTo = (id) => { setPage(id); setDrawer(false) }
+
+  // Phones scroll the whole document: start each page at the top.
+  useEffect(() => { if (isMobile) window.scrollTo(0, 0) }, [page, isMobile])
+
+  useBackHandler(() => {
+    if (drawer) { setDrawer(false); return true }
+    if (page !== 'dashboard') { setPage('dashboard'); return true }
+    return false
+  })
 
   const firstName = user?.firstName || 'Student'
   const initials  = user ? `${user.firstName[0]}${user.lastName[0]}` : 'ST'
@@ -674,7 +701,7 @@ export default function StudentPortal() {
     page === 'achievements' ? 'Badges & milestones' :
     ''
 
-  const sidebarWidth = collapsed ? 76 : 240
+  const sidebarWidth = isMobile ? 0 : collapsed ? 76 : 240
 
   return (
     <div className="app" style={{
@@ -705,6 +732,12 @@ export default function StudentPortal() {
         zIndex:50,
         transition:'width .25s cubic-bezier(.22,.61,.36,1)',
         overflow:'visible',
+        ...(isMobile ? {
+          width:'min(84vw, 300px)', zIndex:120, paddingTop:'env(safe-area-inset-top)',
+          transform: drawer ? 'none' : 'translateX(-105%)',
+          transition:'transform .32s cubic-bezier(.2,.8,.2,1)',
+          boxShadow: drawer ? '0 24px 60px rgba(26,15,14,.28)' : 'none',
+        } : {}),
       }}>
         {/* Logo block */}
         <div style={{
@@ -781,7 +814,7 @@ export default function StudentPortal() {
             background:TOKENS.white,
             border:`1px solid ${TOKENS.line}`,
             boxShadow:'0 2px 8px rgba(0,0,0,.06)',
-            display:'flex', alignItems:'center', justifyContent:'center',
+            display:isMobile ? 'none' : 'flex', alignItems:'center', justifyContent:'center',
             cursor:'pointer', zIndex:60,
             transition:'all .2s',
           }}
@@ -824,6 +857,7 @@ export default function StudentPortal() {
                   return (
                     <div
                       key={item.id}
+                      data-haptic="select"
                       onClick={() => goTo(item.id)}
                       title={collapsed ? item.label : undefined}
                       style={{
@@ -990,6 +1024,7 @@ export default function StudentPortal() {
           }
         `}</style>
       </aside>
+      {isMobile && drawer && <div className="sm-scrim" onClick={() => setDrawer(false)}/>}
 
       {/* ═══════════════════════════════════════════════
           MAIN — frosted top-bar + content
@@ -1005,7 +1040,7 @@ export default function StudentPortal() {
         background:TOKENS.cream,
         position:'relative',
       }}>
-        <div style={{ padding:'16px 24px 0' }}><BirthdayBanner /><SuggestionBox /></div>
+        <div style={{ padding: isMobile ? '0 14px' : '16px 24px 0' }}><BirthdayBanner /><SuggestionBox /></div>
         {/* Frosted top-bar — matches admin portal */}
         <div style={{
           position:'sticky',
@@ -1014,12 +1049,19 @@ export default function StudentPortal() {
           backdropFilter:'saturate(180%) blur(20px)',
           WebkitBackdropFilter:'saturate(180%) blur(20px)',
           borderBottom:`1px solid ${TOKENS.s100}`,
-          padding:'13px 28px',
+          padding: isMobile ? 'calc(10px + env(safe-area-inset-top)) 14px 10px' : '13px 28px',
           display:'flex',
           alignItems:'center',
-          gap:20,
-          minHeight:76,
+          gap: isMobile ? 10 : 20,
+          minHeight: isMobile ? 60 : 76,
         }}>
+          {isMobile && (
+            <button type="button" aria-label="Menu" data-haptic="light" onClick={() => setDrawer(true)}
+              style={{ width:40, height:40, borderRadius:12, border:`1px solid ${TOKENS.line}`, background:'#fff',
+                display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, cursor:'pointer' }}>
+              <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke={TOKENS.crimson} strokeWidth="2" strokeLinecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+            </button>
+          )}
           <div style={{flex:1, minWidth:0}}>
             {pageEyebrow && (
               <div style={{
@@ -1033,7 +1075,7 @@ export default function StudentPortal() {
             )}
             <div style={{
               fontFamily:"'Instrument Serif',Georgia,serif",
-              fontSize:22, fontWeight:400,
+              fontSize: isMobile ? 20 : 22, fontWeight:400,
               color:TOKENS.ink, lineHeight:1.2,
               whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis',
             }}>
@@ -1244,14 +1286,14 @@ export default function StudentPortal() {
           </div>
         </div>
 
-        <div className="content" style={{
+        <div className={isMobile ? 'content sm-page-in' : 'content'} key={isMobile ? page : undefined} style={{
           display:'block',
           width:'100%',
           minHeight:'calc(100vh - 76px)',
           height:'auto',
           overflow:'visible',
-          animation:'fadeIn .25s ease',
-          padding:'24px 32px 48px',
+          animation: isMobile ? undefined : 'fadeIn .25s ease',
+          padding: isMobile ? '16px 14px calc(96px + env(safe-area-inset-bottom))' : '24px 32px 48px',
           boxSizing:'border-box',
         }}>
           
@@ -1659,6 +1701,9 @@ export default function StudentPortal() {
 
         </div>
       </main>
+      {isMobile && (
+        <MobileTabBar tabs={isAdvisory ? ADVISORY_TABS : STUDENT_TABS} page={page} setPage={goTo} onMore={() => setDrawer(true)}/>
+      )}
     </div>
   );
 }

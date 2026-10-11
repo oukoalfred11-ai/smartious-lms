@@ -13,6 +13,7 @@ import { NestedQuestionEditor, AttachmentList, AnnotationCanvas, sumLeafMarks, l
 import ManageSubjectTab from './ManageSubjectTab.jsx'
 import TeacherLeaveRequest from './TeacherLeaveRequest.jsx'
 import LibraryViewer from '../../components/LibraryViewer.jsx'
+import MobileTabBar, { IconParts, useBackHandler } from '../../components/ui/MobileTabBar.jsx'
 
 // ──────────────────────────────────────────────────────
 // DESIGN TOKENS — mirrors the admin Dashboard's TOKENS
@@ -411,13 +412,13 @@ function MobileDrawer({ open, onClose, sections, page, setPage, portalLabel, use
   return (
     <>
       {/* Backdrop */}
-      <div onClick={onClose} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.4)', zIndex:200 }}/>
+      <div className="sm-scrim" onClick={onClose} style={{ zIndex:200 }}/>
       {/* Drawer */}
       <div style={{
-        position:'fixed', top:0, left:0, bottom:0, width:280,
+        position:'fixed', top:0, left:0, bottom:0, width:'min(84vw, 300px)', paddingTop:'env(safe-area-inset-top)',
         background:'#FBFAF5', zIndex:201, display:'flex', flexDirection:'column',
         overflowY:'auto', boxShadow:'4px 0 24px rgba(0,0,0,.12)',
-        animation:'slideInLeft .2s ease',
+        animation:'slideInLeft .3s cubic-bezier(.2,.8,.2,1)',
       }}>
         <style>{`@keyframes slideInLeft{from{transform:translateX(-100%)}to{transform:translateX(0)}}`}</style>
         {/* Logo */}
@@ -436,11 +437,11 @@ function MobileDrawer({ open, onClose, sections, page, setPage, portalLabel, use
               {s.items.map(item => {
                 const active = page === item.id
                 return (
-                  <div key={item.id} onClick={() => { setPage(item.id); onClose() }}
+                  <div key={item.id} data-haptic="select" onClick={() => { setPage(item.id); onClose() }}
                     style={{ display:'flex', alignItems:'center', gap:14, padding:'11px 20px', cursor:'pointer', background:active?'#FBF6E3':'transparent', borderLeft:active?'3px solid #C9A030':'3px solid transparent', color:active?'#7D1025':'#564844', fontWeight:active?600:400, fontSize:15, transition:'all .15s' }}>
                     <div style={{ width:28, height:28, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
                       <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke={active?'#7D1025':'#857973'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                        <path d={item.icon||'M3 12h18M3 6h18M3 18h18'}/>
+                        <IconParts icon={item.icon||'M3 12h18M3 6h18M3 18h18'}/>
                       </svg>
                     </div>
                     <span>{item.label}</span>
@@ -481,39 +482,7 @@ function MobileDrawer({ open, onClose, sections, page, setPage, portalLabel, use
 
 // Mobile bottom tab bar — shows 4-5 most important tabs
 function MobileBottomTabs({ tabs, page, setPage }) {
-  return (
-    <div style={{
-      position:'fixed', bottom:0, left:0, right:0, zIndex:100,
-      background:'rgba(251,250,245,.97)',
-      backdropFilter:'blur(16px)',
-      WebkitBackdropFilter:'blur(16px)',
-      borderTop:'1px solid #E8E2D6',
-      display:'flex',
-      paddingBottom:'env(safe-area-inset-bottom)',
-    }}>
-      {tabs.map(tab => {
-        const active = page === tab.id
-        return (
-          <button key={tab.id} onClick={() => setPage(tab.id)} style={{
-            flex:1, border:'none', background:'transparent', cursor:'pointer',
-            padding:'8px 4px 10px', display:'flex', flexDirection:'column',
-            alignItems:'center', gap:3, transition:'all .15s',
-          }}>
-            <div style={{ width:24, height:24, display:'flex', alignItems:'center', justifyContent:'center' }}>
-              <svg width="22" height="22" fill={active?'#7D1025':'none'} viewBox="0 0 24 24"
-                stroke={active?'#7D1025':'#9A9A9A'} strokeWidth={active?2:1.8} strokeLinecap="round" strokeLinejoin="round">
-                <path d={tab.icon||'M3 12h18'}/>
-              </svg>
-            </div>
-            <span style={{ fontSize:9.5, fontWeight:active?700:500, color:active?'#7D1025':'#9A9A9A', letterSpacing:'.01em' }}>
-              {tab.shortLabel||tab.label}
-            </span>
-            {active&&<div style={{ width:4, height:4, borderRadius:'50%', background:'#C9A030', marginTop:-2 }}/>}
-          </button>
-        )
-      })}
-    </div>
-  )
+  return <MobileTabBar tabs={tabs} page={page} setPage={setPage} />
 }
 
 
@@ -724,18 +693,23 @@ export default function TeacherPortal() {
   const teacherInitials = ((currentUser?.firstName?.[0]||'T')+(currentUser?.lastName?.[0]||'')).toUpperCase()
   const isMobile = useIsMobile()
   const [menuOpen, setMenuOpen] = useState(false)
+  useBackHandler(() => {
+    if (menuOpen) { setMenuOpen(false); return true }
+    if (page !== 'dashboard') { setPage('dashboard'); return true }
+    return false
+  })
 
   const TEACHER_MOBILE_TABS = [
     { id:'dashboard',  label:'Dashboard', shortLabel:'Home',    icon:'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z' },
     { id:'students',   label:'Students',  shortLabel:'Students',icon:'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75' },
     { id:'homework',   label:'Homework',  shortLabel:'HW',      icon:'M9 11l3 3L22 4' },
-    { id:'reports',    label:'Reports',   shortLabel:'Reports', icon:'M14 2H6a2 2 0 0-2 2v16a2 2 0 0 1 2-2h12a2 2 0 0 0 2-2V8z' },
+    { id:'reports',    label:'Reports',   shortLabel:'Reports', icon:'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z|M14 2v6h6' },
     { id:'myratings',  label:'Ratings',   shortLabel:'Ratings', icon:'M12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2' },
   ]
 
   if (isMobile) {
     return (
-      <div style={{ display:'flex', flexDirection:'column', height:'100vh', background:TOKENS.cream, fontFamily:"Inter,-apple-system,sans-serif", color:TOKENS.ink, overflow:'hidden' }}>
+      <div style={{ display:'flex', flexDirection:'column', height:'100dvh', background:TOKENS.cream, fontFamily:"Inter,-apple-system,sans-serif", color:TOKENS.ink, overflow:'hidden' }}>
         <style>{`@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}.card{background:#fff;border:1px solid #E8E2D6;border-radius:12px;}.kpi{background:#fff;border:1px solid #E8E2D6;border-radius:12px;padding:14px 16px;}.tbl{width:100%;border-collapse:collapse;}.tbl thead th{padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#7D1025;text-transform:uppercase;background:#FBFAF5;border-bottom:1.5px solid #E8E2D6;}.tbl tbody tr{border-top:1px solid #E8E2D6;}.tbl td{padding:9px 12px;font-size:13px;}.fi{width:100%;padding:9px 12px;border-radius:8px;border:1.5px solid #E8DDD5;font-size:14px;font-family:inherit;box-sizing:border-box;color:#1A0F0E;}.fsel{width:100%;padding:9px 12px;border-radius:8px;border:1.5px solid #E8DDD5;font-size:14px;font-family:inherit;background:#fff;color:#1A0F0E;}.fl{font-size:11px;font-weight:700;color:#7D1025;text-transform:uppercase;margin-bottom:5px;display:block;}input,select,textarea,option{color:#1A0F0E!important;}`}</style>
 
         <MobileTopBar title={pageTitles[page]||'Dashboard'} eyebrow="Teacher Portal"

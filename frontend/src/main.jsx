@@ -3,6 +3,16 @@ import React from 'react'
 import { createRoot, hydrateRoot } from 'react-dom/client'
 import App from './App.jsx'
 import './styles/global.css'
+import './styles/app.css'
+import { bootAppShell, appReady, isAppMode } from './lib/appShell.js'
+
+bootAppShell()
+
+// Inside the apps the marketing homepage is not a destination: the
+// app is the portal. Rewrite before React mounts so nothing flashes.
+if (isAppMode() && window.location.pathname === '/') {
+  window.history.replaceState(null, '', '/portal' + window.location.search)
+}
 
 /* ═══════════════════════════════════════════════════════════════════
    Global error boundary — catches any React render crash and shows a
@@ -75,7 +85,7 @@ const tree = <ErrorBoundary><App /></ErrorBoundary>
  * Authenticated routes now always render fresh, which is both correct and
  * what was effectively happening after React bailed out.
  */
-const AUTHENTICATED_PREFIXES = ['/admin', '/teacher', '/student', '/parent', '/login']
+const AUTHENTICATED_PREFIXES = ['/admin', '/teacher', '/student', '/parent', '/login', '/portal']
 const isAuthedRoute = AUTHENTICATED_PREFIXES.some(p =>
   window.location.pathname === p || window.location.pathname.startsWith(p + '/'))
 
@@ -86,3 +96,6 @@ if (container.hasChildNodes() && !isAuthedRoute) {
   if (isAuthedRoute) container.innerHTML = ''
   createRoot(container).render(tree)
 }
+
+// Hand over from the native splash once the first frame is on screen.
+requestAnimationFrame(() => requestAnimationFrame(appReady))

@@ -1,0 +1,5 @@
+node_modules/
+# Generated on demand by `npm run add:android` / `add:ios` (and in CI);
+# every customisation lives in scripts/patch-native.mjs.
+android/
+ios/

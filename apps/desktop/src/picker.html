@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
+<title>Share your screen</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #FBFAF5; color: #1A0F0E; font: 14px/1.4 "Segoe UI", Inter, sans-serif; display: flex; flex-direction: column; height: 100vh; }
+  header { padding: 20px 24px 8px; }
+  h1 { margin: 0; font: 400 24px/1.2 Georgia, serif; }
+  h1 em { color: #7D1025; }
+  .sub { color: #6B5F59; font-size: 13px; margin-top: 4px; }
+  .tabs { display: flex; gap: 6px; padding: 10px 24px 0; }
+  .tab { border: 1px solid #E8E2D6; background: #fff; border-radius: 999px; padding: 6px 14px; cursor: pointer; font: inherit; font-size: 13px; color: #564844; }
+  .tab.on { background: #7D1025; border-color: #7D1025; color: #fff; }
+  main { flex: 1; overflow: auto; padding: 14px 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; align-content: start; }
+  .src { border: 2px solid transparent; border-radius: 12px; background: #fff; padding: 8px; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,.06); transition: border-color .15s, transform .12s; text-align: left; font: inherit; }
+  .src:hover { border-color: #E9C766; }
+  .src.on { border-color: #7D1025; }
+  .src:active { transform: scale(.98); }
+  .src img.t { width: 100%; aspect-ratio: 16/10; object-fit: contain; background: #F4EFEB; border-radius: 8px; display: block; }
+  .name { display: flex; gap: 6px; align-items: center; margin-top: 7px; font-size: 12.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .name img { width: 16px; height: 16px; }
+  footer { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 24px; border-top: 1px solid #F4EFEB; }
+  button.b { border-radius: 10px; padding: 10px 20px; font: 600 14px "Segoe UI", sans-serif; cursor: pointer; border: 1px solid #E8E2D6; background: #fff; color: #564844; }
+  button.b.primary { background: #7D1025; border-color: #7D1025; color: #fff; }
+  button.b:disabled { opacity: .45; cursor: default; }
+</style>
+</head>
+<body>
+  <header><h1>Share your <em>screen</em></h1><div class="sub">Choose what your class will see.</div></header>
+  <div class="tabs"><button class="tab on" data-k="screen">Entire screen</button><button class="tab" data-k="window">A window</button></div>
+  <main id="grid"></main>
+  <footer><button class="b" id="cancel">Cancel</button><button class="b primary" id="share" disabled>Share</button></footer>
+<script>
+  let all = [], kind = 'screen', sel = null
+  const grid = document.getElementById('grid'), share = document.getElementById('share')
+  function render() {
+    grid.textContent = ''
+    for (const s of all.filter(s => (kind === 'screen') === s.screen)) {
+      const b = document.createElement('button')
+      b.className = 'src' + (s.id === sel ? ' on' : '')
+      const t = document.createElement('img'); t.className = 't'; t.src = s.thumb; b.appendChild(t)
+      const n = document.createElement('div'); n.className = 'name'
+      if (s.icon) { const i = document.createElement('img'); i.src = s.icon; n.appendChild(i) }
+      n.appendChild(document.createTextNode(s.name)); b.appendChild(n)
+      b.onclick = () => { sel = s.id; share.disabled = false; render() }
+      b.ondblclick = () => window.picker.pick(s.id)
+      grid.appendChild(b)
+    }
+  }
+  document.querySelectorAll('.tab').forEach(t => t.onclick = () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.toggle('on', x === t))
+    kind = t.dataset.k; render()
+  })
+  document.getElementById('cancel').onclick = () => window.picker.pick(null)
+  share.onclick = () => sel && window.picker.pick(sel)
+  window.picker.onSources(list => {
+    all = list
+    const screens = all.filter(s => s.screen)
+    if (screens.length === 1) { sel = screens[0].id; share.disabled = false }
+    render()
+  })
+</script>
+</body>
+</html>

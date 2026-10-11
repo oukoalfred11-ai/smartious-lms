@@ -1,0 +1,50 @@
+{
+  "appId": "com.smartious.homeschool",
+  "appName": "Smartious",
+  "webDir": "www",
+  "appendUserAgent": "SmartiousApp/1.0",
+  "backgroundColor": "#FBFAF5",
+  "loggingBehavior": "none",
+  "server": {
+    "url": "https://smartioushomeschool.com/portal",
+    "errorPath": "offline.html",
+    "allowNavigation": [
+      "smartioushomeschool.com",
+      "*.smartioushomeschool.com",
+      "checkout.paystack.com",
+      "*.paystack.com",
+      "*.paystack.co"
+    ]
+  },
+  "android": {
+    "allowMixedContent": false,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": false
+  },
+  "ios": {
+    "contentInset": "always",
+    "scrollEnabled": true,
+    "limitsNavigationsToAppBoundDomains": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 6000,
+      "launchAutoHide": true,
+      "launchFadeOutDuration": 250,
+      "backgroundColor": "#7D1025",
+      "showSpinner": false,
+      "androidScaleType": "CENTER_CROP",
+      "splashFullScreen": false,
+      "splashImmersive": false
+    },
+    "StatusBar": {
+      "style": "LIGHT",
+      "backgroundColor": "#FBFAF5",
+      "overlaysWebView": false
+    },
+    "Keyboard": {
+      "resize": "native",
+      "resizeOnFullScreen": true
+    }
+  }
+}

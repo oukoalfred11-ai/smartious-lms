@@ -3,6 +3,7 @@ import CommunityChatView from '../../components/CommunityChat.jsx'
 import AnnouncementsStrip from '../../components/AnnouncementsStrip.jsx'
 import MessagesHub from '../../components/MessagesHub.jsx'
 import { api } from '../../context/ctx.jsx'
+import MobileTabBar, { MORE_TAB, useIsPhone, useBackHandler } from '../../components/ui/MobileTabBar.jsx'
 
 // ── Tokens matching admin/student/teacher portals ──────────
 const C = {
@@ -54,41 +55,35 @@ const NAV_SECTIONS = [
 ]
 
 const PAGE_TITLES = {
+  ...Object.fromEntries(NAV_SECTIONS.flatMap(s => s.items).map(i => [i.id, i.label])),
   dashboard:'Dashboard', reports:'Academic Reports', timetable:'Timetable',
   lessons:'Live Lessons', messages:'Messages', community:'Community', fees:'Fees & Invoices',
   programme:'Programme Details', tutor:'Tutor & Advisor',
 }
 
+// Phone layout: the sidebar becomes a slide-in drawer, a tab bar holds
+// the five most-used pages, and "More" opens the drawer for the rest.
+const PARENT_TABS = [
+  { id:'dashboard', label:'Home',     icon:'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z' },
+  { id:'results',   label:'Results',  icon:'M18 20V10|M12 20V4|M6 20v-6' },
+  { id:'messages',  label:'Messages', icon:'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z' },
+  { id:'fees',      label:'Fees',     icon:'M2 5h20v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5z|M2 10h20' },
+  MORE_TAB,
+]
+
 // ══════════════════════════════════════════════════════════════
 // MAIN COMPONENT
 // ══════════════════════════════════════════════════════════════
-// ═══════════════════════════════════════════════════════════
-// MOBILE SHELL — shared across Student, Teacher, Parent portals
-// On mobile (<768px): bottom tab bar + full-width content
-// On desktop: existing sidebar layout
-// ═══════════════════════════════════════════════════════════
-
-// Hook: detects mobile screen
-function useIsMobile() {
-  const [mobile, setMobile] = useState(
-    typeof window !== 'undefined' && window.innerWidth < 768
-  )
-  useEffect(() => {
-    const fn = () => setMobile(window.innerWidth < 768)
-    window.addEventListener('resize', fn)
-    return () => window.removeEventListener('resize', fn)
-  }, [])
-  return mobile
-}
-
 
 export default function ParentPortal() {
-  const isMobile = useIsMobile()
+  const isMobile = useIsPhone()
+  const [drawer, setDrawer] = useState(false)
   const [page,            setPage]            = useState('dashboard')
   const [user,            setUser]            = useState(null)
   const [children,        setChildren]        = useState([])
   const [selectedChild,   setSelectedChild]   = useState(null)
-  const [collapsed,       setCollapsed]       = useState(false)
+  const [collapsedRaw,    setCollapsed]       = useState(false)
+  const collapsed = collapsedRaw && !isMobile
   const [linkModal,       setLinkModal]       = useState(false)
   const [linkAdm,         setLinkAdm]         = useState('')
   const [linking,         setLinking]         = useState(false)
@@ -126,14 +121,24 @@ export default function ParentPortal() {
     finally { setLinking(false) }
   }
 
+  useBackHandler(() => {
+    if (drawer) { setDrawer(false); return true }
+    if (page !== 'dashboard') { setPage('dashboard'); return true }
+    return false
+  })
+  const go = (id) => { setPage(id); setDrawer(false) }
+
   const parentName = user ? `${user.firstName||''} ${user.lastName||''}`.trim() : 'Parent'
   const initials   = user ? ((user.firstName?.[0]||'')+(user.lastName?.[0]||'')).toUpperCase() : 'P'
 
   return (
-    <div style={{ display:'flex', height:'100vh', overflow:'hidden', background:C.cream, fontFamily:"Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif", color:C.ink }}>
+    <div style={{ display:'flex', height:isMobile?'100dvh':'100vh', overflow:'hidden', background:C.cream, fontFamily:"Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif", color:C.ink }}>
 
       {/* ══ SIDEBAR ══ */}
-      <aside style={{ width:collapsed?76:252, flexShrink:0, background:C.cream, borderRight:`1px solid ${C.s100}`, display:'flex', flexDirection:'column', height:'100vh', overflowY:'auto', overflowX:'hidden', transition:'width .25s cubic-bezier(.22,.61,.36,1)', position:'relative', zIndex:50, scrollbarWidth:'none' }}>
+      <aside style={{ width:collapsed?76:252, flexShrink:0, background:C.cream, borderRight:`1px solid ${C.s100}`, display:'flex', flexDirection:'column', height:'100vh', overflowY:'auto', overflowX:'hidden', transition:'width .25s cubic-bezier(.22,.61,.36,1)', position:'relative', zIndex:50, scrollbarWidth:'none' ,
+        ...(isMobile ? { position:'fixed', top:0, left:0, bottom:0, height:'100dvh', width:'min(84vw, 300px)', zIndex:120,
+          paddingTop:'env(safe-area-inset-top)', transform: drawer ? 'none' : 'translateX(-105%)',
+          transition:'transform .32s cubic-bezier(.2,.8,.2,1)', boxShadow: drawer ? '0 24px 60px rgba(26,15,14,.28)' : 'none' } : {}) }}>
 
         {/* Logo */}
         <div style={{ display:'flex', alignItems:'center', gap:12, padding:collapsed?'20px 0':'20px 22px', justifyContent:collapsed?'center':'flex-start', borderBottom:`1px solid ${C.s100}`, minHeight:72, flexShrink:0 }}>
@@ -155,7 +160,7 @@ export default function ParentPortal() {
         </div>
 
         {/* Collapse toggle */}
-        <button onClick={()=>setCollapsed(c=>!c)} style={{ position:'absolute', top:24, right:-13, width:26, height:26, borderRadius:'50%', background:C.white, border:`1px solid ${C.s200}`, boxShadow:'0 2px 8px rgba(0,0,0,.06)', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', zIndex:60 }}>
+        <button onClick={()=>setCollapsed(c=>!c)} style={{ position:'absolute', top:24, right:-13, width:26, height:26, borderRadius:'50%', background:C.white, border:`1px solid ${C.s200}`, boxShadow:'0 2px 8px rgba(0,0,0,.06)', display:isMobile?'none':'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', zIndex:60 }}>
           <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke={C.s500} strokeWidth="2.5" strokeLinecap="round" style={{ transform:collapsed?'rotate(180deg)':'none', transition:'transform .25s' }}>
             <path d="M15 18l-6-6 6-6"/>
           </svg>
@@ -169,7 +174,7 @@ export default function ParentPortal() {
               {s.items.map(item=>{
                 const active = page===item.id
                 return (
-                  <div key={item.id} onClick={()=>setPage(item.id)} title={collapsed?item.label:undefined}
+                  <div key={item.id} data-haptic="select" onClick={()=>go(item.id)} title={collapsed?item.label:undefined}
                     style={{ position:'relative', display:'flex', alignItems:'center', gap:collapsed?0:12, padding:collapsed?'11px 0':'10px 22px', margin:'2px 12px', borderRadius:8, cursor:'pointer', background:active?C.goldPale:'transparent', color:active?C.crimson:C.s700, fontWeight:active?600:500, fontSize:13.5, transition:'background .15s', justifyContent:collapsed?'center':'flex-start' }}
                     onMouseEnter={e=>{ if(!active) e.currentTarget.style.background='#FAF7F4' }}
                     onMouseLeave={e=>{ if(!active) e.currentTarget.style.background='transparent' }}>
@@ -248,17 +253,24 @@ export default function ParentPortal() {
           select option{background:#fff;}
         `}</style>
       </aside>
+      {isMobile && drawer && <div className="sm-scrim" onClick={()=>setDrawer(false)}/>}
 
       {/* ══ MAIN ══ */}
       <div style={{ flex:1, display:'flex', flexDirection:'column', minWidth:0, overflow:'hidden', background:C.cream }}>
 
         {/* Top bar */}
-        <div style={{ position:'sticky', top:0, zIndex:30, background:'rgba(251,250,245,.9)', backdropFilter:'saturate(180%) blur(20px)', WebkitBackdropFilter:'saturate(180%) blur(20px)', borderBottom:`1px solid ${C.s100}`, padding:'13px 28px', display:'flex', alignItems:'center', gap:20, minHeight:60, flexShrink:0 }}>
+        <div style={{ position:'sticky', top:0, zIndex:30, background:'rgba(251,250,245,.9)', backdropFilter:'saturate(180%) blur(20px)', WebkitBackdropFilter:'saturate(180%) blur(20px)', borderBottom:`1px solid ${C.s100}`, padding:isMobile?'10px 14px':'13px 28px', display:'flex', alignItems:'center', gap:isMobile?12:20, minHeight:60, flexShrink:0 }}>
+          {isMobile && (
+            <button type="button" aria-label="Menu" data-haptic="light" onClick={()=>setDrawer(true)}
+              style={{ width:40, height:40, borderRadius:12, border:`1px solid ${C.s200}`, background:'#fff', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, cursor:'pointer' }}>
+              <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke={C.crimson} strokeWidth="2" strokeLinecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+            </button>
+          )}
           <div style={{ flex:1, minWidth:0 }}>
             <div style={{ fontSize:10, fontWeight:700, color:C.crimson, letterSpacing:'.14em', textTransform:'uppercase', marginBottom:3 }}>Parent Portal</div>
             <div style={{ fontFamily:"'Instrument Serif',Georgia,serif", fontSize:22, fontWeight:400, color:C.ink, lineHeight:1.2 }}>
               {PAGE_TITLES[page]||'Dashboard'}
-              {selectedChild&&<span style={{ fontSize:14, fontWeight:400, color:C.s500, marginLeft:12 }}>— {selectedChild.firstName} {selectedChild.lastName}</span>}
+              {selectedChild&&<span style={{ fontSize:14, fontWeight:400, color:C.s500, marginLeft:12, display:isMobile?'none':'inline' }}>— {selectedChild.firstName} {selectedChild.lastName}</span>}
             </div>
           </div>
           {children.length===0&&(
@@ -272,7 +284,7 @@ export default function ParentPortal() {
         </div>
 
         {/* Content */}
-        <div style={{ flex:1, overflowY:'auto', padding:'24px 28px', maxWidth:1400, margin:'0 auto', width:'100%', boxSizing:'border-box', animation:'fadeIn .25s ease' }}>
+        <div key={isMobile ? page : undefined} className={isMobile ? 'sm-page-in' : undefined} style={{ flex:1, overflowY:'auto', WebkitOverflowScrolling:'touch', padding:isMobile?'16px 14px calc(96px + env(safe-area-inset-bottom))':'24px 28px', maxWidth:1400, margin:'0 auto', width:'100%', boxSizing:'border-box', animation:isMobile?undefined:'fadeIn .25s ease' }}>
           {!selectedChild&&page!=='messages'&&page!=='programme'&&page!=='tutor' ? (
             <NoChildLinked onLink={()=>setLinkModal(true)}/>
           ) : (
@@ -300,6 +312,8 @@ export default function ParentPortal() {
           )}
         </div>
       </div>
+
+      {isMobile && <MobileTabBar tabs={PARENT_TABS} page={page} setPage={go} onMore={()=>setDrawer(true)}/>}
 
       {/* ── Link student modal ── */}
       {linkModal&&(
