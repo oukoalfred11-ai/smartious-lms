@@ -35,7 +35,7 @@ const CAN_DELETE = requireRole('admin')
 
 // Roles that see the whole ledger. Sales users see only the
 // invoices they themselves issued.
-const FULL_LEDGER_ROLES = ['admin', 'accountant', 'ops_manager']
+const FULL_LEDGER_ROLES = ['admin', 'accountant', 'ops_manager', 'dos']
 function ledgerScope(user) {
   return FULL_LEDGER_ROLES.includes(user.role) ? {} : { issuedBy: user._id }
 }
@@ -472,7 +472,7 @@ router.post('/preview-pdf', auth, ALLOWED, async (req, res) => {
 })
 
 const parentOrStaff = async (req, res, next) => {
-  if (['admin','accountant','sales','ops_manager'].includes(req.user.role)) return next()
+  if (['admin','accountant','sales','ops_manager','dos'].includes(req.user.role)) return next()
   if (req.user.role === 'parent') {
     const Invoice2 = require('../models/Invoice')
     const inv = await Invoice2.findById(req.params.id).select('billedToEmail').lean()

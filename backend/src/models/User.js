@@ -112,6 +112,10 @@ const userSchema = new mongoose.Schema({
   // Teachers only: 'teacher' (qualified), 'trainee' (in training) or
   // 'support' (lesson preparation and resources). See constants/qa.js.
   teacherCategory: { type: String, enum: ['teacher', 'trainee', 'support'], default: 'teacher' },
+  // Extra responsibilities on top of the main role, e.g. a Dean &
+  // Operations account that also holds Quality Assurance. requireRole
+  // honours these (middleware/auth.js).
+  additionalRoles: { type: [{ type: String, enum: ['qa'] }], default: [] },
 
   // ── ADMIN → TEACHER EMAIL HISTORY ──
   // A record of branded emails an admin has sent this teacher from the

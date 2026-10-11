@@ -152,7 +152,7 @@ function fileStatus(docs, required = REQUIRED_PERSONNEL, now = Date.now()) {
   };
 }
 
-const TEAM_FIELDS = 'firstName lastName email phone avatar bio role teacherCategory jobTitle yearsOfExperience qualifications certifications specializations subjects teachingSpecialties teacherStatus isOnLeave isActive createdAt';
+const TEAM_FIELDS = 'firstName lastName email phone avatar bio role teacherCategory additionalRoles jobTitle yearsOfExperience qualifications certifications specializations subjects teachingSpecialties teacherStatus isOnLeave isActive createdAt';
 // The whole staff team: the Principal, leadership, operations and every
 // kind of teacher. Demo accounts are not people.
 const activeTeamFilter = { role: { $in: TEAM_ROLES }, isActive: { $ne: false }, teacherStatus: { $ne: 'Left' }, isDemo: { $ne: true } };
@@ -160,7 +160,7 @@ const ROLE_ORDER = Object.fromEntries(TEAM_ROLES.map((r, i) => [r, i]));
 const teamSort = (a, b) => (ROLE_ORDER[a.role] - ROLE_ORDER[b.role])
   || [a.firstName, a.lastName].join(' ').localeCompare([b.firstName, b.lastName].join(' '));
 /** Title, group and required documents for one person. */
-const decorate = (u) => ({ ...u, teacherCategory: u.role === 'teacher' ? (u.teacherCategory || 'teacher') : undefined, teamTitle: teamTitle(u), group: teamGroup(u.role) });
+const decorate = (u) => ({ ...u, teacherCategory: u.role === 'teacher' ? (u.teacherCategory || 'teacher') : undefined, alsoQA: (u.additionalRoles || []).includes('qa'), teamTitle: teamTitle(u), group: teamGroup(u.role) });
 const DOC_FIELDS = 'teacherId category title subject description expiresAt verifiedAt verifiedByName uploadedBy uploadedByName file createdAt';
 
 // Trainings each teacher attended, as { [teacherId]: { count, hours, last } }.
@@ -326,6 +326,7 @@ async function getMember(req, res) {
       categoryMeta: TEACHER_DOC_CATEGORIES, required: requiredFor(person),
       teacherCategories: TEACHER_CATEGORIES,
       canEdit: TEAM_EDIT_ROLES.includes(req.user.role),
+      canAssignQA: req.user.role === 'admin' && ['dos', 'ops_manager'].includes(person.role),
     } });
   } catch (e) {
     console.error('[qa member]', e.message);
@@ -341,7 +342,15 @@ router.patch('/team/:id', auth, requireRole(...TEAM_EDIT_ROLES), async (req, res
     if (!mongoose.isValidObjectId(req.params.id)) return res.status(400).json({ success: false, message: 'Invalid id.' });
     const person = await User.findOne({ _id: req.params.id, role: { $in: TEAM_ROLES } });
     if (!person) return res.status(404).json({ success: false, message: 'Team member not found.' });
-    const { teacherCategory, jobTitle } = req.body || {};
+    const { teacherCategory, jobTitle, alsoQA } = req.body || {};
+    // Quality Assurance as an extra responsibility for a Dean & Operations
+    // account. Only the Principal assigns it.
+    if (alsoQA !== undefined) {
+      if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Only the Principal can assign Quality Assurance.' });
+      if (!['dos', 'ops_manager'].includes(person.role)) return res.status(400).json({ success: false, message: 'Quality Assurance can be added to a Dean & Operations account.' });
+      const rest = (person.additionalRoles || []).filter(r => r !== 'qa');
+      person.additionalRoles = alsoQA ? [...rest, 'qa'] : rest;
+    }
     if (teacherCategory !== undefined) {
       if (person.role !== 'teacher') return res.status(400).json({ success: false, message: 'Only teachers have a teacher category.' });
       if (!TEACHER_CATEGORY_KEYS.includes(teacherCategory)) return res.status(400).json({ success: false, message: 'Unknown teacher category.' });

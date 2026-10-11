@@ -100,9 +100,18 @@ const auth = async (req, res, next) => {
 // Matched against the mount path (req.baseUrl), e.g. fee collection is /api/fees.
 const QA_BLOCKED_PATHS = ['/payroll', '/invoices', '/paystack', '/fees', '/payments', '/inventory', '/crm', '/inquiries', '/frontdesk', '/assessment'];
 
+// The Dean of Studies and the Operations Manager are one merged role:
+// "Dean & Operations". Either account may do anything the other can, so
+// the two people sharing the job have identical access.
+const DEAN_OPS = ['dos', 'ops_manager'];
+
 const requireRole = (...roles) => (req, res, next) => {
   if (!req.user) return res.status(403).json({ success: false, message: 'Access denied.' });
   if (roles.includes(req.user.role)) return next();
+  if (DEAN_OPS.includes(req.user.role) && roles.some(r => DEAN_OPS.includes(r))) return next();
+  // Extra responsibilities on one account, e.g. Quality Assurance held
+  // by a member of the Dean & Operations team.
+  if ((req.user.additionalRoles || []).some(r => roles.includes(r))) return next();
 
   // QA (accreditation reviewer, e.g. Cognia or Cambridge): a
   // read-only shadow of the staff surfaces. Any GET that an internal

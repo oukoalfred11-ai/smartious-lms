@@ -90,20 +90,6 @@ const NAV_SECTIONS = {
     { label: 'System',      items: ['settings'] },
     { label: 'Me',          items: ['myprofile', 'mystafffile'] },
   ],
-  dos: [
-    { label: 'Overview',      items: ['command', 'checkin', 'dosanalytics'] },
-    { label: 'Teaching',      items: ['liveclasses'] },
-    { label: 'Exams',         items: ['exams'] },
-    { label: 'Homework',      items: ['doshomework'] },
-    { label: 'Attendance',    items: ['dosattend'] },
-    { label: 'Student Sessions', items: ['sessions'] },
-    { label: 'Breaks',        items: ['dosbreaks'] },
-    { label: 'Timetables',    items: ['dostimetable'] },
-    { label: 'Question Bank', items: ['questionbank'] },
-    { label: 'Reports',       items: ['reports', 'dosperformance', 'mastery'] },
-    { label: 'System',        items: ['settings'] },
-    { label: 'Me',          items: ['myprofile', 'mystafffile'] },
-  ],
   sales: [
     { label: 'Overview',    items: ['checkin', 'dashboard', 'salesperf'] },
     { label: 'CRM',         items: ['crm'] },
@@ -120,20 +106,33 @@ const NAV_SECTIONS = {
     { label: 'Quality & Reports', items: ['reports', 'dosperformance', 'mastery', 'dosattend'] },
     { label: 'Me',          items: ['myprofile', 'mystafffile'] },
   ],
+  // Dean & Operations: one merged role. The Dean of Studies and the
+  // Operations Manager accounts share this portal and its access.
   ops_manager: [
-    { label: 'Overview',    items: ['command', 'checkin', 'dashboard', 'analytics'] },
-    { label: 'Support',       items: ['support', 'dmoversight'] },
-    { label: 'Inventory',     items: ['inventory'] },
-    { label: 'People',      items: ['users', 'teachers', 'allocations', 'sessions', 'communication'] },
+    { label: 'Overview',    items: ['command', 'checkin', 'dashboard', 'analytics', 'dosanalytics'] },
+    { label: 'Academics',   items: ['liveclasses', 'clubs', 'exams', 'doshomework', 'dosattend', 'dostimetable', 'questionbank'] },
+    { label: 'Students',    items: ['sessions', 'dosbreaks'] },
+    { label: 'People',      items: ['users', 'teachers', 'allocations', 'communication', 'teacherratings'] },
+    { label: 'Support',     items: ['support', 'dmoversight'] },
+    // CRM, Front Desk and Group Rooms stay out of Operations per policy.
+    { label: 'Operations',  items: ['documents', 'leave', 'programmes', 'inventory'] },
     { label: 'Reports',     items: ['cooreports', 'reports', 'dosperformance', 'mastery'] },
-    { label: 'Performance', items: ['teacherratings'] },
-    { label: 'Operations',  items: ['documents', 'leave', 'programmes'] },
-    // CRM, Front Desk and Group Rooms removed from Operations per policy;
-    // academic assessments (schedule, mark, publish) live under Teaching.
-    { label: 'Teaching',    items: ['liveclasses', 'clubs', 'exams'] },
     { label: 'System',      items: ['userlogs', 'settings', 'ai'] },
     { label: 'Me',          items: ['myprofile', 'mystafffile'] },
   ],
+}
+
+NAV_SECTIONS.dos = NAV_SECTIONS.ops_manager
+
+// Sections for a signed-in person: their role's menu, plus Quality when
+// their account also holds Quality Assurance (additionalRoles).
+const QUALITY_SECTION = { label: 'Quality', items: ['qaoverview', 'teacherprofiles', 'tdp', 'accreditations'] }
+function navFor(role, user) {
+  const base = NAV_SECTIONS[role] || NAV_SECTIONS.admin
+  const alsoQA = (user?.additionalRoles || []).includes('qa') && !base.some(sec => sec.items.includes('teacherprofiles'))
+  if (!alsoQA) return base
+  const i = base.findIndex(sec => sec.label === 'Me')
+  return i < 0 ? [...base, QUALITY_SECTION] : [...base.slice(0, i), QUALITY_SECTION, ...base.slice(i)]
 }
 
 function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
@@ -148,17 +147,17 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
   const PORTAL_META = {
     admin:       { label: 'Admin Portal',      color: TOKENS.crimson },
     accountant:  { label: 'Accounts Portal',   color: TOKENS.accentEmerald },
-    dos:         { label: 'Dean of Studies',    color: TOKENS.accentNavy },
+    dos:         { label: 'Dean & Operations', color: TOKENS.accentNavy },
     sales:       { label: 'Sales Portal',      color: TOKENS.accentNavy },
-    ops_manager: { label: 'Operations Portal', color: TOKENS.accentAmber },
+    ops_manager: { label: 'Dean & Operations', color: TOKENS.accentNavy },
     qa:          { label: 'QA Portal',         color: TOKENS.gold },
   }
   const portalMeta = PORTAL_META[role] || PORTAL_META.admin
 
-  const SECTIONS = NAV_SECTIONS[role] || NAV_SECTIONS.admin
+  const SECTIONS = navFor(role, auth?.user)
 
   // Guard: if the current page is not in this role's allowed modules, fall back to dashboard
-  const allowedPages = (NAV_SECTIONS[role] || NAV_SECTIONS.admin).flatMap(s => s.items)
+  const allowedPages = navFor(role, auth?.user).flatMap(s => s.items)
   const safePage = allowedPages.includes(page) ? page : 'dashboard'
   const currentMod = MODULES[safePage] || MODULES.dashboard
 
@@ -233,10 +232,10 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
               <div style={{ fontSize: 10, color: TOKENS.s500, letterSpacing: '.06em', textTransform: 'uppercase' }}>
                 {{
                   admin:       'Principal',
-                  dos:         'Dean of Studies',
+                  dos:         (auth?.user?.additionalRoles || []).includes('qa') ? 'Dean & Quality Assurance' : 'Dean & Operations',
                   accountant:  'Accountant',
                   sales:       'Sales & Front Desk',
-                  ops_manager: 'Operations Manager',
+                  ops_manager: (auth?.user?.additionalRoles || []).includes('qa') ? 'Dean & Quality Assurance' : 'Dean & Operations',
                   qa:          'Quality Assurance',
                 }[role] || 'Principal'}
               </div>
@@ -411,7 +410,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
   // Role-based page access — mirrors the logic inside PNavigation
   // (an admin viewing a sub-portal gets that portal's pages)
   const role = forcedRole || auth?.user?.role || 'admin'
-  const allowedPages = (NAV_SECTIONS[role] || NAV_SECTIONS.admin).flatMap(sec => sec.items).concat('dashboard')
+  const allowedPages = navFor(role, auth?.user).flatMap(sec => sec.items).concat('dashboard')
   const safePage = allowedPages.includes(page) ? page : 'dashboard'
 
   return (

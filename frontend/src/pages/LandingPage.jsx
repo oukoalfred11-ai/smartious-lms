@@ -590,35 +590,64 @@ const styles = `
   .lp .ps:last-child .ps-arr{display:none}
   /* CURRICULA */
   .lp .cur-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:60px}
-  /* ── Meet Our Team ── */
-  .lp .tm-group{margin-top:44px}
-  .lp .tm-group:first-child{margin-top:8px}
-  .lp .tm-group-h{display:flex;align-items:center;gap:16px;margin-bottom:22px;font-family:'DM Serif Display',Georgia,serif;font-size:1.5rem;color:${V.ink}}
-  .lp .tm-group-h::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,${V.gold3},transparent)}
-  .lp .team-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px}
-  .lp .tm-card{background:${V.white};border:1px solid ${V.bone3};border-radius:22px;overflow:hidden;display:flex;flex-direction:column;transition:transform .3s,box-shadow .3s,border-color .3s}
-  .lp .tm-card:hover{transform:translateY(-5px);box-shadow:0 22px 50px rgba(8,12,20,.14);border-color:transparent}
-  .lp .tm-principal{border-color:${V.gold3};box-shadow:0 0 0 1px ${V.gold3}}
-  .lp .tm-photo{position:relative;width:100%;aspect-ratio:4/4.2;background:linear-gradient(135deg,${V.cr},${V.cr2});overflow:hidden;flex-shrink:0}
-  .lp .tm-img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s}
-  .lp .tm-card:hover .tm-img{transform:scale(1.04)}
-  .lp .tm-initials{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',Georgia,serif;font-size:4.2rem;font-weight:700;color:${V.gold3}}
-  .lp .tm-scrim{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 60%,rgba(8,12,20,.6));pointer-events:none}
-  .lp .tm-years{position:absolute;left:16px;bottom:14px;display:flex;align-items:baseline;gap:6px;color:#fff;background:rgba(8,12,20,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:6px 12px;border-radius:99px;border:1px solid rgba(255,255,255,.18)}
-  .lp .tm-years strong{font-family:'DM Serif Display',Georgia,serif;font-size:1.25rem;color:${V.gold3}}
-  .lp .tm-years span{font-size:11px;font-weight:600;letter-spacing:.03em}
-  .lp .tm-body{padding:20px 22px 22px;display:flex;flex-direction:column;flex:1}
-  .lp .tm-badge{align-self:flex-start;font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:${V.gold3};background:linear-gradient(135deg,${V.cr},${V.cr2});padding:4px 11px;border-radius:99px;margin-bottom:10px}
-  .lp .tm-name{font-family:'DM Serif Display',Georgia,serif;font-size:1.35rem;font-weight:700;color:${V.ink};line-height:1.2;margin:0}
-  .lp .tm-role{font-size:12px;color:${V.gold};font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin-top:5px}
-  .lp .tm-bio{font-size:13.5px;color:${V.sl};line-height:1.75;margin:14px 0 0}
-  .lp .tm-clamp{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
-  .lp .tm-block{margin-top:14px;padding-top:14px;border-top:1px solid ${V.bone3}}
-  .lp .tm-lbl{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:${V.sl3};margin-bottom:6px}
+  /* ── Meet Our Team: dark stage, slanted portraits, pyramid tiers ── */
+  .lp .tm-stage{background:radial-gradient(ellipse at 50% 0%,#24151A 0%,#14171D 45%,#0E1015 100%);color:#fff;padding:120px 0 90px;position:relative;overflow:hidden}
+  .lp .tm-stage::after{content:'';position:absolute;right:-60px;bottom:-40px;width:260px;height:260px;background:repeating-linear-gradient(115deg,${V.cr} 0 22px,transparent 22px 40px);opacity:.35;transform:skewX(-18deg);pointer-events:none}
+  .lp .tm-head{text-align:center;max-width:720px;margin:0 auto 56px}
+  .lp .tm-eyebrow{font-size:11.5px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:${V.gold3}}
+  .lp .tm-title{font-family:'DM Serif Display',Georgia,serif;font-size:clamp(2.6rem,6vw,4.4rem);font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin:10px 0 0;color:#fff}
+  .lp .tm-title em{color:${V.cr2};font-style:italic;text-shadow:0 0 30px rgba(168,32,58,.45)}
+  .lp .tm-intro{font-style:italic;color:rgba(255,255,255,.72);font-size:15px;line-height:1.7;margin:14px auto 0}
+  .lp .tm-empty{text-align:center;padding:60px 0;color:rgba(255,255,255,.6);font-size:14px}
+  .lp .tm-tree{display:flex;flex-direction:column;align-items:center}
+  .lp .tm-tier{width:100%;display:flex;flex-direction:column;align-items:center;position:relative;padding-top:40px}
+  .lp .tm-tier:first-child{padding-top:0}
+  .lp .tm-tier:not(:first-child)::before{content:'';position:absolute;top:4px;left:50%;width:2px;height:26px;background:linear-gradient(${V.gold3},rgba(201,151,58,0))}
+  .lp .tm-tier-h{display:flex;align-items:center;gap:14px;width:100%;max-width:760px;margin-bottom:22px;font-size:11.5px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:${V.gold3}}
+  .lp .tm-tier-h::before,.lp .tm-tier-h::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(201,151,58,.55),transparent)}
+  .lp .tm-row{display:flex;flex-wrap:wrap;justify-content:center;gap:28px 24px;width:100%}
+  .lp .tm-person{background:none;border:none;padding:0;cursor:pointer;width:210px;text-align:left;font-family:inherit;color:inherit}
+  .lp .tm-tier-principal .tm-person{width:270px}
+  .lp .tm-tier-support .tm-person{width:180px}
+  .lp .tm-frame{position:relative;padding:14px 0 0 16px}
+  .lp .tm-accent{position:absolute;left:4px;top:0;width:58%;height:70%;background:linear-gradient(135deg,${V.cr2},${V.cr});transform:skewX(-14deg);border-radius:3px;transition:transform .35s}
+  .lp .tm-shape{position:relative;aspect-ratio:3/3.7;overflow:hidden;transform:skewX(-14deg);border-radius:4px;background:linear-gradient(135deg,#2A2F38,#1B1F26);box-shadow:0 18px 40px rgba(0,0,0,.45)}
+  .lp .tm-img{position:absolute;top:0;left:-18%;width:136%;height:100%;object-fit:cover;transform:skewX(14deg);transition:transform .6s}
+  .lp .tm-initials{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transform:skewX(14deg);font-family:'DM Serif Display',Georgia,serif;font-size:3.6rem;font-weight:700;color:${V.gold3}}
+  .lp .tm-person:hover .tm-img{transform:skewX(14deg) scale(1.06)}
+  .lp .tm-person:hover .tm-accent{transform:skewX(-14deg) translate(-4px,-4px)}
+  .lp .tm-years{position:absolute;right:6px;top:22px;background:rgba(14,16,21,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid rgba(201,151,58,.45);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px}
+  .lp .tm-years strong{color:${V.gold3};font-size:13px}
+  .lp .tm-plate{position:relative;margin:-26px 0 0 -6px;padding:10px 14px 10px 18px;background:linear-gradient(90deg,${V.cr} 0%,${V.cr2} 55%,rgba(168,32,58,0) 100%);transform:skewX(-14deg);border-left:4px solid ${V.gold3}}
+  .lp .tm-plate > *{transform:skewX(14deg)}
+  .lp .tm-name{font-weight:900;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:#fff;line-height:1.25}
+  .lp .tm-tier-principal .tm-name{font-size:16.5px}
+  .lp .tm-role{font-style:italic;font-size:12.5px;color:rgba(255,255,255,.86);margin-top:2px}
+  .lp .tm-modal{position:fixed;inset:0;z-index:300;background:rgba(6,8,12,.72);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px}
+  .lp .tm-sheet{position:relative;background:#14171D;color:#fff;border:1px solid rgba(201,151,58,.35);border-radius:22px;max-width:820px;width:100%;max-height:90vh;overflow:auto;display:grid;grid-template-columns:300px 1fr;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+  .lp .tm-sheet-photo{position:relative;min-height:340px;background:linear-gradient(135deg,${V.cr},#3D0712)}
+  .lp .tm-sheet-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .lp .tm-sheet-photo .tm-initials{transform:none}
+  .lp .tm-sheet-body{padding:30px 30px 28px}
+  .lp .tm-x{position:absolute;top:12px;right:14px;width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.2);background:rgba(20,23,29,.7);color:#fff;font-size:22px;line-height:1;cursor:pointer;z-index:2}
+  .lp .tm-badge{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#14171D;background:${V.gold3};padding:4px 11px;border-radius:99px;margin-bottom:10px}
+  .lp .tm-sheet-name{font-family:'DM Serif Display',Georgia,serif;font-size:2rem;margin:0;line-height:1.1;color:#fff}
+  .lp .tm-sheet-role{font-style:italic;color:${V.gold3};font-size:14.5px;margin-top:6px}
+  .lp .tm-exp{display:inline-block;margin-top:14px;font-size:12.5px;font-weight:700;color:#fff;background:rgba(168,32,58,.35);border:1px solid rgba(168,32,58,.6);padding:5px 12px;border-radius:99px}
+  .lp .tm-exp strong{color:${V.gold3};font-size:14px}
+  .lp .tm-bio{font-size:14px;color:rgba(255,255,255,.82);line-height:1.8;margin:16px 0 0;white-space:pre-wrap}
+  .lp .tm-block{margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,.1)}
+  .lp .tm-lbl{font-size:10.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:${V.gold3};margin-bottom:8px}
   .lp .tm-list{margin:0;padding-left:18px}
-  .lp .tm-list li{font-size:12.5px;color:${V.ink2};line-height:1.7}
-  .lp .tm-more{margin-top:auto;padding-top:14px;align-self:flex-start;background:none;border:none;color:${V.cr};font-size:12.5px;font-weight:800;cursor:pointer;letter-spacing:.02em}
-  .lp .tm-more:hover{text-decoration:underline}
+  .lp .tm-list li{font-size:13.5px;color:rgba(255,255,255,.86);line-height:1.75}
+  @media (max-width:720px){
+    .lp .tm-stage{padding:96px 0 70px}
+    .lp .tm-person,.lp .tm-tier-support .tm-person{width:calc(50% - 22px)}
+    .lp .tm-tier-principal .tm-person{width:68%}
+    .lp .tm-row{gap:20px 14px;padding-right:14px;box-sizing:border-box}
+    .lp .tm-sheet{grid-template-columns:1fr}
+    .lp .tm-sheet-photo{min-height:280px}
+  }
   .lp .cc{background:${V.white};border:1px solid ${V.bone3};border-radius:24px;overflow:hidden;transition:all .3s;display:flex;flex-direction:column}
   .lp .cc:hover{transform:translateY(-5px);box-shadow:0 12px 40px rgba(8,12,20,.14);border-color:transparent}
   .lp .cc-top{padding:24px 24px 0}
@@ -22961,67 +22990,79 @@ export default function LandingPage() {
       ══════════════════════════════════════════ */}
       {page === 'teachers' && (
         <>
-          <div className="pg-hero"><div className="wrap">
-            <div className="eyebrow">Our People</div>
-            <h1 className="pg-h">Meet Our <em>Team</em></h1>
-            <p className="pg-sub" style={{marginTop:12}}>The educators and leaders behind every Smartious lesson: qualified, experienced and dedicated to each learner.</p>
-          </div></div>
-          <section className="sec" style={{background:V.bone}}><div className="wrap">
+          <section className="tm-stage"><div className="wrap">
+            <div className="tm-head">
+              <div className="tm-eyebrow">Our People</div>
+              <h1 className="tm-title">Our <em>Team</em></h1>
+              <p className="tm-intro">The educators and leaders behind every Smartious lesson: qualified, experienced and dedicated to each learner. Tap anyone to read their profile.</p>
+            </div>
             {teachersLoading ? (
-              <div style={{textAlign:'center',padding:'60px 0',color:V.sl2,fontSize:14}}>Loading our team…</div>
+              <div className="tm-empty">Loading our team…</div>
             ) : publicTeachers.length === 0 ? (
-              <div style={{textAlign:'center',padding:'60px 0',color:V.sl2,fontSize:14}}>
-                Our team will be listed here shortly.
-              </div>
+              <div className="tm-empty">Our team will be listed here shortly.</div>
             ) : (
-              [['leadership', 'Leadership'], ['teaching', 'Our Teachers'], ['operations', 'Operations & Admissions']].map(([g, heading]) => {
-                const people = publicTeachers.filter(t => (t.group || 'teaching') === g)
-                if (!people.length) return null
-                return (
-                  <div key={g} className="tm-group">
-                    <div className="tm-group-h"><span>{heading}</span></div>
-                    <div className="team-grid">
-                      {people.map(t => {
-                        const open = expandedTeacher === t.id
-                        const initials = t.name.split(/\s+/).map(w => w[0]).filter(Boolean).slice(0,2).join('').toUpperCase()
-                        const quals = t.qualifications || []
-                        const long = (t.bio || '').length > 220 || quals.length > 3
-                        return (
-                          <article key={t.id} className={`tm-card${t.principal ? ' tm-principal' : ''}`}>
-                            <div className="tm-photo">
-                              {t.avatar
-                                ? <img src={t.avatar} alt={t.name} className="tm-img" loading="lazy"/>
-                                : <div className="tm-initials">{initials || 'S'}</div>}
-                              <div className="tm-scrim"/>
-                              {t.yearsOfExperience > 0 && (
-                                <div className="tm-years"><strong>{t.yearsOfExperience}</strong><span>yr{t.yearsOfExperience === 1 ? '' : 's'} experience</span></div>
-                              )}
-                            </div>
-                            <div className="tm-body">
-                              {t.principal && <div className="tm-badge">★ Principal</div>}
-                              <h3 className="tm-name">{t.name}</h3>
-                              <div className="tm-role">{t.title}</div>
-                              {t.bio && <p className={`tm-bio${open ? '' : ' tm-clamp'}`}>{t.bio}</p>}
-                              {quals.length > 0 && (
-                                <div className="tm-block">
-                                  <div className="tm-lbl">Qualifications</div>
-                                  <ul className="tm-list">{(open ? quals : quals.slice(0, 3)).map((q,i) => <li key={i}>{q}</li>)}</ul>
+              <div className="tm-tree">
+                {[['principal', 'Principal'], ['management', 'Management'], ['teachers', 'Teachers'], ['support', 'Support Teachers']].map(([tier, heading]) => {
+                  const people = publicTeachers.filter(t => (t.tier || (t.principal ? 'principal' : 'teachers')) === tier)
+                  if (!people.length) return null
+                  return (
+                    <div key={tier} className={`tm-tier tm-tier-${tier}`}>
+                      <div className="tm-tier-h"><span>{heading}</span></div>
+                      <div className="tm-row">
+                        {people.map(t => {
+                          const initials = t.name.split(/\s+/).map(w => w[0]).filter(Boolean).slice(0,2).join('').toUpperCase()
+                          return (
+                            <button key={t.id} type="button" className="tm-person" onClick={() => setExpandedTeacher(t.id)} aria-label={'Read ' + t.name + "'s profile"}>
+                              <div className="tm-frame">
+                                <div className="tm-accent"/>
+                                <div className="tm-shape">
+                                  {t.avatar
+                                    ? <img src={t.avatar} alt={t.name} className="tm-img" loading="lazy"/>
+                                    : <div className="tm-initials">{initials || 'S'}</div>}
                                 </div>
-                              )}
-                              {long && (
-                                <button className="tm-more" onClick={() => setExpandedTeacher(open ? null : t.id)}>
-                                  {open ? 'Show less' : 'Read full profile'}
-                                </button>
-                              )}
-                            </div>
-                          </article>
-                        )
-                      })}
+                                {t.yearsOfExperience > 0 && <div className="tm-years"><strong>{t.yearsOfExperience}</strong> {t.yearsOfExperience === 1 ? 'yr' : 'yrs'}</div>}
+                              </div>
+                              <div className="tm-plate">
+                                <div className="tm-name">{t.name}</div>
+                                <div className="tm-role">{t.title}</div>
+                              </div>
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+            {(() => {
+              const t = publicTeachers.find(x => x.id === expandedTeacher)
+              if (!t) return null
+              const initials = t.name.split(/\s+/).map(w => w[0]).filter(Boolean).slice(0,2).join('').toUpperCase()
+              return (
+                <div className="tm-modal" onClick={() => setExpandedTeacher(null)}>
+                  <div className="tm-sheet" onClick={e => e.stopPropagation()} role="dialog" aria-label={t.name}>
+                    <button className="tm-x" onClick={() => setExpandedTeacher(null)} aria-label="Close">×</button>
+                    <div className="tm-sheet-photo">
+                      {t.avatar ? <img src={t.avatar} alt={t.name}/> : <div className="tm-initials">{initials || 'S'}</div>}
+                    </div>
+                    <div className="tm-sheet-body">
+                      {t.principal && <div className="tm-badge">★ Principal</div>}
+                      <h2 className="tm-sheet-name">{t.name}</h2>
+                      <div className="tm-sheet-role">{t.title}</div>
+                      {t.yearsOfExperience > 0 && <div className="tm-exp"><strong>{t.yearsOfExperience}</strong> year{t.yearsOfExperience === 1 ? '' : 's'} of experience</div>}
+                      {t.bio && <p className="tm-bio">{t.bio}</p>}
+                      {(t.qualifications || []).length > 0 && (
+                        <div className="tm-block">
+                          <div className="tm-lbl">Qualifications</div>
+                          <ul className="tm-list">{t.qualifications.map((q,i) => <li key={i}>{q}</li>)}</ul>
+                        </div>
+                      )}
                     </div>
                   </div>
-                )
-              })
-            )}
+                </div>
+              )
+            })()}
             <div style={{textAlign:'center',marginTop:48}}>
               <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
             </div>

@@ -85,8 +85,8 @@ export default function App() {
               <Route path="/assessment/payment-result" element={<AssessmentPaymentResultPage />} />
               <Route path="/classroom/:liveClassId" element={<Guard roles={['teacher','student','admin','dos','ops_manager','parent']}><ClassroomPage /></Guard>} />
               <Route path="/admin/*"        element={<Guard roles={['admin']}><AdminPortal /></Guard>} />
-              <Route path="/ops/*"          element={<Guard roles={['ops_manager','admin']}><OpsPortal /></Guard>} />
-              <Route path="/dos/*"          element={<Guard roles={['dos','admin']}><DOSPortal /></Guard>} />
+              <Route path="/ops/*"          element={<Guard roles={['ops_manager','dos','admin']}><OpsPortal /></Guard>} />
+              <Route path="/dos/*"          element={<Guard roles={['dos','ops_manager','admin']}><DOSPortal /></Guard>} />
               <Route path="/qa/*"           element={<Guard roles={['qa','admin']}><QAPortal /></Guard>} />
               <Route path="/accounts/*"     element={<Guard roles={['accountant','admin']}><AccountsPortal /></Guard>} />
               <Route path="/sales/*"        element={<Guard roles={['sales','admin']}><SalesPortal /></Guard>} />
