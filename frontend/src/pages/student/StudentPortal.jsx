@@ -21,6 +21,7 @@ import { NestedAnswerCollector, AttachmentList, buildAnswersPayload, labelAt, su
 import LessonPlayerTab from './LessonPlayerTab.jsx'
 import HeroPanelVideo from '../../components/HeroPanelVideo.jsx'
 import { renderMath } from '../../components/ui/MathField.jsx'
+import { NEW_TYPES, ANSWER_TYPE_META, StudentAnswerInput, isAnswered } from '../../components/exam/AnswerTypes.jsx'
 import CommunityChatView from '../../components/CommunityChat.jsx'
 import ClubsHub from '../../components/ClubsHub.jsx'
 import QuizGame from './QuizGame.jsx'
@@ -2444,6 +2445,7 @@ function ExamsTab({ user, toast, goTo, store }) {
       topic: q.topic || '',
       parts: Array.isArray(q.parts) ? q.parts : [],
       attachments: Array.isArray(q.attachments) ? q.attachments : [],
+      unit: q.unit || '', matchLeft: q.matchLeft, matchRight: q.matchRight,
       _source: 'bank',
     }))
     const custom = (realExam.customQuestions || []).map((q, i) => ({
@@ -2455,6 +2457,7 @@ function ExamsTab({ user, toast, goTo, store }) {
       topic: q.topic || '',
       parts: Array.isArray(q.parts) ? q.parts : [],
       attachments: Array.isArray(q.attachments) ? q.attachments : [],
+      unit: q.unit || '', matchLeft: q.matchLeft, matchRight: q.matchRight,
       _source: 'custom',
     }))
     return [...bank, ...custom]
@@ -2482,10 +2485,14 @@ function ExamsTab({ user, toast, goTo, store }) {
       const restored = {}
       ;(sub?.answers || []).forEach(a => {
         if (!a?.questionRef) return
-        const key = (a.partPath && a.partPath.length)
-          ? `${a.questionRef}::${a.partPath.join('.')}`
-          : a.questionRef
-        restored[key] = { answerText: a.answerText || '', selectedOption: a.selectedOption || '' }
+        // Same key format as NestedAnswerCollector ('ref|a.b'). Autosave
+        // used 'ref::path' and restore used a bare ref, so restored answers
+        // never reappeared on the paper.
+        const key = `${a.questionRef}|${(a.partPath || []).join('.')}`
+        restored[key] = {
+          answerText: a.answerText || '', selectedOption: a.selectedOption || '',
+          ...(Array.isArray(a.answerData) ? { answerData: a.answerData } : {}),
+        }
       })
       setRealAnswers(restored)
       if (Object.keys(restored).length) {
@@ -2534,15 +2541,7 @@ function ExamsTab({ user, toast, goTo, store }) {
   const saveRealProgress = useCallback(async (silent = true) => {
     const exam = realExamRef.current
     if (!exam?._id) return
-    const payload = Object.entries(realAnswersRef.current || {}).map(([key, v]) => {
-      const [questionRef, path] = key.split('::')
-      return {
-        questionRef,
-        partPath: path ? path.split('.').map(Number) : [],
-        answerText: v?.answerText || '',
-        selectedOption: v?.selectedOption || '',
-      }
-    })
+    const payload = buildAnswersPayload(realAnswersRef.current || {})
     if (!payload.length) return
     try {
       if (!silent) setRealSaving(true)
@@ -2823,7 +2822,7 @@ function ExamsTab({ user, toast, goTo, store }) {
             // border, exactly as the practice format did — it gives the
             // student an at-a-glance sense of what is left.
             const qTouched = Object.entries(realAnswers || {}).some(([k, v]) =>
-              k.startsWith(q.ref) && v && ((v.answerText && v.answerText.trim()) || v.selectedOption))
+              k.startsWith(q.ref + '|') && v && ((v.answerText && v.answerText.trim()) || v.selectedOption))
             return (
               <div key={q.ref} className="card" style={{
                 padding:16,
@@ -2873,6 +2872,8 @@ function ExamsTab({ user, toast, goTo, store }) {
                       type: q.type,
                       options: q.options,
                       text: '',  // stem already shown above
+                      questionText: q.questionText,  // fill-the-blanks counts its gaps here
+                      unit: q.unit, matchLeft: q.matchLeft, matchRight: q.matchRight,
                     } : null}
                     parts={isNested ? q.parts : []}
                     answers={realAnswers}
@@ -5041,6 +5042,7 @@ const hwTypeLabel = {
   drawing: 'Drawing',
   handwriting: 'Handwriting',
   upload: 'File Upload',
+  ...Object.fromEntries(NEW_TYPES.map(t => [t, ANSWER_TYPE_META[t].label])),
 }
 // ═══════════════════════════════════════════════════════════
 // DRAWING CANVAS — for student homework drawing answers
@@ -7643,6 +7645,10 @@ function HomeworkTab({ user, toast }) {
         if (q.type === 'short' && String(a.answer).trim().length < 3) {
           return 'Question ' + (i + 1) + ': answer is too short'
         }
+      } else if (NEW_TYPES.includes(q.type)) {
+        if (!a || !isAnswered(q.type, a.answer)) {
+          return 'Question ' + (i + 1) + ': answer this question'
+        }
       } else if (q.type === 'upload') {
         if (!a || !a.attachment || !a.attachment.url) {
           return 'Question ' + (i + 1) + ': upload a file'
@@ -7995,6 +8001,20 @@ function HomeworkTab({ user, toast }) {
                               : <span style={{ fontSize: 12, padding: '4px 10px', background: 'var(--bg)', borderRadius: 4 }}>{att.filename || 'File'}</span>}
                           </a>
                         ))}
+                      </div>
+                    )}
+
+                    {/* Select-all, true/false, numeric, maths, blanks, matching, ordering */}
+                    {NEW_TYPES.includes(q.type) && (
+                      <div>
+                        <StudentAnswerInput part={q} readOnly={isReadOnly}
+                          value={a.answer && typeof a.answer === 'object' ? a.answer : {}}
+                          onChange={patch => setAnswer(idx, { ...(a.answer && typeof a.answer === 'object' ? a.answer : {}), ...patch })} />
+                        {isReadOnly && a.marksAwarded !== null && a.marksAwarded !== undefined && (
+                          <div style={{ fontSize: 12, color: 'var(--s600)', marginTop: 6 }}>
+                            Awarded: <strong>{a.marksAwarded}</strong> / {q.marks}
+                          </div>
+                        )}
                       </div>
                     )}
 

@@ -5,6 +5,8 @@
  */
 import { useState, useEffect, useRef } from 'react'
 import { api } from '../../context/ctx.jsx'
+import { renderMath } from '../../components/ui/MathField.jsx'
+import { keyboardMath } from '../../lib/mathText.js'
 
 
 
@@ -117,27 +119,10 @@ function useSounds() {
 
 // ── Math/Formula text renderer ────────────────────────
 function MathText({ text }) {
+  // KaTeX (or the readable Unicode fallback) — the same renderer as
+  // exams, so \frac, \sqrt and powers never show as raw code here.
   if (!text) return null
-  const parts = text.split(/(\\\(.*?\\\)|\$.*?\$|sqrt\([^)]+\)|\d+\^\d+|[⁰¹²³⁴⁵⁶⁷⁸⁹]+|[₀₁₂₃₄₅₆₇₈₉]+)/g)
-  return (
-    <span>
-      {parts.map((p, i) => {
-        if (p.startsWith('\\(') || p.startsWith('$')) {
-          const inner = p.replace(/^\\\(|\\\)$|^\$|\$$/g,'').trim()
-          return <span key={i} style={{ fontFamily:'Georgia,serif', fontStyle:'italic', fontSize:'1.05em', color:C.crimson }}>{inner}</span>
-        }
-        if (/^sqrt\(/.test(p)) {
-          const inner = p.match(/sqrt\(([^)]+)\)/)?.[1]||''
-          return <span key={i} style={{ fontFamily:'Georgia,serif' }}>√<span style={{ borderTop:'1.5px solid currentColor', paddingTop:1 }}>{inner}</span></span>
-        }
-        if (/\d+\^\d+/.test(p)) {
-          const [base,exp] = p.split('^')
-          return <span key={i}>{base}<sup style={{ fontSize:'.7em' }}>{exp}</sup></span>
-        }
-        return <span key={i}>{p}</span>
-      })}
-    </span>
-  )
+  return <span>{renderMath(keyboardMath(String(text)))}</span>
 }
 
 // ── Timer ring ────────────────────────────────────────

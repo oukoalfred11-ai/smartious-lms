@@ -54,12 +54,17 @@ const partSchema = new mongoose.Schema({
   // so adding/removing/reordering parts auto-relabels them.
   type: {
     type: String,
-    enum: ['mcq','short','long','drawing','handwriting','upload'],
+    enum: ['mcq','multi','truefalse','numeric','math','fillblank','matching','ordering','short','long','essay','drawing','handwriting','upload'],
     default: 'short',
   },
   text:          { type: String, default: '', trim: true },
   options:       { type: [String], default: [] },
   correctAnswer: { type: mongoose.Schema.Types.Mixed, default: null },
+  // Answer-format fields (lib/answerTypes.js): numeric tolerance (±) and
+  // unit, and the pairs of a matching question.
+  tolerance:     { type: Number, default: null },
+  unit:          { type: String, default: '', trim: true },
+  pairs:         { type: [{ left: { type: String, default: '' }, right: { type: String, default: '' }, _id: false }], default: [] },
   explanation:   { type: String, default: '', trim: true },
   // For a leaf part, marks is the marks awarded for THIS part.
   // For a parent part (with its own parts[]), marks auto-recomputes
@@ -271,7 +276,8 @@ const questionSchema = new mongoose.Schema({
   // and top-level `marks` auto-recomputes to the sum of leaf marks.
   type: {
     type: String,
-    enum: ['mcq', 'short', 'long', 'essay', 'drawing', 'handwriting', 'upload', 'nested'],
+    enum: ['mcq', 'multi', 'truefalse', 'numeric', 'math', 'fillblank', 'matching', 'ordering',
+           'short', 'long', 'essay', 'drawing', 'handwriting', 'upload', 'nested'],
     required: true,
     default: 'mcq',
   },
@@ -288,6 +294,11 @@ const questionSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.Mixed,
     default: null,
   },
+  // Answer-format fields (lib/answerTypes.js): numeric tolerance (±) and
+  // unit, and the pairs of a matching question.
+  tolerance:     { type: Number, default: null },
+  unit:          { type: String, default: '', trim: true },
+  pairs:         { type: [{ left: { type: String, default: '' }, right: { type: String, default: '' }, _id: false }], default: [] },
   explanation: {
     type: String,
     default: '',

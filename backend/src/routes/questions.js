@@ -115,6 +115,7 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
       marks, difficulty, attachments,
       parts,   // ── NEW: nested parts array (optional)
       markScheme, lessonCode,
+      tolerance, unit, pairs,   // numeric / matching answer keys (lib/answerTypes.js)
     } = req.body;
 
     // Validation
@@ -188,6 +189,9 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
       difficulty:   difficulty || 'medium',
       attachments:  Array.isArray(attachments) ? attachments : [],
       parts:        isNested ? parts : [],
+      tolerance:    Number.isFinite(Number(tolerance)) && tolerance !== null && tolerance !== '' ? Number(tolerance) : null,
+      unit:         typeof unit === 'string' ? unit : '',
+      pairs:        Array.isArray(pairs) ? pairs.filter(p => p && p.left && p.right).map(p => ({ left: String(p.left), right: String(p.right) })) : [],
       markScheme:   hasScheme ? {
         modelAnswer:       ms.modelAnswer || '',
         points:            Array.isArray(ms.points) ? ms.points : [],
@@ -872,6 +876,7 @@ router.patch('/:id', auth, async (req, res) => {
       'curriculum', 'subject', 'grade', 'topic', 'subtopic', 'type',
       'questionText', 'options', 'correctAnswer', 'explanation',
       'marks', 'difficulty', 'attachments', 'parts',
+      'tolerance', 'unit', 'pairs',
     ];
     for (const key of allowed) {
       if (req.body[key] !== undefined) question[key] = req.body[key];

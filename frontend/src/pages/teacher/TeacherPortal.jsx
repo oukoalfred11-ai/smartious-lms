@@ -9,6 +9,7 @@ import { useToast, api } from '../../context/ctx.jsx'
 import { useStore } from '../../context/ctx.jsx'
 import Modal from '../../components/ui/Modal.jsx'
 import MathField, { renderMath } from '../../components/ui/MathField.jsx'
+import { NEW_TYPES, ANSWER_TYPE_META, AnswerKeyEditor, AnswerKeyLine, answerKeyProblem, cleanAnswerKey } from '../../components/exam/AnswerTypes.jsx'
 import { NestedQuestionEditor, AttachmentList, AnnotationCanvas, sumLeafMarks, labelAt } from '../../components/exam/NestedQuestion.jsx'
 import ManageSubjectTab from './ManageSubjectTab.jsx'
 import TeacherLeaveRequest from './TeacherLeaveRequest.jsx'
@@ -1201,6 +1202,13 @@ const qbDifficultyColours = {
  
 const qbTypeMeta = {
   mcq:         { letter: 'M', color: '#1E3A8A', label: 'Multiple Choice' },
+  multi:       { letter: 'A', color: '#0E7490', label: 'Select All' },
+  truefalse:   { letter: 'T', color: '#4D7C0F', label: 'True / False' },
+  numeric:     { letter: 'N', color: '#B45309', label: 'Numeric' },
+  math:        { letter: 'X', color: '#9333EA', label: 'Maths Expression' },
+  fillblank:   { letter: 'B', color: '#0369A1', label: 'Fill the Blanks' },
+  matching:    { letter: 'P', color: '#BE185D', label: 'Matching' },
+  ordering:    { letter: 'O', color: '#4338CA', label: 'Ordering' },
   short:       { letter: 'S', color: '#166534', label: 'Short Answer' },
   long:        { letter: 'L', color: '#7E22CE', label: 'Long Answer' },
   drawing:     { letter: 'D', color: '#DC2626', label: 'Drawing' },
@@ -1262,6 +1270,7 @@ function QvParts({ parts, path = [] }) {
               </div>
               <QvDiagrams list={p.attachments} />
               {p.type === 'mcq' && <QvOptions options={p.options} correct={p.correctAnswer} />}
+              {!hasKids && <AnswerKeyLine q={p} />}
               {hasKids && <QvParts parts={p.parts} path={here} />}
             </div>
           </div>
@@ -1278,6 +1287,7 @@ function QuestionView({ q }) {
       <div>{renderMath(q.questionText || '')}</div>
       <QvDiagrams list={q.attachments} />
       {q.type === 'mcq' && !nested && <QvOptions options={q.options} correct={mcqCorrect} />}
+      {!nested && <AnswerKeyLine q={q} />}
       {nested && <QvParts parts={q.parts} />}
     </div>
   )
@@ -1337,6 +1347,7 @@ function QuestionBankTab({ user, store, setPage, toast }) {
     difficulty: 'medium',
     attachments: [],              // [{url, publicId, filename, mimeType, sizeBytes}]
     parts: [],                    // for NESTED questions — empty = flat question
+    tolerance: null, unit: '', pairs: [],   // numeric / matching answer keys
   })
  
   // Load catalog once
@@ -1481,6 +1492,7 @@ function QuestionBankTab({ user, store, setPage, toast }) {
       questionText: '', options: ['', '', '', ''],
       correctIndex: null, correctAnswer: '', explanation: '',
       marks: 1, difficulty: 'medium', attachments: [], parts: [],
+      tolerance: null, unit: '', pairs: [],
     })
     setCreateOpen(true)
   }
@@ -1504,7 +1516,11 @@ function QuestionBankTab({ user, store, setPage, toast }) {
       questionText: q.questionText || '',
       options: Array.isArray(q.options) && q.options.length > 0 ? [...q.options] : ['', '', '', ''],
       correctIndex,
-      correctAnswer: typeof q.correctAnswer === 'string' ? q.correctAnswer : '',
+      // The newer formats keep their key as is (an index list, true/false, a number).
+      correctAnswer: NEW_TYPES.includes(q.type) ? (q.correctAnswer ?? '')
+        : typeof q.correctAnswer === 'string' ? q.correctAnswer : '',
+      tolerance: q.tolerance ?? null, unit: q.unit || '',
+      pairs: Array.isArray(q.pairs) ? q.pairs.map(p => ({ left: p.left || '', right: p.right || '' })) : [],
       explanation: q.explanation || '',
       marks: q.marks || 1,
       difficulty: q.difficulty || 'medium',
@@ -1647,6 +1663,10 @@ function QuestionBankTab({ user, store, setPage, toast }) {
     if (!form.grade) return 'Grade is required'
     if (!form.subject) return 'Subject is required'
     if (!form.questionText.trim()) return 'Question text is required'
+    if (NEW_TYPES.includes(form.type) && !(form.parts || []).length) {
+      const problem = answerKeyProblem(form)
+      if (problem) return problem
+    }
     if (form.type === 'mcq') {
       const filledOptions = form.options.filter(o => o.trim())
       if (filledOptions.length < 2) return 'MCQ needs at least 2 options'
@@ -1670,8 +1690,12 @@ function QuestionBankTab({ user, store, setPage, toast }) {
         const correctText = form.options[form.correctIndex]
         correctAnswer = cleanOptions.indexOf(correctText)
       } else if (form.type === 'short' || form.type === 'long') {
-        correctAnswer = form.correctAnswer.trim()
+        correctAnswer = String(form.correctAnswer ?? '').trim()
       }
+      const keyFields = NEW_TYPES.includes(form.type)
+        ? { correctAnswer: form.correctAnswer, tolerance: form.tolerance, unit: form.unit,
+            pairs: form.pairs, ...cleanAnswerKey(form) }
+        : {}
  
       const payload = {
         curriculum: form.curriculum,
@@ -1688,7 +1712,7 @@ function QuestionBankTab({ user, store, setPage, toast }) {
         difficulty: form.difficulty,
         attachments: form.attachments,
         parts: Array.isArray(form.parts) ? form.parts : [],
-        // MCQs mark themselves; everything else needs a scheme.
+        ...keyFields,
       }
  
       const { data } = editingId
@@ -2257,7 +2281,8 @@ function QuestionBankTab({ user, store, setPage, toast }) {
                 <label className="fl">Question Type *</label>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 6 }}>
                   {Object.entries(qbTypeMeta).map(([type, meta]) => (
-                    <button key={type} type="button" onClick={() => setF('type', type)}
+                    <button key={type} type="button"
+                      onClick={() => setForm(f => f.type === type ? f : ({ ...f, type, correctAnswer: '' }))}
                       style={{
                         padding: '10px 12px',
                         border: '2px solid ' + (form.type === type ? meta.color : 'var(--border)'),
@@ -2311,6 +2336,14 @@ function QuestionBankTab({ user, store, setPage, toast }) {
                 </div>
               )}
  
+              {/* Answer key for select-all, true/false, numeric, maths, blanks, matching, ordering */}
+              {NEW_TYPES.includes(form.type) && (
+                <div className="fg">
+                  <label className="fl">Answer key · {ANSWER_TYPE_META[form.type]?.hint}</label>
+                  <AnswerKeyEditor q={form} onChange={patch => setForm(f => ({ ...f, ...patch }))} />
+                </div>
+              )}
+
               {/* Short/Long answer fields */}
               {(form.type === 'short' || form.type === 'long') && (
                 <div className="fg">
@@ -5273,7 +5306,19 @@ function ExamsTab({ user, store, setPage, toast }) {
                           </div>
                         </div>
                       )
-                    })() : partType === 'mcq' ? (
+                    })() : NEW_TYPES.includes(partType) ? (
+                      <div style={{ fontSize: 14, color: 'var(--s900)', lineHeight: 1.6 }}>
+                        <div style={{ whiteSpace: 'pre-wrap' }}>
+                          {answer.answerText || answer.selectedOption || <em style={{ color: 'var(--s400)' }}>(no answer)</em>}
+                        </div>
+                        <AnswerKeyLine q={leafPart || question || {}} />
+                        {typeof answer.isCorrect === 'boolean' && (
+                          <div style={{ fontSize: 11, color: 'var(--s500)', marginTop: 4 }}>
+                            Pre-marked {answer.isCorrect ? 'correct' : 'not fully correct'} — the mark below is filled in; change it if needed.
+                          </div>
+                        )}
+                      </div>
+                    ) : partType === 'mcq' ? (
                       <div style={{ fontSize: 14, color: 'var(--s900)' }}>
                         <span style={{ fontFamily: 'JetBrains Mono, monospace', color: 'var(--s500)', marginRight: 8 }}>
                           Selected:
@@ -6407,6 +6452,16 @@ function HomeworkTab({ user, store, setPage, toast }) {
                       {(q.type === 'short' || q.type === 'long') && (
                         <div style={{ fontSize: 13.5, color: 'var(--s700)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
                           {a.studentAnswer || <em style={{ color: 'var(--s400)' }}>No answer provided</em>}
+                        </div>
+                      )}
+                      {NEW_TYPES.includes(q.type) && (
+                        <div style={{ fontSize: 13.5, color: 'var(--s700)', lineHeight: 1.6 }}>
+                          <div style={{ whiteSpace: 'pre-wrap' }}>
+                            {(a.studentAnswer && typeof a.studentAnswer === 'object' && (a.studentAnswer.answerText || a.studentAnswer.selectedOption))
+                              || <em style={{ color: 'var(--s400)' }}>No answer provided</em>}
+                          </div>
+                          <AnswerKeyLine q={q} />
+                          {a.autoGraded && <div style={{ fontSize: 11, color: 'var(--s500)', marginTop: 4 }}>Marked automatically — change the mark if needed.</div>}
                         </div>
                       )}
 

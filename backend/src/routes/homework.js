@@ -55,8 +55,13 @@ function snapshotQuestion(q) {
     difficulty:    q.difficulty || 'medium',
     attachments:   Array.isArray(q.attachments) ? q.attachments.map(a => ({...a})) : [],
     topic:         q.topic || '',
+    tolerance:     q.tolerance ?? null,
+    unit:          q.unit || '',
+    pairs:         Array.isArray(q.pairs) ? q.pairs.map(p => ({ left: p.left, right: p.right })) : [],
   };
 }
+
+const { OBJECTIVE, studentView, autoMark, summarise } = require('../lib/answerTypes');
 
 // Auto-grade MCQ answer (returns awarded marks)
 function autoGradeMCQ(snapshotQuestion, answer) {
@@ -141,6 +146,9 @@ router.post('/', auth, requireRole('teacher', 'admin', 'dos'), async (req, res) 
           difficulty:    q.difficulty || 'medium',
           attachments:   Array.isArray(q.attachments) ? q.attachments : [],
           topic:         q.topic || '',
+          tolerance:     q.tolerance ?? null,
+          unit:          q.unit || '',
+          pairs:         Array.isArray(q.pairs) ? q.pairs : [],
         };
         // If saveCustomToBank flag is true (or per-question flag), also save to question bank
         if (saveCustomToBank || q.saveToBank) {
@@ -290,8 +298,10 @@ router.get('/student/list', auth, async (req, res) => {
       return {
         ...hw,
         // Don't leak correctAnswers / explanations to students before grading
+        // studentView also hides the newer answer keys and shuffles
+        // matching/ordering (seeded per student).
         questions: (hw.questions || []).map(q => ({
-          ...q,
+          ...studentView(q, String(userId)),
           correctAnswer: undefined,
           explanation: undefined,
         })),
@@ -649,6 +659,21 @@ router.post('/:id/submit', auth, async (req, res) => {
         entry.marksAwarded = grade.awarded;
         entry.autoGraded = grade.autoGraded;
         totalAwarded += (grade.awarded || 0);
+      } else if (OBJECTIVE.has(q.type) && a.answer && typeof a.answer === 'object') {
+        // Newer formats send { answerText, answerData, selectedOption }.
+        const ans = {
+          answerText: String(a.answer.answerText || ''),
+          selectedOption: String(a.answer.selectedOption || ''),
+          answerData: Array.isArray(a.answer.answerData) ? a.answer.answerData.slice(0, 100).map(v => String(v ?? '').slice(0, 2000)) : null,
+        };
+        if (!ans.answerText && ans.answerData) ans.answerText = summarise(q.type, ans.answerData, q);
+        entry.answer = ans;
+        const r = autoMark(q.toObject ? q.toObject() : q, ans);
+        if (r) {
+          entry.marksAwarded = r.marks;
+          entry.autoGraded = true;
+          totalAwarded += r.marks;
+        }
       }
       answers.push(entry);
     }
@@ -673,7 +698,7 @@ router.post('/:id/submit', auth, async (req, res) => {
       sub.isLate = true;
     }
     // If all questions are MCQ (auto-graded), mark as graded
-    const allAuto = answers.every(a => a.type === 'mcq');
+    const allAuto = answers.every(a => a.autoGraded);
     if (allAuto && answers.length > 0) {
       sub.status = 'graded';
       sub.gradedAt = new Date();

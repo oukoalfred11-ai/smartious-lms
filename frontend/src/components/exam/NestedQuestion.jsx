@@ -17,6 +17,8 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { renderMath } from '../ui/MathField.jsx'
+import { NEW_TYPES, ANSWER_TYPE_META, StudentAnswerInput, AnswerKeyEditor } from './AnswerTypes.jsx'
 
 // ─────────────────────────────────────────────────────────
 // LABEL HELPERS
@@ -246,12 +248,9 @@ export const NestedQuestionEditor = ({
                 }}
                 title={hasChildren ? 'Disabled: parent parts have no answer type' : ''}
               >
-                <option value="short">Short answer</option>
-                <option value="long">Long answer / essay</option>
-                <option value="mcq">Multiple choice</option>
-                <option value="drawing">Drawing</option>
-                <option value="handwriting">Handwriting</option>
-                <option value="upload">File upload</option>
+                {['short','long','mcq', ...NEW_TYPES, 'drawing','handwriting','upload'].map(t => (
+                  <option key={t} value={t}>{ANSWER_TYPE_META[t]?.label || t}</option>
+                ))}
               </select>
               {!hasChildren && (
                 <div style={{ display:'flex', alignItems:'center', gap:6 }}>
@@ -345,6 +344,13 @@ export const NestedQuestionEditor = ({
               </div>
             )}
 
+            {/* Answer key for the newer formats (select-all, numeric, matching…) */}
+            {NEW_TYPES.includes(part.type) && !hasChildren && (
+              <div style={{ marginTop: 8 }}>
+                <AnswerKeyEditor q={part} onChange={(patch) => updatePart(idx, patch)} />
+              </div>
+            )}
+
             {/* Recursive: render this part's own sub-parts */}
             {hasChildren && (
               <div style={{ marginTop:10 }}>
@@ -425,7 +431,7 @@ export const NestedQuestionRenderer = ({ stem, parts = [], showMarks = true, com
           borderRadius:6, marginBottom:10,
           fontSize: compact ? 12.5 : 13.5, color:BRAND.ink, lineHeight:1.5,
         }}>
-          {stem}
+          {typeof stem === 'string' ? renderMath(stem) : stem}
         </div>
       )}
       {parts.length > 0 && (
@@ -461,20 +467,34 @@ const NestedRendererInner = ({ parts, basePath, depth, showMarks, compact }) => 
               </div>
               <div style={{ flex:1, minWidth:0 }}>
                 <div style={{ fontSize: compact ? 12.5 : 13.5, color:BRAND.ink, lineHeight:1.5 }}>
-                  {part.text}
+                  {renderMath(part.text)}
                 </div>
                 {Array.isArray(part.attachments) && part.attachments.length > 0 && (
                   <AttachmentList attachments={part.attachments} />
                 )}
-                {part.type === 'mcq' && !hasChildren && (part.options || []).length > 0 && (
+                {['mcq','multi','ordering'].includes(part.type) && !hasChildren && (part.options || []).length > 0 && (
                   <div style={{ marginTop:4, paddingLeft:4 }}>
                     {part.options.map((o, oi) => (
                       <div key={oi} style={{ fontSize:11.5, color:BRAND.inkSoft, marginBottom:1 }}>
                         <span style={{ fontFamily:'JetBrains Mono,monospace', color:BRAND.inkMute }}>
-                          {String.fromCharCode(65 + oi)}.
-                        </span> {o}
+                          {part.type === 'ordering' ? `${oi + 1}.` : `${String.fromCharCode(65 + oi)}.`}
+                        </span> {renderMath(o)}
                       </div>
                     ))}
+                  </div>
+                )}
+                {part.type === 'matching' && !hasChildren && (part.pairs || []).length > 0 && (
+                  <div style={{ marginTop:4, paddingLeft:4 }}>
+                    {part.pairs.map((p, pi) => (
+                      <div key={pi} style={{ fontSize:11.5, color:BRAND.inkSoft, marginBottom:1 }}>
+                        {renderMath(p.left)} <span style={{ color:BRAND.gold, fontWeight:800 }}>→</span> {renderMath(p.right)}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {NEW_TYPES.includes(part.type) && !hasChildren && (
+                  <div style={{ display:'inline-block', marginTop:4, fontSize:10, fontWeight:700, letterSpacing:'.06em', textTransform:'uppercase', color: ANSWER_TYPE_META[part.type].color }}>
+                    {ANSWER_TYPE_META[part.type].label}
                   </div>
                 )}
               </div>
@@ -553,7 +573,7 @@ export const NestedAnswerCollector = ({
           borderRadius:6, marginBottom:12,
           fontSize:13.5, color:BRAND.ink, lineHeight:1.5,
         }}>
-          {stem}
+          {typeof stem === 'string' ? renderMath(stem) : stem}
         </div>
       )}
       {/* Flat question: render a single input here */}
@@ -608,7 +628,7 @@ const NestedAnswerInner = ({ parts, basePath, depth, questionRef, answers, updat
                 ({label})
               </div>
               <div style={{ flex:1, minWidth:0, fontSize:13.5, color:BRAND.ink, lineHeight:1.5 }}>
-                {part.text}
+                {renderMath(part.text)}
                 {Array.isArray(part.attachments) && part.attachments.length > 0 && (
                   <AttachmentList attachments={part.attachments} />
                 )}
@@ -652,6 +672,11 @@ const AnswerInput = ({ part, path, questionRef, answer, onChange, readOnly, rend
   const a = answer || {}
   const type = part.type || 'short'
 
+  // ── Select-all, true/false, numeric, maths, blanks, matching, ordering ──
+  if (NEW_TYPES.includes(type)) {
+    return <StudentAnswerInput part={part} value={a} onChange={onChange} readOnly={readOnly} />
+  }
+
   // ── MCQ ──
   if (type === 'mcq' && (part.options || []).length > 0) {
     return (
@@ -678,7 +703,7 @@ const AnswerInput = ({ part, path, questionRef, answer, onChange, readOnly, rend
               <span style={{ fontFamily:'JetBrains Mono,monospace', color:BRAND.inkMute, fontSize:11 }}>
                 {String.fromCharCode(65 + oi)}.
               </span>
-              <span>{opt}</span>
+              <span>{renderMath(opt)}</span>
             </label>
           )
         })}
@@ -861,8 +886,9 @@ export const buildAnswersPayload = (answersMap) => {
       partPath,
       answerText: value.answerText || '',
       selectedOption: value.selectedOption || '',
+      answerData: Array.isArray(value.answerData) ? value.answerData : null,
     }
-  }).filter(a => a.answerText || a.selectedOption)
+  }).filter(a => a.answerText || a.selectedOption || (a.answerData && a.answerData.length))
 }
 
 // ─────────────────────────────────────────────────────────

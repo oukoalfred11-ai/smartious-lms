@@ -60,14 +60,12 @@ async function recomputeAggregates(exam) {
  *
  * Applied recursively, because nested parts carry the same fields.
  */
-function stripAnswerFields(node) {
-  const { correctAnswer, markScheme, explanation, ...rest } = node || {};
-  return { ...rest, parts: stripCorrectAnswersFromParts(node && node.parts) };
-}
-
-function stripCorrectAnswersFromParts(parts) {
-  if (!Array.isArray(parts)) return [];
-  return parts.map(p => stripAnswerFields(p));
+// studentView also hides the newer answer keys (tolerance, matching
+// pairs, [[blank]] answers in the text) and shuffles where the order is
+// the answer. Seeded per student, so a reload shows the same order.
+const { studentView, autoMark, summarise, leafAt } = require('../lib/answerTypes');
+function stripAnswerFields(node, seed = '') {
+  return studentView(node, seed);
 }
 
 // Compute status from raw fields. Use after .lean() because the virtual
@@ -626,9 +624,39 @@ function normaliseAnswers(answers) {
       : [],
     answerText: String(a.answerText || ''),
     selectedOption: String(a.selectedOption || ''),
+    // Structured answers (select-all, blanks, matching, ordering): a short
+    // list of strings. Anything else is dropped.
+    answerData: Array.isArray(a.answerData)
+      ? a.answerData.slice(0, 100).map(v => String(v ?? '').slice(0, 2000))
+      : null,
     isCorrect: null,
     marksAwarded: 0,
   })).filter(a => a.questionRef.length > 0);
+}
+
+/**
+ * Pre-mark every objective answer (multiple choice, select-all, true/false,
+ * numeric, maths, blanks, matching, ordering) so the teacher's marking
+ * screen opens with those marks filled in. Written answers stay at 0 for
+ * the teacher. Nothing is released to the student until the teacher saves.
+ */
+async function premark(exam, answers) {
+  const Question = require('../models/Question');
+  const bankIds = [...new Set(answers.map(a => a.questionRef).filter(r => /^[a-f\d]{24}$/i.test(r)))];
+  const bank = bankIds.length ? await Question.find({ _id: { $in: bankIds } }).lean() : [];
+  const byRef = new Map(bank.map(q => [String(q._id), q]));
+  (exam.customQuestions || []).forEach((q, i) => byRef.set('custom:' + i, q.toObject ? q.toObject() : q));
+  for (const a of answers) {
+    const q = byRef.get(a.questionRef);
+    const leaf = q && leafAt(q, a.partPath);
+    if (!leaf || (Array.isArray(leaf.parts) && leaf.parts.length)) continue;
+    const r = autoMark(leaf, a);
+    if (!r) continue;
+    a.marksAwarded = r.marks;
+    a.isCorrect = r.isCorrect;
+    if (!a.answerText && Array.isArray(a.answerData)) a.answerText = summarise(leaf.type, a.answerData, leaf);
+  }
+  return answers;
 }
 
 /**
@@ -709,12 +737,15 @@ router.get('/:id/take', auth, async (req, res) => {
       // Defence in depth: exclude the answer fields in the projection as
       // well as stripping them below, so a future refactor of the mapper
       // cannot silently reintroduce the leak.
+      // The answer key is excluded at the query for flat questions;
+      // pairs and part keys are needed to build the student view and are
+      // removed by stripAnswerFields.
       const rawBank = await Question.find({ _id: { $in: exam.questionIds || [] } })
-        .select('-__v -markScheme -explanation -correctAnswer').lean();
-      bankQuestions = rawBank.map(q => stripAnswerFields(q));
+        .select('-__v -markScheme -explanation -correctAnswer -tolerance').lean();
+      bankQuestions = rawBank.map(q => stripAnswerFields(q, studentId));
     } catch {}
 
-    const customQuestions = (exam.customQuestions || []).map(q => stripAnswerFields(q));
+    const customQuestions = (exam.customQuestions || []).map(q => stripAnswerFields(q, studentId));
 
     let submission = await ExamSubmission.findOne({ examId: exam._id, studentId: req.user._id });
     if (!submission) {
@@ -759,6 +790,11 @@ router.post('/:id/submit', auth, async (req, res) => {
     // Keep whatever was autosaved if the final payload arrives empty
     // (a connection that died mid-submit should not wipe the draft).
     submission.answers = persistedAnswers.length ? persistedAnswers : (submission.answers || []);
+    try {
+      submission.answers = await premark(exam, submission.answers.map(a => (a.toObject ? a.toObject() : a)));
+    } catch (e) {
+      console.error('[exams submit] pre-marking skipped:', e.message);
+    }
     submission.status = 'submitted';
     submission.submittedAt = new Date();
 
