@@ -116,7 +116,6 @@ export function ProfileEditor({ toast }) {
     yearsOfExperience: u.yearsOfExperience || 0,
     qualifications: (u.qualifications || []).join('\n'),
     certifications: (u.certifications || []).join('\n'),
-    specializations: (u.specializations || []).join('\n'),
     defaultMeetingLink: u.defaultMeetingLink || '',
   })
   const load = useCallback(() => {
@@ -222,10 +221,9 @@ export function ProfileEditor({ toast }) {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14 }}>
           <Field label="Job title" hint={'Shown under your name. Your role is ' + me.teamTitle + '.'}><input style={inp} value={f.jobTitle} onChange={e => set('jobTitle', e.target.value)} placeholder={me.teamTitle} /></Field>
           <Field label="Years of experience"><input type="number" min="0" max="70" style={inp} value={f.yearsOfExperience} onChange={e => set('yearsOfExperience', e.target.value)} /></Field>
-          <Field label="About me" span><textarea rows={4} style={{ ...inp, resize: 'vertical' }} value={f.bio} onChange={e => set('bio', e.target.value)} placeholder="A short introduction for parents, students and colleagues." /></Field>
+          <Field label="About me" span hint="Shown with your photo, title, qualifications and experience on the website's Meet Our Team page."><textarea rows={4} style={{ ...inp, resize: 'vertical' }} value={f.bio} onChange={e => set('bio', e.target.value)} placeholder="A short introduction for parents, students and colleagues." /></Field>
           <Field label="Qualifications" hint="One per line"><textarea rows={3} style={{ ...inp, resize: 'vertical' }} value={f.qualifications} onChange={e => set('qualifications', e.target.value)} placeholder="M.Ed. Educational Leadership" /></Field>
           <Field label="Certifications" hint="One per line"><textarea rows={3} style={{ ...inp, resize: 'vertical' }} value={f.certifications} onChange={e => set('certifications', e.target.value)} /></Field>
-          <Field label="Areas of expertise" hint="One per line"><textarea rows={3} style={{ ...inp, resize: 'vertical' }} value={f.specializations} onChange={e => set('specializations', e.target.value)} /></Field>
           <Field label="My meeting link" hint="Your default link for live classes and meetings (https://…)."><input style={inp} value={f.defaultMeetingLink} onChange={e => set('defaultMeetingLink', e.target.value)} placeholder="https://meet.google.com/..." /></Field>
         </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 18 }}>

@@ -1238,32 +1238,38 @@ router.delete('/:id', auth, requireRole('admin', 'ops_manager'), async (req, res
 // never email, phone, or any private/contact data.
 // ─────────────────────────────────────────────────────────
 router.get('/public-teachers', async (req, res) => {
+  // The website's "Meet Our Team": every active member of staff with
+  // their title, years of experience, bio and qualifications. Subjects,
+  // curricula and teaching specialities are internal (they drive
+  // student and subject allocation) and are not published.
   try {
-    const teachers = await User.find({ role: 'teacher' })
-      .select('firstName lastName jobTitle bio avatar qualifications certifications specializations yearsOfExperience subjects curriculum createdAt')
-      .lean();
+    const { TEAM_ROLES, TEAM_GROUPS, teamTitle, teamGroup } = require('../constants/qa');
+    const people = await User.find({
+      role: { $in: TEAM_ROLES }, isActive: { $ne: false }, isDemo: { $ne: true }, teacherStatus: { $ne: 'Left' },
+    }).select('firstName lastName role teacherCategory jobTitle bio avatar qualifications certifications yearsOfExperience').lean();
 
     // Explicitly whitelist the public fields — nothing else leaves the server.
-    const publicTeachers = teachers.map(t => ({
+    const team = people.map(t => ({
       id: String(t._id),
       name: `${t.firstName || ''} ${t.lastName || ''}`.trim(),
-      jobTitle: t.jobTitle || 'Teacher',
+      title: t.jobTitle || teamTitle(t),
+      role: teamTitle(t),
+      group: teamGroup(t.role),
+      principal: t.role === 'admin',
       bio: t.bio || '',
       avatar: t.avatar || '',
-      qualifications: Array.isArray(t.qualifications) ? t.qualifications : [],
-      certifications: Array.isArray(t.certifications) ? t.certifications : [],
-      specializations: Array.isArray(t.specializations) ? t.specializations : [],
+      qualifications: [...(t.qualifications || []), ...(t.certifications || [])].filter(Boolean),
       yearsOfExperience: t.yearsOfExperience || 0,
-      subjects: Array.isArray(t.subjects) ? t.subjects : [],
-      curriculum: Array.isArray(t.curriculum) ? t.curriculum : (t.curriculum ? [t.curriculum] : []),
     }));
 
-    // Most experienced first, then alphabetical
-    publicTeachers.sort((a, b) =>
-      (b.yearsOfExperience - a.yearsOfExperience) || a.name.localeCompare(b.name)
-    );
+    // Principal first, then leadership, teaching, operations; within a
+    // group the most experienced first.
+    const order = Object.fromEntries(TEAM_GROUPS.map((g, i) => [g.key, i]));
+    team.sort((a, b) => (b.principal - a.principal) || (order[a.group] - order[b.group])
+      || (b.yearsOfExperience - a.yearsOfExperience) || a.name.localeCompare(b.name));
 
-    res.json({ success: true, data: { teachers: publicTeachers } });
+    res.set('Cache-Control', 'public, max-age=300');
+    res.json({ success: true, data: { team, teachers: team } });
   } catch (e) {
     console.error('[users public-teachers]', e.message);
     res.status(e.status || 500).json({ success: false, message: e.message });
