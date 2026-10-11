@@ -914,21 +914,88 @@ async function renderMixOffline({ totalDur, musicBuffer, musicVol, voBuffer, voV
   return oac.startRendering()
 }
 
-// Seek a background <video> to an exact time and wait for the frame.
-const seekVideo = (v, t) => new Promise((res) => {
+// ═══ EXPORT FRAME SOURCE FOR VIDEO CLIPS ═════════════════
+// Seeking a clip for every exported frame made the browser decode from
+// the previous keyframe each time. On phone and 4K footage that often
+// took longer than the wait allowed, so the last frame was encoded
+// again and again: the exported video froze. Instead the clip now plays
+// continuously while frames are drawn; each export frame waits until
+// the clip has reached its time (or pauses the clip if it ran ahead).
+// Only real jumps (a new scene, a trim point, a loop) seek, and those
+// wait properly for the frame.
+const EXPORT_FRAME = 1 / 30
+
+// requestVideoFrameCallback tells us which frame is actually on show.
+function trackFrames(v) {
+  if (v.__track || !v.requestVideoFrameCallback) return
+  v.__track = true
+  const tick = (_, meta) => {
+    v.__mt = meta.mediaTime
+    const w = v.__waiters || []
+    v.__waiters = []
+    w.forEach(fn => fn())
+    if (v.__track) v.requestVideoFrameCallback(tick)
+  }
+  v.requestVideoFrameCallback(tick)
+}
+const shownTime = (v) => (v.__track && v.__mt !== undefined ? v.__mt : v.currentTime)
+const nextShownFrame = (v, ms) => new Promise((res) => {
+  const tm = setTimeout(res, ms)
+  ;(v.__waiters = v.__waiters || []).push(() => { clearTimeout(tm); res() })
+})
+
+// Bring a clip to time t for the frame about to be drawn.
+async function seekVideo(v, t) {
   // Film clips set an exact target (trim offset applied); scene
   // backgrounds set the time within their own scene (__sceneTarget);
   // looping backgrounds keep the modulo behaviour.
   const want = (v.__filmTarget !== undefined) ? v.__filmTarget
     : (v.__sceneTarget !== undefined) ? v.__sceneTarget : t
-  const target = (v.__filmTarget !== undefined) ? Math.min(want, (v.duration || want) - 0.05)
-    : (v.duration && isFinite(v.duration)) ? want % v.duration : want
-  if (Math.abs(v.currentTime - target) < 0.001) return res()
-  const done = () => { v.removeEventListener('seeked', done); res() }
-  v.addEventListener('seeked', done)
-  try { v.currentTime = target } catch (e) { res() }
-  setTimeout(done, 400)   // never wedge on a stubborn seek
-})
+  const dur = (v.duration && isFinite(v.duration)) ? v.duration : null
+  const target = (v.__filmTarget !== undefined) ? Math.min(want, (dur || want) - 0.05)
+    : dur ? want % dur : want
+  trackFrames(v)
+  const ahead = target - shownTime(v)
+
+  // Rolling forward through the clip: let it play to this frame.
+  if (v.__rolling && ahead > -0.5 && ahead < 1.5) {
+    if (ahead > EXPORT_FRAME / 2) {
+      if (v.paused) v.play().catch(() => {})
+      const deadline = performance.now() + 2000
+      while (shownTime(v) < target - EXPORT_FRAME / 2 && !v.ended && performance.now() < deadline) {
+        await nextShownFrame(v, 120)
+      }
+    }
+    // The clip is ahead of the export (drawing is slower than real
+    // time): hold it here until the export catches up.
+    if (shownTime(v) > target + EXPORT_FRAME && !v.paused) v.pause()
+    return
+  }
+
+  // A jump: seek exactly, wait for that frame, then roll from there.
+  v.pause()
+  await new Promise((res) => {
+    let tm = null
+    const done = () => { v.removeEventListener('seeked', done); clearTimeout(tm); res() }
+    v.addEventListener('seeked', done)
+    tm = setTimeout(done, 5000)
+    try { v.currentTime = target } catch (e) { done() }
+  })
+  if (v.__track) await nextShownFrame(v, 300)
+  v.__mt = v.currentTime
+  v.__rolling = true
+}
+
+// Stop rolling clips once an export ends.
+function releaseVideos(vids) {
+  for (const v of vids) {
+    try { v.pause() } catch (e) { /* gone */ }
+    v.__rolling = false
+    v.__track = false
+    v.__waiters = []
+    delete v.__mt
+  }
+}
 
 // ═══ FILM AUDIO TOOLS ═══════════════════════════════════
 // Slice a clip's decoded audio to its trim window, with gain.
@@ -1177,17 +1244,24 @@ async function exportMp4Fast({ canvas, W, H, totalDur, drawFrame, mediaAt, sound
 
   const ctx = canvas.getContext('2d')
   const totalFrames = Math.ceil(totalDur * FPS)
-  for (let f = 0; f < totalFrames; f++) {
-    const t = f / FPS
-    const vids = mediaAt ? mediaAt(t) : []
-    for (const v of vids) if (v && v.play) await seekVideo(v, t)
-    drawFrame(ctx, t)
-    const frame = new VideoFrame(canvas, { timestamp: Math.round(t * 1e6), duration: Math.round(1e6 / FPS) })
-    vEnc.encode(frame, { keyFrame: f % 60 === 0 })
-    frame.close()
-    while (vEnc.encodeQueueSize > 6) await new Promise(r => setTimeout(r, 2))
-    if (f % 12 === 0) { onProgress?.(f / totalFrames); await new Promise(r => setTimeout(r, 0)) }
-    if (vErr) throw vErr
+  const used = new Set()
+  try {
+    for (let f = 0; f < totalFrames; f++) {
+      const t = f / FPS
+      const vids = mediaAt ? mediaAt(t) : []
+      // Clips that leave the frame stop rolling until they are needed.
+      for (const v of used) if (!vids.includes(v) && !v.paused) { v.pause(); v.__rolling = false }
+      for (const v of vids) if (v && v.play) { used.add(v); await seekVideo(v, t) }
+      drawFrame(ctx, t)
+      const frame = new VideoFrame(canvas, { timestamp: Math.round(t * 1e6), duration: Math.round(1e6 / FPS) })
+      vEnc.encode(frame, { keyFrame: f % 60 === 0 })
+      frame.close()
+      while (vEnc.encodeQueueSize > 6) await new Promise(r => setTimeout(r, 2))
+      if (f % 12 === 0) { onProgress?.(f / totalFrames); await new Promise(r => setTimeout(r, 0)) }
+      if (vErr) throw vErr
+    }
+  } finally {
+    releaseVideos(used)
   }
 
   if (aEnc && audioBuf) {
