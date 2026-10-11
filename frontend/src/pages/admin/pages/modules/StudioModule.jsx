@@ -984,12 +984,20 @@ async function seekVideo(v, t) {
   if (v.__track) await nextShownFrame(v, 300)
   v.__mt = v.currentTime
   v.__rolling = true
+  // Start rolling now: play() takes a moment to get going, and waiting
+  // for the next frame to call it held each clip's first frame.
+  v.play().catch(() => {})
 }
 
-// Stop rolling clips once an export ends.
+// Stop rolling clips once an export ends. Scene and card backgrounds go
+// back to their opening frame so stills and thumbnails show the start.
 function releaseVideos(vids) {
   for (const v of vids) {
     try { v.pause() } catch (e) { /* gone */ }
+    if (v.__sceneTarget !== undefined) {
+      delete v.__sceneTarget
+      try { v.currentTime = 0.1 } catch (e) { /* fine */ }
+    }
     v.__rolling = false
     v.__track = false
     v.__waiters = []
@@ -1759,6 +1767,19 @@ function CardMaker({ toast }) {
     return ref.current
   }
 
+  // Each card's clip starts from its beginning when the card first
+  // appears (the start of the transition into it; card 1 at 0) and keeps
+  // rolling through the handover out of it. Returns [[cardIdx, clipTime]]
+  // for the clips on screen at time t.
+  const clipStart = (idx) => idx === 0 ? 0 : Math.max(0, idx * cardDur - TRANS_DUR)
+  const clipsAt = (t) => {
+    const n = cards.length
+    const i = Math.min(n - 1, Math.floor(t / cardDur))
+    const out = [[i, Math.max(0, t - clipStart(i))]]
+    if (i < n - 1 && t - i * cardDur > cardDur - TRANS_DUR) out.push([i + 1, Math.max(0, t - clipStart(i + 1))])
+    return out
+  }
+
   const drawTimeline = (ctx, t) => {
     const n = cards.length
     const seg = cardDur
@@ -1824,8 +1845,11 @@ function CardMaker({ toast }) {
       recorder.start(500)
     }
     mixer.start()
-    // Start every video background rolling; stop them at the end.
-    Object.values(medias).forEach(m => { if (m && m.play) { m.currentTime = 0; m.play().catch(() => {}) } })
+    // Video backgrounds play only while their card is on screen, each
+    // from its own beginning (see clipsAt); stop them all at the end.
+    const vids = Object.values(medias).filter(m => m && m.play)
+    vids.forEach(m => m.pause())
+    const rolling = new Set()
     const total = cards.length * cardDur
     const t0 = performance.now()
     let lastProg = 0
@@ -1835,8 +1859,20 @@ function CardMaker({ toast }) {
       const t = ta !== null ? ta : (now - t0) / 1000
       // A few progress updates a second: each one re-renders the editor.
       if (now - lastProg > 120) { setProgress(Math.min(1, t / total)); lastProg = now }
+      const live = new Set()
+      for (const [idx, ct] of clipsAt(t)) {
+        const v = medias[idx]
+        if (!v || !v.play) continue
+        live.add(v)
+        if (!rolling.has(v)) {
+          try { v.currentTime = (v.duration && isFinite(v.duration)) ? ct % v.duration : ct } catch (e) { /* not seekable yet */ }
+          v.play().catch(() => {})
+          rolling.add(v)
+        }
+      }
+      for (const v of rolling) if (!live.has(v)) { v.pause(); rolling.delete(v) }
       if (drawTimeline(ctx, t)) { rafRef.current = requestAnimationFrame(step); return }
-      Object.values(medias).forEach(m => { if (m && m.pause) m.pause() })
+      vids.forEach(m => { m.pause(); try { m.currentTime = 0.1 } catch (e) { /* fine */ } })
       mixer.stop()
       if (recorder) { recorder.onstop = () => resolve(new Blob(chunks, { type: 'video/webm' })); recorder.stop() }
       else resolve(null)
@@ -1856,10 +1892,11 @@ function CardMaker({ toast }) {
     // Fast path: offline WebCodecs encode straight to MP4 — renders
     // as fast as the machine can draw, not at playback speed.
     try {
-      const mediaAt = (t) => {
-        const i = Math.min(cards.length - 1, Math.floor(t / cardDur))
-        return [medias[i], medias[i + 1]].filter(Boolean)
-      }
+      const mediaAt = (t) => clipsAt(t).map(([idx, ct]) => {
+        const v = medias[idx]
+        if (v && v.play) v.__sceneTarget = ct
+        return v
+      }).filter(Boolean)
       const out = await exportMp4Fast({
         canvas: cvRef.current, W, H, totalDur: totalD,
         drawFrame: (ctx, t) => drawTimeline(ctx, t),
@@ -2212,7 +2249,8 @@ function VideoMaker({ toast }) {
       if (done) return
       done = true
       cancelAnimationFrame(rafRef.current)
-      vids.forEach(m => m.pause())
+      // back to each clip's opening frame for the still preview
+      vids.forEach(m => { m.pause(); try { m.currentTime = 0.1 } catch (e) { /* fine */ } })
       mixer.stop()
       stopRef.current = null
       if (recorder && recorder.state !== 'inactive') {
