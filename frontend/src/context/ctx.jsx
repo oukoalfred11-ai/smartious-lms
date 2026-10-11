@@ -210,7 +210,16 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('sm_user')
     setUser(null)
   }, [])
-  return <AuthCtx.Provider value={{ user, loading, login, logout }}>{children}</AuthCtx.Provider>
+  // Merge fresh profile fields (a new photo, a changed name) into the
+  // signed-in user, so the header and every portal show them at once.
+  const updateUser = useCallback((patch) => {
+    setUser(u => {
+      const next = { ...(u || {}), ...(patch || {}) }
+      try { localStorage.setItem('sm_user', JSON.stringify(next)) } catch {}
+      return next
+    })
+  }, [])
+  return <AuthCtx.Provider value={{ user, loading, login, logout, updateUser }}>{children}</AuthCtx.Provider>
 }
 export const useAuth = () => useContext(AuthCtx)
 // ── TOAST ─────────────────────────────────────────────────

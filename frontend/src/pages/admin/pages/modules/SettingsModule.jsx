@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useAuth, api } from '../../../../context/ctx.jsx'
 import { TOKENS } from '../shared/tokens.js'
 import { PSection } from '../shared/ui.jsx'
+import { ProfileEditor } from './MyProfileModule.jsx'
 
 function SettingsModule({ refreshKey, toast }) {
   const auth = useAuth()
@@ -49,7 +50,7 @@ function SettingsModule({ refreshKey, toast }) {
         ))}
       </div>
 
-      {activeTab === 'profile'  && <SettingsProfileTab  user={user} toast={toast}/>}
+      {activeTab === 'profile'  && <ProfileEditor toast={toast}/>}
       {activeTab === 'password' && <SettingsPasswordTab toast={toast}/>}
       {!isStaff && activeTab === 'email'  && <SettingsEmailTab  toast={toast}/>}
       {!isStaff && activeTab === 'school' && <SettingsSchoolTab toast={toast}/>}
@@ -57,113 +58,7 @@ function SettingsModule({ refreshKey, toast }) {
   )
 }
 
-function SettingsProfileTab({ user, toast }) {
-  const [firstName,  setFirstName]  = useState(user?.firstName || '')
-  const [lastName,   setLastName]   = useState(user?.lastName  || '')
-  const [phone,      setPhone]      = useState(user?.phone     || '')
-  const [saving,     setSaving]     = useState(false)
-  const [avatarUrl,  setAvatarUrl]  = useState(user?.avatar    || '')
-  const [uploading,  setUploading]  = useState(false)
-
-  const save = async () => {
-    if (!firstName.trim() || !lastName.trim()) { toast?.error?.('First and last name are required.'); return }
-    setSaving(true)
-    try {
-      const { data } = await api.patch('/users/me', {
-        firstName: firstName.trim(), lastName: lastName.trim(), phone: phone.trim(),
-      })
-      if (data?.success) toast?.ok?.('Profile updated.')
-      else toast?.error?.(data?.message || 'Could not update profile.')
-    } catch (e) {
-      toast?.error?.(e?.response?.data?.message || 'Could not update profile.')
-    } finally { setSaving(false) }
-  }
-
-  const uploadAvatar = async (file) => {
-    if (!file) return
-    if (file.size > 3 * 1024 * 1024) { toast?.error?.('Image must be under 3 MB.'); return }
-    setUploading(true)
-    try {
-      const formData = new FormData()
-      formData.append('avatar', file)
-      const { data } = await api.post('/users/me/avatar', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
-      if (data?.success) {
-        setAvatarUrl(data.data?.avatarUrl || '')
-        toast?.ok?.('Profile photo updated.')
-      } else {
-        toast?.error?.(data?.message || 'Could not upload photo.')
-      }
-    } catch (e) {
-      toast?.error?.(e?.response?.data?.message || 'Could not upload photo.')
-    } finally { setUploading(false) }
-  }
-
-  const inp = { width: '100%', boxSizing: 'border-box', padding: '9px 12px', borderRadius: 7, border: '1.5px solid ' + TOKENS.line, fontSize: 13, fontFamily: 'inherit' }
-  const lbl = { display: 'block', fontSize: 11, fontWeight: 700, color: TOKENS.crimson, letterSpacing: '.05em', textTransform: 'uppercase', marginBottom: 5 }
-  const initials = (firstName[0] || '') + (lastName[0] || '')
-
-  return (
-    <div className="card" style={{ padding: 26, maxWidth: 520 }}>
-      <div style={{ fontSize: 14, fontWeight: 800, color: TOKENS.s900, marginBottom: 20 }}>Your profile</div>
-
-      {/* Avatar */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 18, marginBottom: 24 }}>
-        <div style={{ position: 'relative', flexShrink: 0 }}>
-          {avatarUrl ? (
-            <img src={avatarUrl} alt="Profile" style={{ width: 72, height: 72, borderRadius: '50%', objectFit: 'cover', border: '2px solid ' + TOKENS.line }}/>
-          ) : (
-            <div style={{ width: 72, height: 72, borderRadius: '50%', background: TOKENS.crimson, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, fontWeight: 700, color: '#fff' }}>
-              {initials || '?'}
-            </div>
-          )}
-          {uploading && (
-            <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'rgba(0,0,0,.45)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{ width: 20, height: 20, border: '2px solid rgba(255,255,255,.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin .7s linear infinite' }}/>
-            </div>
-          )}
-        </div>
-        <div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: TOKENS.s900, marginBottom: 6 }}>Profile photo</div>
-          <label style={{ display: 'inline-block', background: TOKENS.cream, border: '1.5px solid ' + TOKENS.line, borderRadius: 7, padding: '7px 14px', fontSize: 12.5, fontWeight: 700, color: TOKENS.s700, cursor: uploading ? 'not-allowed' : 'pointer' }}>
-            {uploading ? 'Uploading...' : 'Upload photo'}
-            <input type="file" accept="image/*" style={{ display: 'none' }} disabled={uploading}
-              onChange={e => e.target.files?.[0] && uploadAvatar(e.target.files[0])}/>
-          </label>
-          <div style={{ fontSize: 11, color: TOKENS.s500, marginTop: 5 }}>JPG or PNG, max 3 MB</div>
-        </div>
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
-        <div>
-          <label style={lbl}>First name</label>
-          <input value={firstName} onChange={e => setFirstName(e.target.value)} style={inp}/>
-        </div>
-        <div>
-          <label style={lbl}>Last name</label>
-          <input value={lastName} onChange={e => setLastName(e.target.value)} style={inp}/>
-        </div>
-      </div>
-      <div style={{ marginBottom: 14 }}>
-        <label style={lbl}>Phone</label>
-        <input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+254 700 000 000" style={inp}/>
-      </div>
-      <div style={{ marginBottom: 20 }}>
-        <label style={lbl}>Email address</label>
-        <div style={{ ...inp, background: TOKENS.cream, color: TOKENS.s500 }}>{user?.email || '—'}</div>
-        <div style={{ fontSize: 11, color: TOKENS.s500, marginTop: 4 }}>To change your email contact your administrator.</div>
-      </div>
-      <button onClick={save} disabled={saving} style={{
-        background: saving ? TOKENS.s300 : TOKENS.crimson, color: '#fff', border: 'none',
-        padding: '10px 24px', borderRadius: 7, fontSize: 13, fontWeight: 700,
-        cursor: saving ? 'not-allowed' : 'pointer',
-      }}>{saving ? 'Saving...' : 'Save changes'}</button>
-    </div>
-  )
-}
-
-function SettingsPasswordTab({ toast }) {
+export function SettingsPasswordTab({ toast }) {
   const [current,  setCurrent]  = useState('')
   const [next,     setNext]     = useState('')
   const [confirm,  setConfirm]  = useState('')
