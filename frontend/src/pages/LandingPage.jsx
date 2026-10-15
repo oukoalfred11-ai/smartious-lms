@@ -4028,7 +4028,7 @@ export default function LandingPage() {
     }
   } else if (page === 'homeschooling-uae') {
     metaTitle = 'Online School in the UAE | Dubai & Abu Dhabi Homeschooling, IGCSE & A-Level | Smartious'
-    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for UAE families across Dubai, Abu Dhabi, Sharjah, Ajman, Ras Al Khaimah. Wellington / Dubai College / BSAK / Repton / Brighton College alternative. Immediate enrolment, no KHDA/ADEK waiting lists. From USD 400/month (about AED 1,470).'
+    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for UAE families across Dubai, Abu Dhabi, Sharjah, Ajman, Ras Al Khaimah. Wellington / Dubai College / BSAK / Repton / Brighton College alternative. Immediate enrolment, no KHDA/ADEK waiting lists. USD 423/month (about AED 1,553), paid termly.'
   
   } else if (page === 'homeschooling-egypt') {
     metaTitle = 'Online School, Virtual School & Homeschool for Egyptian Families — Cambridge IGCSE & A-Level | Smartious'
@@ -14641,7 +14641,7 @@ export default function LandingPage() {
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
                 {[
                   ['Subject specialists, not generalists','Every Smartious tutor holds a subject-specific university degree. We do not assign generalist tutors to specialist subjects.'],
-                  ['Meaningful cost savings','UAE-licensed private tutors typically charge AED 150-400/hour (USD 40-110). Smartious online tuition is USD 15-25/hour (≈ AED 55-92). Savings reflect delivery model, not tutor quality.'],
+                  ['Meaningful cost savings','UAE-licensed private tutors typically charge AED 150-400/hour (USD 40-110). Smartious online tuition is USD 15/hour (≈ AED 55) at every level. Savings reflect delivery model, not tutor quality.'],
                   ['One-hour time-zone offset','UAE is GMT+4, our Nairobi-based teachers are GMT+3. Far easier scheduling than UK-based tutors (4-hour offset).'],
                   ['Curriculum continuity if you relocate','If your family relocates from UAE to UK, Singapore, US, Australia or back home, Smartious follows you — same teachers, same curriculum, same examination board.'],
                   ['All major UAE curricula','Cambridge IGCSE, Pearson Edexcel IGCSE, A-Level (CIE and Edexcel), IB Diploma, American AP, CBSE — we cover what your child\'s school teaches.'],
@@ -14669,7 +14669,7 @@ export default function LandingPage() {
                 ['Do you offer home tuition in the UAE?', 'No — Smartious in UAE is online-only. We do not visit your villa or apartment, and we do not operate a physical centre in the Emirates. UAE private tutoring is regulated by KHDA (Dubai), ADEK (Abu Dhabi) and SPEA (Sharjah). Smartious operates as an internationally accredited online school based outside the UAE — our online sessions delivered remotely are outside in-person tutoring licensing scope. The educational quality is identical to in-person tutoring.'],
                 ['What is the time difference between UAE and Smartious?', 'UAE is GMT+4. Our Nairobi-based teachers are GMT+3 — one hour behind. A 5pm UAE session is 4pm Kenya time. This is a much smaller offset than UAE families face when using UK-based tutors (4-hour difference) and works especially well for after-school timing.'],
                 ['What curricula do you support for UAE students?', 'Cambridge IGCSE, Pearson Edexcel International, Cambridge A-Level, Edexcel IAL, IB Diploma, American (with AP), CBSE (Indian Curriculum), and Kenyan CBC. We do not currently support French Baccalaureate, German Abitur or Russian curriculum.'],
-                ['How does pricing compare to UAE tutors?', 'Typical UAE-licensed private tutors charge AED 150-400/hour (USD 40-110). Smartious online tuition is USD 15-25/hour (≈ AED 55-92). The cost difference reflects our online-delivery model and Nairobi cost base — not any compromise in tutor qualification. Every Smartious tutor holds a subject-specific university degree.'],
+                ['How does pricing compare to UAE tutors?', 'Typical UAE-licensed private tutors charge AED 150-400/hour (USD 40-110). Smartious online tuition is USD 15/hour (≈ AED 55) at every level. The cost difference reflects our online-delivery model and Nairobi cost base — not any compromise in tutor qualification. Every Smartious tutor holds a subject-specific university degree.'],
                 ['Can you support UAE university applications?', 'Yes — we support applications to UAE branch campuses (NYU Abu Dhabi, Sorbonne Abu Dhabi, University of Birmingham Dubai, Heriot-Watt Dubai, Middlesex University Dubai), plus US (Common App), UK (UCAS), Canadian, Australian and other international universities.'],
                 ['Do you offer full online homeschooling in addition to subject tutoring?', 'Yes — full online homeschool programmes (Cambridge IGCSE, A-Level, IB Diploma, American, CBSE) are available from USD 423/month (≈ AED 1,553/month) for Primary up to USD 923/month (≈ AED 3,387/month) for IB Diploma. Many UAE families use Smartious as supplementary 1-on-1 tutoring alongside their child\'s current school.'],
               ].map(([q, a], i) => (

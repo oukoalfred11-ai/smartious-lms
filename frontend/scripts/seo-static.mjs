@@ -71,7 +71,7 @@ const pages = []
 pages.push({
   path: '/online-school/uae',
   title: 'Online School in the UAE | Dubai & Abu Dhabi Homeschooling, IGCSE & A-Level | Smartious',
-  desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for UAE families across Dubai, Abu Dhabi, Sharjah, Ajman, Ras Al Khaimah. Wellington / Dubai College / BSAK / Repton / Brighton College alternative. Immediate enrolment, no KHDA/ADEK waiting lists. From USD 400/month (about AED 1,470).',
+  desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for UAE families across Dubai, Abu Dhabi, Sharjah, Ajman, Ras Al Khaimah. Wellington / Dubai College / BSAK / Repton / Brighton College alternative. Immediate enrolment, no KHDA/ADEK waiting lists. USD 423/month (about AED 1,553), paid termly.',
   body: [
     `<h1>Online school and homeschooling in the UAE</h1>`,
     p(UAE_COUNTRY.heroSubhead),
