@@ -64,7 +64,7 @@ export const NZ_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Auckland families. Auckland holds a third of New Zealand\'s population, most of its migrant arrivals, and the country\'s Cambridge heartland: Auckland Grammar, Macleans College, and the ACG network run CAIE alongside or instead of NCEA, and the city\'s exam infrastructure for private candidates is the deepest in the country. Home education sits on an equally strong footing — a Ministry Certificate of Exemption with no curriculum mandate, no testing, no parental qualification requirement, and a supervision allowance the state actually pays. Smartious teaches the curriculum Auckland\'s top schools already picked, live, in small groups, on a schedule that lands in the Auckland afternoon and early evening.',
     heroImg: 'https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Auckland skyline with Sky Tower and harbour' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Auckland families — the Cambridge heartland, s.38 exemption framework, supervision allowance. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Auckland families — the Cambridge heartland, s.38 exemption framework, supervision allowance. From USD 423/month.',
     challenges: [
       'Auckland\'s Cambridge schools are heavily zoned and oversubscribed — the grammar-zone property premium is a national institution — leaving families outside the zones without access to the CAIE track those schools validate.',
       'Private Cambridge and IB campuses run approximately NZD 20,000-30,000+/year.',
@@ -116,7 +116,7 @@ export const NZ_CITIES = [
       { q: 'Why Cambridge in an NCEA country?', a: 'Because New Zealand\'s own leading schools chose it: Auckland Grammar, Macleans, and the ACG network run CAIE. NZQA recognises A-Levels for University Entrance, and the same qualification feeds UCAS directly — both doors stay open.' },
       { q: 'How do live classes work with the time difference?', a: 'The timezone works in New Zealand\'s favour differently than in Europe: our Nairobi-morning teaching lands at roughly 3-7pm Auckland time — natural homeschool-afternoon and after-school slots — and every class is recorded.' },
       { q: 'Where do Auckland students sit Cambridge examinations?', a: 'At Cambridge schools in Auckland accepting private candidates — the deepest CAIE infrastructure in the country — confirmed per family per session.' },
-      { q: 'How does Smartious compare to ACG and the private Cambridge campuses?', a: 'They are excellent campuses at approximately NZD 20,000-30,000+/year, zone- or fee-gated. Smartious delivers the same examination pathways live at USD 2,160-6,480/year (~NZD 3,600-10,700) with immediate enrolment.' },
+      { q: 'How does Smartious compare to ACG and the private Cambridge campuses?', a: 'They are excellent campuses at approximately NZD 20,000-30,000+/year, zone- or fee-gated. Smartious delivers the same examination pathways live at USD 5,076/year (~NZD 8,480) with immediate enrolment.' },
     ],
   },
 
@@ -131,7 +131,7 @@ export const NZ_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Wellington families. Wellington is New Zealand\'s capital — government, the diplomatic corps, the public-service economy, and a film and creative-technology sector with global reach. Its schooling market is strong but overwhelmingly NCEA, with a compact private tier (Scots, Samuel Marsden, Wellesley and peers) and limited Cambridge provision — a real constraint for diplomatic families arriving mid-posting, returning expats, and students targeting UK universities. Smartious delivers the Cambridge, IB, and American pathways live, under the s.38 exemption framework, on a schedule that lands in the Wellington afternoon and early evening.',
     heroImg: 'https://images.unsplash.com/photo-1589871973318-9ca1258faa5d?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Wellington harbour and cable car viewpoint' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Wellington families — capital city, diplomatic community, compact Cambridge provision. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Wellington families — capital city, diplomatic community, compact Cambridge provision. From USD 423/month.',
     challenges: [
       'Wellington\'s market is overwhelmingly NCEA with limited Cambridge provision — a real constraint for families targeting UK universities or continuing a CAIE pathway from abroad.',
       'Diplomatic and public-service postings arrive mid-cycle; school years do not.',
@@ -195,7 +195,7 @@ export const NZ_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Christchurch families. Christchurch is the South Island\'s largest city, rebuilt after the earthquakes into one of New Zealand\'s most interesting economies — aerospace, agritech, software, and the University of Canterbury\'s engineering tradition. Canterbury also has its own Cambridge school heritage (St Andrew\'s, St Margaret\'s, Christ\'s College and peers run or have run CAIE and IB tracks) at private fees, alongside a strong but NCEA-dominated state sector. Smartious delivers the international pathways live across Canterbury and the wider South Island — the region where distance makes online delivery matter most — under the s.38 exemption framework, on a schedule that lands in the Christchurch afternoon.',
     heroImg: 'https://images.unsplash.com/photo-1578645510447-e20b4311e3ce?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Christchurch new regent street and rebuilt city' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Christchurch and Canterbury families — rebuilt tech economy, Cambridge tradition, South Island gateway. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Christchurch and Canterbury families — rebuilt tech economy, Cambridge tradition, South Island gateway. From USD 423/month.',
     challenges: [
       'Canterbury\'s Cambridge and IB provision sits in the private tier at approximately NZD 15,000-30,000/year; the state sector is NCEA-dominated.',
       'The wider South Island beyond Christchurch is thinly served for any international curriculum — distances are real.',
@@ -243,7 +243,7 @@ export const NZ_CITIES = [
     onlineLearningDetail: 'Live online via Smartious LMS. Live classes land in the Christchurch mid-afternoon and early evening, with the full recorded library. Canterbury\'s UFB and rural wireless coverage both serve the platform well.',
     faqs: [
       { q: 'We live two hours from Christchurch — does this work?', a: 'It is exactly where live online delivery matters most: identical teaching from Timaru to the West Coast, with exam sittings in Christchurch planned per session and travel scheduled ahead.' },
-      { q: 'How does Smartious compare to Canterbury\'s private Cambridge schools?', a: 'They are excellent campuses at approximately NZD 15,000-30,000/year. Smartious delivers the same examination pathways live at USD 2,160-6,480/year with immediate enrolment.' },
+      { q: 'How does Smartious compare to Canterbury\'s private Cambridge schools?', a: 'They are excellent campuses at approximately NZD 15,000-30,000/year. Smartious delivers the same examination pathways live at USD 5,076/year with immediate enrolment.' },
       { q: 'Where do Christchurch students sit Cambridge examinations?', a: 'At Cambridge schools in Christchurch accepting private candidates, confirmed per family per session.' },
     ],
   },
@@ -259,7 +259,7 @@ export const NZ_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Hamilton and Waikato families. Hamilton anchors the Waikato — the dairy economy\'s heartland, New Zealand\'s agritech capital, and one of its fastest-growing regions, drawing Auckland-priced-out families south and research talent to the University of Waikato and the agritech cluster. Provision is overwhelmingly NCEA, with a small private tier, and the region carries one of the country\'s established homeschool communities. Smartious delivers the international pathways live across the Waikato — under the s.38 exemption framework, on a schedule that lands in the Hamilton afternoon.',
     heroImg: 'https://images.unsplash.com/photo-1591123720164-de1348028a82?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Hamilton gardens and Waikato river' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Hamilton and Waikato families — agritech heartland, strong homeschool community. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Hamilton and Waikato families — agritech heartland, strong homeschool community. From USD 423/month.',
     challenges: [
       'Waikato provision is overwhelmingly NCEA with a small private tier — families wanting external international examination have thin local options.',
       'A fast-growing region whose school capacity is racing its population.',
@@ -322,7 +322,7 @@ export const NZ_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Tauranga and Bay of Plenty families. Tauranga is New Zealand\'s fastest-growing city — the country\'s largest port, a kiwifruit and horticulture economy with global reach, and the capital of its lifestyle migration: Auckland professionals, returning expats, and remote workers who moved for the Mount\'s beaches and brought their careers with them. School capacity has raced the population for a decade, provision is overwhelmingly NCEA, and the region carries a strong homeschool community. Smartious delivers the international pathways live across the Bay — under the s.38 exemption framework, on a schedule that lands in the Tauranga afternoon.',
     heroImg: 'https://images.unsplash.com/photo-1600214459371-b3f4b8bd66b1?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Mount Maunganui beach and harbour entrance' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Tauranga and Bay of Plenty families — fastest-growing city, lifestyle migration, strong homeschool community. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Tauranga and Bay of Plenty families — fastest-growing city, lifestyle migration, strong homeschool community. From USD 423/month.',
     challenges: [
       'New Zealand\'s fastest-growing city has spent a decade with school rolls racing population — zoning pressure is constant.',
       'Provision is overwhelmingly NCEA; families wanting external international examination have thin local options.',
@@ -385,7 +385,7 @@ export const NZ_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Queenstown, Wanaka, and Otago families. Queenstown is New Zealand\'s adventure and remote-work capital — a tourism economy with a genuinely global workforce, an international property and lifestyle-migration community, and some of the thinnest senior schooling provision in the country: Wakatipu\'s growth has outrun its single state high school\'s capacity for years, private options are essentially absent, and Dunedin\'s campuses are three hours east. For the basin\'s international families, live online delivery is not the alternative; it is the complete option. Smartious delivers it under the s.38 exemption framework, on a schedule that lands in the Queenstown afternoon.',
     heroImg: 'https://images.unsplash.com/photo-1589196728426-9d9a7a1d1c6e?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Queenstown Lake Wakatipu and the Remarkables' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Queenstown, Wanaka and Otago families — remote-work capital, thin senior provision. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Queenstown, Wanaka and Otago families — remote-work capital, thin senior provision. From USD 423/month.',
     challenges: [
       'Some of the thinnest senior schooling provision in the country — Wakatipu\'s growth outran its state capacity years ago, private options are essentially absent, and Dunedin is three hours east.',
       'A genuinely global workforce and lifestyle-migration community with international university ambitions the local NCEA track does not serve.',
@@ -475,7 +475,7 @@ export const NZ_COUNTRY = {
   heroEyebrow: 'Online homeschool for New Zealand',
   heroH1Suffix: 'New Zealand',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for Kiwi, migrant, and returning-expat families across Auckland, Wellington, Christchurch, Hamilton, Tauranga, and Queenstown. New Zealand has one of the cleanest homeschool frameworks in the English-speaking world — a free Ministry exemption, no curriculum mandate, and a supervision allowance the state actually pays.',
-  heroValueProp: 'From USD 180/month (~NZD 300/month). Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — live classes land in the New Zealand afternoon and early evening, with the full recorded library behind them.',
+  heroValueProp: 'From USD 423/month (~NZD 706/month). Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — live classes land in the New Zealand afternoon and early evening, with the full recorded library behind them.',
   whatsappTrigger: 'Hi, I would like to enquire about Smartious for our family in New Zealand',
 
   citiesSectionTitle: 'Where our New Zealand families are',
@@ -509,7 +509,7 @@ export const NZ_COUNTRY = {
     { name: 'Canterbury private tier (St Andrew\'s, Christ\'s College)', city: 'Christchurch', curriculum: 'NCEA + CAIE/IB tracks',          feesUsd: '~NZD 15,000-30,000/year',                   feesAed: 'Varies',                        rating: 4.4, capacityNote: 'The South Island\'s established private options' },
     { name: 'Te Kura (Te Aho o Te Kura Pounamu)',         city: 'National (distance)',   curriculum: 'NZ Curriculum / NCEA only',            feesUsd: 'State-funded for eligible students',        feesAed: 'Eligibility-gated',             rating: 4.2, capacityNote: 'The state correspondence school — excellent at what it does, but NZ curriculum only, eligibility rules apply, and no Cambridge, A-Level, or IB' },
     { name: 'CambriLearn / My Homeschool (online, target NZ)', city: 'Online',           curriculum: 'British online / NZ-style homeschool', feesUsd: 'Per-subject and package pricing',           feesAed: 'Varies',                        rating: 4.2, capacityNote: 'Visible online options — self-paced or non-examined models rather than live small-group teaching through A-Level' },
-    { name: 'Smartious Homeschool (New Zealand via online delivery)', city: 'Delivered to all NZ', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 2,160-6,480/year', feesAed: '~NZD 3,600-10,700/year', rating: 4.8, capacityNote: 'Every class live through A-Level + exemption application support and tilsyn-grade documentation + no zone, no roll, no private fee + live classes in the NZ afternoon' },
+    { name: 'Smartious Homeschool (New Zealand via online delivery)', city: 'Delivered to all NZ', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 5,076/year', feesAed: '~NZD 3,600-10,700/year', rating: 4.8, capacityNote: 'Every class live through A-Level + exemption application support and tilsyn-grade documentation + no zone, no roll, no private fee + live classes in the NZ afternoon' },
   ],
 
   legalFrameworkIntro: 'New Zealand runs one of the cleanest homeschool frameworks in the English-speaking world — a free exemption, no curriculum mandate, and an allowance the state pays — with one reform underway that honest pages should mention. Here is the whole picture.',

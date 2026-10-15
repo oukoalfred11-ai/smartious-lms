@@ -97,7 +97,7 @@ export const BOLIVIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Santa Cruz families. The eastern lowland capital is Bolivia\'s economic engine — soy, cattle and agro-industry at export scale, gas services, corporate headquarters, and the fastest population growth in the country — with the strongest international school tier Bolivia has, including the Santa Cruz Cooperative School and the German and Anglo-American schools. Bolivia\'s legal framework is strict on educating outside school and yet a real working practice has developed here, and we set out both accurately before anything else.',
     heroImg: '/heroes/santa-cruz-bo.jpg',
     altTexts: { hero: 'Santa Cruz de la Sierra' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Santa Cruz de la Sierra families — the colegio sombrilla practice explained, morning classes. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Santa Cruz de la Sierra families — the colegio sombrilla practice explained, morning classes. From USD 423/month.',
     challenges: [
       'International school fees in Santa Cruz sit at the top of the Bolivian market with competitive places.',
       'Education is compulsory up to bachillerato under Ley 070, with Educación Regular expressly obligatory.',
@@ -129,7 +129,7 @@ export const BOLIVIA_CITIES = [
     whyChoose: [
       ['Works alongside a colegio sombrilla, not instead of one', 'Umbrella schools carry the Bolivian enrolment and curriculum coverage; we teach the internationally examined track. Families frequently need both and we say so.'],
       ['Agricultural and business depth for an export capital', 'Cambridge A-Level Biology, Chemistry, Economics and Business suit soy, cattle and agro-industrial families directly.'],
-      ['A fee gap against the strongest tier in Bolivia', 'Live small-group teaching at USD 2,160-6,480 a year.'],
+      ['A fee gap against the strongest tier in Bolivia', 'Live small-group teaching at USD 5,076 a year.'],
       ['Seven hours, not nine', 'Bolivian mornings and very early afternoons both land in our teaching day — better than most of Latin America.'],
       ['The statute stated accurately', 'Ley 070 makes education compulsory up to bachillerato and Educación Regular expressly obligatory. We do not soften that.'],
     ],
@@ -162,7 +162,7 @@ export const BOLIVIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for La Paz and El Alto families. The seat of government hosts the diplomatic corps, the international organisations, and one of the largest development and NGO sectors in South America — a population defined by two- and three-year postings — alongside El Alto\'s manufacturing and commercial economy on the altiplano above. For a family who will be in Lima or Nairobi or Geneva next, a curriculum that continues unchanged is worth more than any single campus. Smartious teaches Cambridge and IB live to La Paz, alongside whichever Bolivian arrangement a family holds.',
     heroImg: '/heroes/la-paz-bo.jpg',
     altTexts: { hero: 'La Paz and Illimani' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for La Paz and El Alto families — a development capital built for rotation. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for La Paz and El Alto families — a development capital built for rotation. From USD 423/month.',
     challenges: [
       'A capital defined by two- and three-year postings, so children change systems repeatedly.',
       'International school places are competitive and fees are high relative to local salaries.',
@@ -224,7 +224,7 @@ export const BOLIVIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Cochabamba families. The valley city sits at the centre of Bolivia\'s agricultural processing economy, hosts a major university sector, and has carried a long-established missionary, NGO and international volunteer presence — one of the reasons Bolivia\'s homeschooling community has historically been strongest in the eje troncal of which Cochabamba is part. The climate and cost of living have drawn international residents for decades; the international schooling has stayed a short list. Smartious teaches Cambridge and IB live to the valley.',
     heroImg: '/heroes/cochabamba-bo.jpg',
     altTexts: { hero: 'Cochabamba and the valley' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Cochabamba families — valley university city, missionary and NGO community. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Cochabamba families — valley university city, missionary and NGO community. From USD 423/month.',
     challenges: [
       'A long-established international community with a short list of international schools.',
       'Education is compulsory up to bachillerato under Ley 070.',
@@ -286,7 +286,7 @@ export const BOLIVIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Tarija families. The southern department holds Bolivia\'s hydrocarbon heartland — the gas fields, processing plants and pipeline infrastructure that have funded a substantial share of national revenue, with an engineering and operations workforce recruited nationally and internationally — alongside a distinctive high-altitude wine and viticulture industry and the corridor to the Argentine border. International schooling in the department is minimal, and Santa Cruz and La Paz are both a flight away. Smartious teaches Cambridge and IB live to the south.',
     heroImg: '/heroes/tarija-bo.jpg',
     altTexts: { hero: 'Tarija valley and vineyards' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Tarija and southern Bolivia families — gas fields and vineyards, minimal provision. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Tarija and southern Bolivia families — gas fields and vineyards, minimal provision. From USD 423/month.',
     challenges: [
       'Minimal international schooling in Bolivia\'s hydrocarbon heartland.',
       'Santa Cruz and La Paz are both a flight away.',
@@ -348,7 +348,7 @@ export const BOLIVIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for families across southwestern Bolivia. Potosí carries an mining economy five centuries old — silver, tin, zinc and the cooperatives that still work Cerro Rico — alongside something much newer: the Salar de Uyuni holds one of the largest lithium resources on earth, and the industrialisation projects around it have drawn international technical and engineering interest to one of the highest and most remote inhabited regions anywhere. What has not arrived is schooling. Smartious teaches Cambridge and IB live to the southwest.',
     heroImg: '/heroes/potosi-bo.jpg',
     altTexts: { hero: 'The Salar de Uyuni' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Potosí, Uyuni and southwestern Bolivia families — mining and lithium, no international schooling. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Potosí, Uyuni and southwestern Bolivia families — mining and lithium, no international schooling. From USD 423/month.',
     challenges: [
       'Essentially no international schooling in one of the most remote inhabited regions on earth.',
       'Santa Cruz and La Paz are long journeys or flights away.',
@@ -437,7 +437,7 @@ export const BOLIVIA_COUNTRY = {
   heroEyebrow: 'Online school for Bolivia',
   heroH1Suffix: 'Bolivia',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for agro-industrial, mining, gas, development-sector and Bolivian families across Santa Cruz, La Paz, Cochabamba, Tarija and Potosí. Bolivia has a strict statute and a real working practice — Ley 070 makes education compulsory to bachillerato, while colegios sombrilla operate under the online-education regulation — and we explain both, including exactly where we do and do not fit.',
-  heroValueProp: 'From USD 180/month. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — alongside your Bolivian school or umbrella arrangement.',
+  heroValueProp: 'From USD 423/month. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — alongside your Bolivian school or umbrella arrangement.',
   whatsappTrigger: 'Hi, I would like to enquire about Smartious for our family in Bolivia',
 
   citiesSectionTitle: 'Where our Bolivia families are',
@@ -470,7 +470,7 @@ export const BOLIVIA_COUNTRY = {
     { name: 'The German and heritage schools',                  city: 'Santa Cruz, La Paz',    curriculum: 'National-system bilingual',              feesUsd: 'Premium tier',                                      feesAed: 'Varies',                  rating: 4.4, capacityNote: 'Established heritage provision — a different route entirely' },
     { name: 'Tarija and the southwest',                         city: 'Gas and mining regions', curriculum: '—',                                    feesUsd: 'No international provision',                        feesAed: '—',                       rating: 0,   capacityNote: 'The hydrocarbon heartland and the lithium southwest, neither with international schooling' },
     { name: 'US-based online schools',                          city: 'Online',                curriculum: 'American online',                       feesUsd: 'Varies, often per-course',                          feesAed: 'Varies',                  rating: 4.2, capacityNote: 'Closer to Bolivia on the clock than we are — families should weigh that against price and class size' },
-    { name: 'Smartious Homeschool (Bolivia via online delivery)', city: 'Delivered to all Bolivia', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 2,160-6,480/year',                       feesAed: 'BOB equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + works alongside a colegio sombrilla rather than replacing it + Tarija and Potosí reached + seven hours rather than nine' },
+    { name: 'Smartious Homeschool (Bolivia via online delivery)', city: 'Delivered to all Bolivia', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 5,076/year',                       feesAed: 'BOB equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + works alongside a colegio sombrilla rather than replacing it + Tarija and Potosí reached + seven hours rather than nine' },
   ],
 
   legalFrameworkIntro: 'Bolivia has the strictest statutory framing in our Latin American coverage and, at the same time, one of the most practical working arrangements. Both belong on this page, and so does the line between what a Bolivian umbrella school does and what we do.',

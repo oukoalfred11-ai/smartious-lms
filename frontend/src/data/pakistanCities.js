@@ -77,7 +77,7 @@ export const PAKISTAN_CITIES = [
     intro: 'Live online Cambridge IGCSE and O-Level, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Karachi families. Karachi is Pakistan\'s commercial capital — the port, the banks, the corporate headquarters — and the home of the country\'s deepest Cambridge tradition: Karachi Grammar School, The Lyceum, Cedar College, Bay View, and the Beaconhouse and City School campuses have prepared generations for LUMS, IBA, and universities abroad. Smartious is not built to replace them. It is built for the families those schools cannot fit today: the multi-year waitlist, the cricket or music schedule the timetable will not bend around, the business life that moves between Karachi and Dubai, and the ninety minutes a day that Clifton and DHA traffic simply take. Live small-group classes, unlimited recordings, year-round admission — with British Council Karachi carrying the examinations and IBCC equivalence planned from the first term.',
     heroImg: 'https://images.unsplash.com/photo-1595815771614-ade9d652a65d?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Karachi skyline and the Arabian Sea coast' },
-    seoDesc: 'Live online Cambridge IGCSE, O-Level, A-Level, Pearson Edexcel, IB Diploma and American AP for Karachi families — no waitlist, IBCC equivalence planned, British Council Karachi exams. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, O-Level, A-Level, Pearson Edexcel, IB Diploma and American AP for Karachi families — no waitlist, IBCC equivalence planned, British Council Karachi exams. From USD 423/month.',
     challenges: [
       'Multi-year waitlists at the most established Cambridge schools — a real barrier for families relocating mid-year or deciding late.',
       'Fixed timetables that clash with serious cricket, hockey, music, or competitive training commitments.',
@@ -144,7 +144,7 @@ export const PAKISTAN_CITIES = [
     intro: 'Live online Cambridge IGCSE and O-Level, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Lahore families. Lahore is Pakistan\'s cultural and academic capital — Aitchison College, Lahore Grammar School, the Beaconhouse and City School networks, and the LUMS pipeline that runs through them all. It is also a city where the best schools are the hardest to enter, where serious sport and music collide with fixed timetables, and where the Gulberg and DHA school run takes what it takes. Smartious works alongside that ecosystem rather than against it: live small-group Cambridge teaching, unlimited recordings, year-round admission, British Council Lahore examinations, and IBCC equivalence planned from the first term.',
     heroImg: 'https://images.unsplash.com/photo-1587474260584-136574528ed5?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Lahore Badshahi Mosque and the old city' },
-    seoDesc: 'Live online Cambridge IGCSE, O-Level, A-Level, Pearson Edexcel, IB Diploma and American AP for Lahore families — no waitlist, IBCC equivalence planned, British Council Lahore exams. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, O-Level, A-Level, Pearson Edexcel, IB Diploma and American AP for Lahore families — no waitlist, IBCC equivalence planned, British Council Lahore exams. From USD 423/month.',
     challenges: [
       'The most established schools — Aitchison, LGS, the top network campuses — are the hardest to enter, especially mid-year.',
       'Fixed timetables that clash with serious cricket, hockey, music, or competitive training.',
@@ -207,7 +207,7 @@ export const PAKISTAN_CITIES = [
     intro: 'Live online Cambridge IGCSE and O-Level, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Islamabad and Rawalpindi families. The twin cities carry Pakistan\'s diplomatic corps, its development and international-organisation community, its federal institutions, and a professional class whose careers regularly move between Islamabad, the Gulf, and the West. Their schooling — the International School of Islamabad, Roots Millennium, Headstart, the Beaconhouse and City School campuses — is strong and finite, and postings rarely arrive on admission cycles. Smartious delivers the international pathways live: year-round admission, unlimited recordings, British Council examinations in both cities, and IBCC equivalence planned from the first term.',
     heroImg: 'https://images.unsplash.com/photo-1589129140837-67287c22521f?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Faisal Mosque and the Margalla Hills, Islamabad' },
-    seoDesc: 'Live online Cambridge IGCSE, O-Level, A-Level, Pearson Edexcel, IB Diploma and American AP for Islamabad and Rawalpindi families — diplomatic community, no waitlist, British Council exams. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, O-Level, A-Level, Pearson Edexcel, IB Diploma and American AP for Islamabad and Rawalpindi families — diplomatic community, no waitlist, British Council exams. From USD 423/month.',
     challenges: [
       'Diplomatic and development postings arrive mid-year, not on admission cycles — and the capital\'s international provision is finite.',
       'Families rotating between Islamabad, the Gulf, and Western capitals need curriculum that transfers without a repeated year.',
@@ -269,7 +269,7 @@ export const PAKISTAN_CITIES = [
     intro: 'Live online Cambridge IGCSE and O-Level, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Faisalabad families. Faisalabad is Pakistan\'s textile capital and one of its industrial engines — an export economy whose business-owning families trade with buyers in Europe, the Gulf, and North America, and whose children increasingly need the qualifications those markets read. The city\'s Cambridge provision is real but far thinner than Lahore\'s, and the strongest campuses fill quickly. Smartious delivers the full international pathway live across Punjab\'s industrial belt — year-round admission, unlimited recordings, Lahore exam windows planned per session, and IBCC equivalence planned from the first term.',
     heroImg: 'https://images.unsplash.com/photo-1587474260584-136574528ed5?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Faisalabad clock tower and the city centre' },
-    seoDesc: 'Live online Cambridge IGCSE, O-Level, A-Level, Pearson Edexcel, IB Diploma and American AP for Faisalabad families — textile capital, thin Cambridge tier, IBCC equivalence planned. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, O-Level, A-Level, Pearson Edexcel, IB Diploma and American AP for Faisalabad families — textile capital, thin Cambridge tier, IBCC equivalence planned. From USD 423/month.',
     challenges: [
       'A Cambridge tier far thinner than Lahore\'s, with the strongest campuses filling quickly.',
       'Export-business families need qualifications their trading partners read — and often travel on the trade calendar.',
@@ -331,7 +331,7 @@ export const PAKISTAN_CITIES = [
     intro: 'Live online Cambridge IGCSE and O-Level, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Peshawar and Khyber Pakhtunkhwa families. Peshawar is the gateway to the northwest — KP\'s provincial capital, a trading city with deep regional reach, a medical and engineering university tradition, and a professional class whose children increasingly aim at NUST, LUMS, and universities abroad. Its Cambridge provision runs through a handful of established campuses and thins quickly beyond them, and the province beyond the city has very little. Smartious delivers the full international pathway live across KP — year-round admission, unlimited recordings, Islamabad and Rawalpindi exam windows within reach, and IBCC equivalence planned from the first term.',
     heroImg: 'https://images.unsplash.com/photo-1589129140837-67287c22521f?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Peshawar old city and the surrounding hills' },
-    seoDesc: 'Live online Cambridge IGCSE, O-Level, A-Level, Pearson Edexcel, IB Diploma and American AP for Peshawar and KP families — thin Cambridge tier, IBCC equivalence planned. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, O-Level, A-Level, Pearson Edexcel, IB Diploma and American AP for Peshawar and KP families — thin Cambridge tier, IBCC equivalence planned. From USD 423/month.',
     challenges: [
       'A Cambridge tier concentrated in a handful of campuses, thinning quickly across the province.',
       'Families beyond Peshawar have very little international provision at any distance.',
@@ -393,7 +393,7 @@ export const PAKISTAN_CITIES = [
     intro: 'Live online Cambridge IGCSE and O-Level, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Multan and South Punjab families. Multan anchors South Punjab — an agribusiness economy of cotton, mango, and export trade, a medical and engineering university tradition, and a professional and landowning class whose children aim at LUMS, NUST, and universities abroad. What the region does not have is international schooling at scale: provision is thinner here than anywhere else in Punjab, and Lahore is a long way for a school run. Smartious delivers the full international pathway live across the south — year-round admission, unlimited recordings, Lahore exam windows planned per session, and IBCC equivalence planned from the first term.',
     heroImg: 'https://images.unsplash.com/photo-1587474260584-136574528ed5?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Multan shrine domes and the old city' },
-    seoDesc: 'Live online Cambridge IGCSE, O-Level, A-Level, Pearson Edexcel, IB Diploma and American AP for Multan and South Punjab families — thinnest provision in Punjab, IBCC equivalence planned. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, O-Level, A-Level, Pearson Edexcel, IB Diploma and American AP for Multan and South Punjab families — thinnest provision in Punjab, IBCC equivalence planned. From USD 423/month.',
     challenges: [
       'International provision thinner than anywhere in Punjab, for a region of millions.',
       'Lahore is a long way for a daily school run — boarding or relocation are the usual alternatives.',
@@ -481,7 +481,7 @@ export const PAKISTAN_COUNTRY = {
   heroEyebrow: 'Online homeschool for Pakistan',
   heroH1Suffix: 'Pakistan',
   heroSubhead: 'Live online Cambridge IGCSE and O-Level, A-Level, Pearson Edexcel, IB Diploma, and American AP for families across Karachi, Lahore, Islamabad and Rawalpindi, Faisalabad, Peshawar, and Multan. Pakistan has world-class Cambridge schools — and waitlists, fixed timetables, and school runs measured in hours. Smartious is for the families those schools cannot fit today: year-round admission, unlimited recordings, British Council examinations, and IBCC equivalence planned from the first term.',
-  heroValueProp: 'From USD 180/month. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — with no waitlist, full portability if the family moves, and the IBCC subject set planned in from the start.',
+  heroValueProp: 'From USD 423/month. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — with no waitlist, full portability if the family moves, and the IBCC subject set planned in from the start.',
   whatsappTrigger: 'Hi, I would like to enquire about Smartious for our family in Pakistan',
 
   citiesSectionTitle: 'Where our Pakistan families are',
@@ -517,7 +517,7 @@ export const PAKISTAN_COUNTRY = {
     { name: 'Faisalabad, Peshawar & South Punjab',          city: 'Beyond the big three', curriculum: '—',                                     feesUsd: 'Provision thins or disappears',                    feesAed: '—',                        rating: 0,   capacityNote: 'Millions of people; boarding or relocation has been the usual answer' },
     { name: 'Local home tutoring',                          city: 'Nationwide',           curriculum: 'Subject tuition',                       feesUsd: 'Charged hourly, widely used',                      feesAed: 'Cultural norm',            rating: 4.0, capacityNote: 'Already a normal part of ambitious families\' budgets — proof the supplementary model fits' },
     { name: 'Wolsey Hall Oxford / King\'s InterHigh / bina (online)', city: 'Online',      curriculum: 'Cambridge self-paced / UK online / own to 15', feesUsd: 'Per-subject / GBP 9,000-11,000 / consultation', feesAed: 'Varies',      rating: 4.2, capacityNote: 'Self-paced, priced far above Smartious, or stopping at 15 — and none plans IBCC equivalence' },
-    { name: 'Smartious Homeschool (Pakistan via online delivery)', city: 'Delivered to all Pakistan', curriculum: 'Cambridge IGCSE/O Level, A-Level, IB DP, AP', feesUsd: 'USD 2,160-6,480/year', feesAed: 'PKR equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + no waitlist + full portability + IBCC equivalence planned from the first term + the regions finally served' },
+    { name: 'Smartious Homeschool (Pakistan via online delivery)', city: 'Delivered to all Pakistan', curriculum: 'Cambridge IGCSE/O Level, A-Level, IB DP, AP', feesUsd: 'USD 5,076/year', feesAed: 'PKR equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + no waitlist + full portability + IBCC equivalence planned from the first term + the regions finally served' },
   ],
 
   legalFrameworkIntro: 'Pakistan\'s position is simpler than most countries we serve, and the complications sit elsewhere — in university equivalence rather than in permission. Here is the whole picture exactly.',

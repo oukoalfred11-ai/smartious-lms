@@ -71,7 +71,7 @@ export const PERU_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Lima families. Lima carries Peru\'s corporate and financial weight, the mining sector\'s head offices, the Callao port complex, and a long-established international school tier — Markham, San Silvestre, Roosevelt, Newton, the Franco-Peruano and German schools — with a substantial IB presence and fees at the top of the Peruvian market. Educación básica regular is compulsory in Peru, so our role is alongside a school rather than instead of one. We teach from Nairobi, eight hours ahead, so our classes land in the Peruvian morning.',
     heroImg: '/heroes/lima-pe.jpg',
     altTexts: { hero: 'Lima and the Pacific coast' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Lima families — morning classes that fit the turno tarde, alongside your school. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Lima families — morning classes that fit the turno tarde, alongside your school. From USD 423/month.',
     challenges: [
       'International school fees in Lima sit at the top of the Peruvian market, with competitive places.',
       'Educación básica regular is compulsory, so the school carries the obligation.',
@@ -103,7 +103,7 @@ export const PERU_CITIES = [
     whyChoose: [
       ['Morning classes, which is the point in Peru', 'We teach eight hours ahead, so our block lands in the Peruvian morning — the free half of the day for every student in turno tarde.'],
       ['Cambridge A-Levels in an IB-weighted market', 'Lima is well served for the IB and thinner on A-Levels — which matters for anyone applying through UCAS.'],
-      ['A fee gap against the top of the Peruvian market', 'Live small-group teaching at USD 2,160-6,480 a year.'],
+      ['A fee gap against the top of the Peruvian market', 'Live small-group teaching at USD 5,076 a year.'],
       ['What we are, stated plainly', 'Smartious is not an authorised Peruvian institution. We work alongside a school that is.'],
       ['Spanish kept alongside', 'Cambridge Spanish runs beside the English-medium core, protecting Peruvian and Spanish university routes.'],
     ],
@@ -136,7 +136,7 @@ export const PERU_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Arequipa and southern Peruvian families. Arequipa is Peru\'s second city and the commercial capital of its southern mining belt — Cerro Verde on the city\'s edge and the operations spread across Moquegua and the south, the Matarani export corridor, an industrial base, and a major university. Peru is among the world\'s largest copper producers and the technical workforce is recruited internationally, but international schooling here is a fraction of Lima\'s, and the capital is a flight north. Smartious teaches live to the south, in the Peruvian morning, alongside a school.',
     heroImg: '/heroes/arequipa-pe.jpg',
     altTexts: { hero: 'Arequipa and El Misti' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Arequipa and southern Peru mining families — copper belt, thin international schooling. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Arequipa and southern Peru mining families — copper belt, thin international schooling. From USD 423/month.',
     challenges: [
       'An internationally recruited mining workforce with a fraction of Lima\'s international provision.',
       'Mine sites and camps sit well outside the city, in Moquegua and across the south.',
@@ -198,7 +198,7 @@ export const PERU_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Cusco and Sacred Valley families. Cusco anchors one of the largest tourism economies in South America — the Machu Picchu corridor, the Sacred Valley, and a hospitality and adventure sector that draws owners, managers, and guides from across Europe, North America, and Latin America, many of whom settle. The Camisea gas corridor runs across the wider region. What none of it produced is international schooling: for that, families look to Lima, a flight away. Smartious teaches live to the valley in the Peruvian morning, alongside a school.',
     heroImg: '/heroes/cusco-pe.jpg',
     altTexts: { hero: 'Cusco and the Sacred Valley' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Cusco and Sacred Valley families — global tourism economy, no international schooling. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Cusco and Sacred Valley families — global tourism economy, no international schooling. From USD 423/month.',
     challenges: [
       'A genuinely international resident community with no international schooling in the region.',
       'A tourism season that shapes the household for much of the year.',
@@ -260,7 +260,7 @@ export const PERU_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Trujillo and La Libertad families. Northern Peru runs one of the most successful agro-export transformations anywhere — asparagus, blueberries, avocado and grapes grown on the Chavimochic irrigation complex and shipped to supermarkets across Europe, North America, and Asia, with the technical, commercial, and export management that comes with it. Trujillo is also a major university and medical centre. International schooling is thin, and Lima is nine hours south by road. Smartious teaches live to the north, in the Peruvian morning, alongside a school.',
     heroImg: '/heroes/trujillo-pe.jpg',
     altTexts: { hero: 'Trujillo and the northern Peruvian coast' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Trujillo and La Libertad families — northern agro-export corridor, thin provision. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Trujillo and La Libertad families — northern agro-export corridor, thin provision. From USD 423/month.',
     challenges: [
       'A globally connected agro-export industry with thin international schooling.',
       'Lima is a flight or a long road journey south.',
@@ -322,7 +322,7 @@ export const PERU_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Piura and Talara families. Peru\'s far north carries an unusual mix: the Talara refinery and the offshore oil fields, the fishing and fishmeal complex at Paita, a fruit-export industry shipping mango, grape, and banana to Europe and North America, and the corridor to the Ecuadorian border. It is a genuinely industrial and internationally trading region, and its international schooling is close to non-existent — Lima is well over a thousand kilometres south. Smartious teaches live to the north, in the Peruvian morning, alongside a school.',
     heroImg: '/heroes/piura-pe.jpg',
     altTexts: { hero: 'The northern Peruvian coast at Piura' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Piura and Talara families — refinery, offshore fields and fruit export, almost no provision. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Piura and Talara families — refinery, offshore fields and fruit export, almost no provision. From USD 423/month.',
     challenges: [
       'Almost no international schooling in an industrial and internationally trading region.',
       'Lima is well over a thousand kilometres south.',
@@ -410,7 +410,7 @@ export const PERU_COUNTRY = {
   heroEyebrow: 'Online school for Peru',
   heroH1Suffix: 'Peru',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for mining, corporate, agro-export, and Peruvian families across Lima, Arequipa, Cusco, Trujillo, and Piura. Educación básica regular is compulsory under Ley 28044, so we work alongside your school. We teach eight hours ahead, so our classes land in the Peruvian morning — the free half of the day for turno tarde students.',
-  heroValueProp: 'From USD 180/month. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — morning teaching, Spanish kept alongside.',
+  heroValueProp: 'From USD 423/month. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — morning teaching, Spanish kept alongside.',
   whatsappTrigger: 'Hi, I would like to enquire about Smartious for our family in Peru',
 
   citiesSectionTitle: 'Where our Peru families are',
@@ -443,7 +443,7 @@ export const PERU_COUNTRY = {
     { name: 'Arequipa and the southern belt',                  city: 'Southern Peru',         curriculum: 'Thin provision',                        feesUsd: 'Limited international option',                      feesAed: '—',                       rating: 0,   capacityNote: 'The second city of a major copper producer, with a fraction of Lima\'s provision' },
     { name: 'Cusco, Trujillo and Piura',                       city: 'The regions',           curriculum: 'Close to none',                         feesUsd: 'No real international option',                      feesAed: '—',                       rating: 0,   capacityNote: 'A global tourism economy, a global agro-export corridor, and a refinery region — none with international schooling' },
     { name: 'US-based online schools',                         city: 'Online',                curriculum: 'American online',                       feesUsd: 'Varies, often per-course',                          feesAed: 'Varies',                  rating: 4.2, capacityNote: 'Closer to Peru on the clock than we are — families should weigh that against price and class size' },
-    { name: 'Smartious Homeschool (Peru via online delivery)', city: 'Delivered to all Peru', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP',   feesUsd: 'USD 2,160-6,480/year',                              feesAed: 'PEN equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + morning teaching that fits the turno tarde + the mining south and the regions reached + honest that we are eight hours away and hold no Peruvian authorisation' },
+    { name: 'Smartious Homeschool (Peru via online delivery)', city: 'Delivered to all Peru', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP',   feesUsd: 'USD 5,076/year',                              feesAed: 'PEN equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + morning teaching that fits the turno tarde + the mining south and the regions reached + honest that we are eight hours away and hold no Peruvian authorisation' },
   ],
 
   legalFrameworkIntro: 'Peru\'s framework is administered on three levels — national, regional, and local — which shapes both what we can say and where families should confirm it. Here is the structure.',

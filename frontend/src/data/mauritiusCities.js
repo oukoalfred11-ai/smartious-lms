@@ -74,7 +74,7 @@ export const MAURITIUS_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Port Louis families. Mauritius is the one market we serve where Cambridge is not an international alternative but the national system itself: students sit Cambridge International O Level and A and AS Level examinations through the Mauritius Examinations Syndicate, and Mauritian candidates consistently rank among the very best in the world in them. So we are not here to introduce an unfamiliar qualification. We are here for families who want more of it than a timetable allows — a subject the school cannot staff, a Further Mathematics set that does not run, a bridge across a relocation, or simply small-group teaching in the subjects that decide a university place.',
     heroImg: '/heroes/port-louis-mu.jpg',
     altTexts: { hero: 'Port Louis harbour and the Moka range' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Port Louis families — small-group teaching in the examinations Mauritius already leads. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Port Louis families — small-group teaching in the examinations Mauritius already leads. From USD 423/month.',
     challenges: [
       'A strong national system in which competition for the best secondary places and grades is intense.',
       'Subjects like Further Mathematics or a third science often do not run for small cohorts.',
@@ -139,7 +139,7 @@ export const MAURITIUS_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for families across Ebène, Moka, and the Plaines Wilhems. This is the professional heartland of Mauritius: Ebène Cybercity and the ICT and business-process sector, fund administration and global business, the smart-city developments at Moka, and the belt where much of the island\'s private and international schooling sits, including the IB and French routes. It is also where competition for grades and university places is most intense, in a country that already ranks among the world\'s best at Cambridge examinations. Smartious adds live small-group teaching in the subjects where that competition is decided.',
     heroImg: '/heroes/ebene-mu.jpg',
     altTexts: { hero: 'Ebène Cybercity and the Moka range' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Ebène, Moka and Plaines Wilhems families — subject depth for the island\'s professional belt. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Ebène, Moka and Plaines Wilhems families — subject depth for the island\'s professional belt. From USD 423/month.',
     challenges: [
       'Intense competition for grades and university places in a high-performing national system.',
       'Specialist subjects often do not run for small cohorts even in good schools.',
@@ -202,7 +202,7 @@ export const MAURITIUS_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Grand Baie and northern families. The north is where the island\'s international residential community concentrates — Occupation Permit and Premium Visa households, retirees, remote workers, property and hospitality businesses, the sailing and tourism economy from Grand Baie through Pereybère to Cap Malheureux. Many of these families arrive mid-curriculum from South Africa, France, the UK, or India, and many will move again. The schooling belt is largely down in the Plaines Wilhems, which for a northern family means a long daily run. Smartious teaches live to the north, at a fixed one-hour offset from Nairobi.',
     heroImg: '/heroes/grand-baie-mu.jpg',
     altTexts: { hero: 'Grand Baie and the northern coast of Mauritius' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Grand Baie and northern Mauritius families — expatriate coast, far from the school belt. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Grand Baie and northern Mauritius families — expatriate coast, far from the school belt. From USD 423/month.',
     challenges: [
       'The main schooling belt is in the Plaines Wilhems, an awkward daily commute from the north.',
       'International families arrive mid-curriculum from several different systems and may move again.',
@@ -291,7 +291,7 @@ export const MAURITIUS_COUNTRY = {
   heroEyebrow: 'Online school for Mauritius',
   heroH1Suffix: 'Mauritius',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for financial-services, expatriate, and Mauritian families across Port Louis, Ebène and Moka, and Grand Baie. Mauritius already runs Cambridge as its national system and ranks among the best in the world at it — so we are not offering a different qualification. We are offering live small-group teaching in the one you already have, in the subjects a timetable cannot staff.',
-  heroValueProp: 'From USD 180/month. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — one hour ahead of Nairobi, fixed all year.',
+  heroValueProp: 'From USD 423/month. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — one hour ahead of Nairobi, fixed all year.',
   whatsappTrigger: 'Hi, I would like to enquire about Smartious for our family in Mauritius',
 
   citiesSectionTitle: 'Where our Mauritius families are',
@@ -324,7 +324,7 @@ export const MAURITIUS_COUNTRY = {
     { name: 'Private tuition (leçons particulières)',          city: 'Nationwide',            curriculum: 'Exam-focused coaching',                 feesUsd: 'Per hour, per subject',                             feesAed: 'Widespread',              rating: 3.9, capacityNote: 'The default answer to a timetable gap — usually one-to-one, usually unstructured across a year' },
     { name: 'The north',                                      city: 'Grand Baie, Pereybère', curriculum: 'Thin locally',                          feesUsd: 'A commute to the centre',                           feesAed: '—',                       rating: 0,   capacityNote: 'The expatriate coast, an awkward run from the school belt' },
     { name: 'Wolsey Hall Oxford / CambriLearn / King\'s InterHigh (online)', city: 'Online',   curriculum: 'Cambridge self-paced / UK online',      feesUsd: 'Per-subject / GBP 9,000-11,000',                    feesAed: 'Varies',                  rating: 4.2, capacityNote: 'Self-paced or priced far above Smartious — and several pitch Cambridge to Mauritians as though it were foreign here' },
-    { name: 'Smartious Homeschool (Mauritius via online delivery)', city: 'Delivered to all Mauritius', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 2,160-6,480/year', feesAed: 'MUR equivalent at prevailing rate', rating: 4.8, capacityNote: 'Live small-group teaching in the national qualification + the sets a timetable cannot staff + one hour ahead, fixed + honest that we add depth, not recognition' },
+    { name: 'Smartious Homeschool (Mauritius via online delivery)', city: 'Delivered to all Mauritius', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 5,076/year', feesAed: 'MUR equivalent at prevailing rate', rating: 4.8, capacityNote: 'Live small-group teaching in the national qualification + the sets a timetable cannot staff + one hour ahead, fixed + honest that we add depth, not recognition' },
   ],
 
   legalFrameworkIntro: 'Mauritius needs less legal explanation than any country we cover and more context than most, because the interesting fact here is not the law but the qualification. Both are below.',

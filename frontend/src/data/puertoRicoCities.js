@@ -107,7 +107,7 @@ export const PUERTO_RICO_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for San Juan families. The capital holds Puerto Rico\'s corporate, legal and medical sectors, the island\'s international and bilingual school tier, and its largest homeschooling community — a community that operates under one of the freest legal frameworks anywhere. Puerto Rican home educators run their own non-governmental schools and issue their own transcripts, entirely lawfully. What an external examination board adds on top of that is independence: a grade nobody in the family awarded.',
     heroImg: '/heroes/san-juan-pr.jpg',
     altTexts: { hero: 'San Juan and the Atlantic coast' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for San Juan families — externally examined qualifications alongside a self-issued homeschool transcript. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for San Juan families — externally examined qualifications alongside a self-issued homeschool transcript. From USD 423/month.',
     challenges: [
       'A parent-issued homeschool transcript is self-attested, which some university admissions offices weigh differently.',
       'International and bilingual school fees in San Juan are set at US private-school levels.',
@@ -172,7 +172,7 @@ export const PUERTO_RICO_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Dorado and north coast families. The corridor running west from San Juan through Dorado and Vega Alta has become the principal landing point for mainland US professionals relocating under Puerto Rico\'s tax incentive regime — finance, technology, crypto, consulting and medicine — arriving with school-age children and often with firm expectations about schooling that the island\'s shorter list does not always meet. Many turn to home education, which Puerto Rico permits unusually freely. We supply the externally examined qualification behind it.',
     heroImg: '/heroes/dorado-pr.jpg',
     altTexts: { hero: 'The Dorado coast' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Dorado and north coast families — relocated mainland households, externally examined qualifications. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Dorado and north coast families — relocated mainland households, externally examined qualifications. From USD 423/month.',
     challenges: [
       'Recently arrived families finding the island school list shorter than the mainland one they left.',
       'Private and international school places along the corridor are competitive.',
@@ -235,7 +235,7 @@ export const PUERTO_RICO_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Ponce and southern families. The south holds Puerto Rico\'s second city, a medical school and health-sciences sector, and a pharmaceutical and manufacturing base that has supplied international markets for decades. It is also the region where schooling continuity has been tested most — the 2020 earthquake sequence was centred in the southwest, and hurricane seasons before and since have interrupted school years across the island. A live programme with a complete recorded library is built for exactly that, and we say so without dramatising it.',
     heroImg: '/heroes/ponce-pr.jpg',
     altTexts: { hero: 'Ponce and the southern coast' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Ponce and southern Puerto Rico families — continuity through disruption, externally examined. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Ponce and southern Puerto Rico families — continuity through disruption, externally examined. From USD 423/month.',
     challenges: [
       'A region whose school years have been interrupted by earthquakes and hurricane seasons.',
       'Public school consolidation has lengthened journeys for some southern families.',
@@ -297,7 +297,7 @@ export const PUERTO_RICO_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Mayagüez and western families. The west is defined by the University of Puerto Rico at Mayagüez, whose engineering faculty is among the strongest in the Caribbean and feeds mainland graduate programmes and technology employers directly, alongside a research sector and the surf and relocation communities strung along the western coast from Rincón to Aguadilla. San Juan\'s school tier is two hours east. We teach Cambridge and IB live to the west, full-time or alongside a school.',
     heroImg: '/heroes/mayaguez-pr.jpg',
     altTexts: { hero: 'The western Puerto Rico coast' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Mayagüez, Rincón and western Puerto Rico families — engineering country, thin schooling. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Mayagüez, Rincón and western Puerto Rico families — engineering country, thin schooling. From USD 423/month.',
     challenges: [
       'San Juan\'s school tier is two hours east — a relocation rather than a commute.',
       'Academic families with high expectations and a short list of local options.',
@@ -359,7 +359,7 @@ export const PUERTO_RICO_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for eastern and island families. Fajardo anchors Puerto Rico\'s marina and sailing corridor, and beyond it Vieques and Culebra sit as island municipios reached only by ferry or a short flight — with settled international and second-home communities, tourism and marine businesses, and schooling constrained by geography in a way nowhere else on the island is. For a family on Vieques, the question is not which school but whether reaching one is realistic at all. Live delivery answers that directly, and Puerto Rico\'s framework makes a full-time programme straightforward.',
     heroImg: '/heroes/fajardo-pr.jpg',
     altTexts: { hero: 'The eastern Puerto Rico coast and offshore islands' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Fajardo, Vieques and Culebra families — island municipios with real access constraints. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Fajardo, Vieques and Culebra families — island municipios with real access constraints. From USD 423/month.',
     challenges: [
       'Island municipios reached only by ferry or air, with ferry service subject to disruption.',
       'Very limited local secondary provision on Vieques and Culebra.',
@@ -448,7 +448,7 @@ export const PUERTO_RICO_COUNTRY = {
   heroEyebrow: 'Online school for Puerto Rico',
   heroH1Suffix: 'Puerto Rico',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for homeschooling, relocated-mainland, professional and Puerto Rican families across San Juan, Dorado, Ponce, Mayagüez and the eastern islands. Puerto Rico has the freest home-education framework in our entire coverage — no registration, no notification, no state curriculum — which leaves exactly one gap, and it is the one we fill.',
-  heroValueProp: 'From USD 180/month, in the currency you already use. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — full-time or alongside your school.',
+  heroValueProp: 'From USD 423/month, in the currency you already use. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — full-time or alongside your school.',
   whatsappTrigger: 'Hi, I would like to enquire about Smartious for our family in Puerto Rico',
 
   citiesSectionTitle: 'Where our Puerto Rico families are',
@@ -481,7 +481,7 @@ export const PUERTO_RICO_COUNTRY = {
     { name: 'US curriculum providers and boxed programmes',      city: 'Online',                curriculum: 'Self-paced American curricula',         feesUsd: 'Varies, often per-year',                            feesAed: 'Widely used here',        rating: 4.1, capacityNote: 'Curriculum without live teaching or external examination — a different product from ours' },
     { name: 'Ponce, Mayagüez and the islands',                   city: 'Outside the metro',     curriculum: 'Limited international provision',       feesUsd: '—',                                                 feesAed: '—',                       rating: 0,   capacityNote: 'A medical city, an engineering city and two island municipios, all outside the metro tier' },
     { name: 'US-based online schools',                           city: 'Online',                curriculum: 'American online, accredited',           feesUsd: 'Varies',                                            feesAed: 'Varies',                  rating: 4.3, capacityNote: 'Closer on the clock and issue American diplomas — families needing an accredited US diploma specifically should weigh them' },
-    { name: 'Smartious Homeschool (Puerto Rico via online delivery)', city: 'Delivered island-wide', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 2,160-6,480/year',                        feesAed: 'Quoted in USD',            rating: 4.8, capacityNote: 'Every class live through A-Level + externally examined grades behind a self-issued transcript + full-time genuinely available + the islands and the west reached' },
+    { name: 'Smartious Homeschool (Puerto Rico via online delivery)', city: 'Delivered island-wide', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 5,076/year',                        feesAed: 'Quoted in USD',            rating: 4.8, capacityNote: 'Every class live through A-Level + externally examined grades behind a self-issued transcript + full-time genuinely available + the islands and the west reached' },
   ],
 
   legalFrameworkIntro: 'Puerto Rico has the freest home-education framework in our entire eighty-seven-country coverage. That is genuinely good news, and it produces one specific consequence that families tend to meet late rather than early. Here is both halves.',

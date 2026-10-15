@@ -81,7 +81,7 @@ export const ANGOLA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Luanda families. Luanda carries Angola\'s corporate weight — Sonangol and the international oil operators, banking, construction, the diplomatic and development community, and a professional class that has grown fast around all of it. It has also been ranked repeatedly among the most expensive cities in the world for expatriate staff, and its international school fees sit accordingly high. Under the Lei de Bases, compulsory education covers the iniciação class, primary, and the first cycle of secondary, and the national curriculum is of mandatory compliance — so our clean default through those years is supplementary, with the full pathway opening for the II Ciclo.',
     heroImg: '/heroes/luanda-ao.jpg',
     altTexts: { hero: 'Luanda bay and the city' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Luanda families — international curriculum at a fraction of the capital\'s fees. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Luanda families — international curriculum at a fraction of the capital\'s fees. From USD 423/month.',
     challenges: [
       'International school fees in Luanda are among the highest in Africa, reflecting one of the world\'s most expensive expatriate cities.',
       'Compulsory education covers the iniciação class, primary, and the I Ciclo of secondary, and the national curriculum is of mandatory compliance.',
@@ -111,7 +111,7 @@ export const ANGOLA_CITIES = [
       'University application support — UCAS (UK), Common Application (US), and Portuguese, Brazilian, South African and Angolan university applications',
     ],
     whyChoose: [
-      ['A fee gap that is unusually large even for Africa', 'Luanda\'s international tier prices at one of the world\'s most expensive expatriate cities; Smartious runs USD 2,160-6,480 a year for live small-group teaching toward the same boards.'],
+      ['A fee gap that is unusually large even for Africa', 'Luanda\'s international tier prices at one of the world\'s most expensive expatriate cities; Smartious runs USD 5,076 a year for live small-group teaching toward the same boards.'],
       ['Portuguese kept alongside the English-medium core', 'Cambridge Portuguese runs beside the academic track, which protects Portuguese and Brazilian university routes and keeps a returning child on solid ground.'],
       ['Built for oil and gas rotation', 'Luanda now, Soyo, the Gulf, or Houston next — the curriculum, teachers, and examination board stay constant across the posting.'],
       ['The law stated before anything is sold', 'Compulsory education covers iniciação, primary and the I Ciclo, and the national curriculum is of mandatory compliance. We run supplementary through those years and say so.'],
@@ -131,7 +131,7 @@ export const ANGOLA_CITIES = [
       { q: 'Is homeschooling legal in Angola?', a: 'Compulsory education covers the iniciação class, primary and the I Ciclo of secondary under the Lei de Bases, and the national curriculum is of mandatory compliance. We are not aware of an established parental-choice home-education route under that law, and put it in those terms rather than asserting a flat prohibition — confirm with the Ministério da Educação. Structured study alongside a school enrolment is unrestricted.' },
       { q: 'What happens after the I Ciclo?', a: 'The II Ciclo do Ensino Secundário — the 10th to 12th classes, roughly ages fifteen to seventeen — is not within the compulsory range. From that point the A-Level years run outside the obligation, which is the most useful planning fact on this page.' },
       { q: 'Will a foreign qualification be recognised in Angola?', a: 'The Lei de Bases provides that certificates and diplomas of primary, secondary and higher levels completed abroad are valid in Angola provided they are recognised by the Executive, with a comparability framework supporting mutual recognition. So recognition exists as a defined process — worth starting early rather than assuming it is automatic.' },
-      { q: 'How do the fees compare with Luanda international schools?', a: 'Luanda\'s tier prices at the level of one of the world\'s most expensive expatriate cities. Smartious runs USD 2,160-6,480 a year for live small-group teaching toward the same Cambridge examinations.' },
+      { q: 'How do the fees compare with Luanda international schools?', a: 'Luanda\'s tier prices at the level of one of the world\'s most expensive expatriate cities. Smartious runs USD 5,076 a year for live small-group teaching toward the same Cambridge examinations.' },
     ],
   },
 
@@ -146,7 +146,7 @@ export const ANGOLA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Lobito and Benguela families. The Benguela coast has become strategically important again: the Lobito Corridor rail link runs inland to the Copperbelt and the mining regions of the DRC, drawing logistics, rail, and port investment and the international staff who come with it, alongside a long-established fishing, agriculture, and industrial economy and Angola\'s second urban centre. International schooling along the corridor is almost non-existent, with Luanda\'s tier five hundred kilometres north. Smartious delivers the Cambridge and IB pathways live across Benguela province.',
     heroImg: '/heroes/lobito-ao.jpg',
     altTexts: { hero: 'Lobito bay and the Benguela coast' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Lobito and Benguela families — the Lobito Corridor, no international schooling. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Lobito and Benguela families — the Lobito Corridor, no international schooling. From USD 423/month.',
     challenges: [
       'Almost no international schooling along the corridor, with Luanda five hundred kilometres north.',
       'Rail, port, and logistics investment is bringing international staff faster than provision.',
@@ -209,7 +209,7 @@ export const ANGOLA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for families across Angola\'s oil coast. Cabinda and the Soyo LNG complex sit at the centre of the country\'s hydrocarbon economy — offshore operations, the international operators and oilfield-services companies, and a technical workforce recruited from across Africa, Europe, and the Americas, much of it on rotation. Luanda\'s international schooling is a flight away, and locally there is none. For decades the answers have been boarding abroad, a household split between two countries, or a compound school built for a company rather than a curriculum. Smartious delivers live Cambridge and IB teaching to the oil coast instead.',
     heroImg: '/heroes/cabinda-ao.jpg',
     altTexts: { hero: 'The Angolan oil coast' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Cabinda and Soyo families — Angola\'s oil coast, no international schooling. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Cabinda and Soyo families — Angola\'s oil coast, no international schooling. From USD 423/month.',
     challenges: [
       'An internationally recruited oil and gas workforce with no international schooling locally and Luanda a flight away.',
       'Rotational contracts split households across countries for much of the year.',
@@ -298,7 +298,7 @@ export const ANGOLA_COUNTRY = {
   heroEyebrow: 'Online school for Angola',
   heroH1Suffix: 'Angola',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for oil and gas, corporate, expatriate, and Angolan families across Luanda, Lobito and Benguela, and the Cabinda oil coast. Compulsory education covers the iniciação class, primary and the I Ciclo of secondary — so we run alongside your school through those years, and the full pathway opens for the II Ciclo. Taught live from Nairobi at a fixed two-hour offset that never drifts.',
-  heroValueProp: 'From USD 180/month. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — against Luanda fees set by one of the world\'s most expensive expatriate cities.',
+  heroValueProp: 'From USD 423/month. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — against Luanda fees set by one of the world\'s most expensive expatriate cities.',
   whatsappTrigger: 'Hi, I would like to enquire about Smartious for our family in Angola',
 
   citiesSectionTitle: 'Where our Angola families are',
@@ -331,7 +331,7 @@ export const ANGOLA_COUNTRY = {
     { name: 'Benguela and the corridor',                      city: 'Lobito, Benguela',      curriculum: 'Almost none',                           feesUsd: 'No real international option',                      feesAed: '—',                       rating: 0,   capacityNote: 'A strategically important corridor with no schooling to match the investment' },
     { name: 'Cabinda and Soyo',                               city: 'The oil coast',         curriculum: '—',                                     feesUsd: 'Nothing locally',                                   feesAed: '—',                       rating: 0,   capacityNote: 'Angola\'s hydrocarbon heartland, with Luanda a flight away' },
     { name: 'Boarding in Portugal or South Africa',           city: 'Abroad',                curriculum: 'Portuguese and international',           feesUsd: 'Fees plus travel plus a child living away',         feesAed: '—',                       rating: 4.3, capacityNote: 'The traditional answer for oil-coast and provincial families' },
-    { name: 'Smartious Homeschool (Angola via online delivery)', city: 'Delivered to all Angola', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 2,160-6,480/year', feesAed: 'AOA equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + the oil coast and the corridor reached at last + Portuguese kept alongside + a fixed offset that never drifts' },
+    { name: 'Smartious Homeschool (Angola via online delivery)', city: 'Delivered to all Angola', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 5,076/year', feesAed: 'AOA equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + the oil coast and the corridor reached at last + Portuguese kept alongside + a fixed offset that never drifts' },
   ],
 
   legalFrameworkIntro: 'Angola\'s education law is unusually well documented and unusually specific about what is compulsory and what is not. Here is the framework exactly, including three provisions international families should know.',
@@ -346,7 +346,7 @@ export const ANGOLA_COUNTRY = {
 
   whySmartious: [
     { h: 'The compulsory range stated precisely',                          p: 'Iniciação, primary and the I Ciclo are compulsory; the II Ciclo is not. We plan the whole pathway around that distinction rather than around a vague age.' },
-    { h: 'A fee gap that is exceptional even for Africa',                  p: 'Luanda\'s tier prices at one of the most expensive expatriate cities in the world; Smartious runs USD 2,160-6,480 a year for live small-group teaching.' },
+    { h: 'A fee gap that is exceptional even for Africa',                  p: 'Luanda\'s tier prices at one of the most expensive expatriate cities in the world; Smartious runs USD 5,076 a year for live small-group teaching.' },
     { h: 'The oil coast and the corridor reached at last',                 p: 'Cabinda, Soyo, Lobito and Benguela have had boarding abroad or a split household as their only options. Live teaching reaches all of them.' },
     { h: 'Portuguese kept alongside, deliberately',                        p: 'Cambridge Portuguese runs beside the English-medium core, protecting Portuguese and Brazilian university routes for a diaspora concentrated there.' },
     { h: 'Recognition explained as a process',                            p: 'Foreign qualifications are valid in Angola once recognised by the Executive. We tell families to begin that early rather than discover it late.' },
@@ -358,7 +358,7 @@ export const ANGOLA_COUNTRY = {
     { q: 'Exactly when does the obligation end?', a: 'After the I Ciclo do Ensino Secundário — the 9th class. The II Ciclo, comprising the 10th to 12th classes and attended from around age fifteen, is not within the compulsory range, so the A-Level years run outside the obligation.' },
     { q: 'Will a Cambridge qualification be recognised in Angola?', a: 'The Lei de Bases provides that certificates and diplomas of primary, secondary and higher levels completed abroad are valid in Angola provided they are recognised by the Executive, supported by a comparability framework for mutual recognition. It is a defined process — start it early if a return into the Angolan system is the plan.' },
     { q: 'Our child is at a consular or foreign-system school — does that change anything?', a: 'Those schools teach in their own country\'s official language under their own regulations, but must also teach Portuguese Language, Angolan Literature, History of Angola and Geography of Angola, with programmes approved by the Ministry. Our teaching runs alongside whichever school a child attends.' },
-    { q: 'How do the fees compare with Luanda international schools?', a: 'Luanda\'s international fees are among the highest in Africa, reflecting one of the world\'s most expensive expatriate cities. Smartious runs USD 2,160-6,480 a year for live small-group teaching toward the same Cambridge examinations.' },
+    { q: 'How do the fees compare with Luanda international schools?', a: 'Luanda\'s international fees are among the highest in Africa, reflecting one of the world\'s most expensive expatriate cities. Smartious runs USD 5,076 a year for live small-group teaching toward the same Cambridge examinations.' },
     { q: 'We are posted in Cabinda or Soyo — what are the realistic options?', a: 'Historically boarding abroad or a household split between two countries, because there is no international schooling locally and Luanda is a flight away. Live teaching reaches the oil coast and continues unchanged to the next posting.' },
     { q: 'How do class times work from Nairobi?', a: 'Angola runs WAT all year with no daylight saving and Kenya observes none either, so the two-hour offset is fixed — classes land in the Angolan afternoon and early evening at the same time every week of the year.' },
     { q: 'Which parts of Angola does Smartious cover?', a: 'Luanda, Lobito and Benguela, and Cabinda and Soyo have dedicated pages. Live online delivery works identically anywhere in the country — which on the oil coast and along the corridor is precisely the point.' },
