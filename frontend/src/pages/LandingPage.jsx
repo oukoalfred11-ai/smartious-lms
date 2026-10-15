@@ -254,15 +254,18 @@ function useHeroPreload(active) {
       posterLink.id = posterId
       posterLink.rel = 'preload'
       posterLink.as = 'image'
-      posterLink.href = 'https://res.cloudinary.com/dae99gz1m/video/upload/f_webp,q_auto:good,w_1920,so_0/hero_mhhwhf.jpg'
+      // Phones get an 800px poster, not the 1920px desktop one.
+      const narrow = window.matchMedia('(max-width: 800px)').matches
+      posterLink.href = `https://res.cloudinary.com/dae99gz1m/video/upload/f_webp,q_auto:good,w_${narrow ? 800 : 1920},so_0/hero_mhhwhf.jpg`
       posterLink.setAttribute('fetchpriority', 'high')
       document.head.appendChild(posterLink)
       cleanups.push(posterId)
     }
 
     // 2. Preload the video at LOW priority so it doesn't compete with critical
-    //    CSS, fonts and hero text rendering. The <video preload="auto"> element
-    //    will pick it up as soon as the critical render path completes.
+    //    CSS, fonts and hero text rendering, and the SAME size the <video>
+    //    element will pick: phones used to preload the 1920px file at high
+    //    priority and then download the 800px one as well.
     //    Hero video served from Cloudinary CDN (cloud: dae99gz1m, public_id: hero_mhhwhf).
     const videoId = 'sm-hero-video-preload'
     if (!document.getElementById(videoId)) {
@@ -270,9 +273,10 @@ function useHeroPreload(active) {
       videoLink.id = videoId
       videoLink.rel = 'preload'
       videoLink.as = 'video'
-      videoLink.href = 'https://res.cloudinary.com/dae99gz1m/video/upload/f_auto,q_auto:good,w_1920,vc_auto/hero_mhhwhf.mp4'
+      const narrowVideo = window.matchMedia('(max-width: 800px)').matches
+      videoLink.href = `https://res.cloudinary.com/dae99gz1m/video/upload/f_auto,q_auto:good,w_${narrowVideo ? 800 : 1920},vc_auto/hero_mhhwhf.mp4`
       videoLink.setAttribute('type', 'video/mp4')
-      videoLink.setAttribute('fetchpriority', 'high')
+      videoLink.setAttribute('fetchpriority', 'low')
       document.head.appendChild(videoLink)
       cleanups.push(videoId)
     }
@@ -459,6 +463,7 @@ const styles = `
   .lp .h1 span{display:block}
   .lp .h-sub{font-size:17px;color:rgba(247,243,237,.85);max-width:520px;line-height:1.8;margin-bottom:44px;text-shadow:0 2px 12px rgba(8,12,20,.5)}
   .lp .h-act{display:flex;gap:12px;flex-wrap:wrap}
+  .lp .h-sub-short{display:none}
   .lp .h-stats{position:absolute;right:48px;top:50%;transform:translateY(-50%);z-index:3;display:flex;flex-direction:column;gap:12px}
   .lp .hs{background:rgba(8,12,20,.55);border:1px solid rgba(184,150,12,.22);border-radius:10px;padding:14px 16px;backdrop-filter:blur(16px);min-width:140px;max-width:210px;position:relative;overflow:hidden}
   .lp .hs::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,${V.gold3},transparent)}
@@ -893,10 +898,14 @@ const styles = `
     .lp .h-stats{display:none}
     .lp .h-mob-stats{display:none!important}
     .lp .h-stats-strip{display:block}
-    .lp #hero{min-height:0;height:auto;max-height:720px}
+    /* Phones: let the hero grow with its content. A fixed max-height cut
+       off the third button and the top of the headline. */
+    .lp #hero{min-height:0;height:auto}
+    .lp .h-sub-long,.lp .h-act-3{display:none}
+    .lp .h-sub-short{display:block;margin-bottom:28px}
     .lp .h-bg{object-position:center center;filter:brightness(1.08) saturate(1.05) contrast(1.02)}
     .lp .h-vig{height:140px}
-    .lp .h-body{min-height:60vh;max-height:640px;padding-top:48px;padding-bottom:56px}
+    .lp .h-body{min-height:60vh;padding-top:48px;padding-bottom:56px}
     .lp .mob-burger{display:flex!important}
     .lp .mob-page-strip{display:block!important}
     .lp .wrap,.lp .nav-wrap,.lp .h-body,.lp .cta-in{padding-left:20px;padding-right:20px}
@@ -945,8 +954,6 @@ const styles = `
     .lp .sec{padding:48px 0}
     .lp .sec-hd{margin-bottom:32px}
     .lp .h-body{padding-top:64px;padding-bottom:48px;min-height:55vh}
-    .lp #hero{max-height:680px}
-    .lp .h-body{max-height:600px}
     .lp .h1{font-size:clamp(2.1rem,11vw,2.9rem);margin-bottom:20px}
     .lp .pg-h{font-size:clamp(1.85rem,8.5vw,2.5rem)}
     .lp .pg-hero{padding-top:80px;padding-bottom:36px}
@@ -5213,10 +5220,9 @@ export default function LandingPage() {
               muted
               playsInline
               preload="auto"
-              poster="https://res.cloudinary.com/dae99gz1m/video/upload/f_webp,q_auto:good,w_1920,so_0/hero_mhhwhf.jpg"
+              poster={`https://res.cloudinary.com/dae99gz1m/video/upload/f_webp,q_auto:good,w_${typeof window !== 'undefined' && window.matchMedia('(max-width: 800px)').matches ? 800 : 1920},so_0/hero_mhhwhf.jpg`}
               aria-hidden="true"
               disablePictureInPicture
-              fetchPriority="high"
             >
               {/* Mobile-first: smaller file for phones/tablets (< 800px viewport) */}
               <source
@@ -5238,7 +5244,8 @@ export default function LandingPage() {
                 <span>for <em>IGCSE, A-Level,</em></span>
                 <span><em>IB, American &amp; CBC</em> Students</span>
               </h1>
-              <p className="h-sub">Live classes. Qualified teachers. Internationally recognised qualifications. Smartious is an accredited online school and homeschool provider delivering Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, Kenya CBC and American Curriculum — taught online by specialists serving families across Kenya, the UAE, UK, Canada and more than 40 countries worldwide. <strong style={{color:V.gold3}}>From USD 8/hour</strong> for 1-on-1 tuition · <strong style={{color:V.gold3}}>from USD 423/month</strong> for full homeschool programmes.</p>
+              <p className="h-sub h-sub-short">Live classes with qualified teachers. 1-on-1 tuition <strong style={{color:V.gold3}}>from USD 8/hour</strong> · full programmes <strong style={{color:V.gold3}}>from USD 423/month</strong>.</p>
+              <p className="h-sub h-sub-long">Live classes. Qualified teachers. Internationally recognised qualifications. Smartious is an accredited online school and homeschool provider delivering Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, Kenya CBC and American Curriculum — taught online by specialists serving families across Kenya, the UAE, UK, Canada and more than 40 countries worldwide. <strong style={{color:V.gold3}}>From USD 8/hour</strong> for 1-on-1 tuition · <strong style={{color:V.gold3}}>from USD 423/month</strong> for full homeschool programmes.</p>
               <div className="h-act">
                 <button className="btn-p" onClick={() => nav('/assessment')}
                   style={{padding:'18px 36px',fontSize:16,fontWeight:800,borderRadius:10,boxShadow:'0 8px 24px rgba(201,151,58,.35)',transition:'all .18s ease'}}
@@ -5254,7 +5261,7 @@ export default function LandingPage() {
                   Book Free Consultation
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{marginLeft:8}}><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </button>
-                <button className="btn-o lt" style={{borderColor:'rgba(247,243,237,.45)',color:'rgba(247,243,237,.9)'}} onClick={() => P('programs')}>View Programmes</button>
+                <button className="btn-o lt h-act-3" style={{borderColor:'rgba(247,243,237,.45)',color:'rgba(247,243,237,.9)'}} onClick={() => P('programs')}>View Programmes</button>
               </div>
             </div>
             <div className="h-stats">
