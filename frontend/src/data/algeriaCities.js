@@ -75,7 +75,7 @@ export const ALGERIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Algiers families. Algiers carries Algeria\'s corporate and administrative weight — Sonatrach and the hydrocarbon sector\'s head offices, the ministries, the diplomatic and international-organisation community, and a professional class with long ties to France. Its international schooling is almost entirely the French system, anchored by the Lycée International Alexandre Dumas at Ben Aknoun, and demand for those places substantially exceeds supply. What the capital has never had is a British-curriculum route. Under the Loi d\'orientation of 2008 schooling is free and compulsory to sixteen, so our clean default is supplementary: your enrolment carries that duty, and we teach the Cambridge or IB track live alongside it.',
     heroImg: '/heroes/algiers-dz.jpg',
     altTexts: { hero: 'Algiers and the bay' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Algiers families — the British-curriculum route the capital lacks, supplementary beside your school. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Algiers families — the British-curriculum route the capital lacks, supplementary beside your school. From USD 423/month.',
     challenges: [
       'International schooling in Algiers is overwhelmingly the French system, and places are heavily oversubscribed.',
       'A British or IB route is scarce to non-existent, so families targeting UK, Gulf, or North American universities have had no local path.',
@@ -140,7 +140,7 @@ export const ALGERIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Oran families. Oran is Algeria\'s second city and the capital of its west — the Arzew petrochemical and LNG complex sits along the coast beside it, the port handles a substantial share of national trade, and the university and its medical faculty draw students from across the region. The city\'s Mediterranean orientation and its Spanish and French connections have always been part of its character. What it does not have is international schooling of any depth: the capital\'s provision is four hundred kilometres east. Smartious delivers the Cambridge and IB pathways live across the west, supplementary alongside your school enrolment.',
     heroImg: '/heroes/oran-dz.jpg',
     altTexts: { hero: 'Oran and the Mediterranean coast' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Oran and western Algeria families — petrochemical west, no international schooling. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Oran and western Algeria families — petrochemical west, no international schooling. From USD 423/month.',
     challenges: [
       'Almost no international schooling in the second city, with Algiers four hundred kilometres east.',
       'Petrochemical and port employment with international partners but no matching English-medium schooling.',
@@ -202,7 +202,7 @@ export const ALGERIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for families across Algeria\'s southern hydrocarbon fields. Hassi Messaoud is Algeria\'s oil capital — the country\'s largest field, with Sonatrach and the international oilfield-services companies operating alongside it, and the Hassi R\'Mel gas complex and the southern fields spread across the Sahara around it. The technical workforce is drawn from four continents and works rotations; the nearest international schooling is around eight hundred kilometres north in Algiers. For decades the answer has been families living apart, or children boarding abroad. Smartious delivers the international pathways live to the fields instead, at a fixed two-hour offset that never drifts.',
     heroImg: '/heroes/hassi-messaoud-dz.jpg',
     altTexts: { hero: 'The Algerian Sahara and the southern oilfields' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Hassi Messaoud, Ouargla and southern field families — oil capital, no schooling within 800km. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Hassi Messaoud, Ouargla and southern field families — oil capital, no schooling within 800km. From USD 423/month.',
     challenges: [
       'An internationally recruited technical workforce with no international schooling within around eight hundred kilometres.',
       'Rotational contracts split families across countries and continents for much of the year.',
@@ -291,7 +291,7 @@ export const ALGERIA_COUNTRY = {
   heroEyebrow: 'Online school for Algeria',
   heroH1Suffix: 'Algeria',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for hydrocarbon, corporate, diaspora, and Algerian families across Algiers, Oran, and Hassi Messaoud. International schooling here is almost entirely the French system and heavily oversubscribed — the British-curriculum route simply does not exist locally. Taught live from Nairobi at a fixed two-hour offset that never drifts.',
-  heroValueProp: 'From USD 180/month. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — supplementary beside your school, with French kept alongside.',
+  heroValueProp: 'From USD 423/month. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — supplementary beside your school, with French kept alongside.',
   whatsappTrigger: 'Hi, I would like to enquire about Smartious for our family in Algeria',
 
   citiesSectionTitle: 'Where our Algeria families are',
@@ -324,7 +324,7 @@ export const ALGERIA_COUNTRY = {
     { name: 'The southern fields',                            city: 'Hassi Messaoud, Ouargla', curriculum: '—',                                   feesUsd: 'Nothing within ~800km',                             feesAed: '—',                       rating: 0,   capacityNote: 'Algeria\'s oil capital, staffed internationally, with no schooling to match' },
     { name: 'Boarding abroad',                                city: 'France, Tunisia, Gulf', curriculum: 'French and international',              feesUsd: 'Fees plus travel plus a child living away',         feesAed: '—',                       rating: 4.3, capacityNote: 'The traditional answer for field and western families' },
     { name: 'Wolsey Hall Oxford / King\'s InterHigh (online)', city: 'Online',                curriculum: 'Cambridge self-paced / UK online',      feesUsd: 'Per-subject / GBP 9,000-11,000',                    feesAed: 'Varies',                  rating: 4.2, capacityNote: 'Self-paced or priced far above Smartious, and none carries French alongside the English-medium core' },
-    { name: 'Smartious Homeschool (Algeria via online delivery)', city: 'Delivered to all Algeria', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 2,160-6,480/year', feesAed: 'DZD equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + the British route the country lacks + French kept alongside + the southern fields reached at last + a fixed offset that never drifts' },
+    { name: 'Smartious Homeschool (Algeria via online delivery)', city: 'Delivered to all Algeria', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 5,076/year', feesAed: 'DZD equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + the British route the country lacks + French kept alongside + the southern fields reached at last + a fixed offset that never drifts' },
   ],
 
   legalFrameworkIntro: 'Algerian education law is set by a single orientation law and is straightforward to describe. Here it is exactly, including the two features families most often misread.',

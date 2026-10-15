@@ -100,7 +100,7 @@ export const CYPRUS_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Nicosia families. The capital carries the government, legal and banking sectors, the island\'s academic centre, and some of the oldest British-curriculum schools in the eastern Mediterranean — The English School, the American Academy, the Grammar School and others that have taught IGCSE and A-Level for generations. We are not introducing Cambridge to this city. What we add is narrower: the subject sets a single timetable cannot sustain, and fees a professional family can meet. And Cyprus sits within an hour of our teaching clock all year.',
     heroImg: '/heroes/nicosia-cy.jpg',
     altTexts: { hero: 'Nicosia' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Nicosia families — subject depth beside a long British-curriculum tradition. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Nicosia families — subject depth beside a long British-curriculum tradition. From USD 423/month.',
     challenges: [
       'Specialist A-Level subjects often will not run for small cohorts even in strong schools.',
       'Private school fees are significant locally even where modest by UK standards.',
@@ -165,7 +165,7 @@ export const CYPRUS_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Limassol families. The city runs one of the largest ship management industries in the world, a substantial forex, fintech and professional-services sector, and one of the most genuinely international resident populations in the eastern Mediterranean — Russian-speaking, Ukrainian, Israeli, Lebanese, British and more. Private school demand here has grown faster than places, and families arriving mid-year frequently find the schools they want are full. Live delivery starts within a week of the assessment, with no waitlist.',
     heroImg: '/heroes/limassol-cy.jpg',
     altTexts: { hero: 'Limassol seafront' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Limassol families — shipping and fintech capital, school places scarce. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Limassol families — shipping and fintech capital, school places scarce. From USD 423/month.',
     challenges: [
       'Private school demand has grown faster than places, and mid-year arrivals often find schools full.',
       'Children arriving mid-curriculum from Russian, Ukrainian, Israeli, Lebanese and British systems.',
@@ -229,7 +229,7 @@ export const CYPRUS_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Larnaca families. The city holds the island\'s main airport, a growing port and marina development, and the aviation and logistics services around them — and has drawn an international residential population expanding faster than the schools serving it. Families here often find themselves choosing between a commute to Nicosia or Limassol and a shorter local list. Live delivery removes that choice, and Cyprus sits within an hour of our teaching clock all year.',
     heroImg: '/heroes/larnaca-cy.jpg',
     altTexts: { hero: 'Larnaca seafront and salt lake' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Larnaca families — the island gateway, growing faster than its schools. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Larnaca families — the island gateway, growing faster than its schools. From USD 423/month.',
     challenges: [
       'Residential growth has outpaced local school provision.',
       'Commutes to Nicosia or Limassol are the usual alternative.',
@@ -291,7 +291,7 @@ export const CYPRUS_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Paphos families. The west has one of the longest-established British and northern European residential communities in the eastern Mediterranean — families and retirees who have been here for decades, alongside tourism, property and services businesses and a growing remote-work population. Households are spread across coastal towns and hill villages over a wide district, and the local school list is short. Live delivery reaches all of it, and for families who may return to the UK the qualification question answers itself.',
     heroImg: '/heroes/paphos-cy.jpg',
     altTexts: { hero: 'Paphos coast' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Paphos families — a long-established British belt with a short school list. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Paphos families — a long-established British belt with a short school list. From USD 423/month.',
     challenges: [
       'A short local school list for a long-established international community.',
       'Households spread across coastal towns and hill villages over a wide district.',
@@ -353,7 +353,7 @@ export const CYPRUS_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for families across the eastern coast. Ayia Napa, Protaras and the surrounding district run one of the most concentrated tourism economies in the eastern Mediterranean — hotels, marinas, restaurants and the hospitality and services businesses around them, many owned or managed by families who came for a season and stayed. It is a working pattern that peaks hard and leaves little slack, and local school provision is minimal. Live classes with a complete recorded library are built for exactly that.',
     heroImg: '/heroes/famagusta-cy.jpg',
     altTexts: { hero: 'The eastern Cyprus coast' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Ayia Napa, Protaras and eastern Cyprus families — seasonal work, minimal provision. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Ayia Napa, Protaras and eastern Cyprus families — seasonal work, minimal provision. From USD 423/month.',
     challenges: [
       'Minimal local school provision across the district.',
       'A tourism season that peaks hard and shapes the whole household year.',
@@ -441,7 +441,7 @@ export const CYPRUS_COUNTRY = {
   heroEyebrow: 'Online school for Cyprus',
   heroH1Suffix: 'Cyprus',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for shipping, fintech, expatriate and Cypriot families across Nicosia, Limassol, Larnaca, Paphos and the eastern coast. Cypriot sources genuinely disagree about elective home education — we set out every reading rather than picking one — and Cyprus sits within an hour of our teaching clock all year.',
-  heroValueProp: 'From USD 180/month. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — no waitlist, alongside your Cypriot school.',
+  heroValueProp: 'From USD 423/month. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — no waitlist, alongside your Cypriot school.',
   whatsappTrigger: 'Hi, I would like to enquire about Smartious for our family in Cyprus',
 
   citiesSectionTitle: 'Where our Cyprus families are',
@@ -474,7 +474,7 @@ export const CYPRUS_COUNTRY = {
     { name: 'The Famagusta district',                           city: 'Eastern coast',         curriculum: 'Minimal',                               feesUsd: 'Little international option',                       feesAed: '—',                       rating: 0,   capacityNote: 'A concentrated tourism economy with very little local provision' },
     { name: 'Private tuition (frontistiria and tutors)',        city: 'Island-wide',           curriculum: 'Exam-focused coaching',                 feesUsd: 'Per hour, per subject',                             feesAed: 'Widespread',              rating: 4.0, capacityNote: 'The default answer to a subject gap — usually one-to-one and unstructured across a year' },
     { name: 'Wolsey Hall Oxford / King\'s InterHigh (online)',  city: 'Online',                curriculum: 'Cambridge self-paced / UK online',      feesUsd: 'Per-subject / GBP 9,000-11,000',                    feesAed: 'Varies',                  rating: 4.2, capacityNote: 'Self-paced or priced far above Smartious — and UK providers are close to Cyprus on the clock, which families should weigh' },
-    { name: 'Smartious Homeschool (Cyprus via online delivery)', city: 'Delivered island-wide', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP',   feesUsd: 'USD 2,160-6,480/year',                              feesAed: 'EUR equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + no waitlist + the sets a timetable cannot staff + all three legal readings set out + Paphos and the east reached' },
+    { name: 'Smartious Homeschool (Cyprus via online delivery)', city: 'Delivered island-wide', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP',   feesUsd: 'USD 5,076/year',                              feesAed: 'EUR equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + no waitlist + the sets a timetable cannot staff + all three legal readings set out + Paphos and the east reached' },
   ],
 
   legalFrameworkIntro: 'Cyprus is one of the few countries where we cannot give a single answer, because the available sources give at least three different ones. Here is what is agreed, what is disputed, and what follows.',

@@ -94,7 +94,7 @@ export const IRAQ_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Baghdad families. The capital holds the federal institutions, the University of Baghdad and one of the oldest continuous academic traditions anywhere, the country\'s largest professional population, and a long-established medical and engineering sector whose graduates practise worldwide. What families here most often want from us is not a different education but an additional record: an internationally examined qualification alongside the Iraqi one, read directly by universities abroad. And Iraq shares our teaching clock exactly, so any hour of our day is available.',
     heroImg: '/heroes/baghdad-iq.jpg',
     altTexts: { hero: 'Baghdad and the Tigris' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Baghdad families — an internationally examined record alongside the Iraqi one. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Baghdad families — an internationally examined record alongside the Iraqi one. From USD 423/month.',
     challenges: [
       'International school places are limited relative to the size of the professional population.',
       'Families whose children may study abroad need a record read directly rather than converted.',
@@ -159,7 +159,7 @@ export const IRAQ_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Basra families. The south holds the major oil fields that make Iraq one of the world\'s significant producers, the ports at Umm Qasr and along the Shatt al-Arab, petrochemicals and heavy industry, and a commercial tradition that long predates any of it. The technical workforce is recruited internationally and moves between operations and countries. Cambridge A-Level Physics, Chemistry and Mathematics is the spine that profession runs on, and we teach it live on exactly your clock.',
     heroImg: '/heroes/basra-iq.jpg',
     altTexts: { hero: 'Basra and the Shatt al-Arab' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Basra families — the southern oil province and its international workforce. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Basra families — the southern oil province and its international workforce. From USD 423/month.',
     challenges: [
       'An internationally recruited energy workforce with limited international schooling locally.',
       'Field and operations postings that move families between countries.',
@@ -221,7 +221,7 @@ export const IRAQ_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Erbil families. The Kurdistan Region\'s capital carries its business and administrative centre, a substantial diplomatic, energy and commercial community, and the deepest international school provision in the country — several British-curriculum and international schools, alongside the University of Kurdistan Hewlêr teaching in English. Those schools are good. What a school of any size still cannot always do is staff Further Mathematics for four students, or a third science, or an A-Level set that clashes with everything else. That is most of what we do here.',
     heroImg: '/heroes/erbil-iq.jpg',
     altTexts: { hero: 'Erbil citadel and city' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Erbil families — the subject sets a timetable cannot staff, on exactly your clock. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Erbil families — the subject sets a timetable cannot staff, on exactly your clock. From USD 423/month.',
     challenges: [
       'Specialist A-Level subjects often will not run for small cohorts even in strong schools.',
       'International school fees are set at regional levels with competitive places.',
@@ -285,7 +285,7 @@ export const IRAQ_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Sulaymaniyah families. The city is the Kurdistan Region\'s cultural and academic centre, home to the American University of Iraq Sulaimani — an English-medium institution with a strong regional reputation — alongside a long university and publishing tradition and a mountain setting whose surrounding communities are dispersed. Academic ambition here is high and school-level international provision is thinner than in Erbil. We teach Cambridge and IB live, at whatever hour suits, on a clock with no offset at all.',
     heroImg: '/heroes/sulaymaniyah-iq.jpg',
     altTexts: { hero: 'Sulaymaniyah and the surrounding mountains' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Sulaymaniyah families — an English-medium university city with thin school provision. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Sulaymaniyah families — an English-medium university city with thin school provision. From USD 423/month.',
     challenges: [
       'Thinner school-level international provision than Erbil, three hours west.',
       'High academic ambition in a city with English-medium higher education.',
@@ -347,7 +347,7 @@ export const IRAQ_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Duhok and northern families. The northern governorate carries agriculture, the trade corridor running toward Turkey, and its own university, with communities spread across mountains and valleys over a wide area. International provision is minimal, Erbil is a couple of hours south-east, and for many families the distance is the whole constraint. Live delivery reaches all of it, on a clock with no offset at all — and every session is recorded, so a week that cannot be attended is never a week lost.',
     heroImg: '/heroes/duhok-iq.jpg',
     altTexts: { hero: 'Duhok and the northern mountains' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Duhok and northern Iraq families — trade and agriculture, minimal provision. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Duhok and northern Iraq families — trade and agriculture, minimal provision. From USD 423/month.',
     challenges: [
       'Minimal international provision across a wide and mountainous governorate.',
       'Erbil is a couple of hours south-east and Baghdad much further.',
@@ -435,7 +435,7 @@ export const IRAQ_COUNTRY = {
   heroEyebrow: 'Online school for Iraq',
   heroH1Suffix: 'Iraq',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for energy, corporate, academic and Iraqi families across Baghdad, Basra, Erbil, Sulaymaniyah and Duhok. Iraq shares our teaching clock exactly — UTC+3 year-round on both sides, no offset and no drift — so every hour of our day is available at the hour it shows on yours.',
-  heroValueProp: 'From USD 180/month, quoted in USD. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — alongside your school, at any hour.',
+  heroValueProp: 'From USD 423/month, quoted in USD. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — alongside your school, at any hour.',
   whatsappTrigger: 'Hi, I would like to enquire about Smartious for our family in Iraq',
 
   citiesSectionTitle: 'Where our Iraq families are',
@@ -468,7 +468,7 @@ export const IRAQ_COUNTRY = {
     { name: 'Basra',                                            city: 'The south',             curriculum: 'Thin relative to the energy workforce', feesUsd: 'Limited international option',                      feesAed: '—',                       rating: 0,   capacityNote: 'One of the world\'s significant oil provinces with an internationally recruited workforce and little matching provision' },
     { name: 'Duhok and the northern districts',                 city: 'The north',             curriculum: 'Minimal',                               feesUsd: 'No real international option',                      feesAed: '—',                       rating: 0,   capacityNote: 'A wide mountainous governorate with dispersed communities and almost no international schooling' },
     { name: 'Private tuition',                                  city: 'Nationwide',            curriculum: 'Exam-focused coaching',                 feesUsd: 'Per hour, per subject',                             feesAed: 'Widespread',              rating: 4.0, capacityNote: 'The default answer to a subject gap — usually one-to-one and unstructured across a year' },
-    { name: 'Smartious Homeschool (Iraq via online delivery)',   city: 'Delivered nationwide',  curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP',   feesUsd: 'USD 2,160-6,480/year',                              feesAed: 'Quoted in USD',            rating: 4.8, capacityNote: 'Every class live through A-Level + zero timezone offset year-round + Basra, Duhok and Sulaymaniyah reached + both education authorities explained + examinations planned early' },
+    { name: 'Smartious Homeschool (Iraq via online delivery)',   city: 'Delivered nationwide',  curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP',   feesUsd: 'USD 5,076/year',                              feesAed: 'Quoted in USD',            rating: 4.8, capacityNote: 'Every class live through A-Level + zero timezone offset year-round + Basra, Duhok and Sulaymaniyah reached + both education authorities explained + examinations planned early' },
   ],
 
   legalFrameworkIntro: 'Iraq has one structural feature that shapes everything else about its education framework, and one question we could not verify. Both belong at the top.',

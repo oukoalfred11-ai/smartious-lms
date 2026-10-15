@@ -14,7 +14,7 @@ export const RWANDA_CITIES = [
     intro: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Kigali families — across Kacyiru, Kimihurura, Nyarutarama, Kibagabaga, Remera, Gisozi, Kimironko, Gacuriro, Kicukiro, Niboye, Gikondo, Nyamirambo and all Kigali sub-cities. Built for diplomatic missions, the African Leadership University (ALU) and Carnegie Mellon University Africa (CMU-Africa) professional community, Belgian/French diaspora returnees, and Rwandan families seeking international curriculum without USD 15,000-25,000 Green Hills Academy or ICS Kigali annual fees.',
     heroImg: 'https://images.unsplash.com/photo-1610891015291-3da53b71366c?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Kigali skyline showing the Kigali Convention Centre dome and city hills' },
-    seoDesc: 'Live online homeschooling for Kigali families. Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP. From USD 180/month — meaningfully below Green Hills Academy, ICS Kigali, Riviera High School annual fees. Kigali Smart City infrastructure, CAT live class scheduling.',
+    seoDesc: 'Live online homeschooling for Kigali families. Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP. From USD 423/month — meaningfully below Green Hills Academy, ICS Kigali, Riviera High School annual fees. Kigali Smart City infrastructure, CAT live class scheduling.',
     challenges: [
       'International school tuition pressure: Green Hills Academy, International School of Kigali (ICS Kigali), Riviera High School, Wellspring Academy charge USD 12,000-25,000/year — a heavy cost for middle-class Rwandan families and diaspora-returnee households on transition budgets.',
       'Limited Cambridge/IB seat availability — the few Kigali international schools have constrained capacity, particularly for Year 10-13 (IGCSE/A-Level/IB Diploma) admissions where places are often allocated to existing students from earlier years.',
@@ -47,7 +47,7 @@ export const RWANDA_CITIES = [
     ],
     whyChoose: [
       ['Kigali Smart City infrastructure advantage', 'Kigali has among Africa\'s most reliable internet infrastructure — MTN Rwanda and Airtel Rwanda 4G LTE blanket coverage, fibre in major neighbourhoods, plus Korea Telecom Rwanda Networks (KTRN) WiBro. Smartious live online instruction works reliably across all Kigali sub-cities.'],
-      ['Green Hills / ICS Kigali / Riviera alternative pricing', 'USD 180/month Online tier, USD 295/month Online Plus, USD 540/month Premium 1-on-1. Full multi-year Cambridge IGCSE pathway (Years 10-13) typically costs USD 13,000-25,000 total — versus USD 60,000-100,000 at top Kigali international schools.'],
+      ['Green Hills / ICS Kigali / Riviera alternative pricing', 'USD 423/month, paid termly. Full multi-year Cambridge IGCSE pathway (Years 10-13) typically costs USD 13,000-25,000 total — versus USD 60,000-100,000 at top Kigali international schools.'],
       ['CAT timezone live class scheduling', 'Live classes run 9 AM – 6 PM Central Africa Time (CAT, UTC+2) — matching Kigali school hours exactly. Smartious Nairobi-based subject specialists deliver instruction one hour earlier in their EAT day, no time zone gymnastics for Kigali families.'],
       ['French-to-English transition support', 'For Belgian/French/Canadian/UK diaspora returnee families, Smartious provides graduated English-medium academic instruction. Children with strong French preparation transition to Cambridge English Language and Literature with structured support — particularly valuable for Years 7-10 transitions.'],
       ['Cambridge exam centre access in Kigali', 'British Council Kigali (located in Kimihurura) hosts Cambridge IGCSE and A-Level examinations during May/November series. Smartious students sit examinations locally without travel.'],
@@ -61,14 +61,14 @@ export const RWANDA_CITIES = [
       american: 'American Curriculum — Common Core-aligned through Grade 8, then AP courses for Grades 9-12. Particularly suited to US-based diaspora returnee families and CMU-Africa community households maintaining US university application pathway.',
     },
     homeschoolDetail: 'Kigali families homeschool under varied frameworks — diplomatic families operate under embassy school recognition or international curriculum provider documentation, returning-diaspora families maintain home-country homeschool registration (Belgian Communautés française/flamande, French CNED, US state, Canadian provincial), Rwandan families work with Rwanda Basic Education Board (REB) private candidacy frameworks for national examinations. Smartious provides comprehensive curriculum, scheme of work, and assessment documentation suitable for all contexts.',
-    homeTuitionDetail: 'For Kigali families wanting in-person home tuition in addition to live online instruction, Smartious offers premium 1-on-1 home visits in Kacyiru, Kimihurura, Nyarutarama, Kibagabaga, Remera, Kicukiro areas — typically scheduled around live online sessions. Premium tier (USD 540/month) includes home tuition supplementation where feasible.',
+    homeTuitionDetail: 'For Kigali families wanting in-person home tuition in addition to live online instruction, Smartious offers premium 1-on-1 home visits in Kacyiru, Kimihurura, Nyarutarama, Kibagabaga, Remera, Kicukiro areas — typically scheduled around live online sessions. Premium 1-on-1 support (USD 15/hour) includes home tuition supplementation where feasible.',
     onlineLearningDetail: 'Live online Cambridge IGCSE, A-Level, Edexcel, IB Diploma and American AP delivered via Smartious LMS. Classes scheduled in Central Africa Time (CAT, UTC+2) exactly matching Kigali local time. Class sizes 4-6 students for Online tier, smaller groups for Online Plus, 1-on-1 for Premium. Recorded sessions for review. Mshauri AI tutor support available 24/7. Works across MTN Rwanda 4G LTE, Airtel Rwanda LTE, KTRN WiBro, and Starlink satellite.',
     faqs: [
-      { q: 'How does Smartious work for Kigali families compared to Green Hills Academy or ICS Kigali?', a: 'Green Hills Academy (USD 15,000-22,000/year), ICS Kigali (USD 18,000-25,000/year), Riviera High School (USD 12,000-18,000/year) provide physical campus education. Smartious provides live online instruction in the same Cambridge, IB, and American curricula at USD 2,160-6,480/year (Online to Premium tiers). The trade-off: no physical campus, but the same internationally recognised academic qualifications. Many Kigali families combine Smartious academic instruction with local sports clubs, music schools, and arts activities — a popular hybrid approach.' },
+      { q: 'How does Smartious work for Kigali families compared to Green Hills Academy or ICS Kigali?', a: 'Green Hills Academy (USD 15,000-22,000/year), ICS Kigali (USD 18,000-25,000/year), Riviera High School (USD 12,000-18,000/year) provide physical campus education. Smartious provides live online instruction in the same Cambridge, IB, and American curricula at USD 5,076/year (Online to Premium tiers). The trade-off: no physical campus, but the same internationally recognised academic qualifications. Many Kigali families combine Smartious academic instruction with local sports clubs, music schools, and arts activities — a popular hybrid approach.' },
       { q: 'My family is returning from Belgium/France — my child has French preparation but needs English. How does Smartious work?', a: 'This is one of our most common Kigali use cases. For Belgian/French/Canadian (Quebec) diaspora returnee families, Smartious provides graduated English-medium academic instruction with French language support maintained. Children with strong French preparation typically take 6-12 months to transition fully to English-medium Cambridge instruction — Smartious provides structured Cambridge Lower Secondary or IGCSE English Language preparation alongside subject instruction in English with French academic vocabulary support. Cambridge French A-Level also available for maintaining French academic depth.' },
       { q: 'Where do Kigali students sit Cambridge IGCSE and A-Level examinations?', a: 'British Council Kigali (Kimihurura) is the official Cambridge International examination centre for Rwanda. Cambridge IGCSE and A-Level examinations are held during May/June and October/November series each year. Smartious handles examination registration logistics for our Kigali students.' },
       { q: 'Can my child apply to African Leadership University (ALU) or CMU-Africa with Cambridge qualifications?', a: 'Yes. African Leadership University (ALU) in Kigali, Carnegie Mellon University Africa (CMU-Africa, with masters programmes), and University of Global Health Equity (UGHE) all accept Cambridge IGCSE and A-Level qualifications as part of their international admissions criteria. University of Rwanda also accepts Cambridge for international student admissions, with Rwandan national qualifications remaining primary for Rwandan citizens.' },
-      { q: 'How does pricing work in USD vs Rwandan Franc (RWF)?', a: 'Smartious tuition is denominated in USD: Online tier USD 180/month, Online Plus USD 295/month, Premium 1-on-1 USD 540/month. Payments accepted via international card, PayPal, or Mobile Money (MTN, Airtel) for Rwandan residents. RWF equivalents fluctuate with exchange rates — USD denomination provides predictable pricing for long-term planning. At current rates (~1,300 RWF/USD), Online tier is approximately RWF 234,000/month.' },
+      { q: 'How does pricing work in USD vs Rwandan Franc (RWF)?', a: 'Smartious tuition is denominated in USD: USD 423/month, paid termly. Payments accepted via international card, PayPal, or Mobile Money (MTN, Airtel) for Rwandan residents. RWF equivalents fluctuate with exchange rates — USD denomination provides predictable pricing for long-term planning. At current rates (~1,300 RWF/USD), Online tier is approximately RWF 234,000/month.' },
       { q: 'My family is moving from Kigali to Nairobi, Kampala, or back to Europe next year — does Smartious continue?', a: 'Yes. Smartious is fully online — students continue with the same teachers, the same Cambridge/IB/American curriculum, and the same class schedules from any future location. This is particularly valuable for diplomatic families on rotation, ALU/CMU-Africa professional families on regional assignments, and Belgian/French diaspora families considering Europe-Rwanda transitions.' },
     ],
   },
@@ -83,7 +83,7 @@ export const RWANDA_CITIES = [
     intro: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Huye (formerly Butare) families. Built for University of Rwanda main campus academic households, Southern Province professional families, and historical Huye educational tradition families seeking international curriculum access — without relocating to Kigali for Green Hills Academy or ICS Kigali.',
     heroImg: 'https://images.unsplash.com/photo-1547036967-23d11aacaee0?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Huye showing the Southern Province administrative capital and academic culture' },
-    seoDesc: 'Live online homeschooling for Huye (Butare) and Southern Province families. Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP. International university pathways from the University of Rwanda main campus city. From USD 180/month.',
+    seoDesc: 'Live online homeschooling for Huye (Butare) and Southern Province families. Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP. International university pathways from the University of Rwanda main campus city. From USD 423/month.',
     challenges: [
       'No international school in Huye — families wanting Cambridge IGCSE/A-Level historically relocated to Kigali (135 km north) or sent children to boarding schools abroad.',
       'University of Rwanda Huye campus (the main university campus, with strong Sciences, Arts, Social Sciences, Education, Languages faculties) academic households want international academic exposure for children alongside strong Rwandan university culture.',
@@ -114,7 +114,7 @@ export const RWANDA_CITIES = [
       ['University of Rwanda main campus alignment', 'For University of Rwanda Huye campus faculty households (the main university campus, with strong academic culture spanning Sciences, Arts, Social Sciences, Education, Languages), Smartious provides children with international academic exposure complementing strong Rwandan university culture at home.'],
       ['Southern Province lifestyle compatibility', 'Morning live classes (9 AM – 6 PM CAT) leave afternoons free for Huye\'s cultural and academic environment — National Museum of Rwanda visits, Nyungwe Forest National Park trips, traditional cultural activities — supporting whole-child development around Rwanda\'s historic educational centre.'],
       ['Cambridge exam access via Kigali', 'Huye students travel to British Council Kigali for May/November Cambridge IGCSE and A-Level examinations — 2-hour drive on the well-maintained Kigali-Huye highway, or daily bus services. Smartious handles examination registration logistics.'],
-      ['Affordable international curriculum from Huye', 'USD 180-540/month for Smartious vs USD 25,000-50,000/year for international boarding schools abroad. Dramatic cost reduction with maintained academic quality and family-together education.'],
+      ['Affordable international curriculum from Huye', 'USD 423/month for Smartious vs USD 25,000-50,000/year for international boarding schools abroad. Dramatic cost reduction with maintained academic quality and family-together education.'],
       ['Multilingual academic preparation', 'Live classes delivered in English at international academic standards while supporting Kinyarwanda and French home language preservation — important for Huye\'s historically French-medium academic tradition.'],
     ],
     growingReason: 'Huye (formerly Butare) is Rwanda\'s historical educational capital — the National University of Rwanda was established here in 1963 and the main University of Rwanda campus remains in Huye despite the post-genocide university reorganisation. The concentration of Rwanda\'s academic professional class at Huye creates particular demand for international curriculum access. The Southern Province\'s growing professional base (Nyungwe Forest National Park conservation, agricultural research, medical services) combined with returning diaspora from Belgium, France, Canada with Southern Province roots creates a meaningful market for international online education from Huye.',
@@ -125,7 +125,7 @@ export const RWANDA_CITIES = [
       american: 'American Curriculum with AP — particularly relevant for Huye families with US diaspora ties.',
     },
     homeschoolDetail: 'Huye families work with Rwanda Basic Education Board (REB) private candidacy frameworks for Rwandan qualifications alongside international curriculum documentation supporting UCAS, Common App, and OUAC applications. Smartious provides documentation for both pathways simultaneously.',
-    homeTuitionDetail: 'Premium tier (USD 540/month) includes occasional in-person home tuition for Huye families where Nairobi-based subject specialists travel for intensive workshops — particularly for A-Level Sciences and Mathematics during examination preparation periods.',
+    homeTuitionDetail: 'Premium 1-on-1 support (USD 15/hour) includes occasional in-person home tuition for Huye families where Nairobi-based subject specialists travel for intensive workshops — particularly for A-Level Sciences and Mathematics during examination preparation periods.',
     onlineLearningDetail: 'Live online instruction delivered in Central Africa Time (UTC+2) — exactly matching Huye local time. Works across MTN Rwanda and Airtel Rwanda LTE in Huye. Starlink satellite backup recommended for absolute reliability. Recorded sessions for review. Mshauri AI 24/7 support.',
     faqs: [
       { q: 'Is there an international school in Huye?', a: 'No — Huye does not currently have an international school offering Cambridge, IB, or American curriculum. The nearest options are Green Hills Academy, International School of Kigali, Riviera High School, Wellspring Academy (all in Kigali, 135 km / 2-hour drive north). Smartious eliminates relocation by providing live online international curriculum from Huye.' },
@@ -146,7 +146,7 @@ export const RWANDA_CITIES = [
     intro: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Musanze (formerly Ruhengeri) families. Built for Volcanoes National Park mountain gorilla tourism families, Dian Fossey Gorilla Fund and conservation NGO households, University of Rwanda Musanze campus faculty, and Northern Province professional families seeking international curriculum without Kigali relocation.',
     heroImg: 'https://images.unsplash.com/photo-1591181520183-79fb12d8f2a8?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Musanze showing the Northern Province administrative centre and Volcanoes National Park backdrop' },
-    seoDesc: 'Live online homeschooling for Musanze and Volcanoes National Park area families. Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP. From USD 180/month — international curriculum access from the mountain gorilla tourism gateway without Kigali relocation.',
+    seoDesc: 'Live online homeschooling for Musanze and Volcanoes National Park area families. Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP. From USD 423/month — international curriculum access from the mountain gorilla tourism gateway without Kigali relocation.',
     challenges: [
       'No international school in Musanze — Volcanoes National Park area tourism, lodge management, and conservation NGO families wanting Cambridge IGCSE/A-Level historically relocated to Kigali (95 km southeast) or boarding school abroad.',
       'Tourism lodge operator families (Bisate Lodge, Sabyinyo Silverback Lodge, Virunga Lodge, Wilderness Safaris, Singita Kwitonda Lodge) need international curriculum continuity for international management postings.',
@@ -209,7 +209,7 @@ export const RWANDA_CITIES = [
     intro: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Rubavu (formerly Gisenyi) families. Built for Lake Kivu tourism families, Rwanda-DRC border commerce professionals, and Western Province households seeking international curriculum without Kigali relocation. Particular fit for families with cross-border operations between Rubavu, Rwanda and Goma, DRC.',
     heroImg: 'https://images.unsplash.com/photo-1610891015291-3da53b71366c?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Rubavu showing Lake Kivu shoreline and Western Province coastal architecture' },
-    seoDesc: 'Live online homeschooling for Rubavu (Gisenyi) and Western Province families. Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP. International curriculum access from Lake Kivu without Kigali relocation. From USD 180/month.',
+    seoDesc: 'Live online homeschooling for Rubavu (Gisenyi) and Western Province families. Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP. International curriculum access from Lake Kivu without Kigali relocation. From USD 423/month.',
     challenges: [
       'No international school in Rubavu — Lake Kivu tourism, cross-border commerce, and Western Province professional families wanting Cambridge IGCSE/A-Level historically relocated to Kigali (155 km east) or sent children to boarding schools abroad.',
       'Rwanda-DRC border commerce families (Rubavu-Goma border post is one of the busiest in Africa, with significant cross-border trade in petroleum products, manufactured goods, agricultural products) need flexible curriculum that supports children\'s eventual international university applications.',
@@ -291,7 +291,7 @@ export const RWANDA_COUNTRY = {
   heroEyebrow: 'Online homeschooling · Across Rwanda',
   heroH1Suffix: 'Rwanda',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Rwandan families across Kigali, Huye, Musanze, Rubavu.',
-  heroValueProp: 'The Green Hills Academy / ISK / Riviera High School alternative at USD 180/month. Built for ALU / CMU-Africa / UGHE academic households, Kigali Smart City professionals, Belgian/French-speaking diaspora returnees transitioning to English-medium curriculum, plus diplomatic and NGO families.',
+  heroValueProp: 'The Green Hills Academy / ISK / Riviera High School alternative at USD 423/month. Built for ALU / CMU-Africa / UGHE academic households, Kigali Smart City professionals, Belgian/French-speaking diaspora returnees transitioning to English-medium curriculum, plus diplomatic and NGO families.',
   whatsappTrigger: 'Hi Smartious, I would like online homeschooling for my child in Rwanda.',
   citiesSectionTitle: 'Online homeschooling across Rwanda',
   citiesSectionBody: 'Four Rwandan cities. Each page covers local international school options, family situations, and answers specific to your area — from Kigali Smart City professionals to Musanze Volcanoes National Park NGO households.',
@@ -347,8 +347,8 @@ export const RWANDA_COUNTRY = {
       name: 'Smartious (live online)',
       city: 'All four Rwandan cities',
       curriculum: 'Cambridge IGCSE & A-Level · Edexcel · IB · American AP · CBC',
-      feesAed: 'USD 2,160 – 6,480',
-      feesUsd: '2,160 – 6,480',
+      feesAed: 'USD 5,076',
+      feesUsd: '5,076 a year',
       rating: 'Live online · PGCE specialists · CAT time zone',
       capacityNote: 'Immediate enrolment — accessible from any Rwandan city',
       isUs: true,
@@ -390,7 +390,7 @@ export const RWANDA_COUNTRY = {
   whySmartious: [
     {
       h: 'Green Hills / ISK / Riviera alternative pricing',
-      p: 'Green Hills Academy USD 14,000-22,000/year, ISK USD 16,000-24,000/year, Riviera High School USD 8,000-14,000/year. Smartious USD 2,160-6,480/year delivers Cambridge curriculum at meaningfully lower cost.',
+      p: 'Green Hills Academy USD 14,000-22,000/year, ISK USD 16,000-24,000/year, Riviera High School USD 8,000-14,000/year. Smartious USD 5,076/year delivers Cambridge curriculum at meaningfully lower cost.',
     },
     {
       h: 'Accessible from any Rwandan city',
@@ -417,7 +417,7 @@ export const RWANDA_COUNTRY = {
   faqs: [
     {
       q: 'How does Smartious compare to Green Hills Academy, International School of Kigali (ISK), Riviera High School?',
-      a: 'Green Hills Academy (USD 14,000-22,000/year — IB), International School of Kigali (USD 16,000-24,000/year — American/IB), Riviera High School (USD 8,000-14,000/year — British/Cambridge) provide physical campus education with established sports and arts programmes — all in Kigali. Smartious provides live online Cambridge, IB, or American curriculum at USD 2,160-6,480/year. Trade-off: no physical campus, but the same academic qualifications, immediate enrolment, smaller class sizes, accessibility from any Rwandan city.',
+      a: 'Green Hills Academy (USD 14,000-22,000/year — IB), International School of Kigali (USD 16,000-24,000/year — American/IB), Riviera High School (USD 8,000-14,000/year — British/Cambridge) provide physical campus education with established sports and arts programmes — all in Kigali. Smartious provides live online Cambridge, IB, or American curriculum at USD 5,076/year. Trade-off: no physical campus, but the same academic qualifications, immediate enrolment, smaller class sizes, accessibility from any Rwandan city.',
     },
     {
       q: 'My family lives in Huye / Musanze / Rubavu. How does Smartious work outside Kigali?',
@@ -445,7 +445,7 @@ export const RWANDA_COUNTRY = {
     },
     {
       q: 'How does payment work — Rwandan Franc or USD?',
-      a: 'Smartious tuition is denominated in USD (USD 180/295/540 per month) with payments accepted via international card (Visa, Mastercard, Amex), PayPal, or bank transfer. USD pricing provides predictability for multi-year planning. For families paying from Rwanda, international card or Forex bank transfer is standard.',
+      a: 'Smartious tuition is denominated in USD (USD 423 per month, paid termly) with payments accepted via international card (Visa, Mastercard, Amex), PayPal, or bank transfer. USD pricing provides predictability for multi-year planning. For families paying from Rwanda, international card or Forex bank transfer is standard.',
     },
     {
       q: 'Are Smartious teachers qualified to deliver Cambridge curriculum?',

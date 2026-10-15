@@ -107,7 +107,7 @@ export const ISRAEL_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Tel Aviv families. The city runs one of the densest technology and start-up ecosystems anywhere, with a professional community drawn from across the English-speaking and French-speaking world, and yet remarkably few international schools for that profile. Families who arrived mid-schooling, or who want their children to keep a route back to a university in London, New York, Paris or Toronto, come to us for one specific thing: an internationally examined record alongside the Israeli one. And Israel sits closer to our teaching clock than any country we serve.',
     heroImg: '/heroes/tel-aviv-il.jpg',
     altTexts: { hero: 'Tel Aviv and the Mediterranean' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Tel Aviv families — an internationally examined record alongside the Israeli one, in your own hours. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Tel Aviv families — an internationally examined record alongside the Israeli one, in your own hours. From USD 423/month.',
     challenges: [
       'Few international schools relative to the city\'s international professional population.',
       'Children arriving mid-curriculum from English-speaking or French-speaking systems.',
@@ -172,7 +172,7 @@ export const ISRAEL_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Jerusalem families. The city holds national institutions, the Hebrew University and one of the deepest academic sectors in the region, and an unusually large English-speaking and French-speaking olim community — families who arrived from London, New York, Paris, Toronto or Johannesburg and who frequently want their children to keep a route back to universities there. A few long-established international schools serve part of that need. For everyone else, an internationally examined track alongside the Israeli one is the practical answer, and we teach it live in whichever hours suit.',
     heroImg: '/heroes/jerusalem-il.jpg',
     altTexts: { hero: 'Jerusalem hills and skyline' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Jerusalem families — a route back to UK, US, French and Canadian universities. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Jerusalem families — a route back to UK, US, French and Canadian universities. From USD 423/month.',
     challenges: [
       'A large olim community with more demand for international qualifications than local places.',
       'Children arriving mid-curriculum from several different national systems.',
@@ -235,7 +235,7 @@ export const ISRAEL_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Haifa and northern families. The city is built around the Technion and a major engineering, research and technology sector, alongside the country\'s principal port and its petrochemical complex, with the Krayot and the Galilee beyond. It is a strongly academic and multilingual region whose students aim at engineering and the sciences in numbers, and whose international school options are far fewer than in the centre of the country. We teach Cambridge and IB live across the north, in whichever hours suit.',
     heroImg: '/heroes/haifa-il.jpg',
     altTexts: { hero: 'Haifa bay and Mount Carmel' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Haifa and northern Israel families — Technion country, few international options. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Haifa and northern Israel families — Technion country, few international options. From USD 423/month.',
     challenges: [
       'Far fewer international school options than the centre of the country.',
       'A strongly academic region whose students aim at competitive engineering courses.',
@@ -297,7 +297,7 @@ export const ISRAEL_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Be\'er Sheva and Negev families. The southern capital is built around Ben-Gurion University and a fast-growing technology, cyber and research sector, alongside desert agriculture and water research that is studied internationally. It is also a very large district with dispersed communities, and international schooling in the south is essentially non-existent — the centre of the country is an hour or more north. Live delivery closes that distance without a family moving, and Israel\'s clock means every hour of our teaching day is available.',
     heroImg: '/heroes/beer-sheva-il.jpg',
     altTexts: { hero: 'Be\'er Sheva and the Negev' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Be\'er Sheva and Negev families — research and technology city, no international schooling. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Be\'er Sheva and Negev families — research and technology city, no international schooling. From USD 423/month.',
     challenges: [
       'Essentially no international schooling in the southern district.',
       'A very large area with dispersed communities and long journeys.',
@@ -359,7 +359,7 @@ export const ISRAEL_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Ra\'anana and Sharon families. The corridor through Ra\'anana, Herzliya, Kfar Saba and Netanya is the heartland of Israel\'s English-speaking and French-speaking olim communities — families who arrived from Britain, the United States, France, Canada and South Africa, often mid-schooling, and who keep close ties to the countries they came from. Alongside them runs a technology and corporate corridor with an internationally recruited workforce. The common question in both is the same: how does a child keep a record that reads back home? We teach exactly that, live, in whichever hours suit.',
     heroImg: '/heroes/raanana-il.jpg',
     altTexts: { hero: 'The Sharon corridor' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Ra\'anana, Herzliya and Sharon families — the olim heartland, with a record that reads back home. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Ra\'anana, Herzliya and Sharon families — the olim heartland, with a record that reads back home. From USD 423/month.',
     challenges: [
       'Families arriving mid-curriculum from British, American, French, Canadian and South African systems.',
       'Strong demand for international qualifications and few local places.',
@@ -448,7 +448,7 @@ export const ISRAEL_COUNTRY = {
   heroEyebrow: 'Online school for Israel',
   heroH1Suffix: 'Israel',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for olim, high-tech, academic and Israeli families across Tel Aviv, Jerusalem, Haifa, Be\'er Sheva and the Sharon. Israel sits closer to our teaching clock than any country we serve — one hour behind in winter, exactly level in summer — so our entire teaching day is available to you.',
-  heroValueProp: 'From USD 180/month. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — alongside your Israeli school, at whatever hour suits.',
+  heroValueProp: 'From USD 423/month. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — alongside your Israeli school, at whatever hour suits.',
   whatsappTrigger: 'Hi, I would like to enquire about Smartious for our family in Israel',
 
   citiesSectionTitle: 'Where our Israel families are',
@@ -481,7 +481,7 @@ export const ISRAEL_COUNTRY = {
     { name: 'Tabeetha School',                                 city: 'Jaffa',                  curriculum: 'British / IGCSE',                       feesUsd: 'Mid to premium tier',                               feesAed: 'Limited places',          rating: 4.3, capacityNote: 'Long history and small — one of very few British-curriculum options' },
     { name: 'Haifa, the Galilee and the Negev',                city: 'North and south',        curriculum: 'Minimal to none',                       feesUsd: 'No real international option',                      feesAed: '—',                       rating: 0,   capacityNote: 'A Technion city and a growing technology capital, neither with international schooling' },
     { name: 'Private tuition',                                 city: 'Nationwide',             curriculum: 'Exam-focused coaching',                 feesUsd: 'Per hour, per subject',                             feesAed: 'Widespread',              rating: 4.0, capacityNote: 'The default answer to an international qualification gap — usually one-to-one and unstructured across a year' },
-    { name: 'Smartious Homeschool (Israel via online delivery)', city: 'Delivered nationwide',  curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP',   feesUsd: 'USD 2,160-6,480/year',                              feesAed: 'ILS equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + our entire teaching day available on Israel\'s clock + the north and Negev reached + honest that we cannot help with a permit' },
+    { name: 'Smartious Homeschool (Israel via online delivery)', city: 'Delivered nationwide',  curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP',   feesUsd: 'USD 5,076/year',                              feesAed: 'ILS equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + our entire teaching day available on Israel\'s clock + the north and Negev reached + honest that we cannot help with a permit' },
   ],
 
   legalFrameworkIntro: 'Israel operates a permission tier: home education is lawful but requires an annual permit, and the formal posture is stricter than the practice. Both halves matter, and so does what a provider like us cannot do.',

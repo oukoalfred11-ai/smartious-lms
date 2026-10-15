@@ -78,7 +78,7 @@ export const LEBANON_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Beirut families. The capital holds one of the region\'s great academic traditions — the American University of Beirut and the Lebanese American University teach in English and are among the best known institutions in the Arab world — alongside an unusually plural private school market running French, American, IB and national programmes side by side. Beirut families understand parallel academic tracks better than almost any market we serve. What we add is one more that travels: an internationally examined record read directly wherever a family\'s relatives already are.',
     heroImg: '/heroes/beirut-lb.jpg',
     altTexts: { hero: 'Beirut and the Mediterranean' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Beirut families — a portable record, fees in USD, at whatever hour suits. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Beirut families — a portable record, fees in USD, at whatever hour suits. From USD 423/month.',
     challenges: [
       'Families frequently have members across several countries, and a record needs to read in all of them.',
       'Private school places in the strongest institutions are competitive.',
@@ -143,7 +143,7 @@ export const LEBANON_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Tripoli and northern Lebanese families. The north holds the country\'s second city, its port and a long commercial and trading tradition, with the University of Balamand and the Koura district nearby. It is a substantial population, and international school provision here is thin relative to it — the concentration is in Beirut, an hour and a half south along the coast. Live delivery reaches the north identically, and Lebanon sits within an hour of our teaching clock all year.',
     heroImg: '/heroes/tripoli-lb.jpg',
     altTexts: { hero: 'Tripoli and the northern Lebanese coast' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Tripoli and northern Lebanon families — thin provision outside Beirut. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Tripoli and northern Lebanon families — thin provision outside Beirut. From USD 423/month.',
     challenges: [
       'International school provision is thin relative to the size of the population.',
       'Beirut is an hour and a half south along the coast.',
@@ -205,7 +205,7 @@ export const LEBANON_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Saida and southern Lebanese families. The south carries the coastal city and its port, a citrus and agricultural hinterland, and a commercial tradition with some of the deepest diaspora links in the country — families with relatives established in West Africa, the Gulf, Brazil, North America and Australia, often across several generations. International school provision locally is limited, and the qualification question here is genuinely practical: a record has to work wherever a child ends up applying from.',
     heroImg: '/heroes/saida-lb.jpg',
     altTexts: { hero: 'Saida and the southern Lebanese coast' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Saida and southern Lebanon families — deep diaspora links, portable qualifications. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Saida and southern Lebanon families — deep diaspora links, portable qualifications. From USD 423/month.',
     challenges: [
       'Limited international school provision in the south.',
       'Beirut is around forty minutes north but its tier is priced for a different market.',
@@ -267,7 +267,7 @@ export const LEBANON_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Zahle and Bekaa families. The valley is Lebanon\'s agricultural heartland — vineyards and a wine industry with an international reputation, intensive farming, food processing and agro-industry — spread across towns from Zahle north through Baalbek and south toward the Litani. It is a substantial economy with almost no international school provision, and Beirut is an hour over the mountain. Live delivery reaches the whole valley, and Lebanon sits within an hour of our teaching clock all year.',
     heroImg: '/heroes/zahle-lb.jpg',
     altTexts: { hero: 'The Bekaa valley' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Zahle and Bekaa families — wine and farming valley, no local provision. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Zahle and Bekaa families — wine and farming valley, no local provision. From USD 423/month.',
     challenges: [
       'Almost no international school provision across the valley.',
       'Beirut is an hour over the mountain, and its tier is priced for a different market.',
@@ -329,7 +329,7 @@ export const LEBANON_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Jounieh and Mount Lebanon families. The coastal and mountain belt running north from the capital through Jounieh, Keserwan and the surrounding villages is one of the densest residential and commercial corridors in the country, with several long-established schools and universities in reach and a great many households commuting into Beirut daily. For families already making that journey, the question is usually whether the children need to make it too. Live delivery answers that, and Lebanon sits within an hour of our teaching clock.',
     heroImg: '/heroes/jounieh-lb.jpg',
     altTexts: { hero: 'Jounieh bay and Mount Lebanon' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Jounieh, Keserwan and Mount Lebanon families — no second commute for the children. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Jounieh, Keserwan and Mount Lebanon families — no second commute for the children. From USD 423/month.',
     challenges: [
       'Households already commuting to Beirut daily for work.',
       'Mountain villages spread well above the coastal corridor.',
@@ -417,7 +417,7 @@ export const LEBANON_COUNTRY = {
   heroEyebrow: 'Online school for Lebanon',
   heroH1Suffix: 'Lebanon',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for professional, academic and Lebanese families across Beirut, Tripoli, Saida, the Bekaa and Mount Lebanon. A qualification read directly in every country your family already has ties to, fees quoted in USD, and a teaching clock within an hour of yours all year.',
-  heroValueProp: 'From USD 180/month, quoted in USD. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — alongside your Lebanese school, at whatever hour suits.',
+  heroValueProp: 'From USD 423/month, quoted in USD. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — alongside your Lebanese school, at whatever hour suits.',
   whatsappTrigger: 'Hi, I would like to enquire about Smartious for our family in Lebanon',
 
   citiesSectionTitle: 'Where our Lebanon families are',
@@ -450,7 +450,7 @@ export const LEBANON_COUNTRY = {
     { name: 'The Bekaa, the north and the south',               city: 'Outside the capital belt', curriculum: 'Thin to none',                       feesUsd: 'Limited international option',                      feesAed: '—',                       rating: 0,   capacityNote: 'A farming valley, a second city and a southern commercial region, none with matching provision' },
     { name: 'Private tuition',                                  city: 'Nationwide',            curriculum: 'Exam-focused coaching',                 feesUsd: 'Per hour, per subject',                             feesAed: 'Widespread',              rating: 4.0, capacityNote: 'The default answer to a subject gap — usually one-to-one and unstructured across a year' },
     { name: 'Wolsey Hall Oxford / King\'s InterHigh (online)',  city: 'Online',                curriculum: 'Cambridge self-paced / UK online',      feesUsd: 'Per-subject / GBP 9,000-11,000',                    feesAed: 'Varies',                  rating: 4.2, capacityNote: 'Self-paced or priced far above Smartious — UK providers are close to Lebanon on the clock, which families should weigh' },
-    { name: 'Smartious Homeschool (Lebanon via online delivery)', city: 'Delivered nationwide', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP',   feesUsd: 'USD 2,160-6,480/year',                              feesAed: 'Quoted in USD',            rating: 4.8, capacityNote: 'Every class live through A-Level + a record read in every country your family is in + the Bekaa, north and south reached + fees in one stable figure' },
+    { name: 'Smartious Homeschool (Lebanon via online delivery)', city: 'Delivered nationwide', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP',   feesUsd: 'USD 5,076/year',                              feesAed: 'Quoted in USD',            rating: 4.8, capacityNote: 'Every class live through A-Level + a record read in every country your family is in + the Bekaa, north and south reached + fees in one stable figure' },
   ],
 
   legalFrameworkIntro: 'Lebanon is one of the markets where we could not verify the central question, and we would rather open by saying so than write around it. Here is what we can establish, and the two facts that shape our offer here more than the law does.',
@@ -477,7 +477,7 @@ export const LEBANON_COUNTRY = {
     { q: 'Do you teach the Lebanese Baccalaureate?', a: 'No. We are not a MEHE-licensed school and issue no Lebanese qualification. We teach Cambridge, Edexcel, IB and AP examinations alongside the Lebanese record — an arrangement Lebanese families already understand, since French, IB and American programmes run in parallel here.' },
     { q: 'Our family has relatives in several countries — which qualification travels?', a: 'Cambridge A-Levels and the IB Diploma, with AP for US-focused applications. All are read directly in France, the Gulf, North and South America, Australia, West Africa and the UK, whereas a national or French record is assessed through different procedures in each.' },
     { q: 'Our child will study at AUB or LAU — is an international record still worth it?', a: 'Often yes. Both teach in English and read Cambridge, IB and AP records directly, so a student arrives having demonstrated sustained academic work in the language of instruction rather than only a test score.' },
-    { q: 'How are fees handled?', a: 'Quoted and invoiced in USD, which is widely used here for larger commitments — USD 2,160-6,480 a year for live small-group teaching, one figure to plan a multi-year commitment around.' },
+    { q: 'How are fees handled?', a: 'Quoted and invoiced in USD, which is widely used here for larger commitments — USD 5,076 a year for live small-group teaching, one figure to plan a multi-year commitment around.' },
     { q: 'How does the timezone work?', a: 'One hour behind us in winter and exactly level in summer, so effectively our whole teaching day is available — after-school, mid-morning or evening.' },
     { q: 'Where do Lebanese students sit Cambridge examinations?', a: 'At authorised provision confirmed per family per session — Beirut first, with Mount Lebanon for the coastal belt and travel planned ahead from Tripoli, Saida and the Bekaa. The country is compact enough that this is a handful of short journeys a year.' },
     { q: 'Which parts of Lebanon does Smartious cover?', a: 'Beirut, Tripoli and the north, Saida and the south, Zahle and the Bekaa, and Jounieh and Mount Lebanon have dedicated pages. Live online delivery works identically anywhere in the country.' },

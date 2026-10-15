@@ -68,7 +68,7 @@ export const BOTSWANA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Gaborone families. Gaborone holds Botswana\'s government, its financial services sector, the commercial side of the diamond industry, and an unusually large regional-organisation community — SADC is headquartered here, alongside diplomatic missions and development agencies. It also holds the country\'s international-school tier, which is genuinely strong and priced accordingly. What makes Botswana different from most markets we serve is that Cambridge is not a foreign qualification here at all: the BGCSE is the national senior certificate, developed in association with Cambridge, and most private secondary schools already offer IGCSE. Smartious runs alongside your registered school, one hour ahead of you, all year.',
     heroImg: '/heroes/gaborone-bw.jpg',
     altTexts: { hero: 'Gaborone city centre' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Gaborone families — alongside your registered school, one hour from Nairobi. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Gaborone families — alongside your registered school, one hour from Nairobi. From USD 423/month.',
     challenges: [
       'International school fees in Gaborone sit at the top of the local market, beyond many professional Batswana families.',
       'Places at the strongest schools are limited and competitive.',
@@ -99,7 +99,7 @@ export const BOTSWANA_CITIES = [
     ],
     whyChoose: [
       ['Cambridge, in a country where Cambridge is native', 'The BGCSE was developed in association with Cambridge and most private secondary schools here already offer IGCSE. We teach the international track live — familiar ground, delivered differently.'],
-      ['The tier\'s curriculum at a professional family\'s budget', 'Live small-group teaching at USD 2,160-6,480 a year against Gaborone international fees at the top of the local market.'],
+      ['The tier\'s curriculum at a professional family\'s budget', 'Live small-group teaching at USD 5,076 a year against Gaborone international fees at the top of the local market.'],
       ['One hour from your teachers, all year', 'Botswana and Kenya are an hour apart with no daylight saving on either side, so classes land in the ordinary school day every week of the year.'],
       ['An African school teaching African families', 'Smartious is Nairobi-built and Nairobi-taught, serving families in 51 countries — not an overseas provider reaching in.'],
       ['What we are, stated plainly', 'Smartious is not a registered Botswana school and does not claim to be one. We are an internationally accredited online school working alongside your registered school.'],
@@ -133,7 +133,7 @@ export const BOTSWANA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Francistown and northern Botswana families. Francistown is Botswana\'s second city and its northern commercial hub — mining services, regional trade toward Zimbabwe, transport and logistics, and the road that opens onto Maun, the Okavango Delta, and Chobe, where a tourism and conservation economy employs an internationally connected workforce. Gaborone\'s international-school tier is around five hours south. Smartious delivers the Cambridge and IB pathways live across the north, alongside your registered school and one hour ahead of you all year.',
     heroImg: '/heroes/francistown-bw.jpg',
     altTexts: { hero: 'Francistown in northern Botswana' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Francistown, Maun and northern Botswana families — thin international schooling. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Francistown, Maun and northern Botswana families — thin international schooling. From USD 423/month.',
     challenges: [
       'Thin international schooling in the second city, with Gaborone around five hours south.',
       'Tourism and conservation families in Maun and the Delta are further still from any campus option.',
@@ -196,7 +196,7 @@ export const BOTSWANA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for families in Botswana\'s diamond towns. Jwaneng and Orapa are among the richest diamond mines on earth, and the towns around them — Jwaneng, Orapa, and Letlhakane — exist because of them: purpose-built communities with mine-run infrastructure and an internationally recruited technical workforce of engineers, geologists, metallurgists, and management. Company-town schooling is often decent and it is inevitably narrow, and the nearest international campus is hours away. Smartious delivers the Cambridge and IB pathways live to the diamond towns, alongside your registered school and one hour ahead of you all year.',
     heroImg: '/heroes/jwaneng-bw.jpg',
     altTexts: { hero: 'Diamond mining country in Botswana' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Jwaneng, Orapa and Letlhakane families — diamond mining towns, narrow local schooling. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Jwaneng, Orapa and Letlhakane families — diamond mining towns, narrow local schooling. From USD 423/month.',
     challenges: [
       'Company-town schooling is narrow by design, and the nearest international campus is hours away.',
       'An internationally recruited technical workforce whose children need portable qualifications.',
@@ -285,7 +285,7 @@ export const BOTSWANA_COUNTRY = {
   heroEyebrow: 'Online school for Botswana',
   heroH1Suffix: 'Botswana',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for mining, corporate, expat, and Batswana families across Gaborone, Francistown, and the diamond towns. Taught live from Nairobi — one hour ahead, every week of the year. Cambridge is native here: the BGCSE was developed in association with Cambridge and most private secondary schools already offer IGCSE.',
-  heroValueProp: 'From USD 180/month. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — alongside your registered Botswana school, at a fraction of the capital tier\'s fees.',
+  heroValueProp: 'From USD 423/month. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — alongside your registered Botswana school, at a fraction of the capital tier\'s fees.',
   whatsappTrigger: 'Hi, I would like to enquire about Smartious for our family in Botswana',
 
   citiesSectionTitle: 'Where our Botswana families are',
@@ -318,7 +318,7 @@ export const BOTSWANA_COUNTRY = {
     { name: 'Francistown, Maun and the north',                 city: 'Northern Botswana',     curriculum: 'Thin provision',                        feesUsd: 'Little international option',                       feesAed: '—',                       rating: 0,   capacityNote: 'The second city and the Delta, five hours from the capital tier' },
     { name: 'South African boarding',                          city: 'Johannesburg, Pretoria', curriculum: 'South African and international',      feesUsd: 'Fees plus travel plus a child living away',         feesAed: '—',                       rating: 4.4, capacityNote: 'The traditional answer for mining and northern families' },
     { name: 'Wolsey Hall Oxford / King\'s InterHigh (online)',  city: 'Online',                curriculum: 'Cambridge self-paced / UK online',      feesUsd: 'Per-subject / GBP 9,000-11,000',                    feesAed: 'Varies',                  rating: 4.2, capacityNote: 'Self-paced or priced far above Smartious, and taught from a timezone that puts classes at awkward hours' },
-    { name: 'Smartious Homeschool (Botswana via online delivery)', city: 'Delivered to all Botswana', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 2,160-6,480/year', feesAed: 'BWP equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + one hour from your teachers + the subjects a company town cannot staff + honest about not being a registered Botswana school' },
+    { name: 'Smartious Homeschool (Botswana via online delivery)', city: 'Delivered to all Botswana', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 5,076/year', feesAed: 'BWP equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + one hour from your teachers + the subjects a company town cannot staff + honest about not being a registered Botswana school' },
   ],
 
   legalFrameworkIntro: 'Botswana is the country in our coverage where we have to be most careful about what we assert, because the reporting and the general references do not agree. Here is what we can say, and what we will not.',

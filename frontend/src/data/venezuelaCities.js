@@ -76,7 +76,7 @@ export const VENEZUELA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Caracas families. The capital holds Venezuela\'s corporate and professional centre, the diplomatic community, and a long-established international school tier — the Colegio Internacional de Caracas, Escuela Campo Alegre, the British, French and German schools — with IB and American provision behind it. Many Caracas families now have members living in Spain, the United States, Colombia, Chile, Panama or Portugal, and an internationally examined qualification is read directly in all of them. We quote in USD, which removes the planning question entirely.',
     heroImg: '/heroes/caracas-ve.jpg',
     altTexts: { hero: 'Caracas and El Ávila' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Caracas families — fees in USD, a qualification read in every country your family is in. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Caracas families — fees in USD, a qualification read in every country your family is in. From USD 423/month.',
     challenges: [
       'Families frequently have members in several countries, and a qualification needs to read in all of them.',
       'International school places in Caracas are competitive and fees are set at international levels.',
@@ -125,7 +125,7 @@ export const VENEZUELA_CITIES = [
     faqs: [
       { q: 'Is homeschooling legal in Venezuela?', a: 'We could not verify a position from a primary Venezuelan instrument and will not guess. Education is compulsory under the Ley Orgánica de Educación of 2009 and administered by the Ministerio del Poder Popular para la Educación. Put the question to the ministry directly. Structured study alongside a school enrolment raises none of it, and that is what we offer.' },
       { q: 'Our family is spread across several countries — does that shape the choice?', a: 'It shapes the qualification. Cambridge A-Levels and the IB Diploma are read directly by universities in Spain, the United States, Colombia, Chile, Portugal and Canada, whereas a purely national record is assessed through recognition procedures in each. For a family with ties in more than one country, that difference is the whole argument.' },
-      { q: 'How do fees work?', a: 'We quote and invoice in USD, which is widely used here for larger commitments — USD 2,160-6,480 a year for live small-group teaching. That makes a multi-year education commitment straightforward to plan.' },
+      { q: 'How do fees work?', a: 'We quote and invoice in USD, which is widely used here for larger commitments — USD 5,076 a year for live small-group teaching. That makes a multi-year education commitment straightforward to plan.' },
       { q: 'How does the timezone work?', a: 'Seven hours, fixed. Venezuelan mornings and very early afternoons both land in our teaching day, and with schools commonly running turno mañana and tarde, most students have one window genuinely free.' },
     ],
   },
@@ -141,7 +141,7 @@ export const VENEZUELA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Maracaibo and Zulia families. Lake Maracaibo has been the centre of Venezuelan petroleum since the 1920s, and the region built one of the most experienced petroleum engineering and geoscience communities in the Americas around it, alongside a strong regional university sector and the corridor to the Colombian border. It is a profession that has always been internationally mobile, and Cambridge A-Level Physics, Chemistry and Mathematics is the spine it runs on. We teach live to Zulia in the Venezuelan morning, in USD.',
     heroImg: '/heroes/maracaibo-ve.jpg',
     altTexts: { hero: 'Lake Maracaibo and the bridge' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Maracaibo and Zulia families — petroleum engineering heartland, fees in USD. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Maracaibo and Zulia families — petroleum engineering heartland, fees in USD. From USD 423/month.',
     challenges: [
       'An experienced petroleum engineering community whose profession is internationally mobile.',
       'Caracas is a flight east and international provision in Zulia is limited.',
@@ -203,7 +203,7 @@ export const VENEZUELA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Valencia and Carabobo families. Carabobo built Venezuela\'s industrial heartland — automotive assembly, chemicals, food processing and manufacturing — alongside Puerto Cabello, the country\'s principal port, and a strong regional university and medical sector. The engineering and commercial tradition here is deep, and the qualification that carries it furthest is one universities abroad read directly. We teach Cambridge and IB live to Carabobo in the Venezuelan morning, in USD.',
     heroImg: '/heroes/valencia-ve.jpg',
     altTexts: { hero: 'Valencia and the Carabobo valley' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Valencia and Carabobo families — the industrial belt and Puerto Cabello. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Valencia and Carabobo families — the industrial belt and Puerto Cabello. From USD 423/month.',
     challenges: [
       'International provision in Carabobo is limited relative to the region\'s industrial and academic depth.',
       'Caracas is around two hours east.',
@@ -265,7 +265,7 @@ export const VENEZUELA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Ciudad Guayana families. The Orinoco industrial complex at Puerto Ordaz and San Félix was built around the Guayana shield\'s iron ore and bauxite — steel, aluminium and the Guri hydroelectric project that powers them — producing a metallurgical and industrial engineering community with few equivalents in the region, and the corridor running south toward the Brazilian border. Caracas is a long way north. We teach Cambridge and IB live to Guayana in the Venezuelan morning.',
     heroImg: '/heroes/puerto-ordaz-ve.jpg',
     altTexts: { hero: 'The Orinoco and Caroní confluence at Puerto Ordaz' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Puerto Ordaz and Ciudad Guayana families — the Orinoco heavy-industry belt. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Puerto Ordaz and Ciudad Guayana families — the Orinoco heavy-industry belt. From USD 423/month.',
     challenges: [
       'A metallurgical and heavy-industry region with limited international provision.',
       'Caracas is a long way north.',
@@ -327,7 +327,7 @@ export const VENEZUELA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Mérida and Andean families. Mérida is one of Latin America\'s notable university cities — the Universidad de Los Andes has shaped it for two centuries, giving the highlands an academic and research culture that few regional cities match — alongside highland agriculture, coffee, and the corridor to the Colombian border at San Cristóbal. Academic families here aim high, and a qualification that foreign universities read directly is the practical way to carry that ambition. We teach live to the Andes in the Venezuelan morning.',
     heroImg: '/heroes/merida-ve.jpg',
     altTexts: { hero: 'Mérida and the Venezuelan Andes' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Mérida and Andean Venezuela families — a university city with international ambitions. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Mérida and Andean Venezuela families — a university city with international ambitions. From USD 423/month.',
     challenges: [
       'No international schooling in a region with a strong academic tradition.',
       'Caracas is a long journey or flight north-east.',
@@ -415,7 +415,7 @@ export const VENEZUELA_COUNTRY = {
   heroEyebrow: 'Online school for Venezuela',
   heroH1Suffix: 'Venezuela',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for professional, energy, industrial, and Venezuelan families across Caracas, Maracaibo, Valencia, Ciudad Guayana and Mérida. Fees quoted in USD, a qualification read directly in every country your family may already have ties to, and honest about the one legal question we could not verify.',
-  heroValueProp: 'From USD 180/month, quoted in USD. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — alongside your Venezuelan school.',
+  heroValueProp: 'From USD 423/month, quoted in USD. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — alongside your Venezuelan school.',
   whatsappTrigger: 'Hi, I would like to enquire about Smartious for our family in Venezuela',
 
   citiesSectionTitle: 'Where our Venezuela families are',
@@ -448,7 +448,7 @@ export const VENEZUELA_COUNTRY = {
     { name: 'Zulia, Carabobo, Guayana and the Andes',          city: 'Outside Caracas',       curriculum: 'Limited international provision',       feesUsd: '—',                                                 feesAed: '—',                       rating: 0,   capacityNote: 'Petroleum, industry, metallurgy and a major university city, all thinner than their profiles suggest' },
     { name: 'US and Spanish online schools',                   city: 'Online',                curriculum: 'American or Spanish online',            feesUsd: 'Varies, often per-course',                          feesAed: 'Varies',                  rating: 4.2, capacityNote: 'Closer on the clock or in language — families should weigh that against price, class size and live teaching' },
     { name: 'Private tuition',                                 city: 'Nationwide',            curriculum: 'Exam-focused coaching',                 feesUsd: 'Per hour, per subject',                             feesAed: 'Widespread',              rating: 3.9, capacityNote: 'The default answer to a subject gap — usually one-to-one and unstructured across a year' },
-    { name: 'Smartious Homeschool (Venezuela via online delivery)', city: 'Delivered to all Venezuela', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 2,160-6,480/year',                   feesAed: 'Quoted in USD',            rating: 4.8, capacityNote: 'Every class live through A-Level + a qualification read directly in every country + fees in one stable currency + examination logistics planned early' },
+    { name: 'Smartious Homeschool (Venezuela via online delivery)', city: 'Delivered to all Venezuela', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 5,076/year',                   feesAed: 'Quoted in USD',            rating: 4.8, capacityNote: 'Every class live through A-Level + a qualification read directly in every country + fees in one stable currency + examination logistics planned early' },
   ],
 
   legalFrameworkIntro: 'Venezuela is one of the markets where we could not verify the central question, and we would rather open by saying so than write around it. Here is what we can establish and what follows from it.',
@@ -457,7 +457,7 @@ export const VENEZUELA_COUNTRY = {
     { h: 'What we could not establish', p: 'Venezuela\'s position on parental home education. We could not verify it against a primary instrument, and we are not going to fill that gap with confident prose. We will not tell you home education is permitted in Venezuela and we will not tell you it is prohibited; both would exceed what we can evidence, and a family that plans a school year on an overconfident claim carries the cost of it. What we would add is the point we make in Panama and Guatemala: an absence of clear regulation is an absence of protection rather than a permission, because where a matter is unaddressed there is nothing for a family to demonstrate if the question is raised. Put it to the ministry directly.' },
     { h: 'What we therefore build', p: 'Live Cambridge or IB teaching alongside a Venezuelan school enrolment. The school carries the compulsory-education duty and the domestic record; we teach the internationally examined track alongside it. Nothing in that arrangement depends on the unresolved question, which is exactly why it is the arrangement we build.' },
     { h: 'Why the qualification matters more here than the schooling', p: 'This is the honest heart of what we offer Venezuelan families, and it has nothing to do with the quality of Venezuelan teaching, which has a long and distinguished record. It is that a great many families now have members living in Spain, the United States, Colombia, Chile, Panama, Portugal or Canada — and a student\'s record has to work in whichever of those they end up applying from. A national qualification is assessed through recognition procedures that differ in every one of those countries. Cambridge A-Levels, the IB Diploma and AP records are read directly in all of them. For a family whose future geography is genuinely open, that is not a marginal advantage; it is the whole point.' },
-    { h: 'Fees, stated simply', p: 'We quote and invoice in USD, which is widely used in Venezuela for larger commitments. USD 2,160-6,480 a year for live small-group teaching through to A-Level is one figure a family can plan a five-year commitment around, and we would rather present it that way than in a form that has to be recalculated.' },
+    { h: 'Fees, stated simply', p: 'We quote and invoice in USD, which is widely used in Venezuela for larger commitments. USD 5,076 a year for live small-group teaching through to A-Level is one figure a family can plan a five-year commitment around, and we would rather present it that way than in a form that has to be recalculated.' },
     { h: 'Examinations, planned earlier than usual', p: 'One practical commitment specific to this market. We raise the examination question at enrolment rather than in the term before a series. Caracas provision is checked first and regional families plan travel into each window well ahead — and where a domestic sitting is not practical for a particular series, we discuss alternatives with the family in good time, including sittings arranged where relatives live in Colombia, Panama, Spain or the United States. That planning is part of what a family is buying here, and we would rather over-prepare it than assume it.' },
   ],
 
@@ -474,7 +474,7 @@ export const VENEZUELA_COUNTRY = {
     { q: 'Is homeschooling legal in Venezuela?', a: 'We could not verify a position from a primary Venezuelan instrument and will not guess. Education is compulsory under the Ley Orgánica de Educación of 2009 and administered by the Ministerio del Poder Popular para la Educación. An absence of clear regulation is not a permission — put the question to the ministry directly. Structured study alongside a school enrolment raises none of it.' },
     { q: 'Is Smartious an authorised Venezuelan institution?', a: 'No, and we say so plainly. We work alongside a Venezuelan school that holds authorisation, and teach Cambridge, Edexcel, IB and AP qualifications with their own international validity.' },
     { q: 'Our family has members in several countries — which qualification travels best?', a: 'Cambridge A-Levels and the IB Diploma, with AP for US-focused applications. All are read directly in Spain, the United States, Colombia, Chile, Portugal, Canada and the UK, whereas a national record is assessed through different recognition procedures in each.' },
-    { q: 'How are fees handled?', a: 'Quoted and invoiced in USD, which is widely used here for larger commitments — USD 2,160-6,480 a year for live small-group teaching. One figure to plan a multi-year commitment around.' },
+    { q: 'How are fees handled?', a: 'Quoted and invoiced in USD, which is widely used here for larger commitments — USD 5,076 a year for live small-group teaching. One figure to plan a multi-year commitment around.' },
     { q: 'Where would our child sit examinations?', a: 'We plan this at enrolment rather than late. Caracas provision is checked first, regional families plan travel into each window ahead, and where a domestic sitting is not practical we discuss alternatives in good time — including sittings arranged where relatives live abroad.' },
     { q: 'What if our family moves country mid-programme?', a: 'The curriculum, teachers, and examination board continue unchanged. Only the address changes, and examinations are sat at authorised centres wherever the family is — this is a case we handle regularly across our coverage.' },
     { q: 'How does the timezone work?', a: 'Seven hours, fixed. Venezuelan mornings and very early afternoons both land in our teaching day, and with schools commonly running turno mañana and tarde, most students have one window genuinely free.' },

@@ -67,7 +67,7 @@ export const PANAMA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Panama City families. The capital runs the canal, the banking and maritime sector, and a multinational regional-headquarters regime that has drawn corporate families from across the Americas, Europe, and Asia — and with them an international school tier unusually deep for a country of Panama\'s size: Balboa Academy, the International School of Panama, the Metropolitan School, King\'s College Panama, the French and German schools. The fees sit at the top of the Central American market. We teach Cambridge and IB live in the Panamanian morning, alongside a school enrolment.',
     heroImg: '/heroes/panama-city-pa.jpg',
     altTexts: { hero: 'Panama City skyline and the bay' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Panama City families — the capital tier\'s curriculum at a fraction of its fees. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Panama City families — the capital tier\'s curriculum at a fraction of its fees. From USD 423/month.',
     challenges: [
       'International school fees in Panama City sit at the top of the Central American market.',
       'Places at the strongest schools are competitive, and the regional-headquarters regime keeps demand high.',
@@ -97,7 +97,7 @@ export const PANAMA_CITIES = [
       'University application support — UCAS (UK), Common Application (US), and Spanish, Canadian and Panamanian university applications',
     ],
     whyChoose: [
-      ['The tier\'s examinations at a professional family\'s budget', 'Live small-group Cambridge teaching at USD 2,160-6,480 a year against a capital tier priced at the top of Central America.'],
+      ['The tier\'s examinations at a professional family\'s budget', 'Live small-group Cambridge teaching at USD 5,076 a year against a capital tier priced at the top of Central America.'],
       ['No exchange-rate exposure', 'Panama uses the US dollar alongside the balboa, so our fees are quoted in the currency families already hold.'],
       ['Built for a regional-headquarters posting', 'Corporate families move on; the curriculum, teachers, and examination board continue unchanged to the next country.'],
       ['Morning classes that fit the afternoon turno', 'We are eight hours ahead, so our block lands in the Panamanian morning.'],
@@ -116,7 +116,7 @@ export const PANAMA_CITIES = [
     faqs: [
       { q: 'Is homeschooling legal in Panama?', a: 'We will not give you a confident answer, because we could not verify one. Educación básica general is compulsory and administered by MEDUCA; the indication available is secondary commentary placing Panama among countries where home education is not specifically regulated. An absence of regulation is not a permission, and a family whose plan depends on this should put the question directly to MEDUCA. Structured study alongside a school enrolment raises none of it, and that is what we offer.' },
       { q: 'Is Smartious a MEDUCA-authorised school?', a: 'No, and we say so plainly. Private schools operate with MEDUCA authorisation. We work alongside a Panamanian school that holds it, and teach Cambridge, Edexcel, IB and AP qualifications.' },
-      { q: 'How do the fees compare with the Panama City tier?', a: 'The capital\'s international fees sit at the top of the Central American market. Smartious runs USD 2,160-6,480 a year for live small-group teaching toward the same Cambridge examinations, quoted in the dollars Panama already uses.' },
+      { q: 'How do the fees compare with the Panama City tier?', a: 'The capital\'s international fees sit at the top of the Central American market. Smartious runs USD 5,076 a year for live small-group teaching toward the same Cambridge examinations, quoted in the dollars Panama already uses.' },
       { q: 'What are the class times?', a: 'We are eight hours ahead, so our classes land in the Panamanian morning. For a student in the afternoon turno that is the free half of the day. After-school and morning blocks are both available, since we run two teaching teams in different time zones.' },
     ],
   },
@@ -132,7 +132,7 @@ export const PANAMA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Colón and Atlantic-side families. Colón hosts one of the largest free zones in the world, the Atlantic entrance to the canal, and container terminals handling transhipment for the whole hemisphere — an economy that trades with every continent daily, run by logistics, shipping, and commercial families. What it does not have is international schooling: for that, the capital is an hour and a half across the isthmus. Smartious teaches Cambridge and IB live in the Panamanian morning, alongside a school enrolment.',
     heroImg: '/heroes/colon-pa.jpg',
     altTexts: { hero: 'Colón and the Atlantic canal entrance' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Colón and Atlantic families — the free zone and container ports, no local provision. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Colón and Atlantic families — the free zone and container ports, no local provision. From USD 423/month.',
     challenges: [
       'Almost no international schooling on the Atlantic side, with the capital an hour and a half away.',
       'A free-zone and transhipment economy trading globally with schooling built for a provincial city.',
@@ -194,7 +194,7 @@ export const PANAMA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Chiriquí families. David is the commercial capital of western Panama, and in the highlands above it Boquete has become one of the best-known North American retiree and expatriate destinations in Latin America — increasingly with younger families alongside the retirees, drawn by the climate, the coffee economy, and the cost of living. The border corridor to Costa Rica runs west. International schooling in the province is minimal and the capital is a flight or a long drive east. Smartious teaches live to Chiriquí in the Panamanian morning.',
     heroImg: '/heroes/david-pa.jpg',
     altTexts: { hero: 'Boquete highlands and the Chiriquí valley' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for David, Boquete and Chiriquí families — retiree and expat highlands, minimal provision. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for David, Boquete and Chiriquí families — retiree and expat highlands, minimal provision. From USD 423/month.',
     challenges: [
       'A large and growing expatriate community with minimal international schooling in the province.',
       'Panama City is a flight or a long drive east.',
@@ -257,7 +257,7 @@ export const PANAMA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Bocas del Toro families. The archipelago runs a tourism and hospitality economy of genuinely international scale, with hotel, dive, and adventure businesses owned and staffed by families from North America, Europe, and across Latin America, alongside a scattered remote-work community and the banana plantations of the mainland province. Getting a child to an international school from here means a flight and a boat. Smartious teaches live to the islands in the Panamanian morning, with a rhythm built for a season.',
     heroImg: '/heroes/bocas-del-toro-pa.jpg',
     altTexts: { hero: 'Bocas del Toro archipelago' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Bocas del Toro families — Caribbean archipelago, no realistic school access. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Bocas del Toro families — Caribbean archipelago, no realistic school access. From USD 423/month.',
     challenges: [
       'An island province where reaching an international school means a flight and a boat.',
       'A scattered expatriate community across several islands rather than one settlement.',
@@ -319,7 +319,7 @@ export const PANAMA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for families along Panama\'s Pacific coast. The corridor running west from the capital through Coronado, Gorgona, and out toward Farallón has become one of the largest expatriate residential belts in Central America — built initially around retirement and second homes, and increasingly occupied by younger remote-work households with school-age children. The capital\'s international schools are an hour and a half east on a road nobody wants to drive twice a day. Smartious teaches live to the coast in the Panamanian morning.',
     heroImg: '/heroes/coronado-pa.jpg',
     altTexts: { hero: 'The Panamanian Pacific coast' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Coronado and Pacific coast families — a large expat belt an hour and a half from the capital tier. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Coronado and Pacific coast families — a large expat belt an hour and a half from the capital tier. From USD 423/month.',
     challenges: [
       'A large expatriate residential belt with the international tier an hour and a half east.',
       'A corridor of scattered communities rather than one town with a campus.',
@@ -407,7 +407,7 @@ export const PANAMA_COUNTRY = {
   heroEyebrow: 'Online school for Panama',
   heroH1Suffix: 'Panama',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for canal, banking, expatriate, and Panamanian families across Panama City, Colón, David and Boquete, Bocas del Toro, and the Pacific coast. Educación básica general is compulsory and administered by MEDUCA; on home education we could not verify a position and say so rather than guessing. Fees in USD, because Panama already uses it.',
-  heroValueProp: 'From USD 180/month, quoted in the currency you already hold. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — morning teaching, alongside your school.',
+  heroValueProp: 'From USD 423/month, quoted in the currency you already hold. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — morning teaching, alongside your school.',
   whatsappTrigger: 'Hi, I would like to enquire about Smartious for our family in Panama',
 
   citiesSectionTitle: 'Where our Panama families are',
@@ -440,7 +440,7 @@ export const PANAMA_COUNTRY = {
     { name: 'Chiriquí and Boquete',                            city: 'Western Panama',        curriculum: 'Minimal',                               feesUsd: 'Little international option',                       feesAed: '—',                       rating: 0,   capacityNote: 'One of Latin America\'s best-known expatriate regions, with almost no international schooling' },
     { name: 'Bocas del Toro and the Pacific corridor',         city: 'Islands and coast',     curriculum: '—',                                     feesUsd: 'No realistic campus access',                        feesAed: '—',                       rating: 0,   capacityNote: 'An archipelago and a large residential belt, both outside the school map' },
     { name: 'US-based online schools',                         city: 'Online',                curriculum: 'American online',                       feesUsd: 'Varies, often per-course',                          feesAed: 'Varies',                  rating: 4.3, capacityNote: 'Much closer to Panama on the clock and culturally familiar to the large US community — families should weigh that honestly against price and class size' },
-    { name: 'Smartious Homeschool (Panama via online delivery)', city: 'Delivered to all Panama', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 2,160-6,480/year',                            feesAed: 'Quoted in USD — no FX exposure', rating: 4.8, capacityNote: 'Every class live through A-Level + Chiriquí, Bocas and the corridor reached + honest that we could not verify the home-education position and will not guess' },
+    { name: 'Smartious Homeschool (Panama via online delivery)', city: 'Delivered to all Panama', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 5,076/year',                            feesAed: 'Quoted in USD — no FX exposure', rating: 4.8, capacityNote: 'Every class live through A-Level + Chiriquí, Bocas and the corridor reached + honest that we could not verify the home-education position and will not guess' },
   ],
 
   legalFrameworkIntro: 'Panama is the country in our Latin American coverage where we know the least, and we would rather open by saying so than write around it. Here is what we can establish, what we cannot, and what follows.',
@@ -466,7 +466,7 @@ export const PANAMA_COUNTRY = {
     { q: 'Is homeschooling legal in Panama?', a: 'We could not verify a position from a primary Panamanian instrument, and we will not guess. Educación básica general is compulsory and administered by MEDUCA; the indication available is secondary commentary placing Panama among countries where home education is not specifically regulated. That is an absence of rules rather than a permission — and an absence of rules is also an absence of protection. Put the question directly to MEDUCA before acting.' },
     { q: 'Why does Ecuador get a clearer answer than Panama on your site?', a: 'Because Ecuador\'s ministry names and regulates the modality in detail and Panama, so far as we can establish, does not address it. We would rather show that difference than flatten both into a confident sentence.' },
     { q: 'Is Smartious a MEDUCA-authorised school?', a: 'No, and we say so plainly. Private schools operate with MEDUCA authorisation. We work alongside a Panamanian school that holds it, and teach Cambridge, Edexcel, IB and AP qualifications.' },
-    { q: 'How do fees work given dollarisation?', a: 'Panama uses the US dollar alongside the balboa at parity, so our fees are quoted and invoiced in the currency you already hold — USD 2,160-6,480 a year, with no exchange-rate exposure.' },
+    { q: 'How do fees work given dollarisation?', a: 'Panama uses the US dollar alongside the balboa at parity, so our fees are quoted and invoiced in the currency you already hold — USD 5,076 a year, with no exchange-rate exposure.' },
     { q: 'Eight hours behind — how does the timetable work?', a: 'Our classes land in the Panamanian morning, not the afternoon. For students on the afternoon turno that is the free half of the day; for full-time learners mornings are natural anyway. It does not work after school, and morning-turno families should talk to us before enrolling.' },
     { q: 'We live in Boquete, Bocas, or along the Pacific corridor — is there anything local?', a: 'Almost nothing. A substantial share of Panama\'s international residents live outside the capital and the international tier does not follow them. Live delivery reaches all of it identically.' },
     { q: 'Would a US online school suit us better?', a: 'Possibly, and we would rather raise it than have you discover it. A US provider is closer on the clock and culturally familiar to Panama\'s large American community. What we offer against that is price, live groups of four to six, and Cambridge and IB alongside the American route.' },

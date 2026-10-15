@@ -90,7 +90,7 @@ export const MYANMAR_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Yangon families. The commercial capital holds the country\'s deepest international school provision, a long university tradition, a substantial professional community and the river port that has shaped its trade for centuries. Cambridge is well understood here — Myanmar private schools have offered IGCSE and A-Level for many years. What we add is the subject sets a single timetable cannot sustain, fees below the international tier, and a timetable that fits an ordinary Yangon school day: our teaching hours land squarely in your after-school and evening.',
     heroImg: '/heroes/yangon-mm.jpg',
     altTexts: { hero: 'Yangon' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Yangon families — after-school and evening classes that fit our teaching day. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Yangon families — after-school and evening classes that fit our teaching day. From USD 423/month.',
     challenges: [
       'International school fees in Yangon are set at international levels with competitive places.',
       'Specialist A-Level subjects often will not run for small cohorts even in strong schools.',
@@ -122,7 +122,7 @@ export const MYANMAR_CITIES = [
     whyChoose: [
       ['After-school hours that genuinely work', 'Myanmar runs three and a half hours ahead of our teaching base, so a four or six o\'clock class in Yangon lands in the middle of our day. An after-school arrangement fails in most of our markets and works cleanly here.'],
       ['The set your school cannot staff', 'Further Mathematics or a third science for four pupils is unviable on one timetable and routine in a live group drawn from several countries.'],
-      ['A fee gap against the international tier', 'Live small-group teaching at USD 2,160-6,480 a year, quoted in USD.'],
+      ['A fee gap against the international tier', 'Live small-group teaching at USD 5,076 a year, quoted in USD.'],
       ['Cambridge is already familiar here', 'Myanmar private schools have offered IGCSE and A-Level for many years, so families understand where an examined international track sits.'],
       ['Honest about the legal gap', 'We could not verify Myanmar\'s home-education position and say so rather than guessing in either direction.'],
     ],
@@ -155,7 +155,7 @@ export const MYANMAR_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Mandalay families. The second city sits at the centre of the country\'s trade routes and its historic cultural life — crafts, gemstones, textiles and the agriculture of the central dry zone, alongside a long university tradition. It is a substantial commercial and academic population, and international school provision here is a fraction of Yangon\'s, six hundred kilometres south. Live delivery reaches Mandalay identically, in after-school and evening hours that fit our teaching day.',
     heroImg: '/heroes/mandalay-mm.jpg',
     altTexts: { hero: 'Mandalay and the Ayeyarwady' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Mandalay families — the second city, thin international provision. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Mandalay families — the second city, thin international provision. From USD 423/month.',
     challenges: [
       'International provision is a fraction of Yangon\'s, six hundred kilometres south.',
       'A substantial commercial and academic population with few local options.',
@@ -217,7 +217,7 @@ export const MYANMAR_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Naypyidaw families. The administrative capital holds the country\'s government institutions and the professional community that works around them, laid out as a planned city with widely dispersed districts. International school provision is very limited, and Yangon is around three hundred and twenty kilometres south. For families here the constraint is straightforward — distance and availability — and live delivery answers both, in after-school and evening hours that fit our teaching day.',
     heroImg: '/heroes/naypyidaw-mm.jpg',
     altTexts: { hero: 'Naypyidaw' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Naypyidaw families — the administrative capital, very limited provision. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Naypyidaw families — the administrative capital, very limited provision. From USD 423/month.',
     challenges: [
       'Very limited international school provision in the administrative capital.',
       'Yangon is around three hundred and twenty kilometres south.',
@@ -279,7 +279,7 @@ export const MYANMAR_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Taunggyi and Shan highland families. The highlands carry a distinct regional economy — tea, coffee, horticulture and market gardening in a cooler climate than the plains, with Inle Lake and its communities nearby and agricultural trade running through Taunggyi. It is a genuinely productive region and international schooling here does not exist; Mandalay is a long journey north-west and Yangon further still. Live delivery reaches the highlands identically, in after-school and evening hours that fit our teaching day.',
     heroImg: '/heroes/taunggyi-mm.jpg',
     altTexts: { hero: 'The Shan highlands and Inle Lake' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Taunggyi and Shan highland families — tea and horticulture country, no local provision. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Taunggyi and Shan highland families — tea and horticulture country, no local provision. From USD 423/month.',
     challenges: [
       'Essentially no international schooling in the highlands.',
       'Mandalay is a long journey north-west and Yangon further still.',
@@ -341,7 +341,7 @@ export const MYANMAR_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Mawlamyine and southern Myanmar families. The southern coastal city sits at the mouth of the Thanlwin river with a long trading and maritime tradition, at the centre of a regional economy built on rubber, agriculture and fisheries through Mon State and the coast beyond. International school provision does not exist here and Yangon is around three hundred kilometres north-west. Live delivery reaches the south identically, in after-school and evening hours that fit our teaching day.',
     heroImg: '/heroes/mawlamyine-mm.jpg',
     altTexts: { hero: 'Mawlamyine and the Thanlwin river' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Mawlamyine and southern Myanmar families — port and rubber country, no local provision. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Mawlamyine and southern Myanmar families — port and rubber country, no local provision. From USD 423/month.',
     challenges: [
       'No international school provision in the southern regions.',
       'Yangon is around three hundred kilometres north-west.',
@@ -429,7 +429,7 @@ export const MYANMAR_COUNTRY = {
   heroEyebrow: 'Online school for Myanmar',
   heroH1Suffix: 'Myanmar',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for professional, academic, agricultural and Myanmar families across Yangon, Mandalay, Naypyidaw, Taunggyi and Mawlamyine. Myanmar sits three and a half hours ahead of our teaching base, which means after-school and evening classes land squarely in the middle of our day — one of the better fits in our coverage.',
-  heroValueProp: 'From USD 180/month, quoted in USD. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — after-school and evening, alongside your school.',
+  heroValueProp: 'From USD 423/month, quoted in USD. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — after-school and evening, alongside your school.',
   whatsappTrigger: 'Hi, I would like to enquire about Smartious for our family in Myanmar',
 
   citiesSectionTitle: 'Where our Myanmar families are',
@@ -462,7 +462,7 @@ export const MYANMAR_COUNTRY = {
     { name: 'Mandalay and Naypyidaw',                              city: 'Central Myanmar',    curriculum: 'Thin to very limited',                  feesUsd: 'Limited international option',                      feesAed: '—',                       rating: 0,   capacityNote: 'A second city and an administrative capital, both far thinner than their populations suggest' },
     { name: 'The Shan highlands and the south',                    city: 'Regional Myanmar',   curriculum: '—',                                     feesUsd: 'No international provision',                        feesAed: '—',                       rating: 0,   capacityNote: 'A productive highland agricultural economy and a southern port region, neither with international schooling' },
     { name: 'Private tuition',                                     city: 'Nationwide',         curriculum: 'Exam-focused coaching',                 feesUsd: 'Per hour, per subject',                             feesAed: 'Widespread',              rating: 4.0, capacityNote: 'The default answer to a subject gap — usually one-to-one and unstructured across a year' },
-    { name: 'Smartious Homeschool (Myanmar via online delivery)',   city: 'Delivered nationwide', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 2,160-6,480/year',                              feesAed: 'Quoted in USD',            rating: 4.8, capacityNote: 'Every class live through A-Level + after-school hours that genuinely work + Mandalay, the highlands and the south reached + examinations planned early' },
+    { name: 'Smartious Homeschool (Myanmar via online delivery)',   city: 'Delivered nationwide', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 5,076/year',                              feesAed: 'Quoted in USD',            rating: 4.8, capacityNote: 'Every class live through A-Level + after-school hours that genuinely work + Mandalay, the highlands and the south reached + examinations planned early' },
   ],
 
   legalFrameworkIntro: 'Myanmar is one of the markets where we could not verify the central question, and we would rather open by saying so than write around it. Here is what we can establish, and the practical facts that shape our offer here.',
@@ -491,7 +491,7 @@ export const MYANMAR_COUNTRY = {
     { q: 'Our school already offers IGCSE — what would we gain?', a: 'Usually a subject it cannot staff for a small cohort — Further Mathematics, a third science, or a clashing set. If your school covers what your child needs, we will tell you so.' },
     { q: 'Where would our child sit examinations?', a: 'We plan this at enrolment. Yangon holds the deepest capacity and is checked first, Mandalay serves central-region families, and arrangements for Naypyidaw, Taunggyi and the south are planned several weeks ahead of each window.' },
     { q: 'Where do Myanmar students usually apply abroad?', a: 'Singapore, Thailand, Malaysia, Australia, the United Kingdom, the United States and Japan are all common. UCAS reads A-Levels natively, and Australian, Singaporean and Malaysian universities read A-Levels and the IB directly — they are among the most familiar destinations from this country.' },
-    { q: 'How are fees handled?', a: 'Quoted and invoiced in USD, which is used here for larger commitments — USD 2,160-6,480 a year for live small-group teaching.' },
+    { q: 'How are fees handled?', a: 'Quoted and invoiced in USD, which is used here for larger commitments — USD 5,076 a year for live small-group teaching.' },
     { q: 'Which parts of Myanmar does Smartious cover?', a: 'Yangon, Mandalay, Naypyidaw, Taunggyi and the Shan highlands, and Mawlamyine and the south have dedicated pages. Live online delivery works identically anywhere in the country.' },
   ],
 

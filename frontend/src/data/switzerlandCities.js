@@ -82,7 +82,7 @@ export const SWITZERLAND_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Geneva families. Geneva is the international capital: the UN\'s European headquarters, the WHO, WTO, ILO, and ICRC, CERN across the border, and a private banking sector older than most countries\' central banks. Its schooling matches that history — the International School of Geneva is the world\'s oldest international school and the birthplace of the IB Diploma — and so do its fees, which are among the highest anywhere. Smartious is not built to replace Ecolint or the Geneva English School; it is built for the families beside them: mission staff on shorter contracts, NGO and diplomatic households outside the top allowance bands, and families needing a specific track their campus does not carry. In canton Geneva home education requires authorisation, so our clean default here is supplementary, alongside your enrolment.',
     heroImg: 'https://images.unsplash.com/photo-1573108724029-4c46571d6490?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Geneva lake, Jet d\'Eau and the Alps' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Geneva families — supplementary beside the international tier, UN and NGO households. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Geneva families — supplementary beside the international tier, UN and NGO households. From USD 423/month.',
     challenges: [
       'The international school tier is world-class and priced accordingly — commonly CHF 25,000-45,000 a year at day schools, and far more in boarding.',
       'Allowance bands vary sharply between organisations: two families at the same institution can face completely different fee realities.',
@@ -112,7 +112,7 @@ export const SWITZERLAND_CITIES = [
       'University application support — UCAS (UK), Common Application (US), and Swiss, French and wider European university applications',
     ],
     whyChoose: [
-      ['The fee gap is the largest we have anywhere', 'Geneva day fees commonly run CHF 25,000-45,000; Smartious runs USD 2,160-6,480 a year. We are the supplement, the bridge, or the alternative — never a claim to replace what Ecolint does on campus.'],
+      ['The fee gap is the largest we have anywhere', 'Geneva day fees commonly run CHF 25,000-45,000; Smartious runs USD 5,076 a year. We are the supplement, the bridge, or the alternative — never a claim to replace what Ecolint does on campus.'],
       ['Built for short missions', 'Geneva postings move; the curriculum, teachers, and examination board stay constant to the next duty station.'],
       ['The Cambridge track beside an IB city', 'Geneva is IB country by history. Families wanting A-Levels for UCAS often have to look outside their campus — and that is exactly what we teach live.'],
       ['The canton\'s rules stated honestly', 'Geneva requires authorisation for home education and Switzerland recognises no constitutional right to it. We run supplementary alongside your enrolment and point you to the canton for anything more.'],
@@ -130,7 +130,7 @@ export const SWITZERLAND_CITIES = [
     onlineLearningDetail: 'Live online via Smartious LMS. Classes land inside the Geneva school day given the 1-2 hour offset, with every session recorded — which suits mission travel and the international community\'s rhythms.',
     faqs: [
       { q: 'Is homeschooling legal in Geneva?', a: 'Switzerland recognises no constitutional right to home education — the Federal Supreme Court confirmed in 2019 that cantons may permit or restrict it as they see fit — and canton Geneva requires authorisation. Our clean default is supplementary: your enrolment carries the Schulpflicht while we teach the Cambridge or IB track alongside it. Confirm the current cantonal position with Geneva\'s education department.' },
-      { q: 'How does Smartious compare with Ecolint or the Geneva English School?', a: 'They are outstanding institutions with campus culture, facilities, and peer networks we cannot replicate, and we do not position against them. Smartious runs live small-group teaching at USD 2,160-6,480 a year — the supplement beside a campus, the bridge while a place or an allowance is sorted, or the continuity track when a mission moves.' },
+      { q: 'How does Smartious compare with Ecolint or the Geneva English School?', a: 'They are outstanding institutions with campus culture, facilities, and peer networks we cannot replicate, and we do not position against them. Smartious runs live small-group teaching at USD 5,076 a year — the supplement beside a campus, the bridge while a place or an allowance is sorted, or the continuity track when a mission moves.' },
       { q: 'We are on a two-year mission contract — does that suit online schooling?', a: 'It is one of the strongest fits in Geneva: the curriculum, teachers, and examination board continue unchanged to the next duty station, with examinations sat at authorised centres wherever the family is.' },
       { q: 'Can our child take Cambridge A-Levels in an IB city?', a: 'Yes — Geneva is IB country by history, so families wanting A-Levels for a UCAS application frequently have to look beyond their campus. We teach the full IGCSE-to-A-Level route live.' },
     ],
@@ -147,7 +147,7 @@ export const SWITZERLAND_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Zurich families. Zurich is Switzerland\'s financial capital and, increasingly, its technology one — global banking and insurance alongside the largest engineering operations in continental Europe for several US technology firms, drawing a highly international workforce to the lake\'s Gold Coast and the city\'s western districts. Its international tier is strong and priced at Zurich levels. Smartious works beside it: the supplement for families whose campus does not carry a subject or a board, the bridge while a place opens, and the continuity track for corporate rotations. Canton Zurich permits home education under conditions — including that a person without a recognised teaching diploma may teach for only about a year — so supplementary is our clean default.',
     heroImg: 'https://images.unsplash.com/photo-1515488764276-beab7607c1e6?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Zurich lake and the old town' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Zurich families — supplementary beside the international tier, corporate rotations. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Zurich families — supplementary beside the international tier, corporate rotations. From USD 423/month.',
     challenges: [
       'International school fees at Zurich levels, commonly CHF 25,000-45,000 a year at day schools.',
       'Corporate relocations arrive on business timelines rather than admission cycles.',
@@ -176,7 +176,7 @@ export const SWITZERLAND_CITIES = [
       'University application support — UCAS (UK), Common Application (US), and Swiss and European university applications',
     ],
     whyChoose: [
-      ['A fee gap measured in tens of thousands', 'Zurich day fees commonly run CHF 25,000-45,000; Smartious runs USD 2,160-6,480 a year as supplement, bridge, or alternative.'],
+      ['A fee gap measured in tens of thousands', 'Zurich day fees commonly run CHF 25,000-45,000; Smartious runs USD 5,076 a year as supplement, bridge, or alternative.'],
       ['STEM depth for a quantitative city', 'Cambridge A-Level Mathematics, Further Mathematics, Physics, and Computer Science — led by a founder with a BEd in Mathematics and Physics — suit banking and engineering families precisely.'],
       ['Enrolment on the relocation\'s timeline', 'Mid-year arrivals start within a week of the assessment, with no waitlist.'],
       ['The canton\'s rules stated honestly', 'Zurich permits home education under conditions including a teaching diploma beyond roughly a year, and Switzerland recognises no constitutional right. Supplementary is our default; the canton is the authority.'],
@@ -210,7 +210,7 @@ export const SWITZERLAND_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Basel families. Basel is the world\'s pharmaceutical capital — Roche and Novartis headquartered within sight of each other, a research and biotech ecosystem recruiting scientists globally, and a tri-national metropolitan area spilling into Germany and France. It is also the canton whose refusal of a home-education application produced the 2019 Federal Supreme Court ruling that Switzerland recognises no constitutional right to teach a child at home: in Basel-Stadt, home education is effectively unavailable in practice. Which makes the position here unusually clear — Smartious works alongside your school enrolment, never instead of it, adding the Cambridge or IB track live in the after-school hours.',
     heroImg: 'https://images.unsplash.com/photo-1591101379470-9ca6a9dbbbfb?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Basel Rhine and the old town' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Basel families — pharma capital, supplementary track alongside school enrolment. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Basel families — pharma capital, supplementary track alongside school enrolment. From USD 423/month.',
     challenges: [
       'Basel-Stadt effectively does not permit home education — the supplementary configuration is the only one available.',
       'International school fees at Swiss levels for a globally recruited pharma and biotech workforce.',
@@ -273,7 +273,7 @@ export const SWITZERLAND_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Zug and Lucerne families. Zug packs an extraordinary amount of the world economy into a small canton — global commodity trading houses, the blockchain cluster known as Crypto Valley, and one of Europe\'s densest concentrations of corporate headquarters per resident — while neighbouring Lucerne combines a tourism and services economy with its own university and research base. The two cantons also illustrate the Swiss reality better than anywhere: in Zug home education is effectively unavailable, while Lucerne licenses it under a detailed authorisation regime requiring a teaching diploma. In both, the workable configuration is the same one: Smartious alongside your school enrolment.',
     heroImg: 'https://images.unsplash.com/photo-1527668752968-14dc70a27c95?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Zug lakefront and the central Swiss mountains' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Zug and Lucerne families — commodity trading and Crypto Valley, supplementary track. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Zug and Lucerne families — commodity trading and Crypto Valley, supplementary track. From USD 423/month.',
     challenges: [
       'Zug effectively does not permit home education; Lucerne licenses it under a demanding authorisation regime requiring a teaching diploma.',
       'A highly international corporate population against a compact local international-school tier.',
@@ -305,7 +305,7 @@ export const SWITZERLAND_CITIES = [
       ['Economics and mathematics depth for a trading canton', 'Cambridge A-Level Economics, Mathematics, and Further Mathematics suit commodity and blockchain families precisely.'],
       ['Clarity across two very different cantons', 'Zug effectively forbids home education; Lucerne licenses it with a teaching diploma and a detailed application. The supplementary configuration works in both, and we say which is which.'],
       ['Enrolment on the relocation\'s timeline', 'Short-notice moves start within a week of the assessment, with no waitlist.'],
-      ['A fee gap measured in tens of thousands', 'Swiss day-school fees commonly run CHF 25,000-45,000; Smartious runs USD 2,160-6,480 a year.'],
+      ['A fee gap measured in tens of thousands', 'Swiss day-school fees commonly run CHF 25,000-45,000; Smartious runs USD 5,076 a year.'],
       ['Timezone that lands in the school day', 'Zug and Lucerne are 1-2 hours behind Nairobi EAT.'],
     ],
     growingReason: 'Zug holds global commodity trading houses, Crypto Valley, and one of Europe\'s densest concentrations of corporate headquarters per resident, with Lucerne\'s university and tourism economy beside it — across two cantons at opposite ends of the Swiss home-education spectrum. Both run CET (UTC+1) / CEST (UTC+2), 1-2 hours behind Nairobi EAT.',
@@ -336,7 +336,7 @@ export const SWITZERLAND_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Lausanne and Vaud families. Vaud runs the Lake Geneva arc: EPFL and the University of Lausanne, the International Olympic Committee and the sports-governance cluster, world-leading hospitality schools, and a corridor of research and multinational offices running from Nyon to Montreux. It has also been, historically, the canton with more home-educated children than any other in Switzerland — one of the few that worked on notification rather than authorisation. That position has been tightening, in Vaud as across the country, which is exactly why we describe the current landscape carefully and default to the supplementary configuration.',
     heroImg: 'https://images.unsplash.com/photo-1573108724029-4c46571d6490?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Lausanne, Lake Geneva and the Lavaux vineyards' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Lausanne and Vaud families — EPFL and Olympic capital, historically Switzerland\'s largest home-education canton. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Lausanne and Vaud families — EPFL and Olympic capital, historically Switzerland\'s largest home-education canton. From USD 423/month.',
     challenges: [
       'Vaud has historically been among the most open cantons, but rules across Switzerland have been tightening and the position should be checked currently.',
       'International school fees along the lake arc are at the top of the Swiss range.',
@@ -399,7 +399,7 @@ export const SWITZERLAND_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for families across the Swiss Alpine resort belt. Valais, Graubünden, and the Bernese Oberland run one of the world\'s most international mountain economies — Verbier, Zermatt, St Moritz, Davos, and Gstaad draw resort operators, chalet and hospitality businesses, seasonal professionals, and a permanent international residential community, alongside the most expensive boarding schools on earth. Between those two extremes sits everyone else: families who live and work in the mountains year-round and want an internationally examined education without a six-figure fee or a child sent down the valley. Note the cantonal detail: Valais and Graubünden are among the cantons requiring a recognised teaching diploma of anyone teaching at home, so the supplementary configuration is the practical route.',
     heroImg: 'https://images.unsplash.com/photo-1527668752968-14dc70a27c95?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Swiss Alpine resort village in winter' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Verbier, Zermatt, St Moritz, Davos and Gstaad families — seasonal economy, boarding-school prices, supplementary route. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Verbier, Zermatt, St Moritz, Davos and Gstaad families — seasonal economy, boarding-school prices, supplementary route. From USD 423/month.',
     challenges: [
       'Local schooling is village-scale; the international alternative is the world\'s most expensive boarding tier.',
       'Valais and Graubünden are among the cantons requiring a recognised teaching diploma for home teaching.',
@@ -428,7 +428,7 @@ export const SWITZERLAND_CITIES = [
       'University application support — UCAS (UK), Common Application (US), and Swiss and European university applications',
     ],
     whyChoose: [
-      ['International education without the boarding tier\'s price', 'The Alps hold the world\'s most expensive schools; Smartious runs USD 2,160-6,480 a year, delivered to the valley.'],
+      ['International education without the boarding tier\'s price', 'The Alps hold the world\'s most expensive schools; Smartious runs USD 5,076 a year, delivered to the valley.'],
       ['Built for the season and for ski racing', 'Live classes plus unlimited recordings hold the academic pace through the winter season and a competition calendar — the exact pattern our Austrian and Georgian mountain families run.'],
       ['The alternative to sending a child down the valley', 'Boarding or a long daily descent have been the options; live small-group teaching at home is the third.'],
       ['Cantonal rules stated honestly', 'Valais and Graubünden are among the cantons requiring a teaching diploma for home teaching — so we run supplementary alongside the local school and point families to their canton.'],
@@ -488,7 +488,7 @@ export const SWITZERLAND_COUNTRY = {
   heroEyebrow: 'Online international school for Switzerland',
   heroH1Suffix: 'Switzerland',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for international-organisation, finance, pharma, and Swiss families across Geneva, Zurich, Basel, Zug and Lucerne, Lausanne and Vaud, and the Alpine resorts. Switzerland has twenty-six school laws and no constitutional right to home education — so our clean default is supplementary: your enrolment carries the Schulpflicht, and we teach the international track live alongside it, at a fraction of Swiss school fees.',
-  heroValueProp: 'From USD 180/month (~CHF 160/month). Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — against day-school fees commonly CHF 25,000-45,000 and a boarding tier in six figures.',
+  heroValueProp: 'From USD 423/month (~CHF 372/month). Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — against day-school fees commonly CHF 25,000-45,000 and a boarding tier in six figures.',
   whatsappTrigger: 'Hi, I would like to enquire about Smartious for our family in Switzerland',
 
   citiesSectionTitle: 'Where our Switzerland families are',
@@ -522,7 +522,7 @@ export const SWITZERLAND_COUNTRY = {
     { name: 'Swiss public schools',                         city: 'Nationwide',            curriculum: 'Cantonal curricula',                    feesUsd: 'Free',                                             feesAed: '—',                       rating: 4.4, capacityNote: 'Excellent and free — taught in the cantonal language, with an apprenticeship-oriented upper secondary' },
     { name: 'The Alpine valleys and the regions',           city: 'Valais, Graubünden, Oberland', curriculum: '—',                              feesUsd: 'Boarding or a long descent',                       feesAed: '—',                       rating: 0,   capacityNote: 'No campus in reach for many mountain families' },
     { name: 'Wolsey Hall Oxford / King\'s InterHigh / bina (online)', city: 'Online',       curriculum: 'Cambridge self-paced / UK online / own to 15', feesUsd: 'Per-subject / GBP 9,000-11,000 / consultation', feesAed: 'Varies',      rating: 4.2, capacityNote: 'Self-paced, priced far above Smartious, or stopping at 15 — and none states the cantonal position or the 2019 ruling' },
-    { name: 'Smartious Homeschool (Switzerland via online delivery)', city: 'Delivered to all Switzerland', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 2,160-6,480/year', feesAed: '~CHF 1,900-5,700/year', rating: 4.8, capacityNote: 'Every class live through A-Level + the largest fee gap in our coverage + the cantonal picture stated honestly + the valleys and regions served identically' },
+    { name: 'Smartious Homeschool (Switzerland via online delivery)', city: 'Delivered to all Switzerland', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 5,076/year', feesAed: '~CHF 1,900-5,700/year', rating: 4.8, capacityNote: 'Every class live through A-Level + the largest fee gap in our coverage + the cantonal picture stated honestly + the valleys and regions served identically' },
   ],
 
   legalFrameworkIntro: 'Switzerland is twenty-six school systems in a trench coat, and the federal answer to the home-education question is unusually blunt. Here is the framework exactly — starting with the ruling that governs all of it.',
@@ -537,7 +537,7 @@ export const SWITZERLAND_COUNTRY = {
 
   whySmartious: [
     { h: 'The federal position stated before anything is sold',              p: 'No constitutional right to home education, cantons decide, restrictive rules are lawful — on the page, in plain language. Trust in a country this varied starts there.' },
-    { h: 'The largest fee gap in our entire coverage',                       p: 'Swiss day schools commonly run CHF 25,000-45,000 and the Alpine boarding tier reaches six figures; Smartious runs USD 2,160-6,480 a year, live and in small groups.' },
+    { h: 'The largest fee gap in our entire coverage',                       p: 'Swiss day schools commonly run CHF 25,000-45,000 and the Alpine boarding tier reaches six figures; Smartious runs USD 5,076 a year, live and in small groups.' },
     { h: 'Honest about what we cannot be',                                   p: 'Where a canton requires a recognised Swiss teaching diploma, we cannot substitute for compulsory schooling — so we teach alongside your enrolment and send you to your canton for the rest.' },
     { h: 'Built for international mobility',                                 p: 'Geneva missions, pharma rotations, and corporate postings all move; the curriculum, teachers, and examination board stay constant across every one.' },
     { h: 'The valleys and regions served identically',                       p: 'The Alpine belt\'s options have been boarding or a long descent. Live small-group teaching reaches every valley the same way.' },
@@ -549,7 +549,7 @@ export const SWITZERLAND_COUNTRY = {
     { q: 'Which cantons are most and least permissive?', a: 'Vaud and Neuchâtel have historically been at the open end, with Vaud reporting the most home-educated children; Bern and Geneva require authorisation; Valais, Fribourg, Graubünden, and Lucerne are among those requiring a teaching diploma; Zurich allows teaching without a diploma for roughly a year only; and Basel-Stadt, Zug, and St Gallen are effectively closed. Rules have been tightening nationally, so confirm your own canton\'s current position with its education department.' },
     { q: 'Can Smartious replace school in Switzerland?', a: 'No, and we do not claim it. Where a canton requires a recognised Swiss teaching diploma and cantonal curriculum compliance, an overseas online school cannot satisfy it. Our clean default is supplementary: your school enrolment carries the Schulpflicht while we teach the Cambridge or IB track live alongside it.' },
     { q: 'What does the supplementary configuration look like in practice?', a: 'Your child stays enrolled — public, private, or international — and takes Cambridge or IB subjects with us live, typically in the after-school slot given the 1-2 hour offset, building toward external examinations at authorised centres. It is the cleanest arrangement in a country this strictly governed.' },
-    { q: 'How do the fees compare with Swiss international schools?', a: 'Day international schools commonly run CHF 25,000-45,000 a year and the Alpine boarding tier reaches six figures. Smartious runs USD 2,160-6,480. We do not position against those institutions — they are outstanding — but for families outside those budgets, or supplementing them, the gap is the largest in our coverage.' },
+    { q: 'How do the fees compare with Swiss international schools?', a: 'Day international schools commonly run CHF 25,000-45,000 a year and the Alpine boarding tier reaches six figures. Smartious runs USD 5,076. We do not position against those institutions — they are outstanding — but for families outside those budgets, or supplementing them, the gap is the largest in our coverage.' },
     { q: 'What happens after compulsory schooling?', a: 'Compulsory schooling comprises eleven years and ends around fifteen; upper-secondary — Gymnasium or apprenticeship — is not compulsory, so the A-Level years sit outside the Schulpflicht. We treat that as a planning fact rather than a marketing claim, because the compulsory years remain strictly governed canton by canton.' },
     { q: 'Will Swiss universities accept Cambridge A-Levels or the IB?', a: 'Both are established international qualifications, and Swiss admission for foreign qualifications is assessed per institution and programme — subject combinations, grade thresholds, and language requirements are confirmed with the university and swissuniversities rather than assumed. UCAS reads A-Levels natively, the Common Application serves US plans, and neighbouring European universities assess both routinely.' },
     { q: 'Where do Swiss students sit Cambridge examinations?', a: 'At authorised centres confirmed per family per session — Zurich, Geneva, and Basel-area provision first, with cross-border and regional options where capacity is limited and Alpine families planning valley travel per series.' },

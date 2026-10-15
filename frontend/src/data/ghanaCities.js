@@ -68,7 +68,7 @@ export const GHANA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Accra families. Accra carries more corporate and institutional weight than almost any city in West Africa — a technology and fintech sector that has drawn continental and global headquarters, the oil and gas majors, the diplomatic and development community, and a returning diaspora from the UK and United States that has reshaped whole neighbourhoods. Its international-school tier is genuinely deep by regional standards, and its fees are at the top of the market. Under the Education Act, 2008, education at the basic level is free, compulsory and universal — so our clean default is supplementary: your school enrolment carries that duty, and we teach the Cambridge or IB track live alongside it.',
     heroImg: '/heroes/accra-gh.jpg',
     altTexts: { hero: 'Accra city and the coast' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Accra families — small-group teaching alongside your school, at a fraction of the tier\'s fees. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Accra families — small-group teaching alongside your school, at a fraction of the tier\'s fees. From USD 423/month.',
     challenges: [
       'International school fees in Accra sit at the very top of the West African market, beyond many professional Ghanaian families.',
       'Places at the strongest schools are competitive, and the returning diaspora has increased demand.',
@@ -98,7 +98,7 @@ export const GHANA_CITIES = [
       'University application support — UCAS (UK), Common Application (US), and Ghanaian, South African and Canadian university applications',
     ],
     whyChoose: [
-      ['The tier\'s examinations at a professional family\'s budget', 'Live small-group Cambridge teaching at USD 2,160-6,480 a year against Accra international fees at the top of the West African market.'],
+      ['The tier\'s examinations at a professional family\'s budget', 'Live small-group Cambridge teaching at USD 5,076 a year against Accra international fees at the top of the West African market.'],
       ['Cambridge alongside the WASSCE route', 'Many Accra families keep their school and its national track and add Cambridge subjects for overseas applications. That combination is the most common shape we run here.'],
       ['Built for the diaspora return', 'A child arriving mid-curriculum from London or Maryland keeps one internationally examined pathway instead of restarting inside a new system.'],
       ['Computing depth for a fintech city', 'Cambridge A-Level Computer Science, Mathematics, and Further Mathematics — led by a founder with a BEd in Mathematics and Physics — suit the sector defining Accra.'],
@@ -133,7 +133,7 @@ export const GHANA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Kumasi families. Kumasi is the Ashanti capital and Ghana\'s second city — home to KNUST, one of West Africa\'s most significant technical universities, and to a gold, timber, and trading economy that has made it the commercial heart of the interior for centuries. Its academic community is substantial and its international schooling is thin relative to its size, with Accra\'s tier four hours south. Smartious delivers live small-group Cambridge and IB teaching across Ashanti, alongside your school enrolment.',
     heroImg: '/heroes/kumasi-gh.jpg',
     altTexts: { hero: 'Kumasi, the Ashanti capital' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Kumasi and Ashanti families — second city, KNUST, thin international provision. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Kumasi and Ashanti families — second city, KNUST, thin international provision. From USD 423/month.',
     challenges: [
       'Thin international schooling for a city of Kumasi\'s size and academic weight.',
       'Accra\'s tier is around four hours south — a relocation decision rather than a commute.',
@@ -196,7 +196,7 @@ export const GHANA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Sekondi-Takoradi and Western Region families. Since the Jubilee field came on stream, Takoradi has been Ghana\'s oil and gas capital — the operators and the international oilfield-services companies, the port and its logistics chain, and a technical workforce recruited from across Africa, Europe, and further afield, much of it on rotational contracts. The city also anchors a Western Region economy of gold, cocoa, and timber. What none of it produced was schooling that scaled with the industry: the deep international tier remains in Accra, around four hours east. Smartious delivers live Cambridge and IB teaching to the oil city instead.',
     heroImg: '/heroes/takoradi-gh.jpg',
     altTexts: { hero: 'Takoradi harbour and the Western Region coast' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Sekondi-Takoradi and Western Region families — Ghana\'s oil hub, thin international schooling. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Sekondi-Takoradi and Western Region families — Ghana\'s oil hub, thin international schooling. From USD 423/month.',
     challenges: [
       'An internationally recruited oil and gas workforce with schooling that never scaled with the industry.',
       'Accra\'s international tier is around four hours east — a relocation or a boarding decision.',
@@ -285,7 +285,7 @@ export const GHANA_COUNTRY = {
   heroEyebrow: 'Online school for Ghana',
   heroH1Suffix: 'Ghana',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for corporate, energy, diaspora, and Ghanaian families across Accra, Kumasi, and Sekondi-Takoradi. Education at the basic level is free, compulsory and universal under the Education Act, 2008 — so we work alongside your Ghanaian school, adding the Cambridge subjects overseas applications need at a fraction of the Accra tier\'s fees.',
-  heroValueProp: 'From USD 180/month. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — alongside your school, with WASSCE left intact.',
+  heroValueProp: 'From USD 423/month. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — alongside your school, with WASSCE left intact.',
   whatsappTrigger: 'Hi, I would like to enquire about Smartious for our family in Ghana',
 
   citiesSectionTitle: 'Where our Ghana families are',
@@ -318,7 +318,7 @@ export const GHANA_COUNTRY = {
     { name: 'Kumasi and the interior',                        city: 'Ashanti',               curriculum: 'Thin provision',                        feesUsd: 'Little international option',                       feesAed: '—',                       rating: 0,   capacityNote: 'Over two million people, a major technical university, a fraction of the capital\'s provision' },
     { name: 'Sekondi-Takoradi and the Western Region',        city: 'The oil hub',           curriculum: 'Thin provision',                        feesUsd: 'Little international option',                       feesAed: '—',                       rating: 0,   capacityNote: 'An international oil industry running on local schooling' },
     { name: 'Wolsey Hall Oxford / King\'s InterHigh (online)', city: 'Online',                curriculum: 'Cambridge self-paced / UK online',      feesUsd: 'Per-subject / GBP 9,000-11,000',                    feesAed: 'Varies',                  rating: 4.2, capacityNote: 'Self-paced or priced far above Smartious — though for Ghana specifically, UK-based providers are the closest match on timezone' },
-    { name: 'Smartious Homeschool (Ghana via online delivery)', city: 'Delivered to all Ghana', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 2,160-6,480/year', feesAed: 'GHS equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + Cambridge alongside WASSCE + Kumasi and the Western Region served identically + honest about the three-hour offset' },
+    { name: 'Smartious Homeschool (Ghana via online delivery)', city: 'Delivered to all Ghana', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 5,076/year', feesAed: 'GHS equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + Cambridge alongside WASSCE + Kumasi and the Western Region served identically + honest about the three-hour offset' },
   ],
 
   legalFrameworkIntro: 'Ghanaian education law is set by a single principal statute and one section of it does most of the work. Here is the framework, and the two disclosures that follow from it.',
@@ -333,7 +333,7 @@ export const GHANA_COUNTRY = {
 
   whySmartious: [
     { h: 'Cambridge alongside WASSCE, not instead of it',                   p: 'The most common shape we run in Ghana: the school keeps the national route and the routine, we add two or three Cambridge subjects live for overseas applications.' },
-    { h: 'The tier\'s examinations at a professional family\'s budget',      p: 'Accra international fees sit at the top of the West African market; Smartious runs USD 2,160-6,480 for live small-group teaching toward the same boards.' },
+    { h: 'The tier\'s examinations at a professional family\'s budget',      p: 'Accra international fees sit at the top of the West African market; Smartious runs USD 5,076 for live small-group teaching toward the same boards.' },
     { h: 'Kumasi and the Western Region served identically',                p: 'Over two million people in Ashanti with a fraction of Accra\'s provision, and an international oil industry in Takoradi running on local schooling.' },
     { h: 'Honest about the three-hour offset',                              p: 'Ghana is our widest African gap. We state it, explain the two workable patterns, and note that being fixed year-round means it never drifts.' },
     { h: 'Honest about what we are',                                        p: 'Not a licensed Ghanaian school, and we say it plainly — an internationally accredited online school working alongside yours.' },
@@ -345,7 +345,7 @@ export const GHANA_COUNTRY = {
     { q: 'Is Smartious a licensed school in Ghana?', a: 'No, and we say so plainly. Pre-tertiary schools here are subject to licensing and inspection requirements. We are an internationally accredited online school delivering from Nairobi and working alongside your Ghanaian school rather than replacing it.' },
     { q: 'Can our child do WASSCE and Cambridge A-Levels together?', a: 'Yes, and it is the most common arrangement we run in Ghana. The school keeps the national track and the daily routine; we teach two or three Cambridge subjects live alongside for overseas applications. It is a heavier year, so subject choice has to be disciplined.' },
     { q: 'How do class times work given the three-hour gap?', a: 'Two patterns work. Late-afternoon Ghanaian classes sit in our evening teaching block — a normal working slot for us, the after-school slot for you. Morning Ghanaian classes suit full-time and flexible students. Neither country observes daylight saving, so whichever pattern you choose never drifts with the seasons. We would rather be straight that this is a wider gap than for our East and Southern African families.' },
-    { q: 'How do the fees compare with Accra international schools?', a: 'Accra fees sit at the very top of the West African market. Smartious runs USD 2,160-6,480 a year for live small-group teaching toward the same Cambridge examinations — which for many professional Ghanaian families is the difference between access and no access.' },
+    { q: 'How do the fees compare with Accra international schools?', a: 'Accra fees sit at the very top of the West African market. Smartious runs USD 5,076 a year for live small-group teaching toward the same Cambridge examinations — which for many professional Ghanaian families is the difference between access and no access.' },
     { q: 'We are returning from the UK or the US mid-curriculum — what happens?', a: 'The child keeps their pathway. Ghana\'s private sector already runs IGCSE widely, so a British-curriculum arrival lands in a familiar framework, and we run alongside to smooth subject differences and hold continuity.' },
     { q: 'Where do Ghanaian students sit Cambridge examinations?', a: 'At authorised provision confirmed per family per session. Ghana is an established Cambridge market through its private-school sector, so provision is easier here than in much of our coverage — Accra first, with regional options for Kumasi and travel planned ahead from the Western Region.' },
     { q: 'Which parts of Ghana does Smartious cover?', a: 'Accra, Kumasi and Ashanti, and Sekondi-Takoradi and the Western Region have dedicated pages. Live online delivery works identically anywhere in the country — which outside Greater Accra is precisely the point.' },

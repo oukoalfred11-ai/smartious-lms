@@ -89,7 +89,7 @@ export const COLOMBIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Bogotá families. The capital holds Colombia\'s corporate and financial weight, its diplomatic community, its university centre, and a deep international and bilingual school sector — Colegio Nueva Granada, the British, German, French, Italian and Anglo schools, and a very large calendario B bilingual tier — priced at the top of the Colombian market. Colombian law on educating outside school is genuinely unsettled, and we set out both readings rather than picking the convenient one. We teach from Nairobi, eight hours ahead, so our classes land in the Colombian morning.',
     heroImg: '/heroes/bogota-co.jpg',
     altTexts: { hero: 'Bogotá and the eastern hills' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Bogotá families — morning classes that fit the jornada tarde, and the legal position stated fairly. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Bogotá families — morning classes that fit the jornada tarde, and the legal position stated fairly. From USD 423/month.',
     challenges: [
       'International and bilingual school fees in Bogotá sit at the top of the Colombian market.',
       'Colombian law on educating outside school is contested, with serious sources reaching opposite conclusions.',
@@ -121,7 +121,7 @@ export const COLOMBIA_CITIES = [
     whyChoose: [
       ['Morning classes, which is the point in Colombia', 'We teach eight hours ahead, so our block lands in the Colombian morning — the free half of the day for every student in jornada tarde.'],
       ['The legal position stated fairly, not conveniently', 'Colombian sources disagree about educating outside school. We give both readings, name the decrees, and send you to the Ministerio and your secretaría de educación.'],
-      ['A fee gap against a strong local tier', 'Live small-group teaching at USD 2,160-6,480 a year against Bogotá international fees at the top of the Colombian market.'],
+      ['A fee gap against a strong local tier', 'Live small-group teaching at USD 5,076 a year against Bogotá international fees at the top of the Colombian market.'],
       ['Cambridge A-Levels for UCAS', 'The bilingual sector is large and the A-Level route is thinner — and A-Levels are what British admissions reads most directly.'],
       ['Spanish kept alongside', 'Cambridge Spanish runs beside the English-medium core, protecting Colombian and Spanish university routes.'],
     ],
@@ -154,7 +154,7 @@ export const COLOMBIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Medellín families. Medellín has become Colombia\'s technology and innovation capital and one of the largest digital-nomad destinations in the world — a software and startup cluster, a long-standing textile and manufacturing base, and an international resident community from North America, Europe, and across Latin America that has grown far faster than the schools serving it. The bilingual sector is strong and its best places are competitive. We teach in the Colombian morning, which suits a jornada tarde student and a self-scheduling remote-work family equally well.',
     heroImg: '/heroes/medellin-co.jpg',
     altTexts: { hero: 'Medellín in the Aburrá valley' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Medellín and Antioquia families — digital-nomad capital, morning classes. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Medellín and Antioquia families — digital-nomad capital, morning classes. From USD 423/month.',
     challenges: [
       'An international resident population growing far faster than the schools serving it.',
       'Competitive places at the strongest bilingual and international schools.',
@@ -216,7 +216,7 @@ export const COLOMBIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Cali and Valle del Cauca families. Cali anchors Colombia\'s agro-industrial heartland — sugar, food processing, and manufacturing across the valley — and the corridor down to Buenaventura, the country\'s principal Pacific port. It is also a major university and medical centre. For a city and region of this scale, international provision is thinner than families expect and concentrated in a handful of schools. Smartious teaches Cambridge and IB live in the Colombian morning, alongside a school enrolment.',
     heroImg: '/heroes/cali-co.jpg',
     altTexts: { hero: 'Cali and the Valle del Cauca' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Cali and Valle del Cauca families — agro-industrial capital, thin international provision. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Cali and Valle del Cauca families — agro-industrial capital, thin international provision. From USD 423/month.',
     challenges: [
       'International provision thinner than the city\'s size and industrial profile suggest.',
       'The Pacific corridor and Buenaventura sit well outside the school map.',
@@ -278,7 +278,7 @@ export const COLOMBIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Barranquilla families. Barranquilla is the industrial capital of Colombia\'s Caribbean coast — the Magdalena river port, a manufacturing and logistics belt, a strong regional business community with long international trading ties, and the coast\'s principal university centre. Its international schooling is decent and limited, and Bogotá\'s tier is a flight away. Smartious teaches Cambridge and IB live in the Colombian morning, alongside a school enrolment, reaching the coast identically to the capital.',
     heroImg: '/heroes/barranquilla-co.jpg',
     altTexts: { hero: 'Barranquilla and the Magdalena river' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Barranquilla and Atlántico families — Caribbean industrial capital, limited provision. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Barranquilla and Atlántico families — Caribbean industrial capital, limited provision. From USD 423/month.',
     challenges: [
       'Limited international schooling for the industrial capital of the Caribbean coast.',
       'Bogotá\'s tier is a flight away, so relocation or boarding have been the alternatives.',
@@ -340,7 +340,7 @@ export const COLOMBIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Cartagena families. Cartagena carries two economies at once: the Mamonal industrial belt with its refinery, petrochemical plants, and container port, employing engineers and managers recruited nationally and internationally; and a tourism economy of genuinely international scale around the walled city, with a growing foreign resident and second-home community behind it. The school list is short for either. Smartious teaches Cambridge and IB live in the Colombian morning, alongside a school enrolment, with a rhythm that fits a season.',
     heroImg: '/heroes/cartagena-co.jpg',
     altTexts: { hero: 'Cartagena walled city and bay' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Cartagena and Bolívar families — refinery, port and tourism, short school list. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Cartagena and Bolívar families — refinery, port and tourism, short school list. From USD 423/month.',
     challenges: [
       'A short school list for an industrial belt and an international tourism economy combined.',
       'Refinery and petrochemical staff arrive on project timelines rather than admission cycles.',
@@ -428,7 +428,7 @@ export const COLOMBIA_COUNTRY = {
   heroEyebrow: 'Online school for Colombia',
   heroH1Suffix: 'Colombia',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for corporate, industrial, remote-work, and Colombian families across Bogotá, Medellín, Cali, Barranquilla, and Cartagena. Colombian law on educating outside school is genuinely disputed — we give both readings and name the validation decrees rather than picking the convenient answer. We teach eight hours ahead, so our classes land in the Colombian morning, which is the free half of the day for jornada tarde students.',
-  heroValueProp: 'From USD 180/month. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — morning teaching, Spanish kept alongside.',
+  heroValueProp: 'From USD 423/month. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — morning teaching, Spanish kept alongside.',
   whatsappTrigger: 'Hi, I would like to enquire about Smartious for our family in Colombia',
 
   citiesSectionTitle: 'Where our Colombia families are',
@@ -461,7 +461,7 @@ export const COLOMBIA_COUNTRY = {
     { name: 'Colombian homeschool validation providers',      city: 'Nationwide / online',   curriculum: 'Validation support and materials',      feesUsd: 'Lower cost, different service',                     feesAed: '—',                       rating: 4.0, capacityNote: 'They help families validate through ICFES routes; they are not live international teaching, and the two are often confused' },
     { name: 'Cali, the coast and the regions',                city: 'Outside Bogotá/Medellín', curriculum: 'Thinner provision',                   feesUsd: 'Limited international option',                      feesAed: '—',                       rating: 0,   capacityNote: 'Large cities with less provision than their scale implies' },
     { name: 'US-based online schools',                        city: 'Online',                curriculum: 'American online',                       feesUsd: 'Varies, often per-course',                          feesAed: 'Varies',                  rating: 4.2, capacityNote: 'Closer to Colombia on the clock than we are — families should weigh that against price and class size' },
-    { name: 'Smartious Homeschool (Colombia via online delivery)', city: 'Delivered to all Colombia', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 2,160-6,480/year', feesAed: 'COP equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + the disputed law stated fairly + morning teaching that fits the jornada tarde + the post-fifteen window used properly' },
+    { name: 'Smartious Homeschool (Colombia via online delivery)', city: 'Delivered to all Colombia', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 5,076/year', feesAed: 'COP equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + the disputed law stated fairly + morning teaching that fits the jornada tarde + the post-fifteen window used properly' },
   ],
 
   legalFrameworkIntro: 'Colombia is the only country in our coverage where serious domestic sources reach opposite conclusions on the central question. We are not going to resolve that dispute, and any provider who tells you it is settled is selling rather than advising. Here is what is agreed, what is disputed, and what is usable.',

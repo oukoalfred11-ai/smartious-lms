@@ -91,7 +91,7 @@ export const CHILE_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Santiago families. Santiago holds Chile\'s corporate and financial weight, the mining sector\'s head offices, and one of the strongest international school tiers in South America — Grange, Craighouse, Nido de Águilas, Santiago College, the German and French schools — with fees to match. Chile is also the one country in our Latin American coverage where a full-time international programme is genuinely workable for a resident child, because MINEDUC operates a formal validation route: exámenes libres, regulated by Decreto 2272/2007 and administered regionally by each SECREDUC.',
     heroImg: '/heroes/santiago-cl.jpg',
     altTexts: { hero: 'Santiago and the Andes' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Santiago families — the exámenes libres route explained, full-time or supplementary. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Santiago families — the exámenes libres route explained, full-time or supplementary. From USD 423/month.',
     challenges: [
       'International school fees in Santiago sit among the highest in South America, with competitive places.',
       'Jornada escolar completa means most Chilean schools run a full day — there is no free half-day to schedule around.',
@@ -123,7 +123,7 @@ export const CHILE_CITIES = [
     whyChoose: [
       ['Full-time is genuinely possible here', 'Chile\'s exámenes libres route means a resident child can follow a full international programme and still certify Chilean school levels — which is not true in Mexico, Brazil, Argentina, Colombia, or Peru.'],
       ['The conditions explained before you commit', 'Registration windows, cupos, separate básica and media processes, no enrolment at a Chilean school in the same year — we set these out upfront rather than after enrolment.'],
-      ['A fee gap against South America\'s strongest tier', 'Live small-group teaching at USD 2,160-6,480 a year against Santiago international fees among the highest in the region.'],
+      ['A fee gap against South America\'s strongest tier', 'Live small-group teaching at USD 5,076 a year against Santiago international fees among the highest in the region.'],
       ['Honest about what we are not', 'We do not administer exámenes libres and do not teach the Chilean national curriculum. Chilean online schools do that well; we teach Cambridge, Edexcel, IB and AP.'],
       ['Spanish kept alongside', 'Cambridge Spanish runs beside the English-medium core, protecting Chilean and Spanish university routes.'],
     ],
@@ -156,7 +156,7 @@ export const CHILE_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for families across Chile\'s copper north. The Antofagasta region holds the most significant concentration of copper mining anywhere in the world — Escondida, Chuquicamata, and the operations spread across the Atacama — with a technical workforce of engineers, geologists, metallurgists, and management recruited from Australia, Canada, Europe, North America, and across Latin America, much of it on rotation. Calama and the mine towns sit hours inland. Schooling has never matched the industry, and Santiago is a flight south. Smartious teaches Cambridge and IB live to the north, full-time or alongside a school.',
     heroImg: '/heroes/antofagasta-cl.jpg',
     altTexts: { hero: 'The Atacama and the northern Chilean coast' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Antofagasta, Calama and Atacama families — the world\'s copper capital, thin international schooling. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Antofagasta, Calama and Atacama families — the world\'s copper capital, thin international schooling. From USD 423/month.',
     challenges: [
       'An internationally recruited mining workforce with limited international schooling, and Santiago a flight away.',
       'Calama and the mine towns sit hours inland from the regional capital.',
@@ -219,7 +219,7 @@ export const CHILE_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Valparaíso and Viña del Mar families. The coastal metropolitan area carries Chile\'s principal port, the National Congress, the naval institutions, and one of the country\'s largest concentrations of universities — alongside a growing international resident community drawn to the coast, and a long-standing British and German heritage that shaped the region\'s schools. Santiago\'s tier is an hour and a half inland and priced accordingly. Smartious teaches live to the coast, full-time or alongside a school.',
     heroImg: '/heroes/valparaiso-cl.jpg',
     altTexts: { hero: 'Valparaíso hills and harbour' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Valparaíso and Viña del Mar families — port and coastal region, Santiago tier priced away. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Valparaíso and Viña del Mar families — port and coastal region, Santiago tier priced away. From USD 423/month.',
     challenges: [
       'Santiago\'s international tier is an hour and a half inland and priced at capital level.',
       'A growing international resident community along the coast with limited local provision.',
@@ -251,7 +251,7 @@ export const CHILE_CITIES = [
       ['No commute to Santiago, for the child at least', 'Coastal families who work inland do not need to send their children inland too — live delivery reaches the whole region identically.'],
       ['German and French alongside the core', 'The region\'s heritage communities can run Cambridge German or French beside the English-medium track, and both university systems read the record routinely.'],
       ['Full-time is possible here', 'Chile\'s exámenes libres route makes a full international programme workable for a resident child.'],
-      ['A fee gap against a capital tier', 'Live small-group teaching at USD 2,160-6,480 a year.'],
+      ['A fee gap against a capital tier', 'Live small-group teaching at USD 5,076 a year.'],
       ['Honest about what we are not', 'We do not administer exámenes libres or teach the Chilean national curriculum.'],
     ],
     growingReason: 'The Valparaíso coastal metropolitan area carries Chile\'s principal port, the National Congress, the naval institutions, and a large university sector, alongside a growing international resident community — with Santiago\'s tier an hour and a half inland and priced at capital level. Continental Chile runs six to seven hours behind Nairobi depending on the season.',
@@ -281,7 +281,7 @@ export const CHILE_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Concepción and Biobío families. Concepción is the industrial and academic capital of southern Chile — forestry and pulp at a scale that shapes national exports, steel and petrochemicals around Talcahuano and San Vicente, a major port, and one of the country\'s largest student and academic populations across several universities. Its international provision is thin relative to that profile, and Santiago is five hundred kilometres north. Smartious teaches live across the Biobío, full-time or alongside a school.',
     heroImg: '/heroes/concepcion-cl.jpg',
     altTexts: { hero: 'Concepción and the Biobío river' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Concepción and Biobío families — industrial and university south, thin provision. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Concepción and Biobío families — industrial and university south, thin provision. From USD 423/month.',
     challenges: [
       'International provision thin relative to the region\'s industrial and academic scale.',
       'Santiago is five hundred kilometres north — a relocation rather than a commute.',
@@ -343,7 +343,7 @@ export const CHILE_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Puerto Montt and Los Lagos families. Southern Chile hosts one of the largest salmon farming industries in the world, built substantially on Norwegian and Japanese investment and employing aquaculture scientists, veterinarians, engineers, and management from across Europe, Asia, and the Americas. Around it sit the German-heritage communities of the lake district, a growing tourism economy, and the gateway to Patagonia. International schooling stops well north of here. Smartious teaches live to the south, full-time or alongside a school.',
     heroImg: '/heroes/puerto-montt-cl.jpg',
     altTexts: { hero: 'Puerto Montt and the southern Chilean lakes' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Puerto Montt and Los Lagos families — global salmon industry, no international schooling. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Puerto Montt and Los Lagos families — global salmon industry, no international schooling. From USD 423/month.',
     challenges: [
       'A globally significant aquaculture industry with essentially no international schooling in the region.',
       'International staff arrive from Norway, Japan, and elsewhere on multi-year assignments.',
@@ -432,7 +432,7 @@ export const CHILE_COUNTRY = {
   heroEyebrow: 'Online school for Chile',
   heroH1Suffix: 'Chile',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for mining, corporate, aquaculture, and Chilean families across Santiago, Valparaíso, Antofagasta, Concepción, and Puerto Montt. Chile is the one country in our Latin American coverage where a full-time international programme genuinely works for a resident child — because MINEDUC operates exámenes libres, a state route to certifying school levels without enrolment.',
-  heroValueProp: 'From USD 180/month. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — full-time or alongside your school.',
+  heroValueProp: 'From USD 423/month. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — full-time or alongside your school.',
   whatsappTrigger: 'Hi, I would like to enquire about Smartious for our family in Chile',
 
   citiesSectionTitle: 'Where our Chile families are',
@@ -465,7 +465,7 @@ export const CHILE_COUNTRY = {
     { name: 'The German, French and Italian schools',         city: 'Santiago, Valparaíso',  curriculum: 'National-system bilingual',              feesUsd: 'Premium tier',                                      feesAed: 'Varies',                  rating: 4.6, capacityNote: 'Strong heritage schools — a different route entirely' },
     { name: 'The copper north and the deep south',            city: 'Antofagasta, Los Lagos', curriculum: 'Little to none',                       feesUsd: 'No real international option',                      feesAed: '—',                       rating: 0,   capacityNote: 'The world\'s copper capital and a global salmon industry, both without international schooling' },
     { name: 'Wolsey Hall Oxford / King\'s InterHigh (online)', city: 'Online',                curriculum: 'Cambridge self-paced / UK online',      feesUsd: 'Per-subject / GBP 9,000-11,000',                    feesAed: 'Varies',                  rating: 4.2, capacityNote: 'Self-paced or priced far above Smartious — UK providers are closer to Chile on the clock than we are' },
-    { name: 'Smartious Homeschool (Chile via online delivery)', city: 'Delivered to all Chile', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 2,160-6,480/year', feesAed: 'CLP equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + full-time genuinely possible via exámenes libres + the copper north and Los Lagos reached + honest that we do not teach the Chilean curriculum' },
+    { name: 'Smartious Homeschool (Chile via online delivery)', city: 'Delivered to all Chile', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 5,076/year', feesAed: 'CLP equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + full-time genuinely possible via exámenes libres + the copper north and Los Lagos reached + honest that we do not teach the Chilean curriculum' },
   ],
 
   legalFrameworkIntro: 'Chile has the most accommodating framework in our Latin American coverage, and it is accommodating for a specific structural reason rather than a permissive attitude. Here is the mechanism, its conditions, and what we can and cannot do within it.',

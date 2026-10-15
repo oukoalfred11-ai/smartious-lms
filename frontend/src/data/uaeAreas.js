@@ -123,7 +123,7 @@ export const UAE_AREAS = [
     localFaqs: [
       { q: 'Do you have tutors familiar with JESS and Ranches Primary curricula?', a: 'Yes — we work with students from Jumeirah English Speaking School (JESS), Ranches Primary, GEMS Wellington Academy Al Khail and other Ranches-area schools. Our tutors are familiar with the English National Curriculum, Cambridge IGCSE and IB Diploma frameworks taught in these schools.' },
       { q: 'My child has a sport / activity schedule. Can sessions be flexible?', a: 'Yes — that\'s where online tuition genuinely shines for Ranches families. With no commute and direct booking through our LMS, you can reschedule with 24 hours notice. Evening, weekend and even early-morning slots (UAE 7am-9am works for some families with early school starts) are available.' },
-      { q: 'What\'s the value compared to UAE-licensed tutors?', a: 'Typical UAE-licensed private tutors charge AED 200-400/hour (≈ USD 55-110). Smartious online tuition is USD 15-25/hour (≈ AED 55-92). The cost difference reflects our online delivery and Nairobi cost base, not any reduction in tutor quality — every Smartious tutor holds a subject-specific university degree.' },
+      { q: 'What\'s the value compared to UAE-licensed tutors?', a: 'Typical UAE-licensed private tutors charge AED 200-400/hour (≈ USD 55-110). Smartious online tuition is USD 15/hour (≈ AED 55). The cost difference reflects our online delivery and Nairobi cost base, not any reduction in tutor quality — every Smartious tutor holds a subject-specific university degree.' },
     ],
   },
 
@@ -233,7 +233,7 @@ export const UAE_AREAS = [
     localFaqs: [
       { q: 'Do you offer CBSE Class 10 and Class 12 board exam preparation?', a: 'Yes — CBSE board exam preparation is one of our most-requested services for Sharjah Al Khan\'s Indian-diaspora families. We cover Mathematics, Sciences (Physics, Chemistry, Biology), English and other CBSE subjects with focused topic-by-topic coaching, past-paper drilling and mock examinations in the months leading up to board examinations.' },
       { q: 'Are your tutors familiar with CBSE syllabus and Indian-school curricula?', a: 'Yes — we have CBSE-qualified tutors with relevant Indian university degrees and experience teaching the current CBSE curriculum to UAE-based students. We work with families at Delhi Private School Sharjah, Our Own English High School, Indian School Sharjah and other Indian-curriculum UAE schools.' },
-      { q: 'What\'s your hourly rate compared to UAE tutors?', a: 'Smartious online tuition is USD 15-25/hour (≈ AED 55-92). Typical UAE-licensed private tutors charge AED 150-400/hour (USD 40-110). The savings reflect online delivery from outside UAE — not any compromise in tutor qualifications. Every Smartious tutor holds a subject-specific university degree.' },
+      { q: 'What\'s your hourly rate compared to UAE tutors?', a: 'Smartious online tuition is USD 15/hour (≈ AED 55). Typical UAE-licensed private tutors charge AED 150-400/hour (USD 40-110). The savings reflect online delivery from outside UAE — not any compromise in tutor qualifications. Every Smartious tutor holds a subject-specific university degree.' },
     ],
   },
 
@@ -369,7 +369,7 @@ export const UAE_AREAS = [
     localFaqs: [
       { q: 'Do you tutor students at JESS Jumeirah and Jumeirah College?', a: 'Yes — we work with several families with children at JESS Jumeirah, Jumeirah College, Dubai College and other Jumeirah-area British curriculum schools. Our tutors are familiar with each school\'s curriculum approach and exam timing.' },
       { q: 'Can you prepare students for UK Russell Group university applications?', a: 'Yes — UK Russell Group applications are a core specialism. We support UCAS personal statements, university course selection, A-Level subject combinations, BMAT/UKCAT preparation (medical applications), LNAT (law applications), Oxbridge interview preparation and admissions test coaching.' },
-      { q: 'What\'s the value compared to UAE-licensed tutors?', a: 'Typical Jumeirah-area UAE-licensed private tutors charge AED 250-500/hour (USD 68-136). Smartious online tuition is USD 15-25/hour (≈ AED 55-92) — significantly less, while every tutor holds a subject-specific university degree. The cost difference reflects online delivery and Nairobi cost base, not any reduction in qualifications.' },
+      { q: 'What\'s the value compared to UAE-licensed tutors?', a: 'Typical Jumeirah-area UAE-licensed private tutors charge AED 250-500/hour (USD 68-136). Smartious online tuition is USD 15/hour (≈ AED 55) — significantly less, while every tutor holds a subject-specific university degree. The cost difference reflects online delivery and Nairobi cost base, not any reduction in qualifications.' },
     ],
   },
 
@@ -461,7 +461,7 @@ export const UAE_AREAS = [
     localFaqs: [
       { q: 'Do you offer CBSE Class 10 and Class 12 board exam preparation?', a: 'Yes — CBSE board exam preparation is one of our most-requested services for MBZ City\'s Indian/Pakistani families. We cover Mathematics, Sciences (Physics, Chemistry, Biology), English and other CBSE subjects with focused topic-by-topic coaching, past-paper drilling and weekly mock examinations in the months leading up to board exams.' },
       { q: 'Are your tutors familiar with the current CBSE syllabus?', a: 'Yes — our CBSE tutors hold relevant Indian university degrees and have experience teaching the current CBSE curriculum to UAE-based students. We work with families at Sabari Indian School, Indian School Al Wathba, Pakistan Education Academy and other South Asian curriculum schools in Abu Dhabi.' },
-      { q: 'What\'s the cost saving compared to UAE-licensed CBSE tutors?', a: 'Typical UAE-licensed CBSE tutors charge AED 150-300/hour (USD 40-80). Smartious online CBSE tuition is USD 15-20/hour (≈ AED 55-73). The savings reflect online delivery and Nairobi cost base — not any compromise in CBSE expertise.' },
+      { q: 'What\'s the cost saving compared to UAE-licensed CBSE tutors?', a: 'Typical UAE-licensed CBSE tutors charge AED 150-300/hour (USD 40-80). Smartious online CBSE tuition is USD 15/hour (≈ AED 55). The savings reflect online delivery and Nairobi cost base — not any compromise in CBSE expertise.' },
     ],
   },
 
@@ -487,7 +487,7 @@ export const UAE_AREAS = [
     localFaqs: [
       { q: 'Do you tutor students at Emirates International School Meadows and Dubai British School?', a: 'Yes — we work with several families with children at Emirates International School Meadows, Dubai British School Jumeirah Park, Dubai British School Emirates Hills and other Springs/Meadows-area schools. Our tutors are familiar with each school\'s curriculum approach and exam timing.' },
       { q: 'Can your tutors prepare students for UK Russell Group university applications?', a: 'Yes — UK Russell Group applications are a core specialism. We support UCAS personal statements, university course selection, A-Level subject combinations, admissions tests (BMAT, LNAT, MAT, TMUA, ESAT) and Oxbridge interview preparation.' },
-      { q: 'What\'s the typical Springs-area tutor rate vs Smartious?', a: 'Typical Springs/Meadows-area UAE-licensed private tutors charge AED 200-450/hour (USD 55-122). Smartious online tuition is USD 15-25/hour (≈ AED 55-92). The cost difference reflects online delivery and Nairobi cost base, not any reduction in qualifications.' },
+      { q: 'What\'s the typical Springs-area tutor rate vs Smartious?', a: 'Typical Springs/Meadows-area UAE-licensed private tutors charge AED 200-450/hour (USD 55-122). Smartious online tuition is USD 15/hour (≈ AED 55). The cost difference reflects online delivery and Nairobi cost base, not any reduction in qualifications.' },
     ],
   },
 
@@ -574,7 +574,7 @@ export const UAE_AREAS = [
     keywords: ['online tuition JVC', 'online tuition Jumeirah Village Circle', 'JSS International School tutor', 'CBSE tutor JVC', 'IGCSE tutors JVC', 'A-Level tutor JVC'],
     localFaqs: [
       { q: 'Do you tutor students at JSS International School and Sunmarke?', a: 'Yes — we work with families with children at JSS International School, Sunmarke School, Arcadia Preparatory School and other JVC-area schools. Our tutors cover Cambridge IGCSE, Edexcel IGCSE, A-Level, IB Diploma and CBSE depending on the school\'s curriculum.' },
-      { q: 'What\'s the cost saving compared to local JVC tutors?', a: 'Typical UAE-licensed private tutors charge AED 150-300/hour (USD 40-80) for IGCSE/CBSE level, higher for A-Level/IB. Smartious online tuition is USD 15-25/hour (≈ AED 55-92). The cost difference reflects online delivery and Nairobi cost base, not any reduction in qualifications.' },
+      { q: 'What\'s the cost saving compared to local JVC tutors?', a: 'Typical UAE-licensed private tutors charge AED 150-300/hour (USD 40-80) for IGCSE/CBSE level, higher for A-Level/IB. Smartious online tuition is USD 15/hour (≈ AED 55). The cost difference reflects online delivery and Nairobi cost base, not any reduction in qualifications.' },
       { q: 'Can you handle multi-child families with different curricula?', a: 'Yes — many JVC families have children at different schools following different curricula. We assign curriculum-specialist tutors per child (e.g., a CBSE Mathematics tutor for one child, an IGCSE Mathematics tutor for another), with scheduling coordinated to minimise family disruption.' },
     ],
   },

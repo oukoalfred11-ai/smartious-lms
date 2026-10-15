@@ -62,7 +62,7 @@ export const TUNISIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Tunis families. Tunis carries Tunisia\'s corporate weight — a large francophone offshoring and shared-services sector working for French and European clients, aeronautics and technology firms, banking, the diplomatic and international-organisation community, and a professional class with deep ties to France and Italy. Its international schooling is dominated by the French network, which is strong and heavily oversubscribed, alongside a smaller private bilingual sector. British and IB provision is thin. Under the Loi d\'orientation of 2002 education is compulsory from six to sixteen, so our clean default is supplementary: your school enrolment carries that duty, and we teach the Cambridge or IB track live alongside it — with Cambridge French running beside the English-medium core.',
     heroImg: '/heroes/tunis-tn.jpg',
     altTexts: { hero: 'Tunis and the lake' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Tunis families — the British-curriculum route the capital lacks, French kept alongside. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Tunis families — the British-curriculum route the capital lacks, French kept alongside. From USD 423/month.',
     challenges: [
       'International schooling in Tunis is dominated by the French network and heavily oversubscribed.',
       'British and IB provision is thin, so families targeting UK, Gulf, or North American universities have had little local path.',
@@ -127,7 +127,7 @@ export const TUNISIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Sfax families. Sfax is Tunisia\'s second city and the economic capital of its south — olive oil and agri-processing on a scale that shapes national exports, chemicals and phosphate handling, a major port, and a commercial tradition that has produced much of the country\'s business class. The University of Sfax and its medical faculty draw students from across the region. What the city does not have is international schooling of any depth: the French network and the private bilingual sector are concentrated in the capital, around four hours north. Smartious delivers the Cambridge and IB pathways live across the south, supplementary alongside your school enrolment.',
     heroImg: '/heroes/sfax-tn.jpg',
     altTexts: { hero: 'Sfax and the port' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Sfax and southern Tunisia families — second city, medical faculty, no international schooling. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Sfax and southern Tunisia families — second city, medical faculty, no international schooling. From USD 423/month.',
     challenges: [
       'Almost no international schooling in the second city, with Tunis around four hours north.',
       'A strong commercial and medical-academic community with no English-medium academic route locally.',
@@ -190,7 +190,7 @@ export const TUNISIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Sousse, Monastir, and Sahel families. The Sahel coast is Tunisia\'s most internationally exposed region outside the capital: an aeronautics and automotive-components industry supplying European primes, a tourism economy running from Hammamet through Sousse to Mahdia, Monastir\'s airport and medical school, and a substantial European resident and long-stay community, particularly French, German, and Italian. The industrial employers are international and the visitor economy is international; the schooling is not. Smartious delivers the Cambridge and IB pathways live along the coast, supplementary alongside your school enrolment.',
     heroImg: '/heroes/sousse-tn.jpg',
     altTexts: { hero: 'The Sahel coast at Sousse' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Sousse, Monastir and Sahel families — aeronautics, tourism and European residents, no international schooling. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Sousse, Monastir and Sahel families — aeronautics, tourism and European residents, no international schooling. From USD 423/month.',
     challenges: [
       'An internationally exposed industrial and tourism region with no international schooling of depth.',
       'European resident and long-stay families need to know which framework applies, and that turns on residence.',
@@ -279,7 +279,7 @@ export const TUNISIA_COUNTRY = {
   heroEyebrow: 'Online school for Tunisia',
   heroH1Suffix: 'Tunisia',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for offshoring, aeronautics, expat, diaspora, and Tunisian families across Tunis, Sfax, and Sousse and Monastir. International schooling here is dominated by an oversubscribed French network, with British and IB provision thin — and outside the capital, close to absent. Taught live from Nairobi at a fixed two-hour offset that never drifts, with Cambridge French alongside.',
-  heroValueProp: 'From USD 180/month. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — supplementary beside your school, with French, German, or Italian kept alongside.',
+  heroValueProp: 'From USD 423/month. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — supplementary beside your school, with French, German, or Italian kept alongside.',
   whatsappTrigger: 'Hi, I would like to enquire about Smartious for our family in Tunisia',
 
   citiesSectionTitle: 'Where our Tunisia families are',
@@ -312,7 +312,7 @@ export const TUNISIA_COUNTRY = {
     { name: 'Sousse, Monastir and the Sahel',                 city: 'The Sahel coast',       curriculum: 'Nothing of depth',                      feesUsd: 'No real international option',                      feesAed: '—',                       rating: 0,   capacityNote: 'European industry, European visitors and European residents — and no school built for them' },
     { name: 'Boarding in France or Italy',                    city: 'Europe',                curriculum: 'French and international',              feesUsd: 'Fees plus travel plus a child living away',         feesAed: '—',                       rating: 4.3, capacityNote: 'The traditional answer for families outside the capital' },
     { name: 'Wolsey Hall Oxford / King\'s InterHigh (online)', city: 'Online',                curriculum: 'Cambridge self-paced / UK online',      feesUsd: 'Per-subject / GBP 9,000-11,000',                    feesAed: 'Varies',                  rating: 4.2, capacityNote: 'Self-paced or priced far above Smartious, and none carries French, German, or Italian alongside the English-medium core' },
-    { name: 'Smartious Homeschool (Tunisia via online delivery)', city: 'Delivered to all Tunisia', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 2,160-6,480/year', feesAed: 'TND equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + the British route the country lacks + three European languages available alongside + Sfax and the Sahel served identically + a fixed offset that never drifts' },
+    { name: 'Smartious Homeschool (Tunisia via online delivery)', city: 'Delivered to all Tunisia', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 5,076/year', feesAed: 'TND equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + the British route the country lacks + three European languages available alongside + Sfax and the Sahel served identically + a fixed offset that never drifts' },
   ],
 
   legalFrameworkIntro: 'Tunisian education law is set by a single orientation law and is short to state. Here it is exactly, including the provision families most often misread.',

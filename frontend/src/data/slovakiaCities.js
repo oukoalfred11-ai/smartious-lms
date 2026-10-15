@@ -75,7 +75,7 @@ export const SLOVAKIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Bratislava families. Bratislava is the only European capital bordering two countries, an hour from Vienna and two from Győr, and it anchors the northern end of Central Europe\'s automotive belt with Volkswagen\'s Slovak plant and the supplier network around it. The city holds essentially all of Slovakia\'s international schooling — the British International School Bratislava, QSI, Cambridge International School, the German and French schools — at capital-city fees, and Slovak law offers a route most families have never had explained to them: individuálne vzdelávanie under § 24 of the School Act, granted by the principal of the school where the child stays enrolled. Smartious delivers the Cambridge and IB pathways live, planned honestly around that framework.',
     heroImg: 'https://images.unsplash.com/photo-1585129777188-9f31d1a0b8b3?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Bratislava castle above the Danube' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Bratislava families — VW corridor, individuálne vzdelávanie framework, post-16 window. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Bratislava families — VW corridor, individuálne vzdelávanie framework, post-16 window. From USD 423/month.',
     challenges: [
       'The international tier sits at capital-city fees, and the strongest entry points fill.',
       'Individual education requires the principal\'s permission, half-yearly commission examinations in Slovak, periodic progress reports, and State School Inspection oversight.',
@@ -105,7 +105,7 @@ export const SLOVAKIA_CITIES = [
       'University application support — UCAS (UK), Common Application (US), and Slovak, Czech, Austrian and wider EU university applications',
     ],
     whyChoose: [
-      ['The Cambridge track beside a capital-priced tier', 'Live small-group teaching at USD 2,160-6,480 a year — the alternative, the waitlist bridge, or the supplement beside an existing enrolment.'],
+      ['The Cambridge track beside a capital-priced tier', 'Live small-group teaching at USD 5,076 a year — the alternative, the waitlist bridge, or the supplement beside an existing enrolment.'],
       ['Built for the corridor', 'Bratislava, Győr, or Kecskemét next — the same curriculum, teachers, and examination board across the automotive map, whichever side of the border the plant is on.'],
       ['The framework planned properly', 'The principal\'s permission, the half-yearly commission examinations in Slovak, the progress reports and inspection — all mapped at enrolment beside the Cambridge calendar.'],
       ['The window after compulsory attendance', 'Ten years of compulsory attendance ending at sixteen means the A-Level years run at the family\'s choice.'],
@@ -141,7 +141,7 @@ export const SLOVAKIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Košice families. Košice is Slovakia\'s eastern capital — U. S. Steel\'s vast works and the heavy industry around them, a fast-growing IT and shared-services sector drawing international employers, and a substantial university and medical-faculty population, including students from across Europe and beyond. What it does not have is Bratislava\'s international schooling: provision here is thin, and the capital is four hundred kilometres west. Smartious delivers the international pathways live across eastern Slovakia, planned honestly around the individuálne vzdelávanie framework or run supplementary beside a local enrolment.',
     heroImg: 'https://images.unsplash.com/photo-1585129777188-9f31d1a0b8b3?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Košice St Elisabeth cathedral and the main street' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Košice families — eastern capital, thin international provision, post-16 window. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Košice families — eastern capital, thin international provision, post-16 window. From USD 423/month.',
     challenges: [
       'Thin international provision against a growing IT, industrial, and university international population.',
       'Bratislava\'s tier is four hundred kilometres away — not a commute, and a relocation decision for most families.',
@@ -203,7 +203,7 @@ export const SLOVAKIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Žilina families. Žilina is the Kia city — the Korean carmaker\'s European plant and its supplier network anchor northern Slovakia\'s industrial economy, drawing Korean, Slovak, and international engineering families into a town whose technical university is strong and whose international schooling is essentially absent. It is the same pattern our Hungarian pages document at Győr and Kecskemét, on the other side of the same corridor: world-class manufacturing, and schooling built for someone else. Smartious delivers the Cambridge and IB pathways live, planned around the Slovak framework.',
     heroImg: 'https://images.unsplash.com/photo-1585129777188-9f31d1a0b8b3?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Žilina main square and the northern hills' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Žilina families — the Kia city, no local international school, post-16 window. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Žilina families — the Kia city, no local international school, post-16 window. From USD 423/month.',
     challenges: [
       'No international school in a city with a genuinely international automotive workforce.',
       'Korean and international engineering families arrive on production timelines, not admission cycles.',
@@ -265,7 +265,7 @@ export const SLOVAKIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Nitra families. Nitra is Slovakia\'s newest automotive city — Jaguar Land Rover\'s plant and its supplier park reshaped the region\'s economy and brought British, Indian, and international management and engineering families to a town better known for its agricultural university and its history. The irony writes itself: a British carmaker built here, and no British-curriculum school followed. Smartious delivers exactly that missing track live — Cambridge IGCSE through A-Level, the pathway UCAS reads natively — planned around the Slovak framework.',
     heroImg: 'https://images.unsplash.com/photo-1585129777188-9f31d1a0b8b3?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Nitra castle and the old town' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Nitra families — the Jaguar Land Rover city with no British-curriculum school. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Nitra families — the Jaguar Land Rover city with no British-curriculum school. From USD 423/month.',
     challenges: [
       'A British carmaker\'s plant city with no British-curriculum school and no international provision at all.',
       'International management families arrive on production timelines and rotate again.',
@@ -327,7 +327,7 @@ export const SLOVAKIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Trnava families. Trnava is the Stellantis city — the French-group plant and its supplier network anchor a western Slovak economy that sits half an hour up the motorway from Bratislava and entirely outside its international-school tier: the commute or the fees close that door for most Trnava households. The city is also historic and academic, the so-called Slovak Rome with its own universities. Smartious opens the international track locally — live small-group teaching to Trnava homes, planned around the Slovak framework.',
     heroImg: 'https://images.unsplash.com/photo-1585129777188-9f31d1a0b8b3?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Trnava town square and church towers' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Trnava families — the Stellantis city outside Bratislava\'s tier. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Trnava families — the Stellantis city outside Bratislava\'s tier. From USD 423/month.',
     challenges: [
       'Thirty minutes from Bratislava\'s tier — and outside it: the commute or the fees close the door for most families.',
       'Automotive and supplier assignments arrive on production timelines.',
@@ -355,7 +355,7 @@ export const SLOVAKIA_CITIES = [
       'University application support — UCAS (UK), Common Application (US), and Slovak, Czech and French university applications',
     ],
     whyChoose: [
-      ['The tier\'s curriculum without the commute or the fees', 'Live small-group Cambridge teaching delivered to Trnava homes at USD 2,160-6,480 a year.'],
+      ['The tier\'s curriculum without the commute or the fees', 'Live small-group Cambridge teaching delivered to Trnava homes at USD 5,076 a year.'],
       ['Engineering depth for a plant city', 'Cambridge A-Level Mathematics, Physics, and Further Mathematics suit Stellantis and its suppliers precisely.'],
       ['Portable across the corridor', 'Trnava, Bratislava, or the group\'s next plant — one curriculum held constant.'],
       ['The framework planned properly', 'The principal\'s permission, commission examinations in Slovak, reports and inspection — mapped at enrolment.'],
@@ -372,7 +372,7 @@ export const SLOVAKIA_CITIES = [
     homeTuitionDetail: 'Premium tier includes optional in-person home tuition supplementation for Trnava families during examination preparation periods, subject to associate availability.',
     onlineLearningDetail: 'Live online via Smartious LMS, landing inside the Trnava school day on the 1-2 hour offset, with every session recorded.',
     faqs: [
-      { q: 'Why not commute to Bratislava\'s international schools?', a: 'Some families do — at capital-city fees plus a daily motorway run. Smartious delivers live international curriculum to Trnava homes at USD 2,160-6,480 a year, with Bratislava needed only for exam sittings.' },
+      { q: 'Why not commute to Bratislava\'s international schools?', a: 'Some families do — at capital-city fees plus a daily motorway run. Smartious delivers live international curriculum to Trnava homes at USD 5,076 a year, with Bratislava needed only for exam sittings.' },
       { q: 'Where do Trnava students sit Cambridge examinations?', a: 'At authorised centres confirmed per family per session, with Bratislava half an hour away.' },
     ],
   },
@@ -388,7 +388,7 @@ export const SLOVAKIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Poprad and High Tatras families. Poprad is the gateway to the High Tatras — Slovakia\'s alpine heart, a tourism and mountain-sport economy with genuine international reach, its own airport, and a growing community of resort operators, hospitality businesses, and families who moved for the mountains and kept careers that travel. International schooling in the region does not exist. Smartious delivers the pathways live across the Tatras, with a rhythm built for the season and the framework planned properly.',
     heroImg: 'https://images.unsplash.com/photo-1585129777188-9f31d1a0b8b3?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'High Tatras peaks above Poprad' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Poprad and High Tatras families — mountain tourism economy, no local international schooling. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Poprad and High Tatras families — mountain tourism economy, no local international schooling. From USD 423/month.',
     challenges: [
       'No international schooling in the Tatras region at any practical distance.',
       'Tourism and resort seasons fit poorly with fixed timetables.',
@@ -476,7 +476,7 @@ export const SLOVAKIA_COUNTRY = {
   heroEyebrow: 'Online homeschool for Slovakia',
   heroH1Suffix: 'Slovakia',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for automotive, corporate, and Slovak families across Bratislava, Košice, Žilina, Nitra, Trnava, and the High Tatras. Slovakia allows individuálne vzdelávanie by the principal\'s permission, with half-yearly commission examinations in Slovak and State School Inspection oversight — and compulsory attendance ends after ten years, at sixteen. We plan both calendars from day one, and we state the age-sixteen fact plainly.',
-  heroValueProp: 'From USD 180/month (~EUR 165/month). Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — in the country that builds more cars per head than any other and schools its international workforce in one city.',
+  heroValueProp: 'From USD 423/month (~EUR 389/month). Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — in the country that builds more cars per head than any other and schools its international workforce in one city.',
   whatsappTrigger: 'Hi, I would like to enquire about Smartious for our family in Slovakia',
 
   citiesSectionTitle: 'Where our Slovakia families are',
@@ -510,7 +510,7 @@ export const SLOVAKIA_COUNTRY = {
     { name: 'Košice',                                        city: 'Eastern Slovakia',      curriculum: 'Limited international provision',       feesUsd: 'Thin',                                              feesAed: '—',                       rating: 0,   capacityNote: 'A growing IT and university international community, barely served' },
     { name: 'The automotive cities',                         city: 'Žilina / Nitra / Trnava', curriculum: '—',                                   feesUsd: 'No international provision',                        feesAed: '—',                       rating: 0,   capacityNote: 'Kia, Jaguar Land Rover, Stellantis — world-class plants, no international schools' },
     { name: 'Wolsey Hall Oxford / King\'s InterHigh / bina (online)', city: 'Online',        curriculum: 'Cambridge self-paced / UK online / own to 15', feesUsd: 'Per-subject / GBP 9,000-11,000 / consultation', feesAed: 'Varies',      rating: 4.2, capacityNote: 'Self-paced, priced far above Smartious, or stopping at 15 — and none plans the komisionálne skúšky calendar' },
-    { name: 'Smartious Homeschool (Slovakia via online delivery)', city: 'Delivered to all Slovakia', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 2,160-6,480/year', feesAed: '~EUR 2,000-6,000/year', rating: 4.8, capacityNote: 'Every class live through A-Level + both exam calendars planned at enrolment + the British track the auto corridor never had + the age-sixteen window used properly' },
+    { name: 'Smartious Homeschool (Slovakia via online delivery)', city: 'Delivered to all Slovakia', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 5,076/year', feesAed: '~EUR 2,000-6,000/year', rating: 4.8, capacityNote: 'Every class live through A-Level + both exam calendars planned at enrolment + the British track the auto corridor never had + the age-sixteen window used properly' },
   ],
 
   legalFrameworkIntro: 'Slovakia runs home study on the principal\'s permission with school-based commission examinations — a framework with a clear structure, real oversight, and an age-sixteen fact that changes A-Level planning entirely. Here is the whole framework exactly.',
@@ -538,7 +538,7 @@ export const SLOVAKIA_COUNTRY = {
     { q: 'Can Smartious be the pedagogue of record?', a: 'No. Slovak law frames individual education around a pedagogical employee who provides the education and reports on progress, so qualification requirements attach to that person — confirmed with your school and the Ministry. Smartious is the academic spine beside the arrangement, or runs supplementary beside an ordinary enrolment, which needs no permission.' },
     { q: 'Is it true compulsory attendance ends at sixteen?', a: 'Yes — compulsory school attendance is ten years and lasts at most to the end of the school year in which the pupil turns sixteen. Secondary school beyond that is not compulsory, so the A-Level years fall outside the framework entirely.' },
     { q: 'We are a Volkswagen, Kia, Stellantis or JLR family — what does Smartious solve?', a: 'The corridor\'s exact gap: Žilina, Nitra, and Trnava have no international schooling, and Bratislava\'s tier carries capital fees. Smartious delivers the Cambridge pathway live — full-time or alongside a local enrolment — and it travels unchanged to the next plant, including across the border to Győr or Kecskemét.' },
-    { q: 'How does Smartious compare with the Bratislava international schools?', a: 'They are established campuses with in-person culture and a local peer group we cannot replicate. Smartious delivers live online Cambridge, IB, and American curriculum at USD 2,160-6,480 a year — the fee-relief track, the waitlist bridge, or the only complete option outside the capital.' },
+    { q: 'How does Smartious compare with the Bratislava international schools?', a: 'They are established campuses with in-person culture and a local peer group we cannot replicate. Smartious delivers live online Cambridge, IB, and American curriculum at USD 5,076 a year — the fee-relief track, the waitlist bridge, or the only complete option outside the capital.' },
     { q: 'Where do Slovak students sit Cambridge examinations?', a: 'At authorised provision confirmed per family per session — Bratislava is checked first, Vienna is an hour away, and Budapest-area centres serve southern and eastern families.' },
     { q: 'Can my child access Slovak universities with A-Levels or an IB Diploma?', a: 'Slovak universities admit recognised international qualifications subject to programme requirements, recognition of the foreign leaving qualification, and Slovak-language proficiency for Slovak-taught degrees — with the English-taught offer, medicine especially, admitting them directly. UCAS and the Common Application stand open internationally.' },
     { q: 'How does live class scheduling work given the Slovakia-Nairobi time difference?', a: 'Slovakia runs CET (UTC+1) in winter and CEST (UTC+2) in summer — only 1-2 hours behind Nairobi EAT — so live afternoon teaching lands naturally inside the Slovak school day.' },

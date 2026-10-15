@@ -86,7 +86,7 @@ export const DRC_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Kinshasa families. Kinshasa is one of the largest cities in Africa and carries the country\'s political, banking, and corporate weight, alongside one of the biggest NGO, UN, and diplomatic communities on the continent. Its international schooling — the American school, the French lycée, the Belgian school, and a substantial private bilingual sector — is genuinely established and priced at the top of the local market. Under the loi-cadre of 2014 the State\'s obligations run to basic education, and private establishments operate under an agrément regime. Our clean default is supplementary: your school carries the enrolment, and we teach the Cambridge or IB track live alongside it.',
     heroImg: '/heroes/kinshasa-cd.jpg',
     altTexts: { hero: 'Kinshasa and the Congo river' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Kinshasa families — alongside your school, at a fraction of the capital tier\'s fees. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Kinshasa families — alongside your school, at a fraction of the capital tier\'s fees. From USD 423/month.',
     challenges: [
       'International school fees in Kinshasa sit at the top of the local market, beyond most Congolese professional families.',
       'The NGO, UN, and diplomatic community turns over constantly, so children arrive and leave mid-curriculum.',
@@ -116,7 +116,7 @@ export const DRC_CITIES = [
       'University application support — UCAS (UK), Common Application (US), and Belgian, French, South African and Congolese university applications',
     ],
     whyChoose: [
-      ['The tier\'s examinations at a professional family\'s budget', 'Live small-group Cambridge teaching at USD 2,160-6,480 a year against Kinshasa international fees at the top of the local market.'],
+      ['The tier\'s examinations at a professional family\'s budget', 'Live small-group Cambridge teaching at USD 5,076 a year against Kinshasa international fees at the top of the local market.'],
       ['French kept alongside the English-medium core', 'Cambridge French runs beside the academic track, protecting Belgian and French university routes that Congolese families rely on.'],
       ['Built for a community that rotates', 'NGO, UN, and diplomatic postings move constantly; the curriculum, teachers, and examination board stay constant across every move.'],
       ['What we are, stated plainly', 'Private establishments here operate under an agrément regime. Smartious is not an agréé Congolese establishment — we work alongside your school.'],
@@ -151,7 +151,7 @@ export const DRC_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Lubumbashi families. Lubumbashi is the DRC\'s second city and the commercial capital of the copper and cobalt industry — the mining houses\' regional offices, the smelters and processing plants, the logistics chains running south to Zambia and on to the Indian Ocean and west along the Lobito Corridor, and a substantial university and medical-faculty community. International schooling here is far thinner than in Kinshasa, and the capital is a long flight away. One useful detail: Haut-Katanga runs CAT, only one hour behind our Nairobi teaching base, which makes scheduling easier here than in the capital.',
     heroImg: '/heroes/lubumbashi-cd.jpg',
     altTexts: { hero: 'Lubumbashi and the Katanga mining region' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Lubumbashi families — the mining capital, thin international schooling, one hour from Nairobi. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Lubumbashi families — the mining capital, thin international schooling, one hour from Nairobi. From USD 423/month.',
     challenges: [
       'International schooling far thinner than Kinshasa\'s, with the capital a long flight away.',
       'The mining sector recruits internationally while local provision has not kept pace.',
@@ -214,7 +214,7 @@ export const DRC_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for families across Kolwezi and the Lualaba cobalt belt. Kolwezi sits at the centre of the most strategically watched mining region on earth: the copper and cobalt operations across Lualaba supply the batteries the global energy transition runs on, and they are staffed by engineers, metallurgists, geologists, and managers recruited from four continents, much of it on rotation. What the region does not have is international schooling. For most of these families the choices have been boarding in Lubumbashi, South Africa, or further afield, or keeping the household in another country entirely. Smartious delivers live Cambridge and IB teaching to the cobalt belt instead, one hour behind Nairobi.',
     heroImg: '/heroes/kolwezi-cd.jpg',
     altTexts: { hero: 'The Lualaba mining region' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Kolwezi and Lualaba families — the world\'s cobalt capital, no international schooling. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Kolwezi and Lualaba families — the world\'s cobalt capital, no international schooling. From USD 423/month.',
     challenges: [
       'An internationally recruited mining workforce with essentially no international schooling in the region.',
       'Rotational contracts split households across countries for much of the year.',
@@ -303,7 +303,7 @@ export const DRC_COUNTRY = {
   heroEyebrow: 'Online school for the DR Congo',
   heroH1Suffix: 'the DR Congo',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for mining, corporate, NGO, and Congolese families across Kinshasa, Lubumbashi, and Kolwezi. The loi-cadre of 2014 guarantees unusually explicit parental liberties, and private establishments require agrément — so we work alongside your school, and we say plainly that we are not an agréé Congolese establishment. The mining southeast sits just one hour behind our teaching base.',
-  heroValueProp: 'From USD 180/month. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — with French kept alongside the English-medium core.',
+  heroValueProp: 'From USD 423/month. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — with French kept alongside the English-medium core.',
   whatsappTrigger: 'Hi, I would like to enquire about Smartious for our family in the DRC',
 
   citiesSectionTitle: 'Where our DRC families are',
@@ -336,7 +336,7 @@ export const DRC_COUNTRY = {
     { name: 'Kolwezi and the Lualaba belt',                   city: 'The cobalt belt',       curriculum: '—',                                     feesUsd: 'Essentially nothing',                               feesAed: '—',                       rating: 0,   capacityNote: 'The world\'s cobalt capital, staffed from four continents, with no schooling to match' },
     { name: 'Boarding in Zambia, South Africa or Europe',     city: 'Abroad',                curriculum: 'Various',                               feesUsd: 'Fees plus travel plus a child living away',         feesAed: '—',                       rating: 4.3, capacityNote: 'The traditional answer for mining families across Katanga and Lualaba' },
     { name: 'Wolsey Hall Oxford / King\'s InterHigh (online)', city: 'Online',                curriculum: 'Cambridge self-paced / UK online',      feesUsd: 'Per-subject / GBP 9,000-11,000',                    feesAed: 'Varies',                  rating: 4.2, capacityNote: 'Self-paced or priced far above Smartious, and none carries French alongside the English-medium core' },
-    { name: 'Smartious Homeschool (DRC via online delivery)', city: 'Delivered to all the DRC', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 2,160-6,480/year', feesAed: 'Invoiced in USD', rating: 4.8, capacityNote: 'Every class live through A-Level + the cobalt belt reached at last + French kept alongside + one hour from Katanga + honest about not being an agréé establishment' },
+    { name: 'Smartious Homeschool (DRC via online delivery)', city: 'Delivered to all the DRC', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 5,076/year', feesAed: 'Invoiced in USD', rating: 4.8, capacityNote: 'Every class live through A-Level + the cobalt belt reached at last + French kept alongside + one hour from Katanga + honest about not being an agréé establishment' },
   ],
 
   legalFrameworkIntro: 'The DRC has the most explicit parental-liberty language of any framework in our African coverage — and it is also the one most easily over-read. Here is what the law says, and what we will not claim it says.',

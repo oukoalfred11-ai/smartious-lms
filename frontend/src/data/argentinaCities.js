@@ -77,7 +77,7 @@ export const ARGENTINA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Buenos Aires families. Few cities anywhere have a deeper bilingual school tradition than Buenos Aires — St George\'s, Belgrano Day School, St Andrew\'s, Northlands, Cardenal Newman and the wider Anglo-Argentine sector, alongside the German, French and Italian schools, much of it dating back more than a century and much of it already running IGCSE and the IB. We are not here to introduce the British curriculum to a city that has taught it since the 1800s. We are here for subject access, for fee pressure in a high-inflation economy, and for families the tier cannot seat.',
     heroImg: '/heroes/buenos-aires-ar.jpg',
     altTexts: { hero: 'Buenos Aires city' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Buenos Aires families — subject access and fee relief in a deep bilingual market. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Buenos Aires families — subject access and fee relief in a deep bilingual market. From USD 423/month.',
     challenges: [
       'Bilingual and international school fees under sustained pressure in a high-inflation economy.',
       'Competitive places at the strongest Anglo-Argentine schools, often with long waiting lists.',
@@ -108,7 +108,7 @@ export const ARGENTINA_CITIES = [
     ],
     whyChoose: [
       ['The subject a strong school still cannot staff', 'Further Mathematics or a third science for four pupils is unviable on any single timetable and routine in a live group drawn from several countries.'],
-      ['Fee relief without leaving the qualification', 'Live small-group teaching at USD 2,160-6,480 a year, invoiced in USD, against bilingual fees under sustained inflationary pressure.'],
+      ['Fee relief without leaving the qualification', 'Live small-group teaching at USD 5,076 a year, invoiced in USD, against bilingual fees under sustained inflationary pressure.'],
       ['Respectful of a tradition older than most', 'Buenos Aires has taught the British curriculum since the nineteenth century. We supplement that market; we do not lecture it.'],
       ['A workable clock', 'Six hours, fixed — Argentine mornings and early afternoons both land in our normal teaching day, and turno mañana/tarde leaves most students one window free.'],
       ['Spanish kept alongside', 'Cambridge Spanish runs beside the English-medium core, protecting Argentine and Spanish university routes.'],
@@ -142,7 +142,7 @@ export const ARGENTINA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Córdoba families. Córdoba is Argentina\'s industrial and academic second city — automotive assembly and components, an aerospace and defence industry with a long history, a fast-growing software and services sector, and a university founded in the early seventeenth century that still anchors one of the largest student populations in the country. Its international provision is thinner than Buenos Aires\'s, and the capital is seven hundred kilometres east. We teach live in the Argentine morning or early afternoon, alongside your school.',
     heroImg: '/heroes/cordoba-ar.jpg',
     altTexts: { hero: 'Córdoba city and the sierras' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Córdoba families — industrial and university heartland, thinner provision. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Córdoba families — industrial and university heartland, thinner provision. From USD 423/month.',
     challenges: [
       'International provision thinner than Buenos Aires, seven hundred kilometres east.',
       'Automotive and aerospace employers recruit internationally while schooling has not matched.',
@@ -204,7 +204,7 @@ export const ARGENTINA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Rosario and Santa Fe families. The Paraná corridor around Rosario handles one of the largest concentrations of soy, grain, and vegetable-oil export capacity anywhere in the world, and the international commodity trading houses, crushing plants, and shipping agencies that come with it — an unusually international commercial community for a city its size. Rosario is also a major university and medical centre. International schooling has not matched the trade. Smartious teaches Cambridge and IB live alongside your school, on a six-hour offset that works.',
     heroImg: '/heroes/rosario-ar.jpg',
     altTexts: { hero: 'Rosario and the Paraná river' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Rosario and Santa Fe families — the Paraná agro-export corridor. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Rosario and Santa Fe families — the Paraná agro-export corridor. From USD 423/month.',
     challenges: [
       'An internationally staffed commodity trading and agro-export community with limited international schooling.',
       'Families spread along the Paraná corridor rather than clustered in one city.',
@@ -266,7 +266,7 @@ export const ARGENTINA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Mendoza families. Mendoza is Argentina\'s wine capital and its Andean gateway — an industry with substantial French, Italian, American, and Chilean investment behind it, bringing winemakers, viticulturists, and executives who often stay for years; a mining and energy sector across the province; and the corridor over the Andes to Chile that shapes its trade. The international community is real and the international schooling is limited, concentrated in the city while much of the industry sits in the valleys. Smartious teaches live alongside your school, on a six-hour offset that works.',
     heroImg: '/heroes/mendoza-ar.jpg',
     altTexts: { hero: 'Mendoza vineyards and the Andes' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Mendoza families — wine capital, Andean province, limited provision. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Mendoza families — wine capital, Andean province, limited provision. From USD 423/month.',
     challenges: [
       'A genuinely international wine and mining community with limited international schooling.',
       'Provision is concentrated in the city while the industry sits across the valleys.',
@@ -328,7 +328,7 @@ export const ARGENTINA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for families across Neuquén and the Vaca Muerta belt. Vaca Muerta is one of the largest unconventional oil and gas formations in the world, and the operations around Añelo, Neuquén, and the Río Negro valley have drilled a global industry into a Patagonian province in barely more than a decade — bringing petroleum engineers, geologists, completion specialists, and management recruited from the United States, Canada, Europe, and across Latin America, much of it rotational. What did not arrive at the same pace was schooling. Smartious teaches live to the basin, on a six-hour offset that works.',
     heroImg: '/heroes/neuquen-ar.jpg',
     altTexts: { hero: 'The Neuquén basin and Patagonian steppe' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Neuquén and Vaca Muerta families — one of the world\'s great shale plays, minimal international schooling. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Neuquén and Vaca Muerta families — one of the world\'s great shale plays, minimal international schooling. From USD 423/month.',
     challenges: [
       'An internationally recruited shale workforce with essentially no international schooling in the basin.',
       'Añelo and the operations belt sit well outside any city\'s school map.',
@@ -417,7 +417,7 @@ export const ARGENTINA_COUNTRY = {
   heroEyebrow: 'Online school for Argentina',
   heroH1Suffix: 'Argentina',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for corporate, energy, agro-export, and Argentine families across Buenos Aires, Córdoba, Rosario, Mendoza, and Neuquén. In a country that has taught the British curriculum since the nineteenth century, our offer is narrow and honest: the subjects a timetable cannot staff, fee relief invoiced in USD, and reach beyond Buenos Aires. Six hours behind, so mornings and early afternoons both work.',
-  heroValueProp: 'From USD 180/month, invoiced in USD. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — alongside your Argentine school.',
+  heroValueProp: 'From USD 423/month, invoiced in USD. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — alongside your Argentine school.',
   whatsappTrigger: 'Hi, I would like to enquire about Smartious for our family in Argentina',
 
   citiesSectionTitle: 'Where our Argentina families are',
@@ -450,7 +450,7 @@ export const ARGENTINA_COUNTRY = {
     { name: 'The Neuquén basin',                              city: 'Vaca Muerta, Añelo',    curriculum: '—',                                     feesUsd: 'Essentially nothing',                               feesAed: '—',                       rating: 0,   capacityNote: 'One of the world\'s great shale plays, with no international schooling to match' },
     { name: 'Private tuition (clases particulares)',           city: 'Nationwide',            curriculum: 'Exam-focused coaching',                 feesUsd: 'Per hour, per subject',                             feesAed: 'Widespread',              rating: 3.9, capacityNote: 'The default answer to a timetable gap — usually one-to-one and unstructured across a year' },
     { name: 'Wolsey Hall Oxford / King\'s InterHigh (online)', city: 'Online',                curriculum: 'Cambridge self-paced / UK online',      feesUsd: 'Per-subject / GBP 9,000-11,000',                    feesAed: 'Varies',                  rating: 4.2, capacityNote: 'Self-paced or priced far above Smartious — UK providers are closer to Argentina on the clock than we are' },
-    { name: 'Smartious Homeschool (Argentina via online delivery)', city: 'Delivered to all Argentina', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 2,160-6,480/year', feesAed: 'Invoiced in USD', rating: 4.8, capacityNote: 'Every class live through A-Level + the sets a timetable cannot staff + USD-denominated planning + Vaca Muerta and the provinces reached + honest that Buenos Aires got here first' },
+    { name: 'Smartious Homeschool (Argentina via online delivery)', city: 'Delivered to all Argentina', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 5,076/year', feesAed: 'Invoiced in USD', rating: 4.8, capacityNote: 'Every class live through A-Level + the sets a timetable cannot staff + USD-denominated planning + Vaca Muerta and the provinces reached + honest that Buenos Aires got here first' },
   ],
 
   legalFrameworkIntro: 'Argentina has one of the longest compulsory ranges in our coverage and one of the most decentralised systems. Both shape what we can honestly offer. Here is the framework.',
@@ -460,13 +460,13 @@ export const ARGENTINA_COUNTRY = {
     { h: 'Home education: what we can and cannot say', p: 'We are not aware of an established parental-choice home-education route in Argentine law, and we phrase it in those terms rather than asserting a categorical prohibition we cannot fully evidence. What is unrestricted is structured education alongside a school enrolment, which is the configuration we build — and given the length of the compulsory range, it is the configuration that applies for longer here than in most countries.' },
     { h: 'Twenty-four jurisdictions, which changes the answer', p: 'This is the feature most national summaries flatten. Argentina\'s education system is administered by the twenty-three provinces and the Ciudad Autónoma de Buenos Aires, each with its own education ministry operating within the national law\'s framework and coordinated through the Consejo Federal de Educación. The pattern will be familiar to readers of our Swiss and Bosnian pages: one national framework, many administering authorities, and operative detail that depends on where a family lives. So the position that governs your child is confirmed with your provincial or CABA education authority, not from a national article — ours included.' },
     { h: 'What we are, and are not', p: 'Private schools in Argentina operate with official recognition through their jurisdiction. Smartious does not hold Argentine recognition, does not operate premises in Argentina, and does not present itself as an alternative to a recognised school. The qualifications we deliver carry Cambridge, Pearson Edexcel, IB, or AP validity; your school carries the Argentine one. We state that as plainly here as we do in Mexico, Brazil, Ghana, and the DRC.' },
-    { h: 'Why our offer here is deliberately narrow', p: 'Buenos Aires has taught the British curriculum since the nineteenth century, and the Anglo-Argentine bilingual tier is among the most established anywhere in the world. We are not going to tell Argentine families that Cambridge is unfamiliar or that their schools are failing them, because neither is true. What a strong school still cannot always do is staff Further Mathematics for four pupils, or a third science, or run an A-Level set that clashes with everything else. And what no school can do is insulate a family from a currency. Fees invoiced in USD at USD 2,160-6,480 a year are a different planning proposition in a high-inflation economy, and that — plus reach into Córdoba, Mendoza, the Paraná corridor, and the Neuquén basin — is the honest scope of what we add.' },
+    { h: 'Why our offer here is deliberately narrow', p: 'Buenos Aires has taught the British curriculum since the nineteenth century, and the Anglo-Argentine bilingual tier is among the most established anywhere in the world. We are not going to tell Argentine families that Cambridge is unfamiliar or that their schools are failing them, because neither is true. What a strong school still cannot always do is staff Further Mathematics for four pupils, or a third science, or run an A-Level set that clashes with everything else. And what no school can do is insulate a family from a currency. Fees invoiced in USD at USD 5,076 a year are a different planning proposition in a high-inflation economy, and that — plus reach into Córdoba, Mendoza, the Paraná corridor, and the Neuquén basin — is the honest scope of what we add.' },
   ],
 
   whySmartious: [
     { h: 'Honest that Buenos Aires got here first',                        p: 'The Anglo-Argentine tier has taught this curriculum since the nineteenth century. We supplement a strong market rather than pretending to rescue it.' },
     { h: 'The set your timetable cannot staff',                            p: 'Further Mathematics or a third science for four pupils is unviable at one school and routine in a live group drawn from several countries.' },
-    { h: 'USD-denominated planning',                                       p: 'Fees invoiced in USD at USD 2,160-6,480 a year — a different proposition from peso-denominated fees in a high-inflation economy.' },
+    { h: 'USD-denominated planning',                                       p: 'Fees invoiced in USD at USD 5,076 a year — a different proposition from peso-denominated fees in a high-inflation economy.' },
     { h: 'Vaca Muerta and the provinces reached',                          p: 'One of the world\'s great shale plays, an Andean wine province, and a grain corridor — none of them served by the capital\'s school map.' },
     { h: 'Twenty-four jurisdictions, acknowledged',                        p: 'Argentina\'s detail is provincial. We route families to their own authority rather than giving a single national answer.' },
     { h: 'A timezone that genuinely works',                                p: 'Six hours, fixed, with mornings and early afternoons both inside our teaching day and turno mañana/tarde leaving most students a free window.' },

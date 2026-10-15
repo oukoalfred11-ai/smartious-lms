@@ -81,7 +81,7 @@ export const NAMIBIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Windhoek families. Windhoek holds Namibia\'s government, its financial and mining-sector commercial centre, a diplomatic and development community, and a long-established German-heritage population that has shaped the city\'s schools as much as its architecture. It also holds the country\'s international-school tier, including IB provision and German-language schooling, priced at the top of the local market. Namibia is unusual in our African coverage for another reason: the Basic Education Act 3 of 2020 actually defines home schooling and requires it to be registered — a named statutory route rather than a grey area. We set out exactly what that does and does not settle.',
     heroImg: '/heroes/windhoek-na.jpg',
     altTexts: { hero: 'Windhoek city centre' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Windhoek families — Namibia\'s registered home-schooling route explained, supplementary default. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Windhoek families — Namibia\'s registered home-schooling route explained, supplementary default. From USD 423/month.',
     challenges: [
       'International school fees in Windhoek sit at the top of the local market, beyond many professional Namibian families.',
       'Compulsory school attendance runs under section 9 of the Basic Education Act 3 of 2020 from the year a learner turns six.',
@@ -113,7 +113,7 @@ export const NAMIBIA_CITIES = [
     whyChoose: [
       ['The statute explained precisely, including its limits', 'Namibia defines home schooling in the Basic Education Act and requires registration and a legally approved academic curriculum. We explain both halves — and we do not claim our programme automatically satisfies the second.'],
       ['German alongside the English-medium core', 'In a city with a long German-heritage community and strong ties to Germany, Cambridge German sits naturally beside the academic track.'],
-      ['The tier\'s curriculum at a professional family\'s budget', 'Live small-group teaching at USD 2,160-6,480 a year against Windhoek international fees at the top of the local market.'],
+      ['The tier\'s curriculum at a professional family\'s budget', 'Live small-group teaching at USD 5,076 a year against Windhoek international fees at the top of the local market.'],
       ['One hour from your teachers, all year', 'Namibia has run CAT year-round since 2017 and Kenya observes no daylight saving either, so classes land in the ordinary school day every week of the year.'],
       ['An African school teaching African families', 'Nairobi-built and Nairobi-taught, serving families in 51 countries — not an overseas provider reaching in.'],
     ],
@@ -146,7 +146,7 @@ export const NAMIBIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for coastal Namibian families. The Erongo coast carries an outsized share of the national economy: Walvis Bay is Namibia\'s principal port and the head of a logistics corridor running inland to Botswana, Zambia, and the DRC, with a substantial fishing and marine-industry sector alongside it; Swakopmund runs tourism and a strong German-heritage community; and the uranium operations at Rössing and Husab sit in the desert behind them, employing an internationally recruited technical workforce. International schooling on the coast is thin, and Windhoek is around four hours inland. Smartious delivers the Cambridge and IB pathways live along the coast, one hour ahead of you all year.',
     heroImg: '/heroes/walvis-bay-na.jpg',
     altTexts: { hero: 'The Namibian coast at Walvis Bay' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Walvis Bay, Swakopmund and Erongo families — port, uranium and marine industry, thin international schooling. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Walvis Bay, Swakopmund and Erongo families — port, uranium and marine industry, thin international schooling. From USD 423/month.',
     challenges: [
       'Thin international schooling on a coast carrying the port, the uranium mines, and the fishing industry.',
       'Windhoek\'s tier is around four hours inland, so boarding has been the traditional answer.',
@@ -209,7 +209,7 @@ export const NAMIBIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for northern Namibian families. The four north-central regions hold the largest share of Namibia\'s population, and the Oshakati-Ondangwa-Ongwediva corridor is their commercial heart — retail and wholesale trade, transport, health and education services, a university presence, and cross-border commerce toward Angola. It is also the part of the country with no international schooling of any kind, and Windhoek is around seven hundred kilometres south. For northern families whose children are academically ambitious, the historical answer has been boarding in the capital or in South Africa. Smartious delivers the international pathways live to the north instead, one hour ahead of you all year.',
     heroImg: '/heroes/oshakati-na.jpg',
     altTexts: { hero: 'Northern Namibia' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Oshakati, Ondangwa and northern Namibia families — no international schooling in the region. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Oshakati, Ondangwa and northern Namibia families — no international schooling in the region. From USD 423/month.',
     challenges: [
       'No international schooling anywhere in the northern regions, with Windhoek around seven hundred kilometres south.',
       'Boarding in the capital or South Africa has been the only route to an internationally examined record.',
@@ -298,7 +298,7 @@ export const NAMIBIA_COUNTRY = {
   heroEyebrow: 'Online school for Namibia',
   heroH1Suffix: 'Namibia',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for mining, marine, expat, and Namibian families across Windhoek, Walvis Bay and the coast, and the northern regions. Taught live from Nairobi — one hour ahead, every week of the year. Namibia is unusual in Africa for defining home schooling in statute and requiring it to be registered, and we explain exactly what that does and does not settle.',
-  heroValueProp: 'From USD 180/month. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — supplementary beside your school, or the academic spine behind a registered home-schooling arrangement.',
+  heroValueProp: 'From USD 423/month. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — supplementary beside your school, or the academic spine behind a registered home-schooling arrangement.',
   whatsappTrigger: 'Hi, I would like to enquire about Smartious for our family in Namibia',
 
   citiesSectionTitle: 'Where our Namibia families are',
@@ -331,7 +331,7 @@ export const NAMIBIA_COUNTRY = {
     { name: 'The northern regions',                           city: 'Oshakati, Ondangwa, Ongwediva', curriculum: '—',                             feesUsd: 'No international provision',                        feesAed: '—',                       rating: 0,   capacityNote: 'Where most Namibians live — and no international school has ever been built' },
     { name: 'South African boarding',                         city: 'Cape Town, Johannesburg', curriculum: 'South African and international',      feesUsd: 'Fees plus travel plus a child living away',         feesAed: '—',                       rating: 4.4, capacityNote: 'The traditional answer for coastal and northern families' },
     { name: 'Wolsey Hall Oxford / King\'s InterHigh (online)', city: 'Online',                curriculum: 'Cambridge self-paced / UK online',      feesUsd: 'Per-subject / GBP 9,000-11,000',                    feesAed: 'Varies',                  rating: 4.2, capacityNote: 'Self-paced or priced far above Smartious, and taught from a timezone that puts classes at awkward hours' },
-    { name: 'Smartious Homeschool (Namibia via online delivery)', city: 'Delivered to all Namibia', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 2,160-6,480/year', feesAed: 'NAD equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + one hour from your teachers + the coast and the north served identically + the home-schooling statute explained including what we cannot warrant' },
+    { name: 'Smartious Homeschool (Namibia via online delivery)', city: 'Delivered to all Namibia', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 5,076/year', feesAed: 'NAD equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + one hour from your teachers + the coast and the north served identically + the home-schooling statute explained including what we cannot warrant' },
   ],
 
   legalFrameworkIntro: 'Namibia has the clearest statutory home-education provision we have found anywhere in our African coverage — and one phrase inside it decides everything. Here is the framework exactly.',

@@ -87,7 +87,7 @@ export const NEPAL_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Kathmandu families. The valley holds essentially all of Nepal\'s A-Level provision — Budhanilkantha, St Xavier\'s, Rato Bangala, Ullens and the A-Level colleges — alongside the diplomatic and development community and a professional population that takes education seriously. Cambridge is not new here. What a school still cannot always do is run Further Mathematics or a third science for four students, and admission to the leading institutions is competitive. Both of those are what we answer, in after-school hours that fit our teaching day.',
     heroImg: '/heroes/kathmandu-np.jpg',
     altTexts: { hero: 'Kathmandu valley' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Kathmandu families — subject specialists and no waiting list. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Kathmandu families — subject specialists and no waiting list. From USD 423/month.',
     challenges: [
       'Specialist A-Level subjects often will not run for small cohorts even at the leading colleges.',
       'Admission to the strongest schools and A-Level colleges is competitive.',
@@ -152,7 +152,7 @@ export const NEPAL_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Pokhara families. Nepal\'s second city anchors the trekking and tourism economy, with a growing professional and hospitality population, a substantial international visitor community and an international airport. What it does not have is A-Level provision — that is concentrated almost entirely in the Kathmandu valley, two hundred kilometres east, which for a Pokhara family has meant sending a child away at grade 11. Live delivery supplies the teaching where the family already is, in after-school hours that fit our day.',
     heroImg: '/heroes/pokhara-np.jpg',
     altTexts: { hero: 'Pokhara and the Annapurna range' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB and AP for Pokhara families — the second city, with A-Levels concentrated in Kathmandu. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB and AP for Pokhara families — the second city, with A-Levels concentrated in Kathmandu. From USD 423/month.',
     challenges: [
       'Almost no A-Level provision locally, with the concentration in Kathmandu two hundred kilometres east.',
       'Families who would otherwise send a child to the valley at grade 11.',
@@ -214,7 +214,7 @@ export const NEPAL_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Biratnagar and eastern Nepali families. The east carries the country\'s industrial and commercial belt — jute, textiles and manufacturing — alongside the Indian border trade corridor and the tea gardens of the eastern hills at Ilam. It is a substantial regional economy and A-Level provision is very limited here, with the concentration in the Kathmandu valley a long way west. Live delivery reaches the east identically, in after-school hours that land squarely in our teaching day.',
     heroImg: '/heroes/biratnagar-np.jpg',
     altTexts: { hero: 'The eastern Nepal plains' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB and AP for Biratnagar and eastern Nepal families — the industrial belt, very limited provision. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB and AP for Biratnagar and eastern Nepal families — the industrial belt, very limited provision. From USD 423/month.',
     challenges: [
       'Very limited A-Level provision across the eastern region.',
       'Kathmandu is a long way west and its institutions are competitive.',
@@ -276,7 +276,7 @@ export const NEPAL_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Chitwan and Bharatpur families. Central Nepal has grown quickly, and Bharatpur now carries an unusual concentration of medical colleges and health-sector institutions alongside Chitwan National Park with its conservation, research and tourism work, and the agriculture of the central plains. Academic ambition here runs high — medicine in particular — and A-Level provision remains concentrated in the Kathmandu valley to the north. Live delivery supplies the teaching where the family already is.',
     heroImg: '/heroes/chitwan-np.jpg',
     altTexts: { hero: 'Chitwan and the central plains' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB and AP for Chitwan and Bharatpur families — a medical city with A-Levels concentrated in Kathmandu. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB and AP for Chitwan and Bharatpur families — a medical city with A-Levels concentrated in Kathmandu. From USD 423/month.',
     challenges: [
       'A-Level provision remains concentrated in the Kathmandu valley to the north.',
       'High medical and scientific ambition with limited local A-Level options.',
@@ -338,7 +338,7 @@ export const NEPAL_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Butwal, Bhairahawa and western Nepali families. The western corridor has grown into one of the country\'s significant commercial and industrial regions, running the Indian border trade route through Bhairahawa with its international airport, alongside Lumbini and the international visitor community it draws, and the agriculture and manufacturing of the western plains. A-Level provision is thin here and Kathmandu is a long way east. Live delivery reaches the west identically, in after-school hours that fit our teaching day.',
     heroImg: '/heroes/butwal-np.jpg',
     altTexts: { hero: 'The western Nepal plains' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB and AP for Butwal, Bhairahawa and western Nepal families — a growing corridor with thin provision. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB and AP for Butwal, Bhairahawa and western Nepal families — a growing corridor with thin provision. From USD 423/month.',
     challenges: [
       'Thin A-Level provision across the western region.',
       'Kathmandu is a long way east and its institutions are competitive.',
@@ -426,7 +426,7 @@ export const NEPAL_COUNTRY = {
   heroEyebrow: 'Online school for Nepal',
   heroH1Suffix: 'Nepal',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for academic, business and Nepali families across Kathmandu, Pokhara, Biratnagar, Chitwan and Butwal. A-Level provision sits almost entirely in the valley — we reach the rest of the country, in after-school hours that land squarely in our teaching day.',
-  heroValueProp: 'From USD 180/month. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — after-school, alongside your school, with no waiting list.',
+  heroValueProp: 'From USD 423/month. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — after-school, alongside your school, with no waiting list.',
   whatsappTrigger: 'Hi, I would like to enquire about Smartious for our family in Nepal',
 
   citiesSectionTitle: 'Where our Nepal families are',
@@ -459,7 +459,7 @@ export const NEPAL_COUNTRY = {
     { name: 'Pokhara, Biratnagar, Bharatpur and Butwal',        city: 'Outside the valley',    curriculum: 'Thin to none',                          feesUsd: 'Limited option',                                    feesAed: '—',                       rating: 0,   capacityNote: 'A second city, an industrial belt, a medical city and a trade corridor — none with real A-Level provision' },
     { name: 'Relocation to Kathmandu at grade 11',              city: 'Nationwide practice',   curriculum: '—',                                     feesUsd: 'Cost of a second household',                        feesAed: '—',                       rating: 0,   capacityNote: 'The traditional answer for families outside the valley, and an expensive and disruptive one' },
     { name: 'Private tuition and coaching institutes',          city: 'Nationwide',            curriculum: 'Exam-focused coaching',                 feesUsd: 'Per hour, per subject',                             feesAed: 'Widespread',              rating: 4.0, capacityNote: 'Concentrated where the teachers already are, which is where the shortage is not' },
-    { name: 'Smartious Homeschool (Nepal via online delivery)', city: 'Delivered nationwide',  curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP',   feesUsd: 'USD 2,160-6,480/year',                              feesAed: 'NPR at prevailing rate',   rating: 4.8, capacityNote: 'Every class live through A-Level + the four-fifths of the country outside the valley reached + after-school hours that fit + no relocation at grade 11' },
+    { name: 'Smartious Homeschool (Nepal via online delivery)', city: 'Delivered nationwide',  curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP',   feesUsd: 'USD 5,076/year',                              feesAed: 'NPR at prevailing rate',   rating: 4.8, capacityNote: 'Every class live through A-Level + the four-fifths of the country outside the valley reached + after-school hours that fit + no relocation at grade 11' },
   ],
 
   legalFrameworkIntro: 'Nepal is one of the markets where we could not verify the central question, so we set out what we can establish and then the fact that shapes our offer here more than the law does.',
