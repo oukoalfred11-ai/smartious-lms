@@ -80,7 +80,7 @@ export const BRAZIL_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for São Paulo families. São Paulo is the financial and corporate capital of Latin America, with the deepest international and bilingual school market in South America — the British and American schools, the German, French, Italian, and Japanese schools, and a fast-growing escola bilíngue sector. Fees at the top of that market are among the highest in the region, and the professional class outside them is enormous. Brazilian law is settled and strict on educating outside school, so our role here is unambiguous: alongside your school, never instead of it. The six-hour offset means our classes land in the Brazilian morning or early afternoon — both of which work.',
     heroImg: '/heroes/sao-paulo-br.jpg',
     altTexts: { hero: 'São Paulo skyline' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for São Paulo families — alongside your school, at a fraction of the international tier\'s fees. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for São Paulo families — alongside your school, at a fraction of the international tier\'s fees. From USD 423/month.',
     challenges: [
       'International school fees in São Paulo are among the highest in Latin America.',
       'Educação básica is compulsory from four to seventeen, and the STF has held there is no right to home education.',
@@ -110,7 +110,7 @@ export const BRAZIL_CITIES = [
       'University application support — UCAS (UK), Common Application (US), and Portuguese, Canadian and Brazilian university applications',
     ],
     whyChoose: [
-      ['A fee gap measured against the region\'s most expensive tier', 'Live small-group teaching at USD 2,160-6,480 a year against São Paulo international fees among the highest in Latin America.'],
+      ['A fee gap measured against the region\'s most expensive tier', 'Live small-group teaching at USD 5,076 a year against São Paulo international fees among the highest in Latin America.'],
       ['Cambridge A-Levels where the market runs to IB and bilingual', 'Families applying through UCAS frequently find their bilingual school does not offer an A-Level route. That is what we teach.'],
       ['Alongside the national route, not instead of it', 'Brazilian law is settled: there is no right to home education. Your school keeps the enrolment and the ENEM track; we add the international one.'],
       ['A workable clock, unlike much of the Americas', 'Six hours, fixed — Brazilian mornings and early afternoons both land in our normal teaching day, with no seasonal drift since Brazil ended daylight saving in 2019.'],
@@ -145,7 +145,7 @@ export const BRAZIL_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Rio de Janeiro families. Rio is Brazil\'s energy capital — Petrobras and the international pre-salt operators, the subsea and oilfield-services sector strung north to Macaé, and the engineers and managers recruited from around the world who come with it — alongside creative industries, a large diplomatic and consular presence, and long-established British and American schools whose places are competitive and whose fees are high. Brazilian law is settled on educating outside school, so we work alongside your school. The six-hour offset puts our classes in the Brazilian morning or early afternoon.',
     heroImg: '/heroes/rio-de-janeiro-br.jpg',
     altTexts: { hero: 'Rio de Janeiro and Guanabara Bay' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Rio de Janeiro and Macaé families — pre-salt energy capital, competitive school places. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Rio de Janeiro and Macaé families — pre-salt energy capital, competitive school places. From USD 423/month.',
     challenges: [
       'A short list of international schools with competitive places and high fees.',
       'Energy postings arrive and depart on project timelines rather than admission cycles.',
@@ -207,7 +207,7 @@ export const BRAZIL_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Brasília families. The federal capital hosts one of the largest diplomatic communities in the Southern Hemisphere alongside the federal government, the courts, the regulators, and the international organisations that cluster around them — which makes it a city defined by three- and four-year postings. Its international school market reflects that, and its places are competitive. For a family who will be in Bogotá or Geneva or Pretoria next, a curriculum that continues unchanged matters more than any single campus. Brazilian law is settled on educating outside school, so we work alongside whichever school a family holds.',
     heroImg: '/heroes/brasilia-br.jpg',
     altTexts: { hero: 'Brasília and the Esplanada dos Ministérios' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Brasília families — a diplomatic capital built for rotation. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Brasília families — a diplomatic capital built for rotation. From USD 423/month.',
     challenges: [
       'A city defined by three- and four-year postings, so children change systems repeatedly.',
       'International school places are competitive and fees are high.',
@@ -269,7 +269,7 @@ export const BRAZIL_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Belo Horizonte and Minas Gerais families. Minas is Brazil\'s mining and metallurgy heartland — the Quadrilátero Ferrífero, the iron-ore operations and the international mining houses working them, steel and industrial processing, and the engineering and geoscience community that surrounds all of it, alongside one of the country\'s strongest medical and academic sectors. For a state this size and this internationally connected, international schooling is thinner than families expect, and it is concentrated in the capital. Smartious teaches Cambridge and IB live alongside your school, on a six-hour offset that works.',
     heroImg: '/heroes/belo-horizonte-br.jpg',
     altTexts: { hero: 'Belo Horizonte and the Minas hills' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Belo Horizonte and Minas Gerais families — mining and metallurgy capital, thin provision. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Belo Horizonte and Minas Gerais families — mining and metallurgy capital, thin provision. From USD 423/month.',
     challenges: [
       'International provision is thinner than the state\'s size and industrial profile suggest.',
       'Mining and metallurgy families are spread across the Quadrilátero rather than clustered in the capital.',
@@ -331,7 +331,7 @@ export const BRAZIL_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Florianópolis and Santa Catarina families. Florianópolis has become Brazil\'s technology and remote-work capital — a software and startup cluster, a fast-growing international resident community drawn from across Europe and the Americas, and a lifestyle-migration inflow that has outpaced the schools serving it. Inland, Joinville and Blumenau carry a German-heritage industrial belt with its own international connections. Santa Catarina is also where a state homeschooling law was passed and then struck down, which makes the legal position here worth stating precisely rather than vaguely.',
     heroImg: '/heroes/florianopolis-br.jpg',
     altTexts: { hero: 'Florianópolis island and coast' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Florianópolis and Santa Catarina families — tech and remote-work capital, and the truth about the struck-down state law. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Florianópolis and Santa Catarina families — tech and remote-work capital, and the truth about the struck-down state law. From USD 423/month.',
     challenges: [
       'An international resident and remote-work community growing faster than the schools serving it.',
       'Families spread across the island, the mainland, and the industrial belt rather than clustered near one campus.',
@@ -419,7 +419,7 @@ export const BRAZIL_COUNTRY = {
   heroEyebrow: 'Online school for Brazil',
   heroH1Suffix: 'Brazil',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for corporate, energy, technology, and Brazilian families across São Paulo, Rio de Janeiro, Brasília, Belo Horizonte, and Florianópolis. Brazilian law is settled: the STF held in 2018 that there is no right to home education, and educação básica is compulsory from four to seventeen. So we teach alongside your school — never instead of it — on a six-hour offset that puts our classes in your morning or early afternoon.',
-  heroValueProp: 'From USD 180/month. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — alongside your Brazilian school, with Portuguese kept intact.',
+  heroValueProp: 'From USD 423/month. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — alongside your Brazilian school, with Portuguese kept intact.',
   whatsappTrigger: 'Hi, I would like to enquire about Smartious for our family in Brazil',
 
   citiesSectionTitle: 'Where our Brazil families are',
@@ -452,7 +452,7 @@ export const BRAZIL_COUNTRY = {
     { name: 'Minas and the south',                             city: 'Outside the big three', curriculum: 'Thinner provision',                     feesUsd: 'Limited international option',                      feesAed: '—',                       rating: 0,   capacityNote: 'An iron-ore heartland and a tech capital, both thinner than their profiles suggest' },
     { name: 'Cambridge A-Level provision',                     city: 'Nationwide',            curriculum: 'Comparatively scarce',                  feesUsd: '—',                                                 feesAed: '—',                       rating: 0,   capacityNote: 'In an IB, American and bilingual market, UCAS applicants often find no local A-Level route' },
     { name: 'Wolsey Hall Oxford / King\'s InterHigh (online)',  city: 'Online',                curriculum: 'Cambridge self-paced / UK online',      feesUsd: 'Per-subject / GBP 9,000-11,000',                    feesAed: 'Varies',                  rating: 4.2, capacityNote: 'Self-paced or priced far above Smartious — though UK providers are closer to Brazil on the clock than we are' },
-    { name: 'Smartious Homeschool (Brazil via online delivery)', city: 'Delivered to all Brazil', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 2,160-6,480/year', feesAed: 'BRL equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + the A-Level route the market lacks + a six-hour offset that works + the STF position stated exactly, including the struck-down state laws' },
+    { name: 'Smartious Homeschool (Brazil via online delivery)', city: 'Delivered to all Brazil', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 5,076/year', feesAed: 'BRL equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + the A-Level route the market lacks + a six-hour offset that works + the STF position stated exactly, including the struck-down state laws' },
   ],
 
   legalFrameworkIntro: 'Brazil is the most judicially settled country in our entire coverage on this question, which makes it one of the easiest to describe honestly and one of the easiest to describe dishonestly. Here is the ruling, exactly.',

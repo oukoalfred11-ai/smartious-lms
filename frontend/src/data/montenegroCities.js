@@ -74,7 +74,7 @@ export const MONTENEGRO_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Podgorica families. Podgorica holds Montenegro\'s government, its banking and telecoms sector, the University of Montenegro, and the diplomatic and development community that comes with EU accession negotiations — a small capital with an unusually international professional class. Its international schooling is thin even by regional standards. Montenegrin law is also more accommodating than its neighbours\' in one specific way: primary education is compulsory from six to fifteen, but a parent may, by exception, organise a child\'s primary education at home for a semester or a school year at a time. Smartious delivers the international pathways live — supplementary alongside your enrolment, or as the academic spine within that arrangement.',
     heroImg: '/heroes/podgorica-me.jpg',
     altTexts: { hero: 'Podgorica and the Morača river below the mountains' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Podgorica families — Montenegro\'s semester-at-a-time home education explained, supplementary track available. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Podgorica families — Montenegro\'s semester-at-a-time home education explained, supplementary track available. From USD 423/month.',
     challenges: [
       'International schooling is thin even by regional standards, and concentrated in and around the capital.',
       'Home education is permitted by exception for one semester or one school year at a time — it is not an open-ended right.',
@@ -106,7 +106,7 @@ export const MONTENEGRO_CITIES = [
     whyChoose: [
       ['The semester-at-a-time provision explained properly', 'Montenegro permits home education by exception for a semester or a school year — genuinely more than Croatia, Albania, or North Macedonia allow, and genuinely less than an open-ended right. We describe it as it is.'],
       ['Lighter checkpoints than the regional norm', 'Knowledge checks for home-educated pupils fall at the end of the cycle rather than annually in every subject — fewer checkpoints, not lower standards, and we plan for them either way.'],
-      ['The Cambridge track where the tier is thin', 'Live small-group teaching at USD 2,160-6,480 a year — the supplement, the bridge, or the alternative in a country with very little to choose from.'],
+      ['The Cambridge track where the tier is thin', 'Live small-group teaching at USD 5,076 a year — the supplement, the bridge, or the alternative in a country with very little to choose from.'],
       ['Enrolment at posting speed', 'Diplomatic and development families arrive mid-year; students typically begin within a week of the assessment.'],
       ['Timezone that lands in the school day', 'Podgorica is 1-2 hours behind Nairobi EAT.'],
     ],
@@ -140,7 +140,7 @@ export const MONTENEGRO_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for families around the Bay of Kotor. The bay is UNESCO-listed and, since Porto Montenegro transformed Tivat, one of the Mediterranean\'s significant superyacht centres — bringing marina operators, yacht crew and management, brokerage and refit businesses, and a permanent international residential community that lives here year-round rather than seasonally. Kotor, Herceg Novi, and Perast add tourism and second-home economies around the same water. What the bay does not have is international schooling at scale. Smartious delivers the pathways live around the bay — supplementary alongside a local enrolment, or as the academic spine within Montenegro\'s semester-at-a-time home provision.',
     heroImg: '/heroes/kotor-me.jpg',
     altTexts: { hero: 'The Bay of Kotor and the old town below the mountains' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Kotor, Tivat and Bay of Kotor families — Porto Montenegro\'s international community, no international schooling. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Kotor, Tivat and Bay of Kotor families — Porto Montenegro\'s international community, no international schooling. From USD 423/month.',
     challenges: [
       'A genuinely international year-round community around Porto Montenegro with no international schooling at scale.',
       'Yacht crew and marine-industry careers move between Mediterranean and Caribbean seasons.',
@@ -203,7 +203,7 @@ export const MONTENEGRO_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Budva and Riviera families. Budva is Montenegro\'s tourism capital — Sveti Stefan, Bečići, Rafailovići, and a season that draws visitors from across Europe and the region into a town whose permanent population is a fraction of its August one. Behind the season sits a growing year-round international community: hospitality and property businesses, second-home owners, and families who arrived for a summer and stayed. International schooling on the Riviera does not exist. Smartious delivers the pathways live along the coast, with a rhythm built for the season and Montenegro\'s framework explained properly.',
     heroImg: '/heroes/budva-me.jpg',
     altTexts: { hero: 'Budva old town and the Riviera coastline' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Budva and Riviera families — tourism capital, no international schooling. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Budva and Riviera families — tourism capital, no international schooling. From USD 423/month.',
     challenges: [
       'No international schooling on the Riviera, despite a growing year-round international community.',
       'A summer season that runs the whole household from May to September.',
@@ -266,7 +266,7 @@ export const MONTENEGRO_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Nikšić families. Nikšić is Montenegro\'s second city and its industrial one — the steelworks tradition that shaped the town, EPCG\'s power generation on the Zeta, a brewing industry known across the region, and faculties of the University of Montenegro. It is an hour from Podgorica and further from the coast, with no international schooling anywhere in reach. Smartious delivers the international pathways live across the interior — supplementary alongside a local enrolment, or as the academic spine within Montenegro\'s semester-at-a-time home provision.',
     heroImg: '/heroes/niksic-me.jpg',
     altTexts: { hero: 'Nikšić and the surrounding Montenegrin highlands' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Nikšić families — industrial second city, no international schooling. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Nikšić families — industrial second city, no international schooling. From USD 423/month.',
     challenges: [
       'No international schooling in the second city, with Podgorica an hour away and thin provision even there.',
       'Industrial and energy employment with international investment but no matching schooling.',
@@ -328,7 +328,7 @@ export const MONTENEGRO_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Bar and southern coast families. Bar is Montenegro\'s principal port — the country\'s freight gateway, the ferry link to Bari and Ancona, the rail terminus of the Belgrade line, and a shipping and logistics community that works internationally by definition. South of it, Ulcinj and the long beaches run their own tourism economy toward the Albanian border. Neither has international schooling. Smartious delivers the pathways live across the southern coast — supplementary alongside a local enrolment, or as the academic spine within Montenegro\'s semester-at-a-time home provision.',
     heroImg: '/heroes/bar-me.jpg',
     altTexts: { hero: 'The port of Bar on the Montenegrin coast' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Bar and Ulcinj families — main port and southern coast, no international schooling. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Bar and Ulcinj families — main port and southern coast, no international schooling. From USD 423/month.',
     challenges: [
       'No international schooling on the southern coast, for a port community that works internationally by definition.',
       'Shipping and freight rotations, and a summer season in Ulcinj, both cut across a fixed timetable.',
@@ -391,7 +391,7 @@ export const MONTENEGRO_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for families across Žabljak and northern Montenegro. The north is the country\'s wild half — Durmitor national park and the Tara canyon draw rafting, hiking, and ski visitors from across Europe, Žabljak sits higher than any other town in Montenegro, and Pljevlja, Bijelo Polje, and Berane carry the region\'s industry, coal, and administration. It is also the part of the country furthest from anything: no international schooling exists in the entire north, and Podgorica is two to three hours over the mountains. Smartious delivers the pathways live at altitude — supplementary alongside a local enrolment, or as the academic spine within Montenegro\'s semester-at-a-time home provision.',
     heroImg: '/heroes/zabljak-me.jpg',
     altTexts: { hero: 'Durmitor national park and the northern Montenegrin mountains' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Žabljak and northern Montenegro families — Durmitor and the Tara, no international schooling. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Žabljak and northern Montenegro families — Durmitor and the Tara, no international schooling. From USD 423/month.',
     challenges: [
       'No international schooling anywhere in the north, with Podgorica two to three hours over the mountains.',
       'Ski and rafting seasons run against the school calendar for tourism families.',
@@ -480,7 +480,7 @@ export const MONTENEGRO_COUNTRY = {
   heroEyebrow: 'Online international school for Montenegro',
   heroH1Suffix: 'Montenegro',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for expat, yachting, tourism, industrial, and Montenegrin families across Podgorica, the Bay of Kotor, Budva, Nikšić, Bar, and the north. Montenegro sits between its neighbours: primary education is compulsory from six to fifteen, but a parent may — by exception — organise a child\'s primary education at home for a semester or a school year at a time, with the knowledge check falling at the end of the cycle rather than every year.',
-  heroValueProp: 'From USD 180/month (~EUR 165/month). Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — supplementary beside any enrolment, or as the academic spine within the home-education exception.',
+  heroValueProp: 'From USD 423/month (~EUR 389/month). Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — supplementary beside any enrolment, or as the academic spine within the home-education exception.',
   whatsappTrigger: 'Hi, I would like to enquire about Smartious for our family in Montenegro',
 
   citiesSectionTitle: 'Where our Montenegro families are',
@@ -513,7 +513,7 @@ export const MONTENEGRO_COUNTRY = {
     { name: 'The interior and the north',                     city: 'Nikšić, Žabljak, Pljevlja', curriculum: '—',                                 feesUsd: 'No international provision',                        feesAed: '—',                       rating: 0,   capacityNote: 'The second city and the entire northern half of the country' },
     { name: 'Cross-border schools',                           city: 'Croatia, Serbia, Albania', curriculum: 'National systems',                   feesUsd: 'Varies',                                            feesAed: 'Cross-border',            rating: 4.0, capacityNote: 'Occasionally used by border families — and a different legal framework entirely' },
     { name: 'Wolsey Hall Oxford / King\'s InterHigh / bina (online)', city: 'Online',        curriculum: 'Cambridge self-paced / UK online / own to 15', feesUsd: 'Per-subject / GBP 9,000-11,000 / consultation', feesAed: 'Varies',      rating: 4.2, capacityNote: 'Self-paced, priced far above Smartious, or stopping at 15 — and none explains the semester-at-a-time exception or the cycle-based check' },
-    { name: 'Smartious Homeschool (Montenegro via online delivery)', city: 'Delivered to all Montenegro', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 2,160-6,480/year', feesAed: '~EUR 2,000-6,000/year', rating: 4.8, capacityNote: 'Every class live through A-Level + the home-education exception explained precisely + both configurations planned + the coast, the interior and the north served identically' },
+    { name: 'Smartious Homeschool (Montenegro via online delivery)', city: 'Delivered to all Montenegro', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 5,076/year', feesAed: '~EUR 2,000-6,000/year', rating: 4.8, capacityNote: 'Every class live through A-Level + the home-education exception explained precisely + both configurations planned + the coast, the interior and the north served identically' },
   ],
 
   legalFrameworkIntro: 'Montenegro does not fit either regional pattern. It permits what Croatia, Albania, and North Macedonia forbid, and it checks less often than Slovenia, Serbia, and Bulgaria. Here is the framework exactly.',

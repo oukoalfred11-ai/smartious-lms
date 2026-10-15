@@ -100,7 +100,7 @@ export const CHINA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Hong Kong families. Hong Kong is a Special Administrative Region with its own education system, curriculum and regulator, and one of the deepest international school sectors in the world — ESF, Harrow, Kellett, the Chinese International School, German Swiss, Canadian International and many more. The problem here has never been quality or availability of curriculum. It is places: admissions are among the most competitive anywhere and waiting lists are a well-known feature of the market. We have none.',
     heroImg: '/heroes/hong-kong-cn.jpg',
     altTexts: { hero: 'Hong Kong harbour' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Hong Kong families — no waiting list, evening classes, subject depth. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Hong Kong families — no waiting list, evening classes, subject depth. From USD 423/month.',
     challenges: [
       'International school waiting lists are a long-standing feature of the market, particularly for mid-year arrivals.',
       'Fees are among the highest in the world, with debentures and capital levies on top at some schools.',
@@ -132,7 +132,7 @@ export const CHINA_CITIES = [
     whyChoose: [
       ['No waiting list', 'A child starts within a week of the assessment. In a market where waiting lists are the defining constraint, that is frequently the whole decision rather than one factor among several.'],
       ['The set your school cannot staff', 'Further Mathematics or a third science for four pupils is unviable on one timetable and routine in a live group drawn from several countries.'],
-      ['A fee gap against one of the world\'s most expensive markets', 'Live small-group teaching at USD 2,160-6,480 a year, with no debenture and no capital levy.'],
+      ['A fee gap against one of the world\'s most expensive markets', 'Live small-group teaching at USD 5,076 a year, with no debenture and no capital levy.'],
       ['Evening classes that work', 'Hong Kong is five hours ahead of our teaching base, so a seven o\'clock evening class here is two in the afternoon for our teachers.'],
       ['A separate education system, clearly stated', 'Hong Kong is a Special Administrative Region with its own education system and regulator — distinct from the mainland framework, which we set out separately and carefully.'],
     ],
@@ -165,7 +165,7 @@ export const CHINA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Macau families. Macau is a Special Administrative Region with its own education system, running a distinctive mix of Portuguese-heritage, local Chinese and a small number of international schools alongside an integrated resort and hospitality economy that recruits management and specialist staff internationally. The international sector here is genuinely small for the size of that community, and Hong Kong — an hour away by ferry — has waiting lists of its own. Live delivery reaches Macau identically, in evening hours that suit both a school day and a hospitality household.',
     heroImg: '/heroes/macau-cn.jpg',
     altTexts: { hero: 'Macau' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Macau families — a small international sector, evening classes. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Macau families — a small international sector, evening classes. From USD 423/month.',
     challenges: [
       'A small international school sector relative to the internationally recruited workforce.',
       'Hong Kong is an hour away by ferry and has waiting lists of its own.',
@@ -420,7 +420,7 @@ export const CHINA_COUNTRY = {
   heroEyebrow: 'Online school for Hong Kong and Macau',
   heroH1Suffix: 'Hong Kong, Macau and China',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families in the Hong Kong and Macau Special Administrative Regions, which have their own education systems. For mainland China we set out the regulatory position honestly first: the Double Reduction policy constrains what a provider based outside China may offer, and we do not enrol compulsory-education-age mainland residents for subject teaching.',
-  heroValueProp: 'From USD 180/month. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — no waiting list, evening classes, for Hong Kong and Macau families.',
+  heroValueProp: 'From USD 423/month. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — no waiting list, evening classes, for Hong Kong and Macau families.',
   whatsappTrigger: 'Hi, I would like to enquire about Smartious for our family in Hong Kong or Macau',
 
   citiesSectionTitle: 'Where we serve, and where we do not',
@@ -453,7 +453,7 @@ export const CHINA_COUNTRY = {
     { name: 'The Macau international sector',                  city: 'Macau',                 curriculum: 'International, Portuguese and local',    feesUsd: 'Mid to premium tier',                               feesAed: 'Limited places',          rating: 4.2, capacityNote: 'Small relative to the internationally recruited workforce, with Hong Kong an hour away and full' },
     { name: 'Hong Kong tutoring sector',                       city: 'Hong Kong',             curriculum: 'Exam-focused coaching',                 feesUsd: 'Per hour, per subject',                             feesAed: 'Very widespread',         rating: 4.1, capacityNote: 'Enormous and well established — usually one-to-one or large-group, and rarely a structured year' },
     { name: 'Mainland China',                                  city: 'Shanghai, Beijing, Shenzhen', curriculum: '—',                               feesUsd: 'Not a market we serve',                             feesAed: '—',                       rating: 0,   capacityNote: 'The Double Reduction policy constrains providers based outside China. We do not enrol compulsory-education-age mainland residents for subject teaching' },
-    { name: 'Smartious Homeschool (Hong Kong and Macau)',      city: 'Delivered to both SARs', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP',   feesUsd: 'USD 2,160-6,480/year',                              feesAed: 'HKD/MOP at prevailing rate', rating: 4.8, capacityNote: 'No waiting list + a complete interim programme while a place comes free + the sets a timetable cannot staff + honest about the mainland position' },
+    { name: 'Smartious Homeschool (Hong Kong and Macau)',      city: 'Delivered to both SARs', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP',   feesUsd: 'USD 5,076/year',                              feesAed: 'HKD/MOP at prevailing rate', rating: 4.8, capacityNote: 'No waiting list + a complete interim programme while a place comes free + the sets a timetable cannot staff + honest about the mainland position' },
   ],
 
   legalFrameworkIntro: 'This is the only country page in our coverage where we lead with a constraint on ourselves rather than a description of a system. It is important enough to warrant that.',

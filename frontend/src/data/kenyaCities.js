@@ -25,7 +25,7 @@ export const KENYA_CITIES = [
       { h: 'Subject specialists you can\'t find locally', p: 'For advanced subjects — A-Level Further Mathematics, IB HL Physics, Chemistry, Computer Science — Mombasa\'s local tutor pool is small. Smartious draws from internationally qualified teachers based in Nairobi, accessible online to your Mombasa-based child.' },
       { h: 'University admissions support without travel', p: 'UCAS personal statements, Common App essays, SAT preparation, ACT preparation, interview coaching for UK and US universities — all delivered online to Mombasa families without trips to Nairobi or expensive international agencies.' },
       { h: 'Full international curricula', p: 'Cambridge IGCSE, A-Level, IB MYP and Diploma, American Curriculum with AP, Kenya CBC. Whatever your child\'s current pathway, Smartious supports it without forcing curriculum changes.' },
-      { h: 'Affordable relative to international school supplementary tutoring', p: 'Smartious 1-on-1 sessions from KSh 1,300/hour (USD 10/hour), versus typical Mombasa-area private tutors at KSh 2,500-5,000/hour for advanced subjects. Full online homeschool programmes from USD 423/month.' },
+      { h: 'Affordable relative to international school supplementary tutoring', p: 'Smartious 1-on-1 sessions from KSh 1,300/hour (USD 15/hour), versus typical Mombasa-area private tutors at KSh 2,500-5,000/hour for advanced subjects. Full online homeschool programmes from USD 423/month.' },
     ],
     homeschoolDetail: 'Smartious Online Homeschool for Mombasa families is a complete educational pathway delivered through the Smartious Learning Management System (LMS). Your child receives a personalised timetable, accesses live and recorded lessons, completes assignments and assessments online, and progresses through the curriculum at a pace matched to their ability. We deliver Cambridge IGCSE and A-Level (full programmes leading to internationally recognised qualifications), IB PYP / MYP / Diploma (delivered as a homeschool-aligned pathway with examination support), Kenya CBC (aligned to KICD standards, with KNEC examination preparation), and American Curriculum (high school diploma equivalent with AP option). Sessions are conducted by qualified subject specialists — most holding subject-specific university degrees from Kenyan, South African, UK or American institutions, with several TSC-registered.',
     homeTuitionDetail: 'Smartious Home Tuition in Mombasa is primarily delivered online — live 1-on-1 sessions via Smartious LMS with shared whiteboards, screen sharing, and real-time video. Most Mombasa families find this works better than physical home tuition for several practical reasons: no tutor commute time built into the hourly rate (which keeps costs down), no scheduling conflicts caused by traffic across Nyali Bridge or the Likoni Ferry, and full flexibility on session timing. For families specifically wanting in-person sessions for younger children (KCBC Lower Primary through Upper Primary), we can arrange referrals to vetted local tutors via our coastal partner network, though direct Smartious in-person tutoring in Mombasa is currently limited to scheduled visits during periodic teaching tours.',
@@ -154,7 +154,7 @@ export const KENYA_CITIES = [
       { q: 'What scholarships might my Kisumu child be eligible for?', a: 'Several pathways are relevant: KICD merit scholarships for academic excellence in CBC/KCSE; African Leadership Academy two-year pre-university; US universities offering need-based aid (Harvard, Yale, Princeton, MIT, Stanford, Wesleyan are particularly notable for sub-Saharan African students); UK Commonwealth Scholarships; Mastercard Foundation Scholars Programme; private foundation scholarships (Aga Khan Foundation, Equity Group Foundation Wings to Fly). We provide scholarship application coaching as part of our university admissions support.' },
       { q: 'How do I switch from another tutor to Smartious?', a: 'We facilitate transitions throughout the year. Your child\'s placement test helps us understand their current level, and we develop a transition plan that picks up from where the previous provider left off without losing progress. We can usually start within 7 working days of enrolment confirmation.' },
       { q: 'Can I observe my child\'s Smartious sessions?', a: 'Yes — parents are welcome to join sessions or observe via the LMS. We also send weekly progress reports summarising what was covered, your child\'s engagement, and recommended focus areas for the following week.' },
-      { q: 'What happens if my child needs to pause Smartious tuition?', a: 'You can pause hourly tuition at any time with no penalty. For full homeschool programmes, monthly billing pauses with 14 days notice and pro-rata refunds on unused sessions. We try to support families through periods of disruption (relocation, family events, illness) without administrative friction.' },
+      { q: 'What happens if my child needs to pause Smartious tuition?', a: 'You can pause hourly tuition at any time with no penalty. Full homeschool programmes are paid termly and are non-refundable once the assessment is done, the timetable is created and lessons have started; you can withdraw at the end of any term. We try to support families through periods of disruption (relocation, family events, illness) without administrative friction.' },
       { q: 'Do you provide university application support for African universities?', a: 'Yes — we support applications to Kenyan universities (KUCCPS for state universities, direct for private), Ugandan universities (Makerere, MUST), Tanzanian universities (UDSM, MUHAS), Rwandan universities (University of Rwanda), South African universities (UCT, Wits, Stellenbosch). Application timing, document preparation, personal statements and interview coaching all covered.' },
       { q: 'How do I contact Smartious from Kisumu?', a: 'WhatsApp +254 745 021 212 is fastest. Email hellosmartious@gmail.com. Phone +254 745 021 212. Our admissions team responds in English, Kiswahili and Dholuo for Kisumu families.' },
     ],
@@ -234,7 +234,7 @@ export const KENYA_CITIES = [
       { q: 'What scholarships might my Nakuru child be eligible for?', a: 'Relevant pathways: KICD merit scholarships, African Leadership Academy, US university need-based aid (Harvard, Yale, Princeton, MIT, Stanford, Wesleyan have notable sub-Saharan African intakes), UK Commonwealth Scholarships, Mastercard Foundation Scholars Programme, Equity Group Foundation Wings to Fly, Aga Khan Foundation. We provide scholarship application coaching.' },
       { q: 'How do I switch from another tutor to Smartious?', a: 'Placement test establishes your child\'s current level, and we develop a transition plan picking up from where the previous provider left off. Usually we can start within 7 working days.' },
       { q: 'Can I observe my child\'s sessions?', a: 'Yes — parents are welcome to join sessions or observe via LMS. Weekly progress reports and termly academic reports also provided.' },
-      { q: 'Can I pause if needed?', a: 'Yes — hourly tuition pauses with no penalty. Monthly homeschool programmes pause with 14 days notice and pro-rata refunds on unused sessions.' },
+      { q: 'Can I pause if needed?', a: 'Yes — hourly tuition pauses with no penalty. Homeschool programmes are paid termly and are non-refundable once lessons have started; you can withdraw at the end of any term.' },
       { q: 'Do you support university applications for Kenyan and East African universities?', a: 'Yes — KUCCPS for Kenyan state universities, direct application for Kenyan private universities, Makerere and other Ugandan universities, UDSM and MUHAS for Tanzania, University of Rwanda, South African universities (UCT, Wits, Stellenbosch). Application timing, documents, personal statements covered.' },
       { q: 'How do I contact Smartious from Nakuru?', a: 'WhatsApp +254 745 021 212 fastest. Email hellosmartious@gmail.com. Phone +254 745 021 212.' },
     ],
@@ -394,7 +394,7 @@ export const KENYA_CITIES = [
       { q: 'What scholarships might my Thika child be eligible for?', a: 'US university need-based aid (Harvard, Yale, Princeton, MIT, Stanford). UK Commonwealth Scholarships. Mastercard Foundation Scholars. Equity Group Foundation Wings to Fly. KICD merit scholarships. We provide application coaching across pathways.' },
       { q: 'Can I switch from another tutor to Smartious?', a: 'Yes — placement test establishes current level, transition plan picks up from previous provider. Usually start within 7 working days.' },
       { q: 'Can I observe my child\'s sessions?', a: 'Yes — parents welcome to join sessions or observe via LMS.' },
-      { q: 'What if my child needs to pause?', a: 'Hourly tuition pauses without penalty. Monthly programmes pause with 14 days notice and pro-rata refunds on unused sessions.' },
+      { q: 'What if my child needs to pause?', a: 'Hourly tuition pauses without penalty. Homeschool programmes are paid termly and are non-refundable once lessons have started; you can withdraw at the end of any term.' },
       { q: 'Do you support university applications for Kenyan and East African universities?', a: 'Yes — KUCCPS for state universities, direct for private. Ugandan, Tanzanian, Rwandan and South African universities also supported.' },
       { q: 'Is there a Smartious presence in Juja or Ruiru?', a: 'No physical presence, but online services available across Kiambu County and Thika sub-county. Many Juja and Ruiru families use Smartious for similar reasons to Thika families — eliminating the Nairobi commute.' },
       { q: 'How do I contact Smartious from Thika?', a: 'WhatsApp +254 745 021 212 fastest. Email hellosmartious@gmail.com. Phone +254 745 021 212.' },
@@ -598,8 +598,8 @@ export const KENYA_COUNTRY = {
       name: 'Smartious (live online)',
       city: 'All 47 Kenyan counties',
       curriculum: 'Cambridge IGCSE & A-Level · Edexcel · IB · American AP · CBC',
-      feesAed: 'KES 280K – 836K / year (~from USD 4,800+ per year)',
-      feesUsd: '2,160 – 6,480',
+      feesAed: 'KES 655K / year (~USD 5,076 per year)',
+      feesUsd: '5,076 a year',
       rating: 'Live online · PGCE specialists · Nairobi HQ',
       capacityNote: 'Immediate enrolment — accessible from any county',
       isUs: true,
@@ -645,7 +645,7 @@ export const KENYA_COUNTRY = {
     },
     {
       h: 'Brookhouse / Braeburn / Aga Khan Academy alternative pricing',
-      p: 'Brookhouse KES 1.6M-2.4M/year, Braeburn KES 1.4M-2.2M/year, Aga Khan Academy KES 1.8M-2.6M/year, GEMS Cambridge KES 1.4M-2.0M/year, Hillcrest KES 1.5M-2.2M/year. Smartious KES 280K-836K/year (~from USD 4,800+ per year) — delivers Cambridge curriculum at meaningfully lower cost.',
+      p: 'Brookhouse KES 1.6M-2.4M/year, Braeburn KES 1.4M-2.2M/year, Aga Khan Academy KES 1.8M-2.6M/year, GEMS Cambridge KES 1.4M-2.0M/year, Hillcrest KES 1.5M-2.2M/year. Smartious KES 655K / year (~USD 5,076 per year) — delivers Cambridge curriculum at meaningfully lower cost.',
     },
     {
       h: 'Accessible from any of Kenya\'s 47 counties',
@@ -672,7 +672,7 @@ export const KENYA_COUNTRY = {
   faqs: [
     {
       q: 'How does Smartious compare to Brookhouse, Braeburn, Aga Khan Academy, GEMS Cambridge, Hillcrest, Strathmore?',
-      a: 'Top Cambridge schools in Kenya — Brookhouse (KES 1.6M-2.4M/year), Braeburn (KES 1.4M-2.2M/year), Aga Khan Academy (KES 1.8M-2.6M/year — IB), GEMS Cambridge International School (KES 1.4M-2.0M/year), Hillcrest International (KES 1.5M-2.2M/year), Strathmore School (KES 800K-1.4M/year) — provide physical campus education with established sports, arts, and pastoral programmes. Smartious provides live online Cambridge, IB, American, or CBC curriculum at KES 280K-836K/year (~from USD 4,800+ per year). Trade-off: no physical campus, but the same internationally recognised academic qualifications, immediate enrolment, smaller class sizes (4-6 students vs typical 20-30), accessibility from any Kenyan county.',
+      a: 'Top Cambridge schools in Kenya — Brookhouse (KES 1.6M-2.4M/year), Braeburn (KES 1.4M-2.2M/year), Aga Khan Academy (KES 1.8M-2.6M/year — IB), GEMS Cambridge International School (KES 1.4M-2.0M/year), Hillcrest International (KES 1.5M-2.2M/year), Strathmore School (KES 800K-1.4M/year) — provide physical campus education with established sports, arts, and pastoral programmes. Smartious provides live online Cambridge, IB, American, or CBC curriculum at KES 655K / year (~USD 5,076 per year). Trade-off: no physical campus, but the same internationally recognised academic qualifications, immediate enrolment, smaller class sizes (4-6 students vs typical 20-30), accessibility from any Kenyan county.',
     },
     {
       q: 'My family lives outside Nairobi (Mombasa / Kisumu / Eldoret / Kakamega / Meru / Nyeri / rural Kenya). How does Smartious work?',
@@ -704,7 +704,7 @@ export const KENYA_COUNTRY = {
     },
     {
       q: 'How does payment work — KES or USD?',
-      a: 'Smartious tuition is denominated in USD (from USD 400/month (personalized pricing) — approximately from KES 52,000/month at typical 2026 ~KES 129/USD range). Payments accepted via M-Pesa Paybill 247247 Account 745021, Paystack, international card (Visa, Mastercard, Amex), PayPal, or bank transfer. USD denomination provides stability against KES-USD volatility for multi-year planning. M-Pesa makes Kenya-based payments simple.',
+      a: 'Smartious tuition is denominated in USD (from USD 423/month (personalized pricing) — approximately KES 54,600/month at typical 2026 ~KES 129/USD range). Payments accepted via M-Pesa Paybill 247247 Account 745021, Paystack, international card (Visa, Mastercard, Amex), PayPal, or bank transfer. USD denomination provides stability against KES-USD volatility for multi-year planning. M-Pesa makes Kenya-based payments simple.',
     },
     {
       q: 'How reliable is internet connectivity for live online learning in Kenya?',

@@ -78,7 +78,7 @@ export const JORDAN_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Amman families. The capital is a regional headquarters city — home to one of the largest concentrations of UN agencies, international NGOs and development organisations anywhere in the region, alongside a corporate and professional sector and a deep international school tier priced at the top of the regional market. It is also, uniquely in our coverage, on exactly our clock: Jordan runs UTC+3 year-round and so do we, so every hour of our teaching day is available to an Amman family, permanently and with no seasonal drift.',
     heroImg: '/heroes/amman-jo.jpg',
     altTexts: { hero: 'Amman' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Amman families — taught on exactly your clock, at any hour. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Amman families — taught on exactly your clock, at any hour. From USD 423/month.',
     challenges: [
       'International school fees in Amman sit at the top of the regional market with competitive places.',
       'Development and diplomatic postings arrive and depart on programme timelines rather than admission cycles.',
@@ -110,7 +110,7 @@ export const JORDAN_CITIES = [
     whyChoose: [
       ['Exactly your clock, all year', 'Jordan runs UTC+3 year-round and so do we. There is no offset at all and no seasonal drift — the first country in our coverage where that is true. Any hour of our teaching day works.'],
       ['Built for a rotating sector', 'Development and diplomatic postings move. The curriculum, teachers, and examination board continue unchanged to the next country — which is why our development-sector families often re-enrol from a new posting.'],
-      ['A fee gap against a premium tier', 'Live small-group teaching at USD 2,160-6,480 a year against Amman international fees at the top of the regional market.'],
+      ['A fee gap against a premium tier', 'Live small-group teaching at USD 5,076 a year against Amman international fees at the top of the regional market.'],
       ['Fees that behave predictably', 'The dinar is pegged to the dollar at a long-standing fixed rate, so USD-quoted fees carry effectively no exchange-rate risk over a multi-year commitment.'],
       ['Arabic kept as an examined subject', 'Cambridge Arabic runs alongside the English-medium core rather than being traded away.'],
     ],
@@ -143,7 +143,7 @@ export const JORDAN_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Aqaba families. The Red Sea city is Jordan\'s sole port, a special economic zone with its own investment and logistics regime, and a diving and tourism economy that draws visitors and operators from across Europe and the Gulf. It is a genuinely international working community, and Amman\'s school tier is four hours north. Live delivery reaches Aqaba identically — and because Jordan sits on exactly our teaching clock, a family here can take classes at whatever hour their week allows.',
     heroImg: '/heroes/aqaba-jo.jpg',
     altTexts: { hero: 'Aqaba and the Red Sea' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Aqaba families — the port and economic zone, four hours from Amman. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Aqaba families — the port and economic zone, four hours from Amman. From USD 423/month.',
     challenges: [
       'International schooling is concentrated in Amman, four hours north.',
       'A port, logistics and tourism economy with an internationally mobile workforce.',
@@ -205,7 +205,7 @@ export const JORDAN_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Irbid and northern Jordanian families. Irbid is the country\'s university city — Yarmouk University and the Jordan University of Science and Technology between them give the north a medical and engineering academic culture that few regional cities match, and one of the youngest populations in Jordan. Academic ambition here is high and international schooling is thin, with the tier concentrated in Amman an hour and a half south. We teach Cambridge and IB live across the north, at whatever hour suits.',
     heroImg: '/heroes/irbid-jo.jpg',
     altTexts: { hero: 'Irbid and northern Jordan' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Irbid and northern Jordan families — a university city with thin international provision. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Irbid and northern Jordan families — a university city with thin international provision. From USD 423/month.',
     challenges: [
       'Thin international provision in a city with a strong academic culture.',
       'Amman\'s tier is an hour and a half south.',
@@ -267,7 +267,7 @@ export const JORDAN_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Zarqa and industrial-belt families. Zarqa carries Jordan\'s industrial economy — the refinery, chemicals, manufacturing and the free zones around them — and is one of the country\'s largest population centres, yet its international provision is close to non-existent. Amman is half an hour away and its school tier is priced for a different market. For engineering and technical households here, the answer is not relocation but live delivery, on a clock that has no offset at all.',
     heroImg: '/heroes/zarqa-jo.jpg',
     altTexts: { hero: 'The Jordanian industrial belt' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Zarqa and industrial-belt families — refinery and manufacturing heartland. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Zarqa and industrial-belt families — refinery and manufacturing heartland. From USD 423/month.',
     challenges: [
       'Almost no international provision in one of Jordan\'s largest population centres.',
       'Amman\'s tier is close by but priced for a different market.',
@@ -297,7 +297,7 @@ export const JORDAN_CITIES = [
     ],
     whyChoose: [
       ['Chemistry and process engineering depth', 'Cambridge A-Level Chemistry, Physics and Mathematics suit a refinery and chemicals belt precisely.'],
-      ['A fee gap that matters here more than most', 'Amman is thirty minutes away and its international fees are set for a different market. Live small-group teaching at USD 2,160-6,480 a year is reachable.'],
+      ['A fee gap that matters here more than most', 'Amman is thirty minutes away and its international fees are set for a different market. Live small-group teaching at USD 5,076 a year is reachable.'],
       ['Exactly your clock, all year', 'Zero offset with no seasonal drift, so classes fit around industrial shift patterns rather than fighting them.'],
       ['Every session recorded', 'A missed class on a shift week is never a lost one.'],
       ['Arabic kept as an examined subject', 'Cambridge Arabic runs alongside the English-medium core.'],
@@ -329,7 +329,7 @@ export const JORDAN_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Dead Sea and Jordan Valley families. The valley carries an unusual mix: potash, bromine and mineral processing operations of genuine industrial scale, intensive irrigated agriculture in one of the most distinctive growing environments on earth, and a resort and wellness sector along the shore. It is also dispersed — families are spread down a long valley rather than clustered near any town with a school tier. Live delivery reaches all of it, on a clock with no offset at all.',
     heroImg: '/heroes/dead-sea-jo.jpg',
     altTexts: { hero: 'The Dead Sea and Jordan Valley' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Dead Sea and Jordan Valley families — mineral processing, agriculture and resorts. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Dead Sea and Jordan Valley families — mineral processing, agriculture and resorts. From USD 423/month.',
     challenges: [
       'Dispersed communities down a long valley with no local school tier.',
       'Industrial rosters and agricultural seasons shaping household schedules.',
@@ -417,7 +417,7 @@ export const JORDAN_COUNTRY = {
   heroEyebrow: 'Online school for Jordan',
   heroH1Suffix: 'Jordan',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for development-sector, corporate, industrial and Jordanian families across Amman, Aqaba, Irbid, Zarqa and the Jordan Valley. Jordan is the first country in our entire coverage on exactly our teaching clock — UTC+3 year-round, both sides, no offset and no seasonal drift — so every hour of our day is genuinely available to you.',
-  heroValueProp: 'From USD 180/month, with dinar fees effectively fixed by the dollar peg. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — at any hour that suits.',
+  heroValueProp: 'From USD 423/month, with dinar fees effectively fixed by the dollar peg. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — at any hour that suits.',
   whatsappTrigger: 'Hi, I would like to enquire about Smartious for our family in Jordan',
 
   citiesSectionTitle: 'Where our Jordan families are',
@@ -450,7 +450,7 @@ export const JORDAN_COUNTRY = {
     { name: 'Zarqa and the industrial belt',                     city: 'Zarqa',                curriculum: 'Almost none',                           feesUsd: 'No real international option',                      feesAed: '—',                       rating: 0,   capacityNote: 'One of the largest population centres in the country with essentially no international provision' },
     { name: 'Aqaba, Irbid and the valley',                       city: 'Outside Amman',        curriculum: 'Thin to none',                          feesUsd: 'Limited international option',                      feesAed: '—',                       rating: 0,   capacityNote: 'A port and economic zone, a university city and a minerals valley, none with a school tier' },
     { name: 'Private tuition',                                    city: 'Nationwide',           curriculum: 'Exam-focused coaching',                 feesUsd: 'Per hour, per subject',                             feesAed: 'Widespread',              rating: 4.0, capacityNote: 'The default answer to a subject gap — usually one-to-one and unstructured across a year' },
-    { name: 'Smartious Homeschool (Jordan via online delivery)',  city: 'Delivered nationwide', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP',   feesUsd: 'USD 2,160-6,480/year',                              feesAed: 'JOD effectively fixed by the peg', rating: 4.8, capacityNote: 'Every class live through A-Level + zero timezone offset year-round + Zarqa, Aqaba, Irbid and the valley reached + honest that we could not verify the legal position' },
+    { name: 'Smartious Homeschool (Jordan via online delivery)',  city: 'Delivered nationwide', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP',   feesUsd: 'USD 5,076/year',                              feesAed: 'JOD effectively fixed by the peg', rating: 4.8, capacityNote: 'Every class live through A-Level + zero timezone offset year-round + Zarqa, Aqaba, Irbid and the valley reached + honest that we could not verify the legal position' },
   ],
 
   legalFrameworkIntro: 'Jordan is one of the markets where we could not verify the central question, and we would rather open by saying so than write around it. Here is what we can establish, and the two practical facts that shape our offer here more than the law does.',

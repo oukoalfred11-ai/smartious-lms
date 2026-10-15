@@ -14,7 +14,7 @@ export const ETHIOPIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Addis Ababa families — across Bole, Kazanchis, Old Airport, Sarbet, Ayat, CMC, Gerji, Megenagna, Piassa and all sub-cities. Built for diplomatic, returning-diaspora and Ethiopian middle-class families who want international school academic depth without ICS Addis or Sandford International School annual fees.',
     heroImg: 'https://images.unsplash.com/photo-1633393834745-487e80c2e94d?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Addis Ababa skyline showing modern high-rise buildings against Entoto mountain backdrop' },
-    seoDesc: 'Live online homeschooling for Addis Ababa families. Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP. From USD 180/month — meaningfully below ICS Addis, Sandford, or Bingham annual fees. EAT live class scheduling.',
+    seoDesc: 'Live online homeschooling for Addis Ababa families. Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP. From USD 423/month — meaningfully below ICS Addis, Sandford, or Bingham annual fees. EAT live class scheduling.',
     challenges: [
       'International school tuition pressure: ICS Addis, Sandford International School, Bingham Academy charge USD 18,000–35,000/year — out of reach for most middle-class Ethiopian families and a heavy cost for diplomatic families on local-hire packages.',
       'Limited Cambridge/Edexcel curriculum access outside the top 3-4 international schools — most Ethiopian schools follow the Ethiopian curriculum, which complicates university applications abroad.',
@@ -45,7 +45,7 @@ export const ETHIOPIA_CITIES = [
     ],
     whyChoose: [
       ['Addis Ababa-specific scheduling', 'Live classes run 8 AM – 5 PM East Africa Time (EAT) — exactly matching Addis Ababa school hours. No time zone gymnastics. Bole, Kazanchis, Old Airport, Ayat, CMC, Megenagna families all access identical instruction.'],
-      ['ICS Addis / Sandford alternative pricing', 'USD 180/month for Online tier, USD 295/month for Online Plus, USD 540/month for Premium 1-on-1. Multi-year Cambridge IGCSE pathway from Year 10-13 typically costs USD 13,000-25,000 total — versus USD 90,000-175,000 at top Addis Ababa international schools.'],
+      ['ICS Addis / Sandford alternative pricing', 'USD 423/month, paid termly. Multi-year Cambridge IGCSE pathway from Year 10-13 typically costs USD 13,000-25,000 total — versus USD 90,000-175,000 at top Addis Ababa international schools.'],
       ['Curriculum continuity for diaspora returnees', 'Returning families from the US, UK, Canada, or Australia maintain Cambridge, IB or American AP credentials throughout their Ethiopia stay — making the eventual return abroad seamless for university applications.'],
       ['African Union / UN ECA diplomatic family support', 'For AU, UN ECA, embassy or NGO families on Addis Ababa postings, Smartious provides documentation suitable for embassy schools verification and university applications anywhere worldwide.'],
       ['Cambridge exam centre access in Addis Ababa', 'British Council Addis Ababa hosts Cambridge IGCSE and A-Level examinations during May/November series. Smartious students sit examinations locally without travel.'],
@@ -59,14 +59,14 @@ export const ETHIOPIA_CITIES = [
       american: 'American Curriculum — Common Core-aligned through Grade 8, then AP (Advanced Placement) courses for Grades 9-12. Particularly suited to diaspora families maintaining US university application pathway during their Ethiopia stay.',
     },
     homeschoolDetail: 'Addis Ababa families homeschool under varied frameworks — diplomatic families operate under their embassy school recognition or international curriculum provider documentation, returning-diaspora families maintain their home-country homeschool registration (US state, UK Local Authority, Canadian province), Ethiopian families work with Ministry of Education Ethiopia private candidacy frameworks. Smartious provides comprehensive curriculum, scheme of work, and assessment documentation suitable for all three contexts.',
-    homeTuitionDetail: 'For Addis Ababa families wanting in-person home tuition in addition to live online instruction, Smartious offers premium 1-on-1 home visits in Bole, Kazanchis, Old Airport, Sarbet, Ayat, CMC, Gerji, Megenagna areas — typically scheduled around live online sessions. Premium tier (USD 540/month) includes home tuition supplementation where feasible.',
+    homeTuitionDetail: 'For Addis Ababa families wanting in-person home tuition in addition to live online instruction, Smartious offers premium 1-on-1 home visits in Bole, Kazanchis, Old Airport, Sarbet, Ayat, CMC, Gerji, Megenagna areas — typically scheduled around live online sessions. Premium 1-on-1 support (USD 15/hour) includes home tuition supplementation where feasible.',
     onlineLearningDetail: 'Live online Cambridge IGCSE, A-Level, Edexcel, IB Diploma and American AP delivered via Smartious LMS. Classes scheduled in East Africa Time (EAT, UTC+3) exactly matching Addis Ababa local time. Class sizes 4-6 students for Online tier, smaller groups for Online Plus, 1-on-1 for Premium. Recorded sessions for review. Mshauri AI tutor support available 24/7. Works across Ethio Telecom fibre, Safaricom Ethiopia LTE, and starlink satellite internet.',
     faqs: [
-      { q: 'How does Smartious work for Addis Ababa families compared to ICS Addis or Sandford International School?', a: 'ICS Addis (USD 28,000-35,000/year) and Sandford International School (USD 18,000-25,000/year) provide physical campus education. Smartious provides live online instruction in the same Cambridge, IB, and American curricula at USD 2,160-6,480/year (Online to Premium tiers). The trade-off: no physical campus, but the same internationally recognized academic qualifications. Many Addis Ababa families combine Smartious academic instruction with local social, sports, and arts activities — a popular hybrid approach.' },
+      { q: 'How does Smartious work for Addis Ababa families compared to ICS Addis or Sandford International School?', a: 'ICS Addis (USD 28,000-35,000/year) and Sandford International School (USD 18,000-25,000/year) provide physical campus education. Smartious provides live online instruction in the same Cambridge, IB, and American curricula at USD 5,076/year (Online to Premium tiers). The trade-off: no physical campus, but the same internationally recognized academic qualifications. Many Addis Ababa families combine Smartious academic instruction with local social, sports, and arts activities — a popular hybrid approach.' },
       { q: 'Does Smartious work with Ministry of Education Ethiopia homeschool requirements?', a: 'Ethiopia\'s formal homeschool framework is less developed than UK or US systems. Most Smartious Ethiopian families operate under (a) international curriculum provider documentation supporting eventual UCAS/Common App applications, or (b) Ministry of Education private candidacy frameworks for national qualifications. Smartious provides comprehensive curriculum documentation suitable for both contexts.' },
       { q: 'Is British Council Addis Ababa the exam centre for Cambridge?', a: 'Yes. British Council Addis Ababa (located in Bole area) is the official Cambridge International examination centre for Ethiopia. Cambridge IGCSE and A-Level examinations are held during May/June and October/November series each year. Smartious handles examination registration logistics for our Addis Ababa students.' },
       { q: 'Can my child sit AAU (Addis Ababa University) entrance examinations with Cambridge qualifications?', a: 'Addis Ababa University, Adama Science and Technology University, and other Ethiopian universities accept Cambridge IGCSE and A-Level qualifications for international student admissions. For Ethiopian citizens, the national EHEEC (Ethiopian Higher Education Entrance Certificate) examination remains the primary admissions pathway — Cambridge qualifications support international university applications as a parallel option.' },
-      { q: 'How does pricing work in USD vs Ethiopian Birr (ETB)?', a: 'Smartious tuition is denominated in USD: Online tier USD 180/month, Online Plus USD 295/month, Premium 1-on-1 USD 540/month. Payments accepted via international card, PayPal, or M-Pesa for Ethiopian residents. ETB equivalents fluctuate with exchange rates — USD denomination provides predictable pricing for long-term planning.' },
+      { q: 'How does pricing work in USD vs Ethiopian Birr (ETB)?', a: 'Smartious tuition is denominated in USD: USD 423/month, paid termly. Payments accepted via international card, PayPal, or M-Pesa for Ethiopian residents. ETB equivalents fluctuate with exchange rates — USD denomination provides predictable pricing for long-term planning.' },
       { q: 'My family is moving from Addis Ababa to Nairobi or back to the US next year — does Smartious continue?', a: 'Yes. Smartious is fully online — students continue with the same teachers, the same Cambridge/IB/American curriculum, and the same class schedules from any future location. This is exactly why diaspora and diplomatic families choose Smartious: zero curriculum disruption from international relocations.' },
     ],
   },
@@ -81,7 +81,7 @@ export const ETHIOPIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Dire Dawa families. Built for Ethio-Djibouti railway corridor professionals, Dire Dawa industrial-zone management families, and Eastern Ethiopian urban families seeking international curriculum access — without relocating to Addis Ababa for ICS or Sandford International School.',
     heroImg: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Dire Dawa cityscape showing the Ethio-Djibouti railway heritage architecture' },
-    seoDesc: 'Live online homeschooling for Dire Dawa families. Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP. From USD 180/month — no need to relocate to Addis Ababa for international curriculum access.',
+    seoDesc: 'Live online homeschooling for Dire Dawa families. Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP. From USD 423/month — no need to relocate to Addis Ababa for international curriculum access.',
     challenges: [
       'No international school in Dire Dawa — families wanting Cambridge IGCSE/A-Level historically relocated to Addis Ababa (550 km west) or sent children to boarding schools in Kenya/UAE.',
       'Ethio-Djibouti railway corridor industrial professionals (chemical, cement, logistics) have multinational employers expecting children to maintain international curriculum continuity for next postings.',
@@ -111,7 +111,7 @@ export const ETHIOPIA_CITIES = [
       ['Cambridge exam access via Addis Ababa', 'Cambridge IGCSE and A-Level examinations sit at British Council Addis Ababa during May/November series — 6-7 hours by road or short flight from Dire Dawa. Smartious students travel for examinations twice per year only.'],
       ['Ethio-Djibouti corridor multinational support', 'For railway operating company, cement plant, logistics, and industrial zone families on multinational postings, Smartious provides documentation supporting future relocations anywhere worldwide.'],
       ['Eastern Ethiopia / Djibouti regional flexibility', 'Some Dire Dawa families have business or family ties in Djibouti, Somaliland, or coastal Somalia — Smartious live online instruction continues seamlessly across these regional moves.'],
-      ['Affordable relative to boarding school alternatives', 'USD 180-540/month for Smartious vs USD 25,000-50,000/year for international boarding schools in Kenya, UAE, or South Africa. Dramatic cost reduction with maintained academic quality.'],
+      ['Affordable relative to boarding school alternatives', 'USD 423/month for Smartious vs USD 25,000-50,000/year for international boarding schools in Kenya, UAE, or South Africa. Dramatic cost reduction with maintained academic quality.'],
     ],
     growingReason: 'Dire Dawa\'s position as the second-largest Ethiopian chartered city (after Addis Ababa) plus its Ethio-Djibouti railway corridor industrial role has created a steady professional class of multinational employees whose children need international curriculum continuity. The historical Eastern Ethiopia trade and railway culture (Dire Dawa was founded around the 1902 railway) plus growing Eastern Ethiopian middle class creates a meaningful market for international online education that doesn\'t require Addis Ababa relocation.',
     curricula: {
@@ -121,14 +121,14 @@ export const ETHIOPIA_CITIES = [
       american: 'American Curriculum with AP — particularly relevant for Dire Dawa families with US business ties or planned future US relocation.',
     },
     homeschoolDetail: 'Dire Dawa families work with Ministry of Education Ethiopia private candidacy frameworks for Ethiopian qualifications, while Smartious provides international curriculum documentation supporting UCAS, Common App, OUAC, and other international university applications. The dual approach gives Dire Dawa students both Ethiopian and international university pathways.',
-    homeTuitionDetail: 'Premium tier (USD 540/month) includes in-person home tuition supplementation in Dire Dawa Kezira, Sabian, Megala areas where feasible — scheduled around live online sessions. Subject specialists for A-Level Further Mathematics, IB HL Sciences flown in periodically for intensive workshops.',
+    homeTuitionDetail: 'Premium 1-on-1 support (USD 15/hour) includes in-person home tuition supplementation in Dire Dawa Kezira, Sabian, Megala areas where feasible — scheduled around live online sessions. Subject specialists for A-Level Further Mathematics, IB HL Sciences flown in periodically for intensive workshops.',
     onlineLearningDetail: 'Live online instruction delivered via Smartious LMS in East Africa Time (UTC+3). Works across Ethio Telecom fibre, Safaricom Ethiopia LTE in Dire Dawa, and Starlink satellite for fallback connectivity. Recorded sessions for review. Mshauri AI tutor support available 24/7.',
     faqs: [
       { q: 'Is there an international school in Dire Dawa?', a: 'No — Dire Dawa does not currently have an international school offering Cambridge, IB, or American curriculum. The nearest options are ICS Addis, Sandford International School, Bingham Academy (all in Addis Ababa, ~550 km west) or boarding schools in Kenya/UAE. Smartious eliminates the need to relocate by providing live online international curriculum from Dire Dawa.' },
       { q: 'Where do Dire Dawa students sit Cambridge IGCSE and A-Level examinations?', a: 'British Council Addis Ababa is the official Cambridge International examination centre for Ethiopia. Dire Dawa students travel to Addis Ababa for May/June and October/November Cambridge series — typically twice per year only. Smartious handles examination registration logistics.' },
       { q: 'How does the Ethio-Djibouti railway corridor industrial timeline work with school scheduling?', a: 'Live classes run 8 AM – 5 PM East Africa Time (EAT) — matching Dire Dawa local time. Industrial corridor professional families typically have parents working day shifts compatible with this schedule. For railway corridor families with rotating shifts, recorded sessions allow flexible review.' },
       { q: 'Can my Dire Dawa child apply to Addis Ababa University with Cambridge qualifications?', a: 'Yes. Addis Ababa University accepts Cambridge IGCSE and A-Level qualifications for international student admissions. For Ethiopian citizens, the national EHEEC (Ethiopian Higher Education Entrance Certificate) examination remains primary, with Cambridge qualifications supporting parallel international university applications.' },
-      { q: 'How does pricing work in USD vs Ethiopian Birr (ETB)?', a: 'Smartious tuition is denominated in USD: Online USD 180/month, Online Plus USD 295/month, Premium 1-on-1 USD 540/month. Payments via international card, PayPal, or M-Pesa for Ethiopian residents. ETB equivalents fluctuate — USD pricing provides predictability for multi-year planning.' },
+      { q: 'How does pricing work in USD vs Ethiopian Birr (ETB)?', a: 'Smartious tuition is denominated in USD: USD 423/month, paid termly. Payments via international card, PayPal, or M-Pesa for Ethiopian residents. ETB equivalents fluctuate — USD pricing provides predictability for multi-year planning.' },
     ],
   },
 
@@ -142,7 +142,7 @@ export const ETHIOPIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Mekelle and Tigray families. Built for Mekelle University-adjacent academic households, Tigray professional families, and families rebuilding educational continuity after the 2020-2022 conflict period — with full international university application pathways.',
     heroImg: 'https://images.unsplash.com/photo-1597149950647-3e2bbd1e2861?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Mekelle cityscape showing the Tigray regional capital architecture' },
-    seoDesc: 'Live online homeschooling for Mekelle and Tigray families. Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP. International university application pathways from Tigray. From USD 180/month.',
+    seoDesc: 'Live online homeschooling for Mekelle and Tigray families. Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP. International university application pathways from Tigray. From USD 423/month.',
     challenges: [
       'Educational disruption during the 2020-2022 Tigray conflict period created learning gaps for many Mekelle and Tigray students — rebuilding international university application competitiveness requires comprehensive academic recovery.',
       'No international school in Mekelle — families wanting Cambridge IGCSE/A-Level historically relocated to Addis Ababa or sent children to boarding schools abroad.',
@@ -173,7 +173,7 @@ export const ETHIOPIA_CITIES = [
       ['Diaspora returnee continuity', 'Tigray diaspora returnees from the US, UK, Canada, Australia maintain home-country curriculum (Cambridge, IB, American AP) throughout their Mekelle stay — eventual return abroad for university requires no curriculum bridging.'],
       ['Cambridge exam access via Addis Ababa', 'Mekelle students travel to British Council Addis Ababa (1-hour flight) for May/November Cambridge IGCSE and A-Level examinations. Smartious handles registration logistics.'],
       ['English-medium academic instruction with Tigrinya/Amharic support', 'Live classes delivered in English at international academic standards while supporting Tigrinya/Amharic home language preservation.'],
-      ['Affordable international curriculum from Tigray', 'USD 180-540/month for Smartious vs USD 25,000-50,000/year for boarding schools abroad. Dramatic cost reduction with maintained academic quality and family-together education.'],
+      ['Affordable international curriculum from Tigray', 'USD 423/month for Smartious vs USD 25,000-50,000/year for boarding schools abroad. Dramatic cost reduction with maintained academic quality and family-together education.'],
     ],
     growingReason: 'Mekelle as Tigray\'s regional capital concentrates the region\'s educated professional class, including Mekelle University faculty and graduates. Post-conflict rebuilding creates particular demand for structured international curriculum delivery — Cambridge IGCSE/A-Level provides clear academic pathways for both Ethiopian and international university applications. The significant Tigray diaspora globally (Israel, US, Canada, UK, UAE) creates additional demand for curriculum-continuity solutions for returning families.',
     curricula: {
@@ -183,7 +183,7 @@ export const ETHIOPIA_CITIES = [
       american: 'American Curriculum with AP — particularly relevant for Tigray diaspora families with US ties.',
     },
     homeschoolDetail: 'Mekelle families work with Ministry of Education Ethiopia private candidacy frameworks alongside international curriculum provider documentation. Smartious provides curriculum, scheme of work, and assessment documentation supporting both Ethiopian and international university applications.',
-    homeTuitionDetail: 'Premium tier (USD 540/month) includes occasional in-person home tuition for Mekelle families where Nairobi-based subject specialists can travel for intensive workshops — particularly for A-Level Sciences and Mathematics. Most instruction is live online via the Smartious LMS.',
+    homeTuitionDetail: 'Premium 1-on-1 support (USD 15/hour) includes occasional in-person home tuition for Mekelle families where Nairobi-based subject specialists can travel for intensive workshops — particularly for A-Level Sciences and Mathematics. Most instruction is live online via the Smartious LMS.',
     onlineLearningDetail: 'Live online instruction delivered in East Africa Time (UTC+3). Works across Ethio Telecom fibre and Safaricom Ethiopia LTE in Mekelle. Starlink satellite backup for areas with intermittent terrestrial connectivity. Recorded sessions for review. Mshauri AI 24/7 support.',
     faqs: [
       { q: 'How does Smartious work with Mekelle and Tigray educational rebuilding?', a: 'For families navigating learning gaps from the 2020-2022 conflict period, Smartious provides comprehensive Cambridge IGCSE and A-Level curriculum delivery starting at Year 10 (or earlier where needed) — rebuilding academic depth across Mathematics, Sciences, English, and Humanities. The structured curriculum approach is particularly suited to families consolidating learning before international university applications.' },
@@ -204,7 +204,7 @@ export const ETHIOPIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Hawassa families. Built for Hawassa Industrial Park multinational families, Hawassa University academic households, and Sidama professional families — without relocating to Addis Ababa for international curriculum access.',
     heroImg: 'https://images.unsplash.com/photo-1591181520183-79fb12d8f2a8?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Hawassa city showing Lake Hawassa shoreline and Sidama regional architecture' },
-    seoDesc: 'Live online homeschooling for Hawassa and Sidama families. Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP. From USD 180/month — international curriculum access from Lake Hawassa without Addis Ababa relocation.',
+    seoDesc: 'Live online homeschooling for Hawassa and Sidama families. Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP. From USD 423/month — international curriculum access from Lake Hawassa without Addis Ababa relocation.',
     challenges: [
       'Hawassa Industrial Park multinational management families (textile, apparel manufacturing) need international curriculum continuity for next postings — Ethiopia, Bangladesh, Vietnam, Kenya, India circuits.',
       'No international school in Hawassa — historically meant Addis Ababa relocation (275 km north) or boarding school abroad for families wanting Cambridge/IB curriculum.',
@@ -237,7 +237,7 @@ export const ETHIOPIA_CITIES = [
       ['Hawassa University academic family alignment', 'For Hawassa University faculty households, Smartious provides children with international academic exposure (Cambridge IGCSE/A-Level) complementing strong Ethiopian university culture at home.'],
       ['Lake Hawassa lifestyle alignment', 'Morning live classes (8 AM – 5 PM EAT) leave afternoons free for Lake Hawassa activities — swimming, sailing, fishing, outdoor education — supporting whole-child development.'],
       ['Cambridge exam access via Addis Ababa', 'Hawassa students travel to British Council Addis Ababa for May/November Cambridge examinations — short flight or 4-5 hour drive twice per year.'],
-      ['Affordable international curriculum', 'USD 180-540/month for Smartious vs USD 25,000-50,000/year for international boarding schools in Kenya, UAE, or beyond.'],
+      ['Affordable international curriculum', 'USD 423/month for Smartious vs USD 25,000-50,000/year for international boarding schools in Kenya, UAE, or beyond.'],
     ],
     growingReason: 'Hawassa\'s combination of Hawassa Industrial Park (Ethiopia\'s largest, with major textile and apparel multinationals), Hawassa University (one of Ethiopia\'s largest universities), Lake Hawassa tourism, and the newly-established Sidama regional state has created a rapidly growing professional class. The industrial park alone employs thousands of multinational and Ethiopian professionals, many of whom expect their children to maintain international curriculum continuity for future postings. Combined with the academic culture around Hawassa University and growing tourism sector, demand for international online education in Hawassa now exceeds local supply.',
     curricula: {
@@ -247,14 +247,14 @@ export const ETHIOPIA_CITIES = [
       american: 'American Curriculum with AP — particularly relevant for Hawassa families with US diaspora ties or planned US relocation.',
     },
     homeschoolDetail: 'Hawassa families work with Ministry of Education Ethiopia private candidacy frameworks for Ethiopian qualifications alongside international curriculum documentation supporting UCAS, Common App, and other international applications. Smartious provides documentation suitable for both pathways simultaneously.',
-    homeTuitionDetail: 'Premium tier (USD 540/month) includes occasional in-person home tuition for Hawassa families where feasible — Nairobi-based subject specialists travel for intensive workshops in A-Level Sciences and Mathematics. Most instruction is live online.',
+    homeTuitionDetail: 'Premium 1-on-1 support (USD 15/hour) includes occasional in-person home tuition for Hawassa families where feasible — Nairobi-based subject specialists travel for intensive workshops in A-Level Sciences and Mathematics. Most instruction is live online.',
     onlineLearningDetail: 'Live online instruction delivered in East Africa Time (UTC+3) — exactly matching Hawassa local time. Works across Ethio Telecom fibre and Safaricom Ethiopia LTE in Hawassa. Starlink backup available. Recorded sessions for review. Mshauri AI 24/7 support.',
     faqs: [
       { q: 'How does Smartious support Hawassa Industrial Park multinational families?', a: 'For families on textile manufacturing, apparel, or supplier industry postings, Smartious provides Cambridge IGCSE/A-Level, IB Diploma, or American AP curriculum that transfers seamlessly to future postings — Bangladesh, Vietnam, India, Kenya, Mexico, or other multinational locations. Documentation suitable for international school verification anywhere.' },
       { q: 'Is there an international school in Hawassa?', a: 'No — Hawassa does not currently have an international school offering Cambridge, IB, or American curriculum. Nearest options are ICS Addis, Sandford International School, Bingham Academy (all in Addis Ababa, 275 km / 4-5 hours by road). Smartious eliminates relocation with live online instruction.' },
       { q: 'Where do Hawassa students sit Cambridge examinations?', a: 'British Council Addis Ababa is the official Cambridge International examination centre for Ethiopia. Hawassa students travel to Addis Ababa for May/November Cambridge series — short flight from Hawassa airport or 4-5 hour drive.' },
       { q: 'Can my Hawassa child apply to Hawassa University or AAU with Cambridge?', a: 'Yes. Hawassa University, Addis Ababa University, and other Ethiopian universities accept Cambridge IGCSE and A-Level qualifications for international student admissions. For Ethiopian citizens, the national EHEEC examination remains primary, with Cambridge qualifications opening parallel international university applications.' },
-      { q: 'How does pricing work in USD vs Ethiopian Birr (ETB)?', a: 'Smartious tuition is denominated in USD: Online USD 180/month, Online Plus USD 295/month, Premium 1-on-1 USD 540/month. Payments via international card, PayPal, or M-Pesa for Ethiopian residents. ETB equivalents fluctuate — USD denomination provides predictable pricing for multi-year planning.' },
+      { q: 'How does pricing work in USD vs Ethiopian Birr (ETB)?', a: 'Smartious tuition is denominated in USD: USD 423/month, paid termly. Payments via international card, PayPal, or M-Pesa for Ethiopian residents. ETB equivalents fluctuate — USD denomination provides predictable pricing for multi-year planning.' },
     ],
   },
 
@@ -268,7 +268,7 @@ export const ETHIOPIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Bahir Dar families. Built for Bahir Dar University academic households, Lake Tana tourism and hospitality families, and Amhara professional class — with international university application pathways from one of Ethiopia\'s most culturally significant cities.',
     heroImg: 'https://images.unsplash.com/photo-1547036967-23d11aacaee0?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Bahir Dar showing Lake Tana shoreline and Amhara regional capital' },
-    seoDesc: 'Live online homeschooling for Bahir Dar and Amhara families. Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP. International university pathways from Lake Tana. From USD 180/month.',
+    seoDesc: 'Live online homeschooling for Bahir Dar and Amhara families. Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP. International university pathways from Lake Tana. From USD 423/month.',
     challenges: [
       'No international school in Bahir Dar — families wanting Cambridge IGCSE/A-Level historically relocated to Addis Ababa (560 km southeast) or sent children to boarding schools abroad.',
       'Bahir Dar University faculty households want international academic exposure for children alongside strong Ethiopian university culture.',
@@ -301,7 +301,7 @@ export const ETHIOPIA_CITIES = [
       ['Education stability regardless of regional disruptions', 'Live online instruction continues from any location with internet connectivity — regional security concerns or school disruptions don\'t interrupt curriculum continuity. Critical for Amhara families wanting predictable academic pathways.'],
       ['Cambridge exam access via Addis Ababa', 'Bahir Dar students travel to British Council Addis Ababa for May/November Cambridge examinations — 1-hour flight from Bahir Dar airport.'],
       ['Ethiopian Orthodox tradition compatibility', 'Cambridge curriculum is academically rigorous and secular — Bahir Dar families maintain Ethiopian Orthodox religious and cultural education through family/community while Smartious delivers international academic depth.'],
-      ['Affordable international curriculum', 'USD 180-540/month for Smartious vs USD 25,000-50,000/year for international boarding schools abroad. Family-together education with international quality.'],
+      ['Affordable international curriculum', 'USD 423/month for Smartious vs USD 25,000-50,000/year for international boarding schools abroad. Family-together education with international quality.'],
     ],
     growingReason: 'Bahir Dar combines Amhara regional capital administrative culture, Bahir Dar University academic culture, Lake Tana tourism (a UNESCO consideration site with the historic Lake Tana monasteries), and proximity to Ethiopian historical sites (Gondar castles, Lalibela rock churches). This creates a professional class spanning academia, administration, tourism, and heritage industries — all of whom value international academic exposure for their children. The cultural and historical significance of the region also attracts returning diaspora families wanting their children to experience Ethiopian heritage while maintaining international curriculum continuity.',
     curricula: {
@@ -311,7 +311,7 @@ export const ETHIOPIA_CITIES = [
       american: 'American Curriculum with AP — particularly relevant for Amhara diaspora families with US ties.',
     },
     homeschoolDetail: 'Bahir Dar families work with Ministry of Education Ethiopia private candidacy frameworks for Ethiopian qualifications alongside international curriculum documentation supporting UCAS, Common App, and OUAC applications. Smartious provides documentation for both pathways.',
-    homeTuitionDetail: 'Premium tier (USD 540/month) includes occasional in-person home tuition for Bahir Dar families where Nairobi-based subject specialists travel for intensive workshops — particularly for A-Level Sciences and Mathematics during examination preparation periods.',
+    homeTuitionDetail: 'Premium 1-on-1 support (USD 15/hour) includes occasional in-person home tuition for Bahir Dar families where Nairobi-based subject specialists travel for intensive workshops — particularly for A-Level Sciences and Mathematics during examination preparation periods.',
     onlineLearningDetail: 'Live online instruction delivered in East Africa Time (UTC+3). Works across Ethio Telecom fibre and Safaricom Ethiopia LTE in Bahir Dar. Starlink satellite backup recommended for areas with intermittent terrestrial connectivity. Recorded sessions for review. Mshauri AI 24/7 support.',
     faqs: [
       { q: 'Is there an international school in Bahir Dar?', a: 'No — Bahir Dar does not currently have an international school offering Cambridge, IB, or American curriculum. The nearest options are ICS Addis, Sandford International School, Bingham Academy (all in Addis Ababa, 1-hour flight from Bahir Dar). Smartious eliminates relocation by providing live online international curriculum from Bahir Dar.' },
@@ -350,7 +350,7 @@ export const ETHIOPIA_COUNTRY = {
   heroEyebrow: 'Online homeschooling · Across Ethiopia',
   heroH1Suffix: 'Ethiopia',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Ethiopian families across Addis Ababa, Dire Dawa, Mekelle, Hawassa, Bahir Dar.',
-  heroValueProp: 'The ICS Addis Ababa / Sandford International School alternative at USD 180/month. Built for AU/UN ECA diplomatic families, diaspora returnees, NGO professional families, Ethiopian families seeking international university pathways. USD pricing protects against Ethiopian Birr volatility for multi-year planning.',
+  heroValueProp: 'The ICS Addis Ababa / Sandford International School alternative at USD 423/month. Built for AU/UN ECA diplomatic families, diaspora returnees, NGO professional families, Ethiopian families seeking international university pathways. USD pricing protects against Ethiopian Birr volatility for multi-year planning.',
   whatsappTrigger: 'Hi Smartious, I would like online homeschooling for my child in Ethiopia.',
   citiesSectionTitle: 'Online homeschooling across Ethiopia',
   citiesSectionBody: 'Five Ethiopian cities. Each page covers local international school options, family situations, and answers specific to your area — from Addis Ababa diplomatic households to Mekelle regional families to Bahir Dar academic communities.',
@@ -406,8 +406,8 @@ export const ETHIOPIA_COUNTRY = {
       name: 'Smartious (live online)',
       city: 'All five Ethiopian cities',
       curriculum: 'Cambridge IGCSE & A-Level · Edexcel · IB · American AP · CBC',
-      feesAed: 'USD 2,160 – 6,480',
-      feesUsd: '2,160 – 6,480',
+      feesAed: 'USD 5,076',
+      feesUsd: '5,076 a year',
       rating: 'Live online · PGCE specialists · EAT time zone',
       capacityNote: 'Immediate enrolment — accessible from any Ethiopian city',
       isUs: true,
@@ -449,7 +449,7 @@ export const ETHIOPIA_COUNTRY = {
   whySmartious: [
     {
       h: 'ICS Addis / Sandford alternative pricing',
-      p: 'ICS Addis Ababa USD 16,000-24,000/year, Sandford International USD 12,000-18,000/year, German International USD 10,000-16,000/year. Smartious USD 2,160-6,480/year delivers Cambridge curriculum at meaningfully lower cost.',
+      p: 'ICS Addis Ababa USD 16,000-24,000/year, Sandford International USD 12,000-18,000/year, German International USD 10,000-16,000/year. Smartious USD 5,076/year delivers Cambridge curriculum at meaningfully lower cost.',
     },
     {
       h: 'Accessible from any Ethiopian city',
@@ -461,7 +461,7 @@ export const ETHIOPIA_COUNTRY = {
     },
     {
       h: 'USD pricing — protects against Birr volatility',
-      p: 'The Ethiopian Birr has experienced significant volatility. Smartious USD pricing (USD 180/295/540 per month) provides stable multi-year planning. Payments via international card or bank transfer.',
+      p: 'The Ethiopian Birr has experienced significant volatility. Smartious USD pricing (USD 423 per month, paid termly) provides stable multi-year planning. Payments via international card or bank transfer.',
     },
     {
       h: 'AU / UN ECA diplomatic family portability',
@@ -476,7 +476,7 @@ export const ETHIOPIA_COUNTRY = {
   faqs: [
     {
       q: 'How does Smartious compare to ICS Addis Ababa, Sandford International School, German International School?',
-      a: 'ICS Addis Ababa (USD 16,000-24,000/year — American/IB curriculum), Sandford International School (USD 12,000-18,000/year — British/Cambridge curriculum), German International School Addis Ababa (USD 10,000-16,000/year — German Abitur + IB) provide physical campus education with established sports, arts, and pastoral programmes — all in Addis Ababa. Smartious provides live online Cambridge, IB, or American curriculum at USD 2,160-6,480/year. The trade-off: no physical campus, but the same internationally recognised academic qualifications, immediate enrolment, smaller class sizes (4-6 students), and accessibility from any Ethiopian city (not just Addis Ababa).',
+      a: 'ICS Addis Ababa (USD 16,000-24,000/year — American/IB curriculum), Sandford International School (USD 12,000-18,000/year — British/Cambridge curriculum), German International School Addis Ababa (USD 10,000-16,000/year — German Abitur + IB) provide physical campus education with established sports, arts, and pastoral programmes — all in Addis Ababa. Smartious provides live online Cambridge, IB, or American curriculum at USD 5,076/year. The trade-off: no physical campus, but the same internationally recognised academic qualifications, immediate enrolment, smaller class sizes (4-6 students), and accessibility from any Ethiopian city (not just Addis Ababa).',
     },
     {
       q: 'Will my child miss out on sports, arts, and social development without a physical school?',
@@ -500,7 +500,7 @@ export const ETHIOPIA_COUNTRY = {
     },
     {
       q: 'How does payment work — Birr or USD?',
-      a: 'Smartious tuition is denominated in USD (USD 180/295/540 per month) with payments accepted via international card (Visa, Mastercard, Amex), PayPal, or bank transfer. USD pricing protects against Ethiopian Birr volatility — particularly important for multi-year educational planning. For families paying from Ethiopia, international card or Forex bank transfer is standard.',
+      a: 'Smartious tuition is denominated in USD (USD 423 per month, paid termly) with payments accepted via international card (Visa, Mastercard, Amex), PayPal, or bank transfer. USD pricing protects against Ethiopian Birr volatility — particularly important for multi-year educational planning. For families paying from Ethiopia, international card or Forex bank transfer is standard.',
     },
     {
       q: 'How reliable is internet connectivity for live online learning in Ethiopia?',

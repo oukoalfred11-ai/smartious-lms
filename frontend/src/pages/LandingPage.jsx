@@ -345,8 +345,8 @@ const ENROLMENT_DATA = {
     examBoard: 'Cambridge International Examinations (CIE)',
     levels: [
       { id:'primary',     label:'Cambridge Primary',         years:'Year 1–6',   ages:'Ages 5–11',   feeFrom:'USD 423/mo', feeRef:'Primary Homeschool tier' },
-      { id:'lowersec',    label:'Cambridge Lower Secondary', years:'Year 7–9',   ages:'Ages 11–14',  feeFrom:'USD 538/mo', feeRef:'Junior Secondary tier' },
-      { id:'igcse',       label:'Cambridge IGCSE',           years:'Year 10–11', ages:'Ages 14–16',  feeFrom:'USD 654/mo', feeRef:'IGCSE tier · Most Popular' },
+      { id:'lowersec',    label:'Cambridge Lower Secondary', years:'Year 7–9',   ages:'Ages 11–14',  feeFrom:'USD 423/mo', feeRef:'Junior Secondary tier' },
+      { id:'igcse',       label:'Cambridge IGCSE',           years:'Year 10–11', ages:'Ages 14–16',  feeFrom:'USD 423/mo', feeRef:'IGCSE tier · Most Popular' },
       { id:'alevel',      label:'Cambridge A-Level',         years:'Year 12–13', ages:'Ages 16–19',  feeFrom:'USD 769/mo', feeRef:'A-Level tier · up to 4 subjects' },
     ],
     subjects: 'English Language & Literature, Mathematics, Sciences (Biology, Chemistry, Physics), Humanities (History, Geography), Languages (French, Kiswahili), Business Studies, Economics, ICT, Computer Science.',
@@ -356,7 +356,7 @@ const ENROLMENT_DATA = {
     description: 'Pearson Edexcel International GCSE, IAL and IAL Further Maths. Widely accepted alternative to Cambridge.',
     examBoard: 'Pearson Edexcel International',
     levels: [
-      { id:'igcse',     label:'Edexcel International GCSE',   years:'Year 10–11', ages:'Ages 14–16', feeFrom:'USD 654/mo', feeRef:'IGCSE tier' },
+      { id:'igcse',     label:'Edexcel International GCSE',   years:'Year 10–11', ages:'Ages 14–16', feeFrom:'USD 423/mo', feeRef:'IGCSE tier' },
       { id:'ial',       label:'Edexcel IAL (A-Level)',         years:'Year 12–13', ages:'Ages 16–19', feeFrom:'USD 769/mo', feeRef:'A-Level tier' },
     ],
     subjects: 'English Language A & B, Mathematics, Further Mathematics, Sciences, Humanities, Business, Economics, Computer Science.',
@@ -367,9 +367,9 @@ const ENROLMENT_DATA = {
     examBoard: 'International Baccalaureate Organization (IBO)',
     levels: [
       { id:'pyp',     label:'IB Primary Years (PYP)',  years:'Year 1–6',     ages:'Ages 5–11',   feeFrom:'USD 423/mo', feeRef:'Primary Homeschool tier' },
-      { id:'myp_1_3', label:'IB MYP Years 1–3',         years:'Grade 6–8',    ages:'Ages 11–14',  feeFrom:'USD 538/mo', feeRef:'Junior Secondary tier' },
-      { id:'myp_4_5', label:'IB MYP Years 4–5',         years:'Grade 9–10',   ages:'Ages 14–16',  feeFrom:'USD 654/mo', feeRef:'IGCSE-equivalent tier' },
-      { id:'dp',      label:'IB Diploma Programme',     years:'Grade 11–12',  ages:'Ages 16–19',  feeFrom:'USD 923/mo', feeRef:'IB Diploma tier · 6 subjects + TOK / EE / CAS' },
+      { id:'myp_1_3', label:'IB MYP Years 1–3',         years:'Grade 6–8',    ages:'Ages 11–14',  feeFrom:'USD 423/mo', feeRef:'Junior Secondary tier' },
+      { id:'myp_4_5', label:'IB MYP Years 4–5',         years:'Grade 9–10',   ages:'Ages 14–16',  feeFrom:'USD 423/mo', feeRef:'IGCSE-equivalent tier' },
+      { id:'dp',      label:'IB Diploma Programme',     years:'Grade 11–12',  ages:'Ages 16–19',  feeFrom:'USD 423/mo', feeRef:'IB Diploma tier · 6 subjects + TOK / EE / CAS' },
     ],
     subjects: 'Language & Literature, Language Acquisition, Individuals & Societies, Sciences, Mathematics, Arts, Physical & Health Education, Design. Plus IDU (Interdisciplinary Unit) and Service & Action.',
   },
@@ -381,8 +381,8 @@ const ENROLMENT_DATA = {
       { id:'pp',          label:'Pre-Primary',            years:'PP1–PP2',         ages:'Ages 4–6',   feeFrom:'USD 423/mo', feeRef:'Primary tier' },
       { id:'lower',       label:'Lower Primary',          years:'Grade 1–3',       ages:'Ages 6–9',   feeFrom:'USD 423/mo', feeRef:'Primary tier' },
       { id:'upper',       label:'Upper Primary',          years:'Grade 4–6',       ages:'Ages 9–12',  feeFrom:'USD 423/mo', feeRef:'Primary tier' },
-      { id:'jss',         label:'Junior Secondary',       years:'Grade 7–9',       ages:'Ages 12–14', feeFrom:'USD 538/mo', feeRef:'Junior Secondary tier' },
-      { id:'sss',         label:'Senior Secondary',       years:'Grade 10–12',     ages:'Ages 14–17', feeFrom:'USD 654/mo', feeRef:'Senior tier' },
+      { id:'jss',         label:'Junior Secondary',       years:'Grade 7–9',       ages:'Ages 12–14', feeFrom:'USD 423/mo', feeRef:'Junior Secondary tier' },
+      { id:'sss',         label:'Senior Secondary',       years:'Grade 10–12',     ages:'Ages 14–17', feeFrom:'USD 423/mo', feeRef:'Senior tier' },
     ],
     subjects: 'Mathematics, English, Kiswahili, Science & Technology, Social Studies, Religious Education, Creative Arts, Physical Education, plus pathway choices at Senior School.',
   },
@@ -392,8 +392,8 @@ const ENROLMENT_DATA = {
     examBoard: 'College Board (AP) and Smartious-issued transcripts',
     levels: [
       { id:'elem',  label:'Elementary',     years:'K–5',     ages:'Ages 5–11',   feeFrom:'USD 423/mo', feeRef:'Primary tier' },
-      { id:'mid',   label:'Middle School',  years:'Grade 6–8',  ages:'Ages 11–14',  feeFrom:'USD 538/mo', feeRef:'Junior Secondary tier' },
-      { id:'hs',    label:'High School',    years:'Grade 9–12', ages:'Ages 14–18',  feeFrom:'USD 654/mo', feeRef:'High School tier' },
+      { id:'mid',   label:'Middle School',  years:'Grade 6–8',  ages:'Ages 11–14',  feeFrom:'USD 423/mo', feeRef:'Junior Secondary tier' },
+      { id:'hs',    label:'High School',    years:'Grade 9–12', ages:'Ages 14–18',  feeFrom:'USD 423/mo', feeRef:'High School tier' },
       { id:'ap',    label:'AP Courses',     years:'Grade 11–12', ages:'Ages 16–18', feeFrom:'USD 154/mo per AP subject', feeRef:'AP Subject add-on' },
     ],
     subjects: 'English, Mathematics, Sciences, Social Studies, Foreign Language, Arts/Health/PE. AP: Calculus AB/BC, Sciences, English Literature, US/World History, Economics, Computer Science.',
@@ -1548,6 +1548,33 @@ const COMPARES = [
 // seoTitle, seoDesc, and a `detail` block.
 // ════════════════════════════════════════════════════════════
 
+// ── Article → product links ────────────────────────────────
+// Guides earn the rankings; these links pass that authority on to the
+// pages that enrol families (real <a href> with descriptive anchor text).
+const ARTICLE_HUBS = new Set('albania algeria angola argentina australia austria azerbaijan bahrain bangladesh belgium bolivia bosnia-and-herzegovina botswana brazil bulgaria canada chile china colombia costa-rica croatia cyprus czech-republic denmark dominican-republic drc ecuador egypt ethiopia finland france georgia germany ghana greece guatemala hungary india iraq ireland israel italy japan jordan kenya kosovo kuwait lebanon luxembourg malaysia maldives mauritius mexico montenegro morocco myanmar namibia nepal netherlands new-zealand nigeria north-macedonia norway oman pakistan panama paraguay peru poland portugal puerto-rico qatar romania rwanda saudi-arabia serbia slovakia slovenia somalia south-africa south-korea spain sweden switzerland taiwan tanzania thailand tunisia turkey uae uganda ukraine united-kingdom uruguay usa venezuela vietnam zambia zimbabwe'.split(' '))
+const ARTICLE_COUNTRY_ALIAS = { za: 'south-africa' }
+const ARTICLE_COUNTRY_NAME = { usa: 'the USA', uae: 'the UAE', 'united-kingdom': 'the UK', drc: 'the DRC', 'czech-republic': 'the Czech Republic', 'dominican-republic': 'the Dominican Republic', 'new-zealand': 'New Zealand' }
+function articleProduct(a) {
+  const c = a && a.country
+  if (c === 'uae') return {
+    heading: 'Smartious for families in Dubai and the UAE',
+    text: 'Smartious teaches Dubai families live online: Cambridge IGCSE, A-Level, IB and American programmes, with qualified teachers and lessons timed for the Gulf day.',
+    links: [
+      { href: '/homeschool-dubai-ae', label: 'Online school in Dubai', note: 'Full-time live classes and homeschooling, IGCSE to A-Level and IB' },
+      { href: '/tuition-uae', label: 'Online tutors in Dubai', note: '1-on-1 tuition in IGCSE, A-Level and IB subjects' },
+      { href: '/online-school/uae', label: 'Abu Dhabi, Sharjah and the rest of the UAE', note: 'Every emirate we teach in' },
+    ],
+  }
+  const slug = ARTICLE_COUNTRY_ALIAS[c] || c
+  if (!slug || !ARTICLE_HUBS.has(slug)) return null
+  const name = ARTICLE_COUNTRY_NAME[slug] || slug.split('-').map(w => w[0].toUpperCase() + w.slice(1)).join(' ')
+  return {
+    heading: 'Smartious for families in ' + name,
+    text: 'Live online classes in Cambridge IGCSE, A-Level, IB and American programmes, with qualified teachers and lessons on your time zone.',
+    links: [{ href: '/online-school/' + slug, label: 'Online school in ' + name, note: 'Programmes, fees and how to enrol' }],
+  }
+}
+
 // ── PAGE_META — per-page SEO titles & descriptions ─────────
 // Keyword-rich titles and descriptions for each core landing
 // page. Curriculum and service detail pages derive their meta
@@ -1556,323 +1583,323 @@ const SITE = 'Smartious Homeschool & eSchool'
 const PAGE_META = {
   home: {
     title: 'Online School, Virtual School & Homeschool | IGCSE, A-Level, IB & American — Smartious',
-    desc: 'Accredited online homeschool serving UAE, UK, Canada, Australia, Nigeria and Kenya. Cambridge IGCSE, A-Level, IB Diploma, Edexcel and American curricula. Live classes, qualified teachers, from USD 8/hour for 1-on-1 tuition · from USD 423/month for full homeschool programmes.',
+    desc: 'Accredited online homeschool serving UAE, UK, Canada, Australia, Nigeria and Kenya. Cambridge IGCSE, A-Level, IB Diploma, Edexcel and American curricula. Live classes, qualified teachers, from USD 15/hour for 1-on-1 tuition · from USD 423/month for full homeschool programmes.',
   },
   'homeschooling-malaysia': {
     title: 'Online School, Virtual School & Homeschool Malaysia | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Malaysian families across Kuala Lumpur, Petaling Jaya, Subang Jaya, Cyberjaya, Johor Bahru + Iskandar Puteri, Penang, Kota Kinabalu. British Council KL + Penang exam centres. From USD 400/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Malaysian families across Kuala Lumpur, Petaling Jaya, Subang Jaya, Cyberjaya, Johor Bahru + Iskandar Puteri, Penang, Kota Kinabalu. British Council KL + Penang exam centres. From USD 423/month.',
   },
   'homeschooling-spain': {
     title: 'Online School, Virtual School & Homeschool Spain | Cambridge IGCSE, A-Level, IB — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Madrid, Barcelona, Málaga/Costa del Sol, Alicante/Costa Blanca, Valencia, and Palma de Mallorca. Honest guidance on Spain\'s homeschool legal grey area. From USD 400/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Madrid, Barcelona, Málaga/Costa del Sol, Alicante/Costa Blanca, Valencia, and Palma de Mallorca. Honest guidance on Spain\'s homeschool legal grey area. From USD 423/month.',
   },
   'homeschooling-denmark': {
     title: 'Online School, Virtual School & Homeschool Denmark | Cambridge IGCSE, A-Level, IB — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Copenhagen, Aarhus, Odense, Aalborg, Esbjerg, and Billund. Denmark\'s home-education law is genuinely permissive — notification-based under Grundloven §76. From USD 400/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Copenhagen, Aarhus, Odense, Aalborg, Esbjerg, and Billund. Denmark\'s home-education law is genuinely permissive — notification-based under Grundloven §76. From USD 423/month.',
   },
   'homeschooling-zambia': {
     title: 'Online School, Virtual School & Cambridge Curriculum Zambia | IGCSE, A-Level, IB — Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Lusaka, the Copperbelt and Livingstone. The same Cambridge pathway Zambian private schools already run — taught live in small groups, in English, one hour from our teaching base, at a fraction of local international-school fees. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Lusaka, the Copperbelt and Livingstone. The same Cambridge pathway Zambian private schools already run — taught live in small groups, in English, one hour from our teaching base, at a fraction of local international-school fees. From USD 423/month.',
   },
   'homeschooling-botswana': {
     title: 'Online School, Virtual School & International Curriculum Botswana | Cambridge IGCSE, A-Level, IB — Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Gaborone, Francistown and the diamond towns. Taught live from Nairobi, one hour ahead all year — alongside your registered Botswana school. Cambridge is native here through the BGCSE. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Gaborone, Francistown and the diamond towns. Taught live from Nairobi, one hour ahead all year — alongside your registered Botswana school. Cambridge is native here through the BGCSE. From USD 423/month.',
   },
   'homeschooling-algeria': {
     title: 'Online School, Virtual School & International Curriculum Algeria | Cambridge IGCSE, A-Level, IB \u2014 Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Algiers, Oran and Hassi Messaoud. International schooling here is almost entirely French-system and oversubscribed \u2014 the British route does not exist locally. French kept alongside. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Algiers, Oran and Hassi Messaoud. International schooling here is almost entirely French-system and oversubscribed \u2014 the British route does not exist locally. French kept alongside. From USD 423/month.',
   },
   'homeschooling-mauritius': {
     title: 'Online School & Cambridge Tutoring Mauritius | IGCSE, A-Level, IB \u2014 Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Port Louis, Eb\u00e8ne and Grand Baie. Cambridge is already the national system here \u2014 we add live small-group teaching in the subjects a timetable cannot staff. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Port Louis, Eb\u00e8ne and Grand Baie. Cambridge is already the national system here \u2014 we add live small-group teaching in the subjects a timetable cannot staff. From USD 423/month.',
   },
   'homeschooling-angola': {
     title: 'Online School & International Curriculum Angola | Cambridge IGCSE, A-Level, IB \u2014 Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Luanda, Lobito and Cabinda. Compulsory education covers inicia\u00e7\u00e3o, primary and the I Ciclo \u2014 the II Ciclo years sit outside it. Portuguese kept alongside. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Luanda, Lobito and Cabinda. Compulsory education covers inicia\u00e7\u00e3o, primary and the I Ciclo \u2014 the II Ciclo years sit outside it. Portuguese kept alongside. From USD 423/month.',
   },
   'homeschooling-mexico': {
     title: 'Online School & International Curriculum Mexico | Cambridge IGCSE, A-Level, IB \u2014 Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across CDMX, Monterrey, Guadalajara, Quer\u00e9taro and Canc\u00fan. Morning classes that fit the turno vespertino, and the A-Level route an IB-dominated market lacks. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across CDMX, Monterrey, Guadalajara, Quer\u00e9taro and Canc\u00fan. Morning classes that fit the turno vespertino, and the A-Level route an IB-dominated market lacks. From USD 423/month.',
   },
   'homeschooling-colombia': {
     title: 'Online School & International Curriculum Colombia | Cambridge IGCSE, A-Level, IB \u2014 Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Bogot\u00e1, Medell\u00edn, Cali, Barranquilla and Cartagena. The disputed legal position stated fairly, the validaci\u00f3n decrees named, and morning classes that fit the jornada tarde. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Bogot\u00e1, Medell\u00edn, Cali, Barranquilla and Cartagena. The disputed legal position stated fairly, the validaci\u00f3n decrees named, and morning classes that fit the jornada tarde. From USD 423/month.',
   },
   'homeschooling-chile': {
     title: 'Online School & International Curriculum Chile | Cambridge IGCSE, A-Level, IB \u2014 Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Santiago, Antofagasta, Valpara\u00edso, Concepci\u00f3n and Puerto Montt. Chile\'s ex\u00e1menes libres route makes a full-time international programme genuinely possible. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Santiago, Antofagasta, Valpara\u00edso, Concepci\u00f3n and Puerto Montt. Chile\'s ex\u00e1menes libres route makes a full-time international programme genuinely possible. From USD 423/month.',
   },
   'homeschooling-ecuador': {
     title: 'Online School & International Curriculum Ecuador | Cambridge IGCSE, A-Level, IB \u2014 Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Quito, Guayaquil, Cuenca, Manta and the Amazon. Ecuador names educaci\u00f3n en casa as a regulated modality \u2014 we explain it, including what it forbids a provider from claiming. Fees in USD. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Quito, Guayaquil, Cuenca, Manta and the Amazon. Ecuador names educaci\u00f3n en casa as a regulated modality \u2014 we explain it, including what it forbids a provider from claiming. Fees in USD. From USD 423/month.',
   },
   'homeschooling-costa-rica': {
     title: 'Online School & International Curriculum Costa Rica | Cambridge IGCSE, A-Level, IB \u2014 Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across San Jos\u00e9, Heredia, Guanacaste, Lim\u00f3n and the Central Pacific. The MEP position corrected, the state Educaci\u00f3n Abierta routes explained, morning classes. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across San Jos\u00e9, Heredia, Guanacaste, Lim\u00f3n and the Central Pacific. The MEP position corrected, the state Educaci\u00f3n Abierta routes explained, morning classes. From USD 423/month.',
   },
   'homeschooling-uruguay': {
     title: 'Online School & International Curriculum Uruguay | Cambridge IGCSE, A-Level, IB \u2014 Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Montevideo, Punta del Este, Colonia, Salto and Rocha. The contested legal position given all three sides, and a six-hour offset that works. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Montevideo, Punta del Este, Colonia, Salto and Rocha. The contested legal position given all three sides, and a six-hour offset that works. From USD 423/month.',
   },
   'homeschooling-paraguay': {
     title: 'Online School & International Curriculum Paraguay | Cambridge IGCSE, A-Level, IB \u2014 Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Asunci\u00f3n, Ciudad del Este, Encarnaci\u00f3n, the Chaco and the soy belt. The grey area stated honestly, with German and Portuguese examined alongside. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Asunci\u00f3n, Ciudad del Este, Encarnaci\u00f3n, the Chaco and the soy belt. The grey area stated honestly, with German and Portuguese examined alongside. From USD 423/month.',
   },
   'homeschooling-venezuela': {
     title: 'Online School & International Curriculum Venezuela | Cambridge IGCSE, A-Level, IB \u2014 Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Caracas, Maracaibo, Valencia, Ciudad Guayana and M\u00e9rida. Fees in USD, and a qualification read directly in every country your family has ties to. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Caracas, Maracaibo, Valencia, Ciudad Guayana and M\u00e9rida. Fees in USD, and a qualification read directly in every country your family has ties to. From USD 423/month.',
   },
   'homeschooling-puerto-rico': {
     title: 'Online School & International Curriculum Puerto Rico | Cambridge IGCSE, A-Level, IB \u2014 Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across San Juan, Dorado, Ponce, Mayag\u00fcez and the islands. The freest home-education framework anywhere \u2014 and the externally examined qualification it leaves you needing. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across San Juan, Dorado, Ponce, Mayag\u00fcez and the islands. The freest home-education framework anywhere \u2014 and the externally examined qualification it leaves you needing. From USD 423/month.',
   },
   'homeschooling-jordan': {
     title: 'Online School & International Curriculum Jordan | Cambridge IGCSE, A-Level, IB \u2014 Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Amman, Aqaba, Irbid, Zarqa and the Jordan Valley. Exactly our teaching clock, year-round, with no offset at all. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Amman, Aqaba, Irbid, Zarqa and the Jordan Valley. Exactly our teaching clock, year-round, with no offset at all. From USD 423/month.',
   },
   'homeschooling-iraq': {
     title: 'Online School & International Curriculum Iraq | Cambridge IGCSE, A-Level, IB \u2014 Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Baghdad, Basra, Erbil, Sulaymaniyah and Duhok. Both education authorities explained, and a zero timezone offset. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Baghdad, Basra, Erbil, Sulaymaniyah and Duhok. Both education authorities explained, and a zero timezone offset. From USD 423/month.',
   },
   'homeschooling-lebanon': {
     title: 'Online School & International Curriculum Lebanon | Cambridge IGCSE, A-Level, IB \u2014 Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Beirut, Tripoli, Saida, the Bekaa and Mount Lebanon. A record read in every country your family has ties to, fees in USD. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Beirut, Tripoli, Saida, the Bekaa and Mount Lebanon. A record read in every country your family has ties to, fees in USD. From USD 423/month.',
   },
   'homeschooling-myanmar': {
     title: 'Online School & International Curriculum Myanmar | Cambridge IGCSE, A-Level, IB \u2014 Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Yangon, Mandalay, Naypyidaw, Taunggyi and Mawlamyine. After-school hours that land squarely in our teaching day. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Yangon, Mandalay, Naypyidaw, Taunggyi and Mawlamyine. After-school hours that land squarely in our teaching day. From USD 423/month.',
   },
   'homeschooling-china': {
     title: 'Online School Hong Kong, Macau & China | Cambridge IGCSE, A-Level, IB \u2014 Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families in the Hong Kong and Macau Special Administrative Regions. No waiting list. The mainland regulatory position set out honestly. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families in the Hong Kong and Macau Special Administrative Regions. No waiting list. The mainland regulatory position set out honestly. From USD 423/month.',
   },
   'homeschooling-bangladesh': {
     title: 'Online School & International Curriculum Bangladesh | Cambridge O-Level, A-Level, IB \u2014 Smartious',
-    desc: 'Live online Cambridge O-Level, IGCSE, A-Level, Pearson Edexcel, IB and AP for families across Dhaka, Chattogram, Sylhet, Khulna and Rajshahi. Subject specialists and after-school hours that fit. From USD 400/month.',
+    desc: 'Live online Cambridge O-Level, IGCSE, A-Level, Pearson Edexcel, IB and AP for families across Dhaka, Chattogram, Sylhet, Khulna and Rajshahi. Subject specialists and after-school hours that fit. From USD 423/month.',
   },
   'homeschooling-nepal': {
     title: 'Online School & International Curriculum Nepal | Cambridge IGCSE, A-Level, IB \u2014 Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Kathmandu, Pokhara, Biratnagar, Chitwan and Butwal. A-Levels beyond the valley, with no relocation at grade 11. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Kathmandu, Pokhara, Biratnagar, Chitwan and Butwal. A-Levels beyond the valley, with no relocation at grade 11. From USD 423/month.',
   },
   'homeschooling-maldives': {
     title: 'Online School & International Curriculum Maldives | Cambridge IGCSE, A-Level, Edexcel \u2014 Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel and IB for families across Mal\u00e9, Addu, Kulhudhuffushi, Fuvahmulah and the resort islands. Cambridge is already your national route \u2014 we supply the subject specialists an island cannot house. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel and IB for families across Mal\u00e9, Addu, Kulhudhuffushi, Fuvahmulah and the resort islands. Cambridge is already your national route \u2014 we supply the subject specialists an island cannot house. From USD 423/month.',
   },
   'homeschooling-cyprus': {
     title: 'Online School & International Curriculum Cyprus | Cambridge IGCSE, A-Level, IB \u2014 Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Nicosia, Limassol, Larnaca, Paphos and the eastern coast. Every legal reading set out, no waitlist, almost no timezone. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Nicosia, Limassol, Larnaca, Paphos and the eastern coast. Every legal reading set out, no waitlist, almost no timezone. From USD 423/month.',
   },
   'homeschooling-israel': {
     title: 'Online School & International Curriculum Israel | Cambridge IGCSE, A-Level, IB \u2014 Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Tel Aviv, Jerusalem, Haifa, Be\'er Sheva and the Sharon. The closest timezone we serve, and the permit framework explained properly. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Tel Aviv, Jerusalem, Haifa, Be\'er Sheva and the Sharon. The closest timezone we serve, and the permit framework explained properly. From USD 423/month.',
   },
   'homeschooling-bolivia': {
     title: 'Online School & International Curriculum Bolivia | Cambridge IGCSE, A-Level, IB \u2014 Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Santa Cruz, La Paz, Cochabamba, Tarija and Potos\u00ed. Ley 070 explained, and exactly how we work alongside a colegio sombrilla. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Santa Cruz, La Paz, Cochabamba, Tarija and Potos\u00ed. Ley 070 explained, and exactly how we work alongside a colegio sombrilla. From USD 423/month.',
   },
   'homeschooling-guatemala': {
     title: 'Online School & International Curriculum Guatemala | Cambridge IGCSE, A-Level, IB \u2014 Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Guatemala City, Antigua, Quetzaltenango, Pet\u00e9n and Izabal. Morning classes, and an honest account of what we could not verify. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Guatemala City, Antigua, Quetzaltenango, Pet\u00e9n and Izabal. Morning classes, and an honest account of what we could not verify. From USD 423/month.',
   },
   'homeschooling-dominican-republic': {
     title: 'Online School & International Curriculum Dominican Republic | Cambridge IGCSE, A-Level, IB \u2014 Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Santo Domingo, Santiago, Punta Cana, Puerto Plata and La Romana. Seven hours ahead, with the American-diploma question answered honestly. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Santo Domingo, Santiago, Punta Cana, Puerto Plata and La Romana. Seven hours ahead, with the American-diploma question answered honestly. From USD 423/month.',
   },
   'homeschooling-panama': {
     title: 'Online School & International Curriculum Panama | Cambridge IGCSE, A-Level, IB \u2014 Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Panama City, Col\u00f3n, David, Bocas del Toro and the Pacific coast. Morning classes, fees in USD, and an honest account of what we could not verify. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Panama City, Col\u00f3n, David, Bocas del Toro and the Pacific coast. Morning classes, fees in USD, and an honest account of what we could not verify. From USD 423/month.',
   },
   'homeschooling-peru': {
     title: 'Online School & International Curriculum Peru | Cambridge IGCSE, A-Level, IB \u2014 Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Lima, Arequipa, Cusco, Trujillo and Piura. Morning classes that fit the turno tarde, alongside your school. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Lima, Arequipa, Cusco, Trujillo and Piura. Morning classes that fit the turno tarde, alongside your school. From USD 423/month.',
   },
   'homeschooling-argentina': {
     title: 'Online School & International Curriculum Argentina | Cambridge IGCSE, A-Level, IB \u2014 Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Buenos Aires, C\u00f3rdoba, Rosario, Mendoza and Neuqu\u00e9n. Subject access, USD-denominated fees, and Vaca Muerta reached. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Buenos Aires, C\u00f3rdoba, Rosario, Mendoza and Neuqu\u00e9n. Subject access, USD-denominated fees, and Vaca Muerta reached. From USD 423/month.',
   },
   'homeschooling-brazil': {
     title: 'Online School & International Curriculum Brazil | Cambridge IGCSE, A-Level, IB \u2014 Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across S\u00e3o Paulo, Rio, Bras\u00edlia, Belo Horizonte and Florian\u00f3polis. The STF position stated exactly, alongside your school, on a six-hour offset that works. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across S\u00e3o Paulo, Rio, Bras\u00edlia, Belo Horizonte and Florian\u00f3polis. The STF position stated exactly, alongside your school, on a six-hour offset that works. From USD 423/month.',
   },
   'homeschooling-drc': {
     title: 'Online School & International Curriculum DR Congo | Cambridge IGCSE, A-Level, IB \u2014 Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Kinshasa, Lubumbashi and Kolwezi. The loi-cadre\'s parental liberties stated accurately, French kept alongside, and the cobalt belt reached at last. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Kinshasa, Lubumbashi and Kolwezi. The loi-cadre\'s parental liberties stated accurately, French kept alongside, and the cobalt belt reached at last. From USD 423/month.',
   },
   'homeschooling-ghana': {
     title: 'Online School & Cambridge Tutoring Ghana | IGCSE, A-Level, IB \u2014 Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Accra, Kumasi and Takoradi. Cambridge alongside WASSCE, at a fraction of the Accra tier\'s fees. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Accra, Kumasi and Takoradi. Cambridge alongside WASSCE, at a fraction of the Accra tier\'s fees. From USD 423/month.',
   },
   'homeschooling-tunisia': {
     title: 'Online School, Virtual School & International Curriculum Tunisia | Cambridge IGCSE, A-Level, IB \u2014 Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Tunis, Sfax and Sousse. The French network dominates and is oversubscribed; British and IB provision is thin. French, German or Italian kept alongside. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Tunis, Sfax and Sousse. The French network dominates and is oversubscribed; British and IB provision is thin. French, German or Italian kept alongside. From USD 423/month.',
   },
   'homeschooling-namibia': {
     title: 'Online School, Virtual School & Homeschool Namibia | Cambridge IGCSE, A-Level, IB — Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Windhoek, Walvis Bay and the northern regions. Namibia\'s Basic Education Act 3 of 2020 defines and requires registration of home schooling — explained precisely, including what we cannot warrant. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Windhoek, Walvis Bay and the northern regions. Namibia\'s Basic Education Act 3 of 2020 defines and requires registration of home schooling — explained precisely, including what we cannot warrant. From USD 423/month.',
   },
   'homeschooling-zimbabwe': {
     title: 'Online School, Virtual School & Cambridge Curriculum Zimbabwe | IGCSE, A-Level, IB — Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Harare, Bulawayo and Victoria Falls. The Cambridge qualification Zimbabwe has trusted for generations — taught live, invoiced in USD, one hour from our teaching base. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Harare, Bulawayo and Victoria Falls. The Cambridge qualification Zimbabwe has trusted for generations — taught live, invoiced in USD, one hour from our teaching base. From USD 423/month.',
   },
   'homeschooling-kosovo': {
     title: 'Online School, Virtual School & International Curriculum Kosovo | Cambridge IGCSE, A-Level, IB — Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Prishtina, Prizren, Peja, Gjakova, Ferizaj and Gjilan. Grades 1-9 are compulsory under Law 04/L-032 — supplementary alongside your school — and upper secondary is voluntary, so the A-Level years open from around fifteen. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Prishtina, Prizren, Peja, Gjakova, Ferizaj and Gjilan. Grades 1-9 are compulsory under Law 04/L-032 — supplementary alongside your school — and upper secondary is voluntary, so the A-Level years open from around fifteen. From USD 423/month.',
   },
   'homeschooling-bosnia': {
     title: 'Online School, Virtual School & International Curriculum Bosnia and Herzegovina | Cambridge IGCSE, A-Level, IB — Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Sarajevo, Banja Luka, Mostar, Tuzla, Zenica and Brčko District. A state framework, two entities, ten cantons and a district — the rules that govern your child are made where you live, and we explain that first. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Sarajevo, Banja Luka, Mostar, Tuzla, Zenica and Brčko District. A state framework, two entities, ten cantons and a district — the rules that govern your child are made where you live, and we explain that first. From USD 423/month.',
   },
   'homeschooling-montenegro': {
     title: 'Online School, Virtual School & Homeschool Montenegro | Cambridge IGCSE, A-Level, IB — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Podgorica, Kotor and Tivat, Budva, Nikšić, Bar and the north. Montenegro permits home education by exception for a semester or a school year, with checks at the end of the cycle — explained precisely. From USD 400/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Podgorica, Kotor and Tivat, Budva, Nikšić, Bar and the north. Montenegro permits home education by exception for a semester or a school year, with checks at the end of the cycle — explained precisely. From USD 423/month.',
   },
   'homeschooling-north-macedonia': {
     title: 'Online School, Virtual School & International Curriculum North Macedonia | Cambridge IGCSE, A-Level, IB — Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Skopje, Tetovo, Bitola, Ohrid, Kumanovo and Štip. Parental-choice homeschooling is not established in North Macedonian law and compulsory education extends through secondary — so we run supplementary alongside your school, and never claim a window that does not exist. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Skopje, Tetovo, Bitola, Ohrid, Kumanovo and Štip. Parental-choice homeschooling is not established in North Macedonian law and compulsory education extends through secondary — so we run supplementary alongside your school, and never claim a window that does not exist. From USD 423/month.',
   },
   'homeschooling-albania': {
     title: 'Online School, Virtual School & International Curriculum Albania | Cambridge IGCSE, A-Level, IB — Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Tirana, Durrës, Vlorë, Shkodër, Elbasan and Fier. Albanian law makes basic education compulsory from six to sixteen — stated plainly — with supplementary study alongside your enrolment, and the full pathway after sixteen. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Tirana, Durrës, Vlorë, Shkodër, Elbasan and Fier. Albanian law makes basic education compulsory from six to sixteen — stated plainly — with supplementary study alongside your enrolment, and the full pathway after sixteen. From USD 423/month.',
   },
   'homeschooling-bulgaria': {
     title: 'Online School, Virtual School & Homeschool Bulgaria | Cambridge IGCSE, A-Level, IB — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Sofia, Plovdiv, Varna, Burgas, Ruse and Bansko. Самостоятелна форма explained honestly — regional commission, annual exams, termly oversight — with the simpler supplementary route recommended. From USD 400/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Sofia, Plovdiv, Varna, Burgas, Ruse and Bansko. Самостоятелна форма explained honestly — regional commission, annual exams, termly oversight — with the simpler supplementary route recommended. From USD 423/month.',
   },
   'homeschooling-serbia': {
     title: 'Online School, Virtual School & Homeschool Serbia | Cambridge IGCSE, A-Level, IB — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Belgrade, Novi Sad, Niš, Kragujevac, Subotica and Bor. Serbian law gives parents the right to choose school, education at home, or education at a distance — with class examinations in every subject planned properly. From USD 400/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Belgrade, Novi Sad, Niš, Kragujevac, Subotica and Bor. Serbian law gives parents the right to choose school, education at home, or education at a distance — with class examinations in every subject planned properly. From USD 423/month.',
   },
   'homeschooling-croatia': {
     title: 'Online School, Virtual School & International Curriculum Croatia | Cambridge IGCSE, A-Level, IB — Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Zagreb, Split, Rijeka, Dubrovnik, Istria and Osijek. Croatian law requires primary school attendance — stated plainly — with supplementary study alongside your enrolment, and the full pathway after primary school, since secondary education is not compulsory. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Zagreb, Split, Rijeka, Dubrovnik, Istria and Osijek. Croatian law requires primary school attendance — stated plainly — with supplementary study alongside your enrolment, and the full pathway after primary school, since secondary education is not compulsory. From USD 423/month.',
   },
   'homeschooling-slovenia': {
     title: 'Online School, Virtual School & Homeschool Slovenia | Cambridge IGCSE, A-Level, IB — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Ljubljana, Maribor, Koper, Kranj, Novo mesto and Nova Gorica. Education at home is a right by notification — with a year-end assessment that has real consequences, planned first. From USD 400/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Ljubljana, Maribor, Koper, Kranj, Novo mesto and Nova Gorica. Education at home is a right by notification — with a year-end assessment that has real consequences, planned first. From USD 423/month.',
   },
   'homeschooling-slovakia': {
     title: 'Online School, Virtual School & Homeschool Slovakia | Cambridge IGCSE, A-Level, IB — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Bratislava, Košice, Žilina, Nitra, Trnava and the High Tatras. Individuálne vzdelávanie planned to its commission-examination calendar, and compulsory attendance ending at sixteen — stated plainly. From USD 400/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Bratislava, Košice, Žilina, Nitra, Trnava and the High Tatras. Individuálne vzdelávanie planned to its commission-examination calendar, and compulsory attendance ending at sixteen — stated plainly. From USD 423/month.',
   },
   'homeschooling-switzerland': {
     title: 'Online School, Virtual School & Homeschool Switzerland | Cambridge IGCSE, A-Level, IB — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Geneva, Zurich, Basel, Zug, Lausanne and the Alpine resorts. Switzerland has 26 cantonal school laws and no constitutional right to home education — our clean default is supplementary alongside your enrolment, at a fraction of Swiss school fees. From USD 400/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Geneva, Zurich, Basel, Zug, Lausanne and the Alpine resorts. Switzerland has 26 cantonal school laws and no constitutional right to home education — our clean default is supplementary alongside your enrolment, at a fraction of Swiss school fees. From USD 423/month.',
   },
   'homeschooling-luxembourg': {
     title: 'Online School, Virtual School & Homeschool Luxembourg | Cambridge IGCSE, A-Level, IB — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Luxembourg City, Esch-sur-Alzette, Differdange, the Nordstad, the Moselle and the frontalier belt. Luxembourg requires prior ministerial authorisation for home education — our clean default is supplementary alongside your enrolment. From USD 400/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Luxembourg City, Esch-sur-Alzette, Differdange, the Nordstad, the Moselle and the frontalier belt. Luxembourg requires prior ministerial authorisation for home education — our clean default is supplementary alongside your enrolment. From USD 423/month.',
   },
   'homeschooling-australia': {
     title: 'International Online School & Homeschool Australia | Cambridge IGCSE, A-Level, IB — Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for diaspora, returning-expat, regional and Cambridge-pathway families across Sydney, Melbourne, Brisbane, Perth, Adelaide and regional Australia. Classes in the Australian afternoon. We are not Australian-registered and do not replace your state homeschool registration. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for diaspora, returning-expat, regional and Cambridge-pathway families across Sydney, Melbourne, Brisbane, Perth, Adelaide and regional Australia. Classes in the Australian afternoon. We are not Australian-registered and do not replace your state homeschool registration. From USD 423/month.',
   },
   'homeschooling-pakistan': {
     title: 'Online School, Virtual School & Homeschool Pakistan | Cambridge IGCSE, O-Level, A-Level, IB — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE and O-Level, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Karachi, Lahore, Islamabad, Rawalpindi, Faisalabad, Peshawar and Multan. No waitlist, British Council examinations, and IBCC equivalence planned from the first term. From USD 400/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE and O-Level, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Karachi, Lahore, Islamabad, Rawalpindi, Faisalabad, Peshawar and Multan. No waitlist, British Council examinations, and IBCC equivalence planned from the first term. From USD 423/month.',
   },
   'homeschooling-georgia': {
     title: 'Online School, Virtual School & Homeschool Georgia (Tbilisi) | Cambridge IGCSE, A-Level, IB — Smartious',
-    desc: 'Online, virtual school & homeschool for Georgia (the country). Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Tbilisi, Batumi, Kutaisi, Rustavi, Gudauri, and Kakheti. The eksternati route planned properly, the 2024 grade-ten boundary stated exactly, and secondary school optional after it. From USD 400/month.',
+    desc: 'Online, virtual school & homeschool for Georgia (the country). Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Tbilisi, Batumi, Kutaisi, Rustavi, Gudauri, and Kakheti. The eksternati route planned properly, the 2024 grade-ten boundary stated exactly, and secondary school optional after it. From USD 423/month.',
   },
   'homeschooling-azerbaijan': {
     title: 'Online School, Virtual School & Homeschool Azerbaijan | Cambridge IGCSE, A-Level, IB — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Baku, Ganja, Sumgait, Mingachevir, Gabala, and Lankaran. Home education is lawful under the 2009 Education Law — state standards and Ministry-supervised exams planned honestly — and full secondary after grade nine is not compulsory. From USD 400/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Baku, Ganja, Sumgait, Mingachevir, Gabala, and Lankaran. Home education is lawful under the 2009 Education Law — state standards and Ministry-supervised exams planned honestly — and full secondary after grade nine is not compulsory. From USD 423/month.',
   },
   'homeschooling-greece': {
     title: 'Online School & International Curriculum Greece | Cambridge IGCSE, A-Level, IB — Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Athens, Thessaloniki, Piraeus, Crete, Corfu, and Rhodes. Greek law requires school attendance to 15 — stated plainly — with two lawful configurations: supplementary beside any enrolment, and the full A-Level pathway after gymnasio. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Athens, Thessaloniki, Piraeus, Crete, Corfu, and Rhodes. Greek law requires school attendance to 15 — stated plainly — with two lawful configurations: supplementary beside any enrolment, and the full A-Level pathway after gymnasio. From USD 423/month.',
   },
   'homeschooling-finland': {
     title: 'Online School, Virtual School & Homeschool Finland | Cambridge IGCSE, A-Level, IB — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Helsinki, Espoo, Tampere, Turku, Oulu, and Lapland. Home education needs no permission in Finland — a notification suffices, with examining-teacher monitoring — and the 2021 extension to 18 is planned honestly. From USD 400/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Helsinki, Espoo, Tampere, Turku, Oulu, and Lapland. Home education needs no permission in Finland — a notification suffices, with examining-teacher monitoring — and the 2021 extension to 18 is planned honestly. From USD 423/month.',
   },
   'homeschooling-hungary': {
     title: 'Online School, Virtual School & Homeschool Hungary | Cambridge IGCSE, A-Level, IB — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Budapest, Debrecen, Gyor, Kecskemet, Szeged, and Pecs. Egyeni munkarend planned to its June 15 deadline, both exam calendars mapped together, and compulsory education ending at 16 — stated plainly. From USD 400/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Budapest, Debrecen, Gyor, Kecskemet, Szeged, and Pecs. Egyeni munkarend planned to its June 15 deadline, both exam calendars mapped together, and compulsory education ending at 16 — stated plainly. From USD 423/month.',
   },
   'homeschooling-austria': {
     title: 'Online School, Virtual School & Homeschool Austria | Cambridge IGCSE, A-Level, IB — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Vienna, Graz, Salzburg, Linz, Innsbruck, and Vorarlberg. Haeuslicher Unterricht is lawful under Europe\'s tightest compliance calendar — annual notification, winter reflection meeting, June external exam — planned from day one. From USD 400/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Vienna, Graz, Salzburg, Linz, Innsbruck, and Vorarlberg. Haeuslicher Unterricht is lawful under Europe\'s tightest compliance calendar — annual notification, winter reflection meeting, June external exam — planned from day one. From USD 423/month.',
   },
   'homeschooling-new-zealand': {
     title: 'Online School, Virtual School & Homeschool New Zealand | Cambridge IGCSE, A-Level, IB — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Auckland, Wellington, Christchurch, Hamilton, Tauranga, and Queenstown. A free Ministry exemption, no curriculum mandate, and a supervision allowance the state pays — with live classes landing in the NZ afternoon. From USD 400/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Auckland, Wellington, Christchurch, Hamilton, Tauranga, and Queenstown. A free Ministry exemption, no curriculum mandate, and a supervision allowance the state pays — with live classes landing in the NZ afternoon. From USD 423/month.',
   },
   'homeschooling-norway': {
     title: 'Online School, Virtual School & Homeschool Norway | Cambridge IGCSE, A-Level, IB — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Oslo, Stavanger, Bergen, Trondheim, Tromso, and Kristiansand. Norway is the permissive Nordic exception: home education is a notified right under the 2024 Education Act, with municipal supervision planned in properly. From USD 400/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Oslo, Stavanger, Bergen, Trondheim, Tromso, and Kristiansand. Norway is the permissive Nordic exception: home education is a notified right under the 2024 Education Act, with municipal supervision planned in properly. From USD 423/month.',
   },
   'homeschooling-netherlands': {
     title: 'Online School & Supplementary Cambridge Netherlands | IGCSE, A-Level, IB — Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Amsterdam, The Hague, Rotterdam, Utrecht, Eindhoven, and Groningen. Honest about Dutch law: no home-education right exists — Smartious delivers serious supplementary curriculum alongside a school enrolment. From USD 400/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Amsterdam, The Hague, Rotterdam, Utrecht, Eindhoven, and Groningen. Honest about Dutch law: no home-education right exists — Smartious delivers serious supplementary curriculum alongside a school enrolment. From USD 423/month.',
   },
   'homeschooling-sweden': {
     title: 'Online School, Virtual School & Homeschool Sweden | Cambridge IGCSE, A-Level, IB — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Stockholm, Gothenburg, Malmo, Lund, Uppsala, and the North. Honest about Swedish law: supplementary during the compulsory years, full A-Level delivery from 16 — when skolplikt ends and gymnasiet is voluntary. From USD 400/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Stockholm, Gothenburg, Malmo, Lund, Uppsala, and the North. Honest about Swedish law: supplementary during the compulsory years, full A-Level delivery from 16 — when skolplikt ends and gymnasiet is voluntary. From USD 423/month.',
   },
   'homeschooling-belgium': {
     title: 'Online School, Virtual School & Homeschool Belgium | Cambridge IGCSE, A-Level, IB — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Brussels, Antwerp, Ghent, Leuven, Waterloo, and Mons/SHAPE. Home education is constitutionally protected — and online schooling legally counts as home education here, with community checkpoint exams planned in honestly. From USD 400/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Brussels, Antwerp, Ghent, Leuven, Waterloo, and Mons/SHAPE. Home education is constitutionally protected — and online schooling legally counts as home education here, with community checkpoint exams planned in honestly. From USD 423/month.',
   },
   'homeschooling-czech-republic': {
     title: 'Online School, Virtual School & Homeschool Czech Republic | Cambridge IGCSE, A-Level, IB — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Prague, Brno, Ostrava, Plzen, Olomouc, and Mlada Boleslav. Individualni vzdelavani is explicit in Czech law — and the obligation ends at 15. From USD 400/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Prague, Brno, Ostrava, Plzen, Olomouc, and Mlada Boleslav. Individualni vzdelavani is explicit in Czech law — and the obligation ends at 15. From USD 423/month.',
   },
   'homeschooling-portugal': {
     title: 'Online School, Virtual School & Homeschool Portugal | Cambridge IGCSE, A-Level, IB — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Lisbon, Cascais, Porto, the Algarve, Madeira, and Braga. Both Portuguese education routes explained honestly — ensino domestico and the international-school route. From USD 400/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Lisbon, Cascais, Porto, the Algarve, Madeira, and Braga. Both Portuguese education routes explained honestly — ensino domestico and the international-school route. From USD 423/month.',
   },
   'homeschooling-poland': {
     title: 'Online School, Virtual School & Homeschool Poland | Cambridge IGCSE, A-Level, IB — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Warsaw, Krakow, Wroclaw, Gdansk/Tricity, Poznan, and Katowice/Silesia. Edukacja domowa is mainstream — 63,000+ students — and Smartious runs the Cambridge track alongside the patron-school exams. From USD 400/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Warsaw, Krakow, Wroclaw, Gdansk/Tricity, Poznan, and Katowice/Silesia. Edukacja domowa is mainstream — 63,000+ students — and Smartious runs the Cambridge track alongside the patron-school exams. From USD 423/month.',
   },
   'homeschooling-italy': {
     title: 'Online School, Virtual School & Homeschool Italy | Cambridge IGCSE, A-Level, IB — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Milan, Rome, Florence, Turin, Bologna, and Naples. Istruzione parentale is legal by declaration — and the annual esame di idoneita stops at 16. From USD 400/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Milan, Rome, Florence, Turin, Bologna, and Naples. Istruzione parentale is legal by declaration — and the annual esame di idoneita stops at 16. From USD 423/month.',
   },
   'homeschooling-france': {
     title: 'Online School, Virtual School & Homeschool France | Cambridge IGCSE, A-Level, IB — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Paris, Lyon, Toulouse, Nice/Sophia Antipolis, Bordeaux, and Strasbourg. Honest guidance on France\'s 2022 home-education authorization rules. From USD 400/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Paris, Lyon, Toulouse, Nice/Sophia Antipolis, Bordeaux, and Strasbourg. Honest guidance on France\'s 2022 home-education authorization rules. From USD 423/month.',
   },
   'homeschooling-turkey': {
     title: 'Online School, Virtual School & Homeschool Türkiye | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Turkish and expat families across Istanbul (Bebek, Etiler, Nişantaşı, Kadıköy, Ataşehir), Ankara (Çankaya, Bilkent), Izmir, Antalya (post-2022 Russian and Ukrainian community), Bursa, Adana. British Council Istanbul + Ankara + BESA exam centres. TRT time zone exactly matching Nairobi teaching hours. From USD 400/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Turkish and expat families across Istanbul (Bebek, Etiler, Nişantaşı, Kadıköy, Ataşehir), Ankara (Çankaya, Bilkent), Izmir, Antalya (post-2022 Russian and Ukrainian community), Bursa, Adana. British Council Istanbul + Ankara + BESA exam centres. TRT time zone exactly matching Nairobi teaching hours. From USD 423/month.',
   },
   'homeschooling-kuwait': {
     title: 'Online School, Virtual School & Homeschool Kuwait | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Kuwaiti and expat families across Kuwait City, Salmiya (densest expat district), Hawally (Cambridge English School catchment), Salwa (premium coastal), Bayan (embassy district), and Ahmadi (KOC oil town). British Council Kuwait exam centre. AST time zone exactly matching Nairobi teaching hours. MOHE scholarship pathway alignment. From USD 400/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Kuwaiti and expat families across Kuwait City, Salmiya (densest expat district), Hawally (Cambridge English School catchment), Salwa (premium coastal), Bayan (embassy district), and Ahmadi (KOC oil town). British Council Kuwait exam centre. AST time zone exactly matching Nairobi teaching hours. MOHE scholarship pathway alignment. From USD 423/month.',
   },
   'homeschooling-oman': {
     title: 'Online School, Virtual School & Homeschool Oman | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Omani and expat families across Muscat (MSQ, Al Bandar, Al Khuwair — BSM, Cheltenham, TAISM catchment), Seeb (Sultan\'s School, RGSG Muscat, Downe House), Sohar (Al Batinah North industrial, ABIS), Salalah (Dhofar southern coast), Nizwa (interior cultural capital), and Sur (Ash Sharqiyah North coastal). British Council Muscat exam centre. Immediate enrolment — no BSM/ABA waiting list. From USD 400/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Omani and expat families across Muscat (MSQ, Al Bandar, Al Khuwair — BSM, Cheltenham, TAISM catchment), Seeb (Sultan\'s School, RGSG Muscat, Downe House), Sohar (Al Batinah North industrial, ABIS), Salalah (Dhofar southern coast), Nizwa (interior cultural capital), and Sur (Ash Sharqiyah North coastal). British Council Muscat exam centre. Immediate enrolment — no BSM/ABA waiting list. From USD 423/month.',
   },
   'homeschooling-taiwan': {
     title: 'Online School, Virtual School & Homeschool Taiwan | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Taiwanese and expat families across Taipei (Tianmu — TAS catchment, Shilin — TES catchment), New Taipei City (Linkou — Morrison Academy + TCS), Hsinchu (TSMC ecosystem — HAS, IBSH), Taichung (Morrison Academy, Hong Wen IS Cambridge centre), Kaohsiung (KAS, I-Shou IB), and Taoyuan (TYAS). TES Taipei + HWIS Taichung Cambridge exam centres. Serves Taiwanese-national families that Taiwan physical international schools legally cannot accept. From USD 400/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Taiwanese and expat families across Taipei (Tianmu — TAS catchment, Shilin — TES catchment), New Taipei City (Linkou — Morrison Academy + TCS), Hsinchu (TSMC ecosystem — HAS, IBSH), Taichung (Morrison Academy, Hong Wen IS Cambridge centre), Kaohsiung (KAS, I-Shou IB), and Taoyuan (TYAS). TES Taipei + HWIS Taichung Cambridge exam centres. Serves Taiwanese-national families that Taiwan physical international schools legally cannot accept. From USD 423/month.',
   },
   'homeschooling-ireland': {
     title: 'Online School, Virtual School & Homeschool Ireland | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Irish and expat families across Dublin (South Dublin D4/6/14/18 — NAISD Leopardstown, SEK Kilternan, St. Andrew\'s catchment plus Silicon Docks Google/Meta/LinkedIn corporate), Cork (Apple European HQ + pharma cluster), Galway (Ireland\'s medtech capital — Medtronic + Boston Scientific), Limerick (Analog Devices, Dell), Waterford (South East biotech), and Kildare (Intel Leixlip Fab 34 semiconductor). Post-Brexit UK family continuity + multinational corporate rotation + Túsla-compatible homeschool. From USD 400/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Irish and expat families across Dublin (South Dublin D4/6/14/18 — NAISD Leopardstown, SEK Kilternan, St. Andrew\'s catchment plus Silicon Docks Google/Meta/LinkedIn corporate), Cork (Apple European HQ + pharma cluster), Galway (Ireland\'s medtech capital — Medtronic + Boston Scientific), Limerick (Analog Devices, Dell), Waterford (South East biotech), and Kildare (Intel Leixlip Fab 34 semiconductor). Post-Brexit UK family continuity + multinational corporate rotation + Túsla-compatible homeschool. From USD 423/month.',
   },
   'homeschooling-united-kingdom': {
     title: 'Online School, Virtual School & Homeschool UK | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for UK families across London (all 32 boroughs — Westminster / Eton / Harrow / St. Paul\'s alternative), Manchester (Northern Powerhouse — Manchester Grammar School alternative), Birmingham (HSBC UK HQ + JLR Solihull + King Edward VI alternative), Leeds (Channel 4 Northern HQ + Grammar School at Leeds alternative), Bristol (Airbus UK Filton + Bristol Grammar + Clifton alternative), and Edinburgh (Scotland — Cambridge / A-Level pathway alternative to Scottish CfE). Below Cambridge Home School Online (£10,950/year) at USD 400/month. Elective Home Education, Section 19 alternative provision, SEND-friendly. From USD 400/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for UK families across London (all 32 boroughs — Westminster / Eton / Harrow / St. Paul\'s alternative), Manchester (Northern Powerhouse — Manchester Grammar School alternative), Birmingham (HSBC UK HQ + JLR Solihull + King Edward VI alternative), Leeds (Channel 4 Northern HQ + Grammar School at Leeds alternative), Bristol (Airbus UK Filton + Bristol Grammar + Clifton alternative), and Edinburgh (Scotland — Cambridge / A-Level pathway alternative to Scottish CfE). Below Cambridge Home School Online (£10,950/year) at USD 423/month. Elective Home Education, Section 19 alternative provision, SEND-friendly. From USD 423/month.',
   },
   'homeschooling-india': {
     title: 'Online School, Virtual School & Homeschool India | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Indian families across Mumbai (DAIS + JBCN + Ecole Mondiale + Oberoi alternative), Delhi NCR (BSD + AES + Pathways + Heritage), Bangalore (TISB + CIS + Indus + Oakridge + Trio), Hyderabad (Chirec + Oakridge Nord Anglia + ISH), Chennai (AISC + Chennai British + Chettinad + MCTM Chettyar), and Pune (Mercedes-Benz + Symbiosis + Pune International + Sanjay Ghodawat). Dramatic fee arbitrage — INR 8-20+ lakh/year premium schools vs INR 1.8-5.4 lakh/year Smartious (4-11× cheaper). Serves NRI returnees + tier-2 city access gap + IT/pharma/automotive corporate rotational families. From USD 400/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Indian families across Mumbai (DAIS + JBCN + Ecole Mondiale + Oberoi alternative), Delhi NCR (BSD + AES + Pathways + Heritage), Bangalore (TISB + CIS + Indus + Oakridge + Trio), Hyderabad (Chirec + Oakridge Nord Anglia + ISH), Chennai (AISC + Chennai British + Chettinad + MCTM Chettyar), and Pune (Mercedes-Benz + Symbiosis + Pune International + Sanjay Ghodawat). Dramatic fee arbitrage — INR 8-20+ lakh/year premium schools vs INR 1.8-5.4 lakh/year Smartious (4-11× cheaper). Serves NRI returnees + tier-2 city access gap + IT/pharma/automotive corporate rotational families. From USD 423/month.',
   },
   'homeschooling-germany': {
     title: 'Online School, Virtual School & Homeschool Germany | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Germany-resident families across Berlin (BIS Charlottenburg + BBS + BBIS Kleinmachnow + Berlin Metropolitan School alternative), Munich (MIS Starnberg + BIS Haimhausen + European School alternative), Frankfurt (FIS Oberursel + European School + ISF Wiesbaden alternative), Hamburg (ISH Blankenese alternative), Stuttgart (ISS Sindelfingen alternative), and Düsseldorf (ISD Kaiserswerth alternative). Homeschool is illegal in Germany for German citizen children under Schulpflicht — Smartious serves expat families with foreign passports, Sixth Form 16+ students post-Schulpflicht, supplementary tuition alongside German Gymnasium, and international corporate rotational families. From USD 400/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Germany-resident families across Berlin (BIS Charlottenburg + BBS + BBIS Kleinmachnow + Berlin Metropolitan School alternative), Munich (MIS Starnberg + BIS Haimhausen + European School alternative), Frankfurt (FIS Oberursel + European School + ISF Wiesbaden alternative), Hamburg (ISH Blankenese alternative), Stuttgart (ISS Sindelfingen alternative), and Düsseldorf (ISD Kaiserswerth alternative). Homeschool is illegal in Germany for German citizen children under Schulpflicht — Smartious serves expat families with foreign passports, Sixth Form 16+ students post-Schulpflicht, supplementary tuition alongside German Gymnasium, and international corporate rotational families. From USD 423/month.',
   },
   'homeschooling-romania': {
     title: 'Online School, Virtual School & Homeschool Romania | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Romania-resident families across Bucharest (AISB Pipera + BSB Herăstrău + Cambridge School CSB Voluntari + ISB alternative), Cluj-Napoca (Transylvania College + International School Cluj + KEY International alternative), Timișoara (International British School alternative), Iași (Amazon Development Center corporate + International School alternative), Brașov (Continental Automotive + Schaeffler + International British School alternative), and Constanța (Port of Constanța + OMV Petrom). Smartious as Kenya-based accredited online school satisfies Romania\'s legal "umbrella school" pathway for homeschool families under Law 198/2023. 2-12× fee arbitrage. From USD 400/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Romania-resident families across Bucharest (AISB Pipera + BSB Herăstrău + Cambridge School CSB Voluntari + ISB alternative), Cluj-Napoca (Transylvania College + International School Cluj + KEY International alternative), Timișoara (International British School alternative), Iași (Amazon Development Center corporate + International School alternative), Brașov (Continental Automotive + Schaeffler + International British School alternative), and Constanța (Port of Constanța + OMV Petrom). Smartious as Kenya-based accredited online school satisfies Romania\'s legal "umbrella school" pathway for homeschool families under Law 198/2023. 2-12× fee arbitrage. From USD 423/month.',
   },
   'homeschooling-ukraine': {
     title: 'Online School, Virtual School & Homeschool Ukraine | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS) for Ukrainian families in-country and diaspora — Kyiv (Grammarly + GitLab + MacPaw + Preply + PSI/KIS/BISU alternative), Lviv (SoftServe HQ + EPAM Ukraine + Intellias + N-iX + Ukrainian Catholic University), Kharkiv (NIX Solutions + GlobalLogic + EPAM tech), Dnipro (Interpipe + Metinvest industrial), Odesa (Luxoft + Port of Odesa maritime), Ivano-Frankivsk (western Ukraine safe haven). Distance learning fully legal under 2020 Law on Complete General Secondary Education. Refugee family discounted rates. From USD 400/month personalized.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS) for Ukrainian families in-country and diaspora — Kyiv (Grammarly + GitLab + MacPaw + Preply + PSI/KIS/BISU alternative), Lviv (SoftServe HQ + EPAM Ukraine + Intellias + N-iX + Ukrainian Catholic University), Kharkiv (NIX Solutions + GlobalLogic + EPAM tech), Dnipro (Interpipe + Metinvest industrial), Odesa (Luxoft + Port of Odesa maritime), Ivano-Frankivsk (western Ukraine safe haven). Distance learning fully legal under 2020 Law on Complete General Secondary Education. Refugee family discounted rates. From USD 423/month personalized.',
   },
   assessment: {
     title: 'Book Academic Assessment | Admissions Request — Smartious',
@@ -1892,15 +1919,15 @@ const PAGE_META = {
   },
   'tuition-uk': {
     title: 'Private Tuition UK — Online Cambridge, A-Level, IB, 11+ | Smartious',
-    desc: 'Live online private tuition for UK families across London (Kensington, Chelsea, Notting Hill, Hampstead, Wimbledon, Dulwich), Manchester (Didsbury, Altrincham, Salford), Birmingham (Edgbaston, Solihull, Harborne), Leeds (Roundhay, Alwoodley), Bristol (Clifton, Redland), and Edinburgh (Morningside, New Town). Cambridge IGCSE, A-Level, IB Diploma, 11+ and 13+ Common Entrance preparation. From USD 8/hour.',
+    desc: 'Live online private tuition for UK families across London (Kensington, Chelsea, Notting Hill, Hampstead, Wimbledon, Dulwich), Manchester (Didsbury, Altrincham, Salford), Birmingham (Edgbaston, Solihull, Harborne), Leeds (Roundhay, Alwoodley), Bristol (Clifton, Redland), and Edinburgh (Morningside, New Town). Cambridge IGCSE, A-Level, IB Diploma, 11+ and 13+ Common Entrance preparation. From USD 15/hour.',
   },
   'uk-area': {
     title: 'Private Tuition UK — Online IGCSE, A-Level, 11+ | Smartious',
-    desc: 'Live online and in-person private tuition in select UK areas — Cambridge IGCSE, A-Level, IB Diploma, 11+ Common Entrance preparation. From USD 8/hour.',
+    desc: 'Live online and in-person private tuition in select UK areas — Cambridge IGCSE, A-Level, IB Diploma, 11+ Common Entrance preparation. From USD 15/hour.',
   },
   pricing: {
     title: 'Fee Structure 2026 | Homeschool & Tuition Fees — Smartious',
-    desc: 'Smartious 2026 fee structure — transparent monthly, termly and annual fees for homeschool programmes, A-Level, IB, single subjects and private tuition.',
+    desc: 'Smartious 2026 fee structure — one clear fee for homeschool programmes (USD 423/month, paid termly), A-Level, IB, single subjects and private tuition.',
   },
   programs: {
     title: 'Programmes | Homeschool, Tuition, IUFP & Study Abroad — Smartious',
@@ -1964,12 +1991,12 @@ const TERMS_OF_SERVICE = [
   {h:'1. About these terms',p:'These Terms of Service ("Terms") govern your use of smartioushomeschool.com and any educational services provided by Smartious E-School Ltd ("Smartious"). By enrolling a student, creating an account, or using any part of our website or services, you agree to these Terms. If you do not agree, please do not use our services.'},
   {h:'2. Eligibility',p:'To enrol a student, you must be the student\'s parent or legal guardian and at least 18 years old. Students under 18 cannot create an account without parental consent. We reserve the right to verify identity at any stage, particularly before releasing academic records or issuing predicted grades.'},
   {h:'3. Enrolment and assessment',p:'Enrolment begins when you submit the enrolment form and pay the USD 38 (KSh 5,000) application fee. The assessment fee is non-refundable once the placement test has been served, but counts towards your first month of tuition if you proceed to enrol. We aim to match a tutor within 48 working hours of a completed assessment.'},
-  {h:'4. Fees and payment',p:'All fees are stated in US Dollars. Local currency equivalents (e.g. KES for Kenyan families) are shown for convenience but the dollar price is the contractual amount. Fees are payable in advance , monthly, termly, or annually as selected. Termly payments attract a 5% discount; annual payments attract a 12% discount. Payments are processed via Paystack. We accept M-Pesa, Visa, Mastercard, bank transfer, and Apple Pay.'},
-  {h:'5. Cancellation and refunds',p:'You may cancel your enrolment with 30 days\' written notice. Within the first 14 days of enrolment, you may cancel for any reason and receive a full refund of any unused tuition. After 14 days, refunds are prorated to the next billing period minus any assessment or setup fees already delivered. Termly and annual payments are refunded for the unused balance only. The USD 38 / KSh 5,000 application fee is not refundable once the assessment has been served.'},
+  {h:'4. Fees and payment',p:'All fees are stated in US Dollars. Local currency equivalents (e.g. KES for Kenyan families) are shown for convenience but the dollar price is the contractual amount. Online school and homeschool programmes are USD 423 per month for every year group and curriculum, payable termly in advance. One-to-one tuition is USD 15 per hour. Examination board fees are separate. Payments are processed via Paystack. We accept M-Pesa, Visa, Mastercard, bank transfer, and Apple Pay.'},
+  {h:'5. Cancellation and refunds',p:'Fees are non-refundable once the student\'s assessment has been done, the timetable has been created and lessons have started. This applies to the whole term paid for. If you cancel in writing before that point, we refund tuition paid in advance, less the application fee once the assessment has been served. To withdraw at the end of a term, tell us in writing before the next term\'s invoice is due; no further fees will then be charged.'},
   {h:'6. Your obligations',p:'You agree to: (i) provide accurate information when enrolling; (ii) ensure your child attends scheduled lessons or gives reasonable notice for cancellations; (iii) provide a safe, supervised environment for home-visit tuition in Nairobi; (iv) treat Smartious staff, tutors, and our digital platforms with respect; (v) not share your portal login credentials with anyone outside your household; (vi) not record, reproduce, or redistribute our teaching materials or live lessons without written permission.'},
   {h:'7. Our obligations',p:'Smartious will: (i) deliver lessons, materials, and assessments as described in your enrolment package; (ii) provide qualified, background-checked tutors; (iii) keep academic records for at least 7 years; (iv) issue progress reports as specified in your plan; (v) communicate any material changes at least 30 days in advance; (vi) act in the student\'s best academic interests at all times.'},
   {h:'8. Intellectual property',p:'All content published by Smartious , teaching materials, lesson recordings, assessment banks, software, the Mshauri AI tutor, and the website itself , is the intellectual property of Smartious E-School Ltd or our licensors. You may use this content only within your own household for the enrolled student\'s education. Commercial use, redistribution, or resale is strictly prohibited and may result in termination of services and legal action. Past papers and marking schemes are the property of their respective exam boards (Cambridge, Edexcel, IB) and are reproduced under licence or fair-dealing provisions.'},
-  {h:'9. Tutor availability and substitution',p:'We strive to match each student to the same dedicated tutor for the duration of enrolment. Where a tutor becomes unavailable (illness, relocation, resignation), we will provide a qualified substitute and notify you as soon as reasonably possible. No refunds are issued for minor, temporary substitutions; extended changes may entitle you to a prorated refund or free rematching.'},
+  {h:'9. Tutor availability and substitution',p:'We strive to match each student to the same dedicated tutor for the duration of enrolment. Where a tutor becomes unavailable (illness, relocation, resignation), we will provide a qualified substitute and notify you as soon as reasonably possible. Temporary substitutions do not change the fees; if we cannot provide a qualified tutor for an extended period, we will rematch your child or credit the missed lessons to the next term.'},
   {h:'10. Code of conduct',p:'We reserve the right to suspend or terminate services , without refund , if a parent or student engages in abusive, discriminatory, or harassing behaviour towards our staff or tutors; attempts to defraud or deceive Smartious; or repeatedly breaches these Terms after written warning. This is rare, but necessary to protect our team.'},
   {h:'11. Limitation of liability',p:'To the maximum extent permitted by Kenyan law, Smartious is not liable for: (i) exam results or university admissions: our role is to teach and prepare; outcomes depend on many factors including the student\'s effort and the decisions of exam boards and universities; (ii) indirect, consequential, or punitive damages; (iii) delays or outages caused by third-party services (Paystack, Google, Netlify). Our total liability for any claim is limited to the fees you have paid us in the 12 months preceding the claim.'},
   {h:'12. Governing law',p:'These Terms are governed by the laws of Kenya. Any dispute arising from these Terms or our services will be resolved first by good-faith negotiation, then by mediation in Nairobi under the Mediation (Court-Annexed) Rules, and only then by the courts of Kenya, which have exclusive jurisdiction.'},
@@ -3900,12 +3927,12 @@ export default function LandingPage() {
 
   if (page === 'virtual-school-kenya') {
     metaTitle = 'Smartious — Leading Online & Virtual School for IB, IGCSE, Cambridge & Edexcel | Kenya 2026'
-    metaDesc  = 'Kenya\'s leading virtual school: live small-group Cambridge IGCSE, A-Level, Edexcel, IB Diploma, American AP, Ontario OSSD, CBC. 2-8x cheaper than CHS Online, King\'s InterHigh, Crimson. Kenya time zones, CBC available, two Nairobi centres. From USD 400/month personalized.'
+    metaDesc  = 'Kenya\'s leading virtual school: live small-group Cambridge IGCSE, A-Level, Edexcel, IB Diploma, American AP, Ontario OSSD, CBC. 2-8x cheaper than CHS Online, King\'s InterHigh, Crimson. Kenya time zones, CBC available, two Nairobi centres. From USD 423/month personalized.'
   }
 
   if (page === 'virtual-school-ukraine') {
     metaTitle = 'Smartious — Online & Virtual School for Ukrainian Families | IB, IGCSE, Cambridge, Edexcel, OSSD 2026'
-    metaDesc  = 'Virtual school for Ukrainian families in-country and diaspora. Cambridge IGCSE, A-Level, Edexcel, IB Diploma, AP, Ontario OSSD via CCIS. Education continuity through displacement. Perfect EET/EAT time zones. Cambridge exams at Warsaw/Berlin/London. Polish + German university pathway with Ukrainian student scholarships. Discounted rates for refugee families. From USD 400/month.'
+    metaDesc  = 'Virtual school for Ukrainian families in-country and diaspora. Cambridge IGCSE, A-Level, Edexcel, IB Diploma, AP, Ontario OSSD via CCIS. Education continuity through displacement. Perfect EET/EAT time zones. Cambridge exams at Warsaw/Berlin/London. Polish + German university pathway with Ukrainian student scholarships. Discounted rates for refugee families. From USD 423/month.'
   }
   if (page === 'curriculum-detail' && currentCurriculum) {
     const c = CURRICULA.find(x => x.slug === currentCurriculum)
@@ -3953,10 +3980,10 @@ export default function LandingPage() {
     metaDesc  = c.metaDesc || (c.pitch || '').slice(0, 158)
   } else if (page === 'ca-families') {
     metaTitle = 'Online School, Virtual School & Homeschool for Canadian Families — Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Canadian families. UofT, Waterloo, McGill, UBC, McMaster pipeline. Provincial homeschool compliance support. From USD 400 per month.'
+    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Canadian families. UofT, Waterloo, McGill, UBC, McMaster pipeline. Provincial homeschool compliance support. From USD 423 per month.'
   } else if (page === 'homeschooling-ethiopia') {
     metaTitle = 'Online School, Virtual School & Homeschool for Ethiopian Families — Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Ethiopian families across Addis Ababa, Dire Dawa, Mekelle, Hawassa, Bahir Dar. ICS Addis / Sandford alternative. From USD 400/month.'
+    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Ethiopian families across Addis Ababa, Dire Dawa, Mekelle, Hawassa, Bahir Dar. ICS Addis / Sandford alternative. From USD 423/month.'
   } else if (page === 'ethiopia-city' && currentEthiopiaCity) {
     const c = ETHIOPIA_CITIES.find(x => x.slug === currentEthiopiaCity)
     if (c) {
@@ -3965,7 +3992,7 @@ export default function LandingPage() {
     }
   } else if (page === 'homeschooling-rwanda') {
     metaTitle = 'Online School, Virtual School & Homeschool for Rwandan Families — Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Rwandan families across Kigali, Huye, Musanze, Rubavu. Green Hills Academy / ICS Kigali alternative. Kigali Smart City infrastructure. From USD 400/month.'
+    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Rwandan families across Kigali, Huye, Musanze, Rubavu. Green Hills Academy / ICS Kigali alternative. Kigali Smart City infrastructure. From USD 423/month.'
   } else if (page === 'rwanda-city' && currentRwandaCity) {
     const c = RWANDA_CITIES.find(x => x.slug === currentRwandaCity)
     if (c) {
@@ -3974,7 +4001,7 @@ export default function LandingPage() {
     }
   } else if (page === 'homeschooling-south-africa') {
     metaTitle = 'Online School, Virtual School & Homeschool for South African Families — Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for South African families across Johannesburg, Cape Town, Pretoria, Durban, Gqeberha, Stellenbosch. Lower than Brainline, Cambridge Home School Online. BELA Act 2024 compliant. From USD 400/month (~ZAR 3,400).'
+    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for South African families across Johannesburg, Cape Town, Pretoria, Durban, Gqeberha, Stellenbosch. Lower than Brainline, Cambridge Home School Online. BELA Act 2024 compliant. From USD 423/month (~ZAR 7,700).'
   } else if (page === 'sa-city' && currentSaCity) {
     const c = SOUTH_AFRICA_CITIES.find(x => x.slug === currentSaCity)
     if (c) {
@@ -3983,7 +4010,7 @@ export default function LandingPage() {
     }
   } else if (page === 'homeschooling-qatar') {
     metaTitle = 'Online School, Virtual School & Homeschool for Doha & Qatar Families — Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Qatari families across Doha, Al Wakrah, Al Khor, Lusail. Doha College / ASD / Sherborne Qatar alternative. Immediate enrolment, no waiting lists. From USD 400/month (~QAR 655).'
+    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Qatari families across Doha, Al Wakrah, Al Khor, Lusail. Doha College / ASD / Sherborne Qatar alternative. Immediate enrolment, no waiting lists. From USD 423/month (~QAR 1,540).'
   } else if (page === 'qatar-city' && currentQatarCity) {
     const c = QATAR_CITIES.find(x => x.slug === currentQatarCity)
     if (c) {
@@ -3992,7 +4019,7 @@ export default function LandingPage() {
     }
   } else if (page === 'homeschooling-saudi-arabia') {
     metaTitle = 'Online School, Virtual School & Homeschool for Saudi Arabian Families — Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Saudi Arabian families across Riyadh, Jeddah, Dhahran, Al Khobar, NEOM. AISR / BISR / Saudi Aramco school alternative. Vision 2030 mega-project family portability. From USD 400/month (~SAR 675).'
+    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Saudi Arabian families across Riyadh, Jeddah, Dhahran, Al Khobar, NEOM. AISR / BISR / Saudi Aramco school alternative. Vision 2030 mega-project family portability. From USD 423/month (~SAR 1,590).'
   } else if (page === 'saudi-city' && currentSaudiCity) {
     const c = SAUDI_ARABIA_CITIES.find(x => x.slug === currentSaudiCity)
     if (c) {
@@ -4000,31 +4027,31 @@ export default function LandingPage() {
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'homeschooling-uae') {
-    metaTitle = 'Online School, Virtual School & Homeschool for UAE Families — Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for UAE families across Dubai, Abu Dhabi, Sharjah, Ajman, Ras Al Khaimah. Wellington / Dubai College / BSAK / Repton / Brighton College alternative. Immediate enrolment, no KHDA/ADEK waiting lists. From USD 400/month (~AED 660).'
+    metaTitle = 'Online School in the UAE | Dubai & Abu Dhabi Homeschooling, IGCSE & A-Level | Smartious'
+    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for UAE families across Dubai, Abu Dhabi, Sharjah, Ajman, Ras Al Khaimah. Wellington / Dubai College / BSAK / Repton / Brighton College alternative. Immediate enrolment, no KHDA/ADEK waiting lists. USD 423/month (about AED 1,553), paid termly.'
   
   } else if (page === 'homeschooling-egypt') {
     metaTitle = 'Online School, Virtual School & Homeschool for Egyptian Families — Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Egyptian families across Cairo, New Cairo, Sheikh Zayed, Alexandria, New Administrative Capital, Sharm El Sheikh. Cairo American College / MES / BISC / NCBIS / Hayah / El Alsson / Schutz alternative. Immediate enrolment. From USD 400/month. USD pricing protects against EGP volatility.'
+    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Egyptian families across Cairo, New Cairo, Sheikh Zayed, Alexandria, New Administrative Capital, Sharm El Sheikh. Cairo American College / MES / BISC / NCBIS / Hayah / El Alsson / Schutz alternative. Immediate enrolment. From USD 423/month. USD pricing protects against EGP volatility.'
   } else if (page === 'homeschooling-morocco') {
     metaTitle = 'Online School, Virtual School & Homeschool for Moroccan Families — Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Moroccan families across Casablanca, Rabat, Marrakech, Tangier, Fes, Agadir. Casablanca American School / George Washington Academy / BISC / Rabat American School / Lycée Lyautey / Lycée Descartes alternative. Immediate enrolment. CET live classes matching Moroccan school hours. From USD 400/month.'
+    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Moroccan families across Casablanca, Rabat, Marrakech, Tangier, Fes, Agadir. Casablanca American School / George Washington Academy / BISC / Rabat American School / Lycée Lyautey / Lycée Descartes alternative. Immediate enrolment. CET live classes matching Moroccan school hours. From USD 423/month.'
   } else if (page === 'homeschooling-south-korea') {
     metaTitle = 'Online School, Virtual School & Homeschool for Korean Families — Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level, IB Diploma, American AP for Korean families across Seoul, Songdo (Incheon IBD), Busan, Pyeongtaek (USAG Camp Humphreys), Daejeon (KAIST), Jeju (Jeju Global Education City). Seoul Foreign School / KIS / Dwight / Chadwick International / NLCS Jeju alternative. KST afternoon/evening live classes matching Korean post-school and hagwon hours. From USD 400/month.'
+    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level, IB Diploma, American AP for Korean families across Seoul, Songdo (Incheon IBD), Busan, Pyeongtaek (USAG Camp Humphreys), Daejeon (KAIST), Jeju (Jeju Global Education City). Seoul Foreign School / KIS / Dwight / Chadwick International / NLCS Jeju alternative. KST afternoon/evening live classes matching Korean post-school and hagwon hours. From USD 423/month.'
   } else if (page === 'homeschooling-japan') {
     metaTitle = 'Online School, Virtual School & Homeschool for Japanese Families — Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level, IB Diploma, American AP for Japanese families across Tokyo, Yokohama, Osaka, Kobe, Nagoya (Toyota automotive), Okinawa (USMC + USAF US military bases). ASIJ / BST / KIST / YIS / Saint Maur / Canadian Academy / OIS / NIS alternative. JST afternoon/evening live classes matching Japanese post-school and juku hours. From USD 400/month.'
+    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level, IB Diploma, American AP for Japanese families across Tokyo, Yokohama, Osaka, Kobe, Nagoya (Toyota automotive), Okinawa (USMC + USAF US military bases). ASIJ / BST / KIST / YIS / Saint Maur / Canadian Academy / OIS / NIS alternative. JST afternoon/evening live classes matching Japanese post-school and juku hours. From USD 423/month.'
   } else if (page === 'homeschooling-vietnam') {
     metaTitle = 'Online School, Virtual School & Homeschool for Vietnamese Families — Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level, IB Diploma, American AP for Vietnamese families across Ho Chi Minh City (Thao Dien, Phu My Hung), Hanoi (Tay Ho), Da Nang, Bac Ninh (Samsung Vietnam Korean expat hub), Binh Duong (manufacturing), Vung Tau (oil & gas). ISHCMC / BIS HCMC / SSIS / UNIS Hanoi / BIS Hanoi / Concordia alternative. ICT afternoon/evening live classes matching Vietnamese post-school and học thêm hours. From USD 400/month.'
+    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level, IB Diploma, American AP for Vietnamese families across Ho Chi Minh City (Thao Dien, Phu My Hung), Hanoi (Tay Ho), Da Nang, Bac Ninh (Samsung Vietnam Korean expat hub), Binh Duong (manufacturing), Vung Tau (oil & gas). ISHCMC / BIS HCMC / SSIS / UNIS Hanoi / BIS Hanoi / Concordia alternative. ICT afternoon/evening live classes matching Vietnamese post-school and học thêm hours. From USD 423/month.'
   } else if (page === 'homeschooling-thailand') {
     metaTitle = 'Online School, Virtual School & Homeschool for Thai Families — Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level, IB Diploma, American AP for Thai families across Bangkok (Sukhumvit), Chiang Mai (digital nomad capital), Phuket (resort island, marine/yacht industry), Pattaya (Eastern Seaboard Japanese manufacturing hub), Hua Hin (royal seaside), Khon Kaen (Isaan regional). ISB / Bangkok Patana / Harrow / Shrewsbury / NIST / Brighton College / BISP / UWC Thailand / Prem / ISE alternative. ICT afternoon/evening live classes matching Thai post-school and kuad wicha hours. From USD 400/month.'
+    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level, IB Diploma, American AP for Thai families across Bangkok (Sukhumvit), Chiang Mai (digital nomad capital), Phuket (resort island, marine/yacht industry), Pattaya (Eastern Seaboard Japanese manufacturing hub), Hua Hin (royal seaside), Khon Kaen (Isaan regional). ISB / Bangkok Patana / Harrow / Shrewsbury / NIST / Brighton College / BISP / UWC Thailand / Prem / ISE alternative. ICT afternoon/evening live classes matching Thai post-school and kuad wicha hours. From USD 423/month.'
   } else if (page === 'uae-city' && currentUaeCity) {
     const c = UAE_CITIES.find(x => x.slug === currentUaeCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || ('Online School & Homeschooling in ' + c.name + ' | IGCSE, A-Level, IB | Smartious')
       metaDesc  = c.seoDesc || ''
     }
   
@@ -4538,6 +4565,21 @@ export default function LandingPage() {
       metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
+  } else if (page === 'tuition-uae') {
+    metaTitle = 'Online Tutors in Dubai & the UAE | IGCSE, A-Level & IB Tuition | Smartious'
+    metaDesc  = 'Live online tuition for families in Dubai, Abu Dhabi and Sharjah: Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and American AP. Qualified tutors, Gulf-time lessons, from USD 15/hour (about AED 55).'
+  } else if (page === 'uae-area' && currentUaeArea && UAE_AREAS.find(a => a.slug === currentUaeArea)) {
+    const a = UAE_AREAS.find(x => x.slug === currentUaeArea)
+    metaTitle = a.seoTitle || ('Online Tuition in ' + a.name + ', ' + a.emirate + ' | Smartious')
+    metaDesc  = a.seoDesc || ''
+  } else if (page === 'tuition-area' && currentTuitionArea && NAIROBI_AREAS.find(a => a.slug === currentTuitionArea)) {
+    const a = NAIROBI_AREAS.find(x => x.slug === currentTuitionArea)
+    metaTitle = a.seoTitle || ('Tuition in ' + a.name + ', Nairobi | Smartious')
+    metaDesc  = a.seoDesc || ''
+  } else if (page === 'uk-area' && currentUkArea && UK_AREAS.find(a => a.slug === currentUkArea)) {
+    const a = UK_AREAS.find(x => x.slug === currentUkArea)
+    metaTitle = a.seoTitle || ('Online Tuition in ' + a.name + ', ' + a.city + ' | GCSE, A-Level & 11+ Tutors | Smartious')
+    metaDesc  = a.seoDesc || PAGE_META['uk-area']?.desc || ''
   } else if (PAGE_META[page]) {
     metaTitle = PAGE_META[page].title
     metaDesc  = PAGE_META[page].desc
@@ -4780,7 +4822,7 @@ export default function LandingPage() {
                 ['◆','Over 3,421 students educated in more than 40 countries since 2018'],
                 ['★','Flexible Learning — Home visits, learning centre, or 100% online'],
                 ['●','University Placement — 200+ partner universities worldwide'],
-                ['◆','From $8/hour tuition · $38 application fee · First lesson within 48 hours'],
+                ['◆','From $15/hour tuition · $38 application fee · First lesson within 48 hours'],
                 ['★','Proven Results — 94% A*/A pass rate at IGCSE and A-Level'],
               ].concat([
                 ['★','Internationally Accredited — IGCSE · Cambridge · IB · Edexcel · CBC'],
@@ -4789,7 +4831,7 @@ export default function LandingPage() {
                 ['◆','Serving 2,000+ Students across 12+ Countries'],
                 ['★','Flexible Learning — Home visits, learning centre, or 100% online'],
                 ['●','University Placement — 200+ partner universities worldwide'],
-                ['◆','From $8/hour tuition · $38 application fee · First lesson within 48 hours'],
+                ['◆','From $15/hour tuition · $38 application fee · First lesson within 48 hours'],
                 ['★','Proven Results — 94% A*/A pass rate at IGCSE and A-Level'],
               ]).map(([ico,t],i) => (
                 <div key={i} className="topbar-mi">
@@ -5244,8 +5286,8 @@ export default function LandingPage() {
                 <span>for <em>IGCSE, A-Level,</em></span>
                 <span><em>IB, American &amp; CBC</em> Students</span>
               </h1>
-              <p className="h-sub h-sub-short">Live classes with qualified teachers. 1-on-1 tuition <strong style={{color:V.gold3}}>from USD 8/hour</strong> · full programmes <strong style={{color:V.gold3}}>from USD 423/month</strong>.</p>
-              <p className="h-sub h-sub-long">Live classes. Qualified teachers. Internationally recognised qualifications. Smartious is an accredited online school and homeschool provider delivering Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, Kenya CBC and American Curriculum — taught online by specialists serving families across Kenya, the UAE, UK, Canada and more than 40 countries worldwide. <strong style={{color:V.gold3}}>From USD 8/hour</strong> for 1-on-1 tuition · <strong style={{color:V.gold3}}>from USD 423/month</strong> for full homeschool programmes.</p>
+              <p className="h-sub h-sub-short">Live classes with qualified teachers. 1-on-1 tuition <strong style={{color:V.gold3}}>from USD 15/hour</strong> · full programmes <strong style={{color:V.gold3}}>from USD 423/month</strong>.</p>
+              <p className="h-sub h-sub-long">Live classes. Qualified teachers. Internationally recognised qualifications. Smartious is an accredited online school and homeschool provider delivering Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, Kenya CBC and American Curriculum — taught online by specialists serving families across Kenya, the UAE, UK, Canada and more than 40 countries worldwide. <strong style={{color:V.gold3}}>From USD 15/hour</strong> for 1-on-1 tuition · <strong style={{color:V.gold3}}>from USD 423/month</strong> for full homeschool programmes.</p>
               <div className="h-act">
                 <button className="btn-p" onClick={() => nav('/assessment')}
                   style={{padding:'18px 36px',fontSize:16,fontWeight:800,borderRadius:10,boxShadow:'0 8px 24px rgba(201,151,58,.35)',transition:'all .18s ease'}}
@@ -5318,7 +5360,7 @@ export default function LandingPage() {
               { '@type': 'Question', 'name': 'What is Smartious Homeschool?',
                 'acceptedAnswer': { '@type': 'Answer', 'text': 'Smartious Homeschool & eSchool is an accredited international online school founded in Nairobi in 2018. We deliver Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and American High School curricula to students across Kenya, the UAE, UK, USA, Canada, Australia, Nigeria, South Africa, Qatar and 4 other countries. All classes are taught live by degree-qualified specialists.' } },
               { '@type': 'Question', 'name': 'How much does Smartious cost?',
-                'acceptedAnswer': { '@type': 'Answer', 'text': 'Smartious 1-on-1 tuition starts from USD 8 per hour (primary level), up to USD 15 per hour for A-Level and IB Diploma. Full homeschool programmes range from USD 423 per month (Primary) to USD 923 per month (IB Diploma). Annual plans save approximately 20 percent versus monthly billing. A non-refundable USD 38 application fee covers the placement test and is deducted from your first tuition invoice. 10 percent sibling discount on every additional child.' } },
+                'acceptedAnswer': { '@type': 'Answer', 'text': 'Smartious 1-on-1 tuition is USD 15 per hour at every level. Full online school and homeschool programmes are USD 423 per month for every year group, paid termly. Fees are non-refundable once your child\'s assessment is done, the timetable is created and lessons have started. A non-refundable USD 38 application fee covers the placement test and is deducted from your first tuition invoice. 10 percent sibling discount on every additional child.' } },
               { '@type': 'Question', 'name': 'Which countries does Smartious serve?',
                 'acceptedAnswer': { '@type': 'Answer', 'text': 'Smartious serves students worldwide with dedicated country support for the United Arab Emirates (Dubai, Abu Dhabi, Sharjah), United Kingdom, United States, Canada, Australia, Nigeria, South Africa, Qatar, Egypt, and Kenya. Live classes are scheduled to suit multiple time zones with full recording access for asynchronous review.' } },
               { '@type': 'Question', 'name': 'Will my child get a real qualification through Smartious?',
@@ -5476,7 +5518,7 @@ export default function LandingPage() {
                   ],
                   cta:'View online programmes',
                   ctaPage:'programs',
-                  pricing:'From USD 8/hour',
+                  pricing:'From USD 15/hour',
                 },
                 {
                   tag:'Learn In Person',
@@ -5899,7 +5941,7 @@ export default function LandingPage() {
                     ['Online sessions recorded for review', 'YES', 'NO', 'Sometimes'],
                     ['University admissions support (UCAS/Common App/SAT)', 'YES', 'Rarely', 'Sometimes'],
                     ['Pricing transparency (published rates)', 'YES', 'Sometimes', 'Often hidden'],
-                    ['Starting price', 'USD 8/hour', 'KSh 5-50K/term', 'KSh 1.5-3M/year'],
+                    ['Starting price', 'USD 15/hour', 'KSh 5-50K/term', 'KSh 1.5-3M/year'],
                   ].map(([feat, sm, trad, intl], i) => (
                     <tr key={feat} style={{background: i % 2 === 0 ? V.bone : V.white, borderTop:`1px solid ${V.bone3}`}}>
                       <td style={{padding:'12px 16px',fontWeight:600,color:V.ink}}>{feat}</td>
@@ -5933,10 +5975,10 @@ export default function LandingPage() {
               margin:'36px auto 0',
             }}>
               {[
-                {label:'Cambridge International', detail:'IGCSE · AS · A-Level', from:'Live small-group classes', monthly:'From USD 400/mo · Personalised'},
-                {label:'Pearson Edexcel', detail:'IGCSE · International A-Level', from:'Live small-group classes', monthly:'From USD 400/mo · Personalised'},
+                {label:'Cambridge International', detail:'IGCSE · AS · A-Level', from:'Live small-group classes', monthly:'From USD 423/mo · Personalised'},
+                {label:'Pearson Edexcel', detail:'IGCSE · International A-Level', from:'Live small-group classes', monthly:'From USD 423/mo · Personalised'},
                 {label:'International Baccalaureate', detail:'Diploma and MYP subject support (HL/SL)', from:'Live small-group classes', monthly:'Personalised pricing on request'},
-                {label:'American Curriculum', detail:'Elementary · Middle · High · AP', from:'Live small-group classes', monthly:'From USD 400/mo · Personalised'},
+                {label:'American Curriculum', detail:'Elementary · Middle · High · AP', from:'Live small-group classes', monthly:'From USD 423/mo · Personalised'},
                 {label:'Kenya Pathway (CBC)', detail:'KICD aligned · KCSE eligible', from:'Live small-group classes', monthly:'Personalised pricing on request'},
               ].map(c => (
                 <div key={c.label} className="reveal" style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',cursor:'pointer',transition:'all .2s'}}
@@ -6007,7 +6049,7 @@ export default function LandingPage() {
             <div style={{maxWidth:780, margin:'36px auto 0'}}>
               {[
                 ['What is Smartious Homeschool?', 'Smartious Homeschool & eSchool is an international online school founded in Nairobi in 2018. We deliver Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel, Kenya CBC and American Curriculum to students across 40+ countries. All classes are live, taught by degree-qualified specialists.'],
-                ['How much does Smartious cost?', '1-on-1 tuition from USD 8/hour. Full homeschool programmes from USD 423/month (Primary) to USD 923/month (IB Diploma). Annual plans save ~20%. USD 38 application fee. 10% sibling discount.'],
+                ['How much does Smartious cost?', '1-on-1 tuition USD 15/hour. Full homeschool programmes USD 423/month for every year group, paid termly and non-refundable once the assessment is done, the timetable is created and lessons have started. USD 38 application fee. 10% sibling discount.'],
                 ['Will my child get a real qualification?', 'Yes. Students sit official Cambridge International, Pearson Edexcel, IB Diploma or American High School Diploma exams at British Council and Cambridge centres worldwide. Qualifications are identical to those from any other school.'],
                 ['Which countries do you serve?', 'Dedicated country pages and support for the UAE, UK, USA, Canada, Australia, Nigeria, South Africa, Qatar, Egypt and Kenya. Live classes scheduled across time zones with recordings for asynchronous catch-up.'],
                 ['How do online students socialise?', 'Daily live classes with international classmates. Wednesday enrichment programme (2–4 PM) with sports, clubs, leadership and arts. Active online clubs in debate, coding, AI, Model UN and journalism.'],
@@ -6052,7 +6094,7 @@ export default function LandingPage() {
                   {n:'5',h:'Curricula',p:'Cambridge · IB · Edexcel · CBC · American',pg:'curricula',svg:'<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>'},
                   {n:'6',h:'Services',p:'Homeschool · Tuition · Online · Mshauri AI',pg:'services',svg:'<rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/>'},
                   {n:'40+',h:'Countries',p:'Kenya · UAE · UK · USA · Canada · Australia · and many more',pg:'home',svg:'<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>'},
-                  {n:'$8/hr',h:'Pricing',p:'Transparent USD pricing · From $8 hourly tuition · No contracts',pg:'pricing',svg:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
+                  {n:'$15/hr',h:'Pricing',p:'Transparent USD pricing · From $8 hourly tuition · No contracts',pg:'pricing',svg:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
                   {n:'78+',h:'Tutors',p:'Qualified specialists · BEd, MEd, PhD profiles',pg:'teachers',svg:'<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>'},
                   {n:'10',h:'FAQ',p:'Enrolment, exams, pricing & Mshauri AI answered',pg:'faq',svg:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
                   {n:'9',h:'Blog',p:'IGCSE guides · IB tips · Study abroad · AI learning',pg:'blog',svg:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>'},
@@ -6113,7 +6155,7 @@ export default function LandingPage() {
             <div className="wrap"><div className="cta-in">
               <div className="eyebrow" style={{color:V.gold3,justifyContent:'center',marginBottom:18}}>Start today</div>
               <h2 className="cta-h">Give Your Child a <em>Global Education</em> — Without Paying International School Fees</h2>
-              <p className="cta-sub">Book a free 30-minute consultation. We'll review your child's situation, current school reports, and recommend a Smartious pathway. From <strong style={{color:V.gold3}}>USD 8/hour</strong> tuition · <strong style={{color:V.gold3}}>USD 423/month</strong> full homeschool.</p>
+              <p className="cta-sub">Book a free 30-minute consultation. We'll review your child's situation, current school reports, and recommend a Smartious pathway. From <strong style={{color:V.gold3}}>USD 15/hour</strong> tuition · <strong style={{color:V.gold3}}>USD 423/month</strong> full homeschool.</p>
               <div className="cta-btns">
                 <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
 </div>
@@ -6388,7 +6430,7 @@ export default function LandingPage() {
                 ['40+','Countries served\nacross 5 continents'],
                 ['5','Curricula delivered\nCambridge · IB · Edexcel · CBC · American'],
                 ['54','Areas covered\nNairobi 21 · UAE 27 · Kenya cities 6'],
-                ['$8/hr','Starting tuition rate\ntransparent pricing'],
+                ['$15/hr','Starting tuition rate\ntransparent pricing'],
                 ['24/7','Mshauri AI tutor\navailable on LMS'],
                 ['7-10','Days from enrolment\nto first live session'],
               ].map(([n,l]) => (
@@ -6745,7 +6787,7 @@ export default function LandingPage() {
             <div className="wrap"><div className="cta-in">
               <div className="eyebrow" style={{color:V.gold3,justifyContent:'center',marginBottom:18}}>Ready to start</div>
               <h2 className="cta-h">Give Your Child a <em>Real Education</em>. Not Just a School Day.</h2>
-              <p className="cta-sub">Book a free 30-minute consultation. We'll review your child's situation, current school reports if available, and recommend a Smartious pathway. From <strong style={{color:V.gold3}}>USD 8/hour</strong> tuition · <strong style={{color:V.gold3}}>USD 423/month</strong> full homeschool. USD 38 / KSh 5,000 application fee applies only when you decide to enrol.</p>
+              <p className="cta-sub">Book a free 30-minute consultation. We'll review your child's situation, current school reports if available, and recommend a Smartious pathway. From <strong style={{color:V.gold3}}>USD 15/hour</strong> tuition · <strong style={{color:V.gold3}}>USD 423/month</strong> full homeschool. USD 38 / KSh 5,000 application fee applies only when you decide to enrol.</p>
               <div className="cta-btns">
                 <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
 </div>
@@ -6768,7 +6810,7 @@ export default function LandingPage() {
                   We serve families in Kenya (Nairobi, Mombasa, Kisumu, Nakuru, Eldoret, Thika, Kiambu and across the country), the UAE (Dubai, Abu Dhabi, Sharjah and 27 emirate areas), the UK, USA, Canada, Australia, Qatar, Bahrain, Nigeria, South Africa, Uganda, Tanzania, Somalia and Pakistan. Our delivery is primarily online through the Smartious Learning Management System (LMS), with in-person tuition available at our Diamond Plaza Parklands HQ and our Karen Hardy Centre in Nairobi.
                 </p>
                 <p style={{fontSize:13.5,lineHeight:1.75,marginBottom:14}}>
-                  Smartious supports families relocating between countries needing curriculum continuity, athletes and performers balancing serious training with academic ambition, gifted students whose schools move too slowly, students struggling at school due to oversized classrooms or bullying, IGCSE and A-Level candidates preparing for external examinations, IB Diploma students needing specialist HL subject support, and students with learning differences benefiting from 1-on-1 personal attention. Pricing starts at USD 8/hour for 1-on-1 tuition (KSh 1,300/hour for Kenya-based families) and USD 423/month for full online homeschool programmes — meaningfully below typical premium international school fees while delivering equivalent qualifications.
+                  Smartious supports families relocating between countries needing curriculum continuity, athletes and performers balancing serious training with academic ambition, gifted students whose schools move too slowly, students struggling at school due to oversized classrooms or bullying, IGCSE and A-Level candidates preparing for external examinations, IB Diploma students needing specialist HL subject support, and students with learning differences benefiting from 1-on-1 personal attention. Pricing starts at USD 15/hour for 1-on-1 tuition (KSh 1,300/hour for Kenya-based families) and USD 423/month for full online homeschool programmes — meaningfully below typical premium international school fees while delivering equivalent qualifications.
                 </p>
                 <p style={{fontSize:12.5,lineHeight:1.7,marginTop:18,color:'rgba(247,243,237,.55)'}}>
                   Contact Smartious: <a href="mailto:hello@smartioushomeschool.com" style={{color:V.gold3,textDecoration:'none'}}>hello@smartioushomeschool.com</a> · WhatsApp· Diamond Plaza, Parklands, Nairobi, Kenya · M-Pesa Paybill 247247, Account 745021 (Smartious Edtech).
@@ -8509,7 +8551,7 @@ export default function LandingPage() {
                       {[
                         { n:'01', h:'Submit assessment request', p:'Book a 30-60 minute call with our admissions team. We assess your child\'s current academic level (school transcripts, sample work), discuss your family\'s timeline and target university destinations, and recommend a curriculum and pathway.' },
                         { n:'02', h:'Choose curriculum and pathway', p:'Most UAE families choose Cambridge IGCSE (Year 7-11) progressing to A-Level (Year 12-13) — well-recognised by UAE universities and globally. IB Diploma is also popular for university-bound students. American curriculum suits families targeting US universities. We match curriculum to your university goals.' },
-                        { n:'03', h:'Enrol with Smartious', p:'Pay the USD 38 one-time registration fee, choose your billing plan (monthly, termly with 5% saving, or annual with 12% saving), and receive your child\'s LMS access. No KHDA or ADEK approval required for expatriate families.' },
+                        { n:'03', h:'Enrol with Smartious', p:'Pay the USD 38 one-time registration fee, pay the first term\'s fees (USD 423/month, paid termly), and receive your child\'s LMS access. No KHDA or ADEK approval required for expatriate families.' },
                         { n:'04', h:'Set up your learning environment', p:'A quiet space, laptop or tablet, stable internet, and noise-cancelling headphones. We provide a recommended equipment list. No expensive equipment needed.' },
                         { n:'05', h:'Begin live lessons', p:'Your child starts live online classes on their schedule. Classes run on UAE time (GMT+4) plus recorded sessions for flexibility. Mshauri AI provides 24/7 homework help between live sessions.' },
                         { n:'06', h:'Plan examination centres', p:'Cambridge, Edexcel and IB examinations are sat at registered centres in UAE — British Council Dubai, British Council Abu Dhabi, KHDA-approved centres, and specific schools that accept external candidates. We coordinate registration timing with your child\'s exam readiness.' },
@@ -10587,8 +10629,8 @@ export default function LandingPage() {
       {page === 'pricing' && (
         <>
           {/* ══════════════════════════════════════════
-              PRICING PAGE — Personalized quote model
-              Starting anchor: $400/month
+              PRICING PAGE — one published price
+              Online school USD 423/month (termly) · tuition USD 15/hour
               Form submits to POST /api/inquiries/public
               with campaignTag='pricing-request'
           ══════════════════════════════════════════ */}
@@ -10600,15 +10642,15 @@ export default function LandingPage() {
             color:'#fff',padding:'72px 0 56px',
           }}>
             <div className="wrap" style={{maxWidth:920,margin:'0 auto',textAlign:'center'}}>
-              <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>Personalized fees for every family</div>
+              <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>One clear price for every family</div>
               <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem,5vw,3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
-                Fees <em style={{color:V.gold3,fontStyle:'italic'}}>calibrated</em> to your family
+                Fees, <em style={{color:V.gold3,fontStyle:'italic'}}>simply</em> stated
               </h1>
               <p style={{fontSize:16,color:'rgba(255,255,255,.92)',lineHeight:1.7,maxWidth:720,margin:'0 auto 24px'}}>
-                Every Smartious family receives pricing tailored to their specific needs — country, curriculum, grade level, and enrolment period. Starting from <strong style={{color:V.gold3}}>USD 400/month</strong> for our online school and homeschool programmes.
+                Online school and homeschool: <strong style={{color:V.gold3}}>USD 423/month</strong> for every year group and curriculum, paid termly. One-to-one tuition: <strong style={{color:V.gold3}}>USD 15/hour</strong> at every level.
               </p>
               <div style={{fontSize:13,color:'rgba(255,255,255,.65)',fontStyle:'italic'}}>
-                Personalized quotes delivered within 24 hours · Free consultation call included · Sibling discounts 15-25%
+                Free consultation call included · Sibling discounts 15-25%
               </div>
             </div>
           </section>
@@ -10618,8 +10660,8 @@ export default function LandingPage() {
             <div style={{maxWidth:1080,margin:'0 auto'}}>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:20}}>
                 {[
-                  {h:'Online School & Homeschool',v:'From USD 400/month',sub:'Live small-group classes 4-6 students. Cambridge, Edexcel, IB, American, Ontario OSSD, Kenya CBC.'},
-                  {h:'Private Tuition (1:1)',v:'From USD 25/hour',sub:'One-on-one live online sessions. Custom-scheduled to your family time zone.'},
+                  {h:'Online School & Homeschool',v:'USD 423/month',sub:'Paid termly. Live small-group classes 4-6 students. Cambridge, Edexcel, IB, American, Ontario OSSD, Kenya CBC.'},
+                  {h:'Private Tuition (1:1)',v:'USD 15/hour',sub:'Any subject, any level. One-on-one live online sessions scheduled to your family time zone.'},
                   {h:'Study Abroad & IUFP',v:'Custom pricing',sub:'International University Foundation Programme + university placement support.'},
                   {h:'Application & Registration',v:'USD 30 + 120',sub:'Application (refundable if not enrolled) + one-time registration on enrolment.'},
                 ].map(s => (
@@ -10632,7 +10674,7 @@ export default function LandingPage() {
               </div>
 
               <div style={{textAlign:'center',marginTop:32,fontSize:13,color:V.sl2,fontStyle:'italic',maxWidth:720,margin:'32px auto 0'}}>
-                Final fees depend on your country, curriculum choice, grade level, class-size preference, and enrolment period. Request a personalized quote below and our admissions team will respond within 24 hours.
+                <strong style={{fontStyle:'normal',color:V.ink}}>Payment terms:</strong> fees are paid termly. They are non-refundable once your child's assessment is done, the timetable is created and lessons have started. Examination board fees are separate. Ask for a written quote below and our admissions team will respond within 24 hours.
               </div>
             </div>
           </div></section>
@@ -10803,7 +10845,7 @@ export default function LandingPage() {
                   Real college pathways.
                 </h1>
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,maxWidth:760,marginBottom:30}}>
-                  Tired of recorded-video curricula where your child is essentially alone all day? Worried about how Acellus or BJU Press lessons compare to what students in top-tier private schools are doing? Smartious delivers <strong>Cambridge IGCSE, Pearson Edexcel, A-Level and IB Diploma</strong> programmes — taught live by qualified teachers — to American homeschool families from USD 400 per month.
+                  Tired of recorded-video curricula where your child is essentially alone all day? Worried about how Acellus or BJU Press lessons compare to what students in top-tier private schools are doing? Smartious delivers <strong>Cambridge IGCSE, Pearson Edexcel, A-Level and IB Diploma</strong> programmes — taught live by qualified teachers — to American homeschool families from USD 423 per month.
                 </p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
                   <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
@@ -10822,7 +10864,7 @@ export default function LandingPage() {
                     ['78+','Qualified teachers'],
                     ['40+','Countries served'],
                     ['8 yrs','Of teaching'],
-                    ['From $400/mo','Starting price'],
+                    ['From $423/mo','Starting price'],
                   ].map(([n,l]) => (
                     <div key={l}>
                       <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',color:V.gold3,lineHeight:1}}>{n}</div>
@@ -10942,7 +10984,7 @@ export default function LandingPage() {
                     {n:'02',h:'Cambridge & IB rigour',p:'IGCSE, A-Level, IB Diploma. The qualifications top US universities (Harvard, MIT, Stanford, Yale) recognise as evidence of internationally-elite preparation. Often weighted as advanced beyond AP.'},
                     {n:'03',h:'Free college application support',p:'Free for every enrolled family. UCAS for UK universities. Common App for US universities. OUAC for Canada. We help with personal statements, recommendation coordination, interview prep. No extra invoice.'},
                     {n:'04',h:'Mshauri AI tutor — 24/7',p:'The first AI homework helper trained on Cambridge, Edexcel, IB and American curricula. Voice, text, image — your child can photo a math problem and get guidance. Free in Premium Online tier.'},
-                    {n:'05',h:'Transparent pricing — in USD',p:'Every fee published. No surprise increases. External examination fees are pass-through at the published Cambridge/Edexcel rate — Smartious adds only a $25 admin fee. 12% discount for annual payment. 15-25% sibling discount.'},
+                    {n:'05',h:'Transparent pricing — in USD',p:'Every fee published. No surprise increases. External examination fees are pass-through at the published Cambridge/Edexcel rate — Smartious adds only a $25 admin fee. Fees are paid termly. 15-25% sibling discount.'},
                     {n:'06',h:'Real founder access',p:'Smartious is founder-led. Alfred Ouko personally interviews every family who joins. If something breaks, you can WhatsApp the founder. No call centres. No outsourced support.'},
                   ].map(c => (
                     <div key={c.n} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,padding:'26px 28px'}}>
@@ -11021,15 +11063,14 @@ export default function LandingPage() {
                     Less than half of <em style={{color:V.cr,fontStyle:'italic'}}>premium US alternatives.</em>
                   </h2>
                   <p style={{fontSize:14.5,color:V.sl,maxWidth:680,margin:'0 auto',lineHeight:1.7}}>
-                    The Online tier is fully accessible to American families. All fees in USD. Pay monthly, termly (save 5%) or annually (save 12%).
+                    Smartious is fully accessible to American families. Fees are in USD and paid termly; they are non-refundable once the assessment is done, the timetable is created and lessons have started.
                   </p>
                 </div>
 
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:16}}>
                   {[
-                    {tier:'Basic Online',price:'From $400',sub:'per month',desc:'Self-paced curriculum + Mshauri AI Pro + digital library. Best for older self-driven students.',cta:'enroll'},
-                    {tier:'Premium Online',price:'$260',sub:'per month',desc:'Everything in Basic + weekly live group classes + bi-weekly 1-on-1 tutor consultations. Best for most families.',cta:'enroll',popular:true},
-                    {tier:'IGCSE Full Pack',price:'$360',sub:'per month',desc:'Daily live classes + dedicated IGCSE exam preparation. Year 9-11 students aiming for top universities.',cta:'enroll'},
+                    {tier:'Online School',price:'$423',sub:'per month · paid termly',desc:'Live small-group classes (4-6 students) in every subject, Mshauri AI Pro and the digital library. Primary to A-Level / IB.',cta:'enroll',popular:true},
+                    {tier:'1-on-1 Tuition',price:'$15',sub:'per hour',desc:'One-on-one live online sessions in any subject, at any level, scheduled to your time zone.',cta:'enroll'},
                   ].map(t => (
                     <div key={t.tier} style={{
                       background: t.popular ? V.ink : V.white,
@@ -11121,12 +11162,12 @@ export default function LandingPage() {
                   {q:'What about state homeschool reporting requirements?',a:'Each US state has different homeschool laws. Some states (like Idaho, Texas, Alaska) have minimal requirements. Others (like New York, Pennsylvania) require formal notification and annual reporting. Smartious provides everything you need: official letterhead, transcripts, progress reports, and standardised assessment results. We do not file paperwork on your behalf — but we provide everything you need to file.'},
                   {q:'How do US time zones work with classes in Nairobi?',a:'Smartious afternoon and evening classes (3pm-10pm EAT) map to morning hours across all four US time zones — see the schedule table above. Most US families do Smartious classes between 9am-1pm Eastern, which is the natural morning school window. 1-on-1 tutoring is scheduled by mutual agreement and can flex to any time.'},
                   {q:'Do you offer AP courses?',a:'AP courses are on our curriculum roadmap for the 2026-2027 academic year (launching August 2026). We currently focus on Cambridge IGCSE, A-Level, and IB Diploma as our core international qualifications. American students interested in AP can complement Smartious with US-based AP self-study (College Board, Khan Academy AP, etc.) and we will help coordinate AP exam registration.'},
-                  {q:'How does pricing compare to mainstream US homeschool options?',a:'Smartious Premium Online ($260/month, $2,746/year with annual discount) sits between Acellus Basic ($249/month, $2,400/year) and the premium live-class providers like Veritas Press Scholars Academy ($400+/month). For genuine live teaching with international rigour, Smartious is 30-60% less than direct competitors like Cambridge Home School ($4,500+/year) or InterHigh ($5,200+/year).'},
+                  {q:'How does pricing compare to mainstream US homeschool options?',a:'Smartious Premium Online ($423/month, $2,746/year with annual discount) sits between Acellus Basic ($249/month, $2,400/year) and the premium live-class providers like Veritas Press Scholars Academy ($400+/month). For genuine live teaching with international rigour, Smartious is 30-60% less than direct competitors like Cambridge Home School ($4,500+/year) or InterHigh ($5,200+/year).'},
                   {q:'Can I just enrol my child in one or two subjects?',a:'Yes. Through Private Tuition you can purchase 1-on-1 tutoring in any single subject from $15/hour (Primary) to $28/hour (A-Level / IB). Useful for families who like their current curriculum but want supplementary support in maths, sciences, or specific subjects.'},
                   {q:'What happens if my child needs to return to a regular US school?',a:'Smartious provides full transcripts in US-standard GPA format on request. Students moving from IGCSE to a US high school typically slot in at grade 10 or 11 with credit equivalency. We help families coordinate transcripts with receiving schools.'},
                   {q:'Do you offer a free trial?',a:'We offer a free 30-minute consultation with our admissions team to determine fit. We also offer the placement assessment ($40) which includes one sample 60-minute lesson. We don\'t offer a longer free trial because our delivery model is intensive — committing a teacher\'s time to a student needs proper enrolment.'},
                   {q:'My child has dyslexia / ADHD / autism. Can Smartious help?',a:'Yes. We offer Special Educational Needs (SEN) support at $50 per session with SEN-trained tutors. Initial $80 assessment determines the right pathway. We have experience with dyslexia, ADHD, autism spectrum, dyscalculia, and processing differences. Many SEN students struggle with the self-paced video model of mainstream US homeschool platforms — they often thrive with our 1-on-1 live model.'},
-                  {q:'What if it doesn\'t work out?',a:'Monthly billing requires no commitment beyond the current month — cancel anytime with 14 days\' notice. Tuition for unused weeks is refundable pro-rata. Registration fees are non-refundable. We\'d prefer to discuss any issues before you withdraw — we have a strong record of finding solutions when families raise concerns.'},
+                  {q:'What if it doesn\'t work out?',a:'Fees are paid termly and are non-refundable once your child\'s assessment is done, the timetable is created and lessons have started. You can withdraw at the end of any term by telling us before the next invoice. We\'d prefer to discuss any issues before you withdraw — we have a strong record of finding solutions when families raise concerns.'},
                 ].map((f, i) => (
                   <details key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,marginBottom:10,overflow:'hidden'}}>
                     <summary style={{cursor:'pointer',padding:'15px 20px',fontWeight:600,color:V.ink,fontSize:14,listStyle:'none'}}>{f.q}</summary>
@@ -11237,7 +11278,7 @@ export default function LandingPage() {
                   Real college pathways.
                 </h1>
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,maxWidth:760,marginBottom:30}}>
-                  Tired of recorded-video curricula where your child is essentially alone all day? Worried about how Acellus, Time4Learning, or local board homeschool packages lessons compare to what students in top-tier private schools are doing? Smartious delivers <strong>Cambridge IGCSE, Pearson Edexcel, A-Level and IB Diploma</strong> programmes — taught live by qualified teachers — to Canadian homeschool families from USD 400 per month.
+                  Tired of recorded-video curricula where your child is essentially alone all day? Worried about how Acellus, Time4Learning, or local board homeschool packages lessons compare to what students in top-tier private schools are doing? Smartious delivers <strong>Cambridge IGCSE, Pearson Edexcel, A-Level and IB Diploma</strong> programmes — taught live by qualified teachers — to Canadian homeschool families from USD 423 per month.
                 </p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
                   <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
@@ -11256,7 +11297,7 @@ export default function LandingPage() {
                     ['78+','Qualified teachers'],
                     ['40+','Countries served'],
                     ['8 yrs','Of teaching'],
-                    ['From $400/mo','Starting price'],
+                    ['From $423/mo','Starting price'],
                   ].map(([n,l]) => (
                     <div key={l}>
                       <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',color:V.gold3,lineHeight:1}}>{n}</div>
@@ -11376,7 +11417,7 @@ export default function LandingPage() {
                     {n:'02',h:'Cambridge & IB rigour',p:'IGCSE, A-Level, IB Diploma. The qualifications top US universities (Harvard, MIT, Stanford, Yale) recognise as evidence of internationally-elite preparation. Often weighted as advanced beyond AP.'},
                     {n:'03',h:'Free college application support',p:'Free for every enrolled family. UCAS for UK universities. Common App for US universities. OUAC for Canada. We help with personal statements, recommendation coordination, interview prep. No extra invoice.'},
                     {n:'04',h:'Mshauri AI tutor — 24/7',p:'The first AI homework helper trained on Cambridge, Edexcel, IB and Canadian curricula. Voice, text, image — your child can photo a math problem and get guidance. Free in Premium Online tier.'},
-                    {n:'05',h:'Transparent pricing — in USD',p:'Every fee published. No surprise increases. External examination fees are pass-through at the published Cambridge/Edexcel rate — Smartious adds only a $25 admin fee. 12% discount for annual payment. 15-25% sibling discount.'},
+                    {n:'05',h:'Transparent pricing — in USD',p:'Every fee published. No surprise increases. External examination fees are pass-through at the published Cambridge/Edexcel rate — Smartious adds only a $25 admin fee. Fees are paid termly. 15-25% sibling discount.'},
                     {n:'06',h:'Real founder access',p:'Smartious is founder-led. Alfred Ouko personally interviews every family who joins. If something breaks, you can WhatsApp the founder. No call centres. No outsourced support.'},
                   ].map(c => (
                     <div key={c.n} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,padding:'26px 28px'}}>
@@ -11455,15 +11496,14 @@ export default function LandingPage() {
                     Less than half of <em style={{color:V.cr,fontStyle:'italic'}}>premium US alternatives.</em>
                   </h2>
                   <p style={{fontSize:14.5,color:V.sl,maxWidth:680,margin:'0 auto',lineHeight:1.7}}>
-                    The Online tier is fully accessible to Canadian families. All fees in CAD. Pay monthly, termly (save 5%) or annually (save 12%).
+                    Smartious is fully accessible to Canadian families. Fees are in USD and paid termly; they are non-refundable once the assessment is done, the timetable is created and lessons have started.
                   </p>
                 </div>
 
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:16}}>
                   {[
-                    {tier:'Basic Online',price:'From $400',sub:'per month',desc:'Self-paced curriculum + Mshauri AI Pro + digital library. Best for older self-driven students.',cta:'enroll'},
-                    {tier:'Premium Online',price:'$260',sub:'per month',desc:'Everything in Basic + weekly live group classes + bi-weekly 1-on-1 tutor consultations. Best for most families.',cta:'enroll',popular:true},
-                    {tier:'IGCSE Full Pack',price:'$360',sub:'per month',desc:'Daily live classes + dedicated IGCSE exam preparation. Year 9-11 students aiming for top universities.',cta:'enroll'},
+                    {tier:'Online School',price:'$423',sub:'per month · paid termly',desc:'Live small-group classes (4-6 students) in every subject, Mshauri AI Pro and the digital library. Primary to A-Level / IB.',cta:'enroll',popular:true},
+                    {tier:'1-on-1 Tuition',price:'$15',sub:'per hour',desc:'One-on-one live online sessions in any subject, at any level, scheduled to your time zone.',cta:'enroll'},
                   ].map(t => (
                     <div key={t.tier} style={{
                       background: t.popular ? V.ink : V.white,
@@ -11555,12 +11595,12 @@ export default function LandingPage() {
                   {q:'What about provincial homeschool reporting requirements?',a:'Each Canadian province has different homeschool laws. Some provinces (like Idaho, Texas, Alaska) have minimal requirements. Others (like New York, Pennsylvania) require formal notification and annual reporting. Smartious provides everything you need: official letterhead, transcripts, progress reports, and standardised assessment results. We do not file paperwork on your behalf — but we provide everything you need to file.'},
                   {q:'How do US time zones work with classes in Nairobi?',a:'Smartious afternoon and evening classes (3pm-10pm EAT) map to morning hours across all six Canadian time zones (Pacific, Mountain, Central, Eastern, Atlantic, Newfoundland) — see the schedule table above. Most Canadian families do Smartious classes between 9am-1pm Eastern, which is the natural morning school window. 1-on-1 tutoring is scheduled by mutual agreement and can flex to any time.'},
                   {q:'Do you offer AP courses?',a:'AP courses are on our curriculum roadmap for the 2026-2027 academic year (launching August 2026). We currently focus on Cambridge IGCSE, A-Level, and IB Diploma as our core international qualifications. Canadian students interested in AP can complement Smartious with US-based AP self-study (College Board, Khan Academy AP, etc.) and we will help coordinate AP exam registration.'},
-                  {q:'How does pricing compare to mainstream Canadian and US homeschool options?',a:'Smartious Premium Online ($260/month, $2,746/year with annual discount) sits between Acellus Basic ($249/month, $2,400/year) and the premium live-class providers like Veritas Press Scholars Academy ($400+/month). For genuine live teaching with international rigour, Smartious is 30-60% less than direct competitors like Cambridge Home School ($4,500+/year) or InterHigh ($5,200+/year).'},
+                  {q:'How does pricing compare to mainstream Canadian and US homeschool options?',a:'Smartious Premium Online ($423/month, $2,746/year with annual discount) sits between Acellus Basic ($249/month, $2,400/year) and the premium live-class providers like Veritas Press Scholars Academy ($400+/month). For genuine live teaching with international rigour, Smartious is 30-60% less than direct competitors like Cambridge Home School ($4,500+/year) or InterHigh ($5,200+/year).'},
                   {q:'Can I just enrol my child in one or two subjects?',a:'Yes. Through Private Tuition you can purchase 1-on-1 tutoring in any single subject from $15/hour (Primary) to $28/hour (A-Level / IB). Useful for families who like their current curriculum but want supplementary support in maths, sciences, or specific subjects.'},
                   {q:'What happens if my child needs to return to a regular Canadian or US school?',a:'Smartious provides full transcripts in US-standard GPA format on request. Students moving from IGCSE to a Canadian or US high school typically slot in at grade 10 or 11 with credit equivalency. We help families coordinate transcripts with receiving schools.'},
                   {q:'Do you offer a free trial?',a:'We offer a free 30-minute consultation with our admissions team to determine fit. We also offer the placement assessment ($40) which includes one sample 60-minute lesson. We don\'t offer a longer free trial because our delivery model is intensive — committing a teacher\'s time to a student needs proper enrolment.'},
                   {q:'My child has dyslexia / ADHD / autism. Can Smartious help?',a:'Yes. We offer Special Educational Needs (SEN) support at $50 per session with SEN-trained tutors. Initial $80 assessment determines the right pathway. We have experience with dyslexia, ADHD, autism spectrum, dyscalculia, and processing differences. Many SEN students struggle with the self-paced video model of mainstream Canadian and US homeschool platforms — they often thrive with our 1-on-1 live model.'},
-                  {q:'What if it doesn\'t work out?',a:'Monthly billing requires no commitment beyond the current month — cancel anytime with 14 days\' notice. Tuition for unused weeks is refundable pro-rata. Registration fees are non-refundable. We\'d prefer to discuss any issues before you withdraw — we have a strong record of finding solutions when families raise concerns.'},
+                  {q:'What if it doesn\'t work out?',a:'Fees are paid termly and are non-refundable once your child\'s assessment is done, the timetable is created and lessons have started. You can withdraw at the end of any term by telling us before the next invoice. We\'d prefer to discuss any issues before you withdraw — we have a strong record of finding solutions when families raise concerns.'},
                 ].map((f, i) => (
                   <details key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,marginBottom:10,overflow:'hidden'}}>
                     <summary style={{cursor:'pointer',padding:'15px 20px',fontWeight:600,color:V.ink,fontSize:14,listStyle:'none'}}>{f.q}</summary>
@@ -11808,7 +11848,7 @@ export default function LandingPage() {
                     <div style={{fontSize:13,color:V.sl,marginBottom:14}}>per child / year via {s.voucher.org}</div>
                     {s.voucher.smartiousEligible && (
                       <div style={{padding:'10px 12px',background:V.white,border:'1px dashed '+V.gold3,borderRadius:8,fontSize:12.5,color:V.ink,lineHeight:1.5}}>
-                        ✓ Smartious tuition is voucher-eligible — your $7,000+ voucher covers a large share of our live online programmes, which start from USD 400 per month.
+                        ✓ Smartious tuition is voucher-eligible — your $7,000+ voucher covers a large share of our live online programmes, which start from USD 423 per month.
                       </div>
                     )}
                   </div>
@@ -12116,7 +12156,7 @@ export default function LandingPage() {
                     <div style={{fontSize:13,color:V.sl,marginBottom:14}}>per child / year via {s.voucher.org}</div>
                     {s.voucher.smartiousEligible && (
                       <div style={{padding:'10px 12px',background:V.white,border:'1px dashed '+V.gold3,borderRadius:8,fontSize:12.5,color:V.ink,lineHeight:1.5}}>
-                        ✓ Smartious tuition is funding-eligible — your {s.voucher.amount} provincial funding contributes meaningfully to our live online programmes, which start from USD 400 per month.
+                        ✓ Smartious tuition is funding-eligible — your {s.voucher.amount} provincial funding contributes meaningfully to our live online programmes, which start from USD 423 per month.
                       </div>
                     )}
                     {/* Deep-dive funding pages for provinces with documented programmes */}
@@ -12975,7 +13015,7 @@ export default function LandingPage() {
                   </tbody>
                 </table>
               </div>
-              <p style={{fontSize:13,color:V.sl,marginTop:16,fontStyle:'italic'}}>Smartious tuition starts from USD 400 per month, roughly $6,530 CAD per year at current exchange. Request pricing for your exact programme figure gross of funding.</p>
+              <p style={{fontSize:13,color:V.sl,marginTop:16,fontStyle:'italic'}}>Smartious tuition starts from USD 423 per month, roughly $6,530 CAD per year at current exchange. Request pricing for your exact programme figure gross of funding.</p>
             </div>
           </section>
 
@@ -13276,7 +13316,7 @@ export default function LandingPage() {
                 </button>
               </div>
               <div style={{fontSize:13,color:'rgba(255,255,255,.7)',letterSpacing:'.02em'}}>
-                Established in 2018 &middot; Over 3,421 students educated &middot; Families in more than 40 countries &middot; Two Nairobi centres (Diamond Plaza Parklands &amp; Karen Hardy) &middot; From USD 400/month personalized
+                Established in 2018 &middot; Over 3,421 students educated &middot; Families in more than 40 countries &middot; Two Nairobi centres (Diamond Plaza Parklands &amp; Karen Hardy) &middot; From USD 423/month personalized
               </div>
             </div>
           </section>
@@ -13292,7 +13332,7 @@ export default function LandingPage() {
               </div>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:22}}>
                 {[
-                  {n:'01',h:'2-8&times; lower fees',p:'Smartious from USD 400/month vs CHS Online \u00a310,950/year (USD 13,860), Crimson Global Academy USD 15-25K/year, King\'s InterHigh \u00a38-15K/year. Same live small-group Cambridge/IB curriculum.'},
+                  {n:'01',h:'2-8&times; lower fees',p:'Smartious from USD 423/month vs CHS Online \u00a310,950/year (USD 13,860), Crimson Global Academy USD 15-25K/year, King\'s InterHigh \u00a38-15K/year. Same live small-group Cambridge/IB curriculum.'},
                   {n:'02',h:'Live small groups of 4-6',p:'Smartious classes 4-6 students. CHS Online up to 10. Crimson variable. Braeburn online 12-15. Physical international schools 15-22. Smaller = more teacher attention, faster feedback, stronger relationships.'},
                   {n:'03',h:'Kenya-friendly time zones',p:'EAT UTC+3 delivery matches Kenya school-day rhythm. UK-based schools (CHS Online, King\'s InterHigh) mean UK morning = Kenya afternoon, disrupting family routine. Smartious 9 AM-12 PM Nairobi = natural school day.'},
                   {n:'04',h:'Kenya CBC available',p:'Smartious offers full Kenya CBC (Grade 1-12, KICD-aligned, KCSE-eligible) alongside international curricula. NO UK, US, or NZ virtual school offers CBC. Kenya-domestic by definition.'},
@@ -13338,7 +13378,7 @@ export default function LandingPage() {
                   </thead>
                   <tbody>
                     {[
-                      {c:'Annual fees',   sm:'From USD 4,800 (personalized)', chs:'\u00a310,950 (USD 13,860)', kih:'\u00a38,000-15,000', wh:'\u00a34,000-7,000', cga:'USD 15,000-25,000', bra:'KES 800K-1.5M (~USD 6,000-11,000)'},
+                      {c:'Annual fees',   sm:'USD 5,076 (USD 423/month)', chs:'\u00a310,950 (USD 13,860)', kih:'\u00a38,000-15,000', wh:'\u00a34,000-7,000', cga:'USD 15,000-25,000', bra:'KES 800K-1.5M (~USD 6,000-11,000)'},
                       {c:'Live small-group classes', sm:'\u2713 Yes (4-6)', chs:'\u2713 Yes (up to 10)', kih:'\u2713 Yes', wh:'\u2717 Self-paced only', cga:'\u2713 Yes (variable size)', bra:'\u2713 Yes (12-15)'},
                       {c:'Kenya time-zone-friendly', sm:'\u2713 EAT UTC+3', chs:'\u2717 UK GMT (Kenya lunch)', kih:'\u2717 UK GMT', wh:'N/A (self-paced)', cga:'\u2717 Mixed global', bra:'\u2713 EAT UTC+3'},
                       {c:'Kenya CBC available',      sm:'\u2713 Yes', chs:'\u2717 No', kih:'\u2717 No', wh:'\u2717 No', cga:'\u2717 No', bra:'\u2713 Yes'},
@@ -13465,7 +13505,7 @@ export default function LandingPage() {
                   {q:'Do you offer Kenya CBC alongside Cambridge or IB?', a:'Yes. Smartious offers full Kenya CBC (Grade 1-12, KICD-aligned, KCSE-eligible) alongside international curricula. Multi-curriculum families are common — child studying CBC as main pathway with Cambridge Mathematics and Physics as options is a typical setup for families who might target Kenyan universities but want international breadth.'},
                   {q:'Where do Kenyan students sit Cambridge examinations?', a:'Multiple authorised centres in Kenya — British Council Nairobi, Braeburn Group centres (multiple locations), Peponi School, Brookhouse Schools, International School of Kenya (ISK), plus centres in Mombasa, Kisumu, and Nakuru. Pearson Edexcel offers three examination series per year. Smartious handles all registration logistics — parents do not navigate this themselves.'},
                   {q:'What if we already have a physical Nairobi school but want to switch?', a:'Common situation. Families switching mid-year work with our admissions team to align curriculum transition points (usually end of term for smoothest handover). We can accept students at any point in the academic year subject to assessment. Existing school records are reviewed and prior learning is credited.'},
-                  {q:'What are the fees for Kenyan families?', a:'Personalized pricing based on curriculum choice, class size preference, grade level, and enrolment period. Starting from USD 400/month (approximately KES 52,000/month at 2026 exchange rates). Sibling discounts 15-25% available. Request a quote via the pricing page and our admissions team will respond within 24 hours.'},
+                  {q:'What are the fees for Kenyan families?', a:'Personalized pricing based on curriculum choice, class size preference, grade level, and enrolment period. Starting from USD 423/month (approximately KES 54,600/month at 2026 exchange rates). Sibling discounts 15-25% available. Request a quote via the pricing page and our admissions team will respond within 24 hours.'},
                   {q:'Can I combine online delivery with in-person supplementation?', a:'Yes. Smartious operates two Nairobi centres — Diamond Plaza Parklands (HQ, established 2022) and Karen Hardy (established 2023). Families based in Nairobi can access in-person supplementary tuition, examination invigilation, and holiday intensives. This hybrid capability is unique to Kenya-based providers — UK, US, and NZ virtual schools have zero Kenya physical presence.'},
                   {q:'How do university applications work from Smartious?', a:'Personalised university guidance sessions with the Head of Academics. Covers UCAS (UK Russell Group including Oxbridge admissions test prep — MAT, PAT, ENGAA, TSA, HAT), Common Application (US Ivy League + UC system with SAT/ACT + AP portfolio), OUAC (Canadian U15 via Ontario Secondary School Diploma pathway through our CCIS partnership), and Kenya universities via KUCCPS. UCAS personal statement coaching and Common App essay coaching included.'},
                 ].map((f, i) => (
@@ -13584,7 +13624,7 @@ export default function LandingPage() {
                 </button>
               </div>
               <div style={{fontSize:13,color:'rgba(255,255,255,.7)',letterSpacing:'.02em'}}>
-                Distance learning fully legal &middot; Perfect EET/EAT time zones &middot; Discounted rates for refugee &amp; displaced families &middot; From USD 400/month personalized
+                Distance learning fully legal &middot; Perfect EET/EAT time zones &middot; Discounted rates for refugee &amp; displaced families &middot; From USD 423/month personalized
               </div>
             </div>
           </section>
@@ -13893,7 +13933,7 @@ export default function LandingPage() {
             'email': 'hello@smartioushomeschool.com',
             'address': { '@type': 'PostalAddress', 'streetAddress': 'Diamond Plaza, Parklands', 'addressLocality': 'Nairobi', 'addressRegion': 'Nairobi', 'addressCountry': 'KE' },
             'areaServed': NAIROBI_AREAS.map(a => ({ '@type': 'Place', 'name': a.name + ', Nairobi' })),
-            'priceRange': 'USD 8/hour online · From KSh 1,500/hour home tuition',
+            'priceRange': 'USD 15/hour online · From KSh 1,500/hour home tuition',
           })}}/>
           <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
             '@context': 'https://schema.org',
@@ -13958,7 +13998,7 @@ export default function LandingPage() {
                 marginBottom:24,
                 maxWidth:760,
               }}>
-                Qualified subject specialists for <strong style={{color:V.gold3}}>CBC, Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and American curricula</strong>. Home tuition across 20 Nairobi neighbourhoods. Online tuition from USD 8/hour anywhere in the world.
+                Qualified subject specialists for <strong style={{color:V.gold3}}>CBC, Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and American curricula</strong>. Home tuition across 20 Nairobi neighbourhoods. Online tuition from USD 15/hour anywhere in the world.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:32}}>
                 <button onClick={() => nav('/assessment')}
@@ -14010,7 +14050,7 @@ export default function LandingPage() {
                 {h:'Subject specialists, not generalists', p:'A Maths tutor with a Maths degree. A Physics tutor with a Physics degree. A Chemistry tutor with a Chemistry degree. We match each student to a tutor with genuine subject expertise.'},
                 {h:'Home visits across Nairobi', p:'Our tutors travel to families in 20 Nairobi neighbourhoods — Karen, Lavington, Kilimani, Westlands, Parklands, Runda, Muthaiga and beyond. Transport contribution applies for more distant estates.'},
                 {h:'Online tuition for everyone', p:'Live, interactive online tuition delivered via our learning platform. The same 1-on-1 attention as a home visit, with no commute risk and faster scheduling. Recommended for distant estates and diaspora families.'},
-                {h:'Transparent USD pricing', p:'USD 8 per hour for online tuition. KSh 1,500–2,500 per session for home tuition depending on location. No hidden fees. No long contracts. Pay per session or in 10-hour blocks.'},
+                {h:'Transparent USD pricing', p:'USD 15 per hour for online tuition. KSh 1,500–2,500 per session for home tuition depending on location. No hidden fees. No long contracts. Pay per session or in 10-hour blocks.'},
                 {h:'Five curricula, seven programmes', p:'CBC (Kenyan), Cambridge IGCSE, Cambridge A-Level, IB MYP, IB Diploma, Pearson Edexcel International and American Curriculum (including AP). KCSE revision and university admissions (UCAS, Common App, SAT) also available.'},
               ].map(item => (
                 <div key={item.h} style={{
@@ -14068,8 +14108,8 @@ export default function LandingPage() {
             <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:18,maxWidth:1100,margin:'0 auto'}}>
               {[
                 {h:'Home Tuition', d:'A qualified tutor visits your home on a schedule that suits your family. Available across 20 Nairobi neighbourhoods. Transport contribution applies for distant areas.', price:'From KSh 1,500/session'},
-                {h:'Online Tuition', d:'Interactive 1-on-1 sessions live with your tutor via our online platform. Same attention, no commute. Available globally.', price:'USD 8/hour (≈ KSh 1,040)'},
-                {h:'Exam Preparation', d:'Targeted revision for KCSE, IGCSE, Cambridge Checkpoint, A-Level, IB Diploma and SAT. Past-paper drilling, technique coaching, full mock examination programmes.', price:'USD 8–15/hour'},
+                {h:'Online Tuition', d:'Interactive 1-on-1 sessions live with your tutor via our online platform. Same attention, no commute. Available globally.', price:'USD 15/hour (≈ KSh 1,940)'},
+                {h:'Exam Preparation', d:'Targeted revision for KCSE, IGCSE, Cambridge Checkpoint, A-Level, IB Diploma and SAT. Past-paper drilling, technique coaching, full mock examination programmes.', price:'USD 15/hour'},
                 {h:'Holiday Intensive', d:'Concentrated tuition during April, August and December school breaks. Daily sessions for 2–4 weeks. Catch up or accelerate ahead.', price:'Block bookings available'},
               ].map(s => (
                 <div key={s.h} style={{
@@ -14132,7 +14172,7 @@ export default function LandingPage() {
             </div>
             <div style={{maxWidth:780,margin:'0 auto'}}>
               {[
-                {q:'How much does tuition cost in Nairobi?', a:'Online tuition is USD 8 per hour (≈ KSh 1,040 at current rates). Home tuition starts from KSh 1,500 per 1-hour session including tutor transport for closer areas, increasing for more distant estates (Runda, Karen, Kitengela). Exam-prep intensive packages and SAT preparation are USD 8–15/hour depending on the specialism required. 10-hour blocks attract a 5% discount.'},
+                {q:'How much does tuition cost in Nairobi?', a:'Online tuition is USD 15 per hour (≈ KSh 1,940 at current rates). Home tuition starts from KSh 1,500 per 1-hour session including tutor transport for closer areas, increasing for more distant estates (Runda, Karen, Kitengela). Exam-prep and SAT preparation are the same USD 15/hour. 10-hour blocks attract a 5% discount.'},
                 {q:'How quickly can a tutor start?', a:'For online tuition, typically within 24–48 hours of confirming the subject, level and schedule. For home tuition, 48–72 hours to match a tutor with the right subject and location. Specialist subjects (IB Diploma, A-Level Further Maths) may take 3–5 days to match optimally.'},
                 {q:'Do you offer KCSE revision tutoring?', a:'Yes — KCSE revision is one of our most-requested services. We cover Mathematics, English, Kiswahili, Sciences and Humanities for Form 3 and Form 4 students. Sustained weekly tuition over 6–9 months typically produces the strongest grade improvements.'},
                 {q:'Do you offer IGCSE tutors in Nairobi?', a:'Yes — Cambridge IGCSE and Pearson Edexcel International are core specialisms. Our IGCSE tutors hold subject degrees and have prepared students for both exam boards. Mathematics, Sciences (Physics, Chemistry, Biology), English, Business Studies and Economics are the most-requested IGCSE subjects.'},
@@ -14223,7 +14263,7 @@ export default function LandingPage() {
               'email':'hello@smartioushomeschool.com',
               'areaServed':{'@type':'Place','name': area.name + ', Nairobi'},
               'address':{'@type':'PostalAddress','addressLocality': area.name,'addressRegion':'Nairobi','addressCountry':'KE'},
-              'priceRange':'From USD 8/hour',
+              'priceRange':'From USD 15/hour',
             })}}/>
             <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
               '@context':'https://schema.org','@type':'Service',
@@ -14599,7 +14639,7 @@ export default function LandingPage() {
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
                 {[
                   ['Subject specialists, not generalists','Every Smartious tutor holds a subject-specific university degree. We do not assign generalist tutors to specialist subjects.'],
-                  ['Meaningful cost savings','UAE-licensed private tutors typically charge AED 150-400/hour (USD 40-110). Smartious online tuition is USD 15-25/hour (≈ AED 55-92). Savings reflect delivery model, not tutor quality.'],
+                  ['Meaningful cost savings','UAE-licensed private tutors typically charge AED 150-400/hour (USD 40-110). Smartious online tuition is USD 15/hour (≈ AED 55) at every level. Savings reflect delivery model, not tutor quality.'],
                   ['One-hour time-zone offset','UAE is GMT+4, our Nairobi-based teachers are GMT+3. Far easier scheduling than UK-based tutors (4-hour offset).'],
                   ['Curriculum continuity if you relocate','If your family relocates from UAE to UK, Singapore, US, Australia or back home, Smartious follows you — same teachers, same curriculum, same examination board.'],
                   ['All major UAE curricula','Cambridge IGCSE, Pearson Edexcel IGCSE, A-Level (CIE and Edexcel), IB Diploma, American AP, CBSE — we cover what your child\'s school teaches.'],
@@ -14627,9 +14667,9 @@ export default function LandingPage() {
                 ['Do you offer home tuition in the UAE?', 'No — Smartious in UAE is online-only. We do not visit your villa or apartment, and we do not operate a physical centre in the Emirates. UAE private tutoring is regulated by KHDA (Dubai), ADEK (Abu Dhabi) and SPEA (Sharjah). Smartious operates as an internationally accredited online school based outside the UAE — our online sessions delivered remotely are outside in-person tutoring licensing scope. The educational quality is identical to in-person tutoring.'],
                 ['What is the time difference between UAE and Smartious?', 'UAE is GMT+4. Our Nairobi-based teachers are GMT+3 — one hour behind. A 5pm UAE session is 4pm Kenya time. This is a much smaller offset than UAE families face when using UK-based tutors (4-hour difference) and works especially well for after-school timing.'],
                 ['What curricula do you support for UAE students?', 'Cambridge IGCSE, Pearson Edexcel International, Cambridge A-Level, Edexcel IAL, IB Diploma, American (with AP), CBSE (Indian Curriculum), and Kenyan CBC. We do not currently support French Baccalaureate, German Abitur or Russian curriculum.'],
-                ['How does pricing compare to UAE tutors?', 'Typical UAE-licensed private tutors charge AED 150-400/hour (USD 40-110). Smartious online tuition is USD 15-25/hour (≈ AED 55-92). The cost difference reflects our online-delivery model and Nairobi cost base — not any compromise in tutor qualification. Every Smartious tutor holds a subject-specific university degree.'],
+                ['How does pricing compare to UAE tutors?', 'Typical UAE-licensed private tutors charge AED 150-400/hour (USD 40-110). Smartious online tuition is USD 15/hour (≈ AED 55) at every level. The cost difference reflects our online-delivery model and Nairobi cost base — not any compromise in tutor qualification. Every Smartious tutor holds a subject-specific university degree.'],
                 ['Can you support UAE university applications?', 'Yes — we support applications to UAE branch campuses (NYU Abu Dhabi, Sorbonne Abu Dhabi, University of Birmingham Dubai, Heriot-Watt Dubai, Middlesex University Dubai), plus US (Common App), UK (UCAS), Canadian, Australian and other international universities.'],
-                ['Do you offer full online homeschooling in addition to subject tutoring?', 'Yes — full online homeschool programmes (Cambridge IGCSE, A-Level, IB Diploma, American, CBSE) are available from USD 423/month (≈ AED 1,553/month) for Primary up to USD 923/month (≈ AED 3,387/month) for IB Diploma. Many UAE families use Smartious as supplementary 1-on-1 tutoring alongside their child\'s current school.'],
+                ['Do you offer full online homeschooling in addition to subject tutoring?', 'Yes — full online homeschool programmes (Cambridge IGCSE, A-Level, IB Diploma, American, CBSE) are USD 423/month (≈ AED 1,553/month), paid termly, from Primary to IB Diploma. Many UAE families use Smartious as supplementary 1-on-1 tutoring alongside their child\'s current school.'],
               ].map(([q, a], i) => (
                 <details key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,marginBottom:10,overflow:'hidden'}}>
                   <summary style={{cursor:'pointer',padding:'16px 20px',fontWeight:600,color:V.ink,fontSize:14.5,listStyle:'none'}}>{q}</summary>
@@ -19687,7 +19727,7 @@ export default function LandingPage() {
             '@id': 'https://smartioushomeschool.com/tuition-uk#org',
             'name': 'Smartious — Private Tuition UK',
             'url': 'https://smartioushomeschool.com/tuition-uk',
-            'description': 'Live online private tuition for UK families across London, Manchester, Birmingham, Leeds, Bristol, Edinburgh. Cambridge IGCSE, A-Level, IB Diploma, 11+ and 13+ Common Entrance. From USD 8/hour.',
+            'description': 'Live online private tuition for UK families across London, Manchester, Birmingham, Leeds, Bristol, Edinburgh. Cambridge IGCSE, A-Level, IB Diploma, 11+ and 13+ Common Entrance. From USD 15/hour.',
             'areaServed': UK_AREAS.map(a => ({ '@type': 'Place', 'name': a.name + ', ' + a.city })),
             'sameAs': ['https://smartioushomeschool.com'],
           }) }}/>
@@ -19740,7 +19780,7 @@ export default function LandingPage() {
           <section className="sec" style={{background:V.bone}}><div className="wrap">
             <div style={{maxWidth:1000,margin:'0 auto',display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:16}}>
               {[
-                {h:'From USD 8/hour',p:'Meaningfully more affordable than Cambridge Home School Online (£10,950/year) and traditional UK online school competitors. Live small-group classes 4-6 students.'},
+                {h:'From USD 15/hour',p:'Meaningfully more affordable than Cambridge Home School Online (£10,950/year) and traditional UK online school competitors. Live small-group classes 4-6 students.'},
                 {h:'Cambridge IGCSE and A-Level',p:'UCAS-recognised pathway to all UK universities including Oxbridge, Imperial, LSE, UCL, Warwick, plus international destinations.'},
                 {h:'11+ and 13+ Common Entrance',p:'Structured preparation for Westminster, Eton, Harrow, St. Paul\'s, KCS Wimbledon, Manchester Grammar, King Edward VI, Clifton College, Fettes.'},
                 {h:'EHE-compatible curriculum',p:'Meets Section 7 Education Act 1996 "suitable education" standard. Documented curriculum suitable for local authority enquiry response.'},
@@ -19781,7 +19821,7 @@ export default function LandingPage() {
                         onMouseEnter={(e) => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)' }}
                         onMouseLeave={(e) => { e.currentTarget.style.borderColor = V.line; e.currentTarget.style.transform = 'translateY(0)' }}>
                         <div style={{fontSize:14.5,fontWeight:700,color:V.ink,marginBottom:4}}>{area.name}</div>
-                        <div style={{fontSize:11.5,color:V.sl3,letterSpacing:'.03em'}}>Private tuition · from USD 8/hour</div>
+                        <div style={{fontSize:11.5,color:V.sl3,letterSpacing:'.03em'}}>Private tuition · from USD 15/hour</div>
                       </a>
                     ))}
                   </div>
@@ -19841,7 +19881,7 @@ export default function LandingPage() {
               'email':'hello@smartioushomeschool.com',
               'areaServed':{'@type':'Place','name': area.name + ', ' + area.city + ', UK'},
               'address':{'@type':'PostalAddress','addressLocality': area.name,'addressRegion': area.city,'addressCountry':'GB'},
-              'priceRange':'From USD 8/hour',
+              'priceRange':'From USD 15/hour',
             })}}/>
             <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
               '@context':'https://schema.org','@type':'Service',
@@ -23254,6 +23294,7 @@ export default function LandingPage() {
           )
         }
         const related = Object.entries(FULL_ARTICLES).filter(([s, x]) => s !== currentArticle && x.cat === a.cat).slice(0, 3)
+        const prod = articleProduct(a)
         return (
           <>
             {/* Article hero with splash image + gradient-matched banner */}
@@ -23303,6 +23344,23 @@ export default function LandingPage() {
                 <p style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.35rem',fontStyle:'italic',color:V.ink2,lineHeight:1.7,marginBottom:48,paddingLeft:20,borderLeft:`3px solid ${V.cr}`,fontWeight:400}}>
                   {a.intro}
                 </p>
+
+                {/* Where to go next: the product pages for this country */}
+                {prod && (
+                  <aside style={{background:V.white,border:`1px solid ${V.bone3}`,borderLeft:`4px solid ${V.cr}`,borderRadius:12,padding:'20px 22px',marginBottom:44}}>
+                    <div style={{fontSize:11,fontWeight:800,color:V.cr,letterSpacing:'.14em',textTransform:'uppercase',marginBottom:8}}>{prod.heading}</div>
+                    <p style={{fontSize:15,color:V.ink2,lineHeight:1.7,margin:'0 0 14px'}}>{prod.text}</p>
+                    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:10}}>
+                      {prod.links.map(l => (
+                        <a key={l.href} href={l.href} onClick={e => { e.preventDefault(); nav(l.href) }}
+                          style={{display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'12px 14px',textDecoration:'none',color:'inherit'}}>
+                          <div style={{fontWeight:800,fontSize:14.5,color:V.ink}}>{l.label} →</div>
+                          {l.note && <div style={{fontSize:12.5,color:V.sl,lineHeight:1.5,marginTop:3}}>{l.note}</div>}
+                        </a>
+                      ))}
+                    </div>
+                  </aside>
+                )}
 
                 {/* Sections */}
                 {a.sections.map((s, i) => (
@@ -23424,6 +23482,10 @@ export default function LandingPage() {
                     Book an assessment with our admissions team. We'll review your child's profile and build a personalised learning plan.
                   </p>
                   <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
+                    {prod && (
+                      <a className="btn-o" href={prod.links[0].href} onClick={e => { e.preventDefault(); nav(prod.links[0].href) }}
+                        style={{color:V.white,borderColor:'rgba(255,255,255,.3)',textDecoration:'none'}}>{prod.links[0].label} →</a>
+                    )}
                     <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
                   </div>
                 </div>
@@ -23482,7 +23544,7 @@ export default function LandingPage() {
           LEGAL PAGES — Privacy, Terms, Cookies, GDPR
       ══════════════════════════════════════════ */}
       {page === 'privacy' && <LegalPage P={P} title="Privacy" em="Policy" subtitle="How Smartious Homeschool collects, uses, and protects your personal data." effective="20 April 2026" sections={PRIVACY_POLICY}/>}
-      {page === 'terms'   && <LegalPage P={P} title="Terms" em="of Service"  subtitle="The agreement between you and Smartious E-School Ltd when you use our website, portals, and services." effective="20 April 2026" sections={TERMS_OF_SERVICE}/>}
+      {page === 'terms'   && <LegalPage P={P} title="Terms" em="of Service"  subtitle="The agreement between you and Smartious E-School Ltd when you use our website, portals, and services." effective="15 October 2026" sections={TERMS_OF_SERVICE}/>}
       {page === 'cookies' && <LegalPage P={P} title="Cookie" em="Policy" subtitle="How we use cookies and similar technologies on smartioushomeschool.com." effective="20 April 2026" sections={COOKIE_POLICY}/>}
       {page === 'gdpr'    && <LegalPage P={P} title="GDPR" em="Compliance" subtitle="Your rights under the EU General Data Protection Regulation and Kenya's Data Protection Act, 2019." effective="20 April 2026" sections={GDPR_COMPLIANCE}/>}
       {page === 'child-protection' && <LegalPage P={P} title="Child Protection" em="& Safeguarding" subtitle="How Smartious keeps every child safe, in person and online, and how to raise a concern." effective="27 August 2026" sections={CHILD_PROTECTION_POLICY}/>}

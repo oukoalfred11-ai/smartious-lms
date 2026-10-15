@@ -73,7 +73,7 @@ export const ALBANIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Tirana families. Tirana carries Albania\'s corporate and diplomatic weight — a business-services and call-centre sector serving Italian and German markets, a fast-growing construction and property economy, embassies and international organisations, and a steady return flow from one of Europe\'s largest diasporas. It also holds essentially all of the country\'s international schooling: Tirana International School, the Albanian College, the World Academy of Tirana, Memorial and the Turkish-founded schools, and the Italian and French provision. Albanian law is strict in a way families should hear first: full-time basic education is compulsory for children resident here from six to sixteen. So our clean default is supplementary — your enrolment carries the obligation, and we teach the international track live alongside it.',
     heroImg: 'https://images.unsplash.com/photo-1592485281091-1e7f26f52a80?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Tirana skyline with Dajti mountain behind' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Tirana families — supplementary beside enrolment, plus the full pathway after sixteen. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Tirana families — supplementary beside enrolment, plus the full pathway after sixteen. From USD 423/month.',
     challenges: [
       'Full-time basic education is compulsory for resident children from six to sixteen — parental-choice homeschooling is not established in Albanian law.',
       'The international tier is small, concentrated in the capital, and priced at the top of the local market, with waitlists at popular entry points.',
@@ -104,7 +104,7 @@ export const ALBANIA_CITIES = [
     ],
     whyChoose: [
       ['The law stated before anything is sold', 'Full-time basic education is compulsory here from six to sixteen and parental-choice homeschooling is not established. We say so, run supplementary alongside your enrolment, and reserve the full pathway for after sixteen.'],
-      ['The Cambridge track beside a small tier', 'Live small-group teaching at USD 2,160-6,480 a year — the supplement, the waitlist bridge, or the alternative for families outside the capital tier\'s fees.'],
+      ['The Cambridge track beside a small tier', 'Live small-group teaching at USD 5,076 a year — the supplement, the waitlist bridge, or the alternative for families outside the capital tier\'s fees.'],
       ['Built for returning diaspora children', 'A child arriving mid-stream from Italy, Greece, or Germany keeps one internationally examined pathway instead of restarting inside a new system.'],
       ['The window after sixteen', 'Upper secondary is not compulsory and the obligation ends at sixteen — the A-Level years run entirely at the family\'s choice.'],
       ['Timezone that lands in the school day', 'Tirana is 1-2 hours behind Nairobi EAT.'],
@@ -123,7 +123,7 @@ export const ALBANIA_CITIES = [
       { q: 'Is homeschooling legal in Tirana and Albania generally?', a: 'Parental-choice homeschooling is not established in Albanian law. Full-time basic education is compulsory for resident children from six to sixteen under Law 69/2012. The law\'s education-at-home provision is delivered by the local education unit for students who cannot attend school, under criteria set jointly by the Ministers of Education and Health. What is open: structured education alongside an enrolment, and the phase after sixteen, when the obligation ends.' },
       { q: 'So how does Smartious work during the compulsory years?', a: 'Supplementary. Your child stays enrolled at their Albanian school, which carries the legal obligation entirely, and takes Cambridge or IB subjects with us live in the after-school slot — building toward external examinations at authorised centres.' },
       { q: 'What changes after sixteen?', a: 'Upper secondary — gjimnaz or vocational — is not compulsory, and the obligation ends at sixteen. From that point the A-Level years run entirely at the family\'s choice, with nothing to satisfy.' },
-      { q: 'How does Smartious compare with Tirana International School or the Albanian College?', a: 'They are established campuses with in-person culture and a local peer group we cannot replicate. Smartious runs live small-group teaching at USD 2,160-6,480 a year — the supplement, the bridge while a place is found, or the continuity track for a returning or departing family.' },
+      { q: 'How does Smartious compare with Tirana International School or the Albanian College?', a: 'They are established campuses with in-person culture and a local peer group we cannot replicate. Smartious runs live small-group teaching at USD 5,076 a year — the supplement, the bridge while a place is found, or the continuity track for a returning or departing family.' },
       { q: 'Where do Tirana students sit Cambridge examinations?', a: 'At authorised centres confirmed per family per session, with regional options where local capacity is limited.' },
     ],
   },
@@ -139,7 +139,7 @@ export const ALBANIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Durrës families. Durrës is Albania\'s principal port and its logistics gateway — container and ferry traffic to Italy, a shipping and freight community, and an industrial hinterland — layered with a beach economy that fills every summer and a residential belt half an hour from Tirana. Its international schooling is thin: the capital\'s tier is close enough to tempt and far enough to exhaust as a daily commute. Smartious delivers the international pathways live across the port region, supplementary during the compulsory years and full-time after sixteen.',
     heroImg: 'https://images.unsplash.com/photo-1592485281091-1e7f26f52a80?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Durrës port and the Adriatic coast' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Durrës families — port and logistics city, thin international schooling. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Durrës families — port and logistics city, thin international schooling. From USD 423/month.',
     challenges: [
       'Thin international schooling for a port and logistics community that works internationally by definition.',
       'Tirana\'s tier is half an hour away — close enough to consider, exhausting as a daily school run.',
@@ -185,7 +185,7 @@ export const ALBANIA_CITIES = [
     homeTuitionDetail: 'In-person tuition supplementation in Durrës is subject to associate availability; the live online programme is complete without it.',
     onlineLearningDetail: 'Live online via Smartious LMS, landing inside the Durrës school day on the 1-2 hour offset, with the full recorded library carrying freight rotations and the summer season.',
     faqs: [
-      { q: 'Should we just commute to Tirana\'s international schools?', a: 'Some families do, at capital-tier fees plus a daily run on a busy corridor. Smartious delivers live international curriculum to Durrës homes at USD 2,160-6,480 a year, with Tirana needed only for exam sittings.' },
+      { q: 'Should we just commute to Tirana\'s international schools?', a: 'Some families do, at capital-tier fees plus a daily run on a busy corridor. Smartious delivers live international curriculum to Durrës homes at USD 5,076 a year, with Tirana needed only for exam sittings.' },
       { q: 'Where do Durrës students sit Cambridge examinations?', a: 'At authorised centres confirmed per family per session, with Tirana half an hour away.' },
     ],
   },
@@ -201,7 +201,7 @@ export const ALBANIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for families across Vlorë and the Albanian Riviera. Few coastlines in Europe have changed as fast: Vlorë, Himarë, Dhërmi, Ksamil, and Sarandë went from quiet to internationally busy within a few seasons, bringing hotel and hospitality investment, second-home owners, returning diaspora families, and a growing number of remote workers who came for a summer and stayed. Corfu sits across the strait, half an hour by ferry from Sarandë. What the Riviera does not have is international schooling of any kind. Smartious delivers the pathways live along the coast — supplementary during the compulsory years and full-time after sixteen.',
     heroImg: 'https://images.unsplash.com/photo-1592485281091-1e7f26f52a80?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'The Albanian Riviera coastline at Himarë' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Vlorë, Himarë and Sarandë families — the Riviera tourism boom, no international schooling. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Vlorë, Himarë and Sarandë families — the Riviera tourism boom, no international schooling. From USD 423/month.',
     challenges: [
       'No international schooling anywhere on the Riviera, despite a fast-growing year-round international community.',
       'The tourism season runs the whole household from spring to autumn.',
@@ -264,7 +264,7 @@ export const ALBANIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Shkodër and northern Albanian families. Shkodër is the north\'s historic capital — a lakeside city with a long Catholic and Italian-facing tradition, a university, and the gateway to the Albanian Alps, where the Theth and Valbona valleys have become one of the Balkans\' fastest-growing hiking destinations. Montenegro sits half an hour north. The region has a real international presence in its guesthouse economy, its returning diaspora, and its NGO and heritage sector, and no international schooling at all. Smartious delivers the pathways live across the north — supplementary during the compulsory years and full-time after sixteen.',
     heroImg: 'https://images.unsplash.com/photo-1592485281091-1e7f26f52a80?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Shkodër lake and Rozafa castle below the Albanian Alps' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Shkodër and northern Albania families — Alps tourism corridor, Montenegrin border, no international schooling. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Shkodër and northern Albania families — Alps tourism corridor, Montenegrin border, no international schooling. From USD 423/month.',
     challenges: [
       'No international schooling in the north, with Tirana around two hours south.',
       'A mountain tourism economy whose season shapes the family year.',
@@ -326,7 +326,7 @@ export const ALBANIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Elbasan families. Elbasan is Albania\'s industrial centre — a metallurgical and cement tradition that has drawn foreign investment and technical management, a university, and a position on the east-west corridor that makes it a logistics crossroads between the ports and North Macedonia. It sits an hour from Tirana and entirely outside its schooling: the commute is impractical and the fees are capital-level. Smartious delivers the international pathways live across the centre — supplementary during the compulsory years and full-time after sixteen.',
     heroImg: 'https://images.unsplash.com/photo-1592485281091-1e7f26f52a80?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Elbasan castle and the Shkumbin valley' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Elbasan families — industrial centre, no international schooling. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Elbasan families — industrial centre, no international schooling. From USD 423/month.',
     challenges: [
       'No international schooling in the industrial centre, with Tirana an hour away and priced at capital level.',
       'Foreign-invested industry brings technical management families with no matching provision.',
@@ -355,7 +355,7 @@ export const ALBANIA_CITIES = [
       'University application support — UCAS (UK), Common Application (US), and Albanian and Italian university applications',
     ],
     whyChoose: [
-      ['The tier\'s curriculum an hour from the tier', 'Live small-group Cambridge teaching delivered to Elbasan homes at USD 2,160-6,480 a year, with Tirana needed only for examinations.'],
+      ['The tier\'s curriculum an hour from the tier', 'Live small-group Cambridge teaching delivered to Elbasan homes at USD 5,076 a year, with Tirana needed only for examinations.'],
       ['Engineering and chemistry depth for an industrial city', 'Cambridge A-Level Mathematics, Physics, and Chemistry — led by a founder with a BEd in Mathematics and Physics — suit the metallurgical sector\'s families precisely.'],
       ['Built for shift patterns', 'Live classes plus unlimited recordings work around an industrial household\'s week.'],
       ['The law stated before anything is sold', 'Compulsory basic education runs to sixteen; we run supplementary alongside your enrolment and reserve the full pathway for after that.'],
@@ -388,7 +388,7 @@ export const ALBANIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Fier families. Fier sits at the centre of Albania\'s energy economy — the Patos-Marinza field is among the largest onshore oilfields in continental Europe and has drawn international operators, engineers, and service companies for two decades, while the Trans Adriatic Pipeline corridor runs through the region and the surrounding plain is the country\'s agricultural heartland. The technical workforce is genuinely international. The schooling is not: there is none. Smartious delivers the pathways live across the energy belt — supplementary during the compulsory years and full-time after sixteen, with the portability an oilfield career actually needs.',
     heroImg: 'https://images.unsplash.com/photo-1592485281091-1e7f26f52a80?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'The Fier plain and Albania\'s oil country' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Fier and energy-belt families — Patos-Marinza oilfield, no international schooling. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Fier and energy-belt families — Patos-Marinza oilfield, no international schooling. From USD 423/month.',
     challenges: [
       'An internationally staffed oil and energy workforce with no international schooling in the region.',
       'Oilfield and pipeline assignments move families between countries on project timelines.',
@@ -476,7 +476,7 @@ export const ALBANIA_COUNTRY = {
   heroEyebrow: 'Online international school for Albania',
   heroH1Suffix: 'Albania',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for expat, diaspora, energy, tourism, and Albanian families across Tirana, Durrës, Vlorë, Shkodër, Elbasan, and Fier. Albanian law makes full-time basic education compulsory from six to sixteen and does not establish parental-choice homeschooling — we say so first. What it leaves open is substantial: structured education alongside your enrolment, and the whole phase after sixteen.',
-  heroValueProp: 'From USD 180/month. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — supplementary beside any enrolment, full pathway after sixteen.',
+  heroValueProp: 'From USD 423/month. Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — supplementary beside any enrolment, full pathway after sixteen.',
   whatsappTrigger: 'Hi, I would like to enquire about Smartious for our family in Albania',
 
   citiesSectionTitle: 'Where our Albania families are',
@@ -510,7 +510,7 @@ export const ALBANIA_COUNTRY = {
     { name: 'Durrës',                                        city: 'The port',              curriculum: 'Very limited',                          feesUsd: 'Thin provision',                                    feesAed: '—',                       rating: 0,   capacityNote: 'The country\'s main port, barely served' },
     { name: 'The Riviera, the north, the energy belt',       city: 'Outside Tirana',        curriculum: '—',                                     feesUsd: 'No international provision',                        feesAed: '—',                       rating: 0,   capacityNote: 'A tourism coast, an Alps corridor, an industrial centre, and an oilfield — nothing' },
     { name: 'Wolsey Hall Oxford / King\'s InterHigh / bina (online)', city: 'Online',       curriculum: 'Cambridge self-paced / UK online / own to 15', feesUsd: 'Per-subject / GBP 9,000-11,000 / consultation', feesAed: 'Varies',      rating: 4.2, capacityNote: 'Self-paced, priced far above Smartious, or stopping at 15 — and none states the Albanian attendance rule or the post-sixteen opening' },
-    { name: 'Smartious Homeschool (Albania via online delivery)', city: 'Delivered to all Albania', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 2,160-6,480/year', feesAed: '~ALL 200,000-600,000/year', rating: 4.8, capacityNote: 'Every class live through A-Level + Albanian law stated exactly with both lawful configurations + the post-sixteen phase used properly + the coast, the north and the energy belt served identically' },
+    { name: 'Smartious Homeschool (Albania via online delivery)', city: 'Delivered to all Albania', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 5,076/year', feesAed: '~ALL 200,000-600,000/year', rating: 4.8, capacityNote: 'Every class live through A-Level + Albanian law stated exactly with both lawful configurations + the post-sixteen phase used properly + the coast, the north and the energy belt served identically' },
   ],
 
   legalFrameworkIntro: 'Albania is strict where much of the Balkans is flexible, and completely open after sixteen. Honest pages state the strict half first. Here is the whole framework exactly.',
@@ -537,7 +537,7 @@ export const ALBANIA_COUNTRY = {
     { q: 'So how can Smartious serve families in Albania?', a: 'Through the two lawful configurations: structured supplementary education alongside a school enrolment during the compulsory years, and the full Cambridge pathway after sixteen, when the obligation ends and upper secondary is not compulsory.' },
     { q: 'Is it true the obligation ends at sixteen?', a: 'Yes — the statute frames compulsory full-time basic education by age six to sixteen, and upper secondary is not compulsory. From sixteen the A-Level years sit entirely outside any attendance obligation.' },
     { q: 'We spend part of the year on the coast — does the obligation apply to us?', a: 'It attaches to children resident in Albania. Where the residency line sits for your household depends on registration, permits, and circumstances — a question for your own advisers. We state the distinction precisely and plan around whichever side of it you are on.' },
-    { q: 'How does Smartious compare with Tirana International School or the Albanian College?', a: 'They are established campuses with in-person culture and a local peer group we cannot replicate. Smartious runs live small-group teaching at USD 2,160-6,480 a year — the supplement, the bridge, and the only complete option outside Tirana.' },
+    { q: 'How does Smartious compare with Tirana International School or the Albanian College?', a: 'They are established campuses with in-person culture and a local peer group we cannot replicate. Smartious runs live small-group teaching at USD 5,076 a year — the supplement, the bridge, and the only complete option outside Tirana.' },
     { q: 'Where do Albanian students sit Cambridge examinations?', a: 'At authorised provision confirmed per family per session — Tirana first, with Greek, Italian, and North Macedonian regional options worth checking for border families, and Corfu half an hour from Sarandë by ferry.' },
     { q: 'Can my child access Albanian or Italian universities with A-Levels?', a: 'Albanian universities admit foreign secondary qualifications through recognition procedures with requirements confirmed per programme, and the English- and Italian-taught private institutions admit them more directly. Italian universities in particular admit large numbers of Albanian students and read Cambridge and IB qualifications routinely, as do Greek, German, and Turkish institutions. UCAS and the Common Application stand open internationally.' },
     { q: 'How does live class scheduling work given the Albania-Nairobi time difference?', a: 'Albania runs CET (UTC+1) in winter and CEST (UTC+2) in summer — only 1-2 hours behind Nairobi EAT — so live teaching lands naturally inside the Albanian school day, with the after-school slot suiting supplementary students.' },

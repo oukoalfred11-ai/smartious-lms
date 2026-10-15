@@ -85,7 +85,7 @@ export const BULGARIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Sofia families. Sofia carries Bulgaria\'s corporate weight and one of Europe\'s largest outsourcing and technology sectors — global service centres, engineering teams, and a startup scene that has pulled a substantial diaspora home from Germany, Spain, the UK, and the US. It also holds essentially all of the country\'s international schooling: the Anglo-American School of Sofia, the American College of Sofia, Zlatarski, St George, and the French, German, and Italian lycées, at capital-city fees. Bulgarian law offers a genuine home-study route — самостоятелна форма — but it is granted by a regional commission and supervised every term, and families deserve to hear that before they apply. Smartious delivers the international pathways live, planned honestly around it.',
     heroImg: 'https://images.unsplash.com/photo-1601652114151-3d17a2e1eb1b?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Sofia city centre with Vitosha mountain behind' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Sofia families — самостоятелна форма planned properly, supplementary alongside enrolment. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Sofia families — самостоятелна форма planned properly, supplementary alongside enrolment. From USD 423/month.',
     challenges: [
       'The international tier is concentrated in the capital and priced accordingly, with waitlists at popular entry points.',
       'The parental route into independent study requires a decision by an expert commission at the Regional Education Directorate — it is not a notification.',
@@ -116,7 +116,7 @@ export const BULGARIA_CITIES = [
     ],
     whyChoose: [
       ['The commission route described before it is recommended', 'Independent study in Bulgaria is granted by a regional expert commission and supervised every term. We say so plainly, and for most families we recommend the simpler supplementary configuration instead.'],
-      ['The Cambridge track beside a capital-priced tier', 'Live small-group teaching at USD 2,160-6,480 a year — the alternative, the waitlist bridge, or the supplement beside an existing enrolment.'],
+      ['The Cambridge track beside a capital-priced tier', 'Live small-group teaching at USD 5,076 a year — the alternative, the waitlist bridge, or the supplement beside an existing enrolment.'],
       ['The same clock as our teaching base in summer', 'Bulgaria is 0-1 hours behind Nairobi EAT, so live classes land squarely in the Sofia afternoon — no late-night lessons.'],
       ['Built for a rotating capital', 'Sofia now, Bucharest, Warsaw, or Dubai next — the curriculum, teachers, and examination board stay constant across the posting.'],
       ['The window after sixteen', 'Compulsory school age ends at sixteen, so the A-Level years fall outside the obligation entirely.'],
@@ -135,7 +135,7 @@ export const BULGARIA_CITIES = [
       { q: 'Is homeschooling legal in Bulgaria?', a: 'There is a lawful route — самостоятелна форма на обучение — but it is not a notification. For a student of compulsory school age at the parent\'s request, it requires a decision by an expert commission at the Regional Education Directorate, and that commission (including a Social Assistance Agency representative) supervises the examination sessions and results every school term. The student sits annual examinations in every subject of the school curriculum.' },
       { q: 'What do you recommend for most families?', a: 'The supplementary configuration: your child stays in an ordinary day-form enrolment, which carries every legal obligation and needs no commission, while Smartious teaches Cambridge or IB subjects live in the after-school slot toward external examinations.' },
       { q: 'Can we switch into independent study mid-year?', a: 'Not on the parent-request route — that is a start-of-year decision. Mid-year switching is available for students turning sixteen in that year or on newly arisen circumstances. Confirm the current rules with your school and РУО.' },
-      { q: 'How does Smartious compare with AAS Sofia, the American College, or Zlatarski?', a: 'They are established campuses with in-person culture and a local peer group we cannot replicate. Smartious runs live small-group teaching at USD 2,160-6,480 a year — the supplement, the bridge while a place is found, or the alternative for families outside those fees.' },
+      { q: 'How does Smartious compare with AAS Sofia, the American College, or Zlatarski?', a: 'They are established campuses with in-person culture and a local peer group we cannot replicate. Smartious runs live small-group teaching at USD 5,076 a year — the supplement, the bridge while a place is found, or the alternative for families outside those fees.' },
       { q: 'Where do Sofia students sit Cambridge examinations?', a: 'At authorised centres confirmed per family per session, with regional options where local capacity is limited.' },
     ],
   },
@@ -151,7 +151,7 @@ export const BULGARIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Plovdiv families. Plovdiv is Bulgaria\'s second city and its industrial engine — the Trakia Economic Zone on its edge is among the largest industrial developments in South-Eastern Europe, drawing manufacturers from Germany, Japan, the United States, and beyond, with the engineering and management families that come with them. The city itself is one of the oldest continuously inhabited places in Europe and was a European Capital of Culture. Its international schooling is thin. Smartious delivers the Cambridge and IB pathways live across the region, planned honestly around Bulgaria\'s independent-study framework.',
     heroImg: 'https://images.unsplash.com/photo-1601652114151-3d17a2e1eb1b?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Plovdiv old town and the Roman theatre' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Plovdiv families — Trakia Economic Zone, thin international schooling. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Plovdiv families — Trakia Economic Zone, thin international schooling. From USD 423/month.',
     challenges: [
       'Thin international schooling against one of South-Eastern Europe\'s largest industrial zones and its internationally recruited workforce.',
       'Sofia\'s tier is two hours away — a relocation decision rather than a commute.',
@@ -213,7 +213,7 @@ export const BULGARIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Varna families. Varna is Bulgaria\'s maritime capital — the largest port, the naval base and merchant-marine tradition behind it, a growing IT and outsourcing sector that has made the city a genuine alternative to Sofia, and a summer economy running from Golden Sands to Albena that draws visitors and seasonal workers from across Europe. Its international schooling is minimal. Smartious delivers the pathways live across the northern coast, planned honestly around Bulgaria\'s independent-study framework, with the recorded library built for sea time and the season.',
     heroImg: 'https://images.unsplash.com/photo-1601652114151-3d17a2e1eb1b?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Varna Black Sea coast and the port' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Varna families — Black Sea port, IT sector, minimal international schooling. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Varna families — Black Sea port, IT sector, minimal international schooling. From USD 423/month.',
     challenges: [
       'Minimal international schooling for a port, technology, and tourism economy that operates internationally by definition.',
       'Merchant-marine families spend long periods at sea, on rotations no school calendar matches.',
@@ -275,7 +275,7 @@ export const BULGARIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Burgas families. Burgas anchors Bulgaria\'s southern Black Sea coast — the Lukoil Neftochim refinery is the largest in the Balkans and brings chemical and process engineering families to the city, the port and logistics sector works internationally, and the resort belt from Sunny Beach to Sozopol runs a summer economy that employs a substantial part of the region. International schooling here does not exist. Smartious delivers the pathways live across the south coast, planned honestly around Bulgaria\'s independent-study framework.',
     heroImg: 'https://images.unsplash.com/photo-1601652114151-3d17a2e1eb1b?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Burgas seafront on the southern Black Sea coast' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Burgas and southern coast families — refinery and resort economy, no international schooling. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Burgas and southern coast families — refinery and resort economy, no international schooling. From USD 423/month.',
     challenges: [
       'No international schooling on the southern coast, with Sofia four hours west.',
       'Refinery and port assignments bring international technical families to a city with no matching provision.',
@@ -337,7 +337,7 @@ export const BULGARIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Ruse and Danube families. Ruse is Bulgaria\'s river port and its most European-looking nineteenth-century city — a Danube crossing where the bridge to Giurgiu puts Bucharest an hour north while Sofia sits four hours south-west, which shapes trade, work, and increasingly where families look for opportunity. An industrial and logistics corridor runs along the river, and the university adds a technical community. There is no international school. Smartious delivers the pathways live across the Danube region, planned honestly around Bulgaria\'s framework and with the cross-border question stated precisely.',
     heroImg: 'https://images.unsplash.com/photo-1601652114151-3d17a2e1eb1b?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Ruse nineteenth-century architecture on the Danube' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Ruse and Danube families — Romanian border city, no international schooling. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Ruse and Danube families — Romanian border city, no international schooling. From USD 423/month.',
     challenges: [
       'No international schooling in the region — and Bucharest, an hour away, sits under a different legal framework.',
       'Cross-border households need to know education law follows residence, not workplace.',
@@ -399,7 +399,7 @@ export const BULGARIA_CITIES = [
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for families across Bansko and the Bulgarian mountains. Bansko has become an unlikely international town: a Pirin ski resort that turned itself into one of Europe\'s best-known digital-nomad destinations, with coworking spaces, a well-known nomad festival, and a year-round community of remote workers, founders, and freelancers from across the world — many with school-age children. Around it, Blagoevgrad, Razlog, and the Rila and Pirin valleys run tourism and mountain economies. What none of it has is international schooling. Smartious delivers the pathways live, with a rhythm built for the season and the framework planned honestly.',
     heroImg: 'https://images.unsplash.com/photo-1601652114151-3d17a2e1eb1b?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Bansko and the Pirin mountains in winter' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Bansko and mountain families — nomad and ski community, no international schooling. From USD 400/month.',
+    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Bansko and mountain families — nomad and ski community, no international schooling. From USD 423/month.',
     challenges: [
       'A genuinely international year-round community with no international schooling anywhere in the region.',
       'Remote-work families need to know which country\'s framework applies to them, and that turns on residence rather than location.',
@@ -488,7 +488,7 @@ export const BULGARIA_COUNTRY = {
   heroEyebrow: 'Online homeschool for Bulgaria',
   heroH1Suffix: 'Bulgaria',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for IT-sector, industrial, nomad, and Bulgarian families across Sofia, Plovdiv, Varna, Burgas, Ruse, and Bansko. Bulgaria does allow independent study — самостоятелна форма — but at a parent\'s request it is granted by a regional expert commission and supervised every school term. We say so plainly, and for most families we recommend the simpler route.',
-  heroValueProp: 'From USD 180/month (~BGN 325/month). Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — on a timezone where Sofia and Nairobi share the same summer clock.',
+  heroValueProp: 'From USD 423/month (~BGN 761/month). Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — on a timezone where Sofia and Nairobi share the same summer clock.',
   whatsappTrigger: 'Hi, I would like to enquire about Smartious for our family in Bulgaria',
 
   citiesSectionTitle: 'Where our Bulgaria families are',
@@ -522,7 +522,7 @@ export const BULGARIA_COUNTRY = {
     { name: 'Plovdiv, Varna and Burgas',                     city: 'The regions',           curriculum: 'Very limited',                          feesUsd: 'Thin provision',                                    feesAed: '—',                       rating: 0,   capacityNote: 'The industrial zone, the port, and the coast — barely served' },
     { name: 'Ruse and the mountains',                        city: 'Danube and Pirin',      curriculum: '—',                                     feesUsd: 'No international provision',                        feesAed: '—',                       rating: 0,   capacityNote: 'A border city and a nomad capital with nothing at all' },
     { name: 'Wolsey Hall Oxford / King\'s InterHigh / bina (online)', city: 'Online',       curriculum: 'Cambridge self-paced / UK online / own to 15', feesUsd: 'Per-subject / GBP 9,000-11,000 / consultation', feesAed: 'Varies',      rating: 4.2, capacityNote: 'Self-paced, priced far above Smartious, or stopping at 15 — and none explains the РУО commission or the termly oversight' },
-    { name: 'Smartious Homeschool (Bulgaria via online delivery)', city: 'Delivered to all Bulgaria', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 2,160-6,480/year', feesAed: '~BGN 3,900-11,700/year', rating: 4.8, capacityNote: 'Every class live through A-Level + the commission framework stated honestly + the simpler route recommended + the regions served identically + the same summer clock as our teaching base' },
+    { name: 'Smartious Homeschool (Bulgaria via online delivery)', city: 'Delivered to all Bulgaria', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 5,076/year', feesAed: '~BGN 3,900-11,700/year', rating: 4.8, capacityNote: 'Every class live through A-Level + the commission framework stated honestly + the simpler route recommended + the regions served identically + the same summer clock as our teaching base' },
   ],
 
   legalFrameworkIntro: 'Bulgaria has a genuine home-study route and an unusually supervised one. Honest pages describe both halves before recommending anything. Here is the framework exactly.',
@@ -551,7 +551,7 @@ export const BULGARIA_COUNTRY = {
     { q: 'Can we start independent study mid-year?', a: 'Not on the parent-request route — that is a start-of-year decision. Mid-year switching is permitted for students turning sixteen in that year or where new circumstances arise. Confirm current rules with your school and your РУО.' },
     { q: 'How does progression work?', a: 'Sequentially and strictly: a student may sit the next grade\'s examinations only after successfully passing all the examinations required to complete the previous grade. Applications to sit are made around ten days before each session, and the school provides consultation hours.' },
     { q: 'What changes after sixteen?', a: 'Compulsory school age ends. Inside the Bulgarian system the independent form becomes available to students in their own right; outside it, a student has no Bulgarian schooling obligation at all, which is what makes the A-Level years straightforward.' },
-    { q: 'How does Smartious compare with the Sofia international schools?', a: 'They are established campuses with in-person culture and a local peer group we cannot replicate. Smartious runs live small-group teaching at USD 2,160-6,480 a year — the supplement, the bridge, and the only complete option outside the capital.' },
+    { q: 'How does Smartious compare with the Sofia international schools?', a: 'They are established campuses with in-person culture and a local peer group we cannot replicate. Smartious runs live small-group teaching at USD 5,076 a year — the supplement, the bridge, and the only complete option outside the capital.' },
     { q: 'Where do Bulgarian students sit Cambridge examinations?', a: 'At authorised provision confirmed per family per session — Sofia is checked first, with regional and cross-border options where local capacity is limited and coastal, Plovdiv, and Danube families planning travel ahead.' },
     { q: 'Can my child access Bulgarian universities with A-Levels or an IB Diploma?', a: 'Bulgarian universities admit foreign secondary qualifications through recognition procedures with requirements confirmed per programme. The English-taught tier is strong — the medical universities at Sofia, Plovdiv, and Varna, and the American University in Bulgaria — and reads Cambridge and IB qualifications directly. UCAS and the Common Application stand open internationally.' },
     { q: 'How does live class scheduling work given the Bulgaria-Nairobi time difference?', a: 'It is among the best alignments we have: Bulgaria runs EET (UTC+2) in winter — one hour behind Nairobi — and EEST (UTC+3) in summer, the same clock. Live teaching lands squarely in the Bulgarian afternoon.' },

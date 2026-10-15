@@ -78,7 +78,7 @@ export const BANGLADESH_CITIES = [
     intro: 'Live online Cambridge O-Level and IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Dhaka families. Cambridge needs no introduction in this city — the English-medium sector has run O-Levels and A-Levels for decades and families here understand the qualifications as well as anywhere we teach. What we add is narrower: a subject specialist for the A-Level sets a single school timetable cannot sustain, a fee below the strongest schools, and a place without a queue. And Bangladesh sits three hours ahead of our teaching base, so after-school classes land squarely in our day.',
     heroImg: '/heroes/dhaka-bd.jpg',
     altTexts: { hero: 'Dhaka' },
-    seoDesc: 'Live online Cambridge O-Level, IGCSE, A-Level, Pearson Edexcel, IB and AP for Dhaka families — subject specialists and after-school classes that fit. From USD 400/month.',
+    seoDesc: 'Live online Cambridge O-Level, IGCSE, A-Level, Pearson Edexcel, IB and AP for Dhaka families — subject specialists and after-school classes that fit. From USD 423/month.',
     challenges: [
       'Specialist A-Level subjects often will not run for small cohorts even in strong English-medium schools.',
       'Places at the leading schools are competitive, and mid-year entry is harder still.',
@@ -110,7 +110,7 @@ export const BANGLADESH_CITIES = [
     whyChoose: [
       ['We are not introducing Cambridge to Dhaka', 'The English-medium sector has run O-Levels and A-Levels for decades. What we supply is teaching depth in specific subjects, not a new curriculum.'],
       ['The set your school cannot staff', 'Further Mathematics or a third science for four pupils is unviable on one timetable and routine in a live group drawn from several countries.'],
-      ['A fee gap against the leading schools', 'Live small-group teaching at USD 2,160-6,480 a year toward the same examinations.'],
+      ['A fee gap against the leading schools', 'Live small-group teaching at USD 5,076 a year toward the same examinations.'],
       ['After-school hours that genuinely work', 'Three hours ahead of our teaching base — a four o\'clock class in Dhaka is one in the afternoon for our teachers, six o\'clock is three.'],
       ['No waiting list', 'A child starts within a week of the assessment, which matters for mid-year arrivals and for families who have just changed school.'],
     ],
@@ -128,7 +128,7 @@ export const BANGLADESH_CITIES = [
       { q: 'Our school already does O-Levels and A-Levels — what would we gain?', a: 'Usually one specific thing: a subject set your school cannot staff for four students. Further Mathematics, a third science, or a clash. If your school covers what your child needs, we will tell you so.' },
       { q: 'Do you teach the SSC or HSC?', a: 'No. We are not a registered Bangladeshi school and issue no Bangladeshi qualification. We teach Cambridge, Edexcel, IB and AP, which sit alongside a school record.' },
       { q: 'What time are classes?', a: 'After-school works particularly well. Bangladesh is three hours ahead of our teaching base, so a four o\'clock class in Dhaka is one in the afternoon for our teachers and six o\'clock is three.' },
-      { q: 'How do fees compare with the leading English-medium schools?', a: 'Smartious runs USD 2,160-6,480 a year for live small-group teaching toward the same Cambridge examinations, which is a different proposition financially from the top of the local sector.' },
+      { q: 'How do fees compare with the leading English-medium schools?', a: 'Smartious runs USD 5,076 a year for live small-group teaching toward the same Cambridge examinations, which is a different proposition financially from the top of the local sector.' },
     ],
   },
 
@@ -143,7 +143,7 @@ export const BANGLADESH_CITIES = [
     intro: 'Live online Cambridge O-Level and IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Chattogram families. The port city moves most of Bangladesh\'s trade and hosts the export processing zones, the shipping and shipbreaking industries and a commercial community with a long mercantile tradition. It is the country\'s second city by some distance, and its English-medium school list is a fraction of Dhaka\'s three hundred kilometres north. The constraint here is availability rather than curriculum, and live delivery answers it in after-school hours that fit our teaching day.',
     heroImg: '/heroes/chattogram-bd.jpg',
     altTexts: { hero: 'Chattogram port' },
-    seoDesc: 'Live online Cambridge O-Level, IGCSE, A-Level, Pearson Edexcel, IB and AP for Chattogram families — port and industrial city, short school list. From USD 400/month.',
+    seoDesc: 'Live online Cambridge O-Level, IGCSE, A-Level, Pearson Edexcel, IB and AP for Chattogram families — port and industrial city, short school list. From USD 423/month.',
     challenges: [
       'A much shorter English-medium school list than Dhaka, three hundred kilometres north.',
       'Specialist A-Level subjects rarely run for small cohorts locally.',
@@ -205,7 +205,7 @@ export const BANGLADESH_CITIES = [
     intro: 'Live online Cambridge O-Level and IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Sylhet families. Sylhet has a connection to Britain unlike anywhere else in Bangladesh — the British Bangladeshi community is overwhelmingly of Sylheti origin, and family ties across generations run through almost every household here. That makes one thing worth more in Sylhet than in most cities we serve: a qualification UCAS reads natively. Cambridge A-Levels are the record British admissions expects, requiring no conversion and no equivalence assessment. Alongside that sit the tea gardens, the remittance economy and a growing but still short English-medium school list.',
     heroImg: '/heroes/sylhet-bd.jpg',
     altTexts: { hero: 'Sylhet tea gardens' },
-    seoDesc: 'Live online Cambridge O-Level, IGCSE, A-Level, Pearson Edexcel, IB and AP for Sylhet families — a UCAS-native qualification for a city with deep UK ties. From USD 400/month.',
+    seoDesc: 'Live online Cambridge O-Level, IGCSE, A-Level, Pearson Edexcel, IB and AP for Sylhet families — a UCAS-native qualification for a city with deep UK ties. From USD 423/month.',
     challenges: [
       'A growing but still short English-medium school list for the size of the demand.',
       'Families with UK ties needing a record British admissions reads without conversion.',
@@ -268,7 +268,7 @@ export const BANGLADESH_CITIES = [
     intro: 'Live online Cambridge O-Level and IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Khulna and south-western families. The region anchors Mongla port, the shrimp aquaculture and jute processing industries that export worldwide, and the Sundarbans with the research and conservation work that surrounds it. It is a substantial regional economy and English-medium provision here is very limited, with Dhaka a long way north-east. Live delivery reaches the south-west identically, in after-school hours that land squarely in our teaching day.',
     heroImg: '/heroes/khulna-bd.jpg',
     altTexts: { hero: 'Khulna and the Sundarbans delta' },
-    seoDesc: 'Live online Cambridge O-Level, IGCSE, A-Level, Pearson Edexcel, IB and AP for Khulna and south-western Bangladesh families — ports and aquaculture, minimal provision. From USD 400/month.',
+    seoDesc: 'Live online Cambridge O-Level, IGCSE, A-Level, Pearson Edexcel, IB and AP for Khulna and south-western Bangladesh families — ports and aquaculture, minimal provision. From USD 423/month.',
     challenges: [
       'Very limited English-medium provision across the south-west.',
       'Dhaka is a long way north-east and its schools are competitive.',
@@ -330,7 +330,7 @@ export const BANGLADESH_CITIES = [
     intro: 'Live online Cambridge O-Level and IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Rajshahi and northern families. The north holds the university city and its strong academic and medical tradition, alongside the silk weaving industry and the mango and agricultural belt that runs through the region. Academic ambition here is high — Rajshahi produces doctors, engineers and academics in numbers — and English-medium provision is thin across a wide region, with Dhaka a considerable journey south-east. Live delivery reaches the north identically, in after-school hours that fit our teaching day.',
     heroImg: '/heroes/rajshahi-bd.jpg',
     altTexts: { hero: 'Rajshahi and the northern belt' },
-    seoDesc: 'Live online Cambridge O-Level, IGCSE, A-Level, Pearson Edexcel, IB and AP for Rajshahi and northern Bangladesh families — a university city with thin provision. From USD 400/month.',
+    seoDesc: 'Live online Cambridge O-Level, IGCSE, A-Level, Pearson Edexcel, IB and AP for Rajshahi and northern Bangladesh families — a university city with thin provision. From USD 423/month.',
     challenges: [
       'Thin English-medium provision across a wide northern region.',
       'Dhaka is a considerable journey south-east.',
@@ -418,7 +418,7 @@ export const BANGLADESH_COUNTRY = {
   heroEyebrow: 'Online school for Bangladesh',
   heroH1Suffix: 'Bangladesh',
   heroSubhead: 'Live online Cambridge O-Level, IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for English-medium, professional and Bangladeshi families across Dhaka, Chattogram, Sylhet, Khulna and Rajshahi. Cambridge is already well established here, so we are not introducing a curriculum — we supply subject specialists, in after-school hours that land squarely in our teaching day.',
-  heroValueProp: 'From USD 180/month. Small live classes 4-6 students, Cambridge O-Level / A-Level / IB / AP — after-school, alongside your school, with no waiting list.',
+  heroValueProp: 'From USD 423/month. Small live classes 4-6 students, Cambridge O-Level / A-Level / IB / AP — after-school, alongside your school, with no waiting list.',
   whatsappTrigger: 'Hi, I would like to enquire about Smartious for our family in Bangladesh',
 
   citiesSectionTitle: 'Where our Bangladesh families are',
@@ -451,7 +451,7 @@ export const BANGLADESH_COUNTRY = {
     { name: 'Sylhet, Khulna and Rajshahi',                      city: 'Outside the two cities', curriculum: 'Thin to very limited',                 feesUsd: 'Limited option',                                    feesAed: '—',                       rating: 0,   capacityNote: 'A diaspora city with deep UK ties, a port and aquaculture region, and a university city — all short on provision' },
     { name: 'Private tuition and coaching centres',             city: 'Nationwide',            curriculum: 'Exam-focused coaching',                 feesUsd: 'Per hour, per subject',                             feesAed: 'Very widespread',         rating: 4.1, capacityNote: 'Enormous and long established — usually one-to-one or large-group, and rarely a structured year' },
     { name: 'UK-based online schools',                          city: 'Online',                curriculum: 'UK online, Cambridge and Edexcel',      feesUsd: 'GBP 9,000-11,000',                                  feesAed: 'Varies',                  rating: 4.2, capacityNote: 'Priced far above Smartious — though closer to the UK academic calendar, which some Sylhet families weigh' },
-    { name: 'Smartious Homeschool (Bangladesh via online delivery)', city: 'Delivered nationwide', curriculum: 'Cambridge O-Level, IGCSE, A-Level, IB, AP', feesUsd: 'USD 2,160-6,480/year',                   feesAed: 'BDT at prevailing rate',   rating: 4.8, capacityNote: 'Every class live through A-Level + after-school hours that fit + Sylhet, Khulna and Rajshahi reached + no waiting list' },
+    { name: 'Smartious Homeschool (Bangladesh via online delivery)', city: 'Delivered nationwide', curriculum: 'Cambridge O-Level, IGCSE, A-Level, IB, AP', feesUsd: 'USD 5,076/year',                   feesAed: 'BDT at prevailing rate',   rating: 4.8, capacityNote: 'Every class live through A-Level + after-school hours that fit + Sylhet, Khulna and Rajshahi reached + no waiting list' },
   ],
 
   legalFrameworkIntro: 'Bangladesh is one of the markets where we could not verify the central question, so we set out what we can establish and then the two facts that matter more here in practice.',
