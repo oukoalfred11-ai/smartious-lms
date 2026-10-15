@@ -1548,6 +1548,33 @@ const COMPARES = [
 // seoTitle, seoDesc, and a `detail` block.
 // ════════════════════════════════════════════════════════════
 
+// ── Article → product links ────────────────────────────────
+// Guides earn the rankings; these links pass that authority on to the
+// pages that enrol families (real <a href> with descriptive anchor text).
+const ARTICLE_HUBS = new Set('albania algeria angola argentina australia austria azerbaijan bahrain bangladesh belgium bolivia bosnia-and-herzegovina botswana brazil bulgaria canada chile china colombia costa-rica croatia cyprus czech-republic denmark dominican-republic drc ecuador egypt ethiopia finland france georgia germany ghana greece guatemala hungary india iraq ireland israel italy japan jordan kenya kosovo kuwait lebanon luxembourg malaysia maldives mauritius mexico montenegro morocco myanmar namibia nepal netherlands new-zealand nigeria north-macedonia norway oman pakistan panama paraguay peru poland portugal puerto-rico qatar romania rwanda saudi-arabia serbia slovakia slovenia somalia south-africa south-korea spain sweden switzerland taiwan tanzania thailand tunisia turkey uae uganda ukraine united-kingdom uruguay usa venezuela vietnam zambia zimbabwe'.split(' '))
+const ARTICLE_COUNTRY_ALIAS = { za: 'south-africa' }
+const ARTICLE_COUNTRY_NAME = { usa: 'the USA', uae: 'the UAE', 'united-kingdom': 'the UK', drc: 'the DRC', 'czech-republic': 'the Czech Republic', 'dominican-republic': 'the Dominican Republic', 'new-zealand': 'New Zealand' }
+function articleProduct(a) {
+  const c = a && a.country
+  if (c === 'uae') return {
+    heading: 'Smartious for families in Dubai and the UAE',
+    text: 'Smartious teaches Dubai families live online: Cambridge IGCSE, A-Level, IB and American programmes, with qualified teachers and lessons timed for the Gulf day.',
+    links: [
+      { href: '/homeschool-dubai-ae', label: 'Online school in Dubai', note: 'Full-time live classes and homeschooling, IGCSE to A-Level and IB' },
+      { href: '/tuition-uae', label: 'Online tutors in Dubai', note: '1-on-1 tuition in IGCSE, A-Level and IB subjects' },
+      { href: '/online-school/uae', label: 'Abu Dhabi, Sharjah and the rest of the UAE', note: 'Every emirate we teach in' },
+    ],
+  }
+  const slug = ARTICLE_COUNTRY_ALIAS[c] || c
+  if (!slug || !ARTICLE_HUBS.has(slug)) return null
+  const name = ARTICLE_COUNTRY_NAME[slug] || slug.split('-').map(w => w[0].toUpperCase() + w.slice(1)).join(' ')
+  return {
+    heading: 'Smartious for families in ' + name,
+    text: 'Live online classes in Cambridge IGCSE, A-Level, IB and American programmes, with qualified teachers and lessons on your time zone.',
+    links: [{ href: '/online-school/' + slug, label: 'Online school in ' + name, note: 'Programmes, fees and how to enrol' }],
+  }
+}
+
 // ── PAGE_META — per-page SEO titles & descriptions ─────────
 // Keyword-rich titles and descriptions for each core landing
 // page. Curriculum and service detail pages derive their meta
@@ -4000,8 +4027,8 @@ export default function LandingPage() {
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'homeschooling-uae') {
-    metaTitle = 'Online School, Virtual School & Homeschool for UAE Families — Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for UAE families across Dubai, Abu Dhabi, Sharjah, Ajman, Ras Al Khaimah. Wellington / Dubai College / BSAK / Repton / Brighton College alternative. Immediate enrolment, no KHDA/ADEK waiting lists. From USD 400/month (~AED 660).'
+    metaTitle = 'Online School in the UAE | Dubai & Abu Dhabi Homeschooling, IGCSE & A-Level | Smartious'
+    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for UAE families across Dubai, Abu Dhabi, Sharjah, Ajman, Ras Al Khaimah. Wellington / Dubai College / BSAK / Repton / Brighton College alternative. Immediate enrolment, no KHDA/ADEK waiting lists. From USD 400/month (about AED 1,470).'
   
   } else if (page === 'homeschooling-egypt') {
     metaTitle = 'Online School, Virtual School & Homeschool for Egyptian Families — Cambridge IGCSE & A-Level | Smartious'
@@ -4024,7 +4051,7 @@ export default function LandingPage() {
   } else if (page === 'uae-city' && currentUaeCity) {
     const c = UAE_CITIES.find(x => x.slug === currentUaeCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || ('Online School & Homeschooling in ' + c.name + ' | IGCSE, A-Level, IB | Smartious')
       metaDesc  = c.seoDesc || ''
     }
   
@@ -4538,6 +4565,21 @@ export default function LandingPage() {
       metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
+  } else if (page === 'tuition-uae') {
+    metaTitle = 'Online Tutors in Dubai & the UAE | IGCSE, A-Level & IB Tuition | Smartious'
+    metaDesc  = 'Live online tuition for families in Dubai, Abu Dhabi and Sharjah: Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and American AP. Qualified tutors, Gulf-time lessons, from USD 15/hour (about AED 55).'
+  } else if (page === 'uae-area' && currentUaeArea && UAE_AREAS.find(a => a.slug === currentUaeArea)) {
+    const a = UAE_AREAS.find(x => x.slug === currentUaeArea)
+    metaTitle = a.seoTitle || ('Online Tuition in ' + a.name + ', ' + a.emirate + ' | Smartious')
+    metaDesc  = a.seoDesc || ''
+  } else if (page === 'tuition-area' && currentTuitionArea && NAIROBI_AREAS.find(a => a.slug === currentTuitionArea)) {
+    const a = NAIROBI_AREAS.find(x => x.slug === currentTuitionArea)
+    metaTitle = a.seoTitle || ('Tuition in ' + a.name + ', Nairobi | Smartious')
+    metaDesc  = a.seoDesc || ''
+  } else if (page === 'uk-area' && currentUkArea && UK_AREAS.find(a => a.slug === currentUkArea)) {
+    const a = UK_AREAS.find(x => x.slug === currentUkArea)
+    metaTitle = a.seoTitle || ('Online Tuition in ' + a.name + ', ' + a.city + ' | GCSE, A-Level & 11+ Tutors | Smartious')
+    metaDesc  = a.seoDesc || PAGE_META['uk-area']?.desc || ''
   } else if (PAGE_META[page]) {
     metaTitle = PAGE_META[page].title
     metaDesc  = PAGE_META[page].desc
@@ -23254,6 +23296,7 @@ export default function LandingPage() {
           )
         }
         const related = Object.entries(FULL_ARTICLES).filter(([s, x]) => s !== currentArticle && x.cat === a.cat).slice(0, 3)
+        const prod = articleProduct(a)
         return (
           <>
             {/* Article hero with splash image + gradient-matched banner */}
@@ -23303,6 +23346,23 @@ export default function LandingPage() {
                 <p style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.35rem',fontStyle:'italic',color:V.ink2,lineHeight:1.7,marginBottom:48,paddingLeft:20,borderLeft:`3px solid ${V.cr}`,fontWeight:400}}>
                   {a.intro}
                 </p>
+
+                {/* Where to go next: the product pages for this country */}
+                {prod && (
+                  <aside style={{background:V.white,border:`1px solid ${V.bone3}`,borderLeft:`4px solid ${V.cr}`,borderRadius:12,padding:'20px 22px',marginBottom:44}}>
+                    <div style={{fontSize:11,fontWeight:800,color:V.cr,letterSpacing:'.14em',textTransform:'uppercase',marginBottom:8}}>{prod.heading}</div>
+                    <p style={{fontSize:15,color:V.ink2,lineHeight:1.7,margin:'0 0 14px'}}>{prod.text}</p>
+                    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:10}}>
+                      {prod.links.map(l => (
+                        <a key={l.href} href={l.href} onClick={e => { e.preventDefault(); nav(l.href) }}
+                          style={{display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'12px 14px',textDecoration:'none',color:'inherit'}}>
+                          <div style={{fontWeight:800,fontSize:14.5,color:V.ink}}>{l.label} →</div>
+                          {l.note && <div style={{fontSize:12.5,color:V.sl,lineHeight:1.5,marginTop:3}}>{l.note}</div>}
+                        </a>
+                      ))}
+                    </div>
+                  </aside>
+                )}
 
                 {/* Sections */}
                 {a.sections.map((s, i) => (
@@ -23424,6 +23484,10 @@ export default function LandingPage() {
                     Book an assessment with our admissions team. We'll review your child's profile and build a personalised learning plan.
                   </p>
                   <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
+                    {prod && (
+                      <a className="btn-o" href={prod.links[0].href} onClick={e => { e.preventDefault(); nav(prod.links[0].href) }}
+                        style={{color:V.white,borderColor:'rgba(255,255,255,.3)',textDecoration:'none'}}>{prod.links[0].label} →</a>
+                    )}
                     <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
                   </div>
                 </div>

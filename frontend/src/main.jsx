@@ -68,6 +68,10 @@ class ErrorBoundary extends React.Component {
    list), we render fresh.
 ═══════════════════════════════════════════════════════════════════ */
 const container = document.getElementById('root')
+
+// Static text baked in by scripts/seo-static.mjs for crawlers; the app
+// renders the real page now, so drop it.
+document.getElementById('seo-static')?.remove()
 const tree = <ErrorBoundary><App /></ErrorBoundary>
 
 /* Hydrate ONLY on prerendered public routes.

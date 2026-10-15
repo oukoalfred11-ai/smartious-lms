@@ -6,7 +6,7 @@
     "dev": "vite",
     "postinstall": "node scripts/install-chrome.js",
     "build": "vite build",
-    "postbuild": "echo Prerender skipped for fast deploy",
+    "postbuild": "node scripts/seo-static.mjs || echo seo-static failed, pages served without static HTML",
     "preview": "vite preview"
   },
   "dependencies": {
