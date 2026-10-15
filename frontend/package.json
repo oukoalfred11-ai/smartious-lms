@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "node scripts/build-data-index.js && vite",
     "postinstall": "node scripts/install-chrome.js",
-    "build": "vite build",
+    "build": "node scripts/build-data-index.js && vite build",
     "postbuild": "echo Prerender skipped for fast deploy",
     "preview": "vite preview"
   },
