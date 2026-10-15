@@ -10747,7 +10747,7 @@ export default function LandingPage() {
               </div>
 
               <div style={{textAlign:'center',marginTop:32,fontSize:13,color:V.sl2,fontStyle:'italic',maxWidth:720,margin:'32px auto 0'}}>
-                <strong style={{fontStyle:'normal',color:V.ink}}>Payment terms:</strong> fees are paid termly. They are non-refundable once your child's assessment is done, the timetable is created and lessons have started. Examination board fees are separate. Every family signs our <a href="/Smartious_Admission_Agreement_2026.pdf" target="_blank" rel="noopener" style={{color:V.cr,fontWeight:700}}>Admission Agreement (PDF)</a> before lessons begin. Ask for a written quote below and our admissions team will respond within 24 hours.
+                <strong style={{fontStyle:'normal',color:V.ink}}>Payment terms:</strong> fees are paid termly. They are non-refundable once your child's assessment is done, the timetable is created and lessons have started. Examination board fees are separate. Every family signs our <a href="/Smartious_Admission_Pack_2026.pdf" target="_blank" rel="noopener" style={{color:V.cr,fontWeight:700}}>Admission Pack (PDF)</a> agreement before lessons begin. Ask for a written quote below and our admissions team will respond within 24 hours.
               </div>
             </div>
           </div></section>
