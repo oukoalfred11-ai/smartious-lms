@@ -3,109 +3,50 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
 
 /* Data — extracted from this file for maintainability. Edit src/data/*.js to update. */
-import { COUNTRIES } from '../data/countries.js'
+// Country/city data and blog articles are loaded on demand, per page
+// (see data/lazyData.js), so the home page doesn't ship them.
+import { COUNTRY_SLUGS } from '../data/generated/routeIndex.js'
+import {
+  ARTICLES_INDEX, getFullArticle, loadData, isDataLoaded, dataKeysForPage, dataKeysForPath,
+  COUNTRIES, US_STATES, US_STATES_LIST, US_CITIES, US_CITIES_BY_STATE, CA_PROVINCES,
+  CA_PROVINCES_LIST, CA_CITIES, CA_CITIES_BY_PROVINCE, NAIROBI_AREAS, UAE_AREAS, UK_AREAS,
+  UK_AREAS_BY_CITY, KENYA_CITIES, KENYA_COUNTRY, ETHIOPIA_CITIES, ETHIOPIA_COUNTRY, RWANDA_CITIES,
+  RWANDA_COUNTRY, SOUTH_AFRICA_CITIES, SOUTH_AFRICA_COUNTRY, QATAR_CITIES, QATAR_COUNTRY,
+  SAUDI_ARABIA_CITIES, SAUDI_ARABIA_COUNTRY, UAE_CITIES, UAE_COUNTRY, EGYPT_CITIES, EGYPT_COUNTRY,
+  MOROCCO_CITIES, MOROCCO_COUNTRY, SOUTH_KOREA_CITIES, SOUTH_KOREA_COUNTRY, JAPAN_CITIES,
+  JAPAN_COUNTRY, MALAYSIA_CITIES, MALAYSIA_COUNTRY, SPAIN_CITIES, SPAIN_COUNTRY, DENMARK_CITIES,
+  DENMARK_COUNTRY, FRANCE_CITIES, FRANCE_COUNTRY, ITALY_CITIES, ITALY_COUNTRY, POLAND_CITIES,
+  POLAND_COUNTRY, PORTUGAL_CITIES, PORTUGAL_COUNTRY, CZECH_CITIES, CZECH_COUNTRY, BELGIUM_CITIES,
+  BELGIUM_COUNTRY, SWEDEN_CITIES, SWEDEN_COUNTRY, NETHERLANDS_CITIES, NETHERLANDS_COUNTRY,
+  NORWAY_CITIES, NORWAY_COUNTRY, NZ_CITIES, NZ_COUNTRY, AUSTRIA_CITIES, AUSTRIA_COUNTRY,
+  HUNGARY_CITIES, HUNGARY_COUNTRY, FINLAND_CITIES, FINLAND_COUNTRY, GREECE_CITIES, GREECE_COUNTRY,
+  AZERBAIJAN_CITIES, AZERBAIJAN_COUNTRY, GEORGIA_CITIES, GEORGIA_COUNTRY, PAKISTAN_CITIES,
+  PAKISTAN_COUNTRY, AUSTRALIA_CITIES, AUSTRALIA_COUNTRY, LUXEMBOURG_CITIES, LUXEMBOURG_COUNTRY,
+  SWITZERLAND_CITIES, SWITZERLAND_COUNTRY, SLOVAKIA_CITIES, SLOVAKIA_COUNTRY, SLOVENIA_CITIES,
+  SLOVENIA_COUNTRY, CROATIA_CITIES, CROATIA_COUNTRY, SERBIA_CITIES, SERBIA_COUNTRY,
+  BULGARIA_CITIES, BULGARIA_COUNTRY, ALBANIA_CITIES, ALBANIA_COUNTRY, NORTH_MACEDONIA_CITIES,
+  NORTH_MACEDONIA_COUNTRY, MONTENEGRO_CITIES, MONTENEGRO_COUNTRY, BOSNIA_CITIES, BOSNIA_COUNTRY,
+  KOSOVO_CITIES, KOSOVO_COUNTRY, ZAMBIA_CITIES, ZAMBIA_COUNTRY, ZIMBABWE_CITIES, ZIMBABWE_COUNTRY,
+  BOTSWANA_CITIES, BOTSWANA_COUNTRY, NAMIBIA_CITIES, NAMIBIA_COUNTRY, ALGERIA_CITIES,
+  ALGERIA_COUNTRY, TUNISIA_CITIES, TUNISIA_COUNTRY, MAURITIUS_CITIES, MAURITIUS_COUNTRY,
+  GHANA_CITIES, GHANA_COUNTRY, ANGOLA_CITIES, ANGOLA_COUNTRY, DRC_CITIES, DRC_COUNTRY,
+  MEXICO_CITIES, MEXICO_COUNTRY, BRAZIL_CITIES, BRAZIL_COUNTRY, COLOMBIA_CITIES, COLOMBIA_COUNTRY,
+  ARGENTINA_CITIES, ARGENTINA_COUNTRY, CHILE_CITIES, CHILE_COUNTRY, PERU_CITIES, PERU_COUNTRY,
+  ECUADOR_CITIES, ECUADOR_COUNTRY, PANAMA_CITIES, PANAMA_COUNTRY, COSTA_RICA_CITIES,
+  COSTA_RICA_COUNTRY, DOMINICAN_CITIES, DOMINICAN_COUNTRY, URUGUAY_CITIES, URUGUAY_COUNTRY,
+  GUATEMALA_CITIES, GUATEMALA_COUNTRY, PARAGUAY_CITIES, PARAGUAY_COUNTRY, BOLIVIA_CITIES,
+  BOLIVIA_COUNTRY, VENEZUELA_CITIES, VENEZUELA_COUNTRY, PUERTO_RICO_CITIES, PUERTO_RICO_COUNTRY,
+  ISRAEL_CITIES, ISRAEL_COUNTRY, JORDAN_CITIES, JORDAN_COUNTRY, IRAQ_CITIES, IRAQ_COUNTRY,
+  CYPRUS_CITIES, CYPRUS_COUNTRY, LEBANON_CITIES, LEBANON_COUNTRY, MYANMAR_CITIES, MYANMAR_COUNTRY,
+  MALDIVES_CITIES, MALDIVES_COUNTRY, CHINA_CITIES, CHINA_COUNTRY, BANGLADESH_CITIES,
+  BANGLADESH_COUNTRY, NEPAL_CITIES, NEPAL_COUNTRY, TURKEY_CITIES, TURKEY_COUNTRY, KUWAIT_CITIES,
+  KUWAIT_COUNTRY, OMAN_CITIES, OMAN_COUNTRY, TAIWAN_CITIES, TAIWAN_COUNTRY, IRELAND_CITIES,
+  IRELAND_COUNTRY, UK_CITIES, UK_COUNTRY, INDIA_CITIES, INDIA_COUNTRY, GERMANY_CITIES,
+  GERMANY_COUNTRY, ROMANIA_CITIES, ROMANIA_COUNTRY, UKRAINE_CITIES, UKRAINE_COUNTRY,
+  VIETNAM_CITIES, VIETNAM_COUNTRY, THAILAND_CITIES, THAILAND_COUNTRY,
+} from '../data/lazyData.js'
 import { CURRICULA } from '../data/curricula.js'
 import { SERVICES } from '../data/services.js'
-import { FULL_ARTICLES } from '../data/fullArticles.js'
-import { US_STATES, US_STATES_LIST } from '../data/usStates.js'
-import { US_CITIES, US_CITIES_BY_STATE } from '../data/usCities.js'
-import { CA_PROVINCES, CA_PROVINCES_LIST } from '../data/caProvinces.js'
-import { CA_CITIES, CA_CITIES_BY_PROVINCE } from '../data/caCities.js'
-import { NAIROBI_AREAS } from '../data/nairobiAreas.js'
-import { UAE_AREAS } from '../data/uaeAreas.js'
-import { UK_AREAS, UK_AREAS_BY_CITY } from '../data/ukAreas.js'
-import { KENYA_CITIES, KENYA_COUNTRY } from '../data/kenyaCities.js'
-import { ETHIOPIA_CITIES, ETHIOPIA_COUNTRY } from '../data/ethiopiaCities.js'
-import { RWANDA_CITIES, RWANDA_COUNTRY } from '../data/rwandaCities.js'
-import { SOUTH_AFRICA_CITIES, SOUTH_AFRICA_COUNTRY } from '../data/southAfricaCities.js'
-import { QATAR_CITIES, QATAR_COUNTRY } from '../data/qatarCities.js'
-import { SAUDI_ARABIA_CITIES, SAUDI_ARABIA_COUNTRY } from '../data/saudiArabiaCities.js'
-import { UAE_CITIES, UAE_COUNTRY } from '../data/uaeCities.js'
-import { EGYPT_CITIES, EGYPT_COUNTRY } from '../data/egyptCities.js'
-import { MOROCCO_CITIES, MOROCCO_COUNTRY } from '../data/moroccoCities.js'
-import { SOUTH_KOREA_CITIES, SOUTH_KOREA_COUNTRY } from '../data/southKoreaCities.js'
-import { JAPAN_CITIES, JAPAN_COUNTRY } from '../data/japanCities.js'
-import { MALAYSIA_CITIES, MALAYSIA_COUNTRY } from '../data/malaysiaCities.js'
-import { SPAIN_CITIES, SPAIN_COUNTRY } from '../data/spainCities.js'
-import { DENMARK_CITIES, DENMARK_COUNTRY } from '../data/denmarkCities.js'
-import { FRANCE_CITIES, FRANCE_COUNTRY } from '../data/franceCities.js'
-import { ITALY_CITIES, ITALY_COUNTRY } from '../data/italyCities.js'
-import { POLAND_CITIES, POLAND_COUNTRY } from '../data/polandCities.js'
-import { PORTUGAL_CITIES, PORTUGAL_COUNTRY } from '../data/portugalCities.js'
-import { CZECH_CITIES, CZECH_COUNTRY } from '../data/czechCities.js'
-import { BELGIUM_CITIES, BELGIUM_COUNTRY } from '../data/belgiumCities.js'
-import { SWEDEN_CITIES, SWEDEN_COUNTRY } from '../data/swedenCities.js'
-import { NETHERLANDS_CITIES, NETHERLANDS_COUNTRY } from '../data/netherlandsCities.js'
-import { NORWAY_CITIES, NORWAY_COUNTRY } from '../data/norwayCities.js'
-import { NZ_CITIES, NZ_COUNTRY } from '../data/nzCities.js'
-import { AUSTRIA_CITIES, AUSTRIA_COUNTRY } from '../data/austriaCities.js'
-import { HUNGARY_CITIES, HUNGARY_COUNTRY } from '../data/hungaryCities.js'
-import { FINLAND_CITIES, FINLAND_COUNTRY } from '../data/finlandCities.js'
-import { GREECE_CITIES, GREECE_COUNTRY } from '../data/greeceCities.js'
-import { AZERBAIJAN_CITIES, AZERBAIJAN_COUNTRY } from '../data/azerbaijanCities.js'
-import { GEORGIA_CITIES, GEORGIA_COUNTRY } from '../data/georgiaCities.js'
-import { PAKISTAN_CITIES, PAKISTAN_COUNTRY } from '../data/pakistanCities.js'
-import { AUSTRALIA_CITIES, AUSTRALIA_COUNTRY } from '../data/australiaCities.js'
-import { LUXEMBOURG_CITIES, LUXEMBOURG_COUNTRY } from '../data/luxembourgCities.js'
-import { SWITZERLAND_CITIES, SWITZERLAND_COUNTRY } from '../data/switzerlandCities.js'
-import { SLOVAKIA_CITIES, SLOVAKIA_COUNTRY } from '../data/slovakiaCities.js'
-import { SLOVENIA_CITIES, SLOVENIA_COUNTRY } from '../data/sloveniaCities.js'
-import { CROATIA_CITIES, CROATIA_COUNTRY } from '../data/croatiaCities.js'
-import { SERBIA_CITIES, SERBIA_COUNTRY } from '../data/serbiaCities.js'
-import { BULGARIA_CITIES, BULGARIA_COUNTRY } from '../data/bulgariaCities.js'
-import { ALBANIA_CITIES, ALBANIA_COUNTRY } from '../data/albaniaCities.js'
-import { NORTH_MACEDONIA_CITIES, NORTH_MACEDONIA_COUNTRY } from '../data/northMacedoniaCities.js'
-import { MONTENEGRO_CITIES, MONTENEGRO_COUNTRY } from '../data/montenegroCities.js'
-import { BOSNIA_CITIES, BOSNIA_COUNTRY } from '../data/bosniaCities.js'
-import { KOSOVO_CITIES, KOSOVO_COUNTRY } from '../data/kosovoCities.js'
-import { ZAMBIA_CITIES, ZAMBIA_COUNTRY } from '../data/zambiaCities.js'
-import { ZIMBABWE_CITIES, ZIMBABWE_COUNTRY } from '../data/zimbabweCities.js'
-import { BOTSWANA_CITIES, BOTSWANA_COUNTRY } from '../data/botswanaCities.js'
-import { NAMIBIA_CITIES, NAMIBIA_COUNTRY } from '../data/namibiaCities.js'
-import { ALGERIA_CITIES, ALGERIA_COUNTRY } from '../data/algeriaCities.js'
-import { TUNISIA_CITIES, TUNISIA_COUNTRY } from '../data/tunisiaCities.js'
-import { MAURITIUS_CITIES, MAURITIUS_COUNTRY } from '../data/mauritiusCities.js'
-import { GHANA_CITIES, GHANA_COUNTRY } from '../data/ghanaCities.js'
-import { ANGOLA_CITIES, ANGOLA_COUNTRY } from '../data/angolaCities.js'
-import { DRC_CITIES, DRC_COUNTRY } from '../data/drcCities.js'
-import { MEXICO_CITIES, MEXICO_COUNTRY } from '../data/mexicoCities.js'
-import { BRAZIL_CITIES, BRAZIL_COUNTRY } from '../data/brazilCities.js'
-import { COLOMBIA_CITIES, COLOMBIA_COUNTRY } from '../data/colombiaCities.js'
-import { ARGENTINA_CITIES, ARGENTINA_COUNTRY } from '../data/argentinaCities.js'
-import { CHILE_CITIES, CHILE_COUNTRY } from '../data/chileCities.js'
-import { PERU_CITIES, PERU_COUNTRY } from '../data/peruCities.js'
-import { ECUADOR_CITIES, ECUADOR_COUNTRY } from '../data/ecuadorCities.js'
-import { PANAMA_CITIES, PANAMA_COUNTRY } from '../data/panamaCities.js'
-import { COSTA_RICA_CITIES, COSTA_RICA_COUNTRY } from '../data/costaRicaCities.js'
-import { DOMINICAN_CITIES, DOMINICAN_COUNTRY } from '../data/dominicanCities.js'
-import { URUGUAY_CITIES, URUGUAY_COUNTRY } from '../data/uruguayCities.js'
-import { GUATEMALA_CITIES, GUATEMALA_COUNTRY } from '../data/guatemalaCities.js'
-import { PARAGUAY_CITIES, PARAGUAY_COUNTRY } from '../data/paraguayCities.js'
-import { BOLIVIA_CITIES, BOLIVIA_COUNTRY } from '../data/boliviaCities.js'
-import { VENEZUELA_CITIES, VENEZUELA_COUNTRY } from '../data/venezuelaCities.js'
-import { PUERTO_RICO_CITIES, PUERTO_RICO_COUNTRY } from '../data/puertoRicoCities.js'
-import { ISRAEL_CITIES, ISRAEL_COUNTRY } from '../data/israelCities.js'
-import { JORDAN_CITIES, JORDAN_COUNTRY } from '../data/jordanCities.js'
-import { IRAQ_CITIES, IRAQ_COUNTRY } from '../data/iraqCities.js'
-import { CYPRUS_CITIES, CYPRUS_COUNTRY } from '../data/cyprusCities.js'
-import { LEBANON_CITIES, LEBANON_COUNTRY } from '../data/lebanonCities.js'
-import { MYANMAR_CITIES, MYANMAR_COUNTRY } from '../data/myanmarCities.js'
-import { MALDIVES_CITIES, MALDIVES_COUNTRY } from '../data/maldivesCities.js'
-import { CHINA_CITIES, CHINA_COUNTRY } from '../data/chinaCities.js'
-import { BANGLADESH_CITIES, BANGLADESH_COUNTRY } from '../data/bangladeshCities.js'
-import { NEPAL_CITIES, NEPAL_COUNTRY } from '../data/nepalCities.js'
-import { TURKEY_CITIES, TURKEY_COUNTRY } from '../data/turkeyCities.js'
-import { KUWAIT_CITIES, KUWAIT_COUNTRY } from '../data/kuwaitCities.js'
-import { OMAN_CITIES, OMAN_COUNTRY } from '../data/omanCities.js'
-import { TAIWAN_CITIES, TAIWAN_COUNTRY } from '../data/taiwanCities.js'
-import { IRELAND_CITIES, IRELAND_COUNTRY } from '../data/irelandCities.js'
-import { UK_CITIES, UK_COUNTRY } from '../data/ukCities.js'
-import { INDIA_CITIES, INDIA_COUNTRY } from '../data/indiaCities.js'
-import { GERMANY_CITIES, GERMANY_COUNTRY } from '../data/germanyCities.js'
-import { ROMANIA_CITIES, ROMANIA_COUNTRY } from '../data/romaniaCities.js'
-import { UKRAINE_CITIES, UKRAINE_COUNTRY } from '../data/ukraineCities.js'
-import { VIETNAM_CITIES, VIETNAM_COUNTRY } from '../data/vietnamCities.js'
-import { THAILAND_CITIES, THAILAND_COUNTRY } from '../data/thailandCities.js'
 import CountryCityPage from '../components/CountryCityPage.jsx'
 import CountryHub from '../components/CountryHub.jsx'
 import AssessmentForm from '../components/AssessmentForm.jsx'
@@ -2145,6 +2086,47 @@ function PhoneInput({ value, onChange, placeholder = '7XX XXX XXX', tone = 'ligh
   )
 }
 
+/* Placeholder for a page body whose data module is still loading (see
+   data/lazyData.js). Keeps roughly a page's height so the footer doesn't
+   jump. data-lazy-pending lets scripts/prerender.js wait it out. */
+function PageDataLoading({ failed, onRetry }) {
+  const bar = (w, h = 14, mb = 14, dark) => (
+    <div className={dark ? 'lp-skel lp-skel-d' : 'lp-skel'} style={{width:w,height:h,marginBottom:mb,borderRadius:6}}/>
+  )
+  return (
+    <div data-lazy-pending={failed ? undefined : ''} aria-busy={!failed} style={{minHeight:'80vh'}}>
+      <style>{`.lp-skel{background:linear-gradient(90deg,${V.bone2} 0%,${V.bone3} 50%,${V.bone2} 100%);background-size:200% 100%;animation:lp-skel 1.4s ease-in-out infinite}
+.lp-skel-d{background-image:linear-gradient(90deg,rgba(255,255,255,.05) 0%,rgba(255,255,255,.11) 50%,rgba(255,255,255,.05) 100%)}
+@keyframes lp-skel{0%{background-position:100% 0}100%{background-position:-100% 0}}
+@media (prefers-reduced-motion:reduce){.lp-skel{animation:none}}`}</style>
+      <div className="pg-hero"><div className="wrap">
+        {failed ? (
+          <>
+            <div className="eyebrow">Connection problem</div>
+            <h1 className="pg-h">This page <em>didn't load</em></h1>
+            <p className="pg-sub" style={{marginTop:12}}>Check your connection and try again.</p>
+            <button className="btn-p" style={{marginTop:24}} onClick={onRetry}>Try again</button>
+          </>
+        ) : (
+          <>
+            {bar(120, 12, 22, true)}
+            {bar('min(560px,90%)', 40, 14, true)}
+            {bar('min(420px,70%)', 40, 26, true)}
+            {bar('min(640px,100%)', 14, 14, true)}
+            {bar('min(520px,85%)', 14, 14, true)}
+          </>
+        )}
+      </div></div>
+      {!failed && (
+        <div className="wrap" style={{padding:'48px 20px'}}>
+          {bar('100%', 16)}{bar('92%', 16)}{bar('96%', 16)}{bar('60%', 16, 36)}
+          {bar('100%', 16)}{bar('88%', 16)}{bar('70%', 16)}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function LegalPage({ P, title, em, subtitle, effective, sections }) {
   return (
     <>
@@ -2716,13 +2698,41 @@ export default function LandingPage() {
     return '/' + id
   }
 
+  // Lazy page data (see data/lazyData.js). routeDataPending: the URL
+  // resolver is waiting for the module that defines a slug.
+  const [routeDataPending, setRouteDataPending] = useState(() =>
+    !isDataLoaded(dataKeysForPath(location.pathname.replace(/\/+$/, '') || '/')))
+  const [dataLoadFailed, setDataLoadFailed] = useState(false)
+  const [, setDataVersion] = useState(0)
+
   // Apply the URL to internal page state. Driven by a useEffect
-  // so browser back/forward and direct links all work.
+  // so browser back/forward and direct links all work. Slug routes
+  // (/homeschool-<slug>, /blog/<slug>…) first load the data module
+  // that defines the slug, then resolve exactly as before.
   useEffect(() => {
     const path = location.pathname.replace(/\/+$/, '') || '/'
+    const keys = dataKeysForPath(path)
+    if (isDataLoaded(keys)) {
+      setRouteDataPending(false)
+      applyPath(path)
+      return
+    }
+    let current = true
+    setRouteDataPending(true)
+    setDataLoadFailed(false)
+    loadData(keys).then(
+      () => { if (current) { setRouteDataPending(false); applyPath(path) } },
+      err => {
+        console.error('[site] page data failed to load:', err?.message)
+        if (current) setDataLoadFailed(true)
+      })
+    return () => { current = false }
+  }, [location.pathname])
+
+  function applyPath(path) {
     if (path.startsWith('/blog/')) {
       const slug = decodeURIComponent(path.slice('/blog/'.length))
-      if (slug && FULL_ARTICLES[slug]) {
+      if (slug && ARTICLES_INDEX[slug]) {
         setCurrentArticle(slug)
         setPage('article')
       } else {
@@ -3753,8 +3763,7 @@ export default function LandingPage() {
         setPage('homeschooling-ukraine')
         return
       }
-      const country = COUNTRIES.find(c => c.slug === slug)
-      if (country) {
+      if (COUNTRY_SLUGS.has(slug)) {
         setCurrentCountry(slug)
         setPage('country-detail')
       } else {
@@ -3916,7 +3925,7 @@ export default function LandingPage() {
     } else {
       setPage('home')
     }
-  }, [location.pathname])
+  }
 
   // ── Per-page SEO meta ──────────────────────────────────
   // Derive the title + description for the current page and
@@ -3958,10 +3967,10 @@ export default function LandingPage() {
       metaTitle = cmp.seoTitle
       metaDesc  = cmp.seoDesc
     }
-  } else if (page === 'article' && currentArticle && FULL_ARTICLES[currentArticle]) {
-    const a = FULL_ARTICLES[currentArticle]
+  } else if (page === 'article' && currentArticle && ARTICLES_INDEX[currentArticle]) {
+    const a = ARTICLES_INDEX[currentArticle]
     metaTitle = a.metaTitle || ((a.t || 'Article') + ' | ' + SITE)
-    metaDesc  = a.metaDesc || (a.intro || '').slice(0, 158)
+    metaDesc  = a.metaDesc
   } else if (page === 'state-landing' && currentStateSlug && US_STATES[currentStateSlug]) {
     const s = US_STATES[currentStateSlug]
     metaTitle = s.metaTitle || ('Online Homeschool ' + s.name + ' — Live Cambridge IGCSE & A-Level | ' + SITE)
@@ -4784,20 +4793,27 @@ export default function LandingPage() {
 
   const goPortal = () => nav('/login')
 
-  // Blog items are derived from FULL_ARTICLES — same content, same slugs
-  const BLOG_ITEMS = Object.entries(FULL_ARTICLES).map(([slug, a]) => ({
-    slug,
-    cat: a.cat,
-    country: a.country || 'kenya',
-    img: a.img,
-    splash: a.splash || null,
-    t: a.t,
-    date: a.date,
-    author: a.author,
-    role: a.role,
-    ex: a.intro.length > 150 ? a.intro.slice(0, 147) + '…' : a.intro,
-    featured: !!a.featured,
-  }))
+  // Blog items come from the generated article index (listing fields of
+  // every article, built from the articlesPart files) — same slugs
+  const BLOG_ITEMS = Object.entries(ARTICLES_INDEX).map(([slug, a]) => ({ slug, ...a }))
+
+  // Load the data modules this page renders from, if not loaded yet.
+  // Until then the page body shows <PageDataLoading/>.
+  const pageDataKeys = dataKeysForPage(page, currentArticle)
+  const pageDataReady = isDataLoaded(pageDataKeys)
+  useEffect(() => {
+    if (pageDataReady) return
+    let current = true
+    setDataLoadFailed(false)
+    loadData(pageDataKeys).then(
+      () => { if (current) setDataVersion(v => v + 1) },
+      err => {
+        console.error('[site] page data failed to load:', err?.message)
+        if (current) setDataLoadFailed(true)
+      })
+    return () => { current = false }
+  }, [pageDataKeys.join(','), pageDataReady])
+  const contentPending = routeDataPending || !pageDataReady
 
   const filtered = BLOG_ITEMS.filter(b =>
     (blogCat === 'all' || b.cat === blogCat) &&
@@ -5248,6 +5264,13 @@ export default function LandingPage() {
           </div>
         </div>
       )}
+
+      {/* Page bodies. While the page's data module is loading, show a
+          skeleton in their place (header and footer stay). */}
+      {contentPending ? (
+        // Retry reloads: browsers cache a failed import() for the page's lifetime
+        <PageDataLoading failed={dataLoadFailed} onRetry={() => window.location.reload()} />
+      ) : (<>
 
       {/* ══════════════════════════════════════════
           HOME
@@ -23280,7 +23303,7 @@ export default function LandingPage() {
           ARTICLE (single blog post)
       ══════════════════════════════════════════ */}
       {page === 'article' && (() => {
-        const a = currentArticle && FULL_ARTICLES[currentArticle]
+        const a = currentArticle && getFullArticle(currentArticle)
         if (!a) {
           return (
             <>
@@ -23293,7 +23316,7 @@ export default function LandingPage() {
                 </>
           )
         }
-        const related = Object.entries(FULL_ARTICLES).filter(([s, x]) => s !== currentArticle && x.cat === a.cat).slice(0, 3)
+        const related = Object.entries(ARTICLES_INDEX).filter(([s, x]) => s !== currentArticle && x.cat === a.cat).slice(0, 3)
         const prod = articleProduct(a)
         return (
           <>
@@ -23526,7 +23549,7 @@ export default function LandingPage() {
                           <div className="bc-body">
                             <div className="bc-date">{r.date}</div>
                             <div className="bc-h">{r.t}</div>
-                            <div className="bc-ex">{r.intro.slice(0, 120) + '…'}</div>
+                            <div className="bc-ex">{r.ex.slice(0, 120) + '…'}</div>
                             <div className="bc-rd">Read Article <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
                           </div>
                         </div>
@@ -23969,6 +23992,8 @@ export default function LandingPage() {
           </div>
         </div>
       )}
+
+      </>)}
 
       {/* ── FLOATING ASSISTANCE + WHATSAPP ── */}
       <div className="fab-stack">
