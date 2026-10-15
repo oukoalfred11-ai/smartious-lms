@@ -5782,4 +5782,29 @@
     <changefreq>monthly</changefreq>
     <lastmod>2026-10-15</lastmod>
   </url>
+  <!-- Policies -->
+  <url>
+    <loc>https://smartioushomeschool.com/academic-integrity</loc>
+    <priority>0.4</priority>
+    <changefreq>yearly</changefreq>
+    <lastmod>2026-10-15</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/ai-policy</loc>
+    <priority>0.4</priority>
+    <changefreq>yearly</changefreq>
+    <lastmod>2026-10-15</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/inclusion-policy</loc>
+    <priority>0.4</priority>
+    <changefreq>yearly</changefreq>
+    <lastmod>2026-10-15</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/language-policy</loc>
+    <priority>0.4</priority>
+    <changefreq>yearly</changefreq>
+    <lastmod>2026-10-15</lastmod>
+  </url>
 </urlset>
