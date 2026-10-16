@@ -29,7 +29,7 @@ export default [
         'Meter readings have random errors of about ±0.3 %.',
       ] },
     hidden: (q) => ({ rho: q('rho', 4.7, 5.1) * 1e-7, d: q.pick('d', [0.315, 0.345, 0.376, 0.417]) * (1 + 0.005 * q('dj', -1, 1)), rc: q('rc', 0.05, 0.15), r: q('r', 0.6, 1.0), E: q('E', 1.50, 1.60) }),
-    constants: [{ key: 'd', label: 'Diameter of wire', symbol: 'd', unit: 'mm', resolution: 0.001, instrument: 'micrometer', read: (p, n) => p.d + n(0.003) }],
+    constants: [{ key: 'd', label: 'Diameter of wire', symbol: 'd', unit: 'mm', resolution: 0.01, instrument: 'micrometer', read: (p, n) => p.d + n(0.003) }],
     iv: { key: 'l', label: 'Length of wire', symbol: 'l', unit: 'cm', min: 10, max: 90, step: 5, start: 10, instrument: 'resistance_wire' },
     measures: [
       { key: 'V', label: 'Potential difference', symbol: 'V', unit: 'V', resolution: 0.001, instrument: 'voltmeter',
