@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "node scripts/build-data-index.js && vite",
+    "dev": "node scripts/build-data-index.js && node scripts/seo-static.mjs --noindex-only && vite",
     "postinstall": "node scripts/install-chrome.js",
-    "build": "node scripts/build-data-index.js && vite build",
-    "postbuild": "cp dist/index.html dist/home.html && node scripts/seo-static.mjs || echo seo-static failed, pages served without static HTML",
+    "build": "node scripts/build-data-index.js && node scripts/seo-static.mjs --noindex-only && vite build",
+    "postbuild": "cp dist/index.html dist/home.html && node scripts/seo-static.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

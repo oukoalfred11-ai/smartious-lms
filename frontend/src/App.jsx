@@ -1,7 +1,6 @@
 import { lazy, Suspense, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { AuthProvider, ToastProvider, StoreProvider, useAuth } from './context/ctx.jsx'
-import LandingPage       from './pages/LandingPage.jsx'
 import LoginPage         from './pages/LoginPage.jsx'
 import PausedScreen from './components/PausedScreen.jsx'
 import AssessmentPaymentResult from './components/AssessmentPaymentResult.jsx'
@@ -12,6 +11,9 @@ import ResetPasswordPage from './pages/ResetPasswordPage.jsx'
 // website visitor downloaded the whole system (admin, teacher and
 // student portals, syllabus data, the video classroom): about 3 MB
 // compressed of code a parent reading the homepage never uses.
+// The marketing site is lazy too, so portal users never download it.
+const LandingPage    = lazy(() => import('./pages/LandingPage.jsx'))
+const ArabicPage     = lazy(() => import('./pages/ArabicPage.jsx'))
 const ClassroomPage  = lazy(() => import('./pages/ClassroomPage.jsx'))
 const AdminPortal    = lazy(() => import('./pages/admin/AdminPortal.jsx'))
 const OpsPortal      = lazy(() => import('./pages/admin/OpsPortal.jsx'))
@@ -58,6 +60,16 @@ const P = ({ children }) => {
   useEffect(() => { loadKatex() }, [])
   return <Suspense fallback={<PortalLoading />}>{children}</Suspense>
 }
+// A website screen: same Suspense wrapper, but without KaTeX, which the
+// website does not use.
+function SiteLoading() {
+  return (
+    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100vh', background:'var(--bg)' }}>
+      <div className="spinner" />
+    </div>
+  )
+}
+const W = ({ children }) => <Suspense fallback={<SiteLoading />}>{children}</Suspense>
 
 /**
  * App router.
@@ -136,8 +148,10 @@ export default function App() {
               <Route path="/parent/*"       element={<Guard roles={['parent']}><P><ParentPortal /></P></Guard>} />
               <Route path="/lab/*"          element={<Guard roles={['student','teacher','admin','dos','ops_manager']}><P><LabApp /></P></Guard>} />
               <Route path="/demo/*"         element={<Guard roles={['demo']}><P><DemoPortal /></P></Guard>} />
+              {/* Arabic marketing pages (ArabicPage reads the path itself) */}
+              <Route path="/ar/*"           element={<W><ArabicPage /></W>} />
               {/* Catch-all → LandingPage (handles /, /us-families, /about, /pricing, /blog/*, etc.) */}
-              <Route path="*"               element={<LandingPage />} />
+              <Route path="*"               element={<W><LandingPage /></W>} />
             </Routes>
           </BrowserRouter>
         </ToastProvider>

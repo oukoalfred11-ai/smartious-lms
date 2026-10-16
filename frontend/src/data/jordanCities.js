@@ -6,9 +6,9 @@
 // Jordan Valley.
 // SECOND MIDDLE EAST BUILD — 5 cities.
 //
-// IMAGE NOTE: heroImg / heroImage use LOCAL PATHS under /heroes/.
-// Drop a file at frontend/public/heroes/<slug>.jpg and it appears;
-// if absent the onError handler shows the ink→crimson gradient.
+// IMAGE NOTE: city pages have no heroImg (the hero falls back to the
+// ink→crimson gradient); the country hub uses /online-virtual-school.png.
+// To add a city photo, put it under frontend/public and set heroImg.
 //
 // *** TIMEZONE — THE HEADLINE. READ FIRST ***
 // Jordan runs UTC+3 YEAR-ROUND following the end of seasonal clock
@@ -76,7 +76,6 @@ export const JORDAN_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Amman',
     heroTagline: 'For Amman families — Cambridge and IB taught live on exactly your clock, at any hour of the day that suits you.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Amman families. The capital is a regional headquarters city — home to one of the largest concentrations of UN agencies, international NGOs and development organisations anywhere in the region, alongside a corporate and professional sector and a deep international school tier priced at the top of the regional market. It is also, uniquely in our coverage, on exactly our clock: Jordan runs UTC+3 year-round and so do we, so every hour of our teaching day is available to an Amman family, permanently and with no seasonal drift.',
-    heroImg: '/heroes/amman-jo.jpg',
     altTexts: { hero: 'Amman' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Amman families — taught on exactly your clock, at any hour. From USD 423/month.',
     challenges: [
@@ -141,7 +140,6 @@ export const JORDAN_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Aqaba',
     heroTagline: 'For Aqaba families — the country\'s only port and its economic zone, four hours from the capital\'s schools.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Aqaba families. The Red Sea city is Jordan\'s sole port, a special economic zone with its own investment and logistics regime, and a diving and tourism economy that draws visitors and operators from across Europe and the Gulf. It is a genuinely international working community, and Amman\'s school tier is four hours north. Live delivery reaches Aqaba identically — and because Jordan sits on exactly our teaching clock, a family here can take classes at whatever hour their week allows.',
-    heroImg: '/heroes/aqaba-jo.jpg',
     altTexts: { hero: 'Aqaba and the Red Sea' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Aqaba families — the port and economic zone, four hours from Amman. From USD 423/month.',
     challenges: [
@@ -203,7 +201,6 @@ export const JORDAN_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Irbid',
     heroTagline: 'For Irbid and northern families — a university city with medical and engineering ambitions, and almost no international schooling.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Irbid and northern Jordanian families. Irbid is the country\'s university city — Yarmouk University and the Jordan University of Science and Technology between them give the north a medical and engineering academic culture that few regional cities match, and one of the youngest populations in Jordan. Academic ambition here is high and international schooling is thin, with the tier concentrated in Amman an hour and a half south. We teach Cambridge and IB live across the north, at whatever hour suits.',
-    heroImg: '/heroes/irbid-jo.jpg',
     altTexts: { hero: 'Irbid and northern Jordan' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Irbid and northern Jordan families — a university city with thin international provision. From USD 423/month.',
     challenges: [
@@ -265,7 +262,6 @@ export const JORDAN_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Zarqa',
     heroTagline: 'For Zarqa and industrial-belt families — the refinery and manufacturing heartland, half an hour from Amman and a world from its schools.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Zarqa and industrial-belt families. Zarqa carries Jordan\'s industrial economy — the refinery, chemicals, manufacturing and the free zones around them — and is one of the country\'s largest population centres, yet its international provision is close to non-existent. Amman is half an hour away and its school tier is priced for a different market. For engineering and technical households here, the answer is not relocation but live delivery, on a clock that has no offset at all.',
-    heroImg: '/heroes/zarqa-jo.jpg',
     altTexts: { hero: 'The Jordanian industrial belt' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Zarqa and industrial-belt families — refinery and manufacturing heartland. From USD 423/month.',
     challenges: [
@@ -327,7 +323,6 @@ export const JORDAN_CITIES = [
     primaryKeyword: 'Online school and international curriculum in the Dead Sea and Jordan Valley',
     heroTagline: 'For Dead Sea and Jordan Valley families — mineral processing, agriculture and resorts, spread across a valley with no schools built for it.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Dead Sea and Jordan Valley families. The valley carries an unusual mix: potash, bromine and mineral processing operations of genuine industrial scale, intensive irrigated agriculture in one of the most distinctive growing environments on earth, and a resort and wellness sector along the shore. It is also dispersed — families are spread down a long valley rather than clustered near any town with a school tier. Live delivery reaches all of it, on a clock with no offset at all.',
-    heroImg: '/heroes/dead-sea-jo.jpg',
     altTexts: { hero: 'The Dead Sea and Jordan Valley' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Dead Sea and Jordan Valley families — mineral processing, agriculture and resorts. From USD 423/month.',
     challenges: [
@@ -413,7 +408,7 @@ export const JORDAN_COUNTRY = {
   secondaryProgrammeExamRef: 'Authorised Jordanian Cambridge provision',
   finalCTABadgeExamRef: 'Cambridge centres confirmed per family, per session',
 
-  heroImage: '/heroes/jordan.jpg',
+  heroImage: '/online-virtual-school.png',
   heroEyebrow: 'Online school for Jordan',
   heroH1Suffix: 'Jordan',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for development-sector, corporate, industrial and Jordanian families across Amman, Aqaba, Irbid, Zarqa and the Jordan Valley. Jordan is the first country in our entire coverage on exactly our teaching clock — UTC+3 year-round, both sides, no offset and no seasonal drift — so every hour of our day is genuinely available to you.',
@@ -439,7 +434,7 @@ export const JORDAN_COUNTRY = {
   ibDiplomaDelivery: 'Live online IB DP classes across all six subject groups plus Theory of Knowledge and Extended Essay supervision.',
   americanCurriculumSuits: 'Jordan families targeting US universities via Common Application.',
   americanCurriculumDelivery: 'American Curriculum with AP courses Grades 9-12, SAT/ACT preparation, Common App essay coaching.',
-  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2019 to make international qualifications accessible to families at online-delivery fees rather than campus ones. Jordan is the first country in our ninety-one that shares our clock exactly — same offset, all year, no drift — which makes it the one market where the timetable question simply does not arise.',
+  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2018 to make international qualifications accessible to families at online-delivery fees rather than campus ones. Jordan is the first country in our ninety-one that shares our clock exactly — same offset, all year, no drift — which makes it the one market where the timetable question simply does not arise.',
   founderUniversitySpecialism: 'Alfred holds a BEd in Mathematics and Physics — Smartious\'s Cambridge A-Level and IB Diploma STEM subjects are led personally when needed, suiting Zarqa\'s process engineering households, the valley\'s minerals sector and every medicine-bound student in Irbid and Amman. Head of Academics supervises curriculum delivery and university placement strategy per family.',
 
   competitorsIntro: 'Amman has one of the deepest international school tiers in the Levant — the Amman Baccalaureate School, the International Academy Amman, King\'s Academy, the American Community School, the Ahliyyah and Bishop\'s schools and the Modern American and Modern Montessori schools among them — with substantial IB and IGCSE provision built over decades. Those are strong institutions and their fees sit at the top of the regional market. Outside Amman the picture thins sharply: Zarqa is one of the country\'s largest population centres with almost nothing, Irbid is a major university city with little, and Aqaba and the valley have none.',

@@ -6,9 +6,9 @@
 // Petén and Puerto Barrios.
 // TWELFTH LATIN AMERICAN BUILD — 5 cities.
 //
-// IMAGE NOTE: heroImg / heroImage use LOCAL PATHS under /heroes/.
-// Drop a file at frontend/public/heroes/<slug>.jpg and it appears;
-// if absent the onError handler shows the ink→crimson gradient.
+// IMAGE NOTE: city pages have no heroImg (the hero falls back to the
+// ink→crimson gradient); the country hub uses /online-virtual-school.png.
+// To add a city photo, put it under frontend/public and set heroImg.
 //
 // LEGAL POSITIONING NOTE — HEDGE FIRMLY. SOURCING IS THIN:
 // - We could NOT verify Guatemalan home-education law against a
@@ -65,7 +65,6 @@ export const GUATEMALA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Guatemala City',
     heroTagline: 'For Guatemala City families — the capital tier\'s examinations at a fraction of its fees, taught in your morning.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Guatemala City families. The capital carries the corporate weight of Central America\'s largest economy, one of the region\'s biggest development and NGO communities, the diplomatic sector, and an international school tier to match — the Colegio Americano, Colegio Maya, Colegio Interamericano, the German and French schools — with substantial IB and American provision and fees at the top of the Central American market. On home education Guatemala is one of the markets where we know least, and we say so rather than filling the gap with confident prose.',
-    heroImg: '/heroes/guatemala-city-gt.jpg',
     altTexts: { hero: 'Guatemala City and the volcanoes' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Guatemala City families — the capital tier\'s curriculum at a fraction of its fees. From USD 423/month.',
     challenges: [
@@ -130,7 +129,6 @@ export const GUATEMALA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Antigua Guatemala',
     heroTagline: 'For Antigua families — a small colonial city with an outsized international community, and very little schooling built for it.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Antigua families. Few towns of Antigua\'s size anywhere carry an international community like this one: a UNESCO colonial centre that draws Spanish-language students from around the world, a long-established NGO and development presence, a growing remote-work and lifestyle-migration population, and hospitality and coffee businesses owned by families from North America and Europe who came and stayed. Guatemala City\'s international schools are an hour away over a mountain road. Smartious teaches Cambridge and IB live to Antigua in the Guatemalan morning.',
-    heroImg: '/heroes/antigua-gt.jpg',
     altTexts: { hero: 'Antigua Guatemala and Volcán de Agua' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Antigua Guatemala families — a large expat community, little local schooling. From USD 423/month.',
     challenges: [
@@ -193,7 +191,6 @@ export const GUATEMALA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Quetzaltenango',
     heroTagline: 'For Xela and western highland families — Guatemala\'s second city, four hours from the capital and outside its school map entirely.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Quetzaltenango families. Xela is Guatemala\'s second city and the commercial capital of the western highlands — a major university centre with medical and engineering faculties, a long-standing NGO, medical-mission and Spanish-language-school presence that brings international staff and volunteers through year after year, and a highland agricultural and textile economy. It is also four hours from the capital, which puts the country\'s international schooling firmly out of reach. Smartious teaches Cambridge and IB live across the western highlands.',
-    heroImg: '/heroes/quetzaltenango-gt.jpg',
     altTexts: { hero: 'Quetzaltenango and the western highlands' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Quetzaltenango and western highland families — second city, no international provision. From USD 423/month.',
     challenges: [
@@ -255,7 +252,6 @@ export const GUATEMALA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Petén and Flores',
     heroTagline: 'For Petén and Flores families — archaeology, conservation and tourism in the rainforest, five hundred kilometres from any international school.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Petén families. The northern department runs an economy unlike anywhere else in Guatemala: Tikal and the Maya Biosphere Reserve draw international archaeology, conservation and research staff on multi-year projects; a substantial tourism and hospitality industry works around Flores and Lake Petén Itzá; and agriculture and cattle occupy the lowlands. It is also the country\'s most remote department, with Guatemala City around five hundred kilometres south. International schooling here does not exist. Smartious teaches Cambridge and IB live to the Petén.',
-    heroImg: '/heroes/peten-gt.jpg',
     altTexts: { hero: 'Lake Petén Itzá and the Petén rainforest' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Petén and Flores families — Tikal, conservation and tourism, no international schooling. From USD 423/month.',
     challenges: [
@@ -317,7 +313,6 @@ export const GUATEMALA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Puerto Barrios',
     heroTagline: 'For Puerto Barrios and Izabal families — the port that moves Guatemala\'s trade, and a marine community with nowhere to school.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Izabal families. The Atlantic department carries Puerto Barrios and Santo Tomás de Castilla — the port complex through which most Guatemalan trade passes — alongside the banana and palm-oil plantations that supply European and North American markets, and the Río Dulce cruising community where sailors from across the Americas keep boats and, increasingly, live year-round. Guatemala City is around five hours west. International schooling in the department does not exist. Smartious teaches Cambridge and IB live to the Atlantic coast.',
-    heroImg: '/heroes/puerto-barrios-gt.jpg',
     altTexts: { hero: 'Río Dulce and the Guatemalan Caribbean coast' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Puerto Barrios, Río Dulce and Izabal families — the Atlantic port and marine community, no provision. From USD 423/month.',
     challenges: [
@@ -403,7 +398,7 @@ export const GUATEMALA_COUNTRY = {
   secondaryProgrammeExamRef: 'Authorised Guatemalan Cambridge provision',
   finalCTABadgeExamRef: 'Cambridge centres confirmed per family, per session',
 
-  heroImage: '/heroes/guatemala.jpg',
+  heroImage: '/online-virtual-school.png',
   heroEyebrow: 'Online school for Guatemala',
   heroH1Suffix: 'Guatemala',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for corporate, development-sector, expatriate, and Guatemalan families across Guatemala City, Antigua, Quetzaltenango, Petén, and Izabal. Guatemala is one of the markets where we know least on home education, and we say so rather than guessing. We teach nine hours ahead, so our classes land in the Guatemalan morning.',
@@ -429,7 +424,7 @@ export const GUATEMALA_COUNTRY = {
   ibDiplomaDelivery: 'Live online IB DP classes across all six subject groups plus Theory of Knowledge and Extended Essay supervision.',
   americanCurriculumSuits: 'Guatemala families targeting US universities via Common Application — the dominant overseas destination given the scale of the diaspora and the country\'s ties to the United States.',
   americanCurriculumDelivery: 'American Curriculum with AP courses Grades 9-12, SAT/ACT preparation, Common App essay coaching.',
-  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2019 to make international qualifications accessible to families at online-delivery fees rather than campus ones. Guatemala families join students across more than eighty countries — and Guatemala is a market where our development-sector families often already know us from a previous posting, because the curriculum travels even when the assignment ends.',
+  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2018 to make international qualifications accessible to families at online-delivery fees rather than campus ones. Guatemala families join students across more than eighty countries — and Guatemala is a market where our development-sector families often already know us from a previous posting, because the curriculum travels even when the assignment ends.',
   founderUniversitySpecialism: 'Alfred holds a BEd in Mathematics and Physics — Smartious\'s Cambridge A-Level and IB Diploma STEM subjects are led personally when needed, suiting Quetzaltenango\'s medical-faculty households and every science-bound student in the capital. Head of Academics supervises curriculum delivery and university placement strategy per family.',
 
   competitorsIntro: 'Guatemala City has a strong international tier for the region — the Colegio Americano, Colegio Maya, Colegio Interamericano, the German and French schools — with substantial IB and American provision and fees at the top of the Central American market. Outside the capital the picture collapses almost entirely: Antigua hosts an international community out of all proportion to its size with little schooling for it, Quetzaltenango is a city of hundreds of thousands four hours away, and Petén and Izabal have nothing at all despite hosting international archaeology, conservation, port and marine communities.',

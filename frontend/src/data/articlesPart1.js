@@ -271,7 +271,7 @@ export const ARTICLES_PART_1 = {
     intro:'US families spend over $7 billion annually on private tutoring, and math and science dominate that demand. Here is how to find the right online tutor in 2026.',
     sections:[
       {h:'What "best" actually means',p:'The best online math tutor is not the one with the most prestigious university. It is the one who matches your child\'s level, diagnoses gaps in the first 30 minutes, and builds measurable progress week over week. Prestige correlates weakly with teaching skill.'},
-      {h:'Major platforms — honest review',p:'Wyzant: large marketplace, variable quality, filter by verified reviews. Varsity Tutors: managed, $40–$90/hour. Preply: international, $15–$50/hour. Khan Academy + private tutor: free content reinforced by affordable one-on-one. Smartious: $8–$15/hour for international-standard tutors, competitive for US families.'},
+      {h:'Major platforms — honest review',p:'Wyzant: large marketplace, variable quality, filter by verified reviews. Varsity Tutors: managed, $40–$90/hour. Preply: international, $15–$50/hour. Khan Academy + private tutor: free content reinforced by affordable one-on-one. Smartious: USD 15/hour for live one-to-one online tuition with qualified tutors, competitive for US families.'},
       {h:'For AP Calculus, SAT Math, and ACT',p:'You want a tutor with: specific AP/SAT examiner training, at least 3 years teaching the exact test, access to current (within 2 years) official practice tests. Below those criteria, avoid.'},
       {h:'For chemistry and physics',p:'Laboratory reasoning is harder to teach online. Look for tutors with access to virtual-lab software (PhET, Labster) and the ability to annotate diagrams in real-time. A whiteboard-only session for physics is inadequate.'},
       {h:'For elementary math',p:'Below Grade 5, in-person or parent-led learning usually beats online one-on-one. Tutoring at this age works best when it targets a specific mastery gap with a definite endpoint.'},
@@ -376,6 +376,26 @@ export const ARTICLES_PART_1 = {
       {q:'What about Arabic language requirements?',a:'UAE policy allows homeschooled children to follow their home curriculum without mandatory Arabic. However if returning to UAE public schools is ever planned, Arabic instruction becomes important.'},
     ],
     conclusion:'Homeschooling in Dubai is legal, well-supported, and increasingly popular among expats in 2026. The regulatory environment is expat-friendly. Pair a quality online curriculum with weekly co-op participation, and your child gets the flexibility of homeschool with the social richness of expat Dubai.',
+    countryLinksHeading:'Start with our UAE hub',
+    countryLinksIntro:'Our UAE page is the main guide for families across all seven emirates: curricula, Gulf timetables, fees and how to enrol.',
+    countryLinks:[
+      {name:'Online school in the UAE', slug:'uae', note:'Cambridge IGCSE, A Level, IB and American programmes taught live on Gulf time, for every emirate.'},
+    ],
+    pageLinksHeading:'Dubai, Abu Dhabi, fees and enrolment',
+    pageLinksIntro:'Go straight to the page you need. Fees are from USD 423 a month for Primary, payable termly, and vary by curriculum and level.',
+    pageLinks:[
+      {name:'Homeschool in Dubai', href:'/homeschool-dubai-ae', note:'Full-time live classes and homeschooling for Dubai families.'},
+      {name:'Homeschool in Abu Dhabi', href:'/homeschool-abu-dhabi-ae', note:'Live online schooling for families in the capital.'},
+      {name:'Homeschooling in UAE fees', href:'/blog/online-school-fees-uae', note:'What online school and homeschooling cost in AED, explained plainly.'},
+      {name:'Fees and payment', href:'/pricing', note:'Current fees by curriculum and level.'},
+      {name:'Talk to admissions on WhatsApp', href:'https://wa.me/254745021212', note:'+254 745 021 212'},
+    ],
+    articleLinksHeading:'Read next',
+    articleLinks:[
+      {name:'Online School Fees in the UAE (2026/27)', slug:'online-school-fees-uae', note:'AED figures, payment terms and what is included.'},
+      {name:'Is Online School Recognised in the UAE?', slug:'online-school-recognised-uae', note:'KHDA, ADEK and Ministry of Education equivalency, explained carefully.'},
+      {name:'January 2027 Intake: UAE', slug:'january-2027-intake-uae', note:'Placement assessment, timetable and start dates on Gulf time.'},
+    ],
   },
   
   'british-curriculum-tutors-uae': {
@@ -482,7 +502,7 @@ export const ARTICLES_PART_1 = {
       {h:'WAEC vs IGCSE in Nigeria',p:'WAEC (West African Senior School Certificate Examination) is the Nigerian national exam, taken at the end of SS3 (age 17–18). IGCSE is the Cambridge international exam, increasingly chosen by families targeting international universities or private schools. About 1.5 million Nigerians sit WAEC annually; IGCSE numbers have grown from 5,000 in 2015 to over 40,000 in 2026.'},
       {h:'Why online tutoring wins in Nigeria',p:'Fuel costs make commuting expensive, power cuts disrupt in-person schooling, and Lagos traffic swallows 2–4 hours daily. Online tutoring avoids all three while giving access to UK-trained teachers Nigerian families otherwise cannot afford locally.'},
       {h:'Top-rated online tutoring platforms for Nigeria',p:'Smartious (personalized pricing, strong African exam familiarity), Explore Learning, AfricanFarmSchool, Tutoroo, and global platforms like Preply. For competitive university prep, Crimson Education and QWERTY Education focus on Ivy League applications from Nigeria.'},
-      {h:'Typical cost in naira',p:'Nigerian in-person tutoring: NGN 3,000–8,000/hour in Lagos and Abuja, NGN 2,000–5,000 in other cities. Online Nigerian tutors: NGN 2,500–6,000/hour. International online (Smartious): NGN 6,500–12,000/hour but with far more qualified tutors per naira.'},
+      {h:'Typical cost in naira',p:'Nigerian in-person tutoring: NGN 3,000–8,000/hour in Lagos and Abuja, NGN 2,000–5,000 in other cities. Online Nigerian tutors: NGN 2,500–6,000/hour. International online (Smartious): USD 15/hour, roughly NGN 23,000 at about NGN 1,550 to the dollar (approximate, October 2026; the naira fluctuates), with qualified international-curriculum tutors.'},
       {h:'Qualifications that matter for Nigerian students',p:'For WAEC: a tutor who has WAEC-specific past paper experience and understands the marking scheme nuances. For IGCSE: a Cambridge-trained tutor with at least 3 years teaching the exam board. Never hire a tutor who lists both WAEC and IGCSE without specialising in one — the exam conventions differ too much.'},
       {h:'Subjects where online tutoring delivers most',p:'WAEC Mathematics (NGN 12,000/hour in-person can be replaced by NGN 3,000/hour online without quality loss). WAEC Further Mathematics. WAEC English Language essay writing. IGCSE across the board. Chemistry and Physics with specialist online tutors often outperform Nigerian in-person teaching.'},
     ],
@@ -492,6 +512,24 @@ export const ARTICLES_PART_1 = {
       {q:'How many hours per week for WAEC success?',a:'For students targeting A1–B2 in 8 subjects, budget 2 hours per week per subject for 10 months. Total: 16 hours per week across all subjects.'},
     ],
     conclusion:'Nigerian students in 2026 have no excuse for poor WAEC or IGCSE outcomes if budget allows any online tutoring at all. The cost is one-third of in-person, the quality is higher, and the time savings are massive. Start 10 months before the exam, pick specialists, and measure monthly.',
+    countryLinksHeading:'Start with our Nigeria hub',
+    countryLinksIntro:'Our Nigeria page covers everything in one place: Cambridge and Edexcel pathways, WAT timetables, fees and how to enrol.',
+    countryLinks:[
+      {name:'Online school in Nigeria', slug:'nigeria', note:'Live classes on West Africa Time, from Primary to A Level.'},
+    ],
+    pageLinksHeading:'Lagos, Abuja and next steps',
+    pageLinks:[
+      {name:'Homeschool in Lagos', href:'/homeschool-lagos-ng', note:'Live online schooling for Lagos families.'},
+      {name:'Homeschool in Abuja', href:'/homeschool-abuja-ng', note:'Live online schooling for families in the FCT.'},
+      {name:'Online school fees in Nigeria', href:'/blog/online-school-fees-nigeria', note:'Approximate naira figures, explained plainly.'},
+      {name:'Talk to admissions on WhatsApp', href:'https://wa.me/254745021212', note:'+254 745 021 212'},
+    ],
+    articleLinksHeading:'Read next',
+    articleLinks:[
+      {name:'IGCSE vs WAEC: Which Should Your Child Take?', slug:'igcse-vs-waec', note:'A fair comparison for Nigerian families.'},
+      {name:'Private Candidate IGCSE in Nigeria', slug:'private-candidate-igcse-nigeria', note:'How homeschoolers enter Cambridge and Edexcel exams.'},
+      {name:'January 2027 Intake: Nigeria', slug:'january-2027-intake-nigeria', note:'Placement assessment and start dates on WAT.'},
+    ],
   },
   
   'home-lessons-lagos': {
@@ -515,6 +553,24 @@ export const ARTICLES_PART_1 = {
       {q:'Should we prefer men or women tutors?',a:'Gender does not predict teaching quality. Prioritise personality fit and subject expertise.'},
     ],
     conclusion:'Lagos home lessons cost far more than they should because the market is fragmented and quality-opaque. Families who take 2 weeks to research, verify credentials, and run trials save 30–50% over hasty hires. Or consider online tutoring from vetted platforms like Smartious where the vetting is already done for you.',
+    countryLinksHeading:'Start with our Nigeria hub',
+    countryLinksIntro:'Our Nigeria page covers everything in one place: Cambridge and Edexcel pathways, WAT timetables, fees and how to enrol.',
+    countryLinks:[
+      {name:'Online school in Nigeria', slug:'nigeria', note:'Live classes on West Africa Time, from Primary to A Level.'},
+    ],
+    pageLinksHeading:'Lagos, Abuja and next steps',
+    pageLinks:[
+      {name:'Homeschool in Lagos', href:'/homeschool-lagos-ng', note:'Live online schooling for Lagos families.'},
+      {name:'Homeschool in Abuja', href:'/homeschool-abuja-ng', note:'Live online schooling for families in the FCT.'},
+      {name:'Online school fees in Nigeria', href:'/blog/online-school-fees-nigeria', note:'Approximate naira figures, explained plainly.'},
+      {name:'Talk to admissions on WhatsApp', href:'https://wa.me/254745021212', note:'+254 745 021 212'},
+    ],
+    articleLinksHeading:'Read next',
+    articleLinks:[
+      {name:'IGCSE vs WAEC: Which Should Your Child Take?', slug:'igcse-vs-waec', note:'A fair comparison for Nigerian families.'},
+      {name:'Private Candidate IGCSE in Nigeria', slug:'private-candidate-igcse-nigeria', note:'How homeschoolers enter Cambridge and Edexcel exams.'},
+      {name:'January 2027 Intake: Nigeria', slug:'january-2027-intake-nigeria', note:'Placement assessment and start dates on WAT.'},
+    ],
   },
   
   'good-private-tutor-nigeria': {
@@ -584,6 +640,24 @@ export const ARTICLES_PART_1 = {
       {q:'Are tuition centres cheaper than private tutors?',a:'Per hour yes, but quality varies and group sizes dilute attention. For struggling students, one-on-one tutoring is more cost-effective despite the higher hourly rate.'},
     ],
     conclusion:'Nigerian private tutoring in 2026 rewards families who shop carefully, compare online alternatives, and negotiate. The difference between a well-hired tutor at NGN 5,000/hour and a mediocre one at NGN 8,000/hour can be a full letter grade in WAEC. Pay for value, not prestige.',
+    countryLinksHeading:'Start with our Nigeria hub',
+    countryLinksIntro:'Our Nigeria page covers everything in one place: Cambridge and Edexcel pathways, WAT timetables, fees and how to enrol.',
+    countryLinks:[
+      {name:'Online school in Nigeria', slug:'nigeria', note:'Live classes on West Africa Time, from Primary to A Level.'},
+    ],
+    pageLinksHeading:'Lagos, Abuja and next steps',
+    pageLinks:[
+      {name:'Homeschool in Lagos', href:'/homeschool-lagos-ng', note:'Live online schooling for Lagos families.'},
+      {name:'Homeschool in Abuja', href:'/homeschool-abuja-ng', note:'Live online schooling for families in the FCT.'},
+      {name:'Online school fees in Nigeria', href:'/blog/online-school-fees-nigeria', note:'Approximate naira figures, explained plainly.'},
+      {name:'Talk to admissions on WhatsApp', href:'https://wa.me/254745021212', note:'+254 745 021 212'},
+    ],
+    articleLinksHeading:'Read next',
+    articleLinks:[
+      {name:'IGCSE vs WAEC: Which Should Your Child Take?', slug:'igcse-vs-waec', note:'A fair comparison for Nigerian families.'},
+      {name:'Private Candidate IGCSE in Nigeria', slug:'private-candidate-igcse-nigeria', note:'How homeschoolers enter Cambridge and Edexcel exams.'},
+      {name:'January 2027 Intake: Nigeria', slug:'january-2027-intake-nigeria', note:'Placement assessment and start dates on WAT.'},
+    ],
   },
   
   // SOUTH AFRICA (5)

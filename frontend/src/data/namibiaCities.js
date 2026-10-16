@@ -5,9 +5,9 @@
 // across Windhoek, Walvis Bay and the coast, and the northern regions.
 // AFRICA BUILD — 3 cities.
 //
-// IMAGE NOTE: heroImg / heroImage use LOCAL PATHS under /heroes/.
-// Drop a file at frontend/public/heroes/<slug>.jpg and it appears;
-// if absent the onError handler shows the ink→crimson gradient.
+// IMAGE NOTE: city pages have no heroImg (the hero falls back to the
+// ink→crimson gradient); the country hub uses /online-virtual-school.png.
+// To add a city photo, put it under frontend/public and set heroImg.
 // Do NOT paste guessed stock-photo IDs.
 //
 // LEGAL POSITIONING NOTE — NAMIBIA IS THE STRONGEST HOME-EDUCATION
@@ -79,7 +79,6 @@ export const NAMIBIA_CITIES = [
     primaryKeyword: 'Online school and homeschool in Windhoek',
     heroTagline: 'For Windhoek families — Cambridge taught live from Nairobi, one hour ahead, in the African country with the clearest home-education statute we have found.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Windhoek families. Windhoek holds Namibia\'s government, its financial and mining-sector commercial centre, a diplomatic and development community, and a long-established German-heritage population that has shaped the city\'s schools as much as its architecture. It also holds the country\'s international-school tier, including IB provision and German-language schooling, priced at the top of the local market. Namibia is unusual in our African coverage for another reason: the Basic Education Act 3 of 2020 actually defines home schooling and requires it to be registered — a named statutory route rather than a grey area. We set out exactly what that does and does not settle.',
-    heroImg: '/heroes/windhoek-na.jpg',
     altTexts: { hero: 'Windhoek city centre' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Windhoek families — Namibia\'s registered home-schooling route explained, supplementary default. From USD 423/month.',
     challenges: [
@@ -115,7 +114,7 @@ export const NAMIBIA_CITIES = [
       ['German alongside the English-medium core', 'In a city with a long German-heritage community and strong ties to Germany, Cambridge German sits naturally beside the academic track.'],
       ['The tier\'s curriculum at a professional family\'s budget', 'Live small-group teaching from USD 5,076 a year against Windhoek international fees at the top of the local market.'],
       ['One hour from your teachers, all year', 'Namibia has run CAT year-round since 2017 and Kenya observes no daylight saving either, so classes land in the ordinary school day every week of the year.'],
-      ['An African school teaching African families', 'Nairobi-built and Nairobi-taught, serving families in 51 countries — not an overseas provider reaching in.'],
+      ['An African school teaching African families', 'Nairobi-built and Nairobi-taught, serving families in 40+ countries — not an overseas provider reaching in.'],
     ],
     growingReason: 'Windhoek holds Namibia\'s government, financial and mining commercial centre, a diplomatic community, and a long-established German-heritage population, alongside the country\'s international-school tier — in a system whose Basic Education Act 3 of 2020 defines and requires registration of home schooling. Namibia runs CAT (UTC+2) year-round, exactly one hour behind Nairobi EAT.',
     curricula: {
@@ -144,7 +143,6 @@ export const NAMIBIA_CITIES = [
     primaryKeyword: 'Online school and homeschool in Walvis Bay and Swakopmund',
     heroTagline: 'For Walvis Bay, Swakopmund and Erongo families — a port serving four countries, uranium mines inland, and almost no international schooling.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for coastal Namibian families. The Erongo coast carries an outsized share of the national economy: Walvis Bay is Namibia\'s principal port and the head of a logistics corridor running inland to Botswana, Zambia, and the DRC, with a substantial fishing and marine-industry sector alongside it; Swakopmund runs tourism and a strong German-heritage community; and the uranium operations at Rössing and Husab sit in the desert behind them, employing an internationally recruited technical workforce. International schooling on the coast is thin, and Windhoek is around four hours inland. Smartious delivers the Cambridge and IB pathways live along the coast, one hour ahead of you all year.',
-    heroImg: '/heroes/walvis-bay-na.jpg',
     altTexts: { hero: 'The Namibian coast at Walvis Bay' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Walvis Bay, Swakopmund and Erongo families — port, uranium and marine industry, thin international schooling. From USD 423/month.',
     challenges: [
@@ -207,7 +205,6 @@ export const NAMIBIA_CITIES = [
     primaryKeyword: 'Online school and homeschool in Oshakati and northern Namibia',
     heroTagline: 'For Oshakati, Ondangwa and Ongwediva families — where most Namibians live, and where no international school has ever been built.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for northern Namibian families. The four north-central regions hold the largest share of Namibia\'s population, and the Oshakati-Ondangwa-Ongwediva corridor is their commercial heart — retail and wholesale trade, transport, health and education services, a university presence, and cross-border commerce toward Angola. It is also the part of the country with no international schooling of any kind, and Windhoek is around seven hundred kilometres south. For northern families whose children are academically ambitious, the historical answer has been boarding in the capital or in South Africa. Smartious delivers the international pathways live to the north instead, one hour ahead of you all year.',
-    heroImg: '/heroes/oshakati-na.jpg',
     altTexts: { hero: 'Northern Namibia' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Oshakati, Ondangwa and northern Namibia families — no international schooling in the region. From USD 423/month.',
     challenges: [
@@ -294,7 +291,7 @@ export const NAMIBIA_COUNTRY = {
   secondaryProgrammeExamRef: 'Authorised Namibian Cambridge provision',
   finalCTABadgeExamRef: 'Cambridge centres confirmed per family, per session',
 
-  heroImage: '/heroes/namibia.jpg',
+  heroImage: '/online-virtual-school.png',
   heroEyebrow: 'Online school for Namibia',
   heroH1Suffix: 'Namibia',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for mining, marine, expat, and Namibian families across Windhoek, Walvis Bay and the coast, and the northern regions. Taught live from Nairobi — one hour ahead, every week of the year. Namibia is unusual in Africa for defining home schooling in statute and requiring it to be registered, and we explain exactly what that does and does not settle.',
@@ -305,7 +302,7 @@ export const NAMIBIA_COUNTRY = {
   citiesSectionBody: 'Smartious Namibia families concentrate across Windhoek (government, financial services, the mining sector\'s commercial centre, the German-heritage community, and the country\'s international tier), Walvis Bay and the Erongo coast (the national port and its corridor into three countries, the fishing and marine industry, Swakopmund\'s tourism, and the Rössing and Husab uranium operations inland), and Oshakati and the northern regions (where the largest share of Namibians live, and where no international school has ever been built). One statutory framework explained precisely, two working configurations, and the closest timezone alignment we have anywhere.',
 
   trustSignals: [
-    { h: 'An African school teaching African families', p: 'Smartious was founded in Nairobi in 2019 and teaches from two operational centres established 2022 and 2023 — an African school with international accreditation, serving students in 51 countries.' },
+    { h: 'An African school teaching African families', p: 'Smartious was founded in Nairobi in 2018 and teaches from two operational centres established 2022 and 2023 — an African school with international accreditation, serving families in 40+ countries.' },
     { h: 'One hour apart, every week of the year', p: 'Namibia has run CAT (UTC+2) year-round since abolishing seasonal time changes in 2017, and Kenya observes no daylight saving either. Live classes land in the ordinary Namibian school day and afternoon all year, with no seasonal drift.' },
     { h: 'The statute explained, including its hinge', p: 'The Basic Education Act 3 of 2020 defines home schooling as teaching a learner a legally approved academic curriculum at home instead of at a school, and requires registration. That phrase — legally approved academic curriculum — is the hinge, and whether a given international programme satisfies it is for the Ministry and your regional director to say, not us.' },
     { h: 'What we do not claim', p: 'We do not warrant that our programme is a legally approved academic curriculum for home-schooling registration purposes, and we do not present an absent penalty in the Act as permission. Our clean default is supplementary, where neither question arises.' },
@@ -320,7 +317,7 @@ export const NAMIBIA_COUNTRY = {
   ibDiplomaDelivery: 'Live online IB DP classes across all six subject groups plus Theory of Knowledge and Extended Essay supervision.',
   americanCurriculumSuits: 'Namibia families targeting US universities via Common Application.',
   americanCurriculumDelivery: 'American Curriculum with AP courses Grades 9-12, SAT/ACT preparation, Common App essay coaching.',
-  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2019 to make international qualifications accessible to African and internationally mobile families at online-delivery fees rather than campus ones. Namibia families join students in 51 other countries — and, like our Zambian, Zimbabwean, and Batswana families, they are an hour from their teachers rather than a continent away.',
+  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2018 to make international qualifications accessible to African and internationally mobile families at online-delivery fees rather than campus ones. Namibia families join students in 40+ countries — and, like our Zambian, Zimbabwean, and Batswana families, they are an hour from their teachers rather than a continent away.',
   founderUniversitySpecialism: 'Alfred holds a BEd in Mathematics and Physics — Smartious\'s Cambridge A-Level and IB Diploma STEM subjects are led personally when needed, suiting the Erongo coast\'s uranium and marine-engineering families and every medicine-bound student in Windhoek and the north. Head of Academics supervises curriculum delivery and university placement strategy per family.',
 
   competitorsIntro: 'Namibia\'s international schooling is a Windhoek story — a strong tier including IB provision and long-established German-language schooling, priced at the top of the local market. The Erongo coast has thin provision for an economy carrying the national port and the uranium mines, and the four northern regions, where the largest share of Namibians live, have none at all. Because the national senior certificate has deep Cambridge lineage, the qualification itself is familiar here; the gap is access to live teaching outside the capital.',
@@ -350,7 +347,7 @@ export const NAMIBIA_COUNTRY = {
     { h: 'The coast and the north served identically',                     p: 'Erongo carries the port and the uranium mines with thin provision; the northern regions hold most of the population and have none. Live delivery closes both gaps the same way.' },
     { h: 'The alternative to boarding',                                    p: 'Windhoek or South Africa has been the answer for coastal and northern families for decades. Identical live teaching reaches Walvis Bay and Oshakati instead.' },
     { h: 'German alongside the academic core',                             p: 'For Namibia\'s German-heritage community, Cambridge German sits naturally beside the English-medium track — and German universities read the record routinely.' },
-    { h: 'An African school teaching African families',                    p: 'Nairobi-built and Nairobi-taught, serving 51 countries, working to African school calendars and examination realities.' },
+    { h: 'An African school teaching African families',                    p: 'Nairobi-built and Nairobi-taught, serving families in 40+ countries, working to African school calendars and examination realities.' },
   ],
 
   faqs: [

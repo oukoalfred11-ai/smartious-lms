@@ -84,7 +84,6 @@ export const BOSNIA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Sarajevo',
     heroTagline: 'For Sarajevo families — live Cambridge delivery in a country where the rules depend on which canton you live in, and we tell you so first.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Sarajevo families. Sarajevo holds Bosnia and Herzegovina\'s diplomatic and international-organisation community, a technology and outsourcing sector that has grown steadily and pulled diaspora talent home, and most of what international schooling the country has — the International School of Sarajevo, QSI, and the private international-leaning schools around them. Bosnian education law is unusual and families deserve the structure first: a state Framework Law sets the principles, but the rules that actually govern your child are made by your canton, your entity, or Brčko District. Nine-year primary education is compulsory, parental-choice homeschooling is not established, and our clean default is supplementary — your enrolment carries the obligation while we teach the international track live alongside it.',
-    heroImg: '/heroes/sarajevo-ba.jpg',
     altTexts: { hero: 'Sarajevo old town and the surrounding hills' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Sarajevo families — supplementary beside your enrolment, with the cantonal framework explained. From USD 423/month.',
     challenges: [
@@ -150,7 +149,6 @@ export const BOSNIA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Banja Luka',
     heroTagline: 'For Banja Luka families — the second city, under a different education authority from Sarajevo, and with no international school of its own.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Banja Luka families. Banja Luka is Bosnia and Herzegovina\'s second city and Republika Srpska\'s administrative centre — banking, public administration, a university with a substantial student population, and a technology sector that has grown quickly and works largely for clients in Austria, Germany, and Scandinavia. Zagreb is under three hours west and Belgrade around four east, which shapes where families look. What the city does not have is an international school. It also sits under its own education authority, distinct from the cantons of the Federation, which is the first thing any honest guide should mention. Smartious delivers the international pathways live — supplementary alongside your school enrolment.',
-    heroImg: '/heroes/banja-luka-ba.jpg',
     altTexts: { hero: 'Banja Luka and the Vrbas river' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Banja Luka families — second city, own education authority, no international school. From USD 423/month.',
     challenges: [
@@ -213,7 +211,6 @@ export const BOSNIA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Mostar',
     heroTagline: 'For Mostar and Herzegovina families — home to one of the region\'s most respected IB schools, and to many families who will never get a place in it.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Mostar and Herzegovina families. Mostar is unusual in Bosnia and Herzegovina for having something genuinely world-class: United World College Mostar runs the IB Diploma and is among the most respected schools in this part of Europe, admitting selectively and internationally. We are not positioning against it, and no honest provider would. But a selective two-year IB programme serves a specific cohort, and around it sits a city with an international tourism economy, a returning diaspora, and families whose children are eleven, or not selected, or need a different route. Herzegovina beyond Mostar — Trebinje, Čapljina, Široki Brijeg — has nothing at all. Smartious delivers the pathways live across the region, supplementary alongside your school enrolment.',
-    heroImg: '/heroes/mostar-ba.jpg',
     altTexts: { hero: 'The Old Bridge at Mostar above the Neretva' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Mostar and Herzegovina families — beside UWC Mostar, and for the wider region with nothing. From USD 423/month.',
     challenges: [
@@ -276,7 +273,6 @@ export const BOSNIA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Tuzla',
     heroTagline: 'For Tuzla families — the industrial north-east, its own canton, its own rules, and no international school in any of it.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Tuzla families. Tuzla anchors Bosnia and Herzegovina\'s industrial north-east — a salt and chemicals tradition that gave the city its name, the country\'s largest thermal power plant, an engineering and manufacturing base, and a university whose faculties draw students from across the region. Tuzla Canton is among the most populous in the Federation and sets its own education rules within the state framework. What it does not have is international schooling. Smartious delivers the international pathways live across the north-east — supplementary alongside your school enrolment.',
-    heroImg: '/heroes/tuzla-ba.jpg',
     altTexts: { hero: 'Tuzla city centre and the surrounding hills' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Tuzla families — industrial north-east, own cantonal rules, no international schooling. From USD 423/month.',
     challenges: [
@@ -338,7 +334,6 @@ export const BOSNIA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Zenica',
     heroTagline: 'For Zenica and central Bosnian families — a steel city with global ownership and local schooling only.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Zenica and central Bosnian families. Zenica is the country\'s steel city — the ArcelorMittal works sit at the centre of an industrial corridor running through Kakanj, Visoko, and Travnik, with a metallurgical faculty and an engineering tradition behind them. Global ownership brings international management and technical staff into a valley whose schooling was built for a domestic workforce, and Sarajevo\'s small tier is an hour and a half south. Smartious delivers the international pathways live across central Bosnia — supplementary alongside your school enrolment.',
-    heroImg: '/heroes/zenica-ba.jpg',
     altTexts: { hero: 'Zenica and the central Bosnian valley' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Zenica and central Bosnia families — steel city, no international schooling. From USD 423/month.',
     challenges: [
@@ -400,7 +395,6 @@ export const BOSNIA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Brčko District',
     heroTagline: 'For Brčko families — a district with its own education authority, its own rules, and a river border with two countries.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for families in Brčko District. Brčko is unlike anywhere else in the country: a self-governing district under state sovereignty, belonging to neither entity exclusively, with its own administration and — importantly for any family reading about Bosnian education law — its own competent education authority, named as such in the state Framework Law alongside Republika Srpska, the Federation, and the cantons. Its economy runs on the Sava river port, the trade corridor into Croatia and Serbia, and the agriculture of the Posavina plain. It has no international schooling. Smartious delivers the international pathways live to the district — supplementary alongside your school enrolment.',
-    heroImg: '/heroes/brcko-ba.jpg',
     altTexts: { hero: 'Brčko and the Sava river' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Brčko District families — its own education authority, Sava trade corridor, no international schooling. From USD 423/month.',
     challenges: [
@@ -487,7 +481,7 @@ export const BOSNIA_COUNTRY = {
   secondaryProgrammeExamRef: 'Authorised Sarajevo and regional provision',
   finalCTABadgeExamRef: 'Cambridge centres confirmed per family, per session',
 
-  heroImage: '/heroes/bosnia-and-herzegovina.jpg',
+  heroImage: '/online-virtual-school.png',
   heroEyebrow: 'Online international school for Bosnia and Herzegovina',
   heroH1Suffix: 'Bosnia and Herzegovina',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for expat, diaspora, industrial, and Bosnian families across Sarajevo, Banja Luka, Mostar, Tuzla, Zenica, and Brčko District. One structural fact shapes everything here: a state Framework Law sets the principles, but the rules governing your child are made by your canton, your entity, or your district. Nine-year primary education is compulsory and parental-choice homeschooling is not established — so we run supplementary alongside your school, and we tell you where to check the rest.',
@@ -513,7 +507,7 @@ export const BOSNIA_COUNTRY = {
   ibDiplomaDelivery: 'Live online IB DP classes across all six subject groups plus Theory of Knowledge and Extended Essay supervision.',
   americanCurriculumSuits: 'Bosnia and Herzegovina families targeting US universities via Common Application.',
   americanCurriculumDelivery: 'American Curriculum with AP courses Grades 9-12, SAT/ACT preparation, Common App essay coaching.',
-  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in 2019 to make international qualifications (Cambridge, IB, American) accessible to families across emerging markets and international communities at online-delivery fees. Bosnia and Herzegovina families join students in 48 other countries — from Sarajevo to Nairobi\'s own Diamond Plaza HQ, the Neretva to the Sava.',
+  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2018 to make international qualifications (Cambridge, IB, American) accessible to families across emerging markets and international communities at online-delivery fees. Bosnia and Herzegovina families join students in 40+ countries — from Sarajevo to Nairobi\'s own Diamond Plaza HQ, the Neretva to the Sava.',
   founderUniversitySpecialism: 'Alfred holds a BEd in Mathematics and Physics — Smartious\'s Cambridge A-Level and IB Diploma STEM subjects are led personally when needed, suiting Zenica\'s metallurgists, Tuzla\'s chemical and energy families, and every medicine-bound student in the capital. Head of Academics supervises curriculum delivery and university placement strategy per family.',
 
   competitorsIntro: 'International schooling in Bosnia and Herzegovina is thin and Sarajevo-weighted, with one significant exception: United World College Mostar runs the IB Diploma and is among the most respected schools in this part of Europe. We do not position against it — a selective two-year programme and a live supplementary track serve different families, and frequently the same family at different ages. Everywhere else, from Banja Luka to Brčko, there is essentially nothing, which leaves the competitive space unusually clear.',

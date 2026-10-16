@@ -6,9 +6,9 @@
 // education systems, and on a strictly limited basis elsewhere.
 // SECOND EAST ASIA BUILD — 5 cities.
 //
-// IMAGE NOTE: heroImg / heroImage use LOCAL PATHS under /heroes/.
-// Drop a file at frontend/public/heroes/<slug>.jpg and it appears;
-// if absent the onError handler shows the ink→crimson gradient.
+// IMAGE NOTE: city pages have no heroImg (the hero falls back to the
+// ink→crimson gradient); the country hub uses /online-virtual-school.png.
+// To add a city photo, put it under frontend/public and set heroImg.
 //
 // *** THE MOST IMPORTANT REGULATORY NOTE IN THE ENTIRE SYSTEM ***
 // *** READ IN FULL BEFORE EDITING ANY PART OF THIS FILE ***
@@ -98,7 +98,6 @@ export const CHINA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Hong Kong',
     heroTagline: 'For Hong Kong families — a place in September, not a waiting list, and the A-Level sets even a strong school cannot always run.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Hong Kong families. Hong Kong is a Special Administrative Region with its own education system, curriculum and regulator, and one of the deepest international school sectors in the world — ESF, Harrow, Kellett, the Chinese International School, German Swiss, Canadian International and many more. The problem here has never been quality or availability of curriculum. It is places: admissions are among the most competitive anywhere and waiting lists are a well-known feature of the market. We have none.',
-    heroImg: '/heroes/hong-kong-cn.jpg',
     altTexts: { hero: 'Hong Kong harbour' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Hong Kong families — no waiting list, evening classes, subject depth. From USD 423/month.',
     challenges: [
@@ -163,7 +162,6 @@ export const CHINA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Macau',
     heroTagline: 'For Macau families — a small international sector, and Hong Kong\'s waiting lists an hour across the water.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Macau families. Macau is a Special Administrative Region with its own education system, running a distinctive mix of Portuguese-heritage, local Chinese and a small number of international schools alongside an integrated resort and hospitality economy that recruits management and specialist staff internationally. The international sector here is genuinely small for the size of that community, and Hong Kong — an hour away by ferry — has waiting lists of its own. Live delivery reaches Macau identically, in evening hours that suit both a school day and a hospitality household.',
-    heroImg: '/heroes/macau-cn.jpg',
     altTexts: { hero: 'Macau' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Macau families — a small international sector, evening classes. From USD 423/month.',
     challenges: [
@@ -225,7 +223,6 @@ export const CHINA_CITIES = [
     primaryKeyword: 'International curriculum information for Shanghai families',
     heroTagline: 'For Shanghai families — read this page before enquiring, because what we may offer here is genuinely limited.',
     intro: 'This page is written differently from the rest of our site, and deliberately so. Shanghai is the mainland\'s commercial and financial centre with a large international business community and an established international school sector — but mainland China regulates off-campus subject teaching in a way that directly affects a provider like us. The Double Reduction policy of July 2021 bans for-profit tutoring in academic subjects for students in compulsory education, and places a strict ban on foreign teachers physically based outside China teaching students in China. We are foreign teachers physically based outside China. So before anything else: we do not enrol compulsory-education-age students resident in mainland China for subject teaching, and we will not pretend otherwise to win a family.',
-    heroImg: '/heroes/shanghai-cn.jpg',
     altTexts: { hero: 'Shanghai' },
     seoDesc: 'Information for Shanghai families on international curricula and the regulatory position on off-campus subject teaching in mainland China. Smartious does not enrol compulsory-education-age mainland students.',
     challenges: [
@@ -281,7 +278,6 @@ export const CHINA_CITIES = [
     primaryKeyword: 'International curriculum information for Beijing families',
     heroTagline: 'For Beijing families — the same honest answer as Shanghai, and the reasons behind it.',
     intro: 'This page sets out the regulatory position rather than making an offer, because in mainland China that is the responsible order. Beijing holds the capital\'s diplomatic community, the country\'s leading universities and an established international school sector. It also sits under the Double Reduction policy, which bans for-profit tutoring in academic subjects for students in compulsory education and places a strict ban on foreign teachers physically based outside China teaching students in China. Smartious is a for-profit provider whose teachers are based outside China. We therefore do not enrol compulsory-education-age students resident in mainland China for subject teaching.',
-    heroImg: '/heroes/beijing-cn.jpg',
     altTexts: { hero: 'Beijing' },
     seoDesc: 'Information for Beijing families on international curricula and the regulatory position on off-campus subject teaching in mainland China. Smartious does not enrol compulsory-education-age mainland students.',
     challenges: [
@@ -336,7 +332,6 @@ export const CHINA_CITIES = [
     primaryKeyword: 'International curriculum information for Shenzhen families',
     heroTagline: 'For Shenzhen and Greater Bay families — the mainland position, and what changes across the border.',
     intro: 'This page sets out the regulatory position rather than making an offer. Shenzhen anchors the technology and manufacturing economy of the Pearl River delta with a young professional population and border crossings to Hong Kong, and it sits under the same mainland framework as Beijing and Shanghai: the Double Reduction policy bans for-profit tutoring in academic subjects for students in compulsory education and places a strict ban on foreign teachers physically based outside China teaching students in China. We do not enrol compulsory-education-age students resident in mainland China for subject teaching. What differs here is proximity — Hong Kong and Macau are Special Administrative Regions with their own education systems, and families who move across follow a different framework entirely.',
-    heroImg: '/heroes/shenzhen-cn.jpg',
     altTexts: { hero: 'Shenzhen and the Pearl River delta' },
     seoDesc: 'Information for Shenzhen and Greater Bay families on international curricula and the mainland regulatory position on off-campus subject teaching, and how Hong Kong and Macau differ.',
     challenges: [
@@ -416,7 +411,7 @@ export const CHINA_COUNTRY = {
   secondaryProgrammeExamRef: 'Authorised Hong Kong and Macau provision',
   finalCTABadgeExamRef: 'Cambridge centres confirmed per family, per session',
 
-  heroImage: '/heroes/china.jpg',
+  heroImage: '/online-virtual-school.png',
   heroEyebrow: 'Online school for Hong Kong and Macau',
   heroH1Suffix: 'Hong Kong, Macau and China',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families in the Hong Kong and Macau Special Administrative Regions, which have their own education systems. For mainland China we set out the regulatory position honestly first: the Double Reduction policy constrains what a provider based outside China may offer, and we do not enrol compulsory-education-age mainland residents for subject teaching.',
@@ -442,7 +437,7 @@ export const CHINA_COUNTRY = {
   ibDiplomaDelivery: 'Live online IB DP classes across all six subject groups plus Theory of Knowledge and Extended Essay supervision.',
   americanCurriculumSuits: 'Hong Kong and Macau families targeting American universities via Common Application.',
   americanCurriculumDelivery: 'American Curriculum with AP courses Grades 9-12, SAT/ACT preparation, Common App essay coaching.',
-  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2019 to make international qualifications accessible to families at online-delivery fees rather than campus ones. China is the one market in our coverage where we have narrowed the offer rather than widened it — the mainland regulatory framework speaks directly to providers based outside the country, and we would rather serve Hong Kong and Macau properly than pretend the mainland position is something it is not.',
+  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2018 to make international qualifications accessible to families at online-delivery fees rather than campus ones. China is the one market in our coverage where we have narrowed the offer rather than widened it — the mainland regulatory framework speaks directly to providers based outside the country, and we would rather serve Hong Kong and Macau properly than pretend the mainland position is something it is not.',
   founderUniversitySpecialism: 'Alfred holds a BEd in Mathematics and Physics — Smartious\'s Cambridge A-Level and IB Diploma STEM subjects are led personally when needed, which suits the Hong Kong students most often looking for a Further Mathematics or Physics set their school cannot run. Head of Academics supervises curriculum delivery and university placement strategy per family.',
 
   competitorsIntro: 'Hong Kong has one of the deepest and most competitive international school sectors in the world — ESF, Harrow, Kellett, the Chinese International School, German Swiss, Canadian International and many others — with fees among the highest anywhere and, at some schools, debentures and capital levies on top. Those are outstanding institutions and we would not pretend to improve on them. The gap in Hong Kong is not quality but access: waiting lists, mid-year arrivals with nowhere to go, and specialist A-Level sets that will not run for four students. Macau\'s international sector is much smaller relative to its internationally recruited workforce. For mainland China we are not competing at all, and our pages there say so.',

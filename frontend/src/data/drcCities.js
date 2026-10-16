@@ -5,9 +5,9 @@
 // across Kinshasa, Lubumbashi, and Kolwezi.
 // CENTRAL AFRICA BUILD — 3 cities.
 //
-// IMAGE NOTE: heroImg / heroImage use LOCAL PATHS under /heroes/.
-// Drop a file at frontend/public/heroes/<slug>.jpg and it appears;
-// if absent the onError handler shows the ink→crimson gradient.
+// IMAGE NOTE: city pages have no heroImg (the hero falls back to the
+// ink→crimson gradient); the country hub uses /online-virtual-school.png.
+// To add a city photo, put it under frontend/public and set heroImg.
 // Do NOT paste guessed stock-photo IDs.
 //
 // LEGAL POSITIONING NOTE — READ CAREFULLY. THE DRC HAS THE STRONGEST
@@ -84,7 +84,6 @@ export const DRC_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Kinshasa',
     heroTagline: 'For Kinshasa families — the Cambridge and IB route at a fraction of the capital tier\'s fees, with French kept alongside.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Kinshasa families. Kinshasa is one of the largest cities in Africa and carries the country\'s political, banking, and corporate weight, alongside one of the biggest NGO, UN, and diplomatic communities on the continent. Its international schooling — the American school, the French lycée, the Belgian school, and a substantial private bilingual sector — is genuinely established and priced at the top of the local market. Under the loi-cadre of 2014 the State\'s obligations run to basic education, and private establishments operate under an agrément regime. Our clean default is supplementary: your school carries the enrolment, and we teach the Cambridge or IB track live alongside it.',
-    heroImg: '/heroes/kinshasa-cd.jpg',
     altTexts: { hero: 'Kinshasa and the Congo river' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Kinshasa families — alongside your school, at a fraction of the capital tier\'s fees. From USD 423/month.',
     challenges: [
@@ -120,7 +119,7 @@ export const DRC_CITIES = [
       ['French kept alongside the English-medium core', 'Cambridge French runs beside the academic track, protecting Belgian and French university routes that Congolese families rely on.'],
       ['Built for a community that rotates', 'NGO, UN, and diplomatic postings move constantly; the curriculum, teachers, and examination board stay constant across every move.'],
       ['What we are, stated plainly', 'Private establishments here operate under an agrément regime. Smartious is not an agréé Congolese establishment — we work alongside your school.'],
-      ['An African school teaching African families', 'Nairobi-built and Nairobi-taught, serving families in 57 countries.'],
+      ['An African school teaching African families', 'Nairobi-built and Nairobi-taught, serving families in 40+ countries.'],
     ],
     growingReason: 'Kinshasa is one of Africa\'s largest cities and the country\'s political, banking, and corporate capital, with one of the biggest NGO and diplomatic communities on the continent and an established international-school tier at premium fees. Kinshasa runs WAT (UTC+1), two hours behind Nairobi EAT, with no daylight saving.',
     curricula: {
@@ -149,7 +148,6 @@ export const DRC_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Lubumbashi',
     heroTagline: 'For Lubumbashi families — the mining capital, closer to our teaching clock than Kinshasa is, and far thinner on international schooling.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Lubumbashi families. Lubumbashi is the DRC\'s second city and the commercial capital of the copper and cobalt industry — the mining houses\' regional offices, the smelters and processing plants, the logistics chains running south to Zambia and on to the Indian Ocean and west along the Lobito Corridor, and a substantial university and medical-faculty community. International schooling here is far thinner than in Kinshasa, and the capital is a long flight away. One useful detail: Haut-Katanga runs CAT, only one hour behind our Nairobi teaching base, which makes scheduling easier here than in the capital.',
-    heroImg: '/heroes/lubumbashi-cd.jpg',
     altTexts: { hero: 'Lubumbashi and the Katanga mining region' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Lubumbashi families — the mining capital, thin international schooling, one hour from Nairobi. From USD 423/month.',
     challenges: [
@@ -212,7 +210,6 @@ export const DRC_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Kolwezi',
     heroTagline: 'For Kolwezi and Lualaba families — the mineral the world is competing for, mined by a workforce whose children have nowhere to study.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for families across Kolwezi and the Lualaba cobalt belt. Kolwezi sits at the centre of the most strategically watched mining region on earth: the copper and cobalt operations across Lualaba supply the batteries the global energy transition runs on, and they are staffed by engineers, metallurgists, geologists, and managers recruited from four continents, much of it on rotation. What the region does not have is international schooling. For most of these families the choices have been boarding in Lubumbashi, South Africa, or further afield, or keeping the household in another country entirely. Smartious delivers live Cambridge and IB teaching to the cobalt belt instead, one hour behind Nairobi.',
-    heroImg: '/heroes/kolwezi-cd.jpg',
     altTexts: { hero: 'The Lualaba mining region' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Kolwezi and Lualaba families — the world\'s cobalt capital, no international schooling. From USD 423/month.',
     challenges: [
@@ -299,7 +296,7 @@ export const DRC_COUNTRY = {
   secondaryProgrammeExamRef: 'Authorised Kinshasa and regional provision',
   finalCTABadgeExamRef: 'Cambridge centres confirmed per family, per session',
 
-  heroImage: '/heroes/drc.jpg',
+  heroImage: '/online-virtual-school.png',
   heroEyebrow: 'Online school for the DR Congo',
   heroH1Suffix: 'the DR Congo',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for mining, corporate, NGO, and Congolese families across Kinshasa, Lubumbashi, and Kolwezi. The loi-cadre of 2014 guarantees unusually explicit parental liberties, and private establishments require agrément — so we work alongside your school, and we say plainly that we are not an agréé Congolese establishment. The mining southeast sits just one hour behind our teaching base.',
@@ -310,7 +307,7 @@ export const DRC_COUNTRY = {
   citiesSectionBody: 'Smartious DRC families concentrate across Kinshasa (one of Africa\'s largest cities, the political and banking capital, one of the continent\'s biggest NGO and diplomatic communities, and an established international tier at premium fees), Lubumbashi (the mining capital and second city, with far thinner provision and — usefully — a clock one hour rather than two behind ours), and Kolwezi and the Lualaba cobalt belt (the most strategically watched mining region on earth, staffed from four continents, with essentially no international schooling). One agrément regime, one supplementary configuration, and a country that spans two time zones.',
 
   trustSignals: [
-    { h: 'An African school teaching African families', p: 'Smartious was founded in Nairobi in 2019 and teaches from two operational centres established 2022 and 2023, serving students in 57 countries — an African school with international accreditation, not an overseas provider reaching in.' },
+    { h: 'An African school teaching African families', p: 'Smartious was founded in Nairobi in 2018 and teaches from two operational centres established 2022 and 2023, serving families in 40+ countries — an African school with international accreditation, not an overseas provider reaching in.' },
     { h: 'Two time zones, and the mining belt is closer to us', p: 'Kinshasa runs WAT, two hours behind Nairobi; Lubumbashi and Kolwezi run CAT, just one hour behind. Neither observes daylight saving, so both offsets are fixed — and the mining southeast is better aligned with our teaching day than the capital is.' },
     { h: 'The liberties stated accurately, and not over-read', p: 'The loi-cadre of 2014 guarantees the freedom to create, organise and attend an establishment, the freedom of parents to choose a public or private school, and the freedom of parents to choose the type of education corresponding to their convictions. We quote those accurately — and we do not claim they establish a home-education route.' },
     { h: 'What we are, stated plainly', p: 'Private establishments in the DRC require agrément following prior authorisation to open. Smartious is not an agréé Congolese establishment and does not present itself as one — we work alongside your school.' },
@@ -325,7 +322,7 @@ export const DRC_COUNTRY = {
   ibDiplomaDelivery: 'Live online IB DP classes across all six subject groups plus Theory of Knowledge and Extended Essay supervision.',
   americanCurriculumSuits: 'DRC families targeting American universities via Common Application.',
   americanCurriculumDelivery: 'American Curriculum with AP courses Grades 9-12, SAT/ACT preparation, Common App essay coaching.',
-  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2019 to make international qualifications accessible to African and internationally mobile families at online-delivery fees rather than campus ones. DRC families join students in 57 other countries — and our Katanga and Lualaba families are closer to their teachers on the clock than families in their own capital.',
+  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2018 to make international qualifications accessible to African and internationally mobile families at online-delivery fees rather than campus ones. DRC families join students in 40+ countries — and our Katanga and Lualaba families are closer to their teachers on the clock than families in their own capital.',
   founderUniversitySpecialism: 'Alfred holds a BEd in Mathematics and Physics — Smartious\'s Cambridge A-Level and IB Diploma STEM subjects are led personally when needed, suiting the cobalt belt\'s metallurgy and geoscience families and every medicine-bound student in Kinshasa and Lubumbashi. Head of Academics supervises curriculum delivery and university placement strategy per family.',
 
   competitorsIntro: 'International schooling in the DRC is concentrated in Kinshasa — the American school, the French lycée, the Belgian school, and a private bilingual sector — and it is established and priced at the top of the local market. Lubumbashi, the second city and the mining capital, has far less. Kolwezi and the Lualaba cobalt belt, which supply a strategically critical share of the world\'s battery minerals, have essentially nothing. In a country this size the gap is not a market share; it is most of the map.',

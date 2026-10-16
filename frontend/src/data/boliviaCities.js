@@ -6,9 +6,9 @@
 // and Potosí.
 // FOURTEENTH LATIN AMERICAN BUILD — 5 cities.
 //
-// IMAGE NOTE: heroImg / heroImage use LOCAL PATHS under /heroes/.
-// Drop a file at frontend/public/heroes/<slug>.jpg and it appears;
-// if absent the onError handler shows the ink→crimson gradient.
+// IMAGE NOTE: city pages have no heroImg (the hero falls back to the
+// ink→crimson gradient); the country hub uses /online-virtual-school.png.
+// To add a city photo, put it under frontend/public and set heroImg.
 //
 // LEGAL POSITIONING NOTE — BOLIVIA HAS A STRICT STATUTE AND A REAL
 // WORKING PRACTICE. BOTH MUST BE STATED. READ ALL:
@@ -95,7 +95,6 @@ export const BOLIVIA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Santa Cruz de la Sierra',
     heroTagline: 'For Santa Cruz families — Cambridge and IB taught live alongside your school or your colegio sombrilla, whichever you hold.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Santa Cruz families. The eastern lowland capital is Bolivia\'s economic engine — soy, cattle and agro-industry at export scale, gas services, corporate headquarters, and the fastest population growth in the country — with the strongest international school tier Bolivia has, including the Santa Cruz Cooperative School and the German and Anglo-American schools. Bolivia\'s legal framework is strict on educating outside school and yet a real working practice has developed here, and we set out both accurately before anything else.',
-    heroImg: '/heroes/santa-cruz-bo.jpg',
     altTexts: { hero: 'Santa Cruz de la Sierra' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Santa Cruz de la Sierra families — the colegio sombrilla practice explained, morning classes. From USD 423/month.',
     challenges: [
@@ -160,7 +159,6 @@ export const BOLIVIA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in La Paz',
     heroTagline: 'For La Paz and El Alto families — a diplomatic and development capital where postings rotate and curricula should not.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for La Paz and El Alto families. The seat of government hosts the diplomatic corps, the international organisations, and one of the largest development and NGO sectors in South America — a population defined by two- and three-year postings — alongside El Alto\'s manufacturing and commercial economy on the altiplano above. For a family who will be in Lima or Nairobi or Geneva next, a curriculum that continues unchanged is worth more than any single campus. Smartious teaches Cambridge and IB live to La Paz, alongside whichever Bolivian arrangement a family holds.',
-    heroImg: '/heroes/la-paz-bo.jpg',
     altTexts: { hero: 'La Paz and Illimani' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for La Paz and El Alto families — a development capital built for rotation. From USD 423/month.',
     challenges: [
@@ -222,7 +220,6 @@ export const BOLIVIA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Cochabamba',
     heroTagline: 'For Cochabamba families — the valley city with a long international community and a short list of international schools.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Cochabamba families. The valley city sits at the centre of Bolivia\'s agricultural processing economy, hosts a major university sector, and has carried a long-established missionary, NGO and international volunteer presence — one of the reasons Bolivia\'s homeschooling community has historically been strongest in the eje troncal of which Cochabamba is part. The climate and cost of living have drawn international residents for decades; the international schooling has stayed a short list. Smartious teaches Cambridge and IB live to the valley.',
-    heroImg: '/heroes/cochabamba-bo.jpg',
     altTexts: { hero: 'Cochabamba and the valley' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Cochabamba families — valley university city, missionary and NGO community. From USD 423/month.',
     challenges: [
@@ -284,7 +281,6 @@ export const BOLIVIA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Tarija',
     heroTagline: 'For Tarija and southern gas families — the fields that fund the country, with schooling built for a provincial capital.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Tarija families. The southern department holds Bolivia\'s hydrocarbon heartland — the gas fields, processing plants and pipeline infrastructure that have funded a substantial share of national revenue, with an engineering and operations workforce recruited nationally and internationally — alongside a distinctive high-altitude wine and viticulture industry and the corridor to the Argentine border. International schooling in the department is minimal, and Santa Cruz and La Paz are both a flight away. Smartious teaches Cambridge and IB live to the south.',
-    heroImg: '/heroes/tarija-bo.jpg',
     altTexts: { hero: 'Tarija valley and vineyards' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Tarija and southern Bolivia families — gas fields and vineyards, minimal provision. From USD 423/month.',
     challenges: [
@@ -346,7 +342,6 @@ export const BOLIVIA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Potosí and Uyuni',
     heroTagline: 'For Potosí, Uyuni and southwestern families — five centuries of mining and the world\'s largest lithium flat, with no international school between them.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for families across southwestern Bolivia. Potosí carries an mining economy five centuries old — silver, tin, zinc and the cooperatives that still work Cerro Rico — alongside something much newer: the Salar de Uyuni holds one of the largest lithium resources on earth, and the industrialisation projects around it have drawn international technical and engineering interest to one of the highest and most remote inhabited regions anywhere. What has not arrived is schooling. Smartious teaches Cambridge and IB live to the southwest.',
-    heroImg: '/heroes/potosi-bo.jpg',
     altTexts: { hero: 'The Salar de Uyuni' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Potosí, Uyuni and southwestern Bolivia families — mining and lithium, no international schooling. From USD 423/month.',
     challenges: [
@@ -433,7 +428,7 @@ export const BOLIVIA_COUNTRY = {
   secondaryProgrammeExamRef: 'Authorised Bolivian Cambridge provision',
   finalCTABadgeExamRef: 'Cambridge centres confirmed per family, per session',
 
-  heroImage: '/heroes/bolivia.jpg',
+  heroImage: '/online-virtual-school.png',
   heroEyebrow: 'Online school for Bolivia',
   heroH1Suffix: 'Bolivia',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for agro-industrial, mining, gas, development-sector and Bolivian families across Santa Cruz, La Paz, Cochabamba, Tarija and Potosí. Bolivia has a strict statute and a real working practice — Ley 070 makes education compulsory to bachillerato, while colegios sombrilla operate under the online-education regulation — and we explain both, including exactly where we do and do not fit.',
@@ -459,7 +454,7 @@ export const BOLIVIA_COUNTRY = {
   ibDiplomaDelivery: 'Live online IB DP classes across all six subject groups plus Theory of Knowledge and Extended Essay supervision.',
   americanCurriculumSuits: 'Bolivia families targeting US universities via Common Application.',
   americanCurriculumDelivery: 'American Curriculum with AP courses Grades 9-12, SAT/ACT preparation, Common App essay coaching.',
-  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2019 to make international qualifications accessible to families at online-delivery fees rather than campus ones. Bolivia is the market where a domestic solution already exists for the domestic problem — colegios sombrilla carry the Bolivian side — which makes it unusually easy for us to say exactly what we add and what we do not.',
+  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2018 to make international qualifications accessible to families at online-delivery fees rather than campus ones. Bolivia is the market where a domestic solution already exists for the domestic problem — colegios sombrilla carry the Bolivian side — which makes it unusually easy for us to say exactly what we add and what we do not.',
   founderUniversitySpecialism: 'Alfred holds a BEd in Mathematics and Physics — Smartious\'s Cambridge A-Level and IB Diploma STEM subjects are led personally when needed, suiting Potosí\'s mining and lithium households, Tarija\'s gas engineering families, and every medicine-bound student in Cochabamba and Santa Cruz. Head of Academics supervises curriculum delivery and university placement strategy per family.',
 
   competitorsIntro: 'Bolivia\'s international schooling concentrates in Santa Cruz, La Paz and Cochabamba — the Santa Cruz Cooperative School, the German and Anglo-American schools, the American Cooperative School in La Paz — with fees at the top of the local market. Outside those three cities there is essentially nothing, which matters in a country whose gas, mining and lithium economies sit in Tarija and Potosí. Bolivia also has a competitive feature few markets do: colegios sombrilla, Bolivian umbrella schools serving homeschooling families under the online-education regulation. Those are not competitors to us so much as the other half of a family\'s arrangement.',

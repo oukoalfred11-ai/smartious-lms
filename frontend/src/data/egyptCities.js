@@ -506,7 +506,7 @@ export const EGYPT_COUNTRY = {
     { metric: 'Established', value: '2018', sub: 'Nairobi-based · serving Egyptian families' },
     { metric: 'Curricula', value: '5', sub: 'Cambridge · Edexcel · IB · American AP · CBC' },
     { metric: 'Tutors', value: '78+', sub: 'PGCE-qualified subject specialists' },
-    { metric: 'Countries served', value: '14+', sub: 'Africa · Gulf · Europe · Americas' },
+    { metric: 'Countries served', value: '40+', sub: 'Africa · Gulf · Europe · Americas' },
     { metric: 'Physical centres', value: '2', sub: 'Diamond Plaza Parklands · Karen Hardy' },
     { metric: 'EGP volatility', value: 'Protected', sub: 'USD pricing — fixed across devaluations' },
   ],
@@ -675,11 +675,11 @@ export const EGYPT_COUNTRY = {
     },
     {
       q: 'Will my child miss out on sports, arts, and social development without a physical school?',
-      a: 'A physical school provides a complete daily environment that an online programme does not replicate. However, Egyptian families combine Smartious academic instruction with extensive local activity options: sports clubs (Al-Ahly Sporting Club, Zamalek Sporting Club, Gezira Sporting Club, Heliopolis Sporting Club, Maadi Sporting Club, Smouha Sporting Club, plus Sharm El Sheikh dive academies and Red Sea sports), music academies, scouts, debate clubs, mosque/church/community activities. Smartious classes themselves provide regular live peer interaction across 14+ countries. Many Egyptian families find the time freed from Cairo or Alexandria traffic commute and the academic depth from smaller class sizes more than compensates for the absence of a school sports field.',
+      a: 'A physical school provides a complete daily environment that an online programme does not replicate. However, Egyptian families combine Smartious academic instruction with extensive local activity options: sports clubs (Al-Ahly Sporting Club, Zamalek Sporting Club, Gezira Sporting Club, Heliopolis Sporting Club, Maadi Sporting Club, Smouha Sporting Club, plus Sharm El Sheikh dive academies and Red Sea sports), music academies, scouts, debate clubs, mosque/church/community activities. Smartious classes themselves provide regular live peer interaction across 40+ countries. Many Egyptian families find the time freed from Cairo or Alexandria traffic commute and the academic depth from smaller class sizes more than compensates for the absence of a school sports field.',
     },
     {
       q: 'What about social interaction and peer relationships?',
-      a: 'Smartious classes are small live groups of 4-6 students (Online tier) or smaller (Online Plus). Students attend the same classes with the same peers throughout the academic year, building relationships across the international student body spanning 14+ countries. Many Egyptian families supplement with local community activities — sports clubs, mosque/church/community groups, neighbourhood friendships, scouts, family gatherings (Egyptian extended family culture supports rich social development). For diplomatic or corporate transfer families on 2-5 year Cairo assignments, the Smartious model provides more consistent peer relationships across moves than physical school relationships that reset with each relocation.',
+      a: 'Smartious classes are small live groups of 4-6 students (Online tier) or smaller (Online Plus). Students attend the same classes with the same peers throughout the academic year, building relationships across the international student body spanning 40+ countries. Many Egyptian families supplement with local community activities — sports clubs, mosque/church/community groups, neighbourhood friendships, scouts, family gatherings (Egyptian extended family culture supports rich social development). For diplomatic or corporate transfer families on 2-5 year Cairo assignments, the Smartious model provides more consistent peer relationships across moves than physical school relationships that reset with each relocation.',
     },
     {
       q: 'Can my Cairo / New Cairo / Alexandria child apply to American University in Cairo (AUC), German University in Cairo (GUC), British University in Egypt (BUE) with Cambridge qualifications?',

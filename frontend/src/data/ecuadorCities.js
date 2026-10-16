@@ -5,9 +5,9 @@
 // families across Quito, Guayaquil, Cuenca, Manta and the Amazon.
 // SEVENTH LATIN AMERICAN BUILD — 5 cities.
 //
-// IMAGE NOTE: heroImg / heroImage use LOCAL PATHS under /heroes/.
-// Drop a file at frontend/public/heroes/<slug>.jpg and it appears;
-// if absent the onError handler shows the ink→crimson gradient.
+// IMAGE NOTE: city pages have no heroImg (the hero falls back to the
+// ink→crimson gradient); the country hub uses /online-virtual-school.png.
+// To add a city photo, put it under frontend/public and set heroImg.
 //
 // LEGAL POSITIONING NOTE — ECUADOR NAMES HOMESCHOOLING AS A MODALITY,
 // WHICH IS RARE — AND ONE ARTICLE CONSTRAINS US SHARPLY. READ ALL:
@@ -91,7 +91,6 @@ export const ECUADOR_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Quito',
     heroTagline: 'For Quito families — Cambridge and IB taught live in the morning, in the one Andean country that actually names homeschooling in its regulations.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Quito families. The capital holds Ecuador\'s government, its diplomatic and development community, and the country\'s deepest international school tier — Academia Cotopaxi, Colegio Menor, the Inter-American Academy, the German and French schools — with a substantial IB presence and fees at the top of the Ecuadorian market. Ecuador is also unusual: its Ministry of Education names educación en casa among the recognised modalities and regulates it by ministerial acuerdo. That matters, and so does one article inside it that determines exactly what a provider like us may and may not claim.',
-    heroImg: '/heroes/quito-ec.jpg',
     altTexts: { hero: 'Quito and the Andean highlands' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Quito families — the educación en casa rules explained precisely, morning classes. From USD 423/month.',
     challenges: [
@@ -155,7 +154,6 @@ export const ECUADOR_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Guayaquil',
     heroTagline: 'For Guayaquil families — Ecuador\'s commercial engine, exporting to three continents and schooling for one city.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Guayaquil families. Guayaquil is Ecuador\'s commercial capital and principal port — the banana, shrimp and agro-export complex that makes the country one of the world\'s largest suppliers of both, alongside banking, industry, and a substantial private school sector. Its export businesses trade with Europe, North America, and Asia every day. Smartious teaches Cambridge and IB live in the Ecuadorian morning, alongside a school enrolment or as the academic spine behind whichever extraordinary route a family arranges with MINEDUC.',
-    heroImg: '/heroes/guayaquil-ec.jpg',
     altTexts: { hero: 'Guayaquil and the Guayas river' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Guayaquil families — commercial capital and agro-export hub, morning classes. From USD 423/month.',
     challenges: [
@@ -217,7 +215,6 @@ export const ECUADOR_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Cuenca',
     heroTagline: 'For Cuenca families — the expatriate capital of the Andes, where more households ask about home education than anywhere else in Ecuador.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Cuenca families. Cuenca has drawn one of the largest North American expatriate and retiree communities in Latin America to a UNESCO-listed colonial city with a serious university sector, and with those families has come a visible demand for home education — enough that Ecuadorian lawyers now publish guidance on it for foreigners in Cuenca specifically. That demand collides with a regulation most arrivals have not read. We teach Cambridge and IB live in the Ecuadorian morning, and we set out the rules before anything else.',
-    heroImg: '/heroes/cuenca-ec.jpg',
     altTexts: { hero: 'Cuenca colonial centre' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Cuenca families — the expat capital of the Andes, with the educación en casa rules explained. From USD 423/month.',
     challenges: [
@@ -280,7 +277,6 @@ export const ECUADOR_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Manta',
     heroTagline: 'For Manta and Manabí families — a global tuna industry and a coastal expat belt, four hours from the nearest international school.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Manta and Manabí families. Manta runs one of the largest tuna fishing and processing complexes in the Americas, with a deep-water port, an international seafood trade, and the industrial and agro-processing economy of Manabí behind it — alongside a growing coastal expatriate and remote-work community strung along the beaches north and south. International schooling is in Quito and Guayaquil, hours away. Smartious teaches Cambridge and IB live to the coast in the Ecuadorian morning.',
-    heroImg: '/heroes/manta-ec.jpg',
     altTexts: { hero: 'Manta port and the Ecuadorian coast' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Manta and Manabí families — tuna capital and coastal expat belt, no local provision. From USD 423/month.',
     challenges: [
@@ -342,7 +338,6 @@ export const ECUADOR_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Coca and the Ecuadorian Amazon',
     heroTagline: 'For Coca, Lago Agrio and Amazon families — Ecuador\'s oil economy, run from the rainforest with schooling built for a frontier town.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for families across Ecuador\'s Amazon oil region. Orellana and Sucumbíos hold the fields that have funded much of the national economy for half a century — the operations around Coca and Lago Agrio, the trans-Andean pipeline, and a technical workforce of engineers, geologists, and operations management recruited from across the Americas and beyond, much of it rotational. Quito is a flight or a long road over the Andes. International schooling in the region does not exist. Smartious teaches live to the Amazon in the Ecuadorian morning.',
-    heroImg: '/heroes/coca-ec.jpg',
     altTexts: { hero: 'The Ecuadorian Amazon and the Napo river' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Coca, Lago Agrio and Amazon families — Ecuador\'s oil heartland, no international schooling. From USD 423/month.',
     challenges: [
@@ -429,7 +424,7 @@ export const ECUADOR_COUNTRY = {
   secondaryProgrammeExamRef: 'Authorised Ecuadorian Cambridge provision',
   finalCTABadgeExamRef: 'Cambridge centres confirmed per family, per session',
 
-  heroImage: '/heroes/ecuador.jpg',
+  heroImage: '/online-virtual-school.png',
   heroEyebrow: 'Online school for Ecuador',
   heroH1Suffix: 'Ecuador',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for expatriate, energy, agro-export, and Ecuadorian families across Quito, Guayaquil, Cuenca, Manta, and the Amazon. Ecuador is one of the few countries anywhere that names educación en casa as a modality and regulates it — and one article in that regulation determines exactly what a provider like us may claim. We set both out before anything else. Fees in USD, because Ecuador already uses it.',
@@ -455,7 +450,7 @@ export const ECUADOR_COUNTRY = {
   ibDiplomaDelivery: 'Live online IB DP classes across all six subject groups plus Theory of Knowledge and Extended Essay supervision.',
   americanCurriculumSuits: 'Ecuador families targeting US universities via Common Application — the single most common overseas destination, reinforced by dollarisation and the size of the North American community.',
   americanCurriculumDelivery: 'American Curriculum with AP courses Grades 9-12, SAT/ACT preparation, Common App essay coaching.',
-  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2019 to make international qualifications accessible to families at online-delivery fees rather than campus ones. Ecuador is one of the few countries anywhere whose ministry names homeschooling as a modality — and one of the few where a regulation tells a provider directly what it may not claim, which we would rather quote than work around.',
+  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2018 to make international qualifications accessible to families at online-delivery fees rather than campus ones. Ecuador is one of the few countries anywhere whose ministry names homeschooling as a modality — and one of the few where a regulation tells a provider directly what it may not claim, which we would rather quote than work around.',
   founderUniversitySpecialism: 'Alfred holds a BEd in Mathematics and Physics — Smartious\'s Cambridge A-Level and IB Diploma STEM subjects are led personally when needed, suiting the Amazon\'s petroleum and geoscience families, Manta\'s marine-industry households, and every medicine-bound student in Quito and Guayaquil. Head of Academics supervises curriculum delivery and university placement strategy per family.',
 
   competitorsIntro: 'Ecuador\'s international schooling concentrates in Quito and Guayaquil and is genuinely good — Academia Cotopaxi, Colegio Menor, the Inter-American Academy, the German and French schools, with a substantial IB presence — and priced at the top of the local market. Outside those two cities it thins to almost nothing: Cuenca hosts one of the largest expatriate communities in Latin America without a matching tier, Manta and the coast have none, and the Amazon oil region has none at all. There is also an Ecuadorian sector of accredited schools licensed to offer educación abierta distance programmes, which is a different service from ours and often the right one for a family needing Ecuadorian accreditation.',

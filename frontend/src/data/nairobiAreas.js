@@ -23,7 +23,7 @@ export const NAIROBI_AREAS = [
     localSchools: ['Brookhouse School', 'Hillcrest International School', 'Banda School', 'Karen C Academy', 'St Christopher\'s', 'Rosslyn Academy', 'Nairobi Waldorf School'],
     commonSubjects: ['IGCSE Mathematics', 'IGCSE Physics', 'IGCSE Chemistry', 'A-Level Mathematics', 'A-Level Further Mathematics', 'A-Level Chemistry', 'A-Level Biology', 'IB Diploma Maths AA & AI', 'IB Diploma Sciences', 'SAT preparation', 'UCAS personal statement coaching'],
     commuteNote: 'Karen home visits typically take 60–90 minutes one-way from our Parklands base during rush hour. We schedule Karen tutoring slots in two bands — morning (10am–1pm before traffic) and late evening (after 7pm). Online tuition has no such constraint.',
-    pricingNote: 'Karen home tuition adds a flat KSh 500 per session transport contribution. Online tuition is the standard USD 15/hour (≈ KSh 1,940) with no transport cost. 10-hour block bookings attract a 5% discount.',
+    pricingNote: 'Karen home tuition adds a flat KSh 500 per session transport contribution. Online tuition is the standard USD 15/hour (≈ KSh 1,940 at the Oct 2026 rate) with no transport cost. 10-hour block bookings attract a 5% discount.',
     nearbyAreas: ['langata', 'lavington', 'ngong-road'],
     keywords: ['tuition in Karen Nairobi', 'home tutors Karen', 'private tutors Karen', 'IGCSE tutors Karen', 'IB tutor Karen', 'A-Level tutors Karen', 'Mathematics tutor Karen', 'Physics tutor Karen'],
     localFaqs: [
@@ -42,7 +42,7 @@ export const NAIROBI_AREAS = [
     localSchools: ['Aga Khan Academy Nairobi', 'Hillcrest Primary (Kileleshwa branch)', 'Braeburn Garden Estate', 'Kilimani Junior Academy', 'Sabis International (Runda)', 'St Mary\'s School', 'Kenya High School'],
     commonSubjects: ['IGCSE Mathematics', 'IGCSE Sciences', 'IGCSE English Language', 'A-Level Mathematics', 'A-Level Economics', 'IB Diploma Maths', 'IB Diploma Sciences', 'CBC English & Mathematics', 'KCSE Form 3 & Form 4 revision'],
     commuteNote: 'Kilimani is 15–25 minutes from our Parklands base. Yaya Centre traffic at 3–6pm school pickup time is the main constraint; we recommend booking sessions before 3pm or after 7pm.',
-    pricingNote: 'Kilimani home tuition is standard rate with no transport surcharge. Online tuition USD 15/hour (≈ KSh 1,940). 10-hour blocks save 5%.',
+    pricingNote: 'Kilimani home tuition is standard rate with no transport surcharge. Online tuition USD 15/hour (≈ KSh 1,940 at the Oct 2026 rate). 10-hour blocks save 5%.',
     nearbyAreas: ['kileleshwa', 'lavington', 'westlands'],
     keywords: ['tuition in Kilimani', 'home tutors Kilimani', 'IGCSE tutors Kilimani', 'IB tutor Kilimani', 'Mathematics tutor Kilimani', 'CBC tutor Kilimani'],
     localFaqs: [
@@ -200,7 +200,7 @@ export const NAIROBI_AREAS = [
     localFaqs: [
       { q: 'Is online tuition better than home tuition for Ruaka families?', a: 'Often yes — given the Ruaka-to-city commute, many Ruaka parents prefer online tuition. Same 1-on-1 attention with no scheduling friction or traffic risk.' },
       { q: 'Do you cover Crawford International and Rosslyn Academy syllabi?', a: 'Yes — we work with families at Crawford International, Rosslyn Academy and Sabis International. Our tutors are familiar with each school\'s curriculum approach.' },
-      { q: 'What\'s the most affordable tuition option for Ruaka?', a: 'Online tuition at USD 15/hour (≈ KSh 1,940) is our most cost-efficient option with no transport surcharge. 10-hour blocks save an additional 5%.' },
+      { q: 'What\'s the most affordable tuition option for Ruaka?', a: 'Online tuition at USD 15/hour (≈ KSh 1,940 at the Oct 2026 rate) is our most cost-efficient option with no transport surcharge. 10-hour blocks save an additional 5%.' },
     ],
   },
   {
@@ -219,7 +219,7 @@ export const NAIROBI_AREAS = [
     localFaqs: [
       { q: 'Do you offer KCSE revision in South C?', a: 'Yes — KCSE revision is one of our most-requested services. We cover all KCSE subjects with experienced KCSE-track teachers. Form 3 and Form 4 students see the strongest results from sustained weekly tuition.' },
       { q: 'What CBC support do you offer?', a: 'Full CBC primary support across all learning areas. Our CBC tutors follow current Kenyan competency-based curriculum standards as set by KICD.' },
-      { q: 'How affordable is your tuition?', a: 'Online tuition at USD 15/hour (≈ KSh 1,940) is our most cost-efficient option with no transport surcharge. 10-hour block bookings save 5%.' },
+      { q: 'How affordable is your tuition?', a: 'Online tuition at USD 15/hour (≈ KSh 1,940 at the Oct 2026 rate) is our most cost-efficient option with no transport surcharge. 10-hour block bookings save 5%.' },
     ],
   },
   {
@@ -294,7 +294,7 @@ export const NAIROBI_AREAS = [
     keywords: ['tuition Embakasi', 'home tutors Embakasi', 'KCSE tutor Embakasi', 'CBC tutor Embakasi', 'KCSE revision Embakasi'],
     localFaqs: [
       { q: 'Do you tutor Form 3 and Form 4 students in Embakasi?', a: 'Yes — Form 3 and Form 4 KCSE revision is one of our most-requested services for Embakasi families. Sustained weekly tuition over 6–9 months typically produces the strongest grade improvements.' },
-      { q: 'What\'s the most affordable tuition option?', a: 'Online tuition at USD 15/hour (≈ KSh 1,940) with no transport surcharge. 10-hour block bookings save 5%.' },
+      { q: 'What\'s the most affordable tuition option?', a: 'Online tuition at USD 15/hour (≈ KSh 1,940 at the Oct 2026 rate) with no transport surcharge. 10-hour block bookings save 5%.' },
       { q: 'Can you tutor multiple children in the same household?', a: 'Yes — many Embakasi families have us tutor 2–3 children. We coordinate scheduling for back-to-back sessions and offer modest discounts on second and third children.' },
     ],
   },

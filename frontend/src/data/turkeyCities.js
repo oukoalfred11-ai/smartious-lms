@@ -514,7 +514,7 @@ export const TURKEY_COUNTRY = {
   ibDiplomaDelivery: 'Live online IB DP classes across all six subject groups plus Theory of Knowledge and Extended Essay supervision.',
   americanCurriculumSuits: 'Turkish families targeting US universities via Common Application, plus alternative for Robert College and Üsküdar American Academy families. AP portfolio strengthens US applications; SAT/ACT preparation integrated.',
   americanCurriculumDelivery: 'American Curriculum with AP courses Grades 9-12, SAT/ACT preparation, Common App essay coaching.',
-  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in 2019 to make international qualifications (Cambridge, IB, American, Ontario OSSD) accessible to families across emerging markets at online-delivery fees. Turkish and expat families in Türkiye join students in 14 other countries — from Istanbul Bebek to Cairo Zamalek, Tokyo Setagaya to Dubai Downtown, Ho Chi Minh City District 2 to Kuala Lumpur Mont Kiara.',
+  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2018 to make international qualifications (Cambridge, IB, American, Ontario OSSD) accessible to families across emerging markets at online-delivery fees. Turkish and expat families in Türkiye join students in 40+ countries — from Istanbul Bebek to Cairo Zamalek, Tokyo Setagaya to Dubai Downtown, Ho Chi Minh City District 2 to Kuala Lumpur Mont Kiara.',
   founderUniversitySpecialism: 'Alfred holds a BEd in Mathematics and Physics — Smartious\'s Cambridge A-Level and IB Diploma STEM subjects are led personally when needed. Head of Academics supervises curriculum delivery and university placement strategy per family.',
 
   // ── Competitors ───────────────────────────────────────────────

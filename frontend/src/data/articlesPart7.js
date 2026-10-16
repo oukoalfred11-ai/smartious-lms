@@ -30,7 +30,7 @@ export const ARTICLES_PART_7 = {
   // ═══════════════ AFRICA ═══════════════
   'best-online-virtual-homeschool-africa': {
     cat:'online-school', country:'', featured:true,
-    img:'linear-gradient(135deg,#0A1020,#8B1A2E)', splash:'/blog/homeschool-africa.jpg', splashAlt:'A student in Africa working through a live online lesson at home',
+    img:'linear-gradient(135deg,#0A1020,#8B1A2E)', splash:'https://images.unsplash.com/photo-1577086664693-894d8405334a?w=1200&q=75', splashAlt:'A student in Africa working through a live online lesson at home',
     t:'Online, Virtual and Homeschool Education in Africa: A Country-by-Country Guide',
     date:'August 2026 \u00b7 12 min read',
     author:'Alfred Ouko', role:'Founder',
@@ -82,7 +82,7 @@ export const ARTICLES_PART_7 = {
   // ═══════════════ ASIA AND THE PACIFIC ═══════════════
   'best-online-virtual-homeschool-asia': {
     cat:'online-school', country:'', featured:true,
-    img:'linear-gradient(135deg,#06121A,#8B1A2E)', splash:'/blog/homeschool-asia.jpg', splashAlt:'A student in Asia joining a live online class from home',
+    img:'linear-gradient(135deg,#06121A,#8B1A2E)', splash:'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&q=75', splashAlt:'A student in Asia joining a live online class from home',
     t:'Online, Virtual and Homeschool Education in Asia and the Pacific: A Country-by-Country Guide',
     date:'August 2026 \u00b7 13 min read',
     author:'Alfred Ouko', role:'Founder',
@@ -143,7 +143,7 @@ export const ARTICLES_PART_7 = {
   // ═══════════════ EUROPE ═══════════════
   'best-online-virtual-homeschool-europe': {
     cat:'online-school', country:'', featured:true,
-    img:'linear-gradient(135deg,#0A1A14,#1E2F5F)', splash:'/blog/homeschool-europe.jpg', splashAlt:'A student in Europe studying at home with an online lesson on screen',
+    img:'linear-gradient(135deg,#0A1A14,#1E2F5F)', splash:'https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=1200&q=75', splashAlt:'A student in Europe studying at home with an online lesson on screen',
     t:'Online, Virtual and Homeschool Education in Europe: A Country-by-Country Guide',
     date:'August 2026 \u00b7 13 min read',
     author:'Brendaliz Chelangat', role:'Head of Academics',
@@ -209,7 +209,7 @@ export const ARTICLES_PART_7 = {
   // ═══════════════ THE AMERICAS ═══════════════
   'best-online-virtual-homeschool-americas': {
     cat:'online-school', country:'', featured:true,
-    img:'linear-gradient(135deg,#0A1020,#1E2F5F)', splash:'/blog/homeschool-americas.jpg', splashAlt:'A student in the Americas learning at home in a live online class',
+    img:'linear-gradient(135deg,#0A1020,#1E2F5F)', splash:'https://images.unsplash.com/photo-1569931727762-93b30b4e3bc2?w=1200&q=75', splashAlt:'A student in the Americas learning at home in a live online class',
     t:'Online, Virtual and Homeschool Education in the Americas: A Country-by-Country Guide',
     date:'August 2026 \u00b7 13 min read',
     author:'Brendaliz Chelangat', role:'Head of Academics',
@@ -270,7 +270,7 @@ export const ARTICLES_PART_7 = {
   // If a figure changes, change it here too.
   'smartious-homeschool-global': {
     cat:'homeschool', country:'', featured:true,
-    img:'linear-gradient(135deg,#080C14,#8B1A2E)', splash:'/blog/smartious-homeschool-global.jpg', splashAlt:'Homeschooled students in different countries learning together in a live Smartious online class',
+    img:'linear-gradient(135deg,#080C14,#8B1A2E)', splash:'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1200&q=75', splashAlt:'Homeschooled students in different countries learning together in a live Smartious online class',
     t:'The World\u2019s Most Comprehensive Online, Virtual and Homeschool Provider \u2014 Built Across Ninety-Nine Countries',
     date:'August 2026 \u00b7 14 min read',
     author:'Alfred Ouko', role:'Founder',
@@ -316,7 +316,7 @@ export const ARTICLES_PART_7 = {
       {q:'What makes Smartious different from other online schools?',a:'Three things you can check rather than take on trust. Every class is live, capped at four to six students and taught by a subject specialist \u2014 not recorded modules or a curriculum package. We teach in ninety-nine countries and publish a detailed guide to the law, examinations and timezone for every one of them. And we place families by judgement rather than by sales script, which is what the research is actually for.'},
       {q:'Which qualifications do students leave with?',a:'Cambridge IGCSE and A-Level, Pearson Edexcel International, the IB Diploma Programme and American Advanced Placement \u2014 set and marked by independent examination boards and read directly by universities in more than a hundred and sixty countries. UCAS reads A-Levels natively, and American, Canadian, Australian, Gulf and European institutions read them and the IB without conversion. We are also actively investing in further accreditation to widen the routes we can offer directly.'},
       {q:'How many countries do you teach in?',a:'Ninety-nine, with four hundred and ninety city guides and two hundred and fifty-two articles behind them. Every country hub sets out the ministry, the compulsory range, the home-education position, examination access and the timezone relationship for that specific market.'},
-      {q:'What does it cost?',a:'From USD 5,076 a year for live small-group teaching through to A-Level, quoted in USD. No debenture, no capital levy, no waiting list, and a child can start within a week of the assessment.'},
+      {q:'What does it cost?',a:'From USD 423 a month for Primary (payable termly; fees vary by curriculum and level) for live small-group teaching through to A-Level, quoted in USD. No debenture, no capital levy, no waiting list, and a child can start within a week of the assessment.'},
       {q:'Do you replace my child\u2019s school or work alongside it?',a:'Both configurations exist and the right one depends on where you live. In some markets a full-time programme is straightforward; in most, two to four subjects alongside an existing school enrolment is the stronger arrangement and the one the local framework supports. Your country guide says which, and it is the first thing we would want you to read.'},
     ],
     conclusion:'Ninety-nine countries, four hundred and ninety cities, and a live class of four to six students wherever you are. Open the guide for your country \u2014 it is free and it is the most detailed one written \u2014 then book an assessment for your child.',

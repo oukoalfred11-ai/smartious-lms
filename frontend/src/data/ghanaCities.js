@@ -5,9 +5,9 @@
 // families across Accra, Kumasi, and Takoradi.
 // WEST AFRICA BUILD — 3 cities.
 //
-// IMAGE NOTE: heroImg / heroImage use LOCAL PATHS under /heroes/.
-// Drop a file at frontend/public/heroes/<slug>.jpg and it appears;
-// if absent the onError handler shows the ink→crimson gradient.
+// IMAGE NOTE: city pages have no heroImg (the hero falls back to the
+// ink→crimson gradient); the country hub uses /online-virtual-school.png.
+// To add a city photo, put it under frontend/public and set heroImg.
 // Do NOT paste guessed stock-photo IDs.
 //
 // LEGAL POSITIONING NOTE — READ BEFORE EDITING:
@@ -66,7 +66,6 @@ export const GHANA_CITIES = [
     primaryKeyword: 'Online school and Cambridge tutoring in Accra',
     heroTagline: 'For Accra families from Airport Residential to East Legon — Cambridge taught live in small groups, at a fraction of the tier\'s fees.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Accra families. Accra carries more corporate and institutional weight than almost any city in West Africa — a technology and fintech sector that has drawn continental and global headquarters, the oil and gas majors, the diplomatic and development community, and a returning diaspora from the UK and United States that has reshaped whole neighbourhoods. Its international-school tier is genuinely deep by regional standards, and its fees are at the top of the market. Under the Education Act, 2008, education at the basic level is free, compulsory and universal — so our clean default is supplementary: your school enrolment carries that duty, and we teach the Cambridge or IB track live alongside it.',
-    heroImg: '/heroes/accra-gh.jpg',
     altTexts: { hero: 'Accra city and the coast' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Accra families — small-group teaching alongside your school, at a fraction of the tier\'s fees. From USD 423/month.',
     challenges: [
@@ -131,7 +130,6 @@ export const GHANA_CITIES = [
     primaryKeyword: 'Online school and Cambridge tutoring in Kumasi',
     heroTagline: 'For Kumasi and Ashanti families — Ghana\'s second city, its great technical university, and a fraction of Accra\'s international provision.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Kumasi families. Kumasi is the Ashanti capital and Ghana\'s second city — home to KNUST, one of West Africa\'s most significant technical universities, and to a gold, timber, and trading economy that has made it the commercial heart of the interior for centuries. Its academic community is substantial and its international schooling is thin relative to its size, with Accra\'s tier four hours south. Smartious delivers live small-group Cambridge and IB teaching across Ashanti, alongside your school enrolment.',
-    heroImg: '/heroes/kumasi-gh.jpg',
     altTexts: { hero: 'Kumasi, the Ashanti capital' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Kumasi and Ashanti families — second city, KNUST, thin international provision. From USD 423/month.',
     challenges: [
@@ -194,7 +192,6 @@ export const GHANA_CITIES = [
     primaryKeyword: 'Online school and Cambridge tutoring in Takoradi',
     heroTagline: 'For Takoradi and Western Region families — the oil city, staffed internationally and schooled locally.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Sekondi-Takoradi and Western Region families. Since the Jubilee field came on stream, Takoradi has been Ghana\'s oil and gas capital — the operators and the international oilfield-services companies, the port and its logistics chain, and a technical workforce recruited from across Africa, Europe, and further afield, much of it on rotational contracts. The city also anchors a Western Region economy of gold, cocoa, and timber. What none of it produced was schooling that scaled with the industry: the deep international tier remains in Accra, around four hours east. Smartious delivers live Cambridge and IB teaching to the oil city instead.',
-    heroImg: '/heroes/takoradi-gh.jpg',
     altTexts: { hero: 'Takoradi harbour and the Western Region coast' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Sekondi-Takoradi and Western Region families — Ghana\'s oil hub, thin international schooling. From USD 423/month.',
     challenges: [
@@ -281,7 +278,7 @@ export const GHANA_COUNTRY = {
   secondaryProgrammeExamRef: 'Authorised Ghanaian Cambridge provision',
   finalCTABadgeExamRef: 'Cambridge centres confirmed per family, per session',
 
-  heroImage: '/heroes/ghana.jpg',
+  heroImage: '/online-virtual-school.png',
   heroEyebrow: 'Online school for Ghana',
   heroH1Suffix: 'Ghana',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for corporate, energy, diaspora, and Ghanaian families across Accra, Kumasi, and Sekondi-Takoradi. Education at the basic level is free, compulsory and universal under the Education Act, 2008 — so we work alongside your Ghanaian school, adding the Cambridge subjects overseas applications need at a fraction of the Accra tier\'s fees.',
@@ -292,7 +289,7 @@ export const GHANA_COUNTRY = {
   citiesSectionBody: 'Smartious Ghana families concentrate across Accra (West Africa\'s tech and fintech centre, the energy majors, the diplomatic and development community, a returning diaspora, and an international-school tier priced at the top of the regional market), Kumasi (the Ashanti capital, KNUST, and the gold and trading economy of the interior, four hours from that tier), and Sekondi-Takoradi (Ghana\'s oil and gas hub since Jubilee, with an internationally recruited rotational workforce and schooling that never scaled with the industry). One compulsory basic-education duty, one supplementary configuration, and a fixed three-hour offset we are honest about.',
 
   trustSignals: [
-    { h: 'An African school teaching African families', p: 'Smartious was founded in Nairobi in 2019 and teaches from two operational centres established 2022 and 2023, serving students in 55 countries — an African school with international accreditation, not an overseas provider reaching in.' },
+    { h: 'An African school teaching African families', p: 'Smartious was founded in Nairobi in 2018 and teaches from two operational centres established 2022 and 2023, serving families in 40+ countries — an African school with international accreditation, not an overseas provider reaching in.' },
     { h: 'Honest about the clock', p: 'Ghana runs GMT (UTC+0) and Kenya EAT (UTC+3), with no daylight saving on either side — a fixed three-hour gap. Late-afternoon Ghanaian classes fall in our evening teaching block and morning slots suit full-time students. It is a wider gap than for our East and Southern African families and we schedule around it rather than pretending otherwise.' },
     { h: 'The law stated before anything is sold', p: 'Education at the basic level is free, compulsory and universal under section 2 of the Education Act, 2008. We are not aware of an established parental home-education route and say so in those terms, pointing families to the Ministry of Education and the Ghana Education Service.' },
     { h: 'What we are, stated plainly', p: 'Pre-tertiary schools in Ghana are subject to licensing and inspection requirements. Smartious is not a licensed Ghanaian school and does not present itself as one — we work alongside yours.' },
@@ -307,7 +304,7 @@ export const GHANA_COUNTRY = {
   ibDiplomaDelivery: 'Live online IB DP classes across all six subject groups plus Theory of Knowledge and Extended Essay supervision.',
   americanCurriculumSuits: 'Ghana families targeting US universities via Common Application — a principal destination for Ghanaian students.',
   americanCurriculumDelivery: 'American Curriculum with AP courses Grades 9-12, SAT/ACT preparation, Common App essay coaching.',
-  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2019 to make international qualifications accessible to African and internationally mobile families at online-delivery fees rather than campus ones. Ghana families join students in 55 other countries — West Africa\'s deepest international-school market, and the regions around it that the market never reached.',
+  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2018 to make international qualifications accessible to African and internationally mobile families at online-delivery fees rather than campus ones. Ghana families join students in 40+ countries — West Africa\'s deepest international-school market, and the regions around it that the market never reached.',
   founderUniversitySpecialism: 'Alfred holds a BEd in Mathematics and Physics — Smartious\'s Cambridge A-Level and IB Diploma STEM subjects are led personally when needed, suiting the Western Region\'s petroleum and geoscience families, Kumasi\'s KNUST-bound students, and Accra\'s fintech households. Head of Academics supervises curriculum delivery and university placement strategy per family.',
 
   competitorsIntro: 'Ghana has the deepest international-school market in West Africa, and the Accra schools are genuinely good — Ghana International School, Lincoln Community School, Tema International, Association International and their peers, alongside a large private sector that has offered IGCSE for years. The fees are correspondingly high. Outside Greater Accra the picture thins sharply: Kumasi is a city of over two million with a fraction of the provision, and Takoradi runs an international oil industry on local schooling. That gap, plus the fee gap inside Accra itself, is the space live delivery fills.',
@@ -337,7 +334,7 @@ export const GHANA_COUNTRY = {
     { h: 'Kumasi and the Western Region served identically',                p: 'Over two million people in Ashanti with a fraction of Accra\'s provision, and an international oil industry in Takoradi running on local schooling.' },
     { h: 'Honest about the three-hour offset',                              p: 'Ghana is our widest African gap. We state it, explain the two workable patterns, and note that being fixed year-round means it never drifts.' },
     { h: 'Honest about what we are',                                        p: 'Not a licensed Ghanaian school, and we say it plainly — an internationally accredited online school working alongside yours.' },
-    { h: 'An African school teaching African families',                     p: 'Nairobi-built and Nairobi-taught, serving 55 countries, working to African calendars and examination realities.' },
+    { h: 'An African school teaching African families',                     p: 'Nairobi-built and Nairobi-taught, serving families in 40+ countries, working to African calendars and examination realities.' },
   ],
 
   faqs: [

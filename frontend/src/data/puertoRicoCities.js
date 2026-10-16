@@ -6,9 +6,9 @@
 // and the eastern islands.
 // SIXTEENTH LATIN AMERICAN / CARIBBEAN BUILD — 5 cities.
 //
-// IMAGE NOTE: heroImg / heroImage use LOCAL PATHS under /heroes/.
-// Drop a file at frontend/public/heroes/<slug>.jpg and it appears;
-// if absent the onError handler shows the ink→crimson gradient.
+// IMAGE NOTE: city pages have no heroImg (the hero falls back to the
+// ink→crimson gradient); the country hub uses /online-virtual-school.png.
+// To add a city photo, put it under frontend/public and set heroImg.
 //
 // LEGAL POSITIONING NOTE — PUERTO RICO IS THE MOST PERMISSIVE
 // FRAMEWORK IN OUR ENTIRE 87-COUNTRY COVERAGE. THIS CHANGES THE
@@ -105,7 +105,6 @@ export const PUERTO_RICO_CITIES = [
     primaryKeyword: 'Online school and international curriculum in San Juan Puerto Rico',
     heroTagline: 'For San Juan families — externally examined Cambridge, IB and AP qualifications behind a homeschool transcript you issue yourself.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for San Juan families. The capital holds Puerto Rico\'s corporate, legal and medical sectors, the island\'s international and bilingual school tier, and its largest homeschooling community — a community that operates under one of the freest legal frameworks anywhere. Puerto Rican home educators run their own non-governmental schools and issue their own transcripts, entirely lawfully. What an external examination board adds on top of that is independence: a grade nobody in the family awarded.',
-    heroImg: '/heroes/san-juan-pr.jpg',
     altTexts: { hero: 'San Juan and the Atlantic coast' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for San Juan families — externally examined qualifications alongside a self-issued homeschool transcript. From USD 423/month.',
     challenges: [
@@ -170,7 +169,6 @@ export const PUERTO_RICO_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Dorado Puerto Rico',
     heroTagline: 'For Dorado and north coast families — recently arrived from the mainland, and discovering the island\'s schooling map is shorter than expected.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Dorado and north coast families. The corridor running west from San Juan through Dorado and Vega Alta has become the principal landing point for mainland US professionals relocating under Puerto Rico\'s tax incentive regime — finance, technology, crypto, consulting and medicine — arriving with school-age children and often with firm expectations about schooling that the island\'s shorter list does not always meet. Many turn to home education, which Puerto Rico permits unusually freely. We supply the externally examined qualification behind it.',
-    heroImg: '/heroes/dorado-pr.jpg',
     altTexts: { hero: 'The Dorado coast' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Dorado and north coast families — relocated mainland households, externally examined qualifications. From USD 423/month.',
     challenges: [
@@ -233,7 +231,6 @@ export const PUERTO_RICO_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Ponce Puerto Rico',
     heroTagline: 'For Ponce and southern families — a medical and manufacturing city where schooling continuity has been tested more than most.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Ponce and southern families. The south holds Puerto Rico\'s second city, a medical school and health-sciences sector, and a pharmaceutical and manufacturing base that has supplied international markets for decades. It is also the region where schooling continuity has been tested most — the 2020 earthquake sequence was centred in the southwest, and hurricane seasons before and since have interrupted school years across the island. A live programme with a complete recorded library is built for exactly that, and we say so without dramatising it.',
-    heroImg: '/heroes/ponce-pr.jpg',
     altTexts: { hero: 'Ponce and the southern coast' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Ponce and southern Puerto Rico families — continuity through disruption, externally examined. From USD 423/month.',
     challenges: [
@@ -295,7 +292,6 @@ export const PUERTO_RICO_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Mayagüez',
     heroTagline: 'For Mayagüez and western families — one of the Caribbean\'s best engineering faculties, and a school map that stayed in San Juan.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Mayagüez and western families. The west is defined by the University of Puerto Rico at Mayagüez, whose engineering faculty is among the strongest in the Caribbean and feeds mainland graduate programmes and technology employers directly, alongside a research sector and the surf and relocation communities strung along the western coast from Rincón to Aguadilla. San Juan\'s school tier is two hours east. We teach Cambridge and IB live to the west, full-time or alongside a school.',
-    heroImg: '/heroes/mayaguez-pr.jpg',
     altTexts: { hero: 'The western Puerto Rico coast' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Mayagüez, Rincón and western Puerto Rico families — engineering country, thin schooling. From USD 423/month.',
     challenges: [
@@ -357,7 +353,6 @@ export const PUERTO_RICO_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Vieques and Culebra',
     heroTagline: 'For Fajardo, Vieques and Culebra families — where the school run involves a ferry, and often does not run at all.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for eastern and island families. Fajardo anchors Puerto Rico\'s marina and sailing corridor, and beyond it Vieques and Culebra sit as island municipios reached only by ferry or a short flight — with settled international and second-home communities, tourism and marine businesses, and schooling constrained by geography in a way nowhere else on the island is. For a family on Vieques, the question is not which school but whether reaching one is realistic at all. Live delivery answers that directly, and Puerto Rico\'s framework makes a full-time programme straightforward.',
-    heroImg: '/heroes/fajardo-pr.jpg',
     altTexts: { hero: 'The eastern Puerto Rico coast and offshore islands' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Fajardo, Vieques and Culebra families — island municipios with real access constraints. From USD 423/month.',
     challenges: [
@@ -444,7 +439,7 @@ export const PUERTO_RICO_COUNTRY = {
   secondaryProgrammeExamRef: 'Authorised Puerto Rico Cambridge provision',
   finalCTABadgeExamRef: 'Cambridge centres confirmed per family, per session',
 
-  heroImage: '/heroes/puerto-rico.jpg',
+  heroImage: '/online-virtual-school.png',
   heroEyebrow: 'Online school for Puerto Rico',
   heroH1Suffix: 'Puerto Rico',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for homeschooling, relocated-mainland, professional and Puerto Rican families across San Juan, Dorado, Ponce, Mayagüez and the eastern islands. Puerto Rico has the freest home-education framework in our entire coverage — no registration, no notification, no state curriculum — which leaves exactly one gap, and it is the one we fill.',
@@ -470,7 +465,7 @@ export const PUERTO_RICO_COUNTRY = {
   ibDiplomaDelivery: 'Live online IB DP classes across all six subject groups plus Theory of Knowledge and Extended Essay supervision.',
   americanCurriculumSuits: 'Puerto Rico families targeting mainland US universities via Common Application — the dominant destination, with AP already thoroughly established here.',
   americanCurriculumDelivery: 'American Curriculum with AP courses Grades 9-12, SAT/ACT preparation, Common App essay coaching.',
-  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2019 to make international qualifications accessible to families at online-delivery fees rather than campus ones. Puerto Rico is the freest market we serve and, for that exact reason, the one where our role is clearest: the law leaves families free to teach, and what an independent examination board adds is verification rather than permission.',
+  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2018 to make international qualifications accessible to families at online-delivery fees rather than campus ones. Puerto Rico is the freest market we serve and, for that exact reason, the one where our role is clearest: the law leaves families free to teach, and what an independent examination board adds is verification rather than permission.',
   founderUniversitySpecialism: 'Alfred holds a BEd in Mathematics and Physics — Smartious\'s Cambridge A-Level and IB Diploma STEM subjects are led personally when needed, suiting Mayagüez\'s engineering community and every medicine-bound student in Ponce and San Juan. Head of Academics supervises curriculum delivery and university placement strategy per family.',
 
   competitorsIntro: 'Puerto Rico has a solid private and bilingual school tier concentrated in the San Juan metropolitan area, priced at US private-school levels, and a homeschooling community that is unusually large and well organised for the island\'s size. The most important thing to say about the ecosystem here is that its best-known organisations are not competitors of ours. T\'CHERs — the Caribbean Center of Home Education Resources — offers free island-wide orientation, and HSLDA publishes Puerto Rico legal material in Spanish. Both help families, neither teaches subjects, and we would point a family to them without hesitation.',

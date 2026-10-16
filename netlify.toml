@@ -1,3 +1,7 @@
+# Netlify config (repository root). The site builds from frontend/.
+# Keep in step with frontend/netlify.toml: same command, publish directory,
+# Node version, redirects and headers. `publish` is relative to `base`.
+
 [build]
   base    = "frontend"
   command = "npm run build"
@@ -5,3 +9,31 @@
 
 [build.environment]
   NODE_VERSION = "20"
+
+# Pretty URLs: with the flat files seo-static writes (dist/<route>.html),
+# /route is served at 200 and /route/ is 301-redirected to /route, so each
+# page has one URL. Never emit dist/<route>/index.html.
+[build.processing.html]
+  pretty_urls = true
+
+# Most redirects live in public/_redirects (processed before these).
+# Exclude /pdfjs/* so the PDF viewer files are served as static assets.
+[[redirects]]
+  from   = "/pdfjs/*"
+  to     = "/pdfjs/:splat"
+  status = 200
+  force  = false
+
+# React Router: send every other route to the app
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200
+
+# Global security headers (public/_headers adds caching and X-Robots-Tag)
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy        = "strict-origin-when-cross-origin"
+    Permissions-Policy     = "camera=(self), microphone=(self), display-capture=(self), fullscreen=(self), geolocation=()"

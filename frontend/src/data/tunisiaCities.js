@@ -5,9 +5,9 @@
 // Tunisian families across Tunis, Sfax, and Sousse & Monastir.
 // NORTH AFRICA BUILD — 3 cities.
 //
-// IMAGE NOTE: heroImg / heroImage use LOCAL PATHS under /heroes/.
-// Drop a file at frontend/public/heroes/<slug>.jpg and it appears;
-// if absent the onError handler shows the ink→crimson gradient.
+// IMAGE NOTE: city pages have no heroImg (the hero falls back to the
+// ink→crimson gradient); the country hub uses /online-virtual-school.png.
+// To add a city photo, put it under frontend/public and set heroImg.
 // Do NOT paste guessed stock-photo IDs.
 //
 // LEGAL POSITIONING NOTE — READ BEFORE EDITING:
@@ -60,7 +60,6 @@ export const TUNISIA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Tunis',
     heroTagline: 'For Tunis families from Lac to La Marsa — the Cambridge route the capital has never had, with French kept alongside.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Tunis families. Tunis carries Tunisia\'s corporate weight — a large francophone offshoring and shared-services sector working for French and European clients, aeronautics and technology firms, banking, the diplomatic and international-organisation community, and a professional class with deep ties to France and Italy. Its international schooling is dominated by the French network, which is strong and heavily oversubscribed, alongside a smaller private bilingual sector. British and IB provision is thin. Under the Loi d\'orientation of 2002 education is compulsory from six to sixteen, so our clean default is supplementary: your school enrolment carries that duty, and we teach the Cambridge or IB track live alongside it — with Cambridge French running beside the English-medium core.',
-    heroImg: '/heroes/tunis-tn.jpg',
     altTexts: { hero: 'Tunis and the lake' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Tunis families — the British-curriculum route the capital lacks, French kept alongside. From USD 423/month.',
     challenges: [
@@ -96,7 +95,7 @@ export const TUNISIA_CITIES = [
       ['French kept alongside, deliberately', 'Cambridge French runs beside the English-medium core, so French, Canadian, and Tunisian options stay open while UK, Gulf, and American ones open up.'],
       ['Built for the offshoring economy', 'A sector that works in French and increasingly needs English is exactly where an English-medium examined record pays off for the next generation.'],
       ['A fixed offset, all year', 'Neither Tunisia nor Kenya observes daylight saving, so the two-hour gap never drifts — class times are the same in January and July.'],
-      ['An African school teaching African families', 'Nairobi-built and Nairobi-taught, serving families in 53 countries.'],
+      ['An African school teaching African families', 'Nairobi-built and Nairobi-taught, serving families in 40+ countries.'],
     ],
     growingReason: 'Tunis holds Tunisia\'s offshoring and shared-services sector serving French and European markets, its aeronautics and technology firms, banking, and the diplomatic community — with international schooling dominated by an oversubscribed French network and thin British or IB provision. Tunisia runs CET (UTC+1) with no daylight saving, a fixed two-hour offset behind Nairobi EAT.',
     curricula: {
@@ -125,7 +124,6 @@ export const TUNISIA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Sfax',
     heroTagline: 'For Sfax families — Tunisia\'s working second city, with a medical faculty, a port, and no international school.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Sfax families. Sfax is Tunisia\'s second city and the economic capital of its south — olive oil and agri-processing on a scale that shapes national exports, chemicals and phosphate handling, a major port, and a commercial tradition that has produced much of the country\'s business class. The University of Sfax and its medical faculty draw students from across the region. What the city does not have is international schooling of any depth: the French network and the private bilingual sector are concentrated in the capital, around four hours north. Smartious delivers the Cambridge and IB pathways live across the south, supplementary alongside your school enrolment.',
-    heroImg: '/heroes/sfax-tn.jpg',
     altTexts: { hero: 'Sfax and the port' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Sfax and southern Tunisia families — second city, medical faculty, no international schooling. From USD 423/month.',
     challenges: [
@@ -188,7 +186,6 @@ export const TUNISIA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Sousse and Monastir',
     heroTagline: 'For Sousse, Monastir and Sahel families — European industry, European visitors, European residents, and schooling for none of them.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Sousse, Monastir, and Sahel families. The Sahel coast is Tunisia\'s most internationally exposed region outside the capital: an aeronautics and automotive-components industry supplying European primes, a tourism economy running from Hammamet through Sousse to Mahdia, Monastir\'s airport and medical school, and a substantial European resident and long-stay community, particularly French, German, and Italian. The industrial employers are international and the visitor economy is international; the schooling is not. Smartious delivers the Cambridge and IB pathways live along the coast, supplementary alongside your school enrolment.',
-    heroImg: '/heroes/sousse-tn.jpg',
     altTexts: { hero: 'The Sahel coast at Sousse' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Sousse, Monastir and Sahel families — aeronautics, tourism and European residents, no international schooling. From USD 423/month.',
     challenges: [
@@ -275,7 +272,7 @@ export const TUNISIA_COUNTRY = {
   secondaryProgrammeExamRef: 'Authorised Tunis and regional provision',
   finalCTABadgeExamRef: 'Cambridge centres confirmed per family, per session',
 
-  heroImage: '/heroes/tunisia.jpg',
+  heroImage: '/online-virtual-school.png',
   heroEyebrow: 'Online school for Tunisia',
   heroH1Suffix: 'Tunisia',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for offshoring, aeronautics, expat, diaspora, and Tunisian families across Tunis, Sfax, and Sousse and Monastir. International schooling here is dominated by an oversubscribed French network, with British and IB provision thin — and outside the capital, close to absent. Taught live from Nairobi at a fixed two-hour offset that never drifts, with Cambridge French alongside.',
@@ -286,7 +283,7 @@ export const TUNISIA_COUNTRY = {
   citiesSectionBody: 'Smartious Tunisia families concentrate across Tunis (the offshoring and shared-services sector serving European markets, aeronautics and technology, banking, the diplomatic community, and the oversubscribed French network), Sfax (the second city and economic capital of the south — olive oil, chemicals, a major port, and a large medical faculty, four hours from the capital), and Sousse and Monastir (the Sahel\'s aeronautics and automotive-components industry, a tourism economy of international scale, a medical school, and a substantial European resident community). One compulsory framework, one supplementary configuration, and a British route the country has never really had.',
 
   trustSignals: [
-    { h: 'An African school teaching African families', p: 'Smartious was founded in Nairobi in 2019 and teaches from two operational centres established 2022 and 2023 — an African school with international accreditation, serving students in 53 countries, not a European provider reaching in.' },
+    { h: 'An African school teaching African families', p: 'Smartious was founded in Nairobi in 2018 and teaches from two operational centres established 2022 and 2023 — an African school with international accreditation, serving families in 40+ countries, not a European provider reaching in.' },
     { h: 'A fixed offset that never drifts', p: 'Tunisia runs CET (UTC+1) with no daylight saving and Kenya runs EAT (UTC+3) with none either. The two-hour gap is constant every week of the year, so class times are the same in January as in July.' },
     { h: 'The route the country does not really have', p: 'International schooling in Tunisia is dominated by the French network, which is strong and heavily oversubscribed. British and IB provision is thin in the capital and close to absent outside it.' },
     { h: 'The law stated before anything is sold', p: 'Education is compulsory from six to sixteen under the Loi d\'orientation n° 2002-80 of 2002. We are not aware of an established parental home-education route and say so in those terms, pointing families to the Ministère de l\'Éducation.' },
@@ -301,7 +298,7 @@ export const TUNISIA_COUNTRY = {
   ibDiplomaDelivery: 'Live online IB DP classes across all six subject groups plus Theory of Knowledge and Extended Essay supervision.',
   americanCurriculumSuits: 'Tunisia families targeting American or Canadian universities via Common Application.',
   americanCurriculumDelivery: 'American Curriculum with AP courses Grades 9-12, SAT/ACT preparation, Common App essay coaching.',
-  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2019 to make international qualifications accessible to African and internationally mobile families at online-delivery fees rather than campus ones. Tunisia families join students in 53 other countries — from the Sahel coast to Nairobi\'s own Diamond Plaza HQ.',
+  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2018 to make international qualifications accessible to African and internationally mobile families at online-delivery fees rather than campus ones. Tunisia families join students in 40+ countries — from the Sahel coast to Nairobi\'s own Diamond Plaza HQ.',
   founderUniversitySpecialism: 'Alfred holds a BEd in Mathematics and Physics — Smartious\'s Cambridge A-Level and IB Diploma STEM subjects are led personally when needed, suiting the Sahel\'s aeronautics families and every medicine-bound student in Sfax, Monastir, and Tunis. Head of Academics supervises curriculum delivery and university placement strategy per family.',
 
   competitorsIntro: 'Tunisia\'s international schooling is a French-system story concentrated in Tunis, and the network there is strong and heavily oversubscribed. Outside the capital the picture thins fast: Sfax, the country\'s second city, has almost nothing, and the Sahel — with European industry, European visitors, and European residents — has nothing of depth. British and IB provision is scarce everywhere. The competitive space is therefore an absence rather than a share.',
@@ -331,7 +328,7 @@ export const TUNISIA_COUNTRY = {
     { h: 'A fixed offset that never drifts',                                p: 'Neither Tunisia nor Kenya observes daylight saving, so the two-hour gap is constant — class times are identical in January and July.' },
     { h: 'Sfax and the Sahel served identically',                           p: 'The second city and the industrial coast have almost nothing between them. Live delivery closes both gaps the same way.' },
     { h: 'Careful where the law is not fully evidenced',                    p: 'We say "not established" and name the Ministère rather than asserting a prohibition we cannot document — and we do not dress up the independent-candidate rules as a homeschooling route.' },
-    { h: 'An African school teaching African families',                     p: 'Nairobi-built and Nairobi-taught, serving 53 countries, working to African calendars and examination realities.' },
+    { h: 'An African school teaching African families',                     p: 'Nairobi-built and Nairobi-taught, serving families in 40+ countries, working to African calendars and examination realities.' },
   ],
 
   faqs: [

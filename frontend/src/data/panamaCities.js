@@ -6,9 +6,9 @@
 // Pacific coast.
 // EIGHTH LATIN AMERICAN BUILD — 5 cities.
 //
-// IMAGE NOTE: heroImg / heroImage use LOCAL PATHS under /heroes/.
-// Drop a file at frontend/public/heroes/<slug>.jpg and it appears;
-// if absent the onError handler shows the ink→crimson gradient.
+// IMAGE NOTE: city pages have no heroImg (the hero falls back to the
+// ink→crimson gradient); the country hub uses /online-virtual-school.png.
+// To add a city photo, put it under frontend/public and set heroImg.
 //
 // LEGAL POSITIONING NOTE — HEDGE HARDER HERE THAN ANYWHERE IN LATIN
 // AMERICA. OUR SOURCING ON PANAMA IS THIN:
@@ -65,7 +65,6 @@ export const PANAMA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Panama City',
     heroTagline: 'For Panama City families — one of the deepest international school tiers in Central America, and the fees that come with it.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Panama City families. The capital runs the canal, the banking and maritime sector, and a multinational regional-headquarters regime that has drawn corporate families from across the Americas, Europe, and Asia — and with them an international school tier unusually deep for a country of Panama\'s size: Balboa Academy, the International School of Panama, the Metropolitan School, King\'s College Panama, the French and German schools. The fees sit at the top of the Central American market. We teach Cambridge and IB live in the Panamanian morning, alongside a school enrolment.',
-    heroImg: '/heroes/panama-city-pa.jpg',
     altTexts: { hero: 'Panama City skyline and the bay' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Panama City families — the capital tier\'s curriculum at a fraction of its fees. From USD 423/month.',
     challenges: [
@@ -130,7 +129,6 @@ export const PANAMA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Colón',
     heroTagline: 'For Colón and Atlantic families — one of the world\'s great free ports, an hour and a half from the capital\'s schools and a world away from them.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Colón and Atlantic-side families. Colón hosts one of the largest free zones in the world, the Atlantic entrance to the canal, and container terminals handling transhipment for the whole hemisphere — an economy that trades with every continent daily, run by logistics, shipping, and commercial families. What it does not have is international schooling: for that, the capital is an hour and a half across the isthmus. Smartious teaches Cambridge and IB live in the Panamanian morning, alongside a school enrolment.',
-    heroImg: '/heroes/colon-pa.jpg',
     altTexts: { hero: 'Colón and the Atlantic canal entrance' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Colón and Atlantic families — the free zone and container ports, no local provision. From USD 423/month.',
     challenges: [
@@ -192,7 +190,6 @@ export const PANAMA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in David and Boquete',
     heroTagline: 'For David, Boquete and Chiriquí families — one of Latin America\'s best-known retiree destinations, with school-age children and nowhere to send them.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Chiriquí families. David is the commercial capital of western Panama, and in the highlands above it Boquete has become one of the best-known North American retiree and expatriate destinations in Latin America — increasingly with younger families alongside the retirees, drawn by the climate, the coffee economy, and the cost of living. The border corridor to Costa Rica runs west. International schooling in the province is minimal and the capital is a flight or a long drive east. Smartious teaches live to Chiriquí in the Panamanian morning.',
-    heroImg: '/heroes/david-pa.jpg',
     altTexts: { hero: 'Boquete highlands and the Chiriquí valley' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for David, Boquete and Chiriquí families — retiree and expat highlands, minimal provision. From USD 423/month.',
     challenges: [
@@ -255,7 +252,6 @@ export const PANAMA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Bocas del Toro',
     heroTagline: 'For Bocas del Toro families — an island province where the nearest international school is a flight and a boat away.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Bocas del Toro families. The archipelago runs a tourism and hospitality economy of genuinely international scale, with hotel, dive, and adventure businesses owned and staffed by families from North America, Europe, and across Latin America, alongside a scattered remote-work community and the banana plantations of the mainland province. Getting a child to an international school from here means a flight and a boat. Smartious teaches live to the islands in the Panamanian morning, with a rhythm built for a season.',
-    heroImg: '/heroes/bocas-del-toro-pa.jpg',
     altTexts: { hero: 'Bocas del Toro archipelago' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Bocas del Toro families — Caribbean archipelago, no realistic school access. From USD 423/month.',
     challenges: [
@@ -317,7 +313,6 @@ export const PANAMA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Coronado',
     heroTagline: 'For Coronado and Pacific coast families — a residential belt built for retirees, now full of households with school-age children.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for families along Panama\'s Pacific coast. The corridor running west from the capital through Coronado, Gorgona, and out toward Farallón has become one of the largest expatriate residential belts in Central America — built initially around retirement and second homes, and increasingly occupied by younger remote-work households with school-age children. The capital\'s international schools are an hour and a half east on a road nobody wants to drive twice a day. Smartious teaches live to the coast in the Panamanian morning.',
-    heroImg: '/heroes/coronado-pa.jpg',
     altTexts: { hero: 'The Panamanian Pacific coast' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Coronado and Pacific coast families — a large expat belt an hour and a half from the capital tier. From USD 423/month.',
     challenges: [
@@ -403,7 +398,7 @@ export const PANAMA_COUNTRY = {
   secondaryProgrammeExamRef: 'Authorised Panamanian Cambridge provision',
   finalCTABadgeExamRef: 'Cambridge centres confirmed per family, per session',
 
-  heroImage: '/heroes/panama.jpg',
+  heroImage: '/online-virtual-school.png',
   heroEyebrow: 'Online school for Panama',
   heroH1Suffix: 'Panama',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for canal, banking, expatriate, and Panamanian families across Panama City, Colón, David and Boquete, Bocas del Toro, and the Pacific coast. Educación básica general is compulsory and administered by MEDUCA; on home education we could not verify a position and say so rather than guessing. Fees in USD, because Panama already uses it.',
@@ -429,7 +424,7 @@ export const PANAMA_COUNTRY = {
   ibDiplomaDelivery: 'Live online IB DP classes across all six subject groups plus Theory of Knowledge and Extended Essay supervision.',
   americanCurriculumSuits: 'Panama families targeting US universities via Common Application — the dominant overseas destination, reinforced by dollarisation and the size of the North American community.',
   americanCurriculumDelivery: 'American Curriculum with AP courses Grades 9-12, SAT/ACT preparation, Common App essay coaching.',
-  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2019 to make international qualifications accessible to families at online-delivery fees rather than campus ones. Panama is the market where we have had to be most explicit about the limits of what we know — we could not verify the home-education position from a primary source, and we would rather say that than invent an answer.',
+  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2018 to make international qualifications accessible to families at online-delivery fees rather than campus ones. Panama is the market where we have had to be most explicit about the limits of what we know — we could not verify the home-education position from a primary source, and we would rather say that than invent an answer.',
   founderUniversitySpecialism: 'Alfred holds a BEd in Mathematics and Physics — Smartious\'s Cambridge A-Level and IB Diploma STEM subjects are led personally when needed, suiting the canal and maritime sector\'s engineering households and every medicine-bound student in the capital. Head of Academics supervises curriculum delivery and university placement strategy per family.',
 
   competitorsIntro: 'Panama City has an international school tier unusually deep for a country of four and a half million — Balboa Academy, the International School of Panama, the Metropolitan School, King\'s College Panama, the French and German schools — driven by the canal, the banking sector, the regional-headquarters regime, and a very large expatriate population. Those schools are good and their fees sit at the top of the Central American market. Outside the capital the picture collapses almost completely: Colón, Chiriquí, Bocas del Toro, and the Pacific corridor together hold a substantial share of Panama\'s international residents and almost none of its international schooling.',

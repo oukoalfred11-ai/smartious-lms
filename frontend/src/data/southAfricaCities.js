@@ -444,7 +444,7 @@ export const SOUTH_AFRICA_COUNTRY = {
     { metric: 'Established', value: '2018', sub: 'Nairobi-based' },
     { metric: 'Curricula', value: '5', sub: 'Cambridge · Edexcel · IB · American AP · CBC' },
     { metric: 'Tutors', value: '78+', sub: 'PGCE-qualified subject specialists' },
-    { metric: 'Countries served', value: '14+', sub: 'Africa · Gulf · Europe · Americas' },
+    { metric: 'Countries served', value: '40+', sub: 'Africa · Gulf · Europe · Americas' },
     { metric: 'Physical centres', value: '2', sub: 'Diamond Plaza Parklands · Karen Hardy' },
     { metric: 'BELA Act ready', value: '2024', sub: 'Curriculum docs for DBE compliance' },
   ],
@@ -601,11 +601,11 @@ export const SOUTH_AFRICA_COUNTRY = {
     },
     {
       q: 'Will my child miss out on sports, arts, and social development without a physical school?',
-      a: 'A physical school provides a complete daily environment that an online programme does not replicate. However, many SA-based families combine Smartious academic instruction with local sports clubs (cricket, rugby, hockey, swimming, equestrian — SA has strong club infrastructure), music academies, scouts, debate, drama, plus the SA outdoor lifestyle (mountain biking, surfing, hiking). Smartious classes themselves provide regular live peer interaction across 14+ countries. Many families find the time freed from school commute and the academic depth from smaller class sizes more than compensates.',
+      a: 'A physical school provides a complete daily environment that an online programme does not replicate. However, many SA-based families combine Smartious academic instruction with local sports clubs (cricket, rugby, hockey, swimming, equestrian — SA has strong club infrastructure), music academies, scouts, debate, drama, plus the SA outdoor lifestyle (mountain biking, surfing, hiking). Smartious classes themselves provide regular live peer interaction across 40+ countries. Many families find the time freed from school commute and the academic depth from smaller class sizes more than compensates.',
     },
     {
       q: 'What about social interaction and peer relationships?',
-      a: 'Smartious classes are small live groups of 4-6 students (Online tier) or smaller (Online Plus). Students attend the same classes with the same peers throughout the academic year, building relationships across the international student body spanning 14+ countries. SA families typically supplement with local sports clubs, church/synagogue/mosque communities, neighbourhood friendships. For semigration-evaluating families, the Smartious model provides more consistent peer relationships across moves than physical school relationships that reset with each relocation.',
+      a: 'Smartious classes are small live groups of 4-6 students (Online tier) or smaller (Online Plus). Students attend the same classes with the same peers throughout the academic year, building relationships across the international student body spanning 40+ countries. SA families typically supplement with local sports clubs, church/synagogue/mosque communities, neighbourhood friendships. For semigration-evaluating families, the Smartious model provides more consistent peer relationships across moves than physical school relationships that reset with each relocation.',
     },
     {
       q: 'Can my SA child apply to UCT, Wits, Stellenbosch, UJ, UP with Cambridge qualifications?',

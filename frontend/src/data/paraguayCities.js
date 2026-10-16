@@ -6,9 +6,9 @@
 // Encarnación, the Chaco and the soy belt.
 // THIRTEENTH LATIN AMERICAN BUILD — 5 cities.
 //
-// IMAGE NOTE: heroImg / heroImage use LOCAL PATHS under /heroes/.
-// Drop a file at frontend/public/heroes/<slug>.jpg and it appears;
-// if absent the onError handler shows the ink→crimson gradient.
+// IMAGE NOTE: city pages have no heroImg (the hero falls back to the
+// ink→crimson gradient); the country hub uses /online-virtual-school.png.
+// To add a city photo, put it under frontend/public and set heroImg.
 //
 // LEGAL POSITIONING NOTE — PARAGUAY IS A GENUINE GREY AREA WITH
 // RULINGS REPORTED IN BOTH DIRECTIONS. READ ALL OF THIS:
@@ -82,7 +82,6 @@ export const PARAGUAY_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Asunción',
     heroTagline: 'For Asunción families — Cambridge and IB taught live alongside your school, with the grey area in Paraguayan law stated honestly.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Asunción families. The capital carries Paraguay\'s corporate and financial weight, the diplomatic community, and an international school tier — the American School of Asunción, Colegio Internacional, St Anne\'s, the German and Italian schools — with IB and American provision and fees at the top of the local market. Paraguay is also one of the genuine grey areas in our coverage: there is no explicit law authorising or regulating home education, and rulings have reportedly gone in both directions. We say that rather than pick the convenient version.',
-    heroImg: '/heroes/asuncion-py.jpg',
     altTexts: { hero: 'Asunción and the Paraguay river' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Asunción families — the grey area explained, morning or early-afternoon classes. From USD 423/month.',
     challenges: [
@@ -147,7 +146,6 @@ export const PARAGUAY_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Ciudad del Este',
     heroTagline: 'For Ciudad del Este and Alto Paraná families — a genuinely international trading city with schooling built for a provincial one.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Ciudad del Este and Alto Paraná families. The Triple Frontier city runs one of the largest commercial re-export economies in South America, with Lebanese, Chinese, Korean, Brazilian and Paraguayan trading families who have built businesses across three countries, alongside the Itaipú binational dam and its engineering community. It is one of the most genuinely international commercial populations anywhere in the region, and the schooling has never matched it. Asunción is around three hundred kilometres west. Smartious teaches Cambridge and IB live to the border.',
-    heroImg: '/heroes/ciudad-del-este-py.jpg',
     altTexts: { hero: 'Ciudad del Este and the Paraná river' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Ciudad del Este and Alto Paraná families — Triple Frontier commerce and Itaipú, thin provision. From USD 423/month.',
     challenges: [
@@ -209,7 +207,6 @@ export const PARAGUAY_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Encarnación',
     heroTagline: 'For Encarnación and Itapúa families — a dam, a border and a century of European and Japanese settlement, with no international school between them.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Encarnación and Itapúa families. The southern department carries the Yacyretá binational dam and its engineering community, the Argentine border crossing to Posadas, and an agricultural economy shaped by more than a century of German, Ukrainian, Polish and Japanese settlement — colonies that still farm yerba mate, soy and grain and maintain their own institutions. It is internationally connected in a way its school provision does not reflect, and Asunción is around three hundred and seventy kilometres north. Smartious teaches Cambridge and IB live across Itapúa.',
-    heroImg: '/heroes/encarnacion-py.jpg',
     altTexts: { hero: 'Encarnación and the Paraná river' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Encarnación and Itapúa families — Yacyretá, the Argentine border and settler colonies. From USD 423/month.',
     challenges: [
@@ -271,7 +268,6 @@ export const PARAGUAY_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Filadelfia and the Paraguayan Chaco',
     heroTagline: 'For Chaco and colony families — German-speaking cooperatives farming one of the emptiest places in South America, four hundred kilometres from Asunción.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for families across the Paraguayan Chaco. The central Chaco holds the Mennonite colonies — Filadelfia, Loma Plata and Neuland — German-speaking communities that built cooperative dairy and agricultural operations of genuinely industrial scale in one of the most difficult environments in South America, alongside cattle ranching across the wider region. The colonies run their own institutions and do so well; what they do not have is an internationally examined pathway, and Asunción is four hundred and fifty kilometres east across the Chaco road. Smartious teaches Cambridge and IB live to the Chaco.',
-    heroImg: '/heroes/filadelfia-py.jpg',
     altTexts: { hero: 'The Paraguayan Chaco' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Filadelfia, Loma Plata and Chaco families — German-speaking colonies, no international examinations locally. From USD 423/month.',
     challenges: [
@@ -334,7 +330,6 @@ export const PARAGUAY_CITIES = [
     primaryKeyword: 'Online school and international curriculum in the Paraguayan soy belt',
     heroTagline: 'For Santa Rita, Katueté and soy belt families — Portuguese-speaking farms feeding global markets, and a school map that never followed the crop.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for families across Paraguay\'s eastern soy belt. Alto Paraná, Canindeyú and northern Itapúa produce soy, maize and wheat at a scale that puts Paraguay among the world\'s significant exporters, farmed substantially by Brazilian-descended families whose households often speak Portuguese first and whose commercial relationships run to Brazil, Europe and Asia. The machinery dealerships, silos and agro-industry follow the crop; international schooling never did. Smartious teaches Cambridge and IB live across the belt, with Portuguese kept alongside.',
-    heroImg: '/heroes/santa-rita-py.jpg',
     altTexts: { hero: 'The Paraguayan soy belt' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Santa Rita, Katueté and Paraguayan soy belt families — Portuguese kept alongside. From USD 423/month.',
     challenges: [
@@ -421,7 +416,7 @@ export const PARAGUAY_COUNTRY = {
   secondaryProgrammeExamRef: 'Authorised Paraguayan Cambridge provision',
   finalCTABadgeExamRef: 'Cambridge centres confirmed per family, per session',
 
-  heroImage: '/heroes/paraguay.jpg',
+  heroImage: '/online-virtual-school.png',
   heroEyebrow: 'Online school for Paraguay',
   heroH1Suffix: 'Paraguay',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for agro-export, border-commerce, colony, and Paraguayan families across Asunción, Ciudad del Este, Encarnación, the Chaco and the soy belt. Paraguay is a genuine grey area — no explicit law authorising or regulating home education, and rulings reportedly going both ways — and we say so rather than picking a version.',
@@ -447,7 +442,7 @@ export const PARAGUAY_COUNTRY = {
   ibDiplomaDelivery: 'Live online IB DP classes across all six subject groups plus Theory of Knowledge and Extended Essay supervision.',
   americanCurriculumSuits: 'Paraguay families targeting US universities via Common Application.',
   americanCurriculumDelivery: 'American Curriculum with AP courses Grades 9-12, SAT/ACT preparation, Common App essay coaching.',
-  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2019 to make international qualifications accessible to families at online-delivery fees rather than campus ones. Paraguay is unusual in our coverage for how much of its internationally connected population lives outside the capital — German-speaking cooperatives in the Chaco, Portuguese-speaking farms in the east, and trading families on the Triple Frontier — and for how little schooling followed any of them.',
+  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2018 to make international qualifications accessible to families at online-delivery fees rather than campus ones. Paraguay is unusual in our coverage for how much of its internationally connected population lives outside the capital — German-speaking cooperatives in the Chaco, Portuguese-speaking farms in the east, and trading families on the Triple Frontier — and for how little schooling followed any of them.',
   founderUniversitySpecialism: 'Alfred holds a BEd in Mathematics and Physics — Smartious\'s Cambridge A-Level and IB Diploma STEM subjects are led personally when needed, suiting the Itaipú and Yacyretá engineering communities and the agricultural science households across the Chaco and the soy belt. Head of Academics supervises curriculum delivery and university placement strategy per family.',
 
   competitorsIntro: 'Paraguay\'s international schooling is an Asunción story — the American School of Asunción, Colegio Internacional, St Anne\'s, the German and Italian schools — with IB and American provision and fees at the top of the local market. Outside the capital there is essentially nothing international, which is striking given how much of the country\'s internationally connected population lives in the border departments, the Chaco colonies and the soy belt. Those communities often run good local institutions; what none of them offers is an internationally examined qualification.',

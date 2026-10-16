@@ -359,7 +359,7 @@ export const ETHIOPIA_COUNTRY = {
     { metric: 'Established', value: '2018', sub: 'Nairobi-based' },
     { metric: 'Curricula', value: '5', sub: 'Cambridge · Edexcel · IB · American AP · CBC' },
     { metric: 'Tutors', value: '78+', sub: 'PGCE-qualified subject specialists' },
-    { metric: 'Countries served', value: '14+', sub: 'Africa · Gulf · Europe · Americas' },
+    { metric: 'Countries served', value: '40+', sub: 'Africa · Gulf · Europe · Americas' },
     { metric: 'Physical centres', value: '2', sub: 'Diamond Plaza Parklands · Karen Hardy' },
     { metric: 'USD pricing', value: 'Fixed', sub: 'Protects against Birr volatility' },
   ],
@@ -480,7 +480,7 @@ export const ETHIOPIA_COUNTRY = {
     },
     {
       q: 'Will my child miss out on sports, arts, and social development without a physical school?',
-      a: 'A physical school provides a complete daily environment that an online programme does not replicate. However, Ethiopian families combine Smartious academic instruction with local sports (football clubs, athletics — Ethiopia has world-class running culture, tennis, swimming clubs), music, scouts, and religious/community involvement. Smartious classes themselves provide regular live peer interaction across 14+ countries.',
+      a: 'A physical school provides a complete daily environment that an online programme does not replicate. However, Ethiopian families combine Smartious academic instruction with local sports (football clubs, athletics — Ethiopia has world-class running culture, tennis, swimming clubs), music, scouts, and religious/community involvement. Smartious classes themselves provide regular live peer interaction across 40+ countries.',
     },
     {
       q: 'Can my Ethiopian child apply to Addis Ababa University or international universities with Cambridge qualifications?',

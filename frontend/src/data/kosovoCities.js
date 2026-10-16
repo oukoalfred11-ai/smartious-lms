@@ -87,7 +87,6 @@ export const KOSOVO_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Prishtina',
     heroTagline: 'For Prishtina families — Europe\'s youngest capital, an English-taught university sector, and school provision that has not caught up with either.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Prishtina families. Prishtina is the centre of one of Europe\'s youngest and fastest-changing economies — a technology and outsourcing sector that has grown quickly on the back of strong English among young professionals, a construction and services boom, the diplomatic and development community, and an unusually strong English-medium university tier led by RIT Kosovo (A.U.K), which awards US-accredited degrees. It also holds essentially all of the country\'s international schooling. Under the Law on Pre-University Education, grades 1 to 9 are compulsory, so our clean default for those years is supplementary — your enrolment carries the obligation while we teach the international track live alongside it — with the full pathway opening for the voluntary upper-secondary phase.',
-    heroImg: '/heroes/prishtina-xk.jpg',
     altTexts: { hero: 'Prishtina city centre' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Prishtina families — supplementary through grades 1-9, full pathway for the voluntary upper-secondary years. From USD 423/month.',
     challenges: [
@@ -153,7 +152,6 @@ export const KOSOVO_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Prizren',
     heroTagline: 'For Prizren families — the country\'s cultural capital, internationally visited every summer and internationally schooled never.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Prizren families. Prizren is Kosovo\'s historic and cultural capital — an Ottoman-era old town beneath a hilltop fortress, a genuinely multilingual civic life, the Dokufest documentary festival that brings international visitors and filmmakers every August, and a heritage tourism economy that has grown steadily. The Šar mountains and the Albanian border sit close by, and Prizren\'s diaspora ties to Switzerland and Germany are among the strongest in the country. What the city does not have is international schooling. Smartious delivers the international pathways live — supplementary alongside your school enrolment during the compulsory grades, and full-time through the voluntary upper-secondary years.',
-    heroImg: '/heroes/prizren-xk.jpg',
     altTexts: { hero: 'Prizren old town beneath the fortress' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Prizren families — cultural capital and tourism economy, no international schooling. From USD 423/month.',
     challenges: [
@@ -216,7 +214,6 @@ export const KOSOVO_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Peja',
     heroTagline: 'For Peja and Rugova families — mountains that draw the world in summer, and schooling that stops at the valley mouth.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Peja and Rugova valley families. Peja sits at the western edge of the plain where the Accursed Mountains rise — the Rugova canyon behind it has become one of the region\'s fastest-growing adventure-tourism destinations, on the Peaks of the Balkans trail that runs into Albania and Montenegro, while the city itself carries a brewing and food-industry tradition and a strong diaspora economy. The mountains bring international visitors; nothing brings international schooling. Smartious delivers the pathways live across the west — supplementary alongside your school enrolment during the compulsory grades, and full-time through the voluntary upper-secondary years.',
-    heroImg: '/heroes/peja-xk.jpg',
     altTexts: { hero: 'The Rugova canyon and the mountains above Peja' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Peja and Rugova families — adventure tourism and mountain economy, no international schooling. From USD 423/month.',
     challenges: [
@@ -279,7 +276,6 @@ export const KOSOVO_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Gjakova',
     heroTagline: 'For Gjakova families — a city half of whose extended families live in Germany and Switzerland, and whose schools prepare for neither.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Gjakova families. Gjakova sits on the Dukagjini plain around one of the region\'s great old bazaars — a craft and trade city with a long commercial tradition, an airport nearby, and one of the strongest diaspora economies in the country: a large share of families here have relatives established in Germany, Switzerland, and Austria, with children who split their lives between the two. What the city does not have is any schooling that prepares a child for a future in those countries or anywhere else internationally. Smartious delivers the pathways live — supplementary alongside your school enrolment during the compulsory grades, and full-time through the voluntary upper-secondary years.',
-    heroImg: '/heroes/gjakova-xk.jpg',
     altTexts: { hero: 'The old bazaar at Gjakova' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Gjakova families — strong diaspora economy, no international schooling. From USD 423/month.',
     challenges: [
@@ -341,7 +337,6 @@ export const KOSOVO_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Ferizaj',
     heroTagline: 'For Ferizaj families — the corridor city, minutes from the airport and outside everything the capital offers.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Ferizaj families. Ferizaj grew up on the north-south corridor and has become one of Kosovo\'s manufacturing and logistics centres — furniture, plastics, food processing, and trade, with the international airport a short drive north and the routes toward North Macedonia running south. Its population is young even by Kosovar standards and growing quickly. Prishtina\'s small international tier is forty minutes away, which is close enough to consider and far enough not to serve the city. Smartious delivers the international pathways live — supplementary alongside your school enrolment during the compulsory grades, and full-time through the voluntary upper-secondary years.',
-    heroImg: '/heroes/ferizaj-xk.jpg',
     altTexts: { hero: 'Ferizaj city centre on the central corridor' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Ferizaj families — manufacturing and logistics corridor, no international schooling. From USD 423/month.',
     challenges: [
@@ -403,7 +398,6 @@ export const KOSOVO_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Gjilan',
     heroTagline: 'For Gjilan and eastern families — the regional centre of the east, with every international school an hour or more away.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Gjilan and eastern families. Gjilan anchors Kosovo\'s east — a regional trade and light-manufacturing centre with university faculties, a young population, and corridors running toward North Macedonia and Serbia that shape its commerce. It is also, in schooling terms, on the wrong side of the country: everything international sits in Prishtina, an hour or more west. For eastern families whose children are aiming beyond the region — and for a diaspora that returns every summer — live delivery is the practical answer. Smartious runs supplementary alongside your school enrolment during the compulsory grades, and full-time through the voluntary upper-secondary years.',
-    heroImg: '/heroes/gjilan-xk.jpg',
     altTexts: { hero: 'Gjilan and the eastern hills' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Gjilan and eastern Kosovo families — regional centre, no international schooling. From USD 423/month.',
     challenges: [
@@ -489,7 +483,7 @@ export const KOSOVO_COUNTRY = {
   secondaryProgrammeExamRef: 'Authorised Prishtina and regional provision',
   finalCTABadgeExamRef: 'Cambridge centres confirmed per family, per session',
 
-  heroImage: '/heroes/kosovo.jpg',
+  heroImage: '/online-virtual-school.png',
   heroEyebrow: 'Online international school for Kosovo',
   heroH1Suffix: 'Kosovo',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for diaspora, expat, technology, and Kosovar families across Prishtina, Prizren, Peja, Gjakova, Ferizaj, and Gjilan. Grades 1 to 9 are compulsory under the Law on Pre-University Education, so we run supplementary alongside your school for those years — and upper secondary is voluntary, so the A-Level years open completely from around fifteen.',
@@ -515,7 +509,7 @@ export const KOSOVO_COUNTRY = {
   ibDiplomaDelivery: 'Live online IB DP classes across all six subject groups plus Theory of Knowledge and Extended Essay supervision.',
   americanCurriculumSuits: 'Kosovo families targeting US universities via Common Application, and those aiming at RIT Kosovo (A.U.K)\'s US-accredited degrees.',
   americanCurriculumDelivery: 'American Curriculum with AP courses Grades 9-12, SAT/ACT preparation, Common App essay coaching.',
-  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in 2019 to make international qualifications (Cambridge, IB, American) accessible to families across emerging markets and international communities at online-delivery fees. Kosovo families join students in 49 other countries — from Prishtina to Nairobi\'s own Diamond Plaza HQ, the Rugova valley to the Dukagjini plain.',
+  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2018 to make international qualifications (Cambridge, IB, American) accessible to families across emerging markets and international communities at online-delivery fees. Kosovo families join students in 40+ countries — from Prishtina to Nairobi\'s own Diamond Plaza HQ, the Rugova valley to the Dukagjini plain.',
   founderUniversitySpecialism: 'Alfred holds a BEd in Mathematics and Physics — Smartious\'s Cambridge A-Level and IB Diploma STEM subjects are led personally when needed, suiting Prishtina\'s technology households, Ferizaj\'s manufacturing families, and every medicine- or engineering-bound student in the country. Head of Academics supervises curriculum delivery and university placement strategy per family.',
 
   competitorsIntro: 'International schooling in Kosovo is a Prishtina story — the American School of Kosova, the International School of Prishtina, Mehmet Akif and a small private tier — with essentially nothing in Prizren, Peja, Gjakova, Ferizaj, or Gjilan. What is unusual here is the university end: RIT Kosovo (A.U.K) awards US-accredited degrees taught in English, and UBT and Universum teach in English too. So the country produces real demand for an internationally examined school record without having built the schools to supply it. That gap is the competitive space.',

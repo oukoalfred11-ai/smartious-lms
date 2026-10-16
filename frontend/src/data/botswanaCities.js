@@ -5,9 +5,9 @@
 // across Gaborone, Francistown, and the diamond towns.
 // AFRICA BUILD — 3 cities.
 //
-// IMAGE NOTE: heroImg / heroImage use LOCAL PATHS under /heroes/.
-// Drop a file at frontend/public/heroes/<slug>.jpg and it appears;
-// if absent the onError handler shows the ink→crimson gradient.
+// IMAGE NOTE: city pages have no heroImg (the hero falls back to the
+// ink→crimson gradient); the country hub uses /online-virtual-school.png.
+// To add a city photo, put it under frontend/public and set heroImg.
 // Do NOT paste guessed stock-photo IDs.
 //
 // LEGAL POSITIONING NOTE — READ CAREFULLY, BOTSWANA IS DIFFERENT:
@@ -66,7 +66,6 @@ export const BOTSWANA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Gaborone',
     heroTagline: 'For Gaborone families — Cambridge taught live from Nairobi, one hour ahead, in a country where Cambridge was never foreign.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Gaborone families. Gaborone holds Botswana\'s government, its financial services sector, the commercial side of the diamond industry, and an unusually large regional-organisation community — SADC is headquartered here, alongside diplomatic missions and development agencies. It also holds the country\'s international-school tier, which is genuinely strong and priced accordingly. What makes Botswana different from most markets we serve is that Cambridge is not a foreign qualification here at all: the BGCSE is the national senior certificate, developed in association with Cambridge, and most private secondary schools already offer IGCSE. Smartious runs alongside your registered school, one hour ahead of you, all year.',
-    heroImg: '/heroes/gaborone-bw.jpg',
     altTexts: { hero: 'Gaborone city centre' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Gaborone families — alongside your registered school, one hour from Nairobi. From USD 423/month.',
     challenges: [
@@ -101,7 +100,7 @@ export const BOTSWANA_CITIES = [
       ['Cambridge, in a country where Cambridge is native', 'The BGCSE was developed in association with Cambridge and most private secondary schools here already offer IGCSE. We teach the international track live — familiar ground, delivered differently.'],
       ['The tier\'s curriculum at a professional family\'s budget', 'Live small-group teaching from USD 5,076 a year against Gaborone international fees at the top of the local market.'],
       ['One hour from your teachers, all year', 'Botswana and Kenya are an hour apart with no daylight saving on either side, so classes land in the ordinary school day every week of the year.'],
-      ['An African school teaching African families', 'Smartious is Nairobi-built and Nairobi-taught, serving families in 51 countries — not an overseas provider reaching in.'],
+      ['An African school teaching African families', 'Smartious is Nairobi-built and Nairobi-taught, serving families in 40+ countries — not an overseas provider reaching in.'],
       ['What we are, stated plainly', 'Smartious is not a registered Botswana school and does not claim to be one. We are an internationally accredited online school working alongside your registered school.'],
     ],
     growingReason: 'Gaborone holds Botswana\'s government, financial sector, and the diamond industry\'s commercial centre, alongside SADC\'s headquarters and a substantial diplomatic community — in a country where Cambridge is native rather than foreign. Botswana runs CAT (UTC+2), exactly one hour behind Nairobi EAT with no daylight saving.',
@@ -131,7 +130,6 @@ export const BOTSWANA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Francistown',
     heroTagline: 'For Francistown and northern families — the commercial north, five hours from the capital\'s schools and the gateway to the Delta.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Francistown and northern Botswana families. Francistown is Botswana\'s second city and its northern commercial hub — mining services, regional trade toward Zimbabwe, transport and logistics, and the road that opens onto Maun, the Okavango Delta, and Chobe, where a tourism and conservation economy employs an internationally connected workforce. Gaborone\'s international-school tier is around five hours south. Smartious delivers the Cambridge and IB pathways live across the north, alongside your registered school and one hour ahead of you all year.',
-    heroImg: '/heroes/francistown-bw.jpg',
     altTexts: { hero: 'Francistown in northern Botswana' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Francistown, Maun and northern Botswana families — thin international schooling. From USD 423/month.',
     challenges: [
@@ -194,7 +192,6 @@ export const BOTSWANA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Jwaneng and Orapa',
     heroTagline: 'For Jwaneng, Orapa and Letlhakane families — the richest diamond mines in the world, and company-town schooling.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for families in Botswana\'s diamond towns. Jwaneng and Orapa are among the richest diamond mines on earth, and the towns around them — Jwaneng, Orapa, and Letlhakane — exist because of them: purpose-built communities with mine-run infrastructure and an internationally recruited technical workforce of engineers, geologists, metallurgists, and management. Company-town schooling is often decent and it is inevitably narrow, and the nearest international campus is hours away. Smartious delivers the Cambridge and IB pathways live to the diamond towns, alongside your registered school and one hour ahead of you all year.',
-    heroImg: '/heroes/jwaneng-bw.jpg',
     altTexts: { hero: 'Diamond mining country in Botswana' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Jwaneng, Orapa and Letlhakane families — diamond mining towns, narrow local schooling. From USD 423/month.',
     challenges: [
@@ -281,7 +278,7 @@ export const BOTSWANA_COUNTRY = {
   secondaryProgrammeExamRef: 'Authorised Botswana Cambridge provision',
   finalCTABadgeExamRef: 'Cambridge centres confirmed per family, per session',
 
-  heroImage: '/heroes/botswana.jpg',
+  heroImage: '/online-virtual-school.png',
   heroEyebrow: 'Online school for Botswana',
   heroH1Suffix: 'Botswana',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for mining, corporate, expat, and Batswana families across Gaborone, Francistown, and the diamond towns. Taught live from Nairobi — one hour ahead, every week of the year. Cambridge is native here: the BGCSE was developed in association with Cambridge and most private secondary schools already offer IGCSE.',
@@ -292,7 +289,7 @@ export const BOTSWANA_COUNTRY = {
   citiesSectionBody: 'Smartious Botswana families concentrate across Gaborone (government, financial services, the diamond industry\'s commercial centre, SADC and the diplomatic community, and the international-school tier), Francistown and the north (mining services, regional trade, and the gateway to Maun, the Okavango, and Chobe), and the diamond towns of Jwaneng, Orapa, and Letlhakane (purpose-built communities around the richest mines on earth, with schooling built for a company town). One national picture, one working configuration, and the closest timezone alignment we have anywhere.',
 
   trustSignals: [
-    { h: 'An African school teaching African families', p: 'Smartious was founded in Nairobi in 2019 and teaches from two operational centres established 2022 and 2023 — an African school with international accreditation, serving students in 51 countries, not an overseas provider reaching in.' },
+    { h: 'An African school teaching African families', p: 'Smartious was founded in Nairobi in 2018 and teaches from two operational centres established 2022 and 2023 — an African school with international accreditation, serving families in 40+ countries, not an overseas provider reaching in.' },
     { h: 'One hour apart, every week of the year', p: 'Botswana runs CAT (UTC+2) and Kenya EAT (UTC+3), with no daylight saving on either side. Live classes land in the ordinary Botswana school day and afternoon all year, with no seasonal drift.' },
     { h: 'Cambridge is native here, not foreign', p: 'The BGCSE is Botswana\'s own senior certificate, developed in association with Cambridge, and most private secondary schools already offer IGCSE. An internationally examined record is familiar ground in this market.' },
     { h: 'What we are, stated plainly', p: 'Registration of schools is compulsory in Botswana and operating an unregistered school is an offence. Smartious is not a registered Botswana school and does not present itself as one — we work alongside your registered school.' },
@@ -307,7 +304,7 @@ export const BOTSWANA_COUNTRY = {
   ibDiplomaDelivery: 'Live online IB DP classes across all six subject groups plus Theory of Knowledge and Extended Essay supervision.',
   americanCurriculumSuits: 'Botswana families targeting US universities via Common Application.',
   americanCurriculumDelivery: 'American Curriculum with AP courses Grades 9-12, SAT/ACT preparation, Common App essay coaching.',
-  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2019 to make international qualifications accessible to African and internationally mobile families at online-delivery fees rather than campus ones. Botswana families join students in 51 other countries — and, like our Zambian, Zimbabwean, and Namibian families, they are an hour from their teachers rather than a continent away.',
+  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2018 to make international qualifications accessible to African and internationally mobile families at online-delivery fees rather than campus ones. Botswana families join students in 40+ countries — and, like our Zambian, Zimbabwean, and Namibian families, they are an hour from their teachers rather than a continent away.',
   founderUniversitySpecialism: 'Alfred holds a BEd in Mathematics and Physics — Smartious\'s Cambridge A-Level and IB Diploma STEM subjects are led personally when needed, suiting the diamond towns\' engineering and geoscience families and every medicine-bound student in Gaborone. Head of Academics supervises curriculum delivery and university placement strategy per family.',
 
   competitorsIntro: 'Botswana\'s international schooling is strong where it exists and concentrated in Gaborone, with the good schools priced at the top of the local market and places competitive. Outside the capital the picture thins quickly — Francistown has little, and the diamond towns have company-town provision that is often decent and inevitably narrow. Because Cambridge is already native here through the BGCSE and the IGCSE-offering private sector, the gap is not familiarity with the qualification; it is access to live teaching in the subjects and places the campus map does not reach.',
@@ -337,7 +334,7 @@ export const BOTSWANA_COUNTRY = {
     { h: 'Careful where the sources disagree',                             p: 'Botswana\'s compulsion question is unsettled in the reporting. We say so, decline to market on it, and recommend keeping the school enrolment regardless.' },
     { h: 'Honest about what we are',                                       p: 'Not a registered Botswana school, and we say it plainly. An internationally accredited online school working alongside yours.' },
     { h: 'Cambridge on familiar ground',                                   p: 'The BGCSE was built with Cambridge and most private secondaries run IGCSE. Recognition is not the problem here — access is.' },
-    { h: 'An African school teaching African families',                    p: 'Nairobi-built and Nairobi-taught, serving 51 countries, working to African school calendars and examination realities.' },
+    { h: 'An African school teaching African families',                    p: 'Nairobi-built and Nairobi-taught, serving families in 40+ countries, working to African school calendars and examination realities.' },
   ],
 
   faqs: [

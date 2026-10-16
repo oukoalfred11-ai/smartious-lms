@@ -110,6 +110,8 @@ export let NEPAL_CITIES = [], NEPAL_COUNTRY = null
 export let TURKEY_CITIES = [], TURKEY_COUNTRY = null
 export let KUWAIT_CITIES = [], KUWAIT_COUNTRY = null
 export let OMAN_CITIES = [], OMAN_COUNTRY = null
+export let NIGERIA_CITIES = [], NIGERIA_COUNTRY = null
+export let BAHRAIN_CITIES = [], BAHRAIN_COUNTRY = null
 export let TAIWAN_CITIES = [], TAIWAN_COUNTRY = null
 export let IRELAND_CITIES = [], IRELAND_COUNTRY = null
 export let UK_CITIES = [], UK_COUNTRY = null
@@ -217,6 +219,8 @@ const MODULES = {
   turkeyCities: [() => import('./turkeyCities.js'), m => { TURKEY_CITIES = m.TURKEY_CITIES; TURKEY_COUNTRY = m.TURKEY_COUNTRY }, ['turkey-city', 'homeschooling-turkey']],
   kuwaitCities: [() => import('./kuwaitCities.js'), m => { KUWAIT_CITIES = m.KUWAIT_CITIES; KUWAIT_COUNTRY = m.KUWAIT_COUNTRY }, ['kuwait-city', 'homeschooling-kuwait']],
   omanCities: [() => import('./omanCities.js'), m => { OMAN_CITIES = m.OMAN_CITIES; OMAN_COUNTRY = m.OMAN_COUNTRY }, ['oman-city', 'homeschooling-oman']],
+  nigeriaCities: [() => import('./nigeriaCities.js'), m => { NIGERIA_CITIES = m.NIGERIA_CITIES; NIGERIA_COUNTRY = m.NIGERIA_COUNTRY }, ['nigeria-city', 'homeschooling-nigeria']],
+  bahrainCities: [() => import('./bahrainCities.js'), m => { BAHRAIN_CITIES = m.BAHRAIN_CITIES; BAHRAIN_COUNTRY = m.BAHRAIN_COUNTRY }, ['bahrain-city', 'homeschooling-bahrain']],
   taiwanCities: [() => import('./taiwanCities.js'), m => { TAIWAN_CITIES = m.TAIWAN_CITIES; TAIWAN_COUNTRY = m.TAIWAN_COUNTRY }, ['taiwan-city', 'homeschooling-taiwan']],
   irelandCities: [() => import('./irelandCities.js'), m => { IRELAND_CITIES = m.IRELAND_CITIES; IRELAND_COUNTRY = m.IRELAND_COUNTRY }, ['ireland-city', 'homeschooling-ireland']],
   ukCities: [() => import('./ukCities.js'), m => { UK_CITIES = m.UK_CITIES; UK_COUNTRY = m.UK_COUNTRY }, ['uk-city', 'homeschooling-united-kingdom']],

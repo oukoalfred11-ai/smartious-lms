@@ -67,7 +67,6 @@ export const ZAMBIA_CITIES = [
     primaryKeyword: 'Online school and Cambridge curriculum in Lusaka',
     heroTagline: 'For Lusaka families — the Cambridge pathway you already know, taught live at a fraction of the fees, one hour from our teaching base.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Lusaka families. Lusaka carries Zambia\'s corporate weight and a diplomatic, development, and NGO community that serves much of the region — and its international-school tier has grown alongside it, with the American International School of Lusaka, the International School of Lusaka, Baobab College and the Cambridge-offering private schools drawing families from across the city. What has also grown is the fee. Smartious teaches the same Cambridge pathway those schools run, live and in small groups, from USD 5,076 a year — and with two advantages that do not exist in most of the markets we serve: teaching is in English, so there is no second curriculum to carry, and Zambia sits one hour behind our Nairobi teaching base, the closest alignment we have anywhere.',
-    heroImg: '/heroes/lusaka-zm.jpg',
     altTexts: { hero: 'Lusaka city centre' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Lusaka families — the Cambridge pathway at a fraction of local international-school fees. From USD 423/month.',
     challenges: [
@@ -132,7 +131,6 @@ export const ZAMBIA_CITIES = [
     primaryKeyword: 'Online school and Cambridge curriculum in Kitwe and the Copperbelt',
     heroTagline: 'For Copperbelt families — mines staffed from four continents, and a schooling map that stops in Lusaka.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for families across Kitwe and the Copperbelt. The copper belt running through Kitwe, Ndola, Chingola, Mufulira and out to Solwezi is one of Africa\'s great mining regions, and its workforce reflects that — mining houses, engineering contractors, and service companies recruiting from South Africa, India, China, Australia, and Europe, alongside a deep local professional class of engineers and metallurgists. What the region does not have is anything approaching Lusaka\'s schooling, and the capital is a long drive or a flight away. Smartious delivers the Cambridge pathway live across the Copperbelt — in English, one hour from our teaching base, with the recorded library built around shift patterns.',
-    heroImg: '/heroes/kitwe-zm.jpg',
     altTexts: { hero: 'The Copperbelt mining landscape' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Kitwe, Ndola and Copperbelt families — mining region, thin schooling provision. From USD 423/month.',
     challenges: [
@@ -195,7 +193,6 @@ export const ZAMBIA_CITIES = [
     primaryKeyword: 'Online school and Cambridge curriculum in Livingstone',
     heroTagline: 'For Livingstone and Southern Province families — the falls bring the world every season, and take none of it home to the schools.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Livingstone and Southern Province families. Livingstone is Zambia\'s tourism capital — Victoria Falls, the lodges and camps along the Zambezi, rafting and safari operations, and an airport that connects the region internationally — with a permanent community of tourism operators, hospitality businesses, guides, and conservation staff living here year-round. Across the bridge sits Zimbabwe, and around the province lie Choma, Mazabuka, and the Kafue agricultural belt. International schooling in the region does not exist. Smartious delivers the Cambridge pathway live across the south, with a rhythm built for the season.',
-    heroImg: '/heroes/livingstone-zm.jpg',
     altTexts: { hero: 'Victoria Falls and the Zambezi at Livingstone' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Livingstone and Southern Province families — tourism capital, no international schooling. From USD 423/month.',
     challenges: [
@@ -282,7 +279,7 @@ export const ZAMBIA_COUNTRY = {
   secondaryProgrammeExamRef: 'Established Zambian Cambridge provision',
   finalCTABadgeExamRef: 'Cambridge centres confirmed per family, per session',
 
-  heroImage: '/heroes/zambia.jpg',
+  heroImage: '/online-virtual-school.png',
   heroEyebrow: 'Online Cambridge school for Zambia',
   heroH1Suffix: 'Zambia',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for mining, professional, expatriate, and Zambian families across Lusaka, the Copperbelt, and Livingstone. The same Cambridge pathway Zambian private schools already run — taught live in groups of four to six, in English, one hour from our teaching base, at a fraction of local international-school fees.',
@@ -308,7 +305,7 @@ export const ZAMBIA_COUNTRY = {
   ibDiplomaDelivery: 'Live online IB DP classes across all six subject groups plus Theory of Knowledge and Extended Essay supervision.',
   americanCurriculumSuits: 'Zambia families targeting US universities via Common Application.',
   americanCurriculumDelivery: 'American Curriculum with AP courses Grades 9-12, SAT/ACT preparation, Common App essay coaching.',
-  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in 2019 in Nairobi to make international qualifications accessible to African and internationally mobile families at online-delivery fees. Zambia sits closer to that mission than almost anywhere we serve: same region, same language of instruction, one hour of time difference, and a Cambridge tradition already in place. Zambia families join students in 50 other countries.',
+  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2018 in Nairobi to make international qualifications accessible to African and internationally mobile families at online-delivery fees. Zambia sits closer to that mission than almost anywhere we serve: same region, same language of instruction, one hour of time difference, and a Cambridge tradition already in place. Zambia families join students in 40+ countries.',
   founderUniversitySpecialism: 'Alfred holds a BEd in Mathematics and Physics — Smartious\'s Cambridge A-Level and IB Diploma STEM subjects are led personally when needed, suiting the Copperbelt\'s mining and metallurgy families and every medicine- or engineering-bound student in the country. Head of Academics supervises curriculum delivery and university placement strategy per family.',
 
   competitorsIntro: 'Zambia\'s Cambridge tier is real and, in Lusaka, genuinely good — the American International School of Lusaka, the International School of Lusaka, Baobab College, and the Cambridge-offering private schools do work we are not trying to replicate. The problem is reach and price: fees have risen sharply, the strongest entry points fill, and outside the capital the provision thins to very little. That is the space we occupy — the same qualification, delivered live, to the families and regions the campuses do not reach.',

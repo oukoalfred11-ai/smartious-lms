@@ -10,6 +10,9 @@ export const ARTICLE_PART_LOADERS = {
   articlesPart6: () => import('../articlesPart6.js'),
   articlesPart7: () => import('../articlesPart7.js'),
   articlesPart8: () => import('../articlesPart8.js'),
+  articlesPart9: () => import('../articlesPart9.js'),
+  articlesPart10: () => import('../articlesPart10.js'),
+  articlesPart11: () => import('../articlesPart11.js'),
 }
 
 // module list (comma-separated) → space-separated slugs
@@ -21,6 +24,7 @@ const HOMESCHOOL = {
  "australiaCities": "sydney-au melbourne-au brisbane-au perth-au adelaide-au regional-au",
  "austriaCities": "vienna-at graz-at salzburg-at linz-at innsbruck-at bregenz-at",
  "azerbaijanCities": "baku-az ganja-az sumgait-az mingachevir-az gabala-az lankaran-az",
+ "bahrainCities": "manama-bh riffa-bh",
  "bangladeshCities": "dhaka-bd chattogram-bd sylhet-bd khulna-bd rajshahi-bd",
  "belgiumCities": "brussels-be antwerp-be ghent-be leuven-be waterloo-be mons-be",
  "boliviaCities": "santa-cruz-bo la-paz-bo cochabamba-bo tarija-bo potosi-bo",
@@ -58,7 +62,7 @@ const HOMESCHOOL = {
  "italyCities": "milan-it rome-it florence-it turin-it bologna-it naples-it",
  "japanCities": "tokyo-jp yokohama-jp osaka-jp kobe-jp nagoya-jp okinawa-jp",
  "jordanCities": "amman-jo aqaba-jo irbid-jo zarqa-jo dead-sea-jo",
- "kenyaCities": "mombasa kisumu nakuru eldoret thika kiambu",
+ "kenyaCities": "nairobi mombasa kisumu nakuru eldoret thika kiambu",
  "kosovoCities": "prishtina-xk prizren-xk peja-xk gjakova-xk ferizaj-xk gjilan-xk",
  "kuwaitCities": "kuwait-city-kw salmiya-kw hawally-kw salwa-kw bayan-kw ahmadi-kw",
  "lebanonCities": "beirut-lb tripoli-lb saida-lb zahle-lb jounieh-lb",
@@ -73,6 +77,7 @@ const HOMESCHOOL = {
  "namibiaCities": "windhoek-na walvis-bay-na oshakati-na",
  "nepalCities": "kathmandu-np pokhara-np biratnagar-np chitwan-np butwal-np",
  "netherlandsCities": "amsterdam-nl the-hague-nl rotterdam-nl utrecht-nl eindhoven-nl groningen-nl",
+ "nigeriaCities": "lagos-ng abuja-ng port-harcourt-ng ibadan-ng enugu-ng kano-ng",
  "northMacedoniaCities": "skopje-mk tetovo-mk bitola-mk ohrid-mk kumanovo-mk stip-mk",
  "norwayCities": "oslo-no stavanger-no bergen-no trondheim-no tromso-no kristiansand-no",
  "nzCities": "auckland-nz wellington-nz christchurch-nz hamilton-nz tauranga-nz queenstown-nz",

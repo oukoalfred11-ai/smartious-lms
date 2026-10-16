@@ -75,7 +75,6 @@ export const ZIMBABWE_CITIES = [
     primaryKeyword: 'Online school and Cambridge curriculum in Harare',
     heroTagline: 'For Harare families — the Cambridge education this city has always valued, taught live, at fees built for the present.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Harare families. Few cities in Africa have a longer or deeper relationship with Cambridge examinations than Harare — generations of students have taken O- and A-Levels here, the trust and private schools built their reputations on them, and the qualification carries weight with Zimbabwean families, universities, and employers in a way it does in very few other markets. What has changed is what access costs. Smartious teaches that same pathway live in groups of four to six from USD 5,076 a year, in English, one hour from our Nairobi teaching base — as the full programme, or as one or two subjects alongside a school a family already values.',
-    heroImg: '/heroes/harare-zw.jpg',
     altTexts: { hero: 'Harare city skyline' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Harare families — the Cambridge pathway taught live at accessible fees. From USD 423/month.',
     challenges: [
@@ -140,7 +139,6 @@ export const ZIMBABWE_CITIES = [
     primaryKeyword: 'Online school and Cambridge curriculum in Bulawayo',
     heroTagline: 'For Bulawayo families — a city that has always taken schooling seriously, and an economy that has made it harder to pay for.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Bulawayo families. Bulawayo is Zimbabwe\'s second city and its industrial one — a railway and engineering tradition, a manufacturing base, and a set of long-established schools whose academic records are known well beyond Matabeleland. It is also closely tied to South Africa: the corridor south shapes trade, work, and where a great many families\' relatives now live. Cambridge is familiar here and the ambition is not in question; what has changed is affordability, and how many specialist subjects a smaller cohort can sustain. Smartious teaches the Cambridge pathway live across Bulawayo and Matabeleland — in English, one hour from our teaching base.',
-    heroImg: '/heroes/bulawayo-zw.jpg',
     altTexts: { hero: 'Bulawayo city centre' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Bulawayo and Matabeleland families — Cambridge taught live at accessible fees. From USD 423/month.',
     challenges: [
@@ -203,7 +201,6 @@ export const ZIMBABWE_CITIES = [
     primaryKeyword: 'Online school and Cambridge curriculum in Victoria Falls',
     heroTagline: 'For Victoria Falls and Hwange families — one of Africa\'s great tourism destinations, and a schooling map that stops at Bulawayo.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Victoria Falls and Hwange families. Victoria Falls is one of the most internationally visited places on the continent — lodges and hotels, rafting and safari operations, an international airport, and a permanent community of operators, guides, conservationists, and hospitality managers who live here year-round rather than seasonally. An hour south, Hwange runs the national park alongside the coal and power belt with its own technical workforce. Bulawayo is several hours away and the schooling map effectively stops there. Smartious delivers the Cambridge pathway live across the north-west, with a rhythm built for a season that never quite ends.',
-    heroImg: '/heroes/victoria-falls-zw.jpg',
     altTexts: { hero: 'Victoria Falls and the Zambezi' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Victoria Falls and Hwange families — tourism and conservation economy, no international schooling. From USD 423/month.',
     challenges: [
@@ -290,7 +287,7 @@ export const ZIMBABWE_COUNTRY = {
   secondaryProgrammeExamRef: 'Long-established Zimbabwean Cambridge provision',
   finalCTABadgeExamRef: 'Cambridge centres confirmed per family, per session',
 
-  heroImage: '/heroes/zimbabwe.jpg',
+  heroImage: '/online-virtual-school.png',
   heroEyebrow: 'Online Cambridge school for Zimbabwe',
   heroH1Suffix: 'Zimbabwe',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for professional, diaspora-connected, mining, and Zimbabwean families across Harare, Bulawayo, and Victoria Falls and Hwange. Few countries in Africa know Cambridge better than this one. We teach that same pathway live in groups of four to six, in English, one hour from our teaching base — as the full programme or as the two subjects your school cannot staff.',
@@ -316,7 +313,7 @@ export const ZIMBABWE_COUNTRY = {
   ibDiplomaDelivery: 'Live online IB DP classes across all six subject groups plus Theory of Knowledge and Extended Essay supervision.',
   americanCurriculumSuits: 'Zimbabwe families targeting US universities via Common Application.',
   americanCurriculumDelivery: 'American Curriculum with AP courses Grades 9-12, SAT/ACT preparation, Common App essay coaching.',
-  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in 2019 in Nairobi to make international qualifications accessible to African and internationally mobile families at online-delivery fees. Zimbabwe is a natural market for that: the same region, the same language of instruction, one hour of time difference, and a Cambridge tradition older than most of the schools we compete with elsewhere. Zimbabwe families join students in 50 other countries.',
+  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2018 in Nairobi to make international qualifications accessible to African and internationally mobile families at online-delivery fees. Zimbabwe is a natural market for that: the same region, the same language of instruction, one hour of time difference, and a Cambridge tradition older than most of the schools we compete with elsewhere. Zimbabwe families join students in 40+ countries.',
   founderUniversitySpecialism: 'Alfred holds a BEd in Mathematics and Physics — Smartious\'s Cambridge A-Level and IB Diploma STEM subjects are led personally when needed, which suits a country where Further Mathematics and the specialist sciences are exactly what smaller senior cohorts lose first. Head of Academics supervises curriculum delivery and university placement strategy per family.',
 
   competitorsIntro: 'Zimbabwe\'s schools do not need to be sold on Cambridge, and we would not attempt it. The trust and private schools in Harare and Bulawayo have decades of results behind them and offer a campus experience we cannot replicate. Three specific things have changed: what those schools cost relative to household budgets, how many specialist subjects a smaller senior cohort can sustain, and how much of the country lives beyond reach of either city. Those three gaps are where we work.',

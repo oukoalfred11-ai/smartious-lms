@@ -44,6 +44,7 @@ import {
   IRELAND_COUNTRY, UK_CITIES, UK_COUNTRY, INDIA_CITIES, INDIA_COUNTRY, GERMANY_CITIES,
   GERMANY_COUNTRY, ROMANIA_CITIES, ROMANIA_COUNTRY, UKRAINE_CITIES, UKRAINE_COUNTRY,
   VIETNAM_CITIES, VIETNAM_COUNTRY, THAILAND_CITIES, THAILAND_COUNTRY,
+  NIGERIA_CITIES, NIGERIA_COUNTRY, BAHRAIN_CITIES, BAHRAIN_COUNTRY,
 } from '../data/lazyData.js'
 import { CURRICULA } from '../data/curricula.js'
 import { SERVICES } from '../data/services.js'
@@ -139,8 +140,28 @@ function setCanonical(url) {
   el.setAttribute('href', url)
 }
 
+// setRobots — 'noindex' on pages that must stay out of the index (the
+// not-found page). Otherwise puts back the robots value from index.html.
+function setRobots(noindex) {
+  let el = document.head.querySelector('meta[name="robots"]')
+  if (!el) {
+    if (!noindex) return
+    el = document.createElement('meta')
+    el.setAttribute('name', 'robots')
+    document.head.appendChild(el)
+  }
+  if (!el.hasAttribute('data-default')) el.setAttribute('data-default', el.getAttribute('content') || '')
+  if (noindex) el.setAttribute('content', 'noindex')
+  else if (el.getAttribute('data-default')) el.setAttribute('content', el.getAttribute('data-default'))
+  else el.remove()
+}
+
+// canonicalOverride === false: no canonical at all (the not-found page
+// must not declare the bad URL canonical), and robots noindex.
 function usePageMeta(title, description, canonicalOverride) {
   useEffect(() => {
+    const noindex = canonicalOverride === false
+    setRobots(noindex)
     if (title) document.title = title
     if (description) {
       setMetaTag('description', description, 'name')
@@ -154,6 +175,11 @@ function usePageMeta(title, description, canonicalOverride) {
     // Pages can pass a canonicalOverride to force one canonical URL across
     // multiple URL aliases (e.g. /us-families and /online-school/usa both
     // serve the same content but consolidate SEO authority on the latter).
+    if (noindex) {
+      document.head.querySelector('link[rel="canonical"]')?.remove()
+      document.head.querySelector('meta[property="og:url"]')?.remove()
+      return
+    }
     try {
       const origin = window.location.origin
       let canonical
@@ -171,6 +197,44 @@ function usePageMeta(title, description, canonicalOverride) {
       setMetaTag('og:url', canonical, 'property')
     } catch {}
   }, [title, description, canonicalOverride])
+}
+
+/* ── spaClick — real <a href> links with SPA navigation ─────
+ * Internal links are <a href="/path"> so crawlers can follow them;
+ * a plain left click is intercepted and routed through react-router
+ * (no full reload). Modified clicks (new tab etc.) behave normally.
+ * `before` runs first (e.g. close a menu or set page state).
+ */
+function spaClick(nav, href, before) {
+  return (e) => {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+    e.preventDefault()
+    if (before) before()
+    nav(href)
+    window.scrollTo(0, 0)
+  }
+}
+
+/* ── IntakeCta — January 2027 intake call to action ───────── */
+function IntakeCta({ nav, compact }) {
+  return (
+    <div style={{background:'#080C14',color:'#fff',padding: compact ? '14px 0' : '22px 0',borderTop:'3px solid #C9973A'}}>
+      <div className="wrap" style={{display:'flex',flexWrap:'wrap',alignItems:'center',justifyContent:'center',gap:'10px 18px',textAlign:'center'}}>
+        <span style={{fontSize: compact ? 14 : 15.5,lineHeight:1.5}}>
+          <strong style={{color:'#C9973A'}}>January 2027 intake</strong>
+          {' — '}Term 2 starts 5 January 2027{' — '}apply now
+        </span>
+        <a href="/blog/january-2027-intake" onClick={spaClick(nav, '/blog/january-2027-intake')}
+          style={{color:'#fff',fontWeight:700,fontSize:13.5,textDecoration:'underline',textUnderlineOffset:3}}>
+          January 2027 intake details
+        </a>
+        <a href="/enroll" onClick={spaClick(nav, '/enroll')}
+          style={{background:'#8B1A2E',color:'#fff',fontWeight:800,fontSize:13,padding:'9px 18px',borderRadius:6,textDecoration:'none'}}>
+          Apply now
+        </a>
+      </div>
+    </div>
+  )
 }
 
 /* ── useHeroPreload — LCP optimization ─────────────────────
@@ -286,9 +350,9 @@ const ENROLMENT_DATA = {
     examBoard: 'Cambridge International Examinations (CIE)',
     levels: [
       { id:'primary',     label:'Cambridge Primary',         years:'Year 1–6',   ages:'Ages 5–11',   feeFrom:'From USD 423/mo', feeRef:'Primary Homeschool tier' },
-      { id:'lowersec',    label:'Cambridge Lower Secondary', years:'Year 7–9',   ages:'Ages 11–14',  feeFrom:'From USD 423/mo', feeRef:'Junior Secondary tier' },
-      { id:'igcse',       label:'Cambridge IGCSE',           years:'Year 10–11', ages:'Ages 14–16',  feeFrom:'From USD 423/mo', feeRef:'IGCSE tier · Most Popular' },
-      { id:'alevel',      label:'Cambridge A-Level',         years:'Year 12–13', ages:'Ages 16–19',  feeFrom:'USD 769/mo', feeRef:'A-Level tier · up to 4 subjects' },
+      { id:'lowersec',    label:'Cambridge Lower Secondary', years:'Year 7–9',   ages:'Ages 11–14',  feeFrom:'Fees vary by curriculum and level', feeRef:'Junior Secondary tier' },
+      { id:'igcse',       label:'Cambridge IGCSE',           years:'Year 10–11', ages:'Ages 14–16',  feeFrom:'Fees vary by curriculum and level', feeRef:'IGCSE tier · Most Popular' },
+      { id:'alevel',      label:'Cambridge A-Level',         years:'Year 12–13', ages:'Ages 16–19',  feeFrom:'Fees vary by curriculum and level', feeRef:'A-Level tier · up to 4 subjects' },
     ],
     subjects: 'English Language & Literature, Mathematics, Sciences (Biology, Chemistry, Physics), Humanities (History, Geography), Languages (French, Kiswahili), Business Studies, Economics, ICT, Computer Science.',
   },
@@ -297,8 +361,8 @@ const ENROLMENT_DATA = {
     description: 'Pearson Edexcel International GCSE, IAL and IAL Further Maths. Widely accepted alternative to Cambridge.',
     examBoard: 'Pearson Edexcel International',
     levels: [
-      { id:'igcse',     label:'Edexcel International GCSE',   years:'Year 10–11', ages:'Ages 14–16', feeFrom:'From USD 423/mo', feeRef:'IGCSE tier' },
-      { id:'ial',       label:'Edexcel IAL (A-Level)',         years:'Year 12–13', ages:'Ages 16–19', feeFrom:'USD 769/mo', feeRef:'A-Level tier' },
+      { id:'igcse',     label:'Edexcel International GCSE',   years:'Year 10–11', ages:'Ages 14–16', feeFrom:'Fees vary by curriculum and level', feeRef:'IGCSE tier' },
+      { id:'ial',       label:'Edexcel IAL (A-Level)',         years:'Year 12–13', ages:'Ages 16–19', feeFrom:'Fees vary by curriculum and level', feeRef:'A-Level tier' },
     ],
     subjects: 'English Language A & B, Mathematics, Further Mathematics, Sciences, Humanities, Business, Economics, Computer Science.',
   },
@@ -308,9 +372,9 @@ const ENROLMENT_DATA = {
     examBoard: 'International Baccalaureate Organization (IBO)',
     levels: [
       { id:'pyp',     label:'IB Primary Years (PYP)',  years:'Year 1–6',     ages:'Ages 5–11',   feeFrom:'From USD 423/mo', feeRef:'Primary Homeschool tier' },
-      { id:'myp_1_3', label:'IB MYP Years 1–3',         years:'Grade 6–8',    ages:'Ages 11–14',  feeFrom:'From USD 423/mo', feeRef:'Junior Secondary tier' },
-      { id:'myp_4_5', label:'IB MYP Years 4–5',         years:'Grade 9–10',   ages:'Ages 14–16',  feeFrom:'From USD 423/mo', feeRef:'IGCSE-equivalent tier' },
-      { id:'dp',      label:'IB Diploma Programme',     years:'Grade 11–12',  ages:'Ages 16–19',  feeFrom:'From USD 423/mo', feeRef:'IB Diploma tier · 6 subjects + TOK / EE / CAS' },
+      { id:'myp_1_3', label:'IB MYP Years 1–3',         years:'Grade 6–8',    ages:'Ages 11–14',  feeFrom:'Fees vary by curriculum and level', feeRef:'Junior Secondary tier' },
+      { id:'myp_4_5', label:'IB MYP Years 4–5',         years:'Grade 9–10',   ages:'Ages 14–16',  feeFrom:'Fees vary by curriculum and level', feeRef:'IGCSE-equivalent tier' },
+      { id:'dp',      label:'IB Diploma Programme',     years:'Grade 11–12',  ages:'Ages 16–19',  feeFrom:'Fees vary by curriculum and level', feeRef:'IB Diploma tier · 6 subjects + TOK / EE / CAS' },
     ],
     subjects: 'Language & Literature, Language Acquisition, Individuals & Societies, Sciences, Mathematics, Arts, Physical & Health Education, Design. Plus IDU (Interdisciplinary Unit) and Service & Action.',
   },
@@ -322,8 +386,8 @@ const ENROLMENT_DATA = {
       { id:'pp',          label:'Pre-Primary',            years:'PP1–PP2',         ages:'Ages 4–6',   feeFrom:'From USD 423/mo', feeRef:'Primary tier' },
       { id:'lower',       label:'Lower Primary',          years:'Grade 1–3',       ages:'Ages 6–9',   feeFrom:'From USD 423/mo', feeRef:'Primary tier' },
       { id:'upper',       label:'Upper Primary',          years:'Grade 4–6',       ages:'Ages 9–12',  feeFrom:'From USD 423/mo', feeRef:'Primary tier' },
-      { id:'jss',         label:'Junior Secondary',       years:'Grade 7–9',       ages:'Ages 12–14', feeFrom:'From USD 423/mo', feeRef:'Junior Secondary tier' },
-      { id:'sss',         label:'Senior Secondary',       years:'Grade 10–12',     ages:'Ages 14–17', feeFrom:'From USD 423/mo', feeRef:'Senior tier' },
+      { id:'jss',         label:'Junior Secondary',       years:'Grade 7–9',       ages:'Ages 12–14', feeFrom:'Fees vary by curriculum and level', feeRef:'Junior Secondary tier' },
+      { id:'sss',         label:'Senior Secondary',       years:'Grade 10–12',     ages:'Ages 14–17', feeFrom:'Fees vary by curriculum and level', feeRef:'Senior tier' },
     ],
     subjects: 'Mathematics, English, Kiswahili, Science & Technology, Social Studies, Religious Education, Creative Arts, Physical Education, plus pathway choices at Senior School.',
   },
@@ -333,9 +397,9 @@ const ENROLMENT_DATA = {
     examBoard: 'College Board (AP) and Smartious-issued transcripts',
     levels: [
       { id:'elem',  label:'Elementary',     years:'K–5',     ages:'Ages 5–11',   feeFrom:'From USD 423/mo', feeRef:'Primary tier' },
-      { id:'mid',   label:'Middle School',  years:'Grade 6–8',  ages:'Ages 11–14',  feeFrom:'From USD 423/mo', feeRef:'Junior Secondary tier' },
-      { id:'hs',    label:'High School',    years:'Grade 9–12', ages:'Ages 14–18',  feeFrom:'From USD 423/mo', feeRef:'High School tier' },
-      { id:'ap',    label:'AP Courses',     years:'Grade 11–12', ages:'Ages 16–18', feeFrom:'USD 154/mo per AP subject', feeRef:'AP Subject add-on' },
+      { id:'mid',   label:'Middle School',  years:'Grade 6–8',  ages:'Ages 11–14',  feeFrom:'Fees vary by curriculum and level', feeRef:'Junior Secondary tier' },
+      { id:'hs',    label:'High School',    years:'Grade 9–12', ages:'Ages 14–18',  feeFrom:'Fees vary by curriculum and level', feeRef:'High School tier' },
+      { id:'ap',    label:'AP Courses',     years:'Grade 11–12', ages:'Ages 16–18', feeFrom:'Fees vary by curriculum and level', feeRef:'AP Subject add-on' },
     ],
     subjects: 'English, Mathematics, Sciences, Social Studies, Foreign Language, Arts/Health/PE. AP: Calculus AB/BC, Sciences, English Literature, US/World History, Economics, Computer Science.',
   },
@@ -345,6 +409,10 @@ const styles = `
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   .lp{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:${V.bone};color:${V.ink};overflow-x:hidden;line-height:1.65}
   .lp a{color:inherit;text-decoration:none}
+  /* Links that replaced <button>/<div> click handlers keep the old box:
+     zero-specificity defaults, so classes and inline styles still win. */
+  :where(.lp a.lp-btnlink){display:inline-block;text-align:center;font-size:13.333px;font-weight:400;line-height:normal;cursor:pointer}
+  :where(.lp a.lp-divlink){display:block;cursor:pointer}
   .lp button{font-family:'Plus Jakarta Sans',system-ui,sans-serif;cursor:pointer;border:none;background:none;outline:none}
   .lp ::-webkit-scrollbar{width:4px}
   .lp ::-webkit-scrollbar-thumb{background:${V.cr};border-radius:2px}
@@ -1004,7 +1072,7 @@ function GuideCrossLinks({ guideSlug, guideName, hubHref, hubName }) {
   )
 }
 
-const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','tuition-uk','uk-area','homeschooling-kenya','kenya-city','virtual-school-kenya','virtual-school-ukraine','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschooling-malaysia','malaysia-city','homeschooling-turkey','turkey-city','homeschooling-kuwait','kuwait-city','homeschooling-oman','oman-city','homeschooling-taiwan','taiwan-city','homeschooling-ireland','ireland-city','homeschooling-united-kingdom','uk-city','homeschooling-india','india-city','homeschooling-germany','germany-city','homeschooling-romania','romania-city','homeschooling-ukraine','ukraine-city','homeschooling-spain','spain-city','homeschooling-denmark','denmark-city','homeschooling-france','france-city','homeschooling-italy','italy-city','homeschooling-poland','poland-city','homeschooling-portugal','portugal-city','homeschooling-czech-republic','czech-city','homeschooling-belgium','belgium-city','homeschooling-sweden','sweden-city','homeschooling-netherlands','netherlands-city','homeschooling-norway','norway-city','homeschooling-new-zealand','new-zealand-city','homeschooling-austria','austria-city','homeschooling-hungary','hungary-city','homeschooling-finland','finland-city','homeschooling-greece','greece-city','homeschooling-azerbaijan','azerbaijan-city','homeschooling-georgia','georgia-city','homeschooling-pakistan','pakistan-city','homeschooling-australia','australia-city','homeschooling-luxembourg','luxembourg-city-page','homeschooling-switzerland','switzerland-city','homeschooling-slovakia','slovakia-city','homeschooling-slovenia','slovenia-city','homeschooling-croatia','croatia-city','homeschooling-serbia','serbia-city','homeschooling-bulgaria','bulgaria-city','homeschooling-albania','albania-city','homeschooling-north-macedonia','north-macedonia-city','homeschooling-montenegro','montenegro-city','homeschooling-bosnia','bosnia-city','homeschooling-kosovo','kosovo-city','homeschooling-zambia','zambia-city','homeschooling-zimbabwe','zimbabwe-city','homeschooling-botswana','botswana-city','homeschooling-namibia','namibia-city','homeschooling-algeria','algeria-city','homeschooling-tunisia','tunisia-city','homeschooling-mauritius','mauritius-city','homeschooling-ghana','ghana-city','homeschooling-angola','angola-city','homeschooling-drc','drc-city','homeschooling-mexico','mexico-city-page','homeschooling-brazil','brazil-city','homeschooling-colombia','colombia-city','homeschooling-argentina','argentina-city','homeschooling-chile','chile-city','homeschooling-peru','peru-city','homeschooling-ecuador','ecuador-city','homeschooling-panama','panama-city-page','homeschooling-costa-rica','costa-rica-city','homeschooling-dominican-republic','dominican-city','homeschooling-uruguay','uruguay-city','homeschooling-guatemala','guatemala-city-page','homeschooling-paraguay','paraguay-city','homeschooling-bolivia','bolivia-city','homeschooling-venezuela','venezuela-city','homeschooling-puerto-rico','puerto-rico-city','homeschooling-israel','israel-city','homeschooling-jordan','jordan-city','homeschooling-iraq','iraq-city','homeschooling-cyprus','cyprus-city','homeschooling-lebanon','lebanon-city','homeschooling-myanmar','myanmar-city','homeschooling-maldives','maldives-city','homeschooling-china','china-city','homeschooling-bangladesh','bangladesh-city','homeschooling-nepal','nepal-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','assessment','contact','privacy','terms','cookies','gdpr','child-protection','academic-integrity','ai-policy','inclusion-policy','language-policy','article']
+const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','tuition-uk','uk-area','homeschooling-kenya','kenya-city','virtual-school-kenya','virtual-school-ukraine','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschooling-malaysia','malaysia-city','homeschooling-turkey','turkey-city','homeschooling-kuwait','kuwait-city','homeschooling-nigeria','nigeria-city','homeschooling-bahrain','bahrain-city','homeschooling-oman','oman-city','homeschooling-taiwan','taiwan-city','homeschooling-ireland','ireland-city','homeschooling-united-kingdom','uk-city','homeschooling-india','india-city','homeschooling-germany','germany-city','homeschooling-romania','romania-city','homeschooling-ukraine','ukraine-city','homeschooling-spain','spain-city','homeschooling-denmark','denmark-city','homeschooling-france','france-city','homeschooling-italy','italy-city','homeschooling-poland','poland-city','homeschooling-portugal','portugal-city','homeschooling-czech-republic','czech-city','homeschooling-belgium','belgium-city','homeschooling-sweden','sweden-city','homeschooling-netherlands','netherlands-city','homeschooling-norway','norway-city','homeschooling-new-zealand','new-zealand-city','homeschooling-austria','austria-city','homeschooling-hungary','hungary-city','homeschooling-finland','finland-city','homeschooling-greece','greece-city','homeschooling-azerbaijan','azerbaijan-city','homeschooling-georgia','georgia-city','homeschooling-pakistan','pakistan-city','homeschooling-australia','australia-city','homeschooling-luxembourg','luxembourg-city-page','homeschooling-switzerland','switzerland-city','homeschooling-slovakia','slovakia-city','homeschooling-slovenia','slovenia-city','homeschooling-croatia','croatia-city','homeschooling-serbia','serbia-city','homeschooling-bulgaria','bulgaria-city','homeschooling-albania','albania-city','homeschooling-north-macedonia','north-macedonia-city','homeschooling-montenegro','montenegro-city','homeschooling-bosnia','bosnia-city','homeschooling-kosovo','kosovo-city','homeschooling-zambia','zambia-city','homeschooling-zimbabwe','zimbabwe-city','homeschooling-botswana','botswana-city','homeschooling-namibia','namibia-city','homeschooling-algeria','algeria-city','homeschooling-tunisia','tunisia-city','homeschooling-mauritius','mauritius-city','homeschooling-ghana','ghana-city','homeschooling-angola','angola-city','homeschooling-drc','drc-city','homeschooling-mexico','mexico-city-page','homeschooling-brazil','brazil-city','homeschooling-colombia','colombia-city','homeschooling-argentina','argentina-city','homeschooling-chile','chile-city','homeschooling-peru','peru-city','homeschooling-ecuador','ecuador-city','homeschooling-panama','panama-city-page','homeschooling-costa-rica','costa-rica-city','homeschooling-dominican-republic','dominican-city','homeschooling-uruguay','uruguay-city','homeschooling-guatemala','guatemala-city-page','homeschooling-paraguay','paraguay-city','homeschooling-bolivia','bolivia-city','homeschooling-venezuela','venezuela-city','homeschooling-puerto-rico','puerto-rico-city','homeschooling-israel','israel-city','homeschooling-jordan','jordan-city','homeschooling-iraq','iraq-city','homeschooling-cyprus','cyprus-city','homeschooling-lebanon','lebanon-city','homeschooling-myanmar','myanmar-city','homeschooling-maldives','maldives-city','homeschooling-china','china-city','homeschooling-bangladesh','bangladesh-city','homeschooling-nepal','nepal-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','assessment','contact','privacy','terms','cookies','gdpr','child-protection','academic-integrity','ai-policy','inclusion-policy','language-policy','article']
 
 // ─────────────────────────────────────────────────────────────────
 // Google Business Profile reviews — Smartious Homeschool & Tuition
@@ -1523,18 +1591,25 @@ function articleProduct(a) {
 // page. Curriculum and service detail pages derive their meta
 // from CURRICULA / SERVICES. Edit freely to refine targeting.
 const SITE = 'Smartious Homeschool & eSchool'
+// One organisation entity for all structured data. Every Organization /
+// EducationalOrganization block and every provider points at this @id.
+const ORG_ID = 'https://smartioushomeschool.com/#organization'
+const ORG_REF = { '@type': 'EducationalOrganization', '@id': ORG_ID, 'name': SITE }
+// The only published fee: Primary, per month, paid termly.
+const FEE_OFFER = { '@type': 'Offer', 'priceCurrency': 'USD', 'price': 423, 'description': 'per month, Primary; varies by curriculum and level' }
+const TUITION_OFFER = { '@type': 'Offer', 'priceCurrency': 'USD', 'price': 15, 'description': 'per hour, one-to-one online tuition' }
 const PAGE_META = {
   'tuition-nairobi': {
-    title: 'Private Tutors in Nairobi | IGCSE, A-Level, IB & CBC Tuition | Smartious',
-    desc: 'One-to-one tuition in Nairobi, at home or online: Cambridge IGCSE and A-Level, IB, Pearson Edexcel, American and CBC, with qualified subject specialists. Online tuition USD 15/hour.',
+    title: 'Tutors in Nairobi | IGCSE, A-Level, IB & CBC | Smartious',
+    desc: 'One-to-one tuition in Nairobi, at home or online: IGCSE, A-Level, IB, Edexcel, American and CBC with qualified specialists. Online USD 15/hour.',
   },
   'homeschool': {
-    title: 'Homeschooling with Smartious | Cambridge, IB, American & CBC | Smartious',
-    desc: 'A full homeschool programme with qualified teachers: live lessons, a structured curriculum, assessments and reports, for families in Kenya and worldwide. From USD 423/month for Primary.',
+    title: 'Online Homeschool, Live Classes from USD 423/month',
+    desc: 'A full homeschool with live lessons from qualified teachers, a structured curriculum and reports. From USD 423/month (Primary). January 2027 intake.',
   },
   'tuition': {
-    title: 'Private Tuition | One-to-One Online Tutors for IGCSE, A-Level & IB | Smartious',
-    desc: 'One-to-one online tuition in any subject at any level, from primary to IGCSE, A-Level and IB, with qualified subject specialists. USD 15/hour.',
+    title: 'Online Tutors from USD 15/hour | IGCSE, A-Level, IB',
+    desc: 'Live one-to-one online tuition in any subject and level, from primary to IGCSE, A-Level and IB, with qualified specialists. USD 15/hour.',
   },
   'languages': {
     title: 'Language Courses | French, Spanish, German, Mandarin, Arabic & Kiswahili | Smartious',
@@ -1558,7 +1633,7 @@ const PAGE_META = {
   },
   'calendar': {
     title: 'Academic Calendar 2026-27 | Term Dates | Smartious',
-    desc: 'Smartious term dates for 2026-27: Term 1 from 25 August 2026, Term 2 from 5 January 2027 and Term 3 from 13 April 2027, with half-terms and examination periods.',
+    desc: 'Smartious term dates 2026–27: Term 1 from 25 August 2026, Term 2 from 5 January 2027 (January intake), Term 3 from 13 April 2027.',
   },
   'events': {
     title: 'Events | Smartious Homeschool & eSchool',
@@ -1605,8 +1680,8 @@ const PAGE_META = {
     desc: 'The language we teach in, how we support students learning English, and how we value every family’s languages.',
   },
   home: {
-    title: 'Online School, Virtual School & Homeschool | IGCSE, A-Level, IB & American — Smartious',
-    desc: 'Accredited online homeschool serving UAE, UK, Canada, Australia, Nigeria and Kenya. Cambridge IGCSE, A-Level, IB Diploma, Edexcel and American curricula. Live classes, qualified teachers, from USD 15/hour for 1-on-1 tuition · from USD 423/month for full homeschool programmes.',
+    title: 'Online School & Homeschool from USD 423/month | Smartious',
+    desc: 'Accredited online homeschool with live classes: Cambridge IGCSE, A-Level, IB, Edexcel and American. From USD 423/month. January 2027 intake: apply now.',
   },
   'homeschooling-malaysia': {
     title: 'Online School, Virtual School & Homeschool Malaysia | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
@@ -1925,20 +2000,20 @@ const PAGE_META = {
     desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS) for Ukrainian families in-country and diaspora — Kyiv (Grammarly + GitLab + MacPaw + Preply + PSI/KIS/BISU alternative), Lviv (SoftServe HQ + EPAM Ukraine + Intellias + N-iX + Ukrainian Catholic University), Kharkiv (NIX Solutions + GlobalLogic + EPAM tech), Dnipro (Interpipe + Metinvest industrial), Odesa (Luxoft + Port of Odesa maritime), Ivano-Frankivsk (western Ukraine safe haven). Distance learning fully legal under 2020 Law on Complete General Secondary Education. Refugee family discounted rates. From USD 423/month personalized.',
   },
   assessment: {
-    title: 'Book Academic Assessment | Admissions Request — Smartious',
-    desc: 'Request an academic assessment for your child. Our Head of Admissions reviews every request within three business days. If accepted, the assessment fee is invoiced before the diagnostic is scheduled. Admission is determined on assessment results.',
+    title: 'Book an Academic Assessment | Smartious Admissions',
+    desc: 'Request an assessment for your child. Admissions reviews every request within three business days. January 2027 intake: Term 2 starts 5 January 2027.',
   },
   about: {
-    title: 'About Smartious | Homeschooling & eSchool in Nairobi, Kenya',
-    desc: 'Learn about Smartious Homeschool & eSchool — an international online school founded in Nairobi, delivering accredited curricula to families across Kenya and the diaspora since 2018.',
+    title: 'About Smartious | Online School Founded in Nairobi, 2018',
+    desc: 'Smartious Homeschool & eSchool: an online school founded in Nairobi in 2018, delivering accredited curricula in live classes to families in 40+ countries.',
   },
   curricula: {
-    title: 'Curricula | IGCSE, A-Level, IB, Edexcel & CBC — Smartious',
-    desc: 'Explore the curricula offered by Smartious — Cambridge IGCSE and A-Level, IB Diploma, Pearson Edexcel, the British and American curricula, and Kenya\'s CBC. Taught by degree-qualified specialists.',
+    title: 'Curricula: IGCSE, A-Level, IB, Edexcel & CBC | Smartious',
+    desc: 'Cambridge IGCSE and A-Level, IB, Pearson Edexcel, British, American and Kenya CBC, taught in live classes by specialists. From USD 423/month.',
   },
   services: {
-    title: 'Our Services | Homeschooling, Online School & Tuition — Smartious',
-    desc: 'Smartious services — homeschooling at home, the Parklands learning centre, the online Virtual School, private tuition, the Mshauri AI tutor, and intensive exam preparation.',
+    title: 'Services: Homeschool, Online School & Tuition | Smartious',
+    desc: 'Homeschooling at home, the Parklands learning centre, the live online Virtual School, tuition at USD 15/hour, the Mshauri AI tutor and exam preparation.',
   },
   'tuition-uk': {
     title: 'Private Tuition UK — Online Cambridge, A-Level, IB, 11+ | Smartious',
@@ -1948,13 +2023,25 @@ const PAGE_META = {
     title: 'Private Tuition UK — Online IGCSE, A-Level, 11+ | Smartious',
     desc: 'Live online and in-person private tuition in select UK areas — Cambridge IGCSE, A-Level, IB Diploma, 11+ Common Entrance preparation. From USD 15/hour.',
   },
+  'ab-funding': {
+    title: 'Alberta Home Education Funding | Use Your $850 CAD on Smartious',
+    desc: 'How Alberta home education funding works and how families use their annual allocation on live online Cambridge IGCSE and A-Level classes with Smartious.',
+  },
+  'bc-funding': {
+    title: 'BC Distributed Learning Funding | Online Homeschool | Smartious',
+    desc: 'How British Columbia distributed learning and home education funding works, and how BC families combine it with live online Cambridge IGCSE and A-Level classes.',
+  },
+  'sk-funding': {
+    title: 'Saskatchewan Homeschool Funding | Online Homeschool | Smartious',
+    desc: 'How Saskatchewan home-based education funding works, and how families use it alongside live online Cambridge IGCSE and A-Level classes with Smartious.',
+  },
   pricing: {
-    title: 'Fee Structure 2026 | Homeschool & Tuition Fees — Smartious',
-    desc: 'Smartious 2026 fee structure — one clear fee for homeschool programmes (from USD 423/month, paid termly), A-Level, IB, single subjects and private tuition.',
+    title: 'Fees 2026–27: from USD 423/month | Smartious',
+    desc: 'Online school fees from USD 423/month for Primary, payable termly; they vary by curriculum and level. Tuition USD 15/hour. January 2027 intake.',
   },
   programs: {
-    title: 'Programmes | Homeschool, Tuition, IUFP & Study Abroad — Smartious',
-    desc: 'Smartious programmes — full homeschooling, private tuition, the International University Foundation Programme (IUFP) and study-abroad placement support.',
+    title: 'Programmes: Homeschool, Tuition, IUFP & Study Abroad',
+    desc: 'Live online homeschooling from USD 423/month, one-to-one tuition at USD 15/hour, the IUFP and study-abroad placement support from Smartious.',
   },
   activities: {
     title: 'Student Activities, Sports & Enrichment — Smartious Homeschool',
@@ -1965,28 +2052,28 @@ const PAGE_META = {
     desc: 'Smartious delivers accredited online education to African diaspora families in the UK, UAE, USA and Canada — internationally recognised curricula, taught live from Nairobi.',
   },
   faq: {
-    title: 'Frequently Asked Questions | Homeschooling — Smartious',
-    desc: 'Answers to common questions about homeschooling with Smartious — curricula, fees, enrolment, the online school, tutors and examinations.',
+    title: 'FAQ: Fees, Live Classes & Enrolment | Smartious',
+    desc: 'Answers about homeschooling with Smartious: fees from USD 423/month, live classes, curricula, the January 2027 intake, tutors and examinations.',
   },
   blog: {
     title: 'Blog & Resources | Homeschooling & Curricula — Smartious',
     desc: 'Expert articles from Smartious on homeschooling, choosing a curriculum, exam preparation and AI-supported learning for families in Kenya and worldwide.',
   },
   teachers: {
-    title: 'Meet Our Team | Qualified Homeschool Teachers & Leadership — Smartious',
-    desc: 'Meet the Smartious teaching team — qualified, experienced subject specialists delivering Cambridge IGCSE, A-Level, IB and CBC education to students in Kenya and worldwide.',
+    title: 'Meet Our Team | Qualified Teachers | Smartious',
+    desc: 'Meet the Smartious teaching team: qualified subject specialists teaching live Cambridge IGCSE, A-Level, IB and CBC classes in Kenya and worldwide.',
   },
   enroll: {
-    title: 'Enroll Now | Begin Homeschooling with Smartious',
-    desc: 'Enroll with Smartious Homeschool & eSchool. Start your child\'s accredited home or online education — Cambridge, IB, Edexcel or CBC — with qualified specialist teachers.',
+    title: 'Apply for the January 2027 Intake | Smartious',
+    desc: 'Start your child\'s accredited home or online education with live classes: Cambridge, IB, Edexcel or CBC. From USD 423/month. Term 2 starts 5 Jan 2027.',
   },
   consult: {
-    title: 'Book assessment — Smartious Homeschool & eSchool',
-    desc: 'Request an academic assessment with Smartious. Our Head of Admissions reviews every request within three business days. On acceptance, the assessment fee is invoiced before the diagnostic is scheduled.',
+    title: 'Book an Assessment | Smartious Homeschool & eSchool',
+    desc: 'Request an academic assessment with Smartious. Admissions reviews every request within three business days. January 2027 intake: apply now.',
   },
   contact: {
-    title: 'Contact Smartious Homeschool & eSchool — Nairobi, Kenya',
-    desc: 'Contact Smartious Homeschool & eSchool. Reach our Parklands, Nairobi team by phone or email for enrolment, curricula and programme enquiries. For admissions, submit an assessment request.',
+    title: 'Contact Smartious | Admissions +254 745 021 212',
+    desc: 'Contact Smartious in Parklands, Nairobi: admissions +254 745 021 212, academic +254 182 071 920, or email hello@smartioushomeschool.com.',
   },
 }
 
@@ -1995,7 +2082,7 @@ const PAGE_META = {
 // LEGAL POLICIES — Kenya DPA 2019 + EU GDPR compliant
 // ═══════════════════════════════════════════════════════════
 const PRIVACY_POLICY = [
-  {h:'1. Who we are',p:'Smartious E-School Ltd ("Smartious", "we", "us", "our") is a private limited company registered in Kenya, with its principal place of business at Diamond Plaza I, Parklands, Nairobi. We operate the website smartioushomeschool.com and deliver homeschool, online and private tuition services to students worldwide. For the purposes of Kenya\'s Data Protection Act, 2019 and the EU General Data Protection Regulation (GDPR), Smartious is the Data Controller of the personal data you share with us.'},
+  {h:'1. Who we are',p:'Smartious E-School Ltd ("Smartious", "we", "us", "our") is a private limited company registered in Kenya, with its principal place of business at Diamond Plaza I Annex, 3rd Floor, Office 20, Parklands, Nairobi. We operate the website smartioushomeschool.com and deliver homeschool, online and private tuition services to students worldwide. For the purposes of Kenya\'s Data Protection Act, 2019 and the EU General Data Protection Regulation (GDPR), Smartious is the Data Controller of the personal data you share with us.'},
   {h:'2. What personal data we collect',p:'We collect only the data we genuinely need to deliver education and communicate with families. This includes: (a) contact and identification data: student and parent names, email addresses, WhatsApp numbers, student date of birth, country of residence; (b) academic data: curriculum selection, current school, grade level, placement assessment answers and scores, progress reports; (c) payment data: we do not store full card numbers; Paystack processes all payments and we receive only the transaction reference and amount; (d) technical data: IP address, browser type, device type, pages visited, collected via cookies and analytics; (e) communication records: messages you send us by email, WhatsApp, contact form, or during consultation calls.'},
   {h:'3. How we use your data',p:'We use personal data only for: (i) delivering the programme you have enrolled in, matching tutors, scheduling lessons, issuing progress reports, sitting exams; (ii) communicating with you about your account, lessons, payments, and service updates; (iii) processing payments via Paystack; (iv) improving our website and teaching methods through anonymised analytics; (v) complying with Kenyan tax, education, and regulatory obligations. We do not sell personal data to third parties. Ever.'},
   {h:'4. Lawful basis for processing',p:'Under Article 6 of the GDPR and Section 30 of the Kenya Data Protection Act, we process your data on one of the following lawful bases: (a) Contract: to deliver the services you have enrolled in; (b) Consent: for marketing communications, which you can withdraw at any time; (c) Legitimate interests: for securing our systems, preventing fraud, and improving our services; (d) Legal obligation: for tax records, accounting, and regulatory compliance.'},
@@ -2007,7 +2094,7 @@ const PRIVACY_POLICY = [
   {h:'10. Security',p:'We use industry-standard safeguards: HTTPS (TLS 1.3) across the entire site, password hashing (bcrypt) for all accounts, role-based access control in our backend, encrypted database backups, and quarterly security reviews. Paystack handles payment data to PCI-DSS Level 1 standards, we never see or store full card details. No system is perfectly secure, but we work continuously to reduce risk.'},
   {h:'11. Breach notification',p:'In the unlikely event of a personal data breach affecting your rights, we will notify the Office of the Data Protection Commissioner (Kenya) within 72 hours as required by Section 43 of the Kenya DPA, and the affected individuals without undue delay, describing what happened, what data was affected, and the steps we are taking.'},
   {h:'12. Changes to this policy',p:'We may update this policy to reflect changes in law, our services, or our processors. When we make material changes we will notify active students and parents by email and update the "Effective" date at the top of this page. The most current version is always the one published here.'},
-  {h:'13. Contact & complaints',p:'For any privacy question, data subject request, or complaint, email our Data Protection point of contact: hello@smartioushomeschool.com, phone +254 745 021 212, or write to Smartious E-School Ltd, Diamond Plaza I, Parklands, Nairobi, Kenya. You also have the right to lodge a complaint with the Office of the Data Protection Commissioner of Kenya (odpc.go.ke) or, if you are in the EU, with your national data protection authority.'},
+  {h:'13. Contact & complaints',p:'For any privacy question, data subject request, or complaint, email our Data Protection point of contact: hello@smartioushomeschool.com, phone +254 745 021 212, or write to Smartious E-School Ltd, Diamond Plaza I Annex, 3rd Floor, Office 20, Parklands, Nairobi, Kenya. You also have the right to lodge a complaint with the Office of the Data Protection Commissioner of Kenya (odpc.go.ke) or, if you are in the EU, with your national data protection authority.'},
 ]
 
 const TERMS_OF_SERVICE = [
@@ -2024,7 +2111,7 @@ const TERMS_OF_SERVICE = [
   {h:'11. Limitation of liability',p:'To the maximum extent permitted by Kenyan law, Smartious is not liable for: (i) exam results or university admissions: our role is to teach and prepare; outcomes depend on many factors including the student\'s effort and the decisions of exam boards and universities; (ii) indirect, consequential, or punitive damages; (iii) delays or outages caused by third-party services (Paystack, Google, Netlify). Our total liability for any claim is limited to the fees you have paid us in the 12 months preceding the claim.'},
   {h:'12. Governing law',p:'These Terms are governed by the laws of Kenya. Any dispute arising from these Terms or our services will be resolved first by good-faith negotiation, then by mediation in Nairobi under the Mediation (Court-Annexed) Rules, and only then by the courts of Kenya, which have exclusive jurisdiction.'},
   {h:'13. Changes to these terms',p:'We may update these Terms from time to time. Material changes will be communicated to active students and parents at least 30 days in advance by email. Minor clarifications (typos, reformatting) may be made without notice. The current version is always published here with its effective date.'},
-  {h:'14. Contact',p:'Questions about these Terms: hello@smartioushomeschool.com, +254 745 021 212, or Diamond Plaza I, Parklands, Nairobi, Kenya.'},
+  {h:'14. Contact',p:'Questions about these Terms: hello@smartioushomeschool.com, +254 745 021 212, or Diamond Plaza I Annex, 3rd Floor, Office 20, Parklands, Nairobi, Kenya.'},
 ]
 
 const COOKIE_POLICY = [
@@ -2275,7 +2362,7 @@ function LegalPage({ P, title, em, subtitle, effective, sections }) {
           <h1 className="pg-h">{title} <em>{em}</em></h1>
           <p className="pg-sub" style={{marginTop:12}}>{subtitle}</p>
           <div style={{marginTop:18,fontSize:12,color:'rgba(247,243,237,.45)',fontFamily:"'Fira Code',monospace",letterSpacing:'.08em'}}>
-            Effective: {effective} &nbsp;·&nbsp; Smartious E-School Ltd &nbsp;·&nbsp; Diamond Plaza I, Parklands, Nairobi
+            Effective: {effective} &nbsp;·&nbsp; Smartious E-School Ltd &nbsp;·&nbsp; Diamond Plaza I Annex, 3rd Floor, Office 20, Parklands, Nairobi
           </div>
         </div>
       </div>
@@ -2522,6 +2609,8 @@ export default function LandingPage() {
   const [currentNepalCity, setCurrentNepalCity] = useState(null)
   const [currentTurkeyCity, setCurrentTurkeyCity] = useState(null)
   const [currentKuwaitCity, setCurrentKuwaitCity] = useState(null)
+  const [currentNigeriaCity, setCurrentNigeriaCity] = useState(null)
+  const [currentBahrainCity, setCurrentBahrainCity] = useState(null)
   const [currentOmanCity, setCurrentOmanCity] = useState(null)
   const [currentTaiwanCity, setCurrentTaiwanCity] = useState(null)
   const [currentIrelandCity, setCurrentIrelandCity] = useState(null)
@@ -2833,6 +2922,8 @@ export default function LandingPage() {
     if (id === 'homeschooling-japan') return '/online-school/japan'
     if (id === 'homeschooling-vietnam') return '/online-school/vietnam'
     if (id === 'homeschooling-thailand') return '/online-school/thailand'
+    if (id === 'homeschooling-nigeria') return '/online-school/nigeria'
+    if (id === 'homeschooling-bahrain') return '/online-school/bahrain'
     // Canadian provincial funding landing pages — high-intent SEO URLs
     if (id === 'ab-funding') return '/alberta-home-ed-funding'
     if (id === 'bc-funding') return '/bc-distributed-learning-funding'
@@ -2878,8 +2969,8 @@ export default function LandingPage() {
         setCurrentArticle(slug)
         setPage('article')
       } else {
-        // Unknown article slug — fall back to the blog index
-        setPage('blog')
+        // Unknown article slug — not found (no soft-404 to the blog index)
+        setPage('not-found')
       }
       return
     }
@@ -3415,6 +3506,18 @@ export default function LandingPage() {
           setPage('kuwait-city')
           return
         }
+        const nigeriaCity = NIGERIA_CITIES.find(c => c.slug === slug)
+        if (nigeriaCity) {
+          setCurrentNigeriaCity(slug)
+          setPage('nigeria-city')
+          return
+        }
+        const bahrainCity = BAHRAIN_CITIES.find(c => c.slug === slug)
+        if (bahrainCity) {
+          setCurrentBahrainCity(slug)
+          setPage('bahrain-city')
+          return
+        }
         const omanCity = OMAN_CITIES.find(c => c.slug === slug)
         if (omanCity) {
           setCurrentOmanCity(slug)
@@ -3484,10 +3587,9 @@ export default function LandingPage() {
         setCurrentProvinceSlug(slug)
         setPage('province-landing')
       } else {
-        // Unknown slug — render home. Never fall back to us-families here:
-        // that page forces canonical /online-school/usa, so every stray
-        // /homeschool-* URL became a USA-page duplicate in Google's index.
-        setPage('home')
+        // Unknown slug — not found. Never fall back to home or us-families:
+        // that made every stray /homeschool-* URL a duplicate (soft 404).
+        setPage('not-found')
       }
       return
     }
@@ -3498,8 +3600,8 @@ export default function LandingPage() {
         setCurrentCurriculum(slug)
         setPage('curriculum-detail')
       } else {
-        // Unknown curriculum slug — fall back to the curricula index
-        setPage('curricula')
+        // Unknown curriculum slug — not found
+        setPage('not-found')
       }
       return
     }
@@ -3510,8 +3612,8 @@ export default function LandingPage() {
         setCurrentService(slug)
         setPage('service-detail')
       } else {
-        // Unknown service slug — fall back to the services index
-        setPage('services')
+        // Unknown service slug — not found
+        setPage('not-found')
       }
       return
     }
@@ -3873,6 +3975,16 @@ export default function LandingPage() {
         setPage('homeschooling-kuwait')
         return
       }
+      // Nigeria and Bahrain have dedicated hubs; they take precedence over
+      // the generic country-detail data (COUNTRY_SLUGS), as Kuwait's does.
+      if (slug === 'nigeria') {
+        setPage('homeschooling-nigeria')
+        return
+      }
+      if (slug === 'bahrain') {
+        setPage('homeschooling-bahrain')
+        return
+      }
       if (slug === 'oman') {
         setPage('homeschooling-oman')
         return
@@ -3909,8 +4021,8 @@ export default function LandingPage() {
         setCurrentCountry(slug)
         setPage('country-detail')
       } else {
-        // Unknown country slug — fall back to the global page
-        setPage('home')
+        // Unknown country slug — not found
+        setPage('not-found')
       }
       return
     }
@@ -4056,8 +4168,8 @@ export default function LandingPage() {
         setCurrentCompare(slug)
         setPage('compare-detail')
       } else {
-        // Unknown comparison slug — fall back to home
-        setPage('home')
+        // Unknown comparison slug — not found
+        setPage('not-found')
       }
       return
     }
@@ -4065,7 +4177,7 @@ export default function LandingPage() {
     if (PAGES.includes(id) && id !== 'article') {
       setPage(id)
     } else {
-      setPage('home')
+      setPage('not-found')
     }
   }
 
@@ -4138,7 +4250,7 @@ export default function LandingPage() {
   } else if (page === 'ethiopia-city' && currentEthiopiaCity) {
     const c = ETHIOPIA_CITIES.find(x => x.slug === currentEthiopiaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'homeschooling-rwanda') {
@@ -4147,7 +4259,7 @@ export default function LandingPage() {
   } else if (page === 'rwanda-city' && currentRwandaCity) {
     const c = RWANDA_CITIES.find(x => x.slug === currentRwandaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'homeschooling-south-africa') {
@@ -4156,31 +4268,30 @@ export default function LandingPage() {
   } else if (page === 'sa-city' && currentSaCity) {
     const c = SOUTH_AFRICA_CITIES.find(x => x.slug === currentSaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'homeschooling-qatar') {
-    metaTitle = 'Online School, Virtual School & Homeschool for Doha & Qatar Families — Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Qatari families across Doha, Al Wakrah, Al Khor, Lusail. Doha College / ASD / Sherborne Qatar alternative. Immediate enrolment, no waiting lists. From USD 423/month (~QAR 1,540).'
+    metaTitle = QATAR_COUNTRY?.seoTitle || 'Online School, Virtual School & Homeschool for Doha & Qatar Families — Cambridge IGCSE & A-Level | Smartious'
+    metaDesc  = QATAR_COUNTRY?.seoDesc || 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Qatari families across Doha, Al Wakrah, Al Khor, Lusail. Doha College / ASD / Sherborne Qatar alternative. Immediate enrolment, no waiting lists. From USD 423/month (~QAR 1,540).'
   } else if (page === 'qatar-city' && currentQatarCity) {
     const c = QATAR_CITIES.find(x => x.slug === currentQatarCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'homeschooling-saudi-arabia') {
-    metaTitle = 'Online School, Virtual School & Homeschool for Saudi Arabian Families — Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Saudi Arabian families across Riyadh, Jeddah, Dhahran, Al Khobar, NEOM. AISR / BISR / Saudi Aramco school alternative. Vision 2030 mega-project family portability. From USD 423/month (~SAR 1,590).'
+    metaTitle = SAUDI_ARABIA_COUNTRY?.seoTitle || 'Online School, Virtual School & Homeschool for Saudi Arabian Families — Cambridge IGCSE & A-Level | Smartious'
+    metaDesc  = SAUDI_ARABIA_COUNTRY?.seoDesc || 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Saudi Arabian families across Riyadh, Jeddah, Dhahran, Al Khobar, NEOM. AISR / BISR / Saudi Aramco school alternative. Vision 2030 mega-project family portability. From USD 423/month (~SAR 1,586).'
   } else if (page === 'saudi-city' && currentSaudiCity) {
     const c = SAUDI_ARABIA_CITIES.find(x => x.slug === currentSaudiCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'homeschooling-uae') {
-    metaTitle = 'Online School in the UAE | Dubai & Abu Dhabi Homeschooling, IGCSE & A-Level | Smartious'
-    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for UAE families across Dubai, Abu Dhabi, Sharjah, Ajman, Ras Al Khaimah. Wellington / Dubai College / BSAK / Repton / Brighton College alternative. Immediate enrolment, no KHDA/ADEK waiting lists. From USD 423/month (about AED 1,553), paid termly.'
-  
+    metaTitle = 'Homeschooling & Online School in Dubai and the UAE'
+    metaDesc  = 'Live online classes for Dubai, Abu Dhabi and Sharjah families: IGCSE, A-Level, Edexcel, American. From USD 423/month (≈ AED 1,553). January 2027 intake.'
   } else if (page === 'homeschooling-egypt') {
     metaTitle = 'Online School, Virtual School & Homeschool for Egyptian Families — Cambridge IGCSE & A-Level | Smartious'
     metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Egyptian families across Cairo, New Cairo, Sheikh Zayed, Alexandria, New Administrative Capital, Sharm El Sheikh. Cairo American College / MES / BISC / NCBIS / Hayah / El Alsson / Schutz alternative. Immediate enrolment. From USD 423/month. USD pricing protects against EGP volatility.'
@@ -4209,516 +4320,534 @@ export default function LandingPage() {
   } else if (page === 'egypt-city' && currentEgyptCity) {
     const c = EGYPT_CITIES.find(x => x.slug === currentEgyptCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'morocco-city' && currentMoroccoCity) {
     const c = MOROCCO_CITIES.find(x => x.slug === currentMoroccoCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'south-korea-city' && currentSouthKoreaCity) {
     const c = SOUTH_KOREA_CITIES.find(x => x.slug === currentSouthKoreaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'malaysia-city' && currentMalaysiaCity) {
     const c = MALAYSIA_CITIES.find(x => x.slug === currentMalaysiaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'spain-city' && currentSpainCity) {
     const c = SPAIN_CITIES.find(x => x.slug === currentSpainCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'denmark-city' && currentDenmarkCity) {
     const c = DENMARK_CITIES.find(x => x.slug === currentDenmarkCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'france-city' && currentFranceCity) {
     const c = FRANCE_CITIES.find(x => x.slug === currentFranceCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'italy-city' && currentItalyCity) {
     const c = ITALY_CITIES.find(x => x.slug === currentItalyCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'poland-city' && currentPolandCity) {
     const c = POLAND_CITIES.find(x => x.slug === currentPolandCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'portugal-city' && currentPortugalCity) {
     const c = PORTUGAL_CITIES.find(x => x.slug === currentPortugalCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'czech-city' && currentCzechCity) {
     const c = CZECH_CITIES.find(x => x.slug === currentCzechCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'belgium-city' && currentBelgiumCity) {
     const c = BELGIUM_CITIES.find(x => x.slug === currentBelgiumCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'sweden-city' && currentSwedenCity) {
     const c = SWEDEN_CITIES.find(x => x.slug === currentSwedenCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'netherlands-city' && currentNetherlandsCity) {
     const c = NETHERLANDS_CITIES.find(x => x.slug === currentNetherlandsCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'norway-city' && currentNorwayCity) {
     const c = NORWAY_CITIES.find(x => x.slug === currentNorwayCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'new-zealand-city' && currentNZCity) {
     const c = NZ_CITIES.find(x => x.slug === currentNZCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'austria-city' && currentAustriaCity) {
     const c = AUSTRIA_CITIES.find(x => x.slug === currentAustriaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'hungary-city' && currentHungaryCity) {
     const c = HUNGARY_CITIES.find(x => x.slug === currentHungaryCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'finland-city' && currentFinlandCity) {
     const c = FINLAND_CITIES.find(x => x.slug === currentFinlandCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'greece-city' && currentGreeceCity) {
     const c = GREECE_CITIES.find(x => x.slug === currentGreeceCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'azerbaijan-city' && currentAzerbaijanCity) {
     const c = AZERBAIJAN_CITIES.find(x => x.slug === currentAzerbaijanCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'georgia-city' && currentGeorgiaCity) {
     const c = GEORGIA_CITIES.find(x => x.slug === currentGeorgiaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'pakistan-city' && currentPakistanCity) {
     const c = PAKISTAN_CITIES.find(x => x.slug === currentPakistanCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'australia-city' && currentAustraliaCity) {
     const c = AUSTRALIA_CITIES.find(x => x.slug === currentAustraliaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'luxembourg-city-page' && currentLuxembourgCity) {
     const c = LUXEMBOURG_CITIES.find(x => x.slug === currentLuxembourgCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'switzerland-city' && currentSwitzerlandCity) {
     const c = SWITZERLAND_CITIES.find(x => x.slug === currentSwitzerlandCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'slovakia-city' && currentSlovakiaCity) {
     const c = SLOVAKIA_CITIES.find(x => x.slug === currentSlovakiaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'slovenia-city' && currentSloveniaCity) {
     const c = SLOVENIA_CITIES.find(x => x.slug === currentSloveniaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'croatia-city' && currentCroatiaCity) {
     const c = CROATIA_CITIES.find(x => x.slug === currentCroatiaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'serbia-city' && currentSerbiaCity) {
     const c = SERBIA_CITIES.find(x => x.slug === currentSerbiaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'bulgaria-city' && currentBulgariaCity) {
     const c = BULGARIA_CITIES.find(x => x.slug === currentBulgariaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'albania-city' && currentAlbaniaCity) {
     const c = ALBANIA_CITIES.find(x => x.slug === currentAlbaniaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'north-macedonia-city' && currentNorthMacedoniaCity) {
     const c = NORTH_MACEDONIA_CITIES.find(x => x.slug === currentNorthMacedoniaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'montenegro-city' && currentMontenegroCity) {
     const c = MONTENEGRO_CITIES.find(x => x.slug === currentMontenegroCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'bosnia-city' && currentBosniaCity) {
     const c = BOSNIA_CITIES.find(x => x.slug === currentBosniaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'kosovo-city' && currentKosovoCity) {
     const c = KOSOVO_CITIES.find(x => x.slug === currentKosovoCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'zambia-city' && currentZambiaCity) {
     const c = ZAMBIA_CITIES.find(x => x.slug === currentZambiaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'zimbabwe-city' && currentZimbabweCity) {
     const c = ZIMBABWE_CITIES.find(x => x.slug === currentZimbabweCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'botswana-city' && currentBotswanaCity) {
     const c = BOTSWANA_CITIES.find(x => x.slug === currentBotswanaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'namibia-city' && currentNamibiaCity) {
     const c = NAMIBIA_CITIES.find(x => x.slug === currentNamibiaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'algeria-city' && currentAlgeriaCity) {
     const c = ALGERIA_CITIES.find(x => x.slug === currentAlgeriaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'tunisia-city' && currentTunisiaCity) {
     const c = TUNISIA_CITIES.find(x => x.slug === currentTunisiaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'mauritius-city' && currentMauritiusCity) {
     const c = MAURITIUS_CITIES.find(x => x.slug === currentMauritiusCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'ghana-city' && currentGhanaCity) {
     const c = GHANA_CITIES.find(x => x.slug === currentGhanaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'angola-city' && currentAngolaCity) {
     const c = ANGOLA_CITIES.find(x => x.slug === currentAngolaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'drc-city' && currentDrcCity) {
     const c = DRC_CITIES.find(x => x.slug === currentDrcCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'mexico-city-page' && currentMexicoCity) {
     const c = MEXICO_CITIES.find(x => x.slug === currentMexicoCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'brazil-city' && currentBrazilCity) {
     const c = BRAZIL_CITIES.find(x => x.slug === currentBrazilCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'colombia-city' && currentColombiaCity) {
     const c = COLOMBIA_CITIES.find(x => x.slug === currentColombiaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'argentina-city' && currentArgentinaCity) {
     const c = ARGENTINA_CITIES.find(x => x.slug === currentArgentinaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'chile-city' && currentChileCity) {
     const c = CHILE_CITIES.find(x => x.slug === currentChileCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'peru-city' && currentPeruCity) {
     const c = PERU_CITIES.find(x => x.slug === currentPeruCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'ecuador-city' && currentEcuadorCity) {
     const c = ECUADOR_CITIES.find(x => x.slug === currentEcuadorCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'panama-city-page' && currentPanamaCity) {
     const c = PANAMA_CITIES.find(x => x.slug === currentPanamaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'costa-rica-city' && currentCostaRicaCity) {
     const c = COSTA_RICA_CITIES.find(x => x.slug === currentCostaRicaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'dominican-city' && currentDominicanCity) {
     const c = DOMINICAN_CITIES.find(x => x.slug === currentDominicanCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'uruguay-city' && currentUruguayCity) {
     const c = URUGUAY_CITIES.find(x => x.slug === currentUruguayCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'guatemala-city-page' && currentGuatemalaCity) {
     const c = GUATEMALA_CITIES.find(x => x.slug === currentGuatemalaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'paraguay-city' && currentParaguayCity) {
     const c = PARAGUAY_CITIES.find(x => x.slug === currentParaguayCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'bolivia-city' && currentBoliviaCity) {
     const c = BOLIVIA_CITIES.find(x => x.slug === currentBoliviaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'venezuela-city' && currentVenezuelaCity) {
     const c = VENEZUELA_CITIES.find(x => x.slug === currentVenezuelaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'puerto-rico-city' && currentPuertoRicoCity) {
     const c = PUERTO_RICO_CITIES.find(x => x.slug === currentPuertoRicoCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'israel-city' && currentIsraelCity) {
     const c = ISRAEL_CITIES.find(x => x.slug === currentIsraelCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'jordan-city' && currentJordanCity) {
     const c = JORDAN_CITIES.find(x => x.slug === currentJordanCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'iraq-city' && currentIraqCity) {
     const c = IRAQ_CITIES.find(x => x.slug === currentIraqCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'cyprus-city' && currentCyprusCity) {
     const c = CYPRUS_CITIES.find(x => x.slug === currentCyprusCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'lebanon-city' && currentLebanonCity) {
     const c = LEBANON_CITIES.find(x => x.slug === currentLebanonCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'myanmar-city' && currentMyanmarCity) {
     const c = MYANMAR_CITIES.find(x => x.slug === currentMyanmarCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'maldives-city' && currentMaldivesCity) {
     const c = MALDIVES_CITIES.find(x => x.slug === currentMaldivesCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'china-city' && currentChinaCity) {
     const c = CHINA_CITIES.find(x => x.slug === currentChinaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'bangladesh-city' && currentBangladeshCity) {
     const c = BANGLADESH_CITIES.find(x => x.slug === currentBangladeshCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'nepal-city' && currentNepalCity) {
     const c = NEPAL_CITIES.find(x => x.slug === currentNepalCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'turkey-city' && currentTurkeyCity) {
     const c = TURKEY_CITIES.find(x => x.slug === currentTurkeyCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'kuwait-city' && currentKuwaitCity) {
     const c = KUWAIT_CITIES.find(x => x.slug === currentKuwaitCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaDesc  = c.seoDesc || ''
+    }
+  } else if (page === 'homeschooling-nigeria' && NIGERIA_COUNTRY) {
+    metaTitle = NIGERIA_COUNTRY.seoTitle
+    metaDesc  = NIGERIA_COUNTRY.seoDesc
+  } else if (page === 'nigeria-city' && currentNigeriaCity) {
+    const c = NIGERIA_CITIES.find(x => x.slug === currentNigeriaCity)
+    if (c) {
+      metaTitle = c.seoTitle || ((c.primaryKeyword || c.name) + ' | Smartious')
+      metaDesc  = c.seoDesc || ''
+    }
+  } else if (page === 'homeschooling-bahrain' && BAHRAIN_COUNTRY) {
+    metaTitle = BAHRAIN_COUNTRY.seoTitle
+    metaDesc  = BAHRAIN_COUNTRY.seoDesc
+  } else if (page === 'bahrain-city' && currentBahrainCity) {
+    const c = BAHRAIN_CITIES.find(x => x.slug === currentBahrainCity)
+    if (c) {
+      metaTitle = c.seoTitle || ((c.primaryKeyword || c.name) + ' | Smartious')
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'oman-city' && currentOmanCity) {
     const c = OMAN_CITIES.find(x => x.slug === currentOmanCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'taiwan-city' && currentTaiwanCity) {
     const c = TAIWAN_CITIES.find(x => x.slug === currentTaiwanCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'ireland-city' && currentIrelandCity) {
     const c = IRELAND_CITIES.find(x => x.slug === currentIrelandCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'uk-city' && currentUkCity) {
     const c = UK_CITIES.find(x => x.slug === currentUkCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'india-city' && currentIndiaCity) {
     const c = INDIA_CITIES.find(x => x.slug === currentIndiaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'germany-city' && currentGermanyCity) {
     const c = GERMANY_CITIES.find(x => x.slug === currentGermanyCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'romania-city' && currentRomaniaCity) {
     const c = ROMANIA_CITIES.find(x => x.slug === currentRomaniaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'ukraine-city' && currentUkraineCity) {
     const c = UKRAINE_CITIES.find(x => x.slug === currentUkraineCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'japan-city' && currentJapanCity) {
     const c = JAPAN_CITIES.find(x => x.slug === currentJapanCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'vietnam-city' && currentVietnamCity) {
     const c = VIETNAM_CITIES.find(x => x.slug === currentVietnamCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'thailand-city' && currentThailandCity) {
     const c = THAILAND_CITIES.find(x => x.slug === currentThailandCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'homeschooling-kenya') {
-    metaTitle = 'Online School in Kenya | IGCSE, A-Level, IB & CBC Homeschool | Smartious'
-    metaDesc  = 'Live online school and homeschool for Kenyan families: Cambridge IGCSE and A-Level, Pearson Edexcel, IB, American and CBC, taught by qualified teachers in small classes, with a learning centre in Parklands, Nairobi. From USD 423/month for Primary.'
+    metaTitle = KENYA_COUNTRY?.seoTitle || 'Online School in Kenya | IGCSE, A-Level, IB & CBC Homeschool | Smartious'
+    metaDesc  = KENYA_COUNTRY?.seoDesc || 'Live online school and homeschool for Kenyan families: Cambridge IGCSE and A-Level, Pearson Edexcel, IB, American and CBC, taught by qualified teachers in small classes, with a learning centre in Parklands, Nairobi. From USD 423/month for Primary.'
   } else if (page === 'kenya-city' && currentKenyaCity && KENYA_CITIES.find(x => x.slug === currentKenyaCity)) {
     const c = KENYA_CITIES.find(x => x.slug === currentKenyaCity)
     metaTitle = c.seoTitle || ('Homeschooling in ' + c.name + ' | IGCSE, A-Level, IB & CBC | Smartious')
@@ -4741,6 +4870,24 @@ export default function LandingPage() {
     const a = UK_AREAS.find(x => x.slug === currentUkArea)
     metaTitle = a.seoTitle || ('Online Tuition in ' + a.name + ', ' + a.city + ' | GCSE, A-Level & 11+ Tutors | Smartious')
     metaDesc  = a.seoDesc || PAGE_META['uk-area']?.desc || ''
+  } else if (page === 'test-prep-detail' && currentTestPrep && TEST_PREP.find(x => x.slug === currentTestPrep)) {
+    const t = TEST_PREP.find(x => x.slug === currentTestPrep)
+    metaTitle = t.seoTitle || (t.code + ' Preparation | Smartious')
+    metaDesc  = t.seoDesc || PAGE_META['test-prep'].desc
+  } else if (page === 'language-detail' && currentLanguage && LANGUAGES.find(x => x.slug === currentLanguage)) {
+    const l = LANGUAGES.find(x => x.slug === currentLanguage)
+    metaTitle = l.seoTitle || ('Learn ' + l.name + ' Online | Smartious')
+    metaDesc  = l.seoDesc || PAGE_META.languages.desc
+  } else if (page === 'study-abroad-detail' && currentStudyAbroad && STUDY_ABROAD.find(x => x.slug === currentStudyAbroad)) {
+    const d = STUDY_ABROAD.find(x => x.slug === currentStudyAbroad)
+    metaTitle = d.seoTitle || ('Study in ' + d.name + ' | Smartious')
+    metaDesc  = d.seoDesc || PAGE_META['study-abroad'].desc
+  } else if (page === 'homeschooling-kuwait' && KUWAIT_COUNTRY?.seoTitle) {
+    metaTitle = KUWAIT_COUNTRY.seoTitle
+    metaDesc  = KUWAIT_COUNTRY.seoDesc || PAGE_META[page].desc
+  } else if (page === 'homeschooling-oman' && OMAN_COUNTRY?.seoTitle) {
+    metaTitle = OMAN_COUNTRY.seoTitle
+    metaDesc  = OMAN_COUNTRY.seoDesc || PAGE_META[page].desc
   } else if (PAGE_META[page]) {
     metaTitle = PAGE_META[page].title
     metaDesc  = PAGE_META[page].desc
@@ -4836,6 +4983,8 @@ export default function LandingPage() {
   if (page === 'homeschooling-nepal') canonicalOverride = '/online-school/nepal'
   if (page === 'homeschooling-turkey') canonicalOverride = '/online-school/turkey'
   if (page === 'homeschooling-kuwait') canonicalOverride = '/online-school/kuwait'
+  if (page === 'homeschooling-nigeria') canonicalOverride = '/online-school/nigeria'
+  if (page === 'homeschooling-bahrain') canonicalOverride = '/online-school/bahrain'
   if (page === 'homeschooling-oman') canonicalOverride = '/online-school/oman'
   if (page === 'homeschooling-taiwan') canonicalOverride = '/online-school/taiwan'
   if (page === 'homeschooling-ireland') canonicalOverride = '/online-school/ireland'
@@ -4847,6 +4996,11 @@ export default function LandingPage() {
   if (page === 'tuition-uk') canonicalOverride = '/tuition-uk'
   if (page === 'homeschooling-vietnam') canonicalOverride = '/online-school/vietnam'
   if (page === 'homeschooling-thailand') canonicalOverride = '/online-school/thailand'
+  if (page === 'not-found') {
+    metaTitle = 'Page not found | Smartious'
+    metaDesc  = 'This page does not exist. Find online school by country, fees and contact details for Smartious Homeschool & eSchool.'
+    canonicalOverride = false
+  }
   usePageMeta(metaTitle, metaDesc, canonicalOverride)
   useHeroPreload(page === 'home')
 
@@ -4944,6 +5098,13 @@ export default function LandingPage() {
   }
 
   const goPortal = () => nav('/login')
+  // linkClick(run) — onClick for an internal <a href>: a plain click runs
+  // the existing SPA navigation; ctrl/cmd/middle click open a new tab.
+  const linkClick = (run) => (e) => {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+    e.preventDefault()
+    run()
+  }
 
   // Blog items come from the generated article index (listing fields of
   // every article, built from the articlesPart files) — same slugs
@@ -4996,7 +5157,7 @@ export default function LandingPage() {
                 ['★','Internationally Accredited — IGCSE · Cambridge · IB · Edexcel · CBC'],
                 ['◆','Expert Tutors — Hand-picked, degree-qualified, exam specialists'],
                 ['●','Mshauri AI Tutor — 24/7 personalised learning support'],
-                ['◆','Serving 2,000+ Students across 12+ Countries'],
+                ['◆','Over 3,421 students educated in more than 40 countries since 2018'],
                 ['★','Flexible Learning — Home visits, learning centre, or 100% online'],
                 ['●','University Placement — 200+ partner universities worldwide'],
                 ['◆','From $15/hour tuition · $38 application fee · First lesson within 48 hours'],
@@ -5061,8 +5222,10 @@ export default function LandingPage() {
                 Curricula
                 <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{transform:curriculaMenuOpen?'rotate(180deg)':'rotate(0)',transition:'transform .2s'}}><polyline points="6 9 12 15 18 9"/></svg>
               </div>
-              {curriculaMenuOpen && (
+              {/* Always in the DOM (hidden when closed) so crawlers see the links */}
+              {(
                 <div style={{
+                  display: curriculaMenuOpen ? 'block' : 'none',
                   position:'absolute',top:'calc(100% + 6px)',left:0,
                   background:'#0d1220',border:'1px solid rgba(201,151,58,.2)',
                   borderRadius:8,minWidth:320,padding:'12px 0 8px',zIndex:10000,
@@ -5097,25 +5260,25 @@ export default function LandingPage() {
                     <div key={group.cat} style={{marginBottom: gi < arr.length - 1 ? 6 : 0, paddingBottom: gi < arr.length - 1 ? 6 : 0, borderBottom: gi < arr.length - 1 ? '1px solid rgba(255,255,255,.06)' : 'none'}}>
                       <div style={{padding:'6px 16px 4px',fontSize:9.5,fontWeight:700,letterSpacing:'.16em',textTransform:'uppercase',color:'rgba(201,151,58,.7)'}}>{group.cat}</div>
                       {group.items.map(item => (
-                        <div
+                        <a className="lp-divlink"
                           key={item.slug}
-                          onClick={() => { setCurriculaMenuOpen(false); openCurriculum(item.slug) }}
+                          href={'/curricula/' + encodeURIComponent(item.slug)} onClick={linkClick(() => { setCurriculaMenuOpen(false); openCurriculum(item.slug) })}
                           style={{padding:'9px 16px',cursor:'pointer',borderLeft:'2px solid transparent',transition:'all .15s',display:'flex',alignItems:'center',gap:10}}
                           onMouseEnter={e => { e.currentTarget.style.background = 'rgba(201,151,58,.08)'; e.currentTarget.style.borderLeftColor = V.gold3 }}
                           onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderLeftColor = 'transparent' }}>
                           <div style={{fontSize:14,minWidth:20,textAlign:'center'}}>{item.badge}</div>
                           <div style={{fontSize:13.5,fontWeight:700,color:'#fff'}}>{item.l}</div>
-                        </div>
+                        </a>
                       ))}
                     </div>
                   ))}
-                  <div
-                    onClick={() => { setCurriculaMenuOpen(false); P('curricula') }}
+                  <a className="lp-divlink"
+                    href={pageToPath('curricula')} onClick={linkClick(() => { setCurriculaMenuOpen(false); P('curricula') })}
                     style={{padding:'10px 16px',cursor:'pointer',borderTop:'1px solid rgba(255,255,255,.08)',marginTop:6,fontSize:11.5,fontWeight:700,color:V.gold3,letterSpacing:'.04em'}}
                     onMouseEnter={e => { e.currentTarget.style.background = 'rgba(201,151,58,.08)' }}
                     onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}>
                     View all curricula →
-                  </div>
+                  </a>
                 </div>
               )}
             </div>
@@ -5130,8 +5293,10 @@ export default function LandingPage() {
                 Programmes
                 <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{transform:programmesMenuOpen?'rotate(180deg)':'rotate(0)',transition:'transform .2s'}}><polyline points="6 9 12 15 18 9"/></svg>
               </div>
-              {programmesMenuOpen && (
+              {/* Always in the DOM (hidden when closed) so crawlers see the links */}
+              {(
                 <div style={{
+                  display: programmesMenuOpen ? 'block' : 'none',
                   position:'absolute',top:'calc(100% + 6px)',left:0,
                   background:'#0d1220',border:'1px solid rgba(201,151,58,.2)',
                   borderRadius:8,minWidth:320,padding:'12px 0 8px',zIndex:10000,
@@ -5159,15 +5324,15 @@ export default function LandingPage() {
                     <div key={group.cat} style={{marginBottom: gi < 1 ? 6 : 0, paddingBottom: gi < 1 ? 6 : 0, borderBottom: gi < 1 ? '1px solid rgba(255,255,255,.06)' : 'none'}}>
                       <div style={{padding:'6px 16px 4px',fontSize:9.5,fontWeight:700,letterSpacing:'.16em',textTransform:'uppercase',color:'rgba(201,151,58,.7)'}}>{group.cat}</div>
                       {group.items.map(item => (
-                        <div
+                        <a className="lp-divlink"
                           key={item.l + item.id}
-                          onClick={() => { setProgrammesMenuOpen(false); P(item.id) }}
+                          href={pageToPath(item.id)} onClick={linkClick(() => { setProgrammesMenuOpen(false); P(item.id) })}
                           style={{padding:'10px 16px',cursor:'pointer',borderLeft:'2px solid transparent',transition:'all .15s'}}
                           onMouseEnter={e => { e.currentTarget.style.background = 'rgba(201,151,58,.08)'; e.currentTarget.style.borderLeftColor = V.gold3 }}
                           onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderLeftColor = 'transparent' }}>
                           <div style={{fontSize:13.5,fontWeight:700,color:'#fff'}}>{item.l}</div>
                           {item.sub && <div style={{fontSize:11,color:'rgba(247,243,237,.5)',marginTop:2}}>{item.sub}</div>}
-                        </div>
+                        </a>
                       ))}
                     </div>
                   ))}
@@ -5185,8 +5350,10 @@ export default function LandingPage() {
                 School Life
                 <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{transform:schoolLifeMenuOpen?'rotate(180deg)':'rotate(0)',transition:'transform .2s'}}><polyline points="6 9 12 15 18 9"/></svg>
               </div>
-              {schoolLifeMenuOpen && (
+              {/* Always in the DOM (hidden when closed) so crawlers see the links */}
+              {(
                 <div style={{
+                  display: schoolLifeMenuOpen ? 'block' : 'none',
                   position:'absolute',top:'calc(100% + 6px)',left:0,
                   background:'#0d1220',border:'1px solid rgba(201,151,58,.2)',
                   borderRadius:8,minWidth:280,padding:'8px 0',zIndex:10000,
@@ -5199,15 +5366,15 @@ export default function LandingPage() {
                     {l:'Blog &amp; News', id:'blog', sub:'Articles, updates, insights'},
                     {l:'Photo Gallery', id:'gallery', sub:'Moments from across Smartious'},
                   ].map(item => (
-                    <div
+                    <a className="lp-divlink"
                       key={item.id}
-                      onClick={() => { setSchoolLifeMenuOpen(false); P(item.id) }}
+                      href={pageToPath(item.id)} onClick={linkClick(() => { setSchoolLifeMenuOpen(false); P(item.id) })}
                       style={{padding:'10px 16px',cursor:'pointer',borderLeft:'2px solid transparent',transition:'all .15s'}}
                       onMouseEnter={e => { e.currentTarget.style.background = 'rgba(201,151,58,.08)'; e.currentTarget.style.borderLeftColor = V.gold3 }}
                       onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderLeftColor = 'transparent' }}>
                       <div style={{fontSize:13.5,fontWeight:700,color:'#fff'}} dangerouslySetInnerHTML={{__html: item.l}}/>
                       {item.sub && <div style={{fontSize:11,color:'rgba(247,243,237,.5)',marginTop:2}} dangerouslySetInnerHTML={{__html: item.sub}}/>}
-                    </div>
+                    </a>
                   ))}
                 </div>
               )}
@@ -5217,14 +5384,14 @@ export default function LandingPage() {
             ))}
           </div>
           <div className="nav-actions">
-            <button className="nav-login" onClick={goPortal}>
+            <a className="nav-login lp-btnlink" href={'/login'} onClick={linkClick(goPortal)}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
               Portal Login
-            </button>
-            <div className="nav-cta" onClick={() => nav('/assessment')}>
+            </a>
+            <a className="nav-cta lp-divlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>
               Enroll Now
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </div>
+            </a>
           </div>
         </div>
         </nav>
@@ -5327,9 +5494,11 @@ export default function LandingPage() {
                 {openCategory === group.cat && (
                   <div style={{display:'flex',flexDirection:'column',gap:2,paddingLeft:8,paddingBottom:10,paddingTop:2}}>
                     {group.items.map(([label, id]) => (
-                      <button
+                      <a
                         key={id}
-                        onClick={() => {
+                        className="lp-btnlink"
+                        href={id.startsWith('curr:') ? '/curricula/' + id.slice(5) : pageToPath(id)}
+                        onClick={linkClick(() => {
                           // Handle curriculum shorthand: curr:slug → openCurriculum(slug)
                           if (typeof id === 'string' && id.startsWith('curr:')) {
                             openCurriculum(id.slice(5))
@@ -5337,8 +5506,9 @@ export default function LandingPage() {
                             P(id)
                           }
                           setMobileMenuOpen(false); setOpenCategory(null)
-                        }}
+                        })}
                         style={{
+                          display:'block',
                           textAlign:'left',
                           background: page === id ? 'rgba(139,26,46,.18)' : 'transparent',
                           border:'none',
@@ -5353,7 +5523,7 @@ export default function LandingPage() {
                           borderRadius:6,
                         }}>
                         {label}
-                      </button>
+                      </a>
                     ))}
                   </div>
                 )}
@@ -5389,8 +5559,8 @@ export default function LandingPage() {
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
                 Portal Login
               </button>
-              <button
-                onClick={() => { nav('/assessment'); setMobileMenuOpen(false) }}
+              <a className="lp-btnlink"
+                href={'/assessment'} onClick={linkClick(() => { nav('/assessment'); setMobileMenuOpen(false) })}
                 style={{
                   width:'100%',
                   background:'#8B1A2E',
@@ -5411,7 +5581,7 @@ export default function LandingPage() {
                 }}>
                 Enroll Now
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-              </button>
+              </a>
             </div>
           </div>
         </div>
@@ -5423,6 +5593,55 @@ export default function LandingPage() {
         // Retry reloads: browsers cache a failed import() for the page's lifetime
         <PageDataLoading failed={dataLoadFailed} onRetry={() => window.location.reload()} />
       ) : (<>
+
+      {/* ══════════════════════════════════════════
+          NOT FOUND — unknown paths and slugs. noindex, no canonical
+          (see usePageMeta). Real links so crawlers and people can
+          find their way on.
+      ══════════════════════════════════════════ */}
+      {page === 'not-found' && (
+        <section className="sec" style={{background:V.bone,padding:'96px 0 80px'}}>
+          <div className="wrap" style={{maxWidth:760,textAlign:'center'}}>
+            <div className="eyebrow" style={{justifyContent:'center'}}>Error 404</div>
+            <h1 className="display" style={{marginTop:10}}>Page not found</h1>
+            <p className="lead" style={{margin:'16px auto 0',maxWidth:560}}>The page you were looking for does not exist or has moved. These links will take you somewhere useful.</p>
+            <nav aria-label="Helpful links" style={{display:'flex',flexWrap:'wrap',justifyContent:'center',gap:12,marginTop:32}}>
+              {[
+                ['Home','/'],
+                ['Online school by country','/#countries'],
+                ['Fees','/pricing'],
+                ['Contact','/contact'],
+              ].map(([label, href]) => (
+                <a key={href} href={href} onClick={e => {
+                  if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+                  e.preventDefault()
+                  nav(href === '/#countries' ? '/' : href)
+                  window.scrollTo(0, 0)
+                  if (href === '/#countries') setTimeout(() => document.getElementById('countries')?.scrollIntoView(), 300)
+                }} style={{
+                  display:'inline-flex',alignItems:'center',padding:'12px 22px',borderRadius:8,
+                  background: href === '/' ? V.cr : V.white, color: href === '/' ? '#fff' : V.ink,
+                  border:`1px solid ${href === '/' ? V.cr : V.bone3}`,fontWeight:700,fontSize:14,textDecoration:'none',
+                }}>{label}</a>
+              ))}
+            </nav>
+            <div style={{marginTop:40,fontSize:13.5,color:V.sl,lineHeight:1.9}}>
+              <div style={{fontWeight:700,color:V.ink,marginBottom:6}}>Online school by country</div>
+              {[
+                ['Kenya','/online-school/kenya'],['UAE','/online-school/uae'],['Saudi Arabia','/online-school/saudi-arabia'],
+                ['Qatar','/online-school/qatar'],['Kuwait','/online-school/kuwait'],['Bahrain','/online-school/bahrain'],
+                ['Nigeria','/online-school/nigeria'],['United Kingdom','/online-school/united-kingdom'],
+                ['United States','/online-school/usa'],['Canada','/online-school/canada'],
+              ].map(([label, href], i) => (
+                <span key={href}>{i > 0 && ' · '}<a href={href} onClick={e => {
+                  if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+                  e.preventDefault(); nav(href); window.scrollTo(0, 0)
+                }} style={{color:V.cr,textDecoration:'none'}}>{label}</a></span>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ══════════════════════════════════════════
           HOME
@@ -5464,21 +5683,21 @@ export default function LandingPage() {
               <p className="h-sub h-sub-short">Live classes with qualified teachers. 1-on-1 tuition <strong style={{color:V.gold3}}>from USD 15/hour</strong> · full programmes <strong style={{color:V.gold3}}>from USD 423/month</strong>.</p>
               <p className="h-sub h-sub-long">Live classes. Qualified teachers. Internationally recognised qualifications. Smartious is an accredited online school and homeschool provider delivering Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, Kenya CBC and American Curriculum — taught online by specialists serving families across Kenya, the UAE, UK, Canada and more than 40 countries worldwide. <strong style={{color:V.gold3}}>From USD 15/hour</strong> for 1-on-1 tuition · <strong style={{color:V.gold3}}>from USD 423/month</strong> for full homeschool programmes.</p>
               <div className="h-act">
-                <button className="btn-p" onClick={() => nav('/assessment')}
+                <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
                   style={{padding:'18px 36px',fontSize:16,fontWeight:800,borderRadius:10,boxShadow:'0 8px 24px rgba(201,151,58,.35)',transition:'all .18s ease'}}
                   onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(201,151,58,.5)' }}
                   onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(201,151,58,.35)' }}>
                   Book assessment
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{marginLeft:8}}><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
-                <button className="btn-p" onClick={() => P('consult')}
+                </a>
+                <a className="btn-p lp-btnlink" href={pageToPath('consult')} onClick={linkClick(() => P('consult'))}
                   style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'16px 32px',fontSize:16,fontWeight:700,borderRadius:10,transition:'all .18s ease'}}
                   onMouseEnter={(e) => { e.currentTarget.style.borderColor = V.gold3; e.currentTarget.style.color = V.gold3; e.currentTarget.style.transform = 'translateY(-2px)' }}
                   onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.55)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'translateY(0)' }}>
                   Book Free Consultation
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{marginLeft:8}}><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
-                <button className="btn-o lt h-act-3" style={{borderColor:'rgba(247,243,237,.45)',color:'rgba(247,243,237,.9)'}} onClick={() => P('programs')}>View Programmes</button>
+                </a>
+                <a className="btn-o lt h-act-3 lp-btnlink" style={{borderColor:'rgba(247,243,237,.45)',color:'rgba(247,243,237,.9)'}} href={pageToPath('programs')} onClick={linkClick(() => P('programs'))}>View Programmes</a>
               </div>
             </div>
             <div className="h-stats">
@@ -5507,20 +5726,22 @@ export default function LandingPage() {
           <div style={{display:'none'}} className="mob-page-strip">
             <div style={{background:'rgba(255,255,255,.04)',borderBottom:'1px solid rgba(255,255,255,.08)',padding:'10px 20px',overflowX:'auto',whiteSpace:'nowrap'}}>
               {[['Home','home'],['About','about'],['Curricula','curricula'],['Services','services'],['Pricing','pricing'],['Blog','blog'],['Enroll','enroll']].map(([l,id]) => (
-                <button key={id} onClick={() => P(id)} style={{display:'inline-block',marginRight:8,padding:'6px 14px',borderRadius:99,border:'1px solid rgba(255,255,255,.15)',background:page===id?'rgba(96,165,250,.2)':'transparent',color:page===id?'#60A5FA':'rgba(255,255,255,.55)',fontSize:13,fontWeight:page===id?700:400,cursor:'pointer',whiteSpace:'nowrap'}}>
+                <a className="lp-btnlink" key={id} href={pageToPath(id)} onClick={linkClick(() => P(id))} style={{display:'inline-block',marginRight:8,padding:'6px 14px',borderRadius:99,border:'1px solid rgba(255,255,255,.15)',background:page===id?'rgba(96,165,250,.2)':'transparent',color:page===id?'#60A5FA':'rgba(255,255,255,.55)',fontSize:13,fontWeight:page===id?700:400,cursor:'pointer',whiteSpace:'nowrap'}}>
                   {l}
-                </button>
+                </a>
               ))}
             </div>
           </div>
           {/* MARQUEE */}
           <div className="marq">
             <div className="marq-in">
-              {[...Array(2)].map((_,ri) => ['Online School','Virtual School','Homeschool','IGCSE Excellence','Cambridge A-Level','IB Diploma','British Curriculum','American Curriculum','CBC Kenya','Pearson Edexcel','Live Online Classes','14 Countries Served','7 Years Teaching','78+ Qualified Tutors','Study Abroad','University Admissions Support'].map((t,i) => (
+              {[...Array(2)].map((_,ri) => ['Online School','Virtual School','Homeschool','IGCSE Excellence','Cambridge A-Level','IB Diploma','British Curriculum','American Curriculum','CBC Kenya','Pearson Edexcel','Live Online Classes','40+ Countries Served','Teaching Since 2018','78+ Qualified Tutors','Study Abroad','University Admissions Support'].map((t,i) => (
                 <div key={ri+'-'+i} className="mi"><div className="md"/>{t}</div>
               )))}
             </div>
           </div>
+
+          <IntakeCta nav={nav}/>
 
           {/* ═══════════════════════════════════════════
               HOMEPAGE FAQ SCHEMA (for AI Overviews)
@@ -5709,7 +5930,7 @@ export default function LandingPage() {
                   ],
                   cta:'Visit a Smartious centre',
                   ctaPage:'contact',
-                  pricing:'From KSh 1,500/hour',
+                  pricing:'Fees on request',
                 },
                 {
                   tag:'Personalised Tuition',
@@ -5725,10 +5946,10 @@ export default function LandingPage() {
                   ],
                   cta:'Find tutors in your area',
                   ctaPage:'tuition-nairobi',
-                  pricing:'From KSh 1,300/hour',
+                  pricing:'Online USD 15/hour',
                 },
               ].map(card => (
-                <div key={card.title} className="reveal" style={{
+                <a key={card.title} className="reveal lp-divlink" style={{
                   background:V.white,
                   border:`1px solid ${V.bone3}`,
                   borderRadius:14,
@@ -5738,7 +5959,7 @@ export default function LandingPage() {
                   transition:'all .25s',
                   cursor:'pointer',
                 }}
-                  onClick={() => P(card.ctaPage)}
+                  href={pageToPath(card.ctaPage)} onClick={linkClick(() => P(card.ctaPage))}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(8,12,20,.10)' }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
                   {/* Image */}
@@ -5780,7 +6001,7 @@ export default function LandingPage() {
                       </div>
                     </div>
                   </div>
-                </div>
+                </a>
               ))}
             </div>
             {/* Quality assurance strip */}
@@ -5869,7 +6090,7 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="wrap" style={{textAlign:'center',marginTop:36}}>
-              <button onClick={() => P('about')} style={{
+              <a className="lp-btnlink" href={pageToPath('about')} onClick={linkClick(() => P('about'))} style={{
                 background:'transparent',color:V.gold3,
                 border:`1.5px solid ${V.gold3}`,
                 padding:'11px 26px',borderRadius:6,
@@ -5879,7 +6100,7 @@ export default function LandingPage() {
               }}>
                 Read our story
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-              </button>
+              </a>
             </div>
           </section>
 
@@ -5888,7 +6109,7 @@ export default function LandingPage() {
               Big SEO win: surfaces all country pages from
               homepage so they get internal-link authority.
           ═══════════════════════════════════════════ */}
-          <section className="sec" style={{background:V.white}}><div className="wrap">
+          <section id="countries" className="sec" style={{background:V.white}}><div className="wrap">
             <div className="sec-hd reveal" style={{textAlign:'center'}}>
               <div className="eyebrow" style={{justifyContent:'center'}}>Built for global families</div>
               <h2 className="display">An Online School That <em>Travels With You</em></h2>
@@ -5910,7 +6131,7 @@ export default function LandingPage() {
                 {country:'Japan', slug:'japan', href:'/online-school/japan', sub:'Tokyo · Yokohama · Osaka · Kobe · Nagoya · Okinawa'},
                 {country:'Vietnam', slug:'vietnam', href:'/online-school/vietnam', sub:'Ho Chi Minh City · Hanoi · Da Nang · Bac Ninh · Binh Duong · Vung Tau'},
                 {country:'Thailand', slug:'thailand', href:'/online-school/thailand', sub:'Bangkok · Chiang Mai · Phuket · Pattaya · Hua Hin · Khon Kaen'},
-                {country:'United Kingdom', slug:'uk', href:'/online-school/uk', sub:'London · Manchester'},
+                {country:'United Kingdom', slug:'uk', href:'/online-school/united-kingdom', sub:'London · Manchester'},
                 {country:'United States', slug:'usa', href:'/online-school/usa', sub:'Coast to coast · Live · IGCSE/A-Level'},
                 {country:'Canada', slug:'canada', href:'/online-school/canada', sub:'Toronto · Vancouver'},
                 {country:'Australia', slug:'australia', href:'/online-school/australia', sub:'Sydney · Melbourne'},
@@ -6021,7 +6242,7 @@ export default function LandingPage() {
             </div>
 
             <div style={{textAlign:'center',marginTop:32}}>
-              <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+              <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
             </div>
           </div></section>
 
@@ -6156,8 +6377,8 @@ export default function LandingPage() {
                 {label:'American Curriculum', detail:'Elementary · Middle · High · AP', from:'Live small-group classes', monthly:'From USD 423/mo · Personalised'},
                 {label:'Kenya Pathway (CBC)', detail:'KICD aligned · KCSE eligible', from:'Live small-group classes', monthly:'Personalised pricing on request'},
               ].map(c => (
-                <div key={c.label} className="reveal" style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',cursor:'pointer',transition:'all .2s'}}
-                  onClick={() => P('curricula')}
+                <a key={c.label} className="reveal lp-divlink" style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',cursor:'pointer',transition:'all .2s'}}
+                  href={pageToPath('curricula')} onClick={linkClick(() => P('curricula'))}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
                   <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:6}}>Curriculum</div>
@@ -6167,11 +6388,11 @@ export default function LandingPage() {
                     <div style={{fontSize:13,fontWeight:700,color:V.cr}}>{c.from}</div>
                     <div style={{fontSize:11,color:V.sl2,marginTop:2}}>{c.monthly}</div>
                   </div>
-                </div>
+                </a>
               ))}
             </div>
             <div style={{textAlign:'center',marginTop:24}}>
-              <button onClick={() => P('pricing')} style={{background:'transparent',color:V.cr,border:`1.5px solid ${V.cr}`,padding:'10px 24px',borderRadius:6,fontSize:13,fontWeight:700,cursor:'pointer'}}>Request personalized pricing →</button>
+              <a className="lp-btnlink" href={pageToPath('pricing')} onClick={linkClick(() => P('pricing'))} style={{background:'transparent',color:V.cr,border:`1.5px solid ${V.cr}`,padding:'10px 24px',borderRadius:6,fontSize:13,fontWeight:700,cursor:'pointer'}}>Request personalized pricing →</a>
             </div>
           </div></section>
 
@@ -6247,10 +6468,10 @@ export default function LandingPage() {
                 </details>
               ))}
               <div style={{textAlign:'center', marginTop:24}}>
-                <button className="btn-o" onClick={() => P('faq')}>
+                <a className="btn-o lp-btnlink" href={pageToPath('faq')} onClick={linkClick(() => P('faq'))}>
                   Full FAQ
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
+                </a>
               </div>
             </div>
           </div></section>
@@ -6269,7 +6490,7 @@ export default function LandingPage() {
                   {n:'5',h:'Curricula',p:'Cambridge · IB · Edexcel · CBC · American',pg:'curricula',svg:'<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>'},
                   {n:'6',h:'Services',p:'Homeschool · Tuition · Online · Mshauri AI',pg:'services',svg:'<rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/>'},
                   {n:'40+',h:'Countries',p:'Kenya · UAE · UK · USA · Canada · Australia · and many more',pg:'home',svg:'<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>'},
-                  {n:'$15/hr',h:'Pricing',p:'Transparent USD pricing · From $8 hourly tuition · No contracts',pg:'pricing',svg:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
+                  {n:'$15/hr',h:'Pricing',p:'Transparent USD pricing · One-to-one tuition $15/hour · Fees from $423/month (Primary)',pg:'pricing',svg:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
                   {n:'78+',h:'Tutors',p:'Qualified specialists · BEd, MEd, PhD profiles',pg:'teachers',svg:'<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>'},
                   {n:'10',h:'FAQ',p:'Enrolment, exams, pricing & Mshauri AI answered',pg:'faq',svg:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
                   {n:'9',h:'Blog',p:'IGCSE guides · IB tips · Study abroad · AI learning',pg:'blog',svg:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>'},
@@ -6320,7 +6541,7 @@ export default function LandingPage() {
                 ))}
               </div>
               <div style={{textAlign:'center',marginTop:36}}>
-                <button className="btn-o" onClick={() => P('about')}>More Stories <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                <a className="btn-o lp-btnlink" href={pageToPath('about')} onClick={linkClick(() => P('about'))}>More Stories <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
               </div>
             </div>
           </section>
@@ -6332,7 +6553,7 @@ export default function LandingPage() {
               <h2 className="cta-h">Give Your Child a <em>Global Education</em> — Without Paying International School Fees</h2>
               <p className="cta-sub">Book a free 30-minute consultation. We'll review your child's situation, current school reports, and recommend a Smartious pathway. From <strong style={{color:V.gold3}}>USD 15/hour</strong> tuition · <strong style={{color:V.gold3}}>From USD 423/month</strong> full homeschool.</p>
               <div className="cta-btns">
-                <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
               <div style={{marginTop:18,fontSize:12,color:'rgba(255,255,255,.55)'}}>Most families complete enrolment within 7-10 working days · No long-term contracts</div>
             </div></div>
@@ -6501,7 +6722,7 @@ export default function LandingPage() {
                       <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',color:'#fff',lineHeight:1.2}}>Smartious Company Portfolio <em style={{color:V.gold3,fontStyle:'italic'}}>2026</em></div>
                       <div style={{fontSize:11.5,color:'rgba(255,255,255,.6)',marginTop:4}}>21 pages · PDF · 94 KB · The full picture of Smartious</div>
                     </div>
-                    <a href="/Smartious_Company_Portfolio_2026%20(2).pdf"
+                    <a href="/smartious-portfolio-2026.pdf"
                       download
                       style={{
                         background:V.gold3,color:V.ink,
@@ -6706,7 +6927,7 @@ export default function LandingPage() {
                       ))}
                     </div>
                     <div style={{marginTop:22,paddingTop:20,borderTop:`1px solid ${V.bone3}`}}>
-                      <div onClick={() => P('child-protection')} style={{
+                      <a className="lp-divlink" href={pageToPath('child-protection')} onClick={linkClick(() => P('child-protection'))} style={{
                         cursor:'pointer',
                         display:'inline-flex',
                         alignItems:'center',
@@ -6717,7 +6938,7 @@ export default function LandingPage() {
                       }}>
                         Read our Child Protection and Safeguarding Policy
                         <span style={{fontSize:16}}>{'\u2192'}</span>
-                      </div>
+                      </a>
                     </div>
                   </div>
                 </div>
@@ -6816,7 +7037,7 @@ export default function LandingPage() {
                   <p style={{fontSize:13,color:'rgba(255,255,255,.6)',marginBottom:18}}>
                     These vision, mission and values are reflected in our full Company Portfolio.
                   </p>
-                  <a href="/Smartious_Company_Portfolio_2026%20(2).pdf"
+                  <a href="/smartious-portfolio-2026.pdf"
                     download
                     style={{
                       display:'inline-flex',alignItems:'center',gap:8,
@@ -6834,7 +7055,7 @@ export default function LandingPage() {
           </section>
 
           {/* ═══════════════════════════════════════════
-              WHERE WE TEACH — 14-country grid
+              WHERE WE TEACH — country grid
               Real text grid (not a fake map).
           ═══════════════════════════════════════════ */}
           <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
@@ -6867,7 +7088,7 @@ export default function LandingPage() {
                 {flag:'🇸🇴',c:'Somalia', cities:'Mogadishu · Hargeisa', slug:'somalia'},
                 {flag:'🇵🇰',c:'Pakistan', cities:'Karachi · Lahore · Islamabad', slug:'pakistan'},
               ].map(country => (
-                <div key={country.c} className="reveal" onClick={() => P('home')}
+                <a key={country.c} className="reveal lp-divlink" href={pageToPath('home')} onClick={linkClick(() => P('home'))}
                   style={{
                     background:V.bone,
                     border:`1px solid ${V.bone3}`,
@@ -6881,7 +7102,7 @@ export default function LandingPage() {
                   <div style={{fontSize:20,marginBottom:4}}>{country.flag}</div>
                   <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'.95rem',color:V.ink,fontWeight:400,lineHeight:1.3}}>{country.c}</div>
                   <div style={{fontSize:10.5,color:V.sl2,marginTop:3,lineHeight:1.4}}>{country.cities}</div>
-                </div>
+                </a>
               ))}
             </div>
           </div></section>
@@ -6964,7 +7185,7 @@ export default function LandingPage() {
               <h2 className="cta-h">Give Your Child a <em>Real Education</em>. Not Just a School Day.</h2>
               <p className="cta-sub">Book a free 30-minute consultation. We'll review your child's situation, current school reports if available, and recommend a Smartious pathway. From <strong style={{color:V.gold3}}>USD 15/hour</strong> tuition · <strong style={{color:V.gold3}}>From USD 423/month</strong> full homeschool. USD 38 / KSh 5,000 application fee applies only when you decide to enrol.</p>
               <div className="cta-btns">
-                <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
               <div style={{marginTop:18,fontSize:12,color:'rgba(255,255,255,.55)'}}>Most families complete enrolment within 7-10 working days · No long-term contracts</div>
             </div></div>
@@ -6985,10 +7206,10 @@ export default function LandingPage() {
                   We serve families in Kenya (Nairobi, Mombasa, Kisumu, Nakuru, Eldoret, Thika, Kiambu and across the country), the UAE (Dubai, Abu Dhabi, Sharjah and 27 emirate areas), the UK, USA, Canada, Australia, Qatar, Bahrain, Nigeria, South Africa, Uganda, Tanzania, Somalia and Pakistan. Our delivery is primarily online through the Smartious Learning Management System (LMS), with in-person tuition available at our Diamond Plaza Parklands HQ and our Karen Hardy Centre in Nairobi.
                 </p>
                 <p style={{fontSize:13.5,lineHeight:1.75,marginBottom:14}}>
-                  Smartious supports families relocating between countries needing curriculum continuity, athletes and performers balancing serious training with academic ambition, gifted students whose schools move too slowly, students struggling at school due to oversized classrooms or bullying, IGCSE and A-Level candidates preparing for external examinations, IB Diploma students needing specialist HL subject support, and students with learning differences benefiting from 1-on-1 personal attention. Pricing starts at USD 15/hour for 1-on-1 tuition (KSh 1,300/hour for Kenya-based families) and from USD 423/month for full online homeschool programmes — meaningfully below typical premium international school fees while delivering equivalent qualifications.
+                  Smartious supports families relocating between countries needing curriculum continuity, athletes and performers balancing serious training with academic ambition, gifted students whose schools move too slowly, students struggling at school due to oversized classrooms or bullying, IGCSE and A-Level candidates preparing for external examinations, IB Diploma students needing specialist HL subject support, and students with learning differences benefiting from 1-on-1 personal attention. Pricing starts at USD 15/hour (≈ KSh 1,940) for 1-on-1 tuition and from USD 423/month for full online homeschool programmes — meaningfully below typical premium international school fees while delivering equivalent qualifications.
                 </p>
                 <p style={{fontSize:12.5,lineHeight:1.7,marginTop:18,color:'rgba(247,243,237,.55)'}}>
-                  Contact Smartious: <a href="mailto:hello@smartioushomeschool.com" style={{color:V.gold3,textDecoration:'none'}}>hello@smartioushomeschool.com</a> · WhatsApp· Diamond Plaza, Parklands, Nairobi, Kenya · M-Pesa Paybill 247247, Account 745021 (Smartious Edtech).
+                  Contact Smartious: <a href="mailto:hello@smartioushomeschool.com" style={{color:V.gold3,textDecoration:'none'}}>hello@smartioushomeschool.com</a> · WhatsApp· Diamond Plaza I Annex, 3rd Floor, Office 20, Parklands, Nairobi, Kenya · M-Pesa Paybill 247247, Account 745021 (Smartious Edtech).
                 </p>
               </div>
             </div>
@@ -7005,7 +7226,7 @@ export default function LandingPage() {
           <section className="sec" style={{background:V.bone}}><div className="wrap">
             <div className="cur-grid">
               {CURRICULA.map((c,i) => (
-                <div key={c.slug} className={`cc${c.gold?' cc-hl':''}`} onClick={() => openCurriculum(c.slug)}
+                <a key={c.slug} className={(`cc${c.gold?' cc-hl':''}`) + ' lp-divlink'} href={'/curricula/' + encodeURIComponent(c.slug)} onClick={linkClick(() => openCurriculum(c.slug))}
                   style={{cursor:'pointer'}}>
                   <div className="cc-top">
                     <div className="cc-bar" style={c.gold?{background:'linear-gradient(90deg,#B8960C,#8B1A2E)'}:{}}/>
@@ -7021,11 +7242,11 @@ export default function LandingPage() {
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                     </div>
                   </div>
-                </div>
+                </a>
               ))}
             </div>
             <div style={{textAlign:'center',marginTop:48}}>
-              <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+              <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
             </div>
           </div></section>
 
@@ -7109,7 +7330,7 @@ export default function LandingPage() {
               <div className="pg-hero"><div className="wrap">
                 <h1 className="pg-h">Curriculum not found</h1>
                 <p className="pg-sub" style={{marginTop:12}}>This curriculum page could not be found.</p>
-                <button className="btn-p" style={{marginTop:24}} onClick={() => P('curricula')}>← All Curricula</button>
+                <a className="btn-p lp-btnlink" style={{marginTop:24}} href={pageToPath('curricula')} onClick={linkClick(() => P('curricula'))}>← All Curricula</a>
               </div></div>
                 </>
           )
@@ -7119,11 +7340,11 @@ export default function LandingPage() {
           <>
             <div className="pg-hero" style={c.gold?{background:V.ink}:{}}>
               <div className="wrap">
-                <button onClick={() => P('curricula')}
+                <a className="lp-btnlink" href={pageToPath('curricula')} onClick={linkClick(() => P('curricula'))}
                   style={{background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.15)',color:'rgba(255,255,255,.85)',padding:'7px 14px',borderRadius:20,fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",marginBottom:22,display:'inline-flex',alignItems:'center',gap:6}}>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                   All Curricula
-                </button>
+                </a>
                 <div className="eyebrow">{c.badge}</div>
                 <h1 className="pg-h">{c.h}</h1>
                 <p className="pg-sub" style={{marginTop:12}}>{d.tagline}</p>
@@ -7183,7 +7404,7 @@ export default function LandingPage() {
 
               {/* CTA */}
               <div style={{textAlign:'center',display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
-                <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
               </div>
             </div></section>
             </>
@@ -7199,7 +7420,7 @@ export default function LandingPage() {
           <section className="sec" style={{background:V.ink}}><div className="wrap">
             <div className="svc-grid">
               {SERVICES.map((s,i) => (
-                <div key={s.slug} className="sc reveal" onClick={() => openService(s.slug)} style={{cursor:'pointer'}}>
+                <a key={s.slug} className="sc reveal lp-divlink" href={'/services/' + encodeURIComponent(s.slug)} onClick={linkClick(() => openService(s.slug))} style={{cursor:'pointer'}}>
                   <div className="sc-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={V.cr} strokeWidth="1.8" strokeLinecap="round" dangerouslySetInnerHTML={{__html:s.svg}}/></div>
                   <div className="sc-h">{s.h}</div>
                   <div className="sc-p">{s.desc}</div>
@@ -7207,12 +7428,12 @@ export default function LandingPage() {
                   <div className="sc-lnk">
                     View full details <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                   </div>
-                </div>
+                </a>
               ))}
             </div>
             <div style={{textAlign:'center',marginTop:48,display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
-              <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-              <button className="btn-o lt" onClick={() => P('pricing')}>Compare Prices</button>
+              <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+              <a className="btn-o lt lp-btnlink" href={pageToPath('pricing')} onClick={linkClick(() => P('pricing'))}>Compare Prices</a>
             </div>
           </div></section>
         </>
@@ -7229,7 +7450,7 @@ export default function LandingPage() {
               <div className="pg-hero" style={{background:V.ink}}><div className="wrap">
                 <h1 className="pg-h">Service not found</h1>
                 <p className="pg-sub" style={{marginTop:12}}>This service page could not be found.</p>
-                <button className="btn-p" style={{marginTop:24}} onClick={() => P('services')}>← All Services</button>
+                <a className="btn-p lp-btnlink" style={{marginTop:24}} href={pageToPath('services')} onClick={linkClick(() => P('services'))}>← All Services</a>
               </div></div>
                 </>
           )
@@ -7239,11 +7460,11 @@ export default function LandingPage() {
           <>
             <div className="pg-hero" style={{background:V.ink}}>
               <div className="wrap">
-                <button onClick={() => P('services')}
+                <a className="lp-btnlink" href={pageToPath('services')} onClick={linkClick(() => P('services'))}
                   style={{background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.15)',color:'rgba(255,255,255,.85)',padding:'7px 14px',borderRadius:20,fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",marginBottom:22,display:'inline-flex',alignItems:'center',gap:6}}>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                   All Services
-                </button>
+                </a>
                 <div style={{width:48,height:48,borderRadius:12,background:'rgba(184,150,12,.15)',display:'flex',alignItems:'center',justifyContent:'center',marginBottom:14}}>
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={V.gold3} strokeWidth="1.8" strokeLinecap="round" dangerouslySetInnerHTML={{__html:s.svg}}/>
                 </div>
@@ -7285,8 +7506,8 @@ export default function LandingPage() {
 
               {/* CTA */}
               <div style={{textAlign:'center',display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
-                <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-                <button className="btn-o" onClick={() => P('pricing')}>View Pricing</button>
+                <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+                <a className="btn-o lp-btnlink" href={pageToPath('pricing')} onClick={linkClick(() => P('pricing'))}>View Pricing</a>
               </div>
             </div></section>
             </>
@@ -7322,19 +7543,19 @@ export default function LandingPage() {
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': ['EducationalOrganization', 'LocalBusiness'],
-                  '@id': 'https://smartioushomeschool.com/online-school/kenya#org',
-                  'name': 'Smartious Homeschool & eSchool',
+                  '@id': ORG_ID,
+                  'name': SITE,
                   'alternateName': 'Smartious eSchool',
-                  'url': 'https://smartioushomeschool.com/online-school/kenya',
-                  'logo': 'https://smartioushomeschool.com/logo.png',
-                  'image': 'https://smartioushomeschool.com/og-kenya.jpg',
+                  'url': 'https://smartioushomeschool.com/',
+                  'logo': 'https://smartioushomeschool.com/brand/logo.png',
+                  'image': 'https://smartioushomeschool.com/online-virtual-school.png',
                   'description': 'Accredited international homeschool and online school based in Nairobi, Kenya. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel, American curriculum and Kenya CBC. Founded 2018. Serving students across 40+ countries.',
                   'foundingDate': '2018',
                   'telephone': '+254745021212',
                   'email': 'hello@smartioushomeschool.com',
                   'address': {
                     '@type': 'PostalAddress',
-                    'streetAddress': 'Diamond Plaza I Annex, 3rd Floor, Office 20, Fourth Parklands Avenue',
+                    'streetAddress': 'Diamond Plaza I Annex, 3rd Floor, Office 20',
                     'addressLocality': 'Parklands, Nairobi',
                     'addressRegion': 'Nairobi County',
                     'addressCountry': 'KE',
@@ -7357,27 +7578,13 @@ export default function LandingPage() {
                     'https://www.instagram.com/smartioushomeschool',
                     'https://www.tiktok.com/@smartioushomeschool',
                   ],
-                  'aggregateRating': {
-                    '@type': 'AggregateRating',
-                    'ratingValue': SMARTIOUS_RATING.stars,
-                    'reviewCount': SMARTIOUS_RATING.count,
-                    'bestRating': '5',
-                    'worstRating': '1',
-                  },
-                  'review': ctry.googleReviews.reviews.map(r => ({
-                    '@type': 'Review',
-                    'author': { '@type': 'Person', 'name': r.name },
-                    'reviewRating': { '@type': 'Rating', 'ratingValue': r.rating, 'bestRating': '5' },
-                    'reviewBody': r.text,
-                  })),
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'BreadcrumbList',
                   'itemListElement': [
                     { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': 'https://smartioushomeschool.com/' },
-                    { '@type': 'ListItem', 'position': 2, 'name': 'Online School', 'item': 'https://smartioushomeschool.com/global' },
-                    { '@type': 'ListItem', 'position': 3, 'name': 'Kenya', 'item': 'https://smartioushomeschool.com/online-school/kenya' },
+                    { '@type': 'ListItem', 'position': 2, 'name': 'Kenya', 'item': 'https://smartioushomeschool.com/online-school/kenya' },
                   ],
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
@@ -7385,30 +7592,30 @@ export default function LandingPage() {
                   '@type': 'Course',
                   'name': 'Cambridge IGCSE Online — Kenya',
                   'description': 'Live, online Cambridge IGCSE programme delivered to students in Kenya by degree-qualified specialists. Mathematics, Sciences, English, Business Studies and more. Exams sat at British Council Nairobi.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Secondary',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '360', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'Cambridge A-Level & IB Diploma Online — Kenya',
                   'description': 'Sixth-form online programme for Kenyan students preparing for UK, US, Canadian and Kenyan universities. Cambridge A-Level and IB Diploma pathways available.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Pre-University',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '515', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'Kenya CBC & KCSE Homeschool',
                   'description': 'Kenya\'s Competency-Based Curriculum (Grades 1-12) and KCSE preparation, taught by KICD/KNEC-aligned specialists. For families remaining in the Kenyan national pathway.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Primary & Secondary',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '180', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
               </>
             )}
@@ -7421,21 +7628,14 @@ export default function LandingPage() {
                   '@type': 'BreadcrumbList',
                   'itemListElement': [
                     { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': 'https://smartioushomeschool.com/' },
-                    { '@type': 'ListItem', 'position': 2, 'name': 'Online School', 'item': 'https://smartioushomeschool.com/global' },
-                    { '@type': 'ListItem', 'position': 3, 'name': 'United Arab Emirates', 'item': 'https://smartioushomeschool.com/online-school/uae' },
-                    { '@type': 'ListItem', 'position': 4, 'name': 'Egypt', 'item': 'https://smartioushomeschool.com/online-school/egypt' },
-                    { '@type': 'ListItem', 'position': 5, 'name': 'Morocco', 'item': 'https://smartioushomeschool.com/online-school/morocco' },
-                    { '@type': 'ListItem', 'position': 6, 'name': 'South Korea', 'item': 'https://smartioushomeschool.com/online-school/south-korea' },
-                    { '@type': 'ListItem', 'position': 7, 'name': 'Japan', 'item': 'https://smartioushomeschool.com/online-school/japan' },
-                    { '@type': 'ListItem', 'position': 8, 'name': 'Vietnam', 'item': 'https://smartioushomeschool.com/online-school/vietnam' },
-                    { '@type': 'ListItem', 'position': 9, 'name': 'Thailand', 'item': 'https://smartioushomeschool.com/online-school/thailand' },
+                    { '@type': 'ListItem', 'position': 2, 'name': 'United Arab Emirates', 'item': 'https://smartioushomeschool.com/online-school/uae' },
                   ],
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Service',
                   'serviceType': 'Online International Homeschool & Virtual School',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'areaServed': [
                     { '@type': 'Country', 'name': 'United Arab Emirates', '@id': 'https://www.wikidata.org/wiki/Q878' },
                     { '@type': 'City', 'name': 'Dubai' },
@@ -7445,27 +7645,27 @@ export default function LandingPage() {
                     { '@type': 'City', 'name': 'Ras Al Khaimah' },
                   ],
                   'description': 'Live online international homeschool serving expat and Emirati families across the UAE. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and American curricula on GST timezone.',
-                  'offers': { '@type': 'AggregateOffer', 'priceCurrency': 'USD', 'lowPrice': '180', 'highPrice': '515', 'priceSpecification': { '@type': 'UnitPriceSpecification', 'unitText': 'MONTH' } },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'Cambridge IGCSE Online — UAE',
                   'description': 'Live, online Cambridge IGCSE programme for UAE-based students, taught on GST timezone by degree-qualified specialists. Exams sat at British Council Dubai and Abu Dhabi.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Secondary',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '360', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'IB Diploma & A-Level Online — UAE',
                   'description': 'Sixth-form online programme for UAE students preparing for UAE private universities, UK, US, Canadian and Australian universities. Cambridge A-Level and IB Diploma pathways available, both delivered live on GST timezone.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Pre-University',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '515', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
               </>
             )}
@@ -7478,15 +7678,14 @@ export default function LandingPage() {
                   '@type': 'BreadcrumbList',
                   'itemListElement': [
                     { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': 'https://smartioushomeschool.com/' },
-                    { '@type': 'ListItem', 'position': 2, 'name': 'Online School', 'item': 'https://smartioushomeschool.com/global' },
-                    { '@type': 'ListItem', 'position': 3, 'name': 'United Kingdom', 'item': 'https://smartioushomeschool.com/online-school/uk' },
+                    { '@type': 'ListItem', 'position': 2, 'name': 'United Kingdom', 'item': 'https://smartioushomeschool.com/online-school/united-kingdom' },
                   ],
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Service',
                   'serviceType': 'Online Home Education & International Online School',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'areaServed': [
                     { '@type': 'Country', 'name': 'United Kingdom' },
                     { '@type': 'AdministrativeArea', 'name': 'England' },
@@ -7499,27 +7698,27 @@ export default function LandingPage() {
                     { '@type': 'City', 'name': 'Edinburgh' },
                   ],
                   'description': 'Live online international school accepting home education students from across the United Kingdom. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and AQA GCSE pathways. GMT/BST scheduling. Full UCAS application support.',
-                  'offers': { '@type': 'AggregateOffer', 'priceCurrency': 'USD', 'lowPrice': '180', 'highPrice': '515', 'priceSpecification': { '@type': 'UnitPriceSpecification', 'unitText': 'MONTH' } },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'Cambridge IGCSE & GCSE Online — UK',
                   'description': 'Live, online IGCSE and AQA GCSE programmes for UK home-educating families. Taught on GMT/BST timezone by degree-qualified specialists. Examinations sat at Cambridge International, Pearson Edexcel and AQA private-candidate centres across the UK.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Secondary',
                   'inLanguage': 'en-GB',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '360', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'A-Level & IB Diploma Online — UK with UCAS Support',
                   'description': 'A-Level and IB Diploma online programme for UK Year 12 and 13 students preparing for UCAS applications to Oxford, Cambridge, Russell Group and international universities. Full personal statement support, predicted grades, admissions test preparation (BMAT, UCAT, LNAT, TSA, TMUA).',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Pre-University',
                   'inLanguage': 'en-GB',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '515', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
               </>
             )}
@@ -7532,15 +7731,14 @@ export default function LandingPage() {
                   '@type': 'BreadcrumbList',
                   'itemListElement': [
                     { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': 'https://smartioushomeschool.com/' },
-                    { '@type': 'ListItem', 'position': 2, 'name': 'Online School', 'item': 'https://smartioushomeschool.com/global' },
-                    { '@type': 'ListItem', 'position': 3, 'name': 'Nigeria', 'item': 'https://smartioushomeschool.com/online-school/nigeria' },
+                    { '@type': 'ListItem', 'position': 2, 'name': 'Nigeria', 'item': 'https://smartioushomeschool.com/online-school/nigeria' },
                   ],
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Service',
                   'serviceType': 'Online International Homeschool & Virtual School',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'areaServed': [
                     { '@type': 'Country', 'name': 'Nigeria' },
                     { '@type': 'City', 'name': 'Lagos' },
@@ -7550,37 +7748,37 @@ export default function LandingPage() {
                     { '@type': 'City', 'name': 'Kano' },
                   ],
                   'description': 'Live online international school serving families across Nigeria. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel, American curriculum and WAEC preparation on WAT timezone. Affordable USD pricing with Naira payment support.',
-                  'offers': { '@type': 'AggregateOffer', 'priceCurrency': 'USD', 'lowPrice': '180', 'highPrice': '515', 'priceSpecification': { '@type': 'UnitPriceSpecification', 'unitText': 'MONTH' } },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'WAEC SSCE Preparation Online — Nigeria',
                   'description': 'Live online West African Senior School Certificate Examination (WASSCE/WAEC) preparation programme for Nigerian students, taught by Nigerian-experienced subject specialists. Covers Mathematics, English Language, Sciences, Economics, Government, Literature and other WAEC subjects.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Senior Secondary',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '260', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'Cambridge IGCSE Online — Nigeria',
                   'description': 'Live online Cambridge IGCSE programme for Nigerian students, taught on WAT timezone by degree-qualified specialists. Examinations sat at British Council Lagos, Abuja and Port Harcourt. JAMB Direct Entry eligible.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Secondary',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '360', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'A-Level & IB Diploma Online — Nigeria',
                   'description': 'Sixth-form online programme for Nigerian students preparing for Nigerian universities (UNILAG, Covenant, ABU, OAU) via JAMB Direct Entry, and for UK, US, Canadian and Australian universities.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Pre-University',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '515', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
               </>
             )}
@@ -7593,15 +7791,14 @@ export default function LandingPage() {
                   '@type': 'BreadcrumbList',
                   'itemListElement': [
                     { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': 'https://smartioushomeschool.com/' },
-                    { '@type': 'ListItem', 'position': 2, 'name': 'Online School', 'item': 'https://smartioushomeschool.com/global' },
-                    { '@type': 'ListItem', 'position': 3, 'name': 'United States', 'item': 'https://smartioushomeschool.com/online-school/usa' },
+                    { '@type': 'ListItem', 'position': 2, 'name': 'United States', 'item': 'https://smartioushomeschool.com/online-school/usa' },
                   ],
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Service',
                   'serviceType': 'International Online School for Globally Connected Families',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'areaServed': [
                     { '@type': 'Country', 'name': 'United States' },
                     { '@type': 'City', 'name': 'Houston' },
@@ -7619,27 +7816,27 @@ export default function LandingPage() {
                     { '@type': 'EducationalAudience', 'audienceType': 'Cambridge IGCSE and IB-track students' },
                   ],
                   'description': 'Live online international school for African diaspora families, globally mobile families, and homeschoolers across the United States. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and British curriculum. US-friendly live and recorded learning options.',
-                  'offers': { '@type': 'AggregateOffer', 'priceCurrency': 'USD', 'lowPrice': '180', 'highPrice': '515', 'priceSpecification': { '@type': 'UnitPriceSpecification', 'unitText': 'MONTH' } },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'Cambridge IGCSE Online — USA',
                   'description': 'Live online Cambridge IGCSE programme for US-based students, with mid-morning Eastern Time class blocks and unlimited recordings. Exams sat at private-candidate centres across the United States. Suitable for African diaspora families, globally mobile families and US homeschoolers seeking international qualifications.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Secondary',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '360', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'A-Level & IB Diploma Online — USA',
                   'description': 'Sixth-form online programme for US-based students preparing for Ivy League, state universities, UK Russell Group, Canadian U15 and African university applications. Cambridge A-Level and IB Diploma pathways with Common App and UCAS support.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Pre-University',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '515', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
               </>
             )}
@@ -7652,15 +7849,14 @@ export default function LandingPage() {
                   '@type': 'BreadcrumbList',
                   'itemListElement': [
                     { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': 'https://smartioushomeschool.com/' },
-                    { '@type': 'ListItem', 'position': 2, 'name': 'Online School', 'item': 'https://smartioushomeschool.com/global' },
-                    { '@type': 'ListItem', 'position': 3, 'name': 'Canada', 'item': 'https://smartioushomeschool.com/online-school/canada' },
+                    { '@type': 'ListItem', 'position': 2, 'name': 'Canada', 'item': 'https://smartioushomeschool.com/online-school/canada' },
                   ],
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Service',
                   'serviceType': 'International Online School for Globally Connected Families',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'areaServed': [
                     { '@type': 'Country', 'name': 'Canada' },
                     { '@type': 'AdministrativeArea', 'name': 'Ontario' },
@@ -7681,27 +7877,27 @@ export default function LandingPage() {
                     { '@type': 'EducationalAudience', 'audienceType': 'Canadian homeschoolers seeking international curriculum' },
                   ],
                   'description': 'Live online international school for African and Caribbean diaspora families, South Asian families, globally mobile families and Cambridge-track homeschoolers across Canada. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel. Canadian-friendly live and recorded learning options.',
-                  'offers': { '@type': 'AggregateOffer', 'priceCurrency': 'USD', 'lowPrice': '180', 'highPrice': '515', 'priceSpecification': { '@type': 'UnitPriceSpecification', 'unitText': 'MONTH' } },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'Cambridge IGCSE Online — Canada',
                   'description': 'Live online Cambridge IGCSE programme for Canadian students, with mid-morning Eastern Time class blocks and unlimited recordings. Exams sat at Cambridge-authorised centres in Toronto, Calgary, Edmonton, Ottawa, Vancouver and Montreal. Suitable for African and Caribbean diaspora families, South Asian families, globally mobile families and Canadian homeschoolers.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Secondary',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '360', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'A-Level & IB Diploma Online — Canada',
                   'description': 'Sixth-form online programme for Canadian students preparing for University of Toronto, McGill, UBC, Waterloo and other Canadian U15 universities, plus UK Russell Group, African and Caribbean universities. Cambridge A-Levels often earn first-year university credit at Canadian universities.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Pre-University',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '515', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
               </>
             )}
@@ -7714,15 +7910,14 @@ export default function LandingPage() {
                   '@type': 'BreadcrumbList',
                   'itemListElement': [
                     { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': 'https://smartioushomeschool.com/' },
-                    { '@type': 'ListItem', 'position': 2, 'name': 'Online School', 'item': 'https://smartioushomeschool.com/global' },
-                    { '@type': 'ListItem', 'position': 3, 'name': 'Australia', 'item': 'https://smartioushomeschool.com/online-school/australia' },
+                    { '@type': 'ListItem', 'position': 2, 'name': 'Australia', 'item': 'https://smartioushomeschool.com/online-school/australia' },
                   ],
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Service',
                   'serviceType': 'International Online School for Globally Connected Families',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'areaServed': [
                     { '@type': 'Country', 'name': 'Australia' },
                     { '@type': 'AdministrativeArea', 'name': 'New South Wales' },
@@ -7743,27 +7938,27 @@ export default function LandingPage() {
                     { '@type': 'EducationalAudience', 'audienceType': 'Regional and rural Australian homeschoolers' },
                   ],
                   'description': 'Live online international school for South Asian families, African diaspora families, returning expat Australians and Cambridge-pathway homeschoolers across Australia. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel. Recordings-led delivery model designed for Australian time zones.',
-                  'offers': { '@type': 'AggregateOffer', 'priceCurrency': 'USD', 'lowPrice': '180', 'highPrice': '515', 'priceSpecification': { '@type': 'UnitPriceSpecification', 'unitText': 'MONTH' } },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'Cambridge IGCSE Online — Australia',
                   'description': 'Live and recorded online Cambridge IGCSE programme for Australian students, delivered through recordings (primary), selected live sessions, and one-on-one tuition scheduled in Australian evening hours. Exams sat at Cambridge-authorised centres in Sydney, Melbourne, Brisbane, Perth, Adelaide and Canberra. Suitable for South Asian families, African diaspora families, returning expats and Australian homeschoolers.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Secondary',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '360', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'A-Level & IB Diploma Online — Australia',
                   'description': 'Sixth-form online programme for Australian students preparing for the Group of Eight (Melbourne, Sydney, ANU, UNSW, UQ, Monash, Adelaide, UWA) plus UK Russell Group, Indian, US and African universities. Cambridge A-Level results convert to ATAR equivalents through UAC, VTAC, QTAC.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Pre-University',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '515', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
               </>
             )}
@@ -7776,15 +7971,14 @@ export default function LandingPage() {
                   '@type': 'BreadcrumbList',
                   'itemListElement': [
                     { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': 'https://smartioushomeschool.com/' },
-                    { '@type': 'ListItem', 'position': 2, 'name': 'Online School', 'item': 'https://smartioushomeschool.com/global' },
-                    { '@type': 'ListItem', 'position': 3, 'name': 'Bahrain', 'item': 'https://smartioushomeschool.com/online-school/bahrain' },
+                    { '@type': 'ListItem', 'position': 2, 'name': 'Bahrain', 'item': 'https://smartioushomeschool.com/online-school/bahrain' },
                   ],
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Service',
                   'serviceType': 'Online International Homeschool & Virtual School',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'areaServed': [
                     { '@type': 'Country', 'name': 'Bahrain' },
                     { '@type': 'City', 'name': 'Manama' },
@@ -7794,27 +7988,27 @@ export default function LandingPage() {
                     { '@type': 'City', 'name': 'Hamad Town' },
                   ],
                   'description': 'Live online international school serving Bahraini families and expat residents across the Kingdom of Bahrain. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and British curriculum pathways on Bahrain-friendly time zone. Exams at British Council Manama.',
-                  'offers': { '@type': 'AggregateOffer', 'priceCurrency': 'USD', 'lowPrice': '180', 'highPrice': '515', 'priceSpecification': { '@type': 'UnitPriceSpecification', 'unitText': 'MONTH' } },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'Cambridge IGCSE Online — Bahrain',
                   'description': 'Live online Cambridge IGCSE programme for Bahraini and expat families, taught in the UK & Africa time-zone band that aligns with Bahrain daytime hours. Examinations sat at British Council Manama. Suitable for Bahraini citizens, Indian, Pakistani, Filipino and Western expat families resident in Bahrain.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Secondary',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '360', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'A-Level & IB Diploma Online — Bahrain',
                   'description': 'Sixth-form online programme for Bahrain-based students preparing for University of Bahrain, Gulf universities, UK Russell Group, US Ivy League, Canadian and Australian universities. Cambridge A-Level and IB Diploma pathways with UCAS and Common App support.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Pre-University',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '515', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
               </>
             )}
@@ -7827,15 +8021,14 @@ export default function LandingPage() {
                   '@type': 'BreadcrumbList',
                   'itemListElement': [
                     { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': 'https://smartioushomeschool.com/' },
-                    { '@type': 'ListItem', 'position': 2, 'name': 'Online School', 'item': 'https://smartioushomeschool.com/global' },
-                    { '@type': 'ListItem', 'position': 3, 'name': 'Pakistan', 'item': 'https://smartioushomeschool.com/online-school/pakistan' },
+                    { '@type': 'ListItem', 'position': 2, 'name': 'Pakistan', 'item': 'https://smartioushomeschool.com/online-school/pakistan' },
                   ],
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Service',
                   'serviceType': 'Online International Homeschool & Virtual School',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'areaServed': [
                     { '@type': 'Country', 'name': 'Pakistan' },
                     { '@type': 'City', 'name': 'Karachi' },
@@ -7846,27 +8039,27 @@ export default function LandingPage() {
                     { '@type': 'City', 'name': 'Multan' },
                   ],
                   'description': 'Live online international school serving ambitious Pakistani families. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and British curriculum pathways. Exams sat at British Council Pakistan centres in Karachi, Lahore, Islamabad and Rawalpindi. Live UK & Africa-band classes during Pakistani afternoon hours.',
-                  'offers': { '@type': 'AggregateOffer', 'priceCurrency': 'USD', 'lowPrice': '180', 'highPrice': '515', 'priceSpecification': { '@type': 'UnitPriceSpecification', 'unitText': 'MONTH' } },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'Cambridge IGCSE Online — Pakistan',
                   'description': 'Live online Cambridge IGCSE programme for Pakistani students, taught in the UK & Africa time-zone band during Pakistani afternoon hours. Examinations sat at British Council Pakistan centres in Karachi, Lahore, Islamabad and Rawalpindi. Pakistan was unaffected by the 2026 Cambridge UAE examination cancellations.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Secondary',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '360', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'A-Level & IB Diploma Online — Pakistan',
                   'description': 'Sixth-form online programme for Pakistani students preparing for LUMS, IBA Karachi, NUST, Habib University, AKU and other Pakistani universities, plus UK Russell Group, US Ivy League, Canadian and Australian universities. Cambridge A-Level and IB Diploma pathways with UCAS and Common App support.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Pre-University',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '515', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
               </>
             )}
@@ -7879,15 +8072,14 @@ export default function LandingPage() {
                   '@type': 'BreadcrumbList',
                   'itemListElement': [
                     { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': 'https://smartioushomeschool.com/' },
-                    { '@type': 'ListItem', 'position': 2, 'name': 'Online School', 'item': 'https://smartioushomeschool.com/global' },
-                    { '@type': 'ListItem', 'position': 3, 'name': 'South Africa', 'item': 'https://smartioushomeschool.com/online-school/south-africa' },
+                    { '@type': 'ListItem', 'position': 2, 'name': 'South Africa', 'item': 'https://smartioushomeschool.com/online-school/south-africa' },
                   ],
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Service',
                   'serviceType': 'Online International Homeschool & Virtual School',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'areaServed': [
                     { '@type': 'Country', 'name': 'South Africa' },
                     { '@type': 'AdministrativeArea', 'name': 'Gauteng' },
@@ -7900,27 +8092,27 @@ export default function LandingPage() {
                     { '@type': 'City', 'name': 'Durban' },
                   ],
                   'description': 'Live online international school serving South African families. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and British curriculum pathways. Exams sat at British Council South Africa centres in Johannesburg, Cape Town, Pretoria, Durban. Live UK & Africa-band classes during SA school hours. Compliant with the BELA Act 2024 framework for online schooling.',
-                  'offers': { '@type': 'AggregateOffer', 'priceCurrency': 'USD', 'lowPrice': '180', 'highPrice': '515', 'priceSpecification': { '@type': 'UnitPriceSpecification', 'unitText': 'MONTH' } },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'Cambridge IGCSE Online — South Africa',
                   'description': 'Live online Cambridge IGCSE programme for South African students, taught in the UK & Africa time-zone band during SA school hours. Examinations sat at British Council South Africa centres and Cambridge-authorised centres across Johannesburg, Cape Town, Pretoria, Durban and Stellenbosch.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Secondary',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '360', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'A-Level & IB Diploma Online — South Africa',
                   'description': 'Sixth-form online programme for South African students preparing for UCT, Wits, Stellenbosch, UP, UJ and other SA universities, plus UK Russell Group, US Ivy League, Canadian U15 and Australian Group of Eight universities. Cambridge A-Level often grants first-year credit at SA universities.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Pre-University',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '515', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
               </>
             )}
@@ -7933,15 +8125,14 @@ export default function LandingPage() {
                   '@type': 'BreadcrumbList',
                   'itemListElement': [
                     { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': 'https://smartioushomeschool.com/' },
-                    { '@type': 'ListItem', 'position': 2, 'name': 'Online School', 'item': 'https://smartioushomeschool.com/global' },
-                    { '@type': 'ListItem', 'position': 3, 'name': 'Uganda', 'item': 'https://smartioushomeschool.com/online-school/uganda' },
+                    { '@type': 'ListItem', 'position': 2, 'name': 'Uganda', 'item': 'https://smartioushomeschool.com/online-school/uganda' },
                   ],
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Service',
                   'serviceType': 'Online International School & Cambridge Curriculum Provider',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'areaServed': [
                     { '@type': 'Country', 'name': 'Uganda' },
                     { '@type': 'City', 'name': 'Kampala' },
@@ -7952,27 +8143,27 @@ export default function LandingPage() {
                     { '@type': 'City', 'name': 'Mbarara' },
                   ],
                   'description': 'Live online international school serving Ugandan families. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and British curriculum pathways. Exams sat at British Council Uganda and authorised international school centres in Kampala. Live East Africa Time classes. Dual setup recommended for Ugandan citizen families pending NCDC homeschool policy.',
-                  'offers': { '@type': 'AggregateOffer', 'priceCurrency': 'USD', 'lowPrice': '180', 'highPrice': '515', 'priceSpecification': { '@type': 'UnitPriceSpecification', 'unitText': 'MONTH' } },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'Cambridge IGCSE Online — Uganda',
                   'description': 'Live online Cambridge IGCSE programme for Ugandan students, taught in East Africa Time during Kampala school hours. Examinations sat at British Council Uganda exam centres and authorised international school centres in Kampala. Suitable as primary programme for expat families or as the substantive academic programme alongside local school registration for Ugandan citizen families.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Secondary',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '360', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'A-Level & IB Diploma Online — Uganda',
                   'description': 'Sixth-form online programme for Ugandan students preparing for Makerere, Kyambogo, UCU, MUST and other Ugandan universities, plus UK Russell Group, US Ivy League, South African, Canadian and Australian universities. Cambridge A-Level accepted as equivalent to UACE for Ugandan university entry.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Pre-University',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '515', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
               </>
             )}
@@ -7985,15 +8176,14 @@ export default function LandingPage() {
                   '@type': 'BreadcrumbList',
                   'itemListElement': [
                     { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': 'https://smartioushomeschool.com/' },
-                    { '@type': 'ListItem', 'position': 2, 'name': 'Online School', 'item': 'https://smartioushomeschool.com/global' },
-                    { '@type': 'ListItem', 'position': 3, 'name': 'Somalia', 'item': 'https://smartioushomeschool.com/online-school/somalia' },
+                    { '@type': 'ListItem', 'position': 2, 'name': 'Somalia', 'item': 'https://smartioushomeschool.com/online-school/somalia' },
                   ],
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Service',
                   'serviceType': 'Online International School & Cambridge Curriculum Provider',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'areaServed': [
                     { '@type': 'Country', 'name': 'Somalia' },
                     { '@type': 'City', 'name': 'Mogadishu' },
@@ -8003,27 +8193,27 @@ export default function LandingPage() {
                     { '@type': 'City', 'name': 'Kismayo' },
                   ],
                   'description': 'Live online international school serving Somali families. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and British curriculum pathways. Live East Africa Time classes. Exams sat at Mogadishu Cambridge-authorised centres or British Council Nairobi. USD pricing for dollarised Somali market.',
-                  'offers': { '@type': 'AggregateOffer', 'priceCurrency': 'USD', 'lowPrice': '180', 'highPrice': '515', 'priceSpecification': { '@type': 'UnitPriceSpecification', 'unitText': 'MONTH' } },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'Cambridge IGCSE Online — Somalia',
                   'description': 'Live online Cambridge IGCSE programme for Somali students, taught in East Africa Time during Mogadishu school hours. Examinations sat at Cambridge-authorised Mogadishu schools (DIAS, Sunrise International Academy, others) or British Council Nairobi as backup. Suitable for Mogadishu-resident families, returning diaspora families, and globally mobile Somali families.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Secondary',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '360', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'A-Level & IB Diploma Online — Somalia',
                   'description': 'Sixth-form online programme for Somali students preparing for Mogadishu University, SIMAD, Benadir, University of Hargeisa and other Somali universities, plus Turkish universities (popular for Somali students), Malaysian, Gulf, UK Russell Group, US, Canadian and Australian institutions.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Pre-University',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '515', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
               </>
             )}
@@ -8036,15 +8226,14 @@ export default function LandingPage() {
                   '@type': 'BreadcrumbList',
                   'itemListElement': [
                     { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': 'https://smartioushomeschool.com/' },
-                    { '@type': 'ListItem', 'position': 2, 'name': 'Online School', 'item': 'https://smartioushomeschool.com/global' },
-                    { '@type': 'ListItem', 'position': 3, 'name': 'Tanzania', 'item': 'https://smartioushomeschool.com/online-school/tanzania' },
+                    { '@type': 'ListItem', 'position': 2, 'name': 'Tanzania', 'item': 'https://smartioushomeschool.com/online-school/tanzania' },
                   ],
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Service',
                   'serviceType': 'Online International School & Cambridge Curriculum Provider',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'areaServed': [
                     { '@type': 'Country', 'name': 'Tanzania' },
                     { '@type': 'City', 'name': 'Dar es Salaam' },
@@ -8055,27 +8244,27 @@ export default function LandingPage() {
                     { '@type': 'City', 'name': 'Moshi' },
                   ],
                   'description': 'Live online international school serving Tanzanian families. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and British curriculum pathways. Live East Africa Time classes. Exams sat at British Council Tanzania and authorised international school centres in Dar es Salaam. Cambridge pathway for families outside NECTA-registered schools.',
-                  'offers': { '@type': 'AggregateOffer', 'priceCurrency': 'USD', 'lowPrice': '180', 'highPrice': '515', 'priceSpecification': { '@type': 'UnitPriceSpecification', 'unitText': 'MONTH' } },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'Cambridge IGCSE Online — Tanzania',
                   'description': 'Live online Cambridge IGCSE programme for Tanzanian students, taught in East Africa Time during Tanzanian school hours. Examinations sat at British Council Tanzania exam centres and authorised international school centres (IST, Braeburn Dar, HOPAC, St Constantine\'s, Aga Khan Mzizima) in Dar es Salaam and Arusha. The Cambridge pathway is the standard route for Tanzanian families educating outside NECTA-registered schools.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Secondary',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '360', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'A-Level & IB Diploma Online — Tanzania',
                   'description': 'Sixth-form online programme for Tanzanian students preparing for University of Dar es Salaam, Sokoine, Muhimbili, Mzumbe, UDOM and other Tanzanian universities, plus UK Russell Group, US Ivy League, South African, Canadian and Australian universities. Cambridge A-Level accepted as equivalent to ACSEE by the Tanzania Commission for Universities.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Pre-University',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '515', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
               </>
             )}
@@ -8097,7 +8286,7 @@ export default function LandingPage() {
                 ))}
               </div>
               <div style={{display:'flex',gap:10,flexWrap:'wrap',marginTop:24}}>
-                <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
             </div></div>
 
@@ -8151,8 +8340,9 @@ export default function LandingPage() {
               </div>
             </div></section>
 
-            {/* TESTIMONIAL — only show if a testimonial is supplied */}
-            {ctry.testimonial && (
+            {/* TESTIMONIAL — only show if a real testimonial is supplied
+                (Nigeria, Bahrain and others have empty strings) */}
+            {!!(ctry.testimonial && ctry.testimonial.trim()) && (
               <section className="sec" style={{background:V.ink,color:'#fff'}}><div className="wrap">
                 <div style={{maxWidth:780,margin:'0 auto',textAlign:'center'}}>
                   <svg width="48" height="48" viewBox="0 0 24 24" fill={V.gold2} style={{opacity:.7,marginBottom:18}}>
@@ -8378,7 +8568,7 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:680,margin:'24px auto 0',lineHeight:1.7}}>{ctry.pricingTable.note}</p>
                   <div style={{textAlign:'center',marginTop:24}}>
-                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                    <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
                   </div>
                 </div></section>
 
@@ -8573,7 +8763,7 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:680,margin:'24px auto 0',lineHeight:1.7}}>{ctry.uaePricing.note}</p>
                   <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                    <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
                 </div></section>
 
@@ -8784,7 +8974,7 @@ export default function LandingPage() {
                     </div>
                     <div style={{marginTop:24,padding:'16px 20px',background:V.bone2,border:`1px solid ${V.bone3}`,borderRadius:10,textAlign:'center'}}>
                       <div style={{fontSize:13,color:V.sl,lineHeight:1.6}}>
-                        <strong style={{color:V.ink}}>Combined with Smartious Study Abroad:</strong> students enrolled in Smartious receive free university application support during their final year — university selection, applications, scholarship applications, and visa guidance. <span style={{color:V.cr,fontWeight:600,cursor:'pointer'}} onClick={()=>P('study-abroad')}>Learn more →</span>
+                        <strong style={{color:V.ink}}>Combined with Smartious Study Abroad:</strong> students enrolled in Smartious receive free university application support during their final year — university selection, applications, scholarship applications, and visa guidance. <a href={pageToPath('study-abroad')} style={{color:V.cr,fontWeight:600,cursor:'pointer'}} onClick={linkClick(() => P('study-abroad'))}>Learn more →</a>
                       </div>
                     </div>
                   </div>
@@ -8916,7 +9106,7 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:680,margin:'24px auto 0',lineHeight:1.7}}>{ctry.ukPricing.note}</p>
                   <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                    <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
                   </div>
                 </div></section>
               </>
@@ -9046,7 +9236,7 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:760,margin:'24px auto 0',lineHeight:1.7}}>{ctry.nigeriaPricing.note}</p>
                   <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                    <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
                 </div></section>
               </>
@@ -9165,7 +9355,7 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:760,margin:'24px auto 0',lineHeight:1.7}}>{ctry.usaPricing.note}</p>
                   <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                    <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
                   </div>
                 </div></section>
               </>
@@ -9341,7 +9531,7 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:760,margin:'24px auto 0',lineHeight:1.7}}>{ctry.canadaPricing.note}</p>
                   <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                    <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
                   </div>
                 </div></section>
               </>
@@ -9519,7 +9709,7 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:760,margin:'24px auto 0',lineHeight:1.7}}>{ctry.australiaPricing.note}</p>
                   <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                    <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
                   </div>
                 </div></section>
               </>
@@ -9649,7 +9839,7 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:760,margin:'24px auto 0',lineHeight:1.7}}>{ctry.bahrainPricing.note}</p>
                   <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                    <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
                 </div></section>
               </>
@@ -9786,10 +9976,10 @@ export default function LandingPage() {
                     ))}
                   </div>
                   <div style={{textAlign:'center',marginTop:24}}>
-                    <button onClick={() => P('activities')}
+                    <a className="lp-btnlink" href={pageToPath('activities')} onClick={linkClick(() => P('activities'))}
                       style={{background:'transparent',color:V.cr,border:'1px solid '+V.cr,padding:'10px 22px',borderRadius:8,fontSize:13,fontWeight:700,cursor:'pointer'}}>
                       See full Wednesday programme
-                    </button>
+                    </a>
                   </div>
                 </div></section>
               </>
@@ -9919,7 +10109,7 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:760,margin:'24px auto 0',lineHeight:1.7}}>{ctry.pakistanPricing.note}</p>
                   <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                    <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
                 </div></section>
               </>
@@ -10076,7 +10266,7 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:760,margin:'24px auto 0',lineHeight:1.7}}>{ctry.saPricing.note}</p>
                   <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                    <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
                 </div></section>
               </>
@@ -10244,7 +10434,7 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:760,margin:'24px auto 0',lineHeight:1.7}}>{ctry.ugandaPricing.note}</p>
                   <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                    <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
                 </div></section>
               </>
@@ -10373,7 +10563,7 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:760,margin:'24px auto 0',lineHeight:1.7}}>{ctry.somaliaPricing.note}</p>
                   <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                    <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
                 </div></section>
               </>
@@ -10541,7 +10731,7 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:760,margin:'24px auto 0',lineHeight:1.7}}>{ctry.tanzaniaPricing.note}</p>
                   <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                    <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
                 </div></section>
               </>
@@ -10557,8 +10747,8 @@ export default function LandingPage() {
                 Speak with our admissions team. We'll guide you through the right curriculum, exam pathway and enrolment process for your family.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                <button onClick={() => nav('/assessment')}
-                  style={{background:V.gold2,color:V.ink,border:'none',padding:'13px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                  style={{background:V.gold2,color:V.ink,border:'none',padding:'13px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
             </div></section>
 
@@ -10595,7 +10785,7 @@ export default function LandingPage() {
               <h1 className="pg-h">Smartious vs <em>{cmp.competitor}</em></h1>
               <p className="pg-sub" style={{marginTop:12}}>{cmp.intro}</p>
               <div style={{display:'flex',gap:10,flexWrap:'wrap',marginTop:24}}>
-                <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
               </div>
             </div></div>
 
@@ -10784,8 +10974,8 @@ export default function LandingPage() {
                 Book an assessment. Our Head of Admissions reviews every request and, on acceptance, the diagnostic assessment determines whether Smartious is the right fit.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                <button onClick={() => nav('/assessment')}
-                  style={{background:V.gold2,color:V.ink,border:'none',padding:'13px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                  style={{background:V.gold2,color:V.ink,border:'none',padding:'13px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
             </div></section>
 
@@ -10825,8 +11015,12 @@ export default function LandingPage() {
                 Online school and homeschool: from <strong style={{color:V.gold3}}>USD 423/month</strong> for Primary, varying by curriculum and level, paid termly. One-to-one tuition: <strong style={{color:V.gold3}}>USD 15/hour</strong> at every level.
               </p>
               <div style={{fontSize:13,color:'rgba(255,255,255,.65)',fontStyle:'italic'}}>
-                Free consultation call included · Sibling discounts 15-25%
+                Free consultation call included · 10% sibling discount from the second child
               </div>
+              <a href="/smartious-fees-2026-27.pdf" target="_blank" rel="noopener"
+                style={{display:'inline-block',marginTop:18,padding:'10px 20px',borderRadius:8,border:`1.5px solid ${V.gold3}`,color:V.gold3,fontWeight:700,fontSize:13.5,textDecoration:'none'}}>
+                Download the 2026–27 fee guide (PDF)
+              </a>
             </div>
           </section>
 
@@ -10838,7 +11032,7 @@ export default function LandingPage() {
                   {h:'Online School & Homeschool',v:'From USD 423/month',sub:'Primary; secondary fees vary by curriculum and level. Paid termly. Live small-group classes 4-6 students. Cambridge, Edexcel, IB, American, Ontario OSSD, Kenya CBC.'},
                   {h:'Private Tuition (1:1)',v:'USD 15/hour',sub:'Any subject, any level. One-on-one live online sessions scheduled to your family time zone.'},
                   {h:'Study Abroad & IUFP',v:'Custom pricing',sub:'International University Foundation Programme + university placement support.'},
-                  {h:'Application & Registration',v:'USD 30 + 120',sub:'Application (refundable if not enrolled) + one-time registration on enrolment.'},
+                  {h:'Application fee',v:'USD 38',sub:'One-time and non-refundable (KSh 5,000). Covers the placement test and admissions review; counts towards your first month\'s fees.'},
                 ].map(s => (
                   <div key={s.h} style={{background:'#fff',border:`1px solid ${V.bone3}`,borderRadius:12,padding:'24px 22px',boxShadow:'0 2px 10px rgba(8,12,20,.04)'}}>
                     <div style={{fontSize:11,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.cr,marginBottom:10}}>{s.h}</div>
@@ -10981,7 +11175,7 @@ export default function LandingPage() {
                   {h:'Cambridge-registered examinations',p:'Smartious registers students as private candidates at Cambridge Assessment authorised centres worldwide.'},
                   {h:'University placement support',p:'Personalised guidance for UK Russell Group (UCAS), US Ivy League (Common App), Canadian U15 (OUAC), and more.'},
                   {h:'24/7 recorded catch-up',p:'Missed a class? Every session is recorded. Watch anytime through the Smartious LMS.'},
-                  {h:'Sibling discounts',p:'15-25% off for each additional child from the same family.'},
+                  {h:'Sibling discounts',p:'10% off from the second child, and a 15% family rate for three or more children.'},
                   {h:'Two operational teaching centres',p:'Diamond Plaza Parklands (Nairobi HQ) and Karen Hardy provide in-person option for East African families.'},
                 ].map(f => (
                   <div key={f.h} style={{background:'#fff',border:`1px solid ${V.bone3}`,borderRadius:10,padding:'22px 20px'}}>
@@ -11023,10 +11217,10 @@ export default function LandingPage() {
                   Tired of recorded-video curricula where your child is essentially alone all day? Worried about how Acellus or BJU Press lessons compare to what students in top-tier private schools are doing? Smartious delivers <strong>Cambridge IGCSE, Pearson Edexcel, A-Level and IB Diploma</strong> programmes — taught live by qualified teachers — to American homeschool families from USD 423 per month.
                 </p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('consult_booked'); nav('/assessment') })}
                     style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',letterSpacing:'.01em'}}>
                     Book a free 30-min consultation
-                  </button>
+                  </a>
                   <a href="#compare"
                     style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.3)',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:700,textDecoration:'none'}}>
                     Compare us with Acellus →
@@ -11117,8 +11311,8 @@ export default function LandingPage() {
                         ['Religious neutrality','✓ Secular default','◐ Some objections','✗ Explicitly Christian','✓ Secular'],
                         ['College application support included','✓ UCAS + Common App','✗ Not included','◐ Transcript only','◐ Limited'],
                         ['AI tutor 24/7','✓ Mshauri AI Pro','✗','✗','✗'],
-                        ['Starting price (per month)','From $400','$99-249','$150-300','Free (state-funded) - $300'],
-                        ['Sibling discount','✓ 15-25% off','✗','◐ Curriculum sharing','✗'],
+                        ['Starting price (per month)','From $423 (Primary)','$99-249','$150-300','Free (state-funded) - $300'],
+                        ['Sibling discount','✓ 10% from the 2nd child','✗','◐ Curriculum sharing','✗'],
                         ['Need-based bursary','✓ Up to 50% off','◐ Roger Billings only','✗','State-dependent'],
                         ['Customer service track record','Direct founder access','BBB complaints filed','Established 50+ years','Mixed state-by-state'],
                         ['Time-zone friendly for US East/Central/Mountain/Pacific','✓ Afternoon Nairobi = morning Eastern','N/A (self-paced)','N/A (self-paced)','✓ US-based'],
@@ -11159,7 +11353,7 @@ export default function LandingPage() {
                     {n:'02',h:'Cambridge & IB rigour',p:'IGCSE, A-Level, IB Diploma. The qualifications top US universities (Harvard, MIT, Stanford, Yale) recognise as evidence of internationally-elite preparation. Often weighted as advanced beyond AP.'},
                     {n:'03',h:'Free college application support',p:'Free for every enrolled family. UCAS for UK universities. Common App for US universities. OUAC for Canada. We help with personal statements, recommendation coordination, interview prep. No extra invoice.'},
                     {n:'04',h:'Mshauri AI tutor — 24/7',p:'The first AI homework helper trained on Cambridge, Edexcel, IB and American curricula. Voice, text, image — your child can photo a math problem and get guidance. Free in Premium Online tier.'},
-                    {n:'05',h:'Transparent pricing — in USD',p:'Every fee published. No surprise increases. External examination fees are pass-through at the published Cambridge/Edexcel rate — Smartious adds only a $25 admin fee. Fees are paid termly. 15-25% sibling discount.'},
+                    {n:'05',h:'Transparent pricing — in USD',p:'Every fee published. No surprise increases. External examination fees are pass-through at the published Cambridge/Edexcel rate — Smartious adds only a $25 admin fee. Fees are paid termly. 10% sibling discount from the second child.'},
                     {n:'06',h:'Real founder access',p:'Smartious is founder-led. Alfred Ouko personally interviews every family who joins. If something breaks, you can WhatsApp the founder. No call centres. No outsourced support.'},
                   ].map(c => (
                     <div key={c.n} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,padding:'26px 28px'}}>
@@ -11264,13 +11458,13 @@ export default function LandingPage() {
                         <span style={{fontSize:13,color: t.popular ? 'rgba(255,255,255,.6)' : V.sl}}>{t.sub}</span>
                       </div>
                       <p style={{fontSize:13,color: t.popular ? 'rgba(255,255,255,.75)' : V.sl, lineHeight:1.6, marginBottom:22}}>{t.desc}</p>
-                      <button onClick={() => { trackConversion('enrol_started'); nav('/assessment') }} style={{
+                      <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('enrol_started'); nav('/assessment') })} style={{
                         width:'100%',padding:'12px 16px',
                         background: t.popular ? V.gold3 : V.cr, color: t.popular ? V.ink : '#fff',
                         border:'none',borderRadius:8,fontWeight:700,fontSize:13,cursor:'pointer',
                       }}>
                         Book assessment →
-                      </button>
+                      </a>
                     </div>
                   ))}
                 </div>
@@ -11282,9 +11476,9 @@ export default function LandingPage() {
                       <div style={{fontWeight:700,color:V.ink,fontSize:13,marginBottom:4}}>Payment methods for US families</div>
                       <div style={{fontSize:12,color:V.sl,lineHeight:1.6}}>Visa &amp; Mastercard via Stripe · ACH bank transfer · PayPal · Wire transfer · Apple Pay · Google Pay · Crypto (USDC/USDT)</div>
                     </div>
-                    <button onClick={() => P('pricing')} style={{background:'transparent',color:V.cr,border:`1.5px solid ${V.cr}`,padding:'10px 20px',borderRadius:8,fontSize:12.5,fontWeight:700,cursor:'pointer',whiteSpace:'nowrap'}}>
+                    <a className="lp-btnlink" href={pageToPath('pricing')} onClick={linkClick(() => P('pricing'))} style={{background:'transparent',color:V.cr,border:`1.5px solid ${V.cr}`,padding:'10px 20px',borderRadius:8,fontSize:12.5,fontWeight:700,cursor:'pointer',whiteSpace:'nowrap'}}>
                       See full fee structure →
-                    </button>
+                    </a>
                   </div>
                 </div>
               </div>
@@ -11337,8 +11531,8 @@ export default function LandingPage() {
                   {q:'What about state homeschool reporting requirements?',a:'Each US state has different homeschool laws. Some states (like Idaho, Texas, Alaska) have minimal requirements. Others (like New York, Pennsylvania) require formal notification and annual reporting. Smartious provides everything you need: official letterhead, transcripts, progress reports, and standardised assessment results. We do not file paperwork on your behalf — but we provide everything you need to file.'},
                   {q:'How do US time zones work with classes in Nairobi?',a:'Smartious afternoon and evening classes (3pm-10pm EAT) map to morning hours across all four US time zones — see the schedule table above. Most US families do Smartious classes between 9am-1pm Eastern, which is the natural morning school window. 1-on-1 tutoring is scheduled by mutual agreement and can flex to any time.'},
                   {q:'Do you offer AP courses?',a:'AP courses are on our curriculum roadmap for the 2026-2027 academic year (launching August 2026). We currently focus on Cambridge IGCSE, A-Level, and IB Diploma as our core international qualifications. American students interested in AP can complement Smartious with US-based AP self-study (College Board, Khan Academy AP, etc.) and we will help coordinate AP exam registration.'},
-                  {q:'How does pricing compare to mainstream US homeschool options?',a:'Smartious Premium Online (from $423/month, $2,746/year with annual discount) sits between Acellus Basic ($249/month, $2,400/year) and the premium live-class providers like Veritas Press Scholars Academy ($400+/month). For genuine live teaching with international rigour, Smartious is 30-60% less than direct competitors like Cambridge Home School ($4,500+/year) or InterHigh ($5,200+/year).'},
-                  {q:'Can I just enrol my child in one or two subjects?',a:'Yes. Through Private Tuition you can purchase 1-on-1 tutoring in any single subject from $15/hour (Primary) to $28/hour (A-Level / IB). Useful for families who like their current curriculum but want supplementary support in maths, sciences, or specific subjects.'},
+                  {q:'How does pricing compare to mainstream US homeschool options?',a:'Smartious Online School (from $423/month for Primary, payable termly; fees vary by curriculum and level) sits between Acellus Basic ($249/month, $2,400/year) and the premium live-class providers like Veritas Press Scholars Academy ($400+/month). For genuine live teaching with international rigour, Smartious is 30-60% less than direct competitors like Cambridge Home School ($4,500+/year) or InterHigh ($5,200+/year).'},
+                  {q:'Can I just enrol my child in one or two subjects?',a:'Yes. Through Private Tuition you can purchase 1-on-1 tutoring in any single subject at $15/hour. Useful for families who like their current curriculum but want supplementary support in maths, sciences, or specific subjects.'},
                   {q:'What happens if my child needs to return to a regular US school?',a:'Smartious provides full transcripts in US-standard GPA format on request. Students moving from IGCSE to a US high school typically slot in at grade 10 or 11 with credit equivalency. We help families coordinate transcripts with receiving schools.'},
                   {q:'Do you offer a free trial?',a:'We offer a free 30-minute consultation with our admissions team to determine fit. We also offer the placement assessment ($40) which includes one sample 60-minute lesson. We don\'t offer a longer free trial because our delivery model is intensive — committing a teacher\'s time to a student needs proper enrolment.'},
                   {q:'My child has dyslexia / ADHD / autism. Can Smartious help?',a:'Yes. We offer Special Educational Needs (SEN) support at $50 per session with SEN-trained tutors. Initial $80 assessment determines the right pathway. We have experience with dyslexia, ADHD, autism spectrum, dyscalculia, and processing differences. Many SEN students struggle with the self-paced video model of mainstream US homeschool platforms — they often thrive with our 1-on-1 live model.'},
@@ -11413,10 +11607,10 @@ export default function LandingPage() {
                   Book a 30-minute consultation with our admissions team. We'll discuss your child, your goals, and whether Smartious is the right fit. No high-pressure sales. No commitment. Just a conversation.
                 </p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                  <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('consult_booked'); nav('/assessment') })}
                     style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
                     Book assessment
-                  </button>
+                  </a>
 </div>
                 <p style={{fontSize:11.5,color:'rgba(255,255,255,.5)',marginTop:24,lineHeight:1.7}}>
                   Smartious responds to all enquiries within one US business day. WhatsApp messages typically answered within 2-4 hours.
@@ -11456,10 +11650,10 @@ export default function LandingPage() {
                   Tired of recorded-video curricula where your child is essentially alone all day? Worried about how Acellus, Time4Learning, or local board homeschool packages lessons compare to what students in top-tier private schools are doing? Smartious delivers <strong>Cambridge IGCSE, Pearson Edexcel, A-Level and IB Diploma</strong> programmes — taught live by qualified teachers — to Canadian homeschool families from USD 423 per month.
                 </p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('consult_booked'); nav('/assessment') })}
                     style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',letterSpacing:'.01em'}}>
                     Book a free 30-min consultation
-                  </button>
+                  </a>
                   <a href="#compare"
                     style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.3)',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:700,textDecoration:'none'}}>
                     Compare us with Acellus & Canadian options →
@@ -11550,8 +11744,8 @@ export default function LandingPage() {
                         ['Religious neutrality','✓ Secular default','◐ Some objections','✗ Explicitly Christian','✓ Secular'],
                         ['College application support included','✓ UCAS + Common App','✗ Not included','◐ Transcript only','◐ Limited'],
                         ['AI tutor 24/7','✓ Mshauri AI Pro','✗','✗','✗'],
-                        ['Starting price (per month)','From $400','$99-249','$150-300','Free (state-funded) - $300'],
-                        ['Sibling discount','✓ 15-25% off','✗','◐ Curriculum sharing','✗'],
+                        ['Starting price (per month)','From $423 (Primary)','$99-249','$150-300','Free (state-funded) - $300'],
+                        ['Sibling discount','✓ 10% from the 2nd child','✗','◐ Curriculum sharing','✗'],
                         ['Need-based bursary','✓ Up to 50% off','◐ Roger Billings only','✗','State-dependent'],
                         ['Customer service track record','Direct founder access','BBB complaints filed','Established 50+ years','Mixed state-by-state'],
                         ['Time-zone friendly for US East/Central/Mountain/Pacific','✓ Afternoon Nairobi = morning Eastern','N/A (self-paced)','N/A (self-paced)','✓ US-based'],
@@ -11592,7 +11786,7 @@ export default function LandingPage() {
                     {n:'02',h:'Cambridge & IB rigour',p:'IGCSE, A-Level, IB Diploma. The qualifications top US universities (Harvard, MIT, Stanford, Yale) recognise as evidence of internationally-elite preparation. Often weighted as advanced beyond AP.'},
                     {n:'03',h:'Free college application support',p:'Free for every enrolled family. UCAS for UK universities. Common App for US universities. OUAC for Canada. We help with personal statements, recommendation coordination, interview prep. No extra invoice.'},
                     {n:'04',h:'Mshauri AI tutor — 24/7',p:'The first AI homework helper trained on Cambridge, Edexcel, IB and Canadian curricula. Voice, text, image — your child can photo a math problem and get guidance. Free in Premium Online tier.'},
-                    {n:'05',h:'Transparent pricing — in USD',p:'Every fee published. No surprise increases. External examination fees are pass-through at the published Cambridge/Edexcel rate — Smartious adds only a $25 admin fee. Fees are paid termly. 15-25% sibling discount.'},
+                    {n:'05',h:'Transparent pricing — in USD',p:'Every fee published. No surprise increases. External examination fees are pass-through at the published Cambridge/Edexcel rate — Smartious adds only a $25 admin fee. Fees are paid termly. 10% sibling discount from the second child.'},
                     {n:'06',h:'Real founder access',p:'Smartious is founder-led. Alfred Ouko personally interviews every family who joins. If something breaks, you can WhatsApp the founder. No call centres. No outsourced support.'},
                   ].map(c => (
                     <div key={c.n} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,padding:'26px 28px'}}>
@@ -11697,13 +11891,13 @@ export default function LandingPage() {
                         <span style={{fontSize:13,color: t.popular ? 'rgba(255,255,255,.6)' : V.sl}}>{t.sub}</span>
                       </div>
                       <p style={{fontSize:13,color: t.popular ? 'rgba(255,255,255,.75)' : V.sl, lineHeight:1.6, marginBottom:22}}>{t.desc}</p>
-                      <button onClick={() => { trackConversion('enrol_started'); nav('/assessment') }} style={{
+                      <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('enrol_started'); nav('/assessment') })} style={{
                         width:'100%',padding:'12px 16px',
                         background: t.popular ? V.gold3 : V.cr, color: t.popular ? V.ink : '#fff',
                         border:'none',borderRadius:8,fontWeight:700,fontSize:13,cursor:'pointer',
                       }}>
                         Book assessment →
-                      </button>
+                      </a>
                     </div>
                   ))}
                 </div>
@@ -11715,9 +11909,9 @@ export default function LandingPage() {
                       <div style={{fontWeight:700,color:V.ink,fontSize:13,marginBottom:4}}>Payment methods for US families</div>
                       <div style={{fontSize:12,color:V.sl,lineHeight:1.6}}>Visa &amp; Mastercard via Stripe · ACH bank transfer · PayPal · Wire transfer · Apple Pay · Google Pay · Crypto (USDC/USDT)</div>
                     </div>
-                    <button onClick={() => P('pricing')} style={{background:'transparent',color:V.cr,border:`1.5px solid ${V.cr}`,padding:'10px 20px',borderRadius:8,fontSize:12.5,fontWeight:700,cursor:'pointer',whiteSpace:'nowrap'}}>
+                    <a className="lp-btnlink" href={pageToPath('pricing')} onClick={linkClick(() => P('pricing'))} style={{background:'transparent',color:V.cr,border:`1.5px solid ${V.cr}`,padding:'10px 20px',borderRadius:8,fontSize:12.5,fontWeight:700,cursor:'pointer',whiteSpace:'nowrap'}}>
                       See full fee structure →
-                    </button>
+                    </a>
                   </div>
                 </div>
               </div>
@@ -11770,8 +11964,8 @@ export default function LandingPage() {
                   {q:'What about provincial homeschool reporting requirements?',a:'Each Canadian province has different homeschool laws. Some provinces (like Idaho, Texas, Alaska) have minimal requirements. Others (like New York, Pennsylvania) require formal notification and annual reporting. Smartious provides everything you need: official letterhead, transcripts, progress reports, and standardised assessment results. We do not file paperwork on your behalf — but we provide everything you need to file.'},
                   {q:'How do US time zones work with classes in Nairobi?',a:'Smartious afternoon and evening classes (3pm-10pm EAT) map to morning hours across all six Canadian time zones (Pacific, Mountain, Central, Eastern, Atlantic, Newfoundland) — see the schedule table above. Most Canadian families do Smartious classes between 9am-1pm Eastern, which is the natural morning school window. 1-on-1 tutoring is scheduled by mutual agreement and can flex to any time.'},
                   {q:'Do you offer AP courses?',a:'AP courses are on our curriculum roadmap for the 2026-2027 academic year (launching August 2026). We currently focus on Cambridge IGCSE, A-Level, and IB Diploma as our core international qualifications. Canadian students interested in AP can complement Smartious with US-based AP self-study (College Board, Khan Academy AP, etc.) and we will help coordinate AP exam registration.'},
-                  {q:'How does pricing compare to mainstream Canadian and US homeschool options?',a:'Smartious Premium Online (from $423/month, $2,746/year with annual discount) sits between Acellus Basic ($249/month, $2,400/year) and the premium live-class providers like Veritas Press Scholars Academy ($400+/month). For genuine live teaching with international rigour, Smartious is 30-60% less than direct competitors like Cambridge Home School ($4,500+/year) or InterHigh ($5,200+/year).'},
-                  {q:'Can I just enrol my child in one or two subjects?',a:'Yes. Through Private Tuition you can purchase 1-on-1 tutoring in any single subject from $15/hour (Primary) to $28/hour (A-Level / IB). Useful for families who like their current curriculum but want supplementary support in maths, sciences, or specific subjects.'},
+                  {q:'How does pricing compare to mainstream Canadian and US homeschool options?',a:'Smartious Online School (from $423/month for Primary, payable termly; fees vary by curriculum and level) sits between Acellus Basic ($249/month, $2,400/year) and the premium live-class providers like Veritas Press Scholars Academy ($400+/month). For genuine live teaching with international rigour, Smartious is 30-60% less than direct competitors like Cambridge Home School ($4,500+/year) or InterHigh ($5,200+/year).'},
+                  {q:'Can I just enrol my child in one or two subjects?',a:'Yes. Through Private Tuition you can purchase 1-on-1 tutoring in any single subject at $15/hour. Useful for families who like their current curriculum but want supplementary support in maths, sciences, or specific subjects.'},
                   {q:'What happens if my child needs to return to a regular Canadian or US school?',a:'Smartious provides full transcripts in US-standard GPA format on request. Students moving from IGCSE to a Canadian or US high school typically slot in at grade 10 or 11 with credit equivalency. We help families coordinate transcripts with receiving schools.'},
                   {q:'Do you offer a free trial?',a:'We offer a free 30-minute consultation with our admissions team to determine fit. We also offer the placement assessment ($40) which includes one sample 60-minute lesson. We don\'t offer a longer free trial because our delivery model is intensive — committing a teacher\'s time to a student needs proper enrolment.'},
                   {q:'My child has dyslexia / ADHD / autism. Can Smartious help?',a:'Yes. We offer Special Educational Needs (SEN) support at $50 per session with SEN-trained tutors. Initial $80 assessment determines the right pathway. We have experience with dyslexia, ADHD, autism spectrum, dyscalculia, and processing differences. Many SEN students struggle with the self-paced video model of mainstream Canadian and US homeschool platforms — they often thrive with our 1-on-1 live model.'},
@@ -11888,10 +12082,10 @@ export default function LandingPage() {
                   Book a 30-minute consultation with our admissions team. We'll discuss your child, your goals, and whether Smartious is the right fit. No high-pressure sales. No commitment. Just a conversation.
                 </p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                  <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('consult_booked'); nav('/assessment') })}
                     style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
                     Book assessment
-                  </button>
+                  </a>
 </div>
                 <p style={{fontSize:11.5,color:'rgba(255,255,255,.5)',marginTop:24,lineHeight:1.7}}>
                   Smartious responds to all enquiries within one business day. WhatsApp messages typically answered within 2-4 hours.
@@ -11933,10 +12127,10 @@ export default function LandingPage() {
                 {s.pitch}
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:36}}>
-                <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('consult_booked'); nav('/assessment') })}
                   style={{background:s.accentColor,color:V.ink,border:'none',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',letterSpacing:'.01em'}}>
                   Book a free 30-min consultation
-                </button>
+                </a>
                 <a href={`/blog/${s.blogSlug}`}
                   style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.3)',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:700,textDecoration:'none',display:'inline-block'}}>
                   Read the full {s.name} guide →
@@ -12038,13 +12232,12 @@ export default function LandingPage() {
               <div style={{textAlign:'center',marginBottom:36}}>
                 <div style={{fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',color:V.cr,fontWeight:700,marginBottom:12}}>Pricing in USD for {s.name} families</div>
                 <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.7rem,3.2vw,2.2rem)',color:V.ink,fontWeight:400,marginBottom:8}}>Transparent monthly tuition</h2>
-                <p style={{fontSize:14,color:V.sl,maxWidth:560,margin:'0 auto'}}>Three tiers. Real teachers in every tier. No surprise fees.</p>
+                <p style={{fontSize:14,color:V.sl,maxWidth:560,margin:'0 auto'}}>Fees from USD 423/month for Primary, payable termly; fees vary by curriculum and level. One-to-one tuition USD 15/hour.</p>
               </div>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:18,maxWidth:1000,margin:'0 auto'}}>
                 {[
-                  {name:'Online',price:'From $400',sub:'/month USD',desc:'Live group classes (4–6 students), recorded for review, Mshauri AI included.',popular:false},
-                  {name:'Online Plus',price:'Enquire',sub:'most popular · tailored quote',desc:'Live group + 1-on-1 tutoring, exam prep, free college application support.',popular:true},
-                  {name:'Premium 1-on-1',price:'Enquire',sub:'tailored quote',desc:'Pure one-on-one with a dedicated PGCE-trained teacher. For Ivy League / Oxbridge tracks.',popular:false},
+                  {name:'Online School',price:'From $423',sub:'per month · Primary · paid termly',desc:'Live small-group classes in every subject, Mshauri AI included. Fees vary by curriculum and level.',popular:false},
+                  {name:'1-on-1 Tuition',price:'$15',sub:'per hour',desc:'One-to-one live online sessions in any subject, at any level, scheduled to your time zone.',popular:false},
                 ].map((t,i)=>(
                   <div key={i} style={{background:V.white,border: t.popular ? '2px solid '+V.gold3 : '1px solid '+V.bone3,borderRadius:14,padding:24,position:'relative'}}>
                     {t.popular && <div style={{position:'absolute',top:-12,left:24,background:V.gold3,color:V.ink,fontSize:10,fontWeight:800,letterSpacing:'.1em',padding:'4px 10px',borderRadius:99,textTransform:'uppercase'}}>Most popular</div>}
@@ -12054,19 +12247,19 @@ export default function LandingPage() {
                       <span style={{fontSize:12,color:V.sl}}>{t.sub}</span>
                     </div>
                     <p style={{fontSize:13.5,color:V.sl,lineHeight:1.6,marginBottom:18}}>{t.desc}</p>
-                    <button onClick={() => { trackConversion('enrol_started'); nav('/assessment') }} style={{
+                    <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('enrol_started'); nav('/assessment') })} style={{
                       width:'100%',padding:'12px 16px',
                       background: t.popular ? V.gold3 : V.cr, color: t.popular ? V.ink : '#fff',
                       border:'none',borderRadius:8,fontWeight:700,fontSize:13,cursor:'pointer',
                     }}>
                       Book assessment →
-                    </button>
+                    </a>
                   </div>
                 ))}
               </div>
               {s.voucher && (
                 <div style={{marginTop:24,padding:14,background:V.bone2,borderRadius:10,textAlign:'center',fontSize:13,color:V.sl2,maxWidth:680,margin:'24px auto 0'}}>
-                  <strong style={{color:V.ink}}>{s.name} families:</strong> The {s.voucher.name} voucher ({s.voucher.amount}/child) covers Online and Online Plus tiers fully. Premium 1-on-1 may need supplementary funds.
+                  <strong style={{color:V.ink}}>{s.name} families:</strong> The {s.voucher.name} voucher ({s.voucher.amount}/child) can be put towards Smartious fees where the programme allows; check eligibility with the programme.
                 </div>
               )}
             </div>
@@ -12197,10 +12390,10 @@ export default function LandingPage() {
                 Book a free 30-minute consultation. We'll review your child's current level, recommend the right pathway, and answer every {s.name}-specific question.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('consult_booked'); nav('/assessment') })}
                   style={{background:s.accentColor,color:V.ink,border:'none',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
                   Book assessment
-                </button>
+                </a>
 </div>
             </div>
           </section>
@@ -12241,10 +12434,10 @@ export default function LandingPage() {
                 {s.pitch}
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:36}}>
-                <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('consult_booked'); nav('/assessment') })}
                   style={{background:s.accentColor,color:V.ink,border:'none',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',letterSpacing:'.01em'}}>
                   Book a free 30-min consultation
-                </button>
+                </a>
                 <a href={`/blog/${s.blogSlug}`}
                   style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.3)',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:700,textDecoration:'none',display:'inline-block'}}>
                   Read the full {s.name} guide →
@@ -12367,13 +12560,12 @@ export default function LandingPage() {
               <div style={{textAlign:'center',marginBottom:36}}>
                 <div style={{fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',color:V.cr,fontWeight:700,marginBottom:12}}>Pricing in CAD for {s.name} families</div>
                 <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.7rem,3.2vw,2.2rem)',color:V.ink,fontWeight:400,marginBottom:8}}>Transparent monthly tuition</h2>
-                <p style={{fontSize:14,color:V.sl,maxWidth:560,margin:'0 auto'}}>Three tiers. Real teachers in every tier. No surprise fees.</p>
+                <p style={{fontSize:14,color:V.sl,maxWidth:560,margin:'0 auto'}}>Fees from USD 423/month for Primary, payable termly; fees vary by curriculum and level. One-to-one tuition USD 15/hour.</p>
               </div>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:18,maxWidth:1000,margin:'0 auto'}}>
                 {[
-                  {name:'Online',price:'From $400',sub:'USD /month',desc:'Live group classes (4–6 students), recorded for review, Mshauri AI included.',popular:false},
-                  {name:'Online Plus',price:'Enquire',sub:'most popular · tailored quote',desc:'Live group + 1-on-1 tutoring, exam prep, free college application support.',popular:true},
-                  {name:'Premium 1-on-1',price:'Enquire',sub:'tailored quote',desc:'Pure one-on-one with a dedicated PGCE-trained teacher. For Ivy League / Oxbridge tracks.',popular:false},
+                  {name:'Online School',price:'From $423',sub:'per month · Primary · paid termly',desc:'Live small-group classes in every subject, Mshauri AI included. Fees vary by curriculum and level.',popular:false},
+                  {name:'1-on-1 Tuition',price:'$15',sub:'per hour',desc:'One-to-one live online sessions in any subject, at any level, scheduled to your time zone.',popular:false},
                 ].map((t,i)=>(
                   <div key={i} style={{background:V.white,border: t.popular ? '2px solid '+V.gold3 : '1px solid '+V.bone3,borderRadius:14,padding:24,position:'relative'}}>
                     {t.popular && <div style={{position:'absolute',top:-12,left:24,background:V.gold3,color:V.ink,fontSize:10,fontWeight:800,letterSpacing:'.1em',padding:'4px 10px',borderRadius:99,textTransform:'uppercase'}}>Most popular</div>}
@@ -12383,19 +12575,19 @@ export default function LandingPage() {
                       <span style={{fontSize:12,color:V.sl}}>{t.sub}</span>
                     </div>
                     <p style={{fontSize:13.5,color:V.sl,lineHeight:1.6,marginBottom:18}}>{t.desc}</p>
-                    <button onClick={() => { trackConversion('enrol_started'); nav('/assessment') }} style={{
+                    <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('enrol_started'); nav('/assessment') })} style={{
                       width:'100%',padding:'12px 16px',
                       background: t.popular ? V.gold3 : V.cr, color: t.popular ? V.ink : '#fff',
                       border:'none',borderRadius:8,fontWeight:700,fontSize:13,cursor:'pointer',
                     }}>
                       Book assessment →
-                    </button>
+                    </a>
                   </div>
                 ))}
               </div>
               {s.voucher && (
                 <div style={{marginTop:24,padding:14,background:V.bone2,borderRadius:10,textAlign:'center',fontSize:13,color:V.sl2,maxWidth:680,margin:'24px auto 0'}}>
-                  <strong style={{color:V.ink}}>{s.name} families:</strong> The {s.voucher.name} voucher ({s.voucher.amount}/child) contributes meaningfully to all three tiers. Some provinces (Alberta universal $850, BC DL ~$600, Saskatchewan division-dependent) cover larger portions than others.
+                  <strong style={{color:V.ink}}>{s.name} families:</strong> The {s.voucher.name} voucher ({s.voucher.amount}/child) can be put towards Smartious fees. Some provinces (Alberta universal $850, BC DL ~$600, Saskatchewan division-dependent) cover larger portions than others.
                 </div>
               )}
             </div>
@@ -12526,10 +12718,10 @@ export default function LandingPage() {
                 Book a free 30-minute consultation. We'll review your child's current level, recommend the right pathway, and answer every {s.name}-specific question.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('consult_booked'); nav('/assessment') })}
                   style={{background:s.accentColor,color:V.ink,border:'none',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
                   Book assessment
-                </button>
+                </a>
 </div>
             </div>
           </section>
@@ -12580,10 +12772,10 @@ export default function LandingPage() {
                 {c.pitch}
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:36}}>
-                <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('consult_booked'); nav('/assessment') })}
                   style={{background:s.accentColor,color:'#fff',border:'none',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',letterSpacing:'.01em'}}>
                   Book a free 30-min consultation
-                </button>
+                </a>
                 <a href={`/blog/${s.blogSlug}`}
                   style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.3)',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:700,textDecoration:'none',display:'inline-block'}}>
                   Read full {s.name} homeschool guide →
@@ -12650,13 +12842,12 @@ export default function LandingPage() {
               <div style={{textAlign:'center',marginBottom:36}}>
                 <div style={{fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',color:V.cr,fontWeight:700,marginBottom:12}}>Pricing in USD for {c.name} families</div>
                 <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.7rem,3.2vw,2.2rem)',color:V.ink,fontWeight:400,marginBottom:8}}>Transparent monthly tuition</h2>
-                <p style={{fontSize:14,color:V.sl,maxWidth:560,margin:'0 auto'}}>Three tiers. Real teachers in every tier. No surprise fees.</p>
+                <p style={{fontSize:14,color:V.sl,maxWidth:560,margin:'0 auto'}}>Fees from USD 423/month for Primary, payable termly; fees vary by curriculum and level. One-to-one tuition USD 15/hour.</p>
               </div>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:18,maxWidth:1000,margin:'0 auto'}}>
                 {[
-                  {name:'Online',price:'From $400',sub:'/month USD',desc:'Live group classes (4–6 students), recorded for review, Mshauri AI included.',popular:false},
-                  {name:'Online Plus',price:'Enquire',sub:'most popular · tailored quote',desc:'Live group + 1-on-1 tutoring, exam prep, free college application support.',popular:true},
-                  {name:'Premium 1-on-1',price:'Enquire',sub:'tailored quote',desc:'Pure one-on-one with a dedicated PGCE-trained teacher. For Ivy League / Oxbridge tracks.',popular:false},
+                  {name:'Online School',price:'From $423',sub:'per month · Primary · paid termly',desc:'Live small-group classes in every subject, Mshauri AI included. Fees vary by curriculum and level.',popular:false},
+                  {name:'1-on-1 Tuition',price:'$15',sub:'per hour',desc:'One-to-one live online sessions in any subject, at any level, scheduled to your time zone.',popular:false},
                 ].map((t,i)=>(
                   <div key={i} style={{background:V.white,border: t.popular ? '2px solid '+V.gold3 : '1px solid '+V.bone3,borderRadius:14,padding:24,position:'relative'}}>
                     {t.popular && <div style={{position:'absolute',top:-12,left:24,background:V.gold3,color:V.ink,fontSize:10,fontWeight:800,letterSpacing:'.1em',padding:'4px 10px',borderRadius:99,textTransform:'uppercase'}}>Most popular</div>}
@@ -12666,19 +12857,19 @@ export default function LandingPage() {
                       <span style={{fontSize:12,color:V.sl}}>{t.sub}</span>
                     </div>
                     <p style={{fontSize:13.5,color:V.sl,lineHeight:1.6,marginBottom:18}}>{t.desc}</p>
-                    <button onClick={() => { trackConversion('enrol_started'); nav('/assessment') }} style={{
+                    <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('enrol_started'); nav('/assessment') })} style={{
                       width:'100%',padding:'12px 16px',
                       background: t.popular ? V.gold3 : V.cr, color: t.popular ? V.ink : '#fff',
                       border:'none',borderRadius:8,fontWeight:700,fontSize:13,cursor:'pointer',
                     }}>
                       Book assessment →
-                    </button>
+                    </a>
                   </div>
                 ))}
               </div>
               {s.voucher && (
                 <div style={{marginTop:24,padding:14,background:V.bone2,borderRadius:10,textAlign:'center',fontSize:13,color:V.sl2,maxWidth:680,margin:'24px auto 0'}}>
-                  <strong style={{color:V.ink}}>{c.name} families:</strong> The {s.voucher.name} voucher ({s.voucher.amount}/child) covers Online and Online Plus tiers fully.
+                  <strong style={{color:V.ink}}>{c.name} families:</strong> The {s.voucher.name} voucher ({s.voucher.amount}/child) can be put towards Smartious fees where the programme allows; check eligibility with the programme.
                 </div>
               )}
             </div>
@@ -12758,10 +12949,10 @@ export default function LandingPage() {
                 Book a free 30-minute consultation. We'll review your child's current level, recommend the right pathway, and answer every {c.name}-specific question.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('consult_booked'); nav('/assessment') })}
                   style={{background:s.accentColor,color:'#fff',border:'none',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
                   Book assessment
-                </button>
+                </a>
 </div>
             </div>
           </section>
@@ -12779,9 +12970,9 @@ export default function LandingPage() {
           {/* Schema */}
           <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
             '@context':'https://schema.org','@type':'EducationalOrganization',
-            '@id':'https://smartioushomeschool.com/alberta-home-ed-funding#org',
-            'name':'Smartious — Alberta Home Education Funding ($850 CAD eligible curriculum)',
-            'url':'https://smartioushomeschool.com/alberta-home-ed-funding',
+            '@id': ORG_ID,
+            'name': SITE,
+            'url':'https://smartioushomeschool.com/',
             'description':'Use Alberta\'s universal $850 CAD/child Home Education Funding for Smartious live Cambridge IGCSE & A-Level instruction. Curriculum, tutoring, and exam fees all eligible.',
             'areaServed':{'@type':'AdministrativeArea','name':'Alberta, Canada'},
           })}}/>
@@ -12811,7 +13002,7 @@ export default function LandingPage() {
                   Alberta gives every home-educating family roughly $850 CAD per child per year. Curriculum, tutoring, exam fees — all eligible. Smartious live Cambridge IGCSE &amp; A-Level instruction qualifies as eligible curriculum &amp; tutoring under Alberta Education guidelines. Register with a school authority, send us your receipts, get reimbursed.
                 </p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => nav('/assessment')} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Book assessment</button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Book assessment</a>
                 </div>
               </div>
             </div>
@@ -12848,25 +13039,25 @@ export default function LandingPage() {
           {/* PRICING WITH FUNDING OFFSET */}
           <section className="sec" style={{background:'#fff',padding:'64px 0'}}>
             <div className="wrap" style={{maxWidth:920}}>
-              <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,42px)',color:V.ink,margin:'0 0 8px'}}>What your $850 CAD covers at each tier</h2>
-              <p style={{color:V.sl,fontSize:15,margin:'0 0 32px'}}>Real numbers — your funding allocation applied to actual Smartious tiers.</p>
+              <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,42px)',color:V.ink,margin:'0 0 8px'}}>What your $850 CAD covers</h2>
+              <p style={{color:V.sl,fontSize:15,margin:'0 0 32px'}}>Your funding allocation applied to Smartious fees, which start from USD 423/month for Primary and vary by curriculum and level.</p>
 
               <div style={{overflowX:'auto'}}>
                 <table style={{width:'100%',borderCollapse:'collapse',fontSize:14,minWidth:600}}>
                   <thead>
                     <tr style={{background:V.ink,color:'#fff'}}>
-                      <th style={{padding:'14px 16px',textAlign:'left',fontWeight:600}}>Tier</th>
-                      <th style={{padding:'14px 16px',textAlign:'right',fontWeight:600}}>Smartious CAD/yr</th>
+                      <th style={{padding:'14px 16px',textAlign:'left',fontWeight:600}}>Programme</th>
+                      <th style={{padding:'14px 16px',textAlign:'right',fontWeight:600}}>Smartious fees</th>
                       <th style={{padding:'14px 16px',textAlign:'right',fontWeight:600}}>$850 AB funding</th>
                       <th style={{padding:'14px 16px',textAlign:'right',fontWeight:600}}>You pay (after funding)</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
-                      <td style={{padding:'14px 16px',color:V.ink,fontWeight:600}}>Smartious tuition (from $400 USD/mo)</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.sl}}>from ~$6,530</td>
+                      <td style={{padding:'14px 16px',color:V.ink,fontWeight:600}}>Smartious fees (from USD 423/month, Primary)</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.sl}}>from USD 423/month</td>
                       <td style={{padding:'14px 16px',textAlign:'right',color:V.cr,fontWeight:600}}>−$850</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink,fontWeight:600}}>from ~$5,680 net</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink,fontWeight:600}}>fees less $850</td>
                     </tr>
                   </tbody>
                 </table>
@@ -12926,7 +13117,7 @@ export default function LandingPage() {
               <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,40px)',margin:'0 0 14px'}}>Use your $850 CAD allocation on Smartious this year</h2>
               <p style={{color:V.bone3,fontSize:16,lineHeight:1.6,margin:'0 0 24px'}}>15-minute call to confirm your school authority partnership and what your specific funding lets you book. No commitment.</p>
               <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
-                <button onClick={() => nav('/assessment')} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Book assessment</button>
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Book assessment</a>
               </div>
             </div>
           </section>
@@ -12943,9 +13134,9 @@ export default function LandingPage() {
           {/* Schema */}
           <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
             '@context':'https://schema.org','@type':'EducationalOrganization',
-            '@id':'https://smartioushomeschool.com/bc-distributed-learning-funding#org',
-            'name':'Smartious — BC Distributed Learning Funding pathway for Cambridge IGCSE & A-Level',
-            'url':'https://smartioushomeschool.com/bc-distributed-learning-funding',
+            '@id': ORG_ID,
+            'name': SITE,
+            'url':'https://smartioushomeschool.com/',
             'description':'How BC families use Distributed Learning (DL) school funding alongside Smartious live Cambridge IGCSE & A-Level instruction. Resource allocations typically $200–$700 CAD/year.',
             'areaServed':{'@type':'AdministrativeArea','name':'British Columbia, Canada'},
           })}}/>
@@ -12975,7 +13166,7 @@ export default function LandingPage() {
                   BC Distributed Learning (DL) schools provide a $200–$700 CAD/yr resource allocation per student. Smartious isn\'t a BC DL school — but families can register with a flexible DL school and use part of that allocation to offset Smartious live Cambridge tuition. Or skip DL entirely and self-register as a homeschooler with your school district. Here\'s how each path works.
                 </p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => nav('/assessment')} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Book assessment</button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Book assessment</a>
                 </div>
               </div>
             </div>
@@ -13018,25 +13209,25 @@ export default function LandingPage() {
           {/* PRICING WITH FUNDING OFFSET */}
           <section className="sec" style={{background:'#fff',padding:'64px 0'}}>
             <div className="wrap" style={{maxWidth:920}}>
-              <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,42px)',color:V.ink,margin:'0 0 8px'}}>Path B numbers — DL resource allocation against Smartious tiers</h2>
+              <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,42px)',color:V.ink,margin:'0 0 8px'}}>Path B — DL resource allocation against Smartious fees</h2>
               <p style={{color:V.sl,fontSize:15,margin:'0 0 32px'}}>Assumes a flexible DL school with mid-range $500 CAD resource allocation usable on outside vendors.</p>
 
               <div style={{overflowX:'auto'}}>
                 <table style={{width:'100%',borderCollapse:'collapse',fontSize:14,minWidth:600}}>
                   <thead>
                     <tr style={{background:V.ink,color:'#fff'}}>
-                      <th style={{padding:'14px 16px',textAlign:'left',fontWeight:600}}>Tier</th>
-                      <th style={{padding:'14px 16px',textAlign:'right',fontWeight:600}}>Smartious CAD/yr</th>
+                      <th style={{padding:'14px 16px',textAlign:'left',fontWeight:600}}>Programme</th>
+                      <th style={{padding:'14px 16px',textAlign:'right',fontWeight:600}}>Smartious fees</th>
                       <th style={{padding:'14px 16px',textAlign:'right',fontWeight:600}}>DL allocation</th>
                       <th style={{padding:'14px 16px',textAlign:'right',fontWeight:600}}>You pay (after offset)</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
-                      <td style={{padding:'14px 16px',color:V.ink,fontWeight:600}}>Smartious tuition (from $400 USD/mo)</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.sl}}>from ~$6,530</td>
+                      <td style={{padding:'14px 16px',color:V.ink,fontWeight:600}}>Smartious fees (from USD 423/month, Primary)</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.sl}}>from USD 423/month</td>
                       <td style={{padding:'14px 16px',textAlign:'right',color:V.cr,fontWeight:600}}>−$500 to $1,500</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink,fontWeight:600}}>from ~$5,030 net</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink,fontWeight:600}}>fees less your allocation</td>
                     </tr>
                   </tbody>
                 </table>
@@ -13073,7 +13264,7 @@ export default function LandingPage() {
               <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,40px)',margin:'0 0 14px'}}>BC families — find your pathway in one 15-minute call</h2>
               <p style={{color:V.bone3,fontSize:16,lineHeight:1.6,margin:'0 0 24px'}}>We\'ll help you pick between Path A (self-registered) and Path B (DL + Smartious) based on your specific family situation.</p>
               <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
-                <button onClick={() => nav('/assessment')} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Book assessment</button>
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Book assessment</a>
               </div>
             </div>
           </section>
@@ -13090,9 +13281,9 @@ export default function LandingPage() {
           {/* Schema */}
           <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
             '@context':'https://schema.org','@type':'EducationalOrganization',
-            '@id':'https://smartioushomeschool.com/saskatchewan-homeschool-funding#org',
-            'name':'Smartious — Saskatchewan homeschool funding pathway for Cambridge IGCSE & A-Level',
-            'url':'https://smartioushomeschool.com/saskatchewan-homeschool-funding',
+            '@id': ORG_ID,
+            'name': SITE,
+            'url':'https://smartioushomeschool.com/',
             'description':'How Saskatchewan families use division-dependent homeschool funding ($500–$1,500 CAD/year typical) alongside Smartious live Cambridge IGCSE & A-Level instruction.',
             'areaServed':{'@type':'AdministrativeArea','name':'Saskatchewan, Canada'},
           })}}/>
@@ -13122,7 +13313,7 @@ export default function LandingPage() {
                   Saskatchewan delegates homeschool funding to its 28 school divisions. The amount varies — Saskatoon Public, Regina Public, Prairie Spirit, Sun West and others each set their own policy. Some divisions offer $1,500 CAD/yr in flexible curriculum spending. Others provide $500 CAD plus library access. Smartious tuition is reimbursable in divisions that allow outside curriculum providers.
                 </p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => nav('/assessment')} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Book assessment</button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Book assessment</a>
                 </div>
               </div>
             </div>
@@ -13167,30 +13358,30 @@ export default function LandingPage() {
                   <thead>
                     <tr style={{background:V.ink,color:'#fff'}}>
                       <th style={{padding:'14px 16px',textAlign:'left',fontWeight:600}}>Division funding level</th>
-                      <th style={{padding:'14px 16px',textAlign:'right',fontWeight:600}}>Smartious tuition (from $400 USD/mo)</th>
-                      <th style={{padding:'14px 16px',textAlign:'right',fontWeight:600}}>Your net (from)</th>
+                      <th style={{padding:'14px 16px',textAlign:'right',fontWeight:600}}>Smartious fees (from USD 423/month, Primary)</th>
+                      <th style={{padding:'14px 16px',textAlign:'right',fontWeight:600}}>Your net</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr style={{borderBottom:`1px solid ${V.bone2}`}}>
                       <td style={{padding:'14px 16px',color:V.ink,fontWeight:600}}>Lower band ($500/yr)</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.sl}}>from ~$6,530 CAD/yr</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink,fontWeight:600}}>from ~$6,030</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.sl}}>from USD 423/month</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink,fontWeight:600}}>fees less $500</td>
                     </tr>
                     <tr style={{borderBottom:`1px solid ${V.bone2}`}}>
                       <td style={{padding:'14px 16px',color:V.ink,fontWeight:600}}>Mid band ($1,000/yr)</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.sl}}>from ~$6,530 CAD/yr</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink,fontWeight:600}}>from ~$5,530</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.sl}}>from USD 423/month</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink,fontWeight:600}}>fees less $1,000</td>
                     </tr>
                     <tr>
                       <td style={{padding:'14px 16px',color:V.ink,fontWeight:600}}>Upper band ($1,500/yr)</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.sl}}>from ~$6,530 CAD/yr</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink,fontWeight:600}}>from ~$5,030</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.sl}}>from USD 423/month</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink,fontWeight:600}}>fees less $1,500</td>
                     </tr>
                   </tbody>
                 </table>
               </div>
-              <p style={{fontSize:13,color:V.sl,marginTop:16,fontStyle:'italic'}}>Smartious tuition starts from USD 423 per month, roughly $6,530 CAD per year at current exchange. Request pricing for your exact programme figure gross of funding.</p>
+              <p style={{fontSize:13,color:V.sl,marginTop:16,fontStyle:'italic'}}>Smartious fees start from USD 423/month for Primary, payable termly, and vary by curriculum and level. Request the fee for your exact programme before funding.</p>
             </div>
           </section>
 
@@ -13222,7 +13413,7 @@ export default function LandingPage() {
               <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,40px)',margin:'0 0 14px'}}>Get your Saskatchewan division\'s funding answer in one call</h2>
               <p style={{color:V.bone3,fontSize:16,lineHeight:1.6,margin:'0 0 24px'}}>15-minute consult — we\'ll help you call your division\'s homeschool coordinator and walk you through the questions that matter. No commitment.</p>
               <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
-                <button onClick={() => nav('/assessment')} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Book assessment</button>
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Book assessment</a>
               </div>
             </div>
           </section>
@@ -13266,10 +13457,10 @@ export default function LandingPage() {
                 {c.pitch}
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:36}}>
-                <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('consult_booked'); nav('/assessment') })}
                   style={{background:s.accentColor,color:'#fff',border:'none',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',letterSpacing:'.01em'}}>
                   Book a free 30-min consultation
-                </button>
+                </a>
                 <a href={`/blog/${s.blogSlug}`}
                   style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.3)',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:700,textDecoration:'none',display:'inline-block'}}>
                   Read full {s.name} homeschool guide →
@@ -13336,13 +13527,12 @@ export default function LandingPage() {
               <div style={{textAlign:'center',marginBottom:36}}>
                 <div style={{fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',color:V.cr,fontWeight:700,marginBottom:12}}>Pricing in CAD for {c.name} families</div>
                 <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.7rem,3.2vw,2.2rem)',color:V.ink,fontWeight:400,marginBottom:8}}>Transparent monthly tuition</h2>
-                <p style={{fontSize:14,color:V.sl,maxWidth:560,margin:'0 auto'}}>Three tiers. Real teachers in every tier. No surprise fees.</p>
+                <p style={{fontSize:14,color:V.sl,maxWidth:560,margin:'0 auto'}}>Fees from USD 423/month for Primary, payable termly; fees vary by curriculum and level. One-to-one tuition USD 15/hour.</p>
               </div>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:18,maxWidth:1000,margin:'0 auto'}}>
                 {[
-                  {name:'Online',price:'From $400',sub:'USD /month',desc:'Live group classes (4–6 students), recorded for review, Mshauri AI included.',popular:false},
-                  {name:'Online Plus',price:'Enquire',sub:'most popular · tailored quote',desc:'Live group + 1-on-1 tutoring, exam prep, free college application support.',popular:true},
-                  {name:'Premium 1-on-1',price:'Enquire',sub:'tailored quote',desc:'Pure one-on-one with a dedicated PGCE-trained teacher. For Ivy League / Oxbridge tracks.',popular:false},
+                  {name:'Online School',price:'From $423',sub:'per month · Primary · paid termly',desc:'Live small-group classes in every subject, Mshauri AI included. Fees vary by curriculum and level.',popular:false},
+                  {name:'1-on-1 Tuition',price:'$15',sub:'per hour',desc:'One-to-one live online sessions in any subject, at any level, scheduled to your time zone.',popular:false},
                 ].map((t,i)=>(
                   <div key={i} style={{background:V.white,border: t.popular ? '2px solid '+V.gold3 : '1px solid '+V.bone3,borderRadius:14,padding:24,position:'relative'}}>
                     {t.popular && <div style={{position:'absolute',top:-12,left:24,background:V.gold3,color:V.ink,fontSize:10,fontWeight:800,letterSpacing:'.1em',padding:'4px 10px',borderRadius:99,textTransform:'uppercase'}}>Most popular</div>}
@@ -13352,19 +13542,19 @@ export default function LandingPage() {
                       <span style={{fontSize:12,color:V.sl}}>{t.sub}</span>
                     </div>
                     <p style={{fontSize:13.5,color:V.sl,lineHeight:1.6,marginBottom:18}}>{t.desc}</p>
-                    <button onClick={() => { trackConversion('enrol_started'); nav('/assessment') }} style={{
+                    <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('enrol_started'); nav('/assessment') })} style={{
                       width:'100%',padding:'12px 16px',
                       background: t.popular ? V.gold3 : V.cr, color: t.popular ? V.ink : '#fff',
                       border:'none',borderRadius:8,fontWeight:700,fontSize:13,cursor:'pointer',
                     }}>
                       Book assessment →
-                    </button>
+                    </a>
                   </div>
                 ))}
               </div>
               {s.voucher && (
                 <div style={{marginTop:24,padding:14,background:V.bone2,borderRadius:10,textAlign:'center',fontSize:13,color:V.sl2,maxWidth:680,margin:'24px auto 0'}}>
-                  <strong style={{color:V.ink}}>{c.name} families:</strong> The {s.voucher.name} voucher ({s.voucher.amount}/child) covers Online and Online Plus tiers fully.
+                  <strong style={{color:V.ink}}>{c.name} families:</strong> The {s.voucher.name} voucher ({s.voucher.amount}/child) can be put towards Smartious fees where the programme allows; check eligibility with the programme.
                 </div>
               )}
             </div>
@@ -13444,10 +13634,10 @@ export default function LandingPage() {
                 Book a free 30-minute consultation. We'll review your child's current level, recommend the right pathway, and answer every {c.name}-specific question.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('consult_booked'); nav('/assessment') })}
                   style={{background:s.accentColor,color:'#fff',border:'none',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
                   Book assessment
-                </button>
+                </a>
 </div>
             </div>
           </section>
@@ -13475,20 +13665,20 @@ export default function LandingPage() {
                 Kenya-based, Kenya-founded, Kenya-operating. Live small-group classes 4-6 students. Cambridge IGCSE, A-Level, Pearson Edexcel International, IB Diploma, American AP, Ontario OSSD, and Kenya CBC. Two Nairobi centres for in-person supplementation. 2-8&times; cheaper than CHS Online, King's InterHigh, and Crimson Global Academy.
               </p>
               <div style={{display:'flex',gap:14,flexWrap:'wrap',marginBottom:24}}>
-                <button onClick={() => nav('/assessment')}
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
                   style={{background:V.gold3,color:V.ink,border:'none',padding:'18px 36px',borderRadius:10,fontSize:16,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,boxShadow:'0 8px 24px rgba(201,151,58,.35)',transition:'all .18s ease'}}
                   onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(201,151,58,.5)' }}
                   onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(201,151,58,.35)' }}>
                   Book assessment
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
-                <button onClick={() => nav('/consult')}
+                </a>
+                <a className="lp-btnlink" href={'/consult'} onClick={linkClick(() => nav('/consult'))}
                   style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'16px 32px',borderRadius:10,fontSize:16,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,transition:'all .18s ease'}}
                   onMouseEnter={(e) => { e.currentTarget.style.borderColor = V.gold3; e.currentTarget.style.color = V.gold3 }}
                   onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.55)'; e.currentTarget.style.color = '#fff' }}>
                   Book Free Consultation
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
+                </a>
               </div>
               <div style={{fontSize:13,color:'rgba(255,255,255,.7)',letterSpacing:'.02em'}}>
                 Established in 2018 &middot; Over 3,421 students educated &middot; Families in more than 40 countries &middot; Two Nairobi centres (Diamond Plaza Parklands &amp; Karen Hardy) &middot; From USD 423/month personalized
@@ -13515,7 +13705,7 @@ export default function LandingPage() {
                   {n:'06',h:'Two Nairobi physical centres',p:'Diamond Plaza Parklands (HQ, Est. 2022) and Karen Hardy (Est. 2023). In-person supplementation, examination invigilation, holiday intensives. UK/US/NZ competitors have zero Kenya physical presence.'},
                   {n:'07',h:'Kenya founder, Kenya operations',p:'Founded 2018 by Alfred Ouko, BEd Mathematics &amp; Physics UoN 2022. Local admissions team, local support. Understanding of Kenya families\' needs, not a distant UK head office.'},
                   {n:'08',h:'Kenya examination centres handled',p:'Cambridge exam registration at British Council Nairobi, Braeburn Group centres, Peponi, Brookhouse, ISK, plus Mombasa/Kisumu/Nakuru. Edexcel three series per year. IB Diploma via authorised centres. All logistics managed by Smartious.'},
-                  {n:'09',h:'Sibling discounts 15-25%',p:'Families with multiple children get meaningful sibling discounts. Not available at CHS Online, Crimson, King\'s InterHigh — Smartious specifically designs for Kenyan family sizes.'},
+                  {n:'09',h:'Sibling discounts',p:'Families with multiple children get meaningful sibling discounts. Not available at CHS Online, Crimson, King\'s InterHigh — Smartious specifically designs for Kenyan family sizes.'},
                   {n:'10',h:'Personalized pricing (fair-play)',p:'Every family gets a quote calibrated to grade level, curriculum choice, enrolment period, and specific needs. No one-size-fits-all pricing. Free consultation call included. Response within 24 hours.'},
                 ].map(item => (
                   <div key={item.n} style={{background:'#fff',border:`1px solid ${V.bone3}`,borderRadius:12,padding:'26px 24px',boxShadow:'0 2px 10px rgba(8,12,20,.04)',transition:'all .18s ease'}}>
@@ -13562,7 +13752,7 @@ export default function LandingPage() {
                       {c:'Ontario OSSD',             sm:'\u2713 Yes (via CCIS)', chs:'\u2717 No', kih:'\u2717 No', wh:'\u2717 No', cga:'\u2717 No', bra:'\u2717 No'},
                       {c:'Kenya physical centre',    sm:'\u2713 Two Nairobi centres', chs:'\u2717 No', kih:'\u2717 No', wh:'\u2717 No', cga:'\u2717 No', bra:'\u2713 Multiple KE'},
                       {c:'Kenya exam registration',  sm:'\u2713 Managed by us', chs:'\u2717 Family handles', kih:'\u2717 Family handles', wh:'\u2717 Family handles', cga:'\u2717 Family handles', bra:'\u2713 On-campus'},
-                      {c:'Sibling discounts',        sm:'\u2713 15-25%', chs:'\u2717 Limited', kih:'\u2717 Varies', wh:'\u2717 No', cga:'\u2717 No', bra:'\u2713 Limited'},
+                      {c:'Sibling discounts',        sm:'\u2713 10% from 2nd child', chs:'\u2717 Limited', kih:'\u2717 Varies', wh:'\u2717 No', cga:'\u2717 No', bra:'\u2713 Limited'},
                     ].map((row, i) => (
                       <tr key={row.c} style={{background: i%2 === 0 ? '#fff' : V.bone,borderBottom:`1px solid ${V.bone3}`}}>
                         <td style={{padding:'11px 12px',fontWeight:700,color:V.ink,fontSize:13}}>{row.c}</td>
@@ -13680,7 +13870,7 @@ export default function LandingPage() {
                   {q:'Do you offer Kenya CBC alongside Cambridge or IB?', a:'Yes. Smartious offers full Kenya CBC (Grade 1-12, KICD-aligned, KCSE-eligible) alongside international curricula. Multi-curriculum families are common — child studying CBC as main pathway with Cambridge Mathematics and Physics as options is a typical setup for families who might target Kenyan universities but want international breadth.'},
                   {q:'Where do Kenyan students sit Cambridge examinations?', a:'Multiple authorised centres in Kenya — British Council Nairobi, Braeburn Group centres (multiple locations), Peponi School, Brookhouse Schools, International School of Kenya (ISK), plus centres in Mombasa, Kisumu, and Nakuru. Pearson Edexcel offers three examination series per year. Smartious handles all registration logistics — parents do not navigate this themselves.'},
                   {q:'What if we already have a physical Nairobi school but want to switch?', a:'Common situation. Families switching mid-year work with our admissions team to align curriculum transition points (usually end of term for smoothest handover). We can accept students at any point in the academic year subject to assessment. Existing school records are reviewed and prior learning is credited.'},
-                  {q:'What are the fees for Kenyan families?', a:'Personalized pricing based on curriculum choice, class size preference, grade level, and enrolment period. Starting from USD 423/month (approximately KES 54,600/month at 2026 exchange rates). Sibling discounts 15-25% available. Request a quote via the pricing page and our admissions team will respond within 24 hours.'},
+                  {q:'What are the fees for Kenyan families?', a:'Personalized pricing based on curriculum choice, class size preference, grade level, and enrolment period. Starting from USD 423/month (approximately KES 54,600/month at 2026 exchange rates). A 10% sibling discount applies from the second child. Request a quote via the pricing page and our admissions team will respond within 24 hours.'},
                   {q:'Can I combine online delivery with in-person supplementation?', a:'Yes. Smartious operates two Nairobi centres — Diamond Plaza Parklands (HQ, established 2022) and Karen Hardy (established 2023). Families based in Nairobi can access in-person supplementary tuition, examination invigilation, and holiday intensives. This hybrid capability is unique to Kenya-based providers — UK, US, and NZ virtual schools have zero Kenya physical presence.'},
                   {q:'How do university applications work from Smartious?', a:'Personalised university guidance sessions with the Head of Academics. Covers UCAS (UK Russell Group including Oxbridge admissions test prep — MAT, PAT, ENGAA, TSA, HAT), Common Application (US Ivy League + UC system with SAT/ACT + AP portfolio), OUAC (Canadian U15 via Ontario Secondary School Diploma pathway through our CCIS partnership), and Kenya universities via KUCCPS. UCAS personal statement coaching and Common App essay coaching included.'},
                 ].map((f, i) => (
@@ -13744,20 +13934,20 @@ export default function LandingPage() {
                 Book an assessment to get started, or book a free consultation call to discuss your family's specific needs. Response within 24 hours.
               </p>
               <div style={{display:'inline-flex',gap:14,flexWrap:'wrap',justifyContent:'center'}}>
-                <button onClick={() => nav('/assessment')}
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
                   style={{background:V.gold3,color:V.ink,border:'none',padding:'18px 40px',borderRadius:10,fontSize:16,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,boxShadow:'0 10px 28px rgba(201,151,58,.4)',transition:'all .18s ease'}}
                   onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 36px rgba(201,151,58,.55)' }}
                   onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 28px rgba(201,151,58,.4)' }}>
                   Book assessment
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
-                <button onClick={() => nav('/consult')}
+                </a>
+                <a className="lp-btnlink" href={'/consult'} onClick={linkClick(() => nav('/consult'))}
                   style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'16px 36px',borderRadius:10,fontSize:16,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,transition:'all .18s ease'}}
                   onMouseEnter={(e) => { e.currentTarget.style.borderColor = V.gold3; e.currentTarget.style.color = V.gold3 }}
                   onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.55)'; e.currentTarget.style.color = '#fff' }}>
                   Book Free Consultation
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
+                </a>
               </div>
             </div>
           </div></section>
@@ -13783,20 +13973,20 @@ export default function LandingPage() {
                 Live small-group classes for Ukrainian families in-country (Kyiv, Lviv, Kharkiv, Dnipro, Odesa, Ivano-Frankivsk) and diaspora (Poland, Germany, UK, Czech Republic, Canada, USA). Education continuity through displacement. Cambridge, IB, American, and Ontario OSSD curriculum. Pathway to UK Russell Group, US Ivy League, Canadian U15, German uni-assist, and Polish public universities with Ukrainian student scholarships. Discounted rates for refugee and internally displaced families.
               </p>
               <div style={{display:'flex',gap:14,flexWrap:'wrap',marginBottom:24}}>
-                <button onClick={() => nav('/assessment')}
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
                   style={{background:'#FFDD00',color:V.ink,border:'none',padding:'18px 36px',borderRadius:10,fontSize:16,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,boxShadow:'0 8px 24px rgba(255,221,0,.35)',transition:'all .18s ease'}}
                   onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)' }}
                   onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)' }}>
                   Book assessment
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
-                <button onClick={() => nav('/consult')}
+                </a>
+                <a className="lp-btnlink" href={'/consult'} onClick={linkClick(() => nav('/consult'))}
                   style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'16px 32px',borderRadius:10,fontSize:16,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,transition:'all .18s ease'}}
                   onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#FFDD00'; e.currentTarget.style.color = '#FFDD00' }}
                   onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.55)'; e.currentTarget.style.color = '#fff' }}>
                   Book Free Consultation
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
+                </a>
               </div>
               <div style={{fontSize:13,color:'rgba(255,255,255,.7)',letterSpacing:'.02em'}}>
                 Distance learning fully legal &middot; Perfect EET/EAT time zones &middot; Discounted rates for refugee &amp; displaced families &middot; From USD 423/month personalized
@@ -13874,7 +14064,7 @@ export default function LandingPage() {
                   {n:'04', h:'Distance learning fully legal', p:'Ukrainian Law "On Complete General Secondary Education" (2020) explicitly permits family education (сімейна освіта) and distance learning (дистанційне навчання). Martial law provisions expanded acceptance. No legal barriers.'},
                   {n:'05', h:'Polish + German scholarship pathway', p:'Cambridge A-Level opens Polish public universities with Ukrainian student scholarships (partial or full tuition) and German public universities (free for Ukrainians on temporary protection status).'},
                   {n:'06', h:'Cambridge exams at diaspora centres', p:'British Council Warsaw (primary for Polish diaspora), Berlin, London, Prague, Rome, Madrid, Toronto, US centres. Kyiv when conditions permit. Smartious handles all registration.'},
-                  {n:'07', h:'Discounted rates for refugee families', p:'Discounted rates for Ukrainian refugee and internally displaced families handled through consultation on case-by-case basis. Sibling discounts 15-25%.'},
+                  {n:'07', h:'Discounted rates for refugee families', p:'Discounted rates for Ukrainian refugee and internally displaced families handled through consultation on case-by-case basis. A 10% sibling discount applies from the second child.'},
                   {n:'08', h:'Ukrainian language + English bilingual', p:'Cambridge IGCSE Ukrainian as Foreign Language available. Curriculum in English (Cambridge/IB/American) with Ukrainian identity support. Multi-language families welcome.'},
                   {n:'09', h:'Tech corporate rotation portability', p:'Grammarly, GitLab Ukraine, MacPaw, Preply, SoftServe, EPAM Ukraine rotational families supported through international postings without curriculum switching.'},
                   {n:'10', h:'Post-war planning portability', p:'Cambridge, IB, American qualifications internationally portable — valid regardless of how post-war Ukrainian education system evolves. Ukrainian returnee planning families maintain international mobility options.'},
@@ -13905,7 +14095,7 @@ export default function LandingPage() {
                   {q:'We are Ukrainian refugee family in Poland — can Cambridge A-Level open Polish university scholarships?', a:'Yes. Polish public universities accept Cambridge A-Level and IB Diploma. Many offer substantial scholarships for Ukrainian students (partial or full tuition covered under current programmes). Highly relevant pathway.'},
                   {q:'We are Ukrainian refugee family in Germany — how does the uni-assist pathway work?', a:'German public universities are free for Ukrainians on temporary protection status. Cambridge A-Level and IB Diploma are accepted via uni-assist for TU Munich, LMU Munich, Heidelberg, Humboldt Berlin, RWTH Aachen, TU Berlin, KIT Karlsruhe, Freiburg, and others.'},
                   {q:'Where do Ukrainian students sit Cambridge examinations?', a:'British Council Warsaw (primary for Polish diaspora), Berlin, London, Prague, Rome, Madrid, Toronto, plus US cities. British Council Kyiv when conditions permit. Smartious handles all registration logistics regardless of family location.'},
-                  {q:'Are there discounts for Ukrainian refugee and internally displaced families?', a:'Yes. Discounted rates handled through consultation on case-by-case basis. Request via pricing page or consultation. Sibling discounts 15-25% apply for multiple children.'},
+                  {q:'Are there discounts for Ukrainian refugee and internally displaced families?', a:'Yes. Discounted rates handled through consultation on case-by-case basis. Request via pricing page or consultation. A 10% sibling discount applies from the second child.'},
                   {q:'How does time zone work for Ukrainian families?', a:'Ukraine (EET UTC+2, EEST UTC+3 summer) and Kenya (EAT UTC+3) same time zone in winter, 1 hour apart summer. Smartious 9 AM-12 PM Kyiv delivery = 9 AM-12 PM Nairobi teaching. Perfect timing.'},
                   {q:'We are Grammarly / GitLab Ukraine / SoftServe / EPAM Ukraine tech family. Does Smartious support us?', a:'Yes. Ukrainian tech corporate rotational cycles supported through international postings without curriculum switching. Cross-country cohort provides social continuity through repeated moves.'},
                 ].map((f, i) => (
@@ -13977,20 +14167,20 @@ export default function LandingPage() {
                 Book a free consultation to discuss your family situation — in-country, refugee, internally displaced, or tech corporate rotational. Personalized quotes reflecting your circumstances. Discounted rates available.
               </p>
               <div style={{display:'inline-flex',gap:14,flexWrap:'wrap',justifyContent:'center'}}>
-                <button onClick={() => nav('/assessment')}
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
                   style={{background:'#FFDD00',color:V.ink,border:'none',padding:'18px 40px',borderRadius:10,fontSize:16,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,boxShadow:'0 10px 28px rgba(255,221,0,.4)',transition:'all .18s ease'}}
                   onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)' }}
                   onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)' }}>
                   Book assessment
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
-                <button onClick={() => nav('/consult')}
+                </a>
+                <a className="lp-btnlink" href={'/consult'} onClick={linkClick(() => nav('/consult'))}
                   style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'16px 36px',borderRadius:10,fontSize:16,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,transition:'all .18s ease'}}
                   onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#FFDD00'; e.currentTarget.style.color = '#FFDD00' }}
                   onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.55)'; e.currentTarget.style.color = '#fff' }}>
                   Book Free Consultation
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
+                </a>
               </div>
             </div>
           </div></section>
@@ -14031,7 +14221,7 @@ export default function LandingPage() {
                 <div className="prog-unis">
                   {['University of Birmingham','Coventry University','University of Manchester','Purdue Global','Northeastern University','Deakin University','Griffith University','RWTH Aachen','Maastricht University','+ 190 more'].map(u => <span key={u} className="prog-uni">{u}</span>)}
                 </div>
-                <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
               </div>
             </div>
 
@@ -14081,7 +14271,7 @@ export default function LandingPage() {
                   ))}
                 </div>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                  <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
               </div>
             </div>
@@ -14099,16 +14289,16 @@ export default function LandingPage() {
           {/* Schema — LocalBusiness, Service, BreadcrumbList, FAQPage */}
           <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
             '@context': 'https://schema.org',
-            '@type': 'LocalBusiness',
-            '@id': 'https://smartioushomeschool.com/tuition-nairobi#business',
-            'name': 'Smartious Tuition Nairobi',
+            '@type': ['EducationalOrganization', 'LocalBusiness'],
+            '@id': ORG_ID,
+            'name': SITE,
             'description': 'Home tuition and online tutoring across Nairobi. Qualified teachers for CBC, IGCSE, A-Level, IB Diploma and American curricula.',
             'url': 'https://smartioushomeschool.com/tuition-nairobi',
             'telephone': '+254745021212',
             'email': 'hello@smartioushomeschool.com',
-            'address': { '@type': 'PostalAddress', 'streetAddress': 'Diamond Plaza, Parklands', 'addressLocality': 'Nairobi', 'addressRegion': 'Nairobi', 'addressCountry': 'KE' },
+            'address': { '@type': 'PostalAddress', 'streetAddress': 'Diamond Plaza I Annex, 3rd Floor, Office 20', 'addressLocality': 'Parklands, Nairobi', 'addressRegion': 'Nairobi', 'addressCountry': 'KE' },
             'areaServed': NAIROBI_AREAS.map(a => ({ '@type': 'Place', 'name': a.name + ', Nairobi' })),
-            'priceRange': 'USD 15/hour online · From KSh 1,500/hour home tuition',
+            'priceRange': 'USD 15/hour online tuition',
           })}}/>
           <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
             '@context': 'https://schema.org',
@@ -14122,9 +14312,9 @@ export default function LandingPage() {
             '@context': 'https://schema.org',
             '@type': 'Service',
             'serviceType': 'Private Home Tuition & Online Tutoring',
-            'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool' },
+            'provider': ORG_REF,
             'areaServed': { '@type': 'City', 'name': 'Nairobi' },
-            'offers': { '@type': 'AggregateOffer', 'priceCurrency': 'USD', 'lowPrice': '8', 'highPrice': '15' },
+            'offers': TUITION_OFFER,
             'description': 'Qualified home tutors visit students across Nairobi. Online tuition delivered live by subject specialists in CBC, IGCSE, Cambridge A-Level, IB Diploma, Pearson Edexcel and American curricula.',
           })}}/>
 
@@ -14176,13 +14366,13 @@ export default function LandingPage() {
                 Qualified subject specialists for <strong style={{color:V.gold3}}>CBC, Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and American curricula</strong>. Home tuition across 20 Nairobi neighbourhoods. Online tuition from USD 15/hour anywhere in the world.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:32}}>
-                <button onClick={() => nav('/assessment')}
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
                   style={{
                     background:V.gold3,color:V.ink,border:'none',
                     padding:'13px 26px',borderRadius:8,
                     fontSize:14,fontWeight:800,letterSpacing:'.02em',
                     cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8,
-                  }}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                  }}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
 
               {/* Quick stats */}
@@ -14191,7 +14381,7 @@ export default function LandingPage() {
               }}>
                 {[
                   ['20', 'Nairobi neighbourhoods'],
-                  ['USD 8', 'per online hour'],
+                  ['USD 15', 'per online hour'],
                   ['7', 'curricula covered'],
                   ['1:1', 'personal attention'],
                 ].map(([n,l]) => (
@@ -14225,7 +14415,7 @@ export default function LandingPage() {
                 {h:'Subject specialists, not generalists', p:'A Maths tutor with a Maths degree. A Physics tutor with a Physics degree. A Chemistry tutor with a Chemistry degree. We match each student to a tutor with genuine subject expertise.'},
                 {h:'Home visits across Nairobi', p:'Our tutors travel to families in 20 Nairobi neighbourhoods — Karen, Lavington, Kilimani, Westlands, Parklands, Runda, Muthaiga and beyond. Transport contribution applies for more distant estates.'},
                 {h:'Online tuition for everyone', p:'Live, interactive online tuition delivered via our learning platform. The same 1-on-1 attention as a home visit, with no commute risk and faster scheduling. Recommended for distant estates and diaspora families.'},
-                {h:'Transparent USD pricing', p:'USD 15 per hour for online tuition. KSh 1,500–2,500 per session for home tuition depending on location. No hidden fees. No long contracts. Pay per session or in 10-hour blocks.'},
+                {h:'Transparent USD pricing', p:'USD 15 per hour for online tuition. Home tuition is quoted on request, depending on location. No hidden fees. No long contracts. Pay per session or in 10-hour blocks.'},
                 {h:'Five curricula, seven programmes', p:'CBC (Kenyan), Cambridge IGCSE, Cambridge A-Level, IB MYP, IB Diploma, Pearson Edexcel International and American Curriculum (including AP). KCSE revision and university admissions (UCAS, Common App, SAT) also available.'},
               ].map(item => (
                 <div key={item.h} style={{
@@ -14282,7 +14472,7 @@ export default function LandingPage() {
             </div>
             <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:18,maxWidth:1100,margin:'0 auto'}}>
               {[
-                {h:'Home Tuition', d:'A qualified tutor visits your home on a schedule that suits your family. Available across 20 Nairobi neighbourhoods. Transport contribution applies for distant areas.', price:'From KSh 1,500/session'},
+                {h:'Home Tuition', d:'A qualified tutor visits your home on a schedule that suits your family. Available across 20 Nairobi neighbourhoods. Transport contribution applies for distant areas.', price:'Quote on request'},
                 {h:'Online Tuition', d:'Interactive 1-on-1 sessions live with your tutor via our online platform. Same attention, no commute. Available globally.', price:'USD 15/hour (≈ KSh 1,940)'},
                 {h:'Exam Preparation', d:'Targeted revision for KCSE, IGCSE, Cambridge Checkpoint, A-Level, IB Diploma and SAT. Past-paper drilling, technique coaching, full mock examination programmes.', price:'USD 15/hour'},
                 {h:'Holiday Intensive', d:'Concentrated tuition during April, August and December school breaks. Daily sessions for 2–4 weeks. Catch up or accelerate ahead.', price:'Block bookings available'},
@@ -14347,7 +14537,7 @@ export default function LandingPage() {
             </div>
             <div style={{maxWidth:780,margin:'0 auto'}}>
               {[
-                {q:'How much does tuition cost in Nairobi?', a:'Online tuition is USD 15 per hour (≈ KSh 1,940 at current rates). Home tuition starts from KSh 1,500 per 1-hour session including tutor transport for closer areas, increasing for more distant estates (Runda, Karen, Kitengela). Exam-prep and SAT preparation are the same USD 15/hour. 10-hour blocks attract a 5% discount.'},
+                {q:'How much does tuition cost in Nairobi?', a:'Online tuition is USD 15 per hour (≈ KSh 1,940 at current rates). Home tuition is quoted on request, depending on your area and travel (for example Runda, Karen, Kitengela). Exam-prep and SAT preparation are the same USD 15/hour.'},
                 {q:'How quickly can a tutor start?', a:'For online tuition, typically within 24–48 hours of confirming the subject, level and schedule. For home tuition, 48–72 hours to match a tutor with the right subject and location. Specialist subjects (IB Diploma, A-Level Further Maths) may take 3–5 days to match optimally.'},
                 {q:'Do you offer KCSE revision tutoring?', a:'Yes — KCSE revision is one of our most-requested services. We cover Mathematics, English, Kiswahili, Sciences and Humanities for Form 3 and Form 4 students. Sustained weekly tuition over 6–9 months typically produces the strongest grade improvements.'},
                 {q:'Do you offer IGCSE tutors in Nairobi?', a:'Yes — Cambridge IGCSE and Pearson Edexcel International are core specialisms. Our IGCSE tutors hold subject degrees and have prepared students for both exam boards. Mathematics, Sciences (Physics, Chemistry, Biology), English, Business Studies and Economics are the most-requested IGCSE subjects.'},
@@ -14401,11 +14591,11 @@ export default function LandingPage() {
               20 minutes with our admissions team to understand your child's needs, match a tutor, and agree a schedule. No payment until you've approved the match.
             </p>
             <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-              <button onClick={() => nav('/assessment')}
-                style={{background:V.gold3,color:V.ink,border:'none',padding:'13px 28px',borderRadius:8,fontSize:14,fontWeight:800,letterSpacing:'.02em',cursor:'pointer'}}>Book assessment</button>
+              <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                style={{background:V.gold3,color:V.ink,border:'none',padding:'13px 28px',borderRadius:8,fontSize:14,fontWeight:800,letterSpacing:'.02em',cursor:'pointer'}}>Book assessment</a>
 </div>
             <div style={{marginTop:30,paddingTop:24,borderTop:'1px solid rgba(255,255,255,.15)',fontSize:12,color:'rgba(255,255,255,.6)',letterSpacing:'.04em'}}>
-              Phone: +254 745 021 212 · Email: hello@smartioushomeschool.com · Office: Diamond Plaza, Parklands, Nairobi
+              Phone: +254 745 021 212 · Email: hello@smartioushomeschool.com · Office: Diamond Plaza I Annex, 3rd Floor, Office 20, Parklands, Nairobi
             </div>
           </div></section>
         </>
@@ -14430,20 +14620,9 @@ export default function LandingPage() {
               ],
             })}}/>
             <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
-              '@context':'https://schema.org','@type':'LocalBusiness',
-              'name':'Smartious Tuition — ' + area.name,
-              'description': area.seoDesc,
-              'url':'https://smartioushomeschool.com/tuition/' + area.slug,
-              'telephone':'+254745021212',
-              'email':'hello@smartioushomeschool.com',
-              'areaServed':{'@type':'Place','name': area.name + ', Nairobi'},
-              'address':{'@type':'PostalAddress','addressLocality': area.name,'addressRegion':'Nairobi','addressCountry':'KE'},
-              'priceRange':'From USD 15/hour',
-            })}}/>
-            <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
               '@context':'https://schema.org','@type':'Service',
               'serviceType':'Private Home & Online Tuition in ' + area.name,
-              'provider':{'@type':'EducationalOrganization','name':'Smartious Homeschool & eSchool'},
+              'provider': ORG_REF,
               'areaServed':{'@type':'Place','name': area.name + ', Nairobi'},
               'description': area.intro,
             })}}/>
@@ -14499,8 +14678,8 @@ export default function LandingPage() {
                   {area.intro}
                 </p>
                 <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
-                  <button onClick={() => nav('/assessment')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
               </div>
             </section>
@@ -14668,8 +14847,8 @@ export default function LandingPage() {
                 Book a free 20-minute consultation. We'll match a tutor to your child's subject, level and schedule — and you only pay once you've approved the match.
               </p>
               <div style={{display:'flex',gap:10,flexWrap:'wrap',justifyContent:'center'}}>
-                <button onClick={() => nav('/assessment')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer'}}>Book assessment</a>
 </div>
             </div></section>
           </>
@@ -14688,9 +14867,9 @@ export default function LandingPage() {
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'EducationalOrganization',
-            '@id': 'https://smartioushomeschool.com/tuition-uae#org',
-            'name': 'Smartious — Online Tuition UAE',
-            'url': 'https://smartioushomeschool.com/tuition-uae',
+            '@id': ORG_ID,
+            'name': SITE,
+            'url': 'https://smartioushomeschool.com/',
             'description': 'Premium online tuition for UAE families across Dubai, Abu Dhabi, Sharjah, Ajman, RAK, Fujairah and Al Ain. Cambridge IGCSE, A-Level, IB Diploma, CBSE, American AP. From USD 15/hour.',
             'areaServed': UAE_AREAS.map(a => ({ '@type': 'Place', 'name': a.name + ', ' + a.emirate })),
             'sameAs': ['https://smartioushomeschool.com'],
@@ -14741,8 +14920,8 @@ export default function LandingPage() {
                 Live online 1-on-1 tuition for students across all seven emirates — Dubai, Abu Dhabi, Sharjah, Ajman, Ras Al Khaimah, Fujairah and Al Ain. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel, CBSE and American AP. From <strong style={{color:V.gold3}}>USD 15/hour</strong> (≈ AED 55/hr) — meaningfully below typical UAE tutor rates (AED 150-400/hour).
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                <button onClick={() => nav('/assessment')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8,letterSpacing:'.02em'}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8,letterSpacing:'.02em'}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
             </div>
           </section>
@@ -14890,11 +15069,7 @@ export default function LandingPage() {
               '@context':'https://schema.org','@type':'Service',
               'name':'Online Tuition · ' + area.name + ', ' + area.emirate,
               'description': area.intro,
-              'provider': {
-                '@type':'EducationalOrganization',
-                'name':'Smartious Homeschool Global',
-                'url':'https://smartioushomeschool.com',
-              },
+              'provider': ORG_REF,
               'areaServed':{ '@type':'Place', 'name': area.name + ', ' + area.emirate + ', UAE' },
               'serviceType':'Online tuition',
             })}}/>
@@ -14932,8 +15107,8 @@ export default function LandingPage() {
                   {area.intro}
                 </p>
                 <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
-                  <button onClick={() => nav('/assessment')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
               </div>
             </section>
@@ -15116,22 +15291,12 @@ export default function LandingPage() {
             {/* Schema */}
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
               '@context':'https://schema.org','@type':'EducationalOrganization',
-              '@id':'https://smartioushomeschool.com' + country.hub + '#org',
-              'name':'Smartious — Online Homeschooling Across the UAE',
-              'url':'https://smartioushomeschool.com' + country.hub,
-              'aggregateRating': {
-                '@type':'AggregateRating',
-                'ratingValue': SMARTIOUS_RATING.stars,
-                'reviewCount': SMARTIOUS_RATING.count,
-                'bestRating': 5,
-                'worstRating': 1,
-              },
+              '@id': ORG_ID,
+              'name': SITE,
+              'url':'https://smartioushomeschool.com/',
               'description': country.heroSubhead + ' ' + country.heroValueProp,
               'areaServed': cities.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
-              'offers': country.competitors.filter(c => c.isUs).map(c => ({
-                '@type':'Offer', 'price': c.feesUsd, 'priceCurrency':'USD',
-                'description': 'Annual tuition range for ' + c.curriculum,
-              })),
+              'offers': FEE_OFFER,
             })}}/>
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
               '@context':'https://schema.org','@type':'BreadcrumbList',
@@ -15161,17 +15326,17 @@ export default function LandingPage() {
               <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
                 <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow} · Virtual school</div>
                 <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
-                  Online School &amp; Homeschool in <em style={{color:V.gold3,fontStyle:'italic'}}>{country.heroH1Suffix}</em>
+                  Homeschooling &amp; Online School in <em style={{color:V.gold3,fontStyle:'italic'}}>Dubai and the UAE</em>
                 </h1>
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
                 <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => nav('/assessment')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-<button onClick={() => P('pricing')}
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+<a className="lp-btnlink" href={pageToPath('pricing')} onClick={linkClick(() => P('pricing'))}
                     style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.4)',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:600,cursor:'pointer'}}>
                     View Pricing ({country.currency})
-                  </button>
+                  </a>
                 </div>
               </div>
             </section>
@@ -15191,6 +15356,129 @@ export default function LandingPage() {
               </div>
             </section>
 
+            {/* ─── JANUARY 2027 INTAKE ─── */}
+            <IntakeCta nav={nav} compact/>
+
+            {/* ─── FEES FOR UAE FAMILIES ─── */}
+            <section id="uae-fees" className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:48}}><div className="wrap">
+              <div style={{maxWidth:980,margin:'0 auto'}}>
+                <div className="eyebrow">Homeschooling in the UAE: fees</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                  What online school costs in Dubai and the UAE
+                </h2>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:14,marginBottom:18}}>
+                  {[
+                    {h:'Online school & homeschool', v:'From USD 423/month', sub:'For Primary, about AED 1,553 a month (approximate, at the AED–USD peg). Fees vary by curriculum and level and are payable termly.'},
+                    {h:'One-to-one tuition', v:'USD 15/hour', sub:'Live online lessons in any subject and level, scheduled in UAE time.'},
+                  ].map(f => (
+                    <div key={f.h} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 22px'}}>
+                      <div style={{fontSize:11,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.cr,marginBottom:8}}>{f.h}</div>
+                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',color:V.ink,marginBottom:8,lineHeight:1.15}}>{f.v}</div>
+                      <div style={{fontSize:13,color:V.sl2,lineHeight:1.6}}>{f.sub}</div>
+                    </div>
+                  ))}
+                </div>
+                <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7,margin:'0 0 14px'}}>
+                  Fees are non-refundable once your child&rsquo;s assessment is done, the timetable is created and lessons have started.
+                </p>
+                <div style={{display:'flex',gap:16,flexWrap:'wrap',fontSize:13.5,fontWeight:700}}>
+                  <a href="/blog/online-school-fees-uae" onClick={linkClick(() => nav('/blog/online-school-fees-uae'))} style={{color:V.cr}}>Online school fees in the UAE explained →</a>
+                  <a href="/pricing" onClick={linkClick(() => P('pricing'))} style={{color:V.cr}}>Full fee structure →</a>
+                  <a href="/smartious-fees-2026-27.pdf" target="_blank" rel="noopener" style={{color:V.cr}}>2026–27 fee guide (PDF) →</a>
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── CURRICULUM OPTIONS ─── */}
+            <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:48}}><div className="wrap">
+              <div style={{maxWidth:980,margin:'0 auto'}}>
+                <div className="eyebrow">Home schooling curriculum in the UAE</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                  Curriculum options for UAE families
+                </h2>
+                <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7,marginBottom:20}}>
+                  Many UAE families choose the British pathway (Cambridge or Pearson Edexcel IGCSE, then A-Level), which matches the many British-curriculum schools in Dubai and Abu Dhabi. The American curriculum and IB programmes are also available. All lessons are live with a teacher.
+                </p>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:10}}>
+                  {[
+                    ['igcse','Cambridge IGCSE'],['a-level','Cambridge A-Level'],['edexcel','Pearson Edexcel'],
+                    ['british-national-curriculum','British National Curriculum'],['american-curriculum','American Curriculum'],
+                    ['ib-pyp-myp','IB PYP & MYP'],['ib-diploma','IB Diploma'],
+                  ].map(([slug, label]) => (
+                    <a key={slug} href={'/curricula/' + slug} onClick={linkClick(() => openCurriculum(slug))}
+                      style={{display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'14px 16px',fontSize:14,fontWeight:700,color:V.ink}}>
+                      {label} <span style={{color:V.cr}}>→</span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── GULF TIME-ZONE TIMETABLE + EXAM CENTRES ─── */}
+            <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
+              <div style={{maxWidth:980,margin:'0 auto',display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:18}}>
+                <div style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px'}}>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.35rem',fontWeight:400,color:V.ink,margin:'0 0 10px',lineHeight:1.25}}>A timetable on Gulf time</h2>
+                  <p style={{fontSize:14,color:V.sl,lineHeight:1.7,margin:0}}>
+                    The UAE is on Gulf Standard Time (GMT+4), one hour ahead of our Nairobi teaching base (GMT+3). Live classes are timetabled in the UAE school day, so a 9:00 lesson in Nairobi starts at 10:00 in Dubai, Abu Dhabi or Sharjah. Your child&rsquo;s timetable is created after the assessment.
+                  </p>
+                </div>
+                <div style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px'}}>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.35rem',fontWeight:400,color:V.ink,margin:'0 0 10px',lineHeight:1.25}}>Where exams are sat</h2>
+                  <p style={{fontSize:14,color:V.sl,lineHeight:1.7,margin:0}}>
+                    IGCSE and A-Level exams are sat in person, as a private candidate, at an exam centre in the UAE, for example the British Council in Dubai or Abu Dhabi. Each centre sets its own entry deadlines and fees; we help you plan entries for the May–June and October–November series.
+                  </p>
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── RECOGNITION QUESTIONS ─── */}
+            <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:48}}><div className="wrap">
+              <div style={{maxWidth:880,margin:'0 auto'}}>
+                <div className="eyebrow">Recognition</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:18,lineHeight:1.2}}>
+                  Is online school recognised in the UAE?
+                </h2>
+                <div style={{display:'flex',flexDirection:'column',gap:12}}>
+                  {[
+                    {q:'Can UAE families use Smartious?', a:'Yes. Families across the UAE use Smartious as home education with live online classes. If you will need a transfer certificate, re-enrolment in a UAE school or MOE equivalency later, ask us at admissions and check the current requirements with KHDA, ADEK or the Ministry of Education.'},
+                    {q:'What does that mean for my child’s qualifications?', a:'IGCSE and A-Level certificates are issued by the exam boards (Cambridge or Pearson Edexcel), not by Smartious. UAE universities and the Ministry of Education set their own entry and equivalency rules, so check the current requirements for your child’s plans.'},
+                    {q:'Do we need to register home education with the authorities?', a:'Rules can differ by emirate and can change. Check with KHDA (Dubai), ADEK (Abu Dhabi) or the Ministry of Education for your family’s situation before you start.'},
+                    {q:'Can my child move into a UAE school later?', a:'UAE schools make their own admission and placement decisions, usually after their own assessment. We provide reports on your child’s work and progress to support the application.'},
+                  ].map((f, i) => (
+                    <details key={i} style={{background:V.bone,padding:'16px 22px',borderRadius:10,cursor:'pointer',border:`1px solid ${V.bone3}`}}>
+                      <summary style={{fontWeight:600,color:V.ink,fontSize:14.5}}>{f.q}</summary>
+                      <p style={{color:V.sl,fontSize:14,lineHeight:1.75,margin:'12px 0 0'}}>{f.a}</p>
+                    </details>
+                  ))}
+                </div>
+                <p style={{fontSize:13.5,marginTop:16}}>
+                  <a href="/blog/online-school-recognised-uae" onClick={linkClick(() => nav('/blog/online-school-recognised-uae'))} style={{color:V.cr,fontWeight:700}}>Read more: is online school recognised in the UAE? →</a>
+                </p>
+              </div>
+            </div></section>
+
+            {/* ─── DUBAI, ABU DHABI, SHARJAH ─── */}
+            <section className="sec" style={{background:V.bone,paddingTop:40,paddingBottom:40}}><div className="wrap">
+              <div style={{maxWidth:980,margin:'0 auto',textAlign:'center'}}>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,margin:'0 0 14px',lineHeight:1.2}}>
+                  Homeschooling in Dubai, Abu Dhabi and Sharjah
+                </h2>
+                <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
+                  {[['dubai-ae','Homeschooling in Dubai'],['abu-dhabi-ae','Homeschooling in Abu Dhabi'],['sharjah-ae','Homeschooling in Sharjah']].map(([slug, label]) => (
+                    <a key={slug} href={'/homeschool-' + slug}
+                      onClick={linkClick(() => { setCurrentUaeCity(slug); nav('/homeschool-' + slug); window.scrollTo(0, 0) })}
+                      style={{display:'inline-block',padding:'12px 20px',borderRadius:8,background:V.white,border:`1.5px solid ${V.cr}`,color:V.cr,fontWeight:700,fontSize:14}}>
+                      {label} →
+                    </a>
+                  ))}
+                </div>
+                <p style={{fontSize:13,color:V.sl,marginTop:14}}>
+                  Families in Dubai also read our guide to <a href="/blog/homeschooling-dubai-expats-2026" onClick={linkClick(() => nav('/blog/homeschooling-dubai-expats-2026'))} style={{color:V.cr,fontWeight:700}}>homeschooling in Dubai for expat families</a>.
+                </p>
+              </div>
+            </div></section>
+
             {/* ─── CITIES GRID ─── */}
             <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64}}><div className="wrap">
               <div style={{textAlign:'center',marginBottom:44,maxWidth:720,margin:'0 auto 44px'}}>
@@ -15203,7 +15491,7 @@ export default function LandingPage() {
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14,maxWidth:1100,margin:'0 auto'}}>
                 {cities.map(c => (
                   <a key={c.slug} href={'/homeschool-' + c.slug}
-                    onClick={(e) => { e.preventDefault(); setCurrentUaeCity(c.slug); nav('/homeschool-' + c.slug); P(country.cityPageId) }}
+                    onClick={linkClick(() => { setCurrentUaeCity(c.slug); nav('/homeschool-' + c.slug); window.scrollTo(0, 0) })}
                     style={{display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',textDecoration:'none',color:'inherit',transition:'all .2s',cursor:'pointer'}}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
@@ -15318,7 +15606,7 @@ export default function LandingPage() {
                 </div>
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14,marginBottom:32}}>
                   {[
-                    {h:'Founder-led education company', p:'Founded 2022 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
+                    {h:'Founder-led education company', p:'Founded 2018 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
                     {h:'Two physical Nairobi centres', p:'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
                     {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
                     {h:'40+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
@@ -15398,7 +15686,7 @@ export default function LandingPage() {
                 <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
                 <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
                 <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:24}}>
-                  <button onClick={() => nav('/assessment')} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
                 </div>
                 <div style={{display:'flex',gap:22,justifyContent:'center',flexWrap:'wrap',fontSize:12,color:'rgba(255,255,255,.55)'}}>
                   <span>[+] Immediate enrolment</span>
@@ -15512,6 +15800,20 @@ export default function LandingPage() {
             {page === 'homeschooling-kuwait' && (
               <CountryHub country={KUWAIT_COUNTRY} cities={KUWAIT_CITIES}
                 setCurrentCity={setCurrentKuwaitCity}
+                P={P} V={V} nav={nav}
+                SMARTIOUS_RATING={SMARTIOUS_RATING} SMARTIOUS_REVIEWS={SMARTIOUS_REVIEWS}
+                GOOGLE_REVIEWS_URL={GOOGLE_REVIEWS_URL} LEAVE_REVIEW_URL={LEAVE_REVIEW_URL}/>
+            )}
+            {page === 'homeschooling-nigeria' && NIGERIA_COUNTRY && (
+              <CountryHub country={NIGERIA_COUNTRY} cities={NIGERIA_CITIES}
+                setCurrentCity={setCurrentNigeriaCity}
+                P={P} V={V} nav={nav}
+                SMARTIOUS_RATING={SMARTIOUS_RATING} SMARTIOUS_REVIEWS={SMARTIOUS_REVIEWS}
+                GOOGLE_REVIEWS_URL={GOOGLE_REVIEWS_URL} LEAVE_REVIEW_URL={LEAVE_REVIEW_URL}/>
+            )}
+            {page === 'homeschooling-bahrain' && BAHRAIN_COUNTRY && (
+              <CountryHub country={BAHRAIN_COUNTRY} cities={BAHRAIN_CITIES}
+                setCurrentCity={setCurrentBahrainCity}
                 P={P} V={V} nav={nav}
                 SMARTIOUS_RATING={SMARTIOUS_RATING} SMARTIOUS_REVIEWS={SMARTIOUS_REVIEWS}
                 GOOGLE_REVIEWS_URL={GOOGLE_REVIEWS_URL} LEAVE_REVIEW_URL={LEAVE_REVIEW_URL}/>
@@ -16155,6 +16457,22 @@ export default function LandingPage() {
           P={P} V={V} nav={nav} Footer={Footer}
         />
       )}
+      {page === 'nigeria-city' && currentNigeriaCity && NIGERIA_COUNTRY && (
+        <CountryCityPage
+          country={NIGERIA_COUNTRY}
+          cities={NIGERIA_CITIES}
+          currentCitySlug={currentNigeriaCity}
+          P={P} V={V} nav={nav} Footer={Footer}
+        />
+      )}
+      {page === 'bahrain-city' && currentBahrainCity && BAHRAIN_COUNTRY && (
+        <CountryCityPage
+          country={BAHRAIN_COUNTRY}
+          cities={BAHRAIN_CITIES}
+          currentCitySlug={currentBahrainCity}
+          P={P} V={V} nav={nav} Footer={Footer}
+        />
+      )}
       {page === 'turkey-city' && currentTurkeyCity && (
         <CountryCityPage
           country={TURKEY_COUNTRY}
@@ -16756,22 +17074,12 @@ export default function LandingPage() {
             {/* Schema */}
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
               '@context':'https://schema.org','@type':'EducationalOrganization',
-              '@id':'https://smartioushomeschool.com' + country.hub + '#org',
-              'name':'Smartious — Online Homeschooling Across ' + country.longName,
-              'url':'https://smartioushomeschool.com' + country.hub,
-              'aggregateRating': {
-                '@type':'AggregateRating',
-                'ratingValue': SMARTIOUS_RATING.stars,
-                'reviewCount': SMARTIOUS_RATING.count,
-                'bestRating': 5,
-                'worstRating': 1,
-              },
+              '@id': ORG_ID,
+              'name': SITE,
+              'url':'https://smartioushomeschool.com/',
               'description': country.heroSubhead + ' ' + country.heroValueProp,
               'areaServed': cities.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
-              'offers': country.competitors.filter(c => c.isUs).map(c => ({
-                '@type':'Offer', 'price': c.feesUsd, 'priceCurrency':'USD',
-                'description': 'Annual tuition range for ' + c.curriculum,
-              })),
+              'offers': FEE_OFFER,
             })}}/>
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
               '@context':'https://schema.org','@type':'BreadcrumbList',
@@ -16806,12 +17114,12 @@ export default function LandingPage() {
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
                 <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => nav('/assessment')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-<button onClick={() => P('pricing')}
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+<a className="lp-btnlink" href={pageToPath('pricing')} onClick={linkClick(() => P('pricing'))}
                     style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.4)',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:600,cursor:'pointer'}}>
                     View Pricing ({country.currency})
-                  </button>
+                  </a>
                 </div>
               </div>
             </section>
@@ -16843,7 +17151,7 @@ export default function LandingPage() {
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14,maxWidth:1100,margin:'0 auto'}}>
                 {cities.map(c => (
                   <a key={c.slug} href={'/homeschool-' + c.slug}
-                    onClick={(e) => { e.preventDefault(); setCurrentSaudiCity(c.slug); nav('/homeschool-' + c.slug); P(country.cityPageId) }}
+                    onClick={linkClick(() => { setCurrentSaudiCity(c.slug); nav('/homeschool-' + c.slug); window.scrollTo(0, 0) })}
                     style={{display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',textDecoration:'none',color:'inherit',transition:'all .2s',cursor:'pointer'}}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
@@ -16958,7 +17266,7 @@ export default function LandingPage() {
                 </div>
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14,marginBottom:32}}>
                   {[
-                    {h:'Founder-led education company', p:'Founded 2022 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
+                    {h:'Founder-led education company', p:'Founded 2018 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
                     {h:'Two physical Nairobi centres', p:'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
                     {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
                     {h:'40+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
@@ -17038,7 +17346,7 @@ export default function LandingPage() {
                 <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
                 <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
                 <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:24}}>
-                  <button onClick={() => nav('/assessment')} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
                 </div>
                 <div style={{display:'flex',gap:22,justifyContent:'center',flexWrap:'wrap',fontSize:12,color:'rgba(255,255,255,.55)'}}>
                   <span>[+] Immediate enrolment</span>
@@ -17076,22 +17384,12 @@ export default function LandingPage() {
             {/* Schema */}
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
               '@context':'https://schema.org','@type':'EducationalOrganization',
-              '@id':'https://smartioushomeschool.com' + country.hub + '#org',
-              'name':'Smartious — Online Homeschooling Across ' + country.longName,
-              'url':'https://smartioushomeschool.com' + country.hub,
-              'aggregateRating': {
-                '@type':'AggregateRating',
-                'ratingValue': SMARTIOUS_RATING.stars,
-                'reviewCount': SMARTIOUS_RATING.count,
-                'bestRating': 5,
-                'worstRating': 1,
-              },
+              '@id': ORG_ID,
+              'name': SITE,
+              'url':'https://smartioushomeschool.com/',
               'description': country.heroSubhead + ' ' + country.heroValueProp,
               'areaServed': cities.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
-              'offers': country.competitors.filter(c => c.isUs).map(c => ({
-                '@type':'Offer', 'price': c.feesUsd, 'priceCurrency':'USD',
-                'description': 'Annual tuition range for ' + c.curriculum,
-              })),
+              'offers': FEE_OFFER,
             })}}/>
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
               '@context':'https://schema.org','@type':'BreadcrumbList',
@@ -17126,12 +17424,12 @@ export default function LandingPage() {
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
                 <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => nav('/assessment')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-<button onClick={() => P('pricing')}
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+<a className="lp-btnlink" href={pageToPath('pricing')} onClick={linkClick(() => P('pricing'))}
                     style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.4)',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:600,cursor:'pointer'}}>
                     View Pricing ({country.currency})
-                  </button>
+                  </a>
                 </div>
               </div>
             </section>
@@ -17163,7 +17461,7 @@ export default function LandingPage() {
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14,maxWidth:1100,margin:'0 auto'}}>
                 {cities.map(c => (
                   <a key={c.slug} href={'/homeschool-' + c.slug}
-                    onClick={(e) => { e.preventDefault(); setCurrentQatarCity(c.slug); nav('/homeschool-' + c.slug); P(country.cityPageId) }}
+                    onClick={linkClick(() => { setCurrentQatarCity(c.slug); nav('/homeschool-' + c.slug); window.scrollTo(0, 0) })}
                     style={{display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',textDecoration:'none',color:'inherit',transition:'all .2s',cursor:'pointer'}}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
@@ -17278,7 +17576,7 @@ export default function LandingPage() {
                 </div>
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14,marginBottom:32}}>
                   {[
-                    {h:'Founder-led education company', p:'Founded 2022 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
+                    {h:'Founder-led education company', p:'Founded 2018 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
                     {h:'Two physical Nairobi centres', p:'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
                     {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
                     {h:'40+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
@@ -17358,7 +17656,7 @@ export default function LandingPage() {
                 <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
                 <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
                 <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:24}}>
-                  <button onClick={() => nav('/assessment')} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
                 </div>
                 <div style={{display:'flex',gap:22,justifyContent:'center',flexWrap:'wrap',fontSize:12,color:'rgba(255,255,255,.55)'}}>
                   <span>[+] Immediate enrolment</span>
@@ -17396,22 +17694,12 @@ export default function LandingPage() {
             {/* Schema */}
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
               '@context':'https://schema.org','@type':'EducationalOrganization',
-              '@id':'https://smartioushomeschool.com' + country.hub + '#org',
-              'name':'Smartious — Online Homeschooling Across ' + country.longName,
-              'url':'https://smartioushomeschool.com' + country.hub,
-              'aggregateRating': {
-                '@type':'AggregateRating',
-                'ratingValue': SMARTIOUS_RATING.stars,
-                'reviewCount': SMARTIOUS_RATING.count,
-                'bestRating': 5,
-                'worstRating': 1,
-              },
+              '@id': ORG_ID,
+              'name': SITE,
+              'url':'https://smartioushomeschool.com/',
               'description': country.heroSubhead + ' ' + country.heroValueProp,
               'areaServed': cities.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
-              'offers': country.competitors.filter(c => c.isUs).map(c => ({
-                '@type':'Offer', 'price': c.feesUsd, 'priceCurrency':'USD',
-                'description': 'Annual tuition range for ' + c.curriculum,
-              })),
+              'offers': FEE_OFFER,
             })}}/>
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
               '@context':'https://schema.org','@type':'BreadcrumbList',
@@ -17446,12 +17734,12 @@ export default function LandingPage() {
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
                 <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => nav('/assessment')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-<button onClick={() => P('pricing')}
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+<a className="lp-btnlink" href={pageToPath('pricing')} onClick={linkClick(() => P('pricing'))}
                     style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.4)',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:600,cursor:'pointer'}}>
                     View Pricing ({country.currency})
-                  </button>
+                  </a>
                 </div>
               </div>
             </section>
@@ -17483,7 +17771,7 @@ export default function LandingPage() {
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14,maxWidth:1100,margin:'0 auto'}}>
                 {cities.map(c => (
                   <a key={c.slug} href={'/homeschool-' + c.slug}
-                    onClick={(e) => { e.preventDefault(); setCurrentSaCity(c.slug); nav('/homeschool-' + c.slug); P(country.cityPageId) }}
+                    onClick={linkClick(() => { setCurrentSaCity(c.slug); nav('/homeschool-' + c.slug); window.scrollTo(0, 0) })}
                     style={{display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',textDecoration:'none',color:'inherit',transition:'all .2s',cursor:'pointer'}}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
@@ -17598,7 +17886,7 @@ export default function LandingPage() {
                 </div>
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14,marginBottom:32}}>
                   {[
-                    {h:'Founder-led education company', p:'Founded 2022 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
+                    {h:'Founder-led education company', p:'Founded 2018 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
                     {h:'Two physical Nairobi centres', p:'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
                     {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
                     {h:'40+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
@@ -17678,7 +17966,7 @@ export default function LandingPage() {
                 <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
                 <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
                 <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:24}}>
-                  <button onClick={() => nav('/assessment')} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
                 </div>
                 <div style={{display:'flex',gap:22,justifyContent:'center',flexWrap:'wrap',fontSize:12,color:'rgba(255,255,255,.55)'}}>
                   <span>[+] Immediate enrolment</span>
@@ -17716,22 +18004,12 @@ export default function LandingPage() {
             {/* Schema */}
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
               '@context':'https://schema.org','@type':'EducationalOrganization',
-              '@id':'https://smartioushomeschool.com' + country.hub + '#org',
-              'name':'Smartious — Online Homeschooling Across ' + country.longName,
-              'url':'https://smartioushomeschool.com' + country.hub,
-              'aggregateRating': {
-                '@type':'AggregateRating',
-                'ratingValue': SMARTIOUS_RATING.stars,
-                'reviewCount': SMARTIOUS_RATING.count,
-                'bestRating': 5,
-                'worstRating': 1,
-              },
+              '@id': ORG_ID,
+              'name': SITE,
+              'url':'https://smartioushomeschool.com/',
               'description': country.heroSubhead + ' ' + country.heroValueProp,
               'areaServed': cities.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
-              'offers': country.competitors.filter(c => c.isUs).map(c => ({
-                '@type':'Offer', 'price': c.feesUsd, 'priceCurrency':'USD',
-                'description': 'Annual tuition range for ' + c.curriculum,
-              })),
+              'offers': FEE_OFFER,
             })}}/>
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
               '@context':'https://schema.org','@type':'BreadcrumbList',
@@ -17766,12 +18044,12 @@ export default function LandingPage() {
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
                 <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => nav('/assessment')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-<button onClick={() => P('pricing')}
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+<a className="lp-btnlink" href={pageToPath('pricing')} onClick={linkClick(() => P('pricing'))}
                     style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.4)',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:600,cursor:'pointer'}}>
                     View Pricing ({country.currency})
-                  </button>
+                  </a>
                 </div>
               </div>
             </section>
@@ -17803,7 +18081,7 @@ export default function LandingPage() {
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14,maxWidth:1100,margin:'0 auto'}}>
                 {cities.map(c => (
                   <a key={c.slug} href={'/homeschool-' + c.slug}
-                    onClick={(e) => { e.preventDefault(); setCurrentRwandaCity(c.slug); nav('/homeschool-' + c.slug); P(country.cityPageId) }}
+                    onClick={linkClick(() => { setCurrentRwandaCity(c.slug); nav('/homeschool-' + c.slug); window.scrollTo(0, 0) })}
                     style={{display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',textDecoration:'none',color:'inherit',transition:'all .2s',cursor:'pointer'}}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
@@ -17918,7 +18196,7 @@ export default function LandingPage() {
                 </div>
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14,marginBottom:32}}>
                   {[
-                    {h:'Founder-led education company', p:'Founded 2022 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
+                    {h:'Founder-led education company', p:'Founded 2018 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
                     {h:'Two physical Nairobi centres', p:'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
                     {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
                     {h:'40+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
@@ -17998,7 +18276,7 @@ export default function LandingPage() {
                 <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
                 <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
                 <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:24}}>
-                  <button onClick={() => nav('/assessment')} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
                 </div>
                 <div style={{display:'flex',gap:22,justifyContent:'center',flexWrap:'wrap',fontSize:12,color:'rgba(255,255,255,.55)'}}>
                   <span>[+] Immediate enrolment</span>
@@ -18036,22 +18314,12 @@ export default function LandingPage() {
             {/* Schema */}
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
               '@context':'https://schema.org','@type':'EducationalOrganization',
-              '@id':'https://smartioushomeschool.com' + country.hub + '#org',
-              'name':'Smartious — Online Homeschooling Across ' + country.longName,
-              'url':'https://smartioushomeschool.com' + country.hub,
-              'aggregateRating': {
-                '@type':'AggregateRating',
-                'ratingValue': SMARTIOUS_RATING.stars,
-                'reviewCount': SMARTIOUS_RATING.count,
-                'bestRating': 5,
-                'worstRating': 1,
-              },
+              '@id': ORG_ID,
+              'name': SITE,
+              'url':'https://smartioushomeschool.com/',
               'description': country.heroSubhead + ' ' + country.heroValueProp,
               'areaServed': cities.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
-              'offers': country.competitors.filter(c => c.isUs).map(c => ({
-                '@type':'Offer', 'price': c.feesUsd, 'priceCurrency':'USD',
-                'description': 'Annual tuition range for ' + c.curriculum,
-              })),
+              'offers': FEE_OFFER,
             })}}/>
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
               '@context':'https://schema.org','@type':'BreadcrumbList',
@@ -18086,12 +18354,12 @@ export default function LandingPage() {
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
                 <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => nav('/assessment')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-<button onClick={() => P('pricing')}
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+<a className="lp-btnlink" href={pageToPath('pricing')} onClick={linkClick(() => P('pricing'))}
                     style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.4)',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:600,cursor:'pointer'}}>
                     View Pricing ({country.currency})
-                  </button>
+                  </a>
                 </div>
               </div>
             </section>
@@ -18123,7 +18391,7 @@ export default function LandingPage() {
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14,maxWidth:1100,margin:'0 auto'}}>
                 {cities.map(c => (
                   <a key={c.slug} href={'/homeschool-' + c.slug}
-                    onClick={(e) => { e.preventDefault(); setCurrentEthiopiaCity(c.slug); nav('/homeschool-' + c.slug); P(country.cityPageId) }}
+                    onClick={linkClick(() => { setCurrentEthiopiaCity(c.slug); nav('/homeschool-' + c.slug); window.scrollTo(0, 0) })}
                     style={{display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',textDecoration:'none',color:'inherit',transition:'all .2s',cursor:'pointer'}}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
@@ -18238,7 +18506,7 @@ export default function LandingPage() {
                 </div>
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14,marginBottom:32}}>
                   {[
-                    {h:'Founder-led education company', p:'Founded 2022 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
+                    {h:'Founder-led education company', p:'Founded 2018 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
                     {h:'Two physical Nairobi centres', p:'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
                     {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
                     {h:'40+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
@@ -18318,7 +18586,7 @@ export default function LandingPage() {
                 <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
                 <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
                 <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:24}}>
-                  <button onClick={() => nav('/assessment')} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
                 </div>
                 <div style={{display:'flex',gap:22,justifyContent:'center',flexWrap:'wrap',fontSize:12,color:'rgba(255,255,255,.55)'}}>
                   <span>[+] Immediate enrolment</span>
@@ -18355,22 +18623,12 @@ export default function LandingPage() {
             {/* Schema */}
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
               '@context':'https://schema.org','@type':'EducationalOrganization',
-              '@id':'https://smartioushomeschool.com' + country.hub + '#org',
-              'name':'Smartious — Online Homeschooling Across ' + country.longName,
-              'url':'https://smartioushomeschool.com' + country.hub,
-              'aggregateRating': {
-                '@type':'AggregateRating',
-                'ratingValue': SMARTIOUS_RATING.stars,
-                'reviewCount': SMARTIOUS_RATING.count,
-                'bestRating': 5,
-                'worstRating': 1,
-              },
+              '@id': ORG_ID,
+              'name': SITE,
+              'url':'https://smartioushomeschool.com/',
               'description': country.heroSubhead + ' ' + country.heroValueProp,
               'areaServed': cities.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
-              'offers': country.competitors.filter(c => c.isUs).map(c => ({
-                '@type':'Offer', 'price': c.feesUsd, 'priceCurrency':'USD',
-                'description': 'Annual tuition range for ' + c.curriculum,
-              })),
+              'offers': FEE_OFFER,
             })}}/>
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
               '@context':'https://schema.org','@type':'BreadcrumbList',
@@ -18405,12 +18663,12 @@ export default function LandingPage() {
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
                 <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => nav('/assessment')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-<button onClick={() => P('pricing')}
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+<a className="lp-btnlink" href={pageToPath('pricing')} onClick={linkClick(() => P('pricing'))}
                     style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.4)',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:600,cursor:'pointer'}}>
                     View Pricing ({country.currency})
-                  </button>
+                  </a>
                 </div>
               </div>
             </section>
@@ -18442,7 +18700,7 @@ export default function LandingPage() {
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14,maxWidth:1100,margin:'0 auto'}}>
                 {cities.map(c => (
                   <a key={c.slug} href={'/homeschool-' + c.slug}
-                    onClick={(e) => { e.preventDefault(); setCurrentKenyaCity(c.slug); nav('/homeschool-' + c.slug); P(country.cityPageId) }}
+                    onClick={linkClick(() => { setCurrentKenyaCity(c.slug); nav('/homeschool-' + c.slug); window.scrollTo(0, 0) })}
                     style={{display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',textDecoration:'none',color:'inherit',transition:'all .2s',cursor:'pointer'}}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
@@ -18557,7 +18815,7 @@ export default function LandingPage() {
                 </div>
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14,marginBottom:32}}>
                   {[
-                    {h:'Founder-led education company', p:'Founded 2022 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
+                    {h:'Founder-led education company', p:'Founded 2018 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
                     {h:'Two physical Nairobi centres', p:'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
                     {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
                     {h:'40+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
@@ -18642,7 +18900,7 @@ export default function LandingPage() {
                 <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
                 <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
                 <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:24}}>
-                  <button onClick={() => nav('/assessment')} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
                 </div>
                 <div style={{display:'flex',gap:22,justifyContent:'center',flexWrap:'wrap',fontSize:12,color:'rgba(255,255,255,.55)'}}>
                   <span>[+] Immediate enrolment</span>
@@ -18679,7 +18937,7 @@ export default function LandingPage() {
               '@context':'https://schema.org','@type':'Service',
               'name': city.primaryKeyword,
               'description': city.seoDesc,
-              'provider':{'@type':'EducationalOrganization','name':'Smartious Homeschool Global','url':'https://smartioushomeschool.com'},
+              'provider': ORG_REF,
               'areaServed':{'@type':'Place','name': city.name + ', ' + city.county + ', Kenya'},
               'serviceType':'Online homeschooling and 1-on-1 tuition',
             })}}/>
@@ -18714,8 +18972,8 @@ export default function LandingPage() {
                   {city.intro}
                 </p>
                 <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
-                  <button onClick={() => nav('/assessment')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
               </div>
             </section>
@@ -18929,8 +19187,8 @@ export default function LandingPage() {
                   The enrolment process takes most {city.name} families 7-10 working days from first enquiry to LMS access. Book an assessment — our Head of Admissions will review your request and respond within three business days.
                 </p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                  <button onClick={() => nav('/assessment')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</a>
                 </div>
               </div>
             </div></section>
@@ -18946,10 +19204,10 @@ export default function LandingPage() {
         <>
           <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
             '@context':'https://schema.org','@type':'EducationalOrganization',
-            '@id':'https://smartioushomeschool.com/test-prep#org',
-            'name':'Smartious Global Test Preparation',
-            'url':'https://smartioushomeschool.com/test-prep',
-            'description':'Premium IELTS, TOEFL, PTE, GRE, GMAT and SAT test preparation in Nairobi. Live 1-on-1 sessions with qualified specialists. From KSh 29,000.',
+            '@id': ORG_ID,
+            'name': SITE,
+            'url':'https://smartioushomeschool.com/',
+            'description':'Premium IELTS, TOEFL, PTE, GRE, GMAT and SAT test preparation in Nairobi. Live 1-on-1 sessions with qualified specialists. USD 15/hour.',
           })}}/>
 
           {/* HERO */}
@@ -18967,8 +19225,8 @@ export default function LandingPage() {
                 Live 1-on-1 preparation for the world's most important standardised tests. IELTS, TOEFL, PTE for English proficiency. GRE, GMAT, SAT for graduate and undergraduate admissions. Delivered online by qualified specialists, with mock tests, detailed feedback and a clear path to your target score.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                <button onClick={() => nav('/assessment')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
             </div>
           </section>
@@ -18985,8 +19243,8 @@ export default function LandingPage() {
               </p>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
                 {TEST_PREP.filter(t => t.tier === 'English Proficiency').map(test => (
-                  <div key={test.slug}
-                    onClick={() => { setCurrentTestPrep(test.slug); nav('/test-prep/' + test.slug); window.scrollTo(0,0) }}
+                  <a className="lp-divlink" key={test.slug}
+                    href={'/test-prep/' + test.slug} onClick={linkClick(() => { setCurrentTestPrep(test.slug); nav('/test-prep/' + test.slug); window.scrollTo(0,0) })}
                     style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',cursor:'pointer',transition:'all .2s'}}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
@@ -19001,7 +19259,7 @@ export default function LandingPage() {
                     <div style={{fontSize:12,fontWeight:700,color:V.cr,display:'inline-flex',alignItems:'center',gap:5}}>
                       View {test.code} prep →
                     </div>
-                  </div>
+                  </a>
                 ))}
               </div>
             </div>
@@ -19019,8 +19277,8 @@ export default function LandingPage() {
               </p>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
                 {TEST_PREP.filter(t => t.tier !== 'English Proficiency').map(test => (
-                  <div key={test.slug}
-                    onClick={() => { setCurrentTestPrep(test.slug); nav('/test-prep/' + test.slug); window.scrollTo(0,0) }}
+                  <a className="lp-divlink" key={test.slug}
+                    href={'/test-prep/' + test.slug} onClick={linkClick(() => { setCurrentTestPrep(test.slug); nav('/test-prep/' + test.slug); window.scrollTo(0,0) })}
                     style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',cursor:'pointer',transition:'all .2s'}}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
@@ -19035,7 +19293,7 @@ export default function LandingPage() {
                     <div style={{fontSize:12,fontWeight:700,color:V.cr,display:'inline-flex',alignItems:'center',gap:5}}>
                       View {test.code} prep →
                     </div>
-                  </div>
+                  </a>
                 ))}
               </div>
             </div>
@@ -19057,8 +19315,8 @@ export default function LandingPage() {
               '@context':'https://schema.org','@type':'Course',
               'name': test.code + ' Preparation',
               'description': test.seoDesc,
-              'provider':{'@type':'EducationalOrganization','name':'Smartious Homeschool','url':'https://smartioushomeschool.com'},
-              'offers':{'@type':'Offer','price':test.fee.replace(/[^\d]/g,''),'priceCurrency':'KES'},
+              'provider': ORG_REF,
+              'offers':{'@type':'Offer','price':Number(test.fee.replace(/[^\d]/g,'')),'priceCurrency':'USD'},
             })}}/>
             <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
               '@context':'https://schema.org','@type':'BreadcrumbList',
@@ -19113,8 +19371,8 @@ export default function LandingPage() {
                   </div>
                 </div>
                 <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
-                  <button onClick={() => nav('/assessment')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
               </div>
             </section>
@@ -19272,8 +19530,8 @@ export default function LandingPage() {
                   {test.fee} · {test.sessions} live sessions · {test.duration}. Most students see meaningful improvement within the first 4 sessions.
                 </p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                  <button onClick={() => nav('/assessment')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</a>
 </div>
               </div>
             </div></section>
@@ -19290,8 +19548,9 @@ export default function LandingPage() {
         <>
           <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
             '@context':'https://schema.org','@type':'EducationalOrganization',
-            'name':'Smartious Languages',
-            'url':'https://smartioushomeschool.com/languages',
+            '@id': ORG_ID,
+            'name': SITE,
+            'url':'https://smartioushomeschool.com/',
             'description':'Premium foreign language tuition. French, Spanish, German, Mandarin Chinese, Arabic, Kiswahili, Italian, Portuguese. CEFR A1-C2 plus examination preparation.',
           })}}/>
 
@@ -19307,11 +19566,11 @@ export default function LandingPage() {
                 Language coaching that <em style={{color:V.gold3,fontStyle:'italic'}}>opens worlds</em>
               </h1>
               <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>
-                One-on-one foreign language tuition with qualified specialists. 8 languages, CEFR A1 through C2, plus examination preparation for DELF, DELE, Goethe-Zertifikat, HSK, CILS and more. From KSh 1,500/hour.
+                One-on-one foreign language tuition with qualified specialists. 8 languages, CEFR A1 through C2, plus examination preparation for DELF, DELE, Goethe-Zertifikat, HSK, CILS and more. USD 15/hour (≈ KSh 1,940).
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                <button onClick={() => nav('/assessment')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</a>
 </div>
             </div>
           </section>
@@ -19327,8 +19586,8 @@ export default function LandingPage() {
               </div>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:14}}>
                 {LANGUAGES.map(lang => (
-                  <div key={lang.slug}
-                    onClick={() => { setCurrentLanguage(lang.slug); nav('/languages/' + lang.slug); window.scrollTo(0,0) }}
+                  <a className="lp-divlink" key={lang.slug}
+                    href={'/languages/' + lang.slug} onClick={linkClick(() => { setCurrentLanguage(lang.slug); nav('/languages/' + lang.slug); window.scrollTo(0,0) })}
                     style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',cursor:'pointer',transition:'all .2s'}}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
@@ -19345,7 +19604,7 @@ export default function LandingPage() {
                     <div style={{fontSize:12,fontWeight:700,color:V.cr,display:'inline-flex',alignItems:'center',gap:5}}>
                       Learn {lang.name} →
                     </div>
-                  </div>
+                  </a>
                 ))}
               </div>
             </div>
@@ -19365,9 +19624,9 @@ export default function LandingPage() {
               </div>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:12,marginBottom:24}}>
                 {[
-                  { tier:'Beginner', cefr:'A1-A2', rate:'KSh 1,800/hr', bundle:'20 sessions · KSh 32,000', desc:'Foundation. Build vocabulary, pronunciation, basic grammar.' },
-                  { tier:'Intermediate', cefr:'B1-B2', rate:'KSh 2,200/hr', bundle:'30 sessions · KSh 60,000', desc:'Independent communication. University-prep level.' },
-                  { tier:'Advanced', cefr:'C1-C2', rate:'KSh 2,500/hr', bundle:'40 sessions · KSh 95,000', desc:'Fluent academic and professional use.' },
+                  { tier:'Beginner', cefr:'A1-A2', rate:'USD 15/hr', bundle:'20 sessions · 30 hours · USD 450', desc:'Foundation. Build vocabulary, pronunciation, basic grammar.' },
+                  { tier:'Intermediate', cefr:'B1-B2', rate:'USD 15/hr', bundle:'30 sessions · 45 hours · USD 675', desc:'Independent communication. University-prep level.' },
+                  { tier:'Advanced', cefr:'C1-C2', rate:'USD 15/hr', bundle:'40 sessions · 60 hours · USD 900', desc:'Fluent academic and professional use.' },
                 ].map(p => (
                   <div key={p.tier} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px'}}>
                     <div style={{fontSize:11,fontWeight:700,color:V.gold3,letterSpacing:'.14em',textTransform:'uppercase',marginBottom:5}}>{p.cefr}</div>
@@ -19379,7 +19638,7 @@ export default function LandingPage() {
                 ))}
               </div>
               <div style={{padding:'14px 20px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,fontSize:13,color:V.sl,lineHeight:1.6,textAlign:'center'}}>
-                <strong style={{color:V.ink}}>Note:</strong> Kiswahili pricing starts lower (from KSh 1,500/hr). Exam preparation packages (DELF, DELE, Goethe, HSK, CILS) priced individually — see specific language pages.
+                <strong style={{color:V.ink}}>Note:</strong> All languages, Kiswahili included, are USD 15/hour (≈ KSh 1,940, approximate). Exam preparation packages (DELF, DELE, Goethe, HSK, CILS) priced individually — see specific language pages.
               </div>
             </div>
           </div></section>
@@ -19391,8 +19650,8 @@ export default function LandingPage() {
                 Start your <em style={{color:V.gold3,fontStyle:'italic'}}>language journey</em>
               </h2>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',marginTop:22}}>
-                <button onClick={() => nav('/assessment')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</a>
 </div>
             </div>
           </div></section>
@@ -19413,7 +19672,7 @@ export default function LandingPage() {
               '@context':'https://schema.org','@type':'Course',
               'name': 'Learn ' + lang.name + ' with Smartious',
               'description': lang.seoDesc,
-              'provider':{'@type':'EducationalOrganization','name':'Smartious','url':'https://smartioushomeschool.com'},
+              'provider': ORG_REF,
               'inLanguage': lang.slug,
             })}}/>
             <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
@@ -19464,8 +19723,8 @@ export default function LandingPage() {
                   </div>
                 </div>
                 <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
-                  <button onClick={() => nav('/assessment')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer'}}>Book assessment</a>
 </div>
               </div>
             </section>
@@ -19607,8 +19866,8 @@ export default function LandingPage() {
                   Start learning <em style={{color:V.gold3,fontStyle:'italic'}}>{lang.name}</em> today
                 </h2>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',marginTop:22}}>
-                  <button onClick={() => nav('/assessment')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</a>
 </div>
               </div>
             </div></section>
@@ -19628,8 +19887,9 @@ export default function LandingPage() {
         <>
           <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
             '@context':'https://schema.org','@type':'EducationalOrganization',
-            'name':'Smartious Homeschool Global',
-            'url':'https://smartioushomeschool.com/homeschool',
+            '@id': ORG_ID,
+            'name': SITE,
+            'url':'https://smartioushomeschool.com/',
             'description':'Premium homeschooling worldwide. Cambridge IGCSE, A-Level, IB, American, Kenya CBC curricula. Online, in-centre and home tutoring delivery across Kenya, UAE and 40+ countries.',
           })}}/>
 
@@ -19648,8 +19908,8 @@ export default function LandingPage() {
                 Full curriculum delivery for K-12 students across 5 curricula and 40+ countries. Live 1-on-1 lessons with qualified teachers, structured progress tracking and university-pathway planning — built for families serious about their child's academic future.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                <button onClick={() => nav('/assessment')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
             </div>
           </section>
@@ -19671,8 +19931,8 @@ export default function LandingPage() {
                   { code:'US', name:'American Curriculum', desc:'Elementary through high school. SAT/AP integration.', flag:'🇺🇸' },
                   { code:'CBC', name:'Kenya CBC', desc:'Grade 1-12. Aligned with KICD and KCSE pathways.', flag:'🇰🇪' },
                 ].map(c => (
-                  <div key={c.code}
-                    onClick={() => P('curricula')}
+                  <a className="lp-divlink" key={c.code}
+                    href={pageToPath('curricula')} onClick={linkClick(() => P('curricula'))}
                     style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'18px 20px',cursor:'pointer',transition:'all .2s'}}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)' }}>
@@ -19680,7 +19940,7 @@ export default function LandingPage() {
                     <div style={{fontSize:10.5,fontWeight:700,color:V.gold3,letterSpacing:'.14em',marginBottom:4}}>{c.code}</div>
                     <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{c.name}</h3>
                     <div style={{fontSize:11.5,color:V.sl,lineHeight:1.55}}>{c.desc}</div>
-                  </div>
+                  </a>
                 ))}
               </div>
             </div>
@@ -19744,22 +20004,10 @@ export default function LandingPage() {
                   { name:'Somalia',       slug:'somalia',      flag:'🇸🇴', sub:'Mogadishu · diaspora families' },
                   { name:'Pakistan',      slug:'pakistan',     flag:'🇵🇰', sub:'Karachi · Lahore · Islamabad' },
                 ].map(c => (
-                  <div key={c.slug}
-                    onClick={() => {
-                      // USA, Canada, Kenya, Ethiopia, Rwanda, South Africa,
-                      // Qatar, Saudi Arabia have rich dedicated landing pages
-                      // — route directly. Others use country-detail.
-                      if (c.slug === 'usa') P('us-families')
-                      else if (c.slug === 'canada') P('ca-families')
-                      else if (c.slug === 'kenya') P('homeschooling-kenya')
-                      else if (c.slug === 'ethiopia') P('homeschooling-ethiopia')
-                      else if (c.slug === 'rwanda') P('homeschooling-rwanda')
-                      else if (c.slug === 'south-africa') P('homeschooling-south-africa')
-                      else if (c.slug === 'qatar') P('homeschooling-qatar')
-                      else if (c.slug === 'saudi-arabia') P('homeschooling-saudi-arabia')
-                      else if (c.slug === 'uae') P('homeschooling-uae')
-                      else openCountry(c.slug)
-                    }}
+                  <a key={c.slug} className="lp-divlink" href={'/online-school/' + c.slug}
+                    // Every country (including the rich hub pages) lives at
+                    // /online-school/<slug>; the router picks the right page.
+                    onClick={linkClick(() => openCountry(c.slug))}
                     style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'14px 16px',cursor:'pointer',transition:'all .2s'}}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 18px rgba(8,12,20,.06)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
@@ -19769,7 +20017,7 @@ export default function LandingPage() {
                     </div>
                     <div style={{fontSize:11,color:V.sl,lineHeight:1.5,marginBottom:8}}>{c.sub}</div>
                     <div style={{fontSize:11,fontWeight:700,color:V.cr}}>Homeschool {c.name} →</div>
-                  </div>
+                  </a>
                 ))}
               </div>
             </div>
@@ -19785,24 +20033,24 @@ export default function LandingPage() {
                 </h2>
               </div>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
-                <div
-                  onClick={() => P('homeschooling-kenya')}
+                <a className="lp-divlink"
+                  href={pageToPath('homeschooling-kenya')} onClick={linkClick(() => P('homeschooling-kenya'))}
                   style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',cursor:'pointer',transition:'all .2s'}}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
                   <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>Kenya cities (6)</h3>
                   <p style={{fontSize:12.5,color:V.sl,lineHeight:1.6,marginBottom:14}}>City-specific homeschool pages: Mombasa, Kisumu, Nakuru, Eldoret, Thika, Kiambu — each with KCSE alignment and Cambridge curriculum pathways.</p>
                   <div style={{fontSize:12,fontWeight:700,color:V.cr}}>View Kenya cities homeschool →</div>
-                </div>
-                <div
-                  onClick={() => P('home')}
+                </a>
+                <a className="lp-divlink"
+                  href={pageToPath('home')} onClick={linkClick(() => P('home'))}
                   style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',cursor:'pointer',transition:'all .2s'}}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
                   <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>All countries overview</h3>
                   <p style={{fontSize:12.5,color:V.sl,lineHeight:1.6,marginBottom:14}}>Comprehensive global view across all 16 destination guides — useful for diaspora families wanting to compare contexts and pathways.</p>
                   <div style={{fontSize:12,fontWeight:700,color:V.cr}}>View all countries →</div>
-                </div>
+                </a>
               </div>
             </div>
           </div></section>
@@ -19881,8 +20129,8 @@ export default function LandingPage() {
                 Start your child's <em style={{color:V.gold3,fontStyle:'italic'}}>Smartious</em> journey
               </h2>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',marginTop:22}}>
-                <button onClick={() => nav('/assessment')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</a>
 </div>
             </div>
           </div></section>
@@ -19899,9 +20147,9 @@ export default function LandingPage() {
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'EducationalOrganization',
-            '@id': 'https://smartioushomeschool.com/tuition-uk#org',
-            'name': 'Smartious — Private Tuition UK',
-            'url': 'https://smartioushomeschool.com/tuition-uk',
+            '@id': ORG_ID,
+            'name': SITE,
+            'url': 'https://smartioushomeschool.com/',
             'description': 'Live online private tuition for UK families across London, Manchester, Birmingham, Leeds, Bristol, Edinburgh. Cambridge IGCSE, A-Level, IB Diploma, 11+ and 13+ Common Entrance. From USD 15/hour.',
             'areaServed': UK_AREAS.map(a => ({ '@type': 'Place', 'name': a.name + ', ' + a.city })),
             'sameAs': ['https://smartioushomeschool.com'],
@@ -19933,20 +20181,20 @@ export default function LandingPage() {
                 Live online and in-person private tuition for UK families across London (Kensington, Chelsea, Notting Hill, Hampstead, Wimbledon, Dulwich), Manchester (Didsbury, Altrincham, Salford), Birmingham (Edgbaston, Solihull, Harborne), Leeds (Roundhay, Alwoodley), Bristol (Clifton, Redland), and Edinburgh (Morningside, New Town). Cambridge IGCSE, A-Level, IB Diploma, 11+ and 13+ Common Entrance preparation.
               </p>
               <div style={{display:'flex',gap:14,flexWrap:'wrap'}}>
-                <button onClick={() => nav('/assessment')}
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
                   style={{background:V.gold3,color:V.ink,border:'none',padding:'18px 34px',borderRadius:10,fontSize:15,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,boxShadow:'0 8px 24px rgba(201,151,58,.35)',transition:'all .18s ease'}}
                   onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(201,151,58,.5)' }}
                   onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(201,151,58,.35)' }}>
                   Book assessment
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
-                <button onClick={() => nav('/consult')}
+                </a>
+                <a className="lp-btnlink" href={'/consult'} onClick={linkClick(() => nav('/consult'))}
                   style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'16px 30px',borderRadius:10,fontSize:15,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,transition:'all .18s ease'}}
                   onMouseEnter={(e) => { e.currentTarget.style.borderColor = V.gold3; e.currentTarget.style.color = V.gold3; e.currentTarget.style.transform = 'translateY(-2px)' }}
                   onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.55)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'translateY(0)' }}>
                   Book Free Consultation
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
+                </a>
               </div>
             </div>
           </section>
@@ -20010,20 +20258,20 @@ export default function LandingPage() {
             <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.6rem,3vw,2rem)',fontWeight:700,color:'#fff',marginBottom:16}}>Book an assessment for your child</h2>
             <p style={{fontSize:15,color:'rgba(255,255,255,.85)',marginBottom:24,lineHeight:1.65}}>Two-gate admissions process. Submit the assessment request form — our Head of Admissions reviews every request within three business days. If accepted, the assessment fee is invoiced before the diagnostic is scheduled.</p>
             <div style={{display:'inline-flex',gap:14,flexWrap:'wrap',justifyContent:'center'}}>
-              <button onClick={() => nav('/assessment')}
+              <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
                 style={{background:V.gold3,color:V.ink,border:'none',padding:'18px 36px',borderRadius:10,fontSize:16,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,boxShadow:'0 10px 28px rgba(201,151,58,.4)',transition:'all .18s ease'}}
                 onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 36px rgba(201,151,58,.55)' }}
                 onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 28px rgba(201,151,58,.4)' }}>
                 Book assessment
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-              </button>
-              <button onClick={() => nav('/consult')}
+              </a>
+              <a className="lp-btnlink" href={'/consult'} onClick={linkClick(() => nav('/consult'))}
                 style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'16px 32px',borderRadius:10,fontSize:16,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,transition:'all .18s ease'}}
                 onMouseEnter={(e) => { e.currentTarget.style.borderColor = V.gold3; e.currentTarget.style.color = V.gold3; e.currentTarget.style.transform = 'translateY(-2px)' }}
                 onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.55)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'translateY(0)' }}>
                 Book Free Consultation
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-              </button>
+              </a>
             </div>
           </div></section>
         </>
@@ -20048,20 +20296,9 @@ export default function LandingPage() {
               ],
             })}}/>
             <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
-              '@context':'https://schema.org','@type':'LocalBusiness',
-              'name':'Smartious Tuition — ' + area.name,
-              'description': area.seoDesc,
-              'url':'https://smartioushomeschool.com/tuition-uk/' + area.slug,
-              'telephone':'+254745021212',
-              'email':'hello@smartioushomeschool.com',
-              'areaServed':{'@type':'Place','name': area.name + ', ' + area.city + ', UK'},
-              'address':{'@type':'PostalAddress','addressLocality': area.name,'addressRegion': area.city,'addressCountry':'GB'},
-              'priceRange':'From USD 15/hour',
-            })}}/>
-            <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
               '@context':'https://schema.org','@type':'Service',
               'serviceType':'Private Home & Online Tuition in ' + area.name,
-              'provider':{'@type':'EducationalOrganization','name':'Smartious Homeschool & eSchool'},
+              'provider': ORG_REF,
               'areaServed':{'@type':'Place','name': area.name + ', ' + area.city + ', UK'},
               'description': area.intro,
             })}}/>
@@ -20117,20 +20354,20 @@ export default function LandingPage() {
                   {area.intro}
                 </p>
                 <div style={{display:'flex',gap:14,flexWrap:'wrap'}}>
-                  <button onClick={() => nav('/assessment')}
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
                     style={{background:V.gold3,color:V.ink,border:'none',padding:'18px 34px',borderRadius:10,fontSize:15,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,boxShadow:'0 8px 24px rgba(201,151,58,.35)',transition:'all .18s ease'}}
                     onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(201,151,58,.5)' }}
                     onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(201,151,58,.35)' }}>
                     Book assessment
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </button>
-                  <button onClick={() => nav('/consult')}
+                  </a>
+                  <a className="lp-btnlink" href={'/consult'} onClick={linkClick(() => nav('/consult'))}
                     style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'16px 30px',borderRadius:10,fontSize:15,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,transition:'all .18s ease'}}
                     onMouseEnter={(e) => { e.currentTarget.style.borderColor = V.gold3; e.currentTarget.style.color = V.gold3; e.currentTarget.style.transform = 'translateY(-2px)' }}
                     onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.55)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'translateY(0)' }}>
                     Book Free Consultation
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </button>
+                  </a>
                 </div>
               </div>
             </section>
@@ -20244,20 +20481,20 @@ export default function LandingPage() {
               <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.6rem,3vw,2rem)',fontWeight:700,color:'#fff',marginBottom:16}}>Book an assessment for your child in {area.name}</h2>
               <p style={{fontSize:15,color:'rgba(255,255,255,.85)',marginBottom:24,lineHeight:1.65}}>Two-gate admissions process. Submit the assessment request form — our Head of Admissions reviews every request within three business days.</p>
               <div style={{display:'inline-flex',gap:14,flexWrap:'wrap',justifyContent:'center'}}>
-                <button onClick={() => nav('/assessment')}
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
                   style={{background:V.gold3,color:V.ink,border:'none',padding:'18px 34px',borderRadius:10,fontSize:15,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,boxShadow:'0 10px 28px rgba(201,151,58,.4)',transition:'all .18s ease'}}
                   onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 36px rgba(201,151,58,.55)' }}
                   onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 28px rgba(201,151,58,.4)' }}>
                   Book assessment
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
-                <button onClick={() => nav('/consult')}
+                </a>
+                <a className="lp-btnlink" href={'/consult'} onClick={linkClick(() => nav('/consult'))}
                   style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'16px 30px',borderRadius:10,fontSize:15,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,transition:'all .18s ease'}}
                   onMouseEnter={(e) => { e.currentTarget.style.borderColor = V.gold3; e.currentTarget.style.color = V.gold3; e.currentTarget.style.transform = 'translateY(-2px)' }}
                   onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.55)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'translateY(0)' }}>
                   Book Free Consultation
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
+                </a>
               </div>
             </div></section>
           </>
@@ -20274,8 +20511,9 @@ export default function LandingPage() {
         <>
           <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
             '@context':'https://schema.org','@type':'EducationalOrganization',
-            'name':'Smartious Tuition Global',
-            'url':'https://smartioushomeschool.com/tuition',
+            '@id': ORG_ID,
+            'name': SITE,
+            'url':'https://smartioushomeschool.com/',
             'description':'Premium 1-on-1 tuition worldwide. Mathematics, Sciences, English, Languages and exam preparation. Online, in-centre, and home tutoring across Kenya, UAE and 40+ countries.',
           })}}/>
 
@@ -20294,8 +20532,8 @@ export default function LandingPage() {
                 Specialist subject tuition delivered by qualified teachers. Mathematics, Sciences, English, Foreign Languages, IGCSE, A-Level, IB and exam preparation. Online live, in-centre at our Nairobi locations, or home tutoring across 21 Nairobi areas and 27 UAE areas.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                <button onClick={() => nav('/assessment')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
             </div>
           </section>
@@ -20322,7 +20560,7 @@ export default function LandingPage() {
                 ))}
               </div>
               <div style={{marginTop:18,textAlign:'center',fontSize:13,color:V.sl}}>
-                Plus all curricula-specific subjects across IGCSE, A-Level, IB, American and CBC. <span style={{color:V.cr,fontWeight:600,cursor:'pointer'}} onClick={()=>nav('/assessment')}>Don't see your subject? Ask us.</span>
+                Plus all curricula-specific subjects across IGCSE, A-Level, IB, American and CBC. <a href="/assessment" style={{color:V.cr,fontWeight:600,cursor:'pointer'}} onClick={linkClick(() => nav('/assessment'))}>Don't see your subject? Ask us.</a>
               </div>
             </div>
           </div></section>
@@ -20370,15 +20608,15 @@ export default function LandingPage() {
                   { h:'UAE (27 areas)', d:'Downtown Dubai, Business Bay, JBR, Palm Jumeirah, Abu Dhabi, Sharjah, Al Ain and more', id:'tuition-uae', cta:'View UAE tuition →' },
                   { h:'Online — 40+ countries', d:'Live 1-on-1 sessions to any timezone. UK, USA, Canada, Qatar, South Africa, Nigeria and more', id:'home', cta:'View all countries →' },
                 ].map(r => (
-                  <div key={r.h}
-                    onClick={() => P(r.id)}
+                  <a className="lp-divlink" key={r.h}
+                    href={pageToPath(r.id)} onClick={linkClick(() => P(r.id))}
                     style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',cursor:'pointer',transition:'all .2s'}}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
                     <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{r.h}</h3>
                     <p style={{fontSize:12.5,color:V.sl,lineHeight:1.6,marginBottom:14}}>{r.d}</p>
                     <div style={{fontSize:12,fontWeight:700,color:V.cr}}>{r.cta}</div>
-                  </div>
+                  </a>
                 ))}
               </div>
             </div>
@@ -20429,8 +20667,8 @@ export default function LandingPage() {
                 Find the right <em style={{color:V.gold3,fontStyle:'italic'}}>tutor</em> for your child
               </h2>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',marginTop:22}}>
-                <button onClick={() => nav('/assessment')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</a>
 </div>
             </div>
           </div></section>
@@ -20448,7 +20686,7 @@ export default function LandingPage() {
             '@context':'https://schema.org','@type':'Course',
             'name': 'International University Foundation Programme (IUFP)',
             'description': 'One-year foundation programme bridging Kenyan and African secondary school graduates to top international universities. Academic preparation in Business, Science, Engineering, and Humanities streams.',
-            'provider':{'@type':'EducationalOrganization','name':'Smartious','url':'https://smartioushomeschool.com'},
+            'provider': ORG_REF,
           })}}/>
 
           {/* HERO */}
@@ -20466,8 +20704,8 @@ export default function LandingPage() {
                 A one-year academic foundation programme designed to prepare Kenyan and African secondary school graduates for direct entry to top universities in the UK, Australia, Canada and the US. IUFP bridges the gap between KCSE/national qualifications and international university entry requirements.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                <button onClick={() => nav('/assessment')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</a>
 </div>
             </div>
           </section>
@@ -20586,8 +20824,8 @@ export default function LandingPage() {
                 Start your <em style={{color:V.gold3,fontStyle:'italic'}}>IUFP</em> pathway
               </h2>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',marginTop:22}}>
-                <button onClick={() => nav('/assessment')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</a>
 </div>
             </div>
           </div></section>
@@ -20604,7 +20842,7 @@ export default function LandingPage() {
             '@context':'https://schema.org','@type':'Course',
             'name': 'Pre-University Academic Preparation',
             'description': 'Intensive gap-year and pre-university academic preparation programme. A-Level intensive, IB Diploma preparation, AP coursework, and university entrance examination preparation.',
-            'provider':{'@type':'EducationalOrganization','name':'Smartious','url':'https://smartioushomeschool.com'},
+            'provider': ORG_REF,
           })}}/>
 
           {/* HERO */}
@@ -20622,8 +20860,8 @@ export default function LandingPage() {
                 A structured gap-year academic programme for students who have completed secondary school and want focused preparation before starting university. Subject-specific intensive coursework, university entrance examination preparation and academic skills development.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                <button onClick={() => nav('/assessment')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</a>
 </div>
             </div>
           </section>
@@ -20740,8 +20978,8 @@ export default function LandingPage() {
                 Build your <em style={{color:V.gold3,fontStyle:'italic'}}>pre-university</em> pathway
               </h2>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',marginTop:22}}>
-                <button onClick={() => nav('/assessment')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</a>
 </div>
             </div>
           </div></section>
@@ -20757,9 +20995,9 @@ export default function LandingPage() {
         <>
           <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
             '@context':'https://schema.org','@type':'EducationalOrganization',
-            '@id':'https://smartioushomeschool.com/study-abroad#org',
-            'name':'Smartious Study Abroad',
-            'url':'https://smartioushomeschool.com/study-abroad',
+            '@id': ORG_ID,
+            'name': SITE,
+            'url':'https://smartioushomeschool.com/',
             'description':'Free university application support for Kenyan and African students. UK, USA, Canada, Australia, Germany, Netherlands, Ireland, China, Turkey, UAE.',
           })}}/>
 
@@ -20789,8 +21027,8 @@ export default function LandingPage() {
                   <div style={{fontSize:13,fontWeight:700,color:'#fff'}}>100% free for students · No consultation fees · No application processing fees</div>
                 </div>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => nav('/assessment')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
               </div>
             </div>
@@ -20837,8 +21075,8 @@ export default function LandingPage() {
               </div>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:14}}>
                 {STUDY_ABROAD.map(dest => (
-                  <div key={dest.slug}
-                    onClick={() => { setCurrentStudyAbroad(dest.slug); nav('/study-abroad/' + dest.slug); window.scrollTo(0,0) }}
+                  <a className="lp-divlink" key={dest.slug}
+                    href={'/study-abroad/' + dest.slug} onClick={linkClick(() => { setCurrentStudyAbroad(dest.slug); nav('/study-abroad/' + dest.slug); window.scrollTo(0,0) })}
                     style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',cursor:'pointer',transition:'all .2s'}}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.08)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
@@ -20856,7 +21094,7 @@ export default function LandingPage() {
                     <div style={{fontSize:12,fontWeight:700,color:V.cr,display:'inline-flex',alignItems:'center',gap:5}}>
                       Explore {dest.name} →
                     </div>
-                  </div>
+                  </a>
                 ))}
               </div>
             </div>
@@ -20943,7 +21181,7 @@ export default function LandingPage() {
                   { q:'What costs are involved?', a:'Smartious services are free. Costs paid directly by students/families: university application fees (varies $50-150 per university), English tests (IELTS ~$220, TOEFL ~$220, SAT ~$93), visa fees (varies), tuition and living costs after admission. Scholarships can cover much or all of tuition and living costs.' },
                   { q:'What if I don\'t have strong KCSE grades?', a:'Different destinations have different entry thresholds, and many pathways exist for students with KCSE B (Plain) or lower — foundation years, pathway programmes, applied universities, community college transfer routes. We work with realistic profiles, not just the top tier. Honest assessment in the first consultation is the starting point.' },
                   { q:'Can my family come with me?', a:'Depends on destination and visa type. Generally: Canada and Australia offer the most family-friendly student visa rules (spouse work rights, children in public schools). UK allows family for postgraduate students only. USA F-1 visa allows family but spouses don\'t get work rights. We advise on family accommodation pathway for each destination.' },
-                  { q:'Do you help with English test preparation?', a:'Yes — Smartious Test Prep is our dedicated English and admissions test preparation programme. IELTS, TOEFL, PTE at KSh 29,000 for 20 sessions. GRE, GMAT, SAT at KSh 59,000 for 40 sessions. This is a paid service separate from the free study abroad consulting.' },
+                  { q:'Do you help with English test preparation?', a:'Yes — Smartious Test Prep is our dedicated English and admissions test preparation programme. IELTS, TOEFL and PTE: 20 sessions (30 hours). GRE, GMAT and SAT: 40 sessions (60 hours). All at USD 15/hour. This is a paid service separate from the free study abroad consulting.' },
                   { q:'When should I start preparing for study abroad?', a:'Ideally 18-24 months before intended start date. This timeline allows for: English test preparation, university research and shortlisting, application preparation and submission, scholarship applications (often have early deadlines), visa application and pre-departure preparation. Starting earlier than 24 months can be premature; starting later than 12 months limits options.' },
                   { q:'How do you choose universities for me?', a:'We build personalised shortlists based on: your academic profile (KCSE grades, subject grades, achievements), career goals, programme preferences, geographic preferences, family budget and scholarship needs, post-study residence ambitions. Most students end up with 5-12 university applications strategically balanced across reach/match/safety options.' },
                 ]
@@ -20976,8 +21214,8 @@ export default function LandingPage() {
                 Book an assessment and we'll map out your most realistic path to your top university destinations.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                <button onClick={() => nav('/assessment')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</a>
 </div>
             </div>
           </div></section>
@@ -20998,7 +21236,7 @@ export default function LandingPage() {
               '@context':'https://schema.org','@type':'Service',
               'name': 'Study in ' + dest.fullName + ' — Free Application Support',
               'description': dest.seoDesc,
-              'provider':{'@type':'EducationalOrganization','name':'Smartious','url':'https://smartioushomeschool.com'},
+              'provider': ORG_REF,
               'areaServed': dest.fullName,
               'offers':{'@type':'Offer','price':'0','priceCurrency':'KES','description':'Free university application support'},
             })}}/>
@@ -21041,8 +21279,8 @@ export default function LandingPage() {
                   <div style={{fontSize:13,fontWeight:700,color:'#fff'}}>Smartious Study in {dest.name} — 100% free for students</div>
                 </div>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => nav('/assessment')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
               </div>
             </section>
@@ -21256,8 +21494,8 @@ export default function LandingPage() {
                   Book an assessment and we'll build a personalised application strategy for {dest.fullName}.
                 </p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                  <button onClick={() => nav('/assessment')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</a>
 </div>
               </div>
             </div></section>
@@ -21358,10 +21596,10 @@ export default function LandingPage() {
                 Follow announcements on WhatsApp or browse the blog for event recaps and academic insights.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                <button onClick={() => P('blog')}
+                <a className="lp-btnlink" href={pageToPath('blog')} onClick={linkClick(() => P('blog'))}
                   style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 28px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer'}}>
                   View blog
-                </button>
+                </a>
 </div>
             </div>
           </div></section>
@@ -21385,7 +21623,7 @@ export default function LandingPage() {
                 School <em style={{color:V.gold3,fontStyle:'italic'}}>calendar</em>
               </h1>
               <p style={{fontSize:16,color:'rgba(255,255,255,.92)',lineHeight:1.7,maxWidth:720}}>
-                Term dates, examination periods, holidays and key academic milestones for the 2025-2026 academic year.
+                Term dates, examination periods, holidays and key academic milestones for the 2026–27 academic year.
               </p>
             </div>
           </section>
@@ -21394,21 +21632,20 @@ export default function LandingPage() {
           <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:48}}><div className="wrap">
             <div style={{maxWidth:1000,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:32}}>
-                <div className="eyebrow" style={{justifyContent:'center'}}>2025-2026 academic year</div>
+                <div className="eyebrow" style={{justifyContent:'center'}}>2026–27 academic year</div>
                 <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                   Three <em style={{color:V.cr,fontStyle:'italic'}}>terms</em>, three breaks
                 </h2>
               </div>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
                 {[
-                  { term:'Term 1', dates:'25 August 2025 — 5 December 2025', weeks:'15 weeks', halfTerm:'Half-term: 9 - 21 October 2025', focus:'Onboarding, curriculum foundation, mid-term checkpoints, end-of-term assessments. Exeat weekend 12-14 September.' },
-                  { term:'Term 2', dates:'5 January 2026 — 27 March 2026', weeks:'12 weeks', halfTerm:'Half-term: 13 - 22 February 2026', focus:'Deep curriculum delivery, mock examinations, university application support (Year 12-13).' },
-                  { term:'Term 3', dates:'21 April 2026 — 3 July 2026', weeks:'10 weeks', halfTerm:'Half-term: 22 May - 2 June 2026', focus:'Cambridge & Edexcel examinations (May-June), revision, year-end celebrations, prize-giving.' },
+                  { term:'Term 1', dates:'From 25 August 2026 — ends December 2026', halfTerm:'Half-term: October 2026', focus:'Onboarding, curriculum foundation, mid-term checkpoints, end-of-term assessments.' },
+                  { term:'Term 2', dates:'From 5 January 2027 — ends March 2027', halfTerm:'Half-term: February 2027', focus:'January 2027 intake. Deep curriculum delivery, mock examinations, university application support (Year 12-13).' },
+                  { term:'Term 3', dates:'From 13 April 2027 — ends July 2027', halfTerm:'Half-term: May 2027', focus:'Cambridge & Edexcel examinations (May-June), revision, year-end celebrations, prize-giving.' },
                 ].map(t => (
                   <div key={t.term} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px'}}>
                     <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',color:V.cr,marginBottom:6,fontWeight:400}}>{t.term}</div>
                     <div style={{fontSize:13.5,color:V.ink,fontWeight:700,marginBottom:6}}>{t.dates}</div>
-                    <div style={{fontSize:11.5,color:V.gold3,fontWeight:700,letterSpacing:'.06em',marginBottom:8}}>{t.weeks}</div>
                     <div style={{fontSize:11.5,color:V.sl2,fontWeight:600,marginBottom:10,padding:'4px 8px',background:'rgba(201,151,58,.08)',borderRadius:6,display:'inline-block'}}>{t.halfTerm}</div>
                     <p style={{fontSize:12.5,color:V.sl,lineHeight:1.65,margin:0}}>{t.focus}</p>
                   </div>
@@ -21428,9 +21665,9 @@ export default function LandingPage() {
               </div>
               <div style={{display:'flex',flexDirection:'column',gap:10}}>
                 {[
-                  { break_:'Christmas Break', dates:'6 December 2025 — 4 January 2026', notes:'4-week break. Term 1 reports issued. Pre-term communications for Term 2 sent late December.' },
-                  { break_:'Easter Break', dates:'28 March 2026 — 20 April 2026', notes:'3-week break. Mock examination results discussed. Final UCAS confirmation deadline approaches.' },
-                  { break_:'Summer Break', dates:'4 July 2026 — 24 August 2026', notes:'7-week break. KCSE preparation programmes optional. New academic year preparation begins.' },
+                  { break_:'Christmas Break', dates:'December 2026 — January 2027', notes:'Term 1 reports issued. Pre-term communications for Term 2 sent in December. Term 2 starts 5 January 2027.' },
+                  { break_:'Easter Break', dates:'March — April 2027', notes:'Mock examination results discussed. Term 3 starts 13 April 2027.' },
+                  { break_:'Summer Break', dates:'July — August 2027', notes:'KCSE preparation programmes optional. New academic year preparation begins.' },
                 ].map(b => (
                   <div key={b.break_} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'14px 18px'}}>
                     <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:12,flexWrap:'wrap',marginBottom:6}}>
@@ -21444,37 +21681,13 @@ export default function LandingPage() {
             </div>
           </div></section>
 
-          {/* NEXT ACADEMIC YEAR PREVIEW */}
-          <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:48}}><div className="wrap">
-            <div style={{maxWidth:1000,margin:'0 auto'}}>
-              <div style={{textAlign:'center',marginBottom:32}}>
-                <div className="eyebrow" style={{justifyContent:'center'}}>Looking ahead</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
-                  <em style={{color:V.cr,fontStyle:'italic'}}>2026-2027</em> academic year preview
-                </h2>
-                <p style={{fontSize:13,color:V.sl,maxWidth:680,margin:'14px auto 0',lineHeight:1.7}}>
-                  Preliminary term dates for the next academic year. Subject to minor adjustments — final calendar published in May 2026.
-                </p>
-              </div>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:12}}>
-                {[
-                  { term:'Term 1', dates:'25 August 2026 — 4 December 2026', halfTerm:'Half-term: 12 - 16 October 2026', note:'INSET week 17-21 August (teacher training)' },
-                  { term:'Term 2', dates:'5 January 2027 — 25 March 2027', halfTerm:'Half-term: 15 - 19 February 2027', note:'Mock examination period' },
-                  { term:'Term 3', dates:'13 April 2027 — Early July 2027', halfTerm:'Half-term: Late May 2027', note:'External examinations (provisional)' },
-                ].map(t => (
-                  <div key={t.term} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'16px 18px'}}>
-                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',color:V.cr,marginBottom:6,fontWeight:400}}>{t.term}</div>
-                    <div style={{fontSize:13,color:V.ink,fontWeight:700,marginBottom:6}}>{t.dates}</div>
-                    <div style={{fontSize:11.5,color:V.sl2,fontWeight:600,marginBottom:8,padding:'4px 8px',background:'rgba(201,151,58,.08)',borderRadius:6,display:'inline-block'}}>{t.halfTerm}</div>
-                    <p style={{fontSize:11.5,color:V.sl,lineHeight:1.6,margin:0,fontStyle:'italic'}}>{t.note}</p>
-                  </div>
-                ))}
-              </div>
-              <div style={{marginTop:18,padding:'14px 18px',background:V.bone2,border:`1px solid ${V.bone3}`,borderRadius:10,textAlign:'center'}}>
-                <p style={{fontSize:12.5,color:V.sl,lineHeight:1.7,margin:0}}>
-                  <strong style={{color:V.ink}}>Calendar alignment:</strong> Our academic calendar aligns with major Nairobi international schools so families with children in different schools can plan family time and travel together.
-                </p>
-              </div>
+          {/* JANUARY 2027 INTAKE */}
+          <IntakeCta nav={nav}/>
+          <section className="sec" style={{background:V.white,paddingTop:32,paddingBottom:8}}><div className="wrap">
+            <div style={{maxWidth:900,margin:'0 auto',padding:'14px 18px',background:V.bone2,border:`1px solid ${V.bone3}`,borderRadius:10,textAlign:'center'}}>
+              <p style={{fontSize:12.5,color:V.sl,lineHeight:1.7,margin:0}}>
+                <strong style={{color:V.ink}}>Calendar alignment:</strong> Our academic calendar aligns with major Nairobi international schools so families with children in different schools can plan family time and travel together.
+              </p>
             </div>
           </div></section>
 
@@ -21501,11 +21714,11 @@ export default function LandingPage() {
                   </thead>
                   <tbody>
                     {[
-                      ['Cambridge IGCSE (Main series)', 'May - June 2026', 'August 2026'],
-                      ['Cambridge A-Level (Main series)', 'May - June 2026', 'August 2026'],
-                      ['Pearson Edexcel IGCSE', 'May - June 2026', 'August 2026'],
-                      ['IB Diploma Examinations', 'May 2026', 'July 2026'],
-                      ['SAT International', 'Mar, May, June, Aug 2026', '2-4 weeks after test'],
+                      ['Cambridge IGCSE (Main series)', 'May - June 2027', 'August 2027'],
+                      ['Cambridge A-Level (Main series)', 'May - June 2027', 'August 2027'],
+                      ['Pearson Edexcel IGCSE', 'May - June 2027', 'August 2027'],
+                      ['IB Diploma Examinations', 'May 2027', 'July 2027'],
+                      ['SAT International', 'Several dates a year', '2-4 weeks after test'],
                       ['IELTS / TOEFL', 'Monthly (multiple dates)', '5-13 days after test'],
                       ['KCSE (Form 4 candidates)', 'October - November 2026', 'January 2027'],
                     ].map(([e, p, r], i) => (
@@ -21645,7 +21858,7 @@ export default function LandingPage() {
               { '@type': 'Place', 'name': 'Petronas Twin Towers', 'address': { '@type': 'PostalAddress', 'addressCountry': 'MY', 'addressLocality': 'Kuala Lumpur' } },
               { '@type': 'Place', 'name': 'Batu Caves', 'address': { '@type': 'PostalAddress', 'addressCountry': 'MY', 'addressLocality': 'Selangor' } },
             ],
-            'organizer': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'url': 'https://smartioushomeschool.com/' },
+            'organizer': ORG_REF,
             'offers': {
               '@type': 'Offer',
               'price': '1950',
@@ -21656,7 +21869,7 @@ export default function LandingPage() {
               'validFrom': '2026-06-01',
             },
             'audience': { '@type': 'EducationalAudience', 'audienceType': 'Students aged 10-18' },
-            'image': 'https://smartioushomeschool.com/smartious-logo.png',
+            'image': 'https://smartioushomeschool.com/brand/logo.png',
           })}}/>
           <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
             '@context': 'https://schema.org',
@@ -23028,13 +23241,13 @@ export default function LandingPage() {
               Sports. Music. Code. Leadership. Friendship. Every Wednesday, 2–4 PM, your child is somewhere they want to be — building skills no exam paper can measure.
             </p>
             <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-              <button onClick={() => nav('/assessment')}
+              <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
                 style={{
                   background:V.gold2, color:V.ink, border:'none',
                   padding:'13px 28px', borderRadius:8,
                   fontSize:14, fontWeight:800, cursor:'pointer',
                   display:'inline-flex', alignItems:'center', gap:8,
-                }}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                }}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
 
             <div style={{marginTop:32,paddingTop:24,borderTop:'1px solid rgba(255,255,255,.15)',fontSize:12,color:'rgba(255,255,255,.6)',letterSpacing:'.04em'}}>
@@ -23172,8 +23385,8 @@ export default function LandingPage() {
                     display:'flex',gap:10,flexWrap:'wrap',
                     marginTop:22,paddingTop:20,borderTop:'1px solid '+V.line,
                   }}>
-                    <button
-                      onClick={() => { setOpenActivity(null); nav('/assessment') }}
+                    <a className="lp-btnlink"
+                      href={'/assessment'} onClick={linkClick(() => { setOpenActivity(null); nav('/assessment') })}
                       style={{
                         padding:'11px 22px',borderRadius:8,
                         background:openActivity.c,color:'#fff',border:'none',
@@ -23182,7 +23395,7 @@ export default function LandingPage() {
                       }}>
                       Book assessment
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </button>
+                    </a>
 <button
                       onClick={() => setOpenActivity(null)}
                       style={{
@@ -23286,10 +23499,10 @@ export default function LandingPage() {
               )
             })()}
             <div style={{textAlign:'center',marginTop:48}}>
-              <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+              <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
             </div>
           </div></section>
-          <GuideCrossLinks guideSlug="homeschooling-uk-2026-guide" guideName="Homeschooling in the UK: The Complete 2026 Guide" hubHref="/online-school/uk" hubName="Smartious in the United Kingdom"/>
+          <GuideCrossLinks guideSlug="homeschooling-uk-2026-guide" guideName="Homeschooling in the UK: The Complete 2026 Guide" hubHref="/online-school/united-kingdom" hubName="Smartious in the United Kingdom"/>
         </>
       )}
 
@@ -23322,7 +23535,7 @@ export default function LandingPage() {
             <div style={{textAlign:'center',marginTop:44}}>
               <p style={{fontSize:15,color:V.sl,marginBottom:18}}>Still have questions? We answer within 2 hours.</p>
               <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
-<button className="btn-o" onClick={() => nav('/assessment')}>Book assessment</button>
+<a className="btn-o lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment</a>
               </div>
             </div>
           </div></section>
@@ -23463,7 +23676,7 @@ export default function LandingPage() {
                 <div className="eyebrow">Article Not Found</div>
                 <h1 className="pg-h">That article <em>isn't available</em></h1>
                 <p className="pg-sub" style={{marginTop:12}}>The article you're looking for may have been moved. Browse all our articles below.</p>
-                <button className="btn-p" style={{marginTop:24}} onClick={() => P('blog')}>← Back to Blog</button>
+                <a className="btn-p lp-btnlink" style={{marginTop:24}} href={pageToPath('blog')} onClick={linkClick(() => P('blog'))}>← Back to Blog</a>
               </div></div>
                 </>
           )
@@ -23489,12 +23702,12 @@ export default function LandingPage() {
               {/* Gold accent bar at the very top */}
               <div style={{position:'absolute',top:0,left:0,right:0,height:3,background:`linear-gradient(90deg,transparent 0%,${V.gold3} 50%,transparent 100%)`,zIndex:3}}/>
               <div style={{maxWidth:860,margin:'0 auto',position:'relative',zIndex:2}}>
-                <button onClick={() => P('blog')} style={{background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.15)',color:'rgba(255,255,255,.85)',padding:'7px 14px',borderRadius:20,fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",marginBottom:22,display:'inline-flex',alignItems:'center',gap:6,transition:'all .2s',backdropFilter:'blur(8px)',WebkitBackdropFilter:'blur(8px)'}}
+                <a className="lp-btnlink" href={pageToPath('blog')} onClick={linkClick(() => P('blog'))} style={{background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.15)',color:'rgba(255,255,255,.85)',padding:'7px 14px',borderRadius:20,fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",marginBottom:22,display:'inline-flex',alignItems:'center',gap:6,transition:'all .2s',backdropFilter:'blur(8px)',WebkitBackdropFilter:'blur(8px)'}}
                   onMouseEnter={e=>{e.currentTarget.style.background='rgba(255,255,255,.14)';e.currentTarget.style.borderColor='rgba(255,255,255,.28)'}}
                   onMouseLeave={e=>{e.currentTarget.style.background='rgba(255,255,255,.08)';e.currentTarget.style.borderColor='rgba(255,255,255,.15)'}}>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                   Back to Blog
-                </button>
+                </a>
                 <div style={{display:'inline-block',padding:'4px 12px',background:'rgba(201,151,58,.15)',border:'1px solid rgba(201,151,58,.3)',color:V.gold3,fontSize:10.5,fontWeight:700,letterSpacing:'.1em',borderRadius:20,marginBottom:18,textTransform:'uppercase',backdropFilter:'blur(8px)',WebkitBackdropFilter:'blur(8px)'}}>
                   {a.cat === 'study-abroad' ? 'Study Abroad' : a.cat}
                 </div>
@@ -23661,7 +23874,7 @@ export default function LandingPage() {
                       <a className="btn-o" href={prod.links[0].href} onClick={e => { e.preventDefault(); nav(prod.links[0].href) }}
                         style={{color:V.white,borderColor:'rgba(255,255,255,.3)',textDecoration:'none'}}>{prod.links[0].label} →</a>
                     )}
-                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                    <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
                   </div>
                 </div>
 
@@ -23742,6 +23955,7 @@ export default function LandingPage() {
             <h1 className="pg-h">Apply to <em>Smartious</em></h1>
             <p className="pg-sub" style={{marginTop:12}}>Select your curriculum and year level. Pay the application fee online. Our admissions team responds within 1 working day with the next steps.</p>
           </div></div>
+          <IntakeCta nav={nav} compact/>
 
           {/* STEP 1 — CURRICULUM PICKER */}
           <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
@@ -24054,7 +24268,10 @@ export default function LandingPage() {
           invoices the assessment fee separately if the request is accepted.
           AssessmentForm is fully self-contained (own header, no Footer needed). */}
       {page === 'assessment' && (
-        <AssessmentForm nav={nav}/>
+        <>
+          <IntakeCta nav={nav} compact/>
+          <AssessmentForm nav={nav}/>
+        </>
       )}
 
       {/* ══ CONTACT PAGE ══ */}
@@ -24071,10 +24288,10 @@ export default function LandingPage() {
               <div className="contact-info-card">
                 <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',color:'#FFFFFF',marginBottom:8}}>Our <em style={{color:'#C9973A',fontStyle:'italic'}}>Details</em></div>
                 {[
-                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#C9973A" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42C1.6 2.34 2.33 1.4 3.41 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.81-.81a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>, label:'Admissions', value:'+254 745 021 212', sub:'admissions@smartioushomeschool.com · Call or WhatsApp', href:'mailto:admissions@smartioushomeschool.com'},
-                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#C9973A" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42C1.6 2.34 2.33 1.4 3.41 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.81-.81a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>, label:'Academics', value:'+254 182 071 920', sub:'academics@smartioushomeschool.com · Head of Academics', href:'mailto:academics@smartioushomeschool.com'},
+                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#C9973A" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42C1.6 2.34 2.33 1.4 3.41 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.81-.81a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>, label:'Admissions', value:'+254 745 021 212', sub:'hello@smartioushomeschool.com · Call or WhatsApp', href:'tel:+254745021212'},
+                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#C9973A" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42C1.6 2.34 2.33 1.4 3.41 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.81-.81a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>, label:'Academics', value:'+254 182 071 920', sub:'hello@smartioushomeschool.com · Head of Academics', href:'tel:+254182071920'},
                   {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#C9973A" strokeWidth="2" strokeLinecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>, label:'Administration', value:'hello@smartioushomeschool.com', sub:'Accounts, support and general matters', href:'mailto:hello@smartioushomeschool.com'},
-{icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#C9973A" strokeWidth="2" strokeLinecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>, label:'Office', value:'Diamond Plaza I, Parklands', sub:'Nairobi, Kenya · 4th Avenue', href:'https://maps.google.com/?q=Diamond+Plaza+Parklands+Nairobi'},
+{icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#C9973A" strokeWidth="2" strokeLinecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>, label:'Office', value:'Diamond Plaza I Annex, 3rd Floor, Office 20', sub:'Parklands, Nairobi · plus our Karen centre', href:'https://maps.google.com/?q=Diamond+Plaza+Parklands+Nairobi'},
                 ].map(({icon,label,value,sub,href}) => (
                   <a key={label} href={href} target="_blank" rel="noreferrer" style={{textDecoration:'none'}} className="contact-method">
                     <div className="contact-icon">{icon}</div>
@@ -24118,24 +24335,24 @@ export default function LandingPage() {
             <input className="login-inp" type="email" placeholder="your@email.com"/>
             <label className="login-fl">Password</label>
             <input className="login-inp" type="password" placeholder="••••••••"/>
-            <button className="login-btn" onClick={goPortal}>
+            <a className="login-btn lp-btnlink" href={'/login'} onClick={linkClick(goPortal)}>
               <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
               Sign In to Portal
-            </button>
+            </a>
             <div style={{display:'flex',alignItems:'center',gap:12,margin:'20px 0'}}>
               <div style={{flex:1,height:1,background:'rgba(255,255,255,.07)'}}/>
               <span style={{fontSize:12,color:'rgba(247,243,237,.2)',whiteSpace:'nowrap'}}>Or use demo access</span>
               <div style={{flex:1,height:1,background:'rgba(255,255,255,.07)'}}/>
             </div>
-            <button style={{width:'100%',padding:12,background:'rgba(255,255,255,.06)',border:'1px solid rgba(255,255,255,.1)',borderRadius:8,color:V.white,fontWeight:700,fontSize:13.5,cursor:'pointer',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",display:'flex',alignItems:'center',justifyContent:'center',gap:8}} onClick={goPortal}>
+            <a className="lp-btnlink" style={{width:'100%',padding:12,background:'rgba(255,255,255,.06)',border:'1px solid rgba(255,255,255,.1)',borderRadius:8,color:V.white,fontWeight:700,fontSize:13.5,cursor:'pointer',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",display:'flex',alignItems:'center',justifyContent:'center',gap:8}} href={'/login'} onClick={linkClick(goPortal)}>
               <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
               Go to Full Login Page
-            </button>
+            </a>
           </div>
 
           {/* Quick demo card — Demo only */}
           <div style={{display:'flex',justifyContent:'center',marginTop:8}}>
-            <div className="lpf" style={{cursor:'pointer',minWidth:200,textAlign:'center'}} onClick={goPortal}>
+            <a className="lpf lp-divlink" style={{cursor:'pointer',minWidth:200,textAlign:'center'}} href={'/login'} onClick={linkClick(goPortal)}>
               <div style={{display:'flex',justifyContent:'center',marginBottom:8}}>
                 <div style={{width:40,height:40,borderRadius:10,background:'rgba(139,26,46,.3)',border:'1px solid rgba(139,26,46,.5)',display:'flex',alignItems:'center',justifyContent:'center'}}>
                   <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke={V.cr} strokeWidth="2" strokeLinecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
@@ -24144,7 +24361,7 @@ export default function LandingPage() {
               <div style={{fontWeight:700,fontSize:14,color:V.white,marginBottom:4}}>Try Demo</div>
               <div className="lpf-l">demo@smartious.ac.ke</div>
               <div className="lpf-s">One-click access · No sign up needed</div>
-            </div>
+            </a>
           </div>
         </div>
       )}
@@ -24204,30 +24421,30 @@ export default function LandingPage() {
                 </span>
                 Chat on WhatsApp
               </a>
-              <button className="fab-opt" onClick={() => { setFabOpen(false); nav('/assessment') }}>
+              <a className="fab-opt lp-btnlink" href={'/assessment'} onClick={linkClick(() => { setFabOpen(false); nav('/assessment') })}>
                 <span className="fab-opt-ic">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                 </span>
                 Start enrollment application
-              </button>
-              <button className="fab-opt" onClick={() => { setFabOpen(false); nav('/assessment') }}>
+              </a>
+              <a className="fab-opt lp-btnlink" href={'/assessment'} onClick={linkClick(() => { setFabOpen(false); nav('/assessment') })}>
                 <span className="fab-opt-ic">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                 </span>
                 Book an assessment
-              </button>
-              <button className="fab-opt" onClick={() => { setFabOpen(false); P('pricing') }}>
+              </a>
+              <a className="fab-opt lp-btnlink" href={pageToPath('pricing')} onClick={linkClick(() => { setFabOpen(false); P('pricing') })}>
                 <span className="fab-opt-ic">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                 </span>
                 View pricing & plans
-              </button>
-              <button className="fab-opt" onClick={() => { setFabOpen(false); P('curricula') }}>
+              </a>
+              <a className="fab-opt lp-btnlink" href={pageToPath('curricula')} onClick={linkClick(() => { setFabOpen(false); P('curricula') })}>
                 <span className="fab-opt-ic">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
                 </span>
                 Explore curricula
-              </button>
+              </a>
 <a
                 className="fab-opt"
                 href="mailto:hello@smartioushomeschool.com?subject=Smartious%20Enquiry"
@@ -24270,7 +24487,7 @@ export default function LandingPage() {
           </div>
           <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:20,maxWidth:820,margin:'0 auto'}}>
             {[
-              {name:'Diamond Plaza Parklands',est:'Head Office',addr:'Diamond Plaza Parklands, Annex, 3rd Floor',area:'Parklands, Nairobi'},
+              {name:'Diamond Plaza Parklands',est:'Head Office',addr:'Diamond Plaza I Annex, 3rd Floor, Office 20',area:'Parklands, Nairobi'},
               {name:'Karen Centre',est:'Second Centre',addr:'Mokoyeti West Road, off Langata Road, near Galleria Mall',area:'Karen, Nairobi'},
             ].map(loc => (
               <div key={loc.name} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,padding:'24px 26px',borderTop:`3px solid ${V.cr}`}}>
@@ -24326,7 +24543,7 @@ function ConsultForm({ P }) {
     const formatLabel = form.mode === 'online'
       ? 'Online via Google Meet'
       : form.venue === 'office'
-        ? 'In-person at Smartious Office (Diamond Plaza I, Parklands, Nairobi)'
+        ? 'In-person at Smartious Office (Diamond Plaza I Annex, 3rd Floor, Office 20, Parklands, Nairobi)'
         : `In-person home visit — ${form.address}`
     // Primary store: Front Desk database. Secondary: email copy.
     // The request succeeds if either path goes through.
@@ -24469,7 +24686,7 @@ function ConsultForm({ P }) {
           <label className="consult-label" style={{marginBottom:10}}>Where should we meet? *</label>
           <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:10}}>
             {[
-              {id:'office', title:'At our office', sub:'Diamond Plaza I · Parklands · Nairobi', icon:'<path d="M3 21h18M5 21V7l7-5 7 5v14"/><rect x="9" y="10" width="6" height="11"/>'},
+              {id:'office', title:'At our office', sub:'Diamond Plaza I Annex, 3rd Floor, Office 20, Parklands, Nairobi', icon:'<path d="M3 21h18M5 21V7l7-5 7 5v14"/><rect x="9" y="10" width="6" height="11"/>'},
               {id:'home',   title:'Home visit',    sub:'We come to you (Nairobi metro)',       icon:'<path d="M3 10l9-7 9 7M5 10v10h14V10"/>'},
             ].map(v => {
               const on = form.venue === v.id
@@ -24630,7 +24847,10 @@ function Footer({ P }) {
   const { siteConfig: cfg } = useStore()
   const footerNav = useNavigate()
   // Real hrefs so search engines can follow the footer; clicks stay in the SPA.
-  const go = (path, run) => ({ href: path, onClick: e => { e.preventDefault(); run() } })
+  const go = (path, run) => ({ href: path, onClick: e => {
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+    e.preventDefault(); run(); window.scrollTo(0, 0)
+  } })
   return (
     <footer>
       <div className="wrap">
@@ -24641,7 +24861,7 @@ function Footer({ P }) {
           </div>
           <div>
             <div className="ft-ch">Programmes</div>
-            <ul className="ft-lk">{['IGCSE','Cambridge A-Level','IB Diploma','CBC / KCSE','British Curriculum','American Curriculum','Smartious Blended'].map(l => <li key={l}><a {...go('/curricula', () => P('curricula'))}>{l}</a></li>)}</ul>
+            <ul className="ft-lk">{[['igcse','Cambridge IGCSE'],['a-level','Cambridge A-Level'],['ib-diploma','IB Diploma'],['ib-pyp-myp','IB PYP & MYP'],['edexcel','Pearson Edexcel'],['british-national-curriculum','British Curriculum'],['american-curriculum','American Curriculum'],['cbc-kcse','CBC / KCSE'],['smartious-blended','Smartious Blended']].map(([slug, l]) => <li key={slug}><a {...go('/curricula/' + slug, () => footerNav('/curricula/' + slug))}>{l}</a></li>)}</ul>
           </div>
           <div>
             <div className="ft-ch">Services</div>
@@ -24652,7 +24872,7 @@ function Footer({ P }) {
           <div>
             <div className="ft-ch">Online School</div>
             <ul className="ft-lk">
-              {[['kenya','Kenya'],['uae','UAE & Dubai'],['united-kingdom','United Kingdom'],['usa','USA'],['canada','Canada'],['nigeria','Nigeria'],['south-africa','South Africa'],['saudi-arabia','Saudi Arabia'],['qatar','Qatar'],['australia','Australia']].map(([slug, l]) => (
+              {[['kenya','Kenya'],['uae','UAE & Dubai'],['united-kingdom','United Kingdom'],['usa','USA'],['canada','Canada'],['nigeria','Nigeria'],['south-africa','South Africa'],['saudi-arabia','Saudi Arabia'],['qatar','Qatar'],['kuwait','Kuwait'],['bahrain','Bahrain'],['australia','Australia']].map(([slug, l]) => (
                 <li key={slug}><a {...go('/online-school/' + slug, () => footerNav('/online-school/' + slug))}>{l}</a></li>
               ))}
             </ul>
@@ -24674,7 +24894,7 @@ function Footer({ P }) {
               </a>
 <div style={{display:'flex',alignItems:'center',gap:7}}>
                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                Diamond Plaza Parklands and Karen, Nairobi, Kenya
+                Diamond Plaza I Annex, 3rd Floor, Office 20, Parklands, Nairobi · Karen centre
               </div>
             </div>
           </div>
