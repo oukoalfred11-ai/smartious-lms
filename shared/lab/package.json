@@ -1,0 +1,9 @@
+{
+  "name": "@smartious/lab-core",
+  "private": true,
+  "type": "module",
+  "description": "Smartious Virtual Science Laboratory: scientific models, experiment definitions and grading. No dependencies; shared by the frontend (Vite) and the backend (dynamic import).",
+  "scripts": {
+    "test": "node --test test/"
+  }
+}
