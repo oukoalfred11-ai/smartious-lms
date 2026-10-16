@@ -24,6 +24,14 @@ It uses the LMS login, roles and student records. There is no second account sys
 | Bulk publishing (publish a whole collection in one step) | Implemented, with each experiment checked first |
 | Further curricula and subjects, microscopy, editing experiments from the admin screen | Not implemented |
 
+## Hands-on bench
+
+- **Apparatus on the bench.** Every practical starts with its apparatus laid out, and listed reagents appear as labelled bottles. A teacher can tick "Students choose the apparatus themselves from the stockroom" when assigning; the apparatus choice is then marked.
+- **Wiring with leads.** Circuits are built from a tray of red and black leads: drag from one terminal post to another, or tap one post then the other (touch). Click a lead to select and remove it; click the switch to open or close it. Leads attach to the real posts on the 3D models. A keyboard alternative ("Connect using menus instead") is in the controls panel.
+- **Real behaviour when wired wrongly.** The circuit the student builds is solved with the same circuit solver. When it is correct, meters show the practical's model readings. When it is wrong, they show what that wiring would really give (for example a voltmeter in series reads about the e.m.f. with no current) or 0 where no resistive model is given, and the bench lists what is wrong. A short circuit trips the supply. The "Circuit built correctly" mark counts the readings taken with a correct circuit.
+- **Circuit practicals:** Ohm's law, 1.3 and 20 practicals in chapters 6–16. Not wired yet: 7.3 (needs a three-terminal sliding contact), 13.1 and 13.2 (need a two-way charge/discharge switch), 13.3, 13.5, 13.6, 14.5 (teacher demonstration) and practicals with no meter circuit. In practicals whose currents are in mA, or that use lamps, LEDs or a.c., a wrongly wired meter reads 0 rather than a solved value.
+- **Titration.** All the apparatus and reagents of the manual are on the bench (burette in its clamp, pipette and filler, funnel, flask on a white tile, NaOH and acid bottles, three indicator dropper bottles, wash bottle, beakers, goggles). Students fill the burette from the bottle, pipette the acid, add indicator drops, click the tap for one drop or press and hold it to let it run, and swirl the flask. The burette reading is never printed: students read the scale close-up.
+
 ## AS & A Level Physics practicals
 
 67 practicals across 16 chapters, from "Using apparatus" to "Quantum physics, nuclear physics and medical imaging". The topic list follows a standard AS & A Level practical course. **All procedures, models, questions and wording are Smartious's own; no textbook text is reproduced**, and nothing claims endorsement by an examination board. Curriculum links are marked unverified.

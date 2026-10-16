@@ -205,7 +205,7 @@ export function titration(lab, { dispatch, onSelect, onHover }) {
   lab.add(goggles, { pick: { kind: 'goggles', label: 'Safety goggles: wear them throughout the practical' } })
 
   // Acid side (left)
-  const acidBottle = reagentBottle('Acid\n? M', { body: '#F1F5F7', bodyOpacity: 0.55, cap: '#8B1A2E', seg })
+  const acidBottle = reagentBottle('Acid,\n? M', { body: '#F1F5F7', bodyOpacity: 0.55, cap: '#8B1A2E', seg })
   acidBottle.position.set(-0.3, B, -0.12)
   lab.add(acidBottle, { pick: { kind: 'acid' } })
   const acidBeaker = beakerWithTag('Acid', 0.6); acidBeaker.position.set(-0.2, B, 0.07)
@@ -250,6 +250,7 @@ export function titration(lab, { dispatch, onSelect, onHover }) {
   const applyFlask = (v) => { if (v) flask.userData.setLiquid(v.flask.volume, v.flask.colour); lab.invalidate() }
 
   function spawnDrop(pos, endY, colour) {
+    if (reduced) return false
     const d = drops.find(m => !m.visible)
     if (!d) return false
     d.position.copy(pos); d.userData.v = 0; d.userData.endY = endY
@@ -494,7 +495,7 @@ export function titration(lab, { dispatch, onSelect, onHover }) {
     const key = acid?.id || ''
     if (key === shownAcid) return
     shownAcid = key
-    acidBottle.userData.label.userData.setText((acid?.name || 'Acid') + '\n? M')
+    acidBottle.userData.label.userData.setText((acid?.name || 'Acid') + ',\n? M')
     acidBeaker.userData.tag?.userData.setText(acid?.id === 'CH3COOH' ? 'CH₃COOH' : acid?.id || 'Acid')
   }
 
@@ -545,7 +546,7 @@ export function titration(lab, { dispatch, onSelect, onHover }) {
         playFill(prev.burette.filled && prev.burette.reading != null ? prev.burette.reading : 50, view.burette.reading)
       } else if (!fillAnimating) bur.userData.setLevel(view.burette.reading, view.burette.filled)
       // Drops for alkali added from the controls panel or a single tap click.
-      if (sameRun && fills === prevFills && prev.burette.reading != null && view.burette.reading > prev.burette.reading + 1e-6 && !running && !low) {
+      if (sameRun && fills === prevFills && prev.burette.reading != null && view.burette.reading > prev.burette.reading + 1e-6 && !running) {
         queued = Math.min(6, queued + Math.max(1, Math.round((view.burette.reading - prev.burette.reading) / 0.1)))
         kickDrops()
       } else if (sameRun && running) kickDrops()

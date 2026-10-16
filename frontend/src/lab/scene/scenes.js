@@ -11,54 +11,12 @@ import * as THREE from 'three'
 import * as E from './equipment.js'
 import { buildModel } from './apparatus3d.js'
 import { createWiring, wirePart } from './wiring.js'
+import { titration } from './titrationScene.js'
 
 const { BENCH_Y } = E
 
 // ── Acid–base titration ─────────────────────────────────────
-function titration(lab, { dispatch, onSelect }) {
-  lab.add(E.bench())
-  const stand = E.retortStand(0.95); stand.position.set(0.07, BENCH_Y, -0.05); lab.add(stand)
-  const tile = E.whiteTile(); tile.position.set(0, BENCH_Y, 0); lab.add(tile)
-  const flask = E.conicalFlask(); flask.position.set(0, BENCH_Y + 0.008, 0); lab.add(flask, { pick: { kind: 'flask' } })
-  const bur = E.burette(); bur.position.set(0, BENCH_Y + 0.2, 0); lab.add(bur, { pick: { kind: 'burette' } })
-  lab.makePickable(bur.userData.tap, { kind: 'tap' })
-  const naoh = E.beaker('#EEF3F8', 0.7); naoh.position.set(0.26, BENCH_Y, 0.06); lab.add(naoh, { pick: { kind: 'base' } })
-  const naohTag = E.labelPlane('NaOH 0.100 M', { w: 0.07, h: 0.022, size: 30 }); naohTag.position.set(0.26, BENCH_Y + 0.04, 0.097); lab.add(naohTag)
-  const acid = E.beaker('#F7F3E8', 0.7); acid.position.set(-0.26, BENCH_Y, 0.06); lab.add(acid, { pick: { kind: 'acid' } })
-  const acidTag = E.labelPlane('Acid  ? M', { w: 0.07, h: 0.022, size: 30 }); acidTag.position.set(-0.26, BENCH_Y + 0.04, 0.097); lab.add(acidTag)
-  const inds = [['phenolphthalein', 'Phenolphth.', '#D63384'], ['methyl_orange', 'Methyl orange', '#E67E22'], ['bromothymol_blue', 'Bromothymol', '#2F5BD2']]
-  const bottles = inds.map(([id, label, cap], i) => {
-    const b = E.bottle(label, cap); b.position.set(-0.46 + i * 0.075, BENCH_Y, -0.12)
-    lab.add(b, { pick: { kind: 'indicator', id } }); return { id, b }
-  })
-  // falling drop (cosmetic)
-  const drop = new THREE.Mesh(new THREE.SphereGeometry(0.003, 8, 8), E.mat.liquid('#E8F0F7', 0.9)); drop.visible = false; lab.scene.add(drop)
-  const reduced = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-  const showDrop = () => {
-    if (reduced) return
-    drop.position.set(0, BENCH_Y + 0.195, 0); drop.visible = true
-    let v = 0
-    lab.animate((dt) => { v += 9.8 * dt; drop.position.y -= v * dt; if (drop.position.y < BENCH_Y + 0.06) { drop.visible = false; return false } return true })
-  }
-  const prevReading = { v: null }
-  return {
-    onPick(p) {
-      if (p.kind === 'tap') { if (dispatch('addBase', { volume: 0.05 })) showDrop() }
-      else if (p.kind === 'indicator') dispatch('chooseIndicator', { indicator: p.id })
-      onSelect(p)
-    },
-    update(view) {
-      bur.userData.setLevel(view.burette.reading, view.burette.filled)
-      flask.userData.setLiquid(view.flask.volume, view.flask.colour)
-      bottles.forEach(({ id, b }) => { b.position.y = BENCH_Y + (view.indicatorChosen === id ? 0.01 : 0) })
-      bur.userData.tap.rotation.x = 0
-      if (prevReading.v != null && view.burette.reading > prevReading.v + 0.06 && !lab.lowGraphics) showDrop()
-      prevReading.v = view.burette.reading
-      lab.invalidate()
-    },
-    view: { pos: [0.28, 1.32, 0.78], target: [0, 1.12, 0] },
-  }
-}
+// The hands-on bench lives in titrationScene.js.
 
 // ── Ohm's law ───────────────────────────────────────────────
 // Real apparatus on the bench: supply, switch, ammeter, voltmeter, the
