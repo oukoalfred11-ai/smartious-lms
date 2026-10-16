@@ -116,7 +116,7 @@ export const PARAGUAY_CITIES = [
     whyChoose: [
       ['The grey area stated, not resolved', 'There is no explicit law authorising or regulating home education in Paraguay, and rulings have reportedly gone both ways. We set that out and send families to the MEC rather than offering a confident answer we cannot support.'],
       ['What article 74 means for any provider', 'Private institutions may only grant official certificates or títulos with MEC authorisation. Smartious does not hold it and does not issue Paraguayan official qualifications — we teach Cambridge, Edexcel, IB and AP.'],
-      ['A fee gap against the capital tier', 'Live small-group teaching at USD 5,076 a year.'],
+      ['A fee gap against the capital tier', 'Live small-group teaching from USD 5,076 a year.'],
       ['A workable clock', 'Six hours, fixed — Paraguayan mornings and early afternoons both land in our teaching day, and turno mañana/tarde leaves most students one window free.'],
       ['Spanish, Portuguese and German kept alongside', 'For a country between Brazil and Argentina with substantial German-speaking communities, the languages stay rather than being traded away.'],
     ],
@@ -458,7 +458,7 @@ export const PARAGUAY_COUNTRY = {
     { name: 'Ciudad del Este and Encarnación',                    city: 'Border departments',  curriculum: 'No international provision',            feesUsd: '—',                                                 feesAed: '—',                       rating: 0,   capacityNote: 'A major commercial economy and two binational dams, neither with international schooling' },
     { name: 'The soy belt',                                       city: 'Eastern departments', curriculum: '—',                                     feesUsd: 'No international option',                           feesAed: '—',                       rating: 0,   capacityNote: 'A globally significant agricultural export region with no international schooling at all' },
     { name: 'Wolsey Hall Oxford / King\'s InterHigh (online)',     city: 'Online',              curriculum: 'Cambridge self-paced / UK online',      feesUsd: 'Per-subject / GBP 9,000-11,000',                    feesAed: 'Varies',                  rating: 4.2, capacityNote: 'Self-paced or priced far above Smartious — UK providers are closer to Paraguay on the clock than we are' },
-    { name: 'Smartious Homeschool (Paraguay via online delivery)', city: 'Delivered to all Paraguay', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 5,076/year',                      feesAed: 'PYG equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + German and Portuguese examined + the Chaco, the border and the soy belt reached + the grey area stated honestly' },
+    { name: 'Smartious Homeschool (Paraguay via online delivery)', city: 'Delivered to all Paraguay', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'From USD 5,076/year',                      feesAed: 'PYG equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + German and Portuguese examined + the Chaco, the border and the soy belt reached + the grey area stated honestly' },
   ],
 
   legalFrameworkIntro: 'Paraguay is a genuine grey area — not a settled prohibition like Costa Rica\'s ministerial position, not a regulated modality like Ecuador\'s, and not a simple silence like Panama\'s. Here is what the texts say and what has actually happened.',

@@ -9,7 +9,7 @@ export const KENYA_CITIES = [
   {
     slug: 'mombasa', name: 'Mombasa', county: 'Mombasa County', region: 'Coastal Kenya', heroImg: HERO_LIBRARY,
     seoTitle: 'Homeschooling in Mombasa | IGCSE, IB, CBC, A-Level | Smartious',
-    seoDesc: 'Premium online homeschooling and home tuition in Mombasa. Cambridge IGCSE, IB Diploma, CBC, American Curriculum. Mathematics, Sciences, English specialists. From KSh 1,300/hour or USD 423/month full programmes.',
+    seoDesc: 'Premium online homeschooling and home tuition in Mombasa. Cambridge IGCSE, IB Diploma, CBC, American Curriculum. Mathematics, Sciences, English specialists. From KSh 1,300/hour or from USD 423/month full programmes.',
     primaryKeyword: 'Homeschooling in Mombasa',
     heroTagline: 'Internationally accredited homeschooling for families across Nyali, Bamburi, Tudor and Kizingo',
     intro: 'Mombasa is Kenya\'s second-largest city and the country\'s coastal economic anchor — a 1.2-million-strong port city with a distinctively cosmopolitan character shaped by centuries of Swahili, Arab, Indian, European and African trade. For families in Nyali, Bamburi, Tudor, Kizingo, Shanzu, Mtwapa and the wider Mombasa County, education choices are shaped by a combination of strong international schools, a growing middle-class commitment to academic excellence, and the practical realities of life on the coast — humidity, traffic between the island and mainland, and the cost of premium private education. Smartious provides online homeschooling and 1-on-1 home tuition for Mombasa families across all major curricula — Cambridge IGCSE and A-Level, International Baccalaureate (PYP, MYP and Diploma), Kenya CBC, and American Curriculum with Advanced Placement.',
@@ -89,7 +89,7 @@ export const KENYA_CITIES = [
   {
     slug: 'kisumu', name: 'Kisumu', county: 'Kisumu County', region: 'Western Kenya', heroImg: HERO_STUDY,
     seoTitle: 'Homeschooling in Kisumu | IGCSE, IB, CBC, A-Level | Smartious',
-    seoDesc: 'Premium online homeschooling and home tuition in Kisumu. Cambridge IGCSE, IB Diploma, CBC, American Curriculum. Mathematics, Sciences, English specialists. From KSh 1,300/hour or USD 423/month.',
+    seoDesc: 'Premium online homeschooling and home tuition in Kisumu. Cambridge IGCSE, IB Diploma, CBC, American Curriculum. Mathematics, Sciences, English specialists. From KSh 1,300/hour or from USD 423/month.',
     primaryKeyword: 'Homeschooling in Kisumu',
     heroTagline: 'Internationally accredited homeschooling for families across Milimani, Tom Mboya, Riat Hills and Mamboleo',
     intro: 'Kisumu is Kenya\'s third-largest city and the economic, educational and cultural hub of Western Kenya — a 600,000-strong lakeside city with deep educational tradition reflecting the broader Luo community\'s historic emphasis on academic excellence. For families in Milimani, Tom Mboya, Riat Hills, Mamboleo, Kibos, Kondele and across Kisumu County, education choices balance strong local secondary schools, premium private options like Aga Khan Academy Kisumu and Kisumu International School, and the constraints of a smaller international school landscape compared to Nairobi or Mombasa. Smartious provides online homeschooling and 1-on-1 home tuition for Kisumu families across all major curricula — Cambridge IGCSE and A-Level, International Baccalaureate (PYP, MYP and Diploma), Kenya CBC, and American Curriculum.',
@@ -169,7 +169,7 @@ export const KENYA_CITIES = [
   {
     slug: 'nakuru', name: 'Nakuru', county: 'Nakuru County', region: 'Rift Valley Kenya', heroImg: HERO_TUTOR,
     seoTitle: 'Homeschooling in Nakuru | IGCSE, IB, CBC, A-Level | Smartious',
-    seoDesc: 'Premium online homeschooling and home tuition in Nakuru. Cambridge IGCSE, IB Diploma, CBC, American Curriculum. Mathematics, Sciences, English specialists. From KSh 1,300/hour or USD 423/month.',
+    seoDesc: 'Premium online homeschooling and home tuition in Nakuru. Cambridge IGCSE, IB Diploma, CBC, American Curriculum. Mathematics, Sciences, English specialists. From KSh 1,300/hour or from USD 423/month.',
     primaryKeyword: 'Homeschooling in Nakuru',
     heroTagline: 'Internationally accredited homeschooling for families across Milimani, Section 58, Lanet and London',
     intro: 'Nakuru — recently elevated to city status in 2021 — is Kenya\'s fourth-largest urban centre and the capital of the central Rift Valley. With a population of around 570,000, Nakuru sits at the agricultural heart of Kenya, supported by tourism, manufacturing and a growing services sector. For families in Milimani, Section 58, Lanet, London, Naka, Free Area, Pipeline and across Nakuru County, education choices balance strong private schools, the prestigious Greensteds International School in nearby Gilgil, and the practical reality that many premium international school options require travel or relocation to Nairobi. Smartious provides online homeschooling and 1-on-1 home tuition for Nakuru families across Cambridge International, IB, CBC, and American Curriculum pathways.',
@@ -249,7 +249,7 @@ export const KENYA_CITIES = [
   {
     slug: 'eldoret', name: 'Eldoret', county: 'Uasin Gishu County', region: 'North Rift Valley Kenya', heroImg: HERO_NOTEBOOK,
     seoTitle: 'Homeschooling in Eldoret | IGCSE, IB, CBC, A-Level | Smartious',
-    seoDesc: 'Premium online homeschooling and home tuition in Eldoret. Cambridge IGCSE, IB Diploma, CBC, American Curriculum. Mathematics, Sciences, English specialists. From KSh 1,300/hour or USD 423/month.',
+    seoDesc: 'Premium online homeschooling and home tuition in Eldoret. Cambridge IGCSE, IB Diploma, CBC, American Curriculum. Mathematics, Sciences, English specialists. From KSh 1,300/hour or from USD 423/month.',
     primaryKeyword: 'Homeschooling in Eldoret',
     heroTagline: 'Internationally accredited homeschooling for families across Elgon View, Pioneer, West Indies and Kapsoya',
     intro: 'Eldoret is Kenya\'s fifth-largest urban centre and the agricultural and athletic heart of the North Rift Valley — a 290,000-strong town in Uasin Gishu County, internationally famous for producing world-class long-distance runners across multiple generations. For families in Elgon View, Pioneer, West Indies, Kapsoya, Annex, Kipkenyo, Langas and across Uasin Gishu County, education choices reflect Eldoret\'s distinct character — strong agricultural community values, the Moi University academic presence, robust local secondary schools, and a small but committed international curriculum sector anchored by Hillschool and a few other private options. Smartious provides online homeschooling and 1-on-1 home tuition for Eldoret families across Cambridge International, IB, CBC, and American Curriculum pathways.',
@@ -330,7 +330,7 @@ export const KENYA_CITIES = [
   {
     slug: 'thika', name: 'Thika', county: 'Kiambu County', region: 'Central Kenya', heroImg: HERO_CLASSROOM,
     seoTitle: 'Homeschooling in Thika | IGCSE, IB, CBC, A-Level | Smartious',
-    seoDesc: 'Premium online homeschooling and home tuition in Thika. Cambridge IGCSE, IB Diploma, CBC, American Curriculum. Mathematics, Sciences, English specialists. From KSh 1,300/hour or USD 423/month.',
+    seoDesc: 'Premium online homeschooling and home tuition in Thika. Cambridge IGCSE, IB Diploma, CBC, American Curriculum. Mathematics, Sciences, English specialists. From KSh 1,300/hour or from USD 423/month.',
     primaryKeyword: 'Homeschooling in Thika',
     heroTagline: 'Internationally accredited homeschooling for families across Section 9, Section 12, Makongeni and Landless',
     intro: 'Thika is an established industrial and commercial town 45km north-east of Nairobi, with a population of around 290,000 and a long history as central Kenya\'s agricultural processing hub. For families in Section 9, Section 12, Makongeni, Landless, Athena, Pilot, Kiandutu and across Thika town and Thika sub-county, education choices reflect the town\'s proximity to Nairobi — many families commute to Nairobi international schools — combined with strong local CBC options and a growing private school sector. Smartious provides online homeschooling and 1-on-1 home tuition for Thika families across Cambridge International, IB, CBC, and American Curriculum pathways.',
@@ -410,7 +410,7 @@ export const KENYA_CITIES = [
   {
     slug: 'kiambu', name: 'Kiambu', county: 'Kiambu County', region: 'Central Kenya', heroImg: HERO_TUTOR,
     seoTitle: 'Homeschooling in Kiambu | IGCSE, IB, CBC, A-Level | Smartious',
-    seoDesc: 'Premium online homeschooling and home tuition in Kiambu. Cambridge IGCSE, IB Diploma, CBC, American Curriculum. Mathematics, Sciences, English specialists. From KSh 1,300/hour or USD 423/month.',
+    seoDesc: 'Premium online homeschooling and home tuition in Kiambu. Cambridge IGCSE, IB Diploma, CBC, American Curriculum. Mathematics, Sciences, English specialists. From KSh 1,300/hour or from USD 423/month.',
     primaryKeyword: 'Homeschooling in Kiambu',
     heroTagline: 'Internationally accredited homeschooling for families across Kiambu town, Tigoni, Limuru and Karuri',
     intro: 'Kiambu town is the headquarters of Kiambu County — Kenya\'s fourth-most-populous county with around 2.4 million residents, sitting just 25km north of Nairobi. The county includes Kiambu town itself, Tigoni, Limuru, Karuri, Ruaka, Banana, Ndenderu, Kikuyu town, Thika sub-county and many other established and rapidly growing communities. For Kiambu families, education choices are increasingly shaped by the county\'s identity as a high-growth bedroom community for Nairobi professionals — many families want premium international curriculum education for their children but face the same Thika Road and Limuru Road congestion challenges that complicate daily Nairobi commutes. Smartious provides online homeschooling and 1-on-1 home tuition for Kiambu families across Cambridge International, IB, CBC, and American Curriculum pathways.',

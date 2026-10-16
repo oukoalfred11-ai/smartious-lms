@@ -29,6 +29,9 @@ import { fileURLToPath } from 'node:url'
 import { UAE_CITIES, UAE_COUNTRY } from '../src/data/uaeCities.js'
 import { UAE_AREAS } from '../src/data/uaeAreas.js'
 import { FULL_ARTICLES } from '../src/data/fullArticles.js'
+import { SERVICES } from '../src/data/services.js'
+import { NAIROBI_AREAS } from '../src/data/nairobiAreas.js'
+import { readdirSync } from 'node:fs'
 
 const ORIGIN = 'https://smartioushomeschool.com'
 const SITE = 'Smartious Homeschool & eSchool'
@@ -68,10 +71,118 @@ const CTA_LINKS = [
 // ── Routes ───────────────────────────────────────────────────
 const pages = []
 
+// ── Titles the app sets at runtime (PAGE_META + per-page branches) ──
+const LANDING = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', 'src', 'pages', 'LandingPage.jsx'), 'utf8').replace(/\r\n/g, '\n')
+const PAGE_META = (() => {
+  const i = LANDING.indexOf('const PAGE_META = {'); const j = LANDING.indexOf('\n}\n', i)
+  return new Function('SITE', 'return ' + LANDING.slice(i + 'const PAGE_META = '.length, j + 2))(SITE)
+})()
+const unq = (x) => new Function("return '" + x + "'")()
+const BRANCH = {}
+for (const m of LANDING.matchAll(/page === '([a-z0-9-]+)'\) \{\n\s*metaTitle\s*=\s*'((?:[^'\\]|\\.)*)'\n\s*metaDesc\s*=\s*'((?:[^'\\]|\\.)*)'/g)) {
+  BRANCH[m[1]] = { title: unq(m[2]), desc: unq(m[3]) }
+}
+const metaFor = (id) => BRANCH[id] || PAGE_META[id] || null
+const policy = (name) => {
+  const i = LANDING.indexOf('const ' + name + ' = ['); if (i < 0) return []
+  const j = LANDING.indexOf('\n]', i)
+  return new Function('return ' + LANDING.slice(i + ('const ' + name + ' = ').length, j + 2))()
+}
+
+// ── Countries: every *_COUNTRY / *_CITIES data file ──
+const DATA = join(dirname(fileURLToPath(import.meta.url)), '..', 'src', 'data')
+const COUNTRIES = []
+for (const f of readdirSync(DATA).filter(f => f.endsWith('Cities.js')).sort()) {
+  const m = await import('../src/data/' + f)
+  const country = Object.entries(m).find(([k]) => k.endsWith('_COUNTRY'))?.[1]
+  const cities = Object.entries(m).find(([k, v]) => k.endsWith('_CITIES') && Array.isArray(v))?.[1] || []
+  if (country && country.hub) COUNTRIES.push({ country, cities })
+}
+const KEY_HUBS = ['kenya', 'uae', 'united-kingdom', 'usa', 'canada', 'nigeria', 'south-africa', 'saudi-arabia', 'qatar', 'australia', 'india', 'germany']
+const hubName = (c) => c.name || c.longName
+const allHubLinks = () => COUNTRIES.map(({ country: c }) => ({ href: c.hub, label: 'Online school in ' + hubName(c) }))
+const MAIN_LINKS = [
+  { href: '/about', label: 'About Smartious' }, { href: '/curricula', label: 'Curricula' }, { href: '/programs', label: 'Programmes' },
+  { href: '/homeschool', label: 'Homeschooling' }, { href: '/tuition', label: 'Private tuition' }, { href: '/pricing', label: 'Fees' },
+  { href: '/teachers', label: 'Our team' }, { href: '/faq', label: 'FAQ' }, { href: '/blog', label: 'Guides and articles' },
+  { href: '/contact', label: 'Contact' }, { href: '/assessment', label: 'Book an assessment' },
+]
+const SERVICE_LINKS = SERVICES.map(sv => ({ href: '/services/' + sv.slug, label: sv.h }))
+
+// Home
+{
+  const m = PAGE_META.home
+  pages.push({ path: '/', file: 'home.html', title: m.title, desc: m.desc, body: [
+    '<h1>Online school, virtual school and homeschool</h1>', p(m.desc),
+    h2('Programmes and services'), links([...SERVICE_LINKS, ...MAIN_LINKS.slice(0, 6)]),
+    h2('Online school by country'), links(allHubLinks()),
+    h2('Latest guides'), links(Object.entries(FULL_ARTICLES).slice(-24).reverse().map(([slug, a]) => ({ href: '/blog/' + slug, label: a.t }))),
+  ] })
+}
+// Main pages with their own titles
+for (const id of ['about', 'curricula', 'services', 'pricing', 'programs', 'faq', 'teachers', 'contact', 'homeschool', 'tuition', 'tuition-nairobi',
+                  'languages', 'test-prep', 'study-abroad', 'iufp', 'pre-university', 'calendar', 'events', 'gallery', 'activities', 'assessment']) {
+  const m = metaFor(id); if (!m) continue
+  const body = ['<h1>' + esc(m.title.split(/ [|—–] /)[0]) + '</h1>', p(m.desc)]
+  if (id === 'services' || id === 'programs') body.push(h2('Services'), links(SERVICE_LINKS))
+  if (id === 'tuition-nairobi') body.push(h2('Tuition by area'), links(NAIROBI_AREAS.map(a => ({ href: '/tuition/' + a.slug, label: 'Tutors in ' + a.name }))))
+  if (id === 'pricing' || id === 'about' || id === 'curricula') body.push(h2('Online school by country'), links(allHubLinks()))
+  pages.push({ path: '/' + id, title: m.title, desc: m.desc, body })
+}
+// Blog index: every guide, as real links
+pages.push({ path: '/blog', title: (PAGE_META.blog || {}).title || 'Guides | ' + SITE, desc: (PAGE_META.blog || {}).desc || 'Guides for families.', body: [
+  '<h1>Guides and articles</h1>', links(Object.entries(FULL_ARTICLES).filter(([, a]) => a && a.t).map(([slug, a]) => ({ href: '/blog/' + slug, label: a.t }))),
+] })
+// Policies, in full
+for (const [id, name] of [['privacy', 'PRIVACY_POLICY'], ['terms', 'TERMS_OF_SERVICE'], ['cookies', 'COOKIE_POLICY'], ['gdpr', 'GDPR_COMPLIANCE'],
+                          ['child-protection', 'CHILD_PROTECTION_POLICY'], ['academic-integrity', 'ACADEMIC_INTEGRITY_POLICY'],
+                          ['ai-policy', 'AI_USE_POLICY'], ['inclusion-policy', 'INCLUSION_POLICY'], ['language-policy', 'LANGUAGE_POLICY']]) {
+  const m = metaFor(id); if (!m) continue
+  pages.push({ path: '/' + id, title: m.title, desc: m.desc, body: ['<h1>' + esc(m.title.split(' | ')[0]) + '</h1>', ...policy(name).map(x => h2(x.h) + p(x.p))] })
+}
+// Services
+for (const sv of SERVICES) {
+  pages.push({ path: '/services/' + sv.slug, title: sv.seoTitle || sv.h + ' | ' + SITE, desc: sv.seoDesc || sv.desc, body: [
+    '<h1>' + esc(sv.h) + '</h1>', p(sv.desc), p(typeof sv.detail === 'string' ? sv.detail : ''), h2('Other services'), links(SERVICE_LINKS.filter(l => l.href !== '/services/' + sv.slug)),
+  ] })
+}
+// Nairobi tuition areas
+for (const a of NAIROBI_AREAS) {
+  pages.push({ path: '/tuition/' + a.slug, title: a.seoTitle || 'Tuition in ' + a.name + ', Nairobi | Smartious', desc: a.seoDesc || clip(a.intro), body: [
+    '<h1>Tuition in ' + esc(a.name) + ', Nairobi</h1>', p(a.intro), p(a.introExtended), p(a.pricingNote), faqs(a.localFaqs),
+    h2('Nearby areas'), links(NAIROBI_AREAS.filter(x => x !== a).slice(0, 12).map(x => ({ href: '/tuition/' + x.slug, label: 'Tutors in ' + x.name }))),
+    h2('Online school in Kenya'), links([{ href: '/online-school/kenya', label: 'Online school and homeschool in Kenya' }, { href: '/tuition-nairobi', label: 'All Nairobi tuition' }]),
+  ] })
+}
+// Country hubs and their city pages (UAE has its own, richer pages below)
+for (const { country: c, cities } of COUNTRIES) {
+  if (c.slug === 'uae') continue
+  const m = metaFor(c.hubPageId)
+  const name = hubName(c)
+  const title = (m && m.title) || 'Online School in ' + name + ' | IGCSE, A-Level & IB | Smartious'
+  const desc = (m && m.desc) || c.heroSubhead
+  const cityLinks = cities.map(x => ({ href: '/homeschool-' + x.slug, label: 'Online school in ' + x.name }))
+  pages.push({ path: c.hub, title, desc, body: [
+    '<h1>Online school and homeschool in ' + esc(name) + '</h1>', p(c.heroSubhead), p(c.heroValueProp),
+    cityLinks.length ? h2(c.citiesSectionTitle || 'Cities') + links(cityLinks) : '',
+    h2('Why families choose Smartious'), bullets(c.whySmartious), faqs(c.faqs),
+    h2('Fees and admission'), links([{ href: '/pricing', label: 'Fees: from USD 423/month for Primary' }, { href: '/assessment', label: 'Book a free assessment' }]),
+  ] })
+  for (const x of cities) {
+    pages.push({ path: '/homeschool-' + x.slug,
+      title: x.seoTitle || ((x.primaryKeyword || x.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'),
+      desc: x.seoDesc || clip(x.intro), body: [
+        '<h1>' + esc(x.primaryKeyword || 'Online school in ' + x.name) + '</h1>', p(x.heroTagline), p(x.intro),
+        h2('Why ' + x.name + ' families choose Smartious'), bullets(x.whyChoose), faqs(x.faqs),
+        h2('More in ' + name), links([{ href: c.hub, label: 'Online school in ' + name }, ...cityLinks.filter(l => l.href !== '/homeschool-' + x.slug)]),
+      ] })
+  }
+}
+
 pages.push({
   path: '/online-school/uae',
   title: 'Online School in the UAE | Dubai & Abu Dhabi Homeschooling, IGCSE & A-Level | Smartious',
-  desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for UAE families across Dubai, Abu Dhabi, Sharjah, Ajman, Ras Al Khaimah. Wellington / Dubai College / BSAK / Repton / Brighton College alternative. Immediate enrolment, no KHDA/ADEK waiting lists. USD 423/month (about AED 1,553), paid termly.',
+  desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for UAE families across Dubai, Abu Dhabi, Sharjah, Ajman, Ras Al Khaimah. Wellington / Dubai College / BSAK / Repton / Brighton College alternative. Immediate enrolment, no KHDA/ADEK waiting lists. From USD 423/month (about AED 1,553), paid termly.',
   body: [
     `<h1>Online school and homeschooling in the UAE</h1>`,
     p(UAE_COUNTRY.heroSubhead),
@@ -191,15 +302,17 @@ function render(pg) {
   html = setMeta(html, 'name', 'twitter:title', pg.title)
   html = setMeta(html, 'name', 'twitter:description', desc)
   html = html.replace('</head>', `  <link rel="canonical" href="${url}"/>\n  ${STYLE}\n</head>`)
-  const nav = `<nav><a href="/">Smartious Homeschool</a><a href="/online-school/uae">UAE</a><a href="/blog">Guides</a><a href="/pricing">Fees</a></nav>`
-  const body = `<div id="seo-static">${nav}${pg.body.filter(Boolean).join('')}${h2('Start with Smartious')}${links(CTA_LINKS)}</div>`
+  const hubs = KEY_HUBS.map(slug => COUNTRIES.find(x => x.country.slug === slug)).filter(Boolean)
+  const nav = `<nav><a href="/">Smartious Homeschool</a>${MAIN_LINKS.map(l => `<a href="${l.href}">${esc(l.label)}</a>`).join('')}</nav>`
+  const foot = `<footer>${h2('Online school by country')}<p>${hubs.map(x => `<a href="${x.country.hub}">${esc(hubName(x.country))}</a>`).join(' · ')}</p></footer>`
+  const body = `<div id="seo-static">${nav}${pg.body.filter(Boolean).join('')}${h2('Start with Smartious')}${links(CTA_LINKS)}${foot}</div>`
   return html.replace('<div id="root"></div>', body + '<div id="root"></div>')
 }
 
 let n = 0
 for (const pg of pages) {
   if (!pg.title || !pg.desc) { console.warn('seo-static: skipped', pg.path, '(no title/description)'); continue }
-  const out = join(DIST, pg.path.replace(/^\/+/, '') + '.html')
+  const out = join(DIST, pg.file || pg.path.replace(/^\/+/, '') + '.html')
   mkdirSync(dirname(out), { recursive: true })
   writeFileSync(out, render(pg))
   n++

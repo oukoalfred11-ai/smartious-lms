@@ -120,7 +120,7 @@ export const KOSOVO_CITIES = [
     ],
     whyChoose: [
       ['A record the local English-taught universities read directly', 'RIT Kosovo (A.U.K) awards US-accredited degrees in English; Cambridge A-Levels and the IB are exactly the qualifications such programmes are built to read.'],
-      ['The Cambridge track beside a small tier', 'Live small-group teaching at USD 5,076 a year — the supplement, the waitlist bridge, or the alternative for families outside the capital tier.'],
+      ['The Cambridge track beside a small tier', 'Live small-group teaching from USD 5,076 a year — the supplement, the waitlist bridge, or the alternative for families outside the capital tier.'],
       ['Built for the diaspora return', 'A child arriving mid-curriculum from Germany, Switzerland, or Austria keeps one internationally examined pathway instead of restarting inside a new system.'],
       ['Computing depth for a young tech economy', 'Cambridge A-Level Computer Science, Mathematics, and Further Mathematics — led by a founder with a BEd in Mathematics and Physics — suit the sector that is defining Prishtina.'],
       ['Timezone that lands in the school day', 'Prishtina is 1-2 hours behind Nairobi EAT.'],
@@ -372,7 +372,7 @@ export const KOSOVO_CITIES = [
       'University application support — UCAS (UK), Common Application (US), RIT Kosovo (A.U.K), and German, Swiss and Austrian university applications',
     ],
     whyChoose: [
-      ['The tier\'s curriculum without the daily commute', 'Live small-group Cambridge teaching delivered to Ferizaj homes at USD 5,076 a year, with Prishtina needed only for examinations.'],
+      ['The tier\'s curriculum without the daily commute', 'Live small-group Cambridge teaching delivered to Ferizaj homes from USD 5,076 a year, with Prishtina needed only for examinations.'],
       ['Business and engineering depth for a manufacturing city', 'Cambridge A-Level Economics, Business, Mathematics, and Physics suit the families who run and manage the corridor\'s industry.'],
       ['Built around a working household', 'Live classes plus unlimited recordings fit a family running a business rather than a school schedule.'],
       ['The law stated before anything is sold', 'Grades 1 to 9 are compulsory; we run supplementary alongside your enrolment and reserve the full pathway for the voluntary upper-secondary years.'],
@@ -389,7 +389,7 @@ export const KOSOVO_CITIES = [
     homeTuitionDetail: 'In-person tuition supplementation in Ferizaj is subject to associate availability; the live online programme is complete without it.',
     onlineLearningDetail: 'Live online via Smartious LMS, landing inside the Ferizaj school day on the 1-2 hour offset, with every session recorded.',
     faqs: [
-      { q: 'Should we just commute to Prishtina?', a: 'Some families do, at capital-tier fees plus a daily run on a busy corridor. Smartious delivers live international curriculum to Ferizaj homes at USD 5,076 a year, with Prishtina needed only for exam sittings.' },
+      { q: 'Should we just commute to Prishtina?', a: 'Some families do, at capital-tier fees plus a daily run on a busy corridor. Smartious delivers live international curriculum to Ferizaj homes from USD 5,076 a year, with Prishtina needed only for exam sittings.' },
       { q: 'Where do Ferizaj students sit Cambridge examinations?', a: 'At authorised centres confirmed per family per session, with Prishtina forty minutes away.' },
     ],
   },
@@ -526,7 +526,7 @@ export const KOSOVO_COUNTRY = {
     { name: 'Prizren, Peja, Gjakova, Ferizaj, Gjilan',        city: 'The regions',           curriculum: '—',                                     feesUsd: 'No international provision',                        feesAed: '—',                       rating: 0,   capacityNote: 'The cultural capital, the mountains, the diaspora heartland, the industrial corridor and the east — nothing' },
     { name: 'RIT Kosovo (A.U.K) — the destination, not a competitor', city: 'Prishtina',     curriculum: 'US-accredited degrees in English',      feesUsd: 'University level',                                  feesAed: '—',                       rating: 4.6, capacityNote: 'Reads Cambridge, IB and AP records directly — the clearest domestic reason to hold one' },
     { name: 'Wolsey Hall Oxford / King\'s InterHigh / bina (online)', city: 'Online',        curriculum: 'Cambridge self-paced / UK online / own to 15', feesUsd: 'Per-subject / GBP 9,000-11,000 / consultation', feesAed: 'Varies',      rating: 4.2, capacityNote: 'Self-paced, priced far above Smartious, or stopping at 15 — and none states the compulsory grades or the voluntary upper-secondary phase' },
-    { name: 'Smartious Homeschool (Kosovo via online delivery)', city: 'Delivered to all Kosovo', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 5,076/year', feesAed: '~EUR 2,000-6,000/year', rating: 4.8, capacityNote: 'Every class live through A-Level + both lawful configurations + the voluntary upper-secondary phase used properly + the regions served identically' },
+    { name: 'Smartious Homeschool (Kosovo via online delivery)', city: 'Delivered to all Kosovo', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'From USD 5,076/year', feesAed: '~EUR 2,000-6,000/year', rating: 4.8, capacityNote: 'Every class live through A-Level + both lawful configurations + the voluntary upper-secondary phase used properly + the regions served identically' },
   ],
 
   legalFrameworkIntro: 'Kosovo\'s framework is compact and easy to state accurately, which is a relief after some of its neighbours. Here it is exactly, including the point that changes senior planning.',
@@ -555,7 +555,7 @@ export const KOSOVO_COUNTRY = {
     { q: 'Can we do A-Levels and keep a gymnasium place?', a: 'Families do both. The gymnasium route continues toward the State Matura while the Cambridge track runs alongside, which suits students who want a domestic record and an internationally read one. It is a heavier year, so subject choice has to be disciplined.' },
     { q: 'Will RIT Kosovo (A.U.K) accept Cambridge or IB qualifications?', a: 'Those programmes award US-accredited degrees taught in English and are built to read international qualifications directly, with entry requirements confirmed with the institution per programme. UBT and Universum also run English-taught programmes.' },
     { q: 'Our children move between Kosovo and Switzerland or Germany — how does that work?', a: 'The curriculum, teachers, and examination board stay constant wherever the family is. Education law follows residence, and the German, Swiss, and Austrian frameworks each differ — a question for your own advisers, while the schooling itself continues unchanged.' },
-    { q: 'How does Smartious compare with the American School of Kosova or the International School of Prishtina?', a: 'They are established campuses with in-person culture and a local peer group we cannot replicate. Smartious runs live small-group teaching at USD 5,076 a year — the supplement beside a campus or a national school, and the only complete option outside the capital.' },
+    { q: 'How does Smartious compare with the American School of Kosova or the International School of Prishtina?', a: 'They are established campuses with in-person culture and a local peer group we cannot replicate. Smartious runs live small-group teaching from USD 5,076 a year — the supplement beside a campus or a national school, and the only complete option outside the capital.' },
     { q: 'Where do Kosovar students sit Cambridge examinations?', a: 'At authorised provision confirmed per family per session — Prishtina first, with North Macedonian, Albanian, and Montenegrin options worth checking where capacity is limited. No city we cover is more than about ninety minutes from the capital.' },
     { q: 'How does live class scheduling work given the time difference?', a: 'Kosovo runs CET (UTC+1) in winter and CEST (UTC+2) in summer — only 1-2 hours behind Nairobi EAT — so live teaching lands naturally inside the school day, with the after-school slot suiting supplementary students.' },
     { q: 'Which parts of Kosovo does Smartious cover?', a: 'Prishtina, Prizren, Peja and the Rugova valley, Gjakova, Ferizaj, and Gjilan have dedicated pages with local context. Live online delivery works identically anywhere in the country — which outside Prishtina is precisely the point.' },

@@ -589,7 +589,7 @@ export const MOROCCO_COUNTRY = {
       name: 'Smartious (live online)',
       city: 'All six major Moroccan cities + smaller centres via online delivery',
       curriculum: 'Cambridge IGCSE & A-Level · Edexcel · IB · American AP · CBC',
-      feesAed: 'USD 5,076 per year',
+      feesAed: 'From USD 5,076 per year',
       feesUsd: '5,076 a year',
       rating: 'Live online · degree-qualified specialists · CET time zone',
       capacityNote: 'Immediate enrolment — small classes — accessible from any Moroccan location',
@@ -663,7 +663,7 @@ export const MOROCCO_COUNTRY = {
   faqs: [
     {
       q: 'How does Smartious compare to Casablanca American School, George Washington Academy, BISC, Rabat American School, Lycée Lyautey, Lycée Descartes and American School of Tangier?',
-      a: 'Premium Moroccan international schools — Casablanca American School (USD 15,000-22,000/year, American/IB Diploma), George Washington Academy (USD 12,000-18,000/year, American), British International School Casablanca (USD 12,000-18,000/year, Cambridge), Lycée Lyautey (USD 6,000-10,000/year, French Mission, the most prestigious French school in Morocco), Rabat American School (USD 14,000-20,000/year, American/IB), Lycée Descartes (USD 6,000-10,000/year, Rabat French Mission), American School of Tangier (USD 10,000-15,000/year, American, established 1950) — provide physical campus education with established sports facilities, arts programmes and pastoral programmes. Smartious provides live online Cambridge, IB, or American curriculum at USD 5,076/year. Trade-off: no physical campus, but the same internationally recognised academic qualifications, immediate enrolment, small class sizes (4-6 students), CET time zone matching Moroccan school hours, and accessibility from any Moroccan city or smaller town.',
+      a: 'Premium Moroccan international schools — Casablanca American School (USD 15,000-22,000/year, American/IB Diploma), George Washington Academy (USD 12,000-18,000/year, American), British International School Casablanca (USD 12,000-18,000/year, Cambridge), Lycée Lyautey (USD 6,000-10,000/year, French Mission, the most prestigious French school in Morocco), Rabat American School (USD 14,000-20,000/year, American/IB), Lycée Descartes (USD 6,000-10,000/year, Rabat French Mission), American School of Tangier (USD 10,000-15,000/year, American, established 1950) — provide physical campus education with established sports facilities, arts programmes and pastoral programmes. Smartious provides live online Cambridge, IB, or American curriculum from USD 5,076/year. Trade-off: no physical campus, but the same internationally recognised academic qualifications, immediate enrolment, small class sizes (4-6 students), CET time zone matching Moroccan school hours, and accessibility from any Moroccan city or smaller town.',
     },
     {
       q: 'My family is Moroccan and at a French Mission school (Lycée Lyautey / Lycée Descartes / Lycée Régnault). How does Smartious work for French-system Moroccan families?',

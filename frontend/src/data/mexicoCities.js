@@ -111,7 +111,7 @@ export const MEXICO_CITIES = [
     whyChoose: [
       ['Morning classes, which is the point in Mexico', 'We teach nine hours ahead, so our block lands in the Mexican morning — the free half of the day for every student in turno vespertino, and the natural slot for full-time ones.'],
       ['Cambridge in an IB and American market', 'CDMX is well supplied with IB and US-curriculum schools and thin on Cambridge A-Levels. Families targeting UCAS often have to look outside their campus — which is exactly what we teach.'],
-      ['A fee gap even by Latin American standards', 'Live small-group teaching at USD 5,076 a year against a capital tier priced among the highest in the region.'],
+      ['A fee gap even by Latin American standards', 'Live small-group teaching from USD 5,076 a year against a capital tier priced among the highest in the region.'],
       ['What we are, stated plainly', 'Smartious does not hold RVOE and is not a Mexican school with official validity. We work alongside one that is.'],
       ['Spanish kept alongside', 'Cambridge Spanish runs beside the English-medium core, protecting Mexican and Spanish university routes.'],
     ],
@@ -176,7 +176,7 @@ export const MEXICO_CITIES = [
       ['Engineering depth for an industrial capital', 'Cambridge A-Level Mathematics, Further Mathematics, and Physics — led by a founder with a BEd in Mathematics and Physics — suit the families the nearshoring boom is bringing in.'],
       ['Morning classes that fit the vespertino shift', 'Our teaching block lands in the Mexican morning, which is free for every student whose school runs in the afternoon.'],
       ['Cambridge alongside an American-leaning market', 'Monterrey looks north for university, and A-Levels are read by UK, Canadian, and US institutions alike — a broader record than a single-market curriculum.'],
-      ['A fee gap at the top of the Mexican market', 'Live small-group teaching at USD 5,076 a year.'],
+      ['A fee gap at the top of the Mexican market', 'Live small-group teaching from USD 5,076 a year.'],
       ['What we are, stated plainly', 'No RVOE, no claim to official validity — we work alongside a Mexican school that has it.'],
     ],
     growingReason: 'Monterrey is Mexico\'s industrial and corporate capital and the centre of the nearshoring boom, with manufacturing groups, border-corridor logistics, Tec de Monterrey, and a strong private-school tradition priced at the top of the national market. Mexico runs CST (UTC-6), nine hours behind Nairobi, so our teaching lands in the Mexican morning.',
@@ -451,7 +451,7 @@ export const MEXICO_COUNTRY = {
     { name: 'The Bajío and the Riviera Maya',                  city: 'Fast-growing regions',  curriculum: 'Thin relative to growth',               feesUsd: 'Limited provision',                                 feesAed: '—',                       rating: 0,   capacityNote: 'An industrial corridor and a coast that both grew faster than their schools' },
     { name: 'Cambridge A-Level provision',                     city: 'Nationwide',            curriculum: 'Comparatively scarce',                  feesUsd: '—',                                                 feesAed: '—',                       rating: 0,   capacityNote: 'In an IB and US-curriculum market, families applying through UCAS often find no local A-Level route' },
     { name: 'US-based online schools',                         city: 'Online',                curriculum: 'American online',                       feesUsd: 'Varies, often per-course',                          feesAed: 'Varies',                  rating: 4.2, capacityNote: 'Much closer on the clock than we are — families should weigh that honestly against price and class size' },
-    { name: 'Smartious Homeschool (Mexico via online delivery)', city: 'Delivered to all Mexico', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 5,076/year', feesAed: 'MXN equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + the A-Level route the market lacks + morning teaching that fits the turno vespertino + honest that we are nine hours away and hold no RVOE' },
+    { name: 'Smartious Homeschool (Mexico via online delivery)', city: 'Delivered to all Mexico', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'From USD 5,076/year', feesAed: 'MXN equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + the A-Level route the market lacks + morning teaching that fits the turno vespertino + honest that we are nine hours away and hold no RVOE' },
   ],
 
   legalFrameworkIntro: 'Mexico has a longer compulsory range than most countries we serve and a formal validity regime for school studies. Both shape what we can honestly offer. Here is the framework, and the timezone reality that goes with it.',

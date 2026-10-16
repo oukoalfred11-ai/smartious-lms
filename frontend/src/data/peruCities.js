@@ -103,7 +103,7 @@ export const PERU_CITIES = [
     whyChoose: [
       ['Morning classes, which is the point in Peru', 'We teach eight hours ahead, so our block lands in the Peruvian morning — the free half of the day for every student in turno tarde.'],
       ['Cambridge A-Levels in an IB-weighted market', 'Lima is well served for the IB and thinner on A-Levels — which matters for anyone applying through UCAS.'],
-      ['A fee gap against the top of the Peruvian market', 'Live small-group teaching at USD 5,076 a year.'],
+      ['A fee gap against the top of the Peruvian market', 'Live small-group teaching from USD 5,076 a year.'],
       ['What we are, stated plainly', 'Smartious is not an authorised Peruvian institution. We work alongside a school that is.'],
       ['Spanish kept alongside', 'Cambridge Spanish runs beside the English-medium core, protecting Peruvian and Spanish university routes.'],
     ],
@@ -443,7 +443,7 @@ export const PERU_COUNTRY = {
     { name: 'Arequipa and the southern belt',                  city: 'Southern Peru',         curriculum: 'Thin provision',                        feesUsd: 'Limited international option',                      feesAed: '—',                       rating: 0,   capacityNote: 'The second city of a major copper producer, with a fraction of Lima\'s provision' },
     { name: 'Cusco, Trujillo and Piura',                       city: 'The regions',           curriculum: 'Close to none',                         feesUsd: 'No real international option',                      feesAed: '—',                       rating: 0,   capacityNote: 'A global tourism economy, a global agro-export corridor, and a refinery region — none with international schooling' },
     { name: 'US-based online schools',                         city: 'Online',                curriculum: 'American online',                       feesUsd: 'Varies, often per-course',                          feesAed: 'Varies',                  rating: 4.2, capacityNote: 'Closer to Peru on the clock than we are — families should weigh that against price and class size' },
-    { name: 'Smartious Homeschool (Peru via online delivery)', city: 'Delivered to all Peru', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP',   feesUsd: 'USD 5,076/year',                              feesAed: 'PEN equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + morning teaching that fits the turno tarde + the mining south and the regions reached + honest that we are eight hours away and hold no Peruvian authorisation' },
+    { name: 'Smartious Homeschool (Peru via online delivery)', city: 'Delivered to all Peru', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP',   feesUsd: 'From USD 5,076/year',                              feesAed: 'PEN equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + morning teaching that fits the turno tarde + the mining south and the regions reached + honest that we are eight hours away and hold no Peruvian authorisation' },
   ],
 
   legalFrameworkIntro: 'Peru\'s framework is administered on three levels — national, regional, and local — which shapes both what we can say and where families should confirm it. Here is the structure.',

@@ -123,7 +123,7 @@ export const CHILE_CITIES = [
     whyChoose: [
       ['Full-time is genuinely possible here', 'Chile\'s exámenes libres route means a resident child can follow a full international programme and still certify Chilean school levels — which is not true in Mexico, Brazil, Argentina, Colombia, or Peru.'],
       ['The conditions explained before you commit', 'Registration windows, cupos, separate básica and media processes, no enrolment at a Chilean school in the same year — we set these out upfront rather than after enrolment.'],
-      ['A fee gap against South America\'s strongest tier', 'Live small-group teaching at USD 5,076 a year against Santiago international fees among the highest in the region.'],
+      ['A fee gap against South America\'s strongest tier', 'Live small-group teaching from USD 5,076 a year against Santiago international fees among the highest in the region.'],
       ['Honest about what we are not', 'We do not administer exámenes libres and do not teach the Chilean national curriculum. Chilean online schools do that well; we teach Cambridge, Edexcel, IB and AP.'],
       ['Spanish kept alongside', 'Cambridge Spanish runs beside the English-medium core, protecting Chilean and Spanish university routes.'],
     ],
@@ -251,7 +251,7 @@ export const CHILE_CITIES = [
       ['No commute to Santiago, for the child at least', 'Coastal families who work inland do not need to send their children inland too — live delivery reaches the whole region identically.'],
       ['German and French alongside the core', 'The region\'s heritage communities can run Cambridge German or French beside the English-medium track, and both university systems read the record routinely.'],
       ['Full-time is possible here', 'Chile\'s exámenes libres route makes a full international programme workable for a resident child.'],
-      ['A fee gap against a capital tier', 'Live small-group teaching at USD 5,076 a year.'],
+      ['A fee gap against a capital tier', 'Live small-group teaching from USD 5,076 a year.'],
       ['Honest about what we are not', 'We do not administer exámenes libres or teach the Chilean national curriculum.'],
     ],
     growingReason: 'The Valparaíso coastal metropolitan area carries Chile\'s principal port, the National Congress, the naval institutions, and a large university sector, alongside a growing international resident community — with Santiago\'s tier an hour and a half inland and priced at capital level. Continental Chile runs six to seven hours behind Nairobi depending on the season.',
@@ -465,7 +465,7 @@ export const CHILE_COUNTRY = {
     { name: 'The German, French and Italian schools',         city: 'Santiago, Valparaíso',  curriculum: 'National-system bilingual',              feesUsd: 'Premium tier',                                      feesAed: 'Varies',                  rating: 4.6, capacityNote: 'Strong heritage schools — a different route entirely' },
     { name: 'The copper north and the deep south',            city: 'Antofagasta, Los Lagos', curriculum: 'Little to none',                       feesUsd: 'No real international option',                      feesAed: '—',                       rating: 0,   capacityNote: 'The world\'s copper capital and a global salmon industry, both without international schooling' },
     { name: 'Wolsey Hall Oxford / King\'s InterHigh (online)', city: 'Online',                curriculum: 'Cambridge self-paced / UK online',      feesUsd: 'Per-subject / GBP 9,000-11,000',                    feesAed: 'Varies',                  rating: 4.2, capacityNote: 'Self-paced or priced far above Smartious — UK providers are closer to Chile on the clock than we are' },
-    { name: 'Smartious Homeschool (Chile via online delivery)', city: 'Delivered to all Chile', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 5,076/year', feesAed: 'CLP equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + full-time genuinely possible via exámenes libres + the copper north and Los Lagos reached + honest that we do not teach the Chilean curriculum' },
+    { name: 'Smartious Homeschool (Chile via online delivery)', city: 'Delivered to all Chile', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'From USD 5,076/year', feesAed: 'CLP equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + full-time genuinely possible via exámenes libres + the copper north and Los Lagos reached + honest that we do not teach the Chilean curriculum' },
   ],
 
   legalFrameworkIntro: 'Chile has the most accommodating framework in our Latin American coverage, and it is accommodating for a specific structural reason rather than a permissive attitude. Here is the mechanism, its conditions, and what we can and cannot do within it.',

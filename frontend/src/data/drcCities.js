@@ -116,7 +116,7 @@ export const DRC_CITIES = [
       'University application support — UCAS (UK), Common Application (US), and Belgian, French, South African and Congolese university applications',
     ],
     whyChoose: [
-      ['The tier\'s examinations at a professional family\'s budget', 'Live small-group Cambridge teaching at USD 5,076 a year against Kinshasa international fees at the top of the local market.'],
+      ['The tier\'s examinations at a professional family\'s budget', 'Live small-group Cambridge teaching from USD 5,076 a year against Kinshasa international fees at the top of the local market.'],
       ['French kept alongside the English-medium core', 'Cambridge French runs beside the academic track, protecting Belgian and French university routes that Congolese families rely on.'],
       ['Built for a community that rotates', 'NGO, UN, and diplomatic postings move constantly; the curriculum, teachers, and examination board stay constant across every move.'],
       ['What we are, stated plainly', 'Private establishments here operate under an agrément regime. Smartious is not an agréé Congolese establishment — we work alongside your school.'],
@@ -336,7 +336,7 @@ export const DRC_COUNTRY = {
     { name: 'Kolwezi and the Lualaba belt',                   city: 'The cobalt belt',       curriculum: '—',                                     feesUsd: 'Essentially nothing',                               feesAed: '—',                       rating: 0,   capacityNote: 'The world\'s cobalt capital, staffed from four continents, with no schooling to match' },
     { name: 'Boarding in Zambia, South Africa or Europe',     city: 'Abroad',                curriculum: 'Various',                               feesUsd: 'Fees plus travel plus a child living away',         feesAed: '—',                       rating: 4.3, capacityNote: 'The traditional answer for mining families across Katanga and Lualaba' },
     { name: 'Wolsey Hall Oxford / King\'s InterHigh (online)', city: 'Online',                curriculum: 'Cambridge self-paced / UK online',      feesUsd: 'Per-subject / GBP 9,000-11,000',                    feesAed: 'Varies',                  rating: 4.2, capacityNote: 'Self-paced or priced far above Smartious, and none carries French alongside the English-medium core' },
-    { name: 'Smartious Homeschool (DRC via online delivery)', city: 'Delivered to all the DRC', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 5,076/year', feesAed: 'Invoiced in USD', rating: 4.8, capacityNote: 'Every class live through A-Level + the cobalt belt reached at last + French kept alongside + one hour from Katanga + honest about not being an agréé establishment' },
+    { name: 'Smartious Homeschool (DRC via online delivery)', city: 'Delivered to all the DRC', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'From USD 5,076/year', feesAed: 'Invoiced in USD', rating: 4.8, capacityNote: 'Every class live through A-Level + the cobalt belt reached at last + French kept alongside + one hour from Katanga + honest about not being an agréé establishment' },
   ],
 
   legalFrameworkIntro: 'The DRC has the most explicit parental-liberty language of any framework in our African coverage — and it is also the one most easily over-read. Here is what the law says, and what we will not claim it says.',

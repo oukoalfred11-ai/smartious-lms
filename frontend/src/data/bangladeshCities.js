@@ -110,7 +110,7 @@ export const BANGLADESH_CITIES = [
     whyChoose: [
       ['We are not introducing Cambridge to Dhaka', 'The English-medium sector has run O-Levels and A-Levels for decades. What we supply is teaching depth in specific subjects, not a new curriculum.'],
       ['The set your school cannot staff', 'Further Mathematics or a third science for four pupils is unviable on one timetable and routine in a live group drawn from several countries.'],
-      ['A fee gap against the leading schools', 'Live small-group teaching at USD 5,076 a year toward the same examinations.'],
+      ['A fee gap against the leading schools', 'Live small-group teaching from USD 5,076 a year toward the same examinations.'],
       ['After-school hours that genuinely work', 'Three hours ahead of our teaching base — a four o\'clock class in Dhaka is one in the afternoon for our teachers, six o\'clock is three.'],
       ['No waiting list', 'A child starts within a week of the assessment, which matters for mid-year arrivals and for families who have just changed school.'],
     ],
@@ -128,7 +128,7 @@ export const BANGLADESH_CITIES = [
       { q: 'Our school already does O-Levels and A-Levels — what would we gain?', a: 'Usually one specific thing: a subject set your school cannot staff for four students. Further Mathematics, a third science, or a clash. If your school covers what your child needs, we will tell you so.' },
       { q: 'Do you teach the SSC or HSC?', a: 'No. We are not a registered Bangladeshi school and issue no Bangladeshi qualification. We teach Cambridge, Edexcel, IB and AP, which sit alongside a school record.' },
       { q: 'What time are classes?', a: 'After-school works particularly well. Bangladesh is three hours ahead of our teaching base, so a four o\'clock class in Dhaka is one in the afternoon for our teachers and six o\'clock is three.' },
-      { q: 'How do fees compare with the leading English-medium schools?', a: 'Smartious runs USD 5,076 a year for live small-group teaching toward the same Cambridge examinations, which is a different proposition financially from the top of the local sector.' },
+      { q: 'How do fees compare with the leading English-medium schools?', a: 'Smartious runs from USD 5,076 a year for live small-group teaching toward the same Cambridge examinations, which is a different proposition financially from the top of the local sector.' },
     ],
   },
 
@@ -451,7 +451,7 @@ export const BANGLADESH_COUNTRY = {
     { name: 'Sylhet, Khulna and Rajshahi',                      city: 'Outside the two cities', curriculum: 'Thin to very limited',                 feesUsd: 'Limited option',                                    feesAed: '—',                       rating: 0,   capacityNote: 'A diaspora city with deep UK ties, a port and aquaculture region, and a university city — all short on provision' },
     { name: 'Private tuition and coaching centres',             city: 'Nationwide',            curriculum: 'Exam-focused coaching',                 feesUsd: 'Per hour, per subject',                             feesAed: 'Very widespread',         rating: 4.1, capacityNote: 'Enormous and long established — usually one-to-one or large-group, and rarely a structured year' },
     { name: 'UK-based online schools',                          city: 'Online',                curriculum: 'UK online, Cambridge and Edexcel',      feesUsd: 'GBP 9,000-11,000',                                  feesAed: 'Varies',                  rating: 4.2, capacityNote: 'Priced far above Smartious — though closer to the UK academic calendar, which some Sylhet families weigh' },
-    { name: 'Smartious Homeschool (Bangladesh via online delivery)', city: 'Delivered nationwide', curriculum: 'Cambridge O-Level, IGCSE, A-Level, IB, AP', feesUsd: 'USD 5,076/year',                   feesAed: 'BDT at prevailing rate',   rating: 4.8, capacityNote: 'Every class live through A-Level + after-school hours that fit + Sylhet, Khulna and Rajshahi reached + no waiting list' },
+    { name: 'Smartious Homeschool (Bangladesh via online delivery)', city: 'Delivered nationwide', curriculum: 'Cambridge O-Level, IGCSE, A-Level, IB, AP', feesUsd: 'From USD 5,076/year',                   feesAed: 'BDT at prevailing rate',   rating: 4.8, capacityNote: 'Every class live through A-Level + after-school hours that fit + Sylhet, Khulna and Rajshahi reached + no waiting list' },
   ],
 
   legalFrameworkIntro: 'Bangladesh is one of the markets where we could not verify the central question, so we set out what we can establish and then the two facts that matter more here in practice.',

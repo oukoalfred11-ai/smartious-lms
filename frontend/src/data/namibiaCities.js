@@ -113,7 +113,7 @@ export const NAMIBIA_CITIES = [
     whyChoose: [
       ['The statute explained precisely, including its limits', 'Namibia defines home schooling in the Basic Education Act and requires registration and a legally approved academic curriculum. We explain both halves — and we do not claim our programme automatically satisfies the second.'],
       ['German alongside the English-medium core', 'In a city with a long German-heritage community and strong ties to Germany, Cambridge German sits naturally beside the academic track.'],
-      ['The tier\'s curriculum at a professional family\'s budget', 'Live small-group teaching at USD 5,076 a year against Windhoek international fees at the top of the local market.'],
+      ['The tier\'s curriculum at a professional family\'s budget', 'Live small-group teaching from USD 5,076 a year against Windhoek international fees at the top of the local market.'],
       ['One hour from your teachers, all year', 'Namibia has run CAT year-round since 2017 and Kenya observes no daylight saving either, so classes land in the ordinary school day every week of the year.'],
       ['An African school teaching African families', 'Nairobi-built and Nairobi-taught, serving families in 51 countries — not an overseas provider reaching in.'],
     ],
@@ -331,7 +331,7 @@ export const NAMIBIA_COUNTRY = {
     { name: 'The northern regions',                           city: 'Oshakati, Ondangwa, Ongwediva', curriculum: '—',                             feesUsd: 'No international provision',                        feesAed: '—',                       rating: 0,   capacityNote: 'Where most Namibians live — and no international school has ever been built' },
     { name: 'South African boarding',                         city: 'Cape Town, Johannesburg', curriculum: 'South African and international',      feesUsd: 'Fees plus travel plus a child living away',         feesAed: '—',                       rating: 4.4, capacityNote: 'The traditional answer for coastal and northern families' },
     { name: 'Wolsey Hall Oxford / King\'s InterHigh (online)', city: 'Online',                curriculum: 'Cambridge self-paced / UK online',      feesUsd: 'Per-subject / GBP 9,000-11,000',                    feesAed: 'Varies',                  rating: 4.2, capacityNote: 'Self-paced or priced far above Smartious, and taught from a timezone that puts classes at awkward hours' },
-    { name: 'Smartious Homeschool (Namibia via online delivery)', city: 'Delivered to all Namibia', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 5,076/year', feesAed: 'NAD equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + one hour from your teachers + the coast and the north served identically + the home-schooling statute explained including what we cannot warrant' },
+    { name: 'Smartious Homeschool (Namibia via online delivery)', city: 'Delivered to all Namibia', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'From USD 5,076/year', feesAed: 'NAD equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + one hour from your teachers + the coast and the north served identically + the home-schooling statute explained including what we cannot warrant' },
   ],
 
   legalFrameworkIntro: 'Namibia has the clearest statutory home-education provision we have found anywhere in our African coverage — and one phrase inside it decides everything. Here is the framework exactly.',

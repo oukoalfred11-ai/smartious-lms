@@ -285,9 +285,9 @@ const ENROLMENT_DATA = {
     description: 'Cambridge IGCSE, Cambridge International AS & A-Levels, and Cambridge Primary / Lower Secondary. Globally recognised by universities worldwide.',
     examBoard: 'Cambridge International Examinations (CIE)',
     levels: [
-      { id:'primary',     label:'Cambridge Primary',         years:'Year 1–6',   ages:'Ages 5–11',   feeFrom:'USD 423/mo', feeRef:'Primary Homeschool tier' },
-      { id:'lowersec',    label:'Cambridge Lower Secondary', years:'Year 7–9',   ages:'Ages 11–14',  feeFrom:'USD 423/mo', feeRef:'Junior Secondary tier' },
-      { id:'igcse',       label:'Cambridge IGCSE',           years:'Year 10–11', ages:'Ages 14–16',  feeFrom:'USD 423/mo', feeRef:'IGCSE tier · Most Popular' },
+      { id:'primary',     label:'Cambridge Primary',         years:'Year 1–6',   ages:'Ages 5–11',   feeFrom:'From USD 423/mo', feeRef:'Primary Homeschool tier' },
+      { id:'lowersec',    label:'Cambridge Lower Secondary', years:'Year 7–9',   ages:'Ages 11–14',  feeFrom:'From USD 423/mo', feeRef:'Junior Secondary tier' },
+      { id:'igcse',       label:'Cambridge IGCSE',           years:'Year 10–11', ages:'Ages 14–16',  feeFrom:'From USD 423/mo', feeRef:'IGCSE tier · Most Popular' },
       { id:'alevel',      label:'Cambridge A-Level',         years:'Year 12–13', ages:'Ages 16–19',  feeFrom:'USD 769/mo', feeRef:'A-Level tier · up to 4 subjects' },
     ],
     subjects: 'English Language & Literature, Mathematics, Sciences (Biology, Chemistry, Physics), Humanities (History, Geography), Languages (French, Kiswahili), Business Studies, Economics, ICT, Computer Science.',
@@ -297,7 +297,7 @@ const ENROLMENT_DATA = {
     description: 'Pearson Edexcel International GCSE, IAL and IAL Further Maths. Widely accepted alternative to Cambridge.',
     examBoard: 'Pearson Edexcel International',
     levels: [
-      { id:'igcse',     label:'Edexcel International GCSE',   years:'Year 10–11', ages:'Ages 14–16', feeFrom:'USD 423/mo', feeRef:'IGCSE tier' },
+      { id:'igcse',     label:'Edexcel International GCSE',   years:'Year 10–11', ages:'Ages 14–16', feeFrom:'From USD 423/mo', feeRef:'IGCSE tier' },
       { id:'ial',       label:'Edexcel IAL (A-Level)',         years:'Year 12–13', ages:'Ages 16–19', feeFrom:'USD 769/mo', feeRef:'A-Level tier' },
     ],
     subjects: 'English Language A & B, Mathematics, Further Mathematics, Sciences, Humanities, Business, Economics, Computer Science.',
@@ -307,10 +307,10 @@ const ENROLMENT_DATA = {
     description: 'IB Middle Years Programme (MYP) and IB Diploma Programme (DP). The most rigorous internationally recognised pathway.',
     examBoard: 'International Baccalaureate Organization (IBO)',
     levels: [
-      { id:'pyp',     label:'IB Primary Years (PYP)',  years:'Year 1–6',     ages:'Ages 5–11',   feeFrom:'USD 423/mo', feeRef:'Primary Homeschool tier' },
-      { id:'myp_1_3', label:'IB MYP Years 1–3',         years:'Grade 6–8',    ages:'Ages 11–14',  feeFrom:'USD 423/mo', feeRef:'Junior Secondary tier' },
-      { id:'myp_4_5', label:'IB MYP Years 4–5',         years:'Grade 9–10',   ages:'Ages 14–16',  feeFrom:'USD 423/mo', feeRef:'IGCSE-equivalent tier' },
-      { id:'dp',      label:'IB Diploma Programme',     years:'Grade 11–12',  ages:'Ages 16–19',  feeFrom:'USD 423/mo', feeRef:'IB Diploma tier · 6 subjects + TOK / EE / CAS' },
+      { id:'pyp',     label:'IB Primary Years (PYP)',  years:'Year 1–6',     ages:'Ages 5–11',   feeFrom:'From USD 423/mo', feeRef:'Primary Homeschool tier' },
+      { id:'myp_1_3', label:'IB MYP Years 1–3',         years:'Grade 6–8',    ages:'Ages 11–14',  feeFrom:'From USD 423/mo', feeRef:'Junior Secondary tier' },
+      { id:'myp_4_5', label:'IB MYP Years 4–5',         years:'Grade 9–10',   ages:'Ages 14–16',  feeFrom:'From USD 423/mo', feeRef:'IGCSE-equivalent tier' },
+      { id:'dp',      label:'IB Diploma Programme',     years:'Grade 11–12',  ages:'Ages 16–19',  feeFrom:'From USD 423/mo', feeRef:'IB Diploma tier · 6 subjects + TOK / EE / CAS' },
     ],
     subjects: 'Language & Literature, Language Acquisition, Individuals & Societies, Sciences, Mathematics, Arts, Physical & Health Education, Design. Plus IDU (Interdisciplinary Unit) and Service & Action.',
   },
@@ -319,11 +319,11 @@ const ENROLMENT_DATA = {
     description: 'Kenyan national curriculum following KICD standards. Pre-Primary through Senior School.',
     examBoard: 'Kenya National Examinations Council (KNEC)',
     levels: [
-      { id:'pp',          label:'Pre-Primary',            years:'PP1–PP2',         ages:'Ages 4–6',   feeFrom:'USD 423/mo', feeRef:'Primary tier' },
-      { id:'lower',       label:'Lower Primary',          years:'Grade 1–3',       ages:'Ages 6–9',   feeFrom:'USD 423/mo', feeRef:'Primary tier' },
-      { id:'upper',       label:'Upper Primary',          years:'Grade 4–6',       ages:'Ages 9–12',  feeFrom:'USD 423/mo', feeRef:'Primary tier' },
-      { id:'jss',         label:'Junior Secondary',       years:'Grade 7–9',       ages:'Ages 12–14', feeFrom:'USD 423/mo', feeRef:'Junior Secondary tier' },
-      { id:'sss',         label:'Senior Secondary',       years:'Grade 10–12',     ages:'Ages 14–17', feeFrom:'USD 423/mo', feeRef:'Senior tier' },
+      { id:'pp',          label:'Pre-Primary',            years:'PP1–PP2',         ages:'Ages 4–6',   feeFrom:'From USD 423/mo', feeRef:'Primary tier' },
+      { id:'lower',       label:'Lower Primary',          years:'Grade 1–3',       ages:'Ages 6–9',   feeFrom:'From USD 423/mo', feeRef:'Primary tier' },
+      { id:'upper',       label:'Upper Primary',          years:'Grade 4–6',       ages:'Ages 9–12',  feeFrom:'From USD 423/mo', feeRef:'Primary tier' },
+      { id:'jss',         label:'Junior Secondary',       years:'Grade 7–9',       ages:'Ages 12–14', feeFrom:'From USD 423/mo', feeRef:'Junior Secondary tier' },
+      { id:'sss',         label:'Senior Secondary',       years:'Grade 10–12',     ages:'Ages 14–17', feeFrom:'From USD 423/mo', feeRef:'Senior tier' },
     ],
     subjects: 'Mathematics, English, Kiswahili, Science & Technology, Social Studies, Religious Education, Creative Arts, Physical Education, plus pathway choices at Senior School.',
   },
@@ -332,9 +332,9 @@ const ENROLMENT_DATA = {
     description: 'American High School Diploma with Advanced Placement (AP) courses. Recognised by US universities and increasingly internationally.',
     examBoard: 'College Board (AP) and Smartious-issued transcripts',
     levels: [
-      { id:'elem',  label:'Elementary',     years:'K–5',     ages:'Ages 5–11',   feeFrom:'USD 423/mo', feeRef:'Primary tier' },
-      { id:'mid',   label:'Middle School',  years:'Grade 6–8',  ages:'Ages 11–14',  feeFrom:'USD 423/mo', feeRef:'Junior Secondary tier' },
-      { id:'hs',    label:'High School',    years:'Grade 9–12', ages:'Ages 14–18',  feeFrom:'USD 423/mo', feeRef:'High School tier' },
+      { id:'elem',  label:'Elementary',     years:'K–5',     ages:'Ages 5–11',   feeFrom:'From USD 423/mo', feeRef:'Primary tier' },
+      { id:'mid',   label:'Middle School',  years:'Grade 6–8',  ages:'Ages 11–14',  feeFrom:'From USD 423/mo', feeRef:'Junior Secondary tier' },
+      { id:'hs',    label:'High School',    years:'Grade 9–12', ages:'Ages 14–18',  feeFrom:'From USD 423/mo', feeRef:'High School tier' },
       { id:'ap',    label:'AP Courses',     years:'Grade 11–12', ages:'Ages 16–18', feeFrom:'USD 154/mo per AP subject', feeRef:'AP Subject add-on' },
     ],
     subjects: 'English, Mathematics, Sciences, Social Studies, Foreign Language, Arts/Health/PE. AP: Calculus AB/BC, Sciences, English Literature, US/World History, Economics, Computer Science.',
@@ -384,6 +384,8 @@ const styles = `
   .lp .logo-name em{color:${V.gold3};font-style:italic}
   .lp .logo-tag{font-size:8px;font-weight:600;letter-spacing:.14em;color:rgba(247,243,237,.28);text-transform:uppercase;margin-top:-2px}
   .lp .nav-links{display:flex;align-items:center;margin-left:40px;gap:0;flex:1}
+  .lp a.nl,.lp a.ft-ac,.lp a.logo-lockup,.lp .ft-lk a{text-decoration:none}
+  .lp a.bfc,.lp a.bc{color:inherit;text-decoration:none}
   .lp .nl{position:relative;padding:8px 12px;font-size:12.5px;font-weight:600;letter-spacing:.02em;color:rgba(247,243,237,.5);cursor:pointer;transition:color .2s;white-space:nowrap}
   .lp .nl:hover{color:${V.white}}.lp .nl.on{color:${V.white}}
   .lp .nl.on::after{content:'';position:absolute;bottom:-1px;left:12px;right:12px;height:1.5px;background:${V.gold3};border-radius:2px}
@@ -772,7 +774,7 @@ const styles = `
   .lp .contact-email-card{background:${V.white};border:1px solid ${V.bone3};border-radius:20px;padding:40px}
   /* FOOTER */
   .lp footer{background:${V.ink2};padding:72px 0 28px;border-top:1px solid rgba(184,150,12,.08)}
-  .lp .ft-grid{display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr;gap:52px;margin-bottom:52px}
+  .lp .ft-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr 1fr;gap:40px;margin-bottom:52px}
   .lp .ft-h{font-family:'DM Serif Display',Georgia,serif;font-size:21px;font-weight:700;color:#FFFFFF}
   .lp .ft-h em{color:${V.gold3};font-style:italic}
   .lp .ft-tag{font-size:8.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#A89F94;margin-top:2px;margin-bottom:14px}
@@ -1002,7 +1004,7 @@ function GuideCrossLinks({ guideSlug, guideName, hubHref, hubName }) {
   )
 }
 
-const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','tuition-uk','uk-area','homeschooling-kenya','kenya-city','virtual-school-kenya','virtual-school-ukraine','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschooling-malaysia','malaysia-city','homeschooling-turkey','turkey-city','homeschooling-kuwait','kuwait-city','homeschooling-oman','oman-city','homeschooling-taiwan','taiwan-city','homeschooling-ireland','ireland-city','homeschooling-united-kingdom','uk-city','homeschooling-india','india-city','homeschooling-germany','germany-city','homeschooling-romania','romania-city','homeschooling-ukraine','ukraine-city','homeschooling-spain','spain-city','homeschooling-denmark','denmark-city','homeschooling-france','france-city','homeschooling-italy','italy-city','homeschooling-poland','poland-city','homeschooling-portugal','portugal-city','homeschooling-czech-republic','czech-city','homeschooling-belgium','belgium-city','homeschooling-sweden','sweden-city','homeschooling-netherlands','netherlands-city','homeschooling-norway','norway-city','homeschooling-new-zealand','new-zealand-city','homeschooling-austria','austria-city','homeschooling-hungary','hungary-city','homeschooling-finland','finland-city','homeschooling-greece','greece-city','homeschooling-azerbaijan','azerbaijan-city','homeschooling-georgia','georgia-city','homeschooling-pakistan','pakistan-city','homeschooling-australia','australia-city','homeschooling-luxembourg','luxembourg-city-page','homeschooling-switzerland','switzerland-city','homeschooling-slovakia','slovakia-city','homeschooling-slovenia','slovenia-city','homeschooling-croatia','croatia-city','homeschooling-serbia','serbia-city','homeschooling-bulgaria','bulgaria-city','homeschooling-albania','albania-city','homeschooling-north-macedonia','north-macedonia-city','homeschooling-montenegro','montenegro-city','homeschooling-bosnia','bosnia-city','homeschooling-kosovo','kosovo-city','homeschooling-zambia','zambia-city','homeschooling-zimbabwe','zimbabwe-city','homeschooling-botswana','botswana-city','homeschooling-namibia','namibia-city','homeschooling-algeria','algeria-city','homeschooling-tunisia','tunisia-city','homeschooling-mauritius','mauritius-city','homeschooling-ghana','ghana-city','homeschooling-angola','angola-city','homeschooling-drc','drc-city','homeschooling-mexico','mexico-city-page','homeschooling-brazil','brazil-city','homeschooling-colombia','colombia-city','homeschooling-argentina','argentina-city','homeschooling-chile','chile-city','homeschooling-peru','peru-city','homeschooling-ecuador','ecuador-city','homeschooling-panama','panama-city-page','homeschooling-costa-rica','costa-rica-city','homeschooling-dominican-republic','dominican-city','homeschooling-uruguay','uruguay-city','homeschooling-guatemala','guatemala-city-page','homeschooling-paraguay','paraguay-city','homeschooling-bolivia','bolivia-city','homeschooling-venezuela','venezuela-city','homeschooling-puerto-rico','puerto-rico-city','homeschooling-israel','israel-city','homeschooling-jordan','jordan-city','homeschooling-iraq','iraq-city','homeschooling-cyprus','cyprus-city','homeschooling-lebanon','lebanon-city','homeschooling-myanmar','myanmar-city','homeschooling-maldives','maldives-city','homeschooling-china','china-city','homeschooling-bangladesh','bangladesh-city','homeschooling-nepal','nepal-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','assessment','contact','privacy','terms','cookies','gdpr','child-protection','article']
+const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','tuition-uk','uk-area','homeschooling-kenya','kenya-city','virtual-school-kenya','virtual-school-ukraine','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschooling-malaysia','malaysia-city','homeschooling-turkey','turkey-city','homeschooling-kuwait','kuwait-city','homeschooling-oman','oman-city','homeschooling-taiwan','taiwan-city','homeschooling-ireland','ireland-city','homeschooling-united-kingdom','uk-city','homeschooling-india','india-city','homeschooling-germany','germany-city','homeschooling-romania','romania-city','homeschooling-ukraine','ukraine-city','homeschooling-spain','spain-city','homeschooling-denmark','denmark-city','homeschooling-france','france-city','homeschooling-italy','italy-city','homeschooling-poland','poland-city','homeschooling-portugal','portugal-city','homeschooling-czech-republic','czech-city','homeschooling-belgium','belgium-city','homeschooling-sweden','sweden-city','homeschooling-netherlands','netherlands-city','homeschooling-norway','norway-city','homeschooling-new-zealand','new-zealand-city','homeschooling-austria','austria-city','homeschooling-hungary','hungary-city','homeschooling-finland','finland-city','homeschooling-greece','greece-city','homeschooling-azerbaijan','azerbaijan-city','homeschooling-georgia','georgia-city','homeschooling-pakistan','pakistan-city','homeschooling-australia','australia-city','homeschooling-luxembourg','luxembourg-city-page','homeschooling-switzerland','switzerland-city','homeschooling-slovakia','slovakia-city','homeschooling-slovenia','slovenia-city','homeschooling-croatia','croatia-city','homeschooling-serbia','serbia-city','homeschooling-bulgaria','bulgaria-city','homeschooling-albania','albania-city','homeschooling-north-macedonia','north-macedonia-city','homeschooling-montenegro','montenegro-city','homeschooling-bosnia','bosnia-city','homeschooling-kosovo','kosovo-city','homeschooling-zambia','zambia-city','homeschooling-zimbabwe','zimbabwe-city','homeschooling-botswana','botswana-city','homeschooling-namibia','namibia-city','homeschooling-algeria','algeria-city','homeschooling-tunisia','tunisia-city','homeschooling-mauritius','mauritius-city','homeschooling-ghana','ghana-city','homeschooling-angola','angola-city','homeschooling-drc','drc-city','homeschooling-mexico','mexico-city-page','homeschooling-brazil','brazil-city','homeschooling-colombia','colombia-city','homeschooling-argentina','argentina-city','homeschooling-chile','chile-city','homeschooling-peru','peru-city','homeschooling-ecuador','ecuador-city','homeschooling-panama','panama-city-page','homeschooling-costa-rica','costa-rica-city','homeschooling-dominican-republic','dominican-city','homeschooling-uruguay','uruguay-city','homeschooling-guatemala','guatemala-city-page','homeschooling-paraguay','paraguay-city','homeschooling-bolivia','bolivia-city','homeschooling-venezuela','venezuela-city','homeschooling-puerto-rico','puerto-rico-city','homeschooling-israel','israel-city','homeschooling-jordan','jordan-city','homeschooling-iraq','iraq-city','homeschooling-cyprus','cyprus-city','homeschooling-lebanon','lebanon-city','homeschooling-myanmar','myanmar-city','homeschooling-maldives','maldives-city','homeschooling-china','china-city','homeschooling-bangladesh','bangladesh-city','homeschooling-nepal','nepal-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','assessment','contact','privacy','terms','cookies','gdpr','child-protection','academic-integrity','ai-policy','inclusion-policy','language-policy','article']
 
 // ─────────────────────────────────────────────────────────────────
 // Google Business Profile reviews — Smartious Homeschool & Tuition
@@ -1522,6 +1524,86 @@ function articleProduct(a) {
 // from CURRICULA / SERVICES. Edit freely to refine targeting.
 const SITE = 'Smartious Homeschool & eSchool'
 const PAGE_META = {
+  'tuition-nairobi': {
+    title: 'Private Tutors in Nairobi | IGCSE, A-Level, IB & CBC Tuition | Smartious',
+    desc: 'One-to-one tuition in Nairobi, at home or online: Cambridge IGCSE and A-Level, IB, Pearson Edexcel, American and CBC, with qualified subject specialists. Online tuition USD 15/hour.',
+  },
+  'homeschool': {
+    title: 'Homeschooling with Smartious | Cambridge, IB, American & CBC | Smartious',
+    desc: 'A full homeschool programme with qualified teachers: live lessons, a structured curriculum, assessments and reports, for families in Kenya and worldwide. From USD 423/month for Primary.',
+  },
+  'tuition': {
+    title: 'Private Tuition | One-to-One Online Tutors for IGCSE, A-Level & IB | Smartious',
+    desc: 'One-to-one online tuition in any subject at any level, from primary to IGCSE, A-Level and IB, with qualified subject specialists. USD 15/hour.',
+  },
+  'languages': {
+    title: 'Language Courses | French, Spanish, German, Mandarin, Arabic & Kiswahili | Smartious',
+    desc: 'Live online language lessons in French, Spanish, German, Mandarin Chinese, Arabic, Kiswahili, Italian and Portuguese, including IGCSE, A-Level and IB preparation.',
+  },
+  'test-prep': {
+    title: 'Test Preparation | SAT, IELTS, TOEFL, PTE, GRE & GMAT | Smartious',
+    desc: 'Expert online preparation for SAT, IELTS, TOEFL, PTE, GRE and GMAT, with practice tests and one-to-one coaching from Smartious specialists.',
+  },
+  'study-abroad': {
+    title: 'Study Abroad Guidance | UK, US, Canada & Europe Universities | Smartious',
+    desc: 'University and study-abroad guidance for Smartious students: choosing courses, UCAS, Common App and applications worldwide, with entry requirements and visas.',
+  },
+  'iufp': {
+    title: 'International University Foundation Programme (IUFP) | Smartious',
+    desc: 'The Smartious International University Foundation Programme prepares students for degree study abroad, with academic English, subject foundations and university placement support.',
+  },
+  'pre-university': {
+    title: 'Pre-University Programme | Bridging to Degree Study | Smartious',
+    desc: 'Pre-university courses that bridge school and degree study, with academic skills, subject preparation and application support.',
+  },
+  'calendar': {
+    title: 'Academic Calendar 2026-27 | Term Dates | Smartious',
+    desc: 'Smartious term dates for 2026-27: Term 1 from 25 August 2026, Term 2 from 5 January 2027 and Term 3 from 13 April 2027, with half-terms and examination periods.',
+  },
+  'events': {
+    title: 'Events | Smartious Homeschool & eSchool',
+    desc: 'Upcoming Smartious events for students and parents: orientation, parent-teacher conferences, showcases, workshops and university sessions.',
+  },
+  'gallery': {
+    title: 'Gallery | Smartious Homeschool & eSchool',
+    desc: 'Photos from Smartious classes, events and activities in Nairobi and online.',
+  },
+  'privacy': {
+    title: 'Privacy Policy | Smartious Homeschool & eSchool',
+    desc: 'How Smartious Homeschool collects, uses and protects personal data, under the Kenya Data Protection Act and the GDPR.',
+  },
+  'terms': {
+    title: 'Terms of Service | Smartious Homeschool & eSchool',
+    desc: 'The terms between families and Smartious E-School Ltd: enrolment, fees paid termly, refunds, conduct, intellectual property and liability.',
+  },
+  'cookies': {
+    title: 'Cookie Policy | Smartious Homeschool & eSchool',
+    desc: 'How smartioushomeschool.com uses cookies and similar technologies, and how to control them.',
+  },
+  'gdpr': {
+    title: 'GDPR Compliance | Smartious Homeschool & eSchool',
+    desc: 'Your rights under the EU General Data Protection Regulation and the Kenya Data Protection Act, and how to exercise them with Smartious.',
+  },
+  'child-protection': {
+    title: 'Child Protection & Safeguarding Policy | Smartious',
+    desc: 'How Smartious keeps every child safe, in person and online: safer recruitment, safe online teaching, how to raise a concern and how we respond.',
+  },
+  'academic-integrity': {
+    title: 'Academic Integrity | Smartious Homeschool & eSchool',
+    desc: 'How Smartious keeps every grade, report and certificate honest, and why no record is ever changed for any favour.',
+  },
+  'ai-policy': {
+    title: 'AI Use Policy | Smartious Homeschool & eSchool',
+    desc: 'How Smartious uses artificial intelligence, when students may use it, and how we protect their data and their work.',
+  },
+  'inclusion-policy': {
+    title: 'Inclusion Policy | Smartious Homeschool & eSchool',
+    desc: 'How Smartious includes and supports every learner, whatever their needs, background or ability.',
+  },
+  'language-policy': {
+    title: 'Language Policy | Smartious Homeschool & eSchool',
+    desc: 'The language we teach in, how we support students learning English, and how we value every family’s languages.',
+  },
   home: {
     title: 'Online School, Virtual School & Homeschool | IGCSE, A-Level, IB & American — Smartious',
     desc: 'Accredited online homeschool serving UAE, UK, Canada, Australia, Nigeria and Kenya. Cambridge IGCSE, A-Level, IB Diploma, Edexcel and American curricula. Live classes, qualified teachers, from USD 15/hour for 1-on-1 tuition · from USD 423/month for full homeschool programmes.',
@@ -1824,7 +1906,7 @@ const PAGE_META = {
   },
   'homeschooling-united-kingdom': {
     title: 'Online School, Virtual School & Homeschool UK | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for UK families across London (all 32 boroughs — Westminster / Eton / Harrow / St. Paul\'s alternative), Manchester (Northern Powerhouse — Manchester Grammar School alternative), Birmingham (HSBC UK HQ + JLR Solihull + King Edward VI alternative), Leeds (Channel 4 Northern HQ + Grammar School at Leeds alternative), Bristol (Airbus UK Filton + Bristol Grammar + Clifton alternative), and Edinburgh (Scotland — Cambridge / A-Level pathway alternative to Scottish CfE). Below Cambridge Home School Online (£10,950/year) at USD 423/month. Elective Home Education, Section 19 alternative provision, SEND-friendly. From USD 423/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for UK families across London (all 32 boroughs — Westminster / Eton / Harrow / St. Paul\'s alternative), Manchester (Northern Powerhouse — Manchester Grammar School alternative), Birmingham (HSBC UK HQ + JLR Solihull + King Edward VI alternative), Leeds (Channel 4 Northern HQ + Grammar School at Leeds alternative), Bristol (Airbus UK Filton + Bristol Grammar + Clifton alternative), and Edinburgh (Scotland — Cambridge / A-Level pathway alternative to Scottish CfE). Below Cambridge Home School Online (£10,950/year) from USD 423/month. Elective Home Education, Section 19 alternative provision, SEND-friendly. From USD 423/month.',
   },
   'homeschooling-india': {
     title: 'Online School, Virtual School & Homeschool India | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
@@ -1868,7 +1950,7 @@ const PAGE_META = {
   },
   pricing: {
     title: 'Fee Structure 2026 | Homeschool & Tuition Fees — Smartious',
-    desc: 'Smartious 2026 fee structure — one clear fee for homeschool programmes (USD 423/month, paid termly), A-Level, IB, single subjects and private tuition.',
+    desc: 'Smartious 2026 fee structure — one clear fee for homeschool programmes (from USD 423/month, paid termly), A-Level, IB, single subjects and private tuition.',
   },
   programs: {
     title: 'Programmes | Homeschool, Tuition, IUFP & Study Abroad — Smartious',
@@ -1918,11 +2000,11 @@ const PRIVACY_POLICY = [
   {h:'3. How we use your data',p:'We use personal data only for: (i) delivering the programme you have enrolled in, matching tutors, scheduling lessons, issuing progress reports, sitting exams; (ii) communicating with you about your account, lessons, payments, and service updates; (iii) processing payments via Paystack; (iv) improving our website and teaching methods through anonymised analytics; (v) complying with Kenyan tax, education, and regulatory obligations. We do not sell personal data to third parties. Ever.'},
   {h:'4. Lawful basis for processing',p:'Under Article 6 of the GDPR and Section 30 of the Kenya Data Protection Act, we process your data on one of the following lawful bases: (a) Contract: to deliver the services you have enrolled in; (b) Consent: for marketing communications, which you can withdraw at any time; (c) Legitimate interests: for securing our systems, preventing fraud, and improving our services; (d) Legal obligation: for tax records, accounting, and regulatory compliance.'},
   {h:'5. Who we share your data with',p:'We share data only with parties essential to service delivery: (i) our assigned tutors and assessment teachers, who see only the data needed to teach your child; (ii) Paystack (Paystack Payments Limited, Lagos & Nairobi) for payment processing; (iii) Google (Firebase, Gmail, Drive) for our backend infrastructure, subject to Google\'s Cloud Data Processing Addendum; (iv) FormSubmit.co for form delivery; (v) MongoDB Atlas for database hosting; (vi) Netlify and Render for website and API hosting. All processors are bound by data processing agreements. We require them to meet or exceed our own data protection standards.'},
-  {h:'6. International transfers',p:'Some of our processors (Google, MongoDB Atlas, Netlify, Render) store data in the US or EU. Where data is transferred outside Kenya or the European Economic Area, we rely on appropriate safeguards , Standard Contractual Clauses approved by the European Commission, or equivalent mechanisms under the Kenya DPA , to ensure your data receives equivalent protection.'},
+  {h:'6. International transfers',p:'Some of our processors (Google, MongoDB Atlas, Netlify, Render) store data in the US or EU. Where data is transferred outside Kenya or the European Economic Area, we rely on appropriate safeguards, Standard Contractual Clauses approved by the European Commission, or equivalent mechanisms under the Kenya DPA, to ensure your data receives equivalent protection.'},
   {h:'7. How long we keep your data',p:'We keep data only as long as needed: (a) active student records: for the duration of enrolment plus 7 years after the last lesson, to comply with Kenyan tax law and academic record-keeping standards; (b) enquiry and consultation records: 24 months from last contact; (c) marketing subscribers: until you unsubscribe; (d) website analytics: 26 months (Google Analytics default). After these periods, data is securely deleted or anonymised.'},
   {h:'8. Your rights',p:'Both the Kenya Data Protection Act and the GDPR give you the following rights: (i) Access: request a copy of all personal data we hold about you; (ii) Rectification: correct inaccurate data; (iii) Erasure: request deletion of your data, subject to our legal retention obligations; (iv) Restriction: limit how we process your data; (v) Portability: receive your data in a machine-readable format; (vi) Objection: object to specific types of processing, especially marketing; (vii) Withdraw consent at any time. To exercise any right, email hello@smartioushomeschool.com. We respond within 30 days as required by law.'},
   {h:'9. Data of minors',p:'Because many of our students are under 18, parental consent is required before any child is enrolled or assessed. The parent is the primary account holder and the primary contact. We do not knowingly collect personal data directly from children under 13 without parental involvement. If you believe we have done so inadvertently, contact us and we will delete the data immediately.'},
-  {h:'10. Security',p:'We use industry-standard safeguards: HTTPS (TLS 1.3) across the entire site, password hashing (bcrypt) for all accounts, role-based access control in our backend, encrypted database backups, and quarterly security reviews. Paystack handles payment data to PCI-DSS Level 1 standards , we never see or store full card details. No system is perfectly secure, but we work continuously to reduce risk.'},
+  {h:'10. Security',p:'We use industry-standard safeguards: HTTPS (TLS 1.3) across the entire site, password hashing (bcrypt) for all accounts, role-based access control in our backend, encrypted database backups, and quarterly security reviews. Paystack handles payment data to PCI-DSS Level 1 standards, we never see or store full card details. No system is perfectly secure, but we work continuously to reduce risk.'},
   {h:'11. Breach notification',p:'In the unlikely event of a personal data breach affecting your rights, we will notify the Office of the Data Protection Commissioner (Kenya) within 72 hours as required by Section 43 of the Kenya DPA, and the affected individuals without undue delay, describing what happened, what data was affected, and the steps we are taking.'},
   {h:'12. Changes to this policy',p:'We may update this policy to reflect changes in law, our services, or our processors. When we make material changes we will notify active students and parents by email and update the "Effective" date at the top of this page. The most current version is always the one published here.'},
   {h:'13. Contact & complaints',p:'For any privacy question, data subject request, or complaint, email our Data Protection point of contact: hello@smartioushomeschool.com, phone +254 745 021 212, or write to Smartious E-School Ltd, Diamond Plaza I, Parklands, Nairobi, Kenya. You also have the right to lodge a complaint with the Office of the Data Protection Commissioner of Kenya (odpc.go.ke) or, if you are in the EU, with your national data protection authority.'},
@@ -1932,13 +2014,13 @@ const TERMS_OF_SERVICE = [
   {h:'1. About these terms',p:'These Terms of Service ("Terms") govern your use of smartioushomeschool.com and any educational services provided by Smartious E-School Ltd ("Smartious"). By enrolling a student, creating an account, or using any part of our website or services, you agree to these Terms. If you do not agree, please do not use our services.'},
   {h:'2. Eligibility',p:'To enrol a student, you must be the student\'s parent or legal guardian and at least 18 years old. Students under 18 cannot create an account without parental consent. We reserve the right to verify identity at any stage, particularly before releasing academic records or issuing predicted grades.'},
   {h:'3. Enrolment and assessment',p:'Enrolment begins when you submit the enrolment form and pay the USD 38 (KSh 5,000) application fee. The assessment fee is non-refundable once the placement test has been served, but counts towards your first month of tuition if you proceed to enrol. We aim to match a tutor within 48 working hours of a completed assessment.'},
-  {h:'4. Fees and payment',p:'All fees are stated in US Dollars. Local currency equivalents (e.g. KES for Kenyan families) are shown for convenience but the dollar price is the contractual amount. Online school and homeschool programmes are USD 423 per month for every year group and curriculum, payable termly in advance. One-to-one tuition is USD 15 per hour. Examination board fees are separate. Payments are processed via Paystack. We accept M-Pesa, Visa, Mastercard, bank transfer, and Apple Pay.'},
+  {h:'4. Fees and payment',p:'All fees are stated in US Dollars. Local currency equivalents (e.g. KES for Kenyan families) are shown for convenience but the dollar price is the contractual amount. Online school and homeschool fees start from USD 423 per month for Primary and vary by curriculum and level; the fee for each student is confirmed in writing after the assessment. Fees are payable termly in advance. One-to-one tuition is USD 15 per hour. Examination board fees are separate. Payments are processed via Paystack. We accept M-Pesa, Visa, Mastercard, bank transfer, and Apple Pay.'},
   {h:'5. Cancellation and refunds',p:'Fees are non-refundable once the student\'s assessment has been done, the timetable has been created and lessons have started. This applies to the whole term paid for. If you cancel in writing before that point, we refund tuition paid in advance, less the application fee once the assessment has been served. To withdraw at the end of a term, tell us in writing before the next term\'s invoice is due; no further fees will then be charged.'},
   {h:'6. Your obligations',p:'You agree to: (i) provide accurate information when enrolling; (ii) ensure your child attends scheduled lessons or gives reasonable notice for cancellations; (iii) provide a safe, supervised environment for home-visit tuition in Nairobi; (iv) treat Smartious staff, tutors, and our digital platforms with respect; (v) not share your portal login credentials with anyone outside your household; (vi) not record, reproduce, or redistribute our teaching materials or live lessons without written permission.'},
   {h:'7. Our obligations',p:'Smartious will: (i) deliver lessons, materials, and assessments as described in your enrolment package; (ii) provide qualified, background-checked tutors; (iii) keep academic records for at least 7 years; (iv) issue progress reports as specified in your plan; (v) communicate any material changes at least 30 days in advance; (vi) act in the student\'s best academic interests at all times.'},
-  {h:'8. Intellectual property',p:'All content published by Smartious , teaching materials, lesson recordings, assessment banks, software, the Mshauri AI tutor, and the website itself , is the intellectual property of Smartious E-School Ltd or our licensors. You may use this content only within your own household for the enrolled student\'s education. Commercial use, redistribution, or resale is strictly prohibited and may result in termination of services and legal action. Past papers and marking schemes are the property of their respective exam boards (Cambridge, Edexcel, IB) and are reproduced under licence or fair-dealing provisions.'},
+  {h:'8. Intellectual property',p:'All content published by Smartious, teaching materials, lesson recordings, assessment banks, software, the Mshauri AI tutor, and the website itself, is the intellectual property of Smartious E-School Ltd or our licensors. You may use this content only within your own household for the enrolled student\'s education. Commercial use, redistribution, or resale is strictly prohibited and may result in termination of services and legal action. Past papers and marking schemes are the property of their respective exam boards (Cambridge, Edexcel, IB) and are reproduced under licence or fair-dealing provisions.'},
   {h:'9. Tutor availability and substitution',p:'We strive to match each student to the same dedicated tutor for the duration of enrolment. Where a tutor becomes unavailable (illness, relocation, resignation), we will provide a qualified substitute and notify you as soon as reasonably possible. Temporary substitutions do not change the fees; if we cannot provide a qualified tutor for an extended period, we will rematch your child or credit the missed lessons to the next term.'},
-  {h:'10. Code of conduct',p:'We reserve the right to suspend or terminate services , without refund , if a parent or student engages in abusive, discriminatory, or harassing behaviour towards our staff or tutors; attempts to defraud or deceive Smartious; or repeatedly breaches these Terms after written warning. This is rare, but necessary to protect our team.'},
+  {h:'10. Code of conduct',p:'We reserve the right to suspend or terminate services, without refund, if a parent or student engages in abusive, discriminatory, or harassing behaviour towards our staff or tutors; attempts to defraud or deceive Smartious; or repeatedly breaches these Terms after written warning. This is rare, but necessary to protect our team.'},
   {h:'11. Limitation of liability',p:'To the maximum extent permitted by Kenyan law, Smartious is not liable for: (i) exam results or university admissions: our role is to teach and prepare; outcomes depend on many factors including the student\'s effort and the decisions of exam boards and universities; (ii) indirect, consequential, or punitive damages; (iii) delays or outages caused by third-party services (Paystack, Google, Netlify). Our total liability for any claim is limited to the fees you have paid us in the 12 months preceding the claim.'},
   {h:'12. Governing law',p:'These Terms are governed by the laws of Kenya. Any dispute arising from these Terms or our services will be resolved first by good-faith negotiation, then by mediation in Nairobi under the Mediation (Court-Annexed) Rules, and only then by the courts of Kenya, which have exclusive jurisdiction.'},
   {h:'13. Changes to these terms',p:'We may update these Terms from time to time. Material changes will be communicated to active students and parents at least 30 days in advance by email. Minor clarifications (typos, reformatting) may be made without notice. The current version is always published here with its effective date.'},
@@ -1948,23 +2030,23 @@ const TERMS_OF_SERVICE = [
 const COOKIE_POLICY = [
   {h:'1. What are cookies?',p:'Cookies are small text files placed on your device when you visit a website. They allow the site to remember actions and preferences (such as login, language, font size, and other display preferences) over time, so you don\'t have to re-enter them every time you return. Cookies may be "session" cookies (deleted when you close your browser) or "persistent" cookies (stored until they expire or you delete them).'},
   {h:'2. Cookies we use',p:'Smartious uses a small number of carefully chosen cookies in four categories: (a) strictly necessary: authentication tokens, CSRF protection, session state. These cannot be switched off as the site will not work without them; (b) functional: remembers your preferences such as billing cycle selection, blog category filters; (c) analytics: Google Analytics 4 collects anonymous, aggregated data about how visitors use the site so we can improve it. We have IP anonymisation enabled; (d) payment: Paystack sets cookies during checkout to prevent fraud and maintain the payment session. These are set only on the payment step.'},
-  {h:'3. Third-party cookies',p:'When you load pages that embed third-party content , the Paystack checkout iframe, a YouTube video on the blog, a Google Map of our Nairobi centre , those third parties may set their own cookies. We do not control these. You can review their policies at paystack.com/privacy, policies.google.com, and similar.'},
-  {h:'4. Your choices',p:'You can control cookies three ways: (i) in your browser settings: most browsers let you block all cookies, block third-party cookies, or delete cookies on exit; (ii) through our cookie banner (for EU/UK visitors) , you can accept all, accept only essential, or customise by category; (iii) by opting out of Google Analytics at tools.google.com/dlpage/gaoptout. Blocking strictly necessary cookies will prevent you from logging into the portal or completing enrolment.'},
+  {h:'3. Third-party cookies',p:'When you load pages that embed third-party content, the Paystack checkout iframe, a YouTube video on the blog, a Google Map of our Nairobi centre, those third parties may set their own cookies. We do not control these. You can review their policies at paystack.com/privacy, policies.google.com, and similar.'},
+  {h:'4. Your choices',p:'You can control cookies three ways: (i) in your browser settings: most browsers let you block all cookies, block third-party cookies, or delete cookies on exit; (ii) through our cookie banner (for EU/UK visitors), you can accept all, accept only essential, or customise by category; (iii) by opting out of Google Analytics at tools.google.com/dlpage/gaoptout. Blocking strictly necessary cookies will prevent you from logging into the portal or completing enrolment.'},
   {h:'5. Do Not Track',p:'Our site respects the "Do Not Track" browser signal for analytics cookies. If your browser sends a DNT signal, Google Analytics does not fire.'},
   {h:'6. Changes to this policy',p:'If we add or remove cookies, we will update this page and, for EU/UK visitors, re-request consent via our cookie banner. The effective date at the top of this page reflects the most recent revision.'},
   {h:'7. Questions',p:'For any cookie-related question, email hello@smartioushomeschool.com.'},
 ]
 
 const GDPR_COMPLIANCE = [
-  {h:'1. GDPR in plain English',p:'The EU General Data Protection Regulation (GDPR) is the world\'s strictest privacy law. It applies to Smartious whenever we process personal data of people in the European Union , for example, a family who moves to Germany while their child is enrolled with us, or a parent in France enquiring about IUFP. Kenya\'s own Data Protection Act, 2019 is closely modelled on the GDPR, so the rights described here apply to all our students regardless of country.'},
-  {h:'2. Your rights under GDPR',p:'As a data subject, you have eight specific rights: (i) the right to be informed: which is what this page is for; (ii) the right of access: you can request a copy of everything we hold about you; (iii) the right to rectification: correct inaccurate data; (iv) the right to erasure ("right to be forgotten") , ask us to delete your data, subject to legal retention obligations like tax records; (v) the right to restrict processing: pause our use of your data while a dispute is resolved; (vi) the right to data portability: receive your data in a machine-readable format to transfer to another provider; (vii) the right to object: to direct marketing or to processing based on legitimate interests; (viii) rights related to automated decision-making, we do not make any decision about your child based solely on automated processing, so this right does not currently come into play.'},
+  {h:'1. GDPR in plain English',p:'The EU General Data Protection Regulation (GDPR) is the world\'s strictest privacy law. It applies to Smartious whenever we process personal data of people in the European Union, for example, a family who moves to Germany while their child is enrolled with us, or a parent in France enquiring about IUFP. Kenya\'s own Data Protection Act, 2019 is closely modelled on the GDPR, so the rights described here apply to all our students regardless of country.'},
+  {h:'2. Your rights under GDPR',p:'As a data subject, you have eight specific rights: (i) the right to be informed: which is what this page is for; (ii) the right of access: you can request a copy of everything we hold about you; (iii) the right to rectification: correct inaccurate data; (iv) the right to erasure ("right to be forgotten"), ask us to delete your data, subject to legal retention obligations like tax records; (v) the right to restrict processing: pause our use of your data while a dispute is resolved; (vi) the right to data portability: receive your data in a machine-readable format to transfer to another provider; (vii) the right to object: to direct marketing or to processing based on legitimate interests; (viii) rights related to automated decision-making, we do not make any decision about your child based solely on automated processing, so this right does not currently come into play.'},
   {h:'3. Our lawful bases',p:'We process personal data on one of four lawful bases under Article 6 GDPR: (a) Contract: processing necessary to deliver the educational services you have enrolled in; (b) Consent: for optional marketing emails and analytics cookies, which you can withdraw at any time; (c) Legitimate interests: for preventing fraud, securing our systems, and improving our services, where our interests do not override your rights; (d) Legal obligation: for tax and regulatory record-keeping.'},
   {h:'4. Data Protection Officer',p:'Because Smartious is not a large-scale processor of special-category data, we are not legally required to appoint a formal Data Protection Officer. We have instead designated a Data Protection Point of Contact: Alfred Ouko (Founder), reachable at hello@smartioushomeschool.com or +254 745 021 212. All data subject requests are handled by this contact.'},
   {h:'5. Transfers outside the EEA',p:'We are based in Kenya. Data you share with us crosses the EU and Kenya border. Kenya does not yet have a formal adequacy decision from the European Commission. We rely on the European Commission\'s Standard Contractual Clauses (SCCs) as the lawful safeguard for transfers. Our third-party processors (Google, MongoDB, Netlify, Render, Paystack) are all bound by SCCs or equivalent frameworks and meet or exceed EU data protection standards.'},
   {h:'6. Data minimisation',p:'We collect the minimum data necessary for each purpose. For example, we ask for a student\'s date of birth to assign the correct academic level, but we do not ask for national ID numbers or passport details unless required for university applications. We routinely delete data we no longer need.'},
   {h:'7. Breach notification',p:'Under Article 33 GDPR, we will notify the competent supervisory authority of a personal data breach within 72 hours of becoming aware of it, unless the breach is unlikely to result in a risk to the rights and freedoms of individuals. Under Article 34, we will notify affected individuals without undue delay if the breach is likely to result in a high risk. We will describe what happened, what data was affected, the likely consequences, and the steps we are taking.'},
-  {h:'8. Exercising your rights',p:'To exercise any GDPR right , access, rectification, erasure, restriction, portability, objection , email hello@smartioushomeschool.com. Include: (a) the right you wish to exercise; (b) enough information for us to verify your identity (email associated with your Smartious account, plus one recent transaction reference if applicable); (c) any specific details about the request. We respond within 30 days. This service is free unless requests are manifestly unfounded or excessive, in which case we may charge a reasonable fee or refuse to act.'},
-  {h:'9. Complaints',p:'If you believe we have not handled your personal data properly, we want to hear first and put it right. Email hello@smartioushomeschool.com. If you remain dissatisfied, you have the right to lodge a complaint with: (i) the Office of the Data Protection Commissioner of Kenya at odpc.go.ke; (ii) the data protection authority of your EU country of residence , a list is maintained at edpb.europa.eu/about-edpb/board/members.'},
+  {h:'8. Exercising your rights',p:'To exercise any GDPR right, access, rectification, erasure, restriction, portability, objection, email hello@smartioushomeschool.com. Include: (a) the right you wish to exercise; (b) enough information for us to verify your identity (email associated with your Smartious account, plus one recent transaction reference if applicable); (c) any specific details about the request. We respond within 30 days. This service is free unless requests are manifestly unfounded or excessive, in which case we may charge a reasonable fee or refuse to act.'},
+  {h:'9. Complaints',p:'If you believe we have not handled your personal data properly, we want to hear first and put it right. Email hello@smartioushomeschool.com. If you remain dissatisfied, you have the right to lodge a complaint with: (i) the Office of the Data Protection Commissioner of Kenya at odpc.go.ke; (ii) the data protection authority of your EU country of residence, a list is maintained at edpb.europa.eu/about-edpb/board/members.'},
   {h:'10. Effective date & reviews',p:'This page was last reviewed on 20 April 2026. We review our GDPR compliance at least once every 12 months and whenever we materially change how we process data.'},
 ]
 
@@ -1983,6 +2065,63 @@ const CHILD_PROTECTION_POLICY = [
   {h:'11. Our safeguarding lead',p:'Our Designated Safeguarding Lead is responsible for handling concerns, keeping records, liaising with authorities, and reviewing this policy. Reach the safeguarding lead at safeguarding@smartioushomeschool.com or +254 745 021 212. In the lead\'s absence, the Founder, Alfred Ouko, acts as deputy.'},
   {h:'12. Review',p:'We review this policy at least once every 12 months, and immediately after any safeguarding incident or any change in the law of the countries we serve. This page shows the date it was last reviewed. Keeping children safe is never finished, and we improve our practice continuously.'},
 ]
+
+const ACADEMIC_INTEGRITY_POLICY = [
+  {h:'1. Our commitment',p:'Every grade, report and certificate Smartious issues must tell the truth about what a student has learned and achieved. Universities, exam boards, employers and families rely on our records, and so do our students. This policy sets out the standards of honesty we expect from students, parents and staff, and how we protect the integrity of every record we keep.'},
+  {h:'2. Records are never modified for any favour',p:'No student record will be changed in any way, for any reason, in return for any favour. This covers marks, grades, predicted grades, attendance, reports, transcripts, references, certificates and examination entries. It applies whatever is offered or asked: money, gifts, discounts, extra fees, personal favours, friendship, family connections, promises, pressure or threats, and whoever offers it, whether a parent, a student, a member of staff or anyone else. There are no exceptions, and no member of staff, including the Principal, has the authority to make one.'},
+  {h:'3. Offering a favour is itself a breach',p:'Offering, promising or giving anything to influence a record is a serious breach of this policy, whether or not the offer is accepted. Staff must refuse any such offer, record it, and report it to the Principal and to Quality Assurance on the same day. A member of staff who accepts an offer, or changes a record improperly, will be dismissed. A family or student who makes an offer may have their enrolment ended, and the matter may be reported to the relevant examination board or authority.'},
+  {h:'4. How a genuine error is corrected',p:'Records stay as they were issued. If a student or parent believes a record contains a genuine clerical error, such as a mark entered against the wrong student, they may raise it in writing with Quality Assurance. If evidence proves the error, the original entry is kept exactly as it was, and the corrected entry is added beside it, dated, with the reason and the names of the people who approved it. The original is never deleted or overwritten. A correction never changes a teacher’s academic judgement; disagreement with a mark is handled through the appeals process below.'},
+  {h:'5. Appeals against a mark',p:'A student who disagrees with a mark may appeal within 14 days of receiving it, asking for the work to be reviewed by a second qualified teacher who did not mark it. The reviewer’s decision and reasons are recorded. If the review changes the mark, the original mark is kept and the corrected mark is added beside it. For external examinations, appeals follow the rules of the examination board (Cambridge, Pearson Edexcel, IB or College Board), and Smartious will support the family through that process.'},
+  {h:'6. What we expect of students',p:'Students submit their own work. That means no copying from another student or a source without acknowledging it, no buying or commissioning work, no sharing answers during assessments, no impersonation in online lessons or exams, and no use of unauthorised materials or tools, including AI tools where they are not allowed (see our AI Use Policy). Students acknowledge every source they use, in the way their teacher shows them.'},
+  {h:'7. What we expect of parents',p:'Parents support honest work at home. Helping a child understand a topic is welcome; completing assessed work for them is not. During online assessments, parents make sure the student works alone and without unauthorised help or materials, and never ask a teacher to change, inflate or predict a grade beyond the evidence.'},
+  {h:'8. What we expect of staff',p:'Teachers mark fairly against the published mark scheme and predict grades only on evidence. Staff never share assessment content in advance, never complete work for a student, and never change a record outside the correction process above. Any member of staff who is asked to do so must report it.'},
+  {h:'9. External examinations',p:'Cambridge, Pearson Edexcel, IB and College Board each have rules on malpractice. Smartious follows them in full and reports suspected malpractice in external examinations to the board concerned, as the boards require. A finding of malpractice by a board can lead to the loss of a grade or of a whole qualification.'},
+  {h:'10. How suspected misconduct is handled',p:'Suspected misconduct is investigated by a member of staff who is not the student’s teacher. The student and parent are told what is suspected and are given the chance to respond before any decision is made. Outcomes depend on the seriousness of the case and range from redoing the work under supervision, to a mark of zero for the piece of work, to suspension or ending enrolment. Every decision and its reasons are recorded.'},
+  {h:'11. Reporting a concern',p:'Anyone who is offered a favour, sees a record changed improperly, or suspects misconduct should tell the Principal or Quality Assurance at once by email at hello@smartioushomeschool.com or by phone on +254 745 021 212. Reports can be made in confidence, and no one will be treated unfairly for raising a concern in good faith.'},
+  {h:'12. Review',p:'This policy is reviewed at least once every 12 months, and whenever examination board rules change.'},
+]
+
+const AI_USE_POLICY = [
+  {h:'1. Why we have this policy',p:'Artificial intelligence can help students learn, and it can also be misused to avoid learning. This policy explains how Smartious uses AI, when students may and may not use it, and how we protect students’ data and the honesty of their work.'},
+  {h:'2. How Smartious uses AI',p:'Our Mshauri AI tutor helps students between live lessons: it explains ideas, gives hints and helps students practise. It is a study aid, not a teacher, and it does not replace the qualified teachers who plan lessons, mark work and make every academic decision. Teachers may use AI tools to help prepare materials; they check everything before it reaches a student.'},
+  {h:'3. AI never decides a student’s grade',p:'Every mark, grade, report and predicted grade is decided by a qualified teacher. AI may help to check spelling or suggest feedback, but it never decides an outcome for a student.'},
+  {h:'4. When students may use AI',p:'Students may use AI to understand a topic, to get hints while practising, to check their own understanding, and to revise, unless their teacher says otherwise for a particular task. Students should always think through the answer for themselves rather than copy what an AI tool produces.'},
+  {h:'5. When students may not use AI',p:'Students must not use AI to produce work that they submit as their own, to answer questions in tests, quizzes or examinations, or in any assessed work or coursework, unless the teacher has clearly allowed it for that task. Cambridge, Pearson Edexcel, IB and College Board treat undeclared AI-generated work in assessed tasks as malpractice, and so do we.'},
+  {h:'6. Saying when AI was used',p:'When AI use is allowed in a task, students say which tool they used and how, in the way their teacher shows them. Work that hides AI use is treated as a breach of our Academic Integrity Policy.'},
+  {h:'7. How we check work',p:'Teachers know their students’ work and may ask a student to explain or redo a piece of work in a live lesson. We do not decide that work is AI-generated on the basis of a detection tool alone, because these tools can be wrong. Any concern is handled under the Academic Integrity Policy, and the student is always given the chance to respond.'},
+  {h:'8. Protecting students’ data',p:'We share no more student information with an AI service than a task needs, and we never sell student data. Students must not enter personal details, such as their full name, address, phone number or photographs, into AI tools. Our use of AI services follows our Privacy Policy.'},
+  {h:'9. Safe use',p:'AI tools can be wrong, biased or unsuitable for children. Students should check important facts with their teacher or a trusted source, and tell a teacher or parent if an AI tool shows them anything that worries them. Concerns about a child’s safety are handled under our Child Protection and Safeguarding Policy.'},
+  {h:'10. Parents',p:'We encourage parents to talk with their children about using AI honestly and safely, and to contact us with any question about how AI is used in their child’s learning.'},
+  {h:'11. Review',p:'AI changes quickly. We review this policy at least once every 12 months, and sooner when examination boards update their guidance.'},
+]
+
+const INCLUSION_POLICY = [
+  {h:'1. Our commitment',p:'Smartious welcomes every learner. We believe each child can make real progress when teaching fits how they learn, and our small classes and one-to-one lessons let us adapt to each student. This policy explains how we include and support students with different needs, backgrounds and abilities.'},
+  {h:'2. Equal treatment',p:'We do not discriminate on the grounds of race, ethnicity, nationality, religion or belief, sex, disability, health, family background or income. Every student has the same right to respect, to a safe place to learn, and to the full curriculum.'},
+  {h:'3. Learning differences and special educational needs',p:'We support students with learning differences such as dyslexia, dyscalculia, ADHD and autism, as well as students with physical, sensory or health needs. Parents are asked to tell us about any need at enrolment so we can plan from the first lesson; a diagnosis is helpful but not required for us to start supporting a child.'},
+  {h:'4. How we plan support',p:'After the assessment, we agree a learning plan with the family. It sets out the student’s strengths, needs, the adjustments we will make, such as pace, lesson length, breaks, recorded lessons, visual materials or one-to-one time, and how progress will be measured. Teachers follow the plan, and we review it with the family every term.'},
+  {h:'5. Access arrangements in examinations',p:'Students who need extra time, a reader, a scribe or other arrangements in external examinations may be eligible under the rules of Cambridge, Pearson Edexcel, IB or College Board. These arrangements need evidence and must be applied for well before the exam. We guide families through the evidence each board requires and apply on the student’s behalf where we are the examination centre or work with one.'},
+  {h:'6. Students who need more challenge',p:'Able and gifted students are given work that stretches them, including faster progression, enrichment and early examination entry where it is in the student’s interest.'},
+  {h:'7. Students learning in English as an additional language',p:'Students who are still developing their English receive support so they can access the full curriculum, as set out in our Language Policy.'},
+  {h:'8. Wellbeing',p:'Feeling safe and valued is part of learning. Teachers watch for signs that a student is struggling, and we work with families when a student needs extra care. Bullying, exclusion and unkind language are not tolerated in lessons or in our student community.'},
+  {h:'9. Financial access',p:'We want a Smartious education to be within reach of families who value it. Sibling discounts and need-based bursaries may be available; families can ask our admissions team in confidence.'},
+  {h:'10. Accessible platforms',p:'Our portals and live lessons are designed to work on phones, tablets and computers. Families who have difficulty using our platforms because of a disability can ask us for an alternative, and we will do what we reasonably can to help.'},
+  {h:'11. Working with families and specialists',p:'Parents know their children best. With the family’s consent, we are happy to work with therapists, educational psychologists and other specialists who support the student.'},
+  {h:'12. Concerns and review',p:'If you feel a student’s needs are not being met, contact us at hello@smartioushomeschool.com or +254 745 021 212 and we will respond within five working days. We review this policy at least once every 12 months.'},
+]
+
+const LANGUAGE_POLICY = [
+  {h:'1. Purpose',p:'Language is how students learn, think and connect with others. This policy sets out the language we teach in, how we support students who are learning English, and how we value the many languages our families speak.'},
+  {h:'2. Language of instruction',p:'English is the language of instruction and assessment for all our programmes, except in language lessons and where a curriculum requires another language, such as Kiswahili within the Kenyan CBC.'},
+  {h:'3. Every teacher supports language',p:'All teachers help students build the language of their subject: the vocabulary of science, the structure of an argument in history, and the precise wording examiners expect. Clear written and spoken English is part of every lesson.'},
+  {h:'4. English as an additional language',p:'Students whose first language is not English are assessed when they join, and receive support matched to their level. This can include extra one-to-one sessions, glossaries of key terms, adapted materials and more time to process instructions. Support continues until the student can access the full curriculum independently, and progress is reviewed every term.'},
+  {h:'5. Home languages are valued',p:'A student’s home language is a strength. Students are encouraged to keep reading, speaking and writing in it, and may use it to make sense of new ideas. Families are encouraged to keep using their home language at home.'},
+  {h:'6. Modern foreign languages',p:'Smartious teaches French, Spanish, German, Mandarin Chinese, Arabic, Kiswahili, Italian and Portuguese, including preparation for IGCSE, A-Level and IB examinations. Language lessons are taught mainly in the target language.'},
+  {h:'7. Communication with families',p:'We communicate with families in English. Where a parent is more comfortable in another language, we will try to help, for example by using simpler English, meeting by video, or finding a member of staff who speaks the language.'},
+  {h:'8. Respectful language',p:'Language in lessons, messages and the student community must be respectful. Offensive, discriminatory or bullying language is not accepted, in any language, and is handled under our code of conduct and Child Protection and Safeguarding Policy.'},
+  {h:'9. Review',p:'We review this policy at least once every 12 months.'},
+]
+
 
 // ═══════════════════════════════════════════════════════════
 // COUNTRY DIALLING CODES (for phone / WhatsApp input)
@@ -2182,7 +2321,7 @@ function LegalPage({ P, title, em, subtitle, effective, sections }) {
 
         {/* Other legal pages navigation */}
         <div style={{maxWidth:820,margin:'32px auto 0',display:'flex',gap:8,justifyContent:'center',flexWrap:'wrap'}}>
-          {[['privacy','Privacy Policy'],['terms','Terms of Service'],['cookies','Cookie Policy'],['gdpr','GDPR'],['child-protection','Child Protection']].map(([id,lbl]) => (
+          {[['privacy','Privacy Policy'],['terms','Terms of Service'],['cookies','Cookie Policy'],['gdpr','GDPR'],['child-protection','Child Protection'],['academic-integrity','Academic Integrity'],['ai-policy','AI Use'],['inclusion-policy','Inclusion'],['language-policy','Language']].map(([id,lbl]) => (
             <button key={id} onClick={() => P(id)} style={{padding:'8px 16px',border:'1px solid #F0E8D4',background:'#FFFFFF',color:'#121928',fontSize:12.5,fontWeight:600,borderRadius:20,cursor:'pointer',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",transition:'all .2s'}}
               onMouseEnter={e=>{e.currentTarget.style.borderColor='#8B1A2E';e.currentTarget.style.color='#8B1A2E'}}
               onMouseLeave={e=>{e.currentTarget.style.borderColor='#F0E8D4';e.currentTarget.style.color='#121928'}}>
@@ -4037,7 +4176,7 @@ export default function LandingPage() {
     }
   } else if (page === 'homeschooling-uae') {
     metaTitle = 'Online School in the UAE | Dubai & Abu Dhabi Homeschooling, IGCSE & A-Level | Smartious'
-    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for UAE families across Dubai, Abu Dhabi, Sharjah, Ajman, Ras Al Khaimah. Wellington / Dubai College / BSAK / Repton / Brighton College alternative. Immediate enrolment, no KHDA/ADEK waiting lists. USD 423/month (about AED 1,553), paid termly.'
+    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for UAE families across Dubai, Abu Dhabi, Sharjah, Ajman, Ras Al Khaimah. Wellington / Dubai College / BSAK / Repton / Brighton College alternative. Immediate enrolment, no KHDA/ADEK waiting lists. From USD 423/month (about AED 1,553), paid termly.'
   
   } else if (page === 'homeschooling-egypt') {
     metaTitle = 'Online School, Virtual School & Homeschool for Egyptian Families — Cambridge IGCSE & A-Level | Smartious'
@@ -4574,6 +4713,16 @@ export default function LandingPage() {
       metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
+  } else if (page === 'homeschooling-kenya') {
+    metaTitle = 'Online School in Kenya | IGCSE, A-Level, IB & CBC Homeschool | Smartious'
+    metaDesc  = 'Live online school and homeschool for Kenyan families: Cambridge IGCSE and A-Level, Pearson Edexcel, IB, American and CBC, taught by qualified teachers in small classes, with a learning centre in Parklands, Nairobi. From USD 423/month for Primary.'
+  } else if (page === 'kenya-city' && currentKenyaCity && KENYA_CITIES.find(x => x.slug === currentKenyaCity)) {
+    const c = KENYA_CITIES.find(x => x.slug === currentKenyaCity)
+    metaTitle = c.seoTitle || ('Homeschooling in ' + c.name + ' | IGCSE, A-Level, IB & CBC | Smartious')
+    metaDesc  = c.seoDesc || ''
+  } else if (page === 'us-families') {
+    metaTitle = 'Online School in the USA | Live Classes, AP, IGCSE & A-Level | Smartious'
+    metaDesc  = 'Accredited live online school for American families: American curriculum with AP, plus Cambridge IGCSE and A-Level and IB, taught live in US time zones by qualified teachers. Real teachers, small classes, from USD 423/month for Primary.'
   } else if (page === 'tuition-uae') {
     metaTitle = 'Online Tutors in Dubai & the UAE | IGCSE, A-Level & IB Tuition | Smartious'
     metaDesc  = 'Live online tuition for families in Dubai, Abu Dhabi and Sharjah: Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and American AP. Qualified tutors, Gulf-time lessons, from USD 15/hour (about AED 55).'
@@ -4891,12 +5040,12 @@ export default function LandingPage() {
               )}
             </svg>
           </button>
-          <div className="logo-lockup" onClick={() => P('home')}>
+          <a className="logo-lockup" href="/" onClick={e => { e.preventDefault(); P('home') }} aria-label="Smartious home">
             <SmartiousLogo size={36} withText={true} tone="light"/>
-          </div>
+          </a>
           <div className="nav-links">
             {[['Home','home'],['About','about']].map(([l,id]) => (
-              <div key={id} className={`nl${page===id?' on':''}`} onClick={() => P(id)}>{l}</div>
+              <a key={id} href={pageToPath(id)} className={`nl${page===id?' on':''}`} onClick={e => { e.preventDefault(); P(id) }}>{l}</a>
             ))}
             {/* Curricula dropdown — INTERNATIONAL, LOCAL, SMARTIOUS CUSTOM */}
             <div ref={curriculaRef} style={{position:'relative'}}>
@@ -5061,7 +5210,7 @@ export default function LandingPage() {
               )}
             </div>
             {[['Our Team','teachers'],['FAQ','faq'],['Pricing','pricing']].map(([l,id]) => (
-              <div key={id} className={`nl${page===id?' on':''}`} onClick={() => P(id)}>{l}</div>
+              <a key={id} href={pageToPath(id)} className={`nl${page===id?' on':''}`} onClick={e => { e.preventDefault(); P(id) }}>{l}</a>
             ))}
           </div>
           <div className="nav-actions">
@@ -5383,7 +5532,7 @@ export default function LandingPage() {
               { '@type': 'Question', 'name': 'What is Smartious Homeschool?',
                 'acceptedAnswer': { '@type': 'Answer', 'text': 'Smartious Homeschool & eSchool is an accredited international online school founded in Nairobi in 2018. We deliver Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and American High School curricula to students across Kenya, the UAE, UK, USA, Canada, Australia, Nigeria, South Africa, Qatar and 4 other countries. All classes are taught live by degree-qualified specialists.' } },
               { '@type': 'Question', 'name': 'How much does Smartious cost?',
-                'acceptedAnswer': { '@type': 'Answer', 'text': 'Smartious 1-on-1 tuition is USD 15 per hour at every level. Full online school and homeschool programmes are USD 423 per month for every year group, paid termly. Fees are non-refundable once your child\'s assessment is done, the timetable is created and lessons have started. A non-refundable USD 38 application fee covers the placement test and is deducted from your first tuition invoice. 10 percent sibling discount on every additional child.' } },
+                'acceptedAnswer': { '@type': 'Answer', 'text': 'Smartious 1-on-1 tuition is USD 15 per hour at every level. Full online school and homeschool programmes start from USD 423 per month for Primary and vary by curriculum and level, paid termly. Fees are non-refundable once your child\'s assessment is done, the timetable is created and lessons have started. A non-refundable USD 38 application fee covers the placement test and is deducted from your first tuition invoice. 10 percent sibling discount on every additional child.' } },
               { '@type': 'Question', 'name': 'Which countries does Smartious serve?',
                 'acceptedAnswer': { '@type': 'Answer', 'text': 'Smartious serves students worldwide with dedicated country support for the United Arab Emirates (Dubai, Abu Dhabi, Sharjah), United Kingdom, United States, Canada, Australia, Nigeria, South Africa, Qatar, Egypt, and Kenya. Live classes are scheduled to suit multiple time zones with full recording access for asynchronous review.' } },
               { '@type': 'Question', 'name': 'Will my child get a real qualification through Smartious?',
@@ -6072,7 +6221,7 @@ export default function LandingPage() {
             <div style={{maxWidth:780, margin:'36px auto 0'}}>
               {[
                 ['What is Smartious Homeschool?', 'Smartious Homeschool & eSchool is an international online school founded in Nairobi in 2018. We deliver Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel, Kenya CBC and American Curriculum to students across 40+ countries. All classes are live, taught by degree-qualified specialists.'],
-                ['How much does Smartious cost?', '1-on-1 tuition USD 15/hour. Full homeschool programmes USD 423/month for every year group, paid termly and non-refundable once the assessment is done, the timetable is created and lessons have started. USD 38 application fee. 10% sibling discount.'],
+                ['How much does Smartious cost?', '1-on-1 tuition USD 15/hour. Full homeschool programmes from USD 423/month for Primary, varying by curriculum and level, paid termly and non-refundable once the assessment is done, the timetable is created and lessons have started. USD 38 application fee. 10% sibling discount.'],
                 ['Will my child get a real qualification?', 'Yes. Students sit official Cambridge International, Pearson Edexcel, IB Diploma or American High School Diploma exams at British Council and Cambridge centres worldwide. Qualifications are identical to those from any other school.'],
                 ['Which countries do you serve?', 'Dedicated country pages and support for the UAE, UK, USA, Canada, Australia, Nigeria, South Africa, Qatar, Egypt and Kenya. Live classes scheduled across time zones with recordings for asynchronous catch-up.'],
                 ['How do online students socialise?', 'Daily live classes with international classmates. Wednesday enrichment programme (2–4 PM) with sports, clubs, leadership and arts. Active online clubs in debate, coding, AI, Model UN and journalism.'],
@@ -6178,7 +6327,7 @@ export default function LandingPage() {
             <div className="wrap"><div className="cta-in">
               <div className="eyebrow" style={{color:V.gold3,justifyContent:'center',marginBottom:18}}>Start today</div>
               <h2 className="cta-h">Give Your Child a <em>Global Education</em> — Without Paying International School Fees</h2>
-              <p className="cta-sub">Book a free 30-minute consultation. We'll review your child's situation, current school reports, and recommend a Smartious pathway. From <strong style={{color:V.gold3}}>USD 15/hour</strong> tuition · <strong style={{color:V.gold3}}>USD 423/month</strong> full homeschool.</p>
+              <p className="cta-sub">Book a free 30-minute consultation. We'll review your child's situation, current school reports, and recommend a Smartious pathway. From <strong style={{color:V.gold3}}>USD 15/hour</strong> tuition · <strong style={{color:V.gold3}}>From USD 423/month</strong> full homeschool.</p>
               <div className="cta-btns">
                 <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
 </div>
@@ -6810,7 +6959,7 @@ export default function LandingPage() {
             <div className="wrap"><div className="cta-in">
               <div className="eyebrow" style={{color:V.gold3,justifyContent:'center',marginBottom:18}}>Ready to start</div>
               <h2 className="cta-h">Give Your Child a <em>Real Education</em>. Not Just a School Day.</h2>
-              <p className="cta-sub">Book a free 30-minute consultation. We'll review your child's situation, current school reports if available, and recommend a Smartious pathway. From <strong style={{color:V.gold3}}>USD 15/hour</strong> tuition · <strong style={{color:V.gold3}}>USD 423/month</strong> full homeschool. USD 38 / KSh 5,000 application fee applies only when you decide to enrol.</p>
+              <p className="cta-sub">Book a free 30-minute consultation. We'll review your child's situation, current school reports if available, and recommend a Smartious pathway. From <strong style={{color:V.gold3}}>USD 15/hour</strong> tuition · <strong style={{color:V.gold3}}>From USD 423/month</strong> full homeschool. USD 38 / KSh 5,000 application fee applies only when you decide to enrol.</p>
               <div className="cta-btns">
                 <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
 </div>
@@ -6833,7 +6982,7 @@ export default function LandingPage() {
                   We serve families in Kenya (Nairobi, Mombasa, Kisumu, Nakuru, Eldoret, Thika, Kiambu and across the country), the UAE (Dubai, Abu Dhabi, Sharjah and 27 emirate areas), the UK, USA, Canada, Australia, Qatar, Bahrain, Nigeria, South Africa, Uganda, Tanzania, Somalia and Pakistan. Our delivery is primarily online through the Smartious Learning Management System (LMS), with in-person tuition available at our Diamond Plaza Parklands HQ and our Karen Hardy Centre in Nairobi.
                 </p>
                 <p style={{fontSize:13.5,lineHeight:1.75,marginBottom:14}}>
-                  Smartious supports families relocating between countries needing curriculum continuity, athletes and performers balancing serious training with academic ambition, gifted students whose schools move too slowly, students struggling at school due to oversized classrooms or bullying, IGCSE and A-Level candidates preparing for external examinations, IB Diploma students needing specialist HL subject support, and students with learning differences benefiting from 1-on-1 personal attention. Pricing starts at USD 15/hour for 1-on-1 tuition (KSh 1,300/hour for Kenya-based families) and USD 423/month for full online homeschool programmes — meaningfully below typical premium international school fees while delivering equivalent qualifications.
+                  Smartious supports families relocating between countries needing curriculum continuity, athletes and performers balancing serious training with academic ambition, gifted students whose schools move too slowly, students struggling at school due to oversized classrooms or bullying, IGCSE and A-Level candidates preparing for external examinations, IB Diploma students needing specialist HL subject support, and students with learning differences benefiting from 1-on-1 personal attention. Pricing starts at USD 15/hour for 1-on-1 tuition (KSh 1,300/hour for Kenya-based families) and from USD 423/month for full online homeschool programmes — meaningfully below typical premium international school fees while delivering equivalent qualifications.
                 </p>
                 <p style={{fontSize:12.5,lineHeight:1.7,marginTop:18,color:'rgba(247,243,237,.55)'}}>
                   Contact Smartious: <a href="mailto:hello@smartioushomeschool.com" style={{color:V.gold3,textDecoration:'none'}}>hello@smartioushomeschool.com</a> · WhatsApp· Diamond Plaza, Parklands, Nairobi, Kenya · M-Pesa Paybill 247247, Account 745021 (Smartious Edtech).
@@ -8574,7 +8723,7 @@ export default function LandingPage() {
                       {[
                         { n:'01', h:'Submit assessment request', p:'Book a 30-60 minute call with our admissions team. We assess your child\'s current academic level (school transcripts, sample work), discuss your family\'s timeline and target university destinations, and recommend a curriculum and pathway.' },
                         { n:'02', h:'Choose curriculum and pathway', p:'Most UAE families choose Cambridge IGCSE (Year 7-11) progressing to A-Level (Year 12-13) — well-recognised by UAE universities and globally. IB Diploma is also popular for university-bound students. American curriculum suits families targeting US universities. We match curriculum to your university goals.' },
-                        { n:'03', h:'Enrol with Smartious', p:'Pay the USD 38 one-time registration fee, pay the first term\'s fees (USD 423/month, paid termly), and receive your child\'s LMS access. No KHDA or ADEK approval required for expatriate families.' },
+                        { n:'03', h:'Enrol with Smartious', p:'Pay the USD 38 one-time registration fee, pay the first term\'s fees (from USD 423/month, paid termly), and receive your child\'s LMS access. No KHDA or ADEK approval required for expatriate families.' },
                         { n:'04', h:'Set up your learning environment', p:'A quiet space, laptop or tablet, stable internet, and noise-cancelling headphones. We provide a recommended equipment list. No expensive equipment needed.' },
                         { n:'05', h:'Begin live lessons', p:'Your child starts live online classes on their schedule. Classes run on UAE time (GMT+4) plus recorded sessions for flexibility. Mshauri AI provides 24/7 homework help between live sessions.' },
                         { n:'06', h:'Plan examination centres', p:'Cambridge, Edexcel and IB examinations are sat at registered centres in UAE — British Council Dubai, British Council Abu Dhabi, KHDA-approved centres, and specific schools that accept external candidates. We coordinate registration timing with your child\'s exam readiness.' },
@@ -10653,7 +10802,7 @@ export default function LandingPage() {
         <>
           {/* ══════════════════════════════════════════
               PRICING PAGE — one published price
-              Online school USD 423/month (termly) · tuition USD 15/hour
+              Online school from USD 423/month (termly) · tuition USD 15/hour
               Form submits to POST /api/inquiries/public
               with campaignTag='pricing-request'
           ══════════════════════════════════════════ */}
@@ -10665,12 +10814,12 @@ export default function LandingPage() {
             color:'#fff',padding:'72px 0 56px',
           }}>
             <div className="wrap" style={{maxWidth:920,margin:'0 auto',textAlign:'center'}}>
-              <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>One clear price for every family</div>
+              <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>Clear fees for every family</div>
               <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem,5vw,3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
                 Fees, <em style={{color:V.gold3,fontStyle:'italic'}}>simply</em> stated
               </h1>
               <p style={{fontSize:16,color:'rgba(255,255,255,.92)',lineHeight:1.7,maxWidth:720,margin:'0 auto 24px'}}>
-                Online school and homeschool: <strong style={{color:V.gold3}}>USD 423/month</strong> for every year group and curriculum, paid termly. One-to-one tuition: <strong style={{color:V.gold3}}>USD 15/hour</strong> at every level.
+                Online school and homeschool: from <strong style={{color:V.gold3}}>USD 423/month</strong> for Primary, varying by curriculum and level, paid termly. One-to-one tuition: <strong style={{color:V.gold3}}>USD 15/hour</strong> at every level.
               </p>
               <div style={{fontSize:13,color:'rgba(255,255,255,.65)',fontStyle:'italic'}}>
                 Free consultation call included · Sibling discounts 15-25%
@@ -10683,7 +10832,7 @@ export default function LandingPage() {
             <div style={{maxWidth:1080,margin:'0 auto'}}>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:20}}>
                 {[
-                  {h:'Online School & Homeschool',v:'USD 423/month',sub:'Paid termly. Live small-group classes 4-6 students. Cambridge, Edexcel, IB, American, Ontario OSSD, Kenya CBC.'},
+                  {h:'Online School & Homeschool',v:'From USD 423/month',sub:'Primary; secondary fees vary by curriculum and level. Paid termly. Live small-group classes 4-6 students. Cambridge, Edexcel, IB, American, Ontario OSSD, Kenya CBC.'},
                   {h:'Private Tuition (1:1)',v:'USD 15/hour',sub:'Any subject, any level. One-on-one live online sessions scheduled to your family time zone.'},
                   {h:'Study Abroad & IUFP',v:'Custom pricing',sub:'International University Foundation Programme + university placement support.'},
                   {h:'Application & Registration',v:'USD 30 + 120',sub:'Application (refundable if not enrolled) + one-time registration on enrolment.'},
@@ -10697,7 +10846,7 @@ export default function LandingPage() {
               </div>
 
               <div style={{textAlign:'center',marginTop:32,fontSize:13,color:V.sl2,fontStyle:'italic',maxWidth:720,margin:'32px auto 0'}}>
-                <strong style={{fontStyle:'normal',color:V.ink}}>Payment terms:</strong> fees are paid termly. They are non-refundable once your child's assessment is done, the timetable is created and lessons have started. Examination board fees are separate. Ask for a written quote below and our admissions team will respond within 24 hours.
+                <strong style={{fontStyle:'normal',color:V.ink}}>Payment terms:</strong> fees are paid termly. They are non-refundable once your child's assessment is done, the timetable is created and lessons have started. Examination board fees are separate. Every family signs our Admission Agreement before lessons begin. Ask for a written quote below and our admissions team will respond within 24 hours.
               </div>
             </div>
           </div></section>
@@ -11092,7 +11241,7 @@ export default function LandingPage() {
 
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:16}}>
                   {[
-                    {tier:'Online School',price:'$423',sub:'per month · paid termly',desc:'Live small-group classes (4-6 students) in every subject, Mshauri AI Pro and the digital library. Primary to A-Level / IB.',cta:'enroll',popular:true},
+                    {tier:'Online School',price:'From $423',sub:'per month · Primary · paid termly',desc:'Live small-group classes (4-6 students) in every subject, Mshauri AI Pro and the digital library. Secondary fees vary by curriculum and level.',cta:'enroll',popular:true},
                     {tier:'1-on-1 Tuition',price:'$15',sub:'per hour',desc:'One-on-one live online sessions in any subject, at any level, scheduled to your time zone.',cta:'enroll'},
                   ].map(t => (
                     <div key={t.tier} style={{
@@ -11185,7 +11334,7 @@ export default function LandingPage() {
                   {q:'What about state homeschool reporting requirements?',a:'Each US state has different homeschool laws. Some states (like Idaho, Texas, Alaska) have minimal requirements. Others (like New York, Pennsylvania) require formal notification and annual reporting. Smartious provides everything you need: official letterhead, transcripts, progress reports, and standardised assessment results. We do not file paperwork on your behalf — but we provide everything you need to file.'},
                   {q:'How do US time zones work with classes in Nairobi?',a:'Smartious afternoon and evening classes (3pm-10pm EAT) map to morning hours across all four US time zones — see the schedule table above. Most US families do Smartious classes between 9am-1pm Eastern, which is the natural morning school window. 1-on-1 tutoring is scheduled by mutual agreement and can flex to any time.'},
                   {q:'Do you offer AP courses?',a:'AP courses are on our curriculum roadmap for the 2026-2027 academic year (launching August 2026). We currently focus on Cambridge IGCSE, A-Level, and IB Diploma as our core international qualifications. American students interested in AP can complement Smartious with US-based AP self-study (College Board, Khan Academy AP, etc.) and we will help coordinate AP exam registration.'},
-                  {q:'How does pricing compare to mainstream US homeschool options?',a:'Smartious Premium Online ($423/month, $2,746/year with annual discount) sits between Acellus Basic ($249/month, $2,400/year) and the premium live-class providers like Veritas Press Scholars Academy ($400+/month). For genuine live teaching with international rigour, Smartious is 30-60% less than direct competitors like Cambridge Home School ($4,500+/year) or InterHigh ($5,200+/year).'},
+                  {q:'How does pricing compare to mainstream US homeschool options?',a:'Smartious Premium Online (from $423/month, $2,746/year with annual discount) sits between Acellus Basic ($249/month, $2,400/year) and the premium live-class providers like Veritas Press Scholars Academy ($400+/month). For genuine live teaching with international rigour, Smartious is 30-60% less than direct competitors like Cambridge Home School ($4,500+/year) or InterHigh ($5,200+/year).'},
                   {q:'Can I just enrol my child in one or two subjects?',a:'Yes. Through Private Tuition you can purchase 1-on-1 tutoring in any single subject from $15/hour (Primary) to $28/hour (A-Level / IB). Useful for families who like their current curriculum but want supplementary support in maths, sciences, or specific subjects.'},
                   {q:'What happens if my child needs to return to a regular US school?',a:'Smartious provides full transcripts in US-standard GPA format on request. Students moving from IGCSE to a US high school typically slot in at grade 10 or 11 with credit equivalency. We help families coordinate transcripts with receiving schools.'},
                   {q:'Do you offer a free trial?',a:'We offer a free 30-minute consultation with our admissions team to determine fit. We also offer the placement assessment ($40) which includes one sample 60-minute lesson. We don\'t offer a longer free trial because our delivery model is intensive — committing a teacher\'s time to a student needs proper enrolment.'},
@@ -11525,7 +11674,7 @@ export default function LandingPage() {
 
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:16}}>
                   {[
-                    {tier:'Online School',price:'$423',sub:'per month · paid termly',desc:'Live small-group classes (4-6 students) in every subject, Mshauri AI Pro and the digital library. Primary to A-Level / IB.',cta:'enroll',popular:true},
+                    {tier:'Online School',price:'From $423',sub:'per month · Primary · paid termly',desc:'Live small-group classes (4-6 students) in every subject, Mshauri AI Pro and the digital library. Secondary fees vary by curriculum and level.',cta:'enroll',popular:true},
                     {tier:'1-on-1 Tuition',price:'$15',sub:'per hour',desc:'One-on-one live online sessions in any subject, at any level, scheduled to your time zone.',cta:'enroll'},
                   ].map(t => (
                     <div key={t.tier} style={{
@@ -11618,7 +11767,7 @@ export default function LandingPage() {
                   {q:'What about provincial homeschool reporting requirements?',a:'Each Canadian province has different homeschool laws. Some provinces (like Idaho, Texas, Alaska) have minimal requirements. Others (like New York, Pennsylvania) require formal notification and annual reporting. Smartious provides everything you need: official letterhead, transcripts, progress reports, and standardised assessment results. We do not file paperwork on your behalf — but we provide everything you need to file.'},
                   {q:'How do US time zones work with classes in Nairobi?',a:'Smartious afternoon and evening classes (3pm-10pm EAT) map to morning hours across all six Canadian time zones (Pacific, Mountain, Central, Eastern, Atlantic, Newfoundland) — see the schedule table above. Most Canadian families do Smartious classes between 9am-1pm Eastern, which is the natural morning school window. 1-on-1 tutoring is scheduled by mutual agreement and can flex to any time.'},
                   {q:'Do you offer AP courses?',a:'AP courses are on our curriculum roadmap for the 2026-2027 academic year (launching August 2026). We currently focus on Cambridge IGCSE, A-Level, and IB Diploma as our core international qualifications. Canadian students interested in AP can complement Smartious with US-based AP self-study (College Board, Khan Academy AP, etc.) and we will help coordinate AP exam registration.'},
-                  {q:'How does pricing compare to mainstream Canadian and US homeschool options?',a:'Smartious Premium Online ($423/month, $2,746/year with annual discount) sits between Acellus Basic ($249/month, $2,400/year) and the premium live-class providers like Veritas Press Scholars Academy ($400+/month). For genuine live teaching with international rigour, Smartious is 30-60% less than direct competitors like Cambridge Home School ($4,500+/year) or InterHigh ($5,200+/year).'},
+                  {q:'How does pricing compare to mainstream Canadian and US homeschool options?',a:'Smartious Premium Online (from $423/month, $2,746/year with annual discount) sits between Acellus Basic ($249/month, $2,400/year) and the premium live-class providers like Veritas Press Scholars Academy ($400+/month). For genuine live teaching with international rigour, Smartious is 30-60% less than direct competitors like Cambridge Home School ($4,500+/year) or InterHigh ($5,200+/year).'},
                   {q:'Can I just enrol my child in one or two subjects?',a:'Yes. Through Private Tuition you can purchase 1-on-1 tutoring in any single subject from $15/hour (Primary) to $28/hour (A-Level / IB). Useful for families who like their current curriculum but want supplementary support in maths, sciences, or specific subjects.'},
                   {q:'What happens if my child needs to return to a regular Canadian or US school?',a:'Smartious provides full transcripts in US-standard GPA format on request. Students moving from IGCSE to a Canadian or US high school typically slot in at grade 10 or 11 with credit equivalency. We help families coordinate transcripts with receiving schools.'},
                   {q:'Do you offer a free trial?',a:'We offer a free 30-minute consultation with our admissions team to determine fit. We also offer the placement assessment ($40) which includes one sample 60-minute lesson. We don\'t offer a longer free trial because our delivery model is intensive — committing a teacher\'s time to a student needs proper enrolment.'},
@@ -13401,7 +13550,7 @@ export default function LandingPage() {
                   </thead>
                   <tbody>
                     {[
-                      {c:'Annual fees',   sm:'USD 5,076 (USD 423/month)', chs:'\u00a310,950 (USD 13,860)', kih:'\u00a38,000-15,000', wh:'\u00a34,000-7,000', cga:'USD 15,000-25,000', bra:'KES 800K-1.5M (~USD 6,000-11,000)'},
+                      {c:'Annual fees',   sm:'USD 5,076 (from USD 423/month)', chs:'\u00a310,950 (USD 13,860)', kih:'\u00a38,000-15,000', wh:'\u00a34,000-7,000', cga:'USD 15,000-25,000', bra:'KES 800K-1.5M (~USD 6,000-11,000)'},
                       {c:'Live small-group classes', sm:'\u2713 Yes (4-6)', chs:'\u2713 Yes (up to 10)', kih:'\u2713 Yes', wh:'\u2717 Self-paced only', cga:'\u2713 Yes (variable size)', bra:'\u2713 Yes (12-15)'},
                       {c:'Kenya time-zone-friendly', sm:'\u2713 EAT UTC+3', chs:'\u2717 UK GMT (Kenya lunch)', kih:'\u2717 UK GMT', wh:'N/A (self-paced)', cga:'\u2717 Mixed global', bra:'\u2713 EAT UTC+3'},
                       {c:'Kenya CBC available',      sm:'\u2713 Yes', chs:'\u2717 No', kih:'\u2717 No', wh:'\u2717 No', cga:'\u2717 No', bra:'\u2713 Yes'},
@@ -14692,7 +14841,7 @@ export default function LandingPage() {
                 ['What curricula do you support for UAE students?', 'Cambridge IGCSE, Pearson Edexcel International, Cambridge A-Level, Edexcel IAL, IB Diploma, American (with AP), CBSE (Indian Curriculum), and Kenyan CBC. We do not currently support French Baccalaureate, German Abitur or Russian curriculum.'],
                 ['How does pricing compare to UAE tutors?', 'Typical UAE-licensed private tutors charge AED 150-400/hour (USD 40-110). Smartious online tuition is USD 15/hour (≈ AED 55) at every level. The cost difference reflects our online-delivery model and Nairobi cost base — not any compromise in tutor qualification. Every Smartious tutor holds a subject-specific university degree.'],
                 ['Can you support UAE university applications?', 'Yes — we support applications to UAE branch campuses (NYU Abu Dhabi, Sorbonne Abu Dhabi, University of Birmingham Dubai, Heriot-Watt Dubai, Middlesex University Dubai), plus US (Common App), UK (UCAS), Canadian, Australian and other international universities.'],
-                ['Do you offer full online homeschooling in addition to subject tutoring?', 'Yes — full online homeschool programmes (Cambridge IGCSE, A-Level, IB Diploma, American, CBSE) are USD 423/month (≈ AED 1,553/month), paid termly, from Primary to IB Diploma. Many UAE families use Smartious as supplementary 1-on-1 tutoring alongside their child\'s current school.'],
+                ['Do you offer full online homeschooling in addition to subject tutoring?', 'Yes — full online homeschool programmes (Cambridge IGCSE, A-Level, IB Diploma, American, CBSE) are from USD 423/month (≈ AED 1,553/month), paid termly, for Primary; fees vary by curriculum and level up to IB Diploma. Many UAE families use Smartious as supplementary 1-on-1 tutoring alongside their child\'s current school.'],
               ].map(([q, a], i) => (
                 <details key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,marginBottom:10,overflow:'hidden'}}>
                   <summary style={{cursor:'pointer',padding:'16px 20px',fontWeight:600,color:V.ink,fontSize:14.5,listStyle:'none'}}>{q}</summary>
@@ -18547,7 +18696,7 @@ export default function LandingPage() {
                 </>
               )}
               <div className="wrap" style={{position:'relative',zIndex:2}}>
-                <a href="/homeschooling-kenya"
+                <a href="/online-school/kenya"
                   onClick={(e)=>{e.preventDefault(); P('homeschooling-kenya')}}
                   style={{color:'rgba(255,255,255,.7)',textDecoration:'none',fontSize:12,letterSpacing:'.04em',marginBottom:16,display:'inline-flex',alignItems:'center',gap:6}}>
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
@@ -23213,7 +23362,7 @@ export default function LandingPage() {
               })}
             </div>
             {featuredBlog && (
-              <div className="bfc" onClick={() => openArticle(featuredBlog.slug)}>
+              <a className="bfc" href={'/blog/' + featuredBlog.slug} onClick={e => { e.preventDefault(); openArticle(featuredBlog.slug) }}>
                 <div className="bfc-l" style={{background: featuredBlog.img}}>
                   {featuredBlog.splash && (
                     <img
@@ -23238,7 +23387,7 @@ export default function LandingPage() {
                     <div style={{marginLeft:'auto',display:'flex',alignItems:'center',gap:5,fontSize:'12.5px',fontWeight:700,color:V.gold3}}>Read <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={V.gold3} strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
                   </div>
                 </div>
-              </div>
+              </a>
             )}
             {/* Teacher-published articles appear here automatically */}
             {store.articles.filter(a => a.status === 'Published').length > 0 && (
@@ -23262,7 +23411,7 @@ export default function LandingPage() {
             )}
             <div className="blog-grid">
               {visibleBlog.map((b,i) => (
-                <div key={i} className="bc reveal" onClick={() => openArticle(b.slug)}>
+                <a key={i} className="bc reveal" href={'/blog/' + b.slug} onClick={e => { e.preventDefault(); openArticle(b.slug) }}>
                   <div className="bc-img" style={{background:b.img}}>
                     {b.splash && (
                       <img
@@ -23283,7 +23432,7 @@ export default function LandingPage() {
                     <div className="bc-ex">{b.ex}</div>
                     <div className="bc-rd">Read Article <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
                   </div>
-                </div>
+                </a>
               ))}
             </div>
             <div className="nl-strip">
@@ -23531,7 +23680,7 @@ export default function LandingPage() {
                     <div style={{fontSize:11,fontWeight:700,color:V.cr,letterSpacing:'.14em',textTransform:'uppercase',marginBottom:16}}>Related Articles</div>
                     <div className="blog-grid">
                       {related.map(([slug, r]) => (
-                        <div key={slug} className="bc" onClick={() => openArticle(slug)} style={{cursor:'pointer'}}>
+                        <a key={slug} className="bc" href={'/blog/' + slug} onClick={e => { e.preventDefault(); openArticle(slug) }} style={{cursor:'pointer'}}>
                           <div className="bc-img" style={{background:r.img}}>
                             {r.splash && (
                               <img
@@ -23552,7 +23701,7 @@ export default function LandingPage() {
                             <div className="bc-ex">{r.ex.slice(0, 120) + '…'}</div>
                             <div className="bc-rd">Read Article <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
                           </div>
-                        </div>
+                        </a>
                       ))}
                     </div>
                   </div>
@@ -23571,6 +23720,10 @@ export default function LandingPage() {
       {page === 'cookies' && <LegalPage P={P} title="Cookie" em="Policy" subtitle="How we use cookies and similar technologies on smartioushomeschool.com." effective="20 April 2026" sections={COOKIE_POLICY}/>}
       {page === 'gdpr'    && <LegalPage P={P} title="GDPR" em="Compliance" subtitle="Your rights under the EU General Data Protection Regulation and Kenya's Data Protection Act, 2019." effective="20 April 2026" sections={GDPR_COMPLIANCE}/>}
       {page === 'child-protection' && <LegalPage P={P} title="Child Protection" em="& Safeguarding" subtitle="How Smartious keeps every child safe, in person and online, and how to raise a concern." effective="27 August 2026" sections={CHILD_PROTECTION_POLICY}/>}
+      {page === 'academic-integrity' && <LegalPage P={P} title="Academic" em="Integrity" subtitle="How Smartious keeps every grade, report and certificate honest, and why no record is ever changed for any favour." effective="15 October 2026" sections={ACADEMIC_INTEGRITY_POLICY}/>}
+      {page === 'ai-policy' && <LegalPage P={P} title="AI Use" em="Policy" subtitle="How Smartious uses artificial intelligence, when students may use it, and how we protect their data and their work." effective="15 October 2026" sections={AI_USE_POLICY}/>}
+      {page === 'inclusion-policy' && <LegalPage P={P} title="Inclusion" em="Policy" subtitle="How Smartious includes and supports every learner, whatever their needs, background or ability." effective="15 October 2026" sections={INCLUSION_POLICY}/>}
+      {page === 'language-policy' && <LegalPage P={P} title="Language" em="Policy" subtitle="The language we teach in, how we support students learning English, and how we value every family’s languages." effective="15 October 2026" sections={LANGUAGE_POLICY}/>}
 
       {/* ══════════════════════════════════════════
           ENROLL
@@ -24456,6 +24609,8 @@ function ContactForm() {
 function Footer({ P }) {
   const { siteConfig: cfg } = useStore()
   const footerNav = useNavigate()
+  // Real hrefs so search engines can follow the footer; clicks stay in the SPA.
+  const go = (path, run) => ({ href: path, onClick: e => { e.preventDefault(); run() } })
   return (
     <footer>
       <div className="wrap">
@@ -24466,12 +24621,20 @@ function Footer({ P }) {
           </div>
           <div>
             <div className="ft-ch">Programmes</div>
-            <ul className="ft-lk">{['IGCSE','Cambridge A-Level','IB Diploma','CBC / KCSE','British Curriculum','American Curriculum','Smartious Blended'].map(l => <li key={l}><a onClick={() => P('curricula')}>{l}</a></li>)}</ul>
+            <ul className="ft-lk">{['IGCSE','Cambridge A-Level','IB Diploma','CBC / KCSE','British Curriculum','American Curriculum','Smartious Blended'].map(l => <li key={l}><a {...go('/curricula', () => P('curricula'))}>{l}</a></li>)}</ul>
           </div>
           <div>
             <div className="ft-ch">Services</div>
             <ul className="ft-lk">
-              {[['services','Homeschool at Home'],['services','Learning Centre Nairobi'],['services','Virtual School'],['tuition-nairobi','Tuition Nairobi'],['services','Mshauri AI Tutor'],['services','IUFP Programme'],['services','Study Abroad']].map(([pg, l]) => <li key={l}><a onClick={() => P(pg)}>{l}</a></li>)}
+              {[['/services/homeschool-at-home','Homeschool at Home'],['/services/learning-centre','Learning Centre Nairobi'],['/services/virtual-school','Virtual School'],['/tuition-nairobi','Tuition Nairobi'],['/services/mshauri-ai','Mshauri AI Tutor'],['/iufp','IUFP Programme'],['/study-abroad','Study Abroad'],['/pricing','Fees']].map(([path, l]) => <li key={l}><a {...go(path, () => footerNav(path))}>{l}</a></li>)}
+            </ul>
+          </div>
+          <div>
+            <div className="ft-ch">Online School</div>
+            <ul className="ft-lk">
+              {[['kenya','Kenya'],['uae','UAE & Dubai'],['united-kingdom','United Kingdom'],['usa','USA'],['canada','Canada'],['nigeria','Nigeria'],['south-africa','South Africa'],['saudi-arabia','Saudi Arabia'],['qatar','Qatar'],['australia','Australia']].map(([slug, l]) => (
+                <li key={slug}><a {...go('/online-school/' + slug, () => footerNav('/online-school/' + slug))}>{l}</a></li>
+              ))}
             </ul>
           </div>
           <div>
@@ -24495,8 +24658,8 @@ function Footer({ P }) {
         <div className="ft-bot">
           <div className="ft-copy">{cfg.footerCopy || '© 2026 Smartious E-School Ltd. Nairobi, Kenya. All rights reserved.'}</div>
           <div className="ft-acs">
-            {[['privacy','Privacy Policy'],['terms','Terms of Service'],['cookies','Cookie Policy'],['gdpr','GDPR'],['child-protection','Child Protection']].map(([id, l]) => (
-              <div key={id} className="ft-ac" onClick={() => P(id)} style={{cursor:'pointer'}}>{l}</div>
+            {[['privacy','Privacy Policy'],['terms','Terms of Service'],['cookies','Cookie Policy'],['gdpr','GDPR'],['child-protection','Child Protection'],['academic-integrity','Academic Integrity'],['ai-policy','AI Use'],['inclusion-policy','Inclusion'],['language-policy','Language']].map(([id, l]) => (
+              <a key={id} className="ft-ac" {...go('/' + id, () => P(id))} style={{cursor:'pointer'}}>{l}</a>
             ))}
             <div
               className="ft-ac"

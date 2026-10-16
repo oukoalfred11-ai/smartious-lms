@@ -6,7 +6,7 @@
     "dev": "node scripts/build-data-index.js && vite",
     "postinstall": "node scripts/install-chrome.js",
     "build": "node scripts/build-data-index.js && vite build",
-    "postbuild": "node scripts/seo-static.mjs || echo seo-static failed, pages served without static HTML",
+    "postbuild": "cp dist/index.html dist/home.html && node scripts/seo-static.mjs || echo seo-static failed, pages served without static HTML",
     "preview": "vite preview"
   },
   "dependencies": {

@@ -121,7 +121,7 @@ export const COLOMBIA_CITIES = [
     whyChoose: [
       ['Morning classes, which is the point in Colombia', 'We teach eight hours ahead, so our block lands in the Colombian morning — the free half of the day for every student in jornada tarde.'],
       ['The legal position stated fairly, not conveniently', 'Colombian sources disagree about educating outside school. We give both readings, name the decrees, and send you to the Ministerio and your secretaría de educación.'],
-      ['A fee gap against a strong local tier', 'Live small-group teaching at USD 5,076 a year against Bogotá international fees at the top of the Colombian market.'],
+      ['A fee gap against a strong local tier', 'Live small-group teaching from USD 5,076 a year against Bogotá international fees at the top of the Colombian market.'],
       ['Cambridge A-Levels for UCAS', 'The bilingual sector is large and the A-Level route is thinner — and A-Levels are what British admissions reads most directly.'],
       ['Spanish kept alongside', 'Cambridge Spanish runs beside the English-medium core, protecting Colombian and Spanish university routes.'],
     ],
@@ -461,7 +461,7 @@ export const COLOMBIA_COUNTRY = {
     { name: 'Colombian homeschool validation providers',      city: 'Nationwide / online',   curriculum: 'Validation support and materials',      feesUsd: 'Lower cost, different service',                     feesAed: '—',                       rating: 4.0, capacityNote: 'They help families validate through ICFES routes; they are not live international teaching, and the two are often confused' },
     { name: 'Cali, the coast and the regions',                city: 'Outside Bogotá/Medellín', curriculum: 'Thinner provision',                   feesUsd: 'Limited international option',                      feesAed: '—',                       rating: 0,   capacityNote: 'Large cities with less provision than their scale implies' },
     { name: 'US-based online schools',                        city: 'Online',                curriculum: 'American online',                       feesUsd: 'Varies, often per-course',                          feesAed: 'Varies',                  rating: 4.2, capacityNote: 'Closer to Colombia on the clock than we are — families should weigh that against price and class size' },
-    { name: 'Smartious Homeschool (Colombia via online delivery)', city: 'Delivered to all Colombia', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 5,076/year', feesAed: 'COP equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + the disputed law stated fairly + morning teaching that fits the jornada tarde + the post-fifteen window used properly' },
+    { name: 'Smartious Homeschool (Colombia via online delivery)', city: 'Delivered to all Colombia', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'From USD 5,076/year', feesAed: 'COP equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + the disputed law stated fairly + morning teaching that fits the jornada tarde + the post-fifteen window used properly' },
   ],
 
   legalFrameworkIntro: 'Colombia is the only country in our coverage where serious domestic sources reach opposite conclusions on the central question. We are not going to resolve that dispute, and any provider who tells you it is settled is selling rather than advising. Here is what is agreed, what is disputed, and what is usable.',
