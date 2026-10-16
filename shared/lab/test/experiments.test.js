@@ -13,8 +13,12 @@ test('every experiment definition is valid', () => {
 test('catalogue entries hide functions and hidden values', () => {
   for (const d of EXPERIMENTS) {
     const c = catalogueEntry(d)
-    const json = JSON.stringify(c)
-    assert.ok(!/function|=>/.test(json))
+    const walk = (v, at) => {
+      assert.notEqual(typeof v, 'function', d.id + ': function in catalogue at ' + at)
+      if (v && typeof v === 'object') for (const [k, x] of Object.entries(v)) walk(x, at + '.' + k)
+    }
+    walk(c, 'entry')
+    assert.ok(!/=>/.test(JSON.stringify(c)), d.id + ': code text in catalogue')
     assert.equal(c.params, undefined)
   }
 })
