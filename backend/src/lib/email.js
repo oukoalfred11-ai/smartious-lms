@@ -594,7 +594,7 @@ const admissionSteps = (role) => [
   'Open the attached <strong>Admission Pack</strong> (PDF) and read Part 1' + (role === 'student' ? ' with your parent or guardian.' : ' with your child.'),
   'Complete Part 2, the Admission Agreement: student and parent details, consents, and the student and parent declarations. You can fill it in on screen and sign electronically, or print it and sign by hand.',
   'Gather the documents listed in item 5 of the pack: a copy of the passport or birth certificate, a passport photo, the latest school report, any examination certificates and any learning-needs reports.',
-  '<strong>Reply to this email</strong> with the signed agreement and the documents attached.',
+  'Upload the signed agreement and the documents in your portal, under <strong>Admission Documents</strong>, or <strong>reply to this email</strong> with them attached.',
 ]
 
 const sendAdmissionPackEmail = async ({ to, name, role, studentName, attachmentPath, attachmentName }) => {

@@ -14,6 +14,7 @@ import BirthdayBanner from '../../components/BirthdayBanner.jsx'
 import SuggestionBox from '../../components/SuggestionBox.jsx'
 import AnnouncementsStrip from '../../components/AnnouncementsStrip.jsx'
 import MessagesHub from '../../components/MessagesHub.jsx'
+import AdmissionDocuments from '../../components/AdmissionDocuments.jsx'
 import { playChime } from '../../components/NotificationsBell.jsx'
 import { useAuth, useToast, api } from '../../context/ctx.jsx'
 import { useStore } from '../../context/ctx.jsx'
@@ -95,6 +96,7 @@ const TOKENS = {
 // Each module's signature colour pair (top → bottom of gradient)
 const NAV_ICON_PALETTE = {
   dashboard:    ['#FF6B6B', '#EE5253'], // coral red
+  documents:    ['#0EA5E9', '#0284C7'], // sky blue
   curriculum:   ['#5E8CFF', '#3D6FE8'], // bright blue
   lessons:      ['#FF7B5C', '#F94E3F'], // tomato orange
   practice:     ['#7C3AED', '#5B21B6'], // violet
@@ -278,6 +280,13 @@ const NavIcon = ({ name, active }) => {
             <path d="M4.5 20c.6-4 3.8-6.5 7.5-6.5s6.9 2.5 7.5 6.5" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round"/>
           </g>
         )
+      case 'documents': // file with a tick
+        return (
+          <g fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" fill="#fff" fillOpacity=".25"/>
+            <path d="M14 3v5h5M9.5 14.5l2 2 3.5-4"/>
+          </g>
+        )
       case 'achievements': // trophy
         return (
           <g fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -365,6 +374,7 @@ const NAV_SECTIONS = [
   { label:'Account', items:[
     { id:'profile',      label:'Profile',         icon:'profile',      svg:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>' },
     { id:'achievements', label:'Achievements',    icon:'achievements', svg:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>' },
+    { id:'documents',    label:'Admission Documents', icon:'documents', svg:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4"/>' },
   ]},
 ]
 
@@ -530,7 +540,7 @@ export default function StudentPortal() {
   // Advisory students may only visit dashboard / profile.
   // If they somehow land elsewhere, send them back to the dashboard.
   useEffect(() => {
-    if (isAdvisory && !['dashboard', 'profile'].includes(page)) {
+    if (isAdvisory && !['dashboard', 'profile', 'documents'].includes(page)) {
       setPage('dashboard')
     }
   }, [isAdvisory, page])
@@ -673,6 +683,7 @@ export default function StudentPortal() {
     page === 'resources'    ? 'Resources' :
     page === 'profile'      ? 'My Profile' :
     page === 'achievements' ? 'Achievements' :
+    page === 'documents'    ? 'Admission Documents' :
     'Portal'
 
   const programmeLine = (() => {
@@ -700,6 +711,7 @@ export default function StudentPortal() {
     page === 'resources'    ? 'Learning library' :
     page === 'profile'      ? 'Account details' :
     page === 'achievements' ? 'Badges & milestones' :
+    page === 'documents'    ? 'Upload and track your admission documents' :
     ''
 
   const sidebarWidth = isMobile ? 0 : collapsed ? 76 : 240
@@ -1687,6 +1699,7 @@ export default function StudentPortal() {
               ACHIEVEMENTS — live badges + XP
           ════════════════════════════════════════════ */}
           {page === 'achievements' && <AchievementTab user={user}/>}
+          {page === 'documents' && <AdmissionDocuments toast={toast} />}
 
           {/* ════════════════════════════════════════════
               PROFILE

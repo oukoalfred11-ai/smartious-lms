@@ -12,6 +12,7 @@ import TeachersModule from './modules/TeachersModule.jsx'
 import DocumentsModule from './modules/DocumentsModule.jsx'
 import { QAOverviewModule, TeamProfilesModule, TDPModule, AccreditationsModule } from './modules/QAModules.jsx'
 import StaffFile from '../../../components/StaffFile.jsx'
+import AdmissionDocsModule from './modules/AdmissionDocsModule.jsx'
 import MyProfileModule, { Avatar as ProfileAvatar } from './modules/MyProfileModule.jsx'
 import FrontDeskModule from './modules/FrontDeskModule.jsx'
 import AssessmentModule from './modules/AssessmentModule.jsx'
@@ -73,7 +74,7 @@ const resetForm = () => ({ ...DEFAULT_USER_FORM })
 const NAV_SECTIONS = {
   admin: [
     { label: 'Overview',    items: ['command', 'dashboard', 'analytics'] },
-    { label: 'People',      items: ['users', 'teachers', 'allocations', 'sessions', 'communication', 'support', 'dmoversight', 'community', 'announcements'] },
+    { label: 'People',      items: ['users', 'admissiondocs', 'teachers', 'allocations', 'sessions', 'communication', 'support', 'dmoversight', 'community', 'announcements'] },
     { label: 'Reports',     items: ['reports', 'dosperformance', 'mastery'] },
     { label: 'Operations',  items: ['frontdesk', 'assessment', 'documents', 'payroll', 'leave', 'programmes', 'inventory'] },
     { label: 'Teaching',    items: ['liveclasses', 'clubs', 'grouprooms', 'curriculum'] },
@@ -111,7 +112,7 @@ const NAV_SECTIONS = {
   ops_manager: [
     { label: 'Overview',    items: ['command', 'checkin', 'dashboard', 'analytics', 'dosanalytics'] },
     { label: 'Academics',   items: ['liveclasses', 'clubs', 'exams', 'doshomework', 'dosattend', 'dostimetable', 'questionbank'] },
-    { label: 'Students',    items: ['sessions', 'dosbreaks'] },
+    { label: 'Students',    items: ['admissiondocs', 'sessions', 'dosbreaks'] },
     { label: 'People',      items: ['users', 'teachers', 'allocations', 'communication', 'teacherratings'] },
     { label: 'Support',     items: ['support', 'dmoversight'] },
     // CRM, Front Desk and Group Rooms stay out of Operations per policy.
@@ -449,6 +450,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         {safePage === 'documents' && <DocumentsModule toast={toast} />}
         {safePage === 'teacherprofiles' && <TeamProfilesModule toast={toast} />}
         {safePage === 'mystafffile' && <StaffFile toast={toast} showTeaching={false} />}
+        {safePage === 'admissiondocs' && <AdmissionDocsModule toast={toast} />}
         {safePage === 'myprofile' && <MyProfileModule toast={toast} setPage={setPage} />}
         {safePage === 'tdp' && <TDPModule toast={toast} />}
         {safePage === 'accreditations' && <AccreditationsModule toast={toast} />}
