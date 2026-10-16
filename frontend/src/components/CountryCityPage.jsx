@@ -31,6 +31,7 @@
 import { useEffect } from 'react'
 import { isNoindexSlug } from '../data/noindexSlugs.js'
 import { imageExists } from '../data/generated/publicImages.js'
+import GoogleReviews from './GoogleReviews.jsx'
 
 const ORG_ID = 'https://smartioushomeschool.com/#organization'
 const ROBOTS_DEFAULT = 'index, follow, max-image-preview:large, max-snippet:-1'
@@ -218,6 +219,11 @@ export default function CountryCityPage({ country, cities, currentCitySlug, P, V
             ))}
           </div>
         </div>
+      </div></section>
+
+      {/* GOOGLE REVIEWS */}
+      <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:48}}><div className="wrap">
+        <GoogleReviews V={V} seed={city.slug || city.name} />
       </div></section>
 
       {/* FINAL CTA */}
