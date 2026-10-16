@@ -244,7 +244,7 @@ st.setStyle(TableStyle([('LINEBELOW', (0, 0), (-1, -1), 0.5, LINE), ('VALIGN', (
 story += [st, Spacer(1, 6), boxed([P('Fees become non-refundable once the assessment is done, the timetable is created and lessons have started.', 'box')])]
 
 story += section('5  Documents to submit',
-    'Please send these with the signed agreement, by email to hello@smartioushomeschool.com or through the parent portal. '
+    'Please send these with the signed agreement by replying to your Admission Pack email, or by email to hello@smartioushomeschool.com. '
     'Tick each one as you include it.')
 for t in ['Signed Admission Agreement (Part 2 of this pack)',
           'Copy of the student’s passport or birth certificate',
@@ -341,7 +341,7 @@ story.append(boxed([
     P('2. Read the fees (Section C) and every policy in Section D. They are also published at smartioushomeschool.com.', 'box'),
     P('3. Tick the consents in Section E.', 'box'),
     P('4. The <b>student</b> and a <b>parent or legal guardian</b> sign the declarations in Section F. Students aged 18 or over who pay their own fees sign both.', 'box'),
-    P('5. Return the signed agreement with the documents in item 5 of Part 1 to <b>hello@smartioushomeschool.com</b> or upload it in the parent portal.', 'box'),
+    P('5. Return the signed agreement with the documents in item 5 of Part 1 by replying to your Admission Pack email, or send them to <b>hello@smartioushomeschool.com</b>.', 'box'),
 ]))
 story += [Spacer(1, 6), P('You can fill in the fields on screen and sign electronically, or print the pages and sign by hand. Please keep a copy for your records.', 'small'),
           Spacer(1, 10)]
