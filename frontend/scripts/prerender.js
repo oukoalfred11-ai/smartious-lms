@@ -476,15 +476,26 @@ async function renderRoute(browser, route) {
       timeout: PAGE_TIMEOUT_MS,
     })
     
-    /* Wait for React to mount. */
+    /* Wait for React to mount and for the page's lazily loaded data
+       (blog articles, country/city modules — see src/data/lazyData.js).
+       Until it arrives the page body is a skeleton marked
+       data-lazy-pending, which must never be captured as the page. */
     await page.waitForFunction(
-      () => document.getElementById('root')?.childElementCount > 0,
+      () => document.getElementById('root')?.childElementCount > 0
+        && !document.querySelector('[data-lazy-pending]'),
       { timeout: PAGE_TIMEOUT_MS },
     )
     
     /* Brief pause for usePageMeta to write canonical/title into <head>. */
     await new Promise(r => setTimeout(r, WAIT_AFTER_MOUNT_MS))
-    
+
+    /* The first check can pass on the initial paint, before the route
+       effect has picked the page and started loading its data. */
+    await page.waitForFunction(
+      () => !document.querySelector('[data-lazy-pending]'),
+      { timeout: PAGE_TIMEOUT_MS },
+    )
+
     const html = sanitize(await page.content())
     
     /* Discover internal links from v2-depth country hubs only. */
