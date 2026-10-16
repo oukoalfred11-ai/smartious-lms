@@ -80,7 +80,7 @@ export function checkAnswers(def, answers = {}) {
 export function validateDefinition(def) {
   const p = []
   const need = ['id', 'version', 'subject', 'title', 'summary', 'objectives', 'safety', 'apparatus', 'procedure', 'model',
-    'params', 'initialState', 'actions', 'view', 'questions', 'rubric', 'curriculum', 'notebook']
+    'params', 'initialState', 'actions', 'view', 'questions', 'rubric', 'curriculum', 'notebook', 'dataTables', 'graph']
   for (const k of need) if (def[k] === undefined) p.push('missing ' + k)
   if (!['chemistry', 'physics', 'biology'].includes(def.subject)) p.push('subject must be chemistry, physics or biology')
   if (!Array.isArray(def.model?.assumptions) || !def.model.assumptions.length) p.push('model.assumptions must be listed')
@@ -106,6 +106,8 @@ export function validateDefinition(def) {
     const params = def.params('validation-seed', {})
     const s = def.initialState(params)
     def.view(params, s)
+    def.dataTables(params, s)
+    def.graph(params, s)
   } catch (e) { p.push('initial state fails: ' + e.message) }
   return p
 }

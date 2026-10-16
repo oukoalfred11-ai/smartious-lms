@@ -160,6 +160,19 @@ const def = {
     }
   },
 
+  dataTables(params, s) {
+    return [{
+      title: 'Readings',
+      columns: ['#', 'Supply / V', 'p.d. V / V', 'Current I / A', 'V / I / Ω'],
+      rows: s.rows.map((r, i) => [String(i + 1), r.supply.toFixed(1), r.V.toFixed(2), r.I.toFixed(3), r.I ? (r.V / r.I).toFixed(1) : '—']),
+    }]
+  },
+  graph(params, s) {
+    const pts = s.rows.map(r => ({ x: r.I, y: r.V }))
+    const fit = fitThroughOrigin(pts)
+    return { title: 'Potential difference against current', xLabel: 'Current I / A', yLabel: 'p.d. V / V', points: pts, line: fit ? { m: fit.m, c: 0 } : null }
+  },
+
   questions: [
     { id: 'gradient', type: 'numeric', unit: 'Ω', prompt: 'Resistance from the gradient of your V–I graph', hint: '3 significant figures.' },
     { id: 'ohmic', type: 'choice', prompt: 'Does the resistor obey Ohm’s law?', options: ['Yes: V is proportional to I (straight line through the origin)', 'No: the graph is curved or does not pass through the origin'] },

@@ -155,6 +155,20 @@ const def = {
     }
   },
 
+  dataTables(params, s) {
+    return [{
+      title: 'Mass of potato cylinders',
+      columns: ['Sucrose / mol dm⁻³', 'Initial mass / g', 'Final mass / g', 'Change in mass / %'],
+      rows: s.tubes.map((t, i) => [CONCS[i].toFixed(1), t.m0 != null ? t.m0.toFixed(2) : '—', t.m1 != null ? t.m1.toFixed(2) : '—',
+        t.m0 != null && t.m1 != null ? percentFromMasses(t.m0, t.m1).toFixed(1) : '—']),
+    }]
+  },
+  graph(params, s) {
+    const pts = s.tubes.map((t, i) => (t.m0 != null && t.m1 != null ? { x: CONCS[i], y: percentFromMasses(t.m0, t.m1) } : null)).filter(Boolean)
+    const fit = linearFit(pts)
+    return { title: 'Change in mass against sucrose concentration', xLabel: 'Sucrose concentration / mol dm⁻³', yLabel: 'Change in mass / %', points: pts, line: fit ? { m: fit.m, c: fit.c } : null }
+  },
+
   questions: [
     { id: 'isotonic', type: 'numeric', unit: 'mol dm⁻³', prompt: 'Sucrose concentration isotonic with the potato tissue', hint: 'Read from where your line crosses 0 % change. 2 significant figures.' },
     { id: 'explain', type: 'text', prompt: 'Explain, using water potential, why the cylinder in 0.0 mol dm⁻³ gained mass and the one in 1.0 mol dm⁻³ lost mass.' },
