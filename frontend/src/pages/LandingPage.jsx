@@ -4238,7 +4238,7 @@ export default function LandingPage() {
   } else if (page === 'ethiopia-city' && currentEthiopiaCity) {
     const c = ETHIOPIA_CITIES.find(x => x.slug === currentEthiopiaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'homeschooling-rwanda') {
@@ -4247,7 +4247,7 @@ export default function LandingPage() {
   } else if (page === 'rwanda-city' && currentRwandaCity) {
     const c = RWANDA_CITIES.find(x => x.slug === currentRwandaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'homeschooling-south-africa') {
@@ -4256,25 +4256,25 @@ export default function LandingPage() {
   } else if (page === 'sa-city' && currentSaCity) {
     const c = SOUTH_AFRICA_CITIES.find(x => x.slug === currentSaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'homeschooling-qatar') {
-    metaTitle = 'Online School, Virtual School & Homeschool for Doha & Qatar Families — Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Qatari families across Doha, Al Wakrah, Al Khor, Lusail. Doha College / ASD / Sherborne Qatar alternative. Immediate enrolment, no waiting lists. From USD 423/month (~QAR 1,540).'
+    metaTitle = QATAR_COUNTRY?.seoTitle || 'Online School, Virtual School & Homeschool for Doha & Qatar Families — Cambridge IGCSE & A-Level | Smartious'
+    metaDesc  = QATAR_COUNTRY?.seoDesc || 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Qatari families across Doha, Al Wakrah, Al Khor, Lusail. Doha College / ASD / Sherborne Qatar alternative. Immediate enrolment, no waiting lists. From USD 423/month (~QAR 1,540).'
   } else if (page === 'qatar-city' && currentQatarCity) {
     const c = QATAR_CITIES.find(x => x.slug === currentQatarCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'homeschooling-saudi-arabia') {
-    metaTitle = 'Online School, Virtual School & Homeschool for Saudi Arabian Families — Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Saudi Arabian families across Riyadh, Jeddah, Dhahran, Al Khobar, NEOM. AISR / BISR / Saudi Aramco school alternative. Vision 2030 mega-project family portability. From USD 423/month (~SAR 1,590).'
+    metaTitle = SAUDI_ARABIA_COUNTRY?.seoTitle || 'Online School, Virtual School & Homeschool for Saudi Arabian Families — Cambridge IGCSE & A-Level | Smartious'
+    metaDesc  = SAUDI_ARABIA_COUNTRY?.seoDesc || 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Saudi Arabian families across Riyadh, Jeddah, Dhahran, Al Khobar, NEOM. AISR / BISR / Saudi Aramco school alternative. Vision 2030 mega-project family portability. From USD 423/month (~SAR 1,590).'
   } else if (page === 'saudi-city' && currentSaudiCity) {
     const c = SAUDI_ARABIA_CITIES.find(x => x.slug === currentSaudiCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'homeschooling-uae') {
@@ -4308,445 +4308,445 @@ export default function LandingPage() {
   } else if (page === 'egypt-city' && currentEgyptCity) {
     const c = EGYPT_CITIES.find(x => x.slug === currentEgyptCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'morocco-city' && currentMoroccoCity) {
     const c = MOROCCO_CITIES.find(x => x.slug === currentMoroccoCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'south-korea-city' && currentSouthKoreaCity) {
     const c = SOUTH_KOREA_CITIES.find(x => x.slug === currentSouthKoreaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'malaysia-city' && currentMalaysiaCity) {
     const c = MALAYSIA_CITIES.find(x => x.slug === currentMalaysiaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'spain-city' && currentSpainCity) {
     const c = SPAIN_CITIES.find(x => x.slug === currentSpainCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'denmark-city' && currentDenmarkCity) {
     const c = DENMARK_CITIES.find(x => x.slug === currentDenmarkCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'france-city' && currentFranceCity) {
     const c = FRANCE_CITIES.find(x => x.slug === currentFranceCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'italy-city' && currentItalyCity) {
     const c = ITALY_CITIES.find(x => x.slug === currentItalyCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'poland-city' && currentPolandCity) {
     const c = POLAND_CITIES.find(x => x.slug === currentPolandCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'portugal-city' && currentPortugalCity) {
     const c = PORTUGAL_CITIES.find(x => x.slug === currentPortugalCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'czech-city' && currentCzechCity) {
     const c = CZECH_CITIES.find(x => x.slug === currentCzechCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'belgium-city' && currentBelgiumCity) {
     const c = BELGIUM_CITIES.find(x => x.slug === currentBelgiumCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'sweden-city' && currentSwedenCity) {
     const c = SWEDEN_CITIES.find(x => x.slug === currentSwedenCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'netherlands-city' && currentNetherlandsCity) {
     const c = NETHERLANDS_CITIES.find(x => x.slug === currentNetherlandsCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'norway-city' && currentNorwayCity) {
     const c = NORWAY_CITIES.find(x => x.slug === currentNorwayCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'new-zealand-city' && currentNZCity) {
     const c = NZ_CITIES.find(x => x.slug === currentNZCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'austria-city' && currentAustriaCity) {
     const c = AUSTRIA_CITIES.find(x => x.slug === currentAustriaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'hungary-city' && currentHungaryCity) {
     const c = HUNGARY_CITIES.find(x => x.slug === currentHungaryCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'finland-city' && currentFinlandCity) {
     const c = FINLAND_CITIES.find(x => x.slug === currentFinlandCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'greece-city' && currentGreeceCity) {
     const c = GREECE_CITIES.find(x => x.slug === currentGreeceCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'azerbaijan-city' && currentAzerbaijanCity) {
     const c = AZERBAIJAN_CITIES.find(x => x.slug === currentAzerbaijanCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'georgia-city' && currentGeorgiaCity) {
     const c = GEORGIA_CITIES.find(x => x.slug === currentGeorgiaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'pakistan-city' && currentPakistanCity) {
     const c = PAKISTAN_CITIES.find(x => x.slug === currentPakistanCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'australia-city' && currentAustraliaCity) {
     const c = AUSTRALIA_CITIES.find(x => x.slug === currentAustraliaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'luxembourg-city-page' && currentLuxembourgCity) {
     const c = LUXEMBOURG_CITIES.find(x => x.slug === currentLuxembourgCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'switzerland-city' && currentSwitzerlandCity) {
     const c = SWITZERLAND_CITIES.find(x => x.slug === currentSwitzerlandCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'slovakia-city' && currentSlovakiaCity) {
     const c = SLOVAKIA_CITIES.find(x => x.slug === currentSlovakiaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'slovenia-city' && currentSloveniaCity) {
     const c = SLOVENIA_CITIES.find(x => x.slug === currentSloveniaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'croatia-city' && currentCroatiaCity) {
     const c = CROATIA_CITIES.find(x => x.slug === currentCroatiaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'serbia-city' && currentSerbiaCity) {
     const c = SERBIA_CITIES.find(x => x.slug === currentSerbiaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'bulgaria-city' && currentBulgariaCity) {
     const c = BULGARIA_CITIES.find(x => x.slug === currentBulgariaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'albania-city' && currentAlbaniaCity) {
     const c = ALBANIA_CITIES.find(x => x.slug === currentAlbaniaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'north-macedonia-city' && currentNorthMacedoniaCity) {
     const c = NORTH_MACEDONIA_CITIES.find(x => x.slug === currentNorthMacedoniaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'montenegro-city' && currentMontenegroCity) {
     const c = MONTENEGRO_CITIES.find(x => x.slug === currentMontenegroCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'bosnia-city' && currentBosniaCity) {
     const c = BOSNIA_CITIES.find(x => x.slug === currentBosniaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'kosovo-city' && currentKosovoCity) {
     const c = KOSOVO_CITIES.find(x => x.slug === currentKosovoCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'zambia-city' && currentZambiaCity) {
     const c = ZAMBIA_CITIES.find(x => x.slug === currentZambiaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'zimbabwe-city' && currentZimbabweCity) {
     const c = ZIMBABWE_CITIES.find(x => x.slug === currentZimbabweCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'botswana-city' && currentBotswanaCity) {
     const c = BOTSWANA_CITIES.find(x => x.slug === currentBotswanaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'namibia-city' && currentNamibiaCity) {
     const c = NAMIBIA_CITIES.find(x => x.slug === currentNamibiaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'algeria-city' && currentAlgeriaCity) {
     const c = ALGERIA_CITIES.find(x => x.slug === currentAlgeriaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'tunisia-city' && currentTunisiaCity) {
     const c = TUNISIA_CITIES.find(x => x.slug === currentTunisiaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'mauritius-city' && currentMauritiusCity) {
     const c = MAURITIUS_CITIES.find(x => x.slug === currentMauritiusCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'ghana-city' && currentGhanaCity) {
     const c = GHANA_CITIES.find(x => x.slug === currentGhanaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'angola-city' && currentAngolaCity) {
     const c = ANGOLA_CITIES.find(x => x.slug === currentAngolaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'drc-city' && currentDrcCity) {
     const c = DRC_CITIES.find(x => x.slug === currentDrcCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'mexico-city-page' && currentMexicoCity) {
     const c = MEXICO_CITIES.find(x => x.slug === currentMexicoCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'brazil-city' && currentBrazilCity) {
     const c = BRAZIL_CITIES.find(x => x.slug === currentBrazilCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'colombia-city' && currentColombiaCity) {
     const c = COLOMBIA_CITIES.find(x => x.slug === currentColombiaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'argentina-city' && currentArgentinaCity) {
     const c = ARGENTINA_CITIES.find(x => x.slug === currentArgentinaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'chile-city' && currentChileCity) {
     const c = CHILE_CITIES.find(x => x.slug === currentChileCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'peru-city' && currentPeruCity) {
     const c = PERU_CITIES.find(x => x.slug === currentPeruCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'ecuador-city' && currentEcuadorCity) {
     const c = ECUADOR_CITIES.find(x => x.slug === currentEcuadorCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'panama-city-page' && currentPanamaCity) {
     const c = PANAMA_CITIES.find(x => x.slug === currentPanamaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'costa-rica-city' && currentCostaRicaCity) {
     const c = COSTA_RICA_CITIES.find(x => x.slug === currentCostaRicaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'dominican-city' && currentDominicanCity) {
     const c = DOMINICAN_CITIES.find(x => x.slug === currentDominicanCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'uruguay-city' && currentUruguayCity) {
     const c = URUGUAY_CITIES.find(x => x.slug === currentUruguayCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'guatemala-city-page' && currentGuatemalaCity) {
     const c = GUATEMALA_CITIES.find(x => x.slug === currentGuatemalaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'paraguay-city' && currentParaguayCity) {
     const c = PARAGUAY_CITIES.find(x => x.slug === currentParaguayCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'bolivia-city' && currentBoliviaCity) {
     const c = BOLIVIA_CITIES.find(x => x.slug === currentBoliviaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'venezuela-city' && currentVenezuelaCity) {
     const c = VENEZUELA_CITIES.find(x => x.slug === currentVenezuelaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'puerto-rico-city' && currentPuertoRicoCity) {
     const c = PUERTO_RICO_CITIES.find(x => x.slug === currentPuertoRicoCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'israel-city' && currentIsraelCity) {
     const c = ISRAEL_CITIES.find(x => x.slug === currentIsraelCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'jordan-city' && currentJordanCity) {
     const c = JORDAN_CITIES.find(x => x.slug === currentJordanCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'iraq-city' && currentIraqCity) {
     const c = IRAQ_CITIES.find(x => x.slug === currentIraqCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'cyprus-city' && currentCyprusCity) {
     const c = CYPRUS_CITIES.find(x => x.slug === currentCyprusCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'lebanon-city' && currentLebanonCity) {
     const c = LEBANON_CITIES.find(x => x.slug === currentLebanonCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'myanmar-city' && currentMyanmarCity) {
     const c = MYANMAR_CITIES.find(x => x.slug === currentMyanmarCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'maldives-city' && currentMaldivesCity) {
     const c = MALDIVES_CITIES.find(x => x.slug === currentMaldivesCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'china-city' && currentChinaCity) {
     const c = CHINA_CITIES.find(x => x.slug === currentChinaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'bangladesh-city' && currentBangladeshCity) {
     const c = BANGLADESH_CITIES.find(x => x.slug === currentBangladeshCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'nepal-city' && currentNepalCity) {
     const c = NEPAL_CITIES.find(x => x.slug === currentNepalCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'turkey-city' && currentTurkeyCity) {
     const c = TURKEY_CITIES.find(x => x.slug === currentTurkeyCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'kuwait-city' && currentKuwaitCity) {
     const c = KUWAIT_CITIES.find(x => x.slug === currentKuwaitCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'homeschooling-nigeria' && NIGERIA_COUNTRY) {
@@ -4770,72 +4770,72 @@ export default function LandingPage() {
   } else if (page === 'oman-city' && currentOmanCity) {
     const c = OMAN_CITIES.find(x => x.slug === currentOmanCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'taiwan-city' && currentTaiwanCity) {
     const c = TAIWAN_CITIES.find(x => x.slug === currentTaiwanCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'ireland-city' && currentIrelandCity) {
     const c = IRELAND_CITIES.find(x => x.slug === currentIrelandCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'uk-city' && currentUkCity) {
     const c = UK_CITIES.find(x => x.slug === currentUkCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'india-city' && currentIndiaCity) {
     const c = INDIA_CITIES.find(x => x.slug === currentIndiaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'germany-city' && currentGermanyCity) {
     const c = GERMANY_CITIES.find(x => x.slug === currentGermanyCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'romania-city' && currentRomaniaCity) {
     const c = ROMANIA_CITIES.find(x => x.slug === currentRomaniaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'ukraine-city' && currentUkraineCity) {
     const c = UKRAINE_CITIES.find(x => x.slug === currentUkraineCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'japan-city' && currentJapanCity) {
     const c = JAPAN_CITIES.find(x => x.slug === currentJapanCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'vietnam-city' && currentVietnamCity) {
     const c = VIETNAM_CITIES.find(x => x.slug === currentVietnamCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'thailand-city' && currentThailandCity) {
     const c = THAILAND_CITIES.find(x => x.slug === currentThailandCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = c.seoTitle || (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'homeschooling-kenya') {
-    metaTitle = 'Online School in Kenya | IGCSE, A-Level, IB & CBC Homeschool | Smartious'
-    metaDesc  = 'Live online school and homeschool for Kenyan families: Cambridge IGCSE and A-Level, Pearson Edexcel, IB, American and CBC, taught by qualified teachers in small classes, with a learning centre in Parklands, Nairobi. From USD 423/month for Primary.'
+    metaTitle = KENYA_COUNTRY?.seoTitle || 'Online School in Kenya | IGCSE, A-Level, IB & CBC Homeschool | Smartious'
+    metaDesc  = KENYA_COUNTRY?.seoDesc || 'Live online school and homeschool for Kenyan families: Cambridge IGCSE and A-Level, Pearson Edexcel, IB, American and CBC, taught by qualified teachers in small classes, with a learning centre in Parklands, Nairobi. From USD 423/month for Primary.'
   } else if (page === 'kenya-city' && currentKenyaCity && KENYA_CITIES.find(x => x.slug === currentKenyaCity)) {
     const c = KENYA_CITIES.find(x => x.slug === currentKenyaCity)
     metaTitle = c.seoTitle || ('Homeschooling in ' + c.name + ' | IGCSE, A-Level, IB & CBC | Smartious')
@@ -4858,6 +4858,12 @@ export default function LandingPage() {
     const a = UK_AREAS.find(x => x.slug === currentUkArea)
     metaTitle = a.seoTitle || ('Online Tuition in ' + a.name + ', ' + a.city + ' | GCSE, A-Level & 11+ Tutors | Smartious')
     metaDesc  = a.seoDesc || PAGE_META['uk-area']?.desc || ''
+  } else if (page === 'homeschooling-kuwait' && KUWAIT_COUNTRY?.seoTitle) {
+    metaTitle = KUWAIT_COUNTRY.seoTitle
+    metaDesc  = KUWAIT_COUNTRY.seoDesc || PAGE_META[page].desc
+  } else if (page === 'homeschooling-oman' && OMAN_COUNTRY?.seoTitle) {
+    metaTitle = OMAN_COUNTRY.seoTitle
+    metaDesc  = OMAN_COUNTRY.seoDesc || PAGE_META[page].desc
   } else if (PAGE_META[page]) {
     metaTitle = PAGE_META[page].title
     metaDesc  = PAGE_META[page].desc
@@ -15411,7 +15417,7 @@ export default function LandingPage() {
                 </h2>
                 <div style={{display:'flex',flexDirection:'column',gap:12}}>
                   {[
-                    {q:'Is Smartious a UAE-licensed school?', a:'No. Smartious is an international online school based in Nairobi. It is not licensed by KHDA, ADEK or the UAE Ministry of Education, and we do not claim their approval. UAE families use it as home education.'},
+                    {q:'Can UAE families use Smartious?', a:'Yes. Families across the UAE use Smartious as home education with live online classes. If you will need a transfer certificate, re-enrolment in a UAE school or MOE equivalency later, ask us at admissions and check the current requirements with KHDA, ADEK or the Ministry of Education.'},
                     {q:'What does that mean for my child’s qualifications?', a:'IGCSE and A-Level certificates are issued by the exam boards (Cambridge or Pearson Edexcel), not by Smartious. UAE universities and the Ministry of Education set their own entry and equivalency rules, so check the current requirements for your child’s plans.'},
                     {q:'Do we need to register home education with the authorities?', a:'Rules can differ by emirate and can change. Check with KHDA (Dubai), ADEK (Abu Dhabi) or the Ministry of Education for your family’s situation before you start.'},
                     {q:'Can my child move into a UAE school later?', a:'UAE schools make their own admission and placement decisions, usually after their own assessment. We provide reports on your child’s work and progress to support the application.'},

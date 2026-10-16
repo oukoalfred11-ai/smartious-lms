@@ -78,13 +78,6 @@ function CountryHub({
   SMARTIOUS_RATING, SMARTIOUS_REVIEWS,
   GOOGLE_REVIEWS_URL, LEAVE_REVIEW_URL,
 }) {
-  // Rotate which 3 of the 5 verified reviews display, keyed off the country
-  // slug. Same real reviews everywhere (never fabricated per-country) — this
-  // just avoids every hub page rendering byte-identical review HTML.
-  const reviewOffset = country.slug
-    ? country.slug.split('').reduce((a, c) => a + c.charCodeAt(0), 0) % SMARTIOUS_REVIEWS.length
-    : 0
-  const displayReviews = [...SMARTIOUS_REVIEWS.slice(reviewOffset), ...SMARTIOUS_REVIEWS.slice(0, reviewOffset)].slice(0, 3)
   return (
     <>
       {/* Schema: the service this hub offers, tied to the Organization in
@@ -192,7 +185,7 @@ function CountryHub({
         <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14,maxWidth:1100,margin:'0 auto'}}>
           {cities.map(c => (
             <a key={c.slug} href={'/homeschool-' + c.slug}
-              onClick={(e) => { e.preventDefault(); setCurrentCity(c.slug); nav('/homeschool-' + c.slug); P(country.cityPageId) }}
+              onClick={(e) => { e.preventDefault(); setCurrentCity(c.slug); nav('/homeschool-' + c.slug) }}
               style={{display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',textDecoration:'none',color:'inherit',transition:'all .2s',cursor:'pointer'}}
               onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
@@ -329,28 +322,16 @@ function CountryHub({
               </div>
             ))}
           </div>
-          {/* ─── REAL GOOGLE REVIEWS ─── */}
+          {/* ─── GOOGLE REVIEWS: link only ───
+              No rating figures or quoted reviews are rendered here: hard-coded
+              counts and quotes go stale and cannot be checked from this page.
+              Families read the live reviews on our Google Business Profile. */}
           <div style={{marginTop:32,paddingTop:32,borderTop:`1px solid ${V.bone3}`}}>
-            <div style={{textAlign:'center',marginBottom:28}}>
+            <div style={{textAlign:'center',marginBottom:20}}>
               <div className="eyebrow" style={{justifyContent:'center'}}>What parents say</div>
               <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
-                {SMARTIOUS_RATING.stars} from {SMARTIOUS_RATING.count}+ verified Google reviews
+                Read parent reviews on Google
               </h3>
-              <div style={{display:'inline-flex',alignItems:'center',gap:10,padding:'8px 16px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:24,fontSize:12.5,color:V.sl}}>
-                <span style={{color:V.gold3,fontSize:16,letterSpacing:'.05em'}}>{'\u2605\u2605\u2605\u2605\u2605'}</span>
-                <span style={{fontWeight:700,color:V.ink}}>{SMARTIOUS_RATING.stars} / 5</span>
-                <span>·</span>
-                <span>{SMARTIOUS_RATING.count}+ Google reviews</span>
-              </div>
-            </div>
-            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:16,marginBottom:24}}>
-              {displayReviews.map((r, i) => (
-                <div key={i} style={{padding:'20px 22px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,display:'flex',flexDirection:'column',gap:10}}>
-                  <div style={{color:V.gold3,fontSize:15,letterSpacing:'.05em'}}>{'\u2605'.repeat(r.rating)}</div>
-                  <p style={{fontSize:13,color:V.ink,lineHeight:1.65,margin:0,flex:1}}>&ldquo;{r.text}&rdquo;</p>
-                  <div style={{fontSize:11,color:V.sl,fontWeight:600,letterSpacing:'.04em',textTransform:'uppercase',marginTop:4}}>[+] {r.source}</div>
-                </div>
-              ))}
             </div>
             <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginTop:8}}>
               <a href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer" className="btn-o" style={{textDecoration:'none'}}>
@@ -361,7 +342,7 @@ function CountryHub({
               </a>
             </div>
             <p style={{fontSize:11.5,color:V.sl,lineHeight:1.6,textAlign:'center',marginTop:18,fontStyle:'italic',maxWidth:680,margin:'18px auto 0'}}>
-              Reviews above are from our verified Google Business Profile. For {country.name}-specific parent references during your decision-making, request these during your free assessment — we can introduce you to current {country.name} families happy to share their experience directly.
+              For {country.name}-specific parent references, ask during your free assessment and we can introduce you to current {country.name} families.
             </p>
           </div>
         </div>
