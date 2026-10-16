@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import MessagesHub from '../../components/MessagesHub.jsx'
 import NotificationsBell from '../../components/NotificationsBell.jsx'
 import ClubsHub from '../../components/ClubsHub.jsx'
@@ -520,6 +521,9 @@ export default function TeacherPortal() {
     : 'Teacher'
 
   const [page, setPage] = useState('dashboard')
+  const navigateTo = useNavigate()
+  // The Virtual Lab is its own app at /lab (assign, review and mark experiments).
+  useEffect(() => { if (page === 'virtuallab') { setPage('dashboard'); navigateTo('/lab/teach') } }, [page, navigateTo])
   const [collapsed, setSidebarCollapsed] = useState(false)
   const [uploadModal, setUploadModal] = useState(false)
   const [uploadStep, setUploadStep] = useState(1)
@@ -676,6 +680,7 @@ export default function TeacherPortal() {
       {id:'questionbank',  label:'Question Bank',    iconName:'questionbank',  icon:'M4 19V6a2 2 0 0 1 2-2h13a1 1 0 0 1 1 1v13|M4 19a2 2 0 0 0 2 2h14|M8 10h8M8 14h6|circle:18:18:3'},
       {id:'exambuilder',   label:'Exams',            iconName:'exambuilder',   icon:'M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2|rect:9:3:6:4:1.5|line:9:12:15:12|line:9:16:12:16'},
       {id:'marking',       label:'Homework',         iconName:'marking',       icon:'M9 11l3 3L22 4|M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11'},
+      {id:'virtuallab',    label:'Virtual Lab',      iconName:'virtuallab',    icon:'M9 3h6M10 3v6L4.5 19A1.5 1.5 0 0 0 5.8 21h12.4a1.5 1.5 0 0 0 1.3-2L14 9V3|M7 15h10'},
     ]},
     { section:'Documents', items:[
       {id:'documents',     label:'Reports & Documents', iconName:'documents',  icon:'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z|M14 2v6h6|line:16:13:8:13|line:16:17:8:17|line:10:9:8:9'},

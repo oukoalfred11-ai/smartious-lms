@@ -23,6 +23,7 @@ const TeacherPortal  = lazy(() => import('./pages/teacher/TeacherPortal.jsx'))
 const StudentPortal  = lazy(() => import('./pages/student/StudentPortal.jsx'))
 const ParentPortal   = lazy(() => import('./pages/parent/ParentPortal.jsx'))
 const DemoPortal     = lazy(() => import('./pages/demo/DemoPortal.jsx'))
+const LabApp         = lazy(() => import('./lab/LabApp.jsx'))
 
 // KaTeX draws mathematics in the portals (question bank, exams). The
 // website has none, so it is fetched only when a portal opens; until
@@ -133,6 +134,7 @@ export default function App() {
               <Route path="/teacher/*"      element={<Guard roles={['teacher','admin']}><P><TeacherPortal /></P></Guard>} />
               <Route path="/student/*"      element={<Guard roles={['student']}><P><StudentPortal /></P></Guard>} />
               <Route path="/parent/*"       element={<Guard roles={['parent']}><P><ParentPortal /></P></Guard>} />
+              <Route path="/lab/*"          element={<Guard roles={['student','teacher','admin','dos','ops_manager']}><P><LabApp /></P></Guard>} />
               <Route path="/demo/*"         element={<Guard roles={['demo']}><P><DemoPortal /></P></Guard>} />
               {/* Catch-all → LandingPage (handles /, /us-families, /about, /pricing, /blog/*, etc.) */}
               <Route path="*"               element={<LandingPage />} />

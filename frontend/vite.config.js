@@ -49,6 +49,9 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    // The Virtual Lab imports the shared science engine from ../shared/lab
+    // (the same code the backend uses to re-check submissions).
+    fs: { allow: [resolve(__dirname, '..')] },
     proxy: {
       '/api': {
         target: 'http://localhost:5000',
