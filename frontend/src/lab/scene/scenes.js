@@ -1,7 +1,7 @@
 /**
  * scenes.js — one 3D scene per experiment.
  *
- *   build(lab, { dispatch, onSelect }) → { update(view, state), dispose() }
+ *   build(lab, { dispatch, onSelect, onHover }) → { onPick(p), update(view), view }
  *
  * Scenes only DISPLAY the view computed by the shared engine and turn
  * clicks into the same validated actions the control panels use. A
@@ -9,6 +9,8 @@
  */
 import * as THREE from 'three'
 import * as E from './equipment.js'
+import { buildModel } from './apparatus3d.js'
+import { createWiring, wirePart } from './wiring.js'
 
 const { BENCH_Y } = E
 
@@ -59,68 +61,55 @@ function titration(lab, { dispatch, onSelect }) {
 }
 
 // ── Ohm's law ───────────────────────────────────────────────
-function ohms(lab, { dispatch, onSelect }) {
+// Real apparatus on the bench: supply, switch, ammeter, voltmeter, the
+// unknown resistor and a tray of leads. Students pull leads from post to
+// post (or tap one post then another), click a lead to remove it, set the
+// supply with its up/down buttons and click the switch to close it.
+function ohms(lab, { dispatch, onSelect, onHover }) {
   lab.add(E.bench())
-  const terms = {}            // 'PS.+' → { obj, pos }
-  const place = (obj, x, z) => { obj.position.set(x, BENCH_Y, z); return obj }
-  const addTerm = (id, parent, local, colour) => {
-    const t = E.terminal(colour); t.position.copy(local); parent.add(t)
-    lab.makePickable(t, { kind: 'terminal', id })
-    terms[id] = { obj: t }
-  }
-  const ps = place(E.instrumentBox({ w: 0.2, h: 0.1, d: 0.13, colour: '#1F2A37', title: 'D.C. SUPPLY' }), -0.42, -0.12); lab.add(ps, { pick: { kind: 'supply' } })
-  addTerm('PS.+', ps, new THREE.Vector3(0.06, 0.1, 0.03), '#C62828'); addTerm('PS.-', ps, new THREE.Vector3(-0.06, 0.1, 0.03), '#111111')
-  const sw = place(E.knifeSwitch(), -0.14, 0.12); lab.add(sw, { pick: { kind: 'switch' } })
-  addTerm('S1.a', sw, new THREE.Vector3(-0.05, 0.012, 0.018), '#7A7A7A'); addTerm('S1.b', sw, new THREE.Vector3(0.05, 0.012, 0.018), '#7A7A7A')
-  const am = place(E.instrumentBox({ w: 0.14, h: 0.08, d: 0.1, colour: '#33415C', title: 'AMMETER (A)' }), 0.1, -0.14); lab.add(am, { pick: { kind: 'ammeter' } })
-  addTerm('A1.+', am, new THREE.Vector3(0.04, 0.08, 0.025), '#C62828'); addTerm('A1.-', am, new THREE.Vector3(-0.04, 0.08, 0.025), '#111111')
-  const vm = place(E.instrumentBox({ w: 0.14, h: 0.08, d: 0.1, colour: '#3B5B3B', title: 'VOLTMETER (V)' }), 0.38, -0.1); lab.add(vm, { pick: { kind: 'voltmeter' } })
-  addTerm('V1.+', vm, new THREE.Vector3(0.04, 0.08, 0.025), '#C62828'); addTerm('V1.-', vm, new THREE.Vector3(-0.04, 0.08, 0.025), '#111111')
-  const rb = place(E.resistorBoard('R ?'), 0.18, 0.14); lab.add(rb, { pick: { kind: 'resistor' } })
-  addTerm('R1.a', rb, new THREE.Vector3(-0.06, 0.012, -0.018), '#7A7A7A'); addTerm('R1.b', rb, new THREE.Vector3(0.06, 0.012, -0.018), '#7A7A7A')
+  const place = (obj, x, z, pick) => { obj.position.set(x, BENCH_Y, z); return lab.add(obj, pick ? { pick } : {}) }
+  const w = createWiring(lab, { dispatch, onSelect, onHover })
+  const ps = place(buildModel('dc_supply'), -0.4, -0.16, { kind: 'supply', label: 'Power supply: use the ▲ ▼ buttons to set the voltage' })
+  const sw = place(buildModel('switch'), -0.12, 0.12, { kind: 'switch', label: 'Switch: click to open or close' })
+  const am = place(buildModel('ammeter'), 0.1, -0.16, { kind: 'ammeter', label: 'Ammeter' })
+  const vm = place(buildModel('voltmeter'), 0.36, -0.12, { kind: 'voltmeter', label: 'Voltmeter' })
+  const rb = place(E.resistorBoard('R = ?'), 0.2, 0.13, { kind: 'resistor', label: 'Resistor of unknown resistance' })
+  w.tray(-0.42, 0.17)
+  wirePart(w, ps, { id: 'PS', type: 'supply', label: 'Supply' })
+  wirePart(w, sw, { id: 'S1', type: 'switch', label: 'Switch' })
+  wirePart(w, am, { id: 'A1', type: 'ammeter', label: 'Ammeter' })
+  wirePart(w, vm, { id: 'V1', type: 'voltmeter', label: 'Voltmeter' })
+  wirePart(w, rb, { id: 'R1', type: 'resistor', label: 'Resistor' })
 
-  let pending = null
-  let leads = []
-  let wireKey = ''
-  const worldPos = (id) => { const v = new THREE.Vector3(); terms[id].obj.getWorldPosition(v); v.y += 0.02; return v }
-  const setPending = (id) => {
-    if (pending) terms[pending].obj.userData.setHighlight(false)
-    pending = id
-    if (pending) terms[pending].obj.userData.setHighlight(true)
-    lab.invalidate()
+  // Up/down buttons on the supply.
+  const button = (text, x, kind) => {
+    const b = E.labelPlane(text, { w: 0.026, h: 0.02, size: 40, bg: '#1F2A37', fg: '#FFFFFF' })
+    b.position.set(x, 0.13, 0.07); b.rotation.x = -Math.PI / 2
+    ps.add(b); lab.makePickable(b, { kind, label: kind === 'up' ? 'Increase the supply voltage by 0.5 V' : 'Decrease the supply voltage by 0.5 V' })
   }
+  button('▲', 0.035, 'up'); button('▼', 0.075, 'down')
+  let supplyV = 0
+  lab.setHandlers({ ...w.handlers, hover: (p) => onHover(p?.label || null) })
+
   return {
     onPick(p) {
-      if (p.kind === 'terminal') {
-        if (!pending) setPending(p.id)
-        else if (pending === p.id) setPending(null)
-        else { dispatch('connect', { a: pending, b: p.id }); setPending(null) }
-        onSelect({ kind: 'terminal', id: p.id, pending })
-        return
-      }
+      if (w.onPick(p)) return
       if (p.kind === 'switch') dispatch('toggleSwitch')
-      setPending(null)
-      onSelect(p)
+      else if (p.kind === 'up') dispatch('setSupply', { volts: Math.min(12, supplyV + 0.5) })
+      else if (p.kind === 'down') dispatch('setSupply', { volts: Math.max(0, supplyV - 0.5) })
+      onSelect({ kind: p.kind, label: p.label })
     },
     update(view) {
-      const key = JSON.stringify(view.wires)
-      if (key !== wireKey) {
-        leads.forEach(l => lab.remove(l)); leads = []
-        view.wires.forEach(([a, b], i) => {
-          const colour = a.endsWith('-') || b.endsWith('-') ? '#1A1A1A' : '#C62828'
-          const l = E.leadBetween(worldPos(a), worldPos(b), colour)
-          lab.add(l, { pick: { kind: 'wire', index: i } }); leads.push(l)
-        })
-        wireKey = key
-      }
-      sw.userData.setClosed(view.switchClosed)
-      const fault = view.fault === 'short_circuit'
-      ps.userData.screen.userData.setText(fault ? 'TRIP' : view.supplyV.toFixed(1) + ' V', fault ? { bg: '#F5C6C6', fg: '#7A0000' } : {})
-      am.userData.screen.userData.setText(view.meters.A1 == null ? '----' : view.meters.A1.toFixed(3))
-      vm.userData.screen.userData.setText(view.meters.V1 == null ? '----' : view.meters.V1.toFixed(2))
+      supplyV = view.supplyV
+      w.update(view.wires, view.wireColours, view.maxLeads)
+      sw.userData.setClosed?.(view.switchClosed)
+      const trip = view.fault === 'short_circuit'
+      ps.userData.setDisplay?.(trip ? 'TRIP' : view.supplyV.toFixed(1) + ' V')
+      am.userData.setDisplay?.(view.meters.A1 == null ? '----' : view.meters.A1.toFixed(3))
+      vm.userData.setDisplay?.(view.meters.V1 == null ? '----' : view.meters.V1.toFixed(2))
       lab.invalidate()
     },
-    view: { pos: [0, 1.55, 0.85], target: [0, 0.93, 0] },
+    view: { pos: [0, 1.5, 0.8], target: [0, 0.94, 0] },
   }
 }
 
