@@ -21,6 +21,7 @@
 ═══════════════════════════════════════════════════════════════════ */
 
 import { imageExists } from '../data/generated/publicImages.js'
+import GoogleReviews from './GoogleReviews.jsx'
 
 /* ────────────────────────────────────────────────────────────────
    Country-awareness helpers for cross-market content cleanup.
@@ -322,25 +323,10 @@ function CountryHub({
               </div>
             ))}
           </div>
-          {/* ─── GOOGLE REVIEWS: link only ───
-              No rating figures or quoted reviews are rendered here: hard-coded
-              counts and quotes go stale and cannot be checked from this page.
-              Families read the live reviews on our Google Business Profile. */}
+          {/* ─── GOOGLE REVIEWS — rotating quotes and the live 4.9 rating ───
+              Visible text only; no review JSON-LD (self-serving on our own pages). */}
           <div style={{marginTop:32,paddingTop:32,borderTop:`1px solid ${V.bone3}`}}>
-            <div style={{textAlign:'center',marginBottom:20}}>
-              <div className="eyebrow" style={{justifyContent:'center'}}>What parents say</div>
-              <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
-                Read parent reviews on Google
-              </h3>
-            </div>
-            <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginTop:8}}>
-              <a href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer" className="btn-o" style={{textDecoration:'none'}}>
-                Read all reviews on Google &raquo;
-              </a>
-              <a href={LEAVE_REVIEW_URL} target="_blank" rel="noopener noreferrer" className="btn-p" style={{textDecoration:'none'}}>
-                Leave us a review &raquo;
-              </a>
-            </div>
+            <GoogleReviews V={V} seed={country.slug} />
             <p style={{fontSize:11.5,color:V.sl,lineHeight:1.6,textAlign:'center',marginTop:18,fontStyle:'italic',maxWidth:680,margin:'18px auto 0'}}>
               For {country.name}-specific parent references, ask during your free assessment and we can introduce you to current {country.name} families.
             </p>

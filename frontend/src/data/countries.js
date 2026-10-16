@@ -1408,7 +1408,7 @@ export const COUNTRIES = [
     googleReviews: {
       heading: 'What Kenyan parents are saying',
       intro: 'Verified reviews from Google. All reviews carry the reviewer\'s real name and Google profile.',
-      profileLink: 'https://www.google.com/maps',
+      profileLink: 'https://share.google/wsClmqRDYfpMGNJyK',
       reviews: [
         {
           name: 'Allan H.',

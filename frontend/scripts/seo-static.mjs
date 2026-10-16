@@ -52,6 +52,7 @@ import { LANGUAGES } from '../src/data/languages.js'
 import { STUDY_ABROAD } from '../src/data/studyAbroad.js'
 import { NAIROBI_AREAS } from '../src/data/nairobiAreas.js'
 import { COUNTRIES as COUNTRY_DETAILS } from '../src/data/countries.js'
+import { GOOGLE_RATING, GOOGLE_REVIEWS, GOOGLE_PROFILE_URL, reviewOffset } from '../src/data/googleReviews.js'
 import { US_STATES } from '../src/data/usStates.js'
 import { US_CITIES, US_CITIES_BY_STATE } from '../src/data/usCities.js'
 import { CA_PROVINCES } from '../src/data/caProvinces.js'
@@ -815,7 +816,10 @@ function render(pg) {
   const arAlt = !ar && (ALTERNATES.get(pg.path) || []).find(a => a.hreflang === 'ar')
   const langLink = arAlt ? `<p lang="ar" dir="rtl"><a href="${esc(arAlt.href.slice(ORIGIN.length))}" hreflang="ar">النسخة العربية من هذه الصفحة</a></p>` : ''
   const main = `<h1>${esc(pg.h1 || pg.title.split(/ [|—–] /)[0])}</h1>${langLink}${pg.body.join('')}${faqs(pg.faqs, pg.faqsTitle)}${pg.related.join('')}`
-  const body = `<div id="seo-static"${ar ? ' lang="ar" dir="rtl"' : ''}>${nav}<main>${main}</main>${h2(ar ? 'ابدأ مع Smartious' : 'Start with Smartious')}${links(CTA_LINKS)}${foot}</div>`
+  // Visible rating and one parent quote (text only, no review markup).
+  const rv = GOOGLE_REVIEWS[reviewOffset(pg.path)]
+  const reviews = ar ? '' : `${h2('What parents say')}<p>Rated ${GOOGLE_RATING.stars} out of 5 on Google from ${GOOGLE_RATING.count}+ reviews. <a href="${GOOGLE_PROFILE_URL}" rel="noopener">Read our Google reviews</a></p><blockquote>&ldquo;${esc(rv.text)}&rdquo; &mdash; ${esc(rv.name)}, Google review</blockquote>`
+  const body = `<div id="seo-static"${ar ? ' lang="ar" dir="rtl"' : ''}>${nav}<main>${main}${reviews}</main>${h2(ar ? 'ابدأ مع Smartious' : 'Start with Smartious')}${links(CTA_LINKS)}${foot}</div>`
   return html.replace('<div id="root"></div>', body + '<div id="root"></div>')
 }
 
