@@ -5906,7 +5906,7 @@ export default function LandingPage() {
                   ],
                   cta:'Visit a Smartious centre',
                   ctaPage:'contact',
-                  pricing:'From KSh 1,500/hour',
+                  pricing:'Fees on request',
                 },
                 {
                   tag:'Personalised Tuition',
@@ -5922,7 +5922,7 @@ export default function LandingPage() {
                   ],
                   cta:'Find tutors in your area',
                   ctaPage:'tuition-nairobi',
-                  pricing:'From KSh 1,300/hour',
+                  pricing:'Online USD 15/hour',
                 },
               ].map(card => (
                 <a key={card.title} className="reveal lp-divlink" style={{
@@ -7182,7 +7182,7 @@ export default function LandingPage() {
                   We serve families in Kenya (Nairobi, Mombasa, Kisumu, Nakuru, Eldoret, Thika, Kiambu and across the country), the UAE (Dubai, Abu Dhabi, Sharjah and 27 emirate areas), the UK, USA, Canada, Australia, Qatar, Bahrain, Nigeria, South Africa, Uganda, Tanzania, Somalia and Pakistan. Our delivery is primarily online through the Smartious Learning Management System (LMS), with in-person tuition available at our Diamond Plaza Parklands HQ and our Karen Hardy Centre in Nairobi.
                 </p>
                 <p style={{fontSize:13.5,lineHeight:1.75,marginBottom:14}}>
-                  Smartious supports families relocating between countries needing curriculum continuity, athletes and performers balancing serious training with academic ambition, gifted students whose schools move too slowly, students struggling at school due to oversized classrooms or bullying, IGCSE and A-Level candidates preparing for external examinations, IB Diploma students needing specialist HL subject support, and students with learning differences benefiting from 1-on-1 personal attention. Pricing starts at USD 15/hour for 1-on-1 tuition (KSh 1,300/hour for Kenya-based families) and from USD 423/month for full online homeschool programmes — meaningfully below typical premium international school fees while delivering equivalent qualifications.
+                  Smartious supports families relocating between countries needing curriculum continuity, athletes and performers balancing serious training with academic ambition, gifted students whose schools move too slowly, students struggling at school due to oversized classrooms or bullying, IGCSE and A-Level candidates preparing for external examinations, IB Diploma students needing specialist HL subject support, and students with learning differences benefiting from 1-on-1 personal attention. Pricing starts at USD 15/hour (≈ KSh 1,940) for 1-on-1 tuition and from USD 423/month for full online homeschool programmes — meaningfully below typical premium international school fees while delivering equivalent qualifications.
                 </p>
                 <p style={{fontSize:12.5,lineHeight:1.7,marginTop:18,color:'rgba(247,243,237,.55)'}}>
                   Contact Smartious: <a href="mailto:hello@smartioushomeschool.com" style={{color:V.gold3,textDecoration:'none'}}>hello@smartioushomeschool.com</a> · WhatsApp· Diamond Plaza I Annex, 3rd Floor, Office 20, Parklands, Nairobi, Kenya · M-Pesa Paybill 247247, Account 745021 (Smartious Edtech).
@@ -10991,7 +10991,7 @@ export default function LandingPage() {
                 Online school and homeschool: from <strong style={{color:V.gold3}}>USD 423/month</strong> for Primary, varying by curriculum and level, paid termly. One-to-one tuition: <strong style={{color:V.gold3}}>USD 15/hour</strong> at every level.
               </p>
               <div style={{fontSize:13,color:'rgba(255,255,255,.65)',fontStyle:'italic'}}>
-                Free consultation call included · Sibling discounts 15-25%
+                Free consultation call included · 10% sibling discount from the second child
               </div>
               <a href="/smartious-fees-2026-27.pdf" target="_blank" rel="noopener"
                 style={{display:'inline-block',marginTop:18,padding:'10px 20px',borderRadius:8,border:`1.5px solid ${V.gold3}`,color:V.gold3,fontWeight:700,fontSize:13.5,textDecoration:'none'}}>
@@ -13681,7 +13681,7 @@ export default function LandingPage() {
                   {n:'06',h:'Two Nairobi physical centres',p:'Diamond Plaza Parklands (HQ, Est. 2022) and Karen Hardy (Est. 2023). In-person supplementation, examination invigilation, holiday intensives. UK/US/NZ competitors have zero Kenya physical presence.'},
                   {n:'07',h:'Kenya founder, Kenya operations',p:'Founded 2018 by Alfred Ouko, BEd Mathematics &amp; Physics UoN 2022. Local admissions team, local support. Understanding of Kenya families\' needs, not a distant UK head office.'},
                   {n:'08',h:'Kenya examination centres handled',p:'Cambridge exam registration at British Council Nairobi, Braeburn Group centres, Peponi, Brookhouse, ISK, plus Mombasa/Kisumu/Nakuru. Edexcel three series per year. IB Diploma via authorised centres. All logistics managed by Smartious.'},
-                  {n:'09',h:'Sibling discounts 15-25%',p:'Families with multiple children get meaningful sibling discounts. Not available at CHS Online, Crimson, King\'s InterHigh — Smartious specifically designs for Kenyan family sizes.'},
+                  {n:'09',h:'Sibling discounts',p:'Families with multiple children get meaningful sibling discounts. Not available at CHS Online, Crimson, King\'s InterHigh — Smartious specifically designs for Kenyan family sizes.'},
                   {n:'10',h:'Personalized pricing (fair-play)',p:'Every family gets a quote calibrated to grade level, curriculum choice, enrolment period, and specific needs. No one-size-fits-all pricing. Free consultation call included. Response within 24 hours.'},
                 ].map(item => (
                   <div key={item.n} style={{background:'#fff',border:`1px solid ${V.bone3}`,borderRadius:12,padding:'26px 24px',boxShadow:'0 2px 10px rgba(8,12,20,.04)',transition:'all .18s ease'}}>
@@ -13846,7 +13846,7 @@ export default function LandingPage() {
                   {q:'Do you offer Kenya CBC alongside Cambridge or IB?', a:'Yes. Smartious offers full Kenya CBC (Grade 1-12, KICD-aligned, KCSE-eligible) alongside international curricula. Multi-curriculum families are common — child studying CBC as main pathway with Cambridge Mathematics and Physics as options is a typical setup for families who might target Kenyan universities but want international breadth.'},
                   {q:'Where do Kenyan students sit Cambridge examinations?', a:'Multiple authorised centres in Kenya — British Council Nairobi, Braeburn Group centres (multiple locations), Peponi School, Brookhouse Schools, International School of Kenya (ISK), plus centres in Mombasa, Kisumu, and Nakuru. Pearson Edexcel offers three examination series per year. Smartious handles all registration logistics — parents do not navigate this themselves.'},
                   {q:'What if we already have a physical Nairobi school but want to switch?', a:'Common situation. Families switching mid-year work with our admissions team to align curriculum transition points (usually end of term for smoothest handover). We can accept students at any point in the academic year subject to assessment. Existing school records are reviewed and prior learning is credited.'},
-                  {q:'What are the fees for Kenyan families?', a:'Personalized pricing based on curriculum choice, class size preference, grade level, and enrolment period. Starting from USD 423/month (approximately KES 54,600/month at 2026 exchange rates). Sibling discounts 15-25% available. Request a quote via the pricing page and our admissions team will respond within 24 hours.'},
+                  {q:'What are the fees for Kenyan families?', a:'Personalized pricing based on curriculum choice, class size preference, grade level, and enrolment period. Starting from USD 423/month (approximately KES 54,600/month at 2026 exchange rates). A 10% sibling discount applies from the second child. Request a quote via the pricing page and our admissions team will respond within 24 hours.'},
                   {q:'Can I combine online delivery with in-person supplementation?', a:'Yes. Smartious operates two Nairobi centres — Diamond Plaza Parklands (HQ, established 2022) and Karen Hardy (established 2023). Families based in Nairobi can access in-person supplementary tuition, examination invigilation, and holiday intensives. This hybrid capability is unique to Kenya-based providers — UK, US, and NZ virtual schools have zero Kenya physical presence.'},
                   {q:'How do university applications work from Smartious?', a:'Personalised university guidance sessions with the Head of Academics. Covers UCAS (UK Russell Group including Oxbridge admissions test prep — MAT, PAT, ENGAA, TSA, HAT), Common Application (US Ivy League + UC system with SAT/ACT + AP portfolio), OUAC (Canadian U15 via Ontario Secondary School Diploma pathway through our CCIS partnership), and Kenya universities via KUCCPS. UCAS personal statement coaching and Common App essay coaching included.'},
                 ].map((f, i) => (
@@ -14040,7 +14040,7 @@ export default function LandingPage() {
                   {n:'04', h:'Distance learning fully legal', p:'Ukrainian Law "On Complete General Secondary Education" (2020) explicitly permits family education (сімейна освіта) and distance learning (дистанційне навчання). Martial law provisions expanded acceptance. No legal barriers.'},
                   {n:'05', h:'Polish + German scholarship pathway', p:'Cambridge A-Level opens Polish public universities with Ukrainian student scholarships (partial or full tuition) and German public universities (free for Ukrainians on temporary protection status).'},
                   {n:'06', h:'Cambridge exams at diaspora centres', p:'British Council Warsaw (primary for Polish diaspora), Berlin, London, Prague, Rome, Madrid, Toronto, US centres. Kyiv when conditions permit. Smartious handles all registration.'},
-                  {n:'07', h:'Discounted rates for refugee families', p:'Discounted rates for Ukrainian refugee and internally displaced families handled through consultation on case-by-case basis. Sibling discounts 15-25%.'},
+                  {n:'07', h:'Discounted rates for refugee families', p:'Discounted rates for Ukrainian refugee and internally displaced families handled through consultation on case-by-case basis. A 10% sibling discount applies from the second child.'},
                   {n:'08', h:'Ukrainian language + English bilingual', p:'Cambridge IGCSE Ukrainian as Foreign Language available. Curriculum in English (Cambridge/IB/American) with Ukrainian identity support. Multi-language families welcome.'},
                   {n:'09', h:'Tech corporate rotation portability', p:'Grammarly, GitLab Ukraine, MacPaw, Preply, SoftServe, EPAM Ukraine rotational families supported through international postings without curriculum switching.'},
                   {n:'10', h:'Post-war planning portability', p:'Cambridge, IB, American qualifications internationally portable — valid regardless of how post-war Ukrainian education system evolves. Ukrainian returnee planning families maintain international mobility options.'},
@@ -14071,7 +14071,7 @@ export default function LandingPage() {
                   {q:'We are Ukrainian refugee family in Poland — can Cambridge A-Level open Polish university scholarships?', a:'Yes. Polish public universities accept Cambridge A-Level and IB Diploma. Many offer substantial scholarships for Ukrainian students (partial or full tuition covered under current programmes). Highly relevant pathway.'},
                   {q:'We are Ukrainian refugee family in Germany — how does the uni-assist pathway work?', a:'German public universities are free for Ukrainians on temporary protection status. Cambridge A-Level and IB Diploma are accepted via uni-assist for TU Munich, LMU Munich, Heidelberg, Humboldt Berlin, RWTH Aachen, TU Berlin, KIT Karlsruhe, Freiburg, and others.'},
                   {q:'Where do Ukrainian students sit Cambridge examinations?', a:'British Council Warsaw (primary for Polish diaspora), Berlin, London, Prague, Rome, Madrid, Toronto, plus US cities. British Council Kyiv when conditions permit. Smartious handles all registration logistics regardless of family location.'},
-                  {q:'Are there discounts for Ukrainian refugee and internally displaced families?', a:'Yes. Discounted rates handled through consultation on case-by-case basis. Request via pricing page or consultation. Sibling discounts 15-25% apply for multiple children.'},
+                  {q:'Are there discounts for Ukrainian refugee and internally displaced families?', a:'Yes. Discounted rates handled through consultation on case-by-case basis. Request via pricing page or consultation. A 10% sibling discount applies from the second child.'},
                   {q:'How does time zone work for Ukrainian families?', a:'Ukraine (EET UTC+2, EEST UTC+3 summer) and Kenya (EAT UTC+3) same time zone in winter, 1 hour apart summer. Smartious 9 AM-12 PM Kyiv delivery = 9 AM-12 PM Nairobi teaching. Perfect timing.'},
                   {q:'We are Grammarly / GitLab Ukraine / SoftServe / EPAM Ukraine tech family. Does Smartious support us?', a:'Yes. Ukrainian tech corporate rotational cycles supported through international postings without curriculum switching. Cross-country cohort provides social continuity through repeated moves.'},
                 ].map((f, i) => (
@@ -14274,7 +14274,7 @@ export default function LandingPage() {
             'email': 'hello@smartioushomeschool.com',
             'address': { '@type': 'PostalAddress', 'streetAddress': 'Diamond Plaza I Annex, 3rd Floor, Office 20', 'addressLocality': 'Parklands, Nairobi', 'addressRegion': 'Nairobi', 'addressCountry': 'KE' },
             'areaServed': NAIROBI_AREAS.map(a => ({ '@type': 'Place', 'name': a.name + ', Nairobi' })),
-            'priceRange': 'USD 15/hour online · From KSh 1,500/hour home tuition',
+            'priceRange': 'USD 15/hour online tuition',
           })}}/>
           <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
             '@context': 'https://schema.org',
@@ -14391,7 +14391,7 @@ export default function LandingPage() {
                 {h:'Subject specialists, not generalists', p:'A Maths tutor with a Maths degree. A Physics tutor with a Physics degree. A Chemistry tutor with a Chemistry degree. We match each student to a tutor with genuine subject expertise.'},
                 {h:'Home visits across Nairobi', p:'Our tutors travel to families in 20 Nairobi neighbourhoods — Karen, Lavington, Kilimani, Westlands, Parklands, Runda, Muthaiga and beyond. Transport contribution applies for more distant estates.'},
                 {h:'Online tuition for everyone', p:'Live, interactive online tuition delivered via our learning platform. The same 1-on-1 attention as a home visit, with no commute risk and faster scheduling. Recommended for distant estates and diaspora families.'},
-                {h:'Transparent USD pricing', p:'USD 15 per hour for online tuition. KSh 1,500–2,500 per session for home tuition depending on location. No hidden fees. No long contracts. Pay per session or in 10-hour blocks.'},
+                {h:'Transparent USD pricing', p:'USD 15 per hour for online tuition. Home tuition is quoted on request, depending on location. No hidden fees. No long contracts. Pay per session or in 10-hour blocks.'},
                 {h:'Five curricula, seven programmes', p:'CBC (Kenyan), Cambridge IGCSE, Cambridge A-Level, IB MYP, IB Diploma, Pearson Edexcel International and American Curriculum (including AP). KCSE revision and university admissions (UCAS, Common App, SAT) also available.'},
               ].map(item => (
                 <div key={item.h} style={{
@@ -14448,7 +14448,7 @@ export default function LandingPage() {
             </div>
             <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:18,maxWidth:1100,margin:'0 auto'}}>
               {[
-                {h:'Home Tuition', d:'A qualified tutor visits your home on a schedule that suits your family. Available across 20 Nairobi neighbourhoods. Transport contribution applies for distant areas.', price:'From KSh 1,500/session'},
+                {h:'Home Tuition', d:'A qualified tutor visits your home on a schedule that suits your family. Available across 20 Nairobi neighbourhoods. Transport contribution applies for distant areas.', price:'Quote on request'},
                 {h:'Online Tuition', d:'Interactive 1-on-1 sessions live with your tutor via our online platform. Same attention, no commute. Available globally.', price:'USD 15/hour (≈ KSh 1,940)'},
                 {h:'Exam Preparation', d:'Targeted revision for KCSE, IGCSE, Cambridge Checkpoint, A-Level, IB Diploma and SAT. Past-paper drilling, technique coaching, full mock examination programmes.', price:'USD 15/hour'},
                 {h:'Holiday Intensive', d:'Concentrated tuition during April, August and December school breaks. Daily sessions for 2–4 weeks. Catch up or accelerate ahead.', price:'Block bookings available'},
@@ -19183,7 +19183,7 @@ export default function LandingPage() {
             '@id': ORG_ID,
             'name': SITE,
             'url':'https://smartioushomeschool.com/',
-            'description':'Premium IELTS, TOEFL, PTE, GRE, GMAT and SAT test preparation in Nairobi. Live 1-on-1 sessions with qualified specialists. From KSh 29,000.',
+            'description':'Premium IELTS, TOEFL, PTE, GRE, GMAT and SAT test preparation in Nairobi. Live 1-on-1 sessions with qualified specialists. USD 15/hour.',
           })}}/>
 
           {/* HERO */}
@@ -19292,7 +19292,7 @@ export default function LandingPage() {
               'name': test.code + ' Preparation',
               'description': test.seoDesc,
               'provider': ORG_REF,
-              'offers':{'@type':'Offer','price':test.fee.replace(/[^\d]/g,''),'priceCurrency':'KES'},
+              'offers':{'@type':'Offer','price':Number(test.fee.replace(/[^\d]/g,'')),'priceCurrency':'USD'},
             })}}/>
             <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
               '@context':'https://schema.org','@type':'BreadcrumbList',
@@ -19542,7 +19542,7 @@ export default function LandingPage() {
                 Language coaching that <em style={{color:V.gold3,fontStyle:'italic'}}>opens worlds</em>
               </h1>
               <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>
-                One-on-one foreign language tuition with qualified specialists. 8 languages, CEFR A1 through C2, plus examination preparation for DELF, DELE, Goethe-Zertifikat, HSK, CILS and more. From KSh 1,500/hour.
+                One-on-one foreign language tuition with qualified specialists. 8 languages, CEFR A1 through C2, plus examination preparation for DELF, DELE, Goethe-Zertifikat, HSK, CILS and more. USD 15/hour (≈ KSh 1,940).
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
                 <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
@@ -19600,9 +19600,9 @@ export default function LandingPage() {
               </div>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:12,marginBottom:24}}>
                 {[
-                  { tier:'Beginner', cefr:'A1-A2', rate:'KSh 1,800/hr', bundle:'20 sessions · KSh 32,000', desc:'Foundation. Build vocabulary, pronunciation, basic grammar.' },
-                  { tier:'Intermediate', cefr:'B1-B2', rate:'KSh 2,200/hr', bundle:'30 sessions · KSh 60,000', desc:'Independent communication. University-prep level.' },
-                  { tier:'Advanced', cefr:'C1-C2', rate:'KSh 2,500/hr', bundle:'40 sessions · KSh 95,000', desc:'Fluent academic and professional use.' },
+                  { tier:'Beginner', cefr:'A1-A2', rate:'USD 15/hr', bundle:'20 sessions · 30 hours · USD 450', desc:'Foundation. Build vocabulary, pronunciation, basic grammar.' },
+                  { tier:'Intermediate', cefr:'B1-B2', rate:'USD 15/hr', bundle:'30 sessions · 45 hours · USD 675', desc:'Independent communication. University-prep level.' },
+                  { tier:'Advanced', cefr:'C1-C2', rate:'USD 15/hr', bundle:'40 sessions · 60 hours · USD 900', desc:'Fluent academic and professional use.' },
                 ].map(p => (
                   <div key={p.tier} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px'}}>
                     <div style={{fontSize:11,fontWeight:700,color:V.gold3,letterSpacing:'.14em',textTransform:'uppercase',marginBottom:5}}>{p.cefr}</div>
@@ -19614,7 +19614,7 @@ export default function LandingPage() {
                 ))}
               </div>
               <div style={{padding:'14px 20px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,fontSize:13,color:V.sl,lineHeight:1.6,textAlign:'center'}}>
-                <strong style={{color:V.ink}}>Note:</strong> Kiswahili pricing starts lower (from KSh 1,500/hr). Exam preparation packages (DELF, DELE, Goethe, HSK, CILS) priced individually — see specific language pages.
+                <strong style={{color:V.ink}}>Note:</strong> All languages, Kiswahili included, are USD 15/hour (≈ KSh 1,940, approximate). Exam preparation packages (DELF, DELE, Goethe, HSK, CILS) priced individually — see specific language pages.
               </div>
             </div>
           </div></section>
@@ -21157,7 +21157,7 @@ export default function LandingPage() {
                   { q:'What costs are involved?', a:'Smartious services are free. Costs paid directly by students/families: university application fees (varies $50-150 per university), English tests (IELTS ~$220, TOEFL ~$220, SAT ~$93), visa fees (varies), tuition and living costs after admission. Scholarships can cover much or all of tuition and living costs.' },
                   { q:'What if I don\'t have strong KCSE grades?', a:'Different destinations have different entry thresholds, and many pathways exist for students with KCSE B (Plain) or lower — foundation years, pathway programmes, applied universities, community college transfer routes. We work with realistic profiles, not just the top tier. Honest assessment in the first consultation is the starting point.' },
                   { q:'Can my family come with me?', a:'Depends on destination and visa type. Generally: Canada and Australia offer the most family-friendly student visa rules (spouse work rights, children in public schools). UK allows family for postgraduate students only. USA F-1 visa allows family but spouses don\'t get work rights. We advise on family accommodation pathway for each destination.' },
-                  { q:'Do you help with English test preparation?', a:'Yes — Smartious Test Prep is our dedicated English and admissions test preparation programme. IELTS, TOEFL, PTE at KSh 29,000 for 20 sessions. GRE, GMAT, SAT at KSh 59,000 for 40 sessions. This is a paid service separate from the free study abroad consulting.' },
+                  { q:'Do you help with English test preparation?', a:'Yes — Smartious Test Prep is our dedicated English and admissions test preparation programme. IELTS, TOEFL and PTE: 20 sessions (30 hours). GRE, GMAT and SAT: 40 sessions (60 hours). All at USD 15/hour. This is a paid service separate from the free study abroad consulting.' },
                   { q:'When should I start preparing for study abroad?', a:'Ideally 18-24 months before intended start date. This timeline allows for: English test preparation, university research and shortlisting, application preparation and submission, scholarship applications (often have early deadlines), visa application and pre-departure preparation. Starting earlier than 24 months can be premature; starting later than 12 months limits options.' },
                   { q:'How do you choose universities for me?', a:'We build personalised shortlists based on: your academic profile (KCSE grades, subject grades, achievements), career goals, programme preferences, geographic preferences, family budget and scholarship needs, post-study residence ambitions. Most students end up with 5-12 university applications strategically balanced across reach/match/safety options.' },
                 ]
