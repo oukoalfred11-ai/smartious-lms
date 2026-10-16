@@ -1,34 +1,42 @@
 /**
  * import-ial-biology.cjs
  * ============================================================
- * One off maintenance script. Imports the 156 Smartious IAL Biology
- * lesson notes as published Lesson docs on the Edexcel IAL Biology
- * subject, carries existing class progress over from subtopic mode to
- * lesson mode, and adds the complete course notes booklet to the Library.
+ * One off maintenance script for Edexcel IAL Biology (EdexcelALevel / Biology).
  *
- * Inputs: ial-biology-manifest.json next to this file (fill every
- * PASTE_DRIVE_ID first; files must be shared "Anyone with the link").
+ *   1. Uploads the 156 Smartious lesson note PDFs to R2 (verified) before any Mongo write.
+ *   2. Replaces the subject's old 126 subtopic spine with the new 156 subtopic spine
+ *      embedded in the manifest, exactly as POST /api/syllabus/bulk does (SpineBackup first).
+ *   3. Rebuilds the subject's lessons as exactly 156, one per new subtopic:
+ *        PRIMARY old lessons are updated in place (same _id, videos, teacher kept; new notes),
+ *        MERGED old lessons give their videos to their primary, every reference is
+ *        repointed, then they are deleted; the remaining new lessons are created.
+ *      All 117 original lesson documents are copied to lessons_backup_ialbio_20261017 first.
+ *   4. Renames old subtopic names to the new ones wherever they are stamped (classes,
+ *      syllabus progress, questions, timetable lesson plans) and keeps student progress.
+ *   5. Adds the complete course notes booklet to the Library.
+ *
+ * Inputs: ial-biology-manifest.json next to this file.
  *
  * Usage (Render shell, from backend/):
- *   DRY_RUN=1 node import-ial-biology.cjs     # read only: validates, probes Drive, prints the plan
+ *   DRY_RUN=1 node import-ial-biology.cjs     # read only: validates, probes Drive, prints the whole plan
  *   node import-ial-biology.cjs               # does it
  *
  * Optional env:
- *   AUTHOR_EMAIL=someone@...   lesson author / library uploader (default: oldest active admin)
+ *   AUTHOR_EMAIL=someone@...   author of newly created lessons / library uploader (default: oldest active admin)
  *   SUBJECT_ID=<ObjectId>      pin the Subject if the lookup is ambiguous
- *   FORCE=1                    proceed even if the subject already has lessons not made by this import
- *   SKIP_LESSONS=1             skip lesson upload + lesson DB + progress migration
+ *   SKIP_LESSONS=1             skip notes upload, spine, lessons and progress migration
  *   SKIP_BOOKLET=1             skip the library booklet
  *   SKIP_MASTERY=1             do not mirror syllabus progress marks into LessonProgress
- *   SKIP_RECORDINGS=1          do not attach existing published class recordings to the new lessons
+ *   SKIP_RECORDINGS=1          do not attach published class recordings to lesson videos
  *   PROBE=0                    in DRY_RUN, do not probe the Drive links
  *   MANIFEST=path.json         use another manifest file
  *
- * Safe to re-run: R2 keys are deterministic (an existing object of the
- * right size is skipped), lessons are upserted by (subjectId, subtopicName),
- * migration steps only fill empty fields, the library record is keyed by
- * its r2Key. Nothing is deleted. Ctrl-C stops after the current step
- * (press twice to force); re-run to resume.
+ * Safety: idempotent and resumable (re-run the same command after any failure or
+ * Ctrl-C). Nothing is written to Mongo until every notes PDF is verified in R2.
+ * Before anything is changed, the originals are kept: lessons in
+ * lessons_backup_ialbio_20261017, the spine in SpineBackup (restore with
+ * POST /api/syllabus/restore/:id), and the before value of every other document
+ * changed in ialbio_migration_backup_20261017. Old R2 notes objects are not deleted.
  */
 'use strict';
 
@@ -74,7 +82,7 @@ class DriveError extends Error {
 function parseDriveId(v) {
   const s = String(v || '').trim();
   if (!s || PLACEHOLDER_RE.test(s)) return null;
-  let m = /\/d\/([A-Za-z0-9_-]{10,})/.exec(s) || /[?&]id=([A-Za-z0-9_-]{10,})/.exec(s);
+  const m = /\/d\/([A-Za-z0-9_-]{10,})/.exec(s) || /[?&]id=([A-Za-z0-9_-]{10,})/.exec(s);
   if (m) return m[1];
   if (/^[A-Za-z0-9_-]{10,}$/.test(s)) return s;
   return undefined; // present but malformed
@@ -93,6 +101,186 @@ const fmtMB = (n) => (n / 1048576).toFixed(n >= 10485760 ? 0 : 1) + ' MB';
 const normName = (s) => String(s || '').toLowerCase().replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, ' ').trim();
 const normTitle = (s) => String(s || '').toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]/g, ''); // routes/library.js rule
 const escRe = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const sid = (x) => (x == null ? '' : String(x));
+
+// Same patterns as models/Lesson.js extractYouTubeId.
+function extractYouTubeId(url) {
+  if (!url || typeof url !== 'string') return '';
+  const patterns = [
+    /youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
+    /youtu\.be\/([a-zA-Z0-9_-]{11})/,
+    /youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+    /youtube-nocookie\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+  ];
+  for (const re of patterns) { const m = url.match(re); if (m) return m[1]; }
+  return '';
+}
+
+/** Spine flattened in array order (the order the bulk loader stores and the timetable reads). */
+function flattenTopics(topics) {
+  const out = [];
+  [...(topics || [])].sort((a, b) => (a.topicOrder || 0) - (b.topicOrder || 0)).forEach((t) => {
+    (t.subtopics || []).forEach((s) => out.push({
+      name: s.name, code: String(s.code || '').trim(), topicName: t.topic, topicCode: t.code || '',
+      topicId: t._id || null, position: out.length + 1,
+    }));
+  });
+  return out;
+}
+
+/** Normalised fingerprint of a spine, used to decide whether the live one is already the new one. */
+function spineSignature(topics, sourceSyllabus) {
+  return JSON.stringify([...(topics || [])].sort((a, b) => (a.topicOrder || 0) - (b.topicOrder || 0)).map((t) => ({
+    topic: String(t.topic || '').trim(), code: String(t.code || '').trim(), topicOrder: t.topicOrder || 0,
+    sourceSyllabus: String(sourceSyllabus !== undefined ? sourceSyllabus : (t.sourceSyllabus || '')).trim(),
+    subtopics: (t.subtopics || []).map((s) => ({
+      name: String(s.name || '').trim(), code: String(s.code || '').trim(), subOrder: s.subOrder || 0,
+      suggestedLessons: typeof s.suggestedLessons === 'number' ? s.suggestedLessons : 1,
+      objectives: Array.isArray(s.objectives) ? s.objectives : [],
+    })),
+  })));
+}
+
+/** The SyllabusTopic documents, built exactly as routes/syllabus.js POST /bulk builds them. */
+function buildSpineDocs(subject, spine) {
+  const sourceSyllabus = spine.sourceSyllabus || '';
+  return spine.topics.map((t, i) => ({
+    subjectId: subject._id,
+    curriculum: subject.curriculum || '',
+    subjectName: subject.subjectName || subject.name || '',
+    topic: (t.topic || '').trim(),
+    code: (t.code || '').trim(),
+    topicOrder: typeof t.topicOrder === 'number' ? t.topicOrder : i,
+    sourceSyllabus: (sourceSyllabus || t.sourceSyllabus || '').trim(),
+    subtopics: (Array.isArray(t.subtopics) ? t.subtopics : []).map((s, j) => ({
+      name: (s.name || '').trim(),
+      code: (s.code || '').trim(),
+      subOrder: typeof s.subOrder === 'number' ? s.subOrder : j,
+      suggestedLessons: typeof s.suggestedLessons === 'number' ? s.suggestedLessons : 1,
+      objectives: Array.isArray(s.objectives) ? s.objectives : [],
+    })),
+  })).filter((d) => d.topic);
+}
+
+/**
+ * Build the migration plan from the manifest: target lessons, PRIMARY/MERGED roles,
+ * and the old name -> new name table. Returns { errors, target, byN, byOrder, renames }.
+ */
+function buildPlan(manifest) {
+  const errors = [];
+  const target = flattenTopics((manifest.spine && manifest.spine.topics) || []).map((f, ix) => ({ ...f, n: ix + 1 }));
+  const byName = new Map(target.map((t) => [t.name, t]));
+  const mig = manifest.migration || {};
+  const old = Array.isArray(mig.oldLessons) ? mig.oldLessons : [];
+  const byN = new Map(target.map((t) => [t.n, { primaryOrder: null, mergedOrders: [] }]));
+  const byOrder = new Map();
+  const renames = new Map();
+  [...old].sort((a, b) => a.order - b.order).forEach((o) => {
+    if (!isInt(o.order) || byOrder.has(o.order)) { errors.push(`migration.oldLessons: bad or duplicate order ${o.order}.`); return; }
+    if (!o.subtopicName) { errors.push(`migration.oldLessons order ${o.order}: subtopicName missing.`); return; }
+    const slot = byN.get(o.newN);
+    if (!slot) { errors.push(`migration.oldLessons order ${o.order}: newN ${o.newN} is not a lesson.`); return; }
+    const role = slot.primaryOrder === null ? 'PRIMARY' : 'MERGED';
+    if (o.role && o.role !== role) errors.push(`migration.oldLessons order ${o.order}: role ${o.role} but the first-order rule makes it ${role}.`);
+    if (role === 'PRIMARY') slot.primaryOrder = o.order; else slot.mergedOrders.push(o.order);
+    byOrder.set(o.order, { ...o, role });
+    const to = target[o.newN - 1].name;
+    if (renames.has(o.subtopicName) && renames.get(o.subtopicName) !== to) errors.push(`Old name "${o.subtopicName}" maps to two different lessons.`);
+    renames.set(o.subtopicName, to);
+  });
+  // Every new name maps to itself, unless an old lesson already claims that string for another lesson.
+  target.forEach((t) => { if (!renames.has(t.name)) renames.set(t.name, t.name); else if (renames.get(t.name) !== t.name) errors.push(`New name "${t.name}" is also an old name mapped elsewhere.`); });
+  Object.entries(mig.extraRenames || {}).forEach(([from, to]) => {
+    if (!byName.has(to)) errors.push(`extraRenames: "${to}" is not a new spine name.`);
+    else if (renames.has(from) && renames.get(from) !== to) errors.push(`extraRenames: "${from}" already maps to "${renames.get(from)}".`);
+    else renames.set(from, to);
+  });
+  const norm = new Map();
+  for (const [from, to] of renames) { const k = normName(from); norm.set(k, norm.has(k) && norm.get(k) !== to ? null : to); }
+  return { errors, target, byName, byN, byOrder, renames, norm };
+}
+
+/** Resolve a stamped name to a new spine name: exact, then by normalised spelling. */
+function resolveName(plan, name) {
+  if (!name) return null;
+  const t = String(name).trim();
+  if (plan.renames.has(t)) return { name: plan.renames.get(t), fuzzy: false, changed: plan.renames.get(t) !== t };
+  const n = plan.norm.get(normName(t));
+  return n ? { name: n, fuzzy: true, changed: n !== t } : null;
+}
+
+/** Pair live (or backed up) lesson docs with the listing by subtopicName, order breaking ties. */
+function identifyOriginals(docs, oldLessons) {
+  const errors = [];
+  const want = new Map();
+  [...oldLessons].sort((a, b) => a.order - b.order).forEach((o) => { (want.get(o.subtopicName) || want.set(o.subtopicName, []).get(o.subtopicName)).push(o); });
+  const have = new Map();
+  docs.forEach((d) => { const k = String(d.subtopicName || '').trim(); (have.get(k) || have.set(k, []).get(k)).push(d); });
+  const pairs = [];
+  for (const [name, list] of have) {
+    const exp = want.get(name);
+    if (!exp) { list.forEach((d) => errors.push(`Lesson ${d._id} "${d.title}" (subtopicName "${name}") is not in the expected listing.`)); continue; }
+    if (exp.length !== list.length) { errors.push(`subtopicName "${name}": ${list.length} live lesson(s), the listing expects ${exp.length}.`); continue; }
+    const sorted = [...list].sort((a, b) => ((a.order || 0) - (b.order || 0)) || sid(a._id).localeCompare(sid(b._id)));
+    sorted.forEach((d, i) => pairs.push({ doc: d, entry: exp[i] }));
+  }
+  for (const [name, exp] of want) if (!have.has(name)) exp.forEach((o) => errors.push(`Expected old lesson ${o.order} "${name}" is missing.`));
+  return { pairs, errors };
+}
+
+const videoKey = (v) => (v.source === 'recording' ? 'r2:' + (v.r2Url || v.r2Key) : 'yt:' + v.embedId);
+
+/** Video keys a lesson shows, the way LessonPlayerTab builds its list. */
+function lessonVideoKeys(lesson) {
+  const s = new Set();
+  if (lesson.videoEmbedId) s.add('yt:' + lesson.videoEmbedId);
+  (lesson.videos || []).forEach((v) => s.add(videoKey(v)));
+  return s;
+}
+
+/** Videos to push onto a primary from merged lessons, without duplicates. */
+function planVideoMerge(primary, mergedDocs) {
+  const seen = lessonVideoKeys(primary);
+  const add = [], lost = [];
+  let dup = 0;
+  for (const m of mergedDocs) {
+    const cands = [];
+    const yt = m.videoEmbedId || extractYouTubeId(m.videoUrl || '');
+    if (yt) cands.push({ source: 'youtube', title: String(m.title || '').slice(0, 200), embedId: yt, r2Url: '', r2Key: '', posterUrl: '', durationMins: m.durationMins || 0, liveClassId: null, recordedAt: null, createdBy: m.teacherId || null, createdAt: m.createdAt || new Date() });
+    else if (m.videoUrl) lost.push({ lessonId: m._id, videoUrl: m.videoUrl });
+    (m.videos || []).forEach((v) => cands.push(v));
+    for (const c of cands) {
+      const k = videoKey(c);
+      if (seen.has(k)) { dup++; continue; }
+      seen.add(k); add.push(c);
+    }
+  }
+  return { add, dup, lost };
+}
+
+/** Rename "Topic||Subtopic" keys; unknown keys are kept as they are. */
+function remapTopicPlanOrder(keys, plan) {
+  const out = [], unknown = [];
+  for (const k of keys || []) {
+    const sub = String(k).split('||').slice(1).join('||');
+    const r = resolveName(plan, sub);
+    const nk = r ? `${plan.byName.get(r.name).topicName}||${r.name}` : k;
+    if (!r) unknown.push(k);
+    if (!out.includes(nk)) out.push(nk);
+  }
+  return { keys: out, unknown, changed: JSON.stringify(out) !== JSON.stringify(keys || []) };
+}
+
+/** Replace ids through a map and drop duplicates, keeping first occurrences. */
+function remapIdArray(ids, idMap) {
+  const out = [], seen = new Set();
+  for (const id of ids || []) {
+    const to = idMap.get(sid(id)) || id;
+    if (seen.has(sid(to))) continue;
+    seen.add(sid(to)); out.push(to);
+  }
+  return { ids: out, changed: out.length !== (ids || []).length || out.some((x, i) => sid(x) !== sid(ids[i])) };
+}
 
 /** Validate the manifest. Returns { errors, warnings, missingDriveIds }. */
 function validateManifest(m) {
@@ -109,7 +297,7 @@ function validateManifest(m) {
       if (!l || typeof l !== 'object') { errors.push(`${at} is not an object.`); return; }
       if (!isInt(l.n)) errors.push(`${at}: n must be a positive integer.`);
       else if (ns.has(l.n)) errors.push(`${at}: duplicate n ${l.n}.`); else ns.add(l.n);
-      if (l.n !== i + 1) warnings.push(`${at}: n is ${l.n} but position is ${i + 1}.`);
+      if (l.n !== i + 1) errors.push(`${at}: n is ${l.n} but position is ${i + 1}.`);
       if (!l.code || typeof l.code !== 'string') errors.push(`${at}: code missing.`);
       else if (codes.has(l.code)) errors.push(`${at}: duplicate code.`); else codes.add(l.code);
       if (!l.title || typeof l.title !== 'string') errors.push(`${at}: title missing.`);
@@ -122,6 +310,23 @@ function validateManifest(m) {
       else if (id === undefined) errors.push(`${at}: driveId "${l.driveId}" is not a Drive id or link.`);
     });
   }
+  // Spine: the lessons must be the spine, in order.
+  if (!m.spine || !Array.isArray(m.spine.topics) || !m.spine.topics.length) errors.push('spine.topics missing.');
+  else {
+    const flat = flattenTopics(m.spine.topics);
+    if (flat.length !== EXPECTED_LESSONS) errors.push(`spine has ${flat.length} subtopics, expected ${EXPECTED_LESSONS}.`);
+    if (new Set(flat.map((f) => f.code)).size !== flat.length) errors.push('spine codes are not unique.');
+    if (new Set(flat.map((f) => f.name)).size !== flat.length) errors.push('spine names are not unique.');
+    if (flat.some((f) => !f.name || f.name.length > 200)) errors.push('spine names must be 1 to 200 characters.');
+    if (new Set(m.spine.topics.map((t) => t.topic)).size !== m.spine.topics.length) errors.push('spine topic names are not unique.');
+    if (Array.isArray(L)) L.forEach((l, i) => {
+      if (flat[i] && (flat[i].code !== l.code || flat[i].name !== l.title)) errors.push(`lessons[${i}] ${l.code} "${l.title}" is not spine subtopic ${i + 1} ${flat[i].code} "${flat[i].name}".`);
+    });
+  }
+  if (!m.migration || !Array.isArray(m.migration.oldLessons)) errors.push('migration.oldLessons missing.');
+  else if (!errors.length) errors.push(...buildPlan(m).errors);
+  if (m.migration && !/^[A-Za-z0-9_]+$/.test(String(m.migration.backupCollection || ''))) errors.push('migration.backupCollection must be a plain collection name.');
+  if (m.migration && !/^[A-Za-z0-9_]+$/.test(String(m.migration.changeBackupCollection || ''))) errors.push('migration.changeBackupCollection must be a plain collection name.');
   const b = m.booklet;
   if (b !== undefined) {
     if (!b || typeof b !== 'object') errors.push('booklet must be an object.');
@@ -161,55 +366,6 @@ function validateManifest(m) {
     }
   }
   return { errors, warnings, missingDriveIds };
-}
-
-/** Flatten SyllabusTopic docs: topicOrder, then subOrder (array order breaks ties). */
-function flattenSpine(topics) {
-  const warnings = [];
-  const sortedTopics = [...topics].sort((a, b) => (a.topicOrder || 0) - (b.topicOrder || 0));
-  const flat = [];
-  sortedTopics.forEach((t) => {
-    const subs = (t.subtopics || []).map((s, ix) => ({ s, ix }));
-    const bySub = [...subs].sort((a, b) => ((a.s.subOrder || 0) - (b.s.subOrder || 0)) || (a.ix - b.ix));
-    if (bySub.some((x, i) => x.ix !== i)) {
-      warnings.push(`Topic "${t.topic}": subOrder differs from stored array order (the timetable uses array order).`);
-    }
-    if (t.isActive === false) warnings.push(`Topic "${t.topic}" is marked inactive but is still part of the plan.`);
-    bySub.forEach(({ s }) => flat.push({
-      code: String(s.code || '').trim(), name: s.name, subId: s._id,
-      topicId: t._id, topicName: t.topic, position: flat.length + 1,
-    }));
-  });
-  return { flat, warnings };
-}
-
-/** Match the flattened spine to manifest lessons BY CODE. */
-function matchSpineToManifest(flat, lessons) {
-  const errors = [], warnings = [], pairs = [];
-  if (flat.length !== EXPECTED_LESSONS) errors.push(`Spine has ${flat.length} subtopics, expected ${EXPECTED_LESSONS}.`);
-  const byCode = new Map();
-  flat.forEach((f) => {
-    if (!f.code) errors.push(`Spine subtopic "${f.name}" has no code.`);
-    else if (byCode.has(f.code)) errors.push(`Spine code ${f.code} appears twice.`);
-    else byCode.set(f.code, f);
-  });
-  const names = new Map();
-  flat.forEach((f) => {
-    if (names.has(f.name)) errors.push(`Spine subtopic name "${f.name}" appears twice (lessons are keyed by name).`);
-    names.set(f.name, f);
-  });
-  const seen = new Set();
-  lessons.forEach((l) => {
-    const f = byCode.get(l.code);
-    if (!f) { errors.push(`Manifest code ${l.code} (lesson ${l.n}) is not in the spine.`); return; }
-    seen.add(l.code);
-    if (f.name !== l.title) warnings.push(`${l.code}: spine name "${f.name}" differs from manifest title "${l.title}" (the spine name is used).`);
-    if (f.position !== l.n) warnings.push(`${l.code}: lesson ${l.n} sits at spine position ${f.position}; order follows n.`);
-    if (f.name.length > 200) errors.push(`${l.code}: spine name is longer than 200 characters.`);
-    pairs.push({ lesson: l, spine: f });
-  });
-  flat.forEach((f) => { if (f.code && !seen.has(f.code)) errors.push(`Spine code ${f.code} ("${f.name}") has no manifest lesson.`); });
-  return { pairs, errors, warnings };
 }
 
 function looksLikeHtml(buf) {
@@ -318,8 +474,8 @@ const env = (k) => String(process.env[k] || '').trim();
 const flag = (k) => /^(1|true|yes|y)$/i.test(env(k));
 
 let stopRequested = false;
-// While true, the first Ctrl-C waits: the Mongo lesson + migration block takes
-// seconds, has no network I/O, and should not leave the subject half switched.
+// While true, the first Ctrl-C waits: the Mongo block has no network I/O,
+// takes seconds, and should not leave the subject half migrated.
 let inCriticalSection = false;
 const stopController = new AbortController();
 const checkStop = () => { if (stopRequested) throw new StopRequested(); };
@@ -330,7 +486,7 @@ function installSignalHandlers() {
     stopRequested = true;
     stopController.abort();
     console.log(inCriticalSection
-      ? `\n${sig} received: finishing the lesson and progress writes first (a few seconds), then stopping. Press again to force.`
+      ? `\n${sig} received: finishing the Mongo migration block first (a few seconds), then stopping. Press again to force.`
       : `\n${sig} received: stopping after the current step (press again to force). Re-run to resume.`);
   };
   process.on('SIGINT', handler);
@@ -339,9 +495,8 @@ function installSignalHandlers() {
 
 async function main() {
   const DRY = flag('DRY_RUN');
-  const FORCE = flag('FORCE');
   const tStart = Date.now();
-  const summary = { lessons: {}, migration: {}, booklet: {}, warnings: [] };
+  const summary = { spine: {}, lessons: {}, migration: {}, booklet: {}, unmatched: {}, warnings: [] };
   installSignalHandlers();
 
   console.log(`IAL Biology import${DRY ? ' (DRY RUN: no writes to R2 or Mongo)' : ''}`);
@@ -357,7 +512,11 @@ async function main() {
     if (!DRY) throw new Error(msg + ' Fill them in first; nothing was changed.');
     console.log('  WARN ' + msg + ' Those files are not probed.');
   }
-  console.log(`Manifest OK: ${manifest.lessons.length} lessons, booklet ${manifest.booklet ? fmtMB(manifest.booklet.bytes) + ' in ' + manifest.booklet.parts.length + ' parts' : 'absent'}.`);
+  const plan = buildPlan(manifest);
+  const target = plan.target;
+  const nPrimary = [...plan.byN.values()].filter((s) => s.primaryOrder !== null).length;
+  console.log(`Manifest OK: ${manifest.lessons.length} lessons, new spine ${manifest.spine.topics.length} topics / ${target.length} subtopics, ` +
+    `${plan.byOrder.size} old lessons (${nPrimary} primary, ${plan.byOrder.size - nPrimary} merged), booklet ${fmtMB(manifest.booklet.bytes)} in ${manifest.booklet.parts.length} parts.`);
 
   // Heavy deps are loaded here so the pure helpers can be tested without node_modules.
   require('dotenv').config();
@@ -365,14 +524,15 @@ async function main() {
   const S3 = require('@aws-sdk/client-s3');
   const Subject = require('./src/models/Subject');
   const SyllabusTopic = require('./src/models/SyllabusTopic');
+  const SpineBackup = require('./src/models/SpineBackup');
   const Lesson = require('./src/models/Lesson');
   const LiveClass = require('./src/models/LiveClass');
   const TimetableEntry = require('./src/models/TimetableEntry');
   const StudentSyllabusProgress = require('./src/models/StudentSyllabusProgress');
   const LessonProgress = require('./src/models/LessonProgress');
+  const Question = require('./src/models/Question');
   const LibraryBook = require('./src/models/LibraryBook');
   const User = require('./src/models/User');
-  const ClassroomSession = require('./src/models/ClassroomSession');
 
   const R2_VARS = ['R2_ACCOUNT_ID', 'R2_ACCESS_KEY_ID', 'R2_SECRET_ACCESS_KEY', 'R2_BUCKET_NAME', 'R2_PUBLIC_URL'];
   const missingR2 = R2_VARS.filter((k) => !env(k));
@@ -412,9 +572,10 @@ async function main() {
   if (!uri) throw new Error('MONGODB_URI is not set.');
   await mongoose.connect(uri);
   console.log('Connected to Mongo.');
+  const db = mongoose.connection.db;
 
   try {
-    // 1. Subject + spine
+    // 1. Subject
     const want = manifest.subject || { curriculum: 'EdexcelALevel', subjectName: 'Biology' };
     let subject;
     if (env('SUBJECT_ID')) subject = await Subject.findById(env('SUBJECT_ID')).lean();
@@ -427,26 +588,7 @@ async function main() {
     if (!subject) throw new Error(`Subject ${want.curriculum} ${want.subjectName} not found.`);
     console.log(`Subject: ${subject.subjectName} (${subject.curriculum}) ${subject._id}`);
 
-    const topics = await SyllabusTopic.find({ subjectId: subject._id }).sort({ topicOrder: 1 }).lean();
-    const { flat, warnings: spineWarn } = flattenSpine(topics);
-    spineWarn.forEach((w) => console.log('  WARN ' + w));
-    const match = matchSpineToManifest(flat, manifest.lessons);
-    match.warnings.forEach((w) => console.log('  WARN ' + w));
-    if (match.errors.length) { match.errors.forEach((e) => console.log('  ERROR ' + e)); throw new Error('Spine and manifest do not line up by code; nothing was changed.'); }
-    console.log(`Spine OK: ${topics.length} topics, ${flat.length} subtopics, every code matched.`);
-    const pairs = match.pairs.sort((a, b) => a.lesson.n - b.lesson.n);
-    const spineByName = new Map(flat.map((f) => [f.name, f]));
-    const spineByNorm = new Map();
-    flat.forEach((f) => { const k = normName(f.name); spineByNorm.set(k, spineByNorm.has(k) ? null : f); });
-    const resolveName = (s) => {
-      if (!s) return null;
-      const t = String(s).trim();
-      if (spineByName.has(t)) return { f: spineByName.get(t), fuzzy: false };
-      const f = spineByNorm.get(normName(t));
-      return f ? { f, fuzzy: true } : null;
-    };
-
-    // 2. Author
+    // 2. Author (for newly created lessons and the library record)
     let author;
     if (env('AUTHOR_EMAIL')) {
       author = await User.findOne({ email: env('AUTHOR_EMAIL').toLowerCase() }).select('firstName lastName email role isActive').lean();
@@ -459,166 +601,243 @@ async function main() {
     const authorName = [author.firstName, author.lastName].filter(Boolean).join(' ');
     console.log(`Author / uploader: ${authorName} <${author.email}> (${author.role})`);
 
-    // 3. Existing lessons on this subject
-    const existing = await Lesson.find({ subjectId: subject._id }).select('subjectId curriculum title subtopicName status order notesPdfUrl notesPdfPublicId topicRef termIndex').lean();
-    const ours = existing.filter((l) => String(l.notesPdfPublicId || '').startsWith(LESSON_KEY_PREFIX));
-    const foreign = existing.filter((l) => !String(l.notesPdfPublicId || '').startsWith(LESSON_KEY_PREFIX));
-    const bySubName = new Map();
-    for (const l of existing) {
-      const k = l.subtopicName || '';
-      if (!k) continue;
-      if (bySubName.has(k)) throw new Error(`Two lessons on this subject share subtopicName "${k}" (${bySubName.get(k)._id}, ${l._id}); fix by hand first.`);
-      bySubName.set(k, l);
-    }
-    console.log(`Existing lessons on the subject: ${existing.length} (${ours.length} from this import, ${foreign.length} other).`);
     const skipLessons = flag('SKIP_LESSONS');
-    if (foreign.length && !skipLessons) {
-      foreign.slice(0, 40).forEach((l) => console.log(`    other: ${l._id} [${l.status}] order ${l.order} "${l.title}"${l.subtopicName ? ' / ' + l.subtopicName : ''}`));
-      if (foreign.length > 40) console.log(`    ... and ${foreign.length - 40} more`);
-      if (!FORCE) {
-        const msg = 'The subject already has lessons that this import did not create. Re-run with FORCE=1 to proceed: ' +
-          'ones whose subtopicName matches a spine subtopic are adopted (notes replaced, title and videos kept), the rest are left as they are.';
-        if (!DRY) throw new Error(msg + ' Nothing was changed.');
-        console.log('  WARN ' + msg + ' A real run would abort here.');
-        summary.warnings.push('Foreign lessons present: a real run needs FORCE=1.');
+    let lessonsOk = skipLessons;
+
+    if (!skipLessons) {
+      const BK = manifest.migration.backupCollection;
+      const CBK = manifest.migration.changeBackupCollection;
+      const targetSig = spineSignature(manifest.spine.topics, manifest.spine.sourceSyllabus);
+      const targetNames = new Set(target.map((t) => t.name));
+
+      // 3. Spine state and diff
+      const liveTopics = await SyllabusTopic.find({ subjectId: subject._id }).sort({ topicOrder: 1 }).lean();
+      const liveFlat = flattenTopics(liveTopics);
+      const spineCurrent = liveTopics.length > 0 && spineSignature(liveTopics) === targetSig;
+      console.log('\nSpine:');
+      if (spineCurrent) console.log(`  live spine already equals the new one (${liveTopics.length} topics, ${liveFlat.length} subtopics); no change.`);
+      else {
+        const kept = liveFlat.filter((f) => targetNames.has(f.name));
+        const renamed = liveFlat.filter((f) => !targetNames.has(f.name) && resolveName(plan, f.name));
+        const unmapped = liveFlat.filter((f) => !targetNames.has(f.name) && !resolveName(plan, f.name));
+        const reached = new Set(liveFlat.map((f) => (resolveName(plan, f.name) || {}).name).filter(Boolean));
+        console.log(`  live: ${liveTopics.length} topics, ${liveFlat.length} subtopics -> new: ${manifest.spine.topics.length} topics, ${target.length} subtopics (replaced like POST /api/syllabus/bulk, SpineBackup first)`);
+        console.log(`  old names kept verbatim ${kept.length}, renamed by the lesson map ${renamed.length}, with no new name ${unmapped.length}; new subtopics with no old name ${target.filter((t) => !reached.has(t.name)).length}`);
+        unmapped.forEach((f) => console.log(`    old spine name with no new name: ${f.code} "${f.name}"`));
+        summary.spine = { live: liveFlat.length, target: target.length, kept: kept.length, renamed: renamed.length, unmapped: unmapped.map((f) => f.name) };
       }
-    }
-    if (!existing.length) console.log('The subject is currently in SUBTOPIC mode; this import switches it to LESSON mode.');
 
-    // 4. Progress migration plan (read only; expressed by spine name)
-    const plan = skipLessons ? null : await planMigration();
-    async function planMigration() {
-      const now = new Date();
-      const entries = await TimetableEntry.find({ subjectId: subject._id }).select('teacherId assignedStudents isActive lessonOrder topicPlanOrder dayOfWeek startTime').lean();
-      const entryIds = entries.map((e) => e._id);
-      const classes = await LiveClass.find({
-        $or: [
-          { timetableEntryId: { $in: entryIds } },
-          { subject: new RegExp('^\\s*' + escRe(subject.subjectName) + '\\s*$', 'i'), curriculum: subject.curriculum },
-        ],
-        syllabusSubtopicName: { $nin: [null, ''] },
-      }).select('title scheduledAt status syllabusTopicName syllabusSubtopicName preparationLessonId lessonPinned timetableEntryId assignedStudents recordings teacherId').lean();
+      // 4. Original lessons: the backup once it exists, else the live set (which must match the listing)
+      const bkCount = await db.collection(BK).countDocuments({});
+      const liveLessons = await Lesson.collection.find({ subjectId: subject._id }).toArray();
+      let originals;
+      if (bkCount > 0) {
+        if (bkCount !== plan.byOrder.size) throw new Error(`Backup collection ${BK} holds ${bkCount} docs, expected ${plan.byOrder.size}. Inspect it by hand; nothing was changed.`);
+        originals = await db.collection(BK).find({}).toArray();
+        if (originals.some((d) => sid(d.subjectId) !== sid(subject._id))) throw new Error(`Backup collection ${BK} holds lessons of another subject; nothing was changed.`);
+        console.log(`\nOriginal lessons: read from backup ${BK} (${bkCount} docs, written by an earlier run).`);
+      } else {
+        originals = liveLessons;
+        console.log(`\nOriginal lessons: ${liveLessons.length} live lessons on the subject.`);
+      }
+      const ident = identifyOriginals(originals, manifest.migration.oldLessons);
+      if (ident.errors.length) {
+        ident.errors.slice(0, 40).forEach((e) => console.log('  ERROR ' + e));
+        if (ident.errors.length > 40) console.log(`  ... and ${ident.errors.length - 40} more`);
+        throw new Error('The lessons on the subject do not match the expected 117 old lessons; nothing was changed.');
+      }
+      ident.pairs.forEach(({ doc, entry }) => {
+        if ((doc.order || 0) !== entry.order) console.log(`  WARN lesson "${entry.subtopicName}" has order ${doc.order}, the listing says ${entry.order}.`);
+      });
+      const roleById = new Map();   // original _id -> { entry, role, newN }
+      const idByOrder = new Map();
+      ident.pairs.forEach(({ doc, entry }) => { const r = plan.byOrder.get(entry.order); roleById.set(sid(doc._id), { doc, entry, role: r.role, newN: r.newN }); idByOrder.set(entry.order, doc._id); });
+      const primaryIdByN = new Map();
+      const mergedToPrimary = new Map(); // merged _id string -> primary _id
+      for (const [n, slot] of plan.byN) {
+        if (slot.primaryOrder === null) continue;
+        const pid = idByOrder.get(slot.primaryOrder);
+        primaryIdByN.set(n, pid);
+        slot.mergedOrders.forEach((o) => mergedToPrimary.set(sid(idByOrder.get(o)), pid));
+      }
+      const createNs = target.filter((t) => !primaryIdByN.has(t.n)).map((t) => t.n);
 
-      const link = [], alreadyOurs = [], linkedElsewhere = [], unmatched = [], fuzzy = [], topicDiffers = [];
-      const ourIds = new Set(ours.map((l) => String(l._id)));
-      for (const c of classes) {
-        const r = resolveName(c.syllabusSubtopicName);
-        if (!r) { unmatched.push(c); continue; }
-        c._spine = r.f;
-        if (r.fuzzy) fuzzy.push(c);
-        if (c.syllabusTopicName && c.syllabusTopicName !== r.f.topicName) topicDiffers.push(c);
-        if (!c.preparationLessonId) link.push(c);
-        else {
-          const target = bySubName.get(r.f.name);
-          if (target && String(target._id) === String(c.preparationLessonId)) alreadyOurs.push(c);
-          else if (ourIds.has(String(c.preparationLessonId))) alreadyOurs.push(c);
-          else linkedElsewhere.push(c);
+      // Live lessons must be originals or this import's own new lessons, nothing else.
+      const originalIds = new Set(ident.pairs.map((p) => sid(p.doc._id)));
+      const liveById = new Map(liveLessons.map((l) => [sid(l._id), l]));
+      const strangers = liveLessons.filter((l) => !originalIds.has(sid(l._id)) &&
+        !(String(l.notesPdfPublicId || '').startsWith(LESSON_KEY_PREFIX) && targetNames.has(l.subtopicName) && createNs.includes(plan.byName.get(l.subtopicName).n)));
+      if (strangers.length) {
+        strangers.forEach((l) => console.log(`  ERROR unexpected lesson ${l._id} "${l.title}" (${l.subtopicName || 'no subtopic'})`));
+        throw new Error('The subject has lessons that are neither the 117 originals nor created by this import; nothing was changed.');
+      }
+
+      // Lesson table
+      console.log(`\nOld lessons -> new lessons (${ident.pairs.length}):`);
+      const primarySeen = new Map(); // n -> running copy of the primary's video keys for merge accounting
+      let videosMoved = 0, videosDup = 0;
+      const lostVideos = [];
+      const sortedPairs = [...ident.pairs].sort((a, b) => a.entry.order - b.entry.order);
+      for (const { doc, entry } of sortedPairs) {
+        const r = roleById.get(sid(doc._id));
+        const t = target[r.newN - 1];
+        const live = liveById.get(sid(doc._id));
+        const rename = entry.subtopicName === t.name ? '' : `  "${entry.subtopicName}" -> "${t.name}"`;
+        if (r.role === 'PRIMARY') {
+          const base = live || doc;
+          primarySeen.set(r.newN, { videoEmbedId: base.videoEmbedId, videos: [...(base.videos || [])] });
+          console.log(`  old ${String(entry.order).padStart(3)} -> n ${String(t.n).padStart(3)} ${t.code.padEnd(6)} PRIMARY  keeps ${lessonVideoKeys(base).size} video(s)${live ? '' : ' (GONE?)'}${rename || '  "' + t.name + '"'}`);
+        } else {
+          let txt;
+          if (!live) txt = 'already merged and deleted';
+          else {
+            const p = primarySeen.get(r.newN);
+            const vm = planVideoMerge(p, [live]);
+            p.videos.push(...vm.add);
+            videosMoved += vm.add.length; videosDup += vm.dup; lostVideos.push(...vm.lost);
+            txt = `+${vm.add.length} video(s) moved${vm.dup ? `, ${vm.dup} duplicate(s) skipped` : ''}${vm.lost.length ? `, ${vm.lost.length} non YouTube videoUrl NOT movable` : ''}`;
+          }
+          console.log(`  old ${String(entry.order).padStart(3)} -> n ${String(t.n).padStart(3)} ${t.code.padEnd(6)} MERGED   ${txt}${rename}`);
         }
       }
+      const willHaveVideo = [...primarySeen.values()].filter((p) => lessonVideoKeys(p).size > 0).length;
+      console.log(`  ${primaryIdByN.size} primary lessons kept (${willHaveVideo} with video), ${mergedToPrimary.size} merged (${videosMoved} video(s) moved, ${videosDup} duplicate(s) skipped), ${createNs.length} to create, final lesson count ${primaryIdByN.size + createNs.length}.`);
+      lostVideos.forEach((x) => console.log(`  WARN merged lesson ${x.lessonId} has a non YouTube videoUrl that the videos list cannot hold: ${x.videoUrl}`));
+      const existingCreated = liveLessons.filter((l) => !originalIds.has(sid(l._id)));
+      console.log(`  to create (${createNs.length}${existingCreated.length ? `, ${existingCreated.length} already created by an earlier run` : ''}): ` +
+        createNs.map((n) => target[n - 1].code).join(', '));
+      if (primaryIdByN.size + createNs.length !== EXPECTED_LESSONS) throw new Error('Plan does not produce 156 lessons; nothing was changed.');
+      summary.lessons.plan = { primary: primaryIdByN.size, merged: mergedToPrimary.size, create: createNs.length, final: primaryIdByN.size + createNs.length, videosMoved, withVideo: willHaveVideo };
 
-      // Lesson Plan Manager custom order: topicPlanOrder ("Topic||Subtopic") -> lessonOrder (Lesson ids)
-      const orders = [];
-      for (const e of entries) {
-        if (!Array.isArray(e.topicPlanOrder) || !e.topicPlanOrder.length) continue;
-        if (Array.isArray(e.lessonOrder) && e.lessonOrder.length) { orders.push({ e, skip: 'already has a lessonOrder' }); continue; }
-        const names = [], unknown = [];
-        e.topicPlanOrder.forEach((k) => {
-          const sub = String(k).split('||').slice(1).join('||');
-          const r = resolveName(sub);
-          if (r) { if (!names.includes(r.f.name)) names.push(r.f.name); } else unknown.push(k);
-        });
-        orders.push({ e, names, unknown });
-      }
-
-      // StudentSyllabusProgress -> LessonProgress (mastery) and the lesson-mode coverage preview
-      const ssp = await StudentSyllabusProgress.find({ subjectId: subject._id, status: 'Done' }).lean();
-      const marks = [], sspUnmatched = [];
-      ssp.forEach((p) => { const r = resolveName(p.syllabusSubtopicName); if (r) marks.push({ p, name: r.f.name }); else sspUnmatched.push(p); });
-      const existingLP = ours.length
-        ? await LessonProgress.find({ subjectId: subject._id, lessonId: { $in: ours.map((l) => l._id) } }).select('studentId lessonId').lean()
-        : [];
-      const lessonIdToName = new Map(ours.map((l) => [String(l._id), l.subtopicName]));
-      const haveLP = new Set(existingLP.map((x) => `${x.studentId}|${lessonIdToName.get(String(x.lessonId))}`));
-      const mastery = marks.filter((m) => !haveLP.has(`${m.p.studentId}|${m.name}`));
-
-      // Preview of the student lesson plan view (routes/curriculum.js, lesson mode) for marked subtopics.
-      const matchedClasses = classes.filter((c) => c._spine && (!c.preparationLessonId || alreadyOurs.includes(c)));
-      const pastIds = matchedClasses.filter((c) => new Date(c.scheduledAt) <= now && c.status !== 'cancelled').map((c) => c._id);
-      const sess = pastIds.length ? await ClassroomSession.find({ liveClassId: { $in: pastIds } }).select('liveClassId userId present joinCount').lean() : [];
-      const attendedSet = new Set(sess.filter((s) => ((s.joinCount || 0) > 0 || s.present === true) && s.present !== false).map((s) => `${s.liveClassId}|${s.userId}`));
-      const preview = { attended: 0, missed: 0, scheduled: 0, cancelled: 0, projected: 0 };
-      const projectedSample = [];
-      for (const m of marks) {
-        const sid = String(m.p.studentId);
-        const cl = matchedClasses
-          .filter((c) => c._spine.name === m.name && (c.assignedStudents || []).some((x) => String(x) === sid))
-          .sort((a, b) => new Date(a.scheduledAt) - new Date(b.scheduledAt))[0];
-        if (!cl) { preview.projected++; if (projectedSample.length < 8) projectedSample.push(`${sid} / ${m.name}`); continue; }
-        if (cl.status === 'cancelled') preview.cancelled++;
-        else if (new Date(cl.scheduledAt) > now) preview.scheduled++;
-        else if (attendedSet.has(`${cl._id}|${sid}`)) preview.attended++;
-        else preview.missed++;
-      }
-
-      // Published class recordings to attach to the lessons' videos (what the lesson player shows).
-      const recs = [];
-      for (const c of matchedClasses) for (const r of c.recordings || []) if (r.featured && r.url) recs.push({ c, r, name: c._spine.name });
-
-      return { entries, classes, link, alreadyOurs, linkedElsewhere, unmatched, fuzzy, topicDiffers, orders, ssp, marks, sspUnmatched, mastery, preview, projectedSample, recs };
-    }
-
-    if (plan) {
-      const p = plan;
-      const fmtC = (c) => `${c._id} ${new Date(c.scheduledAt).toISOString().slice(0, 16)} [${c.status}${c.lessonPinned ? ', pinned' : ''}] "${c.syllabusSubtopicName}"`;
-      console.log('\nProgress carry over plan:');
-      console.log(`  Timetable entries for the subject: ${p.entries.length}`);
-      console.log(`  Classes stamped with a subtopic: ${p.classes.length}`);
-      console.log(`    to link (preparationLessonId set): ${p.link.length}` +
-        ` (past ${p.link.filter((c) => new Date(c.scheduledAt) <= new Date()).length}, future ${p.link.filter((c) => new Date(c.scheduledAt) > new Date()).length}, pinned ${p.link.filter((c) => c.lessonPinned).length}, cancelled ${p.link.filter((c) => c.status === 'cancelled').length})`);
-      p.link.slice(0, 8).forEach((c) => console.log('      ' + fmtC(c)));
-      console.log(`    already linked to this import: ${p.alreadyOurs.length}`);
-      console.log(`    linked to some other lesson (left alone): ${p.linkedElsewhere.length}`);
-      p.linkedElsewhere.slice(0, 5).forEach((c) => console.log('      ' + fmtC(c) + ' -> ' + c.preparationLessonId));
-      console.log(`    matched by normalised name only: ${p.fuzzy.length}`);
-      p.fuzzy.slice(0, 5).forEach((c) => console.log(`      "${c.syllabusSubtopicName}" -> "${c._spine.name}"`));
-      console.log(`    subtopic not in the spine (cannot be carried): ${p.unmatched.length}`);
-      p.unmatched.slice(0, 5).forEach((c) => console.log('      ' + fmtC(c)));
-      if (p.topicDiffers.length) console.log(`    stamped topic name differs from the spine (subtopic mode did not count these as taught; lesson mode will): ${p.topicDiffers.length}`);
-      const conv = p.orders.filter((o) => !o.skip);
-      console.log(`  Lesson Plan Manager custom orders to convert (topicPlanOrder -> lessonOrder): ${conv.length}` +
-        `${p.orders.length - conv.length ? `, skipped ${p.orders.length - conv.length} that already have a lessonOrder` : ''}`);
-      conv.forEach((o) => console.log(`      entry ${o.e._id} ${o.e.dayOfWeek} ${o.e.startTime}: ${o.names.length} keys${o.unknown.length ? `, ${o.unknown.length} unknown dropped` : ''}`));
-      console.log(`  Syllabus progress marks (StudentSyllabusProgress, kept as they are): ${p.ssp.length}, ${p.sspUnmatched.length} not in the spine`);
-      console.log(`    mirrored into LessonProgress (lesson player mastery): ${flag('SKIP_MASTERY') ? 'skipped (SKIP_MASTERY)' : p.mastery.length + ' new'}`);
-      console.log(`    how those marks will read in the student lesson plan view after the switch: attended ${p.preview.attended}, missed ${p.preview.missed}, scheduled ${p.preview.scheduled}, cancelled ${p.preview.cancelled}, projected (no linked class, cannot be carried) ${p.preview.projected}`);
-      p.projectedSample.forEach((s) => console.log('      projected: student ' + s));
-      console.log(`  Published class recordings to attach to lesson videos: ${flag('SKIP_RECORDINGS') ? 'skipped (SKIP_RECORDINGS)' : p.recs.length + ' candidate(s)'}`);
-      summary.migration.plan = {
-        link: p.link.length, alreadyLinked: p.alreadyOurs.length, linkedElsewhere: p.linkedElsewhere.length,
-        unmatched: p.unmatched.length, orders: conv.length, mastery: p.mastery.length, projected: p.preview.projected,
+      // 5. Progress and reference plan (read only)
+      const entries = await TimetableEntry.find({ subjectId: subject._id }).lean();
+      const classes = await LiveClass.find({
+        $or: [
+          { timetableEntryId: { $in: entries.map((e) => e._id) } },
+          { subject: new RegExp('^\\s*' + escRe(subject.subjectName) + '\\s*$', 'i'), curriculum: subject.curriculum },
+        ],
+      }).select('title scheduledAt status syllabusTopicName syllabusSubtopicName preparationLessonId lessonPinned timetableEntryId assignedStudents recordings teacherId').lean();
+      const nOfLessonId = (id) => {
+        if (!id) return null;
+        const p = mergedToPrimary.get(sid(id));
+        const r = roleById.get(sid(p || id));
+        if (r) return r.newN;
+        const l = liveById.get(sid(id));
+        return l && plan.byName.get(l.subtopicName) ? plan.byName.get(l.subtopicName).n : null;
       };
-    }
+      const cls = { rename: 0, topicOnly: 0, repoint: 0, link: 0, fuzzy: 0, disagree: [], unmatched: new Map(), empty: 0, otherLink: 0 };
+      const classOps = [];
+      for (const c of classes) {
+        const name = c.syllabusSubtopicName;
+        const r = name ? resolveName(plan, name) : null;
+        const set = {};
+        if (r) {
+          const tt = plan.byName.get(r.name);
+          if (r.name !== name) set.syllabusSubtopicName = r.name;
+          if (c.syllabusTopicName !== tt.topicName) set.syllabusTopicName = tt.topicName;
+          if (r.fuzzy) cls.fuzzy++;
+        } else if (name) cls.unmatched.set(name, (cls.unmatched.get(name) || 0) + 1);
+        else cls.empty++;
+        let prep = null;
+        if (c.preparationLessonId && mergedToPrimary.has(sid(c.preparationLessonId))) { prep = { repointTo: mergedToPrimary.get(sid(c.preparationLessonId)) }; cls.repoint++; }
+        else if (!c.preparationLessonId && r) { prep = { linkN: plan.byName.get(r.name).n }; cls.link++; }
+        else if (c.preparationLessonId && nOfLessonId(c.preparationLessonId) === null) cls.otherLink++;
+        const linkedN = nOfLessonId(c.preparationLessonId);
+        if (r && linkedN !== null && linkedN !== plan.byName.get(r.name).n) cls.disagree.push(c);
+        if (set.syllabusSubtopicName) cls.rename++; else if (set.syllabusTopicName) cls.topicOnly++;
+        if (Object.keys(set).length || prep) classOps.push({ c, set, prep });
+      }
+      console.log('\nProgress and references:');
+      console.log(`  classes for the subject: ${classes.length}; subtopic renamed ${cls.rename}, topic name corrected only ${cls.topicOnly}, repointed from a merged lesson ${cls.repoint}, linked (no lesson before) ${cls.link}, matched by spelling only ${cls.fuzzy}, no name (left alone) ${cls.empty}`);
+      if (cls.otherLink) console.log(`  WARN ${cls.otherLink} class(es) link to a lesson that is not on this subject; left alone.`);
+      cls.disagree.slice(0, 10).forEach((c) => console.log(`  WARN class ${c._id} is linked to lesson n ${nOfLessonId(c.preparationLessonId)} but stamped "${c.syllabusSubtopicName}" (n ${plan.byName.get(resolveName(plan, c.syllabusSubtopicName).name).n}); the link is kept.`));
+      if (cls.disagree.length > 10) console.log(`  ... ${cls.disagree.length - 10} more such classes`);
+      for (const [name, k] of cls.unmatched) console.log(`  UNMATCHED class subtopic "${name}" x${k} (left as it is; add it to migration.extraRenames to map it)`);
 
-    // 5. Lesson PDFs -> R2 (no DB writes yet)
-    const lessonState = [];
-    if (!skipLessons) {
+      const ssp = await StudentSyllabusProgress.find({ subjectId: subject._id }).lean();
+      const sspOps = [], sspUnmatched = [];
+      const sspFinalKey = new Set();
+      ssp.forEach((p) => { const r = resolveName(plan, p.syllabusSubtopicName); if (!r || !r.changed) sspFinalKey.add(`${p.studentId}|${r ? r.name : p.syllabusSubtopicName}`); });
+      for (const p of ssp) {
+        const r = resolveName(plan, p.syllabusSubtopicName);
+        if (!r) { sspUnmatched.push(p); continue; }
+        const topic = plan.byName.get(r.name).topicName;
+        if (!r.changed && p.syllabusTopicName === topic) continue;
+        const k = `${p.studentId}|${r.name}`;
+        const merge = r.changed && sspFinalKey.has(k);
+        sspFinalKey.add(k);
+        sspOps.push({ p, name: r.name, topic, merge });
+      }
+      console.log(`  syllabus progress records: ${ssp.length}; renamed ${sspOps.filter((o) => !o.merge && o.p.syllabusSubtopicName !== o.name).length}, topic name corrected ${sspOps.filter((o) => o.p.syllabusSubtopicName === o.name).length}, merged into an existing record ${sspOps.filter((o) => o.merge).length}, unmatched ${sspUnmatched.length}`);
+      sspOps.forEach((o) => console.log(o.p.syllabusSubtopicName === o.name
+        ? `    progress ${o.p._id}: "${o.name}" (topic name corrected to "${o.topic}")`
+        : `    progress ${o.p._id}: "${o.p.syllabusSubtopicName}" -> "${o.name}"${o.merge ? ' (merged into the existing record)' : ''}`));
+      sspUnmatched.forEach((p) => console.log(`  UNMATCHED progress ${p._id} "${p.syllabusSubtopicName}"`));
+
+      const questions = await Question.find({ subject: subject.subjectName, curriculum: subject.curriculum }).select('subtopic topicRef lessonCode').lean();
+      const qOps = [], qUnmatched = new Map();
+      let qUntagged = 0;
+      for (const q of questions) {
+        if (!q.subtopic) { qUntagged++; continue; }
+        const r = resolveName(plan, q.subtopic);
+        if (!r) { qUnmatched.set(q.subtopic, (qUnmatched.get(q.subtopic) || 0) + 1); continue; }
+        const tt = plan.byName.get(r.name);
+        const liveTid = spineCurrent ? sid((liveFlat.find((f) => f.name === r.name) || {}).topicId) : null;
+        const willChange = q.subtopic !== r.name || (q.lessonCode && q.lessonCode !== tt.code) || (q.topicRef && sid(q.topicRef) !== liveTid);
+        if (willChange) qOps.push({ q, name: r.name, code: tt.code, topicName: tt.topicName });
+      }
+      const otherCurrQ = await Question.countDocuments({ subject: subject.subjectName, curriculum: { $ne: subject.curriculum }, curricula: subject.curriculum, subtopic: { $in: [...plan.renames.keys()].filter((k) => plan.renames.get(k) !== k) } });
+      console.log(`  questions (${subject.subjectName} / ${subject.curriculum}): ${questions.length}; to update ${qOps.length} (subtopic renamed ${qOps.filter((o) => o.q.subtopic !== o.name).length}, topicRef moved to the new topic ${qOps.filter((o) => o.q.topicRef).length}), untagged ${qUntagged} (left alone), unmatched ${[...qUnmatched.values()].reduce((a, b) => a + b, 0)}`);
+      qOps.forEach((o) => console.log(`    question ${o.q._id}: "${o.q.subtopic}"${o.q.subtopic !== o.name ? ` -> "${o.name}"` : ''}${o.q.lessonCode && o.q.lessonCode !== o.code ? ` (lessonCode ${o.q.lessonCode} -> ${o.code})` : ''}${o.q.topicRef ? ' (topicRef -> new topic)' : ''}`));
+      for (const [name, k] of qUnmatched) console.log(`  UNMATCHED question subtopic "${name}" x${k}`);
+      if (otherCurrQ) console.log(`  WARN ${otherCurrQ} question(s) of another primary curriculum also list ${subject.curriculum} and carry an old name; left alone.`);
+
+      const ttOps = [];
+      const ttUnknown = [];
+      for (const e of entries) {
+        const tpo = remapTopicPlanOrder(e.topicPlanOrder || [], plan);
+        const lo = remapIdArray(e.lessonOrder || [], mergedToPrimary);
+        tpo.unknown.forEach((k) => ttUnknown.push(`${e._id}: "${k}"`));
+        const derive = !(e.lessonOrder || []).length && tpo.keys.length;
+        if (tpo.changed || lo.changed || derive) ttOps.push({ e, tpo, lo, derive });
+      }
+      console.log(`  timetable entries for the subject: ${entries.length}; lesson plan changed on ${ttOps.length} (topicPlanOrder renamed ${ttOps.filter((o) => o.tpo.changed).length}, lessonOrder repointed ${ttOps.filter((o) => o.lo.changed).length}, lessonOrder derived ${ttOps.filter((o) => o.derive).length})`);
+      ttUnknown.forEach((k) => console.log(`  UNMATCHED timetable plan key ${k} (kept)`));
+
+      const lpMerged = await LessonProgress.find({ lessonId: { $in: [...mergedToPrimary.keys()].map((x) => new mongoose.Types.ObjectId(x)) } }).lean();
+      console.log(`  mastery records on merged lessons to repoint: ${lpMerged.length}`);
+      const sspDoneNames = ssp.filter((p) => p.status === 'Done').map((p) => ({ p, r: resolveName(plan, p.syllabusSubtopicName) })).filter((x) => x.r);
+      console.log(`  syllabus progress marks to mirror as lesson mastery: ${flag('SKIP_MASTERY') ? 'skipped (SKIP_MASTERY)' : sspDoneNames.length + ' candidate(s) (existing ones are kept)'}`);
+      const recCands = [];
+      for (const c of classes) for (const rec of c.recordings || []) if (rec.featured && rec.url) recCands.push({ c, rec });
+      console.log(`  published class recordings to keep attached to lesson videos: ${flag('SKIP_RECORDINGS') ? 'skipped (SKIP_RECORDINGS)' : recCands.length + ' candidate(s) (already attached ones are skipped)'}`);
+      summary.migration.plan = {
+        classesRenamed: cls.rename, classesTopicOnly: cls.topicOnly, classesRepointed: cls.repoint, classesLinked: cls.link,
+        progressChanged: sspOps.length, questionsChanged: qOps.length, timetableEntriesChanged: ttOps.length, masteryRepoint: lpMerged.length,
+      };
+      summary.unmatched = {
+        classes: Object.fromEntries(cls.unmatched), progress: sspUnmatched.map((p) => p.syllabusSubtopicName),
+        questions: Object.fromEntries(qUnmatched), timetableKeys: ttUnknown.length, spine: (summary.spine.unmapped || []),
+      };
+
+      // 6. Lesson notes -> R2 (no DB writes yet)
       console.log(`\nLesson notes -> R2 (${LESSON_KEY_PREFIX}):`);
-      let up = 0, skip = 0, fail = 0, probedBad = 0;
-      for (const { lesson: l, spine: f } of pairs) {
+      const lessonState = [];
+      let up = 0, skip = 0, fail = 0, probedBad = 0, dryUploads = 0;
+      for (const l of manifest.lessons) {
         if (stopRequested) break;
         const key = LESSON_KEY_PREFIX + l.fileName;
-        const tag = `[${String(l.n).padStart(3)}/${pairs.length}] ${l.code.padEnd(6)} ${f.name.slice(0, 50)}`;
+        const tag = `[${String(l.n).padStart(3)}/${manifest.lessons.length}] ${l.code.padEnd(6)} ${l.title.slice(0, 50)}`;
         try {
           const h = await head(key);
-          if (isCurrent(h, l.bytes, l.sha256)) { skip++; lessonState.push({ l, f, key, ok: true }); console.log(`${tag}  already in R2`); continue; }
+          if (isCurrent(h, l.bytes, l.sha256)) { skip++; lessonState.push({ l, key, ok: true }); if (!DRY) console.log(`${tag}  already in R2`); continue; }
           const id = parseDriveId(l.driveId);
           if (DRY) {
-            if (!id) { console.log(`${tag}  would upload (${fmtMB(l.bytes)}); Drive id missing`); lessonState.push({ l, f, key, ok: true }); continue; }
-            if (env('PROBE') === '0') { console.log(`${tag}  would upload (${fmtMB(l.bytes)})`); lessonState.push({ l, f, key, ok: true }); continue; }
-            const pr = await probeDrive(id, { expectedBytes: l.bytes, stopSignal: stopController.signal });
-            if (!pr.ok) probedBad++;
-            console.log(`${tag}  would upload (${fmtMB(l.bytes)}); Drive ${pr.ok ? 'OK' : 'PROBLEM'}: ${pr.detail}`);
-            lessonState.push({ l, f, key, ok: true });
+            // One line per problem only; the totals follow the loop.
+            if (!id) console.log(`${tag}  Drive id missing`);
+            else if (env('PROBE') !== '0') { const pr = await probeDrive(id, { expectedBytes: l.bytes, stopSignal: stopController.signal }); if (!pr.ok) { probedBad++; console.log(`${tag}  Drive PROBLEM: ${pr.detail}`); } }
+            dryUploads++;
+            lessonState.push({ l, key, ok: true });
             continue;
           }
           const buf = await fetchDrive(id, { expectedBytes: l.bytes, expectedSha: l.sha256, expectPdf: true, stopSignal: stopController.signal, log: (s) => console.log(s) });
@@ -628,132 +847,280 @@ async function main() {
             Metadata: { sha256: sha256(buf) },
           })));
           up++;
-          lessonState.push({ l, f, key, ok: true });
+          lessonState.push({ l, key, ok: true });
           console.log(`${tag}  uploaded ${fmtMB(buf.length)}`);
         } catch (e) {
           if (e instanceof StopRequested) break;
           fail++;
-          lessonState.push({ l, f, key, ok: false, error: e.message });
+          lessonState.push({ l, key, ok: false, error: e.message });
           console.log(`${tag}  FAILED: ${e.message}`);
         }
       }
-      summary.lessons.r2 = { uploaded: up, alreadyThere: skip, failed: fail, probeProblems: probedBad };
+      if (DRY) console.log(`  ${skip} already in R2, ${dryUploads} would be uploaded${env('PROBE') !== '0' ? `; Drive probes: ${dryUploads - probedBad} OK, ${probedBad} problem(s)` : ' (Drive not probed)'}`);
+      summary.lessons.r2 = { uploaded: up, alreadyThere: skip, failed: fail, probeProblems: probedBad, ...(DRY ? { wouldUpload: dryUploads } : {}) };
       checkStop();
 
-      // 6. Lessons in Mongo + progress migration (one tight block, after every upload succeeded)
       const failed = lessonState.filter((s) => !s.ok);
-      if (failed.length) {
-        summary.warnings.push(`${failed.length} lesson upload(s) failed; lessons and migration were NOT written. Fix and re-run.`);
-        console.log(`\n${failed.length} upload(s) failed; skipping the lesson and migration writes so the subject stays in subtopic mode. Re-run to resume.`);
+      if (failed.length || lessonState.length !== manifest.lessons.length) {
+        summary.warnings.push(`${failed.length} lesson upload(s) failed; nothing was written to Mongo. Fix and re-run.`);
+        console.log(`\n${failed.length} upload(s) failed; skipping every Mongo write for lessons, spine and progress. Re-run to resume.`);
       } else if (DRY) {
-        const toCreate = pairs.filter(({ spine: f }) => !bySubName.has(f.name)).length;
-        console.log(`\nWould upsert ${pairs.length} lessons (${toCreate} new, ${pairs.length - toCreate} existing), status published, termIndex 1/2/3 = AS/A2/Exam, order = n.`);
-        const s = pairs[0];
-        console.log(`  sample: ${JSON.stringify({ subtopicName: s.spine.name, title: s.spine.name, topicName: s.spine.topicName, order: s.lesson.n, termIndex: termIndexForCode(s.lesson.code), notesPdfUrl: publicUrl(LESSON_KEY_PREFIX + s.lesson.fileName) })}`);
+        console.log('\nDry run: the Mongo migration above would run now, then the booklet step.');
+        lessonsOk = true;
       } else {
-        console.log('\nWriting lessons:');
+        // 7. Mongo migration block
+        console.log('\nMigrating (Mongo):');
         inCriticalSection = true;
-        const idByName = new Map();
-        let created = 0, updated = 0, unchanged = 0, adopted = 0;
-        for (const { l, f, key } of lessonState) {
-          const prev = bySubName.get(f.name);
-          const set = {
-            subjectId: subject._id, curriculum: subject.curriculum, topicRef: f.topicId, subtopicName: f.name,
-            order: l.n, termIndex: termIndexForCode(l.code), notesPdfUrl: publicUrl(key), notesPdfPublicId: key, status: 'published',
-          };
-          const changed = !prev || Object.keys(set).some((k) => String(prev[k] ?? '') !== String(set[k] ?? ''));
-          const doc = await Lesson.findOneAndUpdate(
-            { subjectId: subject._id, subtopicName: f.name },
-            {
-              $set: set,
-              $setOnInsert: {
-                title: f.name.slice(0, 200),
-                description: `Smartious course notes, lesson ${l.n} of ${pairs.length} (${l.code}), ${f.topicName}.`.slice(0, 2000),
-                teacherId: author._id,
-              },
-            },
-            { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true },
-          ).lean();
-          // topicName is not in the Lesson schema (strict mode would drop it), but the
-          // materializer, Lesson Plan Manager, liveclasses pin and curriculum progress all
-          // read lesson.topicName; without it the class topic falls back to the title.
-          await Lesson.collection.updateOne({ _id: doc._id }, { $set: { topicName: f.topicName } });
-          idByName.set(f.name, doc._id);
-          if (!prev) created++;
-          else if (!String(prev.notesPdfPublicId || '').startsWith(LESSON_KEY_PREFIX)) { adopted++; console.log(`  adopted ${doc._id} (previous notes: ${prev.notesPdfUrl || 'none'})`); }
-          else if (changed) updated++; else unchanged++;
-        }
-        summary.lessons.db = { created, updated, unchanged, adopted };
-        console.log(`  lessons: ${created} created, ${updated} updated, ${unchanged} unchanged, ${adopted} adopted`);
-
-        // Migration
-        const p = plan;
-        let linked = 0;
-        const byName = {};
-        p.link.forEach((c) => { (byName[c._spine.name] = byName[c._spine.name] || []).push(c._id); });
-        for (const [name, ids] of Object.entries(byName)) {
-          const r = await LiveClass.updateMany({ _id: { $in: ids }, preparationLessonId: null }, { $set: { preparationLessonId: idByName.get(name) } }, { timestamps: false });
-          linked += r.modifiedCount;
-        }
-        console.log(`  classes linked to their lesson: ${linked}`);
-
-        let ordersDone = 0;
-        for (const o of p.orders) {
-          if (o.skip || !o.names.length) continue;
-          const ids = o.names.map((n) => idByName.get(n)).filter(Boolean);
-          const r = await TimetableEntry.updateOne(
-            { _id: o.e._id, $or: [{ lessonOrder: { $exists: false } }, { lessonOrder: { $size: 0 } }] },
-            { $set: { lessonOrder: ids } }, { timestamps: false });
-          ordersDone += r.modifiedCount;
-        }
-        console.log(`  custom orders converted: ${ordersDone}`);
-
-        let mastered = 0;
-        if (!flag('SKIP_MASTERY') && p.mastery.length) {
-          const ops = p.mastery.map((m) => ({
+        const counts = {};
+        const snapshot = async (coll, docs, fields) => {
+          if (!docs.length) return;
+          const ops = docs.map((d) => ({
             updateOne: {
-              filter: { studentId: m.p.studentId, lessonId: idByName.get(m.name) },
+              filter: { _id: `${coll}:${d._id}` },
+              update: { $setOnInsert: { coll, docId: d._id, before: Object.fromEntries(fields.map((f) => [f, d[f] === undefined ? null : d[f]])), at: new Date() } },
+              upsert: true,
+            },
+          }));
+          for (let i = 0; i < ops.length; i += 500) await db.collection(CBK).bulkWrite(ops.slice(i, i + 500), { ordered: false });
+        };
+
+        // 7a. Lessons backup, once
+        if (!bkCount) {
+          await db.collection(BK).insertMany(originals.map((d) => ({ ...d })), { ordered: true });
+          const n = await db.collection(BK).countDocuments({});
+          if (n !== originals.length) throw new Error(`Backup ${BK} has ${n} docs after insert, expected ${originals.length}.`);
+          console.log(`  backed up ${n} original lessons to ${BK}`);
+          originals.forEach((d) => { if (roleById.get(sid(d._id))) console.log(`    old notes kept in R2: ${roleById.get(sid(d._id)).entry.order} ${d.notesPdfPublicId || ''} ${d.notesPdfUrl || ''}`); });
+        } else console.log(`  lessons backup ${BK} already present (${bkCount})`);
+
+        // 7b. Spine, exactly as POST /api/syllabus/bulk
+        if (!spineCurrent) {
+          const existing = await SyllabusTopic.find({ subjectId: subject._id }).lean();
+          if (existing.length) {
+            const b = await SpineBackup.create({
+              subjectId: subject._id, subjectName: subject.subjectName, curriculum: subject.curriculum,
+              topics: existing, replacedBy: author._id, reason: manifest.spine.sourceSyllabus || 'bulk load',
+            });
+            console.log(`  spine backed up: SpineBackup ${b._id} (restore with POST /api/syllabus/restore/${b._id})`);
+          }
+          await SyllabusTopic.deleteMany({ subjectId: subject._id });
+          const created = await SyllabusTopic.insertMany(buildSpineDocs(subject, manifest.spine));
+          console.log(`  spine replaced: ${existing.length} topic(s) -> ${created.length} topics, ${target.length} subtopics`);
+        }
+        const nowTopics = await SyllabusTopic.find({ subjectId: subject._id }).sort({ topicOrder: 1 }).lean();
+        if (spineSignature(nowTopics) !== targetSig) throw new Error('The live spine does not equal the new spine after the replace. Stop and inspect.');
+        const topicIdOf = new Map();
+        flattenTopics(nowTopics).forEach((f) => topicIdOf.set(f.name, f.topicId));
+
+        const lessonSet = (t, key) => ({
+          subjectId: subject._id, curriculum: subject.curriculum, topicRef: topicIdOf.get(t.name), subtopicName: t.name,
+          title: t.name.slice(0, 200), order: t.n, termIndex: termIndexForCode(t.code),
+          notesPdfUrl: publicUrl(key), notesPdfPublicId: key, status: 'published',
+        });
+        const keyOfN = (n) => LESSON_KEY_PREFIX + manifest.lessons[n - 1].fileName;
+
+        // Skip writes that would change nothing, so a re-run does not even touch updatedAt.
+        const differs = (doc, set) => !doc || Object.keys(set).some((k) => sid(doc[k]) !== sid(set[k]));
+
+        // 7c. Primaries in place
+        let pUpd = 0, pSame = 0;
+        for (const [n, pid] of primaryIdByN) {
+          const t = target[n - 1];
+          const set = lessonSet(t, keyOfN(n));
+          const cur = liveById.get(sid(pid));
+          if (differs(cur, set)) { await Lesson.updateOne({ _id: pid, subjectId: subject._id }, { $set: set }, { runValidators: true }); pUpd++; } else pSame++;
+          await Lesson.collection.updateOne({ _id: pid, topicName: { $ne: t.topicName } }, { $set: { topicName: t.topicName } });
+        }
+        console.log(`  primary lessons updated in place: ${pUpd}${pSame ? `, ${pSame} already current` : ''}`);
+
+        // 7d. Merges: videos to primary, repoint references, then delete
+        let mMoved = 0, mDeleted = 0, mClasses = 0, mEntries = 0, mLP = 0;
+        for (const [mId, pid] of mergedToPrimary) {
+          const m = await Lesson.collection.findOne({ _id: new mongoose.Types.ObjectId(mId) });
+          const mOid = new mongoose.Types.ObjectId(mId);
+          if (m) {
+            const p = await Lesson.collection.findOne({ _id: pid });
+            const vm = planVideoMerge(p, [m]);
+            const add = vm.add.map((v) => (v._id ? v : { _id: new mongoose.Types.ObjectId(), ...v }));
+            if (add.length) { await Lesson.collection.updateOne({ _id: pid }, { $push: { videos: { $each: add } } }); mMoved += add.length; }
+          }
+          const cl = await LiveClass.find({ preparationLessonId: mOid }).select('preparationLessonId syllabusSubtopicName syllabusTopicName').lean();
+          await snapshot('liveclasses', cl, ['preparationLessonId', 'syllabusSubtopicName', 'syllabusTopicName']);
+          mClasses += (await LiveClass.updateMany({ preparationLessonId: mOid }, { $set: { preparationLessonId: pid } }, { timestamps: false })).modifiedCount;
+          const te = await TimetableEntry.find({ lessonOrder: mOid }).lean();
+          await snapshot('timetableentries', te, ['lessonOrder', 'topicPlanOrder']);
+          for (const e of te) { await TimetableEntry.updateOne({ _id: e._id }, { $set: { lessonOrder: remapIdArray(e.lessonOrder, mergedToPrimary).ids } }, { timestamps: false }); mEntries++; }
+          const lps = await LessonProgress.find({ lessonId: mOid }).lean();
+          await snapshot('lessonprogresses', lps, ['lessonId', 'studentId', 'subjectId', 'mastered', 'masteredAt', 'masteredBy', 'teacherNotes']);
+          for (const lp of lps) {
+            const clash = await LessonProgress.findOne({ studentId: lp.studentId, lessonId: pid }).lean();
+            if (clash) await LessonProgress.deleteOne({ _id: lp._id }); else await LessonProgress.updateOne({ _id: lp._id }, { $set: { lessonId: pid } });
+            mLP++;
+          }
+          if (m) { await Lesson.collection.deleteOne({ _id: mOid, subjectId: subject._id }); mDeleted++; }
+        }
+        console.log(`  merged lessons: ${mDeleted} deleted after moving ${mMoved} video(s); repointed ${mClasses} class(es), ${mEntries} timetable entr(ies), ${mLP} mastery record(s)`);
+
+        // 7e. New lessons
+        let created = 0, unchangedNew = 0;
+        for (const n of createNs) {
+          const t = target[n - 1];
+          const set = lessonSet(t, keyOfN(n));
+          delete set.title;
+          const cur = liveLessons.find((l) => l.subtopicName === t.name && !originalIds.has(sid(l._id)));
+          if (differs(cur, set)) {
+            const r = await Lesson.updateOne(
+              { subjectId: subject._id, subtopicName: t.name },
+              { $set: set, $setOnInsert: { title: t.name.slice(0, 200), description: `Smartious course notes, lesson ${t.n} of ${target.length} (${t.code}), ${t.topicName}.`.slice(0, 2000), teacherId: author._id } },
+              { upsert: true, runValidators: true, setDefaultsOnInsert: true });
+            if (r.upsertedCount) created++; else unchangedNew++;
+          } else unchangedNew++;
+          await Lesson.collection.updateOne({ subjectId: subject._id, subtopicName: t.name, topicName: { $ne: t.topicName } }, { $set: { topicName: t.topicName } });
+        }
+        console.log(`  new lessons: ${created} created, ${unchangedNew} already there`);
+
+        // 7f. Final lesson set
+        const finalLessons = await Lesson.collection.find({ subjectId: subject._id }).project({ subtopicName: 1, videos: 1, videoEmbedId: 1, notesPdfPublicId: 1 }).toArray();
+        const idByName = new Map(finalLessons.map((l) => [l.subtopicName, l._id]));
+        const finalOk = finalLessons.length === EXPECTED_LESSONS && idByName.size === EXPECTED_LESSONS &&
+          target.every((t) => idByName.has(t.name)) && finalLessons.every((l) => String(l.notesPdfPublicId || '').startsWith(LESSON_KEY_PREFIX));
+        console.log(`  lessons on the subject now: ${finalLessons.length}, one per new subtopic: ${finalOk ? 'yes' : 'NO'}`);
+        if (!finalOk) throw new Error('Final lesson set is not exactly the 156 new lessons. Stop and inspect (re-running is safe).');
+        const lidOfN = (n) => idByName.get(target[n - 1].name);
+
+        // 7g. Classes: rename stamps, repoint merged links, link unlinked ones
+        await snapshot('liveclasses', classOps.map((o) => o.c), ['preparationLessonId', 'syllabusSubtopicName', 'syllabusTopicName']);
+        let cRen = 0, cLinked = 0;
+        for (const { c, set, prep } of classOps) {
+          if (Object.keys(set).length) cRen += (await LiveClass.updateOne({ _id: c._id }, { $set: set }, { timestamps: false })).modifiedCount;
+          if (prep && prep.linkN) {
+            cLinked += (await LiveClass.updateOne({ _id: c._id, $or: [{ preparationLessonId: null }, { preparationLessonId: { $exists: false } }] },
+              { $set: { preparationLessonId: lidOfN(prep.linkN) } }, { timestamps: false })).modifiedCount;
+          }
+        }
+        // Belt and braces: nothing may still point at a merged lesson.
+        let cRepoint = 0;
+        for (const [mId, pid] of mergedToPrimary) {
+          cRepoint += (await LiveClass.updateMany({ preparationLessonId: new mongoose.Types.ObjectId(mId) }, { $set: { preparationLessonId: pid } }, { timestamps: false })).modifiedCount;
+        }
+        const cDone = cRen + cLinked + cRepoint;
+        console.log(`  classes: ${cRen} renamed, ${cLinked} linked to their lesson${cRepoint ? `, ${cRepoint} more repointed` : ''}`);
+
+        // 7h. Syllabus progress (unique on student + subject + subtopic: merge, never duplicate)
+        await snapshot('studentsyllabusprogresses', sspOps.map((o) => o.p), ['syllabusSubtopicName', 'syllabusTopicName', 'markedAt', 'markedBy', 'notes', 'status']);
+        let sRen = 0, sMerged = 0;
+        for (const o of sspOps) {
+          const clash = o.p.syllabusSubtopicName !== o.name
+            ? await StudentSyllabusProgress.findOne({ studentId: o.p.studentId, subjectId: subject._id, syllabusSubtopicName: o.name }).lean()
+            : null;
+          if (clash) {
+            const upd = { syllabusTopicName: o.topic };
+            if (o.p.markedAt && (!clash.markedAt || new Date(o.p.markedAt) < new Date(clash.markedAt))) { upd.markedAt = o.p.markedAt; upd.markedBy = o.p.markedBy; }
+            if (!clash.notes && o.p.notes) upd.notes = o.p.notes;
+            await snapshot('studentsyllabusprogresses', [clash], ['syllabusSubtopicName', 'syllabusTopicName', 'markedAt', 'markedBy', 'notes', 'status']);
+            await StudentSyllabusProgress.updateOne({ _id: clash._id }, { $set: upd });
+            await StudentSyllabusProgress.deleteOne({ _id: o.p._id });
+            sMerged++;
+          } else {
+            sRen += (await StudentSyllabusProgress.updateOne({ _id: o.p._id }, { $set: { syllabusSubtopicName: o.name, syllabusTopicName: o.topic } })).modifiedCount;
+          }
+        }
+        console.log(`  syllabus progress: ${sRen} renamed, ${sMerged} merged`);
+
+        // 7i. Questions
+        const qWrites = [];
+        for (const o of qOps) {
+          const set = {};
+          if (o.q.subtopic !== o.name) set.subtopic = o.name;
+          const tid = topicIdOf.get(o.name);
+          if (o.q.topicRef && sid(o.q.topicRef) !== sid(tid)) set.topicRef = tid;
+          if (o.q.lessonCode && o.q.lessonCode !== o.code) set.lessonCode = o.code;
+          if (Object.keys(set).length) qWrites.push({ q: o.q, set });
+        }
+        await snapshot('questions', qWrites.map((w) => w.q), ['subtopic', 'topicRef', 'lessonCode']);
+        let qDone = 0;
+        for (const w of qWrites) qDone += (await Question.updateOne({ _id: w.q._id }, { $set: w.set }, { timestamps: false })).modifiedCount;
+        console.log(`  questions updated: ${qDone}`);
+
+        // 7j. Timetable lesson plans
+        const freshEntries = await TimetableEntry.find({ subjectId: subject._id }).lean();
+        await snapshot('timetableentries', freshEntries, ['lessonOrder', 'topicPlanOrder']);
+        let tDone = 0;
+        for (const e of freshEntries) {
+          const tpo = remapTopicPlanOrder(e.topicPlanOrder || [], plan);
+          const lo = remapIdArray(e.lessonOrder || [], mergedToPrimary);
+          const set = {};
+          if (tpo.changed) set.topicPlanOrder = tpo.keys;
+          if (lo.changed) set.lessonOrder = lo.ids;
+          if (!(e.lessonOrder || []).length && tpo.keys.length) {
+            const ids = [];
+            tpo.keys.forEach((k) => { const id = idByName.get(String(k).split('||').slice(1).join('||')); if (id && !ids.some((x) => sid(x) === sid(id))) ids.push(id); });
+            if (ids.length) set.lessonOrder = ids;
+          }
+          if (Object.keys(set).length) { await TimetableEntry.updateOne({ _id: e._id }, { $set: set }, { timestamps: false }); tDone++; }
+        }
+        console.log(`  timetable entries updated: ${tDone}`);
+
+        // 7k. Any mastery record still on a merged lesson (crash safety)
+        const strayLP = await LessonProgress.countDocuments({ lessonId: { $in: [...mergedToPrimary.keys()].map((x) => new mongoose.Types.ObjectId(x)) } });
+        if (strayLP) summary.warnings.push(`${strayLP} LessonProgress record(s) still point at merged lessons.`);
+
+        // 7l. Mirror syllabus progress marks as lesson mastery
+        let mastered = 0;
+        if (!flag('SKIP_MASTERY')) {
+          const marks = await StudentSyllabusProgress.find({ subjectId: subject._id, status: 'Done' }).lean();
+          // Raw driver: Model.bulkWrite would add $set updatedAt and touch existing records on every run.
+          const nowTs = new Date();
+          const ops = marks.filter((p) => idByName.has(p.syllabusSubtopicName)).map((p) => ({
+            updateOne: {
+              filter: { studentId: p.studentId, lessonId: idByName.get(p.syllabusSubtopicName) },
               update: { $setOnInsert: {
-                studentId: m.p.studentId, lessonId: idByName.get(m.name), subjectId: subject._id, mastered: true,
-                masteredAt: m.p.markedAt || m.p.updatedAt || new Date(), masteredBy: m.p.markedBy || author._id,
-                teacherNotes: m.p.notes || '',
+                studentId: p.studentId, lessonId: idByName.get(p.syllabusSubtopicName), subjectId: subject._id, mastered: true,
+                masteredAt: p.markedAt || p.updatedAt || nowTs, masteredBy: p.markedBy || author._id, teacherNotes: p.notes || '',
+                createdAt: nowTs, updatedAt: nowTs, __v: 0,
               } },
               upsert: true,
             },
           }));
-          for (let i = 0; i < ops.length; i += 500) {
-            const r = await LessonProgress.bulkWrite(ops.slice(i, i + 500), { ordered: false });
-            mastered += r.upsertedCount || 0;
-          }
+          for (let i = 0; i < ops.length; i += 500) mastered += (await LessonProgress.collection.bulkWrite(ops.slice(i, i + 500), { ordered: false })).upsertedCount || 0;
         }
         console.log(`  mastery records added: ${mastered}`);
 
+        // 7m. Published class recordings onto their lesson's videos (classroom.js shape and dedupe)
         let recAttached = 0;
         if (!flag('SKIP_RECORDINGS')) {
-          for (const { c, r, name } of p.recs) {
-            const lid = c.preparationLessonId && String(c.preparationLessonId) !== String(idByName.get(name)) ? null : idByName.get(name);
+          const recClasses = await LiveClass.find({ _id: { $in: recCands.map((x) => x.c._id) } }).select('preparationLessonId syllabusSubtopicName title teacherId recordings').lean();
+          for (const c of recClasses) {
+            const lid = c.preparationLessonId && finalLessons.some((l) => sid(l._id) === sid(c.preparationLessonId)) ? c.preparationLessonId : idByName.get(c.syllabusSubtopicName);
             if (!lid) continue;
-            // Same dedupe rule as routes/classroom.js attachRecordingToLesson.
-            const cur = await Lesson.findById(lid).select('videos').lean();
-            if ((cur && cur.videos || []).some((v) => v.source === 'recording' && v.r2Url === r.url)) continue;
-            const res = await Lesson.updateOne(
-              { _id: lid, 'videos.r2Url': { $ne: r.url } },
-              { $push: { videos: {
-                source: 'recording', title: r.title || c.title || 'Recorded class', r2Url: r.url, r2Key: r.key || '',
-                durationMins: Math.round((r.durationSec || 0) / 60), liveClassId: c._id, recordedAt: r.recordedAt || null,
-                createdBy: c.teacherId || null,
-              } } });
-            recAttached += res.modifiedCount;
+            for (const rec of c.recordings || []) {
+              if (!rec.featured || !rec.url) continue;
+              const cur = await Lesson.findById(lid).select('videos').lean();
+              if ((cur && cur.videos || []).some((v) => v.source === 'recording' && v.r2Url === rec.url)) continue;
+              recAttached += (await Lesson.updateOne({ _id: lid }, { $push: { videos: {
+                source: 'recording', title: rec.title || c.title || 'Recorded class', r2Url: rec.url, r2Key: rec.key || '',
+                durationMins: Math.round((rec.durationSec || 0) / 60), liveClassId: c._id, recordedAt: rec.recordedAt || null, createdBy: c.teacherId || null,
+              } } })).modifiedCount;
+            }
           }
         }
         console.log(`  recordings attached: ${recAttached}`);
-        summary.migration.done = { linked, ordersConverted: ordersDone, mastery: mastered, recordings: recAttached };
+
+        // 7n. Verification
+        const after = await Lesson.collection.find({ subjectId: subject._id }).project({ videos: 1, videoEmbedId: 1 }).toArray();
+        const withVideo = after.filter((l) => lessonVideoKeys(l).size > 0).length;
+        const dangling = await LiveClass.countDocuments({ preparationLessonId: { $in: [...mergedToPrimary.keys()].map((x) => new mongoose.Types.ObjectId(x)) } });
+        console.log(`  check: ${after.length} lessons, ${withVideo} with video, ${dangling} class(es) still linked to a merged lesson`);
+        Object.assign(counts, { primaryUpdated: pUpd, mergedDeleted: mDeleted, videosMoved: mMoved, created, classesUpdated: cDone + mClasses, progressRenamed: sRen, progressMerged: sMerged, questions: qDone, timetable: tDone + mEntries, mastery: mastered, recordings: recAttached, lessons: after.length, withVideo });
+        summary.migration.done = counts;
+        if (dangling) summary.warnings.push(`${dangling} class(es) still linked to merged lessons.`);
         inCriticalSection = false;
+        lessonsOk = true;
         checkStop();
       }
     }
 
-    // 7. Library booklet
+    // 8. Library booklet
     if (manifest.booklet && !flag('SKIP_BOOKLET')) {
       checkStop();
       const b = manifest.booklet;
@@ -803,7 +1170,7 @@ async function main() {
             uploadedBy: author._id, uploadedByName: authorName, isActive: true,
           };
           if (DRY) {
-            console.log('  would create LibraryBook ' + JSON.stringify({ ...record, description: record.description.slice(0, 60) + '...' }));
+            console.log(`  would create LibraryBook "${record.title}" (${record.section}, ${record.shelf}, grades ${record.grades.join(' / ')}, ${fmtMB(record.sizeBytes)})`);
             summary.booklet = { status: 'would create' };
           } else {
             checkStop();
@@ -864,8 +1231,9 @@ async function main() {
         }
       }
     }
+    if (!lessonsOk) process.exitCode = 1;
   } finally {
-    // 8. Summary
+    // 9. Summary
     console.log('\n──────── Summary ────────');
     console.log(JSON.stringify(summary, null, 2));
     summary.warnings.forEach((w) => console.log('WARN ' + w));
@@ -886,6 +1254,8 @@ if (require.main === module) {
 
 module.exports = {
   EXPECTED_LESSONS, LESSON_KEY_PREFIX, termIndexForCode, parseDriveId, driveDownloadUrl, validateManifest,
-  flattenSpine, matchSpineToManifest, looksLikeHtml, parseDriveConfirm, checkDriveBody, fetchDrive, probeDrive,
+  flattenTopics, spineSignature, buildSpineDocs, buildPlan, resolveName, identifyOriginals, lessonVideoKeys,
+  planVideoMerge, remapTopicPlanOrder, remapIdArray, extractYouTubeId,
+  looksLikeHtml, parseDriveConfirm, checkDriveBody, fetchDrive, probeDrive,
   DriveError, StopRequested, normName, normTitle,
 };
