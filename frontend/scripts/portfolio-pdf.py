@@ -9,7 +9,9 @@ A rebuild of the old "Smartious_Company_Portfolio_2026 (2).pdf" with the same
 sections and wording. Only the facts that had gone out of date were changed:
 prices (from USD 423 per month for Primary, paid termly; other levels quoted
 after assessment; one-to-one tuition USD 15 per hour), the head-office address,
-and the date line. Accreditation and partnership wording is copied exactly from
+the date line, and price-dependent offers that are not current (subscription
+tiers, fixed discount percentages). The layout is compact: sections flow on and
+only start a new page when little room is left. Accreditation and partnership wording is copied exactly from
 the old portfolio; do not edit it here without sign-off.
 Brand style (crimson, gold, cream, logo, page furniture) follows admission-pdf.py.
 """
@@ -59,19 +61,19 @@ INK = colors.HexColor('#1E1E24'); CHAR = colors.HexColor('#4A4A52'); GREY = colo
 LINE = colors.HexColor('#E3D9C6'); CREAM = colors.HexColor('#FCF9F3'); CARD = colors.HexColor('#F4ECE1'); WHITE = colors.white
 
 def st(name, **kw):
-    base = dict(fontName=SANS, fontSize=9, leading=13.2, textColor=CHAR)
+    base = dict(fontName=SANS, fontSize=9.8, leading=14.2, textColor=CHAR)
     base.update(kw); return ParagraphStyle(name, **base)
 S = {
     'kicker': st('kicker', fontName=SANS_B, fontSize=7.4, leading=10, textColor=GOLD),
     'h1': st('h1', fontName=SERIF, fontSize=25, leading=30, textColor=INK),
     'h3': st('h3', fontName=SERIF, fontSize=14, leading=17, textColor=INK),
     'body': st('body', spaceAfter=6),
-    'lead': st('lead', fontSize=9.6, leading=14.2, spaceAfter=6),
+    'lead': st('lead', fontSize=10.6, leading=15.6, spaceAfter=6),
     'sub': st('sub', fontName=SANS_B, fontSize=7.6, leading=10, textColor=CRIMSON),
-    'cell': st('cell', fontSize=8.4, leading=11.8),
-    'small': st('small', fontSize=7.4, leading=10.4, textColor=GREY),
+    'cell': st('cell', fontSize=9.2, leading=13),
+    'small': st('small', fontSize=8, leading=11.2, textColor=GREY),
     'label': st('label', fontName=SANS_B, fontSize=7.4, leading=10, textColor=GOLD),
-    'price': st('price', fontName=SANS_B, fontSize=8.4, leading=11.5, textColor=CRIMSON),
+    'price': st('price', fontName=SANS_B, fontSize=9.2, leading=12.6, textColor=CRIMSON),
     'num': st('num', fontName=SERIF, fontSize=22, leading=25, textColor=GOLD),
     'statn': st('statn', fontName=SERIF, fontSize=24, leading=27, textColor=CRIMSON),
     'statl': st('statl', fontName=SANS_B, fontSize=7.8, leading=10.4, textColor=INK),
@@ -107,7 +109,9 @@ class Rule(Flowable):
         self.canv.setStrokeColor(self.color); self.canv.setLineWidth(self.weight); self.canv.line(0, 1, self.w, 1)
 
 def section(num, kicker, plain, accent, key=None, new_page=True):
-    out = [PageBreak()] if new_page else []
+    # Start on a new page only when there isn't room for the heading and a
+    # good part of the section; otherwise continue on the same page.
+    out = [CondPageBreak(110 * mm), Spacer(1, 12)] if new_page else []
     if key:
         out.append(Mark(key))
     out += [P(f'{num}  ·  {kicker}' if num else kicker, 'kicker'), Spacer(1, 2),
@@ -165,7 +169,7 @@ def entry(title, body):
     return KeepTogether([P(f'<b>{title}</b>', st('et', fontSize=9.4, leading=13, textColor=INK)), P(body, 'cell'), Spacer(1, 7)])
 
 def bullets(items):
-    return [P(f'<font color="#C9973A">•</font>&nbsp;&nbsp;{t}', st('bl', fontSize=8.6, leading=12.4, leftIndent=11,
+    return [P(f'<font color="#C9973A">•</font>&nbsp;&nbsp;{t}', st('bl', fontSize=9.2, leading=13.2, leftIndent=11,
               firstLineIndent=-11, spaceAfter=4)) for t in items]
 
 # ── Page furniture ───────────────────────────────────────────
@@ -211,7 +215,7 @@ def furniture(c, doc):
     c.setFont(SANS, 6.8); c.setFillColor(GREY); c.drawRightString(W - 20 * mm, H - 12.5 * mm, 'COMPANY PORTFOLIO  ·  2026 EDITION')
     c.setStrokeColor(LINE); c.setLineWidth(0.6); c.line(20 * mm, H - 19 * mm, W - 20 * mm, H - 19 * mm)
     c.line(20 * mm, 16 * mm, W - 20 * mm, 16 * mm)
-    c.setFont(SANS, 6.8); c.drawString(20 * mm, 11 * mm, FOOTER)
+    c.setFont(SANS, 7.4); c.drawString(20 * mm, 11 * mm, FOOTER)
     c.setFont(SANS_B, 6.8); c.setFillColor(CRIMSON); c.drawRightString(W - 20 * mm, 11 * mm, f'Page {doc.page}')
     c.restoreState()
 
@@ -236,7 +240,7 @@ def story():
     s = [Spacer(1, 1), PageBreak()]
 
     # Page 2 — reason for being
-    s += [Spacer(1, 62 * mm), P('OUR REASON FOR BEING', 'kicker'), Spacer(1, 8),
+    s += [Spacer(1, 6 * mm), P('OUR REASON FOR BEING', 'kicker'), Spacer(1, 8),
           P('We exist to give every child<br/>a chance', 'big'), Spacer(1, 8),
           P('to learn well, learn deeply,<br/>and learn anywhere.', 'bigi'), Spacer(1, 16), Rule(16 * mm, GOLD, 1), Spacer(1, 14),
           P('From a single tutor visiting families in Nairobi homes in 2018, Smartious has grown into a premium international '
@@ -244,10 +248,11 @@ def story():
             '40 countries. And through all of it, we have never lost sight of the one thing that matters most: the child in front of us.', 'lead')]
 
     # Page 3 — contents
-    s += [PageBreak(), P('CONTENTS', 'kicker'), Spacer(1, 2),
+    s += [Spacer(1, 16), P('CONTENTS', 'kicker'), Spacer(1, 2),
           P(f'What you’ll find <font name="{SERIF_I}" color="#8B1A2E">inside</font>', 'h1'), Spacer(1, 3), Rule(), Spacer(1, 12)]
     rows = [[P(f'{i:02d}', 'tocn'), P(t, 'toc'), P(f'{PAGES.get(k, 0):02d}', 'tocp')] for i, (k, t) in enumerate(CONTENTS, 1)]
-    s.append(grid(rows, [16 * mm, W_FULL - 36 * mm, 20 * mm], pad=7))
+    s.append(grid(rows, [16 * mm, W_FULL - 36 * mm, 20 * mm], pad=4))
+    s.append(PageBreak())   # the founder's letter starts on its own page
 
     # 01 Founder
     s += section('01', 'THE FOUNDER', 'A letter from', 'Alfred Ouko', 'founder')
@@ -287,7 +292,7 @@ def story():
         ('2022', 'Diamond Plaza Parklands becomes the first physical centre. Alfred completes his BEd at the University of Nairobi.'),
         ('2023', 'Karen Hardy learning centre opens. Teaching team grows past 40 educators.'),
         ('2024', 'Launch of Mshauri AI, the first AI tutor purpose built for African and international curricula. Smartious LMS goes into beta.'),
-        ('2025', 'Five curricula formally offered. Study Abroad consulting launches as a free service to enrolled families. UAE pricing tier launches for Gulf families.'),
+        ('2025', 'Five curricula formally offered. Study Abroad consulting launches as a free service to enrolled families.'),
         ('2026', 'Over 3,421 students educated to date. 650+ active learners. Families in more than 40 countries. Smartious continues to grow, one family at a time.'),
     ]
     s.append(grid([[P(y, 'year'), P(t, 'cell')] for y, t in story_rows], [22 * mm, W_FULL - 22 * mm], pad=7))
@@ -307,7 +312,7 @@ def story():
         ('Honesty', "We tell families the truth: about their child's progress, about our limits, about our fees. No hidden charges. No spin."),
         ('Care', 'We see each student as a whole person, not a customer. We are in this for the long arc of a young life.'),
         ('Innovation', 'We build the tools we need. From the Smartious LMS to Mshauri AI, we engineer better ways to teach and to learn.'),
-        ('Accessibility', 'Through bursaries, sibling discounts and a 50% scholarship programme for families who demonstrate need, we work to keep excellence within reach.'),
+        ('Accessibility', 'Through bursaries for families who demonstrate need, we work to keep excellence within reach.'),
     ]))
 
     # 04 Numbers
@@ -365,7 +370,7 @@ def story():
          'Full curriculum delivery in your home. Our tutor comes to you, 4 to 5 days per week, for the full academic year. Best for families seeking maximum personalisation and the comfort of learning at home.',
          [PRIMARY_FEE, OTHER_FEES]),
         ('Online Virtual School', 'Fully online, live and recorded',
-         'Full live online classes delivered globally. Best for diaspora families, families seeking flexibility, or students who thrive with virtual learning. Three tiers: Basic, Premium, and the IGCSE Full Pack.',
+         'Full live online classes delivered globally. Best for diaspora families, families seeking flexibility, or students who thrive with virtual learning.',
          [PRIMARY_FEE, OTHER_FEES]),
         ('Private Tuition', 'One to one supplementary tutoring',
          'Hourly tutoring across all subjects and levels, delivered in person in Nairobi or online worldwide. For students attending other schools who need targeted support.',
@@ -382,8 +387,6 @@ def story():
     ]
     for i, p in enumerate(progs, 1):
         s.append(programme(i, *p))
-        if i == 3:
-            s.append(PageBreak())  # three programmes per page, as in the original
     s.append(P('School fees vary by curriculum and level and are confirmed in writing after the placement assessment. External examination fees are separate.', 'small'))
 
     # 07 Technology
@@ -406,7 +409,7 @@ def story():
                   'Available around the clock on web and mobile. Supports text, voice and image questions: photograph a worksheet and get instant guidance.',
                   'Pedagogically trained to guide rather than give answers, protecting authentic student learning.',
                   'Multilingual: communicates in English, Kiswahili, French, Spanish, Arabic and three other languages.',
-                  'Free for Premium tier students. Available as an addition on the Basic tier.'])
+                  'Available to enrolled Smartious students.'])
 
     # 08 Team
     s += section('08', 'OUR TEAM', 'Our teaching', 'team', 'team')
@@ -428,7 +431,7 @@ def story():
     s += [grid([
         [[P('Diamond Plaza Parklands', 'h3'), P(ADDRESS + '. Our flagship learning centre: 6 tutoring pods, parent lounge, resource library, '
                                               'admin office. Open Monday to Saturday, 8am to 7pm.', 'cell')], P('EST. 2022', 'label')],
-        [[P('Karen Hardy Centre', 'h3'), P('Karen, Hardy, Nairobi. Our second centre, purpose built for IGCSE and A-Level intensive tuition. '
+        [[P('Karen Hardy Centre', 'h3'), P('Karen Hardy, Karen, Nairobi. Our second centre, purpose built for IGCSE and A-Level intensive tuition. '
                                            'Bookable session based access.', 'cell')], P('EST. 2023', 'label')],
     ], [W_FULL - 24 * mm, 24 * mm], pad=7)]
     s += label('Nairobi areas served · 21 neighbourhoods')
@@ -490,7 +493,7 @@ def story():
         ('Five curricula, one school', 'Most international schools offer one curriculum, maybe two. We deliver five, properly, through curriculum specialists.'),
         ('Free Study Abroad consulting', 'Every Smartious family gets full university application support included. No extra invoice. No hidden referral commission.'),
         ('Built in technology', 'Our LMS, AI tutor and digital library are part of the offering. Not bolted on. Not extra. Always included.'),
-        ('Bursaries for families in need', 'Up to 50% off tuition for families who demonstrate financial need. Excellence should not be only for the wealthy.'),
+        ('Bursaries for families in need', 'Bursaries for families who demonstrate financial need. Excellence should not be only for the wealthy.'),
         ('8 years of consistent delivery', 'Founded 2018. Same founder. Same values. Same care. The institution today reflects the choices made every day for eight years.'),
     ], title_style=st('wt', fontName=SERIF, fontSize=13, leading=16, textColor=INK)))
 
@@ -511,11 +514,11 @@ def story():
     s += [P('Smartious works with a select group of corporate, governmental and institutional partners. If your organisation values the education '
             'of the children of your employees, citizens or community, we should talk.', 'lead'), Spacer(1, 4)]
     for t, b in [
-        ('CORPORATE EDUCATION BENEFITS', 'Customised employee family education packages. We work with multinationals and Kenyan corporates to provide tuition, school placement and educational consulting as a staff benefit. Volume pricing available.'),
+        ('CORPORATE EDUCATION BENEFITS', 'Customised employee family education packages. We work with multinationals and Kenyan corporates to provide tuition, school placement and educational consulting as a staff benefit. Packages are tailored to each organisation.'),
         ('EMBASSIES AND CONSULATES', 'Educational support for diplomatic families on rotation. We have served the children of multiple foreign missions in Nairobi and across the UAE.'),
         ('NGOS AND FOUNDATIONS', 'Scholarship delivery, refugee education programmes, and pilot education initiatives. We have capacity to absorb sponsored students at any year level.'),
         ('PROPERTY DEVELOPERS', 'Branded education partnerships for serviced residential developments. We provide on site tuition centres for new urban developments seeking premium amenities.'),
-        ('EXPATRIATE COMMUNITIES', 'Customised group packages for expatriate communities on medical, mining and engineering postings. Bulk family enrolments with discounted unified pricing.'),
+        ('EXPATRIATE COMMUNITIES', 'Customised group packages for expatriate communities on medical, mining and engineering postings. Group enrolments with a single point of contact.'),
         ('EDUCATION INVESTORS', 'Smartious is open to strategic investment partnerships. Series A discussions are ongoing. Please contact the founder directly for the investor pack.'),
     ]:
         s.append(card([P(t, 'sub'), Spacer(1, 3), P(b, 'cell')], pad=9, space=7))
