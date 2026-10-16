@@ -5,7 +5,8 @@
  * the instruments; the engine stores what they typed and the server checks it.
  */
 import { useState } from 'react'
-import { INDICATORS, terminalsOf } from './core.js'
+import { INDICATORS, terminalsOf, getExperiment } from './core.js'
+import PracticalControls from './practicalControls.jsx'
 
 function Btn({ children, onClick, disabled, kind = '' }) {
   return <button type="button" className={'lab-btn ' + kind} onClick={onClick} disabled={disabled}>{children}</button>
@@ -196,6 +197,8 @@ function OsmosisControls({ view, dispatch, editable }) {
 
 export default function Controls({ experimentId, view, dispatch, editable }) {
   if (!view) return null
+  const def = getExperiment(experimentId)
+  if (def?.practical) return <PracticalControls def={def} view={view} dispatch={dispatch} editable={editable} />
   const C = { 'chem-titration': TitrationControls, 'phys-ohms-law': OhmsControls, 'bio-osmosis': OsmosisControls }[experimentId]
   return C ? <C view={view} dispatch={dispatch} editable={editable} /> : <p>No controls for this experiment.</p>
 }

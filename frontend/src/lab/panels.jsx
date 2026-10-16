@@ -48,33 +48,48 @@ export function DataTables({ tables }) {
   ))
 }
 
-const nice = (v) => { const p = Math.pow(10, Math.floor(Math.log10(Math.abs(v) || 1))); const n = v / p; return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * p }
+
+// Axis range: from zero when the data start near it (so intercepts show),
+// otherwise padded around the data (e.g. 1/T or log axes far from zero).
+function axisRange(vals) {
+  let lo = Math.min(...vals), hi = Math.max(...vals)
+  if (lo >= 0 && lo <= 0.35 * hi) lo = 0
+  if (hi <= 0 && hi >= 0.35 * lo) hi = 0
+  if (hi === lo) { hi += Math.abs(hi) * 0.1 || 1; lo -= Math.abs(lo) * 0.1 || 1 }
+  const pad = (hi - lo) * 0.06
+  return [lo === 0 ? 0 : lo - pad, hi === 0 ? 0 : hi + pad]
+}
+const SERIES_COLOURS = ['#7D1025', '#1D4C9A', '#1E7B34', '#B86E00']
 
 export function Graph({ g }) {
   if (!g) return null
   if (!g.points.length) return <p className="lab-help">The graph appears when you record data.</p>
-  const W = 460, H = 280, L = 56, B = 44, T = 14, R = 14
-  const xs = g.points.map(p => p.x), ys = g.points.map(p => p.y)
-  const xmax = nice(Math.max(...xs, 0) * 1.05 || 1), xmin = Math.min(0, ...xs) < 0 ? -nice(-Math.min(...xs)) : 0
-  const ymax = Math.max(...ys, 0) > 0 ? nice(Math.max(...ys) * 1.05) : 0, ymin = Math.min(...ys, 0) < 0 ? -nice(-Math.min(...ys) * 1.05) : 0
-  const yTop = ymax === ymin ? 1 : ymax
+  const W = 460, H = 280, L = 62, B = 44, T = 14, R = 14
+  const series = g.series?.length ? g.series : [{ name: null, points: g.points, line: g.line }]
+  const all = series.flatMap(x => x.points)
+  const [xmin, xmax] = axisRange(all.map(p => p.x))
+  const [ymin, ymax] = axisRange(all.map(p => p.y))
   const X = (x) => L + ((x - xmin) / (xmax - xmin)) * (W - L - R)
-  const Y = (y) => T + (1 - (y - ymin) / (yTop - ymin)) * (H - T - B)
+  const Y = (y) => T + (1 - (y - ymin) / (ymax - ymin)) * (H - T - B)
   const ticks = (a, b) => Array.from({ length: 6 }, (_, i) => a + (b - a) * i / 5)
-  const lab = (v) => Number(v.toPrecision(3)).toString()
+  const lab = (v) => (Math.abs(v) < 1e-12 ? '0' : Number(v.toPrecision(3)).toString())
   return (
     <figure className="lab-graph">
-      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${g.title}. ${g.points.length} points plotted.`}>
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${g.title}. ${all.length} points plotted.`}>
         <rect x={L} y={T} width={W - L - R} height={H - T - B} fill="#FFF" stroke="#BBB" />
-        {ticks(xmin, xmax).map(v => <g key={'x' + v}><line x1={X(v)} x2={X(v)} y1={T} y2={H - B} stroke="#EEE" /><text x={X(v)} y={H - B + 14} fontSize="10" textAnchor="middle">{lab(v)}</text></g>)}
-        {ticks(ymin, yTop).map(v => <g key={'y' + v}><line x1={L} x2={W - R} y1={Y(v)} y2={Y(v)} stroke="#EEE" /><text x={L - 6} y={Y(v) + 3} fontSize="10" textAnchor="end">{lab(v)}</text></g>)}
-        {ymin < 0 && <line x1={L} x2={W - R} y1={Y(0)} y2={Y(0)} stroke="#888" />}
-        {g.line && <line x1={X(xmin)} y1={Y(g.line.m * xmin + g.line.c)} x2={X(xmax)} y2={Y(g.line.m * xmax + g.line.c)} stroke="#7D1025" strokeWidth="1.5" />}
-        {g.points.map((p, i) => <g key={i} stroke="#111" strokeWidth="1.6"><line x1={X(p.x) - 4} x2={X(p.x) + 4} y1={Y(p.y) - 4} y2={Y(p.y) + 4} /><line x1={X(p.x) - 4} x2={X(p.x) + 4} y1={Y(p.y) + 4} y2={Y(p.y) - 4} /></g>)}
+        {ticks(xmin, xmax).map((v, i) => <g key={'x' + i}><line x1={X(v)} x2={X(v)} y1={T} y2={H - B} stroke="#EEE" /><text x={X(v)} y={H - B + 14} fontSize="10" textAnchor="middle">{lab(v)}</text></g>)}
+        {ticks(ymin, ymax).map((v, i) => <g key={'y' + i}><line x1={L} x2={W - R} y1={Y(v)} y2={Y(v)} stroke="#EEE" /><text x={L - 6} y={Y(v) + 3} fontSize="10" textAnchor="end">{lab(v)}</text></g>)}
+        {ymin < 0 && ymax > 0 && <line x1={L} x2={W - R} y1={Y(0)} y2={Y(0)} stroke="#888" />}
+        {series.map((sr, k) => (
+          <g key={k}>
+            {sr.line && <line x1={X(xmin)} y1={Y(sr.line.m * xmin + sr.line.c)} x2={X(xmax)} y2={Y(sr.line.m * xmax + sr.line.c)} stroke={SERIES_COLOURS[k % 4]} strokeWidth="1.5" />}
+            {sr.points.map((p, i) => <g key={i} stroke={k ? SERIES_COLOURS[k % 4] : '#111'} strokeWidth="1.6"><line x1={X(p.x) - 4} x2={X(p.x) + 4} y1={Y(p.y) - 4} y2={Y(p.y) + 4} /><line x1={X(p.x) - 4} x2={X(p.x) + 4} y1={Y(p.y) + 4} y2={Y(p.y) - 4} /></g>)}
+          </g>
+        ))}
         <text x={(L + W - R) / 2} y={H - 8} fontSize="11" textAnchor="middle" fontWeight="600">{g.xLabel}</text>
-        <text transform={`translate(14 ${(T + H - B) / 2}) rotate(-90)`} fontSize="11" textAnchor="middle" fontWeight="600">{g.yLabel}</text>
+        <text transform={`translate(13 ${(T + H - B) / 2}) rotate(-90)`} fontSize="11" textAnchor="middle" fontWeight="600">{g.yLabel}</text>
       </svg>
-      <figcaption>{g.title}{g.line ? ` · line of best fit: gradient ${Number(g.line.m.toPrecision(3))}${g.line.c ? ', intercept ' + Number(g.line.c.toPrecision(3)) : ''}` : ''}</figcaption>
+      <figcaption>{g.title}{series.map((sr, k) => sr.line ? ` · ${sr.name ? sr.name + ': ' : 'line of best fit: '}gradient ${Number(sr.line.m.toPrecision(3))}${sr.line.c ? ', intercept ' + Number(sr.line.c.toPrecision(3)) : ''}` : '').join('')}</figcaption>
     </figure>
   )
 }

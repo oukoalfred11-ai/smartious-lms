@@ -54,28 +54,43 @@ function table(doc, { columns, rows }) {
   rows.forEach(r => draw(r, 'Body'))
 }
 
+function axisRange(vals) {
+  let lo = Math.min(...vals), hi = Math.max(...vals)
+  if (lo >= 0 && lo <= 0.35 * hi) lo = 0
+  if (hi <= 0 && hi >= 0.35 * lo) hi = 0
+  if (hi === lo) { hi += Math.abs(hi) * 0.1 || 1; lo -= Math.abs(lo) * 0.1 || 1 }
+  const pad = (hi - lo) * 0.06
+  return [lo === 0 ? 0 : lo - pad, hi === 0 ? 0 : hi + pad]
+}
+const SERIES = [INK, '#1D4C9A', '#1E7B34', '#B86E00']
+
 function graph(doc, g) {
   if (!g || !g.points?.length) return
   const h = 200
-  if (doc.y + h + 40 > 790) doc.addPage()
+  if (doc.y + h + 50 > 790) doc.addPage()
   const x0 = M + 40, y0 = doc.y + 10, gw = W - 60, gh = h
-  const xs = g.points.map(p => p.x), ys = g.points.map(p => p.y)
-  const xmin = Math.min(0, ...xs), xmax = Math.max(...xs) * 1.1 || 1
-  const ymin = Math.min(0, ...ys) * 1.1, ymax = Math.max(0, ...ys) * 1.1 || 1
+  const series = g.series?.length ? g.series : [{ name: null, points: g.points, line: g.line }]
+  const all = series.flatMap(s => s.points)
+  const [xmin, xmax] = axisRange(all.map(p => p.x))
+  const [ymin, ymax] = axisRange(all.map(p => p.y))
   const X = (x) => x0 + ((x - xmin) / (xmax - xmin)) * gw
   const Y = (y) => y0 + gh - ((y - ymin) / (ymax - ymin)) * gh
   doc.rect(x0, y0, gw, gh).lineWidth(0.6).strokeColor('#BBB').stroke()
-  if (ymin < 0) doc.moveTo(x0, Y(0)).lineTo(x0 + gw, Y(0)).strokeColor('#999').lineWidth(0.6).stroke()
-  if (g.line) {
-    doc.moveTo(X(xmin), Y(g.line.m * xmin + g.line.c)).lineTo(X(xmax), Y(g.line.m * xmax + g.line.c)).strokeColor(CRIMSON).lineWidth(1).stroke()
-  }
-  for (const p of g.points) doc.circle(X(p.x), Y(p.y), 2.6).fillColor(INK).fill()
+  if (ymin < 0 && ymax > 0) doc.moveTo(x0, Y(0)).lineTo(x0 + gw, Y(0)).strokeColor('#999').lineWidth(0.6).stroke()
+  series.forEach((s, k) => {
+    const col = k ? SERIES[k % 4] : CRIMSON
+    if (s.line) doc.moveTo(X(xmin), Y(s.line.m * xmin + s.line.c)).lineTo(X(xmax), Y(s.line.m * xmax + s.line.c)).strokeColor(col).lineWidth(1).stroke()
+    for (const p of s.points) doc.circle(X(p.x), Y(p.y), 2.6).fillColor(SERIES[k % 4]).fill()
+  })
+  const t = (v) => (Math.abs(v) < 1e-12 ? '0' : String(Number(v.toPrecision(3))))
   doc.font('Body').fontSize(8).fillColor(GREY)
-  doc.text(xmin.toPrecision(2), x0 - 4, y0 + gh + 3).text(xmax.toPrecision(3), x0 + gw - 20, y0 + gh + 3)
-  doc.text(ymax.toPrecision(3), M, y0 - 2).text(ymin.toPrecision(2), M, y0 + gh - 8)
+  doc.text(t(xmin), x0 - 4, y0 + gh + 3).text(t(xmax), x0 + gw - 24, y0 + gh + 3)
+  doc.text(t(ymax), M - 4, y0 - 2, { width: 42, align: 'right' }).text(t(ymin), M - 4, y0 + gh - 8, { width: 42, align: 'right' })
   doc.font('Bold').fontSize(8.5).fillColor(INK).text(g.xLabel, x0, y0 + gh + 14, { width: gw, align: 'center' })
   doc.save().rotate(-90, { origin: [M + 6, y0 + gh / 2] }).text(g.yLabel, M - 60, y0 + gh / 2 - 4, { width: 140, align: 'center' }).restore()
-  doc.x = M; doc.y = y0 + gh + 32
+  const fits = series.filter(s => s.line).map(s => (s.name ? s.name + ': ' : 'Line of best fit: ') + 'gradient ' + Number(s.line.m.toPrecision(3)) + (s.line.c ? ', intercept ' + Number(s.line.c.toPrecision(3)) : ''))
+  doc.font('Body').fontSize(8).fillColor(GREY).text(fits.join('   '), x0, y0 + gh + 26, { width: gw, align: 'center' })
+  doc.x = M; doc.y = y0 + gh + 42
 }
 
 async function buildLabReportPdf({ lab, def, session }) {
@@ -104,7 +119,7 @@ async function buildLabReportPdf({ lab, def, session }) {
     doc.y += 14
 
     for (const [k, label] of SECTIONS) {
-      const fallback = k === 'aim' ? def.notebook.aim : k === 'variables' ? def.notebook.variables : k === 'apparatus' ? def.apparatus.join(', ').replace(/_/g, ' ') : k === 'procedure' ? def.procedure.map((p, i) => `${i + 1}. ${p}`).join('\n') : ''
+      const fallback = k === 'aim' ? def.notebook.aim : k === 'variables' ? def.notebook.variables : k === 'apparatus' ? def.apparatus.map(a => lab.apparatus?.apparatusName ? lab.apparatus.apparatusName(a) : a.replace(/_/g, ' ')).join(', ') : k === 'procedure' ? def.procedure.map((p, i) => `${i + 1}. ${p}`).join('\n') : ''
       if (k === 'observations') {
         heading(doc, 'Raw data')
         for (const t of def.dataTables(params, state)) { doc.font('Bold').fontSize(9.5).fillColor(INK).text(t.title, M, doc.y); doc.moveDown(0.2); table(doc, t); doc.moveDown(0.4) }

@@ -1,0 +1,152 @@
+// AS & A Level Physics practicals, chapter 3: kinematics and dynamics.
+// Procedures, models and wording are Smartious's own.
+import { definePractical } from '../../practical.js'
+
+const G = 9.81
+const C = (code, chapter = 'Kinematics and dynamics') => ({ id: 'al-physics', name: 'AS & A Level Physics practicals', code, chapter })
+
+export default [
+  definePractical({
+    id: 'phys-al-3-1', collection: C('3.1'), topic: 'Newton’s second law; friction',
+    title: 'Acceleration of connected masses', summary: 'Pull a trolley along the bench with a mass hanging over a pulley, vary the hanging mass at constant total mass and find g and the friction force.',
+    aim: 'To investigate how the acceleration of a trolley and hanging mass depends on the hanging mass, and to determine g and the frictional force.',
+    durationMin: 45,
+    apparatus: ['trolley', 'pulley', 'string', 'slotted_masses', 'g_clamp', 'light_gate', 'metre_rule', 'top_pan_balance'],
+    safety: ['Clamp the pulley firmly to the edge of the bench and place a box of soft material under the hanging masses.', 'Stop the trolley before it reaches the pulley, and keep feet away from the falling masses.'],
+    procedure: [
+      'Clamp the pulley to the end of the bench. Weigh the trolley together with all the slotted masses and the hanger, and record the total mass M.',
+      'Attach the trolley to the mass hanger with string over the pulley. Keep the slotted masses that are not on the hanger on the trolley, so the total moving mass is always M.',
+      'Mark a start line and set the light gate a distance s along the bench from it. Measure s.',
+      'With hanging mass m, hold the trolley at the start line and release it from rest. The timer records the time t taken to reach the gate.',
+      'Repeat each release three times, then move masses from the trolley to the hanger and repeat for values of m from 30 g to 120 g.',
+      'Calculate the acceleration a = 2s / t² and plot a against m. The gradient is g / M and the intercept is −F / M, where F is the friction force.',
+    ],
+    controlled: 'the same total moving mass, the same distance s, release from rest at the same line, the same section of bench.',
+    model: { kind: 'quantitative', summary: 'For the whole system (m g − F) = M a, so a = (g / M) m − F / M.',
+      assumptions: ['Friction F at the wheels and pulley is constant and does not depend on speed.', 'The string is light and inextensible, and the rotational inertia of the pulley and wheels is ignored.', 'The light gate timing is exact, but releasing by hand gives a random error of about ±0.008 s in each time.'] },
+    hidden: (q) => ({ F: q('F', 0.08, 0.15), M: q('M', 0.90, 1.10), s: q('s', 79.5, 80.5) }),
+    constants: [
+      { key: 'M', label: 'Total moving mass', symbol: 'M', unit: 'kg', resolution: 0.001, instrument: 'top_pan_balance', read: (p) => p.M },
+      { key: 's', label: 'Distance from start to light gate', symbol: 's', unit: 'cm', resolution: 0.1, instrument: 'metre_rule', read: (p, n) => p.s + n(0.03) },
+    ],
+    iv: { key: 'm', label: 'Hanging mass', symbol: 'm', unit: 'g', min: 30, max: 120, step: 10, start: 30, instrument: 'slotted_masses' },
+    measures: [{ key: 't', label: 'Time to reach the gate', symbol: 't', unit: 's', resolution: 0.001, instrument: 'light_gate',
+      read: (p, x, n) => Math.sqrt(2 * (p.s / 100) * p.M / (x / 1000 * G - p.F)) + n(0.008) }],
+    repeats: 3,
+    derived: [{ key: 'a', label: 'Acceleration', symbol: 'a', unit: 'm s⁻²', decimals: 3, value: (r, c) => 2 * (c.s / 100) / (r.t * r.t) }],
+    graph: { x: 'm', y: 'a', fit: 'line' },
+    results: [
+      { id: 'g', prompt: 'Acceleration of free fall g', unit: 'm s⁻²', sig: 3, fromFit: (f, c) => f.m * 1000 * c.M, truth: () => G, tolTrue: { rel: 0.06 } },
+      { id: 'F', prompt: 'Friction force on the system', unit: 'N', sig: 3, fromFit: (f, c) => -f.c * c.M, truth: (p) => p.F, tolTrue: { rel: 0.15 } },
+    ],
+    questions: [
+      { id: 'constM', type: 'choice', prompt: 'Why are the masses moved from the trolley to the hanger instead of being added from the bench?', options: ['So that the total accelerated mass M stays constant and a depends linearly on m', 'So that the friction force becomes zero', 'So that the trolley moves at constant speed'], correct: 0 },
+      { id: 'intercept', type: 'text', prompt: 'Explain what the intercept on the m axis represents physically.' },
+    ],
+  }),
+
+  definePractical({
+    id: 'phys-al-3-2', collection: C('3.2'), topic: 'Conservation of energy; kinetic and potential energy',
+    title: 'Energy and amplitude of a pendulum', summary: 'Release a pendulum bob from different heights and measure its speed at the bottom of the swing with a light gate.',
+    aim: 'To investigate how the maximum speed of a pendulum bob depends on the height from which it is released, and to test whether gravitational potential energy is converted to kinetic energy.',
+    durationMin: 40,
+    apparatus: ['stand_clamp', 'string', 'pendulum_bob', 'light_gate', 'vernier_callipers', 'metre_rule', 'set_square'],
+    safety: ['Clamp the stand firmly or weight its base so it does not topple when the bob swings.', 'Keep clear of the path of the swinging bob.'],
+    procedure: [
+      'Measure the diameter d of the bob with the callipers.',
+      'Hang the bob from the clamp on a string about 1 m long. Set the light gate so that the bob passes through its beam at the lowest point of the swing.',
+      'Use the metre rule and set square to measure the height of the bottom of the bob above the bench when it hangs at rest.',
+      'Pull the bob aside, keeping the string taut, until it has risen a height h. Release it and record the time t for which it blocks the light beam.',
+      'Repeat for each height, then repeat for heights from 5 cm to 30 cm.',
+      'Calculate v = d / t. Plot v² against h. If all the potential energy becomes kinetic energy, v² = 2gh and the gradient is 2g.',
+    ],
+    controlled: 'the same bob and string length, the light gate at the lowest point, release without pushing.',
+    model: { kind: 'quantitative', summary: '½ m v² = η m g h, where η (just under 1) is the fraction of energy not lost to air resistance in the quarter swing, so v² = 2ηg h.',
+      assumptions: ['About 1–3 % of the energy is lost to air resistance and the string before the lowest point.', 'The bob’s speed is almost constant while it crosses the beam, so d / t is the maximum speed.', 'Each release height is set with a random error of about ±0.1 cm; the timer resolves 0.1 ms.'] },
+    hidden: (q) => ({ d: q('d', 2.0, 2.6), eta: q('eta', 0.97, 0.99) }),
+    constants: [{ key: 'd', label: 'Diameter of bob', symbol: 'd', unit: 'cm', resolution: 0.01, instrument: 'vernier_callipers', read: (p, n) => p.d + n(0.004) }],
+    iv: { key: 'h', label: 'Release height', symbol: 'h', unit: 'cm', min: 5, max: 30, step: 1, start: 5, instrument: 'metre_rule' },
+    measures: [{ key: 't', label: 'Time to cross the beam', symbol: 't', unit: 's', resolution: 0.0001, instrument: 'light_gate',
+      read: (p, x, n) => (p.d / 100) / Math.sqrt(2 * p.eta * G * Math.max(0.1, x + n(0.1)) / 100) }],
+    repeats: 2,
+    derived: [
+      { key: 'v', label: 'Maximum speed', symbol: 'v', unit: 'm s⁻¹', decimals: 3, value: (r, c) => (c.d / 100) / r.t },
+      { key: 'h_m', label: 'Release height', symbol: 'h', unit: 'm', decimals: 3, value: (r) => r.h / 100 },
+    ],
+    graph: { x: 'h_m', y: 'v', ty: 'square', fit: 'line' },
+    results: [{ id: 'g', prompt: 'Value of g from the gradient (gradient / 2)', unit: 'm s⁻²', sig: 3, fromFit: (f) => f.m / 2, truth: (p) => p.eta * G, tolTrue: { rel: 0.05 } }],
+    questions: [
+      { id: 'air', type: 'choice', prompt: 'If a much lighter bob of the same size were used, such as a polystyrene ball, so that air resistance mattered more, the gradient of v² against h would', options: ['decrease', 'increase', 'stay the same'], correct: 0 },
+      { id: 'energy', type: 'text', prompt: 'Use your value from the gradient to comment on how much of the potential energy became kinetic energy.' },
+    ],
+  }),
+
+  definePractical({
+    id: 'phys-al-3-3', collection: C('3.3'), topic: 'Projectile motion',
+    title: 'Range of a horizontally launched ball', summary: 'Roll a ball bearing off a ramp so it leaves the edge horizontally, vary the drop height and find the launch speed from the range.',
+    aim: 'To investigate how the horizontal range of a ball launched horizontally depends on the height it falls, and to determine its launch speed.',
+    durationMin: 45,
+    apparatus: ['ramp', 'stand_clamp', 'ball_bearing', 'sand_tray', 'metre_rule', 'set_square'],
+    safety: ['Collect the ball bearings after each run; a ball bearing on the floor is a slipping hazard.', 'Make sure the clamp stand holding the ramp cannot topple.'],
+    procedure: [
+      'Clamp the curved ramp to the stand so that the bottom of the ramp is horizontal, and mark a fixed release point near the top.',
+      'Place the tray of sand on the floor below. Use the set square and rule to mark the point on the sand directly below the end of the ramp.',
+      'Set the end of the ramp at height H above the surface of the sand and measure H.',
+      'Release the ball from the mark and measure the horizontal range R from the point below the ramp to the centre of the dent it makes. Smooth the sand and repeat three times.',
+      'Raise the ramp in steps and repeat for heights from 20 cm to 100 cm, keeping the release point on the ramp the same.',
+      'Plot R against √H. Since R = u √(2H / g), the gradient is u √(2 / g) and gives the launch speed u.',
+    ],
+    controlled: 'the same ball, the same release point on the ramp (so the same launch speed), the ramp end horizontal.',
+    model: { kind: 'quantitative', summary: 'The ball leaves horizontally at speed u and falls freely: t = √(2H / g), R = u t.',
+      assumptions: ['Air resistance on a small steel ball over a metre is negligible.', 'The launch speed varies by about 1 % from one release to the next.', 'Locating the centre of each dent has a random error of about ±0.4 cm; each height setting has an irregularity up to ±0.2 cm.'] },
+    hidden: (q) => ({ u: q('u', 1.0, 1.6) }),
+    iv: { key: 'H', label: 'Drop height', symbol: 'H', unit: 'cm', min: 20, max: 100, step: 5, start: 20, instrument: 'metre_rule' },
+    measures: [{ key: 'R', label: 'Horizontal range', symbol: 'R', unit: 'cm', resolution: 0.1, instrument: 'metre_rule',
+      read: (p, x, n) => p.u * 100 * (1 + n(0.01)) * Math.sqrt(2 * (x + 0.2 * p.j('H' + x)) / (G * 100)) + n(0.4) }],
+    repeats: 3,
+    graph: { x: 'H', tx: 'sqrt', y: 'R', fit: 'line' },
+    results: [{ id: 'u', prompt: 'Launch speed of the ball', unit: 'm s⁻¹', sig: 3, fromFit: (f) => f.m * Math.sqrt(G * 100 / 2) / 100, truth: (p) => p.u, tolTrue: { rel: 0.06 } }],
+    questions: [
+      { id: 'double', type: 'choice', prompt: 'If the drop height is made four times larger, the range becomes', options: ['twice as large', 'four times as large', 'sixteen times as large'], correct: 0 },
+      { id: 'sand', type: 'text', prompt: 'Explain why a tray of sand is used and how you located the landing point. Suggest one improvement.' },
+    ],
+  }),
+
+  definePractical({
+    id: 'phys-al-3-4', collection: C('3.4'), topic: 'Drag; terminal velocity',
+    title: 'Terminal velocity of balls falling through water', summary: 'Time steel balls of different sizes falling between two marks on a tall tube of water and find how their terminal speed depends on radius.',
+    aim: 'To investigate how the terminal velocity of a steel ball falling through water depends on its radius, and to determine the drag coefficient.',
+    durationMin: 45,
+    apparatus: ['tall_tube', 'ball_bearing', 'micrometer', 'stopwatch', 'metre_rule'],
+    safety: ['Wipe up spilt water at once. Recover the balls with a magnet on a string rather than reaching into the tube.', 'Stand the tall tube in a clamp or on a stable base so that it cannot be knocked over.'],
+    procedure: [
+      'Fill the tall tube with water. Put rubber bands round it 30 cm below the surface and 100 cm below the first band, and measure the distance between them.',
+      'Measure the diameter d of a ball with the micrometer.',
+      'Drop the ball gently from just above the surface in the centre of the tube. Start the stopwatch as it passes the upper band and stop it at the lower band. Time each size of ball three times.',
+      'Repeat for ball diameters from 2 mm to 8 mm.',
+      'Calculate the terminal speed v = 1.00 m / t and the radius r = d / 2.',
+      'Plot v² against r. For a steel ball (density 7800 kg m⁻³) in water, v² = 8 g r (ρ_s − ρ_w) / (3 C_d ρ_w), so the drag coefficient is C_d = 8 g (ρ_s − ρ_w) / (3 ρ_w × gradient).',
+    ],
+    controlled: 'the same water at room temperature, the same distance between the marks, balls of the same steel, dropped in the centre of the tube.',
+    model: { kind: 'simplified', summary: 'At terminal velocity the weight minus upthrust equals a drag force ½ C_d ρ_w π r² v², with C_d constant, giving v² ∝ r.',
+      assumptions: ['These balls move fast in water (Reynolds number about 10³–10⁴), so Stokes’ law does not apply; the drag coefficient is taken as constant over this range, which is an idealisation.', 'Effects of the tube walls are ignored, and each ball reaches terminal velocity before the upper mark. Densities: steel 7800 kg m⁻³, water 1000 kg m⁻³.', 'Hand timing between two marks has a random error of about ±0.03 s; individual balls differ by up to 2 % in drag.'] },
+    hidden: (q) => ({ Cd: q('Cd', 0.40, 0.50) }),
+    iv: { key: 'dn', label: 'Ball size (nominal diameter)', symbol: 'd₀', unit: 'mm', min: 2, max: 8, step: 0.5, start: 2, instrument: 'ball_bearing' },
+    measures: [
+      { key: 'd', label: 'Diameter of ball', symbol: 'd', unit: 'mm', resolution: 0.01, instrument: 'micrometer', read: (p, x, n) => x * (1 + 0.003 * p.j('d' + x)) + n(0.003) },
+      { key: 't', label: 'Time between marks', symbol: 't', unit: 's', resolution: 0.01, instrument: 'stopwatch',
+        read: (p, x, n) => { const r = x * (1 + 0.003 * p.j('d' + x)) / 2000; const v = Math.sqrt(8 * G * r * 6800 / (3 * p.Cd * (1 + 0.02 * p.j('c' + x)) * 1000)); return 1.00 / v + n(0.03) } },
+    ],
+    repeats: 3,
+    derived: [
+      { key: 'v', label: 'Terminal speed', symbol: 'v', unit: 'm s⁻¹', decimals: 3, value: (r) => 1.00 / r.t },
+      { key: 'r', label: 'Radius of ball', symbol: 'r', unit: 'mm', decimals: 3, value: (r) => r.d / 2 },
+    ],
+    graph: { x: 'r', y: 'v', ty: 'square', fit: 'origin' },
+    results: [{ id: 'Cd', prompt: 'Drag coefficient of the balls', unit: '', sig: 3, fromFit: (f) => 8 * G * 6800 / (3 * 1000 * f.m * 1000), truth: (p) => p.Cd, tolTrue: { rel: 0.1 } }],
+    questions: [
+      { id: 'stokes', type: 'choice', prompt: 'Stokes’ law predicts v ∝ r². Why does it not describe these balls in water?', options: ['They fall too fast in a liquid of low viscosity, so the flow behind them is turbulent and drag depends on v²', 'Steel is too dense for any drag to act', 'Stokes’ law only applies to balls falling in air'], correct: 0 },
+      { id: 'terminal', type: 'text', prompt: 'How could you check that each ball had reached terminal velocity before the upper mark?' },
+    ],
+  }),
+]

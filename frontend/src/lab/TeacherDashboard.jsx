@@ -42,7 +42,9 @@ function AssignForm({ experiments, students, onCreated }) {
       <label>Experiment
         <select required value={f.experimentId} onChange={e => setF({ ...f, experimentId: e.target.value })}>
           <option value="">Choose…</option>
-          {usable.map(e => <option key={e.id} value={e.id}>{e.title} ({e.subject})</option>)}
+          {[...new Set(usable.map(e => e.collection?.name || 'Featured experiments'))].map(g => (
+            <optgroup key={g} label={g}>{usable.filter(e => (e.collection?.name || 'Featured experiments') === g).map(e => <option key={e.id} value={e.id}>{e.collection ? e.collection.code + ' ' : ''}{e.title} ({e.subject})</option>)}</optgroup>
+          ))}
         </select>
       </label>
       {f.experimentId === 'chem-titration' && (
@@ -78,7 +80,7 @@ function AssignForm({ experiments, students, onCreated }) {
 
 function Assignments({ list, experiments, onChange }) {
   const toast = useToast()
-  const title = (id) => experiments.find(e => e.id === id)?.title || id
+  const title = (id) => { const e = experiments.find(x => x.id === id); return e ? (e.collection ? e.collection.code + ' ' : '') + e.title : id }
   const setStatus = async (a, status) => {
     try { await api.patch('/lab/assignments/' + a._id, { status }); toast.ok(status === 'closed' ? 'Assignment closed.' : 'Assignment reopened.'); onChange() }
     catch (e) { toast.error(e?.response?.data?.message || 'Could not update.') }
@@ -114,7 +116,7 @@ function Submissions({ experiments, assignments }) {
     } catch (e) { toast.error(e?.response?.data?.message || 'Could not load submissions.'); setRows([]) }
   }, [filter, toast])
   useEffect(() => { load() }, [load])
-  const title = (id) => experiments.find(e => e.id === id)?.title || id
+  const title = (id) => { const e = experiments.find(x => x.id === id); return e ? (e.collection ? e.collection.code + ' ' : '') + e.title : id }
   const aTitle = (id) => assignments.find(a => a._id === id)?.title || (id ? 'Assignment' : 'Practice')
 
   const exportCsv = () => {
