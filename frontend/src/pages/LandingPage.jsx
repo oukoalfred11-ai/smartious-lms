@@ -46,10 +46,12 @@ import {
   VIETNAM_CITIES, VIETNAM_COUNTRY, THAILAND_CITIES, THAILAND_COUNTRY,
   NIGERIA_CITIES, NIGERIA_COUNTRY, BAHRAIN_CITIES, BAHRAIN_COUNTRY,
 } from '../data/lazyData.js'
+import { withTeacherSlugs, teacherPath, teacherTitle, teacherDescription } from '../data/teacherSlug.js'
 import { CURRICULA } from '../data/curricula.js'
 import { SERVICES } from '../data/services.js'
 import CountryCityPage from '../components/CountryCityPage.jsx'
 import CountryHub from '../components/CountryHub.jsx'
+import HeroBackdrop from '../components/HeroBackdrop.jsx'
 import AssessmentForm from '../components/AssessmentForm.jsx'
 import { TEST_PREP } from '../data/testPrep.js'
 import { STUDY_ABROAD } from '../data/studyAbroad.js'
@@ -215,22 +217,22 @@ function spaClick(nav, href, before) {
   }
 }
 
-/* ── IntakeCta — January 2027 intake call to action ───────── */
+/* ── IntakeCta — the 2027 admissions call to action ─────────
+ * ONE call to action, to the assessment booking page (/assessment),
+ * because every Smartious enrolment starts with an assessment. The old
+ * "Apply now" link to a separate application page (/enroll) is gone;
+ * /enroll now 301s to /assessment (public/_redirects). */
 function IntakeCta({ nav, compact }) {
   return (
     <div style={{background:'#080C14',color:'#fff',padding: compact ? '14px 0' : '22px 0',borderTop:'3px solid #C9973A'}}>
       <div className="wrap" style={{display:'flex',flexWrap:'wrap',alignItems:'center',justifyContent:'center',gap:'10px 18px',textAlign:'center'}}>
         <span style={{fontSize: compact ? 14 : 15.5,lineHeight:1.5}}>
-          <strong style={{color:'#C9973A'}}>January 2027 intake</strong>
-          {' — '}Term 2 starts 5 January 2027{' — '}apply now
+          <strong style={{color:'#C9973A'}}>2027 admissions are open.</strong>
+          {' '}Term 2 starts on 5 January 2027, and every enrolment begins with an assessment.
         </span>
-        <a href="/blog/january-2027-intake" onClick={spaClick(nav, '/blog/january-2027-intake')}
-          style={{color:'#fff',fontWeight:700,fontSize:13.5,textDecoration:'underline',textUnderlineOffset:3}}>
-          January 2027 intake details
-        </a>
-        <a href="/enroll" onClick={spaClick(nav, '/enroll')}
-          style={{background:'#8B1A2E',color:'#fff',fontWeight:800,fontSize:13,padding:'9px 18px',borderRadius:6,textDecoration:'none'}}>
-          Apply now
+        <a href="/assessment" onClick={spaClick(nav, '/assessment')}
+          style={{background:'#8B1A2E',color:'#fff',fontWeight:800,fontSize:13,padding:'10px 20px',borderRadius:6,textDecoration:'none'}}>
+          Book assessment for 2027 admissions
         </a>
       </div>
     </div>
@@ -338,73 +340,6 @@ const V = {
   white:'#FFFFFF',
 }
 
-/* ── ENROLMENT DATA — curriculum × year levels for adaptive enrolment page ──
-   Single source of truth for what each curriculum/year combination requires.
-   Fees here are summaries — the full pricing page (/pricing) has all details.
-   When parents pick curriculum + year, this drives the displayed content.
-   The application fee (USD 38 / KES 5,000) is uniform across all combinations. */
-const ENROLMENT_DATA = {
-  cambridge: {
-    label: 'Cambridge International',
-    description: 'Cambridge IGCSE, Cambridge International AS & A-Levels, and Cambridge Primary / Lower Secondary. Globally recognised by universities worldwide.',
-    examBoard: 'Cambridge International Examinations (CIE)',
-    levels: [
-      { id:'primary',     label:'Cambridge Primary',         years:'Year 1–6',   ages:'Ages 5–11',   feeFrom:'From USD 423/mo', feeRef:'Primary Homeschool tier' },
-      { id:'lowersec',    label:'Cambridge Lower Secondary', years:'Year 7–9',   ages:'Ages 11–14',  feeFrom:'Fees vary by curriculum and level', feeRef:'Junior Secondary tier' },
-      { id:'igcse',       label:'Cambridge IGCSE',           years:'Year 10–11', ages:'Ages 14–16',  feeFrom:'Fees vary by curriculum and level', feeRef:'IGCSE tier · Most Popular' },
-      { id:'alevel',      label:'Cambridge A-Level',         years:'Year 12–13', ages:'Ages 16–19',  feeFrom:'Fees vary by curriculum and level', feeRef:'A-Level tier · up to 4 subjects' },
-    ],
-    subjects: 'English Language & Literature, Mathematics, Sciences (Biology, Chemistry, Physics), Humanities (History, Geography), Languages (French, Kiswahili), Business Studies, Economics, ICT, Computer Science.',
-  },
-  edexcel: {
-    label: 'Pearson Edexcel International',
-    description: 'Pearson Edexcel International GCSE, IAL and IAL Further Maths. Widely accepted alternative to Cambridge.',
-    examBoard: 'Pearson Edexcel International',
-    levels: [
-      { id:'igcse',     label:'Edexcel International GCSE',   years:'Year 10–11', ages:'Ages 14–16', feeFrom:'Fees vary by curriculum and level', feeRef:'IGCSE tier' },
-      { id:'ial',       label:'Edexcel IAL (A-Level)',         years:'Year 12–13', ages:'Ages 16–19', feeFrom:'Fees vary by curriculum and level', feeRef:'A-Level tier' },
-    ],
-    subjects: 'English Language A & B, Mathematics, Further Mathematics, Sciences, Humanities, Business, Economics, Computer Science.',
-  },
-  ib: {
-    label: 'International Baccalaureate (IB)',
-    description: 'IB Middle Years Programme (MYP) and IB Diploma Programme (DP). The most rigorous internationally recognised pathway.',
-    examBoard: 'International Baccalaureate Organization (IBO)',
-    levels: [
-      { id:'pyp',     label:'IB Primary Years (PYP)',  years:'Year 1–6',     ages:'Ages 5–11',   feeFrom:'From USD 423/mo', feeRef:'Primary Homeschool tier' },
-      { id:'myp_1_3', label:'IB MYP Years 1–3',         years:'Grade 6–8',    ages:'Ages 11–14',  feeFrom:'Fees vary by curriculum and level', feeRef:'Junior Secondary tier' },
-      { id:'myp_4_5', label:'IB MYP Years 4–5',         years:'Grade 9–10',   ages:'Ages 14–16',  feeFrom:'Fees vary by curriculum and level', feeRef:'IGCSE-equivalent tier' },
-      { id:'dp',      label:'IB Diploma Programme',     years:'Grade 11–12',  ages:'Ages 16–19',  feeFrom:'Fees vary by curriculum and level', feeRef:'IB Diploma tier · 6 subjects + TOK / EE / CAS' },
-    ],
-    subjects: 'Language & Literature, Language Acquisition, Individuals & Societies, Sciences, Mathematics, Arts, Physical & Health Education, Design. Plus IDU (Interdisciplinary Unit) and Service & Action.',
-  },
-  cbc: {
-    label: 'Kenya CBC (Competency-Based Curriculum)',
-    description: 'Kenyan national curriculum following KICD standards. Pre-Primary through Senior School.',
-    examBoard: 'Kenya National Examinations Council (KNEC)',
-    levels: [
-      { id:'pp',          label:'Pre-Primary',            years:'PP1–PP2',         ages:'Ages 4–6',   feeFrom:'From USD 423/mo', feeRef:'Primary tier' },
-      { id:'lower',       label:'Lower Primary',          years:'Grade 1–3',       ages:'Ages 6–9',   feeFrom:'From USD 423/mo', feeRef:'Primary tier' },
-      { id:'upper',       label:'Upper Primary',          years:'Grade 4–6',       ages:'Ages 9–12',  feeFrom:'From USD 423/mo', feeRef:'Primary tier' },
-      { id:'jss',         label:'Junior Secondary',       years:'Grade 7–9',       ages:'Ages 12–14', feeFrom:'Fees vary by curriculum and level', feeRef:'Junior Secondary tier' },
-      { id:'sss',         label:'Senior Secondary',       years:'Grade 10–12',     ages:'Ages 14–17', feeFrom:'Fees vary by curriculum and level', feeRef:'Senior tier' },
-    ],
-    subjects: 'Mathematics, English, Kiswahili, Science & Technology, Social Studies, Religious Education, Creative Arts, Physical Education, plus pathway choices at Senior School.',
-  },
-  american: {
-    label: 'American (K-12 with AP)',
-    description: 'American High School Diploma with Advanced Placement (AP) courses. Recognised by US universities and increasingly internationally.',
-    examBoard: 'College Board (AP) and Smartious-issued transcripts',
-    levels: [
-      { id:'elem',  label:'Elementary',     years:'K–5',     ages:'Ages 5–11',   feeFrom:'From USD 423/mo', feeRef:'Primary tier' },
-      { id:'mid',   label:'Middle School',  years:'Grade 6–8',  ages:'Ages 11–14',  feeFrom:'Fees vary by curriculum and level', feeRef:'Junior Secondary tier' },
-      { id:'hs',    label:'High School',    years:'Grade 9–12', ages:'Ages 14–18',  feeFrom:'Fees vary by curriculum and level', feeRef:'High School tier' },
-      { id:'ap',    label:'AP Courses',     years:'Grade 11–12', ages:'Ages 16–18', feeFrom:'Fees vary by curriculum and level', feeRef:'AP Subject add-on' },
-    ],
-    subjects: 'English, Mathematics, Sciences, Social Studies, Foreign Language, Arts/Health/PE. AP: Calculus AB/BC, Sciences, English Literature, US/World History, Economics, Computer Science.',
-  },
-}
-
 const styles = `
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   .lp{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:${V.bone};color:${V.ink};overflow-x:hidden;line-height:1.65}
@@ -445,6 +380,7 @@ const styles = `
   .lp .lp-header.scrolled{box-shadow:0 4px 30px rgba(0,0,0,.5)}
   .lp .lp-header.scrolled #topbar{display:none}
   .lp #hero{padding-top:36px}
+  .lp .lp-head-space{height:103px;background:${V.ink}}
   .lp .nav-wrap{max-width:1440px;margin:0 auto;padding:0 48px;height:64px;display:flex;align-items:center;gap:0}
   .lp .logo-lockup{display:flex;align-items:center;gap:13px;cursor:pointer;flex-shrink:0}
   .lp .logo-emblem{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,${V.cr},${V.cr2});display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(139,26,46,.4)}
@@ -607,7 +543,7 @@ const styles = `
   /* CURRICULA */
   .lp .cur-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:60px}
   /* ── Meet Our Team: dark stage, slanted portraits, pyramid tiers ── */
-  .lp .tm-stage{background:radial-gradient(ellipse at 50% 0%,#24151A 0%,#14171D 45%,#0E1015 100%);color:#fff;padding:120px 0 90px;position:relative;overflow:hidden}
+  .lp .tm-stage{background:radial-gradient(ellipse at 50% 0%,#24151A 0%,#14171D 45%,#0E1015 100%);color:#fff;padding:56px 0 90px;position:relative;overflow:hidden}
   .lp .tm-stage::after{content:'';position:absolute;right:-60px;bottom:-40px;width:260px;height:260px;background:repeating-linear-gradient(115deg,${V.cr} 0 22px,transparent 22px 40px);opacity:.35;transform:skewX(-18deg);pointer-events:none}
   .lp .tm-head{text-align:center;max-width:720px;margin:0 auto 56px}
   .lp .tm-eyebrow{font-size:11.5px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:${V.gold3}}
@@ -622,13 +558,13 @@ const styles = `
   .lp .tm-tier-h{display:flex;align-items:center;gap:14px;width:100%;max-width:760px;margin-bottom:22px;font-size:11.5px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:${V.gold3}}
   .lp .tm-tier-h::before,.lp .tm-tier-h::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(201,151,58,.55),transparent)}
   .lp .tm-row{display:flex;flex-wrap:wrap;justify-content:center;gap:28px 24px;width:100%}
-  .lp .tm-person{background:none;border:none;padding:0;cursor:pointer;width:210px;text-align:left;font-family:inherit;color:inherit}
+  .lp .tm-person{display:block;background:none;border:none;padding:0;cursor:pointer;width:210px;text-align:left;font-family:inherit;color:inherit;text-decoration:none}
   .lp .tm-tier-principal .tm-person{width:270px}
   .lp .tm-tier-support .tm-person{width:180px}
   .lp .tm-frame{position:relative;padding:14px 0 0 16px}
   .lp .tm-accent{position:absolute;left:4px;top:0;width:58%;height:70%;background:linear-gradient(135deg,${V.cr2},${V.cr});transform:skewX(-14deg);border-radius:3px;transition:transform .35s}
   .lp .tm-shape{position:relative;aspect-ratio:3/3.7;overflow:hidden;transform:skewX(-14deg);border-radius:4px;background:linear-gradient(135deg,#2A2F38,#1B1F26);box-shadow:0 18px 40px rgba(0,0,0,.45)}
-  .lp .tm-img{position:absolute;top:0;left:-18%;width:136%;height:100%;object-fit:cover;transform:skewX(14deg);transition:transform .6s}
+  .lp .tm-img{position:absolute;top:0;left:-18%;width:136%;max-width:none;height:100%;object-fit:cover;transform:skewX(14deg);transition:transform .6s}
   .lp .tm-initials{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transform:skewX(14deg);font-family:'DM Serif Display',Georgia,serif;font-size:3.6rem;font-weight:700;color:${V.gold3}}
   .lp .tm-person:hover .tm-img{transform:skewX(14deg) scale(1.06)}
   .lp .tm-person:hover .tm-accent{transform:skewX(-14deg) translate(-4px,-4px)}
@@ -639,16 +575,17 @@ const styles = `
   .lp .tm-name{font-weight:900;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:#fff;line-height:1.25}
   .lp .tm-tier-principal .tm-name{font-size:16.5px}
   .lp .tm-role{font-style:italic;font-size:12.5px;color:rgba(255,255,255,.86);margin-top:2px}
-  .lp .tm-modal{position:fixed;inset:0;z-index:300;background:rgba(6,8,12,.72);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px}
-  .lp .tm-sheet{position:relative;background:#14171D;color:#fff;border:1px solid rgba(201,151,58,.35);border-radius:22px;max-width:820px;width:100%;max-height:90vh;overflow:auto;display:grid;grid-template-columns:300px 1fr;box-shadow:0 30px 80px rgba(0,0,0,.6)}
-  .lp .tm-sheet-photo{position:relative;min-height:340px;background:linear-gradient(135deg,${V.cr},#3D0712)}
-  .lp .tm-sheet-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-  .lp .tm-sheet-photo .tm-initials{transform:none}
-  .lp .tm-sheet-body{padding:30px 30px 28px}
-  .lp .tm-x{position:absolute;top:12px;right:14px;width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.2);background:rgba(20,23,29,.7);color:#fff;font-size:22px;line-height:1;cursor:pointer;z-index:2}
-  .lp .tm-badge{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#14171D;background:${V.gold3};padding:4px 11px;border-radius:99px;margin-bottom:10px}
-  .lp .tm-sheet-name{font-family:'DM Serif Display',Georgia,serif;font-size:2rem;margin:0;line-height:1.1;color:#fff}
-  .lp .tm-sheet-role{font-style:italic;color:${V.gold3};font-size:14.5px;margin-top:6px}
+  .lp .tp-back{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.78);margin-bottom:38px;position:relative;z-index:1;transition:color .2s}
+  .lp .tp-back:hover{color:${V.gold3}}
+  .lp .tp-grid{position:relative;z-index:1;display:grid;grid-template-columns:minmax(240px,340px) 1fr;gap:64px;align-items:start;max-width:1040px;margin:0 auto}
+  .lp .tp-photo .tm-frame{padding:20px 0 0 24px}
+  .lp .tp-name{font-family:'DM Serif Display',Georgia,serif;font-size:clamp(2.3rem,5vw,3.6rem);font-weight:400;line-height:1.05;margin:10px 0 0;color:#fff;letter-spacing:-.01em}
+  .lp .tp-role{font-style:italic;color:${V.gold3};font-size:17px;margin-top:10px}
+  .lp .tp-body .tm-bio{font-size:15.5px;max-width:640px}
+  .lp .tp-body .tm-lbl{font-family:inherit}
+  .lp .tp-actions{display:flex;flex-wrap:wrap;align-items:center;gap:14px 26px;margin-top:32px}
+  .lp .tp-more{font-size:13.5px;font-weight:700;color:#fff;border-bottom:1px solid rgba(201,151,58,.6);padding-bottom:2px}
+  .lp .tp-more:hover{color:${V.gold3}}
   .lp .tm-exp{display:inline-block;margin-top:14px;font-size:12.5px;font-weight:700;color:#fff;background:rgba(168,32,58,.35);border:1px solid rgba(168,32,58,.6);padding:5px 12px;border-radius:99px}
   .lp .tm-exp strong{color:${V.gold3};font-size:14px}
   .lp .tm-bio{font-size:14px;color:rgba(255,255,255,.82);line-height:1.8;margin:16px 0 0;white-space:pre-wrap}
@@ -657,12 +594,12 @@ const styles = `
   .lp .tm-list{margin:0;padding-left:18px}
   .lp .tm-list li{font-size:13.5px;color:rgba(255,255,255,.86);line-height:1.75}
   @media (max-width:720px){
-    .lp .tm-stage{padding:96px 0 70px}
+    .lp .tm-stage{padding:36px 0 70px}
     .lp .tm-person,.lp .tm-tier-support .tm-person{width:calc(50% - 22px)}
     .lp .tm-tier-principal .tm-person{width:68%}
     .lp .tm-row{gap:20px 14px;padding-right:14px;box-sizing:border-box}
-    .lp .tm-sheet{grid-template-columns:1fr}
-    .lp .tm-sheet-photo{min-height:280px}
+    .lp .tp-grid{grid-template-columns:1fr;gap:34px}
+    .lp .tp-photo{max-width:300px}
   }
   .lp .cc{background:${V.white};border:1px solid ${V.bone3};border-radius:24px;overflow:hidden;transition:all .3s;display:flex;flex-direction:column}
   .lp .cc:hover{transform:translateY(-5px);box-shadow:0 12px 40px rgba(8,12,20,.14);border-color:transparent}
@@ -1072,7 +1009,7 @@ function GuideCrossLinks({ guideSlug, guideName, hubHref, hubName }) {
   )
 }
 
-const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','tuition-uk','uk-area','homeschooling-kenya','kenya-city','virtual-school-kenya','virtual-school-ukraine','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschooling-malaysia','malaysia-city','homeschooling-turkey','turkey-city','homeschooling-kuwait','kuwait-city','homeschooling-nigeria','nigeria-city','homeschooling-bahrain','bahrain-city','homeschooling-oman','oman-city','homeschooling-taiwan','taiwan-city','homeschooling-ireland','ireland-city','homeschooling-united-kingdom','uk-city','homeschooling-india','india-city','homeschooling-germany','germany-city','homeschooling-romania','romania-city','homeschooling-ukraine','ukraine-city','homeschooling-spain','spain-city','homeschooling-denmark','denmark-city','homeschooling-france','france-city','homeschooling-italy','italy-city','homeschooling-poland','poland-city','homeschooling-portugal','portugal-city','homeschooling-czech-republic','czech-city','homeschooling-belgium','belgium-city','homeschooling-sweden','sweden-city','homeschooling-netherlands','netherlands-city','homeschooling-norway','norway-city','homeschooling-new-zealand','new-zealand-city','homeschooling-austria','austria-city','homeschooling-hungary','hungary-city','homeschooling-finland','finland-city','homeschooling-greece','greece-city','homeschooling-azerbaijan','azerbaijan-city','homeschooling-georgia','georgia-city','homeschooling-pakistan','pakistan-city','homeschooling-australia','australia-city','homeschooling-luxembourg','luxembourg-city-page','homeschooling-switzerland','switzerland-city','homeschooling-slovakia','slovakia-city','homeschooling-slovenia','slovenia-city','homeschooling-croatia','croatia-city','homeschooling-serbia','serbia-city','homeschooling-bulgaria','bulgaria-city','homeschooling-albania','albania-city','homeschooling-north-macedonia','north-macedonia-city','homeschooling-montenegro','montenegro-city','homeschooling-bosnia','bosnia-city','homeschooling-kosovo','kosovo-city','homeschooling-zambia','zambia-city','homeschooling-zimbabwe','zimbabwe-city','homeschooling-botswana','botswana-city','homeschooling-namibia','namibia-city','homeschooling-algeria','algeria-city','homeschooling-tunisia','tunisia-city','homeschooling-mauritius','mauritius-city','homeschooling-ghana','ghana-city','homeschooling-angola','angola-city','homeschooling-drc','drc-city','homeschooling-mexico','mexico-city-page','homeschooling-brazil','brazil-city','homeschooling-colombia','colombia-city','homeschooling-argentina','argentina-city','homeschooling-chile','chile-city','homeschooling-peru','peru-city','homeschooling-ecuador','ecuador-city','homeschooling-panama','panama-city-page','homeschooling-costa-rica','costa-rica-city','homeschooling-dominican-republic','dominican-city','homeschooling-uruguay','uruguay-city','homeschooling-guatemala','guatemala-city-page','homeschooling-paraguay','paraguay-city','homeschooling-bolivia','bolivia-city','homeschooling-venezuela','venezuela-city','homeschooling-puerto-rico','puerto-rico-city','homeschooling-israel','israel-city','homeschooling-jordan','jordan-city','homeschooling-iraq','iraq-city','homeschooling-cyprus','cyprus-city','homeschooling-lebanon','lebanon-city','homeschooling-myanmar','myanmar-city','homeschooling-maldives','maldives-city','homeschooling-china','china-city','homeschooling-bangladesh','bangladesh-city','homeschooling-nepal','nepal-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','assessment','contact','privacy','terms','cookies','gdpr','child-protection','academic-integrity','ai-policy','inclusion-policy','language-policy','article']
+const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','tuition-uk','uk-area','homeschooling-kenya','kenya-city','virtual-school-kenya','virtual-school-ukraine','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschooling-malaysia','malaysia-city','homeschooling-turkey','turkey-city','homeschooling-kuwait','kuwait-city','homeschooling-nigeria','nigeria-city','homeschooling-bahrain','bahrain-city','homeschooling-oman','oman-city','homeschooling-taiwan','taiwan-city','homeschooling-ireland','ireland-city','homeschooling-united-kingdom','uk-city','homeschooling-india','india-city','homeschooling-germany','germany-city','homeschooling-romania','romania-city','homeschooling-ukraine','ukraine-city','homeschooling-spain','spain-city','homeschooling-denmark','denmark-city','homeschooling-france','france-city','homeschooling-italy','italy-city','homeschooling-poland','poland-city','homeschooling-portugal','portugal-city','homeschooling-czech-republic','czech-city','homeschooling-belgium','belgium-city','homeschooling-sweden','sweden-city','homeschooling-netherlands','netherlands-city','homeschooling-norway','norway-city','homeschooling-new-zealand','new-zealand-city','homeschooling-austria','austria-city','homeschooling-hungary','hungary-city','homeschooling-finland','finland-city','homeschooling-greece','greece-city','homeschooling-azerbaijan','azerbaijan-city','homeschooling-georgia','georgia-city','homeschooling-pakistan','pakistan-city','homeschooling-australia','australia-city','homeschooling-luxembourg','luxembourg-city-page','homeschooling-switzerland','switzerland-city','homeschooling-slovakia','slovakia-city','homeschooling-slovenia','slovenia-city','homeschooling-croatia','croatia-city','homeschooling-serbia','serbia-city','homeschooling-bulgaria','bulgaria-city','homeschooling-albania','albania-city','homeschooling-north-macedonia','north-macedonia-city','homeschooling-montenegro','montenegro-city','homeschooling-bosnia','bosnia-city','homeschooling-kosovo','kosovo-city','homeschooling-zambia','zambia-city','homeschooling-zimbabwe','zimbabwe-city','homeschooling-botswana','botswana-city','homeschooling-namibia','namibia-city','homeschooling-algeria','algeria-city','homeschooling-tunisia','tunisia-city','homeschooling-mauritius','mauritius-city','homeschooling-ghana','ghana-city','homeschooling-angola','angola-city','homeschooling-drc','drc-city','homeschooling-mexico','mexico-city-page','homeschooling-brazil','brazil-city','homeschooling-colombia','colombia-city','homeschooling-argentina','argentina-city','homeschooling-chile','chile-city','homeschooling-peru','peru-city','homeschooling-ecuador','ecuador-city','homeschooling-panama','panama-city-page','homeschooling-costa-rica','costa-rica-city','homeschooling-dominican-republic','dominican-city','homeschooling-uruguay','uruguay-city','homeschooling-guatemala','guatemala-city-page','homeschooling-paraguay','paraguay-city','homeschooling-bolivia','bolivia-city','homeschooling-venezuela','venezuela-city','homeschooling-puerto-rico','puerto-rico-city','homeschooling-israel','israel-city','homeschooling-jordan','jordan-city','homeschooling-iraq','iraq-city','homeschooling-cyprus','cyprus-city','homeschooling-lebanon','lebanon-city','homeschooling-myanmar','myanmar-city','homeschooling-maldives','maldives-city','homeschooling-china','china-city','homeschooling-bangladesh','bangladesh-city','homeschooling-nepal','nepal-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','teacher-profile','login','consult','assessment','contact','privacy','terms','cookies','gdpr','child-protection','academic-integrity','ai-policy','inclusion-policy','language-policy','article']
 
 // ─────────────────────────────────────────────────────────────────
 // Google Business Profile reviews — Smartious Homeschool & Tuition
@@ -1224,203 +1161,6 @@ const SmartiousLogo = ({ size = 40, withText = false, tone = 'light' }) => {
   )
 }
 
-// Answer key: the CORRECT option is always the first item in `opts`.
-// We shuffle per-render so position carries no signal.
-const QUESTION_BANK = {
-  'primary-lower': {
-    math: [
-      {id:'pl-m-1', q:'What is 4 + 5?',                         opts:['9','8','10','7']},
-      {id:'pl-m-2', q:'How many sides does a triangle have?',   opts:['3','4','5','6']},
-      {id:'pl-m-3', q:'What comes next: 2, 4, 6, __ ?',         opts:['8','7','9','10']},
-      {id:'pl-m-4', q:'Which is the biggest number?',           opts:['23','17','9','12']},
-      {id:'pl-m-5', q:'15 − 7 = ?',                             opts:['8','9','7','6']},
-      {id:'pl-m-6', q:'How many tens are in 30?',               opts:['3','30','10','0']},
-      {id:'pl-m-7', q:'A pencil costs KES 20. Two pencils cost?', opts:['KES 40','KES 22','KES 30','KES 200']},
-      {id:'pl-m-8', q:'What time does the clock show if the hour hand is on 3 and minute hand on 12?', opts:['3 o\u2019clock','12 o\u2019clock','3:30','3:12']},
-    ],
-    english: [
-      {id:'pl-e-1', q:'Choose the correct word: "I ___ a student."',  opts:['am','is','are','be']},
-      {id:'pl-e-2', q:'What is the plural of "book"?',                opts:['books','bookes','book\u2019s','bookies']},
-      {id:'pl-e-3', q:'Which word is an animal?',                     opts:['Lion','Chair','Cup','Tree']},
-      {id:'pl-e-4', q:'Pick the correct spelling:',                   opts:['Friend','Freind','Frend','Frendd']},
-      {id:'pl-e-5', q:'Opposite of "hot":',                           opts:['cold','warm','sunny','dry']},
-      {id:'pl-e-6', q:'Which one is a question?',                     opts:['Where is my bag?','My bag is red.','I like my bag.','Open the bag!']},
-      {id:'pl-e-7', q:'Choose the naming word (noun):',               opts:['Teacher','Quickly','Run','Blue']},
-      {id:'pl-e-8', q:'Finish the rhyme: "The cat sat on the ___"',   opts:['mat','dog','roof','mug']},
-    ],
-  },
-  'primary-upper': {
-    math: [
-      {id:'pu-m-1', q:'What is 125 \u00F7 5?',                        opts:['25','20','30','15']},
-      {id:'pu-m-2', q:'The perimeter of a square with side 6 cm is:', opts:['24 cm','12 cm','36 cm','18 cm']},
-      {id:'pu-m-3', q:'Convert 3/4 to a decimal:',                    opts:['0.75','0.34','0.43','0.075']},
-      {id:'pu-m-4', q:'What is 15% of 200?',                          opts:['30','15','20','45']},
-      {id:'pu-m-5', q:'If a train travels 120 km in 2 hours, its speed is:', opts:['60 km/h','120 km/h','240 km/h','30 km/h']},
-      {id:'pu-m-6', q:'The area of a rectangle 8 m \u00D7 5 m is:',   opts:['40 m\u00B2','13 m\u00B2','26 m\u00B2','80 m\u00B2']},
-      {id:'pu-m-7', q:'Round 4,678 to the nearest hundred:',          opts:['4,700','4,600','4,680','5,000']},
-      {id:'pu-m-8', q:'What is the smallest prime number?',           opts:['2','1','3','5']},
-      {id:'pu-m-9', q:'A pizza is cut into 8 equal slices. If you eat 3, what fraction is left?', opts:['5/8','3/8','3/5','5/3']},
-    ],
-    english: [
-      {id:'pu-e-1', q:'Choose the correct sentence:', opts:['She doesn\u2019t like apples.','She don\u2019t like apples.','She doesn\u2019t likes apples.','She don\u2019t likes apples.']},
-      {id:'pu-e-2', q:'What is a synonym for "happy"?', opts:['joyful','angry','tired','empty']},
-      {id:'pu-e-3', q:'Identify the verb: "The girl runs quickly."', opts:['runs','girl','quickly','the']},
-      {id:'pu-e-4', q:'Pick the correct spelling:', opts:['Necessary','Neccessary','Necesary','Nessecary']},
-      {id:'pu-e-5', q:'Punctuate: "where are you going"', opts:['Where are you going?','Where are you going.','where are you going?','Where Are You Going!']},
-      {id:'pu-e-6', q:'The opposite of "generous" is:', opts:['stingy','kind','loud','quiet']},
-      {id:'pu-e-7', q:'Which is a complete sentence?', opts:['The dog barked loudly.','Running down the street.','Because it was raining.','In the morning.']},
-      {id:'pu-e-8', q:'Choose the adjective: "The tall building shook."', opts:['tall','building','shook','the']},
-      {id:'pu-e-9', q:'"I saw ___ elephant at the zoo." Fill in the blank:', opts:['an','a','the','one']},
-    ],
-  },
-  'lower-sec': {
-    math: [
-      {id:'ls-m-1', q:'Simplify: 3x + 2y \u2212 x + 5y',                   opts:['2x + 7y','4x + 7y','2x + 3y','4x + 3y']},
-      {id:'ls-m-2', q:'In a right-angled triangle with legs 3 and 4, the hypotenuse is:', opts:['5','7','6','4.5']},
-      {id:'ls-m-3', q:'Solve for x: 2x + 6 = 18',                          opts:['6','12','9','3']},
-      {id:'ls-m-4', q:'What is (\u22125) + 8?',                            opts:['3','\u221213','13','\u22123']},
-      {id:'ls-m-5', q:'The mean of 4, 7, 9, 12 is:',                       opts:['8','7','9','10']},
-      {id:'ls-m-6', q:'Express 0.6 as a fraction in lowest terms:',        opts:['3/5','6/10','2/3','1/6']},
-      {id:'ls-m-7', q:'The sum of angles in a triangle is:',               opts:['180\u00B0','90\u00B0','360\u00B0','270\u00B0']},
-      {id:'ls-m-8', q:'What is 2\u00B3 \u00D7 2\u00B2?',                   opts:['32','16','64','10']},
-      {id:'ls-m-9', q:'If y = 3x \u2212 4 and x = 5, find y:',             opts:['11','15','19','\u221211']},
-      {id:'ls-m-10',q:'The probability of rolling a 3 on a fair die is:',  opts:['1/6','1/3','1/2','3/6']},
-    ],
-    english: [
-      {id:'ls-e-1', q:'Identify the correct sentence:', opts:['Neither of the boys is here.','Neither of the boys are here.','Neither of the boys were here.','Neither of the boys be here.']},
-      {id:'ls-e-2', q:'What is the main idea of a paragraph usually found in?', opts:['The topic sentence','The last word','The middle sentence','The punctuation']},
-      {id:'ls-e-3', q:'Choose the correct punctuation: "I asked \u2018Where is my book"', opts:['I asked, "Where is my book?"','I asked where is my book','I asked. "where is my book?"','I asked "where is my book"']},
-      {id:'ls-e-4', q:'Which word is a conjunction?', opts:['although','quickly','beautiful','run']},
-      {id:'ls-e-5', q:'A metaphor is:', opts:['A direct comparison without "like" or "as"','An exaggeration','A sound word','A repeated letter']},
-      {id:'ls-e-6', q:'Pick the correct past tense: "Yesterday she ___ home."', opts:['went','goes','go','going']},
-      {id:'ls-e-7', q:'Identify the subject: "The loud bell rang suddenly."', opts:['The loud bell','rang','suddenly','bell rang']},
-      {id:'ls-e-8', q:'Which word means "to make shorter"?', opts:['abbreviate','elongate','dilate','irritate']},
-      {id:'ls-e-9', q:'Choose correct spelling:', opts:['Accommodate','Accomodate','Acommodate','Accomadate']},
-      {id:'ls-e-10',q:'Select the adverb: "She sang beautifully."', opts:['beautifully','sang','she','the']},
-    ],
-  },
-  'igcse': {
-    math: [
-      {id:'ig-m-1', q:'Solve: 3(x \u2212 2) = 15',                             opts:['x = 7','x = 5','x = 3','x = 9']},
-      {id:'ig-m-2', q:'Factorise fully: x\u00B2 \u2212 9',                     opts:['(x \u2212 3)(x + 3)','(x \u2212 3)\u00B2','(x + 3)\u00B2','x(x \u2212 9)']},
-      {id:'ig-m-3', q:'The gradient of the line y = 4x \u2212 7 is:',          opts:['4','\u22127','\u22124','7']},
-      {id:'ig-m-4', q:'Solve the simultaneous equations: x + y = 10, x \u2212 y = 2', opts:['x = 6, y = 4','x = 4, y = 6','x = 5, y = 5','x = 8, y = 2']},
-      {id:'ig-m-5', q:'The area of a circle with radius 7 cm is (take \u03C0 = 22/7):', opts:['154 cm\u00B2','44 cm\u00B2','22 cm\u00B2','49 cm\u00B2']},
-      {id:'ig-m-6', q:'Simplify: (x\u00B2y\u00B3)(x\u00B3y)',                  opts:['x\u2075y\u2074','x\u2076y\u00B3','x\u2075y\u00B3','x\u2076y\u2074']},
-      {id:'ig-m-7', q:'sin(30\u00B0) = ?',                                     opts:['0.5','1','0','\u221A3/2']},
-      {id:'ig-m-8', q:'In similar triangles, corresponding sides are:',        opts:['proportional','equal','perpendicular','unrelated']},
-      {id:'ig-m-9', q:'If y \u221D x and y = 12 when x = 3, find y when x = 7:', opts:['28','21','17','35']},
-      {id:'ig-m-10',q:'Simplify: \u221A50',                                    opts:['5\u221A2','2\u221A5','25\u221A2','10\u221A5']},
-      {id:'ig-m-11',q:'The median of 3, 7, 8, 12, 15, 21 is:',                opts:['10','8','12','11']},
-      {id:'ig-m-12',q:'Solve: 2x\u00B2 \u2212 8 = 0',                          opts:['x = \u00B12','x = 4','x = \u22122','x = 0']},
-    ],
-    english: [
-      {id:'ig-e-1', q:'Identify the figure of speech in "Time is a thief":', opts:['Metaphor','Simile','Personification','Hyperbole']},
-      {id:'ig-e-2', q:'Which sentence uses the semicolon correctly?', opts:['She loves reading; her favourite genre is mystery.','She loves reading, her favourite genre; is mystery.','She; loves reading her favourite genre is mystery.','She loves; reading her favourite genre is mystery.']},
-      {id:'ig-e-3', q:'What is the tone of a text that mocks its subject?', opts:['Satirical','Nostalgic','Formal','Sympathetic']},
-      {id:'ig-e-4', q:'Choose the correct passive voice of "The chef cooked the meal":', opts:['The meal was cooked by the chef.','The meal is cooked by the chef.','The meal cooks by the chef.','The meal had cook by the chef.']},
-      {id:'ig-e-5', q:'The word "ambiguous" means:', opts:['having more than one possible meaning','very clear','loud and angry','completely true']},
-      {id:'ig-e-6', q:'In persuasive writing, a rhetorical question is used to:', opts:['engage the reader and provoke thought','state a fact','request actual information','insult the reader']},
-      {id:'ig-e-7', q:'Identify the subordinate clause: "Although it rained, we played outside."', opts:['Although it rained','we played outside','Although','outside']},
-      {id:'ig-e-8', q:'Which is an example of alliteration?', opts:['Peter Piper picked a peck','The bells rang loudly','She was as quiet as a mouse','He shouted with joy']},
-      {id:'ig-e-9', q:'A "protagonist" is:', opts:['the main character','the villain','the setting','the narrator only']},
-      {id:'ig-e-10',q:'Correct the sentence: "Me and him went to the shop."', opts:['He and I went to the shop.','Him and me went to the shop.','I and he went to the shop.','Me and he went to the shop.']},
-      {id:'ig-e-11',q:'What does "juxtaposition" create in a text?', opts:['a contrast between two ideas placed side by side','a chronological order','a rhyme scheme','a climax']},
-      {id:'ig-e-12',q:'Choose the correct spelling:', opts:['Conscientious','Consientious','Conscientous','Concientious']},
-    ],
-  },
-  'upper-sec': {
-    math: [
-      {id:'us-m-1', q:'Differentiate: f(x) = 3x\u2074 \u2212 5x\u00B2 + 7',     opts:['12x\u00B3 \u2212 10x','12x\u00B3 \u2212 5x','4x\u00B3 \u2212 10x','12x\u00B4 \u2212 10x']},
-      {id:'us-m-2', q:'\u222B (2x + 3) dx =',                                   opts:['x\u00B2 + 3x + C','2x\u00B2 + 3x + C','x\u00B2 + 3 + C','2 + C']},
-      {id:'us-m-3', q:'If log\u2081\u2080(x) = 3, then x =',                    opts:['1000','30','100','10\u00B3\u2080']},
-      {id:'us-m-4', q:'The discriminant of x\u00B2 \u2212 4x + 4 = 0 is:',      opts:['0','16','8','\u22124']},
-      {id:'us-m-5', q:'lim (x\u21920) sin(x)/x =',                              opts:['1','0','\u221E','undefined']},
-      {id:'us-m-6', q:'Solve: e\u02E3 = 7. Then x =',                           opts:['ln 7','log 7','7\u1D49','1/7']},
-      {id:'us-m-7', q:'The derivative of ln(x) is:',                            opts:['1/x','ln(x) + 1','e\u02E3','x ln(x)']},
-      {id:'us-m-8', q:'In a binomial distribution n=10, p=0.5, the mean is:',  opts:['5','10','0.5','2.5']},
-      {id:'us-m-9', q:'The magnitude of vector (3, 4) is:',                    opts:['5','7','\u221A7','25']},
-      {id:'us-m-10',q:'cos(60\u00B0) + sin(30\u00B0) =',                        opts:['1','0','\u221A3','0.5']},
-      {id:'us-m-11',q:'Solve: |2x \u2212 3| = 5',                               opts:['x = 4 or x = \u22121','x = 4 only','x = \u22121 only','x = 2.5']},
-      {id:'us-m-12',q:'A matrix has det = 0 when it is:',                       opts:['singular (non-invertible)','orthogonal','symmetric','identity']},
-    ],
-    english: [
-      {id:'us-e-1', q:'Which literary device is at play in "She was drowning in paperwork"?', opts:['Metaphor','Simile','Oxymoron','Allusion']},
-      {id:'us-e-2', q:'A Shakespearean sonnet has how many lines?', opts:['14','12','16','10']},
-      {id:'us-e-3', q:'The term "unreliable narrator" means:', opts:['a storyteller whose credibility is compromised','a narrator who speaks in verse','an author who writes anonymously','a character who never speaks']},
-      {id:'us-e-4', q:'Which is an example of dramatic irony?', opts:['The audience knows something characters do not','Two characters argue loudly','A play within a play','A sudden plot twist']},
-      {id:'us-e-5', q:'The word "ephemeral" most closely means:', opts:['lasting for a very short time','extremely heavy','spiritually uplifting','widely spread']},
-      {id:'us-e-6', q:'In an argumentative essay, a counter-argument:', opts:['acknowledges the opposing view before refuting it','restates the thesis','provides a summary','lists sources']},
-      {id:'us-e-7', q:'"Stream of consciousness" is most associated with which author?', opts:['Virginia Woolf','Charles Dickens','Jane Austen','Ernest Hemingway']},
-      {id:'us-e-8', q:'Identify the correct use of the subjunctive:', opts:['If I were rich, I would travel.','If I was rich, I would travel.','If I am rich, I would travel.','If I be rich, I will travel.']},
-      {id:'us-e-9', q:'A "pathetic fallacy" is when:', opts:['the weather or nature reflects human emotion','an argument uses weak evidence','a character feels sorry for themselves','a metaphor fails']},
-      {id:'us-e-10',q:'Which is the correct plural possessive?', opts:['The children\u2019s books','The childrens\u2019 books','The children\u2019 books','The childrens books']},
-      {id:'us-e-11',q:'In rhetoric, "ethos" appeals to:', opts:['credibility and character','emotion','logic','time and place']},
-      {id:'us-e-12',q:'The structural device where a narrative starts at the climax is called:', opts:['in medias res','denouement','exposition','epilogue']},
-    ],
-  },
-  'foundation': {
-    math: [
-      {id:'fd-m-1', q:'Solve: log\u2082(32) =',                                 opts:['5','4','6','32']},
-      {id:'fd-m-2', q:'The integral \u222B x e\u02E3 dx (by parts) gives:',     opts:['xe\u02E3 \u2212 e\u02E3 + C','xe\u02E3 + C','e\u02E3 + C','x\u00B2e\u02E3/2 + C']},
-      {id:'fd-m-3', q:'Compound interest at 5% p.a. on $1000 for 2 years (annually compounded) ends at:', opts:['$1102.50','$1100.00','$1050.00','$1105.00']},
-      {id:'fd-m-4', q:'The inverse of the function f(x) = 2x + 3 is:',          opts:['(x \u2212 3)/2','(x + 3)/2','2x \u2212 3','1/(2x + 3)']},
-      {id:'fd-m-5', q:'The derivative of sin(2x) is:',                          opts:['2cos(2x)','cos(2x)','\u22122cos(2x)','2sin(2x)']},
-      {id:'fd-m-6', q:'A data set has mean 50 and standard deviation 5. A value of 60 is how many standard deviations above the mean?', opts:['2','1','10','0.2']},
-      {id:'fd-m-7', q:'If P(A)=0.3 and P(B)=0.5 and events are independent, P(A and B) =', opts:['0.15','0.8','0.2','0.35']},
-      {id:'fd-m-8', q:'The roots of x\u00B2 \u2212 5x + 6 = 0 are:',            opts:['2 and 3','\u22122 and \u22123','1 and 6','\u22121 and 6']},
-    ],
-    english: [
-      {id:'fd-e-1', q:'In academic writing, "citation" serves to:', opts:['credit sources and avoid plagiarism','make text longer','add decoration','replace your own argument']},
-      {id:'fd-e-2', q:'A "thesis statement" in an essay is:', opts:['the central claim the essay argues for','the concluding line','a list of sources','the opening anecdote']},
-      {id:'fd-e-3', q:'Choose the most formal register:', opts:['The research indicates a significant correlation.','The data kinda shows they\u2019re linked.','Stuff suggests they\u2019re connected.','Seems linked to me.']},
-      {id:'fd-e-4', q:'The word "empirical" refers to knowledge based on:', opts:['observation and evidence','belief','tradition','intuition']},
-      {id:'fd-e-5', q:'"Plagiarism" is:', opts:['presenting someone else\u2019s work as your own','quoting a source correctly','paraphrasing with attribution','disagreeing with a source']},
-      {id:'fd-e-6', q:'In a literature review, one should primarily:', opts:['synthesise and critique existing research','repeat your thesis','insert personal anecdotes','summarise each source in isolation only']},
-      {id:'fd-e-7', q:'The tone of an effective personal statement is typically:', opts:['reflective and authentic','boastful','apologetic','informal']},
-      {id:'fd-e-8', q:'"Analyse" as a command verb asks you to:', opts:['break something into parts to examine it','give an opinion','describe briefly','list without detail']},
-    ],
-  },
-}
-
-// Detect academic level from user's selections — gradeLevel takes priority,
-// then we infer from curriculum / programme as a fallback.
-function detectLevel(enrollForm, currentProg) {
-  if (enrollForm.gradeLevel && QUESTION_BANK[enrollForm.gradeLevel]) return enrollForm.gradeLevel
-  if (currentProg === 'iufp') return 'foundation'
-  const c = (enrollForm.curriculum || '').toLowerCase()
-  if (c.includes('a-level') || c.includes('a level') || c.includes('ib diploma')) return 'upper-sec'
-  if (c.includes('igcse') || c.includes('edexcel')) return 'igcse'
-  if (c.includes('pyp') || c.includes('myp')) return 'lower-sec'
-  if (c.includes('cbc') || c.includes('kcse')) return 'lower-sec'
-  if (c.includes('british') || c.includes('american')) return 'igcse'
-  return 'igcse' // sensible default
-}
-
-// Fisher-Yates shuffle — returns a new array, does not mutate input
-function shuffle(arr) {
-  const a = arr.slice()
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[a[i], a[j]] = [a[j], a[i]]
-  }
-  return a
-}
-
-// Build the 6-question assessment: 3 Math + 3 English from the detected level,
-// with options shuffled. Correct answer is always opts[0] in the bank — we
-// record the correct answer before shuffling so we can mark it later.
-function buildAssessment(level) {
-  const bank = QUESTION_BANK[level] || QUESTION_BANK['igcse']
-  const mathPicks    = shuffle(bank.math).slice(0, 3)
-  const englishPicks = shuffle(bank.english).slice(0, 3)
-  const merged = shuffle([
-    ...mathPicks.map(q    => ({...q, subject:'Mathematics', correct:q.opts[0]})),
-    ...englishPicks.map(q => ({...q, subject:'English',     correct:q.opts[0]})),
-  ])
-  // Shuffle each question's options so correct answer isn't always first
-  return merged.map(q => ({...q, opts: shuffle(q.opts)}))
-}
 
 // ═══════════════════════════════════════════════════════════
 // BLOG ARTICLES — full content for each of the 10 posts
@@ -2063,10 +1803,7 @@ const PAGE_META = {
     title: 'Meet Our Team | Qualified Teachers | Smartious',
     desc: 'Meet the Smartious teaching team: qualified subject specialists teaching live Cambridge IGCSE, A-Level, IB and CBC classes in Kenya and worldwide.',
   },
-  enroll: {
-    title: 'Apply for the January 2027 Intake | Smartious',
-    desc: 'Start your child\'s accredited home or online education with live classes: Cambridge, IB, Edexcel or CBC. From USD 423/month. Term 2 starts 5 Jan 2027.',
-  },
+
   consult: {
     title: 'Book an Assessment | Smartious Homeschool & eSchool',
     desc: 'Request an academic assessment with Smartious. Admissions reviews every request within three business days. January 2027 intake: apply now.',
@@ -2683,11 +2420,9 @@ export default function LandingPage() {
   const [publicTeachers, setPublicTeachers] = useState([])
   const [teachersLoading, setTeachersLoading] = useState(false)
   const [teachersLoaded, setTeachersLoaded] = useState(false)
-  const [expandedTeacher, setExpandedTeacher] = useState(null)
-  const [wizStep, setWizStep] = useState(1)
-  const [currentProg, setCurrentProg] = useState('homeschool')
+  const [teachersFailed, setTeachersFailed] = useState(false)
+  const [currentTeacherSlug, setCurrentTeacherSlug] = useState(null)   // /teachers/<slug>
   const [toast, setToast] = useState(null)
-  const [wizDone, setWizDone] = useState(false)
 
   // Malaysia Trip 2026 — application form state
   const [malaysiaTripForm, setMalaysiaTripForm] = useState({
@@ -2707,14 +2442,6 @@ export default function LandingPage() {
   const [paystackEmail, setPaystackEmail] = useState('')
   const [paystackStudentName, setPaystackStudentName] = useState('')
   const [paystackProcessing, setPaystackProcessing] = useState(false)
-
-  // Enrolment page — adaptive curriculum/year picker + application fee payment
-  const [enrolCurriculum, setEnrolCurriculum] = useState('cambridge')   // default to most common
-  const [enrolLevel, setEnrolLevel] = useState(null)                     // selected level id, null until chosen
-  const [enrolParentName, setEnrolParentName] = useState('')
-  const [enrolStudentName, setEnrolStudentName] = useState('')
-  const [enrolEmail, setEnrolEmail] = useState('')
-  const [enrolAppFeeProcessing, setEnrolAppFeeProcessing] = useState(false)
 
   // Wednesday activity modal — null when closed, else holds the selected activity object
   const [openActivity, setOpenActivity] = useState(null)
@@ -2743,63 +2470,13 @@ export default function LandingPage() {
   }, [malaysiaTripForm.parentEmail, malaysiaTripForm.studentName])
 
 
-  // Enrollment wizard form data — collected across steps 1, 2, 4
-  const [enrollForm, setEnrollForm] = useState({
-    // Step 1 — Programme
-    programme: '',
-    curriculum: '',
-    learningMode: '',
-    pathway: '',
-    targetCountry: '',
-    destination: '',
-    duration: '',
-    // Step 2 — Details
-    firstName: '',
-    lastName: '',
-    parentEmail: '',
-    whatsapp: '+254 ',
-    dob: '',
-    country: '',
-    currentSchool: '',
-    gradeLevel: '',
-    heardFrom: '',
-    // Step 4 — Placement test answers (keyed by question id, built dynamically)
-    answers: {},
-    // Step 3.5 — Assessment mode chosen after payment
-    assessmentMode: '',        // 'online' | 'centre' | 'home'
-    assessmentAddress: '',     // only used when assessmentMode === 'home'
-  })
-
-  // Placement assessment — built when user reaches Step 4, held in state so
-  // answers persist if they navigate back/forward. Rebuilds if they change
-  // their level/curriculum selections.
-  const [assessment, setAssessment] = useState([])
-  const [assessmentLevel, setAssessmentLevel] = useState('')
-  const [enrollError, setEnrollError] = useState('')
   const [fabOpen, setFabOpen] = useState(false)
   // WhatsApp quick contact (admissions line), with the page the visitor came from.
   const whatsappHref = 'https://wa.me/254745021212?text=' + encodeURIComponent(
     'Hello Smartious, I would like to know more about admissions. (Page: smartioushomeschool.com' + window.location.pathname + ')')
 
-  // Build a fresh placement test when user reaches Step 4.
-  // Also rebuilds if they go back and change their level/curriculum.
-  useEffect(() => {
-    if (wizStep !== 4) return
-    const lvl = detectLevel(enrollForm, currentProg)
-    if (assessment.length === 0 || lvl !== assessmentLevel) {
-      setAssessment(buildAssessment(lvl))
-      setAssessmentLevel(lvl)
-      // Clear any old answers so the new question IDs start blank
-      setEnrollForm(f => ({...f, answers: {}}))
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wizStep, enrollForm.gradeLevel, enrollForm.curriculum, currentProg])
-
   // ── Paystack payment state ──────────────────────────────
   const PAYSTACK_PUBLIC_KEY = 'pk_live_a1608f5c5f71946ca1357afa673cd53ce4057af8'
-  const [payProcessing, setPayProcessing] = useState(false)
-  const [paySuccess, setPaySuccess]       = useState('')   // stores reference on success
-  const [payError, setPayError]           = useState('')
 
   // Lazy-load Paystack inline script on demand
   const loadPaystack = () => new Promise((resolve, reject) => {
@@ -2818,72 +2495,10 @@ export default function LandingPage() {
     document.body.appendChild(s)
   })
 
-  // Application Fee — single Paystack inline payment of USD 38 (KES 5,000).
-  // Pattern mirrors the Malaysia trip handler but with a fixed amount and
-  // metadata pointing to the chosen curriculum + level instead of instalment.
-  const handlePayApplicationFee = async () => {
-    setEnrolAppFeeProcessing(true)
-    if (!enrolEmail || !enrolParentName || !enrolStudentName) {
-      alert('Please fill in your name, your child\'s name, and email before paying the application fee.')
-      setEnrolAppFeeProcessing(false)
-      return
-    }
-    if (!enrolLevel) {
-      alert('Please select a year / grade level before paying the application fee.')
-      setEnrolAppFeeProcessing(false)
-      return
-    }
-
-    const APP_FEE_KES = 5000  // KES 5,000 = USD ~38 at current rate
-    const ref = `applicationfee-${enrolCurriculum}-${enrolLevel}-${Date.now()}`
-    const curriculumLabel = (ENROLMENT_DATA[enrolCurriculum] || {}).label || enrolCurriculum
-    const levelObj = (ENROLMENT_DATA[enrolCurriculum]?.levels || []).find(l => l.id === enrolLevel)
-    const levelLabel = levelObj ? levelObj.label : enrolLevel
-
-    let paid = false
-
-    try {
-      const PaystackPop = await loadPaystack()
-      const handler = PaystackPop.setup({
-        key: PAYSTACK_PUBLIC_KEY,
-        email: enrolEmail,
-        amount: APP_FEE_KES * 100,    // amount in kobo (KES * 100)
-        currency: 'KES',
-        ref,
-        metadata: {
-          custom_fields: [
-            { display_name:'Type',         variable_name:'type',         value:'Application Fee' },
-            { display_name:'Curriculum',   variable_name:'curriculum',   value:curriculumLabel },
-            { display_name:'Year / Grade', variable_name:'level',        value:levelLabel },
-            { display_name:'Parent',       variable_name:'parent_name',  value:enrolParentName },
-            { display_name:'Student',      variable_name:'student_name', value:enrolStudentName },
-          ],
-        },
-        callback: (response) => {
-          paid = true
-          setTimeout(() => {
-            setEnrolAppFeeProcessing(false)
-            alert(`Application fee received. Reference: ${response.reference}\n\nOur admissions team will email you within 1 working day with the next steps.`)
-          }, 0)
-        },
-        onClose: () => {
-          setTimeout(() => {
-            setEnrolAppFeeProcessing(false)
-            if (!paid) {
-              alert('Payment window was closed before completing payment. Please try again when you\'re ready.')
-            }
-          }, 0)
-        },
-      })
-      handler.openIframe()
-    } catch (e) {
-      alert('Could not open Paystack. Please check your internet connection and try again.')
-      setEnrolAppFeeProcessing(false)
-    }
-  }
 
   const nav = useNavigate()
   const location = useLocation()
+  const isHomePath = (location.pathname.replace(/\/+$/, '') || '/') === '/'
   const routeParams = useParams()
   const topRef = useRef(null)
 
@@ -2963,6 +2578,18 @@ export default function LandingPage() {
   }, [location.pathname])
 
   function applyPath(path) {
+    // A team member's profile page. The team list loads from the API
+    // (effect below); an unknown name becomes the not-found page there.
+    if (path.startsWith('/teachers/')) {
+      const slug = decodeURIComponent(path.slice('/teachers/'.length)).toLowerCase()
+      if (slug && !slug.includes('/')) {
+        setCurrentTeacherSlug(slug)
+        setPage('teacher-profile')
+      } else {
+        setPage('not-found')
+      }
+      return
+    }
     if (path.startsWith('/blog/')) {
       const slug = decodeURIComponent(path.slice('/blog/'.length))
       if (slug && ARTICLES_INDEX[slug]) {
@@ -4174,7 +3801,8 @@ export default function LandingPage() {
       return
     }
     const id = path === '/' ? 'home' : path.slice(1)
-    if (PAGES.includes(id) && id !== 'article') {
+    // 'article' and 'teacher-profile' are only reachable by their slug URLs.
+    if (PAGES.includes(id) && id !== 'article' && id !== 'teacher-profile') {
       setPage(id)
     } else {
       setPage('not-found')
@@ -4888,6 +4516,12 @@ export default function LandingPage() {
   } else if (page === 'homeschooling-oman' && OMAN_COUNTRY?.seoTitle) {
     metaTitle = OMAN_COUNTRY.seoTitle
     metaDesc  = OMAN_COUNTRY.seoDesc || PAGE_META[page].desc
+  } else if (page === 'teacher-profile') {
+    // Until the team list arrives, the profile page carries the team
+    // page's description; then the person's own title and summary.
+    const t = publicTeachers.find(x => x.slug === currentTeacherSlug)
+    metaTitle = t ? teacherTitle(t) : PAGE_META.teachers.title
+    metaDesc  = t ? teacherDescription(t) : PAGE_META.teachers.desc
   } else if (PAGE_META[page]) {
     metaTitle = PAGE_META[page].title
     metaDesc  = PAGE_META[page].desc
@@ -4996,6 +4630,7 @@ export default function LandingPage() {
   if (page === 'tuition-uk') canonicalOverride = '/tuition-uk'
   if (page === 'homeschooling-vietnam') canonicalOverride = '/online-school/vietnam'
   if (page === 'homeschooling-thailand') canonicalOverride = '/online-school/thailand'
+  if (page === 'teacher-profile' && currentTeacherSlug) canonicalOverride = '/teachers/' + currentTeacherSlug
   if (page === 'not-found') {
     metaTitle = 'Page not found | Smartious'
     metaDesc  = 'This page does not exist. Find online school by country, fees and contact details for Smartious Homeschool & eSchool.'
@@ -5004,31 +4639,35 @@ export default function LandingPage() {
   usePageMeta(metaTitle, metaDesc, canonicalOverride)
   useHeroPreload(page === 'home')
 
-  // Load public teacher profiles when the Teachers page is opened.
-  // Fetched once, from the public (no-auth) endpoint.
+  // Load public teacher profiles when the Teachers page or a profile
+  // page (/teachers/<slug>) is opened. Fetched once, from the public
+  // (no-auth) endpoint; each person gets the slug of their page URL.
   useEffect(() => {
-    if (page !== 'teachers' || teachersLoaded) return
+    if ((page !== 'teachers' && page !== 'teacher-profile') || teachersLoaded || teachersLoading) return
     setTeachersLoading(true)
+    setTeachersFailed(false)
     const base = (import.meta.env?.VITE_API_URL || 'https://smartious-backend.onrender.com').replace(/\/$/, '')
     fetch(base + '/api/users/public-teachers')
       .then(r => r.json())
-      .then(d => { if (d?.success) setPublicTeachers(d.data?.teachers || []) })
-      .catch(e => console.error('[teachers] load failed:', e?.message))
+      .then(d => {
+        if (!d?.success) throw new Error(d?.message || 'unexpected response')
+        setPublicTeachers(withTeacherSlugs(d.data?.teachers || []))
+      })
+      .catch(e => { console.error('[teachers] load failed:', e?.message); setTeachersFailed(true) })
       .finally(() => { setTeachersLoading(false); setTeachersLoaded(true) })
-  }, [page, teachersLoaded])
+  }, [page, teachersLoaded, teachersLoading])
+
+  // A profile URL that matches nobody on the team is a real 404 (noindex),
+  // but only once the list has loaded: a failed request is not a 404.
+  const currentTeacher = page === 'teacher-profile' ? publicTeachers.find(t => t.slug === currentTeacherSlug) : null
+  useEffect(() => {
+    if (page === 'teacher-profile' && teachersLoaded && !teachersFailed && !currentTeacher) setPage('not-found')
+  }, [page, teachersLoaded, teachersFailed, currentTeacher])
 
   // P(id) — navigate to a landing page by URL. The useEffect
-  // above then syncs `page` state. Resets per-page form state.
+  // above then syncs `page` state.
   const P = (id) => {
     if (!PAGES.includes(id)) return
-    setWizStep(1)
-    setWizDone(false)
-    setPaySuccess('')
-    setPayError('')
-    setPayProcessing(false)
-    setEnrollError('')
-    setAssessment([])
-    setAssessmentLevel('')
     if (id === 'article') {
       // Article navigation handled by openArticle(); ignore here
       return
@@ -5380,7 +5019,7 @@ export default function LandingPage() {
               )}
             </div>
             {[['Our Team','teachers'],['FAQ','faq'],['Pricing','pricing']].map(([l,id]) => (
-              <a key={id} href={pageToPath(id)} className={`nl${page===id?' on':''}`} onClick={e => { e.preventDefault(); P(id) }}>{l}</a>
+              <a key={id} href={pageToPath(id)} className={`nl${page===id || (id==='teachers' && page==='teacher-profile')?' on':''}`} onClick={e => { e.preventDefault(); P(id) }}>{l}</a>
             ))}
           </div>
           <div className="nav-actions">
@@ -5396,6 +5035,14 @@ export default function LandingPage() {
         </div>
         </nav>
       </div>{/* /lp-header */}
+
+      {/* The header above is fixed (topbar + nav, 103px at every width).
+          Every page except the home page, whose film is meant to run
+          under it, starts below it: without this space the first lines
+          of each hero (eyebrow, back link, even the assessment page's
+          title) sat hidden behind the header. Read from the URL, not
+          from page state, so the space is right on the first paint. */}
+      {!isHomePath && <div className="lp-head-space" aria-hidden="true"/>}
 
       {/* Mobile slide-down menu — categorised, premium look */}
       {mobileMenuOpen && (
@@ -5448,7 +5095,6 @@ export default function LandingPage() {
                 ['Pricing','pricing'],
               ]},
               { cat:'Get Started', items:[
-                ['Enroll Now','enroll'],
                 ['Book assessment','assessment'],
               ]},
             ].map((group, gi) => (
@@ -5600,7 +5246,7 @@ export default function LandingPage() {
           find their way on.
       ══════════════════════════════════════════ */}
       {page === 'not-found' && (
-        <section className="sec" style={{background:V.bone,padding:'96px 0 80px'}}>
+        <section className="sec" style={{background:V.bone,padding:'56px 0 80px'}}>
           <div className="wrap" style={{maxWidth:760,textAlign:'center'}}>
             <div className="eyebrow" style={{justifyContent:'center'}}>Error 404</div>
             <h1 className="display" style={{marginTop:10}}>Page not found</h1>
@@ -5725,7 +5371,7 @@ export default function LandingPage() {
           {/* Mobile page summary strip */}
           <div style={{display:'none'}} className="mob-page-strip">
             <div style={{background:'rgba(255,255,255,.04)',borderBottom:'1px solid rgba(255,255,255,.08)',padding:'10px 20px',overflowX:'auto',whiteSpace:'nowrap'}}>
-              {[['Home','home'],['About','about'],['Curricula','curricula'],['Services','services'],['Pricing','pricing'],['Blog','blog'],['Enroll','enroll']].map(([l,id]) => (
+              {[['Home','home'],['About','about'],['Curricula','curricula'],['Services','services'],['Pricing','pricing'],['Blog','blog'],['Assessment','assessment']].map(([l,id]) => (
                 <a className="lp-btnlink" key={id} href={pageToPath(id)} onClick={linkClick(() => P(id))} style={{display:'inline-block',marginRight:8,padding:'6px 14px',borderRadius:99,border:'1px solid rgba(255,255,255,.15)',background:page===id?'rgba(96,165,250,.2)':'transparent',color:page===id?'#60A5FA':'rgba(255,255,255,.55)',fontSize:13,fontWeight:page===id?700:400,cursor:'pointer',whiteSpace:'nowrap'}}>
                   {l}
                 </a>
@@ -11438,8 +11084,8 @@ export default function LandingPage() {
 
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:16}}>
                   {[
-                    {tier:'Online School',price:'From $423',sub:'per month · Primary · paid termly',desc:'Live small-group classes (4-6 students) in every subject, Mshauri AI Pro and the digital library. Secondary fees vary by curriculum and level.',cta:'enroll',popular:true},
-                    {tier:'1-on-1 Tuition',price:'$15',sub:'per hour',desc:'One-on-one live online sessions in any subject, at any level, scheduled to your time zone.',cta:'enroll'},
+                    {tier:'Online School',price:'From $423',sub:'per month · Primary · paid termly',desc:'Live small-group classes (4-6 students) in every subject, Mshauri AI Pro and the digital library. Secondary fees vary by curriculum and level.',popular:true},
+                    {tier:'1-on-1 Tuition',price:'$15',sub:'per hour',desc:'One-on-one live online sessions in any subject, at any level, scheduled to your time zone.'},
                   ].map(t => (
                     <div key={t.tier} style={{
                       background: t.popular ? V.ink : V.white,
@@ -11871,8 +11517,8 @@ export default function LandingPage() {
 
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:16}}>
                   {[
-                    {tier:'Online School',price:'From $423',sub:'per month · Primary · paid termly',desc:'Live small-group classes (4-6 students) in every subject, Mshauri AI Pro and the digital library. Secondary fees vary by curriculum and level.',cta:'enroll',popular:true},
-                    {tier:'1-on-1 Tuition',price:'$15',sub:'per hour',desc:'One-on-one live online sessions in any subject, at any level, scheduled to your time zone.',cta:'enroll'},
+                    {tier:'Online School',price:'From $423',sub:'per month · Primary · paid termly',desc:'Live small-group classes (4-6 students) in every subject, Mshauri AI Pro and the digital library. Secondary fees vary by curriculum and level.',popular:true},
+                    {tier:'1-on-1 Tuition',price:'$15',sub:'per hour',desc:'One-on-one live online sessions in any subject, at any level, scheduled to your time zone.'},
                   ].map(t => (
                     <div key={t.tier} style={{
                       background: t.popular ? V.ink : V.white,
@@ -12108,11 +11754,12 @@ export default function LandingPage() {
         return (
         <>
           {/* Hero — photo background with dark gradient overlay for text contrast */}
-          <section className="sec" style={{
+          <section className="sec hero-legible" style={{
             position:'relative',
-            background:`linear-gradient(180deg, rgba(8,12,20,.42) 0%, rgba(8,12,20,.88) 100%), url('${s.heroPhoto}') center/cover no-repeat`,
+            background:V.ink,
             color:'#fff',padding:'88px 0 72px',overflow:'hidden'
           }}>
+            <HeroBackdrop src={s.heroPhoto}/>
             {/* Subtle state-colored accent stripe at top edge */}
             <div style={{position:'absolute',top:0,left:0,right:0,height:3,background:`linear-gradient(90deg, transparent 0%, ${s.accentColor} 50%, transparent 100%)`,zIndex:1}}/>
             <div className="wrap" style={{position:'relative',zIndex:2,maxWidth:1100}}>
@@ -12121,14 +11768,14 @@ export default function LandingPage() {
                 <span style={{opacity:.95,fontWeight:700}}>Online Homeschool · {s.name}</span>
               </div>
               <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2rem,5vw,3.4rem)',lineHeight:1.08,fontWeight:400,marginBottom:18,letterSpacing:'-0.01em'}}>
-                Online Homeschool for <em style={{color:s.accentColor,fontStyle:'normal'}}>{s.name}</em> Families
+                Online Homeschool for <em style={{color:V.gold3,fontStyle:'normal'}}>{s.name}</em> Families
               </h1>
               <p style={{fontSize:'clamp(1rem,1.6vw,1.18rem)',color:'rgba(255,255,255,.85)',maxWidth:760,lineHeight:1.6,marginBottom:28}}>
                 {s.pitch}
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:36}}>
                 <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('consult_booked'); nav('/assessment') })}
-                  style={{background:s.accentColor,color:V.ink,border:'none',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',letterSpacing:'.01em'}}>
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',letterSpacing:'.01em'}}>
                   Book a free 30-min consultation
                 </a>
                 <a href={`/blog/${s.blogSlug}`}
@@ -12144,7 +11791,7 @@ export default function LandingPage() {
                 </div>
                 <div>
                   <div style={{fontSize:11,letterSpacing:'.1em',textTransform:'uppercase',opacity:.6,marginBottom:4}}>Paperwork</div>
-                  <div style={{fontSize:18,fontWeight:800,color:s.accentColor}}>{s.difficulty}</div>
+                  <div style={{fontSize:18,fontWeight:800,color:V.gold3}}>{s.difficulty}</div>
                 </div>
                 <div>
                   <div style={{fontSize:11,letterSpacing:'.1em',textTransform:'uppercase',opacity:.6,marginBottom:4}}>Time zone</div>
@@ -12153,7 +11800,7 @@ export default function LandingPage() {
                 {s.voucher && (
                   <div>
                     <div style={{fontSize:11,letterSpacing:'.1em',textTransform:'uppercase',opacity:.6,marginBottom:4}}>{s.voucher.name} voucher</div>
-                    <div style={{fontSize:18,fontWeight:800,color:s.accentColor}}>{s.voucher.amount} / child</div>
+                    <div style={{fontSize:18,fontWeight:800,color:V.gold3}}>{s.voucher.amount} / child</div>
                   </div>
                 )}
               </div>
@@ -12415,11 +12062,12 @@ export default function LandingPage() {
         return (
         <>
           {/* Hero — photo background with dark gradient overlay for text contrast */}
-          <section className="sec" style={{
+          <section className="sec hero-legible" style={{
             position:'relative',
-            background:`linear-gradient(180deg, rgba(8,12,20,.42) 0%, rgba(8,12,20,.88) 100%), url('${s.heroPhoto}') center/cover no-repeat`,
+            background:V.ink,
             color:'#fff',padding:'88px 0 72px',overflow:'hidden'
           }}>
+            <HeroBackdrop src={s.heroPhoto}/>
             {/* Subtle state-colored accent stripe at top edge */}
             <div style={{position:'absolute',top:0,left:0,right:0,height:3,background:`linear-gradient(90deg, transparent 0%, ${s.accentColor} 50%, transparent 100%)`,zIndex:1}}/>
             <div className="wrap" style={{position:'relative',zIndex:2,maxWidth:1100}}>
@@ -12428,14 +12076,14 @@ export default function LandingPage() {
                 <span style={{opacity:.95,fontWeight:700}}>Online Homeschool · {s.name}</span>
               </div>
               <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2rem,5vw,3.4rem)',lineHeight:1.08,fontWeight:400,marginBottom:18,letterSpacing:'-0.01em'}}>
-                Online Homeschool for <em style={{color:s.accentColor,fontStyle:'normal'}}>{s.name}</em> Families
+                Online Homeschool for <em style={{color:V.gold3,fontStyle:'normal'}}>{s.name}</em> Families
               </h1>
               <p style={{fontSize:'clamp(1rem,1.6vw,1.18rem)',color:'rgba(255,255,255,.85)',maxWidth:760,lineHeight:1.6,marginBottom:28}}>
                 {s.pitch}
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:36}}>
                 <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('consult_booked'); nav('/assessment') })}
-                  style={{background:s.accentColor,color:V.ink,border:'none',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',letterSpacing:'.01em'}}>
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',letterSpacing:'.01em'}}>
                   Book a free 30-min consultation
                 </a>
                 <a href={`/blog/${s.blogSlug}`}
@@ -12451,7 +12099,7 @@ export default function LandingPage() {
                 </div>
                 <div>
                   <div style={{fontSize:11,letterSpacing:'.1em',textTransform:'uppercase',opacity:.6,marginBottom:4}}>Paperwork</div>
-                  <div style={{fontSize:18,fontWeight:800,color:s.accentColor}}>{s.difficulty}</div>
+                  <div style={{fontSize:18,fontWeight:800,color:V.gold3}}>{s.difficulty}</div>
                 </div>
                 <div>
                   <div style={{fontSize:11,letterSpacing:'.1em',textTransform:'uppercase',opacity:.6,marginBottom:4}}>Time zone</div>
@@ -12460,7 +12108,7 @@ export default function LandingPage() {
                 {s.voucher && (
                   <div>
                     <div style={{fontSize:11,letterSpacing:'.1em',textTransform:'uppercase',opacity:.6,marginBottom:4}}>{s.voucher.name} voucher</div>
-                    <div style={{fontSize:18,fontWeight:800,color:s.accentColor}}>{s.voucher.amount} / child</div>
+                    <div style={{fontSize:18,fontWeight:800,color:V.gold3}}>{s.voucher.amount} / child</div>
                   </div>
                 )}
               </div>
@@ -12746,11 +12394,12 @@ export default function LandingPage() {
         return (
         <>
           {/* Hero — photo background + state-color overlay */}
-          <section className="sec" style={{
+          <section className="sec hero-legible" style={{
             position:'relative',
-            background:`linear-gradient(180deg, rgba(8,12,20,.45) 0%, rgba(8,12,20,.88) 100%), url('${c.heroPhoto}') center/cover no-repeat`,
+            background:V.ink,
             color:'#fff',padding:'88px 0 72px',overflow:'hidden'
           }}>
+            <HeroBackdrop src={c.heroPhoto}/>
             <div style={{position:'absolute',top:0,left:0,right:0,height:3,background:`linear-gradient(90deg, transparent 0%, ${s.accentColor} 50%, transparent 100%)`,zIndex:1}}/>
             <div className="wrap" style={{position:'relative',zIndex:2,maxWidth:1100}}>
               {/* Breadcrumb: state name + city */}
@@ -12766,14 +12415,14 @@ export default function LandingPage() {
                 <span style={{opacity:.95,fontWeight:700}}>Online Homeschool · {c.name}</span>
               </div>
               <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2rem,5vw,3.4rem)',lineHeight:1.08,fontWeight:400,marginBottom:18,letterSpacing:'-0.01em'}}>
-                Online Homeschool for <em style={{color:s.accentColor,fontStyle:'normal'}}>{c.name}</em> Families
+                Online Homeschool for <em style={{color:V.gold3,fontStyle:'normal'}}>{c.name}</em> Families
               </h1>
               <p style={{fontSize:'clamp(1rem,1.6vw,1.18rem)',color:'rgba(255,255,255,.85)',maxWidth:760,lineHeight:1.6,marginBottom:28}}>
                 {c.pitch}
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:36}}>
                 <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('consult_booked'); nav('/assessment') })}
-                  style={{background:s.accentColor,color:'#fff',border:'none',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',letterSpacing:'.01em'}}>
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',letterSpacing:'.01em'}}>
                   Book a free 30-min consultation
                 </a>
                 <a href={`/blog/${s.blogSlug}`}
@@ -12789,7 +12438,7 @@ export default function LandingPage() {
                 </div>
                 <div>
                   <div style={{fontSize:11,letterSpacing:'.1em',textTransform:'uppercase',opacity:.6,marginBottom:4}}>{s.name} paperwork</div>
-                  <div style={{fontSize:16,fontWeight:800,color:s.accentColor}}>{s.difficulty}</div>
+                  <div style={{fontSize:16,fontWeight:800,color:V.gold3}}>{s.difficulty}</div>
                 </div>
                 <div>
                   <div style={{fontSize:11,letterSpacing:'.1em',textTransform:'uppercase',opacity:.6,marginBottom:4}}>Live class hours</div>
@@ -12798,7 +12447,7 @@ export default function LandingPage() {
                 {s.voucher && (
                   <div>
                     <div style={{fontSize:11,letterSpacing:'.1em',textTransform:'uppercase',opacity:.6,marginBottom:4}}>{s.voucher.name} voucher</div>
-                    <div style={{fontSize:16,fontWeight:800,color:s.accentColor}}>{s.voucher.amount} / child</div>
+                    <div style={{fontSize:16,fontWeight:800,color:V.gold3}}>{s.voucher.amount} / child</div>
                   </div>
                 )}
               </div>
@@ -12986,12 +12635,13 @@ export default function LandingPage() {
           })}}/>
 
           {/* HERO */}
-          <section className="sec" style={{
+          <section className="sec hero-legible" style={{
             position:'relative',
-            background:`linear-gradient(180deg, rgba(8,12,20,.55) 0%, rgba(8,12,20,.85) 100%), url('https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1600&q=80&auto=format&fit=crop') center/cover no-repeat`,
+            background:V.ink,
             color:'#fff', padding:'80px 0 64px',
           }}>
-            <div className="wrap">
+            <HeroBackdrop src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1600&q=80&auto=format&fit=crop"/>
+            <div className="wrap" style={{position:'relative',zIndex:2}}>
               <div style={{maxWidth:840}}>
                 <a onClick={() => P('ca-families')} style={{color:V.bone3,fontSize:13,textDecoration:'none',cursor:'pointer',display:'inline-block',marginBottom:12}}>← Canada</a>
                 <div style={{display:'inline-block',background:V.cr,padding:'6px 14px',borderRadius:999,fontSize:12,fontWeight:600,letterSpacing:'.05em',textTransform:'uppercase',marginBottom:20}}>$850 CAD per child · universal · no income test</div>
@@ -13150,12 +12800,13 @@ export default function LandingPage() {
           })}}/>
 
           {/* HERO */}
-          <section className="sec" style={{
+          <section className="sec hero-legible" style={{
             position:'relative',
-            background:`linear-gradient(180deg, rgba(8,12,20,.55) 0%, rgba(8,12,20,.85) 100%), url('https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=1600&q=80&auto=format&fit=crop') center/cover no-repeat`,
+            background:V.ink,
             color:'#fff', padding:'80px 0 64px',
           }}>
-            <div className="wrap">
+            <HeroBackdrop src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=1600&q=80&auto=format&fit=crop"/>
+            <div className="wrap" style={{position:'relative',zIndex:2}}>
               <div style={{maxWidth:840}}>
                 <a onClick={() => P('ca-families')} style={{color:V.bone3,fontSize:13,textDecoration:'none',cursor:'pointer',display:'inline-block',marginBottom:12}}>← Canada</a>
                 <div style={{display:'inline-block',background:V.cr,padding:'6px 14px',borderRadius:999,fontSize:12,fontWeight:600,letterSpacing:'.05em',textTransform:'uppercase',marginBottom:20}}>BC DL · resource allocation $200–$700 CAD/yr</div>
@@ -13297,12 +12948,13 @@ export default function LandingPage() {
           })}}/>
 
           {/* HERO */}
-          <section className="sec" style={{
+          <section className="sec hero-legible" style={{
             position:'relative',
-            background:`linear-gradient(180deg, rgba(8,12,20,.55) 0%, rgba(8,12,20,.85) 100%), url('https://images.unsplash.com/photo-1602074068265-c14c4a78cd97?w=1600&q=80&auto=format&fit=crop') center/cover no-repeat`,
+            background:V.ink,
             color:'#fff', padding:'80px 0 64px',
           }}>
-            <div className="wrap">
+            <HeroBackdrop src="https://images.unsplash.com/photo-1602074068265-c14c4a78cd97?w=1600&q=80&auto=format&fit=crop"/>
+            <div className="wrap" style={{position:'relative',zIndex:2}}>
               <div style={{maxWidth:840}}>
                 <a onClick={() => P('ca-families')} style={{color:V.bone3,fontSize:13,textDecoration:'none',cursor:'pointer',display:'inline-block',marginBottom:12}}>← Canada</a>
                 <div style={{display:'inline-block',background:V.cr,padding:'6px 14px',borderRadius:999,fontSize:12,fontWeight:600,letterSpacing:'.05em',textTransform:'uppercase',marginBottom:20}}>SK · $500–$1,500 CAD/yr · division-dependent</div>
@@ -13431,11 +13083,12 @@ export default function LandingPage() {
         return (
         <>
           {/* Hero — photo background + state-color overlay */}
-          <section className="sec" style={{
+          <section className="sec hero-legible" style={{
             position:'relative',
-            background:`linear-gradient(180deg, rgba(8,12,20,.45) 0%, rgba(8,12,20,.88) 100%), url('${c.heroPhoto}') center/cover no-repeat`,
+            background:V.ink,
             color:'#fff',padding:'88px 0 72px',overflow:'hidden'
           }}>
+            <HeroBackdrop src={c.heroPhoto}/>
             <div style={{position:'absolute',top:0,left:0,right:0,height:3,background:`linear-gradient(90deg, transparent 0%, ${s.accentColor} 50%, transparent 100%)`,zIndex:1}}/>
             <div className="wrap" style={{position:'relative',zIndex:2,maxWidth:1100}}>
               {/* Breadcrumb: state name + city */}
@@ -13451,14 +13104,14 @@ export default function LandingPage() {
                 <span style={{opacity:.95,fontWeight:700}}>Online Homeschool · {c.name}</span>
               </div>
               <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2rem,5vw,3.4rem)',lineHeight:1.08,fontWeight:400,marginBottom:18,letterSpacing:'-0.01em'}}>
-                Online Homeschool for <em style={{color:s.accentColor,fontStyle:'normal'}}>{c.name}</em> Families
+                Online Homeschool for <em style={{color:V.gold3,fontStyle:'normal'}}>{c.name}</em> Families
               </h1>
               <p style={{fontSize:'clamp(1rem,1.6vw,1.18rem)',color:'rgba(255,255,255,.85)',maxWidth:760,lineHeight:1.6,marginBottom:28}}>
                 {c.pitch}
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:36}}>
                 <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('consult_booked'); nav('/assessment') })}
-                  style={{background:s.accentColor,color:'#fff',border:'none',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',letterSpacing:'.01em'}}>
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',letterSpacing:'.01em'}}>
                   Book a free 30-min consultation
                 </a>
                 <a href={`/blog/${s.blogSlug}`}
@@ -13474,7 +13127,7 @@ export default function LandingPage() {
                 </div>
                 <div>
                   <div style={{fontSize:11,letterSpacing:'.1em',textTransform:'uppercase',opacity:.6,marginBottom:4}}>{s.name} paperwork</div>
-                  <div style={{fontSize:16,fontWeight:800,color:s.accentColor}}>{s.difficulty}</div>
+                  <div style={{fontSize:16,fontWeight:800,color:V.gold3}}>{s.difficulty}</div>
                 </div>
                 <div>
                   <div style={{fontSize:11,letterSpacing:'.1em',textTransform:'uppercase',opacity:.6,marginBottom:4}}>Live class hours</div>
@@ -13483,7 +13136,7 @@ export default function LandingPage() {
                 {s.voucher && (
                   <div>
                     <div style={{fontSize:11,letterSpacing:'.1em',textTransform:'uppercase',opacity:.6,marginBottom:4}}>{s.voucher.name} voucher</div>
-                    <div style={{fontSize:16,fontWeight:800,color:s.accentColor}}>{s.voucher.amount} / child</div>
+                    <div style={{fontSize:16,fontWeight:800,color:V.gold3}}>{s.voucher.amount} / child</div>
                   </div>
                 )}
               </div>
@@ -14319,31 +13972,14 @@ export default function LandingPage() {
           })}}/>
 
           {/* HERO with splash image background + gradient overlay */}
-          <section className="sec" style={{
+          <section className="sec hero-legible" style={{
             position:'relative',
             background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
             color:'#fff',
             padding:'72px 0 56px',
             overflow:'hidden',
           }}>
-            <img
-              src="https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=1600&q=80&auto=format&fit=crop"
-              alt=""
-              aria-hidden="true"
-              onError={e => { e.currentTarget.style.display='none' }}
-              style={{
-                position:'absolute',inset:0,
-                width:'100%',height:'100%',objectFit:'cover',
-                opacity:0.55,
-                filter:'saturate(.85)',
-                zIndex:0,
-              }}
-            />
-            <div style={{
-              position:'absolute',inset:0,
-              background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,
-              zIndex:1,
-            }}/>
+            <HeroBackdrop src="https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=1600&q=80&auto=format&fit=crop"/>
             <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
               <div className="eyebrow" style={{color:V.gold3,marginBottom:14}}>Tuition Services · Nairobi</div>
               <h1 style={{
@@ -14628,38 +14264,14 @@ export default function LandingPage() {
             })}}/>
 
             {/* HERO with splash image background + gradient overlay */}
-            <section className="sec" style={{
+            <section className="sec hero-legible" style={{
               position:'relative',
               background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
               color:'#fff',
               padding:'60px 0 48px',
               overflow:'hidden',
             }}>
-              {area.heroImg && (
-                <>
-                  <img
-                    src={area.heroImg}
-                    alt=""
-                    aria-hidden="true"
-                    loading="eager"
-                    fetchPriority="high"
-                    decoding="async"
-                    onError={e => { e.currentTarget.style.display='none' }}
-                    style={{
-                      position:'absolute',inset:0,
-                      width:'100%',height:'100%',objectFit:'cover',
-                      opacity:0.55,
-                      filter:'saturate(.85)',
-                      zIndex:0,
-                    }}
-                  />
-                  <div style={{
-                    position:'absolute',inset:0,
-                    background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,
-                    zIndex:1,
-                  }}/>
-                </>
-              )}
+              <HeroBackdrop src={area.heroImg}/>
               <div className="wrap" style={{position:'relative',zIndex:2}}>
                 <a
                   href="/tuition-nairobi"
@@ -14883,31 +14495,14 @@ export default function LandingPage() {
           }) }}/>
 
           {/* HERO */}
-          <section className="sec" style={{
+          <section className="sec hero-legible" style={{
             position:'relative',
             background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
             color:'#fff',
             padding:'72px 0 56px',
             overflow:'hidden',
           }}>
-            <img
-              src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1600&q=80&auto=format&fit=crop"
-              alt=""
-              aria-hidden="true"
-              onError={e => { e.currentTarget.style.display='none' }}
-              style={{
-                position:'absolute',inset:0,
-                width:'100%',height:'100%',objectFit:'cover',
-                opacity:0.55,
-                filter:'saturate(.85)',
-                zIndex:0,
-              }}
-            />
-            <div style={{
-              position:'absolute',inset:0,
-              background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,
-              zIndex:1,
-            }}/>
+            <HeroBackdrop src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1600&q=80&auto=format&fit=crop"/>
             <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
               <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>Premium online tuition · United Arab Emirates</div>
               <h1 style={{
@@ -15075,21 +14670,14 @@ export default function LandingPage() {
             })}}/>
 
             {/* HERO */}
-            <section className="sec" style={{
+            <section className="sec hero-legible" style={{
               position:'relative',
               background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
               color:'#fff',
               padding:'60px 0 48px',
               overflow:'hidden',
             }}>
-              {area.heroImg && (
-                <>
-                  <img src={area.heroImg} alt="" aria-hidden="true"
-                    onError={e => { e.currentTarget.style.display='none' }}
-                    style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,filter:'saturate(.85)',zIndex:0}}/>
-                  <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
-                </>
-              )}
+              <HeroBackdrop src={area.heroImg}/>
               <div className="wrap" style={{position:'relative',zIndex:2}}>
                 <a href="/tuition-uae"
                   onClick={(e)=>{e.preventDefault(); P('tuition-uae')}}
@@ -15314,15 +14902,12 @@ export default function LandingPage() {
             })}}/>
 
             {/* ─── HERO ─── */}
-            <section className="sec" style={{
+            <section className="sec hero-legible" style={{
               position:'relative',
               background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
               color:'#fff', padding:'72px 0 56px', overflow:'hidden',
             }}>
-              <img src={country.heroImage} alt="" aria-hidden="true"
-                onError={e => { e.currentTarget.style.display='none' }}
-                style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
-              <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
+              <HeroBackdrop src={country.heroImage}/>
               <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
                 <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow} · Virtual school</div>
                 <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
@@ -17097,15 +16682,12 @@ export default function LandingPage() {
             })}}/>
 
             {/* ─── HERO ─── */}
-            <section className="sec" style={{
+            <section className="sec hero-legible" style={{
               position:'relative',
               background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
               color:'#fff', padding:'72px 0 56px', overflow:'hidden',
             }}>
-              <img src={country.heroImage} alt="" aria-hidden="true"
-                onError={e => { e.currentTarget.style.display='none' }}
-                style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
-              <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
+              <HeroBackdrop src={country.heroImage}/>
               <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
                 <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow} · Virtual school</div>
                 <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
@@ -17407,15 +16989,12 @@ export default function LandingPage() {
             })}}/>
 
             {/* ─── HERO ─── */}
-            <section className="sec" style={{
+            <section className="sec hero-legible" style={{
               position:'relative',
               background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
               color:'#fff', padding:'72px 0 56px', overflow:'hidden',
             }}>
-              <img src={country.heroImage} alt="" aria-hidden="true"
-                onError={e => { e.currentTarget.style.display='none' }}
-                style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
-              <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
+              <HeroBackdrop src={country.heroImage}/>
               <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
                 <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow} · Virtual school</div>
                 <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
@@ -17717,15 +17296,12 @@ export default function LandingPage() {
             })}}/>
 
             {/* ─── HERO ─── */}
-            <section className="sec" style={{
+            <section className="sec hero-legible" style={{
               position:'relative',
               background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
               color:'#fff', padding:'72px 0 56px', overflow:'hidden',
             }}>
-              <img src={country.heroImage} alt="" aria-hidden="true"
-                onError={e => { e.currentTarget.style.display='none' }}
-                style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
-              <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
+              <HeroBackdrop src={country.heroImage}/>
               <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
                 <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow} · Virtual school</div>
                 <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
@@ -18027,15 +17603,12 @@ export default function LandingPage() {
             })}}/>
 
             {/* ─── HERO ─── */}
-            <section className="sec" style={{
+            <section className="sec hero-legible" style={{
               position:'relative',
               background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
               color:'#fff', padding:'72px 0 56px', overflow:'hidden',
             }}>
-              <img src={country.heroImage} alt="" aria-hidden="true"
-                onError={e => { e.currentTarget.style.display='none' }}
-                style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
-              <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
+              <HeroBackdrop src={country.heroImage}/>
               <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
                 <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow} · Virtual school</div>
                 <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
@@ -18337,15 +17910,12 @@ export default function LandingPage() {
             })}}/>
 
             {/* ─── HERO ─── */}
-            <section className="sec" style={{
+            <section className="sec hero-legible" style={{
               position:'relative',
               background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
               color:'#fff', padding:'72px 0 56px', overflow:'hidden',
             }}>
-              <img src={country.heroImage} alt="" aria-hidden="true"
-                onError={e => { e.currentTarget.style.display='none' }}
-                style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
-              <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
+              <HeroBackdrop src={country.heroImage}/>
               <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
                 <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow} · Virtual school</div>
                 <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
@@ -18646,15 +18216,12 @@ export default function LandingPage() {
             })}}/>
 
             {/* ─── HERO ─── */}
-            <section className="sec" style={{
+            <section className="sec hero-legible" style={{
               position:'relative',
               background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
               color:'#fff', padding:'72px 0 56px', overflow:'hidden',
             }}>
-              <img src={country.heroImage} alt="" aria-hidden="true"
-                onError={e => { e.currentTarget.style.display='none' }}
-                style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
-              <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
+              <HeroBackdrop src={country.heroImage}/>
               <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
                 <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow} · Virtual school</div>
                 <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
@@ -18943,19 +18510,12 @@ export default function LandingPage() {
             })}}/>
 
             {/* HERO */}
-            <section className="sec" style={{
+            <section className="sec hero-legible" style={{
               position:'relative',
               background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
               color:'#fff', padding:'60px 0 48px', overflow:'hidden',
             }}>
-              {city.heroImg && (
-                <>
-                  <img src={city.heroImg} alt={city.altTexts?.hero || ''} aria-hidden="true"
-                    onError={e => { e.currentTarget.style.display='none' }}
-                    style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
-                  <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
-                </>
-              )}
+              <HeroBackdrop src={city.heroImg}/>
               <div className="wrap" style={{position:'relative',zIndex:2}}>
                 <a href="/online-school/kenya"
                   onClick={(e)=>{e.preventDefault(); P('homeschooling-kenya')}}
@@ -20304,38 +19864,14 @@ export default function LandingPage() {
             })}}/>
 
             {/* HERO */}
-            <section className="sec" style={{
+            <section className="sec hero-legible" style={{
               position:'relative',
               background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
               color:'#fff',
               padding:'60px 0 48px',
               overflow:'hidden',
             }}>
-              {area.heroImg && (
-                <>
-                  <img
-                    src={area.heroImg}
-                    alt=""
-                    aria-hidden="true"
-                    loading="eager"
-                    fetchPriority="high"
-                    decoding="async"
-                    onError={e => { e.currentTarget.style.display='none' }}
-                    style={{
-                      position:'absolute',inset:0,
-                      width:'100%',height:'100%',objectFit:'cover',
-                      opacity:0.55,
-                      filter:'saturate(.85)',
-                      zIndex:0,
-                    }}
-                  />
-                  <div style={{
-                    position:'absolute',inset:0,
-                    background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,
-                    zIndex:1,
-                  }}/>
-                </>
-              )}
+              <HeroBackdrop src={area.heroImg}/>
               <div className="wrap" style={{position:'relative',zIndex:2}}>
                 <a
                   href="/tuition-uk"
@@ -23429,10 +22965,12 @@ export default function LandingPage() {
             <div className="tm-head">
               <div className="tm-eyebrow">Our People</div>
               <h1 className="tm-title">Our <em>Team</em></h1>
-              <p className="tm-intro">The educators and leaders behind every Smartious lesson: qualified, experienced and dedicated to each learner. Tap anyone to read their profile.</p>
+              <p className="tm-intro">The educators and leaders behind every Smartious lesson: qualified, experienced and dedicated to each learner. Choose anyone to read their profile.</p>
             </div>
             {teachersLoading ? (
               <div className="tm-empty">Loading our team…</div>
+            ) : teachersFailed ? (
+              <div className="tm-empty">Our team could not be loaded just now. Please refresh the page to try again.</div>
             ) : publicTeachers.length === 0 ? (
               <div className="tm-empty">Our team will be listed here shortly.</div>
             ) : (
@@ -23447,7 +22985,7 @@ export default function LandingPage() {
                         {people.map(t => {
                           const initials = t.name.split(/\s+/).map(w => w[0]).filter(Boolean).slice(0,2).join('').toUpperCase()
                           return (
-                            <button key={t.id} type="button" className="tm-person" onClick={() => setExpandedTeacher(t.id)} aria-label={'Read ' + t.name + "'s profile"}>
+                            <a key={t.id} className="tm-person" href={teacherPath(t)} onClick={spaClick(nav, teacherPath(t))} aria-label={'Read ' + t.name + "'s profile"}>
                               <div className="tm-frame">
                                 <div className="tm-accent"/>
                                 <div className="tm-shape">
@@ -23461,7 +22999,7 @@ export default function LandingPage() {
                                 <div className="tm-name">{t.name}</div>
                                 <div className="tm-role">{t.title}</div>
                               </div>
-                            </button>
+                            </a>
                           )
                         })}
                       </div>
@@ -23470,34 +23008,6 @@ export default function LandingPage() {
                 })}
               </div>
             )}
-            {(() => {
-              const t = publicTeachers.find(x => x.id === expandedTeacher)
-              if (!t) return null
-              const initials = t.name.split(/\s+/).map(w => w[0]).filter(Boolean).slice(0,2).join('').toUpperCase()
-              return (
-                <div className="tm-modal" onClick={() => setExpandedTeacher(null)}>
-                  <div className="tm-sheet" onClick={e => e.stopPropagation()} role="dialog" aria-label={t.name}>
-                    <button className="tm-x" onClick={() => setExpandedTeacher(null)} aria-label="Close">×</button>
-                    <div className="tm-sheet-photo">
-                      {t.avatar ? <img src={t.avatar} alt={t.name}/> : <div className="tm-initials">{initials || 'S'}</div>}
-                    </div>
-                    <div className="tm-sheet-body">
-                      {t.principal && <div className="tm-badge">★ Principal</div>}
-                      <h2 className="tm-sheet-name">{t.name}</h2>
-                      <div className="tm-sheet-role">{t.title}</div>
-                      {t.yearsOfExperience > 0 && <div className="tm-exp"><strong>{t.yearsOfExperience}</strong> year{t.yearsOfExperience === 1 ? '' : 's'} of experience</div>}
-                      {t.bio && <p className="tm-bio">{t.bio}</p>}
-                      {(t.qualifications || []).length > 0 && (
-                        <div className="tm-block">
-                          <div className="tm-lbl">Qualifications</div>
-                          <ul className="tm-list">{t.qualifications.map((q,i) => <li key={i}>{q}</li>)}</ul>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )
-            })()}
             <div style={{textAlign:'center',marginTop:48}}>
               <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
             </div>
@@ -23505,6 +23015,81 @@ export default function LandingPage() {
           <GuideCrossLinks guideSlug="homeschooling-uk-2026-guide" guideName="Homeschooling in the UK: The Complete 2026 Guide" hubHref="/online-school/united-kingdom" hubName="Smartious in the United Kingdom"/>
         </>
       )}
+
+      {/* ══ TEAM MEMBER PROFILE (/teachers/<slug>) ══
+          Each person on /teachers has their own page, so a profile can be
+          opened in a new tab, shared and found in search. The URL slug is
+          made from the name (data/teacherSlug.js); the build writes the
+          same pages as static HTML and lists them in the sitemap. */}
+      {page === 'teacher-profile' && (() => {
+        const t = currentTeacher
+        const back = (
+          <a className="tp-back" href="/teachers" onClick={spaClick(nav, '/teachers')}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Back to our team
+          </a>
+        )
+        if (!t) return (
+          <section className="tm-stage"><div className="wrap">
+            {back}
+            <div className="tm-empty">{teachersFailed ? 'This profile could not be loaded just now. Please refresh the page to try again.' : 'Loading profile…'}</div>
+          </div></section>
+        )
+        const initials = t.name.split(/\s+/).map(w => w[0]).filter(Boolean).slice(0,2).join('').toUpperCase()
+        const url = 'https://smartioushomeschool.com' + teacherPath(t)
+        const quals = t.qualifications || []
+        return (
+          <>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+              '@context':'https://schema.org',
+              '@graph':[
+                { '@type':'ProfilePage', '@id': url, url, name: teacherTitle(t), description: teacherDescription(t),
+                  mainEntity: { '@type':'Person', name: t.name, jobTitle: t.title || undefined, description: t.bio || undefined,
+                    ...(/^https?:/.test(t.avatar || '') ? { image: t.avatar } : {}),
+                    ...(quals.length ? { hasCredential: quals.map(q => ({ '@type':'EducationalOccupationalCredential', name: q })) } : {}),
+                    worksFor: { '@id':'https://smartioushomeschool.com/#organization' } } },
+                { '@type':'BreadcrumbList', itemListElement:[
+                  {'@type':'ListItem', position:1, name:'Home', item:'https://smartioushomeschool.com/'},
+                  {'@type':'ListItem', position:2, name:'Our team', item:'https://smartioushomeschool.com/teachers'},
+                  {'@type':'ListItem', position:3, name:t.name, item:url},
+                ]},
+              ],
+            })}}/>
+            <section className="tm-stage"><div className="wrap">
+              {back}
+              <article className="tp-grid">
+                <div className={'tp-photo' + (t.principal ? ' tm-tier-principal' : '')}>
+                  <div className="tm-frame">
+                    <div className="tm-accent"/>
+                    <div className="tm-shape">
+                      {t.avatar
+                        ? <img src={t.avatar} alt={t.name + ', ' + (t.title || 'Smartious Homeschool')} className="tm-img"/>
+                        : <div className="tm-initials">{initials || 'S'}</div>}
+                    </div>
+                  </div>
+                </div>
+                <div className="tp-body">
+                  <div className="tm-eyebrow">{t.principal ? 'Principal' : 'Our team'}</div>
+                  <h1 className="tp-name">{t.name}</h1>
+                  {t.title && <div className="tp-role">{t.title}</div>}
+                  {t.yearsOfExperience > 0 && <div className="tm-exp"><strong>{t.yearsOfExperience}</strong> year{t.yearsOfExperience === 1 ? '' : 's'} of experience</div>}
+                  {t.bio && <p className="tm-bio">{t.bio}</p>}
+                  {quals.length > 0 && (
+                    <div className="tm-block">
+                      <h2 className="tm-lbl">Qualifications</h2>
+                      <ul className="tm-list">{quals.map((q,i) => <li key={i}>{q}</li>)}</ul>
+                    </div>
+                  )}
+                  <div className="tp-actions">
+                    <a className="btn-p lp-btnlink" href="/assessment" onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+                    <a className="tp-more" href="/teachers" onClick={spaClick(nav, '/teachers')}>Meet the rest of the team</a>
+                  </div>
+                </div>
+              </article>
+            </div></section>
+          </>
+        )
+      })()}
 
       {page === 'faq' && (
         <>
@@ -23686,19 +23271,12 @@ export default function LandingPage() {
         return (
           <>
             {/* Article hero with splash image + gradient-matched banner */}
-            <div style={{background:a.img,padding:'120px 20px 80px',position:'relative',borderBottom:`1px solid ${V.bone3}`,overflow:'hidden'}}>
-              {a.splash && (
-                <img
-                  src={a.splash}
-                  alt={a.splashAlt || ''}
-                  loading="eager"
-                  onError={e => { e.currentTarget.style.display = 'none' }}
-                  style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',display:'block',zIndex:0}}
-                />
+            <div className="hero-legible" style={{background:a.img,padding:'56px 20px 80px',position:'relative',borderBottom:`1px solid ${V.bone3}`,overflow:'hidden'}}>
+              {a.splash ? <HeroBackdrop src={a.splash} alt={a.splashAlt || ''}/> : (
+                // No photo: darken the article's own gradient so light
+                // flag colours (India, Ukraine, gold) keep white text readable.
+                <div style={{position:'absolute',inset:0,background:'linear-gradient(135deg,rgba(8,12,20,.55) 0%,rgba(125,16,37,.35) 60%,rgba(8,12,20,.75) 100%),linear-gradient(180deg,rgba(8,12,20,.15) 0%,rgba(8,12,20,.5) 100%)',zIndex:1}}/>
               )}
-              {/* Double-gradient scrim: crimson wash + readability fade */}
-              <div style={{position:'absolute',inset:0,background:'linear-gradient(135deg,rgba(8,12,20,.55) 0%,rgba(139,26,46,.35) 60%,rgba(8,12,20,.75) 100%)',zIndex:1}}/>
-              <div style={{position:'absolute',inset:0,background:'linear-gradient(180deg,rgba(8,12,20,.15) 0%,rgba(8,12,20,.5) 100%)',zIndex:1}}/>
               {/* Gold accent bar at the very top */}
               <div style={{position:'absolute',top:0,left:0,right:0,height:3,background:`linear-gradient(90deg,transparent 0%,${V.gold3} 50%,transparent 100%)`,zIndex:3}}/>
               <div style={{maxWidth:860,margin:'0 auto',position:'relative',zIndex:2}}>
@@ -23942,310 +23520,6 @@ export default function LandingPage() {
       {page === 'language-policy' && <LegalPage P={P} title="Language" em="Policy" subtitle="The language we teach in, how we support students learning English, and how we value every family’s languages." effective="15 October 2026" sections={LANGUAGE_POLICY}/>}
 
       {/* ══════════════════════════════════════════
-          ENROLL
-      ══════════════════════════════════════════ */}
-      {page === 'enroll' && (() => {
-        const cur = ENROLMENT_DATA[enrolCurriculum]
-        const selectedLevel = cur && cur.levels.find(l => l.id === enrolLevel)
-        return (
-        <>
-          {/* HERO */}
-          <div className="pg-hero"><div className="wrap">
-            <div className="eyebrow">Begin Your Enrolment</div>
-            <h1 className="pg-h">Apply to <em>Smartious</em></h1>
-            <p className="pg-sub" style={{marginTop:12}}>Select your curriculum and year level. Pay the application fee online. Our admissions team responds within 1 working day with the next steps.</p>
-          </div></div>
-          <IntakeCta nav={nav} compact/>
-
-          {/* STEP 1 — CURRICULUM PICKER */}
-          <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
-            <div style={{maxWidth:1000,margin:'0 auto'}}>
-              <div style={{textAlign:'center',marginBottom:28}}>
-                <div className="eyebrow" style={{justifyContent:'center'}}>Step 1</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:8,lineHeight:1.2}}>
-                  Which curriculum?
-                </h2>
-                <p style={{fontSize:14,color:V.sl,maxWidth:580,margin:'0 auto',lineHeight:1.6}}>
-                  We offer five accredited international curricula. Pick the one your child will follow.
-                </p>
-              </div>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))',gap:12}}>
-                {Object.entries(ENROLMENT_DATA).map(([key, c]) => (
-                  <button
-                    key={key}
-                    onClick={() => { setEnrolCurriculum(key); setEnrolLevel(null) }}
-                    style={{
-                      background: enrolCurriculum === key ? V.cr : V.white,
-                      color: enrolCurriculum === key ? V.white : V.ink,
-                      border: `1.5px solid ${enrolCurriculum === key ? V.cr : V.bone3}`,
-                      borderRadius:10,
-                      padding:'14px 16px',
-                      fontWeight:700,
-                      fontSize:13.5,
-                      cursor:'pointer',
-                      transition:'all .2s',
-                      textAlign:'left',
-                      fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",
-                      lineHeight:1.3,
-                      boxShadow: enrolCurriculum === key ? '0 4px 14px rgba(139,26,46,.25)' : 'none',
-                    }}>
-                    {c.label}
-                  </button>
-                ))}
-              </div>
-              {cur && (
-                <div style={{marginTop:20,padding:'14px 18px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,fontSize:13.5,color:V.sl,lineHeight:1.6}}>
-                  <strong style={{color:V.ink}}>{cur.label}:</strong> {cur.description} <span style={{color:V.sl2,fontStyle:'italic'}}>Exam board: {cur.examBoard}.</span>
-                </div>
-              )}
-            </div>
-          </div></section>
-
-          {/* STEP 2 — YEAR / GRADE PICKER */}
-          {cur && (
-            <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:48}}><div className="wrap">
-              <div style={{maxWidth:1000,margin:'0 auto'}}>
-                <div style={{textAlign:'center',marginBottom:28}}>
-                  <div className="eyebrow" style={{justifyContent:'center'}}>Step 2</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:8,lineHeight:1.2}}>
-                    Which year / grade?
-                  </h2>
-                  <p style={{fontSize:14,color:V.sl,maxWidth:580,margin:'0 auto',lineHeight:1.6}}>
-                    Select your child's year level within {cur.label}. We'll show you the matching subjects and fees.
-                  </p>
-                </div>
-                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:10}}>
-                  {cur.levels.map(lv => (
-                    <button
-                      key={lv.id}
-                      onClick={() => setEnrolLevel(lv.id)}
-                      style={{
-                        background: enrolLevel === lv.id ? V.bone : V.white,
-                        border: `1.5px solid ${enrolLevel === lv.id ? V.cr : V.bone3}`,
-                        borderRadius:10,
-                        padding:'14px 16px',
-                        cursor:'pointer',
-                        transition:'all .2s',
-                        textAlign:'left',
-                        fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",
-                      }}>
-                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1rem',color:V.ink,fontWeight:400,marginBottom:3}}>{lv.label}</div>
-                      <div style={{fontSize:12,color:V.sl2}}>{lv.years} · {lv.ages}</div>
-                      <div style={{fontSize:12,color:V.cr,fontWeight:700,marginTop:5}}>{lv.feeFrom}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div></section>
-          )}
-
-          {/* STEP 3 — REQUIREMENTS + PROCESS (only shown after level chosen) */}
-          {selectedLevel && (
-            <>
-              <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
-                <div style={{maxWidth:1100,margin:'0 auto'}}>
-                  <div style={{textAlign:'center',marginBottom:32}}>
-                    <div className="eyebrow" style={{justifyContent:'center'}}>Step 3 · What we need</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:8,lineHeight:1.2}}>
-                      Enrolment requirements
-                    </h2>
-                    <p style={{fontSize:14,color:V.sl,maxWidth:620,margin:'0 auto',lineHeight:1.6}}>
-                      For {selectedLevel.label} · {selectedLevel.years} ({selectedLevel.ages})
-                    </p>
-                  </div>
-
-                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:14}}>
-                    {[
-                      { tag:'Mandatory', title:'Academic documents', items:[
-                        'Most recent school report (within past 12 months)',
-                        'Transcripts / result slips — last two academic years',
-                        'Reference letter from current teacher or school',
-                        'Previous portfolio (if transferring from IB World School)',
-                        'English proficiency evidence (if not primary language)',
-                      ]},
-                      { tag:'Mandatory', title:'Identity & legal documents', items:[
-                        'Birth certificate — certified copy',
-                        'Valid passport — photo page (international students)',
-                        'Parent National ID / Alien Card (Kenya-based)',
-                        'Recent passport-size photo of student',
-                        'Homeschool Declaration Form — signed by parent / guardian',
-                      ]},
-                      { tag:'Required', title:'Technology', items:[
-                        'Personal laptop or desktop (tablet as secondary only)',
-                        'Reliable internet — minimum 5 Mbps stable broadband',
-                        'Webcam and microphone',
-                        'Google Workspace or Microsoft 365 account',
-                        'Dedicated, quiet home study space',
-                      ]},
-                      { tag:'Placement', title:'Assessment & placement', items:[
-                        'Smartious Placement Test — Maths & English, 60 mins online',
-                        'Learner Profile Questionnaire',
-                        'Parent statement of learning goals',
-                        'Prior knowledge checklist — subject by subject',
-                        'Learning support disclosure (if applicable)',
-                      ]},
-                    ].map((box, i) => (
-                      <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 20px'}}>
-                        <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:10}}>{box.tag}</div>
-                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',fontWeight:400,color:V.ink,marginBottom:12,lineHeight:1.3}}>{box.title}</h3>
-                        <ul style={{listStyle:'none',padding:0,margin:0,display:'flex',flexDirection:'column',gap:8}}>
-                          {box.items.map((it, j) => (
-                            <li key={j} style={{fontSize:13,color:V.sl,lineHeight:1.55,paddingLeft:16,position:'relative'}}>
-                              <span style={{position:'absolute',left:0,top:7,width:6,height:6,borderRadius:'50%',background:V.gold3}}/>
-                              {it}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Subjects offered for this level */}
-                  <div style={{marginTop:24,background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 24px'}}>
-                    <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:8}}>Subjects covered</div>
-                    <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7,margin:0}}>{cur.subjects}</p>
-                  </div>
-                </div>
-              </div></section>
-
-              {/* STEP 4 — 8-STEP PROCESS */}
-              <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
-                <div style={{maxWidth:980,margin:'0 auto'}}>
-                  <div style={{textAlign:'center',marginBottom:32}}>
-                    <div className="eyebrow" style={{justifyContent:'center'}}>Step 4 · The process</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:8,lineHeight:1.2}}>
-                      Eight steps from enquiry to first class
-                    </h2>
-                    <p style={{fontSize:14,color:V.sl,maxWidth:620,margin:'0 auto',lineHeight:1.6}}>
-                      Most families complete the full process within 7–10 working days.
-                    </p>
-                  </div>
-                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:14}}>
-                    {[
-                      ['01','Submit an enquiry','Contact us via WhatsApp, email or website. Admissions responds within 1 working day with a Welcome Pack.'],
-                      ['02','Complete the application','Application fee of USD 38 / KES 5,000 (non-refundable, covers placement test). Form takes 20–30 minutes.'],
-                      ['03','Submit required documents','Upload all academic and identity documents. Reviewed within 3 working days.'],
-                      ['04','Sit the placement test','60-minute online Mathematics & English assessment. Results within 5 working days.'],
-                      ['05','Admissions interview','20-minute virtual meeting between the curriculum coordinator, student and parent.'],
-                      ['06','Offer of admission','Receive formal Letter of Offer. Sign Acceptance Form. Pay registration deposit (deducted from first tuition invoice).'],
-                      ['07','Enrolment confirmation','Receive LMS credentials, timetable, subject guides, and onboarding materials.'],
-                      ['08','Induction week & start','Mandatory online Induction Week. Mentor and tutor sessions for first two weeks. Programme begins.'],
-                    ].map(([num, title, desc]) => (
-                      <div key={num} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'18px 20px'}}>
-                        <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',color:V.cr,marginBottom:6}}>{num}</div>
-                        <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{title}</div>
-                        <p style={{fontSize:13,color:V.sl,lineHeight:1.6,margin:0}}>{desc}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div></section>
-
-              {/* STEP 5 — APPLICATION FEE PAYMENT */}
-              <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:64}}><div className="wrap">
-                <div style={{maxWidth:780,margin:'0 auto'}}>
-                  <div style={{textAlign:'center',marginBottom:28}}>
-                    <div className="eyebrow" style={{justifyContent:'center'}}>Step 5 · Pay the application fee</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:8,lineHeight:1.2}}>
-                      Application fee · USD 38 / KES 5,000
-                    </h2>
-                    <p style={{fontSize:14,color:V.sl,maxWidth:560,margin:'0 auto',lineHeight:1.6}}>
-                      One-time, non-refundable. Covers your child's placement test and admissions review. Deducted from first tuition invoice on enrolment.
-                    </p>
-                  </div>
-
-                  <div style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,padding:'28px 28px'}}>
-                    {/* Summary chip */}
-                    <div style={{display:'flex',gap:10,flexWrap:'wrap',padding:'12px 14px',background:V.bone,borderRadius:8,marginBottom:20,fontSize:13}}>
-                      <div><strong style={{color:V.ink}}>Applying for:</strong> <span style={{color:V.sl}}>{selectedLevel.label} · {selectedLevel.years}</span></div>
-                      <div style={{color:V.sl2}}>·</div>
-                      <div><strong style={{color:V.ink}}>Curriculum:</strong> <span style={{color:V.sl}}>{cur.label}</span></div>
-                    </div>
-
-                    {/* Form fields */}
-                    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14,marginBottom:14}}>
-                      <div>
-                        <label style={{display:'block',fontSize:11.5,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',color:V.sl,marginBottom:6}}>Parent / Guardian Name</label>
-                        <input value={enrolParentName} onChange={e=>setEnrolParentName(e.target.value)} placeholder="Your full name"
-                          style={{width:'100%',padding:'11px 14px',border:`1.5px solid ${V.bone3}`,borderRadius:8,fontSize:14,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",outline:'none',background:V.bone,color:V.ink,boxSizing:'border-box'}}/>
-                      </div>
-                      <div>
-                        <label style={{display:'block',fontSize:11.5,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',color:V.sl,marginBottom:6}}>Student Name</label>
-                        <input value={enrolStudentName} onChange={e=>setEnrolStudentName(e.target.value)} placeholder="Your child's full name"
-                          style={{width:'100%',padding:'11px 14px',border:`1.5px solid ${V.bone3}`,borderRadius:8,fontSize:14,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",outline:'none',background:V.bone,color:V.ink,boxSizing:'border-box'}}/>
-                      </div>
-                    </div>
-                    <div style={{marginBottom:20}}>
-                      <label style={{display:'block',fontSize:11.5,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',color:V.sl,marginBottom:6}}>Email</label>
-                      <input value={enrolEmail} onChange={e=>setEnrolEmail(e.target.value)} type="email" placeholder="your.email@example.com"
-                        style={{width:'100%',padding:'11px 14px',border:`1.5px solid ${V.bone3}`,borderRadius:8,fontSize:14,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",outline:'none',background:V.bone,color:V.ink,boxSizing:'border-box'}}/>
-                    </div>
-
-                    {/* Pay button */}
-                    <button
-                      onClick={handlePayApplicationFee}
-                      disabled={enrolAppFeeProcessing}
-                      style={{
-                        width:'100%',
-                        background:enrolAppFeeProcessing ? V.sl2 : `linear-gradient(135deg, ${V.cr2}, ${V.cr})`,
-                        color:V.white,
-                        border:'none',
-                        borderRadius:8,
-                        padding:'15px 20px',
-                        fontSize:14,
-                        fontWeight:700,
-                        cursor:enrolAppFeeProcessing ? 'not-allowed' : 'pointer',
-                        fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",
-                        letterSpacing:'.04em',
-                        boxShadow:'0 6px 18px rgba(139,26,46,.3)',
-                        transition:'all .2s',
-                        display:'inline-flex',
-                        alignItems:'center',
-                        justifyContent:'center',
-                        gap:8,
-                      }}>
-                      {enrolAppFeeProcessing ? 'Opening Paystack…' : <>Pay USD 38 / KES 5,000 via Paystack
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                      </>}
-                    </button>
-                    <p style={{fontSize:11.5,color:V.sl2,marginTop:14,textAlign:'center',lineHeight:1.6}}>
-                      Secure payment via Paystack. Cards (Visa, Mastercard) and M-Pesa accepted. You'll receive a receipt by email.
-                    </p>
-                  </div>
-
-                  {/* Alternative — manual payment */}
-                  <div style={{marginTop:24,padding:'18px 20px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,fontSize:13,color:V.sl,lineHeight:1.7}}>
-                    <strong style={{color:V.ink,fontSize:13.5,display:'block',marginBottom:8}}>Prefer to pay manually?</strong>
-                    M-Pesa Paybill <strong style={{color:V.ink}}>247247</strong>, Account No. <strong style={{color:V.ink}}>745021</strong>, Account name <strong style={{color:V.ink}}>Smartious Edtech</strong>. After paying, email the M-Pesa confirmation to <strong style={{color:V.cr}}>hello@smartioushomeschool.com</strong> with your child's name and chosen curriculum.
-                  </div>
-
-                  {/* Declaration form download */}
-                  <div style={{marginTop:14,padding:'18px 20px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,fontSize:13,color:V.sl,lineHeight:1.7}}>
-                    <strong style={{color:V.ink,fontSize:13.5,display:'block',marginBottom:8}}>Declaration Form</strong>
-                    Once we receive your application fee, we'll email you the Homeschool Declaration Form for your signature. You can also request it ahead of time by contacting <strong style={{color:V.cr}}>hello@smartioushomeschool.com</strong> or WhatsApp <strong style={{color:V.cr}}>+254 745 021 212</strong>.
-                  </div>
-                </div>
-              </div></section>
-            </>
-          )}
-
-          {/* PRE-SELECTION HINT — shown when no level chosen yet */}
-          {!selectedLevel && cur && (
-            <section className="sec" style={{background:V.bone,paddingTop:24,paddingBottom:64}}><div className="wrap">
-              <div style={{maxWidth:600,margin:'0 auto',textAlign:'center',padding:'32px 20px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12}}>
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={V.gold3} strokeWidth="2" strokeLinecap="round" style={{margin:'0 auto 12px',display:'block'}}>
-                  <polyline points="6 9 12 15 18 9"/>
-                </svg>
-                <p style={{fontSize:14,color:V.sl,margin:0,lineHeight:1.6}}>
-                  Select a year / grade above to see the full enrolment pack — requirements, subjects, process, and application fee payment.
-                </p>
-              </div>
-            </div></section>
-          )}
-        </>
-        )
-      })()}
-      {/* ══════════════════════════════════════════
           LOGIN
       ══════════════════════════════════════════ */}
       {/* ══ CONSULTATION PAGE ══ */}
@@ -24267,12 +23541,7 @@ export default function LandingPage() {
           no payment is collected here. Admissions reviews each request and
           invoices the assessment fee separately if the request is accepted.
           AssessmentForm is fully self-contained (own header, no Footer needed). */}
-      {page === 'assessment' && (
-        <>
-          <IntakeCta nav={nav} compact/>
-          <AssessmentForm nav={nav}/>
-        </>
-      )}
+      {page === 'assessment' && <AssessmentForm nav={nav}/>}
 
       {/* ══ CONTACT PAGE ══ */}
       {page === 'contact' && (

@@ -30,6 +30,14 @@
 /homeschooling-kenya     /online-school/kenya        301
 /online-school/uk        /online-school/united-kingdom 301
 
+# ─── Retired 2027 application page ──────────────────────────────
+# /enroll was a separate "Apply for the January 2027 Intake" page with
+# an application fee. Enrolment starts with the assessment, so the one
+# 2027 call to action now goes to /assessment and old links follow it.
+# Plain 301 (no !): no file is built for /enroll, so it always fires.
+# Netlify matches /enroll/ to this rule too; never add a slash rule.
+/enroll                  /assessment                 301
+
 # ─── Kenya city URL consolidation ────────────────────────────────
 # Legacy /homeschooling/<slug> city URLs 301 to the canonical
 # /homeschool-<slug> form (matches every other country pattern and

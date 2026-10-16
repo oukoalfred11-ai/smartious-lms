@@ -70,7 +70,7 @@ const BLOCKED_DOMAINS = [
 const ROUTES_TO_PRERENDER = [
   '/',
   '/about', '/curricula', '/services', '/programs', '/pricing', '/teachers',
-  '/global', '/contact', '/faq', '/enroll', '/consult',
+  '/global', '/contact', '/faq', '/consult',
   '/calendar', '/events', '/gallery', '/activities',
   '/blog', '/test-prep', '/languages', '/study-abroad',
   // Europe 2026 article batch — prerendered so the SEO articles actually index
@@ -407,6 +407,10 @@ const ROUTES_TO_PRERENDER = [
    second-pass crawl will still index them via sitemap.xml). */
 const CRAWL_FROM_HUBS_PATTERN = /^\/online-school\/(kenya|ethiopia|rwanda|south-africa|qatar|saudi-arabia|uae|egypt|morocco|south-korea|japan|vietnam|thailand|malaysia|turkey|kuwait|oman|taiwan|ireland|united-kingdom|india|germany|romania|ukraine|netherlands|spain|denmark|france|italy|poland|portugal|czech-republic|belgium|sweden|norway|new-zealand|austria|hungary|finland|greece|azerbaijan|georgia|pakistan|australia|luxembourg|switzerland|slovakia|slovenia|croatia|serbia|bulgaria|albania|north-macedonia|montenegro|bosnia-and-herzegovina|kosovo|zambia|zimbabwe|botswana|namibia|algeria|tunisia|mauritius|ghana|angola|drc|mexico|brazil|colombia|argentina|chile|peru|ecuador|panama|costa-rica|dominican-republic|uruguay|guatemala|paraguay|bolivia|venezuela|puerto-rico|israel|jordan|iraq|cyprus|lebanon|myanmar|maldives|china|bangladesh|nepal)$/
 const CRAWL_LINK_PATTERN = /^\/(?:homeschool-|homeschooling\/)[a-z0-9-]+$/
+/* Team profiles (/teachers/<slug>) are discovered from the /teachers
+   page once its list has loaded from the API (data/teacherSlug.js). */
+const TEAM_ROUTE = '/teachers'
+const TEAM_LINK_PATTERN = /^\/teachers\/[a-z0-9-]+$/
 
 /* ────────────────────────────────────────────────────────────────
    Local static server — serves dist/ with SPA fallback that matches
@@ -498,9 +502,12 @@ async function renderRoute(browser, route) {
 
     const html = sanitize(await page.content())
     
-    /* Discover internal links from v2-depth country hubs only. */
+    /* Discover internal links from v2-depth country hubs and the team page. */
     let links = []
-    if (CRAWL_FROM_HUBS_PATTERN.test(route)) {
+    if (route === TEAM_ROUTE) {
+      await page.waitForSelector('a.tm-person', { timeout: PAGE_TIMEOUT_MS }).catch(() => {})
+    }
+    if (CRAWL_FROM_HUBS_PATTERN.test(route) || route === TEAM_ROUTE) {
       links = await page.evaluate(() => {
         return Array.from(document.querySelectorAll('a[href]'))
           .map(a => a.getAttribute('href'))
@@ -552,7 +559,7 @@ async function prerender() {
 
   const queueLink = (href) => {
     if (discovered.size >= MAX_URLS) return
-    if (!CRAWL_LINK_PATTERN.test(href)) return
+    if (!CRAWL_LINK_PATTERN.test(href) && !TEAM_LINK_PATTERN.test(href)) return
     if (discovered.has(href)) return
     discovered.add(href)
     queue.push(href)

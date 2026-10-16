@@ -56,6 +56,7 @@ import { US_STATES } from '../src/data/usStates.js'
 import { US_CITIES, US_CITIES_BY_STATE } from '../src/data/usCities.js'
 import { CA_PROVINCES } from '../src/data/caProvinces.js'
 import { CA_CITIES, CA_CITIES_BY_PROVINCE } from '../src/data/caCities.js'
+import { withTeacherSlugs, teacherPath, teacherTitle, teacherDescription } from '../src/data/teacherSlug.js'
 
 const NOINDEX_ONLY = process.argv.includes('--noindex-only')
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -306,7 +307,7 @@ for (const id of MAIN_IDS) {
   // The contact page's details card is replaced by the canonical NAP block.
   if (id === 'contact') body.push(contactBlock(), ...x.html.filter(t => !/@|Diamond Plaza|Avenue|Accounts, support/.test(t)))
   else body.push(...x.html)
-  if (id === 'teachers') body.push(p('Smartious teachers are qualified subject specialists who teach live, small-group and one-to-one lessons in Cambridge, Pearson Edexcel, IB, American and Kenyan curricula. Team profiles load from our school system when the page opens.'),
+  if (id === 'teachers') body.push(p('Smartious teachers are qualified subject specialists who teach live, small-group and one-to-one lessons in Cambridge, Pearson Edexcel, IB, American and Kenyan curricula. Each member of the team has a profile page with their role, experience and qualifications.'),
     links([{ href: '/about', label: 'About Smartious and our founder' }, { href: '/curricula', label: 'Curricula we teach' }, { href: '/contact', label: 'Contact the academic office' }]))
   if (id === 'curricula' || id === 'programs' || id === 'homeschool') body.push(h2('Curricula'), links(CURRICULA_LINKS))
   if (id === 'services') body.push(...SERVICES.map(sv => h2(sv.h) + p(sv.detail?.summary || sv.desc) + bullets(sv.tags) + links([{ href: '/services/' + sv.slug, label: 'More about ' + sv.h }])),
@@ -758,6 +759,55 @@ for (const r of NOINDEX) r.pg.noindex = true
   if (prev !== src) { writeFileSync(out, src); console.log('seo-static: wrote src/data/noindexSlugs.js (' + slugs.length + ' slugs)') }
 }
 if (NOINDEX_ONLY) process.exit(0)
+
+// ── Team profiles: /teachers/<slug> ──────────────────────────
+// The team lives in the school system, not in a data file, so the build
+// reads the same public endpoint the /teachers page uses (no private
+// fields: see backend routes/users.js public-teachers). The free backend
+// can take a while to wake, hence the long timeout and one retry. If it
+// still cannot be reached the build goes on without the profile pages:
+// they then render from the app at the same URLs, and the next build
+// adds them back to the static HTML and the sitemap.
+{
+  const api = (process.env.VITE_API_URL || 'https://smartious-backend.onrender.com').replace(/\/$/, '') + '/api/users/public-teachers'
+  let team = null
+  for (let attempt = 1; attempt <= 2 && !team; attempt++) {
+    try {
+      const r = await fetch(api, { signal: AbortSignal.timeout(60_000), headers: { accept: 'application/json' } })
+      const d = await r.json()
+      if (!r.ok || !d?.success) throw new Error('HTTP ' + r.status + (d?.message ? ': ' + d.message : ''))
+      team = withTeacherSlugs(d.data?.teachers || [])
+    } catch (e) {
+      console.warn(`seo-static: team profiles: attempt ${attempt} failed (${e.message})`)
+    }
+  }
+  const teamPage = byPath.get('/teachers')
+  if (!team) {
+    console.warn('seo-static: team profiles skipped: ' + api + ' unreachable; /teachers/<slug> still works in the app')
+  } else {
+    if (teamPage) teamPage.body.push(h2('Our team'), links(team.map(t => ({ href: teacherPath(t), label: t.title ? t.name + ', ' + t.title : t.name }))))
+    for (const t of team) {
+      const path = teacherPath(t)
+      const quals = (t.qualifications || []).filter(Boolean)
+      add({
+        path, title: teacherTitle(t), desc: teacherDescription(t), h1: t.name,
+        body: [
+          p([t.title, t.yearsOfExperience > 0 ? t.yearsOfExperience + ' year' + (t.yearsOfExperience === 1 ? '' : 's') + ' of experience' : ''].filter(Boolean).join(', ')),
+          p(t.bio),
+          quals.length ? h2('Qualifications') + bullets(quals) : '',
+        ],
+        related: [links([{ href: '/teachers', label: 'Back to our team' }, { href: '/about', label: 'About Smartious and our founder' }, { href: '/assessment', label: 'Book an assessment' }])],
+        crumbs: [['Our team', '/teachers'], [t.name, path]],
+        ld: [{ '@context': 'https://schema.org', '@type': 'ProfilePage', '@id': ORIGIN + path, url: ORIGIN + path, name: teacherTitle(t),
+          mainEntity: { '@type': 'Person', name: t.name, ...(t.title ? { jobTitle: t.title } : {}), ...(t.bio ? { description: clip(t.bio, 300) } : {}),
+            ...(/^https?:/.test(t.avatar || '') ? { image: t.avatar } : {}),
+            ...(quals.length ? { hasCredential: quals.map(q => ({ '@type': 'EducationalOccupationalCredential', name: q })) } : {}),
+            worksFor: { '@id': ORG_ID } } }],
+      })
+    }
+    console.log(`seo-static: ${team.length} team profile pages`)
+  }
+}
 
 // ── Write ────────────────────────────────────────────────────
 const indexPath = join(DIST, 'index.html')

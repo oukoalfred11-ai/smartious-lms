@@ -21,6 +21,7 @@
 ═══════════════════════════════════════════════════════════════════ */
 
 import { imageExists } from '../data/generated/publicImages.js'
+import HeroBackdrop from './HeroBackdrop.jsx'
 
 /* ────────────────────────────────────────────────────────────────
    Country-awareness helpers for cross-market content cleanup.
@@ -115,20 +116,12 @@ function CountryHub({
       })}}/>
 
       {/* ─── HERO ─── */}
-      <section className="sec" style={{
+      <section className="sec hero-legible" style={{
         position:'relative',
         background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
         color:'#fff', padding:'72px 0 56px', overflow:'hidden',
       }}>
-        {imageExists(country.heroImage) && (
-          <img src={country.heroImage} alt="" aria-hidden="true"
-            loading="eager"
-            fetchPriority="high"
-            decoding="async"
-            onError={e => { e.currentTarget.style.display='none' }}
-            style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
-        )}
-        <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
+        {imageExists(country.heroImage) && <HeroBackdrop src={country.heroImage}/>}
         <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
           <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow} · Virtual school</div>
           <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>

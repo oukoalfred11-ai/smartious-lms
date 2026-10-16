@@ -18,6 +18,7 @@
  */
 import { useState, useEffect } from 'react'
 import { api } from '../context/ctx.jsx'
+import { HERO_DYE } from './HeroBackdrop.jsx'
 
 let heroUrlPromise = null
 function fetchHeroUrl() {
@@ -45,8 +46,9 @@ export default function HeroPanelVideo({ band = false }) {
         style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', borderRadius: radius }} />
       {/* Dye, not veil: a solid crimson multiplied into the footage
           keeps the brand colour deep and vivid instead of the washed,
-          faded look a translucent overlay gives over bright video. */}
-      <div style={{ position: 'absolute', inset: 0, borderRadius: radius, background: '#7D1025', mixBlendMode: 'multiply', opacity: .82 }} />
+          faded look a translucent overlay gives over bright video.
+          HERO_DYE is shared with the website heroes (HeroBackdrop). */}
+      <div style={{ position: 'absolute', inset: 0, borderRadius: radius, ...HERO_DYE }} />
       <div style={{ position: 'absolute', inset: 0, borderRadius: radius, background: 'linear-gradient(100deg, rgba(20,2,6,.5) 0%, rgba(20,2,6,.15) 45%, rgba(20,2,6,.35) 100%)' }} />
     </>
   )

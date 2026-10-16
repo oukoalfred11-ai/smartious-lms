@@ -31,6 +31,7 @@
 import { useEffect } from 'react'
 import { isNoindexSlug } from '../data/noindexSlugs.js'
 import { imageExists } from '../data/generated/publicImages.js'
+import HeroBackdrop from './HeroBackdrop.jsx'
 
 const ORG_ID = 'https://smartioushomeschool.com/#organization'
 const ROBOTS_DEFAULT = 'index, follow, max-image-preview:large, max-snippet:-1'
@@ -84,22 +85,12 @@ export default function CountryCityPage({ country, cities, currentCitySlug, P, V
       })}}/>
 
       {/* HERO */}
-      <section className="sec" style={{
+      <section className="sec hero-legible" style={{
         position:'relative',
         background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
         color:'#fff', padding:'60px 0 48px', overflow:'hidden',
       }}>
-        {imageExists(city.heroImg) && (
-          <>
-            <img src={city.heroImg} alt={city.altTexts?.hero || ''} aria-hidden="true"
-              loading="eager"
-              fetchPriority="high"
-              decoding="async"
-              onError={e => { e.currentTarget.style.display='none' }}
-              style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
-            <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
-          </>
-        )}
+        {imageExists(city.heroImg) && <HeroBackdrop src={city.heroImg}/>}
         <div className="wrap" style={{position:'relative',zIndex:2}}>
           <a href={hubUrl}
             onClick={(e)=>{e.preventDefault(); P(hubPageId)}}

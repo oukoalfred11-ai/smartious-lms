@@ -119,12 +119,10 @@
 /classroom/*
   X-Robots-Tag: noindex
 
-# /enroll and /consult are public marketing pages but thin lead forms
-# (the application form and a booking form) that duplicate /assessment,
-# the indexed lead page. noindex keeps them out of results; follow keeps
-# the links on them counting. Neither is in the sitemap.
-/enroll
-  X-Robots-Tag: noindex, follow
+# /consult is a public marketing page but a thin lead form (a booking
+# form) that duplicates /assessment, the indexed lead page. noindex keeps
+# it out of results; follow keeps the links on it counting. It is not in
+# the sitemap. (/enroll is gone: it 301s to /assessment, see _redirects.)
 /consult
   X-Robots-Tag: noindex, follow
 
