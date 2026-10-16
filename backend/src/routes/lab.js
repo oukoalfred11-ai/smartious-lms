@@ -86,7 +86,7 @@ const statusOf = (map, id) => map[id]?.status || 'review';
 function sessionOut(s, { withActions = true } = {}) {
   const o = s.toObject ? s.toObject() : { ...s };
   delete o.submissionKey;
-  if (!withActions) { delete o.actions; delete o.notebook; delete o.answers; }
+  if (!withActions) { delete o.actions; delete o.notebook; delete o.answers; delete o.analysis; }
   return o;
 }
 

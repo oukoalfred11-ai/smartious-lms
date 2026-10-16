@@ -3,7 +3,8 @@
  *
  *  • Actions run locally through the shared engine for an instant response,
  *    and are queued for the server.
- *  • Autosave sends only the new actions plus the notebook and answers,
+ *  • Autosave sends only the new actions plus the notebook, answers and
+ *    the student's analysis (results table, graphs, working),
  *    with the revision last confirmed. "Saved" is shown only after the
  *    server confirms; failures keep the work queued and retry with backoff.
  *  • Unsaved work is mirrored to localStorage so a refresh or a crash cannot
@@ -13,7 +14,7 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { api } from '../context/ctx.jsx'
-import { paramsFor, applyAction, replay, viewOf, getExperiment } from './core.js'
+import { paramsFor, applyAction, replay, viewOf, getExperiment, emptyAnalysis } from './core.js'
 
 const AUTOSAVE_MS = 2500
 const backupKey = (id) => 'sm_lab_backup_' + id
@@ -32,6 +33,7 @@ export default function useLabSession({ experimentId, assignmentId = null, sessi
   const [actions, setActions] = useState([])         // full local log
   const [notebook, setNotebook] = useState({})
   const [answers, setAnswers] = useState({})
+  const [analysis, setAnalysis] = useState(null)
   const [save, setSave] = useState({ status: 'idle', at: null, error: null })   // idle|dirty|saving|saved|error|conflict
   const [loadError, setLoadError] = useState(null)
   const [actionError, setActionError] = useState(null)
@@ -58,13 +60,14 @@ export default function useLabSession({ experimentId, assignmentId = null, sessi
       setActions(s.actions || [])
       setNotebook(s.notebook || {})
       setAnswers(s.answers || {})
+      setAnalysis(s.analysis || emptyAnalysis())
       setState(replay(d, p, s.actions || []))
       ref.current = { savedCount: (s.actions || []).length, revision: s.revision, dirtyMeta: false, saving: false, retry: 0, inflight: 0, metaV: 0, savedMetaV: 0 }
       setSave({ status: 'saved', at: s.updatedAt, error: null })
       // A local copy newer than the server's (e.g. the network dropped before saving)?
       try {
         const b = JSON.parse(localStorage.getItem(backupKey(s._id)) || 'null')
-        if (b && b.baseRevision === s.revision && (b.actions?.length > (s.actions || []).length || JSON.stringify(b.notebook) !== JSON.stringify(s.notebook || {}) || JSON.stringify(b.answers) !== JSON.stringify(s.answers || {})))
+        if (b && b.baseRevision === s.revision && (b.actions?.length > (s.actions || []).length || JSON.stringify(b.notebook) !== JSON.stringify(s.notebook || {}) || JSON.stringify(b.answers) !== JSON.stringify(s.answers || {}) || (b.analysis && JSON.stringify(b.analysis) !== JSON.stringify(s.analysis || emptyAnalysis()))))
           setRestorable(b)
       } catch {}
     }
@@ -77,8 +80,8 @@ export default function useLabSession({ experimentId, assignmentId = null, sessi
     if (!session || !editable) return
     const dirty = actions.length > ref.current.savedCount || ref.current.dirtyMeta
     if (!dirty) { try { localStorage.removeItem(backupKey(session._id)) } catch {} return }
-    try { localStorage.setItem(backupKey(session._id), JSON.stringify({ baseRevision: ref.current.revision, actions, notebook, answers, at: Date.now() })) } catch {}
-  }, [actions, notebook, answers, session, editable])
+    try { localStorage.setItem(backupKey(session._id), JSON.stringify({ baseRevision: ref.current.revision, actions, notebook, answers, analysis, at: Date.now() })) } catch {}
+  }, [actions, notebook, answers, analysis, session, editable])
 
   // ── Save ─────────────────────────────────────────────────
   const saveNow = useCallback(async () => {
@@ -92,7 +95,7 @@ export default function useLabSession({ experimentId, assignmentId = null, sessi
     setSave(s => ({ ...s, status: 'saving' }))
     try {
       const { data } = await api.put('/lab/sessions/' + session._id, {
-        baseRevision: r.revision, fromIndex: r.savedCount, newActions: pending, notebook, answers,
+        baseRevision: r.revision, fromIndex: r.savedCount, newActions: pending, notebook, answers, analysis,
       })
       r.revision = data.data.revision
       r.savedCount += pending.length
@@ -109,7 +112,7 @@ export default function useLabSession({ experimentId, assignmentId = null, sessi
       else { r.retry += 1; setSave({ status: 'error', at: null, error: status ? (msg || 'Could not save.') : 'You are offline. Your work is kept on this device and will be saved when you reconnect.' }) }
       return false
     } finally { r.saving = false; r.inflight = 0 }
-  }, [session, editable, actions, notebook, answers])
+  }, [session, editable, actions, notebook, answers, analysis])
 
   useEffect(() => {
     if (!session || !editable) return
@@ -118,7 +121,7 @@ export default function useLabSession({ experimentId, assignmentId = null, sessi
     const delay = save.status === 'error' ? Math.min(30000, AUTOSAVE_MS * 2 ** ref.current.retry) : AUTOSAVE_MS
     const t = setTimeout(saveNow, delay)
     return () => clearTimeout(t)
-  }, [actions, notebook, answers, session, editable, save.status, saveNow])
+  }, [actions, notebook, answers, analysis, session, editable, save.status, saveNow])
 
   // Warn before leaving with unsaved work; save when the tab is hidden.
   useEffect(() => {
@@ -159,6 +162,8 @@ export default function useLabSession({ experimentId, assignmentId = null, sessi
   const canUndo = editable && actions.length > ref.current.savedCount + ref.current.inflight
 
   const updateNotebook = useCallback((k, v) => { ref.current.dirtyMeta = true; ref.current.metaV += 1; setNotebook(n => ({ ...n, [k]: v })); setSave(s => ({ ...s, status: 'dirty' })) }, [])
+  /** Replace the analysis (table, graphs, working) with an updater function or a value. */
+  const updateAnalysis = useCallback((fn) => { ref.current.dirtyMeta = true; ref.current.metaV += 1; setAnalysis(a => (typeof fn === 'function' ? fn(a || emptyAnalysis()) : fn)); setSave(s => ({ ...s, status: 'dirty' })) }, [])
   const updateAnswer = useCallback((k, v) => { ref.current.dirtyMeta = true; ref.current.metaV += 1; setAnswers(n => ({ ...n, [k]: v })); setSave(s => ({ ...s, status: 'dirty' })) }, [])
 
   const restoreBackup = useCallback(() => {
@@ -166,7 +171,7 @@ export default function useLabSession({ experimentId, assignmentId = null, sessi
     try {
       const st = replay(def, params, restorable.actions)
       setActions(restorable.actions); setState(st)
-      setNotebook(restorable.notebook || {}); setAnswers(restorable.answers || {})
+      setNotebook(restorable.notebook || {}); setAnswers(restorable.answers || {}); if (restorable.analysis) setAnalysis(restorable.analysis)
       ref.current.dirtyMeta = true
       setSave(s => ({ ...s, status: 'dirty' }))
     } catch (e) { setActionError('The saved copy on this device could not be restored: ' + e.message) }
@@ -197,9 +202,9 @@ export default function useLabSession({ experimentId, assignmentId = null, sessi
   }, [saveNow, session])
 
   return {
-    def, session, params, state, view, notebook, answers, editable,
+    def, session, params, state, view, notebook, answers, analysis: analysis || emptyAnalysis(), editable,
     save, saveNow, loadError, actionError, clearActionError: () => setActionError(null),
-    dispatch, undo, canUndo, updateNotebook, updateAnswer, reset, submit,
+    dispatch, undo, canUndo, updateNotebook, updateAnswer, updateAnalysis, reset, submit,
     restorable, restoreBackup, discardBackup,
   }
 }

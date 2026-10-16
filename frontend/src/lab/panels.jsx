@@ -5,9 +5,8 @@
  */
 import { useState } from 'react'
 import { api } from '../context/ctx.jsx'
-import { NOTEBOOK_SECTIONS } from './core.js'
 
-const LABELS = { aim: 'Aim', hypothesis: 'Hypothesis', variables: 'Variables', apparatus: 'Apparatus and materials', procedure: 'Procedure (what you actually did)', observations: 'Observations', analysis: 'Analysis', evaluation: 'Evaluation and limitations', conclusion: 'Conclusion' }
+export const LABELS = { aim: 'Aim', hypothesis: 'Hypothesis', variables: 'Variables', risk: 'Risk assessment (hazard, risk, precaution)', apparatus: 'Apparatus and materials', procedure: 'Procedure (what you actually did)', observations: 'Observations', analysis: 'Analysis', evaluation: 'Evaluation and limitations', conclusion: 'Conclusion' }
 export const STATUS_LABEL = { in_progress: 'In progress', submitted: 'Submitted', returned: 'Returned for correction', marked: 'Marked' }
 const fmt = (d) => (d ? new Date(d).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '')
 
@@ -91,23 +90,6 @@ export function Graph({ g }) {
       </svg>
       <figcaption>{g.title}{series.map((sr, k) => sr.line ? ` · ${sr.name ? sr.name + ': ' : 'line of best fit: '}gradient ${Number(sr.line.m.toPrecision(3))}${sr.line.c ? ', intercept ' + Number(sr.line.c.toPrecision(3)) : ''}` : '').join('')}</figcaption>
     </figure>
-  )
-}
-
-export function Notebook({ def, notebook, update, editable, tables, graph }) {
-  return (
-    <div className="lab-notebook">
-      {NOTEBOOK_SECTIONS.map(k => (
-        <div key={k} className="lab-nb-sec">
-          {k === 'observations' && <div className="lab-nb-data"><h3>Raw data (recorded automatically from your readings)</h3><DataTables tables={tables} /><Graph g={graph} /></div>}
-          <label htmlFor={'nb-' + k}><h3>{LABELS[k]}</h3></label>
-          {editable
-            ? <textarea id={'nb-' + k} value={notebook[k] ?? ''} onChange={e => update(k, e.target.value)} maxLength={10000} rows={k === 'aim' ? 2 : 4}
-                placeholder={k === 'aim' ? def.notebook.aim : k === 'variables' ? def.notebook.variables : ''} />
-            : <p className="lab-nb-ro">{notebook[k] || '—'}</p>}
-        </div>
-      ))}
-    </div>
   )
 }
 

@@ -159,6 +159,7 @@ const def = {
     return [{
       title: 'Mass of potato cylinders',
       columns: ['Sucrose / mol dm⁻³', 'Initial mass / g', 'Final mass / g', 'Change in mass / %'],
+      derived: [3],
       rows: s.tubes.map((t, i) => [CONCS[i].toFixed(1), t.m0 != null ? t.m0.toFixed(2) : '—', t.m1 != null ? t.m1.toFixed(2) : '—',
         t.m0 != null && t.m1 != null ? percentFromMasses(t.m0, t.m1).toFixed(1) : '—']),
     }]

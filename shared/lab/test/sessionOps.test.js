@@ -67,3 +67,16 @@ test('teacher can override an auto-marked row (recorded as overridden)', () => {
 test('work in progress cannot be marked', () => {
   assert.throws(() => applyMark(def, fresh(), { marks: {}, action: 'mark' }), e => e.code === 409)
 })
+
+test('the student’s analysis (table, graphs, working) is saved cleaned, and kept when not sent', () => {
+  let s = fresh()
+  s = save(s, { baseRevision: 0, fromIndex: 0, newActions: [], notebook: { risk: 'hot resistor' }, analysis: {
+    table: { columns: [{ id: 'c1', name: 'V', unit: 'V' }, { id: 'c2', name: 'I', unit: 'A' }], rows: [['1.00', '0.10']] },
+    graphs: [{ id: 'g1', x: 'c2', y: 'c1', lines: [{ role: 'best', x1: 0, y1: 0, x2: 1, y2: 10 }] }], calcs: [{ name: 'r', expr: 'gradient', unit: 'Ω' }] } })
+  assert.equal(s.notebook.risk, 'hot resistor')
+  assert.equal(s.analysis.table.rows[0][1], '0.10')
+  assert.equal(s.analysis.graphs[0].lines.length, 1)
+  s = save(s, { baseRevision: 1, fromIndex: 0, newActions: [] })
+  assert.equal(s.analysis.calcs[0].name, 'r')
+  assert.throws(() => applySave(def, s, { baseRevision: 2, fromIndex: 0, newActions: [], analysis: 'not an object' }), e => e instanceof SessionOpError && /could not be saved/.test(e.message))
+})
