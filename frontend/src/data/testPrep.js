@@ -2,8 +2,8 @@
 // 6 test programmes: IELTS, TOEFL, PTE, GRE, GMAT, SAT
 //
 // Pricing structure:
-//   English proficiency (IELTS, TOEFL, PTE): KSh 29,000 / 20 sessions
-//   Graduate & undergraduate admissions (GRE, GMAT, SAT): KSh 59,000 / 40 sessions
+//   English proficiency (IELTS, TOEFL, PTE): USD 450 / 20 sessions (30 hours at USD 15/hour)
+//   Graduate & undergraduate admissions (GRE, GMAT, SAT): USD 900 / 40 sessions (60 hours at USD 15/hour)
 //
 // Routes: /test-prep, /test-prep/{slug}
 
@@ -11,11 +11,11 @@ export const TEST_PREP = [
   {
     slug: 'ielts', code: 'IELTS', fullName: 'International English Language Testing System',
     tier: 'English Proficiency',
-    fee: 'KSh 29,000', feeUsd: 'USD 220',
+    fee: 'USD 450', feeUsd: '30 hours at USD 15/hour',
     sessions: 20, sessionLength: '1.5 hours',
     duration: '8-10 weeks (2 sessions/week)',
-    seoTitle: 'IELTS Preparation in Kenya | 20 Sessions · KSh 29,000 | Smartious',
-    seoDesc: 'Premium IELTS preparation in Nairobi. 20 sessions, KSh 29,000. Academic and General Training modules. Live 1-on-1 sessions with qualified tutors. Target Band 7+.',
+    seoTitle: 'IELTS Preparation in Kenya | 20 Sessions · USD 15/hour | Smartious',
+    seoDesc: 'Premium IELTS preparation in Nairobi. 20 sessions at USD 15/hour. Academic and General Training modules. Live 1-on-1 sessions with qualified tutors. Target Band 7+.',
     heroTagline: 'Premium IELTS coaching for university admissions, immigration, and professional registration',
     intro: 'IELTS is the world\'s most widely accepted English-language test for university admissions, immigration, and professional registration. It\'s recognised by 11,000+ universities and 140 countries — including all UK, Australian, New Zealand and Canadian universities, and an increasing number of US institutions. Smartious offers structured 20-session IELTS preparation covering all four modules — Listening, Reading, Writing and Speaking — with a focus on the techniques and time-management strategies that move students from a Band 5-6 baseline to a confident Band 7+.',
     whoFor: [
@@ -60,8 +60,8 @@ export const TEST_PREP = [
       { q: 'Can I take IELTS in Kenya?', a: 'Yes — IELTS is administered by British Council Kenya (Nairobi office) and IDP Education (Westlands Nairobi, plus various centres in Mombasa and Kisumu). Both centres are recognised equally; we help with registration.' },
       { q: 'What if I need IELTS in less than 8 weeks?', a: 'We can compress the 20 sessions into 5-6 weeks (4 sessions per week) for students with urgent timelines. This intensive format works best for students starting from a Band 6.0+ baseline.' },
       { q: 'Do you offer mock tests?', a: 'Yes — 4 full mock tests are included in the 20-session programme (one per module: Listening, Reading, Writing, Speaking). Each mock is followed by a detailed feedback session.' },
-      { q: 'What if my target Band score is very high (8.0+)?', a: 'For students targeting Band 8.0 or above, we recommend extending the programme to 30 sessions (additional sessions at KSh 1,300/hour). Band 8.0+ requires sophisticated vocabulary, complex grammatical structures and near-native speaking fluency — substantial extra practice helps.' },
-      { q: 'Can I retake IELTS if I don\'t hit my target?', a: 'Yes — IELTS can be retaken at any time with no minimum gap. We offer a retake top-up package (5 additional sessions at KSh 8,500) for students wanting focused preparation before retaking.' },
+      { q: 'What if my target Band score is very high (8.0+)?', a: 'For students targeting Band 8.0 or above, we recommend extending the programme to 30 sessions (additional sessions at USD 15/hour). Band 8.0+ requires sophisticated vocabulary, complex grammatical structures and near-native speaking fluency — substantial extra practice helps.' },
+      { q: 'Can I retake IELTS if I don\'t hit my target?', a: 'Yes — IELTS can be retaken at any time with no minimum gap. We offer a retake top-up package (5 additional sessions at USD 15/hour) for students wanting focused preparation before retaking.' },
       { q: 'How do I pay for the Smartious IELTS programme?', a: 'M-Pesa Paybill 247247, Account 745021 (Smartious Edtech). Full payment is required to commence the programme. Instalment options available — typically 50% upfront, 50% by session 10.' },
       { q: 'What is the IELTS test fee separately?', a: 'The IELTS test fee in Kenya is approximately KSh 30,500 (2026 British Council Nairobi rates). This is paid directly to the test centre, separate from your Smartious tuition fee.' },
       { q: 'Do you guarantee a specific Band score?', a: 'No — we don\'t guarantee specific scores because outcomes depend on factors outside our control (your effort between sessions, test-day performance, your starting English level). However, students who complete the full 20-session programme with consistent attendance and homework typically achieve 1.0-1.5 Band points of improvement.' },
@@ -72,11 +72,11 @@ export const TEST_PREP = [
   {
     slug: 'toefl', code: 'TOEFL', fullName: 'Test of English as a Foreign Language',
     tier: 'English Proficiency',
-    fee: 'KSh 29,000', feeUsd: 'USD 220',
+    fee: 'USD 450', feeUsd: '30 hours at USD 15/hour',
     sessions: 20, sessionLength: '1.5 hours',
     duration: '8-10 weeks (2 sessions/week)',
-    seoTitle: 'TOEFL Preparation in Kenya | 20 Sessions · KSh 29,000 | Smartious',
-    seoDesc: 'Premium TOEFL iBT preparation in Nairobi. 20 sessions, KSh 29,000. Reading, Listening, Speaking, Writing. Live 1-on-1 with qualified tutors. Target 100+.',
+    seoTitle: 'TOEFL Preparation in Kenya | 20 Sessions · USD 15/hour | Smartious',
+    seoDesc: 'Premium TOEFL iBT preparation in Nairobi. 20 sessions at USD 15/hour. Reading, Listening, Speaking, Writing. Live 1-on-1 with qualified tutors. Target 100+.',
     heroTagline: 'TOEFL iBT preparation for US, Canadian and global university applications',
     intro: 'TOEFL (Test of English as a Foreign Language) is the most widely accepted English-language test for US university admissions, with strong recognition globally — accepted by 12,000+ universities across 160 countries. The TOEFL iBT (Internet-Based Test) is the current standard format. Smartious offers structured 20-session TOEFL preparation covering all four sections — Reading, Listening, Speaking and Writing — with focus on the integrated tasks that distinguish TOEFL from other English proficiency tests.',
     whoFor: [
@@ -129,11 +129,11 @@ export const TEST_PREP = [
   {
     slug: 'pte', code: 'PTE', fullName: 'Pearson Test of English Academic',
     tier: 'English Proficiency',
-    fee: 'KSh 29,000', feeUsd: 'USD 220',
+    fee: 'USD 450', feeUsd: '30 hours at USD 15/hour',
     sessions: 20, sessionLength: '1.5 hours',
     duration: '6-8 weeks (2-3 sessions/week)',
-    seoTitle: 'PTE Academic Preparation in Kenya | 20 Sessions · KSh 29,000 | Smartious',
-    seoDesc: 'Premium PTE Academic preparation in Nairobi. 20 sessions, KSh 29,000. Computer-based English test with AI scoring. 48-hour results.',
+    seoTitle: 'PTE Academic Preparation in Kenya | 20 Sessions · USD 15/hour | Smartious',
+    seoDesc: 'Premium PTE Academic preparation in Nairobi. 20 sessions at USD 15/hour. Computer-based English test with AI scoring. 48-hour results.',
     heroTagline: 'PTE Academic preparation — AI-scored English test with 48-hour results',
     intro: 'PTE Academic (Pearson Test of English Academic) is a fully computer-based English proficiency test, scored entirely by AI, with results delivered within 48 hours. PTE Academic is accepted by thousands of universities globally — including all UK, Australian, New Zealand and Canadian institutions, plus many US universities — and is particularly popular with applicants seeking fast results and a fully computer-delivered testing experience. Smartious offers structured 20-session PTE preparation across the integrated test format.',
     whoFor: [
@@ -184,11 +184,11 @@ export const TEST_PREP = [
   {
     slug: 'gre', code: 'GRE', fullName: 'Graduate Record Examinations',
     tier: 'Graduate Admissions',
-    fee: 'KSh 59,000', feeUsd: 'USD 450',
+    fee: 'USD 900', feeUsd: '60 hours at USD 15/hour',
     sessions: 40, sessionLength: '1.5 hours',
     duration: '12-16 weeks (2-3 sessions/week)',
-    seoTitle: 'GRE Preparation in Kenya | 40 Sessions · KSh 59,000 | Smartious',
-    seoDesc: 'Premium GRE preparation in Nairobi. 40 sessions, KSh 59,000. Verbal, Quantitative, Analytical Writing. Target 320+ for top US graduate schools.',
+    seoTitle: 'GRE Preparation in Kenya | 40 Sessions · USD 15/hour | Smartious',
+    seoDesc: 'Premium GRE preparation in Nairobi. 40 sessions at USD 15/hour. Verbal, Quantitative, Analytical Writing. Target 320+ for top US graduate schools.',
     heroTagline: 'GRE preparation for graduate school admissions in the US, Canada, UK and Europe',
     intro: 'The GRE (Graduate Record Examinations) is the most widely accepted standardised test for graduate school admissions worldwide — required or accepted by most US graduate programmes, plus a growing number of UK, Canadian and European universities. The current GRE General Test was significantly shortened in September 2023 to under 2 hours. Smartious offers structured 40-session GRE preparation covering all three sections — Verbal Reasoning, Quantitative Reasoning, and Analytical Writing — with focused practice on the computer-adaptive testing format that makes GRE uniquely demanding.',
     whoFor: [
@@ -246,11 +246,11 @@ export const TEST_PREP = [
   {
     slug: 'gmat', code: 'GMAT', fullName: 'Graduate Management Admission Test',
     tier: 'Graduate Admissions',
-    fee: 'KSh 59,000', feeUsd: 'USD 450',
+    fee: 'USD 900', feeUsd: '60 hours at USD 15/hour',
     sessions: 40, sessionLength: '1.5 hours',
     duration: '12-16 weeks (2-3 sessions/week)',
-    seoTitle: 'GMAT Preparation in Kenya | 40 Sessions · KSh 59,000 | Smartious',
-    seoDesc: 'Premium GMAT Focus Edition preparation in Nairobi. 40 sessions, KSh 59,000. Quant, Verbal, Data Insights. Target 605+ for top MBA programmes.',
+    seoTitle: 'GMAT Preparation in Kenya | 40 Sessions · USD 15/hour | Smartious',
+    seoDesc: 'Premium GMAT Focus Edition preparation in Nairobi. 40 sessions at USD 15/hour. Quant, Verbal, Data Insights. Target 605+ for top MBA programmes.',
     heroTagline: 'GMAT Focus Edition preparation for MBA admissions worldwide',
     intro: 'The GMAT (Graduate Management Admission Test) is the global standard for MBA and business graduate programme admissions, used by 2,100+ business schools across 110 countries. The current GMAT Focus Edition replaced the legacy GMAT in November 2023 — shorter (2 hours 15 minutes), more focused, with no Analytical Writing section. Smartious offers structured 40-session GMAT preparation covering all three sections — Quantitative Reasoning, Verbal Reasoning and Data Insights — designed to take students from competitive baseline scores to elite-programme scores (655+).',
     whoFor: [
@@ -299,7 +299,7 @@ export const TEST_PREP = [
       { q: 'Why does GMAT not allow calculators in Quant?', a: 'GMAT Quantitative Reasoning tests mathematical reasoning and problem-solving under time pressure — not raw calculation ability. Mental math, estimation, and elimination strategies are core skills. We train these systematically. Calculator IS allowed in the Data Insights section.' },
       { q: 'Can I take GMAT online from home?', a: 'Yes — GMAT Online is available. Requires a quiet private workspace, a webcam, stable internet, and approved monitoring software. Online GMAT and test-centre GMAT scores are reported identically to schools.' },
       { q: 'How many times can I take the GMAT?', a: 'You can take GMAT Focus Edition up to 5 times in any rolling 12-month period (lifetime limit 8 attempts). At least 16 days between attempts. Most business schools use the highest score from your attempts.' },
-      { q: 'Do you provide MBA application support?', a: 'Yes — we offer MBA application strategy sessions (school selection, essay coaching, recommendation letter guidance) as a separate add-on (KSh 25,000 for 8 sessions). Many of our GMAT students also use this to prepare full MBA applications.' },
+      { q: 'Do you provide MBA application support?', a: 'Yes — we offer MBA application strategy sessions (school selection, essay coaching, recommendation letter guidance) as a separate add-on (8 sessions at USD 15/hour). Many of our GMAT students also use this to prepare full MBA applications.' },
       { q: 'Do you support EA (Executive Assessment) preparation?', a: 'Yes — the Executive Assessment is a shorter alternative to GMAT for executive MBA programmes. Custom preparation available; contact us for pricing.' },
       { q: 'Do you guarantee a specific GMAT score?', a: 'No score guarantees. Students completing the full 40-session programme typically see 50-100 point improvement on the GMAT Focus Edition scale. Outcomes depend on starting level, effort and test-day performance.' },
     ],
@@ -308,11 +308,11 @@ export const TEST_PREP = [
   {
     slug: 'sat', code: 'SAT', fullName: 'Scholastic Assessment Test',
     tier: 'Undergraduate Admissions',
-    fee: 'KSh 59,000', feeUsd: 'USD 450',
+    fee: 'USD 900', feeUsd: '60 hours at USD 15/hour',
     sessions: 40, sessionLength: '1.5 hours',
     duration: '12-16 weeks (2-3 sessions/week)',
-    seoTitle: 'SAT Preparation in Kenya | 40 Sessions · KSh 59,000 | Smartious',
-    seoDesc: 'Premium Digital SAT preparation in Nairobi. 40 sessions, KSh 59,000. Reading & Writing, Math. Target 1400+ for top US universities. Live 1-on-1 with qualified tutors.',
+    seoTitle: 'SAT Preparation in Kenya | 40 Sessions · USD 15/hour | Smartious',
+    seoDesc: 'Premium Digital SAT preparation in Nairobi. 40 sessions at USD 15/hour. Reading & Writing, Math. Target 1400+ for top US universities. Live 1-on-1 with qualified tutors.',
     heroTagline: 'Digital SAT preparation for US university admissions and merit scholarships',
     intro: 'The SAT is the primary standardised test for US university undergraduate admissions. The Digital SAT (launched internationally March 2023, fully digital US March 2024) is shorter (2 hours 14 minutes), adaptive by module, and entirely computer-based. Smartious offers structured 40-session Digital SAT preparation covering both sections — Reading & Writing and Math — with focus on the strategies and pacing that move students from baseline scores to merit-scholarship-competitive scores (1400+).',
     whoFor: [

@@ -2023,6 +2023,18 @@ const PAGE_META = {
     title: 'Private Tuition UK — Online IGCSE, A-Level, 11+ | Smartious',
     desc: 'Live online and in-person private tuition in select UK areas — Cambridge IGCSE, A-Level, IB Diploma, 11+ Common Entrance preparation. From USD 15/hour.',
   },
+  'ab-funding': {
+    title: 'Alberta Home Education Funding | Use Your $850 CAD on Smartious',
+    desc: 'How Alberta home education funding works and how families use their annual allocation on live online Cambridge IGCSE and A-Level classes with Smartious.',
+  },
+  'bc-funding': {
+    title: 'BC Distributed Learning Funding | Online Homeschool | Smartious',
+    desc: 'How British Columbia distributed learning and home education funding works, and how BC families combine it with live online Cambridge IGCSE and A-Level classes.',
+  },
+  'sk-funding': {
+    title: 'Saskatchewan Homeschool Funding | Online Homeschool | Smartious',
+    desc: 'How Saskatchewan home-based education funding works, and how families use it alongside live online Cambridge IGCSE and A-Level classes with Smartious.',
+  },
   pricing: {
     title: 'Fees 2026–27: from USD 423/month | Smartious',
     desc: 'Online school fees from USD 423/month for Primary, payable termly; they vary by curriculum and level. Tuition USD 15/hour. January 2027 intake.',
@@ -4270,7 +4282,7 @@ export default function LandingPage() {
     }
   } else if (page === 'homeschooling-saudi-arabia') {
     metaTitle = SAUDI_ARABIA_COUNTRY?.seoTitle || 'Online School, Virtual School & Homeschool for Saudi Arabian Families — Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = SAUDI_ARABIA_COUNTRY?.seoDesc || 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Saudi Arabian families across Riyadh, Jeddah, Dhahran, Al Khobar, NEOM. AISR / BISR / Saudi Aramco school alternative. Vision 2030 mega-project family portability. From USD 423/month (~SAR 1,590).'
+    metaDesc  = SAUDI_ARABIA_COUNTRY?.seoDesc || 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Saudi Arabian families across Riyadh, Jeddah, Dhahran, Al Khobar, NEOM. AISR / BISR / Saudi Aramco school alternative. Vision 2030 mega-project family portability. From USD 423/month (~SAR 1,586).'
   } else if (page === 'saudi-city' && currentSaudiCity) {
     const c = SAUDI_ARABIA_CITIES.find(x => x.slug === currentSaudiCity)
     if (c) {
@@ -4279,7 +4291,7 @@ export default function LandingPage() {
     }
   } else if (page === 'homeschooling-uae') {
     metaTitle = 'Homeschooling & Online School in Dubai and the UAE'
-    metaDesc  = 'Live online classes for Dubai, Abu Dhabi and Sharjah families: IGCSE, A-Level, Edexcel, American. From USD 423/month (≈ AED 1,555). January 2027 intake.'
+    metaDesc  = 'Live online classes for Dubai, Abu Dhabi and Sharjah families: IGCSE, A-Level, Edexcel, American. From USD 423/month (≈ AED 1,553). January 2027 intake.'
   } else if (page === 'homeschooling-egypt') {
     metaTitle = 'Online School, Virtual School & Homeschool for Egyptian Families — Cambridge IGCSE & A-Level | Smartious'
     metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Egyptian families across Cairo, New Cairo, Sheikh Zayed, Alexandria, New Administrative Capital, Sharm El Sheikh. Cairo American College / MES / BISC / NCBIS / Hayah / El Alsson / Schutz alternative. Immediate enrolment. From USD 423/month. USD pricing protects against EGP volatility.'
@@ -4858,6 +4870,18 @@ export default function LandingPage() {
     const a = UK_AREAS.find(x => x.slug === currentUkArea)
     metaTitle = a.seoTitle || ('Online Tuition in ' + a.name + ', ' + a.city + ' | GCSE, A-Level & 11+ Tutors | Smartious')
     metaDesc  = a.seoDesc || PAGE_META['uk-area']?.desc || ''
+  } else if (page === 'test-prep-detail' && currentTestPrep && TEST_PREP.find(x => x.slug === currentTestPrep)) {
+    const t = TEST_PREP.find(x => x.slug === currentTestPrep)
+    metaTitle = t.seoTitle || (t.code + ' Preparation | Smartious')
+    metaDesc  = t.seoDesc || PAGE_META['test-prep'].desc
+  } else if (page === 'language-detail' && currentLanguage && LANGUAGES.find(x => x.slug === currentLanguage)) {
+    const l = LANGUAGES.find(x => x.slug === currentLanguage)
+    metaTitle = l.seoTitle || ('Learn ' + l.name + ' Online | Smartious')
+    metaDesc  = l.seoDesc || PAGE_META.languages.desc
+  } else if (page === 'study-abroad-detail' && currentStudyAbroad && STUDY_ABROAD.find(x => x.slug === currentStudyAbroad)) {
+    const d = STUDY_ABROAD.find(x => x.slug === currentStudyAbroad)
+    metaTitle = d.seoTitle || ('Study in ' + d.name + ' | Smartious')
+    metaDesc  = d.seoDesc || PAGE_META['study-abroad'].desc
   } else if (page === 'homeschooling-kuwait' && KUWAIT_COUNTRY?.seoTitle) {
     metaTitle = KUWAIT_COUNTRY.seoTitle
     metaDesc  = KUWAIT_COUNTRY.seoDesc || PAGE_META[page].desc
@@ -11151,7 +11175,7 @@ export default function LandingPage() {
                   {h:'Cambridge-registered examinations',p:'Smartious registers students as private candidates at Cambridge Assessment authorised centres worldwide.'},
                   {h:'University placement support',p:'Personalised guidance for UK Russell Group (UCAS), US Ivy League (Common App), Canadian U15 (OUAC), and more.'},
                   {h:'24/7 recorded catch-up',p:'Missed a class? Every session is recorded. Watch anytime through the Smartious LMS.'},
-                  {h:'Sibling discounts',p:'15-25% off for each additional child from the same family.'},
+                  {h:'Sibling discounts',p:'10% off from the second child, and a 15% family rate for three or more children.'},
                   {h:'Two operational teaching centres',p:'Diamond Plaza Parklands (Nairobi HQ) and Karen Hardy provide in-person option for East African families.'},
                 ].map(f => (
                   <div key={f.h} style={{background:'#fff',border:`1px solid ${V.bone3}`,borderRadius:10,padding:'22px 20px'}}>
@@ -11288,7 +11312,7 @@ export default function LandingPage() {
                         ['College application support included','✓ UCAS + Common App','✗ Not included','◐ Transcript only','◐ Limited'],
                         ['AI tutor 24/7','✓ Mshauri AI Pro','✗','✗','✗'],
                         ['Starting price (per month)','From $423 (Primary)','$99-249','$150-300','Free (state-funded) - $300'],
-                        ['Sibling discount','✓ 15-25% off','✗','◐ Curriculum sharing','✗'],
+                        ['Sibling discount','✓ 10% from the 2nd child','✗','◐ Curriculum sharing','✗'],
                         ['Need-based bursary','✓ Up to 50% off','◐ Roger Billings only','✗','State-dependent'],
                         ['Customer service track record','Direct founder access','BBB complaints filed','Established 50+ years','Mixed state-by-state'],
                         ['Time-zone friendly for US East/Central/Mountain/Pacific','✓ Afternoon Nairobi = morning Eastern','N/A (self-paced)','N/A (self-paced)','✓ US-based'],
@@ -11329,7 +11353,7 @@ export default function LandingPage() {
                     {n:'02',h:'Cambridge & IB rigour',p:'IGCSE, A-Level, IB Diploma. The qualifications top US universities (Harvard, MIT, Stanford, Yale) recognise as evidence of internationally-elite preparation. Often weighted as advanced beyond AP.'},
                     {n:'03',h:'Free college application support',p:'Free for every enrolled family. UCAS for UK universities. Common App for US universities. OUAC for Canada. We help with personal statements, recommendation coordination, interview prep. No extra invoice.'},
                     {n:'04',h:'Mshauri AI tutor — 24/7',p:'The first AI homework helper trained on Cambridge, Edexcel, IB and American curricula. Voice, text, image — your child can photo a math problem and get guidance. Free in Premium Online tier.'},
-                    {n:'05',h:'Transparent pricing — in USD',p:'Every fee published. No surprise increases. External examination fees are pass-through at the published Cambridge/Edexcel rate — Smartious adds only a $25 admin fee. Fees are paid termly. 15-25% sibling discount.'},
+                    {n:'05',h:'Transparent pricing — in USD',p:'Every fee published. No surprise increases. External examination fees are pass-through at the published Cambridge/Edexcel rate — Smartious adds only a $25 admin fee. Fees are paid termly. 10% sibling discount from the second child.'},
                     {n:'06',h:'Real founder access',p:'Smartious is founder-led. Alfred Ouko personally interviews every family who joins. If something breaks, you can WhatsApp the founder. No call centres. No outsourced support.'},
                   ].map(c => (
                     <div key={c.n} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,padding:'26px 28px'}}>
@@ -11721,7 +11745,7 @@ export default function LandingPage() {
                         ['College application support included','✓ UCAS + Common App','✗ Not included','◐ Transcript only','◐ Limited'],
                         ['AI tutor 24/7','✓ Mshauri AI Pro','✗','✗','✗'],
                         ['Starting price (per month)','From $423 (Primary)','$99-249','$150-300','Free (state-funded) - $300'],
-                        ['Sibling discount','✓ 15-25% off','✗','◐ Curriculum sharing','✗'],
+                        ['Sibling discount','✓ 10% from the 2nd child','✗','◐ Curriculum sharing','✗'],
                         ['Need-based bursary','✓ Up to 50% off','◐ Roger Billings only','✗','State-dependent'],
                         ['Customer service track record','Direct founder access','BBB complaints filed','Established 50+ years','Mixed state-by-state'],
                         ['Time-zone friendly for US East/Central/Mountain/Pacific','✓ Afternoon Nairobi = morning Eastern','N/A (self-paced)','N/A (self-paced)','✓ US-based'],
@@ -11762,7 +11786,7 @@ export default function LandingPage() {
                     {n:'02',h:'Cambridge & IB rigour',p:'IGCSE, A-Level, IB Diploma. The qualifications top US universities (Harvard, MIT, Stanford, Yale) recognise as evidence of internationally-elite preparation. Often weighted as advanced beyond AP.'},
                     {n:'03',h:'Free college application support',p:'Free for every enrolled family. UCAS for UK universities. Common App for US universities. OUAC for Canada. We help with personal statements, recommendation coordination, interview prep. No extra invoice.'},
                     {n:'04',h:'Mshauri AI tutor — 24/7',p:'The first AI homework helper trained on Cambridge, Edexcel, IB and Canadian curricula. Voice, text, image — your child can photo a math problem and get guidance. Free in Premium Online tier.'},
-                    {n:'05',h:'Transparent pricing — in USD',p:'Every fee published. No surprise increases. External examination fees are pass-through at the published Cambridge/Edexcel rate — Smartious adds only a $25 admin fee. Fees are paid termly. 15-25% sibling discount.'},
+                    {n:'05',h:'Transparent pricing — in USD',p:'Every fee published. No surprise increases. External examination fees are pass-through at the published Cambridge/Edexcel rate — Smartious adds only a $25 admin fee. Fees are paid termly. 10% sibling discount from the second child.'},
                     {n:'06',h:'Real founder access',p:'Smartious is founder-led. Alfred Ouko personally interviews every family who joins. If something breaks, you can WhatsApp the founder. No call centres. No outsourced support.'},
                   ].map(c => (
                     <div key={c.n} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,padding:'26px 28px'}}>
@@ -13728,7 +13752,7 @@ export default function LandingPage() {
                       {c:'Ontario OSSD',             sm:'\u2713 Yes (via CCIS)', chs:'\u2717 No', kih:'\u2717 No', wh:'\u2717 No', cga:'\u2717 No', bra:'\u2717 No'},
                       {c:'Kenya physical centre',    sm:'\u2713 Two Nairobi centres', chs:'\u2717 No', kih:'\u2717 No', wh:'\u2717 No', cga:'\u2717 No', bra:'\u2713 Multiple KE'},
                       {c:'Kenya exam registration',  sm:'\u2713 Managed by us', chs:'\u2717 Family handles', kih:'\u2717 Family handles', wh:'\u2717 Family handles', cga:'\u2717 Family handles', bra:'\u2713 On-campus'},
-                      {c:'Sibling discounts',        sm:'\u2713 15-25%', chs:'\u2717 Limited', kih:'\u2717 Varies', wh:'\u2717 No', cga:'\u2717 No', bra:'\u2713 Limited'},
+                      {c:'Sibling discounts',        sm:'\u2713 10% from 2nd child', chs:'\u2717 Limited', kih:'\u2717 Varies', wh:'\u2717 No', cga:'\u2717 No', bra:'\u2713 Limited'},
                     ].map((row, i) => (
                       <tr key={row.c} style={{background: i%2 === 0 ? '#fff' : V.bone,borderBottom:`1px solid ${V.bone3}`}}>
                         <td style={{padding:'11px 12px',fontWeight:700,color:V.ink,fontSize:13}}>{row.c}</td>
@@ -14513,7 +14537,7 @@ export default function LandingPage() {
             </div>
             <div style={{maxWidth:780,margin:'0 auto'}}>
               {[
-                {q:'How much does tuition cost in Nairobi?', a:'Online tuition is USD 15 per hour (≈ KSh 1,940 at current rates). Home tuition starts from KSh 1,500 per 1-hour session including tutor transport for closer areas, increasing for more distant estates (Runda, Karen, Kitengela). Exam-prep and SAT preparation are the same USD 15/hour. 10-hour blocks attract a 5% discount.'},
+                {q:'How much does tuition cost in Nairobi?', a:'Online tuition is USD 15 per hour (≈ KSh 1,940 at current rates). Home tuition is quoted on request, depending on your area and travel (for example Runda, Karen, Kitengela). Exam-prep and SAT preparation are the same USD 15/hour.'},
                 {q:'How quickly can a tutor start?', a:'For online tuition, typically within 24–48 hours of confirming the subject, level and schedule. For home tuition, 48–72 hours to match a tutor with the right subject and location. Specialist subjects (IB Diploma, A-Level Further Maths) may take 3–5 days to match optimally.'},
                 {q:'Do you offer KCSE revision tutoring?', a:'Yes — KCSE revision is one of our most-requested services. We cover Mathematics, English, Kiswahili, Sciences and Humanities for Form 3 and Form 4 students. Sustained weekly tuition over 6–9 months typically produces the strongest grade improvements.'},
                 {q:'Do you offer IGCSE tutors in Nairobi?', a:'Yes — Cambridge IGCSE and Pearson Edexcel International are core specialisms. Our IGCSE tutors hold subject degrees and have prepared students for both exam boards. Mathematics, Sciences (Physics, Chemistry, Biology), English, Business Studies and Economics are the most-requested IGCSE subjects.'},
@@ -15344,7 +15368,7 @@ export default function LandingPage() {
                 </h2>
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:14,marginBottom:18}}>
                   {[
-                    {h:'Online school & homeschool', v:'From USD 423/month', sub:'For Primary, about AED 1,555 a month (approximate, at the AED–USD peg). Fees vary by curriculum and level and are payable termly.'},
+                    {h:'Online school & homeschool', v:'From USD 423/month', sub:'For Primary, about AED 1,553 a month (approximate, at the AED–USD peg). Fees vary by curriculum and level and are payable termly.'},
                     {h:'One-to-one tuition', v:'USD 15/hour', sub:'Live online lessons in any subject and level, scheduled in UAE time.'},
                   ].map(f => (
                     <div key={f.h} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 22px'}}>

@@ -3,9 +3,9 @@
 // 8 languages: French, Spanish, German, Mandarin, Arabic, Kiswahili, Italian, Portuguese
 //
 // Pricing structure (per language):
-//   Beginner (A1-A2):     KSh 1,800/hour  or  20-session bundle KSh 32,000
-//   Intermediate (B1-B2): KSh 2,200/hour  or  30-session bundle KSh 60,000
-//   Advanced (C1-C2):     KSh 2,500/hour  or  40-session bundle KSh 95,000
+//   Beginner (A1-A2): USD 15/hour (all one-to-one tuition is USD 15/hour)
+//   Intermediate (B1-B2): USD 15/hour (all one-to-one tuition is USD 15/hour)
+//   Advanced (C1-C2): USD 15/hour (all one-to-one tuition is USD 15/hour)
 //   Exam Prep:            Custom packages by target examination
 //
 // Routes: /languages (hub), /languages/{slug}
@@ -17,7 +17,7 @@ export const LANGUAGES = [
     family: 'Romance language',
     difficulty: 'Moderate for English speakers (Category I, ~600 hours to fluency)',
     seoTitle: 'Learn French in Kenya | DELF · DALF · 1-on-1 Tuition | Smartious',
-    seoDesc: 'Premium French tuition in Nairobi and online. DELF, DALF, TCF preparation. From KSh 1,800/hour or KSh 32,000 for 20-session foundation bundle.',
+    seoDesc: 'Premium French tuition in Nairobi and online. DELF, DALF, TCF preparation. USD 15/hour (≈ KSh 1,940).',
     heroTagline: 'The language of diplomacy, culture, and 300+ million speakers — coached by qualified specialists',
     intro: 'French is one of the most strategically valuable foreign languages for African students. It\'s the official language of 29 countries (including 21 in Africa: Senegal, Ivory Coast, Cameroon, DRC, Madagascar and more), a working language of the UN, EU, African Union and International Olympic Committee, and the language of access to top universities in France, Belgium, Switzerland and Quebec, Canada. For Kenyan students, French opens academic pathways (IGCSE/IB French, university study in France/Quebec via DELF certification) and career pathways (diplomacy, international NGOs, Pan-African business, tourism).',
     whyLearn: [
@@ -50,16 +50,16 @@ export const LANGUAGES = [
     ],
     pricing: {
       hourly: [
-        { level: 'Beginner (A1-A2)', rate: 'KSh 1,800/hour', sessionLength: '1.5 hours' },
-        { level: 'Intermediate (B1-B2)', rate: 'KSh 2,200/hour', sessionLength: '1.5 hours' },
-        { level: 'Advanced (C1-C2)', rate: 'KSh 2,500/hour', sessionLength: '1.5 hours' },
+        { level: 'Beginner (A1-A2)', rate: 'USD 15/hour (≈ KSh 1,940)', sessionLength: '1.5 hours' },
+        { level: 'Intermediate (B1-B2)', rate: 'USD 15/hour (≈ KSh 1,940)', sessionLength: '1.5 hours' },
+        { level: 'Advanced (C1-C2)', rate: 'USD 15/hour (≈ KSh 1,940)', sessionLength: '1.5 hours' },
       ],
       packages: [
-        { name: 'Foundation Bundle (A1-A2)', sessions: '20 sessions · 30 hours', price: 'KSh 32,000', timeline: '8-10 weeks at 2 sessions/week' },
-        { name: 'Intermediate Bundle (B1-B2)', sessions: '30 sessions · 45 hours', price: 'KSh 60,000', timeline: '12-16 weeks at 2 sessions/week' },
-        { name: 'Advanced Bundle (C1-C2)', sessions: '40 sessions · 60 hours', price: 'KSh 95,000', timeline: '16-20 weeks at 2-3 sessions/week' },
-        { name: 'DELF B2 Exam Prep', sessions: '25 sessions · 37.5 hours', price: 'KSh 52,000', timeline: '10-12 weeks intensive' },
-        { name: 'DALF C1 Exam Prep', sessions: '30 sessions · 45 hours', price: 'KSh 72,000', timeline: '12-16 weeks intensive' },
+        { name: 'Foundation Bundle (A1-A2)', sessions: '20 sessions · 30 hours', price: 'USD 450', timeline: '8-10 weeks at 2 sessions/week' },
+        { name: 'Intermediate Bundle (B1-B2)', sessions: '30 sessions · 45 hours', price: 'USD 675', timeline: '12-16 weeks at 2 sessions/week' },
+        { name: 'Advanced Bundle (C1-C2)', sessions: '40 sessions · 60 hours', price: 'USD 900', timeline: '16-20 weeks at 2-3 sessions/week' },
+        { name: 'DELF B2 Exam Prep', sessions: '25 sessions · 37.5 hours', price: 'USD 562', timeline: '10-12 weeks intensive' },
+        { name: 'DALF C1 Exam Prep', sessions: '30 sessions · 45 hours', price: 'USD 675', timeline: '12-16 weeks intensive' },
       ],
     },
     faqs: [
@@ -82,7 +82,7 @@ export const LANGUAGES = [
     family: 'Romance language',
     difficulty: 'Easy for English speakers (Category I, ~600 hours to fluency)',
     seoTitle: 'Learn Spanish in Kenya | DELE · 1-on-1 Tuition | Smartious',
-    seoDesc: 'Premium Spanish tuition in Nairobi and online. DELE preparation, IGCSE & A-Level Spanish. From KSh 1,800/hour or KSh 32,000 for 20-session foundation bundle.',
+    seoDesc: 'Premium Spanish tuition in Nairobi and online. DELE preparation, IGCSE & A-Level Spanish. USD 15/hour (≈ KSh 1,940).',
     heroTagline: 'The world\'s second most spoken native language — 500 million speakers across 21 countries',
     intro: 'Spanish is the second most spoken native language globally (after Mandarin Chinese) and the official language of 21 countries — Spain plus most of Latin America. For African and Kenyan students, Spanish opens access to study in Spain (excellent universities at moderate cost), Latin American universities (Argentina, Mexico, Chile have strong institutions), and career pathways in business, tourism, journalism and international development across the Spanish-speaking world. Spanish is also one of the most popular IGCSE, A-Level and IB language subjects globally.',
     whyLearn: [
@@ -114,15 +114,15 @@ export const LANGUAGES = [
     ],
     pricing: {
       hourly: [
-        { level: 'Beginner (A1-A2)', rate: 'KSh 1,800/hour', sessionLength: '1.5 hours' },
-        { level: 'Intermediate (B1-B2)', rate: 'KSh 2,200/hour', sessionLength: '1.5 hours' },
-        { level: 'Advanced (C1-C2)', rate: 'KSh 2,500/hour', sessionLength: '1.5 hours' },
+        { level: 'Beginner (A1-A2)', rate: 'USD 15/hour (≈ KSh 1,940)', sessionLength: '1.5 hours' },
+        { level: 'Intermediate (B1-B2)', rate: 'USD 15/hour (≈ KSh 1,940)', sessionLength: '1.5 hours' },
+        { level: 'Advanced (C1-C2)', rate: 'USD 15/hour (≈ KSh 1,940)', sessionLength: '1.5 hours' },
       ],
       packages: [
-        { name: 'Foundation Bundle (A1-A2)', sessions: '20 sessions · 30 hours', price: 'KSh 32,000', timeline: '8-10 weeks at 2 sessions/week' },
-        { name: 'Intermediate Bundle (B1-B2)', sessions: '30 sessions · 45 hours', price: 'KSh 60,000', timeline: '12-16 weeks at 2 sessions/week' },
-        { name: 'Advanced Bundle (C1-C2)', sessions: '40 sessions · 60 hours', price: 'KSh 95,000', timeline: '16-20 weeks at 2-3 sessions/week' },
-        { name: 'DELE B2 Exam Prep', sessions: '25 sessions · 37.5 hours', price: 'KSh 52,000', timeline: '10-12 weeks intensive' },
+        { name: 'Foundation Bundle (A1-A2)', sessions: '20 sessions · 30 hours', price: 'USD 450', timeline: '8-10 weeks at 2 sessions/week' },
+        { name: 'Intermediate Bundle (B1-B2)', sessions: '30 sessions · 45 hours', price: 'USD 675', timeline: '12-16 weeks at 2 sessions/week' },
+        { name: 'Advanced Bundle (C1-C2)', sessions: '40 sessions · 60 hours', price: 'USD 900', timeline: '16-20 weeks at 2-3 sessions/week' },
+        { name: 'DELE B2 Exam Prep', sessions: '25 sessions · 37.5 hours', price: 'USD 562', timeline: '10-12 weeks intensive' },
       ],
     },
     faqs: [
@@ -145,7 +145,7 @@ export const LANGUAGES = [
     family: 'Germanic language',
     difficulty: 'Moderate for English speakers (Category II, ~750 hours to fluency)',
     seoTitle: 'Learn German in Kenya | Goethe · TestDaF · 1-on-1 Tuition | Smartious',
-    seoDesc: 'Premium German tuition in Nairobi and online. Goethe-Zertifikat, TestDaF preparation. From KSh 1,800/hour. Pathway to free German university education.',
+    seoDesc: 'Premium German tuition in Nairobi and online. Goethe-Zertifikat, TestDaF preparation. USD 15/hour (≈ KSh 1,940). Pathway to free German university education.',
     heroTagline: 'Your gateway to free public university education in Germany — Europe\'s largest economy',
     intro: 'German is the most strategically valuable European foreign language for African students targeting affordable, high-quality university education. Germany\'s public universities charge zero tuition for international students (€0-1,500/year administrative fees only) — and Germany hosts world-leading universities in engineering, sciences and medicine (TU Munich, Heidelberg, RWTH Aachen, LMU Munich, KIT Karlsruhe). For German-taught programmes, you need DSH-2 or TestDaF 4. For English-taught programmes (Germany has 1,800+), basic German is helpful but not required.',
     whyLearn: [
@@ -177,16 +177,16 @@ export const LANGUAGES = [
     ],
     pricing: {
       hourly: [
-        { level: 'Beginner (A1-A2)', rate: 'KSh 1,800/hour', sessionLength: '1.5 hours' },
-        { level: 'Intermediate (B1-B2)', rate: 'KSh 2,200/hour', sessionLength: '1.5 hours' },
-        { level: 'Advanced (C1-C2)', rate: 'KSh 2,500/hour', sessionLength: '1.5 hours' },
+        { level: 'Beginner (A1-A2)', rate: 'USD 15/hour (≈ KSh 1,940)', sessionLength: '1.5 hours' },
+        { level: 'Intermediate (B1-B2)', rate: 'USD 15/hour (≈ KSh 1,940)', sessionLength: '1.5 hours' },
+        { level: 'Advanced (C1-C2)', rate: 'USD 15/hour (≈ KSh 1,940)', sessionLength: '1.5 hours' },
       ],
       packages: [
-        { name: 'Foundation Bundle (A1-A2)', sessions: '20 sessions · 30 hours', price: 'KSh 32,000', timeline: '8-12 weeks at 2 sessions/week' },
-        { name: 'Intermediate Bundle (B1-B2)', sessions: '30 sessions · 45 hours', price: 'KSh 60,000', timeline: '12-16 weeks at 2 sessions/week' },
-        { name: 'Advanced Bundle (C1-C2)', sessions: '40 sessions · 60 hours', price: 'KSh 95,000', timeline: '16-20 weeks at 2-3 sessions/week' },
-        { name: 'TestDaF / DSH Prep', sessions: '30 sessions · 45 hours', price: 'KSh 72,000', timeline: '12-16 weeks intensive' },
-        { name: 'Goethe-Zertifikat B2 Prep', sessions: '25 sessions · 37.5 hours', price: 'KSh 58,000', timeline: '10-14 weeks intensive' },
+        { name: 'Foundation Bundle (A1-A2)', sessions: '20 sessions · 30 hours', price: 'USD 450', timeline: '8-12 weeks at 2 sessions/week' },
+        { name: 'Intermediate Bundle (B1-B2)', sessions: '30 sessions · 45 hours', price: 'USD 675', timeline: '12-16 weeks at 2 sessions/week' },
+        { name: 'Advanced Bundle (C1-C2)', sessions: '40 sessions · 60 hours', price: 'USD 900', timeline: '16-20 weeks at 2-3 sessions/week' },
+        { name: 'TestDaF / DSH Prep', sessions: '30 sessions · 45 hours', price: 'USD 675', timeline: '12-16 weeks intensive' },
+        { name: 'Goethe-Zertifikat B2 Prep', sessions: '25 sessions · 37.5 hours', price: 'USD 562', timeline: '10-14 weeks intensive' },
       ],
     },
     faqs: [
@@ -208,7 +208,7 @@ export const LANGUAGES = [
     family: 'Sino-Tibetan language',
     difficulty: 'Difficult for English speakers (Category IV, ~2200 hours to fluency)',
     seoTitle: 'Learn Mandarin Chinese in Kenya | HSK 1-6 · CSC Scholarship Prep | Smartious',
-    seoDesc: 'Premium Mandarin Chinese tuition in Nairobi and online. HSK 1-6 preparation, CSC scholarship applications. From KSh 1,800/hour or KSh 32,000 for 20-session bundle.',
+    seoDesc: 'Premium Mandarin Chinese tuition in Nairobi and online. HSK 1-6 preparation, CSC scholarship applications. USD 15/hour (≈ KSh 1,940).',
     heroTagline: 'The world\'s most spoken language and the strategic key to China-Africa careers',
     intro: 'Mandarin Chinese is the world\'s most spoken language by native speakers (1.1+ billion) and the second most economically valuable language to learn for African students after English. China is Africa\'s largest trading partner, the source of substantial infrastructure investment and university scholarships (Chinese Government Scholarship — CSC), and a rapidly growing destination for international students. For Kenyan students, Mandarin opens powerful career pathways in trade, infrastructure, diplomacy and academia. Smartious offers Mandarin coaching with HSK certification preparation across all 6 levels.',
     whyLearn: [
@@ -240,15 +240,15 @@ export const LANGUAGES = [
     ],
     pricing: {
       hourly: [
-        { level: 'Beginner (HSK 1-2)', rate: 'KSh 1,800/hour', sessionLength: '1.5 hours' },
-        { level: 'Intermediate (HSK 3-4)', rate: 'KSh 2,200/hour', sessionLength: '1.5 hours' },
-        { level: 'Advanced (HSK 5-6)', rate: 'KSh 2,500/hour', sessionLength: '1.5 hours' },
+        { level: 'Beginner (HSK 1-2)', rate: 'USD 15/hour (≈ KSh 1,940)', sessionLength: '1.5 hours' },
+        { level: 'Intermediate (HSK 3-4)', rate: 'USD 15/hour (≈ KSh 1,940)', sessionLength: '1.5 hours' },
+        { level: 'Advanced (HSK 5-6)', rate: 'USD 15/hour (≈ KSh 1,940)', sessionLength: '1.5 hours' },
       ],
       packages: [
-        { name: 'Foundation Bundle (HSK 1-2)', sessions: '20 sessions · 30 hours', price: 'KSh 32,000', timeline: '10-12 weeks at 2 sessions/week' },
-        { name: 'Intermediate Bundle (HSK 3-4)', sessions: '40 sessions · 60 hours', price: 'KSh 80,000', timeline: '16-20 weeks at 2-3 sessions/week' },
-        { name: 'Advanced Bundle (HSK 5-6)', sessions: '60 sessions · 90 hours', price: 'KSh 145,000', timeline: '24-30 weeks intensive' },
-        { name: 'HSK 4 Exam Prep', sessions: '25 sessions · 37.5 hours', price: 'KSh 55,000', timeline: '10-14 weeks intensive' },
+        { name: 'Foundation Bundle (HSK 1-2)', sessions: '20 sessions · 30 hours', price: 'USD 450', timeline: '10-12 weeks at 2 sessions/week' },
+        { name: 'Intermediate Bundle (HSK 3-4)', sessions: '40 sessions · 60 hours', price: 'USD 900', timeline: '16-20 weeks at 2-3 sessions/week' },
+        { name: 'Advanced Bundle (HSK 5-6)', sessions: '60 sessions · 90 hours', price: 'USD 1,350', timeline: '24-30 weeks intensive' },
+        { name: 'HSK 4 Exam Prep', sessions: '25 sessions · 37.5 hours', price: 'USD 562', timeline: '10-14 weeks intensive' },
         { name: 'CSC Scholarship Pathway', sessions: 'Custom — typically HSK 3 + application coaching', price: 'Custom', timeline: 'Aligned to CSC application timeline (Feb-April)' },
       ],
     },
@@ -272,7 +272,7 @@ export const LANGUAGES = [
     family: 'Semitic language',
     difficulty: 'Difficult for English speakers (Category IV, ~2200 hours)',
     seoTitle: 'Learn Arabic in Kenya | Modern Standard · Quranic · Gulf | Smartious',
-    seoDesc: 'Premium Arabic tuition in Nairobi and online. Modern Standard Arabic, Quranic Arabic, Egyptian, Gulf variants. From KSh 1,800/hour or KSh 32,000 for 20-session bundle.',
+    seoDesc: 'Premium Arabic tuition in Nairobi and online. Modern Standard Arabic, Quranic Arabic, Egyptian, Gulf variants. USD 15/hour (≈ KSh 1,940).',
     heroTagline: 'The language of 1.8 billion Muslims, 400M+ speakers, and growing Africa-Gulf commercial ties',
     intro: 'Arabic is the official language of 25 countries (across the Middle East, North Africa and parts of the Horn of Africa) and the liturgical language of 1.8 billion Muslims worldwide. For Kenyan students, Arabic opens powerful religious, academic and professional pathways — Quranic studies, university scholarships in the Gulf (Saudi Arabia, UAE, Qatar offer substantial international student funding), careers in Africa-Gulf trade and diplomacy, and Islamic banking and finance. Arabic exists in multiple registers: Modern Standard Arabic (formal/written), Classical/Quranic Arabic (religious), and regional dialects (Egyptian most widely understood, Gulf Arabic for the Arabian Peninsula).',
     whyLearn: [
@@ -304,16 +304,16 @@ export const LANGUAGES = [
     ],
     pricing: {
       hourly: [
-        { level: 'Beginner (A1-A2)', rate: 'KSh 1,800/hour', sessionLength: '1.5 hours' },
-        { level: 'Intermediate (B1-B2)', rate: 'KSh 2,200/hour', sessionLength: '1.5 hours' },
-        { level: 'Advanced (C1-C2)', rate: 'KSh 2,500/hour', sessionLength: '1.5 hours' },
+        { level: 'Beginner (A1-A2)', rate: 'USD 15/hour (≈ KSh 1,940)', sessionLength: '1.5 hours' },
+        { level: 'Intermediate (B1-B2)', rate: 'USD 15/hour (≈ KSh 1,940)', sessionLength: '1.5 hours' },
+        { level: 'Advanced (C1-C2)', rate: 'USD 15/hour (≈ KSh 1,940)', sessionLength: '1.5 hours' },
       ],
       packages: [
-        { name: 'Foundation Bundle (A1-A2)', sessions: '20 sessions · 30 hours', price: 'KSh 32,000', timeline: '10-14 weeks at 2 sessions/week' },
-        { name: 'Quranic Arabic Foundation', sessions: '30 sessions · 45 hours', price: 'KSh 60,000', timeline: '12-16 weeks · classical Arabic focus' },
-        { name: 'Modern Standard Arabic Intermediate', sessions: '40 sessions · 60 hours', price: 'KSh 90,000', timeline: '16-20 weeks at 2-3 sessions/week' },
-        { name: 'Gulf Arabic Conversation', sessions: '20 sessions · 30 hours', price: 'KSh 38,000', timeline: '8-10 weeks · UAE/Saudi/Qatar dialect' },
-        { name: 'Egyptian Arabic Conversation', sessions: '20 sessions · 30 hours', price: 'KSh 38,000', timeline: '8-10 weeks · most widely understood dialect' },
+        { name: 'Foundation Bundle (A1-A2)', sessions: '20 sessions · 30 hours', price: 'USD 450', timeline: '10-14 weeks at 2 sessions/week' },
+        { name: 'Quranic Arabic Foundation', sessions: '30 sessions · 45 hours', price: 'USD 675', timeline: '12-16 weeks · classical Arabic focus' },
+        { name: 'Modern Standard Arabic Intermediate', sessions: '40 sessions · 60 hours', price: 'USD 900', timeline: '16-20 weeks at 2-3 sessions/week' },
+        { name: 'Gulf Arabic Conversation', sessions: '20 sessions · 30 hours', price: 'USD 450', timeline: '8-10 weeks · UAE/Saudi/Qatar dialect' },
+        { name: 'Egyptian Arabic Conversation', sessions: '20 sessions · 30 hours', price: 'USD 450', timeline: '8-10 weeks · most widely understood dialect' },
       ],
     },
     faqs: [
@@ -335,7 +335,7 @@ export const LANGUAGES = [
     family: 'Bantu language (with Arabic and Portuguese loanwords)',
     difficulty: 'Easy for English speakers (relatively simple grammar, regular phonetics)',
     seoTitle: 'Learn Kiswahili in Kenya | KCSE · IGCSE · Communication | Smartious',
-    seoDesc: 'Premium Kiswahili tuition in Nairobi and online. KCSE preparation, IGCSE Kiswahili, conversational and cultural. From KSh 1,500/hour or KSh 28,000 for 20-session bundle.',
+    seoDesc: 'Premium Kiswahili tuition in Nairobi and online. KCSE preparation, IGCSE Kiswahili, conversational and cultural. USD 15/hour (≈ KSh 1,940).',
     heroTagline: 'East Africa\'s lingua franca, an African Union working language, and growing globally',
     intro: 'Kiswahili is the most strategically important African language and one of the world\'s fastest-growing languages. It\'s the official language of Kenya, Tanzania, Uganda and the Democratic Republic of Congo; an official language of the African Union, East African Community, Southern African Development Community; and increasingly studied as a foreign language at universities worldwide. Kiswahili reaches 200+ million speakers across East and Central Africa, parts of Southern Africa, and growing diaspora communities. For Kenyan students, Kiswahili remains essential for KCSE, IGCSE Kiswahili, broader East African opportunities, and connection to African cultural identity.',
     whyLearn: [
@@ -366,14 +366,14 @@ export const LANGUAGES = [
     ],
     pricing: {
       hourly: [
-        { level: 'Beginner / Conversational', rate: 'KSh 1,500/hour', sessionLength: '1.5 hours' },
-        { level: 'Intermediate / KCSE Prep', rate: 'KSh 2,000/hour', sessionLength: '1.5 hours' },
-        { level: 'Advanced / IGCSE Prep', rate: 'KSh 2,300/hour', sessionLength: '1.5 hours' },
+        { level: 'Beginner / Conversational', rate: 'USD 15/hour (≈ KSh 1,940)', sessionLength: '1.5 hours' },
+        { level: 'Intermediate / KCSE Prep', rate: 'USD 15/hour (≈ KSh 1,940)', sessionLength: '1.5 hours' },
+        { level: 'Advanced / IGCSE Prep', rate: 'USD 15/hour (≈ KSh 1,940)', sessionLength: '1.5 hours' },
       ],
       packages: [
-        { name: 'Foundation Bundle', sessions: '20 sessions · 30 hours', price: 'KSh 28,000', timeline: '8-10 weeks at 2 sessions/week' },
-        { name: 'KCSE Kiswahili Preparation', sessions: '30 sessions · 45 hours', price: 'KSh 55,000', timeline: '10-14 weeks intensive' },
-        { name: 'IGCSE Kiswahili (Year-long)', sessions: '40 sessions · 60 hours', price: 'KSh 85,000', timeline: 'School year alongside other subjects' },
+        { name: 'Foundation Bundle', sessions: '20 sessions · 30 hours', price: 'USD 450', timeline: '8-10 weeks at 2 sessions/week' },
+        { name: 'KCSE Kiswahili Preparation', sessions: '30 sessions · 45 hours', price: 'USD 675', timeline: '10-14 weeks intensive' },
+        { name: 'IGCSE Kiswahili (Year-long)', sessions: '40 sessions · 60 hours', price: 'USD 900', timeline: 'School year alongside other subjects' },
         { name: 'Diaspora Family Bundle', sessions: '20 sessions · 30 hours · multiple family members', price: 'Custom', timeline: 'Flexible for diaspora families' },
       ],
     },
@@ -395,7 +395,7 @@ export const LANGUAGES = [
     family: 'Romance language',
     difficulty: 'Easy for English speakers (Category I, ~600 hours)',
     seoTitle: 'Learn Italian in Kenya | CILS · CELI · 1-on-1 Tuition | Smartious',
-    seoDesc: 'Premium Italian tuition in Nairobi and online. CILS, CELI preparation, IGCSE Italian. From KSh 1,800/hour or KSh 32,000 for 20-session foundation bundle.',
+    seoDesc: 'Premium Italian tuition in Nairobi and online. CILS, CELI preparation, IGCSE Italian. USD 15/hour (≈ KSh 1,940).',
     heroTagline: 'The language of art, music, design, fashion — and a uniquely accessible pathway to Italian universities',
     intro: 'Italian is the language of Renaissance art, classical music, opera, world-class design, fashion, and gastronomy — and offers underappreciated practical value for international students. Italian public universities offer excellent education at very low tuition (€800-3,000/year for international students) with many programmes available in English. Cities like Milan, Rome, Bologna, Florence host top universities. Italian is also one of the most beautiful and rewarding languages to learn for cultural and aesthetic reasons. For Kenyan students, Italian opens access to Italian university education, careers in design and fashion industries, and rich cultural engagement.',
     whyLearn: [
@@ -427,15 +427,15 @@ export const LANGUAGES = [
     ],
     pricing: {
       hourly: [
-        { level: 'Beginner (A1-A2)', rate: 'KSh 1,800/hour', sessionLength: '1.5 hours' },
-        { level: 'Intermediate (B1-B2)', rate: 'KSh 2,200/hour', sessionLength: '1.5 hours' },
-        { level: 'Advanced (C1-C2)', rate: 'KSh 2,500/hour', sessionLength: '1.5 hours' },
+        { level: 'Beginner (A1-A2)', rate: 'USD 15/hour (≈ KSh 1,940)', sessionLength: '1.5 hours' },
+        { level: 'Intermediate (B1-B2)', rate: 'USD 15/hour (≈ KSh 1,940)', sessionLength: '1.5 hours' },
+        { level: 'Advanced (C1-C2)', rate: 'USD 15/hour (≈ KSh 1,940)', sessionLength: '1.5 hours' },
       ],
       packages: [
-        { name: 'Foundation Bundle (A1-A2)', sessions: '20 sessions · 30 hours', price: 'KSh 32,000', timeline: '8-10 weeks at 2 sessions/week' },
-        { name: 'Intermediate Bundle (B1-B2)', sessions: '30 sessions · 45 hours', price: 'KSh 60,000', timeline: '12-16 weeks at 2 sessions/week' },
-        { name: 'Italian University Prep (B2 target)', sessions: '40 sessions · 60 hours', price: 'KSh 88,000', timeline: '16-20 weeks intensive' },
-        { name: 'CILS B2 Exam Prep', sessions: '25 sessions · 37.5 hours', price: 'KSh 52,000', timeline: '10-12 weeks' },
+        { name: 'Foundation Bundle (A1-A2)', sessions: '20 sessions · 30 hours', price: 'USD 450', timeline: '8-10 weeks at 2 sessions/week' },
+        { name: 'Intermediate Bundle (B1-B2)', sessions: '30 sessions · 45 hours', price: 'USD 675', timeline: '12-16 weeks at 2 sessions/week' },
+        { name: 'Italian University Prep (B2 target)', sessions: '40 sessions · 60 hours', price: 'USD 900', timeline: '16-20 weeks intensive' },
+        { name: 'CILS B2 Exam Prep', sessions: '25 sessions · 37.5 hours', price: 'USD 562', timeline: '10-12 weeks' },
       ],
     },
     faqs: [
@@ -456,7 +456,7 @@ export const LANGUAGES = [
     family: 'Romance language',
     difficulty: 'Easy-to-moderate for English speakers (Category I)',
     seoTitle: 'Learn Portuguese in Kenya | Brazilian · European · CELPE-Bras | Smartious',
-    seoDesc: 'Premium Portuguese tuition in Nairobi and online. Brazilian Portuguese, European Portuguese, CELPE-Bras preparation. From KSh 1,800/hour.',
+    seoDesc: 'Premium Portuguese tuition in Nairobi and online. Brazilian Portuguese, European Portuguese, CELPE-Bras preparation. USD 15/hour (≈ KSh 1,940).',
     heroTagline: 'The official language of 9 countries across 4 continents — Brazil, Portugal, Angola, Mozambique and more',
     intro: 'Portuguese is the official language of 9 countries across 4 continents — Brazil (210M speakers), Portugal (10M), Angola (35M), Mozambique (32M), Guinea-Bissau, Cape Verde, São Tomé and Príncipe, Equatorial Guinea, and Timor-Leste. Portuguese opens significant opportunities in Brazilian business and academia (one of the world\'s largest economies and university systems), Lusophone Africa (Angola and Mozambique with strong economic ties to Kenya), and Portuguese EU membership pathways. The language exists in two main variants — Brazilian Portuguese (most widely spoken globally) and European Portuguese (Portugal and African Lusophone countries).',
     whyLearn: [
@@ -487,15 +487,15 @@ export const LANGUAGES = [
     ],
     pricing: {
       hourly: [
-        { level: 'Beginner (A1-A2)', rate: 'KSh 1,800/hour', sessionLength: '1.5 hours' },
-        { level: 'Intermediate (B1-B2)', rate: 'KSh 2,200/hour', sessionLength: '1.5 hours' },
-        { level: 'Advanced (C1-C2)', rate: 'KSh 2,500/hour', sessionLength: '1.5 hours' },
+        { level: 'Beginner (A1-A2)', rate: 'USD 15/hour (≈ KSh 1,940)', sessionLength: '1.5 hours' },
+        { level: 'Intermediate (B1-B2)', rate: 'USD 15/hour (≈ KSh 1,940)', sessionLength: '1.5 hours' },
+        { level: 'Advanced (C1-C2)', rate: 'USD 15/hour (≈ KSh 1,940)', sessionLength: '1.5 hours' },
       ],
       packages: [
-        { name: 'Foundation Bundle (A1-A2)', sessions: '20 sessions · 30 hours', price: 'KSh 32,000', timeline: '8-10 weeks at 2 sessions/week' },
-        { name: 'Brazilian Portuguese Conversation', sessions: '30 sessions · 45 hours', price: 'KSh 60,000', timeline: '12-16 weeks' },
-        { name: 'European Portuguese (Citizenship Track)', sessions: '20 sessions · 30 hours', price: 'KSh 32,000', timeline: 'CAPLE A2 focus for Portuguese citizenship' },
-        { name: 'CELPE-Bras Exam Prep', sessions: '25 sessions · 37.5 hours', price: 'KSh 52,000', timeline: '10-12 weeks intensive' },
+        { name: 'Foundation Bundle (A1-A2)', sessions: '20 sessions · 30 hours', price: 'USD 450', timeline: '8-10 weeks at 2 sessions/week' },
+        { name: 'Brazilian Portuguese Conversation', sessions: '30 sessions · 45 hours', price: 'USD 675', timeline: '12-16 weeks' },
+        { name: 'European Portuguese (Citizenship Track)', sessions: '20 sessions · 30 hours', price: 'USD 450', timeline: 'CAPLE A2 focus for Portuguese citizenship' },
+        { name: 'CELPE-Bras Exam Prep', sessions: '25 sessions · 37.5 hours', price: 'USD 562', timeline: '10-12 weeks intensive' },
       ],
     },
     faqs: [

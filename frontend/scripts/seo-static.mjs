@@ -507,8 +507,9 @@ for (const { file, country: c, cities } of CITY_FILES) {
   const m = metaFor(c.hubPageId)
   const name = hubName(c)
   const cityLinks = cities.map(x => ({ href: '/homeschool-' + x.slug, label: 'Online school in ' + x.name }))
-  add({ path: c.hub, title: (m && m.title) || 'Online School in ' + name + ' | IGCSE, A-Level & IB | Smartious', desc: (m && m.desc) || c.heroSubhead,
-    h1: 'Online School & Homeschool in ' + (c.heroH1Suffix || name), body: [
+  // The country data's own seoTitle/seoDesc/h1 are the tuned values; the app uses them too.
+  add({ path: c.hub, title: c.seoTitle || (m && m.title) || 'Online School in ' + name + ' | IGCSE, A-Level & IB | Smartious', desc: c.seoDesc || (m && m.desc) || c.heroSubhead,
+    h1: c.h1 || 'Online School & Homeschool in ' + (c.heroH1Suffix || name), body: [
       p(c.heroSubhead), p(c.heroValueProp),
       cityLinks.length ? h2(c.citiesSectionTitle || 'Cities') + p(c.citiesSectionBody) + links(cityLinks) : '',
       c.legalFramework?.length ? h2('Homeschool laws and regulation in ' + name) + p(c.legalFrameworkIntro) + c.legalFramework.map(x => h3(x.h) + p(x.p)).join('') : '',
@@ -542,9 +543,10 @@ for (const { file, country: c, cities } of CITY_FILES) {
 // UAE (its own, richer pages)
 add({
   path: '/online-school/uae',
-  title: 'Online School in the UAE | Dubai & Abu Dhabi Homeschooling, IGCSE & A-Level | Smartious',
-  desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for UAE families across Dubai, Abu Dhabi, Sharjah, Ajman, Ras Al Khaimah. Wellington / Dubai College / BSAK / Repton / Brighton College alternative. Immediate enrolment, no KHDA/ADEK waiting lists. From USD 423/month (about AED 1,553), paid termly.',
-  h1: 'Online school and homeschooling in the UAE',
+  // Same title and description as the app's UAE hub (LandingPage.jsx, page 'homeschooling-uae').
+  title: 'Homeschooling & Online School in Dubai and the UAE',
+  desc: 'Live online classes for Dubai, Abu Dhabi and Sharjah families: IGCSE, A-Level, Edexcel, American. From USD 423/month (≈ AED 1,553). January 2027 intake.',
+  h1: 'Homeschooling & Online School in Dubai and the UAE',
   body: [
     p(UAE_COUNTRY.heroSubhead), p(UAE_COUNTRY.heroValueProp),
     h2(UAE_COUNTRY.citiesSectionTitle || 'Cities we teach in'),
