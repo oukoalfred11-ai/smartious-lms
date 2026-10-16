@@ -6,6 +6,7 @@
  *   GET    /experiments                 catalogue (+ publication status)
  *   GET    /experiments/:id
  *   PATCH  /experiments/:id/status      admin / Dean: draft|review|approved|published
+ *   POST   /experiments/bulk-status     admin / Dean: { ids, status, note } for many at once
  * Sessions (a student's attempt)
  *   POST   /sessions                    student: open or resume { experimentId, assignmentId?, newAttempt? }
  *   GET    /sessions/mine               student: my attempts
@@ -119,6 +120,33 @@ router.get('/experiments/:id', auth, wrap(async (req, res) => {
   const assigned = req.user.role === 'student' && !!(await LabAssignment.exists({ studentIds: req.user._id, experimentId: def.id, status: 'active' }));
   if (!access.canOpenExperiment(req.user, status, { assigned })) return res.status(403).json({ success: false, message: 'This experiment is not available yet.' });
   res.json({ success: true, data: { experiment: { ...experiments.catalogueEntry(def), status } } });
+}));
+
+// Bulk: set many experiments at once (e.g. publish a whole practical collection).
+// Each one is checked exactly as for a single change; failures are reported, not hidden.
+router.post('/experiments/bulk-status', auth, requireRole(...STAFF), wrap(async (req, res) => {
+  const { experiments, engine } = await labCore();
+  const status = req.body?.status;
+  if (!['draft', 'review', 'approved', 'published'].includes(status)) return res.status(400).json({ success: false, message: 'Unknown status.' });
+  const ids = [...new Set((Array.isArray(req.body?.ids) ? req.body.ids : []).map(String))].slice(0, 500);
+  if (!ids.length) return res.status(400).json({ success: false, message: 'Choose at least one experiment.' });
+  const note = String(req.body?.note || '').slice(0, 2000);
+  const done = [], refused = [];
+  for (const id of ids) {
+    const def = experiments.getExperiment(id);
+    if (!def) { refused.push({ id, reason: 'not found' }); continue; }
+    if (['approved', 'published'].includes(status)) {
+      const problems = engine.validateDefinition(def);
+      if (problems.length) { refused.push({ id, reason: problems.join('; ') }); continue; }
+    }
+    await LabContent.findOneAndUpdate(
+      { experimentId: id },
+      { $set: { status, reviewNote: note, reviewedBy: req.user._id, reviewedByName: fullName(req.user) },
+        $push: { history: { $each: [{ byName: fullName(req.user), status, note }], $slice: -50 } } },
+      { upsert: true, new: true });
+    done.push(id);
+  }
+  res.json({ success: true, data: { done, refused }, message: `${done.length} set to ${status}` + (refused.length ? `; ${refused.length} refused` : '') + '.' });
 }));
 
 router.patch('/experiments/:id/status', auth, requireRole(...STAFF), wrap(async (req, res) => {

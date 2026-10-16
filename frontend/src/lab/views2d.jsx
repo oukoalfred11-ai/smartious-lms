@@ -4,6 +4,8 @@
  * real buttons (keyboard and screen-reader reachable).
  */
 import { useState } from 'react'
+import { getExperiment } from './core.js'
+import { apparatusName } from '../../../shared/lab/apparatus.js'
 
 const rgba = (c) => (c ? `rgba(${Math.round(c[0])},${Math.round(c[1])},${Math.round(c[2])},${Math.max(0.15, c[3])})` : 'rgba(235,242,250,0.25)')
 
@@ -130,8 +132,46 @@ function Osmosis2D({ view, dispatch, editable }) {
   )
 }
 
+/** Generic bench for measurement practicals: apparatus tiles with instrument displays. */
+function Practical2D({ def, view, dispatch, editable }) {
+  const P = def.practical
+  const items = view.collected || P.stockroom
+  const readingsBy = {}
+  for (const r of [...P.constants, ...P.measures]) if (r.instrument) (readingsBy[r.instrument] = readingsBy[r.instrument] || []).push(r)
+  const cols = 4, W = 112, H = 78, gap = 10
+  const rows = Math.ceil(items.length / cols)
+  const dpOf = (res) => Math.max(0, Math.ceil(-Math.log10(res) - 1e-9))
+  return (
+    <svg viewBox={`0 0 ${cols * (W + gap) + gap} ${rows * (H + gap) + gap + 34}`} className="lab-svg" role="img" aria-label={view.collected ? 'Your bench' : 'Stockroom'}>
+      <text x={gap} y="22" fontSize="13" fontWeight="600">{view.collected ? (P.iv ? `${P.iv.label}: ${view.x} ${P.iv.unit || ''}` : 'Your bench') : 'Stockroom: choose your apparatus in the controls panel'}</text>
+      {items.map((id, i) => {
+        const x = gap + (i % cols) * (W + gap), y = 34 + gap + Math.floor(i / cols) * (H + gap)
+        const rs = view.collected ? readingsBy[id] || [] : []
+        const body = (
+          <>
+            <rect x={x} y={y} width={W} height={H} rx="8" fill={rs.length ? '#22303C' : '#FFFFFF'} stroke="#B8B2A7" />
+            <foreignObject x={x + 6} y={y + 4} width={W - 12} height={rs.length ? 30 : H - 8}>
+              <div xmlns="http://www.w3.org/1999/xhtml" style={{ fontSize: 10.5, lineHeight: 1.2, color: rs.length ? '#FFF' : '#222' }}>{apparatusName(id)}</div>
+            </foreignObject>
+            {rs.slice(0, 2).map((r, k) => {
+              const v = view.readings[r.key]
+              return <g key={r.key}><rect x={x + 8} y={y + 34 + k * 20} width={W - 16} height="17" fill="#B9E3B0" />
+                <text x={x + W / 2} y={y + 47 + k * 20} fontSize="11" fontFamily="monospace" textAnchor="middle">{v == null ? '----' : v.toFixed(dpOf(r.resolution)) + ' ' + (r.unit || '')}</text></g>
+            })}
+          </>
+        )
+        return rs.length
+          ? <Hot key={id} label={'Take readings with the ' + apparatusName(id)} onClick={() => rs.forEach(r => dispatch('measure', { key: r.key }))} disabled={!editable}>{body}</Hot>
+          : <g key={id}>{body}</g>
+      })}
+    </svg>
+  )
+}
+
 export default function View2D({ experimentId, view, dispatch, editable }) {
   if (!view) return <div className="lab-3d-loading">Loading…</div>
+  const def = getExperiment(experimentId)
+  if (def?.practical) return <div className="lab-2d"><Practical2D def={def} view={view} dispatch={dispatch} editable={editable} /></div>
   const V = { 'chem-titration': Titration2D, 'phys-ohms-law': Ohms2D, 'bio-osmosis': Osmosis2D }[experimentId]
   return <div className="lab-2d">{V ? <V view={view} dispatch={dispatch} editable={editable} /> : <p>No diagram for this experiment.</p>}</div>
 }

@@ -17,10 +17,12 @@ import TeacherDashboard from './TeacherDashboard.jsx'
 import SessionReview from './SessionReview.jsx'
 import ContentAdmin from './ContentAdmin.jsx'
 import { STATUS_LABEL } from './panels.jsx'
+import { getExperiment } from './core.js'
 import './lab.css'
 
 const STAFF = ['admin', 'dos', 'ops_manager']
 const PORTAL = { student: '/student', teacher: '/teacher', admin: '/admin', dos: '/dos', ops_manager: '/ops' }
+const titleOf = (id) => { const d = getExperiment(id); return d ? (d.collection ? d.collection.code + ' ' : '') + d.title : id }
 const fmtD = (d) => (d ? new Date(d).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '')
 
 function Library({ role }) {
@@ -28,6 +30,7 @@ function Library({ role }) {
   const navigate = useNavigate()
   const [list, setList] = useState(null)
   const [subject, setSubject] = useState('')
+  const [q, setQ] = useState('')
   const [err, setErr] = useState(null)
   useEffect(() => { api.get('/lab/experiments').then(r => setList(r.data.data.experiments)).catch(e => setErr(e?.response?.data?.message || 'Could not load the experiments.')) }, [])
   const startNew = async (id) => {
@@ -36,7 +39,22 @@ function Library({ role }) {
   }
   if (err) return <p className="lab-error" role="alert">{err}</p>
   if (!list) return <div className="lab-loading">Loading experiments…</div>
-  const shown = list.filter(e => !subject || e.subject === subject)
+  const needle = q.trim().toLowerCase()
+  const shown = list.filter(e => (!subject || e.subject === subject) && (!needle || (e.title + ' ' + e.summary + ' ' + (e.collection?.code || '') + ' ' + (e.collection?.chapter || '')).toLowerCase().includes(needle)))
+  const featured = shown.filter(e => !e.collection)
+  const collections = []
+  for (const e of shown.filter(x => x.collection)) {
+    let c = collections.find(x => x.id === e.collection.id)
+    if (!c) collections.push(c = { id: e.collection.id, name: e.collection.name, chapters: [] })
+    let ch = c.chapters.find(x => x.name === e.collection.chapter)
+    if (!ch) c.chapters.push(ch = { name: e.collection.chapter, items: [] })
+    ch.items.push(e)
+  }
+  const order = (code) => code.split('.').map(Number)
+  collections.forEach(c => { c.chapters.forEach(ch => ch.items.sort((a, b) => { const x = order(a.collection.code), y = order(b.collection.code); return x[0] - y[0] || x[1] - y[1] })); c.chapters.sort((a, b) => order(a.items[0].collection.code)[0] - order(b.items[0].collection.code)[0]) })
+  const actions = (e) => role === 'student'
+    ? <span className="lab-row"><Link className="lab-btn sm primary" to={'/lab/run/' + e.id}>Open</Link><button type="button" className="lab-btn sm ghost" onClick={() => startNew(e.id)} title="Starts a fresh attempt once your previous practice attempt has been submitted; otherwise it reopens it.">New attempt</button></span>
+    : <span className="lab-help">{e.status}{['approved', 'published'].includes(e.status) ? ' · assign it from Teaching' : ' · needs approval in Content review'}</span>
   return (
     <section>
       <div className="lab-row">
@@ -44,10 +62,11 @@ function Library({ role }) {
         <div className="lab-seg" role="group" aria-label="Subject">
           {[['', 'All'], ['chemistry', 'Chemistry'], ['physics', 'Physics'], ['biology', 'Biology']].map(([k, l]) => <button key={k} type="button" className={subject === k ? 'on' : ''} aria-pressed={subject === k} onClick={() => setSubject(k)}>{l}</button>)}
         </div>
+        <input type="search" value={q} onChange={e => setQ(e.target.value)} placeholder="Search practicals" aria-label="Search practicals" />
       </div>
-      {!shown.length && <p className="lab-help">{role === 'student' ? 'No experiments are open to you yet. Your teacher will assign one.' : 'No experiments.'}</p>}
-      <div className="lab-cards">
-        {shown.map(e => (
+      {!shown.length && <p className="lab-help">{list.length ? 'Nothing matches your search.' : role === 'student' ? 'No experiments are open to you yet. Your teacher will assign one.' : 'No experiments.'}</p>}
+      {featured.length > 0 && <div className="lab-cards">
+        {featured.map(e => (
           <article key={e.id} className="lab-card">
             <span className={'lab-badge ' + e.subject}>{e.subject}</span>
             {role !== 'student' && <span className="lab-help"> · {e.status}</span>}
@@ -55,12 +74,26 @@ function Library({ role }) {
             <p>{e.summary}</p>
             <p className="lab-help">About {e.durationMin} min · {e.difficulty}{e.model.kind === 'simplified' ? ' · simplified model' : ''}</p>
             <details><summary>What you will practise</summary><ul>{e.skills.map(s => <li key={s}>{s}</li>)}</ul></details>
-            {role === 'student'
-              ? <div className="lab-row"><Link className="lab-btn primary" to={'/lab/run/' + e.id}>Open</Link><button type="button" className="lab-btn ghost" onClick={() => startNew(e.id)} title="Starts a fresh attempt once your previous practice attempt has been submitted; otherwise it reopens it.">New attempt</button></div>
-              : <p className="lab-help">{['approved', 'published'].includes(e.status) ? 'Assign it from Teaching.' : 'Needs approval in Content review before it can be assigned.'}</p>}
+            {actions(e)}
           </article>
         ))}
-      </div>
+      </div>}
+      {collections.map(c => (
+        <section key={c.id} className="lab-collection">
+          <h2>{c.name}</h2>
+          {c.chapters.map(ch => (
+            <details key={ch.name} className="lab-chapter" open={!!needle || c.chapters.length <= 2}>
+              <summary><b>{ch.items[0].collection.code.split('.')[0]}. {ch.name}</b> <span className="lab-help">({ch.items.length})</span></summary>
+              <ul className="lab-plist">{ch.items.map(e => (
+                <li key={e.id}>
+                  <div><b>{e.collection.code}</b> {e.title}{e.model.kind === 'simplified' ? <span className="lab-help"> · simplified model</span> : null}<div className="lab-help">{e.summary} · about {e.durationMin} min</div></div>
+                  {actions(e)}
+                </li>
+              ))}</ul>
+            </details>
+          ))}
+        </section>
+      ))}
     </section>
   )
 }
@@ -98,7 +131,7 @@ function MyWork() {
       {!sessions.length ? <p className="lab-help">You have not started an experiment yet.</p> : (
         <table className="lab-table"><thead><tr><th>Experiment</th><th>Attempt</th><th>Status</th><th>Last saved</th><th>Score</th><th></th></tr></thead>
           <tbody>{sessions.map(s => (
-            <tr key={s._id}><td>{s.experimentId}{s.assignmentId ? ' (assignment)' : ' (practice)'}</td><td>{s.attempt}</td><td>{STATUS_LABEL[s.status]}</td><td>{fmtD(s.updatedAt)}</td>
+            <tr key={s._id}><td>{titleOf(s.experimentId)}{s.assignmentId ? ' (assignment)' : ' (practice)'}</td><td>{s.attempt}</td><td>{STATUS_LABEL[s.status]}</td><td>{fmtD(s.updatedAt)}</td>
               <td>{s.score != null ? `${s.score} / ${s.maxScore}` : '—'}</td><td><Link className="lab-btn sm" to={'/lab/session/' + s._id}>Open</Link></td></tr>
           ))}</tbody></table>
       )}

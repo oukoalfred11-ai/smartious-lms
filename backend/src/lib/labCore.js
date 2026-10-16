@@ -13,8 +13,8 @@ const load = (f) => import(pathToFileURL(path.join(ROOT, f)).href);
 let cached = null;
 function labCore() {
   if (!cached) {
-    cached = Promise.all([load('engine.js'), load('experiments/index.js'), load('access.js'), load('sessionOps.js')])
-      .then(([engine, experiments, access, ops]) => ({ engine, experiments, access, ops }))
+    cached = Promise.all([load('engine.js'), load('experiments/index.js'), load('access.js'), load('sessionOps.js'), load('apparatus.js')])
+      .then(([engine, experiments, access, ops, apparatus]) => ({ engine, experiments, access, ops, apparatus }))
       .catch((e) => { cached = null; throw e; });
   }
   return cached;

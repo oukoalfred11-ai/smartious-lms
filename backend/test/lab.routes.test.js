@@ -232,3 +232,26 @@ test('review list is scoped to the teacher’s students', async () => {
   assert.equal(o.body.data.sessions.length, 0)
   assert.equal((await call(student, 'get', '/review')).statusCode, 403)
 })
+
+test('admin/Dean can publish practicals in bulk; a student then completes one end to end', async () => {
+  assert.equal((await call(teacher, 'post', '/experiments/bulk-status', { ids: ['phys-al-1-1'], status: 'published' })).statusCode, 403)
+  const r = await call(dean, 'post', '/experiments/bulk-status', { ids: ['phys-al-1-1', 'phys-al-1-2', 'nope'], status: 'published' })
+  assert.equal(r.statusCode, 200)
+  assert.deepEqual(r.body.data.done, ['phys-al-1-1', 'phys-al-1-2'])
+  assert.equal(r.body.data.refused[0].id, 'nope')
+  const list = await call(stranger, 'get', '/experiments')
+  assert.ok(list.body.data.experiments.some((e) => e.id === 'phys-al-1-1' && e.collection?.code === '1.1'))
+
+  const open = await call(stranger, 'post', '/sessions', { experimentId: 'phys-al-1-1' })
+  assert.ok([200, 201].includes(open.statusCode), JSON.stringify(open.body))
+  const s = open.body.data.session
+  const { carefulRun } = await import(path.join(__dirname, '..', '..', 'shared', 'lab', 'test', 'careful.js'))
+  const { getExperiment } = await import(path.join(__dirname, '..', '..', 'shared', 'lab', 'experiments', 'index.js'))
+  const run = carefulRun(getExperiment('phys-al-1-1'), s.seed)
+  const save = await call(stranger, 'put', '/sessions/' + s._id, { baseRevision: s.revision, fromIndex: 0, newActions: run.actions, notebook: { aim: 'Density' }, answers: run.answers })
+  assert.equal(save.statusCode, 200, JSON.stringify(save.body))
+  const sub = await call(stranger, 'post', '/sessions/' + s._id + '/submit', { baseRevision: save.body.data.revision, submissionKey: 'key-al-1-0001' })
+  assert.equal(sub.statusCode, 200, JSON.stringify(sub.body))
+  const g = sub.body.data.session.autoGrade
+  for (const row of g.rows.filter((x) => x.auto)) assert.equal(row.marks, row.max, row.label + ': ' + row.detail)
+})

@@ -1,0 +1,133 @@
+// AS & A Level Physics practicals, chapter 1: using apparatus.
+// Procedures, models and wording are Smartious's own.
+import { definePractical } from '../../practical.js'
+
+const G = 9.81
+const C = (code, chapter = 'Using apparatus') => ({ id: 'al-physics', name: 'AS & A Level Physics practicals', code, chapter })
+
+export default [
+  definePractical({
+    id: 'phys-al-1-1', collection: C('1.1'), topic: 'Density; measuring length and mass',
+    title: 'Density of water', summary: 'Find the density of water from a graph of mass against depth of water in a beaker.',
+    aim: 'To determine the density of water using a graph of mass against the depth of water in a beaker.',
+    durationMin: 35,
+    apparatus: ['top_pan_balance', 'beaker_250', 'water_jug', 'vernier_callipers', 'metre_rule'],
+    safety: ['Wipe up any spilt water straight away.'],
+    procedure: [
+      'Weigh the empty beaker and record its mass.',
+      'Measure the internal diameter d of the beaker with the callipers.',
+      'Pour in about 40 cm³ of water. Record the total mass of the beaker and water, and the depth h of the water.',
+      'Add more water in steps and repeat until the beaker holds about 200 cm³.',
+      'Calculate the mass of water m for each reading and plot m against h.',
+      'Use the gradient and d to find the density: ρ = 4 × gradient / (π d²).',
+    ],
+    controlled: 'the same beaker, water at room temperature.',
+    model: { kind: 'quantitative', summary: 'The water forms a cylinder of diameter d, so m = (ρπd²/4) h.',
+      assumptions: ['The beaker is a perfect cylinder with a flat base.', 'Water density is between 0.995 and 1.000 g cm⁻³ (room temperature).', 'Reading the depth with a metre rule has a random error of about ±0.05 cm (meniscus and parallax).'] },
+    hidden: (q) => ({ rho: q('rho', 0.9955, 0.9990), d: q('d', 6.60, 7.00), mb: q('mb', 95, 110) }),
+    constants: [
+      { key: 'mb', label: 'Mass of empty beaker', symbol: 'm₀', unit: 'g', resolution: 0.01, instrument: 'top_pan_balance', read: (p) => p.mb },
+      { key: 'd', label: 'Internal diameter of beaker', symbol: 'd', unit: 'cm', resolution: 0.01, instrument: 'vernier_callipers', read: (p, n) => p.d + n(0.004) },
+    ],
+    iv: { key: 'V', label: 'Approximate volume of water poured', symbol: 'V', unit: 'cm³', min: 40, max: 200, step: 10, start: 40, instrument: 'water_jug' },
+    measures: [
+      { key: 'mt', label: 'Mass of beaker and water', symbol: 'M', unit: 'g', resolution: 0.01, instrument: 'top_pan_balance', read: (p, x) => p.mb + p.rho * x * (1 + 0.04 * p.j('V' + x)) },
+      { key: 'h', label: 'Depth of water', symbol: 'h', unit: 'cm', resolution: 0.1, instrument: 'metre_rule', read: (p, x, n) => (x * (1 + 0.04 * p.j('V' + x))) / (Math.PI * p.d * p.d / 4) + n(0.04) },
+    ],
+    derived: [{ key: 'm', label: 'Mass of water', symbol: 'm', unit: 'g', decimals: 2, value: (r, c) => r.mt - c.mb }],
+    graph: { x: 'h', y: 'm', fit: 'line' },
+    results: [{ id: 'rho', prompt: 'Density of water', unit: 'g cm⁻³', sig: 3, fromFit: (f, c) => 4 * f.m / (Math.PI * c.d * c.d), truth: (p) => p.rho, tolTrue: { rel: 0.04 } }],
+    questions: [{ id: 'callipers', type: 'text', prompt: 'Give two advantages of measuring d with callipers rather than a ruler.' }],
+  }),
+
+  definePractical({
+    id: 'phys-al-1-2', collection: C('1.2'), topic: 'Hooke’s law; spring constant',
+    title: 'Spring constant of a spring', summary: 'Load a spring with masses, measure its length and find the spring constant from a force–extension graph.',
+    aim: 'To determine the spring constant of a helical spring.',
+    durationMin: 35,
+    apparatus: ['stand_clamp', 'spring', 'slotted_masses', 'metre_rule', 'set_square'],
+    safety: ['Clamp the stand to the bench or put a heavy weight on its base so it cannot topple.', 'Wear eye protection in case the spring or masses fall; keep feet clear of the masses.'],
+    procedure: [
+      'Hang the spring from the clamp and fix the metre rule vertically beside it.',
+      'Use the set square to read the position of the bottom of the spring against the rule. Record the unstretched length L₀.',
+      'Add the hanger and masses in 50 g steps. For each load record the new length L.',
+      'Calculate the extension e = L − L₀ and the weight F = mg (g = 9.81 N kg⁻¹).',
+      'Plot F against e and find the spring constant from the gradient.',
+    ],
+    controlled: 'the same spring, loads added gently and allowed to come to rest.',
+    model: { kind: 'quantitative', summary: 'The spring obeys Hooke’s law, F = k e, within the loads used.',
+      assumptions: ['The spring stays within its limit of proportionality up to 400 g.', 'The mass of the spring is ignored.', 'Each length reading has a random error of about ±0.05 cm (parallax and oscillation).'] },
+    hidden: (q) => ({ k: q('k', 18, 40), L0: q('L0', 4.0, 6.0) }),
+    constants: [{ key: 'L0', label: 'Unstretched length', symbol: 'L₀', unit: 'cm', resolution: 0.1, instrument: 'metre_rule', read: (p, n) => p.L0 + n(0.03) }],
+    iv: { key: 'mass', label: 'Load', symbol: 'm', unit: 'g', min: 50, max: 400, step: 50, start: 50, instrument: 'slotted_masses' },
+    measures: [{ key: 'L', label: 'Length of spring', symbol: 'L', unit: 'cm', resolution: 0.1, instrument: 'metre_rule', read: (p, x, n) => p.L0 + (x / 1000 * G) / p.k * 100 + n(0.04) }],
+    derived: [
+      { key: 'e', label: 'Extension', symbol: 'e', unit: 'cm', decimals: 1, value: (r, c) => r.L - c.L0 },
+      { key: 'F', label: 'Weight of load', symbol: 'F', unit: 'N', decimals: 3, value: (r) => r.mass / 1000 * G },
+    ],
+    graph: { x: 'e', y: 'F', fit: 'line' },
+    results: [{ id: 'k', prompt: 'Spring constant', unit: 'N m⁻¹', sig: 3, fromFit: (f) => f.m * 100, truth: (p) => p.k, tolTrue: { rel: 0.06 } }],
+  }),
+
+  definePractical({
+    id: 'phys-al-1-3', collection: C('1.3'), topic: 'Resistance; using meters',
+    title: 'Resistance of a metal wire', summary: 'Measure the current and potential difference for different lengths of wire and find its resistance per metre.',
+    aim: 'To determine how the resistance of a metal wire depends on its length and find its resistance per unit length.',
+    durationMin: 40,
+    apparatus: ['resistance_wire', 'dry_cell', 'ammeter', 'voltmeter', 'switch', 'leads'],
+    safety: ['The wire can get warm: open the switch between readings.'],
+    procedure: [
+      'Connect the cell, switch, ammeter and the wire in series, with one crocodile clip at the zero end of the wire.',
+      'Connect the voltmeter across the length of wire between the two clips.',
+      'Place the moving clip at l = 10 cm, close the switch, record V and I, then open the switch.',
+      'Repeat for lengths up to 90 cm.',
+      'Calculate R = V / I and plot R against l. The gradient is the resistance per unit length.',
+    ],
+    controlled: 'the same wire, the same cell; switch opened between readings so the wire stays cool.',
+    model: { kind: 'quantitative', summary: 'R = λ l + R_c, where λ is the resistance per unit length and R_c a small contact resistance at the clips.',
+      assumptions: ['The wire is uniform constantan; its temperature does not change.', 'The cell has an e.m.f. of 1.5 V and internal resistance of 0.5–1.0 Ω.', 'Ideal meters; contact resistance 0.05–0.15 Ω.'] },
+    hidden: (q) => ({ lam: q('lam', 6.0, 11.0), rc: q('rc', 0.05, 0.15), r: q('r', 0.5, 1.0), E: q('E', 1.52, 1.60) }),
+    iv: { key: 'l', label: 'Length of wire', symbol: 'l', unit: 'cm', min: 10, max: 90, step: 5, start: 10, instrument: 'resistance_wire' },
+    measures: [
+      { key: 'V', label: 'Potential difference', symbol: 'V', unit: 'V', resolution: 0.01, instrument: 'voltmeter', read: (p, x) => { const R = p.lam * x / 100 + p.rc; return p.E * R / (R + p.r) } },
+      { key: 'I', label: 'Current', symbol: 'I', unit: 'A', resolution: 0.01, instrument: 'ammeter', read: (p, x) => p.E / (p.lam * x / 100 + p.rc + p.r) },
+    ],
+    derived: [{ key: 'R', label: 'Resistance', symbol: 'R', unit: 'Ω', decimals: 2, value: (r) => r.V / r.I }],
+    graph: { x: 'l', y: 'R', fit: 'line' },
+    results: [{ id: 'lam', prompt: 'Resistance per unit length of the wire', unit: 'Ω m⁻¹', sig: 3, fromFit: (f) => f.m * 100, truth: (p) => p.lam, tolTrue: { rel: 0.08 } }],
+    questions: [{ id: 'intercept', type: 'choice', prompt: 'Why does the line not pass exactly through the origin?', options: ['There is a small extra resistance at the clips and connections', 'The wire gets longer when current flows', 'The voltmeter has zero resistance'], correct: 0 }],
+  }),
+
+  definePractical({
+    id: 'phys-al-1-4', collection: C('1.4'), topic: 'Speed and acceleration; timing',
+    title: 'Cylinder rolling down a ramp', summary: 'Time a cylinder rolling different distances down a ramp, find its average speed and its acceleration.',
+    aim: 'To find the acceleration of a cylinder rolling down a ramp from a graph of distance against time squared.',
+    durationMin: 40,
+    apparatus: ['ramp', 'wooden_blocks', 'cylinder', 'metre_rule', 'stopwatch'],
+    safety: ['Stop the cylinder at the bottom of the ramp so it does not fall off the bench.'],
+    procedure: [
+      'Raise one end of the ramp on the blocks. Measure the height h of the raised end and the length L of the ramp.',
+      'Release the cylinder from rest a distance s from a mark at the bottom and time how long it takes to reach the mark.',
+      'Time each distance three times and calculate the mean time.',
+      'Repeat for distances from 20 cm to 100 cm.',
+      'Calculate the average speed s / t for each distance. Plot s against t²; the gradient is a / 2.',
+    ],
+    controlled: 'the same ramp angle, release from rest without pushing.',
+    model: { kind: 'quantitative', summary: 'A solid cylinder rolling without slipping has a = (2/3) g sin θ, so s = ½ a t².',
+      assumptions: ['The cylinder is solid and rolls without slipping.', 'Rolling resistance reduces the acceleration by about 3 %.', 'Hand timing has a random reaction-time error of about ±0.08 s.'] },
+    hidden: (q) => ({ h: q('h', 6, 12), L: q('L', 115, 125) }),
+    constants: [
+      { key: 'h', label: 'Height of raised end', symbol: 'h', unit: 'cm', resolution: 0.1, instrument: 'metre_rule', read: (p, n) => p.h + n(0.03) },
+      { key: 'L', label: 'Length of ramp', symbol: 'L', unit: 'cm', resolution: 0.1, instrument: 'metre_rule', read: (p, n) => p.L + n(0.03) },
+    ],
+    iv: { key: 's', label: 'Distance rolled', symbol: 's', unit: 'cm', min: 20, max: 100, step: 10, start: 20, instrument: 'metre_rule' },
+    measures: [{ key: 't', label: 'Time', symbol: 't', unit: 's', resolution: 0.01, instrument: 'stopwatch', read: (p, x, n) => Math.sqrt(2 * (x / 100) / (0.97 * (2 / 3) * G * p.h / p.L)) + n(0.08) }],
+    repeats: 3,
+    derived: [
+      { key: 'v', label: 'Average speed', symbol: 'v', unit: 'm s⁻¹', decimals: 3, value: (r) => r.s / 100 / r.t },
+      { key: 's_m', label: 'Distance', symbol: 's', unit: 'm', decimals: 2, value: (r) => r.s / 100 },
+    ],
+    graph: { x: 't', tx: 'square', y: 's_m', fit: 'origin' },
+    results: [{ id: 'a', prompt: 'Acceleration of the cylinder', unit: 'm s⁻²', sig: 3, fromFit: (f) => 2 * f.m, truth: (p) => 0.97 * (2 / 3) * G * p.h / p.L, tolTrue: { rel: 0.12 } }],
+  }),
+]

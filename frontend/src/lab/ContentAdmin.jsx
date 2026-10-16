@@ -44,17 +44,61 @@ function Row({ e, onSaved }) {
   )
 }
 
+function Bulk({ list, onDone }) {
+  const toast = useToast()
+  const groups = [['all', 'All experiments'], ['featured', 'Featured experiments'], ...[...new Map(list.filter(e => e.collection).map(e => [e.collection.id, e.collection.name])).entries()]]
+  const [group, setGroup] = useState('all')
+  const [status, setStatus] = useState('published')
+  const [confirm, setConfirm] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const ids = list.filter(e => group === 'all' || (group === 'featured' ? !e.collection : e.collection?.id === group)).map(e => e.id)
+  const run = async () => {
+    setBusy(true)
+    try {
+      const { data } = await api.post('/lab/experiments/bulk-status', { ids, status, note: 'Bulk change' })
+      toast.ok(data.message)
+      if (data.data.refused.length) toast.error('Refused: ' + data.data.refused.map(r => r.id + ' (' + r.reason + ')').join('; '))
+      setConfirm(false); onDone()
+    } catch (e) { toast.error(e?.response?.data?.message || 'Could not change the status.') }
+    finally { setBusy(false) }
+  }
+  return (
+    <div className="lab-card">
+      <h3>Change many at once</h3>
+      <div className="lab-row">
+        <select value={group} onChange={e => { setGroup(e.target.value); setConfirm(false) }} aria-label="Which experiments">{groups.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>
+        <select value={status} onChange={e => { setStatus(e.target.value); setConfirm(false) }} aria-label="New status">{STATUSES.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>
+        {!confirm
+          ? <button type="button" className="lab-btn primary" onClick={() => setConfirm(true)} disabled={!ids.length}>Apply to {ids.length}</button>
+          : <><span>Set {ids.length} experiment(s) to “{STATUSES.find(x => x[0] === status)[1]}”? Each is checked first; any that fail are left unchanged.</span>
+              <button type="button" className="lab-btn primary" onClick={run} disabled={busy}>{busy ? 'Working…' : 'Yes, apply'}</button>
+              <button type="button" className="lab-btn ghost" onClick={() => setConfirm(false)} disabled={busy}>Cancel</button></>}
+      </div>
+    </div>
+  )
+}
+
 export default function ContentAdmin() {
   const [list, setList] = useState(null)
   const [err, setErr] = useState(null)
   const load = useCallback(() => api.get('/lab/experiments').then(r => setList(r.data.data.experiments)).catch(e => setErr(e?.response?.data?.message || 'Could not load experiments.')), [])
   useEffect(() => { load() }, [load])
+  const counts = (list || []).reduce((a, e) => ({ ...a, [e.status]: (a[e.status] || 0) + 1 }), {})
   return (
     <div className="lab-page">
       <h1>Content review</h1>
       <p className="lab-help">Students only see published experiments, or approved ones their teacher has assigned. Check the science, safety notes and model assumptions before approving. Curriculum links are Smartious’s own mapping and are marked unverified until checked against the official syllabus.</p>
       {err && <p className="lab-error" role="alert">{err}</p>}
-      {list == null && !err ? <div className="lab-loading">Loading…</div> : (list || []).map(e => <Row key={e.id + e.status + (e.reviewNote || '')} e={e} onSaved={load} />)}
+      {list == null && !err ? <div className="lab-loading">Loading…</div> : list && <>
+        <p>{STATUSES.map(([k, l]) => `${l}: ${counts[k] || 0}`).join(' · ')}</p>
+        <Bulk list={list} onDone={load} />
+        {list.map(e => (
+          <details key={e.id + e.status + (e.reviewNote || '')} className="lab-chapter">
+            <summary>{e.collection ? <b>{e.collection.code} </b> : null}{e.title} <span className="lab-help">· {STATUSES.find(s => s[0] === e.status)?.[1] || e.status}</span></summary>
+            <Row e={e} onSaved={load} />
+          </details>
+        ))}
+      </>}
     </div>
   )
 }

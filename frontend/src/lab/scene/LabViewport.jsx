@@ -10,6 +10,7 @@
  */
 import { useEffect, useRef, useState } from 'react'
 import View2D from '../views2d.jsx'
+import { getExperiment } from '../core.js'
 
 export default function LabViewport({ experimentId, view, dispatch, editable, mode, setMode, lowGraphics, setLowGraphics, onSelect }) {
   const box = useRef(null)
@@ -24,10 +25,11 @@ export default function LabViewport({ experimentId, view, dispatch, editable, mo
     if (mode !== '3d' || !box.current) return
     let alive = true
     setStatus('loading'); setProblem(null)
-    Promise.all([import('./engine3d.js'), import('./scenes.js')]).then(([E3, S]) => {
+    Promise.all([import('./engine3d.js'), import('./scenes.js'), import('./practicalScene.js')]).then(([E3, S, PS]) => {
       if (!alive) return
       if (!E3.webglAvailable()) { setProblem('3D graphics (WebGL) are not available on this device, so the 2D view is shown.'); setMode('2d'); return }
-      const build = S.SCENES[experimentId]
+      const def = getExperiment(experimentId)
+      const build = S.SCENES[experimentId] || (def?.practical ? (lab, o) => PS.buildPracticalScene(lab, { ...o, def }) : null)
       if (!build) { setProblem('This experiment has no 3D scene yet; the 2D view is shown.'); setMode('2d'); return }
       try {
         let scene = null
