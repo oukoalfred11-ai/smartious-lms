@@ -5,9 +5,9 @@
 // across Buenos Aires, Córdoba, Rosario, Mendoza and Neuquén.
 // FOURTH LATIN AMERICAN BUILD — 5 cities.
 //
-// IMAGE NOTE: heroImg / heroImage use LOCAL PATHS under /heroes/.
-// Drop a file at frontend/public/heroes/<slug>.jpg and it appears;
-// if absent the onError handler shows the ink→crimson gradient.
+// IMAGE NOTE: city pages have no heroImg (the hero falls back to the
+// ink→crimson gradient); the country hub uses /online-virtual-school.png.
+// To add a city photo, put it under frontend/public and set heroImg.
 //
 // LEGAL POSITIONING NOTE — READ BEFORE EDITING:
 // - Governing statute: LEY DE EDUCACIÓN NACIONAL N° 26.206 (2006).
@@ -75,7 +75,6 @@ export const ARGENTINA_CITIES = [
     primaryKeyword: 'Online school and Cambridge tutoring in Buenos Aires',
     heroTagline: 'For Buenos Aires families — in a city that has taught the British curriculum since the nineteenth century, we add the subjects a timetable cannot.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Buenos Aires families. Few cities anywhere have a deeper bilingual school tradition than Buenos Aires — St George\'s, Belgrano Day School, St Andrew\'s, Northlands, Cardenal Newman and the wider Anglo-Argentine sector, alongside the German, French and Italian schools, much of it dating back more than a century and much of it already running IGCSE and the IB. We are not here to introduce the British curriculum to a city that has taught it since the 1800s. We are here for subject access, for fee pressure in a high-inflation economy, and for families the tier cannot seat.',
-    heroImg: '/heroes/buenos-aires-ar.jpg',
     altTexts: { hero: 'Buenos Aires city' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Buenos Aires families — subject access and fee relief in a deep bilingual market. From USD 423/month.',
     challenges: [
@@ -140,7 +139,6 @@ export const ARGENTINA_CITIES = [
     primaryKeyword: 'Online school and Cambridge tutoring in Córdoba',
     heroTagline: 'For Córdoba families — automotive plants, an aerospace industry and a four-hundred-year-old university, with a fraction of the capital\'s school tier.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Córdoba families. Córdoba is Argentina\'s industrial and academic second city — automotive assembly and components, an aerospace and defence industry with a long history, a fast-growing software and services sector, and a university founded in the early seventeenth century that still anchors one of the largest student populations in the country. Its international provision is thinner than Buenos Aires\'s, and the capital is seven hundred kilometres east. We teach live in the Argentine morning or early afternoon, alongside your school.',
-    heroImg: '/heroes/cordoba-ar.jpg',
     altTexts: { hero: 'Córdoba city and the sierras' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Córdoba families — industrial and university heartland, thinner provision. From USD 423/month.',
     challenges: [
@@ -202,7 +200,6 @@ export const ARGENTINA_CITIES = [
     primaryKeyword: 'Online school and Cambridge tutoring in Rosario',
     heroTagline: 'For Rosario and Santa Fe families — one of the world\'s great grain corridors, staffed by international traders and served by local schools.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Rosario and Santa Fe families. The Paraná corridor around Rosario handles one of the largest concentrations of soy, grain, and vegetable-oil export capacity anywhere in the world, and the international commodity trading houses, crushing plants, and shipping agencies that come with it — an unusually international commercial community for a city its size. Rosario is also a major university and medical centre. International schooling has not matched the trade. Smartious teaches Cambridge and IB live alongside your school, on a six-hour offset that works.',
-    heroImg: '/heroes/rosario-ar.jpg',
     altTexts: { hero: 'Rosario and the Paraná river' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Rosario and Santa Fe families — the Paraná agro-export corridor. From USD 423/month.',
     challenges: [
@@ -264,7 +261,6 @@ export const ARGENTINA_CITIES = [
     primaryKeyword: 'Online school and Cambridge tutoring in Mendoza',
     heroTagline: 'For Mendoza families — an international wine industry, an Andean mining province, and a school map that stops at the city.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Mendoza families. Mendoza is Argentina\'s wine capital and its Andean gateway — an industry with substantial French, Italian, American, and Chilean investment behind it, bringing winemakers, viticulturists, and executives who often stay for years; a mining and energy sector across the province; and the corridor over the Andes to Chile that shapes its trade. The international community is real and the international schooling is limited, concentrated in the city while much of the industry sits in the valleys. Smartious teaches live alongside your school, on a six-hour offset that works.',
-    heroImg: '/heroes/mendoza-ar.jpg',
     altTexts: { hero: 'Mendoza vineyards and the Andes' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Mendoza families — wine capital, Andean province, limited provision. From USD 423/month.',
     challenges: [
@@ -326,7 +322,6 @@ export const ARGENTINA_CITIES = [
     primaryKeyword: 'Online school and Cambridge tutoring in Neuquén and Vaca Muerta',
     heroTagline: 'For Neuquén and Vaca Muerta families — one of the world\'s great shale plays, staffed from four continents and schooled like a provincial town.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for families across Neuquén and the Vaca Muerta belt. Vaca Muerta is one of the largest unconventional oil and gas formations in the world, and the operations around Añelo, Neuquén, and the Río Negro valley have drilled a global industry into a Patagonian province in barely more than a decade — bringing petroleum engineers, geologists, completion specialists, and management recruited from the United States, Canada, Europe, and across Latin America, much of it rotational. What did not arrive at the same pace was schooling. Smartious teaches live to the basin, on a six-hour offset that works.',
-    heroImg: '/heroes/neuquen-ar.jpg',
     altTexts: { hero: 'The Neuquén basin and Patagonian steppe' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Neuquén and Vaca Muerta families — one of the world\'s great shale plays, minimal international schooling. From USD 423/month.',
     challenges: [
@@ -413,7 +408,7 @@ export const ARGENTINA_COUNTRY = {
   secondaryProgrammeExamRef: 'Authorised Argentine Cambridge provision',
   finalCTABadgeExamRef: 'Cambridge centres confirmed per family, per session',
 
-  heroImage: '/heroes/argentina.jpg',
+  heroImage: '/online-virtual-school.png',
   heroEyebrow: 'Online school for Argentina',
   heroH1Suffix: 'Argentina',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for corporate, energy, agro-export, and Argentine families across Buenos Aires, Córdoba, Rosario, Mendoza, and Neuquén. In a country that has taught the British curriculum since the nineteenth century, our offer is narrow and honest: the subjects a timetable cannot staff, fee relief invoiced in USD, and reach beyond Buenos Aires. Six hours behind, so mornings and early afternoons both work.',
@@ -424,7 +419,7 @@ export const ARGENTINA_COUNTRY = {
   citiesSectionBody: 'Smartious Argentina families concentrate across Buenos Aires (one of the oldest and deepest bilingual school traditions in the world, under sustained fee pressure), Córdoba (the automotive, aerospace and university heartland, seven hundred kilometres from the capital\'s tier), Rosario and the Paraná corridor (one of the world\'s great grain and agro-export complexes, staffed by international trading houses), Mendoza (the wine capital and Andean gateway, with the industry spread across valleys the school map does not reach), and Neuquén and Vaca Muerta (one of the largest shale plays on earth, drilled into a Patagonian province faster than any school could follow). One long compulsory range, twenty-four jurisdictions, and a timezone that works.',
 
   trustSignals: [
-    { h: 'An African school teaching Argentine families', p: 'Smartious was founded in Nairobi in 2019 and teaches from two operational centres established 2022 and 2023, serving students across more than seventy countries — an internationally accredited online school, not an Argentine one.' },
+    { h: 'An African school teaching Argentine families', p: 'Smartious was founded in Nairobi in 2018 and teaches from two operational centres established 2022 and 2023, serving students across more than seventy countries — an internationally accredited online school, not an Argentine one.' },
     { h: 'A timezone that works', p: 'Argentina runs ART (UTC-3) with no daylight saving and Kenya EAT (UTC+3) with none either — a fixed six-hour gap. Argentine morning and early-afternoon classes both land in our normal teaching day, and with schools commonly running turno mañana and turno tarde, most students have one window genuinely free.' },
     { h: 'The compulsory range, stated properly', p: 'Under Ley de Educación Nacional 26.206 education is obligatory from early childhood through completion of the secondary level, with the starting age extended down to four by later reform. That is one of the longest ranges in our coverage, and it means Argentina has no post-compulsory window before secondary is completed.' },
     { h: 'Twenty-four jurisdictions, not one', p: 'Argentina\'s system is administered by the twenty-three provinces and the Ciudad Autónoma de Buenos Aires, each with its own education ministry within the national framework and coordinated through the Consejo Federal de Educación. The operative detail depends on your province, and we say so rather than giving a single national answer.' },
@@ -439,7 +434,7 @@ export const ARGENTINA_COUNTRY = {
   ibDiplomaDelivery: 'Live online IB DP classes across all six subject groups plus Theory of Knowledge and Extended Essay supervision.',
   americanCurriculumSuits: 'Argentina families targeting US universities via Common Application.',
   americanCurriculumDelivery: 'American Curriculum with AP courses Grades 9-12, SAT/ACT preparation, Common App essay coaching.',
-  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2019 to make international qualifications accessible to families at online-delivery fees rather than campus ones. Argentina families join students across more than seventy countries — and Argentina is one of the few markets where the British curriculum arrived long before we did, which shapes what we sensibly offer.',
+  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2018 to make international qualifications accessible to families at online-delivery fees rather than campus ones. Argentina families join students across more than seventy countries — and Argentina is one of the few markets where the British curriculum arrived long before we did, which shapes what we sensibly offer.',
   founderUniversitySpecialism: 'Alfred holds a BEd in Mathematics and Physics — Smartious\'s Cambridge A-Level and IB Diploma STEM subjects are led personally when needed, suiting Vaca Muerta\'s petroleum and geoscience families, Córdoba\'s automotive and aerospace households, and every medicine-bound student in Rosario and Buenos Aires. Head of Academics supervises curriculum delivery and university placement strategy per family.',
 
   competitorsIntro: 'Argentina is the market where we are least willing to overclaim, because Buenos Aires has taught the British curriculum since the nineteenth century and does it well. St George\'s, Belgrano Day School, St Andrew\'s, Northlands, Cardenal Newman and the wider Anglo-Argentine sector, plus the German, French and Italian schools, form a tier with more history than almost any comparable market in the world. Our offer here is deliberately narrow: subject access where a timetable runs out, fee relief in a high-inflation economy with USD-denominated invoicing, and reach into the provinces where the tier does not exist.',

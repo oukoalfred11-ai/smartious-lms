@@ -5,9 +5,9 @@
 // families across Montevideo, Punta del Este, Colonia, Salto and Rocha.
 // ELEVENTH LATIN AMERICAN BUILD — 5 cities.
 //
-// IMAGE NOTE: heroImg / heroImage use LOCAL PATHS under /heroes/.
-// Drop a file at frontend/public/heroes/<slug>.jpg and it appears;
-// if absent the onError handler shows the ink→crimson gradient.
+// IMAGE NOTE: city pages have no heroImg (the hero falls back to the
+// ink→crimson gradient); the country hub uses /online-virtual-school.png.
+// To add a city photo, put it under frontend/public and set heroImg.
 //
 // LEGAL POSITIONING NOTE — URUGUAY IS THE MOST ACTIVELY CONTESTED
 // POSITION IN OUR ENTIRE COVERAGE, WITH LIVE LITIGATION. READ ALL:
@@ -93,7 +93,6 @@ export const URUGUAY_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Montevideo',
     heroTagline: 'For Montevideo families — Cambridge subjects a timetable cannot staff, in a city that has taught the British curriculum since 1908.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Montevideo families. Few cities of three million anywhere have a British-heritage school tradition as deep as Montevideo\'s — the British Schools founded in 1908, the Uruguayan American School, Woodlands, St Brendan\'s, St Catherine\'s, the German and French schools — much of it already offering IGCSE and the IB. We are not here to introduce Cambridge to this city. We are here for the subject sets a single timetable cannot sustain, for families outside the tier\'s fees, and for the free-zone and technology community that keeps arriving. And we set out Uruguay\'s genuinely contested legal position honestly, because it is more contested than almost anywhere we teach.',
-    heroImg: '/heroes/montevideo-uy.jpg',
     altTexts: { hero: 'Montevideo and the Río de la Plata' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Montevideo families — subject depth beside a deep British-heritage tier, and the legal position stated fairly. From USD 423/month.',
     challenges: [
@@ -158,7 +157,6 @@ export const URUGUAY_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Punta del Este',
     heroTagline: 'For Punta del Este and Maldonado families — the resort that became a residence, with a school map still built for a season.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Punta del Este and Maldonado families. Punta has changed: what was a summer destination has become a genuine year-round residence, with substantial Argentine and Brazilian settlement drawn by Uruguay\'s stability and residency regime, a financial and wealth-management presence, and an increasing technology and remote-work population from further afield. Families who once came for January now live here in June. The schooling has not fully caught up, and Montevideo is around two hours west. Smartious teaches Cambridge and IB live to the coast.',
-    heroImg: '/heroes/punta-del-este-uy.jpg',
     altTexts: { hero: 'Punta del Este peninsula and coast' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Punta del Este and Maldonado families — year-round residence, schooling built for a season. From USD 423/month.',
     challenges: [
@@ -220,7 +218,6 @@ export const URUGUAY_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Colonia',
     heroTagline: 'For Colonia and litoral families — Finnish pulp mills, an hour from Buenos Aires by ferry, and no international school on either count.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Colonia and litoral families. The western departments carry an unusual concentration of international capital for their size: the UPM and Montes del Plata pulp operations built on Finnish and Chilean investment, the dairy and agro-industrial economy of the litoral, and the ferry corridor that puts Buenos Aires an hour across the river. The engineering and management community around the mills is genuinely international; the schooling is not. Montevideo is around two and a half hours east. Smartious teaches Cambridge and IB live across the litoral.',
-    heroImg: '/heroes/colonia-uy.jpg',
     altTexts: { hero: 'Colonia del Sacramento and the Río de la Plata' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Colonia, Fray Bentos and litoral families — pulp industry and agro-export, no local provision. From USD 423/month.',
     challenges: [
@@ -282,7 +279,6 @@ export const URUGUAY_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Salto',
     heroTagline: 'For Salto, Paysandú and northern families — Uruguay\'s citrus and energy north, five hundred kilometres from any international school.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Salto and northern Uruguayan families. The north runs the country\'s citrus and horticultural export economy, the binational Salto Grande hydroelectric complex on the Argentine border, a thermal tourism sector, and regional university faculties — an economy that exports to Europe and North America and shares a major piece of infrastructure with a neighbouring country. International schooling in the north does not exist, and Montevideo is around five hundred kilometres south. Smartious teaches Cambridge and IB live across northern Uruguay.',
-    heroImg: '/heroes/salto-uy.jpg',
     altTexts: { hero: 'Salto and the Uruguay river' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Salto, Paysandú and northern Uruguay families — citrus, energy and no local provision. From USD 423/month.',
     challenges: [
@@ -344,7 +340,6 @@ export const URUGUAY_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Rocha',
     heroTagline: 'For Rocha and eastern coast families — the quiet coast that filled with remote workers, and the department where home education questions arrive most.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Rocha and eastern coast families. The east — La Paloma, La Pedrera, Cabo Polonio, Punta del Diablo, Valizas — has drawn a settled alternative, artistic and increasingly remote-working community from Uruguay, Argentina, Brazil and Europe, alongside conservation and coastal-ecology work and the corridor to the Brazilian border at Chuy. It is also, anecdotally, the part of Uruguay where interest in educating outside school runs highest, which makes getting the legal position right more important here than anywhere. Smartious teaches Cambridge and IB live to the eastern coast.',
-    heroImg: '/heroes/rocha-uy.jpg',
     altTexts: { hero: 'The Rocha coast at La Pedrera' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Rocha, La Paloma and eastern coast families — remote-work community, contested legal position explained. From USD 423/month.',
     challenges: [
@@ -431,7 +426,7 @@ export const URUGUAY_COUNTRY = {
   secondaryProgrammeExamRef: 'Authorised Uruguayan Cambridge provision',
   finalCTABadgeExamRef: 'Cambridge centres confirmed per family, per session',
 
-  heroImage: '/heroes/uruguay.jpg',
+  heroImage: '/online-virtual-school.png',
   heroEyebrow: 'Online school for Uruguay',
   heroH1Suffix: 'Uruguay',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for expatriate, agro-export, technology, and Uruguayan families across Montevideo, Punta del Este, Colonia, Salto, and Rocha. Uruguay has the most actively contested home-education position in our coverage — a constitutional argument, a 2020 statutory change, and live litigation — and we set out all three sides before anything else.',
@@ -457,7 +452,7 @@ export const URUGUAY_COUNTRY = {
   ibDiplomaDelivery: 'Live online IB DP classes across all six subject groups plus Theory of Knowledge and Extended Essay supervision.',
   americanCurriculumSuits: 'Uruguay families targeting US universities via Common Application.',
   americanCurriculumDelivery: 'American Curriculum with AP courses Grades 9-12, SAT/ACT preparation, Common App essay coaching.',
-  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2019 to make international qualifications accessible to families at online-delivery fees rather than campus ones. Uruguay is the market where the law is most actively being argued while we write — a constitutional provision, a 2020 amendment, a referendum, and a case before the courts — and where we would rather set out all of it than pick the version that helps us.',
+  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2018 to make international qualifications accessible to families at online-delivery fees rather than campus ones. Uruguay is the market where the law is most actively being argued while we write — a constitutional provision, a 2020 amendment, a referendum, and a case before the courts — and where we would rather set out all of it than pick the version that helps us.',
   founderUniversitySpecialism: 'Alfred holds a BEd in Mathematics and Physics — Smartious\'s Cambridge A-Level and IB Diploma STEM subjects are led personally when needed, suiting the litoral\'s pulp and process-engineering families, the north\'s agricultural science households, and Montevideo\'s technology community. Head of Academics supervises curriculum delivery and university placement strategy per family.',
 
   competitorsIntro: 'Uruguay has a British-heritage school tradition out of all proportion to its size — the British Schools Montevideo founded in 1908, the Uruguayan American School, Woodlands, St Brendan\'s, St Catherine\'s, the German and French schools — much of it already offering IGCSE and the IB, and all of it concentrated in and around the capital. We are not competing with that tradition and would not pretend to. The gaps are the subject sets no single timetable can sustain, the fees, and the four departments outside Montevideo where international provision simply does not exist.',

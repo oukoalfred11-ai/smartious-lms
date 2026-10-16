@@ -5,9 +5,9 @@
 // across Tel Aviv, Jerusalem, Haifa, Be'er Sheva and the Sharon.
 // FIRST MIDDLE EAST BUILD OF THIS SERIES — 5 cities.
 //
-// IMAGE NOTE: heroImg / heroImage use LOCAL PATHS under /heroes/.
-// Drop a file at frontend/public/heroes/<slug>.jpg and it appears;
-// if absent the onError handler shows the ink→crimson gradient.
+// IMAGE NOTE: city pages have no heroImg (the hero falls back to the
+// ink→crimson gradient); the country hub uses /online-virtual-school.png.
+// To add a city photo, put it under frontend/public and set heroImg.
 //
 // *** TONE RULE — ABSOLUTE ***
 // NO political content of any kind. No commentary on any conflict,
@@ -105,7 +105,6 @@ export const ISRAEL_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Tel Aviv',
     heroTagline: 'For Tel Aviv families — Cambridge and IB taught live in your own hours, because Israel is the closest country to our clock we teach.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Tel Aviv families. The city runs one of the densest technology and start-up ecosystems anywhere, with a professional community drawn from across the English-speaking and French-speaking world, and yet remarkably few international schools for that profile. Families who arrived mid-schooling, or who want their children to keep a route back to a university in London, New York, Paris or Toronto, come to us for one specific thing: an internationally examined record alongside the Israeli one. And Israel sits closer to our teaching clock than any country we serve.',
-    heroImg: '/heroes/tel-aviv-il.jpg',
     altTexts: { hero: 'Tel Aviv and the Mediterranean' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Tel Aviv families — an internationally examined record alongside the Israeli one, in your own hours. From USD 423/month.',
     challenges: [
@@ -170,7 +169,6 @@ export const ISRAEL_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Jerusalem',
     heroTagline: 'For Jerusalem families — an internationally examined record for children who may study abroad, taught in your own hours.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Jerusalem families. The city holds national institutions, the Hebrew University and one of the deepest academic sectors in the region, and an unusually large English-speaking and French-speaking olim community — families who arrived from London, New York, Paris, Toronto or Johannesburg and who frequently want their children to keep a route back to universities there. A few long-established international schools serve part of that need. For everyone else, an internationally examined track alongside the Israeli one is the practical answer, and we teach it live in whichever hours suit.',
-    heroImg: '/heroes/jerusalem-il.jpg',
     altTexts: { hero: 'Jerusalem hills and skyline' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Jerusalem families — a route back to UK, US, French and Canadian universities. From USD 423/month.',
     challenges: [
@@ -233,7 +231,6 @@ export const ISRAEL_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Haifa',
     heroTagline: 'For Haifa and northern families — a Technion city with engineering ambitions and few international options outside the centre.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Haifa and northern families. The city is built around the Technion and a major engineering, research and technology sector, alongside the country\'s principal port and its petrochemical complex, with the Krayot and the Galilee beyond. It is a strongly academic and multilingual region whose students aim at engineering and the sciences in numbers, and whose international school options are far fewer than in the centre of the country. We teach Cambridge and IB live across the north, in whichever hours suit.',
-    heroImg: '/heroes/haifa-il.jpg',
     altTexts: { hero: 'Haifa bay and Mount Carmel' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Haifa and northern Israel families — Technion country, few international options. From USD 423/month.',
     challenges: [
@@ -295,7 +292,6 @@ export const ISRAEL_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Be\'er Sheva',
     heroTagline: 'For Be\'er Sheva and Negev families — a research and technology city in a very large district, with essentially no international schooling.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Be\'er Sheva and Negev families. The southern capital is built around Ben-Gurion University and a fast-growing technology, cyber and research sector, alongside desert agriculture and water research that is studied internationally. It is also a very large district with dispersed communities, and international schooling in the south is essentially non-existent — the centre of the country is an hour or more north. Live delivery closes that distance without a family moving, and Israel\'s clock means every hour of our teaching day is available.',
-    heroImg: '/heroes/beer-sheva-il.jpg',
     altTexts: { hero: 'Be\'er Sheva and the Negev' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Be\'er Sheva and Negev families — research and technology city, no international schooling. From USD 423/month.',
     challenges: [
@@ -357,7 +353,6 @@ export const ISRAEL_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Ra\'anana',
     heroTagline: 'For Ra\'anana, Herzliya and Sharon families — the olim heartland, where keeping a route home matters as much as settling in.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Ra\'anana and Sharon families. The corridor through Ra\'anana, Herzliya, Kfar Saba and Netanya is the heartland of Israel\'s English-speaking and French-speaking olim communities — families who arrived from Britain, the United States, France, Canada and South Africa, often mid-schooling, and who keep close ties to the countries they came from. Alongside them runs a technology and corporate corridor with an internationally recruited workforce. The common question in both is the same: how does a child keep a record that reads back home? We teach exactly that, live, in whichever hours suit.',
-    heroImg: '/heroes/raanana-il.jpg',
     altTexts: { hero: 'The Sharon corridor' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Ra\'anana, Herzliya and Sharon families — the olim heartland, with a record that reads back home. From USD 423/month.',
     challenges: [
@@ -444,7 +439,7 @@ export const ISRAEL_COUNTRY = {
   secondaryProgrammeExamRef: 'Authorised Israeli Cambridge provision',
   finalCTABadgeExamRef: 'Cambridge centres confirmed per family, per session',
 
-  heroImage: '/heroes/israel.jpg',
+  heroImage: '/online-virtual-school.png',
   heroEyebrow: 'Online school for Israel',
   heroH1Suffix: 'Israel',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for olim, high-tech, academic and Israeli families across Tel Aviv, Jerusalem, Haifa, Be\'er Sheva and the Sharon. Israel sits closer to our teaching clock than any country we serve — one hour behind in winter, exactly level in summer — so our entire teaching day is available to you.',
@@ -470,7 +465,7 @@ export const ISRAEL_COUNTRY = {
   ibDiplomaDelivery: 'Live online IB DP classes across all six subject groups plus Theory of Knowledge and Extended Essay supervision.',
   americanCurriculumSuits: 'Israel families targeting US universities via Common Application — a major destination given the size of the American olim community.',
   americanCurriculumDelivery: 'American Curriculum with AP courses Grades 9-12, SAT/ACT preparation, Common App essay coaching.',
-  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2019 to make international qualifications accessible to families at online-delivery fees rather than campus ones. Israel is the closest country to us on the clock of the eighty-nine we serve — one hour in winter and none at all in summer — which makes it the one market where a family can genuinely pick any hour of our teaching day that suits them.',
+  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2018 to make international qualifications accessible to families at online-delivery fees rather than campus ones. Israel is the closest country to us on the clock of the eighty-nine we serve — one hour in winter and none at all in summer — which makes it the one market where a family can genuinely pick any hour of our teaching day that suits them.',
   founderUniversitySpecialism: 'Alfred holds a BEd in Mathematics and Physics — Smartious\'s Cambridge A-Level and IB Diploma STEM subjects are led personally when needed, suiting Haifa\'s Technion-facing families, Be\'er Sheva\'s technology and cyber households, and Tel Aviv\'s start-up community. Head of Academics supervises curriculum delivery and university placement strategy per family.',
 
   competitorsIntro: 'Israel has a small number of long-established international schools — the Walworth Barbour American International School, the Anglican International School Jerusalem, Tabeetha School in Jaffa, the Eastern Mediterranean International School and the Jerusalem American International School — which is remarkably few for a country with this scale of English-speaking and French-speaking immigration and this size of technology sector. They are good, their places are limited, and they are concentrated in the centre and Jerusalem. Outside that, most international qualification demand is met through private tuition or not at all.',

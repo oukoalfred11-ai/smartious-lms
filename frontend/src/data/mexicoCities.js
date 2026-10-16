@@ -5,9 +5,9 @@
 // families across CDMX, Monterrey, Guadalajara, Querétaro and Cancún.
 // FIRST LATIN AMERICAN BUILD — 5 cities.
 //
-// IMAGE NOTE: heroImg / heroImage use LOCAL PATHS under /heroes/.
-// Drop a file at frontend/public/heroes/<slug>.jpg and it appears;
-// if absent the onError handler shows the ink→crimson gradient.
+// IMAGE NOTE: city pages have no heroImg (the hero falls back to the
+// ink→crimson gradient); the country hub uses /online-virtual-school.png.
+// To add a city photo, put it under frontend/public and set heroImg.
 //
 // TIMEZONE — THE HARDEST IN OUR ENTIRE COVERAGE. BE HONEST:
 // Mexico runs CST (UTC-6) across most of the country with no
@@ -77,7 +77,6 @@ export const MEXICO_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Mexico City',
     heroTagline: 'For CDMX families — Cambridge and IB taught live in the morning, which in Mexico is exactly when the vespertino students are free.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Mexico City families. CDMX is the corporate and financial capital of Latin America\'s second-largest economy, with one of the deepest international and IB school markets in the Americas — and fees to match. Under Article 3 of the Constitution education is compulsory through media superior, so a Mexican student is inside the system for longer than in most countries we serve, and our role is alongside a school rather than instead of one. One practical point we lead with rather than bury: we teach from Nairobi, nine hours ahead, so our classes land in the Mexican morning. For students in turno vespertino, that is precisely the free half of the day.',
-    heroImg: '/heroes/cdmx-mx.jpg',
     altTexts: { hero: 'Mexico City skyline' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Mexico City families — morning classes that fit the turno vespertino. From USD 423/month.',
     challenges: [
@@ -142,7 +141,6 @@ export const MEXICO_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Monterrey',
     heroTagline: 'For Monterrey and Nuevo León families — the nearshoring capital, where morning classes fit both the vespertino shift and an industrial working week.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Monterrey families. Monterrey is Mexico\'s industrial and corporate capital and the centre of the nearshoring boom — manufacturing groups, logistics along the border corridor, and a growing international workforce arriving with the investment, alongside Tec de Monterrey and one of the strongest private-school traditions in the country. Its international schools are good and priced accordingly. We teach in the Mexican morning from Nairobi, which suits students in turno vespertino and full-time learners alike, and we work alongside a school that holds RVOE rather than claiming to replace it.',
-    heroImg: '/heroes/monterrey-mx.jpg',
     altTexts: { hero: 'Monterrey and the Cerro de la Silla' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Monterrey and Nuevo León families — nearshoring capital, morning classes. From USD 423/month.',
     challenges: [
@@ -204,7 +202,6 @@ export const MEXICO_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Guadalajara',
     heroTagline: 'For Guadalajara and Jalisco families — Mexico\'s tech capital, where morning classes fit a remote-work household as neatly as a vespertino timetable.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Guadalajara families. Guadalajara is Mexico\'s technology capital — a software, semiconductor, and electronics cluster that has drawn global firms and a substantial international remote-work community, alongside a strong university and medical sector and, an hour south, the long-established expatriate belt around Lake Chapala. Its international schooling is decent and concentrated. We teach in the Mexican morning from Nairobi, which suits vespertino students and remote-work households alike, and we run alongside a school holding RVOE rather than claiming to replace it.',
-    heroImg: '/heroes/guadalajara-mx.jpg',
     altTexts: { hero: 'Guadalajara cathedral and the city' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Guadalajara and Jalisco families — tech capital, morning classes, Lake Chapala belt. From USD 423/month.',
     challenges: [
@@ -266,7 +263,6 @@ export const MEXICO_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Querétaro and the Bajío',
     heroTagline: 'For Querétaro, León and Bajío families — the corridor that builds cars and aircraft, with schools that arrived later than the plants.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for families across the Bajío corridor. Querétaro, Guanajuato, and Aguascalientes form Mexico\'s automotive and aerospace heartland — assembly plants and supplier parks, an aerospace cluster around Querétaro, and German, Japanese, and Korean manufacturing communities that arrived with the investment. It is among the fastest-growing regions in the country, and its international schooling has not kept pace with the plants. Smartious delivers Cambridge and IB live in the Mexican morning, alongside a school holding RVOE — the same corridor logic our Slovak, Hungarian, and Serbian plant-city pages run.',
-    heroImg: '/heroes/queretaro-mx.jpg',
     altTexts: { hero: 'Querétaro and the Bajío corridor' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Querétaro, León and Bajío families — automotive and aerospace corridor. From USD 423/month.',
     challenges: [
@@ -328,7 +324,6 @@ export const MEXICO_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Cancún and the Riviera Maya',
     heroTagline: 'For Cancún, Playa del Carmen and Tulum families — the coast the world moved to, with schooling that never caught up.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for families across the Riviera Maya. Quintana Roo has changed faster than almost anywhere in Mexico: Cancún\'s tourism economy, Playa del Carmen and Tulum\'s remote-work and second-home communities, and an international resident population — American, Canadian, European, Argentine — that has grown far quicker than the schools serving it. Add a hospitality season that runs most of the year and a geography strung along a coast, and the schooling problem is both a supply problem and a logistics one. We teach live in the Mexican morning, which suits a household working the season and a vespertino timetable alike.',
-    heroImg: '/heroes/cancun-mx.jpg',
     altTexts: { hero: 'The Riviera Maya coast' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Cancún, Playa del Carmen and Tulum families — international residents, thin schooling. From USD 423/month.',
     challenges: [
@@ -414,7 +409,7 @@ export const MEXICO_COUNTRY = {
   secondaryProgrammeExamRef: 'Authorised Mexican Cambridge provision',
   finalCTABadgeExamRef: 'Cambridge centres confirmed per family, per session',
 
-  heroImage: '/heroes/mexico.jpg',
+  heroImage: '/online-virtual-school.png',
   heroEyebrow: 'Online school for Mexico',
   heroH1Suffix: 'Mexico',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for corporate, industrial, expatriate, and Mexican families across Mexico City, Monterrey, Guadalajara, the Bajío, and the Riviera Maya. We teach from Nairobi, nine hours ahead — so our classes land in the Mexican morning, which is exactly the free half of the day for students in turno vespertino. Education is compulsory through media superior, so we work alongside your school, not instead of it.',
@@ -425,7 +420,7 @@ export const MEXICO_COUNTRY = {
   citiesSectionBody: 'Smartious Mexico families concentrate across Mexico City (the corporate capital, one of the deepest international and IB school markets in the Americas, priced accordingly), Monterrey (the industrial capital and the centre of the nearshoring boom), Guadalajara (the technology capital, with a large remote-work community and the Lake Chapala belt nearby), Querétaro and the Bajío (the automotive and aerospace corridor with German, Japanese, and Korean manufacturing communities), and Cancún and the Riviera Maya (an international resident population growing far faster than its schools). One long compulsory range, one morning teaching window, and a school system built around shifts that happens to fit it.',
 
   trustSignals: [
-    { h: 'An African school teaching Mexican families', p: 'Smartious was founded in Nairobi in 2019 and teaches from two operational centres established 2022 and 2023, serving students in 67 countries. Mexico is among the furthest from us on the clock, and we plan around that openly rather than pretending it does not matter.' },
+    { h: 'An African school teaching Mexican families', p: 'Smartious was founded in Nairobi in 2018 and teaches from two operational centres established 2022 and 2023, serving families in 40+ countries. Mexico is among the furthest from us on the clock, and we plan around that openly rather than pretending it does not matter.' },
     { h: 'Morning teaching, and why it fits Mexico', p: 'We are nine hours ahead, so our classes land in the Mexican morning rather than the afternoon. Mexican schools very commonly run turno matutino and turno vespertino — and for a student on the afternoon shift, our block is precisely the free half of the day.' },
     { h: 'The compulsory range stated properly', p: 'Article 3 of the Constitution makes education compulsory through educación media superior. That is a longer range than most countries we serve, and it means Mexico has no post-compulsory window before eighteen — we do not invent one.' },
     { h: 'What we are, stated plainly', p: 'Private schools in Mexico require RVOE for their studies to carry official validity. Smartious does not hold RVOE and is not a Mexican school with official validity — we work alongside one that is.' },
@@ -440,7 +435,7 @@ export const MEXICO_COUNTRY = {
   ibDiplomaDelivery: 'Live online IB DP classes across all six subject groups plus Theory of Knowledge and Extended Essay supervision.',
   americanCurriculumSuits: 'Mexico families targeting US universities via Common Application — the single most common overseas destination for Mexican students.',
   americanCurriculumDelivery: 'American Curriculum with AP courses Grades 9-12, SAT/ACT preparation, Common App essay coaching.',
-  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2019 to make international qualifications accessible to families at online-delivery fees rather than campus ones. Mexico is our first Latin American market and among the furthest from us on the clock — which is why our Mexican timetable is built around the country\'s own shift system rather than around ours.',
+  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2018 to make international qualifications accessible to families at online-delivery fees rather than campus ones. Mexico is our first Latin American market and among the furthest from us on the clock — which is why our Mexican timetable is built around the country\'s own shift system rather than around ours.',
   founderUniversitySpecialism: 'Alfred holds a BEd in Mathematics and Physics — Smartious\'s Cambridge A-Level and IB Diploma STEM subjects are led personally when needed, suiting the Bajío\'s automotive and aerospace families and Guadalajara\'s technology households. Head of Academics supervises curriculum delivery and university placement strategy per family.',
 
   competitorsIntro: 'Mexico has one of the largest and best-established international school markets in the Americas — the American Schools in CDMX, Monterrey and Guadalajara, the British-founded schools, the German, French and Japanese schools, and one of the biggest IB communities in Latin America. These are strong institutions and we do not pretend otherwise. Two gaps are real: the fees, which put the tier out of reach for most Mexican professional families; and the comparative scarcity of Cambridge A-Levels in a market dominated by the IB and the US curriculum, which matters for anyone applying through UCAS.',

@@ -494,7 +494,7 @@ export const OMAN_COUNTRY = {
   ibDiplomaDelivery: 'Live online IB DP classes across all six subject groups plus Theory of Knowledge and Extended Essay supervision.',
   americanCurriculumSuits: 'Omani and expat families targeting US universities via Common Application, plus TAISM (only US Embassy sponsored school in Oman) alternative. AP portfolio strengthens US applications; SAT/ACT preparation integrated.',
   americanCurriculumDelivery: 'American Curriculum with AP courses Grades 9-12, SAT/ACT preparation, Common App essay coaching.',
-  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in 2019 to make international qualifications (Cambridge, IB, American, Ontario OSSD) accessible to families across emerging markets at online-delivery fees. Omani and expat families in Oman join students in 16 other countries — from Muscat MSQ to Kuwait City Sharq, Istanbul Bebek to Cairo Zamalek, Dubai Downtown to Kuala Lumpur Mont Kiara.',
+  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2018 to make international qualifications (Cambridge, IB, American, Ontario OSSD) accessible to families across emerging markets at online-delivery fees. Omani and expat families in Oman join students in 40+ countries — from Muscat MSQ to Kuwait City Sharq, Istanbul Bebek to Cairo Zamalek, Dubai Downtown to Kuala Lumpur Mont Kiara.',
   founderUniversitySpecialism: 'Alfred holds a BEd in Mathematics and Physics — Smartious\'s Cambridge A-Level and IB Diploma STEM subjects are led personally when needed. Head of Academics supervises curriculum delivery and university placement strategy per family.',
 
   // ── Competitors ───────────────────────────────────────────────

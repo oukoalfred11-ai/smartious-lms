@@ -5,9 +5,9 @@
 // families across Algiers, Oran, and Hassi Messaoud.
 // NORTH AFRICA BUILD — 3 cities.
 //
-// IMAGE NOTE: heroImg / heroImage use LOCAL PATHS under /heroes/.
-// Drop a file at frontend/public/heroes/<slug>.jpg and it appears;
-// if absent the onError handler shows the ink→crimson gradient.
+// IMAGE NOTE: city pages have no heroImg (the hero falls back to the
+// ink→crimson gradient); the country hub uses /online-virtual-school.png.
+// To add a city photo, put it under frontend/public and set heroImg.
 // Do NOT paste guessed stock-photo IDs.
 //
 // LEGAL POSITIONING NOTE — READ BEFORE EDITING:
@@ -73,7 +73,6 @@ export const ALGERIA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Algiers',
     heroTagline: 'For Algiers families — the Cambridge route the capital has never had, taught live and landing in your afternoon.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Algiers families. Algiers carries Algeria\'s corporate and administrative weight — Sonatrach and the hydrocarbon sector\'s head offices, the ministries, the diplomatic and international-organisation community, and a professional class with long ties to France. Its international schooling is almost entirely the French system, anchored by the Lycée International Alexandre Dumas at Ben Aknoun, and demand for those places substantially exceeds supply. What the capital has never had is a British-curriculum route. Under the Loi d\'orientation of 2008 schooling is free and compulsory to sixteen, so our clean default is supplementary: your enrolment carries that duty, and we teach the Cambridge or IB track live alongside it.',
-    heroImg: '/heroes/algiers-dz.jpg',
     altTexts: { hero: 'Algiers and the bay' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Algiers families — the British-curriculum route the capital lacks, supplementary beside your school. From USD 423/month.',
     challenges: [
@@ -108,7 +107,7 @@ export const ALGERIA_CITIES = [
       ['The British route the capital does not have', 'Algiers is a French-system city with a long waitlist and no real Cambridge alternative. That gap is the whole reason we are here.'],
       ['French alongside the English-medium core', 'In a country with one of the largest francophone populations in the world, Cambridge French sits naturally beside the academic track — and keeps French university options open.'],
       ['A fixed offset, all year', 'Algeria runs CET with no daylight saving and Kenya observes none either, so our teaching hours sit at a constant two-hour offset with no seasonal drift.'],
-      ['An African school teaching African families', 'Smartious is Nairobi-built and Nairobi-taught, serving families in 53 countries — not a European provider reaching in.'],
+      ['An African school teaching African families', 'Smartious is Nairobi-built and Nairobi-taught, serving families in 40+ countries — not a European provider reaching in.'],
       ['The law stated before anything is sold', 'Schooling is free and compulsory to sixteen under the Loi d\'orientation of 2008; we run supplementary alongside your school and send you to the Ministère for anything else.'],
     ],
     growingReason: 'Algiers holds Sonatrach and the hydrocarbon sector\'s corporate centre, the ministries, and the diplomatic community, with international schooling almost entirely French-system and heavily oversubscribed — and no British-curriculum route at all. Algeria runs CET (UTC+1) with no daylight saving, a fixed two-hour offset behind Nairobi EAT.',
@@ -138,7 +137,6 @@ export const ALGERIA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Oran',
     heroTagline: 'For Oran and western Algerian families — the petrochemical west, four hundred kilometres from the capital\'s only international schools.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Oran families. Oran is Algeria\'s second city and the capital of its west — the Arzew petrochemical and LNG complex sits along the coast beside it, the port handles a substantial share of national trade, and the university and its medical faculty draw students from across the region. The city\'s Mediterranean orientation and its Spanish and French connections have always been part of its character. What it does not have is international schooling of any depth: the capital\'s provision is four hundred kilometres east. Smartious delivers the Cambridge and IB pathways live across the west, supplementary alongside your school enrolment.',
-    heroImg: '/heroes/oran-dz.jpg',
     altTexts: { hero: 'Oran and the Mediterranean coast' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Oran and western Algeria families — petrochemical west, no international schooling. From USD 423/month.',
     challenges: [
@@ -200,7 +198,6 @@ export const ALGERIA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Hassi Messaoud',
     heroTagline: 'For Hassi Messaoud and southern field families — Algeria\'s oil capital, staffed from four continents and schooled from none of them.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for families across Algeria\'s southern hydrocarbon fields. Hassi Messaoud is Algeria\'s oil capital — the country\'s largest field, with Sonatrach and the international oilfield-services companies operating alongside it, and the Hassi R\'Mel gas complex and the southern fields spread across the Sahara around it. The technical workforce is drawn from four continents and works rotations; the nearest international schooling is around eight hundred kilometres north in Algiers. For decades the answer has been families living apart, or children boarding abroad. Smartious delivers the international pathways live to the fields instead, at a fixed two-hour offset that never drifts.',
-    heroImg: '/heroes/hassi-messaoud-dz.jpg',
     altTexts: { hero: 'The Algerian Sahara and the southern oilfields' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Hassi Messaoud, Ouargla and southern field families — oil capital, no schooling within 800km. From USD 423/month.',
     challenges: [
@@ -287,7 +284,7 @@ export const ALGERIA_COUNTRY = {
   secondaryProgrammeExamRef: 'Authorised Algiers and regional provision',
   finalCTABadgeExamRef: 'Cambridge centres confirmed per family, per session',
 
-  heroImage: '/heroes/algeria.jpg',
+  heroImage: '/online-virtual-school.png',
   heroEyebrow: 'Online school for Algeria',
   heroH1Suffix: 'Algeria',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for hydrocarbon, corporate, diaspora, and Algerian families across Algiers, Oran, and Hassi Messaoud. International schooling here is almost entirely the French system and heavily oversubscribed — the British-curriculum route simply does not exist locally. Taught live from Nairobi at a fixed two-hour offset that never drifts.',
@@ -298,7 +295,7 @@ export const ALGERIA_COUNTRY = {
   citiesSectionBody: 'Smartious Algeria families concentrate across Algiers (Sonatrach and the hydrocarbon corporate sector, the ministries, the diplomatic community, and the oversubscribed French lycée system), Oran (the Arzew petrochemical and LNG complex, the port, and a major university and medical faculty, four hundred kilometres from the capital), and Hassi Messaoud and the southern fields (Algeria\'s oil capital, staffed from four continents and around eight hundred kilometres from any international school). One compulsory framework, one supplementary configuration, and a British route the country has never had.',
 
   trustSignals: [
-    { h: 'An African school teaching African families', p: 'Smartious was founded in Nairobi in 2019 and teaches from two operational centres established 2022 and 2023 — an African school with international accreditation, serving students in 53 countries, not a European provider reaching in.' },
+    { h: 'An African school teaching African families', p: 'Smartious was founded in Nairobi in 2018 and teaches from two operational centres established 2022 and 2023 — an African school with international accreditation, serving families in 40+ countries, not a European provider reaching in.' },
     { h: 'A fixed offset that never drifts', p: 'Algeria runs CET (UTC+1) with no daylight saving and Kenya runs EAT (UTC+3) with none either. The two-hour gap is constant every week of the year, so class times are the same in January as in July.' },
     { h: 'The route the country does not have', p: 'International schooling in Algeria is overwhelmingly the French system and heavily oversubscribed. A British or Cambridge pathway is scarce to non-existent — which is precisely the gap live delivery fills.' },
     { h: 'The law stated before anything is sold', p: 'Schooling is free and compulsory to sixteen under the Loi d\'orientation n° 08-04 of 2008. We are not aware of an established parental home-education route and say so in those terms, pointing families to the Ministère de l\'Éducation nationale.' },
@@ -313,7 +310,7 @@ export const ALGERIA_COUNTRY = {
   ibDiplomaDelivery: 'Live online IB DP classes across all six subject groups plus Theory of Knowledge and Extended Essay supervision.',
   americanCurriculumSuits: 'Algeria families targeting American or Canadian universities via Common Application.',
   americanCurriculumDelivery: 'American Curriculum with AP courses Grades 9-12, SAT/ACT preparation, Common App essay coaching.',
-  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2019 to make international qualifications accessible to African and internationally mobile families at online-delivery fees rather than campus ones. Algeria families join students in 53 other countries — from Hassi Messaoud to Nairobi\'s own Diamond Plaza HQ, the Sahara to the Mediterranean.',
+  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2018 to make international qualifications accessible to African and internationally mobile families at online-delivery fees rather than campus ones. Algeria families join students in 40+ countries — from Hassi Messaoud to Nairobi\'s own Diamond Plaza HQ, the Sahara to the Mediterranean.',
   founderUniversitySpecialism: 'Alfred holds a BEd in Mathematics and Physics — Smartious\'s Cambridge A-Level and IB Diploma STEM subjects are led personally when needed, suiting the southern fields\' petroleum-engineering families and Oran\'s petrochemical and medical households. Head of Academics supervises curriculum delivery and university placement strategy per family.',
 
   competitorsIntro: 'Algeria\'s international schooling is a French-system story concentrated in Algiers, and the anchor institution is good and heavily oversubscribed. Outside the capital the picture thins to almost nothing, and in the southern hydrocarbon fields there is nothing at all. What is missing everywhere, including in Algiers, is a British or Cambridge route — which makes the competitive space here unusually clear, because we are not competing with an existing provider so much as filling an absence.',
@@ -343,7 +340,7 @@ export const ALGERIA_COUNTRY = {
     { h: 'A fixed offset that never drifts',                                p: 'Neither Algeria nor Kenya observes daylight saving, so the two-hour gap is constant — class times are identical in January and July.' },
     { h: 'The southern fields reached at last',                             p: 'Hassi Messaoud is around eight hundred kilometres from any international school. Live teaching reaches the field, and travels to the next posting.' },
     { h: 'Careful where the law is not fully evidenced',                    p: 'We say "not established" and name the Ministère rather than asserting a prohibition we cannot document — and we do not dress up the distance-education body or independent-candidate rules as homeschooling routes.' },
-    { h: 'An African school teaching African families',                     p: 'Nairobi-built and Nairobi-taught, serving 53 countries, working to African calendars and examination realities.' },
+    { h: 'An African school teaching African families',                     p: 'Nairobi-built and Nairobi-taught, serving families in 40+ countries, working to African calendars and examination realities.' },
   ],
 
   faqs: [

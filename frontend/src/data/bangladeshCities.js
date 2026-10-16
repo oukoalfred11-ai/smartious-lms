@@ -6,9 +6,9 @@
 // Sylhet, Khulna and Rajshahi.
 // FIRST SOUTH ASIA MAINLAND BUILD — 5 cities.
 //
-// IMAGE NOTE: heroImg / heroImage use LOCAL PATHS under /heroes/.
-// Drop a file at frontend/public/heroes/<slug>.jpg and it appears;
-// if absent the onError handler shows the ink→crimson gradient.
+// IMAGE NOTE: city pages have no heroImg (the hero falls back to the
+// ink→crimson gradient); the country hub uses /online-virtual-school.png.
+// To add a city photo, put it under frontend/public and set heroImg.
 //
 // *** MARKET FRAMING — READ FIRST ***
 // Cambridge is NOT novel in Bangladesh. The English-medium school
@@ -76,7 +76,6 @@ export const BANGLADESH_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Dhaka',
     heroTagline: 'For Dhaka families — Cambridge is already familiar here. What is scarce is a specialist for the subject your school cannot run.',
     intro: 'Live online Cambridge O-Level and IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Dhaka families. Cambridge needs no introduction in this city — the English-medium sector has run O-Levels and A-Levels for decades and families here understand the qualifications as well as anywhere we teach. What we add is narrower: a subject specialist for the A-Level sets a single school timetable cannot sustain, a fee below the strongest schools, and a place without a queue. And Bangladesh sits three hours ahead of our teaching base, so after-school classes land squarely in our day.',
-    heroImg: '/heroes/dhaka-bd.jpg',
     altTexts: { hero: 'Dhaka' },
     seoDesc: 'Live online Cambridge O-Level, IGCSE, A-Level, Pearson Edexcel, IB and AP for Dhaka families — subject specialists and after-school classes that fit. From USD 423/month.',
     challenges: [
@@ -141,7 +140,6 @@ export const BANGLADESH_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Chattogram',
     heroTagline: 'For Chattogram families — the country\'s port and industrial engine, with a fraction of Dhaka\'s school list.',
     intro: 'Live online Cambridge O-Level and IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Chattogram families. The port city moves most of Bangladesh\'s trade and hosts the export processing zones, the shipping and shipbreaking industries and a commercial community with a long mercantile tradition. It is the country\'s second city by some distance, and its English-medium school list is a fraction of Dhaka\'s three hundred kilometres north. The constraint here is availability rather than curriculum, and live delivery answers it in after-school hours that fit our teaching day.',
-    heroImg: '/heroes/chattogram-bd.jpg',
     altTexts: { hero: 'Chattogram port' },
     seoDesc: 'Live online Cambridge O-Level, IGCSE, A-Level, Pearson Edexcel, IB and AP for Chattogram families — port and industrial city, short school list. From USD 423/month.',
     challenges: [
@@ -203,7 +201,6 @@ export const BANGLADESH_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Sylhet',
     heroTagline: 'For Sylhet families — more UK family ties per household than anywhere in Bangladesh, and a qualification UCAS reads natively.',
     intro: 'Live online Cambridge O-Level and IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Sylhet families. Sylhet has a connection to Britain unlike anywhere else in Bangladesh — the British Bangladeshi community is overwhelmingly of Sylheti origin, and family ties across generations run through almost every household here. That makes one thing worth more in Sylhet than in most cities we serve: a qualification UCAS reads natively. Cambridge A-Levels are the record British admissions expects, requiring no conversion and no equivalence assessment. Alongside that sit the tea gardens, the remittance economy and a growing but still short English-medium school list.',
-    heroImg: '/heroes/sylhet-bd.jpg',
     altTexts: { hero: 'Sylhet tea gardens' },
     seoDesc: 'Live online Cambridge O-Level, IGCSE, A-Level, Pearson Edexcel, IB and AP for Sylhet families — a UCAS-native qualification for a city with deep UK ties. From USD 423/month.',
     challenges: [
@@ -266,7 +263,6 @@ export const BANGLADESH_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Khulna',
     heroTagline: 'For Khulna and south-western families — ports, shrimp, jute and the Sundarbans, with almost no English-medium schooling.',
     intro: 'Live online Cambridge O-Level and IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Khulna and south-western families. The region anchors Mongla port, the shrimp aquaculture and jute processing industries that export worldwide, and the Sundarbans with the research and conservation work that surrounds it. It is a substantial regional economy and English-medium provision here is very limited, with Dhaka a long way north-east. Live delivery reaches the south-west identically, in after-school hours that land squarely in our teaching day.',
-    heroImg: '/heroes/khulna-bd.jpg',
     altTexts: { hero: 'Khulna and the Sundarbans delta' },
     seoDesc: 'Live online Cambridge O-Level, IGCSE, A-Level, Pearson Edexcel, IB and AP for Khulna and south-western Bangladesh families — ports and aquaculture, minimal provision. From USD 423/month.',
     challenges: [
@@ -328,7 +324,6 @@ export const BANGLADESH_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Rajshahi',
     heroTagline: 'For Rajshahi and northern families — a university and medical city with high ambition and a short English-medium list.',
     intro: 'Live online Cambridge O-Level and IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Rajshahi and northern families. The north holds the university city and its strong academic and medical tradition, alongside the silk weaving industry and the mango and agricultural belt that runs through the region. Academic ambition here is high — Rajshahi produces doctors, engineers and academics in numbers — and English-medium provision is thin across a wide region, with Dhaka a considerable journey south-east. Live delivery reaches the north identically, in after-school hours that fit our teaching day.',
-    heroImg: '/heroes/rajshahi-bd.jpg',
     altTexts: { hero: 'Rajshahi and the northern belt' },
     seoDesc: 'Live online Cambridge O-Level, IGCSE, A-Level, Pearson Edexcel, IB and AP for Rajshahi and northern Bangladesh families — a university city with thin provision. From USD 423/month.',
     challenges: [
@@ -414,7 +409,7 @@ export const BANGLADESH_COUNTRY = {
   secondaryProgrammeExamRef: 'Authorised Bangladeshi Cambridge provision',
   finalCTABadgeExamRef: 'Cambridge centres confirmed per family, per session',
 
-  heroImage: '/heroes/bangladesh.jpg',
+  heroImage: '/online-virtual-school.png',
   heroEyebrow: 'Online school for Bangladesh',
   heroH1Suffix: 'Bangladesh',
   heroSubhead: 'Live online Cambridge O-Level, IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for English-medium, professional and Bangladeshi families across Dhaka, Chattogram, Sylhet, Khulna and Rajshahi. Cambridge is already well established here, so we are not introducing a curriculum — we supply subject specialists, in after-school hours that land squarely in our teaching day.',
@@ -440,7 +435,7 @@ export const BANGLADESH_COUNTRY = {
   ibDiplomaDelivery: 'Live online IB DP classes across all six subject groups plus Theory of Knowledge and Extended Essay supervision.',
   americanCurriculumSuits: 'Bangladesh families targeting American universities via Common Application.',
   americanCurriculumDelivery: 'American Curriculum with AP courses Grades 9-12, SAT/ACT preparation, Common App essay coaching.',
-  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2019 to make international qualifications accessible to families at online-delivery fees rather than campus ones. Bangladesh is a market where Cambridge arrived long before we did and is thoroughly understood — which makes our role clear and narrow: we supply the subject specialist, not the curriculum.',
+  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2018 to make international qualifications accessible to families at online-delivery fees rather than campus ones. Bangladesh is a market where Cambridge arrived long before we did and is thoroughly understood — which makes our role clear and narrow: we supply the subject specialist, not the curriculum.',
   founderUniversitySpecialism: 'Alfred holds a BEd in Mathematics and Physics — Smartious\'s Cambridge A-Level and IB Diploma STEM subjects are led personally when needed, suiting Chattogram\'s engineering households and every medicine-bound student in Rajshahi and Dhaka. Head of Academics supervises curriculum delivery and university placement strategy per family.',
 
   competitorsIntro: 'Bangladesh has a very large and long-established English-medium school sector — Scholastica, Sunbeams, South Breeze, Maple Leaf, the Aga Khan Academy, International School Dhaka and American International School Dhaka among many others — running Cambridge O-Level, IGCSE, A-Level, Edexcel and IB. Those are serious institutions and the curriculum is thoroughly understood here. The gaps are specific: specialist A-Level sets that will not run for four students, fees at the top of the sector, and a school map that thins sharply outside Dhaka.',

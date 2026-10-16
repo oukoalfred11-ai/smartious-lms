@@ -5,9 +5,9 @@
 // families across Caracas, Maracaibo, Valencia, Puerto Ordaz and Mérida.
 // FIFTEENTH LATIN AMERICAN BUILD — 5 cities.
 //
-// IMAGE NOTE: heroImg / heroImage use LOCAL PATHS under /heroes/.
-// Drop a file at frontend/public/heroes/<slug>.jpg and it appears;
-// if absent the onError handler shows the ink→crimson gradient.
+// IMAGE NOTE: city pages have no heroImg (the hero falls back to the
+// ink→crimson gradient); the country hub uses /online-virtual-school.png.
+// To add a city photo, put it under frontend/public and set heroImg.
 //
 // *** TONE RULE — READ BEFORE EDITING ANYTHING ***
 // Venezuela has been through a great deal and many of our readers here
@@ -74,7 +74,6 @@ export const VENEZUELA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Caracas',
     heroTagline: 'For Caracas families — Cambridge and IB taught live, in USD, with a record that reads anywhere your family already is.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Caracas families. The capital holds Venezuela\'s corporate and professional centre, the diplomatic community, and a long-established international school tier — the Colegio Internacional de Caracas, Escuela Campo Alegre, the British, French and German schools — with IB and American provision behind it. Many Caracas families now have members living in Spain, the United States, Colombia, Chile, Panama or Portugal, and an internationally examined qualification is read directly in all of them. We quote in USD, which removes the planning question entirely.',
-    heroImg: '/heroes/caracas-ve.jpg',
     altTexts: { hero: 'Caracas and El Ávila' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Caracas families — fees in USD, a qualification read in every country your family is in. From USD 423/month.',
     challenges: [
@@ -139,7 +138,6 @@ export const VENEZUELA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Maracaibo',
     heroTagline: 'For Maracaibo and Zulia families — a century of petroleum engineering, and a qualification that travels with the profession.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Maracaibo and Zulia families. Lake Maracaibo has been the centre of Venezuelan petroleum since the 1920s, and the region built one of the most experienced petroleum engineering and geoscience communities in the Americas around it, alongside a strong regional university sector and the corridor to the Colombian border. It is a profession that has always been internationally mobile, and Cambridge A-Level Physics, Chemistry and Mathematics is the spine it runs on. We teach live to Zulia in the Venezuelan morning, in USD.',
-    heroImg: '/heroes/maracaibo-ve.jpg',
     altTexts: { hero: 'Lake Maracaibo and the bridge' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Maracaibo and Zulia families — petroleum engineering heartland, fees in USD. From USD 423/month.',
     challenges: [
@@ -201,7 +199,6 @@ export const VENEZUELA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Valencia Venezuela',
     heroTagline: 'For Valencia and Carabobo families — Venezuela\'s manufacturing belt and its principal port, with an engineering tradition worth building on.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Valencia and Carabobo families. Carabobo built Venezuela\'s industrial heartland — automotive assembly, chemicals, food processing and manufacturing — alongside Puerto Cabello, the country\'s principal port, and a strong regional university and medical sector. The engineering and commercial tradition here is deep, and the qualification that carries it furthest is one universities abroad read directly. We teach Cambridge and IB live to Carabobo in the Venezuelan morning, in USD.',
-    heroImg: '/heroes/valencia-ve.jpg',
     altTexts: { hero: 'Valencia and the Carabobo valley' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Valencia and Carabobo families — the industrial belt and Puerto Cabello. From USD 423/month.',
     challenges: [
@@ -263,7 +260,6 @@ export const VENEZUELA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Puerto Ordaz',
     heroTagline: 'For Puerto Ordaz and Guayana families — iron, steel and aluminium on the Orinoco, and an engineering tradition that reads anywhere.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Ciudad Guayana families. The Orinoco industrial complex at Puerto Ordaz and San Félix was built around the Guayana shield\'s iron ore and bauxite — steel, aluminium and the Guri hydroelectric project that powers them — producing a metallurgical and industrial engineering community with few equivalents in the region, and the corridor running south toward the Brazilian border. Caracas is a long way north. We teach Cambridge and IB live to Guayana in the Venezuelan morning.',
-    heroImg: '/heroes/puerto-ordaz-ve.jpg',
     altTexts: { hero: 'The Orinoco and Caroní confluence at Puerto Ordaz' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Puerto Ordaz and Ciudad Guayana families — the Orinoco heavy-industry belt. From USD 423/month.',
     challenges: [
@@ -325,7 +321,6 @@ export const VENEZUELA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Mérida Venezuela',
     heroTagline: 'For Mérida and Andean families — one of Latin America\'s notable university cities, with an academic tradition worth carrying abroad.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Mérida and Andean families. Mérida is one of Latin America\'s notable university cities — the Universidad de Los Andes has shaped it for two centuries, giving the highlands an academic and research culture that few regional cities match — alongside highland agriculture, coffee, and the corridor to the Colombian border at San Cristóbal. Academic families here aim high, and a qualification that foreign universities read directly is the practical way to carry that ambition. We teach live to the Andes in the Venezuelan morning.',
-    heroImg: '/heroes/merida-ve.jpg',
     altTexts: { hero: 'Mérida and the Venezuelan Andes' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Mérida and Andean Venezuela families — a university city with international ambitions. From USD 423/month.',
     challenges: [
@@ -411,7 +406,7 @@ export const VENEZUELA_COUNTRY = {
   secondaryProgrammeExamRef: 'Authorised Cambridge provision, planned per family',
   finalCTABadgeExamRef: 'Examination arrangements planned individually, well ahead',
 
-  heroImage: '/heroes/venezuela.jpg',
+  heroImage: '/online-virtual-school.png',
   heroEyebrow: 'Online school for Venezuela',
   heroH1Suffix: 'Venezuela',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for professional, energy, industrial, and Venezuelan families across Caracas, Maracaibo, Valencia, Ciudad Guayana and Mérida. Fees quoted in USD, a qualification read directly in every country your family may already have ties to, and honest about the one legal question we could not verify.',
@@ -437,7 +432,7 @@ export const VENEZUELA_COUNTRY = {
   ibDiplomaDelivery: 'Live online IB DP classes across all six subject groups plus Theory of Knowledge and Extended Essay supervision.',
   americanCurriculumSuits: 'Venezuela families targeting US universities via Common Application.',
   americanCurriculumDelivery: 'American Curriculum with AP courses Grades 9-12, SAT/ACT preparation, Common App essay coaching.',
-  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2019 to make international qualifications accessible to families at online-delivery fees rather than campus ones. Venezuela has one of the strongest academic traditions in the region and a great many families with relatives in several countries — which makes a qualification read directly everywhere worth more here than almost anywhere we teach.',
+  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2018 to make international qualifications accessible to families at online-delivery fees rather than campus ones. Venezuela has one of the strongest academic traditions in the region and a great many families with relatives in several countries — which makes a qualification read directly everywhere worth more here than almost anywhere we teach.',
   founderUniversitySpecialism: 'Alfred holds a BEd in Mathematics and Physics — Smartious\'s Cambridge A-Level and IB Diploma STEM subjects are led personally when needed, suiting Zulia\'s petroleum engineering families, Guayana\'s metallurgical households, and every medicine-bound student in Mérida, Valencia and Caracas. Head of Academics supervises curriculum delivery and university placement strategy per family.',
 
   competitorsIntro: 'Venezuela built one of the strongest international school traditions in the region — the Colegio Internacional de Caracas, Escuela Campo Alegre, the British, French and German schools — and a national university system with a long and distinguished history. Provision is concentrated in Caracas, and outside it international options are limited relative to the industrial and academic depth of Zulia, Carabobo, Guayana and the Andes. The most common reason families come to us is not a shortage of good teaching but the need for a qualification that reads directly in whichever country their children ultimately study.',

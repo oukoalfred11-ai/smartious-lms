@@ -569,7 +569,7 @@ export const MALAYSIA_COUNTRY = {
   ibDiplomaDelivery: 'Live online IB DP classes across all six subject groups plus Theory of Knowledge and Extended Essay supervision.',
   americanCurriculumSuits: 'Malaysian families targeting US universities via Common Application. AP portfolio strengthens US applications; SAT/ACT preparation integrated.',
   americanCurriculumDelivery: 'American Curriculum with AP courses Grades 9-12, SAT/ACT preparation, Common App essay coaching.',
-  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in 2019 to make international qualifications (Cambridge, IB, American, Ontario OSSD) accessible to families across emerging markets at online-delivery fees. Malaysian families join students in 13 other countries — from Kuala Lumpur Mont Kiara to Cairo Zamalek, Tokyo Setagaya to Dubai Downtown, Ho Chi Minh City District 2 to Casablanca Ain Diab.',
+  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2018 to make international qualifications (Cambridge, IB, American, Ontario OSSD) accessible to families across emerging markets at online-delivery fees. Malaysian families join students in 40+ countries — from Kuala Lumpur Mont Kiara to Cairo Zamalek, Tokyo Setagaya to Dubai Downtown, Ho Chi Minh City District 2 to Casablanca Ain Diab.',
   founderUniversitySpecialism: 'Alfred holds a BEd in Mathematics and Physics — Smartious\'s Cambridge A-Level and IB Diploma STEM subjects are led personally when needed. Head of Academics supervises curriculum delivery and university placement strategy per family.',
 
   // ── Competitors ───────────────────────────────────────────────

@@ -75,7 +75,7 @@ export const KENYA_CITIES = [
       { q: 'What happens if a session is cancelled?', a: 'With 24+ hours notice, sessions can be rescheduled without charge. Within 24 hours, we attempt to reschedule but may charge 50% of the session fee if the tutor cannot be redeployed. Teacher-side cancellations are always rescheduled at no charge with priority slots offered.' },
       { q: 'Do you offer assessments for placement into international schools?', a: 'Yes — Smartious offers placement assessments for families considering international schools in Mombasa (Aga Khan Academy Mombasa entrance, Light International School entrance, Braeburn Mombasa entrance) or for Nairobi international schools if the family is relocating. These are typically completed within 2 weeks and provide a structured academic profile.' },
       { q: 'Is there a free trial available?', a: 'We offer a free 30-minute consultation call with our Admissions Coordinator to discuss your child\'s situation and recommended Smartious services. We don\'t typically offer free trial lessons — our placement test (USD 38 fee, deducted from your first tuition invoice) serves the equivalent function of giving you a structured assessment of fit before commitment.' },
-      { q: 'How do I contact Smartious from Mombasa?', a: 'WhatsApp +254 745 021 212 is the fastest channel — typical response within 1 hour during working hours. Email hellosmartious@gmail.com. Phone +254 745 021 212. Our admissions team responds in English, Kiswahili and Hindi/Urdu for South Asian families.' },
+      { q: 'How do I contact Smartious from Mombasa?', a: 'WhatsApp +254 745 021 212 is the fastest channel — typical response within 1 hour during working hours. Email hello@smartioushomeschool.com. Phone +254 745 021 212. Our admissions team responds in English, Kiswahili and Hindi/Urdu for South Asian families.' },
       { q: 'What\'s the difference between Smartious homeschool and supplementary tutoring?', a: 'Full homeschool means Smartious is your child\'s primary school — we provide curriculum, timetable, assessments, reports and examination preparation, with your child not attending any other school. Supplementary tutoring means your child remains at their current school and Smartious provides additional 1-on-1 sessions in specific subjects to strengthen performance. Many Mombasa families use supplementary tutoring; some switch to full homeschool for greater flexibility.' },
     ],
     keywords: ['homeschooling Mombasa', 'home tuition Mombasa', 'online tuition Mombasa', 'IGCSE tutors Mombasa', 'IB tutor Mombasa', 'A-Level tutor Mombasa', 'CBC tutor Mombasa', 'KCSE tuition Mombasa', 'Aga Khan Academy Mombasa tutor', 'Mombasa private tutor'],
@@ -156,7 +156,7 @@ export const KENYA_CITIES = [
       { q: 'Can I observe my child\'s Smartious sessions?', a: 'Yes — parents are welcome to join sessions or observe via the LMS. We also send weekly progress reports summarising what was covered, your child\'s engagement, and recommended focus areas for the following week.' },
       { q: 'What happens if my child needs to pause Smartious tuition?', a: 'You can pause hourly tuition at any time with no penalty. Full homeschool programmes are paid termly and are non-refundable once the assessment is done, the timetable is created and lessons have started; you can withdraw at the end of any term. We try to support families through periods of disruption (relocation, family events, illness) without administrative friction.' },
       { q: 'Do you provide university application support for African universities?', a: 'Yes — we support applications to Kenyan universities (KUCCPS for state universities, direct for private), Ugandan universities (Makerere, MUST), Tanzanian universities (UDSM, MUHAS), Rwandan universities (University of Rwanda), South African universities (UCT, Wits, Stellenbosch). Application timing, document preparation, personal statements and interview coaching all covered.' },
-      { q: 'How do I contact Smartious from Kisumu?', a: 'WhatsApp +254 745 021 212 is fastest. Email hellosmartious@gmail.com. Phone +254 745 021 212. Our admissions team responds in English, Kiswahili and Dholuo for Kisumu families.' },
+      { q: 'How do I contact Smartious from Kisumu?', a: 'WhatsApp +254 745 021 212 is fastest. Email hello@smartioushomeschool.com. Phone +254 745 021 212. Our admissions team responds in English, Kiswahili and Dholuo for Kisumu families.' },
     ],
     keywords: ['homeschooling Kisumu', 'home tuition Kisumu', 'online tuition Kisumu', 'IGCSE tutors Kisumu', 'IB tutor Kisumu', 'A-Level tutor Kisumu', 'CBC tutor Kisumu', 'KCSE tuition Kisumu', 'Aga Khan Academy Kisumu tutor', 'Kisumu private tutor'],
     altTexts: {
@@ -236,7 +236,7 @@ export const KENYA_CITIES = [
       { q: 'Can I observe my child\'s sessions?', a: 'Yes — parents are welcome to join sessions or observe via LMS. Weekly progress reports and termly academic reports also provided.' },
       { q: 'Can I pause if needed?', a: 'Yes — hourly tuition pauses with no penalty. Homeschool programmes are paid termly and are non-refundable once lessons have started; you can withdraw at the end of any term.' },
       { q: 'Do you support university applications for Kenyan and East African universities?', a: 'Yes — KUCCPS for Kenyan state universities, direct application for Kenyan private universities, Makerere and other Ugandan universities, UDSM and MUHAS for Tanzania, University of Rwanda, South African universities (UCT, Wits, Stellenbosch). Application timing, documents, personal statements covered.' },
-      { q: 'How do I contact Smartious from Nakuru?', a: 'WhatsApp +254 745 021 212 fastest. Email hellosmartious@gmail.com. Phone +254 745 021 212.' },
+      { q: 'How do I contact Smartious from Nakuru?', a: 'WhatsApp +254 745 021 212 fastest. Email hello@smartioushomeschool.com. Phone +254 745 021 212.' },
     ],
     keywords: ['homeschooling Nakuru', 'home tuition Nakuru', 'online tuition Nakuru', 'IGCSE tutors Nakuru', 'IB tutor Nakuru', 'A-Level tutor Nakuru', 'CBC tutor Nakuru', 'KCSE tuition Nakuru', 'Greensteds International School tutor', 'Nakuru private tutor'],
     altTexts: {
@@ -317,7 +317,7 @@ export const KENYA_CITIES = [
       { q: 'Can I switch from another tutor to Smartious?', a: 'Yes — placement test establishes current level, transition plan picks up from previous provider. Usually we start within 7 working days.' },
       { q: 'Can I observe my child\'s sessions?', a: 'Yes — parents welcome to join or observe via LMS. Weekly progress reports plus termly academic reports.' },
       { q: 'What if my child needs to pause during athletic training tours?', a: 'Hourly tuition pauses without penalty. Monthly programmes pause with 14 days notice. We try to support athletically-talented students through training-tour disruption without administrative friction.' },
-      { q: 'How do I contact Smartious from Eldoret?', a: 'WhatsApp +254 745 021 212 fastest. Email hellosmartious@gmail.com. Phone +254 745 021 212. Admissions team responds in English, Kiswahili, and Kalenjin for Eldoret families.' },
+      { q: 'How do I contact Smartious from Eldoret?', a: 'WhatsApp +254 745 021 212 fastest. Email hello@smartioushomeschool.com. Phone +254 745 021 212. Admissions team responds in English, Kiswahili, and Kalenjin for Eldoret families.' },
     ],
     keywords: ['homeschooling Eldoret', 'home tuition Eldoret', 'online tuition Eldoret', 'IGCSE tutors Eldoret', 'IB tutor Eldoret', 'A-Level tutor Eldoret', 'CBC tutor Eldoret', 'KCSE tuition Eldoret', 'Hillschool Eldoret tutor', 'NCAA athletic scholarship Eldoret'],
     altTexts: {
@@ -397,7 +397,7 @@ export const KENYA_CITIES = [
       { q: 'What if my child needs to pause?', a: 'Hourly tuition pauses without penalty. Homeschool programmes are paid termly and are non-refundable once lessons have started; you can withdraw at the end of any term.' },
       { q: 'Do you support university applications for Kenyan and East African universities?', a: 'Yes — KUCCPS for state universities, direct for private. Ugandan, Tanzanian, Rwandan and South African universities also supported.' },
       { q: 'Is there a Smartious presence in Juja or Ruiru?', a: 'No physical presence, but online services available across Kiambu County and Thika sub-county. Many Juja and Ruiru families use Smartious for similar reasons to Thika families — eliminating the Nairobi commute.' },
-      { q: 'How do I contact Smartious from Thika?', a: 'WhatsApp +254 745 021 212 fastest. Email hellosmartious@gmail.com. Phone +254 745 021 212.' },
+      { q: 'How do I contact Smartious from Thika?', a: 'WhatsApp +254 745 021 212 fastest. Email hello@smartioushomeschool.com. Phone +254 745 021 212.' },
     ],
     keywords: ['homeschooling Thika', 'home tuition Thika', 'online tuition Thika', 'IGCSE tutors Thika', 'IB tutor Thika', 'A-Level tutor Thika', 'CBC tutor Thika', 'KCSE tuition Thika', 'Thika private tutor', 'eliminate Thika Road commute'],
     altTexts: {
@@ -478,7 +478,7 @@ export const KENYA_CITIES = [
       { q: 'What if my child needs to pause?', a: 'Hourly tuition pauses without penalty. Monthly programmes pause with 14 days notice.' },
       { q: 'Do you support university applications for Kenyan and East African universities?', a: 'Yes — KUCCPS for state universities, direct for private. Ugandan, Tanzanian, Rwandan, South African universities supported.' },
       { q: 'Which Kiambu communities specifically do you serve?', a: 'All of Kiambu County — Kiambu town, Tigoni, Limuru, Karuri, Ruaka, Banana, Ndenderu, Kikuyu town, Kabete, Ruiru, Juja, Thika (separate page), Lari, Gatundu, Githunguri, and surrounding communities. Service quality is identical across all areas since delivery is online.' },
-      { q: 'How do I contact Smartious from Kiambu?', a: 'WhatsApp +254 745 021 212 fastest. Email hellosmartious@gmail.com. Phone +254 745 021 212.' },
+      { q: 'How do I contact Smartious from Kiambu?', a: 'WhatsApp +254 745 021 212 fastest. Email hello@smartioushomeschool.com. Phone +254 745 021 212.' },
     ],
     keywords: ['homeschooling Kiambu', 'home tuition Kiambu', 'online tuition Kiambu', 'IGCSE tutors Kiambu', 'IB tutor Kiambu', 'A-Level tutor Kiambu', 'CBC tutor Kiambu', 'KCSE tuition Kiambu', 'Kiambu private tutor', 'Limuru tuition', 'Tigoni tuition'],
     altTexts: {
@@ -524,7 +524,7 @@ export const KENYA_COUNTRY = {
     { metric: 'Established', value: '2018', sub: 'Nairobi-based — HQ in Kenya' },
     { metric: 'Curricula', value: '5', sub: 'Cambridge · Edexcel · IB · American AP · CBC' },
     { metric: 'Tutors', value: '78+', sub: 'PGCE-qualified subject specialists' },
-    { metric: 'Countries served', value: '14+', sub: 'Africa · Gulf · Europe · Americas' },
+    { metric: 'Countries served', value: '40+', sub: 'Africa · Gulf · Europe · Americas' },
     { metric: 'Physical centres', value: '2', sub: 'Diamond Plaza Parklands · Karen Hardy' },
     { metric: 'Founded by', value: 'Alfred Ouko', sub: 'UoN-trained Maths & Physics educator' },
   ],
@@ -641,7 +641,7 @@ export const KENYA_COUNTRY = {
   whySmartious: [
     {
       h: 'Nairobi-based — we are Kenyan',
-      p: 'Smartious is headquartered in Nairobi with two physical centres (Diamond Plaza Parklands HQ and Karen Hardy). Founded by Alfred Ouko, University of Nairobi-trained Mathematics and Physics educator. We are Kenyan-built, Kenyan-led, and Kenyan-serving — with global reach to 14+ countries.',
+      p: 'Smartious is headquartered in Nairobi with two physical centres (Diamond Plaza Parklands HQ and Karen Hardy). Founded by Alfred Ouko, University of Nairobi-trained Mathematics and Physics educator. We are Kenyan-built, Kenyan-led, and Kenyan-serving — with global reach to 40+ countries.',
     },
     {
       h: 'Brookhouse / Braeburn / Aga Khan Academy alternative pricing',
@@ -692,7 +692,7 @@ export const KENYA_COUNTRY = {
     },
     {
       q: 'Will my child miss out on sports, arts, and social development without a physical school?',
-      a: 'A physical school provides a complete daily environment that an online programme does not replicate. However, Kenyan families combine Smartious academic instruction with sports clubs (athletics — Kenya has world-class running culture, football, rugby, swimming, equestrian, golf), music academies, scouts, debate, plus religious community involvement. Smartious classes themselves provide live peer interaction across 14+ countries.',
+      a: 'A physical school provides a complete daily environment that an online programme does not replicate. However, Kenyan families combine Smartious academic instruction with sports clubs (athletics — Kenya has world-class running culture, football, rugby, swimming, equestrian, golf), music academies, scouts, debate, plus religious community involvement. Smartious classes themselves provide live peer interaction across 40+ countries.',
     },
     {
       q: 'Are Smartious teachers qualified to deliver Cambridge curriculum?',

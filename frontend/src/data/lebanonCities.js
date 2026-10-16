@@ -5,9 +5,9 @@
 // Lebanese families across Beirut, Tripoli, Saida, Zahle and Jounieh.
 // FIFTH MIDDLE EAST BUILD — 5 cities.
 //
-// IMAGE NOTE: heroImg / heroImage use LOCAL PATHS under /heroes/.
-// Drop a file at frontend/public/heroes/<slug>.jpg and it appears;
-// if absent the onError handler shows the ink→crimson gradient.
+// IMAGE NOTE: city pages have no heroImg (the hero falls back to the
+// ink→crimson gradient); the country hub uses /online-virtual-school.png.
+// To add a city photo, put it under frontend/public and set heroImg.
 //
 // *** TONE RULE — ABSOLUTE ***
 // NO political commentary of any kind. NO commentary on economic or
@@ -76,7 +76,6 @@ export const LEBANON_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Beirut',
     heroTagline: 'For Beirut families — a record read directly in every country your family already has ties to, taught at whatever hour suits.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Beirut families. The capital holds one of the region\'s great academic traditions — the American University of Beirut and the Lebanese American University teach in English and are among the best known institutions in the Arab world — alongside an unusually plural private school market running French, American, IB and national programmes side by side. Beirut families understand parallel academic tracks better than almost any market we serve. What we add is one more that travels: an internationally examined record read directly wherever a family\'s relatives already are.',
-    heroImg: '/heroes/beirut-lb.jpg',
     altTexts: { hero: 'Beirut and the Mediterranean' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Beirut families — a portable record, fees in USD, at whatever hour suits. From USD 423/month.',
     challenges: [
@@ -141,7 +140,6 @@ export const LEBANON_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Tripoli Lebanon',
     heroTagline: 'For Tripoli and northern families — the second city, an hour and a half from where the international schools are.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Tripoli and northern Lebanese families. The north holds the country\'s second city, its port and a long commercial and trading tradition, with the University of Balamand and the Koura district nearby. It is a substantial population, and international school provision here is thin relative to it — the concentration is in Beirut, an hour and a half south along the coast. Live delivery reaches the north identically, and Lebanon sits within an hour of our teaching clock all year.',
-    heroImg: '/heroes/tripoli-lb.jpg',
     altTexts: { hero: 'Tripoli and the northern Lebanese coast' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Tripoli and northern Lebanon families — thin provision outside Beirut. From USD 423/month.',
     challenges: [
@@ -203,7 +201,6 @@ export const LEBANON_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Saida',
     heroTagline: 'For Saida and southern families — deep diaspora links, and a qualification that reads in every country they lead to.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Saida and southern Lebanese families. The south carries the coastal city and its port, a citrus and agricultural hinterland, and a commercial tradition with some of the deepest diaspora links in the country — families with relatives established in West Africa, the Gulf, Brazil, North America and Australia, often across several generations. International school provision locally is limited, and the qualification question here is genuinely practical: a record has to work wherever a child ends up applying from.',
-    heroImg: '/heroes/saida-lb.jpg',
     altTexts: { hero: 'Saida and the southern Lebanese coast' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Saida and southern Lebanon families — deep diaspora links, portable qualifications. From USD 423/month.',
     challenges: [
@@ -265,7 +262,6 @@ export const LEBANON_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Zahle and the Bekaa',
     heroTagline: 'For Zahle and Bekaa families — Lebanon\'s wine and farming valley, an hour over the mountain from any international school.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Zahle and Bekaa families. The valley is Lebanon\'s agricultural heartland — vineyards and a wine industry with an international reputation, intensive farming, food processing and agro-industry — spread across towns from Zahle north through Baalbek and south toward the Litani. It is a substantial economy with almost no international school provision, and Beirut is an hour over the mountain. Live delivery reaches the whole valley, and Lebanon sits within an hour of our teaching clock all year.',
-    heroImg: '/heroes/zahle-lb.jpg',
     altTexts: { hero: 'The Bekaa valley' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Zahle and Bekaa families — wine and farming valley, no local provision. From USD 423/month.',
     challenges: [
@@ -327,7 +323,6 @@ export const LEBANON_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Jounieh',
     heroTagline: 'For Jounieh, Keserwan and Mount Lebanon families — commuting to Beirut for work without commuting the children too.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Jounieh and Mount Lebanon families. The coastal and mountain belt running north from the capital through Jounieh, Keserwan and the surrounding villages is one of the densest residential and commercial corridors in the country, with several long-established schools and universities in reach and a great many households commuting into Beirut daily. For families already making that journey, the question is usually whether the children need to make it too. Live delivery answers that, and Lebanon sits within an hour of our teaching clock.',
-    heroImg: '/heroes/jounieh-lb.jpg',
     altTexts: { hero: 'Jounieh bay and Mount Lebanon' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Jounieh, Keserwan and Mount Lebanon families — no second commute for the children. From USD 423/month.',
     challenges: [
@@ -413,7 +408,7 @@ export const LEBANON_COUNTRY = {
   secondaryProgrammeExamRef: 'Authorised Lebanese Cambridge provision',
   finalCTABadgeExamRef: 'Cambridge centres confirmed per family, per session',
 
-  heroImage: '/heroes/lebanon.jpg',
+  heroImage: '/online-virtual-school.png',
   heroEyebrow: 'Online school for Lebanon',
   heroH1Suffix: 'Lebanon',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for professional, academic and Lebanese families across Beirut, Tripoli, Saida, the Bekaa and Mount Lebanon. A qualification read directly in every country your family already has ties to, fees quoted in USD, and a teaching clock within an hour of yours all year.',
@@ -439,7 +434,7 @@ export const LEBANON_COUNTRY = {
   ibDiplomaDelivery: 'Live online IB DP classes across all six subject groups plus Theory of Knowledge and Extended Essay supervision.',
   americanCurriculumSuits: 'Lebanon families targeting US universities via Common Application, or preparing for the American-system institutions in Beirut.',
   americanCurriculumDelivery: 'American Curriculum with AP courses Grades 9-12, SAT/ACT preparation, Common App essay coaching.',
-  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2019 to make international qualifications accessible to families at online-delivery fees rather than campus ones. Lebanon has one of the strongest educational traditions in the region and one of the most internationally connected populations anywhere — which makes a qualification that needs no translating worth more here than in most markets we serve.',
+  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2018 to make international qualifications accessible to families at online-delivery fees rather than campus ones. Lebanon has one of the strongest educational traditions in the region and one of the most internationally connected populations anywhere — which makes a qualification that needs no translating worth more here than in most markets we serve.',
   founderUniversitySpecialism: 'Alfred holds a BEd in Mathematics and Physics — Smartious\'s Cambridge A-Level and IB Diploma STEM subjects are led personally when needed, suiting the Bekaa\'s agricultural science households and every medicine-bound student in Beirut, Tripoli and Saida. Head of Academics supervises curriculum delivery and university placement strategy per family.',
 
   competitorsIntro: 'Lebanon has one of the highest private-school participation rates anywhere in our coverage and an unusually plural market — the French system runs deep through the Grand Lycée Franco-Libanais, Collège Notre-Dame de Jamhour and Collège Protestant, alongside American-system schools including International College and the American Community School, IB schools and the national programme. Those are serious institutions with long histories and we would not pretend to improve on them. The gaps are specific: subject sets no single timetable can sustain, fees, and the regions outside Beirut and Mount Lebanon where provision thins sharply.',

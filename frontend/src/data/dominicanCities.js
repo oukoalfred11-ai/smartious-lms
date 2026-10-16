@@ -6,9 +6,9 @@
 // and La Romana.
 // TENTH LATIN AMERICAN BUILD — 5 cities.
 //
-// IMAGE NOTE: heroImg / heroImage use LOCAL PATHS under /heroes/.
-// Drop a file at frontend/public/heroes/<slug>.jpg and it appears;
-// if absent the onError handler shows the ink→crimson gradient.
+// IMAGE NOTE: city pages have no heroImg (the hero falls back to the
+// ink→crimson gradient); the country hub uses /online-virtual-school.png.
+// To add a city photo, put it under frontend/public and set heroImg.
 //
 // LEGAL POSITIONING NOTE — HEDGE FIRMLY. SOURCING IS THIN:
 // - CONSTITUTIONAL BASE WE CAN CITE: the 2010 Dominican Constitution,
@@ -71,7 +71,6 @@ export const DOMINICAN_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Santo Domingo',
     heroTagline: 'For Santo Domingo families — Cambridge and IB taught live at a fraction of the capital tier\'s fees, seven hours ahead rather than nine.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Santo Domingo families. The capital carries the corporate weight of the Caribbean\'s largest economy — banking, telecoms, free-zone administration, the diplomatic community — and an international school tier to match, with substantial IB and American provision and fees at the top of the Caribbean market. Dominican law gives families a genuine constitutional footing on educational choice, and rather less by way of specific regulation, and we set out both accurately before anything else.',
-    heroImg: '/heroes/santo-domingo-do.jpg',
     altTexts: { hero: 'Santo Domingo and the Caribbean coast' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Santo Domingo families — the capital tier\'s curriculum at a fraction of its fees. From USD 423/month.',
     challenges: [
@@ -136,7 +135,6 @@ export const DOMINICAN_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Santiago Dominican Republic',
     heroTagline: 'For Santiago and Cibao families — the Dominican Republic\'s manufacturing heartland, two hours from the capital\'s international schools.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Santiago and Cibao families. Santiago is the commercial capital of the Cibao valley and the centre of Dominican free-zone manufacturing — medical devices, electronics, and the tobacco industry that supplies a large share of the world\'s premium cigars — alongside a major university sector. Its international provision is thinner than the city\'s size and industrial profile suggest, and Santo Domingo is two hours south. Smartious teaches Cambridge and IB live across the Cibao.',
-    heroImg: '/heroes/santiago-do.jpg',
     altTexts: { hero: 'Santiago and the Cibao valley' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Santiago and Cibao families — free-zone manufacturing heartland, thin provision. From USD 423/month.',
     challenges: [
@@ -198,7 +196,6 @@ export const DOMINICAN_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Punta Cana',
     heroTagline: 'For Punta Cana and Bávaro families — the Caribbean\'s biggest resort economy, staffed from thirty countries and schooled for a small town.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Punta Cana and Bávaro families. The eastern coast holds one of the largest concentrations of tourism capacity anywhere in the Caribbean, and behind the resorts sits a genuinely international permanent workforce — hotel management, aviation, construction, real estate, hospitality services — drawn from across Latin America, Europe, and North America, alongside a fast-growing residential and remote-work community. The schooling has not kept pace with any of it, and Santo Domingo is more than two hours west. Smartious teaches live to the east.',
-    heroImg: '/heroes/punta-cana-do.jpg',
     altTexts: { hero: 'The Punta Cana coast' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Punta Cana and Bávaro families — the Caribbean\'s largest resort economy, schooling far behind. From USD 423/month.',
     challenges: [
@@ -260,7 +257,6 @@ export const DOMINICAN_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Puerto Plata and Sosúa',
     heroTagline: 'For Puerto Plata, Sosúa and Cabarete families — a European community settled here for forty years, still without an international school.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for north coast families. Sosúa and Cabarete host one of the longest-settled European and North American resident communities in the Caribbean — German, Swiss, Italian, Canadian and American families, many of them second and third generation, alongside the watersports economy that made Cabarete internationally known and the tourism, port and cruise business at Puerto Plata. The community is decades old and there is still no international school on the coast. Smartious teaches Cambridge and IB live to the north.',
-    heroImg: '/heroes/puerto-plata-do.jpg',
     altTexts: { hero: 'The Dominican north coast at Sosúa' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Puerto Plata, Sosúa and Cabarete families — a long-settled European community with no local provision. From USD 423/month.',
     challenges: [
@@ -323,7 +319,6 @@ export const DOMINICAN_CITIES = [
     primaryKeyword: 'Online school and international curriculum in La Romana',
     heroTagline: 'For La Romana and southeastern families — a resort economy of international scale beside a sugar industry, and one school map that serves neither.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for La Romana and southeastern families. The province carries an unusual mix: Casa de Campo and the resort and residential economy around it, drawing an international owner and management community; the sugar industry and free-zone manufacturing that built the city; a cruise terminal and port; and the tourism belt running east to Bayahíbe. Santo Domingo is around ninety minutes west. International schooling locally is minimal. Smartious teaches Cambridge and IB live to the southeast.',
-    heroImg: '/heroes/la-romana-do.jpg',
     altTexts: { hero: 'La Romana and the southeastern coast' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for La Romana and southeastern families — resort, sugar and free-zone economy, minimal provision. From USD 423/month.',
     challenges: [
@@ -409,7 +404,7 @@ export const DOMINICAN_COUNTRY = {
   secondaryProgrammeExamRef: 'Authorised Dominican Cambridge provision',
   finalCTABadgeExamRef: 'Cambridge centres confirmed per family, per session',
 
-  heroImage: '/heroes/dominican-republic.jpg',
+  heroImage: '/online-virtual-school.png',
   heroEyebrow: 'Online school for the Dominican Republic',
   heroH1Suffix: 'the Dominican Republic',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for tourism, free-zone, diaspora, and Dominican families across Santo Domingo, Santiago, Punta Cana, Puerto Plata, and La Romana. The Constitution gives families the right to choose the type of education for their children; we could not identify a specific framework for home education and say so rather than guessing. Seven hours behind us — closer than most of Latin America.',
@@ -435,7 +430,7 @@ export const DOMINICAN_COUNTRY = {
   ibDiplomaDelivery: 'Live online IB DP classes across all six subject groups plus Theory of Knowledge and Extended Essay supervision.',
   americanCurriculumSuits: 'Dominican families targeting US universities via Common Application — the dominant destination given the scale of the diaspora. Note that we teach AP examinations rather than issuing an American high school diploma.',
   americanCurriculumDelivery: 'American Curriculum with AP courses Grades 9-12, SAT/ACT preparation, Common App essay coaching.',
-  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2019 to make international qualifications accessible to families at online-delivery fees rather than campus ones. The Dominican Republic is a market where families have historically reached for American virtual schools by default — and where we would rather explain the difference between an American diploma and an internationally examined qualification than let a family discover it late.',
+  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2018 to make international qualifications accessible to families at online-delivery fees rather than campus ones. The Dominican Republic is a market where families have historically reached for American virtual schools by default — and where we would rather explain the difference between an American diploma and an internationally examined qualification than let a family discover it late.',
   founderUniversitySpecialism: 'Alfred holds a BEd in Mathematics and Physics — Smartious\'s Cambridge A-Level and IB Diploma STEM subjects are led personally when needed, suiting Santiago\'s free-zone engineering households and every medicine-bound student in Santo Domingo. Head of Academics supervises curriculum delivery and university placement strategy per family.',
 
   competitorsIntro: 'Santo Domingo has a strong international tier — Carol Morgan School, St George School, Saint Michael\'s, the Lincoln School, the Franco-Dominican lycée — with substantial IB and American provision and fees at the top of the Caribbean market. Outside the capital it thins fast, and in Punta Cana, Puerto Plata and La Romana it is minimal to absent despite each hosting a substantial international community. The most distinctive competitive feature here is not a school at all: American virtual schools have been the de facto home-education route for Dominican families, and understanding what they do differently from us matters more than any local comparison.',

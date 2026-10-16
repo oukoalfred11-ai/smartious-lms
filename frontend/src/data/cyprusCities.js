@@ -6,9 +6,9 @@
 // Famagusta district.
 // FOURTH MIDDLE EAST / EASTERN MEDITERRANEAN BUILD — 5 cities.
 //
-// IMAGE NOTE: heroImg / heroImage use LOCAL PATHS under /heroes/.
-// Drop a file at frontend/public/heroes/<slug>.jpg and it appears;
-// if absent the onError handler shows the ink→crimson gradient.
+// IMAGE NOTE: city pages have no heroImg (the hero falls back to the
+// ink→crimson gradient); the country hub uses /online-virtual-school.png.
+// To add a city photo, put it under frontend/public and set heroImg.
 //
 // *** SCOPE AND TONE RULE — ABSOLUTE ***
 // These pages cover the Republic of Cyprus and the areas under its
@@ -98,7 +98,6 @@ export const CYPRUS_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Nicosia',
     heroTagline: 'For Nicosia families — the subjects a strong school still cannot staff, taught live at whatever hour suits.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Nicosia families. The capital carries the government, legal and banking sectors, the island\'s academic centre, and some of the oldest British-curriculum schools in the eastern Mediterranean — The English School, the American Academy, the Grammar School and others that have taught IGCSE and A-Level for generations. We are not introducing Cambridge to this city. What we add is narrower: the subject sets a single timetable cannot sustain, and fees a professional family can meet. And Cyprus sits within an hour of our teaching clock all year.',
-    heroImg: '/heroes/nicosia-cy.jpg',
     altTexts: { hero: 'Nicosia' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Nicosia families — subject depth beside a long British-curriculum tradition. From USD 423/month.',
     challenges: [
@@ -163,7 +162,6 @@ export const CYPRUS_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Limassol',
     heroTagline: 'For Limassol families — a genuinely international city where school places are the scarce commodity, not schools.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Limassol families. The city runs one of the largest ship management industries in the world, a substantial forex, fintech and professional-services sector, and one of the most genuinely international resident populations in the eastern Mediterranean — Russian-speaking, Ukrainian, Israeli, Lebanese, British and more. Private school demand here has grown faster than places, and families arriving mid-year frequently find the schools they want are full. Live delivery starts within a week of the assessment, with no waitlist.',
-    heroImg: '/heroes/limassol-cy.jpg',
     altTexts: { hero: 'Limassol seafront' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Limassol families — shipping and fintech capital, school places scarce. From USD 423/month.',
     challenges: [
@@ -227,7 +225,6 @@ export const CYPRUS_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Larnaca',
     heroTagline: 'For Larnaca families — the island\'s gateway, growing faster than the schools around it.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Larnaca families. The city holds the island\'s main airport, a growing port and marina development, and the aviation and logistics services around them — and has drawn an international residential population expanding faster than the schools serving it. Families here often find themselves choosing between a commute to Nicosia or Limassol and a shorter local list. Live delivery removes that choice, and Cyprus sits within an hour of our teaching clock all year.',
-    heroImg: '/heroes/larnaca-cy.jpg',
     altTexts: { hero: 'Larnaca seafront and salt lake' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Larnaca families — the island gateway, growing faster than its schools. From USD 423/month.',
     challenges: [
@@ -289,7 +286,6 @@ export const CYPRUS_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Paphos',
     heroTagline: 'For Paphos families — a British residential belt decades old, spread across a district with a short school list.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Paphos families. The west has one of the longest-established British and northern European residential communities in the eastern Mediterranean — families and retirees who have been here for decades, alongside tourism, property and services businesses and a growing remote-work population. Households are spread across coastal towns and hill villages over a wide district, and the local school list is short. Live delivery reaches all of it, and for families who may return to the UK the qualification question answers itself.',
-    heroImg: '/heroes/paphos-cy.jpg',
     altTexts: { hero: 'Paphos coast' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Paphos families — a long-established British belt with a short school list. From USD 423/month.',
     challenges: [
@@ -351,7 +347,6 @@ export const CYPRUS_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Ayia Napa and Protaras',
     heroTagline: 'For Ayia Napa, Protaras and eastern coast families — a tourism economy that peaks when the school year does not.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for families across the eastern coast. Ayia Napa, Protaras and the surrounding district run one of the most concentrated tourism economies in the eastern Mediterranean — hotels, marinas, restaurants and the hospitality and services businesses around them, many owned or managed by families who came for a season and stayed. It is a working pattern that peaks hard and leaves little slack, and local school provision is minimal. Live classes with a complete recorded library are built for exactly that.',
-    heroImg: '/heroes/famagusta-cy.jpg',
     altTexts: { hero: 'The eastern Cyprus coast' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Ayia Napa, Protaras and eastern Cyprus families — seasonal work, minimal provision. From USD 423/month.',
     challenges: [
@@ -437,7 +432,7 @@ export const CYPRUS_COUNTRY = {
   secondaryProgrammeExamRef: 'Authorised Cypriot Cambridge provision',
   finalCTABadgeExamRef: 'Cambridge centres confirmed per family, per session',
 
-  heroImage: '/heroes/cyprus.jpg',
+  heroImage: '/online-virtual-school.png',
   heroEyebrow: 'Online school for Cyprus',
   heroH1Suffix: 'Cyprus',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for shipping, fintech, expatriate and Cypriot families across Nicosia, Limassol, Larnaca, Paphos and the eastern coast. Cypriot sources genuinely disagree about elective home education — we set out every reading rather than picking one — and Cyprus sits within an hour of our teaching clock all year.',
@@ -463,7 +458,7 @@ export const CYPRUS_COUNTRY = {
   ibDiplomaDelivery: 'Live online IB DP classes across all six subject groups plus Theory of Knowledge and Extended Essay supervision.',
   americanCurriculumSuits: 'Cyprus families targeting US universities via Common Application.',
   americanCurriculumDelivery: 'American Curriculum with AP courses Grades 9-12, SAT/ACT preparation, Common App essay coaching.',
-  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2019 to make international qualifications accessible to families at online-delivery fees rather than campus ones. Cyprus is one of the few markets where the British curriculum arrived long before we did and where the private school sector is unusually deep for the population — which shapes what we sensibly offer, and what we do not claim.',
+  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2018 to make international qualifications accessible to families at online-delivery fees rather than campus ones. Cyprus is one of the few markets where the British curriculum arrived long before we did and where the private school sector is unusually deep for the population — which shapes what we sensibly offer, and what we do not claim.',
   founderUniversitySpecialism: 'Alfred holds a BEd in Mathematics and Physics — Smartious\'s Cambridge A-Level and IB Diploma STEM subjects are led personally when needed, suiting Limassol\'s maritime and fintech households and every medicine-bound student in Nicosia. Head of Academics supervises curriculum delivery and university placement strategy per family.',
 
   competitorsIntro: 'Cyprus has one of the largest private and international school sectors per head anywhere in our coverage — The English School and the American Academy in Nicosia, the Grammar School, Falcon, Heritage, Foley\'s, Pascal, The Island Private School, Silvertree, King\'s School Paphos and Aspire among many others — much of it British-curriculum and teaching IGCSE and A-Level for generations. Those are established institutions and we would not pretend to improve on them. The gaps are specific: subject sets no single timetable can sustain, places in Limassol and Larnaca that fill faster than families arrive, and districts in the west and east where the local list is short.',

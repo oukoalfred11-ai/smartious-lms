@@ -139,8 +139,28 @@ function setCanonical(url) {
   el.setAttribute('href', url)
 }
 
+// setRobots — 'noindex' on pages that must stay out of the index (the
+// not-found page). Otherwise puts back the robots value from index.html.
+function setRobots(noindex) {
+  let el = document.head.querySelector('meta[name="robots"]')
+  if (!el) {
+    if (!noindex) return
+    el = document.createElement('meta')
+    el.setAttribute('name', 'robots')
+    document.head.appendChild(el)
+  }
+  if (!el.hasAttribute('data-default')) el.setAttribute('data-default', el.getAttribute('content') || '')
+  if (noindex) el.setAttribute('content', 'noindex')
+  else if (el.getAttribute('data-default')) el.setAttribute('content', el.getAttribute('data-default'))
+  else el.remove()
+}
+
+// canonicalOverride === false: no canonical at all (the not-found page
+// must not declare the bad URL canonical), and robots noindex.
 function usePageMeta(title, description, canonicalOverride) {
   useEffect(() => {
+    const noindex = canonicalOverride === false
+    setRobots(noindex)
     if (title) document.title = title
     if (description) {
       setMetaTag('description', description, 'name')
@@ -154,6 +174,11 @@ function usePageMeta(title, description, canonicalOverride) {
     // Pages can pass a canonicalOverride to force one canonical URL across
     // multiple URL aliases (e.g. /us-families and /online-school/usa both
     // serve the same content but consolidate SEO authority on the latter).
+    if (noindex) {
+      document.head.querySelector('link[rel="canonical"]')?.remove()
+      document.head.querySelector('meta[property="og:url"]')?.remove()
+      return
+    }
     try {
       const origin = window.location.origin
       let canonical
@@ -286,9 +311,9 @@ const ENROLMENT_DATA = {
     examBoard: 'Cambridge International Examinations (CIE)',
     levels: [
       { id:'primary',     label:'Cambridge Primary',         years:'Year 1–6',   ages:'Ages 5–11',   feeFrom:'From USD 423/mo', feeRef:'Primary Homeschool tier' },
-      { id:'lowersec',    label:'Cambridge Lower Secondary', years:'Year 7–9',   ages:'Ages 11–14',  feeFrom:'From USD 423/mo', feeRef:'Junior Secondary tier' },
-      { id:'igcse',       label:'Cambridge IGCSE',           years:'Year 10–11', ages:'Ages 14–16',  feeFrom:'From USD 423/mo', feeRef:'IGCSE tier · Most Popular' },
-      { id:'alevel',      label:'Cambridge A-Level',         years:'Year 12–13', ages:'Ages 16–19',  feeFrom:'USD 769/mo', feeRef:'A-Level tier · up to 4 subjects' },
+      { id:'lowersec',    label:'Cambridge Lower Secondary', years:'Year 7–9',   ages:'Ages 11–14',  feeFrom:'Fees vary by curriculum and level', feeRef:'Junior Secondary tier' },
+      { id:'igcse',       label:'Cambridge IGCSE',           years:'Year 10–11', ages:'Ages 14–16',  feeFrom:'Fees vary by curriculum and level', feeRef:'IGCSE tier · Most Popular' },
+      { id:'alevel',      label:'Cambridge A-Level',         years:'Year 12–13', ages:'Ages 16–19',  feeFrom:'Fees vary by curriculum and level', feeRef:'A-Level tier · up to 4 subjects' },
     ],
     subjects: 'English Language & Literature, Mathematics, Sciences (Biology, Chemistry, Physics), Humanities (History, Geography), Languages (French, Kiswahili), Business Studies, Economics, ICT, Computer Science.',
   },
@@ -297,8 +322,8 @@ const ENROLMENT_DATA = {
     description: 'Pearson Edexcel International GCSE, IAL and IAL Further Maths. Widely accepted alternative to Cambridge.',
     examBoard: 'Pearson Edexcel International',
     levels: [
-      { id:'igcse',     label:'Edexcel International GCSE',   years:'Year 10–11', ages:'Ages 14–16', feeFrom:'From USD 423/mo', feeRef:'IGCSE tier' },
-      { id:'ial',       label:'Edexcel IAL (A-Level)',         years:'Year 12–13', ages:'Ages 16–19', feeFrom:'USD 769/mo', feeRef:'A-Level tier' },
+      { id:'igcse',     label:'Edexcel International GCSE',   years:'Year 10–11', ages:'Ages 14–16', feeFrom:'Fees vary by curriculum and level', feeRef:'IGCSE tier' },
+      { id:'ial',       label:'Edexcel IAL (A-Level)',         years:'Year 12–13', ages:'Ages 16–19', feeFrom:'Fees vary by curriculum and level', feeRef:'A-Level tier' },
     ],
     subjects: 'English Language A & B, Mathematics, Further Mathematics, Sciences, Humanities, Business, Economics, Computer Science.',
   },
@@ -308,9 +333,9 @@ const ENROLMENT_DATA = {
     examBoard: 'International Baccalaureate Organization (IBO)',
     levels: [
       { id:'pyp',     label:'IB Primary Years (PYP)',  years:'Year 1–6',     ages:'Ages 5–11',   feeFrom:'From USD 423/mo', feeRef:'Primary Homeschool tier' },
-      { id:'myp_1_3', label:'IB MYP Years 1–3',         years:'Grade 6–8',    ages:'Ages 11–14',  feeFrom:'From USD 423/mo', feeRef:'Junior Secondary tier' },
-      { id:'myp_4_5', label:'IB MYP Years 4–5',         years:'Grade 9–10',   ages:'Ages 14–16',  feeFrom:'From USD 423/mo', feeRef:'IGCSE-equivalent tier' },
-      { id:'dp',      label:'IB Diploma Programme',     years:'Grade 11–12',  ages:'Ages 16–19',  feeFrom:'From USD 423/mo', feeRef:'IB Diploma tier · 6 subjects + TOK / EE / CAS' },
+      { id:'myp_1_3', label:'IB MYP Years 1–3',         years:'Grade 6–8',    ages:'Ages 11–14',  feeFrom:'Fees vary by curriculum and level', feeRef:'Junior Secondary tier' },
+      { id:'myp_4_5', label:'IB MYP Years 4–5',         years:'Grade 9–10',   ages:'Ages 14–16',  feeFrom:'Fees vary by curriculum and level', feeRef:'IGCSE-equivalent tier' },
+      { id:'dp',      label:'IB Diploma Programme',     years:'Grade 11–12',  ages:'Ages 16–19',  feeFrom:'Fees vary by curriculum and level', feeRef:'IB Diploma tier · 6 subjects + TOK / EE / CAS' },
     ],
     subjects: 'Language & Literature, Language Acquisition, Individuals & Societies, Sciences, Mathematics, Arts, Physical & Health Education, Design. Plus IDU (Interdisciplinary Unit) and Service & Action.',
   },
@@ -322,8 +347,8 @@ const ENROLMENT_DATA = {
       { id:'pp',          label:'Pre-Primary',            years:'PP1–PP2',         ages:'Ages 4–6',   feeFrom:'From USD 423/mo', feeRef:'Primary tier' },
       { id:'lower',       label:'Lower Primary',          years:'Grade 1–3',       ages:'Ages 6–9',   feeFrom:'From USD 423/mo', feeRef:'Primary tier' },
       { id:'upper',       label:'Upper Primary',          years:'Grade 4–6',       ages:'Ages 9–12',  feeFrom:'From USD 423/mo', feeRef:'Primary tier' },
-      { id:'jss',         label:'Junior Secondary',       years:'Grade 7–9',       ages:'Ages 12–14', feeFrom:'From USD 423/mo', feeRef:'Junior Secondary tier' },
-      { id:'sss',         label:'Senior Secondary',       years:'Grade 10–12',     ages:'Ages 14–17', feeFrom:'From USD 423/mo', feeRef:'Senior tier' },
+      { id:'jss',         label:'Junior Secondary',       years:'Grade 7–9',       ages:'Ages 12–14', feeFrom:'Fees vary by curriculum and level', feeRef:'Junior Secondary tier' },
+      { id:'sss',         label:'Senior Secondary',       years:'Grade 10–12',     ages:'Ages 14–17', feeFrom:'Fees vary by curriculum and level', feeRef:'Senior tier' },
     ],
     subjects: 'Mathematics, English, Kiswahili, Science & Technology, Social Studies, Religious Education, Creative Arts, Physical Education, plus pathway choices at Senior School.',
   },
@@ -333,9 +358,9 @@ const ENROLMENT_DATA = {
     examBoard: 'College Board (AP) and Smartious-issued transcripts',
     levels: [
       { id:'elem',  label:'Elementary',     years:'K–5',     ages:'Ages 5–11',   feeFrom:'From USD 423/mo', feeRef:'Primary tier' },
-      { id:'mid',   label:'Middle School',  years:'Grade 6–8',  ages:'Ages 11–14',  feeFrom:'From USD 423/mo', feeRef:'Junior Secondary tier' },
-      { id:'hs',    label:'High School',    years:'Grade 9–12', ages:'Ages 14–18',  feeFrom:'From USD 423/mo', feeRef:'High School tier' },
-      { id:'ap',    label:'AP Courses',     years:'Grade 11–12', ages:'Ages 16–18', feeFrom:'USD 154/mo per AP subject', feeRef:'AP Subject add-on' },
+      { id:'mid',   label:'Middle School',  years:'Grade 6–8',  ages:'Ages 11–14',  feeFrom:'Fees vary by curriculum and level', feeRef:'Junior Secondary tier' },
+      { id:'hs',    label:'High School',    years:'Grade 9–12', ages:'Ages 14–18',  feeFrom:'Fees vary by curriculum and level', feeRef:'High School tier' },
+      { id:'ap',    label:'AP Courses',     years:'Grade 11–12', ages:'Ages 16–18', feeFrom:'Fees vary by curriculum and level', feeRef:'AP Subject add-on' },
     ],
     subjects: 'English, Mathematics, Sciences, Social Studies, Foreign Language, Arts/Health/PE. AP: Calculus AB/BC, Sciences, English Literature, US/World History, Economics, Computer Science.',
   },
@@ -1523,6 +1548,13 @@ function articleProduct(a) {
 // page. Curriculum and service detail pages derive their meta
 // from CURRICULA / SERVICES. Edit freely to refine targeting.
 const SITE = 'Smartious Homeschool & eSchool'
+// One organisation entity for all structured data. Every Organization /
+// EducationalOrganization block and every provider points at this @id.
+const ORG_ID = 'https://smartioushomeschool.com/#organization'
+const ORG_REF = { '@type': 'EducationalOrganization', '@id': ORG_ID, 'name': SITE }
+// The only published fee: Primary, per month, paid termly.
+const FEE_OFFER = { '@type': 'Offer', 'priceCurrency': 'USD', 'price': 423, 'description': 'per month, Primary; varies by curriculum and level' }
+const TUITION_OFFER = { '@type': 'Offer', 'priceCurrency': 'USD', 'price': 15, 'description': 'per hour, one-to-one online tuition' }
 const PAGE_META = {
   'tuition-nairobi': {
     title: 'Private Tutors in Nairobi | IGCSE, A-Level, IB & CBC Tuition | Smartious',
@@ -2878,8 +2910,8 @@ export default function LandingPage() {
         setCurrentArticle(slug)
         setPage('article')
       } else {
-        // Unknown article slug — fall back to the blog index
-        setPage('blog')
+        // Unknown article slug — not found (no soft-404 to the blog index)
+        setPage('not-found')
       }
       return
     }
@@ -3484,10 +3516,9 @@ export default function LandingPage() {
         setCurrentProvinceSlug(slug)
         setPage('province-landing')
       } else {
-        // Unknown slug — render home. Never fall back to us-families here:
-        // that page forces canonical /online-school/usa, so every stray
-        // /homeschool-* URL became a USA-page duplicate in Google's index.
-        setPage('home')
+        // Unknown slug — not found. Never fall back to home or us-families:
+        // that made every stray /homeschool-* URL a duplicate (soft 404).
+        setPage('not-found')
       }
       return
     }
@@ -3498,8 +3529,8 @@ export default function LandingPage() {
         setCurrentCurriculum(slug)
         setPage('curriculum-detail')
       } else {
-        // Unknown curriculum slug — fall back to the curricula index
-        setPage('curricula')
+        // Unknown curriculum slug — not found
+        setPage('not-found')
       }
       return
     }
@@ -3510,8 +3541,8 @@ export default function LandingPage() {
         setCurrentService(slug)
         setPage('service-detail')
       } else {
-        // Unknown service slug — fall back to the services index
-        setPage('services')
+        // Unknown service slug — not found
+        setPage('not-found')
       }
       return
     }
@@ -3909,8 +3940,8 @@ export default function LandingPage() {
         setCurrentCountry(slug)
         setPage('country-detail')
       } else {
-        // Unknown country slug — fall back to the global page
-        setPage('home')
+        // Unknown country slug — not found
+        setPage('not-found')
       }
       return
     }
@@ -4056,8 +4087,8 @@ export default function LandingPage() {
         setCurrentCompare(slug)
         setPage('compare-detail')
       } else {
-        // Unknown comparison slug — fall back to home
-        setPage('home')
+        // Unknown comparison slug — not found
+        setPage('not-found')
       }
       return
     }
@@ -4065,7 +4096,7 @@ export default function LandingPage() {
     if (PAGES.includes(id) && id !== 'article') {
       setPage(id)
     } else {
-      setPage('home')
+      setPage('not-found')
     }
   }
 
@@ -4847,6 +4878,11 @@ export default function LandingPage() {
   if (page === 'tuition-uk') canonicalOverride = '/tuition-uk'
   if (page === 'homeschooling-vietnam') canonicalOverride = '/online-school/vietnam'
   if (page === 'homeschooling-thailand') canonicalOverride = '/online-school/thailand'
+  if (page === 'not-found') {
+    metaTitle = 'Page not found | Smartious'
+    metaDesc  = 'This page does not exist. Find online school by country, fees and contact details for Smartious Homeschool & eSchool.'
+    canonicalOverride = false
+  }
   usePageMeta(metaTitle, metaDesc, canonicalOverride)
   useHeroPreload(page === 'home')
 
@@ -5425,6 +5461,55 @@ export default function LandingPage() {
       ) : (<>
 
       {/* ══════════════════════════════════════════
+          NOT FOUND — unknown paths and slugs. noindex, no canonical
+          (see usePageMeta). Real links so crawlers and people can
+          find their way on.
+      ══════════════════════════════════════════ */}
+      {page === 'not-found' && (
+        <section className="sec" style={{background:V.bone,padding:'96px 0 80px'}}>
+          <div className="wrap" style={{maxWidth:760,textAlign:'center'}}>
+            <div className="eyebrow" style={{justifyContent:'center'}}>Error 404</div>
+            <h1 className="display" style={{marginTop:10}}>Page not found</h1>
+            <p className="lead" style={{margin:'16px auto 0',maxWidth:560}}>The page you were looking for does not exist or has moved. These links will take you somewhere useful.</p>
+            <nav aria-label="Helpful links" style={{display:'flex',flexWrap:'wrap',justifyContent:'center',gap:12,marginTop:32}}>
+              {[
+                ['Home','/'],
+                ['Online school by country','/#countries'],
+                ['Fees','/pricing'],
+                ['Contact','/contact'],
+              ].map(([label, href]) => (
+                <a key={href} href={href} onClick={e => {
+                  if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+                  e.preventDefault()
+                  nav(href === '/#countries' ? '/' : href)
+                  window.scrollTo(0, 0)
+                  if (href === '/#countries') setTimeout(() => document.getElementById('countries')?.scrollIntoView(), 300)
+                }} style={{
+                  display:'inline-flex',alignItems:'center',padding:'12px 22px',borderRadius:8,
+                  background: href === '/' ? V.cr : V.white, color: href === '/' ? '#fff' : V.ink,
+                  border:`1px solid ${href === '/' ? V.cr : V.bone3}`,fontWeight:700,fontSize:14,textDecoration:'none',
+                }}>{label}</a>
+              ))}
+            </nav>
+            <div style={{marginTop:40,fontSize:13.5,color:V.sl,lineHeight:1.9}}>
+              <div style={{fontWeight:700,color:V.ink,marginBottom:6}}>Online school by country</div>
+              {[
+                ['Kenya','/online-school/kenya'],['UAE','/online-school/uae'],['Saudi Arabia','/online-school/saudi-arabia'],
+                ['Qatar','/online-school/qatar'],['Kuwait','/online-school/kuwait'],['Bahrain','/online-school/bahrain'],
+                ['Nigeria','/online-school/nigeria'],['United Kingdom','/online-school/united-kingdom'],
+                ['United States','/online-school/usa'],['Canada','/online-school/canada'],
+              ].map(([label, href], i) => (
+                <span key={href}>{i > 0 && ' · '}<a href={href} onClick={e => {
+                  if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+                  e.preventDefault(); nav(href); window.scrollTo(0, 0)
+                }} style={{color:V.cr,textDecoration:'none'}}>{label}</a></span>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ══════════════════════════════════════════
           HOME
       ══════════════════════════════════════════ */}
       {page === 'home' && (
@@ -5888,7 +5973,7 @@ export default function LandingPage() {
               Big SEO win: surfaces all country pages from
               homepage so they get internal-link authority.
           ═══════════════════════════════════════════ */}
-          <section className="sec" style={{background:V.white}}><div className="wrap">
+          <section id="countries" className="sec" style={{background:V.white}}><div className="wrap">
             <div className="sec-hd reveal" style={{textAlign:'center'}}>
               <div className="eyebrow" style={{justifyContent:'center'}}>Built for global families</div>
               <h2 className="display">An Online School That <em>Travels With You</em></h2>
@@ -5910,7 +5995,7 @@ export default function LandingPage() {
                 {country:'Japan', slug:'japan', href:'/online-school/japan', sub:'Tokyo · Yokohama · Osaka · Kobe · Nagoya · Okinawa'},
                 {country:'Vietnam', slug:'vietnam', href:'/online-school/vietnam', sub:'Ho Chi Minh City · Hanoi · Da Nang · Bac Ninh · Binh Duong · Vung Tau'},
                 {country:'Thailand', slug:'thailand', href:'/online-school/thailand', sub:'Bangkok · Chiang Mai · Phuket · Pattaya · Hua Hin · Khon Kaen'},
-                {country:'United Kingdom', slug:'uk', href:'/online-school/uk', sub:'London · Manchester'},
+                {country:'United Kingdom', slug:'uk', href:'/online-school/united-kingdom', sub:'London · Manchester'},
                 {country:'United States', slug:'usa', href:'/online-school/usa', sub:'Coast to coast · Live · IGCSE/A-Level'},
                 {country:'Canada', slug:'canada', href:'/online-school/canada', sub:'Toronto · Vancouver'},
                 {country:'Australia', slug:'australia', href:'/online-school/australia', sub:'Sydney · Melbourne'},
@@ -6269,7 +6354,7 @@ export default function LandingPage() {
                   {n:'5',h:'Curricula',p:'Cambridge · IB · Edexcel · CBC · American',pg:'curricula',svg:'<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>'},
                   {n:'6',h:'Services',p:'Homeschool · Tuition · Online · Mshauri AI',pg:'services',svg:'<rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/>'},
                   {n:'40+',h:'Countries',p:'Kenya · UAE · UK · USA · Canada · Australia · and many more',pg:'home',svg:'<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>'},
-                  {n:'$15/hr',h:'Pricing',p:'Transparent USD pricing · From $8 hourly tuition · No contracts',pg:'pricing',svg:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
+                  {n:'$15/hr',h:'Pricing',p:'Transparent USD pricing · One-to-one tuition $15/hour · Fees from $423/month (Primary)',pg:'pricing',svg:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
                   {n:'78+',h:'Tutors',p:'Qualified specialists · BEd, MEd, PhD profiles',pg:'teachers',svg:'<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>'},
                   {n:'10',h:'FAQ',p:'Enrolment, exams, pricing & Mshauri AI answered',pg:'faq',svg:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
                   {n:'9',h:'Blog',p:'IGCSE guides · IB tips · Study abroad · AI learning',pg:'blog',svg:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>'},
@@ -7322,12 +7407,12 @@ export default function LandingPage() {
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': ['EducationalOrganization', 'LocalBusiness'],
-                  '@id': 'https://smartioushomeschool.com/online-school/kenya#org',
-                  'name': 'Smartious Homeschool & eSchool',
+                  '@id': ORG_ID,
+                  'name': SITE,
                   'alternateName': 'Smartious eSchool',
-                  'url': 'https://smartioushomeschool.com/online-school/kenya',
-                  'logo': 'https://smartioushomeschool.com/logo.png',
-                  'image': 'https://smartioushomeschool.com/og-kenya.jpg',
+                  'url': 'https://smartioushomeschool.com/',
+                  'logo': 'https://smartioushomeschool.com/brand/logo.png',
+                  'image': 'https://smartioushomeschool.com/online-virtual-school.png',
                   'description': 'Accredited international homeschool and online school based in Nairobi, Kenya. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel, American curriculum and Kenya CBC. Founded 2018. Serving students across 40+ countries.',
                   'foundingDate': '2018',
                   'telephone': '+254745021212',
@@ -7357,27 +7442,13 @@ export default function LandingPage() {
                     'https://www.instagram.com/smartioushomeschool',
                     'https://www.tiktok.com/@smartioushomeschool',
                   ],
-                  'aggregateRating': {
-                    '@type': 'AggregateRating',
-                    'ratingValue': SMARTIOUS_RATING.stars,
-                    'reviewCount': SMARTIOUS_RATING.count,
-                    'bestRating': '5',
-                    'worstRating': '1',
-                  },
-                  'review': ctry.googleReviews.reviews.map(r => ({
-                    '@type': 'Review',
-                    'author': { '@type': 'Person', 'name': r.name },
-                    'reviewRating': { '@type': 'Rating', 'ratingValue': r.rating, 'bestRating': '5' },
-                    'reviewBody': r.text,
-                  })),
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'BreadcrumbList',
                   'itemListElement': [
                     { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': 'https://smartioushomeschool.com/' },
-                    { '@type': 'ListItem', 'position': 2, 'name': 'Online School', 'item': 'https://smartioushomeschool.com/global' },
-                    { '@type': 'ListItem', 'position': 3, 'name': 'Kenya', 'item': 'https://smartioushomeschool.com/online-school/kenya' },
+                    { '@type': 'ListItem', 'position': 2, 'name': 'Kenya', 'item': 'https://smartioushomeschool.com/online-school/kenya' },
                   ],
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
@@ -7385,30 +7456,30 @@ export default function LandingPage() {
                   '@type': 'Course',
                   'name': 'Cambridge IGCSE Online — Kenya',
                   'description': 'Live, online Cambridge IGCSE programme delivered to students in Kenya by degree-qualified specialists. Mathematics, Sciences, English, Business Studies and more. Exams sat at British Council Nairobi.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Secondary',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '360', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'Cambridge A-Level & IB Diploma Online — Kenya',
                   'description': 'Sixth-form online programme for Kenyan students preparing for UK, US, Canadian and Kenyan universities. Cambridge A-Level and IB Diploma pathways available.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Pre-University',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '515', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'Kenya CBC & KCSE Homeschool',
                   'description': 'Kenya\'s Competency-Based Curriculum (Grades 1-12) and KCSE preparation, taught by KICD/KNEC-aligned specialists. For families remaining in the Kenyan national pathway.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Primary & Secondary',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '180', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
               </>
             )}
@@ -7421,21 +7492,14 @@ export default function LandingPage() {
                   '@type': 'BreadcrumbList',
                   'itemListElement': [
                     { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': 'https://smartioushomeschool.com/' },
-                    { '@type': 'ListItem', 'position': 2, 'name': 'Online School', 'item': 'https://smartioushomeschool.com/global' },
-                    { '@type': 'ListItem', 'position': 3, 'name': 'United Arab Emirates', 'item': 'https://smartioushomeschool.com/online-school/uae' },
-                    { '@type': 'ListItem', 'position': 4, 'name': 'Egypt', 'item': 'https://smartioushomeschool.com/online-school/egypt' },
-                    { '@type': 'ListItem', 'position': 5, 'name': 'Morocco', 'item': 'https://smartioushomeschool.com/online-school/morocco' },
-                    { '@type': 'ListItem', 'position': 6, 'name': 'South Korea', 'item': 'https://smartioushomeschool.com/online-school/south-korea' },
-                    { '@type': 'ListItem', 'position': 7, 'name': 'Japan', 'item': 'https://smartioushomeschool.com/online-school/japan' },
-                    { '@type': 'ListItem', 'position': 8, 'name': 'Vietnam', 'item': 'https://smartioushomeschool.com/online-school/vietnam' },
-                    { '@type': 'ListItem', 'position': 9, 'name': 'Thailand', 'item': 'https://smartioushomeschool.com/online-school/thailand' },
+                    { '@type': 'ListItem', 'position': 2, 'name': 'United Arab Emirates', 'item': 'https://smartioushomeschool.com/online-school/uae' },
                   ],
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Service',
                   'serviceType': 'Online International Homeschool & Virtual School',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'areaServed': [
                     { '@type': 'Country', 'name': 'United Arab Emirates', '@id': 'https://www.wikidata.org/wiki/Q878' },
                     { '@type': 'City', 'name': 'Dubai' },
@@ -7445,27 +7509,27 @@ export default function LandingPage() {
                     { '@type': 'City', 'name': 'Ras Al Khaimah' },
                   ],
                   'description': 'Live online international homeschool serving expat and Emirati families across the UAE. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and American curricula on GST timezone.',
-                  'offers': { '@type': 'AggregateOffer', 'priceCurrency': 'USD', 'lowPrice': '180', 'highPrice': '515', 'priceSpecification': { '@type': 'UnitPriceSpecification', 'unitText': 'MONTH' } },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'Cambridge IGCSE Online — UAE',
                   'description': 'Live, online Cambridge IGCSE programme for UAE-based students, taught on GST timezone by degree-qualified specialists. Exams sat at British Council Dubai and Abu Dhabi.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Secondary',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '360', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'IB Diploma & A-Level Online — UAE',
                   'description': 'Sixth-form online programme for UAE students preparing for UAE private universities, UK, US, Canadian and Australian universities. Cambridge A-Level and IB Diploma pathways available, both delivered live on GST timezone.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Pre-University',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '515', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
               </>
             )}
@@ -7478,15 +7542,14 @@ export default function LandingPage() {
                   '@type': 'BreadcrumbList',
                   'itemListElement': [
                     { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': 'https://smartioushomeschool.com/' },
-                    { '@type': 'ListItem', 'position': 2, 'name': 'Online School', 'item': 'https://smartioushomeschool.com/global' },
-                    { '@type': 'ListItem', 'position': 3, 'name': 'United Kingdom', 'item': 'https://smartioushomeschool.com/online-school/uk' },
+                    { '@type': 'ListItem', 'position': 2, 'name': 'United Kingdom', 'item': 'https://smartioushomeschool.com/online-school/united-kingdom' },
                   ],
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Service',
                   'serviceType': 'Online Home Education & International Online School',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'areaServed': [
                     { '@type': 'Country', 'name': 'United Kingdom' },
                     { '@type': 'AdministrativeArea', 'name': 'England' },
@@ -7499,27 +7562,27 @@ export default function LandingPage() {
                     { '@type': 'City', 'name': 'Edinburgh' },
                   ],
                   'description': 'Live online international school accepting home education students from across the United Kingdom. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and AQA GCSE pathways. GMT/BST scheduling. Full UCAS application support.',
-                  'offers': { '@type': 'AggregateOffer', 'priceCurrency': 'USD', 'lowPrice': '180', 'highPrice': '515', 'priceSpecification': { '@type': 'UnitPriceSpecification', 'unitText': 'MONTH' } },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'Cambridge IGCSE & GCSE Online — UK',
                   'description': 'Live, online IGCSE and AQA GCSE programmes for UK home-educating families. Taught on GMT/BST timezone by degree-qualified specialists. Examinations sat at Cambridge International, Pearson Edexcel and AQA private-candidate centres across the UK.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Secondary',
                   'inLanguage': 'en-GB',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '360', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'A-Level & IB Diploma Online — UK with UCAS Support',
                   'description': 'A-Level and IB Diploma online programme for UK Year 12 and 13 students preparing for UCAS applications to Oxford, Cambridge, Russell Group and international universities. Full personal statement support, predicted grades, admissions test preparation (BMAT, UCAT, LNAT, TSA, TMUA).',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Pre-University',
                   'inLanguage': 'en-GB',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '515', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
               </>
             )}
@@ -7532,15 +7595,14 @@ export default function LandingPage() {
                   '@type': 'BreadcrumbList',
                   'itemListElement': [
                     { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': 'https://smartioushomeschool.com/' },
-                    { '@type': 'ListItem', 'position': 2, 'name': 'Online School', 'item': 'https://smartioushomeschool.com/global' },
-                    { '@type': 'ListItem', 'position': 3, 'name': 'Nigeria', 'item': 'https://smartioushomeschool.com/online-school/nigeria' },
+                    { '@type': 'ListItem', 'position': 2, 'name': 'Nigeria', 'item': 'https://smartioushomeschool.com/online-school/nigeria' },
                   ],
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Service',
                   'serviceType': 'Online International Homeschool & Virtual School',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'areaServed': [
                     { '@type': 'Country', 'name': 'Nigeria' },
                     { '@type': 'City', 'name': 'Lagos' },
@@ -7550,37 +7612,37 @@ export default function LandingPage() {
                     { '@type': 'City', 'name': 'Kano' },
                   ],
                   'description': 'Live online international school serving families across Nigeria. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel, American curriculum and WAEC preparation on WAT timezone. Affordable USD pricing with Naira payment support.',
-                  'offers': { '@type': 'AggregateOffer', 'priceCurrency': 'USD', 'lowPrice': '180', 'highPrice': '515', 'priceSpecification': { '@type': 'UnitPriceSpecification', 'unitText': 'MONTH' } },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'WAEC SSCE Preparation Online — Nigeria',
                   'description': 'Live online West African Senior School Certificate Examination (WASSCE/WAEC) preparation programme for Nigerian students, taught by Nigerian-experienced subject specialists. Covers Mathematics, English Language, Sciences, Economics, Government, Literature and other WAEC subjects.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Senior Secondary',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '260', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'Cambridge IGCSE Online — Nigeria',
                   'description': 'Live online Cambridge IGCSE programme for Nigerian students, taught on WAT timezone by degree-qualified specialists. Examinations sat at British Council Lagos, Abuja and Port Harcourt. JAMB Direct Entry eligible.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Secondary',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '360', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'A-Level & IB Diploma Online — Nigeria',
                   'description': 'Sixth-form online programme for Nigerian students preparing for Nigerian universities (UNILAG, Covenant, ABU, OAU) via JAMB Direct Entry, and for UK, US, Canadian and Australian universities.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Pre-University',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '515', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
               </>
             )}
@@ -7593,15 +7655,14 @@ export default function LandingPage() {
                   '@type': 'BreadcrumbList',
                   'itemListElement': [
                     { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': 'https://smartioushomeschool.com/' },
-                    { '@type': 'ListItem', 'position': 2, 'name': 'Online School', 'item': 'https://smartioushomeschool.com/global' },
-                    { '@type': 'ListItem', 'position': 3, 'name': 'United States', 'item': 'https://smartioushomeschool.com/online-school/usa' },
+                    { '@type': 'ListItem', 'position': 2, 'name': 'United States', 'item': 'https://smartioushomeschool.com/online-school/usa' },
                   ],
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Service',
                   'serviceType': 'International Online School for Globally Connected Families',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'areaServed': [
                     { '@type': 'Country', 'name': 'United States' },
                     { '@type': 'City', 'name': 'Houston' },
@@ -7619,27 +7680,27 @@ export default function LandingPage() {
                     { '@type': 'EducationalAudience', 'audienceType': 'Cambridge IGCSE and IB-track students' },
                   ],
                   'description': 'Live online international school for African diaspora families, globally mobile families, and homeschoolers across the United States. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and British curriculum. US-friendly live and recorded learning options.',
-                  'offers': { '@type': 'AggregateOffer', 'priceCurrency': 'USD', 'lowPrice': '180', 'highPrice': '515', 'priceSpecification': { '@type': 'UnitPriceSpecification', 'unitText': 'MONTH' } },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'Cambridge IGCSE Online — USA',
                   'description': 'Live online Cambridge IGCSE programme for US-based students, with mid-morning Eastern Time class blocks and unlimited recordings. Exams sat at private-candidate centres across the United States. Suitable for African diaspora families, globally mobile families and US homeschoolers seeking international qualifications.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Secondary',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '360', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'A-Level & IB Diploma Online — USA',
                   'description': 'Sixth-form online programme for US-based students preparing for Ivy League, state universities, UK Russell Group, Canadian U15 and African university applications. Cambridge A-Level and IB Diploma pathways with Common App and UCAS support.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Pre-University',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '515', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
               </>
             )}
@@ -7652,15 +7713,14 @@ export default function LandingPage() {
                   '@type': 'BreadcrumbList',
                   'itemListElement': [
                     { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': 'https://smartioushomeschool.com/' },
-                    { '@type': 'ListItem', 'position': 2, 'name': 'Online School', 'item': 'https://smartioushomeschool.com/global' },
-                    { '@type': 'ListItem', 'position': 3, 'name': 'Canada', 'item': 'https://smartioushomeschool.com/online-school/canada' },
+                    { '@type': 'ListItem', 'position': 2, 'name': 'Canada', 'item': 'https://smartioushomeschool.com/online-school/canada' },
                   ],
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Service',
                   'serviceType': 'International Online School for Globally Connected Families',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'areaServed': [
                     { '@type': 'Country', 'name': 'Canada' },
                     { '@type': 'AdministrativeArea', 'name': 'Ontario' },
@@ -7681,27 +7741,27 @@ export default function LandingPage() {
                     { '@type': 'EducationalAudience', 'audienceType': 'Canadian homeschoolers seeking international curriculum' },
                   ],
                   'description': 'Live online international school for African and Caribbean diaspora families, South Asian families, globally mobile families and Cambridge-track homeschoolers across Canada. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel. Canadian-friendly live and recorded learning options.',
-                  'offers': { '@type': 'AggregateOffer', 'priceCurrency': 'USD', 'lowPrice': '180', 'highPrice': '515', 'priceSpecification': { '@type': 'UnitPriceSpecification', 'unitText': 'MONTH' } },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'Cambridge IGCSE Online — Canada',
                   'description': 'Live online Cambridge IGCSE programme for Canadian students, with mid-morning Eastern Time class blocks and unlimited recordings. Exams sat at Cambridge-authorised centres in Toronto, Calgary, Edmonton, Ottawa, Vancouver and Montreal. Suitable for African and Caribbean diaspora families, South Asian families, globally mobile families and Canadian homeschoolers.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Secondary',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '360', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'A-Level & IB Diploma Online — Canada',
                   'description': 'Sixth-form online programme for Canadian students preparing for University of Toronto, McGill, UBC, Waterloo and other Canadian U15 universities, plus UK Russell Group, African and Caribbean universities. Cambridge A-Levels often earn first-year university credit at Canadian universities.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Pre-University',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '515', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
               </>
             )}
@@ -7714,15 +7774,14 @@ export default function LandingPage() {
                   '@type': 'BreadcrumbList',
                   'itemListElement': [
                     { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': 'https://smartioushomeschool.com/' },
-                    { '@type': 'ListItem', 'position': 2, 'name': 'Online School', 'item': 'https://smartioushomeschool.com/global' },
-                    { '@type': 'ListItem', 'position': 3, 'name': 'Australia', 'item': 'https://smartioushomeschool.com/online-school/australia' },
+                    { '@type': 'ListItem', 'position': 2, 'name': 'Australia', 'item': 'https://smartioushomeschool.com/online-school/australia' },
                   ],
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Service',
                   'serviceType': 'International Online School for Globally Connected Families',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'areaServed': [
                     { '@type': 'Country', 'name': 'Australia' },
                     { '@type': 'AdministrativeArea', 'name': 'New South Wales' },
@@ -7743,27 +7802,27 @@ export default function LandingPage() {
                     { '@type': 'EducationalAudience', 'audienceType': 'Regional and rural Australian homeschoolers' },
                   ],
                   'description': 'Live online international school for South Asian families, African diaspora families, returning expat Australians and Cambridge-pathway homeschoolers across Australia. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel. Recordings-led delivery model designed for Australian time zones.',
-                  'offers': { '@type': 'AggregateOffer', 'priceCurrency': 'USD', 'lowPrice': '180', 'highPrice': '515', 'priceSpecification': { '@type': 'UnitPriceSpecification', 'unitText': 'MONTH' } },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'Cambridge IGCSE Online — Australia',
                   'description': 'Live and recorded online Cambridge IGCSE programme for Australian students, delivered through recordings (primary), selected live sessions, and one-on-one tuition scheduled in Australian evening hours. Exams sat at Cambridge-authorised centres in Sydney, Melbourne, Brisbane, Perth, Adelaide and Canberra. Suitable for South Asian families, African diaspora families, returning expats and Australian homeschoolers.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Secondary',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '360', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'A-Level & IB Diploma Online — Australia',
                   'description': 'Sixth-form online programme for Australian students preparing for the Group of Eight (Melbourne, Sydney, ANU, UNSW, UQ, Monash, Adelaide, UWA) plus UK Russell Group, Indian, US and African universities. Cambridge A-Level results convert to ATAR equivalents through UAC, VTAC, QTAC.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Pre-University',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '515', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
               </>
             )}
@@ -7776,15 +7835,14 @@ export default function LandingPage() {
                   '@type': 'BreadcrumbList',
                   'itemListElement': [
                     { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': 'https://smartioushomeschool.com/' },
-                    { '@type': 'ListItem', 'position': 2, 'name': 'Online School', 'item': 'https://smartioushomeschool.com/global' },
-                    { '@type': 'ListItem', 'position': 3, 'name': 'Bahrain', 'item': 'https://smartioushomeschool.com/online-school/bahrain' },
+                    { '@type': 'ListItem', 'position': 2, 'name': 'Bahrain', 'item': 'https://smartioushomeschool.com/online-school/bahrain' },
                   ],
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Service',
                   'serviceType': 'Online International Homeschool & Virtual School',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'areaServed': [
                     { '@type': 'Country', 'name': 'Bahrain' },
                     { '@type': 'City', 'name': 'Manama' },
@@ -7794,27 +7852,27 @@ export default function LandingPage() {
                     { '@type': 'City', 'name': 'Hamad Town' },
                   ],
                   'description': 'Live online international school serving Bahraini families and expat residents across the Kingdom of Bahrain. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and British curriculum pathways on Bahrain-friendly time zone. Exams at British Council Manama.',
-                  'offers': { '@type': 'AggregateOffer', 'priceCurrency': 'USD', 'lowPrice': '180', 'highPrice': '515', 'priceSpecification': { '@type': 'UnitPriceSpecification', 'unitText': 'MONTH' } },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'Cambridge IGCSE Online — Bahrain',
                   'description': 'Live online Cambridge IGCSE programme for Bahraini and expat families, taught in the UK & Africa time-zone band that aligns with Bahrain daytime hours. Examinations sat at British Council Manama. Suitable for Bahraini citizens, Indian, Pakistani, Filipino and Western expat families resident in Bahrain.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Secondary',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '360', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'A-Level & IB Diploma Online — Bahrain',
                   'description': 'Sixth-form online programme for Bahrain-based students preparing for University of Bahrain, Gulf universities, UK Russell Group, US Ivy League, Canadian and Australian universities. Cambridge A-Level and IB Diploma pathways with UCAS and Common App support.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Pre-University',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '515', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
               </>
             )}
@@ -7827,15 +7885,14 @@ export default function LandingPage() {
                   '@type': 'BreadcrumbList',
                   'itemListElement': [
                     { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': 'https://smartioushomeschool.com/' },
-                    { '@type': 'ListItem', 'position': 2, 'name': 'Online School', 'item': 'https://smartioushomeschool.com/global' },
-                    { '@type': 'ListItem', 'position': 3, 'name': 'Pakistan', 'item': 'https://smartioushomeschool.com/online-school/pakistan' },
+                    { '@type': 'ListItem', 'position': 2, 'name': 'Pakistan', 'item': 'https://smartioushomeschool.com/online-school/pakistan' },
                   ],
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Service',
                   'serviceType': 'Online International Homeschool & Virtual School',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'areaServed': [
                     { '@type': 'Country', 'name': 'Pakistan' },
                     { '@type': 'City', 'name': 'Karachi' },
@@ -7846,27 +7903,27 @@ export default function LandingPage() {
                     { '@type': 'City', 'name': 'Multan' },
                   ],
                   'description': 'Live online international school serving ambitious Pakistani families. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and British curriculum pathways. Exams sat at British Council Pakistan centres in Karachi, Lahore, Islamabad and Rawalpindi. Live UK & Africa-band classes during Pakistani afternoon hours.',
-                  'offers': { '@type': 'AggregateOffer', 'priceCurrency': 'USD', 'lowPrice': '180', 'highPrice': '515', 'priceSpecification': { '@type': 'UnitPriceSpecification', 'unitText': 'MONTH' } },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'Cambridge IGCSE Online — Pakistan',
                   'description': 'Live online Cambridge IGCSE programme for Pakistani students, taught in the UK & Africa time-zone band during Pakistani afternoon hours. Examinations sat at British Council Pakistan centres in Karachi, Lahore, Islamabad and Rawalpindi. Pakistan was unaffected by the 2026 Cambridge UAE examination cancellations.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Secondary',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '360', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'A-Level & IB Diploma Online — Pakistan',
                   'description': 'Sixth-form online programme for Pakistani students preparing for LUMS, IBA Karachi, NUST, Habib University, AKU and other Pakistani universities, plus UK Russell Group, US Ivy League, Canadian and Australian universities. Cambridge A-Level and IB Diploma pathways with UCAS and Common App support.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Pre-University',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '515', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
               </>
             )}
@@ -7879,15 +7936,14 @@ export default function LandingPage() {
                   '@type': 'BreadcrumbList',
                   'itemListElement': [
                     { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': 'https://smartioushomeschool.com/' },
-                    { '@type': 'ListItem', 'position': 2, 'name': 'Online School', 'item': 'https://smartioushomeschool.com/global' },
-                    { '@type': 'ListItem', 'position': 3, 'name': 'South Africa', 'item': 'https://smartioushomeschool.com/online-school/south-africa' },
+                    { '@type': 'ListItem', 'position': 2, 'name': 'South Africa', 'item': 'https://smartioushomeschool.com/online-school/south-africa' },
                   ],
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Service',
                   'serviceType': 'Online International Homeschool & Virtual School',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'areaServed': [
                     { '@type': 'Country', 'name': 'South Africa' },
                     { '@type': 'AdministrativeArea', 'name': 'Gauteng' },
@@ -7900,27 +7956,27 @@ export default function LandingPage() {
                     { '@type': 'City', 'name': 'Durban' },
                   ],
                   'description': 'Live online international school serving South African families. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and British curriculum pathways. Exams sat at British Council South Africa centres in Johannesburg, Cape Town, Pretoria, Durban. Live UK & Africa-band classes during SA school hours. Compliant with the BELA Act 2024 framework for online schooling.',
-                  'offers': { '@type': 'AggregateOffer', 'priceCurrency': 'USD', 'lowPrice': '180', 'highPrice': '515', 'priceSpecification': { '@type': 'UnitPriceSpecification', 'unitText': 'MONTH' } },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'Cambridge IGCSE Online — South Africa',
                   'description': 'Live online Cambridge IGCSE programme for South African students, taught in the UK & Africa time-zone band during SA school hours. Examinations sat at British Council South Africa centres and Cambridge-authorised centres across Johannesburg, Cape Town, Pretoria, Durban and Stellenbosch.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Secondary',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '360', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'A-Level & IB Diploma Online — South Africa',
                   'description': 'Sixth-form online programme for South African students preparing for UCT, Wits, Stellenbosch, UP, UJ and other SA universities, plus UK Russell Group, US Ivy League, Canadian U15 and Australian Group of Eight universities. Cambridge A-Level often grants first-year credit at SA universities.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Pre-University',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '515', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
               </>
             )}
@@ -7933,15 +7989,14 @@ export default function LandingPage() {
                   '@type': 'BreadcrumbList',
                   'itemListElement': [
                     { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': 'https://smartioushomeschool.com/' },
-                    { '@type': 'ListItem', 'position': 2, 'name': 'Online School', 'item': 'https://smartioushomeschool.com/global' },
-                    { '@type': 'ListItem', 'position': 3, 'name': 'Uganda', 'item': 'https://smartioushomeschool.com/online-school/uganda' },
+                    { '@type': 'ListItem', 'position': 2, 'name': 'Uganda', 'item': 'https://smartioushomeschool.com/online-school/uganda' },
                   ],
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Service',
                   'serviceType': 'Online International School & Cambridge Curriculum Provider',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'areaServed': [
                     { '@type': 'Country', 'name': 'Uganda' },
                     { '@type': 'City', 'name': 'Kampala' },
@@ -7952,27 +8007,27 @@ export default function LandingPage() {
                     { '@type': 'City', 'name': 'Mbarara' },
                   ],
                   'description': 'Live online international school serving Ugandan families. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and British curriculum pathways. Exams sat at British Council Uganda and authorised international school centres in Kampala. Live East Africa Time classes. Dual setup recommended for Ugandan citizen families pending NCDC homeschool policy.',
-                  'offers': { '@type': 'AggregateOffer', 'priceCurrency': 'USD', 'lowPrice': '180', 'highPrice': '515', 'priceSpecification': { '@type': 'UnitPriceSpecification', 'unitText': 'MONTH' } },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'Cambridge IGCSE Online — Uganda',
                   'description': 'Live online Cambridge IGCSE programme for Ugandan students, taught in East Africa Time during Kampala school hours. Examinations sat at British Council Uganda exam centres and authorised international school centres in Kampala. Suitable as primary programme for expat families or as the substantive academic programme alongside local school registration for Ugandan citizen families.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Secondary',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '360', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'A-Level & IB Diploma Online — Uganda',
                   'description': 'Sixth-form online programme for Ugandan students preparing for Makerere, Kyambogo, UCU, MUST and other Ugandan universities, plus UK Russell Group, US Ivy League, South African, Canadian and Australian universities. Cambridge A-Level accepted as equivalent to UACE for Ugandan university entry.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Pre-University',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '515', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
               </>
             )}
@@ -7985,15 +8040,14 @@ export default function LandingPage() {
                   '@type': 'BreadcrumbList',
                   'itemListElement': [
                     { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': 'https://smartioushomeschool.com/' },
-                    { '@type': 'ListItem', 'position': 2, 'name': 'Online School', 'item': 'https://smartioushomeschool.com/global' },
-                    { '@type': 'ListItem', 'position': 3, 'name': 'Somalia', 'item': 'https://smartioushomeschool.com/online-school/somalia' },
+                    { '@type': 'ListItem', 'position': 2, 'name': 'Somalia', 'item': 'https://smartioushomeschool.com/online-school/somalia' },
                   ],
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Service',
                   'serviceType': 'Online International School & Cambridge Curriculum Provider',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'areaServed': [
                     { '@type': 'Country', 'name': 'Somalia' },
                     { '@type': 'City', 'name': 'Mogadishu' },
@@ -8003,27 +8057,27 @@ export default function LandingPage() {
                     { '@type': 'City', 'name': 'Kismayo' },
                   ],
                   'description': 'Live online international school serving Somali families. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and British curriculum pathways. Live East Africa Time classes. Exams sat at Mogadishu Cambridge-authorised centres or British Council Nairobi. USD pricing for dollarised Somali market.',
-                  'offers': { '@type': 'AggregateOffer', 'priceCurrency': 'USD', 'lowPrice': '180', 'highPrice': '515', 'priceSpecification': { '@type': 'UnitPriceSpecification', 'unitText': 'MONTH' } },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'Cambridge IGCSE Online — Somalia',
                   'description': 'Live online Cambridge IGCSE programme for Somali students, taught in East Africa Time during Mogadishu school hours. Examinations sat at Cambridge-authorised Mogadishu schools (DIAS, Sunrise International Academy, others) or British Council Nairobi as backup. Suitable for Mogadishu-resident families, returning diaspora families, and globally mobile Somali families.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Secondary',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '360', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'A-Level & IB Diploma Online — Somalia',
                   'description': 'Sixth-form online programme for Somali students preparing for Mogadishu University, SIMAD, Benadir, University of Hargeisa and other Somali universities, plus Turkish universities (popular for Somali students), Malaysian, Gulf, UK Russell Group, US, Canadian and Australian institutions.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Pre-University',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '515', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
               </>
             )}
@@ -8036,15 +8090,14 @@ export default function LandingPage() {
                   '@type': 'BreadcrumbList',
                   'itemListElement': [
                     { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': 'https://smartioushomeschool.com/' },
-                    { '@type': 'ListItem', 'position': 2, 'name': 'Online School', 'item': 'https://smartioushomeschool.com/global' },
-                    { '@type': 'ListItem', 'position': 3, 'name': 'Tanzania', 'item': 'https://smartioushomeschool.com/online-school/tanzania' },
+                    { '@type': 'ListItem', 'position': 2, 'name': 'Tanzania', 'item': 'https://smartioushomeschool.com/online-school/tanzania' },
                   ],
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Service',
                   'serviceType': 'Online International School & Cambridge Curriculum Provider',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'areaServed': [
                     { '@type': 'Country', 'name': 'Tanzania' },
                     { '@type': 'City', 'name': 'Dar es Salaam' },
@@ -8055,27 +8108,27 @@ export default function LandingPage() {
                     { '@type': 'City', 'name': 'Moshi' },
                   ],
                   'description': 'Live online international school serving Tanzanian families. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and British curriculum pathways. Live East Africa Time classes. Exams sat at British Council Tanzania and authorised international school centres in Dar es Salaam. Cambridge pathway for families outside NECTA-registered schools.',
-                  'offers': { '@type': 'AggregateOffer', 'priceCurrency': 'USD', 'lowPrice': '180', 'highPrice': '515', 'priceSpecification': { '@type': 'UnitPriceSpecification', 'unitText': 'MONTH' } },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'Cambridge IGCSE Online — Tanzania',
                   'description': 'Live online Cambridge IGCSE programme for Tanzanian students, taught in East Africa Time during Tanzanian school hours. Examinations sat at British Council Tanzania exam centres and authorised international school centres (IST, Braeburn Dar, HOPAC, St Constantine\'s, Aga Khan Mzizima) in Dar es Salaam and Arusha. The Cambridge pathway is the standard route for Tanzanian families educating outside NECTA-registered schools.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Secondary',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '360', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
                   '@type': 'Course',
                   'name': 'A-Level & IB Diploma Online — Tanzania',
                   'description': 'Sixth-form online programme for Tanzanian students preparing for University of Dar es Salaam, Sokoine, Muhimbili, Mzumbe, UDOM and other Tanzanian universities, plus UK Russell Group, US Ivy League, South African, Canadian and Australian universities. Cambridge A-Level accepted as equivalent to ACSEE by the Tanzania Commission for Universities.',
-                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'provider': ORG_REF,
                   'educationalLevel': 'Pre-University',
                   'inLanguage': 'en',
-                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '515', 'category': 'Monthly tuition' },
+                  'offers': FEE_OFFER,
                 })}}/>
               </>
             )}
@@ -11117,7 +11170,7 @@ export default function LandingPage() {
                         ['Religious neutrality','✓ Secular default','◐ Some objections','✗ Explicitly Christian','✓ Secular'],
                         ['College application support included','✓ UCAS + Common App','✗ Not included','◐ Transcript only','◐ Limited'],
                         ['AI tutor 24/7','✓ Mshauri AI Pro','✗','✗','✗'],
-                        ['Starting price (per month)','From $400','$99-249','$150-300','Free (state-funded) - $300'],
+                        ['Starting price (per month)','From $423 (Primary)','$99-249','$150-300','Free (state-funded) - $300'],
                         ['Sibling discount','✓ 15-25% off','✗','◐ Curriculum sharing','✗'],
                         ['Need-based bursary','✓ Up to 50% off','◐ Roger Billings only','✗','State-dependent'],
                         ['Customer service track record','Direct founder access','BBB complaints filed','Established 50+ years','Mixed state-by-state'],
@@ -11337,8 +11390,8 @@ export default function LandingPage() {
                   {q:'What about state homeschool reporting requirements?',a:'Each US state has different homeschool laws. Some states (like Idaho, Texas, Alaska) have minimal requirements. Others (like New York, Pennsylvania) require formal notification and annual reporting. Smartious provides everything you need: official letterhead, transcripts, progress reports, and standardised assessment results. We do not file paperwork on your behalf — but we provide everything you need to file.'},
                   {q:'How do US time zones work with classes in Nairobi?',a:'Smartious afternoon and evening classes (3pm-10pm EAT) map to morning hours across all four US time zones — see the schedule table above. Most US families do Smartious classes between 9am-1pm Eastern, which is the natural morning school window. 1-on-1 tutoring is scheduled by mutual agreement and can flex to any time.'},
                   {q:'Do you offer AP courses?',a:'AP courses are on our curriculum roadmap for the 2026-2027 academic year (launching August 2026). We currently focus on Cambridge IGCSE, A-Level, and IB Diploma as our core international qualifications. American students interested in AP can complement Smartious with US-based AP self-study (College Board, Khan Academy AP, etc.) and we will help coordinate AP exam registration.'},
-                  {q:'How does pricing compare to mainstream US homeschool options?',a:'Smartious Premium Online (from $423/month, $2,746/year with annual discount) sits between Acellus Basic ($249/month, $2,400/year) and the premium live-class providers like Veritas Press Scholars Academy ($400+/month). For genuine live teaching with international rigour, Smartious is 30-60% less than direct competitors like Cambridge Home School ($4,500+/year) or InterHigh ($5,200+/year).'},
-                  {q:'Can I just enrol my child in one or two subjects?',a:'Yes. Through Private Tuition you can purchase 1-on-1 tutoring in any single subject from $15/hour (Primary) to $28/hour (A-Level / IB). Useful for families who like their current curriculum but want supplementary support in maths, sciences, or specific subjects.'},
+                  {q:'How does pricing compare to mainstream US homeschool options?',a:'Smartious Online School (from $423/month for Primary, payable termly; fees vary by curriculum and level) sits between Acellus Basic ($249/month, $2,400/year) and the premium live-class providers like Veritas Press Scholars Academy ($400+/month). For genuine live teaching with international rigour, Smartious is 30-60% less than direct competitors like Cambridge Home School ($4,500+/year) or InterHigh ($5,200+/year).'},
+                  {q:'Can I just enrol my child in one or two subjects?',a:'Yes. Through Private Tuition you can purchase 1-on-1 tutoring in any single subject at $15/hour. Useful for families who like their current curriculum but want supplementary support in maths, sciences, or specific subjects.'},
                   {q:'What happens if my child needs to return to a regular US school?',a:'Smartious provides full transcripts in US-standard GPA format on request. Students moving from IGCSE to a US high school typically slot in at grade 10 or 11 with credit equivalency. We help families coordinate transcripts with receiving schools.'},
                   {q:'Do you offer a free trial?',a:'We offer a free 30-minute consultation with our admissions team to determine fit. We also offer the placement assessment ($40) which includes one sample 60-minute lesson. We don\'t offer a longer free trial because our delivery model is intensive — committing a teacher\'s time to a student needs proper enrolment.'},
                   {q:'My child has dyslexia / ADHD / autism. Can Smartious help?',a:'Yes. We offer Special Educational Needs (SEN) support at $50 per session with SEN-trained tutors. Initial $80 assessment determines the right pathway. We have experience with dyslexia, ADHD, autism spectrum, dyscalculia, and processing differences. Many SEN students struggle with the self-paced video model of mainstream US homeschool platforms — they often thrive with our 1-on-1 live model.'},
@@ -11550,7 +11603,7 @@ export default function LandingPage() {
                         ['Religious neutrality','✓ Secular default','◐ Some objections','✗ Explicitly Christian','✓ Secular'],
                         ['College application support included','✓ UCAS + Common App','✗ Not included','◐ Transcript only','◐ Limited'],
                         ['AI tutor 24/7','✓ Mshauri AI Pro','✗','✗','✗'],
-                        ['Starting price (per month)','From $400','$99-249','$150-300','Free (state-funded) - $300'],
+                        ['Starting price (per month)','From $423 (Primary)','$99-249','$150-300','Free (state-funded) - $300'],
                         ['Sibling discount','✓ 15-25% off','✗','◐ Curriculum sharing','✗'],
                         ['Need-based bursary','✓ Up to 50% off','◐ Roger Billings only','✗','State-dependent'],
                         ['Customer service track record','Direct founder access','BBB complaints filed','Established 50+ years','Mixed state-by-state'],
@@ -11770,8 +11823,8 @@ export default function LandingPage() {
                   {q:'What about provincial homeschool reporting requirements?',a:'Each Canadian province has different homeschool laws. Some provinces (like Idaho, Texas, Alaska) have minimal requirements. Others (like New York, Pennsylvania) require formal notification and annual reporting. Smartious provides everything you need: official letterhead, transcripts, progress reports, and standardised assessment results. We do not file paperwork on your behalf — but we provide everything you need to file.'},
                   {q:'How do US time zones work with classes in Nairobi?',a:'Smartious afternoon and evening classes (3pm-10pm EAT) map to morning hours across all six Canadian time zones (Pacific, Mountain, Central, Eastern, Atlantic, Newfoundland) — see the schedule table above. Most Canadian families do Smartious classes between 9am-1pm Eastern, which is the natural morning school window. 1-on-1 tutoring is scheduled by mutual agreement and can flex to any time.'},
                   {q:'Do you offer AP courses?',a:'AP courses are on our curriculum roadmap for the 2026-2027 academic year (launching August 2026). We currently focus on Cambridge IGCSE, A-Level, and IB Diploma as our core international qualifications. Canadian students interested in AP can complement Smartious with US-based AP self-study (College Board, Khan Academy AP, etc.) and we will help coordinate AP exam registration.'},
-                  {q:'How does pricing compare to mainstream Canadian and US homeschool options?',a:'Smartious Premium Online (from $423/month, $2,746/year with annual discount) sits between Acellus Basic ($249/month, $2,400/year) and the premium live-class providers like Veritas Press Scholars Academy ($400+/month). For genuine live teaching with international rigour, Smartious is 30-60% less than direct competitors like Cambridge Home School ($4,500+/year) or InterHigh ($5,200+/year).'},
-                  {q:'Can I just enrol my child in one or two subjects?',a:'Yes. Through Private Tuition you can purchase 1-on-1 tutoring in any single subject from $15/hour (Primary) to $28/hour (A-Level / IB). Useful for families who like their current curriculum but want supplementary support in maths, sciences, or specific subjects.'},
+                  {q:'How does pricing compare to mainstream Canadian and US homeschool options?',a:'Smartious Online School (from $423/month for Primary, payable termly; fees vary by curriculum and level) sits between Acellus Basic ($249/month, $2,400/year) and the premium live-class providers like Veritas Press Scholars Academy ($400+/month). For genuine live teaching with international rigour, Smartious is 30-60% less than direct competitors like Cambridge Home School ($4,500+/year) or InterHigh ($5,200+/year).'},
+                  {q:'Can I just enrol my child in one or two subjects?',a:'Yes. Through Private Tuition you can purchase 1-on-1 tutoring in any single subject at $15/hour. Useful for families who like their current curriculum but want supplementary support in maths, sciences, or specific subjects.'},
                   {q:'What happens if my child needs to return to a regular Canadian or US school?',a:'Smartious provides full transcripts in US-standard GPA format on request. Students moving from IGCSE to a Canadian or US high school typically slot in at grade 10 or 11 with credit equivalency. We help families coordinate transcripts with receiving schools.'},
                   {q:'Do you offer a free trial?',a:'We offer a free 30-minute consultation with our admissions team to determine fit. We also offer the placement assessment ($40) which includes one sample 60-minute lesson. We don\'t offer a longer free trial because our delivery model is intensive — committing a teacher\'s time to a student needs proper enrolment.'},
                   {q:'My child has dyslexia / ADHD / autism. Can Smartious help?',a:'Yes. We offer Special Educational Needs (SEN) support at $50 per session with SEN-trained tutors. Initial $80 assessment determines the right pathway. We have experience with dyslexia, ADHD, autism spectrum, dyscalculia, and processing differences. Many SEN students struggle with the self-paced video model of mainstream Canadian and US homeschool platforms — they often thrive with our 1-on-1 live model.'},
@@ -12038,13 +12091,12 @@ export default function LandingPage() {
               <div style={{textAlign:'center',marginBottom:36}}>
                 <div style={{fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',color:V.cr,fontWeight:700,marginBottom:12}}>Pricing in USD for {s.name} families</div>
                 <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.7rem,3.2vw,2.2rem)',color:V.ink,fontWeight:400,marginBottom:8}}>Transparent monthly tuition</h2>
-                <p style={{fontSize:14,color:V.sl,maxWidth:560,margin:'0 auto'}}>Three tiers. Real teachers in every tier. No surprise fees.</p>
+                <p style={{fontSize:14,color:V.sl,maxWidth:560,margin:'0 auto'}}>Fees from USD 423/month for Primary, payable termly; fees vary by curriculum and level. One-to-one tuition USD 15/hour.</p>
               </div>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:18,maxWidth:1000,margin:'0 auto'}}>
                 {[
-                  {name:'Online',price:'From $400',sub:'/month USD',desc:'Live group classes (4–6 students), recorded for review, Mshauri AI included.',popular:false},
-                  {name:'Online Plus',price:'Enquire',sub:'most popular · tailored quote',desc:'Live group + 1-on-1 tutoring, exam prep, free college application support.',popular:true},
-                  {name:'Premium 1-on-1',price:'Enquire',sub:'tailored quote',desc:'Pure one-on-one with a dedicated PGCE-trained teacher. For Ivy League / Oxbridge tracks.',popular:false},
+                  {name:'Online School',price:'From $423',sub:'per month · Primary · paid termly',desc:'Live small-group classes in every subject, Mshauri AI included. Fees vary by curriculum and level.',popular:false},
+                  {name:'1-on-1 Tuition',price:'$15',sub:'per hour',desc:'One-to-one live online sessions in any subject, at any level, scheduled to your time zone.',popular:false},
                 ].map((t,i)=>(
                   <div key={i} style={{background:V.white,border: t.popular ? '2px solid '+V.gold3 : '1px solid '+V.bone3,borderRadius:14,padding:24,position:'relative'}}>
                     {t.popular && <div style={{position:'absolute',top:-12,left:24,background:V.gold3,color:V.ink,fontSize:10,fontWeight:800,letterSpacing:'.1em',padding:'4px 10px',borderRadius:99,textTransform:'uppercase'}}>Most popular</div>}
@@ -12066,7 +12118,7 @@ export default function LandingPage() {
               </div>
               {s.voucher && (
                 <div style={{marginTop:24,padding:14,background:V.bone2,borderRadius:10,textAlign:'center',fontSize:13,color:V.sl2,maxWidth:680,margin:'24px auto 0'}}>
-                  <strong style={{color:V.ink}}>{s.name} families:</strong> The {s.voucher.name} voucher ({s.voucher.amount}/child) covers Online and Online Plus tiers fully. Premium 1-on-1 may need supplementary funds.
+                  <strong style={{color:V.ink}}>{s.name} families:</strong> The {s.voucher.name} voucher ({s.voucher.amount}/child) can be put towards Smartious fees where the programme allows; check eligibility with the programme.
                 </div>
               )}
             </div>
@@ -12367,13 +12419,12 @@ export default function LandingPage() {
               <div style={{textAlign:'center',marginBottom:36}}>
                 <div style={{fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',color:V.cr,fontWeight:700,marginBottom:12}}>Pricing in CAD for {s.name} families</div>
                 <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.7rem,3.2vw,2.2rem)',color:V.ink,fontWeight:400,marginBottom:8}}>Transparent monthly tuition</h2>
-                <p style={{fontSize:14,color:V.sl,maxWidth:560,margin:'0 auto'}}>Three tiers. Real teachers in every tier. No surprise fees.</p>
+                <p style={{fontSize:14,color:V.sl,maxWidth:560,margin:'0 auto'}}>Fees from USD 423/month for Primary, payable termly; fees vary by curriculum and level. One-to-one tuition USD 15/hour.</p>
               </div>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:18,maxWidth:1000,margin:'0 auto'}}>
                 {[
-                  {name:'Online',price:'From $400',sub:'USD /month',desc:'Live group classes (4–6 students), recorded for review, Mshauri AI included.',popular:false},
-                  {name:'Online Plus',price:'Enquire',sub:'most popular · tailored quote',desc:'Live group + 1-on-1 tutoring, exam prep, free college application support.',popular:true},
-                  {name:'Premium 1-on-1',price:'Enquire',sub:'tailored quote',desc:'Pure one-on-one with a dedicated PGCE-trained teacher. For Ivy League / Oxbridge tracks.',popular:false},
+                  {name:'Online School',price:'From $423',sub:'per month · Primary · paid termly',desc:'Live small-group classes in every subject, Mshauri AI included. Fees vary by curriculum and level.',popular:false},
+                  {name:'1-on-1 Tuition',price:'$15',sub:'per hour',desc:'One-to-one live online sessions in any subject, at any level, scheduled to your time zone.',popular:false},
                 ].map((t,i)=>(
                   <div key={i} style={{background:V.white,border: t.popular ? '2px solid '+V.gold3 : '1px solid '+V.bone3,borderRadius:14,padding:24,position:'relative'}}>
                     {t.popular && <div style={{position:'absolute',top:-12,left:24,background:V.gold3,color:V.ink,fontSize:10,fontWeight:800,letterSpacing:'.1em',padding:'4px 10px',borderRadius:99,textTransform:'uppercase'}}>Most popular</div>}
@@ -12395,7 +12446,7 @@ export default function LandingPage() {
               </div>
               {s.voucher && (
                 <div style={{marginTop:24,padding:14,background:V.bone2,borderRadius:10,textAlign:'center',fontSize:13,color:V.sl2,maxWidth:680,margin:'24px auto 0'}}>
-                  <strong style={{color:V.ink}}>{s.name} families:</strong> The {s.voucher.name} voucher ({s.voucher.amount}/child) contributes meaningfully to all three tiers. Some provinces (Alberta universal $850, BC DL ~$600, Saskatchewan division-dependent) cover larger portions than others.
+                  <strong style={{color:V.ink}}>{s.name} families:</strong> The {s.voucher.name} voucher ({s.voucher.amount}/child) can be put towards Smartious fees. Some provinces (Alberta universal $850, BC DL ~$600, Saskatchewan division-dependent) cover larger portions than others.
                 </div>
               )}
             </div>
@@ -12650,13 +12701,12 @@ export default function LandingPage() {
               <div style={{textAlign:'center',marginBottom:36}}>
                 <div style={{fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',color:V.cr,fontWeight:700,marginBottom:12}}>Pricing in USD for {c.name} families</div>
                 <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.7rem,3.2vw,2.2rem)',color:V.ink,fontWeight:400,marginBottom:8}}>Transparent monthly tuition</h2>
-                <p style={{fontSize:14,color:V.sl,maxWidth:560,margin:'0 auto'}}>Three tiers. Real teachers in every tier. No surprise fees.</p>
+                <p style={{fontSize:14,color:V.sl,maxWidth:560,margin:'0 auto'}}>Fees from USD 423/month for Primary, payable termly; fees vary by curriculum and level. One-to-one tuition USD 15/hour.</p>
               </div>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:18,maxWidth:1000,margin:'0 auto'}}>
                 {[
-                  {name:'Online',price:'From $400',sub:'/month USD',desc:'Live group classes (4–6 students), recorded for review, Mshauri AI included.',popular:false},
-                  {name:'Online Plus',price:'Enquire',sub:'most popular · tailored quote',desc:'Live group + 1-on-1 tutoring, exam prep, free college application support.',popular:true},
-                  {name:'Premium 1-on-1',price:'Enquire',sub:'tailored quote',desc:'Pure one-on-one with a dedicated PGCE-trained teacher. For Ivy League / Oxbridge tracks.',popular:false},
+                  {name:'Online School',price:'From $423',sub:'per month · Primary · paid termly',desc:'Live small-group classes in every subject, Mshauri AI included. Fees vary by curriculum and level.',popular:false},
+                  {name:'1-on-1 Tuition',price:'$15',sub:'per hour',desc:'One-to-one live online sessions in any subject, at any level, scheduled to your time zone.',popular:false},
                 ].map((t,i)=>(
                   <div key={i} style={{background:V.white,border: t.popular ? '2px solid '+V.gold3 : '1px solid '+V.bone3,borderRadius:14,padding:24,position:'relative'}}>
                     {t.popular && <div style={{position:'absolute',top:-12,left:24,background:V.gold3,color:V.ink,fontSize:10,fontWeight:800,letterSpacing:'.1em',padding:'4px 10px',borderRadius:99,textTransform:'uppercase'}}>Most popular</div>}
@@ -12678,7 +12728,7 @@ export default function LandingPage() {
               </div>
               {s.voucher && (
                 <div style={{marginTop:24,padding:14,background:V.bone2,borderRadius:10,textAlign:'center',fontSize:13,color:V.sl2,maxWidth:680,margin:'24px auto 0'}}>
-                  <strong style={{color:V.ink}}>{c.name} families:</strong> The {s.voucher.name} voucher ({s.voucher.amount}/child) covers Online and Online Plus tiers fully.
+                  <strong style={{color:V.ink}}>{c.name} families:</strong> The {s.voucher.name} voucher ({s.voucher.amount}/child) can be put towards Smartious fees where the programme allows; check eligibility with the programme.
                 </div>
               )}
             </div>
@@ -12779,9 +12829,9 @@ export default function LandingPage() {
           {/* Schema */}
           <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
             '@context':'https://schema.org','@type':'EducationalOrganization',
-            '@id':'https://smartioushomeschool.com/alberta-home-ed-funding#org',
-            'name':'Smartious — Alberta Home Education Funding ($850 CAD eligible curriculum)',
-            'url':'https://smartioushomeschool.com/alberta-home-ed-funding',
+            '@id': ORG_ID,
+            'name': SITE,
+            'url':'https://smartioushomeschool.com/',
             'description':'Use Alberta\'s universal $850 CAD/child Home Education Funding for Smartious live Cambridge IGCSE & A-Level instruction. Curriculum, tutoring, and exam fees all eligible.',
             'areaServed':{'@type':'AdministrativeArea','name':'Alberta, Canada'},
           })}}/>
@@ -12848,25 +12898,25 @@ export default function LandingPage() {
           {/* PRICING WITH FUNDING OFFSET */}
           <section className="sec" style={{background:'#fff',padding:'64px 0'}}>
             <div className="wrap" style={{maxWidth:920}}>
-              <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,42px)',color:V.ink,margin:'0 0 8px'}}>What your $850 CAD covers at each tier</h2>
-              <p style={{color:V.sl,fontSize:15,margin:'0 0 32px'}}>Real numbers — your funding allocation applied to actual Smartious tiers.</p>
+              <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,42px)',color:V.ink,margin:'0 0 8px'}}>What your $850 CAD covers</h2>
+              <p style={{color:V.sl,fontSize:15,margin:'0 0 32px'}}>Your funding allocation applied to Smartious fees, which start from USD 423/month for Primary and vary by curriculum and level.</p>
 
               <div style={{overflowX:'auto'}}>
                 <table style={{width:'100%',borderCollapse:'collapse',fontSize:14,minWidth:600}}>
                   <thead>
                     <tr style={{background:V.ink,color:'#fff'}}>
-                      <th style={{padding:'14px 16px',textAlign:'left',fontWeight:600}}>Tier</th>
-                      <th style={{padding:'14px 16px',textAlign:'right',fontWeight:600}}>Smartious CAD/yr</th>
+                      <th style={{padding:'14px 16px',textAlign:'left',fontWeight:600}}>Programme</th>
+                      <th style={{padding:'14px 16px',textAlign:'right',fontWeight:600}}>Smartious fees</th>
                       <th style={{padding:'14px 16px',textAlign:'right',fontWeight:600}}>$850 AB funding</th>
                       <th style={{padding:'14px 16px',textAlign:'right',fontWeight:600}}>You pay (after funding)</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
-                      <td style={{padding:'14px 16px',color:V.ink,fontWeight:600}}>Smartious tuition (from $400 USD/mo)</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.sl}}>from ~$6,530</td>
+                      <td style={{padding:'14px 16px',color:V.ink,fontWeight:600}}>Smartious fees (from USD 423/month, Primary)</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.sl}}>from USD 423/month</td>
                       <td style={{padding:'14px 16px',textAlign:'right',color:V.cr,fontWeight:600}}>−$850</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink,fontWeight:600}}>from ~$5,680 net</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink,fontWeight:600}}>fees less $850</td>
                     </tr>
                   </tbody>
                 </table>
@@ -12943,9 +12993,9 @@ export default function LandingPage() {
           {/* Schema */}
           <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
             '@context':'https://schema.org','@type':'EducationalOrganization',
-            '@id':'https://smartioushomeschool.com/bc-distributed-learning-funding#org',
-            'name':'Smartious — BC Distributed Learning Funding pathway for Cambridge IGCSE & A-Level',
-            'url':'https://smartioushomeschool.com/bc-distributed-learning-funding',
+            '@id': ORG_ID,
+            'name': SITE,
+            'url':'https://smartioushomeschool.com/',
             'description':'How BC families use Distributed Learning (DL) school funding alongside Smartious live Cambridge IGCSE & A-Level instruction. Resource allocations typically $200–$700 CAD/year.',
             'areaServed':{'@type':'AdministrativeArea','name':'British Columbia, Canada'},
           })}}/>
@@ -13018,25 +13068,25 @@ export default function LandingPage() {
           {/* PRICING WITH FUNDING OFFSET */}
           <section className="sec" style={{background:'#fff',padding:'64px 0'}}>
             <div className="wrap" style={{maxWidth:920}}>
-              <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,42px)',color:V.ink,margin:'0 0 8px'}}>Path B numbers — DL resource allocation against Smartious tiers</h2>
+              <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,42px)',color:V.ink,margin:'0 0 8px'}}>Path B — DL resource allocation against Smartious fees</h2>
               <p style={{color:V.sl,fontSize:15,margin:'0 0 32px'}}>Assumes a flexible DL school with mid-range $500 CAD resource allocation usable on outside vendors.</p>
 
               <div style={{overflowX:'auto'}}>
                 <table style={{width:'100%',borderCollapse:'collapse',fontSize:14,minWidth:600}}>
                   <thead>
                     <tr style={{background:V.ink,color:'#fff'}}>
-                      <th style={{padding:'14px 16px',textAlign:'left',fontWeight:600}}>Tier</th>
-                      <th style={{padding:'14px 16px',textAlign:'right',fontWeight:600}}>Smartious CAD/yr</th>
+                      <th style={{padding:'14px 16px',textAlign:'left',fontWeight:600}}>Programme</th>
+                      <th style={{padding:'14px 16px',textAlign:'right',fontWeight:600}}>Smartious fees</th>
                       <th style={{padding:'14px 16px',textAlign:'right',fontWeight:600}}>DL allocation</th>
                       <th style={{padding:'14px 16px',textAlign:'right',fontWeight:600}}>You pay (after offset)</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
-                      <td style={{padding:'14px 16px',color:V.ink,fontWeight:600}}>Smartious tuition (from $400 USD/mo)</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.sl}}>from ~$6,530</td>
+                      <td style={{padding:'14px 16px',color:V.ink,fontWeight:600}}>Smartious fees (from USD 423/month, Primary)</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.sl}}>from USD 423/month</td>
                       <td style={{padding:'14px 16px',textAlign:'right',color:V.cr,fontWeight:600}}>−$500 to $1,500</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink,fontWeight:600}}>from ~$5,030 net</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink,fontWeight:600}}>fees less your allocation</td>
                     </tr>
                   </tbody>
                 </table>
@@ -13090,9 +13140,9 @@ export default function LandingPage() {
           {/* Schema */}
           <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
             '@context':'https://schema.org','@type':'EducationalOrganization',
-            '@id':'https://smartioushomeschool.com/saskatchewan-homeschool-funding#org',
-            'name':'Smartious — Saskatchewan homeschool funding pathway for Cambridge IGCSE & A-Level',
-            'url':'https://smartioushomeschool.com/saskatchewan-homeschool-funding',
+            '@id': ORG_ID,
+            'name': SITE,
+            'url':'https://smartioushomeschool.com/',
             'description':'How Saskatchewan families use division-dependent homeschool funding ($500–$1,500 CAD/year typical) alongside Smartious live Cambridge IGCSE & A-Level instruction.',
             'areaServed':{'@type':'AdministrativeArea','name':'Saskatchewan, Canada'},
           })}}/>
@@ -13167,30 +13217,30 @@ export default function LandingPage() {
                   <thead>
                     <tr style={{background:V.ink,color:'#fff'}}>
                       <th style={{padding:'14px 16px',textAlign:'left',fontWeight:600}}>Division funding level</th>
-                      <th style={{padding:'14px 16px',textAlign:'right',fontWeight:600}}>Smartious tuition (from $400 USD/mo)</th>
-                      <th style={{padding:'14px 16px',textAlign:'right',fontWeight:600}}>Your net (from)</th>
+                      <th style={{padding:'14px 16px',textAlign:'right',fontWeight:600}}>Smartious fees (from USD 423/month, Primary)</th>
+                      <th style={{padding:'14px 16px',textAlign:'right',fontWeight:600}}>Your net</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr style={{borderBottom:`1px solid ${V.bone2}`}}>
                       <td style={{padding:'14px 16px',color:V.ink,fontWeight:600}}>Lower band ($500/yr)</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.sl}}>from ~$6,530 CAD/yr</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink,fontWeight:600}}>from ~$6,030</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.sl}}>from USD 423/month</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink,fontWeight:600}}>fees less $500</td>
                     </tr>
                     <tr style={{borderBottom:`1px solid ${V.bone2}`}}>
                       <td style={{padding:'14px 16px',color:V.ink,fontWeight:600}}>Mid band ($1,000/yr)</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.sl}}>from ~$6,530 CAD/yr</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink,fontWeight:600}}>from ~$5,530</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.sl}}>from USD 423/month</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink,fontWeight:600}}>fees less $1,000</td>
                     </tr>
                     <tr>
                       <td style={{padding:'14px 16px',color:V.ink,fontWeight:600}}>Upper band ($1,500/yr)</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.sl}}>from ~$6,530 CAD/yr</td>
-                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink,fontWeight:600}}>from ~$5,030</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.sl}}>from USD 423/month</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink,fontWeight:600}}>fees less $1,500</td>
                     </tr>
                   </tbody>
                 </table>
               </div>
-              <p style={{fontSize:13,color:V.sl,marginTop:16,fontStyle:'italic'}}>Smartious tuition starts from USD 423 per month, roughly $6,530 CAD per year at current exchange. Request pricing for your exact programme figure gross of funding.</p>
+              <p style={{fontSize:13,color:V.sl,marginTop:16,fontStyle:'italic'}}>Smartious fees start from USD 423/month for Primary, payable termly, and vary by curriculum and level. Request the fee for your exact programme before funding.</p>
             </div>
           </section>
 
@@ -13336,13 +13386,12 @@ export default function LandingPage() {
               <div style={{textAlign:'center',marginBottom:36}}>
                 <div style={{fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',color:V.cr,fontWeight:700,marginBottom:12}}>Pricing in CAD for {c.name} families</div>
                 <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.7rem,3.2vw,2.2rem)',color:V.ink,fontWeight:400,marginBottom:8}}>Transparent monthly tuition</h2>
-                <p style={{fontSize:14,color:V.sl,maxWidth:560,margin:'0 auto'}}>Three tiers. Real teachers in every tier. No surprise fees.</p>
+                <p style={{fontSize:14,color:V.sl,maxWidth:560,margin:'0 auto'}}>Fees from USD 423/month for Primary, payable termly; fees vary by curriculum and level. One-to-one tuition USD 15/hour.</p>
               </div>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:18,maxWidth:1000,margin:'0 auto'}}>
                 {[
-                  {name:'Online',price:'From $400',sub:'USD /month',desc:'Live group classes (4–6 students), recorded for review, Mshauri AI included.',popular:false},
-                  {name:'Online Plus',price:'Enquire',sub:'most popular · tailored quote',desc:'Live group + 1-on-1 tutoring, exam prep, free college application support.',popular:true},
-                  {name:'Premium 1-on-1',price:'Enquire',sub:'tailored quote',desc:'Pure one-on-one with a dedicated PGCE-trained teacher. For Ivy League / Oxbridge tracks.',popular:false},
+                  {name:'Online School',price:'From $423',sub:'per month · Primary · paid termly',desc:'Live small-group classes in every subject, Mshauri AI included. Fees vary by curriculum and level.',popular:false},
+                  {name:'1-on-1 Tuition',price:'$15',sub:'per hour',desc:'One-to-one live online sessions in any subject, at any level, scheduled to your time zone.',popular:false},
                 ].map((t,i)=>(
                   <div key={i} style={{background:V.white,border: t.popular ? '2px solid '+V.gold3 : '1px solid '+V.bone3,borderRadius:14,padding:24,position:'relative'}}>
                     {t.popular && <div style={{position:'absolute',top:-12,left:24,background:V.gold3,color:V.ink,fontSize:10,fontWeight:800,letterSpacing:'.1em',padding:'4px 10px',borderRadius:99,textTransform:'uppercase'}}>Most popular</div>}
@@ -13364,7 +13413,7 @@ export default function LandingPage() {
               </div>
               {s.voucher && (
                 <div style={{marginTop:24,padding:14,background:V.bone2,borderRadius:10,textAlign:'center',fontSize:13,color:V.sl2,maxWidth:680,margin:'24px auto 0'}}>
-                  <strong style={{color:V.ink}}>{c.name} families:</strong> The {s.voucher.name} voucher ({s.voucher.amount}/child) covers Online and Online Plus tiers fully.
+                  <strong style={{color:V.ink}}>{c.name} families:</strong> The {s.voucher.name} voucher ({s.voucher.amount}/child) can be put towards Smartious fees where the programme allows; check eligibility with the programme.
                 </div>
               )}
             </div>
@@ -14099,14 +14148,14 @@ export default function LandingPage() {
           {/* Schema — LocalBusiness, Service, BreadcrumbList, FAQPage */}
           <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
             '@context': 'https://schema.org',
-            '@type': 'LocalBusiness',
-            '@id': 'https://smartioushomeschool.com/tuition-nairobi#business',
-            'name': 'Smartious Tuition Nairobi',
+            '@type': ['EducationalOrganization', 'LocalBusiness'],
+            '@id': ORG_ID,
+            'name': SITE,
             'description': 'Home tuition and online tutoring across Nairobi. Qualified teachers for CBC, IGCSE, A-Level, IB Diploma and American curricula.',
             'url': 'https://smartioushomeschool.com/tuition-nairobi',
             'telephone': '+254745021212',
             'email': 'hello@smartioushomeschool.com',
-            'address': { '@type': 'PostalAddress', 'streetAddress': 'Diamond Plaza, Parklands', 'addressLocality': 'Nairobi', 'addressRegion': 'Nairobi', 'addressCountry': 'KE' },
+            'address': { '@type': 'PostalAddress', 'streetAddress': 'Diamond Plaza I Annex, 3rd Floor, Office 20', 'addressLocality': 'Parklands, Nairobi', 'addressRegion': 'Nairobi', 'addressCountry': 'KE' },
             'areaServed': NAIROBI_AREAS.map(a => ({ '@type': 'Place', 'name': a.name + ', Nairobi' })),
             'priceRange': 'USD 15/hour online · From KSh 1,500/hour home tuition',
           })}}/>
@@ -14122,9 +14171,9 @@ export default function LandingPage() {
             '@context': 'https://schema.org',
             '@type': 'Service',
             'serviceType': 'Private Home Tuition & Online Tutoring',
-            'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool' },
+            'provider': ORG_REF,
             'areaServed': { '@type': 'City', 'name': 'Nairobi' },
-            'offers': { '@type': 'AggregateOffer', 'priceCurrency': 'USD', 'lowPrice': '8', 'highPrice': '15' },
+            'offers': TUITION_OFFER,
             'description': 'Qualified home tutors visit students across Nairobi. Online tuition delivered live by subject specialists in CBC, IGCSE, Cambridge A-Level, IB Diploma, Pearson Edexcel and American curricula.',
           })}}/>
 
@@ -14191,7 +14240,7 @@ export default function LandingPage() {
               }}>
                 {[
                   ['20', 'Nairobi neighbourhoods'],
-                  ['USD 8', 'per online hour'],
+                  ['USD 15', 'per online hour'],
                   ['7', 'curricula covered'],
                   ['1:1', 'personal attention'],
                 ].map(([n,l]) => (
@@ -14430,20 +14479,9 @@ export default function LandingPage() {
               ],
             })}}/>
             <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
-              '@context':'https://schema.org','@type':'LocalBusiness',
-              'name':'Smartious Tuition — ' + area.name,
-              'description': area.seoDesc,
-              'url':'https://smartioushomeschool.com/tuition/' + area.slug,
-              'telephone':'+254745021212',
-              'email':'hello@smartioushomeschool.com',
-              'areaServed':{'@type':'Place','name': area.name + ', Nairobi'},
-              'address':{'@type':'PostalAddress','addressLocality': area.name,'addressRegion':'Nairobi','addressCountry':'KE'},
-              'priceRange':'From USD 15/hour',
-            })}}/>
-            <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
               '@context':'https://schema.org','@type':'Service',
               'serviceType':'Private Home & Online Tuition in ' + area.name,
-              'provider':{'@type':'EducationalOrganization','name':'Smartious Homeschool & eSchool'},
+              'provider': ORG_REF,
               'areaServed':{'@type':'Place','name': area.name + ', Nairobi'},
               'description': area.intro,
             })}}/>
@@ -14688,9 +14726,9 @@ export default function LandingPage() {
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'EducationalOrganization',
-            '@id': 'https://smartioushomeschool.com/tuition-uae#org',
-            'name': 'Smartious — Online Tuition UAE',
-            'url': 'https://smartioushomeschool.com/tuition-uae',
+            '@id': ORG_ID,
+            'name': SITE,
+            'url': 'https://smartioushomeschool.com/',
             'description': 'Premium online tuition for UAE families across Dubai, Abu Dhabi, Sharjah, Ajman, RAK, Fujairah and Al Ain. Cambridge IGCSE, A-Level, IB Diploma, CBSE, American AP. From USD 15/hour.',
             'areaServed': UAE_AREAS.map(a => ({ '@type': 'Place', 'name': a.name + ', ' + a.emirate })),
             'sameAs': ['https://smartioushomeschool.com'],
@@ -14890,11 +14928,7 @@ export default function LandingPage() {
               '@context':'https://schema.org','@type':'Service',
               'name':'Online Tuition · ' + area.name + ', ' + area.emirate,
               'description': area.intro,
-              'provider': {
-                '@type':'EducationalOrganization',
-                'name':'Smartious Homeschool Global',
-                'url':'https://smartioushomeschool.com',
-              },
+              'provider': ORG_REF,
               'areaServed':{ '@type':'Place', 'name': area.name + ', ' + area.emirate + ', UAE' },
               'serviceType':'Online tuition',
             })}}/>
@@ -15116,22 +15150,12 @@ export default function LandingPage() {
             {/* Schema */}
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
               '@context':'https://schema.org','@type':'EducationalOrganization',
-              '@id':'https://smartioushomeschool.com' + country.hub + '#org',
-              'name':'Smartious — Online Homeschooling Across the UAE',
-              'url':'https://smartioushomeschool.com' + country.hub,
-              'aggregateRating': {
-                '@type':'AggregateRating',
-                'ratingValue': SMARTIOUS_RATING.stars,
-                'reviewCount': SMARTIOUS_RATING.count,
-                'bestRating': 5,
-                'worstRating': 1,
-              },
+              '@id': ORG_ID,
+              'name': SITE,
+              'url':'https://smartioushomeschool.com/',
               'description': country.heroSubhead + ' ' + country.heroValueProp,
               'areaServed': cities.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
-              'offers': country.competitors.filter(c => c.isUs).map(c => ({
-                '@type':'Offer', 'price': c.feesUsd, 'priceCurrency':'USD',
-                'description': 'Annual tuition range for ' + c.curriculum,
-              })),
+              'offers': FEE_OFFER,
             })}}/>
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
               '@context':'https://schema.org','@type':'BreadcrumbList',
@@ -16756,22 +16780,12 @@ export default function LandingPage() {
             {/* Schema */}
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
               '@context':'https://schema.org','@type':'EducationalOrganization',
-              '@id':'https://smartioushomeschool.com' + country.hub + '#org',
-              'name':'Smartious — Online Homeschooling Across ' + country.longName,
-              'url':'https://smartioushomeschool.com' + country.hub,
-              'aggregateRating': {
-                '@type':'AggregateRating',
-                'ratingValue': SMARTIOUS_RATING.stars,
-                'reviewCount': SMARTIOUS_RATING.count,
-                'bestRating': 5,
-                'worstRating': 1,
-              },
+              '@id': ORG_ID,
+              'name': SITE,
+              'url':'https://smartioushomeschool.com/',
               'description': country.heroSubhead + ' ' + country.heroValueProp,
               'areaServed': cities.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
-              'offers': country.competitors.filter(c => c.isUs).map(c => ({
-                '@type':'Offer', 'price': c.feesUsd, 'priceCurrency':'USD',
-                'description': 'Annual tuition range for ' + c.curriculum,
-              })),
+              'offers': FEE_OFFER,
             })}}/>
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
               '@context':'https://schema.org','@type':'BreadcrumbList',
@@ -17076,22 +17090,12 @@ export default function LandingPage() {
             {/* Schema */}
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
               '@context':'https://schema.org','@type':'EducationalOrganization',
-              '@id':'https://smartioushomeschool.com' + country.hub + '#org',
-              'name':'Smartious — Online Homeschooling Across ' + country.longName,
-              'url':'https://smartioushomeschool.com' + country.hub,
-              'aggregateRating': {
-                '@type':'AggregateRating',
-                'ratingValue': SMARTIOUS_RATING.stars,
-                'reviewCount': SMARTIOUS_RATING.count,
-                'bestRating': 5,
-                'worstRating': 1,
-              },
+              '@id': ORG_ID,
+              'name': SITE,
+              'url':'https://smartioushomeschool.com/',
               'description': country.heroSubhead + ' ' + country.heroValueProp,
               'areaServed': cities.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
-              'offers': country.competitors.filter(c => c.isUs).map(c => ({
-                '@type':'Offer', 'price': c.feesUsd, 'priceCurrency':'USD',
-                'description': 'Annual tuition range for ' + c.curriculum,
-              })),
+              'offers': FEE_OFFER,
             })}}/>
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
               '@context':'https://schema.org','@type':'BreadcrumbList',
@@ -17396,22 +17400,12 @@ export default function LandingPage() {
             {/* Schema */}
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
               '@context':'https://schema.org','@type':'EducationalOrganization',
-              '@id':'https://smartioushomeschool.com' + country.hub + '#org',
-              'name':'Smartious — Online Homeschooling Across ' + country.longName,
-              'url':'https://smartioushomeschool.com' + country.hub,
-              'aggregateRating': {
-                '@type':'AggregateRating',
-                'ratingValue': SMARTIOUS_RATING.stars,
-                'reviewCount': SMARTIOUS_RATING.count,
-                'bestRating': 5,
-                'worstRating': 1,
-              },
+              '@id': ORG_ID,
+              'name': SITE,
+              'url':'https://smartioushomeschool.com/',
               'description': country.heroSubhead + ' ' + country.heroValueProp,
               'areaServed': cities.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
-              'offers': country.competitors.filter(c => c.isUs).map(c => ({
-                '@type':'Offer', 'price': c.feesUsd, 'priceCurrency':'USD',
-                'description': 'Annual tuition range for ' + c.curriculum,
-              })),
+              'offers': FEE_OFFER,
             })}}/>
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
               '@context':'https://schema.org','@type':'BreadcrumbList',
@@ -17716,22 +17710,12 @@ export default function LandingPage() {
             {/* Schema */}
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
               '@context':'https://schema.org','@type':'EducationalOrganization',
-              '@id':'https://smartioushomeschool.com' + country.hub + '#org',
-              'name':'Smartious — Online Homeschooling Across ' + country.longName,
-              'url':'https://smartioushomeschool.com' + country.hub,
-              'aggregateRating': {
-                '@type':'AggregateRating',
-                'ratingValue': SMARTIOUS_RATING.stars,
-                'reviewCount': SMARTIOUS_RATING.count,
-                'bestRating': 5,
-                'worstRating': 1,
-              },
+              '@id': ORG_ID,
+              'name': SITE,
+              'url':'https://smartioushomeschool.com/',
               'description': country.heroSubhead + ' ' + country.heroValueProp,
               'areaServed': cities.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
-              'offers': country.competitors.filter(c => c.isUs).map(c => ({
-                '@type':'Offer', 'price': c.feesUsd, 'priceCurrency':'USD',
-                'description': 'Annual tuition range for ' + c.curriculum,
-              })),
+              'offers': FEE_OFFER,
             })}}/>
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
               '@context':'https://schema.org','@type':'BreadcrumbList',
@@ -18036,22 +18020,12 @@ export default function LandingPage() {
             {/* Schema */}
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
               '@context':'https://schema.org','@type':'EducationalOrganization',
-              '@id':'https://smartioushomeschool.com' + country.hub + '#org',
-              'name':'Smartious — Online Homeschooling Across ' + country.longName,
-              'url':'https://smartioushomeschool.com' + country.hub,
-              'aggregateRating': {
-                '@type':'AggregateRating',
-                'ratingValue': SMARTIOUS_RATING.stars,
-                'reviewCount': SMARTIOUS_RATING.count,
-                'bestRating': 5,
-                'worstRating': 1,
-              },
+              '@id': ORG_ID,
+              'name': SITE,
+              'url':'https://smartioushomeschool.com/',
               'description': country.heroSubhead + ' ' + country.heroValueProp,
               'areaServed': cities.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
-              'offers': country.competitors.filter(c => c.isUs).map(c => ({
-                '@type':'Offer', 'price': c.feesUsd, 'priceCurrency':'USD',
-                'description': 'Annual tuition range for ' + c.curriculum,
-              })),
+              'offers': FEE_OFFER,
             })}}/>
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
               '@context':'https://schema.org','@type':'BreadcrumbList',
@@ -18355,22 +18329,12 @@ export default function LandingPage() {
             {/* Schema */}
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
               '@context':'https://schema.org','@type':'EducationalOrganization',
-              '@id':'https://smartioushomeschool.com' + country.hub + '#org',
-              'name':'Smartious — Online Homeschooling Across ' + country.longName,
-              'url':'https://smartioushomeschool.com' + country.hub,
-              'aggregateRating': {
-                '@type':'AggregateRating',
-                'ratingValue': SMARTIOUS_RATING.stars,
-                'reviewCount': SMARTIOUS_RATING.count,
-                'bestRating': 5,
-                'worstRating': 1,
-              },
+              '@id': ORG_ID,
+              'name': SITE,
+              'url':'https://smartioushomeschool.com/',
               'description': country.heroSubhead + ' ' + country.heroValueProp,
               'areaServed': cities.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
-              'offers': country.competitors.filter(c => c.isUs).map(c => ({
-                '@type':'Offer', 'price': c.feesUsd, 'priceCurrency':'USD',
-                'description': 'Annual tuition range for ' + c.curriculum,
-              })),
+              'offers': FEE_OFFER,
             })}}/>
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
               '@context':'https://schema.org','@type':'BreadcrumbList',
@@ -18679,7 +18643,7 @@ export default function LandingPage() {
               '@context':'https://schema.org','@type':'Service',
               'name': city.primaryKeyword,
               'description': city.seoDesc,
-              'provider':{'@type':'EducationalOrganization','name':'Smartious Homeschool Global','url':'https://smartioushomeschool.com'},
+              'provider': ORG_REF,
               'areaServed':{'@type':'Place','name': city.name + ', ' + city.county + ', Kenya'},
               'serviceType':'Online homeschooling and 1-on-1 tuition',
             })}}/>
@@ -18946,9 +18910,9 @@ export default function LandingPage() {
         <>
           <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
             '@context':'https://schema.org','@type':'EducationalOrganization',
-            '@id':'https://smartioushomeschool.com/test-prep#org',
-            'name':'Smartious Global Test Preparation',
-            'url':'https://smartioushomeschool.com/test-prep',
+            '@id': ORG_ID,
+            'name': SITE,
+            'url':'https://smartioushomeschool.com/',
             'description':'Premium IELTS, TOEFL, PTE, GRE, GMAT and SAT test preparation in Nairobi. Live 1-on-1 sessions with qualified specialists. From KSh 29,000.',
           })}}/>
 
@@ -19057,7 +19021,7 @@ export default function LandingPage() {
               '@context':'https://schema.org','@type':'Course',
               'name': test.code + ' Preparation',
               'description': test.seoDesc,
-              'provider':{'@type':'EducationalOrganization','name':'Smartious Homeschool','url':'https://smartioushomeschool.com'},
+              'provider': ORG_REF,
               'offers':{'@type':'Offer','price':test.fee.replace(/[^\d]/g,''),'priceCurrency':'KES'},
             })}}/>
             <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
@@ -19290,8 +19254,9 @@ export default function LandingPage() {
         <>
           <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
             '@context':'https://schema.org','@type':'EducationalOrganization',
-            'name':'Smartious Languages',
-            'url':'https://smartioushomeschool.com/languages',
+            '@id': ORG_ID,
+            'name': SITE,
+            'url':'https://smartioushomeschool.com/',
             'description':'Premium foreign language tuition. French, Spanish, German, Mandarin Chinese, Arabic, Kiswahili, Italian, Portuguese. CEFR A1-C2 plus examination preparation.',
           })}}/>
 
@@ -19413,7 +19378,7 @@ export default function LandingPage() {
               '@context':'https://schema.org','@type':'Course',
               'name': 'Learn ' + lang.name + ' with Smartious',
               'description': lang.seoDesc,
-              'provider':{'@type':'EducationalOrganization','name':'Smartious','url':'https://smartioushomeschool.com'},
+              'provider': ORG_REF,
               'inLanguage': lang.slug,
             })}}/>
             <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
@@ -19628,8 +19593,9 @@ export default function LandingPage() {
         <>
           <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
             '@context':'https://schema.org','@type':'EducationalOrganization',
-            'name':'Smartious Homeschool Global',
-            'url':'https://smartioushomeschool.com/homeschool',
+            '@id': ORG_ID,
+            'name': SITE,
+            'url':'https://smartioushomeschool.com/',
             'description':'Premium homeschooling worldwide. Cambridge IGCSE, A-Level, IB, American, Kenya CBC curricula. Online, in-centre and home tutoring delivery across Kenya, UAE and 40+ countries.',
           })}}/>
 
@@ -19899,9 +19865,9 @@ export default function LandingPage() {
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'EducationalOrganization',
-            '@id': 'https://smartioushomeschool.com/tuition-uk#org',
-            'name': 'Smartious — Private Tuition UK',
-            'url': 'https://smartioushomeschool.com/tuition-uk',
+            '@id': ORG_ID,
+            'name': SITE,
+            'url': 'https://smartioushomeschool.com/',
             'description': 'Live online private tuition for UK families across London, Manchester, Birmingham, Leeds, Bristol, Edinburgh. Cambridge IGCSE, A-Level, IB Diploma, 11+ and 13+ Common Entrance. From USD 15/hour.',
             'areaServed': UK_AREAS.map(a => ({ '@type': 'Place', 'name': a.name + ', ' + a.city })),
             'sameAs': ['https://smartioushomeschool.com'],
@@ -20048,20 +20014,9 @@ export default function LandingPage() {
               ],
             })}}/>
             <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
-              '@context':'https://schema.org','@type':'LocalBusiness',
-              'name':'Smartious Tuition — ' + area.name,
-              'description': area.seoDesc,
-              'url':'https://smartioushomeschool.com/tuition-uk/' + area.slug,
-              'telephone':'+254745021212',
-              'email':'hello@smartioushomeschool.com',
-              'areaServed':{'@type':'Place','name': area.name + ', ' + area.city + ', UK'},
-              'address':{'@type':'PostalAddress','addressLocality': area.name,'addressRegion': area.city,'addressCountry':'GB'},
-              'priceRange':'From USD 15/hour',
-            })}}/>
-            <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
               '@context':'https://schema.org','@type':'Service',
               'serviceType':'Private Home & Online Tuition in ' + area.name,
-              'provider':{'@type':'EducationalOrganization','name':'Smartious Homeschool & eSchool'},
+              'provider': ORG_REF,
               'areaServed':{'@type':'Place','name': area.name + ', ' + area.city + ', UK'},
               'description': area.intro,
             })}}/>
@@ -20274,8 +20229,9 @@ export default function LandingPage() {
         <>
           <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
             '@context':'https://schema.org','@type':'EducationalOrganization',
-            'name':'Smartious Tuition Global',
-            'url':'https://smartioushomeschool.com/tuition',
+            '@id': ORG_ID,
+            'name': SITE,
+            'url':'https://smartioushomeschool.com/',
             'description':'Premium 1-on-1 tuition worldwide. Mathematics, Sciences, English, Languages and exam preparation. Online, in-centre, and home tutoring across Kenya, UAE and 40+ countries.',
           })}}/>
 
@@ -20448,7 +20404,7 @@ export default function LandingPage() {
             '@context':'https://schema.org','@type':'Course',
             'name': 'International University Foundation Programme (IUFP)',
             'description': 'One-year foundation programme bridging Kenyan and African secondary school graduates to top international universities. Academic preparation in Business, Science, Engineering, and Humanities streams.',
-            'provider':{'@type':'EducationalOrganization','name':'Smartious','url':'https://smartioushomeschool.com'},
+            'provider': ORG_REF,
           })}}/>
 
           {/* HERO */}
@@ -20604,7 +20560,7 @@ export default function LandingPage() {
             '@context':'https://schema.org','@type':'Course',
             'name': 'Pre-University Academic Preparation',
             'description': 'Intensive gap-year and pre-university academic preparation programme. A-Level intensive, IB Diploma preparation, AP coursework, and university entrance examination preparation.',
-            'provider':{'@type':'EducationalOrganization','name':'Smartious','url':'https://smartioushomeschool.com'},
+            'provider': ORG_REF,
           })}}/>
 
           {/* HERO */}
@@ -20757,9 +20713,9 @@ export default function LandingPage() {
         <>
           <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
             '@context':'https://schema.org','@type':'EducationalOrganization',
-            '@id':'https://smartioushomeschool.com/study-abroad#org',
-            'name':'Smartious Study Abroad',
-            'url':'https://smartioushomeschool.com/study-abroad',
+            '@id': ORG_ID,
+            'name': SITE,
+            'url':'https://smartioushomeschool.com/',
             'description':'Free university application support for Kenyan and African students. UK, USA, Canada, Australia, Germany, Netherlands, Ireland, China, Turkey, UAE.',
           })}}/>
 
@@ -20998,7 +20954,7 @@ export default function LandingPage() {
               '@context':'https://schema.org','@type':'Service',
               'name': 'Study in ' + dest.fullName + ' — Free Application Support',
               'description': dest.seoDesc,
-              'provider':{'@type':'EducationalOrganization','name':'Smartious','url':'https://smartioushomeschool.com'},
+              'provider': ORG_REF,
               'areaServed': dest.fullName,
               'offers':{'@type':'Offer','price':'0','priceCurrency':'KES','description':'Free university application support'},
             })}}/>
@@ -21645,7 +21601,7 @@ export default function LandingPage() {
               { '@type': 'Place', 'name': 'Petronas Twin Towers', 'address': { '@type': 'PostalAddress', 'addressCountry': 'MY', 'addressLocality': 'Kuala Lumpur' } },
               { '@type': 'Place', 'name': 'Batu Caves', 'address': { '@type': 'PostalAddress', 'addressCountry': 'MY', 'addressLocality': 'Selangor' } },
             ],
-            'organizer': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'url': 'https://smartioushomeschool.com/' },
+            'organizer': ORG_REF,
             'offers': {
               '@type': 'Offer',
               'price': '1950',
@@ -21656,7 +21612,7 @@ export default function LandingPage() {
               'validFrom': '2026-06-01',
             },
             'audience': { '@type': 'EducationalAudience', 'audienceType': 'Students aged 10-18' },
-            'image': 'https://smartioushomeschool.com/smartious-logo.png',
+            'image': 'https://smartioushomeschool.com/brand/logo.png',
           })}}/>
           <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
             '@context': 'https://schema.org',
@@ -23289,7 +23245,7 @@ export default function LandingPage() {
               <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
             </div>
           </div></section>
-          <GuideCrossLinks guideSlug="homeschooling-uk-2026-guide" guideName="Homeschooling in the UK: The Complete 2026 Guide" hubHref="/online-school/uk" hubName="Smartious in the United Kingdom"/>
+          <GuideCrossLinks guideSlug="homeschooling-uk-2026-guide" guideName="Homeschooling in the UK: The Complete 2026 Guide" hubHref="/online-school/united-kingdom" hubName="Smartious in the United Kingdom"/>
         </>
       )}
 

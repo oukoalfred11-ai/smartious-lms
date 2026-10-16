@@ -5,9 +5,9 @@
 // families across Luanda, Lobito and Benguela, and Cabinda.
 // LUSOPHONE AFRICA BUILD — 3 cities.
 //
-// IMAGE NOTE: heroImg / heroImage use LOCAL PATHS under /heroes/.
-// Drop a file at frontend/public/heroes/<slug>.jpg and it appears;
-// if absent the onError handler shows the ink→crimson gradient.
+// IMAGE NOTE: city pages have no heroImg (the hero falls back to the
+// ink→crimson gradient); the country hub uses /online-virtual-school.png.
+// To add a city photo, put it under frontend/public and set heroImg.
 // Do NOT paste guessed stock-photo IDs.
 //
 // LEGAL POSITIONING NOTE — READ BEFORE EDITING. ANGOLA IS UNUSUALLY
@@ -79,7 +79,6 @@ export const ANGOLA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Luanda',
     heroTagline: 'For Luanda families — the Cambridge and IB route at a fraction of what one of the world\'s most expensive expatriate cities charges for it.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Luanda families. Luanda carries Angola\'s corporate weight — Sonangol and the international oil operators, banking, construction, the diplomatic and development community, and a professional class that has grown fast around all of it. It has also been ranked repeatedly among the most expensive cities in the world for expatriate staff, and its international school fees sit accordingly high. Under the Lei de Bases, compulsory education covers the iniciação class, primary, and the first cycle of secondary, and the national curriculum is of mandatory compliance — so our clean default through those years is supplementary, with the full pathway opening for the II Ciclo.',
-    heroImg: '/heroes/luanda-ao.jpg',
     altTexts: { hero: 'Luanda bay and the city' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Luanda families — international curriculum at a fraction of the capital\'s fees. From USD 423/month.',
     challenges: [
@@ -115,7 +114,7 @@ export const ANGOLA_CITIES = [
       ['Portuguese kept alongside the English-medium core', 'Cambridge Portuguese runs beside the academic track, which protects Portuguese and Brazilian university routes and keeps a returning child on solid ground.'],
       ['Built for oil and gas rotation', 'Luanda now, Soyo, the Gulf, or Houston next — the curriculum, teachers, and examination board stay constant across the posting.'],
       ['The law stated before anything is sold', 'Compulsory education covers iniciação, primary and the I Ciclo, and the national curriculum is of mandatory compliance. We run supplementary through those years and say so.'],
-      ['An African school teaching African families', 'Nairobi-built and Nairobi-taught, serving families in 57 countries — not an overseas provider reaching in.'],
+      ['An African school teaching African families', 'Nairobi-built and Nairobi-taught, serving families in 40+ countries — not an overseas provider reaching in.'],
     ],
     growingReason: 'Luanda holds Sonangol and the international oil operators, banking and construction, and the diplomatic community — in a city ranked repeatedly among the world\'s most expensive for expatriate staff, with international school fees to match. Angola runs WAT (UTC+1) with no daylight saving, a fixed two-hour offset behind Nairobi EAT.',
     curricula: {
@@ -144,7 +143,6 @@ export const ANGOLA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Lobito and Benguela',
     heroTagline: 'For Lobito and Benguela families — the corridor port that now moves Central Africa\'s copper, and no international school along it.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Lobito and Benguela families. The Benguela coast has become strategically important again: the Lobito Corridor rail link runs inland to the Copperbelt and the mining regions of the DRC, drawing logistics, rail, and port investment and the international staff who come with it, alongside a long-established fishing, agriculture, and industrial economy and Angola\'s second urban centre. International schooling along the corridor is almost non-existent, with Luanda\'s tier five hundred kilometres north. Smartious delivers the Cambridge and IB pathways live across Benguela province.',
-    heroImg: '/heroes/lobito-ao.jpg',
     altTexts: { hero: 'Lobito bay and the Benguela coast' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Lobito and Benguela families — the Lobito Corridor, no international schooling. From USD 423/month.',
     challenges: [
@@ -207,7 +205,6 @@ export const ANGOLA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Cabinda',
     heroTagline: 'For Cabinda and Soyo families — the oil coast, staffed internationally and schooled locally, with Luanda a flight away.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for families across Angola\'s oil coast. Cabinda and the Soyo LNG complex sit at the centre of the country\'s hydrocarbon economy — offshore operations, the international operators and oilfield-services companies, and a technical workforce recruited from across Africa, Europe, and the Americas, much of it on rotation. Luanda\'s international schooling is a flight away, and locally there is none. For decades the answers have been boarding abroad, a household split between two countries, or a compound school built for a company rather than a curriculum. Smartious delivers live Cambridge and IB teaching to the oil coast instead.',
-    heroImg: '/heroes/cabinda-ao.jpg',
     altTexts: { hero: 'The Angolan oil coast' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Cabinda and Soyo families — Angola\'s oil coast, no international schooling. From USD 423/month.',
     challenges: [
@@ -294,7 +291,7 @@ export const ANGOLA_COUNTRY = {
   secondaryProgrammeExamRef: 'Authorised Luanda and regional provision',
   finalCTABadgeExamRef: 'Cambridge centres confirmed per family, per session',
 
-  heroImage: '/heroes/angola.jpg',
+  heroImage: '/online-virtual-school.png',
   heroEyebrow: 'Online school for Angola',
   heroH1Suffix: 'Angola',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for oil and gas, corporate, expatriate, and Angolan families across Luanda, Lobito and Benguela, and the Cabinda oil coast. Compulsory education covers the iniciação class, primary and the I Ciclo of secondary — so we run alongside your school through those years, and the full pathway opens for the II Ciclo. Taught live from Nairobi at a fixed two-hour offset that never drifts.',
@@ -305,7 +302,7 @@ export const ANGOLA_COUNTRY = {
   citiesSectionBody: 'Smartious Angola families concentrate across Luanda (Sonangol and the international operators, banking and construction, the diplomatic community, and international school fees among the highest in Africa), Lobito and Benguela (the Atlantic port and the corridor rail link to the Copperbelt and the DRC, drawing logistics and rail investment to a province with almost no international provision), and Cabinda and Soyo (the offshore and LNG heartland, staffed internationally and schooled locally, with Luanda a flight away). One compulsory range ending after the I Ciclo, one supplementary configuration, and a fixed offset that never drifts.',
 
   trustSignals: [
-    { h: 'An African school teaching African families', p: 'Smartious was founded in Nairobi in 2019 and teaches from two operational centres established 2022 and 2023, serving students in 57 countries — an African school with international accreditation, not an overseas provider reaching in.' },
+    { h: 'An African school teaching African families', p: 'Smartious was founded in Nairobi in 2018 and teaches from two operational centres established 2022 and 2023, serving families in 40+ countries — an African school with international accreditation, not an overseas provider reaching in.' },
     { h: 'A fixed offset that never drifts', p: 'Angola runs WAT (UTC+1) and Kenya EAT (UTC+3), with no daylight saving on either side. The two-hour gap is constant every week of the year, so class times are the same in January as in July.' },
     { h: 'The compulsory range stated precisely', p: 'The Lei de Bases provides that the obligation covers the iniciação class, the Ensino Primário and the I Ciclo do Ensino Secundário. The II Ciclo — the 10th to 12th classes — is not within it, which is the most useful planning fact for the senior years.' },
     { h: 'Foreign qualifications are recognised as a process', p: 'The Lei de Bases provides that certificates and diplomas completed abroad are valid in Angola provided they are recognised by the Executive, with a comparability framework supporting mutual recognition. We tell families to start that process early rather than assume it is automatic.' },
@@ -320,7 +317,7 @@ export const ANGOLA_COUNTRY = {
   ibDiplomaDelivery: 'Live online IB DP classes across all six subject groups plus Theory of Knowledge and Extended Essay supervision.',
   americanCurriculumSuits: 'Angola families targeting American universities via Common Application.',
   americanCurriculumDelivery: 'American Curriculum with AP courses Grades 9-12, SAT/ACT preparation, Common App essay coaching.',
-  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2019 to make international qualifications accessible to African and internationally mobile families at online-delivery fees rather than campus ones. Angola families join students in 57 other countries — from the Cabinda oil coast to Nairobi\'s own Diamond Plaza HQ, the Lobito Corridor to the Atlantic.',
+  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2018 to make international qualifications accessible to African and internationally mobile families at online-delivery fees rather than campus ones. Angola families join students in 40+ countries — from the Cabinda oil coast to Nairobi\'s own Diamond Plaza HQ, the Lobito Corridor to the Atlantic.',
   founderUniversitySpecialism: 'Alfred holds a BEd in Mathematics and Physics — Smartious\'s Cambridge A-Level and IB Diploma STEM subjects are led personally when needed, suiting the oil coast\'s petroleum and geoscience families and every medicine-bound student in Luanda. Head of Academics supervises curriculum delivery and university placement strategy per family.',
 
   competitorsIntro: 'Angola\'s international schooling is a Luanda story priced by one of the most expensive expatriate cities in the world — Luanda International School, the Portuguese and French schools, and oil-company-linked provision. The schools themselves are decent; the fees are extraordinary even by international-school standards. Outside the capital the picture collapses: Benguela province has almost nothing along a corridor now attracting serious investment, and the Cabinda and Soyo oil heartland has none at all. The competitive space is both a fee gap and an absence.',

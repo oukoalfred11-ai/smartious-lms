@@ -5,9 +5,9 @@
 // families across San José, Heredia, Guanacaste, Limón and Quepos.
 // NINTH LATIN AMERICAN BUILD — 5 cities.
 //
-// IMAGE NOTE: heroImg / heroImage use LOCAL PATHS under /heroes/.
-// Drop a file at frontend/public/heroes/<slug>.jpg and it appears;
-// if absent the onError handler shows the ink→crimson gradient.
+// IMAGE NOTE: city pages have no heroImg (the hero falls back to the
+// ink→crimson gradient); the country hub uses /online-virtual-school.png.
+// To add a city photo, put it under frontend/public and set heroImg.
 //
 // LEGAL POSITIONING NOTE — SOURCES CONFLICT AND WE MUST SIDE WITH THE
 // COSTA RICAN ONES. READ ALL OF THIS BEFORE EDITING:
@@ -91,7 +91,6 @@ export const COSTA_RICA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in San José Costa Rica',
     heroTagline: 'For San José and Central Valley families — the Cambridge route at a fraction of Escazú\'s fees, and an honest account of what the MEP does and does not accept.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for San José and Central Valley families. The Escazú and Santa Ana belt holds Costa Rica\'s corporate and services sector, its diplomatic community, and the strongest international school tier in Central America outside Panama City — Country Day School, Lincoln School, the British School, Marian Baker, the European School — with fees to match. Costa Rica also has one of the more misreported legal positions in the region, and we set it out plainly: the MEP does not accept homeschooling as a modality, whatever some relocation websites tell arriving families.',
-    heroImg: '/heroes/san-jose-cr.jpg',
     altTexts: { hero: 'San José and the Central Valley' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for San José and Central Valley families — the MEP position stated accurately, morning classes. From USD 423/month.',
     challenges: [
@@ -156,7 +155,6 @@ export const COSTA_RICA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Heredia',
     heroTagline: 'For Heredia, Belén and free-zone families — Costa Rica\'s advanced manufacturing corridor, staffed internationally and priced out of its own schools.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Heredia and free-zone families. The Belén, Cariari and Heredia corridor carries Costa Rica\'s advanced manufacturing economy — medical devices, technology, and shared services in free zones that have drawn multinational operations and an internationally recruited engineering workforce with them. Several international schools sit in the same corridor, including the American International School at Cariari, and their fees reflect the corporate packages around them. Smartious teaches Cambridge and IB live in the Costa Rican morning, alongside a school enrolment.',
-    heroImg: '/heroes/heredia-cr.jpg',
     altTexts: { hero: 'Heredia and the Central Valley free-zone corridor' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Heredia, Belén and free-zone families — medical devices and technology corridor. From USD 423/month.',
     challenges: [
@@ -218,7 +216,6 @@ export const COSTA_RICA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Guanacaste',
     heroTagline: 'For Guanacaste families — the coast the remote-work world moved to, where most of what arrivals read about homeschooling is wrong.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Guanacaste families. The North Pacific coast — Tamarindo, Nosara, Sámara, the Papagayo peninsula — has drawn one of the fastest-growing international resident populations in Central America: tourism and hospitality businesses, second-home owners, retirees, and since the 2022 visa route a substantial digital-nomad community, many with school-age children. The schooling has not kept pace. Neither, in most cases, has the information: much of what arriving families read about home education in Costa Rica conflicts with what Costa Rican sources say.',
-    heroImg: '/heroes/guanacaste-cr.jpg',
     altTexts: { hero: 'The Guanacaste Pacific coast' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Guanacaste, Tamarindo and Nosara families — the MEP position corrected, morning classes. From USD 423/month.',
     challenges: [
@@ -281,7 +278,6 @@ export const COSTA_RICA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Limón',
     heroTagline: 'For Limón and Caribbean families — the port that moves Costa Rica\'s exports, three hours from the schools that serve them.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Limón and Caribbean families. The province handles the container terminal through which most of Costa Rica\'s trade passes, alongside the banana and pineapple export economy that feeds European and North American supermarkets, and the tourism belt running south through Cahuita and Puerto Viejo with its own international resident community. The Central Valley\'s international schools are three hours west over the mountains. Smartious teaches Cambridge and IB live to the Caribbean side in the Costa Rican morning.',
-    heroImg: '/heroes/limon-cr.jpg',
     altTexts: { hero: 'Limón and the Costa Rican Caribbean coast' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Limón and Caribbean families — the country\'s main port, no local international provision. From USD 423/month.',
     challenges: [
@@ -343,7 +339,6 @@ export const COSTA_RICA_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Quepos and Manuel Antonio',
     heroTagline: 'For Quepos, Manuel Antonio and Central Pacific families — an international community on a coast the school map never reached.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Central Pacific families. The corridor around Quepos, Manuel Antonio, and south through Dominical and Uvita runs on tourism, sport fishing, marina and hospitality businesses, much of it owned or managed by families from North America and Europe who settled rather than visited. The national park draws visitors from everywhere; the schooling stayed provincial. San José is three hours inland. Smartious teaches live to the coast in the Costa Rican morning, with a rhythm built for a season.',
-    heroImg: '/heroes/quepos-cr.jpg',
     altTexts: { hero: 'Manuel Antonio and the Central Pacific coast' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Quepos, Manuel Antonio and Central Pacific families — settled expat community, no local provision. From USD 423/month.',
     challenges: [
@@ -429,7 +424,7 @@ export const COSTA_RICA_COUNTRY = {
   secondaryProgrammeExamRef: 'Authorised Costa Rican Cambridge provision',
   finalCTABadgeExamRef: 'Cambridge centres confirmed per family, per session',
 
-  heroImage: '/heroes/costa-rica.jpg',
+  heroImage: '/online-virtual-school.png',
   heroEyebrow: 'Online school for Costa Rica',
   heroH1Suffix: 'Costa Rica',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for expatriate, free-zone, tourism, and Costa Rican families across San José, Heredia, Guanacaste, Limón, and the Central Pacific. Costa Rica is one of the most misreported legal positions in the region — the MEP does not accept homeschooling as a modality, whatever relocation websites tell arriving families — and we set that out before anything else.',
@@ -455,7 +450,7 @@ export const COSTA_RICA_COUNTRY = {
   ibDiplomaDelivery: 'Live online IB DP classes across all six subject groups plus Theory of Knowledge and Extended Essay supervision.',
   americanCurriculumSuits: 'Costa Rica families targeting US universities via Common Application — the dominant overseas destination for the country\'s large North American community.',
   americanCurriculumDelivery: 'American Curriculum with AP courses Grades 9-12, SAT/ACT preparation, Common App essay coaching.',
-  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2019 to make international qualifications accessible to families at online-delivery fees rather than campus ones. Costa Rica is the market where we most often have to correct something a family has already read — and where the state\'s own open-education system turns out to be more useful than the marketing that surrounds it.',
+  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2018 to make international qualifications accessible to families at online-delivery fees rather than campus ones. Costa Rica is the market where we most often have to correct something a family has already read — and where the state\'s own open-education system turns out to be more useful than the marketing that surrounds it.',
   founderUniversitySpecialism: 'Alfred holds a BEd in Mathematics and Physics — Smartious\'s Cambridge A-Level and IB Diploma STEM subjects are led personally when needed, suiting the free-zone corridor\'s medical-device and engineering households and every medicine-bound student in the Central Valley. Head of Academics supervises curriculum delivery and university placement strategy per family.',
 
   competitorsIntro: 'Costa Rica has a strong international tier concentrated in the Central Valley — Country Day School, Lincoln School, the American International School at Cariari, the British School, Marian Baker, the European School — with fees at the top of the Central American market. Outside the Valley the picture collapses: Guanacaste has one of the fastest-growing international populations in the region and almost no matching provision, and Limón and the Central Pacific have none. There is also an unusual competitive feature here: the MEP\'s own open-education system, which is not a competitor to us so much as a parallel certification route families should understand.',

@@ -306,7 +306,7 @@ export const QATAR_COUNTRY = {
     { metric: 'Established', value: '2018', sub: 'Nairobi-based' },
     { metric: 'Curricula', value: '5', sub: 'Cambridge · Edexcel · IB · American AP · CBC' },
     { metric: 'Tutors', value: '78+', sub: 'PGCE-qualified subject specialists' },
-    { metric: 'Countries served', value: '14+', sub: 'Africa · Gulf · Europe · Americas' },
+    { metric: 'Countries served', value: '40+', sub: 'Africa · Gulf · Europe · Americas' },
     { metric: 'Physical centres', value: '2', sub: 'Diamond Plaza Parklands · Karen Hardy' },
     { metric: 'QAR-USD peg', value: '3.64', sub: 'Fixed since 2001 — predictable pricing' },
   ],
@@ -454,11 +454,11 @@ export const QATAR_COUNTRY = {
     },
     {
       q: 'Will my child miss out on sports, arts, and social development without a physical school?',
-      a: 'A physical school provides a complete daily environment that an online programme does not replicate. However, many Qatar-based families combine Smartious academic instruction with local sports clubs (Aspire Zone, club facilities, swimming at Hamad Aquatic Centre), music academies, scouts, debate clubs, plus religious and cultural community involvement. Smartious classes themselves provide regular live peer interaction across 14+ countries. Many families find the time freed from school commute and academic depth from smaller class sizes more than compensates for the absence of a school sports field — particularly during summer heat months.',
+      a: 'A physical school provides a complete daily environment that an online programme does not replicate. However, many Qatar-based families combine Smartious academic instruction with local sports clubs (Aspire Zone, club facilities, swimming at Hamad Aquatic Centre), music academies, scouts, debate clubs, plus religious and cultural community involvement. Smartious classes themselves provide regular live peer interaction across 40+ countries. Many families find the time freed from school commute and academic depth from smaller class sizes more than compensates for the absence of a school sports field — particularly during summer heat months.',
     },
     {
       q: 'What about social interaction and peer relationships?',
-      a: 'Smartious classes are small live groups of 4-6 students (Online tier) or smaller (Online Plus). Students attend the same classes with the same peers throughout the academic year, building relationships across the international student body spanning 14+ countries. Many Qatar-based families supplement with local community activities — sports clubs, mosque/church communities, neighbourhood friendships. For expat families on 2-5 year Qatar assignments, the Smartious model provides more consistent peer relationships across moves than physical school relationships that reset with each relocation.',
+      a: 'Smartious classes are small live groups of 4-6 students (Online tier) or smaller (Online Plus). Students attend the same classes with the same peers throughout the academic year, building relationships across the international student body spanning 40+ countries. Many Qatar-based families supplement with local community activities — sports clubs, mosque/church communities, neighbourhood friendships. For expat families on 2-5 year Qatar assignments, the Smartious model provides more consistent peer relationships across moves than physical school relationships that reset with each relocation.',
     },
     {
       q: 'Can my child apply to Education City universities (Georgetown, Northwestern, CMU, Cornell, Texas A&M, HEC Paris, UCL) with Cambridge?',

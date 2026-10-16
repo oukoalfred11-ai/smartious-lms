@@ -515,7 +515,7 @@ export const MOROCCO_COUNTRY = {
     { metric: 'Established', value: '2018', sub: 'Nairobi-based · serving Moroccan families' },
     { metric: 'Curricula', value: '5', sub: 'Cambridge · Edexcel · IB · American AP · CBC' },
     { metric: 'Subject specialists', value: 'PGCE-trained', sub: 'Degree-qualified · many TSC-registered' },
-    { metric: 'Countries served', value: '14+', sub: 'Africa · Gulf · Europe · Americas' },
+    { metric: 'Countries served', value: '40+', sub: 'Africa · Gulf · Europe · Americas' },
     { metric: 'Physical centres', value: '2', sub: 'Diamond Plaza Parklands · Karen Hardy' },
     { metric: 'Time zone match', value: 'CET (UTC+1)', sub: 'Year-round Moroccan school hours' },
   ],
@@ -675,11 +675,11 @@ export const MOROCCO_COUNTRY = {
     },
     {
       q: 'Will my child miss out on sports, arts, and social development without a physical school?',
-      a: 'A physical school provides a complete daily environment that an online programme does not replicate. However, Moroccan families combine Smartious academic instruction with extensive local activity options: sports clubs (Wydad Athletic Club, Raja Casablanca, FUS Rabat, plus tennis, golf — Marrakech and Casablanca have multiple renowned golf clubs, surfing in Taghazout and Imsouane near Agadir, swimming, equestrian); music academies (Fes Conservatory, Casablanca music schools); scouts; mosque/church/community activities; and the rich cultural calendar (Fes Festival of World Sacred Music, Marrakech Festivals, Tangier International Film Festival). Smartious classes themselves provide regular live peer interaction across 14+ countries.',
+      a: 'A physical school provides a complete daily environment that an online programme does not replicate. However, Moroccan families combine Smartious academic instruction with extensive local activity options: sports clubs (Wydad Athletic Club, Raja Casablanca, FUS Rabat, plus tennis, golf — Marrakech and Casablanca have multiple renowned golf clubs, surfing in Taghazout and Imsouane near Agadir, swimming, equestrian); music academies (Fes Conservatory, Casablanca music schools); scouts; mosque/church/community activities; and the rich cultural calendar (Fes Festival of World Sacred Music, Marrakech Festivals, Tangier International Film Festival). Smartious classes themselves provide regular live peer interaction across 40+ countries.',
     },
     {
       q: 'What about social interaction and peer relationships?',
-      a: 'Smartious classes are small live groups of 4-6 students. Students attend the same classes with the same peers throughout the academic year, building relationships across an international student body spanning 14+ countries. Many Moroccan families supplement with local community activities — sports clubs, mosque/church/community groups, neighbourhood friendships, scouts, family gatherings (Moroccan extended family culture supports rich social development). For diplomatic or corporate transfer families on 2-5 year Morocco assignments, the Smartious model provides more consistent peer relationships across moves than physical school relationships that reset with each relocation.',
+      a: 'Smartious classes are small live groups of 4-6 students. Students attend the same classes with the same peers throughout the academic year, building relationships across an international student body spanning 40+ countries. Many Moroccan families supplement with local community activities — sports clubs, mosque/church/community groups, neighbourhood friendships, scouts, family gatherings (Moroccan extended family culture supports rich social development). For diplomatic or corporate transfer families on 2-5 year Morocco assignments, the Smartious model provides more consistent peer relationships across moves than physical school relationships that reset with each relocation.',
     },
     {
       q: 'Can my Casablanca / Rabat / Marrakech / Tangier child apply to Moroccan universities with Cambridge qualifications?',

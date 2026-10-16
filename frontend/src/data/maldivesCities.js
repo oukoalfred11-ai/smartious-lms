@@ -6,9 +6,9 @@
 // and the resort islands.
 // FIRST INDIAN OCEAN / SOUTH ASIA BUILD OF THIS SERIES — 5 cities.
 //
-// IMAGE NOTE: heroImg / heroImage use LOCAL PATHS under /heroes/.
-// Drop a file at frontend/public/heroes/<slug>.jpg and it appears;
-// if absent the onError handler shows the ink→crimson gradient.
+// IMAGE NOTE: city pages have no heroImg (the hero falls back to the
+// ink→crimson gradient); the country hub uses /online-virtual-school.png.
+// To add a city photo, put it under frontend/public and set heroImg.
 //
 // *** THE HEADLINE FINDING — THIS CHANGES THE WHOLE PITCH ***
 // CAMBRIDGE AND EDEXCEL ARE THE NATIONAL SECONDARY SYSTEM IN THE
@@ -98,7 +98,6 @@ export const MALDIVES_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Malé',
     heroTagline: 'For Malé families — Cambridge is already your national route. What we add is a subject specialist for the sets your timetable cannot fill.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Malé and Greater Malé families. We should be clear about something at the outset that distinguishes the Maldives from almost every market we serve: Cambridge and Edexcel are not a foreign alternative here — they are the national secondary route. IGCSE was introduced in 2002 for grade 10 and A-Level for grade 12, and the secondary curriculum is designed around those examinations. So we are not introducing anything. What we add in Malé is narrower and more useful: subject specialists for the A-Level sets a single school timetable cannot sustain.',
-    heroImg: '/heroes/male-mv.jpg',
     altTexts: { hero: 'Malé and the atoll' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel and IB for Malé families — subject specialists for the sets your school cannot staff, on the national Cambridge route. From USD 423/month.',
     challenges: [
@@ -163,7 +162,6 @@ export const MALDIVES_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Addu City',
     heroTagline: 'For Addu families — the second city, five hundred kilometres south, with a fraction of the capital\'s teaching resources.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Addu City families. The southernmost atoll is the country\'s second urban centre — linked islands joined by a causeway network, an international airport, a growing services sector and an educational tradition older than most in the country. What Addu does not have is the depth of teaching resource concentrated in Malé, five hundred kilometres north, and that gap is human rather than curricular: the Cambridge and Edexcel route is the same one students follow everywhere in the Maldives. Live delivery closes the teaching gap without a family moving.',
-    heroImg: '/heroes/addu-mv.jpg',
     altTexts: { hero: 'Addu Atoll' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel and IB for Addu City families — the second city with a fraction of Malé\'s teaching resources. From USD 423/month.',
     challenges: [
@@ -225,7 +223,6 @@ export const MALDIVES_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Kulhudhuffushi',
     heroTagline: 'For Kulhudhuffushi and northern atoll families — a regional centre serving many islands, and specialist teaching that reaches none of them.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Kulhudhuffushi and northern atoll families. The northern regional centre serves a wide group of surrounding islands with a hospital, services and a growing urban population, alongside fishing and boatbuilding traditions that long predate any of it. Participation in O-levels across the atolls has risen dramatically over the past two decades — the demand is not in question. What is thin is specialist teaching capacity, particularly at A-Level, and that is precisely what live delivery supplies.',
-    heroImg: '/heroes/kulhudhuffushi-mv.jpg',
     altTexts: { hero: 'The northern Maldivian atolls' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel and IB for Kulhudhuffushi and northern atoll families — specialist teaching where capacity is thin. From USD 423/month.',
     challenges: [
@@ -287,7 +284,6 @@ export const MALDIVES_CITIES = [
     primaryKeyword: 'Online school and international curriculum in Fuvahmulah',
     heroTagline: 'For Fuvahmulah and central atoll families — one island, one school system, and a subject list limited by how many teachers live there.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Fuvahmulah and central atoll families. Fuvahmulah is a single-island atoll with a character unlike anywhere else in the country — freshwater lakes, an agricultural tradition rare in the Maldives, and a dive tourism sector that has grown considerably. It is also small, and on an island this size the subject list a student can take is limited by how many specialist teachers happen to live there. That is a teaching-capacity constraint rather than a curriculum one, and it is exactly what live delivery is for.',
-    heroImg: '/heroes/fuvahmulah-mv.jpg',
     altTexts: { hero: 'Fuvahmulah' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel and IB for Fuvahmulah and central atoll families — subject specialists a small island cannot house. From USD 423/month.',
     challenges: [
@@ -349,7 +345,6 @@ export const MALDIVES_CITIES = [
     primaryKeyword: 'Online school and international curriculum for Maldives resort island families',
     heroTagline: 'For resort island families — living where the work is, with no school within a boat ride built for it.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for families living and working across the Maldives\' resort islands. The resort economy employs international management, chefs, dive and marine staff, engineers and hospitality specialists on multi-year contracts, alongside a large Maldivian workforce whose families live on or near the islands where the work is. It is a genuinely international population dispersed across dozens of atolls, and there is no schooling built for it — not because the curriculum is missing, since Cambridge and Edexcel are the national route, but because a resort island has no school and often no specialist teacher within a boat ride.',
-    heroImg: '/heroes/resort-islands-mv.jpg',
     altTexts: { hero: 'A Maldivian resort island and atoll' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel and IB for Maldives resort island families — international staff and Maldivian workforce households with no local schooling. From USD 423/month.',
     challenges: [
@@ -437,7 +432,7 @@ export const MALDIVES_COUNTRY = {
   secondaryProgrammeExamRef: 'DPE and authorised Maldivian provision',
   finalCTABadgeExamRef: 'Private-candidate eligibility confirmed per subject, per session',
 
-  heroImage: '/heroes/maldives.jpg',
+  heroImage: '/online-virtual-school.png',
   heroEyebrow: 'Online school for the Maldives',
   heroH1Suffix: 'the Maldives',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for atoll, resort-sector, professional and Maldivian families across Malé, Addu, Kulhudhuffushi, Fuvahmulah and the resort islands. Cambridge and Edexcel are already your national secondary route — so we are not introducing a curriculum. We are supplying the subject specialists a small island cannot house.',
@@ -463,7 +458,7 @@ export const MALDIVES_COUNTRY = {
   ibDiplomaDelivery: 'Live online IB DP classes across all six subject groups plus Theory of Knowledge and Extended Essay supervision.',
   americanCurriculumSuits: 'Maldives families targeting American universities via Common Application.',
   americanCurriculumDelivery: 'American Curriculum with AP courses Grades 9-12, SAT/ACT preparation, Common App essay coaching.',
-  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2019 to make international qualifications accessible to families at online-delivery fees rather than campus ones. The Maldives is one of only a handful of countries where the Cambridge route we teach is already the national one — which makes our role here unusually clear. We are not changing what a student studies, only who teaches it, and for an island of a few hundred people that turns out to be the whole difference.',
+  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2018 to make international qualifications accessible to families at online-delivery fees rather than campus ones. The Maldives is one of only a handful of countries where the Cambridge route we teach is already the national one — which makes our role here unusually clear. We are not changing what a student studies, only who teaches it, and for an island of a few hundred people that turns out to be the whole difference.',
   founderUniversitySpecialism: 'Alfred holds a BEd in Mathematics and Physics — Smartious\'s Cambridge A-Level and IB Diploma STEM subjects are led personally when needed, which matters in a country where an entire island may have no A-Level Physics or Further Mathematics specialist. Head of Academics supervises curriculum delivery and university placement strategy per family.',
 
   competitorsIntro: 'The Maldives does not have an international school sector in the sense most of our markets do, because it does not need one: the national secondary system already runs on Cambridge IGCSE and Edexcel A-Level. Malé has the schools with the deepest human and material resources in the country, and a small number of private schools run composite Cambridge and national programmes. The competitive picture here is therefore not about curriculum at all — it is about teaching capacity, and about geography. An island of a few thousand people cannot house a Further Mathematics specialist, and no amount of curriculum reform changes that.',

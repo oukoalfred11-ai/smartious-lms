@@ -5,9 +5,9 @@
 // across São Paulo, Rio, Brasília, Belo Horizonte and Florianópolis.
 // SECOND LATIN AMERICAN BUILD — 5 cities.
 //
-// IMAGE NOTE: heroImg / heroImage use LOCAL PATHS under /heroes/.
-// Drop a file at frontend/public/heroes/<slug>.jpg and it appears;
-// if absent the onError handler shows the ink→crimson gradient.
+// IMAGE NOTE: city pages have no heroImg (the hero falls back to the
+// ink→crimson gradient); the country hub uses /online-virtual-school.png.
+// To add a city photo, put it under frontend/public and set heroImg.
 //
 // LEGAL POSITIONING NOTE — BRAZIL IS THE MOST JUDICIALLY SETTLED
 // STRICT-TIER COUNTRY IN OUR ENTIRE COVERAGE. GET IT EXACTLY RIGHT:
@@ -78,7 +78,6 @@ export const BRAZIL_CITIES = [
     primaryKeyword: 'Online school and Cambridge tutoring in São Paulo',
     heroTagline: 'For São Paulo families — Cambridge and IB taught live alongside your school, at a fraction of what the Morumbi tier charges.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for São Paulo families. São Paulo is the financial and corporate capital of Latin America, with the deepest international and bilingual school market in South America — the British and American schools, the German, French, Italian, and Japanese schools, and a fast-growing escola bilíngue sector. Fees at the top of that market are among the highest in the region, and the professional class outside them is enormous. Brazilian law is settled and strict on educating outside school, so our role here is unambiguous: alongside your school, never instead of it. The six-hour offset means our classes land in the Brazilian morning or early afternoon — both of which work.',
-    heroImg: '/heroes/sao-paulo-br.jpg',
     altTexts: { hero: 'São Paulo skyline' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for São Paulo families — alongside your school, at a fraction of the international tier\'s fees. From USD 423/month.',
     challenges: [
@@ -143,7 +142,6 @@ export const BRAZIL_CITIES = [
     primaryKeyword: 'Online school and Cambridge tutoring in Rio de Janeiro',
     heroTagline: 'For Rio and Macaé families — the pre-salt capital, where an internationally recruited energy workforce meets a short list of schools.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Rio de Janeiro families. Rio is Brazil\'s energy capital — Petrobras and the international pre-salt operators, the subsea and oilfield-services sector strung north to Macaé, and the engineers and managers recruited from around the world who come with it — alongside creative industries, a large diplomatic and consular presence, and long-established British and American schools whose places are competitive and whose fees are high. Brazilian law is settled on educating outside school, so we work alongside your school. The six-hour offset puts our classes in the Brazilian morning or early afternoon.',
-    heroImg: '/heroes/rio-de-janeiro-br.jpg',
     altTexts: { hero: 'Rio de Janeiro and Guanabara Bay' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Rio de Janeiro and Macaé families — pre-salt energy capital, competitive school places. From USD 423/month.',
     challenges: [
@@ -205,7 +203,6 @@ export const BRAZIL_CITIES = [
     primaryKeyword: 'Online school and Cambridge tutoring in Brasília',
     heroTagline: 'For Brasília families — a capital built for rotation, where a curriculum that survives the next posting matters more than a campus.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Brasília families. The federal capital hosts one of the largest diplomatic communities in the Southern Hemisphere alongside the federal government, the courts, the regulators, and the international organisations that cluster around them — which makes it a city defined by three- and four-year postings. Its international school market reflects that, and its places are competitive. For a family who will be in Bogotá or Geneva or Pretoria next, a curriculum that continues unchanged matters more than any single campus. Brazilian law is settled on educating outside school, so we work alongside whichever school a family holds.',
-    heroImg: '/heroes/brasilia-br.jpg',
     altTexts: { hero: 'Brasília and the Esplanada dos Ministérios' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Brasília families — a diplomatic capital built for rotation. From USD 423/month.',
     challenges: [
@@ -267,7 +264,6 @@ export const BRAZIL_CITIES = [
     primaryKeyword: 'Online school and Cambridge tutoring in Belo Horizonte',
     heroTagline: 'For Belo Horizonte and Minas families — the iron-ore capital, with an international workforce and a short list of schools.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Belo Horizonte and Minas Gerais families. Minas is Brazil\'s mining and metallurgy heartland — the Quadrilátero Ferrífero, the iron-ore operations and the international mining houses working them, steel and industrial processing, and the engineering and geoscience community that surrounds all of it, alongside one of the country\'s strongest medical and academic sectors. For a state this size and this internationally connected, international schooling is thinner than families expect, and it is concentrated in the capital. Smartious teaches Cambridge and IB live alongside your school, on a six-hour offset that works.',
-    heroImg: '/heroes/belo-horizonte-br.jpg',
     altTexts: { hero: 'Belo Horizonte and the Minas hills' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Belo Horizonte and Minas Gerais families — mining and metallurgy capital, thin provision. From USD 423/month.',
     challenges: [
@@ -329,7 +325,6 @@ export const BRAZIL_CITIES = [
     primaryKeyword: 'Online school and Cambridge tutoring in Florianópolis',
     heroTagline: 'For Florianópolis and Santa Catarina families — the island the tech industry moved to, and the state whose homeschooling law was struck down.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Florianópolis and Santa Catarina families. Florianópolis has become Brazil\'s technology and remote-work capital — a software and startup cluster, a fast-growing international resident community drawn from across Europe and the Americas, and a lifestyle-migration inflow that has outpaced the schools serving it. Inland, Joinville and Blumenau carry a German-heritage industrial belt with its own international connections. Santa Catarina is also where a state homeschooling law was passed and then struck down, which makes the legal position here worth stating precisely rather than vaguely.',
-    heroImg: '/heroes/florianopolis-br.jpg',
     altTexts: { hero: 'Florianópolis island and coast' },
     seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Florianópolis and Santa Catarina families — tech and remote-work capital, and the truth about the struck-down state law. From USD 423/month.',
     challenges: [
@@ -415,7 +410,7 @@ export const BRAZIL_COUNTRY = {
   secondaryProgrammeExamRef: 'Authorised Brazilian Cambridge provision',
   finalCTABadgeExamRef: 'Cambridge centres confirmed per family, per session',
 
-  heroImage: '/heroes/brazil.jpg',
+  heroImage: '/online-virtual-school.png',
   heroEyebrow: 'Online school for Brazil',
   heroH1Suffix: 'Brazil',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for corporate, energy, technology, and Brazilian families across São Paulo, Rio de Janeiro, Brasília, Belo Horizonte, and Florianópolis. Brazilian law is settled: the STF held in 2018 that there is no right to home education, and educação básica is compulsory from four to seventeen. So we teach alongside your school — never instead of it — on a six-hour offset that puts our classes in your morning or early afternoon.',
@@ -426,7 +421,7 @@ export const BRAZIL_COUNTRY = {
   citiesSectionBody: 'Smartious Brazil families concentrate across São Paulo (Latin America\'s financial capital and the deepest international and bilingual school market in South America, at regional-record fees), Rio de Janeiro (the pre-salt energy capital, with the offshore-services belt running north to Macaé), Brasília (one of the largest diplomatic communities in the Southern Hemisphere, defined by three- and four-year postings), Belo Horizonte and Minas Gerais (the iron-ore and metallurgy heartland with thinner provision than its size suggests), and Florianópolis and Santa Catarina (the technology and remote-work capital, and the state whose homeschooling law was struck down). One settled legal position, one supplementary configuration, and a timezone that actually works.',
 
   trustSignals: [
-    { h: 'An African school teaching Brazilian families', p: 'Smartious was founded in Nairobi in 2019 and teaches from two operational centres established 2022 and 2023, serving students in 67 countries — an internationally accredited online school, not a Brazilian one.' },
+    { h: 'An African school teaching Brazilian families', p: 'Smartious was founded in Nairobi in 2018 and teaches from two operational centres established 2022 and 2023, serving families in 40+ countries — an internationally accredited online school, not a Brazilian one.' },
     { h: 'A timezone that works', p: 'Brazil runs BRT (UTC-3) with no daylight saving since 2019 and Kenya EAT (UTC+3) with none either — a fixed six-hour gap. Brazilian morning and early-afternoon classes both land in our normal teaching day, and with schools commonly running manhã and tarde shifts, most students have one of those windows free.' },
     { h: 'The law stated exactly, including the nuance', p: 'The STF fixed in Tema 822 (RE 888815, 2018) that there is no subjective public right to home education, which does not exist in Brazilian legislation. The Court did not rule it unconstitutional in principle — it held only federal law enacted by Congress could create it, and none has been. Educação básica is compulsory from four to seventeen.' },
     { h: 'State laws you may have read about', p: 'Santa Catarina and the Distrito Federal both passed homeschooling laws and both were struck down, upheld by the STF, because the subject falls within the União\'s exclusive competence. A local law reported in the press is not a route, and we would rather say so than let a family act on it.' },
@@ -441,7 +436,7 @@ export const BRAZIL_COUNTRY = {
   ibDiplomaDelivery: 'Live online IB DP classes across all six subject groups plus Theory of Knowledge and Extended Essay supervision.',
   americanCurriculumSuits: 'Brazil families targeting US universities via Common Application.',
   americanCurriculumDelivery: 'American Curriculum with AP courses Grades 9-12, SAT/ACT preparation, Common App essay coaching.',
-  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2019 to make international qualifications accessible to families at online-delivery fees rather than campus ones. Brazil families join students in 67 other countries — and, unusually for the Americas, the timezone works: six hours, fixed, with Brazilian mornings and early afternoons both inside our teaching day.',
+  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in Nairobi in 2018 to make international qualifications accessible to families at online-delivery fees rather than campus ones. Brazil families join students in 40+ countries — and, unusually for the Americas, the timezone works: six hours, fixed, with Brazilian mornings and early afternoons both inside our teaching day.',
   founderUniversitySpecialism: 'Alfred holds a BEd in Mathematics and Physics — Smartious\'s Cambridge A-Level and IB Diploma STEM subjects are led personally when needed, suiting Minas\'s metallurgy and geoscience families, Rio\'s pre-salt households, and Florianópolis\'s technology community. Head of Academics supervises curriculum delivery and university placement strategy per family.',
 
   competitorsIntro: 'Brazil has a large and sophisticated international and bilingual school market — St Paul\'s, Graded, Chapel and the British and American schools in São Paulo, the British School and Escola Americana in Rio, the American School of Brasília, and an escola bilíngue sector that has expanded rapidly. These are strong institutions. Two gaps are real and neither is about quality: the fees at the top of the market are among the highest in Latin America, and Cambridge A-Level provision is thinner than IB and American provision, which matters for anyone applying through UCAS.',

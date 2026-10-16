@@ -381,7 +381,7 @@ export const SAUDI_ARABIA_COUNTRY = {
     { metric: 'Established', value: '2018', sub: 'Nairobi-based' },
     { metric: 'Curricula', value: '5', sub: 'Cambridge · Edexcel · IB · American AP · CBC' },
     { metric: 'Tutors', value: '78+', sub: 'PGCE-qualified subject specialists' },
-    { metric: 'Countries served', value: '14+', sub: 'Africa · Gulf · Europe · Americas' },
+    { metric: 'Countries served', value: '40+', sub: 'Africa · Gulf · Europe · Americas' },
     { metric: 'Physical centres', value: '2', sub: 'Diamond Plaza Parklands · Karen Hardy' },
     { metric: 'SAR-USD peg', value: '3.75', sub: 'Fixed since 1986 — predictable pricing' },
   ],
@@ -524,11 +524,11 @@ export const SAUDI_ARABIA_COUNTRY = {
     },
     {
       q: 'Will my child miss out on sports, arts, and social development without a physical school?',
-      a: 'This is the most common concern. The honest answer: a physical school provides a complete daily environment that an online programme does not replicate. However, many Saudi-based families combine Smartious academic instruction with sports clubs (Saudi has growing youth football academies, swimming, equestrian, motorsports), music academies, scouts, debate clubs, plus religious and cultural community involvement. Smartious classes themselves provide regular live peer interaction across 14+ countries. Many families find the time freed from school commute and the academic depth from smaller class sizes more than compensates for the absence of a school sports field — particularly during summer heat months when in-person commutes are burdensome.',
+      a: 'This is the most common concern. The honest answer: a physical school provides a complete daily environment that an online programme does not replicate. However, many Saudi-based families combine Smartious academic instruction with sports clubs (Saudi has growing youth football academies, swimming, equestrian, motorsports), music academies, scouts, debate clubs, plus religious and cultural community involvement. Smartious classes themselves provide regular live peer interaction across 40+ countries. Many families find the time freed from school commute and the academic depth from smaller class sizes more than compensates for the absence of a school sports field — particularly during summer heat months when in-person commutes are burdensome.',
     },
     {
       q: 'What about social interaction and peer relationships?',
-      a: 'Smartious classes are small live groups of 4-6 students (Online tier) or smaller (Online Plus). Students attend the same classes with the same peers throughout the academic year, building relationships across the international student body spanning 14+ countries. Many Saudi-based families supplement with local community activities — sports clubs, mosque/church communities, neighbourhood friendships, scouts, family gatherings. For expat families on 2-5 year assignments, the Smartious model provides more consistent peer relationships across moves than physical school relationships that reset with each relocation.',
+      a: 'Smartious classes are small live groups of 4-6 students (Online tier) or smaller (Online Plus). Students attend the same classes with the same peers throughout the academic year, building relationships across the international student body spanning 40+ countries. Many Saudi-based families supplement with local community activities — sports clubs, mosque/church communities, neighbourhood friendships, scouts, family gatherings. For expat families on 2-5 year assignments, the Smartious model provides more consistent peer relationships across moves than physical school relationships that reset with each relocation.',
     },
     {
       q: 'Can my child apply to King Saud University, KFUPM, KAUST, or King Abdulaziz University with Cambridge qualifications?',

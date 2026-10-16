@@ -390,7 +390,7 @@ export const UAE_COUNTRY = {
     { metric: 'Established', value: '2018', sub: 'Nairobi-based' },
     { metric: 'Curricula', value: '5', sub: 'Cambridge · Edexcel · IB · American AP · CBC' },
     { metric: 'Tutors', value: '78+', sub: 'PGCE-qualified subject specialists' },
-    { metric: 'Countries served', value: '14+', sub: 'Africa · Gulf · Europe · Americas' },
+    { metric: 'Countries served', value: '40+', sub: 'Africa · Gulf · Europe · Americas' },
     { metric: 'Physical centres', value: '2', sub: 'Diamond Plaza Parklands · Karen Hardy' },
     { metric: 'AED-USD peg', value: '3.6725', sub: 'Predictable multi-year pricing' },
   ],
@@ -589,7 +589,7 @@ export const UAE_COUNTRY = {
     },
     {
       q: 'What about social interaction and peer relationships?',
-      a: 'Smartious classes are small live groups of 4-6 students. Students attend the same classes with the same peers throughout the academic year, building relationships across the international student body spanning 14+ countries. This is different from a physical school playground, but it is genuine peer interaction with consistent classmates. Many UAE families supplement with local community activities — sports clubs, mosque/church communities, neighbourhood friendships, scouts, family gatherings. For UAE expat families on 2-5 year assignments who will move again, the Smartious model actually provides more consistent peer relationships across moves (because the classmates continue regardless of geography) than physical school relationships that reset with each relocation.',
+      a: 'Smartious classes are small live groups of 4-6 students. Students attend the same classes with the same peers throughout the academic year, building relationships across the international student body spanning 40+ countries. This is different from a physical school playground, but it is genuine peer interaction with consistent classmates. Many UAE families supplement with local community activities — sports clubs, mosque/church communities, neighbourhood friendships, scouts, family gatherings. For UAE expat families on 2-5 year assignments who will move again, the Smartious model actually provides more consistent peer relationships across moves (because the classmates continue regardless of geography) than physical school relationships that reset with each relocation.',
     },
     {
       q: 'Can my UAE child apply to UAE universities (Zayed, UAE University, AUS, AUD, NYU Abu Dhabi) with Cambridge qualifications?',
