@@ -219,9 +219,9 @@ function knobFront(r, x, y, zFace, colour = '#1A1A1A') {
 }
 /** LCD with a black bezel on a front face; installs g.userData.setDisplay. */
 function screenOn(g, w, h, x, yc, zFace, initial = '----') {
-  g.add(box(w + 0.008, h + 0.008, 0.003, '#0B0D10', x, yc - (h + 0.008) / 2, zFace + 0.0015 - 0.0015 + 0.0015))
+  g.add(box(w + 0.008, h + 0.008, 0.003, '#0B0D10', x, yc - (h + 0.008) / 2, zFace + 0.0015))
   const s = plate(initial, w, h, { ...LCD, family: MONO, pad: 0.12 })
-  s.position.set(x, yc, zFace + 0.0031 + 0.0008)
+  s.position.set(x, yc, zFace + 0.0038)
   g.add(s)
   g.userData.screen = s
   g.userData.setDisplay = (t) => s.userData.setText(String(t))
@@ -245,7 +245,7 @@ function benchMeter({ title, unit, accent = '#C62828', w = 0.15, h = 0.1, d = 0.
 function cabinet(w, h, d, body, panel) {
   const g = grp(box(w, h, d, body, 0, 0.004, 0), box(w - 0.006, h - 0.006, 0.002, panel, 0, 0.007, d / 2))
   for (const sx of [-1, 1]) for (const sz of [-1, 1]) g.add(cyl(0.006, 0.004, 'rubber', sx * (w / 2 - 0.014), 0, sz * (d / 2 - 0.014), 12))
-  g.userData.zf = d / 2 + 0.002
+  g.userData.zf = d / 2 + 0.001
   return g
 }
 /** Handheld meter leaning back on its stand; screen faces up-front. */
@@ -255,7 +255,6 @@ function handheld({ w = 0.075, h = 0.15, d = 0.035, colour = 'case', holster = n
   inner.add(box(w, h, d, colour, 0, 0, 0))
   const zf = d / 2
   screenOn(inner, w * 0.78, h * 0.2, 0, h * 0.8, zf, initial)
-  inner.userData = { ...inner.userData }
   build?.(inner, zf)
   inner.rotation.x = -0.35
   inner.add(box(w * 0.7, h * 0.5, 0.004, '#3A3F47', 0, 0, -d / 2 - 0.004))
@@ -393,8 +392,7 @@ reg('stopwatch', 0.08, () => {
   const inner = grp(rod(0.032, 0.014, 'case', 'z', 0, 0, 0, 40), torus(0.0305, 0.0018, 'metal', 2 * PI, 0, 0, 0.007, 40))
   inner.add(mesh(new THREE.CircleGeometry(0.029, 40), '#D9DDE2', 0, 0, 0.0072))
   const s = plate('0.00', 0.04, 0.016, { ...LCD, family: MONO }); s.position.set(0, 0.004, 0.0082); inner.add(s)
-  inner.add(plate('STOPWATCH', 0.03, 0.005, { bg: '#D9DDE2', fg: '#333' }))
-  inner.children[inner.children.length - 1].position.set(0, -0.014, 0.0082)
+  const name = plate('STOPWATCH', 0.03, 0.005, { bg: '#D9DDE2', fg: '#333' }); name.position.set(0, -0.014, 0.0082); inner.add(name)
   inner.add(cyl(0.004, 0.008, 'metal', 0, 0.031, 0, 12), torus(0.007, 0.0015, 'metal', 2 * PI, 0, 0.045, 0))
   for (const a of [-0.7, 0.7]) { const b = cyl(0.003, 0.006, a < 0 ? '#C62828' : '#3A3F47', -Math.sin(a) * 0.031, Math.cos(a) * 0.031 - 0.003, 0, 10); b.rotation.z = a; inner.add(b) }
   inner.rotation.x = -1.05
@@ -504,7 +502,7 @@ reg('gm_tube', 0.34, () => {
   return g
 })
 
-reg('hall_probe', 0.28, () => {
+reg('hall_probe', 0.31, () => {
   const m = benchMeter({ title: 'TESLAMETER', unit: 'mT', accent: '#6A3FA0', w: 0.12, h: 0.08, d: 0.09 })
   m.position.x = 0.07
   const g = grp(m)
@@ -516,7 +514,6 @@ reg('hall_probe', 0.28, () => {
 
 reg('datalogger', 0.2, () => {
   const g = grp(box(0.17, 0.045, 0.12, '#E3E6EA', 0, 0, 0))
-  const top = grp(); top.position.set(0, 0.045, 0.0); top.rotation.x = -0.0
   const s = plate('----', 0.1, 0.05, { ...LCD, family: MONO }); onTop(s, 0, 0.045, -0.015); g.add(s)
   g.add(box(0.108, 0.0006, 0.058, '#0B0D10', 0, 0.045, -0.015))
   for (let i = 0; i < 4; i++) g.add(postFront(['#C62828', '#1F5FAF', '#2E7D32', '#E2B21F'][i], -0.06 + i * 0.04, 0.022, 0.06))
@@ -632,7 +629,7 @@ reg('rheostat', 0.36, () => {
   return g
 })
 
-reg('resistance_wire', 1.08, () => {
+reg('resistance_wire', 1.1, () => {
   const g = rule(1.01, 100)
   g.add(box(0.03, 0.03, 0.03, 'case', -0.52, 0, -0.03), box(0.03, 0.03, 0.03, 'case', 0.52, 0, -0.03))
   g.add(postUp('#151515', -0.52, 0.03, -0.03), postUp('#C62828', 0.52, 0.03, -0.03))
@@ -717,7 +714,6 @@ reg('photovoltaic_cell', 0.17, () => {
   panel.add(face); panel.rotation.x = 0.55; panel.position.set(0, 0.03, 0)
   const g = grp(panel, box(0.1, 0.008, 0.07, 'case', 0, 0, -0.01), box(0.006, 0.04, 0.006, 'case', -0.04, 0, -0.035), box(0.006, 0.04, 0.006, 'case', 0.04, 0, -0.035))
   g.add(postUp('#C62828', 0.03, 0.008, 0.012), postUp('#151515', -0.03, 0.008, 0.012))
-  rest(panel)
   return g
 })
 reg('thermocouple', 0.2, () => grp(
@@ -772,12 +768,12 @@ reg('electron_tube', 0.32, () => {
   const g = grp(box(0.26, 0.02, 0.12, 'case'))
   g.add(box(0.012, 0.07, 0.03, 'case', -0.07, 0.02, 0), box(0.012, 0.03, 0.03, 'case', 0.06, 0.02, 0))
   g.add(ball(0.065, 'glass', 0.03, 0.115, 0, 32), rod(0.018, 0.1, 'glass', 'x', -0.07, 0.115, 0, 20), rod(0.02, 0.03, 'case', 'x', -0.125, 0.115, 0, 20))
-  const scr = box(0.09, 0.06, 0.001, M('#7FE0C8', { emissive: '#3FA890', emissiveIntensity: 0.3, transparent: true, opacity: 0.7 }), 0.03, 0.085, 0); scr.rotation.y = 0.0; g.add(scr)
+  g.add(box(0.09, 0.06, 0.001, M('#7FE0C8', { emissive: '#3FA890', emissiveIntensity: 0.3, transparent: true, opacity: 0.7 }), 0.03, 0.085, 0))
   g.add(box(0.07, 0.002, 0.03, 'metal', 0.025, 0.148, 0), box(0.07, 0.002, 0.03, 'metal', 0.025, 0.08, 0))
   g.add(front(plate('TEACHER DEMONSTRATION', 0.16, 0.012, { bg: '#202329', fg: '#E2B21F' }), 0, 0.01, 0.06))
   return g
 })
-reg('helmholtz_coils', 0.3, () => {
+reg('helmholtz_coils', 0.32, () => {
   const inner = grp(box(0.26, 0.015, 0.12, 'woodDk'))
   for (const x of [-0.05, 0.05]) {
     const c = torus(0.1, 0.012, 'copper', 2 * PI, x, 0.127, 0, 48); c.rotation.y = PI / 2
@@ -908,7 +904,7 @@ reg('plasticine', 0.1, () => {
 })
 reg('steel_blade', 0.32, () => grp(box(0.3, 0.0008, 0.012, M('#3A6EA5', { metalness: 0.6, roughness: 0.35 })), cyl(0.002, 0.001, '#111', -0.14, 0.0002, 0, 10), cyl(0.002, 0.001, '#111', 0.14, 0.0002, 0, 10)))
 reg('card', 0.22, () => grp(box(0.2, 0.0015, 0.15, '#F4F1E8'), box(0.2, 0.0015, 0.15, '#EDE8DA', 0.006, 0.0015, 0.008)))
-reg('rubber_bung', 0.22, () => grp(
+reg('rubber_bung', 0.24, () => grp(
   rod(0.006, 0.1, M('#EEF3F6', { transparent: true, opacity: 0.55, depthWrite: false }), 'x', 0, 0.006, 0, 16),
   rod(0.0006, 0.2, '#EDE3C8', 'x', 0.0, 0.006, 0, 6),
   mesh(new THREE.CylinderGeometry(0.009, 0.012, 0.02, 20), '#7A2E2A', -0.105, 0.012, 0),
@@ -925,7 +921,7 @@ reg('beaker_250', 0.1, () => {
   g.userData.setLevel = (f) => { liq.visible = true; liq.scale.y = 0.09 * (0.15 + 0.8 * Math.min(1, Math.max(0, f))) }
   return g
 })
-reg('water_jug', 0.15, () => {
+reg('water_jug', 0.18, () => {
   const g = grp(lathe([[0, 0], [0.05, 0], [0.052, 0.004], [0.055, 0.12], [0.058, 0.15]], 'plastic', 32))
   const h = torus(0.04, 0.007, M('#D7E7F2', { roughness: 0.3 }), PI, 0.052, 0.08, 0, 20); h.rotation.z = -PI / 2
   const spout = box(0.02, 0.004, 0.03, 'plastic', -0.06, 0.146, 0)
@@ -940,7 +936,7 @@ reg('polystyrene_cup', 0.1, () => {
   const liq = mesh(new THREE.CylinderGeometry(0.0355, 0.027, 0.06, 32), 'water', 0, 0.033, 0)
   return grp(cup, liq)
 })
-reg('kettle', 0.22, () => {
+reg('kettle', 0.27, () => {
   const g = grp(cyl(0.085, 0.012, 'case', 0, 0, 0, 36))
   const body = lathe([[0, 0], [0.07, 0], [0.075, 0.01], [0.075, 0.16], [0.06, 0.2], [0.03, 0.205], [0, 0.205]], 'white', 36); body.position.y = 0.012
   const h = torus(0.06, 0.01, 'case', PI, -0.075, 0.11, 0, 20); h.rotation.z = PI / 2
@@ -972,7 +968,7 @@ reg('ice', 0.1, () => {
   }
   return g
 })
-reg('bottle_outlet', 0.14, () => {
+reg('bottle_outlet', 0.16, () => {
   const g = grp(lathe([[0, 0], [0.045, 0], [0.046, 0.004], [0.046, 0.2], [0.03, 0.235], [0.013, 0.25], [0.013, 0.27]], 'plastic', 32))
   g.add(rod(0.004, 0.05, 'plastic', 'x', 0.068, 0.02, 0, 12), rod(0.005, 0.012, 'red', 'x', 0.095, 0.02, 0, 12))
   const liq = column(0.0445, 'water', 28); liq.position.y = 0.003; g.add(liq)
