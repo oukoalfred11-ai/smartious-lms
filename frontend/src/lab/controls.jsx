@@ -5,8 +5,9 @@
  * the instruments; the engine stores what they typed and the server checks it.
  */
 import { useState } from 'react'
-import { INDICATORS, terminalsOf, getExperiment } from './core.js'
+import { INDICATORS, getExperiment } from './core.js'
 import PracticalControls from './practicalControls.jsx'
+import CircuitControls from './circuitControls.jsx'
 
 function Btn({ children, onClick, disabled, kind = '' }) {
   return <button type="button" className={'lab-btn ' + kind} onClick={onClick} disabled={disabled}>{children}</button>
@@ -103,39 +104,27 @@ function TitreSummary({ view }) {
   )
 }
 
-const COMPONENTS = [['PS', 'Supply', 'supply'], ['S1', 'Switch', 'switch'], ['A1', 'Ammeter', 'ammeter'], ['V1', 'Voltmeter', 'voltmeter'], ['R1', 'Resistor', 'resistor']]
-const TERMINALS = COMPONENTS.flatMap(([id, name, type]) => terminalsOf(type).map(t => ({ id: id + '.' + t, label: name + ' ' + t })))
-const termLabel = (id) => TERMINALS.find(t => t.id === id)?.label || id
+
+const OHM_PARTS = [
+  { id: 'PS', type: 'supply', label: 'Supply' }, { id: 'S1', type: 'switch', label: 'Switch' },
+  { id: 'A1', type: 'ammeter', label: 'Ammeter' }, { id: 'V1', type: 'voltmeter', label: 'Voltmeter' }, { id: 'R1', type: 'resistor', label: 'Resistor' },
+]
 
 function OhmsControls({ view, dispatch, editable }) {
-  const [a, setA] = useState(''), [b, setB] = useState('')
   const [V, setV] = useState(''), [I, setI] = useState('')
   const off = !editable
   return (
     <div className="lab-controls">
+      <CircuitControls parts={OHM_PARTS} view={{ ...view, circuit: { ok: view.setupOk, problems: view.problems, fault: view.fault } }} dispatch={dispatch} editable={editable} />
       <fieldset className="lab-fs">
-        <legend>Connect a lead</legend>
-        <form className="lab-row" onSubmit={e => { e.preventDefault(); if (dispatch('connect', { a, b })) { setA(''); setB('') } }}>
-          <select value={a} onChange={e => setA(e.target.value)} disabled={off} aria-label="From terminal"><option value="">From…</option>{TERMINALS.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}</select>
-          <select value={b} onChange={e => setB(e.target.value)} disabled={off} aria-label="To terminal"><option value="">To…</option>{TERMINALS.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}</select>
-          <Btn disabled={off || !a || !b}>Connect</Btn>
-        </form>
-        {view.wires.length ? (
-          <ul className="lab-list">{view.wires.map(([x, y], i) => <li key={i}>{termLabel(x)} → {termLabel(y)} <Btn kind="sm" onClick={() => dispatch('disconnect', { index: i })} disabled={off}>Remove</Btn></li>)}</ul>
-        ) : <p className="lab-help">No leads connected yet.</p>}
-        {view.wires.length > 0 && <Btn kind="ghost" onClick={() => dispatch('clearWires')} disabled={off}>Remove all leads</Btn>}
-      </fieldset>
-      <fieldset className="lab-fs">
-        <legend>Supply and switch</legend>
+        <legend>Supply and meters</legend>
         <label className="lab-range">Supply: <b>{view.supplyV.toFixed(1)} V</b>
           <input type="range" min="0" max="12" step="0.5" value={view.supplyV} onChange={e => dispatch('setSupply', { volts: e.target.value })} disabled={off} />
         </label>
-        <Btn onClick={() => dispatch('toggleSwitch')} disabled={off}>{view.switchClosed ? 'Open switch' : 'Close switch'}</Btn>
         <p className="lab-obs" aria-live="polite">
           Ammeter: <b>{view.meters.A1 == null ? '----' : view.meters.A1.toFixed(3) + ' A'}</b> · Voltmeter: <b>{view.meters.V1 == null ? '----' : view.meters.V1.toFixed(2) + ' V'}</b>
           {view.fault === 'short_circuit' && <span className="lab-warn"> Supply tripped: short circuit. Check your leads.</span>}
         </p>
-        {view.problems?.length > 0 && <ul className="lab-problems">{view.problems.map(p => <li key={p}>{p}</li>)}</ul>}
       </fieldset>
       <fieldset className="lab-fs">
         <legend>Record a reading</legend>

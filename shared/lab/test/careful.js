@@ -3,13 +3,17 @@
 // right axes and answers from the graph.
 import { paramsFor, applyAction } from '../engine.js'
 
-export function carefulRun(def, seed, { points = 8 } = {}) {
+export function carefulRun(def, seed, { points = 8, options = {} } = {}) {
   const P = def.practical
-  const params = paramsFor(def, seed, {})
+  const params = paramsFor(def, seed, options)
   const actions = []
   let state = def.initialState(params)
   const step = (type, payload = {}) => { actions.push({ type, payload }); state = applyAction(def, params, state, { type, payload }) }
-  step('collect', { items: P.required })
+  if (state.collected == null) step('collect', { items: P.required })
+  if (P.circuit) {
+    for (const [a, b] of P.circuit.correct) step('connect', { a, b })
+    if (P.circuit.parts.some(p => p.type === 'switch')) step('toggleSwitch')
+  }
   for (const c of P.constants) { step('measure', { key: c.key }); step('recordConst', { key: c.key, value: state.readings[c.key] }) }
   const seriesSetting = P.seriesBy ? P.settings.find(s => s.key === P.seriesBy) : null
   const settingValues = seriesSetting ? seriesSetting.options.map(o => o.value) : [null]

@@ -7,6 +7,7 @@
 import { useState } from 'react'
 import { apparatusName } from '../../../shared/lab/apparatus.js'
 import { axisLabel, TRANSFORMS } from '../../../shared/lab/practical.js'
+import CircuitControls from './circuitControls.jsx'
 
 const dp = (res) => Math.max(0, Math.ceil(-Math.log10(res) - 1e-9))
 const show = (v, r) => (v == null ? '----' : v.toFixed(dp(r.resolution)) + ' ' + (r.unit || ''))
@@ -21,12 +22,12 @@ export function Stockroom({ def, view, dispatch, editable }) {
   const [open, setOpen] = useState(!view.collected)
   const [pick, setPick] = useState(() => new Set(view.collected || []))
   const toggle = (id) => setPick(p => { const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); return n })
-  if (!open && view.collected) {
+  if (!view.stockroomMode || (!open && view.collected)) {
     return (
       <fieldset className="lab-fs">
         <legend>Apparatus on your bench</legend>
-        <p className="lab-help">{view.collected.map(apparatusName).join(' · ')}</p>
-        <Btn kind="sm ghost" onClick={() => { setPick(new Set(view.collected)); setOpen(true) }} disabled={!editable}>Change apparatus</Btn>
+        <p className="lab-help">{(view.collected || []).map(apparatusName).join(' · ')}{def.materials?.length ? ' · ' + def.materials.join(' · ') : ''}</p>
+        {view.stockroomMode && <Btn kind="sm ghost" onClick={() => { setPick(new Set(view.collected)); setOpen(true) }} disabled={!editable}>Change apparatus</Btn>}
       </fieldset>
     )
   }
@@ -114,6 +115,7 @@ export default function PracticalControls({ def, view, dispatch, editable }) {
     <div className="lab-controls">
       <Stockroom def={def} view={view} dispatch={dispatch} editable={editable} />
       {ready && <>
+        {P.circuit && <CircuitControls parts={P.circuit.parts} view={view} dispatch={dispatch} editable={editable} />}
         {P.settings.length > 0 && (
           <fieldset className="lab-fs"><legend>Conditions</legend>
             {P.settings.map(s => (

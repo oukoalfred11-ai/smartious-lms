@@ -33,17 +33,21 @@ for (const def of PHYSICS_AL) {
   })
 }
 
-test('a wrong result or skipped apparatus loses marks', () => {
+test('a wrong result loses marks; in stockroom mode, missing apparatus blocks readings and loses the mark', () => {
   const def = PHYSICS_AL[0]
   const { params, state, answers } = carefulRun(def, 'w1')
-  const bad = { ...answers, r_rho: '1.5' }
-  const g = gradeSession(def, { params, state, answers: bad })
+  const g = gradeSession(def, { params, state, answers: { ...answers, r_rho: '1.5' } })
   assert.equal(g.rows.find(r => r.id === 'res_rho').marks, 0)
-  const p2 = paramsFor(def, 'w2', {})
+  assert.equal(g.rows.find(r => r.id === 'apparatus'), undefined, 'apparatus was provided, so there is no apparatus mark')
+
+  const p2 = paramsFor(def, 'w2', { stockroom: true })
   let s = def.initialState(p2)
+  assert.equal(s.collected, null)
   s = applyAction(def, p2, s, { type: 'collect', payload: { items: [def.apparatus[0]] } })
   assert.throws(() => applyAction(def, p2, s, { type: 'measure', payload: { key: def.practical.measures[0].key } }), /missing/)
   s = applyAction(def, p2, s, { type: 'collect', payload: { items: def.apparatus } })
-  const g2 = gradeSession(def, { params: p2, state: s, answers: {} })
-  assert.equal(g2.rows.find(r => r.id === 'apparatus').marks, 0)
+  assert.equal(gradeSession(def, { params: p2, state: s, answers: {} }).rows.find(r => r.id === 'apparatus').marks, 0)
+
+  const run = carefulRun(def, 'w3', { options: { stockroom: true } })
+  assert.equal(gradeSession(def, { params: run.params, state: run.state, answers: run.answers }).rows.find(r => r.id === 'apparatus').marks, 1)
 })

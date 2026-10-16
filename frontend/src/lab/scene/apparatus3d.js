@@ -204,11 +204,17 @@ function stripeTex(c1, c2, n = 8) {
 }
 
 // ── Instrument parts ───────────────────────────────────────
+// Terminal posts record where a lead attaches (userData.tip, in the post's
+// own coordinates) and their colour, so the bench can wire them.
 function postFront(colour, x, y, zFace) {
-  return grp(rod(0.0055, 0.012, colour, 'z', x, y, zFace + 0.006, 16), rod(0.0032, 0.004, 'brass', 'z', x, y, zFace + 0.014, 12))
+  const g = grp(rod(0.0055, 0.012, colour, 'z', x, y, zFace + 0.006, 16), rod(0.0032, 0.004, 'brass', 'z', x, y, zFace + 0.014, 12))
+  g.userData.tip = new THREE.Vector3(x, y, zFace + 0.016); g.userData.post = colour
+  return g
 }
 function postUp(colour, x, yTop, z) {
-  return grp(cyl(0.0055, 0.012, colour, x, yTop, z, 16), cyl(0.0032, 0.004, 'brass', x, yTop + 0.012, z, 12))
+  const g = grp(cyl(0.0055, 0.012, colour, x, yTop, z, 16), cyl(0.0032, 0.004, 'brass', x, yTop + 0.012, z, 12))
+  g.userData.tip = new THREE.Vector3(x, yTop + 0.016, z); g.userData.post = colour
+  return g
 }
 function knobFront(r, x, y, zFace, colour = '#1A1A1A') {
   return grp(
@@ -638,6 +644,7 @@ reg('resistance_wire', 1.1, () => {
   const clip = (c) => grp(box(0.008, 0.008, 0.026, c, 0, 0.018, -0.006), box(0.006, 0.004, 0.012, 'steel', 0, 0.016, -0.018))
   const fixed = clip('black'); fixed.position.x = -0.5; g.add(fixed)
   const moving = clip('red'); g.add(moving)
+  moving.userData.tip = new THREE.Vector3(0, 0.024, -0.006); moving.userData.post = 'clip'   // the sliding contact
   g.userData.setLevel = (f) => { moving.position.x = -0.5 + 0.1 + 0.8 * Math.min(1, Math.max(0, f)) }
   g.userData.setLevel(0)
   return g
@@ -1057,3 +1064,10 @@ export function buildModel(id) {
 
 /** Approximate width in metres, for laying out a bench. */
 export function footprint(id) { return FOOT[id] ?? 0.16 }
+
+/** Terminal posts of a model, in build order: [{ obj, tip, colour }]. */
+export function postsOf(model) {
+  const out = []
+  model.traverse(o => { if (o.userData?.tip) out.push({ obj: o, tip: o.userData.tip, colour: o.userData.post }) })
+  return out
+}

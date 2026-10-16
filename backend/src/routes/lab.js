@@ -321,6 +321,7 @@ router.post('/assignments', auth, requireRole('teacher', ...STAFF), wrap(async (
   const dueAt = b.dueAt ? new Date(b.dueAt) : null;
   if (dueAt && isNaN(dueAt.getTime())) return res.status(400).json({ success: false, message: 'Invalid deadline.' });
   const options = def.id === 'chem-titration' && ['HCl', 'CH3COOH'].includes(b.options?.acid) ? { acid: b.options.acid } : {};
+  if (def.practical && b.options?.stockroom === true) options.stockroom = true;   // students choose the apparatus themselves
   const a = await LabAssignment.create({
     experimentId: def.id, title: String(b.title || def.title).trim().slice(0, 200), instructions: String(b.instructions || '').slice(0, 4000),
     options, teacherId: req.user._id, teacherName: fullName(req.user), studentIds, dueAt,

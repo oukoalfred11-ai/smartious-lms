@@ -12,7 +12,7 @@ import { fail } from '../engine.js'
 
 const NOMINAL = [10, 15, 22, 33, 47]       // E12 values, Ω
 const SUPPLY_R = 0.5                       // internal resistance, Ω
-const MAX_WIRES = 20
+const MAX_WIRES = 10                      // leads in the tray (a correct circuit needs 6)
 
 export function circuitOf(params, s) {
   return {
@@ -101,11 +101,11 @@ const def = {
   },
 
   initialState() {
-    return { wires: [], supplyV: 0, switchClosed: false, rows: [] }
+    return { wires: [], wireColours: [], supplyV: 0, switchClosed: false, rows: [] }
   },
 
   actions: {
-    connect(s, { a, b }) {
+    connect(s, { a, b, colour }) {
       const valid = (t) => { const [id, term] = String(t).split('.'); const type = { PS: 'supply', S1: 'switch', A1: 'ammeter', V1: 'voltmeter', R1: 'resistor' }[id]; return type && terminalsOf(type).includes(term) }
       if (!valid(a) || !valid(b)) fail('Connect two terminals.')
       if (a === b) fail('A lead needs two different terminals.')
@@ -113,12 +113,15 @@ const def = {
       if (s.wires.some(([x, y]) => (x === a && y === b) || (x === b && y === a))) fail('Those terminals are already connected.')
       if (s.wires.length >= MAX_WIRES) fail('That is more leads than this circuit needs.')
       s.wires.push([a, b])
+      s.wireColours = s.wireColours || []
+      s.wireColours[s.wires.length - 1] = colour === 'black' ? 'black' : 'red'
     },
     disconnect(s, { index }) {
       if (!s.wires[index]) fail('No such lead.')
       s.wires.splice(index, 1)
+      s.wireColours?.splice(index, 1)
     },
-    clearWires(s) { s.wires = [] },
+    clearWires(s) { s.wires = []; s.wireColours = [] },
     setSupply(s, { volts }) {
       const v = Number(volts)
       if (!Number.isFinite(v) || v < 0 || v > 12) fail('The supply goes from 0 to 12 V.')
@@ -151,7 +154,7 @@ const def = {
       ? { A1: toResolution(sol.readings.A1, METER.ammeter.resolution), V1: toResolution(sol.readings.V1, METER.voltmeter.resolution) }
       : { A1: null, V1: null }
     return {
-      supplyV: s.supplyV, switchClosed: s.switchClosed, wires: s.wires,
+      supplyV: s.supplyV, switchClosed: s.switchClosed, wires: s.wires, wireColours: s.wireColours || [], maxLeads: MAX_WIRES,
       fault: sol && !sol.ok ? sol.fault : null,
       problems: chk.problems, setupOk: chk.ok, meters,
       rows: s.rows,

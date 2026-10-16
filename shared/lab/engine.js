@@ -57,9 +57,10 @@ export function gradeSession(def, { params, state, answers = {} }) {
     if (!r.auto) return { id: r.id, label: r.label, max: r.marks, marks: null, auto: false, detail: r.guidance || '' }
     let res
     try { res = r.auto(ctx) } catch (e) { res = { marks: 0, detail: 'Could not be checked: ' + e.message } }
+    if (res?.na) return null                     // does not apply to this attempt (e.g. apparatus provided)
     const marks = Math.max(0, Math.min(r.marks, Number(res?.marks) || 0))
     return { id: r.id, label: r.label, max: r.marks, marks, auto: true, detail: res?.detail || '' }
-  })
+  }).filter(Boolean)
   const autoMax = rows.filter(r => r.auto).reduce((a, r) => a + r.max, 0)
   const autoMarks = rows.filter(r => r.auto).reduce((a, r) => a + r.marks, 0)
   const max = rows.reduce((a, r) => a + r.max, 0)
