@@ -50,6 +50,17 @@ export default [
     model: { kind: 'quantitative', summary: 'A copper–constantan thermocouple has E = aΔθ + bΔθ², where a is about 39 µV K⁻¹ and b about 0.04 µV K⁻². Over 20–90 K the graph is close to a straight line; its gradient is near the mean sensitivity E(100 K)/100 K = a + 100b.',
       assumptions: ['The small quadratic term makes the sensitivity rise by about 15 % from 0 to 100 °C, so the graph curves slightly upwards.', 'The cold junction stays at the measured ice temperature (0.0–0.4 °C).', 'The hot junction and the thermometer bulb may differ by up to 0.3 K; the thermometer is read to the nearest 0.5 °C.', 'The millivoltmeter has a random error of about ±0.005 mV and draws no current.'] },
     hidden: (q) => ({ a: q('a', 38.0, 41.0), b: q('b', 0.035, 0.048), th0: q('th0', 0.0, 0.4) }),
+    // The thermocouple is the source. Values are in mV and Ω, so the solved
+    // p.d. is in mV as the millivoltmeter shows it.
+    circuit: {
+      parts: [
+        { id: 'TC', type: 'supply', apparatus: 'thermocouple', label: 'Thermocouple' },
+        { id: 'V1', type: 'voltmeter', apparatus: 'millivoltmeter', label: 'Millivoltmeter' },
+      ],
+      checks: [{ meter: 'V1', across: 'TC' }],
+      values: (p, x) => { const d = x + 0.8 * p.j('bath' + x) + 0.3 * p.j('probe' + x) - p.th0; return { TC: { emf: (p.a * d + p.b * d * d) / 1000, r: 5 } } },
+      correct: [['TC.+', 'V1.+'], ['TC.-', 'V1.-']],
+    },
     constants: [{ key: 'th0', label: 'Temperature of cold junction', symbol: 'θ₀', unit: '°C', resolution: 0.5, instrument: 'thermometer', read: (p, n) => p.th0 + n(0.1) }],
     iv: { key: 'set', label: 'Water bath setting', symbol: 'θ_set', unit: '°C', min: 20, max: 90, step: 5, start: 20, instrument: 'water_bath' },
     measures: [
@@ -132,6 +143,18 @@ export default [
     model: { kind: 'quantitative', summary: 'At boiling point P = L (m/t) + h, where h is the rate of heat loss from the beaker, which is the same at every power because the water is always at 100 °C.',
       assumptions: ['The heat loss h is between 6 and 14 W and does not depend on the heater power.', 'L = 2257 J g⁻¹ at 100 °C.', 'Splashing and condensation give a random error of about ±0.06 g in each mass loss; meters read to ±0.01.', 'The heater resistance (2.7–3.1 Ω hot) stays constant during a run.'] },
     hidden: (q) => ({ h: q('h', 6, 14), Rh: q('Rh', 2.7, 3.1) }),
+    // No values: at the highest settings the heater takes over 5 A, where the
+    // solver trips, so a wrongly wired meter reads 0.
+    circuit: {
+      parts: [
+        { id: 'PS', type: 'supply', apparatus: 'dc_supply', label: 'Supply' },
+        { id: 'A1', type: 'ammeter', apparatus: 'ammeter', label: 'Ammeter' },
+        { id: 'V1', type: 'voltmeter', apparatus: 'voltmeter', label: 'Voltmeter' },
+        { id: 'X', type: 'resistor', apparatus: 'immersion_heater', label: 'Heater' },
+      ],
+      checks: [{ meter: 'A1', series: 'X' }, { meter: 'V1', across: 'X' }],
+      correct: [['PS.+', 'A1.+'], ['A1.-', 'X.a'], ['X.b', 'PS.-'], ['V1.+', 'X.a'], ['V1.-', 'X.b']],
+    },
     constants: [{ key: 't', label: 'Time for each run', symbol: 't', unit: 's', resolution: 1, instrument: 'stopwatch', read: () => 300 }],
     iv: { key: 'Vs', label: 'Supply voltage setting', symbol: 'V_s', unit: 'V', min: 7, max: 14, step: 0.5, start: 7, instrument: 'dc_supply' },
     measures: [
@@ -175,6 +198,17 @@ export default [
     model: { kind: 'quantitative', summary: 'At boiling point P = L (dm/dt) + h. The heat loss h depends only on the temperature of the beaker, which is 100 °C in both runs, so it cancels when the two runs are subtracted.',
       assumptions: ['The heat loss is 6–14 W and is equal in both runs.', 'L = 2257 J g⁻¹ at 100 °C.', 'Bubbling makes each balance reading uncertain by about ±0.05 g.', 'The heater resistance is 2.7–3.1 Ω and the supply voltage is steady to within 1 %.'] },
     hidden: (q) => ({ h: q('h', 6, 14), Rh: q('Rh', 2.7, 3.1), M0: q('M0', 230, 260) }),
+    circuit: {
+      parts: [
+        { id: 'PS', type: 'supply', apparatus: 'dc_supply', label: 'Supply' },
+        { id: 'A1', type: 'ammeter', apparatus: 'ammeter', label: 'Ammeter' },
+        { id: 'V1', type: 'voltmeter', apparatus: 'voltmeter', label: 'Voltmeter' },
+        { id: 'X', type: 'resistor', apparatus: 'immersion_heater', label: 'Heater' },
+      ],
+      checks: [{ meter: 'A1', series: 'X' }, { meter: 'V1', across: 'X' }],
+      values: (p, x, s) => ({ PS: { emf: POWER_V[s.power] * (1 + 0.005 * p.j('V' + s.power)), r: 0.01 }, X: { R: p.Rh } }),
+      correct: [['PS.+', 'A1.+'], ['A1.-', 'X.a'], ['X.b', 'PS.-'], ['V1.+', 'X.a'], ['V1.-', 'X.b']],
+    },
     iv: { key: 't', label: 'Time since timing started', symbol: 't', unit: 's', min: 0, max: 600, step: 30, start: 0, instrument: 'stopwatch' },
     measures: [
       { key: 'M', label: 'Balance reading', symbol: 'M', unit: 'g', resolution: 0.01, instrument: 'top_pan_balance', read: (p, x, n, s) => {

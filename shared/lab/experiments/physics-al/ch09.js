@@ -214,6 +214,19 @@ export default [
     model: { kind: 'simplified', summary: 'The lamp is a point source, so the illuminance E ∝ 1/d². The LDR follows the empirical law R ∝ E^(−γ), so I = V/R ∝ d^(−2γ).',
       assumptions: ['The power law R ∝ E^(−γ) with γ = 0.65–0.90 is an empirical fit; real LDRs deviate from it at very low and very high light levels and respond slowly.', 'Stray light in the darkened room is negligible.', 'The lamp filament is up to ±0.5 cm from the zero of the rule.', 'The resistance of the milliammeter is negligible; the current reading fluctuates by about ±1 %.'] },
     hidden: (q) => ({ gamma: q('gamma', 0.65, 0.90), R100: q('R100', 3.0, 8.0), dOff: q('dOff', -0.5, 0.5), V: q('V', 2.98, 3.02) }),
+    // No values: the milliammeter reads in mA, and working in V, kΩ and mA
+    // would trip the solver (5 units) when the LDR is close to the lamp, so a
+    // wrongly wired meter reads 0.
+    circuit: {
+      parts: [
+        { id: 'PS', type: 'supply', apparatus: 'dc_supply', label: 'Supply' },
+        { id: 'A1', type: 'ammeter', apparatus: 'milliammeter', label: 'Milliammeter' },
+        { id: 'V1', type: 'voltmeter', apparatus: 'voltmeter', label: 'Voltmeter' },
+        { id: 'X', type: 'resistor', apparatus: 'ldr', label: 'Light-dependent resistor' },
+      ],
+      checks: [{ meter: 'A1', series: 'X' }, { meter: 'V1', across: 'PS' }],
+      correct: [['PS.+', 'A1.+'], ['A1.-', 'X.a'], ['X.b', 'PS.-'], ['V1.+', 'PS.+'], ['V1.-', 'PS.-']],
+    },
     constants: [{ key: 'V', label: 'Supply p.d.', symbol: 'V', unit: 'V', resolution: 0.01, instrument: 'voltmeter', read: (p) => p.V }],
     iv: { key: 'd', label: 'Distance from lamp', symbol: 'd', unit: 'cm', min: 15, max: 100, step: 1, start: 15, instrument: 'metre_rule' },
     measures: [{ key: 'I', label: 'Current', symbol: 'I', unit: 'mA', resolution: 0.01, instrument: 'milliammeter',
@@ -245,6 +258,20 @@ export default [
     model: { kind: 'simplified', summary: 'Illuminance from a point source falls as 1/d², and the LDR follows R ∝ E^(−γ), so R ∝ d^(2γ) and lg R against lg d is a straight line of gradient 2γ.',
       assumptions: ['R ∝ E^(−γ) with γ = 0.65–0.90 is an empirical fit, not an exact law.', 'Stray light is negligible; the lamp filament is up to ±0.5 cm from the zero of the rule.', 'The voltmeter has a very high resistance; the meter readings fluctuate by about ±1 % because the LDR responds slowly to small changes in light.'] },
     hidden: (q) => ({ gamma: q('gamma', 0.65, 0.90), R100: q('R100', 3.0, 8.0), dOff: q('dOff', -0.5, 0.5), Vs: q('Vs', 5.9, 6.1), Rp: q('Rp', 0.98, 1.02) }),
+    // No values: the milliammeter reads in mA, and working in V, kΩ and mA
+    // would trip the solver (5 units) when the LDR is close to the lamp, so a
+    // wrongly wired meter reads 0.
+    circuit: {
+      parts: [
+        { id: 'PS', type: 'supply', apparatus: 'dc_supply', label: 'Supply' },
+        { id: 'RP', type: 'resistor', apparatus: 'resistors', label: 'Protective resistor' },
+        { id: 'A1', type: 'ammeter', apparatus: 'milliammeter', label: 'Milliammeter' },
+        { id: 'V1', type: 'voltmeter', apparatus: 'voltmeter', label: 'Voltmeter' },
+        { id: 'X', type: 'resistor', apparatus: 'ldr', label: 'Light-dependent resistor' },
+      ],
+      checks: [{ meter: 'A1', series: 'X' }, { meter: 'V1', across: 'X' }],
+      correct: [['PS.+', 'RP.a'], ['RP.b', 'A1.+'], ['A1.-', 'X.a'], ['X.b', 'PS.-'], ['V1.+', 'X.a'], ['V1.-', 'X.b']],
+    },
     iv: { key: 'd', label: 'Distance from lamp', symbol: 'd', unit: 'cm', min: 15, max: 100, step: 1, start: 15, instrument: 'metre_rule' },
     measures: [
       { key: 'V', label: 'P.d. across LDR', symbol: 'V', unit: 'V', resolution: 0.01, instrument: 'voltmeter', read: (p, x, n) => { const R = ldrR(p, x) * (1 + 0.01 * p.j('R' + x)); return p.Vs * R / (R + p.Rp) * (1 + n(0.003)) } },
@@ -284,6 +311,15 @@ export default [
     model: { kind: 'simplified', summary: 'Light is absorbed exponentially, I = I₀ e^(−μx), and the open-circuit e.m.f. of the cell rises with the logarithm of intensity, E = E₀ + (nkT/e) ln(I / I₀). Together these make E fall linearly with x.',
       assumptions: ['The logarithmic e.m.f. law is a simplification that fails at very low intensity, where leakage inside the cell makes the e.m.f. fall faster; the intensities used here are kept above that region.', 'nkT/e is taken as exactly 0.035 V; in practice it depends on the cell and on its temperature, which the lamp can raise.', 'Light scattered sideways or reflected between sheets is ignored; absorption coefficient μ = 1.4–2.2 mm⁻¹.', 'Sheets differ in thickness by up to ±3 %; the e.m.f. reading fluctuates by about ±0.8 mV.'] },
     hidden: (q) => ({ mu: q('mu', 1.4, 2.2), ts: q('ts', 0.10, 0.14), E0: q('E0', 0.50, 0.56) }),
+    circuit: {
+      parts: [
+        { id: 'PV', type: 'supply', apparatus: 'photovoltaic_cell', label: 'Photovoltaic cell' },
+        { id: 'V1', type: 'voltmeter', apparatus: 'multimeter', label: 'Multimeter' },
+      ],
+      checks: [{ meter: 'V1', across: 'PV' }],
+      values: (p, x) => { let t = 0; for (let i = 1; i <= x; i++) t += p.ts * (1 + 0.03 * p.j('sheet' + i)); return { PV: { emf: p.E0 - NVT * p.mu * t, r: 50 } } },
+      correct: [['PV.+', 'V1.+'], ['PV.-', 'V1.-']],
+    },
     constants: [{ key: 'x10', label: 'Thickness of 10 sheets', symbol: 'x₁₀', unit: 'mm', resolution: 0.01, instrument: 'micrometer',
       read: (p, n) => { let x = 0; for (let i = 1; i <= 10; i++) x += p.ts * (1 + 0.03 * p.j('sheet' + i)); return x + n(0.003) } }],
     iv: { key: 'N', label: 'Number of sheets', symbol: 'N', unit: '', min: 0, max: 10, step: 1, start: 0, instrument: 'filter_sheets' },

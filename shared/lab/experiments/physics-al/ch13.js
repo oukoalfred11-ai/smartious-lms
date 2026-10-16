@@ -133,6 +133,18 @@ export default [
     model: { kind: 'quantitative', summary: 'The reactance X_C = 1/(2πfC), so with a constant r.m.s. p.d. V across the capacitor, I = V/X_C = 2πCV f.',
       assumptions: ['The capacitor is marked 2.2 µF; its true value is 2.0–2.4 µF.', 'The p.d. is held at its set value to within ±0.5 % at each frequency; both meters read true r.m.s. values over 100–1000 Hz.', 'The multimeter current reading has a random error of about ±0.8 %.', 'Capacitor losses are negligible.'] },
     hidden: (q) => ({ C: q('C', 2.0, 2.4), V: q('V', 1.995, 2.005) }),
+    // An a.c. circuit, and the current is read in mA: no resistive values,
+    // so a wrongly wired meter reads 0.
+    circuit: {
+      parts: [
+        { id: 'SG', type: 'supply', apparatus: 'signal_generator', label: 'Signal generator' },
+        { id: 'A1', type: 'ammeter', apparatus: 'multimeter', label: 'Multimeter' },
+        { id: 'V1', type: 'voltmeter', apparatus: 'voltmeter', label: 'Voltmeter' },
+        { id: 'X', type: 'resistor', apparatus: 'capacitor', label: 'Capacitor' },
+      ],
+      checks: [{ meter: 'A1', series: 'X' }, { meter: 'V1', across: 'X' }],
+      correct: [['SG.+', 'A1.+'], ['A1.-', 'X.a'], ['X.b', 'SG.-'], ['V1.+', 'X.a'], ['V1.-', 'X.b']],
+    },
     constants: [{ key: 'V', label: 'R.m.s. p.d. across capacitor (held constant)', symbol: 'V', unit: 'V', resolution: 0.01, instrument: 'voltmeter', read: (p) => p.V }],
     iv: { key: 'f', label: 'Frequency', symbol: 'f', unit: 'Hz', min: 100, max: 1000, step: 50, start: 100, instrument: 'signal_generator' },
     measures: [{ key: 'I', label: 'R.m.s. current', symbol: 'I', unit: 'mA', resolution: 0.01, instrument: 'multimeter',

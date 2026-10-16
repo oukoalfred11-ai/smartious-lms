@@ -34,6 +34,20 @@ export default [
     model: { kind: 'quantitative', summary: 'The force on the wire is F = BIL. By Newton’s third law the wire pushes the magnets down with the same force, so the balance reading rises by F / g.',
       assumptions: ['The field is uniform over the length L of the pole faces and zero outside it.', 'The wire is perpendicular to the field and does not move.', 'B is between 0.04 and 0.09 T.', 'The balance reading has a random error of about ±0.01 g (draughts and vibration); L is read to about ±0.03 cm.'] },
     hidden: (q) => ({ B: q('B', 0.040, 0.090), L: q('L', 4.6, 5.4), M0: q('M0', 95, 130) }),
+    // The current is set with the rheostat (read on the ammeter); values set
+    // the rheostat so a 6 V supply gives that current.
+    circuit: {
+      parts: [
+        { id: 'PS', type: 'supply', apparatus: 'dc_supply', label: 'Supply' },
+        { id: 'S1', type: 'switch', apparatus: 'switch', label: 'Switch' },
+        { id: 'RH', type: 'resistor', apparatus: 'rheostat', label: 'Rheostat' },
+        { id: 'A1', type: 'ammeter', apparatus: 'ammeter', label: 'Ammeter' },
+        { id: 'X', type: 'resistor', apparatus: 'magnets', label: 'Wire between the magnets' },
+      ],
+      checks: [{ meter: 'A1', series: 'X' }],
+      values: (p, x) => ({ PS: { emf: 6, r: 0.1 }, X: { R: 0.05 }, RH: { R: 6 / x - 0.16 } }),
+      correct: [['PS.+', 'S1.a'], ['S1.b', 'RH.a'], ['RH.b', 'A1.+'], ['A1.-', 'X.a'], ['X.b', 'PS.-']],
+    },
     constants: [
       { key: 'L', label: 'Length of wire in the field', symbol: 'L', unit: 'cm', resolution: 0.1, instrument: 'ruler_30cm', read: (p, n) => p.L + n(0.03) },
       { key: 'm0', label: 'Balance reading with no current', symbol: 'm₀', unit: 'g', resolution: 0.01, instrument: 'top_pan_balance', read: (p, n) => p.M0 + n(0.005) },
@@ -69,6 +83,18 @@ export default [
     model: { kind: 'simplified', summary: 'Each strip is treated as a rigid strip of length l pivoted at the top. The force per unit length between antiparallel currents, μ₀I²/(2πd), balances the horizontal component of gravity, which for small angles gives d(d − d₀) = μ₀lI²/(πλg).',
       assumptions: ['Foil flexes and bows rather than tilting as a rigid strip; that is left out.', 'The separation d at the bottom is used for the whole length; in reality it varies from d₀ at the top to d at the bottom.', 'Small-angle approximation, and the strips are treated as long thin parallel wires.', 'Foil mass per unit length 0.35–0.50 g m⁻¹; heating and air currents ignored.', 'The separation reading has a random error of about ±0.05 cm (the strips flutter).'] },
     hidden: (q) => ({ lam: q('lam', 3.5e-4, 5.0e-4), l: q('l', 18, 22), d0: q('d0', 1.6, 2.4) }),
+    // No values: currents up to 8 A are above the solver's 5 A trip.
+    circuit: {
+      parts: [
+        { id: 'PS', type: 'supply', apparatus: 'dc_supply', label: 'Supply' },
+        { id: 'S1', type: 'switch', apparatus: 'switch', label: 'Switch' },
+        { id: 'RH', type: 'resistor', apparatus: 'rheostat', label: 'Rheostat' },
+        { id: 'A1', type: 'ammeter', apparatus: 'ammeter', label: 'Ammeter' },
+        { id: 'X', type: 'resistor', apparatus: 'aluminium_foil', label: 'Foil strips' },
+      ],
+      checks: [{ meter: 'A1', series: 'X' }],
+      correct: [['PS.+', 'S1.a'], ['S1.b', 'RH.a'], ['RH.b', 'A1.+'], ['A1.-', 'X.a'], ['X.b', 'PS.-']],
+    },
     constants: [
       { key: 'l', label: 'Hanging length of strips', symbol: 'l', unit: 'cm', resolution: 0.1, instrument: 'ruler_30cm', read: (p, n) => p.l + n(0.05) },
       { key: 'd0', label: 'Separation with no current', symbol: 'd₀', unit: 'cm', resolution: 0.1, instrument: 'ruler_30cm', read: (p, n) => p.d0 + n(0.02) },
@@ -109,6 +135,19 @@ export default [
     model: { kind: 'quantitative', summary: 'At the centre of a flat circular coil of radius R, B = μ₀NI/(2R), so B is proportional to N at a fixed current.',
       assumptions: ['All turns lie at the same radius R = D/2 in one plane.', 'The probe may be tilted by up to about 5° from the axis and its zero may be off by up to ±0.02 mT.', 'The current is 1.5–2.5 A; the Hall probe reading has a random error of about ±0.01 mT.'] },
     hidden: (q) => ({ I: q('I', 1.5, 2.5), D: q('D', 5.0, 8.0), z: q('z', -0.02, 0.02) }),
+    // Values set the rheostat so a 6 V supply gives the coil current I.
+    circuit: {
+      parts: [
+        { id: 'PS', type: 'supply', apparatus: 'dc_supply', label: 'Supply' },
+        { id: 'S1', type: 'switch', apparatus: 'switch', label: 'Switch' },
+        { id: 'RH', type: 'resistor', apparatus: 'rheostat', label: 'Rheostat' },
+        { id: 'A1', type: 'ammeter', apparatus: 'ammeter', label: 'Ammeter' },
+        { id: 'X', type: 'resistor', apparatus: 'coil', label: 'Coil' },
+      ],
+      checks: [{ meter: 'A1', series: 'X' }],
+      values: (p) => ({ PS: { emf: 6, r: 0.1 }, X: { R: 0.3 }, RH: { R: 6 / p.I - 0.41 } }),
+      correct: [['PS.+', 'S1.a'], ['S1.b', 'RH.a'], ['RH.b', 'A1.+'], ['A1.-', 'X.a'], ['X.b', 'PS.-']],
+    },
     constants: [
       { key: 'I', label: 'Current in coil', symbol: 'I', unit: 'A', resolution: 0.01, instrument: 'ammeter', read: (p, n) => p.I + n(0.003) },
       { key: 'D', label: 'Diameter of the windings', symbol: 'D', unit: 'cm', resolution: 0.01, instrument: 'vernier_callipers', read: (p, n) => p.D + n(0.02) },
@@ -143,6 +182,19 @@ export default [
     model: { kind: 'quantitative', summary: 'On the axis of a flat coil of N turns and radius R, B = μ₀NIR² / (2(R² + x²)^{3/2}). Rearranged, B^(−2/3) = K(R² + x²) with K = (2/(μ₀NIR²))^{2/3}.',
       assumptions: ['All turns are at the same radius R in one plane (a flat coil); in practice the windings have some width and depth.', 'The probe is on the axis; its position along the rule is uncertain by about ±1 mm.', 'The Hall probe reading has a random error of about ±0.005 mT plus 0.3 % of the reading.', 'R is 5–7 cm, N is 180–300 and the current 1.5–2.5 A.'] },
     hidden: (q) => ({ N: Math.round(q('N', 180, 300)), I: q('I', 1.5, 2.5), R: q('R', 5.0, 7.0) }),
+    // Values set the rheostat so a 12 V supply gives the coil current I.
+    circuit: {
+      parts: [
+        { id: 'PS', type: 'supply', apparatus: 'dc_supply', label: 'Supply' },
+        { id: 'S1', type: 'switch', apparatus: 'switch', label: 'Switch' },
+        { id: 'RH', type: 'resistor', apparatus: 'rheostat', label: 'Rheostat' },
+        { id: 'A1', type: 'ammeter', apparatus: 'ammeter', label: 'Ammeter' },
+        { id: 'X', type: 'resistor', apparatus: 'coil', label: 'Coil' },
+      ],
+      checks: [{ meter: 'A1', series: 'X' }],
+      values: (p) => ({ PS: { emf: 12, r: 0.1 }, X: { R: 3 }, RH: { R: 12 / p.I - 3.11 } }),
+      correct: [['PS.+', 'S1.a'], ['S1.b', 'RH.a'], ['RH.b', 'A1.+'], ['A1.-', 'X.a'], ['X.b', 'PS.-']],
+    },
     constants: [{ key: 'I', label: 'Current in coil', symbol: 'I', unit: 'A', resolution: 0.01, instrument: 'ammeter', read: (p, n) => p.I + n(0.003) }],
     iv: { key: 'x', label: 'Distance along axis from centre', symbol: 'x', unit: 'cm', min: 0, max: 14, step: 1, start: 0, instrument: 'metre_rule' },
     measures: [{ key: 'B', label: 'Flux density', symbol: 'B', unit: 'mT', resolution: 0.01, instrument: 'hall_probe',

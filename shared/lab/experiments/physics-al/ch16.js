@@ -26,7 +26,7 @@ export default [
     apparatus: ['leds', 'dc_supply', 'rheostat', 'resistors', 'voltmeter', 'switch', 'leads'],
     safety: ['Always keep the protective resistor in series with the LED, or the LED will burn out.', 'Do not stare into a brightly lit LED at close range.'],
     procedure: [
-      'Connect the rheostat as a potential divider across the supply, and connect the LED with a protective resistor to its output. Connect the voltmeter directly across the LED.',
+      'Connect the supply, switch, rheostat, protective resistor and LED in series, so the rheostat controls the p.d. across the LED. Connect the voltmeter directly across the LED.',
       'Note the peak wavelength λ of the LED from its data. Look down a short black tube at the LED to cut out room light.',
       'Increase the voltage slowly from zero and record the voltage V at which the LED just begins to glow.',
       'Repeat three times for each LED, approaching from below each time.',
@@ -37,6 +37,19 @@ export default [
     model: { kind: 'simplified', summary: 'An electron crossing the LED junction gives up energy eV as a photon of energy hc/λ, less an energy that is taken to be the same for every LED, so V = hc/(eλ) − V_off.',
       assumptions: ['Real LEDs emit a band of wavelengths and their threshold depends on the material, so the constant offset is a simplification.', 'Each LED differs from the model by a fixed amount of up to ±0.02 V; V_off is 0.05–0.20 V.', 'Judging when the LED just glows gives a random error of about ±0.015 V.'] },
     hidden: (q) => ({ Voff: q('Voff', 0.05, 0.20) }),
+    // The LED is not ohmic: no values, so a wrongly wired voltmeter reads 0.
+    circuit: {
+      parts: [
+        { id: 'PS', type: 'supply', apparatus: 'dc_supply', label: 'Supply' },
+        { id: 'S1', type: 'switch', apparatus: 'switch', label: 'Switch' },
+        { id: 'RH', type: 'resistor', apparatus: 'rheostat', label: 'Rheostat' },
+        { id: 'RP', type: 'resistor', apparatus: 'resistors', label: 'Protective resistor' },
+        { id: 'V1', type: 'voltmeter', apparatus: 'voltmeter', label: 'Voltmeter' },
+        { id: 'X', type: 'resistor', apparatus: 'leds', label: 'Light-emitting diode' },
+      ],
+      checks: [{ meter: 'V1', across: 'X' }],
+      correct: [['PS.+', 'S1.a'], ['S1.b', 'RH.a'], ['RH.b', 'RP.a'], ['RP.b', 'X.a'], ['X.b', 'PS.-'], ['V1.+', 'X.a'], ['V1.-', 'X.b']],
+    },
     iv: { key: 'lam', label: 'Wavelength of LED', symbol: 'λ', unit: 'nm', min: 450, max: 650, step: 25, start: 450, instrument: 'leds' },
     measures: [{ key: 'V', label: 'Threshold voltage', symbol: 'V', unit: 'V', resolution: 0.01, instrument: 'voltmeter',
       read: (p, x, n) => H * C_LIGHT / (E_CH * x * 1e-9) - p.Voff + 0.02 * p.j('led' + x) + n(0.015) }],
@@ -138,6 +151,19 @@ export default [
     model: { kind: 'simplified', summary: 'Protons in a field B precess at the Larmor frequency f = γB/(2π), with γ = 2.675 × 10⁸ rad s⁻¹ T⁻¹. Energy is absorbed from the RF field only near this frequency.',
       assumptions: ['The field is uniform over the sample; a real MRI magnet is far stronger and the signal far weaker at these low fields, so the readings are simulated.', 'Chemical shifts and the Earth’s field are ignored; the Hall probe may have a zero error of up to ±0.02 mT.', 'The coils give 1.8–2.4 mT per ampere.', 'The resonance is read to about ±0.3 kHz (line width) and B to about ±0.005 mT.'] },
     hidden: (q) => ({ k: q('k', 1.8, 2.4), z: q('z', -0.02, 0.02) }),
+    // The current is set with the rheostat (read on the ammeter); values set
+    // the rheostat so a 12 V supply gives that current.
+    circuit: {
+      parts: [
+        { id: 'PS', type: 'supply', apparatus: 'dc_supply', label: 'Supply' },
+        { id: 'RH', type: 'resistor', apparatus: 'rheostat', label: 'Rheostat' },
+        { id: 'A1', type: 'ammeter', apparatus: 'ammeter', label: 'Ammeter' },
+        { id: 'X', type: 'resistor', apparatus: 'helmholtz_coils', label: 'Helmholtz coils' },
+      ],
+      checks: [{ meter: 'A1', series: 'X' }],
+      values: (p, x) => ({ PS: { emf: 12, r: 0.1 }, X: { R: 2 }, RH: { R: 12 / x - 2.11 } }),
+      correct: [['PS.+', 'RH.a'], ['RH.b', 'A1.+'], ['A1.-', 'X.a'], ['X.b', 'PS.-']],
+    },
     iv: { key: 'I', label: 'Current in Helmholtz coils', symbol: 'I', unit: 'A', min: 0.5, max: 2.5, step: 0.25, start: 0.5, instrument: 'ammeter' },
     measures: [
       { key: 'B', label: 'Flux density at sample', symbol: 'B', unit: 'mT', resolution: 0.01, instrument: 'hall_probe', read: (p, x, n) => p.k * x + p.z + n(0.005) },
