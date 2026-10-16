@@ -648,7 +648,12 @@ for (const [slug, a] of Object.entries(FULL_ARTICLES)) {
   const money = [
     hub ? { href: hub.path, label: hub.h1 || hub.title.split(/ [|—–] /)[0] } : null,
     { href: '/pricing', label: 'Fees: ' + FEE_SCHOOL.replace(/^From/, 'from') },
-    !intakeMissing && slug !== INTAKE ? { href: '/blog/' + INTAKE, label: FULL_ARTICLES[INTAKE].t || 'January 2027 intake' } : null,
+    ...(() => {   // the country's own intake page when there is one, else the general one
+      if (intakeMissing || slug.startsWith(INTAKE)) return []
+      const own = INTAKE + '-' + (COUNTRY_ALIAS[a.country] || a.country || 'kenya')
+      const s = FULL_ARTICLES[own] ? own : INTAKE
+      return [{ href: '/blog/' + s, label: FULL_ARTICLES[s].t || 'January 2027 intake' }]
+    })(),
   ].filter(Boolean)
   add({
     path, title: a.metaTitle || (a.t + ' | ' + SITE), desc: a.metaDesc || clip(a.intro), h1: a.t,
