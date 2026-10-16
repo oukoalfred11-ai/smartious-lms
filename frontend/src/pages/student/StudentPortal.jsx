@@ -10,6 +10,7 @@
  *  - Study plan is personalised per student
  */
 import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import BirthdayBanner from '../../components/BirthdayBanner.jsx'
 import SuggestionBox from '../../components/SuggestionBox.jsx'
 import AnnouncementsStrip from '../../components/AnnouncementsStrip.jsx'
@@ -364,6 +365,7 @@ const NAV_SECTIONS = [
     { id:'live',         label:'Live Classes',    icon:'live',         svg:'<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>', live:true },
     { id:'timetable',    label:'Timetable',       icon:'timetable',    svg:'<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>' },
     { id:'attendance',   label:'My Attendance',   icon:'attendance',   svg:'<rect x="5" y="4" width="14" height="17" rx="2"/><rect x="9" y="2" width="6" height="3" rx="1"/><path d="M8.5 12.5l2 2 4-4.5"/>' },
+    { id:'virtuallab',   label:'Virtual Lab',     icon:'virtuallab',   svg:'<path d="M9 3h6M10 3v6L4.5 19A1.5 1.5 0 0 0 5.8 21h12.4a1.5 1.5 0 0 0 1.3-2L14 9V3"/><path d="M7 15h10"/>' },
     { id:'library',      label:'Library',         icon:'library',      svg:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/>' },
   ]},
   { label:'Tools', items:[
@@ -474,6 +476,9 @@ export default function StudentPortal() {
 
   // ── Navigation ───────────────────────────────────────
   const [page,        setPage]        = useState('dashboard')
+  const navigateTo = useNavigate()
+  // The Virtual Lab is its own app at /lab (3D bench, notebook, submission).
+  useEffect(() => { if (page === 'virtuallab') { setPage('dashboard'); navigateTo('/lab') } }, [page, navigateTo])
   const [collapsedRaw, setCollapsed]  = useState(false)
   const isMobile  = useIsPhone()
   const [drawer,  setDrawer]  = useState(false)

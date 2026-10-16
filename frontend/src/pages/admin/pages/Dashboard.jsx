@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { Link } from 'react-router-dom'
 import BirthdayBanner from '../../../components/BirthdayBanner.jsx'
 import SuggestionBox from '../../../components/SuggestionBox.jsx'
 import { useToast, useAuth, api } from '../../../context/ctx.jsx'
@@ -77,7 +78,7 @@ const NAV_SECTIONS = {
     { label: 'People',      items: ['users', 'admissiondocs', 'teachers', 'allocations', 'sessions', 'communication', 'support', 'dmoversight', 'community', 'announcements'] },
     { label: 'Reports',     items: ['reports', 'dosperformance', 'mastery'] },
     { label: 'Operations',  items: ['frontdesk', 'assessment', 'documents', 'payroll', 'leave', 'programmes', 'inventory'] },
-    { label: 'Teaching',    items: ['liveclasses', 'clubs', 'grouprooms', 'curriculum'] },
+    { label: 'Teaching',    items: ['liveclasses', 'clubs', 'grouprooms', 'curriculum', 'virtuallab'] },
     { label: 'Question Bank', items: ['questionbank'] },
     { label: 'Quality',     items: ['qaoverview', 'teacherprofiles', 'tdp', 'accreditations'] },
     { label: 'Marketing',   items: ['studio'] },
@@ -111,7 +112,7 @@ const NAV_SECTIONS = {
   // Operations Manager accounts share this portal and its access.
   ops_manager: [
     { label: 'Overview',    items: ['command', 'checkin', 'dashboard', 'analytics', 'dosanalytics'] },
-    { label: 'Academics',   items: ['liveclasses', 'clubs', 'exams', 'doshomework', 'dosattend', 'dostimetable', 'questionbank'] },
+    { label: 'Academics',   items: ['liveclasses', 'clubs', 'exams', 'doshomework', 'dosattend', 'dostimetable', 'questionbank', 'virtuallab'] },
     { label: 'Students',    items: ['admissiondocs', 'sessions', 'dosbreaks'] },
     { label: 'People',      items: ['users', 'teachers', 'allocations', 'communication', 'teacherratings'] },
     { label: 'Support',     items: ['support', 'dmoversight'] },
@@ -451,6 +452,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         {safePage === 'teacherprofiles' && <TeamProfilesModule toast={toast} />}
         {safePage === 'mystafffile' && <StaffFile toast={toast} showTeaching={false} />}
         {safePage === 'admissiondocs' && <AdmissionDocsModule toast={toast} />}
+        {safePage === 'virtuallab' && <VirtualLabLauncher />}
         {safePage === 'myprofile' && <MyProfileModule toast={toast} setPage={setPage} />}
         {safePage === 'tdp' && <TDPModule toast={toast} />}
         {safePage === 'accreditations' && <AccreditationsModule toast={toast} />}
@@ -585,6 +587,19 @@ function RoleOverview({ role, setPage, userStats, pendingAllocations, auth }) {
           </button>
         ))}
       </div>
+    </div>
+  )
+}
+
+// The Virtual Science Laboratory is its own app at /lab.
+function VirtualLabLauncher() {
+  const card = { display: 'block', padding: 20, borderRadius: 12, border: '1px solid ' + TOKENS.s200, background: '#fff', color: TOKENS.s900, textDecoration: 'none', marginBottom: 12, maxWidth: 560 }
+  return (
+    <div>
+      <h2 style={{ fontSize: 22, margin: '0 0 6px' }}>Virtual Science Laboratory</h2>
+      <p style={{ color: TOKENS.s500, margin: '0 0 16px', maxWidth: 640 }}>Simulated chemistry, physics and biology practicals. Experiments must be approved here before teachers can assign them, and published before every student can open them.</p>
+      <Link to="/lab/content" style={card}><b>Content review</b><div style={{ color: TOKENS.s500, fontSize: 14 }}>Check, approve and publish experiments.</div></Link>
+      <Link to="/lab/teach" style={card}><b>Teaching and marking</b><div style={{ color: TOKENS.s500, fontSize: 14 }}>Assign experiments, see submissions and marks, export class reports.</div></Link>
     </div>
   )
 }
