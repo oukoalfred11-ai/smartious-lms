@@ -449,7 +449,7 @@ const styles = `
   .lp .fab-help-ic::after{content:'';position:absolute;width:10px;height:10px;border-radius:50%;background:#C9973A;top:8px;right:8px;box-shadow:0 0 0 2px ${V.cr};animation:lp-pulse 1.8s ease-in-out infinite}
   .lp .fab-help{position:relative}
   /* Assistance popup panel */
-  .lp .fab-panel{position:fixed;right:20px;bottom:92px;width:340px;max-width:calc(100vw - 40px);background:${V.white};border-radius:18px;box-shadow:0 24px 60px rgba(8,12,20,.28),0 6px 18px rgba(8,12,20,.12);z-index:9999;overflow:hidden;border:1px solid ${V.bone3};animation:lp-fadeUp .25s cubic-bezier(.23,1,.32,1);font-family:'Plus Jakarta Sans',system-ui,sans-serif}
+  .lp .fab-panel{position:fixed;right:20px;bottom:152px;width:340px;max-width:calc(100vw - 40px);background:${V.white};border-radius:18px;box-shadow:0 24px 60px rgba(8,12,20,.28),0 6px 18px rgba(8,12,20,.12);z-index:9999;overflow:hidden;border:1px solid ${V.bone3};animation:lp-fadeUp .25s cubic-bezier(.23,1,.32,1);font-family:'Plus Jakarta Sans',system-ui,sans-serif}
   .lp .fab-panel-hd{background:linear-gradient(135deg,${V.cr},${V.cr2});padding:20px 22px;color:#fff;position:relative}
   .lp .fab-panel-hd-row{display:flex;align-items:center;gap:12px}
   .lp .fab-panel-av{width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.18);border:2px solid rgba(201,151,58,.6);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'DM Serif Display',Georgia,serif;font-weight:700;font-size:17px;color:${V.gold3}}
@@ -471,7 +471,7 @@ const styles = `
     .lp .fab-wa span.fab-lbl,.lp .fab-help span.fab-lbl{display:none}
     .lp .fab-wa,.lp .fab-help{padding:13px 14px}
     .lp .fab-stack{right:14px;bottom:14px;gap:10px}
-    .lp .fab-panel{right:14px;bottom:86px;width:calc(100vw - 28px)}
+    .lp .fab-panel{right:14px;bottom:140px;width:calc(100vw - 28px);max-height:calc(100vh - 160px);overflow:auto}
   }
   /* TOPBAR MARQUEE — why us */
   .lp .topbar-marq{display:flex;overflow:hidden;width:100%}
@@ -2688,6 +2688,9 @@ export default function LandingPage() {
   const [assessmentLevel, setAssessmentLevel] = useState('')
   const [enrollError, setEnrollError] = useState('')
   const [fabOpen, setFabOpen] = useState(false)
+  // WhatsApp quick contact (admissions line), with the page the visitor came from.
+  const whatsappHref = 'https://wa.me/254745021212?text=' + encodeURIComponent(
+    'Hello Smartious, I would like to know more about admissions. (Page: smartioushomeschool.com' + window.location.pathname + ')')
 
   // Build a fresh placement test when user reaches Step 4.
   // Also rebuilds if they go back and change their level/curriculum.
@@ -24150,6 +24153,17 @@ export default function LandingPage() {
 
       {/* ── FLOATING ASSISTANCE + WHATSAPP ── */}
       <div className="fab-stack">
+        <a
+          className="fab-wa"
+          href={whatsappHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Chat with Smartious admissions on WhatsApp"
+          onClick={() => { try { window.gtag && window.gtag('event', 'whatsapp_click', { page_path: window.location.pathname }) } catch {} }}
+        >
+          <span className="fab-wa-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.21 3.08c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2.01-1.42.25-.7.25-1.29.17-1.42-.07-.12-.27-.2-.57-.35z"/><path d="M12.04 2C6.5 2 2 6.48 2 12c0 1.77.46 3.5 1.34 5.02L2 22l5.12-1.34A9.95 9.95 0 0 0 12.04 22C17.57 22 22 17.52 22 12S17.57 2 12.04 2zm0 18.2c-1.57 0-3.1-.42-4.44-1.21l-.32-.19-3.04.8.81-2.96-.21-.33A8.17 8.17 0 0 1 3.82 12c0-4.53 3.69-8.2 8.22-8.2 4.53 0 8.2 3.67 8.2 8.2 0 4.53-3.67 8.2-8.2 8.2z"/></svg></span>
+          <span className="fab-lbl">WhatsApp us</span>
+        </a>
 <button
           className="fab-help"
           onClick={() => setFabOpen(o => !o)}
@@ -24184,6 +24198,12 @@ export default function LandingPage() {
               Welcome to <strong>Smartious Homeschool</strong>! How can we help you today? Choose an option below or message us directly.
             </div>
             <div className="fab-opts">
+              <a className="fab-opt" href={whatsappHref} target="_blank" rel="noopener noreferrer" onClick={() => setFabOpen(false)} style={{textDecoration:'none'}}>
+                <span className="fab-opt-ic" style={{background:'rgba(37,211,102,.12)',color:'#1FB855'}}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.5 2 2 6.48 2 12c0 1.77.46 3.5 1.34 5.02L2 22l5.12-1.34A9.95 9.95 0 0 0 12.04 22C17.57 22 22 17.52 22 12S17.57 2 12.04 2z"/></svg>
+                </span>
+                Chat on WhatsApp
+              </a>
               <button className="fab-opt" onClick={() => { setFabOpen(false); nav('/assessment') }}>
                 <span className="fab-opt-ic">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
