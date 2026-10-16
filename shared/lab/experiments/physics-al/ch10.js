@@ -31,13 +31,13 @@ export default [
     ],
     controlled: 'the same hanging mass of 200 g, the same bung, the marker kept just below the tube.',
     model: { kind: 'simplified', summary: 'The string tension equals the weight of the hanging mass, and it provides the centripetal force on the bung: Mg = m ω² L. (L is the string length, so the result holds even when the string droops below the horizontal.)',
-      assumptions: ['Friction where the string rubs on the tube changes the tension by up to ±3 %; this is the same for all lengths.', 'The mass of the string is ignored and the bung is treated as a point at the end of L.', 'The length of string in the circle wanders by about ±1 cm as the student whirls it.', 'Each timing of 20 revolutions has a random error of about ±0.15 s.'] },
+      assumptions: ['Friction where the string rubs on the tube changes the tension by up to ±3 %; this is the same for all lengths.', 'The mass of the string is ignored and the bung is treated as a point at the end of L.', 'The length of string in the circle wanders by about ±0.5 cm as the student keeps the marker just below the tube.', 'Each timing of 20 revolutions has a random error of about ±0.15 s.'] },
     hidden: (q) => ({ m: q('m', 0.020, 0.035) }),
     constants: [{ key: 'm', label: 'Mass of bung', symbol: 'm', unit: 'g', resolution: 0.01, instrument: 'top_pan_balance', read: (p) => p.m * 1000 }],
     iv: { key: 'L', label: 'Length of string to bung', symbol: 'L', unit: 'cm', min: 30, max: 100, step: 5, start: 30, instrument: 'metre_rule' },
     measures: [{ key: 't', label: 'Time for 20 revolutions', symbol: 't', unit: 's', resolution: 0.01, instrument: 'stopwatch',
       read: (p, x, n) => {
-        const L = (x + n(1)) / 100
+        const L = (x + n(0.5)) / 100
         const F = M_HANG * G * (1 + 0.03 * p.j('friction'))
         return 20 * 2 * Math.PI * Math.sqrt(p.m * L / F) + n(0.15)
       } }],
@@ -100,23 +100,23 @@ export default [
     procedure: [
       'Hang the bob so that the length L from the point of suspension to the centre of the bob is about 1 m. Measure L.',
       'Draw circles of radius 10 cm to 60 cm on paper centred directly below the point of suspension.',
-      'Set the bob moving so that its centre travels above one of the circles. Time 10 revolutions, three times.',
+      'Set the bob moving so that its centre travels above one of the circles. Time 20 revolutions (T⁴ magnifies timing errors four times, so long timings matter), three times.',
       'Repeat for each radius r.',
       'The height of the cone is h = √(L² − r²), so T⁴ = (16π⁴/g²)(L² − r²). Plot T⁴ against r².',
       'g = √(−16π⁴ / gradient) (with r in m), and L = √(−intercept / gradient).',
     ],
     controlled: 'the same bob and length of string; the centre of the circles directly below the support.',
     model: { kind: 'quantitative', summary: 'T = 2π √(h/g) with h = √(L² − r²). Raising this to the fourth power gives a straight line, T⁴ = (16π⁴/g²) L² − (16π⁴/g²) r².',
-      assumptions: ['Air resistance is negligible and the bob follows the drawn circle; the radius wanders by about ±1 cm.', 'The string is light and does not stretch; L is 90–110 cm and g is 9.78–9.83 N kg⁻¹.', 'Each timing of 10 revolutions has a random error of about ±0.12 s.'] },
+      assumptions: ['Air resistance is negligible and the bob follows the drawn circle; the radius wanders by about ±0.5 cm.', 'The string is light and does not stretch; L is 90–110 cm and g is 9.78–9.83 N kg⁻¹.', 'Each timing of 20 revolutions has a random error of about ±0.12 s.'] },
     hidden: (q) => ({ g: q('g', 9.78, 9.83), L: q('L', 90, 110) }),
     constants: [{ key: 'L', label: 'Length of pendulum', symbol: 'L', unit: 'cm', resolution: 0.1, instrument: 'metre_rule', read: (p, n) => p.L + n(0.2) }],
     iv: { key: 'r', label: 'Radius of circle', symbol: 'r', unit: 'cm', min: 10, max: 60, step: 5, start: 10, instrument: 'metre_rule' },
-    measures: [{ key: 't', label: 'Time for 10 revolutions', symbol: 't', unit: 's', resolution: 0.01, instrument: 'stopwatch',
-      read: (p, x, n) => { const r = x + n(1); return 10 * conicalT(Math.sqrt(p.L * p.L - r * r) / 100, p.g) + n(0.12) } }],
+    measures: [{ key: 't', label: 'Time for 20 revolutions', symbol: 't', unit: 's', resolution: 0.01, instrument: 'stopwatch',
+      read: (p, x, n) => { const r = x + n(0.5); return 20 * conicalT(Math.sqrt(p.L * p.L - r * r) / 100, p.g) + n(0.12) } }],
     repeats: 3,
     derived: [
       { key: 'rm', label: 'Radius of circle', symbol: 'r', unit: 'm', decimals: 2, value: (r) => r.r / 100 },
-      { key: 'T4', label: 'Period to the fourth power', symbol: 'T⁴', unit: 's⁴', decimals: 2, value: (r) => (r.t / 10) ** 4 },
+      { key: 'T4', label: 'Period to the fourth power', symbol: 'T⁴', unit: 's⁴', decimals: 2, value: (r) => (r.t / 20) ** 4 },
     ],
     graph: { x: 'rm', tx: 'square', y: 'T4', fit: 'line' },
     results: [
