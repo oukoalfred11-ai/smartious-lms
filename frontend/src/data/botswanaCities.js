@@ -99,7 +99,7 @@ export const BOTSWANA_CITIES = [
     ],
     whyChoose: [
       ['Cambridge, in a country where Cambridge is native', 'The BGCSE was developed in association with Cambridge and most private secondary schools here already offer IGCSE. We teach the international track live — familiar ground, delivered differently.'],
-      ['The tier\'s curriculum at a professional family\'s budget', 'Live small-group teaching at USD 5,076 a year against Gaborone international fees at the top of the local market.'],
+      ['The tier\'s curriculum at a professional family\'s budget', 'Live small-group teaching from USD 5,076 a year against Gaborone international fees at the top of the local market.'],
       ['One hour from your teachers, all year', 'Botswana and Kenya are an hour apart with no daylight saving on either side, so classes land in the ordinary school day every week of the year.'],
       ['An African school teaching African families', 'Smartious is Nairobi-built and Nairobi-taught, serving families in 51 countries — not an overseas provider reaching in.'],
       ['What we are, stated plainly', 'Smartious is not a registered Botswana school and does not claim to be one. We are an internationally accredited online school working alongside your registered school.'],
@@ -318,7 +318,7 @@ export const BOTSWANA_COUNTRY = {
     { name: 'Francistown, Maun and the north',                 city: 'Northern Botswana',     curriculum: 'Thin provision',                        feesUsd: 'Little international option',                       feesAed: '—',                       rating: 0,   capacityNote: 'The second city and the Delta, five hours from the capital tier' },
     { name: 'South African boarding',                          city: 'Johannesburg, Pretoria', curriculum: 'South African and international',      feesUsd: 'Fees plus travel plus a child living away',         feesAed: '—',                       rating: 4.4, capacityNote: 'The traditional answer for mining and northern families' },
     { name: 'Wolsey Hall Oxford / King\'s InterHigh (online)',  city: 'Online',                curriculum: 'Cambridge self-paced / UK online',      feesUsd: 'Per-subject / GBP 9,000-11,000',                    feesAed: 'Varies',                  rating: 4.2, capacityNote: 'Self-paced or priced far above Smartious, and taught from a timezone that puts classes at awkward hours' },
-    { name: 'Smartious Homeschool (Botswana via online delivery)', city: 'Delivered to all Botswana', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 5,076/year', feesAed: 'BWP equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + one hour from your teachers + the subjects a company town cannot staff + honest about not being a registered Botswana school' },
+    { name: 'Smartious Homeschool (Botswana via online delivery)', city: 'Delivered to all Botswana', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'From USD 5,076/year', feesAed: 'BWP equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + one hour from your teachers + the subjects a company town cannot staff + honest about not being a registered Botswana school' },
   ],
 
   legalFrameworkIntro: 'Botswana is the country in our coverage where we have to be most careful about what we assert, because the reporting and the general references do not agree. Here is what we can say, and what we will not.',

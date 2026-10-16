@@ -116,7 +116,7 @@ export const NZ_CITIES = [
       { q: 'Why Cambridge in an NCEA country?', a: 'Because New Zealand\'s own leading schools chose it: Auckland Grammar, Macleans, and the ACG network run CAIE. NZQA recognises A-Levels for University Entrance, and the same qualification feeds UCAS directly — both doors stay open.' },
       { q: 'How do live classes work with the time difference?', a: 'The timezone works in New Zealand\'s favour differently than in Europe: our Nairobi-morning teaching lands at roughly 3-7pm Auckland time — natural homeschool-afternoon and after-school slots — and every class is recorded.' },
       { q: 'Where do Auckland students sit Cambridge examinations?', a: 'At Cambridge schools in Auckland accepting private candidates — the deepest CAIE infrastructure in the country — confirmed per family per session.' },
-      { q: 'How does Smartious compare to ACG and the private Cambridge campuses?', a: 'They are excellent campuses at approximately NZD 20,000-30,000+/year, zone- or fee-gated. Smartious delivers the same examination pathways live at USD 5,076/year (~NZD 8,480) with immediate enrolment.' },
+      { q: 'How does Smartious compare to ACG and the private Cambridge campuses?', a: 'They are excellent campuses at approximately NZD 20,000-30,000+/year, zone- or fee-gated. Smartious delivers the same examination pathways live from USD 5,076/year (~NZD 8,480) with immediate enrolment.' },
     ],
   },
 
@@ -243,7 +243,7 @@ export const NZ_CITIES = [
     onlineLearningDetail: 'Live online via Smartious LMS. Live classes land in the Christchurch mid-afternoon and early evening, with the full recorded library. Canterbury\'s UFB and rural wireless coverage both serve the platform well.',
     faqs: [
       { q: 'We live two hours from Christchurch — does this work?', a: 'It is exactly where live online delivery matters most: identical teaching from Timaru to the West Coast, with exam sittings in Christchurch planned per session and travel scheduled ahead.' },
-      { q: 'How does Smartious compare to Canterbury\'s private Cambridge schools?', a: 'They are excellent campuses at approximately NZD 15,000-30,000/year. Smartious delivers the same examination pathways live at USD 5,076/year with immediate enrolment.' },
+      { q: 'How does Smartious compare to Canterbury\'s private Cambridge schools?', a: 'They are excellent campuses at approximately NZD 15,000-30,000/year. Smartious delivers the same examination pathways live from USD 5,076/year with immediate enrolment.' },
       { q: 'Where do Christchurch students sit Cambridge examinations?', a: 'At Cambridge schools in Christchurch accepting private candidates, confirmed per family per session.' },
     ],
   },
@@ -509,7 +509,7 @@ export const NZ_COUNTRY = {
     { name: 'Canterbury private tier (St Andrew\'s, Christ\'s College)', city: 'Christchurch', curriculum: 'NCEA + CAIE/IB tracks',          feesUsd: '~NZD 15,000-30,000/year',                   feesAed: 'Varies',                        rating: 4.4, capacityNote: 'The South Island\'s established private options' },
     { name: 'Te Kura (Te Aho o Te Kura Pounamu)',         city: 'National (distance)',   curriculum: 'NZ Curriculum / NCEA only',            feesUsd: 'State-funded for eligible students',        feesAed: 'Eligibility-gated',             rating: 4.2, capacityNote: 'The state correspondence school — excellent at what it does, but NZ curriculum only, eligibility rules apply, and no Cambridge, A-Level, or IB' },
     { name: 'CambriLearn / My Homeschool (online, target NZ)', city: 'Online',           curriculum: 'British online / NZ-style homeschool', feesUsd: 'Per-subject and package pricing',           feesAed: 'Varies',                        rating: 4.2, capacityNote: 'Visible online options — self-paced or non-examined models rather than live small-group teaching through A-Level' },
-    { name: 'Smartious Homeschool (New Zealand via online delivery)', city: 'Delivered to all NZ', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 5,076/year', feesAed: '~NZD 3,600-10,700/year', rating: 4.8, capacityNote: 'Every class live through A-Level + exemption application support and tilsyn-grade documentation + no zone, no roll, no private fee + live classes in the NZ afternoon' },
+    { name: 'Smartious Homeschool (New Zealand via online delivery)', city: 'Delivered to all NZ', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'From USD 5,076/year', feesAed: '~NZD 3,600-10,700/year', rating: 4.8, capacityNote: 'Every class live through A-Level + exemption application support and tilsyn-grade documentation + no zone, no roll, no private fee + live classes in the NZ afternoon' },
   ],
 
   legalFrameworkIntro: 'New Zealand runs one of the cleanest homeschool frameworks in the English-speaking world — a free exemption, no curriculum mandate, and an allowance the state pays — with one reform underway that honest pages should mention. Here is the whole picture.',

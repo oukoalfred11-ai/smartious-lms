@@ -26,7 +26,7 @@ from reportlab.platypus import (BaseDocTemplate, PageTemplate, Frame, Paragraph,
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 FRONT = os.path.dirname(HERE)
-OUT = os.path.join(FRONT, 'public', 'Smartious_Admission_Pack_2026.pdf')
+OUT = os.environ.get('OUT') or os.path.join(FRONT, 'public', 'Smartious_Admission_Pack_2026.pdf')
 LOGO = os.path.join(FRONT, 'public', 'brand', 'logo.png')
 EFFECTIVE = '15 October 2026'
 
@@ -178,7 +178,7 @@ story += [P('Admission Pack', 'title'), Spacer(1, 4),
 contents = [('Part 1 · Welcome and information', ''),
             ('1  Welcome from the Principal', ''), ('2  About Smartious', ''), ('3  Programmes and curricula', ''),
             ('4  How admission works', ''), ('5  Documents to submit', ''), ('6  Fees and payment', ''),
-            ('7  Academic calendar 2026–27', ''), ('8  Getting ready for online learning', ''),
+            ('7  Academic calendar 2026–27', ''), ('8  Recommended devices and getting ready', ''),
             ('9  Reports, examinations and university guidance', ''), ('10  Expectations in lessons', ''),
             ('11  Who to contact', ''),
             ('Part 2 · Admission Agreement (sign and return)', ''),
@@ -255,13 +255,14 @@ for t in ['Signed Admission Agreement (Part 2 of this pack)',
           'Proof of payment of the first term’s fees']:
     story.append(Check(t, 'document'))
 
+story += [PageBreak()]
 story += section('6  Fees and payment',
-    'Online school and homeschool: <b>USD 423 per month</b> for every year group and curriculum, paid termly in advance. '
-    'One-to-one tuition: <b>USD 15 per hour</b>. External examination fees are separate and charged at the examination board’s rate. '
+    'Online school and homeschool: from <b>USD 423 per month</b> for Primary. Fees for secondary, IGCSE, A-Level and IB vary by '
+    'curriculum and level; we confirm your child’s fee in writing after the assessment, and it is recorded in Section C. '
+    'Fees are paid termly in advance. One-to-one tuition: <b>USD 15 per hour</b>. External examination fees are separate and charged at the examination board’s rate. '
     'Sibling discounts and need-based bursaries may be available; ask our admissions team in confidence.',
     'Payments are made through Paystack: M-Pesa, Visa, Mastercard, bank transfer or Apple Pay. The full payment terms are in '
     'Section C and the Terms of Service in Part 2.')
-story.append(PageBreak())
 
 story += section('7  Academic calendar 2026–27')
 cal = Table([[P('<b>Term</b>'), P('<b>Dates</b>'), P('<b>Half-term</b>'), P('<b>Notes</b>')],
@@ -273,12 +274,43 @@ cal.setStyle(TableStyle([('BACKGROUND', (0, 0), (-1, 0), BONE), ('LINEBELOW', (0
                          ('VALIGN', (0, 0), (-1, -1), 'TOP'), ('TOPPADDING', (0, 0), (-1, -1), 5), ('BOTTOMPADDING', (0, 0), (-1, -1), 5)]))
 story += [cal, Spacer(1, 4), P('Students can join at any point in the year. Examination entry deadlines are set by each board; we will tell you yours.', 'small')]
 
-story += section('8  Getting ready for online learning')
-story += bullets(['A laptop or desktop computer is best; a tablet works for most lessons. A camera and microphone are needed for live lessons, and a headset helps.',
-                  'A reliable internet connection, and a backup such as mobile data for exam days.',
-                  'A quiet, well-lit place to learn, where a parent or guardian is nearby for younger students.',
+story.append(PageBreak())
+story += section('8  Recommended devices and getting ready',
+    'At Smartious, <b>notes and examinations are handwritten</b>. Writing by hand builds the handwriting, speed and accuracy '
+    'students need in Cambridge, Pearson Edexcel and IB examination halls, where answers are written on paper. Students therefore '
+    'need a device they can write on with a pen, not only type on. We recommend one of these two.')
+ASSETS = os.path.join(HERE, 'assets')
+def device_card(img, name, kind, points):
+    cell = []
+    path = os.path.join(ASSETS, img)
+    if os.path.exists(path):
+        from PIL import Image as PILImage
+        w, h = PILImage.open(path).size
+        cell += [Image(path, width=62 * mm, height=62 * mm * h / w), Spacer(1, 4)]
+    cell += [P(f'<font color="#8B1A2E"><b>{kind}</b></font>', 'small'), P(f'<b>{name}</b>', 'h2')]
+    cell += [P('•&nbsp;&nbsp;' + t) for t in points]
+    return cell
+cards = Table([[device_card('device-ipad-pro-11.jpg', 'Apple iPad Pro 11-inch with stylus pen', 'OPTION 1 · TABLET',
+                            ['Apple Pencil or a compatible stylus pen for handwritten notes, worksheets and examinations.',
+                             'Light and portable, with a long battery life.',
+                             'Front camera and microphones for live lessons.']),
+                device_card('device-thinkpad-x390-yoga.jpg', 'Lenovo ThinkPad X390 Yoga with pen', 'OPTION 2 · 2-IN-1 LAPTOP',
+                            ['Folds from a laptop into a tablet for writing with the pen.',
+                             'A full keyboard for typed coursework and Windows software.',
+                             'Camera and microphones for live lessons.'])]],
+              colWidths=['50%', '50%'])
+cards.setStyle(TableStyle([('VALIGN', (0, 0), (-1, -1), 'TOP'), ('BOX', (0, 0), (0, 0), 0.6, LINE), ('BOX', (1, 0), (1, 0), 0.6, LINE),
+                           ('BACKGROUND', (0, 0), (-1, -1), colors.white), ('LEFTPADDING', (0, 0), (-1, -1), 12),
+                           ('RIGHTPADDING', (0, 0), (-1, -1), 12), ('TOPPADDING', (0, 0), (-1, -1), 10), ('BOTTOMPADDING', (0, 0), (-1, -1), 10)]))
+story += [Spacer(1, 4), cards, Spacer(1, 8),
+          boxed([P('<b>Already have a device?</b> Another tablet or 2-in-1 laptop can work if it has an active stylus pen, a camera and a '
+                   'microphone. Please check with us before buying. Phones are not suitable for lessons or examinations.', 'box')]),
+          P('Also needed', 'h2')]
+story += bullets(['A reliable internet connection, and a backup such as mobile data for examination days.',
+                  'A headset with a microphone, and a quiet, well-lit place to learn, with a parent or guardian nearby for younger students.',
                   'Exercise books, a scientific calculator for secondary maths and science, and the textbooks your teacher lists.',
                   'Your student and parent portal logins, which we send after admission. Keep them private.'])
+story.append(PageBreak())
 story += section('9  Reports, examinations and university guidance')
 story += bullets(['Parents can follow attendance, homework, marks and invoices in the parent portal.',
                   'Written progress reports every term, with grades, and a parent–teacher consultation each term.',
@@ -343,13 +375,18 @@ story += [P('Fee payer and emergency contact', 'h2'),
 story += [P('Section C · Fees and payment terms', 'h1')]
 fees = Table([
     [P('<b>Programme</b>'), P('<b>Fee</b>'), P('<b>Billing</b>')],
-    [P('Online school and homeschool, every year group and curriculum'), P('USD 423 per month'), P('Paid termly, in advance')],
+    [P('Online school and homeschool, Primary'), P('From USD 423 per month'), P('Paid termly, in advance')],
+    [P('Online school and homeschool, secondary, IGCSE, A-Level and IB'), P('Varies by curriculum and level'), P('Paid termly, in advance')],
     [P('One-to-one tuition, any subject, any level'), P('USD 15 per hour'), P('As booked')],
     [P('External examination fees (Cambridge, Pearson Edexcel, IB, College Board)'), P('Board rate'), P('Separate, before entry')],
 ], colWidths=['52%', '22%', '26%'])
 fees.setStyle(TableStyle([('BACKGROUND', (0, 0), (-1, 0), BONE), ('LINEBELOW', (0, 0), (-1, -1), 0.5, LINE),
                           ('VALIGN', (0, 0), (-1, -1), 'TOP'), ('TOPPADDING', (0, 0), (-1, -1), 6), ('BOTTOMPADDING', (0, 0), (-1, -1), 6)]))
-story += [fees, Spacer(1, 8), boxed([
+story += [fees, Spacer(1, 8),
+          P('<b>Fee for this student</b> (completed by Smartious after the assessment)', 'h2'),
+          Fields([('Programme and level', 0.4, 'fee programme'), ('Monthly fee (USD)', 0.2, 'fee monthly'),
+                  ('Fee per term (USD)', 0.2, 'fee term'), ('Confirmed by', 0.2, 'fee confirmed by')]),
+          Spacer(1, 6), boxed([
     P('<b>Refunds.</b> Fees are non-refundable once the student’s assessment has been done, the timetable has been created and '
       'lessons have started. This applies to the whole term paid for. Before that point, tuition paid in advance is refunded, '
       'less the application fee once the assessment has been served. To withdraw at the end of a term, tell Smartious in writing '
@@ -394,7 +431,7 @@ for t in ['I will do my own work and acknowledge every source I use.',
     story.append(Check(t, 'student decl'))
 story += [Spacer(1, 6), SignBlock('Student'), Spacer(1, 12), P('Parent or guardian declaration', 'h2')]
 for t in ['The information in this agreement is complete and accurate, and I will tell Smartious promptly if it changes.',
-          'I accept the fees in Section C: USD 423 per month, paid termly in advance, and USD 15 per hour for one-to-one tuition.',
+          'I accept the fee confirmed for my child in Section C, paid termly in advance, and USD 15 per hour for any one-to-one tuition.',
           'I understand that fees are non-refundable once the assessment has been done, the timetable has been created and lessons have started.',
           'I understand that no student record will be changed in any way, for any reason, in return for any favour, and that offering a favour may end the enrolment.',
           'I have read and agree to the Terms of Service and the policies in Section D, and I will support my child to follow them.']:

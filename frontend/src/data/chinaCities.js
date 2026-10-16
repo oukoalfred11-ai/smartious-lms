@@ -132,7 +132,7 @@ export const CHINA_CITIES = [
     whyChoose: [
       ['No waiting list', 'A child starts within a week of the assessment. In a market where waiting lists are the defining constraint, that is frequently the whole decision rather than one factor among several.'],
       ['The set your school cannot staff', 'Further Mathematics or a third science for four pupils is unviable on one timetable and routine in a live group drawn from several countries.'],
-      ['A fee gap against one of the world\'s most expensive markets', 'Live small-group teaching at USD 5,076 a year, with no debenture and no capital levy.'],
+      ['A fee gap against one of the world\'s most expensive markets', 'Live small-group teaching from USD 5,076 a year, with no debenture and no capital levy.'],
       ['Evening classes that work', 'Hong Kong is five hours ahead of our teaching base, so a seven o\'clock evening class here is two in the afternoon for our teachers.'],
       ['A separate education system, clearly stated', 'Hong Kong is a Special Administrative Region with its own education system and regulator — distinct from the mainland framework, which we set out separately and carefully.'],
     ],
@@ -453,7 +453,7 @@ export const CHINA_COUNTRY = {
     { name: 'The Macau international sector',                  city: 'Macau',                 curriculum: 'International, Portuguese and local',    feesUsd: 'Mid to premium tier',                               feesAed: 'Limited places',          rating: 4.2, capacityNote: 'Small relative to the internationally recruited workforce, with Hong Kong an hour away and full' },
     { name: 'Hong Kong tutoring sector',                       city: 'Hong Kong',             curriculum: 'Exam-focused coaching',                 feesUsd: 'Per hour, per subject',                             feesAed: 'Very widespread',         rating: 4.1, capacityNote: 'Enormous and well established — usually one-to-one or large-group, and rarely a structured year' },
     { name: 'Mainland China',                                  city: 'Shanghai, Beijing, Shenzhen', curriculum: '—',                               feesUsd: 'Not a market we serve',                             feesAed: '—',                       rating: 0,   capacityNote: 'The Double Reduction policy constrains providers based outside China. We do not enrol compulsory-education-age mainland residents for subject teaching' },
-    { name: 'Smartious Homeschool (Hong Kong and Macau)',      city: 'Delivered to both SARs', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP',   feesUsd: 'USD 5,076/year',                              feesAed: 'HKD/MOP at prevailing rate', rating: 4.8, capacityNote: 'No waiting list + a complete interim programme while a place comes free + the sets a timetable cannot staff + honest about the mainland position' },
+    { name: 'Smartious Homeschool (Hong Kong and Macau)',      city: 'Delivered to both SARs', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP',   feesUsd: 'From USD 5,076/year',                              feesAed: 'HKD/MOP at prevailing rate', rating: 4.8, capacityNote: 'No waiting list + a complete interim programme while a place comes free + the sets a timetable cannot staff + honest about the mainland position' },
   ],
 
   legalFrameworkIntro: 'This is the only country page in our coverage where we lead with a constraint on ourselves rather than a description of a system. It is important enough to warrant that.',

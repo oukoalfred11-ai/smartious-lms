@@ -103,7 +103,7 @@ export const DOMINICAN_CITIES = [
       'University application support — UCAS (UK), Common Application (US), and Spanish, Canadian and Dominican university applications',
     ],
     whyChoose: [
-      ['A fee gap against the Caribbean\'s most expensive tier', 'Live small-group teaching at USD 5,076 a year against Santo Domingo fees at the top of the regional market.'],
+      ['A fee gap against the Caribbean\'s most expensive tier', 'Live small-group teaching from USD 5,076 a year against Santo Domingo fees at the top of the regional market.'],
       ['Seven hours, not nine', 'The DR is closer to our teaching day than Costa Rica, Panama, Ecuador, Colombia or Peru — Dominican mornings and very early afternoons both work.'],
       ['Built for the diaspora return', 'A child arriving mid-curriculum from New York or Florida keeps one internationally examined pathway rather than restarting.'],
       ['Honest about the legal gap', 'We could not identify a specific Dominican framework for home education, and we say so rather than guessing in either direction.'],
@@ -446,7 +446,7 @@ export const DOMINICAN_COUNTRY = {
     { name: 'Punta Cana and the east',                         city: 'La Altagracia',         curriculum: 'Far behind the growth',                 feesUsd: 'Minimal international option',                      feesAed: '—',                       rating: 0,   capacityNote: 'The Caribbean\'s largest resort economy with an international workforce and little schooling' },
     { name: 'Puerto Plata, Sosúa and Cabarete',                city: 'The north coast',       curriculum: '—',                                     feesUsd: 'No international provision',                         feesAed: '—',                       rating: 0,   capacityNote: 'A European community settled for decades, still without an international school' },
     { name: 'Santiago and La Romana',                          city: 'Cibao and southeast',   curriculum: 'Thin',                                  feesUsd: 'Limited international option',                      feesAed: '—',                       rating: 0,   capacityNote: 'A free-zone manufacturing capital and an international resort province, both underserved' },
-    { name: 'Smartious Homeschool (DR via online delivery)',    city: 'Delivered to all the DR', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 5,076/year',                             feesAed: 'DOP equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + the coasts reached + seven hours rather than nine + clear that we teach Cambridge and IB rather than issuing an American diploma' },
+    { name: 'Smartious Homeschool (DR via online delivery)',    city: 'Delivered to all the DR', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'From USD 5,076/year',                             feesAed: 'DOP equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + the coasts reached + seven hours rather than nine + clear that we teach Cambridge and IB rather than issuing an American diploma' },
   ],
 
   legalFrameworkIntro: 'The Dominican Republic gives families a genuine constitutional footing and very little specific regulation. Both facts matter, and the second one is where we stop rather than speculate.',

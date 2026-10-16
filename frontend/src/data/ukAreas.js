@@ -37,7 +37,7 @@ export const UK_AREAS = [
       'French Lycée Charles de Gaulle (South Kensington)',
     ],
     commuteNote: 'In-person tuition in Kensington W8, W11, and W14 postcodes is served via tutors travelling from Central London — typically 15-30 minute journey outside peak hours, up to 45 minutes during rush hour (particularly Kensington High Street congestion). Online delivery eliminates commute entirely and works via Kensington residential fibre (Virgin Media, BT Fibre) at 100+ Mbps typical residential speeds.',
-    pricingNote: 'Kensington pricing follows Smartious global rates: USD 15/hour at every level, primary to A-Level and IB Diploma. Full homeschool programmes USD 423/month. In-person Kensington-area premium tier tuition available with mileage supplement outside base tutor territory. Non-refundable USD 38 application fee covers placement test.',
+    pricingNote: 'Kensington pricing follows Smartious global rates: USD 15/hour at every level, primary to A-Level and IB Diploma. Full homeschool programmes from USD 423/month. In-person Kensington-area premium tier tuition available with mileage supplement outside base tutor territory. Non-refundable USD 38 application fee covers placement test.',
     commonSubjects: [
       '11+ Common Entrance (Mathematics, English, Reasoning)',
       '13+ Common Entrance (Mathematics, English, Sciences, Languages)',
@@ -79,7 +79,7 @@ export const UK_AREAS = [
       'Newton Prep',
     ],
     commuteNote: 'In-person tuition in Chelsea SW3 is served via tutors travelling from Central London — typically 15-25 minute journey outside peak hours. Chelsea traffic during King\'s Road and Sloane Square rush hours can extend commutes to 45 minutes. Online delivery eliminates commute entirely and works via Chelsea residential fibre at 100+ Mbps typical.',
-    pricingNote: 'Chelsea pricing follows Smartious global rates: USD 15/hour at every level, primary to A-Level. Full homeschool programmes USD 423/month. In-person Chelsea-area premium tier tuition includes mileage.',
+    pricingNote: 'Chelsea pricing follows Smartious global rates: USD 15/hour at every level, primary to A-Level. Full homeschool programmes from USD 423/month. In-person Chelsea-area premium tier tuition includes mileage.',
     commonSubjects: [
       '11+ Common Entrance for Westminster / St. Paul\'s / KCS Wimbledon',
       '13+ Common Entrance for Eton / Harrow / Winchester boarding',
@@ -117,7 +117,7 @@ export const UK_AREAS = [
       'Latymer Upper Hammersmith (5-minute drive)',
     ],
     commuteNote: 'In-person tuition in Notting Hill W11 is served via tutors travelling from Central and West London — 15-30 minute journey outside peak hours, up to 45 minutes during Portobello Road and Holland Park rush hours. Online delivery eliminates commute.',
-    pricingNote: 'Notting Hill pricing follows Smartious global rates: USD 15/hour at every level, primary to A-Level. Full homeschool programmes USD 423/month.',
+    pricingNote: 'Notting Hill pricing follows Smartious global rates: USD 15/hour at every level, primary to A-Level. Full homeschool programmes from USD 423/month.',
     commonSubjects: [
       '11+ Common Entrance for St. Paul\'s / Latymer Upper',
       'Cambridge IGCSE Mathematics + Sciences + English Literature',
@@ -154,7 +154,7 @@ export const UK_AREAS = [
       'City of London School for Girls (short journey)',
     ],
     commuteNote: 'In-person tuition in Hampstead NW3 is served via tutors travelling from Central London — 20-35 minute journey outside peak hours, up to 50 minutes during Belsize Park and Swiss Cottage rush hours. Online delivery eliminates commute.',
-    pricingNote: 'Hampstead pricing follows Smartious global rates: USD 15/hour at every level, primary to A-Level. Full homeschool programmes USD 423/month.',
+    pricingNote: 'Hampstead pricing follows Smartious global rates: USD 15/hour at every level, primary to A-Level. Full homeschool programmes from USD 423/month.',
     commonSubjects: [
       '11+ Common Entrance for South Hampstead High / UCS / Channing',
       'Cambridge IGCSE Mathematics + Sciences',
@@ -190,7 +190,7 @@ export const UK_AREAS = [
       'Wimbledon Chase Primary (state)',
     ],
     commuteNote: 'In-person tuition in Wimbledon SW19 is served via tutors travelling from Central and South West London — 25-40 minute journey outside peak hours, up to 60 minutes during Wimbledon Village and Putney High Street rush hours. Online delivery eliminates commute entirely.',
-    pricingNote: 'Wimbledon pricing follows Smartious global rates: USD 15/hour at every level, primary to A-Level. Full homeschool programmes USD 423/month.',
+    pricingNote: 'Wimbledon pricing follows Smartious global rates: USD 15/hour at every level, primary to A-Level. Full homeschool programmes from USD 423/month.',
     commonSubjects: [
       '11+ and 13+ Common Entrance for KCS Wimbledon',
       'Cambridge IGCSE Mathematics + Sciences',
@@ -226,7 +226,7 @@ export const UK_AREAS = [
       'Sydenham High School (short journey)',
     ],
     commuteNote: 'In-person tuition in Dulwich SE21 is served via tutors travelling from South and Central London — 25-40 minute journey outside peak hours. Dulwich Village congestion during school run hours can extend commutes. Online delivery eliminates commute.',
-    pricingNote: 'Dulwich pricing follows Smartious global rates: USD 15/hour at every level, primary to A-Level. Full homeschool programmes USD 423/month.',
+    pricingNote: 'Dulwich pricing follows Smartious global rates: USD 15/hour at every level, primary to A-Level. Full homeschool programmes from USD 423/month.',
     commonSubjects: [
       '11+ Common Entrance for Dulwich College / JAGS / Alleyn\'s',
       'Cambridge IGCSE Mathematics + Sciences',

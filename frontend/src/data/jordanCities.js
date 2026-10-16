@@ -110,7 +110,7 @@ export const JORDAN_CITIES = [
     whyChoose: [
       ['Exactly your clock, all year', 'Jordan runs UTC+3 year-round and so do we. There is no offset at all and no seasonal drift — the first country in our coverage where that is true. Any hour of our teaching day works.'],
       ['Built for a rotating sector', 'Development and diplomatic postings move. The curriculum, teachers, and examination board continue unchanged to the next country — which is why our development-sector families often re-enrol from a new posting.'],
-      ['A fee gap against a premium tier', 'Live small-group teaching at USD 5,076 a year against Amman international fees at the top of the regional market.'],
+      ['A fee gap against a premium tier', 'Live small-group teaching from USD 5,076 a year against Amman international fees at the top of the regional market.'],
       ['Fees that behave predictably', 'The dinar is pegged to the dollar at a long-standing fixed rate, so USD-quoted fees carry effectively no exchange-rate risk over a multi-year commitment.'],
       ['Arabic kept as an examined subject', 'Cambridge Arabic runs alongside the English-medium core rather than being traded away.'],
     ],
@@ -297,7 +297,7 @@ export const JORDAN_CITIES = [
     ],
     whyChoose: [
       ['Chemistry and process engineering depth', 'Cambridge A-Level Chemistry, Physics and Mathematics suit a refinery and chemicals belt precisely.'],
-      ['A fee gap that matters here more than most', 'Amman is thirty minutes away and its international fees are set for a different market. Live small-group teaching at USD 5,076 a year is reachable.'],
+      ['A fee gap that matters here more than most', 'Amman is thirty minutes away and its international fees are set for a different market. Live small-group teaching from USD 5,076 a year is reachable.'],
       ['Exactly your clock, all year', 'Zero offset with no seasonal drift, so classes fit around industrial shift patterns rather than fighting them.'],
       ['Every session recorded', 'A missed class on a shift week is never a lost one.'],
       ['Arabic kept as an examined subject', 'Cambridge Arabic runs alongside the English-medium core.'],
@@ -450,7 +450,7 @@ export const JORDAN_COUNTRY = {
     { name: 'Zarqa and the industrial belt',                     city: 'Zarqa',                curriculum: 'Almost none',                           feesUsd: 'No real international option',                      feesAed: '—',                       rating: 0,   capacityNote: 'One of the largest population centres in the country with essentially no international provision' },
     { name: 'Aqaba, Irbid and the valley',                       city: 'Outside Amman',        curriculum: 'Thin to none',                          feesUsd: 'Limited international option',                      feesAed: '—',                       rating: 0,   capacityNote: 'A port and economic zone, a university city and a minerals valley, none with a school tier' },
     { name: 'Private tuition',                                    city: 'Nationwide',           curriculum: 'Exam-focused coaching',                 feesUsd: 'Per hour, per subject',                             feesAed: 'Widespread',              rating: 4.0, capacityNote: 'The default answer to a subject gap — usually one-to-one and unstructured across a year' },
-    { name: 'Smartious Homeschool (Jordan via online delivery)',  city: 'Delivered nationwide', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP',   feesUsd: 'USD 5,076/year',                              feesAed: 'JOD effectively fixed by the peg', rating: 4.8, capacityNote: 'Every class live through A-Level + zero timezone offset year-round + Zarqa, Aqaba, Irbid and the valley reached + honest that we could not verify the legal position' },
+    { name: 'Smartious Homeschool (Jordan via online delivery)',  city: 'Delivered nationwide', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP',   feesUsd: 'From USD 5,076/year',                              feesAed: 'JOD effectively fixed by the peg', rating: 4.8, capacityNote: 'Every class live through A-Level + zero timezone offset year-round + Zarqa, Aqaba, Irbid and the valley reached + honest that we could not verify the legal position' },
   ],
 
   legalFrameworkIntro: 'Jordan is one of the markets where we could not verify the central question, and we would rather open by saying so than write around it. Here is what we can establish, and the two practical facts that shape our offer here more than the law does.',

@@ -129,7 +129,7 @@ export const BOLIVIA_CITIES = [
     whyChoose: [
       ['Works alongside a colegio sombrilla, not instead of one', 'Umbrella schools carry the Bolivian enrolment and curriculum coverage; we teach the internationally examined track. Families frequently need both and we say so.'],
       ['Agricultural and business depth for an export capital', 'Cambridge A-Level Biology, Chemistry, Economics and Business suit soy, cattle and agro-industrial families directly.'],
-      ['A fee gap against the strongest tier in Bolivia', 'Live small-group teaching at USD 5,076 a year.'],
+      ['A fee gap against the strongest tier in Bolivia', 'Live small-group teaching from USD 5,076 a year.'],
       ['Seven hours, not nine', 'Bolivian mornings and very early afternoons both land in our teaching day — better than most of Latin America.'],
       ['The statute stated accurately', 'Ley 070 makes education compulsory up to bachillerato and Educación Regular expressly obligatory. We do not soften that.'],
     ],
@@ -470,7 +470,7 @@ export const BOLIVIA_COUNTRY = {
     { name: 'The German and heritage schools',                  city: 'Santa Cruz, La Paz',    curriculum: 'National-system bilingual',              feesUsd: 'Premium tier',                                      feesAed: 'Varies',                  rating: 4.4, capacityNote: 'Established heritage provision — a different route entirely' },
     { name: 'Tarija and the southwest',                         city: 'Gas and mining regions', curriculum: '—',                                    feesUsd: 'No international provision',                        feesAed: '—',                       rating: 0,   capacityNote: 'The hydrocarbon heartland and the lithium southwest, neither with international schooling' },
     { name: 'US-based online schools',                          city: 'Online',                curriculum: 'American online',                       feesUsd: 'Varies, often per-course',                          feesAed: 'Varies',                  rating: 4.2, capacityNote: 'Closer to Bolivia on the clock than we are — families should weigh that against price and class size' },
-    { name: 'Smartious Homeschool (Bolivia via online delivery)', city: 'Delivered to all Bolivia', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 5,076/year',                       feesAed: 'BOB equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + works alongside a colegio sombrilla rather than replacing it + Tarija and Potosí reached + seven hours rather than nine' },
+    { name: 'Smartious Homeschool (Bolivia via online delivery)', city: 'Delivered to all Bolivia', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'From USD 5,076/year',                       feesAed: 'BOB equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + works alongside a colegio sombrilla rather than replacing it + Tarija and Potosí reached + seven hours rather than nine' },
   ],
 
   legalFrameworkIntro: 'Bolivia has the strictest statutory framing in our Latin American coverage and, at the same time, one of the most practical working arrangements. Both belong on this page, and so does the line between what a Bolivian umbrella school does and what we do.',

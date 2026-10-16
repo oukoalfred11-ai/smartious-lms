@@ -106,7 +106,7 @@ export const MONTENEGRO_CITIES = [
     whyChoose: [
       ['The semester-at-a-time provision explained properly', 'Montenegro permits home education by exception for a semester or a school year — genuinely more than Croatia, Albania, or North Macedonia allow, and genuinely less than an open-ended right. We describe it as it is.'],
       ['Lighter checkpoints than the regional norm', 'Knowledge checks for home-educated pupils fall at the end of the cycle rather than annually in every subject — fewer checkpoints, not lower standards, and we plan for them either way.'],
-      ['The Cambridge track where the tier is thin', 'Live small-group teaching at USD 5,076 a year — the supplement, the bridge, or the alternative in a country with very little to choose from.'],
+      ['The Cambridge track where the tier is thin', 'Live small-group teaching from USD 5,076 a year — the supplement, the bridge, or the alternative in a country with very little to choose from.'],
       ['Enrolment at posting speed', 'Diplomatic and development families arrive mid-year; students typically begin within a week of the assessment.'],
       ['Timezone that lands in the school day', 'Podgorica is 1-2 hours behind Nairobi EAT.'],
     ],
@@ -513,7 +513,7 @@ export const MONTENEGRO_COUNTRY = {
     { name: 'The interior and the north',                     city: 'Nikšić, Žabljak, Pljevlja', curriculum: '—',                                 feesUsd: 'No international provision',                        feesAed: '—',                       rating: 0,   capacityNote: 'The second city and the entire northern half of the country' },
     { name: 'Cross-border schools',                           city: 'Croatia, Serbia, Albania', curriculum: 'National systems',                   feesUsd: 'Varies',                                            feesAed: 'Cross-border',            rating: 4.0, capacityNote: 'Occasionally used by border families — and a different legal framework entirely' },
     { name: 'Wolsey Hall Oxford / King\'s InterHigh / bina (online)', city: 'Online',        curriculum: 'Cambridge self-paced / UK online / own to 15', feesUsd: 'Per-subject / GBP 9,000-11,000 / consultation', feesAed: 'Varies',      rating: 4.2, capacityNote: 'Self-paced, priced far above Smartious, or stopping at 15 — and none explains the semester-at-a-time exception or the cycle-based check' },
-    { name: 'Smartious Homeschool (Montenegro via online delivery)', city: 'Delivered to all Montenegro', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 5,076/year', feesAed: '~EUR 2,000-6,000/year', rating: 4.8, capacityNote: 'Every class live through A-Level + the home-education exception explained precisely + both configurations planned + the coast, the interior and the north served identically' },
+    { name: 'Smartious Homeschool (Montenegro via online delivery)', city: 'Delivered to all Montenegro', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'From USD 5,076/year', feesAed: '~EUR 2,000-6,000/year', rating: 4.8, capacityNote: 'Every class live through A-Level + the home-education exception explained precisely + both configurations planned + the coast, the interior and the north served identically' },
   ],
 
   legalFrameworkIntro: 'Montenegro does not fit either regional pattern. It permits what Croatia, Albania, and North Macedonia forbid, and it checks less often than Slovenia, Serbia, and Bulgaria. Here is the framework exactly.',

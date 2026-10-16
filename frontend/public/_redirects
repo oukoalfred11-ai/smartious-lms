@@ -14,6 +14,14 @@
 # a redirect loop and was removed.
 # ═══════════════════════════════════════════════════════════════
 
+# ─── Home page ───────────────────────────────────────────────────
+# "/" gets its own static HTML (title, canonical, text and links) written
+# by scripts/seo-static.mjs to dist/home.html. index.html stays the plain
+# app shell for the SPA fallback below, so other routes never inherit the
+# home page's canonical. home.html is always created by the postbuild cp
+# step, so this rule can never point at a missing file.
+/                        /home.html                  200!
+
 # ─── Country hub canonical consolidation (301s) ──────────────────
 /us-families             /online-school/usa          301
 /ca-families             /online-school/canada       301

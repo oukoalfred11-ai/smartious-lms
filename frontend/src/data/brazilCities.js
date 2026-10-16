@@ -110,7 +110,7 @@ export const BRAZIL_CITIES = [
       'University application support — UCAS (UK), Common Application (US), and Portuguese, Canadian and Brazilian university applications',
     ],
     whyChoose: [
-      ['A fee gap measured against the region\'s most expensive tier', 'Live small-group teaching at USD 5,076 a year against São Paulo international fees among the highest in Latin America.'],
+      ['A fee gap measured against the region\'s most expensive tier', 'Live small-group teaching from USD 5,076 a year against São Paulo international fees among the highest in Latin America.'],
       ['Cambridge A-Levels where the market runs to IB and bilingual', 'Families applying through UCAS frequently find their bilingual school does not offer an A-Level route. That is what we teach.'],
       ['Alongside the national route, not instead of it', 'Brazilian law is settled: there is no right to home education. Your school keeps the enrolment and the ENEM track; we add the international one.'],
       ['A workable clock, unlike much of the Americas', 'Six hours, fixed — Brazilian mornings and early afternoons both land in our normal teaching day, with no seasonal drift since Brazil ended daylight saving in 2019.'],
@@ -452,7 +452,7 @@ export const BRAZIL_COUNTRY = {
     { name: 'Minas and the south',                             city: 'Outside the big three', curriculum: 'Thinner provision',                     feesUsd: 'Limited international option',                      feesAed: '—',                       rating: 0,   capacityNote: 'An iron-ore heartland and a tech capital, both thinner than their profiles suggest' },
     { name: 'Cambridge A-Level provision',                     city: 'Nationwide',            curriculum: 'Comparatively scarce',                  feesUsd: '—',                                                 feesAed: '—',                       rating: 0,   capacityNote: 'In an IB, American and bilingual market, UCAS applicants often find no local A-Level route' },
     { name: 'Wolsey Hall Oxford / King\'s InterHigh (online)',  city: 'Online',                curriculum: 'Cambridge self-paced / UK online',      feesUsd: 'Per-subject / GBP 9,000-11,000',                    feesAed: 'Varies',                  rating: 4.2, capacityNote: 'Self-paced or priced far above Smartious — though UK providers are closer to Brazil on the clock than we are' },
-    { name: 'Smartious Homeschool (Brazil via online delivery)', city: 'Delivered to all Brazil', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 5,076/year', feesAed: 'BRL equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + the A-Level route the market lacks + a six-hour offset that works + the STF position stated exactly, including the struck-down state laws' },
+    { name: 'Smartious Homeschool (Brazil via online delivery)', city: 'Delivered to all Brazil', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'From USD 5,076/year', feesAed: 'BRL equivalent at prevailing rate', rating: 4.8, capacityNote: 'Every class live through A-Level + the A-Level route the market lacks + a six-hour offset that works + the STF position stated exactly, including the struck-down state laws' },
   ],
 
   legalFrameworkIntro: 'Brazil is the most judicially settled country in our entire coverage on this question, which makes it one of the easiest to describe honestly and one of the easiest to describe dishonestly. Here is the ruling, exactly.',

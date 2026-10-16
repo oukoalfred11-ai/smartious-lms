@@ -9,11 +9,11 @@ export const COUNTRIES = [
     slug: 'uae',
     country: 'United Arab Emirates',
     h: 'Premium Online Homeschool & Virtual School in UAE',
-    tagline: 'Flexible international online schooling for families across Dubai, Abu Dhabi, Sharjah and the UAE. Live IB, IGCSE, A-Level, Edexcel and American curricula on UAE time. USD 423/month, paid termly.',
+    tagline: 'Flexible international online schooling for families across Dubai, Abu Dhabi, Sharjah and the UAE. Live IB, IGCSE, A-Level, Edexcel and American curricula on UAE time. From USD 423/month, paid termly.',
     seoTitle: 'Best Online Homeschooling in UAE | IB, IGCSE & British Curriculum — Smartious',
-    seoDesc: 'Smartious Homeschool provides premium online homeschooling in the UAE for IB, IGCSE, A-Level and British Curriculum students. Flexible live classes for families in Dubai, Abu Dhabi, Sharjah and across the UAE. USD 423/month (about AED 1,553), paid termly; 1-on-1 tuition USD 15/hour.',
+    seoDesc: 'Smartious Homeschool provides premium online homeschooling in the UAE for IB, IGCSE, A-Level and British Curriculum students. Flexible live classes for families in Dubai, Abu Dhabi, Sharjah and across the UAE. From USD 423/month (about AED 1,553), paid termly; 1-on-1 tuition USD 15/hour.',
     localFacts: ['Dubai · Abu Dhabi · Sharjah', 'British Council exam centres', 'GST timezone · Live online'],
-    pains: 'UAE families face a perfect storm: top international schools charging AED 80,000–150,000+ per year, multi-year waitlists at the best-rated schools, frequent relocations between Dubai, Abu Dhabi and other postings, and Friday timetable changes from 2026 that have parents rethinking the daily routine. Smartious gives expat and Emirati families a serious alternative — an internationally accredited online school with IB, Cambridge, Edexcel and American pathways, taught live in UAE time, USD 423/month, paid termly.',
+    pains: 'UAE families face a perfect storm: top international schools charging AED 80,000–150,000+ per year, multi-year waitlists at the best-rated schools, frequent relocations between Dubai, Abu Dhabi and other postings, and Friday timetable changes from 2026 that have parents rethinking the daily routine. Smartious gives expat and Emirati families a serious alternative — an internationally accredited online school with IB, Cambridge, Edexcel and American pathways, taught live in UAE time, from USD 423/month, paid termly.',
     curricula: ['Cambridge IGCSE', 'Cambridge A-Level', 'IB MYP', 'IB Diploma', 'Pearson Edexcel', 'British National Curriculum', 'American High School Diploma'],
     regulation: 'Homeschooling is fully legal in the UAE. The Ministry of Education recognises homeschooling as a valid educational option, with different pathways depending on whether the family is Emirati or expatriate. Expatriate residents — the majority of UAE families — can enrol their children with an accredited international online school like Smartious without requiring KHDA, ADEK or Ministry approval. In Dubai, the KHDA Rahhal programme offers an optional hybrid registration pathway through participating private schools, useful for families who want a formal local link alongside their online schooling. The MOE Home-Schooling Stream is available to students in Grades 7 to 12 (or aged 14 and above) following the MOE curriculum. Federal UAE universities may require Ministry-attested certificates for private candidates — we discuss this with families during admissions so the university pathway is clear from the start.',
     examCentres: 'Cambridge IGCSE, Cambridge A-Level and Pearson Edexcel examinations are sat at British Council exam centres in Dubai and Abu Dhabi, alongside selected international school centres. IB Diploma examinations are administered at authorised IB World Schools across the UAE. Smartious handles all examination registration, provides full past paper libraries, and runs comprehensive mock examination programmes before the May/June and October/November series.',
@@ -32,7 +32,7 @@ export const COUNTRIES = [
       { q: 'Are classes scheduled in UAE time?',
         a: 'Yes. Smartious runs live group classes across three time-zone bands — UK & Africa, Americas, and Asia-Pacific — with a stable small team of subject specialists in each band. UAE students join the UK & Africa band (GST is just one hour ahead of EAT), with live sessions timetabled during UAE daytime hours. Every class is recorded for unlimited rewatch. Students in Dubai, Abu Dhabi and Sharjah join the same live cohorts as classmates in Doha, London and Nairobi.' },
       { q: 'How much does Smartious cost compared to a Dubai private school?',
-        a: 'Significantly less. Top Dubai international schools charge AED 80,000–150,000+ per year per child. Smartious online school is USD 423/month (about AED 1,553), paid termly: under AED 20,000 for a full year, a fraction of a Dubai private school place. 1-on-1 tuition is USD 15/hour (about AED 55).' },
+        a: 'Significantly less. Top Dubai international schools charge AED 80,000–150,000+ per year per child. Smartious online school is from USD 423/month (about AED 1,553), paid termly: under AED 20,000 for a full year, a fraction of a Dubai private school place. 1-on-1 tuition is USD 15/hour (about AED 55).' },
       { q: 'Will my child still socialise and make friends learning online?',
         a: 'Yes. Smartious students join live virtual classes daily with classmates across the UAE, Kenya, the UK, Canada and beyond. Our Wednesday enrichment programme runs online clubs in coding, debate, Model UN, chess, journalism and leadership. Students build real friendships and develop social confidence — many describe their Smartious classmates as their closest peers, regardless of which city they live in.' },
       { q: 'We move between countries. Will Smartious follow our family?',
@@ -52,7 +52,7 @@ export const COUNTRIES = [
       heading: 'Why UAE families switch to online schooling',
       intro: 'Across Dubai, Abu Dhabi and the other emirates, expat and Emirati families are reaching the same conclusion: the all-in private school model no longer matches their actual life. Here is what we hear most often.',
       points: [
-        { h: 'International school fees keep climbing', p: 'Top-rated Dubai and Abu Dhabi schools charge AED 80,000 to 150,000+ per child per year, with the best schools well above that. Smartious is USD 423/month (about AED 1,553), under AED 20,000 for a full year — same Cambridge, Edexcel, IB and American exam boards, a fraction of the cost.' },
+        { h: 'International school fees keep climbing', p: 'Top-rated Dubai and Abu Dhabi schools charge AED 80,000 to 150,000+ per child per year, with the best schools well above that. Smartious is from USD 423/month (about AED 1,553), under AED 20,000 for a full year — same Cambridge, Edexcel, IB and American exam boards, a fraction of the cost.' },
         { h: 'Waitlists at the best schools are 1–3 years', p: 'KHDA-rated "Outstanding" and "Very Good" schools in Dubai routinely have multi-year waitlists. Families relocating mid-year often have no real choice at premium schools. Smartious admits students year-round with no waitlist.' },
         { h: 'Expat mobility breaks continuity', p: 'A typical Dubai or Abu Dhabi expat posting lasts 2–4 years. Every relocation means a new school, new curriculum interpretation and lost progress. Smartious students keep the same teachers, classmates and exam board through every move — to London, Doha, Toronto or back home.' },
         { h: 'Friday timetable changes are reshaping the school week', p: 'From January 2026, KHDA requires all Dubai private schools to dismiss by 11:30 AM on Fridays, with older students potentially moving to remote learning. Many families are taking the opportunity to rethink the whole structure — and discovering online schooling solves problems they had not articulated.' },
@@ -90,7 +90,8 @@ export const COUNTRIES = [
         {
           mode: 'Online School · Homeschool · Full Programme',
           plans: [
-            { name: 'Full programme', who: 'Primary to A-Level / IB · live classes · paid termly', usd: '423/month', aed: '≈ AED 1,553' },
+            { name: 'Primary', who: 'Grades 1-6 · live classes · paid termly', usd: 'from 423/month', aed: '≈ AED 1,553' },
+            { name: 'Secondary, IGCSE, A-Level / IB', who: 'Varies by curriculum and level · paid termly', usd: 'on assessment' },
           ],
         },
         {
@@ -142,7 +143,7 @@ export const COUNTRIES = [
       { q: 'Is online homeschooling legal in Dubai?',
         a: 'Yes. Expat families in Dubai can enrol with an accredited international online school like Smartious without KHDA approval. KHDA regulates private schools physically operating in Dubai but does not require approval for families using online providers based abroad. The Rahhal programme offers an optional pathway for families wanting formal local registration.' },
       { q: 'How much does Smartious cost compared to a Dubai private school?',
-        a: 'Smartious online school is USD 423 a month (about AED 1,553), paid termly: under AED 20,000 for a full IGCSE year. Top Dubai private schools charge AED 80,000–150,000 for the same age group. Many Dubai families enrol multiple children with Smartious for less than the cost of one private school place.' },
+        a: 'Smartious online school is from USD 423 a month (about AED 1,553), paid termly: under AED 20,000 for a full IGCSE year. Top Dubai private schools charge AED 80,000–150,000 for the same age group. Many Dubai families enrol multiple children with Smartious for less than the cost of one private school place.' },
       { q: 'Will my child be ready for a UK or UAE university after Smartious?',
         a: 'Yes. Smartious students complete the same Cambridge IGCSE, A-Level or IB Diploma qualifications accepted by universities worldwide — including Heriot-Watt Dubai, University of Birmingham Dubai, the American University in Dubai, plus UK, US, Canadian and Australian universities.' },
       { q: 'When can my child start?',
@@ -172,7 +173,7 @@ export const COUNTRIES = [
       { q: 'Where do students sit their examinations in Qatar?',
         a: 'Cambridge International, Pearson Edexcel and IB examinations are sat at the British Council Doha exam centre. Some international schools (Doha College, Qatar Academy) also operate as approved Cambridge and IB examination centres for their students. Smartious handles all registration and runs mock-examination programmes.' },
       { q: 'How does Smartious compare to Doha private school fees?',
-        a: 'Premium Doha international schools charge QAR 65,000–110,000 (USD 18,000–30,000) per year. Smartious full virtual school is USD 5,076 per year, with 1-on-1 tutoring at USD 15/hour. For families using us as supplementary support, USD 100–400 per month delivers measurably stronger outcomes in specific subjects.' },
+        a: 'Premium Doha international schools charge QAR 65,000–110,000 (USD 18,000–30,000) per year. Smartious full virtual school is from USD 5,076 per year, with 1-on-1 tutoring at USD 15/hour. For families using us as supplementary support, USD 100–400 per month delivers measurably stronger outcomes in specific subjects.' },
       { q: 'What\'s the time difference between Qatar and Kenya for scheduling?',
         a: 'Qatar and Kenya are in the same time zone (GMT+3) — no offset, no scheduling friction. A 4pm session in Doha is a 4pm session in Nairobi for our teachers. This is one of the cleanest scheduling situations of any Gulf country.' },
       { q: 'Do you support Doha College, Qatar Academy and ACS Doha curricula?',
@@ -214,19 +215,19 @@ export const COUNTRIES = [
       heading: 'Transparent pricing for Qatar families',
       intro: 'Premium Gulf pricing. No setup fees, no hidden charges. Fees in USD, paid termly; non-refundable once the assessment is done, the timetable is created and lessons have started.',
       rows: [
-        { tier: 'Full Virtual School', detail: 'Live classes 5 days/week, all curriculum subjects, qualified specialist teachers, complete IGCSE/A-Level/IB curriculum.', priceUSD: 'USD 423/month', priceLocal: 'QAR 440/month (approx)' },
+        { tier: 'Full Virtual School', detail: 'Live classes 5 days/week, all curriculum subjects, qualified specialist teachers, complete IGCSE/A-Level/IB curriculum.', priceUSD: 'From USD 423/month', priceLocal: 'QAR 440/month (approx)' },
         { tier: '1-on-1 Tutoring', detail: 'Subject-specific 1-on-1 hourly sessions. Pay per hour or in 10-hour blocks.', priceUSD: 'USD 15/hour', priceLocal: 'QAR 37/hour (approx)' },
         { tier: 'Exam Preparation', detail: 'Intensive IGCSE, A-Level, IB Diploma, SAT or IELTS preparation. Structured programme with past papers, mock examinations and topic-by-topic mastery.', priceUSD: 'USD 15/hour', priceLocal: 'QAR 44/hour (approx)' },
         { tier: 'University Admissions', detail: 'UCAS personal statement, Common App essays, SAT/ACT preparation, interview practice. 1-on-1 with specialist admissions counsellors.', priceUSD: 'USD 15/hour', priceLocal: 'QAR 55/hour (approx)' },
         { tier: '10-Hour Block', detail: 'Pre-purchase 10 hours of any service at a 5% discount. No expiry. Mix and match across subjects.', priceUSD: 'Save 5%', priceLocal: 'No expiry' },
       ],
-      compareNote: 'A Doha international school at QAR 80,000/year is approximately USD 22,000. Smartious full virtual school is USD 5,076/year — meaningfully different. Supplementary tutoring at USD 15/hour fits comfortably alongside any school fee.',
+      compareNote: 'A Doha international school at QAR 80,000/year is approximately USD 22,000. Smartious full virtual school is from USD 5,076/year — meaningfully different. Supplementary tutoring at USD 15/hour fits comfortably alongside any school fee.',
     },
     qatarComparison: {
       heading: 'Smartious vs Doha international schools',
       intro: 'For families using Smartious as supplementary support, the table below shows how the two complement each other. Families using Smartious as primary virtual school replace the international school entirely.',
       rows: [
-        { dim: 'Annual fee', smartious: 'USD 5,076/year (full school)', alt: 'QAR 65,000–110,000 (USD 18,000–30,000)' },
+        { dim: 'Annual fee', smartious: 'From USD 5,076/year (full school)', alt: 'QAR 65,000–110,000 (USD 18,000–30,000)' },
         { dim: 'Class size', smartious: '12 students max (group classes); 1 (tutoring)', alt: '22–28 students typical' },
         { dim: 'Curriculum', smartious: 'Cambridge, Edexcel, IB Diploma, American', alt: 'Varies by school' },
         { dim: 'Exam centre', smartious: 'British Council Doha + school centres', alt: 'School centre or British Council Doha' },
@@ -325,7 +326,8 @@ export const COUNTRIES = [
         {
           mode: 'Online School · Homeschool · Full Programme',
           plans: [
-            { name: 'Full programme', who: 'Primary to A-Level / IB · live classes · paid termly', usd: '423/month', bhd: '≈ BHD 159' },
+            { name: 'Primary', who: 'Grades 1-6 · live classes · paid termly', usd: 'from 423/month', bhd: '≈ BHD 159' },
+            { name: 'Secondary, IGCSE, A-Level / IB', who: 'Varies by curriculum and level · paid termly', usd: 'on assessment' },
           ],
         },
         {
@@ -341,7 +343,7 @@ export const COUNTRIES = [
       heading: 'Smartious vs typical Bahrain international school',
       intro: 'How we compare to a typical Bahrain international school — not because they are bad, but because they are built for a different problem than the one many Bahrain families now face.',
       rows: [
-        { feature: 'Annual fees (Senior school)', traditional: 'BHD 3,000–10,000+', smartious: 'About BHD 1,910 a year (USD 423/month)' },
+        { feature: 'Annual fees (Senior school)', traditional: 'BHD 3,000–10,000+', smartious: 'About BHD 1,910 a year (from USD 423/month)' },
         { feature: 'Class size', traditional: '20–25 typical', smartious: '12 online · 1-on-1 in private tuition' },
         { feature: 'Daily commute', traditional: '30–60 min in Manama traffic', smartious: 'Zero' },
         { feature: 'Curriculum options', traditional: 'School commits to one', smartious: 'Cambridge IGCSE, A-Level, IB, Edexcel, British' },
@@ -377,7 +379,7 @@ export const COUNTRIES = [
       { q: 'Is online homeschooling legal in Pakistan?',
         a: 'Yes. Pakistan has no federal regulation requiring registration of homeschoolers or online learners. Education is a provincial subject — Sindh, Punjab, KP and Balochistan operate their own frameworks — but none specifically restricts parental choice in private international education. Pakistani families have used Cambridge programmes through hundreds of physical schools for over 50 years, and the British Council Pakistan administers Cambridge, Pearson Edexcel and OxfordAQA examinations for private candidates. Families enrolling with Smartious do not need separate government registration.' },
       { q: 'How does Smartious compare to Karachi Grammar, Aitchison or Beaconhouse?',
-        a: 'Honestly: those are excellent schools and we are not built to replace them for the families they fit. They offer prestige, in-person culture, and an established peer network that an online school cannot match. Where we differ is in flexibility (live classes plus unlimited recordings, year-round admissions, no waitlists), portability (the same school follows your family to UAE, UK, Canada or elsewhere), and global classmate diversity (your child learns alongside students in Lagos, Doha, Toronto and London, not just Karachi or Lahore). On fees we are broadly comparable to the mid-tier of Pakistani private schools — USD 5,076 per year (≈ PKR 1.42 million) — though our positioning is not on cost.' },
+        a: 'Honestly: those are excellent schools and we are not built to replace them for the families they fit. They offer prestige, in-person culture, and an established peer network that an online school cannot match. Where we differ is in flexibility (live classes plus unlimited recordings, year-round admissions, no waitlists), portability (the same school follows your family to UAE, UK, Canada or elsewhere), and global classmate diversity (your child learns alongside students in Lagos, Doha, Toronto and London, not just Karachi or Lahore). On fees we are broadly comparable to the mid-tier of Pakistani private schools — from USD 5,076 per year (≈ PKR 1.42 million) — though our positioning is not on cost.' },
       { q: 'Where do Pakistani students sit Cambridge or Edexcel exams?',
         a: 'At British Council Pakistan exam centres in Karachi, Lahore, Islamabad and Rawalpindi. Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel and OxfordAQA are all available. Smartious handles all registration through the British Council private candidate system, manages the February (May/June series) and August (October/November series) submission deadlines, and runs full mock examination programmes before each series.' },
       { q: 'Pakistan was not affected by the 2026 Cambridge UAE cancellations, was it?',
@@ -444,7 +446,8 @@ export const COUNTRIES = [
         {
           mode: 'Online School · Homeschool · Full Programme',
           plans: [
-            { name: 'Full programme', who: 'Primary to A-Level / IB · live classes · paid termly', usd: '423/month', pkr: '≈ PKR 118,000' },
+            { name: 'Primary', who: 'Grades 1-6 · live classes · paid termly', usd: 'from 423/month', pkr: '≈ PKR 118,000' },
+            { name: 'Secondary, IGCSE, A-Level / IB', who: 'Varies by curriculum and level · paid termly', usd: 'on assessment' },
           ],
         },
         {
@@ -460,7 +463,7 @@ export const COUNTRIES = [
       heading: 'Smartious vs a typical Pakistani Cambridge school',
       intro: 'How we compare to a typical premium Pakistani Cambridge school. The comparison is not about cost — our fees are broadly similar — it is about what kind of school experience fits which kind of family.',
       rows: [
-        { feature: 'Annual fees (Senior school)', traditional: 'PKR 600,000–1,500,000+', smartious: 'About PKR 1.42M a year (USD 423/month)' },
+        { feature: 'Annual fees (Senior school)', traditional: 'PKR 600,000–1,500,000+', smartious: 'About PKR 1.42M a year (from USD 423/month)' },
         { feature: 'Class size', traditional: '20-30 typical', smartious: '12 online · 1-on-1 in private tuition' },
         { feature: 'Daily commute', traditional: '60-120 min in DHA/Clifton/Gulberg traffic', smartious: 'Zero' },
         { feature: 'Curriculum options', traditional: 'School commits to one (mostly Cambridge)', smartious: 'Cambridge IGCSE, A-Level, IB, Edexcel, British, plus tutoring' },
@@ -587,7 +590,8 @@ export const COUNTRIES = [
         {
           mode: 'Online School · Homeschool · Full Programme',
           plans: [
-            { name: 'Full programme', who: 'Primary to A-Level / IB · live classes · paid termly', usd: '423/month', cad: '≈ CAD 580' },
+            { name: 'Primary', who: 'Grades 1-6 · live classes · paid termly', usd: 'from 423/month', cad: '≈ CAD 580' },
+            { name: 'Secondary, IGCSE, A-Level / IB', who: 'Varies by curriculum and level · paid termly', usd: 'on assessment' },
           ],
         },
         {
@@ -603,7 +607,7 @@ export const COUNTRIES = [
       heading: 'Smartious vs typical Canadian private schools',
       intro: 'How we compare to typical Canadian private schools. Canadian public schools are free and broadly capable — we are not competing with them. We are competing with private schools, IB schools, and specialist online providers where families are paying for specific international curriculum advantages.',
       rows: [
-        { feature: 'Annual fees (Senior school)', traditional: 'CAD $25,000-$75,000', smartious: 'About CAD $6,950 a year (USD 423/month)' },
+        { feature: 'Annual fees (Senior school)', traditional: 'CAD $25,000-$75,000', smartious: 'About CAD $6,950 a year (from USD 423/month)' },
         { feature: 'Class size', traditional: '15-22 typical', smartious: '12 online · 1-on-1 in private tuition' },
         { feature: 'Curriculum options', traditional: 'Provincial diploma or IB (most schools)', smartious: 'Cambridge IGCSE, A-Level, IB, Edexcel, British, plus university app support' },
         { feature: 'International recognition', traditional: 'Provincial diploma requires conversion abroad', smartious: 'Cambridge/IB are global standards · no conversion needed' },
@@ -730,7 +734,8 @@ export const COUNTRIES = [
         {
           mode: 'Online School · Homeschool · Full Programme',
           plans: [
-            { name: 'Full programme', who: 'Primary to A-Level / IB · live classes · paid termly', usd: '423/month', aud: '≈ AUD 643' },
+            { name: 'Primary', who: 'Grades 1-6 · live classes · paid termly', usd: 'from 423/month', aud: '≈ AUD 643' },
+            { name: 'Secondary, IGCSE, A-Level / IB', who: 'Varies by curriculum and level · paid termly', usd: 'on assessment' },
           ],
         },
         {
@@ -746,7 +751,7 @@ export const COUNTRIES = [
       heading: 'Smartious vs typical Australian private schools',
       intro: 'How we compare to typical Australian private schools. Australian public schools are free and broadly capable — we are not competing with them. We compete with private schools, IB schools and specialist online providers where families want specific international curriculum advantages.',
       rows: [
-        { feature: 'Annual fees (Senior school)', traditional: 'AUD $25,000-$45,000+', smartious: 'About AUD $7,720 a year (USD 423/month)' },
+        { feature: 'Annual fees (Senior school)', traditional: 'AUD $25,000-$45,000+', smartious: 'About AUD $7,720 a year (from USD 423/month)' },
         { feature: 'Class size', traditional: '15-22 typical', smartious: '12 online · 1-on-1 in private tuition' },
         { feature: 'Curriculum options', traditional: 'ATAR pathway or IB (most schools)', smartious: 'Cambridge IGCSE, A-Level, IB, Edexcel, British' },
         { feature: 'International recognition', traditional: 'ATAR requires conversion abroad', smartious: 'Cambridge/IB are global standards' },
@@ -850,7 +855,8 @@ export const COUNTRIES = [
         {
           mode: 'Online School · Homeschool · Full Programme',
           plans: [
-            { name: 'Full programme', who: 'Primary to A-Level / IB · live classes · paid termly', usd: '423/month' },
+            { name: 'Primary', who: 'Grades 1-6 · live classes · paid termly', usd: 'from 423/month' },
+            { name: 'Secondary, IGCSE, A-Level / IB', who: 'Varies by curriculum and level · paid termly', usd: 'on assessment' },
           ],
         },
         {
@@ -866,7 +872,7 @@ export const COUNTRIES = [
       heading: 'Smartious vs a typical Lagos international school',
       intro: 'How we compare to a typical premium Lagos international school in 2026 — not because they are bad, but because they are built for a different problem than the one many Nigerian families now face.',
       rows: [
-        { feature: 'Annual fees (Secondary)', traditional: '₦18,000,000–35,000,000+', smartious: 'About ₦7,900,000 a year (USD 423/month)' },
+        { feature: 'Annual fees (Secondary)', traditional: '₦18,000,000–35,000,000+', smartious: 'About ₦7,900,000 a year (from USD 423/month)' },
         { feature: 'Application fee', traditional: '₦1,000,000–2,000,000', smartious: 'USD 38 (≈₦53,000) one-time' },
         { feature: 'Waitlist', traditional: '1–4 years at top schools', smartious: 'None · admit year-round' },
         { feature: 'Class size', traditional: '20–28', smartious: '12 online · 1-on-1 in private tuition' },
@@ -981,7 +987,8 @@ export const COUNTRIES = [
         {
           mode: 'Online School · Homeschool · Full Programme',
           plans: [
-            { name: 'Full programme', who: 'Primary to A-Level / IB · live classes · paid termly', usd: '423/month', zar: '≈ ZAR 7,700' },
+            { name: 'Primary', who: 'Grades 1-6 · live classes · paid termly', usd: 'from 423/month', zar: '≈ ZAR 7,700' },
+            { name: 'Secondary, IGCSE, A-Level / IB', who: 'Varies by curriculum and level · paid termly', usd: 'on assessment' },
           ],
         },
         {
@@ -997,7 +1004,7 @@ export const COUNTRIES = [
       heading: 'Smartious vs top SA private schools',
       intro: 'How we compare to a typical top-tier SA private school. The comparison is not just about cost — it is about what kind of school experience fits which kind of family.',
       rows: [
-        { feature: 'Annual fees (Senior school)', traditional: 'R200,000–R450,000+', smartious: 'About R92,400 a year (USD 423/month)' },
+        { feature: 'Annual fees (Senior school)', traditional: 'R200,000–R450,000+', smartious: 'About R92,400 a year (from USD 423/month)' },
         { feature: 'Class size', traditional: '18-25 typical', smartious: '12 online · 1-on-1 in private tuition' },
         { feature: 'Daily commute', traditional: '60-90 min on M1/N1/N3', smartious: 'Zero' },
         { feature: 'Curriculum options', traditional: 'IEB, CAPS, sometimes Cambridge', smartious: 'Cambridge IGCSE, A-Level, IB, Edexcel, British' },
@@ -1112,7 +1119,8 @@ export const COUNTRIES = [
         {
           mode: 'Online School · Homeschool · Full Programme',
           plans: [
-            { name: 'Full programme', who: 'Primary to A-Level / IB · live classes · paid termly', usd: '423/month' },
+            { name: 'Primary', who: 'Grades 1-6 · live classes · paid termly', usd: 'from 423/month' },
+            { name: 'Secondary, IGCSE, A-Level / IB', who: 'Varies by curriculum and level · paid termly', usd: 'on assessment' },
           ],
         },
         {
@@ -1128,7 +1136,7 @@ export const COUNTRIES = [
       heading: 'Smartious vs typical US online private schools',
       intro: 'How we compare to typical US private online schools. We are not the cheapest option in the market — there are tuition-free virtual charter schools in every state and free open-curriculum platforms — but among schools delivering taught, accredited international curricula, our positioning is distinct.',
       rows: [
-        { feature: 'Annual fees (Senior school)', traditional: '$8,000–$30,000+', smartious: '$5,076 a year ($423/month)' },
+        { feature: 'Annual fees (Senior school)', traditional: '$8,000–$30,000+', smartious: 'From $5,076 a year (from $423/month)' },
         { feature: 'Class size', traditional: '15–25 typical', smartious: '12 online · 1-on-1 in private tuition' },
         { feature: 'Curriculum options', traditional: 'US diploma + AP (most schools)', smartious: 'Cambridge IGCSE, A-Level, IB, Edexcel, British, plus AP via private tuition' },
         { feature: 'International pathway depth', traditional: 'AP courses for US universities', smartious: 'Built for UK, Canadian, African and US university applications equally' },
@@ -1226,7 +1234,8 @@ export const COUNTRIES = [
         {
           mode: 'Online School · Homeschool · Full Programme',
           plans: [
-            { name: 'Full programme', who: 'Primary to A-Level / IB · live classes · paid termly', usd: '423/month', gbp: '≈ £334' },
+            { name: 'Primary', who: 'Grades 1-6 · live classes · paid termly', usd: 'from 423/month', gbp: '≈ £334' },
+            { name: 'Secondary, IGCSE, A-Level / IB', who: 'Varies by curriculum and level · paid termly', usd: 'on assessment' },
           ],
         },
         {
@@ -1242,7 +1251,7 @@ export const COUNTRIES = [
       heading: 'Smartious vs a typical UK independent school',
       intro: 'How we compare to a typical UK independent day school in 2026 — not because they are bad, but because they are built for a different problem than the one many UK families now face.',
       rows: [
-        { feature: 'Annual fees (Senior school)', traditional: '£22,000–£45,000 (post-VAT)', smartious: 'About £4,010 a year (USD 423/month)' },
+        { feature: 'Annual fees (Senior school)', traditional: '£22,000–£45,000 (post-VAT)', smartious: 'About £4,010 a year (from USD 423/month)' },
         { feature: 'Class size', traditional: '15–22', smartious: '12 online · 1-on-1 in private tuition' },
         { feature: 'Daily commute', traditional: '30–90 min in many regions', smartious: 'Zero' },
         { feature: 'Curriculum options', traditional: 'School commits to one', smartious: 'IGCSE, A-Level, IB, Edexcel, AQA, British' },
@@ -1286,7 +1295,7 @@ export const COUNTRIES = [
       { q: 'What happens if it doesn\'t work and we want to return to a traditional school?',
         a: 'You can transfer back at any time. Smartious issues full transcripts, termly progress reports and predicted grades that are recognised by Kenyan schools (including Brookhouse, Braeburn, Crawford, Hillcrest, Aga Khan Academy and many others) and by schools internationally. Most schools place returning students based on those records combined with their own placement assessment. We have never had a family unable to transfer their child back where they wanted.' },
       { q: 'How much does Smartious cost?',
-        a: 'Online school is USD 423/month (≈ KES 54,600), paid termly, for every year group. In-person homeschooling in Nairobi is also USD 423/month. Private one-to-one tuition is USD 15/hour online or USD 15/hour at-home in the Nairobi area. Fees are paid termly and are non-refundable once the assessment is done, the timetable is created and lessons have started.' },
+        a: 'Online school starts from USD 423/month (≈ KES 54,600) for Primary, paid termly; secondary, IGCSE, A-Level and IB fees vary by curriculum and level. In-person homeschooling in Nairobi also starts from USD 423/month. Private one-to-one tuition is USD 15/hour online or USD 15/hour at-home in the Nairobi area. Fees are paid termly and are non-refundable once the assessment is done, the timetable is created and lessons have started.' },
       { q: 'Why do you price in USD instead of KES?',
         a: 'Because Smartious operates to international standards. Our students sit the same Cambridge International, Pearson Edexcel, IB and American exams as students in London, Dubai and Toronto, and our teachers serve students across multiple currencies and countries. USD pricing reflects that. We always show the KES equivalent alongside, and we accept payment in KES via Paystack, M-Pesa, bank transfer or card.' },
       { q: 'Can my child join Smartious mid-term?',
@@ -1359,13 +1368,15 @@ export const COUNTRIES = [
         {
           mode: 'Online School · Homeschool · Full Programme',
           plans: [
-            { name: 'Full programme', who: 'Primary to A-Level / IB · live classes · paid termly', usd: '423/month', kes: '≈ KES 54,600' },
+            { name: 'Primary', who: 'Grades 1-6 · live classes · paid termly', usd: 'from 423/month', kes: '≈ KES 54,600' },
+            { name: 'Secondary, IGCSE, A-Level / IB', who: 'Varies by curriculum and level · paid termly', usd: 'on assessment' },
           ],
         },
         {
           mode: 'Homeschool · In-Person · Nairobi',
           plans: [
-            { name: 'Full programme', who: 'Primary to A-Level / IB · tutor visits your home · paid termly', usd: '423/month', kes: '≈ KES 54,600' },
+            { name: 'Primary', who: 'Grades 1-6 · tutor visits your home · paid termly', usd: 'from 423/month', kes: '≈ KES 54,600' },
+            { name: 'Secondary, IGCSE, A-Level / IB', who: 'Varies by curriculum and level · paid termly', usd: 'on assessment' },
           ],
         },
         {
@@ -1385,7 +1396,7 @@ export const COUNTRIES = [
         { feature: 'Class size', traditional: '45-60 students per class', smartious: '12 online · 6 in-person' },
         { feature: 'Daily commute', traditional: '2-3 hours of Nairobi traffic', smartious: 'Zero (online) · Walkable (Parklands centre)' },
         { feature: 'Curriculum options', traditional: 'One curriculum, no flexibility', smartious: 'CBC, IGCSE, A-Level, IB, Edexcel, American, Blended' },
-        { feature: 'Annual fees (Secondary)', traditional: 'KES 700,000-1,800,000', smartious: 'About KES 655,000 a year (USD 423/month)' },
+        { feature: 'Annual fees (Secondary)', traditional: 'KES 700,000-1,800,000', smartious: 'About KES 655,000 a year (from USD 423/month)' },
         { feature: 'Schedule flexibility', traditional: 'Fixed timetable, fixed terms', smartious: 'Flexible · Year-round enrolment · Recordings' },
         { feature: 'Exam pathways', traditional: 'Usually one (KCSE or IGCSE)', smartious: 'Both — KNEC and Cambridge / Edexcel in parallel' },
         { feature: 'AI tutor support', traditional: 'None', smartious: 'Mshauri AI · 24/7 homework help' },
@@ -1513,7 +1524,8 @@ export const COUNTRIES = [
         {
           mode: 'Online School · Homeschool · Full Programme',
           plans: [
-            { name: 'Full programme', who: 'Primary to A-Level / IB · live classes · paid termly', usd: '423/month', ugx: '≈ UGX 1,565,000' },
+            { name: 'Primary', who: 'Grades 1-6 · live classes · paid termly', usd: 'from 423/month', ugx: '≈ UGX 1,565,000' },
+            { name: 'Secondary, IGCSE, A-Level / IB', who: 'Varies by curriculum and level · paid termly', usd: 'on assessment' },
           ],
         },
         {
@@ -1529,7 +1541,7 @@ export const COUNTRIES = [
       heading: 'Smartious vs Kampala international schools',
       intro: 'How we compare to a typical premium or mid-tier Kampala international school. The cost difference is significant — but the deeper differences are in flexibility, mobility and the regulatory grey zone Smartious dual-setup helps families navigate.',
       rows: [
-        { feature: 'Annual fees (Primary)', traditional: 'UGX 22M–85M', smartious: 'About UGX 19M a year (USD 423/month)' },
+        { feature: 'Annual fees (Primary)', traditional: 'UGX 22M–85M', smartious: 'About UGX 19M a year (from USD 423/month)' },
         { feature: 'Class size', traditional: '18-25 typical', smartious: '12 online · 1-on-1 in private tuition' },
         { feature: 'Daily commute', traditional: '60-90 min in Kampala traffic', smartious: 'Zero' },
         { feature: 'Curriculum options', traditional: 'School commits to one', smartious: 'Cambridge IGCSE, A-Level, IB, Edexcel, British' },
@@ -1571,7 +1583,7 @@ export const COUNTRIES = [
       { q: 'My family travels between Mogadishu, Nairobi and Dubai. Does the school follow us?',
         a: 'Yes — and this is one of our strongest use cases for Somali families. Many Mogadishu families maintain homes or business interests in Nairobi, Dubai, Istanbul, the UK or Toronto, and children spending parts of the year in different cities is common. Smartious is the same school regardless of which city the family is in — same teachers, same curriculum, same exam board, same classmates. No enrolment break, no curriculum reset. The school travels with the family.' },
       { q: 'How does Smartious cost compare to premium Mogadishu international schools?',
-        a: 'Most Mogadishu international schools price in USD given Somalia\'s dollarised market. Premium tier Mogadishu international schools typically charge in the range of USD 3,000-8,000+ per year depending on level and school. Smartious is USD 423/month, paid termly, for every year group. Crucially, Smartious also eliminates daily transport (a meaningful cost in Mogadishu for security as much as logistics), uniforms, registration fees and the various extras that meaningfully add to in-person school costs.' },
+        a: 'Most Mogadishu international schools price in USD given Somalia\'s dollarised market. Premium tier Mogadishu international schools typically charge in the range of USD 3,000-8,000+ per year depending on level and school. Smartious starts from USD 423/month for Primary, paid termly; fees vary by curriculum and level. Crucially, Smartious also eliminates daily transport (a meaningful cost in Mogadishu for security as much as logistics), uniforms, registration fees and the various extras that meaningfully add to in-person school costs.' },
       { q: 'Are classes scheduled in Somali time?',
         a: 'Yes. Smartious runs live group classes across three time-zone bands — UK & Africa, Americas, and Asia-Pacific — with a stable small team of subject specialists in each band. Somali students join the UK & Africa band (Somalia is GMT+3, identical to East Africa Time and the Smartious home zone), with live sessions timetabled during Somali school hours. Every class is recorded for unlimited rewatch. Students in Mogadishu and Hargeisa join the same live cohorts as classmates in Nairobi, Doha, Dubai, Lagos and London.' },
       { q: 'Will Somali universities accept Smartious qualifications?',
@@ -1633,7 +1645,8 @@ export const COUNTRIES = [
         {
           mode: 'Online School · Homeschool · Full Programme',
           plans: [
-            { name: 'Full programme', who: 'Primary to A-Level / IB · live classes · paid termly', usd: '423/month' },
+            { name: 'Primary', who: 'Grades 1-6 · live classes · paid termly', usd: 'from 423/month' },
+            { name: 'Secondary, IGCSE, A-Level / IB', who: 'Varies by curriculum and level · paid termly', usd: 'on assessment' },
           ],
         },
         {
@@ -1649,7 +1662,7 @@ export const COUNTRIES = [
       heading: 'Smartious vs typical Mogadishu international school',
       intro: 'How we compare to a typical premium or mid-tier Mogadishu international school. Many Mogadishu schools do excellent work for the families they fit; we offer a different proposition for families whose lives need something else.',
       rows: [
-        { feature: 'Annual fees (Senior school)', traditional: 'USD 3,000-8,000+', smartious: 'USD 5,076 a year (USD 423/month)' },
+        { feature: 'Annual fees (Senior school)', traditional: 'USD 3,000-8,000+', smartious: 'From USD 5,076 a year (from USD 423/month)' },
         { feature: 'Class size', traditional: '20-30 typical', smartious: '12 online · 1-on-1 in private tuition' },
         { feature: 'Daily commute', traditional: 'Security and logistical complexity', smartious: 'Zero · learn from home' },
         { feature: 'Curriculum options', traditional: 'School commits to one', smartious: 'Cambridge IGCSE, A-Level, IB, Edexcel, British' },
@@ -1754,7 +1767,8 @@ export const COUNTRIES = [
         {
           mode: 'Online School · Homeschool · Full Programme',
           plans: [
-            { name: 'Full programme', who: 'Primary to A-Level / IB · live classes · paid termly', usd: '423/month', tzs: '≈ TZS 1,100,000' },
+            { name: 'Primary', who: 'Grades 1-6 · live classes · paid termly', usd: 'from 423/month', tzs: '≈ TZS 1,100,000' },
+            { name: 'Secondary, IGCSE, A-Level / IB', who: 'Varies by curriculum and level · paid termly', usd: 'on assessment' },
           ],
         },
         {
@@ -1770,7 +1784,7 @@ export const COUNTRIES = [
       heading: 'Smartious vs Tanzania international schools',
       intro: 'How we compare to a typical premium or mid-tier Tanzania international school. The cost difference is significant — but the deeper differences are in mobility, NECTA constraints, and the regulatory transition Smartious sidesteps entirely.',
       rows: [
-        { feature: 'Annual fees (Senior school)', traditional: 'TZS 12M–50M+', smartious: 'About TZS 13M a year (USD 423/month)' },
+        { feature: 'Annual fees (Senior school)', traditional: 'TZS 12M–50M+', smartious: 'About TZS 13M a year (from USD 423/month)' },
         { feature: 'Class size', traditional: '18-25 typical', smartious: '12 online · 1-on-1 in private tuition' },
         { feature: 'Daily commute', traditional: '60-90 min in Dar/Arusha traffic', smartious: 'Zero' },
         { feature: 'Curriculum options', traditional: 'School commits to one', smartious: 'Cambridge IGCSE, A-Level, IB, Edexcel, British' },

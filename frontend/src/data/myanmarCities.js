@@ -122,7 +122,7 @@ export const MYANMAR_CITIES = [
     whyChoose: [
       ['After-school hours that genuinely work', 'Myanmar runs three and a half hours ahead of our teaching base, so a four or six o\'clock class in Yangon lands in the middle of our day. An after-school arrangement fails in most of our markets and works cleanly here.'],
       ['The set your school cannot staff', 'Further Mathematics or a third science for four pupils is unviable on one timetable and routine in a live group drawn from several countries.'],
-      ['A fee gap against the international tier', 'Live small-group teaching at USD 5,076 a year, quoted in USD.'],
+      ['A fee gap against the international tier', 'Live small-group teaching from USD 5,076 a year, quoted in USD.'],
       ['Cambridge is already familiar here', 'Myanmar private schools have offered IGCSE and A-Level for many years, so families understand where an examined international track sits.'],
       ['Honest about the legal gap', 'We could not verify Myanmar\'s home-education position and say so rather than guessing in either direction.'],
     ],
@@ -462,7 +462,7 @@ export const MYANMAR_COUNTRY = {
     { name: 'Mandalay and Naypyidaw',                              city: 'Central Myanmar',    curriculum: 'Thin to very limited',                  feesUsd: 'Limited international option',                      feesAed: '—',                       rating: 0,   capacityNote: 'A second city and an administrative capital, both far thinner than their populations suggest' },
     { name: 'The Shan highlands and the south',                    city: 'Regional Myanmar',   curriculum: '—',                                     feesUsd: 'No international provision',                        feesAed: '—',                       rating: 0,   capacityNote: 'A productive highland agricultural economy and a southern port region, neither with international schooling' },
     { name: 'Private tuition',                                     city: 'Nationwide',         curriculum: 'Exam-focused coaching',                 feesUsd: 'Per hour, per subject',                             feesAed: 'Widespread',              rating: 4.0, capacityNote: 'The default answer to a subject gap — usually one-to-one and unstructured across a year' },
-    { name: 'Smartious Homeschool (Myanmar via online delivery)',   city: 'Delivered nationwide', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'USD 5,076/year',                              feesAed: 'Quoted in USD',            rating: 4.8, capacityNote: 'Every class live through A-Level + after-school hours that genuinely work + Mandalay, the highlands and the south reached + examinations planned early' },
+    { name: 'Smartious Homeschool (Myanmar via online delivery)',   city: 'Delivered nationwide', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP', feesUsd: 'From USD 5,076/year',                              feesAed: 'Quoted in USD',            rating: 4.8, capacityNote: 'Every class live through A-Level + after-school hours that genuinely work + Mandalay, the highlands and the south reached + examinations planned early' },
   ],
 
   legalFrameworkIntro: 'Myanmar is one of the markets where we could not verify the central question, and we would rather open by saying so than write around it. Here is what we can establish, and the practical facts that shape our offer here.',
@@ -491,7 +491,7 @@ export const MYANMAR_COUNTRY = {
     { q: 'Our school already offers IGCSE — what would we gain?', a: 'Usually a subject it cannot staff for a small cohort — Further Mathematics, a third science, or a clashing set. If your school covers what your child needs, we will tell you so.' },
     { q: 'Where would our child sit examinations?', a: 'We plan this at enrolment. Yangon holds the deepest capacity and is checked first, Mandalay serves central-region families, and arrangements for Naypyidaw, Taunggyi and the south are planned several weeks ahead of each window.' },
     { q: 'Where do Myanmar students usually apply abroad?', a: 'Singapore, Thailand, Malaysia, Australia, the United Kingdom, the United States and Japan are all common. UCAS reads A-Levels natively, and Australian, Singaporean and Malaysian universities read A-Levels and the IB directly — they are among the most familiar destinations from this country.' },
-    { q: 'How are fees handled?', a: 'Quoted and invoiced in USD, which is used here for larger commitments — USD 5,076 a year for live small-group teaching.' },
+    { q: 'How are fees handled?', a: 'Quoted and invoiced in USD, which is used here for larger commitments — from USD 5,076 a year for live small-group teaching.' },
     { q: 'Which parts of Myanmar does Smartious cover?', a: 'Yangon, Mandalay, Naypyidaw, Taunggyi and the Shan highlands, and Mawlamyine and the south have dedicated pages. Live online delivery works identically anywhere in the country.' },
   ],
 
