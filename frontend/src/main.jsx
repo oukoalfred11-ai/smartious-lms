@@ -5,6 +5,9 @@ import App from './App.jsx'
 import './styles/global.css'
 import './styles/app.css'
 import { bootAppShell, appReady, isAppMode } from './lib/appShell.js'
+import { installChunkRecovery, isChunkError, reloadForNewVersion, hardReload } from './lib/chunkReload.js'
+
+installChunkRecovery()
 
 bootAppShell()
 
@@ -16,40 +19,43 @@ if (isAppMode() && window.location.pathname === '/') {
 
 /* ═══════════════════════════════════════════════════════════════════
    Global error boundary — catches any React render crash and shows a
-   readable error instead of a blank page. Unchanged from prior version.
+   readable message instead of a blank page. A failed load of one of the
+   app's files almost always means a new version was deployed while this
+   tab was open: reload once to pick it up (lib/chunkReload.js).
 ═══════════════════════════════════════════════════════════════════ */
 class ErrorBoundary extends React.Component {
-  constructor(props) { super(props); this.state = { error: null } }
+  constructor(props) { super(props); this.state = { error: null, reloading: false } }
   static getDerivedStateFromError(e) { return { error: e } }
-  componentDidCatch(e, info) { console.error('React crash:', e, info) }
+  componentDidCatch(e, info) {
+    console.error('React crash:', e, info)
+    if (isChunkError(e) && reloadForNewVersion()) this.setState({ reloading: true })
+  }
   render() {
-    if (this.state.error) {
-      return (
-        <div style={{ padding: 40, fontFamily: 'monospace', background: '#0f172a', color: '#fff', minHeight: '100vh' }}>
-          <div style={{ maxWidth: 700, margin: '0 auto' }}>
-            <div style={{ color: '#f87171', fontSize: 22, fontWeight: 700, marginBottom: 16 }}>
-              Smartious — Startup Error
-            </div>
-            <div style={{ background: '#1e293b', borderRadius: 8, padding: 20, marginBottom: 20, color: '#fca5a5', fontSize: 14, lineHeight: 1.7 }}>
-              {this.state.error.toString()}
-            </div>
-            <div style={{ color: '#94a3b8', fontSize: 13, marginBottom: 20 }}>
-              This error prevents the app from loading. Common causes:
-              <ul style={{ marginTop: 8, paddingLeft: 20 }}>
-                <li>Old cached files — delete node_modules/.vite/ and restart</li>
-                <li>Wrong file replaced — check all files match the ZIP</li>
-                <li>Missing import — a component references something that doesnt exist</li>
-              </ul>
-            </div>
-            <button onClick={() => { localStorage.clear(); window.location.reload() }}
-              style={{ background: '#3b82f6', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: 8, cursor: 'pointer', fontSize: 14, fontWeight: 700 }}>
-              Clear Cache &amp; Reload
-            </button>
+    const { error, reloading } = this.state
+    if (!error) return this.props.children
+    const update = isChunkError(error)
+    const btn = { border: 'none', padding: '12px 20px', borderRadius: 8, cursor: 'pointer', fontSize: 15, fontWeight: 700 }
+    return (
+      <div style={{ padding: '48px 20px', fontFamily: 'system-ui, -apple-system, Segoe UI, sans-serif', background: '#FDFAF4', color: '#080C14', minHeight: '100vh', boxSizing: 'border-box' }}>
+        <div style={{ maxWidth: 560, margin: '0 auto', background: '#fff', border: '1px solid #F0E8D4', borderRadius: 14, padding: 28 }}>
+          <div style={{ color: '#8B1A2E', fontSize: 22, fontWeight: 700, marginBottom: 10 }}>
+            {update ? 'Smartious has been updated' : 'Something went wrong'}
           </div>
+          <p style={{ fontSize: 15, lineHeight: 1.6, color: '#2E3D55', margin: '0 0 18px' }}>
+            {reloading ? 'Loading the latest version…'
+              : update ? 'A new version of Smartious was released while this page was open. Reload to continue; your work and sign-in are kept.'
+                : 'This page could not be shown. Reloading usually fixes it. If it keeps happening, contact support and mention the message below.'}
+          </p>
+          {!reloading && (
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+              <button onClick={() => window.location.reload()} style={{ ...btn, background: '#8B1A2E', color: '#fff' }}>Reload</button>
+              <button onClick={hardReload} style={{ ...btn, background: '#fff', color: '#8B1A2E', border: '1px solid #8B1A2E' }}>Clear cached files &amp; reload</button>
+            </div>
+          )}
+          {!update && <pre style={{ marginTop: 18, whiteSpace: 'pre-wrap', fontSize: 12, color: '#6B6B6B', background: '#F8F2E6', borderRadius: 8, padding: 12 }}>{String(error)}</pre>}
         </div>
-      )
-    }
-    return this.props.children
+      </div>
+    )
   }
 }
 
