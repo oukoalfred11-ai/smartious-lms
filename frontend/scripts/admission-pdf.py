@@ -162,7 +162,7 @@ class Doc(BaseDocTemplate):
             c.setFont(SANS, 7.5); c.setFillColor(GREY); c.drawRightString(W - 18 * mm, H - 14 * mm, 'Student name: ______________________')
         c.setStrokeColor(LINE); c.setLineWidth(0.5); c.line(18 * mm, 14 * mm, W - 18 * mm, 14 * mm)
         c.setFont(SANS, 7); c.setFillColor(GREY)
-        c.drawString(18 * mm, 9.5 * mm, 'Smartious E-School Ltd · Diamond Plaza I, Parklands, Nairobi · hello@smartioushomeschool.com · +254 745 021 212')
+        c.drawString(18 * mm, 9.5 * mm, 'Smartious E-School Ltd · hello@smartioushomeschool.com · Admissions +254 745 021 212 · Academic +254 182 071 920')
         c.drawRightString(W - 18 * mm, 9.5 * mm, f'Page {doc.page}')
         c.restoreState()
 
@@ -324,7 +324,9 @@ story += bullets(['Join on time, with camera on unless your teacher says otherwi
                   'Do not record, share or post lessons or teaching materials.',
                   'If you miss a lesson, watch the recording and catch up on the work.'])
 story += section('11  Who to contact')
-ct = Table([[P('<b>Admissions, fees and general questions</b>'), P('hello@smartioushomeschool.com · +254 745 021 212')],
+ct = Table([[P('<b>Admissions, fees and enrolment</b>'), P('+254 745 021 212 (call or WhatsApp) · admissions@smartioushomeschool.com')],
+            [P('<b>Academic matters</b><br/>lessons, timetable, homework, reports, examinations'), P('+254 182 071 920 · academics@smartioushomeschool.com')],
+            [P('<b>General questions</b>'), P('hello@smartioushomeschool.com')],
             [P('<b>Safeguarding concerns</b>'), P('safeguarding@smartioushomeschool.com · +254 745 021 212')],
             [P('<b>Office and website</b>'), P('Diamond Plaza I, Parklands, Nairobi, Kenya · smartioushomeschool.com')]], colWidths=['40%', '60%'])
 ct.setStyle(TableStyle([('LINEBELOW', (0, 0), (-1, -1), 0.5, LINE), ('VALIGN', (0, 0), (-1, -1), 'TOP'),
