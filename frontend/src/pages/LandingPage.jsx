@@ -198,6 +198,44 @@ function usePageMeta(title, description, canonicalOverride) {
   }, [title, description, canonicalOverride])
 }
 
+/* ── spaClick — real <a href> links with SPA navigation ─────
+ * Internal links are <a href="/path"> so crawlers can follow them;
+ * a plain left click is intercepted and routed through react-router
+ * (no full reload). Modified clicks (new tab etc.) behave normally.
+ * `before` runs first (e.g. close a menu or set page state).
+ */
+function spaClick(nav, href, before) {
+  return (e) => {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+    e.preventDefault()
+    if (before) before()
+    nav(href)
+    window.scrollTo(0, 0)
+  }
+}
+
+/* ── IntakeCta — January 2027 intake call to action ───────── */
+function IntakeCta({ nav, compact }) {
+  return (
+    <div style={{background:'#080C14',color:'#fff',padding: compact ? '14px 0' : '22px 0',borderTop:'3px solid #C9973A'}}>
+      <div className="wrap" style={{display:'flex',flexWrap:'wrap',alignItems:'center',justifyContent:'center',gap:'10px 18px',textAlign:'center'}}>
+        <span style={{fontSize: compact ? 14 : 15.5,lineHeight:1.5}}>
+          <strong style={{color:'#C9973A'}}>January 2027 intake</strong>
+          {' — '}Term 2 starts 5 January 2027{' — '}apply now
+        </span>
+        <a href="/blog/january-2027-intake" onClick={spaClick(nav, '/blog/january-2027-intake')}
+          style={{color:'#fff',fontWeight:700,fontSize:13.5,textDecoration:'underline',textUnderlineOffset:3}}>
+          January 2027 intake details
+        </a>
+        <a href="/enroll" onClick={spaClick(nav, '/enroll')}
+          style={{background:'#8B1A2E',color:'#fff',fontWeight:800,fontSize:13,padding:'9px 18px',borderRadius:6,textDecoration:'none'}}>
+          Apply now
+        </a>
+      </div>
+    </div>
+  )
+}
+
 /* ── useHeroPreload — LCP optimization ─────────────────────
  * Hero video on the home page is the LCP element. Inject a
  * <link rel="preload" as="video" fetchpriority="high"> so
@@ -370,6 +408,10 @@ const styles = `
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   .lp{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:${V.bone};color:${V.ink};overflow-x:hidden;line-height:1.65}
   .lp a{color:inherit;text-decoration:none}
+  /* Links that replaced <button>/<div> click handlers keep the old box:
+     zero-specificity defaults, so classes and inline styles still win. */
+  :where(.lp a.lp-btnlink){display:inline-block;text-align:center;font-size:13.333px;font-weight:400;line-height:normal;cursor:pointer}
+  :where(.lp a.lp-divlink){display:block;cursor:pointer}
   .lp button{font-family:'Plus Jakarta Sans',system-ui,sans-serif;cursor:pointer;border:none;background:none;outline:none}
   .lp ::-webkit-scrollbar{width:4px}
   .lp ::-webkit-scrollbar-thumb{background:${V.cr};border-radius:2px}
@@ -4980,6 +5022,13 @@ export default function LandingPage() {
   }
 
   const goPortal = () => nav('/login')
+  // linkClick(run) — onClick for an internal <a href>: a plain click runs
+  // the existing SPA navigation; ctrl/cmd/middle click open a new tab.
+  const linkClick = (run) => (e) => {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+    e.preventDefault()
+    run()
+  }
 
   // Blog items come from the generated article index (listing fields of
   // every article, built from the articlesPart files) — same slugs
@@ -5133,25 +5182,25 @@ export default function LandingPage() {
                     <div key={group.cat} style={{marginBottom: gi < arr.length - 1 ? 6 : 0, paddingBottom: gi < arr.length - 1 ? 6 : 0, borderBottom: gi < arr.length - 1 ? '1px solid rgba(255,255,255,.06)' : 'none'}}>
                       <div style={{padding:'6px 16px 4px',fontSize:9.5,fontWeight:700,letterSpacing:'.16em',textTransform:'uppercase',color:'rgba(201,151,58,.7)'}}>{group.cat}</div>
                       {group.items.map(item => (
-                        <div
+                        <a className="lp-divlink"
                           key={item.slug}
-                          onClick={() => { setCurriculaMenuOpen(false); openCurriculum(item.slug) }}
+                          href={'/curricula/' + encodeURIComponent(item.slug)} onClick={linkClick(() => { setCurriculaMenuOpen(false); openCurriculum(item.slug) })}
                           style={{padding:'9px 16px',cursor:'pointer',borderLeft:'2px solid transparent',transition:'all .15s',display:'flex',alignItems:'center',gap:10}}
                           onMouseEnter={e => { e.currentTarget.style.background = 'rgba(201,151,58,.08)'; e.currentTarget.style.borderLeftColor = V.gold3 }}
                           onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderLeftColor = 'transparent' }}>
                           <div style={{fontSize:14,minWidth:20,textAlign:'center'}}>{item.badge}</div>
                           <div style={{fontSize:13.5,fontWeight:700,color:'#fff'}}>{item.l}</div>
-                        </div>
+                        </a>
                       ))}
                     </div>
                   ))}
-                  <div
-                    onClick={() => { setCurriculaMenuOpen(false); P('curricula') }}
+                  <a className="lp-divlink"
+                    href={pageToPath('curricula')} onClick={linkClick(() => { setCurriculaMenuOpen(false); P('curricula') })}
                     style={{padding:'10px 16px',cursor:'pointer',borderTop:'1px solid rgba(255,255,255,.08)',marginTop:6,fontSize:11.5,fontWeight:700,color:V.gold3,letterSpacing:'.04em'}}
                     onMouseEnter={e => { e.currentTarget.style.background = 'rgba(201,151,58,.08)' }}
                     onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}>
                     View all curricula →
-                  </div>
+                  </a>
                 </div>
               )}
             </div>
@@ -5195,15 +5244,15 @@ export default function LandingPage() {
                     <div key={group.cat} style={{marginBottom: gi < 1 ? 6 : 0, paddingBottom: gi < 1 ? 6 : 0, borderBottom: gi < 1 ? '1px solid rgba(255,255,255,.06)' : 'none'}}>
                       <div style={{padding:'6px 16px 4px',fontSize:9.5,fontWeight:700,letterSpacing:'.16em',textTransform:'uppercase',color:'rgba(201,151,58,.7)'}}>{group.cat}</div>
                       {group.items.map(item => (
-                        <div
+                        <a className="lp-divlink"
                           key={item.l + item.id}
-                          onClick={() => { setProgrammesMenuOpen(false); P(item.id) }}
+                          href={pageToPath(item.id)} onClick={linkClick(() => { setProgrammesMenuOpen(false); P(item.id) })}
                           style={{padding:'10px 16px',cursor:'pointer',borderLeft:'2px solid transparent',transition:'all .15s'}}
                           onMouseEnter={e => { e.currentTarget.style.background = 'rgba(201,151,58,.08)'; e.currentTarget.style.borderLeftColor = V.gold3 }}
                           onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderLeftColor = 'transparent' }}>
                           <div style={{fontSize:13.5,fontWeight:700,color:'#fff'}}>{item.l}</div>
                           {item.sub && <div style={{fontSize:11,color:'rgba(247,243,237,.5)',marginTop:2}}>{item.sub}</div>}
-                        </div>
+                        </a>
                       ))}
                     </div>
                   ))}
@@ -5235,15 +5284,15 @@ export default function LandingPage() {
                     {l:'Blog &amp; News', id:'blog', sub:'Articles, updates, insights'},
                     {l:'Photo Gallery', id:'gallery', sub:'Moments from across Smartious'},
                   ].map(item => (
-                    <div
+                    <a className="lp-divlink"
                       key={item.id}
-                      onClick={() => { setSchoolLifeMenuOpen(false); P(item.id) }}
+                      href={pageToPath(item.id)} onClick={linkClick(() => { setSchoolLifeMenuOpen(false); P(item.id) })}
                       style={{padding:'10px 16px',cursor:'pointer',borderLeft:'2px solid transparent',transition:'all .15s'}}
                       onMouseEnter={e => { e.currentTarget.style.background = 'rgba(201,151,58,.08)'; e.currentTarget.style.borderLeftColor = V.gold3 }}
                       onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderLeftColor = 'transparent' }}>
                       <div style={{fontSize:13.5,fontWeight:700,color:'#fff'}} dangerouslySetInnerHTML={{__html: item.l}}/>
                       {item.sub && <div style={{fontSize:11,color:'rgba(247,243,237,.5)',marginTop:2}} dangerouslySetInnerHTML={{__html: item.sub}}/>}
-                    </div>
+                    </a>
                   ))}
                 </div>
               )}
@@ -5253,14 +5302,14 @@ export default function LandingPage() {
             ))}
           </div>
           <div className="nav-actions">
-            <button className="nav-login" onClick={goPortal}>
+            <a className="nav-login lp-btnlink" href={'/login'} onClick={linkClick(goPortal)}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
               Portal Login
-            </button>
-            <div className="nav-cta" onClick={() => nav('/assessment')}>
+            </a>
+            <a className="nav-cta lp-divlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>
               Enroll Now
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </div>
+            </a>
           </div>
         </div>
         </nav>
@@ -5425,8 +5474,8 @@ export default function LandingPage() {
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
                 Portal Login
               </button>
-              <button
-                onClick={() => { nav('/assessment'); setMobileMenuOpen(false) }}
+              <a className="lp-btnlink"
+                href={'/assessment'} onClick={linkClick(() => { nav('/assessment'); setMobileMenuOpen(false) })}
                 style={{
                   width:'100%',
                   background:'#8B1A2E',
@@ -5447,7 +5496,7 @@ export default function LandingPage() {
                 }}>
                 Enroll Now
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-              </button>
+              </a>
             </div>
           </div>
         </div>
@@ -5549,21 +5598,21 @@ export default function LandingPage() {
               <p className="h-sub h-sub-short">Live classes with qualified teachers. 1-on-1 tuition <strong style={{color:V.gold3}}>from USD 15/hour</strong> · full programmes <strong style={{color:V.gold3}}>from USD 423/month</strong>.</p>
               <p className="h-sub h-sub-long">Live classes. Qualified teachers. Internationally recognised qualifications. Smartious is an accredited online school and homeschool provider delivering Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, Kenya CBC and American Curriculum — taught online by specialists serving families across Kenya, the UAE, UK, Canada and more than 40 countries worldwide. <strong style={{color:V.gold3}}>From USD 15/hour</strong> for 1-on-1 tuition · <strong style={{color:V.gold3}}>from USD 423/month</strong> for full homeschool programmes.</p>
               <div className="h-act">
-                <button className="btn-p" onClick={() => nav('/assessment')}
+                <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
                   style={{padding:'18px 36px',fontSize:16,fontWeight:800,borderRadius:10,boxShadow:'0 8px 24px rgba(201,151,58,.35)',transition:'all .18s ease'}}
                   onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(201,151,58,.5)' }}
                   onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(201,151,58,.35)' }}>
                   Book assessment
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{marginLeft:8}}><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
-                <button className="btn-p" onClick={() => P('consult')}
+                </a>
+                <a className="btn-p lp-btnlink" href={pageToPath('consult')} onClick={linkClick(() => P('consult'))}
                   style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'16px 32px',fontSize:16,fontWeight:700,borderRadius:10,transition:'all .18s ease'}}
                   onMouseEnter={(e) => { e.currentTarget.style.borderColor = V.gold3; e.currentTarget.style.color = V.gold3; e.currentTarget.style.transform = 'translateY(-2px)' }}
                   onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.55)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'translateY(0)' }}>
                   Book Free Consultation
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{marginLeft:8}}><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
-                <button className="btn-o lt h-act-3" style={{borderColor:'rgba(247,243,237,.45)',color:'rgba(247,243,237,.9)'}} onClick={() => P('programs')}>View Programmes</button>
+                </a>
+                <a className="btn-o lt h-act-3 lp-btnlink" style={{borderColor:'rgba(247,243,237,.45)',color:'rgba(247,243,237,.9)'}} href={pageToPath('programs')} onClick={linkClick(() => P('programs'))}>View Programmes</a>
               </div>
             </div>
             <div className="h-stats">
@@ -5592,9 +5641,9 @@ export default function LandingPage() {
           <div style={{display:'none'}} className="mob-page-strip">
             <div style={{background:'rgba(255,255,255,.04)',borderBottom:'1px solid rgba(255,255,255,.08)',padding:'10px 20px',overflowX:'auto',whiteSpace:'nowrap'}}>
               {[['Home','home'],['About','about'],['Curricula','curricula'],['Services','services'],['Pricing','pricing'],['Blog','blog'],['Enroll','enroll']].map(([l,id]) => (
-                <button key={id} onClick={() => P(id)} style={{display:'inline-block',marginRight:8,padding:'6px 14px',borderRadius:99,border:'1px solid rgba(255,255,255,.15)',background:page===id?'rgba(96,165,250,.2)':'transparent',color:page===id?'#60A5FA':'rgba(255,255,255,.55)',fontSize:13,fontWeight:page===id?700:400,cursor:'pointer',whiteSpace:'nowrap'}}>
+                <a className="lp-btnlink" key={id} href={pageToPath(id)} onClick={linkClick(() => P(id))} style={{display:'inline-block',marginRight:8,padding:'6px 14px',borderRadius:99,border:'1px solid rgba(255,255,255,.15)',background:page===id?'rgba(96,165,250,.2)':'transparent',color:page===id?'#60A5FA':'rgba(255,255,255,.55)',fontSize:13,fontWeight:page===id?700:400,cursor:'pointer',whiteSpace:'nowrap'}}>
                   {l}
-                </button>
+                </a>
               ))}
             </div>
           </div>
@@ -5606,6 +5655,8 @@ export default function LandingPage() {
               )))}
             </div>
           </div>
+
+          <IntakeCta nav={nav}/>
 
           {/* ═══════════════════════════════════════════
               HOMEPAGE FAQ SCHEMA (for AI Overviews)
@@ -5813,7 +5864,7 @@ export default function LandingPage() {
                   pricing:'From KSh 1,300/hour',
                 },
               ].map(card => (
-                <div key={card.title} className="reveal" style={{
+                <a key={card.title} className="reveal lp-divlink" style={{
                   background:V.white,
                   border:`1px solid ${V.bone3}`,
                   borderRadius:14,
@@ -5823,7 +5874,7 @@ export default function LandingPage() {
                   transition:'all .25s',
                   cursor:'pointer',
                 }}
-                  onClick={() => P(card.ctaPage)}
+                  href={pageToPath(card.ctaPage)} onClick={linkClick(() => P(card.ctaPage))}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(8,12,20,.10)' }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
                   {/* Image */}
@@ -5865,7 +5916,7 @@ export default function LandingPage() {
                       </div>
                     </div>
                   </div>
-                </div>
+                </a>
               ))}
             </div>
             {/* Quality assurance strip */}
@@ -5954,7 +6005,7 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="wrap" style={{textAlign:'center',marginTop:36}}>
-              <button onClick={() => P('about')} style={{
+              <a className="lp-btnlink" href={pageToPath('about')} onClick={linkClick(() => P('about'))} style={{
                 background:'transparent',color:V.gold3,
                 border:`1.5px solid ${V.gold3}`,
                 padding:'11px 26px',borderRadius:6,
@@ -5964,7 +6015,7 @@ export default function LandingPage() {
               }}>
                 Read our story
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-              </button>
+              </a>
             </div>
           </section>
 
@@ -6106,7 +6157,7 @@ export default function LandingPage() {
             </div>
 
             <div style={{textAlign:'center',marginTop:32}}>
-              <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+              <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
             </div>
           </div></section>
 
@@ -6241,8 +6292,8 @@ export default function LandingPage() {
                 {label:'American Curriculum', detail:'Elementary · Middle · High · AP', from:'Live small-group classes', monthly:'From USD 423/mo · Personalised'},
                 {label:'Kenya Pathway (CBC)', detail:'KICD aligned · KCSE eligible', from:'Live small-group classes', monthly:'Personalised pricing on request'},
               ].map(c => (
-                <div key={c.label} className="reveal" style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',cursor:'pointer',transition:'all .2s'}}
-                  onClick={() => P('curricula')}
+                <a key={c.label} className="reveal lp-divlink" style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',cursor:'pointer',transition:'all .2s'}}
+                  href={pageToPath('curricula')} onClick={linkClick(() => P('curricula'))}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
                   <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:6}}>Curriculum</div>
@@ -6252,11 +6303,11 @@ export default function LandingPage() {
                     <div style={{fontSize:13,fontWeight:700,color:V.cr}}>{c.from}</div>
                     <div style={{fontSize:11,color:V.sl2,marginTop:2}}>{c.monthly}</div>
                   </div>
-                </div>
+                </a>
               ))}
             </div>
             <div style={{textAlign:'center',marginTop:24}}>
-              <button onClick={() => P('pricing')} style={{background:'transparent',color:V.cr,border:`1.5px solid ${V.cr}`,padding:'10px 24px',borderRadius:6,fontSize:13,fontWeight:700,cursor:'pointer'}}>Request personalized pricing →</button>
+              <a className="lp-btnlink" href={pageToPath('pricing')} onClick={linkClick(() => P('pricing'))} style={{background:'transparent',color:V.cr,border:`1.5px solid ${V.cr}`,padding:'10px 24px',borderRadius:6,fontSize:13,fontWeight:700,cursor:'pointer'}}>Request personalized pricing →</a>
             </div>
           </div></section>
 
@@ -6332,10 +6383,10 @@ export default function LandingPage() {
                 </details>
               ))}
               <div style={{textAlign:'center', marginTop:24}}>
-                <button className="btn-o" onClick={() => P('faq')}>
+                <a className="btn-o lp-btnlink" href={pageToPath('faq')} onClick={linkClick(() => P('faq'))}>
                   Full FAQ
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
+                </a>
               </div>
             </div>
           </div></section>
@@ -6405,7 +6456,7 @@ export default function LandingPage() {
                 ))}
               </div>
               <div style={{textAlign:'center',marginTop:36}}>
-                <button className="btn-o" onClick={() => P('about')}>More Stories <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                <a className="btn-o lp-btnlink" href={pageToPath('about')} onClick={linkClick(() => P('about'))}>More Stories <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
               </div>
             </div>
           </section>
@@ -6417,7 +6468,7 @@ export default function LandingPage() {
               <h2 className="cta-h">Give Your Child a <em>Global Education</em> — Without Paying International School Fees</h2>
               <p className="cta-sub">Book a free 30-minute consultation. We'll review your child's situation, current school reports, and recommend a Smartious pathway. From <strong style={{color:V.gold3}}>USD 15/hour</strong> tuition · <strong style={{color:V.gold3}}>From USD 423/month</strong> full homeschool.</p>
               <div className="cta-btns">
-                <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
               <div style={{marginTop:18,fontSize:12,color:'rgba(255,255,255,.55)'}}>Most families complete enrolment within 7-10 working days · No long-term contracts</div>
             </div></div>
@@ -6791,7 +6842,7 @@ export default function LandingPage() {
                       ))}
                     </div>
                     <div style={{marginTop:22,paddingTop:20,borderTop:`1px solid ${V.bone3}`}}>
-                      <div onClick={() => P('child-protection')} style={{
+                      <a className="lp-divlink" href={pageToPath('child-protection')} onClick={linkClick(() => P('child-protection'))} style={{
                         cursor:'pointer',
                         display:'inline-flex',
                         alignItems:'center',
@@ -6802,7 +6853,7 @@ export default function LandingPage() {
                       }}>
                         Read our Child Protection and Safeguarding Policy
                         <span style={{fontSize:16}}>{'\u2192'}</span>
-                      </div>
+                      </a>
                     </div>
                   </div>
                 </div>
@@ -6952,7 +7003,7 @@ export default function LandingPage() {
                 {flag:'🇸🇴',c:'Somalia', cities:'Mogadishu · Hargeisa', slug:'somalia'},
                 {flag:'🇵🇰',c:'Pakistan', cities:'Karachi · Lahore · Islamabad', slug:'pakistan'},
               ].map(country => (
-                <div key={country.c} className="reveal" onClick={() => P('home')}
+                <a key={country.c} className="reveal lp-divlink" href={pageToPath('home')} onClick={linkClick(() => P('home'))}
                   style={{
                     background:V.bone,
                     border:`1px solid ${V.bone3}`,
@@ -6966,7 +7017,7 @@ export default function LandingPage() {
                   <div style={{fontSize:20,marginBottom:4}}>{country.flag}</div>
                   <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'.95rem',color:V.ink,fontWeight:400,lineHeight:1.3}}>{country.c}</div>
                   <div style={{fontSize:10.5,color:V.sl2,marginTop:3,lineHeight:1.4}}>{country.cities}</div>
-                </div>
+                </a>
               ))}
             </div>
           </div></section>
@@ -7049,7 +7100,7 @@ export default function LandingPage() {
               <h2 className="cta-h">Give Your Child a <em>Real Education</em>. Not Just a School Day.</h2>
               <p className="cta-sub">Book a free 30-minute consultation. We'll review your child's situation, current school reports if available, and recommend a Smartious pathway. From <strong style={{color:V.gold3}}>USD 15/hour</strong> tuition · <strong style={{color:V.gold3}}>From USD 423/month</strong> full homeschool. USD 38 / KSh 5,000 application fee applies only when you decide to enrol.</p>
               <div className="cta-btns">
-                <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
               <div style={{marginTop:18,fontSize:12,color:'rgba(255,255,255,.55)'}}>Most families complete enrolment within 7-10 working days · No long-term contracts</div>
             </div></div>
@@ -7090,7 +7141,7 @@ export default function LandingPage() {
           <section className="sec" style={{background:V.bone}}><div className="wrap">
             <div className="cur-grid">
               {CURRICULA.map((c,i) => (
-                <div key={c.slug} className={`cc${c.gold?' cc-hl':''}`} onClick={() => openCurriculum(c.slug)}
+                <a key={c.slug} className={(`cc${c.gold?' cc-hl':''}`) + ' lp-divlink'} href={'/curricula/' + encodeURIComponent(c.slug)} onClick={linkClick(() => openCurriculum(c.slug))}
                   style={{cursor:'pointer'}}>
                   <div className="cc-top">
                     <div className="cc-bar" style={c.gold?{background:'linear-gradient(90deg,#B8960C,#8B1A2E)'}:{}}/>
@@ -7106,11 +7157,11 @@ export default function LandingPage() {
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                     </div>
                   </div>
-                </div>
+                </a>
               ))}
             </div>
             <div style={{textAlign:'center',marginTop:48}}>
-              <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+              <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
             </div>
           </div></section>
 
@@ -7194,7 +7245,7 @@ export default function LandingPage() {
               <div className="pg-hero"><div className="wrap">
                 <h1 className="pg-h">Curriculum not found</h1>
                 <p className="pg-sub" style={{marginTop:12}}>This curriculum page could not be found.</p>
-                <button className="btn-p" style={{marginTop:24}} onClick={() => P('curricula')}>← All Curricula</button>
+                <a className="btn-p lp-btnlink" style={{marginTop:24}} href={pageToPath('curricula')} onClick={linkClick(() => P('curricula'))}>← All Curricula</a>
               </div></div>
                 </>
           )
@@ -7204,11 +7255,11 @@ export default function LandingPage() {
           <>
             <div className="pg-hero" style={c.gold?{background:V.ink}:{}}>
               <div className="wrap">
-                <button onClick={() => P('curricula')}
+                <a className="lp-btnlink" href={pageToPath('curricula')} onClick={linkClick(() => P('curricula'))}
                   style={{background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.15)',color:'rgba(255,255,255,.85)',padding:'7px 14px',borderRadius:20,fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",marginBottom:22,display:'inline-flex',alignItems:'center',gap:6}}>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                   All Curricula
-                </button>
+                </a>
                 <div className="eyebrow">{c.badge}</div>
                 <h1 className="pg-h">{c.h}</h1>
                 <p className="pg-sub" style={{marginTop:12}}>{d.tagline}</p>
@@ -7268,7 +7319,7 @@ export default function LandingPage() {
 
               {/* CTA */}
               <div style={{textAlign:'center',display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
-                <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
               </div>
             </div></section>
             </>
@@ -7284,7 +7335,7 @@ export default function LandingPage() {
           <section className="sec" style={{background:V.ink}}><div className="wrap">
             <div className="svc-grid">
               {SERVICES.map((s,i) => (
-                <div key={s.slug} className="sc reveal" onClick={() => openService(s.slug)} style={{cursor:'pointer'}}>
+                <a key={s.slug} className="sc reveal lp-divlink" href={'/services/' + encodeURIComponent(s.slug)} onClick={linkClick(() => openService(s.slug))} style={{cursor:'pointer'}}>
                   <div className="sc-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={V.cr} strokeWidth="1.8" strokeLinecap="round" dangerouslySetInnerHTML={{__html:s.svg}}/></div>
                   <div className="sc-h">{s.h}</div>
                   <div className="sc-p">{s.desc}</div>
@@ -7292,12 +7343,12 @@ export default function LandingPage() {
                   <div className="sc-lnk">
                     View full details <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                   </div>
-                </div>
+                </a>
               ))}
             </div>
             <div style={{textAlign:'center',marginTop:48,display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
-              <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-              <button className="btn-o lt" onClick={() => P('pricing')}>Compare Prices</button>
+              <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+              <a className="btn-o lt lp-btnlink" href={pageToPath('pricing')} onClick={linkClick(() => P('pricing'))}>Compare Prices</a>
             </div>
           </div></section>
         </>
@@ -7314,7 +7365,7 @@ export default function LandingPage() {
               <div className="pg-hero" style={{background:V.ink}}><div className="wrap">
                 <h1 className="pg-h">Service not found</h1>
                 <p className="pg-sub" style={{marginTop:12}}>This service page could not be found.</p>
-                <button className="btn-p" style={{marginTop:24}} onClick={() => P('services')}>← All Services</button>
+                <a className="btn-p lp-btnlink" style={{marginTop:24}} href={pageToPath('services')} onClick={linkClick(() => P('services'))}>← All Services</a>
               </div></div>
                 </>
           )
@@ -7324,11 +7375,11 @@ export default function LandingPage() {
           <>
             <div className="pg-hero" style={{background:V.ink}}>
               <div className="wrap">
-                <button onClick={() => P('services')}
+                <a className="lp-btnlink" href={pageToPath('services')} onClick={linkClick(() => P('services'))}
                   style={{background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.15)',color:'rgba(255,255,255,.85)',padding:'7px 14px',borderRadius:20,fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",marginBottom:22,display:'inline-flex',alignItems:'center',gap:6}}>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                   All Services
-                </button>
+                </a>
                 <div style={{width:48,height:48,borderRadius:12,background:'rgba(184,150,12,.15)',display:'flex',alignItems:'center',justifyContent:'center',marginBottom:14}}>
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={V.gold3} strokeWidth="1.8" strokeLinecap="round" dangerouslySetInnerHTML={{__html:s.svg}}/>
                 </div>
@@ -7370,8 +7421,8 @@ export default function LandingPage() {
 
               {/* CTA */}
               <div style={{textAlign:'center',display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
-                <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-                <button className="btn-o" onClick={() => P('pricing')}>View Pricing</button>
+                <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+                <a className="btn-o lp-btnlink" href={pageToPath('pricing')} onClick={linkClick(() => P('pricing'))}>View Pricing</a>
               </div>
             </div></section>
             </>
@@ -8150,7 +8201,7 @@ export default function LandingPage() {
                 ))}
               </div>
               <div style={{display:'flex',gap:10,flexWrap:'wrap',marginTop:24}}>
-                <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
             </div></div>
 
@@ -8431,7 +8482,7 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:680,margin:'24px auto 0',lineHeight:1.7}}>{ctry.pricingTable.note}</p>
                   <div style={{textAlign:'center',marginTop:24}}>
-                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                    <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
                   </div>
                 </div></section>
 
@@ -8626,7 +8677,7 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:680,margin:'24px auto 0',lineHeight:1.7}}>{ctry.uaePricing.note}</p>
                   <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                    <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
                 </div></section>
 
@@ -8969,7 +9020,7 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:680,margin:'24px auto 0',lineHeight:1.7}}>{ctry.ukPricing.note}</p>
                   <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                    <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
                   </div>
                 </div></section>
               </>
@@ -9099,7 +9150,7 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:760,margin:'24px auto 0',lineHeight:1.7}}>{ctry.nigeriaPricing.note}</p>
                   <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                    <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
                 </div></section>
               </>
@@ -9218,7 +9269,7 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:760,margin:'24px auto 0',lineHeight:1.7}}>{ctry.usaPricing.note}</p>
                   <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                    <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
                   </div>
                 </div></section>
               </>
@@ -9394,7 +9445,7 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:760,margin:'24px auto 0',lineHeight:1.7}}>{ctry.canadaPricing.note}</p>
                   <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                    <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
                   </div>
                 </div></section>
               </>
@@ -9572,7 +9623,7 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:760,margin:'24px auto 0',lineHeight:1.7}}>{ctry.australiaPricing.note}</p>
                   <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                    <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
                   </div>
                 </div></section>
               </>
@@ -9702,7 +9753,7 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:760,margin:'24px auto 0',lineHeight:1.7}}>{ctry.bahrainPricing.note}</p>
                   <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                    <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
                 </div></section>
               </>
@@ -9839,10 +9890,10 @@ export default function LandingPage() {
                     ))}
                   </div>
                   <div style={{textAlign:'center',marginTop:24}}>
-                    <button onClick={() => P('activities')}
+                    <a className="lp-btnlink" href={pageToPath('activities')} onClick={linkClick(() => P('activities'))}
                       style={{background:'transparent',color:V.cr,border:'1px solid '+V.cr,padding:'10px 22px',borderRadius:8,fontSize:13,fontWeight:700,cursor:'pointer'}}>
                       See full Wednesday programme
-                    </button>
+                    </a>
                   </div>
                 </div></section>
               </>
@@ -9972,7 +10023,7 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:760,margin:'24px auto 0',lineHeight:1.7}}>{ctry.pakistanPricing.note}</p>
                   <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                    <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
                 </div></section>
               </>
@@ -10129,7 +10180,7 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:760,margin:'24px auto 0',lineHeight:1.7}}>{ctry.saPricing.note}</p>
                   <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                    <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
                 </div></section>
               </>
@@ -10297,7 +10348,7 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:760,margin:'24px auto 0',lineHeight:1.7}}>{ctry.ugandaPricing.note}</p>
                   <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                    <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
                 </div></section>
               </>
@@ -10426,7 +10477,7 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:760,margin:'24px auto 0',lineHeight:1.7}}>{ctry.somaliaPricing.note}</p>
                   <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                    <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
                 </div></section>
               </>
@@ -10594,7 +10645,7 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:760,margin:'24px auto 0',lineHeight:1.7}}>{ctry.tanzaniaPricing.note}</p>
                   <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                    <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
                 </div></section>
               </>
@@ -10610,8 +10661,8 @@ export default function LandingPage() {
                 Speak with our admissions team. We'll guide you through the right curriculum, exam pathway and enrolment process for your family.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                <button onClick={() => nav('/assessment')}
-                  style={{background:V.gold2,color:V.ink,border:'none',padding:'13px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                  style={{background:V.gold2,color:V.ink,border:'none',padding:'13px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
             </div></section>
 
@@ -10648,7 +10699,7 @@ export default function LandingPage() {
               <h1 className="pg-h">Smartious vs <em>{cmp.competitor}</em></h1>
               <p className="pg-sub" style={{marginTop:12}}>{cmp.intro}</p>
               <div style={{display:'flex',gap:10,flexWrap:'wrap',marginTop:24}}>
-                <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
               </div>
             </div></div>
 
@@ -10837,8 +10888,8 @@ export default function LandingPage() {
                 Book an assessment. Our Head of Admissions reviews every request and, on acceptance, the diagnostic assessment determines whether Smartious is the right fit.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                <button onClick={() => nav('/assessment')}
-                  style={{background:V.gold2,color:V.ink,border:'none',padding:'13px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                  style={{background:V.gold2,color:V.ink,border:'none',padding:'13px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
             </div></section>
 
@@ -11076,10 +11127,10 @@ export default function LandingPage() {
                   Tired of recorded-video curricula where your child is essentially alone all day? Worried about how Acellus or BJU Press lessons compare to what students in top-tier private schools are doing? Smartious delivers <strong>Cambridge IGCSE, Pearson Edexcel, A-Level and IB Diploma</strong> programmes — taught live by qualified teachers — to American homeschool families from USD 423 per month.
                 </p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('consult_booked'); nav('/assessment') })}
                     style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',letterSpacing:'.01em'}}>
                     Book a free 30-min consultation
-                  </button>
+                  </a>
                   <a href="#compare"
                     style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.3)',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:700,textDecoration:'none'}}>
                     Compare us with Acellus →
@@ -11317,13 +11368,13 @@ export default function LandingPage() {
                         <span style={{fontSize:13,color: t.popular ? 'rgba(255,255,255,.6)' : V.sl}}>{t.sub}</span>
                       </div>
                       <p style={{fontSize:13,color: t.popular ? 'rgba(255,255,255,.75)' : V.sl, lineHeight:1.6, marginBottom:22}}>{t.desc}</p>
-                      <button onClick={() => { trackConversion('enrol_started'); nav('/assessment') }} style={{
+                      <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('enrol_started'); nav('/assessment') })} style={{
                         width:'100%',padding:'12px 16px',
                         background: t.popular ? V.gold3 : V.cr, color: t.popular ? V.ink : '#fff',
                         border:'none',borderRadius:8,fontWeight:700,fontSize:13,cursor:'pointer',
                       }}>
                         Book assessment →
-                      </button>
+                      </a>
                     </div>
                   ))}
                 </div>
@@ -11335,9 +11386,9 @@ export default function LandingPage() {
                       <div style={{fontWeight:700,color:V.ink,fontSize:13,marginBottom:4}}>Payment methods for US families</div>
                       <div style={{fontSize:12,color:V.sl,lineHeight:1.6}}>Visa &amp; Mastercard via Stripe · ACH bank transfer · PayPal · Wire transfer · Apple Pay · Google Pay · Crypto (USDC/USDT)</div>
                     </div>
-                    <button onClick={() => P('pricing')} style={{background:'transparent',color:V.cr,border:`1.5px solid ${V.cr}`,padding:'10px 20px',borderRadius:8,fontSize:12.5,fontWeight:700,cursor:'pointer',whiteSpace:'nowrap'}}>
+                    <a className="lp-btnlink" href={pageToPath('pricing')} onClick={linkClick(() => P('pricing'))} style={{background:'transparent',color:V.cr,border:`1.5px solid ${V.cr}`,padding:'10px 20px',borderRadius:8,fontSize:12.5,fontWeight:700,cursor:'pointer',whiteSpace:'nowrap'}}>
                       See full fee structure →
-                    </button>
+                    </a>
                   </div>
                 </div>
               </div>
@@ -11466,10 +11517,10 @@ export default function LandingPage() {
                   Book a 30-minute consultation with our admissions team. We'll discuss your child, your goals, and whether Smartious is the right fit. No high-pressure sales. No commitment. Just a conversation.
                 </p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                  <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('consult_booked'); nav('/assessment') })}
                     style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
                     Book assessment
-                  </button>
+                  </a>
 </div>
                 <p style={{fontSize:11.5,color:'rgba(255,255,255,.5)',marginTop:24,lineHeight:1.7}}>
                   Smartious responds to all enquiries within one US business day. WhatsApp messages typically answered within 2-4 hours.
@@ -11509,10 +11560,10 @@ export default function LandingPage() {
                   Tired of recorded-video curricula where your child is essentially alone all day? Worried about how Acellus, Time4Learning, or local board homeschool packages lessons compare to what students in top-tier private schools are doing? Smartious delivers <strong>Cambridge IGCSE, Pearson Edexcel, A-Level and IB Diploma</strong> programmes — taught live by qualified teachers — to Canadian homeschool families from USD 423 per month.
                 </p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('consult_booked'); nav('/assessment') })}
                     style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',letterSpacing:'.01em'}}>
                     Book a free 30-min consultation
-                  </button>
+                  </a>
                   <a href="#compare"
                     style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.3)',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:700,textDecoration:'none'}}>
                     Compare us with Acellus & Canadian options →
@@ -11750,13 +11801,13 @@ export default function LandingPage() {
                         <span style={{fontSize:13,color: t.popular ? 'rgba(255,255,255,.6)' : V.sl}}>{t.sub}</span>
                       </div>
                       <p style={{fontSize:13,color: t.popular ? 'rgba(255,255,255,.75)' : V.sl, lineHeight:1.6, marginBottom:22}}>{t.desc}</p>
-                      <button onClick={() => { trackConversion('enrol_started'); nav('/assessment') }} style={{
+                      <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('enrol_started'); nav('/assessment') })} style={{
                         width:'100%',padding:'12px 16px',
                         background: t.popular ? V.gold3 : V.cr, color: t.popular ? V.ink : '#fff',
                         border:'none',borderRadius:8,fontWeight:700,fontSize:13,cursor:'pointer',
                       }}>
                         Book assessment →
-                      </button>
+                      </a>
                     </div>
                   ))}
                 </div>
@@ -11768,9 +11819,9 @@ export default function LandingPage() {
                       <div style={{fontWeight:700,color:V.ink,fontSize:13,marginBottom:4}}>Payment methods for US families</div>
                       <div style={{fontSize:12,color:V.sl,lineHeight:1.6}}>Visa &amp; Mastercard via Stripe · ACH bank transfer · PayPal · Wire transfer · Apple Pay · Google Pay · Crypto (USDC/USDT)</div>
                     </div>
-                    <button onClick={() => P('pricing')} style={{background:'transparent',color:V.cr,border:`1.5px solid ${V.cr}`,padding:'10px 20px',borderRadius:8,fontSize:12.5,fontWeight:700,cursor:'pointer',whiteSpace:'nowrap'}}>
+                    <a className="lp-btnlink" href={pageToPath('pricing')} onClick={linkClick(() => P('pricing'))} style={{background:'transparent',color:V.cr,border:`1.5px solid ${V.cr}`,padding:'10px 20px',borderRadius:8,fontSize:12.5,fontWeight:700,cursor:'pointer',whiteSpace:'nowrap'}}>
                       See full fee structure →
-                    </button>
+                    </a>
                   </div>
                 </div>
               </div>
@@ -11941,10 +11992,10 @@ export default function LandingPage() {
                   Book a 30-minute consultation with our admissions team. We'll discuss your child, your goals, and whether Smartious is the right fit. No high-pressure sales. No commitment. Just a conversation.
                 </p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                  <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('consult_booked'); nav('/assessment') })}
                     style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
                     Book assessment
-                  </button>
+                  </a>
 </div>
                 <p style={{fontSize:11.5,color:'rgba(255,255,255,.5)',marginTop:24,lineHeight:1.7}}>
                   Smartious responds to all enquiries within one business day. WhatsApp messages typically answered within 2-4 hours.
@@ -11986,10 +12037,10 @@ export default function LandingPage() {
                 {s.pitch}
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:36}}>
-                <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('consult_booked'); nav('/assessment') })}
                   style={{background:s.accentColor,color:V.ink,border:'none',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',letterSpacing:'.01em'}}>
                   Book a free 30-min consultation
-                </button>
+                </a>
                 <a href={`/blog/${s.blogSlug}`}
                   style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.3)',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:700,textDecoration:'none',display:'inline-block'}}>
                   Read the full {s.name} guide →
@@ -12106,13 +12157,13 @@ export default function LandingPage() {
                       <span style={{fontSize:12,color:V.sl}}>{t.sub}</span>
                     </div>
                     <p style={{fontSize:13.5,color:V.sl,lineHeight:1.6,marginBottom:18}}>{t.desc}</p>
-                    <button onClick={() => { trackConversion('enrol_started'); nav('/assessment') }} style={{
+                    <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('enrol_started'); nav('/assessment') })} style={{
                       width:'100%',padding:'12px 16px',
                       background: t.popular ? V.gold3 : V.cr, color: t.popular ? V.ink : '#fff',
                       border:'none',borderRadius:8,fontWeight:700,fontSize:13,cursor:'pointer',
                     }}>
                       Book assessment →
-                    </button>
+                    </a>
                   </div>
                 ))}
               </div>
@@ -12249,10 +12300,10 @@ export default function LandingPage() {
                 Book a free 30-minute consultation. We'll review your child's current level, recommend the right pathway, and answer every {s.name}-specific question.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('consult_booked'); nav('/assessment') })}
                   style={{background:s.accentColor,color:V.ink,border:'none',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
                   Book assessment
-                </button>
+                </a>
 </div>
             </div>
           </section>
@@ -12293,10 +12344,10 @@ export default function LandingPage() {
                 {s.pitch}
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:36}}>
-                <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('consult_booked'); nav('/assessment') })}
                   style={{background:s.accentColor,color:V.ink,border:'none',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',letterSpacing:'.01em'}}>
                   Book a free 30-min consultation
-                </button>
+                </a>
                 <a href={`/blog/${s.blogSlug}`}
                   style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.3)',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:700,textDecoration:'none',display:'inline-block'}}>
                   Read the full {s.name} guide →
@@ -12434,13 +12485,13 @@ export default function LandingPage() {
                       <span style={{fontSize:12,color:V.sl}}>{t.sub}</span>
                     </div>
                     <p style={{fontSize:13.5,color:V.sl,lineHeight:1.6,marginBottom:18}}>{t.desc}</p>
-                    <button onClick={() => { trackConversion('enrol_started'); nav('/assessment') }} style={{
+                    <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('enrol_started'); nav('/assessment') })} style={{
                       width:'100%',padding:'12px 16px',
                       background: t.popular ? V.gold3 : V.cr, color: t.popular ? V.ink : '#fff',
                       border:'none',borderRadius:8,fontWeight:700,fontSize:13,cursor:'pointer',
                     }}>
                       Book assessment →
-                    </button>
+                    </a>
                   </div>
                 ))}
               </div>
@@ -12577,10 +12628,10 @@ export default function LandingPage() {
                 Book a free 30-minute consultation. We'll review your child's current level, recommend the right pathway, and answer every {s.name}-specific question.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('consult_booked'); nav('/assessment') })}
                   style={{background:s.accentColor,color:V.ink,border:'none',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
                   Book assessment
-                </button>
+                </a>
 </div>
             </div>
           </section>
@@ -12631,10 +12682,10 @@ export default function LandingPage() {
                 {c.pitch}
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:36}}>
-                <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('consult_booked'); nav('/assessment') })}
                   style={{background:s.accentColor,color:'#fff',border:'none',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',letterSpacing:'.01em'}}>
                   Book a free 30-min consultation
-                </button>
+                </a>
                 <a href={`/blog/${s.blogSlug}`}
                   style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.3)',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:700,textDecoration:'none',display:'inline-block'}}>
                   Read full {s.name} homeschool guide →
@@ -12716,13 +12767,13 @@ export default function LandingPage() {
                       <span style={{fontSize:12,color:V.sl}}>{t.sub}</span>
                     </div>
                     <p style={{fontSize:13.5,color:V.sl,lineHeight:1.6,marginBottom:18}}>{t.desc}</p>
-                    <button onClick={() => { trackConversion('enrol_started'); nav('/assessment') }} style={{
+                    <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('enrol_started'); nav('/assessment') })} style={{
                       width:'100%',padding:'12px 16px',
                       background: t.popular ? V.gold3 : V.cr, color: t.popular ? V.ink : '#fff',
                       border:'none',borderRadius:8,fontWeight:700,fontSize:13,cursor:'pointer',
                     }}>
                       Book assessment →
-                    </button>
+                    </a>
                   </div>
                 ))}
               </div>
@@ -12808,10 +12859,10 @@ export default function LandingPage() {
                 Book a free 30-minute consultation. We'll review your child's current level, recommend the right pathway, and answer every {c.name}-specific question.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('consult_booked'); nav('/assessment') })}
                   style={{background:s.accentColor,color:'#fff',border:'none',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
                   Book assessment
-                </button>
+                </a>
 </div>
             </div>
           </section>
@@ -12861,7 +12912,7 @@ export default function LandingPage() {
                   Alberta gives every home-educating family roughly $850 CAD per child per year. Curriculum, tutoring, exam fees — all eligible. Smartious live Cambridge IGCSE &amp; A-Level instruction qualifies as eligible curriculum &amp; tutoring under Alberta Education guidelines. Register with a school authority, send us your receipts, get reimbursed.
                 </p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => nav('/assessment')} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Book assessment</button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Book assessment</a>
                 </div>
               </div>
             </div>
@@ -12976,7 +13027,7 @@ export default function LandingPage() {
               <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,40px)',margin:'0 0 14px'}}>Use your $850 CAD allocation on Smartious this year</h2>
               <p style={{color:V.bone3,fontSize:16,lineHeight:1.6,margin:'0 0 24px'}}>15-minute call to confirm your school authority partnership and what your specific funding lets you book. No commitment.</p>
               <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
-                <button onClick={() => nav('/assessment')} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Book assessment</button>
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Book assessment</a>
               </div>
             </div>
           </section>
@@ -13025,7 +13076,7 @@ export default function LandingPage() {
                   BC Distributed Learning (DL) schools provide a $200–$700 CAD/yr resource allocation per student. Smartious isn\'t a BC DL school — but families can register with a flexible DL school and use part of that allocation to offset Smartious live Cambridge tuition. Or skip DL entirely and self-register as a homeschooler with your school district. Here\'s how each path works.
                 </p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => nav('/assessment')} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Book assessment</button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Book assessment</a>
                 </div>
               </div>
             </div>
@@ -13123,7 +13174,7 @@ export default function LandingPage() {
               <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,40px)',margin:'0 0 14px'}}>BC families — find your pathway in one 15-minute call</h2>
               <p style={{color:V.bone3,fontSize:16,lineHeight:1.6,margin:'0 0 24px'}}>We\'ll help you pick between Path A (self-registered) and Path B (DL + Smartious) based on your specific family situation.</p>
               <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
-                <button onClick={() => nav('/assessment')} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Book assessment</button>
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Book assessment</a>
               </div>
             </div>
           </section>
@@ -13172,7 +13223,7 @@ export default function LandingPage() {
                   Saskatchewan delegates homeschool funding to its 28 school divisions. The amount varies — Saskatoon Public, Regina Public, Prairie Spirit, Sun West and others each set their own policy. Some divisions offer $1,500 CAD/yr in flexible curriculum spending. Others provide $500 CAD plus library access. Smartious tuition is reimbursable in divisions that allow outside curriculum providers.
                 </p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => nav('/assessment')} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Book assessment</button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Book assessment</a>
                 </div>
               </div>
             </div>
@@ -13272,7 +13323,7 @@ export default function LandingPage() {
               <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,40px)',margin:'0 0 14px'}}>Get your Saskatchewan division\'s funding answer in one call</h2>
               <p style={{color:V.bone3,fontSize:16,lineHeight:1.6,margin:'0 0 24px'}}>15-minute consult — we\'ll help you call your division\'s homeschool coordinator and walk you through the questions that matter. No commitment.</p>
               <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
-                <button onClick={() => nav('/assessment')} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Book assessment</button>
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Book assessment</a>
               </div>
             </div>
           </section>
@@ -13316,10 +13367,10 @@ export default function LandingPage() {
                 {c.pitch}
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:36}}>
-                <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('consult_booked'); nav('/assessment') })}
                   style={{background:s.accentColor,color:'#fff',border:'none',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',letterSpacing:'.01em'}}>
                   Book a free 30-min consultation
-                </button>
+                </a>
                 <a href={`/blog/${s.blogSlug}`}
                   style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.3)',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:700,textDecoration:'none',display:'inline-block'}}>
                   Read full {s.name} homeschool guide →
@@ -13401,13 +13452,13 @@ export default function LandingPage() {
                       <span style={{fontSize:12,color:V.sl}}>{t.sub}</span>
                     </div>
                     <p style={{fontSize:13.5,color:V.sl,lineHeight:1.6,marginBottom:18}}>{t.desc}</p>
-                    <button onClick={() => { trackConversion('enrol_started'); nav('/assessment') }} style={{
+                    <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('enrol_started'); nav('/assessment') })} style={{
                       width:'100%',padding:'12px 16px',
                       background: t.popular ? V.gold3 : V.cr, color: t.popular ? V.ink : '#fff',
                       border:'none',borderRadius:8,fontWeight:700,fontSize:13,cursor:'pointer',
                     }}>
                       Book assessment →
-                    </button>
+                    </a>
                   </div>
                 ))}
               </div>
@@ -13493,10 +13544,10 @@ export default function LandingPage() {
                 Book a free 30-minute consultation. We'll review your child's current level, recommend the right pathway, and answer every {c.name}-specific question.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('consult_booked'); nav('/assessment') })}
                   style={{background:s.accentColor,color:'#fff',border:'none',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
                   Book assessment
-                </button>
+                </a>
 </div>
             </div>
           </section>
@@ -13524,20 +13575,20 @@ export default function LandingPage() {
                 Kenya-based, Kenya-founded, Kenya-operating. Live small-group classes 4-6 students. Cambridge IGCSE, A-Level, Pearson Edexcel International, IB Diploma, American AP, Ontario OSSD, and Kenya CBC. Two Nairobi centres for in-person supplementation. 2-8&times; cheaper than CHS Online, King's InterHigh, and Crimson Global Academy.
               </p>
               <div style={{display:'flex',gap:14,flexWrap:'wrap',marginBottom:24}}>
-                <button onClick={() => nav('/assessment')}
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
                   style={{background:V.gold3,color:V.ink,border:'none',padding:'18px 36px',borderRadius:10,fontSize:16,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,boxShadow:'0 8px 24px rgba(201,151,58,.35)',transition:'all .18s ease'}}
                   onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(201,151,58,.5)' }}
                   onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(201,151,58,.35)' }}>
                   Book assessment
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
-                <button onClick={() => nav('/consult')}
+                </a>
+                <a className="lp-btnlink" href={'/consult'} onClick={linkClick(() => nav('/consult'))}
                   style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'16px 32px',borderRadius:10,fontSize:16,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,transition:'all .18s ease'}}
                   onMouseEnter={(e) => { e.currentTarget.style.borderColor = V.gold3; e.currentTarget.style.color = V.gold3 }}
                   onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.55)'; e.currentTarget.style.color = '#fff' }}>
                   Book Free Consultation
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
+                </a>
               </div>
               <div style={{fontSize:13,color:'rgba(255,255,255,.7)',letterSpacing:'.02em'}}>
                 Established in 2018 &middot; Over 3,421 students educated &middot; Families in more than 40 countries &middot; Two Nairobi centres (Diamond Plaza Parklands &amp; Karen Hardy) &middot; From USD 423/month personalized
@@ -13793,20 +13844,20 @@ export default function LandingPage() {
                 Book an assessment to get started, or book a free consultation call to discuss your family's specific needs. Response within 24 hours.
               </p>
               <div style={{display:'inline-flex',gap:14,flexWrap:'wrap',justifyContent:'center'}}>
-                <button onClick={() => nav('/assessment')}
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
                   style={{background:V.gold3,color:V.ink,border:'none',padding:'18px 40px',borderRadius:10,fontSize:16,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,boxShadow:'0 10px 28px rgba(201,151,58,.4)',transition:'all .18s ease'}}
                   onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 36px rgba(201,151,58,.55)' }}
                   onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 28px rgba(201,151,58,.4)' }}>
                   Book assessment
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
-                <button onClick={() => nav('/consult')}
+                </a>
+                <a className="lp-btnlink" href={'/consult'} onClick={linkClick(() => nav('/consult'))}
                   style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'16px 36px',borderRadius:10,fontSize:16,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,transition:'all .18s ease'}}
                   onMouseEnter={(e) => { e.currentTarget.style.borderColor = V.gold3; e.currentTarget.style.color = V.gold3 }}
                   onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.55)'; e.currentTarget.style.color = '#fff' }}>
                   Book Free Consultation
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
+                </a>
               </div>
             </div>
           </div></section>
@@ -13832,20 +13883,20 @@ export default function LandingPage() {
                 Live small-group classes for Ukrainian families in-country (Kyiv, Lviv, Kharkiv, Dnipro, Odesa, Ivano-Frankivsk) and diaspora (Poland, Germany, UK, Czech Republic, Canada, USA). Education continuity through displacement. Cambridge, IB, American, and Ontario OSSD curriculum. Pathway to UK Russell Group, US Ivy League, Canadian U15, German uni-assist, and Polish public universities with Ukrainian student scholarships. Discounted rates for refugee and internally displaced families.
               </p>
               <div style={{display:'flex',gap:14,flexWrap:'wrap',marginBottom:24}}>
-                <button onClick={() => nav('/assessment')}
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
                   style={{background:'#FFDD00',color:V.ink,border:'none',padding:'18px 36px',borderRadius:10,fontSize:16,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,boxShadow:'0 8px 24px rgba(255,221,0,.35)',transition:'all .18s ease'}}
                   onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)' }}
                   onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)' }}>
                   Book assessment
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
-                <button onClick={() => nav('/consult')}
+                </a>
+                <a className="lp-btnlink" href={'/consult'} onClick={linkClick(() => nav('/consult'))}
                   style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'16px 32px',borderRadius:10,fontSize:16,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,transition:'all .18s ease'}}
                   onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#FFDD00'; e.currentTarget.style.color = '#FFDD00' }}
                   onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.55)'; e.currentTarget.style.color = '#fff' }}>
                   Book Free Consultation
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
+                </a>
               </div>
               <div style={{fontSize:13,color:'rgba(255,255,255,.7)',letterSpacing:'.02em'}}>
                 Distance learning fully legal &middot; Perfect EET/EAT time zones &middot; Discounted rates for refugee &amp; displaced families &middot; From USD 423/month personalized
@@ -14026,20 +14077,20 @@ export default function LandingPage() {
                 Book a free consultation to discuss your family situation — in-country, refugee, internally displaced, or tech corporate rotational. Personalized quotes reflecting your circumstances. Discounted rates available.
               </p>
               <div style={{display:'inline-flex',gap:14,flexWrap:'wrap',justifyContent:'center'}}>
-                <button onClick={() => nav('/assessment')}
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
                   style={{background:'#FFDD00',color:V.ink,border:'none',padding:'18px 40px',borderRadius:10,fontSize:16,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,boxShadow:'0 10px 28px rgba(255,221,0,.4)',transition:'all .18s ease'}}
                   onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)' }}
                   onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)' }}>
                   Book assessment
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
-                <button onClick={() => nav('/consult')}
+                </a>
+                <a className="lp-btnlink" href={'/consult'} onClick={linkClick(() => nav('/consult'))}
                   style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'16px 36px',borderRadius:10,fontSize:16,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,transition:'all .18s ease'}}
                   onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#FFDD00'; e.currentTarget.style.color = '#FFDD00' }}
                   onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.55)'; e.currentTarget.style.color = '#fff' }}>
                   Book Free Consultation
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
+                </a>
               </div>
             </div>
           </div></section>
@@ -14080,7 +14131,7 @@ export default function LandingPage() {
                 <div className="prog-unis">
                   {['University of Birmingham','Coventry University','University of Manchester','Purdue Global','Northeastern University','Deakin University','Griffith University','RWTH Aachen','Maastricht University','+ 190 more'].map(u => <span key={u} className="prog-uni">{u}</span>)}
                 </div>
-                <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
               </div>
             </div>
 
@@ -14130,7 +14181,7 @@ export default function LandingPage() {
                   ))}
                 </div>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                  <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
               </div>
             </div>
@@ -14225,13 +14276,13 @@ export default function LandingPage() {
                 Qualified subject specialists for <strong style={{color:V.gold3}}>CBC, Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and American curricula</strong>. Home tuition across 20 Nairobi neighbourhoods. Online tuition from USD 15/hour anywhere in the world.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:32}}>
-                <button onClick={() => nav('/assessment')}
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
                   style={{
                     background:V.gold3,color:V.ink,border:'none',
                     padding:'13px 26px',borderRadius:8,
                     fontSize:14,fontWeight:800,letterSpacing:'.02em',
                     cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8,
-                  }}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                  }}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
 
               {/* Quick stats */}
@@ -14450,8 +14501,8 @@ export default function LandingPage() {
               20 minutes with our admissions team to understand your child's needs, match a tutor, and agree a schedule. No payment until you've approved the match.
             </p>
             <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-              <button onClick={() => nav('/assessment')}
-                style={{background:V.gold3,color:V.ink,border:'none',padding:'13px 28px',borderRadius:8,fontSize:14,fontWeight:800,letterSpacing:'.02em',cursor:'pointer'}}>Book assessment</button>
+              <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                style={{background:V.gold3,color:V.ink,border:'none',padding:'13px 28px',borderRadius:8,fontSize:14,fontWeight:800,letterSpacing:'.02em',cursor:'pointer'}}>Book assessment</a>
 </div>
             <div style={{marginTop:30,paddingTop:24,borderTop:'1px solid rgba(255,255,255,.15)',fontSize:12,color:'rgba(255,255,255,.6)',letterSpacing:'.04em'}}>
               Phone: +254 745 021 212 · Email: hello@smartioushomeschool.com · Office: Diamond Plaza, Parklands, Nairobi
@@ -14537,8 +14588,8 @@ export default function LandingPage() {
                   {area.intro}
                 </p>
                 <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
-                  <button onClick={() => nav('/assessment')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
               </div>
             </section>
@@ -14706,8 +14757,8 @@ export default function LandingPage() {
                 Book a free 20-minute consultation. We'll match a tutor to your child's subject, level and schedule — and you only pay once you've approved the match.
               </p>
               <div style={{display:'flex',gap:10,flexWrap:'wrap',justifyContent:'center'}}>
-                <button onClick={() => nav('/assessment')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer'}}>Book assessment</a>
 </div>
             </div></section>
           </>
@@ -14779,8 +14830,8 @@ export default function LandingPage() {
                 Live online 1-on-1 tuition for students across all seven emirates — Dubai, Abu Dhabi, Sharjah, Ajman, Ras Al Khaimah, Fujairah and Al Ain. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel, CBSE and American AP. From <strong style={{color:V.gold3}}>USD 15/hour</strong> (≈ AED 55/hr) — meaningfully below typical UAE tutor rates (AED 150-400/hour).
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                <button onClick={() => nav('/assessment')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8,letterSpacing:'.02em'}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8,letterSpacing:'.02em'}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
             </div>
           </section>
@@ -14966,8 +15017,8 @@ export default function LandingPage() {
                   {area.intro}
                 </p>
                 <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
-                  <button onClick={() => nav('/assessment')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
               </div>
             </section>
@@ -15190,12 +15241,12 @@ export default function LandingPage() {
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
                 <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => nav('/assessment')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-<button onClick={() => P('pricing')}
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+<a className="lp-btnlink" href={pageToPath('pricing')} onClick={linkClick(() => P('pricing'))}
                     style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.4)',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:600,cursor:'pointer'}}>
                     View Pricing ({country.currency})
-                  </button>
+                  </a>
                 </div>
               </div>
             </section>
@@ -15422,7 +15473,7 @@ export default function LandingPage() {
                 <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
                 <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
                 <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:24}}>
-                  <button onClick={() => nav('/assessment')} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
                 </div>
                 <div style={{display:'flex',gap:22,justifyContent:'center',flexWrap:'wrap',fontSize:12,color:'rgba(255,255,255,.55)'}}>
                   <span>[+] Immediate enrolment</span>
@@ -16820,12 +16871,12 @@ export default function LandingPage() {
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
                 <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => nav('/assessment')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-<button onClick={() => P('pricing')}
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+<a className="lp-btnlink" href={pageToPath('pricing')} onClick={linkClick(() => P('pricing'))}
                     style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.4)',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:600,cursor:'pointer'}}>
                     View Pricing ({country.currency})
-                  </button>
+                  </a>
                 </div>
               </div>
             </section>
@@ -17052,7 +17103,7 @@ export default function LandingPage() {
                 <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
                 <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
                 <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:24}}>
-                  <button onClick={() => nav('/assessment')} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
                 </div>
                 <div style={{display:'flex',gap:22,justifyContent:'center',flexWrap:'wrap',fontSize:12,color:'rgba(255,255,255,.55)'}}>
                   <span>[+] Immediate enrolment</span>
@@ -17130,12 +17181,12 @@ export default function LandingPage() {
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
                 <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => nav('/assessment')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-<button onClick={() => P('pricing')}
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+<a className="lp-btnlink" href={pageToPath('pricing')} onClick={linkClick(() => P('pricing'))}
                     style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.4)',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:600,cursor:'pointer'}}>
                     View Pricing ({country.currency})
-                  </button>
+                  </a>
                 </div>
               </div>
             </section>
@@ -17362,7 +17413,7 @@ export default function LandingPage() {
                 <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
                 <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
                 <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:24}}>
-                  <button onClick={() => nav('/assessment')} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
                 </div>
                 <div style={{display:'flex',gap:22,justifyContent:'center',flexWrap:'wrap',fontSize:12,color:'rgba(255,255,255,.55)'}}>
                   <span>[+] Immediate enrolment</span>
@@ -17440,12 +17491,12 @@ export default function LandingPage() {
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
                 <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => nav('/assessment')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-<button onClick={() => P('pricing')}
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+<a className="lp-btnlink" href={pageToPath('pricing')} onClick={linkClick(() => P('pricing'))}
                     style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.4)',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:600,cursor:'pointer'}}>
                     View Pricing ({country.currency})
-                  </button>
+                  </a>
                 </div>
               </div>
             </section>
@@ -17672,7 +17723,7 @@ export default function LandingPage() {
                 <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
                 <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
                 <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:24}}>
-                  <button onClick={() => nav('/assessment')} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
                 </div>
                 <div style={{display:'flex',gap:22,justifyContent:'center',flexWrap:'wrap',fontSize:12,color:'rgba(255,255,255,.55)'}}>
                   <span>[+] Immediate enrolment</span>
@@ -17750,12 +17801,12 @@ export default function LandingPage() {
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
                 <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => nav('/assessment')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-<button onClick={() => P('pricing')}
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+<a className="lp-btnlink" href={pageToPath('pricing')} onClick={linkClick(() => P('pricing'))}
                     style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.4)',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:600,cursor:'pointer'}}>
                     View Pricing ({country.currency})
-                  </button>
+                  </a>
                 </div>
               </div>
             </section>
@@ -17982,7 +18033,7 @@ export default function LandingPage() {
                 <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
                 <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
                 <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:24}}>
-                  <button onClick={() => nav('/assessment')} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
                 </div>
                 <div style={{display:'flex',gap:22,justifyContent:'center',flexWrap:'wrap',fontSize:12,color:'rgba(255,255,255,.55)'}}>
                   <span>[+] Immediate enrolment</span>
@@ -18060,12 +18111,12 @@ export default function LandingPage() {
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
                 <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => nav('/assessment')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-<button onClick={() => P('pricing')}
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+<a className="lp-btnlink" href={pageToPath('pricing')} onClick={linkClick(() => P('pricing'))}
                     style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.4)',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:600,cursor:'pointer'}}>
                     View Pricing ({country.currency})
-                  </button>
+                  </a>
                 </div>
               </div>
             </section>
@@ -18292,7 +18343,7 @@ export default function LandingPage() {
                 <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
                 <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
                 <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:24}}>
-                  <button onClick={() => nav('/assessment')} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
                 </div>
                 <div style={{display:'flex',gap:22,justifyContent:'center',flexWrap:'wrap',fontSize:12,color:'rgba(255,255,255,.55)'}}>
                   <span>[+] Immediate enrolment</span>
@@ -18369,12 +18420,12 @@ export default function LandingPage() {
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
                 <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => nav('/assessment')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-<button onClick={() => P('pricing')}
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+<a className="lp-btnlink" href={pageToPath('pricing')} onClick={linkClick(() => P('pricing'))}
                     style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.4)',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:600,cursor:'pointer'}}>
                     View Pricing ({country.currency})
-                  </button>
+                  </a>
                 </div>
               </div>
             </section>
@@ -18606,7 +18657,7 @@ export default function LandingPage() {
                 <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
                 <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
                 <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:24}}>
-                  <button onClick={() => nav('/assessment')} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
                 </div>
                 <div style={{display:'flex',gap:22,justifyContent:'center',flexWrap:'wrap',fontSize:12,color:'rgba(255,255,255,.55)'}}>
                   <span>[+] Immediate enrolment</span>
@@ -18678,8 +18729,8 @@ export default function LandingPage() {
                   {city.intro}
                 </p>
                 <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
-                  <button onClick={() => nav('/assessment')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
               </div>
             </section>
@@ -18893,8 +18944,8 @@ export default function LandingPage() {
                   The enrolment process takes most {city.name} families 7-10 working days from first enquiry to LMS access. Book an assessment — our Head of Admissions will review your request and respond within three business days.
                 </p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                  <button onClick={() => nav('/assessment')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</a>
                 </div>
               </div>
             </div></section>
@@ -18931,8 +18982,8 @@ export default function LandingPage() {
                 Live 1-on-1 preparation for the world's most important standardised tests. IELTS, TOEFL, PTE for English proficiency. GRE, GMAT, SAT for graduate and undergraduate admissions. Delivered online by qualified specialists, with mock tests, detailed feedback and a clear path to your target score.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                <button onClick={() => nav('/assessment')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
             </div>
           </section>
@@ -18949,8 +19000,8 @@ export default function LandingPage() {
               </p>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
                 {TEST_PREP.filter(t => t.tier === 'English Proficiency').map(test => (
-                  <div key={test.slug}
-                    onClick={() => { setCurrentTestPrep(test.slug); nav('/test-prep/' + test.slug); window.scrollTo(0,0) }}
+                  <a className="lp-divlink" key={test.slug}
+                    href={'/test-prep/' + test.slug} onClick={linkClick(() => { setCurrentTestPrep(test.slug); nav('/test-prep/' + test.slug); window.scrollTo(0,0) })}
                     style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',cursor:'pointer',transition:'all .2s'}}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
@@ -18965,7 +19016,7 @@ export default function LandingPage() {
                     <div style={{fontSize:12,fontWeight:700,color:V.cr,display:'inline-flex',alignItems:'center',gap:5}}>
                       View {test.code} prep →
                     </div>
-                  </div>
+                  </a>
                 ))}
               </div>
             </div>
@@ -18983,8 +19034,8 @@ export default function LandingPage() {
               </p>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
                 {TEST_PREP.filter(t => t.tier !== 'English Proficiency').map(test => (
-                  <div key={test.slug}
-                    onClick={() => { setCurrentTestPrep(test.slug); nav('/test-prep/' + test.slug); window.scrollTo(0,0) }}
+                  <a className="lp-divlink" key={test.slug}
+                    href={'/test-prep/' + test.slug} onClick={linkClick(() => { setCurrentTestPrep(test.slug); nav('/test-prep/' + test.slug); window.scrollTo(0,0) })}
                     style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',cursor:'pointer',transition:'all .2s'}}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
@@ -18999,7 +19050,7 @@ export default function LandingPage() {
                     <div style={{fontSize:12,fontWeight:700,color:V.cr,display:'inline-flex',alignItems:'center',gap:5}}>
                       View {test.code} prep →
                     </div>
-                  </div>
+                  </a>
                 ))}
               </div>
             </div>
@@ -19077,8 +19128,8 @@ export default function LandingPage() {
                   </div>
                 </div>
                 <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
-                  <button onClick={() => nav('/assessment')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
               </div>
             </section>
@@ -19236,8 +19287,8 @@ export default function LandingPage() {
                   {test.fee} · {test.sessions} live sessions · {test.duration}. Most students see meaningful improvement within the first 4 sessions.
                 </p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                  <button onClick={() => nav('/assessment')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</a>
 </div>
               </div>
             </div></section>
@@ -19275,8 +19326,8 @@ export default function LandingPage() {
                 One-on-one foreign language tuition with qualified specialists. 8 languages, CEFR A1 through C2, plus examination preparation for DELF, DELE, Goethe-Zertifikat, HSK, CILS and more. From KSh 1,500/hour.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                <button onClick={() => nav('/assessment')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</a>
 </div>
             </div>
           </section>
@@ -19292,8 +19343,8 @@ export default function LandingPage() {
               </div>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:14}}>
                 {LANGUAGES.map(lang => (
-                  <div key={lang.slug}
-                    onClick={() => { setCurrentLanguage(lang.slug); nav('/languages/' + lang.slug); window.scrollTo(0,0) }}
+                  <a className="lp-divlink" key={lang.slug}
+                    href={'/languages/' + lang.slug} onClick={linkClick(() => { setCurrentLanguage(lang.slug); nav('/languages/' + lang.slug); window.scrollTo(0,0) })}
                     style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',cursor:'pointer',transition:'all .2s'}}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
@@ -19310,7 +19361,7 @@ export default function LandingPage() {
                     <div style={{fontSize:12,fontWeight:700,color:V.cr,display:'inline-flex',alignItems:'center',gap:5}}>
                       Learn {lang.name} →
                     </div>
-                  </div>
+                  </a>
                 ))}
               </div>
             </div>
@@ -19356,8 +19407,8 @@ export default function LandingPage() {
                 Start your <em style={{color:V.gold3,fontStyle:'italic'}}>language journey</em>
               </h2>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',marginTop:22}}>
-                <button onClick={() => nav('/assessment')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</a>
 </div>
             </div>
           </div></section>
@@ -19429,8 +19480,8 @@ export default function LandingPage() {
                   </div>
                 </div>
                 <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
-                  <button onClick={() => nav('/assessment')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer'}}>Book assessment</a>
 </div>
               </div>
             </section>
@@ -19572,8 +19623,8 @@ export default function LandingPage() {
                   Start learning <em style={{color:V.gold3,fontStyle:'italic'}}>{lang.name}</em> today
                 </h2>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',marginTop:22}}>
-                  <button onClick={() => nav('/assessment')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</a>
 </div>
               </div>
             </div></section>
@@ -19614,8 +19665,8 @@ export default function LandingPage() {
                 Full curriculum delivery for K-12 students across 5 curricula and 40+ countries. Live 1-on-1 lessons with qualified teachers, structured progress tracking and university-pathway planning — built for families serious about their child's academic future.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                <button onClick={() => nav('/assessment')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
             </div>
           </section>
@@ -19637,8 +19688,8 @@ export default function LandingPage() {
                   { code:'US', name:'American Curriculum', desc:'Elementary through high school. SAT/AP integration.', flag:'🇺🇸' },
                   { code:'CBC', name:'Kenya CBC', desc:'Grade 1-12. Aligned with KICD and KCSE pathways.', flag:'🇰🇪' },
                 ].map(c => (
-                  <div key={c.code}
-                    onClick={() => P('curricula')}
+                  <a className="lp-divlink" key={c.code}
+                    href={pageToPath('curricula')} onClick={linkClick(() => P('curricula'))}
                     style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'18px 20px',cursor:'pointer',transition:'all .2s'}}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)' }}>
@@ -19646,7 +19697,7 @@ export default function LandingPage() {
                     <div style={{fontSize:10.5,fontWeight:700,color:V.gold3,letterSpacing:'.14em',marginBottom:4}}>{c.code}</div>
                     <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{c.name}</h3>
                     <div style={{fontSize:11.5,color:V.sl,lineHeight:1.55}}>{c.desc}</div>
-                  </div>
+                  </a>
                 ))}
               </div>
             </div>
@@ -19751,24 +19802,24 @@ export default function LandingPage() {
                 </h2>
               </div>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
-                <div
-                  onClick={() => P('homeschooling-kenya')}
+                <a className="lp-divlink"
+                  href={pageToPath('homeschooling-kenya')} onClick={linkClick(() => P('homeschooling-kenya'))}
                   style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',cursor:'pointer',transition:'all .2s'}}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
                   <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>Kenya cities (6)</h3>
                   <p style={{fontSize:12.5,color:V.sl,lineHeight:1.6,marginBottom:14}}>City-specific homeschool pages: Mombasa, Kisumu, Nakuru, Eldoret, Thika, Kiambu — each with KCSE alignment and Cambridge curriculum pathways.</p>
                   <div style={{fontSize:12,fontWeight:700,color:V.cr}}>View Kenya cities homeschool →</div>
-                </div>
-                <div
-                  onClick={() => P('home')}
+                </a>
+                <a className="lp-divlink"
+                  href={pageToPath('home')} onClick={linkClick(() => P('home'))}
                   style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',cursor:'pointer',transition:'all .2s'}}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
                   <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>All countries overview</h3>
                   <p style={{fontSize:12.5,color:V.sl,lineHeight:1.6,marginBottom:14}}>Comprehensive global view across all 16 destination guides — useful for diaspora families wanting to compare contexts and pathways.</p>
                   <div style={{fontSize:12,fontWeight:700,color:V.cr}}>View all countries →</div>
-                </div>
+                </a>
               </div>
             </div>
           </div></section>
@@ -19847,8 +19898,8 @@ export default function LandingPage() {
                 Start your child's <em style={{color:V.gold3,fontStyle:'italic'}}>Smartious</em> journey
               </h2>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',marginTop:22}}>
-                <button onClick={() => nav('/assessment')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</a>
 </div>
             </div>
           </div></section>
@@ -19899,20 +19950,20 @@ export default function LandingPage() {
                 Live online and in-person private tuition for UK families across London (Kensington, Chelsea, Notting Hill, Hampstead, Wimbledon, Dulwich), Manchester (Didsbury, Altrincham, Salford), Birmingham (Edgbaston, Solihull, Harborne), Leeds (Roundhay, Alwoodley), Bristol (Clifton, Redland), and Edinburgh (Morningside, New Town). Cambridge IGCSE, A-Level, IB Diploma, 11+ and 13+ Common Entrance preparation.
               </p>
               <div style={{display:'flex',gap:14,flexWrap:'wrap'}}>
-                <button onClick={() => nav('/assessment')}
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
                   style={{background:V.gold3,color:V.ink,border:'none',padding:'18px 34px',borderRadius:10,fontSize:15,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,boxShadow:'0 8px 24px rgba(201,151,58,.35)',transition:'all .18s ease'}}
                   onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(201,151,58,.5)' }}
                   onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(201,151,58,.35)' }}>
                   Book assessment
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
-                <button onClick={() => nav('/consult')}
+                </a>
+                <a className="lp-btnlink" href={'/consult'} onClick={linkClick(() => nav('/consult'))}
                   style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'16px 30px',borderRadius:10,fontSize:15,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,transition:'all .18s ease'}}
                   onMouseEnter={(e) => { e.currentTarget.style.borderColor = V.gold3; e.currentTarget.style.color = V.gold3; e.currentTarget.style.transform = 'translateY(-2px)' }}
                   onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.55)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'translateY(0)' }}>
                   Book Free Consultation
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
+                </a>
               </div>
             </div>
           </section>
@@ -19976,20 +20027,20 @@ export default function LandingPage() {
             <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.6rem,3vw,2rem)',fontWeight:700,color:'#fff',marginBottom:16}}>Book an assessment for your child</h2>
             <p style={{fontSize:15,color:'rgba(255,255,255,.85)',marginBottom:24,lineHeight:1.65}}>Two-gate admissions process. Submit the assessment request form — our Head of Admissions reviews every request within three business days. If accepted, the assessment fee is invoiced before the diagnostic is scheduled.</p>
             <div style={{display:'inline-flex',gap:14,flexWrap:'wrap',justifyContent:'center'}}>
-              <button onClick={() => nav('/assessment')}
+              <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
                 style={{background:V.gold3,color:V.ink,border:'none',padding:'18px 36px',borderRadius:10,fontSize:16,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,boxShadow:'0 10px 28px rgba(201,151,58,.4)',transition:'all .18s ease'}}
                 onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 36px rgba(201,151,58,.55)' }}
                 onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 28px rgba(201,151,58,.4)' }}>
                 Book assessment
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-              </button>
-              <button onClick={() => nav('/consult')}
+              </a>
+              <a className="lp-btnlink" href={'/consult'} onClick={linkClick(() => nav('/consult'))}
                 style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'16px 32px',borderRadius:10,fontSize:16,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,transition:'all .18s ease'}}
                 onMouseEnter={(e) => { e.currentTarget.style.borderColor = V.gold3; e.currentTarget.style.color = V.gold3; e.currentTarget.style.transform = 'translateY(-2px)' }}
                 onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.55)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'translateY(0)' }}>
                 Book Free Consultation
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-              </button>
+              </a>
             </div>
           </div></section>
         </>
@@ -20072,20 +20123,20 @@ export default function LandingPage() {
                   {area.intro}
                 </p>
                 <div style={{display:'flex',gap:14,flexWrap:'wrap'}}>
-                  <button onClick={() => nav('/assessment')}
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
                     style={{background:V.gold3,color:V.ink,border:'none',padding:'18px 34px',borderRadius:10,fontSize:15,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,boxShadow:'0 8px 24px rgba(201,151,58,.35)',transition:'all .18s ease'}}
                     onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(201,151,58,.5)' }}
                     onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(201,151,58,.35)' }}>
                     Book assessment
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </button>
-                  <button onClick={() => nav('/consult')}
+                  </a>
+                  <a className="lp-btnlink" href={'/consult'} onClick={linkClick(() => nav('/consult'))}
                     style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'16px 30px',borderRadius:10,fontSize:15,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,transition:'all .18s ease'}}
                     onMouseEnter={(e) => { e.currentTarget.style.borderColor = V.gold3; e.currentTarget.style.color = V.gold3; e.currentTarget.style.transform = 'translateY(-2px)' }}
                     onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.55)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'translateY(0)' }}>
                     Book Free Consultation
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </button>
+                  </a>
                 </div>
               </div>
             </section>
@@ -20199,20 +20250,20 @@ export default function LandingPage() {
               <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.6rem,3vw,2rem)',fontWeight:700,color:'#fff',marginBottom:16}}>Book an assessment for your child in {area.name}</h2>
               <p style={{fontSize:15,color:'rgba(255,255,255,.85)',marginBottom:24,lineHeight:1.65}}>Two-gate admissions process. Submit the assessment request form — our Head of Admissions reviews every request within three business days.</p>
               <div style={{display:'inline-flex',gap:14,flexWrap:'wrap',justifyContent:'center'}}>
-                <button onClick={() => nav('/assessment')}
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
                   style={{background:V.gold3,color:V.ink,border:'none',padding:'18px 34px',borderRadius:10,fontSize:15,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,boxShadow:'0 10px 28px rgba(201,151,58,.4)',transition:'all .18s ease'}}
                   onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 36px rgba(201,151,58,.55)' }}
                   onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 28px rgba(201,151,58,.4)' }}>
                   Book assessment
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
-                <button onClick={() => nav('/consult')}
+                </a>
+                <a className="lp-btnlink" href={'/consult'} onClick={linkClick(() => nav('/consult'))}
                   style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'16px 30px',borderRadius:10,fontSize:15,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,transition:'all .18s ease'}}
                   onMouseEnter={(e) => { e.currentTarget.style.borderColor = V.gold3; e.currentTarget.style.color = V.gold3; e.currentTarget.style.transform = 'translateY(-2px)' }}
                   onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.55)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'translateY(0)' }}>
                   Book Free Consultation
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
+                </a>
               </div>
             </div></section>
           </>
@@ -20250,8 +20301,8 @@ export default function LandingPage() {
                 Specialist subject tuition delivered by qualified teachers. Mathematics, Sciences, English, Foreign Languages, IGCSE, A-Level, IB and exam preparation. Online live, in-centre at our Nairobi locations, or home tutoring across 21 Nairobi areas and 27 UAE areas.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                <button onClick={() => nav('/assessment')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
             </div>
           </section>
@@ -20326,15 +20377,15 @@ export default function LandingPage() {
                   { h:'UAE (27 areas)', d:'Downtown Dubai, Business Bay, JBR, Palm Jumeirah, Abu Dhabi, Sharjah, Al Ain and more', id:'tuition-uae', cta:'View UAE tuition →' },
                   { h:'Online — 40+ countries', d:'Live 1-on-1 sessions to any timezone. UK, USA, Canada, Qatar, South Africa, Nigeria and more', id:'home', cta:'View all countries →' },
                 ].map(r => (
-                  <div key={r.h}
-                    onClick={() => P(r.id)}
+                  <a className="lp-divlink" key={r.h}
+                    href={pageToPath(r.id)} onClick={linkClick(() => P(r.id))}
                     style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',cursor:'pointer',transition:'all .2s'}}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
                     <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{r.h}</h3>
                     <p style={{fontSize:12.5,color:V.sl,lineHeight:1.6,marginBottom:14}}>{r.d}</p>
                     <div style={{fontSize:12,fontWeight:700,color:V.cr}}>{r.cta}</div>
-                  </div>
+                  </a>
                 ))}
               </div>
             </div>
@@ -20385,8 +20436,8 @@ export default function LandingPage() {
                 Find the right <em style={{color:V.gold3,fontStyle:'italic'}}>tutor</em> for your child
               </h2>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',marginTop:22}}>
-                <button onClick={() => nav('/assessment')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</a>
 </div>
             </div>
           </div></section>
@@ -20422,8 +20473,8 @@ export default function LandingPage() {
                 A one-year academic foundation programme designed to prepare Kenyan and African secondary school graduates for direct entry to top universities in the UK, Australia, Canada and the US. IUFP bridges the gap between KCSE/national qualifications and international university entry requirements.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                <button onClick={() => nav('/assessment')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</a>
 </div>
             </div>
           </section>
@@ -20542,8 +20593,8 @@ export default function LandingPage() {
                 Start your <em style={{color:V.gold3,fontStyle:'italic'}}>IUFP</em> pathway
               </h2>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',marginTop:22}}>
-                <button onClick={() => nav('/assessment')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</a>
 </div>
             </div>
           </div></section>
@@ -20578,8 +20629,8 @@ export default function LandingPage() {
                 A structured gap-year academic programme for students who have completed secondary school and want focused preparation before starting university. Subject-specific intensive coursework, university entrance examination preparation and academic skills development.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                <button onClick={() => nav('/assessment')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</a>
 </div>
             </div>
           </section>
@@ -20696,8 +20747,8 @@ export default function LandingPage() {
                 Build your <em style={{color:V.gold3,fontStyle:'italic'}}>pre-university</em> pathway
               </h2>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',marginTop:22}}>
-                <button onClick={() => nav('/assessment')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</a>
 </div>
             </div>
           </div></section>
@@ -20745,8 +20796,8 @@ export default function LandingPage() {
                   <div style={{fontSize:13,fontWeight:700,color:'#fff'}}>100% free for students · No consultation fees · No application processing fees</div>
                 </div>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => nav('/assessment')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
               </div>
             </div>
@@ -20793,8 +20844,8 @@ export default function LandingPage() {
               </div>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:14}}>
                 {STUDY_ABROAD.map(dest => (
-                  <div key={dest.slug}
-                    onClick={() => { setCurrentStudyAbroad(dest.slug); nav('/study-abroad/' + dest.slug); window.scrollTo(0,0) }}
+                  <a className="lp-divlink" key={dest.slug}
+                    href={'/study-abroad/' + dest.slug} onClick={linkClick(() => { setCurrentStudyAbroad(dest.slug); nav('/study-abroad/' + dest.slug); window.scrollTo(0,0) })}
                     style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',cursor:'pointer',transition:'all .2s'}}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.08)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
@@ -20812,7 +20863,7 @@ export default function LandingPage() {
                     <div style={{fontSize:12,fontWeight:700,color:V.cr,display:'inline-flex',alignItems:'center',gap:5}}>
                       Explore {dest.name} →
                     </div>
-                  </div>
+                  </a>
                 ))}
               </div>
             </div>
@@ -20932,8 +20983,8 @@ export default function LandingPage() {
                 Book an assessment and we'll map out your most realistic path to your top university destinations.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                <button onClick={() => nav('/assessment')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</a>
 </div>
             </div>
           </div></section>
@@ -20997,8 +21048,8 @@ export default function LandingPage() {
                   <div style={{fontSize:13,fontWeight:700,color:'#fff'}}>Smartious Study in {dest.name} — 100% free for students</div>
                 </div>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => nav('/assessment')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
               </div>
             </section>
@@ -21212,8 +21263,8 @@ export default function LandingPage() {
                   Book an assessment and we'll build a personalised application strategy for {dest.fullName}.
                 </p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                  <button onClick={() => nav('/assessment')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</a>
 </div>
               </div>
             </div></section>
@@ -21314,10 +21365,10 @@ export default function LandingPage() {
                 Follow announcements on WhatsApp or browse the blog for event recaps and academic insights.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                <button onClick={() => P('blog')}
+                <a className="lp-btnlink" href={pageToPath('blog')} onClick={linkClick(() => P('blog'))}
                   style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 28px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer'}}>
                   View blog
-                </button>
+                </a>
 </div>
             </div>
           </div></section>
@@ -21341,7 +21392,7 @@ export default function LandingPage() {
                 School <em style={{color:V.gold3,fontStyle:'italic'}}>calendar</em>
               </h1>
               <p style={{fontSize:16,color:'rgba(255,255,255,.92)',lineHeight:1.7,maxWidth:720}}>
-                Term dates, examination periods, holidays and key academic milestones for the 2025-2026 academic year.
+                Term dates, examination periods, holidays and key academic milestones for the 2026–27 academic year.
               </p>
             </div>
           </section>
@@ -21350,21 +21401,20 @@ export default function LandingPage() {
           <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:48}}><div className="wrap">
             <div style={{maxWidth:1000,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:32}}>
-                <div className="eyebrow" style={{justifyContent:'center'}}>2025-2026 academic year</div>
+                <div className="eyebrow" style={{justifyContent:'center'}}>2026–27 academic year</div>
                 <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                   Three <em style={{color:V.cr,fontStyle:'italic'}}>terms</em>, three breaks
                 </h2>
               </div>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
                 {[
-                  { term:'Term 1', dates:'25 August 2025 — 5 December 2025', weeks:'15 weeks', halfTerm:'Half-term: 9 - 21 October 2025', focus:'Onboarding, curriculum foundation, mid-term checkpoints, end-of-term assessments. Exeat weekend 12-14 September.' },
-                  { term:'Term 2', dates:'5 January 2026 — 27 March 2026', weeks:'12 weeks', halfTerm:'Half-term: 13 - 22 February 2026', focus:'Deep curriculum delivery, mock examinations, university application support (Year 12-13).' },
-                  { term:'Term 3', dates:'21 April 2026 — 3 July 2026', weeks:'10 weeks', halfTerm:'Half-term: 22 May - 2 June 2026', focus:'Cambridge & Edexcel examinations (May-June), revision, year-end celebrations, prize-giving.' },
+                  { term:'Term 1', dates:'From 25 August 2026 — ends December 2026', halfTerm:'Half-term: October 2026', focus:'Onboarding, curriculum foundation, mid-term checkpoints, end-of-term assessments.' },
+                  { term:'Term 2', dates:'From 5 January 2027 — ends March 2027', halfTerm:'Half-term: February 2027', focus:'January 2027 intake. Deep curriculum delivery, mock examinations, university application support (Year 12-13).' },
+                  { term:'Term 3', dates:'From 13 April 2027 — ends July 2027', halfTerm:'Half-term: May 2027', focus:'Cambridge & Edexcel examinations (May-June), revision, year-end celebrations, prize-giving.' },
                 ].map(t => (
                   <div key={t.term} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px'}}>
                     <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',color:V.cr,marginBottom:6,fontWeight:400}}>{t.term}</div>
                     <div style={{fontSize:13.5,color:V.ink,fontWeight:700,marginBottom:6}}>{t.dates}</div>
-                    <div style={{fontSize:11.5,color:V.gold3,fontWeight:700,letterSpacing:'.06em',marginBottom:8}}>{t.weeks}</div>
                     <div style={{fontSize:11.5,color:V.sl2,fontWeight:600,marginBottom:10,padding:'4px 8px',background:'rgba(201,151,58,.08)',borderRadius:6,display:'inline-block'}}>{t.halfTerm}</div>
                     <p style={{fontSize:12.5,color:V.sl,lineHeight:1.65,margin:0}}>{t.focus}</p>
                   </div>
@@ -21384,9 +21434,9 @@ export default function LandingPage() {
               </div>
               <div style={{display:'flex',flexDirection:'column',gap:10}}>
                 {[
-                  { break_:'Christmas Break', dates:'6 December 2025 — 4 January 2026', notes:'4-week break. Term 1 reports issued. Pre-term communications for Term 2 sent late December.' },
-                  { break_:'Easter Break', dates:'28 March 2026 — 20 April 2026', notes:'3-week break. Mock examination results discussed. Final UCAS confirmation deadline approaches.' },
-                  { break_:'Summer Break', dates:'4 July 2026 — 24 August 2026', notes:'7-week break. KCSE preparation programmes optional. New academic year preparation begins.' },
+                  { break_:'Christmas Break', dates:'December 2026 — January 2027', notes:'Term 1 reports issued. Pre-term communications for Term 2 sent in December. Term 2 starts 5 January 2027.' },
+                  { break_:'Easter Break', dates:'March — April 2027', notes:'Mock examination results discussed. Term 3 starts 13 April 2027.' },
+                  { break_:'Summer Break', dates:'July — August 2027', notes:'KCSE preparation programmes optional. New academic year preparation begins.' },
                 ].map(b => (
                   <div key={b.break_} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'14px 18px'}}>
                     <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:12,flexWrap:'wrap',marginBottom:6}}>
@@ -21400,37 +21450,13 @@ export default function LandingPage() {
             </div>
           </div></section>
 
-          {/* NEXT ACADEMIC YEAR PREVIEW */}
-          <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:48}}><div className="wrap">
-            <div style={{maxWidth:1000,margin:'0 auto'}}>
-              <div style={{textAlign:'center',marginBottom:32}}>
-                <div className="eyebrow" style={{justifyContent:'center'}}>Looking ahead</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
-                  <em style={{color:V.cr,fontStyle:'italic'}}>2026-2027</em> academic year preview
-                </h2>
-                <p style={{fontSize:13,color:V.sl,maxWidth:680,margin:'14px auto 0',lineHeight:1.7}}>
-                  Preliminary term dates for the next academic year. Subject to minor adjustments — final calendar published in May 2026.
-                </p>
-              </div>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:12}}>
-                {[
-                  { term:'Term 1', dates:'25 August 2026 — 4 December 2026', halfTerm:'Half-term: 12 - 16 October 2026', note:'INSET week 17-21 August (teacher training)' },
-                  { term:'Term 2', dates:'5 January 2027 — 25 March 2027', halfTerm:'Half-term: 15 - 19 February 2027', note:'Mock examination period' },
-                  { term:'Term 3', dates:'13 April 2027 — Early July 2027', halfTerm:'Half-term: Late May 2027', note:'External examinations (provisional)' },
-                ].map(t => (
-                  <div key={t.term} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'16px 18px'}}>
-                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',color:V.cr,marginBottom:6,fontWeight:400}}>{t.term}</div>
-                    <div style={{fontSize:13,color:V.ink,fontWeight:700,marginBottom:6}}>{t.dates}</div>
-                    <div style={{fontSize:11.5,color:V.sl2,fontWeight:600,marginBottom:8,padding:'4px 8px',background:'rgba(201,151,58,.08)',borderRadius:6,display:'inline-block'}}>{t.halfTerm}</div>
-                    <p style={{fontSize:11.5,color:V.sl,lineHeight:1.6,margin:0,fontStyle:'italic'}}>{t.note}</p>
-                  </div>
-                ))}
-              </div>
-              <div style={{marginTop:18,padding:'14px 18px',background:V.bone2,border:`1px solid ${V.bone3}`,borderRadius:10,textAlign:'center'}}>
-                <p style={{fontSize:12.5,color:V.sl,lineHeight:1.7,margin:0}}>
-                  <strong style={{color:V.ink}}>Calendar alignment:</strong> Our academic calendar aligns with major Nairobi international schools so families with children in different schools can plan family time and travel together.
-                </p>
-              </div>
+          {/* JANUARY 2027 INTAKE */}
+          <IntakeCta nav={nav}/>
+          <section className="sec" style={{background:V.white,paddingTop:32,paddingBottom:8}}><div className="wrap">
+            <div style={{maxWidth:900,margin:'0 auto',padding:'14px 18px',background:V.bone2,border:`1px solid ${V.bone3}`,borderRadius:10,textAlign:'center'}}>
+              <p style={{fontSize:12.5,color:V.sl,lineHeight:1.7,margin:0}}>
+                <strong style={{color:V.ink}}>Calendar alignment:</strong> Our academic calendar aligns with major Nairobi international schools so families with children in different schools can plan family time and travel together.
+              </p>
             </div>
           </div></section>
 
@@ -21457,11 +21483,11 @@ export default function LandingPage() {
                   </thead>
                   <tbody>
                     {[
-                      ['Cambridge IGCSE (Main series)', 'May - June 2026', 'August 2026'],
-                      ['Cambridge A-Level (Main series)', 'May - June 2026', 'August 2026'],
-                      ['Pearson Edexcel IGCSE', 'May - June 2026', 'August 2026'],
-                      ['IB Diploma Examinations', 'May 2026', 'July 2026'],
-                      ['SAT International', 'Mar, May, June, Aug 2026', '2-4 weeks after test'],
+                      ['Cambridge IGCSE (Main series)', 'May - June 2027', 'August 2027'],
+                      ['Cambridge A-Level (Main series)', 'May - June 2027', 'August 2027'],
+                      ['Pearson Edexcel IGCSE', 'May - June 2027', 'August 2027'],
+                      ['IB Diploma Examinations', 'May 2027', 'July 2027'],
+                      ['SAT International', 'Several dates a year', '2-4 weeks after test'],
                       ['IELTS / TOEFL', 'Monthly (multiple dates)', '5-13 days after test'],
                       ['KCSE (Form 4 candidates)', 'October - November 2026', 'January 2027'],
                     ].map(([e, p, r], i) => (
@@ -22984,13 +23010,13 @@ export default function LandingPage() {
               Sports. Music. Code. Leadership. Friendship. Every Wednesday, 2–4 PM, your child is somewhere they want to be — building skills no exam paper can measure.
             </p>
             <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-              <button onClick={() => nav('/assessment')}
+              <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
                 style={{
                   background:V.gold2, color:V.ink, border:'none',
                   padding:'13px 28px', borderRadius:8,
                   fontSize:14, fontWeight:800, cursor:'pointer',
                   display:'inline-flex', alignItems:'center', gap:8,
-                }}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                }}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
 
             <div style={{marginTop:32,paddingTop:24,borderTop:'1px solid rgba(255,255,255,.15)',fontSize:12,color:'rgba(255,255,255,.6)',letterSpacing:'.04em'}}>
@@ -23128,8 +23154,8 @@ export default function LandingPage() {
                     display:'flex',gap:10,flexWrap:'wrap',
                     marginTop:22,paddingTop:20,borderTop:'1px solid '+V.line,
                   }}>
-                    <button
-                      onClick={() => { setOpenActivity(null); nav('/assessment') }}
+                    <a className="lp-btnlink"
+                      href={'/assessment'} onClick={linkClick(() => { setOpenActivity(null); nav('/assessment') })}
                       style={{
                         padding:'11px 22px',borderRadius:8,
                         background:openActivity.c,color:'#fff',border:'none',
@@ -23138,7 +23164,7 @@ export default function LandingPage() {
                       }}>
                       Book assessment
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </button>
+                    </a>
 <button
                       onClick={() => setOpenActivity(null)}
                       style={{
@@ -23242,7 +23268,7 @@ export default function LandingPage() {
               )
             })()}
             <div style={{textAlign:'center',marginTop:48}}>
-              <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+              <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
             </div>
           </div></section>
           <GuideCrossLinks guideSlug="homeschooling-uk-2026-guide" guideName="Homeschooling in the UK: The Complete 2026 Guide" hubHref="/online-school/united-kingdom" hubName="Smartious in the United Kingdom"/>
@@ -23278,7 +23304,7 @@ export default function LandingPage() {
             <div style={{textAlign:'center',marginTop:44}}>
               <p style={{fontSize:15,color:V.sl,marginBottom:18}}>Still have questions? We answer within 2 hours.</p>
               <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
-<button className="btn-o" onClick={() => nav('/assessment')}>Book assessment</button>
+<a className="btn-o lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment</a>
               </div>
             </div>
           </div></section>
@@ -23419,7 +23445,7 @@ export default function LandingPage() {
                 <div className="eyebrow">Article Not Found</div>
                 <h1 className="pg-h">That article <em>isn't available</em></h1>
                 <p className="pg-sub" style={{marginTop:12}}>The article you're looking for may have been moved. Browse all our articles below.</p>
-                <button className="btn-p" style={{marginTop:24}} onClick={() => P('blog')}>← Back to Blog</button>
+                <a className="btn-p lp-btnlink" style={{marginTop:24}} href={pageToPath('blog')} onClick={linkClick(() => P('blog'))}>← Back to Blog</a>
               </div></div>
                 </>
           )
@@ -23445,12 +23471,12 @@ export default function LandingPage() {
               {/* Gold accent bar at the very top */}
               <div style={{position:'absolute',top:0,left:0,right:0,height:3,background:`linear-gradient(90deg,transparent 0%,${V.gold3} 50%,transparent 100%)`,zIndex:3}}/>
               <div style={{maxWidth:860,margin:'0 auto',position:'relative',zIndex:2}}>
-                <button onClick={() => P('blog')} style={{background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.15)',color:'rgba(255,255,255,.85)',padding:'7px 14px',borderRadius:20,fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",marginBottom:22,display:'inline-flex',alignItems:'center',gap:6,transition:'all .2s',backdropFilter:'blur(8px)',WebkitBackdropFilter:'blur(8px)'}}
+                <a className="lp-btnlink" href={pageToPath('blog')} onClick={linkClick(() => P('blog'))} style={{background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.15)',color:'rgba(255,255,255,.85)',padding:'7px 14px',borderRadius:20,fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",marginBottom:22,display:'inline-flex',alignItems:'center',gap:6,transition:'all .2s',backdropFilter:'blur(8px)',WebkitBackdropFilter:'blur(8px)'}}
                   onMouseEnter={e=>{e.currentTarget.style.background='rgba(255,255,255,.14)';e.currentTarget.style.borderColor='rgba(255,255,255,.28)'}}
                   onMouseLeave={e=>{e.currentTarget.style.background='rgba(255,255,255,.08)';e.currentTarget.style.borderColor='rgba(255,255,255,.15)'}}>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                   Back to Blog
-                </button>
+                </a>
                 <div style={{display:'inline-block',padding:'4px 12px',background:'rgba(201,151,58,.15)',border:'1px solid rgba(201,151,58,.3)',color:V.gold3,fontSize:10.5,fontWeight:700,letterSpacing:'.1em',borderRadius:20,marginBottom:18,textTransform:'uppercase',backdropFilter:'blur(8px)',WebkitBackdropFilter:'blur(8px)'}}>
                   {a.cat === 'study-abroad' ? 'Study Abroad' : a.cat}
                 </div>
@@ -23617,7 +23643,7 @@ export default function LandingPage() {
                       <a className="btn-o" href={prod.links[0].href} onClick={e => { e.preventDefault(); nav(prod.links[0].href) }}
                         style={{color:V.white,borderColor:'rgba(255,255,255,.3)',textDecoration:'none'}}>{prod.links[0].label} →</a>
                     )}
-                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                    <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
                   </div>
                 </div>
 
@@ -23698,6 +23724,7 @@ export default function LandingPage() {
             <h1 className="pg-h">Apply to <em>Smartious</em></h1>
             <p className="pg-sub" style={{marginTop:12}}>Select your curriculum and year level. Pay the application fee online. Our admissions team responds within 1 working day with the next steps.</p>
           </div></div>
+          <IntakeCta nav={nav} compact/>
 
           {/* STEP 1 — CURRICULUM PICKER */}
           <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
@@ -24010,7 +24037,10 @@ export default function LandingPage() {
           invoices the assessment fee separately if the request is accepted.
           AssessmentForm is fully self-contained (own header, no Footer needed). */}
       {page === 'assessment' && (
-        <AssessmentForm nav={nav}/>
+        <>
+          <IntakeCta nav={nav} compact/>
+          <AssessmentForm nav={nav}/>
+        </>
       )}
 
       {/* ══ CONTACT PAGE ══ */}
@@ -24074,24 +24104,24 @@ export default function LandingPage() {
             <input className="login-inp" type="email" placeholder="your@email.com"/>
             <label className="login-fl">Password</label>
             <input className="login-inp" type="password" placeholder="••••••••"/>
-            <button className="login-btn" onClick={goPortal}>
+            <a className="login-btn lp-btnlink" href={'/login'} onClick={linkClick(goPortal)}>
               <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
               Sign In to Portal
-            </button>
+            </a>
             <div style={{display:'flex',alignItems:'center',gap:12,margin:'20px 0'}}>
               <div style={{flex:1,height:1,background:'rgba(255,255,255,.07)'}}/>
               <span style={{fontSize:12,color:'rgba(247,243,237,.2)',whiteSpace:'nowrap'}}>Or use demo access</span>
               <div style={{flex:1,height:1,background:'rgba(255,255,255,.07)'}}/>
             </div>
-            <button style={{width:'100%',padding:12,background:'rgba(255,255,255,.06)',border:'1px solid rgba(255,255,255,.1)',borderRadius:8,color:V.white,fontWeight:700,fontSize:13.5,cursor:'pointer',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",display:'flex',alignItems:'center',justifyContent:'center',gap:8}} onClick={goPortal}>
+            <a className="lp-btnlink" style={{width:'100%',padding:12,background:'rgba(255,255,255,.06)',border:'1px solid rgba(255,255,255,.1)',borderRadius:8,color:V.white,fontWeight:700,fontSize:13.5,cursor:'pointer',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",display:'flex',alignItems:'center',justifyContent:'center',gap:8}} href={'/login'} onClick={linkClick(goPortal)}>
               <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
               Go to Full Login Page
-            </button>
+            </a>
           </div>
 
           {/* Quick demo card — Demo only */}
           <div style={{display:'flex',justifyContent:'center',marginTop:8}}>
-            <div className="lpf" style={{cursor:'pointer',minWidth:200,textAlign:'center'}} onClick={goPortal}>
+            <a className="lpf lp-divlink" style={{cursor:'pointer',minWidth:200,textAlign:'center'}} href={'/login'} onClick={linkClick(goPortal)}>
               <div style={{display:'flex',justifyContent:'center',marginBottom:8}}>
                 <div style={{width:40,height:40,borderRadius:10,background:'rgba(139,26,46,.3)',border:'1px solid rgba(139,26,46,.5)',display:'flex',alignItems:'center',justifyContent:'center'}}>
                   <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke={V.cr} strokeWidth="2" strokeLinecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
@@ -24100,7 +24130,7 @@ export default function LandingPage() {
               <div style={{fontWeight:700,fontSize:14,color:V.white,marginBottom:4}}>Try Demo</div>
               <div className="lpf-l">demo@smartious.ac.ke</div>
               <div className="lpf-s">One-click access · No sign up needed</div>
-            </div>
+            </a>
           </div>
         </div>
       )}
@@ -24160,30 +24190,30 @@ export default function LandingPage() {
                 </span>
                 Chat on WhatsApp
               </a>
-              <button className="fab-opt" onClick={() => { setFabOpen(false); nav('/assessment') }}>
+              <a className="fab-opt lp-btnlink" href={'/assessment'} onClick={linkClick(() => { setFabOpen(false); nav('/assessment') })}>
                 <span className="fab-opt-ic">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                 </span>
                 Start enrollment application
-              </button>
-              <button className="fab-opt" onClick={() => { setFabOpen(false); nav('/assessment') }}>
+              </a>
+              <a className="fab-opt lp-btnlink" href={'/assessment'} onClick={linkClick(() => { setFabOpen(false); nav('/assessment') })}>
                 <span className="fab-opt-ic">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                 </span>
                 Book an assessment
-              </button>
-              <button className="fab-opt" onClick={() => { setFabOpen(false); P('pricing') }}>
+              </a>
+              <a className="fab-opt lp-btnlink" href={pageToPath('pricing')} onClick={linkClick(() => { setFabOpen(false); P('pricing') })}>
                 <span className="fab-opt-ic">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                 </span>
                 View pricing & plans
-              </button>
-              <button className="fab-opt" onClick={() => { setFabOpen(false); P('curricula') }}>
+              </a>
+              <a className="fab-opt lp-btnlink" href={pageToPath('curricula')} onClick={linkClick(() => { setFabOpen(false); P('curricula') })}>
                 <span className="fab-opt-ic">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
                 </span>
                 Explore curricula
-              </button>
+              </a>
 <a
                 className="fab-opt"
                 href="mailto:hello@smartioushomeschool.com?subject=Smartious%20Enquiry"
@@ -24586,7 +24616,10 @@ function Footer({ P }) {
   const { siteConfig: cfg } = useStore()
   const footerNav = useNavigate()
   // Real hrefs so search engines can follow the footer; clicks stay in the SPA.
-  const go = (path, run) => ({ href: path, onClick: e => { e.preventDefault(); run() } })
+  const go = (path, run) => ({ href: path, onClick: e => {
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+    e.preventDefault(); run(); window.scrollTo(0, 0)
+  } })
   return (
     <footer>
       <div className="wrap">
@@ -24597,7 +24630,7 @@ function Footer({ P }) {
           </div>
           <div>
             <div className="ft-ch">Programmes</div>
-            <ul className="ft-lk">{['IGCSE','Cambridge A-Level','IB Diploma','CBC / KCSE','British Curriculum','American Curriculum','Smartious Blended'].map(l => <li key={l}><a {...go('/curricula', () => P('curricula'))}>{l}</a></li>)}</ul>
+            <ul className="ft-lk">{[['igcse','Cambridge IGCSE'],['a-level','Cambridge A-Level'],['ib-diploma','IB Diploma'],['ib-pyp-myp','IB PYP & MYP'],['edexcel','Pearson Edexcel'],['british-national-curriculum','British Curriculum'],['american-curriculum','American Curriculum'],['cbc-kcse','CBC / KCSE'],['smartious-blended','Smartious Blended']].map(([slug, l]) => <li key={slug}><a {...go('/curricula/' + slug, () => footerNav('/curricula/' + slug))}>{l}</a></li>)}</ul>
           </div>
           <div>
             <div className="ft-ch">Services</div>
@@ -24608,7 +24641,7 @@ function Footer({ P }) {
           <div>
             <div className="ft-ch">Online School</div>
             <ul className="ft-lk">
-              {[['kenya','Kenya'],['uae','UAE & Dubai'],['united-kingdom','United Kingdom'],['usa','USA'],['canada','Canada'],['nigeria','Nigeria'],['south-africa','South Africa'],['saudi-arabia','Saudi Arabia'],['qatar','Qatar'],['australia','Australia']].map(([slug, l]) => (
+              {[['kenya','Kenya'],['uae','UAE & Dubai'],['united-kingdom','United Kingdom'],['usa','USA'],['canada','Canada'],['nigeria','Nigeria'],['south-africa','South Africa'],['saudi-arabia','Saudi Arabia'],['qatar','Qatar'],['kuwait','Kuwait'],['bahrain','Bahrain'],['australia','Australia']].map(([slug, l]) => (
                 <li key={slug}><a {...go('/online-school/' + slug, () => footerNav('/online-school/' + slug))}>{l}</a></li>
               ))}
             </ul>
@@ -24630,7 +24663,7 @@ function Footer({ P }) {
               </a>
 <div style={{display:'flex',alignItems:'center',gap:7}}>
                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                Diamond Plaza Parklands and Karen, Nairobi, Kenya
+                Diamond Plaza I Annex, 3rd Floor, Office 20, Parklands, Nairobi · Karen centre
               </div>
             </div>
           </div>
