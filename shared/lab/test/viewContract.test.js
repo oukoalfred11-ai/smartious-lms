@@ -41,5 +41,5 @@ test('osmosis view has what the UI reads', () => {
 })
 
 test('notebook sections match the report sections', () => {
-  assert.deepEqual(NOTEBOOK_SECTIONS, ['aim', 'hypothesis', 'variables', 'apparatus', 'procedure', 'observations', 'analysis', 'evaluation', 'conclusion'])
+  assert.deepEqual(NOTEBOOK_SECTIONS, ['aim', 'hypothesis', 'variables', 'risk', 'apparatus', 'procedure', 'observations', 'analysis', 'evaluation', 'conclusion'])
 })

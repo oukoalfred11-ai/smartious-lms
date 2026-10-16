@@ -7,7 +7,7 @@
 // aggregateRating/review JSON-LD on our own Organization pages: Google
 // treats that as self-serving review markup and does not award stars for it.
 
-export const GOOGLE_RATING = { stars: 4.9, count: 123 }
+export const GOOGLE_RATING = { stars: 4.9, count: 130 }
 
 export const GOOGLE_PROFILE_URL = 'https://share.google/wsClmqRDYfpMGNJyK'
 export const GOOGLE_REVIEWS_URL = 'https://search.google.com/local/reviews?placeid=ChIJM59xkrsXLxgRNJot8ptZ1l8'

@@ -1079,7 +1079,7 @@ const PAGES = ['home','about','curricula','curriculum-detail','services','servic
 // ─────────────────────────────────────────────────────────────────
 // Google Business Profile reviews — Smartious Homeschool & Tuition
 // Diamond Plaza, Fourth Parklands Ave, Nairobi
-// 4.9★ from 123+ verified reviews
+// 4.9★ from 130+ verified reviews
 // ─────────────────────────────────────────────────────────────────
 // Data lives in data/googleReviews.js (shared with CountryHub and city pages).
 const SMARTIOUS_REVIEWS = GOOGLE_REVIEWS

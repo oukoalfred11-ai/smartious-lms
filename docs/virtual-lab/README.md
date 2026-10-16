@@ -12,7 +12,7 @@ It uses the LMS login, roles and student records. There is no second account sys
 | Ohm's law (physics) | Implemented: free wiring, short-circuit trip, meter resistances, V–I graph |
 | Osmosis in potato tissue (biology) | Implemented as a **simplified** model, labelled as such |
 | 3D bench (Three.js) with 2D fallback, low-graphics mode | Implemented; **not yet run in a browser** (see Verification) |
-| Notebook (9 sections), raw-data tables, graph, questions | Implemented |
+| A-to-Z practical flow: plan, bench, student-built results table, hand-drawn graphs, working, conclusion, formal report | Implemented |
 | Autosave, offline copy on the device, conflict detection, idempotent submit | Implemented |
 | Automatic rubric checks re-run on the server, teacher rubric marking, return for correction | Implemented |
 | Teacher dashboard: assign to own students, deadlines, progress, review, CSV class report | Implemented |
@@ -23,6 +23,22 @@ It uses the LMS login, roles and student records. There is no second account sys
 | Stockroom: students collect the apparatus for each practical (with distractors) | Implemented; 96 apparatus items, each with a procedural 3D model (`scene/apparatus3d.js`) |
 | Bulk publishing (publish a whole collection in one step) | Implemented, with each experiment checked first |
 | Further curricula and subjects, microscopy, editing experiments from the admin screen | Not implemented |
+
+## A-to-Z practical (student's own data handling)
+
+Every experiment runs as seven steps, in the order of a school practical:
+
+1. **Plan**: aim, hypothesis, variables, risk assessment, apparatus and method (plus planning questions where the practical has them).
+2. **Experiment**: the 3D/2D bench. Readings the student records here form the *bench record*.
+3. **Results table**: the student draws up their own table. Headings are quantity / unit; readings are typed (or copied from the bench record, measured columns only); calculated columns use a spreadsheet-style formula (`A/B`, `1/A`, `mean(B,C,D)`, `lg(A)`) with a chosen precision.
+4. **Graph**: scatter, line or bar chart from the student's table, with their own axes, labels and scales on graph paper, optional error bars, and a line of best fit, worst acceptable line or tangent **dragged by hand** (mouse, touch or arrow keys). A gradient triangle reads Δy/Δx from the line; best − worst gives the uncertainty. The computer's least-squares line is only a check, shown on request, and the report and teacher see that it was used.
+5. **Analysis**: working set out line by line (`gradient`, `worst_gradient`, `intercept`… from the graph; named results reused in later lines; templates for % uncertainty and % difference), plus the result questions.
+6. **Conclusion** and evaluation.
+7. **Report and submit**: a formal lab report (sections 1 to 11, Table 1, Figures) that prints or saves as PDF from the browser; the server PDF has the same content.
+
+The **lab coach** checks what an examiner would: headings and units, consistent decimal places, significant figures of calculated values, enough rows, labelled axes, scales using more than half the grid, points inside the scale, a balanced line of best fit, a large triangle, a worst line, and units on results. It is formative and never changes marks.
+
+Code: `shared/lab/analysis.js` (formula parser, table, lines, checks, input cleaning; tested in `test/analysis.test.js`), `frontend/src/lab/analysis/*` (ResultsTable, GraphCanvas, GraphStudio, Working, Coach, Report), `frontend/src/lab/Workspace.jsx` (steps). Saved as `analysis` on the session (`applySave` cleans it); bench tables mark their calculated columns with `derived` so copying leaves those to the student.
 
 ## Hands-on bench
 

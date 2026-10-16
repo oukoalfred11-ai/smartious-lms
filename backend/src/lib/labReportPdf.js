@@ -2,9 +2,11 @@
  * lib/labReportPdf.js — printable Virtual Lab report.
  *
  * Built from the session's action log (replayed with the shared engine), so
- * the tables and graph are exactly what the student recorded. Includes the
- * notebook, answers, marks and teacher feedback, and states clearly that the
- * data are simulated by an educational model.
+ * the bench record is exactly what the student recorded. Laid out as a
+ * formal lab report: plan, the student's own results table, graphs (with
+ * their hand-drawn lines and gradient triangle) and working, answers,
+ * conclusion, evaluation, marks and teacher feedback. States clearly that
+ * the data are simulated by an educational model.
  */
 const PDFDocument = require('pdfkit')
 const fs = require('fs')
@@ -14,8 +16,7 @@ const LOGO = path.join(__dirname, '..', 'assets', 'logo.jpg')
 const CRIMSON = '#7D1025', INK = '#1A1A1A', GREY = '#6B6B6B', LIGHT = '#E8E2D6', BONE = '#FDFAF4'
 const M = 46, PW = 595.28, W = PW - 2 * M
 
-const SECTIONS = [['aim', 'Aim'], ['hypothesis', 'Hypothesis'], ['variables', 'Variables'], ['apparatus', 'Apparatus and materials'],
-  ['procedure', 'Procedure'], ['observations', 'Observations'], ['analysis', 'Analysis'], ['evaluation', 'Evaluation and limitations'], ['conclusion', 'Conclusion']]
+const PLAN = [['aim', 'Aim'], ['hypothesis', 'Hypothesis'], ['variables', 'Variables'], ['risk', 'Risk assessment'], ['apparatus', 'Apparatus and materials'], ['procedure', 'Method']]
 const STATUS = { in_progress: 'In progress', submitted: 'Submitted, awaiting marking', returned: 'Returned for correction', marked: 'Marked' }
 const fmtD = (d) => (d ? new Date(d).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—')
 
@@ -93,6 +94,57 @@ function graph(doc, g) {
   doc.x = M; doc.y = y0 + gh + 42
 }
 
+// The student's own graph: graph paper, their scales, crosses, their lines and triangle.
+function studentGraph(doc, A, analysis, g, caption) {
+  const pts = A.graphPoints(analysis, g)
+  if (!pts.length) return
+  const cols = analysis.table.columns
+  const xc = cols.find(c => c.id === g.x), yc = cols.find(c => c.id === g.y)
+  if (!xc || !yc) return
+  const ax = A.axesOf(g, pts)
+  const gh = 230
+  if (doc.y + gh + 70 > 790) doc.addPage()
+  const x0 = M + 48, y0 = doc.y + 8, gw = W - 70
+  const X = (x) => x0 + ((x - ax.xmin) / (ax.xmax - ax.xmin)) * gw
+  const Y = (y) => y0 + gh - ((y - ax.ymin) / (ax.ymax - ax.ymin)) * gh
+  const ticks = (lo, hi, st) => { const o = []; for (let v = Math.ceil(lo / st - 1e-9) * st; v <= hi + 1e-9; v += st) o.push(v); return o }
+  doc.save()
+  doc.rect(x0, y0, gw, gh).fill('#FFFEFA')
+  if (g.type !== 'bar') ticks(ax.xmin, ax.xmax, ax.xstep / 5).forEach(v => doc.moveTo(X(v), y0).lineTo(X(v), y0 + gh).lineWidth(0.25).strokeColor('#F1DFC9').stroke())
+  ticks(ax.ymin, ax.ymax, ax.ystep / 5).forEach(v => doc.moveTo(x0, Y(v)).lineTo(x0 + gw, Y(v)).lineWidth(0.25).strokeColor('#F1DFC9').stroke())
+  const lab = (v, st) => (Math.abs(v) < st * 1e-6 ? '0' : String(Number(v.toPrecision(6))))
+  doc.font('Body').fontSize(7.5).fillColor(GREY)
+  if (g.type !== 'bar') ticks(ax.xmin, ax.xmax, ax.xstep).forEach(v => { doc.moveTo(X(v), y0).lineTo(X(v), y0 + gh).lineWidth(0.5).strokeColor('#E2BE96').stroke(); doc.text(lab(v, ax.xstep), X(v) - 20, y0 + gh + 3, { width: 40, align: 'center', lineBreak: false }) })
+  ticks(ax.ymin, ax.ymax, ax.ystep).forEach(v => { doc.moveTo(x0, Y(v)).lineTo(x0 + gw, Y(v)).lineWidth(0.5).strokeColor('#E2BE96').stroke(); doc.text(lab(v, ax.ystep), x0 - 46, Y(v) - 3.5, { width: 42, align: 'right', lineBreak: false }) })
+  doc.rect(x0, y0, gw, gh).lineWidth(0.7).strokeColor('#6B6B6B').stroke()
+  doc.rect(x0, y0, gw, gh).clip()
+  if (g.type === 'bar') {
+    const bw = gw / pts.length, base = Y(Math.max(ax.ymin, Math.min(ax.ymax, 0)))
+    pts.forEach((p, i) => doc.rect(x0 + i * bw + bw * 0.18, Math.min(Y(p.y), base), bw * 0.64, Math.abs(Y(p.y) - base)).fillAndStroke('#C9A5AD', CRIMSON))
+  } else {
+    if (g.type === 'line') { const s = pts.slice().sort((a, b) => a.x - b.x); s.forEach((p, i) => (i ? doc.lineTo(X(p.x), Y(p.y)) : doc.moveTo(X(p.x), Y(p.y)))); doc.lineWidth(1).strokeColor(CRIMSON).stroke() }
+    for (const p of pts) {
+      if (p.e) doc.moveTo(X(p.x), Y(p.y - p.e)).lineTo(X(p.x), Y(p.y + p.e)).lineWidth(0.6).strokeColor('#333').stroke()
+      doc.moveTo(X(p.x) - 3, Y(p.y) - 3).lineTo(X(p.x) + 3, Y(p.y) + 3).moveTo(X(p.x) - 3, Y(p.y) + 3).lineTo(X(p.x) + 3, Y(p.y) - 3).lineWidth(1).strokeColor(INK).stroke()
+    }
+    const colour = { best: CRIMSON, worst: '#1D4C9A', tangent: '#1E7B34' }
+    if (g.type === 'scatter') for (const l of g.lines || []) {
+      doc.moveTo(X(l.x1), Y(l.y1)).lineTo(X(l.x2), Y(l.y2)).lineWidth(1.3).strokeColor(colour[l.role])
+      if (l.role === 'worst') doc.dash(5, { space: 3 })
+      doc.stroke().undash()
+    }
+    const r = A.graphResults(g)
+    if (r.triangle) doc.moveTo(X(r.triangle.xa), Y(r.triangle.ya)).lineTo(X(r.triangle.xb), Y(r.triangle.ya)).lineTo(X(r.triangle.xb), Y(r.triangle.yb)).lineWidth(0.7).strokeColor('#333').dash(3, { space: 2 }).stroke().undash()
+  }
+  doc.restore()
+  if (g.type === 'bar') { const bw = gw / pts.length; doc.font('Body').fontSize(7.5).fillColor(GREY); pts.forEach((p, i) => doc.text(p.cat.slice(0, 16), x0 + i * bw, y0 + gh + 3, { width: bw, align: 'center', lineBreak: false })) }
+  const xl = String(g.xLabel || '').trim() || A.headingOf(xc), yl = String(g.yLabel || '').trim() || A.headingOf(yc)
+  doc.font('Bold').fontSize(8.5).fillColor(INK).text(xl, x0, y0 + gh + 15, { width: gw, align: 'center' })
+  doc.save().rotate(-90, { origin: [M + 2, y0 + gh / 2] }).text(yl, M - 68, y0 + gh / 2 - 4, { width: 140, align: 'center' }).restore()
+  doc.font('Body').fontSize(8).fillColor(GREY).text(caption, M, y0 + gh + 30, { width: W, align: 'center' })
+  doc.x = M; doc.y = y0 + gh + 30 + doc.heightOfString(caption, { width: W }) + 6
+}
+
 async function buildLabReportPdf({ lab, def, session }) {
   const params = lab.engine.paramsFor(def, session.seed, session.options)
   const state = lab.engine.replay(def, params, session.actions || [])
@@ -118,25 +170,66 @@ async function buildLabReportPdf({ lab, def, session }) {
       'All measurements in this report were produced by a computer simulation, not by real laboratory apparatus.', M + 8, doc.y + 8, { width: W - 16 })
     doc.y += 14
 
-    for (const [k, label] of SECTIONS) {
+    const A = lab.analysis
+    const an = session.analysis && A ? A.cleanAnalysis(session.analysis) : null
+    const sig = (v, n = 3) => (v == null || !Number.isFinite(v) ? '—' : String(Number(v.toPrecision(n))))
+    const ans = (q) => { const a = answers[q.id]; return q.type === 'choice' && a != null && a !== '' ? (q.options[Number(a)] || a) : a }
+    let n = 0
+    const H = (t) => heading(doc, `${++n}. ${t}`)
+
+    for (const [k, label] of PLAN) {
       const fallback = k === 'aim' ? def.notebook.aim : k === 'variables' ? def.notebook.variables : k === 'apparatus' ? def.apparatus.map(a => lab.apparatus?.apparatusName ? lab.apparatus.apparatusName(a) : a.replace(/_/g, ' ')).join(', ') : k === 'procedure' ? def.procedure.map((p, i) => `${i + 1}. ${p}`).join('\n') : ''
-      if (k === 'observations') {
-        heading(doc, 'Raw data')
-        for (const t of def.dataTables(params, state)) { doc.font('Bold').fontSize(9.5).fillColor(INK).text(t.title, M, doc.y); doc.moveDown(0.2); table(doc, t); doc.moveDown(0.4) }
-        const g = def.graph(params, state)
-        if (g?.points?.length) { heading(doc, 'Graph: ' + g.title); graph(doc, g) }
-      }
-      heading(doc, label)
+      H(label)
       para(doc, nb[k] || fallback)
     }
+    const planQs = def.questions.filter(q => /^plan_/.test(q.id))
+    if (planQs.length) { H('Plan'); for (const q of planQs) { doc.font('Bold').fontSize(9.5).fillColor(INK).text(q.prompt.replace(/^Plan:\s*/, ''), M, doc.y, { width: W }); para(doc, ans(q) || '—'); doc.moveDown(0.3) } }
 
-    heading(doc, 'Calculations and answers')
-    for (const q of def.questions) {
-      doc.font('Bold').fontSize(9.5).fillColor(INK).text(q.prompt, M, doc.y, { width: W })
-      const a = answers[q.id]
-      const shown = q.type === 'choice' && a != null && a !== '' ? (q.options[Number(a)] || a) : a
-      para(doc, shown ? shown + (q.unit && q.type === 'numeric' ? ' ' + q.unit : '') : '—')
+    H('Results')
+    const t = an ? A.computeTable(an.table) : null
+    if (t && t.columns.length) {
+      table(doc, { columns: t.columns.map(c => A.headingOf(c) || '—'), rows: t.cells.map(r => r.map(c => c.text || '')) })
+      const calc = t.columns.filter(c => c.kind === 'calc')
+      if (calc.length) { doc.moveDown(0.2); para(doc, 'Calculated columns: ' + calc.map(c => `${c.name || '?'} = ${c.formula}`).join('; '), { fontSize: 8.5 }) }
+    } else para(doc, 'The student did not draw up a results table; the bench record follows.')
+    if (nb.observations) { doc.moveDown(0.3); doc.font('Bold').fontSize(9.5).fillColor(INK).text('Observations', M, doc.y); para(doc, nb.observations) }
+    doc.moveDown(0.4)
+    doc.font('Bold').fontSize(9.5).fillColor(GREY).text('Bench record (what the instruments showed)', M, doc.y); doc.moveDown(0.2)
+    for (const bt of def.dataTables(params, state)) { doc.font('Bold').fontSize(9).fillColor(INK).text(bt.title, M, doc.y); doc.moveDown(0.2); table(doc, bt); doc.moveDown(0.4) }
+
+    H('Graphs')
+    if (an && an.graphs.length) {
+      an.graphs.forEach((g, i) => {
+        const r = A.graphResults(g, A.graphPoints(an, g))
+        const cap = `Figure ${i + 1}. ${g.title || 'Graph'}` + (r.best ? `. Line of best fit: gradient ${sig(r.best.gradient)}, y-intercept ${sig(r.best.intercept)}` : '') + (r.worst ? `; worst acceptable line: gradient ${sig(r.worst.gradient)}` : '') + (r.triangle ? `; triangle Δy/Δx = ${sig(r.triangle.dy)} / ${sig(r.triangle.dx)}` : '') + (g.showComputer ? '. The computer’s least-squares line was shown to the student as a check' : '') + '.'
+        if (doc.y > 520) doc.addPage()
+        studentGraph(doc, A, an, g, cap)
+      })
+    } else {
+      para(doc, 'The student did not plot a graph.')
+      const g = def.graph(params, state)
+      if (g?.points?.length) { doc.moveDown(0.3); doc.font('Bold').fontSize(9).fillColor(GREY).text('Computer plot of the bench readings, for reference: ' + g.title, M, doc.y); graph(doc, g) }
+    }
+
+    H('Analysis')
+    if (an && an.calcs.length) {
+      for (const c of A.computeCalcs(an)) para(doc, `${c.label ? c.label + ': ' : ''}${c.name ? c.name + ' = ' : ''}${c.expr || '—'} = ${c.text || '—'} ${c.unit || ''}${c.error ? '  (' + c.error + ')' : ''}`, { fontSize: 9 })
       doc.moveDown(0.3)
+    }
+    if (nb.analysis) para(doc, nb.analysis)
+    for (const q of def.questions.filter(x => !/^plan_/.test(x.id) && x.id !== 'evaluation')) {
+      doc.moveDown(0.3)
+      doc.font('Bold').fontSize(9.5).fillColor(INK).text(q.prompt, M, doc.y, { width: W })
+      const shown = ans(q)
+      para(doc, shown ? shown + (q.unit && q.type === 'numeric' ? ' ' + q.unit : '') : '—')
+    }
+    H('Conclusion'); para(doc, nb.conclusion)
+    H('Evaluation'); para(doc, [nb.evaluation, answers.evaluation].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).join('\n\n'))
+
+    if (an && A) {
+      const todo = A.checkAnalysis(an, { minRows: def.practical?.minPoints || 5 }).filter(c => !c.ok)
+      heading(doc, 'Lab coach: data-handling points to improve')
+      para(doc, todo.length ? todo.map(c => '• ' + c.text).join('\n') : 'None: the table, graph and working meet every check.', { fontSize: 9 })
     }
 
     const rows = session.markedRows || session.autoGrade?.rows

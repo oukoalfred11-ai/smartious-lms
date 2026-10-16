@@ -20,6 +20,8 @@ const labSessionSchema = new mongoose.Schema({
   actions:  { type: [mongoose.Schema.Types.Mixed], default: [] },
   notebook: { type: mongoose.Schema.Types.Mixed, default: {} },
   answers:  { type: mongoose.Schema.Types.Mixed, default: {} },
+  // The student's own results table, graphs and working (shared/lab/analysis.js).
+  analysis: { type: mongoose.Schema.Types.Mixed, default: null },
   revision: { type: Number, default: 0 },
 
   status: { type: String, enum: ['in_progress', 'submitted', 'returned', 'marked'], default: 'in_progress', index: true },

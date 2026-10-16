@@ -5,3 +5,4 @@ export { EXPERIMENTS, getExperiment, catalogueEntry } from '../../../shared/lab/
 export { NOTEBOOK_SECTIONS } from '../../../shared/lab/sessionOps.js'
 export { INDICATORS } from '../../../shared/lab/science/indicators.js'
 export { terminalsOf } from '../../../shared/lab/science/circuit.js'
+export * from '../../../shared/lab/analysis.js'

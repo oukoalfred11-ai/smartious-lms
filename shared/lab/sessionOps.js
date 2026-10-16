@@ -4,13 +4,14 @@
  * with persistence; tests exercise them directly.
  *
  * Session shape (plain object):
- *   { status, revision, seed, options, actions[], notebook{}, answers{},
+ *   { status, revision, seed, options, actions[], notebook{}, answers{}, analysis{},
  *     autoGrade, rubricMarks{}, score, maxScore, submissionKey, feedback }
  */
 import { paramsFor, replay, gradeSession, MAX_ACTIONS } from './engine.js'
 import { EDITABLE, validateMarks } from './access.js'
+import { cleanAnalysis } from './analysis.js'
 
-export const NOTEBOOK_SECTIONS = ['aim', 'hypothesis', 'variables', 'apparatus', 'procedure', 'observations', 'analysis', 'evaluation', 'conclusion']
+export const NOTEBOOK_SECTIONS = ['aim', 'hypothesis', 'variables', 'risk', 'apparatus', 'procedure', 'observations', 'analysis', 'evaluation', 'conclusion']
 const MAX_TEXT = 10000
 
 export class SessionOpError extends Error {
@@ -37,6 +38,10 @@ function cleanAnswers(def, ans = {}) {
     out[q.id] = v
   }
   return out
+}
+
+function cleanAnalysisOrFail(a) {
+  try { return cleanAnalysis(a) } catch (e) { throw new SessionOpError('Your results table or graph could not be saved: ' + e.message) }
 }
 
 /** State of a session, rebuilt from its action log. */
@@ -67,6 +72,7 @@ export function applySave(def, session, body) {
     actions,
     notebook: body.notebook !== undefined ? cleanNotebook(body.notebook) : session.notebook,
     answers: body.answers !== undefined ? cleanAnswers(def, body.answers) : session.answers,
+    analysis: body.analysis !== undefined ? cleanAnalysisOrFail(body.analysis) : session.analysis,
     revision: session.revision + 1,
   }
 }

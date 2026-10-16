@@ -406,7 +406,8 @@ export function definePractical(spec) {
       if (measures.length) {
         const cs = typedConsts(s)
         const cols = [...(settings.length ? settings.map(x => x.label) : []), ...(iv ? [axisLabel(iv)] : []), ...measures.map(m => axisLabel(m)), ...derived.map(d => axisLabel(d))]
-        tables.push({ title: 'Results', columns: cols, rows: s.rows.map(r => {
+        const nFixed = settings.length + (iv ? 1 : 0) + measures.length
+        tables.push({ title: 'Results', columns: cols, derived: derived.map((d, i) => nFixed + i), rows: s.rows.map(r => {
           const row = iv ? { [iv.key]: r.x } : {}
           for (const m of measures) row[m.key] = num(r.values[m.key])
           return [...settings.map(x => labelOfSetting(x, r.settings?.[x.key])), ...(iv ? [fmtNum(r.x)] : []), ...measures.map(m => fmtRes(row[m.key], m.resolution)),

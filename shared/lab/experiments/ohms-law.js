@@ -167,6 +167,7 @@ const def = {
     return [{
       title: 'Readings',
       columns: ['#', 'Supply / V', 'p.d. V / V', 'Current I / A', 'V / I / Ω'],
+      derived: [4],
       rows: s.rows.map((r, i) => [String(i + 1), r.supply.toFixed(1), r.V.toFixed(2), r.I.toFixed(3), r.I ? (r.V / r.I).toFixed(1) : '—']),
     }]
   },

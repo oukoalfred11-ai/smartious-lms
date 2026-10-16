@@ -224,6 +224,7 @@ const def = {
     return [{
       title: 'Titration results',
       columns: ['Run', 'Indicator', 'Initial reading / cm³', 'Final reading / cm³', 'Titre / cm³', 'Rough?'],
+      derived: [4],
       rows: s.runs.filter(r => r.initial != null || r.final != null).map((r, i) => [
         String(i + 1), r.indicator ? INDICATORS[r.indicator].name : '—',
         r.initial != null ? r.initial.toFixed(2) : '—', r.final != null ? r.final.toFixed(2) : '—',

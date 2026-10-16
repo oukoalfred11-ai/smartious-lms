@@ -9,7 +9,9 @@ import { Link } from 'react-router-dom'
 import { api, useToast } from '../context/ctx.jsx'
 import useLabSession from './useLabSession.js'
 import View2D from './views2d.jsx'
-import { DataTables, Graph, Notebook, Questions, RubricTable, STATUS_LABEL, SimulationNotice, openReport } from './panels.jsx'
+import { DataTables, Graph, Questions, RubricTable, STATUS_LABEL, SimulationNotice, openReport } from './panels.jsx'
+import Report from './analysis/Report.jsx'
+import Coach from './analysis/Coach.jsx'
 
 function MarkForm({ session, def, onDone }) {
   const toast = useToast()
@@ -83,16 +85,17 @@ function ReviewBody({ sessionId, onReload }) {
         <section>
           <h2>Bench at the end</h2>
           <View2D experimentId={def.id} view={view} dispatch={() => false} editable={false} />
-          <h2>Data</h2>
+          <h2>Bench record</h2>
           <DataTables tables={tables} />
-          <Graph g={graph} />
+          <details><summary>Computer’s graph of the bench readings (for comparison)</summary><Graph g={graph} /></details>
           <h2>Answers</h2>
           <Questions def={def} answers={lab.answers} update={() => {}} editable={false} expected={expected} />
           <p className="lab-help">Hidden model values for this attempt (teacher only): {Object.entries(expected || {}).filter(([k]) => /^true/.test(k)).map(([k, v]) => `${k.replace(/^true/, '')}: ${v}`).join(' · ') || '—'}</p>
-          <h2>Notebook</h2>
-          <Notebook def={def} notebook={lab.notebook} update={() => {}} editable={false} tables={[]} graph={null} />
+          <h2>The student’s report</h2>
+          <div className="lab-review-report"><Report def={def} session={s} notebook={lab.notebook} answers={lab.answers} analysis={lab.analysis} benchTables={tables} /></div>
         </section>
         <section>
+          <Coach analysis={lab.analysis} minRows={def.practical?.minPoints || 5} />
           <h2>Marking</h2>
           {['submitted', 'marked', 'returned'].includes(s.status)
             ? <MarkForm session={s} def={def} onDone={onReload} />
