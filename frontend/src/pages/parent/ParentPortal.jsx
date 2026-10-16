@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import CommunityChatView from '../../components/CommunityChat.jsx'
 import AnnouncementsStrip from '../../components/AnnouncementsStrip.jsx'
 import MessagesHub from '../../components/MessagesHub.jsx'
+import AdmissionDocuments from '../../components/AdmissionDocuments.jsx'
 import { api } from '../../context/ctx.jsx'
 import MobileTabBar, { MORE_TAB, useIsPhone, useBackHandler } from '../../components/ui/MobileTabBar.jsx'
 
@@ -47,6 +48,7 @@ const NAV_SECTIONS = [
   { section:'Finance', items:[
     { id:'rateteacher',label:'Rate Teachers',    icon:'M12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2' },
     { id:'fees',       label:'Fees & Invoices',   icon:'M2 5h20v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5zM2 10h20' },
+    { id:'documents',  label:'Admission Documents', icon:'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M9 15l2 2 4-4' },
   ]},
   { section:'More', items:[
     { id:'programme',  label:'Programme Details', icon:'M22 10v6M2 10l10-5 10 5-10 5zM6 12v5c3 3 9 3 12 0v-5' },
@@ -297,6 +299,7 @@ export default function ParentPortal() {
               {page==='timetable'  && <ParentTimetable    child={selectedChild}/>}
               {page==='rateteacher'&& <ParentRateTeachers child={selectedChild} showToast={showToast}/>}
               {page==='fees'       && <ParentFees         child={selectedChild} showToast={showToast}/>}
+              {page==='documents'  && <AdmissionDocuments key={selectedChild?._id} studentId={selectedChild?._id} toast={{ ok: m => showToast(m, 'ok'), error: m => showToast(m, 'error') }}/>}
               {page==='lessons'    && <ParentLessons      child={selectedChild}/>}
               {page==='messages' && (<>
                 <MessagesHub meId={user?._id} role="parent" />

@@ -4,6 +4,7 @@ export const MODULES = {
   dashboard:   { label: 'Overview',     accent: TOKENS.crimson,     icon: 'home' },
   analytics:   { label: 'Analytics',    accent: TOKENS.accentNavy,  icon: 'chart' },
   users:       { label: 'Users',        accent: TOKENS.crimson,     icon: 'users' },
+  admissiondocs: { label: 'Admission Documents', accent: TOKENS.crimson, icon: 'documents' },
   teachers:    { label: 'Teachers',     accent: TOKENS.accentTeal,  icon: 'teacher' },
   allocations: { label: 'Manage Students',  accent: TOKENS.accentAmber, icon: 'allocations' },
   communication: { label: 'Communication', accent: TOKENS.crimson, icon: 'mail' },
