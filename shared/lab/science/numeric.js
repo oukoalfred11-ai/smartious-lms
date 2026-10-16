@@ -6,10 +6,8 @@
 /** Round to a number of significant figures (returns a Number). */
 export function toSigFigs(x, sf) {
   if (!Number.isFinite(x) || x === 0) return x
-  const d = Math.ceil(Math.log10(Math.abs(x)))
-  const p = sf - d
-  const m = Math.pow(10, p)
-  return Math.round(x * m) / m
+  // toPrecision avoids binary noise such as 6.530000000000001e-34
+  return Number(x.toPrecision(sf))
 }
 
 /** Round to an instrument's resolution (e.g. 0.05 cm³ burette, 0.01 g balance). */
