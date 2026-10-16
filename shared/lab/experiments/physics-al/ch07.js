@@ -29,6 +29,18 @@ export default [
         'Meter readings have random errors of about ±0.3 %.',
       ] },
     hidden: (q) => ({ rho: q('rho', 4.7, 5.1) * 1e-7, d: q.pick('d', [0.315, 0.345, 0.376, 0.417]) * (1 + 0.005 * q('dj', -1, 1)), rc: q('rc', 0.05, 0.15), r: q('r', 0.6, 1.0), E: q('E', 1.50, 1.60) }),
+    circuit: {
+      parts: [
+        { id: 'PS', type: 'supply', apparatus: 'dry_cell', label: 'Cell' },
+        { id: 'S1', type: 'switch', apparatus: 'switch', label: 'Switch' },
+        { id: 'A1', type: 'ammeter', apparatus: 'ammeter', label: 'Ammeter' },
+        { id: 'V1', type: 'voltmeter', apparatus: 'voltmeter', label: 'Voltmeter' },
+        { id: 'X', type: 'resistor', apparatus: 'resistance_wire', label: 'Wire' },
+      ],
+      checks: [{ meter: 'A1', series: 'X' }, { meter: 'V1', across: 'X' }],
+      values: (p, x) => ({ PS: { emf: p.E, r: p.r }, X: { R: p.rho * (x / 100) / (Math.PI * (p.d / 1000) ** 2 / 4) + p.rc } }),
+      correct: [['PS.+', 'S1.a'], ['S1.b', 'A1.+'], ['A1.-', 'X.a'], ['X.b', 'PS.-'], ['V1.+', 'X.a'], ['V1.-', 'X.b']],
+    },
     constants: [{ key: 'd', label: 'Diameter of wire', symbol: 'd', unit: 'mm', resolution: 0.01, instrument: 'micrometer', read: (p, n) => p.d + n(0.003) }],
     iv: { key: 'l', label: 'Length of wire', symbol: 'l', unit: 'cm', min: 10, max: 90, step: 5, start: 10, instrument: 'resistance_wire' },
     measures: [
@@ -69,6 +81,18 @@ export default [
         'The voltmeter takes no current; meter readings have random errors of about ±0.003 V and ±0.3 %; small chemical changes in the cell add a fixed ±0.003 V at each setting.',
       ] },
     hidden: (q) => ({ E: q('E', 1.50, 1.60), r: q('r', 0.5, 1.5) }),
+    circuit: {
+      parts: [
+        { id: 'PS', type: 'supply', apparatus: 'dry_cell', label: 'Cell' },
+        { id: 'S1', type: 'switch', apparatus: 'switch', label: 'Switch' },
+        { id: 'A1', type: 'ammeter', apparatus: 'ammeter', label: 'Ammeter' },
+        { id: 'V1', type: 'voltmeter', apparatus: 'voltmeter', label: 'Voltmeter' },
+        { id: 'RH', type: 'resistor', apparatus: 'rheostat', label: 'Rheostat' },
+      ],
+      checks: [{ meter: 'A1', series: 'RH' }, { meter: 'V1', across: 'PS' }],
+      values: (p, x) => ({ PS: { emf: p.E, r: p.r }, RH: { R: x * (1 + 0.05 * p.j('R' + x)) } }),
+      correct: [['PS.+', 'S1.a'], ['S1.b', 'A1.+'], ['A1.-', 'RH.a'], ['RH.b', 'PS.-'], ['V1.+', 'PS.+'], ['V1.-', 'PS.-']],
+    },
     iv: { key: 'Rx', label: 'Rheostat resistance', symbol: 'R', unit: 'Ω', min: 1, max: 12, step: 0.5, start: 12, instrument: 'rheostat' },
     measures: [
       { key: 'V', label: 'Terminal p.d.', symbol: 'V', unit: 'V', resolution: 0.001, instrument: 'voltmeter',

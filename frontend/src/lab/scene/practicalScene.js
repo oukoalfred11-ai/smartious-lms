@@ -16,6 +16,7 @@ import * as THREE from 'three'
 import * as E from './equipment.js'
 import { buildModel, footprint, plate, wrapText, LCD } from './apparatus3d.js'
 import { apparatusName } from '../../../../shared/lab/apparatus.js'
+import { createWiring, wirePart } from './wiring.js'
 
 const { BENCH_Y } = E
 const DEPTH = 0.9
@@ -70,7 +71,7 @@ function tentCard(text, w = 0.12, h = 0.04, colours = {}) {
   return g
 }
 
-export function buildPracticalScene(lab, { def, dispatch, onSelect }) {
+export function buildPracticalScene(lab, { def, dispatch, onSelect, onHover = () => {} }) {
   const P = def?.practical || {}
   const iv = P.iv || null
   const readingDefs = [...(P.constants || []), ...(P.measures || [])]
@@ -78,6 +79,11 @@ export function buildPracticalScene(lab, { def, dispatch, onSelect }) {
   const keysByInstrument = {}
   for (const r of readingDefs) if (r.instrument) (keysByInstrument[r.instrument] ||= []).push(r.key)
   const stock = [...new Set(P.stockroom || [])]
+  const circuit = P.circuit || null
+  let wiring = null
+  const hoverLabel = (p) => p?.label || (p?.kind === 'instrument' ? apparatusName(p.id) + ': click to take a reading' : p?.kind === 'stock' ? apparatusName(p.id) : p?.id === 'switch' && circuit ? 'Switch: click to open or close' : p?.id ? apparatusName(p.id) : null)
+  const setHandlers = () => lab.setHandlers({ ...(wiring?.handlers || {}), hover: (p) => onHover(hoverLabel(p)) })
+  setHandlers()
 
   // Bench width: the stockroom must fit on three rows.
   const foot = (id) => (id === IV_SLOT ? IV_FOOT : footprint(id))
@@ -100,6 +106,7 @@ export function buildPracticalScene(lab, { def, dispatch, onSelect }) {
 
   const add = (obj, pick) => { lab.add(obj, pick ? { pick } : {}); softenShadows(obj); objects.push(obj); return obj }
   const clear = () => {
+    if (wiring) { wiring.dispose(); wiring = null; setHandlers() }
     for (const o of objects) lab.remove(o)
     objects = []; placed = []; displays = {}; shown = {}; ivCard = null; ivText = ''; chain = []; hangAt = null; lastLevel = null
   }
@@ -231,6 +238,34 @@ export function buildPracticalScene(lab, { def, dispatch, onSelect }) {
     }
   }
 
+  /** Reagents and materials listed in the practical, as labelled bottles at the back of the bench. */
+  function placeMaterials() {
+    const list = (def.materials || []).slice(0, 10)
+    if (!list.length) return
+    const caps = ['#1F5FAF', '#C62828', '#2E7D32', '#E2B21F', '#6A1B9A', '#00838F', '#5D4037', '#AD1457', '#455A64', '#EF6C00']
+    const step = Math.min(0.11, (W - 0.4) / list.length)
+    list.forEach((name, i) => {
+      const b = E.bottle(wrapText(name, 14, 2), caps[i % caps.length])
+      b.position.set(-((list.length - 1) * step) / 2 + i * step, BENCH_Y, -DEPTH / 2 + 0.08)
+      add(b, { kind: 'material', label: name })
+    })
+  }
+
+  /** Make the circuit parts on the bench wireable and add a tray of leads. */
+  function wireBench() {
+    if (!circuit) return
+    wiring = createWiring(lab, { dispatch, onSelect, onHover })
+    const used = {}
+    for (const part of circuit.parts) {
+      const at = placed.find(p => p.id === part.apparatus)
+      if (!at) continue
+      const k = used[part.apparatus] = (used[part.apparatus] ?? -1) + 1
+      wirePart(wiring, at.model, part, { index: k })
+    }
+    wiring.tray(-W / 2 + 0.2, 0.36)
+    setHandlers()
+  }
+
   function rehang() {
     if (!hangAt) return
     let top = hangAt.y
@@ -250,8 +285,10 @@ export function buildPracticalScene(lab, { def, dispatch, onSelect }) {
 
   return {
     onPick(p) {
+      if (wiring?.onPick(p)) return
       if (p?.kind === 'instrument') for (const key of p.keys || []) dispatch('measure', { key })
-      onSelect(p)
+      if (p?.id === 'switch' && circuit?.parts.some(x => x.type === 'switch')) dispatch('toggleSwitch')
+      onSelect({ ...p, label: hoverLabel(p) })
     },
     update(view) {
       if (!view) return
@@ -259,7 +296,7 @@ export function buildPracticalScene(lab, { def, dispatch, onSelect }) {
       const key = JSON.stringify(collected)
       if (key !== layoutKey) {
         clear()
-        if (collected) buildBench(collected); else buildStockroom()
+        if (collected) { buildBench(collected); placeMaterials(); wireBench() } else buildStockroom()
         layoutKey = key
       }
       // Which reading changed last, per instrument.
@@ -275,6 +312,10 @@ export function buildPracticalScene(lab, { def, dispatch, onSelect }) {
         const text = k != null && rd[k] !== undefined ? format(k, rd[k], !!set.card) : '----'
         if (shown[id] !== text) { set(text); shown[id] = text }
       }
+      if (wiring) {
+        wiring.update(view.wires, view.wireColours, view.maxLeads)
+        placed.find(p => p.id === 'switch')?.model.userData.setClosed?.(view.switchClosed)
+      }
       // Independent variable: label stand and visual level hooks.
       if (iv && collected) {
         const x = Number(view.x)
@@ -288,6 +329,7 @@ export function buildPracticalScene(lab, { def, dispatch, onSelect }) {
             if (ud.setLevel && (id === iv.instrument || ud.levelWith?.includes(iv.instrument))) ud.setLevel(f)
           }
           rehang()
+          if (wiring) { wiring.refresh(); wiring.update(view.wires, view.wireColours, view.maxLeads) }   // a sliding contact may have moved
           lastLevel = f
         }
       }

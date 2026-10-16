@@ -20,6 +20,15 @@ export default function LabViewport({ experimentId, view, dispatch, editable, mo
   const selectRef = useRef(onSelect); selectRef.current = onSelect
   const [status, setStatus] = useState('idle')   // idle | loading | ready | failed
   const [problem, setProblem] = useState(null)
+  const [hover, setHover] = useState(null)      // what the pointer is over
+  const [sel, setSel] = useState(null)          // what was last clicked (lead, pending terminal…)
+  const selTimer = useRef(0)
+  const showSel = (p) => {
+    clearTimeout(selTimer.current)
+    setSel(p)
+    // Plain notices fade; a selected lead or a half-made connection stays.
+    if (p && !['wire', 'pending'].includes(p.kind)) selTimer.current = setTimeout(() => setSel(null), 2500)
+  }
 
   useEffect(() => {
     if (mode !== '3d' || !box.current) return
@@ -34,7 +43,7 @@ export default function LabViewport({ experimentId, view, dispatch, editable, mo
       try {
         let scene = null
         const lab = E3.createLabScene(box.current, { lowGraphics, onPick: (p) => scene?.onPick(p) })
-        scene = build(lab, { dispatch: (t, p) => dispatchRef.current(t, p), onSelect: (p) => selectRef.current?.(p) })
+        scene = build(lab, { dispatch: (t, p) => dispatchRef.current(t, p), onSelect: (p) => { showSel(p); selectRef.current?.(p) }, onHover: (t) => setHover(t || null) })
         if (scene.view) { lab.camera.position.set(...scene.view.pos); lab.controls.target.set(...scene.view.target); lab.controls.update() }
         lab.resetViewTo = () => { if (scene.view) { lab.camera.position.set(...scene.view.pos); lab.controls.target.set(...scene.view.target); lab.controls.update(); lab.invalidate() } else lab.resetView() }
         lab.onContextLost(() => { setProblem('The 3D view stopped (the graphics card was reset). Your work is safe; the 2D view is shown.'); setMode('2d') })
@@ -47,7 +56,7 @@ export default function LabViewport({ experimentId, view, dispatch, editable, mo
     return () => {
       alive = false
       labRef.current?.dispose(); labRef.current = null; sceneRef.current = null
-      setStatus('idle')
+      setStatus('idle'); setSel(null); setHover(null)
     }
   }, [mode, lowGraphics, experimentId, setMode])
 
@@ -83,6 +92,14 @@ export default function LabViewport({ experimentId, view, dispatch, editable, mo
         ? <div className="lab-3d" ref={box} tabIndex={0} onKeyDown={onKey}
             aria-label="3D bench. Drag to rotate, scroll or + and − to zoom, arrow keys to pan, R to reset. Every action is also available in the controls panel.">
             {status === 'loading' && <div className="lab-3d-loading">Loading the 3D laboratory…</div>}
+            {status === 'ready' && (hover || sel) && (
+              <div className="lab-3d-overlay" role="status" aria-live="polite">
+                {sel?.kind === 'pending' && <>Lead from <b>{sel.label}</b>: now tap the other terminal, or drag between terminals. <button type="button" className="lab-btn sm ghost" onClick={() => { sel.cancel?.(); setSel(null) }}>Cancel</button></>}
+                {sel?.kind === 'wire' && <>{sel.label.replace(' (click to select)', '')} <button type="button" className="lab-btn sm danger" disabled={!editable} onClick={() => { dispatch('disconnect', { index: sel.index }); setSel(null) }}>Remove lead</button> <button type="button" className="lab-btn sm ghost" onClick={() => { sel.clear?.(); setSel(null) }}>Close</button></>}
+                {sel && !['pending', 'wire'].includes(sel.kind) && sel.label && <span>{sel.label}</span>}
+                {!sel && hover && <span>{hover}</span>}
+              </div>
+            )}
           </div>
         : <View2D experimentId={experimentId} view={view} dispatch={dispatch} editable={editable} onSelect={onSelect} />}
       {mode === '3d' && <p className="lab-hint">Drag to look around · click equipment to use it · every action is also in the controls panel.</p>}

@@ -191,6 +191,7 @@ test('grading marks teacher-only rows as pending (null)', () => {
     const params = paramsFor(def, 'g', {})
     const g = gradeSession(def, { params, state: def.initialState(params), answers: {} })
     for (const r of g.rows.filter(r => !r.auto)) assert.equal(r.marks, null)
-    assert.equal(g.max, def.rubric.reduce((a, r) => a + r.marks, 0))
+    assert.equal(g.max, g.rows.reduce((a, r) => a + r.max, 0))
+    assert.ok(g.rows.length >= def.rubric.length - 1)   // only the apparatus row may not apply
   }
 })

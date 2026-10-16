@@ -19,7 +19,7 @@ export default [
     apparatus: ['dc_supply', 'filament_lamp', 'rheostat', 'milliammeter', 'voltmeter', 'switch', 'leads'],
     safety: ['The lamp glass becomes hot: do not touch it while it is lit or for a few minutes afterwards.', 'Do not exceed the rated 6.0 V of the lamp.'],
     procedure: [
-      'Connect the rheostat as a potential divider across the supply, and connect the lamp in series with the milliammeter between the output terminals.',
+      'Connect the supply, switch, rheostat, milliammeter and lamp in series, so the rheostat controls the p.d. across the lamp.',
       'Connect the voltmeter directly across the lamp.',
       'Set the p.d. across the lamp to about 1.0 V, wait a few seconds for the filament to settle and record V and I.',
       'Increase the p.d. in steps of about 0.5 V up to 6.0 V, recording V and I each time.',
@@ -34,6 +34,20 @@ export default [
         'The p.d. settles within ±0.02 V of the value aimed for; meter readings have random errors of about ±0.003 V and ±0.3 %.',
       ] },
     hidden: (q) => ({ b: q('b', 0.52, 0.62), I6: q('I6', 0.285, 0.315) }),
+    // No values: the milliammeter reads in mA, which the solver (in A) cannot
+    // give, so a wrongly wired meter reads 0. The lamp is not ohmic either.
+    circuit: {
+      parts: [
+        { id: 'PS', type: 'supply', apparatus: 'dc_supply', label: 'Supply' },
+        { id: 'S1', type: 'switch', apparatus: 'switch', label: 'Switch' },
+        { id: 'RH', type: 'resistor', apparatus: 'rheostat', label: 'Rheostat' },
+        { id: 'A1', type: 'ammeter', apparatus: 'milliammeter', label: 'Milliammeter' },
+        { id: 'V1', type: 'voltmeter', apparatus: 'voltmeter', label: 'Voltmeter' },
+        { id: 'X', type: 'resistor', apparatus: 'filament_lamp', label: 'Lamp' },
+      ],
+      checks: [{ meter: 'A1', series: 'X' }, { meter: 'V1', across: 'X' }],
+      correct: [['PS.+', 'S1.a'], ['S1.b', 'RH.a'], ['RH.b', 'A1.+'], ['A1.-', 'X.a'], ['X.b', 'PS.-'], ['V1.+', 'X.a'], ['V1.-', 'X.b']],
+    },
     iv: { key: 'Vset', label: 'P.d. aimed for', symbol: 'V_set', unit: 'V', min: 1.0, max: 6.0, step: 0.5, start: 1.0, instrument: 'rheostat' },
     measures: [
       { key: 'V', label: 'P.d. across lamp', symbol: 'V', unit: 'V', resolution: 0.01, instrument: 'voltmeter', read: (p, x, n) => x + 0.02 * p.j('V' + x) + n(0.003) },
@@ -76,6 +90,19 @@ export default [
         'Meter readings have random errors of about ±0.005 V and ±0.2 %.',
       ] },
     hidden: (q) => ({ R0: q.pick('R0', [22, 27, 33, 39, 47]), rj: q('rj', 0.02, 0.06), E: q('E', 2.95, 3.05), ri: q('ri', 0.3, 0.7) }),
+    // No values: the milliammeter reads in mA, which the solver (in A) cannot
+    // give, so a wrongly wired meter reads 0.
+    circuit: {
+      parts: [
+        { id: 'PS', type: 'supply', apparatus: 'dc_supply', label: 'Supply' },
+        { id: 'S1', type: 'switch', apparatus: 'switch', label: 'Switch' },
+        { id: 'A1', type: 'ammeter', apparatus: 'milliammeter', label: 'Milliammeter' },
+        { id: 'V1', type: 'voltmeter', apparatus: 'voltmeter', label: 'Voltmeter' },
+        { id: 'X', type: 'resistor', apparatus: 'resistors', label: 'Resistor chain' },
+      ],
+      checks: [{ meter: 'A1', series: 'X' }, { meter: 'V1', across: 'X' }],
+      correct: [['PS.+', 'S1.a'], ['S1.b', 'A1.+'], ['A1.-', 'X.a'], ['X.b', 'PS.-'], ['V1.+', 'X.a'], ['V1.-', 'X.b']],
+    },
     iv: { key: 'N', label: 'Number of resistors in series', symbol: 'N', unit: '', min: 1, max: 8, step: 1, start: 1, instrument: 'resistors' },
     measures: [
       { key: 'V', label: 'P.d. across chain', symbol: 'V', unit: 'V', resolution: 0.01, instrument: 'voltmeter', read: (p, x, n) => { const R = seriesR(p, x); return p.E * R / (R + p.ri) + n(0.005) } },
@@ -112,6 +139,19 @@ export default [
         'The supply has an internal resistance of about 0.5 Ω; meter readings have random errors of about ±0.003 V and ±0.2 %.',
       ] },
     hidden: (q) => ({ R0: q.pick('R0', [82, 100, 120, 150, 180, 220]), rj: q('rj', 0.02, 0.06), E: q('E', 1.48, 1.52), ri: q('ri', 0.3, 0.7) }),
+    // No values: the milliammeter reads in mA, which the solver (in A) cannot
+    // give, so a wrongly wired meter reads 0.
+    circuit: {
+      parts: [
+        { id: 'PS', type: 'supply', apparatus: 'dc_supply', label: 'Supply' },
+        { id: 'S1', type: 'switch', apparatus: 'switch', label: 'Switch' },
+        { id: 'A1', type: 'ammeter', apparatus: 'milliammeter', label: 'Milliammeter' },
+        { id: 'V1', type: 'voltmeter', apparatus: 'voltmeter', label: 'Voltmeter' },
+        { id: 'X', type: 'resistor', apparatus: 'resistors', label: 'Parallel group' },
+      ],
+      checks: [{ meter: 'A1', series: 'X' }, { meter: 'V1', across: 'X' }],
+      correct: [['PS.+', 'S1.a'], ['S1.b', 'A1.+'], ['A1.-', 'X.a'], ['X.b', 'PS.-'], ['V1.+', 'X.a'], ['V1.-', 'X.b']],
+    },
     iv: { key: 'N', label: 'Number of resistors in parallel', symbol: 'N', unit: '', min: 1, max: 8, step: 1, start: 1, instrument: 'resistors' },
     measures: [
       { key: 'V', label: 'P.d. across group', symbol: 'V', unit: 'V', resolution: 0.001, instrument: 'voltmeter', read: (p, x, n) => { const R = parallelR(p, x); return p.E * R / (R + p.ri) + n(0.003) } },

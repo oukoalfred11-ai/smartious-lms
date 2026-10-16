@@ -28,6 +28,13 @@
  *               series?, truth: (p) => v, tolOwn?: {rel|abs}, tolTrue?: {rel|abs} }]
  *   questions?: [{ id, type, prompt, options?, correct? }]   choice questions with `correct` are auto-marked
  *   planning?: true                    adds planning prompts and a teacher-marked planning row
+ *   circuit?: {                        students wire the circuit themselves with leads
+ *     parts: [{ id, type: 'supply'|'switch'|'ammeter'|'voltmeter'|'resistor', apparatus, label }],
+ *     checks: [{ meter, series: partId } | { meter, across: partId }],
+ *     correct: [['PS.+', 'S1.a'], ...]   one correct wiring (used by tests and the teacher's guide)
+ *     values?: (p, x, s) => ({ PS: { emf, r }, X: { R } })   resistive model for solving any wiring
+ *     leads?: number                   leads in the tray (default: correct + 4)
+ *   }                                  measures read by a meter name it: { meter: 'A1' } (or it is inferred)
  *   minPoints?: 5, minSpanFrac?: 0.5
  * }
  *
@@ -37,6 +44,7 @@
 import { rng, hashSeed, seeded, pick } from './science/random.js'
 import { toResolution, toSigFigs, linearFit, fitThroughOrigin, within, mean } from './science/numeric.js'
 import { APPARATUS, apparatusName } from './apparatus.js'
+import { solveCircuit, sameNode, terminalsOf } from './science/circuit.js'
 
 class PracticalError extends Error { constructor(m) { super(m); this.name = 'LabActionError' } }
 const fail = (m) => { throw new PracticalError(m) }
@@ -96,6 +104,51 @@ export function definePractical(spec) {
   const vars = [...(iv ? [{ key: iv.key, label: iv.label, symbol: iv.symbol, unit: iv.unit }] : []), ...measures, ...derived]
   const varByKey = Object.fromEntries(vars.map(v => [v.key, v]))
   const defaultSettings = Object.fromEntries(settings.map(s => [s.key, s.default ?? s.options[0].value]))
+  // ── Circuit wiring ────────────────────────────────────────
+  const circuit = spec.circuit || null
+  const partById = Object.fromEntries((circuit?.parts || []).map(p => [p.id, p]))
+  const maxLeads = circuit ? (circuit.leads ?? circuit.correct.length + 4) : 0
+  if (circuit) {
+    for (const p of circuit.parts) if (!terminalsOf(p.type).length) throw new Error(spec.id + ': circuit part ' + p.id + ' has unknown type ' + p.type)
+    for (const m of measures) if (!m.meter) {
+      const cands = circuit.parts.filter(p => ['ammeter', 'voltmeter'].includes(p.type) && p.apparatus === m.instrument)
+      if (cands.length === 1) m.meter = cands[0].id
+    }
+  }
+  const meterOf = (key) => (circuit ? measures.find(m => m.key === key)?.meter || null : null)
+  const validTerminal = (t) => { const [id, term] = String(t).split('.'); return !!partById[id] && terminalsOf(partById[id].type).includes(term) }
+  function circuitStatus(params, s) {
+    const v = circuit.values ? circuit.values(params, s.x, s.settings) || {} : {}
+    const components = circuit.parts.map(p => {
+      if (p.type === 'supply') return { id: p.id, type: 'supply', emf: v[p.id]?.emf ?? 3, internalResistance: v[p.id]?.r ?? 0.5 }
+      if (p.type === 'resistor') return { id: p.id, type: 'resistor', resistance: Math.max(1e-6, v[p.id]?.R ?? 10) }
+      if (p.type === 'switch') return { id: p.id, type: 'switch', closed: !!s.switchClosed }
+      return { id: p.id, type: p.type }
+    })
+    const c = { components, wires: s.wires || [] }
+    const sol = solveCircuit(c)
+    if (!sol.ok) return { ok: false, fault: sol.fault, problems: sol.problems || [], sol }
+    const problems = []
+    const hasSwitch = circuit.parts.some(p => p.type === 'switch')
+    if (hasSwitch && !s.switchClosed) problems.push('Close the switch to take readings.')
+    let noLoop = false
+    for (const ch of circuit.checks || []) {
+      const meter = partById[ch.meter]
+      if (ch.across) {
+        const part = partById[ch.across], [a, b] = terminalsOf(part.type)
+        const ok = (sameNode(c, ch.meter + '.+', ch.across + '.' + a) && sameNode(c, ch.meter + '.-', ch.across + '.' + b)) ||
+          (sameNode(c, ch.meter + '.+', ch.across + '.' + b) && sameNode(c, ch.meter + '.-', ch.across + '.' + a))
+        if (!ok) problems.push(`The ${meter.label.toLowerCase()} must be connected across (in parallel with) the ${part.label.toLowerCase()}.`)
+      } else if (ch.series) {
+        const part = partById[ch.series]
+        const iP = sol.current(ch.series), iM = sol.current(ch.meter)
+        if (Math.abs(iP) < 1e-6) { if (!noLoop && (!hasSwitch || s.switchClosed)) problems.push(`No current flows through the ${part.label.toLowerCase()}: the circuit is not a complete loop.`); noLoop = true }
+        else if (Math.abs(Math.abs(iM) - Math.abs(iP)) > Math.abs(iP) * 0.01) problems.push(`The ${meter.label.toLowerCase()} must be in series with the ${part.label.toLowerCase()}, so the same current flows through both.`)
+      }
+    }
+    return { ok: problems.length === 0, problems, sol, fault: null }
+  }
+
   const correctGraph = spec.graph ? { x: spec.graph.x, tx: spec.graph.tx || 'none', y: spec.graph.y, ty: spec.graph.ty || 'none' } : null
 
   // ── helpers over state ────────────────────────────────────
@@ -147,7 +200,8 @@ export function definePractical(spec) {
   ]
 
   const rubric = [
-    { id: 'apparatus', label: 'Correct apparatus collected', marks: 1, auto: ({ state }) => {
+    { id: 'apparatus', label: 'Correct apparatus collected', marks: 1, auto: ({ state, params }) => {
+      if (!params._stockroom) return { na: true }       // apparatus was provided on the bench
       const extra = (state.collected || []).filter(a => !required.includes(a) && a !== 'goggles')
       const ok = state.firstCollectComplete && extra.length <= 1
       return { marks: ok ? 1 : 0, detail: !state.collected ? 'No apparatus collected.' : !state.firstCollectComplete ? 'The first selection missed something needed.' : extra.length > 1 ? extra.length + ' unnecessary items collected.' : 'Apparatus chosen correctly.' }
@@ -158,6 +212,11 @@ export function definePractical(spec) {
       for (const r of state.rows) for (const m of measures) { total++; if (!within(num(r.values[m.key]), r.shown[m.key], { abs: m.resolution * 0.51 })) bad++ }
       return { marks: total && !bad ? 1 : 0, detail: !total ? 'No readings recorded.' : bad ? bad + ' of ' + total + ' readings differ from the instrument.' : 'All ' + total + ' readings match the instruments.' }
     } },
+    ...(circuit ? [{ id: 'circuit', label: 'Circuit built correctly', marks: 2, auto: ({ state }) => {
+      const good = state.rows.filter(r => r.circuitOk).length
+      return { marks: good >= Math.min(minPoints, Math.max(1, state.rows.length)) && good === state.rows.length && good > 0 ? 2 : good > 0 ? 1 : 0,
+        detail: `${good} of ${state.rows.length} readings taken with a correct circuit.` }
+    } }] : []),
     ...(iv ? [{ id: 'range', label: 'Enough values over a suitable range', marks: 1, auto: ({ state }) => {
       const xs = [...new Set(state.rows.map(r => r.x))]
       const span = xs.length ? Math.max(...xs) - Math.min(...xs) : 0
@@ -210,6 +269,7 @@ export function definePractical(spec) {
     practical: {
       iv, constants, measures, derived, settings, repeats, stockroom, required, minPoints, minSpanFrac,
       vars: vars.map(({ key, label, symbol, unit }) => ({ key, label, symbol, unit })),
+      circuit: circuit ? { parts: circuit.parts.map(({ id, type, apparatus, label }) => ({ id, type, apparatus, label })), correct: circuit.correct, leads: maxLeads } : null,
       choiceAnswers: Object.fromEntries((spec.questions || []).filter(q => q.type === 'choice' && q.correct != null).map(q => [q.id, q.correct])),
       transforms: Object.keys(TRANSFORMS), seriesBy: spec.graph?.seriesBy || null, fitKind: spec.graph?.fit || 'line',
       instruments: [...new Set([iv?.instrument, ...allReadings.map(r => r.instrument)].filter(Boolean))],
@@ -221,11 +281,14 @@ export function definePractical(spec) {
       // j(name): a fixed value in [−1, 1] for this attempt, for physical
       // irregularities that must be the same every time they are read.
       const j = (name) => seeded(seed, 'j|' + name, -1, 1)
-      return { seed, j, ...spec.hidden(q, options) }
+      return { seed, j, ...spec.hidden(q, options), _stockroom: !!options.stockroom }
     },
 
-    initialState() {
-      return { collected: null, firstCollectComplete: false, x: iv ? (iv.start ?? iv.min) : 0, settings: { ...defaultSettings },
+    initialState(params = {}) {
+      // Apparatus starts on the bench, unless the teacher asked students to
+      // choose it from the stockroom (assignment option `stockroom`).
+      return { collected: params._stockroom ? null : [...required], firstCollectComplete: false,
+        wires: [], wireColours: [], switchClosed: false, x: iv ? (iv.start ?? iv.min) : 0, settings: { ...defaultSettings },
         readings: {}, counter: 0, constants: {}, constShown: {}, rows: [], graph: { x: iv ? iv.key : measures[0]?.key, tx: 'none', y: measures[0]?.key || derived[0]?.key, ty: 'none' } }
     },
 
@@ -236,6 +299,28 @@ export function definePractical(spec) {
         if (list.some(a => !stockroom.includes(a))) fail('That item is not in this stockroom.')
         if (s.collected == null) s.firstCollectComplete = required.every(a => list.includes(a))
         s.collected = list
+      },
+      connect(s, { a, b, colour }) {
+        if (!circuit) fail('There is no circuit in this experiment.')
+        ensureApparatus(s)
+        if (!validTerminal(a) || !validTerminal(b)) fail('Connect two terminals.')
+        if (a === b) fail('A lead needs two different terminals.')
+        if (a.split('.')[0] === b.split('.')[0]) fail('Do not connect a component to itself.')
+        if (s.wires.some(([x, y]) => (x === a && y === b) || (x === b && y === a))) fail('Those terminals are already connected.')
+        if (s.wires.length >= maxLeads) fail('There are no leads left in the tray. Remove one you do not need.')
+        s.wires.push([a, b]); s.wireColours.push(colour === 'black' ? 'black' : 'red')
+        s.readings = {}
+      },
+      disconnect(s, { index }) {
+        if (!circuit || !s.wires[index]) fail('No such lead.')
+        s.wires.splice(index, 1); s.wireColours.splice(index, 1)
+        s.readings = {}
+      },
+      clearWires(s) { if (!circuit) fail('There is no circuit in this experiment.'); s.wires = []; s.wireColours = []; s.readings = {} },
+      toggleSwitch(s) {
+        if (!circuit || !circuit.parts.some(p => p.type === 'switch')) fail('There is no switch in this circuit.')
+        s.switchClosed = !s.switchClosed
+        s.readings = {}
       },
       setting(s, { key, value }) {
         const st = settings.find(x => x.key === key)
@@ -260,7 +345,17 @@ export function definePractical(spec) {
         if (r.instrument && !s.collected.includes(r.instrument)) fail('You need the ' + apparatusName(r.instrument).toLowerCase() + ' for this reading.')
         s.counter += 1
         const n = noiseFor(params.seed, key, s.counter)
-        const raw = r.kind === 'constant' ? r.read(params, n, s.settings) : r.read(params, s.x, n, s.settings)
+        let raw
+        const meter = r.kind === 'measure' ? meterOf(key) : null
+        if (meter) {
+          // A meter shows what the circuit the student wired really gives:
+          // the model's reading when it is wired correctly, otherwise the
+          // solved value for their wiring (or nothing if the supply tripped).
+          const st = circuitStatus(params, s)
+          if (st.fault) raw = null
+          else if (st.ok) { raw = r.read(params, s.x, n, s.settings); if ((st.sol.readings[meter] ?? 1) < 0) raw = -raw }
+          else raw = circuit.values ? st.sol.readings[meter] : 0
+        } else raw = r.kind === 'constant' ? r.read(params, n, s.settings) : r.read(params, s.x, n, s.settings)
         s.readings[key] = raw == null || !Number.isFinite(raw) ? null : toResolution(raw, r.resolution)
       },
       recordConst(s, { key, value }) {
@@ -271,7 +366,7 @@ export function definePractical(spec) {
         s.constants[key] = num(value)
         s.constShown[key] = s.readings[key]
       },
-      recordRow(s, { values }) {
+      recordRow(s, { values }, params) {
         if (!measures.length) fail('There is nothing to tabulate in this experiment.')
         if (s.rows.length >= 60) fail('Sixty readings are plenty.')
         const vals = {}, shown = {}
@@ -281,7 +376,9 @@ export function definePractical(spec) {
           if (!Number.isFinite(v)) fail('Enter the ' + m.label.toLowerCase() + ' as a number.')
           vals[m.key] = v; shown[m.key] = s.readings[m.key]
         }
-        s.rows.push({ x: s.x, settings: { ...s.settings }, values: vals, shown })
+        const row = { x: s.x, settings: { ...s.settings }, values: vals, shown }
+        if (circuit) row.circuitOk = circuitStatus(params, s).ok
+        s.rows.push(row)
         s.readings = {}
       },
       deleteRow(s, { index }) {
@@ -297,7 +394,10 @@ export function definePractical(spec) {
     },
 
     view(params, s) {
-      return { collected: s.collected, x: s.x, settings: s.settings, readings: s.readings, constants: s.constants, rows: s.rows, graph: s.graph, groups: groups(s).map(g => ({ x: g.x, n: g.n, row: g.row, settings: g.settings })) }
+      const cs = circuit ? circuitStatus(params, s) : null
+      return { wires: s.wires || [], wireColours: s.wireColours || [], switchClosed: !!s.switchClosed, maxLeads,
+        circuit: cs ? { ok: cs.ok, problems: cs.problems, fault: cs.fault } : null,
+        collected: s.collected, stockroomMode: !!params._stockroom, x: s.x, settings: s.settings, readings: s.readings, constants: s.constants, rows: s.rows, graph: s.graph, groups: groups(s).map(g => ({ x: g.x, n: g.n, row: g.row, settings: g.settings })) }
     },
 
     dataTables(params, s) {

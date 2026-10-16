@@ -65,8 +65,26 @@ const def = {
     'Fill the burette below eye level, with the tap closed, and remove the funnel before titrating.',
     'This is a virtual practice. It does not replace any practical work your examination board requires.',
   ],
-  apparatus: ['burette', 'stand', 'pipette', 'conical_flask', 'white_tile', 'funnel', 'beaker', 'indicator_bottle', 'wash_bottle'],
-  materials: ['Acid of unknown concentration', 'Sodium hydroxide, 0.100 mol dm⁻³ (standard solution)', 'Indicators: phenolphthalein, methyl orange, bromothymol blue', 'Distilled water'],
+  apparatus: [
+    '50 cm³ burette (graduated in 0.10 cm³)',
+    '25.0 cm³ volumetric pipette',
+    'Pipette filler',
+    '250 cm³ conical flask',
+    'Retort stand with boss and burette clamp',
+    'Small filter funnel (for filling the burette)',
+    'White tile',
+    'Wash bottle of distilled water',
+    '100 cm³ beakers: one for the sodium hydroxide, one for the acid, one for rinsings',
+    'Safety goggles',
+  ],
+  materials: [
+    'Sodium hydroxide solution, 0.100 mol dm⁻³ (standard solution)',
+    'Acid of unknown concentration (hydrochloric acid or ethanoic acid, as set by your teacher)',
+    'Phenolphthalein indicator',
+    'Methyl orange indicator',
+    'Bromothymol blue indicator',
+    'Distilled water',
+  ],
   procedure: [
     'Rinse and fill the burette with the sodium hydroxide solution. Record the initial reading.',
     'Pipette 25.0 cm³ of the acid into a clean conical flask on a white tile.',
@@ -184,6 +202,7 @@ const def = {
     const ind = r.indicatorDrops > 0 ? r.indicator : null
     const ep = ind ? endpointPH(ind) : null
     return {
+      acid: { id: params.acid, name: params.acidName },   // which acid (set by the teacher); its concentration stays hidden
       run: s.current + 1,
       runs: s.runs.map((x, i) => ({ n: i + 1, rough: x.rough, initial: x.initial, final: x.final, titre: titreOf(x), indicator: x.indicator })),
       flask: {
@@ -193,7 +212,7 @@ const def = {
         changed: ind ? baseFraction(ind, pH) >= 0.5 : false,
         overshot: ind ? pH > ep + 1.5 : false,
       },
-      burette: { filled: s.burette.filled, reading: s.burette.reading, resolution: READ_RES, max: BURETTE_MAX },
+      burette: { filled: s.burette.filled, reading: s.burette.reading, resolution: READ_RES, max: BURETTE_MAX, fills: s.fills },
       indicatorChosen: s.indicator,
       titres: titres(s),
       // pH is shown only as a teaching aid in the pH-meter panel (optional);

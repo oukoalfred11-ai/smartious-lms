@@ -87,6 +87,18 @@ export default [
     model: { kind: 'quantitative', summary: 'R = λ l + R_c, where λ is the resistance per unit length and R_c a small contact resistance at the clips.',
       assumptions: ['The wire is uniform constantan; its temperature does not change.', 'The cell has an e.m.f. of 1.5 V and internal resistance of 0.5–1.0 Ω.', 'Ideal meters; contact resistance 0.05–0.15 Ω.'] },
     hidden: (q) => ({ lam: q('lam', 6.0, 11.0), rc: q('rc', 0.05, 0.15), r: q('r', 0.5, 1.0), E: q('E', 1.52, 1.60) }),
+    circuit: {
+      parts: [
+        { id: 'PS', type: 'supply', apparatus: 'dry_cell', label: 'Cell' },
+        { id: 'S1', type: 'switch', apparatus: 'switch', label: 'Switch' },
+        { id: 'A1', type: 'ammeter', apparatus: 'ammeter', label: 'Ammeter' },
+        { id: 'V1', type: 'voltmeter', apparatus: 'voltmeter', label: 'Voltmeter' },
+        { id: 'X', type: 'resistor', apparatus: 'resistance_wire', label: 'Wire' },
+      ],
+      checks: [{ meter: 'A1', series: 'X' }, { meter: 'V1', across: 'X' }],
+      values: (p, x) => ({ PS: { emf: p.E, r: p.r }, X: { R: p.lam * x / 100 + p.rc } }),
+      correct: [['PS.+', 'S1.a'], ['S1.b', 'A1.+'], ['A1.-', 'X.a'], ['X.b', 'PS.-'], ['V1.+', 'X.a'], ['V1.-', 'X.b']],
+    },
     iv: { key: 'l', label: 'Length of wire', symbol: 'l', unit: 'cm', min: 10, max: 90, step: 5, start: 10, instrument: 'resistance_wire' },
     measures: [
       { key: 'V', label: 'Potential difference', symbol: 'V', unit: 'V', resolution: 0.01, instrument: 'voltmeter', read: (p, x) => { const R = p.lam * x / 100 + p.rc; return p.E * R / (R + p.r) } },

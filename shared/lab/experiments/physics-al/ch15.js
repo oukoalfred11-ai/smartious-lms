@@ -28,6 +28,19 @@ export default [
     model: { kind: 'simplified', summary: 'The alternating flux induces a current in the ring proportional to the coil current, so the repulsive force is proportional to I². The field of the core is taken to fall off exponentially with height, so the force is kI²e^(−h/h₀). The ring floats where this equals its weight, giving h = 2h₀ ln(I / I₀).',
       assumptions: ['The exponential fall-off of the force with height is an approximation to the real field of the core.', 'The ring’s resistance does not change as it warms; in practice a hot ring floats lower.', 'Phase differences, the ring’s self-inductance and friction on the core are ignored.', 'h₀ is 3–5 cm and I₀ is 1.0–1.5 A; the height is read to about ±0.15 cm because the ring hovers and vibrates.'] },
     hidden: (q) => ({ h0: q('h0', 3.0, 5.0), I0: q('I0', 1.0, 1.5) }),
+    // An a.c. circuit with currents up to 6 A (above the solver's 5 A trip):
+    // no resistive values.
+    circuit: {
+      parts: [
+        { id: 'PS', type: 'supply', apparatus: 'ac_supply', label: 'A.c. supply' },
+        { id: 'S1', type: 'switch', apparatus: 'switch', label: 'Switch' },
+        { id: 'RH', type: 'resistor', apparatus: 'rheostat', label: 'Rheostat' },
+        { id: 'A1', type: 'ammeter', apparatus: 'ammeter', label: 'A.c. ammeter' },
+        { id: 'X', type: 'resistor', apparatus: 'coil', label: 'Coil' },
+      ],
+      checks: [{ meter: 'A1', series: 'X' }],
+      correct: [['PS.+', 'S1.a'], ['S1.b', 'RH.a'], ['RH.b', 'A1.+'], ['A1.-', 'X.a'], ['X.b', 'PS.-']],
+    },
     iv: { key: 'I', label: 'Current in coil (r.m.s.)', symbol: 'I', unit: 'A', min: 2.0, max: 6.0, step: 0.25, start: 2.0, instrument: 'ammeter' },
     measures: [{ key: 'h', label: 'Height of ring above coil', symbol: 'h', unit: 'cm', resolution: 0.1, instrument: 'metre_rule', read: (p, x, n) => 2 * p.h0 * Math.log(x / p.I0) + n(0.15) }],
     repeats: 2,
@@ -124,6 +137,21 @@ export default [
     model: { kind: 'simplified', summary: 'Each secondary turn links a fraction k of the flux per primary turn, so V_s = kVₚN_s/Nₚ. With a closed iron core k is close to 1; in air most of the flux spreads out and k is small.',
       assumptions: ['Resistance of the coils, core losses and the effect of the voltmeter are ignored.', 'The primary voltage stays the same when the core is removed (in practice the primary current rises).', 'k is 0.88–0.96 with the core and 0.06–0.12 without; Vₚ is 1.8–2.2 V.', 'The multimeter reading has a random error of about ±1 mV plus 1 %.'] },
     hidden: (q) => ({ Vp: q('Vp', 1.8, 2.2), kc: q('kc', 0.88, 0.96), ka: q('ka', 0.06, 0.12) }),
+    // Two separate circuits: the primary on the a.c. supply, and the
+    // secondary coil with the multimeter across it. Coupling by flux is not
+    // resistive, so there are no values and a wrongly wired meter reads 0.
+    circuit: {
+      parts: [
+        { id: 'PS', type: 'supply', apparatus: 'ac_supply', label: 'A.c. supply' },
+        { id: 'S1', type: 'switch', apparatus: 'switch', label: 'Switch' },
+        { id: 'XP', type: 'resistor', apparatus: 'transformer_kit', label: 'Primary coil' },
+        { id: 'XS', type: 'resistor', apparatus: 'transformer_kit', label: 'Secondary coil' },
+        { id: 'V1', type: 'voltmeter', apparatus: 'voltmeter', label: 'Voltmeter' },
+        { id: 'V2', type: 'voltmeter', apparatus: 'multimeter', label: 'Multimeter' },
+      ],
+      checks: [{ meter: 'V1', across: 'XP' }, { meter: 'V2', across: 'XS' }],
+      correct: [['PS.+', 'S1.a'], ['S1.b', 'XP.a'], ['XP.b', 'PS.-'], ['V1.+', 'XP.a'], ['V1.-', 'XP.b'], ['V2.+', 'XS.a'], ['V2.-', 'XS.b']],
+    },
     settings: [{ key: 'core', label: 'Core', options: [{ value: 'core', label: 'Iron core in place' }, { value: 'air', label: 'No core (air)' }], default: 'core' }],
     constants: [{ key: 'Vp', label: 'Primary voltage (r.m.s.)', symbol: 'Vₚ', unit: 'V', resolution: 0.01, instrument: 'voltmeter', read: (p, n) => p.Vp + n(0.005) }],
     iv: { key: 'Ns', label: 'Number of secondary turns', symbol: 'N_s', unit: '', min: 10, max: 80, step: 5, start: 10, instrument: 'transformer_kit' },

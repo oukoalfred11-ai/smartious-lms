@@ -65,36 +65,84 @@ export function createLabScene(container, { lowGraphics = false, onPick = null, 
     invalidate()
   }
 
-  // ── Picking ──────────────────────────────────────────────
+  // ── Picking, dragging, press-and-hold and hover ─────────
+  // Scenes register handlers with lab.setHandlers({ dragStart, dragMove,
+  // dragEnd, holdStart, holdEnd, hover }). A press on an object whose pick
+  // has drag: true starts a drag (e.g. pulling a lead from a terminal);
+  // hold: true calls holdStart/holdEnd (e.g. holding a burette tap open).
+  // Anything else is a click, unless the pointer moved (then it orbited).
   const raycaster = new THREE.Raycaster()
   const pointer = new THREE.Vector2()
   const pickables = []
-  let downAt = null
-  const onDown = (e) => { downAt = { x: e.clientX, y: e.clientY } }
-  const onUp = (e) => {
-    if (!downAt || !onPick) return
+  let handlers = {}
+  let downAt = null, mode = null, dragPick = null, hoverPick = null
+  const dragPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0)
+  const findPick = (o) => { while (o) { if (o.userData?.pick) return o.userData.pick; o = o.parent } return null }
+  const aim = (e) => {
+    const r = renderer.domElement.getBoundingClientRect()
+    pointer.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1)
+    raycaster.setFromCamera(pointer, camera)
+  }
+  const pickAt = (e) => {
+    aim(e)
+    const hit = raycaster.intersectObjects(pickables, true).find(h => findPick(h.object))
+    return hit ? { pick: findPick(hit.object), hit } : null
+  }
+  const onDown = (e) => {
+    if (e.button != null && e.button !== 0) return
+    downAt = { x: e.clientX, y: e.clientY }
+    const at = pickAt(e)
+    mode = 'click'
+    if (at?.pick?.drag && handlers.dragStart && handlers.dragStart(at.pick, at.hit) !== false) {
+      mode = 'drag'; dragPick = at.pick
+      dragPlane.set(new THREE.Vector3(0, 1, 0), -at.hit.point.y)
+    } else if (at?.pick?.hold && handlers.holdStart) {
+      mode = 'hold'; dragPick = at.pick
+      handlers.holdStart(at.pick)
+    }
+    if (mode !== 'click') {
+      controls.enabled = false
+      try { renderer.domElement.setPointerCapture(e.pointerId) } catch {}
+      e.preventDefault()
+    }
+  }
+  const onMove = (e) => {
+    if (mode === 'drag') {
+      const at = pickAt(e)
+      const pt = new THREE.Vector3()
+      if (!raycaster.ray.intersectPlane(dragPlane, pt)) return
+      handlers.dragMove?.(pt, at?.pick || null)
+      invalidate()
+      return
+    }
+    if (mode) return
+    const at = pickAt(e)
+    const p = at?.pick || null
+    renderer.domElement.style.cursor = p ? (p.drag ? 'crosshair' : 'pointer') : 'grab'
+    if (p !== hoverPick) { hoverPick = p; handlers.hover?.(p) }
+  }
+  const finish = (e, cancelled) => {
+    const m = mode
+    mode = null
+    controls.enabled = true
+    try { renderer.domElement.releasePointerCapture(e.pointerId) } catch {}
+    if (m === 'drag') { const at = cancelled ? null : pickAt(e); handlers.dragEnd?.(at?.pick || null, dragPick); dragPick = null; invalidate(); return }
+    if (m === 'hold') { handlers.holdEnd?.(dragPick); dragPick = null; invalidate(); return }
+    if (m !== 'click' || cancelled || !downAt || !onPick) return
     const moved = Math.hypot(e.clientX - downAt.x, e.clientY - downAt.y)
     downAt = null
     if (moved > 6) return                        // it was a drag (orbit), not a click
-    const r = renderer.domElement.getBoundingClientRect()
-    pointer.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1)
-    raycaster.setFromCamera(pointer, camera)
-    const hit = raycaster.intersectObjects(pickables, true).find(h => findPick(h.object))
-    if (hit) onPick(findPick(hit.object), hit)
+    const at = pickAt(e)
+    if (at) onPick(at.pick, at.hit)
   }
-  const findPick = (o) => { while (o) { if (o.userData?.pick) return o.userData.pick; o = o.parent } return null }
+  const onUp = (e) => finish(e, false)
+  const onCancel = (e) => finish(e, true)
+  const onLeave = () => { if (!mode && hoverPick) { hoverPick = null; handlers.hover?.(null) } }
   renderer.domElement.addEventListener('pointerdown', onDown)
   renderer.domElement.addEventListener('pointerup', onUp)
-
-  // Hover cursor for pickable equipment.
-  const onMove = (e) => {
-    const r = renderer.domElement.getBoundingClientRect()
-    pointer.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1)
-    raycaster.setFromCamera(pointer, camera)
-    const hit = raycaster.intersectObjects(pickables, true).find(h => findPick(h.object))
-    renderer.domElement.style.cursor = hit ? 'pointer' : 'grab'
-  }
-  if (!lowGraphics) renderer.domElement.addEventListener('pointermove', onMove)
+  renderer.domElement.addEventListener('pointercancel', onCancel)
+  renderer.domElement.addEventListener('pointermove', onMove)
+  renderer.domElement.addEventListener('pointerleave', onLeave)
 
   // ── On-demand render loop ────────────────────────────────
   let needsRender = true, raf = 0, visible = true, onscreen = true, disposed = false
@@ -145,8 +193,10 @@ export function createLabScene(container, { lowGraphics = false, onPick = null, 
       scene.add(obj); invalidate(); return obj
     },
     makePickable(obj, pick) { obj.userData.pick = pick; if (!pickables.includes(obj)) pickables.push(obj) },
+    setHandlers(h) { handlers = h || {} },
+    worldPos(obj, dy = 0) { const v = new THREE.Vector3(); obj.getWorldPosition(v); v.y += dy; return v },
     unpick(obj) { const i = pickables.indexOf(obj); if (i >= 0) pickables.splice(i, 1) },
-    remove(obj) { this.unpick(obj); scene.remove(obj); disposeTree(obj); invalidate() },
+    remove(obj) { if (!obj) return; obj.traverse(o => this.unpick(o)); obj.parent?.remove(obj); disposeTree(obj); invalidate() },
     invalidate, animate, resetView,
     onContextLost(fn) { onLost = fn },
     zoom(factor) { const d = camera.position.clone().sub(controls.target).multiplyScalar(factor); camera.position.copy(controls.target).add(d); controls.update(); invalidate() },
@@ -157,6 +207,8 @@ export function createLabScene(container, { lowGraphics = false, onPick = null, 
       document.removeEventListener('visibilitychange', onVis)
       renderer.domElement.removeEventListener('pointerdown', onDown)
       renderer.domElement.removeEventListener('pointerup', onUp)
+      renderer.domElement.removeEventListener('pointercancel', onCancel)
+      renderer.domElement.removeEventListener('pointerleave', onLeave)
       renderer.domElement.removeEventListener('pointermove', onMove)
       renderer.domElement.removeEventListener('webglcontextlost', lost)
       controls.dispose()

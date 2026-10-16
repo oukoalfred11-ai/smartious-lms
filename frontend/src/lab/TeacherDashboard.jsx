@@ -15,7 +15,7 @@ const csvCell = (v) => { const s = v == null ? '' : String(v); return /[",\n]/.t
 function AssignForm({ experiments, students, onCreated }) {
   const toast = useToast()
   const usable = experiments.filter(e => ['approved', 'published'].includes(e.status))
-  const [f, setF] = useState({ experimentId: '', title: '', instructions: '', dueAt: '', acid: 'HCl' })
+  const [f, setF] = useState({ experimentId: '', title: '', instructions: '', dueAt: '', acid: 'HCl', stockroom: false })
   const [picked, setPicked] = useState(() => new Set())
   const [q, setQ] = useState('')
   const [busy, setBusy] = useState(false)
@@ -28,9 +28,10 @@ function AssignForm({ experiments, students, onCreated }) {
     try {
       const body = { experimentId: f.experimentId, title: f.title, instructions: f.instructions, dueAt: f.dueAt ? new Date(f.dueAt).toISOString() : null, studentIds: [...picked] }
       if (f.experimentId === 'chem-titration') body.options = { acid: f.acid }
+      else if (f.stockroom && experiments.find(e => e.id === f.experimentId)?.collection) body.options = { stockroom: true }
       const { data } = await api.post('/lab/assignments', body)
       toast.ok(data.message || 'Assigned.')
-      setF({ experimentId: '', title: '', instructions: '', dueAt: '', acid: 'HCl' }); setPicked(new Set())
+      setF({ experimentId: '', title: '', instructions: '', dueAt: '', acid: 'HCl', stockroom: false }); setPicked(new Set())
       onCreated()
     } catch (err) { toast.error(err?.response?.data?.message || 'Could not create the assignment.') }
     finally { setBusy(false) }
@@ -54,6 +55,10 @@ function AssignForm({ experiments, students, onCreated }) {
             <option value="CH3COOH">Ethanoic acid (weak)</option>
           </select>
         </label>
+      )}
+      {experiments.find(e => e.id === f.experimentId)?.collection && (
+        <label className="lab-check" style={{ fontWeight: 400 }}><input type="checkbox" checked={f.stockroom} onChange={e => setF({ ...f, stockroom: e.target.checked })} />
+          Students choose the apparatus themselves from the stockroom (marked). Otherwise the apparatus is already on the bench.</label>
       )}
       <label>Title (optional)<input value={f.title} maxLength={200} onChange={e => setF({ ...f, title: e.target.value })} /></label>
       <label>Instructions to students (optional)<textarea rows={3} maxLength={4000} value={f.instructions} onChange={e => setF({ ...f, instructions: e.target.value })} /></label>
