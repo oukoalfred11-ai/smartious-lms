@@ -46,7 +46,7 @@ const emailFooter = () => `
     <p style="font-size: 12px; line-height: 1.55; color: #6b6b6b; margin: 0 0 8px;">
       Questions? Contact us at
       <a href="mailto:hello@smartioushomeschool.com" style="color: #7D1025;">hello@smartioushomeschool.com</a>
-      or call +254 745 021 212.
+      or call admissions on +254 745 021 212 (academic matters: +254 182 071 920).
     </p>
     <p style="font-size: 11px; color: #999; margin: 0;">
       © ${new Date().getFullYear()} Smartious E-School · Nairobi, Kenya ·
@@ -580,7 +580,89 @@ const sendExamScheduledEmail = async (params) => {
   }
 }
 
+// ─────────────────────────────────────────────────────────
+// ADMISSION PACK EMAIL
+// ─────────────────────────────────────────────────────────
+// Sent once to each new student and parent, separately from the
+// credentials email, with the Admission Pack PDF attached and the steps
+// to read, complete, sign and return it. See lib/admissionPack.js.
+// ─────────────────────────────────────────────────────────
+const escHtml = (v) => String(v == null ? '' : v)
+  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+
+const admissionSteps = (role) => [
+  'Open the attached <strong>Admission Pack</strong> (PDF) and read Part 1' + (role === 'student' ? ' with your parent or guardian.' : ' with your child.'),
+  'Complete Part 2, the Admission Agreement: student and parent details, consents, and the student and parent declarations. You can fill it in on screen and sign electronically, or print it and sign by hand.',
+  'Gather the documents listed in item 5 of the pack: a copy of the passport or birth certificate, a passport photo, the latest school report, any examination certificates and any learning-needs reports.',
+  '<strong>Reply to this email</strong> with the signed agreement and the documents attached.',
+]
+
+const sendAdmissionPackEmail = async ({ to, name, role, studentName, attachmentPath, attachmentName }) => {
+  const t = getTransporter()
+  if (!t) return { success: false, message: 'Email service not configured' }
+  const from = process.env.EMAIL_FROM || 'Smartious Homeschool <hello@smartioushomeschool.com>'
+  const who = role === 'parent' && studentName ? `${escHtml(studentName)}’s admission` : 'your admission'
+  const steps = admissionSteps(role)
+  const html = `<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Your Smartious Admission Pack</title></head>
+<body style="margin: 0; padding: 0; background: #FBFAF5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; color: #1a1a1a;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background: #FBFAF5; padding: 32px 16px;">
+    <tr><td align="center">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 580px; background: #FFFFFF; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 24px rgba(125, 16, 37, 0.08);">
+        <tr><td style="background: linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%); padding: 32px 36px; color: #FBFAF5;">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #C9A030; margin-bottom: 6px;">Smartious E-School · Admissions</div>
+          <div style="font-family: Georgia, 'Times New Roman', serif; font-size: 26px; font-weight: 400; line-height: 1.2;">Welcome to Smartious, ${escHtml(name)}</div>
+          <div style="font-size: 13px; opacity: 0.85; margin-top: 6px;">Your Admission Pack is attached</div>
+        </td></tr>
+        <tr><td style="padding: 30px 36px;">
+          <p style="font-size: 15px; line-height: 1.65; color: #2c2c2c; margin: 0 0 18px;">We are delighted to welcome you. To complete ${who}, please read, fill in and send back the attached Admission Pack.</p>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 22px;">
+            ${steps.map((st, i) => `<tr>
+              <td style="vertical-align: top; width: 34px; padding: 8px 0;"><div style="width: 26px; height: 26px; border-radius: 50%; background: #7D1025; color: #FBFAF5; font-weight: 700; font-size: 13px; text-align: center; line-height: 26px;">${i + 1}</div></td>
+              <td style="padding: 8px 0; font-size: 14px; line-height: 1.6; color: #2c2c2c;">${st}</td>
+            </tr>`).join('')}
+          </table>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background: #FEF3C7; border-left: 4px solid #B45309; border-radius: 6px; margin-bottom: 22px;">
+            <tr><td style="padding: 14px 18px; font-size: 13.5px; line-height: 1.55; color: #7C2D12;">
+              <strong>Lessons begin only after we receive the signed Admission Agreement</strong> and the first term’s fees. Your login details come in a separate email.
+            </td></tr>
+          </table>
+          <p style="font-size: 13.5px; line-height: 1.65; color: #2c2c2c; margin: 0;">Questions about admission or fees: <strong>+254 745 021 212</strong> (call or WhatsApp). Academic questions: <strong>+254 182 071 920</strong>.</p>
+        </td></tr>
+        ${emailFooter()}
+      </table>
+    </td></tr>
+  </table>
+</body></html>`
+  const text = [
+    'Welcome to Smartious, ' + name + '.',
+    '',
+    'Your Admission Pack is attached (PDF). To complete ' + (role === 'parent' && studentName ? studentName + "'s admission" : 'your admission') + ':',
+    ...steps.map((st, i) => (i + 1) + '. ' + st.replace(/<[^>]+>/g, '')),
+    '',
+    "Lessons begin only after we receive the signed Admission Agreement and the first term's fees. Your login details come in a separate email.",
+    '',
+    'Admissions and fees: +254 745 021 212 (call or WhatsApp). Academic questions: +254 182 071 920.',
+    '',
+    '— Smartious E-School',
+  ].join('\n')
+  try {
+    const info = await t.sendMail({
+      from, to,
+      subject: 'Welcome to Smartious — your Admission Pack (please read, sign and return)',
+      text, html,
+      attachments: [{ filename: attachmentName || 'Smartious_Admission_Pack.pdf', path: attachmentPath, contentType: 'application/pdf' }],
+    })
+    console.log('[email] Admission pack sent to ' + to + ' — messageId: ' + info.messageId)
+    return { success: true, messageId: info.messageId }
+  } catch (err) {
+    console.error('[email] Failed to send admission pack to ' + to + ':', err.message)
+    return { success: false, message: err.message }
+  }
+}
+
 module.exports = {
+  sendAdmissionPackEmail,
   sendWelcomeEmail,
   sendLiveClassEmail,
   sendLiveClassEmailBatch,

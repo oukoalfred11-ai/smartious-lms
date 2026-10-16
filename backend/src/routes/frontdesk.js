@@ -451,6 +451,13 @@ router.post('/:id/import', auth, requireRole('admin', 'sales', 'ops_manager'), a
       }
     }
 
+    // ── Admission Pack (best-effort; each person gets it once) ──
+    try {
+      const { sendAdmissionPack } = require('../lib/admissionPack');
+      emailReport.studentPack = (await sendAdmissionPack(student)).sent;
+      emailReport.parentPack = (await sendAdmissionPack(parent, { studentName: `${student.firstName} ${student.lastName}`.trim() })).sent;
+    } catch (e) { console.error('[frontdesk import] admission pack failed:', e.message); }
+
     // ── Mark the lead converted + record the import ──
     lead.status = 'converted';
     lead.importedUserId = student._id;

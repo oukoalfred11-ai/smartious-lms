@@ -921,6 +921,19 @@ function UsersModule({ refreshKey, toast, setUserForm, setUserModal, openAddUser
     }
   }
 
+  const handleSendPack = async (u) => {
+    const name = ((u.firstName || '') + ' ' + (u.lastName || '')).trim()
+    const again = u.admissionPackSentAt ? ' It was last sent on ' + new Date(u.admissionPackSentAt).toLocaleDateString() + '.' : ''
+    if (!window.confirm('Email the Admission Pack to ' + name + ' (' + u.email + ')?' + again)) return
+    try {
+      const res = await api.post('/users/' + u._id + '/admission-pack')
+      toast?.ok?.(res.data?.message || 'Admission pack sent.')
+      loadUsers()
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Could not send the admission pack.')
+    }
+  }
+
   const handleEdit = (u) => {
     setUserForm({
       firstName: u.firstName || '', lastName: u.lastName || '', email: u.email || '',
@@ -1085,6 +1098,12 @@ function UsersModule({ refreshKey, toast, setUserForm, setUserModal, openAddUser
                         <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
                           {u.archived && u.role === 'student' && (
                             <button className="btn btn-sm" style={{ background: '#065F46', color: '#fff', border: 'none' }} onClick={() => handleReinstate(u)}>Reinstate</button>
+                          )}
+                          {(u.role === 'student' || u.role === 'parent') && !u.archived && (
+                            <button className="btn btn-g btn-sm" onClick={() => handleSendPack(u)}
+                              title={u.admissionPackSentAt ? 'Admission pack sent ' + new Date(u.admissionPackSentAt).toLocaleDateString() + ' · click to resend' : 'Email the Admission Pack'}>
+                              {u.admissionPackSentAt ? 'Resend pack' : 'Send pack'}
+                            </button>
                           )}
                           <button className="btn btn-g btn-sm" onClick={() => handleEdit(u)}>Edit</button>
                           <button className="btn btn-d btn-sm" onClick={() => handleDelete(u)}>Delete</button>

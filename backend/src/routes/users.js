@@ -6,6 +6,7 @@ const { auth, requireRole } = require('../middleware/auth');
 const jwt = require('jsonwebtoken');
 const { sendVerificationEmail, sendTeacherMemoEmail } = require('../services/emailService');
 const { sendWelcomeEmail } = require('../lib/email');
+const { sendAdmissionPack } = require('../lib/admissionPack');
 
 // ── Avatar upload setup ───────────────────────────────────
 // Uses in-memory multer + Cloudflare R2 (same proven path as
@@ -651,11 +652,18 @@ router.post('/', auth, requireRole('admin','ops_manager'), async (req, res) => {
       }
     }
 
+    // Admission Pack: a second email with the PDF to read, sign and return.
+    let admissionPack = { sent: false, reason: null };
+    if (['student', 'parent'].includes(user.role) && req.body.sendAdmissionPack !== false) {
+      admissionPack = await sendAdmissionPack(user);
+    }
+
     res.status(201).json({
       success: true,
       user: safe,
       credentials,
       emailStatus,
+      admissionPack,
       message: emailStatus.sent
         ? 'User created successfully. Credentials sent to email.'
         : 'User created successfully. Email delivery failed — share credentials manually.'
@@ -771,6 +779,7 @@ router.post('/:id/create-and-link-parent', auth, requireRole('admin', 'ops_manag
       } catch (mailErr) {
         console.error('Parent welcome email failed:', mailErr.message);
       }
+      await sendAdmissionPack(parent, { studentName: `${student.firstName || ''} ${student.lastName || ''}`.trim() });
     }
 
     // Link both ways — one parent per student
@@ -1081,6 +1090,24 @@ router.patch('/:id/leave', auth, requireRole('admin', 'ops_manager'), async (req
     });
   } catch (e) {
     res.status(e.status || 500).json({ success: false, message: e.message });
+  }
+});
+
+// POST /api/users/:id/admission-pack — (re)send the Admission Pack email
+router.post('/:id/admission-pack', auth, requireRole('admin', 'ops_manager', 'sales'), async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
+    let studentName = null;
+    if (user.role === 'parent' && Array.isArray(user.linkedStudents) && user.linkedStudents.length) {
+      const kid = await User.findById(user.linkedStudents[0]).select('firstName lastName');
+      if (kid) studentName = `${kid.firstName || ''} ${kid.lastName || ''}`.trim();
+    }
+    const r = await sendAdmissionPack(user, { studentName, force: true });
+    if (!r.sent) return res.status(400).json({ success: false, message: r.reason || 'Could not send the admission pack.' });
+    res.json({ success: true, message: 'Admission pack sent to ' + user.email + '.' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
   }
 });
 

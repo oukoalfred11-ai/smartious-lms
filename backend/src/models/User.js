@@ -221,6 +221,7 @@ const userSchema = new mongoose.Schema({
   mustChangePassword: { type: Boolean, default: false }, // Only true for student/parent accounts created by admin
   credentialsSentCount: { type: Number, default: 0 },
   lastCredentialsSentAt: { type: Date },
+  admissionPackSentAt: { type: Date },      // when the Admission Pack email went out (lib/admissionPack.js)
 }, { timestamps: true });
 
 // Hash password before saving (existing hook — DO NOT REMOVE)
