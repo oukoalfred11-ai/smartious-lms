@@ -5,13 +5,15 @@
 #
 # Rules are processed top-to-bottom; first match wins.
 #
-# TRAILING SLASH HANDLING:
-# We rely on prerender.js writing flat .html files
-# (dist/<route>.html instead of dist/<route>/index.html).
-# With flat files + Netlify Pretty URLs default, /foo serves
-# dist/foo.html at 200 without any trailing-slash redirect.
-# A force trailing-slash strip rule (/*/  /:splat  301!) caused
-# a redirect loop and was removed.
+# TRAILING SLASH HANDLING (one URL per page, no trailing slash):
+# scripts/seo-static.mjs writes a FLAT file for every indexable route
+# (dist/<route>.html, never dist/<route>/index.html). For a flat file
+# Netlify serves /foo at 200 and 301s /foo/ to /foo (Pretty URLs,
+# also set in netlify.toml). Slash rules CANNOT be written here:
+# Netlify normalises the trailing slash before matching rules, so
+# "/foo/ /foo 301" loops (it did — see git history). App-only routes
+# served by the SPA fallback are normalised by the inline script at
+# the top of index.html.
 # ═══════════════════════════════════════════════════════════════
 
 # ─── Home page ───────────────────────────────────────────────────
@@ -34,5 +36,15 @@
 # the URLs Google has already crawled from the Kenya hub cards).
 /homeschooling/*         /homeschool-:splat          301
 
+# ─── Renamed documents (the old file names had spaces) ───────────
+# Forced (!) because the old files may still exist in public/, and a
+# plain rule never fires when a file matches. Both encodings of "(2)".
+/Smartious_Company_Portfolio_2026%20(2).pdf      /smartious-portfolio-2026.pdf   301!
+/Smartious_Company_Portfolio_2026%20%282%29.pdf  /smartious-portfolio-2026.pdf   301!
+/Smartious_Fee_Structure_2026%20(2).pdf          /smartious-fees-2026-27.pdf     301!
+/Smartious_Fee_Structure_2026%20%282%29.pdf      /smartious-fees-2026-27.pdf     301!
+
 # ─── SPA fallback — MUST be last so it doesn't override above ────
+# Unknown paths render the app's NotFound page (noindex). The portals
+# (/admin, /teacher, /student…) also depend on this fallback.
 /*                       /index.html                 200

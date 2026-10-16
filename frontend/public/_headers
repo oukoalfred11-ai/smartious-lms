@@ -51,6 +51,83 @@
 /sitemap.xml
   Cache-Control: public, max-age=3600
 
+# Service worker — always revalidate, so a new build's worker (with its
+# per-build cache names) is picked up on the next visit.
+/sw.js
+  Cache-Control: no-cache
+
+# ─── Not for search: sign-in, portals and app screens ───────────
+# X-Robots-Tag is sent for the requested path even when the SPA fallback
+# serves index.html. Exact paths and their sub-paths are both listed
+# because "/admin/*" does not match "/admin" itself.
+/login
+  X-Robots-Tag: noindex
+/admin-login
+  X-Robots-Tag: noindex
+/reset-password
+  X-Robots-Tag: noindex
+/verify-email
+  X-Robots-Tag: noindex
+/portal
+  X-Robots-Tag: noindex
+/paused
+  X-Robots-Tag: noindex
+/admin
+  X-Robots-Tag: noindex
+/admin/*
+  X-Robots-Tag: noindex
+/teacher
+  X-Robots-Tag: noindex
+/teacher/*
+  X-Robots-Tag: noindex
+/student
+  X-Robots-Tag: noindex
+/student/*
+  X-Robots-Tag: noindex
+/parent
+  X-Robots-Tag: noindex
+/parent/*
+  X-Robots-Tag: noindex
+/ops
+  X-Robots-Tag: noindex
+/ops/*
+  X-Robots-Tag: noindex
+/dos
+  X-Robots-Tag: noindex
+/dos/*
+  X-Robots-Tag: noindex
+/qa
+  X-Robots-Tag: noindex
+/qa/*
+  X-Robots-Tag: noindex
+/accounts
+  X-Robots-Tag: noindex
+/accounts/*
+  X-Robots-Tag: noindex
+/sales
+  X-Robots-Tag: noindex
+/sales/*
+  X-Robots-Tag: noindex
+/demo
+  X-Robots-Tag: noindex
+/demo/*
+  X-Robots-Tag: noindex
+/lab
+  X-Robots-Tag: noindex
+/lab/*
+  X-Robots-Tag: noindex
+/classroom/*
+  X-Robots-Tag: noindex
+
+# /enroll and /consult are public marketing pages but thin lead forms
+# (the application form and a booking form) that duplicate /assessment,
+# the indexed lead page. noindex keeps them out of results; follow keeps
+# the links on them counting. Neither is in the sitemap.
+/enroll
+  X-Robots-Tag: noindex, follow
+/consult
+  X-Robots-Tag: noindex, follow
+
 # Security headers — apply to all routes
 # Permissions-Policy: camera=(self) etc. allows THIS SITE to request
 # camera/microphone/screen-share (the Smartious Classroom needs all

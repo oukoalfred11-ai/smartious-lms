@@ -1,85 +1,104 @@
 /*
- * Smartious service worker: offline and low-bandwidth support, phase 1.
+ * Smartious service worker: offline and low-bandwidth support.
  *
- * Strategy, deliberately conservative:
- *  - API calls (/api/...) are NEVER cached: live data and anything behind
- *    authentication always goes to the network.
- *  - Page navigations are network-first with an offline fallback to the
- *    cached app shell, so the app opens even with no connection.
- *  - Hashed static assets (JS/CSS/fonts/images) are cache-first: Vite
- *    fingerprints them, so a cached copy is always the right copy.
- *  - Media and documents the student has already opened (lesson notes,
- *    PDFs, recordings from the school's storage) are cached with a small
- *    LRU cap, so revisiting them costs no data and works offline.
+ * Cache names carry the build id: scripts/seo-static.mjs replaces
+ * __BUILD_ID__ in dist/sw.js on every build, so each deploy installs a new
+ * worker and `activate` deletes every older Smartious cache.
+ *
+ * Strategy:
+ *  - API calls (/api/...) and sockets are NEVER intercepted.
+ *  - Page navigations go to the network. Only the app shell ("/") is kept,
+ *    refreshed on install and on each successful load of "/", and served
+ *    only when the network fails. Individual pages are not stored.
+ *  - Hashed Vite assets (/assets/*) are cache-first: their file names change
+ *    whenever their content does, so a cached copy is always correct.
+ *  - Every other same-origin GET (PDFs, images, /brand/*, /blog/*.jpg,
+ *    /pdfjs/*, fonts) is stale-while-revalidate: served from cache when
+ *    present, refreshed in the background, capped in size.
+ *  - Cross-origin requests are left to the browser. Opaque responses are
+ *    never cached (their status is unknown and they inflate quota).
  */
-const SHELL = 'sm-shell-v1';
-const ASSETS = 'sm-assets-v1';
-const MEDIA = 'sm-media-v1';
-const MEDIA_MAX = 60;
+const VERSION = '__BUILD_ID__';
+const SHELL = 'sm-shell-' + VERSION;
+const ASSETS = 'sm-assets-' + VERSION;
+const STATIC = 'sm-static-' + VERSION;
+const STATIC_MAX = 80;
+const CURRENT = [SHELL, ASSETS, STATIC];
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(SHELL).then((c) => c.addAll(['/'])).then(() => self.skipWaiting()));
+  e.waitUntil(
+    caches.open(SHELL)
+      .then((c) => c.add(new Request('/', { cache: 'reload' })))
+      .catch(() => {})
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => ![SHELL, ASSETS, MEDIA].includes(k)).map((k) => caches.delete(k)))
-    ).then(() => self.clients.claim())
+    caches.keys()
+      .then((keys) => Promise.all(keys.filter((k) => k.startsWith('sm-') && !CURRENT.includes(k)).map((k) => caches.delete(k))))
+      .then(() => self.clients.claim())
   );
 });
 
 async function trimCache(name, max) {
   const cache = await caches.open(name);
   const keys = await cache.keys();
-  if (keys.length > max) await cache.delete(keys[0]);
+  for (let i = 0; i < keys.length - max; i++) await cache.delete(keys[i]);
 }
+
+const cacheable = (res) => res && res.ok && res.type === 'basic';
 
 self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
 
+  // Cross-origin (storage, fonts, analytics): let the browser handle it.
+  if (url.origin !== self.location.origin) return;
+
   // Live data: never cached, never intercepted.
   if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/socket.io')) return;
+  // Partial (Range) requests for media and large PDFs go straight through.
+  if (req.headers.has('range')) return;
 
-  // Navigations: network first, offline fallback to the app shell.
+  // Navigations: network; the shell is the offline fallback only.
   if (req.mode === 'navigate') {
     e.respondWith(
       fetch(req)
         .then((res) => {
-          const copy = res.clone();
-          caches.open(SHELL).then((c) => c.put('/', copy)).catch(() => {});
+          if (url.pathname === '/' && cacheable(res)) {
+            const copy = res.clone();
+            caches.open(SHELL).then((c) => c.put('/', copy)).catch(() => {});
+          }
           return res;
         })
-        .catch(() => caches.match('/'))
+        .catch(() => caches.open(SHELL).then((c) => c.match('/')))
     );
     return;
   }
 
-  // Same-origin static assets: cache first (Vite fingerprints them).
-  if (url.origin === self.location.origin) {
+  // Hashed build assets: cache first.
+  if (url.pathname.startsWith('/assets/')) {
     e.respondWith(
-      caches.match(req).then((hit) => hit || fetch(req).then((res) => {
-        if (res.ok) { const copy = res.clone(); caches.open(ASSETS).then((c) => c.put(req, copy)).catch(() => {}); }
+      caches.open(ASSETS).then((cache) => cache.match(req).then((hit) => hit || fetch(req).then((res) => {
+        if (cacheable(res)) cache.put(req, res.clone()).catch(() => {});
         return res;
-      }))
+      })))
     );
     return;
   }
 
-  // Cross-origin media/documents (school storage, fonts): cache what has
-  // been viewed, with an LRU cap so the phone is never filled up.
-  if (/\.(pdf|png|jpe?g|webp|gif|mp4|webm|mp3|m4a|woff2?)($|\?)/i.test(url.pathname + url.search) ||
-      req.destination === 'video' || req.destination === 'audio' || req.destination === 'font') {
-    e.respondWith(
-      caches.match(req).then((hit) => hit || fetch(req).then((res) => {
-        if (res.ok || res.type === 'opaque') {
-          const copy = res.clone();
-          caches.open(MEDIA).then((c) => c.put(req, copy)).then(() => trimCache(MEDIA, MEDIA_MAX)).catch(() => {});
-        }
+  // Other same-origin files: stale-while-revalidate.
+  e.respondWith(
+    caches.open(STATIC).then((cache) => cache.match(req).then((hit) => {
+      const network = fetch(req).then((res) => {
+        if (cacheable(res)) cache.put(req, res.clone()).then(() => trimCache(STATIC, STATIC_MAX)).catch(() => {});
         return res;
-      }).catch(() => caches.match(req)))
-    );
-  }
+      });
+      if (hit) { e.waitUntil(network.catch(() => {})); return hit; }
+      return network;
+    }))
+  );
 });

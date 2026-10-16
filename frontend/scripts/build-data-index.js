@@ -15,11 +15,17 @@
        slug → listing fields (title, category, excerpt, image, date…),
        meta title/description, and which part file holds the article.
 
+     src/data/generated/publicImages.js  (small, used by the hub and
+       city page components)
+       the local hero/banner images that really exist under public/, so a
+       page never renders an <img> that would 404 (heroes/*.jpg named in
+       the data but never added, for example).
+
    Runs before every `npm run dev` and `npm run build`, so the indexes
    can't drift from the data files. Never edit the generated files.
 ═══════════════════════════════════════════════════════════════════ */
 
-import { readFileSync, readdirSync, writeFileSync, mkdirSync } from 'node:fs'
+import { readFileSync, readdirSync, writeFileSync, mkdirSync, existsSync, statSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
@@ -104,5 +110,25 @@ writeFileSync(join(OUT, 'routeIndex.js'),
   `for (const [mods, slugs] of Object.entries(HOMESCHOOL)) for (const s of slugs.split(' ')) HOMESCHOOL_SLUG_MODULES.set(s, mods.split(','))\n\n` +
   `export const COUNTRY_SLUGS = new Set(${JSON.stringify(countrySlugs)})\n`)
 
+// ── Local images that exist (public/ top level, heroes/, banners/) ─────
+const PUBLIC = join(__dirname, '..', 'public')
+const IMG = /\.(jpe?g|png|webp|avif|gif|svg)$/i
+const images = []
+const walk = (dir, rel) => {
+  if (!existsSync(dir)) return
+  for (const f of readdirSync(dir)) {
+    const p = join(dir, f), r = rel + '/' + f
+    if (statSync(p).isDirectory()) { if (rel === '' ? ['heroes', 'banners'].includes(f) : true) walk(p, r) }
+    else if (IMG.test(f)) images.push(r)
+  }
+}
+walk(PUBLIC, '')
+writeFileSync(join(OUT, 'publicImages.js'),
+  HEADER +
+  `// Local images under public/ (top level, heroes/, banners/). Remote URLs are not listed.\n` +
+  `export const PUBLIC_IMAGES = new Set(${JSON.stringify(images.sort())})\n\n` +
+  `// True for a remote URL or a local image that exists; false for a missing local file or no src.\n` +
+  `export const imageExists = (src) => !!src && (/^(https?:)?\\/\\//.test(src) || /^data:/.test(src) || PUBLIC_IMAGES.has(src.split(/[?#]/)[0]))\n`)
+
 console.log(`[data-index] ${Object.keys(articles).length} articles from ${partFiles.length} parts, ` +
-  `${Object.keys(homeschool).length} /homeschool- slugs from ${slugModules.length} modules, ${countrySlugs.length} countries`)
+  `${Object.keys(homeschool).length} /homeschool- slugs from ${slugModules.length} modules, ${countrySlugs.length} countries, ${images.length} local images`)

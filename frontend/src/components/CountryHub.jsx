@@ -20,7 +20,7 @@
    data file and Smartious renders the full hub automatically.
 ═══════════════════════════════════════════════════════════════════ */
 
-import { useEffect } from 'react'
+import { imageExists } from '../data/generated/publicImages.js'
 
 /* ────────────────────────────────────────────────────────────────
    Country-awareness helpers for cross-market content cleanup.
@@ -32,7 +32,7 @@ import { useEffect } from 'react'
    Africa) that content is replaced with country-neutral operational
    language to avoid diluting local search intent.
    
-   REGION_LABELS: used in the "14+ countries served" trust card to
+   REGION_LABELS: used in the "40+ countries served" trust card to
    frame the geographic distribution around the current country's
    region rather than always leading with East Africa.
    ──────────────────────────────────────────────────────────────── */
@@ -65,132 +65,12 @@ const REGION_LABELS = {
   ukraine:       'Eastern Europe, the diaspora, and East Africa',
 }
 
-/* ISO country codes for hreflang. Format: en-<CC> tells Google
-   the page is English-language content targeting a specific
-   country. Improves regional search indexation. */
-const HREFLANG_MAP = {
-  kenya:'en-ke', ethiopia:'en-et', rwanda:'en-rw',
-  'south-africa':'en-za',
-  egypt:'en-eg', morocco:'en-ma',
-  uae:'en-ae', qatar:'en-qa', 'saudi-arabia':'en-sa',
-  japan:'en-jp', 'south-korea':'en-kr',
-  vietnam:'en-vn', thailand:'en-th',
-  malaysia:'en-my',
-  turkey:'en-tr',
-  kuwait:'en-kw',
-  oman:'en-om',
-  taiwan:'en-tw',
-  ireland:'en-ie',
-  'united-kingdom':'en-gb',
-  india:'en-in',
-  germany:'en-de',
-  romania:'en-ro',
-  ukraine:'en-ua',
-  spain:'en-es',
-  denmark:'en-dk',
-  france:'en-fr',
-  italy:'en-it',
-  poland:'en-pl',
-  portugal:'en-pt',
-  'czech-republic':'en-cz',
-  belgium:'en-be',
-  sweden:'en-se',
-  netherlands:'en-nl',
-  norway:'en-no',
-  'new-zealand':'en-nz',
-  austria:'en-at',
-  hungary:'en-hu',
-  finland:'en-fi',
-  greece:'en-gr',
-  azerbaijan:'en-az',
-  georgia:'en-ge',
-  pakistan:'en-pk',
-  australia:'en-au',
-  luxembourg:'en-lu',
-  switzerland:'en-ch',
-  slovakia:'en-sk',
-  slovenia:'en-si',
-  croatia:'en-hr',
-  serbia:'en-rs',
-  bulgaria:'en-bg',
-  albania:'en-al',
-  'north-macedonia':'en-mk',
-  montenegro:'en-me',
-  'bosnia-and-herzegovina':'en-ba',
-  kosovo:'en-xk',
-  zambia:'en-zm',
-  zimbabwe:'en-zw',
-  botswana:'en-bw',
-  namibia:'en-na',
-  algeria:'en-dz',
-  tunisia:'en-tn',
-  mauritius:'en-mu',
-  ghana:'en-gh',
-  angola:'en-ao',
-  drc:'en-cd',
-  mexico:'en-mx',
-  brazil:'en-br',
-  colombia:'en-co',
-  argentina:'en-ar',
-  chile:'en-cl',
-  peru:'en-pe',
-  ecuador:'en-ec',
-  panama:'en-pa',
-  'costa-rica':'en-cr',
-  'dominican-republic':'en-do',
-  uruguay:'en-uy',
-  guatemala:'en-gt',
-  paraguay:'en-py',
-  bolivia:'en-bo',
-  venezuela:'en-ve',
-  'puerto-rico':'en-pr',
-  israel:'en-il',
-  jordan:'en-jo',
-  iraq:'en-iq',
-  cyprus:'en-cy',
-  lebanon:'en-lb',
-  myanmar:'en-mm',
-  maldives:'en-mv',
-  china:'en-hk',
-  bangladesh:'en-bd',
-  nepal:'en-np',
-  usa:'en-us',
-  canada:'en-ca',
-}
-
-/* Idempotent hreflang tag injection. Adds one rel=alternate tag for
-   the current country's en-<CC>, one for the general en fallback,
-   and one x-default pointing to the homepage. Cleanup removes any
-   Smartious hreflang tags this instance created, so navigating to
-   another hub doesn't leave stale tags in the head. */
-function useHreflang(countrySlug) {
-  useEffect(() => {
-    if (typeof document === 'undefined') return
-    const hreflangCC = HREFLANG_MAP[countrySlug]
-    if (!hreflangCC) return
-    
-    const url = `https://smartioushomeschool.com/online-school/${countrySlug}`
-    const tags = [
-      { rel: 'alternate', hreflang: hreflangCC, href: url },
-      { rel: 'alternate', hreflang: 'en',       href: url },
-      { rel: 'alternate', hreflang: 'x-default', href: 'https://smartioushomeschool.com/' },
-    ]
-    
-    const created = tags.map(({ rel, hreflang, href }) => {
-      const el = document.createElement('link')
-      el.setAttribute('rel', rel)
-      el.setAttribute('hreflang', hreflang)
-      el.setAttribute('href', href)
-      el.setAttribute('data-smartious-hreflang', '1')
-      document.head.appendChild(el)
-      return el
-    })
-    
-    return () => {
-      created.forEach(el => { try { el.remove() } catch (_) {} })
-    }
-  }, [countrySlug])
-}
+/* No hreflang here. Country hubs are different pages for different
+   markets, not translations of one another, so en-<CC> alternates between
+   them were wrong (and some codes were invalid, e.g. en-xk). hreflang is
+   used only for real translations: the /ar/* Arabic pages and the English
+   pages they translate (scripts/seo-static.mjs). */
+const ORG_ID = 'https://smartioushomeschool.com/#organization'
 
 function CountryHub({
   country, cities, setCurrentCity,
@@ -198,7 +78,6 @@ function CountryHub({
   SMARTIOUS_RATING, SMARTIOUS_REVIEWS,
   GOOGLE_REVIEWS_URL, LEAVE_REVIEW_URL,
 }) {
-  useHreflang(country.slug)
   // Rotate which 3 of the 5 verified reviews display, keyed off the country
   // slug. Same real reviews everywhere (never fabricated per-country) — this
   // just avoids every hub page rendering byte-identical review HTML.
@@ -208,25 +87,24 @@ function CountryHub({
   const displayReviews = [...SMARTIOUS_REVIEWS.slice(reviewOffset), ...SMARTIOUS_REVIEWS.slice(0, reviewOffset)].slice(0, 3)
   return (
     <>
-      {/* Schema */}
+      {/* Schema: the service this hub offers, tied to the Organization in
+          index.html by @id. Numeric price only (Offer.price must be a number);
+          no aggregateRating (self-serving review markup on our own pages). */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-        '@context':'https://schema.org','@type':'EducationalOrganization',
-        '@id':'https://smartioushomeschool.com' + country.hub + '#org',
-        'name':'Smartious — Online Homeschooling Across ' + country.name,
+        '@context':'https://schema.org','@type':'Service',
+        'name':'Online school and homeschool in ' + country.name,
         'url':'https://smartioushomeschool.com' + country.hub,
-        'aggregateRating': {
-          '@type':'AggregateRating',
-          'ratingValue': SMARTIOUS_RATING.stars,
-          'reviewCount': SMARTIOUS_RATING.count,
-          'bestRating': 5,
-          'worstRating': 1,
-        },
+        'provider':{'@id': ORG_ID},
         'description': country.heroSubhead + ' ' + country.heroValueProp,
-        'areaServed': cities.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
-        'offers': country.competitors.filter(c => c.isUs).map(c => ({
-          '@type':'Offer', 'price': c.feesUsd, 'priceCurrency':'USD',
-          'description': 'Annual tuition range for ' + c.curriculum,
-        })),
+        'serviceType':'Online school and homeschooling',
+        'areaServed': cities.length
+          ? cities.map(c => ({ '@type':'Place','name': [c.name, c.county].filter(Boolean).join(', ') }))
+          : { '@type':'Country','name': country.name },
+        'offers': {
+          '@type':'Offer', 'price': 423, 'priceCurrency':'USD',
+          'description':'From USD 423/month for Primary, payable termly; varies by curriculum and level',
+          'priceSpecification': { '@type':'UnitPriceSpecification', 'price': 423, 'priceCurrency':'USD', 'unitCode':'MON', 'unitText':'month' },
+        },
       })}}/>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context':'https://schema.org','@type':'BreadcrumbList',
@@ -249,12 +127,14 @@ function CountryHub({
         background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
         color:'#fff', padding:'72px 0 56px', overflow:'hidden',
       }}>
-        <img src={country.heroImage} alt="" aria-hidden="true"
-          loading="eager"
-          fetchPriority="high"
-          decoding="async"
-          onError={e => { e.currentTarget.style.display='none' }}
-          style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
+        {imageExists(country.heroImage) && (
+          <img src={country.heroImage} alt="" aria-hidden="true"
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+            onError={e => { e.currentTarget.style.display='none' }}
+            style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
+        )}
         <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
         <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
           <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow} · Virtual school</div>
@@ -264,20 +144,20 @@ function CountryHub({
           <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
           <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
           <div style={{display:'flex',gap:14,flexWrap:'wrap',alignItems:'center'}}>
-            <button onClick={() => nav('/assessment?from=' + country.slug)}
-              style={{background:V.gold3,color:V.ink,border:'none',padding:'18px 36px',borderRadius:10,fontSize:16,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,letterSpacing:'.01em',boxShadow:'0 8px 24px rgba(201,151,58,.35)',transition:'all .18s ease'}}
+            <a href={'/assessment?from=' + country.slug} onClick={(e) => { if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return; e.preventDefault(); nav('/assessment?from=' + country.slug) }}
+              style={{textDecoration:'none',background:V.gold3,color:V.ink,border:'none',padding:'18px 36px',borderRadius:10,fontSize:16,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,letterSpacing:'.01em',boxShadow:'0 8px 24px rgba(201,151,58,.35)',transition:'all .18s ease'}}
               onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(201,151,58,.5)' }}
               onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(201,151,58,.35)' }}>
               Book assessment
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
-            <button onClick={() => nav('/consult')}
-              style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'16px 32px',borderRadius:10,fontSize:16,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,letterSpacing:'.01em',transition:'all .18s ease'}}
+            </a>
+            <a href={'/consult'} onClick={(e) => { if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return; e.preventDefault(); nav('/consult') }}
+              style={{textDecoration:'none',background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'16px 32px',borderRadius:10,fontSize:16,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,letterSpacing:'.01em',transition:'all .18s ease'}}
               onMouseEnter={(e) => { e.currentTarget.style.borderColor = V.gold3; e.currentTarget.style.color = V.gold3; e.currentTarget.style.transform = 'translateY(-2px)' }}
               onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.55)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'translateY(0)' }}>
               Book Free Consultation
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
+            </a>
             <span style={{fontSize:12.5,color:'rgba(255,255,255,.62)',letterSpacing:'.01em',width:'100%'}}>
               Admissions reviews every request &middot; assessment fee billed only on acceptance
             </span>
@@ -428,14 +308,14 @@ function CountryHub({
           <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14,marginBottom:32}}>
             {[
               {h:'Founder-led education company', p: EAST_AFRICA_HUBS.has(country.slug)
-                ? 'Founded 2019 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered education company operating two physical centres (Diamond Plaza Parklands HQ established 2022, Karen Hardy centre established 2023) alongside the online platform.'
-                : 'Founded 2019 by Alfred Ouko (BEd Mathematics & Physics). Smartious operates a full teaching team of 11 with two international-standard operational centres established 2022 and 2023. Not a marketplace, not a freelance network.'},
+                ? 'Founded 2018 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered education company operating two physical centres (Diamond Plaza Parklands HQ established 2022, Karen Hardy centre established 2023) alongside the online platform.'
+                : 'Founded 2018 by Alfred Ouko (BEd Mathematics & Physics). Smartious operates a full teaching team of 11 with two international-standard operational centres established 2022 and 2023. Not a marketplace, not a freelance network.'},
               {h: EAST_AFRICA_HUBS.has(country.slug) ? 'Two physical Nairobi centres' : 'Two operational centres',
                 p: EAST_AFRICA_HUBS.has(country.slug)
                   ? 'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'
                   : `Live teaching is delivered to ${country.name} families from two international-standard operational centres, established 2022 and 2023. Teachers work from professional academic facilities with accountability and infrastructure beyond marketplace or freelance models.`},
               {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
-              {h:'120+ countries served', p: `Active students in ${country.name} and 13 other markets across ${REGION_LABELS[country.slug] || 'Africa, the Gulf, Europe and Asia'}. Verifiable through cross-country cohort interaction in live classes.`},
+              {h:'40+ countries served', p: `Active students in ${country.name} and in more than 40 countries across ${REGION_LABELS[country.slug] || 'Africa, the Gulf, Europe and Asia'}. Verifiable through cross-country cohort interaction in live classes.`},
               {h:'Ontario Diploma (OSSD) partnership', p:'Smartious students can earn the Ontario Secondary School Diploma through our partnership with Canadian Cross International School (Ontario-inspected private school). The OSSD is recognised by Canadian universities (OUAC), US universities (Common Application), UK universities (UCAS) and globally — particularly valuable for Canadian U15 applications.'},
               {h: EAST_AFRICA_HUBS.has(country.slug) ? '6 international curricula' : '5 international curricula',
                 p: EAST_AFRICA_HUBS.has(country.slug)
@@ -689,7 +569,7 @@ function CountryHub({
               {h:'Small class sizes',p:'Online tier classes have four to six students. Online Plus has smaller groups. Premium is one-on-one. Class size affects individual attention, question response time, and student speaking time during class.'},
               {h:'Progress monitoring',p:'Weekly parent dashboards showing attendance and assessment results. Monthly written subject reports from each teacher. Termly comprehensive reports covering academic progress, study habits and university preparation.'},
               {h:'Parent communication',p:'Direct communication with subject teachers and form tutors via the parent portal. Email for admissions and pastoral matters, with response within one business day. Scheduled parent-teacher meetings each term.'},
-              {h:'Global student community',p:'Live classes bring together students from across 14 countries. Wednesday afternoon enrichment programmes &mdash; coding, robotics, debate, Model UN, chess, journalism, leadership &mdash; develop collaborative learning across geographies.'},
+              {h:'Global student community',p:'Live classes bring together students from more than 40 countries. Wednesday afternoon enrichment programmes &mdash; coding, robotics, debate, Model UN, chess, journalism, leadership &mdash; develop collaborative learning across geographies.'},
               {h:'University admissions guidance',p:'Progressive guidance from Year 10 onwards. UCAS, Common Application, OUAC, UAC and direct university application support. Personal statement coaching, interview preparation and offer-management guidance.'},
             ].map((c,i) => (
               <div key={i} style={{padding:'20px 22px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,borderTop:`3px solid ${V.gold3}`}}>
@@ -717,7 +597,7 @@ function CountryHub({
               <p style={{fontSize:13.5,color:V.gold3,fontWeight:600,letterSpacing:'.04em',textTransform:'uppercase',margin:'0 0 18px'}}>Founder, Smartious Homeschool &amp; eSchool</p>
 
               <p style={{fontSize:14.5,color:V.sl,lineHeight:1.75,margin:'0 0 16px'}}>
-                Alfred Ouko is the founder of Smartious Homeschool &amp; eSchool, established in 2019 while studying at the University of Nairobi. He has grown the organisation from a tuition support service into an international online school serving families across 14 countries, including {country.founderBioCountrySpecific}.
+                Alfred Ouko is the founder of Smartious Homeschool &amp; eSchool, established in 2018 while studying at the University of Nairobi. He has grown the organisation from a tuition support service into an international online school serving families across more than 40 countries, including {country.founderBioCountrySpecific}.
               </p>
 
               <div style={{marginBottom:18}}>
@@ -777,10 +657,10 @@ function CountryHub({
           <div style={{textAlign:'center',marginBottom:40,maxWidth:780,marginLeft:'auto',marginRight:'auto'}}>
             <div className="eyebrow" style={{justifyContent:'center'}}>Smartious worldwide</div>
             <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
-              {country.adjective} students join a 14+ country global cohort
+              {country.adjective} students join a 40+ country global cohort
             </h2>
             <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>
-              Live classes bring together students from across Africa, the Gulf, Europe and Asia. A {country.name} student in our Year 11 IGCSE Mathematics class will be alongside peers in Cairo, Dubai, Bangkok, Seoul, Casablanca and Kigali. The Wednesday enrichment programmes (debate, Model UN, robotics, journalism) operate as one global classroom rather than thirteen separate national ones.
+              Live classes bring together students from across Africa, the Gulf, Europe and Asia. A {country.name} student in our Year 11 IGCSE Mathematics class will be alongside peers in Cairo, Dubai, Bangkok, Seoul, Casablanca and Kigali. The Wednesday enrichment programmes (debate, Model UN, robotics, journalism) operate as one global classroom rather than many separate national ones.
             </p>
           </div>
           {[
@@ -845,19 +725,19 @@ function CountryHub({
               Two-gate funnel: form submission → admissions review → fee invoice on
               acceptance → assessment → enrolment decision. No other CTAs anywhere. */}
           <div style={{display:'flex',justifyContent:'center',marginBottom:18,gap:14,flexWrap:'wrap'}}>
-            <button onClick={() => nav('/assessment?from=' + country.slug)} style={{background:V.gold3,color:V.ink,border:'none',padding:'20px 40px',borderRadius:10,fontSize:16,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,letterSpacing:'.01em',boxShadow:'0 10px 28px rgba(201,151,58,.4)',transition:'all .18s ease'}}
+            <a href={'/assessment?from=' + country.slug} onClick={(e) => { if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return; e.preventDefault(); nav('/assessment?from=' + country.slug) }} style={{textDecoration:'none',background:V.gold3,color:V.ink,border:'none',padding:'20px 40px',borderRadius:10,fontSize:16,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,letterSpacing:'.01em',boxShadow:'0 10px 28px rgba(201,151,58,.4)',transition:'all .18s ease'}}
               onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 36px rgba(201,151,58,.55)' }}
               onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 28px rgba(201,151,58,.4)' }}>
               Book assessment
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
-            <button onClick={() => nav('/consult')}
-              style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'18px 36px',borderRadius:10,fontSize:16,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,letterSpacing:'.01em',transition:'all .18s ease'}}
+            </a>
+            <a href={'/consult'} onClick={(e) => { if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return; e.preventDefault(); nav('/consult') }}
+              style={{textDecoration:'none',background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'18px 36px',borderRadius:10,fontSize:16,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,letterSpacing:'.01em',transition:'all .18s ease'}}
               onMouseEnter={(e) => { e.currentTarget.style.borderColor = V.gold3; e.currentTarget.style.color = V.gold3; e.currentTarget.style.transform = 'translateY(-2px)' }}
               onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.55)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'translateY(0)' }}>
               Book Free Consultation
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
+            </a>
           </div>
 
           {/* Process explanation — replaces the old fee-transparency paragraph */}

@@ -44,6 +44,7 @@ import {
   IRELAND_COUNTRY, UK_CITIES, UK_COUNTRY, INDIA_CITIES, INDIA_COUNTRY, GERMANY_CITIES,
   GERMANY_COUNTRY, ROMANIA_CITIES, ROMANIA_COUNTRY, UKRAINE_CITIES, UKRAINE_COUNTRY,
   VIETNAM_CITIES, VIETNAM_COUNTRY, THAILAND_CITIES, THAILAND_COUNTRY,
+  NIGERIA_CITIES, NIGERIA_COUNTRY, BAHRAIN_CITIES, BAHRAIN_COUNTRY,
 } from '../data/lazyData.js'
 import { CURRICULA } from '../data/curricula.js'
 import { SERVICES } from '../data/services.js'
@@ -1071,7 +1072,7 @@ function GuideCrossLinks({ guideSlug, guideName, hubHref, hubName }) {
   )
 }
 
-const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','tuition-uk','uk-area','homeschooling-kenya','kenya-city','virtual-school-kenya','virtual-school-ukraine','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschooling-malaysia','malaysia-city','homeschooling-turkey','turkey-city','homeschooling-kuwait','kuwait-city','homeschooling-oman','oman-city','homeschooling-taiwan','taiwan-city','homeschooling-ireland','ireland-city','homeschooling-united-kingdom','uk-city','homeschooling-india','india-city','homeschooling-germany','germany-city','homeschooling-romania','romania-city','homeschooling-ukraine','ukraine-city','homeschooling-spain','spain-city','homeschooling-denmark','denmark-city','homeschooling-france','france-city','homeschooling-italy','italy-city','homeschooling-poland','poland-city','homeschooling-portugal','portugal-city','homeschooling-czech-republic','czech-city','homeschooling-belgium','belgium-city','homeschooling-sweden','sweden-city','homeschooling-netherlands','netherlands-city','homeschooling-norway','norway-city','homeschooling-new-zealand','new-zealand-city','homeschooling-austria','austria-city','homeschooling-hungary','hungary-city','homeschooling-finland','finland-city','homeschooling-greece','greece-city','homeschooling-azerbaijan','azerbaijan-city','homeschooling-georgia','georgia-city','homeschooling-pakistan','pakistan-city','homeschooling-australia','australia-city','homeschooling-luxembourg','luxembourg-city-page','homeschooling-switzerland','switzerland-city','homeschooling-slovakia','slovakia-city','homeschooling-slovenia','slovenia-city','homeschooling-croatia','croatia-city','homeschooling-serbia','serbia-city','homeschooling-bulgaria','bulgaria-city','homeschooling-albania','albania-city','homeschooling-north-macedonia','north-macedonia-city','homeschooling-montenegro','montenegro-city','homeschooling-bosnia','bosnia-city','homeschooling-kosovo','kosovo-city','homeschooling-zambia','zambia-city','homeschooling-zimbabwe','zimbabwe-city','homeschooling-botswana','botswana-city','homeschooling-namibia','namibia-city','homeschooling-algeria','algeria-city','homeschooling-tunisia','tunisia-city','homeschooling-mauritius','mauritius-city','homeschooling-ghana','ghana-city','homeschooling-angola','angola-city','homeschooling-drc','drc-city','homeschooling-mexico','mexico-city-page','homeschooling-brazil','brazil-city','homeschooling-colombia','colombia-city','homeschooling-argentina','argentina-city','homeschooling-chile','chile-city','homeschooling-peru','peru-city','homeschooling-ecuador','ecuador-city','homeschooling-panama','panama-city-page','homeschooling-costa-rica','costa-rica-city','homeschooling-dominican-republic','dominican-city','homeschooling-uruguay','uruguay-city','homeschooling-guatemala','guatemala-city-page','homeschooling-paraguay','paraguay-city','homeschooling-bolivia','bolivia-city','homeschooling-venezuela','venezuela-city','homeschooling-puerto-rico','puerto-rico-city','homeschooling-israel','israel-city','homeschooling-jordan','jordan-city','homeschooling-iraq','iraq-city','homeschooling-cyprus','cyprus-city','homeschooling-lebanon','lebanon-city','homeschooling-myanmar','myanmar-city','homeschooling-maldives','maldives-city','homeschooling-china','china-city','homeschooling-bangladesh','bangladesh-city','homeschooling-nepal','nepal-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','assessment','contact','privacy','terms','cookies','gdpr','child-protection','academic-integrity','ai-policy','inclusion-policy','language-policy','article']
+const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','tuition-uk','uk-area','homeschooling-kenya','kenya-city','virtual-school-kenya','virtual-school-ukraine','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschooling-malaysia','malaysia-city','homeschooling-turkey','turkey-city','homeschooling-kuwait','kuwait-city','homeschooling-nigeria','nigeria-city','homeschooling-bahrain','bahrain-city','homeschooling-oman','oman-city','homeschooling-taiwan','taiwan-city','homeschooling-ireland','ireland-city','homeschooling-united-kingdom','uk-city','homeschooling-india','india-city','homeschooling-germany','germany-city','homeschooling-romania','romania-city','homeschooling-ukraine','ukraine-city','homeschooling-spain','spain-city','homeschooling-denmark','denmark-city','homeschooling-france','france-city','homeschooling-italy','italy-city','homeschooling-poland','poland-city','homeschooling-portugal','portugal-city','homeschooling-czech-republic','czech-city','homeschooling-belgium','belgium-city','homeschooling-sweden','sweden-city','homeschooling-netherlands','netherlands-city','homeschooling-norway','norway-city','homeschooling-new-zealand','new-zealand-city','homeschooling-austria','austria-city','homeschooling-hungary','hungary-city','homeschooling-finland','finland-city','homeschooling-greece','greece-city','homeschooling-azerbaijan','azerbaijan-city','homeschooling-georgia','georgia-city','homeschooling-pakistan','pakistan-city','homeschooling-australia','australia-city','homeschooling-luxembourg','luxembourg-city-page','homeschooling-switzerland','switzerland-city','homeschooling-slovakia','slovakia-city','homeschooling-slovenia','slovenia-city','homeschooling-croatia','croatia-city','homeschooling-serbia','serbia-city','homeschooling-bulgaria','bulgaria-city','homeschooling-albania','albania-city','homeschooling-north-macedonia','north-macedonia-city','homeschooling-montenegro','montenegro-city','homeschooling-bosnia','bosnia-city','homeschooling-kosovo','kosovo-city','homeschooling-zambia','zambia-city','homeschooling-zimbabwe','zimbabwe-city','homeschooling-botswana','botswana-city','homeschooling-namibia','namibia-city','homeschooling-algeria','algeria-city','homeschooling-tunisia','tunisia-city','homeschooling-mauritius','mauritius-city','homeschooling-ghana','ghana-city','homeschooling-angola','angola-city','homeschooling-drc','drc-city','homeschooling-mexico','mexico-city-page','homeschooling-brazil','brazil-city','homeschooling-colombia','colombia-city','homeschooling-argentina','argentina-city','homeschooling-chile','chile-city','homeschooling-peru','peru-city','homeschooling-ecuador','ecuador-city','homeschooling-panama','panama-city-page','homeschooling-costa-rica','costa-rica-city','homeschooling-dominican-republic','dominican-city','homeschooling-uruguay','uruguay-city','homeschooling-guatemala','guatemala-city-page','homeschooling-paraguay','paraguay-city','homeschooling-bolivia','bolivia-city','homeschooling-venezuela','venezuela-city','homeschooling-puerto-rico','puerto-rico-city','homeschooling-israel','israel-city','homeschooling-jordan','jordan-city','homeschooling-iraq','iraq-city','homeschooling-cyprus','cyprus-city','homeschooling-lebanon','lebanon-city','homeschooling-myanmar','myanmar-city','homeschooling-maldives','maldives-city','homeschooling-china','china-city','homeschooling-bangladesh','bangladesh-city','homeschooling-nepal','nepal-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','assessment','contact','privacy','terms','cookies','gdpr','child-protection','academic-integrity','ai-policy','inclusion-policy','language-policy','article']
 
 // ─────────────────────────────────────────────────────────────────
 // Google Business Profile reviews — Smartious Homeschool & Tuition
@@ -1599,16 +1600,16 @@ const FEE_OFFER = { '@type': 'Offer', 'priceCurrency': 'USD', 'price': 423, 'des
 const TUITION_OFFER = { '@type': 'Offer', 'priceCurrency': 'USD', 'price': 15, 'description': 'per hour, one-to-one online tuition' }
 const PAGE_META = {
   'tuition-nairobi': {
-    title: 'Private Tutors in Nairobi | IGCSE, A-Level, IB & CBC Tuition | Smartious',
-    desc: 'One-to-one tuition in Nairobi, at home or online: Cambridge IGCSE and A-Level, IB, Pearson Edexcel, American and CBC, with qualified subject specialists. Online tuition USD 15/hour.',
+    title: 'Tutors in Nairobi | IGCSE, A-Level, IB & CBC | Smartious',
+    desc: 'One-to-one tuition in Nairobi, at home or online: IGCSE, A-Level, IB, Edexcel, American and CBC with qualified specialists. Online USD 15/hour.',
   },
   'homeschool': {
-    title: 'Homeschooling with Smartious | Cambridge, IB, American & CBC | Smartious',
-    desc: 'A full homeschool programme with qualified teachers: live lessons, a structured curriculum, assessments and reports, for families in Kenya and worldwide. From USD 423/month for Primary.',
+    title: 'Online Homeschool, Live Classes from USD 423/month',
+    desc: 'A full homeschool with live lessons from qualified teachers, a structured curriculum and reports. From USD 423/month (Primary). January 2027 intake.',
   },
   'tuition': {
-    title: 'Private Tuition | One-to-One Online Tutors for IGCSE, A-Level & IB | Smartious',
-    desc: 'One-to-one online tuition in any subject at any level, from primary to IGCSE, A-Level and IB, with qualified subject specialists. USD 15/hour.',
+    title: 'Online Tutors from USD 15/hour | IGCSE, A-Level, IB',
+    desc: 'Live one-to-one online tuition in any subject and level, from primary to IGCSE, A-Level and IB, with qualified specialists. USD 15/hour.',
   },
   'languages': {
     title: 'Language Courses | French, Spanish, German, Mandarin, Arabic & Kiswahili | Smartious',
@@ -1632,7 +1633,7 @@ const PAGE_META = {
   },
   'calendar': {
     title: 'Academic Calendar 2026-27 | Term Dates | Smartious',
-    desc: 'Smartious term dates for 2026-27: Term 1 from 25 August 2026, Term 2 from 5 January 2027 and Term 3 from 13 April 2027, with half-terms and examination periods.',
+    desc: 'Smartious term dates 2026–27: Term 1 from 25 August 2026, Term 2 from 5 January 2027 (January intake), Term 3 from 13 April 2027.',
   },
   'events': {
     title: 'Events | Smartious Homeschool & eSchool',
@@ -1679,8 +1680,8 @@ const PAGE_META = {
     desc: 'The language we teach in, how we support students learning English, and how we value every family’s languages.',
   },
   home: {
-    title: 'Online School, Virtual School & Homeschool | IGCSE, A-Level, IB & American — Smartious',
-    desc: 'Accredited online homeschool serving UAE, UK, Canada, Australia, Nigeria and Kenya. Cambridge IGCSE, A-Level, IB Diploma, Edexcel and American curricula. Live classes, qualified teachers, from USD 15/hour for 1-on-1 tuition · from USD 423/month for full homeschool programmes.',
+    title: 'Online School & Homeschool from USD 423/month | Smartious',
+    desc: 'Accredited online homeschool with live classes: Cambridge IGCSE, A-Level, IB, Edexcel and American. From USD 423/month. January 2027 intake: apply now.',
   },
   'homeschooling-malaysia': {
     title: 'Online School, Virtual School & Homeschool Malaysia | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
@@ -1999,20 +2000,20 @@ const PAGE_META = {
     desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS) for Ukrainian families in-country and diaspora — Kyiv (Grammarly + GitLab + MacPaw + Preply + PSI/KIS/BISU alternative), Lviv (SoftServe HQ + EPAM Ukraine + Intellias + N-iX + Ukrainian Catholic University), Kharkiv (NIX Solutions + GlobalLogic + EPAM tech), Dnipro (Interpipe + Metinvest industrial), Odesa (Luxoft + Port of Odesa maritime), Ivano-Frankivsk (western Ukraine safe haven). Distance learning fully legal under 2020 Law on Complete General Secondary Education. Refugee family discounted rates. From USD 423/month personalized.',
   },
   assessment: {
-    title: 'Book Academic Assessment | Admissions Request — Smartious',
-    desc: 'Request an academic assessment for your child. Our Head of Admissions reviews every request within three business days. If accepted, the assessment fee is invoiced before the diagnostic is scheduled. Admission is determined on assessment results.',
+    title: 'Book an Academic Assessment | Smartious Admissions',
+    desc: 'Request an assessment for your child. Admissions reviews every request within three business days. January 2027 intake: Term 2 starts 5 January 2027.',
   },
   about: {
-    title: 'About Smartious | Homeschooling & eSchool in Nairobi, Kenya',
-    desc: 'Learn about Smartious Homeschool & eSchool — an international online school founded in Nairobi, delivering accredited curricula to families across Kenya and the diaspora since 2018.',
+    title: 'About Smartious | Online School Founded in Nairobi, 2018',
+    desc: 'Smartious Homeschool & eSchool: an online school founded in Nairobi in 2018, delivering accredited curricula in live classes to families in 40+ countries.',
   },
   curricula: {
-    title: 'Curricula | IGCSE, A-Level, IB, Edexcel & CBC — Smartious',
-    desc: 'Explore the curricula offered by Smartious — Cambridge IGCSE and A-Level, IB Diploma, Pearson Edexcel, the British and American curricula, and Kenya\'s CBC. Taught by degree-qualified specialists.',
+    title: 'Curricula: IGCSE, A-Level, IB, Edexcel & CBC | Smartious',
+    desc: 'Cambridge IGCSE and A-Level, IB, Pearson Edexcel, British, American and Kenya CBC, taught in live classes by specialists. From USD 423/month.',
   },
   services: {
-    title: 'Our Services | Homeschooling, Online School & Tuition — Smartious',
-    desc: 'Smartious services — homeschooling at home, the Parklands learning centre, the online Virtual School, private tuition, the Mshauri AI tutor, and intensive exam preparation.',
+    title: 'Services: Homeschool, Online School & Tuition | Smartious',
+    desc: 'Homeschooling at home, the Parklands learning centre, the live online Virtual School, tuition at USD 15/hour, the Mshauri AI tutor and exam preparation.',
   },
   'tuition-uk': {
     title: 'Private Tuition UK — Online Cambridge, A-Level, IB, 11+ | Smartious',
@@ -2023,12 +2024,12 @@ const PAGE_META = {
     desc: 'Live online and in-person private tuition in select UK areas — Cambridge IGCSE, A-Level, IB Diploma, 11+ Common Entrance preparation. From USD 15/hour.',
   },
   pricing: {
-    title: 'Fee Structure 2026 | Homeschool & Tuition Fees — Smartious',
-    desc: 'Smartious 2026 fee structure — one clear fee for homeschool programmes (from USD 423/month, paid termly), A-Level, IB, single subjects and private tuition.',
+    title: 'Fees 2026–27: from USD 423/month | Smartious',
+    desc: 'Online school fees from USD 423/month for Primary, payable termly; they vary by curriculum and level. Tuition USD 15/hour. January 2027 intake.',
   },
   programs: {
-    title: 'Programmes | Homeschool, Tuition, IUFP & Study Abroad — Smartious',
-    desc: 'Smartious programmes — full homeschooling, private tuition, the International University Foundation Programme (IUFP) and study-abroad placement support.',
+    title: 'Programmes: Homeschool, Tuition, IUFP & Study Abroad',
+    desc: 'Live online homeschooling from USD 423/month, one-to-one tuition at USD 15/hour, the IUFP and study-abroad placement support from Smartious.',
   },
   activities: {
     title: 'Student Activities, Sports & Enrichment — Smartious Homeschool',
@@ -2039,28 +2040,28 @@ const PAGE_META = {
     desc: 'Smartious delivers accredited online education to African diaspora families in the UK, UAE, USA and Canada — internationally recognised curricula, taught live from Nairobi.',
   },
   faq: {
-    title: 'Frequently Asked Questions | Homeschooling — Smartious',
-    desc: 'Answers to common questions about homeschooling with Smartious — curricula, fees, enrolment, the online school, tutors and examinations.',
+    title: 'FAQ: Fees, Live Classes & Enrolment | Smartious',
+    desc: 'Answers about homeschooling with Smartious: fees from USD 423/month, live classes, curricula, the January 2027 intake, tutors and examinations.',
   },
   blog: {
     title: 'Blog & Resources | Homeschooling & Curricula — Smartious',
     desc: 'Expert articles from Smartious on homeschooling, choosing a curriculum, exam preparation and AI-supported learning for families in Kenya and worldwide.',
   },
   teachers: {
-    title: 'Meet Our Team | Qualified Homeschool Teachers & Leadership — Smartious',
-    desc: 'Meet the Smartious teaching team — qualified, experienced subject specialists delivering Cambridge IGCSE, A-Level, IB and CBC education to students in Kenya and worldwide.',
+    title: 'Meet Our Team | Qualified Teachers | Smartious',
+    desc: 'Meet the Smartious teaching team: qualified subject specialists teaching live Cambridge IGCSE, A-Level, IB and CBC classes in Kenya and worldwide.',
   },
   enroll: {
-    title: 'Enroll Now | Begin Homeschooling with Smartious',
-    desc: 'Enroll with Smartious Homeschool & eSchool. Start your child\'s accredited home or online education — Cambridge, IB, Edexcel or CBC — with qualified specialist teachers.',
+    title: 'Apply for the January 2027 Intake | Smartious',
+    desc: 'Start your child\'s accredited home or online education with live classes: Cambridge, IB, Edexcel or CBC. From USD 423/month. Term 2 starts 5 Jan 2027.',
   },
   consult: {
-    title: 'Book assessment — Smartious Homeschool & eSchool',
-    desc: 'Request an academic assessment with Smartious. Our Head of Admissions reviews every request within three business days. On acceptance, the assessment fee is invoiced before the diagnostic is scheduled.',
+    title: 'Book an Assessment | Smartious Homeschool & eSchool',
+    desc: 'Request an academic assessment with Smartious. Admissions reviews every request within three business days. January 2027 intake: apply now.',
   },
   contact: {
-    title: 'Contact Smartious Homeschool & eSchool — Nairobi, Kenya',
-    desc: 'Contact Smartious Homeschool & eSchool. Reach our Parklands, Nairobi team by phone or email for enrolment, curricula and programme enquiries. For admissions, submit an assessment request.',
+    title: 'Contact Smartious | Admissions +254 745 021 212',
+    desc: 'Contact Smartious in Parklands, Nairobi: admissions +254 745 021 212, academic +254 182 071 920, or email hello@smartioushomeschool.com.',
   },
 }
 
@@ -2069,7 +2070,7 @@ const PAGE_META = {
 // LEGAL POLICIES — Kenya DPA 2019 + EU GDPR compliant
 // ═══════════════════════════════════════════════════════════
 const PRIVACY_POLICY = [
-  {h:'1. Who we are',p:'Smartious E-School Ltd ("Smartious", "we", "us", "our") is a private limited company registered in Kenya, with its principal place of business at Diamond Plaza I, Parklands, Nairobi. We operate the website smartioushomeschool.com and deliver homeschool, online and private tuition services to students worldwide. For the purposes of Kenya\'s Data Protection Act, 2019 and the EU General Data Protection Regulation (GDPR), Smartious is the Data Controller of the personal data you share with us.'},
+  {h:'1. Who we are',p:'Smartious E-School Ltd ("Smartious", "we", "us", "our") is a private limited company registered in Kenya, with its principal place of business at Diamond Plaza I Annex, 3rd Floor, Office 20, Parklands, Nairobi. We operate the website smartioushomeschool.com and deliver homeschool, online and private tuition services to students worldwide. For the purposes of Kenya\'s Data Protection Act, 2019 and the EU General Data Protection Regulation (GDPR), Smartious is the Data Controller of the personal data you share with us.'},
   {h:'2. What personal data we collect',p:'We collect only the data we genuinely need to deliver education and communicate with families. This includes: (a) contact and identification data: student and parent names, email addresses, WhatsApp numbers, student date of birth, country of residence; (b) academic data: curriculum selection, current school, grade level, placement assessment answers and scores, progress reports; (c) payment data: we do not store full card numbers; Paystack processes all payments and we receive only the transaction reference and amount; (d) technical data: IP address, browser type, device type, pages visited, collected via cookies and analytics; (e) communication records: messages you send us by email, WhatsApp, contact form, or during consultation calls.'},
   {h:'3. How we use your data',p:'We use personal data only for: (i) delivering the programme you have enrolled in, matching tutors, scheduling lessons, issuing progress reports, sitting exams; (ii) communicating with you about your account, lessons, payments, and service updates; (iii) processing payments via Paystack; (iv) improving our website and teaching methods through anonymised analytics; (v) complying with Kenyan tax, education, and regulatory obligations. We do not sell personal data to third parties. Ever.'},
   {h:'4. Lawful basis for processing',p:'Under Article 6 of the GDPR and Section 30 of the Kenya Data Protection Act, we process your data on one of the following lawful bases: (a) Contract: to deliver the services you have enrolled in; (b) Consent: for marketing communications, which you can withdraw at any time; (c) Legitimate interests: for securing our systems, preventing fraud, and improving our services; (d) Legal obligation: for tax records, accounting, and regulatory compliance.'},
@@ -2081,7 +2082,7 @@ const PRIVACY_POLICY = [
   {h:'10. Security',p:'We use industry-standard safeguards: HTTPS (TLS 1.3) across the entire site, password hashing (bcrypt) for all accounts, role-based access control in our backend, encrypted database backups, and quarterly security reviews. Paystack handles payment data to PCI-DSS Level 1 standards, we never see or store full card details. No system is perfectly secure, but we work continuously to reduce risk.'},
   {h:'11. Breach notification',p:'In the unlikely event of a personal data breach affecting your rights, we will notify the Office of the Data Protection Commissioner (Kenya) within 72 hours as required by Section 43 of the Kenya DPA, and the affected individuals without undue delay, describing what happened, what data was affected, and the steps we are taking.'},
   {h:'12. Changes to this policy',p:'We may update this policy to reflect changes in law, our services, or our processors. When we make material changes we will notify active students and parents by email and update the "Effective" date at the top of this page. The most current version is always the one published here.'},
-  {h:'13. Contact & complaints',p:'For any privacy question, data subject request, or complaint, email our Data Protection point of contact: hello@smartioushomeschool.com, phone +254 745 021 212, or write to Smartious E-School Ltd, Diamond Plaza I, Parklands, Nairobi, Kenya. You also have the right to lodge a complaint with the Office of the Data Protection Commissioner of Kenya (odpc.go.ke) or, if you are in the EU, with your national data protection authority.'},
+  {h:'13. Contact & complaints',p:'For any privacy question, data subject request, or complaint, email our Data Protection point of contact: hello@smartioushomeschool.com, phone +254 745 021 212, or write to Smartious E-School Ltd, Diamond Plaza I Annex, 3rd Floor, Office 20, Parklands, Nairobi, Kenya. You also have the right to lodge a complaint with the Office of the Data Protection Commissioner of Kenya (odpc.go.ke) or, if you are in the EU, with your national data protection authority.'},
 ]
 
 const TERMS_OF_SERVICE = [
@@ -2098,7 +2099,7 @@ const TERMS_OF_SERVICE = [
   {h:'11. Limitation of liability',p:'To the maximum extent permitted by Kenyan law, Smartious is not liable for: (i) exam results or university admissions: our role is to teach and prepare; outcomes depend on many factors including the student\'s effort and the decisions of exam boards and universities; (ii) indirect, consequential, or punitive damages; (iii) delays or outages caused by third-party services (Paystack, Google, Netlify). Our total liability for any claim is limited to the fees you have paid us in the 12 months preceding the claim.'},
   {h:'12. Governing law',p:'These Terms are governed by the laws of Kenya. Any dispute arising from these Terms or our services will be resolved first by good-faith negotiation, then by mediation in Nairobi under the Mediation (Court-Annexed) Rules, and only then by the courts of Kenya, which have exclusive jurisdiction.'},
   {h:'13. Changes to these terms',p:'We may update these Terms from time to time. Material changes will be communicated to active students and parents at least 30 days in advance by email. Minor clarifications (typos, reformatting) may be made without notice. The current version is always published here with its effective date.'},
-  {h:'14. Contact',p:'Questions about these Terms: hello@smartioushomeschool.com, +254 745 021 212, or Diamond Plaza I, Parklands, Nairobi, Kenya.'},
+  {h:'14. Contact',p:'Questions about these Terms: hello@smartioushomeschool.com, +254 745 021 212, or Diamond Plaza I Annex, 3rd Floor, Office 20, Parklands, Nairobi, Kenya.'},
 ]
 
 const COOKIE_POLICY = [
@@ -2349,7 +2350,7 @@ function LegalPage({ P, title, em, subtitle, effective, sections }) {
           <h1 className="pg-h">{title} <em>{em}</em></h1>
           <p className="pg-sub" style={{marginTop:12}}>{subtitle}</p>
           <div style={{marginTop:18,fontSize:12,color:'rgba(247,243,237,.45)',fontFamily:"'Fira Code',monospace",letterSpacing:'.08em'}}>
-            Effective: {effective} &nbsp;·&nbsp; Smartious E-School Ltd &nbsp;·&nbsp; Diamond Plaza I, Parklands, Nairobi
+            Effective: {effective} &nbsp;·&nbsp; Smartious E-School Ltd &nbsp;·&nbsp; Diamond Plaza I Annex, 3rd Floor, Office 20, Parklands, Nairobi
           </div>
         </div>
       </div>
@@ -2596,6 +2597,8 @@ export default function LandingPage() {
   const [currentNepalCity, setCurrentNepalCity] = useState(null)
   const [currentTurkeyCity, setCurrentTurkeyCity] = useState(null)
   const [currentKuwaitCity, setCurrentKuwaitCity] = useState(null)
+  const [currentNigeriaCity, setCurrentNigeriaCity] = useState(null)
+  const [currentBahrainCity, setCurrentBahrainCity] = useState(null)
   const [currentOmanCity, setCurrentOmanCity] = useState(null)
   const [currentTaiwanCity, setCurrentTaiwanCity] = useState(null)
   const [currentIrelandCity, setCurrentIrelandCity] = useState(null)
@@ -2907,6 +2910,8 @@ export default function LandingPage() {
     if (id === 'homeschooling-japan') return '/online-school/japan'
     if (id === 'homeschooling-vietnam') return '/online-school/vietnam'
     if (id === 'homeschooling-thailand') return '/online-school/thailand'
+    if (id === 'homeschooling-nigeria') return '/online-school/nigeria'
+    if (id === 'homeschooling-bahrain') return '/online-school/bahrain'
     // Canadian provincial funding landing pages — high-intent SEO URLs
     if (id === 'ab-funding') return '/alberta-home-ed-funding'
     if (id === 'bc-funding') return '/bc-distributed-learning-funding'
@@ -3489,6 +3494,18 @@ export default function LandingPage() {
           setPage('kuwait-city')
           return
         }
+        const nigeriaCity = NIGERIA_CITIES.find(c => c.slug === slug)
+        if (nigeriaCity) {
+          setCurrentNigeriaCity(slug)
+          setPage('nigeria-city')
+          return
+        }
+        const bahrainCity = BAHRAIN_CITIES.find(c => c.slug === slug)
+        if (bahrainCity) {
+          setCurrentBahrainCity(slug)
+          setPage('bahrain-city')
+          return
+        }
         const omanCity = OMAN_CITIES.find(c => c.slug === slug)
         if (omanCity) {
           setCurrentOmanCity(slug)
@@ -3946,6 +3963,16 @@ export default function LandingPage() {
         setPage('homeschooling-kuwait')
         return
       }
+      // Nigeria and Bahrain have dedicated hubs; they take precedence over
+      // the generic country-detail data (COUNTRY_SLUGS), as Kuwait's does.
+      if (slug === 'nigeria') {
+        setPage('homeschooling-nigeria')
+        return
+      }
+      if (slug === 'bahrain') {
+        setPage('homeschooling-bahrain')
+        return
+      }
       if (slug === 'oman') {
         setPage('homeschooling-oman')
         return
@@ -4251,9 +4278,8 @@ export default function LandingPage() {
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'homeschooling-uae') {
-    metaTitle = 'Online School in the UAE | Dubai & Abu Dhabi Homeschooling, IGCSE & A-Level | Smartious'
-    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for UAE families across Dubai, Abu Dhabi, Sharjah, Ajman, Ras Al Khaimah. Wellington / Dubai College / BSAK / Repton / Brighton College alternative. Immediate enrolment, no KHDA/ADEK waiting lists. From USD 423/month (about AED 1,553), paid termly.'
-  
+    metaTitle = 'Homeschooling & Online School in Dubai and the UAE'
+    metaDesc  = 'Live online classes for Dubai, Abu Dhabi and Sharjah families: IGCSE, A-Level, Edexcel, American. From USD 423/month (≈ AED 1,555). January 2027 intake.'
   } else if (page === 'homeschooling-egypt') {
     metaTitle = 'Online School, Virtual School & Homeschool for Egyptian Families — Cambridge IGCSE & A-Level | Smartious'
     metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Egyptian families across Cairo, New Cairo, Sheikh Zayed, Alexandria, New Administrative Capital, Sharm El Sheikh. Cairo American College / MES / BISC / NCBIS / Hayah / El Alsson / Schutz alternative. Immediate enrolment. From USD 423/month. USD pricing protects against EGP volatility.'
@@ -4723,6 +4749,24 @@ export default function LandingPage() {
       metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
+  } else if (page === 'homeschooling-nigeria' && NIGERIA_COUNTRY) {
+    metaTitle = NIGERIA_COUNTRY.seoTitle
+    metaDesc  = NIGERIA_COUNTRY.seoDesc
+  } else if (page === 'nigeria-city' && currentNigeriaCity) {
+    const c = NIGERIA_CITIES.find(x => x.slug === currentNigeriaCity)
+    if (c) {
+      metaTitle = c.seoTitle || ((c.primaryKeyword || c.name) + ' | Smartious')
+      metaDesc  = c.seoDesc || ''
+    }
+  } else if (page === 'homeschooling-bahrain' && BAHRAIN_COUNTRY) {
+    metaTitle = BAHRAIN_COUNTRY.seoTitle
+    metaDesc  = BAHRAIN_COUNTRY.seoDesc
+  } else if (page === 'bahrain-city' && currentBahrainCity) {
+    const c = BAHRAIN_CITIES.find(x => x.slug === currentBahrainCity)
+    if (c) {
+      metaTitle = c.seoTitle || ((c.primaryKeyword || c.name) + ' | Smartious')
+      metaDesc  = c.seoDesc || ''
+    }
   } else if (page === 'oman-city' && currentOmanCity) {
     const c = OMAN_CITIES.find(x => x.slug === currentOmanCity)
     if (c) {
@@ -4909,6 +4953,8 @@ export default function LandingPage() {
   if (page === 'homeschooling-nepal') canonicalOverride = '/online-school/nepal'
   if (page === 'homeschooling-turkey') canonicalOverride = '/online-school/turkey'
   if (page === 'homeschooling-kuwait') canonicalOverride = '/online-school/kuwait'
+  if (page === 'homeschooling-nigeria') canonicalOverride = '/online-school/nigeria'
+  if (page === 'homeschooling-bahrain') canonicalOverride = '/online-school/bahrain'
   if (page === 'homeschooling-oman') canonicalOverride = '/online-school/oman'
   if (page === 'homeschooling-taiwan') canonicalOverride = '/online-school/taiwan'
   if (page === 'homeschooling-ireland') canonicalOverride = '/online-school/ireland'
@@ -5081,7 +5127,7 @@ export default function LandingPage() {
                 ['★','Internationally Accredited — IGCSE · Cambridge · IB · Edexcel · CBC'],
                 ['◆','Expert Tutors — Hand-picked, degree-qualified, exam specialists'],
                 ['●','Mshauri AI Tutor — 24/7 personalised learning support'],
-                ['◆','Serving 2,000+ Students across 12+ Countries'],
+                ['◆','Over 3,421 students educated in more than 40 countries since 2018'],
                 ['★','Flexible Learning — Home visits, learning centre, or 100% online'],
                 ['●','University Placement — 200+ partner universities worldwide'],
                 ['◆','From $15/hour tuition · $38 application fee · First lesson within 48 hours'],
@@ -5146,8 +5192,10 @@ export default function LandingPage() {
                 Curricula
                 <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{transform:curriculaMenuOpen?'rotate(180deg)':'rotate(0)',transition:'transform .2s'}}><polyline points="6 9 12 15 18 9"/></svg>
               </div>
-              {curriculaMenuOpen && (
+              {/* Always in the DOM (hidden when closed) so crawlers see the links */}
+              {(
                 <div style={{
+                  display: curriculaMenuOpen ? 'block' : 'none',
                   position:'absolute',top:'calc(100% + 6px)',left:0,
                   background:'#0d1220',border:'1px solid rgba(201,151,58,.2)',
                   borderRadius:8,minWidth:320,padding:'12px 0 8px',zIndex:10000,
@@ -5215,8 +5263,10 @@ export default function LandingPage() {
                 Programmes
                 <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{transform:programmesMenuOpen?'rotate(180deg)':'rotate(0)',transition:'transform .2s'}}><polyline points="6 9 12 15 18 9"/></svg>
               </div>
-              {programmesMenuOpen && (
+              {/* Always in the DOM (hidden when closed) so crawlers see the links */}
+              {(
                 <div style={{
+                  display: programmesMenuOpen ? 'block' : 'none',
                   position:'absolute',top:'calc(100% + 6px)',left:0,
                   background:'#0d1220',border:'1px solid rgba(201,151,58,.2)',
                   borderRadius:8,minWidth:320,padding:'12px 0 8px',zIndex:10000,
@@ -5270,8 +5320,10 @@ export default function LandingPage() {
                 School Life
                 <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{transform:schoolLifeMenuOpen?'rotate(180deg)':'rotate(0)',transition:'transform .2s'}}><polyline points="6 9 12 15 18 9"/></svg>
               </div>
-              {schoolLifeMenuOpen && (
+              {/* Always in the DOM (hidden when closed) so crawlers see the links */}
+              {(
                 <div style={{
+                  display: schoolLifeMenuOpen ? 'block' : 'none',
                   position:'absolute',top:'calc(100% + 6px)',left:0,
                   background:'#0d1220',border:'1px solid rgba(201,151,58,.2)',
                   borderRadius:8,minWidth:280,padding:'8px 0',zIndex:10000,
@@ -5412,9 +5464,11 @@ export default function LandingPage() {
                 {openCategory === group.cat && (
                   <div style={{display:'flex',flexDirection:'column',gap:2,paddingLeft:8,paddingBottom:10,paddingTop:2}}>
                     {group.items.map(([label, id]) => (
-                      <button
+                      <a
                         key={id}
-                        onClick={() => {
+                        className="lp-btnlink"
+                        href={id.startsWith('curr:') ? '/curricula/' + id.slice(5) : pageToPath(id)}
+                        onClick={linkClick(() => {
                           // Handle curriculum shorthand: curr:slug → openCurriculum(slug)
                           if (typeof id === 'string' && id.startsWith('curr:')) {
                             openCurriculum(id.slice(5))
@@ -5422,8 +5476,9 @@ export default function LandingPage() {
                             P(id)
                           }
                           setMobileMenuOpen(false); setOpenCategory(null)
-                        }}
+                        })}
                         style={{
+                          display:'block',
                           textAlign:'left',
                           background: page === id ? 'rgba(139,26,46,.18)' : 'transparent',
                           border:'none',
@@ -5438,7 +5493,7 @@ export default function LandingPage() {
                           borderRadius:6,
                         }}>
                         {label}
-                      </button>
+                      </a>
                     ))}
                   </div>
                 )}
@@ -5650,7 +5705,7 @@ export default function LandingPage() {
           {/* MARQUEE */}
           <div className="marq">
             <div className="marq-in">
-              {[...Array(2)].map((_,ri) => ['Online School','Virtual School','Homeschool','IGCSE Excellence','Cambridge A-Level','IB Diploma','British Curriculum','American Curriculum','CBC Kenya','Pearson Edexcel','Live Online Classes','14 Countries Served','7 Years Teaching','78+ Qualified Tutors','Study Abroad','University Admissions Support'].map((t,i) => (
+              {[...Array(2)].map((_,ri) => ['Online School','Virtual School','Homeschool','IGCSE Excellence','Cambridge A-Level','IB Diploma','British Curriculum','American Curriculum','CBC Kenya','Pearson Edexcel','Live Online Classes','40+ Countries Served','Teaching Since 2018','78+ Qualified Tutors','Study Abroad','University Admissions Support'].map((t,i) => (
                 <div key={ri+'-'+i} className="mi"><div className="md"/>{t}</div>
               )))}
             </div>
@@ -6637,7 +6692,7 @@ export default function LandingPage() {
                       <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',color:'#fff',lineHeight:1.2}}>Smartious Company Portfolio <em style={{color:V.gold3,fontStyle:'italic'}}>2026</em></div>
                       <div style={{fontSize:11.5,color:'rgba(255,255,255,.6)',marginTop:4}}>21 pages · PDF · 94 KB · The full picture of Smartious</div>
                     </div>
-                    <a href="/Smartious_Company_Portfolio_2026%20(2).pdf"
+                    <a href="/smartious-portfolio-2026.pdf"
                       download
                       style={{
                         background:V.gold3,color:V.ink,
@@ -6952,7 +7007,7 @@ export default function LandingPage() {
                   <p style={{fontSize:13,color:'rgba(255,255,255,.6)',marginBottom:18}}>
                     These vision, mission and values are reflected in our full Company Portfolio.
                   </p>
-                  <a href="/Smartious_Company_Portfolio_2026%20(2).pdf"
+                  <a href="/smartious-portfolio-2026.pdf"
                     download
                     style={{
                       display:'inline-flex',alignItems:'center',gap:8,
@@ -6970,7 +7025,7 @@ export default function LandingPage() {
           </section>
 
           {/* ═══════════════════════════════════════════
-              WHERE WE TEACH — 14-country grid
+              WHERE WE TEACH — country grid
               Real text grid (not a fake map).
           ═══════════════════════════════════════════ */}
           <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
@@ -7124,7 +7179,7 @@ export default function LandingPage() {
                   Smartious supports families relocating between countries needing curriculum continuity, athletes and performers balancing serious training with academic ambition, gifted students whose schools move too slowly, students struggling at school due to oversized classrooms or bullying, IGCSE and A-Level candidates preparing for external examinations, IB Diploma students needing specialist HL subject support, and students with learning differences benefiting from 1-on-1 personal attention. Pricing starts at USD 15/hour for 1-on-1 tuition (KSh 1,300/hour for Kenya-based families) and from USD 423/month for full online homeschool programmes — meaningfully below typical premium international school fees while delivering equivalent qualifications.
                 </p>
                 <p style={{fontSize:12.5,lineHeight:1.7,marginTop:18,color:'rgba(247,243,237,.55)'}}>
-                  Contact Smartious: <a href="mailto:hello@smartioushomeschool.com" style={{color:V.gold3,textDecoration:'none'}}>hello@smartioushomeschool.com</a> · WhatsApp· Diamond Plaza, Parklands, Nairobi, Kenya · M-Pesa Paybill 247247, Account 745021 (Smartious Edtech).
+                  Contact Smartious: <a href="mailto:hello@smartioushomeschool.com" style={{color:V.gold3,textDecoration:'none'}}>hello@smartioushomeschool.com</a> · WhatsApp· Diamond Plaza I Annex, 3rd Floor, Office 20, Parklands, Nairobi, Kenya · M-Pesa Paybill 247247, Account 745021 (Smartious Edtech).
                 </p>
               </div>
             </div>
@@ -7470,7 +7525,7 @@ export default function LandingPage() {
                   'email': 'hello@smartioushomeschool.com',
                   'address': {
                     '@type': 'PostalAddress',
-                    'streetAddress': 'Diamond Plaza I Annex, 3rd Floor, Office 20, Fourth Parklands Avenue',
+                    'streetAddress': 'Diamond Plaza I Annex, 3rd Floor, Office 20',
                     'addressLocality': 'Parklands, Nairobi',
                     'addressRegion': 'Nairobi County',
                     'addressCountry': 'KE',
@@ -8255,8 +8310,9 @@ export default function LandingPage() {
               </div>
             </div></section>
 
-            {/* TESTIMONIAL — only show if a testimonial is supplied */}
-            {ctry.testimonial && (
+            {/* TESTIMONIAL — only show if a real testimonial is supplied
+                (Nigeria, Bahrain and others have empty strings) */}
+            {!!(ctry.testimonial && ctry.testimonial.trim()) && (
               <section className="sec" style={{background:V.ink,color:'#fff'}}><div className="wrap">
                 <div style={{maxWidth:780,margin:'0 auto',textAlign:'center'}}>
                   <svg width="48" height="48" viewBox="0 0 24 24" fill={V.gold2} style={{opacity:.7,marginBottom:18}}>
@@ -8888,7 +8944,7 @@ export default function LandingPage() {
                     </div>
                     <div style={{marginTop:24,padding:'16px 20px',background:V.bone2,border:`1px solid ${V.bone3}`,borderRadius:10,textAlign:'center'}}>
                       <div style={{fontSize:13,color:V.sl,lineHeight:1.6}}>
-                        <strong style={{color:V.ink}}>Combined with Smartious Study Abroad:</strong> students enrolled in Smartious receive free university application support during their final year — university selection, applications, scholarship applications, and visa guidance. <span style={{color:V.cr,fontWeight:600,cursor:'pointer'}} onClick={()=>P('study-abroad')}>Learn more →</span>
+                        <strong style={{color:V.ink}}>Combined with Smartious Study Abroad:</strong> students enrolled in Smartious receive free university application support during their final year — university selection, applications, scholarship applications, and visa guidance. <a href={pageToPath('study-abroad')} style={{color:V.cr,fontWeight:600,cursor:'pointer'}} onClick={linkClick(() => P('study-abroad'))}>Learn more →</a>
                       </div>
                     </div>
                   </div>
@@ -10931,6 +10987,10 @@ export default function LandingPage() {
               <div style={{fontSize:13,color:'rgba(255,255,255,.65)',fontStyle:'italic'}}>
                 Free consultation call included · Sibling discounts 15-25%
               </div>
+              <a href="/smartious-fees-2026-27.pdf" target="_blank" rel="noopener"
+                style={{display:'inline-block',marginTop:18,padding:'10px 20px',borderRadius:8,border:`1.5px solid ${V.gold3}`,color:V.gold3,fontWeight:700,fontSize:13.5,textDecoration:'none'}}>
+                Download the 2026–27 fee guide (PDF)
+              </a>
             </div>
           </section>
 
@@ -10942,7 +11002,7 @@ export default function LandingPage() {
                   {h:'Online School & Homeschool',v:'From USD 423/month',sub:'Primary; secondary fees vary by curriculum and level. Paid termly. Live small-group classes 4-6 students. Cambridge, Edexcel, IB, American, Ontario OSSD, Kenya CBC.'},
                   {h:'Private Tuition (1:1)',v:'USD 15/hour',sub:'Any subject, any level. One-on-one live online sessions scheduled to your family time zone.'},
                   {h:'Study Abroad & IUFP',v:'Custom pricing',sub:'International University Foundation Programme + university placement support.'},
-                  {h:'Application & Registration',v:'USD 30 + 120',sub:'Application (refundable if not enrolled) + one-time registration on enrolment.'},
+                  {h:'Application fee',v:'USD 38',sub:'One-time and non-refundable (KSh 5,000). Covers the placement test and admissions review; counts towards your first month\'s fees.'},
                 ].map(s => (
                   <div key={s.h} style={{background:'#fff',border:`1px solid ${V.bone3}`,borderRadius:12,padding:'24px 22px',boxShadow:'0 2px 10px rgba(8,12,20,.04)'}}>
                     <div style={{fontSize:11,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.cr,marginBottom:10}}>{s.h}</div>
@@ -14505,7 +14565,7 @@ export default function LandingPage() {
                 style={{background:V.gold3,color:V.ink,border:'none',padding:'13px 28px',borderRadius:8,fontSize:14,fontWeight:800,letterSpacing:'.02em',cursor:'pointer'}}>Book assessment</a>
 </div>
             <div style={{marginTop:30,paddingTop:24,borderTop:'1px solid rgba(255,255,255,.15)',fontSize:12,color:'rgba(255,255,255,.6)',letterSpacing:'.04em'}}>
-              Phone: +254 745 021 212 · Email: hello@smartioushomeschool.com · Office: Diamond Plaza, Parklands, Nairobi
+              Phone: +254 745 021 212 · Email: hello@smartioushomeschool.com · Office: Diamond Plaza I Annex, 3rd Floor, Office 20, Parklands, Nairobi
             </div>
           </div></section>
         </>
@@ -15236,7 +15296,7 @@ export default function LandingPage() {
               <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
                 <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow} · Virtual school</div>
                 <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
-                  Online School &amp; Homeschool in <em style={{color:V.gold3,fontStyle:'italic'}}>{country.heroH1Suffix}</em>
+                  Homeschooling &amp; Online School in <em style={{color:V.gold3,fontStyle:'italic'}}>Dubai and the UAE</em>
                 </h1>
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
                 <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
@@ -15266,6 +15326,129 @@ export default function LandingPage() {
               </div>
             </section>
 
+            {/* ─── JANUARY 2027 INTAKE ─── */}
+            <IntakeCta nav={nav} compact/>
+
+            {/* ─── FEES FOR UAE FAMILIES ─── */}
+            <section id="uae-fees" className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:48}}><div className="wrap">
+              <div style={{maxWidth:980,margin:'0 auto'}}>
+                <div className="eyebrow">Homeschooling in the UAE: fees</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                  What online school costs in Dubai and the UAE
+                </h2>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:14,marginBottom:18}}>
+                  {[
+                    {h:'Online school & homeschool', v:'From USD 423/month', sub:'For Primary, about AED 1,555 a month (approximate, at the AED–USD peg). Fees vary by curriculum and level and are payable termly.'},
+                    {h:'One-to-one tuition', v:'USD 15/hour', sub:'Live online lessons in any subject and level, scheduled in UAE time.'},
+                  ].map(f => (
+                    <div key={f.h} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 22px'}}>
+                      <div style={{fontSize:11,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.cr,marginBottom:8}}>{f.h}</div>
+                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',color:V.ink,marginBottom:8,lineHeight:1.15}}>{f.v}</div>
+                      <div style={{fontSize:13,color:V.sl2,lineHeight:1.6}}>{f.sub}</div>
+                    </div>
+                  ))}
+                </div>
+                <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7,margin:'0 0 14px'}}>
+                  Fees are non-refundable once your child&rsquo;s assessment is done, the timetable is created and lessons have started.
+                </p>
+                <div style={{display:'flex',gap:16,flexWrap:'wrap',fontSize:13.5,fontWeight:700}}>
+                  <a href="/blog/online-school-fees-uae" onClick={linkClick(() => nav('/blog/online-school-fees-uae'))} style={{color:V.cr}}>Online school fees in the UAE explained →</a>
+                  <a href="/pricing" onClick={linkClick(() => P('pricing'))} style={{color:V.cr}}>Full fee structure →</a>
+                  <a href="/smartious-fees-2026-27.pdf" target="_blank" rel="noopener" style={{color:V.cr}}>2026–27 fee guide (PDF) →</a>
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── CURRICULUM OPTIONS ─── */}
+            <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:48}}><div className="wrap">
+              <div style={{maxWidth:980,margin:'0 auto'}}>
+                <div className="eyebrow">Home schooling curriculum in the UAE</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                  Curriculum options for UAE families
+                </h2>
+                <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7,marginBottom:20}}>
+                  Many UAE families choose the British pathway (Cambridge or Pearson Edexcel IGCSE, then A-Level), which matches the many British-curriculum schools in Dubai and Abu Dhabi. The American curriculum and IB programmes are also available. All lessons are live with a teacher.
+                </p>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:10}}>
+                  {[
+                    ['igcse','Cambridge IGCSE'],['a-level','Cambridge A-Level'],['edexcel','Pearson Edexcel'],
+                    ['british-national-curriculum','British National Curriculum'],['american-curriculum','American Curriculum'],
+                    ['ib-pyp-myp','IB PYP & MYP'],['ib-diploma','IB Diploma'],
+                  ].map(([slug, label]) => (
+                    <a key={slug} href={'/curricula/' + slug} onClick={linkClick(() => openCurriculum(slug))}
+                      style={{display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'14px 16px',fontSize:14,fontWeight:700,color:V.ink}}>
+                      {label} <span style={{color:V.cr}}>→</span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── GULF TIME-ZONE TIMETABLE + EXAM CENTRES ─── */}
+            <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
+              <div style={{maxWidth:980,margin:'0 auto',display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:18}}>
+                <div style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px'}}>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.35rem',fontWeight:400,color:V.ink,margin:'0 0 10px',lineHeight:1.25}}>A timetable on Gulf time</h2>
+                  <p style={{fontSize:14,color:V.sl,lineHeight:1.7,margin:0}}>
+                    The UAE is on Gulf Standard Time (GMT+4), one hour ahead of our Nairobi teaching base (GMT+3). Live classes are timetabled in the UAE school day, so a 9:00 lesson in Nairobi starts at 10:00 in Dubai, Abu Dhabi or Sharjah. Your child&rsquo;s timetable is created after the assessment.
+                  </p>
+                </div>
+                <div style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px'}}>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.35rem',fontWeight:400,color:V.ink,margin:'0 0 10px',lineHeight:1.25}}>Where exams are sat</h2>
+                  <p style={{fontSize:14,color:V.sl,lineHeight:1.7,margin:0}}>
+                    IGCSE and A-Level exams are sat in person, as a private candidate, at an exam centre in the UAE, for example the British Council in Dubai or Abu Dhabi. Each centre sets its own entry deadlines and fees; we help you plan entries for the May–June and October–November series.
+                  </p>
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── RECOGNITION QUESTIONS ─── */}
+            <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:48}}><div className="wrap">
+              <div style={{maxWidth:880,margin:'0 auto'}}>
+                <div className="eyebrow">Recognition</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:18,lineHeight:1.2}}>
+                  Is online school recognised in the UAE?
+                </h2>
+                <div style={{display:'flex',flexDirection:'column',gap:12}}>
+                  {[
+                    {q:'Is Smartious a UAE-licensed school?', a:'No. Smartious is an international online school based in Nairobi. It is not licensed by KHDA, ADEK or the UAE Ministry of Education, and we do not claim their approval. UAE families use it as home education.'},
+                    {q:'What does that mean for my child’s qualifications?', a:'IGCSE and A-Level certificates are issued by the exam boards (Cambridge or Pearson Edexcel), not by Smartious. UAE universities and the Ministry of Education set their own entry and equivalency rules, so check the current requirements for your child’s plans.'},
+                    {q:'Do we need to register home education with the authorities?', a:'Rules can differ by emirate and can change. Check with KHDA (Dubai), ADEK (Abu Dhabi) or the Ministry of Education for your family’s situation before you start.'},
+                    {q:'Can my child move into a UAE school later?', a:'UAE schools make their own admission and placement decisions, usually after their own assessment. We provide reports on your child’s work and progress to support the application.'},
+                  ].map((f, i) => (
+                    <details key={i} style={{background:V.bone,padding:'16px 22px',borderRadius:10,cursor:'pointer',border:`1px solid ${V.bone3}`}}>
+                      <summary style={{fontWeight:600,color:V.ink,fontSize:14.5}}>{f.q}</summary>
+                      <p style={{color:V.sl,fontSize:14,lineHeight:1.75,margin:'12px 0 0'}}>{f.a}</p>
+                    </details>
+                  ))}
+                </div>
+                <p style={{fontSize:13.5,marginTop:16}}>
+                  <a href="/blog/online-school-recognised-uae" onClick={linkClick(() => nav('/blog/online-school-recognised-uae'))} style={{color:V.cr,fontWeight:700}}>Read more: is online school recognised in the UAE? →</a>
+                </p>
+              </div>
+            </div></section>
+
+            {/* ─── DUBAI, ABU DHABI, SHARJAH ─── */}
+            <section className="sec" style={{background:V.bone,paddingTop:40,paddingBottom:40}}><div className="wrap">
+              <div style={{maxWidth:980,margin:'0 auto',textAlign:'center'}}>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,margin:'0 0 14px',lineHeight:1.2}}>
+                  Homeschooling in Dubai, Abu Dhabi and Sharjah
+                </h2>
+                <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
+                  {[['dubai-ae','Homeschooling in Dubai'],['abu-dhabi-ae','Homeschooling in Abu Dhabi'],['sharjah-ae','Homeschooling in Sharjah']].map(([slug, label]) => (
+                    <a key={slug} href={'/homeschool-' + slug}
+                      onClick={linkClick(() => { setCurrentUaeCity(slug); nav('/homeschool-' + slug); window.scrollTo(0, 0) })}
+                      style={{display:'inline-block',padding:'12px 20px',borderRadius:8,background:V.white,border:`1.5px solid ${V.cr}`,color:V.cr,fontWeight:700,fontSize:14}}>
+                      {label} →
+                    </a>
+                  ))}
+                </div>
+                <p style={{fontSize:13,color:V.sl,marginTop:14}}>
+                  Families in Dubai also read our guide to <a href="/blog/homeschooling-dubai-expats-2026" onClick={linkClick(() => nav('/blog/homeschooling-dubai-expats-2026'))} style={{color:V.cr,fontWeight:700}}>homeschooling in Dubai for expat families</a>.
+                </p>
+              </div>
+            </div></section>
+
             {/* ─── CITIES GRID ─── */}
             <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64}}><div className="wrap">
               <div style={{textAlign:'center',marginBottom:44,maxWidth:720,margin:'0 auto 44px'}}>
@@ -15278,7 +15461,7 @@ export default function LandingPage() {
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14,maxWidth:1100,margin:'0 auto'}}>
                 {cities.map(c => (
                   <a key={c.slug} href={'/homeschool-' + c.slug}
-                    onClick={(e) => { e.preventDefault(); setCurrentUaeCity(c.slug); nav('/homeschool-' + c.slug); P(country.cityPageId) }}
+                    onClick={linkClick(() => { setCurrentUaeCity(c.slug); nav('/homeschool-' + c.slug); window.scrollTo(0, 0) })}
                     style={{display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',textDecoration:'none',color:'inherit',transition:'all .2s',cursor:'pointer'}}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
@@ -15393,7 +15576,7 @@ export default function LandingPage() {
                 </div>
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14,marginBottom:32}}>
                   {[
-                    {h:'Founder-led education company', p:'Founded 2022 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
+                    {h:'Founder-led education company', p:'Founded 2018 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
                     {h:'Two physical Nairobi centres', p:'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
                     {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
                     {h:'40+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
@@ -15587,6 +15770,20 @@ export default function LandingPage() {
             {page === 'homeschooling-kuwait' && (
               <CountryHub country={KUWAIT_COUNTRY} cities={KUWAIT_CITIES}
                 setCurrentCity={setCurrentKuwaitCity}
+                P={P} V={V} nav={nav}
+                SMARTIOUS_RATING={SMARTIOUS_RATING} SMARTIOUS_REVIEWS={SMARTIOUS_REVIEWS}
+                GOOGLE_REVIEWS_URL={GOOGLE_REVIEWS_URL} LEAVE_REVIEW_URL={LEAVE_REVIEW_URL}/>
+            )}
+            {page === 'homeschooling-nigeria' && NIGERIA_COUNTRY && (
+              <CountryHub country={NIGERIA_COUNTRY} cities={NIGERIA_CITIES}
+                setCurrentCity={setCurrentNigeriaCity}
+                P={P} V={V} nav={nav}
+                SMARTIOUS_RATING={SMARTIOUS_RATING} SMARTIOUS_REVIEWS={SMARTIOUS_REVIEWS}
+                GOOGLE_REVIEWS_URL={GOOGLE_REVIEWS_URL} LEAVE_REVIEW_URL={LEAVE_REVIEW_URL}/>
+            )}
+            {page === 'homeschooling-bahrain' && BAHRAIN_COUNTRY && (
+              <CountryHub country={BAHRAIN_COUNTRY} cities={BAHRAIN_CITIES}
+                setCurrentCity={setCurrentBahrainCity}
                 P={P} V={V} nav={nav}
                 SMARTIOUS_RATING={SMARTIOUS_RATING} SMARTIOUS_REVIEWS={SMARTIOUS_REVIEWS}
                 GOOGLE_REVIEWS_URL={GOOGLE_REVIEWS_URL} LEAVE_REVIEW_URL={LEAVE_REVIEW_URL}/>
@@ -16227,6 +16424,22 @@ export default function LandingPage() {
           country={KUWAIT_COUNTRY}
           cities={KUWAIT_CITIES}
           currentCitySlug={currentKuwaitCity}
+          P={P} V={V} nav={nav} Footer={Footer}
+        />
+      )}
+      {page === 'nigeria-city' && currentNigeriaCity && NIGERIA_COUNTRY && (
+        <CountryCityPage
+          country={NIGERIA_COUNTRY}
+          cities={NIGERIA_CITIES}
+          currentCitySlug={currentNigeriaCity}
+          P={P} V={V} nav={nav} Footer={Footer}
+        />
+      )}
+      {page === 'bahrain-city' && currentBahrainCity && BAHRAIN_COUNTRY && (
+        <CountryCityPage
+          country={BAHRAIN_COUNTRY}
+          cities={BAHRAIN_CITIES}
+          currentCitySlug={currentBahrainCity}
           P={P} V={V} nav={nav} Footer={Footer}
         />
       )}
@@ -16908,7 +17121,7 @@ export default function LandingPage() {
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14,maxWidth:1100,margin:'0 auto'}}>
                 {cities.map(c => (
                   <a key={c.slug} href={'/homeschool-' + c.slug}
-                    onClick={(e) => { e.preventDefault(); setCurrentSaudiCity(c.slug); nav('/homeschool-' + c.slug); P(country.cityPageId) }}
+                    onClick={linkClick(() => { setCurrentSaudiCity(c.slug); nav('/homeschool-' + c.slug); window.scrollTo(0, 0) })}
                     style={{display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',textDecoration:'none',color:'inherit',transition:'all .2s',cursor:'pointer'}}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
@@ -17023,7 +17236,7 @@ export default function LandingPage() {
                 </div>
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14,marginBottom:32}}>
                   {[
-                    {h:'Founder-led education company', p:'Founded 2022 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
+                    {h:'Founder-led education company', p:'Founded 2018 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
                     {h:'Two physical Nairobi centres', p:'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
                     {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
                     {h:'40+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
@@ -17218,7 +17431,7 @@ export default function LandingPage() {
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14,maxWidth:1100,margin:'0 auto'}}>
                 {cities.map(c => (
                   <a key={c.slug} href={'/homeschool-' + c.slug}
-                    onClick={(e) => { e.preventDefault(); setCurrentQatarCity(c.slug); nav('/homeschool-' + c.slug); P(country.cityPageId) }}
+                    onClick={linkClick(() => { setCurrentQatarCity(c.slug); nav('/homeschool-' + c.slug); window.scrollTo(0, 0) })}
                     style={{display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',textDecoration:'none',color:'inherit',transition:'all .2s',cursor:'pointer'}}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
@@ -17333,7 +17546,7 @@ export default function LandingPage() {
                 </div>
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14,marginBottom:32}}>
                   {[
-                    {h:'Founder-led education company', p:'Founded 2022 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
+                    {h:'Founder-led education company', p:'Founded 2018 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
                     {h:'Two physical Nairobi centres', p:'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
                     {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
                     {h:'40+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
@@ -17528,7 +17741,7 @@ export default function LandingPage() {
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14,maxWidth:1100,margin:'0 auto'}}>
                 {cities.map(c => (
                   <a key={c.slug} href={'/homeschool-' + c.slug}
-                    onClick={(e) => { e.preventDefault(); setCurrentSaCity(c.slug); nav('/homeschool-' + c.slug); P(country.cityPageId) }}
+                    onClick={linkClick(() => { setCurrentSaCity(c.slug); nav('/homeschool-' + c.slug); window.scrollTo(0, 0) })}
                     style={{display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',textDecoration:'none',color:'inherit',transition:'all .2s',cursor:'pointer'}}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
@@ -17643,7 +17856,7 @@ export default function LandingPage() {
                 </div>
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14,marginBottom:32}}>
                   {[
-                    {h:'Founder-led education company', p:'Founded 2022 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
+                    {h:'Founder-led education company', p:'Founded 2018 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
                     {h:'Two physical Nairobi centres', p:'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
                     {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
                     {h:'40+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
@@ -17838,7 +18051,7 @@ export default function LandingPage() {
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14,maxWidth:1100,margin:'0 auto'}}>
                 {cities.map(c => (
                   <a key={c.slug} href={'/homeschool-' + c.slug}
-                    onClick={(e) => { e.preventDefault(); setCurrentRwandaCity(c.slug); nav('/homeschool-' + c.slug); P(country.cityPageId) }}
+                    onClick={linkClick(() => { setCurrentRwandaCity(c.slug); nav('/homeschool-' + c.slug); window.scrollTo(0, 0) })}
                     style={{display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',textDecoration:'none',color:'inherit',transition:'all .2s',cursor:'pointer'}}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
@@ -17953,7 +18166,7 @@ export default function LandingPage() {
                 </div>
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14,marginBottom:32}}>
                   {[
-                    {h:'Founder-led education company', p:'Founded 2022 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
+                    {h:'Founder-led education company', p:'Founded 2018 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
                     {h:'Two physical Nairobi centres', p:'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
                     {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
                     {h:'40+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
@@ -18148,7 +18361,7 @@ export default function LandingPage() {
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14,maxWidth:1100,margin:'0 auto'}}>
                 {cities.map(c => (
                   <a key={c.slug} href={'/homeschool-' + c.slug}
-                    onClick={(e) => { e.preventDefault(); setCurrentEthiopiaCity(c.slug); nav('/homeschool-' + c.slug); P(country.cityPageId) }}
+                    onClick={linkClick(() => { setCurrentEthiopiaCity(c.slug); nav('/homeschool-' + c.slug); window.scrollTo(0, 0) })}
                     style={{display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',textDecoration:'none',color:'inherit',transition:'all .2s',cursor:'pointer'}}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
@@ -18263,7 +18476,7 @@ export default function LandingPage() {
                 </div>
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14,marginBottom:32}}>
                   {[
-                    {h:'Founder-led education company', p:'Founded 2022 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
+                    {h:'Founder-led education company', p:'Founded 2018 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
                     {h:'Two physical Nairobi centres', p:'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
                     {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
                     {h:'40+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
@@ -18457,7 +18670,7 @@ export default function LandingPage() {
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14,maxWidth:1100,margin:'0 auto'}}>
                 {cities.map(c => (
                   <a key={c.slug} href={'/homeschool-' + c.slug}
-                    onClick={(e) => { e.preventDefault(); setCurrentKenyaCity(c.slug); nav('/homeschool-' + c.slug); P(country.cityPageId) }}
+                    onClick={linkClick(() => { setCurrentKenyaCity(c.slug); nav('/homeschool-' + c.slug); window.scrollTo(0, 0) })}
                     style={{display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',textDecoration:'none',color:'inherit',transition:'all .2s',cursor:'pointer'}}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
@@ -18572,7 +18785,7 @@ export default function LandingPage() {
                 </div>
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14,marginBottom:32}}>
                   {[
-                    {h:'Founder-led education company', p:'Founded 2022 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
+                    {h:'Founder-led education company', p:'Founded 2018 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
                     {h:'Two physical Nairobi centres', p:'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
                     {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
                     {h:'40+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
@@ -19761,22 +19974,10 @@ export default function LandingPage() {
                   { name:'Somalia',       slug:'somalia',      flag:'🇸🇴', sub:'Mogadishu · diaspora families' },
                   { name:'Pakistan',      slug:'pakistan',     flag:'🇵🇰', sub:'Karachi · Lahore · Islamabad' },
                 ].map(c => (
-                  <div key={c.slug}
-                    onClick={() => {
-                      // USA, Canada, Kenya, Ethiopia, Rwanda, South Africa,
-                      // Qatar, Saudi Arabia have rich dedicated landing pages
-                      // — route directly. Others use country-detail.
-                      if (c.slug === 'usa') P('us-families')
-                      else if (c.slug === 'canada') P('ca-families')
-                      else if (c.slug === 'kenya') P('homeschooling-kenya')
-                      else if (c.slug === 'ethiopia') P('homeschooling-ethiopia')
-                      else if (c.slug === 'rwanda') P('homeschooling-rwanda')
-                      else if (c.slug === 'south-africa') P('homeschooling-south-africa')
-                      else if (c.slug === 'qatar') P('homeschooling-qatar')
-                      else if (c.slug === 'saudi-arabia') P('homeschooling-saudi-arabia')
-                      else if (c.slug === 'uae') P('homeschooling-uae')
-                      else openCountry(c.slug)
-                    }}
+                  <a key={c.slug} className="lp-divlink" href={'/online-school/' + c.slug}
+                    // Every country (including the rich hub pages) lives at
+                    // /online-school/<slug>; the router picks the right page.
+                    onClick={linkClick(() => openCountry(c.slug))}
                     style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'14px 16px',cursor:'pointer',transition:'all .2s'}}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 18px rgba(8,12,20,.06)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
@@ -19786,7 +19987,7 @@ export default function LandingPage() {
                     </div>
                     <div style={{fontSize:11,color:V.sl,lineHeight:1.5,marginBottom:8}}>{c.sub}</div>
                     <div style={{fontSize:11,fontWeight:700,color:V.cr}}>Homeschool {c.name} →</div>
-                  </div>
+                  </a>
                 ))}
               </div>
             </div>
@@ -20329,7 +20530,7 @@ export default function LandingPage() {
                 ))}
               </div>
               <div style={{marginTop:18,textAlign:'center',fontSize:13,color:V.sl}}>
-                Plus all curricula-specific subjects across IGCSE, A-Level, IB, American and CBC. <span style={{color:V.cr,fontWeight:600,cursor:'pointer'}} onClick={()=>nav('/assessment')}>Don't see your subject? Ask us.</span>
+                Plus all curricula-specific subjects across IGCSE, A-Level, IB, American and CBC. <a href="/assessment" style={{color:V.cr,fontWeight:600,cursor:'pointer'}} onClick={linkClick(() => nav('/assessment'))}>Don't see your subject? Ask us.</a>
               </div>
             </div>
           </div></section>
@@ -24057,10 +24258,10 @@ export default function LandingPage() {
               <div className="contact-info-card">
                 <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',color:'#FFFFFF',marginBottom:8}}>Our <em style={{color:'#C9973A',fontStyle:'italic'}}>Details</em></div>
                 {[
-                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#C9973A" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42C1.6 2.34 2.33 1.4 3.41 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.81-.81a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>, label:'Admissions', value:'+254 745 021 212', sub:'admissions@smartioushomeschool.com · Call or WhatsApp', href:'mailto:admissions@smartioushomeschool.com'},
-                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#C9973A" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42C1.6 2.34 2.33 1.4 3.41 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.81-.81a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>, label:'Academics', value:'+254 182 071 920', sub:'academics@smartioushomeschool.com · Head of Academics', href:'mailto:academics@smartioushomeschool.com'},
+                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#C9973A" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42C1.6 2.34 2.33 1.4 3.41 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.81-.81a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>, label:'Admissions', value:'+254 745 021 212', sub:'hello@smartioushomeschool.com · Call or WhatsApp', href:'tel:+254745021212'},
+                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#C9973A" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42C1.6 2.34 2.33 1.4 3.41 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.81-.81a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>, label:'Academics', value:'+254 182 071 920', sub:'hello@smartioushomeschool.com · Head of Academics', href:'tel:+254182071920'},
                   {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#C9973A" strokeWidth="2" strokeLinecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>, label:'Administration', value:'hello@smartioushomeschool.com', sub:'Accounts, support and general matters', href:'mailto:hello@smartioushomeschool.com'},
-{icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#C9973A" strokeWidth="2" strokeLinecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>, label:'Office', value:'Diamond Plaza I, Parklands', sub:'Nairobi, Kenya · 4th Avenue', href:'https://maps.google.com/?q=Diamond+Plaza+Parklands+Nairobi'},
+{icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#C9973A" strokeWidth="2" strokeLinecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>, label:'Office', value:'Diamond Plaza I Annex, 3rd Floor, Office 20', sub:'Parklands, Nairobi · plus our Karen centre', href:'https://maps.google.com/?q=Diamond+Plaza+Parklands+Nairobi'},
                 ].map(({icon,label,value,sub,href}) => (
                   <a key={label} href={href} target="_blank" rel="noreferrer" style={{textDecoration:'none'}} className="contact-method">
                     <div className="contact-icon">{icon}</div>
@@ -24256,7 +24457,7 @@ export default function LandingPage() {
           </div>
           <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:20,maxWidth:820,margin:'0 auto'}}>
             {[
-              {name:'Diamond Plaza Parklands',est:'Head Office',addr:'Diamond Plaza Parklands, Annex, 3rd Floor',area:'Parklands, Nairobi'},
+              {name:'Diamond Plaza Parklands',est:'Head Office',addr:'Diamond Plaza I Annex, 3rd Floor, Office 20',area:'Parklands, Nairobi'},
               {name:'Karen Centre',est:'Second Centre',addr:'Mokoyeti West Road, off Langata Road, near Galleria Mall',area:'Karen, Nairobi'},
             ].map(loc => (
               <div key={loc.name} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,padding:'24px 26px',borderTop:`3px solid ${V.cr}`}}>
@@ -24312,7 +24513,7 @@ function ConsultForm({ P }) {
     const formatLabel = form.mode === 'online'
       ? 'Online via Google Meet'
       : form.venue === 'office'
-        ? 'In-person at Smartious Office (Diamond Plaza I, Parklands, Nairobi)'
+        ? 'In-person at Smartious Office (Diamond Plaza I Annex, 3rd Floor, Office 20, Parklands, Nairobi)'
         : `In-person home visit — ${form.address}`
     // Primary store: Front Desk database. Secondary: email copy.
     // The request succeeds if either path goes through.
@@ -24455,7 +24656,7 @@ function ConsultForm({ P }) {
           <label className="consult-label" style={{marginBottom:10}}>Where should we meet? *</label>
           <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:10}}>
             {[
-              {id:'office', title:'At our office', sub:'Diamond Plaza I · Parklands · Nairobi', icon:'<path d="M3 21h18M5 21V7l7-5 7 5v14"/><rect x="9" y="10" width="6" height="11"/>'},
+              {id:'office', title:'At our office', sub:'Diamond Plaza I Annex, 3rd Floor, Office 20, Parklands, Nairobi', icon:'<path d="M3 21h18M5 21V7l7-5 7 5v14"/><rect x="9" y="10" width="6" height="11"/>'},
               {id:'home',   title:'Home visit',    sub:'We come to you (Nairobi metro)',       icon:'<path d="M3 10l9-7 9 7M5 10v10h14V10"/>'},
             ].map(v => {
               const on = form.venue === v.id

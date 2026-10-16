@@ -3,6 +3,11 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <!-- One URL per page: strip a trailing slash (/online-school/kenya/ ->
+       /online-school/kenya). Netlify already 301s /x/ to /x for every page
+       with a static file (dist/x.html); this covers app-only routes served by
+       the SPA fallback, where both forms would otherwise return 200. -->
+  <script>(function(l){var p=l.pathname;if(p.length>1&&/\/$/.test(p)){l.replace((p.replace(/\/+$/,'')||'/')+l.search+l.hash)}})(location);</script>
   <!-- Installed app (iOS home screen / Smartious apps) -->
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="mobile-web-app-capable" content="yes"/>
@@ -87,29 +92,29 @@
   <meta property="og:site_name" content="Smartious Homeschool"/>
   <meta property="og:title" content="Online Homeschool | IGCSE, A-Level, IB & American — Smartious"/>
   <meta property="og:description" content="Accredited online homeschool serving UAE, UK, Canada, Australia, Nigeria and Kenya. Cambridge IGCSE, A-Level, IB Diploma, Edexcel and American curricula."/>
-  <meta property="og:image" content="https://smartioushomeschool.com/favicon-512x512.png"/>
-  <meta property="og:image:width" content="512"/>
-  <meta property="og:image:height" content="512"/>
-  <meta property="og:image:alt" content="Smartious Homeschool logo"/>
+  <meta property="og:image" content="https://smartioushomeschool.com/online-virtual-school.png"/>
+  <meta property="og:image:width" content="747"/>
+  <meta property="og:image:height" content="380"/>
+  <meta property="og:image:alt" content="Smartious online and virtual school"/>
   <meta property="og:locale" content="en_US"/>
 
   <!-- Twitter / X card -->
-  <meta name="twitter:card" content="summary"/>
+  <meta name="twitter:card" content="summary_large_image"/>
   <meta name="twitter:title" content="Online Homeschool | IGCSE, A-Level, IB & American — Smartious"/>
   <meta name="twitter:description" content="Accredited online homeschool serving UAE, UK, Canada, Australia, Nigeria and Kenya."/>
-  <meta name="twitter:image" content="https://smartioushomeschool.com/favicon-512x512.png"/>
+  <meta name="twitter:image" content="https://smartioushomeschool.com/online-virtual-school.png"/>
 
   <!-- Fonts (non-blocking) -->
   <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Syne:wght@400..800&display=swap"
+        href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap"
         media="print"
         onload="this.media='all'"/>
   <noscript>
     <link rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Syne:wght@400..800&display=swap"/>
+          href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap"/>
   </noscript>
 
-  <!-- Structured data: EducationalOrganization (with OSSD + American as 5 credentials, foundingDate 2019) -->
+  <!-- Structured data: EducationalOrganization (with OSSD + American as 5 credentials, foundingDate 2018) -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -121,17 +126,17 @@
     "logo": "https://smartioushomeschool.com/favicon-512x512.png",
     "image": "https://smartioushomeschool.com/favicon-512x512.png",
     "description": "Smartious Homeschool & eSchool is an accredited international online and home-based school. We deliver Cambridge IGCSE, Cambridge A-Level, IB Diploma, Pearson Edexcel and the British and American curricula to students across Kenya, the diaspora and worldwide. Live classes, qualified specialists, and full university-application support.",
-    "foundingDate": "2019",
+    "foundingDate": "2018",
     "foundingLocation": {
       "@type": "Place",
       "name": "Nairobi, Kenya"
     },
-    "email": "hellosmartious@gmail.com",
+    "email": "hello@smartioushomeschool.com",
     "telephone": "+254745021212",
     "address": {
       "@type": "PostalAddress",
-      "streetAddress": "Diamond Plaza I Annex, 3rd Floor, Office 20, Fourth Parklands Avenue",
-      "addressLocality": "Parklands",
+      "streetAddress": "Diamond Plaza I Annex, 3rd Floor, Office 20, Parklands",
+      "addressLocality": "Nairobi",
       "addressRegion": "Nairobi County",
       "postalCode": "00100",
       "addressCountry": "KE"
@@ -145,7 +150,15 @@
       "@type": "ContactPoint",
       "telephone": "+254-745-021212",
       "contactType": "admissions",
-      "areaServed": ["KE", "AE", "GB", "US", "CA", "AU", "NG", "ZA", "QA", "EG"],
+      "email": "hello@smartioushomeschool.com",
+      "areaServed": ["KE", "AE", "GB", "US", "CA", "AU", "NG", "ZA", "QA", "EG", "SA", "KW", "OM", "BH"],
+      "availableLanguage": ["English"]
+    }, {
+      "@type": "ContactPoint",
+      "telephone": "+254-182-071920",
+      "contactType": "academic office",
+      "email": "hello@smartioushomeschool.com",
+      "areaServed": ["KE", "AE", "GB", "US", "CA", "AU", "NG", "ZA", "QA", "EG", "SA", "KW", "OM", "BH"],
       "availableLanguage": ["English"]
     }],
     "areaServed": [
@@ -158,7 +171,11 @@
       { "@type": "Country", "name": "Nigeria" },
       { "@type": "Country", "name": "South Africa" },
       { "@type": "Country", "name": "Qatar" },
-      { "@type": "Country", "name": "Egypt" }
+      { "@type": "Country", "name": "Egypt" },
+      { "@type": "Country", "name": "Saudi Arabia" },
+      { "@type": "Country", "name": "Kuwait" },
+      { "@type": "Country", "name": "Oman" },
+      { "@type": "Country", "name": "Bahrain" }
     ],
     "sameAs": [
       "https://www.facebook.com/smartioushomeschool",

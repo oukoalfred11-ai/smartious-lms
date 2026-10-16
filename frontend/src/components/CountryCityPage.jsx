@@ -19,9 +19,36 @@
      6. Communities and nearby areas (chip cloud)
      7. FAQs (accordion)
      8. Final CTA (dark band + Footer)
+
+   Thin templated pages outside the priority markets (see
+   scripts/seo-static.mjs, noindexRule) get <meta name="robots"
+   content="noindex, follow">, the same as their static HTML. The hero
+   image renders only if the file exists (src/data/generated/publicImages.js),
+   so a missing /heroes/*.jpg never costs a 404 or a wasted high-priority
+   fetch. CTAs are real <a href> links, so they crawl and open in new tabs.
 ═══════════════════════════════════════════════════════════════════ */
 
+import { useEffect } from 'react'
+import { isNoindexSlug } from '../data/noindexSlugs.js'
+import { imageExists } from '../data/generated/publicImages.js'
+
+const ORG_ID = 'https://smartioushomeschool.com/#organization'
+const ROBOTS_DEFAULT = 'index, follow, max-image-preview:large, max-snippet:-1'
+
+// Sets robots noindex,follow while a thin page is shown, and restores the
+// site default when it unmounts so client navigation elsewhere is unaffected.
+function useNoindex(noindex) {
+  useEffect(() => {
+    if (!noindex || typeof document === 'undefined') return
+    let el = document.head.querySelector('meta[name="robots"]')
+    if (!el) { el = document.createElement('meta'); el.setAttribute('name', 'robots'); document.head.appendChild(el) }
+    el.setAttribute('content', 'noindex, follow')
+    return () => { el.setAttribute('content', ROBOTS_DEFAULT) }
+  }, [noindex])
+}
+
 export default function CountryCityPage({ country, cities, currentCitySlug, P, V, nav, Footer }) {
+  useNoindex(isNoindexSlug(currentCitySlug))
   const city = cities.find(c => c.slug === currentCitySlug)
   if (!city) return null
 
@@ -45,9 +72,15 @@ export default function CountryCityPage({ country, cities, currentCitySlug, P, V
         '@context':'https://schema.org','@type':'Service',
         'name': city.primaryKeyword,
         'description': city.seoDesc,
-        'provider':{'@type':'EducationalOrganization','name':'Smartious Homeschool Global','url':'https://smartioushomeschool.com'},
-        'areaServed':{'@type':'Place','name': city.name + ', ' + city.county + ', ' + countryName},
+        'url': cityUrl,
+        'provider':{'@id': ORG_ID},
+        'areaServed':{'@type':'Place','name': [city.name, city.county, countryName].filter(Boolean).join(', ')},
         'serviceType':'Online homeschooling and international curriculum delivery',
+        'offers':{
+          '@type':'Offer','price':423,'priceCurrency':'USD',
+          'description':'From USD 423/month for Primary, payable termly; varies by curriculum and level',
+          'priceSpecification':{'@type':'UnitPriceSpecification','price':423,'priceCurrency':'USD','unitCode':'MON','unitText':'month'},
+        },
       })}}/>
 
       {/* HERO */}
@@ -56,7 +89,7 @@ export default function CountryCityPage({ country, cities, currentCitySlug, P, V
         background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
         color:'#fff', padding:'60px 0 48px', overflow:'hidden',
       }}>
-        {city.heroImg && (
+        {imageExists(city.heroImg) && (
           <>
             <img src={city.heroImg} alt={city.altTexts?.hero || ''} aria-hidden="true"
               loading="eager"
@@ -83,20 +116,20 @@ export default function CountryCityPage({ country, cities, currentCitySlug, P, V
             {city.intro}
           </p>
           <div style={{display:'flex',gap:14,flexWrap:'wrap'}}>
-            <button onClick={() => nav('/assessment')}
-              style={{background:V.gold3,color:V.ink,border:'none',padding:'18px 34px',borderRadius:10,fontSize:15,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,boxShadow:'0 8px 24px rgba(201,151,58,.35)',transition:'all .18s ease'}}
+            <a href={'/assessment'} onClick={(e) => { if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return; e.preventDefault(); nav('/assessment') }}
+              style={{textDecoration:'none',background:V.gold3,color:V.ink,border:'none',padding:'18px 34px',borderRadius:10,fontSize:15,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,boxShadow:'0 8px 24px rgba(201,151,58,.35)',transition:'all .18s ease'}}
               onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(201,151,58,.5)' }}
               onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(201,151,58,.35)' }}>
               Book assessment
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
-            <button onClick={() => nav('/consult')}
-              style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'16px 30px',borderRadius:10,fontSize:15,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,transition:'all .18s ease'}}
+            </a>
+            <a href={'/consult'} onClick={(e) => { if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return; e.preventDefault(); nav('/consult') }}
+              style={{textDecoration:'none',background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'16px 30px',borderRadius:10,fontSize:15,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,transition:'all .18s ease'}}
               onMouseEnter={(e) => { e.currentTarget.style.borderColor = V.gold3; e.currentTarget.style.color = V.gold3; e.currentTarget.style.transform = 'translateY(-2px)' }}
               onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.55)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'translateY(0)' }}>
               Book Free Consultation
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
+            </a>
           </div>
         </div>
       </section>
@@ -193,20 +226,20 @@ export default function CountryCityPage({ country, cities, currentCitySlug, P, V
           <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.4rem)',margin:'0 0 14px',color:'#fff'}}>Ready to start your child's Cambridge journey from {city.name}?</h2>
           <p style={{color:V.bone3,fontSize:16,lineHeight:1.6,margin:'0 0 24px'}}>Free 15-minute consultation. No commitment.</p>
           <div style={{display:'flex',gap:14,justifyContent:'center',flexWrap:'wrap'}}>
-            <button onClick={() => nav('/assessment')}
-              style={{background:V.gold3,color:V.ink,border:'none',padding:'18px 34px',borderRadius:10,fontSize:15,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,boxShadow:'0 8px 24px rgba(201,151,58,.4)',transition:'all .18s ease'}}
+            <a href={'/assessment'} onClick={(e) => { if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return; e.preventDefault(); nav('/assessment') }}
+              style={{textDecoration:'none',background:V.gold3,color:V.ink,border:'none',padding:'18px 34px',borderRadius:10,fontSize:15,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,boxShadow:'0 8px 24px rgba(201,151,58,.4)',transition:'all .18s ease'}}
               onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(201,151,58,.55)' }}
               onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(201,151,58,.4)' }}>
               Book assessment
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
-            <button onClick={() => nav('/consult')}
-              style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'16px 30px',borderRadius:10,fontSize:15,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,transition:'all .18s ease'}}
+            </a>
+            <a href={'/consult'} onClick={(e) => { if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return; e.preventDefault(); nav('/consult') }}
+              style={{textDecoration:'none',background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'16px 30px',borderRadius:10,fontSize:15,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,transition:'all .18s ease'}}
               onMouseEnter={(e) => { e.currentTarget.style.borderColor = V.gold3; e.currentTarget.style.color = V.gold3; e.currentTarget.style.transform = 'translateY(-2px)' }}
               onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.55)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'translateY(0)' }}>
               Book Free Consultation
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
+            </a>
           </div>
         </div>
       </section>
