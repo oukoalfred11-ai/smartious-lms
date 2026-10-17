@@ -1271,8 +1271,8 @@ export const COUNTRIES = [
     tagline: 'Nairobi-based international online school for Kenyan families — CBC, KCSE, Cambridge IGCSE, A-Level, IB Diploma, Edexcel and American curricula, taught live by degree-qualified specialists. From USD 423/month.',
     seoTitle: 'Online School in Kenya | Live Classes from USD 423/month',
     seoDesc: 'Online school and homeschool in Kenya: live CBC, IGCSE, A-Level and IB classes from Nairobi. From USD 423/month (≈ KSh 54,600). January 2027 intake open.',
-    localFacts: ['Nairobi HQ · Diamond Plaza I Annex', 'Founded in Nairobi in 2018', 'Live classes · EAT timezone'],
-    pains: 'Kenyan families face rising fees at leading private schools, long school runs in Nairobi traffic, and questions about the move from CBC to CBE senior school in Grade 10. Smartious, founded in Nairobi in 2018, offers live online CBE, Cambridge, Pearson Edexcel, IB and American teaching, plus in-person homeschooling at our Parklands and Karen centres, from USD 423/month for Primary (≈ KSh 54,600, Oct 2026 rate), payable termly.',
+    localFacts: ['Nairobi HQ · Diamond Plaza I Parklands Annex', 'Founded in Nairobi in 2018', 'Live classes · EAT timezone'],
+    pains: 'Kenyan families face rising fees at leading private schools, long school runs in Nairobi traffic, and questions about the move from CBC to CBE senior school in Grade 10. Smartious, founded in Nairobi in 2018, offers live online CBE, Cambridge, Pearson Edexcel, IB and American teaching, plus in-person homeschooling at our Parklands and Karen West centres, from USD 423/month for Primary (≈ KSh 54,600, Oct 2026 rate), payable termly.',
     curricula: ['Kenya CBC (Grades 1-12)', 'KCSE Preparation', 'Cambridge IGCSE', 'Cambridge A-Level', 'IB MYP & Diploma', 'Pearson Edexcel', 'American High School Diploma', 'Smartious Blended'],
     regulation: 'Homeschooling is fully legal in Kenya under the Basic Education Act, 2013, which recognises alternative forms of basic education provided the learner accesses quality education equivalent to that of a registered school. There is no requirement to register your homeschool with the Ministry of Education, though many families choose to register their home-based learning with an accredited provider for record-keeping, exam eligibility and university applications. Smartious acts as that registered provider — we issue enrolment certificates, termly progress reports and predicted grades that are accepted by Kenyan universities (UoN, Strathmore, USIU, JKUAT, Kenyatta) and by universities worldwide. Students remain free to sit KCSE through KNEC, or to follow international examinations through Cambridge International and Pearson Edexcel.',
     examCentres: 'Smartious students in Kenya have full access to both national and international examination pathways. CBC and KCSE examinations are administered by the Kenya National Examinations Council (KNEC). Cambridge IGCSE, A-Level and IB Diploma examinations are sat at British Council Nairobi, the Cambridge International authorised centre in Westlands, and selected international school exam centres. Smartious handles all registration, runs full mock exam programmes before May/June and October/November series, and provides the past papers, marking schemes and predicted-grade documentation that exam boards and universities require.',
@@ -1297,7 +1297,7 @@ export const COUNTRIES = [
       { q: 'Can my child join Smartious mid-term?',
         a: 'Yes. We accept enrolments year-round. There are no fixed term-start dates. Whether your child is currently at a Kenyan school, moving from abroad, or just starting their education journey, our admissions team will assess where they are in their curriculum and place them at the right point. Most students begin within one week of admissions assessment.' },
       { q: 'Do you offer in-person classes in Nairobi?',
-        a: 'Yes. Our Nairobi learning centre at Diamond Plaza I Annex, 3rd Floor, Office 20, Parklands offers in-person homeschooling for families in the city. Students attend our centre for live small-group classes with dedicated subject specialists, with the same curriculum as our online programme. We also offer at-home private tuition across Nairobi at USD 15/hour, with the tutor coming to your home.' },
+        a: 'Yes. Our Nairobi learning centre at Diamond Plaza I Parklands Annex, 3rd Floor, offers in-person homeschooling for families in the city. Students attend our centre for live small-group classes with dedicated subject specialists, with the same curriculum as our online programme. We also offer at-home private tuition across Nairobi at USD 15/hour, with the tutor coming to your home.' },
       { q: 'What curricula do you offer Kenyan families?',
         a: 'Eight pathways: (1) Kenya\'s Competency-Based Curriculum (CBC) Grades 1-12 with KCSE preparation, (2) Cambridge IGCSE, (3) Cambridge A-Level, (4) IB Middle Years Programme, (5) IB Diploma Programme, (6) Pearson Edexcel, (7) American High School Diploma, and (8) Smartious Blended — our signature programme combining Cambridge academic rigour with CBC\'s competency focus and added AI literacy and digital skills. Most Kenyan families choose CBC for local continuity, IGCSE or A-Level for international university access, or Smartious Blended for the best of both.' },
       { q: 'Who are the teachers? Are they qualified?',
@@ -1308,9 +1308,8 @@ export const COUNTRIES = [
     // RICH KENYA-SPECIFIC FIELDS (kenya-only)
     isKenya: true,
     address: {
-      building: 'Diamond Plaza I Annex',
-      floor: '3rd Floor, Office 20',
-      street: 'Fourth Parklands Avenue',
+      building: 'Diamond Plaza I Parklands Annex',
+      floor: '3rd Floor',
       area: 'Parklands',
       city: 'Nairobi',
       country: 'Kenya',
@@ -1332,8 +1331,8 @@ export const COUNTRIES = [
     },
     learningCentre: {
       heading: 'The Nairobi Learning Centre',
-      intro: 'For families in Nairobi who prefer in-person learning, our centre at Diamond Plaza I Annex, Fourth Parklands Avenue offers small-group homeschool classes with the same teachers and curriculum as our online programme. Six students per class, dedicated subject specialists, full materials provided. Open Monday to Friday, 8:30 AM to 3:30 PM, with Wednesday afternoons reserved for the enrichment programme.',
-      mapEmbed: 'https://maps.google.com/maps?q=Smartious%20Homeschool%20Diamond%20Plaza%20Fourth%20Parklands%20Avenue%20Nairobi&t=&z=16&ie=UTF8&iwloc=&output=embed',
+      intro: 'For families in Nairobi who prefer in-person learning, our centre at Diamond Plaza I Parklands Annex, 3rd Floor offers small-group homeschool classes with the same teachers and curriculum as our online programme. Six students per class, dedicated subject specialists, full materials provided. Open Monday to Friday, 8:30 AM to 3:30 PM, with Wednesday afternoons reserved for the enrichment programme.',
+      mapEmbed: 'https://maps.google.com/maps?q=Smartious%20Homeschool%20Diamond%20Plaza%20I%20Parklands%20Annex%20Nairobi&t=&z=16&ie=UTF8&iwloc=&output=embed',
     },
     universities: {
       heading: 'University pathways for Kenyan students',

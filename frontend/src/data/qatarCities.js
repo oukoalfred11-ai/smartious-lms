@@ -342,7 +342,7 @@ export const QATAR_COUNTRY = {
     { metric: 'Curricula', value: '5', sub: 'Cambridge · Edexcel · IB · American AP · CBC' },
     { metric: 'Tutors', value: '78+', sub: 'PGCE-qualified subject specialists' },
     { metric: 'Countries served', value: '40+', sub: 'Africa · Gulf · Europe · Americas' },
-    { metric: 'Physical centres', value: '2', sub: 'Diamond Plaza Parklands · Karen Hardy' },
+    { metric: 'Physical centres', value: '2', sub: 'Diamond Plaza, Parklands · Karen West' },
     { metric: 'QAR-USD peg', value: '3.64', sub: 'Fixed since 2001 — predictable pricing' },
   ],
 

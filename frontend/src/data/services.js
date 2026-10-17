@@ -29,14 +29,14 @@ export const SERVICES = [
     slug: 'learning-centre',
     h: 'Smartious Learning Centre',
     svg: '<rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/>',
-    desc: 'Our supervised study centre at Diamond Plaza I, Parklands, Nairobi. Professional environment with peer interaction and specialist teachers on-site.',
+    desc: 'Our supervised study centre at Diamond Plaza I Parklands Annex, 3rd Floor, Nairobi. Professional environment with peer interaction and specialist teachers on-site.',
     tags: ['Parklands Nairobi', 'Supervised', 'Peer Learning', 'Specialist Teachers'],
     seoTitle: 'Homeschool Learning Centre in Parklands, Nairobi — Smartious',
-    seoDesc: 'The Smartious Learning Centre at Diamond Plaza I, Parklands, Nairobi — a supervised, professional study environment with specialist teachers and peer learning for homeschooled students.',
+    seoDesc: 'The Smartious Learning Centre at Diamond Plaza I Parklands Annex, 3rd Floor, Nairobi — a supervised, professional study environment with specialist teachers and peer learning for homeschooled students.',
     detail: {
       tagline: 'A supervised study centre in the heart of Parklands',
-      summary: 'In-centre learning at Diamond Plaza I, Parklands — specialist teachers and a focused, professional environment.',
-      overview: 'The Smartious Learning Centre offers homeschooling families a professional, supervised study environment outside the home. Located at Diamond Plaza I in Parklands, Nairobi, the centre brings students together for structured learning with specialist teachers on-site — combining the individual attention of homeschooling with the focus and social interaction of a dedicated learning space.',
+      summary: 'In-centre learning at Diamond Plaza I Parklands Annex — specialist teachers and a focused, professional environment.',
+      overview: 'The Smartious Learning Centre offers homeschooling families a professional, supervised study environment outside the home. Located at Diamond Plaza I Parklands Annex (3rd Floor), Nairobi, the centre brings students together for structured learning with specialist teachers on-site — combining the individual attention of homeschooling with the focus and social interaction of a dedicated learning space.',
       sections: [
         { h: 'The environment', p: 'The centre provides a calm, well-equipped study setting designed for concentration and learning. Students work with specialist teachers across subjects, with supervision throughout the day. It removes the distractions of learning at home while keeping class sizes small and attention personal.' },
         { h: 'Peer interaction', p: 'A key benefit of the centre is structured peer learning. Students interact with others on similar pathways, building the social confidence and collaboration skills that fully isolated home study can lack — without the crowding of a conventional classroom.' },

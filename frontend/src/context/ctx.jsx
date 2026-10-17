@@ -285,7 +285,7 @@ const DEFAULT_SITE = {
   footerCopy:    '© 2026 Smartious E-School Ltd. Nairobi, Kenya. All rights reserved.',
   footerEmail:   'info@smartious.ac.ke',
   footerPhone:   '+254 745 021 212',
-  footerAddress: 'Diamond Plaza I, Parklands, Nairobi, Kenya',
+  footerAddress: 'Diamond Plaza I Parklands Annex, 3rd Floor, Nairobi, Kenya',
   phone2:        '+254 733 456 789',
   whatsapp:      '+254 745 021 212',
   heroVideo:     '',

@@ -664,7 +664,7 @@ function buildReceiptHTML(inv) {
   </div>
 </div>
 <div class="body">
-  <div class="addr">Smartious Homeschool Global · Diamond Plaza, 4th Avenue, Parklands, Nairobi · hello@smartioushomeschool.com · +254 745 021 212</div>
+  <div class="addr">Smartious Homeschool Global · Diamond Plaza I Parklands Annex, 3rd Floor, Nairobi · hello@smartioushomeschool.com · +254 745 021 212</div>
   <div class="br">
     <div><div class="bl">Received From</div><div class="bn2">${esc(inv.billedToName)}</div>${inv.billedToAddress?`<div class="bs">${esc(inv.billedToAddress)}</div>`:''}</div>
     ${inv.studentName?`<div><div class="bl">Student</div><div class="bn2">${esc(inv.studentName)}</div><div class="bs">${[inv.studentGrade,inv.subject].filter(Boolean).map(s=>esc(s)).join(' · ')}</div></div>`:''}
