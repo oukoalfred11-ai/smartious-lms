@@ -155,6 +155,11 @@ export default function EndOfLessonOverlay({ classId, toast, onClose }) {
           </Step>
 
           <Step n="3" title="Next lesson">
+            {info.toRecover > 0 && (
+              <div style={{ fontSize: 13, color: C.amber, background: '#FEF3C7', borderRadius: 8, padding: '8px 10px', marginBottom: 10 }}>
+                <b>{info.toRecover} session{info.toRecover > 1 ? 's' : ''} missed while you were on leave</b> with {info.lesson.students.length > 1 ? 'these students' : 'this student'}. The family was told you would agree the make-up time{info.toRecover > 1 ? 's' : ''} in this class — book {info.toRecover > 1 ? 'them' : 'it'} under My Classes → This week.
+              </div>
+            )}
             {!info.next ? (
               <div style={{ fontSize: 13, color: C.mut }}>There is no next lesson with these students on the calendar yet.</div>
             ) : (

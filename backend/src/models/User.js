@@ -211,7 +211,7 @@ const userSchema = new mongoose.Schema({
   breakBlocksAccess: { type: Boolean, default: false }, // true only when the pause suspends portal access (e.g. fee hold)
   isDemo: { type: Boolean, default: false }, // PHASE 3: Protect main admin from deletion
   isMainAdmin: { type: Boolean, default: false }, // PHASE 3: Protect main admin from deletion
-  isOnLeave: { type: Boolean, default: false }, // Teacher on leave - invalidates their allocations
+  isOnLeave: { type: Boolean, default: false }, // Teacher on approved leave (their students stay with them; lessons in the leave are cancelled)
   leaveStartDate: Date,
   leaveEndDate: Date,
   

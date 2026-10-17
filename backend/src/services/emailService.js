@@ -504,12 +504,12 @@ async function sendLeaveRequestApprovedEmail(options) {
               <h3 style="margin-top: 0; color: #16a34a;">Leave Details</h3>
               <p><strong>Leave Type:</strong> ${leaveType}</p>
               <p><strong>Period:</strong> ${startDate} to ${endDate}</p>
-              ${affectedStudents ? `<p><strong>Note:</strong> ${affectedStudents} of your students will be reassigned to other teachers during your absence.</p>` : ''}
+              <p><strong>Your lessons:</strong> lessons in these dates are cancelled and your students' families have been told. Your students stay with you.</p>
               <p><strong>Approved by:</strong> ${approvedBy || 'Admin'}</p>
             </div>
 
             <div style="background: #f0fdf4; border-left: 4px solid #22c55e; padding: 16px; margin: 20px 0; border-radius: 4px;">
-              <p><strong>Important:</strong> You are all set for your leave. Your students and parents have been notified about their temporary teacher assignments.</p>
+              <p><strong>When you are back:</strong> in your next class with each student, agree when to recover the missed sessions and book them as make-up lessons in <em>My Classes</em>. The missed sessions are listed there until each one is booked.</p>
             </div>
 
             <hr style="border: none; border-top: 1px solid #ddd; margin: 24px 0;">

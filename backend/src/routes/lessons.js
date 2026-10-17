@@ -469,7 +469,7 @@ router.get('/student/my-subjects', auth, async (req, res) => {
 
     // Filter to allocations whose teacher is still active
     const valid = allocations.filter(a =>
-      a.teacherId && a.teacherId.isActive && !a.teacherId.isOnLeave && a.subjectId
+      a.teacherId && a.teacherId.isActive && a.subjectId
     );
 
     if (valid.length === 0)
@@ -531,7 +531,7 @@ router.get('/student/subject/:subjectId', auth, async (req, res) => {
 
     if (!allocation)
       return res.status(403).json({ success: false, message: 'Not enrolled in this subject.' });
-    if (!allocation.teacherId || !allocation.teacherId.isActive || allocation.teacherId.isOnLeave)
+    if (!allocation.teacherId || !allocation.teacherId.isActive)   // a teacher on leave keeps their students
       return res.status(403).json({ success: false, message: 'No active teacher allocated.' });
 
     const lessons = await Lesson.find({

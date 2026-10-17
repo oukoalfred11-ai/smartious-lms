@@ -137,4 +137,56 @@ async function academicAlert(subject, lines) {
   catch (e) { console.error('[academic alert]', e.message) }
 }
 
-module.exports = { lessonMoved, lessonCancelled, lessonAdded, absenceAlert, academicAlert, when, whenFor }
+/**
+ * The teacher is unavailable (approved leave): one message per student
+ * per leave, to the student and parents. The reason for the leave is
+ * never shared.
+ */
+async function teacherUnavailable({ studentId, teacher, leave, lessons }) {
+  const t = getTransporter()
+  if (!t) return false
+  try {
+    const st = await User.findById(studentId)
+      .select('firstName lastName email emailPrefs parentEmail linkedParents parentId parentName onBreak timezone').lean()
+    if (!st) return true
+    const r = await resolveStudentRecipients(st, { includeStudent: true, category: 'classUpdates' })
+    if (!r.to.length) return true
+    const tName = teacher ? `${teacher.firstName} ${teacher.lastName || ''}`.trim() : 'Your teacher'
+    const day = (d) => new Date(d).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Africa/Nairobi' })
+    const period = day(leave.leaveStartDate) === day(leave.leaveEndDate) ? `on ${day(leave.leaveStartDate)}` : `from ${day(leave.leaveStartDate)} to ${day(leave.leaveEndDate)}`
+    const list = lessons.map(l => `<li>${esc(subjectOf(l))} — ${esc(whenFor(l.scheduledAt, st.timezone))}</li>`).join('')
+    const n = lessons.length
+    await t.sendMail({
+      from: FROM(), to: r.to.join(', '),
+      subject: `${tName} is unavailable ${period} — ${st.firstName}'s lessons`,
+      html: page(`${tName} is unavailable`, [
+        `${esc(tName)} is unavailable ${esc(period)}, so ${esc(st.firstName)}'s lesson${n > 1 ? 's' : ''} with ${esc(teacher ? teacher.firstName : 'the teacher')} in that time will not take place:`,
+        `<ul style="margin:0;padding-left:18px">${list}</ul>`,
+        `<strong>The missed session${n > 1 ? 's' : ''} will be recovered.</strong> In the next class, ${esc(teacher ? teacher.firstName : 'the teacher')} will agree with ${esc(st.firstName)} when to hold the make-up session${n > 1 ? 's' : ''}, and you will receive the new time${n > 1 ? 's' : ''} by email.`,
+        'No action is needed from you. Lessons with other teachers continue as normal.',
+      ], { href: PORTAL() + '/parent', label: 'Open the parent portal' }),
+    })
+    return true
+  } catch (e) { console.error('[lesson notice] unavailable', e.message); return false }
+}
+
+/** A leave was withdrawn: these lessons take place after all. */
+function lessonsRestored(lessons) {
+  const byStudent = new Map()
+  for (const l of lessons) for (const sid of l.assignedStudents || []) {
+    const k = String(sid); if (!byStudent.has(k)) byStudent.set(k, []); byStudent.get(k).push(l)
+  }
+  return toFamilies([...byStudent.keys()], (st) => {
+    const mine = byStudent.get(String(st._id)) || []
+    return {
+      subject: `Lessons back on — ${mine.map(subjectOf).filter((x, i, a) => a.indexOf(x) === i).join(', ')}`,
+      html: page('Lessons are back on', [
+        `Good news: the teacher is available after all, so ${esc(st.firstName)}'s lesson${mine.length > 1 ? 's' : ''} below will take place as originally scheduled:`,
+        `<ul style="margin:0;padding-left:18px">${mine.map(l => `<li>${esc(subjectOf(l))} — ${esc(whenFor(l.scheduledAt, st.timezone))}</li>`).join('')}</ul>`,
+        'The reminder will come 30 minutes before each lesson.',
+      ], { href: PORTAL() + '/student', label: 'Open the student portal' }),
+    }
+  })
+}
+
+module.exports = { lessonMoved, lessonCancelled, lessonAdded, absenceAlert, academicAlert, teacherUnavailable, lessonsRestored, when, whenFor }

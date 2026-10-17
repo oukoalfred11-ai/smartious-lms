@@ -551,33 +551,46 @@ router.get('/staff/unconfirmed', auth, requireRole(...STAFF_ROLES), async (req, 
   }
 });
 
-// Lessons flagged as needing cover (teacher on leave without a replacement).
-router.get('/staff/needs-cover', auth, requireRole(...STAFF_ROLES), async (req, res) => {
+// ── Sessions missed while the teacher was on leave ──────────────
+// Listed for the teacher until a make-up lesson is booked for each
+// (POST / with makeUpFor) or the teacher records that none is needed.
+async function missedToRecover(teacherId, studentIds = null) {
+  const q = { teacherId, leaveMissed: true, status: 'cancelled', recoveryWaived: { $ne: true } };
+  if (studentIds) q.assignedStudents = { $in: studentIds };
+  const missed = await LiveClass.find(q).sort({ scheduledAt: 1 }).limit(200)
+    .populate('assignedStudents', 'firstName lastName')
+    .select('title subject curriculum grade scheduledAt durationMins assignedStudents syllabusTopicName syllabusSubtopicName').lean();
+  if (!missed.length) return [];
+  const booked = await LiveClass.distinct('makeUpFor', { makeUpFor: { $in: missed.map(m => m._id) }, status: { $ne: 'cancelled' } });
+  const done = new Set(booked.map(String));
+  return missed.filter(m => !done.has(String(m._id)));
+}
+
+router.get('/teacher/to-recover', auth, requireRole('teacher', ...STAFF_ROLES), async (req, res) => {
   try {
-    const classes = await LiveClass.find({ needsCover: true, status: 'scheduled', scheduledAt: { $gt: new Date() } })
-      .sort({ scheduledAt: 1 }).limit(300)
-      .populate('teacherId', 'firstName lastName').populate('assignedStudents', 'firstName lastName')
-      .select('title subject grade scheduledAt durationMins teacherId assignedStudents').lean();
-    res.json({ success:true, data: { classes } });
-  } catch (e) { res.status(500).json({ success:false, message:'Failed to load lessons needing cover.' }); }
+    res.json({ success:true, data: { classes: await missedToRecover(req.user._id) } });
+  } catch (e) {
+    console.error('[liveclasses to-recover]', e.message);
+    res.status(500).json({ success:false, message:'Could not load the sessions to recover.' });
+  }
 });
 
-// Staff: hand one lesson to a cover teacher.
-router.post('/:id/cover', auth, requireRole(...STAFF_ROLES), async (req, res) => {
+// The teacher and family agreed no make-up is needed (e.g. covered in
+// later lessons). Recorded with a note.
+router.post('/:id/recovery', auth, requireRole('teacher', ...STAFF_ROLES), async (req, res) => {
   try {
-    const { teacherId } = req.body || {};
-    if (!mongoose.isValidObjectId(req.params.id) || !mongoose.isValidObjectId(teacherId))
-      return res.status(400).json({ success:false, message:'Choose a cover teacher.' });
-    const cover = await User.findOne({ _id: teacherId, role: 'teacher' }).select('_id').lean();
-    if (!cover) return res.status(400).json({ success:false, message:'That user is not a teacher.' });
+    if (!mongoose.isValidObjectId(req.params.id)) return res.status(400).json({ success:false, message:'Invalid class id.' });
     const lc = await LiveClass.findById(req.params.id);
-    if (!lc) return res.status(404).json({ success:false, message:'Class not found.' });
-    if (!lc.originalTeacherId && String(lc.teacherId) !== String(teacherId)) lc.originalTeacherId = lc.teacherId;
-    lc.teacherId = teacherId;
-    lc.needsCover = false;
+    if (!lc || !lc.leaveMissed) return res.status(404).json({ success:false, message:'Missed session not found.' });
+    if (!STAFF_ROLES.includes(req.user.role) && String(lc.teacherId) !== String(req.user._id))
+      return res.status(403).json({ success:false, message:'Not your class.' });
+    const note = String((req.body && req.body.note) || '').trim().slice(0, 300);
+    if (!note) return res.status(400).json({ success:false, message:'Say why no make-up is needed.' });
+    lc.recoveryWaived = true;
+    lc.recoveryNote = note;
     await lc.save();
-    res.json({ success:true, message:'Cover teacher assigned.', data: { liveClass: lc } });
-  } catch (e) { res.status(500).json({ success:false, message:'Failed to assign cover.' }); }
+    res.json({ success:true, message:'Recorded: no make-up needed.' });
+  } catch (e) { res.status(500).json({ success:false, message:'Could not save.' }); }
 });
 
 // ═══════════════════════════════════════════════════════════
@@ -888,7 +901,9 @@ router.get('/:id/next', auth, requireRole('teacher', ...STAFF_ROLES), async (req
       ? { value: today, lessonId: lc.preparationLessonId, label: label(lc) || lc.title, today: true }
       : { value: today, topicName: lc.syllabusTopicName || '', subtopicName: lc.syllabusSubtopicName, label: label(lc), today: true }) : null;
     options = options.filter(o => o.value !== today);
+    const toRecover = (await missedToRecover(lc.teacherId, lc.assignedStudents || [])).length;
     res.json({ success:true, data: {
+      toRecover,
       lesson: { _id: lc._id, title: lc.title, subject: lc.subject, scheduledAt: lc.scheduledAt, label: label(lc), outcome: lc.outcome || null,
         topicName: lc.syllabusTopicName || '', subtopicName: lc.syllabusSubtopicName || '',
         students: (await User.find({ _id: { $in: lc.assignedStudents || [] } }).select('firstName lastName').lean())

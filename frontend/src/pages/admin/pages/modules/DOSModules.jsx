@@ -3,7 +3,7 @@ import { useAuth, api } from '../../../../context/ctx.jsx'
 import { TOKENS } from '../shared/tokens.js'
 import { DOSSpinner, PSection } from '../shared/ui.jsx'
 import { LessonsToClose } from '../../../../components/lessons/LessonControl.jsx'
-import { SchoolCalendarManager, LessonsNeedingCover } from '../../../../components/lessons/SchoolCalendar.jsx'
+import { SchoolCalendarManager } from '../../../../components/lessons/SchoolCalendar.jsx'
 
 export function DOSAnalyticsModule({ toast, refreshKey }) {
   const [overview, setOverview]   = useState(null)
@@ -1063,7 +1063,6 @@ export function DOSTimetableModule({ toast, refreshKey }) {
 
       {/* Lessons teachers have not closed for over 24 hours */}
       <div style={{ margin: '10px 0' }}><LessonsToClose toast={toast} staff /></div>
-      <LessonsNeedingCover toast={toast} />
       <SchoolCalendarManager toast={toast} />
 
       {/* Stats */}

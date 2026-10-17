@@ -259,18 +259,14 @@ router.patch('/:id/approve', auth, requireRole('admin', 'ops_manager'), async (r
       approvedBy: `${req.user.firstName} ${req.user.lastName}`
     });
 
-    // Lessons in the leave dates: to the cover teacher, or flagged for cover.
+    // Lessons in the leave dates are cancelled (never handed to another
+    // teacher) and each family is told once; the teacher agrees make-up
+    // times with the students in the next class.
+    let missedLessons = 0;
     try {
       await require('../lib/leaveCover').applyLeaveCover();
-      const LiveClass = require('../models/LiveClass');
-      const needing = await LiveClass.countDocuments({ coverLeaveId: leaveRequest._id, needsCover: true });
-      if (needing) {
-        await require('../lib/lessonNotices').academicAlert(`${needing} lesson${needing > 1 ? 's' : ''} need cover — ${teacher.firstName} ${teacher.lastName} on leave`, [
-          `${teacher.firstName} ${teacher.lastName}'s leave from ${new Date(leaveRequest.leaveStartDate).toDateString()} to ${new Date(leaveRequest.leaveEndDate).toDateString()} was approved without a replacement teacher.`,
-          'Assign a cover teacher to each lesson, or close it as not held (the family is then told), under Lessons needing cover in the timetable console. Lessons further ahead are flagged as they are created.',
-        ]);
-      }
-    } catch (e) { console.error('[leave cover]', e.message); }
+      missedLessons = await require('../models/LiveClass').countDocuments({ coverLeaveId: leaveRequest._id, leaveMissed: true });
+    } catch (e) { console.error('[leave] apply', e.message); }
 
     console.log(`✓ Leave request approved for ${teacher.firstName} ${teacher.lastName}`);
     console.log(`  Affected allocations: ${affectedAllocations.length}`);
@@ -279,7 +275,8 @@ router.patch('/:id/approve', auth, requireRole('admin', 'ops_manager'), async (r
       success: true,
       leaveRequest,
       affectedAllocations: affectedAllocations.length,
-      message: 'Leave request approved. Affected students marked as pending allocation.'
+      missedLessons,
+      message: `Leave approved. ${missedLessons} lesson${missedLessons === 1 ? '' : 's'} in the leave dates cancelled and the families told; the teacher will agree make-up times with the students.`
     });
   } catch (e) {
     res.status(400).json({ success: false, message: e.message });

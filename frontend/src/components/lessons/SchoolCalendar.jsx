@@ -1,10 +1,8 @@
 /**
- * SchoolCalendar.jsx — the school calendar and leave cover.
+ * SchoolCalendar.jsx — the school calendar.
  *
  *  <SchoolCalendarManager />  staff: holidays and breaks (no lessons are
  *                             created on these days).
- *  <LessonsNeedingCover />    staff: lessons of teachers on leave with no
- *                             replacement - assign a cover teacher.
  *  <UpcomingClosures />       families: "No lessons: Mid-term break …".
  */
 import { useCallback, useEffect, useState } from 'react'
@@ -66,45 +64,6 @@ export function SchoolCalendarManager({ toast }) {
         </ul>
       )}
       {list && !list.length && <p style={{ fontSize: 13, color: C.mut, margin: '10px 0 0' }}>No holidays or breaks entered yet.</p>}
-    </section>
-  )
-}
-
-export function LessonsNeedingCover({ toast }) {
-  const [list, setList] = useState(null)
-  const [teachers, setTeachers] = useState([])
-  const [pick, setPick] = useState({})
-  const load = useCallback(() => {
-    api.get('/liveclasses/staff/needs-cover').then(r => setList(r.data?.data?.classes || [])).catch(() => setList([]))
-    api.get('/timetable/overview').then(r => setTeachers(r.data?.data?.teachers || [])).catch(() => {})
-  }, [])
-  useEffect(() => { load() }, [load])
-  if (!list || !list.length) return null
-  const assign = async (c) => {
-    try { await api.post(`/liveclasses/${c._id}/cover`, { teacherId: pick[c._id] }); toast?.ok?.('Cover teacher assigned.'); load() }
-    catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not assign cover.') }
-  }
-  return (
-    <section style={{ background: '#fff', border: '1px solid #FCA5A5', borderRadius: 12, padding: '14px 16px', margin: '10px 0' }}>
-      <h3 style={{ margin: 0, fontSize: 16, color: C.ink }}>Lessons needing cover <span style={{ marginLeft: 6, background: '#FEE2E2', color: C.red, borderRadius: 99, padding: '2px 9px', fontSize: 12 }}>{list.length}</span></h3>
-      <p style={{ fontSize: 12, color: C.mut, margin: '4px 0 6px' }}>The teacher is on approved leave with no replacement. Assign a cover teacher, or let the teacher close the lesson as not held afterwards.</p>
-      <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-        {list.map(c => (
-          <li key={c._id} style={{ borderTop: `1px solid ${C.line}`, padding: '8px 0', display: 'flex', gap: 10, justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 13.5, color: C.ink }}>
-              <b>{c.subject || c.title}</b> · {new Date(c.scheduledAt).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
-              <span style={{ color: C.mut }}> · {c.teacherId ? `${c.teacherId.firstName} ${c.teacherId.lastName}` : ''} · {(c.assignedStudents || []).map(s => s.firstName).join(', ')}</span>
-            </span>
-            <span style={{ display: 'flex', gap: 6 }}>
-              <select style={field} value={pick[c._id] || ''} onChange={e => setPick(p => ({ ...p, [c._id]: e.target.value }))}>
-                <option value="">Cover teacher…</option>
-                {teachers.filter(t => !c.teacherId || String(t._id) !== String(c.teacherId._id)).map(t => <option key={t._id} value={t._id}>{t.name}</option>)}
-              </select>
-              <button type="button" style={btn(true)} disabled={!pick[c._id]} onClick={() => assign(c)}>Assign</button>
-            </span>
-          </li>
-        ))}
-      </ul>
     </section>
   )
 }

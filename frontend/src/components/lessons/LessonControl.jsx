@@ -11,6 +11,8 @@
  *  <LessonsToClose staff /> the Director of Studies' view: every lesson
  *                           left unconfirmed for over 24 hours.
  *  <ExtraLessonForm />      book an extra or make-up lesson.
+ *  <MissedSessions />       lessons missed while the teacher was on leave,
+ *                           until a make-up is booked for each.
  */
 import { useCallback, useEffect, useState } from 'react'
 import { api } from '../../context/ctx.jsx'
@@ -189,5 +191,60 @@ export function ExtraLessonForm({ toast, makeUpFor = null, students = [], subjec
         {onCancel && <button type="button" style={btn(false)} onClick={onCancel}>{makeUpFor ? 'Not now' : 'Cancel'}</button>}
       </div>
     </div>
+  )
+}
+
+/**
+ * Sessions missed while the teacher was on approved leave. The families
+ * were told the teacher would agree make-up times with the student in the
+ * next class; each stays here until its make-up lesson is booked (or the
+ * teacher records why none is needed).
+ */
+export function MissedSessions({ toast }) {
+  const [list, setList] = useState(null)
+  const [open, setOpen] = useState(null)
+  const load = useCallback(() => {
+    api.get('/liveclasses/teacher/to-recover').then(r => setList(r.data?.data?.classes || [])).catch(() => setList([]))
+  }, [])
+  useEffect(() => { load() }, [load])
+  if (!list || !list.length) return null
+  const waive = async (c) => {
+    const note = window.prompt('Why is no make-up needed? (e.g. agreed with the family to cover it in the next lessons)', '')
+    if (note === null) return
+    if (!note.trim()) { toast?.error?.('Please give a short reason.'); return }
+    try { await api.post(`/liveclasses/${c._id}/recovery`, { note }); toast?.ok?.('Recorded.'); load() }
+    catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not save.') }
+  }
+  return (
+    <section style={{ background: '#fff', border: '1px solid #F3D9A4', borderRadius: 12, padding: '14px 16px', marginBottom: 16 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
+        <h3 style={{ margin: 0, fontSize: 16, color: C.ink }}>
+          Missed sessions to recover
+          <span style={{ marginLeft: 8, background: '#FEF3C7', color: C.amber, borderRadius: 99, padding: '2px 9px', fontSize: 12 }}>{list.length}</span>
+        </h3>
+        <span style={{ fontSize: 12, color: C.mut }}>Missed while you were on leave. The families were told you will agree the make-up times with the student in your next class, then book them here.</span>
+      </div>
+      <ul style={{ listStyle: 'none', margin: '10px 0 0', padding: 0 }}>
+        {list.map(c => (
+          <li key={c._id} style={{ borderTop: `1px solid ${C.line}`, padding: '10px 0' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+              <div style={{ fontSize: 13.5, color: C.ink }}>
+                <b>{c.subject || c.title}</b>{c.syllabusTopicName ? ` — ${c.syllabusTopicName}${c.syllabusSubtopicName ? ': ' + c.syllabusSubtopicName : ''}` : ''}
+                <div style={{ fontSize: 12, color: C.mut }}>Was {fmt(c.scheduledAt)} · {(c.assignedStudents || []).map(s => s.firstName).join(', ') || 'no students'}</div>
+              </div>
+              <span style={{ display: 'flex', gap: 6 }}>
+                <button type="button" style={btn(open !== c._id)} onClick={() => setOpen(open === c._id ? null : c._id)}>{open === c._id ? 'Cancel' : 'Book make-up'}</button>
+                {open !== c._id && <button type="button" style={btn(false)} onClick={() => waive(c)}>No make-up needed</button>}
+              </span>
+            </div>
+            {open === c._id && (
+              <div style={{ marginTop: 10 }}>
+                <ExtraLessonForm toast={toast} makeUpFor={c} onDone={() => { setOpen(null); load() }} onCancel={() => setOpen(null)} />
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
+    </section>
   )
 }

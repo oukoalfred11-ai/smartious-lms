@@ -21,8 +21,11 @@ const TeacherLeaveRequestSchema = new mongoose.Schema({
   approvalDate: Date,
   rejectionReason: String,
   
-  // Temporary replacement during leave
-  temporaryReplacementTeacherId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Optional: another teacher to cover
+  // Old field: lessons are no longer handed to another teacher during leave
+  // (see lib/leaveCover.js). Kept so existing records still load.
+  temporaryReplacementTeacherId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  // Students whose families have been told about this leave (once each).
+  familiesNotified: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   
   // Affected allocations tracking
   affectedAllocations: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Allocation' }],
