@@ -75,7 +75,7 @@ const W = ({ children }) => <Suspense fallback={<SiteLoading />}>{children}</Sus
  *
  * Catch-all route mounts <LandingPage /> for any unmatched path, so
  * LandingPage handles /us-families, /about, /pricing, /blog/:slug,
- * /enroll, /consult and all other marketing pages via its own
+ * /assessment and all other marketing pages via its own
  * pathname-reading useEffect.
  *
  * LMS portal routes (/admin, /teacher, /student, /parent) and

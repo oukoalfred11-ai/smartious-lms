@@ -24,6 +24,10 @@
 # step, so this rule can never point at a missing file.
 /                        /home.html                  200!
 
+# ─── Retired admissions pages: Book assessment is the only way in ─
+/enroll                  /assessment                 301
+/consult                 /assessment                 301
+
 # ─── Country hub canonical consolidation (301s) ──────────────────
 /us-families             /online-school/usa          301
 /ca-families             /online-school/canada       301
