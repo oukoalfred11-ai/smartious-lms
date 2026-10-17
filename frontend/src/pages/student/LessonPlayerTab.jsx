@@ -740,7 +740,7 @@ function LessonDetailView({ lesson, subject, teacher, mastered, onBack, lessons 
                 <ProgressRing percentage={pct} size={104} color={G} trackColor="rgba(255,255,255,.10)" />
                 <div style={{ fontSize: 15, color: PLAYER.text, fontWeight: 700 }}>{doneCount} of {playlist.length} lessons mastered</div>
                 <div style={{ fontSize: 12.5, textAlign: 'center', maxWidth: 340, lineHeight: 1.6 }}>
-                  A lesson counts as mastered once you pass its practice questions. Keep going.
+                  Your teacher marks a lesson as mastered once you have shown you understand it. Keep going.
                 </div>
               </div>
             )}

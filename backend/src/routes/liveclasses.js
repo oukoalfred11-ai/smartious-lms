@@ -73,6 +73,31 @@ const withComputedStatus = (arr) => arr.map(lc => ({
   computedStatus: computeStatus(lc),
 }));
 
+// A timetable-born class that is moved or cancelled keeps a record of the
+// weekly occurrence it stood for, so the reconciler treats that
+// occurrence as taken and never re-creates it on the original day.
+function rememberOccurrence(lc) {
+  if (lc.timetableEntryId && !lc.originalScheduledAt && lc.scheduledAt) {
+    lc.originalScheduledAt = lc.scheduledAt;
+  }
+}
+
+// Save, tolerating the one-class-per-occurrence index: a legacy duplicate
+// of the same occurrence already holds it, so this copy drops the claim
+// rather than failing the teacher's edit.
+async function saveClass(lc) {
+  try {
+    await lc.save();
+  } catch (e) {
+    if (e && e.code === 11000 && lc.originalScheduledAt) {
+      lc.originalScheduledAt = null;
+      await lc.save();
+    } else throw e;
+  }
+}
+
+const STAFF_ROLES = ['admin', 'dos', 'ops_manager'];
+
 // ═══════════════════════════════════════════════════════════
 // CREATE — teacher schedules a new class
 // ═══════════════════════════════════════════════════════════
@@ -206,6 +231,8 @@ router.get('/student/list', auth, async (req, res) => {
     })
       .sort({ scheduledAt: 1 })
       .populate('teacherId', 'firstName lastName')
+      // "Prepare for this class" needs the lesson's id and title.
+      .populate('preparationLessonId', 'title')
       .lean();
     res.json({ success:true, data: { classes: withComputedStatus(classes) } });
   } catch (e) {
@@ -217,21 +244,29 @@ router.get('/student/list', auth, async (req, res) => {
 // ═══════════════════════════════════════════════════════════
 // SINGLE CLASS
 // ═══════════════════════════════════════════════════════════
-// ── Auto-scheduled class cleanup ────────────────────────────────────
-// Classes created by the old auto-timetable promotion confused teachers:
-// reminders went out for classes nobody had scheduled. These endpoints
-// find and remove the future ones. Classes already taught (ended, or
-// with recordings) are never touched, so no history is lost.
+// ── Orphaned timetable class cleanup ───────────────────────────────
+// Future classes materialized from a timetable slot that has since been
+// deactivated or deleted. The reconciler removes these itself; this is
+// the manual broom for anything left behind. Classes of ACTIVE slots are
+// never touched (the reconciler would only re-create them), nor are
+// teachers' one-off moves (detached), taught, recorded or attended ones.
+async function orphanFilter() {
+  const TimetableEntry = require('../models/TimetableEntry');
+  const activeIds = await TimetableEntry.distinct('_id', { isActive: { $ne: false } });
+  return {
+    fromTimetable: true,
+    status: 'scheduled',
+    detached: { $ne: true },
+    scheduledAt: { $gte: new Date() },
+    'recordings.0': { $exists: false },
+    timetableEntryId: { $nin: activeIds },
+  };
+}
 
-// GET /api/liveclasses/auto/count — how many future auto classes exist
+// GET /api/liveclasses/auto/count — how many orphaned future classes exist
 router.get('/auto/count', auth, requireRole('admin', 'ops_manager', 'dos'), async (req, res) => {
   try {
-    const filter = {
-      fromTimetable: true,
-      status: 'scheduled',
-      scheduledAt: { $gte: new Date() },
-      'recordings.0': { $exists: false },
-    };
+    const filter = await orphanFilter();
     const count = await LiveClass.countDocuments(filter);
     const sample = await LiveClass.find(filter).sort({ scheduledAt: 1 }).limit(5)
       .select('title subject grade scheduledAt').lean();
@@ -242,15 +277,14 @@ router.get('/auto/count', auth, requireRole('admin', 'ops_manager', 'dos'), asyn
 // DELETE /api/liveclasses/auto/purge — remove them
 router.delete('/auto/purge', auth, requireRole('admin', 'ops_manager', 'dos'), async (req, res) => {
   try {
-    const filter = {
-      fromTimetable: true,
-      status: 'scheduled',
-      scheduledAt: { $gte: new Date() },
-      'recordings.0': { $exists: false },
-    };
-    const r = await LiveClass.deleteMany(filter);
-    console.log(`[liveclasses] purge-auto: removed ${r.deletedCount} auto-scheduled classes (by ${req.user.email})`);
-    res.json({ success: true, message: `Removed ${r.deletedCount} auto-scheduled class(es). Reminders for them stop immediately.`, data: { removed: r.deletedCount } });
+    const ClassroomSession = require('../models/ClassroomSession');
+    const filter = await orphanFilter();
+    const ids = await LiveClass.distinct('_id', filter);
+    const joined = new Set((await ClassroomSession.distinct('liveClassId', { liveClassId: { $in: ids }, joinCount: { $gt: 0 } })).map(String));
+    const del = ids.filter(id => !joined.has(String(id)));
+    const r = await LiveClass.deleteMany({ _id: { $in: del } });
+    console.log(`[liveclasses] purge-orphans: removed ${r.deletedCount} orphaned timetable classes (by ${req.user.email})`);
+    res.json({ success: true, message: `Removed ${r.deletedCount} class(es) left over from removed timetable slots. Reminders for them stop immediately.`, data: { removed: r.deletedCount } });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
 
@@ -291,7 +325,7 @@ router.patch('/:id', auth, requireRole('teacher', 'admin', 'dos', 'ops_manager')
     const lc = await LiveClass.findById(req.params.id);
     if (!lc) return res.status(404).json({ success:false, message:'Class not found.' });
 
-    if (!['admin', 'dos', 'ops_manager'].includes(req.user.role) && String(lc.teacherId) !== String(req.user._id))
+    if (!STAFF_ROLES.includes(req.user.role) && String(lc.teacherId) !== String(req.user._id))
       return res.status(403).json({ success:false, message:'Not your class.' });
 
     // Capture old link before any updates so we can detect a change
@@ -299,7 +333,10 @@ router.patch('/:id', auth, requireRole('teacher', 'admin', 'dos', 'ops_manager')
 
     // One-off change to a timetable-born class: detach it so the
     // reconciler treats it as an exception rather than reverting it.
-    if (lc.timetableEntryId && (req.body.scheduledAt || req.body.durationMins)) lc.detached = true;
+    if (lc.timetableEntryId && (req.body.scheduledAt || req.body.durationMins)) {
+      lc.detached = true;
+      rememberOccurrence(lc);
+    }
 
     const allowed = [
       'title','description','subject','curriculum','grade',
@@ -325,7 +362,7 @@ router.patch('/:id', auth, requireRole('teacher', 'admin', 'dos', 'ops_manager')
       }
     }
 
-    await lc.save();
+    await saveClass(lc);
 
     res.json({ success:true, message:'Class updated.', data: { liveClass: lc } });
 
@@ -366,7 +403,7 @@ router.delete('/:id', auth, requireRole('teacher', 'admin', 'dos', 'ops_manager'
 
     const lc = await LiveClass.findById(req.params.id);
     if (!lc) return res.status(404).json({ success:false, message:'Class not found.' });
-    if (!['admin', 'dos', 'ops_manager'].includes(req.user.role) && String(lc.teacherId) !== String(req.user._id))
+    if (!STAFF_ROLES.includes(req.user.role) && String(lc.teacherId) !== String(req.user._id))
       return res.status(403).json({ success:false, message:'Not your class.' });
 
     if (lc.timetableEntryId) {
@@ -376,7 +413,11 @@ router.delete('/:id', auth, requireRole('teacher', 'admin', 'dos', 'ops_manager'
       // weekly slot continues next week.
       lc.status = 'cancelled';
       lc.detached = true;
-      await lc.save();
+      lc.cancelledAt = new Date();
+      rememberOccurrence(lc);
+      await saveClass(lc);
+      // The cancelled class gives its topic back to the plan.
+      require('../lib/lessonPlan').restampForEntryId(lc.timetableEntryId);
       return res.json({ success: true, message: 'This occurrence is cancelled. The weekly timetable slot continues from next week.' });
     }
     await lc.deleteOne();
@@ -390,11 +431,11 @@ router.delete('/:id', auth, requireRole('teacher', 'admin', 'dos', 'ops_manager'
 // ═══════════════════════════════════════════════════════════
 // START
 // ═══════════════════════════════════════════════════════════
-router.post('/:id/start', auth, requireRole('teacher', 'admin'), async (req, res) => {
+router.post('/:id/start', auth, requireRole('teacher', ...STAFF_ROLES), async (req, res) => {
   try {
     const lc = await LiveClass.findById(req.params.id);
     if (!lc) return res.status(404).json({ success:false, message:'Class not found.' });
-    if (!['admin', 'dos', 'ops_manager'].includes(req.user.role) && String(lc.teacherId) !== String(req.user._id))
+    if (!STAFF_ROLES.includes(req.user.role) && String(lc.teacherId) !== String(req.user._id))
       return res.status(403).json({ success:false, message:'Not your class.' });
 
     lc.status = 'live';
@@ -410,11 +451,11 @@ router.post('/:id/start', auth, requireRole('teacher', 'admin'), async (req, res
 // ═══════════════════════════════════════════════════════════
 // END
 // ═══════════════════════════════════════════════════════════
-router.post('/:id/end', auth, requireRole('teacher', 'admin'), async (req, res) => {
+router.post('/:id/end', auth, requireRole('teacher', ...STAFF_ROLES), async (req, res) => {
   try {
     const lc = await LiveClass.findById(req.params.id);
     if (!lc) return res.status(404).json({ success:false, message:'Class not found.' });
-    if (!['admin', 'dos', 'ops_manager'].includes(req.user.role) && String(lc.teacherId) !== String(req.user._id))
+    if (!STAFF_ROLES.includes(req.user.role) && String(lc.teacherId) !== String(req.user._id))
       return res.status(403).json({ success:false, message:'Not your class.' });
 
     lc.status = 'ended';
@@ -430,18 +471,20 @@ router.post('/:id/end', auth, requireRole('teacher', 'admin'), async (req, res) 
 // ═══════════════════════════════════════════════════════════
 // CANCEL
 // ═══════════════════════════════════════════════════════════
-router.post('/:id/cancel', auth, requireRole('teacher', 'admin'), async (req, res) => {
+router.post('/:id/cancel', auth, requireRole('teacher', ...STAFF_ROLES), async (req, res) => {
   try {
     const lc = await LiveClass.findById(req.params.id);
     if (!lc) return res.status(404).json({ success:false, message:'Class not found.' });
-    if (!['admin', 'dos', 'ops_manager'].includes(req.user.role) && String(lc.teacherId) !== String(req.user._id))
+    if (!STAFF_ROLES.includes(req.user.role) && String(lc.teacherId) !== String(req.user._id))
       return res.status(403).json({ success:false, message:'Not your class.' });
 
     lc.status = 'cancelled';
     lc.cancelledAt = new Date();
     lc.cancelReason = (req.body?.reason || '').trim();
-    await lc.save();
+    rememberOccurrence(lc);
+    await saveClass(lc);
     res.json({ success:true, message:'Class cancelled.', data: { liveClass: lc } });
+    if (lc.timetableEntryId) require('../lib/lessonPlan').restampForEntryId(lc.timetableEntryId);
   } catch (e) {
     console.error('[liveclasses cancel]', e.message);
     res.status(500).json({ success:false, message:'Failed to cancel class.' });
@@ -468,6 +511,7 @@ router.patch('/:id/lesson', auth, async (req, res) => {
       cls.syllabusSubtopicName = String(req.body.subtopicName);
       cls.lessonPinned = true;
       await cls.save();
+      if (cls.timetableEntryId) await require('../lib/lessonPlan').restampForEntryId(cls.timetableEntryId);
       return res.json({ success: true, message: `Pinned "${cls.syllabusSubtopicName}" to this class.` });
     }
     const lesson = await Lesson.findById(req.body?.lessonId).lean();
@@ -478,11 +522,14 @@ router.patch('/:id/lesson', auth, async (req, res) => {
         return res.status(400).json({ success: false, message: 'That lesson belongs to a different syllabus.' });
       }
     }
+    const { topicNameOf, restampForEntryId } = require('../lib/lessonPlan');
     cls.preparationLessonId = lesson._id;
-    cls.syllabusTopicName = lesson.topicName || lesson.title || '';
+    cls.syllabusTopicName = (await topicNameOf(lesson)) || lesson.title || '';
     cls.syllabusSubtopicName = lesson.subtopicName || '';
     cls.lessonPinned = true;
     await cls.save();
+    // The rest of the series moves up so nothing else repeats this lesson.
+    if (cls.timetableEntryId) await restampForEntryId(cls.timetableEntryId);
     res.json({ success: true, message: `Pinned "${lesson.title}" to this class.` });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });

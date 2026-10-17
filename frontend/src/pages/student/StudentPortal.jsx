@@ -11652,26 +11652,39 @@ function RealTimetableTab({ user, setPage, toast }) {
   }, [user?._id])
 
   // ── Helpers ──
-  const DAYS      = ['Mon','Tue','Wed','Thu','Fri']
-  const DAYS_LONG = { Mon:'Monday', Tue:'Tuesday', Wed:'Wednesday', Thu:'Thursday', Fri:'Friday' }
-  const DAY_TYPE  = { Mon:'Lessons', Tue:'Lessons', Wed:'Lessons', Thu:'Lessons', Fri:'Assessment & Activities' }
+  // Weekdays always; Saturday and Sunday appear when the student has
+  // lessons then (tuition students are often timetabled at weekends).
+  const ALL_DAYS  = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
+  const DAYS      = ALL_DAYS.filter((d, i) => i < 5 || entries.some(e => e.dayOfWeek === d))
+  const DAYS_LONG = { Mon:'Monday', Tue:'Tuesday', Wed:'Wednesday', Thu:'Thursday', Fri:'Friday', Sat:'Saturday', Sun:'Sunday' }
+  const DAY_TYPE  = { Mon:'Lessons', Tue:'Lessons', Wed:'Lessons', Thu:'Lessons', Fri:'Assessment & Activities', Sat:'Lessons', Sun:'Lessons' }
   const FRI_COLOR = '#6D28D9'
 
-  // School slots 09:00–15:00, lunch 13:00–14:00
-  const SLOTS = [
-    { label:'9 AM',  start:'09:00', end:'10:00' },
-    { label:'10 AM', start:'10:00', end:'11:00' },
-    { label:'11 AM', start:'11:00', end:'12:00' },
-    { label:'12 PM', start:'12:00', end:'13:00' },
-    { label:'Lunch', start:'13:00', end:'14:00', isBreak:true },
-    { label:'2 PM',  start:'14:00', end:'15:00' },
-  ]
-
   const toMins = hhmm => { if (!hhmm) return 0; const [h,m]=hhmm.split(':').map(Number); return h*60+m }
+
+  // Hourly rows covering the school day (09:00–15:00) and any earlier or
+  // later lessons, so evening and early-morning tuition is never hidden.
+  // The 13:00 lunch row stays a break unless a lesson is timetabled then.
+  const SLOTS = (() => {
+    const starts = entries.map(e => toMins(e.startTime)).filter(n => n > 0)
+    const ends   = entries.map(e => toMins(e.endTime)).filter(n => n > 0)
+    const first  = Math.min(9, ...starts.map(m => Math.floor(m / 60)))
+    const last   = Math.max(15, ...ends.map(m => Math.ceil(m / 60)))
+    const lunchTaken = entries.some(e => toMins(e.startTime) >= 780 && toMins(e.startTime) < 840)
+    const label = h => `${h % 12 === 0 ? 12 : h % 12} ${h >= 12 ? 'PM' : 'AM'}`
+    const pad = h => String(h).padStart(2, '0') + ':00'
+    const out = []
+    for (let h = first; h < last; h++) {
+      out.push(h === 13 && !lunchTaken
+        ? { label:'Lunch', start:'13:00', end:'14:00', isBreak:true }
+        : { label:label(h), start:pad(h), end:pad(h + 1) })
+    }
+    return out
+  })()
   const fmt    = hhmm => { if (!hhmm) return ''; const [h,m]=hhmm.split(':').map(Number); const mer=h>=12?'PM':'AM'; let hr=h%12; if(hr===0)hr=12; return `${hr}${m===0?'':':'+String(m).padStart(2,'0')} ${mer}` }
   const now    = new Date()
   const todayDayIdx = (now.getDay()+6)%7   // Mon=0
-  const todayDay    = DAYS[todayDayIdx] || null
+  const todayDay    = DAYS.includes(ALL_DAYS[todayDayIdx]) ? ALL_DAYS[todayDayIdx] : null
   const nowMins     = now.getHours()*60+now.getMinutes()
   const isLive  = e => e.dayOfWeek===todayDay && nowMins>=toMins(e.startTime) && nowMins<toMins(e.endTime)
   const isPast  = e => e.dayOfWeek===todayDay && nowMins>=toMins(e.endTime)
@@ -11827,8 +11840,8 @@ function RealTimetableTab({ user, setPage, toast }) {
         </div>
       ) : view==='grid' ? (
         /* ── PREMIUM GRID VIEW ── */
-        <div style={{ background:'#fff', border:'1px solid #E8E2D6', borderRadius:12, overflow:'hidden', boxShadow:'0 2px 12px rgba(0,0,0,.06)' }}>
-          <table style={{ width:'100%', borderCollapse:'collapse' }}>
+        <div style={{ background:'#fff', border:'1px solid #E8E2D6', borderRadius:12, overflowX:'auto', boxShadow:'0 2px 12px rgba(0,0,0,.06)' }}>
+          <table style={{ width:'100%', borderCollapse:'collapse', minWidth: DAYS.length > 5 ? 760 : undefined }}>
             <thead>
               <tr>
                 <th style={{ width:60, padding:'10px 12px', background:'#1A0F0E', fontSize:10.5, fontWeight:700, color:'rgba(255,255,255,.5)', textAlign:'center', borderRight:'1px solid rgba(255,255,255,.1)' }}>Time</th>

@@ -97,6 +97,19 @@ const liveClassSchema = new mongoose.Schema({
   // Detached instances are EXCEPTIONS: the reconciler never deletes,
   // moves, or recreates over them - one-off changes survive the series.
   detached: { type: Boolean, default: false },
+  // The weekly occurrence a template-born class stands for. Set when the
+  // reconciler creates it and kept when the class is later moved or
+  // cancelled, so that occurrence stays "taken" and is never re-created
+  // on the original day. Null on manual classes and on template classes
+  // made before this field existed (the reconciler backfills those).
+  originalScheduledAt: { type: Date, default: null },
+
+  // ── Reminders ───────────────────────────────────
+  // Who has been sent the 30-minute reminder (student ids, plus
+  // 'teacher'), and when the reminder pass for this class completed.
+  // Persisted so a restart or a second sweep never repeats a reminder.
+  remindedRecipients: { type: [String], default: [] },
+  reminderSentAt:     { type: Date, default: null },
 
   // Clubs. A club meeting is a live class with clubId set; it opens in
   // the classroom's meeting (conference) view instead of the whiteboard,
@@ -169,6 +182,20 @@ const liveClassSchema = new mongoose.Schema({
 // Compound indexes for student/teacher dashboards
 liveClassSchema.index({ assignedStudents: 1, scheduledAt: -1 });
 liveClassSchema.index({ teacherId: 1, scheduledAt: -1 });
+// One class per weekly occurrence of a timetable entry. Partial: only
+// template-born classes that carry their occurrence take part, so manual
+// classes and older documents are unaffected and the build cannot fail
+// on existing data.
+liveClassSchema.index(
+  { timetableEntryId: 1, originalScheduledAt: 1 },
+  {
+    unique: true,
+    name: 'uniq_timetable_occurrence',
+    partialFilterExpression: { timetableEntryId: { $type: 'objectId' }, originalScheduledAt: { $type: 'date' } },
+  },
+);
+// Reminder sweep: scheduled classes starting soon that are not done yet.
+liveClassSchema.index({ status: 1, scheduledAt: 1, reminderSentAt: 1 });
 
 // Virtual: computed status — accounts for the actual date even if the
 // `status` field hasn't been flipped yet.

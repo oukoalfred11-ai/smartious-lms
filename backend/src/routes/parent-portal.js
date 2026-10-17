@@ -97,7 +97,8 @@ router.get('/children/:id/timetable', auth, async (req, res) => {
     if (!student) return fail(res,404,'Student not found.')
     await assertAccess(req.user, student)
 
-    const entries = await TimetableEntry.find({ assignedStudents:req.params.id, isActive:true })
+    const { studentVisibilityFilter } = require('../lib/scheduling')
+    const entries = await TimetableEntry.find(studentVisibilityFilter(student))
       .populate('teacherId','firstName lastName')
       .lean()
     return ok(res, { entries })
@@ -257,16 +258,25 @@ router.get('/children/:id/liveclasses', auth, async (req, res) => {
     const when = c => new Date(c.startAt || c.scheduledAt || c.date || c.createdAt)
     const past = classes.filter(c => when(c) < now || c.status === 'completed' || c.status === 'ended')
     const upcoming = classes.filter(c => !past.includes(c)).reverse()
+    // A class whose time has passed was HELD only if it ended properly or
+    // somebody was in the room; otherwise it is 'not_confirmed', never
+    // presented to the family as completed.
+    const { classOutcome } = require('../lib/scheduling')
+    const ClassroomSession = require('../models/ClassroomSession')
+    const heldIds = new Set((await ClassroomSession.distinct('liveClassId', {
+      liveClassId: { $in: past.map(c => c._id) }, joinCount: { $gt: 0 },
+    })).map(String))
     // Published recordings ride along on covered classes, so the
     // portal can offer Watch recording. Only featured ones show;
     // an admin unpublishing a weak recording hides it here too.
     const shape = c => ({
       ...c,
+      outcome: classOutcome(c, now, heldIds),
       recordings: (c.recordings || [])
         .filter(r => r.featured)
         .map(r => ({ url: r.url, title: r.title || c.title || '', durationSec: r.durationSec || 0, recordedAt: r.recordedAt })),
     })
-    return ok(res, { past: past.map(shape), upcoming: upcoming.map(shape), doneCount: past.length, totalCount: classes.length })
+    return ok(res, { past: past.map(shape), upcoming: upcoming.map(shape), doneCount: past.filter(c => classOutcome(c, now, heldIds) === 'held').length, totalCount: classes.length })
   } catch(e) { return fail(res, e.status||500, e.message) }
 })
 
@@ -404,136 +414,124 @@ async function assertAccess(reqUser, student) {
 }
 
 // ── Class reminder function ───────────────────────────────
-// Called by cron every minute; sends email 30min before class starts
-//
-// The matching window below is +/-2 minutes, so a given class matches on
-// five consecutive one-minute sweeps. Without a record of what has already
-// gone out, the family received the same reminder five times. This cache
-// remembers which class occurrences have been reminded, keyed by
-// entry + date + start time, and is pruned after 24h so it cannot grow
-// unbounded. It is in-memory by design: a process restart may allow one
-// repeat, which is far safer than adding writes to the timetable on a
-// path that runs every minute.
-const remindedOccurrences = new Map()   // key -> timestamp sent
+// Called every minute. Reads the REAL classes (LiveClass), so a lesson
+// a teacher moved is announced at its new time, a cancelled one is not
+// announced at all, and clubs/events get reminders too. Who has been
+// reminded is stored on the class itself (remindedRecipients), so a
+// restart or a second server never repeats a reminder, and a failed send
+// is retried on the next sweep until the class starts.
+const {
+  reminderWindow, reminderStudents, classTypeLabel,
+} = require('../lib/scheduling')
+const { zonedParts, zonedHHMM, DEFAULT_TZ } = require('../lib/schoolTime')
 
-function pruneRemindedOccurrences(nowMs) {
-  const DAY = 24 * 60 * 60 * 1000
-  for (const [key, at] of remindedOccurrences) {
-    if (nowMs - at > DAY) remindedOccurrences.delete(key)
-  }
+async function pausedStudentIds(ids, now) {
+  if (!ids.length) return []
+  try {
+    const StudentPause = require('../models/StudentPause')
+    return await StudentPause.distinct('student', {
+      student: { $in: ids }, status: 'active', startAt: { $lte: now },
+      $or: [{ expectedEnd: null }, { expectedEnd: { $gt: now } }],
+    })
+  } catch { return [] }
 }
 
 async function sendClassReminders() {
   const t = getTransporter()
   if (!t) return 0
+  const LiveClass = require('../models/LiveClass')
+  const now = new Date()
+  const { from, to } = reminderWindow(now)
 
-  const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
-  const now     = new Date()
-  const eat     = new Date(now.getTime() + 3*60*60*1000)  // UTC+3
-  const dayName = DAYS[eat.getDay()]
-  const nowMins = eat.getHours()*60 + eat.getMinutes()
-  const target  = nowMins + 30  // classes starting in 30 minutes
-
-  // Find timetable entries starting in 30±2 minutes
-  const entries = await TimetableEntry.find({ dayOfWeek:dayName, isActive:true })
-    .populate('teacherId','firstName lastName')
-    .populate('assignedStudents','firstName lastName parentEmail linkedParents parentId email parentName onBreak')
+  const classes = await LiveClass.find({
+    status: 'scheduled', reminderSentAt: null, scheduledAt: { $gte: from, $lte: to },
+  })
+    .populate('teacherId', 'firstName lastName email')
+    .populate('assignedStudents', 'firstName lastName parentEmail linkedParents parentId email parentName onBreak')
     .lean()
 
-  const upcoming = entries.filter(e => {
-    if (!e.startTime) return false
-    const [h,m] = e.startTime.split(':').map(Number)
-    const slotMins = h*60+m
-    return Math.abs(slotMins - target) <= 2
-  })
-
-  pruneRemindedOccurrences(now.getTime())
-  // Identifies one specific occurrence of a class: this entry, on this
-  // date, at this start time.
-  const occurrenceDate = eat.toISOString().slice(0, 10)
-
   let sent = 0
-  for (const entry of upcoming) {
-    // Exception check: if this occurrence was cancelled (a materialized
-    // instance with status cancelled exists for this entry today), the
-    // family must NOT get a reminder for a class that will not happen.
-    let entryForEmail = entry
-    try {
-      const LiveClassX = require('../models/LiveClass')
-      const [oh, om] = String(entry.startTime).split(':').map(Number)
-      const occ = new Date(Date.UTC(eat.getUTCFullYear(), eat.getUTCMonth(), eat.getUTCDate(), oh, om) - 3 * 3600 * 1000)
-      const inst = await LiveClassX.findOne({
-        timetableEntryId: entry._id,
-        scheduledAt: { $gte: new Date(occ.getTime() - 5 * 60000), $lte: new Date(occ.getTime() + 5 * 60000) },
-      }).select('status syllabusTopicName syllabusSubtopicName').lean()
-      // A cancelled occurrence must not be announced.
-      if (inst && inst.status === 'cancelled') continue
-      // Topic-bearing reminders: today's materialized instance knows
-      // which spine lesson this class covers - announce it, as the old
-      // per-class scheduling always did.
-      if (inst && inst.syllabusTopicName) {
-        const topic = inst.syllabusTopicName + (inst.syllabusSubtopicName ? ': ' + inst.syllabusSubtopicName : '')
-        entryForEmail = { ...entry, subject: entry.subject + ' — ' + topic }
-      }
-    } catch (e) { /* reminder proceeds if the check itself fails */ }
+  for (const cls of classes) {
+    const done = new Set(cls.remindedRecipients || [])
+    const ids = (cls.assignedStudents || []).filter(s => s && s._id).map(s => s._id)
+    const students = reminderStudents(cls, { pausedIds: await pausedStudentIds(ids, now) })
+    const newlyDone = []
+    let failed = false
 
-    // The same student can appear twice on one entry if the timetable was
-    // edited; without this the family would receive the reminder twice.
-    const seenStudents = new Set()
-
-    for (const student of (entry.assignedStudents||[])) {
-      if (!student || !student._id) continue
-      if (seenStudents.has(String(student._id))) continue
-      seenStudents.add(String(student._id))
-
-      if (student.onBreak) continue // paused students receive no class reminders
-
-      // Already reminded for this exact class occurrence? Skip. Recorded
-      // only after a successful send below, so a transient SMTP failure
-      // still gets retried on the next sweep.
-      const occurrenceKey = `${entry._id}:${occurrenceDate}:${entry.startTime}:${student._id}`
-      if (remindedOccurrences.has(occurrenceKey)) continue
-
-      // Student AND parents. The previous version collected parent
-      // addresses only, and pushed whatever the linked parent records
-      // held straight into the recipient set — including blanks and
-      // undefined values, which is what produced the empty sends.
-      // resolveStudentRecipients validates each address and de-duplicates
-      // case-insensitively before anything is sent.
+    for (const student of students) {
       const resolved = await resolveStudentRecipients(student, { includeStudent: true, category: 'classReminders' })
       if (!resolved.to.length) {
-        console.warn(`[class reminder] ${student.firstName} ${student.lastName}: ` +
-                     'no valid email address on file — skipped')
+        console.warn(`[class reminder] ${student.firstName} ${student.lastName}: no valid email address on file — skipped`)
+        newlyDone.push(String(student._id))
         continue
       }
-
-      // One message addressed to the family rather than a separate send
-      // per address, so parent and student see the same thread.
       try {
         await t.sendMail({
           from:    process.env.EMAIL_FROM || 'Smartious <hello@smartioushomeschool.com>',
           to:      resolved.to.join(', '),
-          subject: `Class reminder — ${entryForEmail.subject} starts in 30 minutes`,
-          html:    buildClassReminderEmail(student, entryForEmail),
+          subject: `Class reminder — ${classHeadline(cls)} starts in 30 minutes`,
+          html:    buildClassReminderEmail(student, cls),
         })
-        remindedOccurrences.set(occurrenceKey, Date.now())
+        newlyDone.push(String(student._id))
         sent++
-        console.log(`[class reminder] ${entry.subject} \u00B7 ${student.firstName} ${student.lastName} ` +
-                    `\u2192 ${describeRecipients(resolved)}`)
-      } catch(e) {
+        console.log(`[class reminder] ${classHeadline(cls)} · ${student.firstName} ${student.lastName} → ${describeRecipients(resolved)}`)
+      } catch (e) {
+        failed = true
         console.error('[class reminder]', resolved.to.join(', '), e.message)
       }
     }
+
+    // The teacher is reminded too, once per class.
+    const teacher = cls.teacherId
+    if (teacher && teacher.email && !done.has('teacher')) {
+      try {
+        await t.sendMail({
+          from:    process.env.EMAIL_FROM || 'Smartious <hello@smartioushomeschool.com>',
+          to:      teacher.email,
+          subject: `Your class starts in 30 minutes — ${classHeadline(cls)}`,
+          html:    buildClassReminderEmail(null, cls),
+        })
+        newlyDone.push('teacher')
+        sent++
+      } catch (e) { failed = true; console.error('[class reminder] teacher', teacher.email, e.message) }
+    } else if (!done.has('teacher')) newlyDone.push('teacher')
+
+    const update = { $addToSet: { remindedRecipients: { $each: newlyDone } } }
+    if (!failed) update.$set = { reminderSentAt: new Date() }
+    try { await LiveClass.updateOne({ _id: cls._id }, update) } catch (e) { console.error('[class reminder] could not record:', e.message) }
   }
 
   if (sent > 0) console.log(`[class reminder] Sent ${sent} class reminders`)
   return sent
 }
 
-function buildClassReminderEmail(student, entry) {
-  const teacherName = entry.teacherId ? `${entry.teacherId.firstName} ${entry.teacherId.lastName}` : 'Your teacher'
-  const isFri = entry.dayOfWeek === 'Fri'
-  const typeLabel = isFri ? 'Assessment / Activities' : 'Lesson'
+function classHeadline(cls) {
+  const topic = cls.syllabusTopicName
+    ? ' — ' + cls.syllabusTopicName + (cls.syllabusSubtopicName ? ': ' + cls.syllabusSubtopicName : '')
+    : ''
+  return (cls.subject || cls.title || 'Class') + topic
+}
+
+const escHtml = (v) => String(v == null ? '' : v).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]))
+
+// student = null → the teacher's copy.
+function buildClassReminderEmail(student, cls) {
+  const teacherName = cls.teacherId ? `${cls.teacherId.firstName} ${cls.teacherId.lastName}` : 'Your teacher'
+  const typeLabel = classTypeLabel(cls)
+  const tz = DEFAULT_TZ
+  const start = new Date(cls.scheduledAt)
+  const end = new Date(start.getTime() + (cls.durationMins || 60) * 60000)
+  const p = zonedParts(start, tz)
+  const day = new Date(Date.UTC(p.year, p.month - 1, p.day)).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' })
+  const who = student ? `${escHtml(student.firstName)} ${escHtml(student.lastName)}` : escHtml(teacherName)
+  const lead = student
+    ? `<strong>${escHtml(student.firstName)}</strong>'s ${typeLabel.toLowerCase()} starts in <strong>30 minutes</strong>.`
+    : `Your ${typeLabel.toLowerCase()} starts in <strong>30 minutes</strong>.`
+  const note = student ? `This reminder has been sent to ${escHtml(student.firstName)} and to their parents.` : 'Please open the classroom a few minutes early.'
+  const portal = student ? 'https://smartioushomeschool.com/student' : 'https://smartioushomeschool.com/teacher'
+  const rows = [['Subject', `<strong>${escHtml(classHeadline(cls))}</strong>`], ['Type', typeLabel],
+    ['Time', `<strong>${fmtTime(zonedHHMM(start, tz))} – ${fmtTime(zonedHHMM(end, tz))}</strong> (Nairobi time)`],
+    ['Teacher', escHtml(teacherName)], ['Day', day]]
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
 <body style="margin:0;padding:0;background:#FDFAF4;font-family:sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="padding:32px 16px;">
@@ -541,24 +539,20 @@ function buildClassReminderEmail(student, entry) {
 <tr><td style="background:linear-gradient(135deg,#7D1025,#5A0B1B);padding:24px 32px;">
   <div style="font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:8px">Smartious Homeschool · Class Reminder</div>
   <div style="font-size:20px;font-weight:800;color:#fff;">Class starting in 30 minutes</div>
-  <div style="font-size:13px;color:rgba(255,255,255,.65);margin-top:4px;">${student.firstName} ${student.lastName}</div>
+  <div style="font-size:13px;color:rgba(255,255,255,.65);margin-top:4px;">${who}</div>
 </td></tr>
 <tr><td style="padding:28px 32px;">
-  <p style="font-size:14px;color:#2c2c2c;margin:0 0 8px;line-height:1.65;">
-    <strong>${student.firstName}</strong>'s ${typeLabel.toLowerCase()} starts in <strong>30 minutes</strong>.
-  </p>
-  <p style="font-size:12px;color:#6B6B6B;margin:0 0 20px;line-height:1.6;">
-    This reminder has been sent to ${student.firstName} and to their parents.
-  </p>
+  <p style="font-size:14px;color:#2c2c2c;margin:0 0 8px;line-height:1.65;">${lead}</p>
+  <p style="font-size:12px;color:#6B6B6B;margin:0 0 20px;line-height:1.6;">${note}</p>
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#FDFAF4;border-radius:8px;border:1px solid #E8E2D6;margin-bottom:24px;">
   <tr><td style="padding:16px 20px;">
     <table width="100%">
-      ${[['Subject',`<strong>${entry.subject}</strong>`],['Type',typeLabel],['Time',`<strong>${fmtTime(entry.startTime)} – ${fmtTime(entry.endTime)}</strong>`],['Teacher',teacherName],['Day',entry.dayOfWeek]].map(([l,v])=>`
+      ${rows.map(([l, v]) => `
       <tr><td style="font-size:12px;font-weight:700;color:#6B6B6B;text-transform:uppercase;letter-spacing:.06em;padding-bottom:6px;">${l}</td><td style="font-size:13px;color:#1A1A1A;padding-bottom:6px;text-align:right;">${v}</td></tr>`).join('')}
     </table>
   </td></tr></table>
-  <a href="https://smartioushomeschool.com/student" style="display:block;background:#7D1025;color:#fff;text-align:center;padding:13px;border-radius:8px;font-weight:700;font-size:14px;text-decoration:none;">
-    Go to student portal
+  <a href="${portal}" style="display:block;background:#7D1025;color:#fff;text-align:center;padding:13px;border-radius:8px;font-weight:700;font-size:14px;text-decoration:none;">
+    ${student ? 'Go to student portal' : 'Go to teacher portal'}
   </a>
 </td></tr>
 <tr><td style="background:#FDFAF4;padding:14px 32px;border-top:1px solid #E8E2D6;">
