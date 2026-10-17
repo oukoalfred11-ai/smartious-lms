@@ -77,7 +77,7 @@ export default function LoginPage() {
         return
       }
       toast.ok(`Welcome back, ${user.firstName}!`)
-      const ROLE_PATHS = { student:'/student', parent:'/parent', demo:'/demo' }
+      const ROLE_PATHS = { student:'/student', parent:'/parent' }
       nav(ROLE_PATHS[user.role] || '/portal')
     } catch (e) {
       setErr(e.message || 'Invalid email or password.')

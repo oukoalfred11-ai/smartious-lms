@@ -24164,26 +24164,12 @@ export default function LandingPage() {
             </a>
             <div style={{display:'flex',alignItems:'center',gap:12,margin:'20px 0'}}>
               <div style={{flex:1,height:1,background:'rgba(255,255,255,.07)'}}/>
-              <span style={{fontSize:12,color:'rgba(247,243,237,.2)',whiteSpace:'nowrap'}}>Or use demo access</span>
+              <span style={{fontSize:12,color:'rgba(247,243,237,.2)',whiteSpace:'nowrap'}}>or</span>
               <div style={{flex:1,height:1,background:'rgba(255,255,255,.07)'}}/>
             </div>
             <a className="lp-btnlink" style={{width:'100%',padding:12,background:'rgba(255,255,255,.06)',border:'1px solid rgba(255,255,255,.1)',borderRadius:8,color:V.white,fontWeight:700,fontSize:13.5,cursor:'pointer',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",display:'flex',alignItems:'center',justifyContent:'center',gap:8}} href={'/login'} onClick={linkClick(goPortal)}>
               <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
               Go to Full Login Page
-            </a>
-          </div>
-
-          {/* Quick demo card — Demo only */}
-          <div style={{display:'flex',justifyContent:'center',marginTop:8}}>
-            <a className="lpf lp-divlink" style={{cursor:'pointer',minWidth:200,textAlign:'center'}} href={'/login'} onClick={linkClick(goPortal)}>
-              <div style={{display:'flex',justifyContent:'center',marginBottom:8}}>
-                <div style={{width:40,height:40,borderRadius:10,background:'rgba(139,26,46,.3)',border:'1px solid rgba(139,26,46,.5)',display:'flex',alignItems:'center',justifyContent:'center'}}>
-                  <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke={V.cr} strokeWidth="2" strokeLinecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                </div>
-              </div>
-              <div style={{fontWeight:700,fontSize:14,color:V.white,marginBottom:4}}>Try Demo</div>
-              <div className="lpf-l">demo@smartious.ac.ke</div>
-              <div className="lpf-s">One-click access · No sign up needed</div>
             </a>
           </div>
         </div>
