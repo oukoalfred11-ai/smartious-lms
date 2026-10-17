@@ -417,7 +417,7 @@ export const ROMANIA_CITIES = [
       'Universitatea Ovidius academic families.',
       'Academia Navală Mircea cel Bătrân naval academy families.',
     ],
-    nearboritas: ['Mamaia', 'Faleză Nord', 'Boemia', 'Tomis', 'Palas', 'Coiciu', 'Peninsula', 'Năvodari (adjacent)', 'Ovidiu (adjacent)', 'Mangalia (adjacent — Damen Shipyards)'],
+    nearbyAreas: ['Mamaia', 'Faleză Nord', 'Boemia', 'Tomis', 'Palas', 'Coiciu', 'Peninsula', 'Năvodari (adjacent)', 'Ovidiu (adjacent)', 'Mangalia (adjacent — Damen Shipyards)'],
     subjects: [
       'Cambridge IGCSE Mathematics, Sciences, English, Romanian, French',
       'Cambridge A-Level Mathematics + Chemistry — oil & gas / marine engineering pathway',
