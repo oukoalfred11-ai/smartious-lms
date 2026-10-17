@@ -399,6 +399,13 @@ const styles = `
   .lp .nav-login:hover{color:${V.white};border-color:rgba(247,243,237,.28)}
   .lp .nav-cta{display:flex;align-items:center;gap:7px;padding:9px 20px;border-radius:6px;font-size:12.5px;font-weight:700;background:${V.cr};color:${V.white};box-shadow:0 4px 14px rgba(139,26,46,.35);transition:all .2s;cursor:pointer;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
   .lp .nav-cta:hover{background:${V.cr2};transform:translateY(-1px)}
+  .lp .nav-login,.lp .nav-cta{white-space:nowrap;flex-shrink:0}
+  /* Laptops: a tighter nav so the links, Portal Login and Book assessment
+     fit on one line. Below 1180px the full nav cannot fit, so the menu
+     button takes over, as on phones (the Book assessment button had
+     been pushed off the right edge between 769px and 1200px). */
+  @media(max-width:1280px){.lp .nav-wrap{padding:0 28px}.lp .nav-links{margin-left:22px}.lp .nl{padding:8px 9px}.lp .nav-login{padding:8px 12px}.lp .nav-cta{padding:9px 16px}}
+  @media(max-width:1180px){.lp .nav-links,.lp .nav-actions{display:none}.lp .mob-burger{display:flex!important}}
   /* HERO */
   .lp #hero{position:relative;min-height:calc(100vh - 64px);background:${V.ink};display:flex;flex-direction:column;overflow:hidden}
   .lp .h-bg{position:absolute;inset:0;z-index:1;width:100%;height:100%;object-fit:cover;object-position:center 35%;filter:brightness(1.32) saturate(1.15) contrast(1.04);pointer-events:none;background:${V.ink}}
@@ -5028,7 +5035,7 @@ export default function LandingPage() {
               Portal Login
             </a>
             <a className="nav-cta lp-divlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>
-              Enroll Now
+              Book assessment
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </a>
           </div>
@@ -5048,7 +5055,9 @@ export default function LandingPage() {
       {mobileMenuOpen && (
         <div style={{
           position:'fixed',
-          top:64,left:0,right:0,bottom:0,
+          // Below the header: 103px with the topbar, 64px once scrolled
+          // (the topbar hides), so the close button stays visible.
+          top: scrolled ? 64 : 103,left:0,right:0,bottom:0,
           background:'linear-gradient(180deg, #080C14 0%, #1a0e12 100%)',
           zIndex:9998,
           overflowY:'auto',
@@ -5094,14 +5103,11 @@ export default function LandingPage() {
                 ['Services','services'],
                 ['Pricing','pricing'],
               ]},
-              { cat:'Get Started', items:[
-                ['Book assessment','assessment'],
-              ]},
-            ].map((group, gi) => (
+            ].map((group, gi, groups) => (
               <div key={group.cat} style={{
                 marginBottom: 6,
-                borderBottom: gi < 5 ? '1px solid rgba(255,255,255,.06)' : 'none',
-                paddingBottom: gi < 5 ? 4 : 0,
+                borderBottom: gi < groups.length - 1 ? '1px solid rgba(255,255,255,.06)' : 'none',
+                paddingBottom: gi < groups.length - 1 ? 4 : 0,
               }}>
                 {/* Category header — tap to toggle */}
                 <button
@@ -5225,7 +5231,7 @@ export default function LandingPage() {
                   letterSpacing:'.04em',
                   boxShadow:'0 6px 18px rgba(139,26,46,.4)',
                 }}>
-                Enroll Now
+                Book assessment
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </a>
             </div>
@@ -6987,7 +6993,7 @@ export default function LandingPage() {
             <div className="pg-hero" style={c.gold?{background:V.ink}:{}}>
               <div className="wrap">
                 <a className="lp-btnlink" href={pageToPath('curricula')} onClick={linkClick(() => P('curricula'))}
-                  style={{background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.15)',color:'rgba(255,255,255,.85)',padding:'7px 14px',borderRadius:20,fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",marginBottom:22,display:'inline-flex',alignItems:'center',gap:6}}>
+                  style={{background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.15)',color:'rgba(255,255,255,.85)',padding:'7px 14px',borderRadius:20,fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",marginBottom:22,display:'flex',width:'fit-content',alignItems:'center',gap:6}}>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                   All Curricula
                 </a>
@@ -7107,7 +7113,7 @@ export default function LandingPage() {
             <div className="pg-hero" style={{background:V.ink}}>
               <div className="wrap">
                 <a className="lp-btnlink" href={pageToPath('services')} onClick={linkClick(() => P('services'))}
-                  style={{background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.15)',color:'rgba(255,255,255,.85)',padding:'7px 14px',borderRadius:20,fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",marginBottom:22,display:'inline-flex',alignItems:'center',gap:6}}>
+                  style={{background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.15)',color:'rgba(255,255,255,.85)',padding:'7px 14px',borderRadius:20,fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",marginBottom:22,display:'flex',width:'fit-content',alignItems:'center',gap:6}}>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                   All Services
                 </a>
@@ -12643,7 +12649,7 @@ export default function LandingPage() {
             <HeroBackdrop src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1600&q=80&auto=format&fit=crop"/>
             <div className="wrap" style={{position:'relative',zIndex:2}}>
               <div style={{maxWidth:840}}>
-                <a onClick={() => P('ca-families')} style={{color:V.bone3,fontSize:13,textDecoration:'none',cursor:'pointer',display:'inline-block',marginBottom:12}}>← Canada</a>
+                <a onClick={() => P('ca-families')} style={{color:V.bone3,fontSize:13,textDecoration:'none',cursor:'pointer',display:'block',width:'fit-content',marginBottom:14}}>← Canada</a>
                 <div style={{display:'inline-block',background:V.cr,padding:'6px 14px',borderRadius:999,fontSize:12,fontWeight:600,letterSpacing:'.05em',textTransform:'uppercase',marginBottom:20}}>$850 CAD per child · universal · no income test</div>
                 <h1 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(36px,5.5vw,60px)',lineHeight:1.1,margin:'0 0 18px',color:'#fff'}}>
                   Alberta Home Education Funding — every dollar of your $850 CAD covers Smartious Cambridge instruction
@@ -12808,7 +12814,7 @@ export default function LandingPage() {
             <HeroBackdrop src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=1600&q=80&auto=format&fit=crop"/>
             <div className="wrap" style={{position:'relative',zIndex:2}}>
               <div style={{maxWidth:840}}>
-                <a onClick={() => P('ca-families')} style={{color:V.bone3,fontSize:13,textDecoration:'none',cursor:'pointer',display:'inline-block',marginBottom:12}}>← Canada</a>
+                <a onClick={() => P('ca-families')} style={{color:V.bone3,fontSize:13,textDecoration:'none',cursor:'pointer',display:'block',width:'fit-content',marginBottom:14}}>← Canada</a>
                 <div style={{display:'inline-block',background:V.cr,padding:'6px 14px',borderRadius:999,fontSize:12,fontWeight:600,letterSpacing:'.05em',textTransform:'uppercase',marginBottom:20}}>BC DL · resource allocation $200–$700 CAD/yr</div>
                 <h1 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(36px,5.5vw,60px)',lineHeight:1.1,margin:'0 0 18px',color:'#fff'}}>
                   BC Distributed Learning funding + Smartious Cambridge — the realistic pathway
@@ -12956,7 +12962,7 @@ export default function LandingPage() {
             <HeroBackdrop src="https://images.unsplash.com/photo-1602074068265-c14c4a78cd97?w=1600&q=80&auto=format&fit=crop"/>
             <div className="wrap" style={{position:'relative',zIndex:2}}>
               <div style={{maxWidth:840}}>
-                <a onClick={() => P('ca-families')} style={{color:V.bone3,fontSize:13,textDecoration:'none',cursor:'pointer',display:'inline-block',marginBottom:12}}>← Canada</a>
+                <a onClick={() => P('ca-families')} style={{color:V.bone3,fontSize:13,textDecoration:'none',cursor:'pointer',display:'block',width:'fit-content',marginBottom:14}}>← Canada</a>
                 <div style={{display:'inline-block',background:V.cr,padding:'6px 14px',borderRadius:999,fontSize:12,fontWeight:600,letterSpacing:'.05em',textTransform:'uppercase',marginBottom:20}}>SK · $500–$1,500 CAD/yr · division-dependent</div>
                 <h1 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(36px,5.5vw,60px)',lineHeight:1.1,margin:'0 0 18px',color:'#fff'}}>
                   Saskatchewan homeschool funding — depends entirely on your school division
@@ -14276,7 +14282,7 @@ export default function LandingPage() {
                 <a
                   href="/tuition-nairobi"
                   onClick={(e)=>{e.preventDefault(); P('tuition-nairobi')}}
-                  style={{color:'rgba(255,255,255,.7)',textDecoration:'none',fontSize:12,letterSpacing:'.04em',marginBottom:16,display:'inline-flex',alignItems:'center',gap:6}}>
+                  style={{color:'rgba(255,255,255,.7)',textDecoration:'none',fontSize:12,letterSpacing:'.04em',marginBottom:16,display:'flex',width:'fit-content',alignItems:'center',gap:6}}>
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                   Tuition Nairobi
                 </a>
@@ -14681,7 +14687,7 @@ export default function LandingPage() {
               <div className="wrap" style={{position:'relative',zIndex:2}}>
                 <a href="/tuition-uae"
                   onClick={(e)=>{e.preventDefault(); P('tuition-uae')}}
-                  style={{color:'rgba(255,255,255,.7)',textDecoration:'none',fontSize:12,letterSpacing:'.04em',marginBottom:16,display:'inline-flex',alignItems:'center',gap:6}}>
+                  style={{color:'rgba(255,255,255,.7)',textDecoration:'none',fontSize:12,letterSpacing:'.04em',marginBottom:16,display:'flex',width:'fit-content',alignItems:'center',gap:6}}>
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                   Tuition UAE
                 </a>
@@ -18519,7 +18525,7 @@ export default function LandingPage() {
               <div className="wrap" style={{position:'relative',zIndex:2}}>
                 <a href="/online-school/kenya"
                   onClick={(e)=>{e.preventDefault(); P('homeschooling-kenya')}}
-                  style={{color:'rgba(255,255,255,.7)',textDecoration:'none',fontSize:12,letterSpacing:'.04em',marginBottom:16,display:'inline-flex',alignItems:'center',gap:6}}>
+                  style={{color:'rgba(255,255,255,.7)',textDecoration:'none',fontSize:12,letterSpacing:'.04em',marginBottom:16,display:'flex',width:'fit-content',alignItems:'center',gap:6}}>
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                   Homeschooling Kenya
                 </a>
@@ -18895,7 +18901,7 @@ export default function LandingPage() {
             }}>
               <div className="wrap">
                 <a href="/test-prep" onClick={(e)=>{e.preventDefault(); P('test-prep')}}
-                  style={{color:'rgba(255,255,255,.7)',textDecoration:'none',fontSize:12,letterSpacing:'.04em',marginBottom:16,display:'inline-flex',alignItems:'center',gap:6}}>
+                  style={{color:'rgba(255,255,255,.7)',textDecoration:'none',fontSize:12,letterSpacing:'.04em',marginBottom:16,display:'flex',width:'fit-content',alignItems:'center',gap:6}}>
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                   All test preparation
                 </a>
@@ -19252,7 +19258,7 @@ export default function LandingPage() {
             }}>
               <div className="wrap">
                 <a href="/languages" onClick={(e)=>{e.preventDefault(); P('languages')}}
-                  style={{color:'rgba(255,255,255,.7)',textDecoration:'none',fontSize:12,letterSpacing:'.04em',marginBottom:18,display:'inline-flex',alignItems:'center',gap:6}}>
+                  style={{color:'rgba(255,255,255,.7)',textDecoration:'none',fontSize:12,letterSpacing:'.04em',marginBottom:18,display:'flex',width:'fit-content',alignItems:'center',gap:6}}>
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                   All languages
                 </a>
@@ -19876,7 +19882,7 @@ export default function LandingPage() {
                 <a
                   href="/tuition-uk"
                   onClick={(e)=>{e.preventDefault(); P('tuition-uk')}}
-                  style={{color:'rgba(255,255,255,.7)',textDecoration:'none',fontSize:12,letterSpacing:'.04em',marginBottom:16,display:'inline-flex',alignItems:'center',gap:6}}>
+                  style={{color:'rgba(255,255,255,.7)',textDecoration:'none',fontSize:12,letterSpacing:'.04em',marginBottom:16,display:'flex',width:'fit-content',alignItems:'center',gap:6}}>
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                   Tuition UK · {area.city}
                 </a>
@@ -20793,7 +20799,7 @@ export default function LandingPage() {
             }}>
               <div className="wrap" style={{position:'relative',zIndex:2}}>
                 <a href="/study-abroad" onClick={(e)=>{e.preventDefault(); P('study-abroad')}}
-                  style={{color:'rgba(255,255,255,.7)',textDecoration:'none',fontSize:12,letterSpacing:'.04em',marginBottom:18,display:'inline-flex',alignItems:'center',gap:6}}>
+                  style={{color:'rgba(255,255,255,.7)',textDecoration:'none',fontSize:12,letterSpacing:'.04em',marginBottom:18,display:'flex',width:'fit-content',alignItems:'center',gap:6}}>
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                   All destinations
                 </a>

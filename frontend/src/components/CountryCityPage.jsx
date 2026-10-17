@@ -94,7 +94,7 @@ export default function CountryCityPage({ country, cities, currentCitySlug, P, V
         <div className="wrap" style={{position:'relative',zIndex:2}}>
           <a href={hubUrl}
             onClick={(e)=>{e.preventDefault(); P(hubPageId)}}
-            style={{color:'rgba(255,255,255,.7)',textDecoration:'none',fontSize:12,letterSpacing:'.04em',marginBottom:16,display:'inline-flex',alignItems:'center',gap:6}}>
+            style={{color:'rgba(255,255,255,.7)',textDecoration:'none',fontSize:12,letterSpacing:'.04em',marginBottom:16,display:'flex',width:'fit-content',alignItems:'center',gap:6}}>
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
             Homeschooling {countryName}
           </a>
