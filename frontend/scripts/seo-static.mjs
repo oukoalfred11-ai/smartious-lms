@@ -525,7 +525,9 @@ for (const c of COUNTRY_DETAILS) {
     : c.slug === 'kenya' ? [h2('More for Kenyan families'), links([{ href: '/virtual-school-kenya', label: 'Virtual school in Kenya' }, { href: '/tuition-nairobi', label: 'Tuition in Nairobi' }])]
     : []
   const sections = Object.values(c).filter(v => v && typeof v === 'object' && !Array.isArray(v) && v.heading && !v.reviews).map(section)
-  add({ path, title: (branch && branch.title) || c.seoTitle, desc: (branch && branch.desc) || c.seoDesc, h1: c.h, body: [
+  // The USA and Canada pages' H1 (LandingPage.jsx) names the search, not the slogan.
+  const h1 = c.slug === 'usa' ? 'Online School & Homeschool in the USA' : c.slug === 'canada' ? 'Online School & Homeschool in Canada' : c.h
+  add({ path, title: (branch && branch.title) || c.seoTitle, desc: (branch && branch.desc) || c.seoDesc, h1, body: [
     p(c.tagline), c.localFacts?.length ? bullets(c.localFacts) : '', p(c.pains),
     c.curricula?.length ? h2('Curricula') + bullets(c.curricula) : '',
     c.regulation ? h2('Is homeschooling legal in ' + c.country + '?') + p(c.regulation) : '',
@@ -534,7 +536,7 @@ for (const c of COUNTRY_DETAILS) {
     c.cities?.length ? h2('Cities we serve in ' + c.country) + bullets(c.cities) : '',
     ...(cityHub ? [h2('Online school by city'), links(cityHub.cities.map(x => ({ href: '/homeschool-' + x.slug, label: 'Online school in ' + x.name })))] : []),
     ...extra,
-  ], faqs: c.faqs, crumbs: [[c.country, path]], src: ['src/data/countries.js', ...(cityHub ? ['src/data/' + cityHub.file] : [])],
+  ], faqs: c.faqs, related: guideLinks(path, '', 'Guides for families in this country'), crumbs: [[c.country, path]], src: ['src/data/countries.js', ...(cityHub ? ['src/data/' + cityHub.file] : [])],
   ld: [serviceLd({ name: c.h, desc: c.seoDesc, path, area: c.country })] })
 }
 for (const { file, country: c, cities } of CITY_FILES) {
@@ -658,7 +660,8 @@ function regionPage({ slug, s, country, hub, childLinks, parent, src }) {
       h2('Fees'), p(FEE_SCHOOL + '. One-to-one tuition: ' + FEE_TUITION + '.'),
       s.blogSlug && FULL_ARTICLES[s.blogSlug] ? links([{ href: '/blog/' + s.blogSlug, label: FULL_ARTICLES[s.blogSlug].t }]) : '',
     ], faqs: s.faqs, related: [childLinks?.length ? h2('Cities in ' + s.name) + links(childLinks) : '',
-      h2('More in ' + country), links([...(parent ? [{ href: '/homeschool-' + parent.slug, label: 'Online homeschool in ' + parent.name }] : []), { href: hub, label: 'Online school for families in ' + country }])],
+      h2('More in ' + country), links([...(parent ? [{ href: '/homeschool-' + parent.slug, label: 'Online homeschool in ' + parent.name }] : []), { href: hub, label: 'Online school for families in ' + country }]),
+      ...guideLinks(hub, s.name, 'Guides for families in ' + country)],
     crumbs: [[country, hub], ...(parent ? [[parent.name, '/homeschool-' + parent.slug]] : []), [s.name, path]], src: [src],
     ld: [serviceLd({ name: 'Online homeschool in ' + s.name, desc: s.metaDesc || s.pitch, path, area: [s.name, parent?.name, country].filter(Boolean).join(', ') })] })
 }

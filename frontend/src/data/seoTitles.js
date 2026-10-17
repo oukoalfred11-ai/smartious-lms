@@ -130,7 +130,22 @@ const LIST_SEP = /(, | · )/
 // Hong Kong". Searches are for "homeschool <city>" and "online school
 // <city>"; "international curriculum" is rarely typed.
 const GENERIC_CITY = /^Online school and (?:international curriculum|Cambridge tutoring|Cambridge curriculum|homeschool) (?:in|for) /
+// US and Canadian state, province and city pages: "Online Homeschool
+// Houston Texas | Smartious" also targets "online school <place>".
+// Titles carrying their own hook ("— FES-EO Voucher Eligible") are kept.
 export function fitTitle(path, title) {
+  const t = fitTitleBase(path, title)
+  if (t && /^\/homeschool-/.test(path || '')) {
+    const m = /^Online Homeschool ([^—|]+?)(?: \| Smartious)?$/.exec(t)
+    if (m) {
+      const n = 'Online School & Homeschool in ' + m[1]
+      if (n.length + BRAND.length <= MAX) return n + BRAND
+      if (n.length <= MAX) return n
+    }
+  }
+  return t
+}
+function fitTitleBase(path, title) {
   if (title && /^\/homeschool-/.test(path || '') && GENERIC_CITY.test(title) && !KEEP.test(title)) {
     const rest = title.replace(GENERIC_CITY, '')
     const place = rest.split(PHRASE_SEP)[0].trim()

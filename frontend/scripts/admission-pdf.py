@@ -214,7 +214,7 @@ story += section('1  Welcome from the Principal',
 story += section('2  About Smartious',
     'Smartious E-School Ltd is an international online and home-based school founded in Nairobi in 2018. We teach the Cambridge, '
     'Pearson Edexcel, IB and American curricula, the Kenyan CBC, and the Ontario Secondary School Diploma (OSSD) through our '
-    'partnership with Canadian Cross International School.',
+    'Ontario partner school.',
     'Lessons are taught live by qualified subject specialists, in small groups or one to one, at times that suit each family’s '
     'time zone. Our learning platform brings lessons, homework, assessments, reports and invoices together in one place for '
     'students and parents.')
