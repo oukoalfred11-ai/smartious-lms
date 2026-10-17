@@ -27,7 +27,9 @@ export function createWiring(lab, { dispatch, onSelect = () => {}, onHover = () 
   let selectedLead = null
 
   const labelOf = (id) => terms[id]?.label || id
-  const tipOf = (id) => { const t = terms[id]; return t.tip ? t.obj.localToWorld(t.tip.clone()) : lab.worldPos(t.obj, 0.024) }
+  // matrixWorld is only refreshed when a frame renders; a bench that was just
+  // built (or a lead drawn in the same tick) would otherwise use stale matrices.
+  const tipOf = (id) => { const t = terms[id]; if (!t.tip) return lab.worldPos(t.obj, 0.024); t.obj.updateWorldMatrix(true, false); return t.obj.localToWorld(t.tip.clone()) }
   const highlight = (id, on) => terms[id]?.obj.userData.setHighlight?.(on)
 
   function addTerminal(id, parent, local, postColour, label) {
