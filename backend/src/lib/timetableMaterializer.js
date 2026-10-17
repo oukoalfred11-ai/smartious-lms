@@ -9,9 +9,14 @@
  * instances are reconciled away. Manual lesson creation is closed
  * (routes/liveclasses.js) — clubs, events and assemblies stay manual.
  *
- * Reminders keep reading TimetableEntry directly, which is now safe:
- * entries and classes can no longer disagree, because classes ARE the
- * entries, materialized.
+ * Reminders read the materialized LiveClass instances (the real
+ * lessons, with their one-off moves and cancellations), not the template.
+ *
+ * Each template-born class records the weekly occurrence it stands for
+ * (originalScheduledAt). Moving or cancelling it keeps that occurrence
+ * taken, so the reconciler never re-creates it on the original day; a
+ * unique index on (timetableEntryId, originalScheduledAt) backs this up
+ * against concurrent runs.
  *
  * Idempotent: safe to run any number of times. Protective: it never
  * deletes an instance that has recordings or that any student joined.
@@ -19,35 +24,12 @@
 const TimetableEntry = require('../models/TimetableEntry');
 const LiveClass = require('../models/LiveClass');
 const ClassroomSession = require('../models/ClassroomSession');
+const {
+  occurrencesFor, durationOf, planEntryOccurrences, groupKey,
+  buildLessonQueue, buildSubtopicQueue, stampKey, stampFor, serialize,
+} = require('./scheduling');
 
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const EAT_OFFSET_MS = 3 * 3600 * 1000; // Africa/Nairobi, no DST
-const HORIZON_DAYS = 7;
-
-function occurrencesFor(entry, now) {
-  // Walk the next HORIZON_DAYS of the Nairobi calendar; each date whose
-  // weekday matches the entry yields one UTC Date at startTime EAT.
-  const [h, m] = String(entry.startTime || '').split(':').map(Number);
-  if (!(h >= 0) || !(m >= 0)) return [];
-  const out = [];
-  for (let i = 0; i <= HORIZON_DAYS; i++) {
-    const eat = new Date(now.getTime() + EAT_OFFSET_MS + i * 864e5);
-    if (DAYS[eat.getUTCDay()] !== entry.dayOfWeek) continue;
-    const when = new Date(Date.UTC(eat.getUTCFullYear(), eat.getUTCMonth(), eat.getUTCDate(), h, m) - EAT_OFFSET_MS);
-    if (when <= now) continue;
-    if (entry.effectiveFrom && when < new Date(entry.effectiveFrom)) continue;
-    if (entry.effectiveTo && when > new Date(entry.effectiveTo)) continue;
-    out.push(when);
-  }
-  return out;
-}
-
-function durationOf(entry) {
-  const [sh, sm] = String(entry.startTime || '').split(':').map(Number);
-  const [eh, em] = String(entry.endTime || '').split(':').map(Number);
-  const mins = (eh * 60 + em) - (sh * 60 + sm);
-  return mins > 0 && mins <= 240 ? mins : 60;
-}
+const isDuplicateKey = (e) => e && (e.code === 11000 || /E11000/.test(String(e.message || '')));
 
 async function protectedIds(candidateIds) {
   if (!candidateIds.length) return new Set();
@@ -57,12 +39,48 @@ async function protectedIds(candidateIds) {
   return new Set(joined.map(String));
 }
 
-async function reconcile() {
+// The queue of what a group's next new classes teach: published lessons
+// (or syllabus subtopics) not yet given to any NON-CANCELLED class of the
+// group. A cancelled class gives its topic back.
+async function buildQueue(members) {
+  const lead = members[0];
+  if (!lead || !lead.subjectId) return [];
+  const { loadPublishedLessons } = require('./lessonPlan');
+  const memberIds = members.map(m => m._id);
+  const lessons = await loadPublishedLessons(lead.subjectId);
+  if (lessons.length) {
+    const used = await LiveClass.distinct('preparationLessonId', {
+      timetableEntryId: { $in: memberIds },
+      preparationLessonId: { $ne: null },
+      status: { $ne: 'cancelled' },
+    });
+    // The teacher's custom sequence (any member carrying one) outranks spine order.
+    const orderSource = members.find(m => Array.isArray(m.lessonOrder) && m.lessonOrder.length);
+    return buildLessonQueue({ lessons, usedLessonIds: used, lessonOrder: orderSource && orderSource.lessonOrder });
+  }
+  // Subtopic dialect: the spine's plan lives as topics/subtopics.
+  const SyllabusTopic = require('../models/SyllabusTopic');
+  const topics = await SyllabusTopic.find({ subjectId: lead.subjectId }).sort({ topicOrder: 1 }).lean();
+  if (!topics.length) return [];
+  const stamped = await LiveClass.find({
+    timetableEntryId: { $in: memberIds },
+    syllabusSubtopicName: { $nin: [null, ''] },
+    status: { $ne: 'cancelled' },
+  }).select('syllabusTopicName syllabusSubtopicName').lean();
+  const os = members.find(m => Array.isArray(m.topicPlanOrder) && m.topicPlanOrder.length);
+  return buildSubtopicQueue({
+    topics,
+    usedKeys: stamped.map(x => stampKey(x.syllabusTopicName, x.syllabusSubtopicName)),
+    topicPlanOrder: os && os.topicPlanOrder,
+  });
+}
+
+async function reconcileOnce() {
   const now = new Date();
   const entries = await TimetableEntry.find({}).lean();
   const activeIds = new Set(entries.filter(e => e.isActive !== false).map(e => String(e._id)));
 
-  let created = 0, removed = 0;
+  let created = 0, removed = 0, moved = 0;
 
   // 1. Future instances whose entry is gone or deactivated: reconcile away
   //    (unless recorded or attended — those are history, we keep them).
@@ -70,7 +88,7 @@ async function reconcile() {
     timetableEntryId: { $ne: null },
     detached: { $ne: true },
     scheduledAt: { $gt: now },
-    status: { $in: ['scheduled', 'live'] },
+    status: 'scheduled',
     'recordings.0': { $exists: false },
   }).select('timetableEntryId scheduledAt').lean();
   const strayCandidates = strays.filter(c => !activeIds.has(String(c.timetableEntryId)));
@@ -88,116 +106,68 @@ async function reconcile() {
   // 2. Per active entry: desired vs existing.
   for (const entry of entries) {
     if (entry.isActive === false) continue;
-    const desired = occurrencesFor(entry, now);
+    // Every instance that sits in the future or stands for a future
+    // occurrence - including one moved earlier (perhaps already taught)
+    // whose original slot is still ahead.
     const existing = await LiveClass.find({
       timetableEntryId: entry._id,
-      scheduledAt: { $gt: now },
-    }).select('scheduledAt recordings status detached').lean();
+      $or: [{ scheduledAt: { $gt: now } }, { originalScheduledAt: { $gt: now } }],
+    }).select('scheduledAt originalScheduledAt recordings status detached lessonPinned').lean();
 
-    // Exceptions: a cancelled or individually-edited (detached) instance
-    // OWNS its calendar day. The reconciler never removes it and never
-    // creates a sibling on that day - "no class this Tuesday" and
-    // "5pm just this week" both stick.
-    const sameEATDay = (a, b) => {
-      const da = new Date(new Date(a).getTime() + 3 * 3600 * 1000);
-      const db = new Date(new Date(b).getTime() + 3 * 3600 * 1000);
-      return da.getUTCFullYear() === db.getUTCFullYear() && da.getUTCMonth() === db.getUTCMonth() && da.getUTCDate() === db.getUTCDate();
-    };
-    const exceptions = existing.filter(x => x.detached === true || x.status === 'cancelled');
+    const plan = planEntryOccurrences(entry, existing, now);
 
-    const match = (a, b) => Math.abs(new Date(a) - new Date(b)) < 2 * 60000;
-
-    // Existing future instances that no longer match the (edited) entry.
-    const mismatched = existing.filter(x => x.detached !== true && x.status !== 'cancelled' && !desired.some(d => match(x.scheduledAt, d)) && !(x.recordings || []).length);
-    if (mismatched.length) {
-      const keep = await protectedIds(mismatched.map(c => c._id));
-      const del = mismatched.filter(c => !keep.has(String(c._id))).map(c => c._id);
+    if (plan.remove.length) {
+      const keep = await protectedIds(plan.remove);
+      const del = plan.remove.filter(id => !keep.has(String(id)));
       if (del.length) {
         const r = await LiveClass.deleteMany({ _id: { $in: del } });
         removed += r.deletedCount;
       }
     }
-
-    // Collect missing instances; lesson assignment happens per
-    // SUBJECT GROUP after this loop, so multiple weekly slots of one
-    // subject advance a single scheme of work instead of each
-    // re-teaching lesson 1.
-    for (const when of desired) {
-      if (existing.some(x => match(x.scheduledAt, when))) continue;
-      if (exceptions.some(x => sameEATDay(x.scheduledAt, when))) continue;
-      pending.push({ entry, when });
+    // Pinned topics are never discarded by a slot edit: the class is
+    // carried to the replacement occurrence, or kept as an exception.
+    for (const { id, when } of plan.move) {
+      try {
+        await LiveClass.updateOne({ _id: id }, { $set: { scheduledAt: when, originalScheduledAt: when, durationMins: durationOf(entry) } });
+        moved += 1;
+      } catch (e) {
+        if (!isDuplicateKey(e)) console.error('[timetable] could not move pinned class:', e.message);
+      }
     }
+    if (plan.detach.length) {
+      await LiveClass.updateMany({ _id: { $in: plan.detach } }, { $set: { detached: true } });
+    }
+    // Classes made before originalScheduledAt existed learn their slot.
+    for (const { id, when } of plan.backfill) {
+      try { await LiveClass.updateOne({ _id: id, originalScheduledAt: null }, { $set: { originalScheduledAt: when } }); }
+      catch (e) { if (!isDuplicateKey(e)) console.error('[timetable] backfill failed:', e.message); }
+    }
+
+    // Lesson assignment happens per GROUP after this loop, so multiple
+    // weekly slots of one subject advance a single scheme of work
+    // instead of each re-teaching lesson 1.
+    for (const when of plan.create) pending.push({ entry, when });
   }
 
-  // 3. Subject-group lesson assignment + creation, chronologically.
-  const groupKey = (e) => e.subjectId
-    ? `${e.subjectId}|${(e.assignedStudents || []).map(String).sort().join(',')}`
-    : `solo|${e._id}`;
-  const activeEntries = entries.filter(e => e.isActive !== false);
+  // 3. Group lesson assignment + creation, chronologically. A group is
+  //    teacher + subject + students, exactly as in the lesson-plan view.
   const groups = {};
-  activeEntries.forEach(e => { (groups[groupKey(e)] = groups[groupKey(e)] || []).push(e); });
+  entries.filter(e => e.isActive !== false)
+    .forEach(e => { (groups[groupKey(e)] = groups[groupKey(e)] || []).push(e); });
   pending.sort((a, b) => new Date(a.when) - new Date(b.when));
 
   const queues = {};
-  for (const key of Object.keys(groups)) {
-    const members = groups[key];
-    const lead = members[0];
-    if (!lead.subjectId) { queues[key] = []; continue; }
-    try {
-      const Lesson = require('../models/Lesson');
-      const used = await LiveClass.distinct('preparationLessonId', {
-        timetableEntryId: { $in: members.map(m => m._id) },
-        preparationLessonId: { $ne: null },
-      });
-      let spineQueue = await Lesson.find({
-        subjectId: lead.subjectId,
-        _id: { $nin: used },
-        isActive: { $ne: false },
-      }).sort({ order: 1 }).limit(60).select('title topicName subtopicName').lean();
-      // The teacher's custom sequence (any member carrying one) outranks
-      // spine order.
-      const orderSource = members.find(m => Array.isArray(m.lessonOrder) && m.lessonOrder.length);
-      if (orderSource) {
-        const rank = {};
-        orderSource.lessonOrder.forEach((id, ix) => { rank[String(id)] = ix; });
-        spineQueue.sort((a, b) => (rank[String(a._id)] ?? 1e9) - (rank[String(b._id)] ?? 1e9));
-      }
-      if (!spineQueue.length) {
-        // Subtopic dialect: the spine's plan lives as topics/subtopics.
-        const SyllabusTopic = require('../models/SyllabusTopic');
-        const topics = await SyllabusTopic.find({ subjectId: lead.subjectId }).sort({ topicOrder: 1 }).lean();
-        if (topics.length) {
-          const stampedPairs = await LiveClass.find({
-            timetableEntryId: { $in: members.map(m => m._id) },
-            syllabusSubtopicName: { $nin: [null, ''] },
-          }).select('syllabusTopicName syllabusSubtopicName').lean();
-          const usedKeys = new Set(stampedPairs.map(x => `${x.syllabusTopicName || ''}||${x.syllabusSubtopicName}`));
-          let items = [];
-          topics.forEach(tp => (tp.subtopics || []).forEach(st => {
-            const k = `${tp.topic}||${st.name}`;
-            if (!usedKeys.has(k)) items.push({ sub: true, key: k, topicName: tp.topic, name: st.name });
-          }));
-          const os = members.find(m => Array.isArray(m.topicPlanOrder) && m.topicPlanOrder.length);
-          if (os) {
-            const rank = {};
-            os.topicPlanOrder.forEach((k, ix) => { rank[k] = ix; });
-            items.sort((a, b) => (rank[a.key] ?? 1e9) - (rank[b.key] ?? 1e9));
-          }
-          spineQueue = items.slice(0, 60);
-        }
-      }
-      queues[key] = spineQueue;
-    } catch (e) { queues[key] = []; }
+  for (const key of new Set(pending.map(p => groupKey(p.entry)))) {
+    try { queues[key] = await buildQueue(groups[key] || []); }
+    catch (e) { queues[key] = []; }
   }
 
   for (const { entry, when } of pending) {
     const nextLesson = (queues[groupKey(entry)] || []).shift() || null;
     try {
       await LiveClass.create({
-        preparationLessonId: nextLesson && !nextLesson.sub ? nextLesson._id : null,
-        syllabusTopicName: nextLesson ? (nextLesson.topicName || nextLesson.title || '') : '',
-        syllabusSubtopicName: nextLesson ? (nextLesson.sub ? nextLesson.name : (nextLesson.subtopicName || '')) : '',
-        title: entry.title || `${entry.subject} \u2014 ${entry.grade || 'class'}`.trim(),
+        ...stampFor(nextLesson),
+        title: entry.title || `${entry.subject} — ${entry.grade || 'class'}`.trim(),
         description: entry.description || '',
         subject: entry.subject || 'Class',
         // curriculum and grade are REQUIRED by the LiveClass model and
@@ -207,8 +177,10 @@ async function reconcile() {
         teacherId: entry.teacherId,
         assignedStudents: entry.assignedStudents || [],
         scheduledAt: when,
+        originalScheduledAt: when,
         durationMins: durationOf(entry),
         classroomMode: 'native',
+        deliveryMode: entry.deliveryMode === 'physical' ? 'physical' : 'virtual',
         kind: 'lesson',
         status: 'scheduled',
         fromTimetable: true,
@@ -216,21 +188,32 @@ async function reconcile() {
       });
       created += 1;
     } catch (createErr) {
-      // One malformed entry must never zero the whole run.
+      // A duplicate key means a concurrent run (another process) already
+      // made this occurrence - the outcome we wanted. Anything else is one
+      // malformed entry, which must never zero the whole run.
+      if (isDuplicateKey(createErr)) continue;
       console.error(`[timetable] could not materialize "${entry.title || entry.subject}": ${createErr.message}`);
     }
   }
 
-  if (created || removed) {
-    console.log(`[timetable] reconciled: ${created} class(es) materialized, ${removed} stale future instance(s) removed`);
+  if (created || removed || moved) {
+    console.log(`[timetable] reconciled: ${created} class(es) materialized, ${removed} stale future instance(s) removed, ${moved} pinned class(es) moved`);
   }
-  return { created, removed };
+  return { created, removed, moved };
+}
+
+// Boot, the interval and every timetable/allocation write call this;
+// runs never overlap within the process (see scheduling.serialize).
+const reconcile = serialize(reconcileOnce);
+
+/** Fire-and-forget reconcile for write paths. */
+function reconcileSoon() {
+  reconcile().catch(e => console.error('[timetable] reconcile failed:', e.message));
 }
 
 function startTimetableMaterializer() {
-  const run = () => reconcile().catch(e => console.error('[timetable] reconcile failed:', e.message));
-  run();
-  setInterval(run, 3 * 3600 * 1000); // every 3 hours
+  reconcileSoon();
+  setInterval(reconcileSoon, 3 * 3600 * 1000); // every 3 hours
 }
 
-module.exports = { reconcile, startTimetableMaterializer };
+module.exports = { reconcile, reconcileSoon, startTimetableMaterializer, occurrencesFor };

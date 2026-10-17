@@ -138,6 +138,30 @@ function scoreSlot(slot, ctx) {
   return score
 }
 
+/**
+ * Take a student off every active slot of one subject: solo slots are
+ * deactivated, group slots just lose the student. The materializer then
+ * removes the affected future classes. Used when an allocation ends or
+ * moves to another teacher. Returns { deactivated, leftGroups }.
+ */
+async function releaseStudentFromSubject({ studentId, subjectId, subjectName }) {
+  const TimetableEntry = require('../models/TimetableEntry')
+  const or = []
+  if (subjectId) or.push({ subjectId })
+  if (subjectName) or.push({ subject: subjectName })
+  if (!or.length) return { deactivated: 0, leftGroups: 0 }
+  const entries = await TimetableEntry.find({ assignedStudents: studentId, isActive: true, $or: or })
+  let deactivated = 0, leftGroups = 0
+  for (const o of entries) {
+    const rest = o.assignedStudents.filter(id => String(id) !== String(studentId))
+    const keepsAudience = !!(o.audienceCurriculum && o.audienceGrade)
+    if (!rest.length && !keepsAudience) { o.isActive = false; deactivated++ }
+    else { o.assignedStudents = rest; leftGroups++ }
+    await o.save()
+  }
+  return { deactivated, leftGroups }
+}
+
 async function autoGenerateTimetable({ teacherId, studentId, subjectId, createdBy, canBeGrouped = false }) {
   try {
     const User           = require('../models/User')
@@ -157,14 +181,7 @@ async function autoGenerateTimetable({ teacherId, studentId, subjectId, createdB
     console.log(`[autoTimetable] ${student.firstName} · ${subject.subjectName} · teacher ${teacher.firstName} · ${centre ? 'CENTRE' : 'TUITION'}`)
 
     // ── Release any existing entry for this student and subject ──
-    const old = await TimetableEntry.find({ assignedStudents: studentId, subject: subject.subjectName, isActive: true })
-    for (const o of old) {
-      if (o.assignedStudents.length === 1) { o.isActive = false; await o.save() }
-      else {
-        o.assignedStudents = o.assignedStudents.filter(id => String(id) !== String(studentId))
-        await o.save()
-      }
-    }
+    await releaseStudentFromSubject({ studentId, subjectId, subjectName: subject.subjectName })
 
     // ── Join an existing group where allowed ─────────────────────
     if (canBeGrouped) {
@@ -230,7 +247,10 @@ async function autoGenerateTimetable({ teacherId, studentId, subjectId, createdB
       dayOfWeek:  chosen.dayOfWeek,
       startTime:  chosen.startTime,
       endTime:    chosen.endTime,
-      deliveryMode: centre ? 'in-person' : 'virtual',
+      // TimetableEntry.deliveryMode is ['virtual','physical']; the old
+      // 'in-person' failed validation, so no centre student was ever
+      // auto-scheduled.
+      deliveryMode: centre ? 'physical' : 'virtual',
       teacherId,
       assignedStudents: [studentId],
       canBeGrouped: !!canBeGrouped,
@@ -254,11 +274,13 @@ async function autoGenerateTimetable({ teacherId, studentId, subjectId, createdB
     }
   } catch (err) {
     console.error('[autoTimetable] error:', err.message)
-    return { created:false, reason:'Auto-timetable error: ' + err.message }
+    // A failure to write the slot leaves the student with no lesson at
+    // all, exactly like finding no free slot: somebody must be told.
+    return { created:false, needsManualScheduling:true, error:true, reason:'Auto-timetable error: ' + err.message }
   }
 }
 
 module.exports = {
-  autoGenerateTimetable,
+  autoGenerateTimetable, releaseStudentFromSubject,
   scoreSlot, centreGrid, tuitionGrid, isCentreStudent, covered,
 }

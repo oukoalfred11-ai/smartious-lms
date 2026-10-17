@@ -26,6 +26,73 @@ function logAudit(user, action, details) {
 }
 
 // ─────────────────────────────────────────────────────────────────
+// Timetable follow-up for an allocation
+// ─────────────────────────────────────────────────────────────────
+// Ops must hear about any allocation that ends up with no timetable slot:
+// the student would otherwise have no lesson at all.
+async function alertManualScheduling(student, subject, reason) {
+  try {
+    const { getTransporter } = require('../lib/issueInvoice');
+    const t = getTransporter();
+    const to = process.env.SCHEDULING_ALERT_EMAIL
+            || process.env.OPS_EMAIL
+            || process.env.EMAIL_FROM
+            || 'hello@smartioushomeschool.com';
+    if (!t) return;
+    await t.sendMail({
+      from: process.env.EMAIL_FROM || 'Smartious <hello@smartioushomeschool.com>',
+      to,
+      subject: `Timetable needs manual scheduling — ${student.firstName} ${student.lastName}, ${subject.subjectName}`,
+      html: `<p>An allocation was created or changed but no timetable slot could be made.</p>
+<p><strong>Student:</strong> ${student.firstName} ${student.lastName}<br>
+<strong>Subject:</strong> ${subject.subjectName}</p>
+<p><strong>Reason:</strong> ${reason}</p>
+<p>The lesson will not appear on any timetable, and homework deadline
+warnings depend on that entry, so this needs scheduling by hand.</p>`,
+    });
+    console.log('[allocation] manual-scheduling alert sent to', to);
+  } catch (e) { console.error('[allocation] alert failed:', e.message); }
+}
+
+// Propose a weekly slot for (student, subject) with this teacher, then
+// materialize its classes. Non-blocking: never delays or fails the
+// allocation response.
+function scheduleAllocation({ teacher, student, subject, createdBy, canBeGrouped }) {
+  const autoGenerateTimetable = getAutoTimetable();
+  if (!autoGenerateTimetable) return;
+  autoGenerateTimetable({
+    teacherId:    teacher._id,
+    studentId:    student._id,
+    subjectId:    subject._id,
+    createdBy,
+    canBeGrouped: !!canBeGrouped,
+  }).then(async result => {
+    if (result.created) {
+      console.log('[allocation] Auto-timetable created for', student.firstName, '-', subject.subjectName,
+        result.confident ? '(both declared free)' : '(no declared availability — needs confirming)');
+      // Where neither party had declared the hour, the slot is a
+      // guess. Flag it so a coordinator confirms it rather than
+      // discovering the clash when nobody turns up.
+      if (result.entry && !result.confident) {
+        try {
+          const TimetableEntry = require('../models/TimetableEntry');
+          await TimetableEntry.updateOne({ _id: result.entry._id }, { needsConfirmation: true });
+        } catch (e) { console.error('[allocation] could not flag entry:', e.message); }
+      }
+    } else {
+      // The scheduler refuses rather than double-booking, and a write
+      // failure is no better, so a silent failure would leave the
+      // student with no lesson at all. Somebody has to be told.
+      console.warn('[allocation] NO TIMETABLE SLOT:', result.reason);
+      if (result.needsManualScheduling) await alertManualScheduling(student, subject, result.reason);
+    }
+    // The released slot (if any) and the new one take effect in the
+    // calendar now, not at the next 3-hourly reconcile.
+    require('../lib/timetableMaterializer').reconcileSoon();
+  }).catch(err => console.error('[allocation] Auto-timetable error:', err.message));
+}
+
+// ─────────────────────────────────────────────────────────────────
 // Group room auto-allocation
 // ─────────────────────────────────────────────────────────────────
 // When a student is allocated to a teacher via the Allocations UI,
@@ -460,59 +527,11 @@ router.post('/', auth, requireRole('admin', 'ops_manager'), async (req, res) => 
     // Non-blocking — runs after the response is sent so the
     // allocation endpoint doesn't slow down even if the teacher
     // has no availability set.
-    const autoGenerateTimetable = getAutoTimetable();
-    if (autoGenerateTimetable) {
-      autoGenerateTimetable({
-        teacherId:    teacher._id,
-        studentId:    student._id,
-        subjectId:    subject._id,
-        createdBy:    req.user?._id,
-        canBeGrouped: !!canBeGrouped,
-      }).then(async result => {
-        if (result.created) {
-          console.log('[allocation] Auto-timetable created for', student.firstName, '-', subject.subjectName,
-            result.confident ? '(both declared free)' : '(no declared availability — needs confirming)');
-          // Where neither party had declared the hour, the slot is a
-          // guess. Flag it so a coordinator confirms it rather than
-          // discovering the clash when nobody turns up.
-          if (result.entry && !result.confident) {
-            try {
-              const TimetableEntry = require('../models/TimetableEntry');
-              await TimetableEntry.updateOne({ _id: result.entry._id }, { needsConfirmation: true });
-            } catch (e) { console.error('[allocation] could not flag entry:', e.message); }
-          }
-        } else {
-          // The scheduler now refuses rather than double-booking, so a
-          // silent failure would leave the student with no lesson at
-          // all. Somebody has to be told.
-          console.warn('[allocation] NO TIMETABLE SLOT:', result.reason);
-          if (result.needsManualScheduling) {
-            try {
-              const { getTransporter } = require('../lib/issueInvoice');
-              const t = getTransporter();
-              const to = process.env.SCHEDULING_ALERT_EMAIL
-                      || process.env.OPS_EMAIL
-                      || process.env.EMAIL_FROM
-                      || 'hello@smartioushomeschool.com';
-              if (t) {
-                await t.sendMail({
-                  from: process.env.EMAIL_FROM || 'Smartious <hello@smartioushomeschool.com>',
-                  to,
-                  subject: `Timetable needs manual scheduling — ${student.firstName} ${student.lastName}, ${subject.subjectName}`,
-                  html: `<p>An allocation was created but no timetable slot could be found.</p>
-<p><strong>Student:</strong> ${student.firstName} ${student.lastName}<br>
-<strong>Subject:</strong> ${subject.subjectName}</p>
-<p><strong>Reason:</strong> ${result.reason}</p>
-<p>The lesson will not appear on any timetable, and homework deadline
-warnings depend on that entry, so this needs scheduling by hand.</p>`,
-                });
-                console.log('[allocation] manual-scheduling alert sent to', to);
-              }
-            } catch (e) { console.error('[allocation] alert failed:', e.message); }
-          }
-        }
-      }).catch(err => console.error('[allocation] Auto-timetable error:', err.message));
-    }
+    scheduleAllocation({
+      teacher, student, subject,
+      createdBy: req.user?._id,
+      canBeGrouped: !!canBeGrouped,
+    });
 
     res.status(201).json({ success: true, allocation, emailsSent: sendEmails });
   } catch (e) {
@@ -587,6 +606,37 @@ router.patch('/:id', auth, requireRole('admin', 'ops_manager'), async (req, res)
       }
     } catch (roomErr) {
       console.error('[allocations patch] auto-room reconcile failed:', roomErr.message);
+    }
+
+    // The timetable follows the allocation. Ending it takes the student
+    // off the subject's slots; a new teacher gets a fresh slot proposal
+    // (which releases the old teacher's slot first); reactivating
+    // proposes a slot again. The materializer then cleans up or creates
+    // the future classes. Never fails the allocation update.
+    try {
+      const willReactivate = status === 'Active' && allocation.status !== 'Active';
+      const [student, subject] = await Promise.all([
+        User.findById(allocation.studentId).select('firstName lastName').lean(),
+        Subject.findById(allocation.subjectId).select('subjectName').lean(),
+      ]);
+      const finalStatus = status || allocation.status;
+      if (student && subject) {
+        if (willGoInactive) {
+          const { releaseStudentFromSubject } = require('../services/autoTimetable');
+          const r = await releaseStudentFromSubject({ studentId: student._id, subjectId: subject._id, subjectName: subject.subjectName });
+          console.log(`[allocations patch] released ${student.firstName} from ${subject.subjectName}: ${r.deactivated} slot(s) off, ${r.leftGroups} group(s) left`);
+          require('../lib/timetableMaterializer').reconcileSoon();
+        } else if ((willChangeTeacher || willReactivate) && finalStatus === 'Active') {
+          const teacher = await User.findById(willChangeTeacher ? teacherId : oldTeacherId).select('_id').lean();
+          if (teacher) scheduleAllocation({
+            teacher, student, subject,
+            createdBy: req.user._id,
+            canBeGrouped: !!allocation.canBeGrouped,
+          });
+        }
+      }
+    } catch (ttErr) {
+      console.error('[allocations patch] timetable follow-up failed:', ttErr.message);
     }
 
     logAudit(req.user?.email || 'system', 'update_allocation', allocation._id);

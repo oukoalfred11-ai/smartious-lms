@@ -42,22 +42,13 @@ const fail = (res, status, message) => res.status(status).json({ success: false,
 // module if they want to reach a teacher.
 const TEACHER_PUBLIC_FIELDS = '_id firstName lastName avatar role jobTitle bio qualifications specializations yearsOfExperience';
 
-// Compute the visibility filter for a student-facing query.
-// Returns a Mongo $or clause matching either assignment OR audience.
-function studentVisibilityFilter(student) {
-  const clauses = [
-    { assignedStudents: student._id },
-  ];
-  const curriculum = typeof student.curriculum === 'string' ? student.curriculum : '';
-  const grade = typeof student.grade === 'string' ? student.grade : '';
-  if (curriculum && grade) {
-    clauses.push({
-      audienceCurriculum: curriculum,
-      audienceGrade: grade,
-    });
-  }
-  return { isActive: true, $or: clauses };
-}
+// Visibility filter for a student-facing query: assignment OR
+// curriculum+grade audience. Shared with the parent portal.
+const { studentVisibilityFilter } = require('../lib/scheduling');
+const { reconcileSoon } = require('../lib/timetableMaterializer');
+
+// Staff who may edit any slot (teachers edit the slots they teach or created).
+const SLOT_ADMIN_ROLES = ['admin', 'dos', 'ops_manager'];
 
 // Sort entries by day-of-week then start time
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -161,7 +152,7 @@ router.get('/teacher/:id', auth, async (req, res) => {
 // audienceCurriculum, audienceGrade, deliveryMode, meetingLink,
 // location, description
 // ═══════════════════════════════════════════════════════════
-router.post('/', auth, requireRole('teacher', 'admin', 'dos'), async (req, res) => {
+router.post('/', auth, requireRole('teacher', ...SLOT_ADMIN_ROLES), async (req, res) => {
   try {
     const b = req.body || {};
     const teacherId = b.teacherId && mongoose.isValidObjectId(b.teacherId)
@@ -197,7 +188,7 @@ router.post('/', auth, requireRole('teacher', 'admin', 'dos'), async (req, res) 
       audienceGrade:      b.audienceGrade || '',
       createdBy: req.user._id,
     });
-    require('../lib/timetableMaterializer').reconcile().catch(() => {});
+    reconcileSoon();
 
     return ok(res, { entry }, 'Timetable entry created.');
   } catch (err) {
@@ -210,7 +201,7 @@ router.post('/', auth, requireRole('teacher', 'admin', 'dos'), async (req, res) 
 // PATCH /:id — Edit a timetable slot
 // Allowed for the creator or an admin.
 // ═══════════════════════════════════════════════════════════
-router.patch('/:id', auth, requireRole('teacher', 'admin', 'dos'), async (req, res) => {
+router.patch('/:id', auth, requireRole('teacher', ...SLOT_ADMIN_ROLES), async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id)) return fail(res, 400, 'Invalid entry id.');
     const entry = await TimetableEntry.findById(req.params.id);
@@ -218,7 +209,7 @@ router.patch('/:id', auth, requireRole('teacher', 'admin', 'dos'), async (req, r
 
     const isCreator = String(entry.createdBy || '') === String(req.user._id);
     const isOwner   = String(entry.teacherId) === String(req.user._id);
-    if (req.user.role !== 'admin' && !isCreator && !isOwner) {
+    if (!SLOT_ADMIN_ROLES.includes(req.user.role) && !isCreator && !isOwner) {
       return fail(res, 403, 'You can only edit entries you created or teach.');
     }
 
@@ -239,7 +230,7 @@ router.patch('/:id', auth, requireRole('teacher', 'admin', 'dos'), async (req, r
     if ('subjectId'     in b) entry.subjectId     = mongoose.isValidObjectId(b.subjectId) ? b.subjectId : null;
 
     await entry.save();
-    require('../lib/timetableMaterializer').reconcile().catch(() => {});
+    reconcileSoon();
     return ok(res, { entry }, 'Entry updated.');
   } catch (err) {
     console.error('[timetable PATCH /:id]', err.message);
@@ -251,7 +242,7 @@ router.patch('/:id', auth, requireRole('teacher', 'admin', 'dos'), async (req, r
 // DELETE /:id — Delete a timetable slot
 // Allowed for the creator or an admin.
 // ═══════════════════════════════════════════════════════════
-router.delete('/:id', auth, requireRole('teacher', 'admin', 'dos'), async (req, res) => {
+router.delete('/:id', auth, requireRole('teacher', ...SLOT_ADMIN_ROLES), async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id)) return fail(res, 400, 'Invalid entry id.');
     const entry = await TimetableEntry.findById(req.params.id);
@@ -259,12 +250,12 @@ router.delete('/:id', auth, requireRole('teacher', 'admin', 'dos'), async (req, 
 
     const isCreator = String(entry.createdBy || '') === String(req.user._id);
     const isOwner   = String(entry.teacherId) === String(req.user._id);
-    if (req.user.role !== 'admin' && !isCreator && !isOwner) {
+    if (!SLOT_ADMIN_ROLES.includes(req.user.role) && !isCreator && !isOwner) {
       return fail(res, 403, 'You can only delete entries you created or teach.');
     }
 
     await entry.deleteOne();
-    require('../lib/timetableMaterializer').reconcile().catch(() => {});
+    reconcileSoon();
     return ok(res, { deleted: true }, 'Entry deleted.');
   } catch (err) {
     console.error('[timetable DELETE /:id]', err.message);
@@ -319,89 +310,9 @@ router.get('/overview', auth, requireRole('admin', 'ops_manager', 'dos', 'teache
 // ── Per-slot lesson-plan management ──────────────────────────────────
 // The teacher's control over WHAT gets taught in a slot, while WHEN
 // stays fixed by the timetable. Only slotted classes are manageable.
-const Lesson = require('../models/Lesson');
 const LiveClass = require('../models/LiveClass');
-
-async function groupEntries(entry) {
-  if (!entry.subjectId) return [entry];
-  const key = (e) => (e.assignedStudents || []).map(String).sort().join(',');
-  const siblings = await TimetableEntry.find({
-    teacherId: entry.teacherId, subjectId: entry.subjectId, isActive: true,
-  }).lean();
-  return siblings.filter(e => key(e) === key(entry));
-}
-
-async function loadPlan(entry) {
-  const lessons = await Lesson.find({ subjectId: entry.subjectId, isActive: { $ne: false } })
-    .sort({ order: 1 }).select('title topicName subtopicName').lean();
-  if (!lessons.length) return loadSubtopicPlan(entry);
-  const members = await groupEntries(entry);
-  const usedIds = await LiveClass.distinct('preparationLessonId', {
-    timetableEntryId: { $in: members.map(m => m._id) }, preparationLessonId: { $ne: null },
-    status: { $ne: 'cancelled' }, scheduledAt: { $lte: new Date() },
-  });
-  const usedSet = new Set(usedIds.map(String));
-  const rank = {};
-  (entry.lessonOrder || []).forEach((id, ix) => { rank[String(id)] = ix; });
-  const ordered = [...lessons].sort((a, b) => (rank[String(a._id)] ?? 1e9) - (rank[String(b._id)] ?? 1e9));
-  // Taught lessons first (history), then the teachable queue.
-  const taught = ordered.filter(l => usedSet.has(String(l._id)));
-  const queue = ordered.filter(l => !usedSet.has(String(l._id)));
-  return { mode: 'lessons', taught, queue, members };
-}
-
-// Subtopic dialect: the plan is the SyllabusTopic tree; "taught" is
-// what the group's past classes have stamped.
-async function loadSubtopicPlan(entry) {
-  const SyllabusTopic = require('../models/SyllabusTopic');
-  const members = await groupEntries(entry);
-  const topics = await SyllabusTopic.find({ subjectId: entry.subjectId }).sort({ topicOrder: 1 }).lean();
-  if (!topics.length) return { mode: 'none', taught: [], queue: [], members };
-  const stamped = await LiveClass.find({
-    timetableEntryId: { $in: members.map(m => m._id) },
-    syllabusSubtopicName: { $nin: [null, ''] },
-    status: { $ne: 'cancelled' }, scheduledAt: { $lte: new Date() },
-  }).select('syllabusTopicName syllabusSubtopicName').lean();
-  const usedKeys = new Set(stamped.map(x => `${x.syllabusTopicName || ''}||${x.syllabusSubtopicName}`));
-  const all = [];
-  topics.forEach(tp => (tp.subtopics || []).forEach(st => all.push({
-    key: `${tp.topic}||${st.name}`, title: st.name, topicName: tp.topic,
-  })));
-  const os = members.find(m => Array.isArray(m.topicPlanOrder) && m.topicPlanOrder.length);
-  const ordered = [...all];
-  if (os) {
-    const rank = {};
-    os.topicPlanOrder.forEach((k, ix) => { rank[k] = ix; });
-    ordered.sort((a, b) => (rank[a.key] ?? 1e9) - (rank[b.key] ?? 1e9));
-  }
-  return {
-    mode: 'subtopics',
-    taught: ordered.filter(x => usedKeys.has(x.key)),
-    queue: ordered.filter(x => !usedKeys.has(x.key)),
-    members,
-  };
-}
-
-// Re-stamp future materialized instances to follow the (new) queue.
-async function restampFuture(entry) {
-  const { queue, members } = await loadPlan(entry);
-  const future = await LiveClass.find({
-    timetableEntryId: { $in: members.map(m => m._id) }, fromTimetable: true,
-    detached: { $ne: true }, status: { $nin: ['cancelled', 'completed'] },
-    scheduledAt: { $gt: new Date() },
-  }).sort({ scheduledAt: 1 });
-  let i = 0, stamped = 0;
-  for (const cls of future) {
-    if (cls.lessonPinned) continue;   // teacher pinned this class - keep it
-    const l = queue[i++] || null;
-    cls.preparationLessonId = l && l._id ? l._id : null;
-    cls.syllabusTopicName = l ? (l.topicName || l.title || '') : '';
-    cls.syllabusSubtopicName = l ? (l.key ? l.title : (l.subtopicName || '')) : '';
-    await cls.save();
-    stamped += 1;
-  }
-  return stamped;
-}
+const { loadPlan, restampFuture, groupEntries } = require('../lib/lessonPlan');
+const { startOfZonedDay } = require('../lib/schoolTime');
 
 function canManage(req, entry) {
   const role = req.user.role;
@@ -416,19 +327,14 @@ router.get('/:id/lesson-plan', auth, async (req, res) => {
     if (!entry || entry.isActive === false) return res.status(404).json({ success: false, message: 'Slot not found.' });
     if (!canManage(req, entry)) return res.status(403).json({ success: false, message: 'Not your slot.' });
     if (!entry.subjectId) return res.json({ success: true, data: { linked: false } });
-    // Align upcoming classes to the saved order on every view, so the
-    // teacher always sees the exact lesson each class will teach.
-    {
-      const pre = await loadPlan(entry);
-      if (pre.mode !== 'none' && pre.queue.length) await restampFuture(entry);
-    }
+    // Read-only: upcoming classes are re-stamped on the write paths
+    // (reorder, pin, cancel) and stamped by the materializer at creation.
     const { mode, taught, queue, members } = await loadPlan(entry);
     const lessonName = {};
     [...taught, ...queue].forEach(l => { if (l._id) lessonName[String(l._id)] = l.title; });
     // From the start of TODAY (EAT), not strictly future - a teacher
     // must see this morning's classes and the one running right now.
-    const eatNow = new Date(Date.now() + 3 * 3600 * 1000);
-    const todayStart = new Date(Date.UTC(eatNow.getUTCFullYear(), eatNow.getUTCMonth(), eatNow.getUTCDate()) - 3 * 3600 * 1000);
+    const todayStart = startOfZonedDay(new Date(), entry.timezone);
     const upcoming = await LiveClass.find({
       timetableEntryId: { $in: members.map(m => m._id) }, fromTimetable: true, detached: { $ne: true },
       status: { $nin: ['cancelled', 'completed'] }, scheduledAt: { $gte: todayStart },
@@ -461,9 +367,10 @@ router.patch('/:id/lesson-plan', auth, async (req, res) => {
     const ids = Array.isArray(req.body?.queueOrder) ? req.body.queueOrder.filter(x => x) : [];
     if (!ids.length) return res.status(400).json({ success: false, message: 'queueOrder required.' });
     const members = await groupEntries(entry);
-    const lessonCount = await Lesson.countDocuments({ subjectId: entry.subjectId, isActive: { $ne: false } });
+    const Lesson = require('../models/Lesson');
+    const lessonCount = await Lesson.countDocuments({ subjectId: entry.subjectId, status: 'published' });
     if (lessonCount > 0) {
-      const valid = await Lesson.countDocuments({ _id: { $in: ids }, subjectId: entry.subjectId });
+      const valid = await Lesson.countDocuments({ _id: { $in: ids }, subjectId: entry.subjectId, status: 'published' });
       if (valid !== ids.length) return res.status(400).json({ success: false, message: 'Order contains lessons outside this syllabus.' });
       await TimetableEntry.updateMany({ _id: { $in: members.map(m => m._id) } }, { $set: { lessonOrder: ids } });
     } else {
