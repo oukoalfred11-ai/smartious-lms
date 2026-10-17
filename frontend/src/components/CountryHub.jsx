@@ -22,6 +22,7 @@
 
 import { imageExists } from '../data/generated/publicImages.js'
 import GoogleReviews from './GoogleReviews.jsx'
+import CountryVideo from './CountryVideo.jsx'
 
 /* ────────────────────────────────────────────────────────────────
    Country-awareness helpers for cross-market content cleanup.
@@ -333,6 +334,8 @@ function CountryHub({
           </div>
         </div>
       </div></section>
+
+      {country.slug !== 'kenya' && <CountryVideo V={V} countryName={country.name} />}
 
       {/* ─── ACCREDITATION, RECOGNITION & UNIVERSITY PATHWAYS ─── */}
       <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64,borderTop:`1px solid ${V.bone3}`}}><div className="wrap">

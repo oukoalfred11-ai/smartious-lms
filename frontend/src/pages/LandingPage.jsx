@@ -51,6 +51,7 @@ import { SERVICES } from '../data/services.js'
 import CountryCityPage from '../components/CountryCityPage.jsx'
 import CountryHub from '../components/CountryHub.jsx'
 import GoogleReviews, { GoogleRatingBadge } from '../components/GoogleReviews.jsx'
+import CountryVideo from '../components/CountryVideo.jsx'
 import { GOOGLE_RATING, GOOGLE_REVIEWS, GOOGLE_PROFILE_URL as GOOGLE_REVIEWS_URL, LEAVE_REVIEW_URL } from '../data/googleReviews.js'
 import AssessmentForm from '../components/AssessmentForm.jsx'
 import { TEST_PREP } from '../data/testPrep.js'
@@ -8647,6 +8648,8 @@ export default function LandingPage() {
 
             {/* /KENYA-ONLY RICH SECTIONS */}
 
+            {!ctry.isKenya && <CountryVideo V={V} countryName={ctry.country} />}
+
             {/* UAE-ONLY RICH SECTIONS — only render when ctry.isUae is true */}
             {ctry.isUae && (
               <>
@@ -15632,6 +15635,8 @@ export default function LandingPage() {
               </div>
             </div></section>
 
+            {country.slug !== 'kenya' && <CountryVideo V={V} countryName={country.name} />}
+
             {/* ─── COMPREHENSIVE FAQ ─── */}
             <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
               <div style={{maxWidth:880,margin:'0 auto'}}>
@@ -17265,6 +17270,8 @@ export default function LandingPage() {
               </div>
             </div></section>
 
+            {country.slug !== 'kenya' && <CountryVideo V={V} countryName={country.name} />}
+
             {/* ─── COMPREHENSIVE FAQ ─── */}
             <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
               <div style={{maxWidth:880,margin:'0 auto'}}>
@@ -17547,6 +17554,8 @@ export default function LandingPage() {
                 </div>
               </div>
             </div></section>
+
+            {country.slug !== 'kenya' && <CountryVideo V={V} countryName={country.name} />}
 
             {/* ─── COMPREHENSIVE FAQ ─── */}
             <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
@@ -17831,6 +17840,8 @@ export default function LandingPage() {
               </div>
             </div></section>
 
+            {country.slug !== 'kenya' && <CountryVideo V={V} countryName={country.name} />}
+
             {/* ─── COMPREHENSIVE FAQ ─── */}
             <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
               <div style={{maxWidth:880,margin:'0 auto'}}>
@@ -18113,6 +18124,8 @@ export default function LandingPage() {
                 </div>
               </div>
             </div></section>
+
+            {country.slug !== 'kenya' && <CountryVideo V={V} countryName={country.name} />}
 
             {/* ─── COMPREHENSIVE FAQ ─── */}
             <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
@@ -18397,6 +18410,8 @@ export default function LandingPage() {
               </div>
             </div></section>
 
+            {country.slug !== 'kenya' && <CountryVideo V={V} countryName={country.name} />}
+
             {/* ─── COMPREHENSIVE FAQ ─── */}
             <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
               <div style={{maxWidth:880,margin:'0 auto'}}>
@@ -18678,6 +18693,8 @@ export default function LandingPage() {
                 </div>
               </div>
             </div></section>
+
+            {country.slug !== 'kenya' && <CountryVideo V={V} countryName={country.name} />}
 
             {/* ─── COMPREHENSIVE FAQ ─── */}
             <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
