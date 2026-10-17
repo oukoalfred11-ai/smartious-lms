@@ -57,6 +57,7 @@ import { TEST_PREP } from '../data/testPrep.js'
 import { STUDY_ABROAD } from '../data/studyAbroad.js'
 import { LANGUAGES } from '../data/languages.js'
 import { PRIORITY_CITY_LINKS } from '../data/priorityLinks.js'
+import { HUB_TITLES, guideTitle, nairobiAreaTitle } from '../data/seoTitles.js'
 
 
 /* ── Front Desk capture ───────────────────────────────────
@@ -1587,9 +1588,6 @@ function articleProduct(a) {
 // page. Curriculum and service detail pages derive their meta
 // from CURRICULA / SERVICES. Edit freely to refine targeting.
 const SITE = 'Smartious Homeschool & eSchool'
-// Blog titles: the article title, plus "| Smartious" only while the whole
-// title stays within ~60 characters (scripts/seo-static.mjs uses the same rule).
-const articleTitle = (t) => { t = t || 'Article'; return t.length <= 47 ? t + ' | Smartious' : t }
 // One organisation entity for all structured data. Every Organization /
 // EducationalOrganization block and every provider points at this @id.
 const ORG_ID = 'https://smartioushomeschool.com/#organization'
@@ -4222,7 +4220,7 @@ export default function LandingPage() {
     }
   } else if (page === 'article' && currentArticle && ARTICLES_INDEX[currentArticle]) {
     const a = ARTICLES_INDEX[currentArticle]
-    metaTitle = a.metaTitle || articleTitle(a.t)
+    metaTitle = guideTitle(a.metaTitle, a.t)   // ≤ 60 characters; same rule as scripts/seo-static.mjs
     metaDesc  = a.metaDesc
   } else if (page === 'state-landing' && currentStateSlug && US_STATES[currentStateSlug]) {
     const s = US_STATES[currentStateSlug]
@@ -4863,7 +4861,7 @@ export default function LandingPage() {
     metaDesc  = a.seoDesc || ''
   } else if (page === 'tuition-area' && currentTuitionArea && NAIROBI_AREAS.find(a => a.slug === currentTuitionArea)) {
     const a = NAIROBI_AREAS.find(x => x.slug === currentTuitionArea)
-    metaTitle = a.seoTitle || ('Tuition in ' + a.name + ', Nairobi | Smartious')
+    metaTitle = nairobiAreaTitle(a)
     metaDesc  = a.seoDesc || ''
   } else if (page === 'uk-area' && currentUkArea && UK_AREAS.find(a => a.slug === currentUkArea)) {
     const a = UK_AREAS.find(x => x.slug === currentUkArea)
@@ -4995,6 +4993,13 @@ export default function LandingPage() {
   if (page === 'tuition-uk') canonicalOverride = '/tuition-uk'
   if (page === 'homeschooling-vietnam') canonicalOverride = '/online-school/vietnam'
   if (page === 'homeschooling-thailand') canonicalOverride = '/online-school/thailand'
+  // Country hubs: short titles (src/data/seoTitles.js), the same ones the
+  // static HTML carries. Looked up by the page's canonical path.
+  {
+    const hubPath = typeof canonicalOverride === 'string' ? canonicalOverride
+      : (typeof window !== 'undefined' ? (window.location.pathname.replace(/\/+$/, '') || '/') : '')
+    if (HUB_TITLES[hubPath]) metaTitle = HUB_TITLES[hubPath]
+  }
   if (page === 'not-found') {
     metaTitle = 'Page not found | Smartious'
     metaDesc  = 'This page does not exist. Find online school by country, fees and contact details for Smartious Homeschool & eSchool.'
