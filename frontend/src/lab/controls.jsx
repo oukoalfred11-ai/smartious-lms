@@ -9,9 +9,11 @@ import { INDICATORS, getExperiment } from './core.js'
 import PracticalControls from './practicalControls.jsx'
 import HandsOnControls, { OhmsHandsOn } from './handsOnControls.jsx'
 import CircuitControls from './circuitControls.jsx'
+import { HandsOnTitrationControls, HandsOnOsmosisControls } from './handsOnChemControls.jsx'
+import { oneClickTitration, oneClickOsmosis } from './benchMode.js'
 
-function Btn({ children, onClick, disabled, kind = '' }) {
-  return <button type="button" className={'lab-btn ' + kind} onClick={onClick} disabled={disabled}>{children}</button>
+function Btn({ children, onClick, disabled, kind = '', type = 'button' }) {
+  return <button type={type} className={'lab-btn ' + kind} onClick={onClick} disabled={disabled}>{children}</button>
 }
 
 /** Close-up of the burette scale around the meniscus (0.1 cm³ graduations). */
@@ -43,7 +45,7 @@ function ReadingInput({ label, onRecord, disabled }) {
   return (
     <form className="lab-inline" onSubmit={e => { e.preventDefault(); if (v !== '' && onRecord(v)) setV('') }}>
       <label>{label} <input inputMode="decimal" value={v} onChange={e => setV(e.target.value)} placeholder="0.00" disabled={disabled} aria-describedby="reading-help" /> cm³</label>
-      <Btn disabled={disabled || v === ''}>Record</Btn>
+      <Btn type="submit" disabled={disabled || v === ''}>Record</Btn>
     </form>
   )
 }
@@ -133,7 +135,7 @@ function OhmsControls({ view, dispatch, editable }) {
         <form className="lab-row" onSubmit={e => { e.preventDefault(); if (dispatch('recordRow', { V, I })) { setV(''); setI('') } }}>
           <label>V <input inputMode="decimal" value={V} onChange={e => setV(e.target.value)} disabled={off} size="6" /> V</label>
           <label>I <input inputMode="decimal" value={I} onChange={e => setI(e.target.value)} disabled={off} size="6" /> A</label>
-          <Btn disabled={off || V === '' || I === ''}>Record</Btn>
+          <Btn type="submit" disabled={off || V === '' || I === ''}>Record</Btn>
         </form>
         {view.rows.length > 0 && (
           <table className="lab-table"><thead><tr><th>#</th><th>Supply / V</th><th>V / V</th><th>I / A</th><th></th></tr></thead>
@@ -149,7 +151,7 @@ function MassInput({ label, onRecord, disabled }) {
   return (
     <form className="lab-inline" onSubmit={e => { e.preventDefault(); if (v !== '' && onRecord(v)) setV('') }}>
       <label>{label} <input inputMode="decimal" value={v} onChange={e => setV(e.target.value)} disabled={disabled} size="6" placeholder="0.00" /> g</label>
-      <Btn disabled={disabled || v === ''}>Record</Btn>
+      <Btn type="submit" disabled={disabled || v === ''}>Record</Btn>
     </form>
   )
 }
@@ -177,7 +179,7 @@ function OsmosisControls({ view, dispatch, editable }) {
           : <form className="lab-row" onSubmit={e => { e.preventDefault(); dispatch('wait', { minutes: mins }) }}>
               <span>In solution for <b>{view.elapsed} min</b>.</span>
               <label>Wait <input inputMode="numeric" value={mins} onChange={e => setMins(e.target.value)} size="4" disabled={off} /> min</label>
-              <Btn disabled={off}>Wait</Btn>
+              <Btn type="submit" disabled={off}>Wait</Btn>
             </form>}
       </fieldset>
       <table className="lab-table"><thead><tr><th>Sucrose / M</th><th>Initial / g</th><th>Final / g</th><th>Change / %</th></tr></thead>
@@ -192,6 +194,8 @@ export default function Controls({ experimentId, view, dispatch, editable }) {
   if (def?.practical) return view.bench === 2
     ? <HandsOnControls def={def} view={view} dispatch={dispatch} editable={editable} />
     : <PracticalControls def={def} view={view} dispatch={dispatch} editable={editable} />
+  if (experimentId === 'chem-titration' && !oneClickTitration(view)) return <HandsOnTitrationControls view={view} dispatch={dispatch} editable={editable} />
+  if (experimentId === 'bio-osmosis' && !oneClickOsmosis(view)) return <HandsOnOsmosisControls view={view} dispatch={dispatch} editable={editable} />
   const C = { 'chem-titration': TitrationControls, 'phys-ohms-law': OhmsControls, 'bio-osmosis': OsmosisControls }[experimentId]
   return C ? <C view={view} dispatch={dispatch} editable={editable} /> : <p>No controls for this experiment.</p>
 }

@@ -1,20 +1,29 @@
 /**
- * titrationScene.js — the hands-on acid–base titration bench.
+ * titrationScene.js — the hands-on acid–base titration bench, in a school
+ * laboratory (labRoom.js).
  *
  * Everything in the practical's apparatus and materials list is on the
  * bench: retort stand and burette clamp, 50 cm³ burette, filter funnel,
  * 25.0 cm³ pipette with filler, 250 cm³ conical flask on a white tile,
  * labelled reagent bottles of sodium hydroxide and the acid, a beaker of
- * each solution and one for rinsings, three indicator dropper bottles, a
- * wash bottle of distilled water and safety goggles.
+ * each solution and one for waste, three indicator dropper bottles, a wash
+ * bottle of distilled water, safety goggles and a lab coat.
  *
- * Students use the apparatus directly:
- *   NaOH bottle / beaker / funnel → fillBurette (funnel in, pour, funnel out)
- *   pipette / acid bottle / beaker → pipetteAcid (pipette fills, delivers, returns)
- *   indicator bottle, then flask  → chooseIndicator, addIndicator (dropper, 2 drops)
- *   burette tap: click            → addBase 0.05 (one drop)
- *   burette tap: press and hold   → addBase 0.1 every 150 ms while held
- *   flask (no indicator armed)    → swirl (cosmetic)
+ * Step-by-step bench (every new session). Clicking apparatus does the
+ * obvious thing, or offers a short menu of what can be done with it:
+ *   goggles, lab coat              → wearPPE
+ *   funnel                         → burFunnel (in / out of the burette)
+ *   NaOH bottle / beaker           → menu: rinseBurette naoh, pourIntoBurette
+ *   waste beaker                   → menu: runToWaste 0.5 / 1 / 2 cm³
+ *   wash bottle                    → menu: rinse burette, flask or pipette with water
+ *   burette                        → menu: crouch to eye level (eyeLevel), rinse
+ *   pipette                        → menu: attachFiller, adjustPipette, deliverPipette
+ *   acid bottle / beaker           → menu: rinsePipette acid, fillPipette, rinseFlask acid
+ *   indicator bottle, then flask   → chooseIndicator, addIndicator (dropper, 2 drops)
+ *   burette tap: click / hold      → addBase 0.05 / 0.1 every 150 ms
+ *   flask                          → swirl (an engine action: it mixes the solution)
+ * One-click bench (sessions saved before the step-by-step bench): the NaOH,
+ * funnel and pipette fill and pipette in one click, as before.
  *
  * Animations are cosmetic and follow the engine's view: the burette level,
  * flask volume and colour always come from view. The burette reading is
@@ -23,6 +32,8 @@
 import * as THREE from 'three'
 import * as E from './equipment.js'
 import { buildModel, plate, wrapText } from './apparatus3d.js'
+import { addLabRoom } from './labRoom.js'
+import { oneClickTitration } from '../benchMode.js'
 import { INDICATORS } from '../../../../shared/lab/science/indicators.js'
 
 const { BENCH_Y: B } = E
@@ -102,27 +113,32 @@ function funnel(seg) {
 function pipetteWithFiller(seg) {
   const g = new THREE.Group()
   const glass = glassMat()
-  const add = (geo, m, y) => { const o = new THREE.Mesh(geo, m); o.position.y = y; g.add(o); return o }
+  const add = (geo, m, y, to = g) => { const o = new THREE.Mesh(geo, m); o.position.y = y; to.add(o); return o }
   add(new THREE.CylinderGeometry(0.003, 0.0013, 0.04, 12), glass, 0.02)                      // tip
   add(new THREE.CylinderGeometry(0.003, 0.003, 0.1, 12), glass, 0.09)                          // lower stem
   const bulb = add(new THREE.SphereGeometry(0.013, seg, 14), glass, 0.175); bulb.scale.y = 2.6  // bulb
   add(new THREE.CylinderGeometry(0.003, 0.003, 0.15, 12), glass, 0.285)                        // upper stem
   add(new THREE.CylinderGeometry(0.0034, 0.0034, 0.0012, 12), E.mat.black(), 0.31)              // the 25.0 cm³ mark
-  // Filler (thumb-wheel type)
+  // Filler (thumb-wheel type), in its own group so it can be shown when attached
+  const filler = new THREE.Group(); g.add(filler)
   const green = std({ color: '#2E7D32', roughness: 0.5 })
-  add(new THREE.CylinderGeometry(0.006, 0.0045, 0.02, 14), std({ color: '#26282B', roughness: 0.9 }), 0.365)
-  add(new THREE.CylinderGeometry(0.011, 0.011, 0.07, seg), green, 0.41)
-  add(new THREE.CylinderGeometry(0.012, 0.012, 0.006, seg), std({ color: '#1B5E20', roughness: 0.5 }), 0.447)
+  add(new THREE.CylinderGeometry(0.006, 0.0045, 0.02, 14), std({ color: '#26282B', roughness: 0.9 }), 0.365, filler)
+  add(new THREE.CylinderGeometry(0.011, 0.011, 0.07, seg), green, 0.41, filler)
+  add(new THREE.CylinderGeometry(0.012, 0.012, 0.006, seg), std({ color: '#1B5E20', roughness: 0.5 }), 0.447, filler)
   const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.006, 18), std({ color: '#1F2227', roughness: 0.6 }))
-  wheel.rotation.x = PI / 2; wheel.position.set(0, 0.41, 0.012); g.add(wheel)
-  // Liquid inside (shown while the pipette holds acid)
+  wheel.rotation.x = PI / 2; wheel.position.set(0, 0.41, 0.012); filler.add(wheel)
+  // Liquid inside (shown while the pipette holds acid); l3 rises above the mark when overfilled
   const lm = E.mat.liquid('#E7EEF5', 0)
   const liq = new THREE.Group()
   const l1 = new THREE.Mesh(new THREE.CylinderGeometry(0.0022, 0.0022, 0.13, 10), lm); l1.position.y = 0.075
   const l2 = new THREE.Mesh(new THREE.SphereGeometry(0.0118, 16, 12), lm); l2.scale.y = 2.6; l2.position.y = 0.175
-  const l3 = new THREE.Mesh(new THREE.CylinderGeometry(0.0022, 0.0022, 0.1, 10), lm); l3.position.y = 0.26
+  const l3 = new THREE.Mesh(new THREE.CylinderGeometry(0.0022, 0.0022, 1, 10), lm)
   liq.add(l1, l2, l3); liq.visible = false; g.add(liq)
+  const setTop = (yTop) => { const h = Math.max(0.001, yTop - 0.24); l3.scale.y = h; l3.position.y = 0.24 + h / 2 }
+  setTop(0.31)
   g.userData.setFill = (f) => { liq.visible = f > 0.01; lm.opacity = 0.55 * f }
+  g.userData.setAboveMark = (above) => setTop(above ? 0.335 : 0.31)
+  g.userData.setFiller = (on) => { filler.visible = !!on }
   g.userData.wheel = wheel
   return g
 }
@@ -143,6 +159,22 @@ function washBottle(seg) {
   return g
 }
 
+/** A folded white lab coat. */
+function labCoat() {
+  const g = new THREE.Group()
+  const cloth = std({ color: '#F7F8F8', roughness: 0.95 })
+  const body = new THREE.Mesh(new THREE.BoxGeometry(0.17, 0.035, 0.13), cloth); body.position.y = 0.0175
+  const fold = new THREE.Mesh(new THREE.BoxGeometry(0.17, 0.012, 0.05), cloth); fold.position.set(0, 0.04, -0.035)
+  g.add(body, fold)
+  for (const s of [-1, 1]) {
+    const lapel = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.004, 0.06), std({ color: '#E8EAEB', roughness: 0.95 }))
+    lapel.position.set(s * 0.025, 0.037, 0.02); lapel.rotation.y = s * 0.45; g.add(lapel)
+  }
+  for (let k = 0; k < 3; k++) { const b = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.003, 10), std({ color: '#B7BDC4' })); b.position.set(0, 0.036, 0.05 - k * 0.025); g.add(b) }
+  const tag = plate('LAB COAT', 0.05, 0.012, { bg: '#F7F8F8', fg: '#55606B' }); tag.rotation.x = -PI / 2; tag.position.set(0.05, 0.0362, 0.04); g.add(tag)
+  return g
+}
+
 /** Name tag stuck on the front of a beaker. */
 function beakerWithTag(text, fill) {
   const b = E.beaker('#E8F0F7', fill)
@@ -153,6 +185,7 @@ function beakerWithTag(text, fill) {
 const INDICATOR_LIQUID = { phenolphthalein: '#F2F4F7', methyl_orange: '#E8862A', bromothymol_blue: '#3A78C9' }
 const ease = (k) => k * k * (3 - 2 * k)
 const v3 = (x, y, z) => new THREE.Vector3(x, y, z)
+const rgbaColour = (c) => new THREE.Color().setRGB(c[0] / 255, c[1] / 255, c[2] / 255, THREE.SRGBColorSpace)
 
 // ── The scene ────────────────────────────────────────────────
 export function titration(lab, { dispatch, onSelect, onHover }) {
@@ -160,8 +193,10 @@ export function titration(lab, { dispatch, onSelect, onHover }) {
   const seg = low ? 16 : 32
   const reduced = typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
   const say = (label, kind = 'notice') => onSelect({ kind, label })
+  const menu = (label, actions) => onSelect({ kind: 'menu', label, actions })
 
   lab.add(E.bench())
+  addLabRoom(lab)
 
   // Positions (x, z) on the bench. Flask under the burette at the centre.
   const BUR_Y = B + 0.2                       // burette tip
@@ -185,24 +220,32 @@ export function titration(lab, { dispatch, onSelect, onHover }) {
   tapTarget.position.x = 0.015; tap.add(tapTarget)
   lab.makePickable(tap, { kind: 'tap', hold: true, label: 'Burette tap: click for one drop, hold to run' })
   const setTap = (open) => { tap.rotation.x = open ? PI / 2 : 0; lab.invalidate() }
+  // Air bubble in the jet (visible to a student who looks), and the jet's liquid.
+  const bubble = new THREE.Mesh(new THREE.SphereGeometry(0.0022, 10, 8), std({ color: '#FFFFFF', transparent: true, opacity: 0.85, roughness: 0.05 }))
+  bubble.scale.y = 2.2; bubble.position.set(0, 0.03, 0); bubble.visible = false; bur.add(bubble)
+  const jet = new THREE.Mesh(new THREE.CylinderGeometry(0.0018, 0.003, 0.045, 10), E.mat.liquid('#DCEBF7', 0.45)); jet.position.y = 0.026; jet.visible = false; bur.add(jet)
 
   // Sodium hydroxide side (right)
-  const naohBottle = reagentBottle('Sodium hydroxide\n0.100 M', { cap: '#1F5FAF', hazard: 'IRRITANT', seg })
+  const naohBottle = reagentBottle('Sodium hydroxide\n0.100 M', { cap: '#1F5FAF', hazard: 'CORROSIVE', seg })
   naohBottle.position.set(0.31, B, -0.12)
-  lab.add(naohBottle, { pick: { kind: 'naoh', label: 'Sodium hydroxide 0.100 M: click to fill the burette through the funnel' } })
+  lab.add(naohBottle, { pick: { kind: 'naoh', label: 'Sodium hydroxide 0.100 M' } })
   const naohBeaker = beakerWithTag('NaOH', 0.6); naohBeaker.position.set(0.2, B, 0.07)
   naohBeaker.userData.home = naohBeaker.position.clone()
-  lab.add(naohBeaker, { pick: { kind: 'naoh', label: 'Beaker of sodium hydroxide: click to fill the burette through the funnel' } })
-  const rinse = beakerWithTag('Rinsings', 0.08); rinse.position.set(0.17, B, -0.12)
-  lab.add(rinse, { pick: { kind: 'rinse', label: 'Beaker for rinsings; the funnel rests in it' } })
+  lab.add(naohBeaker, { pick: { kind: 'naoh', label: 'Beaker of sodium hydroxide' } })
+  const rinse = beakerWithTag('Waste', 0.08); rinse.position.set(0.17, B, -0.12)
+  const RINSE_HOME = rinse.position.clone()
+  lab.add(rinse, { pick: { kind: 'rinse', label: 'Waste beaker for rinsings; the funnel rests in it' } })
   const fun = funnel(seg)
   const FUNNEL_HOME = v3(0.17, B + 0.055, -0.12)
+  const FUNNEL_IN = v3(0, BUR_TOP - 0.035, 0)
   fun.position.copy(FUNNEL_HOME)
-  lab.add(fun, { pick: { kind: 'funnel', label: 'Filter funnel: click to fill the burette with sodium hydroxide' } })
+  lab.add(fun, { pick: { kind: 'funnel', label: 'Filter funnel' } })
   const wash = washBottle(seg); wash.position.set(0.42, B, 0.12); wash.rotation.y = PI
-  lab.add(wash, { pick: { kind: 'wash', label: 'Wash bottle of distilled water: click to rinse the inside of the flask' } })
+  lab.add(wash, { pick: { kind: 'wash', label: 'Wash bottle of distilled water' } })
   const goggles = buildModel('goggles'); goggles.position.set(0.3, B, 0.3); goggles.rotation.y = -0.5
   lab.add(goggles, { pick: { kind: 'goggles', label: 'Safety goggles: wear them throughout the practical' } })
+  const coat = labCoat(); coat.position.set(0.5, B, 0.27); coat.rotation.y = -0.3
+  lab.add(coat, { pick: { kind: 'coat', label: 'Lab coat: put it on before handling the reagents' } })
 
   // Acid side (left)
   const acidBottle = reagentBottle('Acid,\n? M', { body: '#F1F5F7', bodyOpacity: 0.55, cap: '#8B1A2E', seg })
@@ -212,8 +255,9 @@ export function titration(lab, { dispatch, onSelect, onHover }) {
   lab.add(acidBeaker, { pick: { kind: 'acid' } })
   const pip = pipetteWithFiller(seg)
   const PIP_HOME = { p: v3(-0.44, B + 0.014, 0.3), r: { z: -PI / 2 } }
+  const PIP_HELD = { p: v3(acidBeaker.position.x, B + 0.16, acidBeaker.position.z), r: { z: 0 } }   // full, held above the acid beaker
   pip.position.copy(PIP_HOME.p); pip.rotation.z = PIP_HOME.r.z
-  lab.add(pip, { pick: { kind: 'pipette', label: '25.0 cm³ pipette with filler: click to transfer 25.0 cm³ of acid to the flask' } })
+  lab.add(pip, { pick: { kind: 'pipette', label: '25.0 cm³ pipette and filler' } })
 
   // Indicators (left, in a row)
   const bottles = Object.keys(INDICATOR_LIQUID).map((id, i) => {
@@ -224,6 +268,12 @@ export function titration(lab, { dispatch, onSelect, onHover }) {
   })
   const ring = new THREE.Mesh(new THREE.TorusGeometry(0.022, 0.0018, 8, 32), new THREE.MeshBasicMaterial({ color: '#F0B429' }))
   ring.rotation.x = PI / 2; ring.visible = false; lab.scene.add(ring)
+
+  // Flash of colour where unswirled alkali lands (follows view.flask.flash; fades on swirling).
+  const flashMat = new THREE.MeshBasicMaterial({ color: '#D63384', transparent: true, opacity: 0, depthWrite: false })
+  const flashDisc = new THREE.Mesh(new THREE.CircleGeometry(0.018, 24), flashMat)
+  flashDisc.rotation.x = -PI / 2; flashDisc.visible = false; flashDisc.renderOrder = 2; flask.add(flashDisc)
+  let fading = false
 
   // Falling drops (cosmetic): a small pool of meshes reused.
   const dropGeo = new THREE.SphereGeometry(0.0028, 8, 6)
@@ -244,10 +294,39 @@ export function titration(lab, { dispatch, onSelect, onHover }) {
   let hold = null
   let swirling = false
   let queued = 0, dropT = 0, dropLoop = false
+  let dropTarget = null       // where tap drops land: null = the flask
+  let residue = null          // colour left in a used flask until it is washed out
 
+  const legacy = () => oneClickTitration(last)
+  const handsOn = () => !!last && !legacy()
   const liquidHeight = (vol) => (vol ? Math.min(0.11, 0.0006 * vol + 0.004) : 0)
   const flaskSurfaceY = () => flask.position.y + 0.002 + Math.max(0.006, liquidHeight(last?.flask.volume || 0))
-  const applyFlask = (v) => { if (v) flask.userData.setLiquid(v.flask.volume, v.flask.colour); lab.invalidate() }
+  const applyFlask = (v) => {
+    if (!v) return
+    if (v.flask.hasAcid) flask.userData.setLiquid(v.flask.volume, v.flask.colour)
+    else if (residue && v.handsOn && !v.flask.clean) flask.userData.setLiquid(6, residue)   // last run's solution, not yet washed out
+    else flask.userData.setLiquid(0)
+    const f = v.flask
+    if (f.flash && f.flashColour) {
+      flashDisc.visible = true; flashMat.color.copy(rgbaColour(f.flashColour)); flashMat.opacity = Math.max(0.5, f.flashColour[3] || 0.6)
+      flashDisc.position.y = 0.003 + liquidHeight(f.volume)
+    } else if (flashDisc.visible) fadeFlash()
+    lab.invalidate()
+  }
+  function fadeFlash() {
+    if (reduced) { flashDisc.visible = false; return }
+    if (fading) return
+    fading = true
+    let t = 0
+    const from = flashMat.opacity
+    lab.animate((dt) => {
+      t += dt
+      if (last?.flask.flash) { fading = false; return false }   // a new flash replaced it
+      flashMat.opacity = from * Math.max(0, 1 - t / 0.7)
+      if (t >= 0.7) { flashDisc.visible = false; fading = false; return false }
+      return true
+    })
+  }
 
   function spawnDrop(pos, endY, colour) {
     if (reduced) return false
@@ -267,7 +346,7 @@ export function titration(lab, { dispatch, onSelect, onHover }) {
       const underBurette = flask.position.distanceTo(FLASK_HOME) < 0.01
       if ((running || queued > 0) && dropT >= gap) {
         dropT = 0
-        const endY = underBurette ? flaskSurfaceY() : B + 0.008
+        const endY = dropTarget ?? (underBurette ? flaskSurfaceY() : B + 0.008)
         if (spawnDrop(v3(0, BUR_Y - 0.004, 0), endY, '#E8F0F7') && !running) queued--
       }
       let any = false
@@ -288,7 +367,7 @@ export function titration(lab, { dispatch, onSelect, onHover }) {
   // step jumps to its end state at once.
   function play(steps, done) {
     busy = true
-    const finish = () => { busy = false; done?.(); lab.invalidate() }
+    const finish = () => { busy = false; done?.(); syncPoses(); lab.invalidate() }
     if (reduced) { for (const s of steps) { s.begin?.(); s.run?.(1); s.end?.() } finish(); return }
     let i = -1, t = 0, cur = null
     const next = () => { i++; t = 0; cur = steps[i] || null; cur?.begin?.() }
@@ -329,16 +408,36 @@ export function titration(lab, { dispatch, onSelect, onHover }) {
     return { d: 0.6, begin() { from = flask.position.clone() }, run(k) { flask.position.lerpVectors(from, target, k); flask.position.y += Math.sin(PI * k) * 0.025 } }
   }
 
-  // Filling the burette: funnel in, pour the NaOH from its beaker, funnel out.
-  function playFill(fromReading, toReading) {
+  /** Put the movable apparatus where the engine state says it is (when nothing is animating). */
+  function syncPoses() {
+    if (busy || !last) return
+    const v = last
+    if (!fillAnimating) fun.position.copy(v.burette.funnel ? FUNNEL_IN : FUNNEL_HOME)
+    if (v.handsOn) {
+      const P = v.pipette.full ? PIP_HELD : PIP_HOME
+      pip.position.copy(P.p); pip.rotation.set(0, 0, P.r.z)
+      pip.userData.setFill(v.pipette.full ? 1 : 0)
+      pip.userData.setAboveMark(v.pipette.aboveMark)
+    }
+    pip.userData.setFiller(legacy() || v.pipette.filler)
+    for (const [obj, worn] of [[goggles, v.ppe.goggles], [coat, v.ppe.coat]]) {
+      if (worn && !obj.userData.worn) { obj.userData.worn = true; obj.visible = false; obj.traverse(o => lab.unpick(o)) }   // hidden objects would still be hit by the raycaster
+    }
+    lab.invalidate()
+  }
+
+  // Filling the burette: (funnel in,) pour the NaOH from its beaker, (funnel out).
+  function playFill(fromReading, toReading, funnelMoves) {
     fillAnimating = true
     const rest = naohBeaker.userData.home
     const liq = naohBeaker.children[1]
     const lipX = 0.02, lipY = BUR_TOP + 0.085, cupY = BUR_TOP + 0.055
     play([
-      move(fun, { p: v3(FUNNEL_HOME.x, BUR_TOP + 0.12, FUNNEL_HOME.z) }, 0.45),
-      move(fun, { p: v3(0, BUR_TOP + 0.12, 0) }, 0.45),
-      move(fun, { p: v3(0, BUR_TOP - 0.035, 0) }, 0.3),
+      ...(funnelMoves ? [
+        move(fun, { p: v3(FUNNEL_HOME.x, BUR_TOP + 0.12, FUNNEL_HOME.z) }, 0.45),
+        move(fun, { p: v3(0, BUR_TOP + 0.12, 0) }, 0.45),
+        move(fun, { p: FUNNEL_IN }, 0.3),
+      ] : []),
       move(naohBeaker, { p: v3(0.16, BUR_TOP + 0.12, 0) }, 0.7),
       move(naohBeaker, { p: v3(0.097, BUR_TOP + 0.15, 0), r: { z: 1.9 } }, 0.45),
       now(() => {
@@ -349,10 +448,12 @@ export function titration(lab, { dispatch, onSelect, onHover }) {
       now(() => { stream.visible = false; if (liq) liq.visible = true }),
       move(naohBeaker, { p: v3(0.16, BUR_TOP + 0.12, 0), r: { z: 0 } }, 0.4),
       move(naohBeaker, { p: rest }, 0.7),
-      // Remove the funnel before titrating (drips from it would change the reading).
-      move(fun, { p: v3(0, BUR_TOP + 0.12, 0) }, 0.3),
-      move(fun, { p: v3(FUNNEL_HOME.x, BUR_TOP + 0.12, FUNNEL_HOME.z) }, 0.45),
-      move(fun, { p: FUNNEL_HOME }, 0.45),
+      // One-click bench: the funnel is removed before titrating (drips from it would change the reading).
+      ...(funnelMoves ? [
+        move(fun, { p: v3(0, BUR_TOP + 0.12, 0) }, 0.3),
+        move(fun, { p: v3(FUNNEL_HOME.x, BUR_TOP + 0.12, FUNNEL_HOME.z) }, 0.45),
+        move(fun, { p: FUNNEL_HOME }, 0.45),
+      ] : []),
     ], () => {
       fillAnimating = false
       stream.visible = false
@@ -360,7 +461,34 @@ export function titration(lab, { dispatch, onSelect, onHover }) {
     })
   }
 
-  // Pipetting 25.0 cm³ of acid into the flask.
+  // Rinsing the burette with a little NaOH: pour a splash in, let it run to waste.
+  function playRinse() {
+    const rest = naohBeaker.userData.home
+    play([
+      move(naohBeaker, { p: v3(0.16, BUR_TOP + 0.12, 0) }, 0.6),
+      move(naohBeaker, { p: v3(0.097, BUR_TOP + 0.15, 0), r: { z: 1.7 } }, 0.4),
+      wait(0.5, (k) => bur.userData.setLevel(50 - 6 * k, true)),
+      move(naohBeaker, { p: v3(0.16, BUR_TOP + 0.12, 0), r: { z: 0 } }, 0.35),
+      move(naohBeaker, { p: rest }, 0.6),
+      ...wasteSteps(0.9, () => bur.userData.setLevel(last?.burette.filled ? last.burette.reading : 50, !!last?.burette.filled)),
+    ])
+  }
+
+  // Running liquid to waste: the flask comes off the tile, the waste beaker goes under the tap.
+  function wasteSteps(d, during) {
+    return [
+      flaskTo(FLASK_FRONT),
+      move(rinse, { p: v3(0, B + 0.008, 0) }, 0.5),
+      now(() => { dropTarget = B + 0.03; queued = Math.min(6, queued + 4); kickDrops(); during?.() }),
+      wait(d),
+      now(() => { dropTarget = null }),
+      move(rinse, { p: RINSE_HOME }, 0.5),
+      flaskTo(FLASK_HOME),
+    ]
+  }
+  function playWaste() { play(wasteSteps(1.0), () => { dropTarget = null }) }
+
+  // One-click bench: pipetting 25.0 cm³ of acid into the flask in one go.
   function playPipette() {
     deferFlask++
     const bx = acidBeaker.position.x, bz = acidBeaker.position.z
@@ -377,6 +505,49 @@ export function titration(lab, { dispatch, onSelect, onHover }) {
       move(pip, { p: v3(0, B + 0.12, fz) }, 0.4),
       wait(1.0, (k) => { pip.userData.setFill(1 - k); if (k > 0.25 && deferFlask) { deferFlask--; applyFlask(last) } }),
       wait(0.35),                                                                    // touch the tip on the inside of the flask
+      move(pip, { p: v3(0, B + 0.24, fz) }, 0.4),
+      move(pip, { p: v3(-0.3, B + 0.22, 0.2) }, 0.6),
+      move(pip, PIP_HOME, 0.7),
+      flaskTo(FLASK_HOME),
+    ], () => {
+      pip.userData.setFill(0)
+      if (deferFlask) { deferFlask--; applyFlask(last) }
+    })
+  }
+
+  // Step-by-step: draw the acid up above the mark with the filler, and hold it there.
+  function playPipFill() {
+    const bx = acidBeaker.position.x, bz = acidBeaker.position.z
+    const wheel = pip.userData.wheel
+    play([
+      move(pip, { p: v3(-0.3, B + 0.22, 0.2), r: { z: 0 } }, 0.6),
+      move(pip, { p: v3(bx, B + 0.16, bz) }, 0.45),
+      move(pip, { p: v3(bx, B + 0.012, bz) }, 0.45),
+      now(() => pip.userData.setAboveMark(true)),
+      wait(1.0, (k) => { pip.userData.setFill(k); wheel.rotation.y = k * 7 }),
+      move(pip, PIP_HELD, 0.5),
+    ])
+  }
+  // Let the acid down to the mark: a few drops back into the beaker.
+  function playAdjust() {
+    const wheel = pip.userData.wheel
+    play([
+      wait(0.5, (k) => { wheel.rotation.y = 7 - k }),
+      now(() => { spawnDrop(lab.worldPos(pip, -0.004), B + 0.03, '#E7EEF5') && kickDrops(); pip.userData.setAboveMark(false) }),
+      wait(0.4),
+    ])
+  }
+  // Deliver into the conical flask, touch the tip, put the pipette down.
+  function playDeliver() {
+    deferFlask++
+    const fz = FLASK_FRONT.z
+    play([
+      flaskTo(FLASK_FRONT),
+      move(pip, { p: v3(PIP_HELD.p.x, B + 0.24, PIP_HELD.p.z), r: { z: 0 } }, 0.4),
+      move(pip, { p: v3(0, B + 0.24, fz) }, 0.6),
+      move(pip, { p: v3(0, B + 0.12, fz) }, 0.4),
+      wait(1.2, (k) => { pip.userData.setFill(1 - k); if (k > 0.25 && deferFlask) { deferFlask--; applyFlask(last) } }),
+      wait(0.35),
       move(pip, { p: v3(0, B + 0.24, fz) }, 0.4),
       move(pip, { p: v3(-0.3, B + 0.22, 0.2) }, 0.6),
       move(pip, PIP_HOME, 0.7),
@@ -408,7 +579,21 @@ export function titration(lab, { dispatch, onSelect, onHover }) {
     ], () => { if (deferFlask) { deferFlask--; applyFlask(last) } })
   }
 
-  function swirl() {
+  // Moving the funnel in or out of the burette top.
+  function playFunnel(into) {
+    const hi = (x, z) => ({ p: v3(x, BUR_TOP + 0.12, z) })
+    play(into
+      ? [move(fun, hi(FUNNEL_HOME.x, FUNNEL_HOME.z), 0.4), move(fun, hi(0, 0), 0.45), move(fun, { p: FUNNEL_IN }, 0.3)]
+      : [move(fun, hi(0, 0), 0.3), move(fun, hi(FUNNEL_HOME.x, FUNNEL_HOME.z), 0.45), move(fun, { p: FUNNEL_HOME }, 0.4)])
+  }
+
+  // Putting on goggles / coat: the item rises towards the student and is gone (being worn).
+  function playWear(obj) {
+    const cam = lab.camera.position
+    play([move(obj, () => ({ p: obj.position.clone().lerp(cam, 0.35) }), 0.5), now(() => { obj.visible = false })])
+  }
+
+  function swirlAnim() {
     if (reduced || swirling || busy) return
     swirling = true
     let t = 0
@@ -429,6 +614,22 @@ export function titration(lab, { dispatch, onSelect, onHover }) {
       t += dt
       const k = Math.min(1, t / 0.6), s = 1 - 0.1 * Math.sin(PI * k)
       sq.scale.set(s, 1, s)
+      return k < 1
+    })
+  }
+
+  // Crouch to read the meniscus at eye level: the camera moves level with it.
+  function eyeToMeniscus() {
+    const r = last?.burette.filled ? last.burette.reading : 0
+    const y = BUR_Y + 0.07 + 0.04 + (0.62 - 0.08) * (1 - Math.max(-1.5, r) / 50)
+    const camTo = v3(0.03, y, 0.37), tgt = v3(0, y, 0)
+    if (reduced) { lab.camera.position.copy(camTo); lab.controls.target.copy(tgt); lab.controls.update(); lab.invalidate(); return }
+    const fp = lab.camera.position.clone(), ft = lab.controls.target.clone()
+    let t = 0
+    lab.animate((dt) => {
+      t += dt
+      const k = ease(Math.min(1, t / 0.8))
+      lab.camera.position.lerpVectors(fp, camTo, k); lab.controls.target.lerpVectors(ft, tgt, k); lab.controls.update()
       return k < 1
     })
   }
@@ -474,17 +675,25 @@ export function titration(lab, { dispatch, onSelect, onHover }) {
   const indName = (id) => INDICATORS[id]?.name || id
   const acidName = () => last?.acid?.name || 'Acid'
   function hintFor(p) {
+    const ho = handsOn()
     switch (p.kind) {
       case 'flask': {
         const f = last?.flask
-        const what = f?.hasAcid ? 'Conical flask: ' + f.colourName : 'Conical flask (250 cm³): empty'
-        return what + (armed ? '. Click to add 2 drops of ' + indName(armed).toLowerCase() : '. Click to swirl')
+        const what = f?.hasAcid ? 'Conical flask: ' + f.colourName + (f.flash ? ', with a flash of ' + f.flashName + ' where the alkali lands' : '') : 'Conical flask (250 cm³): ' + (f && !f.clean ? 'needs washing out' : 'empty')
+        return what + (armed ? '. Click to add 2 drops of ' + indName(armed).toLowerCase() : f?.hasAcid ? '. Click to swirl' : ho ? '. Click to rinse it' : '')
       }
       case 'burette':
         return last?.burette.filled
-          ? 'Burette (50 cm³) of sodium hydroxide. Read the scale close-up in the controls panel'
-          : 'Burette (50 cm³): empty. Click the sodium hydroxide or the funnel to fill it'
-      case 'acid': return acidName() + ', ? M: click to pipette 25.0 cm³ into the flask'
+          ? 'Burette (50 cm³) of sodium hydroxide. ' + (ho ? 'Click to crouch with your eye level with the meniscus; ' : '') + 'read the scale close-up in the controls panel'
+          : 'Burette (50 cm³): empty. ' + (ho ? 'Rinse it, put the funnel in and pour the sodium hydroxide in' : 'Click the sodium hydroxide or the funnel to fill it')
+      case 'naoh': return ho ? 'Sodium hydroxide 0.100 M (corrosive): click to rinse or fill the burette' : 'Sodium hydroxide 0.100 M: click to fill the burette through the funnel'
+      case 'funnel': return ho ? (last?.burette.funnel ? 'Filter funnel in the burette: click to take it out' : 'Filter funnel: click to put it in the top of the burette') : 'Filter funnel: click to fill the burette with sodium hydroxide'
+      case 'acid': return ho ? acidName() + ', ? M: click to rinse or fill the pipette' : acidName() + ', ? M: click to pipette 25.0 cm³ into the flask'
+      case 'pipette': return ho ? '25.0 cm³ pipette' + (last?.pipette.filler ? ' with filler' : ': attach the filler first') + (last?.pipette.full ? (last.pipette.atMark ? ' (on the mark)' : ' (acid above the mark)') : '') : '25.0 cm³ pipette with filler: click to transfer 25.0 cm³ of acid to the flask'
+      case 'rinse': return ho ? 'Waste beaker: click to run some solution out of the burette into it' : 'Beaker for rinsings; the funnel rests in it'
+      case 'wash': return ho ? 'Wash bottle of distilled water: click to rinse the flask, burette or pipette' : 'Wash bottle of distilled water: click to rinse the inside of the flask'
+      case 'goggles': return 'Safety goggles: click to put them on'
+      case 'coat': return 'Lab coat: click to put it on'
       case 'indicator': return indName(p.id) + ' indicator: click to choose it, then click the flask to add 2 drops' + (last?.indicatorChosen === p.id ? ' (chosen)' : '')
       default: return p.label || null
     }
@@ -499,8 +708,78 @@ export function titration(lab, { dispatch, onSelect, onHover }) {
     acidBeaker.userData.tag?.userData.setText(acid?.id === 'CH3COOH' ? 'CH₃COOH' : acid?.id || 'Acid')
   }
 
+  const wait4 = () => { if (busy) { say('Wait for the apparatus to be put down.'); return true } return false }
+  /** Dispatch from the 3D bench; returns true when the engine accepted it. */
+  const go = (type, payload, done) => { if (wait4()) return false; const ok = dispatch(type, payload); if (ok) done?.(); return ok }
+
+  function handsOnPick(p) {
+    const v = last
+    switch (p.kind) {
+      case 'goggles': go('wearPPE', { item: 'goggles' }, () => { say('Safety goggles on.', 'goggles'); playWear(goggles) }); return true
+      case 'coat': go('wearPPE', { item: 'coat' }, () => { say('Lab coat on.', 'coat'); playWear(coat) }); return true
+      case 'funnel': {
+        const into = !v.burette.funnel
+        go('burFunnel', { place: into }, () => { say(into ? 'Funnel in the top of the burette.' : 'Funnel taken out of the burette.', 'funnel'); playFunnel(into) })
+        return true
+      }
+      case 'naoh':
+        menu('Sodium hydroxide', [
+          { label: 'Rinse the burette with it', disabled: v.burette.filled, run: () => go('rinseBurette', { with: 'naoh' }, () => { say('Burette rinsed with a little sodium hydroxide; the rinsings run to waste.'); playRinse() }) },
+          { label: 'Pour it into the burette', run: () => go('pourIntoBurette') },
+        ])
+        return true
+      case 'rinse':
+        menu('Run into the waste beaker', [0.5, 1, 2].map(vol => ({ label: vol + ' cm³', disabled: !v.burette.filled, run: () => go('runToWaste', { volume: vol }, playWaste) })))
+        return true
+      case 'wash':
+        menu('Distilled water', [
+          { label: 'Rinse the flask', run: () => go('rinseFlask', { with: 'water' }, () => { squeezeWash(); say(last?.flask.hasAcid ? 'Washed the walls of the flask down with distilled water.' : 'Flask rinsed with distilled water.') }) },
+          { label: 'Rinse the burette', disabled: v.burette.filled, run: () => go('rinseBurette', { with: 'water' }, () => { squeezeWash(); say('Burette rinsed with distilled water.') }) },
+          { label: 'Rinse the pipette', disabled: v.pipette.full, run: () => go('rinsePipette', { with: 'water' }, () => { squeezeWash(); say('Pipette rinsed with distilled water.') }) },
+        ])
+        return true
+      case 'burette':
+        if (v.burette.filled) {
+          menu('Burette', [
+            { label: 'Crouch: eye level with the meniscus', run: () => go('eyeLevel', { pos: 'level' }, () => { eyeToMeniscus(); say('Your eye is level with the meniscus. Read the close-up in the controls panel.') }) },
+            { label: 'Stand up', run: () => go('eyeLevel', { pos: 'above' }, () => lab.resetViewTo?.()) },
+          ])
+        } else {
+          menu('Burette', [
+            { label: 'Rinse with distilled water', run: () => go('rinseBurette', { with: 'water' }, squeezeWash) },
+            { label: 'Rinse with sodium hydroxide', run: () => go('rinseBurette', { with: 'naoh' }, playRinse) },
+          ])
+        }
+        return true
+      case 'acid':
+        menu(acidName(), [
+          { label: 'Rinse the pipette with it', disabled: v.pipette.full, run: () => go('rinsePipette', { with: 'acid' }, () => say('Pipette rinsed with a little of the acid.')) },
+          { label: 'Fill the pipette (above the mark)', disabled: v.pipette.full, run: () => go('fillPipette') },
+          { label: 'Rinse the flask with it', disabled: v.flask.hasAcid, run: () => go('rinseFlask', { with: 'acid' }, () => say('Flask rinsed with the acid.')) },
+        ])
+        return true
+      case 'pipette':
+        menu('25.0 cm³ pipette', [
+          { label: 'Attach the filler', disabled: v.pipette.filler, run: () => go('attachFiller', undefined, () => say('Pipette filler attached.')) },
+          { label: 'Let down to the mark', disabled: !v.pipette.aboveMark, run: () => go('adjustPipette') },
+          { label: 'Deliver into the flask', disabled: !v.pipette.full, run: () => go('deliverPipette') },
+        ])
+        return true
+      case 'flask':
+        if (armed) return false
+        if (v.flask.hasAcid) { if (go('swirl')) { swirlAnim(); say('Swirling the flask: ' + (last?.flask.colourName || '') + '.', 'flask') } return true }
+        menu('Conical flask', [
+          { label: 'Rinse with distilled water', run: () => go('rinseFlask', { with: 'water' }, () => { squeezeWash(); say('Flask emptied and rinsed with distilled water.') }) },
+          { label: 'Rinse with the acid', run: () => go('rinseFlask', { with: 'acid' }, () => say('Flask rinsed with the acid.')) },
+        ])
+        return true
+      default: return false
+    }
+  }
+
   return {
     onPick(p) {
+      if (handsOn() && handsOnPick(p)) return
       switch (p.kind) {
         case 'naoh': case 'funnel':
           if (busy) { say('Wait for the apparatus to be put down.'); return }
@@ -525,7 +804,7 @@ export function titration(lab, { dispatch, onSelect, onHover }) {
             if (!dispatch('addIndicator')) { busy = false; deferFlask--; return }
             say('2 drops of ' + indName(id).toLowerCase() + ' added.', 'indicator')
             playDropper(id)
-          } else { swirl(); say(last?.flask.hasAcid ? 'Swirling the flask: ' + last.flask.colourName + '.' : 'The flask is empty.', 'flask') }
+          } else { swirlAnim(); say(last?.flask.hasAcid ? 'Swirling the flask: ' + last.flask.colourName + '.' : 'The flask is empty.', 'flask') }
           return
         case 'wash':
           squeezeWash()
@@ -536,25 +815,34 @@ export function titration(lab, { dispatch, onSelect, onHover }) {
       }
     },
     update(view) {
+      if (prev && prev.run !== view.run && prev.flask.colour) residue = prev.flask.colour    // what is left in the used flask
       last = view
       setAcidLabel(view.acid)
+      const ho = !oneClickTitration(view)
       const sameRun = prev && prev.run === view.run
       const fills = view.burette.fills ?? 0, prevFills = prev?.burette.fills ?? 0
 
       // Burette: animate a fill, otherwise follow the reading.
       if (prev && fills > prevFills && view.burette.filled && !busy && !reduced) {
-        playFill(prev.burette.filled && prev.burette.reading != null ? prev.burette.reading : 50, view.burette.reading)
+        playFill(prev.burette.filled && prev.burette.reading != null ? prev.burette.reading : 50, view.burette.reading, !ho)
       } else if (!fillAnimating) bur.userData.setLevel(view.burette.reading, view.burette.filled)
+      bubble.visible = !!view.burette.bubble && view.burette.filled
+      jet.visible = view.burette.filled && !view.burette.bubble
       // Drops for alkali added from the controls panel or a single tap click.
-      if (sameRun && fills === prevFills && prev.burette.reading != null && view.burette.reading > prev.burette.reading + 1e-6 && !running) {
+      if (sameRun && fills === prevFills && prev.burette.reading != null && view.burette.reading > prev.burette.reading + 1e-6 && !running && !busy) {
         queued = Math.min(6, queued + Math.max(1, Math.round((view.burette.reading - prev.burette.reading) / 0.1)))
         kickDrops()
       } else if (sameRun && running) kickDrops()
 
-      // Flask: pipetting and the first indicator drops are animated.
-      if (sameRun && !prev.flask.hasAcid && view.flask.hasAcid && !busy && !reduced) playPipette()
-      else if (sameRun && view.flask.hasAcid && !prev.flask.indicator && view.flask.indicator && !busy && !reduced) { busy = true; deferFlask++; playDropper(view.flask.indicator) }
+      // Flask and pipette: pipetting and the first indicator drops are animated.
+      if (ho && prev && !reduced && !busy) {
+        if (!prev.pipette.full && view.pipette.full) playPipFill()
+        else if (prev.pipette.aboveMark && view.pipette.atMark) playAdjust()
+        else if (sameRun && !prev.flask.hasAcid && view.flask.hasAcid) playDeliver()
+      } else if (!ho && sameRun && !prev.flask.hasAcid && view.flask.hasAcid && !busy && !reduced) playPipette()
+      if (sameRun && view.flask.hasAcid && !prev.flask.indicator && view.flask.indicator && !busy && !reduced) { busy = true; deferFlask++; playDropper(view.flask.indicator) }
       if (!sameRun) { if (!busy) { flask.position.copy(FLASK_HOME); deferFlask = 0 } }
+      if (view.flask.clean && !view.flask.hasAcid) residue = null
       if (!deferFlask) applyFlask(view)
 
       // Chosen indicator: raised slightly with a ring.
@@ -563,8 +851,10 @@ export function titration(lab, { dispatch, onSelect, onHover }) {
       ring.visible = !!ch
       if (ch) ring.position.set(ch.b.position.x, B + 0.002, ch.b.position.z)
       if (armed && view.indicatorChosen !== armed) armed = null
+      if (rinse.userData.shown !== ho) { rinse.userData.shown = ho; rinse.userData.tag?.userData.setText(ho ? 'Waste' : 'Rinsings') }
 
       prev = view
+      syncPoses()
       lab.invalidate()
     },
     view: { pos: [0.12, 1.4, 1.12], target: [-0.02, 1.08, 0.02] },

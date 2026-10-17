@@ -40,6 +40,12 @@ test('osmosis view has what the UI reads', () => {
   assert.ok(Number.isFinite(v.balance))
 })
 
+test('hands-on titration view has what the UI reads', () => {
+  check('chem-titration', [{ type: 'wearPPE', payload: { item: 'goggles' } }, { type: 'wearPPE', payload: { item: 'coat' } }, { type: 'burFunnel', payload: { place: true } }, { type: 'pourIntoBurette' }],
+    ['handsOn', 'ppe.goggles', 'ppe.coat', 'eye', 'burette.apparent', 'burette.aboveZero', 'burette.funnel', 'burette.bubble', 'burette.rinsedWith',
+      'pipette.filler', 'pipette.full', 'pipette.atMark', 'pipette.aboveMark', 'pipette.rinsedWith', 'flask.flash', 'flask.clean', 'flask.unmixed', 'notes'])
+})
+
 test('notebook sections match the report sections', () => {
   assert.deepEqual(NOTEBOOK_SECTIONS, ['aim', 'hypothesis', 'variables', 'risk', 'apparatus', 'procedure', 'observations', 'analysis', 'evaluation', 'conclusion'])
 })

@@ -73,7 +73,7 @@ export default function Workspace({ experimentId, assignmentId, sessionId }) {
     if (!def || !state) return {}
     const nb = lab.notebook, filled = (k) => String(nb[k] || '').trim().length > 3
     const t = computeTable(analysis.table)
-    const benchRows = tables.reduce((a, x) => a + x.rows.length, 0)
+    const benchRows = tables.filter(x => !/^Technique/.test(x.title)).reduce((a, x) => a + x.rows.length, 0)
     const checks = checkAnalysis(analysis, { minRows })
     const qs = def.questions.filter(q => !/^plan_/.test(q.id) && q.id !== 'evaluation')
     return {

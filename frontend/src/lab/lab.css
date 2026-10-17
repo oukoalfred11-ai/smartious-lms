@@ -141,6 +141,8 @@
 .lab-main input[type=search] { min-width: 14em; }
 .lab-3d-overlay { position: absolute; left: 10px; right: 10px; bottom: 10px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: rgba(31,35,40,0.88); color: #FFF; padding: 8px 12px; border-radius: 8px; font-size: 14px; pointer-events: auto; }
 .lab-3d-overlay .lab-btn.ghost { color: #FFF; border-color: rgba(255,255,255,0.4); }
+.lab-3d-menu { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.lab-3d-menu .lab-btn:not(.ghost) { color: var(--lab-ink); }
 .lab-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
 .lab-dot.r { background: #C62828; } .lab-dot.k { background: #1A1A1A; }
 .lab-menus { margin: 6px 0; font-size: 13.5px; } .lab-menus > summary { cursor: pointer; color: var(--lab-grey); }
