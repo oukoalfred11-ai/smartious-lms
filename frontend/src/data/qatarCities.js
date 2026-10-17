@@ -531,6 +531,12 @@ export const QATAR_COUNTRY = {
       q: 'How do we know if Smartious is the right fit for our family?',
       a: 'Book a free 15-minute consultation. We will discuss your child\'s current year group, target university destinations (Qatar University, Education City universities, UK, US, Canada, Australia, anywhere), family situation (which area, corporate assignment context, child\'s learning preferences), and curriculum options. The consultation is genuinely no-commitment.',
     },
+    { q: 'How much does online school cost in Qatar?', a: 'Online school is from USD 423/month for Primary (≈ QAR 1,540/month; the riyal is pegged to the USD at 3.64), payable termly. Secondary, IGCSE, A Level and IB fees vary by curriculum and level. One-to-one tuition is USD 15/hour. Fees are non-refundable once the assessment is done, the timetable created and lessons started.' },
+    { q: 'What time are live lessons in Qatar?', a: 'Qatar is on Arabia Standard Time (AST, UTC+3), the same time as our teachers in Nairobi. A 9:00 lesson is 9:00 in Doha, so live lessons fall in normal school hours, Sunday to Thursday, and every lesson is recorded.' },
+    { q: 'How do live online classes work?', a: 'Students follow a weekly timetable of live lessons with qualified teachers, in small groups or one to one, and every lesson is recorded for catch-up. Families receive assessments and termly reports. Each student starts with a placement assessment, so we can place them at the right level.' },
+    { q: 'Where do students in Qatar sit IGCSE and A Level exams?', a: 'Cambridge IGCSE and A Level, and Pearson Edexcel International GCSE and A Level, are taken as a private candidate. Entries in Qatar are made through British Council Qatar. Entry deadlines fall months before each series, so check the British Council Qatar website for current dates, venues and fees. We plan the entry with you.' },
+    { q: 'When is the next intake?', a: 'The January 2027 intake is open: Term 2 starts on 5 January 2027. Students can also join during the year after an assessment.' },
+    { q: 'How do we contact Smartious?', a: 'Admissions: +254 745 021 212 (call or WhatsApp). Academic office: +254 182 071 920. Email: hello@smartioushomeschool.com.' },
   ],
 
   ctaH: 'Ready to start your child\'s Cambridge journey from Qatar?',

@@ -670,6 +670,12 @@ export const UAE_COUNTRY = {
       q: 'How do we know if Smartious is the right fit for our family?',
       a: 'Book a free 15-minute consultation. We will discuss your child\'s current year group, target university destinations, family situation (which emirate, corporate assignment timeline, child\'s learning preferences), and curriculum options. The consultation is genuinely no-commitment — we will be straightforward about whether Smartious or a different option (physical KHDA/ADEK school, different online provider, hybrid approach) better fits your circumstances. Many families benefit from trying a single Smartious class as a trial before committing to enrolment.',
     },
+    { q: 'How much does online school cost in the UAE?', a: 'Online school is from USD 423/month for Primary (≈ AED 1,553/month; the dirham is pegged to the USD at 3.6725), payable termly. Secondary, IGCSE, A Level and IB fees vary by curriculum and level. One-to-one tuition is USD 15/hour (about AED 55). Fees are non-refundable once the assessment is done, the timetable created and lessons started.' },
+    { q: 'What time are live lessons in the UAE?', a: 'The UAE is on Gulf Standard Time (GST, UTC+4), one hour ahead of our teachers in Nairobi. A 9:00 Nairobi lesson is at 10:00 in the UAE, so live lessons fall in the UAE school day, Monday to Friday, and every lesson is recorded.' },
+    { q: 'How do live online classes work?', a: 'Students follow a weekly timetable of live lessons with qualified teachers, in small groups or one to one, and every lesson is recorded for catch-up. Families receive assessments and termly reports. Each student starts with a placement assessment, so we can place them at the right level.' },
+    { q: 'Where do UAE students sit IGCSE and A Level exams?', a: 'Cambridge IGCSE and A Level, and Pearson Edexcel International GCSE and A Level, are taken as a private candidate. Entries in UAE are made through British Council UAE. Entry deadlines fall months before each series, so check the British Council UAE website for current dates, venues and fees. We plan the entry with you.' },
+    { q: 'When is the next intake?', a: 'The January 2027 intake is open: Term 2 starts on 5 January 2027. Students can also join during the year after an assessment.' },
+    { q: 'How do we contact Smartious?', a: 'Admissions: +254 745 021 212 (call or WhatsApp). Academic office: +254 182 071 920. Email: hello@smartioushomeschool.com.' },
   ],
 
   // ─── Final CTA messaging ───
