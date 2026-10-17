@@ -2,14 +2,6 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth, useToast } from '../context/ctx.jsx'
 
-// Admin-portal demo credentials — Teacher + Admin only
-const STAFF_DEMO = [
-  {role:'teacher', label:'Teacher', email:'j.muthomi@smartious.ac.ke', pw:'Teacher@2024', col:'#22C55E',
-   svg:'<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>'},
-  {role:'admin',   label:'Admin',   email:'admin@smartious.ac.ke',    pw:'Admin@2024',   col:'#F59E0B',
-   svg:'<circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>'},
-]
-
 // Inline Smartious logo — crimson gradient shield, gold star, white open book
 const SmartiousLogo = ({ size = 40, withText = false }) => (
   <div style={{display:'inline-flex',alignItems:'center',gap:12}}>
@@ -72,21 +64,7 @@ export default function AdminLoginPage() {
     if (!email || !pw) { setErr('Enter your email and password.'); return }
     setLoading(true)
     try {
-      let user
-      try {
-        user = await login(email, pw)
-      } catch {
-        // Offline / demo fallback
-        const found = STAFF_DEMO.find(d => d.email === email && d.pw === pw)
-        if (!found) throw new Error('Invalid credentials')
-        const nameMap = { teacher:'James', admin:'Admin' }
-        const lastMap = { teacher:'Muthomi', admin:'User' }
-        const fakeUser = { firstName: nameMap[found.role]||'Staff', lastName: lastMap[found.role]||'', role: found.role, email }
-        localStorage.setItem('sm_token', 'demo-token-' + found.role)
-        localStorage.setItem('sm_user', JSON.stringify(fakeUser))
-        window.location.href = '/' + found.role
-        return
-      }
+      const user = await login(email, pw)
       // ctx.login() returns null when mustChangePassword is true —
       // in that case it already redirected to /reset-password, so just stop here.
       if (!user) { setLoading(false); return }

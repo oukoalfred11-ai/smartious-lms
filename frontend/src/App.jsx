@@ -24,7 +24,6 @@ const SalesPortal    = lazy(() => import('./pages/admin/SalesPortal.jsx'))
 const TeacherPortal  = lazy(() => import('./pages/teacher/TeacherPortal.jsx'))
 const StudentPortal  = lazy(() => import('./pages/student/StudentPortal.jsx'))
 const ParentPortal   = lazy(() => import('./pages/parent/ParentPortal.jsx'))
-const DemoPortal     = lazy(() => import('./pages/demo/DemoPortal.jsx'))
 const LabApp         = lazy(() => import('./lab/LabApp.jsx'))
 
 // KaTeX draws mathematics in the portals (question bank, exams). The
@@ -79,7 +78,7 @@ const W = ({ children }) => <Suspense fallback={<SiteLoading />}>{children}</Sus
  * /enroll, /consult and all other marketing pages via its own
  * pathname-reading useEffect.
  *
- * LMS portal routes (/admin, /teacher, /student, /parent, /demo) and
+ * LMS portal routes (/admin, /teacher, /student, /parent) and
  * auth pages (/login, /admin-login, /reset-password)
  * take precedence over the catch-all.
  */
@@ -118,7 +117,6 @@ function RoleRedirect() {
     teacher:     '/teacher',
     student:     '/student',
     parent:      '/parent',
-    demo:        '/demo',
   }
   return <Navigate to={ROLE_PATHS[user.role] || '/login'} replace />
 }
@@ -147,7 +145,6 @@ export default function App() {
               <Route path="/student/*"      element={<Guard roles={['student']}><P><StudentPortal /></P></Guard>} />
               <Route path="/parent/*"       element={<Guard roles={['parent']}><P><ParentPortal /></P></Guard>} />
               <Route path="/lab/*"          element={<Guard roles={['student','teacher','admin','dos','ops_manager']}><P><LabApp /></P></Guard>} />
-              <Route path="/demo/*"         element={<Guard roles={['demo']}><P><DemoPortal /></P></Guard>} />
               {/* Arabic marketing pages (ArabicPage reads the path itself) */}
               <Route path="/ar/*"           element={<W><ArabicPage /></W>} />
               {/* Catch-all → LandingPage (handles /, /us-families, /about, /pricing, /blog/*, etc.) */}
