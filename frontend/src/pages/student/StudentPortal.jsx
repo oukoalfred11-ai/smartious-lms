@@ -405,7 +405,7 @@ function AdvisoryDashboard({ programme, deliveryMode, firstName }) {
     'Study Abroad': {
       tag: 'Study Abroad Programme',
       blurb: 'Your dedicated advisor will guide you through every step of your study-abroad journey — university selection, applications, documentation, and visa support.',
-      next: 'Your advisor will reach out shortly to begin your consultation. You can also contact the Smartious team any time at hellosmartious@gmail.com.',
+      next: 'Your advisor will reach out shortly to begin your consultation. You can also contact the Smartious team any time at hello@smartioushomeschool.com.',
     },
     'Pre-University': {
       tag: 'Pre-University Programme',
@@ -1514,7 +1514,7 @@ export default function StudentPortal() {
                     </div>
                     <div style={{ fontSize: 13.5, color:'#6B6B6B', maxWidth: 480, margin:'0 auto', lineHeight: 1.55 }}>
                       Your curriculum and subjects haven't been set up yet. Contact your
-                      programme coordinator at <strong style={{color:'#7D1025'}}>hellosmartious@gmail.com</strong> to complete your enrolment.
+                      programme coordinator at <strong style={{color:'#7D1025'}}>hello@smartioushomeschool.com</strong> to complete your enrolment.
                     </div>
 
                     {/* ── DIAGNOSTIC: show raw user fields so we can debug ── */}
