@@ -48,6 +48,26 @@ Code: `shared/lab/analysis.js` (formula parser, table, lines, checks, input clea
 - **Circuit practicals:** Ohm's law, 1.3 and 20 practicals in chapters 6–16. Not wired yet: 7.3 (needs a three-terminal sliding contact), 13.1 and 13.2 (need a two-way charge/discharge switch), 13.3, 13.5, 13.6, 14.5 (teacher demonstration) and practicals with no meter circuit. In practicals whose currents are in mA, or that use lamps, LEDs or a.c., a wrongly wired meter reads 0 rather than a solved value.
 - **Titration.** All the apparatus and reagents of the manual are on the bench (burette in its clamp, pipette and filler, funnel, flask on a white tile, NaOH and acid bottles, three indicator dropper bottles, wash bottle, beakers, goggles). Students fill the burette from the bottle, pipette the acid, add indicator drops, click the tap for one drop or press and hold it to let it run, and swirl the flask. The burette reading is never printed: students read the scale close-up.
 
+### Using the instruments (physics practicals and Ohm's law, new attempts)
+
+New physics attempts are created with the session option `bench: 2` (set by `POST /sessions`). On this bench students use the instruments as in a real laboratory instead of being handed numbers. Attempts made before this option existed have no `bench` option and replay, look and mark exactly as before.
+
+| What the student does | Engine action(s) | What it changes |
+|---|---|---|
+| Reads each instrument from a close-up in the controls panel: magnified meter scale with a mirror strip, metre rule (mm), vernier callipers (10 or 50 divisions), micrometer sleeve and thimble, thermometer, stopwatch, digital display. Only real digital displays show a number. | `measure` (unchanged) | The pointer position, scale and display come from the engine (`view.hands.look`, `view.hands.kinds`), so the drawing is exactly what the grader treats as shown. A digital value between two digits flickers; either value is accepted. |
+| Moves their eye until the needle hides its reflection / the pointer is square-on | `setEye {offset}` | The student starts looking from one side. Off-square, the pointer appears shifted (parallax); the shown value is the square-on one. |
+| Checks the micrometer's zero with the jaws closed and records the zero error | `zeroCheck`, `recordZero` | Every micrometer reading includes a per-attempt zero error (−0.04 to +0.04 mm). The recorded zero error is subtracted from the readings used for the student's own result. |
+| Presses TARE on the balance | `tare` | Until tared, the balance reads a few digits high. |
+| Waits for a needle, a thermometer or a bouncing load to settle | `wait` | After any change (variable, switch, leads) a reading overshoots by 3–7 % (a spring by 4–9 mm) until the student waits. |
+| Starts and stops the stopwatch, counting oscillations from the swing shown at its real period; resets it between timings | `startTimer`, `measure {key, cycles}`, `resetTimer` | The human timing error (already in each practical's model) is shared between the oscillations timed, so timing more is better; one oscillation miscounted is a whole period out; a stopwatch not reset counts on. |
+| Closes the switch only for each reading | `toggleSwitch`, `wait` | A resistance wire (1.3, 7.1) or the Ohm's law resistor warms while current flows, so its resistance and the readings drift up; opening the switch lets it cool. |
+| Puts on goggles before loading or stretching anything (practicals whose safety notes say so), adds masses one at a time | `wearGoggles`, `setIV` | Without goggles, loading and reading are refused. Masses go on or off one step at a time. |
+| Switches off and tidies away at the end | `tidyUp` | Refused while the switch is closed (Ohm's law: also until the supply is at 0 V) or the stopwatch is running; any later bench step un-tidies. |
+
+Two automatic marks are added on this bench: **Instrument technique** (zero error recorded correctly, balance tared before use, readings settled, scales read square-on, stopwatch reset before each timing, wire kept cool; only the checks that apply) and **Safe working** (goggles where needed, switched off and tidied away). The bench record and the report list the recorded zero error. The 3D bench shows the same steps: goggles and TARE are clickable, the stopwatch starts and stops and ticks, the pendulum swings at its real period, a loaded spring bounces until it settles, the resistance wire glows as it warms and lamps light up. The models are in `shared/lab/science/instruments.js`; tests in `test/handsOn.test.js`, and every practical is also played by a careful student on this bench (`test/practicals.test.js`, `test/checkChapter.mjs`).
+
+Not yet on this bench: no practical takes a protractor reading; oscilloscope, data logger, GM counter, signal generator and light gate readings are shown as digital displays, as is any meter whose resolution is too fine for a needle scale (most voltmeters and the pressure gauge); four readings without a drawn scale (14.5 electron tube, 5.2 number of coils, 12.2 oil column, 8.1 hanging mass) still show their value as text.
+
 ## AS & A Level Physics practicals
 
 67 practicals across 16 chapters, from "Using apparatus" to "Quantum physics, nuclear physics and medical imaging". The topic list follows a standard AS & A Level practical course. **All procedures, models, questions and wording are Smartious's own; no textbook text is reproduced**, and nothing claims endorsement by an examination board. Curriculum links are marked unverified.
@@ -154,8 +174,9 @@ Science tests check the models against known values: pH of strong and weak acids
 
 What has been checked:
 
-- 136 tests in `shared/lab` and 11 route tests in `backend` pass. One route test publishes a practical in bulk and runs it end to end: a student does it and the server marks the submission.
+- 228 tests in `shared/lab` and 11 route tests in `backend` pass. One route test publishes a practical in bulk and runs it end to end: a student does it and the server marks the submission.
 - Every new frontend file bundles with Bun (syntax and import resolution). External packages were left out of that check.
+- The hands-on bench controls, close-ups and 2D bench were rendered (with a minimal stand-in for React, no effects) against engine views at several stages of every practical, and every button was pressed to check it sends a real engine action. The close-up drawings were rasterised and inspected (meter, rule, vernier, micrometer, thermometer). The 3D additions have only been bundled, not run.
 
 What has **not** been checked, because the build machine had no package registry, no React or Three.js, and no database:
 
