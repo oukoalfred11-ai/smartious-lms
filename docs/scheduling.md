@@ -19,3 +19,16 @@
 - Pure logic, unit-tested: `backend/src/lib/scheduling.js`, `backend/src/lib/schoolTime.js` (`backend/test/scheduling.test.js`).
 - Materializer: `backend/src/lib/timetableMaterializer.js`; plans: `lib/lessonPlan.js`, `lib/studentPlan.js`; notices: `lib/lessonNotices.js`; alerts: `lib/absenceAlerts.js`; leave: `lib/leaveCover.js`.
 - UI: `frontend/src/components/lessons/` (LessonControl, LessonPlan, SchoolCalendar).
+
+## My Classes, end of lesson and homework (teacher portal)
+
+- **My Classes** replaces the separate Schedule Classes and Timetable modules. Tabs: *This week* (lessons to close, coming lessons with Start, Lesson, Homework, Move, Cancel), *Weekly timetable* (the repeating slots), *Lesson order* (the order the syllabus is taught in) and *Past lessons* (registers). Old page ids `timetable`, `scheduleclasses` and `schedule` redirect to it.
+- **End-of-lesson pop-up.** A teacher who leaves the classroom lands on `/teacher?ended=<liveClassId>`: a full-screen form with three steps (how the lesson went, its homework, what the next lesson teaches) and one Finish button. Finish sets the next lesson first (`PATCH /liveclasses/:id/lesson`), then closes the lesson (`POST /liveclasses/:id/close`), which sends the homework. "Do this later" leaves it under Lessons to close.
+- **Homework plan.** `LiveClass.homeworkPlan { questions, edited, lessonKey }`. `GET /liveclasses/:id/homework` builds the list from the question bank on first open and keeps it, so what the teacher sees is what every student receives. `PUT` saves the teacher's list (add from the bank, write their own, edit, delete) or turns homework off; editing a bank question saves a copy, the bank is never changed. `POST …/homework/reset` makes a new selection; `GET …/homework/bank?q=` searches the bank. A list the teacher only viewed follows the lesson (ignored if the class is re-stamped to another topic); an edited list is always used. Lessons nobody reviewed keep per-student sampled papers.
+- `GET /liveclasses/:id/next` returns the next lesson with the same students and the lessons it can teach (the plan queue, plus "continue today").
+
+## Weekly reports and show cause
+
+- `lib/weeklyReportsDue.js` is the single rule: a report is owed for every student the teacher had a lesson with this week (Monday 00:00 Nairobi; cancelled and not-held lessons do not count). It is cleared by a published weekly report for that student (linked by id, or by name for older typed reports) or a term report published in the last 14 days.
+- The teacher's Weekly Reports page shows that list (*Reports due this week*, with Write report / Edit / Publish) from `GET /weekly-reports/due`; the Thursday 5 PM reminder and Friday 5 PM show cause use the same function, so a report the teacher sees as published is never chased.
+- A published report stays published: auto-save and later edits no longer turn it back into a draft (this was why teachers who had published still got show-cause notices). Reports typed by name are linked to the student when the name is unambiguous. Deductions are applied once per student per week.

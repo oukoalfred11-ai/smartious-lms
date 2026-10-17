@@ -687,4 +687,220 @@ router.patch('/:id/lesson', auth, async (req, res) => {
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
 
+// ═══════════════════════════════════════════════════════════
+// The lesson's homework and the next lesson (My Classes).
+//
+// GET  /:id/homework        the questions that will be sent when the
+//                           lesson is closed as taught (built on first
+//                           open, then kept, so what the teacher sees is
+//                           what every student receives)
+// PUT  /:id/homework        { enabled, questions } - the teacher's list
+// POST /:id/homework/reset  rebuild from the question bank
+// GET  /:id/homework/bank   ?q= search the bank to add a question
+// GET  /:id/next            the next lesson with this class + the lessons
+//                           it can teach (the end-of-lesson pop-up)
+// ═══════════════════════════════════════════════════════════
+const HW_TYPES = ['mcq', 'short', 'long', 'drawing', 'handwriting', 'upload'];
+const MAX_HW_QUESTIONS = 40;
+
+async function ownClass(req, res) {
+  if (!mongoose.isValidObjectId(req.params.id)) { res.status(400).json({ success:false, message:'Invalid class id.' }); return null; }
+  const lc = await LiveClass.findById(req.params.id);
+  if (!lc) { res.status(404).json({ success:false, message:'Class not found.' }); return null; }
+  if (!STAFF_ROLES.includes(req.user.role) && String(lc.teacherId) !== String(req.user._id)) {
+    res.status(403).json({ success:false, message:'Not your class.' }); return null;
+  }
+  return lc;
+}
+
+function cleanHomeworkQuestion(q) {
+  if (!q || typeof q !== 'object') return null;
+  const type = HW_TYPES.includes(q.type) ? q.type : 'short';
+  const questionText = String(q.questionText || '').trim().slice(0, 5000);
+  if (!questionText) return null;
+  const options = type === 'mcq'
+    ? (Array.isArray(q.options) ? q.options : []).map(o => String(o == null ? '' : o).trim().slice(0, 1000)).filter(Boolean).slice(0, 8)
+    : [];
+  if (type === 'mcq' && options.length < 2) return null;
+  let correctAnswer = q.correctAnswer == null ? null : q.correctAnswer;
+  if (type === 'mcq') {
+    // Stored as the option index; accept the option text too.
+    const i = typeof correctAnswer === 'number' ? correctAnswer : options.indexOf(String(correctAnswer));
+    correctAnswer = i >= 0 && i < options.length ? i : (Number.isInteger(Number(correctAnswer)) && Number(correctAnswer) < options.length ? Number(correctAnswer) : null);
+  } else if (correctAnswer != null) correctAnswer = String(correctAnswer).slice(0, 5000);
+  const marks = Math.min(50, Math.max(1, parseInt(q.marks, 10) || 1));
+  return {
+    questionId: q.questionId && mongoose.isValidObjectId(q.questionId) ? q.questionId : null,
+    type, questionText, options, correctAnswer,
+    explanation: String(q.explanation || '').slice(0, 5000),
+    marks,
+    difficulty: ['easy', 'medium', 'hard'].includes(q.difficulty) ? q.difficulty : 'medium',
+    topic: String(q.topic || '').slice(0, 300),
+    _isReview: !!q._isReview,
+    _needsManualGrading: type !== 'mcq',
+  };
+}
+
+async function buildHomeworkPlan(lc) {
+  const hw = require('../services/autoHomeworkCron');
+  const prior = await hw.priorLessonNames(lc);
+  const { paper } = await hw.buildPaper(lc, prior, hw.QUESTIONS_PER_HOMEWORK);
+  lc.homeworkPlan = { questions: paper.map(hw.snapshot), edited: false, lessonKey: hw.planLessonKey(lc), updatedAt: new Date() };
+  await LiveClass.updateOne({ _id: lc._id }, { $set: { homeworkPlan: lc.homeworkPlan } });
+  return lc.homeworkPlan;
+}
+
+function homeworkView(lc) {
+  const { planLessonKey } = require('../services/autoHomeworkCron');
+  const p = lc.homeworkPlan || { questions: [], edited: false };
+  return {
+    enabled: lc.autoHomeworkEnabled !== false,
+    sent: !!lc.autoHomeworkGeneratedAt,
+    sentNote: lc.autoHomeworkNote || '',
+    edited: !!p.edited,
+    // An edited list made for a different lesson than the class now teaches.
+    stale: !!(p.edited && p.lessonKey && p.lessonKey !== planLessonKey(lc)),
+    lesson: [lc.syllabusTopicName, lc.syllabusSubtopicName].filter(Boolean).join(': '),
+    questions: p.questions || [],
+  };
+}
+
+router.get('/:id/homework', auth, requireRole('teacher', ...STAFF_ROLES), async (req, res) => {
+  try {
+    const lc = await ownClass(req, res); if (!lc) return;
+    const { planFor } = require('../services/autoHomeworkCron');
+    if (!lc.autoHomeworkGeneratedAt && lc.autoHomeworkEnabled !== false && !planFor(lc) && !(lc.homeworkPlan && lc.homeworkPlan.edited)) {
+      await buildHomeworkPlan(lc);
+    }
+    res.json({ success:true, data: homeworkView(lc) });
+  } catch (e) {
+    console.error('[liveclasses homework]', e.message);
+    res.status(500).json({ success:false, message:'Could not load the homework.' });
+  }
+});
+
+router.put('/:id/homework', auth, requireRole('teacher', ...STAFF_ROLES), async (req, res) => {
+  try {
+    const lc = await ownClass(req, res); if (!lc) return;
+    if (lc.autoHomeworkGeneratedAt) return res.status(400).json({ success:false, message:'This homework has already been sent to the students.' });
+    const { planLessonKey } = require('../services/autoHomeworkCron');
+    const set = {};
+    if (typeof req.body?.enabled === 'boolean') set.autoHomeworkEnabled = req.body.enabled;
+    if (Array.isArray(req.body?.questions)) {
+      if (req.body.questions.length > MAX_HW_QUESTIONS) return res.status(400).json({ success:false, message:`At most ${MAX_HW_QUESTIONS} questions.` });
+      const questions = [];
+      for (let i = 0; i < req.body.questions.length; i++) {
+        const q = cleanHomeworkQuestion(req.body.questions[i]);
+        if (!q) return res.status(400).json({ success:false, message:`Question ${i + 1} needs its text${req.body.questions[i]?.type === 'mcq' ? ' and at least two options' : ''}.` });
+        questions.push(q);
+      }
+      set.homeworkPlan = { questions, edited: true, lessonKey: planLessonKey(lc), updatedAt: new Date() };
+    }
+    await LiveClass.updateOne({ _id: lc._id }, { $set: set });
+    Object.assign(lc, set);
+    res.json({ success:true, message: set.autoHomeworkEnabled === false ? 'Homework is off for this lesson.' : 'Homework saved.', data: homeworkView(lc) });
+  } catch (e) {
+    console.error('[liveclasses homework save]', e.message);
+    res.status(500).json({ success:false, message:'Could not save the homework.' });
+  }
+});
+
+router.post('/:id/homework/reset', auth, requireRole('teacher', ...STAFF_ROLES), async (req, res) => {
+  try {
+    const lc = await ownClass(req, res); if (!lc) return;
+    if (lc.autoHomeworkGeneratedAt) return res.status(400).json({ success:false, message:'This homework has already been sent to the students.' });
+    await buildHomeworkPlan(lc);
+    res.json({ success:true, message:'Rebuilt from the question bank.', data: homeworkView(lc) });
+  } catch (e) {
+    console.error('[liveclasses homework reset]', e.message);
+    res.status(500).json({ success:false, message:'Could not rebuild the homework.' });
+  }
+});
+
+router.get('/:id/homework/bank', auth, requireRole('teacher', ...STAFF_ROLES), async (req, res) => {
+  try {
+    const lc = await ownClass(req, res); if (!lc) return;
+    const Question = require('../models/Question');
+    const hw = require('../services/autoHomeworkCron');
+    const match = hw.questionBase(lc);
+    const q = String(req.query.q || '').trim().slice(0, 100);
+    const esc = (x) => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    if (q) {
+      const re = new RegExp(esc(q), 'i');
+      match.$or = [{ questionText: re }, { topic: re }, { subtopic: re }];
+    } else if (lc.syllabusSubtopicName) {
+      match.subtopic = new RegExp('^' + esc(lc.syllabusSubtopicName) + '$', 'i');
+    } else if (lc.syllabusTopicName) {
+      match.topic = new RegExp('^' + esc(lc.syllabusTopicName) + '$', 'i');
+    }
+    const found = await Question.find(match).limit(25)
+      .select('questionText options correctAnswer explanation marks difficulty topic subtopic type').lean();
+    res.json({ success:true, data: { questions: found.map(hw.snapshot) } });
+  } catch (e) {
+    console.error('[liveclasses homework bank]', e.message);
+    res.status(500).json({ success:false, message:'Could not search the question bank.' });
+  }
+});
+
+router.get('/:id/next', auth, requireRole('teacher', ...STAFF_ROLES), async (req, res) => {
+  try {
+    const lc = await ownClass(req, res); if (!lc) return;
+    const after = new Date(Math.max(Date.now(), new Date(lc.scheduledAt).getTime()));
+    const label = (c) => c.syllabusSubtopicName ? `${c.syllabusTopicName ? c.syllabusTopicName + ': ' : ''}${c.syllabusSubtopicName}` : (c.syllabusTopicName || '');
+    let next = null, options = [];
+    if (lc.timetableEntryId) {
+      const TimetableEntry = require('../models/TimetableEntry');
+      const { loadPlan } = require('../lib/lessonPlan');
+      const entry = await TimetableEntry.findById(lc.timetableEntryId).lean();
+      if (entry && entry.subjectId) {
+        const plan = await loadPlan(entry);
+        next = await LiveClass.findOne({
+          timetableEntryId: { $in: plan.members.map(m => m._id) }, status: 'scheduled',
+          scheduledAt: { $gt: after },
+        }).sort({ scheduledAt: 1 }).select('scheduledAt subject syllabusTopicName syllabusSubtopicName preparationLessonId lessonPinned').lean();
+        options = plan.queue.map(x => x.sub
+          ? { value: 'S:' + x.key, topicName: x.topicName || '', subtopicName: x.name, label: `${x.topicName ? x.topicName + ': ' : ''}${x.name}` }
+          : { value: 'L:' + x._id, lessonId: x._id, label: `${x.topicName ? x.topicName + ': ' : ''}${x.title}` });
+      }
+    }
+    if (!next) {
+      next = await LiveClass.findOne({
+        teacherId: lc.teacherId, subject: lc.subject, assignedStudents: { $in: lc.assignedStudents || [] },
+        kind: { $in: ['lesson', null] }, status: 'scheduled', scheduledAt: { $gt: after },
+      }).sort({ scheduledAt: 1 }).select('scheduledAt subject syllabusTopicName syllabusSubtopicName preparationLessonId lessonPinned').lean();
+    }
+    let current = '';
+    if (next) {
+      current = next.preparationLessonId ? 'L:' + next.preparationLessonId
+        : next.syllabusSubtopicName ? `S:${next.syllabusTopicName || ''}||${next.syllabusSubtopicName}` : '';
+      // The lesson already on the next class is always offered (it may
+      // have been taken out of the queue by being pinned).
+      if (current && !options.some(o => o.value === current)) {
+        options.unshift(current.startsWith('L:')
+          ? { value: current, lessonId: next.preparationLessonId, label: label(next) || 'Assigned lesson' }
+          : { value: current, topicName: next.syllabusTopicName || '', subtopicName: next.syllabusSubtopicName, label: label(next) });
+      }
+    }
+    // "Continue today's lesson" - for a lesson that ran out of time.
+    const today = lc.preparationLessonId ? 'L:' + lc.preparationLessonId
+      : lc.syllabusSubtopicName ? `S:${lc.syllabusTopicName || ''}||${lc.syllabusSubtopicName}` : '';
+    const todayOption = today ? (lc.preparationLessonId
+      ? { value: today, lessonId: lc.preparationLessonId, label: label(lc) || lc.title, today: true }
+      : { value: today, topicName: lc.syllabusTopicName || '', subtopicName: lc.syllabusSubtopicName, label: label(lc), today: true }) : null;
+    options = options.filter(o => o.value !== today);
+    res.json({ success:true, data: {
+      lesson: { _id: lc._id, title: lc.title, subject: lc.subject, scheduledAt: lc.scheduledAt, label: label(lc), outcome: lc.outcome || null,
+        topicName: lc.syllabusTopicName || '', subtopicName: lc.syllabusSubtopicName || '',
+        students: (await User.find({ _id: { $in: lc.assignedStudents || [] } }).select('firstName lastName').lean())
+          .map(u => ({ _id: u._id, name: [u.firstName, u.lastName].filter(Boolean).join(' ') })) },
+      next: next ? { _id: next._id, scheduledAt: next.scheduledAt, subject: next.subject, label: label(next), current } : null,
+      today: todayOption,
+      options,
+    } });
+  } catch (e) {
+    console.error('[liveclasses next]', e.message);
+    res.status(500).json({ success:false, message:'Could not load the next lesson.' });
+  }
+});
+
 module.exports = router;

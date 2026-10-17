@@ -17,7 +17,9 @@ export default function ClassroomPage() {
     <LiveClassroom
       liveClassId={liveClassId}
       user={user}
-      onLeave={() => navigate('/portal')}
+      // A teacher lands on the end-of-lesson pop-up: close the lesson,
+      // check the homework and choose the next lesson.
+      onLeave={() => navigate(user?.role === 'teacher' ? `/teacher?ended=${liveClassId}` : '/portal')}
     />
   )
 }

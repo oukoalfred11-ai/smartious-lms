@@ -1,15 +1,12 @@
 /**
  * services/showCauseCron.js
- * Every Friday at 5 PM EAT:
- * - Find all active students with teachers assigned
- * - Check if teacher has published a report for this student this week
- * - If not, send show-cause email to teacher and apply 0.3 rating deduction
+ * Thursday 5 PM EAT: reminder listing the weekly reports still owed.
+ * Friday 5 PM EAT: for every student a teacher taught this week with no
+ * published report (lib/weeklyReportsDue.js), a show-cause email and a
+ * 0.3 rating deduction (once per student per week).
  */
 const User          = require('../models/User')
-const Report        = require('../models/Report')
-const WeeklyReport  = require('../models/WeeklyReport')
 const TeacherRating = require('../models/TeacherRating')
-const TimetableEntry = require('../models/TimetableEntry')
 
 function getTransporter() {
   const nodemailer = require('nodemailer')
@@ -23,82 +20,57 @@ function getTransporter() {
   })
 }
 
-async function runShowCauseCheck() {
-  console.log('[show-cause] Running Friday 5PM check...')
+async function runShowCauseCheck({ reminder = false } = {}) {
+  console.log(reminder ? '[show-cause] Running Thursday reminder...' : '[show-cause] Running Friday 5PM check...')
   const t = getTransporter()
 
-  // Get the current week's Monday-Friday date range
+  // Monday 00:00 Nairobi of the current week, whatever the server's zone.
+  const { reportsDue, teachersWithLessons, weekStart } = require('../lib/weeklyReportsDue')
   const now    = new Date()
-  const eat    = new Date(now.getTime() + 3*60*60*1000)
-  const monday = new Date(eat)
-  monday.setDate(eat.getDate() - eat.getDay() + 1)
-  monday.setHours(0,0,0,0)
-  const friday = new Date(monday)
-  friday.setDate(monday.getDate() + 4)
-  friday.setHours(23,59,59,999)
-
-  // Get all active timetable entries with teacher assigned
-  const entries = await TimetableEntry.find({ isActive:true, teacherId:{ $exists:true } })
-    .populate('teacherId','firstName lastName email _id')
-    .populate('assignedStudents','firstName lastName _id')
-    .lean()
-
-  // Build map: teacherId → set of studentIds they teach
-  const teacherStudentMap = {}
-  entries.forEach(e => {
-    if (!e.teacherId) return
-    const tid = String(e.teacherId._id)
-    if (!teacherStudentMap[tid]) teacherStudentMap[tid] = { teacher:e.teacherId, students:new Set(), subjects:new Set() }
-    ;(e.assignedStudents||[]).forEach(s => teacherStudentMap[tid].students.add(String(s._id)))
-    if (e.subject) teacherStudentMap[tid].subjects.add(e.subject)
-  })
+  const monday = weekStart(now)
 
   let issued = 0, missing = 0
 
-  for (const [teacherId, info] of Object.entries(teacherStudentMap)) {
-    const { teacher, students, subjects } = info
-    if (!students.size) continue
+  // Teachers who taught this week. The same reportsDue() drives the
+  // teacher's "Reports due this week" list, so a report the teacher sees
+  // as published is never chased here.
+  const teacherIds = await teachersWithLessons(monday, now)
 
-    const missingStudents = []
+  for (const teacherId of teacherIds) {
+    const teacher = await User.findById(teacherId)
+      .select('firstName lastName email isOnLeave leaveStartDate leaveEndDate').lean()
+    if (!teacher) continue
 
-    for (const studentId of students) {
-      // Hardened check. Teachers publish WeeklyReport documents, so
-      // that collection is the primary evidence (the old check looked
-      // only at term Reports and show-caused teachers who HAD
-      // published). The window starts two days before Monday so a
-      // weekend-early publish counts, and has no upper bound: anything
-      // published up to the moment this cron runs clears the teacher.
-      const grace = new Date(monday.getTime() - 2 * 864e5)
-      const weekly = await WeeklyReport.findOne({
-        teacherId,
-        studentId,
-        status: 'published',
-        updatedAt: { $gte: grace },
-      }).lean()
+    // A teacher on approved leave this week is not chased.
+    if (teacher.isOnLeave && (!teacher.leaveEndDate || new Date(teacher.leaveEndDate) >= monday)) { issued++; continue }
 
-      // A term Report published in the last fourteen days also clears:
-      // a teacher who just delivered the big report is not chased for
-      // the week around it.
-      const term = weekly ? null : await Report.findOne({
-        teacherId,
-        studentId,
-        status: 'published',
-        updatedAt: { $gte: new Date(Date.now() - 14 * 864e5) },
-      }).lean()
-
-      if (!weekly && !term) {
-        const student = await User.findById(studentId).select('firstName lastName onBreak').lean()
-        if (student && !student.onBreak) missingStudents.push(student)
-      }
-    }
+    const due = await reportsDue(teacherId, { monday, until: now })
+    const missingStudents = due.items.filter(x => !x.cleared && !x.student.onBreak).map(x => x.student)
 
     if (missingStudents.length === 0) { issued++; continue }
     missing += missingStudents.length
+
+    // Thursday: a friendly reminder, no deduction.
+    if (reminder) {
+      if (t && teacher.email) {
+        try {
+          await t.sendMail({
+            from: process.env.EMAIL_FROM || 'Smartious <hello@smartioushomeschool.com>',
+            to: teacher.email,
+            subject: `Reminder: ${missingStudents.length} weekly report${missingStudents.length > 1 ? 's' : ''} due by Friday 5 PM`,
+            html: `<p>Dear ${teacher.firstName},</p><p>This week's report is still to be published for:</p><ul>${missingStudents.map(x => `<li>${x.firstName} ${x.lastName}</li>`).join('')}</ul><p>Please publish by <strong>Friday 5:00 PM (Nairobi time)</strong> to avoid a show-cause notice. In the teacher portal open <strong>Reports</strong>, pick the student and press <strong>Publish</strong>.</p><p><a href="https://smartioushomeschool.com/teacher">Open the teacher portal</a></p>`,
+          })
+        } catch (e) { console.error('[show-cause reminder]', teacher.email, e.message) }
+      }
+      continue
+    }
 
     // Apply 0.3 deduction per missing report
     const systemUser = await User.findOne({ role:'ops_manager' }).select('_id').lean()
     const raterId = systemUser?._id || teacher._id
 
+    // Idempotent: a restart during the 5 PM hour must not deduct twice.
+    let fresh = 0
     for (const student of missingStudents) {
       try {
         let rating = await TeacherRating.findOne({ teacherId, raterId })
@@ -108,19 +80,19 @@ async function runShowCauseCheck() {
             raterRole:'parent', raterName:'System (Auto)', score:5, comment:'',
           })
         }
-        rating.showCauseDeductions.push({
-          amount: 0.3,
-          reason: `Report not issued for ${student.firstName} ${student.lastName} by Friday 5PM — week of ${monday.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}`,
-          date: new Date(),
-        })
+        const reason = `Report not issued for ${student.firstName} ${student.lastName} by Friday 5PM — week of ${monday.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric',timeZone:'Africa/Nairobi'})}`
+        if ((rating.showCauseDeductions || []).some(d => d.reason === reason)) continue
+        rating.showCauseDeductions.push({ amount: 0.3, reason, date: new Date() })
         await rating.save()
+        fresh++
       } catch(e) { console.error('[show-cause rating]', e.message) }
     }
+    if (!fresh) continue
 
     // Send show-cause email to teacher
     if (t && teacher.email) {
       const studentList = missingStudents.map(s=>`<li>${s.firstName} ${s.lastName}</li>`).join('')
-      const weekLabel = monday.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})
+      const weekLabel = monday.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric',timeZone:'Africa/Nairobi'})
 
       try {
         await t.sendMail({
@@ -168,24 +140,23 @@ async function runShowCauseCheck() {
   return { issued, missing }
 }
 
-// Schedule: every Friday at 5 PM EAT
+// Schedule: Thursday 5 PM EAT reminder, Friday 5 PM EAT show cause.
+// Checked every 10 minutes against Nairobi time (robust to restarts and
+// to the server's own time zone); each run happens once per day.
+let lastRun = ''
 function scheduleShowCauseCron() {
-  const checkAndSchedule = () => {
-    const now  = new Date()
-    const eat  = new Date(now.getTime() + 3*60*60*1000)
-    const next = new Date(eat)
-    // Find next Friday
-    const daysUntilFri = (5 - eat.getDay() + 7) % 7 || 7
-    next.setDate(eat.getDate() + daysUntilFri)
-    next.setHours(17,0,0,0)
-    const ms = next.getTime() - eat.getTime()
-    console.log(`[show-cause] Next check: ${next.toLocaleDateString('en-GB')} 5:00 PM EAT (in ${Math.round(ms/3600000)}h)`)
-    setTimeout(() => {
-      runShowCauseCheck().catch(e => console.error('[show-cause cron]', e.message))
-      setInterval(() => runShowCauseCheck().catch(e => console.error('[show-cause cron]', e.message)), 7*24*60*60*1000)
-    }, ms)
+  const { zonedParts, zonedDayKey } = require('../lib/schoolTime')
+  const tick = () => {
+    const now = new Date()
+    const p = zonedParts(now, 'Africa/Nairobi')
+    if (p.hour !== 17 || !['Thu', 'Fri'].includes(p.weekday)) return
+    const key = zonedDayKey(now, 'Africa/Nairobi')
+    if (lastRun === key) return
+    lastRun = key
+    runShowCauseCheck({ reminder: p.weekday === 'Thu' }).catch(e => console.error('[show-cause cron]', e.message))
   }
-  checkAndSchedule()
+  setInterval(tick, 10 * 60 * 1000)
+  console.log('[show-cause] Scheduled: Thursday 5 PM reminder, Friday 5 PM check (Nairobi time)')
 }
 
 module.exports = { runShowCauseCheck, scheduleShowCauseCron }

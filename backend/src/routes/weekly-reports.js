@@ -3,6 +3,7 @@
  * Mounted at /api/weekly-reports
  *
  * POST /api/weekly-reports/save          — teacher creates/updates (auto-save)
+ * GET  /api/weekly-reports/due            — teacher: reports owed this week
  * GET  /api/weekly-reports/my            — teacher: list all their reports
  * GET  /api/weekly-reports/student/:id   — parent/admin: reports for a student
  * GET  /api/weekly-reports/:id           — get one report
@@ -29,6 +30,15 @@ function getTransporter() {
   })
 }
 
+// ── GET /due — reports owed this week (same rule as the show-cause check)
+router.get('/due', auth, requireRole('admin','ops_manager','dos','teacher'), async (req, res) => {
+  try {
+    const { reportsDue } = require('../lib/weeklyReportsDue')
+    const r = await reportsDue(req.user._id)
+    return ok(res, { week: r.week, monday: r.monday, items: r.items })
+  } catch (e) { return fail(res, 500, e.message) }
+})
+
 // ── POST /save ────────────────────────────────────────────
 router.post('/save', auth, requireRole('admin','ops_manager','dos','teacher'), async (req, res) => {
   try {
@@ -44,6 +54,20 @@ router.post('/save', auth, requireRole('admin','ops_manager','dos','teacher'), a
     if (studentId) {
       student = await User.findById(studentId)
         .select('firstName lastName email parentEmail linkedParents curriculum gradeLevel').lean()
+    } else if ((studentName || '').trim()) {
+      // Typed by name: link it to the student record when the name is
+      // unambiguous, so the report counts for show-cause and reaches the
+      // parent portal.
+      const parts = studentName.trim().split(/\s+/)
+      const esc = (x) => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      if (parts.length >= 2) {
+        const matches = await User.find({
+          role: 'student',
+          firstName: new RegExp('^' + esc(parts[0]) + '$', 'i'),
+          lastName: new RegExp('^' + esc(parts.slice(1).join(' ')) + '$', 'i'),
+        }).select('firstName lastName email parentEmail linkedParents curriculum gradeLevel').limit(2).lean()
+        if (matches.length === 1) student = matches[0]
+      }
     }
     const sName      = student ? `${student.firstName} ${student.lastName}` : (studentName||'').trim()
     const sEmail     = student?.email || ''
@@ -86,29 +110,29 @@ router.post('/save', auth, requireRole('admin','ops_manager','dos','teacher'), a
     }
 
     let report
-    if (_id) {
-      // Update existing
-      report = await WeeklyReport.findOneAndUpdate(
-        { _id, teacherId:req.user._id },
-        { $set: data },
-        { new:true }
-      )
-      if (!report) return fail(res, 404, 'Report not found.')
+    // Find the report being edited, or this week's report for the same
+    // student + subject, so saving never creates duplicates.
+    const existing = _id
+      ? await WeeklyReport.findOne({ _id, teacherId:req.user._id })
+      : await WeeklyReport.findOne({
+          teacherId: req.user._id,
+          ...(student ? { $or: [{ studentId: student._id }, { studentName: sName }] } : { studentName: sName }),
+          subject,
+          week: week||'',
+          academicYear: yearStr,
+          // Only this week's report: never overwrite an earlier week's.
+          updatedAt: { $gte: new Date(require('../lib/weeklyReportsDue').weekStart().getTime() - 2 * 864e5) },
+        })
+    if (_id && !existing) return fail(res, 404, 'Report not found.')
+    // Once published, a report stays published: an auto-save or an edit
+    // after publishing must not turn it back into a draft (that is how
+    // teachers who HAD published still received show-cause notices).
+    if (existing?.status === 'published') data.status = 'published'
+    if (existing) {
+      Object.assign(existing, data)
+      report = await existing.save()
     } else {
-      // Try to find existing draft for same teacher+student+subject+week
-      const existing = await WeeklyReport.findOne({
-        teacherId: req.user._id,
-        studentName: sName,
-        subject,
-        week: week||'',
-        academicYear: yearStr,
-      })
-      if (existing) {
-        Object.assign(existing, data)
-        report = await existing.save()
-      } else {
-        report = await WeeklyReport.create(data)
-      }
+      report = await WeeklyReport.create(data)
     }
 
     // Notify ONLY when publishing, and only once per report.
@@ -172,11 +196,23 @@ router.get('/student/:id', auth, async (req, res) => {
   } catch(e) { return fail(res,500,e.message) }
 })
 
+// Who may read a report: staff, its own teacher, the student, their parents.
+function canView(req, report) {
+  const role = req.user.role
+  if (['admin','ops_manager','dos','accountant'].includes(role)) return true
+  if (role === 'teacher') return String(report.teacherId?._id || report.teacherId) === String(req.user._id)
+  if (role === 'student') return String(report.studentId||'') === String(req.user._id)
+  if (role === 'parent') return [ ...(req.user.linkedStudents||[]), ...(req.user.children||[]) ].map(String).includes(String(report.studentId||'')) ||
+    !!(report.parentEmail && report.parentEmail.toLowerCase() === String(req.user.email||'').toLowerCase())
+  return false
+}
+
 // ── GET /:id ──────────────────────────────────────────────
 router.get('/:id', auth, async (req, res) => {
   try {
     const report = await WeeklyReport.findById(req.params.id).lean()
     if (!report) return fail(res,404,'Report not found.')
+    if (!canView(req, report)) return fail(res,403,'Access denied.')
     return ok(res, { report })
   } catch(e) { return fail(res,500,e.message) }
 })
@@ -188,6 +224,7 @@ router.get('/:id/html', auth, async (req, res) => {
       .populate('teacherId','firstName lastName')
       .lean()
     if (!report) return fail(res,404,'Report not found.')
+    if (!canView(req, report)) return fail(res,403,'Access denied.')
     return ok(res, { html: buildReportHTML(report) })
   } catch(e) { return fail(res,500,e.message) }
 })
