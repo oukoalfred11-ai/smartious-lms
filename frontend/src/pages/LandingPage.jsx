@@ -5159,7 +5159,7 @@ export default function LandingPage() {
                 ['★','Flexible Learning — Home visits, learning centre, or 100% online'],
                 ['●','University Placement — 200+ partner universities worldwide'],
                 ['◆','From $15/hour tuition · $38 application fee · First lesson within 48 hours'],
-                ['★','Proven Results — 94% A*/A pass rate at IGCSE and A-Level'],
+                ['★','Exam Preparation — past papers, mock exams and exam-entry support for IGCSE and A-Level'],
               ].concat([
                 ['★','Internationally Accredited — IGCSE · Cambridge · IB · Edexcel · CBC'],
                 ['◆','Expert Tutors — Hand-picked, degree-qualified, exam specialists'],
@@ -5168,7 +5168,7 @@ export default function LandingPage() {
                 ['★','Flexible Learning — Home visits, learning centre, or 100% online'],
                 ['●','University Placement — 200+ partner universities worldwide'],
                 ['◆','From $15/hour tuition · $38 application fee · First lesson within 48 hours'],
-                ['★','Proven Results — 94% A*/A pass rate at IGCSE and A-Level'],
+                ['★','Exam Preparation — past papers, mock exams and exam-entry support for IGCSE and A-Level'],
               ]).map(([ico,t],i) => (
                 <div key={i} className="topbar-mi">
                   <span style={{color:V.gold3,fontSize:10}}>{ico}</span>
@@ -8798,7 +8798,7 @@ export default function LandingPage() {
                         {
                           h:'Expatriate families (most readers)',
                           tag:'Most common pathway',
-                          p:'If you\'re an expatriate resident (the majority of UAE families), you can enrol your child with an accredited international online school like Smartious without requiring KHDA, ADEK or Ministry approval. The school is regulated abroad (Cambridge, Edexcel, IB) and your child sits internationally-recognised examinations.',
+                          p:'If you\'re an expatriate resident (the majority of UAE families), you can enrol your child with an accredited international online school like Smartious without requiring KHDA, ADEK or Ministry approval. The school is regulated abroad (Cambridge, Edexcel, IB) and your child sits internationally-recognised examinations. Rules can differ by emirate and can change, so check your family\'s situation with KHDA, ADEK or the Ministry of Education before you start.',
                           ok:true,
                         },
                         {
@@ -8926,7 +8926,7 @@ export default function LandingPage() {
                       {[
                         { n:'01', h:'Submit assessment request', p:'Book a 30-60 minute call with our admissions team. We assess your child\'s current academic level (school transcripts, sample work), discuss your family\'s timeline and target university destinations, and recommend a curriculum and pathway.' },
                         { n:'02', h:'Choose curriculum and pathway', p:'Most UAE families choose Cambridge IGCSE (Year 7-11) progressing to A-Level (Year 12-13) — well-recognised by UAE universities and globally. IB Diploma is also popular for university-bound students. American curriculum suits families targeting US universities. We match curriculum to your university goals.' },
-                        { n:'03', h:'Enrol with Smartious', p:'Pay the USD 38 one-time registration fee, pay the first term\'s fees (from USD 423/month, paid termly), and receive your child\'s LMS access. No KHDA or ADEK approval required for expatriate families.' },
+                        { n:'03', h:'Enrol with Smartious', p:'Pay the USD 38 one-time registration fee, pay the first term\'s fees (from USD 423/month, paid termly), and receive your child\'s LMS access. Rules can differ by emirate, so check your family\'s situation with KHDA, ADEK or the Ministry of Education before you start.' },
                         { n:'04', h:'Set up your learning environment', p:'A quiet space, laptop or tablet, stable internet, and noise-cancelling headphones. We provide a recommended equipment list. No expensive equipment needed.' },
                         { n:'05', h:'Begin live lessons', p:'Your child starts live online classes on their schedule. Classes run on UAE time (GMT+4) plus recorded sessions for flexibility. Mshauri AI provides 24/7 homework help between live sessions.' },
                         { n:'06', h:'Plan examination centres', p:'Cambridge, Edexcel and IB examinations are sat at registered centres in UAE — British Council Dubai, British Council Abu Dhabi, KHDA-approved centres, and specific schools that accept external candidates. We coordinate registration timing with your child\'s exam readiness.' },
@@ -13667,7 +13667,7 @@ export default function LandingPage() {
           {/* HERO */}
           <section className="sec" style={{position:'relative',background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,color:'#fff',padding:'80px 0 64px',overflow:'hidden'}}>
             <div className="wrap" style={{maxWidth:1080,margin:'0 auto',position:'relative',zIndex:2}}>
-              <div className="eyebrow" style={{color:V.gold3,marginBottom:12,letterSpacing:'.14em'}}>Kenya's leading virtual school &middot; Online school &middot; Since 2018</div>
+              <div className="eyebrow" style={{color:V.gold3,marginBottom:12,letterSpacing:'.14em'}}>Online school founded in Nairobi in 2018 &middot; Virtual school &middot; Homeschool</div>
               <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.4rem, 5vw, 3.6rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:22,letterSpacing:'-.01em',maxWidth:920}}>
                 <em style={{color:V.gold3,fontStyle:'italic'}}>Virtual School</em> in Kenya for <em style={{color:V.gold3,fontStyle:'italic'}}>IGCSE, A-Level, IB &amp; CBC</em>
               </h1>

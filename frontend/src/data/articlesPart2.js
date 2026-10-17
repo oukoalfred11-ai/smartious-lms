@@ -233,7 +233,7 @@ export const ARTICLES_PART_2 = {
       {h:'Legal requirements differ by country',p:'Some countries require homeschool registration. Germany bans homeschooling outright — expat families there must enrol at an international school or an online school that provides a legal enrolment certificate. Check before you move. We provide enrolment documentation to families in Germany, France, and the UAE when needed.'},
       {h:'University applications from anywhere',p:'An expat homeschooler applying to UK universities needs predicted grades from an accredited centre, a UCAS reference from a registered educator, and a personal statement that reflects real academic engagement. We support our families through UCAS and the Common App every year.'},
     ],
-    conclusion:'Homeschooling as an expat family is harder than picking a good school in your home country, but it is also more flexible, more academically focused, and more resilient to relocations. We have 340+ students in 12 countries doing exactly this.',
+    conclusion:'Homeschooling as an expat family is harder than picking a good school in your home country, but it is also more flexible, more academically focused, and more resilient to relocations. We teach families in more than 40 countries doing exactly this.',
   },
   'meet-mshauri': {
     cat:'ai',
@@ -319,7 +319,7 @@ export const ARTICLES_PART_2 = {
       {h:'The APS process',p:'African students must first get their academic qualifications verified by the Academic Evaluation Centre (APS) at the German Embassy in their country. The process takes 8–12 weeks and costs around KES 25,000. After APS, you can apply directly to universities.'},
       {h:'Post-study work',p:'Germany offers an 18-month post-study job-seeker visa. Most graduates find employment within that window — engineering, IT, and finance graduates especially. After 2 years of work, you can apply for permanent residency. After 5 years of work, German citizenship.'},
     ],
-    conclusion:'If your child is studying IGCSE or A-Level and wants to study engineering, computer science, or the sciences without the financial burden of UK or US tuition, Germany should be on the shortlist. We place 20–30 students there every year through our Study Abroad programme.',
+    conclusion:'If your child is studying IGCSE or A-Level and wants to study engineering, computer science, or the sciences without the financial burden of UK or US tuition, Germany should be on the shortlist. Our Study Abroad programme supports students applying there.',
   },
   'ib-extended-essay': {
     cat:'ib',

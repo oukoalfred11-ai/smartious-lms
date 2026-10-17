@@ -289,7 +289,7 @@ const DEFAULT_SITE = {
   phone2:        '+254 733 456 789',
   whatsapp:      '+254 745 021 212',
   heroVideo:     '',
-  aboutText:     'Smartious is Kenya\'s leading homeschool provider, offering both individual and group learning pathways across 6 international curricula.',
+  aboutText:     'Smartious is an online school founded in Nairobi in 2018, offering both individual and group learning pathways across 6 international curricula.',
 }
 // ── Default curricula ─────────────────────────────────────
 const DEFAULT_CURRICULA = [
