@@ -68,6 +68,7 @@ import { US_CITIES, US_CITIES_BY_STATE } from '../src/data/usCities.js'
 import { CA_PROVINCES } from '../src/data/caProvinces.js'
 import { CA_CITIES, CA_CITIES_BY_PROVINCE } from '../src/data/caCities.js'
 import { PRIORITY_HUB_LINKS, PRIORITY_CITY_LINKS } from '../src/data/priorityLinks.js'
+import { HUB_TITLES, guideTitle, nairobiAreaTitle } from '../src/data/seoTitles.js'
 import { ARTICLES_INDEX } from '../src/data/generated/articlesIndex.js'
 
 const NOINDEX_ONLY = process.argv.includes('--noindex-only')
@@ -79,8 +80,6 @@ const ORG_ID = ORIGIN + '/#organization'
 const SITE = 'Smartious Homeschool & eSchool'
 const BUILD_DATE = new Date().toISOString().slice(0, 10)
 const BUILD_ID = (process.env.COMMIT_REF || '').slice(0, 10) || Date.now().toString(36)
-// Same rule as articleTitle() in LandingPage.jsx: "| Smartious" only while the title stays within ~60 characters.
-const articleTitle = (t) => { t = t || 'Article'; return t.length <= 47 ? t + ' | Smartious' : t }
 
 // The only published prices (see pricing page): school from USD 423/month
 // for Primary, payable termly; tuition USD 15/hour.
@@ -440,7 +439,7 @@ for (const c of COMPARES) {
 // Nairobi tuition areas
 for (const a of NAIROBI_AREAS) {
   const path = '/tuition/' + a.slug
-  add({ path, title: a.seoTitle || 'Tuition in ' + a.name + ', Nairobi | Smartious', desc: a.seoDesc || clip(a.intro), h1: 'Tuition in ' + a.name + ', Nairobi', body: [
+  add({ path, title: nairobiAreaTitle(a), desc: a.seoDesc || clip(a.intro), h1: 'Tuition in ' + a.name + ', Nairobi', body: [
     p(a.intro), p(a.introExtended), p(a.parentProfile), p(a.pricingNote), a.commonSubjects?.length ? h2('Subjects') + bullets(a.commonSubjects) : '',
   ], faqs: a.localFaqs, related: [
     h2('Nearby areas'), links(NAIROBI_AREAS.filter(x => x !== a).slice(0, 12).map(x => ({ href: '/tuition/' + x.slug, label: 'Tutors in ' + x.name }))),
@@ -679,7 +678,7 @@ for (const [slug, a] of Object.entries(FULL_ARTICLES)) {
     })(),
   ].filter(Boolean)
   add({
-    path, title: a.metaTitle || articleTitle(a.t), desc: a.metaDesc || clip(a.intro), h1: a.t,
+    path, title: guideTitle(a.metaTitle, a.t), desc: a.metaDesc || clip(a.intro), h1: a.t,
     src: [ARTICLES_INDEX[slug]?.part ? 'src/data/' + ARTICLES_INDEX[slug].part + '.js' : 'src/data/fullArticles.js'],
     body: [
       a.author ? `<p class="ss-by">By ${esc(a.author)}${a.role ? ', ' + esc(a.role) : ''}${a.date ? ' · ' + esc(a.date) : ''}</p>` : '',
@@ -721,6 +720,9 @@ if (existsSync(arabicFile)) {
 } else {
   console.warn('seo-static: src/data/arabicPages.js not found — no Arabic pages')
 }
+
+// Country hubs: the short titles the app also uses (src/data/seoTitles.js).
+for (const pg of pages) if (HUB_TITLES[pg.path]) pg.title = HUB_TITLES[pg.path]
 
 // ── Thin / doorway city pages → noindex,follow ──────────────
 // Uniqueness = share of a page's 6-word shingles that appear on no other
