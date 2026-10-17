@@ -112,3 +112,50 @@ export function guideTitle(metaTitle, t) {
   if (dash >= 20) return fit(full.slice(0, dash) + BRAND, full.slice(0, dash))
   return full
 }
+
+// ── City, tuition-area, curriculum, language, test-prep, study-abroad
+//    and service pages ───────────────────────────────────────────
+// Their titles are "<query> — <phrase> | <phrase> | Smartious". fitTitle
+// keeps the leading phrases that fit (whole phrases, or a list cut at a
+// comma or "·"), then adds "| Smartious" if it still fits, so each page
+// keeps its own wording and intent. Titles of 60 characters or less, other
+// paths, and titles naming accreditation, recognition or licensing are
+// returned unchanged.
+const FIT_PATHS = /^\/(?:homeschool-[^/]+|tuition-uae\/[^/]+|tuition-uk(?:\/[^/]+)?|study-abroad(?:\/[^/]+)?|curricula\/[^/]+|languages(?:\/[^/]+)?|test-prep(?:\/[^/]+)?|services\/[^/]+)$/
+const PHRASE_SEP = /( \| | — | – )/
+const LIST_SEP = /(, | · )/
+export function fitTitle(path, title) {
+  if (!title || title.length <= MAX || !FIT_PATHS.test(path || '') || KEEP.test(title)) return title
+  const parts = title.split(PHRASE_SEP)                 // [phrase, sep, phrase, sep, …]
+  while (parts.length > 1 && /^Smartious\b/.test(parts[parts.length - 1].trim())) parts.splice(-2, 2)
+  let best = ''
+  let next = 0
+  for (let n = 1; n <= parts.length; n += 2) {
+    const t = parts.slice(0, n).join('').trim()
+    if (t.length > MAX) break
+    best = t; next = n                                 // index of the separator after it
+  }
+  if (!best) {
+    // First phrase alone is too long ("Online school and international
+    // curriculum in Valparaíso and Viña del Mar"): say the same thing in
+    // the short form, then drop a trailing "and <area>" if still needed.
+    let first = parts[0].trim()
+      .replace(/^Online school and homeschool in /, 'Online School & Homeschool in ')
+      .replace(/^Online school and (?:international curriculum|Cambridge tutoring|Cambridge curriculum) (in|for) /, 'Online School $1 ')
+    if (first.length > MAX) {
+      const and = first.lastIndexOf(' and ')
+      if (and >= 25) first = first.slice(0, and)
+    }
+    if (first.length > MAX) return title                 // leave as written
+    best = first; next = parts.length
+  }
+  if (next < parts.length - 1) {                         // part of the next phrase, cut at a list separator
+    const items = parts[next + 1].split(LIST_SEP)
+    const base = best
+    for (let n = 3; n < items.length; n += 2) {          // at least two list items
+      const t = base + parts[next] + items.slice(0, n).join('')
+      if (t.length <= MAX) best = t
+    }
+  }
+  return best.length + BRAND.length <= MAX ? best + BRAND : best
+}

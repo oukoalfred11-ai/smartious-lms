@@ -68,7 +68,7 @@ import { US_CITIES, US_CITIES_BY_STATE } from '../src/data/usCities.js'
 import { CA_PROVINCES } from '../src/data/caProvinces.js'
 import { CA_CITIES, CA_CITIES_BY_PROVINCE } from '../src/data/caCities.js'
 import { PRIORITY_HUB_LINKS, PRIORITY_CITY_LINKS } from '../src/data/priorityLinks.js'
-import { HUB_TITLES, guideTitle, nairobiAreaTitle } from '../src/data/seoTitles.js'
+import { HUB_TITLES, guideTitle, nairobiAreaTitle, fitTitle } from '../src/data/seoTitles.js'
 import { ARTICLES_INDEX } from '../src/data/generated/articlesIndex.js'
 
 const NOINDEX_ONLY = process.argv.includes('--noindex-only')
@@ -378,7 +378,7 @@ for (const c of CURRICULA) {
   const d = c.detail || {}
   const path = '/curricula/' + c.slug
   const desc = d.overview ? d.overview.slice(0, 158) : c.desc.slice(0, 158)
-  add({ path, title: c.h + ' Curriculum | Homeschooling & Online — ' + SITE, desc, h1: c.h + (d.tagline ? ': ' + d.tagline : ''), body: [
+  add({ path, title: c.h + (/Curriculum$/.test(c.h) ? '' : ' Curriculum') + ' | Homeschooling & Online — ' + SITE, desc, h1: c.h + (d.tagline ? ': ' + d.tagline : ''), body: [
     p(c.badge + (d.ageRange ? ' · ' + d.ageRange : '')), p(c.desc), p(d.overview), bullets(c.meta), c.tags?.length ? h2('Subjects') + bullets(c.tags) : '',
     ...(d.sections || []).map(s => h2(s.h) + (Array.isArray(s.p) ? s.p.map(p).join('') : p(s.p)) + bullets(s.items)),
     d.whyChoose ? h2('Why choose ' + c.h) + p(d.whyChoose) : '',
@@ -727,8 +727,10 @@ if (existsSync(arabicFile)) {
   console.warn('seo-static: src/data/arabicPages.js not found — no Arabic pages')
 }
 
-// Country hubs: the short titles the app also uses (src/data/seoTitles.js).
-for (const pg of pages) if (HUB_TITLES[pg.path]) pg.title = HUB_TITLES[pg.path]
+// Short titles the app also uses (src/data/seoTitles.js): country hubs,
+// then fitTitle for city, tuition-area, curriculum, language, test-prep,
+// study-abroad and service pages.
+for (const pg of pages) pg.title = fitTitle(pg.path, HUB_TITLES[pg.path] || pg.title)
 
 // ── Thin / doorway city pages → noindex,follow ──────────────
 // Uniqueness = share of a page's 6-word shingles that appear on no other

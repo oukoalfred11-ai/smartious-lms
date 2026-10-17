@@ -57,7 +57,7 @@ import { TEST_PREP } from '../data/testPrep.js'
 import { STUDY_ABROAD } from '../data/studyAbroad.js'
 import { LANGUAGES } from '../data/languages.js'
 import { PRIORITY_CITY_LINKS } from '../data/priorityLinks.js'
-import { HUB_TITLES, guideTitle, nairobiAreaTitle } from '../data/seoTitles.js'
+import { HUB_TITLES, guideTitle, nairobiAreaTitle, fitTitle } from '../data/seoTitles.js'
 
 
 /* ── Front Desk capture ───────────────────────────────────
@@ -4197,7 +4197,7 @@ export default function LandingPage() {
   if (page === 'curriculum-detail' && currentCurriculum) {
     const c = CURRICULA.find(x => x.slug === currentCurriculum)
     if (c) {
-      metaTitle = c.h + ' Curriculum | Homeschooling & Online — ' + SITE
+      metaTitle = c.h + (/Curriculum$/.test(c.h) ? '' : ' Curriculum') + ' | Homeschooling & Online — ' + SITE
       metaDesc  = c.detail?.overview ? c.detail.overview.slice(0, 158) : c.desc.slice(0, 158)
     }
   } else if (page === 'service-detail' && currentService) {
@@ -4993,12 +4993,15 @@ export default function LandingPage() {
   if (page === 'tuition-uk') canonicalOverride = '/tuition-uk'
   if (page === 'homeschooling-vietnam') canonicalOverride = '/online-school/vietnam'
   if (page === 'homeschooling-thailand') canonicalOverride = '/online-school/thailand'
-  // Country hubs: short titles (src/data/seoTitles.js), the same ones the
-  // static HTML carries. Looked up by the page's canonical path.
+  // Short titles (src/data/seoTitles.js), the same ones the static HTML
+  // carries: country hubs by canonical path, and city, tuition-area,
+  // curriculum, language, test-prep, study-abroad and service pages cut
+  // to 60 characters by fitTitle.
   {
-    const hubPath = typeof canonicalOverride === 'string' ? canonicalOverride
+    const metaPath = typeof canonicalOverride === 'string' ? canonicalOverride
       : (typeof window !== 'undefined' ? (window.location.pathname.replace(/\/+$/, '') || '/') : '')
-    if (HUB_TITLES[hubPath]) metaTitle = HUB_TITLES[hubPath]
+    if (HUB_TITLES[metaPath]) metaTitle = HUB_TITLES[metaPath]
+    metaTitle = fitTitle(metaPath, metaTitle)
   }
   if (page === 'not-found') {
     metaTitle = 'Page not found | Smartious'
