@@ -136,10 +136,16 @@ export default function useLabSession({ experimentId, assignmentId = null, sessi
   }, [actions, editable, saveNow])
 
   // ── Actions ──────────────────────────────────────────────
+  // Several actions can be dispatched before React re-renders (an instrument
+  // with two readings, a held burette tap): each must build on the last one,
+  // as the server's replay of the log does, not on the state of the last render.
+  const stateRef = useRef(state)
+  stateRef.current = state
   const dispatch = useCallback((type, payload = {}) => {
     if (!editable || !def || !params) return false
     try {
-      const next = applyAction(def, params, state, { type, payload })
+      const next = applyAction(def, params, stateRef.current, { type, payload })
+      stateRef.current = next
       setState(next)
       setActions(a => [...a, { type, payload }])
       setActionError(null)

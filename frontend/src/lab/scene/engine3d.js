@@ -79,6 +79,9 @@ export function createLabScene(container, { lowGraphics = false, onPick = null, 
   let downAt = null, mode = null, dragPick = null, hoverPick = null
   const dragPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0)
   const findPick = (o) => { while (o) { if (o.userData?.pick) return o.userData.pick; o = o.parent } return null }
+  // The raycaster also hits hidden meshes (worn goggles, apparatus of the
+  // other bench mode, cylinders not cut yet); they must not take clicks.
+  const shown = (o) => { while (o) { if (!o.visible) return false; o = o.parent } return true }
   const aim = (e) => {
     const r = renderer.domElement.getBoundingClientRect()
     pointer.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1)
@@ -86,7 +89,7 @@ export function createLabScene(container, { lowGraphics = false, onPick = null, 
   }
   const pickAt = (e) => {
     aim(e)
-    const hit = raycaster.intersectObjects(pickables, true).find(h => findPick(h.object))
+    const hit = raycaster.intersectObjects(pickables, true).find(h => shown(h.object) && findPick(h.object))
     return hit ? { pick: findPick(hit.object), hit } : null
   }
   const onDown = (e) => {
@@ -156,7 +159,9 @@ export function createLabScene(container, { lowGraphics = false, onPick = null, 
     let moving = controls.update()
     for (const a of [...animations]) { if (!a(dt)) animations.delete(a); else moving = true }
     if (needsRender || moving) { renderer.render(scene, camera); needsRender = false }
-    if (moving || animations.size) raf = requestAnimationFrame(frame)
+    // An animation or the controls' 'change' event may already have queued
+    // the next frame through invalidate(); never queue a second one.
+    if ((moving || animations.size) && !raf) raf = requestAnimationFrame(frame)
   }
   function invalidate() {
     needsRender = true
