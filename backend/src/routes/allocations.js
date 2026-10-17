@@ -183,7 +183,7 @@ router.get('/', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
       .sort('-createdAt');
 
     allocations = allocations.filter(a => {
-      return a.teacherId && a.teacherId.isActive && !a.teacherId.isOnLeave;
+      return a.teacherId && a.teacherId.isActive;
     });
 
     res.json({ success: true, allocations });
@@ -208,7 +208,7 @@ router.get('/pending-count', auth, requireRole('admin', 'ops_manager', 'dos', 'a
     const allocatedByStudent = new Map();
     for (const a of allocations) {
       if (!a.studentId || !a.teacherId) continue;
-      if (!a.teacherId.isActive || a.teacherId.isOnLeave) continue;
+      if (!a.teacherId.isActive) continue;   // a teacher on leave keeps their students
       const key = a.studentId.toString();
       if (!allocatedByStudent.has(key)) allocatedByStudent.set(key, new Set());
       allocatedByStudent.get(key).add(a.subjectId.toString());
@@ -306,7 +306,7 @@ router.get('/unallocated/:studentId', auth, requireRole('admin', 'ops_manager'),
     }).populate('teacherId', 'isActive isOnLeave');
 
     const validAllocations = allAllocations.filter(a =>
-      a.teacherId && a.teacherId.isActive && !a.teacherId.isOnLeave
+      a.teacherId && a.teacherId.isActive
     );
 
     const allocatedSet = new Set(validAllocations.map(a => a.subjectId.toString()));

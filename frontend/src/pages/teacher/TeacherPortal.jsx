@@ -17,7 +17,7 @@ import ManageSubjectTab from './ManageSubjectTab.jsx'
 import TeacherLeaveRequest from './TeacherLeaveRequest.jsx'
 import LibraryViewer from '../../components/LibraryViewer.jsx'
 import MobileTabBar, { IconParts, useBackHandler } from '../../components/ui/MobileTabBar.jsx'
-import { LessonsToClose, ExtraLessonForm } from '../../components/lessons/LessonControl.jsx'
+import { LessonsToClose, ExtraLessonForm, MissedSessions } from '../../components/lessons/LessonControl.jsx'
 import { HelpRequests } from '../../components/lessons/LessonPlan.jsx'
 import HomeworkEditor from '../../components/lessons/HomeworkEditor.jsx'
 import EndOfLessonOverlay from '../../components/lessons/EndOfLessonOverlay.jsx'
@@ -14904,6 +14904,7 @@ function MyClassesTab({ user, toast, onEndLesson }) {
 
       {tab === 'week' && (<>
       <LessonsToClose toast={toast} onOpen={onEndLesson} />
+      <MissedSessions toast={toast} />
       <HelpRequests toast={toast} />
       {proposed > 0 && (
         <div style={{ background: '#FFF7E6', border: '1px solid #F3D9A4', borderRadius: 12, padding: '12px 14px', fontSize: 12.5, color: '#7A4B00' }}>

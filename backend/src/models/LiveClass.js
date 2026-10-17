@@ -133,14 +133,19 @@ const liveClassSchema = new mongoose.Schema({
   extraLesson:    { type: Boolean, default: false },
   makeUpFor:      { type: mongoose.Schema.Types.ObjectId, ref: 'LiveClass', default: null },
 
-  // ── Cover while the teacher is on approved leave ──
-  // With a replacement teacher, teacherId is the cover teacher and
-  // originalTeacherId the absent one; without, needsCover flags the
-  // lesson for the Director of Studies. coverLeaveId undoes it if the
-  // leave is cancelled.
+  // ── Teacher on approved leave (lib/leaveCover.js) ──
+  // Lessons in the leave are cancelled (leaveMissed), never handed to
+  // another teacher; coverLeaveId is the leave, so cancelling the leave
+  // restores them. A missed lesson waits for recovery until a make-up
+  // lesson (makeUpFor) is booked or the teacher records that none is
+  // needed (recoveryWaived). originalTeacherId / needsCover are from the
+  // old cover policy and are only read to undo it.
   originalTeacherId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
   coverLeaveId:   { type: mongoose.Schema.Types.ObjectId, ref: 'TeacherLeaveRequest', default: null },
   needsCover:     { type: Boolean, default: false, index: true },
+  leaveMissed:    { type: Boolean, default: false, index: true },
+  recoveryWaived: { type: Boolean, default: false },
+  recoveryNote:   { type: String, default: '' },
 
   // ── Absence alerts to families ──
   // Students whose parents were told the student had not joined.
