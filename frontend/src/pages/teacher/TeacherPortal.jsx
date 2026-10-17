@@ -17,6 +17,7 @@ import ManageSubjectTab from './ManageSubjectTab.jsx'
 import TeacherLeaveRequest from './TeacherLeaveRequest.jsx'
 import LibraryViewer from '../../components/LibraryViewer.jsx'
 import MobileTabBar, { IconParts, useBackHandler } from '../../components/ui/MobileTabBar.jsx'
+import { LessonsToClose, ExtraLessonForm } from '../../components/lessons/LessonControl.jsx'
 
 // ──────────────────────────────────────────────────────
 // DESIGN TOKENS — mirrors the admin Dashboard's TOKENS
@@ -14640,6 +14641,11 @@ function TeacherTimetableTab({ user, toast }) {
   const [form, setForm] = useState(null)
   const [resched, setResched] = useState(null)      // { cls, when, mins }
   const [saving, setSaving] = useState(false)
+  const [extraFor, setExtraFor] = useState(null)    // weekly slot an extra lesson is being booked for
+  const confirmSlot = async (e) => {
+    try { const r = await api.post('/timetable/' + e._id + '/confirm'); toast?.ok?.(r.data?.message || 'Slot confirmed.'); load() }
+    catch (err) { toast?.error?.(err?.response?.data?.message || 'Could not confirm the slot.') }
+  }
 
   const load = useCallback(() => {
     setLoading(true)
@@ -14696,8 +14702,14 @@ function TeacherTimetableTab({ user, toast }) {
       const body = { title: finalTitle, subject: form.subject.trim(), curriculum: form.curriculum.trim(),
         grade: form.grade.trim(), dayOfWeek: form.dayOfWeek, startTime: form.startTime, endTime: form.endTime,
         assignedStudents: form.assignedStudents, subjectId: form.subjectId || null }
-      if (modal.entry) await api.patch('/timetable/' + modal.entry._id, body)
-      else await api.post('/timetable', body)
+      const send = (b) => (modal.entry ? api.patch('/timetable/' + modal.entry._id, b) : api.post('/timetable', b))
+      try { await send(body) }
+      catch (err) {
+        // The server found a clash with another of your slots or a student's.
+        if (err?.response?.status !== 409 || !err.response.data?.clash) throw err
+        if (!window.confirm(err.response.data.message)) return
+        await send({ ...body, allowClash: true })
+      }
       toast?.ok?.(modal.entry ? 'Slot updated. Future classes follow it immediately.' : 'Slot added. This week\u2019s classes are being created now.')
       setModal(null); load()
     } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not save the slot.') }
@@ -14710,9 +14722,10 @@ function TeacherTimetableTab({ user, toast }) {
   }
 
   const cancelOccurrence = async (cls) => {
-    if (!window.confirm(`Cancel "${cls.title || cls.subject}" on ${new Date(cls.scheduledAt).toDateString()}? Students will not see it or be reminded. Your weekly slot continues next week as normal.`)) return
+    const reason = window.prompt(`Cancel "${cls.title || cls.subject}" on ${new Date(cls.scheduledAt).toDateString()}? The student and parents are emailed. Your weekly slot continues next week as normal.\n\nReason (sent to the family):`, '')
+    if (reason === null) return
     try {
-      const r = await api.delete('/liveclasses/' + cls._id)
+      const r = await api.delete('/liveclasses/' + cls._id, { data: { reason } })
       toast?.ok?.(r.data?.message || 'Occurrence cancelled.')
       load()
     } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not cancel it.') }
@@ -14793,6 +14806,14 @@ function TeacherTimetableTab({ user, toast }) {
         </p>
       </div>
 
+      <LessonsToClose toast={toast} />
+
+      {entries.some(e => e.needsConfirmation) && (
+        <div style={{ background: '#FFF7E6', border: '1px solid #F3D9A4', borderRadius: 12, padding: '12px 14px', fontSize: 12.5, color: '#7A4B00' }}>
+          <b>Proposed slots to confirm.</b> These times were picked automatically. Confirm each one (the family is then told the weekly time), or press Edit to choose a better time.
+        </div>
+      )}
+
       {/* ── Weekly pattern ── */}
       <div style={{ background: '#fff', border: `1px solid ${C.line}`, borderRadius: 12, padding: 14 }}>
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 10 }}>
@@ -14811,6 +14832,13 @@ function TeacherTimetableTab({ user, toast }) {
                     <div style={{ fontSize: 10.5, fontWeight: 800, color: C.crimson }}>{e.startTime}-{e.endTime}</div>
                     <div style={{ fontSize: 11.5, fontWeight: 700, color: C.ink }}>{e.subject}</div>
                     <div style={{ fontSize: 9.5, color: C.mut }}>{e.grade || e.curriculum}{Array.isArray(e.assignedStudents) ? ` \u00b7 ${e.assignedStudents.length} student(s)` : ''}</div>
+                    {e.needsConfirmation && (
+                      <div style={{ marginTop: 5 }}>
+                        {chip('#FEF3C7', '#B45309', 'proposed')}
+                        <button onClick={() => confirmSlot(e)} style={{ marginLeft: 5, padding: '2px 8px', borderRadius: 6, border: 'none', background: C.green, color: '#fff', fontSize: 9, fontWeight: 800, cursor: 'pointer' }}>Confirm</button>
+                      </div>
+                    )}
+                    <button onClick={() => setExtraFor(e)} style={{ width: '100%', marginTop: 5, padding: '3px 0', borderRadius: 6, border: `1px dashed ${C.line}`, background: '#fff', fontSize: 9, fontWeight: 800, cursor: 'pointer', color: C.crimson }}>+ Extra lesson</button>
                     <div style={{ display: 'flex', gap: 5, marginTop: 5 }}>
                       <button onClick={() => openEdit(e)} style={{ flex: 1, padding: '3px 0', borderRadius: 6, border: `1px solid ${C.line}`, background: '#fff', fontSize: 9, fontWeight: 800, cursor: 'pointer', color: C.mut }}>Edit</button>
                       <button onClick={() => removeSlot(e)} style={{ flex: 1, padding: '3px 0', borderRadius: 6, border: '1px solid #FCA5A5', background: '#fff', fontSize: 9, fontWeight: 800, cursor: 'pointer', color: C.red }}>Remove</button>
@@ -14822,6 +14850,19 @@ function TeacherTimetableTab({ user, toast }) {
             )
           })}
         </div>
+        {extraFor && (
+          <div style={{ marginTop: 12 }}>
+            <b style={{ fontSize: 13, color: C.ink }}>Extra lesson — {extraFor.subject}</b>
+            <div style={{ marginTop: 6 }}>
+              <ExtraLessonForm toast={toast} subject={extraFor.subject} curriculum={extraFor.curriculum} grade={extraFor.grade}
+                students={(() => {
+                  const ids = new Set((extraFor.assignedStudents || []).map(x => String(x?._id || x)))
+                  return ov.students.filter(st => ids.has(String(st._id)))
+                })()}
+                onDone={() => { setExtraFor(null); load() }} onCancel={() => setExtraFor(null)} />
+            </div>
+          </div>
+        )}
         {entries.length === 0 && (
           <div style={{ marginTop: 10, fontSize: 12, color: C.red, fontWeight: 700 }}>
             You have no weekly slots yet \u2014 which means no classes are being created for your students. Add your teaching times above.

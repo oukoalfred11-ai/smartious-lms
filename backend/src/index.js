@@ -268,6 +268,16 @@ mongoose.connect(MONGODB_URI)
     }, 60 * 1000);
     console.log('[class reminder] Cron started — checks every minute');
 
+    // "Has not joined" alerts to families 10 minutes into a lesson, and
+    // to the academic office after two missed lessons in a row.
+    setInterval(() => {
+      require('./lib/absenceAlerts').runAbsenceAlerts().catch(e => console.error('[absence alert]', e.message));
+    }, 60 * 1000);
+    // Morning digest of lessons teachers have not closed (07:00 Nairobi).
+    setInterval(() => {
+      require('./lib/absenceAlerts').runUnconfirmedDigest().catch(e => console.error('[unconfirmed digest]', e.message));
+    }, 10 * 60 * 1000);
+
     // Show-cause cron — runs every Friday at 5PM EAT
     scheduleShowCauseCron();
   })

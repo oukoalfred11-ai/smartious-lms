@@ -247,16 +247,164 @@ function classTypeLabel(cls) {
 // ── Outcomes ──────────────────────────────────────────────────
 
 /**
- * How a family should read a class: 'upcoming', 'held' (it ended or
- * somebody was in the room) or 'not_confirmed' (its time passed with no
- * record that it happened).
+ * From this instant a lesson whose time has passed counts as held only
+ * when its teacher closed it (or someone was in the room). Before it,
+ * history keeps the old rule (time passed = held), so past reports do
+ * not change. Override with LESSON_CLOSE_CUTOVER=YYYY-MM-DD.
+ */
+const DEFAULT_CLOSE_CUTOVER = '2026-10-26';
+function closeCutover() {
+  const raw = process.env.LESSON_CLOSE_CUTOVER || DEFAULT_CLOSE_CUTOVER;
+  const d = new Date(/T/.test(raw) ? raw : raw + 'T00:00:00Z');
+  return isNaN(d.getTime()) ? new Date(DEFAULT_CLOSE_CUTOVER + 'T00:00:00Z') : d;
+}
+
+const OUTCOMES = ['taught', 'student_absent', 'not_held'];
+const endOf = (cls) => new Date(new Date(cls.scheduledAt).getTime() + (cls.durationMins || 60) * 60000);
+const isLegacy = (cls) => new Date(cls.scheduledAt) < closeCutover();
+
+/**
+ * Did this lesson take place? `joined` = someone was in the room.
+ * Cancelled or "not held" never; closed taught/absent always; before the
+ * cutover, when its time passed; after it, when the teacher pressed End
+ * or someone joined. Otherwise the lesson is unconfirmed.
+ */
+function isHeldClass(cls, { joined = false, now = new Date() } = {}) {
+  if (!cls || cls.status === 'cancelled' || cls.outcome === 'not_held') return false;
+  if (cls.outcome === 'taught' || cls.outcome === 'student_absent') return true;
+  if (isLegacy(cls)) return cls.status === 'ended' || endOf(cls) < now;
+  if (cls.status === 'ended' && !cls.autoEnded) return true;
+  return !!joined;
+}
+
+/** Past, not cancelled, not closed, after the cutover: the teacher still has to say what happened. */
+function needsClosing(cls, now = new Date()) {
+  if (!cls || cls.status === 'cancelled' || cls.outcome) return false;
+  if ((cls.kind || 'lesson') !== 'lesson') return false;
+  if (isLegacy(cls)) return false;
+  return new Date(cls.scheduledAt) <= now;
+}
+
+/** Does this class use up its topic in the scheme of work? */
+function consumesTopic(cls) {
+  if (!cls || cls.status === 'cancelled') return false;
+  if (cls.outcome === 'not_held' || cls.outcome === 'student_absent') return false;
+  if (cls.coverage === 'partial') return false;
+  return true;
+}
+
+/** Mongo filter: classes that consume their topic (mirror of consumesTopic). */
+function consumesTopicFilter() {
+  return {
+    status: { $ne: 'cancelled' },
+    outcome: { $nin: ['not_held', 'student_absent'] },
+    coverage: { $ne: 'partial' },
+  };
+}
+
+/**
+ * Mongo filter: lessons that count as TAUGHT for the plan view. Before
+ * the cutover, any past non-cancelled lesson; after it, only lessons the
+ * teacher closed as taught with full coverage.
+ */
+function taughtFilter(now = new Date()) {
+  return {
+    status: { $ne: 'cancelled' },
+    scheduledAt: { $lte: now },
+    $or: [
+      { scheduledAt: { $lt: closeCutover() }, outcome: { $nin: ['not_held', 'student_absent'] } },
+      { outcome: 'taught', coverage: { $ne: 'partial' } },
+    ],
+  };
+}
+
+/**
+ * How a family should read a class: 'upcoming', 'held', 'not_held'
+ * (the teacher recorded it did not take place) or 'not_confirmed'
+ * (its time passed with no record that it happened).
  */
 function classOutcome(cls, now, heldIds) {
-  const when = new Date(cls.scheduledAt || cls.startAt || cls.createdAt);
-  const held = cls.status === 'ended' || (heldIds && heldIds.has(String(cls._id)));
-  if (held) return 'held';
+  if (cls.outcome === 'not_held') return 'not_held';
   if (cls.status === 'live') return 'upcoming';
-  return when < now ? 'not_confirmed' : 'upcoming';
+  const when = new Date(cls.scheduledAt || cls.startAt || cls.createdAt);
+  if (when >= now && !cls.outcome) return 'upcoming';
+  const joined = !!(heldIds && heldIds.has(String(cls._id)));
+  return isHeldClass(cls, { joined, now }) ? 'held' : 'not_confirmed';
+}
+
+/** Validate a close-the-lesson request. Returns { error } or { update }. */
+function closeUpdate(body, { now = new Date(), userId = null } = {}) {
+  const outcome = String(body && body.outcome || '');
+  if (!OUTCOMES.includes(outcome)) return { error: 'Choose what happened: taught, student absent, or not held.' };
+  const clean = (v, n = 300) => String(v == null ? '' : v).trim().slice(0, n);
+  const update = { outcome, outcomeAt: now, outcomeBy: userId, teacherNote: clean(body.note, 1000) };
+  if (outcome === 'taught') {
+    const coverage = body.coverage === 'partial' ? 'partial' : 'full';
+    Object.assign(update, { coverage, coveredTopic: clean(body.topic), coveredSubtopic: clean(body.subtopic), notHeldReason: '' });
+  } else if (outcome === 'not_held') {
+    const reason = clean(body.reason);
+    if (!reason) return { error: 'Say why the lesson did not take place.' };
+    Object.assign(update, { coverage: null, notHeldReason: reason });
+  } else {
+    Object.assign(update, { coverage: null, notHeldReason: '' });
+  }
+  return { update };
+}
+
+// ── Absence alerts ────────────────────────────────────────────
+
+const ABSENCE_ALERT_AFTER_MIN = 10;
+const ABSENCE_ALERT_UNTIL_MIN = 40;
+
+/** Is it time to tell families about students who have not joined? */
+function absenceAlertDue(cls, now) {
+  if (!cls || cls.status === 'cancelled' || cls.outcome === 'not_held') return false;
+  if ((cls.kind || 'lesson') !== 'lesson') return false;
+  const start = new Date(cls.scheduledAt).getTime();
+  const t = new Date(now).getTime();
+  return t >= start + ABSENCE_ALERT_AFTER_MIN * 60000 && t <= start + ABSENCE_ALERT_UNTIL_MIN * 60000;
+}
+
+/** Students to alert about: assigned, not joined, not paused, not alerted yet. */
+function absentStudents(cls, { joinedIds = [], pausedIds = [] } = {}) {
+  const joined = new Set(joinedIds.map(String));
+  const paused = new Set(pausedIds.map(String));
+  const done = new Set((cls.absenceAlerted || []).map(String));
+  const seen = new Set();
+  const out = [];
+  for (const st of cls.assignedStudents || []) {
+    const id = String(st && st._id ? st._id : st);
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    if (joined.has(id) || paused.has(id) || done.has(id) || (st && st.onBreak)) continue;
+    out.push(st);
+  }
+  return out;
+}
+
+// ── Clashes ───────────────────────────────────────────────────
+
+const minsOf = (hhmm) => { const [h, m] = String(hhmm || '').split(':').map(Number); return h * 60 + m; };
+
+/**
+ * Weekly slots in `others` that clash with `entry`: same day, times
+ * overlapping, and the same teacher or a shared student.
+ * Returns [{ entry, who: 'teacher'|'student', studentIds }].
+ */
+function findClashes(entry, others) {
+  const a0 = minsOf(entry.startTime), a1 = minsOf(entry.endTime);
+  if (!(a1 > a0)) return [];
+  const mine = new Set((entry.assignedStudents || []).map(String));
+  const out = [];
+  for (const o of others || []) {
+    if (!o || String(o._id) === String(entry._id || '') || o.isActive === false || o.dayOfWeek !== entry.dayOfWeek) continue;
+    const b0 = minsOf(o.startTime), b1 = minsOf(o.endTime);
+    if (!(a0 < b1 && b0 < a1)) continue;
+    if (entry.teacherId && String(o.teacherId) === String(entry.teacherId)) { out.push({ entry: o, who: 'teacher', studentIds: [] }); continue; }
+    const shared = (o.assignedStudents || []).map(String).filter(id => mine.has(id));
+    if (shared.length) out.push({ entry: o, who: 'student', studentIds: shared });
+  }
+  return out;
 }
 
 // ── Serialisation ─────────────────────────────────────────────
@@ -289,6 +437,8 @@ module.exports = {
   groupKey, orderLessons, subtopicItems, stampKey, buildLessonQueue, buildSubtopicQueue, stampFor,
   studentVisibilityFilter,
   REMINDER_LEAD_MIN, reminderWindow, isReminderDue, reminderStudents, classTypeLabel,
-  classOutcome,
+  closeCutover, isHeldClass, needsClosing, consumesTopic, consumesTopicFilter, taughtFilter,
+  classOutcome, closeUpdate, OUTCOMES,
+  ABSENCE_ALERT_AFTER_MIN, absenceAlertDue, absentStudents, findClashes,
   serialize,
 };

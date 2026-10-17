@@ -52,7 +52,7 @@ async function heldLessons(from, to, opts = {}) {
   };
   if (opts.studentIds) q.assignedStudents = { $in: opts.studentIds };
   let query = LiveClass.find(q)
-    .select(opts.select || 'title subject grade teacherId assignedStudents scheduledAt durationMins status')
+    .select(opts.select || 'title subject grade teacherId assignedStudents scheduledAt durationMins status outcome autoEnded')
     .sort({ scheduledAt: 1 });
   if (opts.limit) query = query.limit(opts.limit);
   const raw = await query.lean();
@@ -60,8 +60,25 @@ async function heldLessons(from, to, opts = {}) {
   // the range cutoff); snapshots pass Date.now() so a lesson starting late
   // in the day still counts for that day.
   const heldBy = opts.heldBy ? new Date(opts.heldBy).getTime() : cutoff;
-  return raw.filter(c => c.status === 'ended' ||
-    new Date(c.scheduledAt).getTime() + (c.durationMins || 60) * 60000 < heldBy);
+  // A lesson counts as held by the rule in lib/scheduling (isHeldClass):
+  // after the close-the-lesson cutover, only when its teacher closed it as
+  // taught / student absent, pressed End, or someone joined - never just
+  // because its time passed (a teacher no-show is not a student absence).
+  const { isHeldClass, closeCutover } = require('./scheduling');
+  const cut = closeCutover();
+  const needJoin = raw.filter(c => new Date(c.scheduledAt) >= cut && !c.outcome && !(c.status === 'ended' && !c.autoEnded));
+  let joined = new Set();
+  if (needJoin.length) {
+    joined = new Set((await ClassroomSession.distinct('liveClassId', {
+      liveClassId: { $in: needJoin.map(c => c._id) }, joinCount: { $gt: 0 },
+    })).map(String));
+  }
+  return raw.filter(c => {
+    const lapsed = c.status === 'ended' ||
+      new Date(c.scheduledAt).getTime() + (c.durationMins || 60) * 60000 < heldBy;
+    if (!lapsed && !c.outcome) return false;
+    return isHeldClass(c, { joined: joined.has(String(c._id)), now: new Date(heldBy) });
+  });
 }
 
 /** Map `${classId}|${userId}` -> session doc for the given classes. */

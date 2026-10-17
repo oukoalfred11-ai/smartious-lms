@@ -218,7 +218,9 @@ async function autoEndLapsedClasses() {
   for (const lc of open) {
     const endsAt = new Date(new Date(lc.scheduledAt).getTime() + (lc.durationMins || 60) * 60000)
     if (endsAt <= now) {
-      await LiveClass.updateOne({ _id: lc._id }, { $set: { status: 'ended', endedAt: endsAt } })
+      // autoEnded: "ended" here only means its time is over. Whether the
+      // lesson happened is the teacher's close-the-lesson record.
+      await LiveClass.updateOne({ _id: lc._id }, { $set: { status: 'ended', endedAt: endsAt, autoEnded: true } })
       ended++
       console.log(`[autoEnd] "${lc.title}" auto-ended (was ${lc.status}, due to end ${endsAt.toISOString()})`)
     }
@@ -240,10 +242,14 @@ async function processEndedClasses(opts = {}) {
   // doesn't permanently skip classes.
   const lookback = new Date(now.getTime() - LOOKBACK_HOURS * 60 * 60 * 1000)
 
+  // After the close-the-lesson cutover, homework follows only a lesson
+  // its teacher closed as TAUGHT (closing triggers this run for that
+  // class directly, so no lookback window applies to it).
+  const { closeCutover } = require('../lib/scheduling')
   const candidates = await LiveClass.find({
     autoHomeworkGeneratedAt: { $in: [null, undefined] },
     autoHomeworkEnabled: { $ne: false },
-    scheduledAt: { $gte: lookback },
+    scheduledAt: { $gte: lookback, $lt: closeCutover() },
     $or: [
       // Teacher flipped it to ended — honour that even if the
       // scheduled end time is still in the future.
@@ -270,6 +276,9 @@ async function processEndedClasses(opts = {}) {
     const endsAt = new Date(new Date(lc.scheduledAt).getTime() + (lc.durationMins || 60) * 60000)
     const finished = lc.status === 'ended' || endsAt <= now
     if (!finished) { report.skipped.push({ title: lc.title, why: 'not finished yet, ends ' + endsAt.toISOString() }); continue }
+    if (new Date(lc.scheduledAt) >= require('../lib/scheduling').closeCutover() && lc.outcome !== 'taught') {
+      report.skipped.push({ title: lc.title, why: 'the teacher has not closed this lesson as taught' }); continue
+    }
     if (!lc.assignedStudents?.length) {
       report.skipped.push({ title: lc.title, why: 'no students assigned' })
       console.log(`[autoHomework] ${lc.title}: no students assigned — skipped`)

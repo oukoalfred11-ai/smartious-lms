@@ -26,7 +26,7 @@ const LiveClass = require('../models/LiveClass');
 const ClassroomSession = require('../models/ClassroomSession');
 const {
   occurrencesFor, durationOf, planEntryOccurrences, groupKey,
-  buildLessonQueue, buildSubtopicQueue, stampKey, stampFor, serialize,
+  buildLessonQueue, buildSubtopicQueue, stampKey, stampFor, serialize, consumesTopicFilter,
 } = require('./scheduling');
 
 const isDuplicateKey = (e) => e && (e.code === 11000 || /E11000/.test(String(e.message || '')));
@@ -52,7 +52,9 @@ async function buildQueue(members) {
     const used = await LiveClass.distinct('preparationLessonId', {
       timetableEntryId: { $in: memberIds },
       preparationLessonId: { $ne: null },
-      status: { $ne: 'cancelled' },
+      // Cancelled, not-held, student-absent and partly covered lessons
+      // give their topic back.
+      ...consumesTopicFilter(),
     });
     // The teacher's custom sequence (any member carrying one) outranks spine order.
     const orderSource = members.find(m => Array.isArray(m.lessonOrder) && m.lessonOrder.length);
@@ -65,7 +67,7 @@ async function buildQueue(members) {
   const stamped = await LiveClass.find({
     timetableEntryId: { $in: memberIds },
     syllabusSubtopicName: { $nin: [null, ''] },
-    status: { $ne: 'cancelled' },
+    ...consumesTopicFilter(),
   }).select('syllabusTopicName syllabusSubtopicName').lean();
   const os = members.find(m => Array.isArray(m.topicPlanOrder) && m.topicPlanOrder.length);
   return buildSubtopicQueue({
