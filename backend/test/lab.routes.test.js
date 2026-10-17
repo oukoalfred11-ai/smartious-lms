@@ -247,7 +247,8 @@ test('admin/Dean can publish practicals in bulk; a student then completes one en
   const s = open.body.data.session
   const { carefulRun } = await import(path.join(__dirname, '..', '..', 'shared', 'lab', 'test', 'careful.js'))
   const { getExperiment } = await import(path.join(__dirname, '..', '..', 'shared', 'lab', 'experiments', 'index.js'))
-  const run = carefulRun(getExperiment('phys-al-1-1'), s.seed)
+  assert.equal(s.options.bench, 2, 'new physics attempts use the hands-on bench')
+  const run = carefulRun(getExperiment('phys-al-1-1'), s.seed, { options: s.options })
   const save = await call(stranger, 'put', '/sessions/' + s._id, { baseRevision: s.revision, fromIndex: 0, newActions: run.actions, notebook: { aim: 'Density' }, answers: run.answers })
   assert.equal(save.statusCode, 200, JSON.stringify(save.body))
   const sub = await call(stranger, 'post', '/sessions/' + s._id + '/submit', { baseRevision: save.body.data.revision, submissionKey: 'key-al-1-0001' })
