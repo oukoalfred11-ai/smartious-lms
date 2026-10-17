@@ -27,7 +27,7 @@ export default function LabViewport({ experimentId, view, dispatch, editable, mo
     clearTimeout(selTimer.current)
     setSel(p)
     // Plain notices fade; a selected lead or a half-made connection stays.
-    if (p && !['wire', 'pending'].includes(p.kind)) selTimer.current = setTimeout(() => setSel(null), 2500)
+    if (p && !['wire', 'pending', 'menu'].includes(p.kind)) selTimer.current = setTimeout(() => setSel(null), 2500)
   }
 
   useEffect(() => {
@@ -96,7 +96,8 @@ export default function LabViewport({ experimentId, view, dispatch, editable, mo
               <div className="lab-3d-overlay" role="status" aria-live="polite">
                 {sel?.kind === 'pending' && <>Lead from <b>{sel.label}</b>: now tap the other terminal, or drag between terminals. <button type="button" className="lab-btn sm ghost" onClick={() => { sel.cancel?.(); setSel(null) }}>Cancel</button></>}
                 {sel?.kind === 'wire' && <>{sel.label.replace(' (click to select)', '')} <button type="button" className="lab-btn sm danger" disabled={!editable} onClick={() => { dispatch('disconnect', { index: sel.index }); setSel(null) }}>Remove lead</button> <button type="button" className="lab-btn sm ghost" onClick={() => { sel.clear?.(); setSel(null) }}>Close</button></>}
-                {sel && !['pending', 'wire'].includes(sel.kind) && sel.label && <span>{sel.label}</span>}
+                {sel?.kind === 'menu' && <span className="lab-3d-menu" role="group" aria-label={sel.label}><b>{sel.label}:</b> {sel.actions.map(a => <button key={a.label} type="button" className="lab-btn sm" disabled={!editable || a.disabled} onClick={() => { setSel(null); a.run() }}>{a.label}</button>)} <button type="button" className="lab-btn sm ghost" onClick={() => setSel(null)}>Close</button></span>}
+                {sel && !['pending', 'wire', 'menu'].includes(sel.kind) && sel.label && <span>{sel.label}</span>}
                 {!sel && hover && <span>{hover}</span>}
               </div>
             )}
