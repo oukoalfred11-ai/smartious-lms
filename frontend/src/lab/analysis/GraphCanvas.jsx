@@ -69,8 +69,10 @@ export default function GraphCanvas({ analysis, graph, editable = false, onChang
   }
 
   const xLabel = (g.xLabel || '').trim() || headingOf(xc), yLabel = (g.yLabel || '').trim() || headingOf(yc)
-  const minor = (lo, hi, st) => { const out = []; const s = st / 5; for (let v = Math.ceil(lo / s - 1e-9) * s; v <= hi + 1e-9; v += s) out.push(v); return out }
-  const major = (lo, hi, st) => { const out = []; for (let v = Math.ceil(lo / st - 1e-9) * st; v <= hi + 1e-9; v += st) out.push(v); return out }
+  // At most a few hundred lines: with a typed scale such as 1e17 to 1e17 + 100
+  // the step is below the precision of v, and v += s would never advance.
+  const minor = (lo, hi, st) => { const out = []; const s = st / 5; for (let v = Math.ceil(lo / s - 1e-9) * s; v <= hi + 1e-9 && out.length < 500; v += s) out.push(v); return out }
+  const major = (lo, hi, st) => { const out = []; for (let v = Math.ceil(lo / st - 1e-9) * st; v <= hi + 1e-9 && out.length < 500; v += st) out.push(v); return out }
   const best = lineOf(g.lines?.find(l => l.role === 'best'))
   const tri = best && g.triangle ? { xa: g.triangle.xa, xb: g.triangle.xb, ya: best.m * g.triangle.xa + best.c, yb: best.m * g.triangle.xb + best.c } : null
   const comp = g.showComputer && g.type === 'scatter' ? computerFit(pts) : null

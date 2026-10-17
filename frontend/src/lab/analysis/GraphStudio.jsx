@@ -81,7 +81,7 @@ export default function GraphStudio({ analysis, update, editable, onUseInWorking
 
       <div className="lab-gs-grid">
         <div className="lab-gs-paper">
-          <GraphCanvas analysis={analysis} graph={g} editable={editable} onChange={(ng) => setG(ng)} />
+          <GraphCanvas key={g.id} analysis={analysis} graph={g} editable={editable} onChange={(ng) => setG(ng)} />
           {editable && scatter && g.lines.length > 0 && <p className="lab-hint">Drag the round ends to turn a line, drag the line itself to move it, drag the square corners to size the triangle. Arrow keys move a selected handle (Shift for bigger steps).</p>}
         </div>
 
