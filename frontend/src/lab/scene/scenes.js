@@ -13,7 +13,7 @@ import { buildModel } from './apparatus3d.js'
 import { createWiring, wirePart } from './wiring.js'
 import { titration } from './titrationScene.js'
 import { addLabRoom, analogueClock } from './labRoom.js'
-import { oneClickOsmosis } from '../benchMode.js'
+import { oneClickOsmosis, osmosisBalance } from '../benchMode.js'
 
 const { BENCH_Y } = E
 
@@ -196,7 +196,7 @@ function osmosis(lab, { dispatch, onSelect }) {
           if (v.cut) { if (dispatch('blot', { index: v.selected })) say('Blotted dry on the paper towel.') }
           return
         case 'balance':
-          menu('Balance (reads ' + (v.balance == null ? '-.--' : v.balance.toFixed(2)) + ' g)', [
+          menu('Balance (reads ' + (osmosisBalance(v) == null ? '-.--' : osmosisBalance(v).toFixed(2)) + ' g)', [
             { label: 'Tare (zero)', disabled: v.onPan != null, run: () => dispatch('tareBalance') },
             { label: 'Put the selected cylinder on', disabled: !v.cut || v.cylinders[v.selected].inSolution, run: () => dispatch('putOnPan', { index: v.selected }) },
             { label: 'Take it off', disabled: v.onPan == null, run: () => dispatch('clearPan') },
@@ -248,7 +248,7 @@ function osmosis(lab, { dispatch, onSelect }) {
         else { c.position.set(towelX(i), BENCH_Y + 0.008, 0.12); c.rotation.set(0, Math.PI / 2, Math.PI / 2) }
         tubes[i].position.y = BENCH_Y + 0.01
       })
-      bal.userData.screen.userData.setText(view.balance == null ? '-.-- g' : view.balance.toFixed(2) + ' g')
+      bal.userData.screen.userData.setText(osmosisBalance(view) == null ? '-.-- g' : osmosisBalance(view).toFixed(2) + ' g')
       if (ho) showTime(minutesOf(view.clockTime))
       else legacyClock.userData.setText(view.immersed ? view.elapsed + ' min' : 'not started')
       lab.invalidate()

@@ -7,6 +7,7 @@
  */
 import { useState } from 'react'
 import { INDICATORS } from './core.js'
+import { osmosisBalance } from './benchMode.js'
 
 function Btn({ children, onClick, disabled, kind = '', type = 'button', pressed }) {
   return <button type={type} className={'lab-btn ' + kind} onClick={onClick} disabled={disabled} aria-pressed={pressed}>{children}</button>
@@ -303,8 +304,8 @@ export function HandsOnOsmosisControls({ view, dispatch, editable }) {
           <Btn onClick={() => d('putOnPan', { index: i })} disabled={off || !view.cut || !out || c.onPan}>Put this cylinder on the pan</Btn>
           <Btn onClick={() => d('clearPan')} disabled={off || view.onPan == null}>Take it off</Btn>
         </div>
-        <p className="lab-obs" aria-live="polite">Balance: <b>{view.balance == null ? '-.-- g' : view.balance.toFixed(2) + ' g'}</b>{view.onPan != null ? ` (cylinder for ${view.tubes[view.onPan].C.toFixed(1)} M on the pan)` : ' (weighing boat only)'}</p>
-        {c.tube == null && <NumInput label={`Initial mass (${t.C.toFixed(1)} M)`} unit="g" onRecord={(v) => d('recordInitial', { index: i, value: v })} disabled={off || view.immersed} />}
+        <p className="lab-obs" aria-live="polite">Balance: <b>{osmosisBalance(view) == null ? '-.-- g' : osmosisBalance(view).toFixed(2) + ' g'}</b>{view.onPan != null ? ` (cylinder for ${view.tubes[view.onPan].C.toFixed(1)} M on the pan)` : ' (weighing boat only)'}</p>
+        {c.tube == null && <NumInput label={`Initial mass (${t.C.toFixed(1)} M)`} unit="g" onRecord={(v) => d('recordInitial', { index: i, value: v })} disabled={off || view.immersed || !view.cut} />}
         {t.removed && <NumInput label={`Final mass (${t.C.toFixed(1)} M)`} unit="g" onRecord={(v) => d('recordFinal', { index: i, value: v })} disabled={off || t.m1 != null} />}
       </fieldset>
       <fieldset className="lab-fs">

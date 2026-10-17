@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from 'react'
 import { getExperiment } from './core.js'
 import Practical2D from './practical2d.jsx'
 import { titrationNext, osmosisNext } from './handsOnChemControls.jsx'
-import { oneClickTitration, oneClickOsmosis } from './benchMode.js'
+import { oneClickTitration, oneClickOsmosis, osmosisBalance } from './benchMode.js'
 
 const rgba = (c) => (c ? `rgba(${Math.round(c[0])},${Math.round(c[1])},${Math.round(c[2])},${Math.max(0.15, c[3])})` : 'rgba(235,242,250,0.25)')
 
@@ -496,7 +496,7 @@ function HandsOsmosis2D({ view, dispatch, editable }) {
         <path d="M440 236 L500 236 L494 228 L446 228 Z" fill="#F2F4F7" stroke="#9AA3AD" />
         {view.onPan != null && <rect x={470 - (view.cylinders[view.onPan].length || 40) * 0.6} y="220" width={(view.cylinders[view.onPan].length || 40) * 1.2} height="9" rx="3" fill="#EBD9A0" stroke="#B89B4A" />}
         <rect x="420" y="264" width="100" height="26" fill="#B9E3B0" />
-        <text x="470" y="283" fontSize="15" fontFamily="monospace" textAnchor="middle">{view.balance == null ? '-.-- g' : view.balance.toFixed(2) + ' g'}</text>
+        <text x="470" y="283" fontSize="15" fontFamily="monospace" textAnchor="middle">{osmosisBalance(view) == null ? '-.-- g' : osmosisBalance(view).toFixed(2) + ' g'}</text>
       </Hot>
       <Menu2D menu={menu} close={() => setMenu(null)} W={560} H={340} />
     </svg>
