@@ -73,11 +73,44 @@ async function heldLessons(from, to, opts = {}) {
       liveClassId: { $in: needJoin.map(c => c._id) }, joinCount: { $gt: 0 },
     })).map(String));
   }
-  return raw.filter(c => {
+  const held = raw.filter(c => {
     const lapsed = c.status === 'ended' ||
       new Date(c.scheduledAt).getTime() + (c.durationMins || 60) * 60000 < heldBy;
     if (!lapsed && !c.outcome) return false;
     return isHeldClass(c, { joined: joined.has(String(c._id)), now: new Date(heldBy) });
+  });
+  return withoutPausedStudents(held);
+}
+
+/**
+ * A student on a pause (holiday, break, fee hold…) at the time of a
+ * lesson is not expected at it: drop them from that lesson's students so
+ * the lesson neither counts as scheduled nor as missed for them.
+ */
+async function withoutPausedStudents(classes) {
+  if (!classes.length) return classes;
+  let pauses = [];
+  try {
+    const StudentPause = require('../models/StudentPause');
+    const times = classes.map(c => new Date(c.scheduledAt).getTime());
+    const min = new Date(Math.min(...times)), max = new Date(Math.max(...times));
+    const ids = [...new Set(classes.flatMap(c => (c.assignedStudents || []).map(String)))];
+    pauses = await StudentPause.find({
+      student: { $in: ids }, startAt: { $lte: max },
+      $or: [{ endedAt: null, expectedEnd: null }, { endedAt: { $gte: min } }, { endedAt: null, expectedEnd: { $gte: min } }],
+    }).select('student startAt expectedEnd endedAt status').lean();
+  } catch { return classes; }
+  if (!pauses.length) return classes;
+  const byStudent = {};
+  for (const p of pauses) (byStudent[String(p.student)] = byStudent[String(p.student)] || []).push(p);
+  const pausedAt = (sid, t) => (byStudent[sid] || []).some(p => {
+    const end = p.endedAt || p.expectedEnd;
+    return new Date(p.startAt).getTime() <= t && (!end || new Date(end).getTime() >= t);
+  });
+  return classes.map(c => {
+    const t = new Date(c.scheduledAt).getTime();
+    const kept = (c.assignedStudents || []).filter(u => !pausedAt(String(u), t));
+    return kept.length === (c.assignedStudents || []).length ? c : { ...c, assignedStudents: kept };
   });
 }
 

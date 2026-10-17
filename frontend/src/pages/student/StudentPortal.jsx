@@ -11,6 +11,7 @@
  */
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { LessonPlan } from '../../components/lessons/LessonPlan.jsx'
+import { UpcomingClosures } from '../../components/lessons/SchoolCalendar.jsx'
 import { useNavigate } from 'react-router-dom'
 import BirthdayBanner from '../../components/BirthdayBanner.jsx'
 import SuggestionBox from '../../components/SuggestionBox.jsx'
@@ -1657,7 +1658,7 @@ export default function StudentPortal() {
           {/* ════════════════════════════════════════════
               TIMETABLE
           ════════════════════════════════════════════ */}
-          {page === 'timetable' && <RealTimetableTab user={user} setPage={setPage} toast={toast} />}
+          {page === 'timetable' && <><UpcomingClosures /><RealTimetableTab user={user} setPage={setPage} toast={toast} /></>}
           {page === 'lessonplan' && <LessonPlan editable toast={toast} />}
 
           {page === 'attendance' && <StudentAttendancePage user={user} toast={toast} />}

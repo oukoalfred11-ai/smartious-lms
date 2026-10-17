@@ -26,7 +26,7 @@ const LiveClass = require('../models/LiveClass');
 const ClassroomSession = require('../models/ClassroomSession');
 const {
   occurrencesFor, durationOf, planEntryOccurrences, groupKey,
-  buildLessonQueue, buildSubtopicQueue, stampKey, stampFor, serialize, consumesTopicFilter,
+  buildLessonQueue, buildSubtopicQueue, stampKey, stampFor, serialize, consumesTopicFilter, closedDaySet,
 } = require('./scheduling');
 
 const isDuplicateKey = (e) => e && (e.code === 11000 || /E11000/.test(String(e.message || '')));
@@ -80,6 +80,13 @@ async function buildQueue(members) {
 async function reconcileOnce() {
   const now = new Date();
   const entries = await TimetableEntry.find({}).lean();
+  // School holidays and breaks in the horizon: no lessons on those days.
+  let closedDays = new Set();
+  try {
+    const SchoolClosure = require('../models/SchoolClosure');
+    const today = new Date(now.getTime() - 864e5).toISOString().slice(0, 10);
+    closedDays = closedDaySet(await SchoolClosure.find({ end: { $gte: today } }).select('start end').lean());
+  } catch (e) { console.error('[timetable] closures:', e.message); }
   const activeIds = new Set(entries.filter(e => e.isActive !== false).map(e => String(e._id)));
 
   let created = 0, removed = 0, moved = 0;
@@ -116,7 +123,7 @@ async function reconcileOnce() {
       $or: [{ scheduledAt: { $gt: now } }, { originalScheduledAt: { $gt: now } }],
     }).select('scheduledAt originalScheduledAt recordings status detached lessonPinned').lean();
 
-    const plan = planEntryOccurrences(entry, existing, now);
+    const plan = planEntryOccurrences(entry, existing, now, { closedDays });
 
     if (plan.remove.length) {
       const keep = await protectedIds(plan.remove);
@@ -197,6 +204,11 @@ async function reconcileOnce() {
       console.error(`[timetable] could not materialize "${entry.title || entry.subject}": ${createErr.message}`);
     }
   }
+
+  // Lessons of teachers on approved leave go to the cover teacher, or are
+  // flagged for the Director of Studies to arrange cover.
+  try { await require('./leaveCover').applyLeaveCover(); }
+  catch (e) { console.error('[timetable] leave cover:', e.message); }
 
   if (created || removed || moved) {
     console.log(`[timetable] reconciled: ${created} class(es) materialized, ${removed} stale future instance(s) removed, ${moved} pinned class(es) moved`);

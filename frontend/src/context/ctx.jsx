@@ -131,6 +131,14 @@ export function AuthProvider({ children }) {
           // server-side (e.g. admin updated their grade, curriculum, role)
           setUser(fresh)
           localStorage.setItem('sm_user', JSON.stringify(fresh))
+          // Record the browser's time zone so lesson emails can show the
+          // family's own time (e.g. a student in London).
+          try {
+            const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+            if (tz && fresh.timezone !== tz) {
+              axios.patch(`${BASE}/auth/me/timezone`, { timezone: tz }, { headers: { Authorization: `Bearer ${t}` }, timeout: 8000 }).catch(() => {})
+            }
+          } catch {}
         } else {
           // Endpoint exists but returned no user — treat as expired
           localStorage.removeItem('sm_token')

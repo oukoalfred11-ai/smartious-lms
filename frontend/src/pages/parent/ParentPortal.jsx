@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import CommunityChatView from '../../components/CommunityChat.jsx'
 import AnnouncementsStrip from '../../components/AnnouncementsStrip.jsx'
 import { LessonPlan } from '../../components/lessons/LessonPlan.jsx'
+import { UpcomingClosures } from '../../components/lessons/SchoolCalendar.jsx'
 import MessagesHub from '../../components/MessagesHub.jsx'
 import AdmissionDocuments from '../../components/AdmissionDocuments.jsx'
 import { api } from '../../context/ctx.jsx'
@@ -298,7 +299,7 @@ export default function ParentPortal() {
               {page==='homework'   && <ParentHomework     child={selectedChild} showToast={showToast}/>}
               {page==='results'    && <ParentResults      child={selectedChild} showToast={showToast}/>}
               {page==='attendance' && <ParentAttendance   child={selectedChild} showToast={showToast}/>}
-              {page==='timetable'  && <ParentTimetable    child={selectedChild}/>}
+              {page==='timetable'  && <><UpcomingClosures /><ParentTimetable    child={selectedChild}/></>}
               {page==='rateteacher'&& <ParentRateTeachers child={selectedChild} showToast={showToast}/>}
               {page==='fees'       && <ParentFees         child={selectedChild} showToast={showToast}/>}
               {page==='documents'  && <AdmissionDocuments key={selectedChild?._id} studentId={selectedChild?._id} toast={{ ok: m => showToast(m, 'ok'), error: m => showToast(m, 'error') }}/>}

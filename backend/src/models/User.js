@@ -165,6 +165,11 @@ const userSchema = new mongoose.Schema({
   // Per-user email notification preferences, managed from the profile.
   // Every send site checks these; operational mail (welcome, billing,
   // show cause, password) is never optional.
+  // The user's own IANA time zone (e.g. Europe/London), detected by the
+  // browser at sign-in. Lesson emails add the time in this zone when it is
+  // not Nairobi time. Empty = unknown (Nairobi assumed).
+  timezone: { type: String, default: '' },
+
   emailPrefs: {
     classReminders: { type: Boolean, default: true },   // 30 minute class reminders
     classUpdates:   { type: Boolean, default: true },   // manual class created or changed

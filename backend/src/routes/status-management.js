@@ -259,6 +259,19 @@ router.patch('/:id/approve', auth, requireRole('admin', 'ops_manager'), async (r
       approvedBy: `${req.user.firstName} ${req.user.lastName}`
     });
 
+    // Lessons in the leave dates: to the cover teacher, or flagged for cover.
+    try {
+      await require('../lib/leaveCover').applyLeaveCover();
+      const LiveClass = require('../models/LiveClass');
+      const needing = await LiveClass.countDocuments({ coverLeaveId: leaveRequest._id, needsCover: true });
+      if (needing) {
+        await require('../lib/lessonNotices').academicAlert(`${needing} lesson${needing > 1 ? 's' : ''} need cover — ${teacher.firstName} ${teacher.lastName} on leave`, [
+          `${teacher.firstName} ${teacher.lastName}'s leave from ${new Date(leaveRequest.leaveStartDate).toDateString()} to ${new Date(leaveRequest.leaveEndDate).toDateString()} was approved without a replacement teacher.`,
+          'Assign a cover teacher to each lesson, or close it as not held (the family is then told), under Lessons needing cover in the timetable console. Lessons further ahead are flagged as they are created.',
+        ]);
+      }
+    } catch (e) { console.error('[leave cover]', e.message); }
+
     console.log(`✓ Leave request approved for ${teacher.firstName} ${teacher.lastName}`);
     console.log(`  Affected allocations: ${affectedAllocations.length}`);
 
@@ -337,6 +350,10 @@ router.patch('/:id/cancel', auth, async (req, res) => {
     const wasApproved = leaveRequest.status === 'Approved';
     leaveRequest.status = 'Cancelled';
     await leaveRequest.save();
+    if (wasApproved) {
+      try { await require('../lib/leaveCover').releaseLeaveCover(leaveRequest._id); }
+      catch (e) { console.error('[leave cover] release', e.message); }
+    }
 
     // If was approved, revert teacher status
     if (wasApproved) {

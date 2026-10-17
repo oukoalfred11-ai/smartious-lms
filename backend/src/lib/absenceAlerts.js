@@ -48,7 +48,7 @@ async function runAbsenceAlerts(now = new Date()) {
     classroomMode: { $ne: 'link' },
     status: { $in: ['scheduled', 'live'] },
     scheduledAt: { $gte: new Date(now.getTime() - 40 * 60000), $lte: new Date(now.getTime() - ABSENCE_ALERT_AFTER_MIN * 60000) },
-  }).populate('assignedStudents', 'firstName lastName email emailPrefs parentEmail linkedParents parentId parentName onBreak')
+  }).populate('assignedStudents', 'firstName lastName email emailPrefs parentEmail linkedParents parentId parentName onBreak timezone')
     .populate('teacherId', 'firstName lastName').lean()
 
   let sent = 0
