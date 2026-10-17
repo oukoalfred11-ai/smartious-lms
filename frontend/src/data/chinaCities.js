@@ -99,7 +99,7 @@ export const CHINA_CITIES = [
     heroTagline: 'For Hong Kong families — a place in September, not a waiting list, and the A-Level sets even a strong school cannot always run.',
     intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Hong Kong families. Hong Kong is a Special Administrative Region with its own education system, curriculum and regulator, and one of the deepest international school sectors in the world — ESF, Harrow, Kellett, the Chinese International School, German Swiss, Canadian International and many more. The problem here has never been quality or availability of curriculum. It is places: admissions are among the most competitive anywhere and waiting lists are a well-known feature of the market. We have none.',
     altTexts: { hero: 'Hong Kong harbour' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Hong Kong families — no waiting list, evening classes, subject depth. From USD 423/month.',
+    seoDesc: 'Online school and homeschooling in Hong Kong: live Cambridge IGCSE, A-Level, IB Diploma and AP classes in the HK evening. No waiting list. From USD 423/month.',
     challenges: [
       'International school waiting lists are a long-standing feature of the market, particularly for mid-year arrivals.',
       'Fees are among the highest in the world, with debentures and capital levies on top at some schools.',

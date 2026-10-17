@@ -60,7 +60,8 @@ import { LANGUAGES } from '../data/languages.js'
 import { PRIORITY_CITY_LINKS } from '../data/priorityLinks.js'
 import { SOCIAL_LINKS, SOCIAL_URLS, KAREN_MAP_URL } from '../data/social.js'
 import SocialLinks from '../components/SocialLinks.jsx'
-import { HUB_TITLES, guideTitle, nairobiAreaTitle, fitTitle } from '../data/seoTitles.js'
+import { HUB_TITLES, guideTitle, nairobiAreaTitle, fitTitle, fitDesc } from '../data/seoTitles.js'
+import { guidesFor } from '../data/geoGuides.js'
 
 
 /* ── Front Desk capture ───────────────────────────────────
@@ -1769,7 +1770,7 @@ const PAGE_META = {
   },
   'homeschooling-china': {
     title: 'Online School Hong Kong, Macau & China | Cambridge IGCSE, A-Level, IB \u2014 Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families in the Hong Kong and Macau Special Administrative Regions. No waiting list. The mainland regulatory position set out honestly. From USD 423/month.',
+    desc: 'Online school and homeschool in Hong Kong and Macau: live Cambridge IGCSE, A-Level, IB and AP classes. Mainland China rules explained. From USD 423/month.',
   },
   'homeschooling-bangladesh': {
     title: 'Online School & International Curriculum Bangladesh | Cambridge O-Level, A-Level, IB \u2014 Smartious',
@@ -5000,6 +5001,7 @@ export default function LandingPage() {
       : (typeof window !== 'undefined' ? (window.location.pathname.replace(/\/+$/, '') || '/') : '')
     if (HUB_TITLES[metaPath]) metaTitle = HUB_TITLES[metaPath]
     metaTitle = fitTitle(metaPath, metaTitle)
+    metaDesc = fitDesc(metaDesc, metaTitle)
   }
   if (page === 'not-found') {
     metaTitle = 'Page not found | Smartious'
@@ -24004,6 +24006,23 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* ── Guides written for this country (country hubs only; city pages
+          list them in CountryCityPage) ── */}
+      {typeof canonicalOverride === 'string' && canonicalOverride.startsWith('/online-school/') && (() => {
+        const g = guidesFor(canonicalOverride.split('/').pop())
+        if (!g.length) return null
+        return (
+          <section className="sec" style={{background:V.white,paddingTop:40,paddingBottom:40}}><div className="wrap">
+            <nav aria-label="Guides" style={{maxWidth:880,margin:'0 auto'}}>
+              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',fontWeight:400,color:V.ink,margin:'0 0 14px',lineHeight:1.25}}>Guides for families in this country</h2>
+              <p style={{fontSize:14.5,lineHeight:1.9,color:V.sl,margin:0}}>
+                {g.map((x, i) => (<span key={x.slug}>{i > 0 ? ' · ' : ''}<a href={'/blog/' + x.slug} onClick={linkClick(() => { nav('/blog/' + x.slug); window.scrollTo(0, 0) })} style={{color:V.cr,textDecoration:'none'}}>{x.title}</a></span>))}
+              </p>
+            </nav>
+          </div></section>
+        )
+      })()}
 
       {/* ── FOOTER — one footer, every page, always the same ── */}
       <Footer P={P}/>

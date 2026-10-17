@@ -2,7 +2,8 @@
    priorityLinks.js — internal links to the priority markets
    ───────────────────────────────────────────────────────────────────
    The country hubs and main city pages for the January 2027 intake
-   markets (the Gulf, Nigeria and Kenya). The city links are used by the
+   markets (the Gulf, Nigeria and Kenya), plus Hong Kong, where the site
+   already ranks for "homeschool" and "online school". The city links are used by the
    home page and the footer in LandingPage.jsx; both lists are used by
    scripts/seo-static.mjs (static home page and footer), so the app and the
    crawler HTML link to the same pages. Every href must be an indexable
@@ -36,4 +37,5 @@ export const PRIORITY_CITY_LINKS = [
   ['/homeschool-port-harcourt-ng', 'Port Harcourt'],
   ['/homeschool-nairobi', 'Nairobi'],
   ['/homeschool-mombasa', 'Mombasa'],
+  ['/homeschool-hong-kong-cn', 'Hong Kong'],
 ]

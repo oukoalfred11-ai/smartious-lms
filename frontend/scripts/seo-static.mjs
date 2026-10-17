@@ -69,8 +69,9 @@ import { US_CITIES, US_CITIES_BY_STATE } from '../src/data/usCities.js'
 import { CA_PROVINCES } from '../src/data/caProvinces.js'
 import { CA_CITIES, CA_CITIES_BY_PROVINCE } from '../src/data/caCities.js'
 import { PRIORITY_HUB_LINKS, PRIORITY_CITY_LINKS } from '../src/data/priorityLinks.js'
-import { HUB_TITLES, guideTitle, nairobiAreaTitle, fitTitle } from '../src/data/seoTitles.js'
+import { HUB_TITLES, guideTitle, nairobiAreaTitle, fitTitle, fitDesc } from '../src/data/seoTitles.js'
 import { ARTICLES_INDEX } from '../src/data/generated/articlesIndex.js'
+import { guidesFor } from '../src/data/geoGuides.js'
 
 const NOINDEX_ONLY = process.argv.includes('--noindex-only')
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -306,6 +307,13 @@ const hubLinks = () => [...CITY_FILES.map(({ country: c }) => ({ href: c.hub, la
   ...COUNTRY_DETAILS.filter(c => !['uk', 'dubai'].includes(c.slug) && !CITY_FILES.some(x => x.country.hub === '/online-school/' + c.slug))
     .map(c => ({ href: '/online-school/' + c.slug, label: 'Online school in ' + c.country }))]
   .filter((l, i, a) => a.findIndex(x => x.href === l.href) === i)
+
+// The guides written for a hub's country (src/data/geoGuides.js), as a
+// related-links block; empty when the country has none.
+const guideLinks = (hub, place, heading) => {
+  const g = guidesFor(String(hub || '').split('/').pop(), place)
+  return g.length ? [h2(heading), links(g.map(x => ({ href: '/blog/' + x.slug, label: x.title })))] : []
+}
 
 // Home
 {
@@ -545,7 +553,7 @@ for (const { file, country: c, cities } of CITY_FILES) {
       c.slug === 'kenya' ? h2('More for Kenyan families') + links([{ href: '/virtual-school-kenya', label: 'Virtual school in Kenya' }, { href: '/tuition-nairobi', label: 'Tuition in Nairobi' }]) : '',
       c.slug === 'united-kingdom' ? h2('Tuition in the UK') + links([{ href: '/tuition-uk', label: 'Tutors in the UK' }]) : '',
       c.slug === 'ukraine' ? h2('Virtual school for Ukrainian families') + links([{ href: '/virtual-school-ukraine', label: 'Virtual school for Ukrainian families in Ukraine and abroad' }]) : '',
-    ], faqs: c.faqs, crumbs: [[name, c.hub]], src: ['src/data/' + file],
+    ], faqs: c.faqs, related: guideLinks(c.hub, '', 'Guides for families in this country'), crumbs: [[name, c.hub]], src: ['src/data/' + file],
     ld: [serviceLd({ name: 'Online school and homeschool in ' + name, desc: (m && m.desc) || c.heroSubhead, path: c.hub, area: name })] })
   for (const x of cities) {
     const path = '/homeschool-' + x.slug
@@ -560,7 +568,8 @@ for (const { file, country: c, cities } of CITY_FILES) {
         x.successScenarios?.length ? h2('How families use Smartious') + bullets(x.successScenarios) : '',
         x.nearbyAreas?.length ? h2(x.name + ' communities and nearby areas') + `<p>${x.nearbyAreas.map(esc).join(' · ')}</p>` : '',
       ], faqs: x.faqs, faqsTitle: 'Common questions from ' + x.name + ' families',
-      related: [h2('More in ' + name), links([{ href: c.hub, label: 'Online school in ' + name }, ...cityLinks.filter(l => l.href !== path)])],
+      related: [h2('More in ' + name), links([{ href: c.hub, label: 'Online school in ' + name }, ...cityLinks.filter(l => l.href !== path)]),
+        ...guideLinks(c.hub, x.name, 'Guides for families in ' + name)],
       crumbs: [[name, c.hub], [x.name, path]], src: ['src/data/' + file],
       ld: [serviceLd({ name: x.primaryKeyword || 'Online school in ' + x.name, desc: x.seoDesc || x.intro, path, area: [x.name, x.county, name].filter(Boolean).join(', ') })] })
     if (pg.path === path && isNoindexCandidateFile(file)) CITY_PAGES.push({ slug: x.slug, pg, countrySlug: c.slug, cityName: x.name, countryName: name })
@@ -582,7 +591,7 @@ add({
     h2('Why families choose Smartious'), bullets(UAE_COUNTRY.whySmartious),
     h2('Fees and admission'), p(FEE_SCHOOL + '. One-to-one tuition: ' + FEE_TUITION + '.'),
   ],
-  faqs: UAE_COUNTRY.faqs, crumbs: [['UAE', '/online-school/uae']], src: ['src/data/uaeCities.js', 'src/pages/LandingPage.jsx'],
+  faqs: UAE_COUNTRY.faqs, related: guideLinks('/online-school/uae', '', 'Guides for families in this country'), crumbs: [['UAE', '/online-school/uae']], src: ['src/data/uaeCities.js', 'src/pages/LandingPage.jsx'],
   ld: [serviceLd({ name: 'Online school and homeschool in the UAE', desc: UAE_COUNTRY.heroSubhead, path: '/online-school/uae', area: 'United Arab Emirates' })],
 })
 for (const c of UAE_CITIES) {
@@ -836,7 +845,7 @@ const FOOT_MORE = [['/services', 'Services'], ['/compare/wolsey-hall', 'Smartiou
 
 function render(pg) {
   const url = ORIGIN + (pg.path === '/' ? '/' : pg.path)
-  const desc = clip(pg.desc, 300)
+  const desc = pg.lang === 'ar' ? clip(pg.desc, 300) : fitDesc(pg.desc, pg.title)
   const ar = pg.lang === 'ar'
   let html = shell.replace(/<title>[^<]*<\/title>/, () => `<title>${esc(pg.title)}</title>`)
   if (ar) html = html.replace(/<html lang="en">/, '<html lang="ar" dir="rtl">')

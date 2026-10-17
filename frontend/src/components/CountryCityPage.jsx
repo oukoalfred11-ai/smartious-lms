@@ -32,6 +32,7 @@ import { useEffect } from 'react'
 import { isNoindexSlug } from '../data/noindexSlugs.js'
 import { imageExists } from '../data/generated/publicImages.js'
 import GoogleReviews from './GoogleReviews.jsx'
+import { guidesFor } from '../data/geoGuides.js'
 
 const ORG_ID = 'https://smartioushomeschool.com/#organization'
 const ROBOTS_DEFAULT = 'index, follow, max-image-preview:large, max-snippet:-1'
@@ -56,6 +57,7 @@ export default function CountryCityPage({ country, cities, currentCitySlug, P, V
   const hubUrl = country.hub
   const hubPageId = country.hubPageId
   const countryName = country.name
+  const guides = guidesFor(String(hubUrl || '').split('/').pop(), city.name)
   const cityUrl = 'https://smartioushomeschool.com/homeschool-' + city.slug
   const hubFullUrl = 'https://smartioushomeschool.com' + hubUrl
 
@@ -238,6 +240,19 @@ export default function CountryCityPage({ country, cities, currentCitySlug, P, V
               </span>
             ))}
           </p>
+          {guides.length > 0 && (<>
+            <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',fontWeight:400,color:V.ink,margin:'26px 0 14px',lineHeight:1.25}}>
+              Guides for families in {countryName}
+            </h2>
+            <p style={{fontSize:14.5,lineHeight:1.9,color:V.sl,margin:0}}>
+              {guides.map((g, i) => (
+                <span key={g.slug}>{i > 0 ? ' · ' : ''}
+                  <a href={'/blog/' + g.slug} onClick={(e) => { if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return; e.preventDefault(); nav('/blog/' + g.slug); window.scrollTo(0, 0) }}
+                    style={{color:V.cr,textDecoration:'none'}}>{g.title}</a>
+                </span>
+              ))}
+            </p>
+          </>)}
         </nav>
       </div></section>
 

@@ -124,7 +124,20 @@ export function guideTitle(metaTitle, t) {
 const FIT_PATHS = /^\/(?:homeschool-[^/]+|tuition-uae\/[^/]+|tuition-uk(?:\/[^/]+)?|study-abroad(?:\/[^/]+)?|curricula\/[^/]+|languages(?:\/[^/]+)?|test-prep(?:\/[^/]+)?|services\/[^/]+)$/
 const PHRASE_SEP = /( \| | — | – )/
 const LIST_SEP = /(, | · )/
+// City pages whose title leads with a generic phrase ("Online school and
+// international curriculum in Hong Kong") say what families search for
+// instead, the same words as the page's H1: "Online School & Homeschool in
+// Hong Kong". Searches are for "homeschool <city>" and "online school
+// <city>"; "international curriculum" is rarely typed.
+const GENERIC_CITY = /^Online school and (?:international curriculum|Cambridge tutoring|Cambridge curriculum|homeschool) (?:in|for) /
 export function fitTitle(path, title) {
+  if (title && /^\/homeschool-/.test(path || '') && GENERIC_CITY.test(title) && !KEEP.test(title)) {
+    const rest = title.replace(GENERIC_CITY, '')
+    const place = rest.split(PHRASE_SEP)[0].trim()
+    const t = 'Online School & Homeschool in ' + place
+    if (t.length + BRAND.length <= MAX) return t + BRAND
+    if (t.length <= MAX) return t
+  }
   if (!title || title.length <= MAX || !FIT_PATHS.test(path || '') || KEEP.test(title)) return title
   const parts = title.split(PHRASE_SEP)                 // [phrase, sep, phrase, sep, …]
   while (parts.length > 1 && /^Smartious\b/.test(parts[parts.length - 1].trim())) parts.splice(-2, 2)
@@ -158,4 +171,55 @@ export function fitTitle(path, title) {
     }
   }
   return best.length + BRAND.length <= MAX ? best + BRAND : best
+}
+
+// ── Meta descriptions ────────────────────────────────────────
+// Google shows about 155–160 characters of a description. Most country
+// and city descriptions ran to 200–300, so the price and the end of the
+// sentence were cut. fitDesc keeps whole sentences that fit, always keeps
+// "From USD 423/month." when the description had it, and when even the
+// first sentence is too long writes a short one for the place named in
+// the title. Descriptions naming accreditation, recognition or licensing
+// are left exactly as written. Used by LandingPage.jsx and seo-static.mjs.
+const DMAX = 158
+export function fitDesc(desc, title) {
+  let d = String(desc || '').replace(/\s+/g, ' ').trim()
+  if (d.length <= DMAX || KEEP.test(d)) return d
+  d = d.replace(/^Online, virtual school & homeschool(?: for [^.]+)?\.\s*/, '')
+  const pm = d.match(/From USD 423(?:\/month| per month)[^.]*\./)
+  const price = pm ? 'From USD 423/month.' : ''
+  const rest = (pm ? d.replace(pm[0], '') : d).replace(/\s+/g, ' ').trim()
+  const room = DMAX - (price ? price.length + 1 : 0)
+  const sents = rest.match(/[^.!?]+[.!?]+(?=\s|$)/g) || [rest]
+  let out = ''
+  for (const x of sents) {
+    const t = (out + ' ' + x.trim()).trim()
+    if (t.length <= room) out = t
+    else break
+  }
+  if (out.length >= 70) return (out + (price ? ' ' + price : '')).trim()
+  if (price) {                                   // the price does not fit with the opening: keep the opening
+    let o2 = ''
+    for (const x of sents) { const t = (o2 + ' ' + x.trim()).trim(); if (t.length <= DMAX) o2 = t; else break }
+    if (o2.length >= 100) return o2
+  }
+  const m = / in (?:the )?(.+?)(?: \| | — | – |$)/.exec(String(title || '')) || /^Online Homeschool (?:in )?(.+?)(?: \| | — | – |$)/.exec(String(title || ''))
+  const place = m ? m[1].trim() : ''
+  // The short form is a sales line, so it only replaces a description that
+  // already is one ("Live online …"); informational ones (e.g. mainland
+  // China's regulatory position) are cut, never reworded.
+  if (place && place.length <= 40 && /^Live online\b/.test(rest)) {
+    const end = price || 'Small live classes.'
+    const c = [
+      `Live online Cambridge IGCSE, A-Level, IB and American AP classes for families in ${place}. Homeschool or full-time online school. ${end}`,
+      `Live online IGCSE, A-Level, IB and American AP for families in ${place}. Homeschool or full-time online school. ${end}`,
+      `Live online IGCSE, A-Level and IB for families in ${place}. Homeschool or online school. ${end}`,
+    ].find(x => x.length <= DMAX)
+    if (c) return c
+  }
+  // No place: cut the first sentence at the last comma or dash that fits.
+  const first = sents[0].trim().replace(/[.!?]+$/, '')
+  const cut = Math.max(first.lastIndexOf(', ', room - 2), first.lastIndexOf(' — ', room - 2))
+  if (cut >= 60) return (first.slice(0, cut) + '.' + (price ? ' ' + price : '')).trim()
+  return d.slice(0, d.lastIndexOf(' ', DMAX - 1)) + '…'
 }

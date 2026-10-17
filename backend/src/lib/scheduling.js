@@ -254,11 +254,12 @@ function classTypeLabel(cls) {
  * history keeps the old rule (time passed = held), so past reports do
  * not change. Override with LESSON_CLOSE_CUTOVER=YYYY-MM-DD.
  */
-const DEFAULT_CLOSE_CUTOVER = '2026-10-26';
+// Monday 19 October 2026, 00:00 Nairobi.
+const DEFAULT_CLOSE_CUTOVER = '2026-10-18T21:00:00Z';
 function closeCutover() {
   const raw = process.env.LESSON_CLOSE_CUTOVER || DEFAULT_CLOSE_CUTOVER;
   const d = new Date(/T/.test(raw) ? raw : raw + 'T00:00:00Z');
-  return isNaN(d.getTime()) ? new Date(DEFAULT_CLOSE_CUTOVER + 'T00:00:00Z') : d;
+  return isNaN(d.getTime()) ? new Date(DEFAULT_CLOSE_CUTOVER) : d;
 }
 
 const OUTCOMES = ['taught', 'student_absent', 'not_held'];
