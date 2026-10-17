@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import CommunityChatView from '../../components/CommunityChat.jsx'
 import AnnouncementsStrip from '../../components/AnnouncementsStrip.jsx'
+import { LessonPlan } from '../../components/lessons/LessonPlan.jsx'
 import MessagesHub from '../../components/MessagesHub.jsx'
 import AdmissionDocuments from '../../components/AdmissionDocuments.jsx'
 import { api } from '../../context/ctx.jsx'
@@ -40,6 +41,7 @@ const NAV_SECTIONS = [
     { id:'results',    label:'Results',           icon:'M18 20V10M12 20V4M6 20v-6' },
     { id:'attendance', label:'Attendance',        icon:'M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11' },
     { id:'timetable',  label:'Timetable',         icon:'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z' },
+    { id:'lessonplan', label:'Lesson Plan',       icon:'M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11' },
     { id:'lessons',    label:'Live Lessons',      icon:'M15 10l4.553-2.276A1 1 0 0 1 21 8.618v6.764a1 1 0 0 1-1.447.894L15 14M3 8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8z', live:true },
     { id:'messages',   label:'Messages',          icon:'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z' },
     { id:'settings',   label:'Settings',          icon:'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' },
@@ -301,6 +303,7 @@ export default function ParentPortal() {
               {page==='fees'       && <ParentFees         child={selectedChild} showToast={showToast}/>}
               {page==='documents'  && <AdmissionDocuments key={selectedChild?._id} studentId={selectedChild?._id} toast={{ ok: m => showToast(m, 'ok'), error: m => showToast(m, 'error') }}/>}
               {page==='lessons'    && <ParentLessons      child={selectedChild}/>}
+              {page==='lessonplan' && selectedChild && <LessonPlan key={selectedChild._id} studentId={selectedChild._id} />}
               {page==='messages' && (<>
                 <MessagesHub meId={user?._id} role="parent" />
                 <ParentMessages     user={user} showToast={showToast}/>

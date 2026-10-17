@@ -65,7 +65,7 @@ router.get('/children', auth, async (req, res) => {
     byEmail.forEach(s => { if (!all.some(x=>String(x._id)===String(s._id))) all.push(s) })
 
     return ok(res, { children: all })
-  } catch(e) { return fail(res,500,e.message) }
+  } catch(e) { return fail(res,e.status||500,e.message) }
 })
 
 // ── POST /api/parent/link ─────────────────────────────────
@@ -87,7 +87,7 @@ router.post('/link', auth, async (req, res) => {
     await User.findByIdAndUpdate(student._id,  { $addToSet:{ linkedParents:req.user._id }, $set:{ parentEmail:req.user.email } })
 
     return ok(res, { student:{ _id:student._id, firstName:student.firstName, lastName:student.lastName } }, 'Student linked.')
-  } catch(e) { return fail(res,500,e.message) }
+  } catch(e) { return fail(res,e.status||500,e.message) }
 })
 
 // ── GET /api/parent/children/:id/timetable ───────────────
@@ -102,7 +102,7 @@ router.get('/children/:id/timetable', auth, async (req, res) => {
       .populate('teacherId','firstName lastName')
       .lean()
     return ok(res, { entries })
-  } catch(e) { return fail(res,500,e.message) }
+  } catch(e) { return fail(res,e.status||500,e.message) }
 })
 
 // ── GET /api/parent/children/:id/reports ─────────────────
@@ -218,7 +218,7 @@ router.get('/children/:id/reports', auth, async (req, res) => {
       subjectAverages,
       overallAvg,
     })
-  } catch(e) { return fail(res,500,e.message) }
+  } catch(e) { return fail(res,e.status||500,e.message) }
 })
 
 // ── GET /api/parent/children/:id/teachers ──────────────
@@ -398,7 +398,7 @@ router.get('/children/:id/fees', auth, async (req, res) => {
       paid,
       pending,
     })
-  } catch(e) { return fail(res,500,e.message) }
+  } catch(e) { return fail(res,e.status||500,e.message) }
 })
 
 // ── Access guard ──────────────────────────────────────────
@@ -410,7 +410,11 @@ async function assertAccess(reqUser, student) {
     const byEmail = student.parentEmail === reqUser.email
     if (!linked.includes(String(student._id)) && !byEmail)
       throw Object.assign(new Error('Not authorised to view this student.'), {status:403})
+    return
   }
+  // Any other role (student, teacher, …) has no business in the parent
+  // portal's child views: previously they fell through and were allowed.
+  throw Object.assign(new Error('Not authorised to view this student.'), {status:403})
 }
 
 // ── Class reminder function ───────────────────────────────

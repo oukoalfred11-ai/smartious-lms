@@ -77,6 +77,7 @@ app.use('/api/curriculum',     require('./routes/curriculum'));
 app.use('/api/syllabus', require('./routes/syllabus'));
 app.use('/api/classroom', require('./routes/classroom'));
 app.use('/api/timetable', require('./routes/timetable'));
+app.use('/api/lesson-plan', require('./routes/lessonPlan'));
 app.use('/api/student-profile', require('./routes/student-profile'));
 app.use('/api/students',       require('./routes/students'));
 app.use('/api/student-sessions', require('./routes/student-sessions'));

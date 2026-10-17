@@ -18,6 +18,7 @@ import TeacherLeaveRequest from './TeacherLeaveRequest.jsx'
 import LibraryViewer from '../../components/LibraryViewer.jsx'
 import MobileTabBar, { IconParts, useBackHandler } from '../../components/ui/MobileTabBar.jsx'
 import { LessonsToClose, ExtraLessonForm } from '../../components/lessons/LessonControl.jsx'
+import { HelpRequests } from '../../components/lessons/LessonPlan.jsx'
 
 // ──────────────────────────────────────────────────────
 // DESIGN TOKENS — mirrors the admin Dashboard's TOKENS
@@ -14807,6 +14808,7 @@ function TeacherTimetableTab({ user, toast }) {
       </div>
 
       <LessonsToClose toast={toast} />
+      <HelpRequests toast={toast} />
 
       {entries.some(e => e.needsConfirmation) && (
         <div style={{ background: '#FFF7E6', border: '1px solid #F3D9A4', borderRadius: 12, padding: '12px 14px', fontSize: 12.5, color: '#7A4B00' }}>
