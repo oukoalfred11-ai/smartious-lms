@@ -516,7 +516,7 @@ export const MOROCCO_COUNTRY = {
     { metric: 'Curricula', value: '5', sub: 'Cambridge · Edexcel · IB · American AP · CBC' },
     { metric: 'Subject specialists', value: 'PGCE-trained', sub: 'Degree-qualified · many TSC-registered' },
     { metric: 'Countries served', value: '40+', sub: 'Africa · Gulf · Europe · Americas' },
-    { metric: 'Physical centres', value: '2', sub: 'Diamond Plaza Parklands · Karen Hardy' },
+    { metric: 'Physical centres', value: '2', sub: 'Diamond Plaza, Parklands · Karen West' },
     { metric: 'Time zone match', value: 'CET (UTC+1)', sub: 'Year-round Moroccan school hours' },
   ],
 

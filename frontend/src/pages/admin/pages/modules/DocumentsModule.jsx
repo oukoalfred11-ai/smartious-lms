@@ -593,7 +593,7 @@ function buildReceiptHTML(f) {
       </div>
       <div class="paid-stamp">
         <div class="org">SMARTIOUS HOMESCHOOL GLOBAL</div>
-        <div class="addr">Diamond Plaza I, Parklands</div>
+        <div class="addr">Diamond Plaza I Parklands Annex</div>
         <div class="addr">Nairobi, Kenya</div>
         <div class="paid">PAID</div>
         <div class="pdate">${esc(f.paidDate)}</div>
@@ -607,7 +607,7 @@ function buildReceiptHTML(f) {
 
   <div class="ft">
     <b>Smartious Homeschool Global</b><br>
-    Diamond Plaza I, Parklands, Nairobi, Kenya<br>
+    Diamond Plaza I Parklands Annex, 3rd Floor, Nairobi, Kenya<br>
     +254 745 021 212 &nbsp;|&nbsp; hellosmartious@gmail.com &nbsp;|&nbsp; smartioushomeschool.com
   </div>
 </div>
@@ -737,7 +737,7 @@ export function buildInvoiceHTML(f, t) {
   </div>
 
   <div class="page-body">
-    <div style="font-size:9px;color:var(--mute);margin-top:4mm;margin-bottom:2mm">Smartious Homeschool Global · Diamond Plaza, 4th Avenue, Parklands, Nairobi · hellosmartious@gmail.com · +254 745 021 212</div>
+    <div style="font-size:9px;color:var(--mute);margin-top:4mm;margin-bottom:2mm">Smartious Homeschool Global · Diamond Plaza I Parklands Annex, 3rd Floor, Nairobi · hellosmartious@gmail.com · +254 745 021 212</div>
     <div class="bill-row">
       <div>
         <div class="bill-lbl">Bill To</div>

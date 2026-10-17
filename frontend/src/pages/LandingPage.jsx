@@ -57,6 +57,8 @@ import { TEST_PREP } from '../data/testPrep.js'
 import { STUDY_ABROAD } from '../data/studyAbroad.js'
 import { LANGUAGES } from '../data/languages.js'
 import { PRIORITY_CITY_LINKS } from '../data/priorityLinks.js'
+import { SOCIAL_LINKS, SOCIAL_URLS, KAREN_MAP_URL } from '../data/social.js'
+import SocialLinks from '../components/SocialLinks.jsx'
 import { HUB_TITLES, guideTitle, nairobiAreaTitle, fitTitle } from '../data/seoTitles.js'
 
 
@@ -1080,7 +1082,7 @@ const PAGES = ['home','about','curricula','curriculum-detail','services','servic
 
 // ─────────────────────────────────────────────────────────────────
 // Google Business Profile reviews — Smartious Homeschool & Tuition
-// Diamond Plaza, Fourth Parklands Ave, Nairobi
+// Diamond Plaza I Parklands Annex, 3rd Floor, Nairobi
 // 4.9★ from 130+ verified reviews
 // ─────────────────────────────────────────────────────────────────
 // Data lives in data/googleReviews.js (shared with CountryHub and city pages).
@@ -2079,7 +2081,7 @@ const PAGE_META = {
 // LEGAL POLICIES — Kenya DPA 2019 + EU GDPR compliant
 // ═══════════════════════════════════════════════════════════
 const PRIVACY_POLICY = [
-  {h:'1. Who we are',p:'Smartious E-School Ltd ("Smartious", "we", "us", "our") is a private limited company registered in Kenya, with its principal place of business at Diamond Plaza I Annex, 3rd Floor, Office 20, Parklands, Nairobi. We operate the website smartioushomeschool.com and deliver homeschool, online and private tuition services to students worldwide. For the purposes of Kenya\'s Data Protection Act, 2019 and the EU General Data Protection Regulation (GDPR), Smartious is the Data Controller of the personal data you share with us.'},
+  {h:'1. Who we are',p:'Smartious E-School Ltd ("Smartious", "we", "us", "our") is a private limited company registered in Kenya, with its principal place of business at Diamond Plaza I Parklands Annex, 3rd Floor, Nairobi. We operate the website smartioushomeschool.com and deliver homeschool, online and private tuition services to students worldwide. For the purposes of Kenya\'s Data Protection Act, 2019 and the EU General Data Protection Regulation (GDPR), Smartious is the Data Controller of the personal data you share with us.'},
   {h:'2. What personal data we collect',p:'We collect only the data we genuinely need to deliver education and communicate with families. This includes: (a) contact and identification data: student and parent names, email addresses, WhatsApp numbers, student date of birth, country of residence; (b) academic data: curriculum selection, current school, grade level, placement assessment answers and scores, progress reports; (c) payment data: we do not store full card numbers; Paystack processes all payments and we receive only the transaction reference and amount; (d) technical data: IP address, browser type, device type, pages visited, collected via cookies and analytics; (e) communication records: messages you send us by email, WhatsApp, contact form, or during consultation calls.'},
   {h:'3. How we use your data',p:'We use personal data only for: (i) delivering the programme you have enrolled in, matching tutors, scheduling lessons, issuing progress reports, sitting exams; (ii) communicating with you about your account, lessons, payments, and service updates; (iii) processing payments via Paystack; (iv) improving our website and teaching methods through anonymised analytics; (v) complying with Kenyan tax, education, and regulatory obligations. We do not sell personal data to third parties. Ever.'},
   {h:'4. Lawful basis for processing',p:'Under Article 6 of the GDPR and Section 30 of the Kenya Data Protection Act, we process your data on one of the following lawful bases: (a) Contract: to deliver the services you have enrolled in; (b) Consent: for marketing communications, which you can withdraw at any time; (c) Legitimate interests: for securing our systems, preventing fraud, and improving our services; (d) Legal obligation: for tax records, accounting, and regulatory compliance.'},
@@ -2091,7 +2093,7 @@ const PRIVACY_POLICY = [
   {h:'10. Security',p:'We use industry-standard safeguards: HTTPS (TLS 1.3) across the entire site, password hashing (bcrypt) for all accounts, role-based access control in our backend, encrypted database backups, and quarterly security reviews. Paystack handles payment data to PCI-DSS Level 1 standards, we never see or store full card details. No system is perfectly secure, but we work continuously to reduce risk.'},
   {h:'11. Breach notification',p:'In the unlikely event of a personal data breach affecting your rights, we will notify the Office of the Data Protection Commissioner (Kenya) within 72 hours as required by Section 43 of the Kenya DPA, and the affected individuals without undue delay, describing what happened, what data was affected, and the steps we are taking.'},
   {h:'12. Changes to this policy',p:'We may update this policy to reflect changes in law, our services, or our processors. When we make material changes we will notify active students and parents by email and update the "Effective" date at the top of this page. The most current version is always the one published here.'},
-  {h:'13. Contact & complaints',p:'For any privacy question, data subject request, or complaint, email our Data Protection point of contact: hello@smartioushomeschool.com, phone +254 745 021 212, or write to Smartious E-School Ltd, Diamond Plaza I Annex, 3rd Floor, Office 20, Parklands, Nairobi, Kenya. You also have the right to lodge a complaint with the Office of the Data Protection Commissioner of Kenya (odpc.go.ke) or, if you are in the EU, with your national data protection authority.'},
+  {h:'13. Contact & complaints',p:'For any privacy question, data subject request, or complaint, email our Data Protection point of contact: hello@smartioushomeschool.com, phone +254 745 021 212, or write to Smartious E-School Ltd, Diamond Plaza I Parklands Annex, 3rd Floor, Nairobi, Kenya. You also have the right to lodge a complaint with the Office of the Data Protection Commissioner of Kenya (odpc.go.ke) or, if you are in the EU, with your national data protection authority.'},
 ]
 
 const TERMS_OF_SERVICE = [
@@ -2108,7 +2110,7 @@ const TERMS_OF_SERVICE = [
   {h:'11. Limitation of liability',p:'To the maximum extent permitted by Kenyan law, Smartious is not liable for: (i) exam results or university admissions: our role is to teach and prepare; outcomes depend on many factors including the student\'s effort and the decisions of exam boards and universities; (ii) indirect, consequential, or punitive damages; (iii) delays or outages caused by third-party services (Paystack, Google, Netlify). Our total liability for any claim is limited to the fees you have paid us in the 12 months preceding the claim.'},
   {h:'12. Governing law',p:'These Terms are governed by the laws of Kenya. Any dispute arising from these Terms or our services will be resolved first by good-faith negotiation, then by mediation in Nairobi under the Mediation (Court-Annexed) Rules, and only then by the courts of Kenya, which have exclusive jurisdiction.'},
   {h:'13. Changes to these terms',p:'We may update these Terms from time to time. Material changes will be communicated to active students and parents at least 30 days in advance by email. Minor clarifications (typos, reformatting) may be made without notice. The current version is always published here with its effective date.'},
-  {h:'14. Contact',p:'Questions about these Terms: hello@smartioushomeschool.com, +254 745 021 212, or Diamond Plaza I Annex, 3rd Floor, Office 20, Parklands, Nairobi, Kenya.'},
+  {h:'14. Contact',p:'Questions about these Terms: hello@smartioushomeschool.com, +254 745 021 212, or Diamond Plaza I Parklands Annex, 3rd Floor, Nairobi, Kenya.'},
 ]
 
 const COOKIE_POLICY = [
@@ -2359,7 +2361,7 @@ function LegalPage({ P, title, em, subtitle, effective, sections }) {
           <h1 className="pg-h">{title} <em>{em}</em></h1>
           <p className="pg-sub" style={{marginTop:12}}>{subtitle}</p>
           <div style={{marginTop:18,fontSize:12,color:'rgba(247,243,237,.45)',fontFamily:"'Fira Code',monospace",letterSpacing:'.08em'}}>
-            Effective: {effective} &nbsp;·&nbsp; Smartious E-School Ltd &nbsp;·&nbsp; Diamond Plaza I Annex, 3rd Floor, Office 20, Parklands, Nairobi
+            Effective: {effective} &nbsp;·&nbsp; Smartious E-School Ltd &nbsp;·&nbsp; Diamond Plaza I Parklands Annex, 3rd Floor, Nairobi
           </div>
         </div>
       </div>
@@ -5927,11 +5929,11 @@ export default function LandingPage() {
                   tag:'Learn In Person',
                   title:'Smartious Learning Centres',
                   img:'https://res.cloudinary.com/dae99gz1m/image/upload/v1780593515/photo_2026-06-04_20-09-57_ujfvdf.jpg',
-                  alt:'Smartious learning centre Nairobi — Diamond Plaza Parklands and Karen Hardy',
-                  desc:'Face to face learning at our Nairobi centres in Diamond Plaza Parklands and Karen, with premium tutoring halls, intensive examination preparation and supervised study.',
+                  alt:'Smartious learning centre Nairobi — Diamond Plaza, Parklands and Karen West',
+                  desc:'Face to face learning at our Nairobi centres in Diamond Plaza, Parklands and Karen West, with premium tutoring halls, intensive examination preparation and supervised study.',
                   bullets:[
-                    'Diamond Plaza Parklands (HQ)',
-                    'Karen Hardy Centre',
+                    'Diamond Plaza, Parklands (head office)',
+                    'Karen West Centre',
                     'Small classes and study cohorts',
                     'Quiet study areas, supervised',
                   ],
@@ -6729,7 +6731,7 @@ export default function LandingPage() {
 
                     <p>When I started Smartious in 2018, I was a young mathematics and physics teacher visiting Nairobi homes one at a time. The families I met all wanted the same thing: an excellent education for their child, delivered with care, on their own terms.</p>
 
-                    <p>What began as one tutor in Parklands has grown into a network of <strong style={{color:V.ink}}>78+ qualified teachers across 40+ countries</strong>. We deliver five international curricula — Cambridge IGCSE, Pearson Edexcel, Cambridge A-Level, IB Diploma and the American curriculum — alongside our own Smartious Blended programme. We have two physical centres in Nairobi (Diamond Plaza Parklands and Karen Hardy) and serve families online from London, Dubai, Toronto, Riyadh and everywhere in between.</p>
+                    <p>What began as one tutor in Parklands has grown into a network of <strong style={{color:V.ink}}>78+ qualified teachers across 40+ countries</strong>. We deliver five international curricula — Cambridge IGCSE, Pearson Edexcel, Cambridge A-Level, IB Diploma and the American curriculum — alongside our own Smartious Blended programme. We have two physical centres in Nairobi (Diamond Plaza, Parklands and Karen West) and serve families online from London, Dubai, Toronto, Riyadh and everywhere in between.</p>
 
                     <p>But the heart of Smartious has never been the curricula or the technology, important as both are. The heart of Smartious is a simple promise: <strong style={{color:V.cr}}>your child will be known.</strong> Known by name. Known for what excites them. Known for what they struggle with. Known well enough that we can meet them where they are and walk with them to where they want to go.</p>
 
@@ -6804,7 +6806,7 @@ export default function LandingPage() {
                 {year:'Growth phase', h:'Curriculum expansion', p:'Smartious adds dedicated programmes for Cambridge IGCSE and International A-Level, IB Primary Years, Middle Years and Diploma, Pearson Edexcel International GCSE and A-Level, Kenya CBC (KICD-aligned) and American Curriculum with Advanced Placement. Subject and curriculum specialists are recruited specifically for each pathway.'},
                 {year:'LMS launch', h:'Smartious Learning Platform', p:'The Smartious Learning Management System launches with three portals — Admin, Teacher and Student. Features include live session delivery, recorded session libraries, assignment and assessment workflows, automated billing, integrated Paystack payments and the Mshauri AI tutor for 24/7 student support.'},
                 {year:'International', h:'Diaspora expansion', p:'Kenyan and African diaspora families in the UAE, UK, USA, Canada, Australia, Qatar, Bahrain and other countries begin enrolling — using Smartious to maintain Cambridge, IB or CBC curriculum continuity through international relocations. Country-specific pages launch for 14 territories.'},
-                {year:'2026', h:'Where we are now', p:'More than 78 qualified tutors. Families served in over 40 countries. Five curricula delivered. 21 Nairobi area pages, 27 UAE area pages and 6 Kenya city pages live. Two permanent centres: Diamond Plaza Parklands (HQ) and Karen Hardy.'},
+                {year:'2026', h:'Where we are now', p:'More than 78 qualified tutors. Families served in over 40 countries. Five curricula delivered. 21 Nairobi area pages, 27 UAE area pages and 6 Kenya city pages live. Two permanent centres: Diamond Plaza, Parklands (head office) and Karen West.'},
               ].map((m, i) => (
                 <div key={i} className="reveal" style={{
                   position:'relative',
@@ -7235,13 +7237,13 @@ export default function LandingPage() {
                   Smartious Homeschool &amp; eSchool is an international online school founded in Nairobi, Kenya in 2018 by Alfred Ouko, a Mathematics and Physics teacher educated at the University of Nairobi (BEd Science, 2022). We provide live, internationally recognised education for students preparing for <strong style={{color:'#fff'}}>Cambridge IGCSE</strong>, <strong style={{color:'#fff'}}>Cambridge International A-Level</strong>, <strong style={{color:'#fff'}}>Pearson Edexcel International GCSE and A-Level</strong>, the <strong style={{color:'#fff'}}>International Baccalaureate Diploma Programme</strong>, <strong style={{color:'#fff'}}>Kenya CBC</strong> (KICD-aligned, KCSE-eligible) and the <strong style={{color:'#fff'}}>American High School Curriculum</strong> with Advanced Placement (AP).
                 </p>
                 <p style={{fontSize:13.5,lineHeight:1.75,marginBottom:14}}>
-                  We serve families in Kenya (Nairobi, Mombasa, Kisumu, Nakuru, Eldoret, Thika, Kiambu and across the country), the UAE (Dubai, Abu Dhabi, Sharjah and 27 emirate areas), the UK, USA, Canada, Australia, Qatar, Bahrain, Nigeria, South Africa, Uganda, Tanzania, Somalia and Pakistan. Our delivery is primarily online through the Smartious Learning Management System (LMS), with in-person tuition available at our Diamond Plaza Parklands HQ and our Karen Hardy Centre in Nairobi.
+                  We serve families in Kenya (Nairobi, Mombasa, Kisumu, Nakuru, Eldoret, Thika, Kiambu and across the country), the UAE (Dubai, Abu Dhabi, Sharjah and 27 emirate areas), the UK, USA, Canada, Australia, Qatar, Bahrain, Nigeria, South Africa, Uganda, Tanzania, Somalia and Pakistan. Our delivery is primarily online through the Smartious Learning Management System (LMS), with in-person tuition available at our Diamond Plaza, Parklands head office and our Karen West Centre in Nairobi.
                 </p>
                 <p style={{fontSize:13.5,lineHeight:1.75,marginBottom:14}}>
                   Smartious supports families relocating between countries needing curriculum continuity, athletes and performers balancing serious training with academic ambition, gifted students whose schools move too slowly, students struggling at school due to oversized classrooms or bullying, IGCSE and A-Level candidates preparing for external examinations, IB Diploma students needing specialist HL subject support, and students with learning differences benefiting from 1-on-1 personal attention. Pricing starts at USD 15/hour (≈ KSh 1,940) for 1-on-1 tuition and from USD 423/month for full online homeschool programmes — meaningfully below typical premium international school fees while delivering equivalent qualifications.
                 </p>
                 <p style={{fontSize:12.5,lineHeight:1.7,marginTop:18,color:'rgba(247,243,237,.55)'}}>
-                  Contact Smartious: <a href="mailto:hello@smartioushomeschool.com" style={{color:V.gold3,textDecoration:'none'}}>hello@smartioushomeschool.com</a> · WhatsApp· Diamond Plaza I Annex, 3rd Floor, Office 20, Parklands, Nairobi, Kenya · M-Pesa Paybill 247247, Account 745021 (Smartious Edtech).
+                  Contact Smartious: <a href="mailto:hello@smartioushomeschool.com" style={{color:V.gold3,textDecoration:'none'}}>hello@smartioushomeschool.com</a> · WhatsApp· Diamond Plaza I Parklands Annex, 3rd Floor, Nairobi, Kenya · M-Pesa Paybill 247247, Account 745021 (Smartious Edtech).
                 </p>
               </div>
             </div>
@@ -7587,7 +7589,7 @@ export default function LandingPage() {
                   'email': 'hello@smartioushomeschool.com',
                   'address': {
                     '@type': 'PostalAddress',
-                    'streetAddress': 'Diamond Plaza I Annex, 3rd Floor, Office 20',
+                    'streetAddress': 'Diamond Plaza I Parklands Annex, 3rd Floor',
                     'addressLocality': 'Parklands, Nairobi',
                     'addressRegion': 'Nairobi County',
                     'addressCountry': 'KE',
@@ -7605,11 +7607,7 @@ export default function LandingPage() {
                     { '@type': 'City', 'name': 'Nakuru' },
                     { '@type': 'City', 'name': 'Eldoret' },
                   ],
-                  'sameAs': [
-                    'https://www.facebook.com/smartioushomeschool',
-                    'https://www.instagram.com/smartioushomeschool',
-                    'https://www.tiktok.com/@smartioushomeschool',
-                  ],
+                  'sameAs': SOCIAL_URLS,
                 })}}/>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                   '@context': 'https://schema.org',
@@ -8475,12 +8473,12 @@ export default function LandingPage() {
                         <div style={{fontSize:14.5,color:V.ink,fontWeight:600,lineHeight:1.6}}>
                           {ctry.address.building}<br/>
                           {ctry.address.floor}<br/>
-                          {ctry.address.street}<br/>
+                          {ctry.address.street && <>{ctry.address.street}<br/></>}
                           {ctry.address.area}, {ctry.address.city}<br/>
                           {ctry.address.country}
                         </div>
                       </div>
-                      <a href="https://www.google.com/maps/place/Smartious+Homeschool+and+Tuition,+Diamond+Plaza,+Fourth+Parklands+Ave,+Nairobi/@-1.2573424,36.8182174,17z"
+                      <a href="https://www.google.com/maps/search/?api=1&amp;query=Smartious+Homeschool&query_place_id=ChIJM5_xkrsXLxgRNJotpps29l8"
                          target="_blank" rel="noopener noreferrer"
                          style={{display:'inline-flex',alignItems:'center',gap:8,padding:'11px 22px',borderRadius:8,background:V.cr,color:'#fff',textDecoration:'none',fontSize:13.5,fontWeight:700}}>
                         Open in Google Maps
@@ -8495,7 +8493,7 @@ export default function LandingPage() {
                         allowFullScreen=""
                         loading="lazy"
                         referrerPolicy="no-referrer-when-downgrade"
-                        title="Smartious Nairobi Learning Centre — Diamond Plaza I Annex, Parklands"
+                        title="Smartious Nairobi Learning Centre — Diamond Plaza I Parklands Annex"
                       />
                     </div>
                   </div>
@@ -11186,7 +11184,7 @@ export default function LandingPage() {
                   {h:'University placement support',p:'Personalised guidance for UK Russell Group (UCAS), US Ivy League (Common App), Canadian U15 (OUAC), and more.'},
                   {h:'24/7 recorded catch-up',p:'Missed a class? Every session is recorded. Watch anytime through the Smartious LMS.'},
                   {h:'Sibling discounts',p:'10% off from the second child, and a 15% family rate for three or more children.'},
-                  {h:'Two operational teaching centres',p:'Diamond Plaza Parklands (Nairobi HQ) and Karen Hardy provide in-person option for East African families.'},
+                  {h:'Two operational teaching centres',p:'Diamond Plaza, Parklands (Nairobi head office) and Karen West provide in-person option for East African families.'},
                 ].map(f => (
                   <div key={f.h} style={{background:'#fff',border:`1px solid ${V.bone3}`,borderRadius:10,padding:'22px 20px'}}>
                     <div style={{fontSize:14.5,fontWeight:700,color:V.ink,marginBottom:8}}>{f.h}</div>
@@ -13691,7 +13689,7 @@ export default function LandingPage() {
                 </a>
               </div>
               <div style={{fontSize:13,color:'rgba(255,255,255,.7)',letterSpacing:'.02em'}}>
-                Established in 2018 &middot; Over 3,421 students educated &middot; Families in more than 40 countries &middot; Two Nairobi centres (Diamond Plaza Parklands &amp; Karen Hardy) &middot; From USD 423/month personalized
+                Established in 2018 &middot; Over 3,421 students educated &middot; Families in more than 40 countries &middot; Two Nairobi centres (Diamond Plaza, Parklands &amp; Karen West) &middot; From USD 423/month personalized
               </div>
             </div>
           </section>
@@ -13712,7 +13710,7 @@ export default function LandingPage() {
                   {n:'03',h:'Kenya-friendly time zones',p:'EAT UTC+3 delivery matches Kenya school-day rhythm. UK-based schools (CHS Online, King\'s InterHigh) mean UK morning = Kenya afternoon, disrupting family routine. Smartious 9 AM-12 PM Nairobi = natural school day.'},
                   {n:'04',h:'Kenya CBC available',p:'Smartious offers full Kenya CBC (Grade 1-12, KICD-aligned, KCSE-eligible) alongside international curricula. NO UK, US, or NZ virtual school offers CBC. Kenya-domestic by definition.'},
                   {n:'05',h:'Six curricula, one provider',p:'Cambridge IGCSE + A-Level, Pearson Edexcel International, IB Diploma, American AP, Ontario Secondary School Diploma (via CCIS), plus CBC. Multi-curriculum families (CBC + Cambridge) welcome.'},
-                  {n:'06',h:'Two Nairobi physical centres',p:'Diamond Plaza Parklands (HQ, Est. 2022) and Karen Hardy (Est. 2023). In-person supplementation, examination invigilation, holiday intensives. UK/US/NZ competitors have zero Kenya physical presence.'},
+                  {n:'06',h:'Two Nairobi physical centres',p:'Diamond Plaza, Parklands (head office, Est. 2022) and Karen West (Est. 2023). In-person supplementation, examination invigilation, holiday intensives. UK/US/NZ competitors have zero Kenya physical presence.'},
                   {n:'07',h:'Kenya founder, Kenya operations',p:'Founded 2018 by Alfred Ouko, BEd Mathematics &amp; Physics UoN 2022. Local admissions team, local support. Understanding of Kenya families\' needs, not a distant UK head office.'},
                   {n:'08',h:'Kenya examination centres handled',p:'Cambridge exam registration at British Council Nairobi, Braeburn Group centres, Peponi, Brookhouse, ISK, plus Mombasa/Kisumu/Nakuru. Edexcel three series per year. IB Diploma via authorised centres. All logistics managed by Smartious.'},
                   {n:'09',h:'Sibling discounts',p:'Families with multiple children get meaningful sibling discounts. Not available at CHS Online, Crimson, King\'s InterHigh — Smartious specifically designs for Kenyan family sizes.'},
@@ -13881,7 +13879,7 @@ export default function LandingPage() {
                   {q:'Where do Kenyan students sit Cambridge examinations?', a:'Multiple authorised centres in Kenya — British Council Nairobi, Braeburn Group centres (multiple locations), Peponi School, Brookhouse Schools, International School of Kenya (ISK), plus centres in Mombasa, Kisumu, and Nakuru. Pearson Edexcel offers three examination series per year. Smartious handles all registration logistics — parents do not navigate this themselves.'},
                   {q:'What if we already have a physical Nairobi school but want to switch?', a:'Common situation. Families switching mid-year work with our admissions team to align curriculum transition points (usually end of term for smoothest handover). We can accept students at any point in the academic year subject to assessment. Existing school records are reviewed and prior learning is credited.'},
                   {q:'What are the fees for Kenyan families?', a:'Personalized pricing based on curriculum choice, class size preference, grade level, and enrolment period. Starting from USD 423/month (approximately KES 54,600/month at 2026 exchange rates). A 10% sibling discount applies from the second child. Request a quote via the pricing page and our admissions team will respond within 24 hours.'},
-                  {q:'Can I combine online delivery with in-person supplementation?', a:'Yes. Smartious operates two Nairobi centres — Diamond Plaza Parklands (HQ, established 2022) and Karen Hardy (established 2023). Families based in Nairobi can access in-person supplementary tuition, examination invigilation, and holiday intensives. This hybrid capability is unique to Kenya-based providers — UK, US, and NZ virtual schools have zero Kenya physical presence.'},
+                  {q:'Can I combine online delivery with in-person supplementation?', a:'Yes. Smartious operates two Nairobi centres — Diamond Plaza, Parklands (head office, established 2022) and Karen West (established 2023). Families based in Nairobi can access in-person supplementary tuition, examination invigilation, and holiday intensives. This hybrid capability is unique to Kenya-based providers — UK, US, and NZ virtual schools have zero Kenya physical presence.'},
                   {q:'How do university applications work from Smartious?', a:'Personalised university guidance sessions with the Head of Academics. Covers UCAS (UK Russell Group including Oxbridge admissions test prep — MAT, PAT, ENGAA, TSA, HAT), Common Application (US Ivy League + UC system with SAT/ACT + AP portfolio), OUAC (Canadian U15 via Ontario Secondary School Diploma pathway through our CCIS partnership), and Kenya universities via KUCCPS. UCAS personal statement coaching and Common App essay coaching included.'},
                 ].map((f, i) => (
                   <details key={i} style={{background:'#fff',border:`1px solid ${V.bone3}`,borderRadius:10,padding:'0',overflow:'hidden'}}>
@@ -14306,7 +14304,8 @@ export default function LandingPage() {
             'url': 'https://smartioushomeschool.com/tuition-nairobi',
             'telephone': '+254745021212',
             'email': 'hello@smartioushomeschool.com',
-            'address': { '@type': 'PostalAddress', 'streetAddress': 'Diamond Plaza I Annex, 3rd Floor, Office 20', 'addressLocality': 'Parklands, Nairobi', 'addressRegion': 'Nairobi', 'addressCountry': 'KE' },
+            'address': { '@type': 'PostalAddress', 'streetAddress': 'Diamond Plaza I Parklands Annex, 3rd Floor', 'addressLocality': 'Parklands, Nairobi', 'addressRegion': 'Nairobi', 'addressCountry': 'KE' },
+            'sameAs': SOCIAL_URLS,
             'areaServed': NAIROBI_AREAS.map(a => ({ '@type': 'Place', 'name': a.name + ', Nairobi' })),
             'priceRange': 'USD 15/hour online tuition',
           })}}/>
@@ -14598,7 +14597,7 @@ export default function LandingPage() {
                 style={{background:V.gold3,color:V.ink,border:'none',padding:'13px 28px',borderRadius:8,fontSize:14,fontWeight:800,letterSpacing:'.02em',cursor:'pointer'}}>Book assessment</a>
 </div>
             <div style={{marginTop:30,paddingTop:24,borderTop:'1px solid rgba(255,255,255,.15)',fontSize:12,color:'rgba(255,255,255,.6)',letterSpacing:'.04em'}}>
-              Phone: +254 745 021 212 · Email: hello@smartioushomeschool.com · Office: Diamond Plaza I Annex, 3rd Floor, Office 20, Parklands, Nairobi
+              Phone: +254 745 021 212 · Email: hello@smartioushomeschool.com · Office: Diamond Plaza I Parklands Annex, 3rd Floor, Nairobi
             </div>
           </div></section>
         </>
@@ -15611,7 +15610,7 @@ export default function LandingPage() {
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14,marginBottom:32}}>
                   {[
                     {h:'Founder-led education company', p:'Founded 2018 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
-                    {h:'Two physical Nairobi centres', p:'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
+                    {h:'Two physical Nairobi centres', p:'Diamond Plaza, Parklands head office (established 2022) and Karen West centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
                     {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
                     {h:'40+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
                     {h:'5 international curricula', p:'Cambridge IGCSE & A-Level (primary offering), Pearson Edexcel International GCSE & A-Level, IB Diploma Programme, American Curriculum with AP, Kenya CBC. Multiple credential pathways per family.'},
@@ -15627,7 +15626,7 @@ export default function LandingPage() {
                 <div style={{marginTop:32,paddingTop:32,borderTop:`1px solid ${V.bone3}`}}>
                   <GoogleReviews V={V} seed={country.slug} />
                   <p style={{fontSize:11.5,color:V.sl,lineHeight:1.6,textAlign:'center',marginTop:18,fontStyle:'italic',maxWidth:680,margin:'18px auto 0'}}>
-                    Reviews rotate from our Google Business Profile (Diamond Plaza, Parklands Nairobi HQ). For {country.name}-specific parent references during your decision-making, request these when you submit your assessment request — we can introduce you to current {country.name} families happy to share their experience directly.
+                    Reviews rotate from our Google Business Profile (Diamond Plaza, Parklands, Nairobi head office). For {country.name}-specific parent references during your decision-making, request these when you submit your assessment request — we can introduce you to current {country.name} families happy to share their experience directly.
                   </p>
                 </div>
               </div>
@@ -17244,7 +17243,7 @@ export default function LandingPage() {
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14,marginBottom:32}}>
                   {[
                     {h:'Founder-led education company', p:'Founded 2018 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
-                    {h:'Two physical Nairobi centres', p:'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
+                    {h:'Two physical Nairobi centres', p:'Diamond Plaza, Parklands head office (established 2022) and Karen West centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
                     {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
                     {h:'40+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
                     {h:'5 international curricula', p:'Cambridge IGCSE & A-Level (primary offering), Pearson Edexcel International GCSE & A-Level, IB Diploma Programme, American Curriculum with AP, Kenya CBC. Multiple credential pathways per family.'},
@@ -17260,7 +17259,7 @@ export default function LandingPage() {
                 <div style={{marginTop:32,paddingTop:32,borderTop:`1px solid ${V.bone3}`}}>
                   <GoogleReviews V={V} seed={country.slug} />
                   <p style={{fontSize:11.5,color:V.sl,lineHeight:1.6,textAlign:'center',marginTop:18,fontStyle:'italic',maxWidth:680,margin:'18px auto 0'}}>
-                    Reviews rotate from our Google Business Profile (Diamond Plaza, Parklands Nairobi HQ). For {country.name}-specific parent references during your decision-making, request these when you submit your assessment request — we can introduce you to current {country.name} families happy to share their experience directly.
+                    Reviews rotate from our Google Business Profile (Diamond Plaza, Parklands, Nairobi head office). For {country.name}-specific parent references during your decision-making, request these when you submit your assessment request — we can introduce you to current {country.name} families happy to share their experience directly.
                   </p>
                 </div>
               </div>
@@ -17527,7 +17526,7 @@ export default function LandingPage() {
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14,marginBottom:32}}>
                   {[
                     {h:'Founder-led education company', p:'Founded 2018 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
-                    {h:'Two physical Nairobi centres', p:'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
+                    {h:'Two physical Nairobi centres', p:'Diamond Plaza, Parklands head office (established 2022) and Karen West centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
                     {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
                     {h:'40+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
                     {h:'5 international curricula', p:'Cambridge IGCSE & A-Level (primary offering), Pearson Edexcel International GCSE & A-Level, IB Diploma Programme, American Curriculum with AP, Kenya CBC. Multiple credential pathways per family.'},
@@ -17543,7 +17542,7 @@ export default function LandingPage() {
                 <div style={{marginTop:32,paddingTop:32,borderTop:`1px solid ${V.bone3}`}}>
                   <GoogleReviews V={V} seed={country.slug} />
                   <p style={{fontSize:11.5,color:V.sl,lineHeight:1.6,textAlign:'center',marginTop:18,fontStyle:'italic',maxWidth:680,margin:'18px auto 0'}}>
-                    Reviews rotate from our Google Business Profile (Diamond Plaza, Parklands Nairobi HQ). For {country.name}-specific parent references during your decision-making, request these when you submit your assessment request — we can introduce you to current {country.name} families happy to share their experience directly.
+                    Reviews rotate from our Google Business Profile (Diamond Plaza, Parklands, Nairobi head office). For {country.name}-specific parent references during your decision-making, request these when you submit your assessment request — we can introduce you to current {country.name} families happy to share their experience directly.
                   </p>
                 </div>
               </div>
@@ -17810,7 +17809,7 @@ export default function LandingPage() {
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14,marginBottom:32}}>
                   {[
                     {h:'Founder-led education company', p:'Founded 2018 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
-                    {h:'Two physical Nairobi centres', p:'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
+                    {h:'Two physical Nairobi centres', p:'Diamond Plaza, Parklands head office (established 2022) and Karen West centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
                     {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
                     {h:'40+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
                     {h:'5 international curricula', p:'Cambridge IGCSE & A-Level (primary offering), Pearson Edexcel International GCSE & A-Level, IB Diploma Programme, American Curriculum with AP, Kenya CBC. Multiple credential pathways per family.'},
@@ -17826,7 +17825,7 @@ export default function LandingPage() {
                 <div style={{marginTop:32,paddingTop:32,borderTop:`1px solid ${V.bone3}`}}>
                   <GoogleReviews V={V} seed={country.slug} />
                   <p style={{fontSize:11.5,color:V.sl,lineHeight:1.6,textAlign:'center',marginTop:18,fontStyle:'italic',maxWidth:680,margin:'18px auto 0'}}>
-                    Reviews rotate from our Google Business Profile (Diamond Plaza, Parklands Nairobi HQ). For {country.name}-specific parent references during your decision-making, request these when you submit your assessment request — we can introduce you to current {country.name} families happy to share their experience directly.
+                    Reviews rotate from our Google Business Profile (Diamond Plaza, Parklands, Nairobi head office). For {country.name}-specific parent references during your decision-making, request these when you submit your assessment request — we can introduce you to current {country.name} families happy to share their experience directly.
                   </p>
                 </div>
               </div>
@@ -18093,7 +18092,7 @@ export default function LandingPage() {
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14,marginBottom:32}}>
                   {[
                     {h:'Founder-led education company', p:'Founded 2018 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
-                    {h:'Two physical Nairobi centres', p:'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
+                    {h:'Two physical Nairobi centres', p:'Diamond Plaza, Parklands head office (established 2022) and Karen West centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
                     {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
                     {h:'40+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
                     {h:'5 international curricula', p:'Cambridge IGCSE & A-Level (primary offering), Pearson Edexcel International GCSE & A-Level, IB Diploma Programme, American Curriculum with AP, Kenya CBC. Multiple credential pathways per family.'},
@@ -18109,7 +18108,7 @@ export default function LandingPage() {
                 <div style={{marginTop:32,paddingTop:32,borderTop:`1px solid ${V.bone3}`}}>
                   <GoogleReviews V={V} seed={country.slug} />
                   <p style={{fontSize:11.5,color:V.sl,lineHeight:1.6,textAlign:'center',marginTop:18,fontStyle:'italic',maxWidth:680,margin:'18px auto 0'}}>
-                    Reviews rotate from our Google Business Profile (Diamond Plaza, Parklands Nairobi HQ). For {country.name}-specific parent references during your decision-making, request these when you submit your assessment request — we can introduce you to current {country.name} families happy to share their experience directly.
+                    Reviews rotate from our Google Business Profile (Diamond Plaza, Parklands, Nairobi head office). For {country.name}-specific parent references during your decision-making, request these when you submit your assessment request — we can introduce you to current {country.name} families happy to share their experience directly.
                   </p>
                 </div>
               </div>
@@ -18376,7 +18375,7 @@ export default function LandingPage() {
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14,marginBottom:32}}>
                   {[
                     {h:'Founder-led education company', p:'Founded 2018 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
-                    {h:'Two physical Nairobi centres', p:'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
+                    {h:'Two physical Nairobi centres', p:'Diamond Plaza, Parklands head office (established 2022) and Karen West centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
                     {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
                     {h:'40+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
                     {h:'5 international curricula', p:'Cambridge IGCSE & A-Level (primary offering), Pearson Edexcel International GCSE & A-Level, IB Diploma Programme, American Curriculum with AP, Kenya CBC. Multiple credential pathways per family.'},
@@ -18392,7 +18391,7 @@ export default function LandingPage() {
                 <div style={{marginTop:32,paddingTop:32,borderTop:`1px solid ${V.bone3}`}}>
                   <GoogleReviews V={V} seed={country.slug} />
                   <p style={{fontSize:11.5,color:V.sl,lineHeight:1.6,textAlign:'center',marginTop:18,fontStyle:'italic',maxWidth:680,margin:'18px auto 0'}}>
-                    Reviews rotate from our Google Business Profile (Diamond Plaza, Parklands Nairobi HQ). For {country.name}-specific parent references during your decision-making, request these when you submit your assessment request — we can introduce you to current {country.name} families happy to share their experience directly.
+                    Reviews rotate from our Google Business Profile (Diamond Plaza, Parklands, Nairobi head office). For {country.name}-specific parent references during your decision-making, request these when you submit your assessment request — we can introduce you to current {country.name} families happy to share their experience directly.
                   </p>
                 </div>
               </div>
@@ -18658,7 +18657,7 @@ export default function LandingPage() {
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14,marginBottom:32}}>
                   {[
                     {h:'Founder-led education company', p:'Founded 2018 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
-                    {h:'Two physical Nairobi centres', p:'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
+                    {h:'Two physical Nairobi centres', p:'Diamond Plaza, Parklands head office (established 2022) and Karen West centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
                     {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
                     {h:'40+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
                     {h:'5 international curricula', p:'Cambridge IGCSE & A-Level (primary offering), Pearson Edexcel International GCSE & A-Level, IB Diploma Programme, American Curriculum with AP, Kenya CBC. Multiple credential pathways per family.'},
@@ -18674,7 +18673,7 @@ export default function LandingPage() {
                 <div style={{marginTop:32,paddingTop:32,borderTop:`1px solid ${V.bone3}`}}>
                   <GoogleReviews V={V} seed={country.slug} />
                   <p style={{fontSize:11.5,color:V.sl,lineHeight:1.6,textAlign:'center',marginTop:18,fontStyle:'italic',maxWidth:680,margin:'18px auto 0'}}>
-                    Reviews rotate from our Google Business Profile (Diamond Plaza, Parklands Nairobi HQ). For {country.name}-specific parent references during your decision-making, request these when you submit your assessment request — we can introduce you to current {country.name} families happy to share their experience directly.
+                    Reviews rotate from our Google Business Profile (Diamond Plaza, Parklands, Nairobi head office). For {country.name}-specific parent references during your decision-making, request these when you submit your assessment request — we can introduce you to current {country.name} families happy to share their experience directly.
                   </p>
                 </div>
               </div>
@@ -19781,7 +19780,7 @@ export default function LandingPage() {
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
                 {[
                   { h:'Online Live', p:'Live 1-on-1 lessons via Smartious LMS — anywhere in the world, on your schedule. Best for families seeking flexibility.' },
-                  { h:'In-Centre', p:'Lessons at our Parklands centre (Diamond Plaza) or Karen Hardy location. Best for Nairobi families wanting structured environment.' },
+                  { h:'In-Centre', p:'Lessons at our Parklands centre (Diamond Plaza) or Karen West location. Best for Nairobi families wanting structured environment.' },
                   { h:'Home Tutoring', p:'Our qualified teachers come to your home — Nairobi, UAE areas, select Kenya cities. Best for families wanting in-person at home.' },
                 ].map(m => (
                   <div key={m.h} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px'}}>
@@ -19919,7 +19918,7 @@ export default function LandingPage() {
               {(() => {
                 const hsFaqs = [
                   { q:'What curricula do you offer?', a:'Five core curricula: Cambridge IGCSE (and Edexcel), Cambridge A-Level, International Baccalaureate (IB), American Curriculum (with SAT/AP integration), and Kenya CBC. All are delivered by qualified teachers with curriculum-specific experience.' },
-                  { q:'Where can we homeschool with Smartious?', a:'Online globally (anywhere with internet), in-centre at our Nairobi Parklands or Karen Hardy locations, or home tutoring in 21 Nairobi areas, 27 UAE areas, 6 Kenya cities. We serve diaspora families in 40+ countries primarily online.' },
+                  { q:'Where can we homeschool with Smartious?', a:'Online globally (anywhere with internet), in-centre at our Nairobi Parklands or Karen West locations, or home tutoring in 21 Nairobi areas, 27 UAE areas, 6 Kenya cities. We serve diaspora families in 40+ countries primarily online.' },
                   { q:'How much does homeschooling with Smartious cost?', a:'Pricing depends on curriculum, year level and delivery mode. We work with families across multiple budgets — premium full-day programmes at one end and focused subject-only support at the other. Book an assessment to receive personalised pricing recommendations.' },
                   { q:'Are your teachers qualified?', a:'Yes — all Smartious teachers hold relevant academic qualifications (Bachelor\'s or higher in their teaching subject area), with verified teaching experience. Many hold curriculum-specific certifications from Cambridge, IB or local boards.' },
                   { q:'How do we track our child\'s progress?', a:'Through the Smartious LMS — parents see live attendance, assignment submissions, grades, teacher feedback and progress reports. Weekly summaries and monthly progress reports keep families fully informed.' },
@@ -20400,7 +20399,7 @@ export default function LandingPage() {
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
                 {[
                   { h:'Online Live', p:'Live 1-on-1 video sessions via Smartious LMS. Anywhere with internet. Most flexible for working parents and diaspora families.', best:'Best for international families and busy schedules' },
-                  { h:'In-Centre', p:'At our Nairobi Parklands (Diamond Plaza) or Karen Hardy centres. Quiet study environment, peer cohort, structured setting.', best:'Best for focused students in Nairobi' },
+                  { h:'In-Centre', p:'At our Nairobi Parklands (Diamond Plaza) or Karen West centres. Quiet study environment, peer cohort, structured setting.', best:'Best for focused students in Nairobi' },
                   { h:'Home Tutoring', p:'Qualified teachers visit your home — 21 Nairobi areas, 27 UAE areas, 6 Kenya cities. Personal attention in familiar setting.', best:'Best for younger learners and families seeking in-person' },
                 ].map(m => (
                   <div key={m.h} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px'}}>
@@ -21367,7 +21366,7 @@ export default function LandingPage() {
                   { season:'Term 1 · December', h:'End-of-Year Showcase', p:'Student presentations, music performances, art exhibitions, and academic awards. Family attendance encouraged.' },
                   { season:'Term 2 · February', h:'Cambridge Mock Exams', p:'Mock examinations for IGCSE, A-Level and IB candidates. Detailed feedback and targeted revision plans.' },
                   { season:'Term 2 · March', h:'University Application Workshop', p:'Final-year students workshop on UCAS, Common App, scholarship applications. Open to all Year 13 / Grade 12 students.' },
-                  { season:'Term 3 · April', h:'Inter-Centre Sports Day', p:'Sports competitions between Parklands and Karen Hardy centres. Track, ball games, swimming, eSports.' },
+                  { season:'Term 3 · April', h:'Inter-Centre Sports Day', p:'Sports competitions between Parklands and Karen West centres. Track, ball games, swimming, eSports.' },
                   { season:'Term 3 · May', h:'IGCSE & A-Level Examinations', p:'Cambridge and Edexcel main examination series. Students sit at British Council and authorised centres.' },
                   { season:'Term 3 · July', h:'Annual Speech & Prize Day', p:'Celebration of academic achievement, scholarship recipients, and graduating cohort. The flagship Smartious event of the year.' },
                 ].map(e => (
@@ -21393,8 +21392,8 @@ export default function LandingPage() {
               <div style={{display:'flex',flexDirection:'column',gap:12}}>
                 {[
                   { date:'April 2026', h:'KCSE 2025 Results — Strong Pass Rates Across the Board', p:'Our Form 4 cohort achieved consistent A and B grades. Particular strength in Mathematics, Sciences and Languages.' },
-                  { date:'March 2026', h:'Karen Hardy Centre Robotics Launch', p:'New robotics programme launched at our Karen Hardy campus. Students working with Arduino, Python and competitive robotics pathways.' },
-                  { date:'February 2026', h:'Diamond Plaza Parklands — Open House for New Families', p:'Welcomed prospective families for centre tour, meeting teachers, and trial classes. Strong interest from new Form 1 and IGCSE Year 9 enrolment.' },
+                  { date:'March 2026', h:'Karen West Centre Robotics Launch', p:'New robotics programme launched at our Karen West campus. Students working with Arduino, Python and competitive robotics pathways.' },
+                  { date:'February 2026', h:'Diamond Plaza, Parklands — Open House for New Families', p:'Welcomed prospective families for centre tour, meeting teachers, and trial classes. Strong interest from new Form 1 and IGCSE Year 9 enrolment.' },
                   { date:'January 2026', h:'University Offers — Cohort 2026', p:'Students receiving offers from universities in UK (Bath, Sussex), Australia (Sydney), Canada (Toronto, Waterloo), and US universities.' },
                 ].map(h => (
                   <div key={h.date} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'16px 20px',display:'flex',gap:16,alignItems:'flex-start'}}>
@@ -21638,13 +21637,13 @@ export default function LandingPage() {
                   More photos are added throughout the academic year. Follow us on Instagram and Facebook for the latest moments from across Smartious centres.
                 </div>
                 <div style={{display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                  <a href="https://www.instagram.com/smartioushomeschool"
+                  <a href={SOCIAL_LINKS.find(s => s.id === 'instagram').href} aria-label="Smartious on Instagram (opens in a new tab)"
                     target="_blank" rel="noopener noreferrer"
                     style={{display:'inline-flex',alignItems:'center',gap:8,padding:'10px 22px',borderRadius:8,background:V.cr,color:'#fff',textDecoration:'none',fontSize:13,fontWeight:700}}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c2.7 0 3 0 4.1.1 1 0 1.7.2 2.3.4.6.3 1.2.6 1.7 1.1.5.5.8 1 1.1 1.7.2.6.4 1.3.4 2.3 0 1-.1 1.4-.1 4.1 0 2.7 0 3-.1 4.1 0 1-.2 1.7-.4 2.3-.3.6-.6 1.2-1.1 1.7-.5.5-1 .8-1.7 1.1-.6.2-1.3.4-2.3.4-1 0-1.4.1-4.1.1-2.7 0-3 0-4.1-.1-1 0-1.7-.2-2.3-.4-.6-.3-1.2-.6-1.7-1.1-.5-.5-.8-1-1.1-1.7-.2-.6-.4-1.3-.4-2.3 0-1-.1-1.4-.1-4.1 0-2.7 0-3 .1-4.1 0-1 .2-1.7.4-2.3.3-.6.6-1.2 1.1-1.7.5-.5 1-.8 1.7-1.1.6-.2 1.3-.4 2.3-.4C9 2 9.3 2 12 2zm0 5a5 5 0 100 10 5 5 0 000-10zm6.5-.5a1.2 1.2 0 100 2.4 1.2 1.2 0 000-2.4zM12 9a3 3 0 110 6 3 3 0 010-6z"/></svg>
                     Instagram
                   </a>
-                  <a href="https://www.facebook.com/smartioushomeschool"
+                  <a href={SOCIAL_LINKS.find(s => s.id === 'facebook').href} aria-label="Smartious on Facebook (opens in a new tab)"
                     target="_blank" rel="noopener noreferrer"
                     style={{display:'inline-flex',alignItems:'center',gap:8,padding:'10px 22px',borderRadius:8,background:'#1877F2',color:'#fff',textDecoration:'none',fontSize:13,fontWeight:700}}>
                     Facebook
@@ -24114,9 +24113,10 @@ export default function LandingPage() {
                   {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#C9973A" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42C1.6 2.34 2.33 1.4 3.41 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.81-.81a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>, label:'Admissions', value:'+254 745 021 212', sub:'hello@smartioushomeschool.com · Call or WhatsApp', href:'tel:+254745021212'},
                   {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#C9973A" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42C1.6 2.34 2.33 1.4 3.41 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.81-.81a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>, label:'Academics', value:'+254 182 071 920', sub:'hello@smartioushomeschool.com · Head of Academics', href:'tel:+254182071920'},
                   {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#C9973A" strokeWidth="2" strokeLinecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>, label:'Administration', value:'hello@smartioushomeschool.com', sub:'Accounts, support and general matters', href:'mailto:hello@smartioushomeschool.com'},
-{icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#C9973A" strokeWidth="2" strokeLinecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>, label:'Office', value:'Diamond Plaza I Annex, 3rd Floor, Office 20', sub:'Parklands, Nairobi · plus our Karen centre', href:'https://maps.google.com/?q=Diamond+Plaza+Parklands+Nairobi'},
+{icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#C9973A" strokeWidth="2" strokeLinecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>, label:'Office', value:'Diamond Plaza I Parklands Annex, 3rd Floor', sub:'Head office · Parklands, Nairobi, Kenya', href:'https://www.google.com/maps/search/?api=1&query=Smartious+Homeschool&query_place_id=ChIJM5_xkrsXLxgRNJotpps29l8'},
+{icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#C9973A" strokeWidth="2" strokeLinecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>, label:'Second centre', value:'Karen West, Mokoyeti Road', sub:'Past Galleria Mall · Karen, Nairobi, Kenya', href:KAREN_MAP_URL},
                 ].map(({icon,label,value,sub,href}) => (
-                  <a key={label} href={href} target="_blank" rel="noreferrer" style={{textDecoration:'none'}} className="contact-method">
+                  <a key={label} href={href} target="_blank" rel="noopener noreferrer" style={{textDecoration:'none'}} className="contact-method">
                     <div className="contact-icon">{icon}</div>
                     <div>
                       <div className="contact-method-label">{label}</div>
@@ -24125,6 +24125,10 @@ export default function LandingPage() {
                     </div>
                   </a>
                 ))}
+                <div style={{marginTop:6}}>
+                  <div className="contact-method-label">Follow us</div>
+                  <SocialLinks color="#F7F3ED" size={16} style={{marginTop:8}}/>
+                </div>
               </div>
               {/* Right — email form */}
               <div className="contact-email-card">
@@ -24310,8 +24314,8 @@ export default function LandingPage() {
           </div>
           <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:20,maxWidth:820,margin:'0 auto'}}>
             {[
-              {name:'Diamond Plaza Parklands',est:'Head Office',addr:'Diamond Plaza I Annex, 3rd Floor, Office 20',area:'Parklands, Nairobi'},
-              {name:'Karen Centre',est:'Second Centre',addr:'Mokoyeti West Road, off Langata Road, near Galleria Mall',area:'Karen, Nairobi'},
+              {name:'Diamond Plaza, Parklands',est:'Head Office',addr:'Diamond Plaza I Parklands Annex, 3rd Floor',area:'Parklands, Nairobi',map:'https://www.google.com/maps/search/?api=1&query=Smartious+Homeschool&query_place_id=ChIJM5_xkrsXLxgRNJotpps29l8'},
+              {name:'Karen West Centre',est:'Second Centre',addr:'Karen West, Mokoyeti Road, past Galleria Mall',area:'Karen, Nairobi',map:KAREN_MAP_URL},
             ].map(loc => (
               <div key={loc.name} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,padding:'24px 26px',borderTop:`3px solid ${V.cr}`}}>
                 <div style={{display:'flex',alignItems:'flex-start',gap:12}}>
@@ -24323,6 +24327,7 @@ export default function LandingPage() {
                     <div style={{fontWeight:800,fontSize:17,color:V.ink,marginBottom:6}}>{loc.name}</div>
                     <div style={{fontSize:13.5,color:V.sl,lineHeight:1.6}}>{loc.addr}</div>
                     <div style={{fontSize:12.5,color:V.gold3,fontWeight:700,marginTop:6}}>{loc.area}</div>
+                    <a href={loc.map} target="_blank" rel="noopener noreferrer" aria-label={`Get directions to ${loc.name} (opens Google Maps in a new tab)`} style={{display:'inline-block',fontSize:12.5,color:V.cr,fontWeight:700,marginTop:8,textDecoration:'none'}}>Get directions &rarr;</a>
                   </div>
                 </div>
               </div>
@@ -24366,7 +24371,7 @@ function ConsultForm({ P }) {
     const formatLabel = form.mode === 'online'
       ? 'Online via Google Meet'
       : form.venue === 'office'
-        ? 'In-person at Smartious Office (Diamond Plaza I Annex, 3rd Floor, Office 20, Parklands, Nairobi)'
+        ? 'In-person at Smartious Office (Diamond Plaza I Parklands Annex, 3rd Floor, Nairobi)'
         : `In-person home visit — ${form.address}`
     // Primary store: Front Desk database. Secondary: email copy.
     // The request succeeds if either path goes through.
@@ -24509,7 +24514,7 @@ function ConsultForm({ P }) {
           <label className="consult-label" style={{marginBottom:10}}>Where should we meet? *</label>
           <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:10}}>
             {[
-              {id:'office', title:'At our office', sub:'Diamond Plaza I Annex, 3rd Floor, Office 20, Parklands, Nairobi', icon:'<path d="M3 21h18M5 21V7l7-5 7 5v14"/><rect x="9" y="10" width="6" height="11"/>'},
+              {id:'office', title:'At our office', sub:'Diamond Plaza I Parklands Annex, 3rd Floor, Nairobi', icon:'<path d="M3 21h18M5 21V7l7-5 7 5v14"/><rect x="9" y="10" width="6" height="11"/>'},
               {id:'home',   title:'Home visit',    sub:'We come to you (Nairobi metro)',       icon:'<path d="M3 10l9-7 9 7M5 10v10h14V10"/>'},
             ].map(v => {
               const on = form.venue === v.id
@@ -24717,8 +24722,13 @@ function Footer({ P }) {
               </a>
 <div style={{display:'flex',alignItems:'center',gap:7}}>
                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                Diamond Plaza I Annex, 3rd Floor, Office 20, Parklands, Nairobi · Karen centre
+                Head office: Diamond Plaza I Parklands Annex, 3rd Floor, Nairobi
               </div>
+              <div style={{display:'flex',alignItems:'center',gap:7}}>
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                Karen West centre: Mokoyeti Road, past Galleria Mall
+              </div>
+              <SocialLinks color="#C0B5A8" size={14} gap={8} style={{marginTop:10}}/>
             </div>
           </div>
         </div>

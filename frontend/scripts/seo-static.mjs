@@ -57,6 +57,7 @@ import { UK_AREAS } from '../src/data/ukAreas.js'
 import { FULL_ARTICLES } from '../src/data/fullArticles.js'
 import { SERVICES } from '../src/data/services.js'
 import { CURRICULA } from '../src/data/curricula.js'
+import { SOCIAL_LINKS } from '../src/data/social.js'
 import { TEST_PREP } from '../src/data/testPrep.js'
 import { LANGUAGES } from '../src/data/languages.js'
 import { STUDY_ABROAD } from '../src/data/studyAbroad.js'
@@ -280,13 +281,15 @@ const CTA_LINKS = [
 ]
 const CONTACT = {
   admissions: '+254 745 021 212', academic: '+254 182 071 920', email: 'hello@smartioushomeschool.com',
-  address: 'Diamond Plaza I Annex, 3rd Floor, Office 20, Parklands, Nairobi, Kenya',
+  address: 'Diamond Plaza I Parklands Annex, 3rd Floor, Nairobi, Kenya',
+  centre: 'Karen West, Mokoyeti Road, past Galleria Mall, Nairobi, Kenya',
 }
 const contactBlock = () => h2('Contact Smartious') +
-  `<address><p>${esc(SITE)}<br/>${esc(CONTACT.address)}</p>` +
+  `<address><p>${esc(SITE)}<br/>Head office: ${esc(CONTACT.address)}<br/>Second centre: ${esc(CONTACT.centre)}</p>` +
   `<p>Admissions: <a href="tel:+254745021212">${CONTACT.admissions}</a> (call or WhatsApp)<br/>` +
   `Academic office: <a href="tel:+254182071920">${CONTACT.academic}</a><br/>` +
-  `Email: <a href="mailto:${CONTACT.email}">${CONTACT.email}</a></p></address>`
+  `Email: <a href="mailto:${CONTACT.email}">${CONTACT.email}</a></p></address>` +
+  `<p>Follow Smartious: ${SOCIAL_LINKS.map(s => `<a href="${s.href}" target="_blank" rel="noopener noreferrer" aria-label="Smartious on ${s.name}">${s.name}</a>`).join(' · ')}</p>`
 
 // ── Page registry ────────────────────────────────────────────
 // { path, title, desc, h1, body[], related[], faqs[], ld[], crumbs[[name,path]],
@@ -328,7 +331,7 @@ for (const id of MAIN_IDS) {
   const x = id === 'teachers' ? { html: [], faqs: [], h1: '' } : jsxContent(id)
   const body = [p(m.desc)]
   // The contact page's details card is replaced by the canonical NAP block.
-  if (id === 'contact') body.push(contactBlock(), ...x.html.filter(t => !/@|Diamond Plaza|Avenue|Accounts, support/.test(t)))
+  if (id === 'contact') body.push(contactBlock(), ...x.html.filter(t => !/@|Diamond Plaza|Mokoyeti|Avenue|Accounts, support|Follow us/.test(t)))
   else body.push(...x.html)
   if (id === 'teachers') body.push(p('Smartious teachers are qualified subject specialists who teach live, small-group and one-to-one lessons in Cambridge, Pearson Edexcel, IB, American and Kenyan curricula. Team profiles load from our school system when the page opens.'),
     links([{ href: '/about', label: 'About Smartious and our founder' }, { href: '/curricula', label: 'Curricula we teach' }, { href: '/contact', label: 'Contact the academic office' }]))

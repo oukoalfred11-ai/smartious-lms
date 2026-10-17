@@ -36,7 +36,7 @@ LOGO_RATIO = 441 / 1200
 PRIMARY_FEE = 'From USD 423 per month (Primary), payable termly'
 OTHER_FEES = 'Other levels quoted after assessment'
 TUITION = 'USD 15 per hour, one to one'
-ADDRESS = 'Diamond Plaza I Annex, 3rd Floor, Office 20, Parklands, Nairobi, Kenya'
+ADDRESS = 'Diamond Plaza I Parklands Annex, 3rd Floor, Nairobi, Kenya'
 FOOTER = 'smartioushomeschool.com  ·  hello@smartioushomeschool.com  ·  +254 745 021 212'
 
 # ── Type and colour ──────────────────────────────────────────
@@ -204,7 +204,7 @@ def cover(c, doc):
         c.setFont(SANS, 7.5); c.setFillColor(CHAR); c.drawCentredString(cx, y - 2.5 * mm, l)
     c.setFont(SANS, 7.4); c.setFillColor(GREY)
     c.drawCentredString(W / 2, 24 * mm, 'smartioushomeschool.com   ·   hello@smartioushomeschool.com')
-    c.drawCentredString(W / 2, 19.5 * mm, '+254 745 021 212   ·   Diamond Plaza I Annex, Parklands  ·  Karen  ·  Nairobi')
+    c.drawCentredString(W / 2, 19.5 * mm, '+254 745 021 212   ·   Diamond Plaza I Parklands Annex  ·  Karen West  ·  Nairobi')
     c.restoreState()
 
 def furniture(c, doc):
@@ -263,7 +263,7 @@ def story():
         'What began as one tutor in Parklands has grown into a school of more than 78 qualified teachers, serving over 650 active learners, '
         'with families in more than 40 countries. We deliver five international curricula: Cambridge IGCSE, Pearson Edexcel, Cambridge A-Level, '
         'IB Diploma and the American curriculum, alongside our own Smartious Blended programme. We run two physical centres in Nairobi, at '
-        'Diamond Plaza Parklands and Karen Hardy, and we teach families online from London, Dubai, Toronto, Riyadh and everywhere in between.',
+        'Diamond Plaza, Parklands and Karen West, and we teach families online from London, Dubai, Toronto, Riyadh and everywhere in between.',
         'But the heart of Smartious has never been the curricula or the technology, important as both are. The heart of Smartious is a simple '
         'promise: your child will be known. Known by name. Known for what excites them. Known for what they struggle with. Known well enough that '
         'we can meet them where they are and walk with them to where they want to go.',
@@ -289,8 +289,8 @@ def story():
         ('2019', 'Expansion to 15 students across Nairobi. First Cambridge IGCSE student passes with distinction.'),
         ('2020', 'COVID-19 catalyses the shift online. Smartious launches its first virtual classroom programme and discovers that quality online education is its true calling.'),
         ('2021', 'First diaspora family signs on from Dubai. International expansion begins.'),
-        ('2022', 'Diamond Plaza Parklands becomes the first physical centre. Alfred completes his BEd at the University of Nairobi.'),
-        ('2023', 'Karen Hardy learning centre opens. Teaching team grows past 40 educators.'),
+        ('2022', 'Diamond Plaza, Parklands becomes the first physical centre. Alfred completes his BEd at the University of Nairobi.'),
+        ('2023', 'Karen West learning centre opens. Teaching team grows past 40 educators.'),
         ('2024', 'Launch of Mshauri AI, the first AI tutor purpose built for African and international curricula. Smartious LMS goes into beta.'),
         ('2025', 'Five curricula formally offered. Study Abroad consulting launches as a free service to enrolled families.'),
         ('2026', 'Over 3,421 students educated to date. 650+ active learners. Families in more than 40 countries. Smartious continues to grow, one family at a time.'),
@@ -330,7 +330,7 @@ def story():
         ('40+', 'Countries with Smartious families', 'Including Kenya, the UAE, the UK, the USA, Canada, Saudi Arabia, Qatar, Oman, Nigeria, South Africa, Tanzania, Uganda, Rwanda and Ethiopia.'),
         ('78+', 'Qualified teachers', 'All hold at least a Bachelor’s degree. Most hold an additional teaching qualification.'),
         ('5', 'International curricula', 'CBC Kenya, Cambridge IGCSE and A-Level, Pearson Edexcel, IB Diploma, American Common Core.'),
-        ('2', 'Physical centres in Nairobi', 'Diamond Plaza Parklands, since 2022, and the Karen Hardy Centre, since 2023.'),
+        ('2', 'Physical centres in Nairobi', 'Diamond Plaza, Parklands, since 2022, and the Karen West Centre, since 2023.'),
         ('21', 'Nairobi areas served', 'In person tuition from Kileleshwa to Karen, Westlands to Runda, and everywhere between.'),
         ('27', 'UAE areas served', 'Online tuition across Dubai, Abu Dhabi, Sharjah, Ajman, Al Ain and beyond.'),
         ('10', 'Languages taught', 'French, Spanish, German, Italian, Portuguese, Mandarin, Japanese, Kiswahili, Arabic, Russian.'),
@@ -429,9 +429,9 @@ def story():
             'with families in more than 40 countries and concentrated reach across the UAE, the United Kingdom and the diaspora communities of North America.', 'lead')]
     s += label('Physical centres')
     s += [grid([
-        [[P('Diamond Plaza Parklands', 'h3'), P(ADDRESS + '. Our flagship learning centre: 6 tutoring pods, parent lounge, resource library, '
+        [[P('Diamond Plaza, Parklands', 'h3'), P(ADDRESS + '. Our flagship learning centre: 6 tutoring pods, parent lounge, resource library, '
                                               'admin office. Open Monday to Saturday, 8am to 7pm.', 'cell')], P('EST. 2022', 'label')],
-        [[P('Karen Hardy Centre', 'h3'), P('Karen Hardy, Karen, Nairobi. Our second centre, purpose built for IGCSE and A-Level intensive tuition. '
+        [[P('Karen West Centre', 'h3'), P('Karen West, Mokoyeti Road, past Galleria Mall, Nairobi, Kenya. Our second centre, purpose built for IGCSE and A-Level intensive tuition. '
                                            'Bookable session based access.', 'cell')], P('EST. 2023', 'label')],
     ], [W_FULL - 24 * mm, 24 * mm], pad=7)]
     s += label('Nairobi areas served · 21 neighbourhoods')
@@ -525,7 +525,7 @@ def story():
 
     # 15 Contact
     s += section('15', 'CONTACT', 'Get in', 'touch', 'contact')
-    rows = [('HEADQUARTERS', ADDRESS), ('SECOND CENTRE', 'Karen Hardy Centre, Karen, Nairobi'),
+    rows = [('HEADQUARTERS', ADDRESS), ('SECOND CENTRE', 'Karen West, Mokoyeti Road, past Galleria Mall, Nairobi, Kenya'),
             ('PHONE', '+254 745 021 212 (admissions)'), ('ACADEMIC', '+254 182 071 920'), ('WHATSAPP', '+254 745 021 212'),
             ('EMAIL', 'hello@smartioushomeschool.com'), ('WEBSITE', 'smartioushomeschool.com'),
             ('FOUNDER', 'Alfred Ouko · alfred@smartioushomeschool.com'),

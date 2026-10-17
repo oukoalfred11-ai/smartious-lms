@@ -328,7 +328,7 @@ ct = Table([[P('<b>Admissions, fees and enrolment</b>'), P('+254 745 021 212 (ca
             [P('<b>Academic matters</b><br/>lessons, timetable, homework, reports, examinations'), P('+254 182 071 920 · academics@smartioushomeschool.com')],
             [P('<b>General questions</b>'), P('hello@smartioushomeschool.com')],
             [P('<b>Safeguarding concerns</b>'), P('safeguarding@smartioushomeschool.com · +254 745 021 212')],
-            [P('<b>Office and website</b>'), P('Diamond Plaza I, Parklands, Nairobi, Kenya · smartioushomeschool.com')]], colWidths=['40%', '60%'])
+            [P('<b>Office and website</b>'), P('Diamond Plaza I Parklands Annex, 3rd Floor, Nairobi, Kenya · smartioushomeschool.com')]], colWidths=['40%', '60%'])
 ct.setStyle(TableStyle([('LINEBELOW', (0, 0), (-1, -1), 0.5, LINE), ('VALIGN', (0, 0), (-1, -1), 'TOP'),
                         ('TOPPADDING', (0, 0), (-1, -1), 5), ('BOTTOMPADDING', (0, 0), (-1, -1), 5)]))
 story += [ct, PageBreak()]
