@@ -253,6 +253,7 @@ export const BAHRAIN_COUNTRY = {
     { q: 'Is a virtual school in Bahrain the same as homeschooling?', a: 'Families use both words. With Smartious your child follows a full timetable with live teachers, marked work and reports, studying from home.' },
     { q: 'When is the next intake?', a: INTAKE },
     { q: 'How do we contact Smartious?', a: CONTACT },
+    { q: 'How do live online classes work?', a: 'Students follow a weekly timetable of live lessons with qualified teachers, in small groups or one to one, and every lesson is recorded for catch-up. Families receive assessments and termly reports. Each student starts with a placement assessment, so we can place them at the right level.' },
   ],
 
   // ── CTA ──────────────────────────────────────────────────────

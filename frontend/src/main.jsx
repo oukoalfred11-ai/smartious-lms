@@ -78,6 +78,32 @@ const container = document.getElementById('root')
 // Static text baked in by scripts/seo-static.mjs for crawlers; the app
 // renders the real page now, so drop it.
 document.getElementById('seo-static')?.remove()
+
+// The static JSON-LD in <head> (marked data-ss) describes the URL the visit
+// started on. Once the app renders its own block of the same @type, drop the
+// static one, so Google never sees two FAQPage or BreadcrumbList blocks;
+// drop them all on the first client-side navigation, when they no longer
+// describe the page.
+{
+  const staticLd = [...document.querySelectorAll('script[type="application/ld+json"][data-ss]')]
+  if (staticLd.length) {
+    const firstPath = window.location.pathname
+    const typeOf = (el) => { try { return String(JSON.parse(el.textContent)['@type']) } catch { return '' } }
+    let queued = false
+    const observer = new MutationObserver(() => {
+      if (queued) return
+      queued = true
+      requestAnimationFrame(() => {
+        queued = false
+        const moved = window.location.pathname !== firstPath
+        const live = new Set([...document.querySelectorAll('script[type="application/ld+json"]:not([data-ss])')].map(typeOf))
+        for (const el of staticLd) if (el.isConnected && (moved || live.has(typeOf(el)))) el.remove()
+        if (staticLd.every(el => !el.isConnected)) observer.disconnect()
+      })
+    })
+    observer.observe(container, { childList: true, subtree: true })
+  }
+}
 const tree = <ErrorBoundary><App /></ErrorBoundary>
 
 /* Hydrate ONLY on prerendered public routes.

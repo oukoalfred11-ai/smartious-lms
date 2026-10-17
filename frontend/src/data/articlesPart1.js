@@ -359,6 +359,7 @@ export const ARTICLES_PART_1 = {
     cat:'homeschool', country:'uae',
     img:'linear-gradient(135deg,#0A1220,#1B2B52)', splash:'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1000&q=70',
     t:'Homeschooling in Dubai: Complete Guide for Expats (2026)',
+    metaDesc:'Homeschooling in Dubai for expat families: legal status, curriculum options, 2026 costs in dirhams and the homeschool community. Read the full guide.',
     date:'April 2026 · 10 min read',
     author:'Jane Wanjiku', role:'Admissions Director',
     intro:'Dubai has the highest concentration of expats in the world, and homeschooling is growing fast among them. The UAE\'s official education regulator KHDA formally allows homeschooling since 2020. Here is how it works in 2026.',

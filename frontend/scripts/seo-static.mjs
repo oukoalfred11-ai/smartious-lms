@@ -18,7 +18,16 @@
      · hreflang only for real translations (the /ar/* Arabic pages and the
        English pages they translate)
    and then writes dist/sitemap.xml (and the public/sitemap.xml fallback)
-   from exactly the set of indexable pages it generated.
+   from exactly the set of indexable pages it generated. Each URL's
+   <lastmod> is the last git commit date of the data file(s) the page is
+   built from (pg.src), not the build date, so it only moves when the
+   page's content does.
+
+   JSON-LD written here carries data-ss. Pages that render their own
+   JSON-LD in the app would otherwise show Google two FAQPage or
+   BreadcrumbList blocks once the page has run; main.jsx drops a static
+   block when the app renders one of the same @type (and all of them on
+   the first client-side navigation).
 
    main.jsx removes #seo-static before React renders, so visitors see the
    normal page; until then it doubles as a readable loading state.
@@ -39,6 +48,7 @@
 ═══════════════════════════════════════════════════════════════════ */
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from 'node:fs'
+import { execFileSync } from 'node:child_process'
 import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { UAE_CITIES, UAE_COUNTRY } from '../src/data/uaeCities.js'
@@ -57,6 +67,8 @@ import { US_STATES } from '../src/data/usStates.js'
 import { US_CITIES, US_CITIES_BY_STATE } from '../src/data/usCities.js'
 import { CA_PROVINCES } from '../src/data/caProvinces.js'
 import { CA_CITIES, CA_CITIES_BY_PROVINCE } from '../src/data/caCities.js'
+import { PRIORITY_HUB_LINKS, PRIORITY_CITY_LINKS } from '../src/data/priorityLinks.js'
+import { ARTICLES_INDEX } from '../src/data/generated/articlesIndex.js'
 
 const NOINDEX_ONLY = process.argv.includes('--noindex-only')
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -67,6 +79,8 @@ const ORG_ID = ORIGIN + '/#organization'
 const SITE = 'Smartious Homeschool & eSchool'
 const BUILD_DATE = new Date().toISOString().slice(0, 10)
 const BUILD_ID = (process.env.COMMIT_REF || '').slice(0, 10) || Date.now().toString(36)
+// Same rule as articleTitle() in LandingPage.jsx: "| Smartious" only while the title stays within ~60 characters.
+const articleTitle = (t) => { t = t || 'Article'; return t.length <= 47 ? t + ' | Smartious' : t }
 
 // The only published prices (see pricing page): school from USD 423/month
 // for Primary, payable termly; tuition USD 15/hour.
@@ -288,13 +302,17 @@ const hubLinks = () => [...CITY_FILES.map(({ country: c }) => ({ href: c.hub, la
 // Home
 {
   const m = PAGE_META.home
-  add({ path: '/', file: 'home.html', title: m.title, desc: m.desc, h1: 'Online school, virtual school and homeschool', body: [
+  add({ path: '/', file: 'home.html', title: m.title, desc: m.desc, h1: 'Online School & Homeschool for IGCSE, A-Level, IB, American & CBC Students', body: [
     p(m.desc),
+    h2('Online school in the Gulf, Nigeria and Kenya'),
+    links(PRIORITY_HUB_LINKS.map(([href, label]) => ({ href, label: 'Online school and homeschool in ' + label }))),
+    h2('Online school and homeschool by city'),
+    links(PRIORITY_CITY_LINKS.map(([href, label]) => ({ href, label: 'Online school in ' + label }))),
     h2('Programmes and services'), links([...SERVICE_LINKS, ...MAIN_LINKS.slice(0, 6)]),
     h2('Curricula'), links(CURRICULA_LINKS),
     h2('Online school by country'), links(hubLinks()),
     h2('Latest guides'), links(Object.entries(FULL_ARTICLES).slice(-24).reverse().map(([slug, a]) => ({ href: '/blog/' + slug, label: a.t }))),
-  ], crumbs: [] })
+  ], crumbs: [], src: ['src/pages/LandingPage.jsx', 'src/data/priorityLinks.js'] })
 }
 
 // Main pages with their own titles; body = the page's own text + data.
@@ -347,7 +365,7 @@ for (const sv of SERVICES) {
     d.whySmartious ? h2('Why Smartious') + p(d.whySmartious) : '',
     h2('Fees'), p(/tuition|tutor/i.test(sv.slug + sv.h) ? 'One-to-one tuition: ' + FEE_TUITION + ' at every level.' : FEE_SCHOOL + '. One-to-one tuition: ' + FEE_TUITION + '.'),
   ], related: [h2('Other services'), links(SERVICE_LINKS.filter(l => l.href !== '/services/' + sv.slug))],
-  crumbs: [['Services', '/services'], [sv.h, '/services/' + sv.slug]],
+  crumbs: [['Services', '/services'], [sv.h, '/services/' + sv.slug]], src: ['src/data/services.js'],
   ld: [serviceLd({ name: sv.h, desc: sv.seoDesc || sv.desc, path: '/services/' + sv.slug, kind: /tuition|tutor/i.test(sv.slug) ? 'tuition' : 'school' })] })
 }
 // Curricula
@@ -361,7 +379,7 @@ for (const c of CURRICULA) {
     d.whyChoose ? h2('Why choose ' + c.h) + p(d.whyChoose) : '',
     h2('Fees'), p(FEE_SCHOOL + '. One-to-one tuition: ' + FEE_TUITION + '.'),
   ], related: [h2('Other curricula'), links(CURRICULA_LINKS.filter(l => l.href !== path))],
-  crumbs: [['Curricula', '/curricula'], [c.h, path]],
+  crumbs: [['Curricula', '/curricula'], [c.h, path]], src: ['src/data/curricula.js'],
   ld: [{ '@context': 'https://schema.org', '@type': 'Course', name: c.h + (d.tagline ? ' — ' + d.tagline : ''), description: clip(d.overview || c.desc, 300),
     url: ORIGIN + path, provider: ORG, ...(c.badge ? { educationalCredentialAwarded: c.badge } : {}),
     hasCourseInstance: { '@type': 'CourseInstance', courseMode: 'online', courseWorkload: 'Live classes on a weekly timetable' },
@@ -379,7 +397,7 @@ for (const t of TEST_PREP) {
     t.bandTargets?.length ? h2('Score targets') + bullets(t.bandTargets) : '',
     t.keyFacts?.length ? h2('Key facts') + bullets(t.keyFacts) : '',
   ], faqs: t.faqs, related: [h2('Other tests'), links(TEST_PREP.filter(x => x !== t).map(x => ({ href: '/test-prep/' + x.slug, label: x.code + ' preparation' })))],
-  crumbs: [['Test preparation', '/test-prep'], [t.code, path]] })
+  crumbs: [['Test preparation', '/test-prep'], [t.code, path]], src: ['src/data/testPrep.js'] })
 }
 for (const l of LANGUAGES) {
   const path = '/languages/' + l.slug
@@ -392,7 +410,7 @@ for (const l of LANGUAGES) {
     l.examPrep?.length ? h2('Exam preparation') + bullets(l.examPrep) : '',
     pr.hourly ? h2('Fees') + p(typeof pr.hourly === 'string' ? pr.hourly : itemText(pr.hourly)) + bullets(pr.packages || []) : '',
   ], faqs: l.faqs, related: [h2('Other languages'), links(LANGUAGES.filter(x => x !== l).map(x => ({ href: '/languages/' + x.slug, label: 'Learn ' + x.name })))],
-  crumbs: [['Languages', '/languages'], [l.name, path]] })
+  crumbs: [['Languages', '/languages'], [l.name, path]], src: ['src/data/languages.js'] })
 }
 for (const d of STUDY_ABROAD) {
   const path = '/study-abroad/' + d.slug
@@ -407,7 +425,7 @@ for (const d of STUDY_ABROAD) {
     d.postStudy ? h2('After graduation') + p(d.postStudy) : '',
     d.smartiousHelp?.length ? h2('How Smartious helps') + bullets(d.smartiousHelp) : '',
   ], faqs: d.faqs, related: [h2('Other destinations'), links(STUDY_ABROAD.filter(x => x !== d).map(x => ({ href: '/study-abroad/' + x.slug, label: 'Study in ' + (x.fullName || x.name) })))],
-  crumbs: [['Study abroad', '/study-abroad'], [d.name, path]] })
+  crumbs: [['Study abroad', '/study-abroad'], [d.name, path]], src: ['src/data/studyAbroad.js'] })
 }
 // Comparisons
 for (const c of COMPARES) {
@@ -427,7 +445,7 @@ for (const a of NAIROBI_AREAS) {
   ], faqs: a.localFaqs, related: [
     h2('Nearby areas'), links(NAIROBI_AREAS.filter(x => x !== a).slice(0, 12).map(x => ({ href: '/tuition/' + x.slug, label: 'Tutors in ' + x.name }))),
     h2('Online school in Kenya'), links([{ href: '/online-school/kenya', label: 'Online school and homeschool in Kenya' }, { href: '/tuition-nairobi', label: 'All Nairobi tuition' }]),
-  ], crumbs: [['Tuition in Nairobi', '/tuition-nairobi'], [a.name, path]], kind: 'tuition',
+  ], crumbs: [['Tuition in Nairobi', '/tuition-nairobi'], [a.name, path]], kind: 'tuition', src: ['src/data/nairobiAreas.js'],
   ld: [serviceLd({ name: 'Tuition in ' + a.name + ', Nairobi', desc: a.seoDesc || a.intro, path, area: a.name + ', Nairobi, Kenya', kind: 'tuition' })] })
 }
 // UK tuition
@@ -447,7 +465,7 @@ for (const a of NAIROBI_AREAS) {
         a.commonSubjects?.length ? h2('Subjects') + bullets(a.commonSubjects) : '', a.localSchools?.length ? h2('Local schools we prepare students for') + bullets(a.localSchools) : '',
       ], faqs: a.localFaqs, related: [h2('Other areas in ' + a.city), links(UK_AREAS.filter(x => x !== a && x.city === a.city).map(x => ({ href: '/tuition-uk/' + x.slug, label: 'Tutors in ' + x.name }))),
         links([{ href: '/tuition-uk', label: 'All UK tuition' }])],
-      crumbs: [['Tuition in the UK', '/tuition-uk'], [a.name, path]],
+      crumbs: [['Tuition in the UK', '/tuition-uk'], [a.name, path]], src: ['src/data/ukAreas.js'],
       ld: [serviceLd({ name: 'Tuition in ' + a.name + ', ' + a.city, desc: a.seoDesc || a.intro, path, area: a.name + ', ' + a.city + ', United Kingdom', kind: 'tuition' })] })
   }
 }
@@ -500,7 +518,7 @@ for (const c of COUNTRY_DETAILS) {
     c.cities?.length ? h2('Cities we serve in ' + c.country) + bullets(c.cities) : '',
     ...(cityHub ? [h2('Online school by city'), links(cityHub.cities.map(x => ({ href: '/homeschool-' + x.slug, label: 'Online school in ' + x.name })))] : []),
     ...extra,
-  ], faqs: c.faqs, crumbs: [[c.country, path]],
+  ], faqs: c.faqs, crumbs: [[c.country, path]], src: ['src/data/countries.js', ...(cityHub ? ['src/data/' + cityHub.file] : [])],
   ld: [serviceLd({ name: c.h, desc: c.seoDesc, path, area: c.country })] })
 }
 for (const { file, country: c, cities } of CITY_FILES) {
@@ -519,7 +537,7 @@ for (const { file, country: c, cities } of CITY_FILES) {
       c.slug === 'kenya' ? h2('More for Kenyan families') + links([{ href: '/virtual-school-kenya', label: 'Virtual school in Kenya' }, { href: '/tuition-nairobi', label: 'Tuition in Nairobi' }]) : '',
       c.slug === 'united-kingdom' ? h2('Tuition in the UK') + links([{ href: '/tuition-uk', label: 'Tutors in the UK' }]) : '',
       c.slug === 'ukraine' ? h2('Virtual school for Ukrainian families') + links([{ href: '/virtual-school-ukraine', label: 'Virtual school for Ukrainian families in Ukraine and abroad' }]) : '',
-    ], faqs: c.faqs, crumbs: [[name, c.hub]],
+    ], faqs: c.faqs, crumbs: [[name, c.hub]], src: ['src/data/' + file],
     ld: [serviceLd({ name: 'Online school and homeschool in ' + name, desc: (m && m.desc) || c.heroSubhead, path: c.hub, area: name })] })
   for (const x of cities) {
     const path = '/homeschool-' + x.slug
@@ -535,7 +553,7 @@ for (const { file, country: c, cities } of CITY_FILES) {
         x.nearbyAreas?.length ? h2(x.name + ' communities and nearby areas') + `<p>${x.nearbyAreas.map(esc).join(' · ')}</p>` : '',
       ], faqs: x.faqs, faqsTitle: 'Common questions from ' + x.name + ' families',
       related: [h2('More in ' + name), links([{ href: c.hub, label: 'Online school in ' + name }, ...cityLinks.filter(l => l.href !== path)])],
-      crumbs: [[name, c.hub], [x.name, path]],
+      crumbs: [[name, c.hub], [x.name, path]], src: ['src/data/' + file],
       ld: [serviceLd({ name: x.primaryKeyword || 'Online school in ' + x.name, desc: x.seoDesc || x.intro, path, area: [x.name, x.county, name].filter(Boolean).join(', ') })] })
     if (pg.path === path && isNoindexCandidateFile(file)) CITY_PAGES.push({ slug: x.slug, pg, countrySlug: c.slug, cityName: x.name, countryName: name })
   }
@@ -556,7 +574,7 @@ add({
     h2('Why families choose Smartious'), bullets(UAE_COUNTRY.whySmartious),
     h2('Fees and admission'), p(FEE_SCHOOL + '. One-to-one tuition: ' + FEE_TUITION + '.'),
   ],
-  faqs: UAE_COUNTRY.faqs, crumbs: [['UAE', '/online-school/uae']],
+  faqs: UAE_COUNTRY.faqs, crumbs: [['UAE', '/online-school/uae']], src: ['src/data/uaeCities.js', 'src/pages/LandingPage.jsx'],
   ld: [serviceLd({ name: 'Online school and homeschool in the UAE', desc: UAE_COUNTRY.heroSubhead, path: '/online-school/uae', area: 'United Arab Emirates' })],
 })
 for (const c of UAE_CITIES) {
@@ -572,16 +590,18 @@ for (const c of UAE_CITIES) {
       h2('Online tuition in ' + c.name),
       links(UAE_AREAS.filter(a => a.emirate === c.name).map(a => ({ href: '/tuition-uae/' + a.slug, label: 'Online tutors in ' + a.name }))),
     ],
-    faqs: c.faqs, related: [h2('Other emirates'), links(UAE_CITIES.filter(x => x !== c).map(x => ({ href: '/homeschool-' + x.slug, label: 'Online school in ' + x.name })))],
-    crumbs: [['UAE', '/online-school/uae'], [c.name, path]],
+    faqs: c.faqs, related: [h2('More in the UAE'), links([{ href: '/online-school/uae', label: 'Homeschooling and online school in Dubai and the UAE' },
+      ...UAE_CITIES.filter(x => x !== c).map(x => ({ href: '/homeschool-' + x.slug, label: 'Online school in ' + x.name }))])],
+    crumbs: [['UAE', '/online-school/uae'], [c.name, path]], src: ['src/data/uaeCities.js', 'src/data/uaeAreas.js'],
     ld: [serviceLd({ name: 'Online school in ' + c.name, desc: c.seoDesc, path, area: c.name + ', United Arab Emirates' })],
   })
   if (pg.path === path) CITY_PAGES.push({ slug: c.slug, pg, countrySlug: 'uae', cityName: c.name, countryName: 'UAE' })
 }
 add({
   path: '/tuition-uae',
-  title: 'Online Tutors in Dubai & the UAE | IGCSE, A-Level & IB Tuition | Smartious',
-  desc: 'Live online tuition for families in Dubai, Abu Dhabi and Sharjah: Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and American AP. Qualified tutors, Gulf-time lessons, from USD 15/hour (about AED 55).',
+  // Same title and description as the app (LandingPage.jsx, page 'tuition-uae').
+  title: 'Online Tutors in Dubai & UAE | IGCSE, A-Level | Smartious',
+  desc: 'Live online 1-on-1 tuition in Dubai, Abu Dhabi and Sharjah: IGCSE, A-Level, IB, Edexcel and AP with qualified tutors. From USD 15/hour (about AED 55).',
   h1: 'Online tutors in Dubai and the UAE',
   body: [
     p('Live online 1-on-1 tuition for Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and American AP, with lessons timed for the Gulf day. Smartious tuition in the UAE is online only.'),
@@ -590,7 +610,7 @@ add({
       return list.length ? h2(em) + links(list.map(a => ({ href: '/tuition-uae/' + a.slug, label: 'Online tutors in ' + a.name }))) : ''
     }),
   ],
-  related: [h2('Full-time online school'), links([UAE_PRODUCT_LINKS[0], UAE_PRODUCT_LINKS[2]])],
+  related: [h2('Full-time online school'), links([UAE_PRODUCT_LINKS[0], UAE_PRODUCT_LINKS[2]])], src: ['src/data/uaeAreas.js', 'src/pages/LandingPage.jsx'],
   ld: [serviceLd({ name: 'Online tuition in the UAE', desc: 'Live online 1-on-1 tuition for UAE families.', path: '/tuition-uae', area: 'United Arab Emirates', kind: 'tuition' })],
 })
 for (const a of UAE_AREAS) {
@@ -603,13 +623,13 @@ for (const a of UAE_AREAS) {
       h2('Nearby areas'), links((a.nearbyAreas || []).map(s => UAE_AREAS.find(x => x.slug === s)).filter(Boolean).map(x => ({ href: '/tuition-uae/' + x.slug, label: 'Online tutors in ' + x.name }))),
       h2('Smartious in the UAE'), links(UAE_PRODUCT_LINKS),
     ],
-    crumbs: [['Tuition in the UAE', '/tuition-uae'], [a.name, path]],
+    crumbs: [['Tuition in the UAE', '/tuition-uae'], [a.name, path]], src: ['src/data/uaeAreas.js'],
     ld: [serviceLd({ name: 'Online tuition in ' + a.name, desc: a.seoDesc || a.intro, path, area: a.name + ', ' + a.emirate + ', United Arab Emirates', kind: 'tuition' })],
   })
 }
 
 // US states and cities, Canadian provinces and cities (/homeschool-<slug>)
-function regionPage({ slug, s, country, hub, childLinks, parent }) {
+function regionPage({ slug, s, country, hub, childLinks, parent, src }) {
   const path = '/homeschool-' + slug
   return add({ path, title: s.metaTitle || ('Online Homeschool ' + s.name + ' — Live Cambridge IGCSE & A-Level | ' + SITE),
     desc: s.metaDesc || clip(s.pitch), h1: 'Online homeschool in ' + s.name + (parent ? ', ' + parent.name : ''), body: [
@@ -622,17 +642,17 @@ function regionPage({ slug, s, country, hub, childLinks, parent }) {
       s.blogSlug && FULL_ARTICLES[s.blogSlug] ? links([{ href: '/blog/' + s.blogSlug, label: FULL_ARTICLES[s.blogSlug].t }]) : '',
     ], faqs: s.faqs, related: [childLinks?.length ? h2('Cities in ' + s.name) + links(childLinks) : '',
       h2('More in ' + country), links([...(parent ? [{ href: '/homeschool-' + parent.slug, label: 'Online homeschool in ' + parent.name }] : []), { href: hub, label: 'Online school for families in ' + country }])],
-    crumbs: [[country, hub], ...(parent ? [[parent.name, '/homeschool-' + parent.slug]] : []), [s.name, path]],
+    crumbs: [[country, hub], ...(parent ? [[parent.name, '/homeschool-' + parent.slug]] : []), [s.name, path]], src: [src],
     ld: [serviceLd({ name: 'Online homeschool in ' + s.name, desc: s.metaDesc || s.pitch, path, area: [s.name, parent?.name, country].filter(Boolean).join(', ') })] })
 }
 for (const [slug, s] of Object.entries(US_STATES))
-  regionPage({ slug, s, country: 'the USA', hub: '/online-school/usa', childLinks: (US_CITIES_BY_STATE?.[slug] || []).filter(cs => US_CITIES[cs]).map(cs => ({ href: '/homeschool-' + cs, label: 'Online homeschool in ' + US_CITIES[cs].name })) })
+  regionPage({ slug, s, src: 'src/data/usStates.js', country: 'the USA', hub: '/online-school/usa', childLinks: (US_CITIES_BY_STATE?.[slug] || []).filter(cs => US_CITIES[cs]).map(cs => ({ href: '/homeschool-' + cs, label: 'Online homeschool in ' + US_CITIES[cs].name })) })
 for (const [slug, s] of Object.entries(US_CITIES))
-  regionPage({ slug, s, country: 'the USA', hub: '/online-school/usa', parent: US_STATES[s.state] ? { slug: s.state, name: US_STATES[s.state].name } : null })
+  regionPage({ slug, s, src: 'src/data/usCities.js', country: 'the USA', hub: '/online-school/usa', parent: US_STATES[s.state] ? { slug: s.state, name: US_STATES[s.state].name } : null })
 for (const [slug, s] of Object.entries(CA_PROVINCES))
-  regionPage({ slug, s, country: 'Canada', hub: '/online-school/canada', childLinks: (CA_CITIES_BY_PROVINCE?.[slug] || []).filter(cs => CA_CITIES[cs]).map(cs => ({ href: '/homeschool-' + cs, label: 'Online homeschool in ' + CA_CITIES[cs].name })) })
+  regionPage({ slug, s, src: 'src/data/caProvinces.js', country: 'Canada', hub: '/online-school/canada', childLinks: (CA_CITIES_BY_PROVINCE?.[slug] || []).filter(cs => CA_CITIES[cs]).map(cs => ({ href: '/homeschool-' + cs, label: 'Online homeschool in ' + CA_CITIES[cs].name })) })
 for (const [slug, s] of Object.entries(CA_CITIES))
-  regionPage({ slug, s, country: 'Canada', hub: '/online-school/canada', parent: CA_PROVINCES[s.province] ? { slug: s.province, name: CA_PROVINCES[s.province].name } : null })
+  regionPage({ slug, s, src: 'src/data/caCities.js', country: 'Canada', hub: '/online-school/canada', parent: CA_PROVINCES[s.province] ? { slug: s.province, name: CA_PROVINCES[s.province].name } : null })
 
 // Blog posts, each linked to its country hub, the fees page and the
 // January 2027 intake page.
@@ -659,7 +679,8 @@ for (const [slug, a] of Object.entries(FULL_ARTICLES)) {
     })(),
   ].filter(Boolean)
   add({
-    path, title: a.metaTitle || (a.t + ' | ' + SITE), desc: a.metaDesc || clip(a.intro), h1: a.t,
+    path, title: a.metaTitle || articleTitle(a.t), desc: a.metaDesc || clip(a.intro), h1: a.t,
+    src: [ARTICLES_INDEX[slug]?.part ? 'src/data/' + ARTICLES_INDEX[slug].part + '.js' : 'src/data/fullArticles.js'],
     body: [
       a.author ? `<p class="ss-by">By ${esc(a.author)}${a.role ? ', ' + esc(a.role) : ''}${a.date ? ' · ' + esc(a.date) : ''}</p>` : '',
       p(a.intro),
@@ -689,7 +710,7 @@ if (existsSync(arabicFile)) {
       body: [p(a.intro), ...(a.sections || []).map(s => h2(s.h) + (Array.isArray(s.p) ? s.p.map(p).join('') : p(s.p)))],
       faqs: a.faqs, faqsTitle: 'الأسئلة الشائعة',
       related: enPath ? [links([{ href: enPath, label: 'English version' }])] : [],
-      crumbs: [[a.h1 || a.title, a.path]] })
+      crumbs: [[a.h1 || a.title, a.path]], src: ['src/data/arabicPages.js'] })
     if (enPath) {
       const pair = [{ hreflang: 'ar', href: ORIGIN + href(a.path) }, { hreflang: 'en', href: ORIGIN + enPath }, { hreflang: 'x-default', href: ORIGIN + enPath }]
       ALTERNATES.set(href(a.path), pair)
@@ -776,7 +797,7 @@ function setMeta(html, attr, key, value) {
   const tag = `<meta ${attr}="${key}" content="${esc(value)}"/>`
   return re.test(html) ? html.replace(re, tag) : html.replace('</head>', `  ${tag}\n</head>`)
 }
-const ldTag = (o) => `<script type="application/ld+json">${JSON.stringify(o).replace(/</g, '\\u003c')}</script>`
+const ldTag = (o) => `<script type="application/ld+json" data-ss>${JSON.stringify(o).replace(/</g, '\\u003c')}</script>`
 const crumbLd = (pg) => {
   const list = [['Home', '/'], ...(pg.crumbs || [[pg.h1 || pg.title.split(/ [|—–] /)[0], pg.path]])]
     .filter((c, i, a) => a.findIndex(x => x[1] === c[1]) === i)
@@ -785,9 +806,15 @@ const crumbLd = (pg) => {
     itemListElement: list.map(([name, path], i) => ({ '@type': 'ListItem', position: i + 1, name: clip(name, 80), item: ORIGIN + (path === '/' ? '/' : href(path)) })),
   }
 }
-const KEY_HUBS = ['kenya', 'uae', 'united-kingdom', 'usa', 'canada', 'nigeria', 'south-africa', 'saudi-arabia', 'qatar', 'australia', 'india', 'germany']
+const KEY_HUBS = ['kenya', 'uae', 'qatar', 'saudi-arabia', 'kuwait', 'bahrain', 'oman', 'nigeria', 'united-kingdom', 'usa', 'canada', 'south-africa', 'australia', 'india', 'germany']
 const FOOT_HUBS = KEY_HUBS.map(s => byPath.get('/online-school/' + s)).filter(Boolean)
   .map(pg => `<a href="${pg.path}">${esc(pg.crumbs?.[0]?.[0] || pg.path.split('/').pop())}</a>`).join(' · ')
+
+const FOOT_CITIES = PRIORITY_CITY_LINKS.filter(([pth]) => byPath.has(pth) && !byPath.get(pth).noindex)
+  .map(([pth, label]) => `<a href="${pth}">${esc(label)}</a>`).join(' · ')
+for (const [pth] of [...PRIORITY_HUB_LINKS, ...PRIORITY_CITY_LINKS]) {
+  if (!byPath.has(pth) || byPath.get(pth).noindex) console.warn('seo-static: priority link ' + pth + ' is not an indexable page (src/data/priorityLinks.js)')
+}
 
 const FOOT_MORE = [['/services', 'Services'], ['/compare/wolsey-hall', 'Smartious vs Wolsey Hall'], ['/calendar', 'School calendar'], ['/events', 'Events'],
   ['/gallery', 'Gallery'], ['/privacy', 'Privacy'], ['/terms', 'Terms'], ['/cookies', 'Cookies'], ['/gdpr', 'GDPR'], ['/child-protection', 'Child protection'],
@@ -812,7 +839,7 @@ function render(pg) {
   const lds = [crumbLd(pg), faqLd(pg.faqs), ...(pg.ld || [])].filter(Boolean).map(ldTag).join('\n  ')
   html = html.replace('</head>', `  <link rel="canonical" href="${url}"/>\n  ${alt ? alt + '\n  ' : ''}${lds}\n  ${STYLE}\n</head>`)
   const nav = `<nav><a href="/">Smartious Homeschool</a>${MAIN_LINKS.map(l => `<a href="${l.href}">${esc(l.label)}</a>`).join('')}</nav>`
-  const foot = `<footer>${h2('Online school by country')}<p>${FOOT_HUBS}</p><p>${FOOT_MORE}</p>${contactBlock().replace(/^<h2>[^<]*<\/h2>/, '')}</footer>`
+  const foot = `<footer>${h2('Online school by country')}<p>${FOOT_HUBS}</p><p>Online school by city: ${FOOT_CITIES}</p><p>${FOOT_MORE}</p>${contactBlock().replace(/^<h2>[^<]*<\/h2>/, '')}</footer>`
   const arAlt = !ar && (ALTERNATES.get(pg.path) || []).find(a => a.hreflang === 'ar')
   const langLink = arAlt ? `<p lang="ar" dir="rtl"><a href="${esc(arAlt.href.slice(ORIGIN.length))}" hreflang="ar">النسخة العربية من هذه الصفحة</a></p>` : ''
   const main = `<h1>${esc(pg.h1 || pg.title.split(/ [|—–] /)[0])}</h1>${langLink}${pg.body.join('')}${faqs(pg.faqs, pg.faqsTitle)}${pg.related.join('')}`
@@ -838,10 +865,22 @@ for (const pg of pages) {
 if (n < 500) { console.error(`seo-static: only ${n} pages written — refusing to publish an incomplete site`); process.exit(1) }
 
 // ── Sitemap: exactly the indexable pages written above ──
+// lastmod = newest git commit date of the page's source files (pg.src,
+// default LandingPage.jsx), falling back to the build date without git.
+const GIT_DATES = new Map()
+const gitDate = (file) => {
+  if (!GIT_DATES.has(file)) {
+    let d = ''
+    try { d = execFileSync('git', ['log', '-1', '--format=%cs', '--', file], { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim() } catch {}
+    GIT_DATES.set(file, /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : BUILD_DATE)
+  }
+  return GIT_DATES.get(file)
+}
+const lastmod = (pg) => (pg.src && pg.src.length ? pg.src : ['src/pages/LandingPage.jsx']).map(gitDate).sort().pop()
 const sm = '<?xml version="1.0" encoding="UTF-8"?>\n' +
   '<!-- GENERATED by scripts/seo-static.mjs at build time: every indexable page with static HTML. Do not edit by hand. -->\n' +
   '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
-  written.filter(pg => !pg.noindex).map(pg => `  <url><loc>${esc(ORIGIN + (pg.path === '/' ? '/' : pg.path))}</loc><lastmod>${BUILD_DATE}</lastmod></url>`).join('\n') +
+  written.filter(pg => !pg.noindex).map(pg => `  <url><loc>${esc(ORIGIN + (pg.path === '/' ? '/' : pg.path))}</loc><lastmod>${lastmod(pg)}</lastmod></url>`).join('\n') +
   '\n</urlset>\n'
 writeFileSync(join(DIST, 'sitemap.xml'), sm)
 try { writeFileSync(join(ROOT, 'public', 'sitemap.xml'), sm) } catch (e) { console.warn('seo-static: could not refresh public/sitemap.xml:', e.message) }

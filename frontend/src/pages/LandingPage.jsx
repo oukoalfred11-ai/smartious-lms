@@ -56,6 +56,7 @@ import AssessmentForm from '../components/AssessmentForm.jsx'
 import { TEST_PREP } from '../data/testPrep.js'
 import { STUDY_ABROAD } from '../data/studyAbroad.js'
 import { LANGUAGES } from '../data/languages.js'
+import { PRIORITY_CITY_LINKS } from '../data/priorityLinks.js'
 
 
 /* ── Front Desk capture ───────────────────────────────────
@@ -1586,6 +1587,9 @@ function articleProduct(a) {
 // page. Curriculum and service detail pages derive their meta
 // from CURRICULA / SERVICES. Edit freely to refine targeting.
 const SITE = 'Smartious Homeschool & eSchool'
+// Blog titles: the article title, plus "| Smartious" only while the whole
+// title stays within ~60 characters (scripts/seo-static.mjs uses the same rule).
+const articleTitle = (t) => { t = t || 'Article'; return t.length <= 47 ? t + ' | Smartious' : t }
 // One organisation entity for all structured data. Every Organization /
 // EducationalOrganization block and every provider points at this @id.
 const ORG_ID = 'https://smartioushomeschool.com/#organization'
@@ -4184,8 +4188,8 @@ export default function LandingPage() {
   let metaDesc  = PAGE_META.home.desc
 
   if (page === 'virtual-school-kenya') {
-    metaTitle = 'Smartious — Leading Online & Virtual School for IB, IGCSE, Cambridge & Edexcel | Kenya 2026'
-    metaDesc  = 'Kenya\'s leading virtual school: live small-group Cambridge IGCSE, A-Level, Edexcel, IB Diploma, American AP, Ontario OSSD, CBC. 2-8x cheaper than CHS Online, King\'s InterHigh, Crimson. Kenya time zones, CBC available, two Nairobi centres. From USD 423/month personalized.'
+    metaTitle = 'Virtual School in Kenya | Live IGCSE, IB & CBC | Smartious'
+    metaDesc  = 'Virtual school in Kenya with live small-group IGCSE, A-Level, Edexcel, IB and CBC classes on Kenya time. From USD 423/month. Book a free assessment.'
   }
 
   if (page === 'virtual-school-ukraine') {
@@ -4218,7 +4222,7 @@ export default function LandingPage() {
     }
   } else if (page === 'article' && currentArticle && ARTICLES_INDEX[currentArticle]) {
     const a = ARTICLES_INDEX[currentArticle]
-    metaTitle = a.metaTitle || ((a.t || 'Article') + ' | ' + SITE)
+    metaTitle = a.metaTitle || articleTitle(a.t)
     metaDesc  = a.metaDesc
   } else if (page === 'state-landing' && currentStateSlug && US_STATES[currentStateSlug]) {
     const s = US_STATES[currentStateSlug]
@@ -4851,8 +4855,8 @@ export default function LandingPage() {
     metaTitle = 'Online School in the USA | Live Classes, AP, IGCSE & A-Level | Smartious'
     metaDesc  = 'Accredited live online school for American families: American curriculum with AP, plus Cambridge IGCSE and A-Level and IB, taught live in US time zones by qualified teachers. Real teachers, small classes, from USD 423/month for Primary.'
   } else if (page === 'tuition-uae') {
-    metaTitle = 'Online Tutors in Dubai & the UAE | IGCSE, A-Level & IB Tuition | Smartious'
-    metaDesc  = 'Live online tuition for families in Dubai, Abu Dhabi and Sharjah: Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and American AP. Qualified tutors, Gulf-time lessons, from USD 15/hour (about AED 55).'
+    metaTitle = 'Online Tutors in Dubai & UAE | IGCSE, A-Level | Smartious'
+    metaDesc  = 'Live online 1-on-1 tuition in Dubai, Abu Dhabi and Sharjah: IGCSE, A-Level, IB, Edexcel and AP with qualified tutors. From USD 15/hour (about AED 55).'
   } else if (page === 'uae-area' && currentUaeArea && UAE_AREAS.find(a => a.slug === currentUaeArea)) {
     const a = UAE_AREAS.find(x => x.slug === currentUaeArea)
     metaTitle = a.seoTitle || ('Online Tuition in ' + a.name + ', ' + a.emirate + ' | Smartious')
@@ -6121,6 +6125,8 @@ export default function LandingPage() {
                 {country:'Qatar', slug:'qatar', href:'/online-school/qatar', sub:'Doha'},
                 {country:'Saudi Arabia', slug:'saudi-arabia', href:'/online-school/saudi-arabia', sub:'Riyadh · Jeddah · Dhahran · NEOM'},
                 {country:'Bahrain', slug:'bahrain', href:'/online-school/bahrain', sub:'Manama · Riffa'},
+                {country:'Kuwait', slug:'kuwait', href:'/online-school/kuwait', sub:'Kuwait City · Salmiya · Hawally'},
+                {country:'Oman', slug:'oman', href:'/online-school/oman', sub:'Muscat · Seeb · Sohar · Salalah'},
                 {country:'Pakistan', slug:'pakistan', href:'/online-school/pakistan', sub:'Karachi · Lahore · Islamabad'},
                 {country:'South Korea', slug:'south-korea', href:'/online-school/south-korea', sub:'Seoul · Songdo · Busan · Pyeongtaek · Daejeon · Jeju'},
                 {country:'Japan', slug:'japan', href:'/online-school/japan', sub:'Tokyo · Yokohama · Osaka · Kobe · Nagoya · Okinawa'},
@@ -6130,13 +6136,13 @@ export default function LandingPage() {
                 {country:'United States', slug:'usa', href:'/online-school/usa', sub:'Coast to coast · Live · IGCSE/A-Level'},
                 {country:'Canada', slug:'canada', href:'/online-school/canada', sub:'Toronto · Vancouver'},
                 {country:'Australia', slug:'australia', href:'/online-school/australia', sub:'Sydney · Melbourne'},
-                {country:'Nigeria', slug:'nigeria', href:'/online-school/nigeria', sub:'Lagos · Abuja'},
+                {country:'Nigeria', slug:'nigeria', href:'/online-school/nigeria', sub:'Lagos · Abuja · Port Harcourt'},
                 {country:'South Africa', slug:'south-africa', href:'/online-school/south-africa', sub:'Johannesburg · Cape Town'},
                 {country:'Egypt', slug:'egypt', href:'/online-school/egypt', sub:'Cairo · New Cairo · Sheikh Zayed · Alexandria · NAC · Sharm El Sheikh'},
                 {country:'Morocco', slug:'morocco', href:'/online-school/morocco', sub:'Casablanca · Rabat · Marrakech · Tangier · Fes · Agadir'},
                 {country:'Ethiopia', slug:'ethiopia', href:'/online-school/ethiopia', sub:'Addis Ababa · Mekelle · Hawassa'},
                 {country:'Rwanda', slug:'rwanda', href:'/online-school/rwanda', sub:'Kigali · Huye · Musanze · Rubavu'},
-                {country:'Kenya', slug:'kenya', href:'/online-school/kenya', sub:'Nairobi HQ · Diamond Plaza'},
+                {country:'Kenya', slug:'kenya', href:'/online-school/kenya', sub:'Nairobi HQ · Mombasa · Kisumu'},
                 {country:'Uganda', slug:'uganda', href:'/online-school/uganda', sub:'Kampala · Entebbe · Wakiso'},
                 {country:'Somalia', slug:'somalia', href:'/online-school/somalia', sub:'Mogadishu · Hargeisa · Garowe'},
                 {country:'Tanzania', slug:'tanzania', href:'/online-school/tanzania', sub:'Dar es Salaam · Arusha · Zanzibar'},
@@ -6178,6 +6184,13 @@ export default function LandingPage() {
                 </a>
               ))}
             </div>
+            <p style={{marginTop:28,textAlign:'center',fontSize:13.5,lineHeight:2,color:V.sl}}>
+              <strong style={{color:V.ink}}>Online school &amp; homeschool by city:</strong>{' '}
+              {PRIORITY_CITY_LINKS.map(([href, label], i) => (
+                <span key={href}>{i ? ' · ' : ''}<a href={href} onClick={linkClick(() => { nav(href); window.scrollTo(0, 0) })}
+                  style={{color:V.cr,fontWeight:600,textDecoration:'none'}}>{label}</a></span>
+              ))}
+            </p>
           </div></section>
 
           {/* ═══════════════════════════════════════════
@@ -6591,11 +6604,20 @@ export default function LandingPage() {
                   <div>
                     <h3 style={{fontSize:13,fontWeight:700,letterSpacing:'.04em',textTransform:'uppercase',color:V.gold3,marginBottom:10}}>Cities &amp; Countries</h3>
                     <ul style={{listStyle:'none',padding:0,margin:0,fontSize:13,lineHeight:1.9}}>
-                      <li><a onClick={() => P('tuition-nairobi')} style={{color:'inherit',textDecoration:'none',cursor:'pointer'}}>Tuition Nairobi (21 areas)</a></li>
-                      <li><a onClick={() => P('homeschooling-kenya')} style={{color:'inherit',textDecoration:'none',cursor:'pointer'}}>Homeschooling Mombasa · Kisumu · Nakuru · Eldoret · Thika · Kiambu</a></li>
-                      <li><a onClick={() => P('tuition-uae')} style={{color:'inherit',textDecoration:'none',cursor:'pointer'}}>Tuition UAE (27 emirate areas: Dubai · Abu Dhabi · Sharjah)</a></li>
-                      <li><a onClick={() => P('home')} style={{color:'inherit',textDecoration:'none',cursor:'pointer'}}>Qatar · Bahrain · UK · Canada · Australia</a></li>
-                      <li><a onClick={() => P('home')} style={{color:'inherit',textDecoration:'none',cursor:'pointer'}}>USA · Nigeria · South Africa · Uganda · Tanzania · Somalia · Pakistan</a></li>
+                      {[
+                        ['/online-school/kenya', 'Homeschooling and online school in Kenya'],
+                        ['/tuition-nairobi', 'Tuition in Nairobi (21 areas)'],
+                        ['/online-school/uae', 'Homeschooling in Dubai and the UAE'],
+                        ['/tuition-uae', 'Online tutors in Dubai and the UAE'],
+                        ['/online-school/qatar', 'Online school in Qatar'],
+                        ['/online-school/saudi-arabia', 'Online school in Saudi Arabia'],
+                        ['/online-school/kuwait', 'Online school in Kuwait'],
+                        ['/online-school/bahrain', 'Online school in Bahrain'],
+                        ['/online-school/oman', 'Online school in Oman'],
+                        ['/online-school/nigeria', 'Online school in Nigeria'],
+                      ].map(([href, label]) => (
+                        <li key={href}><a href={href} onClick={linkClick(() => { nav(href); window.scrollTo(0, 0) })} style={{color:'inherit',textDecoration:'none',cursor:'pointer'}}>{label}</a></li>
+                      ))}
                     </ul>
                   </div>
                   <div>
@@ -13639,7 +13661,7 @@ export default function LandingPage() {
             <div className="wrap" style={{maxWidth:1080,margin:'0 auto',position:'relative',zIndex:2}}>
               <div className="eyebrow" style={{color:V.gold3,marginBottom:12,letterSpacing:'.14em'}}>Kenya's leading virtual school &middot; Online school &middot; Since 2018</div>
               <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.4rem, 5vw, 3.6rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:22,letterSpacing:'-.01em',maxWidth:920}}>
-                Smartious &mdash; Leading <em style={{color:V.gold3,fontStyle:'italic'}}>Online &amp; Virtual School</em> for <em style={{color:V.gold3,fontStyle:'italic'}}>IB, IGCSE, Cambridge &amp; Edexcel</em>
+                <em style={{color:V.gold3,fontStyle:'italic'}}>Virtual School</em> in Kenya for <em style={{color:V.gold3,fontStyle:'italic'}}>IGCSE, A-Level, IB &amp; CBC</em>
               </h1>
               <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,maxWidth:820,marginBottom:32}}>
                 Kenya-based, Kenya-founded, Kenya-operating. Live small-group classes 4-6 students. Cambridge IGCSE, A-Level, Pearson Edexcel International, IB Diploma, American AP, Ontario OSSD, and Kenya CBC. Two Nairobi centres for in-person supplementation. 2-8&times; cheaper than CHS Online, King's InterHigh, and Crimson Global Academy.
@@ -14326,15 +14348,8 @@ export default function LandingPage() {
             }}/>
             <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
               <div className="eyebrow" style={{color:V.gold3,marginBottom:14}}>Tuition Services · Nairobi</div>
-              <h1 style={{
-                fontFamily:"'DM Serif Display',Georgia,serif",
-                fontSize:'clamp(2.2rem,5vw,3.4rem)',
-                fontWeight:700,
-                color:'#fff',
-                lineHeight:1.05,
-                marginBottom:18,
-              }}>
-                Premium Tuition Across <em style={{color:V.gold3,fontStyle:'italic'}}>Nairobi</em> — Home & Online
+              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem,5vw,3.4rem)',fontWeight:700,color:'#fff',lineHeight:1.05,marginBottom:18}}>
+                Tuition in <em style={{color:V.gold3,fontStyle:'italic'}}>Nairobi</em> — Home &amp; Online Tutors
               </h1>
               <p style={{
                 fontSize:17,
@@ -14846,13 +14861,13 @@ export default function LandingPage() {
           {/* LocalBusiness schema — UAE-wide */}
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
             '@context': 'https://schema.org',
-            '@type': 'EducationalOrganization',
-            '@id': ORG_ID,
-            'name': SITE,
-            'url': 'https://smartioushomeschool.com/',
+            '@type': 'Service',
+            'name': 'Online tuition in the UAE',
+            'url': 'https://smartioushomeschool.com/tuition-uae',
+            'provider': { '@id': ORG_ID },
+            'serviceType': 'Private tuition',
             'description': 'Premium online tuition for UAE families across Dubai, Abu Dhabi, Sharjah, Ajman, RAK, Fujairah and Al Ain. Cambridge IGCSE, A-Level, IB Diploma, CBSE, American AP. From USD 15/hour.',
             'areaServed': UAE_AREAS.map(a => ({ '@type': 'Place', 'name': a.name + ', ' + a.emirate })),
-            'sameAs': ['https://smartioushomeschool.com'],
           }) }}/>
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
             '@context': 'https://schema.org', '@type': 'BreadcrumbList',
@@ -15270,10 +15285,11 @@ export default function LandingPage() {
           <>
             {/* Schema */}
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-              '@context':'https://schema.org','@type':'EducationalOrganization',
-              '@id': ORG_ID,
-              'name': SITE,
-              'url':'https://smartioushomeschool.com/',
+              '@context':'https://schema.org','@type':'Service',
+              'name': 'Online school and homeschool in ' + country.name,
+              'url': 'https://smartioushomeschool.com' + (country.hub || '/'),
+              'provider': { '@id': ORG_ID },
+              'serviceType': 'Online school and homeschooling',
               'description': country.heroSubhead + ' ' + country.heroValueProp,
               'areaServed': cities.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
               'offers': FEE_OFFER,
@@ -17025,10 +17041,11 @@ export default function LandingPage() {
           <>
             {/* Schema */}
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-              '@context':'https://schema.org','@type':'EducationalOrganization',
-              '@id': ORG_ID,
-              'name': SITE,
-              'url':'https://smartioushomeschool.com/',
+              '@context':'https://schema.org','@type':'Service',
+              'name': 'Online school and homeschool in ' + country.name,
+              'url': 'https://smartioushomeschool.com' + (country.hub || '/'),
+              'provider': { '@id': ORG_ID },
+              'serviceType': 'Online school and homeschooling',
               'description': country.heroSubhead + ' ' + country.heroValueProp,
               'areaServed': cities.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
               'offers': FEE_OFFER,
@@ -17307,10 +17324,11 @@ export default function LandingPage() {
           <>
             {/* Schema */}
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-              '@context':'https://schema.org','@type':'EducationalOrganization',
-              '@id': ORG_ID,
-              'name': SITE,
-              'url':'https://smartioushomeschool.com/',
+              '@context':'https://schema.org','@type':'Service',
+              'name': 'Online school and homeschool in ' + country.name,
+              'url': 'https://smartioushomeschool.com' + (country.hub || '/'),
+              'provider': { '@id': ORG_ID },
+              'serviceType': 'Online school and homeschooling',
               'description': country.heroSubhead + ' ' + country.heroValueProp,
               'areaServed': cities.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
               'offers': FEE_OFFER,
@@ -17589,10 +17607,11 @@ export default function LandingPage() {
           <>
             {/* Schema */}
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-              '@context':'https://schema.org','@type':'EducationalOrganization',
-              '@id': ORG_ID,
-              'name': SITE,
-              'url':'https://smartioushomeschool.com/',
+              '@context':'https://schema.org','@type':'Service',
+              'name': 'Online school and homeschool in ' + country.name,
+              'url': 'https://smartioushomeschool.com' + (country.hub || '/'),
+              'provider': { '@id': ORG_ID },
+              'serviceType': 'Online school and homeschooling',
               'description': country.heroSubhead + ' ' + country.heroValueProp,
               'areaServed': cities.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
               'offers': FEE_OFFER,
@@ -17871,10 +17890,11 @@ export default function LandingPage() {
           <>
             {/* Schema */}
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-              '@context':'https://schema.org','@type':'EducationalOrganization',
-              '@id': ORG_ID,
-              'name': SITE,
-              'url':'https://smartioushomeschool.com/',
+              '@context':'https://schema.org','@type':'Service',
+              'name': 'Online school and homeschool in ' + country.name,
+              'url': 'https://smartioushomeschool.com' + (country.hub || '/'),
+              'provider': { '@id': ORG_ID },
+              'serviceType': 'Online school and homeschooling',
               'description': country.heroSubhead + ' ' + country.heroValueProp,
               'areaServed': cities.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
               'offers': FEE_OFFER,
@@ -18153,10 +18173,11 @@ export default function LandingPage() {
           <>
             {/* Schema */}
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-              '@context':'https://schema.org','@type':'EducationalOrganization',
-              '@id': ORG_ID,
-              'name': SITE,
-              'url':'https://smartioushomeschool.com/',
+              '@context':'https://schema.org','@type':'Service',
+              'name': 'Online school and homeschool in ' + country.name,
+              'url': 'https://smartioushomeschool.com' + (country.hub || '/'),
+              'provider': { '@id': ORG_ID },
+              'serviceType': 'Online school and homeschooling',
               'description': country.heroSubhead + ' ' + country.heroValueProp,
               'areaServed': cities.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
               'offers': FEE_OFFER,
@@ -18434,10 +18455,11 @@ export default function LandingPage() {
           <>
             {/* Schema */}
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-              '@context':'https://schema.org','@type':'EducationalOrganization',
-              '@id': ORG_ID,
-              'name': SITE,
-              'url':'https://smartioushomeschool.com/',
+              '@context':'https://schema.org','@type':'Service',
+              'name': 'Online school and homeschool in ' + country.name,
+              'url': 'https://smartioushomeschool.com' + (country.hub || '/'),
+              'provider': { '@id': ORG_ID },
+              'serviceType': 'Online school and homeschooling',
               'description': country.heroSubhead + ' ' + country.heroValueProp,
               'areaServed': cities.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
               'offers': FEE_OFFER,
@@ -18708,7 +18730,7 @@ export default function LandingPage() {
               '@context':'https://schema.org','@type':'BreadcrumbList',
               'itemListElement':[
                 {'@type':'ListItem','position':1,'name':'Home','item':'https://smartioushomeschool.com/'},
-                {'@type':'ListItem','position':2,'name':'Homeschooling Kenya','item':'https://smartioushomeschool.com/online-school/kenya'},
+                {'@type':'ListItem','position':2,'name':'Kenya','item':'https://smartioushomeschool.com/online-school/kenya'},
                 {'@type':'ListItem','position':3,'name': city.name,'item':'https://smartioushomeschool.com/homeschool-' + city.slug},
               ],
             })}}/>
@@ -18953,6 +18975,20 @@ export default function LandingPage() {
                   'mainEntity': city.faqs.map(f => ({'@type':'Question','name': f.q,'acceptedAnswer':{'@type':'Answer','text': f.a}})),
                 })}}/>
               </div>
+            </div></section>
+
+            {/* MORE IN KENYA — back to the hub and across to the other cities */}
+            <section className="sec" style={{background:V.white,paddingTop:40,paddingBottom:40}}><div className="wrap">
+              <nav aria-label="More in Kenya" style={{maxWidth:880,margin:'0 auto'}}>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',fontWeight:400,color:V.ink,margin:'0 0 14px',lineHeight:1.25}}>More in Kenya</h2>
+                <p style={{fontSize:14.5,lineHeight:1.9,color:V.sl,margin:0}}>
+                  <a href="/online-school/kenya" onClick={linkClick(() => { nav('/online-school/kenya'); window.scrollTo(0, 0) })} style={{color:V.cr,fontWeight:700,textDecoration:'none'}}>Homeschooling and online school in Kenya</a>
+                  {KENYA_CITIES.filter(c => c.slug !== city.slug).map(c => (
+                    <span key={c.slug}>{' · '}<a href={'/homeschool-' + c.slug} onClick={linkClick(() => { nav('/homeschool-' + c.slug); window.scrollTo(0, 0) })} style={{color:V.cr,textDecoration:'none'}}>Online school in {c.name}</a></span>
+                  ))}
+                  {' · '}<a href="/tuition-nairobi" onClick={linkClick(() => { nav('/tuition-nairobi'); window.scrollTo(0, 0) })} style={{color:V.cr,textDecoration:'none'}}>Tuition in Nairobi</a>
+                </p>
+              </nav>
             </div></section>
 
             {/* ENROL CTA */}
@@ -19925,13 +19961,13 @@ export default function LandingPage() {
         <>
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
             '@context': 'https://schema.org',
-            '@type': 'EducationalOrganization',
-            '@id': ORG_ID,
-            'name': SITE,
-            'url': 'https://smartioushomeschool.com/',
+            '@type': 'Service',
+            'name': 'Online tuition in the UK',
+            'url': 'https://smartioushomeschool.com/tuition-uk',
+            'provider': { '@id': ORG_ID },
+            'serviceType': 'Private tuition',
             'description': 'Live online private tuition for UK families across London, Manchester, Birmingham, Leeds, Bristol, Edinburgh. Cambridge IGCSE, A-Level, IB Diploma, 11+ and 13+ Common Entrance. From USD 15/hour.',
             'areaServed': UK_AREAS.map(a => ({ '@type': 'Place', 'name': a.name + ', ' + a.city })),
-            'sameAs': ['https://smartioushomeschool.com'],
           }) }}/>
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
             '@context': 'https://schema.org', '@type': 'BreadcrumbList',
@@ -24651,7 +24687,7 @@ function Footer({ P }) {
           <div>
             <div className="ft-ch">Online School</div>
             <ul className="ft-lk">
-              {[['kenya','Kenya'],['uae','UAE & Dubai'],['united-kingdom','United Kingdom'],['usa','USA'],['canada','Canada'],['nigeria','Nigeria'],['south-africa','South Africa'],['saudi-arabia','Saudi Arabia'],['qatar','Qatar'],['kuwait','Kuwait'],['bahrain','Bahrain'],['australia','Australia']].map(([slug, l]) => (
+              {[['kenya','Kenya'],['uae','UAE & Dubai'],['united-kingdom','United Kingdom'],['usa','USA'],['canada','Canada'],['nigeria','Nigeria'],['south-africa','South Africa'],['saudi-arabia','Saudi Arabia'],['qatar','Qatar'],['kuwait','Kuwait'],['bahrain','Bahrain'],['oman','Oman'],['australia','Australia']].map(([slug, l]) => (
                 <li key={slug}><a {...go('/online-school/' + slug, () => footerNav('/online-school/' + slug))}>{l}</a></li>
               ))}
             </ul>
@@ -24678,6 +24714,12 @@ function Footer({ P }) {
             </div>
           </div>
         </div>
+        <p style={{fontSize:13,lineHeight:1.9,color:'#C0B5A8',margin:'-24px 0 28px'}}>
+          <span style={{color:'#F7F3ED',fontWeight:600}}>Online school by city:</span>{' '}
+          {PRIORITY_CITY_LINKS.map(([href, l], i) => (
+            <span key={href}>{i ? ' · ' : ''}<a {...go(href, () => footerNav(href))} style={{color:'inherit'}}>{l}</a></span>
+          ))}
+        </p>
         <div className="ft-bot">
           <div className="ft-copy">{cfg.footerCopy || '© 2026 Smartious E-School Ltd. Nairobi, Kenya. All rights reserved.'}</div>
           <div className="ft-acs">

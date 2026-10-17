@@ -500,6 +500,7 @@ export const NIGERIA_COUNTRY = {
     { q: 'Can we pay in naira?', a: PAY_NG },
     { q: 'When is the next intake?', a: INTAKE },
     { q: 'How do we contact Smartious?', a: CONTACT },
+    { q: 'How do live online classes work?', a: 'Students follow a weekly timetable of live lessons with qualified teachers, in small groups or one to one, and every lesson is recorded for catch-up. Families receive assessments and termly reports. Each student starts with a placement assessment, so we can place them at the right level.' },
   ],
 
   // ── CTA ──────────────────────────────────────────────────────

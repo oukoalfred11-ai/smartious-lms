@@ -65,7 +65,7 @@ export default function CountryCityPage({ country, cities, currentCitySlug, P, V
         '@context':'https://schema.org','@type':'BreadcrumbList',
         'itemListElement':[
           {'@type':'ListItem','position':1,'name':'Home','item':'https://smartioushomeschool.com/'},
-          {'@type':'ListItem','position':2,'name':'Homeschooling ' + countryName,'item': hubFullUrl},
+          {'@type':'ListItem','position':2,'name': countryName,'item': hubFullUrl},
           {'@type':'ListItem','position':3,'name': city.name,'item': cityUrl},
         ],
       })}}/>
@@ -219,6 +219,26 @@ export default function CountryCityPage({ country, cities, currentCitySlug, P, V
             ))}
           </div>
         </div>
+      </div></section>
+
+      {/* MORE IN THIS COUNTRY — back to the hub and across to sibling cities
+          (the static HTML from scripts/seo-static.mjs links the same pages) */}
+      <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:16}}><div className="wrap">
+        <nav aria-label={'More in ' + countryName} style={{maxWidth:880,margin:'0 auto'}}>
+          <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',fontWeight:400,color:V.ink,margin:'0 0 14px',lineHeight:1.25}}>
+            More in {countryName}
+          </h2>
+          <p style={{fontSize:14.5,lineHeight:1.9,color:V.sl,margin:0}}>
+            <a href={hubUrl} onClick={(e) => { if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return; e.preventDefault(); P(hubPageId) }}
+              style={{color:V.cr,fontWeight:700,textDecoration:'none'}}>Online school and homeschool in {countryName}</a>
+            {cities.filter(c => c.slug !== city.slug).map(c => (
+              <span key={c.slug}>{' · '}
+                <a href={'/homeschool-' + c.slug} onClick={(e) => { if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return; e.preventDefault(); nav('/homeschool-' + c.slug); window.scrollTo(0, 0) }}
+                  style={{color:V.cr,textDecoration:'none'}}>Online school in {c.name}</a>
+              </span>
+            ))}
+          </p>
+        </nav>
       </div></section>
 
       {/* GOOGLE REVIEWS */}

@@ -104,7 +104,7 @@ function CountryHub({
         '@context':'https://schema.org','@type':'BreadcrumbList',
         'itemListElement':[
           {'@type':'ListItem','position':1,'name':'Home','item':'https://smartioushomeschool.com/'},
-          {'@type':'ListItem','position':2,'name':'Homeschooling ' + country.name,'item':'https://smartioushomeschool.com' + country.hub},
+          {'@type':'ListItem','position':2,'name': country.name,'item':'https://smartioushomeschool.com' + country.hub},
         ],
       })}}/>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
@@ -555,7 +555,8 @@ function CountryHub({
             <div style={{width:180,height:180,borderRadius:'50%',overflow:'hidden',flexShrink:0,boxShadow:'0 8px 24px rgba(139,26,46,.25)',border:`3px solid ${V.gold3}`,background:V.bone}}>
               <img src="/alfred-ouko-founder.jpg"
                 alt="Alfred Ouko, founder and CEO of Smartious Homeschool"
-                loading="lazy"
+                width="180" height="180"
+                loading="lazy" decoding="async"
                 style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}/>
             </div>
             <div>
@@ -637,6 +638,10 @@ function CountryHub({
               {slug:'rwanda', name:'Rwanda', note:'Kigali tech + East African Community'},
               {slug:'south-africa', name:'South Africa', note:'Johannesburg + Cape Town expat'},
             ]},
+            {region:'West Africa', hubs:[
+              {slug:'nigeria', name:'Nigeria', note:'Lagos · Abuja · Port Harcourt'},
+              {slug:'ghana', name:'Ghana', note:'Accra · Kumasi · Takoradi'},
+            ]},
             {region:'North Africa', hubs:[
               {slug:'egypt', name:'Egypt', note:'Cairo · Alexandria · New Capital'},
               {slug:'morocco', name:'Morocco', note:'Casablanca · Rabat · Marrakech'},
@@ -645,6 +650,9 @@ function CountryHub({
               {slug:'uae', name:'UAE', note:'Dubai · Abu Dhabi · Sharjah'},
               {slug:'qatar', name:'Qatar', note:'Doha · Education City'},
               {slug:'saudi-arabia', name:'Saudi Arabia', note:'Riyadh · Jeddah · Dammam'},
+              {slug:'kuwait', name:'Kuwait', note:'Kuwait City · Salmiya'},
+              {slug:'bahrain', name:'Bahrain', note:'Manama · Riffa'},
+              {slug:'oman', name:'Oman', note:'Muscat · Sohar · Salalah'},
             ]},
             {region:'East & Southeast Asia', hubs:[
               {slug:'japan', name:'Japan', note:'Tokyo · Yokohama · Osaka · Kobe'},
