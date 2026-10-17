@@ -125,7 +125,7 @@ export const KUWAIT_CITIES = [
       'Salmiya is densely populated, and families often look for a curriculum that continues if their contract moves them.',
       'Kuwait is on Arabia Standard Time (AST, UTC+3), the same time as our teachers in Nairobi. A 9:00 lesson is 9:00 in Kuwait, so live lessons fall in normal school hours, Sunday to Thursday, and every lesson is recorded.',
       'Salmiya is Kuwait\'s densest expatriate residential concentration. Filipino families (~250,000+ Kuwait total), Indian families (~1,000,000+ Kuwait total), Egyptian families (~800,000+), plus Bangladeshi, Sri Lankan, Pakistani expat concentrations — many at fee-sensitive corporate salary bands where Kuwait mid-tier and premium international school fees (KWD 3,200-9,500+/year) create genuine budget constraint. Smartious from USD 423/month for Primary (≈ KWD 130, Oct 2026 rate) is a fundamentally different fee tier.',
-      'Salmiya international school proximity: Kuwait English School (KES, mid-tier), Gulf English School (British curriculum ages 3-18), American Baccalaureate School (IB and American), plus multiple smaller Cambridge and Indian-curriculum schools. Kuwait mid-tier and premium physical schools remain 4-16× the Smartious fee point.',
+      'Salmiya international school proximity: Kuwait English School (KES, mid-tier), Gulf English School (British curriculum ages 3-18), American Baccalaureate School (IB and American), plus multiple smaller Cambridge and Indian-curriculum schools. Kuwait mid-tier and premium physical schools remain well above the Smartious fee point.',
       'Expatriate rotation cycles for Salmiya corporate families — typical 2-3 year assignments for many Filipino, Indian, and Egyptian professional families. Smartious enrolment portability across rotation eliminates repeated re-enrolment friction.',
       'Iranian diaspora Salmiya community — smaller than Istanbul concentration but present. Iranian families access Cambridge / IB / OSSD without Iran-side sanctions constraints via Kuwait residence status.',
       'Time zone: AST UTC+3 = EAT UTC+3. Zero offset.',
@@ -156,7 +156,7 @@ export const KUWAIT_CITIES = [
       'Home language options — Tagalog/Filipino, Hindi, Bengali, Urdu, Tamil, Sinhala, Persian (Farsi), Arabic — for expat families',
     ],
     whyChoose: [
-      ['Kuwait English School / Gulf English School / ABS alternative', 'Smartious from USD 5,076/year vs KWD 3,200-9,500+/year Salmiya-adjacent mid-tier and premium schools — 4-16× fee difference with identical Cambridge / IB / American qualifications.'],
+      ['Kuwait English School / Gulf English School / ABS alternative', 'Smartious from USD 5,076/year vs KWD 3,200-9,500+/year Salmiya-adjacent mid-tier and premium schools — substantial fee difference with identical Cambridge / IB / American qualifications.'],
       ['Fee point aligned with expat professional salary bands', 'Filipino, Indian, Egyptian, Bangladeshi, Sri Lankan, Pakistani expat professional families at fee-sensitive corporate salary bands access international curriculum without mid-tier physical school budget constraint.'],
       ['Zero time zone friction', 'AST UTC+3 = EAT UTC+3.'],
       ['Expat rotation portability', 'Salmiya Filipino, Indian, Egyptian corporate rotation cycles supported without re-enrolment friction.'],
