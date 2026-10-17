@@ -1985,7 +1985,7 @@ const PAGE_META = {
   },
   'homeschooling-india': {
     title: 'Online School, Virtual School & Homeschool India | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Indian families across Mumbai (DAIS + JBCN + Ecole Mondiale + Oberoi alternative), Delhi NCR (BSD + AES + Pathways + Heritage), Bangalore (TISB + CIS + Indus + Oakridge + Trio), Hyderabad (Chirec + Oakridge Nord Anglia + ISH), Chennai (AISC + Chennai British + Chettinad + MCTM Chettyar), and Pune (Mercedes-Benz + Symbiosis + Pune International + Sanjay Ghodawat). Dramatic fee arbitrage — INR 8-20+ lakh/year premium schools vs INR 1.8-5.4 lakh/year Smartious (4-11× cheaper). Serves NRI returnees + tier-2 city access gap + IT/pharma/automotive corporate rotational families. From USD 423/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Indian families across Mumbai (DAIS + JBCN + Ecole Mondiale + Oberoi alternative), Delhi NCR (BSD + AES + Pathways + Heritage), Bangalore (TISB + CIS + Indus + Oakridge + Trio), Hyderabad (Chirec + Oakridge Nord Anglia + ISH), Chennai (AISC + Chennai British + Chettinad + MCTM Chettyar), and Pune (Mercedes-Benz + Symbiosis + Pune International + Sanjay Ghodawat). Dramatic fee arbitrage — INR 8-20+ lakh/year premium schools vs Smartious from ~INR 4.3 lakh/year. Serves NRI returnees + tier-2 city access gap + IT/pharma/automotive corporate rotational families. From USD 423/month.',
   },
   'homeschooling-germany': {
     title: 'Online School, Virtual School & Homeschool Germany | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
@@ -1993,7 +1993,7 @@ const PAGE_META = {
   },
   'homeschooling-romania': {
     title: 'Online School, Virtual School & Homeschool Romania | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Romania-resident families across Bucharest (AISB Pipera + BSB Herăstrău + Cambridge School CSB Voluntari + ISB alternative), Cluj-Napoca (Transylvania College + International School Cluj + KEY International alternative), Timișoara (International British School alternative), Iași (Amazon Development Center corporate + International School alternative), Brașov (Continental Automotive + Schaeffler + International British School alternative), and Constanța (Port of Constanța + OMV Petrom). Smartious as Kenya-based accredited online school satisfies Romania\'s legal "umbrella school" pathway for homeschool families under Law 198/2023. 2-12× fee arbitrage. From USD 423/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Romania-resident families across Bucharest (AISB Pipera + BSB Herăstrău + Cambridge School CSB Voluntari + ISB alternative), Cluj-Napoca (Transylvania College + International School Cluj + KEY International alternative), Timișoara (International British School alternative), Iași (Amazon Development Center corporate + International School alternative), Brașov (Continental Automotive + Schaeffler + International British School alternative), and Constanța (Port of Constanța + OMV Petrom). Smartious as Kenya-based accredited online school satisfies Romania\'s legal "umbrella school" pathway for homeschool families under Law 198/2023. Substantial fee savings. From USD 423/month.',
   },
   'homeschooling-ukraine': {
     title: 'Online School, Virtual School & Homeschool Ukraine | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
@@ -4195,7 +4195,7 @@ export default function LandingPage() {
 
   if (page === 'virtual-school-ukraine') {
     metaTitle = 'Smartious — Online & Virtual School for Ukrainian Families | IB, IGCSE, Cambridge, Edexcel, OSSD 2026'
-    metaDesc  = 'Virtual school for Ukrainian families in-country and diaspora. Cambridge IGCSE, A-Level, Edexcel, IB Diploma, AP, Ontario OSSD via CCIS. Education continuity through displacement. Perfect EET/EAT time zones. Cambridge exams at Warsaw/Berlin/London. Polish + German university pathway with Ukrainian student scholarships. Discounted rates for refugee families. From USD 423/month.'
+    metaDesc  = 'Virtual school for Ukrainian families in-country and diaspora. Cambridge IGCSE, A-Level, Edexcel, IB Diploma, AP, Ontario OSSD via CCIS. Education continuity through displacement. Close EET/EAT time zones. Cambridge exams at Warsaw/Berlin/London. Polish + German university pathway with Ukrainian student scholarships. Discounted rates for refugee families. From USD 423/month.'
   }
   if (page === 'curriculum-detail' && currentCurriculum) {
     const c = CURRICULA.find(x => x.slug === currentCurriculum)
@@ -5162,7 +5162,7 @@ export default function LandingPage() {
                 ['★','Flexible Learning — Home visits, learning centre, or 100% online'],
                 ['●','University Placement — 200+ partner universities worldwide'],
                 ['◆','From $15/hour tuition · $38 application fee · First lesson within 48 hours'],
-                ['★','Proven Results — 94% A*/A pass rate at IGCSE and A-Level'],
+                ['★','Exam Preparation — past papers, mock exams and exam-entry support for IGCSE and A-Level'],
               ].concat([
                 ['★','Internationally Accredited — IGCSE · Cambridge · IB · Edexcel · CBC'],
                 ['◆','Expert Tutors — Hand-picked, degree-qualified, exam specialists'],
@@ -5171,7 +5171,7 @@ export default function LandingPage() {
                 ['★','Flexible Learning — Home visits, learning centre, or 100% online'],
                 ['●','University Placement — 200+ partner universities worldwide'],
                 ['◆','From $15/hour tuition · $38 application fee · First lesson within 48 hours'],
-                ['★','Proven Results — 94% A*/A pass rate at IGCSE and A-Level'],
+                ['★','Exam Preparation — past papers, mock exams and exam-entry support for IGCSE and A-Level'],
               ]).map(([ico,t],i) => (
                 <div key={i} className="topbar-mi">
                   <span style={{color:V.gold3,fontSize:10}}>{ico}</span>
@@ -8799,7 +8799,7 @@ export default function LandingPage() {
                         {
                           h:'Expatriate families (most readers)',
                           tag:'Most common pathway',
-                          p:'If you\'re an expatriate resident (the majority of UAE families), you can enrol your child with an accredited international online school like Smartious without requiring KHDA, ADEK or Ministry approval. The school is regulated abroad (Cambridge, Edexcel, IB) and your child sits internationally-recognised examinations.',
+                          p:'If you\'re an expatriate resident (the majority of UAE families), you can enrol your child with an accredited international online school like Smartious without requiring KHDA, ADEK or Ministry approval. The school is regulated abroad (Cambridge, Edexcel, IB) and your child sits internationally-recognised examinations. Rules can differ by emirate and can change, so check your family\'s situation with KHDA, ADEK or the Ministry of Education before you start.',
                           ok:true,
                         },
                         {
@@ -8927,7 +8927,7 @@ export default function LandingPage() {
                       {[
                         { n:'01', h:'Submit assessment request', p:'Book a 30-60 minute call with our admissions team. We assess your child\'s current academic level (school transcripts, sample work), discuss your family\'s timeline and target university destinations, and recommend a curriculum and pathway.' },
                         { n:'02', h:'Choose curriculum and pathway', p:'Most UAE families choose Cambridge IGCSE (Year 7-11) progressing to A-Level (Year 12-13) — well-recognised by UAE universities and globally. IB Diploma is also popular for university-bound students. American curriculum suits families targeting US universities. We match curriculum to your university goals.' },
-                        { n:'03', h:'Enrol with Smartious', p:'Pay the USD 38 one-time registration fee, pay the first term\'s fees (from USD 423/month, paid termly), and receive your child\'s LMS access. No KHDA or ADEK approval required for expatriate families.' },
+                        { n:'03', h:'Enrol with Smartious', p:'Pay the USD 38 one-time registration fee, pay the first term\'s fees (from USD 423/month, paid termly), and receive your child\'s LMS access. Rules can differ by emirate, so check your family\'s situation with KHDA, ADEK or the Ministry of Education before you start.' },
                         { n:'04', h:'Set up your learning environment', p:'A quiet space, laptop or tablet, stable internet, and noise-cancelling headphones. We provide a recommended equipment list. No expensive equipment needed.' },
                         { n:'05', h:'Begin live lessons', p:'Your child starts live online classes on their schedule. Classes run on UAE time (GMT+4) plus recorded sessions for flexibility. Mshauri AI provides 24/7 homework help between live sessions.' },
                         { n:'06', h:'Plan examination centres', p:'Cambridge, Edexcel and IB examinations are sat at registered centres in UAE — British Council Dubai, British Council Abu Dhabi, KHDA-approved centres, and specific schools that accept external candidates. We coordinate registration timing with your child\'s exam readiness.' },
@@ -13668,12 +13668,12 @@ export default function LandingPage() {
           {/* HERO */}
           <section className="sec" style={{position:'relative',background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,color:'#fff',padding:'80px 0 64px',overflow:'hidden'}}>
             <div className="wrap" style={{maxWidth:1080,margin:'0 auto',position:'relative',zIndex:2}}>
-              <div className="eyebrow" style={{color:V.gold3,marginBottom:12,letterSpacing:'.14em'}}>Kenya's leading virtual school &middot; Online school &middot; Since 2018</div>
+              <div className="eyebrow" style={{color:V.gold3,marginBottom:12,letterSpacing:'.14em'}}>Online school founded in Nairobi in 2018 &middot; Virtual school &middot; Homeschool</div>
               <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.4rem, 5vw, 3.6rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:22,letterSpacing:'-.01em',maxWidth:920}}>
                 <em style={{color:V.gold3,fontStyle:'italic'}}>Virtual School</em> in Kenya for <em style={{color:V.gold3,fontStyle:'italic'}}>IGCSE, A-Level, IB &amp; CBC</em>
               </h1>
               <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,maxWidth:820,marginBottom:32}}>
-                Kenya-based, Kenya-founded, Kenya-operating. Live small-group classes 4-6 students. Cambridge IGCSE, A-Level, Pearson Edexcel International, IB Diploma, American AP, Ontario OSSD, and Kenya CBC. Two Nairobi centres for in-person supplementation. 2-8&times; cheaper than CHS Online, King's InterHigh, and Crimson Global Academy.
+                Kenya-based, Kenya-founded, Kenya-operating. Live small-group classes 4-6 students. Cambridge IGCSE, A-Level, Pearson Edexcel International, IB Diploma, American AP, Ontario OSSD, and Kenya CBC. Two Nairobi centres for in-person supplementation. Lower fees than CHS Online, King's InterHigh, and Crimson Global Academy.
               </p>
               <div style={{display:'flex',gap:14,flexWrap:'wrap',marginBottom:24}}>
                 <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
@@ -13708,7 +13708,7 @@ export default function LandingPage() {
               </div>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:22}}>
                 {[
-                  {n:'01',h:'2-8&times; lower fees',p:'Smartious from USD 423/month vs CHS Online \u00a310,950/year (USD 13,860), Crimson Global Academy USD 15-25K/year, King\'s InterHigh \u00a38-15K/year. Same live small-group Cambridge/IB curriculum.'},
+                  {n:'01',h:'Lower fees',p:'Smartious from USD 423/month vs CHS Online \u00a310,950/year (USD 13,860), Crimson Global Academy USD 15-25K/year, King\'s InterHigh \u00a38-15K/year. Same live small-group Cambridge/IB curriculum.'},
                   {n:'02',h:'Live small groups of 4-6',p:'Smartious classes 4-6 students. CHS Online up to 10. Crimson variable. Braeburn online 12-15. Physical international schools 15-22. Smaller = more teacher attention, faster feedback, stronger relationships.'},
                   {n:'03',h:'Kenya-friendly time zones',p:'EAT UTC+3 delivery matches Kenya school-day rhythm. UK-based schools (CHS Online, King\'s InterHigh) mean UK morning = Kenya afternoon, disrupting family routine. Smartious 9 AM-12 PM Nairobi = natural school day.'},
                   {n:'04',h:'Kenya CBC available',p:'Smartious offers full Kenya CBC (Grade 1-12, KICD-aligned, KCSE-eligible) alongside international curricula. NO UK, US, or NZ virtual school offers CBC. Kenya-domestic by definition.'},
@@ -13877,7 +13877,7 @@ export default function LandingPage() {
               <div style={{display:'flex',flexDirection:'column',gap:12}}>
                 {[
                   {q:'What is the difference between a virtual school and online tutoring?', a:'A virtual school delivers structured curriculum (Cambridge, Edexcel, IB, American, Ontario, or CBC) with live teacher-led classes, exam registration, and university placement support. Online tutoring is hourly-paid individual sessions with no structured curriculum. Smartious is a virtual school — though we also offer private tuition as a separate service if you need targeted subject support.'},
-                  {q:'How does Smartious compare to Cambridge Home School Online (CHS Online)?', a:'CHS Online is the UK market leader at approximately £10,950 per year with live small-group classes of up to 10 pupils and ISI accreditation. Smartious delivers the same live small-group Cambridge curriculum (4-6 pupils per class) at 2-3× lower cost with Kenya-friendly EAT time zones and Kenya CBC available. For families where UK ISI accreditation is essential (e.g. local authority commissioning), CHS Online is the safer choice. For everyone else, Smartious.'},
+                  {q:'How does Smartious compare to Cambridge Home School Online (CHS Online)?', a:'CHS Online is the UK market leader at approximately £10,950 per year with live small-group classes of up to 10 pupils and ISI accreditation. Smartious delivers the same live small-group Cambridge curriculum (4-6 pupils per class) at lower cost with Kenya-friendly EAT time zones and Kenya CBC available. For families where UK ISI accreditation is essential (e.g. local authority commissioning), CHS Online is the safer choice. For everyone else, Smartious.'},
                   {q:'Do you offer Kenya CBC alongside Cambridge or IB?', a:'Yes. Smartious offers full Kenya CBC (Grade 1-12, KICD-aligned, KCSE-eligible) alongside international curricula. Multi-curriculum families are common — child studying CBC as main pathway with Cambridge Mathematics and Physics as options is a typical setup for families who might target Kenyan universities but want international breadth.'},
                   {q:'Where do Kenyan students sit Cambridge examinations?', a:'Multiple authorised centres in Kenya — British Council Nairobi, Braeburn Group centres (multiple locations), Peponi School, Brookhouse Schools, International School of Kenya (ISK), plus centres in Mombasa, Kisumu, and Nakuru. Pearson Edexcel offers three examination series per year. Smartious handles all registration logistics — parents do not navigate this themselves.'},
                   {q:'What if we already have a physical Nairobi school but want to switch?', a:'Common situation. Families switching mid-year work with our admissions team to align curriculum transition points (usually end of term for smoothest handover). We can accept students at any point in the academic year subject to assessment. Existing school records are reviewed and prior learning is credited.'},
@@ -14000,7 +14000,7 @@ export default function LandingPage() {
                 </a>
               </div>
               <div style={{fontSize:13,color:'rgba(255,255,255,.7)',letterSpacing:'.02em'}}>
-                Distance learning fully legal &middot; Perfect EET/EAT time zones &middot; Discounted rates for refugee &amp; displaced families &middot; From USD 423/month personalized
+                Distance learning fully legal &middot; Close EET/EAT time zones &middot; Discounted rates for refugee &amp; displaced families &middot; From USD 423/month personalized
               </div>
             </div>
           </section>
@@ -14070,7 +14070,7 @@ export default function LandingPage() {
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:22}}>
                 {[
                   {n:'01', h:'Consistent curriculum across borders', p:'Family moving Kharkiv → Lviv → Warsaw → Berlin continues same Cambridge/IB curriculum with same teachers and cohort. Cross-country social continuity through repeated relocations.'},
-                  {n:'02', h:'Perfect EET / EAT time zone alignment', p:'Ukraine (EET UTC+2) and Nairobi (EAT UTC+3) same time zone in winter. Smartious 9 AM Kyiv delivery = 9 AM Nairobi teaching. Natural morning school-day timing.'},
+                  {n:'02', h:'Close EET / EAT time zone alignment', p:'Ukraine (EET UTC+2, EEST UTC+3 summer) is 1 hour behind Nairobi (EAT UTC+3) in winter and on the same time in summer. Smartious 9 AM Nairobi teaching = 8 AM Kyiv in winter, 9 AM in summer. Natural morning school-day timing.'},
                   {n:'03', h:'Complements free state VOS', p:'Smartious does NOT compete with free All-Ukrainian Online School (Всеукраїнська школа онлайн). Adds international pathway alongside free Ukrainian state curriculum. Many families use both.'},
                   {n:'04', h:'Distance learning fully legal', p:'Ukrainian Law "On Complete General Secondary Education" (2020) explicitly permits family education (сімейна освіта) and distance learning (дистанційне навчання). Martial law provisions expanded acceptance. No legal barriers.'},
                   {n:'05', h:'Polish + German scholarship pathway', p:'Cambridge A-Level opens Polish public universities with Ukrainian student scholarships (partial or full tuition) and German public universities (free for Ukrainians on temporary protection status).'},
@@ -14107,7 +14107,7 @@ export default function LandingPage() {
                   {q:'We are Ukrainian refugee family in Germany — how does the uni-assist pathway work?', a:'German public universities are free for Ukrainians on temporary protection status. Cambridge A-Level and IB Diploma are accepted via uni-assist for TU Munich, LMU Munich, Heidelberg, Humboldt Berlin, RWTH Aachen, TU Berlin, KIT Karlsruhe, Freiburg, and others.'},
                   {q:'Where do Ukrainian students sit Cambridge examinations?', a:'British Council Warsaw (primary for Polish diaspora), Berlin, London, Prague, Rome, Madrid, Toronto, plus US cities. British Council Kyiv when conditions permit. Smartious handles all registration logistics regardless of family location.'},
                   {q:'Are there discounts for Ukrainian refugee and internally displaced families?', a:'Yes. Discounted rates handled through consultation on case-by-case basis. Request via pricing page or consultation. A 10% sibling discount applies from the second child.'},
-                  {q:'How does time zone work for Ukrainian families?', a:'Ukraine (EET UTC+2, EEST UTC+3 summer) and Kenya (EAT UTC+3) same time zone in winter, 1 hour apart summer. Smartious 9 AM-12 PM Kyiv delivery = 9 AM-12 PM Nairobi teaching. Perfect timing.'},
+                  {q:'How does time zone work for Ukrainian families?', a:'Ukraine (EET UTC+2, EEST UTC+3 summer) is 1 hour behind Kenya (EAT UTC+3) in winter and on the same time in summer. Smartious 9 AM-12 PM Nairobi teaching = 8 AM-11 AM Kyiv in winter, 9 AM-12 PM in summer.'},
                   {q:'We are Grammarly / GitLab Ukraine / SoftServe / EPAM Ukraine tech family. Does Smartious support us?', a:'Yes. Ukrainian tech corporate rotational cycles supported through international postings without curriculum switching. Cross-country cohort provides social continuity through repeated moves.'},
                 ].map((f, i) => (
                   <details key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'0',overflow:'hidden'}}>
