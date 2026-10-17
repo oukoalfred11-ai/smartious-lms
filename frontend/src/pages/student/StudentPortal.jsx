@@ -10,6 +10,7 @@
  *  - Study plan is personalised per student
  */
 import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { LessonPlan } from '../../components/lessons/LessonPlan.jsx'
 import { useNavigate } from 'react-router-dom'
 import BirthdayBanner from '../../components/BirthdayBanner.jsx'
 import SuggestionBox from '../../components/SuggestionBox.jsx'
@@ -364,6 +365,7 @@ const NAV_SECTIONS = [
     { id:'results',      label:'My Results',      icon:'results',      svg:'<circle cx="12" cy="8" r="6"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>' },
     { id:'live',         label:'Live Classes',    icon:'live',         svg:'<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>', live:true },
     { id:'timetable',    label:'Timetable',       icon:'timetable',    svg:'<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>' },
+    { id:'lessonplan',   label:'My Lesson Plan',  icon:'timetable',    svg:'<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>' },
     { id:'attendance',   label:'My Attendance',   icon:'attendance',   svg:'<rect x="5" y="4" width="14" height="17" rx="2"/><rect x="9" y="2" width="6" height="3" rx="1"/><path d="M8.5 12.5l2 2 4-4.5"/>' },
     { id:'virtuallab',   label:'Virtual Lab',     icon:'virtuallab',   svg:'<path d="M9 3h6M10 3v6L4.5 19A1.5 1.5 0 0 0 5.8 21h12.4a1.5 1.5 0 0 0 1.3-2L14 9V3"/><path d="M7 15h10"/>' },
     { id:'library',      label:'Library',         icon:'library',      svg:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/>' },
@@ -683,6 +685,7 @@ export default function StudentPortal() {
     page === 'results'      ? 'My Results' :
     page === 'live'         ? 'Live Classes' :
     page === 'timetable'    ? 'Timetable' :
+    page === 'lessonplan'   ? 'My Lesson Plan' :
     page === 'attendance'   ? 'Attendance & Check-in' :
     page === 'library'      ? 'Library' :
     page === 'resources'    ? 'Resources' :
@@ -711,6 +714,7 @@ export default function StudentPortal() {
     page === 'results'      ? 'Grades & feedback' :
     page === 'live'         ? 'Scheduled sessions' :
     page === 'timetable'    ? 'Weekly schedule' :
+    page === 'lessonplan'   ? 'Topics, progress and help' :
     page === 'attendance'   ? 'Mark today and view your history' :
     page === 'library'      ? 'Coursebook PDFs' :
     page === 'resources'    ? 'Learning library' :
@@ -1654,6 +1658,7 @@ export default function StudentPortal() {
               TIMETABLE
           ════════════════════════════════════════════ */}
           {page === 'timetable' && <RealTimetableTab user={user} setPage={setPage} toast={toast} />}
+          {page === 'lessonplan' && <LessonPlan editable toast={toast} />}
 
           {page === 'attendance' && <StudentAttendancePage user={user} toast={toast} />}
 
