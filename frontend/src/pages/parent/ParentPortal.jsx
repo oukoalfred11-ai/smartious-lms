@@ -954,7 +954,13 @@ function ParentLessons({ child }) {
           <span style={{ fontSize:10 }}>{'\u25B6'}</span> Watch recording
         </button>
       )}
-      <span style={{ background:done?'#D1FAE5':'#FEF3C7', color:done?'#065F46':'#92400E', fontSize:11, fontWeight:700, padding:'3px 10px', borderRadius:999 }}>{done?'Completed':'Upcoming'}</span>
+      {(() => {
+        // A past class is 'Held' only when it ended or someone attended;
+        // otherwise the school has no record it took place.
+        const held = done && (c.outcome ? c.outcome === 'held' : true)
+        const [bg, fg, label] = !done ? ['#FEF3C7', '#92400E', 'Upcoming'] : held ? ['#D1FAE5', '#065F46', 'Held'] : ['#F3F4F6', '#4B5563', 'Not confirmed']
+        return <span title={done && !held ? 'The time has passed but there is no record that this class took place.' : undefined} style={{ background:bg, color:fg, fontSize:11, fontWeight:700, padding:'3px 10px', borderRadius:999 }}>{label}</span>
+      })()}
     </div>
   )
   return (
@@ -962,7 +968,7 @@ function ParentLessons({ child }) {
       <PSection tag="Parent Portal" title="Live" em="Lessons"
         sub={`${child.firstName}'s live classroom sessions: what is coming up and everything already covered.`}/>
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(160px,1fr))', gap:12, marginBottom:18 }}>
-        {[['Classes completed', doneCount, '#065F46'],['Upcoming classes', upcoming.length, C.crimson],['Total scheduled', totalCount, C.ink]].map(([l,v,col]) => (
+        {[['Classes held', doneCount, '#065F46'],['Upcoming classes', upcoming.length, C.crimson],['Total scheduled', totalCount, C.ink]].map(([l,v,col]) => (
           <div key={l} style={{ background:'#fff', border:`1px solid ${C.line}`, borderRadius:12, padding:'14px 16px' }}>
             <div style={{ fontSize:10.5, fontWeight:700, color:C.s500, textTransform:'uppercase', letterSpacing:'.06em' }}>{l}</div>
             <div style={{ fontSize:22, fontWeight:800, color:col, marginTop:4 }}>{v}</div>
@@ -974,7 +980,7 @@ function ParentLessons({ child }) {
         {upcoming.map(c => Row(c, false))}
       </div>}
       <div style={{ background:'#fff', border:`1px solid ${C.line}`, borderRadius:14, overflow:'hidden' }}>
-        <div style={{ padding:'12px 18px', fontWeight:800, fontSize:12, color:'#065F46', textTransform:'uppercase', letterSpacing:'.08em', borderBottom:`1px solid ${C.line}` }}>Previously covered ({doneCount})</div>
+        <div style={{ padding:'12px 18px', fontWeight:800, fontSize:12, color:'#065F46', textTransform:'uppercase', letterSpacing:'.08em', borderBottom:`1px solid ${C.line}` }}>Past classes ({past.length})</div>
         {past.length===0 ? <div style={{ padding:30, textAlign:'center', color:C.s400, fontSize:13 }}>No classes completed yet.</div> : past.map(c => Row(c, true))}
       </div>
     </>
