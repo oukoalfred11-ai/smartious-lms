@@ -229,15 +229,15 @@ function IntakeCta({ nav, compact }) {
       <div className="wrap" style={{display:'flex',flexWrap:'wrap',alignItems:'center',justifyContent:'center',gap:'10px 18px',textAlign:'center'}}>
         <span style={{fontSize: compact ? 14 : 15.5,lineHeight:1.5}}>
           <strong style={{color:'#C9973A'}}>January 2027 intake</strong>
-          {' — '}Term 2 starts 5 January 2027{' — '}apply now
+          {' — '}Term 2 starts 5 January 2027
         </span>
         <a href="/blog/january-2027-intake" onClick={spaClick(nav, '/blog/january-2027-intake')}
           style={{color:'#fff',fontWeight:700,fontSize:13.5,textDecoration:'underline',textUnderlineOffset:3}}>
           January 2027 intake details
         </a>
-        <a href="/enroll" onClick={spaClick(nav, '/enroll')}
+        <a href="/assessment" onClick={spaClick(nav, '/assessment')}
           style={{background:'#8B1A2E',color:'#fff',fontWeight:800,fontSize:13,padding:'9px 18px',borderRadius:6,textDecoration:'none'}}>
-          Apply now
+          Book assessment
         </a>
       </div>
     </div>
@@ -1079,7 +1079,7 @@ function GuideCrossLinks({ guideSlug, guideName, hubHref, hubName }) {
   )
 }
 
-const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','tuition-uk','uk-area','homeschooling-kenya','kenya-city','virtual-school-kenya','virtual-school-ukraine','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschooling-malaysia','malaysia-city','homeschooling-turkey','turkey-city','homeschooling-kuwait','kuwait-city','homeschooling-nigeria','nigeria-city','homeschooling-bahrain','bahrain-city','homeschooling-oman','oman-city','homeschooling-taiwan','taiwan-city','homeschooling-ireland','ireland-city','homeschooling-united-kingdom','uk-city','homeschooling-india','india-city','homeschooling-germany','germany-city','homeschooling-romania','romania-city','homeschooling-ukraine','ukraine-city','homeschooling-spain','spain-city','homeschooling-denmark','denmark-city','homeschooling-france','france-city','homeschooling-italy','italy-city','homeschooling-poland','poland-city','homeschooling-portugal','portugal-city','homeschooling-czech-republic','czech-city','homeschooling-belgium','belgium-city','homeschooling-sweden','sweden-city','homeschooling-netherlands','netherlands-city','homeschooling-norway','norway-city','homeschooling-new-zealand','new-zealand-city','homeschooling-austria','austria-city','homeschooling-hungary','hungary-city','homeschooling-finland','finland-city','homeschooling-greece','greece-city','homeschooling-azerbaijan','azerbaijan-city','homeschooling-georgia','georgia-city','homeschooling-pakistan','pakistan-city','homeschooling-australia','australia-city','homeschooling-luxembourg','luxembourg-city-page','homeschooling-switzerland','switzerland-city','homeschooling-slovakia','slovakia-city','homeschooling-slovenia','slovenia-city','homeschooling-croatia','croatia-city','homeschooling-serbia','serbia-city','homeschooling-bulgaria','bulgaria-city','homeschooling-albania','albania-city','homeschooling-north-macedonia','north-macedonia-city','homeschooling-montenegro','montenegro-city','homeschooling-bosnia','bosnia-city','homeschooling-kosovo','kosovo-city','homeschooling-zambia','zambia-city','homeschooling-zimbabwe','zimbabwe-city','homeschooling-botswana','botswana-city','homeschooling-namibia','namibia-city','homeschooling-algeria','algeria-city','homeschooling-tunisia','tunisia-city','homeschooling-mauritius','mauritius-city','homeschooling-ghana','ghana-city','homeschooling-angola','angola-city','homeschooling-drc','drc-city','homeschooling-mexico','mexico-city-page','homeschooling-brazil','brazil-city','homeschooling-colombia','colombia-city','homeschooling-argentina','argentina-city','homeschooling-chile','chile-city','homeschooling-peru','peru-city','homeschooling-ecuador','ecuador-city','homeschooling-panama','panama-city-page','homeschooling-costa-rica','costa-rica-city','homeschooling-dominican-republic','dominican-city','homeschooling-uruguay','uruguay-city','homeschooling-guatemala','guatemala-city-page','homeschooling-paraguay','paraguay-city','homeschooling-bolivia','bolivia-city','homeschooling-venezuela','venezuela-city','homeschooling-puerto-rico','puerto-rico-city','homeschooling-israel','israel-city','homeschooling-jordan','jordan-city','homeschooling-iraq','iraq-city','homeschooling-cyprus','cyprus-city','homeschooling-lebanon','lebanon-city','homeschooling-myanmar','myanmar-city','homeschooling-maldives','maldives-city','homeschooling-china','china-city','homeschooling-bangladesh','bangladesh-city','homeschooling-nepal','nepal-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','assessment','contact','privacy','terms','cookies','gdpr','child-protection','academic-integrity','ai-policy','inclusion-policy','language-policy','article']
+const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','tuition-uk','uk-area','homeschooling-kenya','kenya-city','virtual-school-kenya','virtual-school-ukraine','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschooling-malaysia','malaysia-city','homeschooling-turkey','turkey-city','homeschooling-kuwait','kuwait-city','homeschooling-nigeria','nigeria-city','homeschooling-bahrain','bahrain-city','homeschooling-oman','oman-city','homeschooling-taiwan','taiwan-city','homeschooling-ireland','ireland-city','homeschooling-united-kingdom','uk-city','homeschooling-india','india-city','homeschooling-germany','germany-city','homeschooling-romania','romania-city','homeschooling-ukraine','ukraine-city','homeschooling-spain','spain-city','homeschooling-denmark','denmark-city','homeschooling-france','france-city','homeschooling-italy','italy-city','homeschooling-poland','poland-city','homeschooling-portugal','portugal-city','homeschooling-czech-republic','czech-city','homeschooling-belgium','belgium-city','homeschooling-sweden','sweden-city','homeschooling-netherlands','netherlands-city','homeschooling-norway','norway-city','homeschooling-new-zealand','new-zealand-city','homeschooling-austria','austria-city','homeschooling-hungary','hungary-city','homeschooling-finland','finland-city','homeschooling-greece','greece-city','homeschooling-azerbaijan','azerbaijan-city','homeschooling-georgia','georgia-city','homeschooling-pakistan','pakistan-city','homeschooling-australia','australia-city','homeschooling-luxembourg','luxembourg-city-page','homeschooling-switzerland','switzerland-city','homeschooling-slovakia','slovakia-city','homeschooling-slovenia','slovenia-city','homeschooling-croatia','croatia-city','homeschooling-serbia','serbia-city','homeschooling-bulgaria','bulgaria-city','homeschooling-albania','albania-city','homeschooling-north-macedonia','north-macedonia-city','homeschooling-montenegro','montenegro-city','homeschooling-bosnia','bosnia-city','homeschooling-kosovo','kosovo-city','homeschooling-zambia','zambia-city','homeschooling-zimbabwe','zimbabwe-city','homeschooling-botswana','botswana-city','homeschooling-namibia','namibia-city','homeschooling-algeria','algeria-city','homeschooling-tunisia','tunisia-city','homeschooling-mauritius','mauritius-city','homeschooling-ghana','ghana-city','homeschooling-angola','angola-city','homeschooling-drc','drc-city','homeschooling-mexico','mexico-city-page','homeschooling-brazil','brazil-city','homeschooling-colombia','colombia-city','homeschooling-argentina','argentina-city','homeschooling-chile','chile-city','homeschooling-peru','peru-city','homeschooling-ecuador','ecuador-city','homeschooling-panama','panama-city-page','homeschooling-costa-rica','costa-rica-city','homeschooling-dominican-republic','dominican-city','homeschooling-uruguay','uruguay-city','homeschooling-guatemala','guatemala-city-page','homeschooling-paraguay','paraguay-city','homeschooling-bolivia','bolivia-city','homeschooling-venezuela','venezuela-city','homeschooling-puerto-rico','puerto-rico-city','homeschooling-israel','israel-city','homeschooling-jordan','jordan-city','homeschooling-iraq','iraq-city','homeschooling-cyprus','cyprus-city','homeschooling-lebanon','lebanon-city','homeschooling-myanmar','myanmar-city','homeschooling-maldives','maldives-city','homeschooling-china','china-city','homeschooling-bangladesh','bangladesh-city','homeschooling-nepal','nepal-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','login','assessment','contact','privacy','terms','cookies','gdpr','child-protection','academic-integrity','ai-policy','inclusion-policy','language-policy','article']
 
 // ─────────────────────────────────────────────────────────────────
 // Google Business Profile reviews — Smartious Homeschool & Tuition
@@ -2062,14 +2062,6 @@ const PAGE_META = {
   teachers: {
     title: 'Meet Our Team | Qualified Teachers | Smartious',
     desc: 'Meet the Smartious teaching team: qualified subject specialists teaching live Cambridge IGCSE, A-Level, IB and CBC classes in Kenya and worldwide.',
-  },
-  enroll: {
-    title: 'Apply for the January 2027 Intake | Smartious',
-    desc: 'Start your child\'s accredited home or online education with live classes: Cambridge, IB, Edexcel or CBC. From USD 423/month. Term 2 starts 5 Jan 2027.',
-  },
-  consult: {
-    title: 'Book an Assessment | Smartious Homeschool & eSchool',
-    desc: 'Request an academic assessment with Smartious. Admissions reviews every request within three business days. January 2027 intake: apply now.',
   },
   contact: {
     title: 'Contact Smartious | Admissions +254 745 021 212',
@@ -4173,6 +4165,9 @@ export default function LandingPage() {
       }
       return
     }
+    // The old Apply (/enroll) and consultation (/consult) pages are gone:
+    // Book assessment is the only way in.
+    if (path === '/enroll' || path === '/consult') { nav('/assessment', { replace: true }); return }
     const id = path === '/' ? 'home' : path.slice(1)
     if (PAGES.includes(id) && id !== 'article') {
       setPage(id)
@@ -5399,7 +5394,7 @@ export default function LandingPage() {
               Portal Login
             </a>
             <a className="nav-cta lp-divlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>
-              Enroll Now
+              Book assessment
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </a>
           </div>
@@ -5458,7 +5453,6 @@ export default function LandingPage() {
                 ['Pricing','pricing'],
               ]},
               { cat:'Get Started', items:[
-                ['Enroll Now','enroll'],
                 ['Book assessment','assessment'],
               ]},
             ].map((group, gi) => (
@@ -5589,7 +5583,7 @@ export default function LandingPage() {
                   letterSpacing:'.04em',
                   boxShadow:'0 6px 18px rgba(139,26,46,.4)',
                 }}>
-                Enroll Now
+                Book assessment
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </a>
             </div>
@@ -5700,13 +5694,6 @@ export default function LandingPage() {
                   Book assessment
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{marginLeft:8}}><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </a>
-                <a className="btn-p lp-btnlink" href={pageToPath('consult')} onClick={linkClick(() => P('consult'))}
-                  style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'16px 32px',fontSize:16,fontWeight:700,borderRadius:10,transition:'all .18s ease'}}
-                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = V.gold3; e.currentTarget.style.color = V.gold3; e.currentTarget.style.transform = 'translateY(-2px)' }}
-                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.55)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'translateY(0)' }}>
-                  Book Free Consultation
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{marginLeft:8}}><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </a>
                 <a className="btn-o lt h-act-3 lp-btnlink" style={{borderColor:'rgba(247,243,237,.45)',color:'rgba(247,243,237,.9)'}} href={pageToPath('programs')} onClick={linkClick(() => P('programs'))}>View Programmes</a>
               </div>
             </div>
@@ -5735,7 +5722,7 @@ export default function LandingPage() {
           {/* Mobile page summary strip */}
           <div style={{display:'none'}} className="mob-page-strip">
             <div style={{background:'rgba(255,255,255,.04)',borderBottom:'1px solid rgba(255,255,255,.08)',padding:'10px 20px',overflowX:'auto',whiteSpace:'nowrap'}}>
-              {[['Home','home'],['About','about'],['Curricula','curricula'],['Services','services'],['Pricing','pricing'],['Blog','blog'],['Enroll','enroll']].map(([l,id]) => (
+              {[['Home','home'],['About','about'],['Curricula','curricula'],['Services','services'],['Pricing','pricing'],['Blog','blog'],['Book assessment','assessment']].map(([l,id]) => (
                 <a className="lp-btnlink" key={id} href={pageToPath(id)} onClick={linkClick(() => P(id))} style={{display:'inline-block',marginRight:8,padding:'6px 14px',borderRadius:99,border:'1px solid rgba(255,255,255,.15)',background:page===id?'rgba(96,165,250,.2)':'transparent',color:page===id?'#60A5FA':'rgba(255,255,255,.55)',fontSize:13,fontWeight:page===id?700:400,cursor:'pointer',whiteSpace:'nowrap'}}>
                   {l}
                 </a>
@@ -11449,8 +11436,8 @@ export default function LandingPage() {
 
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:16}}>
                   {[
-                    {tier:'Online School',price:'From $423',sub:'per month · Primary · paid termly',desc:'Live small-group classes (4-6 students) in every subject, Mshauri AI Pro and the digital library. Secondary fees vary by curriculum and level.',cta:'enroll',popular:true},
-                    {tier:'1-on-1 Tuition',price:'$15',sub:'per hour',desc:'One-on-one live online sessions in any subject, at any level, scheduled to your time zone.',cta:'enroll'},
+                    {tier:'Online School',price:'From $423',sub:'per month · Primary · paid termly',desc:'Live small-group classes (4-6 students) in every subject, Mshauri AI Pro and the digital library. Secondary fees vary by curriculum and level.',cta:'assessment',popular:true},
+                    {tier:'1-on-1 Tuition',price:'$15',sub:'per hour',desc:'One-on-one live online sessions in any subject, at any level, scheduled to your time zone.',cta:'assessment'},
                   ].map(t => (
                     <div key={t.tier} style={{
                       background: t.popular ? V.ink : V.white,
@@ -11882,8 +11869,8 @@ export default function LandingPage() {
 
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:16}}>
                   {[
-                    {tier:'Online School',price:'From $423',sub:'per month · Primary · paid termly',desc:'Live small-group classes (4-6 students) in every subject, Mshauri AI Pro and the digital library. Secondary fees vary by curriculum and level.',cta:'enroll',popular:true},
-                    {tier:'1-on-1 Tuition',price:'$15',sub:'per hour',desc:'One-on-one live online sessions in any subject, at any level, scheduled to your time zone.',cta:'enroll'},
+                    {tier:'Online School',price:'From $423',sub:'per month · Primary · paid termly',desc:'Live small-group classes (4-6 students) in every subject, Mshauri AI Pro and the digital library. Secondary fees vary by curriculum and level.',cta:'assessment',popular:true},
+                    {tier:'1-on-1 Tuition',price:'$15',sub:'per hour',desc:'One-on-one live online sessions in any subject, at any level, scheduled to your time zone.',cta:'assessment'},
                   ].map(t => (
                     <div key={t.tier} style={{
                       background: t.popular ? V.ink : V.white,
@@ -12302,7 +12289,7 @@ export default function LandingPage() {
                   })}
                 </div>
                 <p style={{textAlign:'center',marginTop:20,fontSize:12,color:V.sl3}}>
-                  More {s.name} cities added quarterly. Need a specific city? <a href="/consult" style={{color:V.cr,textDecoration:'underline'}}>Book a consultation</a>.
+                  More {s.name} cities added quarterly. Need a specific city? <a href="/assessment" style={{color:V.cr,textDecoration:'underline'}}>Book a consultation</a>.
                 </p>
               </div>
             </section>
@@ -12630,7 +12617,7 @@ export default function LandingPage() {
                   })}
                 </div>
                 <p style={{textAlign:'center',marginTop:20,fontSize:12,color:V.sl3}}>
-                  More {s.name} cities added quarterly. Need a specific city? <a href="/consult" style={{color:V.cr,textDecoration:'underline'}}>Book a consultation</a>.
+                  More {s.name} cities added quarterly. Need a specific city? <a href="/assessment" style={{color:V.cr,textDecoration:'underline'}}>Book a consultation</a>.
                 </p>
               </div>
             </section>
@@ -13683,7 +13670,7 @@ export default function LandingPage() {
                   Book assessment
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </a>
-                <a className="lp-btnlink" href={'/consult'} onClick={linkClick(() => nav('/consult'))}
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
                   style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'16px 32px',borderRadius:10,fontSize:16,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,transition:'all .18s ease'}}
                   onMouseEnter={(e) => { e.currentTarget.style.borderColor = V.gold3; e.currentTarget.style.color = V.gold3 }}
                   onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.55)'; e.currentTarget.style.color = '#fff' }}>
@@ -13899,7 +13886,7 @@ export default function LandingPage() {
 
               <div style={{textAlign:'center',marginTop:28,fontSize:13,color:V.sl2}}>
                 Have a question not answered here?{' '}
-                <a href="/consult" onClick={(e) => { e.preventDefault(); nav('/consult') }} style={{color:V.cr,fontWeight:700,textDecoration:'none'}}>Book a free consultation</a>
+                <a href="/assessment" onClick={(e) => { e.preventDefault(); nav('/assessment') }} style={{color:V.cr,fontWeight:700,textDecoration:'none'}}>Book a free consultation</a>
                 {' '}and our admissions team will walk through your specific situation.
               </div>
             </div>
@@ -13952,7 +13939,7 @@ export default function LandingPage() {
                   Book assessment
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </a>
-                <a className="lp-btnlink" href={'/consult'} onClick={linkClick(() => nav('/consult'))}
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
                   style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'16px 36px',borderRadius:10,fontSize:16,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,transition:'all .18s ease'}}
                   onMouseEnter={(e) => { e.currentTarget.style.borderColor = V.gold3; e.currentTarget.style.color = V.gold3 }}
                   onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.55)'; e.currentTarget.style.color = '#fff' }}>
@@ -13991,7 +13978,7 @@ export default function LandingPage() {
                   Book assessment
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </a>
-                <a className="lp-btnlink" href={'/consult'} onClick={linkClick(() => nav('/consult'))}
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
                   style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'16px 32px',borderRadius:10,fontSize:16,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,transition:'all .18s ease'}}
                   onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#FFDD00'; e.currentTarget.style.color = '#FFDD00' }}
                   onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.55)'; e.currentTarget.style.color = '#fff' }}>
@@ -14185,7 +14172,7 @@ export default function LandingPage() {
                   Book assessment
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </a>
-                <a className="lp-btnlink" href={'/consult'} onClick={linkClick(() => nav('/consult'))}
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
                   style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'16px 36px',borderRadius:10,fontSize:16,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,transition:'all .18s ease'}}
                   onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#FFDD00'; e.currentTarget.style.color = '#FFDD00' }}
                   onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.55)'; e.currentTarget.style.color = '#fff' }}>
@@ -20027,7 +20014,7 @@ export default function LandingPage() {
                   Book assessment
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </a>
-                <a className="lp-btnlink" href={'/consult'} onClick={linkClick(() => nav('/consult'))}
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
                   style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'16px 30px',borderRadius:10,fontSize:15,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,transition:'all .18s ease'}}
                   onMouseEnter={(e) => { e.currentTarget.style.borderColor = V.gold3; e.currentTarget.style.color = V.gold3; e.currentTarget.style.transform = 'translateY(-2px)' }}
                   onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.55)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'translateY(0)' }}>
@@ -20104,7 +20091,7 @@ export default function LandingPage() {
                 Book assessment
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </a>
-              <a className="lp-btnlink" href={'/consult'} onClick={linkClick(() => nav('/consult'))}
+              <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
                 style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'16px 32px',borderRadius:10,fontSize:16,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,transition:'all .18s ease'}}
                 onMouseEnter={(e) => { e.currentTarget.style.borderColor = V.gold3; e.currentTarget.style.color = V.gold3; e.currentTarget.style.transform = 'translateY(-2px)' }}
                 onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.55)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'translateY(0)' }}>
@@ -20200,7 +20187,7 @@ export default function LandingPage() {
                     Book assessment
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                   </a>
-                  <a className="lp-btnlink" href={'/consult'} onClick={linkClick(() => nav('/consult'))}
+                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
                     style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'16px 30px',borderRadius:10,fontSize:15,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,transition:'all .18s ease'}}
                     onMouseEnter={(e) => { e.currentTarget.style.borderColor = V.gold3; e.currentTarget.style.color = V.gold3; e.currentTarget.style.transform = 'translateY(-2px)' }}
                     onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.55)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'translateY(0)' }}>
@@ -20327,7 +20314,7 @@ export default function LandingPage() {
                   Book assessment
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </a>
-                <a className="lp-btnlink" href={'/consult'} onClick={linkClick(() => nav('/consult'))}
+                <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
                   style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'16px 30px',borderRadius:10,fontSize:15,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,transition:'all .18s ease'}}
                   onMouseEnter={(e) => { e.currentTarget.style.borderColor = V.gold3; e.currentTarget.style.color = V.gold3; e.currentTarget.style.transform = 'translateY(-2px)' }}
                   onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.55)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'translateY(0)' }}>
@@ -23781,326 +23768,8 @@ export default function LandingPage() {
       {page === 'language-policy' && <LegalPage P={P} title="Language" em="Policy" subtitle="The language we teach in, how we support students learning English, and how we value every family’s languages." effective="15 October 2026" sections={LANGUAGE_POLICY}/>}
 
       {/* ══════════════════════════════════════════
-          ENROLL
-      ══════════════════════════════════════════ */}
-      {page === 'enroll' && (() => {
-        const cur = ENROLMENT_DATA[enrolCurriculum]
-        const selectedLevel = cur && cur.levels.find(l => l.id === enrolLevel)
-        return (
-        <>
-          {/* HERO */}
-          <div className="pg-hero"><div className="wrap">
-            <div className="eyebrow">Begin Your Enrolment</div>
-            <h1 className="pg-h">Apply to <em>Smartious</em></h1>
-            <p className="pg-sub" style={{marginTop:12}}>Select your curriculum and year level. Pay the application fee online. Our admissions team responds within 1 working day with the next steps.</p>
-          </div></div>
-          <IntakeCta nav={nav} compact/>
-
-          {/* STEP 1 — CURRICULUM PICKER */}
-          <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
-            <div style={{maxWidth:1000,margin:'0 auto'}}>
-              <div style={{textAlign:'center',marginBottom:28}}>
-                <div className="eyebrow" style={{justifyContent:'center'}}>Step 1</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:8,lineHeight:1.2}}>
-                  Which curriculum?
-                </h2>
-                <p style={{fontSize:14,color:V.sl,maxWidth:580,margin:'0 auto',lineHeight:1.6}}>
-                  We offer five accredited international curricula. Pick the one your child will follow.
-                </p>
-              </div>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))',gap:12}}>
-                {Object.entries(ENROLMENT_DATA).map(([key, c]) => (
-                  <button
-                    key={key}
-                    onClick={() => { setEnrolCurriculum(key); setEnrolLevel(null) }}
-                    style={{
-                      background: enrolCurriculum === key ? V.cr : V.white,
-                      color: enrolCurriculum === key ? V.white : V.ink,
-                      border: `1.5px solid ${enrolCurriculum === key ? V.cr : V.bone3}`,
-                      borderRadius:10,
-                      padding:'14px 16px',
-                      fontWeight:700,
-                      fontSize:13.5,
-                      cursor:'pointer',
-                      transition:'all .2s',
-                      textAlign:'left',
-                      fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",
-                      lineHeight:1.3,
-                      boxShadow: enrolCurriculum === key ? '0 4px 14px rgba(139,26,46,.25)' : 'none',
-                    }}>
-                    {c.label}
-                  </button>
-                ))}
-              </div>
-              {cur && (
-                <div style={{marginTop:20,padding:'14px 18px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,fontSize:13.5,color:V.sl,lineHeight:1.6}}>
-                  <strong style={{color:V.ink}}>{cur.label}:</strong> {cur.description} <span style={{color:V.sl2,fontStyle:'italic'}}>Exam board: {cur.examBoard}.</span>
-                </div>
-              )}
-            </div>
-          </div></section>
-
-          {/* STEP 2 — YEAR / GRADE PICKER */}
-          {cur && (
-            <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:48}}><div className="wrap">
-              <div style={{maxWidth:1000,margin:'0 auto'}}>
-                <div style={{textAlign:'center',marginBottom:28}}>
-                  <div className="eyebrow" style={{justifyContent:'center'}}>Step 2</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:8,lineHeight:1.2}}>
-                    Which year / grade?
-                  </h2>
-                  <p style={{fontSize:14,color:V.sl,maxWidth:580,margin:'0 auto',lineHeight:1.6}}>
-                    Select your child's year level within {cur.label}. We'll show you the matching subjects and fees.
-                  </p>
-                </div>
-                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:10}}>
-                  {cur.levels.map(lv => (
-                    <button
-                      key={lv.id}
-                      onClick={() => setEnrolLevel(lv.id)}
-                      style={{
-                        background: enrolLevel === lv.id ? V.bone : V.white,
-                        border: `1.5px solid ${enrolLevel === lv.id ? V.cr : V.bone3}`,
-                        borderRadius:10,
-                        padding:'14px 16px',
-                        cursor:'pointer',
-                        transition:'all .2s',
-                        textAlign:'left',
-                        fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",
-                      }}>
-                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1rem',color:V.ink,fontWeight:400,marginBottom:3}}>{lv.label}</div>
-                      <div style={{fontSize:12,color:V.sl2}}>{lv.years} · {lv.ages}</div>
-                      <div style={{fontSize:12,color:V.cr,fontWeight:700,marginTop:5}}>{lv.feeFrom}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div></section>
-          )}
-
-          {/* STEP 3 — REQUIREMENTS + PROCESS (only shown after level chosen) */}
-          {selectedLevel && (
-            <>
-              <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
-                <div style={{maxWidth:1100,margin:'0 auto'}}>
-                  <div style={{textAlign:'center',marginBottom:32}}>
-                    <div className="eyebrow" style={{justifyContent:'center'}}>Step 3 · What we need</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:8,lineHeight:1.2}}>
-                      Enrolment requirements
-                    </h2>
-                    <p style={{fontSize:14,color:V.sl,maxWidth:620,margin:'0 auto',lineHeight:1.6}}>
-                      For {selectedLevel.label} · {selectedLevel.years} ({selectedLevel.ages})
-                    </p>
-                  </div>
-
-                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:14}}>
-                    {[
-                      { tag:'Mandatory', title:'Academic documents', items:[
-                        'Most recent school report (within past 12 months)',
-                        'Transcripts / result slips — last two academic years',
-                        'Reference letter from current teacher or school',
-                        'Previous portfolio (if transferring from IB World School)',
-                        'English proficiency evidence (if not primary language)',
-                      ]},
-                      { tag:'Mandatory', title:'Identity & legal documents', items:[
-                        'Birth certificate — certified copy',
-                        'Valid passport — photo page (international students)',
-                        'Parent National ID / Alien Card (Kenya-based)',
-                        'Recent passport-size photo of student',
-                        'Homeschool Declaration Form — signed by parent / guardian',
-                      ]},
-                      { tag:'Required', title:'Technology', items:[
-                        'Personal laptop or desktop (tablet as secondary only)',
-                        'Reliable internet — minimum 5 Mbps stable broadband',
-                        'Webcam and microphone',
-                        'Google Workspace or Microsoft 365 account',
-                        'Dedicated, quiet home study space',
-                      ]},
-                      { tag:'Placement', title:'Assessment & placement', items:[
-                        'Smartious Placement Test — Maths & English, 60 mins online',
-                        'Learner Profile Questionnaire',
-                        'Parent statement of learning goals',
-                        'Prior knowledge checklist — subject by subject',
-                        'Learning support disclosure (if applicable)',
-                      ]},
-                    ].map((box, i) => (
-                      <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 20px'}}>
-                        <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:10}}>{box.tag}</div>
-                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',fontWeight:400,color:V.ink,marginBottom:12,lineHeight:1.3}}>{box.title}</h3>
-                        <ul style={{listStyle:'none',padding:0,margin:0,display:'flex',flexDirection:'column',gap:8}}>
-                          {box.items.map((it, j) => (
-                            <li key={j} style={{fontSize:13,color:V.sl,lineHeight:1.55,paddingLeft:16,position:'relative'}}>
-                              <span style={{position:'absolute',left:0,top:7,width:6,height:6,borderRadius:'50%',background:V.gold3}}/>
-                              {it}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Subjects offered for this level */}
-                  <div style={{marginTop:24,background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 24px'}}>
-                    <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:8}}>Subjects covered</div>
-                    <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7,margin:0}}>{cur.subjects}</p>
-                  </div>
-                </div>
-              </div></section>
-
-              {/* STEP 4 — 8-STEP PROCESS */}
-              <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
-                <div style={{maxWidth:980,margin:'0 auto'}}>
-                  <div style={{textAlign:'center',marginBottom:32}}>
-                    <div className="eyebrow" style={{justifyContent:'center'}}>Step 4 · The process</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:8,lineHeight:1.2}}>
-                      Eight steps from enquiry to first class
-                    </h2>
-                    <p style={{fontSize:14,color:V.sl,maxWidth:620,margin:'0 auto',lineHeight:1.6}}>
-                      Most families complete the full process within 7–10 working days.
-                    </p>
-                  </div>
-                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:14}}>
-                    {[
-                      ['01','Submit an enquiry','Contact us via WhatsApp, email or website. Admissions responds within 1 working day with a Welcome Pack.'],
-                      ['02','Complete the application','Application fee of USD 38 / KES 5,000 (non-refundable, covers placement test). Form takes 20–30 minutes.'],
-                      ['03','Submit required documents','Upload all academic and identity documents. Reviewed within 3 working days.'],
-                      ['04','Sit the placement test','60-minute online Mathematics & English assessment. Results within 5 working days.'],
-                      ['05','Admissions interview','20-minute virtual meeting between the curriculum coordinator, student and parent.'],
-                      ['06','Offer of admission','Receive formal Letter of Offer. Sign Acceptance Form. Pay registration deposit (deducted from first tuition invoice).'],
-                      ['07','Enrolment confirmation','Receive LMS credentials, timetable, subject guides, and onboarding materials.'],
-                      ['08','Induction week & start','Mandatory online Induction Week. Mentor and tutor sessions for first two weeks. Programme begins.'],
-                    ].map(([num, title, desc]) => (
-                      <div key={num} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'18px 20px'}}>
-                        <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',color:V.cr,marginBottom:6}}>{num}</div>
-                        <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{title}</div>
-                        <p style={{fontSize:13,color:V.sl,lineHeight:1.6,margin:0}}>{desc}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div></section>
-
-              {/* STEP 5 — APPLICATION FEE PAYMENT */}
-              <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:64}}><div className="wrap">
-                <div style={{maxWidth:780,margin:'0 auto'}}>
-                  <div style={{textAlign:'center',marginBottom:28}}>
-                    <div className="eyebrow" style={{justifyContent:'center'}}>Step 5 · Pay the application fee</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:8,lineHeight:1.2}}>
-                      Application fee · USD 38 / KES 5,000
-                    </h2>
-                    <p style={{fontSize:14,color:V.sl,maxWidth:560,margin:'0 auto',lineHeight:1.6}}>
-                      One-time, non-refundable. Covers your child's placement test and admissions review. Deducted from first tuition invoice on enrolment.
-                    </p>
-                  </div>
-
-                  <div style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,padding:'28px 28px'}}>
-                    {/* Summary chip */}
-                    <div style={{display:'flex',gap:10,flexWrap:'wrap',padding:'12px 14px',background:V.bone,borderRadius:8,marginBottom:20,fontSize:13}}>
-                      <div><strong style={{color:V.ink}}>Applying for:</strong> <span style={{color:V.sl}}>{selectedLevel.label} · {selectedLevel.years}</span></div>
-                      <div style={{color:V.sl2}}>·</div>
-                      <div><strong style={{color:V.ink}}>Curriculum:</strong> <span style={{color:V.sl}}>{cur.label}</span></div>
-                    </div>
-
-                    {/* Form fields */}
-                    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14,marginBottom:14}}>
-                      <div>
-                        <label style={{display:'block',fontSize:11.5,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',color:V.sl,marginBottom:6}}>Parent / Guardian Name</label>
-                        <input value={enrolParentName} onChange={e=>setEnrolParentName(e.target.value)} placeholder="Your full name"
-                          style={{width:'100%',padding:'11px 14px',border:`1.5px solid ${V.bone3}`,borderRadius:8,fontSize:14,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",outline:'none',background:V.bone,color:V.ink,boxSizing:'border-box'}}/>
-                      </div>
-                      <div>
-                        <label style={{display:'block',fontSize:11.5,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',color:V.sl,marginBottom:6}}>Student Name</label>
-                        <input value={enrolStudentName} onChange={e=>setEnrolStudentName(e.target.value)} placeholder="Your child's full name"
-                          style={{width:'100%',padding:'11px 14px',border:`1.5px solid ${V.bone3}`,borderRadius:8,fontSize:14,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",outline:'none',background:V.bone,color:V.ink,boxSizing:'border-box'}}/>
-                      </div>
-                    </div>
-                    <div style={{marginBottom:20}}>
-                      <label style={{display:'block',fontSize:11.5,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',color:V.sl,marginBottom:6}}>Email</label>
-                      <input value={enrolEmail} onChange={e=>setEnrolEmail(e.target.value)} type="email" placeholder="your.email@example.com"
-                        style={{width:'100%',padding:'11px 14px',border:`1.5px solid ${V.bone3}`,borderRadius:8,fontSize:14,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",outline:'none',background:V.bone,color:V.ink,boxSizing:'border-box'}}/>
-                    </div>
-
-                    {/* Pay button */}
-                    <button
-                      onClick={handlePayApplicationFee}
-                      disabled={enrolAppFeeProcessing}
-                      style={{
-                        width:'100%',
-                        background:enrolAppFeeProcessing ? V.sl2 : `linear-gradient(135deg, ${V.cr2}, ${V.cr})`,
-                        color:V.white,
-                        border:'none',
-                        borderRadius:8,
-                        padding:'15px 20px',
-                        fontSize:14,
-                        fontWeight:700,
-                        cursor:enrolAppFeeProcessing ? 'not-allowed' : 'pointer',
-                        fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",
-                        letterSpacing:'.04em',
-                        boxShadow:'0 6px 18px rgba(139,26,46,.3)',
-                        transition:'all .2s',
-                        display:'inline-flex',
-                        alignItems:'center',
-                        justifyContent:'center',
-                        gap:8,
-                      }}>
-                      {enrolAppFeeProcessing ? 'Opening Paystack…' : <>Pay USD 38 / KES 5,000 via Paystack
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                      </>}
-                    </button>
-                    <p style={{fontSize:11.5,color:V.sl2,marginTop:14,textAlign:'center',lineHeight:1.6}}>
-                      Secure payment via Paystack. Cards (Visa, Mastercard) and M-Pesa accepted. You'll receive a receipt by email.
-                    </p>
-                  </div>
-
-                  {/* Alternative — manual payment */}
-                  <div style={{marginTop:24,padding:'18px 20px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,fontSize:13,color:V.sl,lineHeight:1.7}}>
-                    <strong style={{color:V.ink,fontSize:13.5,display:'block',marginBottom:8}}>Prefer to pay manually?</strong>
-                    M-Pesa Paybill <strong style={{color:V.ink}}>247247</strong>, Account No. <strong style={{color:V.ink}}>745021</strong>, Account name <strong style={{color:V.ink}}>Smartious Edtech</strong>. After paying, email the M-Pesa confirmation to <strong style={{color:V.cr}}>hello@smartioushomeschool.com</strong> with your child's name and chosen curriculum.
-                  </div>
-
-                  {/* Declaration form download */}
-                  <div style={{marginTop:14,padding:'18px 20px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,fontSize:13,color:V.sl,lineHeight:1.7}}>
-                    <strong style={{color:V.ink,fontSize:13.5,display:'block',marginBottom:8}}>Declaration Form</strong>
-                    Once we receive your application fee, we'll email you the Homeschool Declaration Form for your signature. You can also request it ahead of time by contacting <strong style={{color:V.cr}}>hello@smartioushomeschool.com</strong> or WhatsApp <strong style={{color:V.cr}}>+254 745 021 212</strong>.
-                  </div>
-                </div>
-              </div></section>
-            </>
-          )}
-
-          {/* PRE-SELECTION HINT — shown when no level chosen yet */}
-          {!selectedLevel && cur && (
-            <section className="sec" style={{background:V.bone,paddingTop:24,paddingBottom:64}}><div className="wrap">
-              <div style={{maxWidth:600,margin:'0 auto',textAlign:'center',padding:'32px 20px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12}}>
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={V.gold3} strokeWidth="2" strokeLinecap="round" style={{margin:'0 auto 12px',display:'block'}}>
-                  <polyline points="6 9 12 15 18 9"/>
-                </svg>
-                <p style={{fontSize:14,color:V.sl,margin:0,lineHeight:1.6}}>
-                  Select a year / grade above to see the full enrolment pack — requirements, subjects, process, and application fee payment.
-                </p>
-              </div>
-            </div></section>
-          )}
-        </>
-        )
-      })()}
-      {/* ══════════════════════════════════════════
           LOGIN
       ══════════════════════════════════════════ */}
-      {/* ══ CONSULTATION PAGE ══ */}
-      {page === 'consult' && (
-        <div>
-          <div className="pg-hero"><div className="wrap">
-            <div className="eyebrow">Book assessment</div>
-            <h1 className="pg-h">Book a Free <em>Consultation</em></h1>
-            <p className="pg-sub">Speak with our admissions team about the right curriculum and learning plan for your child. No commitment required.</p>
-          </div></div>
-          <section className="sec"><div className="wrap"><div className="consult-wrap">
-            <ConsultForm P={P} />
-          </div></div></section>
-        </div>
-      )}
-
       {/* ══ ASSESSMENT REQUEST PAGE ══
           Single conversion path on the public site. Submits a request only —
           no payment is collected here. Admissions reviews each request and
@@ -24253,12 +23922,6 @@ export default function LandingPage() {
               </a>
               <a className="fab-opt lp-btnlink" href={'/assessment'} onClick={linkClick(() => { setFabOpen(false); nav('/assessment') })}>
                 <span className="fab-opt-ic">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                </span>
-                Start enrollment application
-              </a>
-              <a className="fab-opt lp-btnlink" href={'/assessment'} onClick={linkClick(() => { setFabOpen(false); nav('/assessment') })}>
-                <span className="fab-opt-ic">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                 </span>
                 Book an assessment
@@ -24356,219 +24019,6 @@ export default function LandingPage() {
 // ── Price Card Component ──────────────────────────────────
 
 // ── Consultation Form ─────────────────────────────────────
-function ConsultForm({ P }) {
-  const [form, setForm] = useState({name:'',email:'',phone:'+254 ',country:'',curriculum:'',message:'',mode:'online',venue:'office',address:''})
-  const [sending, setSending] = useState(false)
-  const [sent, setSent] = useState(false)
-  const [err, setErr] = useState('')
-  const set = (k,v) => setForm(f => ({...f,[k]:v}))
-
-  const submit = async () => {
-    if (!form.name || !form.email || !form.phone) { setErr('Please fill in all required fields.'); return }
-    if (form.mode === 'inperson' && form.venue === 'home' && !form.address.trim()) {
-      setErr('Please provide your home visit address for the consultation.')
-      return
-    }
-    setSending(true); setErr('')
-    // Build a human-readable consultation format string for the email
-    const formatLabel = form.mode === 'online'
-      ? 'Online via Google Meet'
-      : form.venue === 'office'
-        ? 'In-person at Smartious Office (Diamond Plaza I Parklands Annex, 3rd Floor, Nairobi)'
-        : `In-person home visit — ${form.address}`
-    // Primary store: Front Desk database. Secondary: email copy.
-    // The request succeeds if either path goes through.
-    let fdOk = false, emailOk = false
-    try {
-      const fd = await fetch(FRONTDESK_API, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'consultation',
-          name: form.name,
-          email: form.email,
-          phone: form.phone,
-          country: form.country,
-          curriculum: form.curriculum,
-          consultFormat: formatLabel,
-          address: form.mode === 'inperson' && form.venue === 'home' ? form.address : '',
-          message: form.message,
-          sourcePage: 'consult-form',
-        }),
-      })
-      fdOk = fd.ok
-    } catch (e) {
-      console.error('[consult] front desk capture failed:', e?.message)
-    }
-    try {
-      const res = await fetch(((import.meta.env?.VITE_API_URL || 'https://smartious-backend.onrender.com').replace(/\/$/, '')) + '/api/inquiries/public', {
-        method:'POST',
-        headers:{'Content-Type':'application/json','Accept':'application/json'},
-        body: JSON.stringify({
-          _subject: `Free Consultation Request — ${form.name}`,
-          _template: 'table',
-          _captcha: 'false',
-          Name: form.name,
-          Email: form.email,
-          Phone: form.phone,
-          Country: form.country,
-          Curriculum: form.curriculum,
-          'Consultation Format': formatLabel,
-          Message: form.message || 'No additional message provided.',
-        })
-      })
-      emailOk = res.ok
-    } catch (e) {
-      console.error('[consult] email copy failed:', e?.message)
-    }
-    if (fdOk || emailOk) {
-      setSent(true)
-      try {
-        if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
-          window.gtag('event', 'ads_conversion_Submit_lead_form_1', {})
-        }
-      } catch (e) {
-        console.error('[gtag] conversion event failed:', e?.message)
-      }
-    } else {
-      setErr('Could not send your request. Please check your connection and try again, or WhatsApp us at +254 745 021 212.')
-    }
-    setSending(false)
-  }
-
-  if (sent) return (
-    <div className="consult-card consult-success">
-      <div className="consult-success-icon">
-        <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="#8B1A2E" strokeWidth="2" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-      </div>
-      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',color:'#080C14',marginBottom:12}}>Request <em style={{color:'#8B1A2E',fontStyle:'italic'}}>Received!</em></div>
-      <p style={{fontSize:15,color:'#2E3D55',lineHeight:1.8,marginBottom:12,maxWidth:440,margin:'0 auto 12px'}}>Thank you {form.name}. Our admissions team will reach you at <strong>{form.email}</strong> within 2 working hours to schedule your free consultation.</p>
-      <p style={{fontSize:13,color:'#3D5066',marginBottom:32,maxWidth:440,margin:'0 auto 32px'}}>
-        <strong>Preferred format:</strong>{' '}
-        {form.mode === 'online'
-          ? 'Online via Google Meet'
-          : form.venue === 'office'
-            ? 'In-person at our Nairobi office'
-            : 'In-person home visit'}
-      </p>
-      <button className="btn-p" onClick={() => P('home')}>Back to Home</button>
-    </div>
-  )
-
-  return (
-    <div className="consult-card">
-      <div style={{marginBottom:32}}>
-        <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',color:'#080C14',marginBottom:8}}>Tell us about <em style={{color:'#8B1A2E',fontStyle:'italic'}}>your child</em></div>
-        <p style={{fontSize:14,color:'#2E3D55',lineHeight:1.7}}>Fill in the form below. Our team will contact you within 2 working hours to schedule a free 30-minute consultation call.</p>
-      </div>
-      <div className="consult-grid">
-        <div className="consult-field">
-          <label className="consult-label">Your Full Name *</label>
-          <input className="consult-input" placeholder="Jane Osei" value={form.name} onChange={e=>set('name',e.target.value)}/>
-        </div>
-        <div className="consult-field">
-          <label className="consult-label">Email Address *</label>
-          <input className="consult-input" type="email" placeholder="jane@email.com" value={form.email} onChange={e=>set('email',e.target.value)}/>
-        </div>
-        <div className="consult-field">
-          <label className="consult-label">WhatsApp / Phone *</label>
-          <PhoneInput value={form.phone} onChange={v => set('phone', v)} placeholder="7XX XXX XXX" />
-        </div>
-        <div className="consult-field">
-          <label className="consult-label">Country of Residence</label>
-          <select className="consult-select" value={form.country} onChange={e=>set('country',e.target.value)}>
-            <option value="">Select country…</option>
-            {['Kenya','Nigeria','South Africa','Uganda','Tanzania','UAE','United Kingdom','United States','Canada','Australia','Other'].map(c=><option key={c}>{c}</option>)}
-          </select>
-        </div>
-      </div>
-
-      {/* Consultation format — Online via Google Meet vs In-person */}
-      <div className="consult-field">
-        <label className="consult-label">How would you like to meet? *</label>
-        <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:10,marginTop:4}}>
-          {[
-            {id:'online',   title:'Online via Google Meet', sub:'Video call · Anywhere in the world', icon:'<rect x="2" y="4" width="20" height="14" rx="2"/><polyline points="7 22 12 18 17 22"/>'},
-            {id:'inperson', title:'In-person consultation', sub:'Meet our team face to face',          icon:'<path d="M20 10c0 7-8 12-8 12s-8-5-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>'},
-          ].map(o => {
-            const on = form.mode === o.id
-            return (
-              <button key={o.id} type="button" onClick={() => set('mode', o.id)}
-                style={{textAlign:'left',padding:'14px 14px',border:`1.5px solid ${on?'#8B1A2E':'#F0E8D4'}`,borderRadius:10,background:on?'rgba(139,26,46,.04)':'#FFFFFF',cursor:'pointer',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",transition:'all .2s',display:'flex',alignItems:'flex-start',gap:11}}>
-                <div style={{width:32,height:32,borderRadius:8,background:on?'#8B1A2E':'#FDFAF4',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={on?'#fff':'#8B1A2E'} strokeWidth="2" strokeLinecap="round" dangerouslySetInnerHTML={{__html:o.icon}}/>
-                </div>
-                <div style={{flex:1,minWidth:0}}>
-                  <div style={{fontWeight:700,fontSize:13.5,color:'#080C14',marginBottom:2}}>{o.title}</div>
-                  <div style={{fontSize:11.5,color:'#3D5066',lineHeight:1.4}}>{o.sub}</div>
-                </div>
-                {on && <div style={{width:16,height:16,borderRadius:'50%',background:'#8B1A2E',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,marginTop:4}}>
-                  <svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="#fff" strokeWidth="2.3" strokeLinecap="round"><path d="M2 6l3 3 5-5"/></svg>
-                </div>}
-              </button>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* If in-person — pick Office vs Home */}
-      {form.mode === 'inperson' && (
-        <div className="consult-field" style={{background:'rgba(139,26,46,.025)',border:'1px dashed rgba(139,26,46,.2)',borderRadius:10,padding:'16px 18px'}}>
-          <label className="consult-label" style={{marginBottom:10}}>Where should we meet? *</label>
-          <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:10}}>
-            {[
-              {id:'office', title:'At our office', sub:'Diamond Plaza I Parklands Annex, 3rd Floor, Nairobi', icon:'<path d="M3 21h18M5 21V7l7-5 7 5v14"/><rect x="9" y="10" width="6" height="11"/>'},
-              {id:'home',   title:'Home visit',    sub:'We come to you (Nairobi metro)',       icon:'<path d="M3 10l9-7 9 7M5 10v10h14V10"/>'},
-            ].map(v => {
-              const on = form.venue === v.id
-              return (
-                <button key={v.id} type="button" onClick={() => set('venue', v.id)}
-                  style={{textAlign:'left',padding:'12px 14px',border:`1.5px solid ${on?'#8B1A2E':'#F0E8D4'}`,borderRadius:8,background:on?'#fff':'#FFFFFF',cursor:'pointer',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",display:'flex',alignItems:'flex-start',gap:10,transition:'all .2s'}}>
-                  <div style={{width:28,height:28,borderRadius:6,background:on?'#8B1A2E':'#FDFAF4',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={on?'#fff':'#8B1A2E'} strokeWidth="2" strokeLinecap="round" dangerouslySetInnerHTML={{__html:v.icon}}/>
-                  </div>
-                  <div>
-                    <div style={{fontWeight:700,fontSize:13,color:'#080C14',marginBottom:2}}>{v.title}</div>
-                    <div style={{fontSize:11,color:'#3D5066',lineHeight:1.4}}>{v.sub}</div>
-                  </div>
-                </button>
-              )
-            })}
-          </div>
-          {form.venue === 'home' && (
-            <div style={{marginTop:14}}>
-              <label className="consult-label">Home visit address *</label>
-              <input className="consult-input" placeholder="Estate, street, house number, nearest landmark…" value={form.address} onChange={e=>set('address',e.target.value)}/>
-              <div style={{fontSize:11.5,color:'#3D5066',marginTop:6,lineHeight:1.5}}>
-                Home visits are available within the Nairobi metro area. We'll confirm feasibility when we call you back.
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      <div className="consult-field">
-        <label className="consult-label">Curriculum of Interest</label>
-        <select className="consult-select" value={form.curriculum} onChange={e=>set('curriculum',e.target.value)}>
-          <option value="">Select curriculum…</option>
-          {['IGCSE (Cambridge)','Cambridge A-Level','IB Diploma','CBC / KCSE','British National Curriculum','American Curriculum','Not sure — need guidance'].map(c=><option key={c}>{c}</option>)}
-        </select>
-      </div>
-      <div className="consult-field">
-        <label className="consult-label">Any questions or context? (Optional)</label>
-        <textarea className="consult-textarea" placeholder="Tell us about your child's age, current grade, learning goals, or any specific needs…" value={form.message} onChange={e=>set('message',e.target.value)}/>
-      </div>
-      {err && <div style={{color:'#8B1A2E',fontSize:13,marginBottom:16,padding:'10px 14px',background:'rgba(139,26,46,.06)',borderRadius:6,border:'1px solid rgba(139,26,46,.15)'}}>{err}</div>}
-      <button className="btn-p" style={{width:'100%',justifyContent:'center',padding:'14px',fontSize:14.5}} onClick={submit} disabled={sending}>
-        {sending ? 'Sending…' : <>
-          <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-          Book assessment
-        </>}
-      </button>
-      <p style={{fontSize:12,color:'#B0A490',textAlign:'center',marginTop:14}}>No commitment · Our team contacts you within 2 hours · 100% free</p>
-    </div>
-  )
-}
 
 // ── Contact Form ───────────────────────────────────────────
 function ContactForm() {

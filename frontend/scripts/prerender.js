@@ -70,7 +70,7 @@ const BLOCKED_DOMAINS = [
 const ROUTES_TO_PRERENDER = [
   '/',
   '/about', '/curricula', '/services', '/programs', '/pricing', '/teachers',
-  '/global', '/contact', '/faq', '/enroll', '/consult',
+  '/global', '/contact', '/faq',
   '/calendar', '/events', '/gallery', '/activities',
   '/blog', '/test-prep', '/languages', '/study-abroad',
   // Europe 2026 article batch — prerendered so the SEO articles actually index

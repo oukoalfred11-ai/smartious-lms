@@ -303,13 +303,13 @@ export default function LoginPage() {
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
             Back to Website
           </Link>
-          <Link to="/enroll" style={{
+          <Link to="/assessment" style={{
             fontSize:12,
             color:'rgba(247,243,237,.65)',
             textDecoration:'none',
             fontWeight:600,
           }}>
-            New here? <span style={{color:'#C9973A',borderBottom:'1px solid rgba(201,151,58,.4)'}}>Enroll →</span>
+            New here? <span style={{color:'#C9973A',borderBottom:'1px solid rgba(201,151,58,.4)'}}>Book an assessment →</span>
           </Link>
         </div>
       </div>
