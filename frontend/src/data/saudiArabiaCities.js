@@ -430,7 +430,7 @@ export const SAUDI_ARABIA_COUNTRY = {
     { metric: 'Curricula', value: '5', sub: 'Cambridge · Edexcel · IB · American AP · CBC' },
     { metric: 'Tutors', value: '78+', sub: 'PGCE-qualified subject specialists' },
     { metric: 'Countries served', value: '40+', sub: 'Africa · Gulf · Europe · Americas' },
-    { metric: 'Physical centres', value: '2', sub: 'Diamond Plaza Parklands · Karen Hardy' },
+    { metric: 'Physical centres', value: '2', sub: 'Diamond Plaza, Parklands · Karen West' },
     { metric: 'SAR-USD peg', value: '3.75', sub: 'Fixed since 1986 — predictable pricing' },
   ],
 
@@ -596,7 +596,7 @@ export const SAUDI_ARABIA_COUNTRY = {
     },
     {
       q: 'Are Smartious teachers qualified to deliver Cambridge curriculum?',
-      a: 'Yes. Smartious teaching staff are PGCE-qualified (Postgraduate Certificate in Education) subject specialists with Cambridge International training. Teachers are based primarily in Nairobi, where Smartious operates two physical centres (Diamond Plaza Parklands HQ and Karen Hardy). The PGCE qualification is the standard professional teaching credential used by Cambridge schools globally. Subject specialism means a Mathematics teacher teaches only Mathematics, a Chemistry teacher only Chemistry, etc. — not generalist primary-school-style teaching.',
+      a: 'Yes. Smartious teaching staff are PGCE-qualified (Postgraduate Certificate in Education) subject specialists with Cambridge International training. Teachers are based primarily in Nairobi, where Smartious operates two physical centres (Diamond Plaza, Parklands head office and Karen West). The PGCE qualification is the standard professional teaching credential used by Cambridge schools globally. Subject specialism means a Mathematics teacher teaches only Mathematics, a Chemistry teacher only Chemistry, etc. — not generalist primary-school-style teaching.',
     },
     {
       q: 'What technology and internet do we need at home in Saudi Arabia?',

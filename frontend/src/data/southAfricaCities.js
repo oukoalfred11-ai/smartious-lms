@@ -445,7 +445,7 @@ export const SOUTH_AFRICA_COUNTRY = {
     { metric: 'Curricula', value: '5', sub: 'Cambridge · Edexcel · IB · American AP · CBC' },
     { metric: 'Tutors', value: '78+', sub: 'PGCE-qualified subject specialists' },
     { metric: 'Countries served', value: '40+', sub: 'Africa · Gulf · Europe · Americas' },
-    { metric: 'Physical centres', value: '2', sub: 'Diamond Plaza Parklands · Karen Hardy' },
+    { metric: 'Physical centres', value: '2', sub: 'Diamond Plaza, Parklands · Karen West' },
     { metric: 'BELA Act ready', value: '2024', sub: 'Curriculum docs for DBE compliance' },
   ],
 
@@ -625,7 +625,7 @@ export const SOUTH_AFRICA_COUNTRY = {
     },
     {
       q: 'Are Smartious teachers qualified to deliver Cambridge curriculum?',
-      a: 'Yes. Smartious teaching staff are PGCE-qualified (Postgraduate Certificate in Education) subject specialists with Cambridge International training. Teachers are based primarily in Nairobi, where Smartious operates two physical centres (Diamond Plaza Parklands HQ and Karen Hardy). PGCE is the standard professional teaching credential used by Cambridge schools globally, including SA ISASA schools.',
+      a: 'Yes. Smartious teaching staff are PGCE-qualified (Postgraduate Certificate in Education) subject specialists with Cambridge International training. Teachers are based primarily in Nairobi, where Smartious operates two physical centres (Diamond Plaza, Parklands head office and Karen West). PGCE is the standard professional teaching credential used by Cambridge schools globally, including SA ISASA schools.',
     },
     {
       q: 'What technology and internet do we need at home?',

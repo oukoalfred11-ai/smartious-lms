@@ -9,7 +9,7 @@
 // - Local-currency figures are approximate, at about KSh 129/USD
 //   (Oct 2026 rate): USD 423 ≈ KSh 54,600, USD 15 ≈ KSh 1,940.
 // - Smartious was founded in Nairobi in 2018. Head office and learning
-//   centre: Diamond Plaza I Annex, Parklands. Second centre in Karen.
+//   centre: Diamond Plaza I Parklands Annex. Second centre: Karen West, Mokoyeti Road.
 // - Contacts: admissions +254 745 021 212, academic +254 182 071 920,
 //   hello@smartioushomeschool.com.
 // - January 2027 intake: Term 2 starts 5 January 2027.
@@ -42,10 +42,10 @@ export const KENYA_CITIES = [
   {
     slug: 'nairobi', name: 'Nairobi', county: 'Nairobi County', region: 'Capital city · Smartious head office', heroImg: HERO_CLASSROOM,
     seoTitle: 'Online School & Homeschool Nairobi | Live IGCSE, CBC',
-    seoDesc: 'Online school and homeschool in Nairobi with live IGCSE, A-Level and CBC classes. Parklands and Karen centres. From USD 423/month. January 2027 intake.',
+    seoDesc: 'Online school and homeschool in Nairobi with live IGCSE, A-Level and CBC classes. Parklands and Karen West centres. From USD 423/month. January 2027 intake.',
     primaryKeyword: 'Online school and homeschooling in Nairobi',
     heroTagline: 'Live online classes and in-person homeschooling for families in Karen, Westlands, Kilimani, Lavington, Runda, Kileleshwa and across the city, from our Parklands head office.',
-    intro: 'Smartious was founded in Nairobi in 2018 and Nairobi is still home: our head office and learning centre are at Diamond Plaza I Annex in Parklands, and we have a second centre in Karen. Nairobi families use us in three ways. Some enrol full time in the online school, with live lessons on a weekly timetable and recordings of every class. Some choose in-person homeschooling at one of our centres, which keeps a school-day routine without the long cross-city school run. Others keep their child at their current school and book one-to-one tuition for one or two subjects. We teach Cambridge Primary, Lower Secondary, IGCSE and A Level, Pearson Edexcel, the IB, the American curriculum with AP, and Kenya\'s CBE (CBC), all in East Africa Time.',
+    intro: 'Smartious was founded in Nairobi in 2018 and Nairobi is still home: our head office and learning centre are at Diamond Plaza I Parklands Annex, and we have a second centre in Karen West (Mokoyeti Road). Nairobi families use us in three ways. Some enrol full time in the online school, with live lessons on a weekly timetable and recordings of every class. Some choose in-person homeschooling at one of our centres, which keeps a school-day routine without the long cross-city school run. Others keep their child at their current school and book one-to-one tuition for one or two subjects. We teach Cambridge Primary, Lower Secondary, IGCSE and A Level, Pearson Edexcel, the IB, the American curriculum with AP, and Kenya\'s CBE (CBC), all in East Africa Time.',
     challenges: [
       'The school run. A 7.30 am start at a school across town can mean leaving Runda, Karen or South C before 6 am. Waiyaki Way, Ngong Road, Langata Road, Thika Road and Mombasa Road are slow in both directions at peak times, and the Expressway helps only some routes.',
       'Fees at the leading Cambridge and IB schools in Karen, Gigiri, Runda and Westlands have risen faster than many family budgets, and many add development levies, transport, lunch and exam fees on top.',
@@ -54,14 +54,14 @@ export const KENYA_CITIES = [
       'Finding a specialist. Good A Level Further Mathematics, Physics or IB Higher Level Chemistry teachers are in demand, and freelance tutors are hard to vet.',
     ],
     whyChoose: [
-      { h: 'Two Nairobi centres plus live online classes', p: 'Our Parklands head office (Diamond Plaza I Annex) and our Karen centre host in-person homeschooling and tuition. Families anywhere in the city can also learn fully online on the same timetable.' },
-      { h: 'Less time in traffic', p: 'A Lavington or Kileleshwa student learning online starts lessons at home instead of on Waiyaki Way or James Gichuru Road. Families in Parklands, Westlands and Highridge can reach the Parklands centre quickly. Karen and Langata families can use the Karen centre.' },
+      { h: 'Two Nairobi centres plus live online classes', p: 'Our Parklands head office (Diamond Plaza I Parklands Annex) and our Karen West centre host in-person homeschooling and tuition. Families anywhere in the city can also learn fully online on the same timetable.' },
+      { h: 'Less time in traffic', p: 'A Lavington or Kileleshwa student learning online starts lessons at home instead of on Waiyaki Way or James Gichuru Road. Families in Parklands, Westlands and Highridge can reach the Parklands centre quickly. Karen and Langata families can use the Karen West centre.' },
       { h: 'Every major curriculum under one roof', p: 'Cambridge, Pearson Edexcel, IB, American with AP and CBE (CBC). Siblings on different curricula can study with the same school, and a CBE learner can move to IGCSE at Year 10 with a planned bridge.' },
       { h: 'Exams handled with you', p: 'For Cambridge and Pearson Edexcel we plan each private-candidate entry through British Council Kenya, whose exams team is in Nairobi. For KJSEA and KCSE we work with you on registering through a KNEC-registered centre.' },
       { h: 'Tuition at a clear rate', p: 'One-to-one tuition is USD 15/hour (≈ KSh 1,940 at the Oct 2026 rate), online or at our centres. For home visits in Nairobi estates, see our Nairobi tuition page at /tuition-nairobi.' },
     ],
-    homeschoolDetail: 'Full-time Smartious students in Nairobi get a personal timetable on the Smartious LMS, live small-group lessons with subject teachers, recordings of every lesson, homework and assessments marked online, and termly reports. Families who want structure outside the home can choose in-person homeschooling at Parklands or Karen. Students come to the centre for taught lessons and supervised study, then go home without crossing the city.',
-    homeTuitionDetail: 'One-to-one tuition is USD 15/hour (≈ KSh 1,940 at the Oct 2026 rate). It runs online, at our Parklands or Karen centre, or, in many Nairobi estates, at your home. Some estates further from our centres carry a small transport contribution. Our Nairobi tuition page (/tuition-nairobi) lists the areas we cover, including Karen, Westlands, Kilimani, Lavington, Runda, Kileleshwa, Parklands, Langata, Muthaiga, South B and C, Syokimau and Kitengela, with the details for each.',
+    homeschoolDetail: 'Full-time Smartious students in Nairobi get a personal timetable on the Smartious LMS, live small-group lessons with subject teachers, recordings of every lesson, homework and assessments marked online, and termly reports. Families who want structure outside the home can choose in-person homeschooling at Parklands or Karen West. Students come to the centre for taught lessons and supervised study, then go home without crossing the city.',
+    homeTuitionDetail: 'One-to-one tuition is USD 15/hour (≈ KSh 1,940 at the Oct 2026 rate). It runs online, at our Parklands or Karen West centre, or, in many Nairobi estates, at your home. Some estates further from our centres carry a small transport contribution. Our Nairobi tuition page (/tuition-nairobi) lists the areas we cover, including Karen, Westlands, Kilimani, Lavington, Runda, Kileleshwa, Parklands, Langata, Muthaiga, South B and C, Syokimau and Kitengela, with the details for each.',
     onlineLearningDetail: 'Live lessons run in East Africa Time, so there is no time-zone adjustment: a 9 am lesson is 9 am in Nairobi. Safaricom, Zuku, Faiba and other fibre services in Nairobi estates are fine for live classes. A laptop, a headset and a quiet room are what matter most. Recordings mean that a power cut or a dropped connection does not mean a lost lesson.',
     curricula: {
       cambridge: 'Cambridge Primary, Lower Secondary, IGCSE (Years 10 to 11) and International AS and A Level (Years 12 to 13). Cambridge is the most common international route in Nairobi. Entries for IGCSE and A Level are made as a private candidate through British Council Kenya, for the May/June or October/November series.',
@@ -73,18 +73,18 @@ export const KENYA_CITIES = [
     nearbyAreas: ['Parklands (head office)', 'Karen (centre)', 'Westlands', 'Kilimani', 'Lavington', 'Kileleshwa', 'Runda', 'Muthaiga', 'Gigiri', 'Spring Valley', 'Loresho', 'Langata', 'South B', 'South C', 'Upper Hill', 'Riverside', 'Highridge', 'Kasarani', 'Embakasi', 'Syokimau'],
     growingReason: 'More Nairobi parents now see online and centre-based homeschooling as a serious option. Many have lived with the cost and stress of the cross-city school run. Others are returning diaspora families who need a school place mid-year, or have a teenager who needs a particular A Level combination that their school does not timetable. The move from 8-4-4 to CBE has also led many families to compare the national route and the IGCSE route side by side.',
     familySituations: [
-      { context: 'Karen to town', scenario: 'A Karen family whose two children were spending well over an hour each way on Langata and Ngong Road. They now learn at our Karen centre in the morning and do sports in the afternoon.' },
+      { context: 'Karen to town', scenario: 'A Karen family whose two children were spending well over an hour each way on Langata and Ngong Road. They now learn at our Karen West centre in the morning and do sports in the afternoon.' },
       { context: 'Grade 9 decision', scenario: 'A Kileleshwa family with a Grade 9 learner deciding between Grade 10 senior school on the STEM pathway and starting Cambridge IGCSE at Year 10.' },
       { context: 'Returning diaspora', scenario: 'A family moving back to Runda from the UK in the middle of the year who want their Year 10 child to continue IGCSE without a gap while they settle in.' },
       { context: 'One subject, one-to-one', scenario: 'A Westlands Year 12 student at a Cambridge school who needs A Level Further Mathematics, which the school cannot timetable, taught one-to-one.' },
     ],
     faqs: [
       { q: 'Which estates are closest to the Parklands centre?', a: 'Parklands, Westlands, Highridge, Spring Valley, Loresho, Muthaiga and Gigiri are the closest, via the Ring Road Westlands, Limuru Road and Waiyaki Way. Families from Runda and Kitisuru often come down Limuru Road or Kiambu Road outside peak hours.' },
-      { q: 'Is the Karen centre practical for Langata, Lavington or Kilimani families?', a: 'Karen and Langata families usually find the Karen centre easiest. Lavington and Kilimani families often choose between Karen and Parklands depending on which way they already drive, Ngong Road or Waiyaki Way. Many simply learn online on the days the traffic is worst.' },
+      { q: 'Is the Karen West centre practical for Langata, Lavington or Kilimani families?', a: 'Karen and Langata families usually find the Karen West centre easiest. Lavington and Kilimani families often choose between Karen and Parklands depending on which way they already drive, Ngong Road or Waiyaki Way. Many simply learn online on the days the traffic is worst.' },
       { q: 'My child attends an international school in Gigiri or Karen. Can we just take tuition?', a: 'Yes. Many Nairobi students keep their school place and take one-to-one lessons with us in one or two subjects, online, at a centre or at home, at USD 15/hour (≈ KSh 1,940 at the Oct 2026 rate).' },
-      { q: 'Where are your Nairobi centres?', a: 'Our head office and learning centre is at Diamond Plaza I Annex, Parklands. Our second centre is in Karen. You are welcome to visit either centre. Call admissions on +254 745 021 212 to arrange a time.' },
+      { q: 'Where are your Nairobi centres?', a: 'Our head office and learning centre is at Diamond Plaza I Parklands Annex. Our second centre is in Karen West, on Mokoyeti Road past Galleria Mall. You are welcome to visit either centre. Call admissions on +254 745 021 212 to arrange a time.' },
       { q: 'What does online school cost in Nairobi?', a: FEES_KE },
-      { q: 'Can my child homeschool in person in Nairobi instead of online?', a: 'Yes. In-person homeschooling runs at our Parklands and Karen centres for families who want a daily routine and a teacher in the room. Many families mix the two: centre days plus online lessons at home.' },
+      { q: 'Can my child homeschool in person in Nairobi instead of online?', a: 'Yes. In-person homeschooling runs at our Parklands and Karen West centres for families who want a daily routine and a teacher in the room. Many families mix the two: centre days plus online lessons at home.' },
       { q: 'Do you offer home tuition in my estate?', a: 'In many Nairobi estates, yes. Tuition is USD 15/hour (≈ KSh 1,940 at the Oct 2026 rate), and some estates further from our centres carry a small transport contribution. Our Nairobi tuition page (/tuition-nairobi) lists the areas and details.' },
       { q: 'Where does my child sit IGCSE or A Level exams in Nairobi?', a: EXAMS_KE },
       { q: 'My child is in Grade 9. Should we go to Grade 10 senior school or switch to IGCSE?', a: CBE_KE + ' Both routes lead to Kenyan and international universities. At the assessment we look at your child\'s strengths, the subjects they want, and where they hope to study, and we explain how each route would work for them.' },
@@ -147,7 +147,7 @@ export const KENYA_CITIES = [
       { q: 'We live on the south coast in Diani or Ukunda. Can my child join?', a: 'Yes. Online lessons work the same in Diani, Ukunda and Kwale as in Nyali. There is no ferry or Dongo Kundu bypass drive on school mornings.' },
       { q: 'Can the timetable fit Ramadan?', a: 'Yes. Families can ask us to adjust lesson times during Ramadan, and recordings help when evenings are busy. Islamic Religious Education and Arabic are available as subjects.' },
       { q: 'Do you teach families in Kilifi, Watamu and Malindi?', a: 'Yes. Families along the north coast learn online on the same timetable as Mombasa students.' },
-      { q: 'Do you have a centre in Mombasa?', a: 'No. Our centres are in Nairobi (Parklands and Karen). Mombasa families learn live online, on the same timetable and with the same teachers as our Nairobi students.' },
+      { q: 'Do you have a centre in Mombasa?', a: 'No. Our centres are in Nairobi (Parklands and Karen West). Mombasa families learn live online, on the same timetable and with the same teachers as our Nairobi students.' },
       { q: 'What does it cost in Mombasa?', a: FEES_KE },
       { q: 'Where can my child sit IGCSE or A Level exams from Mombasa?', a: EXAMS_KE + ' For coastal families, it is worth asking British Council Kenya early which venue is available for your series, and planning travel to Nairobi if needed.' },
       { q: 'Can my child still sit KCSE or KJSEA?', a: 'Yes. KNEC exams are registered through a KNEC-registered centre in Mombasa County within KNEC\'s registration window. We prepare students for the syllabus and help you plan the registration. ' + CBE_KE },
@@ -208,9 +208,9 @@ export const KENYA_CITIES = [
     ],
     faqs: [
       { q: 'Can my child sit KCSE in Kisumu as a private candidate?', a: 'Yes. KNEC registers private candidates through designated centres, including in Kisumu County. Registration is within KNEC\'s window early in the exam year, so plan ahead. We prepare students for the syllabus.' },
-      { q: 'If we move from Kisumu to Nairobi, can my child switch to a centre?', a: 'Yes. Your child keeps the same timetable and teachers and can add centre days at Parklands or Karen after the move.' },
+      { q: 'If we move from Kisumu to Nairobi, can my child switch to a centre?', a: 'Yes. Your child keeps the same timetable and teachers and can add centre days at Parklands or Karen West after the move.' },
       { q: 'Do families in Kakamega, Siaya or Homa Bay use Smartious?', a: 'Yes. The lessons are online, so families anywhere in the lake region can join with a reliable connection.' },
-      { q: 'Is there a Smartious centre in Kisumu?', a: 'No. Kisumu students learn live online. Our centres are in Nairobi (Parklands and Karen), and families travelling to Nairobi are welcome to visit.' },
+      { q: 'Is there a Smartious centre in Kisumu?', a: 'No. Kisumu students learn live online. Our centres are in Nairobi (Parklands and Karen West), and families travelling to Nairobi are welcome to visit.' },
       { q: 'What does online school cost for a Kisumu family?', a: FEES_KE },
       { q: 'Where would my child sit Cambridge exams?', a: EXAMS_KE + ' From Kisumu, plan for travel to Nairobi by road or a short flight unless British Council Kenya confirms a venue nearer to you for your series.' },
       { q: 'Can my child do KCSE or KJSEA instead?', a: 'Yes. We teach to the KNEC syllabus, and registration is through a KNEC-registered centre in Kisumu County. ' + CBE_KE },
@@ -251,7 +251,7 @@ export const KENYA_CITIES = [
       { h: 'Clear fees', p: 'From USD 423/month for Primary (≈ KSh 54,600 at the Oct 2026 rate), payable termly. One-to-one tuition is USD 15/hour (≈ KSh 1,940).' },
     ],
     homeschoolDetail: 'Full-time Nakuru students get a personal timetable, live small-group lessons, recordings, marked assignments and termly reports on the Smartious LMS. Families often add local sport, such as athletics, rugby, swimming and riding, and outdoor learning around Lake Nakuru and Menengai.',
-    homeTuitionDetail: 'In Nakuru, tuition is delivered online: live one-to-one lessons at USD 15/hour (≈ KSh 1,940 at the Oct 2026 rate). We have no centre in Nakuru. Families visiting Nairobi are welcome at our Parklands or Karen centre.',
+    homeTuitionDetail: 'In Nakuru, tuition is delivered online: live one-to-one lessons at USD 15/hour (≈ KSh 1,940 at the Oct 2026 rate). We have no centre in Nakuru. Families visiting Nairobi are welcome at our Parklands or Karen West centre.',
     onlineLearningDetail: 'Fibre is available in Milimani, Section 58 and much of central Nakuru, and 4G covers Lanet, Kiamunyi and most estates. For farms further out, a 4G router or satellite backup helps, and every lesson is recorded.',
     curricula: {
       cambridge: 'Cambridge Primary to IGCSE and A Level, taken as a private candidate through British Council Kenya. Many Nakuru families choose IGCSE for its recognition by universities abroad.',
@@ -271,7 +271,7 @@ export const KENYA_CITIES = [
     faqs: [
       { q: 'We live in Naivasha or Gilgil. Is that covered?', a: 'Yes. Families in Naivasha, Gilgil, Njoro and Molo learn online on the same timetable as Nakuru students.' },
       { q: 'Can online school fit around riding, rugby or athletics?', a: 'Yes. Most families put live lessons in the morning and keep the afternoon for sport, with recordings for anything missed.' },
-      { q: 'Do you have a Nakuru centre?', a: 'No. Nakuru families learn live online. Our centres are in Nairobi (Parklands and Karen).' },
+      { q: 'Do you have a Nakuru centre?', a: 'No. Nakuru families learn live online. Our centres are in Nairobi (Parklands and Karen West).' },
       { q: 'What are the fees for a Nakuru family?', a: FEES_KE },
       { q: 'Where would my child sit IGCSE exams?', a: EXAMS_KE + ' From Nakuru this usually means planning a trip to Nairobi, so allow for highway traffic around Naivasha.' },
       { q: 'Is this an alternative to boarding school?', a: 'For many families, yes. Your child follows a live international curriculum at home and can join local clubs. Some families use Smartious for a few years and then move their child to boarding for the sixth form, or the other way round.' },
@@ -332,7 +332,7 @@ export const KENYA_CITIES = [
     faqs: [
       { q: 'We live in Iten or Kaptagat. Will the internet be good enough?', a: 'Usually, yes, with 4G. A 4G router positioned well in the house helps, and every lesson is recorded in case the connection drops.' },
       { q: 'My child trains in athletics. Can lessons fit around training?', a: 'Yes. Many families keep early-morning training and start live lessons later in the morning, with recordings for review in the evening.' },
-      { q: 'Is there a Smartious centre in Eldoret?', a: 'No. Eldoret families learn live online. Our centres are in Nairobi (Parklands and Karen).' },
+      { q: 'Is there a Smartious centre in Eldoret?', a: 'No. Eldoret families learn live online. Our centres are in Nairobi (Parklands and Karen West).' },
       { q: 'What are the fees?', a: FEES_KE },
       { q: 'Can my child keep studying while we travel for races?', a: 'Yes. Lessons are recorded and timetables are personal. Students can join live from another time zone or catch up from recordings, and teachers set work that keeps them on track.' },
       { q: 'Where would my child sit IGCSE exams?', a: EXAMS_KE + ' From Eldoret, plan for a flight or drive to Nairobi unless British Council Kenya confirms a nearer venue for your series.' },
@@ -393,7 +393,7 @@ export const KENYA_CITIES = [
     faqs: [
       { q: 'We live in Juja near JKUAT. Can we use the Parklands centre?', a: 'Yes. Juja and Ruiru families often combine online days with centre days at Parklands, using the Thika Superhighway outside peak hours.' },
       { q: 'Can my Grade 9 child prepare for KJSEA online?', a: 'Yes. We teach the Grade 9 learning areas and practise KJSEA-style tasks, and help you plan Grade 10 pathway choices.' },
-      { q: 'Can my Thika child attend your Nairobi centre?', a: 'Yes. Our head office and learning centre is at Diamond Plaza I Annex, Parklands. It is a practical choice for families who commute into Nairobi on some days.' },
+      { q: 'Can my Thika child attend your Nairobi centre?', a: 'Yes. Our head office and learning centre is at Diamond Plaza I Parklands Annex. It is a practical choice for families who commute into Nairobi on some days.' },
       { q: 'What are the fees?', a: FEES_KE },
       { q: 'Where would my child sit KJSEA, KCSE or IGCSE?', a: EXAMS_KE },
       { q: 'How does Grade 10 senior school work under CBE?', a: CBE_KE + ' We teach the pathway subjects and help you understand placement and subject choices.' },
@@ -426,7 +426,7 @@ export const KENYA_CITIES = [
       'Many parents work in Nairobi with long days and need a dependable routine for their children.',
     ],
     whyChoose: [
-      { h: 'Parklands centre nearby', p: 'Our head office and learning centre at Diamond Plaza I Annex, Parklands, is a short drive from Ruaka and Kiambu outside peak traffic. You can use it for in-person homeschooling or tuition.' },
+      { h: 'Parklands centre nearby', p: 'Our head office and learning centre at Diamond Plaza I Parklands Annex is a short drive from Ruaka and Kiambu outside peak traffic. You can use it for in-person homeschooling or tuition.' },
       { h: 'Or learn at home', p: 'Live online lessons mean no Limuru Road queue on school mornings.' },
       { h: 'CBE and international routes', p: 'We teach CBE, Cambridge, Pearson Edexcel, IB subjects and the American curriculum, so families can choose a route or plan a switch.' },
       { h: 'Exams close by', p: 'British Council Kenya, for Cambridge and Pearson private-candidate entries, is in Nairobi. KJSEA and KCSE are registered through a KNEC-registered centre in Kiambu County.' },
@@ -453,7 +453,7 @@ export const KENYA_CITIES = [
     faqs: [
       { q: 'Is the Limuru Road traffic a problem for centre days?', a: 'Peak-hour traffic through Ruaka can be slow, so most families choose centre days and times that avoid it, and learn online on other days.' },
       { q: 'My child attends a school in Runda. Can they take just one subject with you?', a: 'Yes. One-to-one tuition is USD 15/hour (≈ KSh 1,940 at the Oct 2026 rate), online or at our Parklands centre.' },
-      { q: 'How close is your centre to Kiambu?', a: 'Our head office and learning centre is at Diamond Plaza I Annex, Parklands, a short drive down Limuru Road or Kiambu Road outside peak hours. We also have a centre in Karen.' },
+      { q: 'How close is your centre to Kiambu?', a: 'Our head office and learning centre is at Diamond Plaza I Parklands Annex, a short drive down Limuru Road or Kiambu Road outside peak hours. We also have a centre in Karen West (Mokoyeti Road).' },
       { q: 'What are the fees?', a: FEES_KE },
       { q: 'Do you offer home tuition in Ruaka?', a: 'In parts of Ruaka and nearby areas, yes, at USD 15/hour (≈ KSh 1,940 at the Oct 2026 rate), sometimes with a small transport contribution. See /tuition-nairobi for the areas and details.' },
       { q: 'Where would my child sit exams?', a: EXAMS_KE },
@@ -491,7 +491,7 @@ export const KENYA_COUNTRY = {
   heroEyebrow: 'Online school in Kenya · Live classes',
   heroH1Suffix: 'Kenya',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP plus CBE (CBC), for Kenyan families in Nairobi, Mombasa, Kisumu, Nakuru, Eldoret, Thika and Kiambu, and for Kenyan families abroad. From USD 423/month for Primary (≈ KSh 54,600, Oct 2026 rate), payable termly. January 2027 intake: Term 2 starts 5 January 2027.',
-  heroValueProp: 'The Brookhouse / Braeburn / Aga Khan Academy / Hillcrest / GEMS Cambridge / Strathmore / Pembroke House alternative. Built for Kenyan families across all 47 counties — plus Kenyan diaspora globally seeking curriculum continuity for return home. Founded in Nairobi in 2018, with our head office at Diamond Plaza I Annex, Parklands, and a second centre in Karen.',
+  heroValueProp: 'The Brookhouse / Braeburn / Aga Khan Academy / Hillcrest / GEMS Cambridge / Strathmore / Pembroke House alternative. Built for Kenyan families across all 47 counties — plus Kenyan diaspora globally seeking curriculum continuity for return home. Founded in Nairobi in 2018, with our head office at Diamond Plaza I Parklands Annex, and a second centre in Karen West (Mokoyeti Road).',
   whatsappTrigger: 'Hi Smartious, I would like online homeschooling for my child in Kenya.',
   citiesSectionTitle: 'Online homeschooling across Kenya',
   citiesSectionBody: 'Seven Kenyan city pages: Nairobi, Mombasa, Kisumu, Nakuru, Eldoret, Thika and Kiambu. Each covers local estates, the school run, where to sit exams, CBE and Grade 10 choices, fees and the questions parents in that city ask.',
@@ -501,7 +501,7 @@ export const KENYA_COUNTRY = {
     { metric: 'Curricula', value: '5', sub: 'Cambridge · Edexcel · IB · American AP · CBC' },
     { metric: 'January 2027 intake', value: '5 Jan', sub: 'Term 2 starts 5 January 2027' },
     { metric: 'Countries served', value: '40+', sub: 'Africa · Gulf · Europe · Americas' },
-    { metric: 'Nairobi centres', value: '2', sub: 'Parklands head office · Karen' },
+    { metric: 'Nairobi centres', value: '2', sub: 'Parklands head office · Karen West' },
     { metric: 'Founded by', value: 'Alfred Ouko', sub: 'UoN-trained Maths & Physics educator' },
   ],
 
@@ -609,7 +609,7 @@ export const KENYA_COUNTRY = {
   whySmartious: [
     {
       h: 'Nairobi-based — we are Kenyan',
-      p: 'Smartious was founded in Nairobi in 2018. Our head office and learning centre is at Diamond Plaza I Annex, Parklands, and we have a second centre in Karen. Founded by Alfred Ouko, University of Nairobi-trained Mathematics and Physics educator. We are Kenyan-built, Kenyan-led, and Kenyan-serving — with global reach to 40+ countries.',
+      p: 'Smartious was founded in Nairobi in 2018. Our head office and learning centre is at Diamond Plaza I Parklands Annex, and we have a second centre in Karen West (Mokoyeti Road). Founded by Alfred Ouko, University of Nairobi-trained Mathematics and Physics educator. We are Kenyan-built, Kenyan-led, and Kenyan-serving — with global reach to 40+ countries.',
     },
     {
       h: 'Brookhouse / Braeburn / Aga Khan Academy alternative pricing',
@@ -644,7 +644,7 @@ export const KENYA_COUNTRY = {
     },
     {
       q: 'How does Smartious compare to Brookhouse, Braeburn, Aga Khan Academy, GEMS Cambridge, Hillcrest, Strathmore?',
-      a: 'Top Cambridge schools in Kenya — Brookhouse (KES 1.6M-2.4M/year), Braeburn (KES 1.4M-2.2M/year), Aga Khan Academy (KES 1.8M-2.6M/year — IB), GEMS Cambridge International School (KES 1.4M-2.0M/year), Hillcrest International (KES 1.5M-2.2M/year), Strathmore School (KES 800K-1.4M/year) — provide physical campus education with established sports, arts, and pastoral programmes. Smartious provides live online Cambridge, IB, American or CBE (CBC) teaching from USD 423/month for Primary (≈ KSh 54,600 at the Oct 2026 rate), payable termly; fees vary by curriculum and level. The trade-off: no full campus, but the same exam boards and qualifications, small live classes, and access from any county, with centres in Parklands and Karen for Nairobi families.',
+      a: 'Top Cambridge schools in Kenya — Brookhouse (KES 1.6M-2.4M/year), Braeburn (KES 1.4M-2.2M/year), Aga Khan Academy (KES 1.8M-2.6M/year — IB), GEMS Cambridge International School (KES 1.4M-2.0M/year), Hillcrest International (KES 1.5M-2.2M/year), Strathmore School (KES 800K-1.4M/year) — provide physical campus education with established sports, arts, and pastoral programmes. Smartious provides live online Cambridge, IB, American or CBE (CBC) teaching from USD 423/month for Primary (≈ KSh 54,600 at the Oct 2026 rate), payable termly; fees vary by curriculum and level. The trade-off: no full campus, but the same exam boards and qualifications, small live classes, and access from any county, with centres in Parklands and Karen West for Nairobi families.',
     },
     {
       q: 'My family lives outside Nairobi (Mombasa / Kisumu / Eldoret / Kakamega / Meru / Nyeri / rural Kenya). How does Smartious work?',
@@ -668,7 +668,7 @@ export const KENYA_COUNTRY = {
     },
     {
       q: 'Are Smartious teachers qualified to deliver Cambridge curriculum?',
-      a: 'Yes. Smartious teachers are qualified subject specialists who teach the Cambridge, Pearson Edexcel, IB, American and CBE programmes they deliver. They teach from Nairobi, at our Parklands and Karen centres.',
+      a: 'Yes. Smartious teachers are qualified subject specialists who teach the Cambridge, Pearson Edexcel, IB, American and CBE programmes they deliver. They teach from Nairobi, at our Parklands and Karen West centres.',
     },
     {
       q: 'Is homeschooling legal in Kenya?',
@@ -688,7 +688,7 @@ export const KENYA_COUNTRY = {
     },
     {
       q: 'How do we know if Smartious is the right fit for our family?',
-      a: 'Book a free consultation. We will talk through your child\'s current grade or year, the universities they may aim for, your county and routine, and whether CBE or an international curriculum fits best. We will tell you honestly if another option suits your family better. You can also visit our Parklands or Karen centre. Admissions: +254 745 021 212. Academic office: +254 182 071 920. Email: hello@smartioushomeschool.com. The January 2027 intake is open: Term 2 starts on 5 January 2027.',
+      a: 'Book a free consultation. We will talk through your child\'s current grade or year, the universities they may aim for, your county and routine, and whether CBE or an international curriculum fits best. We will tell you honestly if another option suits your family better. You can also visit our Parklands or Karen West centre. Admissions: +254 745 021 212. Academic office: +254 182 071 920. Email: hello@smartioushomeschool.com. The January 2027 intake is open: Term 2 starts on 5 January 2027.',
     },
     { q: 'How do live online classes work?', a: 'Students follow a weekly timetable of live lessons with qualified teachers, in small groups or one to one, and every lesson is recorded for catch-up. Families receive assessments and termly reports. Each student starts with a placement assessment, so we can place them at the right level.' },
     { q: 'When is the next intake?', a: 'The January 2027 intake is open: Term 2 starts on 5 January 2027. Students can also join during the year after an assessment.' },
@@ -696,5 +696,5 @@ export const KENYA_COUNTRY = {
   ],
 
   ctaH: 'Ready to start your child\'s Cambridge journey from Kenya?',
-  ctaSubhead: 'Free 15-minute consultation. We\'ll walk through your child\'s year group, target universities, and curriculum fit. Visit our Parklands or Karen centre, or join online. January 2027 intake: Term 2 starts 5 January 2027. No commitment.',
+  ctaSubhead: 'Free 15-minute consultation. We\'ll walk through your child\'s year group, target universities, and curriculum fit. Visit our Parklands or Karen West centre, or join online. January 2027 intake: Term 2 starts 5 January 2027. No commitment.',
 }

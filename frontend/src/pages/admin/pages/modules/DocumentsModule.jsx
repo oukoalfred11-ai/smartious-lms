@@ -593,7 +593,7 @@ function buildReceiptHTML(f) {
       </div>
       <div class="paid-stamp">
         <div class="org">SMARTIOUS HOMESCHOOL GLOBAL</div>
-        <div class="addr">Diamond Plaza I, Parklands</div>
+        <div class="addr">Diamond Plaza I Parklands Annex</div>
         <div class="addr">Nairobi, Kenya</div>
         <div class="paid">PAID</div>
         <div class="pdate">${esc(f.paidDate)}</div>
@@ -607,8 +607,8 @@ function buildReceiptHTML(f) {
 
   <div class="ft">
     <b>Smartious Homeschool Global</b><br>
-    Diamond Plaza I, Parklands, Nairobi, Kenya<br>
-    +254 745 021 212 &nbsp;|&nbsp; hellosmartious@gmail.com &nbsp;|&nbsp; smartioushomeschool.com
+    Diamond Plaza I Parklands Annex, 3rd Floor, Nairobi, Kenya<br>
+    +254 745 021 212 &nbsp;|&nbsp; hello@smartioushomeschool.com &nbsp;|&nbsp; smartioushomeschool.com
   </div>
 </div>
 </body></html>`
@@ -737,7 +737,7 @@ export function buildInvoiceHTML(f, t) {
   </div>
 
   <div class="page-body">
-    <div style="font-size:9px;color:var(--mute);margin-top:4mm;margin-bottom:2mm">Smartious Homeschool Global · Diamond Plaza, 4th Avenue, Parklands, Nairobi · hellosmartious@gmail.com · +254 745 021 212</div>
+    <div style="font-size:9px;color:var(--mute);margin-top:4mm;margin-bottom:2mm">Smartious Homeschool Global · Diamond Plaza I Parklands Annex, 3rd Floor, Nairobi · hello@smartioushomeschool.com · +254 745 021 212</div>
     <div class="bill-row">
       <div>
         <div class="bill-lbl">Bill To</div>
@@ -774,7 +774,7 @@ export function buildInvoiceHTML(f, t) {
   </div>
 
   <div class="ft">
-    <span>smartioushomeschool.com · hellosmartious@gmail.com · +254 745 021 212</span>
+    <span>smartioushomeschool.com · hello@smartioushomeschool.com · +254 745 021 212</span>
     <span>Page 1</span>
   </div>
 </div>
@@ -826,13 +826,13 @@ export function buildInvoiceHTML(f, t) {
     </table>
 
     <div class="closing">
-      <p class="ref-note">Please share the payment confirmation (M-Pesa message or SWIFT copy) with hellosmartious@gmail.com, quoting invoice number ${esc(f.invoiceNo)}, so it can be matched and receipted promptly.</p>
+      <p class="ref-note">Please share the payment confirmation (M-Pesa message or SWIFT copy) with hello@smartioushomeschool.com, quoting invoice number ${esc(f.invoiceNo)}, so it can be matched and receipted promptly.</p>
       <p>Thank you for choosing Smartious Homeschool Global${f.studentName?' for '+esc(f.studentName)+"'s learning journey":''}.</p>
     </div>
   </div>
 
   <div class="ft">
-    <span>smartioushomeschool.com · hellosmartious@gmail.com · +254 745 021 212</span>
+    <span>smartioushomeschool.com · hello@smartioushomeschool.com · +254 745 021 212</span>
     <span>Page 2</span>
   </div>
 </div>

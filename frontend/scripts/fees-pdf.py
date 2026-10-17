@@ -205,7 +205,7 @@ contact = table([
     [P('+254 745 021 212', 'cell'), P('+254 182 071 920', 'cell'), P('hello@smartioushomeschool.com', 'cell'), P('smartioushomeschool.com', 'cell')],
 ], [W_FULL * f for f in (0.25, 0.19, 0.32, 0.24)], pad=4)
 story += [KeepTogether(heading('Section 6 · Contact', 'Talk to', 'us') + [contact, Spacer(1, 5),
-    P('<b>Head office:</b> Diamond Plaza I Annex, 3rd Floor, Office 20, Parklands, Nairobi, Kenya. We also have a centre in Karen, Nairobi.'),
+    P('<b>Head office:</b> Diamond Plaza I Parklands Annex, 3rd Floor, Nairobi, Kenya. Our second centre is at Karen West, Mokoyeti Road, past Galleria Mall, Nairobi.'),
     Spacer(1, 2),
     P('This guide applies to the 2026–27 academic year. Fees may be revised for future years with written notice. Smartious E-School Ltd.', 'small')])]
 

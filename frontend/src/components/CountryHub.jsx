@@ -27,7 +27,7 @@ import GoogleReviews from './GoogleReviews.jsx'
    Country-awareness helpers for cross-market content cleanup.
    
    EAST_AFRICA_HUBS: hubs where Nairobi-specific content (Diamond
-   Plaza Parklands / Karen Hardy centre names, Kenya CBC in the
+   Plaza Parklands / Karen West centre names, Kenya CBC in the
    curricula list) is genuinely locally relevant. On all other
    hubs (Gulf, North Africa, East Asia, Southeast Asia, Southern
    Africa) that content is replaced with country-neutral operational
@@ -302,11 +302,11 @@ function CountryHub({
           <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14,marginBottom:32}}>
             {[
               {h:'Founder-led education company', p: EAST_AFRICA_HUBS.has(country.slug)
-                ? 'Founded 2018 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered education company operating two physical centres (Diamond Plaza Parklands HQ established 2022, Karen Hardy centre established 2023) alongside the online platform.'
+                ? 'Founded 2018 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered education company operating two physical centres (Diamond Plaza, Parklands head office established 2022, Karen West centre established 2023) alongside the online platform.'
                 : 'Founded 2018 by Alfred Ouko (BEd Mathematics & Physics). Smartious operates a full teaching team of 11 with two international-standard operational centres established 2022 and 2023. Not a marketplace, not a freelance network.'},
               {h: EAST_AFRICA_HUBS.has(country.slug) ? 'Two physical Nairobi centres' : 'Two operational centres',
                 p: EAST_AFRICA_HUBS.has(country.slug)
-                  ? 'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'
+                  ? 'Diamond Plaza, Parklands head office (established 2022) and Karen West centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'
                   : `Live teaching is delivered to ${country.name} families from two international-standard operational centres, established 2022 and 2023. Teachers work from professional academic facilities with accountability and infrastructure beyond marketplace or freelance models.`},
               {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
               {h:'40+ countries served', p: `Active students in ${country.name} and in more than 40 countries across ${REGION_LABELS[country.slug] || 'Africa, the Gulf, Europe and Asia'}. Verifiable through cross-country cohort interaction in live classes.`},
@@ -581,7 +581,7 @@ function CountryHub({
                   <li style={{marginBottom:6}}>Over six years supporting students through international curriculum pathways &mdash; Cambridge International (IGCSE and A-Level), Pearson Edexcel International, IB Diploma Programme, American Curriculum with AP, and homeschooling pathways.</li>
                   <li style={{marginBottom:6}}>Direct teaching experience in secondary-level Mathematics and Physics across multiple international curriculum boards.</li>
                   <li style={{marginBottom:6}}>{ EAST_AFRICA_HUBS.has(country.slug)
-                    ? "Leadership of curriculum development, teacher recruitment and academic standards across Smartious's two Nairobi-based physical centres (Diamond Plaza Parklands HQ and Karen Hardy) and online programmes."
+                    ? "Leadership of curriculum development, teacher recruitment and academic standards across Smartious's two Nairobi-based physical centres (Diamond Plaza, Parklands head office and Karen West) and online programmes."
                     : "Leadership of curriculum development, teacher recruitment and academic standards across Smartious's two international-standard operational centres and online programmes serving " + country.name + " families." }</li>
                   <li>Specialism in supporting students through university admissions to {country.founderUniversitySpecialism}.</li>
                 </ul>
