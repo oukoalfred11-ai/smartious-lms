@@ -4192,7 +4192,7 @@ export default function LandingPage() {
 
   if (page === 'virtual-school-ukraine') {
     metaTitle = 'Smartious — Online & Virtual School for Ukrainian Families | IB, IGCSE, Cambridge, Edexcel, OSSD 2026'
-    metaDesc  = 'Virtual school for Ukrainian families in-country and diaspora. Cambridge IGCSE, A-Level, Edexcel, IB Diploma, AP, Ontario OSSD via CCIS. Education continuity through displacement. Perfect EET/EAT time zones. Cambridge exams at Warsaw/Berlin/London. Polish + German university pathway with Ukrainian student scholarships. Discounted rates for refugee families. From USD 423/month.'
+    metaDesc  = 'Virtual school for Ukrainian families in-country and diaspora. Cambridge IGCSE, A-Level, Edexcel, IB Diploma, AP, Ontario OSSD via CCIS. Education continuity through displacement. Close EET/EAT time zones. Cambridge exams at Warsaw/Berlin/London. Polish + German university pathway with Ukrainian student scholarships. Discounted rates for refugee families. From USD 423/month.'
   }
   if (page === 'curriculum-detail' && currentCurriculum) {
     const c = CURRICULA.find(x => x.slug === currentCurriculum)
@@ -13999,7 +13999,7 @@ export default function LandingPage() {
                 </a>
               </div>
               <div style={{fontSize:13,color:'rgba(255,255,255,.7)',letterSpacing:'.02em'}}>
-                Distance learning fully legal &middot; Perfect EET/EAT time zones &middot; Discounted rates for refugee &amp; displaced families &middot; From USD 423/month personalized
+                Distance learning fully legal &middot; Close EET/EAT time zones &middot; Discounted rates for refugee &amp; displaced families &middot; From USD 423/month personalized
               </div>
             </div>
           </section>
@@ -14069,7 +14069,7 @@ export default function LandingPage() {
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:22}}>
                 {[
                   {n:'01', h:'Consistent curriculum across borders', p:'Family moving Kharkiv → Lviv → Warsaw → Berlin continues same Cambridge/IB curriculum with same teachers and cohort. Cross-country social continuity through repeated relocations.'},
-                  {n:'02', h:'Perfect EET / EAT time zone alignment', p:'Ukraine (EET UTC+2) and Nairobi (EAT UTC+3) same time zone in winter. Smartious 9 AM Kyiv delivery = 9 AM Nairobi teaching. Natural morning school-day timing.'},
+                  {n:'02', h:'Close EET / EAT time zone alignment', p:'Ukraine (EET UTC+2, EEST UTC+3 summer) is 1 hour behind Nairobi (EAT UTC+3) in winter and on the same time in summer. Smartious 9 AM Nairobi teaching = 8 AM Kyiv in winter, 9 AM in summer. Natural morning school-day timing.'},
                   {n:'03', h:'Complements free state VOS', p:'Smartious does NOT compete with free All-Ukrainian Online School (Всеукраїнська школа онлайн). Adds international pathway alongside free Ukrainian state curriculum. Many families use both.'},
                   {n:'04', h:'Distance learning fully legal', p:'Ukrainian Law "On Complete General Secondary Education" (2020) explicitly permits family education (сімейна освіта) and distance learning (дистанційне навчання). Martial law provisions expanded acceptance. No legal barriers.'},
                   {n:'05', h:'Polish + German scholarship pathway', p:'Cambridge A-Level opens Polish public universities with Ukrainian student scholarships (partial or full tuition) and German public universities (free for Ukrainians on temporary protection status).'},
@@ -14106,7 +14106,7 @@ export default function LandingPage() {
                   {q:'We are Ukrainian refugee family in Germany — how does the uni-assist pathway work?', a:'German public universities are free for Ukrainians on temporary protection status. Cambridge A-Level and IB Diploma are accepted via uni-assist for TU Munich, LMU Munich, Heidelberg, Humboldt Berlin, RWTH Aachen, TU Berlin, KIT Karlsruhe, Freiburg, and others.'},
                   {q:'Where do Ukrainian students sit Cambridge examinations?', a:'British Council Warsaw (primary for Polish diaspora), Berlin, London, Prague, Rome, Madrid, Toronto, plus US cities. British Council Kyiv when conditions permit. Smartious handles all registration logistics regardless of family location.'},
                   {q:'Are there discounts for Ukrainian refugee and internally displaced families?', a:'Yes. Discounted rates handled through consultation on case-by-case basis. Request via pricing page or consultation. A 10% sibling discount applies from the second child.'},
-                  {q:'How does time zone work for Ukrainian families?', a:'Ukraine (EET UTC+2, EEST UTC+3 summer) and Kenya (EAT UTC+3) same time zone in winter, 1 hour apart summer. Smartious 9 AM-12 PM Kyiv delivery = 9 AM-12 PM Nairobi teaching. Perfect timing.'},
+                  {q:'How does time zone work for Ukrainian families?', a:'Ukraine (EET UTC+2, EEST UTC+3 summer) is 1 hour behind Kenya (EAT UTC+3) in winter and on the same time in summer. Smartious 9 AM-12 PM Nairobi teaching = 8 AM-11 AM Kyiv in winter, 9 AM-12 PM in summer.'},
                   {q:'We are Grammarly / GitLab Ukraine / SoftServe / EPAM Ukraine tech family. Does Smartious support us?', a:'Yes. Ukrainian tech corporate rotational cycles supported through international postings without curriculum switching. Cross-country cohort provides social continuity through repeated moves.'},
                 ].map((f, i) => (
                   <details key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'0',overflow:'hidden'}}>

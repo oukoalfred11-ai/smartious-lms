@@ -366,7 +366,7 @@ export const GERMANY_CITIES = [
     ],
     whyChoose: [
       ['ISS Stuttgart fee arbitrage', 'Smartious from USD 5,076/year (~EUR 4,670/year) vs ISS Sindelfingen EUR 18,000-24,000/year — substantial fee savings.'],
-      ['Sixth Form pathway for 16+ students post-Schulpflicht'],
+      ['Sixth Form pathway for 16+ students post-Schulpflicht', 'German compulsory full-time schooling ends at around 16 in most Bundesländer, so check the rule that applies in Baden-Württemberg. Sixth Form students (Years 12-13, ages 16-18) may then pursue full Cambridge A-Level or IB Diploma via Smartious as their primary pathway, targeting UK universities via UCAS or US universities via the Common App.'],
       ['Automotive engineering pathway alignment', 'Cambridge A-Level Mathematics + Physics + Chemistry for automotive engineering at KIT Karlsruhe (Baden-Württemberg\'s premier engineering university adjacent), TU Munich, RWTH Aachen — plus Mercedes / Porsche / Bosch career pathway.'],
       ['Mercedes / Porsche / Bosch corporate rotation portability', 'Stuttgart automotive rotational cycles supported through global postings.'],
     ],
@@ -433,9 +433,9 @@ export const GERMANY_CITIES = [
     ],
     whyChoose: [
       ['ISD Düsseldorf fee arbitrage', 'Smartious from USD 5,076/year (~EUR 4,670/year) vs ISD Kaiserswerth EUR 20,000-26,000/year — substantial fee savings.'],
-      ['Sixth Form pathway for 16+ students post-Schulpflicht'],
+      ['Sixth Form pathway for 16+ students post-Schulpflicht', 'German compulsory full-time schooling ends at around 16 in most Bundesländer, so check the rule that applies in North Rhine-Westphalia. Sixth Form students (Years 12-13, ages 16-18) may then pursue full Cambridge A-Level or IB Diploma via Smartious as their primary pathway, targeting UK universities via UCAS or US universities via the Common App.'],
       ['Japanese corporate rotation portability', 'Panasonic Europe, Sharp Europe, Mitsubishi Europe rotational cycles supported through Düsseldorf → Tokyo → Osaka → Singapore → London postings.'],
-      ['Henkel / E.ON / Vodafone / Metro AG corporate rotation portability'],
+      ['Henkel / E.ON / Vodafone / Metro AG corporate rotation portability', 'Henkel, E.ON, Vodafone Deutschland and Metro AG rotational cycles supported without curriculum switching — the same Cambridge, IB, American or OSSD programme continues live online through onward postings.'],
       ['Rhine-Ruhr metro coverage', 'Düsseldorf serves broader Rhine-Ruhr metropolitan region (~11.4 million residents — Germany\'s largest metro) via live online — Cologne, Essen, Dortmund, Bochum, Duisburg families.'],
     ],
     growingReason: 'Düsseldorf (~620K city, ~11.4 million Rhine-Ruhr metropolitan region — Germany\'s largest metro, North Rhine-Westphalia capital) is Germany\'s Japanese business capital of Europe. Little Tokyo / Immermannstraße quarter concentrates Panasonic Europe HQ, Sharp Europe, Mitsubishi Europe, All Nippon Airways, Japan Airlines — ~11,000+ Japanese residents forming Europe\'s largest Japanese diaspora. Plus Henkel HQ, E.ON HQ, Vodafone Deutschland HQ (Telekom Rhine campus), Metro AG HQ, Rheinmetall HQ. International School of Düsseldorf (ISD Kaiserswerth) primary international school; Japanese International School Düsseldorf serves substantial Japanese business community.',
