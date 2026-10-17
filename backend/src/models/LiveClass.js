@@ -133,6 +133,15 @@ const liveClassSchema = new mongoose.Schema({
   extraLesson:    { type: Boolean, default: false },
   makeUpFor:      { type: mongoose.Schema.Types.ObjectId, ref: 'LiveClass', default: null },
 
+  // ── Cover while the teacher is on approved leave ──
+  // With a replacement teacher, teacherId is the cover teacher and
+  // originalTeacherId the absent one; without, needsCover flags the
+  // lesson for the Director of Studies. coverLeaveId undoes it if the
+  // leave is cancelled.
+  originalTeacherId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+  coverLeaveId:   { type: mongoose.Schema.Types.ObjectId, ref: 'TeacherLeaveRequest', default: null },
+  needsCover:     { type: Boolean, default: false, index: true },
+
   // ── Absence alerts to families ──
   // Students whose parents were told the student had not joined.
   absenceAlerted: { type: [String], default: [] },

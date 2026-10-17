@@ -486,4 +486,15 @@ router.patch('/me/email-prefs', authMiddleware, async (req, res) => {
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
 
+// ── Time zone (sent by the browser) ─────────────────────────────────
+router.patch('/me/timezone', authMiddleware, async (req, res) => {
+  try {
+    const tz = String((req.body && req.body.timezone) || '').trim().slice(0, 64);
+    try { new Intl.DateTimeFormat('en-US', { timeZone: tz }); } catch { return res.status(400).json({ success: false, message: 'Unknown time zone.' }); }
+    const User = require('../models/User');
+    await User.updateOne({ _id: req.user._id }, { $set: { timezone: tz } });
+    res.json({ success: true, data: { timezone: tz } });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
 module.exports = router;

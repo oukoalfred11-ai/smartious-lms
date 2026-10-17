@@ -19,6 +19,16 @@ const WHEN = new Intl.DateTimeFormat('en-GB', {
   weekday: 'long', day: 'numeric', month: 'long', hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Africa/Nairobi',
 })
 const when = (d) => (d ? WHEN.format(new Date(d)) + ' (Nairobi time)' : '')
+// Nairobi time, plus the family's own time when they live elsewhere.
+function whenFor(d, tz) {
+  if (!d) return ''
+  const base = when(d)
+  if (!tz || tz === 'Africa/Nairobi') return base
+  try {
+    const local = new Intl.DateTimeFormat('en-GB', { weekday: 'short', hour: 'numeric', minute: '2-digit', hour12: true, timeZone: tz }).format(new Date(d))
+    return `${base} — ${local} your time`
+  } catch { return base }
+}
 const subjectOf = (cls) => cls.subject || cls.title || 'Lesson'
 
 function page(title, lines, cta) {
@@ -44,7 +54,7 @@ async function toFamilies(studentIds, build, category = 'classUpdates') {
   const t = getTransporter()
   if (!t || !studentIds || !studentIds.length) return 0
   const students = await User.find({ _id: { $in: studentIds }, role: 'student' })
-    .select('firstName lastName email emailPrefs parentEmail linkedParents parentId parentName onBreak').lean()
+    .select('firstName lastName email emailPrefs parentEmail linkedParents parentId parentName onBreak timezone').lean()
   let sent = 0
   for (const st of students) {
     try {
@@ -61,11 +71,11 @@ async function toFamilies(studentIds, build, category = 'classUpdates') {
 /** A lesson was moved to a new time. */
 function lessonMoved(cls, oldAt) {
   return toFamilies(cls.assignedStudents, (st) => ({
-    subject: `Lesson moved — ${subjectOf(cls)}, now ${when(cls.scheduledAt)}`,
+    subject: `Lesson moved — ${subjectOf(cls)}, now ${whenFor(cls.scheduledAt, st.timezone)}`,
     html: page('A lesson has moved', [
       `${esc(st.firstName)}'s <strong>${esc(subjectOf(cls))}</strong> lesson has been moved.`,
-      oldAt ? `Was: ${esc(when(oldAt))}` : '',
-      `<strong>Now: ${esc(when(cls.scheduledAt))}</strong>`,
+      oldAt ? `Was: ${esc(whenFor(oldAt, st.timezone))}` : '',
+      `<strong>Now: ${esc(whenFor(cls.scheduledAt, st.timezone))}</strong>`,
       'The reminder will come 30 minutes before the new time.',
     ].filter(Boolean), { href: PORTAL() + '/student', label: 'Open the student portal' }),
   })).catch(e => console.error('[lesson notice] moved', e.message))
@@ -76,7 +86,7 @@ function lessonCancelled(cls, { reason = '', notHeld = false } = {}) {
   return toFamilies(cls.assignedStudents, (st) => ({
     subject: `${notHeld ? 'Lesson did not take place' : 'Lesson cancelled'} — ${subjectOf(cls)}, ${when(cls.scheduledAt)}`,
     html: page(notHeld ? 'A lesson did not take place' : 'A lesson has been cancelled', [
-      `${esc(st.firstName)}'s <strong>${esc(subjectOf(cls))}</strong> lesson on ${esc(when(cls.scheduledAt))} ${notHeld ? 'did not take place' : 'is cancelled'}.`,
+      `${esc(st.firstName)}'s <strong>${esc(subjectOf(cls))}</strong> lesson on ${esc(whenFor(cls.scheduledAt, st.timezone))} ${notHeld ? 'did not take place' : 'is cancelled'}.`,
       reason ? `Reason: ${esc(reason)}` : '',
       'If a make-up lesson is arranged you will receive its time by email.',
     ].filter(Boolean), { href: PORTAL() + '/student', label: 'Open the student portal' }),
@@ -89,7 +99,7 @@ function lessonAdded(cls, { makeUp = false } = {}) {
     subject: `${makeUp ? 'Make-up lesson' : 'Extra lesson'} — ${subjectOf(cls)}, ${when(cls.scheduledAt)}`,
     html: page(makeUp ? 'A make-up lesson is booked' : 'An extra lesson is booked', [
       `${esc(st.firstName)} has ${makeUp ? 'a make-up' : 'an extra'} <strong>${esc(subjectOf(cls))}</strong> lesson.`,
-      `<strong>${esc(when(cls.scheduledAt))}</strong>, ${cls.durationMins || 60} minutes.`,
+      `<strong>${esc(whenFor(cls.scheduledAt, st.timezone))}</strong>, ${cls.durationMins || 60} minutes.`,
       cls.syllabusTopicName ? `Topic: ${esc(cls.syllabusTopicName)}${cls.syllabusSubtopicName ? ': ' + esc(cls.syllabusSubtopicName) : ''}` : '',
     ].filter(Boolean), { href: PORTAL() + '/student', label: 'Open the student portal' }),
   })).catch(e => console.error('[lesson notice] added', e.message))
@@ -110,7 +120,7 @@ async function absenceAlert(cls, student) {
       from: FROM(), to: r.to.join(', '),
       subject: `${student.firstName} has not joined ${subjectOf(cls)} — started ${WHEN.format(new Date(cls.scheduledAt))}`,
       html: page(`${student.firstName} has not joined the lesson`, [
-        `<strong>${esc(student.firstName)} ${esc(student.lastName || '')}</strong> has not joined today's <strong>${esc(subjectOf(cls))}</strong> lesson, which started at ${esc(when(cls.scheduledAt))}.`,
+        `<strong>${esc(student.firstName)} ${esc(student.lastName || '')}</strong> has not joined today's <strong>${esc(subjectOf(cls))}</strong> lesson, which started at ${esc(whenFor(cls.scheduledAt, student.timezone))}.`,
         'Please make sure they join now. If they cannot attend, a parent or guardian should tell the Academic office (+254 182 071 920, call or WhatsApp, or academics@smartioushomeschool.com).',
         '<span style="font-size:12px;color:#6B6B6B">Attendance is the responsibility of the family; you can see every lesson and its attendance in the parent portal.</span>',
       ], { href: PORTAL() + '/parent', label: 'Open the parent portal' }),
@@ -127,4 +137,4 @@ async function academicAlert(subject, lines) {
   catch (e) { console.error('[academic alert]', e.message) }
 }
 
-module.exports = { lessonMoved, lessonCancelled, lessonAdded, absenceAlert, academicAlert, when }
+module.exports = { lessonMoved, lessonCancelled, lessonAdded, absenceAlert, academicAlert, when, whenFor }

@@ -182,3 +182,20 @@ test('clashes: same teacher or a shared student, overlapping times, same day', (
   assert.deepEqual(c.map(x => [x.entry._id, x.who]), [['o1', 'teacher'], ['o2', 'student']])
   assert.deepEqual(c[1].studentIds, ['s2'])
 })
+
+test('school closures: no lessons on holiday days, existing ones removed', () => {
+  const closed = S.closedDaySet([{ start: '2026-10-20', end: '2026-10-21' }, { start: '2026-12-25' }])
+  assert.ok(closed.has('2026-10-20') && closed.has('2026-10-21') && closed.has('2026-12-25'))
+  assert.ok(!closed.has('2026-10-22'))
+  assert.deepEqual(S.occurrencesFor(entry, NOW, 7, { closedDays: closed }).map(iso), ['2026-10-27T13:00:00.000Z'])
+  const existing = [{ _id: 'h', scheduledAt: new Date('2026-10-20T13:00:00Z'), originalScheduledAt: new Date('2026-10-20T13:00:00Z'), status: 'scheduled' }]
+  const p = S.planEntryOccurrences(entry, existing, NOW, { closedDays: closed })
+  assert.deepEqual(p.remove, ['h'])
+  assert.deepEqual(p.create.map(iso), ['2026-10-27T13:00:00.000Z'])
+})
+
+test('leave covers whole days, to the end of the last day in Nairobi', () => {
+  const { leaveWindow } = require('../src/lib/leaveCover')
+  const w = leaveWindow({ leaveStartDate: new Date('2026-10-20T00:00:00Z'), leaveEndDate: new Date('2026-10-22T00:00:00Z') })
+  assert.equal(iso(w.to), '2026-10-22T20:59:59.000Z')
+})

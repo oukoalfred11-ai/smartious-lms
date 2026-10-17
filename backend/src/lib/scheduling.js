@@ -6,7 +6,7 @@
  * routes and the class reminders call these functions and do the I/O.
  */
 const {
-  DEFAULT_TZ, resolveTz, zonedParts, zonedTimeToUtc, sameZonedDay,
+  DEFAULT_TZ, resolveTz, zonedParts, zonedTimeToUtc, sameZonedDay, zonedDayKey,
 } = require('./schoolTime');
 
 const HORIZON_DAYS = 7;
@@ -25,7 +25,7 @@ function entryTz(entry) {
  * meets: walk the next HORIZON_DAYS calendar days of the entry's zone;
  * each day whose weekday matches yields startTime on that day.
  */
-function occurrencesFor(entry, now, horizonDays = HORIZON_DAYS) {
+function occurrencesFor(entry, now, horizonDays = HORIZON_DAYS, { closedDays = null } = {}) {
   const [h, m] = String(entry.startTime || '').split(':').map(Number);
   if (!(h >= 0) || !(m >= 0)) return [];
   const tz = entryTz(entry);
@@ -39,6 +39,8 @@ function occurrencesFor(entry, now, horizonDays = HORIZON_DAYS) {
     if (when <= now) continue;
     if (entry.effectiveFrom && when < new Date(entry.effectiveFrom)) continue;
     if (entry.effectiveTo && when > new Date(entry.effectiveTo)) continue;
+    // School holidays and breaks: no lesson (days are Nairobi calendar days).
+    if (closedDays && closedDays.has(zonedDayKey(when, DEFAULT_TZ))) continue;
     out.push(when);
   }
   return out;
@@ -80,9 +82,9 @@ const isException = (cls) => cls.detached === true || cls.status === 'cancelled'
  *   backfill: {id, when}[],         classes missing originalScheduledAt
  * }}
  */
-function planEntryOccurrences(entry, existing, now) {
+function planEntryOccurrences(entry, existing, now, { closedDays = null } = {}) {
   const tz = entryTz(entry);
-  const desired = occurrencesFor(entry, now);
+  const desired = occurrencesFor(entry, now, HORIZON_DAYS, { closedDays });
   const exceptions = existing.filter(isException);
   const regular = existing.filter(x => !isException(x));
 
@@ -382,6 +384,17 @@ function absentStudents(cls, { joinedIds = [], pausedIds = [] } = {}) {
   return out;
 }
 
+/** The set of "YYYY-MM-DD" days covered by closures [{start, end}]. */
+function closedDaySet(closures) {
+  const out = new Set();
+  for (const c of closures || []) {
+    if (!c || !c.start) continue;
+    const a = new Date(c.start + 'T00:00:00Z'), b = new Date((c.end || c.start) + 'T00:00:00Z');
+    for (let d = a, n = 0; d <= b && n < 400; d = new Date(d.getTime() + 864e5), n++) out.add(d.toISOString().slice(0, 10));
+  }
+  return out;
+}
+
 // ── Clashes ───────────────────────────────────────────────────
 
 const minsOf = (hhmm) => { const [h, m] = String(hhmm || '').split(':').map(Number); return h * 60 + m; };
@@ -439,6 +452,6 @@ module.exports = {
   REMINDER_LEAD_MIN, reminderWindow, isReminderDue, reminderStudents, classTypeLabel,
   closeCutover, isHeldClass, needsClosing, consumesTopic, consumesTopicFilter, taughtFilter,
   classOutcome, closeUpdate, OUTCOMES,
-  ABSENCE_ALERT_AFTER_MIN, absenceAlertDue, absentStudents, findClashes,
+  ABSENCE_ALERT_AFTER_MIN, absenceAlertDue, absentStudents, findClashes, closedDaySet,
   serialize,
 };

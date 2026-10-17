@@ -451,7 +451,7 @@ async function sendClassReminders() {
     status: 'scheduled', reminderSentAt: null, scheduledAt: { $gte: from, $lte: to },
   })
     .populate('teacherId', 'firstName lastName email')
-    .populate('assignedStudents', 'firstName lastName parentEmail linkedParents parentId email parentName onBreak')
+    .populate('assignedStudents', 'firstName lastName parentEmail linkedParents parentId email parentName onBreak timezone')
     .lean()
 
   let sent = 0
@@ -534,7 +534,8 @@ function buildClassReminderEmail(student, cls) {
   const note = student ? `This reminder has been sent to ${escHtml(student.firstName)} and to their parents.` : 'Please open the classroom a few minutes early.'
   const portal = student ? 'https://smartioushomeschool.com/student' : 'https://smartioushomeschool.com/teacher'
   const rows = [['Subject', `<strong>${escHtml(classHeadline(cls))}</strong>`], ['Type', typeLabel],
-    ['Time', `<strong>${fmtTime(zonedHHMM(start, tz))} – ${fmtTime(zonedHHMM(end, tz))}</strong> (Nairobi time)`],
+    ['Time', `<strong>${fmtTime(zonedHHMM(start, tz))} – ${fmtTime(zonedHHMM(end, tz))}</strong> (Nairobi time)` +
+      (student && student.timezone && student.timezone !== tz ? `<br>${fmtTime(zonedHHMM(start, student.timezone))} – ${fmtTime(zonedHHMM(end, student.timezone))} your time` : '')],
     ['Teacher', escHtml(teacherName)], ['Day', day]]
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
 <body style="margin:0;padding:0;background:#FDFAF4;font-family:sans-serif;">

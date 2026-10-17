@@ -551,6 +551,35 @@ router.get('/staff/unconfirmed', auth, requireRole(...STAFF_ROLES), async (req, 
   }
 });
 
+// Lessons flagged as needing cover (teacher on leave without a replacement).
+router.get('/staff/needs-cover', auth, requireRole(...STAFF_ROLES), async (req, res) => {
+  try {
+    const classes = await LiveClass.find({ needsCover: true, status: 'scheduled', scheduledAt: { $gt: new Date() } })
+      .sort({ scheduledAt: 1 }).limit(300)
+      .populate('teacherId', 'firstName lastName').populate('assignedStudents', 'firstName lastName')
+      .select('title subject grade scheduledAt durationMins teacherId assignedStudents').lean();
+    res.json({ success:true, data: { classes } });
+  } catch (e) { res.status(500).json({ success:false, message:'Failed to load lessons needing cover.' }); }
+});
+
+// Staff: hand one lesson to a cover teacher.
+router.post('/:id/cover', auth, requireRole(...STAFF_ROLES), async (req, res) => {
+  try {
+    const { teacherId } = req.body || {};
+    if (!mongoose.isValidObjectId(req.params.id) || !mongoose.isValidObjectId(teacherId))
+      return res.status(400).json({ success:false, message:'Choose a cover teacher.' });
+    const cover = await User.findOne({ _id: teacherId, role: 'teacher' }).select('_id').lean();
+    if (!cover) return res.status(400).json({ success:false, message:'That user is not a teacher.' });
+    const lc = await LiveClass.findById(req.params.id);
+    if (!lc) return res.status(404).json({ success:false, message:'Class not found.' });
+    if (!lc.originalTeacherId && String(lc.teacherId) !== String(teacherId)) lc.originalTeacherId = lc.teacherId;
+    lc.teacherId = teacherId;
+    lc.needsCover = false;
+    await lc.save();
+    res.json({ success:true, message:'Cover teacher assigned.', data: { liveClass: lc } });
+  } catch (e) { res.status(500).json({ success:false, message:'Failed to assign cover.' }); }
+});
+
 // ═══════════════════════════════════════════════════════════
 // START
 // ═══════════════════════════════════════════════════════════
