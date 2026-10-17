@@ -665,6 +665,12 @@ export function definePractical(spec) {
             ...derived.map(d => { let v; try { v = d.value(row, cs, r.settings) } catch { v = NaN } return fmtNum(v, d.decimals) })]
         }) })
       }
+      if (s.hands && zeroInstruments.length) {
+        tables.push({ title: 'Zero errors', columns: ['Instrument', 'Zero error'], rows: zeroInstruments.map(id => {
+          const r = allReadings.find(x => x.instrument === id)
+          return [apparatusName(id) + ' / ' + r.unit, s.hands.zero[id] ? fmtRes(s.hands.zero[id].value, r.resolution) : 'not checked']
+        }) })
+      }
       return tables
     },
 

@@ -46,6 +46,11 @@ function ohms(lab, { dispatch, onSelect, onHover }) {
     ps.add(b); lab.makePickable(b, { kind, label: kind === 'up' ? 'Increase the supply voltage by 0.5 V' : 'Decrease the supply voltage by 0.5 V' })
   }
   button('▲', 0.035, 'up'); button('▼', 0.075, 'down')
+  // Hands-on bench: how warm the resistor is, and whether the bench is tidied away.
+  const temp = E.labelPlane('', { w: 0.12, h: 0.026, size: 30 })
+  temp.position.set(0.2, BENCH_Y + 0.002, 0.2); temp.rotation.x = -Math.PI / 2; temp.visible = false
+  lab.add(temp)
+  let tempText = ''
   let supplyV = 0
   lab.setHandlers({ ...w.handlers, hover: (p) => onHover(p?.label || null) })
 
@@ -65,6 +70,12 @@ function ohms(lab, { dispatch, onSelect, onHover }) {
       ps.userData.setDisplay?.(trip ? 'TRIP' : view.supplyV.toFixed(1) + ' V')
       am.userData.setDisplay?.(view.meters.A1 == null ? '----' : view.meters.A1.toFixed(3))
       vm.userData.setDisplay?.(view.meters.V1 == null ? '----' : view.meters.V1.toFixed(2))
+      if (view.bench === 2 && view.hands) {
+        const h = view.hands
+        const t = h.tidy ? 'Tidied away' : h.hot ? 'Resistor HOT' : h.heatFrac > 0.02 ? 'Resistor warm' : h.settled ? 'Readings steady' : 'Settling…'
+        temp.visible = true
+        if (t !== tempText) { temp.userData.setText(t, h.hot ? { bg: '#C62828', fg: '#FFFFFF' } : h.heatFrac > 0.02 ? { bg: '#FFE0B2', fg: '#7A2E00' } : {}); tempText = t }
+      }
       lab.invalidate()
     },
     view: { pos: [0, 1.5, 0.8], target: [0, 0.94, 0] },
