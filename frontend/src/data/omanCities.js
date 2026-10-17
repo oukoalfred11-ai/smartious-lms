@@ -12,7 +12,7 @@
 // hour ahead of EAT), tuition VAT-exempt (5% general VAT since
 // 2021), Cambridge dominant among 15-20 British-curriculum schools
 // nationwide, and Oman being the cheapest GCC country for
-// international schooling yet still 2-6× Smartious fee tier.
+// international schooling yet still well above the Smartious fee tier.
 // ═══════════════════════════════════════════════════════════════════
 
 export const OMAN_CITIES = [
