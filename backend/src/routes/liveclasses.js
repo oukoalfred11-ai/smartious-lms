@@ -101,7 +101,7 @@ const STAFF_ROLES = ['admin', 'dos', 'ops_manager'];
 // ═══════════════════════════════════════════════════════════
 // CREATE — teacher schedules a new class
 // ═══════════════════════════════════════════════════════════
-router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
+router.post('/', auth, requireRole('teacher', ...STAFF_ROLES), async (req, res) => {
   try {
     const {
       title, description = '',
@@ -115,7 +115,12 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
       notes = '',
       syllabusTopicName = '',
       syllabusSubtopicName = '',
+      extra = false,
+      makeUpFor = null,
     } = req.body;
+    // Extra and make-up lessons a teacher adds by hand. They live in the
+    // Smartious classroom (so attendance is recorded) unless a link is given.
+    const isExtra = !!extra || mongoose.isValidObjectId(makeUpFor);
 
     if (!title || !title.trim())
       return res.status(400).json({ success:false, message:'Title is required.' });
@@ -127,7 +132,7 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
       return res.status(400).json({ success:false, message:'Invalid classroom mode.' });
     // A meeting link is only required for link-mode classes; native
     // classes are joined at /classroom/:id inside the platform.
-    if (classroomMode === 'link' && (!meetingLink || !meetingLink.trim()))
+    if (classroomMode === 'link' && !isExtra && (!meetingLink || !meetingLink.trim()))
       return res.status(400).json({ success:false, message:'Meeting link is required.' });
 
     const startDate = new Date(scheduledAt);
@@ -153,21 +158,31 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
     // ONE SYSTEM: the timetable dictates classes. Lessons are
     // materialized from timetable entries by the reconciler and cannot
     // be slotted directly. Clubs, events and assemblies remain manual.
-    if (wantedKind === 'lesson') {
+    if (wantedKind === 'lesson' && !isExtra) {
       return res.status(400).json({
         success: false,
         message: 'Lessons are created from the timetable. Add or edit your timetable slot and the class will appear automatically for the coming week.',
       });
     }
+    let makeUpOf = null;
+    if (mongoose.isValidObjectId(makeUpFor)) {
+      makeUpOf = await LiveClass.findById(makeUpFor).select('teacherId subject').lean();
+      if (!makeUpOf) return res.status(404).json({ success:false, message:'The lesson this makes up for was not found.' });
+      if (!STAFF_ROLES.includes(req.user.role) && String(makeUpOf.teacherId) !== String(req.user._id))
+        return res.status(403).json({ success:false, message:'You can only make up your own lessons.' });
+    }
+    const mode = isExtra && !(meetingLink && meetingLink.trim()) ? 'native' : classroomMode;
     const liveClass = await LiveClass.create({
       kind: ['lesson','club','competition','event','assembly'].includes(kind) ? kind : 'lesson',
+      extraLesson: isExtra,
+      makeUpFor: makeUpOf ? makeUpOf._id : null,
       title: title.trim(),
       description: description.trim(),
       subject, curriculum, grade,
       scheduledAt: startDate,
       durationMins: dur,
-      classroomMode,
-      meetingLink: classroomMode === 'native' ? '' : meetingLink.trim(),
+      classroomMode: mode,
+      meetingLink: mode === 'native' ? '' : meetingLink.trim(),
       teacherId: req.user._id,
       assignedStudents: validStudentIds,
       preparationLessonId: mongoose.isValidObjectId(preparationLessonId) ? preparationLessonId : null,
@@ -180,6 +195,10 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
     // ── Respond immediately, then email in the background ──
     res.status(201).json({ success:true, message:'Live class scheduled.', data: { liveClass } });
 
+    if (isExtra) {
+      require('../lib/lessonNotices').lessonAdded(liveClass, { makeUp: !!makeUpOf });
+      return;
+    }
     // Gather teacher name for the email
     const teacherName = `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim() || 'Your Teacher';
 
@@ -328,8 +347,9 @@ router.patch('/:id', auth, requireRole('teacher', 'admin', 'dos', 'ops_manager')
     if (!STAFF_ROLES.includes(req.user.role) && String(lc.teacherId) !== String(req.user._id))
       return res.status(403).json({ success:false, message:'Not your class.' });
 
-    // Capture old link before any updates so we can detect a change
+    // Capture old link and time before any updates so we can detect a change
     const oldMeetingLink = lc.meetingLink;
+    const oldAt = lc.scheduledAt;
 
     // One-off change to a timetable-born class: detach it so the
     // reconciler treats it as an exception rather than reverting it.
@@ -365,6 +385,12 @@ router.patch('/:id', auth, requireRole('teacher', 'admin', 'dos', 'ops_manager')
     await saveClass(lc);
 
     res.json({ success:true, message:'Class updated.', data: { liveClass: lc } });
+
+    // A lesson moved to a new time: the family is told straight away.
+    if (oldAt && lc.scheduledAt && Math.abs(new Date(lc.scheduledAt) - new Date(oldAt)) > 60000
+        && new Date(lc.scheduledAt) > new Date() && lc.status === 'scheduled') {
+      require('../lib/lessonNotices').lessonMoved(lc, oldAt);
+    }
 
     // ── Re-notify students only if the meeting link actually changed ──
     const newMeetingLink = lc.meetingLink;
@@ -418,13 +444,110 @@ router.delete('/:id', auth, requireRole('teacher', 'admin', 'dos', 'ops_manager'
       await saveClass(lc);
       // The cancelled class gives its topic back to the plan.
       require('../lib/lessonPlan').restampForEntryId(lc.timetableEntryId);
-      return res.json({ success: true, message: 'This occurrence is cancelled. The weekly timetable slot continues from next week.' });
+      if (new Date(lc.scheduledAt) > new Date()) require('../lib/lessonNotices').lessonCancelled(lc, { reason: (req.body && req.body.reason) || '' });
+      return res.json({ success: true, message: 'This occurrence is cancelled and the family has been told. The weekly timetable slot continues from next week.' });
     }
     await lc.deleteOne();
     res.json({ success:true, message:'Class deleted.' });
   } catch (e) {
     console.error('[liveclasses delete]', e.message);
     res.status(500).json({ success:false, message:'Failed to delete class.' });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+// CLOSE THE LESSON — the teacher records what happened
+// ═══════════════════════════════════════════════════════════
+// taught (topic, full/partial) · student_absent · not_held (reason).
+// Only a closed lesson counts as taught: it moves the scheme of work on
+// and triggers homework. Not held = cancelled after the fact (the family
+// is told, the topic returns to the plan, nobody is marked absent).
+router.post('/:id/close', auth, requireRole('teacher', ...STAFF_ROLES), async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id))
+      return res.status(400).json({ success:false, message:'Invalid class id.' });
+    const lc = await LiveClass.findById(req.params.id);
+    if (!lc) return res.status(404).json({ success:false, message:'Class not found.' });
+    if (!STAFF_ROLES.includes(req.user.role) && String(lc.teacherId) !== String(req.user._id))
+      return res.status(403).json({ success:false, message:'Not your class.' });
+    if (new Date(lc.scheduledAt) > new Date())
+      return res.status(400).json({ success:false, message:'A lesson can be closed once it has started.' });
+    if (lc.status === 'cancelled' && lc.outcome !== 'not_held')
+      return res.status(400).json({ success:false, message:'This lesson was cancelled in advance.' });
+
+    const { closeUpdate } = require('../lib/scheduling');
+    const { error, update } = closeUpdate(req.body || {}, { userId: req.user._id });
+    if (error) return res.status(400).json({ success:false, message: error });
+    const wasNotHeld = lc.outcome === 'not_held';
+    Object.assign(lc, update);
+    if (update.outcome === 'taught' && !lc.coveredTopic) {
+      lc.coveredTopic = lc.syllabusTopicName || '';
+      lc.coveredSubtopic = lc.syllabusSubtopicName || '';
+    }
+    if (update.outcome === 'not_held') {
+      lc.status = 'cancelled';
+      lc.cancelledAt = lc.cancelledAt || new Date();
+      lc.cancelReason = update.notHeldReason;
+      rememberOccurrence(lc);
+    } else {
+      lc.status = 'ended';
+      lc.endedAt = lc.endedAt || new Date();
+      lc.autoEnded = false;
+    }
+    await saveClass(lc);
+    res.json({ success:true, message:'Lesson closed.', data: { liveClass: lc } });
+
+    // Side effects after the response.
+    if (lc.timetableEntryId) require('../lib/lessonPlan').restampForEntryId(lc.timetableEntryId);
+    if (update.outcome === 'not_held' && !wasNotHeld) require('../lib/lessonNotices').lessonCancelled(lc, { reason: update.notHeldReason, notHeld: true });
+    if (update.outcome === 'taught' && !lc.autoHomeworkGeneratedAt) {
+      try { require('../services/autoHomeworkCron').processEndedClasses({ classId: lc._id }).catch(e => console.error('[close] homework', e.message)); }
+      catch (e) { console.error('[close] homework', e.message); }
+    }
+  } catch (e) {
+    console.error('[liveclasses close]', e.message);
+    res.status(500).json({ success:false, message:'Failed to close the lesson.' });
+  }
+});
+
+// Lessons the teacher still has to close (past, not cancelled, no outcome).
+router.get('/teacher/to-close', auth, requireRole('teacher', ...STAFF_ROLES), async (req, res) => {
+  try {
+    const { closeCutover } = require('../lib/scheduling');
+    const q = {
+      kind: { $in: ['lesson', null] }, status: { $ne: 'cancelled' }, outcome: null,
+      scheduledAt: { $gte: closeCutover(), $lte: new Date() },
+    };
+    if (!STAFF_ROLES.includes(req.user.role) || req.query.mine === '1') q.teacherId = req.user._id;
+    const classes = await LiveClass.find(q).sort({ scheduledAt: -1 }).limit(100)
+      .populate('assignedStudents', 'firstName lastName')
+      .populate('preparationLessonId', 'title')
+      .select('title subject grade scheduledAt durationMins assignedStudents syllabusTopicName syllabusSubtopicName preparationLessonId timetableEntryId teacherId status')
+      .lean();
+    res.json({ success:true, data: { classes } });
+  } catch (e) {
+    console.error('[liveclasses to-close]', e.message);
+    res.status(500).json({ success:false, message:'Failed to load lessons to close.' });
+  }
+});
+
+// For the Director of Studies: lessons left unconfirmed for over 24 hours.
+router.get('/staff/unconfirmed', auth, requireRole(...STAFF_ROLES), async (req, res) => {
+  try {
+    const { closeCutover } = require('../lib/scheduling');
+    const hours = Math.max(1, Math.min(24 * 30, Number(req.query.hours) || 24));
+    const classes = await LiveClass.find({
+      kind: { $in: ['lesson', null] }, status: { $ne: 'cancelled' }, outcome: null,
+      scheduledAt: { $gte: closeCutover(), $lte: new Date(Date.now() - hours * 3600000) },
+    }).sort({ scheduledAt: 1 }).limit(300)
+      .populate('teacherId', 'firstName lastName email')
+      .populate('assignedStudents', 'firstName lastName')
+      .select('title subject grade scheduledAt durationMins assignedStudents teacherId syllabusTopicName syllabusSubtopicName')
+      .lean();
+    res.json({ success:true, data: { classes, hours } });
+  } catch (e) {
+    console.error('[liveclasses unconfirmed]', e.message);
+    res.status(500).json({ success:false, message:'Failed to load unconfirmed lessons.' });
   }
 });
 
@@ -485,6 +608,7 @@ router.post('/:id/cancel', auth, requireRole('teacher', ...STAFF_ROLES), async (
     await saveClass(lc);
     res.json({ success:true, message:'Class cancelled.', data: { liveClass: lc } });
     if (lc.timetableEntryId) require('../lib/lessonPlan').restampForEntryId(lc.timetableEntryId);
+    if (new Date(lc.scheduledAt) > new Date()) require('../lib/lessonNotices').lessonCancelled(lc, { reason: lc.cancelReason });
   } catch (e) {
     console.error('[liveclasses cancel]', e.message);
     res.status(500).json({ success:false, message:'Failed to cancel class.' });

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { useAuth, api } from '../../../../context/ctx.jsx'
 import { TOKENS } from '../shared/tokens.js'
 import { DOSSpinner, PSection } from '../shared/ui.jsx'
+import { LessonsToClose } from '../../../../components/lessons/LessonControl.jsx'
 
 export function DOSAnalyticsModule({ toast, refreshKey }) {
   const [overview, setOverview]   = useState(null)
@@ -1058,6 +1059,9 @@ export function DOSTimetableModule({ toast, refreshKey }) {
     <div>
       <PSection tag="Dean of Studies" title="Timetable" em="Manager"
         sub="The timetable dictates classes: every slot here creates the real lessons for the coming week, automatically, until edited." />
+
+      {/* Lessons teachers have not closed for over 24 hours */}
+      <div style={{ margin: '10px 0' }}><LessonsToClose toast={toast} staff /></div>
 
       {/* Stats */}
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', margin: '10px 0 4px' }}>

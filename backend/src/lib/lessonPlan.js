@@ -11,7 +11,7 @@ const TimetableEntry = require('../models/TimetableEntry');
 const LiveClass = require('../models/LiveClass');
 const Lesson = require('../models/Lesson');
 const {
-  groupKey, orderLessons, subtopicItems, stampKey, stampFor,
+  groupKey, orderLessons, subtopicItems, stampKey, stampFor, taughtFilter,
 } = require('./scheduling');
 
 /** Published lessons of a subject in spine order, each with its topic name. */
@@ -51,10 +51,11 @@ async function loadPlan(entry) {
   const lessons = await loadPublishedLessons(entry.subjectId);
   if (!lessons.length) return loadSubtopicPlan(entry);
   const members = await groupEntries(entry);
-  // Taught = given to a class that has already started and was not cancelled.
+  // Taught = closed by the teacher as taught in full (or, before the
+  // close-the-lesson cutover, any past lesson that was not cancelled).
   const usedIds = await LiveClass.distinct('preparationLessonId', {
     timetableEntryId: { $in: members.map(m => m._id) }, preparationLessonId: { $ne: null },
-    status: { $ne: 'cancelled' }, scheduledAt: { $lte: new Date() },
+    ...taughtFilter(),
   });
   const usedSet = new Set(usedIds.map(String));
   const orderSource = members.find(m => Array.isArray(m.lessonOrder) && m.lessonOrder.length) || entry;
@@ -77,7 +78,7 @@ async function loadSubtopicPlan(entry) {
   const stamped = await LiveClass.find({
     timetableEntryId: { $in: members.map(m => m._id) },
     syllabusSubtopicName: { $nin: [null, ''] },
-    status: { $ne: 'cancelled' }, scheduledAt: { $lte: new Date() },
+    ...taughtFilter(),
   }).select('syllabusTopicName syllabusSubtopicName').lean();
   const usedKeys = new Set(stamped.map(x => stampKey(x.syllabusTopicName, x.syllabusSubtopicName)));
   const os = members.find(m => Array.isArray(m.topicPlanOrder) && m.topicPlanOrder.length);

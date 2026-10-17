@@ -50,6 +50,27 @@ const { reconcileSoon } = require('../lib/timetableMaterializer');
 // Staff who may edit any slot (teachers edit the slots they teach or created).
 const SLOT_ADMIN_ROLES = ['admin', 'dos', 'ops_manager'];
 
+// Clash check for a slot being created or edited: the same teacher, or
+// a shared student, already has an overlapping weekly slot. The client
+// may resend with allowClash: true after the user confirms.
+async function clashMessage(candidate) {
+  const { findClashes } = require('../lib/scheduling');
+  const or = [{ teacherId: candidate.teacherId }];
+  if ((candidate.assignedStudents || []).length) or.push({ assignedStudents: { $in: candidate.assignedStudents } });
+  const others = await TimetableEntry.find({ isActive: true, dayOfWeek: candidate.dayOfWeek, $or: or })
+    .select('title subject dayOfWeek startTime endTime teacherId assignedStudents isActive').lean();
+  const clashes = findClashes(candidate, others);
+  if (!clashes.length) return null;
+  const c = clashes[0];
+  const what = `${c.entry.subject || c.entry.title} ${c.entry.dayOfWeek} ${c.entry.startTime}–${c.entry.endTime}`;
+  return {
+    message: c.who === 'teacher'
+      ? `This overlaps the teacher's slot ${what}.`
+      : `This overlaps ${c.studentIds.length > 1 ? c.studentIds.length + ' students\'' : 'a student\'s'} slot ${what}.`,
+    clashes: clashes.map(x => ({ id: x.entry._id, who: x.who, subject: x.entry.subject, dayOfWeek: x.entry.dayOfWeek, startTime: x.entry.startTime, endTime: x.entry.endTime, studentIds: x.studentIds })),
+  };
+}
+
 // Sort entries by day-of-week then start time
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 function sortBySlot(a, b) {
@@ -164,6 +185,14 @@ router.post('/', auth, requireRole('teacher', ...SLOT_ADMIN_ROLES), async (req, 
       return fail(res, 403, 'Teachers can only create timetable entries for themselves.');
     }
 
+    if (!b.allowClash) {
+      const clash = await clashMessage({
+        teacherId, dayOfWeek: b.dayOfWeek, startTime: b.startTime, endTime: b.endTime,
+        assignedStudents: Array.isArray(b.assignedStudents) ? b.assignedStudents.filter(id => mongoose.isValidObjectId(id)) : [],
+      });
+      if (clash) return res.status(409).json({ success: false, clash: true, message: clash.message + ' Save anyway?', data: clash });
+    }
+
     const entry = await TimetableEntry.create({
       title:        b.title,
       description:  b.description || '',
@@ -229,12 +258,63 @@ router.patch('/:id', auth, requireRole('teacher', ...SLOT_ADMIN_ROLES), async (r
     if ('effectiveTo'   in b) entry.effectiveTo   = b.effectiveTo   ? new Date(b.effectiveTo)   : null;
     if ('subjectId'     in b) entry.subjectId     = mongoose.isValidObjectId(b.subjectId) ? b.subjectId : null;
 
+    const timeChanged = ['dayOfWeek', 'startTime', 'endTime', 'assignedStudents'].some(k => k in b);
+    if (timeChanged && entry.isActive !== false && !b.allowClash) {
+      const clash = await clashMessage(entry.toObject());
+      if (clash) return res.status(409).json({ success: false, clash: true, message: clash.message + ' Save anyway?', data: clash });
+    }
+    // Editing the time of a proposed slot is the teacher deciding it.
+    if (timeChanged && entry.needsConfirmation) { entry.needsConfirmation = false; entry.confirmed = true; entry.confirmedAt = new Date(); }
+
     await entry.save();
     reconcileSoon();
     return ok(res, { entry }, 'Entry updated.');
   } catch (err) {
     console.error('[timetable PATCH /:id]', err.message);
     return fail(res, 400, err.message || 'Failed to update.');
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+// POST /:id/confirm — the teacher (or staff) accepts a PROPOSED slot
+// (one the auto-scheduler picked without both sides having declared the
+// hour free). The family is told the confirmed weekly time.
+// ═══════════════════════════════════════════════════════════
+router.post('/:id/confirm', auth, requireRole('teacher', ...SLOT_ADMIN_ROLES), async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) return fail(res, 400, 'Invalid entry id.');
+    const entry = await TimetableEntry.findById(req.params.id);
+    if (!entry) return fail(res, 404, 'Entry not found.');
+    if (!SLOT_ADMIN_ROLES.includes(req.user.role) && String(entry.teacherId) !== String(req.user._id))
+      return fail(res, 403, 'You can only confirm your own slots.');
+    entry.needsConfirmation = false;
+    entry.confirmed = true;
+    entry.confirmedAt = new Date();
+    await entry.save();
+    ok(res, { entry }, 'Slot confirmed. The family has been told the weekly time.');
+    try {
+      const { getTransporter } = require('../lib/issueInvoice');
+      const { resolveStudentRecipients } = require('../lib/recipients');
+      const User = require('../models/User');
+      const t = getTransporter();
+      if (!t) return;
+      const days = { Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday', Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday', Sun: 'Sunday' };
+      const students = await User.find({ _id: { $in: entry.assignedStudents || [] } })
+        .select('firstName lastName email emailPrefs parentEmail linkedParents parentId parentName').lean();
+      for (const st of students) {
+        const r = await resolveStudentRecipients(st, { includeStudent: true, category: 'classUpdates' });
+        if (!r.to.length) continue;
+        await t.sendMail({
+          from: process.env.EMAIL_FROM || 'Smartious <hello@smartioushomeschool.com>',
+          to: r.to.join(', '),
+          subject: `Weekly lesson time confirmed — ${entry.subject}, ${days[entry.dayOfWeek] || entry.dayOfWeek}s ${entry.startTime}`,
+          html: `<p>Dear ${st.firstName} and family,</p><p>${st.firstName}'s weekly <strong>${entry.subject}</strong> lesson is confirmed for <strong>${days[entry.dayOfWeek] || entry.dayOfWeek}s, ${entry.startTime}–${entry.endTime}</strong> (${entry.timezone || 'Africa/Nairobi'} time).</p><p>You will receive a reminder 30 minutes before each lesson. You can see the timetable at any time in the portal.</p><p>Smartious Academic office · +254 182 071 920</p>`,
+        });
+      }
+    } catch (e) { console.error('[timetable confirm] notice', e.message); }
+  } catch (err) {
+    console.error('[timetable POST /:id/confirm]', err.message);
+    return fail(res, 400, err.message || 'Failed to confirm.');
   }
 });
 

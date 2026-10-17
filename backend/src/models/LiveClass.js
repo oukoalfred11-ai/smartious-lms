@@ -111,6 +111,32 @@ const liveClassSchema = new mongoose.Schema({
   remindedRecipients: { type: [String], default: [] },
   reminderSentAt:     { type: Date, default: null },
 
+  // ── Closing the lesson (the teacher's record of what happened) ──
+  // A lesson whose time has passed is NOT assumed to have happened. The
+  // teacher closes it: taught (full or partial coverage of a topic),
+  // student absent, or not held (with a reason). Until then it is
+  // "unconfirmed": no homework, no topic progress, no absences counted,
+  // and after 24h it is flagged to the Director of Studies.
+  outcome:        { type: String, enum: ['taught', 'student_absent', 'not_held', null], default: null },
+  coverage:       { type: String, enum: ['full', 'partial', null], default: null },
+  coveredTopic:   { type: String, default: '' },
+  coveredSubtopic:{ type: String, default: '' },
+  notHeldReason:  { type: String, default: '' },
+  teacherNote:    { type: String, default: '' },
+  outcomeAt:      { type: Date, default: null },
+  outcomeBy:      { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+  // Set by the auto-end sweep when a lesson's time lapsed with nobody
+  // pressing End: "ended" then means only "its time is over".
+  autoEnded:      { type: Boolean, default: false },
+
+  // ── Extra and make-up lessons a teacher adds ──
+  extraLesson:    { type: Boolean, default: false },
+  makeUpFor:      { type: mongoose.Schema.Types.ObjectId, ref: 'LiveClass', default: null },
+
+  // ── Absence alerts to families ──
+  // Students whose parents were told the student had not joined.
+  absenceAlerted: { type: [String], default: [] },
+
   // Clubs. A club meeting is a live class with clubId set; it opens in
   // the classroom's meeting (conference) view instead of the whiteboard,
   // and its recording becomes part of the club's archive.
@@ -196,6 +222,8 @@ liveClassSchema.index(
 );
 // Reminder sweep: scheduled classes starting soon that are not done yet.
 liveClassSchema.index({ status: 1, scheduledAt: 1, reminderSentAt: 1 });
+// Lessons waiting to be closed by their teacher.
+liveClassSchema.index({ teacherId: 1, outcome: 1, scheduledAt: -1 });
 
 // Virtual: computed status — accounts for the actual date even if the
 // `status` field hasn't been flipped yet.

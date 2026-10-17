@@ -5,6 +5,8 @@
  */
 const { test } = require('node:test')
 const assert = require('node:assert/strict')
+// These tests run after the close-the-lesson cutover unless they say otherwise.
+process.env.LESSON_CLOSE_CUTOVER = '2026-01-01'
 const T = require('../src/lib/schoolTime')
 const S = require('../src/lib/scheduling')
 
@@ -116,4 +118,67 @@ test('student visibility includes grade-wide audiences', () => {
   const f = S.studentVisibilityFilter({ _id: 'st', curriculum: 'IGCSE', grade: 'Year 10' })
   assert.equal(f.$or.length, 2)
   assert.equal(S.studentVisibilityFilter({ _id: 'st' }).$or.length, 1)
+})
+
+test('a lesson counts as held only when closed, ended by the teacher, or attended', () => {
+  const now = new Date('2026-10-21T00:00:00Z')
+  const past = { _id: 'x', scheduledAt: '2026-10-20T13:00:00Z', durationMins: 60, status: 'scheduled' }
+  assert.equal(S.isHeldClass(past, { now }), false)
+  assert.equal(S.isHeldClass({ ...past, status: 'ended', autoEnded: true }, { now }), false)
+  assert.equal(S.isHeldClass({ ...past, status: 'ended' }, { now }), true)
+  assert.equal(S.isHeldClass(past, { now, joined: true }), true)
+  assert.equal(S.isHeldClass({ ...past, outcome: 'taught' }, { now }), true)
+  assert.equal(S.isHeldClass({ ...past, outcome: 'not_held', status: 'cancelled' }, { now, joined: true }), false)
+  process.env.LESSON_CLOSE_CUTOVER = '2026-12-01'   // before the cutover: the old rule
+  assert.equal(S.isHeldClass(past, { now }), true)
+  assert.equal(S.needsClosing(past, now), false)
+  process.env.LESSON_CLOSE_CUTOVER = '2026-01-01'
+  assert.equal(S.needsClosing(past, now), true)
+  assert.equal(S.needsClosing({ ...past, outcome: 'taught' }, now), false)
+  assert.equal(S.needsClosing({ ...past, kind: 'club' }, now), false)
+  assert.equal(S.classOutcome({ ...past, outcome: 'not_held' }, now, new Set()), 'not_held')
+})
+
+test('topics: only fully taught lessons use them up', () => {
+  assert.equal(S.consumesTopic({ status: 'ended', outcome: 'taught', coverage: 'full' }), true)
+  assert.equal(S.consumesTopic({ status: 'ended', outcome: 'taught', coverage: 'partial' }), false)
+  assert.equal(S.consumesTopic({ status: 'ended', outcome: 'student_absent' }), false)
+  assert.equal(S.consumesTopic({ status: 'cancelled' }), false)
+  assert.equal(S.consumesTopic({ status: 'scheduled' }), true)   // a future lesson holds its topic
+  const f = S.taughtFilter(new Date('2026-10-21T00:00:00Z'))
+  assert.equal(f.$or.length, 2)
+  assert.deepEqual(f.$or[1], { outcome: 'taught', coverage: { $ne: 'partial' } })
+})
+
+test('closing a lesson: valid outcomes, a reason for not held', () => {
+  assert.match(S.closeUpdate({}).error, /Choose/)
+  assert.match(S.closeUpdate({ outcome: 'not_held' }).error, /why/)
+  assert.equal(S.closeUpdate({ outcome: 'not_held', reason: 'Teacher ill' }).update.notHeldReason, 'Teacher ill')
+  const t = S.closeUpdate({ outcome: 'taught', coverage: 'partial', topic: 'Algebra', subtopic: 'Expand', note: 'x'.repeat(2000) }).update
+  assert.equal(t.coverage, 'partial'); assert.equal(t.coveredTopic, 'Algebra'); assert.equal(t.teacherNote.length, 1000)
+  assert.equal(S.closeUpdate({ outcome: 'taught' }).update.coverage, 'full')
+  assert.equal(S.closeUpdate({ outcome: 'student_absent' }).update.coverage, null)
+})
+
+test('absence alerts: 10 to 40 minutes in, students who have not joined', () => {
+  const cls = { scheduledAt: '2026-10-20T13:00:00Z', status: 'scheduled', kind: 'lesson', assignedStudents: [{ _id: 'a' }, { _id: 'b' }, { _id: 'c', onBreak: true }, { _id: 'd' }], absenceAlerted: ['d'] }
+  assert.equal(S.absenceAlertDue(cls, new Date('2026-10-20T13:05:00Z')), false)
+  assert.equal(S.absenceAlertDue(cls, new Date('2026-10-20T13:11:00Z')), true)
+  assert.equal(S.absenceAlertDue(cls, new Date('2026-10-20T13:45:00Z')), false)
+  assert.equal(S.absenceAlertDue({ ...cls, kind: 'club' }, new Date('2026-10-20T13:11:00Z')), false)
+  assert.deepEqual(S.absentStudents(cls, { joinedIds: ['a'] }).map(s => s._id), ['b'])
+})
+
+test('clashes: same teacher or a shared student, overlapping times, same day', () => {
+  const e = { _id: 'new', dayOfWeek: 'Mon', startTime: '10:00', endTime: '11:00', teacherId: 't1', assignedStudents: ['s1', 's2'] }
+  const others = [
+    { _id: 'o1', dayOfWeek: 'Mon', startTime: '10:30', endTime: '11:30', teacherId: 't1', assignedStudents: [] },
+    { _id: 'o2', dayOfWeek: 'Mon', startTime: '10:59', endTime: '12:00', teacherId: 't2', assignedStudents: ['s2'] },
+    { _id: 'o3', dayOfWeek: 'Mon', startTime: '11:00', endTime: '12:00', teacherId: 't1', assignedStudents: [] },   // touches, no overlap
+    { _id: 'o4', dayOfWeek: 'Tue', startTime: '10:00', endTime: '11:00', teacherId: 't1', assignedStudents: [] },
+    { _id: 'new', dayOfWeek: 'Mon', startTime: '10:00', endTime: '11:00', teacherId: 't1', assignedStudents: [] },  // itself
+  ]
+  const c = S.findClashes(e, others)
+  assert.deepEqual(c.map(x => [x.entry._id, x.who]), [['o1', 'teacher'], ['o2', 'student']])
+  assert.deepEqual(c[1].studentIds, ['s2'])
 })
