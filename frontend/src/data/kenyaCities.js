@@ -477,7 +477,7 @@ export const KENYA_COUNTRY = {
   hub: '/online-school/kenya',
   hubPageId: 'homeschooling-kenya',
   cityPageId: 'kenya-city',
-  seoTitle: 'Online School in Kenya | Live Classes from USD 423/month',
+  seoTitle: 'Homeschooling & Online School in Kenya | Smartious',
   seoDesc: 'Online school and homeschool in Kenya: live CBC, IGCSE, A-Level and IB classes from Nairobi. From USD 423/month (≈ KSh 54,600). January 2027 intake open.',
   currency: 'KES',
   currencyName: 'Kenyan Shilling',
@@ -690,6 +690,9 @@ export const KENYA_COUNTRY = {
       q: 'How do we know if Smartious is the right fit for our family?',
       a: 'Book a free consultation. We will talk through your child\'s current grade or year, the universities they may aim for, your county and routine, and whether CBE or an international curriculum fits best. We will tell you honestly if another option suits your family better. You can also visit our Parklands or Karen centre. Admissions: +254 745 021 212. Academic office: +254 182 071 920. Email: hello@smartioushomeschool.com. The January 2027 intake is open: Term 2 starts on 5 January 2027.',
     },
+    { q: 'How do live online classes work?', a: 'Students follow a weekly timetable of live lessons with qualified teachers, in small groups or one to one, and every lesson is recorded for catch-up. Families receive assessments and termly reports. Each student starts with a placement assessment, so we can place them at the right level.' },
+    { q: 'When is the next intake?', a: 'The January 2027 intake is open: Term 2 starts on 5 January 2027. Students can also join during the year after an assessment.' },
+    { q: 'How do we contact Smartious?', a: 'Admissions: +254 745 021 212 (call or WhatsApp). Academic office: +254 182 071 920. Email: hello@smartioushomeschool.com.' },
   ],
 
   ctaH: 'Ready to start your child\'s Cambridge journey from Kenya?',
