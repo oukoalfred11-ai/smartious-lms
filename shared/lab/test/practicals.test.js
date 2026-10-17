@@ -31,6 +31,15 @@ for (const def of PHYSICS_AL) {
       for (const v of Object.values(def.expected({ params, state, answers }))) assert.ok(v == null || Number.isFinite(v))
     }
   })
+  test(`${def.collection.code} ${def.title}: on the hands-on bench a careful student also scores every automatic mark`, () => {
+    for (const seed of ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']) {
+      const { params, state, actions, answers } = carefulRun(def, seed, { options: { bench: 2 } })
+      assert.deepEqual(replay(def, params, actions), state)
+      const g = gradeSession(def, { params, state, answers })
+      assert.ok(g.rows.some(r => r.id === 'safety'), def.id + ': the safety row applies on the hands-on bench')
+      for (const row of g.rows.filter(r => r.auto)) assert.equal(row.marks, row.max, `${def.id} seed ${seed}: ${row.label}: ${row.detail}`)
+    }
+  })
 }
 
 test('a wrong result loses marks; in stockroom mode, missing apparatus blocks readings and loses the mark', () => {

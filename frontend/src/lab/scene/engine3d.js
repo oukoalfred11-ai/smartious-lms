@@ -40,7 +40,8 @@ export function createLabScene(container, { lowGraphics = false, onPick = null, 
   const camera = new THREE.PerspectiveCamera(42, 1, 0.02, 30)
 
   // Lighting: soft fill + key light with shadows (disabled in low graphics).
-  scene.add(new THREE.HemisphereLight('#ffffff', '#b9c2cc', 1.1))
+  const hemi = new THREE.HemisphereLight('#ffffff', '#b9c2cc', 1.1)
+  scene.add(hemi)
   const key = new THREE.DirectionalLight('#ffffff', 1.6)
   key.position.set(1.4, 2.6, 1.6)
   key.castShadow = !lowGraphics
@@ -187,6 +188,7 @@ export function createLabScene(container, { lowGraphics = false, onPick = null, 
 
   return {
     THREE, scene, camera, renderer, controls, lowGraphics,
+    lights: { hemi, key },                       // scenes may tune these (e.g. the lab room)
     add(obj, { pick } = {}) {
       if (pick) { obj.userData.pick = pick; pickables.push(obj) }
       obj.traverse(o => { if (o.isMesh) { o.castShadow = !lowGraphics; o.receiveShadow = !lowGraphics } })

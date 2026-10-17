@@ -11,6 +11,15 @@
  * Clicking an instrument dispatches 'measure' for every reading it makes;
  * displays show the engine's latest readings. Nothing here decides a result:
  * levels and stretches are visual cues driven by the independent variable.
+ *
+ * Hands-on bench (view.bench === 2): scales show no number (they are read
+ * from the close-ups in the controls panel; digital displays still show
+ * theirs). Click the goggles to put them on, TARE by the balance, a mass
+ * hanger to add one mass, the stopwatch to start it and again to stop it
+ * (oscillations counted from the swing you watch). The pendulum swings at
+ * its real period while it is being timed, the stopwatch ticks, a loaded
+ * spring bounces until it settles, the resistance wire glows as it warms
+ * and lamps light up.
  */
 import * as THREE from 'three'
 import * as E from './equipment.js'
@@ -103,12 +112,18 @@ export function buildPracticalScene(lab, { def, dispatch, onSelect, onHover = ()
   let lastLevel = null
   let prevReadings = {}
   const lastKey = {}
+  // Hands-on bench state (view.bench === 2).
+  let lastView = null, hands = null
+  let extrasBuilt = false, goggles = null, statusCard = null, statusText = ''
+  let timerStartedAt = null, animating = false, lastTick = ''
+  const timedKey = (P.measures || []).find(m => m.instrument === 'stopwatch')?.key || null
 
   const add = (obj, pick) => { lab.add(obj, pick ? { pick } : {}); softenShadows(obj); objects.push(obj); return obj }
   const clear = () => {
     if (wiring) { wiring.dispose(); wiring = null; setHandlers() }
     for (const o of objects) lab.remove(o)
     objects = []; placed = []; displays = {}; shown = {}; ivCard = null; ivText = ''; chain = []; hangAt = null; lastLevel = null
+    extrasBuilt = false; goggles = null; statusCard = null; statusText = ''
   }
 
   /** Put a model into a wrapper so its footprint centre is at (x, y, z). */
@@ -222,7 +237,7 @@ export function buildPracticalScene(lab, { def, dispatch, onSelect, onHover = ()
         const wrap = new THREE.Group(); wrap.add(model)
         add(wrap, pick)
         placed.push({ id, model, wrap })
-        chain.push({ model, wrap })
+        chain.push({ id, model, wrap })
         if (keys.length) {
           if (model.userData.setDisplay) displays[id] = model.userData.setDisplay
           else {
@@ -269,11 +284,90 @@ export function buildPracticalScene(lab, { def, dispatch, onSelect, onHover = ()
   function rehang() {
     if (!hangAt) return
     let top = hangAt.y
-    for (const { model, wrap } of chain) {
+    for (const c of chain) {
+      const { model, wrap } = c
       const t = model.userData.hangTop ? model.userData.hangTop() : measure(model).h
       wrap.position.set(hangAt.x, top - t, hangAt.z)
+      wrap.rotation.z = 0
+      c.baseY = wrap.position.y                    // rest position, for the swing
       top = wrap.position.y + (model.userData.hangBottom ?? 0) + 0.004
     }
+  }
+
+  // ── Hands-on bench extras ─────────────────────────────
+  function buildExtras(H) {
+    extrasBuilt = true
+    if (H.needsGoggles) {
+      const have = placed.find(p => p.id === 'goggles')
+      if (have) goggles = have.wrap
+      else {
+        goggles = buildModel('goggles')
+        goggles.position.set(W / 2 - 0.22, BENCH_Y, 0.34)
+        add(goggles, { kind: 'goggles', label: 'Safety goggles: click to put them on' })
+      }
+    }
+    statusCard = tentCard('', 0.2, 0.05, { bg: '#1F2A37', fg: '#FFFFFF' })
+    statusCard.position.set(W / 2 - 0.5, BENCH_Y, 0.36)
+    add(statusCard)
+    for (const id of H.tareInstruments || []) {
+      const at = placed.find(p => p.id === id)
+      if (!at) continue
+      const card = tentCard('TARE', 0.05, 0.022, { bg: '#C62828', fg: '#FFFFFF' })
+      card.position.set(at.wrap.position.x + 0.09, BENCH_Y, at.wrap.position.z + 0.12)
+      add(card, { kind: 'tare', id, label: 'TARE: zero the balance with the pan empty' })
+    }
+  }
+
+  const swTime = (t) => (t < 60 ? t.toFixed(1) + '0' : Math.floor(t / 60) + ':' + String(Math.floor(t % 60)).padStart(2, '0') + '.' + Math.floor((t % 1) * 10) + '0')
+  /** One animation frame: ticking stopwatch, swinging pendulum, bouncing load. Returns true while still moving. */
+  function frame() {
+    if (!hands) return false
+    const running = !!hands.timer?.running
+    const t = running && timerStartedAt != null ? (performance.now() - timerStartedAt) / 1000 : 0
+    if (running && displays.stopwatch) {
+      const txt = swTime((hands.timer.acc || 0) + t)
+      if (txt !== lastTick) { displays.stopwatch(txt); shown.stopwatch = txt; lastTick = txt }
+    }
+    const motion = hands.motion
+    const bob = chain.find(c => c.id === 'pendulum_bob')
+    if (bob && hangAt && motion?.period && running) {
+      const a = 0.16 * Math.cos(2 * Math.PI * t / motion.period)
+      const L = hangAt.y - bob.baseY
+      bob.wrap.rotation.z = a
+      bob.wrap.position.x = hangAt.x + L * Math.sin(a)
+      bob.wrap.position.y = hangAt.y - L * Math.cos(a)
+    }
+    const bouncing = !hands.settled && chain.length && iv?.instrument === 'slotted_masses'
+    if (bouncing) {
+      const dy = 0.006 * Math.sin(2 * Math.PI * performance.now() / 650)
+      rehang()
+      for (const c of chain) c.wrap.position.y += dy
+    }
+    return running || !!bouncing
+  }
+  function animateHands() {
+    if (animating) return
+    animating = true
+    lab.animate(() => {
+      const go = frame()
+      if (!go) { animating = false; rehang(); lastTick = '' }
+      return go
+    })
+  }
+  function updateHands(view) {
+    const H = view.hands
+    hands = H
+    if (!extrasBuilt) buildExtras(H)
+    if (goggles) goggles.visible = !H.goggles
+    const st = H.tidy ? 'Bench tidied away' : H.needsGoggles && !H.goggles ? 'Put on your goggles' : H.timer?.running ? 'Stopwatch running' : H.settled ? 'Readings steady' : 'Wait: still settling'
+    if (statusCard && st !== statusText) { statusCard.userData.setText(st); statusText = st }
+    for (const { id, model } of placed) {
+      if (id === 'resistance_wire') model.userData.setHeat?.(H.heatFrac || 0)
+      if (H.glow && H.glow[id] != null) model.userData.setGlow?.(H.glow[id])
+    }
+    if (H.timer?.running && timerStartedAt == null) timerStartedAt = performance.now()
+    if (!H.timer?.running) timerStartedAt = null
+    if (H.timer?.running || !H.settled) animateHands()
   }
 
   function format(key, v, withSymbol) {
@@ -286,6 +380,25 @@ export function buildPracticalScene(lab, { def, dispatch, onSelect, onHover = ()
   return {
     onPick(p) {
       if (wiring?.onPick(p)) return
+      if (hands) {
+        // Hands-on bench: the physical steps.
+        if (p?.kind === 'goggles' || p?.id === 'goggles') { if (!hands.goggles) dispatch('wearGoggles'); onSelect({ ...p, label: 'Safety goggles' }); return }
+        if (p?.kind === 'tare') { dispatch('tare', { instrument: p.id }); onSelect({ ...p, label: 'Balance tared' }); return }
+        if (p?.id === 'stopwatch' && timedKey) {
+          if (!hands.timer?.running) dispatch('startTimer')
+          else {
+            const T = hands.motion?.period, el = timerStartedAt != null ? (performance.now() - timerStartedAt) / 1000 : 0
+            dispatch('measure', T ? { key: timedKey, cycles: Math.max(1, Math.min(200, Math.round(el / T))) } : { key: timedKey })
+          }
+          onSelect({ ...p, label: 'Stopwatch' })
+          return
+        }
+        if (p?.id === 'slotted_masses' && iv?.instrument === 'slotted_masses' && lastView) {
+          dispatch('setIV', { value: Number(lastView.x) + iv.step })
+          onSelect({ ...p, label: 'Added one mass' })
+          return
+        }
+      }
       if (p?.kind === 'instrument') for (const key of p.keys || []) dispatch('measure', { key })
       if (p?.id === 'switch' && circuit?.parts.some(x => x.type === 'switch')) dispatch('toggleSwitch')
       onSelect({ ...p, label: hoverLabel(p) })
@@ -305,11 +418,19 @@ export function buildPracticalScene(lab, { def, dispatch, onSelect, onHover = ()
         if (v !== prevReadings[k] && defByKey[k]?.instrument) lastKey[defByKey[k].instrument] = k
       }
       prevReadings = { ...rd }
+      lastView = view
+      const H = view.bench === 2 ? view.hands : null
       for (const [id, set] of Object.entries(displays)) {
         const keys = keysByInstrument[id] || []
         let k = lastKey[id]
         if (k == null || rd[k] === undefined) k = keys.find(x => rd[x] !== undefined)
-        const text = k != null && rd[k] !== undefined ? format(k, rd[k], !!set.card) : '----'
+        let text = k != null && rd[k] !== undefined ? format(k, rd[k], !!set.card) : '----'
+        if (H) {
+          // Scales are read from the close-up; only real displays show a number.
+          const kind = k != null ? H.kinds?.[k]?.kind : H.kinds?.[keys[0]]?.kind
+          if (kind === 'stopwatch') { if (H.timer?.running) continue; text = rd[k] !== undefined ? format(k, rd[k], false) : swTime(H.timer?.acc || 0) }
+          else if (kind && kind !== 'digital' && rd[k] !== undefined) text = 'see close-up'
+        }
         if (shown[id] !== text) { set(text); shown[id] = text }
       }
       if (wiring) {
@@ -333,6 +454,8 @@ export function buildPracticalScene(lab, { def, dispatch, onSelect, onHover = ()
           lastLevel = f
         }
       }
+      if (view.bench === 2 && collected) updateHands(view)
+      else hands = null
       lab.invalidate()
     },
     dispose() { clear() },

@@ -190,7 +190,10 @@ router.post('/sessions', auth, requireRole('student'), wrap(async (req, res) => 
   const doc = {
     ...key, attempt: (latest?.attempt || 0) + 1, experimentVersion: def.version,
     studentName: fullName(req.user), seed: crypto.randomBytes(12).toString('hex'),
-    options: assignment?.options || {}, history: [{ by: req.user._id, byName: fullName(req.user), event: 'started' }],
+    // New physics attempts use the hands-on bench (instruments read from close-ups, zero errors,
+    // settling, stopwatch, safety and tidying). Older sessions keep replaying without it.
+    options: { ...(assignment?.options || {}), ...(def.practical || def.id === 'phys-ohms-law' ? { bench: 2 } : {}) },
+    history: [{ by: req.user._id, byName: fullName(req.user), event: 'started' }],
   };
   try {
     const s = await LabSession.create(doc);

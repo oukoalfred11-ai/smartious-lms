@@ -8,10 +8,11 @@ It uses the LMS login, roles and student records. There is no second account sys
 
 | Area | Status |
 |---|---|
-| Acid–base titration (chemistry) | Implemented: strong or weak acid, three indicators, burette scale close-up, rough and concordant runs |
+| Acid–base titration (chemistry) | Implemented: strong or weak acid, three indicators, burette scale close-up, rough and concordant runs, done **step by step** (goggles and coat, rinse, funnel, jet, eye level, pipette filler, swirl) with technique marked |
 | Ohm's law (physics) | Implemented: free wiring, short-circuit trip, meter resistances, V–I graph |
-| Osmosis in potato tissue (biology) | Implemented as a **simplified** model, labelled as such |
+| Osmosis in potato tissue (biology) | Implemented as a **simplified** model, labelled as such; done **step by step** (cork borer, ruler and scalpel, blotting, tared balance, labelled tubes, lab clock) with technique marked |
 | 3D bench (Three.js) with 2D fallback, low-graphics mode | Implemented; **not yet run in a browser** (see Verification) |
+| School laboratory room around the bench (titration and osmosis) | Implemented (`scene/labRoom.js`); **not yet seen in a browser** |
 | A-to-Z practical flow: plan, bench, student-built results table, hand-drawn graphs, working, conclusion, formal report | Implemented |
 | Autosave, offline copy on the device, conflict detection, idempotent submit | Implemented |
 | Automatic rubric checks re-run on the server, teacher rubric marking, return for correction | Implemented |
@@ -46,7 +47,56 @@ Code: `shared/lab/analysis.js` (formula parser, table, lines, checks, input clea
 - **Wiring with leads.** Circuits are built from a tray of red and black leads: drag from one terminal post to another, or tap one post then the other (touch). Click a lead to select and remove it; click the switch to open or close it. Leads attach to the real posts on the 3D models. A keyboard alternative ("Connect using menus instead") is in the controls panel.
 - **Real behaviour when wired wrongly.** The circuit the student builds is solved with the same circuit solver. When it is correct, meters show the practical's model readings. When it is wrong, they show what that wiring would really give (for example a voltmeter in series reads about the e.m.f. with no current) or 0 where no resistive model is given, and the bench lists what is wrong. A short circuit trips the supply. The "Circuit built correctly" mark counts the readings taken with a correct circuit.
 - **Circuit practicals:** Ohm's law, 1.3 and 20 practicals in chapters 6–16. Not wired yet: 7.3 (needs a three-terminal sliding contact), 13.1 and 13.2 (need a two-way charge/discharge switch), 13.3, 13.5, 13.6, 14.5 (teacher demonstration) and practicals with no meter circuit. In practicals whose currents are in mA, or that use lamps, LEDs or a.c., a wrongly wired meter reads 0 rather than a solved value.
-- **Titration.** All the apparatus and reagents of the manual are on the bench (burette in its clamp, pipette and filler, funnel, flask on a white tile, NaOH and acid bottles, three indicator dropper bottles, wash bottle, beakers, goggles). Students fill the burette from the bottle, pipette the acid, add indicator drops, click the tap for one drop or press and hold it to let it run, and swirl the flask. The burette reading is never printed: students read the scale close-up.
+- **Titration.** All the apparatus and reagents of the manual are on the bench (burette in its clamp, pipette and filler, funnel, flask on a white tile, NaOH and acid bottles, three indicator dropper bottles, wash bottle, beakers, goggles and a lab coat). The burette reading is never printed: students read the scale close-up. See *Step-by-step technique* below.
+- **Osmosis.** A potato and cork borer, a ruler and scalpel on a white tile, a paper towel, a balance with a weighing boat, six labelled boiling tubes of sucrose solution and a lab clock. See *Step-by-step technique* below.
+- **The room.** The titration and osmosis benches stand in a school laboratory (`scene/labRoom.js`): a service ledge with gas taps and sockets, tiled splashback, a window with daylight, shelves of reagent bottles, a sink with a swan-neck tap, a fume cupboard, safety signs, a periodic table, a wall clock, a stool, a tiled floor and ceiling lights. Nothing in the room is clickable or affects results. Ambient motion (a drip from the tap every few seconds, steam from a beaker in the fume cupboard, the clock's second hand) runs on a one-second timer, is switched off in low graphics and under *reduced motion*, and stops when the 3D view closes. The physics practicals' generic bench does not use the room yet; adding it is one call, `addLabRoom(lab, { width: W, depth: DEPTH })`, in `practicalScene.js`.
+
+## Step-by-step technique (titration and osmosis)
+
+Every new titration and osmosis session is done with the student's hands, step by step, as in a school lab. Each step is an engine action, validated with a clear message and replayed on the server, so it can be marked. In the 3D view a click on a piece of apparatus does the obvious thing or opens a short menu (shown in the bench overlay) of what can be done with it, including the wrong things; the 2D view has the same menus; the controls panel has every step as a button and a **Next** prompt that says what a teacher would say next, without giving away a reading.
+
+**Titration** (`wearPPE`, `rinseBurette`, `burFunnel`, `pourIntoBurette`, `runToWaste`, `eyeLevel`, `attachFiller`, `rinsePipette`, `fillPipette`, `adjustPipette`, `deliverPipette`, `rinseFlask`, `swirl`, plus the existing `chooseIndicator`, `addIndicator`, `addBase`, `recordReading`, `markRough`, `newRun`):
+
+1. Put on goggles and a lab coat. Handling the sodium hydroxide or the acid without them is refused. Pipetting without a filler is refused ("Never pipette by mouth").
+2. Rinse the burette with the alkali; put the funnel in; pour (the level lands just above or near 0.00); take the funnel out; run a little into the waste beaker to fill the jet and bring the meniscus onto the scale (a reading above 0.00 is refused).
+3. Read the initial volume. The student is standing (eye above the meniscus) until they choose to crouch; the close-up is drawn from where their eye is, so from above or below the scale really is misread by 0.15 cm³ (the graduation rings and meniscus look like ellipses). In 3D, *Crouch* moves the camera level with the meniscus.
+4. Rinse the pipette with the acid, draw the acid above the mark with the filler, let it down to the mark, deliver it into the flask on the white tile; add 2 drops of indicator.
+5. Open the tap (one drop, two drops, faster portions, or hold to run) and swirl. Unswirled alkali gives a flash of colour where it lands (it is locally far more alkaline); swirling makes it fade until, at the end point, the colour stays. Overshooting is possible and real.
+6. Read the final volume; rough run first, then accurate runs. Between runs the flask must be washed out with distilled water before the next portion of acid (refused otherwise); refill the burette through the funnel when it is low.
+
+Mistakes are allowed and have the effect they would have at a real bench: an unrinsed burette dilutes the alkali (0.6 cm³ of water: titre too large), an unrinsed pipette dilutes the acid (0.3 cm³: titre too small), a pipette not let down to the mark delivers 0.5–1.2 cm³ too much, a flask rinsed with acid holds 1.0 cm³ extra, an air bubble left in the jet (0.15–0.35 cm³) comes out during the titration (titre too large), a funnel left in drips 0.05 cm³ into the burette each time the tap is used (titre too small), reading off eye level gives a parallax error, and judging the end point without swirling is recorded. Each mistake is written to the session's **technique notes** (run number and an examiner's sentence), which appear in the controls panel, as a "Technique notes" table in the bench record (so the teacher's review and the PDF report show it), and in the new automatic rubric row **Burette and pipette technique (3 marks; one lost per kind of mistake)**. The existing readings and accuracy marks are affected too, because the readings really are wrong.
+
+**Osmosis** (`cutCylinders`, `trimCylinder`, `blot`, `putOnPan`, `clearPan`, `tareBalance`, `placeInTube`, `startTimer`, plus `select`, `recordInitial`, `wait`, `remove`, `recordFinal`):
+
+1. Cut six cylinders with the cork borer (they come out 42–58 mm long and wet with sap).
+2. Read each cylinder's length against the ruler (drawn, not printed) and trim it with the scalpel to a length the student chooses (good to about ±0.4 mm). Initial mass follows the length (0.054 g per mm).
+3. Blot each cylinder, tare the balance with the weighing boat on it (refused with a cylinder on the pan), put each cylinder on the pan and record its mass.
+4. Place each cylinder in its labelled tube (the student may choose the wrong tube), start the timer and fast-forward the lab clock (it reads 09:00 at the start; its hands sweep round in 3D).
+5. Take each cylinder out, blot it, reweigh it.
+
+Mistakes: not blotting after cutting adds 0.03–0.07 g of sap to the first weighing; not blotting after the solution adds 0.08–0.15 g (final masses too large, so the line crosses zero at too high a concentration); not taring adds the boat (1.2–1.6 g) to every mass, so every % change is too small; unequal lengths are not a fair test (shorter pieces also change slightly faster); a cylinder in the wrong tube really sat in that concentration. Each is recorded in the technique notes and marked in the rubric row **Preparing and weighing the cylinders (3 marks)**. The initial/final mass rows now compare what the student wrote with what the balance showed.
+
+**Older sessions** (saved before this release) used one-click steps (`fillBurette`, `pipetteAcid`, `immerse` on ready-cut cylinders). They still replay and keep their original controls, 2D and 3D bench so they can be finished, and they are not marked on technique (the row does not apply). Once a session has used a step-by-step action, the one-click shortcuts are refused. Code: `shared/lab/experiments/titration.js`, `osmosis.js`; tests: `test/handsOnTitration.test.js`, `test/handsOnOsmosis.test.js`; UI: `frontend/src/lab/handsOnControls.jsx`, the hands-on views in `views2d.jsx`, `scene/titrationScene.js`, the osmosis scene in `scene/scenes.js`.
+
+### Using the instruments (physics practicals and Ohm's law, new attempts)
+
+New physics attempts are created with the session option `bench: 2` (set by `POST /sessions`). On this bench students use the instruments as in a real laboratory instead of being handed numbers. Attempts made before this option existed have no `bench` option and replay, look and mark exactly as before.
+
+| What the student does | Engine action(s) | What it changes |
+|---|---|---|
+| Reads each instrument from a close-up in the controls panel: magnified meter scale with a mirror strip, metre rule (mm), vernier callipers (10 or 50 divisions), micrometer sleeve and thimble, thermometer, stopwatch, digital display. Only real digital displays show a number. | `measure` (unchanged) | The pointer position, scale and display come from the engine (`view.hands.look`, `view.hands.kinds`), so the drawing is exactly what the grader treats as shown. A digital value between two digits flickers; either value is accepted. |
+| Moves their eye until the needle hides its reflection / the pointer is square-on | `setEye {offset}` | The student starts looking from one side. Off-square, the pointer appears shifted (parallax); the shown value is the square-on one. |
+| Checks the micrometer's zero with the jaws closed and records the zero error | `zeroCheck`, `recordZero` | Every micrometer reading includes a per-attempt zero error (−0.04 to +0.04 mm). The recorded zero error is subtracted from the readings used for the student's own result. |
+| Presses TARE on the balance | `tare` | Until tared, the balance reads a few digits high. |
+| Waits for a needle, a thermometer or a bouncing load to settle | `wait` | After any change (variable, switch, leads) a reading overshoots by 3–7 % (a spring by 4–9 mm) until the student waits. |
+| Starts and stops the stopwatch, counting oscillations from the swing shown at its real period; resets it between timings | `startTimer`, `measure {key, cycles}`, `resetTimer` | The human timing error (already in each practical's model) is shared between the oscillations timed, so timing more is better; one oscillation miscounted is a whole period out; a stopwatch not reset counts on. |
+| Closes the switch only for each reading | `toggleSwitch`, `wait` | A resistance wire (1.3, 7.1) or the Ohm's law resistor warms while current flows, so its resistance and the readings drift up; opening the switch lets it cool. |
+| Puts on goggles before loading or stretching anything (practicals whose safety notes say so), adds masses one at a time | `wearGoggles`, `setIV` | Without goggles, loading and reading are refused. Masses go on or off one step at a time. |
+| Switches off and tidies away at the end | `tidyUp` | Refused while the switch is closed (Ohm's law: also until the supply is at 0 V) or the stopwatch is running; any later bench step un-tidies. |
+
+Two automatic marks are added on this bench: **Instrument technique** (zero error recorded correctly, balance tared before use, readings settled, scales read square-on, stopwatch reset before each timing, wire kept cool; only the checks that apply) and **Safe working** (goggles where needed, switched off and tidied away). The bench record and the report list the recorded zero error. The 3D bench shows the same steps: goggles and TARE are clickable, the stopwatch starts and stops and ticks, the pendulum swings at its real period, a loaded spring bounces until it settles, the resistance wire glows as it warms and lamps light up. The models are in `shared/lab/science/instruments.js`; tests in `test/handsOn.test.js`, and every practical is also played by a careful student on this bench (`test/practicals.test.js`, `test/checkChapter.mjs`).
+
+Not yet on this bench: no practical takes a protractor reading; oscilloscope, data logger, GM counter, signal generator and light gate readings are shown as digital displays, as is any meter whose resolution is too fine for a needle scale (most voltmeters and the pressure gauge); four readings without a drawn scale (14.5 electron tube, 5.2 number of coils, 12.2 oil column, 8.1 hanging mass) still show their value as text.
 
 ## AS & A Level Physics practicals
 
@@ -99,7 +149,8 @@ frontend/src/lab/
   LabApp.jsx                /lab/* routes, header, library, "my work"
   Workspace.jsx             the student's experiment page
   useLabSession.js          local replay, autosave, backup, submit
-  scene/                    engine3d.js (Three.js framework), equipment.js, scenes.js, LabViewport.jsx
+  scene/                    engine3d.js (Three.js framework), equipment.js, labRoom.js (the room), scenes.js, titrationScene.js, LabViewport.jsx
+  handsOnControls.jsx       step-by-step titration and osmosis panels; benchMode.js tells old one-click sessions apart
   views2d.jsx, controls.jsx, panels.jsx
   TeacherDashboard.jsx, SessionReview.jsx, ContentAdmin.jsx, lab.css
 ```
@@ -112,7 +163,7 @@ frontend/src/lab/
 
 - **Titration:** exact charge balance for a monoprotic acid and a strong base, `[H⁺] + [Na⁺] = [OH⁻] + [A⁻]`, solved numerically for each added volume. Weak acids use their Ka (ethanoic acid 1.74 × 10⁻⁵). Indicator colour comes from the indicator equilibrium (pKIn), so the endpoint seen depends on the indicator chosen. The burette is read to 0.05 cm³.
 - **Ohm's law:** the wired circuit is solved with modified nodal analysis. Supply internal resistance 0.5 Ω, ammeter 0.01 Ω, voltmeter 10 MΩ. A current above 5 A trips the supply. Resistors are E12 values with ±5 % tolerance.
-- **Osmosis (simplified):** % change in mass = 40 × (C_iso − C) at equilibrium, capped at +18 % and −32 %, approached as 1 − e^(−t/45 min), with ±0.02 g blotting error. Sucrose uptake, cut-surface damage and temperature are not modelled. The interface and the report say so.
+- **Osmosis (simplified):** % change in mass = 40 × (C_iso − C) at equilibrium, capped at +18 % and −32 %, approached as 1 − e^(−t/45 min) for a 40 mm cylinder (τ scales with the cylinder's volume-to-surface ratio), with ±0.02 g blotting error. Sucrose uptake, cut-surface damage and temperature are not modelled. The interface and the report say so.
 
 Every experiment lists its assumptions, and every screen and report states that the data are simulated, not real measurements.
 
@@ -154,8 +205,10 @@ Science tests check the models against known values: pH of strong and weak acids
 
 What has been checked:
 
-- 136 tests in `shared/lab` and 11 route tests in `backend` pass. One route test publishes a practical in bulk and runs it end to end: a student does it and the server marks the submission.
+- All tests in `shared/lab` and 11 route tests in `backend` pass. One route test publishes a practical in bulk and runs it end to end: a student does it and the server marks the submission. The step-by-step titration and osmosis tests check a careful student scores every automatic mark (several seeds, and replay gives the same state), every refusal message, and the direction and size of every technique mistake.
+- The new titration and osmosis scenes, 2D views and control panels were driven through whole practicals (by clicking the 3D apparatus and menus, in high and low graphics) with stand-ins for Three.js and React, and every button and hotspot was clicked at several points: no errors, and the careful runs left no technique notes. This checks the code paths, not what the scenes look like.
 - Every new frontend file bundles with Bun (syntax and import resolution). External packages were left out of that check.
+- The hands-on bench controls, close-ups and 2D bench were rendered (with a minimal stand-in for React, no effects) against engine views at several stages of every practical, and every button was pressed to check it sends a real engine action. The close-up drawings were rasterised and inspected (meter, rule, vernier, micrometer, thermometer). The 3D additions have only been bundled, not run.
 
 What has **not** been checked, because the build machine had no package registry, no React or Three.js, and no database:
 
