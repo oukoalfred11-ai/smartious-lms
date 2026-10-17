@@ -19,6 +19,8 @@ import LibraryViewer from '../../components/LibraryViewer.jsx'
 import MobileTabBar, { IconParts, useBackHandler } from '../../components/ui/MobileTabBar.jsx'
 import { LessonsToClose, ExtraLessonForm } from '../../components/lessons/LessonControl.jsx'
 import { HelpRequests } from '../../components/lessons/LessonPlan.jsx'
+import HomeworkEditor from '../../components/lessons/HomeworkEditor.jsx'
+import EndOfLessonOverlay from '../../components/lessons/EndOfLessonOverlay.jsx'
 
 // ──────────────────────────────────────────────────────
 // DESIGN TOKENS — mirrors the admin Dashboard's TOKENS
@@ -473,7 +475,7 @@ function MobileDrawer({ open, onClose, sections, page, setPage, portalLabel, use
             </div>
           </div>
           <div style={{ display:'flex', justifyContent:'flex-end', marginBottom:8 }}>
-            <NotificationsBell onNavigate={(mod) => { const map = { support: 'communication', messages: 'communication', timetable: 'timetable', homework: 'homework', exams: 'marking' }; if (map[mod]) setPage(map[mod]) }} />
+            <NotificationsBell onNavigate={(mod) => { const map = { support: 'communication', messages: 'communication', timetable: 'myclasses', homework: 'marking', exams: 'marking' }; if (map[mod]) setPage(map[mod]) }} />
           </div>
           <button onClick={onLogout} style={{ width:'100%', padding:'10px', borderRadius:8, border:'1px solid #E8E2D6', background:'transparent', color:'#564844', fontSize:13, fontWeight:600, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:8 }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -524,6 +526,19 @@ export default function TeacherPortal() {
 
   const [page, setPage] = useState('dashboard')
   const navigateTo = useNavigate()
+  // Schedule Classes and Timetable are one module now: My Classes.
+  useEffect(() => { if (['timetable', 'scheduleclasses', 'schedule'].includes(page)) setPage('myclasses') }, [page])
+  // The end-of-lesson pop-up: /teacher?ended=<liveClassId> (set when the
+  // teacher leaves the classroom), or opened from My Classes.
+  const [endedId, setEndedId] = useState(() => {
+    try { return new URLSearchParams(window.location.search).get('ended') || null } catch { return null }
+  })
+  const [classesKey, setClassesKey] = useState(0)
+  const closeEnded = (saved) => {
+    setEndedId(null)
+    if (window.location.search.includes('ended=')) navigateTo('/teacher', { replace: true })
+    if (saved) { setPage('myclasses'); setClassesKey(k => k + 1) }
+  }
   // The Virtual Lab is its own app at /lab (assign, review and mark experiments).
   useEffect(() => { if (page === 'virtuallab') { setPage('dashboard'); navigateTo('/lab/teach') } }, [page, navigateTo])
   const [collapsed, setSidebarCollapsed] = useState(false)
@@ -654,6 +669,8 @@ export default function TeacherPortal() {
     students: 'My Students',
     clubs: 'My Clubs',
     liveclass: 'Live Classes',
+    myclasses: 'My Classes',
+    reports: 'Weekly Reports',
     classroom: 'Live Studio',
     questionbank: 'Question Bank',
     exambuilder: 'Exams',
@@ -670,12 +687,11 @@ export default function TeacherPortal() {
       {id:'students',      label:'My Students',      iconName:'students',      icon:'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2|circle:9:7:4|M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75'},
       {id:'attendance',    label:'Attendance & Check-in',       iconName:'attendance',    icon:'rect:5:4:14:17:2|rect:9:2:6:3:1|M8.5 12.5l2 2 4-4.5'},
       {id:'library',       label:'Library',          iconName:'library',       icon:'M4 19.5A2.5 2.5 0 0 1 6.5 17H20|M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'},
-      {id:'scheduleclasses', label:'Schedule Classes', iconName:'scheduleclasses', icon:'rect:3:4:18:18:2|line:16:2:16:6|line:8:2:8:6|line:3:10:21:10'},
+      {id:'myclasses',     label:'My Classes',       iconName:'timetable',     icon:'rect:3:4:18:18:2|line:16:2:16:6|line:8:2:8:6|line:3:10:21:10'},
       {id:'clubs',         label:'My Clubs',         iconName:'clubs',         icon:'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2|circle:9:7:4|M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75' },
       {id:'myratings',     label:'My Ratings',         iconName:'ratings',       icon:'M12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2'},
       {id:'earnings',      label:'My Earnings',       iconName:'earnings',      icon:'M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6'},
       {id:'leave',         label:'Leave Requests',    iconName:'timetable',     icon:'rect:3:4:18:18:2|line:16:2:16:6|line:8:2:8:6|line:3:10:21:10'},
-      {id:'timetable',     label:'Timetable',        iconName:'timetable',     icon:'rect:3:4:18:18:2|line:8:2:8:6|line:16:2:16:6|line:3:10:21:10'},
       {id:'managesubject',  label:'Manage My Subject', iconName:'managesubject', icon:'M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z|M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z'},
     ]},
     { section:'Assessment', items:[
@@ -685,6 +701,7 @@ export default function TeacherPortal() {
       {id:'virtuallab',    label:'Virtual Lab',      iconName:'virtuallab',    icon:'M9 3h6M10 3v6L4.5 19A1.5 1.5 0 0 0 5.8 21h12.4a1.5 1.5 0 0 0 1.3-2L14 9V3|M7 15h10'},
     ]},
     { section:'Documents', items:[
+      {id:'reports',       label:'Weekly Reports',     iconName:'documents',  icon:'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z|M14 2v6h6|line:16:13:8:13|line:16:17:8:17'},
       {id:'documents',     label:'Reports & Documents', iconName:'documents',  icon:'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z|M14 2v6h6|line:16:13:8:13|line:16:17:8:17|line:10:9:8:9'},
       {id:'mydocs',        label:'My Documents',       iconName:'documents',  icon:'M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z'},
     ]},
@@ -713,7 +730,7 @@ export default function TeacherPortal() {
     { id:'students',   label:'Students',  shortLabel:'Students',icon:'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75' },
     { id:'homework',   label:'Homework',  shortLabel:'HW',      icon:'M9 11l3 3L22 4' },
     { id:'reports',    label:'Reports',   shortLabel:'Reports', icon:'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z|M14 2v6h6' },
-    { id:'myratings',  label:'Ratings',   shortLabel:'Ratings', icon:'M12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2' },
+    { id:'myclasses',  label:'My Classes', shortLabel:'Classes', icon:'M3 4h18v18H3z|M16 2v4M8 2v4M3 10h18' },
   ]
 
   if (isMobile) {
@@ -740,11 +757,16 @@ export default function TeacherPortal() {
           {page==='clubs'      && <ClubsHub               user={currentUser} toast={toast}/>}
           {page==='students'   && <MyStudentsTab           user={currentUser} store={store} setPage={setPage} toast={toast} setMsgTo={setMsgTo} setMsgSubject={setMsgSubject} setMsgBody={setMsgBody} setMsgModal={setMsgModal}/>}
           {page==='homework'   && <HomeworkTab             user={currentUser} toast={toast}/>}
-          {page==='timetable'  && <TeacherTimetableTab     user={currentUser} toast={toast}/>}
+          {page==='myclasses'  && <MyClassesTab key={classesKey} user={currentUser} toast={toast} onEndLesson={setEndedId}/>}
           {page==='exams'      && <ExamsTab                user={currentUser} toast={toast}/>}
           {page==='library'    && <TeacherLibraryTab       user={currentUser} toast={toast}/>}
           {page==='live'       && <TeacherLiveClassesTab   user={currentUser} toast={toast}/>}
-          {page==='schedule'   && <ScheduleClassesTab      user={currentUser} toast={toast}/>}
+          {page==='marking'    && <HomeworkTab             user={currentUser} toast={toast}/>}
+          {page==='questionbank' && <QuestionBankTab       user={currentUser} store={store} setPage={setPage} toast={toast}/>}
+          {page==='exambuilder' && <ExamsTab               user={currentUser} store={store} setPage={setPage} toast={toast}/>}
+          {page==='managesubject' && <ManageSubjectTab     user={currentUser} toast={toast}/>}
+          {page==='communication' && <MessagesHub meId={currentUser?._id} role="teacher" />}
+          {page==='mshauri'    && <MshauriAITab            user={currentUser} store={store} setPage={setPage} toast={toast}/>}
           {page==='subjects'   && <ManageSubjectTab        user={currentUser} toast={toast}/>}
           {page==='profile'    && (<><TeacherProfileTab user={currentUser} setCurrentUser={setCurrentUser} store={store} setPage={setPage} toast={toast} /><EmailPrefsCard /></>)}
           {page==='documents'  && <DocumentsTab            user={currentUser} store={store} setPage={setPage} toast={toast}/>}
@@ -752,6 +774,7 @@ export default function TeacherPortal() {
         </div>
 
         <MobileBottomTabs tabs={TEACHER_MOBILE_TABS} page={page} setPage={setPage}/>
+        {endedId && <EndOfLessonOverlay classId={endedId} toast={toast} onClose={closeEnded}/>}
       </div>
     )
   }
@@ -963,7 +986,7 @@ export default function TeacherPortal() {
 
           {page === 'library' && <TeacherLibraryTab user={currentUser} toast={toast} />}
 
-          {page === 'timetable' && <TeacherTimetableTab user={currentUser} toast={toast} />}
+          {page === 'myclasses' && <MyClassesTab key={classesKey} user={currentUser} toast={toast} onEndLesson={setEndedId} />}
 
 
           {/* ── QUESTION BANK ── */}
@@ -983,10 +1006,6 @@ export default function TeacherPortal() {
             <TeacherLiveClassesTab user={currentUser} toast={toast} />
           )}
 
-          {/* ── SCHEDULE CLASSES ── (new scheduling system) */}
-          {page === 'scheduleclasses' && (
-            <ScheduleClassesTab user={currentUser} toast={toast} />
-          )}
 
           {/* ── MANAGE MY SUBJECT ── */}
           {page === 'managesubject' && (
@@ -999,6 +1018,7 @@ export default function TeacherPortal() {
              <CommunicationTab user={currentUser} store={store} setPage={setPage} toast={toast} />
            </>)}           {page === 'documents' && <DocumentsTab user={currentUser} store={store} setPage={setPage} toast={toast} />}
            {page === 'mydocs' && <TeacherDocsLibrary user={currentUser} toast={toast} onBack={null} />}
+           {page === 'reports' && <WeeklyReportGenerator user={currentUser} toast={toast} />}
 
            {/* ── MSHAURI AI ── */}
            {page === 'mshauri' && <MshauriAITab user={currentUser} store={store} setPage={setPage} toast={toast} />}
@@ -1009,6 +1029,8 @@ export default function TeacherPortal() {
 
         </div>
       </main>
+
+      {endedId && <EndOfLessonOverlay classId={endedId} toast={toast} onClose={closeEnded} />}
 
       {/* ── Mshauri Floating Button & Panel ── */}
       <MshauriFloatingButton user={currentUser} setPage={setPage} toast={toast} currentPage={page}/>
@@ -7401,6 +7423,8 @@ function WeeklyReportGenerator({ user, toast, onBack }) {
   const [lastSaved, setLastSaved] = useState(null)
   const [students, setStudents]   = useState([])
   const [publishing, setPublishing] = useState(false)
+  const [due, setDue] = useState(null)        // { week, items } — reports owed this week
+  const loadDue = () => api.get('/weekly-reports/due').then(r => setDue(r.data?.data || { items: [] })).catch(() => setDue({ items: [] }))
 
   // ── Load saved reports + students ──
   useEffect(() => {
@@ -7408,6 +7432,7 @@ function WeeklyReportGenerator({ user, toast, onBack }) {
       .then(r => setSaved(r.data?.data?.reports||[]))
       .catch(() => {})
       .finally(() => setLSaved(false))
+    loadDue()
     api.get('/users', { params:{ role:'student', limit:200 } })
       .then(r => setStudents(r.data?.users||r.data?.data?.users||[]))
       .catch(() => {})
@@ -7446,7 +7471,7 @@ function WeeklyReportGenerator({ user, toast, onBack }) {
       if (!silent) toast?.ok?.(r.data?.message||'Saved.')
       // Refresh saved list
       api.get('/weekly-reports/my').then(r2=>setSaved(r2.data?.data?.reports||[])).catch(()=>{})
-      if (publish) { setTimeout(()=>setView('list'), 800) }
+      if (publish) { loadDue(); setTimeout(()=>setView('list'), 800) }
     } catch(e) {
       if (!silent) toast?.error?.(e?.response?.data?.message||'Save failed.')
     } finally {
@@ -7473,8 +7498,43 @@ function WeeklyReportGenerator({ user, toast, onBack }) {
     try {
       const r = await api.post('/weekly-reports/'+id+'/publish')
       toast?.ok?.(r.data?.message||'Published.')
+      loadDue()
       api.get('/weekly-reports/my').then(r2=>setSaved(r2.data?.data?.reports||[])).catch(()=>{})
     } catch(e) { toast?.error?.(e?.response?.data?.message||'Failed.') }
+  }
+
+  // A fresh form; `pre` fills in what we already know.
+  const EMPTY = { _id:'', studentName:'', studentId:'', classLevel:'', subject:'', week:'', period:'Term 1',
+    topics:[''], subTopics:[''], activities:[''], understanding:'', participation:'', generalPerf:'',
+    strengths:[''], improvements:[''], assessments:[{desc:'',score:'',outOf:''}], homework:[''], remarks:'' }
+  const startForm = (pre = {}) => {
+    setF(p => ({ ...p, ...EMPTY, week: due?.week || '', ...pre }))
+    setLastSaved(null); setView('form')
+  }
+  // "Write report" from the due list: student, subject, week and the
+  // topics of this week's lessons are filled in already.
+  const startFor = (it) => {
+    const topics = (it.topics || []).map(t => t.split(': ')[0]).filter((t, k, a) => t && a.indexOf(t) === k)
+    const subs = (it.topics || []).map(t => t.split(': ').slice(1).join(': ')).filter(Boolean)
+    startForm({ studentId: String(it.student._id), studentName: `${it.student.firstName} ${it.student.lastName}`.trim(),
+      classLevel: it.student.gradeLevel || '', subject: (it.subjects || [])[0] || '',
+      topics: topics.length ? topics : [''], subTopics: subs.length ? subs : [''] })
+  }
+  // Open a saved report to continue or correct it.
+  const openForEdit = async (id) => {
+    try {
+      const r = await api.get('/weekly-reports/' + id)
+      const x = r.data?.data?.report
+      if (!x) throw new Error()
+      const arr = (v) => (Array.isArray(v) && v.length ? v : [''])
+      setF(p => ({ ...p, ...EMPTY, _id: x._id, studentId: x.studentId ? String(x.studentId) : '', studentName: x.studentName || '',
+        classLevel: x.classLevel || '', subject: x.subject || '', week: x.week || '', period: x.period || 'Term 1',
+        topics: arr(x.topics), subTopics: arr(x.subTopics), activities: arr(x.activities), homework: arr(x.homework),
+        strengths: arr(x.strengths), improvements: arr(x.improvements),
+        assessments: (x.assessments || []).length ? x.assessments.map(a => ({ desc: a.desc || '', score: a.score ?? '', outOf: a.outOf ?? '' })) : [{ desc:'', score:'', outOf:'' }],
+        understanding: x.understanding || '', participation: x.participation || '', generalPerf: x.generalPerf || '', remarks: x.remarks || '' }))
+      setLastSaved(null); setView('form')
+    } catch { toast?.error?.('Could not open the report.') }
   }
 
   // Styles
@@ -7495,11 +7555,54 @@ function WeeklyReportGenerator({ user, toast, onBack }) {
             <div style={{ fontSize:10, fontWeight:700, color:'#7D1025', textTransform:'uppercase', letterSpacing:'.1em' }}>Teacher Reports</div>
             <div style={{ fontFamily:"'Instrument Serif',serif", fontSize:24, color:'#1A0F0E' }}>Weekly Reports</div>
           </div>
-          <button onClick={()=>{ setF(p=>({...p,studentName:'',studentId:'',subject:'',week:'',topics:[''],subTopics:[''],activities:[''],understanding:'',participation:'',generalPerf:'',strengths:[''],improvements:[''],assessments:[{desc:'',score:'',outOf:''}],homework:[''],remarks:''})); setLastSaved(null); setView('form') }}
+          <button onClick={()=>startForm()}
             style={{ background:'#7D1025', color:'#fff', border:'none', padding:'10px 20px', borderRadius:8, fontSize:13, fontWeight:700, cursor:'pointer' }}>
             + New report
           </button>
         </div>
+
+        {/* ── Due this week: the same rule as the Friday 5 PM show-cause check ── */}
+        {due && due.items && due.items.length > 0 && (() => {
+          const done = due.items.filter(x => x.cleared).length
+          const all = due.items.length
+          return (
+            <div style={{ ...card, padding:0, overflow:'hidden', border: done === all ? '1px solid #A7F3D0' : '1px solid #F3D9A4' }}>
+              <div style={{ padding:'14px 18px', background: done === all ? '#ECFDF5' : '#FFF8EB', display:'flex', gap:12, alignItems:'center', flexWrap:'wrap' }}>
+                <div style={{ flex:1, minWidth:220 }}>
+                  <div style={{ fontSize:14, fontWeight:800, color:'#1A0F0E' }}>Reports due this week{due.week ? ` — ${due.week}` : ''}</div>
+                  <div style={{ fontSize:12.5, color:'#7A6652', marginTop:2 }}>
+                    {done === all ? 'All done. Nothing more is needed this week.' : <>One report for each student you taught this week. Publish by <b>Friday 5:00 PM</b> (Nairobi time); a reminder comes on Thursday.</>}
+                  </div>
+                </div>
+                <div style={{ fontSize:22, fontWeight:900, color: done === all ? '#065F46' : '#B45309' }}>{done}/{all}</div>
+              </div>
+              {due.items.map(it => {
+                const name = `${it.student.firstName} ${it.student.lastName}`.trim()
+                const st = it.cleared ? 'done' : it.report?.status === 'draft' ? 'draft' : 'todo'
+                return (
+                  <div key={it.student._id} style={{ display:'flex', gap:12, alignItems:'center', padding:'11px 18px', borderTop:'1px solid #E8E2D6', flexWrap:'wrap' }}>
+                    <div style={{ flex:1, minWidth:180 }}>
+                      <div style={{ fontSize:13.5, fontWeight:700, color:'#1A0F0E' }}>{name}</div>
+                      <div style={{ fontSize:11.5, color:'#857973' }}>{(it.subjects||[]).join(', ')} · {it.lessons} lesson{it.lessons===1?'':'s'} this week{it.student.onBreak ? ' · on a break' : ''}</div>
+                    </div>
+                    <span style={{ padding:'3px 10px', borderRadius:99, fontSize:11, fontWeight:800,
+                      background: st==='done' ? '#D1FAE5' : st==='draft' ? '#FEF3C7' : '#FEE2E2', color: st==='done' ? '#065F46' : st==='draft' ? '#B45309' : '#991B1B' }}>
+                      {st==='done' ? 'Published ✓' : st==='draft' ? 'Draft — not published' : 'Not started'}
+                    </span>
+                    <div style={{ display:'flex', gap:6 }}>
+                      {st==='todo' && <button onClick={()=>startFor(it)} style={{ padding:'6px 14px', borderRadius:7, border:'none', background:'#7D1025', color:'#fff', fontSize:12, fontWeight:800, cursor:'pointer' }}>Write report</button>}
+                      {st==='draft' && <>
+                        <button onClick={()=>openForEdit(it.report._id)} style={{ padding:'6px 12px', borderRadius:7, border:'1px solid #E8E2D6', background:'#fff', color:'#564844', fontSize:12, fontWeight:700, cursor:'pointer' }}>Edit</button>
+                        <button onClick={()=>publishExisting(it.report._id)} style={{ padding:'6px 14px', borderRadius:7, border:'none', background:'#065F46', color:'#fff', fontSize:12, fontWeight:800, cursor:'pointer' }}>Publish</button>
+                      </>}
+                      {st==='done' && it.report && <button onClick={()=>openReport(it.report._id)} style={{ padding:'6px 12px', borderRadius:7, border:'1px solid #E8E2D6', background:'#fff', color:'#564844', fontSize:12, fontWeight:700, cursor:'pointer' }}>View</button>}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )
+        })()}
 
         {loadingSaved ? (
           <div style={{ textAlign:'center', color:'#9A9A9A', padding:'40px 0', fontSize:13 }}>Loading saved reports...</div>
@@ -7507,13 +7610,13 @@ function WeeklyReportGenerator({ user, toast, onBack }) {
           <div style={{ ...card, textAlign:'center', padding:'40px 24px' }}>
             <div style={{ fontFamily:"'Instrument Serif',serif", fontSize:20, color:'#1A0F0E', marginBottom:8 }}>No reports yet</div>
             <div style={{ fontSize:13, color:'#7A6652', marginBottom:20 }}>Create your first weekly report — it auto-saves as you type and notifies parents when you publish.</div>
-            <button onClick={()=>setView('form')} style={{ background:'#7D1025', color:'#fff', border:'none', padding:'10px 24px', borderRadius:8, fontSize:13, fontWeight:700, cursor:'pointer' }}>Create first report</button>
+            <button onClick={()=>startForm()} style={{ background:'#7D1025', color:'#fff', border:'none', padding:'10px 24px', borderRadius:8, fontSize:13, fontWeight:700, cursor:'pointer' }}>Create first report</button>
           </div>
         ) : (
           <div style={{ ...card, padding:0, overflow:'hidden' }}>
             <table style={{ width:'100%', borderCollapse:'collapse' }}>
               <thead><tr style={{ background:'#FBFAF5' }}>
-                {['Student','Subject','Period','Score','Status','Last saved',''].map(h=>(
+                {['Student','Subject','Week','Score','Status','Last saved',''].map(h=>(
                   <th key={h} style={{ padding:'9px 14px', textAlign:'left', fontSize:10.5, fontWeight:700, color:'#7D1025', textTransform:'uppercase', letterSpacing:'.06em', borderBottom:'1.5px solid #E8E2D6' }}>{h}</th>
                 ))}
               </tr></thead>
@@ -7524,7 +7627,7 @@ function WeeklyReportGenerator({ user, toast, onBack }) {
                     <tr key={r._id} style={{ borderTop:'1px solid #E8E2D6' }}>
                       <td style={{ padding:'10px 14px', fontWeight:700, fontSize:13, color:'#1A0F0E' }}>{r.studentName}</td>
                       <td style={{ padding:'10px 14px', color:'#564844', fontSize:13 }}>{r.subject}</td>
-                      <td style={{ padding:'10px 14px', fontSize:12.5, color:'#857973' }}>Term {r.term} · {r.academicYear}</td>
+                      <td style={{ padding:'10px 14px', fontSize:12.5, color:'#857973' }}>{r.week || r.period || '—'}</td>
                       <td style={{ padding:'10px 14px', fontWeight:800, color:r.overallAverage!==null?'#7D1025':'#9A9A9A' }}>
                         {r.overallAverage!==null?r.overallAverage+'% ('+r.meanGrade+')':'—'}
                       </td>
@@ -7537,6 +7640,7 @@ function WeeklyReportGenerator({ user, toast, onBack }) {
                       <td style={{ padding:'10px 14px' }}>
                         <div style={{ display:'flex', gap:6 }}>
                           <button onClick={()=>openReport(r._id)} style={{ padding:'5px 10px', borderRadius:6, border:'1px solid #E8E2D6', background:'#fff', color:'#564844', fontSize:11.5, cursor:'pointer', fontWeight:600 }}>View</button>
+                          <button onClick={()=>openForEdit(r._id)} style={{ padding:'5px 10px', borderRadius:6, border:'1px solid #E8E2D6', background:'#fff', color:'#564844', fontSize:11.5, cursor:'pointer', fontWeight:600 }}>Edit</button>
                           {r.status==='draft'&&(
                             <button onClick={()=>publishExisting(r._id)} style={{ padding:'5px 10px', borderRadius:6, border:'none', background:'#065F46', color:'#fff', fontSize:11.5, cursor:'pointer', fontWeight:700 }}>
                               Publish & notify parent
@@ -7562,7 +7666,7 @@ function WeeklyReportGenerator({ user, toast, onBack }) {
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20 }}>
         <button onClick={()=>setView('list')} style={{ background:'transparent', border:'none', cursor:'pointer', color:'#7D1025', fontSize:12.5, fontWeight:700, padding:0 }}>← All reports</button>
         <div style={{ display:'flex', flexDirection:'column', alignItems:'center' }}>
-          <div style={{ fontFamily:"'Instrument Serif',serif", fontSize:22, color:'#1A0F0E' }}>New Weekly Report</div>
+          <div style={{ fontFamily:"'Instrument Serif',serif", fontSize:22, color:'#1A0F0E' }}>{f._id ? 'Weekly Report' : 'New Weekly Report'}</div>
           {lastSaved&&<div style={{ fontSize:11, color:'#065F46', marginTop:2 }}>✓ Auto-saved {new Date(lastSaved).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}</div>}
         </div>
         <div style={{ display:'flex', gap:8 }}>
@@ -10267,17 +10371,6 @@ function ScheduleClassesTab({ user, toast }) {
   }
   const teachNext = (ix) => move(ix, 0)
 
-  const pinLesson = async (classId, idOrKey) => {
-    try {
-      const body = String(idOrKey).includes('||')
-        ? { topicName: idOrKey.split('||')[0], subtopicName: idOrKey.split('||')[1] }
-        : { lessonId: idOrKey }
-      const r = await api.patch(`/liveclasses/${classId}/lesson`, body)
-      toast?.ok?.(r.data?.message || 'Topic set for that lesson.')
-      openSlot(sel)
-    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not set the topic.') }
-  }
-
   const save = async () => {
     if (!sel || !queue.length) return
     setSaving(true)
@@ -10296,19 +10389,6 @@ function ScheduleClassesTab({ user, toast }) {
       x.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
   }
 
-  const joinBtn = (c) => c.status === 'live'
-    ? (
-      <button onClick={() => window.open('/classroom/' + c._id, '_blank')}
-        style={{ padding: '7px 16px', borderRadius: 8, border: 'none', background: GREEN, color: '#fff', fontSize: 11.5, fontWeight: 800, cursor: 'pointer', whiteSpace: 'nowrap' }}>
-        Join live
-      </button>
-    ) : (
-      <button onClick={() => window.open('/classroom/' + c._id, '_blank')}
-        style={{ padding: '7px 16px', borderRadius: 8, border: `1.5px solid ${CRIM}`, background: '#fff', color: CRIM, fontSize: 11.5, fontWeight: 800, cursor: 'pointer', whiteSpace: 'nowrap' }}>
-        Open classroom
-      </button>
-    )
-
   // ── Subject list ──
   if (!sel) {
     const groups = {}
@@ -10324,7 +10404,7 @@ function ScheduleClassesTab({ user, toast }) {
           <div style={kicker}>Lesson plans</div>
           <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, color: INK, margin: '2px 0 0' }}>What each class learns next</h2>
           <div style={{ fontSize: 13, color: MUT, marginTop: 3, maxWidth: 640 }}>
-            Pick a subject to see its students, its full lesson plan, and every scheduled lesson with one-tap classroom access. Rearrange the plan and your timetabled classes follow it automatically.
+            Pick a subject to see its lesson plan. Drag lessons into the order you want to teach them; your coming lessons follow that order automatically.
           </div>
         </div>
         {entries === null && <div style={{ color: MUT, fontSize: 13 }}>Loading your subjects...</div>}
@@ -10332,7 +10412,7 @@ function ScheduleClassesTab({ user, toast }) {
           <div style={{ ...card, borderStyle: 'dashed', padding: 26, textAlign: 'center' }}>
             <div style={{ fontWeight: 800, fontSize: 15, color: INK }}>No timetable slots yet</div>
             <div style={{ fontSize: 12.5, color: MUT, marginTop: 5 }}>
-              Lesson plans are managed per slotted class. Set your weekly timetable first in the <b>Timetable</b> tab, then arrange what each class learns here.
+              Lesson plans are managed per slotted class. Set your teaching times first in <b>Weekly timetable</b>, then arrange what each class learns here.
             </div>
           </div>
         )}
@@ -10353,7 +10433,7 @@ function ScheduleClassesTab({ user, toast }) {
                     </span>
                   ))}
                 </div>
-                {!lead.subjectId && <div style={{ fontSize: 10.5, color: '#B45309', fontWeight: 700, marginTop: 10 }}>Not linked to a syllabus - link it in the Timetable tab to manage lessons</div>}
+                {!lead.subjectId && <div style={{ fontSize: 10.5, color: '#B45309', fontWeight: 700, marginTop: 10 }}>Not linked to a syllabus - link it in Weekly timetable to manage lessons</div>}
               </div>
             )
           })}
@@ -10389,7 +10469,7 @@ function ScheduleClassesTab({ user, toast }) {
       )}
       {plan && plan.linked === false && (
         <div style={{ background: '#FFF8EB', border: '1.5px solid #F1E4C8', borderRadius: 12, padding: 18, fontSize: 12.5, color: '#7A5A17' }}>
-          This slot is not linked to a syllabus, so there is no lesson plan to manage. Edit the slot in the <b>Timetable</b> tab and pick its subject from the syllabus list.
+          This slot is not linked to a syllabus, so there is no lesson plan to manage. Edit the slot in <b>Weekly timetable</b> and pick its subject from the syllabus list.
         </div>
       )}
 
@@ -10445,8 +10525,8 @@ function ScheduleClassesTab({ user, toast }) {
           {/* RIGHT: live lessons + students */}
           <div style={{ display: 'grid', gap: 16 }}>
             <div style={{ ...card, padding: 18 }}>
-              <div style={{ ...kicker, color: GREEN }}>Live lessons</div>
-              <div style={{ fontSize: 11, color: MUT, marginTop: 2 }}>your scheduled classes for this subject - live ones glow green</div>
+              <div style={{ ...kicker, color: GREEN }}>Coming lessons</div>
+              <div style={{ fontSize: 11, color: MUT, marginTop: 2 }}>what each coming lesson will teach in this order (to change one lesson only, use This week \u2192 Lesson)</div>
               {dirty && <div style={{ fontSize: 10.5, color: CRIM, fontWeight: 800, marginTop: 6 }}>Previewing your unsaved order - press Save order to apply it.</div>}
               <div style={{ display: 'grid', gap: 6, marginTop: 10 }}>
                 {(plan.upcoming || []).length === 0 && <div style={{ fontSize: 12, color: MUT }}>No classes scheduled yet - the scheduler creates them from your timetable within a few hours.</div>}
@@ -10466,13 +10546,7 @@ function ScheduleClassesTab({ user, toast }) {
                         {shown || <i style={{ color: MUT, fontWeight: 400 }}>end of plan reached</i>}
                         {c.pinned && <span style={{ fontSize: 9, fontWeight: 900, color: '#B45309', marginLeft: 6 }}>PINNED</span>}
                       </span>
-                      {joinBtn(c)}
                     </div>
-                    <select defaultValue="" onChange={ev => { if (ev.target.value) pinLesson(c._id, ev.target.value) }}
-                      style={{ padding: '5px 9px', border: `1px solid ${TRACK}`, borderRadius: 7, fontSize: 10.5, color: MUT, width: '100%' }}>
-                      <option value="">Change this lesson's topic...</option>
-                      {queue.map(l => <option key={l.id} value={l.id}>{l.title}</option>)}
-                    </select>
                   </div>
                 )})})()}
               </div>
@@ -14609,23 +14683,16 @@ function BookCard({ book, onView, onDelete, onEdit, canDelete }) {
   )
 }
 
-// ═══════════════════════════════════════════════════════════
-// TeacherTimetableTab
-// ═══════════════════════════════════════════════════════════
-// Recurring weekly timetable management for teachers.
-//
-// Flow:
-//   - Loads the teacher's existing slots via GET /timetable/me
-//   - "Add slot" expands an inline form
-//   - Form supports either explicit student picker OR broadcast
-//     by curriculum + grade (radio toggle)
-//   - Existing slots can be edited (inline) or deleted
-//
-// Slots are stored as recurring weekly templates — one document
-// represents "Maths every Monday 09:00–10:00 for these students."
-// The Student Portal reads from the same source.
-// ═══════════════════════════════════════════════════════════
-function TeacherTimetableTab({ user, toast }) {
+// ═══════════════════════════════════════════════════════════════════
+// MY CLASSES — the teacher's one place for lessons (it replaces the old
+// Schedule Classes and Timetable modules):
+//   This week        lessons to close, the coming lessons (start, lesson,
+//                    homework, move, cancel)
+//   Weekly timetable the repeating slots that create the lessons
+//   Lesson order     the order the syllabus is taught in
+//   Past lessons     registers
+// ═══════════════════════════════════════════════════════════════════
+function MyClassesTab({ user, toast, onEndLesson }) {
   // The teacher's scheduling home under the one-system rule: the weekly
   // timetable below IS the class schedule. Slot a time once and the real
   // classes materialize for every coming week until the slot is edited.
@@ -14643,6 +14710,25 @@ function TeacherTimetableTab({ user, toast }) {
   const [resched, setResched] = useState(null)      // { cls, when, mins }
   const [saving, setSaving] = useState(false)
   const [extraFor, setExtraFor] = useState(null)    // weekly slot an extra lesson is being booked for
+  const [tab, setTab] = useState('week')
+  const [hwFor, setHwFor] = useState(null)          // class whose homework is open
+  const [lessonFor, setLessonFor] = useState(null)  // { cls, options|null, error }
+  const openLessonPicker = (cls) => {
+    const entryId = cls.timetableEntryId ? String(cls.timetableEntryId._id || cls.timetableEntryId) : ''
+    if (!entryId) { setLessonFor({ cls, options: [], error: 'This lesson is not part of a timetabled lesson plan. Set its topic when you book it.' }); return }
+    setLessonFor({ cls, options: null })
+    api.get(`/timetable/${entryId}/lesson-plan`)
+      .then(r => setLessonFor(x => x && ({ ...x, options: (r.data?.data?.queue || []).map(l => ({ value: l._id || l.key, label: `${l.topicName && l.topicName !== l.title ? l.topicName + ': ' : ''}${l.title}`, key: l.key })) })))
+      .catch(e => setLessonFor(x => x && ({ ...x, options: [], error: e?.response?.data?.message || 'Could not load the lesson plan.' })))
+  }
+  const pickLesson = async (cls, opt) => {
+    try {
+      const body = opt.key ? { topicName: opt.key.split('||')[0], subtopicName: opt.key.split('||')[1] } : { lessonId: opt.value }
+      const r = await api.patch(`/liveclasses/${cls._id}/lesson`, body)
+      toast?.ok?.(r.data?.message || 'Lesson set.')
+      setLessonFor(null); load()
+    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not set the lesson.') }
+  }
   const confirmSlot = async (e) => {
     try { const r = await api.post('/timetable/' + e._id + '/confirm'); toast?.ok?.(r.data?.message || 'Slot confirmed.'); load() }
     catch (err) { toast?.error?.(err?.response?.data?.message || 'Could not confirm the slot.') }
@@ -14797,25 +14883,93 @@ function TeacherTimetableTab({ user, toast }) {
 
   if (loading) return <div style={{ padding: 40, textAlign: 'center', color: C.mut, fontSize: 13 }}>Loading your timetable...</div>
 
+  const TABS = [['week', 'This week'], ['timetable', 'Weekly timetable'], ['order', 'Lesson order'], ['past', 'Past lessons']]
+  const proposed = entries.filter(e => e.needsConfirmation).length
   return (
     <div style={{ display: 'grid', gap: 16 }}>
       <div>
-        <h2 style={{ fontSize: 19, fontWeight: 800, color: C.ink, margin: 0 }}>My timetable</h2>
+        <h2 style={{ fontSize: 19, fontWeight: 800, color: C.ink, margin: 0 }}>My classes</h2>
         <p style={{ fontSize: 12.5, color: C.mut, margin: '4px 0 0' }}>
-          Slot a time once and it repeats weekly \u2014 the real classes are created automatically for every coming week.
-          Need a one-off change? Cancel or move the class below without touching your weekly pattern.
+          Your lessons in one place. When a lesson ends you close it, check its homework and choose the next lesson.
         </p>
       </div>
+      <div role="tablist" style={{ display: 'flex', gap: 4, flexWrap: 'wrap', borderBottom: `1.5px solid ${C.line}` }}>
+        {TABS.map(([k, l]) => (
+          <button key={k} role="tab" aria-selected={tab === k} onClick={() => setTab(k)}
+            style={{ padding: '9px 14px', border: 'none', borderBottom: `3px solid ${tab === k ? C.crimson : 'transparent'}`, marginBottom: -1.5, background: 'none', color: tab === k ? C.crimson : C.mut, fontSize: 13, fontWeight: 800, cursor: 'pointer' }}>
+            {l}{k === 'timetable' && proposed > 0 ? ` (${proposed} to confirm)` : ''}
+          </button>
+        ))}
+      </div>
 
-      <LessonsToClose toast={toast} />
+      {tab === 'week' && (<>
+      <LessonsToClose toast={toast} onOpen={onEndLesson} />
       <HelpRequests toast={toast} />
+      {proposed > 0 && (
+        <div style={{ background: '#FFF7E6', border: '1px solid #F3D9A4', borderRadius: 12, padding: '12px 14px', fontSize: 12.5, color: '#7A4B00' }}>
+          <b>{proposed} proposed weekly slot{proposed > 1 ? 's' : ''} to confirm.</b> <button onClick={() => setTab('timetable')} style={{ marginLeft: 6, padding: '3px 10px', borderRadius: 7, border: '1px solid #F3D9A4', background: '#fff', color: '#7A4B00', fontSize: 11.5, fontWeight: 800, cursor: 'pointer' }}>Review in Weekly timetable</button>
+        </div>
+      )}
+      {/* ── This week's classes (occurrences) ── */}
+      <div style={{ background: '#fff', border: `1px solid ${C.line}`, borderRadius: 12, padding: 14 }}>
+        <b style={{ fontSize: 14, color: C.ink }}>Coming lessons (next 7 days)</b>
+        <div style={{ fontSize: 11, color: C.mut, margin: '2px 0 10px' }}>Start a lesson, choose what it teaches, check its homework, or move or cancel just this one lesson \u2014 your weekly timetable is never affected.</div>
+        <div style={{ display: 'grid', gap: 8 }}>
+          {week.map(cls => {
+            const cancelled = cls.status === 'cancelled'
+            return (
+              <div key={cls._id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', border: `1px solid ${C.line}`, borderRadius: 10, background: cancelled ? '#FAFAF8' : '#fff', opacity: cancelled ? 0.75 : 1, flexWrap: 'wrap' }}>
+                <div style={{ minWidth: 86 }}>
+                  <div style={{ fontSize: 11.5, fontWeight: 800, color: C.ink }}>{fmtDay(cls.scheduledAt)}</div>
+                  <div style={{ fontSize: 11, color: C.crimson, fontWeight: 800 }}>{fmtTime(cls.scheduledAt)} \u00b7 {cls.durationMins || 60}m</div>
+                </div>
+                <div style={{ flex: 1, minWidth: 150 }}>
+                  <div style={{ fontSize: 12.5, fontWeight: 700, color: C.ink }}>{cls.title || cls.subject}</div>
+                  {cls.syllabusTopicName && <div style={{ fontSize: 10.5, color: C.gold, fontWeight: 700 }}>{cls.syllabusTopicName}{cls.syllabusSubtopicName ? `: ${cls.syllabusSubtopicName}` : ''}</div>}
+                  <div style={{ fontSize: 10, color: C.mut }}>{(cls.assignedStudents || []).length} student(s)</div>
+                </div>
+                {cancelled ? chip('#F3F4F6', C.mut, 'cancelled \u00b7 slot continues next week')
+                  : (
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                      {cls.detached && chip('#FEF3C7', '#B45309', 'moved')}
+                      {cls.timetableEntryId && !cls.detached && chip('#EFF6EF', C.green, 'from timetable')}
+                      {(() => {
+                        const start = new Date(cls.scheduledAt)
+                        const isToday = start.toDateString() === new Date().toDateString()
+                        const soonOrLive = cls.status === 'live' || (isToday && start - Date.now() < 6 * 3600e3)
+                        if (cls.status === 'cancelled' || !soonOrLive) return null
+                        return (
+                          <button onClick={() => window.open('/classroom/' + cls._id, '_blank')}
+                            style={{ padding: '5px 12px', borderRadius: 7, border: 'none', background: cls.status === 'live' ? '#15803D' : '#7D1025', color: '#fff', fontSize: 10.5, fontWeight: 800, cursor: 'pointer' }}>
+                            {cls.status === 'live' ? 'Join live' : 'Start class'}
+                          </button>
+                        )
+                      })()}
+                      {new Date(cls.scheduledAt) <= Date.now() && !cls.outcome && (
+                        <button onClick={() => onEndLesson?.(cls._id)} style={{ padding: '6px 12px', borderRadius: 7, border: 'none', background: C.crimson, color: '#fff', fontSize: 10.5, fontWeight: 800, cursor: 'pointer' }}>Finish lesson</button>
+                      )}
+                      {new Date(cls.scheduledAt) > Date.now() && <button onClick={() => openLessonPicker(cls)} style={{ padding: '6px 12px', borderRadius: 7, border: `1px solid ${C.line}`, background: '#fff', fontSize: 10.5, fontWeight: 800, cursor: 'pointer', color: C.ink }}>Lesson</button>}
+                      {!cls.autoHomeworkGeneratedAt && <button onClick={() => setHwFor(cls)} style={{ padding: '6px 12px', borderRadius: 7, border: `1px solid ${C.line}`, background: '#fff', fontSize: 10.5, fontWeight: 800, cursor: 'pointer', color: C.ink }}>Homework</button>}
+                      <button onClick={() => openResched(cls)} style={{ padding: '6px 12px', borderRadius: 7, border: `1px solid ${C.line}`, background: '#fff', fontSize: 10.5, fontWeight: 800, cursor: 'pointer', color: C.ink }}>Move</button>
+                      <button onClick={() => cancelOccurrence(cls)} style={{ padding: '6px 12px', borderRadius: 7, border: '1px solid #FCA5A5', background: '#fff', fontSize: 10.5, fontWeight: 800, cursor: 'pointer', color: C.red }}>Cancel</button>
+                    </div>
+                  )}
+              </div>
+            )
+          })}
+          {week.length === 0 && <div style={{ fontSize: 12, color: C.mut, padding: '14px 0' }}>No lessons in the coming week. Add your teaching times in Weekly timetable and they appear here.</div>}
+        </div>
+      </div>
 
+      </>)}
+
+      {tab === 'timetable' && (<>
+      <div style={{ fontSize: 12.5, color: C.mut }}>Slot a time once and it repeats every week; the lessons are created automatically. Changes here apply to all future lessons from that slot.</div>
       {entries.some(e => e.needsConfirmation) && (
         <div style={{ background: '#FFF7E6', border: '1px solid #F3D9A4', borderRadius: 12, padding: '12px 14px', fontSize: 12.5, color: '#7A4B00' }}>
           <b>Proposed slots to confirm.</b> These times were picked automatically. Confirm each one (the family is then told the weekly time), or press Edit to choose a better time.
         </div>
       )}
-
       {/* ── Weekly pattern ── */}
       <div style={{ background: '#fff', border: `1px solid ${C.line}`, borderRadius: 12, padding: 14 }}>
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 10 }}>
@@ -14872,56 +15026,55 @@ function TeacherTimetableTab({ user, toast }) {
         )}
       </div>
 
-      {/* ── This week's classes (occurrences) ── */}
-      <div style={{ background: '#fff', border: `1px solid ${C.line}`, borderRadius: 12, padding: 14 }}>
-        <b style={{ fontSize: 14, color: C.ink }}>This week\u2019s classes</b>
-        <div style={{ fontSize: 11, color: C.mut, margin: '2px 0 10px' }}>Created from your timetable (plus any older manual classes). Cancel or move a single class here \u2014 the weekly slot is never affected.</div>
-        <div style={{ display: 'grid', gap: 8 }}>
-          {week.map(cls => {
-            const cancelled = cls.status === 'cancelled'
-            return (
-              <div key={cls._id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', border: `1px solid ${C.line}`, borderRadius: 10, background: cancelled ? '#FAFAF8' : '#fff', opacity: cancelled ? 0.75 : 1, flexWrap: 'wrap' }}>
-                <div style={{ minWidth: 86 }}>
-                  <div style={{ fontSize: 11.5, fontWeight: 800, color: C.ink }}>{fmtDay(cls.scheduledAt)}</div>
-                  <div style={{ fontSize: 11, color: C.crimson, fontWeight: 800 }}>{fmtTime(cls.scheduledAt)} \u00b7 {cls.durationMins || 60}m</div>
-                </div>
-                <div style={{ flex: 1, minWidth: 150 }}>
-                  <div style={{ fontSize: 12.5, fontWeight: 700, color: C.ink }}>{cls.title || cls.subject}</div>
-                  {cls.syllabusTopicName && <div style={{ fontSize: 10.5, color: C.gold, fontWeight: 700 }}>{cls.syllabusTopicName}{cls.syllabusSubtopicName ? `: ${cls.syllabusSubtopicName}` : ''}</div>}
-                  <div style={{ fontSize: 10, color: C.mut }}>{(cls.assignedStudents || []).length} student(s)</div>
-                </div>
-                {cancelled ? chip('#F3F4F6', C.mut, 'cancelled \u00b7 slot continues next week')
-                  : (
-                    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                      {cls.detached && chip('#FEF3C7', '#B45309', 'moved')}
-                      {cls.timetableEntryId && !cls.detached && chip('#EFF6EF', C.green, 'from timetable')}
-                      {(() => {
-                        const start = new Date(cls.scheduledAt)
-                        const isToday = start.toDateString() === new Date().toDateString()
-                        const soonOrLive = cls.status === 'live' || (isToday && start - Date.now() < 6 * 3600e3)
-                        if (cls.status === 'cancelled' || !soonOrLive) return null
-                        return (
-                          <button onClick={() => window.open('/classroom/' + cls._id, '_blank')}
-                            style={{ padding: '5px 12px', borderRadius: 7, border: 'none', background: cls.status === 'live' ? '#15803D' : '#7D1025', color: '#fff', fontSize: 10.5, fontWeight: 800, cursor: 'pointer' }}>
-                            {cls.status === 'live' ? 'Join live' : 'Start class'}
-                          </button>
-                        )
-                      })()}
-                      <button onClick={() => openResched(cls)} style={{ padding: '6px 12px', borderRadius: 7, border: `1px solid ${C.line}`, background: '#fff', fontSize: 10.5, fontWeight: 800, cursor: 'pointer', color: C.ink }}>Move</button>
-                      <button onClick={() => cancelOccurrence(cls)} style={{ padding: '6px 12px', borderRadius: 7, border: '1px solid #FCA5A5', background: '#fff', fontSize: 10.5, fontWeight: 800, cursor: 'pointer', color: C.red }}>Cancel</button>
-                    </div>
-                  )}
-              </div>
-            )
-          })}
-          {week.length === 0 && <div style={{ fontSize: 12, color: C.mut, padding: '14px 0' }}>No classes in the coming week. Add a weekly slot above and they will appear here.</div>}
-        </div>
-      </div>
+      </>)}
 
-      {/* ── Past classes: per-lesson registers ── */}
+      {tab === 'order' && <ScheduleClassesTab user={user} toast={toast} />}
+
+      {tab === 'past' && (
       <div style={{ marginTop: 14 }}>
         <RecentClassRegisters toast={toast} classes={loading ? null : classes} />
       </div>
+
+      )}
+
+      {/* ── Homework of one lesson ── */}
+      {hwFor && (
+        <div onClick={() => { setHwFor(null); load() }} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 90, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 14 }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 14, width: 'min(720px,100%)', maxHeight: '92vh', overflow: 'auto', padding: 20, display: 'grid', gap: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+              <div style={{ flex: 1 }}>
+                <b style={{ fontSize: 15.5, color: C.ink }}>Homework — {hwFor.subject || hwFor.title}</b>
+                <div style={{ fontSize: 11.5, color: C.mut }}>{fmtDay(hwFor.scheduledAt)} {fmtTime(hwFor.scheduledAt)} · sent when you close the lesson as taught</div>
+              </div>
+              <button onClick={() => { setHwFor(null); load() }} style={{ padding: '7px 14px', borderRadius: 9, border: `1.5px solid ${C.line}`, background: '#fff', color: C.ink, fontSize: 12.5, fontWeight: 800, cursor: 'pointer' }}>Done</button>
+            </div>
+            <HomeworkEditor classId={hwFor._id} toast={toast} />
+          </div>
+        </div>
+      )}
+
+      {/* ── What one lesson teaches ── */}
+      {lessonFor && (
+        <div onClick={() => setLessonFor(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 90, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 14 }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 14, width: 'min(480px,100%)', padding: 20, display: 'grid', gap: 10 }}>
+            <b style={{ fontSize: 15, color: C.ink }}>What will this lesson teach?</b>
+            <div style={{ fontSize: 11.5, color: C.mut }}>{lessonFor.cls.subject || lessonFor.cls.title} · {fmtDay(lessonFor.cls.scheduledAt)} {fmtTime(lessonFor.cls.scheduledAt)}{lessonFor.cls.syllabusSubtopicName || lessonFor.cls.syllabusTopicName ? ` · now: ${[lessonFor.cls.syllabusTopicName, lessonFor.cls.syllabusSubtopicName].filter(Boolean).join(': ')}` : ''}</div>
+            {lessonFor.error && <div style={{ fontSize: 12.5, color: C.red }}>{lessonFor.error}</div>}
+            {!lessonFor.error && lessonFor.options === null && <div style={{ fontSize: 12.5, color: C.mut }}>Loading the lesson plan…</div>}
+            {lessonFor.options && lessonFor.options.length > 0 && (
+              <select defaultValue="" style={inp} onChange={e => { const o = lessonFor.options.find(x => String(x.value) === e.target.value); if (o) pickLesson(lessonFor.cls, o) }}>
+                <option value="">Choose a lesson…</option>
+                {lessonFor.options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
+            )}
+            {lessonFor.options && !lessonFor.options.length && !lessonFor.error && <div style={{ fontSize: 12.5, color: C.mut }}>Every lesson in the plan has been taught.</div>}
+            <div style={{ fontSize: 11, color: C.mut }}>The lessons after it move along so nothing is taught twice. To change the order of the whole plan, use Lesson order.</div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <button onClick={() => setLessonFor(null)} style={{ padding: '9px 16px', borderRadius: 9, border: `1.5px solid ${C.line}`, background: '#fff', color: C.mut, fontSize: 12.5, fontWeight: 800, cursor: 'pointer' }}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Slot modal ── */}
       {modal && form && (

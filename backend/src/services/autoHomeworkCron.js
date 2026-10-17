@@ -105,17 +105,14 @@ async function priorLessonNames(lc) {
   }
 }
 
-async function buildPaper(lc, priorNames, total) {
-  // Active questions only, and never one whose required diagram has
-  // not been uploaded: "study the diagram below" with no diagram is
-  // unanswerable, and activation no longer guarantees artwork exists.
+// Questions usable for this class's homework: active, a type the
+// homework player supports (anything else, e.g. 'nested', fails
+// validation on save and the class silently gets NOTHING - seen live:
+// Year 10 Chemistry), and never one whose required diagram has not been
+// uploaded ("study the diagram below" with no diagram is unanswerable).
+function questionBase(lc) {
   const base = {
     isActive: { $ne: false },
-    // The homework player supports these types only. Anything else
-    // (e.g. 'nested' multi-part questions) makes the whole homework
-    // fail validation on save - the class then silently gets NOTHING
-    // (seen live: Year 10 Chemistry). Exclude at selection, exactly
-    // like the missing-diagram rule below.
     type: { $in: ['mcq', 'short', 'long', 'drawing', 'handwriting', 'upload'] },
     $nor: [
       { imageNeeded: true,        'artwork.status': { $ne: 'uploaded' } },
@@ -124,6 +121,14 @@ async function buildPaper(lc, priorNames, total) {
   }
   if (lc.subject)    base.subject    = new RegExp('^' + escapeRe(lc.subject) + '$', 'i')
   if (lc.curriculum) base.curriculum = lc.curriculum
+  return base
+}
+
+async function buildPaper(lc, priorNames, total) {
+  // Active questions only, and never one whose required diagram has
+  // not been uploaded: "study the diagram below" with no diagram is
+  // unanswerable, and activation no longer guarantees artwork exists.
+  const base = questionBase(lc)
 
   // ── Review questions from earlier lessons (harder only) ──
   let review = []
@@ -164,21 +169,7 @@ async function poolForClass(lc) {
   // Active questions only, and never one whose required diagram has
   // not been uploaded: "study the diagram below" with no diagram is
   // unanswerable, and activation no longer guarantees artwork exists.
-  const base = {
-    isActive: { $ne: false },
-    // The homework player supports these types only. Anything else
-    // (e.g. 'nested' multi-part questions) makes the whole homework
-    // fail validation on save - the class then silently gets NOTHING
-    // (seen live: Year 10 Chemistry). Exclude at selection, exactly
-    // like the missing-diagram rule below.
-    type: { $in: ['mcq', 'short', 'long', 'drawing', 'handwriting', 'upload'] },
-    $nor: [
-      { imageNeeded: true,        'artwork.status': { $ne: 'uploaded' } },
-      { 'artwork.required': true, 'artwork.status': { $ne: 'uploaded' } },
-    ],
-  }
-  if (lc.subject)    base.subject    = new RegExp('^' + escapeRe(lc.subject) + '$', 'i')
-  if (lc.curriculum) base.curriculum = lc.curriculum
+  const base = questionBase(lc)
   const filter = lc.syllabusSubtopicName
     ? { ...base, subtopic: new RegExp('^' + escapeRe(lc.syllabusSubtopicName) + '$', 'i') }
     : base
@@ -187,6 +178,18 @@ async function poolForClass(lc) {
 }
 
 function escapeRe(s) { return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') }
+
+// The lesson a homework plan was built for. A plan the teacher only
+// viewed follows the lesson: if the class now teaches something else it
+// is ignored (and rebuilt next time it is opened). An edited plan is the
+// teacher's own choice and is always used.
+const planLessonKey = (lc) => `${lc.syllabusTopicName || ''}||${lc.syllabusSubtopicName || ''}`
+function planFor(lc) {
+  const p = lc && lc.homeworkPlan
+  if (!p || !Array.isArray(p.questions) || !p.questions.length) return null
+  if (!p.edited && p.lessonKey !== planLessonKey(lc)) return null
+  return p.questions
+}
 
 function snapshot(q) {
   return {
@@ -287,6 +290,10 @@ async function processEndedClasses(opts = {}) {
       continue
     }
 
+    if (lc.autoHomeworkEnabled === false) {
+      report.skipped.push({ title: lc.title, why: 'the teacher turned homework off for this lesson' }); continue
+    }
+
     if (lc.autoHomeworkGeneratedAt && !force && !classId) {
       report.skipped.push({ title: lc.title, why: 'already processed at ' + lc.autoHomeworkGeneratedAt })
       continue
@@ -319,7 +326,10 @@ async function processEndedClasses(opts = {}) {
     }
 
     try {
-      const { pool } = await poolForClass(lc)
+      // The teacher's reviewed list (My Classes → homework): every student
+      // gets exactly these questions.
+      const plan = planFor(lc)
+      const { pool } = plan ? { pool: plan } : await poolForClass(lc)
       if (!pool.length) {
         await LiveClass.updateOne({ _id: lc._id }, { $set: {
           autoHomeworkGeneratedAt: now,
@@ -332,7 +342,7 @@ async function processEndedClasses(opts = {}) {
 
       const lessonKey  = lc.syllabusSubtopicName || lc.syllabusTopicName || lc.subject
       const dueAt      = new Date(now.getTime() + DUE_AFTER_HOURS * 3600 * 1000)
-      const priorNames = await priorLessonNames(lc)
+      const priorNames = plan ? [] : await priorLessonNames(lc)
       let made = 0, mailed = 0, reviewTotal = 0
 
       // Pause awareness: access-blocked students (e.g. fee hold) get no
@@ -349,10 +359,12 @@ async function processEndedClasses(opts = {}) {
         if (pf.onBreak && pf.breakBlocksAccess) continue // no homework while access is blocked
         // Sampled per student, server-side — two students in the same
         // class receive different papers without a large local pool.
-        const { paper, reviewCount } = await buildPaper(lc, priorNames, QUESTIONS_PER_HOMEWORK)
+        const { paper, reviewCount } = plan
+          ? { paper: plan, reviewCount: plan.filter(q => q._isReview).length }
+          : await buildPaper(lc, priorNames, QUESTIONS_PER_HOMEWORK)
         if (!paper.length) continue
         reviewTotal += reviewCount
-        const qs = paper.map(snapshot)
+        const qs = plan ? plan.map(q => ({ ...q })) : paper.map(snapshot)
 
         const hw = await Homework.create({
           title:       `${lc.subject}: ${lessonKey}`,
@@ -466,6 +478,7 @@ async function notifyStudent(studentId, hw, lc, lessonKey) {
     const studentEmail = student.email && !parentEmails.has(student.email) ? student.email : null
 
     const from = process.env.EMAIL_FROM || 'Smartious <hello@smartioushomeschool.com>'
+    const shared = !!planFor(lc)
     let sent = 0
 
     // ── STUDENT ──
@@ -479,9 +492,9 @@ async function notifyStudent(studentId, hw, lc, lessonKey) {
             Hi ${student.firstName}, your live class <strong>${lc.title}</strong> has ended and your homework is now open.
           </p>
           ${factsTable(facts)}
-          <p style="font-size:13px;color:#564844;line-height:1.7;margin:0 0 20px;">
+          ${shared ? '' : `<p style="font-size:13px;color:#564844;line-height:1.7;margin:0 0 20px;">
             Your question set is unique to you, so compare your working with classmates rather than your answers.
-          </p>
+          </p>`}
           ${cta('https://smartioushomeschool.com/student', 'Start my homework &rarr;')}`,
       })
       try {
@@ -507,7 +520,7 @@ async function notifyStudent(studentId, hw, lc, lessonKey) {
           <div style="background:#F9F2F3;border-radius:8px;padding:14px 18px;margin-bottom:20px;border-left:3px solid #7D1025;">
             <p style="font-size:12px;font-weight:700;color:#7D1025;text-transform:uppercase;letter-spacing:.06em;margin:0 0 6px">How you can help</p>
             <p style="font-size:13px;color:#2c2c2c;margin:0;line-height:1.65;">
-              Each learner receives a different selection of questions, so answers cannot be shared.
+              ${shared ? 'These questions were chosen by the teacher for this lesson.' : 'Each learner receives a different selection of questions, so answers cannot be shared.'}
               A quiet 30 minutes before the deadline is usually enough. You can follow ${student.firstName}'s
               progress and marks in the parent portal once the work is submitted.
             </p>
@@ -558,4 +571,9 @@ module.exports = {
   poolForClass,
   buildPaper,
   priorLessonNames,
+  questionBase,
+  snapshot,
+  planFor,
+  planLessonKey,
+  QUESTIONS_PER_HOMEWORK,
 }

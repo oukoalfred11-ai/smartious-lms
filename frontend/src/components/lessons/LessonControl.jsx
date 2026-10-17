@@ -6,6 +6,8 @@
  *                           student absent, or not held (with a reason).
  *                           Only a closed lesson moves the scheme of work
  *                           on, sets homework and counts attendance.
+ *                           onOpen(id): open the end-of-lesson pop-up
+ *                           instead of the inline form (teacher portal).
  *  <LessonsToClose staff /> the Director of Studies' view: every lesson
  *                           left unconfirmed for over 24 hours.
  *  <ExtraLessonForm />      book an extra or make-up lesson.
@@ -85,7 +87,7 @@ function CloseForm({ cls, onDone, toast }) {
   )
 }
 
-export function LessonsToClose({ toast, staff = false, compact = false }) {
+export function LessonsToClose({ toast, staff = false, compact = false, onOpen = null }) {
   const [list, setList] = useState(null)
   const [open, setOpen] = useState(null)
   const [err, setErr] = useState('')
@@ -120,7 +122,9 @@ export function LessonsToClose({ toast, staff = false, compact = false }) {
                 <b>{c.subject || c.title}</b>{c.syllabusTopicName ? ` — ${c.syllabusTopicName}${c.syllabusSubtopicName ? ': ' + c.syllabusSubtopicName : ''}` : ''}
                 <div style={{ fontSize: 12, color: C.mut }}>{fmt(c.scheduledAt)} · {(c.assignedStudents || []).map(s => s.firstName).join(', ') || 'no students'}{staff && c.teacherId ? ` · ${c.teacherId.firstName} ${c.teacherId.lastName}` : ''}</div>
               </div>
-              <button type="button" style={btn(open !== c._id)} onClick={() => setOpen(open === c._id ? null : c._id)}>{open === c._id ? 'Cancel' : 'Close lesson'}</button>
+              {onOpen
+                ? <button type="button" style={btn(true)} onClick={() => onOpen(c._id)}>Finish lesson</button>
+                : <button type="button" style={btn(open !== c._id)} onClick={() => setOpen(open === c._id ? null : c._id)}>{open === c._id ? 'Cancel' : 'Close lesson'}</button>}
             </div>
             {open === c._id && <CloseForm cls={c} toast={toast} onDone={done} />}
           </li>

@@ -211,6 +211,18 @@ const liveClassSchema = new mongoose.Schema({
   autoHomeworkEnabled:     { type: Boolean, default: true },
   autoHomeworkGeneratedAt: { type: Date,    default: null, index: true },
   autoHomeworkNote:        { type: String,  default: '' },
+  // The teacher's reviewed homework for this lesson (My Classes). Null =
+  // not reviewed: each student gets their own sampled paper. Set = every
+  // student gets exactly these questions (Homework question snapshots).
+  homeworkPlan: {
+    type: new mongoose.Schema({
+      questions: { type: [mongoose.Schema.Types.Mixed], default: [] },
+      edited:    { type: Boolean, default: false },
+      lessonKey: { type: String, default: '' },
+      updatedAt: { type: Date, default: null },
+    }, { _id: false }),
+    default: null,
+  },
 
 }, { timestamps: true });
 
