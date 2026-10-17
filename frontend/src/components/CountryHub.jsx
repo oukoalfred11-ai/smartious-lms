@@ -311,11 +311,11 @@ function CountryHub({
                   : `Live teaching is delivered to ${country.name} families from two international-standard operational centres, established 2022 and 2023. Teachers work from professional academic facilities with accountability and infrastructure beyond marketplace or freelance models.`},
               {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
               {h:'40+ countries served', p: `Active students in ${country.name} and in more than 40 countries across ${REGION_LABELS[country.slug] || 'Africa, the Gulf, Europe and Asia'}. Verifiable through cross-country cohort interaction in live classes.`},
-              {h:'Ontario Diploma (OSSD) partnership', p:'Smartious students can earn the Ontario Secondary School Diploma through our partnership with Canadian Cross International School (Ontario-inspected private school). The OSSD is recognised by Canadian universities (OUAC), US universities (Common Application), UK universities (UCAS) and globally — particularly valuable for Canadian U15 applications.'},
+              {h:'Ontario Diploma (OSSD) partnership', p:'Smartious students can earn the Ontario Secondary School Diploma through our Ontario partner school (an Ontario-inspected private school). The OSSD is recognised by Canadian universities (OUAC), US universities (Common Application), UK universities (UCAS) and globally — particularly valuable for Canadian U15 applications.'},
               {h: EAST_AFRICA_HUBS.has(country.slug) ? '6 international curricula' : '5 international curricula',
                 p: EAST_AFRICA_HUBS.has(country.slug)
-                  ? 'Cambridge IGCSE & A-Level (primary offering), Pearson Edexcel International GCSE & A-Level, IB Diploma Programme, American Curriculum with AP, Ontario Secondary School Diploma (OSSD) via Canadian Cross International School partnership, Kenya CBC. Multiple credential pathways per family.'
-                  : 'Cambridge IGCSE & A-Level (primary offering), Pearson Edexcel International GCSE & A-Level, IB Diploma Programme, American Curriculum with AP, Ontario Secondary School Diploma (OSSD) via Canadian Cross International School partnership. Multiple credential pathways per family.'},
+                  ? 'Cambridge IGCSE & A-Level (primary offering), Pearson Edexcel International GCSE & A-Level, IB Diploma Programme, American Curriculum with AP, Ontario Secondary School Diploma (OSSD) through our Ontario partner school, Kenya CBC. Multiple credential pathways per family.'
+                  : 'Cambridge IGCSE & A-Level (primary offering), Pearson Edexcel International GCSE & A-Level, IB Diploma Programme, American Curriculum with AP, Ontario Secondary School Diploma (OSSD) through our Ontario partner school. Multiple credential pathways per family.'},
               {h:'Live class transparency', p:'Every class is live with recorded sessions for review. Parents can audit class quality directly. This is materially different from pre-recorded video courses with light tutor support.'},
             ].map((t, i) => (
               <div key={i} style={{padding:'18px 20px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10}}>
@@ -357,7 +357,7 @@ function CountryHub({
               {h:'Pearson Edexcel International',sub:'Pearson · UK Edexcel curriculum adapted for international delivery',p:'International GCSE and International A-Level qualifications, administered by Pearson. Three examination series annually (January, May/June, October/November) providing additional flexibility versus the Cambridge twice-yearly schedule.'},
               {h:'International Baccalaureate Organisation',sub:'IB Diploma Programme · IBO Geneva',p:'IB Diploma administered by the International Baccalaureate Organisation in Geneva. Recognised by leading universities globally with particularly strong weighting at US Ivy League, US selective liberal arts colleges, Canadian U15 and top European universities.'},
               {h:'College Board',sub:'American Curriculum with Advanced Placement (AP)',p:'AP courses and examinations administered by the College Board, the US non-profit responsible for the SAT and AP programmes. AP scores are widely recognised by US universities for university credit, plus by Canadian, UK, Australian and many universities worldwide.'},
-              {h:'Ontario Secondary School Diploma (OSSD)',sub:'Canadian Cross International School · Ontario Ministry of Education',p:'OSSD earned through Smartious\'s partnership with Canadian Cross International School, an Ontario-inspected private school. Smartious students enrol concurrently with CCIS to complete the OSSD curriculum and credit requirements alongside Cambridge or other pathways. OSSD is one of the most recognised secondary credentials worldwide — particularly strong for Canadian U15 admissions via OUAC, US universities via Common Application, and UK universities via UCAS.'},
+              {h:'Ontario Secondary School Diploma (OSSD)',sub:'Through our Ontario partner school · Ontario Ministry of Education',p:'OSSD earned through Smartious\'s Ontario partner school, an Ontario-inspected private school. Smartious students enrol concurrently with our Ontario partner school to complete the OSSD curriculum and credit requirements alongside Cambridge or other pathways. OSSD is one of the most recognised secondary credentials worldwide — particularly strong for Canadian U15 admissions via OUAC, US universities via Common Application, and UK universities via UCAS.'},
             ].map((c,i) => (
               <div key={i} style={{padding:'22px 22px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,borderLeft:`3px solid ${V.cr}`}}>
                 <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',color:V.ink,margin:'0 0 4px',lineHeight:1.3,fontWeight:400}}>{c.h}</h3>
@@ -453,10 +453,10 @@ function CountryHub({
               },
               {
                 h:'Ontario Secondary School Diploma',
-                sub:'OSSD · via Canadian Cross International School partnership',
-                structure:'Grades 9-12 Ontario curriculum delivered through Smartious\'s partnership with Canadian Cross International School (Ontario-inspected private secondary school). Students complete the 30 credits required for OSSD including the Ontario Secondary School Literacy Test (OSSLT) and 40 community involvement hours.',
+                sub:'OSSD · through our Ontario partner school',
+                structure:'Grades 9-12 Ontario curriculum delivered through Smartious\'s Ontario partner school (an Ontario-inspected private secondary school). Students complete the 30 credits required for OSSD including the Ontario Secondary School Literacy Test (OSSLT) and 40 community involvement hours.',
                 suits:`${country.adjective} families targeting Canadian U15 universities (Toronto, McGill, UBC, McMaster, Waterloo, Western, Queen's) via OUAC, US universities via the Common Application, UK universities via UCAS, and Australian universities. The OSSD is particularly strong for direct Canadian university applications because students apply as Ontario secondary graduates rather than international students.`,
-                delivery:'Live online instruction by qualified subject teachers, concurrent enrolment with Canadian Cross International School for official OSSD transcripting, Ontario course codes (ENG4U, MHF4U, SCH4U etc.) recorded against each student. CCIS issues the official Ontario diploma and transcript on successful completion of the OSSD requirements.',
+                delivery:'Live online instruction by qualified subject teachers, concurrent enrolment with our Ontario partner school for official OSSD transcripting, Ontario course codes (ENG4U, MHF4U, SCH4U etc.) recorded against each student. The partner school issues the official Ontario diploma and transcript on successful completion of the OSSD requirements.',
               },
             ].map((c,i) => (
               <div key={i} style={{padding:'24px 24px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,display:'flex',flexDirection:'column',gap:14}}>
@@ -734,7 +734,7 @@ function CountryHub({
             <span>[+] Immediate enrolment</span>
             <span>[+] No school waiting lists</span>
             <span>[+] USD pricing stability</span>
-            <span>[+] Ontario OSSD pathway via CCIS partnership</span>
+            <span>[+] Ontario OSSD pathway through our Ontario partner school</span>
             <span>[+] {country.finalCTABadgeExamRef}</span>
           </div>
         </div>

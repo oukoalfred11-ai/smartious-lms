@@ -1686,7 +1686,7 @@ const PAGE_META = {
   },
   'homeschooling-malaysia': {
     title: 'Online School, Virtual School & Homeschool Malaysia | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Malaysian families across Kuala Lumpur, Petaling Jaya, Subang Jaya, Cyberjaya, Johor Bahru + Iskandar Puteri, Penang, Kota Kinabalu. British Council KL + Penang exam centres. From USD 423/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (through our Ontario partner school) for Malaysian families across Kuala Lumpur, Petaling Jaya, Subang Jaya, Cyberjaya, Johor Bahru + Iskandar Puteri, Penang, Kota Kinabalu. British Council KL + Penang exam centres. From USD 423/month.',
   },
   'homeschooling-spain': {
     title: 'Online School, Virtual School & Homeschool Spain | Cambridge IGCSE, A-Level, IB — Smartious',
@@ -1962,43 +1962,43 @@ const PAGE_META = {
   },
   'homeschooling-turkey': {
     title: 'Online School, Virtual School & Homeschool Türkiye | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Turkish and expat families across Istanbul (Bebek, Etiler, Nişantaşı, Kadıköy, Ataşehir), Ankara (Çankaya, Bilkent), Izmir, Antalya (post-2022 Russian and Ukrainian community), Bursa, Adana. British Council Istanbul + Ankara + BESA exam centres. TRT time zone exactly matching Nairobi teaching hours. From USD 423/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (through our Ontario partner school) for Turkish and expat families across Istanbul (Bebek, Etiler, Nişantaşı, Kadıköy, Ataşehir), Ankara (Çankaya, Bilkent), Izmir, Antalya (post-2022 Russian and Ukrainian community), Bursa, Adana. British Council Istanbul + Ankara + BESA exam centres. TRT time zone exactly matching Nairobi teaching hours. From USD 423/month.',
   },
   'homeschooling-kuwait': {
     title: 'Online School, Virtual School & Homeschool Kuwait | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Kuwaiti and expat families across Kuwait City, Salmiya (densest expat district), Hawally (Cambridge English School catchment), Salwa (premium coastal), Bayan (embassy district), and Ahmadi (KOC oil town). British Council Kuwait exam centre. AST time zone exactly matching Nairobi teaching hours. MOHE scholarship pathway alignment. From USD 423/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (through our Ontario partner school) for Kuwaiti and expat families across Kuwait City, Salmiya (densest expat district), Hawally (Cambridge English School catchment), Salwa (premium coastal), Bayan (embassy district), and Ahmadi (KOC oil town). British Council Kuwait exam centre. AST time zone exactly matching Nairobi teaching hours. MOHE scholarship pathway alignment. From USD 423/month.',
   },
   'homeschooling-oman': {
     title: 'Online School, Virtual School & Homeschool Oman | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Omani and expat families across Muscat (MSQ, Al Bandar, Al Khuwair — BSM, Cheltenham, TAISM catchment), Seeb (Sultan\'s School, RGSG Muscat, Downe House), Sohar (Al Batinah North industrial, ABIS), Salalah (Dhofar southern coast), Nizwa (interior cultural capital), and Sur (Ash Sharqiyah North coastal). British Council Muscat exam centre. Immediate enrolment — no BSM/ABA waiting list. From USD 423/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (through our Ontario partner school) for Omani and expat families across Muscat (MSQ, Al Bandar, Al Khuwair — BSM, Cheltenham, TAISM catchment), Seeb (Sultan\'s School, RGSG Muscat, Downe House), Sohar (Al Batinah North industrial, ABIS), Salalah (Dhofar southern coast), Nizwa (interior cultural capital), and Sur (Ash Sharqiyah North coastal). British Council Muscat exam centre. Immediate enrolment — no BSM/ABA waiting list. From USD 423/month.',
   },
   'homeschooling-taiwan': {
     title: 'Online School, Virtual School & Homeschool Taiwan | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Taiwanese and expat families across Taipei (Tianmu — TAS catchment, Shilin — TES catchment), New Taipei City (Linkou — Morrison Academy + TCS), Hsinchu (TSMC ecosystem — HAS, IBSH), Taichung (Morrison Academy, Hong Wen IS Cambridge centre), Kaohsiung (KAS, I-Shou IB), and Taoyuan (TYAS). TES Taipei + HWIS Taichung Cambridge exam centres. Serves Taiwanese-national families that Taiwan physical international schools legally cannot accept. From USD 423/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (through our Ontario partner school) for Taiwanese and expat families across Taipei (Tianmu — TAS catchment, Shilin — TES catchment), New Taipei City (Linkou — Morrison Academy + TCS), Hsinchu (TSMC ecosystem — HAS, IBSH), Taichung (Morrison Academy, Hong Wen IS Cambridge centre), Kaohsiung (KAS, I-Shou IB), and Taoyuan (TYAS). TES Taipei + HWIS Taichung Cambridge exam centres. Serves Taiwanese-national families that Taiwan physical international schools legally cannot accept. From USD 423/month.',
   },
   'homeschooling-ireland': {
     title: 'Online School, Virtual School & Homeschool Ireland | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Irish and expat families across Dublin (South Dublin D4/6/14/18 — NAISD Leopardstown, SEK Kilternan, St. Andrew\'s catchment plus Silicon Docks Google/Meta/LinkedIn corporate), Cork (Apple European HQ + pharma cluster), Galway (Ireland\'s medtech capital — Medtronic + Boston Scientific), Limerick (Analog Devices, Dell), Waterford (South East biotech), and Kildare (Intel Leixlip Fab 34 semiconductor). Post-Brexit UK family continuity + multinational corporate rotation + Túsla-compatible homeschool. From USD 423/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (through our Ontario partner school) for Irish and expat families across Dublin (South Dublin D4/6/14/18 — NAISD Leopardstown, SEK Kilternan, St. Andrew\'s catchment plus Silicon Docks Google/Meta/LinkedIn corporate), Cork (Apple European HQ + pharma cluster), Galway (Ireland\'s medtech capital — Medtronic + Boston Scientific), Limerick (Analog Devices, Dell), Waterford (South East biotech), and Kildare (Intel Leixlip Fab 34 semiconductor). Post-Brexit UK family continuity + multinational corporate rotation + Túsla-compatible homeschool. From USD 423/month.',
   },
   'homeschooling-united-kingdom': {
     title: 'Online School, Virtual School & Homeschool UK | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for UK families across London (all 32 boroughs — Westminster / Eton / Harrow / St. Paul\'s alternative), Manchester (Northern Powerhouse — Manchester Grammar School alternative), Birmingham (HSBC UK HQ + JLR Solihull + King Edward VI alternative), Leeds (Channel 4 Northern HQ + Grammar School at Leeds alternative), Bristol (Airbus UK Filton + Bristol Grammar + Clifton alternative), and Edinburgh (Scotland — Cambridge / A-Level pathway alternative to Scottish CfE). Below Cambridge Home School Online (£10,950/year) from USD 423/month. Elective Home Education, Section 19 alternative provision, SEND-friendly. From USD 423/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (through our Ontario partner school) for UK families across London (all 32 boroughs — Westminster / Eton / Harrow / St. Paul\'s alternative), Manchester (Northern Powerhouse — Manchester Grammar School alternative), Birmingham (HSBC UK HQ + JLR Solihull + King Edward VI alternative), Leeds (Channel 4 Northern HQ + Grammar School at Leeds alternative), Bristol (Airbus UK Filton + Bristol Grammar + Clifton alternative), and Edinburgh (Scotland — Cambridge / A-Level pathway alternative to Scottish CfE). Below Cambridge Home School Online (£10,950/year) from USD 423/month. Elective Home Education, Section 19 alternative provision, SEND-friendly. From USD 423/month.',
   },
   'homeschooling-india': {
     title: 'Online School, Virtual School & Homeschool India | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Indian families across Mumbai (DAIS + JBCN + Ecole Mondiale + Oberoi alternative), Delhi NCR (BSD + AES + Pathways + Heritage), Bangalore (TISB + CIS + Indus + Oakridge + Trio), Hyderabad (Chirec + Oakridge Nord Anglia + ISH), Chennai (AISC + Chennai British + Chettinad + MCTM Chettyar), and Pune (Mercedes-Benz + Symbiosis + Pune International + Sanjay Ghodawat). Dramatic fee arbitrage — INR 8-20+ lakh/year premium schools vs Smartious from ~INR 4.3 lakh/year. Serves NRI returnees + tier-2 city access gap + IT/pharma/automotive corporate rotational families. From USD 423/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (through our Ontario partner school) for Indian families across Mumbai (DAIS + JBCN + Ecole Mondiale + Oberoi alternative), Delhi NCR (BSD + AES + Pathways + Heritage), Bangalore (TISB + CIS + Indus + Oakridge + Trio), Hyderabad (Chirec + Oakridge Nord Anglia + ISH), Chennai (AISC + Chennai British + Chettinad + MCTM Chettyar), and Pune (Mercedes-Benz + Symbiosis + Pune International + Sanjay Ghodawat). Dramatic fee arbitrage — INR 8-20+ lakh/year premium schools vs Smartious from ~INR 4.3 lakh/year. Serves NRI returnees + tier-2 city access gap + IT/pharma/automotive corporate rotational families. From USD 423/month.',
   },
   'homeschooling-germany': {
     title: 'Online School, Virtual School & Homeschool Germany | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Germany-resident families across Berlin (BIS Charlottenburg + BBS + BBIS Kleinmachnow + Berlin Metropolitan School alternative), Munich (MIS Starnberg + BIS Haimhausen + European School alternative), Frankfurt (FIS Oberursel + European School + ISF Wiesbaden alternative), Hamburg (ISH Blankenese alternative), Stuttgart (ISS Sindelfingen alternative), and Düsseldorf (ISD Kaiserswerth alternative). Homeschool is illegal in Germany for German citizen children under Schulpflicht — Smartious serves expat families with foreign passports, Sixth Form 16+ students post-Schulpflicht, supplementary tuition alongside German Gymnasium, and international corporate rotational families. From USD 423/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (through our Ontario partner school) for Germany-resident families across Berlin (BIS Charlottenburg + BBS + BBIS Kleinmachnow + Berlin Metropolitan School alternative), Munich (MIS Starnberg + BIS Haimhausen + European School alternative), Frankfurt (FIS Oberursel + European School + ISF Wiesbaden alternative), Hamburg (ISH Blankenese alternative), Stuttgart (ISS Sindelfingen alternative), and Düsseldorf (ISD Kaiserswerth alternative). Homeschool is illegal in Germany for German citizen children under Schulpflicht — Smartious serves expat families with foreign passports, Sixth Form 16+ students post-Schulpflicht, supplementary tuition alongside German Gymnasium, and international corporate rotational families. From USD 423/month.',
   },
   'homeschooling-romania': {
     title: 'Online School, Virtual School & Homeschool Romania | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Romania-resident families across Bucharest (AISB Pipera + BSB Herăstrău + Cambridge School CSB Voluntari + ISB alternative), Cluj-Napoca (Transylvania College + International School Cluj + KEY International alternative), Timișoara (International British School alternative), Iași (Amazon Development Center corporate + International School alternative), Brașov (Continental Automotive + Schaeffler + International British School alternative), and Constanța (Port of Constanța + OMV Petrom). Smartious as Kenya-based accredited online school satisfies Romania\'s legal "umbrella school" pathway for homeschool families under Law 198/2023. Substantial fee savings. From USD 423/month.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (through our Ontario partner school) for Romania-resident families across Bucharest (AISB Pipera + BSB Herăstrău + Cambridge School CSB Voluntari + ISB alternative), Cluj-Napoca (Transylvania College + International School Cluj + KEY International alternative), Timișoara (International British School alternative), Iași (Amazon Development Center corporate + International School alternative), Brașov (Continental Automotive + Schaeffler + International British School alternative), and Constanța (Port of Constanța + OMV Petrom). Smartious as Kenya-based accredited online school satisfies Romania\'s legal "umbrella school" pathway for homeschool families under Law 198/2023. Substantial fee savings. From USD 423/month.',
   },
   'homeschooling-ukraine': {
     title: 'Online School, Virtual School & Homeschool Ukraine | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS) for Ukrainian families in-country and diaspora — Kyiv (Grammarly + GitLab + MacPaw + Preply + PSI/KIS/BISU alternative), Lviv (SoftServe HQ + EPAM Ukraine + Intellias + N-iX + Ukrainian Catholic University), Kharkiv (NIX Solutions + GlobalLogic + EPAM tech), Dnipro (Interpipe + Metinvest industrial), Odesa (Luxoft + Port of Odesa maritime), Ivano-Frankivsk (western Ukraine safe haven). Distance learning fully legal under 2020 Law on Complete General Secondary Education. Refugee family discounted rates. From USD 423/month personalized.',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (through our Ontario partner school) for Ukrainian families in-country and diaspora — Kyiv (Grammarly + GitLab + MacPaw + Preply + PSI/KIS/BISU alternative), Lviv (SoftServe HQ + EPAM Ukraine + Intellias + N-iX + Ukrainian Catholic University), Kharkiv (NIX Solutions + GlobalLogic + EPAM tech), Dnipro (Interpipe + Metinvest industrial), Odesa (Luxoft + Port of Odesa maritime), Ivano-Frankivsk (western Ukraine safe haven). Distance learning fully legal under 2020 Law on Complete General Secondary Education. Refugee family discounted rates. From USD 423/month personalized.',
   },
   assessment: {
     title: 'Book an Academic Assessment | Smartious Admissions',
@@ -4191,7 +4191,7 @@ export default function LandingPage() {
 
   if (page === 'virtual-school-ukraine') {
     metaTitle = 'Smartious — Online & Virtual School for Ukrainian Families | IB, IGCSE, Cambridge, Edexcel, OSSD 2026'
-    metaDesc  = 'Virtual school for Ukrainian families in-country and diaspora. Cambridge IGCSE, A-Level, Edexcel, IB Diploma, AP, Ontario OSSD via CCIS. Education continuity through displacement. Close EET/EAT time zones. Cambridge exams at Warsaw/Berlin/London. Polish + German university pathway with Ukrainian student scholarships. Discounted rates for refugee families. From USD 423/month.'
+    metaDesc  = 'Virtual school for Ukrainian families in-country and diaspora. Cambridge IGCSE, A-Level, Edexcel, IB Diploma, AP, Ontario OSSD through our Ontario partner school. Education continuity through displacement. Close EET/EAT time zones. Cambridge exams at Warsaw/Berlin/London. Polish + German university pathway with Ukrainian student scholarships. Discounted rates for refugee families. From USD 423/month.'
   }
   if (page === 'curriculum-detail' && currentCurriculum) {
     const c = CURRICULA.find(x => x.slug === currentCurriculum)
@@ -11206,13 +11206,14 @@ export default function LandingPage() {
           }}>
             <div className="wrap">
               <div style={{maxWidth:920,margin:'0 auto'}}>
-                <div style={{display:'inline-flex',alignItems:'center',gap:8,background:'rgba(201,151,58,.15)',color:V.gold3,padding:'7px 14px',borderRadius:99,fontSize:11.5,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',marginBottom:20}}>
-                  <span>🇺🇸</span> For American homeschool families
-                </div>
-                <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.4rem, 6vw, 4rem)',fontWeight:400,color:'#fff',lineHeight:1.02,marginBottom:22,letterSpacing:'-.015em'}}>
+                {/* The page heading says what families search for; the slogan below keeps its look. */}
+                <h1 style={{display:'inline-flex',alignItems:'center',gap:8,background:'rgba(201,151,58,.15)',color:V.gold3,padding:'7px 14px',borderRadius:99,fontSize:11.5,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',margin:'0 0 20px',fontFamily:'inherit',lineHeight:1.4}}>
+                  <span aria-hidden="true">🇺🇸</span> Online School &amp; Homeschool in the USA
+                </h1>
+                <p style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.4rem, 6vw, 4rem)',fontWeight:400,color:'#fff',lineHeight:1.02,marginTop:0,marginBottom:22,letterSpacing:'-.015em'}}>
                   Real teachers. <em style={{color:V.gold3,fontStyle:'italic'}}>Real rigour.</em><br/>
                   Real college pathways.
-                </h1>
+                </p>
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,maxWidth:760,marginBottom:30}}>
                   Tired of recorded-video curricula where your child is essentially alone all day? Worried about how Acellus or BJU Press lessons compare to what students in top-tier private schools are doing? Smartious delivers <strong>Cambridge IGCSE, Pearson Edexcel, A-Level and IB Diploma</strong> programmes — taught live by qualified teachers — to American homeschool families from USD 423 per month.
                 </p>
@@ -11639,13 +11640,14 @@ export default function LandingPage() {
           }}>
             <div className="wrap">
               <div style={{maxWidth:920,margin:'0 auto'}}>
-                <div style={{display:'inline-flex',alignItems:'center',gap:8,background:'rgba(201,151,58,.15)',color:V.gold3,padding:'7px 14px',borderRadius:99,fontSize:11.5,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',marginBottom:20}}>
-                  <span>🇨🇦</span> For Canadian homeschool families
-                </div>
-                <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.4rem, 6vw, 4rem)',fontWeight:400,color:'#fff',lineHeight:1.02,marginBottom:22,letterSpacing:'-.015em'}}>
+                {/* The page heading says what families search for; the slogan below keeps its look. */}
+                <h1 style={{display:'inline-flex',alignItems:'center',gap:8,background:'rgba(201,151,58,.15)',color:V.gold3,padding:'7px 14px',borderRadius:99,fontSize:11.5,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',margin:'0 0 20px',fontFamily:'inherit',lineHeight:1.4}}>
+                  <span aria-hidden="true">🇨🇦</span> Online School &amp; Homeschool in Canada
+                </h1>
+                <p style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.4rem, 6vw, 4rem)',fontWeight:400,color:'#fff',lineHeight:1.02,marginTop:0,marginBottom:22,letterSpacing:'-.015em'}}>
                   Real teachers. <em style={{color:V.gold3,fontStyle:'italic'}}>Real rigour.</em><br/>
                   Real college pathways.
-                </h1>
+                </p>
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,maxWidth:760,marginBottom:30}}>
                   Tired of recorded-video curricula where your child is essentially alone all day? Worried about how Acellus, Time4Learning, or local board homeschool packages lessons compare to what students in top-tier private schools are doing? Smartious delivers <strong>Cambridge IGCSE, Pearson Edexcel, A-Level and IB Diploma</strong> programmes — taught live by qualified teachers — to Canadian homeschool families from USD 423 per month.
                 </p>
@@ -13701,7 +13703,7 @@ export default function LandingPage() {
                   {n:'02',h:'Live small groups of 4-6',p:'Smartious classes 4-6 students. CHS Online up to 10. Crimson variable. Braeburn online 12-15. Physical international schools 15-22. Smaller = more teacher attention, faster feedback, stronger relationships.'},
                   {n:'03',h:'Kenya-friendly time zones',p:'EAT UTC+3 delivery matches Kenya school-day rhythm. UK-based schools (CHS Online, King\'s InterHigh) mean UK morning = Kenya afternoon, disrupting family routine. Smartious 9 AM-12 PM Nairobi = natural school day.'},
                   {n:'04',h:'Kenya CBC available',p:'Smartious offers full Kenya CBC (Grade 1-12, KICD-aligned, KCSE-eligible) alongside international curricula. NO UK, US, or NZ virtual school offers CBC. Kenya-domestic by definition.'},
-                  {n:'05',h:'Six curricula, one provider',p:'Cambridge IGCSE + A-Level, Pearson Edexcel International, IB Diploma, American AP, Ontario Secondary School Diploma (via CCIS), plus CBC. Multi-curriculum families (CBC + Cambridge) welcome.'},
+                  {n:'05',h:'Six curricula, one provider',p:'Cambridge IGCSE + A-Level, Pearson Edexcel International, IB Diploma, American AP, Ontario Secondary School Diploma (through our Ontario partner school), plus CBC. Multi-curriculum families (CBC + Cambridge) welcome.'},
                   {n:'06',h:'Two Nairobi physical centres',p:'Diamond Plaza, Parklands (head office, Est. 2022) and Karen West (Est. 2023). In-person supplementation, examination invigilation, holiday intensives. UK/US/NZ competitors have zero Kenya physical presence.'},
                   {n:'07',h:'Kenya founder, Kenya operations',p:'Founded 2018 by Alfred Ouko, BEd Mathematics &amp; Physics UoN 2022. Local admissions team, local support. Understanding of Kenya families\' needs, not a distant UK head office.'},
                   {n:'08',h:'Kenya examination centres handled',p:'Cambridge exam registration at British Council Nairobi, Braeburn Group centres, Peponi, Brookhouse, ISK, plus Mombasa/Kisumu/Nakuru. Edexcel three series per year. IB Diploma via authorised centres. All logistics managed by Smartious.'},
@@ -13749,7 +13751,7 @@ export default function LandingPage() {
                       {c:'Kenya CBC available',      sm:'\u2713 Yes', chs:'\u2717 No', kih:'\u2717 No', wh:'\u2717 No', cga:'\u2717 No', bra:'\u2713 Yes'},
                       {c:'Cambridge IGCSE',          sm:'\u2713 Yes', chs:'\u2713 Yes', kih:'\u2713 Yes', wh:'\u2713 Yes', cga:'\u2713 Yes', bra:'\u2713 Yes'},
                       {c:'IB Diploma',               sm:'\u2713 Yes', chs:'\u2717 No', kih:'\u2717 No', wh:'\u2717 No', cga:'\u2713 Yes', bra:'\u2717 No'},
-                      {c:'Ontario OSSD',             sm:'\u2713 Yes (via CCIS)', chs:'\u2717 No', kih:'\u2717 No', wh:'\u2717 No', cga:'\u2717 No', bra:'\u2717 No'},
+                      {c:'Ontario OSSD',             sm:'\u2713 Yes (through our Ontario partner school)', chs:'\u2717 No', kih:'\u2717 No', wh:'\u2717 No', cga:'\u2717 No', bra:'\u2717 No'},
                       {c:'Kenya physical centre',    sm:'\u2713 Two Nairobi centres', chs:'\u2717 No', kih:'\u2717 No', wh:'\u2717 No', cga:'\u2717 No', bra:'\u2713 Multiple KE'},
                       {c:'Kenya exam registration',  sm:'\u2713 Managed by us', chs:'\u2717 Family handles', kih:'\u2717 Family handles', wh:'\u2717 Family handles', cga:'\u2717 Family handles', bra:'\u2713 On-campus'},
                       {c:'Sibling discounts',        sm:'\u2713 10% from 2nd child', chs:'\u2717 Limited', kih:'\u2717 Varies', wh:'\u2717 No', cga:'\u2717 No', bra:'\u2713 Limited'},
@@ -13872,7 +13874,7 @@ export default function LandingPage() {
                   {q:'What if we already have a physical Nairobi school but want to switch?', a:'Common situation. Families switching mid-year work with our admissions team to align curriculum transition points (usually end of term for smoothest handover). We can accept students at any point in the academic year subject to assessment. Existing school records are reviewed and prior learning is credited.'},
                   {q:'What are the fees for Kenyan families?', a:'Personalized pricing based on curriculum choice, class size preference, grade level, and enrolment period. Starting from USD 423/month (approximately KES 54,600/month at 2026 exchange rates). A 10% sibling discount applies from the second child. Request a quote via the pricing page and our admissions team will respond within 24 hours.'},
                   {q:'Can I combine online delivery with in-person supplementation?', a:'Yes. Smartious operates two Nairobi centres — Diamond Plaza, Parklands (head office, established 2022) and Karen West (established 2023). Families based in Nairobi can access in-person supplementary tuition, examination invigilation, and holiday intensives. This hybrid capability is unique to Kenya-based providers — UK, US, and NZ virtual schools have zero Kenya physical presence.'},
-                  {q:'How do university applications work from Smartious?', a:'Personalised university guidance sessions with the Head of Academics. Covers UCAS (UK Russell Group including Oxbridge admissions test prep — MAT, PAT, ENGAA, TSA, HAT), Common Application (US Ivy League + UC system with SAT/ACT + AP portfolio), OUAC (Canadian U15 via Ontario Secondary School Diploma pathway through our CCIS partnership), and Kenya universities via KUCCPS. UCAS personal statement coaching and Common App essay coaching included.'},
+                  {q:'How do university applications work from Smartious?', a:'Personalised university guidance sessions with the Head of Academics. Covers UCAS (UK Russell Group including Oxbridge admissions test prep — MAT, PAT, ENGAA, TSA, HAT), Common Application (US Ivy League + UC system with SAT/ACT + AP portfolio), OUAC (Canadian U15 via Ontario Secondary School Diploma pathway through our Ontario partner school), and Kenya universities via KUCCPS. UCAS personal statement coaching and Common App essay coaching included.'},
                 ].map((f, i) => (
                   <details key={i} style={{background:'#fff',border:`1px solid ${V.bone3}`,borderRadius:10,padding:'0',overflow:'hidden'}}>
                     <summary style={{padding:'18px 22px',cursor:'pointer',fontSize:15,fontWeight:700,color:V.ink,listStyle:'none',display:'flex',alignItems:'center',justifyContent:'space-between',gap:16}}>
@@ -14034,7 +14036,7 @@ export default function LandingPage() {
                   {flag:'🇩🇪', h:'German public universities', p:'Free tuition for Ukrainians on temporary protection status via uni-assist. TU Munich, LMU Munich, Heidelberg, Humboldt Berlin, RWTH Aachen, TU Berlin, KIT Karlsruhe. Only administrative semester fees EUR 100-350 apply.'},
                   {flag:'🇬🇧', h:'UK Russell Group', p:'Oxford, Cambridge, Imperial, LSE, UCL, Warwick, Edinburgh via UCAS (Oct 15 Oxbridge early deadline). Cambridge A-Level Further Mathematics + Physics + Chemistry pathway to Oxbridge STEM particularly valued.'},
                   {flag:'🇺🇸', h:'US Ivy League + UC system', p:'Common Application with SAT/ACT + AP portfolio. Harvard, Yale, MIT, Stanford, Berkeley, UCLA — competitive pathway with strong scholarship options for Ukrainian students.'},
-                  {flag:'🇨🇦', h:'Canadian U15', p:'Toronto, McGill, UBC, McMaster, Waterloo, Western, Queen\'s via OUAC. Ontario Secondary School Diploma pathway via CCIS partnership particularly relevant.'},
+                  {flag:'🇨🇦', h:'Canadian U15', p:'Toronto, McGill, UBC, McMaster, Waterloo, Western, Queen\'s via OUAC. Ontario Secondary School Diploma pathway through our Ontario partner school particularly relevant.'},
                   {flag:'🇺🇦', h:'Ukrainian universities', p:'Cambridge A-Level and IB Diploma accepted directly by Ukrainian universities via Bologna process alignment. Taras Shevchenko Kyiv, KPI Kyiv, Ivan Franko Lviv, V.N. Karazin Kharkiv.'},
                 ].map(item => (
                   <div key={item.h} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 22px'}}>
@@ -24007,10 +24009,15 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Guides written for this country (country hubs only; city pages
-          list them in CountryCityPage) ── */}
-      {typeof canonicalOverride === 'string' && canonicalOverride.startsWith('/online-school/') && (() => {
-        const g = guidesFor(canonicalOverride.split('/').pop())
+      {/* ── Guides written for this country (CountryCityPage lists them on
+          its own city pages) ── */}
+      {(() => {
+        // Country hubs, and the US / Canadian state, province and city pages.
+        const region = page === 'state-landing' ? [ 'usa', US_STATES[currentStateSlug]?.name ] : page === 'city-landing' ? [ 'usa', US_CITIES[currentCitySlug]?.name ]
+          : page === 'province-landing' ? [ 'canada', CA_PROVINCES[currentProvinceSlug]?.name ] : page === 'ca-city-landing' ? [ 'canada', CA_CITIES[currentCaCitySlug]?.name ]
+          : typeof canonicalOverride === 'string' && canonicalOverride.startsWith('/online-school/') ? [ canonicalOverride.split('/').pop(), '' ] : null
+        if (!region) return null
+        const g = guidesFor(region[0], region[1] || '')
         if (!g.length) return null
         return (
           <section className="sec" style={{background:V.white,paddingTop:40,paddingBottom:40}}><div className="wrap">
