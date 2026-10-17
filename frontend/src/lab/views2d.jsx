@@ -203,7 +203,7 @@ function Ohms2D({ view, dispatch, editable }) {
                 <text x={c.x + c.w / 2} y={c.y + 28} fontSize="11" textAnchor="middle">{view.switchClosed ? 'Switch: closed' : 'Switch: open'}</text>
               </Hot>
             : <>
-                <rect x={c.x} y={c.y} width={c.w} height={c.h} rx="6" fill={id === 'R1' ? '#F1E5C8' : '#2B3440'} stroke="#555" />
+                <rect x={c.x} y={c.y} width={c.w} height={c.h} rx="6" fill={id === 'R1' ? (view.hands?.heatFrac > 0.02 ? `rgb(245, ${Math.round(229 - 110 * view.hands.heatFrac)}, ${Math.round(200 - 150 * view.hands.heatFrac)})` : '#F1E5C8') : '#2B3440'} stroke="#555" />
                 <text x={c.x + c.w / 2} y={c.y + (id === 'R1' ? 22 : 24)} fontSize="11" textAnchor="middle" fill={id === 'R1' ? '#222' : '#FFF'}>{c.title}</text>
                 {screen[id] && <><rect x={c.x + 14} y={c.y + 32} width={c.w - 28} height="26" fill={id === 'PS' && trip ? '#F5C6C6' : '#B9E3B0'} /><text x={c.x + c.w / 2} y={c.y + 50} fontSize="14" fontFamily="monospace" textAnchor="middle">{screen[id]}</text></>}
               </>}

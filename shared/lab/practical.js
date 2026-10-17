@@ -36,15 +36,42 @@
  *     leads?: number                   leads in the tray (default: correct + 4)
  *   }                                  measures read by a meter name it: { meter: 'A1' } (or it is inferred)
  *   minPoints?: 5, minSpanFrac?: 0.5
+ *   goggles?: boolean                  eye protection needed (default: the safety notes say "wear eye protection")
  * }
+ *   A measure labelled "Time for 20 oscillations" (or with cycles: 20) is timed by counting cycles.
  *
  * The read functions are the physics. n(sd) returns a normally distributed
  * error (seeded, so a reload gives the same readings); n.u(lo, hi) is uniform.
+ *
+ * Hands-on bench (session option bench: 2, given to every new session):
+ * the student uses the instruments as in a real laboratory. Sessions
+ * without the option replay exactly as before.
+ *   • Instruments are read from a close-up, never handed over as a number:
+ *     needle on a scale, rule, vernier, micrometer, thermometer, stopwatch,
+ *     digital display (whose last digit may flicker between two values;
+ *     either is accepted as "shown").
+ *   • Scales are read square-on: setEye moves the eye; an off-square eye
+ *     sees the pointer shifted (parallax), and the shown value is the
+ *     square-on one.
+ *   • The micrometer has a zero error (zeroCheck, recordZero; readings are
+ *     corrected with the recorded zero error), the balance is tared (tare).
+ *   • Needles, thermometers and loaded springs take a moment to settle
+ *     after a change (wait); a reading taken before then overshoots.
+ *   • The stopwatch is started (startTimer) and stopped (measure), counts
+ *     on unless reset (resetTimer); oscillations are counted (cycles).
+ *   • A resistance wire warms while current flows (switch left closed),
+ *     raising its resistance; opening the switch lets it cool.
+ *   • Masses are added one at a time; eye protection is put on before
+ *     anything is loaded or stretched (wearGoggles); the bench is switched
+ *     off and tidied at the end (tidyUp).
+ * Two extra automatic marks: safe working, and instrument technique.
  */
 import { rng, hashSeed, seeded, pick } from './science/random.js'
 import { toResolution, toSigFigs, linearFit, fitThroughOrigin, within, mean } from './science/numeric.js'
 import { APPARATUS, apparatusName } from './apparatus.js'
 import { solveCircuit, sameNode, terminalsOf } from './science/circuit.js'
+import { instrumentKind, dialScale, displayPosition, flickerAlt, cycleTiming, unsettledReading,
+  FLICKER_INSTRUMENTS, SETTLING_INSTRUMENTS, PARALLAX_KINDS, ZERO_INSTRUMENTS, TARE_INSTRUMENTS } from './science/instruments.js'
 
 class PracticalError extends Error { constructor(m) { super(m); this.name = 'LabActionError' } }
 const fail = (m) => { throw new PracticalError(m) }
@@ -80,6 +107,15 @@ function noiseFor(seed, key, counter) {
   n.u = (lo, hi) => lo + (hi - lo) * r()
   return n
 }
+
+// A noise source that always returns the mean: the model's error-free value.
+const zeroNoise = () => 0
+zeroNoise.u = (lo, hi) => (lo + hi) / 2
+const HEAT_ALPHA = 4e-4          // fractional rise in resistance per kelvin for the resistance wire
+const HEAT_K_PER_STEP = 3        // kelvin gained per step with current flowing
+const HOT_STEPS = 6              // above this a reading counts as taken with the wire warm
+const EYE_SQUARE = 0.125         // |eye| at or below this counts as square-on
+export const cyclesOf = (m) => m.cycles ?? (Number((/time for (\d+) (oscillations|revolutions|swings|cycles)/i.exec(m.label || '') || [])[1]) || null)
 
 const num = (v) => (v === '' || v == null ? NaN : Number(v))
 const decimalsOf = (res) => Math.max(0, Math.ceil(-Math.log10(res) - 1e-9))
@@ -117,11 +153,14 @@ export function definePractical(spec) {
   }
   const meterOf = (key) => (circuit ? measures.find(m => m.key === key)?.meter || null : null)
   const validTerminal = (t) => { const [id, term] = String(t).split('.'); return !!partById[id] && terminalsOf(partById[id].type).includes(term) }
-  function circuitStatus(params, s) {
+  // Parts that warm up while current flows (hands-on bench only).
+  const heatParts = circuit ? (circuit.heats || circuit.parts.filter(p => p.type === 'resistor' && p.apparatus === 'resistance_wire').map(p => p.id)) : []
+  const heatFactor = (steps) => 1 + HEAT_ALPHA * Math.min(80, HEAT_K_PER_STEP * Math.max(0, steps || 0))
+  function circuitStatus(params, s, heat = s.hands?.heat || 0) {
     const v = circuit.values ? circuit.values(params, s.x, s.settings) || {} : {}
     const components = circuit.parts.map(p => {
       if (p.type === 'supply') return { id: p.id, type: 'supply', emf: v[p.id]?.emf ?? 3, internalResistance: v[p.id]?.r ?? 0.5 }
-      if (p.type === 'resistor') return { id: p.id, type: 'resistor', resistance: Math.max(1e-6, v[p.id]?.R ?? 10) }
+      if (p.type === 'resistor') return { id: p.id, type: 'resistor', resistance: Math.max(1e-6, (v[p.id]?.R ?? 10) * (heat && heatParts.includes(p.id) ? heatFactor(heat) : 1)) }
       if (p.type === 'switch') return { id: p.id, type: 'switch', closed: !!s.switchClosed }
       return { id: p.id, type: p.type }
     })
@@ -151,8 +190,51 @@ export function definePractical(spec) {
 
   const correctGraph = spec.graph ? { x: spec.graph.x, tx: spec.graph.tx || 'none', y: spec.graph.y, ty: spec.graph.ty || 'none' } : null
 
+  // ── Hands-on bench (bench: 2) ─────────────────────────────
+  const needsGoggles = spec.goggles ?? /wear eye protection|goggles/i.test((spec.safety || []).join(' '))
+  const baseKind = (r) => instrumentKind(r.instrument, r)
+  const zeroInstruments = [...new Set(allReadings.filter(r => ZERO_INSTRUMENTS.includes(r.instrument) && baseKind(r) === 'micrometer').map(r => r.instrument))]
+  const tareInstruments = [...new Set(allReadings.filter(r => TARE_INSTRUMENTS.includes(r.instrument)).map(r => r.instrument))]
+  const timed = measures.filter(m => m.instrument === 'stopwatch')
+  const hasSwitch = !!circuit?.parts.some(p => p.type === 'switch')
+  const settles = (r) => r.kind === 'measure' && (SETTLING_INSTRUMENTS.includes(r.instrument) ||
+    ((r.instrument === 'metre_rule' || r.instrument === 'ruler_30cm') && iv?.instrument === 'slotted_masses'))
+  const zeroRes = Object.fromEntries(zeroInstruments.map(id => [id, allReadings.find(r => r.instrument === id).resolution]))
+  const scaleCache = new WeakMap()
+  /** Analogue scale of a reading for this attempt (null: drawn as a digital display). */
+  function scaleOf(params, r) {
+    if (baseKind(r) !== 'dial') return null
+    let m = scaleCache.get(params)
+    if (!m) { m = {}; scaleCache.set(params, m) }
+    if (r.key in m) return m[r.key]
+    let max = 0
+    const xs = iv ? Array.from({ length: 9 }, (_, i) => iv.min + (iv.max - iv.min) * i / 8) : [0]
+    const sts = [defaultSettings, ...settings.flatMap(st => st.options.map(o => ({ ...defaultSettings, [st.key]: o.value })))]
+    for (const st of sts) for (const x of xs) {
+      try { const v = r.kind === 'constant' ? r.read(params, zeroNoise, st) : r.read(params, x, zeroNoise, st); if (Number.isFinite(v)) max = Math.max(max, Math.abs(v)) } catch { /* ignore */ }
+    }
+    return (m[r.key] = dialScale(max, r.resolution))
+  }
+  const kindOf = (params, r) => { const k = baseKind(r); return k === 'dial' && !scaleOf(params, r) ? 'digital' : k }
+  /** The student's typed value, corrected with the zero error they recorded (hands-on bench). */
+  function corrected(s, key, v) {
+    const r = byKey[key]
+    const z = s.hands && r && zeroInstruments.includes(r.instrument) ? s.hands.zero[r.instrument] : null
+    return z && Number.isFinite(v) ? Number((v - z.value).toFixed(10)) : v
+  }
+  const clearReadings = (s) => { s.readings = {}; if (s.look) s.look = {} }
+  const unsettle = (s) => { if (s.hands) s.hands.settled = false }
+  const flowing = (params, s) => {
+    if (!circuit || !s.hands || (hasSwitch && !s.switchClosed)) return false
+    const st = circuitStatus(params, s, 0)
+    return !!st.sol?.ok && heatParts.some(id => Math.abs(st.sol.current(id)) > 1e-6)
+  }
+  const warm = (params, s) => { if (heatParts.length && flowing(params, s)) s.hands.heat += 1 }
+  function needHands(s) { if (!s.hands) fail('This step is part of the hands-on bench. Start a new attempt to use it.') }
+  function needGoggles(s) { if (s.hands && needsGoggles && !s.hands.goggles) fail('Put on your safety goggles first: something here is loaded or stretched and could snap.') }
+
   // ── helpers over state ────────────────────────────────────
-  const typedConsts = (s) => Object.fromEntries(constants.map(c => [c.key, num(s.constants[c.key])]))
+  const typedConsts = (s) => Object.fromEntries(constants.map(c => [c.key, corrected(s, c.key, num(s.constants[c.key]))]))
   const settingsKey = (st) => JSON.stringify(settings.map(x => st?.[x.key] ?? defaultSettings[x.key]))
   function groups(s) {
     const map = new Map()
@@ -164,7 +246,7 @@ export function definePractical(spec) {
     const c = typedConsts(s)
     return [...map.values()].map(g => {
       const row = iv ? { [iv.key]: g.x } : {}
-      for (const m of measures) { const vs = g.rows.map(r => num(r.values[m.key])).filter(Number.isFinite); row[m.key] = vs.length ? mean(vs) : NaN }
+      for (const m of measures) { const vs = g.rows.map(r => corrected(s, m.key, num(r.values[m.key]))).filter(Number.isFinite); row[m.key] = vs.length ? mean(vs) : NaN }
       for (const d of derived) { try { row[d.key] = d.value(row, c, g.settings) } catch { row[d.key] = NaN } }
       return { ...g, row, n: g.rows.length }
     }).sort((a, b) => a.x - b.x)
@@ -208,9 +290,39 @@ export function definePractical(spec) {
     } },
     { id: 'readings', label: 'Readings recorded as shown on the instruments', marks: 1, auto: ({ state }) => {
       let bad = 0, total = 0
-      for (const cst of constants) { total++; if (!within(num(state.constants[cst.key]), state.constShown[cst.key], { abs: cst.resolution * 0.51 })) bad++ }
-      for (const r of state.rows) for (const m of measures) { total++; if (!within(num(r.values[m.key]), r.shown[m.key], { abs: m.resolution * 0.51 })) bad++ }
+      // A flickering digital display showed two values; either is what it showed.
+      const ok = (v, shown, alt, res) => within(v, shown, { abs: res * 0.51 }) || (alt != null && within(v, alt, { abs: res * 0.51 }))
+      for (const cst of constants) { total++; if (!ok(num(state.constants[cst.key]), state.constShown[cst.key], state.constAlt?.[cst.key], cst.resolution)) bad++ }
+      for (const r of state.rows) for (const m of measures) { total++; if (!ok(num(r.values[m.key]), r.shown[m.key], r.alt?.[m.key], m.resolution)) bad++ }
       return { marks: total && !bad ? 1 : 0, detail: !total ? 'No readings recorded.' : bad ? bad + ' of ' + total + ' readings differ from the instrument.' : 'All ' + total + ' readings match the instruments.' }
+    } },
+    { id: 'technique', label: 'Instrument technique: zero errors, settled readings, eye level with the scale', marks: 1, auto: ({ state, params }) => {
+      if (!state.hands) return { na: true }               // sessions from before the hands-on bench
+      const H = state.hands, problems = [], good = []
+      let checks = 0
+      for (const id of zeroInstruments) {
+        checks++; good.push('zero error of the ' + apparatusName(id).toLowerCase() + ' checked and recorded')
+        const z = H.zero[id], name = apparatusName(id).toLowerCase()
+        if (!z) problems.push(`The zero error of the ${name} was not checked and recorded.`)
+        else if (!within(z.value, z.shown, { abs: zeroRes[id] * 0.51 })) problems.push(`The zero error of the ${name} was recorded as ${z.value} but it read ${z.shown}.`)
+      }
+      for (const id of tareInstruments) { checks++; good.push(apparatusName(id).toLowerCase() + ' tared'); if (H.untared?.[id]) problems.push(`${H.untared[id]} reading(s) taken before the ${apparatusName(id).toLowerCase()} was tared (zeroed).`) }
+      const recs = [...state.rows.map(r => r.tech), ...Object.values(state.constTech || {})].filter(Boolean)
+      if (allReadings.some(settles)) { checks++; good.push('readings allowed to settle'); const n = recs.filter(t => t.unsettled?.length).length; if (n) problems.push(`${n} reading(s) taken before the instrument had settled.`) }
+      if (allReadings.some(r => PARALLAX_KINDS.includes(kindOf(params, r)))) { checks++; good.push('scales read square-on'); const n = recs.filter(t => t.offSquare?.length).length; if (n) problems.push(`${n} reading(s) recorded with the eye not level with the scale (parallax).`) }
+      if (timed.length) { checks++; good.push('stopwatch reset before each timing'); if (H.unreset) problems.push(`The stopwatch was started ${H.unreset} time(s) without being reset to zero.`) }
+      if (heatParts.length) { checks++; good.push('switch opened between readings'); const n = state.rows.filter(r => (r.tech?.hot || 0) > HOT_STEPS).length; if (n) problems.push(`${n} reading(s) taken with the wire warm: open the switch between readings.`) }
+      if (!checks) return { na: true }
+      return { marks: problems.length ? 0 : 1, detail: problems.length ? problems.join(' ') : good.join('; ').replace(/^./, c => c.toUpperCase()) + '.' }
+    } },
+    { id: 'safety', label: needsGoggles ? 'Safe working: eye protection, then switched off and tidied away' : 'Safe working: switched off and tidied away at the end', marks: 1, auto: ({ state }) => {
+      if (!state.hands) return { na: true }
+      const p = []
+      if (needsGoggles && !state.hands.goggles) p.push('Safety goggles were not worn.')
+      if (hasSwitch && state.switchClosed) p.push('The switch was left closed.')
+      if (state.hands.timer?.running) p.push('The stopwatch was left running.')
+      if (!state.hands.tidy) p.push('The apparatus was not switched off and tidied away at the end.')
+      return { marks: p.length ? 0 : 1, detail: p.length ? p.join(' ') : (needsGoggles ? 'Goggles worn; bench' : 'Bench') + ' switched off and tidied away.' }
     } },
     ...(circuit ? [{ id: 'circuit', label: 'Circuit built correctly', marks: 2, auto: ({ state }) => {
       const good = state.rows.filter(r => r.circuitOk).length
@@ -281,7 +393,15 @@ export function definePractical(spec) {
       // j(name): a fixed value in [−1, 1] for this attempt, for physical
       // irregularities that must be the same every time they are read.
       const j = (name) => seeded(seed, 'j|' + name, -1, 1)
-      return { seed, j, ...spec.hidden(q, options), _stockroom: !!options.stockroom }
+      const p = { seed, j, ...spec.hidden(q, options), _stockroom: !!options.stockroom }
+      if (Number(options.bench) >= 2) {
+        // Hands-on bench: each attempt's own instrument quirks.
+        p._bench = 2
+        p._zero = Object.fromEntries(zeroInstruments.map(id => [id, Number((Math.round(seeded(seed, 'zero|' + id, -4.49, 4.49)) * zeroRes[id]).toFixed(6))]))
+        p._tare = Object.fromEntries(tareInstruments.map(id => [id, 2 + Math.floor(seeded(seed, 'tare|' + id, 0, 7))]))   // empty-pan reading, in steps of the resolution
+        p._eye0 = pick(seed, 'eye0', [-0.75, -0.5, 0.5, 0.75])
+      }
+      return p
     },
 
     initialState(params = {}) {
@@ -289,7 +409,11 @@ export function definePractical(spec) {
       // choose it from the stockroom (assignment option `stockroom`).
       return { collected: params._stockroom ? null : [...required], firstCollectComplete: false,
         wires: [], wireColours: [], switchClosed: false, x: iv ? (iv.start ?? iv.min) : 0, settings: { ...defaultSettings },
-        readings: {}, counter: 0, constants: {}, constShown: {}, rows: [], graph: { x: iv ? iv.key : measures[0]?.key, tx: 'none', y: measures[0]?.key || derived[0]?.key, ty: 'none' } }
+        readings: {}, counter: 0, constants: {}, constShown: {}, rows: [], graph: { x: iv ? iv.key : measures[0]?.key, tx: 'none', y: measures[0]?.key || derived[0]?.key, ty: 'none' },
+        ...(params._bench >= 2 ? {
+          hands: { goggles: false, tidy: false, eye: params._eye0 ?? 0.5, settled: true, heat: 0, timer: { running: false, acc: 0 }, tared: {}, untared: {}, zeroShown: {}, zero: {} },
+          look: {}, constAlt: {}, constTech: {},
+        } : {}) }
     },
 
     actions: {
@@ -309,40 +433,52 @@ export function definePractical(spec) {
         if (s.wires.some(([x, y]) => (x === a && y === b) || (x === b && y === a))) fail('Those terminals are already connected.')
         if (s.wires.length >= maxLeads) fail('There are no leads left in the tray. Remove one you do not need.')
         s.wires.push([a, b]); s.wireColours.push(colour === 'black' ? 'black' : 'red')
-        s.readings = {}
+        clearReadings(s); unsettle(s)
       },
       disconnect(s, { index }) {
         if (!circuit || !s.wires[index]) fail('No such lead.')
         s.wires.splice(index, 1); s.wireColours.splice(index, 1)
-        s.readings = {}
+        clearReadings(s); unsettle(s)
       },
-      clearWires(s) { if (!circuit) fail('There is no circuit in this experiment.'); s.wires = []; s.wireColours = []; s.readings = {} },
+      clearWires(s) { if (!circuit) fail('There is no circuit in this experiment.'); s.wires = []; s.wireColours = []; clearReadings(s); unsettle(s) },
       toggleSwitch(s) {
         if (!circuit || !circuit.parts.some(p => p.type === 'switch')) fail('There is no switch in this circuit.')
         s.switchClosed = !s.switchClosed
-        s.readings = {}
+        if (s.hands && !s.switchClosed) s.hands.heat = Math.floor(s.hands.heat / 2)     // the wire starts to cool
+        clearReadings(s); unsettle(s)
       },
       setting(s, { key, value }) {
         const st = settings.find(x => x.key === key)
         if (!st || !st.options.some(o => String(o.value) === String(value))) fail('Choose one of the options.')
         s.settings[key] = st.options.find(o => String(o.value) === String(value)).value
-        s.readings = {}
+        clearReadings(s); unsettle(s)
       },
-      setIV(s, { value }) {
+      setIV(s, { value }, params) {
         if (!iv) fail('Nothing to vary in this experiment.')
         ensureApparatus(s)
         let v = num(value)
         if (!Number.isFinite(v) || v < iv.min - 1e-9 || v > iv.max + 1e-9) fail(`${iv.label} must be between ${iv.min} and ${iv.max} ${iv.unit || ''}.`)
         v = Number((Math.round((v - iv.min) / iv.step) * iv.step + iv.min).toFixed(6))
         if (iv.monotonic && s.rows.length && v < s.x) fail(`${iv.label} cannot go back to an earlier value.`)
+        if (s.hands) {
+          needGoggles(s)
+          if (iv.instrument === 'slotted_masses' && Math.abs(v - s.x) > iv.step + 1e-9) fail(`Add or remove one ${toSigFigs(iv.step, 3)} ${iv.unit || ''} mass at a time, gently, and let the load come to rest.`)
+          if (v !== s.x) { unsettle(s); warm(params, s) }
+        }
         s.x = v
-        s.readings = {}
+        clearReadings(s)
       },
-      measure(s, { key }, params) {
+      measure(s, { key, cycles }, params) {
         const r = byKey[key]
         if (!r) fail('Unknown reading.')
         ensureApparatus(s)
         if (r.instrument && !s.collected.includes(r.instrument)) fail('You need the ' + apparatusName(r.instrument).toLowerCase() + ' for this reading.')
+        const H = s.hands
+        const isTimer = r.instrument === 'stopwatch' && r.kind === 'measure'
+        if (H) {
+          needGoggles(s)
+          if (isTimer && !H.timer.running) fail('Start the stopwatch first, then stop it to take the reading.')
+        }
         s.counter += 1
         const n = noiseFor(params.seed, key, s.counter)
         let raw
@@ -353,10 +489,54 @@ export function definePractical(spec) {
           // solved value for their wiring (or nothing if the supply tripped).
           const st = circuitStatus(params, s)
           if (st.fault) raw = null
-          else if (st.ok) { raw = r.read(params, s.x, n, s.settings); if ((st.sol.readings[meter] ?? 1) < 0) raw = -raw }
-          else raw = circuit.values ? st.sol.readings[meter] : 0
+          else if (st.ok) {
+            raw = r.read(params, s.x, n, s.settings)
+            if ((st.sol.readings[meter] ?? 1) < 0) raw = -raw
+            if (H?.heat && heatParts.length) {
+              // The warm wire: scale the model reading by what the hotter resistance does to this meter.
+              const hot = st.sol.readings[meter], cold = circuitStatus(params, s, 0).sol?.readings?.[meter]
+              if (Number.isFinite(hot) && Number.isFinite(cold) && Math.abs(cold) > 1e-12) raw *= hot / cold
+            }
+          } else raw = circuit.values ? st.sol.readings[meter] : 0
         } else raw = r.kind === 'constant' ? r.read(params, n, s.settings) : r.read(params, s.x, n, s.settings)
-        s.readings[key] = raw == null || !Number.isFinite(raw) ? null : toResolution(raw, r.resolution)
+        if (!H) { s.readings[key] = raw == null || !Number.isFinite(raw) ? null : toResolution(raw, r.resolution); return }
+
+        // Hands-on bench: what the real instrument shows.
+        const kind = kindOf(params, r)
+        let cyc = null, unsettled = false
+        if (isTimer) {
+          const fixed = cyclesOf(r)
+          if (fixed && raw != null && Number.isFinite(raw)) {
+            cyc = cycles == null || cycles === '' ? fixed : Math.round(num(cycles))
+            if (!Number.isFinite(cyc) || cyc < 1 || cyc > 200) fail('Count between 1 and 200 oscillations before you stop the stopwatch.')
+            raw = cycleTiming(raw, fixed, cyc, r.read(params, s.x, zeroNoise, s.settings))
+          }
+          raw = H.timer.acc + (Number.isFinite(raw) ? raw : 0)          // a stopwatch that was not reset counts on
+          H.timer.running = false
+        }
+        const sc = kind === 'dial' ? scaleOf(params, r) : null
+        if (raw != null && Number.isFinite(raw)) {
+          if (zeroInstruments.includes(r.instrument)) raw += params._zero[r.instrument]
+          if (tareInstruments.includes(r.instrument) && !H.tared[r.instrument]) { raw += params._tare[r.instrument] * r.resolution; H.untared[r.instrument] = (H.untared[r.instrument] || 0) + 1 }
+          if (settles(r) && !H.settled) {
+            unsettled = true
+            const u = noiseFor(params.seed, key + '|settle', s.counter)
+            raw = unsettledReading(raw, kind === 'rule' ? { relative: 0, absolute: u.u(4, 9) * r.resolution, sign: u.u(0, 1) < 0.5 ? -1 : 1 } : { relative: u.u(0.03, 0.07), sign: u.u(0, 1) < 0.5 ? -1 : 1 })
+          }
+          if (sc) raw = Math.max(0, Math.min(sc.fullScale, raw))       // the needle stops at each end of the scale
+        }
+        const shown = raw == null || !Number.isFinite(raw) ? null : toResolution(raw, r.resolution)
+        s.readings[key] = shown
+        if (isTimer) H.timer.acc = shown ?? 0
+        const look = { kind, settled: !unsettled, heat: H.heat }
+        if (shown != null) {
+          if (PARALLAX_KINDS.includes(kind)) look.pos = displayPosition(raw, shown, r.resolution)
+          if (sc) Object.assign(look, { fullScale: sc.fullScale, division: sc.division, half: sc.half })
+          if (kind === 'digital' && FLICKER_INSTRUMENTS.includes(r.instrument)) { const alt = flickerAlt(raw, shown, r.resolution); if (alt != null) look.alt = alt }
+          if (cyc != null) look.cycles = cyc
+        }
+        s.look[key] = look
+        warm(params, s)
       },
       recordConst(s, { key, value }) {
         const c = constants.find(x => x.key === key)
@@ -365,6 +545,7 @@ export function definePractical(spec) {
         if (!Number.isFinite(num(value))) fail('Enter the reading as a number.')
         s.constants[key] = num(value)
         s.constShown[key] = s.readings[key]
+        if (s.hands) { s.constAlt[key] = s.look[key]?.alt ?? null; s.constTech[key] = techOf(s, [key]) }
       },
       recordRow(s, { values }, params) {
         if (!measures.length) fail('There is nothing to tabulate in this experiment.')
@@ -378,8 +559,13 @@ export function definePractical(spec) {
         }
         const row = { x: s.x, settings: { ...s.settings }, values: vals, shown }
         if (circuit) row.circuitOk = circuitStatus(params, s).ok
+        if (s.hands) {
+          const alt = Object.fromEntries(measures.map(m => [m.key, s.look[m.key]?.alt]).filter(([, v]) => v != null))
+          if (Object.keys(alt).length) row.alt = alt
+          row.tech = techOf(s, measures.map(m => m.key))
+        }
         s.rows.push(row)
-        s.readings = {}
+        clearReadings(s)
       },
       deleteRow(s, { index }) {
         if (!s.rows[index]) fail('No such reading.')
@@ -391,13 +577,78 @@ export function definePractical(spec) {
         if (x === y && tx === ty) fail('Choose different quantities for the two axes.')
         s.graph = { x, tx, y, ty }
       },
+
+      // ── Hands-on bench actions ─────────────────────────────
+      wearGoggles(s) {
+        needHands(s)
+        if (s.hands.goggles) fail('You are already wearing your safety goggles.')
+        s.hands.goggles = true
+      },
+      setEye(s, { offset }) {
+        needHands(s)
+        const v = num(offset)
+        if (!Number.isFinite(v) || v < -1 - 1e-9 || v > 1 + 1e-9) fail('Move your eye between −1 and 1 (0 is square-on to the scale).')
+        s.hands.eye = Math.round(v * 8) / 8
+      },
+      tare(s, { instrument }) {
+        needHands(s); ensureApparatus(s)
+        if (!tareInstruments.includes(instrument)) fail('There is nothing to tare in this experiment.')
+        s.hands.tared[instrument] = true
+        for (const r of allReadings) if (r.instrument === instrument) { delete s.readings[r.key]; delete s.look[r.key] }
+      },
+      zeroCheck(s, { instrument }, params) {
+        needHands(s); ensureApparatus(s)
+        if (!zeroInstruments.includes(instrument)) fail('There is no zero to check on that instrument here.')
+        s.hands.zeroShown[instrument] = params._zero[instrument]
+      },
+      recordZero(s, { instrument, value }) {
+        needHands(s)
+        if (!zeroInstruments.includes(instrument)) fail('There is no zero to check on that instrument here.')
+        if (s.hands.zeroShown[instrument] === undefined) fail('Close the jaws gently with the ratchet and look at the reading first.')
+        const v = num(value)
+        if (!Number.isFinite(v)) fail('Enter the zero error as a number: negative if the reading with the jaws closed is below zero.')
+        if (Math.abs(v) > 0.5) fail('A zero error is a small reading close to zero. Read the instrument with its jaws closed.')
+        s.hands.zero[instrument] = { value: v, shown: s.hands.zeroShown[instrument] }
+      },
+      wait(s, _p, params) {
+        needHands(s); ensureApparatus(s)
+        s.hands.settled = true
+        if (heatParts.length && flowing(params, s)) s.hands.heat += 1
+        else s.hands.heat = Math.max(0, s.hands.heat - 4)
+      },
+      startTimer(s) {
+        needHands(s); ensureApparatus(s)
+        if (!timed.length) fail('There is nothing to time with the stopwatch in this experiment.')
+        if (!s.collected.includes('stopwatch')) fail('You need the stopwatch.')
+        if (s.hands.timer.running) fail('The stopwatch is already running.')
+        needGoggles(s)
+        if (s.hands.timer.acc) s.hands.unreset = (s.hands.unreset || 0) + 1      // it will count on from the last time
+        s.hands.timer.running = true
+        for (const m of timed) { delete s.readings[m.key]; delete s.look[m.key] }
+      },
+      resetTimer(s) {
+        needHands(s)
+        if (!timed.length) fail('There is nothing to time with the stopwatch in this experiment.')
+        if (s.hands.timer.running) fail('Stop the stopwatch before you reset it.')
+        s.hands.timer.acc = 0
+        for (const m of timed) { delete s.readings[m.key]; delete s.look[m.key] }
+      },
+      tidyUp(s) {
+        needHands(s)
+        if (!s.collected) fail('There is nothing on your bench to tidy away.')
+        if (hasSwitch && s.switchClosed) fail('Open the switch (switch off) before you tidy away.')
+        if (s.hands.timer.running) fail('Stop the stopwatch first.')
+        s.hands.tidy = true
+        clearReadings(s)
+      },
     },
 
     view(params, s) {
       const cs = circuit ? circuitStatus(params, s) : null
       return { wires: s.wires || [], wireColours: s.wireColours || [], switchClosed: !!s.switchClosed, maxLeads,
         circuit: cs ? { ok: cs.ok, problems: cs.problems, fault: cs.fault } : null,
-        collected: s.collected, stockroomMode: !!params._stockroom, x: s.x, settings: s.settings, readings: s.readings, constants: s.constants, rows: s.rows, graph: s.graph, groups: groups(s).map(g => ({ x: g.x, n: g.n, row: g.row, settings: g.settings })) }
+        collected: s.collected, stockroomMode: !!params._stockroom, x: s.x, settings: s.settings, readings: s.readings, constants: s.constants, rows: s.rows, graph: s.graph, groups: groups(s).map(g => ({ x: g.x, n: g.n, row: g.row, settings: g.settings })),
+        ...(s.hands ? { bench: 2, hands: handsView(params, s, cs) } : {}) }
     },
 
     dataTables(params, s) {
@@ -412,6 +663,12 @@ export function definePractical(spec) {
           for (const m of measures) row[m.key] = num(r.values[m.key])
           return [...settings.map(x => labelOfSetting(x, r.settings?.[x.key])), ...(iv ? [fmtNum(r.x)] : []), ...measures.map(m => fmtRes(row[m.key], m.resolution)),
             ...derived.map(d => { let v; try { v = d.value(row, cs, r.settings) } catch { v = NaN } return fmtNum(v, d.decimals) })]
+        }) })
+      }
+      if (s.hands && zeroInstruments.length) {
+        tables.push({ title: 'Zero errors', columns: ['Instrument', 'Zero error'], rows: zeroInstruments.map(id => {
+          const r = allReadings.find(x => x.instrument === id)
+          return [apparatusName(id) + ' / ' + r.unit, s.hands.zero[id] ? fmtRes(s.hands.zero[id].value, r.resolution) : 'not checked']
         }) })
       }
       return tables
@@ -452,6 +709,49 @@ export function definePractical(spec) {
     correctGraph,
   }
 
+  /** What the hands-on bench UI needs: instrument kinds and scales, timers, zero errors, heating. */
+  function handsView(params, s, cs) {
+    const H = s.hands
+    const kinds = Object.fromEntries(allReadings.map(r => {
+      const k = kindOf(params, r), sc = scaleOf(params, r)
+      return [r.key, { kind: k, ...(k === 'dial' && sc ? sc : {}), ...(k === 'vernier' ? { n: Math.round(1 / (r.resolution * (r.unit === 'cm' ? 10 : 1))) } : {}) }]
+    }))
+    let motion = null
+    if (timed.length) {
+      const m = timed[0], c = cyclesOf(m)
+      try { const T = m.read(params, s.x, zeroNoise, s.settings); if (Number.isFinite(T) && T > 0) motion = { key: m.key, cycles: c, period: c ? T / c : null, duration: T } } catch { motion = null }
+    }
+    const glow = {}
+    for (const p of circuit?.parts || []) if (['filament_lamp', 'leds'].includes(p.apparatus)) {
+      const on = cs?.sol?.ok && Math.abs(cs.sol.current(p.id)) > 1e-6
+      glow[p.apparatus] = on ? (iv ? Math.max(0.15, Math.min(1, (s.x - iv.min) / ((iv.max - iv.min) || 1))) : 1) : 0
+    }
+    const balanceZero = Object.fromEntries(tareInstruments.map(id => {
+      const r = allReadings.find(x => x.instrument === id)
+      return [id, { value: H.tared[id] ? 0 : toResolution(params._tare[id] * r.resolution, r.resolution), resolution: r.resolution, unit: r.unit }]
+    }))
+    return {
+      goggles: H.goggles, needsGoggles, tidy: H.tidy, eye: H.eye, eyeSquare: EYE_SQUARE, settled: H.settled, timer: { ...H.timer },
+      heat: H.heat, heatFrac: heatParts.length ? Math.min(1, (heatFactor(H.heat) - 1) / (heatFactor(1e9) - 1)) : 0, hot: H.heat > HOT_STEPS,
+      tared: { ...H.tared }, tareInstruments, balanceZero, zeroInstruments, zeroShown: { ...H.zeroShown }, zero: { ...H.zero },
+      settles: allReadings.filter(settles).map(r => r.key), timed: timed.map(m => ({ key: m.key, cycles: cyclesOf(m) })),
+      kinds, look: s.look || {}, motion, glow, hasSwitch,
+    }
+  }
+  function techOf(s, keys) {
+    const L = s.look || {}
+    return {
+      unsettled: keys.filter(k => L[k] && L[k].settled === false),
+      offSquare: keys.filter(k => PARALLAX_KINDS.includes(L[k]?.kind) && Math.abs(s.hands.eye) > EYE_SQUARE),
+      hot: Math.max(0, ...keys.map(k => L[k]?.heat || 0)),
+    }
+  }
+  // Any bench step after tidying away gets the apparatus out again.
+  const KEEPS_TIDY = new Set(['tidyUp', 'setGraph', 'deleteRow', 'setEye', 'wearGoggles'])
+  for (const [name, fn] of Object.entries(def.actions)) {
+    if (KEEPS_TIDY.has(name)) continue
+    def.actions[name] = (s, payload, params) => { const out = fn(s, payload, params); const st = out === undefined ? s : out; if (st?.hands) st.hands.tidy = false; return out }
+  }
   function ensureApparatus(s) {
     if (!s.collected) fail('Collect your apparatus from the stockroom first.')
     const missing = required.filter(a => !s.collected.includes(a))

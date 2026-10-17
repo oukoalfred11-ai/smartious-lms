@@ -4,15 +4,27 @@
  * Every reading comes from solving the circuit the student actually wired
  * (science/circuit.js); a wrong or incomplete circuit gives the readings
  * that circuit would really give, or a fault.
+ *
+ * Hands-on bench (session option bench: 2): the meters take a moment to
+ * settle after anything is changed (wait), their last digit may flicker,
+ * the resistor warms up if the switch is left closed (its resistance
+ * rises, so readings drift), and the bench is switched off and tidied at
+ * the end. Sessions without the option replay exactly as before.
  */
 import { solveCircuit, sameNode, terminalsOf, METER } from '../science/circuit.js'
 import { seeded, pick } from '../science/random.js'
 import { toResolution, within, fitThroughOrigin, linearFit } from '../science/numeric.js'
 import { fail } from '../engine.js'
+import { flickerAlt } from '../science/instruments.js'
 
 const NOMINAL = [10, 15, 22, 33, 47]       // E12 values, Ω
 const SUPPLY_R = 0.5                       // internal resistance, Ω
 const MAX_WIRES = 10                      // leads in the tray (a correct circuit needs 6)
+// Hands-on bench: the resistor warms while current flows.
+const HEAT_ALPHA = 6e-4                   // fractional rise in resistance per kelvin
+const HEAT_K_PER_STEP = 3                 // kelvin gained per step with current flowing
+const HOT_STEPS = 6                       // above this a reading counts as taken with the resistor warm
+export const heatFactor = (steps) => 1 + HEAT_ALPHA * Math.min(60, HEAT_K_PER_STEP * Math.max(0, steps || 0))
 
 export function circuitOf(params, s) {
   return {
@@ -21,7 +33,7 @@ export function circuitOf(params, s) {
       { id: 'S1', type: 'switch', closed: s.switchClosed },
       { id: 'A1', type: 'ammeter' },
       { id: 'V1', type: 'voltmeter' },
-      { id: 'R1', type: 'resistor', resistance: params.R },
+      { id: 'R1', type: 'resistor', resistance: params.R * (s.hands ? heatFactor(s.hands.heat) : 1) },
     ],
     wires: s.wires,
   }
@@ -42,6 +54,35 @@ export function checkSetup(params, s) {
   if (!s.switchClosed) problems.push('Close the switch to take readings.')
   return { ok: problems.length === 0, problems, solution: sol }
 }
+
+/**
+ * What the two digital meters display. On the hands-on bench a meter that
+ * has not settled since the last change overshoots by a few per cent, and
+ * a value between two digits flickers (alt).
+ */
+export function meterDisplay(params, s, sol) {
+  if (!sol?.ok) return { A1: null, V1: null, alt: { A1: null, V1: null }, settled: true }
+  let a = sol.readings.A1, v = sol.readings.V1
+  const settled = !s.hands || s.hands.settled
+  if (!settled) {
+    const k = 1 + (seeded(params.seed, 'settle|' + s.hands.changes, 0, 1) < 0.5 ? -1 : 1) * seeded(params.seed, 'settleSize|' + s.hands.changes, 0.03, 0.07)
+    a *= k; v *= k
+  }
+  const A1 = toResolution(a, METER.ammeter.resolution), V1 = toResolution(v, METER.voltmeter.resolution)
+  const alt = s.hands ? { A1: flickerAlt(a, A1, METER.ammeter.resolution), V1: flickerAlt(v, V1, METER.voltmeter.resolution) } : { A1: null, V1: null }
+  return { A1, V1, alt, settled }
+}
+const flowing = (params, s) => {
+  if (!s.switchClosed) return false
+  const sol = solveCircuit(circuitOf(params, s))
+  return !!sol.ok && Math.abs(sol.current('R1')) > 1e-6
+}
+const changed = (params, s) => {             // something changed: meters swing, the resistor warms if current flows
+  if (!s.hands) return
+  s.hands.settled = false; s.hands.changes += 1; s.hands.tidy = false
+  if (flowing(params, s)) s.hands.heat += 1
+}
+const needHands = (s) => { if (!s.hands) fail('This step is part of the hands-on bench. Start a new attempt to use it.') }
 
 const def = {
   id: 'phys-ohms-law',
@@ -95,17 +136,20 @@ const def = {
     variables: 'Independent: potential difference (V). Dependent: current (A). Controlled: the resistor, temperature.',
   },
 
-  params(seed) {
+  params(seed, options = {}) {
     const nominal = pick(seed, 'nominal', NOMINAL)
-    return { seed, nominal, R: Number((nominal * seeded(seed, 'tolerance', 0.95, 1.05)).toFixed(2)) } // R hidden
+    const p = { seed, nominal, R: Number((nominal * seeded(seed, 'tolerance', 0.95, 1.05)).toFixed(2)) } // R hidden
+    if (Number(options?.bench) >= 2) p._bench = 2
+    return p
   },
 
-  initialState() {
-    return { wires: [], wireColours: [], supplyV: 0, switchClosed: false, rows: [] }
+  initialState(params = {}) {
+    return { wires: [], wireColours: [], supplyV: 0, switchClosed: false, rows: [],
+      ...(params._bench >= 2 ? { hands: { settled: true, changes: 0, heat: 0, tidy: false } } : {}) }
   },
 
   actions: {
-    connect(s, { a, b, colour }) {
+    connect(s, { a, b, colour }, params) {
       const valid = (t) => { const [id, term] = String(t).split('.'); const type = { PS: 'supply', S1: 'switch', A1: 'ammeter', V1: 'voltmeter', R1: 'resistor' }[id]; return type && terminalsOf(type).includes(term) }
       if (!valid(a) || !valid(b)) fail('Connect two terminals.')
       if (a === b) fail('A lead needs two different terminals.')
@@ -115,31 +159,54 @@ const def = {
       s.wires.push([a, b])
       s.wireColours = s.wireColours || []
       s.wireColours[s.wires.length - 1] = colour === 'black' ? 'black' : 'red'
+      changed(params, s)
     },
-    disconnect(s, { index }) {
+    disconnect(s, { index }, params) {
       if (!s.wires[index]) fail('No such lead.')
       s.wires.splice(index, 1)
       s.wireColours?.splice(index, 1)
+      changed(params, s)
     },
-    clearWires(s) { s.wires = []; s.wireColours = [] },
-    setSupply(s, { volts }) {
+    clearWires(s, _p, params) { s.wires = []; s.wireColours = []; changed(params, s) },
+    setSupply(s, { volts }, params) {
       const v = Number(volts)
       if (!Number.isFinite(v) || v < 0 || v > 12) fail('The supply goes from 0 to 12 V.')
+      const before = s.supplyV
       s.supplyV = Math.round(v * 2) / 2
+      if (s.supplyV !== before) changed(params, s)
     },
-    toggleSwitch(s) { s.switchClosed = !s.switchClosed },
+    toggleSwitch(s, _p, params) {
+      s.switchClosed = !s.switchClosed
+      if (s.hands && !s.switchClosed) s.hands.heat = Math.floor(s.hands.heat / 2)     // the resistor starts to cool
+      changed(params, s)
+    },
     recordRow(s, { V, I }, params) {
       const v = Number(V), i = Number(I)
       if (!Number.isFinite(v) || !Number.isFinite(i)) fail('Enter both readings as numbers.')
       if (s.rows.length >= 15) fail('Fifteen readings are plenty.')
       const chk = checkSetup(params, s)
-      const r = chk.solution?.ok ? chk.solution.readings : {}
-      s.rows.push({
-        V: v, I: i, supply: s.supplyV,
-        trueV: r.V1 != null ? toResolution(r.V1, METER.voltmeter.resolution) : null,
-        trueI: r.A1 != null ? toResolution(r.A1, METER.ammeter.resolution) : null,
-        validSetup: chk.ok,
-      })
+      const m = meterDisplay(params, s, chk.solution)
+      const row = { V: v, I: i, supply: s.supplyV, trueV: m.V1, trueI: m.A1, validSetup: chk.ok }
+      if (s.hands) {
+        row.altV = m.alt.V1; row.altI = m.alt.A1
+        row.settled = m.settled; row.hot = s.hands.heat > HOT_STEPS
+        if (flowing(params, s)) s.hands.heat += 1
+        s.hands.tidy = false
+      }
+      s.rows.push(row)
+    },
+    // ── Hands-on bench ─────────────────────────────────────
+    wait(s, _p, params) {
+      needHands(s)
+      s.hands.settled = true
+      if (flowing(params, s)) s.hands.heat += 1
+      else s.hands.heat = Math.max(0, s.hands.heat - 4)
+    },
+    tidyUp(s) {
+      needHands(s)
+      if (s.switchClosed) fail('Open the switch before you tidy away.')
+      if (s.supplyV !== 0) fail('Turn the supply down to 0 V and switch it off before you tidy away.')
+      s.hands.tidy = true
     },
     deleteRow(s, { index }) {
       if (!s.rows[index]) fail('No such reading.')
@@ -150,10 +217,10 @@ const def = {
   view(params, s) {
     const chk = checkSetup(params, s)
     const sol = chk.solution
-    const meters = sol?.ok
-      ? { A1: toResolution(sol.readings.A1, METER.ammeter.resolution), V1: toResolution(sol.readings.V1, METER.voltmeter.resolution) }
-      : { A1: null, V1: null }
+    const md = meterDisplay(params, s, sol)
+    const meters = { A1: md.A1, V1: md.V1 }
     return {
+      ...(s.hands ? { bench: 2, hands: { ...s.hands, hot: s.hands.heat > HOT_STEPS, heatFrac: Math.min(1, (heatFactor(s.hands.heat) - 1) / (heatFactor(1e9) - 1)), metersAlt: md.alt } } : {}),
       supplyV: s.supplyV, switchClosed: s.switchClosed, wires: s.wires, wireColours: s.wireColours || [], maxLeads: MAX_WIRES,
       fault: sol && !sol.ok ? sol.fault : null,
       problems: chk.problems, setupOk: chk.ok, meters,
@@ -213,6 +280,18 @@ const def = {
       if (e.gradient != null && within(a, e.gradient, { rel: 0.03 })) m += 1
       if (within(a, ctx.params.R, { rel: 0.03 })) m += 1
       return { marks: m, detail: 'From your data: ' + (e.gradient ?? '—') + ' Ω. True value: ' + ctx.params.R + ' Ω.' }
+    } },
+    { id: 'technique', label: 'Meters allowed to settle; switch opened between readings so the resistor stays cool', marks: 1, auto: ({ state }) => {
+      if (!state.hands) return { na: true }                // sessions from before the hands-on bench
+      const good = state.rows.filter(r => r.validSetup)
+      if (!good.length) return { marks: 0, detail: 'No valid readings.' }
+      const unsettled = good.filter(r => r.settled === false).length, hot = good.filter(r => r.hot).length
+      const p = [unsettled ? unsettled + ' reading(s) recorded before the meters had settled.' : '', hot ? hot + ' reading(s) taken with the resistor warm: open the switch between readings.' : ''].filter(Boolean)
+      return { marks: p.length ? 0 : 1, detail: p.length ? p.join(' ') : 'Meters settled before every reading; the resistor stayed cool.' }
+    } },
+    { id: 'safety', label: 'Switched off and tidied away at the end', marks: 1, auto: ({ state }) => {
+      if (!state.hands) return { na: true }
+      return state.hands.tidy && !state.switchClosed && state.supplyV === 0 ? { marks: 1, detail: 'Supply at 0 V, switch open, bench tidied.' } : { marks: 0, detail: 'Open the switch, turn the supply to 0 V and tidy away at the end.' }
     } },
     { id: 'ohmic', label: 'Correct conclusion about Ohm’s law', marks: 1, auto: ({ answers }) => ({ marks: Number(answers.ohmic) === 0 ? 1 : 0, detail: 'The resistor is ohmic in this model.' }) },
     { id: 'report', label: 'Graph, explanation and evaluation', marks: 4, auto: null, guidance: 'Graph with labelled axes and units (1), switch/heating explained (1), two sensible improvements (2).' },

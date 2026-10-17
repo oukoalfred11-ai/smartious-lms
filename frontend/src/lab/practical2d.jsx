@@ -3,6 +3,11 @@
  * with instrument displays, and for circuit practicals real terminals that
  * students wire by tapping one terminal and then another. Same actions as
  * the 3D bench.
+ *
+ * On the hands-on bench (view.bench === 2) only digital displays show a
+ * number; scales are read from the close-ups in the controls panel. Tap the
+ * stopwatch to start or stop it, the masses to add one, the goggles to put
+ * them on. Lamps glow and the resistance wire reddens as it warms.
  */
 import { useState } from 'react'
 import { apparatusName } from '../../../shared/lab/apparatus.js'
@@ -19,6 +24,7 @@ function Hot({ label, onClick, disabled, children }) {
   )
 }
 const dpOf = (res) => Math.max(0, Math.ceil(-Math.log10(res) - 1e-9))
+const DIGITAL = ['digital']
 
 export default function Practical2D({ def, view, dispatch, editable }) {
   const P = def.practical
@@ -51,26 +57,55 @@ export default function Practical2D({ def, view, dispatch, editable }) {
     else { dispatch('connect', { a: pending, b: tid }); setPending(null) }
   }
   const height = rows * (H + gap) + gap + 40
+  const hands = view.bench === 2 ? view.hands : null
+  const timerKey = hands?.timed?.[0]?.key
+  /** Text on an instrument tile: digital displays show their number, scales say where to read them. */
+  const tileText = (r) => {
+    const v = view.readings[r.key]
+    if (!hands) return v == null ? '----' : v.toFixed(dpOf(r.resolution)) + ' ' + (r.unit || '')
+    const kind = hands.kinds[r.key]?.kind
+    if (kind === 'stopwatch') return hands.timer.running ? 'running…' : v === undefined ? (hands.timer.acc ? 'not reset' : '0.00') : 'stopped'
+    if (v === undefined) return 'tap to read'
+    if (DIGITAL.includes(kind)) return v == null ? '----' : v.toFixed(dpOf(r.resolution)) + ' ' + (r.unit || '')
+    return 'read close-up →'
+  }
+  const tileFill = (id, rs) => {
+    if (hands?.glow?.[id] > 0) return `rgb(255, ${Math.round(236 - 40 * hands.glow[id])}, ${Math.round(160 - 120 * hands.glow[id])})`
+    if (hands && id === 'resistance_wire' && hands.heatFrac > 0.02) return `rgb(255, ${Math.round(240 - 120 * hands.heatFrac)}, ${Math.round(225 - 170 * hands.heatFrac)})`
+    return rs.length ? '#22303C' : '#FFFFFF'
+  }
+  const tapTile = (id, rs) => {
+    // Stopping is done in the controls panel, where the oscillations are counted.
+    if (hands && id === 'stopwatch' && timerKey) return hands.timer.running ? null : dispatch('startTimer')
+    rs.forEach(r => dispatch('measure', { key: r.key }))
+  }
   return (
     <div>
       <svg viewBox={`0 0 ${cols * (W + gap) + gap} ${height}`} className="lab-svg" role="img" aria-label={view.collected ? 'Your bench' : 'Stockroom'}>
         <text x={gap} y="24" fontSize="13" fontWeight="600">{view.collected ? (P.iv ? `${P.iv.label}: ${view.x} ${P.iv.unit || ''}` : 'Your bench') : 'Stockroom: choose your apparatus in the controls panel'}</text>
+        {hands && view.collected && (
+          <Hot label={hands.needsGoggles && !hands.goggles ? 'Put on safety goggles' : 'Safety goggles'} onClick={() => dispatch('wearGoggles')} disabled={!editable || !hands.needsGoggles || hands.goggles}>
+            <text x={cols * (W + gap)} y="24" fontSize="12" textAnchor="end" fill={hands.needsGoggles && !hands.goggles ? '#B42318' : '#1E7B34'}>
+              {hands.tidy ? 'Bench tidied away' : hands.needsGoggles ? (hands.goggles ? 'Goggles on' : 'Goggles: tap to put on') : hands.settled ? 'Readings steady' : 'Readings settling…'}</text>
+          </Hot>
+        )}
         {tiles.map(({ id, x, y, rs }) => {
           const body = (
             <>
-              <rect x={x} y={y} width={W} height={H} rx="8" fill={rs.length ? '#22303C' : '#FFFFFF'} stroke="#B8B2A7" />
+              <rect x={x} y={y} width={W} height={H} rx="8" fill={tileFill(id, rs)} stroke="#B8B2A7" />
               <foreignObject x={x + 6} y={y + 4} width={W - 12} height={30}>
-                <div xmlns="http://www.w3.org/1999/xhtml" style={{ fontSize: 10.5, lineHeight: 1.2, color: rs.length ? '#FFF' : '#222' }}>{apparatusName(id)}</div>
+                <div xmlns="http://www.w3.org/1999/xhtml" style={{ fontSize: 10.5, lineHeight: 1.2, color: rs.length && !(hands?.glow?.[id] > 0) ? '#FFF' : '#222' }}>{apparatusName(id)}</div>
               </foreignObject>
-              {rs.slice(0, 2).map((r, k) => {
-                const v = view.readings[r.key]
-                return <g key={r.key}><rect x={x + 8} y={y + 34 + k * 20} width={W - 16} height="17" fill="#B9E3B0" />
-                  <text x={x + W / 2} y={y + 47 + k * 20} fontSize="11" fontFamily="monospace" textAnchor="middle">{v == null ? '----' : v.toFixed(dpOf(r.resolution)) + ' ' + (r.unit || '')}</text></g>
-              })}
+              {rs.slice(0, 2).map((r, k) => (
+                <g key={r.key}><rect x={x + 8} y={y + 34 + k * 20} width={W - 16} height="17" fill="#B9E3B0" />
+                  <text x={x + W / 2} y={y + 47 + k * 20} fontSize="11" fontFamily="monospace" textAnchor="middle">{tileText(r)}</text></g>
+              ))}
+              {hands && id === P.iv?.instrument && id === 'slotted_masses' && <text x={x + W / 2} y={y + H - 8} fontSize="10.5" textAnchor="middle" fill="#333">{view.x} {P.iv.unit} · tap to add one</text>}
               {id === 'switch' && P.circuit && <text x={x + W / 2} y={y + 50} fontSize="12" textAnchor="middle">{view.switchClosed ? 'closed' : 'open'}</text>}
             </>
           )
-          if (rs.length) return <Hot key={id} label={'Take readings with the ' + apparatusName(id)} onClick={() => rs.forEach(r => dispatch('measure', { key: r.key }))} disabled={!editable}>{body}</Hot>
+          if (rs.length) return <Hot key={id} label={hands && id === 'stopwatch' && timerKey ? (hands.timer.running ? 'Stopwatch running: stop it in the controls panel when you have counted' : 'Start the stopwatch') : 'Take readings with the ' + apparatusName(id)} onClick={() => tapTile(id, rs)} disabled={!editable}>{body}</Hot>
+          if (hands && id === 'slotted_masses' && P.iv?.instrument === id) return <Hot key={id} label={'Add a ' + P.iv.step + ' ' + P.iv.unit + ' mass'} onClick={() => dispatch('setIV', { value: view.x + P.iv.step })} disabled={!editable || view.x + P.iv.step > P.iv.max + 1e-9}>{body}</Hot>
           if (id === 'switch' && P.circuit) return <Hot key={id} label={view.switchClosed ? 'Open the switch' : 'Close the switch'} onClick={() => dispatch('toggleSwitch')} disabled={!editable}>{body}</Hot>
           return <g key={id}>{body}</g>
         })}

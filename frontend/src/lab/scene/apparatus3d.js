@@ -639,8 +639,16 @@ reg('resistance_wire', 1.1, () => {
   const g = rule(1.01, 100)
   g.add(box(0.03, 0.03, 0.03, 'case', -0.52, 0, -0.03), box(0.03, 0.03, 0.03, 'case', 0.52, 0, -0.03))
   g.add(postUp('#151515', -0.52, 0.03, -0.03), postUp('#C62828', 0.52, 0.03, -0.03))
-  g.add(rod(0.0005, 1.04, '#D7D9DC', 'x', 0, 0.022, -0.012, 6))
+  const wire = rod(0.0005, 1.04, '#D7D9DC', 'x', 0, 0.022, -0.012, 6)
+  g.add(wire)
   g.add(link([-0.52, 0.03, -0.03], [-0.505, 0.022, -0.012], 0.0006, 'steel', 6), link([0.52, 0.03, -0.03], [0.505, 0.022, -0.012], 0.0006, 'steel', 6))
+  // Hands-on bench: the wire warms (0 cool … 1 hot) when current is left flowing.
+  const cool = new THREE.Color('#D7D9DC'), hot = new THREE.Color('#E0602A')
+  g.userData.setHeat = (f) => {
+    const k = Math.min(1, Math.max(0, f))
+    wire.material.color.copy(cool).lerp(hot, k)
+    wire.material.emissive = hot.clone(); wire.material.emissiveIntensity = 0.7 * k
+  }
   const clip = (c) => grp(box(0.008, 0.008, 0.026, c, 0, 0.018, -0.006), box(0.006, 0.004, 0.012, 'steel', 0, 0.016, -0.018))
   const fixed = clip('black'); fixed.position.x = -0.5; g.add(fixed)
   const moving = clip('red'); g.add(moving)
@@ -668,7 +676,14 @@ reg('filament_lamp', 0.12, () => {
   const glassB = lathe([[0.006, 0], [0.012, 0.012], [0.013, 0.02], [0.01, 0.032], [0.0, 0.036]], 'glass', 24); glassB.position.y = 0.028
   const fil = cable([[-0.004, 0.035, 0], [-0.002, 0.044, 0], [0, 0.046, 0], [0.002, 0.044, 0], [0.004, 0.035, 0]], 0.0004, glow('#FFB74D'), 12)
   bulb.add(glassB, fil)
-  return onBoard('LAMP 2.5 V', bulb, { w: 0.1, d: 0.07 })
+  const g = onBoard('LAMP 2.5 V', bulb, { w: 0.1, d: 0.07 })
+  // Hands-on bench: brightness 0 (off) … 1 (full).
+  g.userData.setGlow = (f) => {
+    const k = Math.min(1, Math.max(0, f))
+    fil.material.emissiveIntensity = 0.05 + 2.4 * k
+    glassB.material.emissive = new THREE.Color('#FFD27A'); glassB.material.emissiveIntensity = 0.9 * k
+  }
+  return g
 })
 
 reg('ldr', 0.12, () => {
@@ -693,12 +708,15 @@ reg('diodes', 0.12, () => {
   return onBoard('DIODES', g)
 })
 reg('leds', 0.13, () => {
-  const g = grp()
+  const g = grp(), mats = []
   ;['#E53935', '#FFB300', '#43A047', '#1E88E5'].forEach((c, i) => {
     const x = -0.027 + i * 0.018, m = M(c, { emissive: c, emissiveIntensity: 0.35, transparent: true, opacity: 0.9, roughness: 0.2 })
+    mats.push(m)
     g.add(cyl(0.0034, 0.002, m, x, 0.012, 0, 16), cyl(0.0028, 0.005, m, x, 0.014, 0, 16), ball(0.0028, m, x, 0.019, 0, 14), link([x - 0.001, 0, 0], [x - 0.001, 0.012, 0], 0.0005, 'steel', 6), link([x + 0.001, 0, 0], [x + 0.001, 0.012, 0], 0.0005, 'steel', 6))
   })
-  return onBoard('LEDs', g, { w: 0.11 })
+  const b = onBoard('LEDs', g, { w: 0.11 })
+  b.userData.setGlow = (f) => { for (const m of mats) m.emissiveIntensity = 0.1 + 1.6 * Math.min(1, Math.max(0, f)) }
+  return b
 })
 reg('op_amp_board', 0.17, () => {
   const g = grp()

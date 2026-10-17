@@ -7,6 +7,7 @@
 import { useState } from 'react'
 import { INDICATORS, getExperiment } from './core.js'
 import PracticalControls from './practicalControls.jsx'
+import HandsOnControls, { OhmsHandsOn } from './handsOnControls.jsx'
 import CircuitControls from './circuitControls.jsx'
 
 function Btn({ children, onClick, disabled, kind = '' }) {
@@ -121,11 +122,12 @@ function OhmsControls({ view, dispatch, editable }) {
         <label className="lab-range">Supply: <b>{view.supplyV.toFixed(1)} V</b>
           <input type="range" min="0" max="12" step="0.5" value={view.supplyV} onChange={e => dispatch('setSupply', { volts: e.target.value })} disabled={off} />
         </label>
-        <p className="lab-obs" aria-live="polite">
+        {view.bench !== 2 && <p className="lab-obs" aria-live="polite">
           Ammeter: <b>{view.meters.A1 == null ? '----' : view.meters.A1.toFixed(3) + ' A'}</b> · Voltmeter: <b>{view.meters.V1 == null ? '----' : view.meters.V1.toFixed(2) + ' V'}</b>
           {view.fault === 'short_circuit' && <span className="lab-warn"> Supply tripped: short circuit. Check your leads.</span>}
-        </p>
+        </p>}
       </fieldset>
+      {view.bench === 2 && <OhmsHandsOn view={view} dispatch={dispatch} editable={editable} />}
       <fieldset className="lab-fs">
         <legend>Record a reading</legend>
         <form className="lab-row" onSubmit={e => { e.preventDefault(); if (dispatch('recordRow', { V, I })) { setV(''); setI('') } }}>
@@ -187,7 +189,9 @@ function OsmosisControls({ view, dispatch, editable }) {
 export default function Controls({ experimentId, view, dispatch, editable }) {
   if (!view) return null
   const def = getExperiment(experimentId)
-  if (def?.practical) return <PracticalControls def={def} view={view} dispatch={dispatch} editable={editable} />
+  if (def?.practical) return view.bench === 2
+    ? <HandsOnControls def={def} view={view} dispatch={dispatch} editable={editable} />
+    : <PracticalControls def={def} view={view} dispatch={dispatch} editable={editable} />
   const C = { 'chem-titration': TitrationControls, 'phys-ohms-law': OhmsControls, 'bio-osmosis': OsmosisControls }[experimentId]
   return C ? <C view={view} dispatch={dispatch} editable={editable} /> : <p>No controls for this experiment.</p>
 }
