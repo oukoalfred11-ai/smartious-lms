@@ -180,7 +180,7 @@ contents = [('Part 1 · Welcome and information', ''),
             ('4  How admission works', ''), ('5  Documents to submit', ''), ('6  Fees and payment', ''),
             ('7  Academic calendar 2026–27', ''), ('8  Recommended devices and getting ready', ''),
             ('9  Reports, examinations and university guidance', ''), ('10  Expectations in lessons', ''),
-            ('11  Who to contact', ''),
+            ('11  Attendance and absence', ''), ('12  Who to contact', ''),
             ('Part 2 · Admission Agreement (sign and return)', ''),
             ('A  Student details   ·   B  Parent or guardian details   ·   C  Fees and payment terms', ''),
             ('D  Policies   ·   E  Consents   ·   F  Declarations and signatures', '')]
@@ -323,7 +323,25 @@ story += bullets(['Join on time, with camera on unless your teacher says otherwi
                   'Do your own work, and use AI only as the AI Use Policy allows.',
                   'Do not record, share or post lessons or teaching materials.',
                   'If you miss a lesson, watch the recording and catch up on the work.'])
-story += section('11  Who to contact')
+story += section('11  Attendance and absence: the family’s responsibility')
+story.append(boxed([P('<b>Attendance is the responsibility of the parent or guardian and the student.</b> Smartious teaches every '
+                      'scheduled lesson, sends lesson reminders to students and parents, records attendance in every lesson and shows it in '
+                      'the parent portal. We do not supervise students at home, and we are not responsible for lessons a student misses.', 'box')]))
+story += [Spacer(1, 4)]
+story += bullets(['<b>Check the parent portal.</b> Attendance, homework and marks are visible to parents at all times. Please check them at '
+                  'least once a week. The attendance recorded in the portal is the official record.',
+                  '<b>Absences must be reported by a parent.</b> If the student cannot attend, a parent or guardian tells the Academic office '
+                  '(+254 182 071 920, call or WhatsApp, or academics@smartioushomeschool.com) before the lesson. A message from the student '
+                  'alone, including a student telling us they are unwell, is not an authorised absence until a parent confirms it.',
+                  '<b>Calls and messages from us are a courtesy.</b> When a student is missing from a lesson we may call or message the '
+                  'student or the parent, but we are not obliged to, and a call not made does not make Smartious responsible for the absence.',
+                  '<b>Missed lessons.</b> Lessons missed by the student are not refunded, credited or repeated. The student catches up from the '
+                  'lesson recording and the work set in the portal. Lessons that Smartious cancels are rescheduled.',
+                  '<b>Keep your details up to date.</b> Reminders and attendance alerts go to the phone numbers and email addresses in Section B. '
+                  'Tell us straight away if they change.',
+                  '<b>Results.</b> Poor attendance affects progress, reports and examination results. Smartious is not responsible for the '
+                  'academic consequences of lessons the student did not attend.'])
+story += section('12  Who to contact')
 ct = Table([[P('<b>Admissions, fees and enrolment</b>'), P('+254 745 021 212 (call or WhatsApp) · admissions@smartioushomeschool.com')],
             [P('<b>Academic matters</b><br/>lessons, timetable, homework, reports, examinations'), P('+254 182 071 920 · academics@smartioushomeschool.com')],
             [P('<b>General questions</b>'), P('hello@smartioushomeschool.com')],
@@ -429,6 +447,7 @@ for t in ['I will do my own work and acknowledge every source I use.',
           'I will not copy, buy or share answers, and I will not use AI tools in tests or assessed work unless my teacher allows it, and I will say when I have used them.',
           'I understand that my marks, grades, reports and certificates will never be changed for any favour, gift, payment or pressure, from anyone, and that offering one is a serious breach.',
           'I will treat teachers and other students with respect, online and in lessons, and follow the Child Protection rules for safe online learning.',
+          'I will attend every lesson on time. If I cannot attend, I will ask my parent or guardian to tell Smartious before the lesson; telling my teacher or classmates is not enough.',
           'I have read, or had explained to me, the Academic Integrity, AI Use, Language and Inclusion policies.']:
     story.append(Check(t, 'student decl'))
 story += [Spacer(1, 6), SignBlock('Student'), Spacer(1, 12), P('Parent or guardian declaration', 'h2')]
@@ -436,6 +455,7 @@ for t in ['The information in this agreement is complete and accurate, and I wil
           'I accept the fee confirmed for my child in Section C, paid termly in advance, and USD 15 per hour for any one-to-one tuition.',
           'I understand that fees are non-refundable once the assessment has been done, the timetable has been created and lessons have started.',
           'I understand that no student record will be changed in any way, for any reason, in return for any favour, and that offering a favour may end the enrolment.',
+          'I accept that my child’s attendance is my responsibility and my child’s, not Smartious’s. I will check attendance in the parent portal at least weekly and report any absence myself before the lesson, and I understand that lessons my child misses are not refunded, credited or repeated.',
           'I have read and agree to the Terms of Service and the policies in Section D, and I will support my child to follow them.']:
     story.append(Check(t, 'parent decl'))
 story += [Spacer(1, 6), SignBlock('Parent or guardian'), Spacer(1, 14)]
