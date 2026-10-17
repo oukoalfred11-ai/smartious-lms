@@ -246,7 +246,7 @@ export default function AssessmentForm({ nav }) {
         setSubmitError(data.error || 'Submission failed. Please try again.')
       }
     } catch (err) {
-      setSubmitError('Could not reach the server. Please check your connection and try again, or email hellosmartious@gmail.com directly.')
+      setSubmitError('Could not reach the server. Please check your connection and try again, or email hello@smartioushomeschool.com directly.')
     } finally {
       setSubmitting(false)
     }

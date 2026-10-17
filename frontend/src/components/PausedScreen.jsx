@@ -69,7 +69,7 @@ export default function PausedScreen() {
           )}
 
           <p style={{ fontSize: 13.5, color: '#6B7280', lineHeight: 1.7, margin: '16px 0 24px', fontFamily: 'Arial, sans-serif' }}>
-            Questions or ready to resume? Contact us at <strong>hellosmartious@gmail.com</strong> or <strong>+254 745 021 212</strong>{isFee ? ' (M-Pesa Paybill 745021)' : ''}.
+            Questions or ready to resume? Contact us at <strong>hello@smartioushomeschool.com</strong> or <strong>+254 745 021 212</strong>{isFee ? ' (M-Pesa Paybill 745021)' : ''}.
           </p>
 
           <button onClick={signOut} style={{ background: '#7D1025', color: '#fff', border: 'none', padding: '11px 26px', borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'Arial, sans-serif' }}>

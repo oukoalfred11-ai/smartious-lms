@@ -143,7 +143,7 @@ export default function CountryCityPage({ country, cities, currentCitySlug, P, V
             Challenges {city.name} families face
           </h2>
           <ul style={{listStyle:'none',padding:0,margin:0,display:'flex',flexDirection:'column',gap:12}}>
-            {city.challenges.map((ch, i) => (
+            {(city.challenges || []).map((ch, i) => (
               <li key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'14px 18px',fontSize:14,color:V.sl,lineHeight:1.7,display:'flex',gap:12}}>
                 <span style={{flexShrink:0,width:24,height:24,borderRadius:'50%',background:`rgba(139,26,46,.1)`,color:V.cr,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700,fontSize:12}}>{i+1}</span>
                 <span>{ch}</span>
@@ -161,7 +161,7 @@ export default function CountryCityPage({ country, cities, currentCitySlug, P, V
             Six reasons {city.name} families choose Smartious
           </h2>
           <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
-            {city.whyChoose.map(([h, p], i) => (
+            {(city.whyChoose || []).map(([h, p], i) => (
               <div key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px'}}>
                 <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1rem',color:V.cr,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{h}</h3>
                 <p style={{fontSize:13.5,color:V.sl,lineHeight:1.65,margin:0}}>{p}</p>
@@ -179,7 +179,7 @@ export default function CountryCityPage({ country, cities, currentCitySlug, P, V
             Family situations we work with
           </h2>
           <ul style={{listStyle:'none',padding:0,margin:0,display:'flex',flexDirection:'column',gap:10}}>
-            {city.familySituations.map((sit, i) => (
+            {(city.familySituations || []).map((sit, i) => (
               <li key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'12px 18px',fontSize:14,color:V.sl,lineHeight:1.65}}>
                 <span style={{color:V.cr,fontWeight:700,marginRight:8}}>[+]</span>{sit}
               </li>
@@ -196,7 +196,7 @@ export default function CountryCityPage({ country, cities, currentCitySlug, P, V
             {city.name} communities and nearby areas
           </h2>
           <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
-            {city.nearbyAreas.map((area, i) => (
+            {(city.nearbyAreas || []).map((area, i) => (
               <span key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:99,padding:'6px 14px',fontSize:13,color:V.sl}}>{area}</span>
             ))}
           </div>
@@ -211,7 +211,7 @@ export default function CountryCityPage({ country, cities, currentCitySlug, P, V
             Common questions from {city.name} families
           </h2>
           <div style={{display:'flex',flexDirection:'column',gap:14}}>
-            {city.faqs.map((f, i) => (
+            {(city.faqs || []).map((f, i) => (
               <details key={i} style={{background:V.white,padding:'14px 20px',borderRadius:8,cursor:'pointer',border:`1px solid ${V.bone3}`}}>
                 <summary style={{fontWeight:600,color:V.ink,fontSize:15,listStyle:'none'}}>{f.q}</summary>
                 <p style={{color:V.sl,fontSize:14,lineHeight:1.65,margin:'12px 0 0'}}>{f.a}</p>

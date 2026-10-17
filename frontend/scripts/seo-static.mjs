@@ -226,7 +226,13 @@ function jsxContent(id) {
       const s = decode(m[1]).trim(); if (s && !/[;=]|⇒|^\)|^\(|&&|\|\||^\}|^\{/.test(s)) texts.push(s)
     }
     const s = decode(texts.join(' ').replace(/\s+/g, ' ').trim()).replace(/\s+([.,;:!?])/g, '$1')
-    if (!s || /[→←]$/.test(s) || !PROSE(s) && !/^h[1-4]$/.test(pendingTag || tag)) continue
+    // A line that only closes a heading ("</h2>") still ends it, or the
+    // style-object lines that follow would be read as heading text.
+    // Style-object lines ("padding:'36px 40px',") are never text.
+    if (!s || /[→←]$/.test(s) || /^[a-z][a-zA-Z]*\s*:.*,$/.test(s) || !PROSE(s) && !/^h[1-4]$/.test(pendingTag || tag)) {
+      if (/<\/(h[1-4]|p|li)>/.test(t)) pendingTag = ''
+      continue
+    }
     const use = tag || (/<\/(h[1-4])>/.exec(t) || [])[1] || pendingTag
     if (/^h[1-4]$/.test(use) && s.split(' ').length <= 24) out.push([use === 'h4' ? 'h3' : use, s])
     else if (s.split(' ').length >= 4) out.push([use === 'li' ? 'li' : 'p', s])
@@ -408,7 +414,7 @@ for (const l of LANGUAGES) {
     l.whoFor?.length ? h2('Who it is for') + bullets(l.whoFor) : '',
     l.cefrLevels?.length ? h2('Levels') + bullets(l.cefrLevels) : '',
     l.examPrep?.length ? h2('Exam preparation') + bullets(l.examPrep) : '',
-    pr.hourly ? h2('Fees') + p(typeof pr.hourly === 'string' ? pr.hourly : itemText(pr.hourly)) + bullets(pr.packages || []) : '',
+    pr.hourly ? h2('Fees') + (typeof pr.hourly === 'string' ? p(pr.hourly) : Array.isArray(pr.hourly) ? bullets(pr.hourly.map(r => [r.level, [r.rate, r.sessionLength && 'sessions of ' + r.sessionLength].filter(Boolean).join(', ')])) : p(itemText(pr.hourly))) + bullets(pr.packages || []) : '',
   ], faqs: l.faqs, related: [h2('Other languages'), links(LANGUAGES.filter(x => x !== l).map(x => ({ href: '/languages/' + x.slug, label: 'Learn ' + x.name })))],
   crumbs: [['Languages', '/languages'], [l.name, path]], src: ['src/data/languages.js'] })
 }
@@ -795,7 +801,7 @@ const STYLE = `<style>#seo-static{max-width:760px;margin:0 auto;padding:96px 20p
 function setMeta(html, attr, key, value) {
   const re = new RegExp(`<meta\\s+${attr}="${key}"\\s+content="[^"]*"\\s*/?>`)
   const tag = `<meta ${attr}="${key}" content="${esc(value)}"/>`
-  return re.test(html) ? html.replace(re, tag) : html.replace('</head>', `  ${tag}\n</head>`)
+  return re.test(html) ? html.replace(re, () => tag) : html.replace('</head>', () => `  ${tag}\n</head>`)
 }
 const ldTag = (o) => `<script type="application/ld+json" data-ss>${JSON.stringify(o).replace(/</g, '\\u003c')}</script>`
 const crumbLd = (pg) => {
@@ -825,7 +831,7 @@ function render(pg) {
   const url = ORIGIN + (pg.path === '/' ? '/' : pg.path)
   const desc = clip(pg.desc, 300)
   const ar = pg.lang === 'ar'
-  let html = shell.replace(/<title>[^<]*<\/title>/, `<title>${esc(pg.title)}</title>`)
+  let html = shell.replace(/<title>[^<]*<\/title>/, () => `<title>${esc(pg.title)}</title>`)
   if (ar) html = html.replace(/<html lang="en">/, '<html lang="ar" dir="rtl">')
   html = setMeta(html, 'name', 'description', desc)
   html = setMeta(html, 'name', 'robots', pg.noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large, max-snippet:-1')
@@ -837,7 +843,7 @@ function render(pg) {
   html = setMeta(html, 'name', 'twitter:description', desc)
   const alt = (ALTERNATES.get(pg.path) || []).map(a => `<link rel="alternate" hreflang="${a.hreflang}" href="${a.href}"/>`).join('\n  ')
   const lds = [crumbLd(pg), faqLd(pg.faqs), ...(pg.ld || [])].filter(Boolean).map(ldTag).join('\n  ')
-  html = html.replace('</head>', `  <link rel="canonical" href="${url}"/>\n  ${alt ? alt + '\n  ' : ''}${lds}\n  ${STYLE}\n</head>`)
+  html = html.replace('</head>', () => `  <link rel="canonical" href="${url}"/>\n  ${alt ? alt + '\n  ' : ''}${lds}\n  ${STYLE}\n</head>`)
   const nav = `<nav><a href="/">Smartious Homeschool</a>${MAIN_LINKS.map(l => `<a href="${l.href}">${esc(l.label)}</a>`).join('')}</nav>`
   const foot = `<footer>${h2('Online school by country')}<p>${FOOT_HUBS}</p><p>Online school by city: ${FOOT_CITIES}</p><p>${FOOT_MORE}</p>${contactBlock().replace(/^<h2>[^<]*<\/h2>/, '')}</footer>`
   const arAlt = !ar && (ALTERNATES.get(pg.path) || []).find(a => a.hreflang === 'ar')
@@ -847,7 +853,9 @@ function render(pg) {
   const rv = GOOGLE_REVIEWS[reviewOffset(pg.path)]
   const reviews = ar ? '' : `${h2('What parents say')}<p>Rated ${GOOGLE_RATING.stars} out of 5 on Google from ${GOOGLE_RATING.count}+ reviews. <a href="${GOOGLE_PROFILE_URL}" rel="noopener">Read our Google reviews</a></p><blockquote>&ldquo;${esc(rv.text)}&rdquo; &mdash; ${esc(rv.name)}, Google review</blockquote>`
   const body = `<div id="seo-static"${ar ? ' lang="ar" dir="rtl"' : ''}>${nav}<main>${main}${reviews}</main>${h2(ar ? 'ابدأ مع Smartious' : 'Start with Smartious')}${links(CTA_LINKS)}${foot}</div>`
-  return html.replace('<div id="root"></div>', body + '<div id="root"></div>')
+  // Function replacements: page text may contain "$`" or "$'", which a
+  // string replacement expands into the rest of the document.
+  return html.replace('<div id="root"></div>', () => body + '<div id="root"></div>')
 }
 
 let n = 0

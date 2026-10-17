@@ -79,7 +79,7 @@ export default function AssessmentPaymentResult({ nav }) {
             Your payment was not completed
           </h1>
           <p style={{ fontSize: 15, color: V.sl, lineHeight: 1.7, marginBottom: 28 }}>
-            No amount was charged. You can try again using the button below, or contact us at <a href="mailto:hellosmartious@gmail.com" style={{ color: V.cr }}>hellosmartious@gmail.com</a> if you need help.
+            No amount was charged. You can try again using the button below, or contact us at <a href="mailto:hello@smartioushomeschool.com" style={{ color: V.cr }}>hello@smartioushomeschool.com</a> if you need help.
           </p>
           {payUrl && (
             <a href={payUrl} style={{
@@ -103,7 +103,7 @@ export default function AssessmentPaymentResult({ nav }) {
             We couldn't confirm your payment
           </h1>
           <p style={{ fontSize: 15, color: V.sl, lineHeight: 1.7, marginBottom: 28 }}>
-            Please email <a href="mailto:hellosmartious@gmail.com" style={{ color: V.cr }}>hellosmartious@gmail.com</a> with your reference number and we'll sort this out right away.
+            Please email <a href="mailto:hello@smartioushomeschool.com" style={{ color: V.cr }}>hello@smartioushomeschool.com</a> with your reference number and we'll sort this out right away.
             {reason && <><br/><span style={{ fontSize: 12, opacity: .6, marginTop: 8, display: 'block' }}>Technical detail: {reason}</span></>}
           </p>
         </>)}
