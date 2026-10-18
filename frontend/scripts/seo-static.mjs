@@ -377,12 +377,14 @@ for (const sv of SERVICES) {
   const d = sv.detail || {}
   add({ path: '/services/' + sv.slug, title: sv.seoTitle || sv.h + ' — ' + SITE, desc: sv.seoDesc || sv.desc, h1: sv.h, body: [
     p(d.tagline), p(sv.desc), p(d.summary), p(d.overview), bullets(sv.tags),
+    (d.photos || []).map(ph => `<figure><img src="${esc(ph.src)}" alt="${esc(ph.alt)}" width="${ph.w}" height="${ph.h}" loading="lazy"><figcaption>${esc(ph.caption)}</figcaption></figure>`).join(''),
     ...(d.sections || []).map(s => h2(s.h) + (Array.isArray(s.p) ? s.p.map(p).join('') : p(s.p)) + bullets(s.items)),
     d.whySmartious ? h2('Why Smartious') + p(d.whySmartious) : '',
     h2('Fees'), p(/tuition|tutor/i.test(sv.slug + sv.h) ? 'One-to-one tuition: ' + FEE_TUITION + ' at every level.' : FEE_SCHOOL + '. One-to-one tuition: ' + FEE_TUITION + '.'),
   ], related: [h2('Other services'), links(SERVICE_LINKS.filter(l => l.href !== '/services/' + sv.slug))],
   crumbs: [['Services', '/services'], [sv.h, '/services/' + sv.slug]], src: ['src/data/services.js'],
-  ld: [serviceLd({ name: sv.h, desc: sv.seoDesc || sv.desc, path: '/services/' + sv.slug, kind: /tuition|tutor/i.test(sv.slug) ? 'tuition' : 'school' })] })
+  ld: [{ ...serviceLd({ name: sv.h, desc: sv.seoDesc || sv.desc, path: '/services/' + sv.slug, kind: /tuition|tutor/i.test(sv.slug) ? 'tuition' : 'school' }),
+    ...(d.photos?.length ? { image: d.photos.map(ph => ORIGIN + ph.src) } : {}) }] })
 }
 // Curricula
 for (const c of CURRICULA) {

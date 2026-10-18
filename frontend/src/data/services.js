@@ -12,7 +12,7 @@ export const SERVICES = [
     desc: 'A qualified tutor visits your home (Nairobi) or connects via video. Structured, accredited curriculum in your own environment. Weekly lesson planning, monthly reports, parent portal. All curricula available.',
     tags: ['1-on-1 Tutor', 'Flexible Schedule', 'All Curricula', 'Written Reports'],
     seoTitle: 'Homeschooling in Nairobi, Kenya | Qualified Home Tutors — Smartious',
-    seoDesc: 'Smartious provides structured homeschooling in Nairobi and online — qualified tutors, Cambridge IGCSE, A-Level, IB and CBC curricula, weekly reports and a full parent portal.',
+    seoDesc: 'Structured homeschooling in Nairobi and online with qualified tutors: Cambridge IGCSE, A-Level, IB and CBC, weekly reports and a full parent portal.',
     detail: {
       tagline: 'Accredited home education, delivered by a dedicated tutor',
       summary: 'One-on-one schooling at home — a tutor visits in Nairobi, or teaches live by video anywhere.',
@@ -30,9 +30,9 @@ export const SERVICES = [
     h: 'Smartious Learning Centre',
     svg: '<rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/>',
     desc: 'Our supervised study centre at Diamond Plaza I Parklands Annex, 3rd Floor, Nairobi. Professional environment with peer interaction and specialist teachers on-site.',
-    tags: ['Parklands Nairobi', 'Supervised', 'Peer Learning', 'Specialist Teachers'],
+    tags: ['Parklands & Karen West', 'Supervised', 'Science Laboratory', 'Peer Learning', 'Specialist Teachers'],
     seoTitle: 'Homeschool Learning Centre in Parklands, Nairobi — Smartious',
-    seoDesc: 'The Smartious Learning Centre at Diamond Plaza I Parklands Annex, 3rd Floor, Nairobi — a supervised, professional study environment with specialist teachers and peer learning for homeschooled students.',
+    seoDesc: 'Homeschool learning centre in Parklands and Karen, Nairobi: supervised study, specialist teachers and a modern science lab for hands-on practicals.',
     detail: {
       tagline: 'A supervised study centre in the heart of Parklands',
       summary: 'In-centre learning at Diamond Plaza I Parklands Annex — specialist teachers and a focused, professional environment.',
@@ -41,8 +41,19 @@ export const SERVICES = [
         { h: 'The environment', p: 'The centre provides a calm, well-equipped study setting designed for concentration and learning. Students work with specialist teachers across subjects, with supervision throughout the day. It removes the distractions of learning at home while keeping class sizes small and attention personal.' },
         { h: 'Peer interaction', p: 'A key benefit of the centre is structured peer learning. Students interact with others on similar pathways, building the social confidence and collaboration skills that fully isolated home study can lack — without the crowding of a conventional classroom.' },
         { h: 'Who it suits', p: 'The Learning Centre suits Nairobi families who want the structure of homeschooling but prefer their child learn outside the home, students who focus better in a dedicated environment, and parents who value the social dimension of in-person learning.' },
+        { h: 'A modern science laboratory', p: 'Science at the centre is hands-on. The laboratory has white work benches, a sink and storage, and the equipment that real practical work needs: a compound microscope, digital balances, Bunsen burners, retort stands with burettes and clamps, beakers, conical flasks, measuring cylinders and test tubes, pipette fillers, wash bottles, indicator solutions and universal indicator paper with its colour chart, and meters and components for electrical circuits. Students carry out the practicals their courses assess, such as titrations, rates of reaction, food tests, microscopy, osmosis, density and circuits, and record, graph and write up their results under a teacher\'s supervision. Students learning online practise the same experiments in the Smartious Virtual Lab, so the two fit together.' },
+        { h: 'Two centres in Nairobi', p: 'The head office and learning centre is at Diamond Plaza I Parklands Annex, 3rd Floor. The second centre is in Karen West, on Mokoyeti Road past Galleria Mall, with small classrooms and a garden for breaks. Families choose the centre closer to home, and visits can be arranged through admissions on +254 745 021 212.' },
       ],
       whySmartious: 'Few homeschool providers in Nairobi operate a genuine, supervised learning centre with specialist teachers on-site. The Smartious centre at Parklands gives families a real physical home for their child\'s education — a professional middle ground between home tutoring and conventional school that Smartious is uniquely positioned to offer.',
+      // Photographs of the centres (frontend/public/centre). Shown on the
+      // page and in the static HTML; width/height avoid layout shift.
+      photos: [
+        { src: '/centre/smartious-science-laboratory.webp', w: 1400, h: 1050, alt: 'The Smartious science laboratory: benches with a microscope, digital balances, Bunsen burners, a burette on a retort stand, glassware and indicator solutions', caption: 'The science laboratory: microscope, digital balances, burners, titration and electrical equipment.' },
+        { src: '/centre/smartious-parklands-centre-corridor.webp', w: 1400, h: 1050, alt: 'The Smartious learning centre entrance at Diamond Plaza I Parklands Annex, 3rd floor, Nairobi', caption: 'Diamond Plaza I Parklands Annex, 3rd floor: the head office and learning centre.' },
+        { src: '/centre/smartious-classroom.webp', w: 1280, h: 960, alt: 'A quiet small-group classroom at a Smartious centre in Nairobi', caption: 'A small-group classroom: quiet, bright and set up for focused work.' },
+        { src: '/centre/smartious-karen-west-centre-gate.webp', w: 752, h: 1000, alt: 'The gate of the Smartious Karen West centre on Mokoyeti Road, Nairobi', caption: 'Karen West centre, Mokoyeti Road, past Galleria Mall.' },
+        { src: '/centre/smartious-karen-west-centre-garden.webp', w: 1000, h: 750, alt: 'A shaded garden table for study breaks at the Smartious Karen West centre', caption: 'The garden at Karen West: space to take a break outdoors.' },
+      ],
     },
   },
   {
