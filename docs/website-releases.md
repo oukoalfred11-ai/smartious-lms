@@ -17,3 +17,8 @@ publishes all of them.
 
 Backend change in #51 (Render, not Netlify): closing every lesson is required
 from Monday 19 October 2026.
+
+Note: Netlify builds from `frontend/` and skips a build when nothing under
+it changed, so a docs-only merge does not deploy. PR #55 carries a small
+`frontend/` change (two Luxembourg descriptions, which were duplicates in
+search results) so the production build runs.
