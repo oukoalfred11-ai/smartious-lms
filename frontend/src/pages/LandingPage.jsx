@@ -1690,7 +1690,7 @@ const PAGE_META = {
   },
   'homeschooling-spain': {
     title: 'Online School, Virtual School & Homeschool Spain | Cambridge IGCSE, A-Level, IB — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Madrid, Barcelona, Málaga/Costa del Sol, Alicante/Costa Blanca, Valencia, and Palma de Mallorca. Honest guidance on Spain\'s homeschool legal grey area. From USD 423/month.',
+    desc: 'Online school and homeschooling in Spain: live Cambridge IGCSE, A-Level, IB and AP on Spanish time, with the legal position explained. From USD 423/month.',
   },
   'homeschooling-denmark': {
     title: 'Online School, Virtual School & Homeschool Denmark | Cambridge IGCSE, A-Level, IB — Smartious',
@@ -1954,7 +1954,7 @@ const PAGE_META = {
   },
   'homeschooling-italy': {
     title: 'Online School, Virtual School & Homeschool Italy | Cambridge IGCSE, A-Level, IB — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Milan, Rome, Florence, Turin, Bologna, and Naples. Istruzione parentale is legal by declaration — and the annual esame di idoneita stops at 16. From USD 423/month.',
+    desc: 'Homeschooling in Italy is legal: live Cambridge IGCSE, A-Level and IB, planned around the annual Italian exam, which stops at 16. From USD 423/month.',
   },
   'homeschooling-france': {
     title: 'Online School, Virtual School & Homeschool France | Cambridge IGCSE, A-Level, IB — Smartious',
