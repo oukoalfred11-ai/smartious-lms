@@ -234,7 +234,9 @@ export function fitDesc(desc, title) {
   }
   // No place: cut the first sentence at the last comma or dash that fits.
   const first = sents[0].trim().replace(/[.!?]+$/, '')
-  const cut = Math.max(first.lastIndexOf(', ', room - 2), first.lastIndexOf(' — ', room - 2))
+  // Prefer a dash (a clause ends there) over a comma (often mid-list).
+  const dash = first.lastIndexOf(' — ', room - 2)
+  const cut = dash >= 60 ? dash : first.lastIndexOf(', ', room - 2)
   if (cut >= 60) return (first.slice(0, cut) + '.' + (price ? ' ' + price : '')).trim()
   return d.slice(0, d.lastIndexOf(' ', DMAX - 1)) + '…'
 }

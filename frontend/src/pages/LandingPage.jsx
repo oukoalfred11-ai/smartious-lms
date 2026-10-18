@@ -7504,6 +7504,19 @@ export default function LandingPage() {
                 <p style={{fontSize:15,color:V.sl,lineHeight:1.85,margin:0}}>{d.overview}</p>
               </div>
 
+              {/* Photographs (the learning centre) */}
+              {d.photos?.length > 0 && (
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(240px, 1fr))',gap:14,marginBottom:20}}>
+                  {d.photos.map((ph, i) => (
+                    <figure key={ph.src} style={{margin:0,background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,overflow:'hidden',gridColumn: i === 0 ? '1 / -1' : undefined}}>
+                      <img src={ph.src} alt={ph.alt} width={ph.w} height={ph.h} loading={i === 0 ? 'eager' : 'lazy'} decoding="async"
+                        style={{display:'block',width:'100%',height: i === 0 ? 'auto' : 220,objectFit:'cover'}}/>
+                      <figcaption style={{padding:'10px 14px',fontSize:13,color:V.sl,lineHeight:1.5}}>{ph.caption}</figcaption>
+                    </figure>
+                  ))}
+                </div>
+              )}
+
               {/* Detail sections */}
               {d.sections.map((sec,i) => (
                 <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:16,padding:'26px 32px',marginBottom:16}}>
