@@ -197,7 +197,11 @@ router.post('/break', auth, requireRole(...ADMIN_ROLES), async (req, res) => {
         breakNote,
         breakStart: breakStart ? new Date(breakStart) : new Date(),
         breakEnd:   breakEnd   ? new Date(breakEnd)   : null,
-        isActive:   false,
+        // A break pauses reminders and check-in; it does NOT deactivate the
+        // account. Setting isActive=false here locked students out of the
+        // portal ("unauthorised") until staff manually ended the break.
+        // Blocking access is a separate, explicit choice (StudentPause with
+        // blockAccess, e.g. a fee hold).
       }
     }, { new:true })
 

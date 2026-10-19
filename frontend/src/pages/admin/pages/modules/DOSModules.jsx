@@ -1521,7 +1521,7 @@ export function DOSBreakModule({ toast, refreshKey }) {
     setSaving(modal._id)
     try {
       await api.post('/checkin/break', { userId:modal._id, ...form })
-      toast?.ok?.(modal.firstName+' placed on break. Their account is deactivated.')
+      toast?.ok?.(modal.firstName+' placed on break. Reminders and check-in are paused; they can still log in.')
       setModal(null); load()
     } catch(e) { toast?.error?.(e?.response?.data?.message||'Failed.') }
     finally { setSaving(null) }
@@ -1544,7 +1544,7 @@ export function DOSBreakModule({ toast, refreshKey }) {
   return (
     <>
       <PSection tag="Dean of Studies" title="Manage" em="Breaks"
-        sub="Place students or staff on break to pause check-in reminders and deactivate their account temporarily."/>
+        sub="Place students or staff on break to pause check-in reminders and absence alerts. They can still log in to the portal."/>
 
       <div style={{ display:'flex', gap:8, marginBottom:16, alignItems:'center' }}>
         <div style={{ display:'flex', border:'1.5px solid '+TOKENS.line, borderRadius:7, overflow:'hidden' }}>
@@ -1565,7 +1565,7 @@ export function DOSBreakModule({ toast, refreshKey }) {
         <div className="card" style={{ overflow:'hidden', marginBottom:16 }}>
           <div style={{ padding:'12px 16px', borderBottom:'1px solid '+TOKENS.line, background:'#FEF9C3', display:'flex', justifyContent:'space-between' }}>
             <span style={{ fontWeight:800, fontSize:13, color:'#92400E' }}>Currently on break ({onBreak.length})</span>
-            <span style={{ fontSize:12, color:'#92400E' }}>Accounts deactivated — no reminders</span>
+            <span style={{ fontSize:12, color:'#92400E' }}>On break — no reminders</span>
           </div>
           {onBreak.map(u=>(
             <div key={u._id} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'12px 16px', borderBottom:'1px solid '+TOKENS.line }}>

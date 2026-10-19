@@ -26,6 +26,8 @@ async function runPauseAutoResume() {
       const student = await User.findByIdAndUpdate(pause.student, {
         $set: { onBreak: false, breakType: '', breakStart: null, breakEnd: null, breakNote: '', breakBlocksAccess: false }
       }, { new: true }).select('firstName lastName email parentEmail linkedParents').lean()
+      // Report back = an active account again (unless it was archived since).
+      await User.updateOne({ _id: pause.student, archived: { $ne: true }, studentStatus: { $nin: ['Graduated', 'Removed'] } }, { $set: { isActive: true } })
       console.log('[pause-cron] Auto report-back for student', String(pause.student), '(' + pause.type + ')')
       if (student) {
         const parents = await User.find({ _id: { $in: (student.linkedParents || []) }, role: 'parent' }).select('email').lean()
@@ -46,6 +48,15 @@ async function runPauseAutoResume() {
       })
       console.log('[pause-cron] Auto-restored legacy break for', s.firstName, s.lastName)
     }
+
+    // 3. Heal accounts the old /checkin/break deactivated: a user on break
+    //    who was never archived, withdrawn or graduated is an active
+    //    account (the break itself is what pauses reminders and check-in).
+    const healed = await User.updateMany(
+      { onBreak: true, isActive: false, archived: { $ne: true }, studentStatus: { $nin: ['Graduated', 'Removed'] } },
+      { $set: { isActive: true } }
+    )
+    if (healed.modifiedCount) console.log('[pause-cron] Re-activated', healed.modifiedCount, 'account(s) deactivated by a break')
   } catch (e) {
     console.error('[pause-cron]', e.message)
   }
