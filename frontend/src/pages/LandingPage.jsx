@@ -62,6 +62,7 @@ import { SOCIAL_LINKS, SOCIAL_URLS, KAREN_MAP_URL } from '../data/social.js'
 import SocialLinks from '../components/SocialLinks.jsx'
 import { HUB_TITLES, guideTitle, nairobiAreaTitle, fitTitle, fitDesc } from '../data/seoTitles.js'
 import { guidesFor } from '../data/geoGuides.js'
+import { naMeta, usLead, caLead, US_HEADLINE, CA_HEADLINE } from '../data/naFocus.js'
 
 
 /* ── Front Desk capture ───────────────────────────────────
@@ -4223,23 +4224,31 @@ export default function LandingPage() {
     metaDesc  = a.metaDesc
   } else if (page === 'state-landing' && currentStateSlug && US_STATES[currentStateSlug]) {
     const s = US_STATES[currentStateSlug]
-    metaTitle = s.metaTitle || ('Online Homeschool ' + s.name + ' — Live Cambridge IGCSE & A-Level | ' + SITE)
-    metaDesc  = s.metaDesc || (s.pitch || '').slice(0, 158)
+    // USA: K-12 American curriculum; Canada: the OSSD (src/data/naFocus.js).
+    const m = naMeta('us', { slug: currentStateSlug, name: s.name, oldTitle: s.metaTitle, oldDesc: s.metaDesc })
+    metaTitle = m.title
+    metaDesc  = m.desc
   } else if (page === 'city-landing' && currentCitySlug && US_CITIES[currentCitySlug]) {
     const c = US_CITIES[currentCitySlug]
-    metaTitle = c.metaTitle || ('Online Homeschool ' + c.name + ' — Live Cambridge IGCSE & A-Level | ' + SITE)
-    metaDesc  = c.metaDesc || (c.pitch || '').slice(0, 158)
+    // USA: K-12 American curriculum; Canada: the OSSD (src/data/naFocus.js).
+    const m = naMeta('us', { slug: currentCitySlug, name: c.name, oldTitle: c.metaTitle, oldDesc: c.metaDesc })
+    metaTitle = m.title
+    metaDesc  = m.desc
   } else if (page === 'province-landing' && currentProvinceSlug && CA_PROVINCES[currentProvinceSlug]) {
     const p = CA_PROVINCES[currentProvinceSlug]
-    metaTitle = p.metaTitle || ('Online Homeschool ' + p.name + ' — Live Cambridge IGCSE & A-Level | ' + SITE)
-    metaDesc  = p.metaDesc || (p.pitch || '').slice(0, 158)
+    // USA: K-12 American curriculum; Canada: the OSSD (src/data/naFocus.js).
+    const m = naMeta('ca', { slug: currentProvinceSlug, name: p.name, oldTitle: p.metaTitle, oldDesc: p.metaDesc })
+    metaTitle = m.title
+    metaDesc  = m.desc
   } else if (page === 'ca-city-landing' && currentCaCitySlug && CA_CITIES[currentCaCitySlug]) {
     const c = CA_CITIES[currentCaCitySlug]
-    metaTitle = c.metaTitle || ('Online Homeschool ' + c.name + ' — Live Cambridge IGCSE & A-Level | ' + SITE)
-    metaDesc  = c.metaDesc || (c.pitch || '').slice(0, 158)
+    // USA: K-12 American curriculum; Canada: the OSSD (src/data/naFocus.js).
+    const m = naMeta('ca', { slug: currentCaCitySlug, name: c.name, oldTitle: c.metaTitle, oldDesc: c.metaDesc })
+    metaTitle = m.title
+    metaDesc  = m.desc
   } else if (page === 'ca-families') {
-    metaTitle = 'Online School, Virtual School & Homeschool for Canadian Families — Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Canadian families. UofT, Waterloo, McGill, UBC, McMaster pipeline. Provincial homeschool compliance support. From USD 423 per month.'
+    metaTitle = 'Online OSSD School & Homeschool in Canada | Smartious'
+    metaDesc  = 'Online OSSD school for families across Canada: earn the Ontario Secondary School Diploma through our Ontario partner school, with live classes. From USD 423/month.'
   } else if (page === 'homeschooling-ethiopia') {
     metaTitle = 'Online School, Virtual School & Homeschool for Ethiopian Families — Cambridge IGCSE & A-Level | Smartious'
     metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Ethiopian families across Addis Ababa, Dire Dawa, Mekelle, Hawassa, Bahir Dar. ICS Addis / Sandford alternative. From USD 423/month.'
@@ -4849,8 +4858,8 @@ export default function LandingPage() {
     metaTitle = c.seoTitle || ('Homeschooling in ' + c.name + ' | IGCSE, A-Level, IB & CBC | Smartious')
     metaDesc  = c.seoDesc || ''
   } else if (page === 'us-families') {
-    metaTitle = 'Online School in the USA | Live Classes, AP, IGCSE & A-Level | Smartious'
-    metaDesc  = 'Accredited live online school for American families: American curriculum with AP, plus Cambridge IGCSE and A-Level and IB, taught live in US time zones by qualified teachers. Real teachers, small classes, from USD 423/month for Primary.'
+    metaTitle = 'K-12 Online School in the USA | American Curriculum & AP'
+    metaDesc  = 'Accredited K-12 online school for American families: the American curriculum with AP, taught live in US time zones by qualified teachers. From USD 423/month.'
   } else if (page === 'tuition-uae') {
     metaTitle = 'Online Tutors in Dubai & UAE | IGCSE, A-Level | Smartious'
     metaDesc  = 'Live online 1-on-1 tuition in Dubai, Abu Dhabi and Sharjah: IGCSE, A-Level, IB, Edexcel and AP with qualified tutors. From USD 15/hour (about AED 55).'
@@ -11221,14 +11230,14 @@ export default function LandingPage() {
               <div style={{maxWidth:920,margin:'0 auto'}}>
                 {/* The page heading says what families search for; the slogan below keeps its look. */}
                 <h1 style={{display:'inline-flex',alignItems:'center',gap:8,background:'rgba(201,151,58,.15)',color:V.gold3,padding:'7px 14px',borderRadius:99,fontSize:11.5,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',margin:'0 0 20px',fontFamily:'inherit',lineHeight:1.4}}>
-                  <span aria-hidden="true">🇺🇸</span> Online School &amp; Homeschool in the USA
+                  <span aria-hidden="true">🇺🇸</span> K-12 Online School &amp; Homeschool in the USA
                 </h1>
                 <p style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.4rem, 6vw, 4rem)',fontWeight:400,color:'#fff',lineHeight:1.02,marginTop:0,marginBottom:22,letterSpacing:'-.015em'}}>
                   Real teachers. <em style={{color:V.gold3,fontStyle:'italic'}}>Real rigour.</em><br/>
                   Real college pathways.
                 </p>
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,maxWidth:760,marginBottom:30}}>
-                  Tired of recorded-video curricula where your child is essentially alone all day? Worried about how Acellus or BJU Press lessons compare to what students in top-tier private schools are doing? Smartious delivers <strong>Cambridge IGCSE, Pearson Edexcel, A-Level and IB Diploma</strong> programmes — taught live by qualified teachers — to American homeschool families from USD 423 per month.
+                  Tired of recorded-video curricula where your child is essentially alone all day? Worried about how Acellus or BJU Press lessons compare to what students in top-tier private schools are doing? Smartious is a K-12 online school on the <strong>American curriculum, Kindergarten to Grade 12, with Advanced Placement (AP)</strong>, taught live by qualified teachers in US time zones, with Cambridge IGCSE, A-Level and IB as options. From USD 423 per month.
                 </p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
                   <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('consult_booked'); nav('/assessment') })}
@@ -11655,14 +11664,14 @@ export default function LandingPage() {
               <div style={{maxWidth:920,margin:'0 auto'}}>
                 {/* The page heading says what families search for; the slogan below keeps its look. */}
                 <h1 style={{display:'inline-flex',alignItems:'center',gap:8,background:'rgba(201,151,58,.15)',color:V.gold3,padding:'7px 14px',borderRadius:99,fontSize:11.5,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',margin:'0 0 20px',fontFamily:'inherit',lineHeight:1.4}}>
-                  <span aria-hidden="true">🇨🇦</span> Online School &amp; Homeschool in Canada
+                  <span aria-hidden="true">🇨🇦</span> Online OSSD School &amp; Homeschool in Canada
                 </h1>
                 <p style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.4rem, 6vw, 4rem)',fontWeight:400,color:'#fff',lineHeight:1.02,marginTop:0,marginBottom:22,letterSpacing:'-.015em'}}>
                   Real teachers. <em style={{color:V.gold3,fontStyle:'italic'}}>Real rigour.</em><br/>
                   Real college pathways.
                 </p>
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,maxWidth:760,marginBottom:30}}>
-                  Tired of recorded-video curricula where your child is essentially alone all day? Worried about how Acellus, Time4Learning, or local board homeschool packages lessons compare to what students in top-tier private schools are doing? Smartious delivers <strong>Cambridge IGCSE, Pearson Edexcel, A-Level and IB Diploma</strong> programmes — taught live by qualified teachers — to Canadian homeschool families from USD 423 per month.
+                  Tired of recorded-video curricula where your child is essentially alone all day? Worried about how Acellus, Time4Learning, or local board homeschool packages lessons compare to what students in top-tier private schools are doing? Smartious offers the <strong>Ontario Secondary School Diploma (OSSD)</strong> to families anywhere in Canada, through our Ontario partner school, with every class taught live by qualified teachers, and Cambridge IGCSE, A-Level and IB as options. From USD 423 per month.
                 </p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
                   <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('consult_booked'); nav('/assessment') })}
@@ -12136,9 +12145,12 @@ export default function LandingPage() {
                 <span style={{opacity:.95,fontWeight:700}}>Online Homeschool · {s.name}</span>
               </div>
               <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2rem,5vw,3.4rem)',lineHeight:1.08,fontWeight:400,marginBottom:18,letterSpacing:'-0.01em'}}>
-                Online Homeschool for <em style={{color:s.accentColor,fontStyle:'normal'}}>{s.name}</em> Families
+                {US_HEADLINE} for <em style={{color:s.accentColor,fontStyle:'normal'}}>{s.name}</em> Families
               </h1>
               <p style={{fontSize:'clamp(1rem,1.6vw,1.18rem)',color:'rgba(255,255,255,.85)',maxWidth:760,lineHeight:1.6,marginBottom:28}}>
+                {usLead(s.name)}
+              </p>
+              <p style={{fontSize:'clamp(.95rem,1.4vw,1.05rem)',color:'rgba(255,255,255,.72)',maxWidth:760,lineHeight:1.6,marginTop:-14,marginBottom:28}}>
                 {s.pitch}
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:36}}>
@@ -12443,9 +12455,12 @@ export default function LandingPage() {
                 <span style={{opacity:.95,fontWeight:700}}>Online Homeschool · {s.name}</span>
               </div>
               <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2rem,5vw,3.4rem)',lineHeight:1.08,fontWeight:400,marginBottom:18,letterSpacing:'-0.01em'}}>
-                Online Homeschool for <em style={{color:s.accentColor,fontStyle:'normal'}}>{s.name}</em> Families
+                {CA_HEADLINE} for <em style={{color:s.accentColor,fontStyle:'normal'}}>{s.name}</em> Families
               </h1>
               <p style={{fontSize:'clamp(1rem,1.6vw,1.18rem)',color:'rgba(255,255,255,.85)',maxWidth:760,lineHeight:1.6,marginBottom:28}}>
+                {caLead(s.name)}
+              </p>
+              <p style={{fontSize:'clamp(.95rem,1.4vw,1.05rem)',color:'rgba(255,255,255,.72)',maxWidth:760,lineHeight:1.6,marginTop:-14,marginBottom:28}}>
                 {s.pitch}
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:36}}>
@@ -12781,9 +12796,12 @@ export default function LandingPage() {
                 <span style={{opacity:.95,fontWeight:700}}>Online Homeschool · {c.name}</span>
               </div>
               <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2rem,5vw,3.4rem)',lineHeight:1.08,fontWeight:400,marginBottom:18,letterSpacing:'-0.01em'}}>
-                Online Homeschool for <em style={{color:s.accentColor,fontStyle:'normal'}}>{c.name}</em> Families
+                {US_HEADLINE} for <em style={{color:s.accentColor,fontStyle:'normal'}}>{c.name}</em> Families
               </h1>
               <p style={{fontSize:'clamp(1rem,1.6vw,1.18rem)',color:'rgba(255,255,255,.85)',maxWidth:760,lineHeight:1.6,marginBottom:28}}>
+                {usLead(c.name)}
+              </p>
+              <p style={{fontSize:'clamp(.95rem,1.4vw,1.05rem)',color:'rgba(255,255,255,.72)',maxWidth:760,lineHeight:1.6,marginTop:-14,marginBottom:28}}>
                 {c.pitch}
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:36}}>
@@ -13466,9 +13484,12 @@ export default function LandingPage() {
                 <span style={{opacity:.95,fontWeight:700}}>Online Homeschool · {c.name}</span>
               </div>
               <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2rem,5vw,3.4rem)',lineHeight:1.08,fontWeight:400,marginBottom:18,letterSpacing:'-0.01em'}}>
-                Online Homeschool for <em style={{color:s.accentColor,fontStyle:'normal'}}>{c.name}</em> Families
+                {CA_HEADLINE} for <em style={{color:s.accentColor,fontStyle:'normal'}}>{c.name}</em> Families
               </h1>
               <p style={{fontSize:'clamp(1rem,1.6vw,1.18rem)',color:'rgba(255,255,255,.85)',maxWidth:760,lineHeight:1.6,marginBottom:28}}>
+                {caLead(c.name)}
+              </p>
+              <p style={{fontSize:'clamp(.95rem,1.4vw,1.05rem)',color:'rgba(255,255,255,.72)',maxWidth:760,lineHeight:1.6,marginTop:-14,marginBottom:28}}>
                 {c.pitch}
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:36}}>

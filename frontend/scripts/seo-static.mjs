@@ -72,6 +72,7 @@ import { PRIORITY_HUB_LINKS, PRIORITY_CITY_LINKS } from '../src/data/priorityLin
 import { HUB_TITLES, guideTitle, nairobiAreaTitle, fitTitle, fitDesc } from '../src/data/seoTitles.js'
 import { ARTICLES_INDEX } from '../src/data/generated/articlesIndex.js'
 import { guidesFor } from '../src/data/geoGuides.js'
+import { naMeta, usLead, caLead, US_HEADLINE, CA_HEADLINE } from '../src/data/naFocus.js'
 
 const NOINDEX_ONLY = process.argv.includes('--noindex-only')
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -528,7 +529,7 @@ for (const c of COUNTRY_DETAILS) {
     : []
   const sections = Object.values(c).filter(v => v && typeof v === 'object' && !Array.isArray(v) && v.heading && !v.reviews).map(section)
   // The USA and Canada pages' H1 (LandingPage.jsx) names the search, not the slogan.
-  const h1 = c.slug === 'usa' ? 'Online School & Homeschool in the USA' : c.slug === 'canada' ? 'Online School & Homeschool in Canada' : c.h
+  const h1 = c.slug === 'usa' ? 'K-12 Online School & Homeschool in the USA' : c.slug === 'canada' ? 'Online OSSD School & Homeschool in Canada' : c.h
   add({ path, title: (branch && branch.title) || c.seoTitle, desc: (branch && branch.desc) || c.seoDesc, h1, body: [
     p(c.tagline), c.localFacts?.length ? bullets(c.localFacts) : '', p(c.pains),
     c.curricula?.length ? h2('Curricula') + bullets(c.curricula) : '',
@@ -652,9 +653,12 @@ for (const a of UAE_AREAS) {
 // US states and cities, Canadian provinces and cities (/homeschool-<slug>)
 function regionPage({ slug, s, country, hub, childLinks, parent, src }) {
   const path = '/homeschool-' + slug
-  return add({ path, title: s.metaTitle || ('Online Homeschool ' + s.name + ' — Live Cambridge IGCSE & A-Level | ' + SITE),
-    desc: s.metaDesc || clip(s.pitch), h1: 'Online homeschool in ' + s.name + (parent ? ', ' + parent.name : ''), body: [
-      p(s.pitch), p(s.proof), p(s.uniqueHook), p(s.metroPop),
+  // USA: K-12 American curriculum; Canada: the OSSD (src/data/naFocus.js).
+  const ca = country === 'Canada'
+  const m = naMeta(ca ? 'ca' : 'us', { slug, name: s.name, oldTitle: s.metaTitle, oldDesc: s.metaDesc })
+  return add({ path, title: m.title, desc: m.desc || clip(s.pitch),
+    h1: (ca ? CA_HEADLINE : US_HEADLINE) + ' for ' + s.name + (parent ? ', ' + parent.name : '') + ' Families', body: [
+      p(ca ? caLead(s.name) : usLead(s.name)), p(s.pitch), p(s.proof), p(s.uniqueHook), p(s.metroPop),
       bullets([['Homeschool rules', [s.difficulty, s.difficultyDetail].filter(Boolean).join(' — ')], ['Paperwork', s.paperworkLevel], ['Live class times', [s.classTime, s.classTimeBenefit].filter(Boolean).join(' — ')], ['Exam centres', s.examCentre], ['Population', [s.pop, s.popLabel].filter(Boolean).join(' ')]].filter(r => r[1])),
       s.legalSummary ? h2('Homeschool law in ' + s.name) + p(s.legalSummary) : '',
       s.universities?.length || s.topUnis?.length ? h2('University pathways') + bullets(s.universities || s.topUnis) : '',
