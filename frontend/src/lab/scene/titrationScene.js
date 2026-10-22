@@ -205,13 +205,13 @@ export function titration(lab, { dispatch, onSelect, onHover }) {
   const FLASK_FRONT = v3(0, B, 0.17)          // in front, for pipetting and indicator
 
   const stand = standAndClamp(BUR_Y + 0.5 - B, 0.15, seg); stand.position.set(0, B, -0.15)
-  lab.add(stand, { pick: { kind: 'stand', label: 'Retort stand with boss and burette clamp' } })
+  lab.add(stand, { pick: { kind: 'stand', name: 'Retort stand', label: 'Retort stand with boss and burette clamp' } })
   const tile = E.whiteTile(); tile.position.set(0, B, 0)
-  lab.add(tile, { pick: { kind: 'tile', label: 'White tile: makes the colour change easy to see' } })
+  lab.add(tile, { pick: { kind: 'tile', name: 'White tile', label: 'White tile: makes the colour change easy to see' } })
   const flask = E.conicalFlask(); flask.position.copy(FLASK_HOME)
-  lab.add(flask, { pick: { kind: 'flask' } })
+  lab.add(flask, { pick: { kind: 'flask', name: '250 cm³ conical flask' } })
   const bur = E.burette(); bur.position.set(0, BUR_Y, 0)
-  lab.add(bur, { pick: { kind: 'burette' } })
+  lab.add(bur, { pick: { kind: 'burette', name: '50 cm³ burette' } })
 
   // Tap: a T-grip shows whether it is open; a larger invisible target is easier to press.
   const tap = bur.userData.tap
@@ -228,42 +228,42 @@ export function titration(lab, { dispatch, onSelect, onHover }) {
   // Sodium hydroxide side (right)
   const naohBottle = reagentBottle('Sodium hydroxide\n0.100 M', { cap: '#1F5FAF', hazard: 'CORROSIVE', seg })
   naohBottle.position.set(0.31, B, -0.12)
-  lab.add(naohBottle, { pick: { kind: 'naoh', label: 'Sodium hydroxide 0.100 M' } })
+  lab.add(naohBottle, { pick: { kind: 'naoh', name: 'Sodium hydroxide 0.100 M', label: 'Sodium hydroxide 0.100 M' } })
   const naohBeaker = beakerWithTag('NaOH', 0.6); naohBeaker.position.set(0.2, B, 0.07)
   naohBeaker.userData.home = naohBeaker.position.clone()
-  lab.add(naohBeaker, { pick: { kind: 'naoh', label: 'Beaker of sodium hydroxide' } })
+  lab.add(naohBeaker, { pick: { kind: 'naoh', name: 'NaOH beaker', label: 'Beaker of sodium hydroxide' } })
   const rinse = beakerWithTag('Waste', 0.08); rinse.position.set(0.17, B, -0.12)
   const RINSE_HOME = rinse.position.clone()
-  lab.add(rinse, { pick: { kind: 'rinse', label: 'Waste beaker for rinsings; the funnel rests in it' } })
+  lab.add(rinse, { pick: { kind: 'rinse', name: 'Waste beaker', label: 'Waste beaker for rinsings; the funnel rests in it' } })
   const fun = funnel(seg)
   const FUNNEL_HOME = v3(0.17, B + 0.055, -0.12)
   const FUNNEL_IN = v3(0, BUR_TOP - 0.035, 0)
   fun.position.copy(FUNNEL_HOME)
-  lab.add(fun, { pick: { kind: 'funnel', label: 'Filter funnel' } })
+  lab.add(fun, { pick: { kind: 'funnel', name: 'Filter funnel', label: 'Filter funnel' } })
   const wash = washBottle(seg); wash.position.set(0.42, B, 0.12); wash.rotation.y = PI
-  lab.add(wash, { pick: { kind: 'wash', label: 'Wash bottle of distilled water' } })
+  lab.add(wash, { pick: { kind: 'wash', name: 'Wash bottle', label: 'Wash bottle of distilled water' } })
   const goggles = buildModel('goggles'); goggles.position.set(0.3, B, 0.3); goggles.rotation.y = -0.5
-  lab.add(goggles, { pick: { kind: 'goggles', label: 'Safety goggles: wear them throughout the practical' } })
+  lab.add(goggles, { pick: { kind: 'goggles', name: 'Safety goggles', label: 'Safety goggles: wear them throughout the practical' } })
   const coat = labCoat(); coat.position.set(0.5, B, 0.27); coat.rotation.y = -0.3
-  lab.add(coat, { pick: { kind: 'coat', label: 'Lab coat: put it on before handling the reagents' } })
+  lab.add(coat, { pick: { kind: 'coat', name: 'Lab coat', label: 'Lab coat: put it on before handling the reagents' } })
 
   // Acid side (left)
   const acidBottle = reagentBottle('Acid,\n? M', { body: '#F1F5F7', bodyOpacity: 0.55, cap: '#8B1A2E', seg })
   acidBottle.position.set(-0.3, B, -0.12)
-  lab.add(acidBottle, { pick: { kind: 'acid' } })
+  lab.add(acidBottle, { pick: { kind: 'acid', name: 'Acid (unknown concentration)' } })
   const acidBeaker = beakerWithTag('Acid', 0.6); acidBeaker.position.set(-0.2, B, 0.07)
-  lab.add(acidBeaker, { pick: { kind: 'acid' } })
+  lab.add(acidBeaker, { pick: { kind: 'acid', name: 'Acid beaker' } })
   const pip = pipetteWithFiller(seg)
   const PIP_HOME = { p: v3(-0.44, B + 0.014, 0.3), r: { z: -PI / 2 } }
   const PIP_HELD = { p: v3(acidBeaker.position.x, B + 0.16, acidBeaker.position.z), r: { z: 0 } }   // full, held above the acid beaker
   pip.position.copy(PIP_HOME.p); pip.rotation.z = PIP_HOME.r.z
-  lab.add(pip, { pick: { kind: 'pipette', label: '25.0 cm³ pipette and filler' } })
+  lab.add(pip, { pick: { kind: 'pipette', name: '25.0 cm³ pipette', label: '25.0 cm³ pipette and filler' } })
 
   // Indicators (left, in a row)
   const bottles = Object.keys(INDICATOR_LIQUID).map((id, i) => {
     const b = dropperBottle(INDICATORS[id].name, INDICATOR_LIQUID[id], seg)
     b.position.set(-0.5 + i * 0.05, B, 0.06)
-    lab.add(b, { pick: { kind: 'indicator', id } })
+    lab.add(b, { pick: { kind: 'indicator', id, name: INDICATORS[id].name } })
     return { id, b }
   })
   const ring = new THREE.Mesh(new THREE.TorusGeometry(0.022, 0.0018, 8, 32), new THREE.MeshBasicMaterial({ color: '#F0B429' }))
@@ -858,5 +858,33 @@ export function titration(lab, { dispatch, onSelect, onHover }) {
       lab.invalidate()
     },
     view: { pos: [0.12, 1.4, 1.12], target: [-0.02, 1.08, 0.02] },
+    /** What the student fetches when setting up the bench (setupQuest.js), and what they should leave. */
+    setup: () => ({
+      bench: { minX: -1.08, maxX: 1.08, minZ: -0.44, maxZ: 0.43 },
+      items: [
+        { key: 'goggles', name: 'safety goggles', objects: [goggles] },
+        { key: 'lab_coat', name: 'lab coat', objects: [coat] },
+        { key: 'stand_clamp', name: 'retort stand and burette clamp', objects: [stand] },
+        { key: 'burette', name: '50 cm³ burette', objects: [bur] },
+        { key: 'white_tile', name: 'white tile', objects: [tile] },
+        { key: 'conical_flask', name: '250 cm³ conical flask', objects: [flask] },
+        { key: 'pipette', name: '25.0 cm³ pipette and filler', objects: [pip] },
+        { key: 'funnel', name: 'filter funnel', objects: [fun] },
+        { key: 'beaker_naoh', name: 'beaker for the sodium hydroxide', objects: [naohBeaker] },
+        { key: 'beaker_acid', name: 'beaker for the acid', objects: [acidBeaker] },
+        { key: 'beaker_waste', name: 'waste beaker', objects: [rinse] },
+        { key: 'naoh', name: 'sodium hydroxide, 0.100 M', kind: 'reagent', objects: [naohBottle] },
+        { key: 'acid', name: 'acid of unknown concentration', kind: 'reagent', objects: [acidBottle] },
+        ...bottles.map(({ id, b }) => ({ key: 'ind_' + id, name: INDICATORS[id].name.toLowerCase() + ' indicator', kind: 'reagent', objects: [b] })),
+        { key: 'wash_bottle', name: 'wash bottle of distilled water', kind: 'reagent', objects: [wash] },
+      ],
+      distractors: [
+        { key: 'measuring_cylinder', name: 'The 250 cm³ measuring cylinder', object: buildModel('measuring_cylinder') },
+        { key: 'flask_100', name: 'The 100 cm³ conical flask', object: (() => { const f = E.conicalFlask(); f.scale.setScalar(0.72); const g = new THREE.Group(); g.add(f); return g })() },
+        { key: 'thermometer', name: 'The thermometer', object: buildModel('thermometer') },
+        { key: 'ethanol', name: 'Ethanol', kind: 'reagent', object: reagentBottle('Ethanol', { cap: '#2E7D32', hazard: 'FLAMMABLE', seg }) },
+        { key: 'nacl', name: 'Sodium chloride solution', kind: 'reagent', object: reagentBottle('Sodium chloride\n0.5 M', { cap: '#6A1B9A', seg }) },
+      ],
+    }),
   }
 }

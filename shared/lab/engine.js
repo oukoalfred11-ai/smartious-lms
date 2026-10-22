@@ -24,9 +24,31 @@ export function paramsFor(def, seed, options = {}) {
   return def.params(String(seed), options || {})
 }
 
+/**
+ * Bench set-up (every experiment): the student fetches the apparatus and
+ * reagents from the cupboard and reagent rack before starting. One action
+ * per item taken to the bench ({ item }), per wrong item taken out and put
+ * back ({ item, wrong: true }), and one when the bench is ready
+ * ({ done: true }). It records what the student did and changes nothing
+ * else, so it is safe in any experiment and old sessions replay as before.
+ */
+const SETUP_MAX = 80
+function applySetUp(state, payload = {}) {
+  const s = state._setup || { fetched: [], wrong: [], done: false }
+  if (payload.done) { s.done = true; state._setup = s; return state }
+  const item = String(payload.item || '').slice(0, 60)
+  if (!/^[\w.:-]+$/.test(item)) fail('Unknown item.')
+  const list = payload.wrong ? s.wrong : s.fetched
+  if (s.fetched.length + s.wrong.length >= SETUP_MAX) fail('Too many set-up steps.')
+  if (payload.wrong || !list.includes(item)) list.push(item)
+  state._setup = s
+  return state
+}
+
 /** Apply one action; returns the new state (input is not mutated). */
 export function applyAction(def, params, state, action) {
   if (!action || typeof action.type !== 'string') fail('Unknown action.')
+  if (action.type === 'setUp' && !def.actions.setUp) return applySetUp(clone(state), action.payload || {})
   const handler = def.actions[action.type]
   if (!handler) fail('This action is not available in this experiment.')
   const next = clone(state)
@@ -45,7 +67,11 @@ export function replay(def, params, actions = []) {
   return state
 }
 
-export const viewOf = (def, params, state) => def.view(params, state)
+export function viewOf(def, params, state) {
+  const view = def.view(params, state)
+  if (state && state._setup && view && typeof view === 'object') view.setup = state._setup
+  return view
+}
 
 /**
  * Auto-mark. Returns rubric rows; teacher-marked rows have auto=false and
