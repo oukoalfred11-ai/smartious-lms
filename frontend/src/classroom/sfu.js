@@ -15,6 +15,10 @@
  * Only used when the backend reports engine 'sfu' (LIVEKIT_* env set);
  * otherwise the classroom builds MeshEngine exactly as before.
  */
+// Students and parents are the learners' side of the room; everyone else
+// (teacher, staff observers) is staff. Same rule as the classroom tiles.
+export const isLearnerRole = (role) => role === 'student' || role === 'parent';
+
 export class SfuEngine {
   constructor({ url, token, localStream, onTrack, onPeerClosed, resolveSocketId, publish = true, onCanPublishChanged, getToken, onMediaState, onAudioBlocked }) {
     this.url = url;
@@ -42,11 +46,22 @@ export class SfuEngine {
     this._quality = new Map(); // identity ('__local' for self) -> good|fair|poor|down
     this._closed = false;
     this._rejoining = false;
+    // Data saver (applyVideoPolicy): which remote identities are staff
+    // (their video is kept), and whether the saver is on.
+    this._saver = false;
+    this._staff = new Set();
+    this._camSaver = null;
+    this._camTrack = null;
+    this._lk = null;
   }
 
   async start() {
-    const { Room, RoomEvent } = await import('livekit-client');
+    this._lk = await import('livekit-client');
+    const { Room, RoomEvent } = this._lk;
     this.room = new Room({ adaptiveStream: true, dynacast: true });
+
+    // New cameras arriving while the data saver is on follow it too.
+    this.room.on(RoomEvent.TrackPublished, (_pub, participant) => this._applyRemote(participant));
 
     this.room.on(RoomEvent.TrackSubscribed, (track, _pub, participant) => {
       const id = participant.identity;
@@ -54,6 +69,7 @@ export class SfuEngine {
       try { stream.addTrack(track.mediaStreamTrack); } catch (e) { /* dup */ }
       this._streams.set(id, stream);
       this._emit(id);
+      if (track.kind === 'video') this._applyRemote(participant);
     });
     this.room.on(RoomEvent.TrackUnsubscribed, (track, _pub, participant) => {
       const id = participant.identity;
@@ -233,8 +249,43 @@ export class SfuEngine {
     });
   }
 
-  /** SFU manages per-subscriber quality server-side (dynacast/adaptive). */
-  async applyVideoPolicy() { return { sfu: true }; }
+  /**
+   * Data saver. Without it the SFU already adapts per subscriber
+   * (simulcast, dynacast, adaptive stream). With it, for a weak connection:
+   *   upload   : the camera is captured at 320x240, 12fps, so every
+   *              simulcast layer shrinks (a shared screen is left alone);
+   *   download : other students' cameras are unsubscribed — they cost the
+   *              most and matter least; staff video (the teacher's camera
+   *              or shared screen) is kept, at the lowest layer.
+   * Audio is never touched. peers = the roster ({ userId, role }).
+   */
+  async applyVideoPolicy({ dataSaver = false, sharing = false, peers = [] } = {}) {
+    this._saver = !!dataSaver;
+    this._staff = new Set(peers.filter((p) => !isLearnerRole(p.role)).map((p) => String(p.userId)));
+    const cam = !sharing && this.localStream && this.localStream.getVideoTracks().find((t) => t.readyState === 'live');
+    if (cam && cam.readyState === 'live' && (this._camSaver !== this._saver || this._camTrack !== cam)) {
+      this._camSaver = this._saver;
+      this._camTrack = cam;
+      const c = this._saver
+        ? { width: { ideal: 320 }, height: { ideal: 240 }, frameRate: { ideal: 12, max: 15 } }
+        : { width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 20 } };
+      try { await cam.applyConstraints(c); } catch (e) { /* camera keeps its size */ }
+    }
+    if (this.room) for (const p of this.room.remoteParticipants.values()) this._applyRemote(p);
+    return { sfu: true, dataSaver: this._saver };
+  }
+
+  _applyRemote(participant) {
+    if (!participant || !this._lk) return;
+    const staff = this._staff.has(String(participant.identity).split('#')[0]);
+    const want = !this._saver || staff;
+    for (const pub of participant.videoTrackPublications.values()) {
+      try { if (pub.isSubscribed !== want) pub.setSubscribed(want); } catch (e) { /* noop */ }
+      if (want && staff && pub.isSubscribed) {
+        try { pub.setVideoQuality(this._saver ? this._lk.VideoQuality.LOW : this._lk.VideoQuality.HIGH); } catch (e) { /* adaptive stream decides */ }
+      }
+    }
+  }
   /** Same shape the mesh engine returns — socketId -> good|fair|poor|down —
    *  plus 'self' for the local link, fed by ConnectionQualityChanged. */
   async getQuality() {

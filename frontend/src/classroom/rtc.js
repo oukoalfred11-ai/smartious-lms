@@ -181,43 +181,59 @@ export class MeshEngine {
   }
 
   /**
-   * Per-peer connection quality from WebRTC stats.
-   * Returns { [socketId]: 'good' | 'fair' | 'poor' | 'down' }.
-   * fair: RTT > 300ms or loss > 3%; poor: RTT > 600ms or loss > 8%.
-   */
-  /**
    * Bandwidth governor. In a mesh, every camera is uploaded once per peer,
    * so upload cost grows with room size. This caps each outgoing video
    * sender's bitrate and resolution according to room size, and supports a
    * "data saver" mode for low-bandwidth homes:
    *   auto  : <=3 peers 650kbps, <=6 peers 350kbps/half-res, more 180kbps/third-res
    *   saver : 120kbps at quarter resolution regardless of room size
+   * A mesh sender is per peer, so a peer who has turned the data saver on
+   * (roster `saver`) is also sent less: a learner's camera is not sent to
+   * them at all, and staff video goes at 100kbps (a shared screen at
+   * half resolution, 5fps, so the text stays readable).
    * Audio is never touched: voice always gets priority.
    */
-  async applyVideoPolicy({ dataSaver = false } = {}) {
+  async applyVideoPolicy({ dataSaver = false, sharing = false, peers = [], selfRole = '' } = {}) {
     const n = this.peers ? this.peers.size : 0;
     let maxBitrate, scale;
     if (dataSaver) { maxBitrate = 120000; scale = 4; }
     else if (n <= 3) { maxBitrate = 650000; scale = 1; }
     else if (n <= 6) { maxBitrate = 350000; scale = 2; }
     else { maxBitrate = 180000; scale = 3; }
+    const learner = selfRole === 'student' || selfRole === 'parent';
+    const saverPeers = new Set(peers.filter((p) => p.saver).map((p) => p.socketId));
     const jobs = [];
-    this.peers.forEach((entry) => {
+    this.peers.forEach((entry, remoteId) => {
       const pc = entry && entry.pc;
       if (!pc) return;
+      const toSaver = saverPeers.has(remoteId);
       pc.getSenders().forEach((sender) => {
         if (!sender.track || sender.track.kind !== 'video') return;
         const params = sender.getParameters();
         if (!params.encodings || !params.encodings.length) params.encodings = [{}];
-        params.encodings[0].maxBitrate = maxBitrate;
-        params.encodings[0].scaleResolutionDownBy = scale;
+        const enc = params.encodings[0];
+        enc.active = !(toSaver && learner);
+        if (toSaver && !learner) {
+          enc.maxBitrate = Math.min(maxBitrate, sharing ? 200000 : 100000);
+          enc.scaleResolutionDownBy = sharing ? 2 : Math.max(scale, 4);
+          enc.maxFramerate = sharing ? 5 : 12;
+        } else {
+          enc.maxBitrate = maxBitrate;
+          enc.scaleResolutionDownBy = scale;
+          delete enc.maxFramerate;
+        }
         jobs.push(sender.setParameters(params).catch(() => {}));
       });
     });
     await Promise.all(jobs);
-    return { peers: n, maxBitrate, scale, dataSaver };
+    return { peers: n, maxBitrate, scale, dataSaver, saverPeers: saverPeers.size };
   }
 
+  /**
+   * Per-peer connection quality from WebRTC stats.
+   * Returns { [socketId]: 'good' | 'fair' | 'poor' | 'down' }.
+   * fair: RTT > 300ms or loss > 3%; poor: RTT > 600ms or loss > 8%.
+   */
   async getQuality() {
     const out = {};
     for (const [id, { pc }] of this.peers) {

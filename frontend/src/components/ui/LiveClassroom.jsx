@@ -21,11 +21,11 @@
  *
  * Props: { liveClassId, user, onLeave }
  */
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, createContext, useContext } from 'react'
 import { io } from 'socket.io-client'
 import { api, useToast } from '../../context/ctx.jsx'
 import { MeshEngine } from '../../classroom/rtc.js'
-import { SfuEngine } from '../../classroom/sfu.js'
+import { SfuEngine, isLearnerRole } from '../../classroom/sfu.js'
 
 const BASE = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/api\/?$/, '')
 
@@ -485,9 +485,14 @@ function AudioRail({ streams }) {
   )
 }
 
+// Data saver on: other learners' cameras are not downloaded (see
+// classroom/sfu.js and rtc.js), so their tiles show the initials instead.
+const SaverCtx = createContext(false)
+
 // One video tile. Visible tiles are ALWAYS muted — audio comes from
 // the AudioRail above, so unmounting a tile can't silence anyone.
 function Tile({ stream, name, role, self, micOn, camOn, hand, quality, small, big }) {
+  const paused = useContext(SaverCtx) && !self && isLearnerRole(role)
   // Callback ref, NOT an effect: toggling the camera swaps between a
   // <video> and a hidden <audio> element, and each swap mounts a
   // brand-new element that must be (re)attached to the stream. An
@@ -510,11 +515,11 @@ function Tile({ stream, name, role, self, micOn, camOn, hand, quality, small, bi
       background: '#1B2230', border: hand ? '2px solid #F59E0B' : '1px solid rgba(255,255,255,.12)',
       flexShrink: 0,
     }}>
-      {stream && camOn !== false ? (
+      {stream && camOn !== false && !paused ? (
         <video ref={attach} autoPlay playsInline muted
           style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       ) : (
-        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div title={paused ? 'Video paused to save data' : undefined} style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
 
           <div style={{
             width: 42, height: 42, borderRadius: '50%', background: role === 'teacher' ? '#7D1025' : '#1E3A8A',
@@ -637,19 +642,31 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   useEffect(() => { sharingLiveRef.current = sharing }, [sharing])
   useEffect(() => { mainViewRef.current = mainView }, [mainView])
   useEffect(() => { camOnRef.current = camOn }, [camOn])
-  // Data saver: caps outgoing video bitrate and resolution for
-  // low-bandwidth homes. Voice is never reduced. The governor also
-  // auto-tiers by room size so mesh rooms degrade gracefully.
+  // Data saver, for weak connections: my camera is sent smaller, other
+  // learners' cameras are not downloaded, the teacher's video comes at
+  // the lowest quality, and the room is told (state.saver) so a mesh
+  // peer sends me less. Voice and the whiteboard are never reduced. It
+  // switches on by itself when my connection stays poor (see the
+  // quality poll), unless I have turned it off this session. The mesh
+  // governor also auto-tiers by room size.
   // Assembly stage-and-audience: viewers join without publishing until
   // staff invite them to speak.
   const [audience, setAudience] = useState(false)
   const [dataSaver, setDataSaver] = useState(() => {
     try { return localStorage.getItem('sm_data_saver') === '1' } catch (e) { return false }
   })
+  const dataSaverRef = useRef(dataSaver)
+  dataSaverRef.current = dataSaver
+  const myRoleRef = useRef(myRole)
+  myRoleRef.current = myRole
+  const saverOptOutRef = useRef(false)   // turned off by hand: no auto switch-on
+  const weakPollsRef = useRef(0)
+  const [engineTick, setEngineTick] = useState(0)   // bumps when the media engine is ready
+  const rosterKey = roster.map(p => p.socketId + ':' + p.role + ':' + (p.saver ? 1 : 0)).join('|')
   useEffect(() => {
     try { localStorage.setItem('sm_data_saver', dataSaver ? '1' : '0') } catch (e) { /* noop */ }
-    engineRef.current?.applyVideoPolicy?.({ dataSaver })
-  }, [dataSaver, roster.length])
+    engineRef.current?.applyVideoPolicy?.({ dataSaver, sharing, peers: roster, selfRole: myRole })
+  }, [dataSaver, sharing, rosterKey, myRole, engineTick, localStream]) // eslint-disable-line react-hooks/exhaustive-deps
   themeRef.current = T
   themeTokensRef.current = T
   const [grid, setGrid] = useState(false)
@@ -695,6 +712,10 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   const drawRef = useRef({ active: false, pts: [], start: null })
 
   const isTeacher = myRole === 'teacher' || myRole === 'admin' || myRole === 'dos' || myRole === 'ops_manager'
+  // Tell the room about my data saver, so peers send me less.
+  useEffect(() => {
+    if (phase === 'live') socketRef.current?.emit('state', { saver: dataSaver })
+  }, [dataSaver, phase])
   const canDraw = isTeacher || !boardLocked
 
   // ═══ BOARD RENDERING ═══════════════════════════════════════
@@ -1106,6 +1127,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
         const wireEngine = (eng) => {
           engine = eng
           engineRef.current = eng
+          setEngineTick(t => t + 1)
           while (pendingConnects.length) {
             const id = pendingConnects.shift()
             try { eng.connectTo(id) } catch (e) { /* noop */ }
@@ -1227,6 +1249,8 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
             if (engineRef.current) { try { engineRef.current.connectTo(p.socketId) } catch (e) { /* noop */ } }
             else pendingConnects.push(p.socketId)
           }
+          // A rejoin gets a new socket id: re-announce the data saver.
+          if (dataSaverRef.current) socket.emit('state', { saver: true })
           setPhase('live')
         })
 
@@ -1281,7 +1305,22 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
     const t = setInterval(() => setElapsed(s => s + 1), 1000)
     const q = setInterval(async () => {
       const eng = engineRef.current
-      if (eng) setQuality(await eng.getQuality())
+      if (!eng) return
+      const qq = await eng.getQuality()
+      setQuality(qq)
+      // Weak connection for two polls in a row (8s): switch the data saver
+      // on. The SFU scores my own link (self); in a mesh a learner's link
+      // to the teacher stands in for it.
+      const bad = (v) => v === 'poor' || v === 'down'
+      const weak = qq.self ? bad(qq.self)
+        : isLearnerRole(myRoleRef.current) && (rosterRef.current || []).some(p => !isLearnerRole(p.role) && bad(qq[p.socketId]))
+      weakPollsRef.current = weak ? weakPollsRef.current + 1 : 0
+      if (weakPollsRef.current >= 2 && !dataSaverRef.current && !saverOptOutRef.current) {
+        setDataSaver(true)
+        toast?.ok?.(isLearnerRole(myRoleRef.current)
+          ? 'Your internet is weak, so Data Saver is on. You will still hear the teacher and see the whiteboard.'
+          : 'Your internet is weak, so Data Saver is on: students\' cameras are paused. Voice and the whiteboard continue.')
+      }
     }, 4000)
     return () => { clearInterval(t); clearInterval(q) }
   }, [phase])
@@ -2564,6 +2603,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   )
 
   return (
+    <SaverCtx.Provider value={dataSaver}>
     <div ref={rootRef} style={{ position: 'fixed', inset: 0, background: C.bg, display: 'flex', flexDirection: 'column', zIndex: 500, fontFamily: 'Inter, Arial, sans-serif' }}>
       {/* Audio rail lives at the ROOT of the classroom, mounted for the
           whole session and NEVER inside a conditional layout branch. The
@@ -2822,7 +2862,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
         <CtlBtn icon="pen" label="Whiteboard" active={mainView === 'board'} onClick={() => setMainView('board')} />
         <CtlBtn icon="grid" label="Meeting" active={mainView === 'meeting'} onClick={() => setMainView('meeting')} />
         <CtlBtn icon="saver" label={dataSaver ? 'Saver On' : 'Data Saver'} active={dataSaver}
-          onClick={() => { setDataSaver(v => !v); }} />
+          onClick={() => { if (dataSaver) saverOptOutRef.current = true; setDataSaver(!dataSaver) }} />
         {!isTeacher && <CtlBtn icon="raise" label={handUp ? 'Lower Hand' : 'Raise Hand'} active={handUp} onClick={toggleHand} />}
         <CtlBtn icon="chat" label="Chat" active={panelOpen && panel === 'chat'}
           onClick={() => { setPanel('chat'); setPanelOpen(o => !(o && panel === 'chat')) }} />
@@ -2835,6 +2875,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       </div>
       )}
     </div>
+    </SaverCtx.Provider>
   )
 }
 
