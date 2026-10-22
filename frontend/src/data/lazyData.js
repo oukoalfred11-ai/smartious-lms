@@ -121,6 +121,7 @@ export let ROMANIA_CITIES = [], ROMANIA_COUNTRY = null
 export let UKRAINE_CITIES = [], UKRAINE_COUNTRY = null
 export let VIETNAM_CITIES = [], VIETNAM_COUNTRY = null
 export let THAILAND_CITIES = [], THAILAND_COUNTRY = null
+export let INDONESIA_CITIES = [], INDONESIA_COUNTRY = null
 
 // Blog: listing index (all articles, no bodies) and the full-article parts.
 export let ARTICLES_INDEX = {}
@@ -230,6 +231,7 @@ const MODULES = {
   ukraineCities: [() => import('./ukraineCities.js'), m => { UKRAINE_CITIES = m.UKRAINE_CITIES; UKRAINE_COUNTRY = m.UKRAINE_COUNTRY }, ['ukraine-city', 'homeschooling-ukraine']],
   vietnamCities: [() => import('./vietnamCities.js'), m => { VIETNAM_CITIES = m.VIETNAM_CITIES; VIETNAM_COUNTRY = m.VIETNAM_COUNTRY }, ['vietnam-city', 'homeschooling-vietnam']],
   thailandCities: [() => import('./thailandCities.js'), m => { THAILAND_CITIES = m.THAILAND_CITIES; THAILAND_COUNTRY = m.THAILAND_COUNTRY }, ['thailand-city', 'homeschooling-thailand']],
+  indonesiaCities: [() => import('./indonesiaCities.js'), m => { INDONESIA_CITIES = m.INDONESIA_CITIES; INDONESIA_COUNTRY = m.INDONESIA_COUNTRY }, ['indonesia-city', 'homeschooling-indonesia']],
   articlesIndex: [() => import('./generated/articlesIndex.js'), m => { ARTICLES_INDEX = m.ARTICLES_INDEX }, ['blog', 'article']],
 }
 for (const [part, load] of Object.entries(ARTICLE_PART_LOADERS)) {

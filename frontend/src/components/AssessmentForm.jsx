@@ -63,6 +63,7 @@ const SERVED_COUNTRIES = [
   { slug:'south-korea',   name:'South Korea',          iso:'KR', dial:'+82'  },
   { slug:'vietnam',       name:'Vietnam',              iso:'VN', dial:'+84'  },
   { slug:'thailand',      name:'Thailand',             iso:'TH', dial:'+66'  },
+  { slug:'indonesia',     name:'Indonesia',            iso:'ID', dial:'+62'  },
   { slug:'uk',            name:'United Kingdom',       iso:'GB', dial:'+44'  },
   { slug:'usa',           name:'United States',        iso:'US', dial:'+1'   },
   { slug:'canada',        name:'Canada',               iso:'CA', dial:'+1'   },

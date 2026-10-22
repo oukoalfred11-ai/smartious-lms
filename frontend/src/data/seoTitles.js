@@ -31,7 +31,7 @@ const HUBS = [
   ['drc', 'DR Congo', 0], ['ecuador', 'Ecuador', 0], ['egypt', 'Egypt', 1], ['ethiopia', 'Ethiopia', 1],
   ['finland', 'Finland', 1], ['france', 'France', 1], ['georgia', 'Georgia', 1], ['germany', 'Germany', 1],
   ['ghana', 'Ghana', 0], ['greece', 'Greece', 0], ['guatemala', 'Guatemala', 0], ['hungary', 'Hungary', 1],
-  ['india', 'India', 1], ['iraq', 'Iraq', 0], ['ireland', 'Ireland', 1], ['israel', 'Israel', 0],
+  ['india', 'India', 1], ['indonesia', 'Indonesia', 1], ['iraq', 'Iraq', 0], ['ireland', 'Ireland', 1], ['israel', 'Israel', 0],
   ['italy', 'Italy', 1], ['japan', 'Japan', 1], ['jordan', 'Jordan', 0], ['kosovo', 'Kosovo', 0],
   ['lebanon', 'Lebanon', 0], ['luxembourg', 'Luxembourg', 1], ['malaysia', 'Malaysia', 1], ['maldives', 'the Maldives', 0],
   ['mauritius', 'Mauritius', 0], ['mexico', 'Mexico', 0], ['montenegro', 'Montenegro', 1], ['morocco', 'Morocco', 1],

@@ -54,6 +54,7 @@ const REGION_LABELS = {
   'south-korea': 'East Asia, the Gulf and Africa',
   vietnam:       'Southeast Asia, the Gulf and Africa',
   thailand:      'Southeast Asia, the Gulf and Africa',
+  indonesia:     'Southeast Asia, the Gulf and Africa',
   malaysia:      'Southeast Asia, the Gulf and East Asia',
   turkey:        'the Middle East, Europe, and East Africa',
   kuwait:        'the Middle East, the Gulf, and East Africa',
@@ -662,6 +663,7 @@ function CountryHub({
               {slug:'south-korea', name:'South Korea', note:'Seoul · Songdo · Busan'},
               {slug:'vietnam', name:'Vietnam', note:'HCMC · Hanoi · Da Nang'},
               {slug:'thailand', name:'Thailand', note:'Bangkok · Chiang Mai · Phuket'},
+              {slug:'indonesia', name:'Indonesia', note:'Jakarta · Bali · Surabaya'},
             ]},
           ].map((group, gi) => (
             <div key={gi} style={{marginBottom:24}}>

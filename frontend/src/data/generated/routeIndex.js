@@ -57,6 +57,7 @@ const HOMESCHOOL = {
  "guatemalaCities": "guatemala-city-gt antigua-gt quetzaltenango-gt peten-gt puerto-barrios-gt",
  "hungaryCities": "budapest-hu debrecen-hu gyor-hu kecskemet-hu szeged-hu pecs-hu",
  "indiaCities": "mumbai-in delhi-ncr-in bangalore-in hyderabad-in chennai-in pune-in",
+ "indonesiaCities": "jakarta-id bali-id surabaya-id bandung-id batam-id yogyakarta-id",
  "iraqCities": "baghdad-iq basra-iq erbil-iq sulaymaniyah-iq duhok-iq",
  "irelandCities": "dublin-ie cork-ie galway-ie limerick-ie waterford-ie kildare-ie",
  "israelCities": "tel-aviv-il jerusalem-il haifa-il beer-sheva-il raanana-il",
