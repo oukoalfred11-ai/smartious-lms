@@ -343,8 +343,13 @@ export function createLabScene(container, { lowGraphics = false, onPick = null, 
     renderer.domElement.style.width = w + 'px'; renderer.domElement.style.height = h + 'px'
     camera.aspect = w / h
     camera.updateProjectionMatrix()
+    for (const fn of resizeFns) fn(w, h)
     invalidate()
   }
+  const resizeFns = new Set()
+  // Did the person move the camera themselves? (Then a resize keeps their view.)
+  let userMoved = false
+  controls.addEventListener('start', () => { userMoved = true })
   const ro = new ResizeObserver(resize); ro.observe(container)
   const onVis = () => { visible = document.visibilityState === 'visible'; if (visible) invalidate() }
   document.addEventListener('visibilitychange', onVis)
@@ -379,6 +384,7 @@ export function createLabScene(container, { lowGraphics = false, onPick = null, 
     /** Look closely at one object (fills about half the view). */
     focusOn(obj, { closeness = 1 } = {}) {
       const b = footOf(obj); if (!b) return
+      userMoved = true
       const dir = camera.position.clone().sub(controls.target).normalize()
       dir.y = Math.max(dir.y, 0.45); dir.normalize()
       const f = framing(b, dir, 2.2 * closeness)
@@ -399,6 +405,9 @@ export function createLabScene(container, { lowGraphics = false, onPick = null, 
       return { x: (p.x + 1) / 2 * w, y: (1 - p.y) / 2 * h, behind: p.z > 1 || p.z < -1 }
     },
     onRendered(fn) { renderedFns.add(fn); return () => renderedFns.delete(fn) },
+    onResize(fn) { resizeFns.add(fn); return () => resizeFns.delete(fn) },
+    get userMoved() { return userMoved },
+    set userMoved(v) { userMoved = !!v },
     get carrying() { return mode === 'carry' },
     makePickable(obj, pick) { obj.userData.pick = pick; if (!pickables.includes(obj)) pickables.push(obj) },
     setHandlers(h) { handlers = h || {} },
@@ -408,7 +417,7 @@ export function createLabScene(container, { lowGraphics = false, onPick = null, 
     remove(obj) { if (!obj) return; obj.traverse(o => this.unpick(o)); obj.parent?.remove(obj); disposeTree(obj); invalidate() },
     invalidate, animate, resetView,
     onContextLost(fn) { onLost = fn },
-    zoom(factor) { const d = camera.position.clone().sub(controls.target).multiplyScalar(factor); camera.position.copy(controls.target).add(d); controls.update(); invalidate() },
+    zoom(factor) { userMoved = true; const d = camera.position.clone().sub(controls.target).multiplyScalar(factor); camera.position.copy(controls.target).add(d); controls.update(); invalidate() },
     dispose() {
       disposed = true
       if (raf) cancelAnimationFrame(raf)

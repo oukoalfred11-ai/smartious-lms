@@ -52,8 +52,10 @@ export default function LabViewport({ experimentId, view, dispatch, editable, mo
   const [hover, setHover] = useState(null)      // what the pointer is over
   const [sel, setSel] = useState(null)          // what was last clicked (lead, pending terminal…)
   const [questTick, setQuestTick] = useState(0) // bumps when the set-up quest changes
-  const [labels, setLabelsRaw] = useState(() => pref('labels', '1') === '1')
-  const setLabels = (v) => { setLabelsRaw(v); setPref('labels', v ? '1' : '0') }
+  const [labels, setLabelsRaw] = useState(() => pref('labels2', '0') === '1')
+  const [hudOpen, setHudOpen] = useState(true)
+  const [showMethod, setShowMethod] = useState(false)
+  const setLabels = (v) => { setLabelsRaw(v); setPref('labels2', v ? '1' : '0') }
   const hoverPick = useRef(null)
   const selTimer = useRef(0)
   const def = useMemo(() => getExperiment(experimentId), [experimentId])
@@ -122,8 +124,11 @@ export default function LabViewport({ experimentId, view, dispatch, editable, mo
           else if (scene.view) { lab.camera.position.set(...scene.view.pos); lab.controls.target.set(...scene.view.target); lab.controls.update() }
         }
         frame(false)
-        lab.resetViewTo = () => frame(true)
+        lab.resetViewTo = () => { frame(true); lab.userMoved = false }
         lab.frameWork = frame
+        // The page may still be settling (fonts, panels): keep the work framed
+        // until the student moves the camera themselves.
+        lab.onResize(() => { if (!lab.userMoved) frame(false) })
         lab.onContextLost(() => { setProblem('The 3D view stopped (the graphics card was reset). Your work is safe; the 2D view is shown.'); setMode('2d') })
         labRef.current = lab; sceneRef.current = scene
         setStatus('ready')
@@ -173,7 +178,9 @@ export default function LabViewport({ experimentId, view, dispatch, editable, mo
     const place = () => {
       const want = new Set()
       const q = questRef.current && !questRef.current.done ? questRef.current : null
-      for (const o of lab.pickables) {
+      const taken = []                 // screen boxes of tags already placed: never overlap
+      const order = [...lab.pickables].sort((a, b) => (hoverPick.current === b.userData.pick) - (hoverPick.current === a.userData.pick))
+      for (const o of order) {
         const p = o.userData.pick
         if (!p || NO_TAG.has(p.kind) || !shown(o)) continue
         const isHover = hoverPick.current === p
@@ -188,6 +195,11 @@ export default function LabViewport({ experimentId, view, dispatch, editable, mo
         top.set((bx.min.x + bx.max.x) / 2, bx.max.y + 0.012, (bx.min.z + bx.max.z) / 2)
         const s = lab.project(top)
         if (s.behind || s.x < -40 || s.y < -20 || s.x > layer.clientWidth + 40 || s.y > layer.clientHeight + 20) continue
+        // A tag that would cover another is left out (hover and the target win).
+        const w = name.length * 7 + 18, h = 24
+        const r = { l: s.x - w / 2, r: s.x + w / 2, t: s.y - h, b: s.y }
+        if (!isHover && !isTarget && taken.some(k => r.l < k.r && r.r > k.l && r.t < k.b && r.b > k.t)) continue
+        taken.push(r)
         let el = els.get(o)
         if (!el) { el = document.createElement('div'); el.className = 'lab-tag'; layer.appendChild(el); els.set(o, el) }
         if (el.textContent !== name) el.textContent = name
@@ -232,7 +244,8 @@ export default function LabViewport({ experimentId, view, dispatch, editable, mo
       }
     } else {
       const g = benchGuide(def, view)
-      if (g) hud = { title: def?.title || 'Experiment', progress: g.progress, text: g.text }
+      hud = g ? { title: def?.title || 'Experiment', progress: g.progress, text: g.text }
+        : { title: def?.title || 'Experiment', text: 'Follow the method. Click apparatus to use it; every step is also in the controls panel.' }
     }
   }
 
@@ -260,19 +273,26 @@ export default function LabViewport({ experimentId, view, dispatch, editable, mo
             {status === 'loading' && <div className="lab-3d-loading">Loading the 3D laboratory…</div>}
             <div className="lab-tags" ref={tagsBox} aria-hidden="true" />
             {hud && (
-              <div className="lab-hud" role="status" aria-live="polite">
-                <div className="lab-hud-top">
+              <div className={'lab-hud' + (hudOpen ? '' : ' min')} role="status" aria-live="polite">
+                <button type="button" className="lab-hud-top" onClick={() => setHudOpen(o => !o)} aria-expanded={hudOpen} title={hudOpen ? 'Hide the instructions' : 'Show the instructions'}>
                   <span className="lab-hud-title">{hud.title}</span>
                   {hud.of ? <span className="lab-hud-step">Step {hud.step} of {hud.of}</span> : null}
-                  <span className="lab-hud-pct">{Math.round((hud.progress || 0) * 100)}%</span>
-                </div>
-                <div className="lab-hud-bar"><i style={{ width: Math.round((hud.progress || 0) * 100) + '%' }} /></div>
-                <p className="lab-hud-text">{hud.text}</p>
-                {hud.extra && <p className="lab-hud-extra">{hud.extra}</p>}
-                <div className="lab-hud-btns">
-                  {hud.show && <button type="button" className="lab-btn sm ghost" onClick={hud.show}>Show me</button>}
-                  {hud.action && <button type="button" className="lab-btn sm primary" disabled={!editable} onClick={hud.action.run}>{hud.action.label}</button>}
-                </div>
+                  {hud.progress != null && <span className="lab-hud-pct">{Math.round(hud.progress * 100)}%</span>}
+                  <span className="lab-hud-tog" aria-hidden="true">{hudOpen ? '▾' : '▸'}</span>
+                </button>
+                {hudOpen && <>
+                  {hud.progress != null && <div className="lab-hud-bar"><i style={{ width: Math.round(hud.progress * 100) + '%' }} /></div>}
+                  <p className="lab-hud-text">{hud.text}</p>
+                  {hud.extra && <p className="lab-hud-extra">{hud.extra}</p>}
+                  <div className="lab-hud-btns">
+                    {hud.show && <button type="button" className="lab-btn sm ghost" onClick={hud.show}>Show me</button>}
+                    {hud.action && <button type="button" className="lab-btn sm primary" disabled={!editable} onClick={hud.action.run}>{hud.action.label}</button>}
+                    {def?.procedure?.length > 0 && <button type="button" className="lab-btn sm ghost" aria-expanded={showMethod} onClick={() => setShowMethod(m => !m)}>{showMethod ? 'Hide method' : 'Method'}</button>}
+                  </div>
+                  {showMethod && def?.procedure?.length > 0 && (
+                    <ol className="lab-hud-method">{def.procedure.map((p, i) => <li key={i}>{p}</li>)}</ol>
+                  )}
+                </>}
               </div>
             )}
             {status === 'ready' && (hover || sel) && (
