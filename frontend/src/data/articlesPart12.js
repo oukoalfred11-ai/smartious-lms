@@ -2,7 +2,8 @@
 /**
  * articlesPart12.js: guides for Canada (the OSSD) and the USA (K-12
  * American curriculum, AP and college admission), and Wales (home education,
- * the Curriculum for Wales and exams). Researched October 2026;
+ * the Curriculum for Wales and exams) and Indonesia (sekolahrumah, Paket
+ * A/B/C and international routes). Researched October 2026;
  * each guide ends with the official sources to check. Review each term.
  */
 
@@ -178,5 +179,92 @@ export const ARTICLES_PART_12 = {
         }
     ],
     conclusion: "Home education in Wales is lawful, and a family can start straight away by writing to the school. The parts that need planning are the council's enquiries, the coming register, and above all qualifications: decide early between Made-for-Wales GCSEs and Cambridge IGCSE, and book an exam centre in good time. Smartious gives families in Wales a live, teacher-led programme with the records councils look for. Book an assessment to plan your child's route.",
+  },
+  "homeschooling-in-indonesia-sekolahrumah-paket-c": {
+    cat: "homeschool",
+    country: "indonesia",
+    featured: true,
+    img: "linear-gradient(135deg,#0A1020,#8B1A2E)",
+    splash: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&q=75",
+    t: "Homeschooling in Indonesia: Sekolahrumah, Paket A/B/C and International Curricula (2026 Guide)",
+    date: "October 2026 · 10 min read",
+    author: "Brendaliz Chelangat",
+    role: "Head of Academics",
+    metaTitle: "Homeschooling in Indonesia 2026: Sekolahrumah & Paket C | Smartious",
+    metaDesc: "Is homeschooling legal in Indonesia? Sekolahrumah registration, Paket A/B/C, penyetaraan for IGCSE and A-Level, exam centres, and options for expat families.",
+    intro: "Short answer: yes. Homeschooling is legal in Indonesia. The National Education System Law (Law No. 20/2003) recognises informal education run by the family, and a 2014 Ministry regulation on sekolahrumah sets out how family homeschools work. What makes Indonesia unusual is that it gives homeschoolers two clear routes: the Indonesian state diploma through the Paket A, B and C equivalency exams, and international qualifications such as Cambridge IGCSE and A-Level, the IB or AP. Each has consequences for university. This guide explains both, the registration step, where to sit exams, and what expatriate families in Jakarta, Bali and elsewhere should check.",
+    sections: [
+        {
+            "h": "The short answer, in five points",
+            "p": "1. Homeschooling (sekolahrumah) is lawful in Indonesia under Law No. 20/2003 and Permendikbud No. 129/2014. 2. Single-family and multi-family homeschools register with the district or city education office (Dinas Pendidikan). 3. For an Indonesian ijazah, homeschooled students sit the Paket A (primary), Paket B (lower secondary) or Paket C (upper secondary) equivalency exams, usually through a PKBM. 4. Indonesian citizens who use a foreign diploma for an Indonesian university need ijazah equivalence (penyetaraan) from the Ministry. 5. Universities abroad accept Cambridge A-Level, the IB Diploma and AP directly, subject to course requirements. Regulations change: check with your local Dinas and the Ministry before you act."
+        },
+        {
+            "h": "What the law says",
+            "p": "Law No. 20/2003 on the National Education System recognises three pathways: formal (schools), non-formal (courses, PKBMs) and informal (the family and the community). Article 27 provides that informal education is carried out by families and the environment, and that its results are recognised as equal to formal and non-formal education once the learner passes an assessment against the national education standards. Nine years of basic education are compulsory (wajib belajar), and homeschooling is a lawful way to meet that duty. Permendikbud No. 129/2014 on Sekolahrumah then sets out how homeschooling is organised. Academic reviews in 2024 and 2025 still treat these two instruments as the legal basis."
+        },
+        {
+            "h": "The three forms of sekolahrumah, and registration",
+            "p": "The regulation describes three forms. Sekolahrumah tunggal is run by one family for its own children. Sekolahrumah majemuk is run by two or more families together. Sekolahrumah komunitas is a group of majemuk homeschools with a shared programme, facilities and tutors, and operates more like an institution. Single and multi-family homeschools register with the district or city education office (Dinas Pendidikan kabupaten/kota). In practice, procedures vary by district: some offices ask for a simple form and a learning plan, others point families to a local PKBM. Ask your Dinas what it needs, keep a copy of what you submit, and keep a record of your child's learning."
+        },
+        {
+            "h": "Route one: the Indonesian ijazah through Paket A, B and C",
+            "p": "A homeschooled student who wants an Indonesian diploma takes the equivalency exams: Paket A, equivalent to primary school (SD); Paket B, equivalent to lower secondary (SMP); and Paket C, equivalent to upper secondary (SMA). Students usually enrol with a PKBM (Pusat Kegiatan Belajar Masyarakat, a community learning centre) or an SKB, which registers them for assessment against the national curriculum. In 2024 the Ministry confirmed that Paket C graduates can apply to state universities on the same footing as SMA graduates. This route suits Indonesian families who expect their child to study at an Indonesian university or to work in the civil service."
+        },
+        {
+            "h": "Route two: international qualifications",
+            "p": "Many Indonesian and expatriate homeschoolers follow an international curriculum instead: Cambridge Primary, Lower Secondary, IGCSE and A-Level; Pearson Edexcel International GCSE and A-Level; the IB Diploma; or an American high school programme with AP. These are recognised by universities in Singapore, Malaysia, Australia, the UK, Europe, the US and Canada. For an Indonesian citizen who later wants to use the qualification in Indonesia, for example at an Indonesian university, the foreign diploma needs ijazah equivalence (penyetaraan ijazah) from the Ministry. Check the current procedure and documents with the Ministry well before applications open."
+        },
+        {
+            "h": "Doing both",
+            "p": "Indonesian families who want to keep every door open often combine the two routes: an international curriculum as the main programme, with the Paket C exam taken in the final year so the student holds an Indonesian ijazah as well. This takes planning, because Paket C follows the national curriculum, including Indonesian language, Pancasila and civics, and religion, which are not part of Cambridge or IB courses. Talk to a PKBM early about timing and preparation."
+        },
+        {
+            "h": "Where to sit Cambridge and Pearson exams",
+            "p": "Homeschooled students sit international exams as private candidates. The British Council in Indonesia accepts Cambridge private candidates, and some Cambridge schools in Jakarta, Surabaya, Bandung, Bali and Batam accept them too, though not every school does and not every subject is offered. Cambridge exams run in the May/June and October/November series; Pearson Edexcel International GCSE and A-Level also run in January in some subjects. Cambridge itself does not advise private candidates, so families need to find a centre, check its deadlines and fees, and book well ahead. Science practical components and speaking tests need extra arrangements."
+        },
+        {
+            "h": "SPK and international schools",
+            "p": "Indonesia's licensed international schools are called SPK schools (Satuan Pendidikan Kerjasama, cooperation education units). Indonesian students at SPK schools also study Indonesian language, religion and civics alongside the international curriculum. Many families compare an SPK school with homeschooling: SPK schools offer a campus community and in-person activities; homeschooling with live online classes offers flexibility, no commute and a much lower cost."
+        },
+        {
+            "h": "Expatriate families",
+            "p": "Expatriate families in Jakarta, Bali and other cities commonly homeschool or use international schools. Indonesia's rules apply to education in Indonesia, but families should also check the rules of their home country, especially if they plan to return and re-enter a school system there, and the conditions of their visa or KITAS. Keep good records: a timetable, samples of work and reports make any later transfer or university application easier."
+        },
+        {
+            "h": "How Smartious works for families in Indonesia",
+            "p": "Smartious teaches live online in small classes of 4-6 students, in the Indonesian afternoon (from about 1 PM WIB; 2 PM in Bali). We teach Primary through Cambridge IGCSE and A-Level, Pearson Edexcel, the IB Diploma, the American curriculum with AP, and the Ontario OSSD through our Ontario partner school. Every student gets a timetable, marked homework after each lesson and weekly reports, which supports both registration with your Dinas and later university applications. We help plan exam entries. Smartious is not an SPK school or a PKBM; for the Indonesian ijazah, students sit Paket exams through a PKBM. Fees are from USD 423/month for Primary and vary by curriculum and level; one-to-one tuition is USD 15/hour. Admission starts with a placement assessment."
+        },
+        {
+            "h": "Sources and where to check",
+            "p": "Law No. 20/2003 on the National Education System (UU Sisdiknas), especially Article 27. Permendikbud No. 129/2014 on Sekolahrumah (JDIH Kemendikbud). Ministry guidance on pendidikan kesetaraan (Paket A, B and C) and on penyetaraan ijazah luar negeri. Cambridge International, Indonesia pages, and the British Council Indonesia exams pages for private candidate dates and fees. Regulations and procedures change: confirm with your local Dinas Pendidikan, a PKBM and the Ministry before you act."
+        }
+    ],
+    faqs: [
+        {
+            "q": "Is homeschooling legal in Indonesia?",
+            "a": "Yes. Law No. 20/2003 recognises informal education run by the family, and Permendikbud No. 129/2014 sets out homeschooling (sekolahrumah) in single-family, multi-family and community forms."
+        },
+        {
+            "q": "Do I need to register our homeschool in Indonesia?",
+            "a": "Single-family and multi-family homeschools register with the district or city education office (Dinas Pendidikan). Procedures vary by district, so ask your Dinas what it needs."
+        },
+        {
+            "q": "How does a homeschooled child get an Indonesian diploma?",
+            "a": "By passing the equivalency exams: Paket A for primary, Paket B for lower secondary and Paket C for upper secondary, usually through a PKBM. Paket C graduates can apply to Indonesian state universities like SMA graduates."
+        },
+        {
+            "q": "Can my child use IGCSE and A-Level to enter an Indonesian university?",
+            "a": "Indonesian citizens using a foreign diploma need ijazah equivalence (penyetaraan) from the Ministry. Some families also take Paket C. Universities abroad accept A-Level, the IB and AP directly."
+        },
+        {
+            "q": "Where can a homeschooled student sit IGCSE exams in Indonesia?",
+            "a": "As a private candidate through the British Council in Indonesia or a Cambridge school that accepts private candidates, in the May/June or October/November series. Book early."
+        },
+        {
+            "q": "Can expatriate families homeschool in Bali or Jakarta?",
+            "a": "Many do. Check your home country's rules if you plan to return, and your visa or KITAS conditions, and keep records of your child's learning."
+        }
+    ],
+    conclusion: "Indonesia is one of the more open countries in Asia for homeschooling, with a clear legal basis and two recognised routes: the Indonesian ijazah through Paket exams, and international qualifications for universities at home and abroad. The key decisions are which route, or both, and when to register and book exams. Smartious gives families across Indonesia live, teacher-led classes in the Indonesian afternoon, with the records and exam planning each route needs. Book an assessment to plan your child's route.",
   },
 }

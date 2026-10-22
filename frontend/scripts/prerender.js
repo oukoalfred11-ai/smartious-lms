@@ -296,6 +296,7 @@ const ROUTES_TO_PRERENDER = [
   '/online-school/japan',
   '/online-school/vietnam',
   '/online-school/thailand',
+  '/online-school/indonesia',
   '/online-school/malaysia',
   '/online-school/turkey',
   '/online-school/kuwait',
@@ -405,7 +406,7 @@ const ROUTES_TO_PRERENDER = [
    US city links each, which would blow past MAX_URLS instantly.
    US/Canada city pages fall back to SPA rendering (Google's JS
    second-pass crawl will still index them via sitemap.xml). */
-const CRAWL_FROM_HUBS_PATTERN = /^\/online-school\/(kenya|ethiopia|rwanda|south-africa|qatar|saudi-arabia|uae|egypt|morocco|south-korea|japan|vietnam|thailand|malaysia|turkey|kuwait|oman|taiwan|ireland|united-kingdom|india|germany|romania|ukraine|netherlands|spain|denmark|france|italy|poland|portugal|czech-republic|belgium|sweden|norway|new-zealand|austria|hungary|finland|greece|azerbaijan|georgia|pakistan|australia|luxembourg|switzerland|slovakia|slovenia|croatia|serbia|bulgaria|albania|north-macedonia|montenegro|bosnia-and-herzegovina|kosovo|zambia|zimbabwe|botswana|namibia|algeria|tunisia|mauritius|ghana|angola|drc|mexico|brazil|colombia|argentina|chile|peru|ecuador|panama|costa-rica|dominican-republic|uruguay|guatemala|paraguay|bolivia|venezuela|puerto-rico|israel|jordan|iraq|cyprus|lebanon|myanmar|maldives|china|bangladesh|nepal)$/
+const CRAWL_FROM_HUBS_PATTERN = /^\/online-school\/(kenya|ethiopia|rwanda|south-africa|qatar|saudi-arabia|uae|egypt|morocco|south-korea|japan|vietnam|thailand|indonesia|malaysia|turkey|kuwait|oman|taiwan|ireland|united-kingdom|india|germany|romania|ukraine|netherlands|spain|denmark|france|italy|poland|portugal|czech-republic|belgium|sweden|norway|new-zealand|austria|hungary|finland|greece|azerbaijan|georgia|pakistan|australia|luxembourg|switzerland|slovakia|slovenia|croatia|serbia|bulgaria|albania|north-macedonia|montenegro|bosnia-and-herzegovina|kosovo|zambia|zimbabwe|botswana|namibia|algeria|tunisia|mauritius|ghana|angola|drc|mexico|brazil|colombia|argentina|chile|peru|ecuador|panama|costa-rica|dominican-republic|uruguay|guatemala|paraguay|bolivia|venezuela|puerto-rico|israel|jordan|iraq|cyprus|lebanon|myanmar|maldives|china|bangladesh|nepal)$/
 const CRAWL_LINK_PATTERN = /^\/(?:homeschool-|homeschooling\/)[a-z0-9-]+$/
 
 /* ────────────────────────────────────────────────────────────────
