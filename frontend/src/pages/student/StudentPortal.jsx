@@ -3621,6 +3621,10 @@ function LiveClassesTab({ user, toast, goTo }) {
 // LiveClassCard — one card per scheduled session
 // ─────────────────────────────────────────────────────────
 function LiveClassCard({ lc, subjectColour, fmtDateTime, countdownText, canJoin, toast, goTo, muted }) {
+  const { user } = useAuth()
+  // In person for this student (same rule as backend lib/learningMode.js):
+  // an In-person student, or a lesson held at the centre. No join button.
+  const inPerson = /in.?person|physical|centre|center/i.test(user?.deliveryMode || '') || lc.deliveryMode === 'physical'
   const col = subjectColour(lc.subject)
   const isLive = lc.computedStatus === 'live'
   const isEnded = lc.computedStatus === 'ended'
@@ -3671,7 +3675,11 @@ function LiveClassCard({ lc, subjectColour, fmtDateTime, countdownText, canJoin,
       ]}
       meta={lc.preparationLessonId?.title ? `Prep: ${lc.preparationLessonId.title}` : null}
       footer={
-        isLive || canJoin?.(lc) ? (
+        inPerson && !isEnded ? (
+          <div style={{ fontSize:12, color:'var(--s500)', textAlign:'center' }}>
+            At the centre{isLive ? ' \u2014 in progress' : ''}
+          </div>
+        ) : isLive || canJoin?.(lc) ? (
           <button className="btn btn-p"
             style={{ width:'100%', justifyContent:'center', background:col, borderColor:col }}
             onClick={onJoin}>

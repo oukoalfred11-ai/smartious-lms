@@ -5,10 +5,15 @@
  *
  * Every function is fire-and-forget: it logs and never throws, so a mail
  * problem can never fail the request that triggered it.
+ *
+ * Lessons that are in person for a student (lib/learningMode.js) send that
+ * family none of these: they get tomorrow's timetable each evening instead.
  */
-const User = require('../models/User')
-const { resolveStudentRecipients } = require('./recipients')
-const { getTransporter } = require('./issueInvoice')
+// Loaded lazily, so page() can be used (and unit-tested) without a database.
+const User = { find: (...a) => require('../models/User').find(...a), findById: (...a) => require('../models/User').findById(...a) }
+const resolveStudentRecipients = (...a) => require('./recipients').resolveStudentRecipients(...a)
+const getTransporter = () => require('./issueInvoice').getTransporter()
+const { inPersonLesson } = require('./learningMode')
 
 const FROM = () => process.env.EMAIL_FROM || 'Smartious <hello@smartioushomeschool.com>'
 const ACADEMIC_TO = () => process.env.ACADEMIC_EMAIL || process.env.SCHEDULING_ALERT_EMAIL || 'academics@smartioushomeschool.com'
@@ -49,18 +54,25 @@ function page(title, lines, cta) {
 </td></tr></table></td></tr></table></body></html>`
 }
 
-/** Send one message per student to the student and their parents. */
-async function toFamilies(studentIds, build, category = 'classUpdates') {
+/**
+ * Send one message per student to the student and their parents. `cls`
+ * (one lesson) skips students for whom it is in person; `build` may also
+ * return null to skip a student.
+ */
+async function toFamilies(studentIds, build, category = 'classUpdates', cls = null) {
   const t = getTransporter()
   if (!t || !studentIds || !studentIds.length) return 0
   const students = await User.find({ _id: { $in: studentIds }, role: 'student' })
-    .select('firstName lastName email emailPrefs parentEmail linkedParents parentId parentName onBreak timezone').lean()
+    .select('firstName lastName email emailPrefs parentEmail linkedParents parentId parentName onBreak timezone deliveryMode').lean()
   let sent = 0
   for (const st of students) {
+    if (cls && inPersonLesson(cls, st)) continue
     try {
+      const msg = build(st)
+      if (!msg) continue
       const r = await resolveStudentRecipients(st, { includeStudent: true, category })
       if (!r.to.length) continue
-      const { subject, html } = build(st)
+      const { subject, html } = msg
       await t.sendMail({ from: FROM(), to: r.to.join(', '), subject, html })
       sent++
     } catch (e) { console.error('[lesson notice]', st.firstName, e.message) }
@@ -78,7 +90,7 @@ function lessonMoved(cls, oldAt) {
       `<strong>Now: ${esc(whenFor(cls.scheduledAt, st.timezone))}</strong>`,
       'The reminder will come 30 minutes before the new time.',
     ].filter(Boolean), { href: PORTAL() + '/student', label: 'Open the student portal' }),
-  })).catch(e => console.error('[lesson notice] moved', e.message))
+  }), 'classUpdates', cls).catch(e => console.error('[lesson notice] moved', e.message))
 }
 
 /** A lesson was cancelled in advance, or closed as not held. */
@@ -90,7 +102,7 @@ function lessonCancelled(cls, { reason = '', notHeld = false } = {}) {
       reason ? `Reason: ${esc(reason)}` : '',
       'If a make-up lesson is arranged you will receive its time by email.',
     ].filter(Boolean), { href: PORTAL() + '/student', label: 'Open the student portal' }),
-  })).catch(e => console.error('[lesson notice] cancelled', e.message))
+  }), 'classUpdates', cls).catch(e => console.error('[lesson notice] cancelled', e.message))
 }
 
 /** A teacher added an extra or make-up lesson. */
@@ -102,7 +114,7 @@ function lessonAdded(cls, { makeUp = false } = {}) {
       `<strong>${esc(whenFor(cls.scheduledAt, st.timezone))}</strong>, ${cls.durationMins || 60} minutes.`,
       cls.syllabusTopicName ? `Topic: ${esc(cls.syllabusTopicName)}${cls.syllabusSubtopicName ? ': ' + esc(cls.syllabusSubtopicName) : ''}` : '',
     ].filter(Boolean), { href: PORTAL() + '/student', label: 'Open the student portal' }),
-  })).catch(e => console.error('[lesson notice] added', e.message))
+  }), 'classUpdates', cls).catch(e => console.error('[lesson notice] added', e.message))
 }
 
 /**
@@ -147,8 +159,11 @@ async function teacherUnavailable({ studentId, teacher, leave, lessons }) {
   if (!t) return false
   try {
     const st = await User.findById(studentId)
-      .select('firstName lastName email emailPrefs parentEmail linkedParents parentId parentName onBreak timezone').lean()
+      .select('firstName lastName email emailPrefs parentEmail linkedParents parentId parentName onBreak timezone deliveryMode').lean()
     if (!st) return true
+    // In-person lessons are on the family's evening timetable instead.
+    lessons = (lessons || []).filter(l => !inPersonLesson(l, st))
+    if (!lessons.length) return true
     const r = await resolveStudentRecipients(st, { includeStudent: true, category: 'classUpdates' })
     if (!r.to.length) return true
     const tName = teacher ? `${teacher.firstName} ${teacher.lastName || ''}`.trim() : 'Your teacher'
@@ -177,7 +192,8 @@ function lessonsRestored(lessons) {
     const k = String(sid); if (!byStudent.has(k)) byStudent.set(k, []); byStudent.get(k).push(l)
   }
   return toFamilies([...byStudent.keys()], (st) => {
-    const mine = byStudent.get(String(st._id)) || []
+    const mine = (byStudent.get(String(st._id)) || []).filter(l => !inPersonLesson(l, st))
+    if (!mine.length) return null
     return {
       subject: `Lessons back on — ${mine.map(subjectOf).filter((x, i, a) => a.indexOf(x) === i).join(', ')}`,
       html: page('Lessons are back on', [
@@ -189,4 +205,4 @@ function lessonsRestored(lessons) {
   })
 }
 
-module.exports = { lessonMoved, lessonCancelled, lessonAdded, absenceAlert, academicAlert, teacherUnavailable, lessonsRestored, when, whenFor }
+module.exports = { lessonMoved, lessonCancelled, lessonAdded, absenceAlert, academicAlert, teacherUnavailable, lessonsRestored, when, whenFor, page }

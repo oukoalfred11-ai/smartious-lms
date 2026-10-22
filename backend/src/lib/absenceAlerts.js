@@ -7,11 +7,15 @@
  * (absenceAlerted), so nobody is told twice. When a student has now
  * missed two lessons in a row (and again at four), the academic office
  * is told, so a week of silent absences cannot happen.
+ *
+ * In-person lessons (lib/learningMode.js) are skipped: those students never
+ * join online, and the Dean keeps their register (routes/centre-register.js).
  */
 const LiveClass = require('../models/LiveClass')
 const ClassroomSession = require('../models/ClassroomSession')
 const { absenceAlertDue, absentStudents, ABSENCE_ALERT_AFTER_MIN } = require('./scheduling')
 const notices = require('./lessonNotices')
+const { inPersonLesson } = require('./learningMode')
 
 async function pausedIds(ids, now) {
   if (!ids.length) return []
@@ -29,6 +33,7 @@ async function missStreak(studentId, uptoClass) {
   const recent = await LiveClass.find({
     assignedStudents: studentId, kind: { $in: ['lesson', null] },
     status: { $ne: 'cancelled' }, outcome: { $ne: 'not_held' }, classroomMode: { $ne: 'link' },
+    deliveryMode: { $ne: 'physical' },   // centre lessons are never joined online
     scheduledAt: { $lte: uptoClass.scheduledAt },
   }).sort({ scheduledAt: -1 }).limit(6).select('_id').lean()
   if (!recent.length) return 0
@@ -48,7 +53,7 @@ async function runAbsenceAlerts(now = new Date()) {
     classroomMode: { $ne: 'link' },
     status: { $in: ['scheduled', 'live'] },
     scheduledAt: { $gte: new Date(now.getTime() - 40 * 60000), $lte: new Date(now.getTime() - ABSENCE_ALERT_AFTER_MIN * 60000) },
-  }).populate('assignedStudents', 'firstName lastName email emailPrefs parentEmail linkedParents parentId parentName onBreak timezone')
+  }).populate('assignedStudents', 'firstName lastName email emailPrefs parentEmail linkedParents parentId parentName onBreak timezone deliveryMode')
     .populate('teacherId', 'firstName lastName').lean()
 
   let sent = 0
@@ -58,6 +63,7 @@ async function runAbsenceAlerts(now = new Date()) {
     const joinedIds = await ClassroomSession.distinct('userId', { liveClassId: cls._id, joinCount: { $gt: 0 } })
     const absent = absentStudents(cls, { joinedIds, pausedIds: await pausedIds(ids, now) })
     for (const st of absent) {
+      if (inPersonLesson(cls, st)) continue
       const ok = await notices.absenceAlert(cls, st)
       if (!ok) continue
       sent++

@@ -19,11 +19,17 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['Homeschool', 'Tuition', 'IUFP', 'Study Abroad', 'Pre-University'],
   },
-  // Delivery mode for the programme.
+  // How the student learns (lib/learningMode.js): Virtual = online,
+  // In-person = at a centre (records only, no online-lesson emails),
+  // Hybrid = per lesson (LiveClass.deliveryMode).
   deliveryMode: {
     type: String,
-    enum: ['Virtual', 'In-person'],
+    enum: ['Virtual', 'In-person', 'Hybrid'],
   },
+  // The Nairobi day (YYYY-MM-DD) whose timetable was last emailed to an
+  // In-person / Hybrid family (lib/dailyTimetable.js), so a restart never
+  // sends it twice.
+  timetableEmailedFor: { type: String, default: '' },
 
   // Student enrollment fields (only relevant when role === 'student')
   // - curriculum: string for students (one curriculum), array for teachers (multi-curriculum)

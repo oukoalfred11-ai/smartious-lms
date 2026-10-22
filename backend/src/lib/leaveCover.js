@@ -81,7 +81,7 @@ async function applyLeaveCover(now = new Date()) {
  */
 async function notifyFamilies(leave) {
   const missed = await LC().find({ coverLeaveId: leave._id, leaveMissed: true, status: 'cancelled' })
-    .sort({ scheduledAt: 1 }).select('assignedStudents subject title scheduledAt').lean()
+    .sort({ scheduledAt: 1 }).select('assignedStudents subject title scheduledAt deliveryMode').lean()
   const done = new Set((leave.familiesNotified || []).map(String))
   const byStudent = new Map()
   for (const lc of missed) {
