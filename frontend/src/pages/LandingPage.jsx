@@ -24246,7 +24246,7 @@ function Footer({ P }) {
           <div>
             <div className="ft-ch">Services</div>
             <ul className="ft-lk">
-              {[['/services/homeschool-at-home','Homeschool at Home'],['/services/learning-centre','Learning Centre Nairobi'],['/services/virtual-school','Virtual School'],['/tuition-nairobi','Tuition Nairobi'],['/services/mshauri-ai','Mshauri AI Tutor'],['/iufp','IUFP Programme'],['/study-abroad','Study Abroad'],['/pricing','Fees']].map(([path, l]) => <li key={l}><a {...go(path, () => footerNav(path))}>{l}</a></li>)}
+              {[['/services/homeschool-at-home','Homeschool at Home'],['/services/learning-centre','Learning Centre Nairobi'],['/services/virtual-classroom','Our Virtual Classroom'],['/services/virtual-school','Virtual School'],['/tuition-nairobi','Tuition Nairobi'],['/services/mshauri-ai','Mshauri AI Tutor'],['/iufp','IUFP Programme'],['/study-abroad','Study Abroad'],['/pricing','Fees']].map(([path, l]) => <li key={l}><a {...go(path, () => footerNav(path))}>{l}</a></li>)}
             </ul>
           </div>
           <div>

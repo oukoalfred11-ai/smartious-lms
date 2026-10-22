@@ -75,6 +75,7 @@ function publicRoster(room) {
     micOn: p.micOn !== false,
     camOn: p.camOn !== false,
     sharing: !!p.sharing,
+    saver: !!p.saver,
   }));  // activeSince is intentionally excluded
 }
 
@@ -288,7 +289,7 @@ function attachClassroom(httpServer, allowedOrigins) {
       nsp.to(socket.data.roomId).emit('chat:msg', msg);
     });
 
-    // ── Presence state: hand, mic, cam ───────────────────────
+    // ── Presence state: hand, mic, cam, screen share, data saver ──
     socket.on('state', (patch = {}) => {
       const room = rooms.get(socket.data.roomId);
       if (!room) return;
@@ -298,8 +299,10 @@ function attachClassroom(httpServer, allowedOrigins) {
       if (typeof patch.micOn === 'boolean') peer.micOn = patch.micOn;
       if (typeof patch.camOn === 'boolean') peer.camOn = patch.camOn;
       if (typeof patch.sharing === 'boolean') peer.sharing = patch.sharing;
+      // Data saver: peers send this person less video (see classroom/rtc.js).
+      if (typeof patch.saver === 'boolean') peer.saver = patch.saver;
       nsp.to(socket.data.roomId).emit('peer:state', {
-        socketId: socket.id, hand: peer.hand, micOn: peer.micOn, camOn: peer.camOn, sharing: !!peer.sharing,
+        socketId: socket.id, hand: peer.hand, micOn: peer.micOn, camOn: peer.camOn, sharing: !!peer.sharing, saver: !!peer.saver,
       });
     });
 
