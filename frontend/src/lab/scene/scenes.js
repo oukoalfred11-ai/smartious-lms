@@ -81,6 +81,21 @@ function ohms(lab, { dispatch, onSelect, onHover }) {
       lab.invalidate()
     },
     view: { pos: [0, 1.5, 0.8], target: [0, 0.94, 0] },
+    setup: () => ({
+      bench: { minX: -1.08, maxX: 1.08, minZ: -0.44, maxZ: 0.43 },
+      items: [
+        { key: 'dc_supply', name: 'variable d.c. power supply', objects: [ps] },
+        { key: 'switch', name: 'switch', objects: [sw] },
+        { key: 'ammeter', name: 'ammeter', objects: [am] },
+        { key: 'voltmeter', name: 'voltmeter', objects: [vm] },
+        { key: 'resistor', name: 'resistor of unknown resistance', objects: [rb] },
+      ],
+      distractors: [
+        { key: 'thermometer', name: 'The thermometer', object: buildModel('thermometer') },
+        { key: 'stopwatch', name: 'The stopwatch', object: buildModel('stopwatch') },
+        { key: 'bar_magnet', name: 'The bar magnet', object: buildModel('bar_magnet') },
+      ],
+    }),
   }
 }
 
@@ -123,12 +138,12 @@ function osmosis(lab, { dispatch, onSelect }) {
   const menu = (label, actions) => onSelect({ kind: 'menu', label, actions })
   const reduced = typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
   const rk = E.rack(6, SP); rk.position.set(-0.12, BENCH_Y, -0.04); lab.add(rk)
-  const tubes = [], cyls = []
+  const tubes = [], cyls = [], tubeTags = []
   const concs = ['0.0', '0.2', '0.4', '0.6', '0.8', '1.0']
   for (let i = 0; i < 6; i++) {
     const x = -0.12 + (i - 2.5) * SP
     const t = E.boilingTube(); t.position.set(x, BENCH_Y + 0.01, -0.04); lab.add(t, { pick: { kind: 'tube', index: i } }); tubes.push(t)
-    const tag = E.labelPlane(concs[i] + ' M', { w: 0.045, h: 0.018, size: 34 }); tag.position.set(x, BENCH_Y + 0.07, -0.012); lab.add(tag)
+    const tag = E.labelPlane(concs[i] + ' M', { w: 0.045, h: 0.018, size: 34 }); tag.position.set(x, BENCH_Y + 0.07, -0.012); lab.add(tag); tubeTags.push(tag)
     const c = E.potatoCylinder(); lab.add(c, { pick: { kind: 'cyl', index: i } }); cyls.push(c)
   }
   const towel = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.002, 0.08), new THREE.MeshStandardMaterial({ color: '#FAFAF5', roughness: 1 })); towel.position.set(-0.12, BENCH_Y + 0.001, 0.12); lab.add(towel, { pick: { kind: 'towel' } })
@@ -254,6 +269,27 @@ function osmosis(lab, { dispatch, onSelect }) {
       lab.invalidate()
     },
     view: { pos: [0.05, 1.3, 0.7], target: [0.02, 0.98, 0] },
+    /** Set-up quest (setupQuest.js): what the student fetches, and what they should leave. */
+    setup: () => ({
+      bench: { minX: -1.08, maxX: 1.08, minZ: -0.44, maxZ: 0.43 },
+      items: [
+        { key: 'balance', name: 'electronic balance and weighing boat', objects: [bal, boat] },
+        { key: 'tube_rack', name: 'rack of six labelled boiling tubes of sucrose solution', kind: 'reagent', objects: [rk, ...tubes, ...tubeTags] },
+        { key: 'potato', name: 'potato and cork borer', objects: [pb] },
+        { key: 'white_tile', name: 'white tile', objects: [tile] },
+        { key: 'ruler', name: '30 cm ruler', objects: [ruler] },
+        { key: 'scalpel', name: 'scalpel', objects: [knife] },
+        { key: 'towel', name: 'paper towel', objects: [towel] },
+        { key: 'lab_clock', name: 'lab clock', objects: [clockStand, clock] },
+      ],
+      distractors: [
+        { key: 'thermometer', name: 'The thermometer', object: buildModel('thermometer') },
+        { key: 'measuring_cylinder', name: 'The measuring cylinder', object: buildModel('measuring_cylinder') },
+        { key: 'tongs', name: 'The tongs', object: buildModel('tongs') },
+        { key: 'iodine', name: 'Iodine solution', kind: 'reagent', object: E.bottle('Iodine\nsolution', '#5D4037') },
+        { key: 'benedicts', name: 'Benedict’s reagent', kind: 'reagent', object: E.bottle('Benedict’s\nreagent', '#1F5FAF') },
+      ],
+    }),
   }
 }
 

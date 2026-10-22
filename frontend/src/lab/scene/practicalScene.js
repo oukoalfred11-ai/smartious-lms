@@ -26,6 +26,7 @@ import * as E from './equipment.js'
 import { buildModel, footprint, plate, wrapText, LCD } from './apparatus3d.js'
 import { apparatusName } from '../../../../shared/lab/apparatus.js'
 import { createWiring, wirePart } from './wiring.js'
+import { addLabRoom } from './labRoom.js'
 
 const { BENCH_Y } = E
 const DEPTH = 0.9
@@ -99,6 +100,7 @@ export function buildPracticalScene(lab, { def, dispatch, onSelect, onHover = ()
   let W = 2.4
   while (W < 4.4 && packRows(stock, foot, W - 0.3).length > 3) W += 0.2
   lab.add(E.bench({ width: W, depth: DEPTH }))
+  addLabRoom(lab, { width: W, depth: DEPTH })     // the school laboratory around the bench
   const wallZ = -DEPTH / 2 - 0.25
 
   let objects = []                 // everything added for the current layout
@@ -115,6 +117,7 @@ export function buildPracticalScene(lab, { def, dispatch, onSelect, onHover = ()
   // Hands-on bench state (view.bench === 2).
   let lastView = null, hands = null
   let extrasBuilt = false, goggles = null, statusCard = null, statusText = ''
+  let materials = [], tareCards = {}           // for the set-up quest
   let timerStartedAt = null, animating = false, lastTick = ''
   const timedKey = (P.measures || []).find(m => m.instrument === 'stopwatch')?.key || null
 
@@ -124,6 +127,7 @@ export function buildPracticalScene(lab, { def, dispatch, onSelect, onHover = ()
     for (const o of objects) lab.remove(o)
     objects = []; placed = []; displays = {}; shown = {}; ivCard = null; ivText = ''; chain = []; hangAt = null; lastLevel = null
     extrasBuilt = false; goggles = null; statusCard = null; statusText = ''
+    materials = []; tareCards = {}
   }
 
   /** Put a model into a wrapper so its footprint centre is at (x, y, z). */
@@ -262,7 +266,8 @@ export function buildPracticalScene(lab, { def, dispatch, onSelect, onHover = ()
     list.forEach((name, i) => {
       const b = E.bottle(wrapText(name, 14, 2), caps[i % caps.length])
       b.position.set(-((list.length - 1) * step) / 2 + i * step, BENCH_Y, -DEPTH / 2 + 0.08)
-      add(b, { kind: 'material', label: name })
+      add(b, { kind: 'material', label: name, name })
+      materials.push({ name, b })
     })
   }
 
@@ -315,6 +320,7 @@ export function buildPracticalScene(lab, { def, dispatch, onSelect, onHover = ()
       const card = tentCard('TARE', 0.05, 0.022, { bg: '#C62828', fg: '#FFFFFF' })
       card.position.set(at.wrap.position.x + 0.09, BENCH_Y, at.wrap.position.z + 0.12)
       add(card, { kind: 'tare', id, label: 'TARE: zero the balance with the pan empty' })
+      tareCards[id] = card
     }
   }
 
@@ -459,6 +465,23 @@ export function buildPracticalScene(lab, { def, dispatch, onSelect, onHover = ()
       lab.invalidate()
     },
     dispose() { clear() },
+    /** Set-up quest (setupQuest.js): the collected apparatus is fetched from the
+     *  cupboard, the materials from the reagent rack; stockroom extras are the
+     *  things to leave behind. Not used when students choose from the stockroom. */
+    setup: () => {
+      if (!placed.length) return null
+      const seen = {}
+      const items = placed.map(({ id, wrap }) => {
+        const n = seen[id] = (seen[id] || 0) + 1
+        return { key: n > 1 ? id + '_' + n : id, name: apparatusName(id).toLowerCase(), objects: [wrap, ...(tareCards[id] && n === 1 ? [tareCards[id]] : [])] }
+      })
+      if (goggles && !placed.some(p => p.id === 'goggles')) items.push({ key: 'goggles', name: 'safety goggles', objects: [goggles] })
+      materials.forEach(({ name, b }, i) => items.push({ key: 'material_' + i, name: name.toLowerCase(), kind: 'reagent', objects: [b] }))
+      const have = new Set(placed.map(p => p.id))
+      const distractors = stock.filter(id => !have.has(id)).slice(0, 4)
+        .map(id => ({ key: id, name: 'The ' + apparatusName(id).toLowerCase(), object: buildModel(id) }))
+      return { bench: { minX: -W / 2 + 0.05, maxX: W / 2 - 0.05, minZ: -DEPTH / 2 + 0.01, maxZ: DEPTH / 2 - 0.02 }, items, distractors }
+    },
     view: { pos: [0, BENCH_Y + 0.72, 0.7 + 0.5 * W], target: [0, BENCH_Y + 0.12, -0.05] },
   }
 }

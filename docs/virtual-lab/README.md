@@ -41,6 +41,20 @@ The **lab coach** checks what an examiner would: headings and units, consistent 
 
 Code: `shared/lab/analysis.js` (formula parser, table, lines, checks, input cleaning; tested in `test/analysis.test.js`), `frontend/src/lab/analysis/*` (ResultsTable, GraphCanvas, GraphStudio, Working, Coach, Report), `frontend/src/lab/Workspace.jsx` (steps). Saved as `analysis` on the session (`applySave` cleans it); bench tables mark their calculated columns with `derived` so copying leaves those to the student.
 
+## Set up your bench (3D, every new attempt)
+
+A new attempt in 3D starts like a game: the bench is empty, the apparatus is in a **glass-fronted cupboard** at the back of the bench and the reagents stand on a **reagent rack**, with things the practical does not need among them (for titration: a measuring cylinder, a 100 cm³ flask, a thermometer, ethanol and a salt solution).
+
+- A **step panel** (top left of the bench) says what to do next, with progress, "Step 3 of 18", and a **Show me** button that flies the camera to it; a gold ring pulses under it.
+- The student opens the cupboard (click its glass doors) and **carries** each item to the bench: press and drag it (it is lifted, a ring shows where it will land), or tap it and choose *Put it on the bench*. A needed item glides to its place and the real apparatus appears there; an item that is not needed is put back with a message, and the panel counts the mistakes.
+- **Name tags** float over the apparatus as crisp text: the item under the pointer and the next one to fetch during set-up, and every item afterwards (the *Labels* switch turns them off). Double-click anything to look closer; *Whole bench* returns.
+- The camera stands at the bench and frames the work (the cupboard and rack during set-up, the bench top afterwards), so the apparatus fills the view; the bench is full width (panels beside it only on screens wider than 1500 px). The physics benches now stand in the school laboratory room too.
+- *Start the practical* closes the set-up; then the panel shows the next step of the practical itself (the same advice as the controls panel's *Next*, and a simple guide for the physics practicals).
+
+Each fetch, each wrong item and the finish are saved as engine actions (`setUp`, generic in `shared/lab/engine.js`), so a reload resumes the set-up, the server replays it, and `view.setup` holds `{ fetched, wrong, done }` for the teacher. It changes nothing else: marks are unchanged (`test/setUp.test.js`). The set-up runs only for new attempts in 3D; doing any other bench step (for example from the controls panel or the 2D view) skips it and lays the bench out as before. Older sessions are unaffected.
+
+Code: `frontend/src/lab/scene/setupQuest.js` (cupboard, rack, carrying, snapping into place), `engine3d.js` (carrying objects with `pick.move`, `focusOn`, `fitTo`, rings, `project` for tags), `LabViewport.jsx` (quest, step panel, tags), `benchGuide.js` (next step and progress). Each scene lists what is fetched in `setup()`: `titrationScene.js`, `scenes.js` (osmosis, Ohm's law), `practicalScene.js` (the collected apparatus; stockroom extras as distractors; not used when students choose from the stockroom). Real items waiting in the cupboard are on render layer 1, so they are neither drawn nor clickable and the scene's own logic is untouched.
+
 ## Hands-on bench
 
 - **Apparatus on the bench.** Every practical starts with its apparatus laid out, and listed reagents appear as labelled bottles. A teacher can tick "Students choose the apparatus themselves from the stockroom" when assigning; the apparatus choice is then marked.

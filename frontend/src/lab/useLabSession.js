@@ -209,6 +209,8 @@ export default function useLabSession({ experimentId, assignmentId = null, sessi
 
   return {
     def, session, params, state, view, notebook, answers, analysis: analysis || emptyAnalysis(), editable,
+    // Nothing but bench set-up so far (or nothing at all): the 3D set-up quest may run.
+    onlySetup: actions.every(a => a.type === 'setUp'),
     save, saveNow, loadError, actionError, clearActionError: () => setActionError(null),
     dispatch, undo, canUndo, updateNotebook, updateAnswer, updateAnalysis, reset, submit,
     restorable, restoreBackup, discardBackup,

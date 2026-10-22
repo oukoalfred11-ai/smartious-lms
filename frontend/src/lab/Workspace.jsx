@@ -168,7 +168,7 @@ export default function Workspace({ experimentId, assignmentId, sessionId }) {
       {STEPS[cur][0] === 'experiment' && (
         <div className="lab-grid">
           <LabViewport experimentId={def.id} view={view} dispatch={lab.dispatch} editable={editable}
-            mode={mode} setMode={setMode} lowGraphics={low} setLowGraphics={setLow} />
+            mode={mode} setMode={setMode} lowGraphics={low} setLowGraphics={setLow} onlySetup={lab.onlySetup} />
           <aside className="lab-side">
             <div className="lab-tabs" role="tablist" aria-label="Bench panels">
               {[['controls', 'Controls'], ['record', 'Bench record'], ['observations', 'Observations'], ['instructions', 'Method']].map(([k, label]) => (
