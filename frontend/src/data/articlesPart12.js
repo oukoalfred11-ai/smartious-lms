@@ -1,7 +1,8 @@
 /* eslint-disable */
 /**
  * articlesPart12.js: guides for Canada (the OSSD) and the USA (K-12
- * American curriculum, AP and college admission). Researched October 2026;
+ * American curriculum, AP and college admission), and Wales (home education,
+ * the Curriculum for Wales and exams). Researched October 2026;
  * each guide ends with the official sources to check. Review each term.
  */
 
@@ -90,5 +91,92 @@ export const ARTICLES_PART_12 = {
     sections: [{"h": "The short answer", "p": "1. AP exams: contact the AP coordinator at a local school or authorised test centre in the autumn and ask to test as an outside student; families cannot order exams directly from College Board. 2. A course labelled AP is not required to sit an AP exam. 3. The transcript lists courses by year with grades, credits and a GPA, with course descriptions for advanced courses. 4. On the Common App, a homeschool applicant selects the homeschool option and invites a parent as counselor to submit the school report, transcript, profile and counselor recommendation. 5. Student-athletes register with the NCAA Eligibility Center early and document core courses."}, {"h": "Step 1: Register for AP exams in the autumn", "p": "AP exams are held in May, but places for outside students are arranged months earlier. In September or October, contact AP coordinators at nearby public or private schools, or authorised test centres, and ask whether they accept homeschooled students. The school orders the exams on the student's behalf and may add an administration fee to the College Board exam fee (around US$100 per exam in the US; more outside the US). Students needing accommodations must apply through College Board in advance. On test day students bring photo ID; many AP exams are now taken in College Board's Bluebook app."}, {"h": "Step 2: Choose AP subjects that match the plan", "p": "Choose AP subjects for what they show and what they may earn: strength in the intended major, breadth across subjects, and possible college credit for scores of 3, 4 or 5 (each college sets its own policy). A course can be called AP on a transcript only if it has passed the College Board AP Course Audit, so online schools with audited courses can list them as AP; otherwise list the course under its own name and report the exam score."}, {"h": "Step 3: Build a transcript colleges trust", "p": "List each course by school year with the grade, the credit (usually 0.5 or 1 per course) and a cumulative GPA, and state the grading scale. Add course descriptions for advanced or unusual courses: the textbook or programme, the topics covered and how work was assessed. External evidence makes a homeschool transcript stronger: AP scores, SAT or ACT scores where used, dual-enrollment college courses and grades from an online school."}, {"h": "Step 4: Apply on the Common App as a homeschool student", "p": "In the Education section the student selects the homeschool option and invites a parent as counselor through the Recommenders section. The parent then submits the school report, a one-page school profile describing the home education programme, the transcript, course descriptions and a counselor recommendation. Homeschool applicants report a class size of one and no class rank. The same parent account sends the mid-year report (first-semester senior grades) and the final report after graduation. Students enrolled in an online school may instead have that school's counselor complete these forms; ask the school which applies."}, {"h": "Step 5: Student-athletes and the NCAA", "p": "Homeschooled student-athletes aiming for NCAA Division I or II register with the NCAA Eligibility Center, ideally by Grade 10. Core courses must be college-preparatory in English, mathematics (Algebra I or higher), natural or physical science, social science, world language, and comparative religion or philosophy, and are recorded on the homeschool transcript with grade and credit. College courses taken through dual enrollment must be marked as such on the transcript and sent separately by the college. Division I expects 16 core courses completed within eight semesters of starting Grade 9. Check current rules on test scores and documentation directly with the Eligibility Center, as guidance has changed."}, {"h": "A timeline that works", "p": "Grade 9 and 10: plan the four-year course map; start a transcript and course descriptions; athletes register with the NCAA. Grade 10 and 11 (September to November): arrange AP exam places. Grade 11: SAT or ACT if the target colleges use them; shortlist colleges. Summer before Grade 12: draft essays; prepare the school profile. Grade 12 (autumn): submit applications with the parent counselor forms. Grade 12 (January to February): mid-year report. After graduation: final report and final transcript."}, {"h": "Sources and where to check", "p": "College Board, AP for homeschooled students and AP Course Audit (apcentral.collegeboard.org; apstudents.collegeboard.org). Common App, homeschool applicant and counselor guidance (commonapp.org). NCAA Eligibility Center, home school students and the home school toolkit (ncaa.org). Fees, deadlines and NCAA rules change each year; confirm on the official pages."}],
     faqs: [{"q": "Can homeschoolers take AP exams?", "a": "Yes. They register through the AP coordinator of a school or authorised test centre that accepts outside students. Contact schools in the autumn; families cannot order AP exams directly from College Board."}, {"q": "Do you need to take an AP class to sit an AP exam?", "a": "No. Any student can sit an AP exam. A course can be labelled AP on a transcript only if it passed the College Board AP Course Audit; otherwise list it by its own name and report the score."}, {"q": "Who is the counselor for a homeschool student on the Common App?", "a": "Usually a parent. The student selects the homeschool option and invites the parent as counselor, who submits the school report, school profile, transcript, course descriptions and recommendation."}, {"q": "Do colleges accept homeschool transcripts?", "a": "Yes. Colleges admit homeschooled students every year. A clear transcript with grades, credits, GPA and course descriptions, supported by external evidence such as AP scores, makes the application stronger."}, {"q": "How do homeschooled athletes become NCAA eligible?", "a": "Register with the NCAA Eligibility Center early, document college-preparatory core courses on the transcript with grades and credits, and send any dual-enrollment college transcripts. Confirm current requirements with the Eligibility Center."}],
     conclusion: "AP exams and selective college admission are fully open to homeschooled and online students; they simply need planning a few months earlier than in a traditional school. Book AP places in the autumn, keep a clear transcript with course descriptions, and decide early who will act as counselor. Smartious teaches the American curriculum with AP live in US time zones and prepares the documents colleges ask for. Book an assessment to plan your child's route to AP and college.",
+  },
+  "homeschooling-in-wales-law-curriculum-exams": {
+    cat: "homeschool",
+    country: "united-kingdom",
+    featured: true,
+    img: "linear-gradient(135deg,#0A1020,#8B1A2E)",
+    splash: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&q=75",
+    t: "Homeschooling in Wales: The Law, the Curriculum for Wales and Exams (2026 Guide)",
+    date: "October 2026 · 10 min read",
+    author: "Brendaliz Chelangat",
+    role: "Head of Academics",
+    metaTitle: "Homeschooling in Wales 2026: Law, Curriculum & Exams | Smartious",
+    metaDesc: "Is homeschooling legal in Wales? How to deregister, what the council can ask, the Curriculum for Wales, Made-for-Wales GCSEs, IGCSEs and the 2026 Act.",
+    intro: "Short answer: yes. Home education is lawful in Wales. Under section 7 of the Education Act 1996, which applies in both England and Wales, parents must make sure their child receives a suitable full-time education \"either by regular attendance at school or otherwise\". You do not need permission to start if your child is at a mainstream school; you tell the school in writing and it takes your child off the roll. What makes Wales different from England is everything around that law: its own statutory guidance for councils, its own Curriculum for Wales, its own exams regulator and new Made-for-Wales GCSEs, and a register of children not in school arriving on a timetable set by the Welsh Ministers. This guide covers each one, and how families in Cardiff, Swansea, Newport, Wrexham and the rest of Wales plan qualifications.",
+    sections: [
+        {
+            "h": "The short answer, in five points",
+            "p": "1. Home education is lawful in Wales under section 7 of the Education Act 1996. 2. A child at a mainstream school is deregistered when the parent tells the school in writing; a child at a special school placed by the local authority needs the authority's consent. 3. Councils follow the Welsh Government's statutory elective home education guidance (2023) and may make enquiries to check the education is suitable. 4. The Curriculum for Wales and Made-for-Wales GCSEs apply to state-funded schools; home-educating families choose their own curriculum and qualifications, including Cambridge IGCSE and A-Level. 5. The Children's Wellbeing and Schools Act 2026 brings a children-not-in-school register to England and Wales, but in Wales it starts on a date set by the Welsh Ministers. Check its status before you rely on any summary, including this one."
+        },
+        {
+            "h": "How to take your child out of school in Wales",
+            "p": "If your child attends a mainstream school, write to the headteacher to say you are educating your child at home and ask for their name to be removed from the admission register. Under the Education (Pupil Registration) (Wales) Regulations 2010, the school removes the name and informs the local authority. Keep a copy of your letter. If your child attends a special school under arrangements made by the local authority, you need the authority's consent before the name can be removed. If your child has never been to school, there is nothing to deregister, though many councils invite families to let them know. Flexi-schooling (part school, part home) needs the headteacher's agreement."
+        },
+        {
+            "h": "What the council can ask, and what \"suitable\" means",
+            "p": "Under section 436A of the Education Act 1996, councils must make arrangements to identify children of compulsory school age who are not receiving a suitable education. The Welsh Government's statutory guidance (2023) tells them how to approach home-educating families, including an offer to meet at least once a year. There is no fixed national curriculum for home education: a suitable education is generally understood as one that prepares the child for life in modern society and lets them reach their potential, and full-time is judged by what the child actually receives. In practice, councils respond well to a clear plan: the subjects your child studies, roughly how many hours, how progress is checked, and samples of work. A structured online programme with a timetable, marked homework and termly reports makes that straightforward. An independent evaluation of the guidance, published in January 2026, found councils still struggle to identify every child they are responsible for, which is part of why the register is coming."
+        },
+        {
+            "h": "The Children's Wellbeing and Schools Act 2026: what changes",
+            "p": "The Act received Royal Assent in April 2026. Its children-not-in-school provisions require local authorities to keep a register of children who are not in school, require parents to provide information for it, and give councils a duty to offer advice and support. The Senedd agreed in March 2026 that these provisions should apply in Wales, and the Welsh Government has said the commencement in Wales is for the Welsh Ministers, with changes to the Welsh pupil registration regulations to follow. At the time of writing they were not yet in force. The right to home educate remains. If you home educate in Wales, follow the Welsh Government's page on the Act for the start date and what you will be asked to provide."
+        },
+        {
+            "h": "The Curriculum for Wales and Made-for-Wales GCSEs",
+            "p": "State-funded schools in Wales have moved to the Curriculum for Wales, introduced from September 2022 and rolled out year by year. Qualifications follow it: WJEC, the main exam board in Wales, is introducing new Made-for-Wales GCSEs approved by Qualifications Wales, with the first wave (including English, Cymraeg, Mathematics and Numeracy, Geography, French, German, Spanish, Music, Drama and Religious Studies) taught from September 2025, and more subjects, such as History, from September 2026. Welsh state schools no longer offer the separate English-board GCSEs. None of this binds a home-educating family. You may follow the Curriculum for Wales at home if it suits you, but you are free to choose a different curriculum and different qualifications."
+        },
+        {
+            "h": "Which qualifications should a home-educated student in Wales take?",
+            "p": "Most home-educating families in Wales choose one of three routes. Made-for-Wales GCSEs (WJEC) suit a child who may return to a Welsh school or college, but some subjects include non-exam assessment that a private candidate may find hard to arrange. Cambridge IGCSE or Pearson Edexcel International GCSE suit families who want exam-only assessment, a course that does not change if the family moves to England or abroad, and a natural path to A-Level. Cambridge or Edexcel A-Levels are accepted by UK universities through UCAS, including Cardiff, Swansea, Aberystwyth and Bangor, and by universities worldwide. The Welsh Government has confirmed that home-educated learners are not limited to Made-for-Wales GCSEs and can choose the qualifications that best suit their needs. Whichever route you pick, check the entry requirements of the college or university your child is aiming for."
+        },
+        {
+            "h": "Where to sit exams as a private candidate",
+            "p": "A home-educated student sits exams as a private candidate at an exam centre that accepts them, and pays the entry fees. Centres in Wales mostly enter candidates for WJEC; for Cambridge or Edexcel international qualifications you may need a centre that offers that board, which for some families means a centre in England (Bristol, Gloucester, Chester or Shrewsbury, for example). Some independent schools in Wales accept external candidates. The Welsh Government's advice is to contact your local authority's home education officer, who can tell you how your council handles private candidates and whether any support is available. Book early: many centres close entries for the summer series in the preceding winter, and practical science or speaking components need extra arrangements."
+        },
+        {
+            "h": "Additional learning needs (ALN)",
+            "p": "Wales has its own system for additional learning needs under the Additional Learning Needs and Education Tribunal (Wales) Act 2018, which replaced the old SEN statements with individual development plans (IDPs). If your child has an IDP maintained by the local authority, talk to the authority before deregistering, especially if the plan names a special school, where consent is needed. Many families of children with anxiety, autism or a long-term illness find a small live class at home works better than a large school, and exam access arrangements can still be requested through the exam centre."
+        },
+        {
+            "h": "Welsh language",
+            "p": "Welsh is compulsory up to 16 in Welsh state schools, and many families value it highly. A home-educating family decides for itself whether and how to continue Welsh. Smartious teaches in English; families who want Welsh to continue often keep it alongside our programme through Welsh-medium clubs, Urdd activities or a Welsh tutor, and a GCSE Cymraeg can be sat as a private candidate."
+        },
+        {
+            "h": "How Smartious works for families in Wales",
+            "p": "Smartious teaches live online in small classes of 4-6 students, during the UK school day (GMT/BST), from Primary through Cambridge IGCSE and A-Level, the IB Diploma, the American curriculum with AP, and the Ontario OSSD through our Ontario partner school. Every student gets a timetable, marked homework after each lesson and weekly reports, which gives families the records councils ask to see. We help plan exam entries and find a centre. Fees are from USD 423/month for Primary and vary by curriculum and level; one-to-one tuition is USD 15/hour. Admission starts with a placement assessment. We teach families across Wales, with pages for Cardiff, Swansea, Newport and Wrexham."
+        },
+        {
+            "h": "Sources and where to check",
+            "p": "Education Act 1996, sections 7 and 436A (legislation.gov.uk). Education (Pupil Registration) (Wales) Regulations 2010. Welsh Government, Elective home education: statutory guidance for local authorities (2023), and its evaluation (Social Research Number 14/2026, January 2026). Welsh Government, Children's Wellbeing and Schools Act 2026 and elective home education (gov.wales). WJEC, Made-for-Wales qualifications (wjec.co.uk). Qualifications Wales. Additional Learning Needs and Education Tribunal (Wales) Act 2018. Rules change: check these sources, or your council's home education officer, before you act."
+        }
+    ],
+    faqs: [
+        {
+            "q": "Is homeschooling legal in Wales?",
+            "a": "Yes. Section 7 of the Education Act 1996 lets parents provide a suitable full-time education at school or otherwise. Home education is lawful across Wales, including Cardiff, Swansea, Newport and Wrexham."
+        },
+        {
+            "q": "Do I need permission to home educate in Wales?",
+            "a": "Not if your child is at a mainstream school: write to the school and it removes your child from the roll. If your child is at a special school placed by the local authority, you need the authority's consent."
+        },
+        {
+            "q": "Do I have to register with the council?",
+            "a": "Not yet. The Children's Wellbeing and Schools Act 2026 brings in a register of children not in school for England and Wales, but in Wales it starts on a date set by the Welsh Ministers. It was not in force when this guide was written."
+        },
+        {
+            "q": "Can a home-educated child in Wales sit IGCSEs instead of Made-for-Wales GCSEs?",
+            "a": "Yes. Home-educated learners can choose the qualifications that suit them. They sit exams as private candidates at a centre that offers the board they want, which may be in England for Cambridge IGCSE."
+        },
+        {
+            "q": "Does my child have to follow the Curriculum for Wales at home?",
+            "a": "No. The Curriculum for Wales applies to state-funded schools. Home-educating families choose their own curriculum, as long as the education is suitable and full-time."
+        },
+        {
+            "q": "Will Welsh universities accept Cambridge A-Levels?",
+            "a": "Yes. Cambridge and Edexcel A-Levels are accepted through UCAS by universities across the UK, including Cardiff, Swansea, Aberystwyth and Bangor. Always check the specific course requirements."
+        }
+    ],
+    conclusion: "Home education in Wales is lawful, and a family can start straight away by writing to the school. The parts that need planning are the council's enquiries, the coming register, and above all qualifications: decide early between Made-for-Wales GCSEs and Cambridge IGCSE, and book an exam centre in good time. Smartious gives families in Wales a live, teacher-led programme with the records councils look for. Book an assessment to plan your child's route.",
   },
 }

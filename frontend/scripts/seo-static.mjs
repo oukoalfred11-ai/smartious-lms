@@ -574,7 +574,7 @@ for (const { file, country: c, cities } of CITY_FILES) {
         x.nearbyAreas?.length ? h2(x.name + ' communities and nearby areas') + `<p>${x.nearbyAreas.map(esc).join(' · ')}</p>` : '',
       ], faqs: x.faqs, faqsTitle: 'Common questions from ' + x.name + ' families',
       related: [h2('More in ' + name), links([{ href: c.hub, label: 'Online school in ' + name }, ...cityLinks.filter(l => l.href !== path)]),
-        ...guideLinks(c.hub, x.name, 'Guides for families in ' + name)],
+        ...guideLinks(c.hub, [x.name, x.nation], 'Guides for families in ' + name)],
       crumbs: [[name, c.hub], [x.name, path]], src: ['src/data/' + file],
       ld: [serviceLd({ name: x.primaryKeyword || 'Online school in ' + x.name, desc: x.seoDesc || x.intro, path, area: [x.name, x.county, name].filter(Boolean).join(', ') })] })
     if (pg.path === path && isNoindexCandidateFile(file)) CITY_PAGES.push({ slug: x.slug, pg, countrySlug: c.slug, cityName: x.name, countryName: name })

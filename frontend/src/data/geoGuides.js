@@ -14,13 +14,19 @@ import { ARTICLES_INDEX } from './generated/articlesIndex.js'
 // Hub slug → the article index's country code, where they differ.
 const ALIAS = { 'south-africa': 'za' }
 
-/** [{ slug, title }] for a hub slug ('china', 'south-africa' …): place-named, then featured, then newest first. */
+/**
+ * [{ slug, title }] for a hub slug ('china', 'south-africa' …): place-named, then featured, then newest first.
+ * `place` may be a list, e.g. [city, nation] so a Cardiff page lists the Wales guides first.
+ */
 export function guidesFor(hubSlug, place = '', n = 4) {
   const code = ALIAS[hubSlug] || hubSlug
-  const p = String(place || '').replace(/\s+SAR$/, '').toLowerCase()
+  const ps = [].concat(place).map(x => String(x || '').replace(/\s+SAR$/, '').toLowerCase()).filter(Boolean)
   return Object.entries(ARTICLES_INDEX)
     .filter(([, a]) => a.country === code)
-    .map(([slug, a], i) => ({ slug, title: a.t, i, featured: !!a.featured, named: p && (a.t + ' ' + slug.replace(/-/g, ' ')).toLowerCase().includes(p) }))
+    .map(([slug, a], i) => {
+      const hay = (a.t + ' ' + slug.replace(/-/g, ' ')).toLowerCase()
+      return { slug, title: a.t, i, featured: !!a.featured, named: ps.some(x => hay.includes(x)) }
+    })
     // Place-named first, then featured guides, then the newest.
     .sort((a, b) => Number(b.named) - Number(a.named) || Number(b.featured) - Number(a.featured) || b.i - a.i)
     .slice(0, n)
