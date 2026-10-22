@@ -32,3 +32,31 @@
 - `lib/weeklyReportsDue.js` is the single rule: a report is owed for every student the teacher had a lesson with this week (Monday 00:00 Nairobi; cancelled and not-held lessons do not count). It is cleared by a published weekly report for that student (linked by id, or by name for older typed reports) or a term report published in the last 14 days.
 - The teacher's Weekly Reports page shows that list (*Reports due this week*, with Write report / Edit / Publish) from `GET /weekly-reports/due`; the Thursday 5 PM reminder and Friday 5 PM show cause use the same function, so a report the teacher sees as published is never chased.
 - A published report stays published: auto-save and later edits no longer turn it back into a draft (this was why teachers who had published still got show-cause notices). Reports typed by name are linked to the student when the name is unambiguous. Deductions are applied once per student per week.
+
+## Learning modes: Virtual, In-person, Hybrid
+
+`User.deliveryMode` says how a student learns (`backend/src/lib/learningMode.js`):
+
+- **Virtual**: every lesson online in the Smartious classroom. Unchanged.
+- **In-person**: every lesson at a centre. The system keeps the records:
+  timetable, homework (set and handed in online), attendance and reports.
+- **Hybrid**: some lessons online, some at a centre, per lesson
+  (`LiveClass.deliveryMode` = `virtual` or `physical`, set on the timetable entry).
+
+A lesson is *in person* for a student when the student is In-person or the
+lesson is physical. For in-person lessons:
+
+- No 30-minute join reminder, no "has not joined" alert, no missed-lesson
+  streak alert, and no per-lesson emails (moved, cancelled, extra, teacher
+  unavailable, lessons back on).
+- Each evening from 18:00 Nairobi the family gets **tomorrow's timetable**
+  (`lib/dailyTimetable.js`). It is sent to In-person students, and to Hybrid
+  students when at least one lesson tomorrow is in person. It asks them to
+  contact the academic office before the day if anything must change.
+  `TIMETABLE_EMAIL_HOUR` changes the hour.
+- The Dean marks attendance in **Centre Register** (Dean & Operations →
+  Academics). One tap marks the student's whole day; a lesson chip marks one
+  lesson. Marks go to the same per-lesson record as the teacher's register,
+  so attendance reports and report cards count them.
+- General school communications (announcements, invoices, exam notices,
+  results, reports) are unchanged.

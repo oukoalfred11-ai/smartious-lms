@@ -551,6 +551,7 @@ export function UserFormFields({ userForm, setUserForm, toast }) {
                 onChange={e => upd('deliveryMode', e.target.value)}>
                 <option value="Virtual">Virtual</option>
                 <option value="In-person">In-person</option>
+                <option value="Hybrid">Hybrid (online and in person)</option>
               </select>
             </div>
           </div>

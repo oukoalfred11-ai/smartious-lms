@@ -37,6 +37,7 @@ import CommunityModule from './modules/CommunityModule.jsx'
 import LiveClassesModule from './modules/LiveClassesModule.jsx'
 import MasteryModule from './modules/MasteryModule.jsx'
 import DOSPerformanceModule from './modules/DOSPerformanceModule.jsx'
+import CentreRegisterModule from './modules/CentreRegisterModule.jsx'
 import CommandModule from './modules/CommandModule.jsx'
 import ClubsModule from './modules/ClubsModule.jsx'
 import AnnouncementsModule from './modules/AnnouncementsModule.jsx'
@@ -78,7 +79,7 @@ const NAV_SECTIONS = {
     { label: 'People',      items: ['users', 'admissiondocs', 'teachers', 'allocations', 'sessions', 'communication', 'support', 'dmoversight', 'community', 'announcements'] },
     { label: 'Reports',     items: ['reports', 'dosperformance', 'mastery'] },
     { label: 'Operations',  items: ['frontdesk', 'assessment', 'documents', 'payroll', 'leave', 'programmes', 'inventory'] },
-    { label: 'Teaching',    items: ['liveclasses', 'clubs', 'grouprooms', 'curriculum', 'virtuallab'] },
+    { label: 'Teaching',    items: ['liveclasses', 'clubs', 'grouprooms', 'curriculum', 'centreregister', 'virtuallab'] },
     { label: 'Question Bank', items: ['questionbank'] },
     { label: 'Quality',     items: ['qaoverview', 'teacherprofiles', 'tdp', 'accreditations'] },
     { label: 'Marketing',   items: ['studio'] },
@@ -112,7 +113,7 @@ const NAV_SECTIONS = {
   // Operations Manager accounts share this portal and its access.
   ops_manager: [
     { label: 'Overview',    items: ['command', 'checkin', 'dashboard', 'analytics', 'dosanalytics'] },
-    { label: 'Academics',   items: ['liveclasses', 'clubs', 'exams', 'doshomework', 'dosattend', 'dostimetable', 'questionbank', 'virtuallab'] },
+    { label: 'Academics',   items: ['liveclasses', 'clubs', 'exams', 'doshomework', 'centreregister', 'dosattend', 'dostimetable', 'questionbank', 'virtuallab'] },
     { label: 'Students',    items: ['admissiondocs', 'sessions', 'dosbreaks'] },
     { label: 'People',      items: ['users', 'teachers', 'allocations', 'communication', 'teacherratings'] },
     { label: 'Support',     items: ['support', 'dmoversight'] },
@@ -464,6 +465,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         {safePage === 'exams'         && <DOSExamsModule toast={toast} refreshKey={refreshKey}/>}
         {safePage === 'doshomework'   && <DOSHomeworkModule toast={toast} refreshKey={refreshKey}/>}
         {safePage === 'dosattend'     && <DOSAttendanceModule toast={toast} refreshKey={refreshKey}/>}
+        {safePage === 'centreregister' && <CentreRegisterModule toast={toast} />}
         {safePage === 'checkin'       && <CheckInModule toast={toast} refreshKey={refreshKey}/>}
         {safePage === 'dosbreaks'     && <DOSBreakModule toast={toast} refreshKey={refreshKey}/>}
         {safePage === 'dostimetable'  && <DOSTimetableModule toast={toast} refreshKey={refreshKey}/>}

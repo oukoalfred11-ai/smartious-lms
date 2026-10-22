@@ -451,9 +451,10 @@ async function sendClassReminders() {
     status: 'scheduled', reminderSentAt: null, scheduledAt: { $gte: from, $lte: to },
   })
     .populate('teacherId', 'firstName lastName email')
-    .populate('assignedStudents', 'firstName lastName parentEmail linkedParents parentId email parentName onBreak timezone')
+    .populate('assignedStudents', 'firstName lastName parentEmail linkedParents parentId email parentName onBreak timezone deliveryMode')
     .lean()
 
+  const { inPersonLesson } = require('../lib/learningMode')
   let sent = 0
   for (const cls of classes) {
     const done = new Set(cls.remindedRecipients || [])
@@ -463,6 +464,9 @@ async function sendClassReminders() {
     let failed = false
 
     for (const student of students) {
+      // In-person lessons need no join reminder: the family had tomorrow's
+      // timetable the evening before (lib/dailyTimetable.js).
+      if (inPersonLesson(cls, student)) { newlyDone.push(String(student._id)); continue }
       const resolved = await resolveStudentRecipients(student, { includeStudent: true, category: 'classReminders' })
       if (!resolved.to.length) {
         console.warn(`[class reminder] ${student.firstName} ${student.lastName}: no valid email address on file — skipped`)

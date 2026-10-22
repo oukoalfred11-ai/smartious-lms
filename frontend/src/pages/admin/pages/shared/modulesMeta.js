@@ -39,6 +39,7 @@ export const MODULES = {
   dmoversight:  { label: 'Messages Oversight',    accent: TOKENS.crimson,    icon: 'chart' },
   inventory:    { label: 'Inventory',             accent: TOKENS.crimson,    icon: 'billing' },
   dosattend:    { label: 'Attendance Analytics',   accent: TOKENS.accentTeal,    icon: 'frontdesk' },
+  centreregister: { label: 'Centre Register',      accent: TOKENS.accentEmerald, icon: 'frontdesk' },
   checkin:      { label: 'Check In',              accent: TOKENS.accentEmerald||'#065F46', icon: 'frontdesk' },
   dosbreaks:    { label: 'Staff Breaks',           accent: TOKENS.crimson,       icon: 'frontdesk' },
   sessions:     { label: 'Student Sessions',       accent: TOKENS.accentAmber,   icon: 'users' },

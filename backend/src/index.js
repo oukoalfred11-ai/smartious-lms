@@ -118,6 +118,7 @@ app.use('/api/mastery', require('./routes/mastery'));
 app.use('/api/livekit', require('./routes/livekit'));
 app.use('/api/dos-reports', require('./routes/dos-reports'));
 app.use('/api/class-register', require('./routes/class-register'));
+app.use('/api/centre-register', require('./routes/centre-register'));
 app.use('/api/snapshots', require('./routes/snapshots'));
 app.use('/api/ops-reports', require('./routes/ops-reports'));
 app.use('/api/observations', require('./routes/observations'));
@@ -278,6 +279,12 @@ mongoose.connect(MONGODB_URI)
     // Morning digest of lessons teachers have not closed (07:00 Nairobi).
     setInterval(() => {
       require('./lib/absenceAlerts').runUnconfirmedDigest().catch(e => console.error('[unconfirmed digest]', e.message));
+    }, 10 * 60 * 1000);
+
+    // Tomorrow's timetable for In-person and Hybrid families (from 18:00
+    // Nairobi); in-person lessons send no join reminders.
+    setInterval(() => {
+      require('./lib/dailyTimetable').runDailyTimetable().catch(e => console.error('[daily timetable]', e.message));
     }, 10 * 60 * 1000);
 
     // Show-cause cron — runs every Friday at 5PM EAT

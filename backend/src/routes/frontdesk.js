@@ -359,6 +359,7 @@ router.post('/:id/import', auth, requireRole('admin', 'sales', 'ops_manager'), a
     // Delivery mode from the lead's learning-mode / programme text.
     const mapDelivery = (raw) => {
       const s = (raw || '').toLowerCase()
+      if (s.includes('hybrid') || s.includes('blended')) return 'Hybrid'
       if (s.includes('virtual') || s.includes('online') || s.includes('remote')) return 'Virtual'
       if (s.includes('in-person') || s.includes('centre') || s.includes('center')
           || s.includes('home') || s.includes('visit')) return 'In-person'
