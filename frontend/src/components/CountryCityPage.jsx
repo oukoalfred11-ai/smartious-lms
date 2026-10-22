@@ -57,7 +57,7 @@ export default function CountryCityPage({ country, cities, currentCitySlug, P, V
   const hubUrl = country.hub
   const hubPageId = country.hubPageId
   const countryName = country.name
-  const guides = guidesFor(String(hubUrl || '').split('/').pop(), city.name)
+  const guides = guidesFor(String(hubUrl || '').split('/').pop(), [city.name, city.nation])
   const cityUrl = 'https://smartioushomeschool.com/homeschool-' + city.slug
   const hubFullUrl = 'https://smartioushomeschool.com' + hubUrl
 

@@ -107,7 +107,7 @@ const HOMESCHOOL = {
  "tunisiaCities": "tunis-tn sfax-tn sousse-tn",
  "turkeyCities": "istanbul-tr ankara-tr izmir-tr antalya-tr bursa-tr adana-tr",
  "uaeCities": "dubai-ae abu-dhabi-ae sharjah-ae ajman-ae ras-al-khaimah-ae",
- "ukCities": "london-uk manchester-uk birmingham-uk leeds-uk bristol-uk edinburgh-uk",
+ "ukCities": "london-uk manchester-uk birmingham-uk leeds-uk bristol-uk edinburgh-uk cardiff-uk swansea-uk newport-uk wrexham-uk",
  "ukraineCities": "kyiv-ua lviv-ua kharkiv-ua dnipro-ua odesa-ua ivano-frankivsk-ua",
  "uruguayCities": "montevideo-uy punta-del-este-uy colonia-uy salto-uy rocha-uy",
  "usCities": "houston-tx los-angeles-ca miami-fl charlotte-nc atlanta-ga phoenix-az nashville-tn northern-virginia-va philadelphia-pa columbus-oh dallas-tx austin-tx san-francisco-bay-area-ca san-diego-ca orlando-fl tampa-fl raleigh-nc greensboro-nc athens-ga savannah-ga tucson-az memphis-tn knoxville-tn richmond-va virginia-beach-va pittsburgh-pa cleveland-oh cincinnati-oh el-paso-tx sacramento-ca fresno-ca jacksonville-fl naples-fl asheville-nc wilmington-nc augusta-ga macon-ga mesa-az flagstaff-az chattanooga-tn murfreesboro-tn charlottesville-va roanoke-va lancaster-pa allentown-pa toledo-oh dayton-oh akron-oh lubbock-tx corpus-christi-tx oakland-ca long-beach-ca santa-barbara-ca riverside-ca gainesville-fl tallahassee-fl west-palm-beach-fl durham-nc fayetteville-nc winston-salem-nc columbus-ga albany-ga yuma-az prescott-az clarksville-tn johnson-city-tn lynchburg-va williamsburg-va harrisburg-pa erie-pa youngstown-oh canton-oh",
