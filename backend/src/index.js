@@ -121,6 +121,7 @@ app.use('/api/class-register', require('./routes/class-register'));
 app.use('/api/centre-register', require('./routes/centre-register'));
 app.use('/api/marks', require('./routes/marks'));
 app.use('/api/oversight', require('./routes/oversight'));
+app.use('/api/stat-reports', require('./routes/stat-reports'));
 app.use('/api/snapshots', require('./routes/snapshots'));
 app.use('/api/ops-reports', require('./routes/ops-reports'));
 app.use('/api/observations', require('./routes/observations'));

@@ -151,7 +151,8 @@ router.get('/children/:id/reports', auth, async (req, res) => {
           awarded,
           totalMarks: ex.totalMarks,
           date:       ex.startAt || s.submittedAt,
-          grade:      pct>=80?'A*':pct>=70?'B':pct>=60?'C':pct>=50?'D':pct>=40?'E':'U',
+          // Graded on the child's own curriculum scale (lib/grading.js).
+          grade:      require('../lib/grading').gradeFor(student.curriculum, pct, student.gradeLevel),
         }
       }).sort((a,b)=>new Date(b.date)-new Date(a.date))
     }
@@ -204,7 +205,7 @@ router.get('/children/:id/reports', auth, async (req, res) => {
       subject:s.subject,
       avg:Math.round(s.scores.reduce((a,b)=>a+b,0)/s.scores.length),
       count:s.scores.length,
-      grade:(avg=>avg>=80?'A*':avg>=70?'B':avg>=60?'C':avg>=50?'D':avg>=40?'E':'U')(Math.round(s.scores.reduce((a,b)=>a+b,0)/s.scores.length)),
+      grade:require('../lib/grading').gradeFor(student.curriculum, Math.round(s.scores.reduce((a,b)=>a+b,0)/s.scores.length), student.gradeLevel),
     })).sort((a,b)=>b.avg-a.avg)
 
     const overallAvg = examResults.length ? Math.round(examResults.reduce((s,e)=>s+e.score,0)/examResults.length) : null

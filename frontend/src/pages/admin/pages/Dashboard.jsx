@@ -40,6 +40,7 @@ import DOSPerformanceModule from './modules/DOSPerformanceModule.jsx'
 import CentreRegisterModule from './modules/CentreRegisterModule.jsx'
 import MarksEntryModule from './modules/MarksEntryModule.jsx'
 import AcademicOversightModule from './modules/AcademicOversightModule.jsx'
+import Hub from './shared/Hub.jsx'
 import CommandModule from './modules/CommandModule.jsx'
 import ClubsModule from './modules/ClubsModule.jsx'
 import AnnouncementsModule from './modules/AnnouncementsModule.jsx'
@@ -79,9 +80,9 @@ const NAV_SECTIONS = {
   admin: [
     { label: 'Overview',    items: ['command', 'dashboard', 'analytics'] },
     { label: 'People',      items: ['users', 'admissiondocs', 'teachers', 'allocations', 'sessions', 'communication', 'support', 'dmoversight', 'community', 'announcements'] },
-    { label: 'Reports',     items: ['reports', 'dosperformance', 'mastery'] },
+    { label: 'Reports',     items: ['reports', 'dosanalytics'] },
     { label: 'Operations',  items: ['frontdesk', 'assessment', 'documents', 'payroll', 'leave', 'programmes', 'inventory'] },
-    { label: 'Teaching',    items: ['liveclasses', 'clubs', 'grouprooms', 'curriculum', 'oversight', 'centreregister', 'marksentry', 'virtuallab'] },
+    { label: 'Teaching',    items: ['liveclasses', 'clubs', 'grouprooms', 'curriculum', 'oversight', 'dosattend', 'virtuallab'] },
     { label: 'Question Bank', items: ['questionbank'] },
     { label: 'Quality',     items: ['qaoverview', 'teacherprofiles', 'tdp', 'accreditations'] },
     { label: 'Marketing',   items: ['studio'] },
@@ -108,26 +109,41 @@ const NAV_SECTIONS = {
     { label: 'Overview',  items: ['dashboard'] },
     { label: 'Our School', items: ['teacherprofiles', 'tdp', 'accreditations'] },
     { label: 'Academics', items: ['curriculum', 'questionbank', 'exams'] },
-    { label: 'Quality & Reports', items: ['reports', 'dosperformance', 'mastery', 'dosattend'] },
+    { label: 'Quality & Reports', items: ['reports', 'dosanalytics', 'dosattend'] },
     { label: 'Me',          items: ['myprofile', 'mystafffile'] },
   ],
   // Dean & Operations: one merged role. The Dean of Studies and the
   // Operations Manager accounts share this portal and its access.
   ops_manager: [
-    { label: 'Overview',    items: ['command', 'checkin', 'dashboard', 'analytics', 'dosanalytics'] },
-    { label: 'Academics',   items: ['oversight', 'liveclasses', 'clubs', 'exams', 'doshomework', 'centreregister', 'marksentry', 'dosattend', 'dostimetable', 'questionbank', 'virtuallab'] },
-    { label: 'Students',    items: ['admissiondocs', 'sessions', 'dosbreaks'] },
+    // Overview is the Command page: KPIs that open their reports.
+    { label: 'Overview',    items: ['dashboard', 'checkin'] },
+    { label: 'Academics',   items: ['oversight', 'dosattend', 'liveclasses', 'clubs', 'exams', 'doshomework', 'dostimetable', 'questionbank', 'virtuallab'] },
+    { label: 'Students',    items: ['admissiondocs', 'sessions'] },
     { label: 'People',      items: ['users', 'teachers', 'allocations', 'communication', 'teacherratings'] },
     { label: 'Support',     items: ['support', 'dmoversight'] },
     // CRM, Front Desk and Group Rooms stay out of Operations per policy.
     { label: 'Operations',  items: ['documents', 'leave', 'programmes', 'inventory'] },
-    { label: 'Reports',     items: ['cooreports', 'reports', 'dosperformance', 'mastery'] },
+    { label: 'Reports',     items: ['reports', 'dosanalytics'] },
     { label: 'System',      items: ['userlogs', 'settings', 'ai'] },
     { label: 'Me',          items: ['myprofile', 'mystafffile'] },
   ],
 }
 
 NAV_SECTIONS.dos = NAV_SECTIONS.ops_manager
+
+// Merged modules: an old menu key opens its hub on the right tab, so links
+// and bookmarks to the separate pages keep working.
+const HUB_ALIAS = {
+  dosperformance: ['dosanalytics', 'evidence'], mastery: ['dosanalytics', 'mastery'],
+  centreregister: ['dosattend', 'centre'], dosbreaks: ['dosattend', 'breaks'],
+  marksentry: ['oversight', 'marks'], cooreports: ['reports', 'weekly'],
+  command: ['dashboard'], analytics: ['dashboard'],
+}
+function resolvePage(page, allowed) {
+  if (allowed.includes(page)) return [page, null]
+  const a = HUB_ALIAS[page]
+  return a && allowed.includes(a[0]) ? a : [page, null]
+}
 
 // Sections for a signed-in person: their role's menu, plus Quality when
 // their account also holds Quality Assurance (additionalRoles).
@@ -163,7 +179,8 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
 
   // Guard: if the current page is not in this role's allowed modules, fall back to dashboard
   const allowedPages = navFor(role, auth?.user).flatMap(s => s.items)
-  const safePage = allowedPages.includes(page) ? page : 'dashboard'
+  const shownPage = resolvePage(page, allowedPages)[0]
+  const safePage = allowedPages.includes(shownPage) ? shownPage : 'dashboard'
   const currentMod = MODULES[safePage] || MODULES.dashboard
 
   return (
@@ -416,7 +433,9 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
   // (an admin viewing a sub-portal gets that portal's pages)
   const role = forcedRole || auth?.user?.role || 'admin'
   const allowedPages = navFor(role, auth?.user).flatMap(sec => sec.items).concat('dashboard')
-  const safePage = allowedPages.includes(page) ? page : 'dashboard'
+  const [shownPage, hubTab] = resolvePage(page, allowedPages)
+  const safePage = allowedPages.includes(shownPage) ? shownPage : 'dashboard'
+  const deanPortal = forcedRole === 'dos' || forcedRole === 'ops_manager'
 
   return (
     <div style={{
@@ -435,7 +454,8 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         <BirthdayBanner />
         <SuggestionBox />
         {safePage === 'dashboard'   && forcedRole === 'qa' && <QAOverviewModule toast={toast} setPage={setPage} />}
-        {safePage === 'dashboard'   && forcedRole && forcedRole !== 'qa' && <RoleOverview role={forcedRole} setPage={setPage} userStats={userStats} pendingAllocations={pendingAllocations} auth={auth} />}
+        {safePage === 'dashboard'   && deanPortal && <CommandModule toast={toast} role={forcedRole} />}
+        {safePage === 'dashboard'   && forcedRole && forcedRole !== 'qa' && !deanPortal && <RoleOverview role={forcedRole} setPage={setPage} userStats={userStats} pendingAllocations={pendingAllocations} auth={auth} />}
         {safePage === 'qaoverview'  && <QAOverviewModule toast={toast} setPage={setPage} />}
         {safePage === 'dashboard'   && !forcedRole && <DashboardModule  setPage={setPage} userStats={userStats} pendingAllocations={pendingAllocations} refreshKey={refreshKey} auth={auth} toast={toast} openAddUser={openAddUser} adminFirst={adminFirst} />}
         {safePage === 'analytics'   && <AnalyticsModule  setPage={setPage} refreshKey={refreshKey} toast={toast} />}
@@ -445,8 +465,6 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         {safePage === 'communication' && <CommunicationModule refreshKey={refreshKey} toast={toast} />}
         {safePage === 'community' && <CommunityModule refreshKey={refreshKey} toast={toast} />}
         {safePage === 'liveclasses' && <LiveClassesModule toast={toast} />}
-        {safePage === 'mastery' && <MasteryModule toast={toast} refreshKey={refreshKey} />}
-        {safePage === 'dosperformance' && <DOSPerformanceModule toast={toast} />}
         {safePage === 'command' && <CommandModule toast={toast} role={role} />}
         {safePage === 'clubs' && <ClubsModule toast={toast} />}
         {safePage === 'announcements' && <AnnouncementsModule toast={toast} />}
@@ -462,22 +480,32 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         {safePage === 'assessment' && <AssessmentModule refreshKey={refreshKey} toast={toast} />}
         {safePage === 'crm' && <CRMModule toast={toast} refreshKey={refreshKey}/>}
         {safePage === 'salesperf' && <SalesPerformanceModule toast={toast} refreshKey={refreshKey}/>}
-        {safePage === 'reports'      && <ReportsModule toast={toast} refreshKey={refreshKey}/>}
-        {safePage === 'dosanalytics'  && <DOSAnalyticsModule toast={toast} refreshKey={refreshKey}/>}
+        {safePage === 'reports'      && <Hub tab={hubTab} tabs={[
+          ['term', 'Term reports', <ReportsModule toast={toast} refreshKey={refreshKey}/>],
+          ['weekly', 'Weekly reports issued', <COOReportOverviewModule refreshKey={refreshKey} toast={toast}/>],
+        ]} />}
+        {safePage === 'dosanalytics'  && <Hub tab={hubTab} tabs={[
+          ['analytics', 'Analytics', <DOSAnalyticsModule toast={toast} refreshKey={refreshKey}/>],
+          ['evidence', 'By grade & teacher', <DOSPerformanceModule toast={toast} />],
+          ['mastery', 'Mastery & early warning', <MasteryModule toast={toast} refreshKey={refreshKey} />],
+        ]} />}
         {safePage === 'exams'         && <DOSExamsModule toast={toast} refreshKey={refreshKey}/>}
         {safePage === 'doshomework'   && <DOSHomeworkModule toast={toast} refreshKey={refreshKey}/>}
-        {safePage === 'dosattend'     && <DOSAttendanceModule toast={toast} refreshKey={refreshKey}/>}
-        {safePage === 'centreregister' && <CentreRegisterModule toast={toast} />}
-        {safePage === 'marksentry'    && <MarksEntryModule toast={toast} />}
-        {safePage === 'oversight'     && <AcademicOversightModule toast={toast} />}
+        {safePage === 'dosattend'     && <Hub tab={hubTab} tabs={[
+          ['overview', 'Overview & records', <DOSAttendanceModule toast={toast} refreshKey={refreshKey}/>],
+          ['centre', 'Centre register', <CentreRegisterModule toast={toast} />],
+          ['breaks', 'Breaks', <DOSBreakModule toast={toast} refreshKey={refreshKey}/>],
+        ]} />}
+        {safePage === 'oversight'     && <Hub tab={hubTab} tabs={[
+          ['records', 'Student records', <AcademicOversightModule toast={toast} />],
+          ['marks', 'Marks entry', <MarksEntryModule toast={toast} />],
+        ]} />}
         {safePage === 'checkin'       && <CheckInModule toast={toast} refreshKey={refreshKey}/>}
-        {safePage === 'dosbreaks'     && <DOSBreakModule toast={toast} refreshKey={refreshKey}/>}
         {safePage === 'dostimetable'  && <DOSTimetableModule toast={toast} refreshKey={refreshKey}/>}
         {safePage === 'payroll'        && <PayrollModule         refreshKey={refreshKey} toast={toast}/>}
         {safePage === 'sessions'    && <StudentSessionsModule toast={toast} refreshKey={refreshKey} />}
         {safePage === 'suggestions' && <SuggestionsModule toast={toast} refreshKey={refreshKey} />}
         {safePage === 'questionbank'   && <QuestionBankModule   refreshKey={refreshKey} toast={toast}/>}
-        {safePage === 'cooreports'    && <COOReportOverviewModule refreshKey={refreshKey} toast={toast}/>}
         {safePage === 'teacherratings'&& <TeacherRatingsModule    refreshKey={refreshKey} toast={toast}/>}
         {safePage === 'leave'       && <LeaveModule      refreshKey={refreshKey} toast={toast} />}
         {safePage === 'programmes'  && <ProgrammesModule refreshKey={refreshKey} toast={toast} />}
