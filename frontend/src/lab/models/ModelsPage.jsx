@@ -27,6 +27,7 @@ export function ModelsLibrary() {
                 <span className={'lab-badge ' + m.subject}>{m.topic}</span>
                 <h3>{m.title}</h3>
                 <p>{m.summary}</p>
+                {m.credit && <p className="lab-help">3D model: {m.credit.author || m.credit.source} · {m.credit.licence}</p>}
               </Link>
             ))}
           </div>
@@ -149,6 +150,11 @@ export function ModelViewer() {
           ) : (
             <div className="m3d-panel">
               {part ? <><h3>{part.name}</h3><p>{part.info}</p></> : <><h3>{meta.title}</h3><p>{meta.summary}</p><p className="lab-help" style={{ marginTop: 8 }}>Click a part or a label to read what it does. Drag to turn the model; scroll or pinch to zoom.</p></>}
+            </div>
+          )}
+          {meta.credit && (
+            <div className="m3d-panel m3d-credit">
+              <p>3D model: {meta.credit.url ? <a href={meta.credit.url} target="_blank" rel="noopener noreferrer">{meta.credit.title || meta.title}</a> : (meta.credit.title || meta.title)}{meta.credit.author ? ' by ' + meta.credit.author : ''}{meta.credit.source ? ' (' + meta.credit.source + ')' : ''}, {meta.credit.licenceUrl ? <a href={meta.credit.licenceUrl} target="_blank" rel="noopener noreferrer">{meta.credit.licence}</a> : meta.credit.licence}.{meta.credit.changes ? ' ' + meta.credit.changes : ''}</p>
             </div>
           )}
           {model && !quiz && (
