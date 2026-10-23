@@ -40,6 +40,7 @@
  *   goggles?: boolean                  eye protection needed (default: the safety notes say "wear eye protection")
  *   gogglesWhy?: string                why, shown before goggles are put on (default: something could snap)
  * }
+ *   A timed measure may set look: 'cross' | 'iodine' | 'agar' to show what is being watched while the stopwatch runs.
  *   A measure labelled "Time for 20 oscillations" (or with cycles: 20) is timed by counting cycles.
  *
  * The read functions are the physics. n(sd) returns a normally distributed
@@ -722,7 +723,7 @@ export function definePractical(spec) {
     let motion = null
     if (timed.length) {
       const m = timed[0], c = cyclesOf(m)
-      try { const T = m.read(params, s.x, zeroNoise, s.settings); if (Number.isFinite(T) && T > 0) motion = { key: m.key, cycles: c, period: c ? T / c : null, duration: T } } catch { motion = null }
+      try { const T = m.read(params, s.x, zeroNoise, s.settings); if (Number.isFinite(T) && T > 0) motion = { key: m.key, cycles: c, period: c ? T / c : null, duration: T, look: m.look || null } } catch { motion = null }
     }
     const glow = {}
     for (const p of circuit?.parts || []) if (['filament_lamp', 'leds'].includes(p.apparatus)) {

@@ -116,6 +116,8 @@ export const APPARATUS = {
   photosynthometer:  { name: 'Capillary tube and syringe (photosynthometer)', group: 'Chemistry and biology' },
   bench_lamp:        { name: 'Bench lamp (LED)', group: 'Chemistry and biology' },
   agar_blocks:       { name: 'Pink agar block, scalpel and tile', group: 'Chemistry and biology' },
+  copper_electrodes: { name: 'Copper electrodes in a holder', group: 'Chemistry and biology' },
+  gas_syringe:       { name: 'Gas syringe (100 cm³) with delivery tube', group: 'Chemistry and biology' },
   // Safety
   goggles:           { name: 'Safety goggles', group: 'Safety' },
   heat_mat:          { name: 'Heat-proof mat', group: 'Safety' },

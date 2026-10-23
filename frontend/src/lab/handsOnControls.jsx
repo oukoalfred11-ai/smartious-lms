@@ -150,9 +150,10 @@ function StopwatchControl({ m, view, dispatch, editable }) {
           : <Btn kind="sm primary" onClick={stop} disabled={!editable}>Stop the stopwatch</Btn>}
         <Btn kind="sm" onClick={() => dispatch('resetTimer')} disabled={!editable || running}>Reset to zero</Btn>
         <label className="lab-help">Speed <select value={speed} onChange={e => setSpeed(Number(e.target.value))} disabled={running} aria-label="Playback speed">
-          <option value={1}>real time</option><option value={2}>× 2 (time-lapse)</option><option value={5}>× 5 (time-lapse)</option></select></label>
+          <option value={1}>real time</option><option value={2}>× 2 (time-lapse)</option><option value={5}>× 5 (time-lapse)</option>
+          {motion?.duration > 60 && <><option value={10}>× 10 (time-lapse)</option><option value={30}>× 30 (time-lapse)</option></>}</select></label>
       </div>
-      <p className="lab-help">{fixed ? `Count ${fixed} complete ${revolve ? 'revolutions' : 'oscillations'}, starting the count from 0 as you start, and stop the stopwatch as the ${revolve ? 'bung' : 'bob'} completes the last one. ` : 'Start the stopwatch as the motion begins and stop it at the mark. '}
+      <p className="lab-help">{fixed ? `Count ${fixed} complete ${revolve ? 'revolutions' : 'oscillations'}, starting the count from 0 as you start, and stop the stopwatch as the ${revolve ? 'bung' : 'bob'} completes the last one. ` : motion?.look === 'cross' ? 'Start the stopwatch as you add the acid and stop it when the cross can no longer be seen. ' : motion?.look === 'iodine' ? 'Start the stopwatch as you mix, and stop it at the first drop that leaves the iodine orange-brown. ' : motion?.look === 'agar' ? 'Start the stopwatch as the cube goes into the acid and stop it when no pink is left. ' : 'Start the stopwatch as the motion begins and stop it at the mark. '}
         Reset it before each new timing: a stopwatch that is not reset counts on from its last time.</p>
     </div>
   )
