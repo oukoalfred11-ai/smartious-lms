@@ -44,6 +44,8 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  // The class teacher the Dean assigned (students). Shown on term reports.
+  classTeacherId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
   // Student subjects (strings, e.g. "Mathematics", "Physics")
   subjects: {
     type: [String],

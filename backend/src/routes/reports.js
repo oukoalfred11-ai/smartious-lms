@@ -17,29 +17,11 @@ const { scoresFor } = require('../lib/reportScores')
 // Term end dates arrive as YYYY-MM-DD (UTC midnight); lessons that day count.
 const endOfDay = (d) => (d.getUTCHours() === 0 && d.getUTCMinutes() === 0 ? new Date(d.getTime() + 864e5 - 1) : d)
 
-// ── Grading helper ──────────────────────────────────────────
-function toLetterGrade(score) {
-  if (score === null || score === undefined) return '—'
-  if (score >= 80) return 'A*'
-  if (score >= 70) return 'B'
-  if (score >= 60) return 'C'
-  if (score >= 50) return 'D'
-  if (score >= 40) return 'E'
-  return 'U'
-}
-
-function gradeLabel(g) {
-  const MAP = {
-    'A*': 'Excellent — exceeds level expectations',
-    'A':  'Excellent — exceeds level expectations',
-    'B':  'Very good — secure command',
-    'C':  'Good — meets expectations',
-    'D':  'Satisfactory — developing',
-    'E':  'Needs support — targeted intervention',
-    'U':  'Ungraded — foundation rebuild required',
-  }
-  return MAP[g] || ''
-}
+// ── Grading ──────────────────────────────────────────────────
+// Grades follow the student's curriculum (lib/grading.js).
+const { gradeFor } = require('../lib/grading')
+// Promotion is decided at the end of the year, so only Term 3 reports carry it.
+const promotionFor = (term, decision) => (Number(term) === 3 ? (decision || '') : '')
 
 // ── GET /api/reports ────────────────────────────────────────
 router.get('/', auth, ALLOWED, async (req, res) => {
@@ -101,7 +83,7 @@ router.post('/teacher-save', auth, requireRole('admin','ops_manager','dos','acco
       subject, curriculum:student?.curriculum||classLevel||'', yearGrade:student?.gradeLevel||classLevel||'',
       academicYear:yearStr, term:termNum, status:publish?'published':'draft',
       subjectScores:scores, overallAverage:avg,
-      meanGrade:avg!==null?(avg>=80?'A*':avg>=70?'A':avg>=60?'B':avg>=50?'C':avg>=40?'D':'E'):null,
+      meanGrade:avg!==null?gradeFor(student?.curriculum||classLevel, avg, student?.gradeLevel):null,
       overallRemark:avg!==null?(avg>=80?'Excellent':avg>=70?'Very Good':avg>=60?'Good':avg>=50?'Satisfactory':'Needs Improvement'):null,
       hodRemarks:remarks||'',
       weeklyData:{ week, period, classLevel, topics, subTopics, activities, understanding, participation, generalPerf, strengths, improvements, homework, remarks },
@@ -170,10 +152,12 @@ router.get('/preview', auth, ALLOWED, async (req, res) => {
 
     // Weekly tests and end of term: online exams plus marks keyed in by the Dean.
     const scores = await scoresFor(studentId, tStart, endOfDay(tEnd))
+    const stu = await User.findById(studentId).select('curriculum gradeLevel').lean()
+    const grade = (pct) => gradeFor(stu?.curriculum, pct, stu?.gradeLevel)
     const subjects = Object.entries(scores).map(([subject, r]) => ({
       subject, weeklyScores: r.weekly.map(w => w.pct), weeklyTests: r.weekly, weeklyAverage: r.weeklyAverage,
       endTermScore: r.endTerm, endTermSource: r.endTermSource || '', weightedScore: r.finalScore,
-      letterGrade: toLetterGrade(r.finalScore),
+      letterGrade: grade(r.finalScore),
       missedWeekly: r.weeklyAverage == null, missedEndTerm: r.endTerm == null,
     }))
 
@@ -227,8 +211,8 @@ router.post('/generate', auth, ALLOWED, async (req, res) => {
       return res.status(400).json({ success: false, message: 'studentId, academicYear, term, termStart, termEnd are required.' })
 
     const student = await User.findById(studentId).select(
-      'firstName lastName admissionNo gender curriculum gradeLevel programme avatar'
-    ).lean()
+      'firstName lastName admissionNo gender curriculum gradeLevel programme avatar classTeacherId'
+    ).populate('classTeacherId', 'firstName lastName').lean()
     if (!student) return res.status(404).json({ success: false, message: 'Student not found.' })
 
     const tStart = new Date(termStart)
@@ -259,7 +243,7 @@ router.post('/generate', auth, ALLOWED, async (req, res) => {
         endTermScore:    r.endTerm,
         endTermSource:   r.endTermSource || '',
         weightedScore:   r.finalScore,
-        letterGrade:     toLetterGrade(r.finalScore),
+        letterGrade:     gradeFor(student.curriculum, r.finalScore, student.gradeLevel),
         teacherComment:  meta.comment || '',
         missedWeekly:    r.weeklyAverage == null,
         missedEndTerm:   r.endTerm == null,
@@ -293,7 +277,8 @@ router.post('/generate', auth, ALLOWED, async (req, res) => {
         yearGrade:    student.gradeLevel  || '—',
         classStream:  classStream || '—',
         programme:    programme || student.programme || '—',
-        classTeacher: classTeacher || '—',
+        // The class teacher the Dean assigned, unless the form names one.
+        classTeacher: classTeacher || [student.classTeacherId?.firstName, student.classTeacherId?.lastName].filter(Boolean).join(' ') || '—',
         photoUrl:     student.avatar || '',
         scheduledDays: scheduledCount,
         attendedDays:  totalAttended,
@@ -301,14 +286,14 @@ router.post('/generate', auth, ALLOWED, async (req, res) => {
         punctualityPct: attendanceRate,
         subjects:       subjectResults,
         endTermAverage, weeklyAverage: null, overallAverage,
-        meanGrade:      toLetterGrade(overallAverage),
+        meanGrade:      gradeFor(student.curriculum, overallAverage, student.gradeLevel),
         learningHabits: { ...DEFAULT_HABITS, ...learningHabits },
         coCurricular, agreedTargets, classTeacherReport, hodRemarks,
         deanName: deanName || (hodRemarks ? [req.user.firstName, req.user.lastName].filter(Boolean).join(' ') : ''),
         principalComment, ...(principalName ? { principalName } : {}),
         issuedBy: issuedBy || 'Ms. Brendaliz Chelangat — Head of Academics',
         dateIssued: new Date(),
-        promotionDecision, nextTermStart, reportingTime,
+        promotionDecision: promotionFor(term, promotionDecision), nextTermStart, reportingTime,
         generatedBy: req.user._id,
         status: 'draft',
       },
@@ -334,6 +319,16 @@ router.patch('/:id', auth, ALLOWED, async (req, res) => {
     ]
     const upd = {}
     allowed.forEach(k => { if (req.body[k] !== undefined) upd[k] = req.body[k] })
+    const cur = await Report.findById(req.params.id).select('term curriculum yearGrade').lean()
+    if (!cur) return res.status(404).json({ success: false, message: 'Report not found.' })
+    if (upd.promotionDecision !== undefined) upd.promotionDecision = promotionFor(cur.term, upd.promotionDecision)
+    // Corrected scores are regraded on the student's own scale.
+    if (Array.isArray(upd.subjects)) {
+      upd.subjects = upd.subjects.map(s => ({ ...s, letterGrade: gradeFor(cur.curriculum, s.weightedScore, cur.yearGrade) }))
+      const scored = upd.subjects.filter(s => s.weightedScore !== null && s.weightedScore !== undefined)
+      upd.overallAverage = scored.length ? Math.round(scored.reduce((t, s) => t + Number(s.weightedScore), 0) / scored.length) : null
+      upd.meanGrade = gradeFor(cur.curriculum, upd.overallAverage, cur.yearGrade)
+    }
     const report = await Report.findByIdAndUpdate(req.params.id, { $set: upd }, { new: true })
     if (!report) return res.status(404).json({ success: false, message: 'Report not found.' })
     return res.json({ success: true, data: { report } })
@@ -669,15 +664,15 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;font-size:11px;color:#1A1A1A;
 
 <!-- Promotion -->
 <div style="margin-top:4mm">
-  <div class="promo-row">
+  ${Number(r.term) === 3 ? `<div class="promo-row">
     <strong style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#8B1A2E">End-of-Year Decision</strong>
-    <span>☐ Promoted to: ____________________</span>
+    ${r.promotionDecision ? `<span><strong>${esc(r.promotionDecision)}</strong></span>` : `<span>☐ Promoted to: ____________________</span>
     <span>☐ Promoted on probation</span>
     <span>☐ To repeat: ____________________</span>
-    <span>☐ Completing — external examinations</span>
-  </div>
+    <span>☐ Completing — external examinations</span>`}
+  </div>` : ''}
   <div style="display:flex;gap:20px;font-size:10px;padding:3px 8px">
-    <span>Next Academic Year &nbsp; Term 1 begins: <strong>${esc(r.nextTermStart||'____________________')}</strong></span>
+    <span>${Number(r.term) === 3 ? 'Next Academic Year &nbsp; Term 1' : 'Next term'} begins: <strong>${esc(r.nextTermStart||'____________________')}</strong></span>
     <span>Reporting time: <strong>${esc(r.reportingTime||'____________')}</strong></span>
     <span>Fees per published Fee Structure — statement attached</span>
   </div>

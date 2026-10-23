@@ -7,6 +7,11 @@
  * their ClassroomSession shows they joined (or the class teacher marked
  * them present) and the teacher has not discounted it (present:false).
  *
+ * Never counted as missed: lessons on a school closure day (mid-term,
+ * holidays: SchoolClosure) unless the student came anyway, lessons while
+ * the student is on a pause or break, and lessons the Dean excused
+ * (ClassroomSession.excused).
+ *
  * Legacy history: before ATTENDANCE_CUTOVER the school kept a day
  * register (Attendance collection). For the part of a requested range that
  * falls before the cutover, those day docs are used instead (present /
@@ -79,7 +84,38 @@ async function heldLessons(from, to, opts = {}) {
     if (!lapsed && !c.outcome) return false;
     return isHeldClass(c, { joined: joined.has(String(c._id)), now: new Date(heldBy) });
   });
-  return withoutPausedStudents(held);
+  return markClosureDays(await withoutPausedStudents(held));
+}
+
+/**
+ * Flag lessons that fall on a school closure day (Nairobi calendar days).
+ * The timetable creates none there, but a lesson booked by hand, or one
+ * created before the closure was entered, may exist: it counts only for
+ * students who came (see lessonCounts).
+ */
+async function markClosureDays(classes) {
+  if (!classes.length) return classes;
+  let closed;
+  try {
+    const SchoolClosure = require('../models/SchoolClosure');
+    const { closedDaySet } = require('./scheduling');
+    const { zonedDayKey, DEFAULT_TZ } = require('./schoolTime');
+    const keys = classes.map(c => zonedDayKey(new Date(c.scheduledAt), DEFAULT_TZ)).sort();
+    const closures = await SchoolClosure.find({ start: { $lte: keys[keys.length - 1] }, end: { $gte: keys[0] } }).select('start end').lean();
+    if (!closures.length) return classes;
+    closed = closedDaySet(closures);
+    return classes.map(c => (closed.has(zonedDayKey(new Date(c.scheduledAt), DEFAULT_TZ)) ? { ...c, closureDay: true } : c));
+  } catch { return classes; }
+}
+
+/**
+ * Does this lesson count for this student? Excused lessons never count;
+ * lessons on a closure day count only when the student attended.
+ */
+function lessonCounts(c, s) {
+  if (s && s.excused) return false;
+  if (c.closureDay && !sessionAttended(s)) return false;
+  return true;
 }
 
 /**
@@ -99,6 +135,11 @@ async function withoutPausedStudents(classes) {
       student: { $in: ids }, startAt: { $lte: max },
       $or: [{ endedAt: null, expectedEnd: null }, { endedAt: { $gte: min } }, { endedAt: null, expectedEnd: { $gte: min } }],
     }).select('student startAt expectedEnd endedAt status').lean();
+    // A break set on the check-in page before it recorded a pause lives
+    // only on the user (onBreak, breakStart, breakEnd).
+    const onBreak = await User.find({ _id: { $in: ids }, onBreak: true, breakStart: { $ne: null, $lte: max } })
+      .select('_id breakStart breakEnd').lean();
+    onBreak.forEach(u => pauses.push({ student: u._id, startAt: u.breakStart, expectedEnd: u.breakEnd || null, endedAt: null }));
   } catch { return classes; }
   if (!pauses.length) return classes;
   const byStudent = {};
@@ -121,7 +162,7 @@ async function sessionsFor(classes, studentIds) {
   const q = { liveClassId: { $in: ids } };
   if (studentIds) q.userId = { $in: studentIds };
   const docs = await ClassroomSession.find(q)
-    .select('liveClassId userId present joinCount firstJoinedAt durationMs markedBy').lean();
+    .select('liveClassId userId present excused excuseNote joinCount firstJoinedAt durationMs markedBy').lean();
   return new Map(docs.map(s => [String(s.liveClassId) + '|' + String(s.userId), s]));
 }
 
@@ -140,9 +181,11 @@ async function sessionFacts(from, to, opts = {}) {
     perClass[cid] = { assigned: (c.assignedStudents || []).length, attended: 0 };
     (c.assignedStudents || []).forEach(u => {
       const uid = String(u);
+      const s = sess.get(cid + '|' + uid);
+      if (!lessonCounts(c, s)) { perClass[cid].assigned -= 1; return; }
       perStudent[uid] = perStudent[uid] || { scheduled: 0, attended: 0 };
       perStudent[uid].scheduled += 1;
-      if (sessionAttended(sess.get(cid + '|' + uid))) { perStudent[uid].attended += 1; perClass[cid].attended += 1; }
+      if (sessionAttended(s)) { perStudent[uid].attended += 1; perClass[cid].attended += 1; }
     });
   });
   const attended = (classId, userId) => sessionAttended(sess.get(String(classId) + '|' + String(userId)));
@@ -194,6 +237,17 @@ async function studentAttendance(from, to, opts = {}) {
         const uid = String(u);
         if (wanted && !wanted.has(uid)) return;
         const s = sess.get(cid + '|' + uid);
+        if (!lessonCounts(c, s)) {
+          // opts.allRows: the Dean's oversight view lists uncounted lessons too.
+          if (withRows && opts.allRows) get(uid).lessons.push({
+            liveClassId: c._id, title: c.title || '', subject: c.subject || '',
+            scheduledAt: c.scheduledAt, durationMins: c.durationMins || null,
+            attended: false, late: false, joinedAt: null, counted: false,
+            excused: !!(s && s.excused), excuseNote: (s && s.excuseNote) || '', closureDay: !!c.closureDay,
+            source: s?.markedBy ? 'teacher' : 'session',
+          });
+          return;
+        }
         const attended = sessionAttended(s);
         const late = attended && !!s.firstJoinedAt &&
           new Date(s.firstJoinedAt).getTime() > new Date(c.scheduledAt).getTime() + LATE_GRACE_MS;
@@ -204,7 +258,7 @@ async function studentAttendance(from, to, opts = {}) {
         if (withRows) r.lessons.push({
           liveClassId: c._id, title: c.title || '', subject: c.subject || '',
           scheduledAt: c.scheduledAt, durationMins: c.durationMins || null,
-          attended, late, joinedAt: s?.firstJoinedAt || null,
+          attended, late, joinedAt: s?.firstJoinedAt || null, counted: true,
           source: s?.markedBy ? 'teacher' : 'session',
         });
       });
@@ -251,6 +305,6 @@ async function oneStudent(studentId, from, to, opts = {}) {
 }
 
 module.exports = {
-  DEFAULT_CUTOVER, cutoverDate, sessionAttended, heldLessons, sessionsFor,
+  DEFAULT_CUTOVER, cutoverDate, sessionAttended, lessonCounts, heldLessons, sessionsFor,
   sessionFacts, studentAttendance, oneStudent, rateOf,
 };

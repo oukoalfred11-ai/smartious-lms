@@ -136,7 +136,9 @@ function photoFrame(doc, x, y, w, h, photo, name) {
   doc.restore()
 }
 
-const GRADE_WORD = { 'A*': 'Outstanding', A: 'Excellent', B: 'Very good', C: 'Good', D: 'Satisfactory', E: 'Needs support', U: 'Ungraded' }
+const { scaleKey, wordFor, keyLine } = require('./grading')
+// Catalogue ids (e.g. CambridgeIGCSE) print as their names.
+const curriculumName = (c) => (require('../constants/curriculum').CURRICULA.find(x => x.id === require('./academic').canonCurriculum(c)) || {}).name || c
 const HABITS = [['effort', 'Effort'], ['participation', 'Participation'], ['homework', 'Homework'], ['organisation', 'Organisation'],
   ['conduct', 'Conduct'], ['collaboration', 'Collaboration'], ['feedback', 'Response to feedback'], ['digital', 'Digital responsibility']]
 const SCALE = { 1: 'Concern', 2: 'Developing', 3: 'Good', 4: 'Excellent' }
@@ -191,7 +193,7 @@ function draw(doc, r, { logo, photo, signature }) {
   caps(doc, 'Student', ix, y + 2)
   doc.font('Times-Bold').fontSize(19).fillColor(INK).text(r.studentName || '', ix, y + 12, { width: iw, lineBreak: false, ellipsis: true })
   const pairs = [
-    ['Admission no.', r.admissionNo], ['Year / Grade', r.yearGrade], ['Curriculum', r.curriculum],
+    ['Admission no.', r.admissionNo], ['Year / Grade', r.yearGrade], ['Curriculum', curriculumName(r.curriculum)],
     ['Programme', r.programme], ['Class teacher', r.classTeacher], ['Term dates', r.termStart && r.termEnd ? `${fmtShort(r.termStart)} – ${fmtShort(r.termEnd)}` : ''],
   ]
   const cw = iw / 3
@@ -206,7 +208,7 @@ function draw(doc, r, { logo, photo, signature }) {
   const att = r.scheduledDays ? Math.round((r.attendedDays / r.scheduledDays) * 100) : null
   const meds = [
     ['Overall average', r.overallAverage != null ? n0(r.overallAverage) + '%' : '—'],
-    ['Mean grade', r.meanGrade && r.meanGrade !== '—' ? r.meanGrade : '—', GRADE_WORD[r.meanGrade] || ''],
+    ['Mean grade', r.meanGrade && r.meanGrade !== '—' ? r.meanGrade : '—', wordFor(r.curriculum, r.meanGrade, r.yearGrade)],
     ['Weekly tests', (() => { const xs = (r.subjects || []).map(s => s.weeklyAverage).filter(v => v != null); return xs.length ? n0(xs.reduce((a, b) => a + b, 0) / xs.length) + '%' : '—' })(), 'average'],
     ['Attendance', att != null ? att + '%' : '—', r.scheduledDays ? `${r.attendedDays} of ${r.scheduledDays} lessons` : ''],
   ]
@@ -229,9 +231,12 @@ function draw(doc, r, { logo, photo, signature }) {
     return yy + 17
   }
   y = sectionHead('Academic performance', y)
+  // Descriptive bands (Exceeding, Developing...) need a wider grade column.
+  const wordy = scaleKey(r.curriculum, r.yearGrade) === 'descriptive'
+  const gw = wordy ? 58 : 34
   const cols = [
     ['Subject', 104, 'left'], ['Weekly tests', 76, 'left'], ['Wk avg', 36, 'right'], ['Exam', 40, 'right'],
-    ['Final', 34, 'right'], ['Grade', 34, 'center'], ["Teacher's comment", W - 104 - 76 - 36 - 40 - 34 - 34 - 6, 'left'],
+    ['Final', 34, 'right'], ['Grade', gw, 'center'], ["Teacher's comment", W - 104 - 76 - 36 - 40 - 34 - gw - 6, 'left'],
   ]
   const head = (yy) => {
     let x = M + 3
@@ -270,14 +275,15 @@ function draw(doc, r, { logo, photo, signature }) {
     doc.text(n0(s.weeklyAverage), x, y + 7, { width: cols[2][1] - 4, align: 'right', lineBreak: false }); x += cols[2][1]
     doc.fillColor(s.endTermScore == null ? '#A23B2A' : INK).text(s.endTermScore == null ? '—' : n0(s.endTermScore), x, y + 7, { width: cols[3][1] - 4, align: 'right', lineBreak: false }); x += cols[3][1]
     doc.font('Times-Bold').fillColor(INK).text(n0(s.weightedScore), x, y + 7, { width: cols[4][1] - 4, align: 'right', lineBreak: false }); x += cols[4][1]
-    doc.font('Times-Bold').fontSize(11).fillColor(CRIMSON).text(s.letterGrade || '—', x, y + 6, { width: cols[5][1], align: 'center', lineBreak: false }); x += cols[5][1]
+    doc.font('Times-Bold').fontSize(wordy ? 9 : 11).fillColor(CRIMSON).text(s.letterGrade || '—', x, y + 6, { width: cols[5][1], align: 'center', lineBreak: false }); x += cols[5][1]
     doc.font('Times-Italic').fontSize(8.6).fillColor(SEPIA).text(cmt || '—', x + 4, y + 6, { width: cols[6][1] - 4 })
     y += rh
   })
   doc.lineWidth(0.9).strokeColor(GOLD).moveTo(M, y + 1).lineTo(PW - M, y + 1).stroke()
   doc.font('Times-Italic').fontSize(7.2).fillColor(SEPIA)
     .text('Final = weekly test average 30% + end-of-term exam 70%. Bars: each weekly test in order (green 70%+, gold 50–69%, red under 50%, outline = missed).', M, y + 5, { width: W, lineBreak: false })
-  y += 18
+  doc.text('Grades — ' + keyLine(r.curriculum, r.yearGrade) + '.', M, y + 14, { width: W, lineBreak: false, ellipsis: true })
+  y += 27
 
   // ── Attendance and learning habits ──
   y = ensure(y, 70)
@@ -338,7 +344,9 @@ function draw(doc, r, { logo, photo, signature }) {
   y = ensure(y, 40)
   ornamentRule(doc, y, 340)
   y += 10
-  const close = [['Date issued', fmtD(r.dateIssued || new Date())], ['Next term begins', r.nextTermStart], ['Reporting time', r.reportingTime], ['Promotion', r.promotionDecision]]
+  const close = [['Date issued', fmtD(r.dateIssued || new Date())], ['Next term begins', r.nextTermStart], ['Reporting time', r.reportingTime],
+    // Promotion is a year-end decision: Term 3 only.
+    ['Promotion', Number(r.term) === 3 ? r.promotionDecision : '']]
     .filter(([, v]) => v)
   const qw = W / Math.max(1, close.length)
   close.forEach(([k, v], i) => {

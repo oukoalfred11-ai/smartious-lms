@@ -206,6 +206,19 @@ router.post('/break', auth, requireRole(...ADMIN_ROLES), async (req, res) => {
     }, { new:true })
 
     if (!user) return res.status(404).json({ success:false, message:'User not found.' })
+    // Record the break as a student pause too: attendance excuses lessons
+    // during a pause, so a mid-term break never reads as absences.
+    if (user.role === 'student') {
+      try {
+        const StudentPause = require('../models/StudentPause')
+        await StudentPause.updateMany({ student: user._id, status: 'active', blockAccess: { $ne: true } }, { $set: { status: 'ended', endedAt: new Date() } })
+        await StudentPause.create({
+          student: user._id, type: StudentPause.PAUSE_TYPES.includes(breakType) ? breakType : 'other',
+          note: breakNote, startAt: user.breakStart, expectedEnd: user.breakEnd,
+          createdBy: req.user._id, createdByRole: req.user.role,
+        })
+      } catch (e) { console.error('[checkin] break pause', e.message) }
+    }
     console.log('[checkin] Placed on break:', user.firstName, user.lastName, breakType)
     return res.json({ success:true, message:`${user.firstName} ${user.lastName} placed on ${breakType}.`, data:{ user } })
   } catch(e) { return res.status(500).json({ success:false, message:e.message }) }
@@ -219,6 +232,10 @@ router.delete('/break/:userId', auth, requireRole(...ADMIN_ROLES), async (req, r
       $set: { onBreak:false, breakType:'', breakNote:'', breakStart:null, breakEnd:null, isActive:true }
     }, { new:true })
     if (!user) return res.status(404).json({ success:false, message:'User not found.' })
+    try {
+      const StudentPause = require('../models/StudentPause')
+      await StudentPause.updateMany({ student: user._id, status: 'active', blockAccess: { $ne: true } }, { $set: { status: 'ended', endedAt: new Date() } })
+    } catch (e) { console.error('[checkin] end pause', e.message) }
     return res.json({ success:true, message:`${user.firstName} ${user.lastName} is back from break.`, data:{ user } })
   } catch(e) { return res.status(500).json({ success:false, message:e.message }) }
 })

@@ -48,6 +48,10 @@ const classroomSessionSchema = new mongoose.Schema({
   // doc created by a teacher with joinCount 0 records off-platform presence.
   present:  { type: Boolean, default: true },
   markedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+  // Set by the Dean: the lesson does not count for this student at all
+  // (excused absence, wrongly scheduled during a break). See attendanceFacts.
+  excused:    { type: Boolean, default: false },
+  excuseNote: { type: String, default: '', maxlength: 300 },
 
   joinCount: { type: Number, default: 0, min: 0 },
 }, { timestamps: true });
