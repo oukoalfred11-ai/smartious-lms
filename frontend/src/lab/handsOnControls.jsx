@@ -28,6 +28,9 @@ function ivVerb(iv) {
     case 'rheostat': return 'Move the rheostat slider until it reads'
     case 'dc_supply': return 'Turn the supply knob to'
     case 'water_bath': return 'Set the water bath to'
+    case 'measuring_cylinder': return 'Measure out'
+    case 'bench_lamp': return 'Move the lamp to'
+    case 'agar_blocks': return 'Cut a cube with side'
     case 'stopwatch': return 'Wait until the stopwatch reads'
     case 'metre_rule': return 'Move it (or the clamp) to'
     case 'signal_generator': return 'Set the signal generator to'
@@ -51,7 +54,7 @@ function Preparation({ def, view, dispatch, editable }) {
         <div className="lab-row">
           {H.goggles
             ? <span className="lab-ok">Safety goggles on.</span>
-            : <><span className="lab-warn">Something here is loaded or stretched and could snap.</span><Btn kind="sm primary" onClick={() => dispatch('wearGoggles')} disabled={!editable}>Put on safety goggles</Btn></>}
+            : <><span className="lab-warn">{H.gogglesWhy || 'Something here is loaded or stretched and could snap.'}</span><Btn kind="sm primary" onClick={() => dispatch('wearGoggles')} disabled={!editable}>Put on safety goggles</Btn></>}
         </div>
       )}
       {H.tareInstruments.map(id => {

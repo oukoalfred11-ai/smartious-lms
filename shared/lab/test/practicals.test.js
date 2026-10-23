@@ -4,13 +4,16 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { PHYSICS_AL } from '../experiments/physics-al/index.js'
+import { IGCSE } from '../experiments/igcse/index.js'
 import { paramsFor, applyAction, replay, gradeSession, validateDefinition } from '../engine.js'
 import { APPARATUS } from '../apparatus.js'
 import { carefulRun } from './careful.js'
 
-test('every AS & A Level physics practical definition is valid', () => {
+const ALL = [...PHYSICS_AL, ...IGCSE]
+
+test('every measurement practical definition is valid (AS & A Level physics, IGCSE chemistry and biology)', () => {
   const ids = new Set()
-  for (const d of PHYSICS_AL) {
+  for (const d of ALL) {
     assert.deepEqual(validateDefinition(d), [], d.id)
     assert.ok(!ids.has(d.id), 'duplicate id ' + d.id); ids.add(d.id)
     for (const a of d.apparatus) assert.ok(APPARATUS[a], d.id + ': apparatus ' + a)
@@ -20,8 +23,8 @@ test('every AS & A Level physics practical definition is valid', () => {
   }
 })
 
-for (const def of PHYSICS_AL) {
-  test(`${def.collection.code} ${def.title}: a careful student scores every automatic mark`, () => {
+for (const def of ALL) {
+  test(`${def.collection.name} ${def.collection.code} ${def.title}: a careful student scores every automatic mark`, () => {
     for (const seed of ['s1', 's2', 's3', 's4', 's5', 's6']) {
       const { params, state, actions, answers } = carefulRun(def, seed)
       // The server rebuilds the same state from the action log.
@@ -31,7 +34,7 @@ for (const def of PHYSICS_AL) {
       for (const v of Object.values(def.expected({ params, state, answers }))) assert.ok(v == null || Number.isFinite(v))
     }
   })
-  test(`${def.collection.code} ${def.title}: on the hands-on bench a careful student also scores every automatic mark`, () => {
+  test(`${def.collection.name} ${def.collection.code} ${def.title}: on the hands-on bench a careful student also scores every automatic mark`, () => {
     for (const seed of ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']) {
       const { params, state, actions, answers } = carefulRun(def, seed, { options: { bench: 2 } })
       assert.deepEqual(replay(def, params, actions), state)
@@ -59,4 +62,17 @@ test('a wrong result loses marks; in stockroom mode, missing apparatus blocks re
 
   const run = carefulRun(def, 'w3', { options: { stockroom: true } })
   assert.equal(gradeSession(def, { params: run.params, state: run.state, answers: run.answers }).rows.find(r => r.id === 'apparatus').marks, 1)
+})
+
+test('IGCSE practicals carry their own subject, level and goggles reason', () => {
+  assert.deepEqual([...new Set(IGCSE.map(d => d.subject))].sort(), ['biology', 'chemistry'])
+  for (const d of IGCSE) {
+    assert.equal(d.difficulty, 'IGCSE')
+    assert.ok(d.curriculum.every(c => c.subject.toLowerCase() === d.subject && !c.verified), d.id + ': curriculum')
+  }
+  const def = IGCSE.find(d => d.id === 'chem-ig-1-1')
+  const p = paramsFor(def, 'g1', { bench: 2 })
+  let s = def.initialState(p)
+  s = applyAction(def, p, s, { type: 'setEye', payload: { offset: 0 } })
+  assert.throws(() => applyAction(def, p, s, { type: 'measure', payload: { key: 'room' } }), /splash/)
 })

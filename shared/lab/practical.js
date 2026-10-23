@@ -12,7 +12,8 @@
  *
  * Specification (all text is Smartious's own wording):
  * {
- *   id, collection: { id, name, code, chapter }, title, summary, aim, topic,
+ *   id, subject?: 'physics'|'chemistry'|'biology' (default physics),
+ *   collection: { id, name, code, chapter }, title, summary, aim, topic,
  *   durationMin, difficulty, skills[], objectives[], safety[], procedure[], controlled,
  *   apparatus: [ids from apparatus.js], distractors?: [ids],
  *   model: { kind: 'quantitative'|'simplified', summary, assumptions[] },
@@ -37,6 +38,7 @@
  *   }                                  measures read by a meter name it: { meter: 'A1' } (or it is inferred)
  *   minPoints?: 5, minSpanFrac?: 0.5
  *   goggles?: boolean                  eye protection needed (default: the safety notes say "wear eye protection")
+ *   gogglesWhy?: string                why, shown before goggles are put on (default: something could snap)
  * }
  *   A measure labelled "Time for 20 oscillations" (or with cycles: 20) is timed by counting cycles.
  *
@@ -192,6 +194,7 @@ export function definePractical(spec) {
 
   // ── Hands-on bench (bench: 2) ─────────────────────────────
   const needsGoggles = spec.goggles ?? /wear eye protection|goggles/i.test((spec.safety || []).join(' '))
+  const gogglesWhy = spec.gogglesWhy || 'Something here is loaded or stretched and could snap.'
   const baseKind = (r) => instrumentKind(r.instrument, r)
   const zeroInstruments = [...new Set(allReadings.filter(r => ZERO_INSTRUMENTS.includes(r.instrument) && baseKind(r) === 'micrometer').map(r => r.instrument))]
   const tareInstruments = [...new Set(allReadings.filter(r => TARE_INSTRUMENTS.includes(r.instrument)).map(r => r.instrument))]
@@ -231,7 +234,7 @@ export function definePractical(spec) {
   }
   const warm = (params, s) => { if (heatParts.length && flowing(params, s)) s.hands.heat += 1 }
   function needHands(s) { if (!s.hands) fail('This step is part of the hands-on bench. Start a new attempt to use it.') }
-  function needGoggles(s) { if (s.hands && needsGoggles && !s.hands.goggles) fail('Put on your safety goggles first: something here is loaded or stretched and could snap.') }
+  function needGoggles(s) { if (s.hands && needsGoggles && !s.hands.goggles) fail('Put on your safety goggles first. ' + gogglesWhy) }
 
   // ── helpers over state ────────────────────────────────────
   const typedConsts = (s) => Object.fromEntries(constants.map(c => [c.key, corrected(s, c.key, num(s.constants[c.key]))]))
@@ -362,11 +365,11 @@ export function definePractical(spec) {
   ]
 
   const def = {
-    id: spec.id, version: spec.version || 1, subject: 'physics',
+    id: spec.id, version: spec.version || 1, subject: spec.subject || 'physics',
     title: spec.title, summary: spec.summary,
     collection: spec.collection || null,
     durationMin: spec.durationMin || 40, difficulty: spec.difficulty || 'AS',
-    curriculum: spec.curriculum || [{ board: 'Cambridge', level: 'International AS & A Level', subject: 'Physics', topic: spec.topic || spec.title, syllabusRef: null, verified: false }],
+    curriculum: spec.curriculum || [{ board: 'Cambridge', level: 'International AS & A Level', subject: (spec.subject || 'physics').replace(/^./, ch => ch.toUpperCase()), topic: spec.topic || spec.title, syllabusRef: null, verified: false }],
     skills: spec.skills || ['Taking and recording readings', 'Plotting and analysing a graph', 'Evaluating uncertainty'],
     objectives: spec.objectives || [spec.aim],
     prerequisites: spec.prerequisites || [],
@@ -731,7 +734,7 @@ export function definePractical(spec) {
       return [id, { value: H.tared[id] ? 0 : toResolution(params._tare[id] * r.resolution, r.resolution), resolution: r.resolution, unit: r.unit }]
     }))
     return {
-      goggles: H.goggles, needsGoggles, tidy: H.tidy, eye: H.eye, eyeSquare: EYE_SQUARE, settled: H.settled, timer: { ...H.timer },
+      goggles: H.goggles, needsGoggles, gogglesWhy, tidy: H.tidy, eye: H.eye, eyeSquare: EYE_SQUARE, settled: H.settled, timer: { ...H.timer },
       heat: H.heat, heatFrac: heatParts.length ? Math.min(1, (heatFactor(H.heat) - 1) / (heatFactor(1e9) - 1)) : 0, hot: H.heat > HOT_STEPS,
       tared: { ...H.tared }, tareInstruments, balanceZero, zeroInstruments, zeroShown: { ...H.zeroShown }, zero: { ...H.zero },
       settles: allReadings.filter(settles).map(r => r.key), timed: timed.map(m => ({ key: m.key, cycles: cyclesOf(m) })),

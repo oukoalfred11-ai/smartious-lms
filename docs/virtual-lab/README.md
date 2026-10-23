@@ -112,6 +112,21 @@ Two automatic marks are added on this bench: **Instrument technique** (zero erro
 
 Not yet on this bench: no practical takes a protractor reading; oscilloscope, data logger, GM counter, signal generator and light gate readings are shown as digital displays, as is any meter whose resolution is too fine for a needle scale (most voltmeters and the pressure gauge); four readings without a drawn scale (14.5 electron tube, 5.2 number of coils, 12.2 oil column, 8.1 hanging mass) still show their value as text.
 
+## IGCSE chemistry and biology practicals
+
+Six practicals on the same `definePractical()` engine, with `subject: 'chemistry'` or `'biology'`, level IGCSE, and curriculum links to Cambridge IGCSE and Pearson Edexcel International GCSE (topics only, marked unverified). **All procedures, models, questions and wording are Smartious's own**, and nothing claims endorsement by an examination board. Code: `shared/lab/experiments/igcse/`.
+
+| Code | Practical | Graph and result |
+|---|---|---|
+| Chem 1.1 | Concentration and rate: the disappearing cross | 1/t against c; gradient, and a predicted time read from the line |
+| Chem 1.2 | Temperature and rate: the disappearing cross (water bath) | lg(1/t) against θ; the temperature rise that doubles the rate |
+| Chem 2.1 | Energy from burning ethanol (spirit burner, copper can) | ΔT against mass burned; kJ per gram and the percentage of the data-book value |
+| Bio 1.1 | Light intensity and photosynthesis (pondweed, photosynthometer) | lg(rate) against lg(d); gradient close to −2 (inverse square) |
+| Bio 2.1 | Temperature and amylase (iodine on a spotting tile every 10 s) | rate against θ as a curve; optimum temperature from the results |
+| Bio 3.1 | Diffusion into agar cubes | t against L²; time for a 1 cm cube, and surface area to volume ratio |
+
+The models are simplified and say so: their assumptions are listed on each practical (for example, Arrhenius behaviour with a stated activation energy; light as the only limiting factor; testing every 10 s, so the amylase times are rounded up to the next test). The goggles prompt gives each practical's own reason (`gogglesWhy`). New stockroom items with 3D models: conical flask, cross card, boiling tubes, spirit burner, copper can, spotting tile, pondweed, photosynthometer, bench lamp and agar blocks. Every practical is played by a careful student on 12 seeds, on both benches (`test/practicals.test.js`). Each bench was also rendered in headless Chromium.
+
 ## AS & A Level Physics practicals
 
 67 practicals across 16 chapters, from "Using apparatus" to "Quantum physics, nuclear physics and medical imaging". The topic list follows a standard AS & A Level practical course. **All procedures, models, questions and wording are Smartious's own; no textbook text is reproduced**, and nothing claims endorsement by an examination board. Curriculum links are marked unverified.
