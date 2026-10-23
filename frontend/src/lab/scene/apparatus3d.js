@@ -454,6 +454,7 @@ reg('measuring_cylinder', 0.1, () => {
   const band = gradBand(0.0213, 0.24, 5, { label: '50' }); band.position.y = 0.012 + 0.12; g.add(band)
   const liq = column(0.0198, 'water'); liq.position.y = 0.011; g.add(liq)
   g.userData.setLevel = (f) => { liq.scale.y = 0.24 * (0.05 + 0.9 * Math.min(1, Math.max(0, f))) }
+  g.userData.setReading = (cm3) => { liq.scale.y = 0.24 * Math.min(1, Math.max(0.02, cm3 / 250)) }
   g.userData.setLevel(0.4)
   return g
 })
@@ -1091,6 +1092,13 @@ reg('spirit_burner', 0.09, () => {
   g.add(cyl(0.01, 0.012, 'brass', 0, 0.044, 0, 18), cyl(0.0035, 0.012, M('#F2EBDA', { roughness: 1 }), 0, 0.056, 0, 10))
   const cap = cyl(0.012, 0.018, 'brass', 0.045, 0, 0.02, 18); g.add(cap)
   g.add(front(plate('ETHANOL', 0.04, 0.012, { bg: '#FFFFFF', fg: '#B42318' }), 0, 0.02, 0.037))
+  // The flame: a blue base and a pale yellow tip that flicker while lit.
+  const outer = mesh(new THREE.ConeGeometry(0.009, 0.045, 18, 1, true), M('#FFC46B', { emissive: '#FF9A2E', emissiveIntensity: 1.4, transparent: true, opacity: 0.55, depthWrite: false, side: THREE.DoubleSide }), 0, 0.085, 0)
+  const inner = mesh(new THREE.ConeGeometry(0.005, 0.018, 16, 1, true), M('#6FA8FF', { emissive: '#3D7BFF', emissiveIntensity: 1.6, transparent: true, opacity: 0.7, depthWrite: false, side: THREE.DoubleSide }), 0, 0.071, 0)
+  const flame = grp(outer, inner); flame.visible = false; g.add(flame)
+  let t = 0
+  g.userData.setLit = (on) => { flame.visible = !!on }
+  g.userData.tick = (dt) => { if (!flame.visible) return; t += dt; const f = 1 + 0.12 * Math.sin(t * 23) + 0.08 * Math.sin(t * 37 + 1); outer.scale.set(1 / Math.sqrt(f), f, 1 / Math.sqrt(f)); outer.position.x = 0.0012 * Math.sin(t * 11) }
   return g
 })
 reg('copper_can', 0.1, () => {
@@ -1123,7 +1131,15 @@ reg('pondweed', 0.07, () => {
     g.add(cyl(0.0011, 0.13, leaf, x, 0.03, 0, 6))
     for (let i = 0; i < 9; i++) { const l = box(0.009, 0.0008, 0.003, leaf, x, 0.045 + i * 0.012, 0); l.rotation.y = i * 1.1 + k; l.rotation.z = 0.4; g.add(l) }
   }
-  g.add(ball(0.0016, M('#FFFFFF', { transparent: true, opacity: 0.8 }), 0.002, 0.17, 0, 8), ball(0.0012, M('#FFFFFF', { transparent: true, opacity: 0.8 }), -0.001, 0.15, 0.001, 8))
+  // Oxygen bubbles rising from the cut stem; tick(dt, perSecond) animates them.
+  const bm = M('#FFFFFF', { transparent: true, opacity: 0.75, roughness: 0.05 })
+  const bubbles = Array.from({ length: 8 }, () => { const b = ball(0.0016, bm, 0, 0.17, 0, 8); b.visible = false; g.add(b); return b })
+  let due = 0, k = 0
+  g.userData.tick = (dt, perSecond) => {
+    due += dt * perSecond
+    while (due >= 1) { due -= 1; const b = bubbles[k++ % bubbles.length]; b.visible = true; b.position.set((Math.random() - 0.5) * 0.004, 0.16, (Math.random() - 0.5) * 0.004); b.scale.setScalar(0.7 + Math.random() * 0.6) }
+    for (const b of bubbles) if (b.visible) { b.position.y += dt * 0.03; if (b.position.y > 0.19) b.visible = false }
+  }
   return g
 })
 reg('photosynthometer', 0.3, () => {
@@ -1172,6 +1188,7 @@ reg('gas_syringe', 0.34, () => {
   // The plunger moves out as gas is collected (more in a warmer bath).
   g.userData.levelWith = ['water_bath']
   g.userData.setLevel = (f) => { plunger.position.x = -0.1 + 0.19 * Math.min(1, Math.max(0, f)) }
+  g.userData.setReading = (cm3) => g.userData.setLevel(cm3 / 100)
   return g
 })
 

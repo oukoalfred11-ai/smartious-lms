@@ -154,6 +154,59 @@ export function Thermometer({ pos, eye = 0, settled = true, label }) {
   )
 }
 
+// ── Measuring cylinder ─────────────────────────────────────
+/** A measuring cylinder seen side-on; pos (cm³) is the bottom of the meniscus. Divisions of `division` cm³. */
+export function Cylinder({ pos, division = 1, eye = 0, label }) {
+  const H = 320, Y0 = H / 2, PX = 26 / division, SPAN = 6 * division
+  const shift = parallaxShift(eye, division) * PX
+  const yOf = (v) => Y0 - (v - pos) * PX
+  const from = Math.floor((pos - SPAN) / division), to = Math.ceil((pos + SPAN) / division)
+  const top = yOf(pos) + shift
+  return (
+    <svg viewBox={`0 0 200 ${H}`} className="lab-closeup-svg tall" role="img" aria-label={label || 'Measuring cylinder close-up'}>
+      <rect x="40" y="0" width="120" height={H} fill="#F4F8FB" stroke="#9AA9B6" />
+      <path d={`M40 ${top - 9} Q100 ${top + 7} 160 ${top - 9} L160 ${H} L40 ${H} Z`} fill="#BFDDF2" opacity="0.85" />
+      <path d={`M40 ${top - 9} Q100 ${top + 7} 160 ${top - 9}`} fill="none" stroke="#4A7FA8" strokeWidth="2" />
+      {Array.from({ length: to - from + 1 }, (_, i) => {
+        const k = from + i, v = k * division, y = yOf(v)
+        const major = Math.abs(v / (division * 10) - Math.round(v / (division * 10))) < 1e-6, mid = !major && Math.abs(v / (division * 5) - Math.round(v / (division * 5))) < 1e-6
+        return <g key={k}>
+          <line x1="40" y1={y} x2={40 + (major ? 48 : mid ? 34 : 22)} y2={y} stroke={INK} strokeWidth={major ? 1.8 : 1} />
+          {(major || mid) && <text x={major ? 94 : 80} y={y + 5} fontSize="13" fill={INK}>{Number(v.toFixed(3))}</text>}
+        </g>
+      })}
+      <text x="190" y={H - 8} fontSize="12" textAnchor="end" fill="#555">cm³</text>
+      <text x="190" y="16" fontSize="10" textAnchor="end" fill="#555">read the bottom of the curve</text>
+    </svg>
+  )
+}
+
+// ── Gas syringe ────────────────────────────────────────────
+/** A glass gas syringe seen from the front; pos (cm³) is where the plunger's inner edge sits. 1 cm³ divisions. */
+export function Syringe({ pos, eye = 0, label }) {
+  const W = 560, X0 = W / 2, PX = 26, SPAN = 9
+  const shift = parallaxShift(eye, 1) * PX
+  const xOf = (v) => X0 + (v - pos) * PX
+  const from = Math.max(0, Math.floor(pos - SPAN)), to = Math.ceil(pos + SPAN)
+  const edge = X0 + shift
+  return (
+    <svg viewBox={`0 0 ${W} 150`} className="lab-closeup-svg" role="img" aria-label={label || 'Gas syringe close-up'}>
+      <rect x="0" y="34" width={W} height="84" rx="10" fill="#F2F7FA" stroke="#9AA9B6" />
+      <rect x="0" y="50" width={Math.max(0, edge)} height="52" fill="#FFFFFF" opacity="0.6" />
+      <rect x={edge} y="44" width={W - edge} height="64" fill="#DCE6EE" stroke="#8A99A6" />
+      <rect x={edge} y="44" width="10" height="64" fill="#A9B8C4" />
+      {Array.from({ length: to - from + 1 }, (_, i) => {
+        const v = from + i, x = xOf(v), L = v % 10 === 0 ? 24 : v % 5 === 0 ? 17 : 10
+        return <g key={v}>
+          <line x1={x} y1="34" x2={x} y2={34 + L} stroke={INK} strokeWidth={v % 5 === 0 ? 1.6 : 1} />
+          {v % 10 === 0 && <text x={x} y="28" fontSize="15" textAnchor="middle" fill={INK}>{v}</text>}
+        </g>
+      })}
+      <text x={W - 8} y="140" fontSize="12" textAnchor="end" fill="#555">cm³ · read at the inner edge of the plunger</text>
+    </svg>
+  )
+}
+
 // ── Vernier callipers ──────────────────────────────────────
 /** Main scale (mm) and the sliding vernier with n divisions; value in mm. */
 export function Vernier({ mm, n = 10, label }) {
@@ -325,6 +378,8 @@ export function CloseUp({ r, view, label }) {
     case 'dial': return <Dial pos={value == null ? null : look.pos ?? value} fullScale={look.fullScale ?? info.fullScale} division={look.division ?? info.division} unit={r.unit} eye={H.eye} settled={settled} label={name} />
     case 'rule': return value == null ? null : <Rule pos={look.pos ?? value} eye={H.eye} settled={settled} label={name} />
     case 'thermometer': return value == null ? null : <Thermometer pos={look.pos ?? value} eye={H.eye} settled={settled} label={name} />
+    case 'cylinder': return value == null ? null : <Cylinder pos={look.pos ?? value} division={r.resolution >= 1 ? r.resolution : 1} eye={H.eye} label={name} />
+    case 'syringe': return value == null ? null : <Syringe pos={look.pos ?? value} eye={H.eye} label={name} />
     case 'vernier': return value == null ? null : <Vernier mm={value * (r.unit === 'cm' ? 10 : 1)} n={info.n || 10} label={name} />
     case 'micrometer': return value == null ? null : <Micrometer mm={value} label={name} />
     case 'stopwatch': return <StopwatchFace text={stopwatchText(value, r.resolution)} running={false} />
