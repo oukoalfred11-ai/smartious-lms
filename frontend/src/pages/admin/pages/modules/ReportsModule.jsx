@@ -178,6 +178,8 @@ function ReportGenerator({ toast, onBack, onSaved }) {
     agreedTargets: ['', '', ''],
     classTeacherReport: '',
     hodRemarks: '',
+    deanName: '',
+    principalComment: '',
     issuedBy: 'Ms. Brendaliz Chelangat — Head of Academics',
     promotionDecision: '',
     nextTermStart: '',
@@ -456,9 +458,16 @@ function ReportGenerator({ toast, onBack, onSaved }) {
             style={{ ...inp, resize:'vertical', fontFamily:'inherit' }}/>
         </div>
         <div style={{ marginBottom:14 }}>
-          <label style={lbl}>Head of Academics' remarks</label>
-          <textarea value={f.hodRemarks} onChange={e=>set('hodRemarks',e.target.value)} rows={4}
-            placeholder="HoD's remarks..."
+          <label style={lbl}>Dean's comment</label>
+          <textarea value={f.hodRemarks} onChange={e=>set('hodRemarks',e.target.value)} rows={3}
+            placeholder="The Dean's comment on this student's term..."
+            style={{ ...inp, resize:'vertical', fontFamily:'inherit' }}/>
+          <input value={f.deanName} onChange={e=>set('deanName',e.target.value)} placeholder="Dean's name as it should appear (leave blank to use yours)" style={{ ...inp, marginTop:6 }}/>
+        </div>
+        <div style={{ marginBottom:14 }}>
+          <label style={lbl}>Principal's comment</label>
+          <textarea value={f.principalComment} onChange={e=>set('principalComment',e.target.value)} rows={3}
+            placeholder="A short comment from the Principal (signed Alfred Ouko, Founder & Principal, with the school seal)..."
             style={{ ...inp, resize:'vertical', fontFamily:'inherit' }}/>
         </div>
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:12 }}>
@@ -488,13 +497,13 @@ function ReportDetail({ toast, report: initialReport, onBack }) {
   const downloadPdf = async () => {
     setLoadingPdf(true)
     try {
-      const { data } = await api.get('/reports/'+report._id+'/pdf-html')
-      if (data.success) {
-        const w = window.open('','_blank')
-        if (!w) { toast?.error?.('Allow pop-ups to open the report.'); return }
-        w.document.write(data.data.html)
-        w.document.close()
-      }
+      // The official PDF (logo, photo, seal and signature), as students download it.
+      const w = window.open('','_blank')
+      if (!w) { toast?.error?.('Allow pop-ups to open the report.'); return }
+      try {
+        const res = await api.get('/reports/'+report._id+'/pdf', { responseType:'blob' })
+        w.location.href = URL.createObjectURL(new Blob([res.data], { type:'application/pdf' }))
+      } catch (e) { w.close(); throw e }
     } catch { toast?.error?.('Could not load report PDF.') }
     finally { setLoadingPdf(false) }
   }
@@ -615,15 +624,19 @@ function ReportDetail({ toast, report: initialReport, onBack }) {
       </div>
 
       {/* Remarks */}
-      {(report.classTeacherReport || report.hodRemarks) && (
+      {(report.classTeacherReport || report.hodRemarks || report.principalComment) && (
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14, marginBottom:14 }}>
           <div className="card" style={{ padding:18 }}>
             <div style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.06em', marginBottom:8 }}>Class Teacher's Report</div>
             <div style={{ fontSize:12.5, color:TOKENS.s700, lineHeight:1.65 }}>{report.classTeacherReport||'—'}</div>
           </div>
           <div className="card" style={{ padding:18 }}>
-            <div style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.06em', marginBottom:8 }}>Head of Academics</div>
+            <div style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.06em', marginBottom:8 }}>Dean{report.deanName ? ' · ' + report.deanName : ''}</div>
             <div style={{ fontSize:12.5, color:TOKENS.s700, lineHeight:1.65 }}>{report.hodRemarks||'—'}</div>
+          </div>
+          <div className="card" style={{ padding:18, gridColumn:'1 / -1' }}>
+            <div style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.06em', marginBottom:8 }}>Principal</div>
+            <div style={{ fontSize:12.5, color:TOKENS.s700, lineHeight:1.65 }}>{report.principalComment||'—'}</div>
           </div>
         </div>
       )}

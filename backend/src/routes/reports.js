@@ -13,6 +13,7 @@ const User     = require('../models/User')
 const Exam     = require('../models/Exam')
 const ExamSubmission = require('../models/ExamSubmission')
 const attendanceFacts = require('../lib/attendanceFacts')
+const { scoresFor } = require('../lib/reportScores')
 // Term end dates arrive as YYYY-MM-DD (UTC midnight); lessons that day count.
 const endOfDay = (d) => (d.getUTCHours() === 0 && d.getUTCMinutes() === 0 ? new Date(d.getTime() + 864e5 - 1) : d)
 
@@ -57,6 +58,18 @@ router.get('/', auth, ALLOWED, async (req, res) => {
     ])
     return res.json({ success: true, data: { reports, total, page: p, totalPages: Math.ceil(total/lim) } })
   } catch(e) { return res.status(500).json({ success: false, message: e.message }) }
+})
+
+// ── GET /api/reports/mine ─────────────────────────────────
+// The signed-in student's published term reports (parents use
+// /api/parent/children/:id/reports).
+router.get('/mine', auth, requireRole('student'), async (req, res) => {
+  try {
+    const reports = await Report.find({ studentId: req.user._id, status: 'published' })
+      .select('academicYear term termLabel overallAverage meanGrade dateIssued punctualityPct subjects.subject')
+      .sort({ academicYear: -1, term: -1 }).lean()
+    return res.json({ success: true, data: { reports } })
+  } catch (e) { return res.status(500).json({ success: false, message: e.message }) }
 })
 
 // ── GET /api/reports/:id ────────────────────────────────────
@@ -125,10 +138,19 @@ router.post('/:id/publish', auth, requireRole('admin','ops_manager','dos','accou
   } catch(e) { return res.status(500).json({ success:false, message:e.message }) }
 })
 
-router.get('/:id', auth, requireRole('admin','ops_manager','accountant','teacher','student','parent'), async (req, res) => {
+router.get('/:id', auth, requireRole('admin','ops_manager','dos','accountant','teacher','student','parent'), async (req, res, next) => {
+  // Named routes registered below (/preview) must not be read as an id.
+  if (!require('mongoose').isValidObjectId(req.params.id)) return next()
   try {
     const report = await Report.findById(req.params.id).lean()
     if (!report) return res.status(404).json({ success: false, message: 'Report not found.' })
+    // Families see only their own child's published reports.
+    const role = req.user.role
+    if (role === 'student' || role === 'parent') {
+      const own = role === 'student' ? String(report.studentId) === String(req.user._id)
+        : [...(req.user.linkedStudents || []), ...(req.user.children || [])].map(String).includes(String(report.studentId))
+      if (!own || report.status !== 'published') return res.status(403).json({ success: false, message: 'Access denied.' })
+    }
     return res.json({ success: true, data: { report } })
   } catch(e) { return res.status(500).json({ success: false, message: e.message }) }
 })
@@ -146,50 +168,14 @@ router.get('/preview', auth, ALLOWED, async (req, res) => {
     const tStart = new Date(termStart)
     const tEnd   = new Date(termEnd)
 
-    const exams = await Exam.find({
-      assignedStudents: studentId,
-      startAt: { $gte: tStart, $lte: tEnd },
-    }).lean()
-
-    const examIds = exams.map(e => e._id)
-    const submissions = await ExamSubmission.find({
-      examId: { $in: examIds },
-      studentId,
-      status: 'graded',
-    }).lean()
-
-    const submissionMap = {}
-    submissions.forEach(sub => {
-      const totalAwarded = (sub.answers||[]).reduce((s,a)=>s+(a.marksAwarded||0),0)
-      const exam = exams.find(e=>String(e._id)===String(sub.examId))
-      const totalMarks = exam?.totalMarks||100
-      submissionMap[String(sub.examId)] = { pct: Math.round((totalAwarded/totalMarks)*100) }
-    })
-
-    const subjectMap = {}
-    for (const exam of exams) {
-      const subj = exam.subject
-      if (!subjectMap[subj]) subjectMap[subj] = { weekly:[], endTerm:null }
-      const isEndTerm = /end.?term|final|terminal/i.test(exam.title)
-      const sub = submissionMap[String(exam._id)]
-      if (isEndTerm) subjectMap[subj].endTerm = sub ? sub.pct : null
-      else subjectMap[subj].weekly.push(sub ? sub.pct : null)
-    }
-
-    const subjects = Object.entries(subjectMap).map(([subject, data]) => {
-      const scored = data.weekly.filter(s=>s!==null)
-      const weeklyAverage = scored.length ? Math.round(scored.reduce((a,b)=>a+b,0)/scored.length) : null
-      const endTermScore  = data.endTerm
-      let weightedScore = null
-      if (weeklyAverage!==null && endTermScore!==null) weightedScore = Math.round(weeklyAverage*0.30+endTermScore*0.70)
-      else if (endTermScore!==null) weightedScore = endTermScore
-      else if (weeklyAverage!==null) weightedScore = weeklyAverage
-      return {
-        subject, weeklyScores: data.weekly, weeklyAverage, endTermScore, weightedScore,
-        letterGrade: toLetterGrade(weightedScore),
-        missedWeekly: scored.length===0, missedEndTerm: endTermScore===null,
-      }
-    })
+    // Weekly tests and end of term: online exams plus marks keyed in by the Dean.
+    const scores = await scoresFor(studentId, tStart, endOfDay(tEnd))
+    const subjects = Object.entries(scores).map(([subject, r]) => ({
+      subject, weeklyScores: r.weekly.map(w => w.pct), weeklyTests: r.weekly, weeklyAverage: r.weeklyAverage,
+      endTermScore: r.endTerm, endTermSource: r.endTermSource || '', weightedScore: r.finalScore,
+      letterGrade: toLetterGrade(r.finalScore),
+      missedWeekly: r.weeklyAverage == null, missedEndTerm: r.endTerm == null,
+    }))
 
     // Attendance: attended / scheduled lessons in the term (legacy day
     // register for dates before the cutover).
@@ -228,6 +214,9 @@ router.post('/generate', auth, ALLOWED, async (req, res) => {
       agreedTargets = [],
       classTeacherReport = '',
       hodRemarks = '',
+      deanName = '',
+      principalComment = '',
+      principalName,
       issuedBy,
       promotionDecision = '',
       nextTermStart = '',
@@ -256,84 +245,26 @@ router.post('/generate', auth, ALLOWED, async (req, res) => {
     const absentDays     = scheduledCount - totalAttended
     const attendanceRate = scheduledCount ? Math.round((totalAttended / scheduledCount) * 100) : 0
 
-    // ── Exam scores per subject ──────────────────────────────
-    // Find all exams for this student in the term date range
-    const exams = await Exam.find({
-      assignedStudents: studentId,
-      startAt: { $gte: tStart, $lte: tEnd },
-    }).lean()
-
-    // Get all submissions for these exams by this student
-    const examIds = exams.map(e => e._id)
-    const submissions = await ExamSubmission.find({
-      examId: { $in: examIds },
-      studentId,
-      status: 'graded',
-    }).lean()
-
-    // Map submission results: examId -> { score, totalMarks, pct }
-    const submissionMap = {}
-    submissions.forEach(sub => {
-      const totalAwarded = (sub.answers || []).reduce((s,a) => s + (a.marksAwarded||0), 0)
-      const exam = exams.find(e => String(e._id) === String(sub.examId))
-      const totalMarks = exam?.totalMarks || 100
-      submissionMap[String(sub.examId)] = {
-        pct: Math.round((totalAwarded / totalMarks) * 100),
-        marksAwarded: totalAwarded,
-        totalMarks,
-      }
-    })
-
-    // Group exams by subject — label end-term by title containing 'end' or 'term' or 'final'
-    const subjectMap = {}
-    for (const exam of exams) {
-      const subj = exam.subject
-      if (!subjectMap[subj]) subjectMap[subj] = { weekly: [], endTerm: null, endTermExam: null }
-      const isEndTerm = /end.?term|final|terminal/i.test(exam.title)
-      const sub = submissionMap[String(exam._id)]
-      if (isEndTerm) {
-        subjectMap[subj].endTerm = sub ? sub.pct : null
-        subjectMap[subj].endTermExam = exam
-      } else {
-        subjectMap[subj].weekly.push(sub ? sub.pct : null)
-      }
-    }
-
-    // Build subject results
-    const subjectResults = []
-    for (const [subject, data] of Object.entries(subjectMap)) {
-      const scoredWeekly = data.weekly.filter(s => s !== null)
-      const weeklyAverage = scoredWeekly.length > 0
-        ? Math.round(scoredWeekly.reduce((a,b)=>a+b,0) / scoredWeekly.length)
-        : null
-      const endTermScore = data.endTerm
-
-      // Weighted: weekly 30%, end-term 70%
-      let weightedScore = null
-      if (weeklyAverage !== null && endTermScore !== null) {
-        weightedScore = Math.round(weeklyAverage * 0.30 + endTermScore * 0.70)
-      } else if (endTermScore !== null) {
-        weightedScore = endTermScore  // no weekly — use end-term only
-      } else if (weeklyAverage !== null) {
-        weightedScore = weeklyAverage // no end-term — use weekly only
-      }
-
+    // ── Scores per subject: online exams + marks keyed in by the Dean ──
+    const scores = await scoresFor(studentId, tStart, endOfDay(tEnd))
+    const subjectResults = Object.entries(scores).map(([subject, r]) => {
       const meta = subjectComments[subject] || {}
-
-      subjectResults.push({
+      return {
         subject,
         teacherId:       meta.teacherId || null,
         teacherInitials: meta.initials  || '',
-        weeklyScores:    data.weekly,
-        weeklyAverage,
-        endTermScore,
-        weightedScore,
-        letterGrade:     toLetterGrade(weightedScore),
+        weeklyScores:    r.weekly.map(w => w.pct),
+        weeklyTests:     r.weekly,
+        weeklyAverage:   r.weeklyAverage,
+        endTermScore:    r.endTerm,
+        endTermSource:   r.endTermSource || '',
+        weightedScore:   r.finalScore,
+        letterGrade:     toLetterGrade(r.finalScore),
         teacherComment:  meta.comment || '',
-        missedWeekly:    scoredWeekly.length === 0,
-        missedEndTerm:   endTermScore === null,
-      })
-    }
+        missedWeekly:    r.weeklyAverage == null,
+        missedEndTerm:   r.endTerm == null,
+      }
+    })
 
     // Overall averages
     const withScores = subjectResults.filter(s => s.weightedScore !== null)
@@ -373,6 +304,8 @@ router.post('/generate', auth, ALLOWED, async (req, res) => {
         meanGrade:      toLetterGrade(overallAverage),
         learningHabits: { ...DEFAULT_HABITS, ...learningHabits },
         coCurricular, agreedTargets, classTeacherReport, hodRemarks,
+        deanName: deanName || (hodRemarks ? [req.user.firstName, req.user.lastName].filter(Boolean).join(' ') : ''),
+        principalComment, ...(principalName ? { principalName } : {}),
         issuedBy: issuedBy || 'Ms. Brendaliz Chelangat — Head of Academics',
         dateIssued: new Date(),
         promotionDecision, nextTermStart, reportingTime,
@@ -396,6 +329,7 @@ router.patch('/:id', auth, ALLOWED, async (req, res) => {
       'classTeacherReport','hodRemarks','learningHabits','coCurricular',
       'agreedTargets','promotionDecision','nextTermStart','reportingTime',
       'classTeacher','issuedBy','dateIssued','status',
+      'deanName','principalComment','principalName','principalTitle',
       'subjects','scheduledDays',
     ]
     const upd = {}
@@ -421,7 +355,8 @@ router.get('/:id/pdf-html', auth, requireRole('admin','ops_manager','accountant'
 // parents (published reports only for families).
 router.get('/:id/pdf', auth, async (req, res) => {
   try {
-    const { buildTermReportPdf } = require('../lib/reportPdf')
+    const { buildTermReportPdf } = require('../lib/termReportPdf')
+    const { studentPhoto } = require('../lib/studentPhoto')
     const report = await Report.findById(req.params.id).lean()
     if (!report) return res.status(404).json({ success:false, message:'Report not found.' })
 
@@ -435,9 +370,10 @@ router.get('/:id/pdf', auth, async (req, res) => {
     if ((isStudent || isParent) && report.status !== 'published')
       return res.status(403).json({ success:false, message:'This report has not been published yet.' })
 
-    const pdf = await buildTermReportPdf(report)
+    const photo = await studentPhoto(report.studentId, report.photoUrl)
+    const pdf = await buildTermReportPdf(report, { photo })
     res.setHeader('Content-Type', 'application/pdf')
-    res.setHeader('Content-Disposition', 'inline; filename="Report-' + (report.admissionNo||report.studentName||'student').replace(/[^A-Za-z0-9-]/g,'-') + '-T' + report.term + '.pdf"')
+    res.setHeader('Content-Disposition', (req.query.download ? 'attachment' : 'inline') + '; filename="Report-' + (report.admissionNo||report.studentName||'student').replace(/[^A-Za-z0-9-]/g,'-') + '-T' + report.term + '.pdf"')
     return res.send(pdf)
   } catch(e) { return res.status(500).json({ success:false, message:e.message }) }
 })
