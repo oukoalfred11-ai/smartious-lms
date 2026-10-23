@@ -688,7 +688,7 @@ export default function StudentPortal() {
     page === 'live'         ? 'Live Classes' :
     page === 'timetable'    ? 'Timetable' :
     page === 'lessonplan'   ? 'My Lesson Plan' :
-    page === 'attendance'   ? 'Attendance & Check-in' :
+    page === 'attendance'   ? 'Attendance' :
     page === 'library'      ? 'Library' :
     page === 'resources'    ? 'Resources' :
     page === 'profile'      ? 'My Profile' :
@@ -9812,7 +9812,6 @@ function DashboardTab({ user, store, setPage, toast }) {
   const [hwPending,    setHwPending]    = useState([])
   const [recentExams,  setRecentExams]  = useState([])
   const [timetable,    setTimetable]    = useState([])
-  const [ciStatus,     setCiStatus]     = useState(null)
   const [loading,      setLoading]      = useState(true)
 
   const firstName    = user?.firstName || 'Student'
@@ -9859,8 +9858,7 @@ function DashboardTab({ user, store, setPage, toast }) {
       api.get('/homework/student/list'),
       api.get('/exams/student/list'),
       api.get('/timetable/me'),
-      api.get('/checkin/today'),
-    ]).then(([hw, ex, tt, ci]) => {
+    ]).then(([hw, ex, tt]) => {
       if (hw.status==='fulfilled') {
         const list = hw.value.data?.homework||hw.value.data?.data?.homework||[]
         setHwPending(list.filter(h=>h.status!=='submitted'&&h.status!=='graded').slice(0,5))
@@ -9870,7 +9868,6 @@ function DashboardTab({ user, store, setPage, toast }) {
         setRecentExams(list.slice(0,4))
       }
       if (tt.status==='fulfilled') setTimetable(tt.value.data?.data?.entries||tt.value.data?.entries||[])
-      if (ci.status==='fulfilled') setCiStatus(ci.value.data?.data)
     }).finally(()=>setLoading(false))
   }, [user?._id])
 
@@ -10000,13 +9997,10 @@ function DashboardTab({ user, store, setPage, toast }) {
               {gradeLabel && <span style={{ fontSize:12.5, color:'rgba(255,255,255,.55)' }}>{gradeLabel}</span>}
               <span style={{ fontSize:12.5, color:'rgba(255,255,255,.45)', textTransform:'capitalize' }}>{programme}</span>
             </div>
-            {ciStatus && (
-              <div style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'5px 12px', borderRadius:99, background:ciStatus.checkedIn?'rgba(21,128,61,.25)':ciStatus.onBreak?'rgba(107,33,168,.25)':'rgba(255,255,255,.1)', border:'1px solid '+(ciStatus.checkedIn?'rgba(21,128,61,.4)':ciStatus.onBreak?'rgba(107,33,168,.4)':'rgba(255,255,255,.2)'), width:'fit-content' }}>
-                <div style={{ width:6, height:6, borderRadius:'50%', background:ciStatus.checkedIn?'#4ADE80':ciStatus.onBreak?'#C084FC':'#9CA3AF', flexShrink:0 }}/>
-                <span style={{ fontSize:11, fontWeight:600, color:ciStatus.checkedIn?'#4ADE80':ciStatus.onBreak?'#C084FC':'rgba(255,255,255,.6)' }}>
-                  {ciStatus.onBreak?'On break':ciStatus.checkedIn?'Checked in \u00b7 '+(ciStatus.checkInStatus||'present'):'Not checked in today'}
-                </span>
-                {!ciStatus.checkedIn&&!ciStatus.onBreak&&<button onClick={()=>setPage('attendance')} style={{ fontSize:10, fontWeight:700, color:'#C9A030', background:'transparent', border:'none', cursor:'pointer', padding:0, textDecoration:'underline' }}>Check in</button>}
+            {user?.onBreak && (
+              <div style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'5px 12px', borderRadius:99, background:'rgba(107,33,168,.25)', border:'1px solid rgba(107,33,168,.4)', width:'fit-content' }}>
+                <div style={{ width:6, height:6, borderRadius:'50%', background:'#C084FC', flexShrink:0 }}/>
+                <span style={{ fontSize:11, fontWeight:600, color:'#C084FC' }}>On break</span>
               </div>
             )}
             <div style={{ width:66, height:5, background:'#C9A030', borderRadius:3, marginTop:18 }}/>
@@ -11131,15 +11125,6 @@ export { LessonPracticeTab }
 // ═══════════════════════════════════════════════════════════
 function StudentAttendancePage({ user, toast }) {
   const todayStr = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})
-  const isWeekend = [0,6].includes(new Date().getDay())
-
-  // ── Check-in state ──
-  const [ciStatus, setCiStatus] = useState(null)
-  const [ciLoading,setCiLoading]= useState(true)
-  const [saving,   setSaving]   = useState(false)
-  const [pick,     setPick]     = useState('present')
-  const [lateTime, setLateTime] = useState('')
-  const [reason,   setReason]   = useState('')
 
   // ── Calendar state ──
   const today = new Date()
@@ -11155,10 +11140,6 @@ function StudentAttendancePage({ user, toast }) {
   const toKey     = `${year}-${String(month+1).padStart(2,'0')}-${String(lastDay.getDate()).padStart(2,'0')}`
   const monthLabel= firstDay.toLocaleDateString('en-GB',{month:'long',year:'numeric'})
 
-  const loadCI = () => {
-    setCiLoading(true)
-    api.get('/checkin/today').then(r=>setCiStatus(r.data?.data)).catch(()=>{}).finally(()=>setCiLoading(false))
-  }
   const loadCal = () => {
     if (!user?._id) return
     setCalLoad(true); setError(null)
@@ -11168,17 +11149,7 @@ function StudentAttendancePage({ user, toast }) {
       .finally(()=>setCalLoad(false))
   }
 
-  useEffect(()=>{loadCI()},[ ])
   useEffect(()=>{loadCal()},[user?._id,fromKey,toKey])
-
-  const submit = async () => {
-    if(pick==='late'&&!lateTime.trim()){toast?.error?.('Enter your arrival time.');return}
-    if(pick==='absent'&&!reason.trim()){toast?.error?.('Enter a reason for absence.');return}
-    setSaving(true)
-    try { await api.post('/checkin',{status:pick,lateTime,reason}); toast?.ok?.('Check-in recorded.'); loadCI(); loadCal() }
-    catch(e){toast?.error?.(e?.response?.data?.message||'Check-in failed.')}
-    finally{setSaving(false)}
-  }
 
   const SS = {
     present:{bg:'#D1FAE5',fg:'#065F46',label:'Present'},
@@ -11186,8 +11157,6 @@ function StudentAttendancePage({ user, toast }) {
     absent: {bg:'#FEE2E2',fg:'#991B1B',label:'Absent'},
     half_day:{bg:'#DBEAFE',fg:'#1E40AF',label:'Half day'},
   }
-  const alreadyIn = !ciLoading&&ciStatus?.checkedIn
-  const todaySS   = alreadyIn ? SS[ciStatus.checkInStatus]||SS.present : null
 
   // Calendar helpers. Attendance is per lesson: each day shows lessons
   // attended / scheduled. Day-register records from before per-lesson
@@ -11218,20 +11187,6 @@ function StudentAttendancePage({ user, toast }) {
 
   const DAY_LABELS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
 
-  // On break
-  if(!ciLoading&&ciStatus?.onBreak) return (
-    <div>
-      <div style={{marginBottom:20}}>
-        <div className="sec-tag">Attendance</div>
-        <h2 className="serif" style={{fontSize:26,color:TOKENS.ink,margin:'6px 0 4px'}}>My Attendance</h2>
-      </div>
-      <div style={{padding:'40px 20px',textAlign:'center',background:'#fff',border:'1px solid #E8E2D6',borderRadius:12}}>
-        <div style={{fontFamily:"'Instrument Serif',serif",fontSize:22,color:'#1A0F0E',marginBottom:8}}>You are on a break</div>
-        <div style={{fontSize:13,color:'#857973',lineHeight:1.65}}>Check-in is paused. Contact your DOS or admin to return.{ciStatus.breakNote?' Note: '+ciStatus.breakNote:''}</div>
-      </div>
-    </div>
-  )
-
   return (
     <div>
       {/* Page header */}
@@ -11241,74 +11196,11 @@ function StudentAttendancePage({ user, toast }) {
         <div style={{fontSize:13,color:'#6B6B6B'}}>{todayStr}</div>
       </div>
 
-      {/* ── Daily check-in card ── */}
-      <div style={{background:'#fff',border:'1px solid #E8E2D6',borderRadius:12,overflow:'hidden',marginBottom:20}}>
-        <div style={{background:'linear-gradient(135deg,#7D1025,#5A0B1B)',padding:'20px 24px',display:'flex',justifyContent:'space-between',alignItems:'center',position:'relative',zIndex:0,overflow:'hidden'}}>
-          <HeroPanelVideo />
-          <div>
-            <div style={{fontSize:13,fontWeight:800,color:'#C9A030',letterSpacing:'.06em',textTransform:'uppercase',marginBottom:4}}>Daily check-in</div>
-            <div style={{fontSize:16,fontWeight:700,color:'#fff'}}>
-              {alreadyIn ? 'Checked in' : isWeekend ? 'No check-in today' : 'Mark your attendance'}
-            </div>
-          </div>
-          {alreadyIn && todaySS && (
-            <span style={{padding:'6px 16px',borderRadius:99,background:todaySS.fg,color:'#fff',fontSize:13,fontWeight:700}}>
-              {todaySS.label}
-            </span>
-          )}
-        </div>
-
-        <div style={{padding:'20px 24px'}}>
-          {ciLoading ? (
-            <div style={{textAlign:'center',color:'#9A9A9A',fontSize:13}}>Loading...</div>
-          ) : isWeekend ? (
-            <div style={{textAlign:'center',color:'#9A9A9A',fontSize:13,padding:'8px 0'}}>Enjoy your weekend! Check-in resumes Monday.</div>
-          ) : alreadyIn ? (
-            <div style={{display:'flex',alignItems:'center',gap:16}}>
-              <div style={{width:52,height:52,borderRadius:'50%',background:todaySS.bg,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={todaySS.fg} strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-              </div>
-              <div>
-                <div style={{fontSize:15,fontWeight:800,color:todaySS.fg}}>{todaySS.label} today</div>
-                <div style={{fontSize:12.5,color:'#857973',marginTop:2}}>
-                  {ciStatus.record?.checkInTime ? 'Checked in at '+new Date(ciStatus.record.checkInTime).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',...tzOpt()}) : ''}
-                  {ciStatus.checkInStatus==='late'&&ciStatus.record?.lateTime ? ' · Arrived: '+ciStatus.record.lateTime : ''}
-                  {ciStatus.checkInStatus==='absent'&&ciStatus.record?.reason ? ' · '+ciStatus.record.reason : ''}
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10,marginBottom:14}}>
-                {[{val:'present',label:'Present',bg:'#D1FAE5',fg:'#065F46',desc:'On time'},{val:'late',label:'Late',bg:'#FEF3C7',fg:'#D97706',desc:'Running late'},{val:'absent',label:'Absent',bg:'#FEE2E2',fg:'#991B1B',desc:'Not attending'}].map(opt=>(
-                  <button key={opt.val} onClick={()=>{setPick(opt.val);if(opt.val!=='late')setLateTime('');if(opt.val!=='absent')setReason('')}}
-                    style={{padding:'12px 8px',borderRadius:9,cursor:'pointer',textAlign:'center',border:'2px solid '+(pick===opt.val?opt.fg:'#E8E2D6'),background:pick===opt.val?opt.bg:'#fff',transition:'all .15s'}}>
-                    <div style={{fontSize:13,fontWeight:800,color:pick===opt.val?opt.fg:'#564844',marginBottom:2}}>{opt.label}</div>
-                    <div style={{fontSize:10.5,color:pick===opt.val?opt.fg:'#9A9A9A'}}>{opt.desc}</div>
-                  </button>
-                ))}
-              </div>
-              {pick==='late'&&(
-                <div style={{marginBottom:12}}>
-                  <label style={{fontSize:11,fontWeight:700,color:'#8B1A2E',textTransform:'uppercase',letterSpacing:'.05em',marginBottom:4,display:'block'}}>Arrival time</label>
-                  <input type="time" value={lateTime} onChange={e=>setLateTime(e.target.value)} style={{width:'100%',padding:'9px 12px',borderRadius:8,border:'1.5px solid #E8E2D6',fontSize:15,fontFamily:'inherit',boxSizing:'border-box'}}/>
-                </div>
-              )}
-              {pick==='absent'&&(
-                <div style={{marginBottom:12}}>
-                  <label style={{fontSize:11,fontWeight:700,color:'#8B1A2E',textTransform:'uppercase',letterSpacing:'.05em',marginBottom:4,display:'block'}}>Reason for absence</label>
-                  <textarea value={reason} onChange={e=>setReason(e.target.value)} rows={2} placeholder="Please explain your absence..."
-                    style={{width:'100%',padding:'9px 12px',borderRadius:8,border:'1.5px solid #E8E2D6',fontSize:13,fontFamily:'inherit',resize:'vertical',boxSizing:'border-box'}}/>
-                </div>
-              )}
-              <button onClick={submit} disabled={saving} style={{
-                width:'100%',padding:'11px',borderRadius:9,
-                background:saving?'#9A9A9A':pick==='absent'?'#991B1B':pick==='late'?'#D97706':'#065F46',
-                color:'#fff',border:'none',fontSize:13,fontWeight:800,cursor:saving?'not-allowed':'pointer',
-              }}>{saving?'Submitting...':'Mark myself as '+pick}</button>
-            </div>
-          )}
-        </div>
+      {/* How attendance is taken: from lessons, not a daily check-in */}
+      <div style={{background:user?.onBreak?'#F5F3FF':'#FBF8F2',border:'1px solid '+(user?.onBreak?'#DDD6FE':'#E8E2D6'),borderRadius:12,padding:'14px 18px',marginBottom:20,fontSize:13,color:'#564844',lineHeight:1.6}}>
+        {user?.onBreak
+          ? <><b style={{color:'#5B21B6'}}>You are on a break.</b> Lessons during your break are not counted as missed.</>
+          : <>Your attendance is taken from your lessons: joining a lesson online marks you present, and your teacher or the Dean records lessons at the centre. There is nothing to check in.</>}
       </div>
 
       {/* ── Attendance stats + calendar ── */}

@@ -110,7 +110,7 @@ async function sendPauseNotice({ student, parentEmails = [], pause, typeLabel })
       <p>Dear Smartious family,</p>
       <p>The student account for <strong>${name}</strong> has been marked as on
       <strong>${typeLabel}</strong>${expected ? ` until <strong>${expected}</strong>` : ''}.</p>
-      <p>During this period, daily check-in and reminders are paused. The student
+      <p>During this period, lesson reminders are paused and missed lessons are not counted as absences. The student
       portal remains fully available for homework, practice and personal studies,
       so learning can continue at a relaxed pace whenever it suits.</p>
       ${pause.note ? `<div style="background:#F9FAFB;border-left:3px solid ${GOLD};padding:10px 14px;margin:14px 0;">${pause.note}</div>` : ''}
@@ -130,8 +130,8 @@ async function sendReportBackNotice({ student, parentEmails = [], auto = false }
   const body = `
     <p>Dear Smartious family,</p>
     <p>Great news: the account for <strong>${name}</strong> is fully active again
-    ${auto ? 'following the scheduled return date' : ''}. Portal access, classes,
-    check-in and reminders have all resumed as normal.</p>
+    ${auto ? 'following the scheduled return date' : ''}. Portal access, classes
+    and reminders have all resumed as normal.</p>
     <p>Everything is exactly where it was left: lessons, homework, progress and
     materials are ready to continue.</p>
     <p>If anything looks out of place or you need help settling back in, reply to

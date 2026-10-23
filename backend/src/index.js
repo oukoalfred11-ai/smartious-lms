@@ -121,6 +121,7 @@ app.use('/api/class-register', require('./routes/class-register'));
 app.use('/api/centre-register', require('./routes/centre-register'));
 app.use('/api/marks', require('./routes/marks'));
 app.use('/api/oversight', require('./routes/oversight'));
+app.use('/api/staff-attendance', require('./routes/staff-attendance'));
 app.use('/api/stat-reports', require('./routes/stat-reports'));
 app.use('/api/snapshots', require('./routes/snapshots'));
 app.use('/api/ops-reports', require('./routes/ops-reports'));
@@ -174,10 +175,6 @@ const { startTimetableConfirm } = require('./services/timetableConfirm');
 // AUTO_TIMETABLE=on in the environment when ready to trust it again.
 const AUTO_TIMETABLE_ON = String(process.env.AUTO_TIMETABLE || '').toLowerCase() === 'on';
 
-// ── Daily 7 AM check-in reminder ─────────────────────────────
-// Fires every weekday at 07:00 school local time (EAT = UTC+3).
-// Sends email to every active user who hasn't checked in yet.
-const { sendDailyReminders } = require('./routes/checkin');
 const { sendDueReminders  } = require('./routes/fee-collection');
 const { sendClassReminders } = require('./routes/parent-portal');
 const { scheduleShowCauseCron } = require('./services/showCauseCron');
@@ -187,15 +184,6 @@ try { require('./lib/snapshots').startSnapshotJobs(); } catch (e) { console.erro
 try { require('./lib/timetableMaterializer').startTimetableMaterializer(); } catch (e) { console.error('[timetable]', e.message); }
 try { require('./services/birthdayCron').startBirthdayCron(); } catch (e) { console.error('[birthday-cron] start failed:', e.message); }
 try { require('./services/announcementMailer').startAnnouncementMailer(); } catch (e) { console.error('[announcement-mailer] failed to start:', e.message); }
-
-const runCheckinReminder = () => {
-  const now = new Date();
-  const eat = new Date(now.getTime() + 3*60*60*1000); // UTC+3
-  if (eat.getDay() === 0 || eat.getDay() === 6) return; // skip weekends
-  sendDailyReminders()
-    .then(n => console.log('[checkin reminder] Sent', n, 'reminders'))
-    .catch(e => console.error('[checkin reminder] Error:', e.message));
-};
 
 // ── Database + start ──────────────────────────────────────
 const PORT        = process.env.PORT || 5000;
@@ -232,19 +220,6 @@ mongoose.connect(MONGODB_URI)
     } else {
       console.log('[timetable] AUTO TIMETABLE IS OFF — timetables and classes are manual only. Set AUTO_TIMETABLE=on to re-enable.');
     }
-
-    // Schedule daily 7 AM EAT reminder
-    const scheduleReminder = () => {
-      const now = new Date();
-      const eat = new Date(now.getTime() + 3*60*60*1000);
-      const next7am = new Date(eat);
-      next7am.setHours(7, 0, 0, 0);
-      if (next7am <= eat) next7am.setDate(next7am.getDate() + 1);
-      const msUntil = next7am.getTime() - eat.getTime();
-      console.log('[checkin] Next reminder in', Math.round(msUntil/60000), 'minutes');
-      setTimeout(() => { runCheckinReminder(); setInterval(runCheckinReminder, 24*60*60*1000); }, msUntil);
-    };
-    scheduleReminder();
 
     // Fee payment reminders — daily at 8 AM EAT
     const scheduleFeeReminder = () => {

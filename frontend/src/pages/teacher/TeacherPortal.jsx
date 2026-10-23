@@ -685,7 +685,7 @@ export default function TeacherPortal() {
     { section:'Teaching', items:[
       {id:'dashboard',     label:'Dashboard',        iconName:'dashboard',     icon:'rect:3:3:7:7:1|rect:14:3:7:7:1|rect:14:14:7:7:1|rect:3:14:7:7:1'},
       {id:'students',      label:'My Students',      iconName:'students',      icon:'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2|circle:9:7:4|M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75'},
-      {id:'attendance',    label:'Attendance & Check-in',       iconName:'attendance',    icon:'rect:5:4:14:17:2|rect:9:2:6:3:1|M8.5 12.5l2 2 4-4.5'},
+      {id:'attendance',    label:'Attendance',       iconName:'attendance',    icon:'rect:5:4:14:17:2|rect:9:2:6:3:1|M8.5 12.5l2 2 4-4.5'},
       {id:'library',       label:'Library',          iconName:'library',       icon:'M4 19.5A2.5 2.5 0 0 1 6.5 17H20|M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'},
       {id:'myclasses',     label:'My Classes',       iconName:'timetable',     icon:'rect:3:4:18:18:2|line:16:2:16:6|line:8:2:8:6|line:3:10:21:10'},
       {id:'clubs',         label:'My Clubs',         iconName:'clubs',         icon:'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2|circle:9:7:4|M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75' },
@@ -13640,27 +13640,15 @@ function StudentAttendanceDetail({ student, onBack, toast }) {
 }
 
 function AttendanceTab({ user, toast }) {
-  const todayStr = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})
-  const isWeekend = [0,6].includes(new Date().getDay())
-
-  // ── Self check-in state ──
-  const [ciStatus,  setCiStatus]  = useState(null)
-  const [ciLoading, setCiLoading] = useState(true)
-  const [saving,    setSaving]    = useState(false)
-  const [pick,      setPick]      = useState('present')
-  const [lateTime,  setLateTime]  = useState('')
-  const [reason,    setReason]    = useState('')
+  // ── My attendance: the Dean's register (read only) ──
+  const [mine, setMine] = useState(null)
 
   // ── Student attendance state ──
   const [students,         setStudents]         = useState([])
   const [studentsLoading,  setStudentsLoading]  = useState(true)
   const [selectedStudent,  setSelectedStudent]  = useState(null)
 
-  const loadCI = () => {
-    setCiLoading(true)
-    api.get('/checkin/today').then(r=>setCiStatus(r.data?.data)).catch(()=>{}).finally(()=>setCiLoading(false))
-  }
-  useEffect(()=>{loadCI()},[])
+  useEffect(()=>{ api.get('/staff-attendance/mine').then(r=>setMine(r.data?.data||null)).catch(()=>setMine(false)) },[])
 
   useEffect(() => {
     let cancelled = false
@@ -13695,68 +13683,34 @@ function AttendanceTab({ user, toast }) {
     return () => { cancelled = true }
   }, [user?._id])
 
-  const submitCI = async () => {
-    if(pick==='late'&&!lateTime.trim()){toast?.error?.('Enter your arrival time.');return}
-    if(pick==='absent'&&!reason.trim()){toast?.error?.('Enter a reason.');return}
-    setSaving(true)
-    try { await api.post('/checkin',{status:pick,lateTime,reason}); toast?.ok?.('Checked in.'); loadCI() }
-    catch(e){toast?.error?.(e?.response?.data?.message||'Failed.')}
-    finally{setSaving(false)}
-  }
-
-  const SS={present:{bg:'#D1FAE5',fg:'#065F46',label:'Present'},late:{bg:'#FEF3C7',fg:'#D97706',label:'Late'},absent:{bg:'#FEE2E2',fg:'#991B1B',label:'Absent'}}
-  const alreadyIn = !ciLoading&&ciStatus?.checkedIn
-  const todaySS   = alreadyIn?SS[ciStatus.checkInStatus]||SS.present:null
+  const MK={present:{bg:'#D1FAE5',fg:'#065F46',label:'Present'},late:{bg:'#FEF3C7',fg:'#92400E',label:'Late'},half_day:{bg:'#E0F2FE',fg:'#075985',label:'Half day'},absent:{bg:'#FEE2E2',fg:'#991B1B',label:'Absent'},leave:{bg:'#EDE9FE',fg:'#5B21B6',label:'On leave'},off:{bg:'#F3F4F6',fg:'#4B5563',label:'Day off'}}
 
   return (
     <div>
-      {/* ── My Check-in ── */}
+      {/* ── My attendance: marked by the Dean ── */}
       <div style={{marginBottom:24}}>
-        <h3 style={{fontFamily:"'Instrument Serif',serif",fontSize:20,color:'#231715',margin:'0 0 12px'}}>My Daily Check-in</h3>
-        <div style={{background:'#fff',border:'1px solid #E8DDD5',borderRadius:12,overflow:'hidden'}}>
-          <div style={{background:'linear-gradient(135deg,#8B1A2E,#5A0B1B)',padding:'16px 20px',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-            <div>
-              <div style={{fontSize:11,fontWeight:700,color:'#C9A030',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:3}}>Daily attendance — {todayStr}</div>
-              <div style={{fontSize:15,fontWeight:700,color:'#fff'}}>{alreadyIn?'Attendance recorded':isWeekend?'No check-in on weekends':'Mark your attendance for today'}</div>
-            </div>
-            {alreadyIn&&todaySS&&<span style={{padding:'5px 14px',borderRadius:99,background:todaySS.fg,color:'#fff',fontSize:12,fontWeight:700}}>{todaySS.label}</span>}
-          </div>
-          <div style={{padding:'16px 20px'}}>
-            {ciLoading?<div style={{color:'#9A9A9A',fontSize:13}}>Loading...</div>
-            :ciStatus?.onBreak?<div style={{fontSize:13,color:'#7A6652'}}>You are on a break. Contact admin to return.</div>
-            :isWeekend?<div style={{fontSize:13,color:'#9A9A9A'}}>Enjoy your weekend!</div>
-            :alreadyIn?(
-              <div style={{display:'flex',alignItems:'center',gap:12}}>
-                <div style={{width:44,height:44,borderRadius:'50%',background:todaySS.bg,display:'flex',alignItems:'center',justifyContent:'center'}}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={todaySS.fg} strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                </div>
-                <div>
-                  <div style={{fontSize:14,fontWeight:800,color:todaySS.fg}}>{todaySS.label}</div>
-                  <div style={{fontSize:12,color:'#7A6652',marginTop:1}}>
-                    {ciStatus.record?.checkInTime?new Date(ciStatus.record.checkInTime).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}):''}
-                    {ciStatus.checkInStatus==='late'&&ciStatus.record?.lateTime?' · Arrived: '+ciStatus.record.lateTime:''}
-                    {ciStatus.checkInStatus==='absent'&&ciStatus.record?.reason?' · '+ciStatus.record.reason:''}
-                  </div>
-                </div>
+        <h3 style={{fontFamily:"'Instrument Serif',serif",fontSize:20,color:'#231715',margin:'0 0 4px'}}>My Attendance</h3>
+        <div style={{fontSize:12.5,color:'#7A6652',marginBottom:12}}>Kept by the Dean of Studies. There is no daily check-in: speak to the Dean if a mark looks wrong.</div>
+        <div style={{background:'#fff',border:'1px solid #E8DDD5',borderRadius:12,padding:'14px 18px'}}>
+          {mine===null?<div style={{color:'#9A9A9A',fontSize:13}}>Loading...</div>
+          :!mine?<div style={{color:'#9A9A9A',fontSize:13}}>Could not load your attendance.</div>
+          :!mine.days.length?<div style={{color:'#9A9A9A',fontSize:13}}>No days marked in the last 60 days.</div>:(
+            <>
+              <div style={{display:'flex',gap:16,flexWrap:'wrap',marginBottom:12}}>
+                <div><div style={{fontSize:22,fontWeight:800,color:'#8B1A2E'}}>{mine.rate!=null?mine.rate+'%':'—'}</div><div style={{fontSize:11,color:'#7A6652',fontWeight:700}}>ATTENDANCE (60 DAYS)</div></div>
+                {Object.entries(MK).filter(([k])=>mine[k]).map(([k,m])=>(
+                  <div key={k}><div style={{fontSize:18,fontWeight:800,color:m.fg}}>{mine[k]}</div><div style={{fontSize:11,color:'#7A6652',fontWeight:700}}>{m.label.toUpperCase()}</div></div>
+                ))}
               </div>
-            ):(
-              <div style={{display:'flex',gap:10,alignItems:'flex-end',flexWrap:'wrap'}}>
-                <div style={{display:'flex',gap:8}}>
-                  {[{val:'present',label:'Present',bg:'#D1FAE5',fg:'#065F46'},{val:'late',label:'Late',bg:'#FEF3C7',fg:'#D97706'},{val:'absent',label:'Absent',bg:'#FEE2E2',fg:'#991B1B'}].map(opt=>(
-                    <button key={opt.val} onClick={()=>{setPick(opt.val);if(opt.val!=='late')setLateTime('');if(opt.val!=='absent')setReason('')}}
-                      style={{padding:'8px 14px',borderRadius:8,cursor:'pointer',border:'2px solid '+(pick===opt.val?opt.fg:'#E8DDD5'),background:pick===opt.val?opt.bg:'#fff',fontSize:12.5,fontWeight:700,color:pick===opt.val?opt.fg:'#564844'}}>
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-                {pick==='late'&&<input type="time" value={lateTime} onChange={e=>setLateTime(e.target.value)} placeholder="Arrival time" style={{padding:'8px 10px',borderRadius:7,border:'1.5px solid #E8DDD5',fontSize:13,fontFamily:'inherit'}}/>}
-                {pick==='absent'&&<input value={reason} onChange={e=>setReason(e.target.value)} placeholder="Reason for absence" style={{flex:1,padding:'8px 10px',borderRadius:7,border:'1.5px solid #E8DDD5',fontSize:13,fontFamily:'inherit',minWidth:180}}/>}
-                <button onClick={submitCI} disabled={saving} style={{padding:'9px 20px',borderRadius:8,background:saving?'#9A9A9A':pick==='absent'?'#991B1B':pick==='late'?'#D97706':'#065F46',color:'#fff',border:'none',fontSize:13,fontWeight:700,cursor:saving?'not-allowed':'pointer',whiteSpace:'nowrap'}}>
-                  {saving?'Saving...':'Submit'}
-                </button>
+              <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+                {[...mine.days].reverse().map(d=>{ const m=MK[d.status]||MK.present; return (
+                  <span key={d.day} title={d.note||''} style={{padding:'4px 10px',borderRadius:99,background:m.bg,color:m.fg,fontSize:11.5,fontWeight:700}}>
+                    {new Date(d.day+'T12:00:00Z').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})} · {m.label}{d.note?' · '+d.note:''}
+                  </span>
+                )})}
               </div>
-            )}
-          </div>
+            </>
+          )}
         </div>
       </div>
 

@@ -235,7 +235,7 @@ function StudentSessionsModule({ toast, refreshKey }) {
             <option value="archived">Archived (left / graduated)</option>
           </select>
           <div style={{ marginLeft: 'auto', fontSize: 12, color: TOKENS.s500 || '#6B7280' }}>
-            Fee holds block portal access for student and parent; holidays and breaks keep access while pausing reminders and check-in.
+            Fee holds block portal access for student and parent; holidays and breaks keep access while pausing reminders; lessons during a pause are not counted as missed.
           </div>
         </div>
 
@@ -344,7 +344,7 @@ function StudentSessionsModule({ toast, refreshKey }) {
                 <strong>{form.blockAccess ? 'Portal access suspended' : 'Portal access kept'}</strong><br />
                 {form.blockAccess
                   ? 'The student and linked parent cannot log in until Report Back. Standard for fee holds.'
-                  : 'The student can still log in for homework and personal studies. Reminders and check-in are paused. Standard for holidays and breaks.'}
+                  : 'The student can still log in for homework and personal studies. Reminders are paused and lessons during the pause are not counted as missed. Standard for holidays and breaks.'}
               </span>
             </label>
 
