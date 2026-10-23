@@ -41,6 +41,7 @@ export const MODULES = {
   dosattend:    { label: 'Attendance Analytics',   accent: TOKENS.accentTeal,    icon: 'frontdesk' },
   centreregister: { label: 'Centre Register',      accent: TOKENS.accentEmerald, icon: 'frontdesk' },
   marksentry:   { label: 'Marks Entry',           accent: TOKENS.crimson,       icon: 'chart' },
+  oversight:    { label: 'Academic Oversight',    accent: TOKENS.crimson,       icon: 'chart' },
   checkin:      { label: 'Check In',              accent: TOKENS.accentEmerald||'#065F46', icon: 'frontdesk' },
   dosbreaks:    { label: 'Staff Breaks',           accent: TOKENS.crimson,       icon: 'frontdesk' },
   sessions:     { label: 'Student Sessions',       accent: TOKENS.accentAmber,   icon: 'users' },

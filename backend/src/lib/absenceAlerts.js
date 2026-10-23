@@ -56,9 +56,24 @@ async function runAbsenceAlerts(now = new Date()) {
   }).populate('assignedStudents', 'firstName lastName email emailPrefs parentEmail linkedParents parentId parentName onBreak timezone deliveryMode')
     .populate('teacherId', 'firstName lastName').lean()
 
+  // No missed-lesson emails on a closure day (mid-term, holidays): a lesson
+  // left on the calendar then is not one the family expects.
+  let closed = new Set()
+  if (classes.length) {
+    try {
+      const SchoolClosure = require('../models/SchoolClosure')
+      const { closedDaySet } = require('./scheduling')
+      const { zonedDayKey } = require('./schoolTime')
+      const day = zonedDayKey(now, 'Africa/Nairobi')
+      closed = closedDaySet(await SchoolClosure.find({ start: { $lte: day }, end: { $gte: zonedDayKey(new Date(now.getTime() - 864e5), 'Africa/Nairobi') } }).select('start end').lean())
+    } catch {}
+  }
+  const onClosureDay = (cls) => closed.size > 0 && closed.has(require('./schoolTime').zonedDayKey(new Date(cls.scheduledAt), 'Africa/Nairobi'))
+
   let sent = 0
   for (const cls of classes) {
     if (!absenceAlertDue(cls, now)) continue
+    if (onClosureDay(cls)) continue
     const ids = (cls.assignedStudents || []).filter(Boolean).map(s => s._id)
     const joinedIds = await ClassroomSession.distinct('userId', { liveClassId: cls._id, joinCount: { $gt: 0 } })
     const absent = absentStudents(cls, { joinedIds, pausedIds: await pausedIds(ids, now) })

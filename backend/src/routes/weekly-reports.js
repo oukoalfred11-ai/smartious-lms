@@ -83,7 +83,8 @@ router.post('/save', auth, requireRole('admin','ops_manager','dos','teacher'), a
       percentage: Math.round((parseFloat(a.score||0)/parseFloat(a.outOf||100))*100),
     }))
     const avg  = scores.length ? Math.round(scores.reduce((s,a)=>s+a.percentage,0)/scores.length) : null
-    const grade = avg===null?'':(avg>=80?'A*':avg>=70?'A':avg>=60?'B':avg>=50?'C':avg>=40?'D':'E')
+    // Graded on the student's own curriculum scale (lib/grading.js).
+    const grade = avg===null?'':require('../lib/grading').gradeFor(student?.curriculum, avg, student?.gradeLevel)
 
     const yearStr = new Date().getFullYear()+'/'+(new Date().getFullYear()+1)
     const teacher = await User.findById(req.user._id).select('firstName lastName').lean()

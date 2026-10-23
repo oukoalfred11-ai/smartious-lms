@@ -840,7 +840,8 @@ router.post('/submissions/:subId/grade', auth, requireRole('teacher','admin', 'd
     const { answers = [], feedback = '', grade: gradeLetter = '' } = req.body;
     const submission = await ExamSubmission.findById(req.params.subId).populate('examId');
     if (!submission) return res.status(404).json({ success:false, message:'Submission not found.' });
-    if (req.user.role !== 'admin' && String(submission.examId.teacherId) !== String(req.user._id))
+    // The Dean may correct any paper; teachers mark their own.
+    if (!['admin', 'dos', 'ops_manager'].includes(req.user.role) && String(submission.examId.teacherId) !== String(req.user._id))
       return res.status(403).json({ success:false, message:'Not your exam.' });
 
     let total = 0;

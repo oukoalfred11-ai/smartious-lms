@@ -78,7 +78,7 @@ router.post('/:liveClassId', auth, requireRole('teacher', ...STAFF), async (req,
       await ClassroomSession.updateOne(
         { liveClassId: cls._id, userId: m.studentId },
         {
-          $set: { present: m.present !== false, markedBy: req.user._id },
+          $set: { present: m.present !== false, excused: false, markedBy: req.user._id },
           $setOnInsert: { firstJoinedAt: null, joinCount: 0 },
         },
         { upsert: true }

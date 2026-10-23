@@ -3,6 +3,9 @@ import { api } from '../../../../context/ctx.jsx'
 import { TOKENS } from '../shared/tokens.js'
 import { PSection } from '../shared/ui.jsx'
 
+// Grades differ by curriculum (A*–G, 9–1, 1–7, EE/ME/AE/BE...), so colour by score.
+const scoreColor = (pct) => pct == null ? TOKENS.s700 : pct >= 70 ? '#065F46' : pct >= 50 ? '#1E40AF' : pct >= 40 ? '#92400E' : '#991B1B'
+
 function ReportsModule({ toast, refreshKey }) {
   const [view, setView] = useState('list') // list | generate | detail
   const [selected, setSelected] = useState(null)
@@ -46,10 +49,6 @@ function ReportList({ toast, refreshKey, onOpen, onNew }) {
 
   const fmtDate = d => d ? new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—'
 
-  const GRADE_COLORS = {
-    'A*':'#065F46','A':'#065F46','B':'#1E40AF','C':'#92400E',
-    'D':'#6B21A8','E':'#9A3412','U':'#991B1B',
-  }
 
   const filtered = reports.filter(r => {
     if (!search) return true
@@ -94,7 +93,7 @@ function ReportList({ toast, refreshKey, onOpen, onNew }) {
             </tr></thead>
             <tbody>
               {filtered.map(r => {
-                const gc = GRADE_COLORS[r.meanGrade] || TOKENS.s700
+                const gc = scoreColor(r.overallAverage)
                 return (
                   <tr key={r._id} style={{ borderTop:'1px solid '+TOKENS.line, cursor:'pointer' }}
                     onMouseEnter={e=>e.currentTarget.style.background=TOKENS.cream}
@@ -360,8 +359,7 @@ function ReportGenerator({ toast, onBack, onSaved }) {
                   </td>
                   <td style={{ padding:'8px 10px', textAlign:'center' }}>
                     <span style={{ padding:'2px 8px', borderRadius:99, fontSize:11, fontWeight:800,
-                      background:s.letterGrade==='U'?'#FEE2E2':s.letterGrade==='A*'||s.letterGrade==='A'?'#D1FAE5':'#EFF6FF',
-                      color:s.letterGrade==='U'?'#991B1B':s.letterGrade==='A*'||s.letterGrade==='A'?'#065F46':'#1E40AF',
+                      background:scoreColor(s.weightedScore)+'15', color:scoreColor(s.weightedScore),
                     }}>{s.letterGrade}</span>
                   </td>
                 </tr>
@@ -475,6 +473,20 @@ function ReportGenerator({ toast, onBack, onSaved }) {
           <div><label style={lbl}>Next term start</label><input value={f.nextTermStart} onChange={e=>set('nextTermStart',e.target.value)} placeholder="e.g. 10 September 2026" style={inp}/></div>
           <div><label style={lbl}>Reporting time</label><input value={f.reportingTime} onChange={e=>set('reportingTime',e.target.value)} placeholder="e.g. 7:30 AM" style={inp}/></div>
         </div>
+        {String(f.term) === '3' ? (
+          <div style={{ marginTop:12 }}>
+            <label style={lbl}>Promotion decision (end of year)</label>
+            <select value={f.promotionDecision} onChange={e=>set('promotionDecision',e.target.value)} style={inp}>
+              <option value="">Not stated</option>
+              <option>Promoted to the next year</option>
+              <option>Promoted on probation</option>
+              <option>To repeat the year</option>
+              <option>Completing: external examinations</option>
+            </select>
+          </div>
+        ) : (
+          <div style={{ marginTop:10, fontSize:12, color:TOKENS.s500 }}>Promotion is shown on Term 3 reports only.</div>
+        )}
       </div>
 
       <div style={{ display:'flex', gap:10 }}>
@@ -517,8 +529,7 @@ function ReportDetail({ toast, report: initialReport, onBack }) {
     finally { setPublishing(false) }
   }
 
-  const GRADE_COLORS = { 'A*':'#065F46','A':'#065F46','B':'#1E40AF','C':'#92400E','D':'#6B21A8','E':'#9A3412','U':'#991B1B' }
-  const gc = GRADE_COLORS[report.meanGrade] || TOKENS.s700
+  const gc = scoreColor(report.overallAverage)
 
   return (
     <>
@@ -594,7 +605,7 @@ function ReportDetail({ toast, report: initialReport, onBack }) {
           </tr></thead>
           <tbody>
             {(report.subjects||[]).map(s => {
-              const gc2 = GRADE_COLORS[s.letterGrade] || TOKENS.s700
+              const gc2 = scoreColor(s.weightedScore)
               return (
                 <tr key={s.subject} style={{ borderTop:'1px solid '+TOKENS.line }}>
                   <td style={{ padding:'10px 12px', fontWeight:700, fontSize:13 }}>{s.subject}</td>
