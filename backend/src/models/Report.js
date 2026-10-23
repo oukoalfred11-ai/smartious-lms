@@ -21,6 +21,9 @@ const subjectResultSchema = new mongoose.Schema({
   letterGrade:        { type: String, default: '' },
 
   teacherComment:     { type: String, default: '' },
+  // Each weekly test this term (online or keyed in by the Dean), for the trend on the report.
+  weeklyTests:        [{ _id: false, label: String, date: Date, pct: Number, source: String }],
+  endTermSource:      { type: String, default: '' },   // online | keyed | missed
   missedWeekly:       { type: Boolean, default: false },
   missedEndTerm:      { type: Boolean, default: false },
 }, { _id: false })
@@ -77,7 +80,11 @@ const reportSchema = new mongoose.Schema({
   coCurricular:        { type: String, default: '' },
   agreedTargets:       [String],
   classTeacherReport:  { type: String, default: '' },
-  hodRemarks:          { type: String, default: '' },
+  hodRemarks:          { type: String, default: '' },   // the Dean's comment
+  deanName:            { type: String, default: '' },   // who wrote it (the Dean signing)
+  principalComment:    { type: String, default: '' },
+  principalName:       { type: String, default: 'Alfred Ouko' },
+  principalTitle:      { type: String, default: 'Founder & Principal' },
   issuedBy:            { type: String, default: 'Ms. Brendaliz Chelangat — Head of Academics' },
   dateIssued:          { type: Date, default: Date.now },
 

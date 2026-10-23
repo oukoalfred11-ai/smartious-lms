@@ -18,6 +18,7 @@ import SuggestionBox from '../../components/SuggestionBox.jsx'
 import AnnouncementsStrip from '../../components/AnnouncementsStrip.jsx'
 import MessagesHub from '../../components/MessagesHub.jsx'
 import AdmissionDocuments from '../../components/AdmissionDocuments.jsx'
+import ReportCards from '../../components/ReportCards.jsx'
 import { playChime } from '../../components/NotificationsBell.jsx'
 import { useAuth, useToast, api } from '../../context/ctx.jsx'
 import { useStore } from '../../context/ctx.jsx'
@@ -6398,6 +6399,7 @@ function MyResultsTab({ user, toast, setPage }) {
 
   return (
     <div>
+      <ReportCards toast={toast} />
       {/* ── MY RESULTS HERO ─────────────────────────────────────
           Same treatment as the single-result screen: a flat light band,
           the student's photo bleeding through the middle, and the
