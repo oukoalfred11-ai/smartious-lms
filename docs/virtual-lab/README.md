@@ -114,18 +114,22 @@ Not yet on this bench: no practical takes a protractor reading; oscilloscope, da
 
 ## IGCSE chemistry and biology practicals
 
-Six practicals on the same `definePractical()` engine, with `subject: 'chemistry'` or `'biology'`, level IGCSE, and curriculum links to Cambridge IGCSE and Pearson Edexcel International GCSE (topics only, marked unverified). **All procedures, models, questions and wording are Smartious's own**, and nothing claims endorsement by an examination board. Code: `shared/lab/experiments/igcse/`.
+Eight practicals on the same `definePractical()` engine, with `subject: 'chemistry'` or `'biology'`, level IGCSE, and curriculum links to Cambridge IGCSE and Pearson Edexcel International GCSE (topics only, marked unverified). **All procedures, models, questions and wording are Smartious's own**, and nothing claims endorsement by an examination board. Code: `shared/lab/experiments/igcse/`.
 
 | Code | Practical | Graph and result |
 |---|---|---|
 | Chem 1.1 | Concentration and rate: the disappearing cross | 1/t against c; gradient, and a predicted time read from the line |
 | Chem 1.2 | Temperature and rate: the disappearing cross (water bath) | lg(1/t) against θ; the temperature rise that doubles the rate |
 | Chem 2.1 | Energy from burning ethanol (spirit burner, copper can) | ΔT against mass burned; kJ per gram and the percentage of the data-book value |
+| Chem 2.2 | Electrolysis of copper(II) sulfate (weigh the cathode every 2 min) | Δm against t; mass per minute and the charge on a mole of electrons |
 | Bio 1.1 | Light intensity and photosynthesis (pondweed, photosynthometer) | lg(rate) against lg(d); gradient close to −2 (inverse square) |
 | Bio 2.1 | Temperature and amylase (iodine on a spotting tile every 10 s) | rate against θ as a curve; optimum temperature from the results |
 | Bio 3.1 | Diffusion into agar cubes | t against L²; time for a 1 cm cube, and surface area to volume ratio |
+| Bio 4.1 | Temperature and respiration in yeast (gas syringe) | lg V against θ; the temperature coefficient Q₁₀ |
 
-The models are simplified and say so: their assumptions are listed on each practical (for example, Arrhenius behaviour with a stated activation energy; light as the only limiting factor; testing every 10 s, so the amylase times are rounded up to the next test). The goggles prompt gives each practical's own reason (`gogglesWhy`). New stockroom items with 3D models: conical flask, cross card, boiling tubes, spirit burner, copper can, spotting tile, pondweed, photosynthometer, bench lamp and agar blocks. Every practical is played by a careful student on 12 seeds, on both benches (`test/practicals.test.js`). Each bench was also rendered in headless Chromium.
+**Watching the reaction.** A timed measure can say what is being watched (`look: 'cross' | 'iodine' | 'agar'`). While the stopwatch runs, the 3D bench shows it happening: the flask (standing on the cross) clouds over until the cross is hidden, a drop of the mixture turns the iodine in the next well of the spotting tile blue-black every 10 s until no starch is left, and the cut agar cubes lose their pink. The close-up beside the stopwatch draws the same thing (looking down through the flask, the spotting tile, the cube shrinking to a pink core). Slow runs play as a time-lapse on the 3D bench (the status card says ×N and the stopwatch shows laboratory time); the close-up offers ×10 and ×30. Some items stand on or in another (`STACK` in `practicalScene.js`): the flask on the cross, the copper electrodes in a beaker of blue copper(II) sulfate solution. The gas syringe's plunger moves out further at higher bath settings.
+
+The models are simplified and say so: their assumptions are listed on each practical (for example, Arrhenius behaviour with a stated activation energy; light as the only limiting factor; testing every 10 s, so the amylase times are rounded up to the next test). The goggles prompt gives each practical's own reason (`gogglesWhy`). New stockroom items with 3D models: conical flask, cross card, boiling tubes, spirit burner, copper can, spotting tile, pondweed, photosynthometer, bench lamp, agar blocks, copper electrodes and gas syringe. The gas syringe's volume is shown as a number, not yet drawn as a scale to read. Every practical is played by a careful student on 12 seeds, on both benches (`test/practicals.test.js`). Each bench was also rendered in headless Chromium.
 
 ## AS & A Level Physics practicals
 

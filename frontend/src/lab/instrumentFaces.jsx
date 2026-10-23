@@ -246,6 +246,7 @@ export function StopwatchFace({ text, running }) {
  * The motion being timed, drawn at the model's own period (or duration), so
  * the student can count oscillations. speed > 1 is a time-lapse.
  */
+const IODINE_WELLS = 12
 export function MotionView({ motion, running, speed = 1, startedAt, revolve = false }) {
   const ref = useRef(null)
   useEffect(() => {
@@ -266,6 +267,24 @@ export function MotionView({ motion, running, speed = 1, startedAt, revolve = fa
           bob?.setAttribute('cx', String(x)); bob?.setAttribute('cy', String(y))
           str?.setAttribute('x2', String(x)); str?.setAttribute('y2', String(y))
         }
+      } else if (motion.look === 'cross') {
+        // Sulfur clouds the flask until the cross can no longer be seen.
+        const f = running ? Math.min(1, t / motion.duration) : 0
+        el.querySelector('[data-cloud]')?.setAttribute('opacity', String(f >= 1 ? 1 : 0.92 * Math.pow(f, 1.6)))
+      } else if (motion.look === 'agar') {
+        // Acid diffuses in from every face; the pink core shrinks to nothing.
+        const f = running ? Math.min(1, t / motion.duration) : 0
+        const core = el.querySelector('[data-core]'), side = 90 * Math.sqrt(Math.max(0, 1 - f))
+        core?.setAttribute('x', String(100 - side / 2)); core?.setAttribute('y', String(60 - side / 2))
+        core?.setAttribute('width', String(side)); core?.setAttribute('height', String(side))
+      } else if (motion.look === 'iodine') {
+        // Iodine in every well; a drop of the mixture every 10 s turns it blue-black while starch is left.
+        const n = running ? Math.floor(t / 10) + 1 : 0, first = Math.max(0, n - IODINE_WELLS)
+        for (let i = 0; i < IODINE_WELLS; i++) {
+          const w = el.querySelector(`[data-well="${i}"]`), k = first + i
+          w?.setAttribute('fill', k < n && k * 10 < motion.duration ? '#1E1530' : '#C77A1E')
+          w?.setAttribute('stroke', k < n ? '#3A3F45' : '#B0B6BD'); w?.setAttribute('stroke-width', k < n ? '2.5' : '1')
+        }
       } else {
         const f = running ? Math.min(1, t / motion.duration) : 0
         bob?.setAttribute('cx', String(20 + 160 * f)); bob?.setAttribute('cy', '60')
@@ -277,12 +296,18 @@ export function MotionView({ motion, running, speed = 1, startedAt, revolve = fa
   }, [motion, running, speed, startedAt, revolve])
   if (!motion) return null
   return (
-    <svg ref={ref} viewBox="0 0 200 120" className="lab-closeup-svg" role="img" aria-label={motion.period ? 'The oscillation you are timing' : 'The motion you are timing'}>
+    <svg ref={ref} viewBox="0 0 200 120" className="lab-closeup-svg" role="img" aria-label={motion.period ? 'The oscillation you are timing' : motion.look ? 'What you are watching while you time it' : 'The motion you are timing'}>
       <rect x="0" y="0" width="200" height="120" fill="#F4F6F8" />
       {motion.period ? (revolve
         ? <><ellipse cx="100" cy="60" rx="60" ry="22" fill="none" stroke="#C9CED4" strokeDasharray="4 4" /><line data-str x1="100" y1="60" x2="160" y2="60" stroke="#555" /><circle data-bob cx="160" cy="60" r="7" fill="#8B5A2B" /></>
         : <><line x1="70" y1="10" x2="130" y2="10" stroke="#555" strokeWidth="4" /><line x1="100" y1="10" x2="100" y2="104" stroke="#C9CED4" strokeDasharray="3 4" /><line data-str x1="100" y1="10" x2="100" y2="102" stroke="#555" /><circle data-bob cx="100" cy="102" r="8" fill="#B8860B" /></>)
-        : <><line x1="20" y1="80" x2="180" y2="80" stroke="#888" /><line x1="20" y1="30" x2="20" y2="90" stroke="#C62828" /><line x1="180" y1="30" x2="180" y2="90" stroke="#C62828" /><circle data-bob cx="20" cy="60" r="8" fill="#5D6D7E" /></>}
+        : motion.look === 'cross'
+          ? <><circle cx="100" cy="60" r="52" fill="#FFFFFF" stroke="#9AA5B1" strokeWidth="3" /><path d="M72 32 L128 88 M128 32 L72 88" stroke="#111" strokeWidth="9" strokeLinecap="round" /><circle data-cloud cx="100" cy="60" r="50" fill="#EFE6B8" opacity="0" /><text x="100" y="116" fontSize="9" textAnchor="middle" fill="#555">looking down through the flask</text></>
+          : motion.look === 'agar'
+            ? <><rect x="55" y="15" width="90" height="90" fill="#F3EEF1" stroke="#C9B8C2" /><rect data-core x="55" y="15" width="90" height="90" fill="#E86AA8" /><text x="100" y="117" fontSize="9" textAnchor="middle" fill="#555">cube in acid (side view)</text></>
+            : motion.look === 'iodine'
+              ? <><rect x="20" y="12" width="160" height="96" rx="6" fill="#FBFBF8" stroke="#C9CED4" />{Array.from({ length: IODINE_WELLS }, (_, i) => <circle key={i} data-well={i} cx={42 + (i % 4) * 39} cy={32 + Math.floor(i / 4) * 29} r="11" fill="#C77A1E" stroke="#B0B6BD" />)}<text x="100" y="118" fontSize="9" textAnchor="middle" fill="#555">one drop every 10 s</text></>
+              : <><line x1="20" y1="80" x2="180" y2="80" stroke="#888" /><line x1="20" y1="30" x2="20" y2="90" stroke="#C62828" /><line x1="180" y1="30" x2="180" y2="90" stroke="#C62828" /><circle data-bob cx="20" cy="60" r="8" fill="#5D6D7E" /></>}
     </svg>
   )
 }

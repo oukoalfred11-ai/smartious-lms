@@ -944,6 +944,7 @@ reg('beaker_250', 0.1, () => {
   const liq = column(0.0348, 'water', 32); liq.position.y = 0.002; liq.visible = false; g.add(liq)
   g.userData.levelWith = ['water_jug', 'measuring_cylinder', 'kettle']
   g.userData.setLevel = (f) => { liq.visible = true; liq.scale.y = 0.09 * (0.15 + 0.8 * Math.min(1, Math.max(0, f))) }
+  g.userData.setLiquid = (colour, f = 0.7) => { liq.material = M('water', { color: colour, opacity: 0.7 }); g.userData.setLevel(f) }
   return g
 })
 reg('water_jug', 0.18, () => {
@@ -1062,12 +1063,16 @@ reg('tongs', 0.24, () => {
 // Chemistry and biology ────────────────────────────────────
 reg('conical_flask', 0.09, () => {
   const g = grp(lathe([[0, 0], [0.032, 0], [0.034, 0.003], [0.033, 0.012], [0.0125, 0.078], [0.0125, 0.105], [0.0145, 0.108]], 'glass', 36))
-  g.add(mesh(new THREE.CylinderGeometry(0.0255, 0.0322, 0.026, 32), M('#F3F1E4', { transparent: true, opacity: 0.55, roughness: 0.2, depthWrite: false }), 0, 0.016, 0))
+  const liq = M('#EAF2F6', { transparent: true, opacity: 0.35, roughness: 0.2, depthWrite: false })
+  g.add(mesh(new THREE.CylinderGeometry(0.0255, 0.0322, 0.026, 32), liq, 0, 0.016, 0))
+  // Sulfur forming: the liquid clouds over as the reaction runs.
+  const clear = new THREE.Color('#EAF2F6'), cloudy = new THREE.Color('#EFE3A6')
+  g.userData.setProgress = (f) => { const k = Math.pow(Math.min(1, Math.max(0, f)), 1.3); liq.color.copy(clear).lerp(cloudy, k); liq.opacity = 0.35 + 0.65 * k }
   return g
 })
 reg('cross_card', 0.14, () => {
   const g = grp(box(0.12, 0.002, 0.12, 'white'))
-  for (const a of [PI / 4, -PI / 4]) { const b = box(0.1, 0.0006, 0.012, 'black', 0, 0.002, 0); b.rotation.y = a; g.add(b) }
+  for (const a of [PI / 4, -PI / 4]) { const b = box(0.05, 0.0006, 0.009, 'black', 0, 0.002, 0); b.rotation.y = a; g.add(b) }
   return g
 })
 function tube(h = 0.15, r = 0.0125, liquid = null, fill = 0.4) {
@@ -1096,10 +1101,15 @@ reg('copper_can', 0.1, () => {
 })
 reg('spotting_tile', 0.17, () => {
   const g = grp(box(0.14, 0.012, 0.1, M('#FBFBF8', { roughness: 0.35 })))
-  const tones = ['#2B1A3D', '#2B1A3D', '#3B2440', '#5A3A2A', '#8A5A20', '#B8792A']
+  // A drop of iodine in each well; a test drop every 10 s turns it blue-black while starch is left.
+  const wells = []
   for (let r = 0; r < 3; r++) for (let c = 0; c < 4; c++) {
-    const i = r * 4 + c
-    g.add(mesh(new THREE.CylinderGeometry(0.009, 0.007, 0.002, 20), M(tones[Math.min(i, tones.length - 1)], { roughness: 0.2 }), -0.045 + c * 0.03, 0.0115, -0.03 + r * 0.03))
+    const w = mesh(new THREE.CylinderGeometry(0.009, 0.007, 0.002, 20), M('#C77A1E', { roughness: 0.2 }), -0.045 + c * 0.03, 0.0115, -0.03 + r * 0.03)
+    wells.push(w); g.add(w)
+  }
+  g.userData.setProgress = (f, m = {}) => {
+    const n = Number.isFinite(m.t) ? Math.floor(m.t / 10) + 1 : 0, first = Math.max(0, n - wells.length)
+    wells.forEach((w, i) => { const k = first + i; w.material.color.set(k < n && k * 10 < (m.duration ?? Infinity) ? '#1E1530' : '#C77A1E') })
   }
   g.add(rod(0.0035, 0.1, 'glass', 'x', 0.02, 0.016, 0.065, 12), ball(0.008, 'red', -0.035, 0.016, 0.065, 14))
   return g
@@ -1136,8 +1146,32 @@ reg('agar_blocks', 0.18, () => {
   const g = grp(box(0.16, 0.008, 0.11, M('#F7F7F4', { roughness: 0.35 })))
   const pink = M('#E86AA8', { transparent: true, opacity: 0.85, roughness: 0.25 })
   ;[[0.02, -0.05, -0.02], [0.015, -0.015, -0.025], [0.01, 0.015, -0.028], [0.005, 0.04, -0.03]].forEach(([a, x, z]) => g.add(box(a, a, a, pink, x, 0.008, z)))
-  g.add(box(0.06, 0.006, 0.03, pink, 0.035, 0.008, 0.025))
+  g.add(box(0.06, 0.006, 0.03, M('#E86AA8', { transparent: true, opacity: 0.85, roughness: 0.25 }), 0.035, 0.008, 0.025))
+  // The cut cubes lose their pink as the acid diffuses in.
+  const p0 = new THREE.Color('#E86AA8'), p1 = new THREE.Color('#F3EEF1')
+  g.userData.setProgress = (f) => { const k = Math.min(1, Math.max(0, f)); pink.color.copy(p0).lerp(p1, k); pink.opacity = 0.85 - 0.35 * k }
   g.add(box(0.07, 0.006, 0.01, 'steel', -0.025, 0.008, 0.035), box(0.03, 0.003, 0.009, 'chrome', -0.075, 0.009, 0.035))
+  return g
+})
+
+reg('copper_electrodes', 0.12, () => {
+  const g = grp(box(0.1, 0.012, 0.03, M('#2E333B', { roughness: 0.5 }), 0, 0.13, 0))
+  for (const [x, c] of [[-0.03, 'red'], [0.03, 'black']]) {
+    g.add(box(0.024, 0.12, 0.002, M('#B86B3A', { metalness: 0.75, roughness: 0.4 }), x, 0.012, 0))
+    g.add(cyl(0.004, 0.012, c, x, 0.142, 0, 12))
+  }
+  return g
+})
+reg('gas_syringe', 0.34, () => {
+  const g = grp(box(0.05, 0.008, 0.04, 'case', -0.1, 0, 0), box(0.05, 0.008, 0.04, 'case', 0.08, 0, 0), box(0.006, 0.04, 0.02, 'steel', -0.1, 0.008, 0), box(0.006, 0.04, 0.02, 'steel', 0.08, 0.008, 0))
+  g.add(rod(0.016, 0.24, 'glass', 'x', 0, 0.065, 0, 24))
+  const band = scalePlane(0.2, 0.012, 20, { margin: 0.002 }); band.position.set(0.0, 0.0815, 0); g.add(band)
+  const plunger = grp(rod(0.0145, 0.012, M('#EEF3F6', { transparent: true, opacity: 0.8, depthWrite: false }), 'x', 0, 0, 0, 20), rod(0.003, 0.2, 'glass', 'x', 0.1, 0, 0, 10), rod(0.012, 0.004, 'glass', 'x', 0.2, 0, 0, 18))
+  plunger.position.set(-0.1, 0.065, 0); g.add(plunger)
+  g.add(rod(0.003, 0.04, 'glass', 'x', -0.14, 0.065, 0, 10), cable([[-0.16, 0.065, 0], [-0.19, 0.05, 0.02], [-0.21, 0.01, 0.05]], 0.003, M('#F2EEE4', { roughness: 0.8 }), 12))
+  // The plunger moves out as gas is collected (more in a warmer bath).
+  g.userData.levelWith = ['water_bath']
+  g.userData.setLevel = (f) => { plunger.position.x = -0.1 + 0.19 * Math.min(1, Math.max(0, f)) }
   return g
 })
 

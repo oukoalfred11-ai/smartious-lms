@@ -45,6 +45,11 @@ function measure(obj) {
   return { cx: (b.min.x + b.max.x) / 2, cz: (b.min.z + b.max.z) / 2, w: b.max.x - b.min.x, h: b.max.y - b.min.y, d: b.max.z - b.min.z, minY: b.min.y }
 }
 
+/** Apparatus that stands on (or in) another item when both are on the bench. */
+const STACK = { conical_flask: 'cross_card', copper_electrodes: 'beaker_250' }
+const STACK_INSIDE = ['copper_electrodes']
+const STACK_FILL = { copper_electrodes: '#2F7FD0' }   // the solution the item stands in (copper(II) sulfate)
+
 /** Greedy rows of ids whose footprints fit in maxW. */
 function packRows(ids, foot, maxW) {
   const rows = [[]]
@@ -193,8 +198,10 @@ export function buildPracticalScene(lab, { def, dispatch, onSelect, onHover = ()
       if (have.has('spring')) { hung.push('spring'); if (have.has('slotted_masses')) hung.push('slotted_masses') }
       else if (have.has('pendulum_bob')) hung.push('pendulum_bob')
     }
-    const frontIds = collected.filter(id => isInstrument(id) || id === iv?.instrument).filter(id => !hung.includes(id))
-    const rest = collected.filter(id => !frontIds.includes(id) && !hung.includes(id))
+    // Items that stand on another (the flask on the cross) instead of taking a place of their own.
+    const stacked = collected.filter(id => STACK[id] && have.has(STACK[id]) && !isInstrument(id) && id !== iv?.instrument)
+    const frontIds = collected.filter(id => isInstrument(id) || id === iv?.instrument).filter(id => !hung.includes(id) && !stacked.includes(id))
+    const rest = collected.filter(id => !frontIds.includes(id) && !hung.includes(id) && !stacked.includes(id))
     const models = Object.fromEntries(collected.map(id => [id, buildModel(id)]))
     const heightOf = (id) => measure(models[id]).h
     const maxW = W - 0.3
@@ -228,6 +235,13 @@ export function buildPracticalScene(lab, { def, dispatch, onSelect, onHover = ()
         }
       })
     })
+    for (const id of stacked) {
+      const base = placed.find(p => p.id === STACK[id])
+      if (!base) continue
+      const y = BENCH_Y + (STACK_INSIDE.includes(id) ? 0.003 : measure(base.model).h)
+      placeModel(id, models[id], base.wrap.position.x, y, base.wrap.position.z, { kind: 'apparatus', id })
+      if (STACK_FILL[id]) base.model.userData.setLiquid?.(STACK_FILL[id])
+    }
     // Hang the chain from the stand's clamp.
     const stand = placed.find(p => p.id === 'stand_clamp')
     if (stand && hung.length && stand.model.userData.hangPoint) {
@@ -324,17 +338,25 @@ export function buildPracticalScene(lab, { def, dispatch, onSelect, onHover = ()
     }
   }
 
+  // Slow reactions run as a time-lapse on the 3D bench (the stopwatch shows the lab time).
+  const lapse = (m) => (m?.look && m.duration > 60 ? Math.ceil(m.duration / 30) : 1)
   const swTime = (t) => (t < 60 ? t.toFixed(1) + '0' : Math.floor(t / 60) + ':' + String(Math.floor(t % 60)).padStart(2, '0') + '.' + Math.floor((t % 1) * 10) + '0')
   /** One animation frame: ticking stopwatch, swinging pendulum, bouncing load. Returns true while still moving. */
   function frame() {
     if (!hands) return false
     const running = !!hands.timer?.running
-    const t = running && timerStartedAt != null ? (performance.now() - timerStartedAt) / 1000 : 0
+    const motion = hands.motion
+    const sp = lapse(motion)
+    const t = running && timerStartedAt != null ? (performance.now() - timerStartedAt) / 1000 * sp : 0
     if (running && displays.stopwatch) {
       const txt = swTime((hands.timer.acc || 0) + t)
       if (txt !== lastTick) { displays.stopwatch(txt); shown.stopwatch = txt; lastTick = txt }
     }
-    const motion = hands.motion
+    // A reaction being watched (cross, iodine, agar): the apparatus changes as it runs.
+    if (running && motion?.look && motion.duration > 0) {
+      const f = Math.min(1, t / motion.duration)
+      for (const { model } of placed) model.userData.setProgress?.(f, { t, duration: motion.duration })
+    }
     const bob = chain.find(c => c.id === 'pendulum_bob')
     if (bob && hangAt && motion?.period && running) {
       const a = 0.16 * Math.cos(2 * Math.PI * t / motion.period)
@@ -365,7 +387,7 @@ export function buildPracticalScene(lab, { def, dispatch, onSelect, onHover = ()
     hands = H
     if (!extrasBuilt) buildExtras(H)
     if (goggles) goggles.visible = !H.goggles
-    const st = H.tidy ? 'Bench tidied away' : H.needsGoggles && !H.goggles ? 'Put on your goggles' : H.timer?.running ? 'Stopwatch running' : H.settled ? 'Readings steady' : 'Wait: still settling'
+    const st = H.tidy ? 'Bench tidied away' : H.needsGoggles && !H.goggles ? 'Put on your goggles' : H.timer?.running ? 'Stopwatch running' + (lapse(H.motion) > 1 ? ' (time-lapse ×' + lapse(H.motion) + ')' : '') : H.settled ? 'Readings steady' : 'Wait: still settling'
     if (statusCard && st !== statusText) { statusCard.userData.setText(st); statusText = st }
     for (const { id, model } of placed) {
       if (id === 'resistance_wire') model.userData.setHeat?.(H.heatFrac || 0)
