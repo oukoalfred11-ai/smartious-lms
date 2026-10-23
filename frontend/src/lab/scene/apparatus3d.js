@@ -1059,6 +1059,88 @@ reg('tongs', 0.24, () => {
   return grp(a, b, cyl(0.004, 0.008, 'steel', -0.098, 0, 0, 12))
 })
 
+// Chemistry and biology ────────────────────────────────────
+reg('conical_flask', 0.09, () => {
+  const g = grp(lathe([[0, 0], [0.032, 0], [0.034, 0.003], [0.033, 0.012], [0.0125, 0.078], [0.0125, 0.105], [0.0145, 0.108]], 'glass', 36))
+  g.add(mesh(new THREE.CylinderGeometry(0.0255, 0.0322, 0.026, 32), M('#F3F1E4', { transparent: true, opacity: 0.55, roughness: 0.2, depthWrite: false }), 0, 0.016, 0))
+  return g
+})
+reg('cross_card', 0.14, () => {
+  const g = grp(box(0.12, 0.002, 0.12, 'white'))
+  for (const a of [PI / 4, -PI / 4]) { const b = box(0.1, 0.0006, 0.012, 'black', 0, 0.002, 0); b.rotation.y = a; g.add(b) }
+  return g
+})
+function tube(h = 0.15, r = 0.0125, liquid = null, fill = 0.4) {
+  const g = grp(lathe([[0, 0], [r * 0.7, 0.002], [r, r], [r, h], [r * 1.12, h + 0.003]], 'glass', 24))
+  if (liquid) { const l = column(r * 0.9, liquid, 20); l.position.y = 0.003; l.scale.y = h * fill; g.add(l) }
+  return g
+}
+reg('boiling_tube', 0.14, () => {
+  const g = grp(box(0.13, 0.012, 0.05, 'wood'), box(0.13, 0.008, 0.05, 'wood', 0, 0.07, 0), box(0.008, 0.07, 0.04, 'wood', -0.061, 0, 0), box(0.008, 0.07, 0.04, 'wood', 0.061, 0, 0))
+  ;[-0.035, 0, 0.035].forEach((x, i) => { const t = tube(0.15, 0.0125, i === 0 ? 'water' : i === 1 ? M('#F4F0E0', { transparent: true, opacity: 0.6, depthWrite: false }) : null, 0.35); t.position.set(x, 0.012, 0); g.add(t) })
+  return g
+})
+reg('spirit_burner', 0.09, () => {
+  const g = grp(lathe([[0, 0], [0.035, 0], [0.037, 0.004], [0.037, 0.028], [0.03, 0.04], [0.012, 0.046], [0, 0.046]], 'glass', 32))
+  const fuel = mesh(new THREE.CylinderGeometry(0.034, 0.034, 0.024, 28), M('#CFE3F2', { transparent: true, opacity: 0.55, depthWrite: false }), 0, 0.015, 0); g.add(fuel)
+  g.add(cyl(0.01, 0.012, 'brass', 0, 0.044, 0, 18), cyl(0.0035, 0.012, M('#F2EBDA', { roughness: 1 }), 0, 0.056, 0, 10))
+  const cap = cyl(0.012, 0.018, 'brass', 0.045, 0, 0.02, 18); g.add(cap)
+  g.add(front(plate('ETHANOL', 0.04, 0.012, { bg: '#FFFFFF', fg: '#B42318' }), 0, 0.02, 0.037))
+  return g
+})
+reg('copper_can', 0.1, () => {
+  const g = grp(lathe([[0, 0], [0.036, 0], [0.038, 0.003], [0.038, 0.09], [0.04, 0.093]], M('#B86B3A', { metalness: 0.7, roughness: 0.35, side: THREE.DoubleSide }), 36))
+  const w = column(0.036, 'water', 28); w.position.y = 0.003; w.scale.y = 0.06; g.add(w)
+  const h = torus(0.04, 0.0012, 'steel', PI, 0, 0.093, 0, 24); g.add(h)
+  return g
+})
+reg('spotting_tile', 0.17, () => {
+  const g = grp(box(0.14, 0.012, 0.1, M('#FBFBF8', { roughness: 0.35 })))
+  const tones = ['#2B1A3D', '#2B1A3D', '#3B2440', '#5A3A2A', '#8A5A20', '#B8792A']
+  for (let r = 0; r < 3; r++) for (let c = 0; c < 4; c++) {
+    const i = r * 4 + c
+    g.add(mesh(new THREE.CylinderGeometry(0.009, 0.007, 0.002, 20), M(tones[Math.min(i, tones.length - 1)], { roughness: 0.2 }), -0.045 + c * 0.03, 0.0115, -0.03 + r * 0.03))
+  }
+  g.add(rod(0.0035, 0.1, 'glass', 'x', 0.02, 0.016, 0.065, 12), ball(0.008, 'red', -0.035, 0.016, 0.065, 14))
+  return g
+})
+reg('pondweed', 0.07, () => {
+  const g = grp(box(0.06, 0.012, 0.06, 'case'), cyl(0.016, 0.03, 'case', 0, 0.012, 0, 20))
+  const t = tube(0.17, 0.0125, M('#D6ECF2', { transparent: true, opacity: 0.5, depthWrite: false }), 0.9); t.position.y = 0.012; g.add(t)
+  const leaf = M('#2F8A3A', { roughness: 0.6 })
+  for (let k = 0; k < 3; k++) {
+    const x = (k - 1) * 0.004
+    g.add(cyl(0.0011, 0.13, leaf, x, 0.03, 0, 6))
+    for (let i = 0; i < 9; i++) { const l = box(0.009, 0.0008, 0.003, leaf, x, 0.045 + i * 0.012, 0); l.rotation.y = i * 1.1 + k; l.rotation.z = 0.4; g.add(l) }
+  }
+  g.add(ball(0.0016, M('#FFFFFF', { transparent: true, opacity: 0.8 }), 0.002, 0.17, 0, 8), ball(0.0012, M('#FFFFFF', { transparent: true, opacity: 0.8 }), -0.001, 0.15, 0.001, 8))
+  return g
+})
+reg('photosynthometer', 0.3, () => {
+  const g = grp(box(0.27, 0.01, 0.045, 'cream'))
+  const sc = scalePlane(0.2, 0.014, 20, { bg: '#FFFFFF' }); sc.position.set(0.02, 0.0105, -0.012); g.add(sc)
+  g.add(rod(0.0022, 0.24, 'glass', 'x', 0.005, 0.016, 0.008, 10))
+  g.add(rod(0.0018, 0.03, M('#E6F4FF', { emissive: '#9FD3FF', emissiveIntensity: 0.4 }), 'x', 0.06, 0.016, 0.008, 10))
+  g.add(rod(0.009, 0.06, 'plastic', 'x', -0.15, 0.016, 0.008, 18), rod(0.002, 0.04, 'case', 'x', -0.19, 0.016, 0.008, 8), rod(0.008, 0.003, 'case', 'x', -0.21, 0.016, 0.008, 14))
+  return g
+})
+reg('bench_lamp', 0.16, () => {
+  const g = grp(cyl(0.055, 0.014, 'case', 0, 0, 0, 32))
+  g.add(link([0, 0.014, 0], [0.01, 0.17, 0], 0.005, 'steel'), link([0.01, 0.17, 0], [0.07, 0.2, 0], 0.005, 'steel'), ball(0.008, 'case', 0.01, 0.17, 0, 14))
+  const shade = mesh(new THREE.CylinderGeometry(0.018, 0.045, 0.06, 28, 1, true), M('#2E6DB4', { side: THREE.DoubleSide, roughness: 0.4 }), 0.08, 0.17, 0); shade.rotation.z = 0.5; g.add(shade)
+  g.add(ball(0.017, M('#FFF6D8', { emissive: '#FFE7A0', emissiveIntensity: 1.2 }), 0.068, 0.155, 0, 16))
+  g.add(cable([[-0.03, 0.007, -0.04], [-0.08, 0.004, -0.05], [-0.1, 0.004, 0.01]], 0.0025, 'case', 12))
+  return g
+})
+reg('agar_blocks', 0.18, () => {
+  const g = grp(box(0.16, 0.008, 0.11, M('#F7F7F4', { roughness: 0.35 })))
+  const pink = M('#E86AA8', { transparent: true, opacity: 0.85, roughness: 0.25 })
+  ;[[0.02, -0.05, -0.02], [0.015, -0.015, -0.025], [0.01, 0.015, -0.028], [0.005, 0.04, -0.03]].forEach(([a, x, z]) => g.add(box(a, a, a, pink, x, 0.008, z)))
+  g.add(box(0.06, 0.006, 0.03, pink, 0.035, 0.008, 0.025))
+  g.add(box(0.07, 0.006, 0.01, 'steel', -0.025, 0.008, 0.035), box(0.03, 0.003, 0.009, 'chrome', -0.075, 0.009, 0.035))
+  return g
+})
+
 // ── Fallback and exports ───────────────────────────────────
 function stockBox(name) {
   const g = grp(box(0.14, 0.09, 0.11, 'card'), box(0.142, 0.001, 0.03, '#B08A55', 0, 0.09, 0))

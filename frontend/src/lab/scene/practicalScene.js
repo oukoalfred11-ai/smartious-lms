@@ -449,7 +449,7 @@ export function buildPracticalScene(lab, { def, dispatch, onSelect, onHover = ()
       if (iv && collected) {
         const x = Number(view.x)
         const sym = iv.symbol ? iv.symbol + ' = ' : ''
-        const t = wrapText(iv.label, 24, 1) + '\n' + sym + (Number.isFinite(x) ? x.toFixed(decimalsOf(iv.step)) : '—') + (iv.unit ? ' ' + iv.unit : '')
+        const t = wrapText(iv.label, 22, 2) + '\n' + sym + (Number.isFinite(x) ? x.toFixed(decimalsOf(iv.step)) : '—') + (iv.unit ? ' ' + iv.unit : '')
         if (ivCard && t !== ivText) { ivCard.userData.setText(t); ivText = t }
         const f = iv.max > iv.min && Number.isFinite(x) ? clamp01((x - iv.min) / (iv.max - iv.min)) : 0
         if (f !== lastLevel) {

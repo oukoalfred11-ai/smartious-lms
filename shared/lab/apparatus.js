@@ -105,6 +105,17 @@ export const APPARATUS = {
   ray_box:           { name: 'Illuminated object (ray box)', group: 'Optics' },
   lamp_point:        { name: 'Small lamp (point source)', group: 'Optics' },
   filter_sheets:     { name: 'Translucent absorber sheets', group: 'Optics' },
+  // Chemistry and biology
+  conical_flask:     { name: 'Conical flask (100 cm³)', group: 'Chemistry and biology' },
+  cross_card:        { name: 'White card marked with a black cross', group: 'Chemistry and biology' },
+  boiling_tube:      { name: 'Boiling tubes in a rack', group: 'Chemistry and biology' },
+  spirit_burner:     { name: 'Spirit burner (ethanol)', group: 'Chemistry and biology' },
+  copper_can:        { name: 'Copper calorimeter can', group: 'Chemistry and biology' },
+  spotting_tile:     { name: 'Spotting tile and dropping pipette', group: 'Chemistry and biology' },
+  pondweed:          { name: 'Pondweed (Elodea) in a boiling tube', group: 'Chemistry and biology' },
+  photosynthometer:  { name: 'Capillary tube and syringe (photosynthometer)', group: 'Chemistry and biology' },
+  bench_lamp:        { name: 'Bench lamp (LED)', group: 'Chemistry and biology' },
+  agar_blocks:       { name: 'Pink agar block, scalpel and tile', group: 'Chemistry and biology' },
   // Safety
   goggles:           { name: 'Safety goggles', group: 'Safety' },
   heat_mat:          { name: 'Heat-proof mat', group: 'Safety' },

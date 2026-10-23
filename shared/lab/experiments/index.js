@@ -7,8 +7,9 @@ import titration from './titration.js'
 import ohmsLaw from './ohms-law.js'
 import osmosis from './osmosis.js'
 import { PHYSICS_AL } from './physics-al/index.js'
+import { IGCSE } from './igcse/index.js'
 
-export const EXPERIMENTS = [titration, ohmsLaw, osmosis, ...PHYSICS_AL]
+export const EXPERIMENTS = [titration, ohmsLaw, osmosis, ...PHYSICS_AL, ...IGCSE]
 export const getExperiment = (id) => EXPERIMENTS.find(e => e.id === id) || null
 
 /** Catalogue entry safe to send to any client (no functions, nothing hidden). */
