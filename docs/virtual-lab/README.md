@@ -11,8 +11,8 @@ It uses the LMS login, roles and student records. There is no second account sys
 | Acid–base titration (chemistry) | Implemented: strong or weak acid, three indicators, burette scale close-up, rough and concordant runs, done **step by step** (goggles and coat, rinse, funnel, jet, eye level, pipette filler, swirl) with technique marked |
 | Ohm's law (physics) | Implemented: free wiring, short-circuit trip, meter resistances, V–I graph |
 | Osmosis in potato tissue (biology) | Implemented as a **simplified** model, labelled as such; done **step by step** (cork borer, ruler and scalpel, blotting, tared balance, labelled tubes, lab clock) with technique marked |
-| 3D bench (Three.js) with 2D fallback, low-graphics mode | Implemented; **not yet run in a browser** (see Verification) |
-| School laboratory room around the bench (titration and osmosis) | Implemented (`scene/labRoom.js`); **not yet seen in a browser** |
+| 3D bench (Three.js) with 2D fallback, low-graphics mode | Implemented; rendered in headless Chromium (see Verification) |
+| School laboratory room around the bench (titration, osmosis, Ohm's law and every physics practical) | Implemented (`scene/labRoom.js`); rendered in headless Chromium |
 | A-to-Z practical flow: plan, bench, student-built results table, hand-drawn graphs, working, conclusion, formal report | Implemented |
 | Autosave, offline copy on the device, conflict detection, idempotent submit | Implemented |
 | Automatic rubric checks re-run on the server, teacher rubric marking, return for correction | Implemented |
@@ -63,7 +63,7 @@ Code: `frontend/src/lab/scene/setupQuest.js` (cupboard, rack, carrying, snapping
 - **Circuit practicals:** Ohm's law, 1.3 and 20 practicals in chapters 6–16. Not wired yet: 7.3 (needs a three-terminal sliding contact), 13.1 and 13.2 (need a two-way charge/discharge switch), 13.3, 13.5, 13.6, 14.5 (teacher demonstration) and practicals with no meter circuit. In practicals whose currents are in mA, or that use lamps, LEDs or a.c., a wrongly wired meter reads 0 rather than a solved value.
 - **Titration.** All the apparatus and reagents of the manual are on the bench (burette in its clamp, pipette and filler, funnel, flask on a white tile, NaOH and acid bottles, three indicator dropper bottles, wash bottle, beakers, goggles and a lab coat). The burette reading is never printed: students read the scale close-up. See *Step-by-step technique* below.
 - **Osmosis.** A potato and cork borer, a ruler and scalpel on a white tile, a paper towel, a balance with a weighing boat, six labelled boiling tubes of sucrose solution and a lab clock. See *Step-by-step technique* below.
-- **The room.** The titration and osmosis benches stand in a school laboratory (`scene/labRoom.js`): a service ledge with gas taps and sockets, tiled splashback, a window with daylight, shelves of reagent bottles, a sink with a swan-neck tap, a fume cupboard, safety signs, a periodic table, a wall clock, a stool, a tiled floor and ceiling lights. Nothing in the room is clickable or affects results. Ambient motion (a drip from the tap every few seconds, steam from a beaker in the fume cupboard, the clock's second hand) runs on a one-second timer, is switched off in low graphics and under *reduced motion*, and stops when the 3D view closes. The physics practicals' generic bench does not use the room yet; adding it is one call, `addLabRoom(lab, { width: W, depth: DEPTH })`, in `practicalScene.js`.
+- **The room.** The titration, osmosis, Ohm's law and physics benches stand in a school laboratory (`scene/labRoom.js`): a service ledge with gas taps and sockets, tiled splashback, a window with daylight, shelves of reagent bottles, a sink with a swan-neck tap, a fume cupboard, safety signs, a periodic table, a wall clock, a stool, a tiled floor and ceiling lights. Nothing in the room is clickable or affects results. Ambient motion (a drip from the tap every few seconds, steam from a beaker in the fume cupboard, the clock's second hand) runs on a one-second timer, is switched off in low graphics and under *reduced motion*, and stops when the 3D view closes. The bench and the ledge have a dark epoxy worktop so white and glass apparatus stands out. Tent cards and labels shrink their text to fit. The camera keeps the variable card in frame (`frameExtras`), never frames less than 0.9 m of bench, and a scene can ask for a taller frame (`frameHeight`; the titration uses it for the burette).
 
 ## Step-by-step technique (titration and osmosis)
 
@@ -224,9 +224,11 @@ What has been checked:
 - Every new frontend file bundles with Bun (syntax and import resolution). External packages were left out of that check.
 - The hands-on bench controls, close-ups and 2D bench were rendered (with a minimal stand-in for React, no effects) against engine views at several stages of every practical, and every button was pressed to check it sends a real engine action. The close-up drawings were rasterised and inspected (meter, rule, vernier, micrometer, thermometer). The 3D additions have only been bundled, not run.
 
+- **3D render sweep.** Every 3D scene (titration, osmosis, Ohm's law and all 67 physics practicals) was bundled with three.js and run in headless Chromium (software WebGL): the set-up quest was completed by script and the finished bench was screenshotted and inspected. No page errors and no missing apparatus models. Fixes from the sweep: low-contrast white bench, clipped variable cards, overflowing label text, z-fighting on the service ledge, the burette cut off by the frame, Ohm's law without the room, and over-zoomed one-item benches.
+
 What has **not** been checked, because the build machine had no package registry, no React or Three.js, and no database:
 
-- The pages have not been rendered in a browser, and the 3D scenes have not been seen.
+- The full pages (React panels around the 3D view) have not been rendered in a browser; the 3D scenes have (see above).
 - No end-to-end test (student → submit → teacher marks) has been run against a live server.
 - The PDF report has not been generated (pdfkit was not installed).
 - The routes have been tested against in-memory model stand-ins, not MongoDB.

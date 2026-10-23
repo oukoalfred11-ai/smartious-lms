@@ -384,6 +384,8 @@ export function buildPracticalScene(lab, { def, dispatch, onSelect, onHover = ()
   }
 
   return {
+    // Not pickable, but part of the work: keep the variable card in frame.
+    frameExtras: () => (ivCard ? [ivCard] : []),
     onPick(p) {
       if (wiring?.onPick(p)) return
       if (hands) {
