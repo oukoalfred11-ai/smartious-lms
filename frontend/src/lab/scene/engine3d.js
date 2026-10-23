@@ -1,7 +1,8 @@
 /**
  * engine3d.js — the reusable 3D laboratory framework (Three.js).
  *
- *   const lab = createLabScene(container, { lowGraphics, onPick })
+ *   const lab = createLabScene(container, { lowGraphics, onPick, freeOrbit, background })
+ *   (freeOrbit: orbit all round a model, with clipping for cut-aways)
  *   lab.add(object, { pick: { kind, id } })   register pickable meshes
  *   lab.invalidate()                          request a re-render
  *   lab.resetView()                           default camera
@@ -59,7 +60,7 @@ function studioRoom() {
   return room
 }
 
-export function createLabScene(container, { lowGraphics = false, onPick = null, onHoverPick = null, view = { pos: [0, 1.25, 1.35], target: [0, 0.95, 0] } } = {}) {
+export function createLabScene(container, { lowGraphics = false, onPick = null, onHoverPick = null, view = { pos: [0, 1.25, 1.35], target: [0, 0.95, 0] }, freeOrbit = false, background = '#EEF1F4' } = {}) {
   const renderer = new THREE.WebGLRenderer({ antialias: !lowGraphics, powerPreference: lowGraphics ? 'low-power' : 'high-performance' })
   renderer.setPixelRatio(lowGraphics ? 1 : Math.min(window.devicePixelRatio || 1, 2))
   renderer.outputColorSpace = THREE.SRGBColorSpace
@@ -75,7 +76,7 @@ export function createLabScene(container, { lowGraphics = false, onPick = null, 
   container.appendChild(renderer.domElement)
 
   const scene = new THREE.Scene()
-  scene.background = new THREE.Color('#EEF1F4')
+  scene.background = new THREE.Color(background)
   const camera = new THREE.PerspectiveCamera(42, 1, 0.02, 30)
 
   // Reflections: glass, metal and liquids reflect a soft laboratory room
@@ -106,11 +107,18 @@ export function createLabScene(container, { lowGraphics = false, onPick = null, 
   controls.dampingFactor = 0.12
   controls.minDistance = 0.35
   controls.maxDistance = 3.2
-  // Stay standing at the bench: no looking from under it or behind it.
-  controls.minPolarAngle = Math.PI * 0.12
-  controls.maxPolarAngle = Math.PI * 0.47
-  controls.minAzimuthAngle = -1.15
-  controls.maxAzimuthAngle = 1.15
+  if (freeOrbit) {
+    // A model on a stand: walk all the way round it, close up or from afar.
+    controls.minPolarAngle = 0.05; controls.maxPolarAngle = Math.PI - 0.05
+    controls.minDistance = 0.12; controls.maxDistance = 4
+    renderer.localClippingEnabled = true            // cut-away views
+  } else {
+    // Stay standing at the bench: no looking from under it or behind it.
+    controls.minPolarAngle = Math.PI * 0.12
+    controls.maxPolarAngle = Math.PI * 0.47
+    controls.minAzimuthAngle = -1.15
+    controls.maxAzimuthAngle = 1.15
+  }
   controls.listenToKeyEvents?.(container)       // arrow keys pan when the viewport has focus
   controls.keyPanSpeed = 14
 

@@ -133,6 +133,25 @@ Eight practicals on the same `definePractical()` engine, with `subject: 'chemist
 
 The models are simplified and say so: their assumptions are listed on each practical (for example, Arrhenius behaviour with a stated activation energy; light as the only limiting factor; testing every 10 s, so the amylase times are rounded up to the next test). The goggles prompt gives each practical's own reason (`gogglesWhy`). New stockroom items with 3D models: conical flask, cross card, boiling tubes, spirit burner, copper can, spotting tile, pondweed, photosynthometer, bench lamp, agar blocks, copper electrodes and gas syringe. Every practical is played by a careful student on 12 seeds, on both benches (`test/practicals.test.js`). Each bench was also rendered in headless Chromium.
 
+## 3D models library
+
+`/lab/models`, open to every role (nav: **3D models**). Labelled 3D models to turn, take apart and test yourself on, built in code (`frontend/src/lab/models/`; no model files, nothing to licence, nothing on the server).
+
+| Model | What it shows | Animation |
+|---|---|---|
+| The human heart | Section: four chambers (left ventricle wall thickest), septum, tricuspid and bicuspid valves with tendons, semilunar valves, aorta, pulmonary artery and veins, venae cavae, coronary arteries | Heartbeat: atria then ventricles contract, valves open and close (“lub-dub”), blood flows through (blue right side, red left) |
+| The human eye | Cut-away: cornea, iris, pupil, aqueous and vitreous humour, lens, ciliary muscle, suspensory ligaments, retina, fovea, blind spot, optic nerve, choroid, sclera | Accommodation: near and far focus (lens shape, ciliary muscle, pupil) |
+| Animal cell | Membrane, cytoplasm, nucleus and nucleolus (with pores), mitochondria with cristae, rough ER with ribosomes, free ribosomes, Golgi apparatus | Cytoplasm moving |
+| Plant cell | Cell wall, membrane, large permanent vacuole, chloroplasts with grana, nucleus, mitochondria, rough ER, ribosomes | Cytoplasmic streaming (chloroplasts circulate) |
+| D.C. electric motor | N and S poles, coil, split-ring commutator, carbon brushes, axle, cell; field, current and force arrows | The coil turns; the current reverses every half turn (Fleming’s left-hand rule) |
+| Four-stroke petrol engine | Cut-away cylinder with fins, piston and rings, connecting rod, crankshaft, flywheel, inlet and exhaust valves with springs, spark plug, ports | Induction, compression, power (spark, burning gas), exhaust, with a line explaining each stroke |
+
+**Using a model.** Labels are callouts in two columns beside the model, joined to the part by leader lines; they follow the model as it turns, and a label whose point is hidden behind the model is dimmed. Click a part or a label to highlight it and read what it does. **Cut-away** shows or hides the cut (a clipping plane; organelles that cross it are sliced too). **Test yourself** hides the labels and asks for up to 8 parts in turn (“Click the bicuspid valve”), scoring first-try answers. *Low graphics* drops shadows and reflections.
+
+Code: `catalogue.js` (the list; loads each model only when opened), `modelStage.js` (viewer: framing, labels, picking, highlight, animation), `kit.js` (materials and geometry helpers; the model contract is documented there), one file per model, `ModelsPage.jsx` (gallery and viewer page). Adding a model is one file returning `{ root, parts: [{ id, name, info, objects, anchor }], tick?, status?, cutaway? }` and a line in `catalogue.js`. The 3D engine gained `freeOrbit` (orbit all round, clipping enabled) for this.
+
+**Checked:** each model was rendered in headless Chromium with its labels, a selected part and its animation at several moments (heart in ventricular systole, engine in the exhaust stroke, eye focusing near). The page around the viewer (React) has been bundled and linted but not rendered.
+
 ## AS & A Level Physics practicals
 
 67 practicals across 16 chapters, from "Using apparatus" to "Quantum physics, nuclear physics and medical imaging". The topic list follows a standard AS & A Level practical course. **All procedures, models, questions and wording are Smartious's own; no textbook text is reproduced**, and nothing claims endorsement by an examination board. Curriculum links are marked unverified.
