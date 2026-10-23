@@ -117,8 +117,12 @@ export default function LabViewport({ experimentId, view, dispatch, editable, mo
               let vis = true, x = o; while (x) { if (!x.visible) { vis = false; break } x = x.parent }
               if (vis) area.expandByObject(o)
             }
-            // Frame the bench top, not the top of a tall stand: the work is down here.
-            if (!area.isEmpty()) { area.min.y = Math.max(area.min.y, BENCH_Y); area.max.y = Math.max(area.min.y + 0.05, Math.min(area.max.y, BENCH_Y + 0.32)) }
+            for (const o of scene.frameExtras?.() || []) area.expandByObject(o)
+            // A bench with one or two items should still read as a bench, not a close-up.
+            if (!area.isEmpty() && area.max.x - area.min.x < 0.9) { const cx = (area.min.x + area.max.x) / 2; area.min.x = cx - 0.45; area.max.x = cx + 0.45 }
+            // Frame the bench top, not the top of a tall stand: the work is down here
+            // (a scene can ask for more, e.g. the titration's burette).
+            if (!area.isEmpty()) { area.min.y = Math.max(area.min.y, BENCH_Y); area.max.y = Math.max(area.min.y + 0.05, Math.min(area.max.y, BENCH_Y + (scene.frameHeight || 0.32))) }
           }
           if (area && !area.isEmpty()) lab.fitTo(area, { pitch: q && !q.done ? 0.72 : 0.7, margin: 1.03, fly })
           else if (scene.view) { lab.camera.position.set(...scene.view.pos); lab.controls.target.set(...scene.view.target); lab.controls.update() }

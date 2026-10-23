@@ -858,6 +858,7 @@ export function titration(lab, { dispatch, onSelect, onHover }) {
       lab.invalidate()
     },
     view: { pos: [0.12, 1.4, 1.12], target: [-0.02, 1.08, 0.02] },
+    frameHeight: 0.66,          // the burette is read and filled at its top: keep it in the frame
     /** What the student fetches when setting up the bench (setupQuest.js), and what they should leave. */
     setup: () => ({
       bench: { minX: -1.08, maxX: 1.08, minZ: -0.44, maxZ: 0.43 },

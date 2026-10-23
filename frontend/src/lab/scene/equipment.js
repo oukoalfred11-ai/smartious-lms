@@ -10,7 +10,9 @@ export const BENCH_Y = 0.9
 
 const mat = {
   bench:  () => new THREE.MeshStandardMaterial({ color: '#2B2F36', roughness: 0.75 }),
-  top:    () => new THREE.MeshStandardMaterial({ color: '#F4F5F7', roughness: 0.55 }),
+  // Dark epoxy-resin worktop, as in school labs: clear glass, white tiles,
+  // labels and colour changes all stand out against it.
+  top:    () => new THREE.MeshStandardMaterial({ color: '#3A4048', roughness: 0.42, metalness: 0.05 }),
   metal:  () => new THREE.MeshStandardMaterial({ color: '#9AA3AD', metalness: 0.7, roughness: 0.35 }),
   dark:   () => new THREE.MeshStandardMaterial({ color: '#1F2227', roughness: 0.6 }),
   glass:  () => new THREE.MeshStandardMaterial({ color: '#DDEBF5', transparent: true, opacity: 0.28, roughness: 0.05, metalness: 0, depthWrite: false, side: THREE.DoubleSide }),
@@ -134,9 +136,14 @@ export function labelPlane(text, { w = 0.1, h = 0.04, size = 40, bg = '#FFFFFF',
     const ctx = canvas.getContext('2d')
     ctx.fillStyle = colours.bg || bg; ctx.fillRect(0, 0, canvas.width, canvas.height)
     ctx.fillStyle = colours.fg || fg
-    ctx.font = `${font} ${size}px "Courier New", monospace`
+    // Shrink the type until the longest line fits the card, so labels never run off the edge.
+    const lines = String(t).split('\n')
+    let px = size
+    ctx.font = `${font} ${px}px "Courier New", monospace`
+    const widest = () => Math.max(0, ...lines.map(l => ctx.measureText(l).width))
+    while (px > 10 && (widest() > canvas.width * 0.94 || px * 1.1 * lines.length > canvas.height * 0.98)) { px -= 1; ctx.font = `${font} ${px}px "Courier New", monospace` }
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
-    String(t).split('\n').forEach((line, i, arr) => ctx.fillText(line, canvas.width / 2, canvas.height / 2 + (i - (arr.length - 1) / 2) * size * 1.1))
+    lines.forEach((line, i, arr) => ctx.fillText(line, canvas.width / 2, canvas.height / 2 + (i - (arr.length - 1) / 2) * px * 1.1))
     tex.needsUpdate = true
   }
   mesh.userData.setText(text)

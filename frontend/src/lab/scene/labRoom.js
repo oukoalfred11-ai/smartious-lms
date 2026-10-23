@@ -175,8 +175,9 @@ export function addLabRoom(lab, { width = 2.2, depth = 0.9 } = {}) {
 
   // Service ledge behind the bench: fills the gap to the wall; gas taps on top, sockets in front.
   const ledgeH = B + 0.1, ledgeD = -backZ - depth / 2
-  const ledge = box(width, ledgeH, ledgeD, std({ color: '#2B2F36', roughness: 0.75 }), 0, ledgeH / 2, -depth / 2 - ledgeD / 2)
-  const ledgeTop = box(width, 0.02, ledgeD, std({ color: '#E9EBEE', roughness: 0.55 }), 0, ledgeH - 0.01, -depth / 2 - ledgeD / 2)
+  // The cabinet stops under the worktop slab: coplanar tops flicker (z-fighting).
+  const ledge = box(width, ledgeH - 0.02, ledgeD, std({ color: '#2B2F36', roughness: 0.75 }), 0, (ledgeH - 0.02) / 2, -depth / 2 - ledgeD / 2)
+  const ledgeTop = box(width, 0.02, ledgeD, std({ color: '#3A4048', roughness: 0.42, metalness: 0.05 }), 0, ledgeH - 0.01, -depth / 2 - ledgeD / 2)
   room.add(shade(ledge), shade(ledgeTop))
   const brass = std({ color: '#C8A04A', metalness: 0.8, roughness: 0.3 })
   for (const x of [-0.75, 0.45]) {

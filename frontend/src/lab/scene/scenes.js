@@ -27,6 +27,7 @@ const { BENCH_Y } = E
 // supply with its up/down buttons and click the switch to close it.
 function ohms(lab, { dispatch, onSelect, onHover }) {
   lab.add(E.bench())
+  addLabRoom(lab)                                  // the school laboratory around the bench
   const place = (obj, x, z, pick) => { obj.position.set(x, BENCH_Y, z); return lab.add(obj, pick ? { pick } : {}) }
   const w = createWiring(lab, { dispatch, onSelect, onHover })
   const ps = place(buildModel('dc_supply'), -0.4, -0.16, { kind: 'supply', label: 'Power supply: use the ▲ ▼ buttons to set the voltage' })
