@@ -554,8 +554,7 @@ function LessonRegister({ toast }) {
 
 export function DOSAttendanceModule({ toast, refreshKey }) {
   const report = useStatReport(toast)
-  const [view,    setView]    = useState('checkins')   // checkins | register
-  const [rec, setRec] = useState(null)               // { lessonRows, dailyRows }
+  const [rec, setRec] = useState(null)               // { lessonRows }
   const [recRange, setRecRange] = useState({ from: new Date(Date.now() - 30 * 864e5).toISOString().slice(0, 10), to: new Date().toISOString().slice(0, 10) })
   const [recLoading, setRecLoading] = useState(false)
   const loadRecords = () => {
@@ -591,33 +590,26 @@ export function DOSAttendanceModule({ toast, refreshKey }) {
   const studentSummary = () => {
     const by = {}
     ;(rec?.lessonRows || []).forEach(r => {
-      by[r.student] = by[r.student] || { name: r.student, grade: r.studentGrade, sched: 0, joined: 0, present: 0, days: 0, daysPresent: 0 }
+      by[r.student] = by[r.student] || { name: r.student, grade: r.studentGrade, sched: 0, joined: 0, present: 0, excused: 0 }
+      // Excused lessons and closure days are listed but not counted.
+      if (r.present === 'excused' || r.present === 'school closed') { by[r.student].excused += 1; return }
       by[r.student].sched += 1
       if (r.joined === 'yes') by[r.student].joined += 1
       if (r.present === 'present') by[r.student].present += 1
-    })
-    ;(rec?.dailyRows || []).forEach(r => {
-      by[r.student] = by[r.student] || { name: r.student, grade: r.grade, sched: 0, joined: 0, present: 0, days: 0, daysPresent: 0 }
-      by[r.student].days += 1
-      if (r.status === 'present' || r.status === 'half_day') by[r.student].daysPresent += 1
     })
     return Object.values(by).map(x => ({ ...x, pct: x.sched ? Math.round(x.present / x.sched * 100) : null })).sort((a, b) => a.name.localeCompare(b.name))
   }
   const printRecord = (kind, name) => {
     const lessons = (rec?.lessonRows || []).filter(r => (kind === 'teacher' ? r.teacher : r.student) === name)
-    const daily = kind === 'student' ? (rec?.dailyRows || []).filter(r => r.student === name) : []
     const sum = kind === 'teacher' ? teacherSummary().find(x => x.name === name) : studentSummary().find(x => x.name === name)
     const row = (cells) => '<tr>' + cells.map(c => `<td>${c ?? ''}</td>`).join('') + '</tr>'
     const table = (heads, rows) => `<table><thead><tr>${heads.map(h => '<th>' + h + '</th>').join('')}</tr></thead><tbody>${rows.join('')}</tbody></table>`
     const kpis = kind === 'teacher'
       ? `<div class="k"><div><b>${sum?.lessons ?? 0}</b>Lessons held</div><div><b>${sum?.rows ?? 0}</b>Student attendances</div><div><b>${sum?.pct ?? 0}%</b>Present rate</div></div>`
-      : `<div class="k"><div><b>${sum?.sched ?? 0}</b>Lessons scheduled</div><div><b>${sum?.joined ?? 0}</b>Joined</div><div><b>${sum?.pct ?? '\u2013'}${sum?.pct !== null ? '%' : ''}</b>Lesson attendance</div><div><b>${sum?.daysPresent ?? 0}/${sum?.days ?? 0}</b>Days present (check-in)</div></div>`
+      : `<div class="k"><div><b>${sum?.sched ?? 0}</b>Lessons scheduled</div><div><b>${sum?.joined ?? 0}</b>Joined</div><div><b>${sum?.pct ?? '\u2013'}${sum?.pct !== null ? '%' : ''}</b>Lesson attendance</div><div><b>${sum?.excused ?? 0}</b>Excused / school closed</div></div>`
     const lessonTable = kind === 'teacher'
       ? table(['Date', 'Class', 'Student', 'Grade', 'Joined', 'Register'], lessons.map(r => row([fmtD(r.date), r.class, r.student, r.studentGrade, r.joined, r.present])))
       : table(['Date', 'Class', 'Subject', 'Teacher', 'Joined', 'Register'], lessons.map(r => row([fmtD(r.date), r.class, r.subject, r.teacher, r.joined, r.present])))
-    const dailyTable = kind === 'student' && daily.length
-      ? `<h2>Daily attendance (check-in)</h2>` + table(['Date', 'Status'], daily.map(r => row([fmtD(r.date), r.status])))
-      : ''
     const html = `<!doctype html><html><head><title>Attendance Record - ${name}</title><style>
       body{font-family:Georgia,serif;color:#1a1a1a;margin:36px;line-height:1.45}
       h1{font-size:20px;margin:0;color:#7D1025}.sub{color:#666;font-size:11.5px;margin-bottom:14px}
@@ -630,92 +622,17 @@ export function DOSAttendanceModule({ toast, refreshKey }) {
     </style></head><body>
       <h1>${kind === 'teacher' ? 'Teacher' : 'Student'} Attendance Record \u2014 ${name}</h1>
       <div class="sub">${fmtD(rec.from)} to ${fmtD(rec.to)} \u00b7 generated ${new Date().toDateString()}</div>
-      ${kpis}<h2>${kind === 'teacher' ? 'Lessons held' : 'Lesson attendance'}</h2>${lessonTable}${dailyTable}
+      ${kpis}<h2>${kind === 'teacher' ? 'Lessons held' : 'Lesson attendance'}</h2>${lessonTable}
       <div class="foot"><b>Method.</b> ${rec.method} Smartious Homeschool \u00b7 Est. 2018 \u00b7 smartioushomeschool.com</div>
     <script>window.onload = () => window.print()</` + `script></body></html>`
     const w = window.open('', '_blank')
     if (!w) return toast?.error?.('Allow pop-ups to print records.')
     w.document.write(html); w.document.close()
   }
-  const [data,    setData]    = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [roleF,   setRoleF]   = useState('all')
-  const [date,    setDate]    = useState(new Date().toISOString().split('T')[0])
-  const [history, setHistory] = useState([])
-  const [histLoad,setHistLoad]= useState(false)
-  const [showHist,setShowHist]= useState(false)
-
-  const load = useCallback(() => {
-    setLoading(true)
-    const params = {}
-    if (roleF !== 'all') params.role = roleF
-    api.get('/checkin/status', { params })
-      .then(r => setData(r.data?.data))
-      .catch(e => toast?.error?.('Failed to load attendance: '+(e?.response?.data?.message||e.message)))
-      .finally(() => setLoading(false))
-  }, [roleF, refreshKey])
-
-  useEffect(() => { load() }, [load])
-
-  const loadHistory = () => {
-    setHistLoad(true); setShowHist(true)
-    // Get last 7 days check-in stats
-    const days = []
-    for (let i=6; i>=0; i--) {
-      const d = new Date(); d.setDate(d.getDate()-i)
-      days.push(d.toISOString().split('T')[0])
-    }
-    Promise.allSettled(days.map(d => api.get('/attendance/day', { params:{ date:d } })))
-      .then(results => {
-        const hist = results.map((r,i) => ({
-          date:    days[i],
-          label:   new Date(days[i]).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}),
-          present: r.status==='fulfilled' ? (r.value.data?.data?.items||[]).filter(x=>x.status==='present').length : 0,
-          total:   r.status==='fulfilled' ? (r.value.data?.data?.items||[]).length : 0,
-        }))
-        setHistory(hist)
-      })
-      .finally(() => setHistLoad(false))
-  }
-
-  const users   = data?.users || []
-  const summary = data?.summary || {}
-
-  const STATUS_S = {
-    present: { bg:'#D1FAE5', fg:'#065F46', label:'Present' },
-    late:    { bg:'#FEF3C7', fg:'#D97706', label:'Late' },
-    absent:  { bg:'#FEE2E2', fg:'#991B1B', label:'Absent' },
-  }
-
-  const fmtTime = d => d ? new Date(d).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : '—'
-
-  // Group by role for display
-  const byRole = {}
-  users.forEach(u => {
-    if (!byRole[u.role]) byRole[u.role] = []
-    byRole[u.role].push(u)
-  })
-
-  const maxBar = Math.max(...(history.map(h=>h.total)||[1]), 1)
-
-  // The people behind each check-in count (today's register, the filter applied).
-  const checkinReport = (k) => {
-    const list = users.filter(k.is)
-    const tm = d => d ? new Date(d).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : ''
-    return {
-      title: 'Check-in: ' + k.label, value: list.length,
-      summary: [['Total', summary.total||0], ['Present', summary.present||0], ['Late', summary.late||0], ['Absent', summary.absent||0], ['Not checked in', summary.notCheckedIn||0], ['On break', summary.onBreak||0]],
-      method: 'Today\'s self check-in register' + (roleF !== 'all' ? ' for ' + roleF + 's' : '') + '. This is the daily check-in, not lesson attendance: lesson attendance is under Overview & records and in each student\'s record.',
-      columns: [{ key:'name', label:'Name' }, { key:'role', label:'Role' }, { key:'email', label:'Email' }, { key:'status', label:'Status' }, { key:'time', label:'Time' }, { key:'reason', label:'Late reason' }, { key:'brk', label:'Break' }],
-      rows: list.map(u => ({ name:u.name, role:u.role, email:u.email, status: u.onBreak ? 'On break' : u.checkedIn ? (STATUS_S[u.checkInStatus]||STATUS_S.present).label : 'Not checked in',
-        time: tm(u.checkInTime), reason: u.reason||'', brk: u.onBreak ? (u.breakType||'').replace(/_/g,' ') : '' })),
-    }
-  }
-
   return (
     <>
       <PSection tag="Dean of Studies" title="Attendance" em="Analytics"
-        sub="Lesson attendance records, and today's check-in. Click any number for the list behind it."/>
+        sub="Lesson attendance for students, recorded when they join or when the teacher marks the register. Teachers' attendance is under the Teachers tab."/>
       {report.modal}
 
       {/* ── Attendance records: pull a range, download clean CSVs ── */}
@@ -734,9 +651,8 @@ export function DOSAttendanceModule({ toast, refreshKey }) {
               <span style={{ fontSize: 12.5, fontWeight: 800, color: TOKENS.s800 }}>Lesson attendance: {rec.lessonRows.length} record(s)</span>
               <button onClick={() => dlCSV(rec.lessonRows, [['Date', r => fmtD(r.date)], ['Class', 'class'], ['Subject', 'subject'], ['Teacher', 'teacher'], ['Student', 'student'], ['Grade', 'studentGrade'], ['Joined', 'joined'], ['Register', 'present']], `lesson-attendance-${recRange.from}-to-${recRange.to}.csv`)}
                 style={{ padding: '5px 12px', borderRadius: 7, border: `1.5px solid ${TOKENS.crimson}`, background: '#fff', color: TOKENS.crimson, fontSize: 10.5, fontWeight: 800, cursor: 'pointer' }}>Download CSV</button>
-              <span style={{ fontSize: 12.5, fontWeight: 800, color: TOKENS.s800, marginLeft: 16 }}>Daily attendance: {rec.dailyRows.length} record(s)</span>
-              <button onClick={() => dlCSV(rec.dailyRows, [['Date', r => fmtD(r.date)], ['Student', 'student'], ['Grade', 'grade'], ['Status', 'status']], `daily-attendance-${recRange.from}-to-${recRange.to}.csv`)}
-                style={{ padding: '5px 12px', borderRadius: 7, border: `1.5px solid ${TOKENS.crimson}`, background: '#fff', color: TOKENS.crimson, fontSize: 10.5, fontWeight: 800, cursor: 'pointer' }}>Download CSV</button>
+              <button onClick={() => report.open({ key: 'attendance', params: { from: recRange.from, to: recRange.to } })}
+                style={{ padding: '5px 12px', borderRadius: 7, border: 'none', background: TOKENS.crimson, color: '#fff', fontSize: 10.5, fontWeight: 800, cursor: 'pointer', marginLeft: 8 }}>Attendance report by student</button>
             </div>
             <div style={{ maxHeight: 220, overflow: 'auto', border: `1px solid ${TOKENS.line}`, borderRadius: 9 }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
@@ -769,16 +685,16 @@ export function DOSAttendanceModule({ toast, refreshKey }) {
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '4px 0 6px' }}>
                   <b style={{ fontSize: 12.5, color: TOKENS.s900 }}>Students ({studentSummary().length})</b>
-                  <button onClick={() => dlCSV(studentSummary(), [['Student', 'name'], ['Grade', 'grade'], ['Lessons scheduled', 'sched'], ['Joined', 'joined'], ['Lesson %', r => r.pct ?? ''], ['Days present', r => `${r.daysPresent}/${r.days}`]], `student-records-${recRange.from}-to-${recRange.to}.csv`)}
+                  <button onClick={() => dlCSV(studentSummary(), [['Student', 'name'], ['Grade', 'grade'], ['Lessons scheduled', 'sched'], ['Joined', 'joined'], ['Lesson %', r => r.pct ?? ''], ['Excused / closed', 'excused']], `student-records-${recRange.from}-to-${recRange.to}.csv`)}
                     style={{ padding: '3px 10px', borderRadius: 6, border: `1px solid ${TOKENS.line}`, background: '#fff', fontSize: 9.5, fontWeight: 800, cursor: 'pointer', color: TOKENS.s600 }}>CSV</button>
                 </div>
                 <div style={{ maxHeight: 200, overflow: 'auto', border: `1px solid ${TOKENS.line}`, borderRadius: 9 }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
-                    <thead><tr>{['Student', 'Grade', 'Lesson %', 'Days', ''].map(h => <th key={h} style={{ position: 'sticky', top: 0, textAlign: 'left', padding: '4px 8px', background: '#F7F2EA' }}>{h}</th>)}</tr></thead>
+                    <thead><tr>{['Student', 'Grade', 'Lesson %', 'Excused', ''].map(h => <th key={h} style={{ position: 'sticky', top: 0, textAlign: 'left', padding: '4px 8px', background: '#F7F2EA' }}>{h}</th>)}</tr></thead>
                     <tbody>{studentSummary().map(st => (
                       <tr key={st.name}><td style={{ padding: '4px 8px' }}>{st.name}</td><td style={{ padding: '4px 8px' }}>{st.grade}</td>
                         <td style={{ padding: '4px 8px', fontWeight: 700, color: st.pct === null ? TOKENS.s400 : st.pct >= 80 ? '#15803D' : st.pct >= 60 ? '#B45309' : '#B91C1C' }}>{st.pct === null ? '\u2013' : st.pct + '%'}</td>
-                        <td style={{ padding: '4px 8px' }}>{st.daysPresent}/{st.days}</td>
+                        <td style={{ padding: '4px 8px' }}>{st.excused}</td>
                         <td style={{ padding: '3px 6px' }}><button onClick={() => printRecord('student', st.name)} style={{ padding: '3px 10px', borderRadius: 6, border: 'none', background: TOKENS.crimson, color: '#fff', fontSize: 9.5, fontWeight: 800, cursor: 'pointer' }}>Print</button></td></tr>
                     ))}</tbody>
                   </table>
@@ -789,139 +705,8 @@ export function DOSAttendanceModule({ toast, refreshKey }) {
           </div>
         )}
       </div>
-      {/* View toggle: check-in analytics vs the (read-only) lesson registers */}
-      <div style={{ display:'flex', gap:6, background:TOKENS.cream, padding:5, borderRadius:10, width:'fit-content', marginBottom:16 }}>
-        {[['checkins','Check-ins'],['register','Lesson registers']].map(([id,label]) => (
-          <button key={id} onClick={() => setView(id)} style={{ padding:'7px 16px', borderRadius:8, border:'none', cursor:'pointer', fontSize:12.5, fontWeight:800, background:view===id?TOKENS.crimson:'transparent', color:view===id?'#fff':TOKENS.s500 }}>{label}</button>
-        ))}
-      </div>
-
-      {view === 'register' ? <LessonRegister toast={toast} /> : (
-      <>
-
-      {/* Controls */}
-      <div style={{ display:'flex', gap:10, marginBottom:18, flexWrap:'wrap', alignItems:'center' }}>
-        <div style={{ display:'flex', border:'1.5px solid '+TOKENS.line, borderRadius:7, overflow:'hidden' }}>
-          {[['all','All'],['student','Students'],['teacher','Teachers'],['sales','Sales'],['ops_manager','Ops'],['accountant','Accounts'],['dos','DOS']].map(([val,label])=>(
-            <button key={val} onClick={()=>setRoleF(val)} style={{
-              padding:'8px 12px', border:'none', cursor:'pointer', fontSize:12, fontWeight:600,
-              background:roleF===val?TOKENS.crimson:'#fff', color:roleF===val?'#fff':TOKENS.s500,
-              borderRight:'1px solid '+TOKENS.line,
-            }}>{label}</button>
-          ))}
-        </div>
-        <button onClick={load} style={{ background:TOKENS.crimson, color:'#fff', border:'none', padding:'8px 16px', borderRadius:7, fontSize:12.5, fontWeight:700, cursor:'pointer' }}>Refresh</button>
-        <button onClick={loadHistory} style={{ background:TOKENS.cream, color:TOKENS.crimson, border:'1px solid '+TOKENS.line, padding:'8px 16px', borderRadius:7, fontSize:12.5, fontWeight:700, cursor:'pointer' }}>
-          {showHist ? 'Hide 7-day trend' : 'Show 7-day trend'}
-        </button>
-        <div style={{ fontSize:12, color:TOKENS.s400, marginLeft:'auto' }}>
-          Today: {new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}
-        </div>
-      </div>
-
-      {loading ? <DOSSpinner/> : (
-        <>
-          {/* Summary KPIs */}
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(130px,1fr))', gap:12, marginBottom:20 }}>
-            {[
-              { label:'Total',        val:summary.total||0,            color:TOKENS.s900, is:()=>true },
-              { label:'Present',      val:summary.present||0,          color:'#065F46', is:u=>u.checkInStatus==='present' },
-              { label:'Late',         val:summary.late||0,             color:'#D97706', is:u=>u.checkInStatus==='late' },
-              { label:'Absent',       val:summary.absent||0,           color:'#991B1B', is:u=>u.checkInStatus==='absent' },
-              { label:'Not checked in', val:summary.notCheckedIn||0,   color:TOKENS.crimson, is:u=>!u.onBreak&&!u.checkedIn },
-              { label:'On break',     val:summary.onBreak||0,          color:'#6B21A8', is:u=>!!u.onBreak },
-            ].map(k=>(
-              <ClickStat key={k.label} onOpen={()=>report.open({ load: async () => checkinReport(k) })}>
-                <div className="card" style={{ padding:'14px 16px 20px', height:'100%', boxSizing:'border-box' }}>
-                  <div style={{ fontSize:10, fontWeight:700, color:TOKENS.s400, textTransform:'uppercase', letterSpacing:'.06em', marginBottom:5 }}>{k.label}</div>
-                  <div style={{ fontSize:24, fontWeight:800, color:k.color, lineHeight:1 }}>{k.val}</div>
-                  {summary.total>0 && k.label!=='Total' && (
-                    <div style={{ fontSize:10, color:TOKENS.s400, marginTop:3 }}>{Math.round((k.val/summary.total)*100)}%</div>
-                  )}
-                </div>
-              </ClickStat>
-            ))}
-          </div>
-
-          {/* 7-day trend chart */}
-          {showHist && (
-            <div className="card" style={{ padding:18, marginBottom:18 }}>
-              <div style={{ fontSize:12, fontWeight:800, color:TOKENS.s900, marginBottom:14 }}>7-day attendance trend</div>
-              {histLoad ? <div style={{ textAlign:'center', color:TOKENS.s400, padding:'20px 0', fontSize:13 }}>Loading...</div> : (
-                <div style={{ display:'flex', alignItems:'flex-end', gap:10, height:80 }}>
-                  {history.map((h,i) => {
-                    const pct = h.total>0 ? Math.round((h.present/h.total)*100) : 0
-                    const barH = Math.max(4, (pct/100)*80)
-                    return (
-                      <div key={i} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:4 }}>
-                        <div style={{ fontSize:10, fontWeight:700, color:pct>=80?'#065F46':pct>=60?'#D97706':'#991B1B' }}>{pct}%</div>
-                        <div style={{ width:'100%', height:barH, background:pct>=80?'#065F46':pct>=60?'#D97706':'#991B1B', borderRadius:'3px 3px 0 0', transition:'height .3s' }}/>
-                        <div style={{ fontSize:9.5, color:TOKENS.s500, textAlign:'center', lineHeight:1.2 }}>{h.label}</div>
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Attendance table by role */}
-          {Object.keys(byRole).length === 0 ? (
-            <div style={{ padding:'40px 0', textAlign:'center', color:TOKENS.s400, fontSize:13 }}>No users found.</div>
-          ) : (
-            Object.entries(byRole).map(([role, roleUsers]) => (
-              <div key={role} className="card" style={{ overflow:'hidden', marginBottom:14 }}>
-                <div style={{ padding:'11px 16px', borderBottom:'1px solid '+TOKENS.line, background:TOKENS.cream, display:'flex', justifyContent:'space-between' }}>
-                  <span style={{ fontWeight:800, fontSize:12.5, color:TOKENS.s900, textTransform:'capitalize' }}>
-                    {role==='ops_manager'?'Operations Manager':role.charAt(0).toUpperCase()+role.slice(1)}s
-                  </span>
-                  <span style={{ fontSize:12, color:TOKENS.s500 }}>
-                    {roleUsers.filter(u=>u.checkInStatus==='present').length} present · {roleUsers.filter(u=>!u.checkedIn&&!u.onBreak).length} not checked in
-                  </span>
-                </div>
-                <table className="tbl" style={{ width:'100%', borderCollapse:'collapse' }}>
-                  <thead><tr>
-                    {['Name','Status','Time','Late arrival / Reason','Break'].map(h=>(
-                      <th key={h} style={{ padding:'8px 12px', textAlign:'left', fontSize:10.5 }}>{h}</th>
-                    ))}
-                  </tr></thead>
-                  <tbody>
-                    {roleUsers.map(u => {
-                      const ss = u.onBreak ? { bg:'#F3E8FF', fg:'#6B21A8', label:'On break' }
-                                 : u.checkedIn ? STATUS_S[u.checkInStatus]||STATUS_S.present
-                                 : { bg:'#F3F4F6', fg:'#6B7280', label:'Not checked in' }
-                      return (
-                        <tr key={String(u.userId)} style={{ borderTop:'1px solid '+TOKENS.line, opacity:u.onBreak?.6:1 }}>
-                          <td style={{ padding:'9px 12px', fontWeight:700, fontSize:13, color:TOKENS.s900 }}>
-                            {u.name}
-                            <div style={{ fontSize:11, color:TOKENS.s500, fontWeight:400 }}>{u.email}</div>
-                          </td>
-                          <td style={{ padding:'9px 12px' }}>
-                            <span style={{ padding:'3px 10px', borderRadius:99, fontSize:11, fontWeight:700, background:ss.bg, color:ss.fg }}>
-                              {ss.label}
-                            </span>
-                          </td>
-                          <td style={{ padding:'9px 12px', fontSize:12, color:TOKENS.s500, whiteSpace:'nowrap' }}>
-                            {u.checkInTime ? fmtTime(u.checkInTime) : '—'}
-                          </td>
-                          <td style={{ padding:'9px 12px', fontSize:12, color:TOKENS.s600 }}>
-                            {u.lateTime ? 'Arrived: '+u.lateTime : u.reason || '—'}
-                          </td>
-                          <td style={{ padding:'9px 12px', fontSize:11.5, color:'#6B21A8' }}>
-                            {u.onBreak ? u.breakType?.replace(/_/g,' ')||'On break' : ''}
-                          </td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            ))
-          )}
-        </>
-      )}
-      </>
-      )}
+      {/* Each lesson's register, read-only (teachers keep it; the Dean corrects in Academic Oversight) */}
+      <LessonRegister toast={toast} />
     </>
   )
 }
@@ -1250,273 +1035,6 @@ export function DOSTimetableModule({ toast, refreshKey }) {
   )
 }
 
-export function CheckInModule({ toast, refreshKey }) {
-  const { user } = useAuth()
-  const today = new Date().toLocaleDateString('en-GB',{ weekday:'long', day:'numeric', month:'long', year:'numeric' })
-  const dayOfWeek = new Date().getDay() // 0=Sun, 6=Sat
-  const isWeekend = dayOfWeek === 0 || dayOfWeek === 6
-
-  const [status,    setStatus]    = useState(null)   // today's check-in from API
-  const [loading,   setLoading]   = useState(true)
-  const [saving,    setSaving]    = useState(false)
-  const [history,   setHistory]   = useState([])
-  const [histLoad,  setHistLoad]  = useState(true)
-
-  // Form state
-  const [pick,      setPick]      = useState('present')  // what user picks
-  const [lateTime,  setLateTime]  = useState('')
-  const [reason,    setReason]    = useState('')
-
-  const load = useCallback(() => {
-    setLoading(true)
-    api.get('/checkin/today')
-      .then(r => { setStatus(r.data?.data) })
-      .catch(() => {})
-      .finally(() => setLoading(false))
-  }, [refreshKey])
-
-  const loadHistory = useCallback(() => {
-    setHistLoad(true)
-    api.get('/checkin/history')
-      .then(r => setHistory(r.data?.data?.records || []))
-      .catch(() => {})
-      .finally(() => setHistLoad(false))
-  }, [])
-
-  useEffect(() => { load(); loadHistory() }, [load, loadHistory])
-
-  const submit = async () => {
-    if (pick === 'late' && !lateTime.trim()) { toast?.error?.('Enter your arrival time.'); return }
-    if (pick === 'absent' && !reason.trim()) { toast?.error?.('Enter a reason for absence.'); return }
-    setSaving(true)
-    try {
-      await api.post('/checkin', { status:pick, lateTime, reason })
-      toast?.ok?.('Check-in recorded.')
-      load(); loadHistory()
-    } catch(e) {
-      toast?.error?.(e?.response?.data?.message || 'Check-in failed.')
-    } finally { setSaving(false) }
-  }
-
-  const fmtDate = d => d ? new Date(d).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}) : '—'
-  const fmtTime = d => d ? new Date(d).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : '—'
-
-  const STATUS_STYLE = {
-    present: { bg:'#D1FAE5', fg:'#065F46', label:'Present' },
-    late:    { bg:'#FEF3C7', fg:'#92400E', label:'Late' },
-    absent:  { bg:'#FEE2E2', fg:'#991B1B', label:'Absent' },
-  }
-
-  // On break
-  if (!loading && status?.onBreak) {
-    const BREAK_LABELS = {
-      mid_term_break:'Mid-term break', end_term_break:'End-term break',
-      summer_break:'Summer break', medical_leave:'Medical leave', other:'Break',
-    }
-    return (
-      <>
-        <PSection tag="Daily" title="Check" em="In" sub={today}/>
-        <div className="card" style={{ padding:32, textAlign:'center', maxWidth:480, margin:'0 auto' }}>
-          <div style={{ width:64, height:64, borderRadius:'50%', background:'#FEF3C7', border:'2px solid #FDE68A', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 16px' }}>
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2" strokeLinecap="round">
-              <path d="M18.364 5.636l-12.728 12.728M5.636 5.636l12.728 12.728"/>
-            </svg>
-          </div>
-          <div style={{ fontSize:18, fontWeight:800, color:TOKENS.s900, marginBottom:8 }}>
-            {BREAK_LABELS[status.breakType] || 'On Break'}
-          </div>
-          <div style={{ fontSize:13, color:TOKENS.s500, lineHeight:1.65, marginBottom:status.breakNote?12:0 }}>
-            Your account is currently on a break. Check-in and daily reminders are paused.
-          </div>
-          {status.breakNote && (
-            <div style={{ fontSize:12.5, color:TOKENS.s600, background:TOKENS.cream, borderRadius:8, padding:'10px 14px', marginTop:8, fontStyle:'italic' }}>
-              "{status.breakNote}"
-            </div>
-          )}
-          <div style={{ fontSize:12, color:TOKENS.s400, marginTop:16 }}>
-            Contact your DOS or admin to return from break.
-          </div>
-        </div>
-      </>
-    )
-  }
-
-  const alreadyCheckedIn = !loading && status?.checkedIn
-  const todaySS = alreadyCheckedIn ? STATUS_STYLE[status.checkInStatus] || STATUS_STYLE.present : null
-
-  return (
-    <>
-      <PSection tag="Daily" title="Check" em="In" sub={today}/>
-
-      {/* Main check-in card */}
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 380px', gap:20, alignItems:'start' }}>
-
-        {/* Left — check in form or confirmed */}
-        <div className="card" style={{ padding:0, overflow:'hidden' }}>
-          {/* Card header */}
-          <div style={{ background:'linear-gradient(135deg,#7D1025,#5A0B1B)', padding:'24px 28px' }}>
-            <div style={{ fontSize:10, fontWeight:700, letterSpacing:'.16em', textTransform:'uppercase', color:'rgba(255,255,255,.5)', marginBottom:8 }}>
-              {new Date().toLocaleDateString('en-GB',{weekday:'long'})} · {new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}
-            </div>
-            <div style={{ fontSize:22, fontWeight:800, color:'#fff', marginBottom:4 }}>
-              Good {new Date().getHours()<12?'morning':new Date().getHours()<17?'afternoon':'evening'}, {user?.firstName}
-            </div>
-            <div style={{ fontSize:13, color:'rgba(255,255,255,.6)' }}>
-              {alreadyCheckedIn ? 'You have checked in for today.' : isWeekend ? 'No check-in required on weekends.' : 'Please mark your attendance for today.'}
-            </div>
-          </div>
-
-          <div style={{ padding:'24px 28px' }}>
-            {loading ? (
-              <div style={{ padding:'30px 0', textAlign:'center', color:TOKENS.s400 }}>Loading...</div>
-            ) : isWeekend ? (
-              <div style={{ textAlign:'center', padding:'20px 0', color:TOKENS.s400, fontSize:13 }}>
-                Enjoy your weekend! Check-in resumes on Monday.
-              </div>
-            ) : alreadyCheckedIn ? (
-              /* Already checked in */
-              <div style={{ textAlign:'center' }}>
-                <div style={{ width:72, height:72, borderRadius:'50%', background:todaySS.bg, border:'3px solid '+todaySS.fg+'40', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 16px' }}>
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={todaySS.fg} strokeWidth="2.5" strokeLinecap="round">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                </div>
-                <div style={{ fontSize:22, fontWeight:800, color:todaySS.fg, marginBottom:4 }}>
-                  {todaySS.label}
-                </div>
-                <div style={{ fontSize:13, color:TOKENS.s500, marginBottom:12 }}>
-                  Checked in at {fmtTime(status?.record?.checkInTime)}
-                </div>
-                {status?.checkInStatus==='late' && status?.record?.lateTime && (
-                  <div style={{ fontSize:13, color:'#92400E', background:'#FEF3C7', borderRadius:7, padding:'8px 14px', display:'inline-block', marginBottom:12 }}>
-                    Arrival time: {status.record.lateTime}
-                  </div>
-                )}
-                {status?.checkInStatus==='absent' && status?.record?.reason && (
-                  <div style={{ fontSize:13, color:'#991B1B', background:'#FEE2E2', borderRadius:7, padding:'8px 14px', display:'inline-block', marginBottom:12 }}>
-                    Reason: {status.record.reason}
-                  </div>
-                )}
-                <div style={{ fontSize:12, color:TOKENS.s400, marginTop:8 }}>
-                  Need to correct this? Contact your admin.
-                </div>
-              </div>
-            ) : (
-              /* Check-in form */
-              <>
-                {/* Status picker */}
-                <div style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.06em', marginBottom:12 }}>
-                  I am
-                </div>
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:10, marginBottom:20 }}>
-                  {[
-                    { val:'present', label:'Present', icon:'check', bg:'#D1FAE5', fg:'#065F46', desc:'On time' },
-                    { val:'late',    label:'Late',    icon:'clock', bg:'#FEF3C7', fg:'#D97706', desc:'Running late' },
-                    { val:'absent',  label:'Absent',  icon:'x',     bg:'#FEE2E2', fg:'#991B1B', desc:'Not attending' },
-                  ].map(opt=>(
-                    <button key={opt.val} onClick={()=>{ setPick(opt.val); if(opt.val!=='late')setLateTime(''); if(opt.val!=='absent')setReason('') }}
-                      style={{
-                        padding:'16px 12px', borderRadius:10, cursor:'pointer', textAlign:'center',
-                        border:'2px solid '+(pick===opt.val?opt.fg:TOKENS.line),
-                        background:pick===opt.val?opt.bg:'#fff',
-                        transition:'all .15s',
-                      }}>
-                      <div style={{ fontSize:13, fontWeight:800, color:pick===opt.val?opt.fg:TOKENS.s600, marginBottom:4 }}>{opt.label}</div>
-                      <div style={{ fontSize:11, color:pick===opt.val?opt.fg:TOKENS.s400 }}>{opt.desc}</div>
-                    </button>
-                  ))}
-                </div>
-
-                {/* Late time input */}
-                {pick==='late' && (
-                  <div style={{ marginBottom:16 }}>
-                    <label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:6, display:'block' }}>
-                      What time did you arrive?
-                    </label>
-                    <input type="time" value={lateTime} onChange={e=>setLateTime(e.target.value)}
-                      style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1.5px solid '+(lateTime?TOKENS.line:'#FDE68A'), fontSize:15, fontFamily:'inherit', boxSizing:'border-box' }}/>
-                  </div>
-                )}
-
-                {/* Absence reason */}
-                {pick==='absent' && (
-                  <div style={{ marginBottom:16 }}>
-                    <label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:6, display:'block' }}>
-                      Reason for absence
-                    </label>
-                    <textarea value={reason} onChange={e=>setReason(e.target.value)} rows={3}
-                      placeholder="Please explain your absence..."
-                      style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1.5px solid '+(reason?TOKENS.line:'#FCA5A5'), fontSize:13, fontFamily:'inherit', resize:'vertical', boxSizing:'border-box' }}/>
-                  </div>
-                )}
-
-                <button onClick={submit} disabled={saving} style={{
-                  width:'100%', padding:'13px', borderRadius:9,
-                  background:saving?TOKENS.s300:pick==='absent'?'#991B1B':pick==='late'?'#D97706':TOKENS.accentEmerald||'#065F46',
-                  color:'#fff', border:'none', fontSize:14, fontWeight:800,
-                  cursor:saving?'not-allowed':'pointer', letterSpacing:'.03em',
-                }}>
-                  {saving ? 'Submitting...' : `Mark myself as ${pick}`}
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Right — history */}
-        <div className="card" style={{ padding:0, overflow:'hidden' }}>
-          <div style={{ padding:'14px 18px', borderBottom:'1px solid '+TOKENS.line, fontWeight:800, fontSize:13, color:TOKENS.s900 }}>
-            My attendance (last 30 days)
-          </div>
-          {histLoad ? (
-            <div style={{ padding:24, textAlign:'center', color:TOKENS.s400, fontSize:13 }}>Loading...</div>
-          ) : history.length === 0 ? (
-            <div style={{ padding:24, textAlign:'center', color:TOKENS.s400, fontSize:13 }}>No records yet.</div>
-          ) : (
-            <>
-              {/* Mini stats */}
-              {(() => {
-                const p = history.filter(r=>r.checkInStatus==='present').length
-                const l = history.filter(r=>r.checkInStatus==='late').length
-                const a = history.filter(r=>r.checkInStatus==='absent').length
-                const total = history.length
-                return (
-                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:0, borderBottom:'1px solid '+TOKENS.line }}>
-                    {[{ label:'Present',val:p,color:'#065F46',bg:'#D1FAE5' },{ label:'Late',val:l,color:'#D97706',bg:'#FEF3C7' },{ label:'Absent',val:a,color:'#991B1B',bg:'#FEE2E2' }].map((s,i)=>(
-                      <div key={s.label} style={{ padding:'12px 10px', textAlign:'center', background:s.bg+'40', borderRight:i<2?'1px solid '+TOKENS.line:'none' }}>
-                        <div style={{ fontSize:20, fontWeight:800, color:s.color }}>{s.val}</div>
-                        <div style={{ fontSize:10, color:s.color, fontWeight:600, marginTop:2 }}>{s.label}</div>
-                        <div style={{ fontSize:9, color:s.color, opacity:.6 }}>{total?Math.round(s.val/total*100)+'%':''}</div>
-                      </div>
-                    ))}
-                  </div>
-                )
-              })()}
-              {/* Record list */}
-              <div style={{ maxHeight:320, overflowY:'auto' }}>
-                {[...history].sort((a,b)=>new Date(b.date)-new Date(a.date)).map((r,i)=>{
-                  const s = STATUS_STYLE[r.checkInStatus||r.status] || { bg:'#F3F4F6',fg:'#6B7280',label:r.status }
-                  return (
-                    <div key={r._id||i} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'9px 16px', borderBottom:'1px solid '+TOKENS.line }}>
-                      <div>
-                        <div style={{ fontSize:12.5, fontWeight:600, color:TOKENS.s900 }}>{fmtDate(r.date)}</div>
-                        {(r.lateTime||r.reason) && <div style={{ fontSize:11, color:TOKENS.s500, marginTop:1 }}>{r.lateTime?'Arrived: '+r.lateTime:r.reason}</div>}
-                      </div>
-                      <span style={{ padding:'3px 10px', borderRadius:99, fontSize:11, fontWeight:700, background:s.bg, color:s.fg }}>
-                        {r.checkInStatus==='late'?'Late':s.label}
-                      </span>
-                    </div>
-                  )
-                })}
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-    </>
-  )
-}
-
 export function DOSBreakModule({ toast, refreshKey }) {
   const [users,   setUsers]   = useState([])
   const [loading, setLoading] = useState(true)
@@ -1546,7 +1064,7 @@ export function DOSBreakModule({ toast, refreshKey }) {
     setSaving(modal._id)
     try {
       await api.post('/checkin/break', { userId:modal._id, ...form })
-      toast?.ok?.(modal.firstName+' placed on break. Reminders and check-in are paused; they can still log in.')
+      toast?.ok?.(modal.firstName+' placed on break. Reminders are paused and missed lessons do not count; they can still log in.')
       setModal(null); load()
     } catch(e) { toast?.error?.(e?.response?.data?.message||'Failed.') }
     finally { setSaving(null) }
@@ -1569,7 +1087,7 @@ export function DOSBreakModule({ toast, refreshKey }) {
   return (
     <>
       <PSection tag="Dean of Studies" title="Manage" em="Breaks"
-        sub="Place students or staff on break to pause check-in reminders and absence alerts. They can still log in to the portal."/>
+        sub="Place students or staff on break to pause reminders and absence alerts; lessons during a break are not counted as missed. They can still log in to the portal."/>
 
       <div style={{ display:'flex', gap:8, marginBottom:16, alignItems:'center' }}>
         <div style={{ display:'flex', border:'1.5px solid '+TOKENS.line, borderRadius:7, overflow:'hidden' }}>
@@ -1681,7 +1199,7 @@ export function DOSBreakModule({ toast, refreshKey }) {
             </div>
 
             <div style={{ background:'#FEF9C3',borderRadius:8,padding:'10px 14px',marginTop:16,fontSize:12,color:'#92400E',lineHeight:1.5 }}>
-              This will deactivate {modal.firstName}'s account and stop daily check-in reminders until you remove the break.
+              {modal.firstName} keeps portal access. Reminders and absence alerts stop, and lessons are not counted as missed, until you remove the break.
             </div>
 
             <div style={{ display:'flex',gap:10,marginTop:18 }}>

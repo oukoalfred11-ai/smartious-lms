@@ -18,7 +18,7 @@ import MyProfileModule, { Avatar as ProfileAvatar } from './modules/MyProfileMod
 import FrontDeskModule from './modules/FrontDeskModule.jsx'
 import AssessmentModule from './modules/AssessmentModule.jsx'
 import CRMModule, { SalesPerformanceModule } from './modules/CRMModule.jsx'
-import { DOSAnalyticsModule, DOSExamsModule, DOSHomeworkModule, DOSAttendanceModule, DOSTimetableModule, CheckInModule, DOSBreakModule } from './modules/DOSModules.jsx'
+import { DOSAnalyticsModule, DOSExamsModule, DOSHomeworkModule, DOSAttendanceModule, DOSTimetableModule, DOSBreakModule } from './modules/DOSModules.jsx'
 import ReportsModule from './modules/ReportsModule.jsx'
 import CommunicationModule from './modules/CommunicationModule.jsx'
 import StudentsManagementModule from './modules/AllocationsModule.jsx'
@@ -40,6 +40,7 @@ import DOSPerformanceModule from './modules/DOSPerformanceModule.jsx'
 import CentreRegisterModule from './modules/CentreRegisterModule.jsx'
 import MarksEntryModule from './modules/MarksEntryModule.jsx'
 import AcademicOversightModule from './modules/AcademicOversightModule.jsx'
+import TeacherRegisterModule from './modules/TeacherRegisterModule.jsx'
 import Hub from './shared/Hub.jsx'
 import CommandModule from './modules/CommandModule.jsx'
 import ClubsModule from './modules/ClubsModule.jsx'
@@ -90,14 +91,14 @@ const NAV_SECTIONS = {
     { label: 'Me',          items: ['myprofile', 'mystafffile'] },
   ],
   accountant: [
-    { label: 'Overview',    items: ['checkin', 'dashboard', 'analytics'] },
+    { label: 'Overview',    items: ['dashboard', 'analytics'] },
     { label: 'Fee Management', items: ['feecollection', 'billing', 'documents', 'sessions'] },
     { label: 'Finance',     items: ['payroll', 'inventory'] },
     { label: 'System',      items: ['settings'] },
     { label: 'Me',          items: ['myprofile', 'mystafffile'] },
   ],
   sales: [
-    { label: 'Overview',    items: ['checkin', 'dashboard', 'salesperf'] },
+    { label: 'Overview',    items: ['dashboard', 'salesperf'] },
     { label: 'CRM',         items: ['crm'] },
     { label: 'Billing',     items: ['billing'] },
     { label: 'Admissions',  items: ['assessment', 'frontdesk', 'communication'] },
@@ -116,7 +117,7 @@ const NAV_SECTIONS = {
   // Operations Manager accounts share this portal and its access.
   ops_manager: [
     // Overview is the Command page: KPIs that open their reports.
-    { label: 'Overview',    items: ['dashboard', 'checkin'] },
+    { label: 'Overview',    items: ['dashboard'] },
     { label: 'Academics',   items: ['oversight', 'dosattend', 'liveclasses', 'clubs', 'exams', 'doshomework', 'dostimetable', 'questionbank', 'virtuallab'] },
     { label: 'Students',    items: ['admissiondocs', 'sessions'] },
     { label: 'People',      items: ['users', 'teachers', 'allocations', 'communication', 'teacherratings'] },
@@ -138,7 +139,7 @@ const HUB_ALIAS = {
   dosperformance: ['dosanalytics', 'evidence'], mastery: ['dosanalytics', 'mastery'],
   centreregister: ['dosattend', 'centre'], dosbreaks: ['dosattend', 'breaks'],
   marksentry: ['oversight', 'marks'], cooreports: ['reports', 'weekly'],
-  command: ['dashboard'], analytics: ['dashboard'],
+  command: ['dashboard'], analytics: ['dashboard'], checkin: ['dosattend', 'teachers'],
 }
 function resolvePage(page, allowed) {
   if (allowed.includes(page)) return [page, null]
@@ -493,7 +494,8 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         {safePage === 'exams'         && <DOSExamsModule toast={toast} refreshKey={refreshKey}/>}
         {safePage === 'doshomework'   && <DOSHomeworkModule toast={toast} refreshKey={refreshKey}/>}
         {safePage === 'dosattend'     && <Hub tab={hubTab} tabs={[
-          ['overview', 'Overview & records', <DOSAttendanceModule toast={toast} refreshKey={refreshKey}/>],
+          ['overview', 'Students', <DOSAttendanceModule toast={toast} refreshKey={refreshKey}/>],
+          ['teachers', 'Teachers', <TeacherRegisterModule toast={toast} />],
           ['centre', 'Centre register', <CentreRegisterModule toast={toast} />],
           ['breaks', 'Breaks', <DOSBreakModule toast={toast} refreshKey={refreshKey}/>],
         ]} />}
@@ -501,7 +503,6 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
           ['records', 'Student records', <AcademicOversightModule toast={toast} />],
           ['marks', 'Marks entry', <MarksEntryModule toast={toast} />],
         ]} />}
-        {safePage === 'checkin'       && <CheckInModule toast={toast} refreshKey={refreshKey}/>}
         {safePage === 'dostimetable'  && <DOSTimetableModule toast={toast} refreshKey={refreshKey}/>}
         {safePage === 'payroll'        && <PayrollModule         refreshKey={refreshKey} toast={toast}/>}
         {safePage === 'sessions'    && <StudentSessionsModule toast={toast} refreshKey={refreshKey} />}

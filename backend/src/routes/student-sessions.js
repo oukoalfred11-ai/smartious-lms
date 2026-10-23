@@ -140,7 +140,7 @@ router.post('/pause', auth, STAFF, async (req, res) => {
 
     const accessMsg = blockAccess
       ? 'Portal access suspended for the student and linked parents.'
-      : 'Student keeps portal access for homework and personal studies; reminders and check-in are paused.'
+      : 'Student keeps portal access for homework and personal studies; reminders are paused and lessons during the pause are not counted as missed.'
     return res.status(201).json({ success: true,
       message: `${student.firstName} ${student.lastName} paused (${TYPE_LABELS[type]}). ${accessMsg}`,
       data: { pause } })

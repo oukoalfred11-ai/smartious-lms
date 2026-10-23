@@ -298,12 +298,11 @@ router.get('/question-bank', auth, requireRole(...STAFF), async (req, res) => {
 });
 
 // ── Downloadable attendance records ──────────────────────────────────
-// Two clean record sets for a date range: per-LESSON attendance (from
-// classroom session registers) and DAILY attendance (from check-ins).
+// Clean records for a date range: per-LESSON attendance (from
+// classroom session registers).
 //   GET /api/dos-reports/attendance-records?from=YYYY-MM-DD&to=YYYY-MM-DD
 router.get('/attendance-records', auth, requireRole('admin', 'ops_manager', 'dos'), async (req, res) => {
   try {
-    const Attendance = require('../models/Attendance');
     const to = req.query.to ? new Date(req.query.to + 'T23:59:59Z') : new Date();
     const from = req.query.from ? new Date(req.query.from + 'T00:00:00Z') : new Date(to.getTime() - 30 * 864e5);
     if (to - from > 100 * 864e5) return res.status(400).json({ success: false, message: 'Range too large - 100 days maximum.' });
@@ -329,21 +328,14 @@ router.get('/attendance-records', auth, requireRole('admin', 'ops_manager', 'dos
         teacher: nm(U[String(c.teacherId)]),
         student: nm(st), studentGrade: st.gradeLevel || '',
         joined: (x?.joinCount || 0) > 0 ? 'yes' : 'no',
-        present: attendanceFacts.sessionAttended(x) ? 'present' : 'absent',
+        // Excused lessons and closure days do not count (lib/attendanceFacts).
+        present: !attendanceFacts.lessonCounts(c, x) ? (x?.excused ? 'excused' : 'school closed') : attendanceFacts.sessionAttended(x) ? 'present' : 'absent',
         source: x?.markedBy ? 'teacher' : 'session',
       });
     }));
 
-    const daily = await Attendance.find({ date: { $gte: from, $lte: to } })
-      .populate('studentId', 'firstName lastName gradeLevel role')
-      .sort({ date: 1 }).limit(8000).lean();
-    const dailyRows = daily.filter(x => x.studentId && x.studentId.role === 'student').map(x => ({
-      date: x.date, student: [x.studentId.firstName, x.studentId.lastName].filter(Boolean).join(' '),
-      grade: x.studentId.gradeLevel || '', status: x.status || '',
-    }));
-
-    res.json({ success: true, data: { from, to, lessonRows, dailyRows,
-      method: 'Lesson attendance: every assigned student of every held lesson (scheduled time passed, not cancelled). Joined = the student entered the live room; Register = present when joined or marked present by the class teacher, unless the teacher marked them absent. Daily rows are student check-ins (and, before the per-lesson cutover, the old day register) — history only, not the attendance metric.' } });
+    res.json({ success: true, data: { from, to, lessonRows,
+      method: 'Lesson attendance: every assigned student of every held lesson (scheduled time passed, not cancelled). Joined = the student entered the live room; Register = present when joined or marked present by the class teacher, unless the teacher marked them absent. Excused = excused by the Dean; school closed = a closure day the student did not attend; neither counts.' } });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
 
