@@ -1,0 +1,38 @@
+/* Labelled 3D models (ModelsPage, modelStage.js) */
+.m3d-stage { position: relative; width: 100%; height: min(72vh, 680px); min-height: 420px; border-radius: 14px; overflow: hidden; background: #141C26; }
+.m3d-stage canvas { width: 100% !important; height: 100% !important; }
+.m3d-overlay { position: absolute; inset: 0; pointer-events: none; font: 500 13px/1.2 "Inter", "Helvetica Neue", Arial, sans-serif; }
+.m3d-lines { position: absolute; inset: 0; overflow: visible; }
+.m3d-line { fill: none; stroke: rgba(226, 236, 246, 0.75); stroke-width: 1.2; }
+.m3d-line.sel { stroke: #FFB020; stroke-width: 2; }
+.m3d-line.dim { stroke: rgba(226, 236, 246, 0.28); stroke-dasharray: 3 3; }
+.m3d-dot { fill: #FFFFFF; stroke: #141C26; stroke-width: 1.5; }
+.m3d-dot.sel { fill: #FFB020; }
+.m3d-dot.dim { fill: rgba(255, 255, 255, 0.35); }
+.m3d-label { position: absolute; transform: translateY(-50%); pointer-events: auto; cursor: pointer; white-space: nowrap; max-width: 210px; overflow: hidden; text-overflow: ellipsis;
+  padding: 4px 9px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.22); background: rgba(16, 24, 34, 0.86); color: #EEF3F8; font: inherit; }
+.m3d-label:hover, .m3d-label:focus-visible { border-color: #FFB020; outline: none; }
+.m3d-label.sel { background: #FFB020; color: #1B1300; border-color: #FFB020; }
+.m3d-label.dim { opacity: 0.55; }
+@media (max-width: 640px) { .m3d-overlay { font-size: 11px; } .m3d-label { padding: 3px 6px; max-width: 130px; } }
+
+.m3d-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 16px; align-items: start; }
+@media (max-width: 1000px) { .m3d-layout { grid-template-columns: 1fr; } }
+.m3d-side { display: flex; flex-direction: column; gap: 12px; }
+.m3d-panel { background: var(--lab-card, #fff); border: 1px solid var(--lab-line, #dfe3e8); border-radius: 12px; padding: 12px 14px; }
+.m3d-panel h3 { margin: 0 0 6px; font-size: 16px; }
+.m3d-panel p { margin: 0; line-height: 1.5; }
+.m3d-tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 10px 0; }
+.m3d-status { min-height: 1.5em; margin: 8px 2px 0; color: #3D4A57; }
+.m3d-parts { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; }
+.m3d-parts button { all: unset; cursor: pointer; padding: 3px 4px; border-radius: 4px; font-size: 13px; }
+.m3d-parts button:hover, .m3d-parts button:focus-visible { background: #EEF2F6; }
+.m3d-parts button.on { background: #FFE3A6; }
+.m3d-quiz { font-size: 15px; }
+.m3d-quiz b { color: #8A5A00; }
+.m3d-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+.m3d-card { display: flex; flex-direction: column; gap: 6px; text-decoration: none; color: inherit; background: var(--lab-card, #fff); border: 1px solid var(--lab-line, #dfe3e8); border-radius: 12px; padding: 14px; }
+.m3d-card:hover { border-color: #FFB020; }
+.m3d-card h3 { margin: 0; font-size: 16px; }
+.m3d-card p { margin: 0; font-size: 13.5px; line-height: 1.45; color: #3D4A57; }
+.m3d-icon { font-size: 26px; line-height: 1; }

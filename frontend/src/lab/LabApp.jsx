@@ -8,6 +8,7 @@
  *   /lab/teach               teacher / admin / Dean dashboard
  *   /lab/review/:id          mark one submission
  *   /lab/content             admin / Dean content review
+ *   /lab/models              labelled 3D models (heart, eye, cells, motor, engine…), /lab/models/:id one model
  */
 import { useEffect, useState } from 'react'
 import { Link, NavLink, Navigate, Route, Routes, useNavigate, useParams, useSearchParams } from 'react-router-dom'
@@ -17,6 +18,7 @@ import TeacherDashboard from './TeacherDashboard.jsx'
 import SessionReview from './SessionReview.jsx'
 import ContentAdmin from './ContentAdmin.jsx'
 import { STATUS_LABEL } from './panels.jsx'
+import { ModelsLibrary, ModelViewer } from './models/ModelsPage.jsx'
 import { getExperiment } from './core.js'
 import './lab.css'
 
@@ -161,6 +163,7 @@ export default function LabApp() {
         <Link to="/lab" className="lab-brand"><span className="lab-brand-mark" aria-hidden="true">S</span> Smartious Virtual Lab</Link>
         <nav aria-label="Virtual Lab">
           <NavLink end to="/lab">{role === 'student' ? 'My lab' : 'Experiments'}</NavLink>
+          <NavLink to="/lab/models">3D models</NavLink>
           {teaches && <NavLink to="/lab/teach">Teaching</NavLink>}
           {STAFF.includes(role) && <NavLink to="/lab/content">Content review</NavLink>}
           <Link to={PORTAL[role] || '/portal'}>Back to portal</Link>
@@ -174,6 +177,8 @@ export default function LabApp() {
           <Route path="teach" element={teaches ? <TeacherDashboard /> : <Navigate to="/lab" replace />} />
           <Route path="review/:id" element={teaches ? <ReviewPage /> : <Navigate to="/lab" replace />} />
           <Route path="content" element={STAFF.includes(role) ? <ContentAdmin /> : <Navigate to="/lab" replace />} />
+          <Route path="models" element={<ModelsLibrary />} />
+          <Route path="models/:id" element={<ModelViewer />} />
           <Route path="*" element={<Navigate to="/lab" replace />} />
         </Routes>
       </main>
