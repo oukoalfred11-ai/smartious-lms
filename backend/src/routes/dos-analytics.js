@@ -11,7 +11,8 @@ const mongoose = require('mongoose')
 const { auth, requireRole } = require('../middleware/auth')
 const attendanceFacts = require('../lib/attendanceFacts')
 
-const ALLOWED = requireRole('admin', 'dos')
+// The Dean and the Operations Manager share one portal.
+const ALLOWED = requireRole('admin', 'dos', 'ops_manager', 'qa')
 
 // ── Lazy model loaders ──────────────────────────────────────
 const m = name => mongoose.model(name)

@@ -4,6 +4,7 @@ import { TOKENS } from '../shared/tokens.js'
 import { DOSSpinner, PSection } from '../shared/ui.jsx'
 import { LessonsToClose } from '../../../../components/lessons/LessonControl.jsx'
 import { SchoolCalendarManager } from '../../../../components/lessons/SchoolCalendar.jsx'
+import { ClickStat, useStatReport } from '../shared/StatReport.jsx'
 
 export function DOSAnalyticsModule({ toast, refreshKey }) {
   const [overview, setOverview]   = useState(null)
@@ -12,6 +13,7 @@ export function DOSAnalyticsModule({ toast, refreshKey }) {
   const [atRisk,   setAtRisk]     = useState(null)
   const [loading,  setLoading]    = useState(true)
   const [filters,  setFilters]    = useState({ termStart:'', termEnd:'', curriculum:'', subject:'' })
+  const report = useStatReport(toast)
 
   const load = useCallback(() => {
     setLoading(true)
@@ -32,12 +34,14 @@ export function DOSAnalyticsModule({ toast, refreshKey }) {
   useEffect(() => { load() }, [load])
 
   const gc = s => s===null?TOKENS.s400:s>=80?'#065F46':s>=70?'#1E40AF':s>=60?'#92400E':s>=50?'#6B21A8':s>=40?'#9A3412':'#991B1B'
-  const gl = s => s===null?'—':s>=80?'A*':s>=70?'B':s>=60?'C':s>=50?'D':s>=40?'E':'U'
+  // Mixed curricula grade differently (A*–G, 9–1, EE/ME…), so school-wide tables show a band, not a letter.
+  const gl = s => s===null?'—':s>=80?'Strong':s>=60?'Secure':s>=40?'Developing':'Weak'
 
   return (
     <>
       <PSection tag="Dean of Studies" title="Performance" em="Analytics"
         sub="Live overview of student performance, exam results, homework tracking and at-risk flags."/>
+      {report.modal}
       <div style={{ display:'flex', gap:8, marginBottom:20, flexWrap:'wrap', alignItems:'center', background:'#fff', border:'1px solid '+TOKENS.line, borderRadius:10, padding:'12px 14px' }}>
         <input type="date" value={filters.termStart} onChange={e=>setFilters(p=>({...p,termStart:e.target.value}))}
           style={{ padding:'8px 10px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:12.5, fontFamily:'inherit' }}/>
@@ -60,17 +64,19 @@ export function DOSAnalyticsModule({ toast, refreshKey }) {
           {overview && (
             <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(150px,1fr))', gap:12, marginBottom:24 }}>
               {[
-                { label:'Active students',  val:overview.totalStudents,        color:TOKENS.crimson },
-                { label:'Teachers',         val:overview.totalTeachers,        color:'#1E40AF' },
-                { label:'Exams this month', val:overview.examsThisMonth,       color:'#6B21A8' },
-                { label:'Avg exam score',   val:overview.avgExamScore!==null?overview.avgExamScore+'%':'—', color:gc(overview.avgExamScore) },
-                { label:'HW compliance',    val:overview.hwComplianceRate!==null?overview.hwComplianceRate+'%':'—', color:overview.hwComplianceRate>=80?'#065F46':overview.hwComplianceRate>=60?'#D97706':'#991B1B' },
-                { label:'Attendance (7d)',  val:overview.attendanceRate!==null?overview.attendanceRate+'%':'—', color:overview.attendanceRate>=80?'#065F46':overview.attendanceRate>=60?'#D97706':'#991B1B' },
+                { label:'Active students',  val:overview.totalStudents,        color:TOKENS.crimson, spec:{ key:'students' } },
+                { label:'Teachers',         val:overview.totalTeachers,        color:'#1E40AF', spec:{ key:'teachers', params:{ days:30 } } },
+                { label:'Exams this month', val:overview.examsThisMonth,       color:'#6B21A8', spec:{ key:'examsSet', params:{ days:30 } } },
+                { label:'Avg exam score',   val:overview.avgExamScore!==null?overview.avgExamScore+'%':'—', color:gc(overview.avgExamScore), spec:{ key:'exams', params:{ days:30 } } },
+                { label:'HW compliance',    val:overview.hwComplianceRate!==null?overview.hwComplianceRate+'%':'—', color:overview.hwComplianceRate>=80?'#065F46':overview.hwComplianceRate>=60?'#D97706':'#991B1B', spec:{ key:'homework', params:{ days:30 } } },
+                { label:'Attendance (7d)',  val:overview.attendanceRate!==null?overview.attendanceRate+'%':'—', color:overview.attendanceRate>=80?'#065F46':overview.attendanceRate>=60?'#D97706':'#991B1B', spec:{ key:'attendance', params:{ days:7 } } },
               ].map(k=>(
-                <div key={k.label} className="card" style={{ padding:'14px 16px' }}>
-                  <div style={{ fontSize:10, fontWeight:700, color:TOKENS.s400, textTransform:'uppercase', letterSpacing:'.06em', marginBottom:6 }}>{k.label}</div>
-                  <div style={{ fontSize:22, fontWeight:800, color:k.color, lineHeight:1 }}>{k.val}</div>
-                </div>
+                <ClickStat key={k.label} onOpen={()=>report.open(k.spec)}>
+                  <div className="card" style={{ padding:'14px 16px 20px', height:'100%', boxSizing:'border-box' }}>
+                    <div style={{ fontSize:10, fontWeight:700, color:TOKENS.s400, textTransform:'uppercase', letterSpacing:'.06em', marginBottom:6 }}>{k.label}</div>
+                    <div style={{ fontSize:22, fontWeight:800, color:k.color, lineHeight:1 }}>{k.val}</div>
+                  </div>
+                </ClickStat>
               ))}
             </div>
           )}
@@ -221,7 +227,8 @@ export function DOSExamsModule({ toast, refreshKey }) {
   }
 
   const gc = s => s===null?TOKENS.s400:s>=80?'#065F46':s>=70?'#1E40AF':s>=60?'#92400E':s>=50?'#6B21A8':s>=40?'#9A3412':'#991B1B'
-  const gl = s => s===null?'—':s>=80?'A*':s>=70?'B':s>=60?'C':s>=50?'D':s>=40?'E':'U'
+  // Mixed curricula grade differently (A*–G, 9–1, EE/ME…), so school-wide tables show a band, not a letter.
+  const gl = s => s===null?'—':s>=80?'Strong':s>=60?'Secure':s>=40?'Developing':'Weak'
   const fmtDate = d => d?new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'—'
   const isEndTerm = e => /end.?term|final|terminal/i.test(e.title||'')
 
@@ -233,9 +240,9 @@ export function DOSExamsModule({ toast, refreshKey }) {
     }).sort((a,b)=>b.pct-a.pct)
     const all = scores.map(s=>s.pct)
     const avg = all.length?Math.round(all.reduce((a,b)=>a+b,0)/all.length):null
-    const GKEYS = ['A*','B','C','D','E','U']
-    const GCOLS = {'A*':'#065F46',B:'#1E40AF',C:'#92400E',D:'#6B21A8',E:'#9A3412',U:'#991B1B'}
-    const dist = all.reduce((acc,sc)=>{ const g=sc>=80?'A*':sc>=70?'B':sc>=60?'C':sc>=50?'D':sc>=40?'E':'U'; acc[g]=(acc[g]||0)+1; return acc },{})
+    const GKEYS = ['Strong','Secure','Developing','Weak']
+    const GCOLS = { Strong:'#065F46', Secure:'#1E40AF', Developing:'#92400E', Weak:'#991B1B' }
+    const dist = all.reduce((acc,sc)=>{ const g=gl(sc); acc[g]=(acc[g]||0)+1; return acc },{})
     return (
       <>
         <button onClick={()=>setSelected(null)} style={{ background:'transparent', border:'none', cursor:'pointer', color:TOKENS.crimson, fontSize:12.5, fontWeight:700, padding:0, marginBottom:16 }}>← Back to exams</button>
@@ -254,7 +261,7 @@ export function DOSExamsModule({ toast, refreshKey }) {
         </div>
         {all.length>0&&(
           <div className="card" style={{ padding:16, marginBottom:14 }}>
-            <div style={{ fontSize:12, fontWeight:700, color:TOKENS.s900, marginBottom:10 }}>Grade distribution</div>
+            <div style={{ fontSize:12, fontWeight:700, color:TOKENS.s900, marginBottom:10 }}>Score bands <span style={{ fontWeight:400, color:TOKENS.s400 }}>(80%+ strong · 60–79 secure · 40–59 developing · under 40 weak; letter grades follow each student's curriculum on reports)</span></div>
             <div style={{ display:'flex', gap:8, alignItems:'flex-end', height:60 }}>
               {GKEYS.map(g=>{ const c=dist[g]||0; const h=all.length?Math.max(4,(c/all.length)*60):0; return (
                 <div key={g} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:3 }}>

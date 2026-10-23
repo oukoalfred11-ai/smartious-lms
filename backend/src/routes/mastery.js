@@ -188,3 +188,7 @@ router.get('/student/:id', auth, requireRole(...STAFF), async (req, res) => {
 });
 
 module.exports = router;
+// Shared with routes/stat-reports.js so the at-risk drill-down uses the same rules.
+module.exports.cohortMetrics = cohortMetrics;
+module.exports.evaluate = evaluate;
+module.exports.RULES = RULES;

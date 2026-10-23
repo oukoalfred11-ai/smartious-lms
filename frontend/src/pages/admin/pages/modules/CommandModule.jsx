@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { api } from '../../../../context/ctx.jsx'
 import { TOKENS } from '../shared/tokens.js'
 import { AnalyticsStrip } from '../shared/charts.jsx'
+import { ClickStat, useStatReport, CLIENT_REPORTS } from '../shared/StatReport.jsx'
 
 /**
  * CommandModule: the landing page for academic and business leadership.
@@ -31,6 +32,7 @@ export default function CommandModule({ toast, role = 'dos' }) {
   const [funnel, setFunnel] = useState(null)
   const [past, setPast] = useState([])
   const isOps = role === 'ops_manager' || role === 'admin'
+  const report = useStatReport(toast)
 
   useEffect(() => {
     api.get('/snapshots', { params: { scope: 'school', days: 7 } }).then(r => setWk(r.data?.data?.summary)).catch(() => {})
@@ -108,23 +110,26 @@ export default function CommandModule({ toast, role = 'dos' }) {
   }
 
   const dueIvs = ivs.filter(i => new Date(i.dueDate) <= new Date())
-  const card = (label, value, sub, arrow) => (
-    <div key={label} style={{ background: '#fff', border: `1px solid ${TOKENS.line}`, borderRadius: 12, padding: '14px 16px' }}>
-      <div style={{ fontSize: 22, fontWeight: 900, color: TOKENS.s900 }}>{value}</div>
-      <div style={{ fontSize: 11.5, color: TOKENS.s500, fontWeight: 700, display: 'flex', gap: 8, alignItems: 'center' }}>{label} {arrow}</div>
-      {sub && <div style={{ fontSize: 10.5, color: TOKENS.s400, marginTop: 2 }}>{sub}</div>}
-    </div>
+  // Every card opens the report behind its number.
+  const card = (label, value, sub, arrow, spec) => (
+    <ClickStat key={label} onOpen={() => report.open(spec)}>
+      <div style={{ background: '#fff', border: `1px solid ${TOKENS.line}`, borderRadius: 12, padding: '14px 16px 20px', height: '100%', boxSizing: 'border-box' }}>
+        <div style={{ fontSize: 22, fontWeight: 900, color: TOKENS.s900 }}>{value}</div>
+        <div style={{ fontSize: 11.5, color: TOKENS.s500, fontWeight: 700, display: 'flex', gap: 8, alignItems: 'center' }}>{label} {arrow}</div>
+        {sub && <div style={{ fontSize: 10.5, color: TOKENS.s400, marginTop: 2 }}>{sub}</div>}
+      </div>
+    </ClickStat>
   )
 
   const need = []
-  if (mastery?.high) need.push({ tag: 'ACADEMIC', color: '#B91C1C', text: `${mastery.high} student(s) at high risk`, detail: mastery.top.map(t => t.name).join(', '), go: 'Mastery & Early Warning' })
+  if (mastery?.high) need.push({ tag: 'ACADEMIC', color: '#B91C1C', text: `${mastery.high} student(s) at high risk`, detail: mastery.top.map(t => t.name).join(', '), go: 'Mastery & Early Warning', spec: { key: 'atRisk' } })
   if (dueIvs.length) need.push({ tag: 'REVIEW', color: '#B45309', text: `${dueIvs.length} intervention(s) past review date`, detail: dueIvs.slice(0, 3).map(i => i.studentId ? `${i.studentId.firstName || ''} ${i.studentId.lastName || ''}` : '?').join(', '), go: 'Mastery \u2192 Interventions' })
-  if (past.length) need.push({ tag: 'DELIVERY', color: '#B91C1C', text: `${past.length} recent class(es) DID NOT RUN`, detail: past.map(p => p.teacher || p.title).join(', '), go: 'Live Classes \u2192 Past' })
-  if (isOps && churn?.high) need.push({ tag: 'RETENTION', color: '#B91C1C', text: `${churn.high} family(ies) at leaving risk`, detail: churn.rows.slice(0, 3).map(r => `${r.name} (${r.signals[0] || ''})`).join('; '), go: 'Business \u2192 Churn' })
+  if (past.length) need.push({ tag: 'DELIVERY', color: '#B91C1C', text: `${past.length} recent class(es) DID NOT RUN`, detail: past.map(p => p.teacher || p.title).join(', '), go: 'Live Classes \u2192 Past', spec: { key: 'lessons', params: { days: 7 } } })
+  if (isOps && churn?.high) need.push({ tag: 'RETENTION', color: '#B91C1C', text: `${churn.high} family(ies) at leaving risk`, detail: churn.rows.slice(0, 3).map(r => `${r.name} (${r.signals[0] || ''})`).join('; '), go: 'Business \u2192 Churn', spec: { load: CLIENT_REPORTS.churn } })
   if (isOps && revenue?.aging?.length) {
     const old = revenue.aging.filter(a => a.bucket === '31-60d' || a.bucket === '60d+')
     const amt = old.reduce((t, a) => t + a.amount, 0)
-    if (amt > 0) need.push({ tag: 'CASH', color: '#B45309', text: `${fmtMoney(amt)} unpaid over 30 days (${old.reduce((t, a) => t + a.n, 0)} invoices)`, detail: 'Oldest first in Billing \u2192 aging', go: 'Billing & Invoices' })
+    if (amt > 0) need.push({ tag: 'CASH', color: '#B45309', text: `${fmtMoney(amt)} unpaid over 30 days (${old.reduce((t, a) => t + a.n, 0)} invoices)`, detail: 'Oldest first in Billing \u2192 aging', go: 'Billing & Invoices', spec: { load: CLIENT_REPORTS.aging } })
   }
 
   return (
@@ -139,16 +144,16 @@ export default function CommandModule({ toast, role = 'dos' }) {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12 }}>
         {card('Attendance', wk?.attendancePct !== null && wk?.attendancePct !== undefined ? wk.attendancePct + '%' : '\u2013',
-          wk ? `${wk.attended} of ${wk.scheduled} this week` : '', <Arrow now={wk?.attendancePct} prev={pwk?.attendancePct} suffix="pp" />)}
+          wk ? `${wk.attended} of ${wk.scheduled} this week` : '', <Arrow now={wk?.attendancePct} prev={pwk?.attendancePct} suffix="pp" />, { key: 'attendance', params: { days: 7 } })}
         {card('Exam average', wk?.examAvg !== null && wk?.examAvg !== undefined ? wk.examAvg + '%' : '\u2013',
-          wk ? `${wk.examN} graded` : '', <Arrow now={wk?.examAvg} prev={pwk?.examAvg} suffix="pp" />)}
-        {card('Lessons held', wk?.sessionsHeld ?? '\u2013', 'this week', <Arrow now={wk?.sessionsHeld} prev={pwk?.sessionsHeld} />)}
-        {card('At risk', mastery ? mastery.high : '\u2013', mastery ? `${mastery.watch} on watch` : '', null)}
-        {isOps && card('Leaving risk', churn ? churn.high : '\u2013', churn ? `${churn.watch} families on watch` : '', null)}
+          wk ? `${wk.examN} graded` : '', <Arrow now={wk?.examAvg} prev={pwk?.examAvg} suffix="pp" />, { key: 'exams', params: { days: 7 } })}
+        {card('Lessons held', wk?.sessionsHeld ?? '\u2013', 'this week', <Arrow now={wk?.sessionsHeld} prev={pwk?.sessionsHeld} />, { key: 'lessons', params: { days: 7 } })}
+        {card('At risk', mastery ? mastery.high : '\u2013', mastery ? `${mastery.watch} on watch` : '', null, { key: 'atRisk' })}
+        {isOps && card('Leaving risk', churn ? churn.high : '\u2013', churn ? `${churn.watch} families on watch` : '', null, { load: CLIENT_REPORTS.churn })}
         {isOps && card('Collected this month', revenue ? fmtMoney(revenue.collected) : '\u2013',
-          revenue ? `of ${fmtMoney(revenue.issued)} issued (${revenue.collectionPct ?? '\u2013'}%)` : '', null)}
+          revenue ? `of ${fmtMoney(revenue.issued)} issued (${revenue.collectionPct ?? '\u2013'}%)` : '', null, { key: 'collected' })}
         {isOps && card('Pipeline', funnel ? funnel.activePipeline : '\u2013',
-          funnel ? `${funnel.conversionPct ?? '\u2013'}% convert to enrolled (90d)` : '', null)}
+          funnel ? `${funnel.conversionPct ?? '\u2013'}% convert to enrolled (90d)` : '', null, { key: 'pipeline', params: { days: 90 } })}
       </div>
 
       {/* Needs you today */}
@@ -159,11 +164,12 @@ export default function CommandModule({ toast, role = 'dos' }) {
         ) : (
           <div style={{ display: 'grid', gap: 8, marginTop: 10 }}>
             {need.map((n, i) => (
-              <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'baseline', flexWrap: 'wrap', padding: '8px 10px', background: '#FBF8F3', borderRadius: 9 }}>
+              <div key={i} onClick={n.spec ? () => report.open(n.spec) : undefined} title={n.spec ? 'Open the report' : undefined}
+                style={{ display: 'flex', gap: 10, alignItems: 'baseline', flexWrap: 'wrap', padding: '8px 10px', background: '#FBF8F3', borderRadius: 9, cursor: n.spec ? 'pointer' : 'default' }}>
                 <span style={{ fontSize: 9.5, fontWeight: 900, color: '#fff', background: n.color, padding: '2px 8px', borderRadius: 999, letterSpacing: '.05em' }}>{n.tag}</span>
                 <b style={{ fontSize: 12.5, color: TOKENS.s900 }}>{n.text}</b>
                 <span style={{ fontSize: 11.5, color: TOKENS.s500, flex: 1, minWidth: 160 }}>{n.detail}</span>
-                <span style={{ fontSize: 10.5, color: TOKENS.s400, fontWeight: 700 }}>{n.go}</span>
+                <span style={{ fontSize: 10.5, color: n.spec ? TOKENS.crimson : TOKENS.s400, fontWeight: 700 }}>{n.spec ? 'Open report ›' : n.go}</span>
               </div>
             ))}
           </div>
@@ -216,6 +222,7 @@ export default function CommandModule({ toast, role = 'dos' }) {
       )}
 
       <AnalyticsStrip scope="school" days={30} title="School trend: last 30 days" show={['attendance', 'exams', 'sessions']} />
+      {report.modal}
     </div>
   )
 }
