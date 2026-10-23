@@ -53,6 +53,7 @@ export function ModelViewer() {
   const [status, setStatus] = useState('')
   const [low, setLow] = useState(pref('low', '0') === '1')
   const [quiz, setQuiz] = useState(null)          // { order, i, score, tries, feedback }
+  const [progress, setProgress] = useState(null)  // downloading a model file: { f, total }
   const quizRef = useRef(null); quizRef.current = quiz
 
   useEffect(() => {
@@ -64,9 +65,9 @@ export function ModelViewer() {
       if (!E.webglAvailable()) { setProblem('3D graphics (WebGL) are not available on this device.'); return }
       stage = S.createModelStage(box.current, { low, onSelect: (pid) => onPart(pid) })
       stageRef.current = stage
-      const m = await stage.load(build)
+      const m = await stage.load(build, { onProgress: (f, total) => { if (!cancelled) setProgress({ f, total }) } })
       if (cancelled) return
-      setModel(m); setStatus(stage.status())
+      setModel(m); setProgress(null); setStatus(stage.status())
     }).catch(() => setProblem('This model could not be loaded. Check your connection and try again.'))
     return () => { cancelled = true; stage?.dispose(); stageRef.current = null }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -120,7 +121,7 @@ export function ModelViewer() {
       <div className="m3d-layout">
         <div>
           <div ref={box} className="m3d-stage" role="img" aria-label={'3D model: ' + meta.title + '. Drag to turn it, scroll or pinch to zoom.'}>
-            {!model && !problem && <div className="lab-loading" style={{ color: '#DDE5EE', padding: 24 }}>Building the model…</div>}
+            {!model && !problem && <div className="lab-loading" style={{ color: '#DDE5EE', padding: 24 }}>{progress ? `Downloading the model… ${Math.round(progress.f * 100)}% of ${(progress.total / 1048576).toFixed(1)} MB` : 'Building the model…'}</div>}
             {problem && <p className="lab-error" role="alert" style={{ margin: 16 }}>{problem}</p>}
           </div>
           <div className="m3d-tools">

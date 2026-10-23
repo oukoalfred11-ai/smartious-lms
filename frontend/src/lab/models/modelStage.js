@@ -49,9 +49,9 @@ export function createModelStage(container, { onSelect = () => {}, low = false }
     labels = []; model = null; selected = null
   }
 
-  async function load(build) {
+  async function load(build, opts = {}) {
     clearModel()
-    const m = await build()
+    const m = await build(opts)
     model = m
     // Every mesh gets its own material, so highlighting one part leaves the others alone.
     m.root.traverse(o => { if (o.isMesh) o.material = Array.isArray(o.material) ? o.material.map(x => x.clone()) : o.material.clone() })
