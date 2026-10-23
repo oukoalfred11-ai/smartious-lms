@@ -8,7 +8,7 @@
  * or display the student looks at is exactly what the grader treats as
  * "shown".
  *
- *   instrumentKind(id, reading)        'dial' | 'rule' | 'vernier' | 'micrometer' | 'thermometer' | 'stopwatch' | 'digital' | 'plain'
+ *   instrumentKind(id, reading)        'dial' | 'rule' | 'vernier' | 'micrometer' | 'thermometer' | 'cylinder' | 'syringe' | 'stopwatch' | 'digital' | 'plain'
  *   dialScale(maxAbs, resolution)      full scale and division of an analogue meter (or null: use a digital display)
  *   displayPosition(raw, shown, res)   where to draw a pointer so that rounding to the resolution is unambiguous
  *   parallaxShift(eye, division, k)    apparent shift of a pointer read off-square
@@ -26,7 +26,7 @@ export const FLICKER_INSTRUMENTS = ['multimeter', 'top_pan_balance', 'ammeter', 
 // (a needle swinging, a thermometer catching up, a loaded spring bouncing).
 export const SETTLING_INSTRUMENTS = ['ammeter', 'voltmeter', 'milliammeter', 'millivoltmeter', 'multimeter', 'thermometer', 'newton_meter', 'hall_probe', 'light_meter', 'pressure_gauge', 'top_pan_balance']
 // Read against a scale, so the eye position matters.
-export const PARALLAX_KINDS = ['dial', 'rule', 'thermometer']
+export const PARALLAX_KINDS = ['dial', 'rule', 'thermometer', 'cylinder', 'syringe']
 // Instruments whose zero must be checked (and corrected) before use.
 export const ZERO_INSTRUMENTS = ['micrometer']
 export const TARE_INSTRUMENTS = ['top_pan_balance']
@@ -62,6 +62,9 @@ export function instrumentKind(id, { unit, resolution } = {}) {
   if (id === 'micrometer' && unit === 'mm') return 'micrometer'
   if ((id === 'metre_rule' || id === 'ruler_30cm') && unit === 'cm' && near(resolution, 0.1)) return 'rule'
   if (id === 'thermometer' && unit === '°C' && near(resolution, 0.5)) return 'thermometer'
+  // Liquid read at the bottom of the meniscus; gas syringe read at the plunger's edge.
+  if (id === 'measuring_cylinder' && unit === 'cm³' && resolution >= 0.5) return 'cylinder'
+  if (id === 'gas_syringe' && unit === 'cm³' && resolution >= 0.5) return 'syringe'
   if (id === 'stopwatch') return 'stopwatch'
   if (DIAL_INSTRUMENTS.includes(id)) return 'dial'          // falls back to 'digital' if no scale fits
   if (['multimeter', 'top_pan_balance', 'digital_callipers', 'light_gate', 'gm_tube', 'hall_probe', 'light_meter', 'datalogger', 'signal_generator', 'oscilloscope', 'joulemeter'].includes(id)) return 'digital'

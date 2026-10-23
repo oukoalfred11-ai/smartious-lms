@@ -19,7 +19,7 @@ function Btn({ children, onClick, disabled, kind = '', type = 'button', label })
   return <button type={type} className={'lab-btn ' + kind} onClick={onClick} disabled={disabled} aria-label={label}>{children}</button>
 }
 const lower = (id) => apparatusName(id).toLowerCase()
-const PARALLAX = ['dial', 'rule', 'thermometer']
+const PARALLAX = ['dial', 'rule', 'thermometer', 'cylinder', 'syringe']
 
 /** What moving the independent variable looks like for its apparatus. */
 function ivVerb(iv) {

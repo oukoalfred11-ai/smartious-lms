@@ -46,8 +46,9 @@ function measure(obj) {
 }
 
 /** Apparatus that stands on (or in) another item when both are on the bench. */
-const STACK = { conical_flask: 'cross_card', copper_electrodes: 'beaker_250' }
+const STACK = { conical_flask: 'cross_card', copper_electrodes: 'beaker_250', copper_can: 'spirit_burner' }
 const STACK_INSIDE = ['copper_electrodes']
+const STACK_ABOVE = { copper_can: 0.035 }   // held in a clamp this far above the item below
 const STACK_FILL = { copper_electrodes: '#2F7FD0' }   // the solution the item stands in (copper(II) sulfate)
 
 /** Greedy rows of ids whose footprints fit in maxW. */
@@ -113,6 +114,21 @@ export function buildPracticalScene(lab, { def, dispatch, onSelect, onHover = ()
   let displays = {}                // instrument id → (text) => void
   let shown = {}                   // instrument id → text last drawn
   let ivCard = null, ivText = ''
+  // Living bench: bubbles from the pondweed, the burner's flame. Off in low
+  // graphics and for reduced motion; a new layout stops the old loop.
+  const reduced = typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  let liveToken = 0
+  const liveRate = {}
+  function startLive() {
+    const movers = placed.filter(p => p.model.userData.tick)
+    if (!movers.length || lab.lowGraphics || reduced) return
+    const token = ++liveToken
+    lab.animate((dt) => {
+      if (token !== liveToken) return false
+      for (const p of movers) p.model.userData.tick(dt, liveRate[p.id] ?? 1)
+      return true
+    })
+  }
   let chain = []                   // hung items: [{ model, wrap }]
   let hangAt = null                // world point the chain hangs from
   let layoutKey = null
@@ -238,7 +254,7 @@ export function buildPracticalScene(lab, { def, dispatch, onSelect, onHover = ()
     for (const id of stacked) {
       const base = placed.find(p => p.id === STACK[id])
       if (!base) continue
-      const y = BENCH_Y + (STACK_INSIDE.includes(id) ? 0.003 : measure(base.model).h)
+      const y = BENCH_Y + (STACK_INSIDE.includes(id) ? 0.003 : measure(base.model).h + (STACK_ABOVE[id] || 0))
       placeModel(id, models[id], base.wrap.position.x, y, base.wrap.position.z, { kind: 'apparatus', id })
       if (STACK_FILL[id]) base.model.userData.setLiquid?.(STACK_FILL[id])
     }
@@ -439,7 +455,8 @@ export function buildPracticalScene(lab, { def, dispatch, onSelect, onHover = ()
       const key = JSON.stringify(collected)
       if (key !== layoutKey) {
         clear()
-        if (collected) { buildBench(collected); placeMaterials(); wireBench() } else buildStockroom()
+        liveToken++
+        if (collected) { buildBench(collected); placeMaterials(); wireBench(); startLive() } else buildStockroom()
         layoutKey = key
       }
       // Which reading changed last, per instrument.
@@ -474,6 +491,21 @@ export function buildPracticalScene(lab, { def, dispatch, onSelect, onHover = ()
         const t = wrapText(iv.label, 22, 2) + '\n' + sym + (Number.isFinite(x) ? x.toFixed(decimalsOf(iv.step)) : '—') + (iv.unit ? ' ' + iv.unit : '')
         if (ivCard && t !== ivText) { ivCard.userData.setText(t); ivText = t }
         const f = iv.max > iv.min && Number.isFinite(x) ? clamp01((x - iv.min) / (iv.max - iv.min)) : 0
+        // A supply, bath or generator shows its own setting on its display.
+        const ivModel = placed.find(p => p.id === iv.instrument)
+        if (ivModel?.model.userData.setDisplay && !keysByInstrument[iv.instrument]?.length && Number.isFinite(x)) {
+          const txt = x.toFixed(Math.max(1, decimalsOf(iv.step))) + ' ' + (iv.unit || '')
+          if (shown['iv:' + iv.instrument] !== txt) { ivModel.model.userData.setDisplay(txt); shown['iv:' + iv.instrument] = txt }
+        }
+        // The lamp really is d from the pondweed (and the heat shield between them).
+        if (iv.instrument === 'bench_lamp' && Number.isFinite(x)) {
+          const pond = placed.find(p => p.id === 'pondweed'), lamp = placed.find(p => p.id === 'bench_lamp'), shield = placed.find(p => p.id === 'beaker_250')
+          if (pond && lamp) {
+            lamp.wrap.position.set(pond.wrap.position.x - x / 100 - (0.068 + lamp.model.position.x), BENCH_Y, pond.wrap.position.z)
+            if (shield) { shield.wrap.position.set(pond.wrap.position.x - 0.075, BENCH_Y, pond.wrap.position.z); shield.model.userData.setLevel?.(0.7) }
+            liveRate.pondweed = 300 / (x * x)
+          }
+        }
         if (f !== lastLevel) {
           for (const { id, model } of placed) {
             const ud = model.userData
@@ -484,11 +516,18 @@ export function buildPracticalScene(lab, { def, dispatch, onSelect, onHover = ()
           lastLevel = f
         }
       }
+      // Instruments that show a reading physically (the syringe's plunger, the liquid in a cylinder).
+      for (const { id, model } of placed) {
+        const k = lastKey[id]
+        if (model.userData.setReading && k != null && Number.isFinite(rd[k])) model.userData.setReading(rd[k])
+      }
+      const burner = placed.find(p => p.id === 'spirit_burner')
+      if (burner) burner.model.userData.setLit?.(view.bench === 2 ? !!view.hands?.goggles && !view.hands?.tidy : true)
       if (view.bench === 2 && collected) updateHands(view)
       else hands = null
       lab.invalidate()
     },
-    dispose() { clear() },
+    dispose() { liveToken++; clear() },
     /** Set-up quest (setupQuest.js): the collected apparatus is fetched from the
      *  cupboard, the materials from the reagent rack; stockroom extras are the
      *  things to leave behind. Not used when students choose from the stockroom. */

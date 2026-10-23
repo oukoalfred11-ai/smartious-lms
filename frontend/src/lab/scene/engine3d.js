@@ -39,6 +39,26 @@ export function webglAvailable() {
   } catch { return false }
 }
 
+/**
+ * A small room for reflections: grey walls, a bright ceiling panel (the lab
+ * lights) and a window on one side. Built from core three.js, so there is no
+ * environment file to download.
+ */
+function studioRoom() {
+  const room = new THREE.Scene()
+  const shell = new THREE.Mesh(new THREE.BoxGeometry(10, 5, 10), new THREE.MeshStandardMaterial({ color: '#8C939B', side: THREE.BackSide, roughness: 1 }))
+  shell.position.y = 2.5
+  room.add(shell)
+  const glow = (c, i) => new THREE.MeshBasicMaterial({ color: new THREE.Color(c).multiplyScalar(i) })
+  const panel = (w, h, d, m, x, y, z) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); o.position.set(x, y, z); room.add(o) }
+  panel(4, 0.05, 1.2, glow('#FFFFFF', 6), 0, 4.95, 0)              // ceiling lights
+  panel(2.5, 0.05, 0.6, glow('#FFFFFF', 4), -2.5, 4.95, 2)
+  panel(0.05, 2.2, 3.5, glow('#EAF3FF', 3.2), -4.95, 2.4, -0.5)     // window
+  panel(10, 0.02, 10, new THREE.MeshStandardMaterial({ color: '#4A4F56', roughness: 1 }), 0, 0.01, 0)   // floor
+  panel(6, 1, 0.05, new THREE.MeshStandardMaterial({ color: '#D8DCE0', roughness: 1 }), 0, 1.6, -4.95)  // tiled wall
+  return room
+}
+
 export function createLabScene(container, { lowGraphics = false, onPick = null, onHoverPick = null, view = { pos: [0, 1.25, 1.35], target: [0, 0.95, 0] } } = {}) {
   const renderer = new THREE.WebGLRenderer({ antialias: !lowGraphics, powerPreference: lowGraphics ? 'low-power' : 'high-performance' })
   renderer.setPixelRatio(lowGraphics ? 1 : Math.min(window.devicePixelRatio || 1, 2))
@@ -58,8 +78,20 @@ export function createLabScene(container, { lowGraphics = false, onPick = null, 
   scene.background = new THREE.Color('#EEF1F4')
   const camera = new THREE.PerspectiveCamera(42, 1, 0.02, 30)
 
+  // Reflections: glass, metal and liquids reflect a soft laboratory room
+  // (baked once into an environment map; skipped in low graphics).
+  let envTex = null
+  if (!lowGraphics) {
+    const pm = new THREE.PMREMGenerator(renderer)
+    const room = studioRoom()
+    envTex = pm.fromScene(room, 0.03).texture
+    scene.environment = envTex
+    scene.environmentIntensity = 0.55
+    disposeTree(room); pm.dispose()
+  }
+
   // Lighting: soft fill + key light with shadows (disabled in low graphics).
-  const hemi = new THREE.HemisphereLight('#ffffff', '#b9c2cc', 1.1)
+  const hemi = new THREE.HemisphereLight('#ffffff', '#b9c2cc', lowGraphics ? 1.1 : 0.8)
   scene.add(hemi)
   const key = new THREE.DirectionalLight('#ffffff', 1.6)
   key.position.set(1.4, 2.6, 1.6)
@@ -432,6 +464,7 @@ export function createLabScene(container, { lowGraphics = false, onPick = null, 
       controls.dispose()
       renderedFns.clear()
       disposeTree(scene)
+      envTex?.dispose()
       renderer.dispose()
       renderer.forceContextLoss?.()
       renderer.domElement.remove()
