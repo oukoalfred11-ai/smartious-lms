@@ -23,7 +23,8 @@ const { resolveStudentRecipients, describeRecipients } = require('../lib/recipie
 const Invoice      = require('../models/Invoice')
 const { createInvoiceWithNumber } = require('../lib/issueInvoice')
 
-const ALLOWED = requireRole('admin', 'accountant', 'ops_manager')
+// Fees: Finance and the Principal only.
+const ALLOWED = requireRole('admin', 'accountant')
 
 // ── Helpers ──────────────────────────────────────────────
 function getTransporter() {

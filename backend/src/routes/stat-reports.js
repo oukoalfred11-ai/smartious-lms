@@ -26,8 +26,8 @@ const attendanceFacts = require('../lib/attendanceFacts')
 const { gradeFor } = require('../lib/grading')
 
 // Quality Assurance reads the academic reports; money reports stay with operations.
-const STAFF = ['admin', 'ops_manager', 'dos', 'qa']
-const MONEY = ['admin', 'ops_manager']
+const STAFF = ['admin', 'ops_manager', 'dos', 'qa', 'accountant']
+const MONEY = ['admin', 'accountant']   // financial reports: Principal and Finance only
 const nameOf = (u) => (u ? [u.firstName, u.lastName].filter(Boolean).join(' ') : '')
 const pct = (n, d) => (d > 0 ? Math.round((n / d) * 1000) / 10 : null)
 const mean = (xs) => (xs.length ? Math.round((xs.reduce((a, b) => a + b, 0) / xs.length) * 10) / 10 : null)
@@ -232,7 +232,7 @@ const REPORTS = {
   },
 
   async pipeline(q, user) {
-    if (!MONEY.includes(user.role)) return null
+    if (!['admin', 'ops_manager'].includes(user.role)) return null
     const w = windowOf(q, 90)
     const list = await Inquiry.find({ createdAt: { $gte: w.from }, status: { $nin: ['enrolled', 'lost', 'unqualified'] } })
       .select('parentName studentName studentGrade curriculum country source status createdAt').sort({ createdAt: -1 }).limit(2000).lean()
@@ -252,7 +252,7 @@ router.get('/:key', auth, requireRole(...STAFF), async (req, res) => {
     const fn = Object.prototype.hasOwnProperty.call(REPORTS, req.params.key) && REPORTS[req.params.key]
     if (!fn) return res.status(404).json({ success: false, message: 'No such report.' })
     const data = await fn(req.query, req.user)
-    if (!data) return res.status(403).json({ success: false, message: 'This report is for operations and admin.' })
+    if (!data) return res.status(403).json({ success: false, message: 'This report is not available to your role.' })
     res.json({ success: true, data: { key: req.params.key, generatedAt: new Date(), ...data } })
   } catch (e) {
     console.error('[stat-reports]', req.params.key, e.message)

@@ -91,7 +91,7 @@ const NAV_SECTIONS = {
   ],
   accountant: [
     { label: 'Overview',    items: ['checkin', 'dashboard', 'analytics'] },
-    { label: 'Fee Management', items: ['feecollection', 'billing', 'sessions'] },
+    { label: 'Fee Management', items: ['feecollection', 'billing', 'documents', 'sessions'] },
     { label: 'Finance',     items: ['payroll', 'inventory'] },
     { label: 'System',      items: ['settings'] },
     { label: 'Me',          items: ['myprofile', 'mystafffile'] },
@@ -122,7 +122,8 @@ const NAV_SECTIONS = {
     { label: 'People',      items: ['users', 'teachers', 'allocations', 'communication', 'teacherratings'] },
     { label: 'Support',     items: ['support', 'dmoversight'] },
     // CRM, Front Desk and Group Rooms stay out of Operations per policy.
-    { label: 'Operations',  items: ['documents', 'leave', 'programmes', 'inventory'] },
+    // Invoices and receipts (Documents) are Finance's, not Dean & Operations'.
+    { label: 'Operations',  items: ['leave', 'programmes', 'inventory'] },
     { label: 'Reports',     items: ['reports', 'dosanalytics'] },
     { label: 'System',      items: ['userlogs', 'settings', 'ai'] },
     { label: 'Me',          items: ['myprofile', 'mystafffile'] },
@@ -508,7 +509,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         {safePage === 'questionbank'   && <QuestionBankModule   refreshKey={refreshKey} toast={toast}/>}
         {safePage === 'teacherratings'&& <TeacherRatingsModule    refreshKey={refreshKey} toast={toast}/>}
         {safePage === 'leave'       && <LeaveModule      refreshKey={refreshKey} toast={toast} />}
-        {safePage === 'programmes'  && <ProgrammesModule refreshKey={refreshKey} toast={toast} />}
+        {safePage === 'programmes'  && <ProgrammesModule refreshKey={refreshKey} toast={toast} showFees={role === 'admin' || role === 'accountant'} />}
         {safePage === 'grouprooms'  && <GroupRoomsModule refreshKey={refreshKey} toast={toast} />}
         {safePage === 'curriculum'  && <CurriculumModule refreshKey={refreshKey} toast={toast} />}
         {safePage === 'billing'        && <BillingModule       refreshKey={refreshKey} toast={toast}/>}

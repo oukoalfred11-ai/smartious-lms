@@ -27,7 +27,8 @@ try {
   console.warn('[invoices] PDF attachments disabled -', e.message)
 }
 
-const ALLOWED = requireRole('admin', 'accountant', 'sales', 'ops_manager')
+// Invoices: Finance, the Principal, and Sales (admission invoices). Not Dean & Operations.
+const ALLOWED = requireRole('admin', 'accountant', 'sales')
 // Only the admin may remove an invoice. Invoices are financial
 // records: everyone else can raise and view them, but deletion
 // is restricted to a single accountable role.
@@ -78,7 +79,7 @@ router.get('/stats', auth, ALLOWED, async (req, res) => {
 })
 
 // ── GET /api/invoices/sales-performance ────────────────────
-router.get('/sales-performance', auth, requireRole('admin','sales','ops_manager'), async (req, res) => {
+router.get('/sales-performance', auth, requireRole('admin','sales'), async (req, res) => {
   try {
     const mongoose = require('mongoose')
     const { cycle, userId } = req.query

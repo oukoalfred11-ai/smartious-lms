@@ -124,6 +124,11 @@ router.get('/churn', auth, requireRole('admin', 'ops_manager'), async (req, res)
       };
     }).filter(r => r.risk !== 'ok').sort((a, b) => b.score - a.score);
 
+    // Fee amounts and lateness are financial: Finance and admin only.
+    if (!['admin', 'accountant'].includes(req.user.role)) rows.forEach(r => {
+      delete r.monthlyFee; delete r.feeLateDays
+      r.signals = r.signals.map(x => (/^fees /.test(x) ? 'fees overdue' : x))
+    })
     res.json({ success: true, data: {
       rows, high: rows.filter(r => r.risk === 'high').length, watch: rows.filter(r => r.risk === 'watch').length,
       method: 'Composite of: fee lateness (days past the billing clock), attendance decline (last 14 days vs the 14 before, derived-status classes), current attendance below 50%, and family portal inactivity over 21 days. Score >= 4 is high risk, >= 2 watch.',
@@ -132,7 +137,8 @@ router.get('/churn', auth, requireRole('admin', 'ops_manager'), async (req, res)
 });
 
 // ── Revenue health ───────────────────────────────────────────────────
-router.get('/revenue', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
+// Financial analysis is for the Principal (admin) and Finance only.
+router.get('/revenue', auth, requireRole('admin', 'accountant'), async (req, res) => {
   try {
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
