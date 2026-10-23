@@ -1,0 +1,18 @@
+skeleton-v1.glb — the human skeleton used in the Smartious Virtual Lab (/lab/models/skeleton)
+
+Source: "Z-Biomechanics" (Startup.blend) from Z-Anatomy, https://www.z-anatomy.com
+
+Attribution, as required by the licensor:
+  "BodyParts3D, © The Database Center for Life Science licensed under CC Attribution-Share Alike 2.1 Japan"
+  mixed and modified by 'Z-anatomy.com'
+  https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html
+
+Licence: Creative Commons Attribution-Share Alike 2.1 Japan (CC BY-SA 2.1 JP)
+  https://creativecommons.org/licenses/by-sa/2.1/jp/deed.en
+This file is a derivative work and is distributed under the same licence.
+
+Changes made by Smartious (2026): converted from Blender to glTF binary with
+tools/models/blend2glb.py; kept the visible bones, cartilage and teeth (muscle
+insertion patches, label lines and cross-section planes removed); converted to
+a Y-up coordinate system; smooth normals computed; positions stored as 16-bit
+integers (KHR_mesh_quantization); materials replaced with plain colours.

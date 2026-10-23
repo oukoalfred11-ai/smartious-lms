@@ -3,10 +3,13 @@
  *
  *   fromGLTF({
  *     url,                          the file (e.g. /models/heart.glb, served from frontend/public)
- *     parts: [{ id, name, info, match, anchor? }],
+ *     parts: [{ id, name, info, match, anchor?, anchorFrom? }],
  *                                   match: a RegExp tested on each mesh's name (and its parents'),
  *                                   or a list of exact names; anchor (optional, root coordinates)
- *                                   overrides the automatic label point
+ *                                   overrides the automatic label point; anchorFrom (RegExp) picks
+ *                                   which matched meshes the automatic point is taken from (e.g. /\.l$/
+ *                                   for one of a pair, so the label does not point between them);
+ *                                   side (+1 / −1) keeps only meshes on that side of the model (by position)
  *     size = 0.5,                   longest side after fitting, in metres
  *     rotate = [0, 0, 0],           turn the file's own axes (radians) before fitting
  *     view, status, animateLabel,   as in kit.js
@@ -24,7 +27,8 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js'
 import { clipper } from './kit.js'
 
-const nameChain = (o) => { const n = []; while (o) { if (o.name) n.push(o.name); o = o.parent } return n }
+// three.js tidies node names (spaces → _, dots removed); the file's own name is kept in userData.name.
+const nameChain = (o) => { const n = []; while (o) { if (o.userData?.name) n.push(o.userData.name); if (o.name) n.push(o.name); o = o.parent } return n }
 const matches = (o, match) => {
   const names = nameChain(o)
   return Array.isArray(match) ? names.some(n => match.includes(n)) : names.some(n => match.test(n))
@@ -58,10 +62,10 @@ function labelPoint(meshes, root, centre, plane = null) {
 }
 
 export function fromGLTF(spec) {
-  return async function build() {
+  return async function build({ onProgress } = {}) {
     const loader = new GLTFLoader()
     loader.setMeshoptDecoder(MeshoptDecoder)
-    const gltf = await loader.loadAsync(spec.url)
+    const gltf = await loader.loadAsync(spec.url, (e) => { if (onProgress && e.total) onProgress(e.loaded / e.total, e.total) })
     const scene = gltf.scene
     const root = new THREE.Group()
     const holder = new THREE.Group()
@@ -96,7 +100,13 @@ export function fromGLTF(spec) {
     for (const p of spec.parts) {
       const objects = meshes.filter(m => matches(m, p.match))
       if (!objects.length) { console.warn('[models] no mesh matches part', p.id, 'in', spec.url); continue }
-      parts.push({ id: p.id, name: p.name, info: p.info, objects, anchor: p.anchor || labelPoint(objects, root, centre, cut?.plane) })
+      let from = p.anchorFrom ? objects.filter(m => matches(m, p.anchorFrom)) : objects
+      if (p.side) {
+        // Of a left–right pair, point at the one on this side (+1: the viewer's right in the front view).
+        const onSide = from.filter(m => new THREE.Box3().setFromObject(m).getCenter(new THREE.Vector3()).x * p.side > 0)
+        if (onSide.length) from = onSide
+      }
+      parts.push({ id: p.id, name: p.name, info: p.info, objects, anchor: p.anchor || labelPoint(from.length ? from : objects, root, centre, cut?.plane) })
     }
 
     // Animation stored in the file (if any) plays with the Animate button.
