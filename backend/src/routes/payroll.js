@@ -33,8 +33,11 @@ const Payroll  = require('../models/Payroll')
 let buildPayslipPdfBuffer = null
 try { ({ buildPayslipPdfBuffer } = require('../lib/payslipPdf')) }
 catch (e) { console.error('[payroll] payslip PDF disabled —', e.message) }
-const ACCT  = requireRole('admin', 'accountant', 'ops_manager')
+// Salaries are Finance's and the Principal's only.
+const ACCT  = requireRole('admin', 'accountant')
 const DOS   = requireRole('admin', 'dos', 'accountant', 'ops_manager')
+// A payslip is read by its owner, Finance and the Principal: nobody else.
+const canReadRecord = (user, record) => ['admin', 'accountant'].includes(user.role) || String(record.teacherId) === String(user._id)
 const ok    = (res, data, msg) => res.json({ success:true, data, message:msg })
 const fail  = (res, code, msg) => res.status(code).json({ success:false, message:msg })
 
@@ -351,7 +354,8 @@ router.patch('/:id/extras/:extraId', auth, DOS, async (req, res) => {
     record.netPay              = computed.net
     await record.save()
 
-    return ok(res, { record }, `Extra ${extra.status}.`)
+    const visible = ['admin', 'accountant'].includes(req.user.role) ? { record } : { extra }
+    return ok(res, visible, `Extra ${extra.status}.`)
   } catch(e) { return fail(res,500,e.message) }
 })
 
@@ -361,8 +365,7 @@ router.get('/:id', auth, async (req, res) => {
     const record = await Payroll.findById(req.params.id).lean()
     if (!record) return fail(res,404,'Not found.')
     // Teacher can only see own records
-    if (req.user.role==='teacher' && String(record.teacherId)!==String(req.user._id))
-      return fail(res,403,'Not allowed.')
+    if (!canReadRecord(req.user, record)) return fail(res, 403, 'Not allowed.')
     return ok(res, { record })
   } catch(e) { return fail(res,500,e.message) }
 })
@@ -372,8 +375,7 @@ router.get('/:id/payslip-html', auth, async (req, res) => {
   try {
     const record = await Payroll.findById(req.params.id).lean()
     if (!record) return fail(res,404,'Not found.')
-    if (req.user.role==='teacher' && String(record.teacherId)!==String(req.user._id))
-      return fail(res,403,'Not allowed.')
+    if (!canReadRecord(req.user, record)) return fail(res, 403, 'Not allowed.')
     return ok(res, { html: buildPayslipHTML(record) })
   } catch(e) { return fail(res,500,e.message) }
 })
@@ -387,8 +389,7 @@ router.get('/:id/payslip-pdf', auth, async (req, res) => {
 
     const record = await Payroll.findById(req.params.id).lean()
     if (!record) return fail(res, 404, 'Not found.')
-    if (req.user.role === 'teacher' && String(record.teacherId) !== String(req.user._id))
-      return fail(res, 403, 'Not allowed.')
+    if (!canReadRecord(req.user, record)) return fail(res, 403, 'Not allowed.')
 
     const pdf = await buildPayslipPdfBuffer(record)
     const safeName = String(record.teacherName || 'payslip')

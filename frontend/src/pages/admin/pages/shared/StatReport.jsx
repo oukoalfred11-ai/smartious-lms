@@ -175,7 +175,7 @@ export const CLIENT_REPORTS = {
     return {
       title: 'Families at leaving risk', value: d.high ?? 0, method: d.method || '',
       summary: [['High risk', d.high ?? 0], ['On watch', d.watch ?? 0]],
-      columns: [{ key: 'name', label: 'Student' }, { key: 'grade', label: 'Grade' }, { key: 'curriculum', label: 'Curriculum' }, { key: 'risk', label: 'Risk' }, { key: 'score', label: 'Score', type: 'num' }, { key: 'attendanceRecentPct', label: 'Attendance 14d', type: 'pct' }, { key: 'feeLateDays', label: 'Fees late (days)', type: 'num' }, { key: 'parentGapDays', label: 'Parent inactive (days)', type: 'num' }, { key: 'why', label: 'Signals' }],
+      columns: [{ key: 'name', label: 'Student' }, { key: 'grade', label: 'Grade' }, { key: 'curriculum', label: 'Curriculum' }, { key: 'risk', label: 'Risk' }, { key: 'score', label: 'Score', type: 'num' }, { key: 'attendanceRecentPct', label: 'Attendance 14d', type: 'pct' }, { key: 'parentGapDays', label: 'Parent inactive (days)', type: 'num' }, { key: 'why', label: 'Signals' }],
       rows: (d.rows || []).map(x => ({ ...x, why: (x.signals || []).join('; ') })),
     }
   }),

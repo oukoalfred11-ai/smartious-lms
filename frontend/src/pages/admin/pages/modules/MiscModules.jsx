@@ -84,7 +84,8 @@ export function LeaveModule({ refreshKey, toast }) {
   )
 }
 
-export function ProgrammesModule({ refreshKey, toast }) {
+// Fees are shown to the Principal (admin) and Finance only.
+export function ProgrammesModule({ refreshKey, toast, showFees = false }) {
   return (
     <>
       <PSection tag="Programmes" title="IUFP &" em="Study Abroad" sub="International foundation pathways and university preparation"/>
@@ -109,10 +110,12 @@ export function ProgrammesModule({ refreshKey, toast }) {
                 <div style={{ fontSize: 10, color: TOKENS.s500, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase' }}>Enrolled</div>
                 <div style={{ fontSize: 17, fontWeight: 700, color: TOKENS.s900 }}>{p.enrolled}</div>
               </div>
+              {showFees && (
               <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: 10, color: TOKENS.s500, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase' }}>Annual Fee</div>
-                <div style={{ fontSize: 17, fontWeight: 700, color: TOKENS.crimson, fontFamily: 'JetBrains Mono, monospace' }}>{fmtKsh(p.fee)}</div>
-              </div>
+                  <div style={{ fontSize: 10, color: TOKENS.s500, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase' }}>Annual Fee</div>
+                  <div style={{ fontSize: 17, fontWeight: 700, color: TOKENS.crimson, fontFamily: 'JetBrains Mono, monospace' }}>{fmtKsh(p.fee)}</div>
+                </div>
+              )}
             </div>
           </PCard>
         ))}

@@ -32,6 +32,8 @@ export default function CommandModule({ toast, role = 'dos' }) {
   const [funnel, setFunnel] = useState(null)
   const [past, setPast] = useState([])
   const isOps = role === 'ops_manager' || role === 'admin'
+  // Money (revenue, collections, unpaid invoices, fee values) is for the Principal and Finance only.
+  const isFinance = role === 'admin' || role === 'accountant'
   const report = useStatReport(toast)
 
   useEffect(() => {
@@ -55,10 +57,10 @@ export default function CommandModule({ toast, role = 'dos' }) {
     api.get('/classroom/live/all').then(r => setPast((r.data?.data?.past || []).filter(c => c.joined === 0 && c.kind === 'lesson').slice(0, 5))).catch(() => {})
     if (isOps) {
       api.get('/ops-reports/churn').then(r => setChurn(r.data?.data)).catch(() => {})
-      api.get('/ops-reports/revenue').then(r => setRevenue(r.data?.data)).catch(() => {})
       api.get('/ops-reports/funnel').then(r => setFunnel(r.data?.data)).catch(() => {})
     }
-  }, [isOps])
+    if (isFinance) api.get('/ops-reports/revenue').then(r => setRevenue(r.data?.data)).catch(() => {})
+  }, [isOps, isFinance])
 
   const printBoardPack = async () => {
     try {
@@ -126,7 +128,7 @@ export default function CommandModule({ toast, role = 'dos' }) {
   if (dueIvs.length) need.push({ tag: 'REVIEW', color: '#B45309', text: `${dueIvs.length} intervention(s) past review date`, detail: dueIvs.slice(0, 3).map(i => i.studentId ? `${i.studentId.firstName || ''} ${i.studentId.lastName || ''}` : '?').join(', '), go: 'Mastery \u2192 Interventions' })
   if (past.length) need.push({ tag: 'DELIVERY', color: '#B91C1C', text: `${past.length} recent class(es) DID NOT RUN`, detail: past.map(p => p.teacher || p.title).join(', '), go: 'Live Classes \u2192 Past', spec: { key: 'lessons', params: { days: 7 } } })
   if (isOps && churn?.high) need.push({ tag: 'RETENTION', color: '#B91C1C', text: `${churn.high} family(ies) at leaving risk`, detail: churn.rows.slice(0, 3).map(r => `${r.name} (${r.signals[0] || ''})`).join('; '), go: 'Business \u2192 Churn', spec: { load: CLIENT_REPORTS.churn } })
-  if (isOps && revenue?.aging?.length) {
+  if (isFinance && revenue?.aging?.length) {
     const old = revenue.aging.filter(a => a.bucket === '31-60d' || a.bucket === '60d+')
     const amt = old.reduce((t, a) => t + a.amount, 0)
     if (amt > 0) need.push({ tag: 'CASH', color: '#B45309', text: `${fmtMoney(amt)} unpaid over 30 days (${old.reduce((t, a) => t + a.n, 0)} invoices)`, detail: 'Oldest first in Billing \u2192 aging', go: 'Billing & Invoices', spec: { load: CLIENT_REPORTS.aging } })
@@ -150,7 +152,7 @@ export default function CommandModule({ toast, role = 'dos' }) {
         {card('Lessons held', wk?.sessionsHeld ?? '\u2013', 'this week', <Arrow now={wk?.sessionsHeld} prev={pwk?.sessionsHeld} />, { key: 'lessons', params: { days: 7 } })}
         {card('At risk', mastery ? mastery.high : '\u2013', mastery ? `${mastery.watch} on watch` : '', null, { key: 'atRisk' })}
         {isOps && card('Leaving risk', churn ? churn.high : '\u2013', churn ? `${churn.watch} families on watch` : '', null, { load: CLIENT_REPORTS.churn })}
-        {isOps && card('Collected this month', revenue ? fmtMoney(revenue.collected) : '\u2013',
+        {isFinance && card('Collected this month', revenue ? fmtMoney(revenue.collected) : '\u2013',
           revenue ? `of ${fmtMoney(revenue.issued)} issued (${revenue.collectionPct ?? '\u2013'}%)` : '', null, { key: 'collected' })}
         {isOps && card('Pipeline', funnel ? funnel.activePipeline : '\u2013',
           funnel ? `${funnel.conversionPct ?? '\u2013'}% convert to enrolled (90d)` : '', null, { key: 'pipeline', params: { days: 90 } })}
@@ -177,7 +179,7 @@ export default function CommandModule({ toast, role = 'dos' }) {
       </div>
 
       {/* Ops: revenue + funnel snapshot rows */}
-      {isOps && revenue && (
+      {isFinance && revenue && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 12 }}>
           <div style={{ background: '#fff', border: `1px solid ${TOKENS.line}`, borderRadius: 12, padding: '14px 16px' }}>
             <b style={{ fontSize: 13, color: TOKENS.s900 }}>Unpaid invoice aging</b>
