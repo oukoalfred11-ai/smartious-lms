@@ -1,5 +1,11 @@
 // The 3D models library. No three.js here, so the gallery loads quickly;
 // each model's code is fetched only when it is opened.
+//
+// Models from real 3D files (frontend/public/models/*.glb, loaded with
+// gltfModel.js) must carry a credit, shown on the model's page:
+//   credit: { title, author, source, url, licence, licenceUrl, changes }
+// Only files whose licence allows use in a school platform are added
+// (CC0, CC BY, CC BY-SA with the same licence kept on our changes).
 export const MODELS = [
   { id: 'heart', subject: 'biology', topic: 'Transport in animals', title: 'The human heart', summary: 'A section through the heart: four chambers, valves, septum and the great vessels. Watch it beat and follow the blood through it.', load: () => import('./heart.js').then(m => m.default) },
   { id: 'eye', subject: 'biology', topic: 'Coordination and response', title: 'The human eye', summary: 'A cut-away eye from cornea to optic nerve. See how the ciliary muscle and lens change shape to focus near and far.', load: () => import('./eye.js').then(m => m.default) },
