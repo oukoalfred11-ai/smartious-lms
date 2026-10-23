@@ -553,6 +553,7 @@ function LessonRegister({ toast }) {
 }
 
 export function DOSAttendanceModule({ toast, refreshKey }) {
+  const report = useStatReport(toast)
   const [view,    setView]    = useState('checkins')   // checkins | register
   const [rec, setRec] = useState(null)               // { lessonRows, dailyRows }
   const [recRange, setRecRange] = useState({ from: new Date(Date.now() - 30 * 864e5).toISOString().slice(0, 10), to: new Date().toISOString().slice(0, 10) })
@@ -697,10 +698,25 @@ export function DOSAttendanceModule({ toast, refreshKey }) {
 
   const maxBar = Math.max(...(history.map(h=>h.total)||[1]), 1)
 
+  // The people behind each check-in count (today's register, the filter applied).
+  const checkinReport = (k) => {
+    const list = users.filter(k.is)
+    const tm = d => d ? new Date(d).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : ''
+    return {
+      title: 'Check-in: ' + k.label, value: list.length,
+      summary: [['Total', summary.total||0], ['Present', summary.present||0], ['Late', summary.late||0], ['Absent', summary.absent||0], ['Not checked in', summary.notCheckedIn||0], ['On break', summary.onBreak||0]],
+      method: 'Today\'s self check-in register' + (roleF !== 'all' ? ' for ' + roleF + 's' : '') + '. This is the daily check-in, not lesson attendance: lesson attendance is under Overview & records and in each student\'s record.',
+      columns: [{ key:'name', label:'Name' }, { key:'role', label:'Role' }, { key:'email', label:'Email' }, { key:'status', label:'Status' }, { key:'time', label:'Time' }, { key:'reason', label:'Late reason' }, { key:'brk', label:'Break' }],
+      rows: list.map(u => ({ name:u.name, role:u.role, email:u.email, status: u.onBreak ? 'On break' : u.checkedIn ? (STATUS_S[u.checkInStatus]||STATUS_S.present).label : 'Not checked in',
+        time: tm(u.checkInTime), reason: u.reason||'', brk: u.onBreak ? (u.breakType||'').replace(/_/g,' ') : '' })),
+    }
+  }
+
   return (
     <>
       <PSection tag="Dean of Studies" title="Attendance" em="Analytics"
-        sub="Daily check-in overview. Students and staff self-report. Use Manage Breaks to deactivate accounts."/>
+        sub="Lesson attendance records, and today's check-in. Click any number for the list behind it."/>
+      {report.modal}
 
       {/* ── Attendance records: pull a range, download clean CSVs ── */}
       <div style={{ background: '#fff', border: `1px solid ${TOKENS.line}`, borderRadius: 12, padding: 16, marginBottom: 16 }}>
@@ -808,20 +824,22 @@ export function DOSAttendanceModule({ toast, refreshKey }) {
           {/* Summary KPIs */}
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(130px,1fr))', gap:12, marginBottom:20 }}>
             {[
-              { label:'Total',        val:summary.total||0,            color:TOKENS.s900 },
-              { label:'Present',      val:summary.present||0,          color:'#065F46' },
-              { label:'Late',         val:summary.late||0,             color:'#D97706' },
-              { label:'Absent',       val:summary.absent||0,           color:'#991B1B' },
-              { label:'Not checked in', val:summary.notCheckedIn||0,   color:TOKENS.crimson },
-              { label:'On break',     val:summary.onBreak||0,          color:'#6B21A8' },
+              { label:'Total',        val:summary.total||0,            color:TOKENS.s900, is:()=>true },
+              { label:'Present',      val:summary.present||0,          color:'#065F46', is:u=>u.checkInStatus==='present' },
+              { label:'Late',         val:summary.late||0,             color:'#D97706', is:u=>u.checkInStatus==='late' },
+              { label:'Absent',       val:summary.absent||0,           color:'#991B1B', is:u=>u.checkInStatus==='absent' },
+              { label:'Not checked in', val:summary.notCheckedIn||0,   color:TOKENS.crimson, is:u=>!u.onBreak&&!u.checkedIn },
+              { label:'On break',     val:summary.onBreak||0,          color:'#6B21A8', is:u=>!!u.onBreak },
             ].map(k=>(
-              <div key={k.label} className="card" style={{ padding:'14px 16px' }}>
-                <div style={{ fontSize:10, fontWeight:700, color:TOKENS.s400, textTransform:'uppercase', letterSpacing:'.06em', marginBottom:5 }}>{k.label}</div>
-                <div style={{ fontSize:24, fontWeight:800, color:k.color, lineHeight:1 }}>{k.val}</div>
-                {summary.total>0 && k.label!=='Total' && (
-                  <div style={{ fontSize:10, color:TOKENS.s400, marginTop:3 }}>{Math.round((k.val/summary.total)*100)}%</div>
-                )}
-              </div>
+              <ClickStat key={k.label} onOpen={()=>report.open({ load: async () => checkinReport(k) })}>
+                <div className="card" style={{ padding:'14px 16px 20px', height:'100%', boxSizing:'border-box' }}>
+                  <div style={{ fontSize:10, fontWeight:700, color:TOKENS.s400, textTransform:'uppercase', letterSpacing:'.06em', marginBottom:5 }}>{k.label}</div>
+                  <div style={{ fontSize:24, fontWeight:800, color:k.color, lineHeight:1 }}>{k.val}</div>
+                  {summary.total>0 && k.label!=='Total' && (
+                    <div style={{ fontSize:10, color:TOKENS.s400, marginTop:3 }}>{Math.round((k.val/summary.total)*100)}%</div>
+                  )}
+                </div>
+              </ClickStat>
             ))}
           </div>
 

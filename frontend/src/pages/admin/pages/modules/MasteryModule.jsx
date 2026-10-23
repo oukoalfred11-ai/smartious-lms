@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { api } from '../../../../context/ctx.jsx'
 import { TOKENS } from '../shared/tokens.js'
+import { ClickStat, useStatReport } from '../shared/StatReport.jsx'
 
 /**
  * MasteryModule: per-student mastery evidence and early-warning indicators.
@@ -16,6 +17,7 @@ const fmtDate = (d) => (d ? new Date(d).toLocaleDateString('en-GB', { day: 'nume
 const Val = ({ v, suffix = '%' }) => (v === null || v === undefined ? <span style={{ color: TOKENS.s400 }}>&ndash;</span> : <>{v}{suffix}</>)
 
 export default function MasteryModule({ toast }) {
+  const report = useStatReport(toast)
   const [rows, setRows] = useState([])
   const [rules, setRules] = useState({})
   const [loading, setLoading] = useState(true)
@@ -52,11 +54,36 @@ export default function MasteryModule({ toast }) {
   const filtered = rows.filter(r => !search || r.name.toLowerCase().includes(search.toLowerCase()))
   const counts = { high: rows.filter(r => r.risk === 'high').length, watch: rows.filter(r => r.risk === 'watch').length }
 
+  // The students behind each risk count, with the rules that flagged them.
+  const riskReport = (k) => {
+    const list = rows.filter(r => r.risk === k)
+    return {
+      title: k === 'high' ? 'Students at risk' : 'Students on watch', value: list.length,
+      summary: [['At risk', counts.high], ['On watch', counts.watch], ['Students checked', rows.length]],
+      method: 'Early-warning rules: ' + Object.values(rules).join(' · ') + '. Two or more flags = at risk, one = watch.' + (grade ? ' Grade: ' + grade + '.' : ''),
+      columns: [{ key: 'name', label: 'Student' }, { key: 'grade', label: 'Grade' }, { key: 'attendance30', label: 'Attendance 30d', type: 'pct' }, { key: 'examAvg', label: 'Exam avg', type: 'pct' }, { key: 'quizAcc', label: 'Quiz accuracy', type: 'pct' }, { key: 'lastActive', label: 'Last active', type: 'date' }, { key: 'why', label: 'Why' }],
+      rows: list.map(r => ({ ...r, why: (r.flags || []).map(f => f.rule || f.code).join('; ') })),
+    }
+  }
+  const ivReport = () => {
+    const name = (u) => (u ? `${u.firstName || ''} ${u.lastName || ''}`.trim() : '')
+    const open = ivRows.filter(r => r.status === 'open'), overdue = open.filter(r => new Date(r.dueDate) < new Date())
+    return {
+      title: 'Interventions', value: open.length + ' open',
+      summary: [['Open', open.length], ['Overdue for review', overdue.length], ['Improved', ivRows.filter(r => r.outcome === 'improved').length], ['No change', ivRows.filter(r => r.outcome === 'no_change').length], ['Worse', ivRows.filter(r => r.outcome === 'worse').length]],
+      method: 'Every intervention logged against an early-warning flag: what was done, who owns it, when it is reviewed, and the outcome once closed.',
+      columns: [{ key: 'student', label: 'Student' }, { key: 'flag', label: 'Flag' }, { key: 'action', label: 'Action' }, { key: 'owner', label: 'Owner' }, { key: 'dueDate', label: 'Review by', type: 'date' }, { key: 'state', label: 'Status' }],
+      rows: ivRows.map(iv => ({ student: name(iv.studentId), flag: iv.flag, action: iv.action, owner: name(iv.owner), dueDate: iv.dueDate,
+        state: iv.status === 'closed' ? (iv.outcome || 'closed').replace('_', ' ') : new Date(iv.dueDate) < new Date() ? 'open · overdue' : 'open' })),
+    }
+  }
+
   const th = { padding: '9px 12px', textAlign: 'left', fontSize: 11, fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase', color: TOKENS.s500, borderBottom: `1.5px solid ${TOKENS.line}` }
   const td = { padding: '10px 12px', fontSize: 13, color: TOKENS.s800, borderBottom: `1px solid ${TOKENS.line}` }
 
   return (
     <div style={{ display: 'grid', gap: 18, maxWidth: 1080 }}>
+      {report.modal}
       <div>
         <h2 style={{ fontSize: 21, fontWeight: 800, color: TOKENS.s900, margin: 0 }}>Mastery & Early Warning</h2>
         <p style={{ fontSize: 13, color: TOKENS.s500, margin: '4px 0 0' }}>
@@ -66,9 +93,11 @@ export default function MasteryModule({ toast }) {
 
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
         {['high', 'watch'].map(k => (
-          <span key={k} style={{ padding: '8px 14px', borderRadius: 10, background: RISK[k].bg, color: RISK[k].fg, fontSize: 13, fontWeight: 800 }}>
-            {counts[k]} {RISK[k].label.toLowerCase()}
-          </span>
+          <ClickStat key={k} onOpen={() => report.open({ load: async () => riskReport(k) })}>
+            <span style={{ display: 'inline-block', padding: '8px 52px 8px 14px', borderRadius: 10, background: RISK[k].bg, color: RISK[k].fg, fontSize: 13, fontWeight: 800 }}>
+              {counts[k]} {RISK[k].label.toLowerCase()}
+            </span>
+          </ClickStat>
         ))}
         <select value={grade} onChange={e => setGrade(e.target.value)} style={{ padding: '8px 12px', border: `1.5px solid ${TOKENS.line}`, borderRadius: 9, fontSize: 13 }}>
           <option value="">All grades</option>
@@ -177,6 +206,7 @@ export default function MasteryModule({ toast }) {
         <b style={{ fontSize: 14.5, color: TOKENS.s900 }}>Interventions</b>
         <span style={{ fontSize: 11.5, color: TOKENS.s500 }}>what we did about each flag, and whether it worked</span>
         <span style={{ flex: 1 }} />
+        <button onClick={() => report.open({ load: async () => ivReport() })} style={{ padding: '5px 12px', borderRadius: 8, border: 'none', background: TOKENS.crimson, color: '#fff', fontSize: 11, fontWeight: 800, cursor: 'pointer' }}>Report</button>
         <button onClick={() => setIvTab(v => !v)} style={{ padding: '5px 12px', borderRadius: 8, border: `1.5px solid ${TOKENS.line}`, background: '#fff', color: TOKENS.s600, fontSize: 11, fontWeight: 800, cursor: 'pointer' }}>{ivTab ? 'Hide' : `Show (${ivRows.filter(r => r.status === 'open').length} open)`}</button>
       </div>
       {ivTab && (

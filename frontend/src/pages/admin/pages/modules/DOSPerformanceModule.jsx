@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { api } from '../../../../context/ctx.jsx'
 import { TOKENS } from '../shared/tokens.js'
 import { AnalyticsStrip } from '../shared/charts.jsx'
+import { ClickStat, useStatReport } from '../shared/StatReport.jsx'
 
 /**
  * DOSPerformanceModule: the DOS's evidence room.
@@ -25,6 +26,7 @@ const download = (name, text) => {
 }
 
 export default function DOSPerformanceModule({ toast }) {
+  const report = useStatReport(toast)
   const today = new Date().toISOString().split('T')[0]
   const ago90 = new Date(Date.now() - 90 * 24 * 3600 * 1000).toISOString().split('T')[0]
   const [from, setFrom] = useState(ago90)
@@ -146,17 +148,20 @@ export default function DOSPerformanceModule({ toast }) {
       </div>
 
       <AnalyticsStrip scope="school" days={30} title="School trend: last 30 days" show={['attendance', 'exams', 'sessions', 'qb']} />
+      {report.modal}
 
       {/* KPI strip */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12 }}>
-        {[['Active students', k.students, ''], ['Lessons held', k.sessionsHeld, ''],
-          ['Attendance', k.attendancePct ?? '–', k.attendancePct !== null ? `% (${k.attended} of ${k.scheduled})` : ''],
-          ['Exam average', k.examAvg ?? '–', k.examAvg !== null ? `% (${k.examsGraded} graded)` : ''],
-          ['At risk', risk?.high ?? 0, ` students (${risk?.watch ?? 0} on watch)`]].map(([l, v, s]) => (
-          <div key={l} style={{ background: '#fff', border: `1px solid ${TOKENS.line}`, borderRadius: 12, padding: '14px 16px' }}>
-            <div style={{ fontSize: 22, fontWeight: 900, color: TOKENS.s900 }}>{v}<span style={{ fontSize: 12, fontWeight: 700, color: TOKENS.s500 }}>{s}</span></div>
-            <div style={{ fontSize: 11.5, color: TOKENS.s500, fontWeight: 700, marginTop: 2 }}>{l}</div>
-          </div>
+        {[['Active students', k.students, '', { key: 'students' }], ['Lessons held', k.sessionsHeld, '', { key: 'lessons', params: { from, to } }],
+          ['Attendance', k.attendancePct ?? '–', k.attendancePct !== null ? `% (${k.attended} of ${k.scheduled})` : '', { key: 'attendance', params: { from, to } }],
+          ['Exam average', k.examAvg ?? '–', k.examAvg !== null ? `% (${k.examsGraded} graded)` : '', { key: 'exams', params: { from, to } }],
+          ['At risk', risk?.high ?? 0, ` students (${risk?.watch ?? 0} on watch)`, { key: 'atRisk' }]].map(([l, v, s, spec]) => (
+          <ClickStat key={l} onOpen={() => report.open(spec)}>
+            <div style={{ background: '#fff', border: `1px solid ${TOKENS.line}`, borderRadius: 12, padding: '14px 16px 20px', height: '100%', boxSizing: 'border-box' }}>
+              <div style={{ fontSize: 22, fontWeight: 900, color: TOKENS.s900 }}>{v}<span style={{ fontSize: 12, fontWeight: 700, color: TOKENS.s500 }}>{s}</span></div>
+              <div style={{ fontSize: 11.5, color: TOKENS.s500, fontWeight: 700, marginTop: 2 }}>{l}</div>
+            </div>
+          </ClickStat>
         ))}
       </div>
 
