@@ -1,3 +1,4 @@
+import { KISWAHILI_PRIMARY, KISWAHILI_LOWER_SECONDARY, KISWAHILI_A_LEVEL, KISWAHILI_SOURCES, KISWAHILI_MATCH } from './spineKiswahili.js'
 export const IGCSE_MATHS_0580 = [
   { topic: 'Unit 1 · Number & Arithmetic', code: 'U1', subtopics: [
     { name: 'Types of Number, Factors, Multiples & Prime Factorization', code: '001', suggestedLessons: 1 },
@@ -7855,6 +7856,7 @@ export const KCSE_LIBRARY = [
 ]
 
 export const IPRIMARY_LIBRARY = [
+  { match: KISWAHILI_MATCH, const_: KISWAHILI_PRIMARY, source: 'Edexcel iPrimary Kiswahili \u2014 ' + KISWAHILI_SOURCES.primary },
   { match: /^(?!.*comput).*\bscience\b/i,  const_: IPRIMARY_SCIENCE,
     source: 'Edexcel iPrimary Science \u2014 Years 1-6' },
   { match: /\bcomputing\b|\bcomputer\s*science\b|\bict\b/i, const_: IPRIMARY_COMPUTING,
@@ -7866,6 +7868,7 @@ export const IPRIMARY_LIBRARY = [
 ]
 
 export const PRIMARY_LIBRARY = [
+  { match: KISWAHILI_MATCH, const_: KISWAHILI_PRIMARY, source: 'Cambridge Primary Kiswahili \u2014 ' + KISWAHILI_SOURCES.primary },
   // Cambridge Primary, Stages 1-6 at lesson level. The previous entries
   // pointed at all-stage outlines that compressed six years into 24-110
   // lessons — too coarse to file a question against.
@@ -9629,6 +9632,7 @@ const LOWERSEC_ARABIC = [
 ];
 
 export const LOWER_SEC_LIBRARY = [
+  { match: KISWAHILI_MATCH, const_: KISWAHILI_LOWER_SECONDARY, source: 'Cambridge Lower Secondary Kiswahili \u2014 ' + KISWAHILI_SOURCES.lowerSec },
   // Cambridge Lower Secondary — Stages 7-9, rebuilt at lesson level.
   // The previous spines were far too thin (27 lessons for three years of
   // Mathematics), so questions could not be filed against a real lesson.
@@ -9659,6 +9663,7 @@ export const LOWER_SEC_LIBRARY = [
 // differ: Edexcel integrates Science rather than splitting it into
 // biology, chemistry and physics strands.
 export const ILOWER_SEC_LIBRARY = [
+  { match: KISWAHILI_MATCH, const_: KISWAHILI_LOWER_SECONDARY, source: 'Edexcel International Lower Secondary Kiswahili \u2014 ' + KISWAHILI_SOURCES.lowerSec },
   { match: /\bmathematics\b|\bmaths\b/i, const_: ILOWERSEC_MATHS,
     source: 'Edexcel International Lower Secondary Mathematics \u2014 Years 7-9' },
   { match: /\benglish\b/i,                const_: ILOWERSEC_ENGLISH,
@@ -20240,6 +20245,7 @@ const IAL_STATISTICS = [
 ]
 
 export const IAL_LIBRARY = [
+  { match: KISWAHILI_MATCH, const_: KISWAHILI_A_LEVEL, source: 'Edexcel International A Level Kiswahili \u2014 ' + KISWAHILI_SOURCES.aLevel },
   // Information Technology before Computer Science, so a subject named
   // "Information Technology" cannot fall through to the CS matcher.
   { match: /\binformation\s+technology\b|\bict\b/i, const_: IAL_INFORMATION_TECHNOLOGY,
@@ -20293,6 +20299,7 @@ export const IAL_LIBRARY = [
 ]
 
 export const ALEVEL_LIBRARY = [
+  { match: KISWAHILI_MATCH, const_: KISWAHILI_A_LEVEL, source: 'Cambridge A Level Kiswahili \u2014 ' + KISWAHILI_SOURCES.aLevel },
   { match: /\bbiology\b/i, const_: ALEVEL_BIOLOGY_9700,
     source: 'Cambridge International AS & A Level Biology 9700 \u2014 252-lesson scheme (AS 128 / A2 124)' },
   { match: /\bchemistry\b/i, const_: ALEVEL_CHEMISTRY_9701,

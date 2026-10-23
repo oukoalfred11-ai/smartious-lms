@@ -81,6 +81,7 @@ const ALL_SUBJECTS = [
   { curriculum:'EdexcelIGCSE', subjectName:'Spanish',                 category:'Languages' },
   { curriculum:'EdexcelIGCSE', subjectName:'Arabic',                  category:'Languages' },
   { curriculum:'EdexcelIGCSE', subjectName:'Swahili',                 category:'Languages' },
+  { curriculum:'EdexcelIGCSE', subjectName:'Kiswahili',               category:'Languages' },
   { curriculum:'EdexcelIGCSE', subjectName:'German',                  category:'Languages' },
   { curriculum:'EdexcelIGCSE', subjectName:'Chinese',                 category:'Languages' },
   { curriculum:'EdexcelIGCSE', subjectName:'Media Studies',           category:'Arts' },
@@ -111,6 +112,7 @@ const ALL_SUBJECTS = [
   { curriculum:'CambridgeALevel', subjectName:'French',               category:'Languages' },
   { curriculum:'CambridgeALevel', subjectName:'Spanish',              category:'Languages' },
   { curriculum:'CambridgeALevel', subjectName:'Arabic',               category:'Languages' },
+  { curriculum:'CambridgeALevel', subjectName:'Kiswahili',            category:'Languages' },
 
   // ── EdexcelALevel ────────────────────────────────────────
   { curriculum:'EdexcelALevel', subjectName:'Mathematics',            category:'Mathematics' },
@@ -141,6 +143,7 @@ const ALL_SUBJECTS = [
   { curriculum:'EdexcelALevel', subjectName:'Spanish',                category:'Languages' },
   { curriculum:'EdexcelALevel', subjectName:'German',                 category:'Languages' },
   { curriculum:'EdexcelALevel', subjectName:'Arabic',                 category:'Languages' },
+  { curriculum:'EdexcelALevel', subjectName:'Kiswahili',              category:'Languages' },
 
   // ── CambridgeLowerSec ────────────────────────────────────
   { curriculum:'CambridgeLowerSec', subjectName:'Mathematics',        category:'Mathematics' },
@@ -155,6 +158,7 @@ const ALL_SUBJECTS = [
   { curriculum:'CambridgeLowerSec', subjectName:'Global Perspectives',category:'Humanities' },
   { curriculum:'CambridgeLowerSec', subjectName:'French',             category:'Languages' },
   { curriculum:'CambridgeLowerSec', subjectName:'Arabic',             category:'Languages' },
+  { curriculum:'CambridgeLowerSec', subjectName:'Kiswahili',          category:'Languages' },
 
   // ── EdexcelLowerSec ──────────────────────────────────────
   { curriculum:'EdexcelLowerSec', subjectName:'Mathematics',          category:'Mathematics' },
@@ -166,6 +170,7 @@ const ALL_SUBJECTS = [
   { curriculum:'EdexcelLowerSec', subjectName:'Art & Design',         category:'Arts' },
   { curriculum:'EdexcelLowerSec', subjectName:'French',               category:'Languages' },
   { curriculum:'EdexcelLowerSec', subjectName:'Arabic',               category:'Languages' },
+  { curriculum:'EdexcelLowerSec', subjectName:'Kiswahili',            category:'Languages' },
   { curriculum:'EdexcelLowerSec', subjectName:'Physical Education',   category:'Physical Education' },
 
   // ── CambridgePrimary ─────────────────────────────────────
@@ -178,6 +183,12 @@ const ALL_SUBJECTS = [
   { curriculum:'CambridgePrimary', subjectName:'Music',               category:'Arts' },
   { curriculum:'CambridgePrimary', subjectName:'Physical Education',  category:'Physical Education' },
   { curriculum:'CambridgePrimary', subjectName:'French',              category:'Languages' },
+  { curriculum:'CambridgePrimary', subjectName:'Kiswahili',           category:'Languages' },
+
+  // ── EdexcelPrimary (iPrimary) ────────────────────────────
+  // Core iPrimary subjects are set up with the curriculum; Kiswahili is
+  // added here so the Kiswahili spine has a subject to load into.
+  { curriculum:'EdexcelPrimary', subjectName:'Kiswahili',             category:'Languages' },
 
   // ── IB Diploma (IBDP) ────────────────────────────────────
   { curriculum:'IBDP', subjectName:'Mathematics: Analysis & Approaches (HL)', category:'Mathematics' },
