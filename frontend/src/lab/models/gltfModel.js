@@ -12,6 +12,7 @@
  *                                   which matched meshes the automatic point is taken from (e.g. /\.l$/
  *                                   for one of a pair, so the label does not point between them);
  *                                   side (+1 / −1) keeps only meshes on that side of the model (by position);
+ *                                   centreOf (RegExp): put the label at the centre of those meshes (e.g. a socket);
  *                                   at (0…1) puts the label on the front of the part's meshes at that fraction
  *                                   of the model's height; with no match, on the model's front (for parts that
  *                                   are not separate meshes in the file, e.g. a rocket's stages)
@@ -21,6 +22,9 @@
  *     cutaway: { normal, at },      optional cut: keep the side the normal points to, the fraction
  *                                   `at` (0…1) of the model's depth measured from that side
  *     materials: (mesh) => void,    optional fix-ups (e.g. make a membrane see-through)
+ *     explode: [{ match, offset }   optional "pull apart" slider: meshes matching `match` slide by offset
+ *               | { match, fade }],   ([x, y, z], root units after fitting) carrying their labels, or fade out
+ *     explodeLabel,                 the slider's name (default "Pull apart")
  *     animations = true,            false: ignore animation clips stored in the file
  *     pose: seconds | 'end',        optional: hold the file's animations at that time (or their last frame)
  *   }) → build()                    the same contract as the models built in code (kit.js)
@@ -150,8 +154,37 @@ export function fromGLTF(spec) {
         if (onSide.length) from = onSide
       }
       const pick = from.length ? from : objects
-      const anchor = p.anchor || (p.at != null ? frontPoint(pick, root, p.at) : labelPoint(pick, root, centre, cut?.plane))
+      const centreOf = p.centreOf && meshes.filter(m => matches(m, p.centreOf))
+      const anchor = p.anchor
+        || (centreOf?.length ? root.worldToLocal(centreOf.reduce((b, m) => b.expandByObject(m), new THREE.Box3()).getCenter(new THREE.Vector3())).toArray() : null)
+        || (p.at != null ? frontPoint(pick, root, p.at) : labelPoint(pick, root, centre, cut?.plane))
       parts.push({ id: p.id, name: p.name, info: p.info, objects, anchor })
+    }
+
+    // Pull apart (the page's slider): groups of meshes slide by an offset (root units, after
+    // fitting), carrying their labels; others fade out of the way.
+    let explode
+    if (spec.explode) {
+      const k = holder.scale.x
+      const moves = spec.explode.filter(g => g.offset).map(g => ({ meshes: meshes.filter(m => matches(m, g.match)), offset: new THREE.Vector3(...g.offset) }))
+      const fades = meshes.filter(m => spec.explode.some(g => g.fade && matches(m, g.match)))
+      moves.forEach(g => g.meshes.forEach(m => { m.userData.home = m.position.clone() }))
+      fades.forEach(m => { m.material = m.material.clone(); m.userData.opacity = m.material.transparent ? m.material.opacity : 1 })
+      parts.forEach(pt => {
+        const g = moves.find(g => pt.objects.length && pt.objects.every(o => g.meshes.includes(o)))
+        if (g) { pt.home = [...pt.anchor]; pt.move = g.offset }
+      })
+      explode = (f) => {
+        moves.forEach(g => g.meshes.forEach(m => m.position.copy(m.userData.home).addScaledVector(g.offset, f / k)))
+        fades.forEach(m => {
+          const o = m.userData.opacity * (1 - f)
+          m.material.transparent = o < 1; m.material.opacity = o; m.material.depthWrite = o >= 1; m.visible = o > 0.02
+        })
+        parts.forEach(pt => {
+          if (pt.move) pt.anchor = pt.home.map((v, i) => v + pt.move.getComponent(i) * f)
+          if (pt.objects.length && pt.objects.every(o => fades.includes(o))) pt.hidden = f > 0.6   // its label goes too
+        })
+      }
     }
 
     // Animation stored in the file (if any) plays with the Animate button.
@@ -166,6 +199,7 @@ export function fromGLTF(spec) {
       tick: mixer ? (t, dt = 0.016) => mixer.update(dt) : undefined,
       status: spec.status,
       cutaway: cut ? (on) => cut.set(on) : undefined,
+      explode, explodeLabel: spec.explodeLabel,
       reset: mixer ? () => mixer.setTime(0) : undefined,
       view: spec.view || { yaw: 0.4, pitch: 0.25 },
     }

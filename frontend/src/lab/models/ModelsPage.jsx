@@ -50,6 +50,7 @@ export function ModelViewer() {
   const [labels, setLabels] = useState(true)
   const [animate, setAnimate] = useState(false)
   const [cutaway, setCutaway] = useState(true)
+  const [apart, setApart] = useState(0)
   const [status, setStatus] = useState('')
   const [low, setLow] = useState(pref('low', '0') === '1')
   const [quiz, setQuiz] = useState(null)          // { order, i, score, tries, feedback }
@@ -59,7 +60,7 @@ export function ModelViewer() {
   useEffect(() => {
     if (!meta || !box.current) return undefined
     let stage = null, cancelled = false
-    setModel(null); setSelected(null); setAnimate(false); setQuiz(null); setProblem(null)
+    setModel(null); setSelected(null); setAnimate(false); setQuiz(null); setProblem(null); setApart(0)
     Promise.all([import('./modelStage.js'), import('../scene/engine3d.js'), meta.load()]).then(async ([S, E, build]) => {
       if (cancelled) return
       if (!E.webglAvailable()) { setProblem('3D graphics (WebGL) are not available on this device.'); return }
@@ -128,6 +129,7 @@ export function ModelViewer() {
             <button type="button" className={'lab-btn sm' + (labels ? ' primary' : '')} aria-pressed={labels} onClick={toggleLabels} disabled={!model || !!quiz}>Labels</button>
             {model?.tick && <button type="button" className={'lab-btn sm' + (animate ? ' primary' : '')} aria-pressed={animate} onClick={toggleAnimate}>{animate ? 'Pause' : model.animateLabel || 'Animate'}</button>}
             {model?.cutaway && <button type="button" className={'lab-btn sm' + (cutaway ? ' primary' : '')} aria-pressed={cutaway} onClick={toggleCut}>Cut-away</button>}
+            {model?.explode && <label className="lab-check">{model.explodeLabel || 'Pull apart'} <input type="range" min="0" max="1" step="0.02" value={apart} onChange={e => { const v = +e.target.value; setApart(v); stageRef.current?.explode(v) }} aria-label={model.explodeLabel || 'Pull apart'} /></label>}
             <button type="button" className="lab-btn sm" onClick={() => stageRef.current?.resetView()} disabled={!model}>Reset view</button>
             {!quiz ? <button type="button" className="lab-btn sm" onClick={startQuiz} disabled={!model}>Test yourself</button> : <button type="button" className="lab-btn sm" onClick={endQuiz}>End test</button>}
             <label className="lab-check"><input type="checkbox" checked={low} onChange={e => { setLow(e.target.checked); setPref('low', e.target.checked ? '1' : '0') }} /> Low graphics</label>

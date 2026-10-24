@@ -27,6 +27,7 @@ The full atlas (`Startup.blend` in `Z-Anatomy.zip` from https://github.com/Z-Ana
     python3 -I blend2glb.py $B muscles.glb --root "4: Muscular system" --root "1: Skeletal system" --names-file muscles-v1.names.txt --simplify 3.5
 
     python3 -I blend2glb.py $B knee.glb --root "1: Skeletal system" --root "3: Joints" --crop-y 0.33,0.53 --name "^(Femur|Tibia|Fibula|Patella|Anterior cruciate ligament|Posterior cruciate ligament|Lateral meniscus|Medial meniscus|Superficial part of tibial collateral ligament|Deep part of tibial collateral ligament|Transverse ligament of knee|Articular capsule of knee joint|Oblique popliteal ligament|Arcuate popliteal ligament|Popliteofibular ligament|Meniscopatellar ligament|.*meniscotibial ligament.*|Anterior ligament of fibular head|Posterior ligament of fibular head)\.r$"
+    python3 -I blend2glb.py $B hip.glb --root "1: Skeletal system" --root "3: Joints" --crop-y 0.66,1.3 --name "^(Femur|Hip bone|Acetabular labrum|Articular capsule of hip joint|Descending part of iliofemoral ligament|Transverse part of iliofemoral ligament|Ischiofemoral ligament|Ligament of head of femur|Pubofemoral ligament|Transverse acetabular ligament)\.r$"
 
 `--crop-y` cuts the meshes at two heights (triangles are clipped exactly at the planes), so a joint can be shown
 without the whole length of its bones.
