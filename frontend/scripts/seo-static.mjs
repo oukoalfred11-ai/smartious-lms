@@ -73,7 +73,7 @@ import { HUB_TITLES, guideTitle, nairobiAreaTitle, fitTitle, fitDesc } from '../
 import { ARTICLES_INDEX } from '../src/data/generated/articlesIndex.js'
 import { guidesFor } from '../src/data/geoGuides.js'
 import { naMeta, usLead, caLead, US_HEADLINE, CA_HEADLINE } from '../src/data/naFocus.js'
-import { VL_PATH, VL_META, VL_HERO, VL_IMAGES, VL_BONES, VL_MODEL_IMAGES, VL_FEATURES, VL_KENYA, VL_CURRICULA, VL_FAQS, VL_CREDITS, VL_PRACTICALS, VL_MODELS } from '../src/data/virtualLab.js'
+import { VL_PATH, VL_META, VL_HERO, VL_IMAGES, VL_BONES, VL_MODEL_IMAGES, VL_FEATURES, VL_KENYA, VL_INTERNATIONAL, VL_FAQS, VL_CREDITS, VL_PRACTICALS, VL_MODELS } from '../src/data/virtualLab.js'
 import { EXPERIMENTS } from '../../shared/lab/experiments/index.js'
 import { MODELS } from '../src/lab/models/catalogue.js'
 
@@ -527,10 +527,10 @@ for (const [id, s] of Object.entries(STATIC_META)) {
       h2('A real laboratory, not a slideshow'), ...VL_FEATURES.map(f => h3(f.h) + p(f.p)), img(VL_IMAGES.cupboard),
       h2('The human skeleton and bones in 3D'), ...VL_BONES.map(b => h3(b.title) + p(b.text) + img(b)),
       h2('3D models for biology and physics'), bullets(VL_MODELS.map(m => [m.title.replace(' (real anatomical model)', ''), m.topic])),
+      h2(VL_INTERNATIONAL.h2), p(VL_INTERNATIONAL.intro), ...VL_INTERNATIONAL.items.map(it => h3(it.h + ' (' + it.sub + ')') + p(it.exam + '.') + p(it.p)), p(VL_INTERNATIONAL.note),
       h2(VL_KENYA.h2), p(VL_KENYA.intro), ...VL_KENYA.items.map(([h, t]) => h3(h) + p(t)), p(VL_KENYA.note),
       h2('All ' + practicalCount + ' virtual practicals'),
       ...['chemistry', 'biology', 'physics'].map(sub => h3(SUBJ[sub]) + VL_PRACTICALS.filter(g => g.subject === sub).map(g => p(g.group) + bullets(g.items)).join('')),
-      h2('One lab for every science curriculum'), ...VL_CURRICULA.map(([h, t]) => h3(h) + p(t)),
       h2('Get the full Virtual Lab with Smartious'), links([{ href: '/assessment', label: 'Book an assessment' }, { href: '/curricula', label: 'Curricula we teach' }, { href: '/homeschool', label: 'Online homeschool' }]),
       p(VL_CREDITS),
     ],
@@ -547,7 +547,7 @@ for (const [id, s] of Object.entries(STATIC_META)) {
         offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD', description: 'The titration practical and the 3D skeleton on this page are free; the full lab is included in Smartious programmes.' } },
       { '@context': 'https://schema.org', '@type': 'LearningResource', '@id': url + '#titration', name: 'Acid–base titration: virtual practical in 3D', url: url + '#try',
         description: 'Find the concentration of an unknown acid by titration with 0.100 mol dm⁻³ sodium hydroxide, step by step on a 3D bench.',
-        learningResourceType: ['Simulation', 'Virtual laboratory'], educationalLevel: ['Secondary school', 'IGCSE', 'KCSE', 'A-Level'],
+        learningResourceType: ['Simulation', 'Virtual laboratory'], educationalLevel: ['Secondary school', 'IGCSE', 'A-Level', 'IB Diploma', 'KCSE'],
         teaches: ['Acid–base titration', 'Volumetric analysis', 'Reading a burette', 'Concordant titres', 'Mole calculations'],
         about: { '@type': 'Thing', name: 'Chemistry practical' }, isAccessibleForFree: true, inLanguage: 'en', image: ORIGIN + VL_IMAGES.hero.src, provider: { '@id': ORG_ID } },
       { '@context': 'https://schema.org', '@type': 'LearningResource', '@id': url + '#skeleton', name: 'The human skeleton in 3D: labelled bones', url: url + '#bones',

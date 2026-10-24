@@ -9,7 +9,7 @@
  */
 import { lazy, Suspense, useState } from 'react'
 import {
-  VL_HERO, VL_IMAGES, VL_BONES, VL_MODEL_IMAGES, VL_FEATURES, VL_KENYA, VL_CURRICULA,
+  VL_HERO, VL_IMAGES, VL_BONES, VL_MODEL_IMAGES, VL_FEATURES, VL_KENYA, VL_INTERNATIONAL,
   VL_FAQS, VL_CREDITS, VL_PRACTICALS, VL_MODELS,
 } from '../data/virtualLab.js'
 
@@ -159,6 +159,26 @@ export default function VirtualLabPage({ go }) {
         </div>
       </section>
 
+      {/* ── IGCSE, A Level and IB ── */}
+      <section id="igcse-a-level-ib" style={sec(C.bone)}>
+        <div className="wrap">
+          <div className="eyebrow">Cambridge · Pearson Edexcel · IB</div>
+          <h2 style={h2}>{VL_INTERNATIONAL.h2}</h2>
+          <p style={lead}>{VL_INTERNATIONAL.intro}</p>
+          <div style={grid(330)}>
+            {VL_INTERNATIONAL.items.map(it => (
+              <div key={it.h} style={card}>
+                <h3 style={{ margin: 0, fontSize: 18, color: C.cr }}>{it.h}</h3>
+                <div style={{ fontSize: 12.5, color: '#8A8F98', margin: '2px 0 10px' }}>{it.sub}</div>
+                <p style={{ margin: '0 0 10px', fontSize: 14, fontWeight: 700, color: C.ink, background: C.bone2, borderRadius: 8, padding: '8px 10px' }}>{it.exam}</p>
+                <p style={{ margin: 0, color: C.sl, lineHeight: 1.7, fontSize: 15 }}>{it.p}</p>
+              </div>
+            ))}
+          </div>
+          <p style={{ fontSize: 13, color: C.sl, marginTop: 22, maxWidth: 900 }}>{VL_INTERNATIONAL.note}</p>
+        </div>
+      </section>
+
       {/* ── KCSE and CBE ── */}
       <section id="kcse-cbe" style={{ ...sec(C.ink2), color: '#fff' }}>
         <div className="wrap">
@@ -194,17 +214,6 @@ export default function VirtualLabPage({ go }) {
                 ))}
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Curricula ── */}
-      <section style={sec('#fff')}>
-        <div className="wrap">
-          <div className="eyebrow">Curricula</div>
-          <h2 style={h2}>One lab for every science curriculum</h2>
-          <div style={grid(260)}>
-            {VL_CURRICULA.map(([h, p]) => <div key={h} style={card}><h3 style={{ margin: '0 0 8px', fontSize: 17, color: C.ink }}>{h}</h3><p style={{ margin: 0, color: C.sl, lineHeight: 1.7, fontSize: 15 }}>{p}</p></div>)}
           </div>
         </div>
       </section>
