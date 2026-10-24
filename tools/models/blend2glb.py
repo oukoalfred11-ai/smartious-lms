@@ -8,6 +8,7 @@
      --exclude REGEX      leave out objects whose name or collection matches
      --material REGEX     only objects whose Z-Anatomy material matches (e.g. "lobe|Cerebellum")
      --include-insertions keep muscle insertion patches (left out by default)
+     --crop-y LO,HI       cut the meshes to the band between these heights (metres, glTF Y), e.g. around a joint
      --simplify MM        merge vertices closer than MM millimetres (vertex clustering) to make the file smaller
      --skip-render-hidden leave out objects hidden from Blender's renderer (the Z-Biomechanics skeleton needs this:
                           it hides overlapping sub-regions that way; the full atlas hides real structures too)
@@ -31,6 +32,7 @@ excl_re = re.compile(opt('--exclude'), re.I) if opt('--exclude') else None
 mat_re = re.compile(opt('--material'), re.I) if opt('--material') else None
 with_insertions = '--include-insertions' in args
 simplify = float(opt('--simplify')) / 1000 if opt('--simplify') else 0
+crop_y = [float(x) for x in opt('--crop-y').split(',')] if opt('--crop-y') else None
 listing = '--list' in args
 skip_render_hidden = '--skip-render-hidden' in args
 
@@ -155,9 +157,52 @@ def mesh_arrays(o, me, nv, np_):
     det = m[0] * (m[5] * m[10] - m[6] * m[9]) - m[4] * (m[1] * m[10] - m[2] * m[9]) + m[8] * (m[1] * m[6] - m[2] * m[5])
     if det < 0:                                  # mirrored objects: flip the winding
         for t in range(0, len(idx), 3): idx[t + 1], idx[t + 2] = idx[t + 2], idx[t + 1]
+    if crop_y:
+        pos, idx, nv = crop(pos, idx, nv, *crop_y)
+        if not nv: return pos, array.array('b'), idx, 0
     if simplify:
         pos, idx, nv = cluster(pos, idx, nv, simplify)
     return pos, normals(pos, idx, nv), idx, nv
+
+def crop(pos, idx, nv, lo, hi):
+    """Cut the mesh to the band lo <= y <= hi: triangles are clipped at the two planes, unused vertices dropped."""
+    out_pos, remap, cut = array.array('f'), {}, {}
+    def old(v):                                   # an original vertex
+        if v not in remap: remap[v] = len(out_pos) // 3; out_pos.extend(pos[3 * v:3 * v + 3])
+        return remap[v]
+    def on_plane(a, b, y):                        # the point where edge a–b crosses height y (shared by both faces)
+        key = (min(a[0], b[0]), max(a[0], b[0]), y)
+        if key not in cut:
+            pa, pb = a[1], b[1]; t = (y - pa[1]) / (pb[1] - pa[1])
+            cut[key] = len(out_pos) // 3; out_pos.extend(pa[i] + t * (pb[i] - pa[i]) for i in range(3))
+        return cut[key]
+    ni = array.array('I')
+    for t in range(0, len(idx), 3):
+        poly = [(v, tuple(pos[3 * v:3 * v + 3]), None) for v in idx[t:t + 3]]
+        for y, keep in ((lo, lambda p: p[1] >= lo), (hi, lambda p: p[1] <= hi)):
+            res = []
+            for i in range(len(poly)):
+                cur, nxt = poly[i], poly[(i + 1) % len(poly)]
+                if keep(cur[1]): res.append(cur)
+                if keep(cur[1]) != keep(nxt[1]):
+                    # an original edge gets a shared vertex; an edge already cut is new to this triangle
+                    if cur[2] is None and nxt[2] is None:
+                        k = on_plane(cur, nxt, y); res.append((None, tuple(out_pos[3 * k:3 * k + 3]), k))
+                    else:
+                        pa, pb = cur[1], nxt[1]; s_ = (y - pa[1]) / (pb[1] - pa[1])
+                        k = len(out_pos) // 3; out_pos.extend(pa[i2] + s_ * (pb[i2] - pa[i2]) for i2 in range(3))
+                        res.append((None, tuple(out_pos[3 * k:3 * k + 3]), k))
+            poly = res
+            if len(poly) < 3: break
+        if len(poly) < 3: continue
+        ids = [p[2] if p[2] is not None else old(p[0]) for p in poly]
+        for k in range(1, len(ids) - 1): ni.extend((ids[0], ids[k], ids[k + 1]))
+    # drop vertices no triangle uses (cut points of discarded pieces)
+    used, np2, m2 = {}, array.array('f'), array.array('I')
+    for v in ni:
+        if v not in used: used[v] = len(used); np2.extend(out_pos[3 * v:3 * v + 3])
+        m2.append(used[v])
+    return np2, m2, len(used)
 
 def cluster(pos, idx, nv, g):
     """Vertex clustering: merge the vertices in each g-sized cell (their mean), drop collapsed triangles."""

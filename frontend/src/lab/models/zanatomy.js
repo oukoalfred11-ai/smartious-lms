@@ -92,3 +92,32 @@ export const muscles = fromGLTF({
   ],
   status: () => 'Skeletal muscles move the body by contracting and pulling on bones through tendons. A muscle can only pull, so muscles work in antagonistic pairs.',
 })
+
+// The right knee: a synovial joint, cut out of the atlas around the joint (--crop-y).
+const kindOf = (o) => o.userData?.material || o.parent?.userData?.material || ''
+export const knee = fromGLTF({
+  url: '/models/knee-v1.glb',
+  size: 0.45,
+  view: { yaw: 2.8, pitch: 0.12 },   // from behind, where the cruciate ligaments show
+  materials: (m) => {
+    const kind = kindOf(m)
+    if (kind === 'Ligament') { m.material = m.material.clone(); m.material.color.set('#D9A441') }
+    if (kind === 'Articular capsule') {
+      m.material = m.material.clone()
+      Object.assign(m.material, { transparent: true, opacity: 0.18, depthWrite: false, side: THREE.DoubleSide })
+      m.material.color.set('#8FC1E3')
+    }
+  },
+  parts: [
+    { id: 'femur', name: 'Femur (thigh bone)', match: /^Femur/, info: 'Its two rounded ends (condyles) roll and glide on the top of the tibia as the knee bends.' },
+    { id: 'tibia', name: 'Tibia (shin bone)', match: /^Tibia/, info: 'Carries the body’s weight from the knee to the ankle. Its flat top is covered by cartilage and the menisci.' },
+    { id: 'fibula', name: 'Fibula', match: /^Fibula/, info: 'The thin bone beside the tibia. It is joined to the tibia below the knee but is not part of the knee joint itself.' },
+    { id: 'patella', name: 'Patella (kneecap)', match: /^Patella/, info: 'A small bone in the tendon of the quadriceps. It protects the front of the joint and helps the thigh muscles straighten the leg.' },
+    { id: 'menisci', name: 'Cartilage (menisci)', match: /meniscus\.r$/, not: /ligament/, info: 'Two C-shaped pads of tough, smooth cartilage between the femur and tibia. With the cartilage covering the bone ends, they absorb shock and reduce friction.' },
+    { id: 'acl', name: 'Anterior cruciate ligament', match: /^Anterior cruciate/, info: 'A strong band inside the joint, from the tibia to the femur. It stops the tibia sliding forwards. Ligaments join bone to bone and are slightly elastic.' },
+    { id: 'pcl', name: 'Posterior cruciate ligament', match: /^Posterior cruciate/, info: 'Crosses the anterior cruciate ligament (cruciate means “cross-shaped”) and stops the tibia sliding backwards.' },
+    { id: 'mcl', name: 'Collateral ligament', match: /tibial collateral/, info: 'Runs down the inner side of the knee and stops it bending sideways, so the joint moves only like a hinge.' },
+    { id: 'capsule', name: 'Joint capsule', match: /^Articular capsule/, info: 'A tough sleeve around the joint. Its lining, the synovial membrane, makes synovial fluid, which fills the joint and lubricates it.' },
+  ],
+  status: () => 'The knee is a synovial joint, a hinge joint: it bends and straightens in one direction. Cartilage and synovial fluid reduce friction; ligaments hold the bones together. Seen from behind; turn it round to see the kneecap.',
+})

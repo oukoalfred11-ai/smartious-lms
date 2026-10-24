@@ -1,5 +1,6 @@
-heart-v1.glb, organs-v1.glb, brain-v1.glb, muscles-v1.glb — real anatomical models used in the
-Smartious Virtual Lab (/lab/models/real-heart, /lab/models/organs, /lab/models/brain, /lab/models/muscles)
+heart-v1.glb, organs-v1.glb, brain-v1.glb, muscles-v1.glb, knee-v1.glb — real anatomical models used in the
+Smartious Virtual Lab (/lab/models/real-heart, /lab/models/organs, /lab/models/brain, /lab/models/muscles,
+/lab/models/knee)
 
 Source: the Z-Anatomy atlas (Startup.blend, https://github.com/Z-Anatomy/Models-of-human-anatomy),
 https://www.z-anatomy.com
@@ -27,7 +28,8 @@ Changes made by Smartious (2026): converted from Blender to glTF binary with
 tools/models/blend2glb.py; kept a selection of structures from the cardiovascular,
 visceral and nervous systems (label lines, text and helper objects removed);
 the brain simplified to about 1 mm; the muscles (with the skeleton) simplified to about
-3.5 mm, keeping only the muscles and bones that can be seen from outside (tools/models/muscles-v1.names.txt); converted to a Y-up coordinate system; smooth
+3.5 mm, keeping only the muscles and bones that can be seen from outside (tools/models/muscles-v1.names.txt); the right knee cut out of the atlas between
+0.33 m and 0.53 m above the ground; converted to a Y-up coordinate system; smooth
 normals computed; positions stored as 16-bit integers (KHR_mesh_quantization);
 materials replaced with plain colours.
 The descriptions shown in the lab are Smartious's own and are not part of these files.
