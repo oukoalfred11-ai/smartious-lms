@@ -79,3 +79,17 @@ export const ingenuity = fromGLTF({
   ],
   status: () => 'Ingenuity, a 1.8 kg helicopter, made the first powered flight on another planet on 19 April 2021 and flew 72 times on Mars.',
 })
+
+// A simple model of the whole station: one mesh, so parts are matched by material.
+export const iss = fromGLTF({
+  url: '/models/iss-v1.glb',
+  size: 0.9,
+  animations: false,
+  view: { yaw: 0.5, pitch: 0.45 },
+  parts: [
+    { id: 'solar', name: 'Solar arrays', material: /^ISSSolarPanels$/, info: 'Eight pairs of huge solar panels that turn sunlight into electricity for the station. They turn to face the Sun as the station orbits.' },
+    { id: 'radiators', name: 'Radiators', material: /^ISSGray2$/, info: 'Panels that get rid of the heat made by the station’s equipment and crew, by emitting infrared radiation into space.' },
+    { id: 'structure', name: 'Modules and truss', material: /^ISSMetal1$/, info: 'The modules are pressurised rooms where the crew live and work; the long truss holds the solar arrays and radiators.' },
+  ],
+  status: () => 'The ISS orbits about 400 km above the Earth at about 7.7 km/s, going round once every 90 minutes. The crew float because the station and everything in it are in free fall around the Earth.',
+})
