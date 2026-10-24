@@ -1,6 +1,9 @@
 """Export the visible meshes of a Blender 3.x file to a .glb (one named node per object).
-   python3 -I blend2glb.py IN.blend OUT.glb [--include-insertions]"""
-import sys, struct, json, math, array
+   python3 -I blend2glb.py IN.blend OUT.glb [--include-insertions]
+
+   Structures Z-Anatomy adapted from non-commercial sources (the kidney, CC BY-NC 4.0;
+   the inner ear, CC BY-NC-SA 4.0) are always left out: Smartious is a paid platform."""
+import sys, struct, json, math, array, re
 sys.path.insert(0, __file__.rsplit('/', 1)[0])
 from blend import Blend
 
@@ -30,6 +33,7 @@ def first_material(ob_start, me_start):
             if ptr in b.by_addr: return F('ID', F('Material', b.by_addr[ptr]['start'], 'id'), 'name')[2:]
     return 'Bone'
 
+NON_COMMERCIAL = re.compile(r'kidney|renal|cochle|vestibul|semicircular|labyrinth|utricle|saccule|spiral organ|organ of corti', re.I)
 MV = b.struct_by_name['MVert']; MP = b.struct_by_name['MPoly']; ML = b.struct_by_name['MLoop']
 co_off = MV['fields']['co']['off']
 objs = []
@@ -43,6 +47,8 @@ for o in b.blocks_of('OB'):
     nv, np_ = F('Mesh', ms, 'totvert'), F('Mesh', ms, 'totpoly')
     colls = coll_of.get(o['addr'], [])
     if np_ < 4 or name.endswith('-line'): continue
+    if NON_COMMERCIAL.search(name) or any(NON_COMMERCIAL.search(c) for c in colls):
+        print('left out (non-commercial licence):', name, file=sys.stderr); continue
     if F('Object', s, 'restrictflag') & 4: continue                         # not rendered in Z-Anatomy either
     if any(c in ('Cross section planes',) for c in colls): continue
     if not with_insertions and any('nsertion' in c for c in colls): continue
