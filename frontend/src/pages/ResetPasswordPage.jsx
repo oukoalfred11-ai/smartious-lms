@@ -19,6 +19,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useToast, useAuth, api } from '../context/ctx.jsx'
+import SmartiousCrest from '../components/SmartiousCrest.jsx'
 
 const CR = '#8B1A2E'
 const GD = '#C9973A'
@@ -26,11 +27,7 @@ const BG = 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=1600&
 
 const Logo = () => (
   <div style={{ display:'inline-flex', alignItems:'center', gap:12 }}>
-    <svg width="42" height="42" viewBox="0 0 80 80" fill="none">
-      <defs><linearGradient id="lg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#A8203A"/><stop offset="100%" stopColor="#7A1026"/></linearGradient></defs>
-      <path d="M40 6 L68 14 Q70 14 70 17 L70 44 Q70 60 40 74 Q10 60 10 44 L10 17 Q10 14 12 14 Z" fill="url(#lg)" stroke="#6A0E20" strokeWidth="0.6"/>
-      <polygon points="40,19 42.2,26 49.5,26 43.7,30.4 45.9,37.5 40,33 34.1,37.5 36.3,30.4 30.5,26 37.8,26" fill="#C9973A"/>
-    </svg>
+    <SmartiousCrest size={42} />
     <div style={{ lineHeight:1.1 }}>
       <div style={{ fontFamily:"'DM Serif Display',Georgia,serif", fontSize:23, fontWeight:700, color:'#fff' }}>
         Smart<em style={{ fontStyle:'italic', color:GD, fontWeight:500 }}>ious</em>
