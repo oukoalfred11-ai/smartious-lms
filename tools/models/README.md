@@ -31,6 +31,7 @@ The full atlas (`Startup.blend` in `Z-Anatomy.zip` from https://github.com/Z-Ana
     python3 -I blend2glb.py $B skull.glb --root "1: Skeletal system" --crop-y 1.45,2.0 --exclude "^(Atlas|Axis|Vertebra|Arytenoid|Corniculate|Cricoid|Thyroid cartilage|Hyoid|Malleus|Incus|Stapes|Anterior cells|Middle cells|Posterior cells|Sinus of)"
     python3 -I blend2glb.py $B arm.glb --root "1: Skeletal system" --root "3: Joints" --root "4: Muscular system" --crop-y 0.86,1.6 --name "^(Humerus|Radius|Ulna|Scapula|Long head of biceps brachii|Short head of biceps brachii|Long head of triceps brachii|Lateral head of triceps brachii|Medial head of triceps brachii|Brachialis muscle|Annular ligament of radius|Articular capsule of elbow joint|Radial collateral ligament|Ulnar collateral ligament)\.r$"
     python3 -I blend2glb.py $B spine.glb --root "1: Skeletal system" --root "3: Joints" --name "^(Atlas \(C1\)|Axis \(C2\)|Vertebra [CTL]\d+|Sacrum|Coccyx|Intervertebral disc .*)$"
+    python3 -I blend2glb.py $B hand.glb --root "1: Skeletal system" --crop-y 0.69,0.95 --name "^(Radius|Ulna|Scaphoid bone|Lunate bone|Triquetrum bone|Pisiform bone|Trapezium bone|Trapezoid bone|Capitate bone|Hamate bone|.*metacarpal bone|.*phalanx of .* of hand)\.r$"
 
 (The ear ossicles are left out of the skull to be safe: Z-Anatomy's inner-ear model is non-commercial and it is not
 clear which ear structures come from it.)
@@ -42,3 +43,6 @@ without the whole length of its bones.
 figure from 26 directions with each object in its own flat colour, and keeping the objects whose visible area was
 at least 20% (muscles) or 5% (bones, with the muscles on) of their area when drawn alone; deep muscles that only
 peek through gaps were left out. That keeps the full figure to 5.5 MB.
+
+The atlas file has no peripheral nerves (only a thin slice of the spinal cord), so the reflex arc model
+(`src/lab/models/reflexArc.js`) is built in code instead.

@@ -239,3 +239,28 @@ export const spine = fromGLTF({
   ],
   status: () => 'The vertebral column has 33 vertebrae. It supports the head and body, lets the back bend and twist, and protects the spinal cord, which runs through the hole in each vertebra.',
 })
+
+// The right hand and wrist (--crop-y): carpals, metacarpals and phalanges in three colours.
+const HAND_COLOURS = [[/^(Scaphoid|Lunate|Triquetrum|Pisiform|Trapezium|Trapezoid|Capitate|Hamate) bone/, '#F4A261'], [/metacarpal/, '#8AB6D6'], [/phalanx/, '#9CCC9C']]
+export const hand = fromGLTF({
+  url: '/models/hand-v1.glb',
+  size: 0.4,
+  view: { yaw: 0.2, pitch: 0.05 },
+  materials: (m) => {
+    const name = m.userData?.name || m.parent?.userData?.name || ''
+    const hit = HAND_COLOURS.find(([re]) => re.test(name))
+    if (hit) { m.material = m.material.clone(); m.material.color.set(hit[1]) }
+  },
+  parts: [
+    { id: 'carpals', name: 'Carpals (wrist bones)', match: /^(Scaphoid|Lunate|Triquetrum|Pisiform|Trapezium|Trapezoid|Capitate|Hamate) bone/, info: 'Eight small bones in two rows. They glide over each other, so the wrist can bend and turn in many directions.' },
+    { id: 'scaphoid', name: 'Scaphoid', match: /^Scaphoid/, info: 'The carpal bone below the thumb; the one most often broken in a fall on an outstretched hand.' },
+    { id: 'metacarpals', name: 'Metacarpals (palm bones)', match: /metacarpal/, info: 'Five long bones in the palm, one for each finger and the thumb.' },
+    { id: 'proximal', name: 'Proximal phalanges', match: /^Proximal phalanx/, info: 'The finger bones nearest the palm.' },
+    { id: 'middle', name: 'Middle phalanges', match: /^Middle phalanx/, info: 'The middle bones of the fingers. The thumb has none: it has only two phalanges.' },
+    { id: 'distal', name: 'Distal phalanges', match: /^Distal phalanx/, info: 'The fingertip bones. The joints between phalanges are hinge joints, so the fingers can only bend one way.' },
+    { id: 'thumb', name: 'Thumb', match: /(First metacarpal|of first finger)/, info: 'Its saddle joint at the base (between the trapezium and the first metacarpal) lets the thumb move across the palm to touch the other fingers, so we can grip.' },
+    { id: 'radius', name: 'Radius', match: /^Radius/, info: 'The forearm bone on the thumb side; the wrist joint is mainly between it and the carpals.' },
+    { id: 'ulna', name: 'Ulna', match: /^Ulna/, info: 'The forearm bone on the little-finger side.' },
+  ],
+  status: () => 'The hand has 27 bones: 8 carpals, 5 metacarpals and 14 phalanges. Many joints between small bones make it able to grip and make fine movements.',
+})

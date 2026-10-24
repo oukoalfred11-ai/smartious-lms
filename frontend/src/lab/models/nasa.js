@@ -93,3 +93,19 @@ export const iss = fromGLTF({
   ],
   status: () => 'The ISS orbits about 400 km above the Earth at about 7.7 km/s, going round once every 90 minutes. The crew float because the station and everything in it are in free fall around the Earth.',
 })
+
+// Hubble: one mesh, so its sections are matched by material.
+export const hubble = fromGLTF({
+  url: '/models/hubble-v1.glb',
+  size: 0.8,
+  animations: false,
+  view: { yaw: 0.6, pitch: 0.25 },
+  parts: [
+    { id: 'aperture', name: 'Aperture door', material: /^hbltel_4$/, at: 0.97, info: 'The opening at the front of the telescope. The door can close to protect the optics from sunlight.' },
+    { id: 'tube', name: 'Telescope tube and mirrors', material: /^hbltel_4$/, at: 0.72, info: 'Inside is a reflecting telescope: a 2.4 m curved primary mirror collects light and reflects it to a smaller secondary mirror, which sends it back through a hole in the primary to the instruments.' },
+    { id: 'solar', name: 'Solar arrays', material: /^hbltel_3$/, at: [0.85, 0.47], info: 'Solar panels that turn sunlight into electricity. Batteries keep the telescope working while it is in the Earth’s shadow.' },
+    { id: 'instruments', name: 'Science instruments (aft shroud)', material: /^hbltel_1$/, at: 0.22, info: 'Cameras and spectrographs that record the light the mirrors collect, from ultraviolet through visible light to near infrared.' },
+    { id: 'wfc', name: 'Wide Field Camera 3', material: /^hbltel_wfc_1$/, info: 'Hubble’s main camera, fitted by astronauts in 2009. It takes many of Hubble’s famous pictures.' },
+  ],
+  status: () => 'The Hubble Space Telescope has orbited about 540 km above the Earth since 1990. Above the atmosphere, starlight is not blurred or absorbed, so it sees farther and more sharply than telescopes on the ground.',
+})
