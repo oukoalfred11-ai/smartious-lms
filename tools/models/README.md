@@ -8,10 +8,12 @@ models in `frontend/public/models/` for the Virtual Lab's 3D models library.
 - `blend2glb.py IN.blend OUT.glb [options]` — writes the visible meshes as a `.glb`: one named node per object
   (names kept, so labels can match them; the Z-Anatomy material and collections go in the node's extras), Y-up,
   smooth normals, 16-bit quantized positions, colours by material or organ. Label lines, text and helper objects
-  are left out, and so are the non-commercial structures (below), always. Reads Blender 2.8x–3.5 files.
+  are left out, and so are the non-commercial structures (below), always. Reads Blender 2.8x–4.2 files (Blender 4: generic mesh attributes, shared arrays, and world
+  matrices rebuilt from location, rotation, scale and parents).
   Options: `--list` (print the collections and objects), `--root NAME` / `--collection RE` (what to export),
   `--name RE` / `--exclude RE` / `--material RE` (filter objects), `--simplify MM` (vertex clustering),
-  `--skip-render-hidden`, `--include-insertions`.
+  `--skip-render-hidden`, `--include-insertions`, `--material-colours` (use the file's own material colours, for files
+  that are not Z-Anatomy), `--copyright TEXT`, `--names-file FILE`, `--crop-y LO,HI`.
 - `glb_patch_images.py IN.glb OUT.glb 'IMAGE:x0,y0,x1,y1:sx,sy' ...` — paints rectangles over a .glb's textures (every
   copy of the named image, e.g. a WebP and its JPEG fallback) with the colour sampled at (sx, sy), and repacks the file (needs Pillow).
   Used to remove the NASA and JPL logos: see `frontend/public/models/LICENSE-nasa.txt`.
@@ -46,3 +48,10 @@ peek through gaps were left out. That keeps the full figure to 5.5 MB.
 
 The atlas file has no peripheral nerves (only a thin slice of the spinal cord), so the reflex arc model
 (`src/lab/models/reflexArc.js`) is built in code instead.
+
+NASA's Curiosity rover (Blender 4.2 file from https://github.com/nasa/NASA-3D-Resources):
+
+    python3 -I blend2glb.py "Curiosity Rover (MSL) (Clean).blend" curiosity.glb --collection "Collection 1" --material-colours --copyright "NASA (no copyright)"
+
+NASA's Space Launch System files were tried and left out: the Blender file holds only the details (no core stage or
+booster casings) and the full model is a 3ds Max file.

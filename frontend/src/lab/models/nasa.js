@@ -109,3 +109,41 @@ export const hubble = fromGLTF({
   ],
   status: () => 'The Hubble Space Telescope has orbited about 540 km above the Earth since 1990. Above the atmosphere, starlight is not blurred or absorbed, so it sees farther and more sharply than telescopes on the ground.',
 })
+
+// Curiosity, converted from NASA's Blender file (tools/models/blend2glb.py) without its textures,
+// so it is coloured here by part. Its parts are named in the file.
+const CURIOSITY_COLOURS = [
+  [/^wheel/, '#5A5F66'], [/^(suspension|Chassis)/, '#6E747B'], [/^RTG/, '#3B3F45'], [/^(antenna_HG|ChemCam|MastCam|NavCam)/, '#D9DBDE'],
+  [/^(arm_|bit_|Drill|APXS|MAHLI|Dust Removal|CHIMERA)/, '#8F959C'], [/^(lens_covers|HazCam)/, '#2E3238'], [/^sundial|cal_target/, '#C9A46A'],
+]
+export const curiosity = fromGLTF({
+  url: '/models/curiosity-v1.glb',
+  size: 0.65,
+  animations: false,
+  view: { yaw: 0.7, pitch: 0.2 },
+  materials: (m) => {
+    const name = m.userData?.name || m.parent?.userData?.name || ''
+    const hit = CURIOSITY_COLOURS.find(([re]) => re.test(name))
+    m.material = m.material.clone()
+    m.material.color.set(hit ? hit[1] : '#ECEAE4')
+    m.material.side = 2                     // a few faces in the file point inwards
+  },
+  parts: [
+    { id: 'chemcam', name: 'ChemCam', match: /^ChemCam$/, info: 'Fires a laser at rocks up to 7 m away and studies the light from the vaporised spot (spectroscopy) to find which elements the rock contains.' },
+    { id: 'mastcam', name: 'Mastcam', match: /^MastCam$/, info: 'A pair of colour cameras on the mast that take detailed and 3D pictures of the landscape.' },
+    { id: 'navcam', name: 'Navigation cameras', match: /^NavCam$/, info: 'Black-and-white stereo cameras used to plan where the rover drives.' },
+    { id: 'mast', name: 'Remote sensing mast', match: /^mast_/, info: 'The rover’s “neck”, about 2 m high, carrying the cameras and ChemCam.' },
+    { id: 'arm', name: 'Robotic arm', match: /^arm_0[1-4]/, info: 'A 2.1 m arm with five joints that places the tools on its turret against rocks.' },
+    { id: 'drill', name: 'Drill', match: /^(Drill|bit_)/, info: 'Drills into rock and collects the powder, which is passed to the rover’s laboratories inside the body.' },
+    { id: 'mahli', name: 'MAHLI (hand lens camera)', match: /^MAHLI$/, info: 'A close-up camera on the arm, like a geologist’s hand lens, that photographs grains and textures in rock.' },
+    { id: 'apxs', name: 'APXS', match: /^APXS$/, info: 'An X-ray spectrometer: placed against a rock, it measures which chemical elements are in it.' },
+    { id: 'sam', name: 'SAM (sample analysis lab)', match: /^SAM$/, info: 'A laboratory inside the rover that heats samples and analyses the gases, looking for carbon compounds linked to life.' },
+    { id: 'chemin', name: 'CheMin', match: /^CheMin$/, info: 'Uses X-ray diffraction to identify the minerals in rock powder, which tells scientists how the rocks formed, e.g. in water.' },
+    { id: 'rtg', name: 'Power source (RTG)', match: /^RTG$/, info: 'Heat from decaying plutonium-238 is changed into electricity by thermocouples, about 110 W, day and night.' },
+    { id: 'hga', name: 'High-gain antenna', match: /^antenna_HG/, info: 'A steerable dish that sends data directly to Earth.' },
+    { id: 'uhf', name: 'UHF antenna', match: /^antenna_UHF$/, info: 'Sends most data to spacecraft in orbit around Mars, which relay it to Earth.' },
+    { id: 'wheels', name: 'Wheels', match: /^wheel_/, side: 1, info: 'Six aluminium wheels, 50 cm across, each with its own motor.' },
+    { id: 'suspension', name: 'Rocker-bogie suspension', match: /^suspension/, side: 1, info: 'Lets the wheels climb over rocks while keeping the body level, without springs.' },
+  ],
+  status: () => 'NASA’s Curiosity rover landed in Gale Crater on Mars in 2012. It found that the crater once held a lake with water that could have supported microbes.',
+})

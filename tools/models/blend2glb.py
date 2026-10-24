@@ -8,6 +8,8 @@
      --exclude REGEX      leave out objects whose name or collection matches
      --material REGEX     only objects whose Z-Anatomy material matches (e.g. "lobe|Cerebellum")
      --include-insertions keep muscle insertion patches (left out by default)
+     --material-colours   colour each mesh with its own Blender material colour (files other than Z-Anatomy)
+     --copyright TEXT     the copyright/credit written into the file (default: the Z-Anatomy credit)
      --crop-y LO,HI       cut the meshes to the band between these heights (metres, glTF Y), e.g. around a joint
      --simplify MM        merge vertices closer than MM millimetres (vertex clustering) to make the file smaller
      --skip-render-hidden leave out objects hidden from Blender's renderer (the Z-Biomechanics skeleton needs this:
@@ -33,6 +35,8 @@ mat_re = re.compile(opt('--material'), re.I) if opt('--material') else None
 with_insertions = '--include-insertions' in args
 simplify = float(opt('--simplify')) / 1000 if opt('--simplify') else 0
 crop_y = [float(x) for x in opt('--crop-y').split(',')] if opt('--crop-y') else None
+own_colours = '--material-colours' in args
+copyright_text = opt('--copyright')
 listing = '--list' in args
 skip_render_hidden = '--skip-render-hidden' in args
 
@@ -49,8 +53,17 @@ def local(owner_block):
     while i < len(b.blocks) and b.blocks[i]['code'] == 'DATA':
         m.setdefault(b.blocks[i]['addr'], b.blocks[i]); i += 1
     return m
-def resolve(addr, run):
-    return run.get(addr) or b.by_addr.get(addr)
+# Blender 4 shares arrays between meshes (implicit sharing): a mesh can point at data written in an
+# earlier mesh's run. With repeated addresses, that is the last block with the address before the owner.
+blocks_at = {}
+for i, x in enumerate(b.blocks):
+    if x['addr']: blocks_at.setdefault(x['addr'], []).append(i)
+def resolve(addr, run, owner=None):
+    if addr in run: return run[addr]
+    if owner is not None and addr in blocks_at:
+        before = [i for i in blocks_at[addr] if i < index_of[id(owner)]]
+        if before: return b.blocks[before[-1]]
+    return b.by_addr.get(addr)
 
 # Collections: membership and top-level parent.
 coll_of, parent = {}, {}
@@ -76,14 +89,19 @@ def material(ob_block, me_block):
         run = local(blk); arr = resolve(F(st, blk['start'], 'mat'), run)
         if arr:
             ptr, = struct.unpack_from(PTR, b.data, arr['start'])
-            if ptr in b.by_addr: return F('ID', F('Material', b.by_addr[ptr]['start'], 'id'), 'name')[2:]
+            if ptr in b.by_addr:
+                ms_ = b.by_addr[ptr]['start']; name = F('ID', F('Material', ms_, 'id'), 'name')[2:]
+                mat_colour.setdefault(name, [F('Material', ms_, k) for k in 'rgb'])
+                return name
     return 'Bone'
+mat_colour = {}
 
 # The kidney (CC BY-NC) and the inner ear (CC BY-NC-SA). "(?<![a-z])renal" keeps the suprarenal (adrenal) gland.
 NON_COMMERCIAL = re.compile(r'kidney|(?<![a-z])renal|nephron|cochlea(?!r nucle)|^vestibule|semicircular|labyrinth|utricle|saccule|spiral organ|organ of corti|endolymph|perilymph', re.I)
 LABEL_PARTS = re.compile(r'(\.(j|t|g|st)|-line|-txt)$')
 HELPER_MATERIALS = re.compile(r'^(Text|Lines|Planes|Directions|Movement|Dots Stroke|Black)', re.I)
-legacy = 'mvert' in b.struct_by_name['Mesh']['fields']          # Blender ≤ 3.4 keeps arrays on the mesh
+legacy = b.version < 305                                          # Blender ≤ 3.4 keeps arrays on the mesh
+modern = b.version >= 400                                          # Blender 4: generic attributes
 
 objs = []
 for o in b.blocks_of('OB'):
@@ -116,37 +134,37 @@ if listing:
     for name, o, me, nv, np_, colls, mat in objs: print(nv, name, '|', ' / '.join(colls[:2]), '|', mat)
     sys.exit(0)
 
-def layer(me, cdname, ltype):
-    """The data block of the first CustomData layer of this type (Blender 3.5 meshes)."""
+def layer(me, cdname, ltype, lname=None):
+    """The data block of the first CustomData layer of this type (and name), for Blender ≥ 3.5 meshes."""
     run = local(me); cd = F('Mesh', me['start'], cdname)
-    lp = resolve(F('CustomData', cd, 'layers'), run)
+    lp = resolve(F('CustomData', cd, 'layers'), run, me)
     if not lp: return None
     L = b.struct_by_name['CustomDataLayer']['size']
     for i in range(F('CustomData', cd, 'totlayer')):
         base = lp['start'] + i * L
-        if F('CustomDataLayer', base, 'type') == ltype: return resolve(F('CustomDataLayer', base, 'data'), run)
+        if F('CustomDataLayer', base, 'type') == ltype and (lname is None or F('CustomDataLayer', base, 'name') == lname):
+            return resolve(F('CustomDataLayer', base, 'data'), run, me)
     return None
 
-MV = b.struct_by_name['MVert']; MP = b.struct_by_name['MPoly']
-co_off = MV['fields']['co']['off']
+MV = b.struct_by_name.get('MVert'); MP = b.struct_by_name.get('MPoly')
+co_off = MV['fields']['co']['off'] if MV else 0
 
 def mesh_arrays(o, me, nv, np_):
     d = b.data; ms = me['start']
     if legacy:
         run = local(me)
         vb = resolve(F('Mesh', ms, 'mvert'), run); pb = resolve(F('Mesh', ms, 'mpoly'), run); lb = resolve(F('Mesh', ms, 'mloop'), run)
+    elif modern:
+        # Blender 4: positions are a float3 attribute, faces are offsets into the corner (loop) vertices.
+        vb = layer(me, 'vdata', 48, 'position'); lb = layer(me, 'ldata', 11, '.corner_vert')
+        pb = resolve(F('Mesh', ms, 'poly_offset_indices'), local(me), me)
+        if not (vb and pb and lb): return None
+        return finish(o, read_positions(o, vb, nv, 0, 12), corners4(ms, lb, pb, np_), nv)
     else:
         vb, pb, lb = layer(me, 'vdata', 0), layer(me, 'pdata', 25), layer(me, 'ldata', 26)
     if not (vb and pb and lb) or vb['count'] < nv: return None
-    m = F('Object', o['start'], 'obmat')          # 16 floats, column-major (m[12..14] = translation)
-    pos = array.array('f')
-    vs = vb['size'] // vb['count']; p0 = vb['start']
-    for i in range(nv):
-        x, y, z = struct.unpack_from('<fff', d, p0 + i * vs + co_off)
-        wx = m[0] * x + m[4] * y + m[8] * z + m[12]
-        wy = m[1] * x + m[5] * y + m[9] * z + m[13]
-        wz = m[2] * x + m[6] * y + m[10] * z + m[14]
-        pos.extend((wx, wz, -wy))                # Blender Z-up → glTF Y-up
+    vs = vb['size'] // vb['count']
+    pos = read_positions(o, vb, nv, co_off, vs)
     nl = F('Mesh', ms, 'totloop')
     loops = struct.unpack_from('<' + 'II' * nl, d, lb['start'])[0::2]
     idx = array.array('I')
@@ -154,6 +172,79 @@ def mesh_arrays(o, me, nv, np_):
     for i in range(np_):
         ls, tl = struct.unpack_from('<ii', d, q0 + i * ps)
         for k in range(1, tl - 1): idx.extend((loops[ls], loops[ls + k], loops[ls + k + 1]))
+    return finish(o, pos, idx, nv)
+
+# The object's world matrix (16 floats, column-major). Blender ≤ 3.x saves it (obmat); Blender 4 does not,
+# so it is rebuilt from location, rotation and scale and the parent chain: parent world × parentinv × local.
+HAS_OBMAT = 'obmat' in b.struct_by_name['Object']['fields']
+_world = {}
+def _mul(a, c):                                  # 4×4 row-major
+    return [[sum(a[i][k] * c[k][j] for k in range(4)) for j in range(4)] for i in range(4)]
+def _axis(axis, t):
+    c, s_ = math.cos(t), math.sin(t)
+    if axis == 'X': return [[1, 0, 0, 0], [0, c, -s_, 0], [0, s_, c, 0], [0, 0, 0, 1]]
+    if axis == 'Y': return [[c, 0, s_, 0], [0, 1, 0, 0], [-s_, 0, c, 0], [0, 0, 0, 1]]
+    return [[c, -s_, 0, 0], [s_, c, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+EULER = {1: 'XYZ', 2: 'XZY', 3: 'YXZ', 4: 'YZX', 5: 'ZXY', 6: 'ZYX'}
+def _rotation(s0):
+    mode = F('Object', s0, 'rotmode')
+    if mode == 0:                                # quaternion (w, x, y, z)
+        w, x, y, z = F('Object', s0, 'quat'); n = math.sqrt(w * w + x * x + y * y + z * z) or 1; w, x, y, z = w / n, x / n, y / n, z / n
+        return [[1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w), 0], [2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w), 0],
+                [2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y), 0], [0, 0, 0, 1]]
+    if mode == -1:                               # axis and angle
+        ax = F('Object', s0, 'rotAxis'); t = F('Object', s0, 'rotAngle'); n = math.sqrt(sum(a * a for a in ax)) or 1
+        x, y, z = (a / n for a in ax); c, s_ = math.cos(t), math.sin(t); C = 1 - c
+        return [[c + x * x * C, x * y * C - z * s_, x * z * C + y * s_, 0], [y * x * C + z * s_, c + y * y * C, y * z * C - x * s_, 0],
+                [z * x * C - y * s_, z * y * C + x * s_, c + z * z * C, 0], [0, 0, 0, 1]]
+    rot = [a + d for a, d in zip(F('Object', s0, 'rot'), F('Object', s0, 'drot'))]
+    r = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+    for axis in EULER.get(mode, 'XYZ'):          # 'XYZ' applies X first: R = Rz · Ry · Rx
+        r = _mul(_axis(axis, rot['XYZ'.index(axis)]), r)
+    return r
+def world_matrix(o):
+    if HAS_OBMAT: return F('Object', o['start'], 'obmat')
+    key = o['addr']
+    if key in _world: return _world[key]
+    s0 = o['start']
+    loc = [a + d for a, d in zip(F('Object', s0, 'loc'), F('Object', s0, 'dloc'))]
+    sc = [a * d for a, d in zip(F('Object', s0, 'size'), F('Object', s0, 'dscale'))]
+    r = _rotation(s0)
+    local = [[r[i][j] * sc[j] for j in range(3)] + [loc[i]] for i in range(3)] + [[0, 0, 0, 1]]
+    p = b.by_addr.get(F('Object', s0, 'parent'))
+    if p and p['code'] == 'OB':
+        pw = world_matrix(p); P = [[pw[j * 4 + i] for j in range(4)] for i in range(4)]
+        pi = F('Object', s0, 'parentinv'); PI_ = [[pi[j * 4 + i] for j in range(4)] for i in range(4)]
+        local = _mul(_mul(P, PI_), local)
+    m = [local[i][j] for j in range(4) for i in range(4)]
+    _world[key] = m
+    return m
+
+def read_positions(o, vb, nv, off, stride):
+    """World-space vertex positions, converted from Blender Z-up to glTF Y-up."""
+    d = b.data; m = world_matrix(o)          # 16 floats, column-major (m[12..14] = translation)
+    pos = array.array('f'); p0 = vb['start']
+    for i in range(nv):
+        x, y, z = struct.unpack_from('<fff', d, p0 + i * stride + off)
+        wx = m[0] * x + m[4] * y + m[8] * z + m[12]
+        wy = m[1] * x + m[5] * y + m[9] * z + m[13]
+        wz = m[2] * x + m[6] * y + m[10] * z + m[14]
+        pos.extend((wx, wz, -wy))
+    return pos
+
+def corners4(ms, lb, pb, np_):
+    """Triangles from Blender 4 face offsets and corner vertices (fan per face)."""
+    d = b.data; nl = F('Mesh', ms, 'totloop')
+    loops = struct.unpack_from('<' + 'i' * nl, d, lb['start'])
+    offs = struct.unpack_from('<' + 'i' * (np_ + 1), d, pb['start'])
+    idx = array.array('I')
+    for i in range(np_):
+        ls, le = offs[i], offs[i + 1]
+        for k in range(ls + 1, le - 1): idx.extend((loops[ls], loops[k], loops[k + 1]))
+    return idx
+
+def finish(o, pos, idx, nv):
+    m = world_matrix(o)
     det = m[0] * (m[5] * m[10] - m[6] * m[9]) - m[4] * (m[1] * m[10] - m[2] * m[9]) + m[8] * (m[1] * m[6] - m[2] * m[5])
     if det < 0:                                  # mirrored objects: flip the winding
         for t in range(0, len(idx), 3): idx[t + 1], idx[t + 2] = idx[t + 2], idx[t + 1]
@@ -270,11 +361,18 @@ BYN = [(n, re.compile(r, re.I)) for n, r, c in BY_NAME]
 def family(mat, name=''):
     return next((n for n, r in BYN if r.search(name)), None) or next(n for n, r, c in FAM if r.search(mat))
 
-gl = {'asset': {'version': '2.0', 'generator': 'Smartious blend2glb', 'copyright': 'BodyParts3D - The Database Center for Life Science - CC-BY-SA 2.1 Japan; Z-Anatomy - The libre 3D atlas of anatomy - CC-BY-SA 4.0'},
+gl = {'asset': {'version': '2.0', 'generator': 'Smartious blend2glb', 'copyright': copyright_text or 'BodyParts3D - The Database Center for Life Science - CC-BY-SA 2.1 Japan; Z-Anatomy - The libre 3D atlas of anatomy - CC-BY-SA 4.0'},
       'extensionsUsed': ['KHR_mesh_quantization'], 'extensionsRequired': ['KHR_mesh_quantization'],
       'scene': 0, 'scenes': [{'nodes': []}], 'nodes': [], 'meshes': [], 'accessors': [], 'bufferViews': [], 'materials': []}
 mat_index = {}
-def mat_for(fam):
+def mat_for(fam, own=None):
+    if own is not None:                          # the file's own material colour (--material-colours)
+        key = 'own:' + own
+        if key not in mat_index:
+            mat_index[key] = len(gl['materials'])
+            c = [min(1.0, max(0.0, x)) for x in mat_colour.get(own, [0.8, 0.8, 0.8])]
+            gl['materials'].append({'name': own, 'pbrMetallicRoughness': {'baseColorFactor': c + [1], 'metallicFactor': 0.0, 'roughnessFactor': 0.55}})
+        return mat_index[key]
     if fam not in mat_index:
         c = next(c for n, r, c in FAM if n == fam)
         mat_index[fam] = len(gl['materials'])
@@ -308,7 +406,7 @@ for name, o, me, nv, np_, colls, mat in objs:
     small = nv < 65536
     ib = array.array('H', idx) if small else idx
     ia = len(gl['accessors']); gl['accessors'].append({'bufferView': view(ib.tobytes(), 34963), 'componentType': 5123 if small else 5125, 'count': len(idx), 'type': 'SCALAR'})
-    gl['meshes'].append({'name': name, 'primitives': [{'attributes': {'POSITION': pa, 'NORMAL': na}, 'indices': ia, 'material': mat_for(family(mat, name))}]})
+    gl['meshes'].append({'name': name, 'primitives': [{'attributes': {'POSITION': pa, 'NORMAL': na}, 'indices': ia, 'material': mat_for(None, mat) if own_colours else mat_for(family(mat, name))}]})
     gl['nodes'].append({'name': name, 'mesh': len(gl['meshes']) - 1, 'translation': tr, 'scale': sc, 'extras': {'collections': colls, 'material': mat}})
     gl['scenes'][0]['nodes'].append(len(gl['nodes']) - 1)
     total_v += nv; total_t += len(idx) // 3
