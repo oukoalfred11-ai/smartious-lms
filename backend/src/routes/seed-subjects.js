@@ -213,6 +213,8 @@ const ALL_SUBJECTS = [
   { curriculum:'IBDP', subjectName:'Geography (SL)',                    category:'Individuals and Societies' },
   { curriculum:'IBDP', subjectName:'Economics (HL)',                    category:'Individuals and Societies' },
   { curriculum:'IBDP', subjectName:'Economics (SL)',                    category:'Individuals and Societies' },
+  { curriculum:'IBDP', subjectName:'Digital Society (HL)',              category:'Individuals and Societies' },
+  { curriculum:'IBDP', subjectName:'Digital Society (SL)',              category:'Individuals and Societies' },
   { curriculum:'IBDP', subjectName:'Business Management (HL)',          category:'Individuals and Societies' },
   { curriculum:'IBDP', subjectName:'Business Management (SL)',          category:'Individuals and Societies' },
   { curriculum:'IBDP', subjectName:'Psychology (HL)',                   category:'Individuals and Societies' },

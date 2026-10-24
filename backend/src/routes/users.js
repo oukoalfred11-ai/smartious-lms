@@ -1081,6 +1081,15 @@ router.patch('/:id', auth, requireRole('admin','ops_manager'), async (req, res) 
       }
     }
 
+    // Learning mode changed: bring this student's timetable slots and upcoming lessons in line.
+    if (user.role === 'student' && req.body.deliveryMode !== undefined) {
+      try {
+        const { syncDeliveryModes } = require('../lib/deliverySync');
+        const r = await syncDeliveryModes({ studentIds: [user._id] });
+        console.log('[users PATCH] Delivery mode', user.deliveryMode, '·', r.slots.length, 'slots,', r.lessons.length, 'lessons updated');
+      } catch (e) { console.error('[users PATCH] Delivery sync failed:', e.message); }
+    }
+
     // Auto-sync GroupRoom enrollments if this is a student and curriculum/grade/subjects changed
     if (user.role === 'student' && (
       req.body.curriculum !== undefined ||
