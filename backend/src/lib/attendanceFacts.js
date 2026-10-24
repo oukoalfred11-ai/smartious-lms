@@ -15,9 +15,10 @@
  * Legacy history: before ATTENDANCE_CUTOVER the school kept a day
  * register (Attendance collection). For the part of a requested range that
  * falls before the cutover, those day docs are used instead (present /
- * late / half_day = attended), flagged source:'legacy'. After the cutover
- * the Attendance collection is only the self check-in log (routes/checkin.js)
- * and is never read as student attendance.
+ * late / half_day = attended), flagged source:'legacy'. The Attendance
+ * collection is never read as student attendance after the cutover; the
+ * retired self check-ins are deleted at startup (lib/purgeCheckins), except
+ * students' pre-cutover ones, which are part of this history.
  */
 const LiveClass = require('../models/LiveClass');
 const ClassroomSession = require('../models/ClassroomSession');
