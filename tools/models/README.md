@@ -26,6 +26,11 @@ The full atlas (`Startup.blend` in `Z-Anatomy.zip` from https://github.com/Z-Ana
     python3 -I blend2glb.py $B brain.glb --root "7: Nervous system & Sense organs" --material "lobe|Cerebellum|Insula|Interlobar|^Brain$" --exclude "fasciculus|spinal|Filum|Conus" --simplify 1.0
     python3 -I blend2glb.py $B muscles.glb --root "4: Muscular system" --root "1: Skeletal system" --names-file muscles-v1.names.txt --simplify 3.5
 
+    python3 -I blend2glb.py $B knee.glb --root "1: Skeletal system" --root "3: Joints" --crop-y 0.33,0.53 --name "^(Femur|Tibia|Fibula|Patella|Anterior cruciate ligament|Posterior cruciate ligament|Lateral meniscus|Medial meniscus|Superficial part of tibial collateral ligament|Deep part of tibial collateral ligament|Transverse ligament of knee|Articular capsule of knee joint|Oblique popliteal ligament|Arcuate popliteal ligament|Popliteofibular ligament|Meniscopatellar ligament|.*meniscotibial ligament.*|Anterior ligament of fibular head|Posterior ligament of fibular head)\.r$"
+
+`--crop-y` cuts the meshes at two heights (triangles are clipped exactly at the planes), so a joint can be shown
+without the whole length of its bones.
+
 `muscles-v1.names.txt` lists the muscles and bones that can be seen from outside. It was made by rendering the
 figure from 26 directions with each object in its own flat colour, and keeping the objects whose visible area was
 at least 20% (muscles) or 5% (bones, with the muscles on) of their area when drawn alone; deep muscles that only
