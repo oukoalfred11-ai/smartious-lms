@@ -14,7 +14,7 @@
  *                                   side (+1 / −1) keeps only meshes on that side of the model (by position);
  *                                   centreOf (RegExp): put the label at the centre of those meshes (e.g. a socket);
  *                                   at (0…1) puts the label on the part's meshes, on the side the model is first
- *                                   seen from (view.yaw), at that fraction
+ *                                   seen from (view.yaw), at that fraction ([across, up] fractions also work)
  *                                   of the model's height; with no match, on the model's front (for parts that
  *                                   are not separate meshes in the file, e.g. a rocket's stages)
  *     size = 0.5,                   longest side after fitting, in metres
@@ -93,7 +93,10 @@ function frontPoint(meshes, root, f, yaw = 0) {
   const mid = new THREE.Box3()
   for (const m of meshes) mid.expandByObject(m)
   const c = mid.getCenter(new THREE.Vector3())
-  const y = box.min.y + f * (box.max.y - box.min.y)
+  // f = height fraction, or [across, height]: across = fraction of the meshes' own width (e.g. one wing)
+  const [fx, fy] = Array.isArray(f) ? f : [null, f]
+  if (fx != null) c.x = mid.min.x + fx * (mid.max.x - mid.min.x)
+  const y = box.min.y + fy * (box.max.y - box.min.y)
   const dir = new THREE.Vector3(Math.sin(yaw), 0, Math.cos(yaw))
   const far = box.getSize(new THREE.Vector3()).length() + 1
   const ray = new THREE.Raycaster(new THREE.Vector3(c.x, y, c.z).addScaledVector(dir, far), dir.clone().negate())
