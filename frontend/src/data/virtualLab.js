@@ -1,0 +1,100 @@
+/**
+ * data/virtualLab.js — the public Virtual Lab page (/virtual-lab).
+ * One source for the React page (pages/VirtualLabPage.jsx) and the static
+ * HTML, JSON-LD and sitemap entry (scripts/seo-static.mjs), so the text
+ * crawlers read is the text visitors see.
+ *
+ * VL_PRACTICALS and VL_MODELS list the real lab (shared/lab/experiments and
+ * lab/models/catalogue.js); seo-static.mjs warns at build time when they no
+ * longer match, so the counts on the page stay true.
+ *
+ * Wording rules: the page says the lab helps KCSE and CBE students practise
+ * the same practical skills, never that it is approved for, aligned to or
+ * part of those programmes. No ratings or
+ * reviews markup. The only admissions path is /assessment.
+ */
+
+export const VL_PATH = '/virtual-lab'
+
+export const VL_META = {
+  title: 'Virtual Lab | Free 3D Science Practicals Online | Smartious',
+  desc: 'Try the Smartious Virtual Lab free: a 3D titration done step by step, a labelled human skeleton and 3D models. 78 practicals for IGCSE, A-Level, KCSE and CBE.',
+  ogImage: '/virtual-lab/virtual-lab-og.jpg',
+}
+
+export const VL_HERO = {
+  eyebrow: 'Smartious Virtual Lab · Chemistry · Physics · Biology',
+  h1: 'Smartious Virtual Lab: 3D science practicals you do with your own hands',
+  lead: 'A full school laboratory in the browser. Open the apparatus cupboard, set up your bench, rinse the burette, read the meniscus at eye level and record real readings, then turn them into a results table, a graph and a lab report. Try a complete titration below for free, no sign-up needed.',
+  stats: [['78', 'practicals'], ['28', '3D models'], ['3', 'sciences'], ['Free', 'titration to try now']],
+}
+
+export const VL_IMAGES = {
+  hero: { src: '/virtual-lab/titration-end-point.webp', w: 1280, h: 720, alt: 'Smartious Virtual Lab: a 3D acid–base titration at the end point, the conical flask turning pink under the burette' },
+  bench: { src: '/virtual-lab/titration-bench.webp', w: 1280, h: 720, alt: 'The titration bench from above: burette and stand, white tile, pipette, beakers of acid and alkali, indicator bottles and wash bottle' },
+  cupboard: { src: '/virtual-lab/apparatus-cupboard.webp', w: 1280, h: 720, alt: 'The apparatus cupboard and reagent rack in the Smartious Virtual Lab: students fetch only what the practical needs' },
+}
+
+// Bones first: the skeleton is the model families search for most.
+export const VL_BONES = [
+  { id: 'skeleton', src: '/virtual-lab/skeleton.webp', title: 'The human skeleton', alt: 'Labelled 3D human skeleton: cranium, clavicle, scapula, sternum, ribs, humerus, radius, ulna, pelvis, femur, patella, tibia and fibula', text: 'A complete adult skeleton from real anatomical data. Every bone is named, from the cranium to the toes, with a self-test on 28 bones and groups.' },
+  { id: 'skull', src: '/virtual-lab/skull.webp', title: 'The skull and teeth', alt: '3D human skull with each bone in its own colour: frontal, parietal, temporal, occipital, maxilla and mandible, with the teeth', text: 'Each cranial bone in its own colour. Open the jaw to see incisors, canines, premolars and molars.' },
+  { id: 'spine', src: '/virtual-lab/spine.webp', title: 'The vertebral column', alt: '3D vertebral column from the atlas to the coccyx with the intervertebral discs and the cervical, thoracic and lumbar regions', text: 'Cervical, thoracic and lumbar vertebrae, the sacrum, coccyx and the discs between them.' },
+  { id: 'hand', src: '/virtual-lab/hand.webp', title: 'The hand and wrist', alt: '3D hand and wrist bones: carpals, metacarpals and phalanges with the ends of the radius and ulna', text: 'All 27 bones of the hand: carpals, metacarpals and phalanges.' },
+  { id: 'knee', src: '/virtual-lab/knee.webp', title: 'The knee: a hinge joint', alt: '3D knee joint: femur, tibia, fibula and patella with the cartilage menisci and cruciate ligaments', text: 'Femur, tibia and kneecap with cartilage and ligaments. Open the joint, then compare it with the hip, a ball and socket joint.' },
+]
+
+export const VL_MODEL_IMAGES = [
+  { id: 'real-heart', src: '/virtual-lab/real-heart.webp', title: 'The heart', alt: '3D human heart cut open: four chambers, tricuspid and bicuspid valves and papillary muscles' },
+  { id: 'brain', src: '/virtual-lab/brain.webp', title: 'The brain', alt: '3D human brain with the frontal, parietal, temporal and occipital lobes, cerebellum and brainstem' },
+  { id: 'eye', src: '/virtual-lab/eye.webp', title: 'The eye', alt: 'Cut-away 3D human eye: cornea, iris, lens, ciliary muscle, retina and optic nerve' },
+  { id: 'organs', src: '/virtual-lab/organs.webp', title: 'Organs of the body', alt: '3D organs of the chest and abdomen: lungs, liver, stomach, intestines and bladder' },
+  { id: 'muscles', src: '/virtual-lab/muscles.webp', title: 'The muscular system', alt: '3D muscular system: biceps, triceps, quadriceps, hamstrings and calf muscles' },
+  { id: 'plant-cell', src: '/virtual-lab/plant-cell.webp', title: 'The plant cell', alt: '3D plant cell: cell wall, vacuole, chloroplasts, nucleus and mitochondria' },
+  { id: 'saturn-v', src: '/virtual-lab/saturn-v.webp', title: 'Saturn V rocket', alt: '3D Saturn V rocket with its three stages and the Apollo spacecraft labelled' },
+  { id: 'perseverance', src: '/virtual-lab/perseverance.webp', title: 'Perseverance Mars rover', alt: '3D Perseverance Mars rover with its cameras, robotic arm and rocker-bogie wheels labelled' },
+]
+
+export const VL_FEATURES = [
+  { h: 'Real technique, not just buttons', p: 'Students wear goggles, rinse the burette with the alkali, remove the funnel, expel the air bubble, swirl the flask and read the scale square-on. Skip a step and the readings change the way they would at a real bench.' },
+  { h: 'Every reading has an uncertainty', p: 'Burettes read to 0.05 cm³, micrometers have zero errors, meters settle and stopwatches need resetting. Students learn to record what the instrument shows, to the right precision.' },
+  { h: 'From bench to lab report', p: 'Each practical runs in the order of a school lab: plan, experiment, results table, graph with a line of best fit, analysis, conclusion and evaluation, then a printable report.' },
+  { h: 'Set up your own bench', p: 'Open the apparatus cupboard, carry each item to the bench and take the right reagents from the rack. Choosing the apparatus is part of the skill.' },
+  { h: 'Marked by teachers', p: 'Teachers assign practicals, see every action a student took, and mark the report with the rubric. Technique, readings and answers are checked automatically first.' },
+  { h: 'Works on modest devices', p: 'It runs in the browser on a laptop, tablet or phone, with a low-graphics mode and a clear 2D view for older devices. Nothing to install.' },
+]
+
+export const VL_KENYA = {
+  h2: 'Makes learning easy for KCSE and CBE science students',
+  intro: 'Many students meet a burette or a voltmeter for the first time in the exam room. The Smartious Virtual Lab lets them practise the same practical skills before they get there, as often as they like, with instant feedback on technique.',
+  items: [
+    ['Chemistry', 'Volumetric analysis by titration: rinsing, pipetting, reading the burette and getting concordant titres. Rates of reaction, energy changes from burning fuels and electrolysis.'],
+    ['Biology', 'Osmosis and diffusion, the effect of temperature on enzymes, photosynthesis and respiration. The 3D skeleton, skull, spine and joints for support and movement, plus the heart, eye, brain and cells.'],
+    ['Physics', 'Measuring with vernier calipers and micrometers, Ohm’s law, resistance of a wire, series and parallel circuits, lenses, pendulums and springs, and plotting and reading graphs.'],
+    ['CBE Junior and Senior School', 'Learners on the STEM pathway can explore a full laboratory in 3D: apparatus, safety and the scientific method, even where a school laboratory is shared or still being equipped.'],
+  ],
+  note: 'The Virtual Lab is a practice tool: it helps any student build practical skills, and it does not replace the practical work set by KNEC or any examination board.',
+}
+
+export const VL_CURRICULA = [
+  ['Cambridge IGCSE', 'Chemistry, Biology and Physics practicals, including the rates, energy, electrolysis, enzyme and photosynthesis investigations.'],
+  ['Cambridge AS & A Level Physics', '67 practicals across every chapter, from density and Young modulus to capacitors, magnetic fields and the Planck constant.'],
+  ['Pearson Edexcel', 'Core practical skills for International GCSE and International A Level sciences: measurement, uncertainty, graphs and evaluation.'],
+  ['IB Diploma', 'Practice for the scientific investigation (IA): data with uncertainties, processing, graphs and evaluation.'],
+]
+
+export const VL_FAQS = [
+  { q: 'What is the Smartious Virtual Lab?', a: 'An online science laboratory in 3D. Students carry out chemistry, physics and biology practicals step by step in the browser, record their own readings and write them up as a lab report. It also has 28 labelled 3D models, including a real human skeleton.' },
+  { q: 'Is the virtual lab free?', a: 'The acid–base titration and the 3D skeleton on this page are free for anyone, with no sign-up. The full lab, with all 78 practicals, saved work, lab reports and teacher marking, is included for Smartious students.' },
+  { q: 'Does it help with KCSE and CBE practicals?', a: 'Yes, as practice. Titration, rates of reaction, osmosis, enzymes, Ohm’s law and the skeleton are all part of secondary science in Kenya, and the lab lets students rehearse the technique and the calculations. It does not replace the practical work set by KNEC or any examination board.' },
+  { q: 'Do I need to download or install anything?', a: 'No. It runs in a modern browser on a computer, tablet or phone. If 3D graphics are not available, the same practical runs in a 2D view.' },
+  { q: 'How is it different from a simulation?', a: 'Most simulations let you change a number and watch a graph. Here you do the practical: fetch apparatus, follow safe technique and read instruments with real precision. Mistakes such as an unrinsed burette or reading the scale from above change your results, as they would at a real bench.' },
+  { q: 'Which curricula is it for?', a: 'Cambridge IGCSE and AS & A Level, Pearson Edexcel, the IB Diploma and secondary science in Kenya (KCSE and CBE). The skills — measurement, uncertainty, results tables, graphs and evaluation — are the same in every curriculum.' },
+  { q: 'Can teachers assign and mark practicals?', a: 'Yes. Smartious teachers assign practicals to a class, follow each student’s actions at the bench, and mark the report with a rubric. Technique, readings and numerical answers are checked automatically first.' },
+  { q: 'How do I get full access?', a: 'The Virtual Lab is part of Smartious online school and homeschool programmes. Book an assessment and our academic team will place your child in the right programme.' },
+]
+
+export const VL_CREDITS = 'The skeleton, skull, spine, hand, knee, heart, brain, organs and muscles are built from the Z-Anatomy atlas and BodyParts3D (CC BY-SA 4.0 and CC BY-SA 2.1 Japan); our converted models and these images are shared under the same licence. Spacecraft models are from NASA 3D Resources, used courtesy of NASA and not endorsed by NASA. The lab benches are Smartious’s own.'
+// Generated from shared/lab/experiments and lab/models/catalogue.js.
+export const VL_PRACTICALS = [ { "subject": "chemistry", "group": "Core practicals", "items": [ "Acid–base titration" ] }, { "subject": "chemistry", "group": "IGCSE · Rates of reaction", "items": [ "Concentration and rate: the disappearing cross", "Temperature and rate: the disappearing cross" ] }, { "subject": "chemistry", "group": "IGCSE · Energy changes", "items": [ "Energy from burning ethanol" ] }, { "subject": "chemistry", "group": "IGCSE · Electrolysis", "items": [ "Electrolysis of copper(II) sulfate" ] }, { "subject": "biology", "group": "Core practicals", "items": [ "Osmosis in potato tissue" ] }, { "subject": "biology", "group": "IGCSE · Plant nutrition", "items": [ "Light intensity and photosynthesis" ] }, { "subject": "biology", "group": "IGCSE · Enzymes", "items": [ "Temperature and amylase" ] }, { "subject": "biology", "group": "IGCSE · Movement into and out of cells", "items": [ "Diffusion into agar cubes" ] }, { "subject": "biology", "group": "IGCSE · Respiration", "items": [ "Temperature and respiration in yeast" ] }, { "subject": "physics", "group": "Core practicals", "items": [ "Ohm's law" ] }, { "subject": "physics", "group": "AS & A Level · Using apparatus", "items": [ "Density of water", "Spring constant of a spring", "Resistance of a metal wire", "Cylinder rolling down a ramp" ] }, { "subject": "physics", "group": "AS & A Level · Limitations and improvements", "items": [ "Cooling of water in a polystyrene cup", "Stretching a loaded rubber band", "Mass of a balanced metre rule" ] }, { "subject": "physics", "group": "AS & A Level · Kinematics and dynamics", "items": [ "Acceleration of connected masses", "Energy and amplitude of a pendulum", "Range of a horizontally launched ball", "Terminal velocity of balls falling through water" ] }, { "subject": "physics", "group": "AS & A Level · Forces, work and energy", "items": [ "Load position and the forces on beam supports", "Density of a metal sample", "Equilibrium of a pivoted wooden strip", "Kinetic energy and work against friction" ] }, { "subject": "physics", "group": "AS & A Level · Matter and materials", "items": [ "Young modulus of nylon", "Young modulus of steel using a spring", "Water pressure and flow rate" ] }, { "subject": "physics", "group": "AS & A Level · Electric current, potential difference and resistance", "items": [ "Power and resistance of a filament lamp", "Resistors in series", "Resistors in parallel" ] }, { "subject": "physics", "group": "AS & A Level · Resistance and resistivity", "items": [ "Resistivity of the metal of a wire", "Internal resistance of a dry cell", "Potential divider using a resistance wire" ] }, { "subject": "physics", "group": "AS & A Level · Waves", "items": [ "Stationary waves on a wire carrying a current", "Inverse-square law for light from a small lamp", "Focal length of a converging lens" ] }, { "subject": "physics", "group": "AS & A Level · Planning and data analysis", "items": [ "Planning data analysis: falling spheres", "Treatment of uncertainties: a simple pendulum", "Planning: acceleration down an inclined plane", "Acceleration of a trolley on an inclined plane", "Planning: current in an LDR and distance from a lamp", "Resistance of an LDR", "Planning: e.m.f. of a photovoltaic cell and absorber thickness" ] }, { "subject": "physics", "group": "AS & A Level · Circular motion and gravitational fields", "items": [ "Whirling bung: centripetal force", "The conical pendulum: period and height", "Conical pendulum: period and radius of the circle", "Planetary motion (simulation)", "Gravitational potential (simulation)" ] }, { "subject": "physics", "group": "AS & A Level · Oscillations and communications", "items": [ "Period of oscillation of a loaded steel blade", "Damped oscillations of a mass on a spring", "Mass on a spring: period and mass", "Attenuation of a signal in a coaxial cable" ] }, { "subject": "physics", "group": "AS & A Level · Thermal physics and ideal gases", "items": [ "The thermocouple", "Boyle’s law", "Planning an investigation into the specific latent heat of vaporisation of water", "Specific latent heat of vaporisation of water" ] }, { "subject": "physics", "group": "AS & A Level · Coulomb’s law, capacitance and electronics", "items": [ "Planning how the time for the p.d. across a capacitor to halve varies with resistance", "Capacitance of a capacitor from its discharge", "Planning how the peak current in a capacitor circuit varies with frequency", "Capacitance of a capacitor in an a.c. circuit", "Planning how the resistance of a thermistor varies with temperature", "Investigation into a non-inverting amplifier" ] }, { "subject": "physics", "group": "AS & A Level · Magnetic fields, electromagnetism and charged particles", "items": [ "Force on a wire in a magnetic field", "Planning: separation of two current-carrying foils", "Planning: field at the centre of a coil", "Field on the axis of a coil", "Specific charge of the electron" ] }, { "subject": "physics", "group": "AS & A Level · Electromagnetic induction and alternating currents", "items": [ "Planning: height of a levitating ring", "A magnet falling through a coil", "Planning: damping by eddy currents", "Planning: the iron core of a transformer", "Ripple voltage of a smoothed rectifier" ] }, { "subject": "physics", "group": "AS & A Level · Quantum physics, nuclear physics and medical imaging", "items": [ "Planck constant from LEDs", "Decay constant of protactinium", "Attenuation of an X-ray beam", "Larmor frequency of protons" ] } ]
+export const VL_MODELS = [{"id":"heart","subject":"biology","topic":"Transport in animals","title":"The human heart"},{"id":"skeleton","subject":"biology","topic":"Movement and support","title":"The human skeleton (real anatomical model)"},{"id":"real-heart","subject":"biology","topic":"Transport in animals","title":"The human heart (real anatomical model)"},{"id":"organs","subject":"biology","topic":"Human organ systems","title":"Organs of the chest and abdomen (real anatomical model)"},{"id":"brain","subject":"biology","topic":"Coordination and response","title":"The human brain (real anatomical model)"},{"id":"muscles","subject":"biology","topic":"Movement and support","title":"The muscular system (real anatomical model)"},{"id":"knee","subject":"biology","topic":"Movement and support","title":"The knee joint (real anatomical model)"},{"id":"hip","subject":"biology","topic":"Movement and support","title":"The hip joint (real anatomical model)"},{"id":"skull","subject":"biology","topic":"Movement and support","title":"The human skull (real anatomical model)"},{"id":"arm","subject":"biology","topic":"Movement and support","title":"The arm: biceps, triceps and elbow (real anatomical model)"},{"id":"spine","subject":"biology","topic":"Movement and support","title":"The vertebral column (real anatomical model)"},{"id":"hand","subject":"biology","topic":"Movement and support","title":"The hand and wrist (real anatomical model)"},{"id":"reflex-arc","subject":"biology","topic":"Coordination and response","title":"The reflex arc"},{"id":"gas-exchange","subject":"biology","topic":"Gas exchange in humans","title":"Breathing and gas exchange"},{"id":"female-reproductive","subject":"biology","topic":"Reproduction in humans","title":"The female reproductive system"},{"id":"male-reproductive","subject":"biology","topic":"Reproduction in humans","title":"The male reproductive system"},{"id":"eye","subject":"biology","topic":"Coordination and response","title":"The human eye"},{"id":"animal-cell","subject":"biology","topic":"Cell structure","title":"Animal cell"},{"id":"plant-cell","subject":"biology","topic":"Cell structure","title":"Plant cell"},{"id":"saturn-v","subject":"physics","topic":"Forces and motion: rockets","title":"Saturn V rocket"},{"id":"lunar-module","subject":"physics","topic":"Space exploration","title":"Apollo lunar module"},{"id":"perseverance","subject":"physics","topic":"Space exploration","title":"Perseverance Mars rover"},{"id":"curiosity","subject":"physics","topic":"Space exploration","title":"Curiosity Mars rover"},{"id":"ingenuity","subject":"physics","topic":"Space exploration","title":"Ingenuity Mars helicopter"},{"id":"iss","subject":"physics","topic":"Gravity and orbits","title":"International Space Station"},{"id":"hubble","subject":"physics","topic":"Space and telescopes","title":"Hubble Space Telescope"},{"id":"motor","subject":"physics","topic":"Electromagnetic effects","title":"D.C. electric motor"},{"id":"engine","subject":"physics","topic":"Energy and machines","title":"Four-stroke petrol engine"}]
