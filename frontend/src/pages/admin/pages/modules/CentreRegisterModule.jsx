@@ -46,7 +46,7 @@ export default function CentreRegisterModule({ toast }) {
         ...d,
         students: d.students.map(s => {
           const ms = marks.filter(m => String(m.studentId) === String(s.studentId))
-          if (!ms.length) return s
+          if (!ms.length || !s.lessons.length) return s
           const lessons = s.lessons.map(l => {
             const m = ms.find(x => !x.liveClassId || String(x.liveClassId) === String(l.liveClassId))
             return m ? { ...l, present: m.present } : l
@@ -63,7 +63,7 @@ export default function CentreRegisterModule({ toast }) {
 
   const students = (data?.students || []).filter(s => !q || s.name.toLowerCase().includes(q.toLowerCase()))
   const unmarked = (data?.students || []).filter(s => s.day === null)
-  const counts = (data?.students || []).reduce((a, s) => { a[s.day || 'unmarked']++; return a }, { present: 0, absent: 0, partial: 0, unmarked: 0 })
+  const counts = (data?.students || []).reduce((a, s) => { a[s.day || 'unmarked']++; return a }, { present: 0, absent: 0, partial: 0, unmarked: 0, none: 0 })
 
   return (
     <div>
@@ -90,12 +90,14 @@ export default function CentreRegisterModule({ toast }) {
           <span><b style={{ color: '#B91C1C' }}>{counts.absent}</b> absent</span>
           <span><b style={{ color: '#B45309' }}>{counts.partial}</b> part of the day</span>
           <span><b style={{ color: TOKENS.ink }}>{counts.unmarked}</b> not marked</span>
+          {counts.none > 0 && <span><b style={{ color: TOKENS.ink }}>{counts.none}</b> with no lessons on the timetable</span>}
+          <span style={{ marginLeft: 'auto' }}><b style={{ color: TOKENS.ink }}>{data.students.length}</b> centre students</span>
         </div>
       )}
 
       {loading ? <DOSSpinner /> : !students.length ? (
         <div style={{ padding: 30, textAlign: 'center', color: TOKENS.inkMute, background: '#fff', border: `1px solid ${TOKENS.line}`, borderRadius: 12 }}>
-          No in-person lessons on this day.
+          No centre students or in-person lessons on this day.
         </div>
       ) : (
         <div style={{ display: 'grid', gap: 10 }}>
@@ -106,7 +108,9 @@ export default function CentreRegisterModule({ toast }) {
                   <div style={{ fontWeight: 800, color: TOKENS.ink }}>{s.name}</div>
                   <div style={{ fontSize: 12, color: TOKENS.inkMute }}>{[s.grade, MODE[s.mode]].filter(Boolean).join(' · ')}{s.onBreak ? ' · on break' : ''}</div>
                 </div>
-                {data.canMark ? (
+                {!s.lessons.length ? (
+                  <span style={{ fontSize: 12, color: '#B45309', fontWeight: 700 }}>No lessons on the timetable this day</span>
+                ) : data.canMark ? (
                   <div style={{ display: 'flex', gap: 6 }}>
                     <button type="button" disabled={!!busy} style={pill(s.day === 'present', '#15803D')}
                       onClick={() => save([{ studentId: s.studentId, present: true }], s.studentId + 'p')}>Present</button>

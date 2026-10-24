@@ -37,7 +37,7 @@ function dayBounds(raw) {
   return { key: zonedDayKey(start, TZ), start, end }
 }
 
-/** Centre students with lessons that day, and the lessons in person for each. */
+/** Centre students for the day, and the lessons in person for each (may be none). */
 async function load(day) {
   const lessons = await LiveClass.find({
     kind: { $in: ['lesson', null] }, status: { $ne: 'cancelled' },
@@ -52,6 +52,13 @@ async function load(day) {
     const mine = lessons.filter(l => (l.assignedStudents || []).some(id => String(id) === String(st._id)) && inPersonLesson(l, st))
     if (mine.length) rows.push({ st, lessons: mine })
   }
+  // Every In-person student is on the register, lessons or not, so a
+  // student with no timetable that day is visible rather than missing.
+  // (Hybrid students appear only on days they have a lesson in person.)
+  const listed = new Set(rows.map(r => String(r.st._id)))
+  const centre = await User.find({ role: 'student', deliveryMode: 'In-person', archived: { $ne: true }, isActive: { $ne: false } })
+    .select('firstName lastName gradeLevel deliveryMode onBreak').lean()
+  for (const st of centre) if (!listed.has(String(st._id))) rows.push({ st, lessons: [] })
   return rows.sort((a, b) => (`${a.st.firstName} ${a.st.lastName}`).localeCompare(`${b.st.firstName} ${b.st.lastName}`))
 }
 
@@ -84,12 +91,15 @@ router.get('/', auth, requireRole(...STAFF), async (req, res) => {
         mode: learningMode(st),
         onBreak: !!st.onBreak,
         lessons: ls,
-        day: !marked.length ? null : marked.every(l => l.present) && marked.length === ls.length ? 'present'
+        // 'none' = no lessons that day, nothing to mark
+        day: !ls.length ? 'none' : !marked.length ? null : marked.every(l => l.present) && marked.length === ls.length ? 'present'
           : marked.every(l => !l.present) && marked.length === ls.length ? 'absent' : 'partial',
       }
     })
     const today = dayBounds().key
-    res.json({ success: true, data: { date: day.key, today, canMark: day.key <= today, students } })
+    const withLessons = students.filter(s => s.lessons.length).length
+    res.json({ success: true, data: { date: day.key, today, canMark: day.key <= today, students,
+      summary: { total: students.length, withLessons, withoutLessons: students.length - withLessons } } })
   } catch (e) { res.status(500).json({ success: false, message: e.message }) }
 })
 
@@ -105,7 +115,7 @@ router.post('/', auth, requireRole(...STAFF), async (req, res) => {
     let applied = 0
     for (const m of marks) {
       const lessons = byStudent.get(String(m?.studentId))
-      if (!lessons) continue
+      if (!lessons || !lessons.length) continue
       const targets = m.liveClassId ? lessons.filter(l => String(l._id) === String(m.liveClassId)) : lessons
       for (const l of targets) {
         await ClassroomSession.updateOne(
