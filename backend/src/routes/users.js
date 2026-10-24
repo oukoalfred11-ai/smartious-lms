@@ -477,16 +477,11 @@ router.patch('/teachers/:id/specialties', auth, requireRole('admin', 'ops_manage
     if (!Array.isArray(curricula) || !Array.isArray(subjectIds))
       return res.status(400).json({ success: false, message: 'curricula and subjectIds must be arrays.' });
 
-    const VALID = [
-      'CambridgePrimary','CambridgeLowerSec','CambridgeIGCSE','CambridgeALevel',
-      'EdexcelLowerSec','EdexcelIGCSE','EdexcelALevel',
-      'AQALowerSec','AQAGCSE','AQAALevel',
-      'IBPYP','IBMYP','IBDP',
-      'KenyaCBE','KCSE','KenyaCBC','BNC','American','Canadian',
-      // Legacy IDs — keep for backwards compatibility
-      'IB','IGCSE','A-Level','IB Diploma','IB MYP','Kenya CBC',
-    ];
+    const VALID = require('../constants/curriculum').TEACHER_CURRICULUM_IDS;
     const cleanCurricula = curricula.filter(c => VALID.includes(c));
+    const unknown = curricula.filter(c => !VALID.includes(c));
+    if (unknown.length)
+      return res.status(400).json({ success: false, message: `Unknown curriculum: ${unknown.join(', ')}.` });
     const cleanIds = subjectIds.filter(id => mongoose.isValidObjectId(id));
 
     // Empty is allowed — admin may want to clear specialties

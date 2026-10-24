@@ -106,15 +106,8 @@ router.post('/', auth, requireRole('admin', 'ops_manager'), async (req, res) => 
       });
     }
 
-    // Full 15-curriculum catalog — matches SCHOOL_CURRICULA in Dashboard.jsx
-    const validCurriculums = [
-      'CambridgePrimary', 'CambridgeLowerSec', 'CambridgeIGCSE', 'CambridgeALevel',
-      'EdexcelLowerSec',  'EdexcelIGCSE',      'EdexcelALevel',
-      'AQALowerSec',      'AQAGCSE',           'AQAALevel',
-      'IB', 'BNC', 'American', 'Canadian', 'KenyaCBE', 'KCSE', 'KenyaCBC',
-      // Legacy strings — kept so existing teacher data is not broken
-      'IGCSE', 'A-Level', 'IB Diploma', 'IB MYP', 'Kenya CBC',
-    ];
+    // Every curriculum in the catalogue (constants/curriculum.js), plus legacy codes.
+    const validCurriculums = require('../constants/curriculum').TEACHER_CURRICULUM_IDS;
     if (!req.body.curriculum || !validCurriculums.includes(req.body.curriculum)) {
       return res.status(400).json({
         success: false,

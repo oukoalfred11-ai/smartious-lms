@@ -391,7 +391,17 @@ const isSubjectValidForCurriculum = (subjectId, curriculumId) => {
 // validation still used the old one, which offered Accounting and
 // Travel & Tourism to Lower Secondary and knew nothing of EdexcelPrimary.
 // routes/curriculum.js now imports from here. Edit this file only.
+// Curricula a teacher record may carry: the catalogue above plus legacy codes
+// still on older records. Routes validate against this, not a hand-copied
+// list (a copied list once left out Edexcel iPrimary, which was then
+// silently dropped from teachers' specialities).
+const TEACHER_CURRICULUM_IDS = [
+  ...CURRICULA.map(c => c.id),
+  'KenyaCBC', 'IB', 'IGCSE', 'A-Level', 'IB Diploma', 'IB MYP', 'Kenya CBC', 'IUFP',
+];
+
 module.exports = {
+  TEACHER_CURRICULUM_IDS,
   CURRICULA,
   GRADES_BY_CURRICULUM,
   SUBJECTS,
