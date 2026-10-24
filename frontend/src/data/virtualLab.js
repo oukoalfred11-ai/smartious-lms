@@ -18,7 +18,7 @@ export const VL_PATH = '/virtual-lab'
 
 export const VL_META = {
   title: 'Virtual Lab | Free 3D Science Practicals Online | Smartious',
-  desc: 'Try the Smartious Virtual Lab free: a 3D titration done step by step, a labelled human skeleton and 3D models. 78 practicals for IGCSE, A-Level, KCSE and CBE.',
+  desc: 'Try the Smartious Virtual Lab free: a 3D titration step by step, a labelled human skeleton and 3D models. 78 practicals for IGCSE, A-Level, IB, KCSE and CBE.',
   ogImage: '/lab-images/virtual-lab-og.jpg',
 }
 
@@ -76,16 +76,30 @@ export const VL_KENYA = {
   note: 'The Virtual Lab is a practice tool: it helps any student build practical skills, and it does not replace the practical work set by KNEC or any examination board.',
 }
 
-export const VL_CURRICULA = [
-  ['Cambridge IGCSE', 'Chemistry, Biology and Physics practicals, including the rates, energy, electrolysis, enzyme and photosynthesis investigations.'],
-  ['Cambridge AS & A Level Physics', '67 practicals across every chapter, from density and Young modulus to capacitors, magnetic fields and the Planck constant.'],
-  ['Pearson Edexcel', 'Core practical skills for International GCSE and International A Level sciences: measurement, uncertainty, graphs and evaluation.'],
-  ['IB Diploma', 'Practice for the scientific investigation (IA): data with uncertainties, processing, graphs and evaluation.'],
-]
+// Exam names are the boards' own. Say the lab helps students prepare for
+// these papers; never that it is endorsed by Cambridge, Pearson or the IB.
+export const VL_INTERNATIONAL = {
+  h2: 'Makes practical exams easier for IGCSE, A Level and IB students',
+  intro: 'Practical papers reward skills that only come with practice: reading instruments to the right precision, drawing up a results table, plotting a graph with a line of best fit, finding a gradient and judging uncertainty. The Smartious Virtual Lab lets students rehearse every step of a practical, as often as they need, before the real exam.',
+  items: [
+    { h: 'Cambridge IGCSE', sub: 'Chemistry 0620 · Biology 0610 · Physics 0625', exam: 'Helps with Paper 5 (Practical Test) and Paper 6 (Alternative to Practical)',
+      p: 'Students carry out the investigations that come up again and again: rates of reaction with the disappearing cross, energy from burning ethanol, electrolysis of copper(II) sulfate, titration, light intensity and photosynthesis, temperature and amylase, diffusion into agar cubes, osmosis in potato and respiration in yeast. Each ends with a results table, a graph and the method, accuracy and improvement questions that Paper 6 asks.' },
+    { h: 'Pearson Edexcel International GCSE', sub: 'Chemistry · Biology · Physics', exam: 'Helps with the practical questions in the written papers',
+      p: 'Edexcel examines practical work through questions on method, readings, results and evaluation. Doing titration, rates, electrolysis, osmosis, enzymes, photosynthesis and Ohm’s law on a 3D bench gives students the first-hand experience those questions assume.' },
+    { h: 'Cambridge AS & A Level Physics', sub: '9702', exam: 'Helps with Paper 3 (Advanced Practical Skills) and Paper 5 (Planning, Analysis and Evaluation)',
+      p: '67 practicals across every chapter, from the spring constant and resistivity to capacitor discharge, magnetic fields and the Planck constant. Students read instruments to their real precision, deal with zero errors, process data into reciprocals or logarithms for a straight-line graph, draw best-fit and worst acceptable lines to find a gradient and its uncertainty, and write planning answers for the Paper 5 investigations. Chemistry students practise titration to concordant titres.' },
+    { h: 'Pearson Edexcel International A Level', sub: 'Physics · Chemistry · Biology', exam: 'Helps with the practical skills papers (Units 3 and 6 in Physics)',
+      p: 'The same skills the practical units test in writing: planning a method, taking measurements, calculating uncertainties, plotting and using graphs, and evaluating results, rehearsed on a full 3D bench instead of only on paper.' },
+    { h: 'IB Diploma Programme', sub: 'Biology · Chemistry · Physics', exam: 'Helps with the Internal Assessment: the scientific investigation, 20% of the final grade',
+      p: 'The IA is marked on research design, data analysis, conclusion and evaluation. In the lab, students collect real data with uncertainties, plot graphs with error bars and a gradient uncertainty from the worst acceptable line, and evaluate weaknesses and improvements: the habits a strong IA needs. The 78 practicals are also a source of tried and tested investigation ideas.' },
+  ],
+  note: 'Cambridge, Pearson Edexcel and the IB set and mark their own practical assessments. The Virtual Lab is practice that builds the skills those assessments test; it does not replace the practical work a school or examination board requires.',
+}
 
 export const VL_FAQS = [
   { q: 'What is the Smartious Virtual Lab?', a: 'An online science laboratory in 3D. Students carry out chemistry, physics and biology practicals step by step in the browser, record their own readings and write them up as a lab report. It also has 28 labelled 3D models, including a real human skeleton.' },
   { q: 'Is the virtual lab free?', a: 'The acid–base titration and the 3D skeleton on this page are free for anyone, with no sign-up. The full lab, with all 78 practicals, saved work, lab reports and teacher marking, is included for Smartious students.' },
+  { q: 'Does it help with IGCSE, A Level and IB practical exams?', a: 'Yes. It is practice for Cambridge IGCSE Paper 5 and Paper 6, Cambridge A Level Physics Papers 3 and 5, the Pearson Edexcel practical questions and papers, and the IB Internal Assessment: taking readings, results tables, graphs, gradients and uncertainties, and evaluation. It does not replace the practical work a school or examination board requires.' },
   { q: 'Does it help with KCSE and CBE practicals?', a: 'Yes, as practice. Titration, rates of reaction, osmosis, enzymes, Ohm’s law and the skeleton are all part of secondary science in Kenya, and the lab lets students rehearse the technique and the calculations. It does not replace the practical work set by KNEC or any examination board.' },
   { q: 'Do I need to download or install anything?', a: 'No. It runs in a modern browser on a computer, tablet or phone. If 3D graphics are not available, the same practical runs in a 2D view.' },
   { q: 'How is it different from a simulation?', a: 'Most simulations let you change a number and watch a graph. Here you do the practical: fetch apparatus, follow safe technique and read instruments with real precision. Mistakes such as an unrinsed burette or reading the scale from above change your results, as they would at a real bench.' },
