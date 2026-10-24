@@ -209,6 +209,10 @@ mongoose.connect(MONGODB_URI)
     // students' pre-cutover days, which are their attendance history).
     require('./lib/purgeCheckins').purgeOldCheckins().catch(e => console.error('[checkin] purge', e.message));
 
+    // Students who graduated or left before lib/studentExit existed are
+    // still on upcoming lessons; take them off (idempotent).
+    require('./lib/studentExit').detachAllLeavers().catch(e => console.error('[leavers] detach', e.message));
+
     // Invoice reminder scheduler: chases unpaid invoices three days
     // before each service period ends, skipping students on a break.
     startReminderScheduler();

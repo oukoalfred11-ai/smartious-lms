@@ -45,7 +45,7 @@ async function load(day) {
   }).select('subject title scheduledAt durationMins deliveryMode assignedStudents teacherId outcome')
     .populate('teacherId', 'firstName lastName').sort({ scheduledAt: 1 }).lean()
   const ids = [...new Set(lessons.flatMap(l => (l.assignedStudents || []).map(String)))]
-  const students = ids.length ? await User.find({ _id: { $in: ids }, role: 'student', archived: { $ne: true } })
+  const students = ids.length ? await User.find({ _id: { $in: ids }, role: 'student', archived: { $ne: true }, studentStatus: { $nin: ['Graduated', 'Removed'] } })
     .select('firstName lastName gradeLevel deliveryMode onBreak').lean() : []
   const rows = []
   for (const st of students) {
@@ -56,7 +56,7 @@ async function load(day) {
   // student with no timetable that day is visible rather than missing.
   // (Hybrid students appear only on days they have a lesson in person.)
   const listed = new Set(rows.map(r => String(r.st._id)))
-  const centre = await User.find({ role: 'student', deliveryMode: 'In-person', archived: { $ne: true }, isActive: { $ne: false } })
+  const centre = await User.find({ role: 'student', deliveryMode: 'In-person', archived: { $ne: true }, isActive: { $ne: false }, studentStatus: { $nin: ['Graduated', 'Removed'] } })
     .select('firstName lastName gradeLevel deliveryMode onBreak').lean()
   for (const st of centre) if (!listed.has(String(st._id))) rows.push({ st, lessons: [] })
   return rows.sort((a, b) => (`${a.st.firstName} ${a.st.lastName}`).localeCompare(`${b.st.firstName} ${b.st.lastName}`))
