@@ -28,6 +28,10 @@ The full atlas (`Startup.blend` in `Z-Anatomy.zip` from https://github.com/Z-Ana
 
     python3 -I blend2glb.py $B knee.glb --root "1: Skeletal system" --root "3: Joints" --crop-y 0.33,0.53 --name "^(Femur|Tibia|Fibula|Patella|Anterior cruciate ligament|Posterior cruciate ligament|Lateral meniscus|Medial meniscus|Superficial part of tibial collateral ligament|Deep part of tibial collateral ligament|Transverse ligament of knee|Articular capsule of knee joint|Oblique popliteal ligament|Arcuate popliteal ligament|Popliteofibular ligament|Meniscopatellar ligament|.*meniscotibial ligament.*|Anterior ligament of fibular head|Posterior ligament of fibular head)\.r$"
     python3 -I blend2glb.py $B hip.glb --root "1: Skeletal system" --root "3: Joints" --crop-y 0.66,1.3 --name "^(Femur|Hip bone|Acetabular labrum|Articular capsule of hip joint|Descending part of iliofemoral ligament|Transverse part of iliofemoral ligament|Ischiofemoral ligament|Ligament of head of femur|Pubofemoral ligament|Transverse acetabular ligament)\.r$"
+    python3 -I blend2glb.py $B skull.glb --root "1: Skeletal system" --crop-y 1.45,2.0 --exclude "^(Atlas|Axis|Vertebra|Arytenoid|Corniculate|Cricoid|Thyroid cartilage|Hyoid|Malleus|Incus|Stapes|Anterior cells|Middle cells|Posterior cells|Sinus of)"
+
+(The ear ossicles are left out of the skull to be safe: Z-Anatomy's inner-ear model is non-commercial and it is not
+clear which ear structures come from it.)
 
 `--crop-y` cuts the meshes at two heights (triangles are clipped exactly at the planes), so a joint can be shown
 without the whole length of its bones.
