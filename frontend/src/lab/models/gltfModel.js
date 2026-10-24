@@ -11,22 +11,27 @@
  *                                   overrides the automatic label point; anchorFrom (RegExp) picks
  *                                   which matched meshes the automatic point is taken from (e.g. /\.l$/
  *                                   for one of a pair, so the label does not point between them);
- *                                   side (+1 / −1) keeps only meshes on that side of the model (by position)
+ *                                   side (+1 / −1) keeps only meshes on that side of the model (by position);
+ *                                   at (0…1) instead puts the label on the front surface at that fraction of
+ *                                   the model's height, for parts that are not separate meshes in the file
  *     size = 0.5,                   longest side after fitting, in metres
  *     rotate = [0, 0, 0],           turn the file's own axes (radians) before fitting
  *     view, status, animateLabel,   as in kit.js
  *     cutaway: { normal, at },      optional cut: keep the side the normal points to, the fraction
  *                                   `at` (0…1) of the model's depth measured from that side
  *     materials: (mesh) => void,    optional fix-ups (e.g. make a membrane see-through)
+ *     animations = true,            false: ignore animation clips stored in the file
+ *     pose: seconds | 'end',        optional: hold the file's animations at that time (or their last frame)
  *   }) → build()                    the same contract as the models built in code (kit.js)
  *
- * Files compressed with meshopt (gltfpack -cc, or gltf-transform meshopt) load as well.
+ * Files compressed with meshopt (gltfpack -cc, or gltf-transform meshopt) or Draco load as well.
  * Every file used must come with a licence that allows it, and its credit is shown on
  * the model's page (catalogue.js: credit).
  */
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js'
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import { clipper } from './kit.js'
 
 // three.js tidies node names (spaces → _, dots removed); the file's own name is kept in userData.name.
@@ -67,12 +72,35 @@ function labelPoint(meshes, root, centre, plane = null) {
   return root.worldToLocal(best || c).toArray()
 }
 
+// Draco-compressed files (e.g. NASA's): the decoder (public/draco/, Apache 2.0)
+// is fetched only when such a file is opened, and shared by every load.
+let draco = null
+const dracoLoader = () => (draco ||= new DRACOLoader().setDecoderPath('/draco/'))
+
+// A point on the front (+z) surface at a fraction of the model's height: for
+// parts that are not separate meshes in the file (e.g. a rocket's stages).
+function frontPoint(meshes, root, f) {
+  const box = new THREE.Box3().setFromObject(root)
+  const c = box.getCenter(new THREE.Vector3())
+  const y = box.min.y + f * (box.max.y - box.min.y)
+  const ray = new THREE.Raycaster(new THREE.Vector3(c.x, y, box.max.z + 1), new THREE.Vector3(0, 0, -1))
+  const hit = ray.intersectObjects(meshes, false)[0]
+  return root.worldToLocal(hit ? hit.point : new THREE.Vector3(c.x, y, c.z)).toArray()
+}
+
 export function fromGLTF(spec) {
   return async function build({ onProgress } = {}) {
     const loader = new GLTFLoader()
     loader.setMeshoptDecoder(MeshoptDecoder)
+    loader.setDRACOLoader(dracoLoader())
     const gltf = await loader.loadAsync(spec.url, (e) => { if (onProgress && e.total) onProgress(e.loaded / e.total, e.total) })
     const scene = gltf.scene
+    if (spec.pose != null && gltf.animations?.length) {
+      // Hold the file's animations at one moment (e.g. a rover with its mast raised).
+      const mx = new THREE.AnimationMixer(scene)
+      for (const clip of gltf.animations) { const a = mx.clipAction(clip); a.setLoop(THREE.LoopOnce); a.clampWhenFinished = true; a.play() }
+      mx.update(spec.pose === 'end' ? Math.max(...gltf.animations.map(c => c.duration)) : spec.pose)
+    }
     const root = new THREE.Group()
     const holder = new THREE.Group()
     holder.rotation.set(...(spec.rotate || [0, 0, 0]))
@@ -104,6 +132,12 @@ export function fromGLTF(spec) {
     }
     const parts = []
     for (const p of spec.parts) {
+      if (p.at != null) {
+        // Placed by height: highlights the matched meshes, if any.
+        const objects = p.match || p.material ? partMeshes(meshes, p) : []
+        parts.push({ id: p.id, name: p.name, info: p.info, objects, anchor: frontPoint(objects.length ? objects : meshes, root, p.at) })
+        continue
+      }
       const objects = partMeshes(meshes, p)
       if (!objects.length) { console.warn('[models] no mesh matches part', p.id, 'in', spec.url); continue }
       let from = p.anchorFrom ? objects.filter(m => matches(m, p.anchorFrom)) : objects
@@ -117,7 +151,7 @@ export function fromGLTF(spec) {
 
     // Animation stored in the file (if any) plays with the Animate button.
     let mixer = null
-    if (gltf.animations?.length) {
+    if (gltf.animations?.length && spec.animations !== false && spec.pose == null) {
       mixer = new THREE.AnimationMixer(scene)
       for (const clip of gltf.animations) mixer.clipAction(clip).play()
     }

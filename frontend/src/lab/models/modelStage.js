@@ -99,6 +99,8 @@ export function createModelStage(container, { onSelect = () => {}, low = false }
     const cutAway = (h) => (h.object.material?.clippingPlanes || []).some(pl => pl.distanceToPoint(h.point) < 0)
     const hits = raycaster.intersectObject(model.root, true).filter(h => h.object.visible && !(h.object.material?.transparent && h.object.material.opacity < 0.5) && !cutAway(h))
     if (!hits.length) return false
+    // A part placed on a surface without meshes of its own: hidden only by something clearly in front.
+    if (!part.objects.length) return hits[0].distance < dist - 0.02
     const mine = new Set(); for (const o of part.objects) o.traverse(x => mine.add(x))
     return !mine.has(hits[0].object)
   }
