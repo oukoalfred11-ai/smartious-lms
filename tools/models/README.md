@@ -12,6 +12,9 @@ models in `frontend/public/models/` for the Virtual Lab's 3D models library.
   Options: `--list` (print the collections and objects), `--root NAME` / `--collection RE` (what to export),
   `--name RE` / `--exclude RE` / `--material RE` (filter objects), `--simplify MM` (vertex clustering),
   `--skip-render-hidden`, `--include-insertions`.
+- `glb_patch_images.py IN.glb OUT.glb 'IMAGE:x0,y0,x1,y1:sx,sy' ...` — paints rectangles over a .glb's textures (every
+  copy of the named image, e.g. a WebP and its JPEG fallback) with the colour sampled at (sx, sy), and repacks the file (needs Pillow).
+  Used to remove the NASA and JPL logos: see `frontend/public/models/LICENSE-nasa.txt`.
 
 The skeleton: `python3 -I blend2glb.py Z-Biomechanics/Startup.blend skeleton.glb --skip-render-hidden`.
 

@@ -1,0 +1,13 @@
+saturn-v-v1.glb, apollo-lunar-module-v1.glb, perseverance-v1.glb, ingenuity-v1.glb
+— spacecraft models used in the Smartious Virtual Lab (/lab/models)
+
+Source: NASA 3D Resources, https://github.com/nasa/NASA-3D-Resources
+  ("Saturn V", "Apollo Lunar Module", "Mars 2020 Perseverance Rover", "Ingenuity Mars Helicopter")
+NASA describes these assets as "free and without copyright". Credit: NASA.
+
+Use follows NASA's media usage guidelines (https://www.nasa.gov/nasa-brand-center/images-and-media/):
+Smartious is not endorsed by NASA, and the models are used for education only.
+The NASA insignia ("meatball") and logotype ("worm") and the JPL logo, whose use is
+restricted, were painted out of the textures of perseverance-v1.glb and ingenuity-v1.glb
+(tools/models/glb_patch_images.py). saturn-v-v1.glb and apollo-lunar-module-v1.glb are
+NASA's files unchanged. The labels and descriptions shown in the lab are Smartious's own.
