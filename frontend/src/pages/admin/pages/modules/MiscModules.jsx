@@ -84,39 +84,71 @@ export function LeaveModule({ refreshKey, toast }) {
   )
 }
 
-// Fees are shown to the Principal (admin) and Finance only.
+// Students per programme come live from each student's `programme`; fees
+// (this year's invoices) are shown to the Principal (admin) and Finance only.
+const PROGRAMME_INFO = {
+  'Homeschool':     'Full-time live online schooling on the student\'s curriculum.',
+  'Tuition':        'One-to-one and small-group tuition in chosen subjects.',
+  'IUFP':           'International University Foundation Programme: academic English and subject foundations for degree study abroad.',
+  'Study Abroad':   'Advisory: university selection, applications, scholarships and visa guidance.',
+  'Pre-University': 'Advisory: preparation and guidance before university entry.',
+  '':               'Students whose programme has not been set on their profile.',
+}
+const fmtMoney = (n, cur) => cur === 'KES' ? fmtKsh(n) : cur + ' ' + Math.round(n || 0).toLocaleString('en-US')
+
 export function ProgrammesModule({ refreshKey, toast, showFees = false }) {
+  const [data, setData] = useState(null)
+  const [error, setError] = useState('')
+  useEffect(() => {
+    setError('')
+    api.get('/users/programmes-summary')
+      .then(res => { if (res.data?.success) setData(res.data); else setError(res.data?.message || 'Could not load programmes.') })
+      .catch(e => setError(e.response?.data?.message || 'Could not load programmes.'))
+  }, [refreshKey])
+
+  const rows = data?.programmes || []
+  const named = rows.filter(r => r.programme)
+  const unset = rows.find(r => !r.programme)
+  const total = rows.reduce((a, r) => a + r.active, 0)
+  const sum = (names) => rows.filter(r => names.includes(r.programme)).reduce((a, r) => a + r.active, 0)
+  const feesFor = (programme) => (data?.fees || []).filter(f => f.programme === programme)
+  const year = data?.since ? new Date(data.since).getUTCFullYear() : new Date().getFullYear()
+  const show = [...named, ...(unset && (unset.active || unset.inactive) ? [unset] : [])]
+
   return (
     <>
-      <PSection tag="Programmes" title="IUFP &" em="Study Abroad" sub="International foundation pathways and university preparation"/>
+      <PSection tag="Programmes" title="Programmes &" em="Enrolment" sub="Active students in each Smartious programme, counted live from student profiles"/>
+      {error && <PCard><div style={{ color: '#991B1B', fontSize: 13 }}>{error}</div></PCard>}
       <div style={{ display: 'flex', gap: 14, marginBottom: 28, flexWrap: 'wrap' }}>
-        <PKpi label="Programmes" value="3"/>
-        <PKpi label="Enrolled" value="42"/>
-        <PKpi label="Partner Universities" value="12"/>
-        <PKpi label="Placement Rate" value="87%"/>
+        <PKpi label="Active students" value={data ? total : '…'}/>
+        <PKpi label="Academic (Homeschool, Tuition, IUFP)" value={data ? sum(['Homeschool', 'Tuition', 'IUFP']) : '…'}/>
+        <PKpi label="Advisory (Study Abroad, Pre-University)" value={data ? sum(['Study Abroad', 'Pre-University']) : '…'}/>
+        <PKpi label="Programme not set" value={data ? (unset?.active || 0) : '…'} deltaColor={unset?.active ? TOKENS.accentAmber : undefined}/>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
-        {[
-          { name: 'IUFP — UK Pathway', desc: 'University foundation for UK universities', enrolled: 18, fee: 250000 },
-          { name: 'IUFP — North America', desc: 'College prep for US/Canada admissions', enrolled: 14, fee: 280000 },
-          { name: 'IUFP — Australia/NZ', desc: 'Foundation pathway to Aus/NZ', enrolled: 10, fee: 230000 },
-        ].map(p => (
-          <PCard key={p.name} accent={TOKENS.accentPurple}>
+        {show.map(p => (
+          <PCard key={p.programme || 'unset'} accent={p.programme ? TOKENS.accentPurple : TOKENS.accentAmber}>
             <div style={{ fontSize: 11, fontWeight: 700, color: TOKENS.gold, letterSpacing: '.08em', marginBottom: 6, textTransform: 'uppercase' }}>Programme</div>
-            <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 19, color: TOKENS.s900, marginBottom: 6, fontWeight: 600 }}>{p.name}</h3>
-            <div style={{ fontSize: 13, color: TOKENS.s500, lineHeight: 1.6, marginBottom: 14 }}>{p.desc}</div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 12, borderTop: '1px solid ' + TOKENS.s100 }}>
-              <div>
-                <div style={{ fontSize: 10, color: TOKENS.s500, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase' }}>Enrolled</div>
-                <div style={{ fontSize: 17, fontWeight: 700, color: TOKENS.s900 }}>{p.enrolled}</div>
-              </div>
-              {showFees && (
-              <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: 10, color: TOKENS.s500, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase' }}>Annual Fee</div>
-                  <div style={{ fontSize: 17, fontWeight: 700, color: TOKENS.crimson, fontFamily: 'JetBrains Mono, monospace' }}>{fmtKsh(p.fee)}</div>
+            <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 19, color: TOKENS.s900, marginBottom: 6, fontWeight: 600 }}>{p.programme || 'Not set'}</h3>
+            <div style={{ fontSize: 13, color: TOKENS.s500, lineHeight: 1.6, marginBottom: 14 }}>{PROGRAMME_INFO[p.programme]}</div>
+            <div style={{ display: 'flex', gap: 18, paddingTop: 12, borderTop: '1px solid ' + TOKENS.s100 }}>
+              {[['Active', p.active], ['Inactive', p.inactive], ['Joined ' + year, p.newThisYear]].map(([k, v]) => (
+                <div key={k}>
+                  <div style={{ fontSize: 10, color: TOKENS.s500, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase' }}>{k}</div>
+                  <div style={{ fontSize: 17, fontWeight: 700, color: TOKENS.s900 }}>{v}</div>
                 </div>
-              )}
+              ))}
             </div>
+            {showFees && (
+              <div style={{ paddingTop: 12, marginTop: 12, borderTop: '1px solid ' + TOKENS.s100 }}>
+                <div style={{ fontSize: 10, color: TOKENS.s500, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: 4 }}>Invoiced in {year} · paid</div>
+                {feesFor(p.programme).length ? feesFor(p.programme).map(f => (
+                  <div key={f.currency} style={{ fontSize: 14, fontWeight: 700, color: TOKENS.crimson, fontFamily: 'JetBrains Mono, monospace' }}>
+                    {fmtMoney(f.invoiced, f.currency)} <span style={{ color: TOKENS.s500, fontWeight: 600 }}>· {fmtMoney(f.paid, f.currency)}</span>
+                  </div>
+                )) : <div style={{ fontSize: 13, color: TOKENS.s500 }}>No invoices this year</div>}
+              </div>
+            )}
           </PCard>
         ))}
       </div>
