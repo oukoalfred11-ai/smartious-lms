@@ -194,3 +194,48 @@ export const skull = fromGLTF({
   ],
   status: () => 'The skull: the cranium protects the brain, and the facial bones shape the face. Its bones are joined by sutures, joints that cannot move; only the mandible moves.',
 })
+
+// The right arm from the shoulder blade to the forearm, with the biceps and
+// triceps: an antagonistic pair working the elbow, a hinge joint (--crop-y).
+export const arm = fromGLTF({
+  url: '/models/arm-v1.glb',
+  size: 0.6,
+  view: { yaw: -1.35, pitch: 0.1 },   // from the outer side, so the biceps and triceps both show
+  materials: (m) => {
+    const kind = kindOf(m)
+    if (kind === 'Ligament') { m.material = m.material.clone(); m.material.color.set('#D9A441') }
+    if (kind === 'Articular capsule') {
+      m.material = m.material.clone()
+      Object.assign(m.material, { transparent: true, opacity: 0.25, depthWrite: false, side: THREE.DoubleSide })
+      m.material.color.set('#8FC1E3')
+    }
+  },
+  parts: [
+    { id: 'biceps', at: 0.6, name: 'Biceps', match: /biceps brachii/, info: 'At the front of the upper arm. When it contracts it pulls on the radius and bends (flexes) the arm at the elbow, while the triceps relaxes.' },
+    { id: 'triceps', at: 0.66, name: 'Triceps', match: /triceps brachii/, info: 'At the back of the upper arm. When it contracts it pulls on the ulna and straightens (extends) the arm, while the biceps relaxes. Muscles can only pull, so they work in antagonistic pairs.' },
+    { id: 'brachialis', at: 0.42, name: 'Brachialis', match: /^Brachialis/, info: 'Lies under the biceps and helps it bend the elbow.' },
+    { id: 'humerus', at: 0.78, name: 'Humerus', match: /^Humerus/, info: 'The bone of the upper arm, from the shoulder to the elbow.' },
+    { id: 'scapula', name: 'Scapula (shoulder blade)', match: /^Scapula/, info: 'The biceps and triceps are attached to it at the top; its socket forms the shoulder joint with the humerus.' },
+    { id: 'radius', at: 0.12, name: 'Radius', match: /^Radius/, info: 'The forearm bone on the thumb side. The biceps tendon is attached to it.' },
+    { id: 'ulna', at: 0.2, name: 'Ulna', match: /^Ulna/, info: 'The forearm bone on the little-finger side. The triceps tendon is attached to its point at the back of the elbow.' },
+    { id: 'elbow', name: 'Elbow joint', match: /elbow joint|collateral ligament|^Annular ligament/, info: 'A hinge joint between the humerus, radius and ulna, held by ligaments inside a capsule of synovial fluid. It bends and straightens in one direction.' },
+  ],
+  status: () => 'Muscles are attached to bones by tendons. The biceps and triceps are an antagonistic pair: as one contracts, the other relaxes, and the arm bends or straightens at the elbow.',
+})
+
+// The vertebral column with its intervertebral discs.
+export const spine = fromGLTF({
+  url: '/models/spine-v1.glb',
+  size: 0.8,
+  view: { yaw: 1.25, pitch: 0.08 },   // from the side, to show its S-shaped curves
+  parts: [
+    { id: 'atlas', name: 'Atlas and axis (C1, C2)', match: /^(Atlas|Axis)/, info: 'The top two vertebrae. The skull nods on the atlas, and the atlas turns on the axis when you shake your head.' },
+    { id: 'cervical', at: 0.88, name: 'Cervical vertebrae', match: /^Vertebra C\d$/, info: 'Seven small vertebrae of the neck (C1–C7), which let the head move freely.' },
+    { id: 'thoracic', at: 0.62, name: 'Thoracic vertebrae', match: /^Vertebra T\d+$/, info: 'Twelve vertebrae of the chest (T1–T12); each is joined to a pair of ribs.' },
+    { id: 'lumbar', name: 'Lumbar vertebrae', match: /^Vertebra L\d$/, info: 'Five large, strong vertebrae of the lower back (L1–L5) that carry most of the body’s weight.' },
+    { id: 'sacrum', name: 'Sacrum', match: /^Sacrum$/, info: 'Five vertebrae fused into one bone, which joins the spine to the pelvis.' },
+    { id: 'coccyx', name: 'Coccyx', match: /^Coccyx$/, info: 'The tail bone: a few small fused vertebrae at the base of the spine.' },
+    { id: 'discs', at: 0.3, name: 'Intervertebral discs', match: /^Intervertebral disc/, info: 'Pads of cartilage between the vertebrae. They absorb shock and let the spine bend; the joints between vertebrae are slightly movable.' },
+  ],
+  status: () => 'The vertebral column has 33 vertebrae. It supports the head and body, lets the back bend and twist, and protects the spinal cord, which runs through the hole in each vertebra.',
+})

@@ -6,14 +6,15 @@
  *     parts: [{ id, name, info, match?, material?, not?, anchor?, anchorFrom?, side? }],
  *                                   match: a RegExp tested on each mesh's name (and its parents'),
  *                                   or a list of exact names; material (RegExp) matches the Z-Anatomy
- *                                   material kept in the node's extras; not (RegExp) leaves names out;
+ *                                   material kept in the node's extras (or the mesh's material name); not (RegExp) leaves names out;
  *                                   anchor (optional, root coordinates)
  *                                   overrides the automatic label point; anchorFrom (RegExp) picks
  *                                   which matched meshes the automatic point is taken from (e.g. /\.l$/
  *                                   for one of a pair, so the label does not point between them);
  *                                   side (+1 / −1) keeps only meshes on that side of the model (by position);
  *                                   centreOf (RegExp): put the label at the centre of those meshes (e.g. a socket);
- *                                   at (0…1) puts the label on the front of the part's meshes at that fraction
+ *                                   at (0…1) puts the label on the part's meshes, on the side the model is first
+ *                                   seen from (view.yaw), at that fraction
  *                                   of the model's height; with no match, on the model's front (for parts that
  *                                   are not separate meshes in the file, e.g. a rocket's stages)
  *     size = 0.5,                   longest side after fitting, in metres
@@ -45,8 +46,9 @@ const matches = (o, match) => {
   const names = nameChain(o)
   return Array.isArray(match) ? names.some(n => match.includes(n)) : names.some(n => match.test(n))
 }
-// Extra data written by tools/models/blend2glb.py (the Z-Anatomy material of each object).
-const materialOf = (o) => { while (o) { if (o.userData?.material) return o.userData.material; o = o.parent } return '' }
+// Extra data written by tools/models/blend2glb.py (the Z-Anatomy material of each object),
+// or else the mesh's own material name (files from elsewhere).
+const materialOf = (m) => { for (let o = m; o; o = o.parent) if (o.userData?.material) return o.userData.material; return m.material?.name || '' }
 /** A part's meshes: by name (match), by Z-Anatomy material (material), minus names matching `not`. */
 const partMeshes = (meshes, p) => meshes.filter(m => (!p.match || matches(m, p.match)) && (!p.material || p.material.test(materialOf(m))) && !(p.not && matches(m, p.not)))
 
@@ -84,16 +86,19 @@ const dracoLoader = () => (draco ||= new DRACOLoader().setDecoderPath('/draco/')
 
 // A point on the front (+z) surface at a fraction of the model's height: for
 // parts that are not separate meshes in the file (e.g. a rocket's stages).
-function frontPoint(meshes, root, f) {
+function frontPoint(meshes, root, f, yaw = 0) {
   const box = new THREE.Box3().setFromObject(root)
-  // Aim at the middle of these meshes (left to right), at that height of the whole model.
+  // Aim at the middle of these meshes, at that height of the whole model, from the side the
+  // model is first seen from (its view's yaw).
   const mid = new THREE.Box3()
   for (const m of meshes) mid.expandByObject(m)
-  const x = mid.getCenter(new THREE.Vector3()).x
+  const c = mid.getCenter(new THREE.Vector3())
   const y = box.min.y + f * (box.max.y - box.min.y)
-  const ray = new THREE.Raycaster(new THREE.Vector3(x, y, box.max.z + 1), new THREE.Vector3(0, 0, -1))
+  const dir = new THREE.Vector3(Math.sin(yaw), 0, Math.cos(yaw))
+  const far = box.getSize(new THREE.Vector3()).length() + 1
+  const ray = new THREE.Raycaster(new THREE.Vector3(c.x, y, c.z).addScaledVector(dir, far), dir.clone().negate())
   const hit = ray.intersectObjects(meshes, false)[0]
-  return root.worldToLocal(hit ? hit.point : new THREE.Vector3(x, y, mid.getCenter(new THREE.Vector3()).z)).toArray()
+  return root.worldToLocal(hit ? hit.point : new THREE.Vector3(c.x, y, c.z)).toArray()
 }
 
 export function fromGLTF(spec) {
@@ -142,7 +147,7 @@ export function fromGLTF(spec) {
     for (const p of spec.parts) {
       if (p.at != null && !p.match && !p.material) {
         // Placed only by height (not separate meshes in the file): nothing to highlight.
-        parts.push({ id: p.id, name: p.name, info: p.info, objects: [], anchor: p.anchor || frontPoint(meshes, root, p.at) })
+        parts.push({ id: p.id, name: p.name, info: p.info, objects: [], anchor: p.anchor || frontPoint(meshes, root, p.at, spec.view?.yaw) })
         continue
       }
       const objects = partMeshes(meshes, p)
@@ -157,7 +162,7 @@ export function fromGLTF(spec) {
       const centreOf = p.centreOf && meshes.filter(m => matches(m, p.centreOf))
       const anchor = p.anchor
         || (centreOf?.length ? root.worldToLocal(centreOf.reduce((b, m) => b.expandByObject(m), new THREE.Box3()).getCenter(new THREE.Vector3())).toArray() : null)
-        || (p.at != null ? frontPoint(pick, root, p.at) : labelPoint(pick, root, centre, cut?.plane))
+        || (p.at != null ? frontPoint(pick, root, p.at, spec.view?.yaw) : labelPoint(pick, root, centre, cut?.plane))
       parts.push({ id: p.id, name: p.name, info: p.info, objects, anchor })
     }
 
