@@ -69,7 +69,7 @@ async function runDailyTimetable(now = new Date()) {
   if (!t) return 0
   const { start, end, key } = tomorrow(now)
   const students = await User.find({
-    ...CENTRE_STUDENT_FILTER, isActive: true, archived: { $ne: true }, onBreak: { $ne: true },
+    ...CENTRE_STUDENT_FILTER, isActive: true, archived: { $ne: true }, onBreak: { $ne: true }, studentStatus: { $nin: ['Graduated', 'Removed'] },
     timetableEmailedFor: { $ne: key },
   }).select('firstName lastName email emailPrefs parentEmail linkedParents parentId parentName onBreak timezone deliveryMode').lean()
   if (!students.length) return 0

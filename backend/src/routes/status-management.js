@@ -37,6 +37,10 @@ router.patch('/:id/student-status', auth, requireRole('admin', 'ops_manager'), a
 
     await student.save();
 
+    // Graduated or removed: off every upcoming lesson and timetable slot.
+    const exit = require('../lib/studentExit');
+    if (exit.LEFT_STATUSES.includes(newStatus)) await exit.detachFromSchedule([student._id]);
+
     // When student becomes inactive, handle linked parents
     if (oldStatus === 'Active' && newStatus !== 'Active') {
       // Check each linked parent

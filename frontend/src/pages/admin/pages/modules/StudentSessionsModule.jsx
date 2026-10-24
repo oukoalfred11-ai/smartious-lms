@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { api } from '../../../../context/ctx.jsx'
 import { TOKENS } from '../shared/tokens.js'
 import { PCard } from '../shared/ui.jsx'
+import LeaversPanel from './LeaversPanel.jsx'
 
 /**
  * StudentSessionsModule
@@ -193,12 +194,15 @@ function StudentSessionsModule({ toast, refreshKey }) {
         )}
       </div>
 
+      {/* ── Leavers and alumni (reloads with the years data after an exit, reinstatement or promotion) ── */}
+      <LeaversPanel refreshKey={refreshKey} reloadOn={yearsData} />
+
       {/* ── Exit modal: left or graduated ── */}
       {exiting && (
         <div onClick={() => setExiting(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 90, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 14 }}>
           <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 14, width: 'min(430px,100%)', padding: 20, display: 'grid', gap: 10 }}>
             <b style={{ fontSize: 15, color: TOKENS.s900 }}>{exiting.kind === 'graduated' ? 'Mark graduated' : 'Mark as left'} \u00b7 {exiting.s.firstName} {exiting.s.lastName}</b>
-            <div style={{ fontSize: 11.5, color: TOKENS.s500 }}>Archives the student: they leave rosters, timetables, portals and the users list, every record stays, and an exit email goes to the student and their parents. Parents with no other active child are archived too. Reinstate any time from the Archived view.</div>
+            <div style={{ fontSize: 11.5, color: TOKENS.s500 }}>Archives the student: they leave rosters, timetables, upcoming lessons, portals and the users list (no more class reminders), every record stays, and an exit email goes to the student and their parents. Parents with no other active child are archived too. Reinstate any time from the Archived view.</div>
             <textarea value={exiting.reason} onChange={e => setExiting(x => ({ ...x, reason: e.target.value }))} rows={2}
               placeholder={exiting.kind === 'graduated' ? 'e.g. Completed Year 13, June 2027' : 'Reason, e.g. relocated, moved schools, fees'}
               style={{ padding: '8px 10px', border: `1.5px solid ${TOKENS.line}`, borderRadius: 8, fontSize: 12.5, resize: 'vertical' }} />

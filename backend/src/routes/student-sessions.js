@@ -207,6 +207,7 @@ router.patch('/report-back-by-student/:studentId', auth, STAFF, async (req, res)
 // year. Together they produce cohort tables and the retention rate.
 // ════════════════════════════════════════════════════════════════════
 const Enrollment = require('../models/Enrollment');
+const { detachFromSchedule, LEFT_FILTER } = require('../lib/studentExit');
 
 // Next grade in each curriculum ladder; null = terminal (graduates).
 function nextGrade(grade) {
@@ -258,6 +259,21 @@ router.get('/years', auth, STAFF, async (req, res) => {
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
 
+// GET /leavers — students who graduated or left: the alumni list and
+// the analysis of who leaves, when and why (lib/leavers.js).
+router.get('/leavers', auth, STAFF, async (req, res) => {
+  try {
+    const students = await User.find(LEFT_FILTER)
+      .select('firstName lastName email phone admissionNumber curriculum gradeLevel programme deliveryMode studentStatus statusReason statusChangedAt archived archivedAt academicYear createdAt parentName parentEmail parentPhone linkedParents')
+      .populate('linkedParents', 'firstName lastName email phone')
+      .lean();
+    const enrollments = students.length
+      ? await Enrollment.find({ studentId: { $in: students.map(s => s._id) } }).select('studentId academicYear grade curriculum status startedAt').lean()
+      : [];
+    res.json({ success: true, data: require('../lib/leavers').analyseLeavers(students, enrollments) });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
 // POST /years/init { academicYear } — snapshot every active student
 // into the year at their current grade. Idempotent per student+year.
 router.post('/years/init', auth, STAFF, async (req, res) => {
@@ -292,11 +308,13 @@ router.post('/years/promote', auth, STAFF, async (req, res) => {
 
     const recs = await Enrollment.find({ academicYear: fromYear, status: { $in: ['active', 'break'] } }).lean();
     let promoted = 0, graduated = 0;
+    const graduates = [];
     for (const r of recs) {
       const ng = nextGrade(r.grade);
       if (ng === null) {
         await Enrollment.updateOne({ _id: r._id }, { $set: { status: 'graduated', endedAt: new Date() } });
         await User.updateOne({ _id: r.studentId }, { $set: { studentStatus: 'Graduated', statusChangedAt: new Date(), statusReason: 'Completed ' + r.grade + ' (' + fromYear + ')', isActive: false } });
+        graduates.push(r.studentId);
         graduated += 1;
       } else {
         await Enrollment.updateOne({ _id: r._id }, { $set: { status: 'completed', endedAt: new Date() } });
@@ -309,7 +327,10 @@ router.post('/years/promote', auth, STAFF, async (req, res) => {
         promoted += 1;
       }
     }
-    res.json({ success: true, message: `${fromYear} closed: ${promoted} promoted into ${toYear}, ${graduated} graduated.` });
+    // Graduates leave the schedule (records stay): no more lessons or reminders.
+    const off = await detachFromSchedule(graduates);
+    res.json({ success: true, message: `${fromYear} closed: ${promoted} promoted into ${toYear}, ${graduated} graduated` +
+      (off.lessons || off.slots ? ` (taken off ${off.lessons} upcoming lesson(s) and ${off.slots} timetable slot(s)).` : '.') });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
 
@@ -335,6 +356,9 @@ router.patch('/exit/:studentId', auth, STAFF, async (req, res) => {
     student.archived = true;
     student.archivedAt = new Date();
     await student.save();
+    // Off every upcoming lesson and timetable slot, so no more class
+    // reminders or lesson emails; past lessons keep their record.
+    const off = await detachFromSchedule([student._id]);
 
     // ── Parents: every linked parent is told; a parent with no other
     // active child is archived along with the student. Records are
@@ -383,7 +407,8 @@ router.patch('/exit/:studentId', auth, STAFF, async (req, res) => {
     const parentNote = parents.length
       ? ` ${parents.length} linked parent(s) emailed${parentsArchived ? `, ${parentsArchived} archived with them` : ''}.`
       : '';
-    res.json({ success: true, message: `${student.firstName || 'Student'} marked ${label} and archived. Exit email sent.${parentNote} Records are kept and they can be reinstated any time.` });
+    const offNote = off.lessons || off.slots ? ` Taken off ${off.lessons} upcoming lesson(s) and ${off.slots} timetable slot(s).` : '';
+    res.json({ success: true, message: `${student.firstName || 'Student'} marked ${label} and archived. Exit email sent.${parentNote}${offNote} Records are kept and they can be reinstated any time.` });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
 

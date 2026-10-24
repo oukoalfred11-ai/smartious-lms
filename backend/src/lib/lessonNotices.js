@@ -11,6 +11,7 @@
  */
 // Loaded lazily, so page() can be used (and unit-tested) without a database.
 const User = { find: (...a) => require('../models/User').find(...a), findById: (...a) => require('../models/User').findById(...a) }
+const hasLeft = (...a) => require('./studentExit').hasLeft(...a)
 const resolveStudentRecipients = (...a) => require('./recipients').resolveStudentRecipients(...a)
 const getTransporter = () => require('./issueInvoice').getTransporter()
 const { inPersonLesson } = require('./learningMode')
@@ -63,10 +64,11 @@ async function toFamilies(studentIds, build, category = 'classUpdates', cls = nu
   const t = getTransporter()
   if (!t || !studentIds || !studentIds.length) return 0
   const students = await User.find({ _id: { $in: studentIds }, role: 'student' })
-    .select('firstName lastName email emailPrefs parentEmail linkedParents parentId parentName onBreak timezone deliveryMode').lean()
+    .select('firstName lastName email emailPrefs parentEmail linkedParents parentId parentName onBreak timezone deliveryMode archived studentStatus').lean()
   let sent = 0
   for (const st of students) {
     if (cls && inPersonLesson(cls, st)) continue
+    if (hasLeft(st)) continue
     try {
       const msg = build(st)
       if (!msg) continue
@@ -159,8 +161,8 @@ async function teacherUnavailable({ studentId, teacher, leave, lessons }) {
   if (!t) return false
   try {
     const st = await User.findById(studentId)
-      .select('firstName lastName email emailPrefs parentEmail linkedParents parentId parentName onBreak timezone deliveryMode').lean()
-    if (!st) return true
+      .select('firstName lastName email emailPrefs parentEmail linkedParents parentId parentName onBreak timezone deliveryMode archived studentStatus').lean()
+    if (!st || hasLeft(st)) return true
     // In-person lessons are on the family's evening timetable instead.
     lessons = (lessons || []).filter(l => !inPersonLesson(l, st))
     if (!lessons.length) return true
