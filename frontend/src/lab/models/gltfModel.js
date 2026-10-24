@@ -12,8 +12,9 @@
  *                                   which matched meshes the automatic point is taken from (e.g. /\.l$/
  *                                   for one of a pair, so the label does not point between them);
  *                                   side (+1 / −1) keeps only meshes on that side of the model (by position);
- *                                   at (0…1) instead puts the label on the front surface at that fraction of
- *                                   the model's height, for parts that are not separate meshes in the file
+ *                                   at (0…1) puts the label on the front of the part's meshes at that fraction
+ *                                   of the model's height; with no match, on the model's front (for parts that
+ *                                   are not separate meshes in the file, e.g. a rocket's stages)
  *     size = 0.5,                   longest side after fitting, in metres
  *     rotate = [0, 0, 0],           turn the file's own axes (radians) before fitting
  *     view, status, animateLabel,   as in kit.js
@@ -81,11 +82,14 @@ const dracoLoader = () => (draco ||= new DRACOLoader().setDecoderPath('/draco/')
 // parts that are not separate meshes in the file (e.g. a rocket's stages).
 function frontPoint(meshes, root, f) {
   const box = new THREE.Box3().setFromObject(root)
-  const c = box.getCenter(new THREE.Vector3())
+  // Aim at the middle of these meshes (left to right), at that height of the whole model.
+  const mid = new THREE.Box3()
+  for (const m of meshes) mid.expandByObject(m)
+  const x = mid.getCenter(new THREE.Vector3()).x
   const y = box.min.y + f * (box.max.y - box.min.y)
-  const ray = new THREE.Raycaster(new THREE.Vector3(c.x, y, box.max.z + 1), new THREE.Vector3(0, 0, -1))
+  const ray = new THREE.Raycaster(new THREE.Vector3(x, y, box.max.z + 1), new THREE.Vector3(0, 0, -1))
   const hit = ray.intersectObjects(meshes, false)[0]
-  return root.worldToLocal(hit ? hit.point : new THREE.Vector3(c.x, y, c.z)).toArray()
+  return root.worldToLocal(hit ? hit.point : new THREE.Vector3(x, y, mid.getCenter(new THREE.Vector3()).z)).toArray()
 }
 
 export function fromGLTF(spec) {
@@ -132,10 +136,9 @@ export function fromGLTF(spec) {
     }
     const parts = []
     for (const p of spec.parts) {
-      if (p.at != null) {
-        // Placed by height: highlights the matched meshes, if any.
-        const objects = p.match || p.material ? partMeshes(meshes, p) : []
-        parts.push({ id: p.id, name: p.name, info: p.info, objects, anchor: frontPoint(objects.length ? objects : meshes, root, p.at) })
+      if (p.at != null && !p.match && !p.material) {
+        // Placed only by height (not separate meshes in the file): nothing to highlight.
+        parts.push({ id: p.id, name: p.name, info: p.info, objects: [], anchor: p.anchor || frontPoint(meshes, root, p.at) })
         continue
       }
       const objects = partMeshes(meshes, p)
@@ -146,7 +149,9 @@ export function fromGLTF(spec) {
         const onSide = from.filter(m => new THREE.Box3().setFromObject(m).getCenter(new THREE.Vector3()).x * p.side > 0)
         if (onSide.length) from = onSide
       }
-      parts.push({ id: p.id, name: p.name, info: p.info, objects, anchor: p.anchor || labelPoint(from.length ? from : objects, root, centre, cut?.plane) })
+      const pick = from.length ? from : objects
+      const anchor = p.anchor || (p.at != null ? frontPoint(pick, root, p.at) : labelPoint(pick, root, centre, cut?.plane))
+      parts.push({ id: p.id, name: p.name, info: p.info, objects, anchor })
     }
 
     // Animation stored in the file (if any) plays with the Animate button.

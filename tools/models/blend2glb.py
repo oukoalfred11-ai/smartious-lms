@@ -4,6 +4,7 @@
      --root NAME          only objects under this top-level collection (repeatable), e.g. "4: Muscular system"
      --collection NAME    only objects in a collection with this name, at any depth (repeatable)
      --name REGEX         only objects whose name matches
+     --names-file FILE    only the objects named in FILE (one exact name per line)
      --exclude REGEX      leave out objects whose name or collection matches
      --material REGEX     only objects whose Z-Anatomy material matches (e.g. "lobe|Cerebellum")
      --include-insertions keep muscle insertion patches (left out by default)
@@ -25,6 +26,7 @@ def opt_all(flag): return [args[i + 1] for i, a in enumerate(args) if a == flag]
 def opt(flag): v = opt_all(flag); return v[-1] if v else None
 roots, colls_wanted = opt_all('--root'), opt_all('--collection')
 name_re = re.compile(opt('--name')) if opt('--name') else None
+names_only = set(l.strip() for l in open(opt('--names-file'), encoding='utf-8') if l.strip()) if opt('--names-file') else None
 excl_re = re.compile(opt('--exclude'), re.I) if opt('--exclude') else None
 mat_re = re.compile(opt('--material'), re.I) if opt('--material') else None
 with_insertions = '--include-insertions' in args
@@ -100,6 +102,7 @@ for o in b.blocks_of('OB'):
     if roots and not any(root_of(c) in roots for c in colls): continue
     if colls_wanted and not any(c in colls_wanted for c in colls): continue
     if name_re and not name_re.search(name): continue
+    if names_only is not None and name not in names_only: continue
     if excl_re and (excl_re.search(name) or any(excl_re.search(c) for c in colls)): continue
     mat = material(o, me)
     if HELPER_MATERIALS.search(mat): continue

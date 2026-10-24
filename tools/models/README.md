@@ -24,13 +24,9 @@ The full atlas (`Startup.blend` in `Z-Anatomy.zip` from https://github.com/Z-Ana
     python3 -I blend2glb.py $B heart.glb --root "5: Cardiovascular system" --exclude "sinus|plexus|communicating"
     python3 -I blend2glb.py $B organs.glb --root "8: Visceral systems" --exclude "Genital|Pleura|Testis|penis|Prostate|Seminal|Epididymis|parathyroid|parotid|Gingiva|Uvula|palate|Mucosa of nasal|pharynx|taenia|Meso|omentum|segment of liver|Tongue|Epiglottis|lingual|mandibular|hypophysis|Pineal"
     python3 -I blend2glb.py $B brain.glb --root "7: Nervous system & Sense organs" --material "lobe|Cerebellum|Insula|Interlobar|^Brain$" --exclude "fasciculus|spinal|Filum|Conus" --simplify 1.0
+    python3 -I blend2glb.py $B muscles.glb --root "4: Muscular system" --root "1: Skeletal system" --names-file muscles-v1.names.txt --simplify 3.5
 
-All are Z-Anatomy, CC BY-SA 4.0, from BodyParts3D, CC BY-SA 2.1 JP; see `frontend/public/models/LICENSE-*.txt`
-for the required attribution.
-
-**Licences when converting more of Z-Anatomy.** Most of the atlas is CC BY-SA (fine: credit it, keep the licence).
-But Z-Anatomy lists two adapted models that are **non-commercial**: "Kidney - by Lissie Cowley - CC-BY-NC 4.0" and
-"Anatomy of the Inner Ear - by University of Dundee School of Medicine - CC-BY-NC-SA 4.0". Smartious charges fees, so
-leave those objects out of any export (the kidney and the inner-ear structures: cochlea, vestibule, semicircular canals).
-"Cranial Nerves and Foramina" (University of Dundee) is CC BY 4.0 and may be used with its credit. Name a new build `skeleton-v2.glb` (or `brain-v2.glb`…)
-and update the model's `.js` file: the files are cached for a year under their name.
+`muscles-v1.names.txt` lists the muscles and bones that can be seen from outside. It was made by rendering the
+figure from 26 directions with each object in its own flat colour, and keeping the objects whose visible area was
+at least 20% (muscles) or 5% (bones, with the muscles on) of their area when drawn alone; deep muscles that only
+peek through gaps were left out. That keeps the full figure to 5.5 MB.
