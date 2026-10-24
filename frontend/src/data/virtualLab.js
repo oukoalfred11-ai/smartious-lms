@@ -19,7 +19,7 @@ export const VL_PATH = '/virtual-lab'
 export const VL_META = {
   title: 'Virtual Lab | Free 3D Science Practicals Online | Smartious',
   desc: 'Try the Smartious Virtual Lab free: a 3D titration done step by step, a labelled human skeleton and 3D models. 78 practicals for IGCSE, A-Level, KCSE and CBE.',
-  ogImage: '/virtual-lab/virtual-lab-og.jpg',
+  ogImage: '/lab-images/virtual-lab-og.jpg',
 }
 
 export const VL_HERO = {
@@ -30,29 +30,29 @@ export const VL_HERO = {
 }
 
 export const VL_IMAGES = {
-  hero: { src: '/virtual-lab/titration-end-point.webp', w: 1280, h: 720, alt: 'Smartious Virtual Lab: a 3D acid–base titration at the end point, the conical flask turning pink under the burette' },
-  bench: { src: '/virtual-lab/titration-bench.webp', w: 1280, h: 720, alt: 'The titration bench from above: burette and stand, white tile, pipette, beakers of acid and alkali, indicator bottles and wash bottle' },
-  cupboard: { src: '/virtual-lab/apparatus-cupboard.webp', w: 1280, h: 720, alt: 'The apparatus cupboard and reagent rack in the Smartious Virtual Lab: students fetch only what the practical needs' },
+  hero: { src: '/lab-images/titration-end-point.webp', w: 1280, h: 720, alt: 'Smartious Virtual Lab: a 3D acid–base titration at the end point, the conical flask turning pink under the burette' },
+  bench: { src: '/lab-images/titration-bench.webp', w: 1280, h: 720, alt: 'The titration bench from above: burette and stand, white tile, pipette, beakers of acid and alkali, indicator bottles and wash bottle' },
+  cupboard: { src: '/lab-images/apparatus-cupboard.webp', w: 1280, h: 720, alt: 'The apparatus cupboard and reagent rack in the Smartious Virtual Lab: students fetch only what the practical needs' },
 }
 
 // Bones first: the skeleton is the model families search for most.
 export const VL_BONES = [
-  { id: 'skeleton', src: '/virtual-lab/skeleton.webp', title: 'The human skeleton', alt: 'Labelled 3D human skeleton: cranium, clavicle, scapula, sternum, ribs, humerus, radius, ulna, pelvis, femur, patella, tibia and fibula', text: 'A complete adult skeleton from real anatomical data. Every bone is named, from the cranium to the toes, with a self-test on 28 bones and groups.' },
-  { id: 'skull', src: '/virtual-lab/skull.webp', title: 'The skull and teeth', alt: '3D human skull with each bone in its own colour: frontal, parietal, temporal, occipital, maxilla and mandible, with the teeth', text: 'Each cranial bone in its own colour. Open the jaw to see incisors, canines, premolars and molars.' },
-  { id: 'spine', src: '/virtual-lab/spine.webp', title: 'The vertebral column', alt: '3D vertebral column from the atlas to the coccyx with the intervertebral discs and the cervical, thoracic and lumbar regions', text: 'Cervical, thoracic and lumbar vertebrae, the sacrum, coccyx and the discs between them.' },
-  { id: 'hand', src: '/virtual-lab/hand.webp', title: 'The hand and wrist', alt: '3D hand and wrist bones: carpals, metacarpals and phalanges with the ends of the radius and ulna', text: 'All 27 bones of the hand: carpals, metacarpals and phalanges.' },
-  { id: 'knee', src: '/virtual-lab/knee.webp', title: 'The knee: a hinge joint', alt: '3D knee joint: femur, tibia, fibula and patella with the cartilage menisci and cruciate ligaments', text: 'Femur, tibia and kneecap with cartilage and ligaments. Open the joint, then compare it with the hip, a ball and socket joint.' },
+  { id: 'skeleton', src: '/lab-images/skeleton.webp', title: 'The human skeleton', alt: 'Labelled 3D human skeleton: cranium, clavicle, scapula, sternum, ribs, humerus, radius, ulna, pelvis, femur, patella, tibia and fibula', text: 'A complete adult skeleton from real anatomical data. Every bone is named, from the cranium to the toes, with a self-test on 28 bones and groups.' },
+  { id: 'skull', src: '/lab-images/skull.webp', title: 'The skull and teeth', alt: '3D human skull with each bone in its own colour: frontal, parietal, temporal, occipital, maxilla and mandible, with the teeth', text: 'Each cranial bone in its own colour. Open the jaw to see incisors, canines, premolars and molars.' },
+  { id: 'spine', src: '/lab-images/spine.webp', title: 'The vertebral column', alt: '3D vertebral column from the atlas to the coccyx with the intervertebral discs and the cervical, thoracic and lumbar regions', text: 'Cervical, thoracic and lumbar vertebrae, the sacrum, coccyx and the discs between them.' },
+  { id: 'hand', src: '/lab-images/hand.webp', title: 'The hand and wrist', alt: '3D hand and wrist bones: carpals, metacarpals and phalanges with the ends of the radius and ulna', text: 'All 27 bones of the hand: carpals, metacarpals and phalanges.' },
+  { id: 'knee', src: '/lab-images/knee.webp', title: 'The knee: a hinge joint', alt: '3D knee joint: femur, tibia, fibula and patella with the cartilage menisci and cruciate ligaments', text: 'Femur, tibia and kneecap with cartilage and ligaments. Open the joint, then compare it with the hip, a ball and socket joint.' },
 ]
 
 export const VL_MODEL_IMAGES = [
-  { id: 'real-heart', src: '/virtual-lab/real-heart.webp', title: 'The heart', alt: '3D human heart cut open: four chambers, tricuspid and bicuspid valves and papillary muscles' },
-  { id: 'brain', src: '/virtual-lab/brain.webp', title: 'The brain', alt: '3D human brain with the frontal, parietal, temporal and occipital lobes, cerebellum and brainstem' },
-  { id: 'eye', src: '/virtual-lab/eye.webp', title: 'The eye', alt: 'Cut-away 3D human eye: cornea, iris, lens, ciliary muscle, retina and optic nerve' },
-  { id: 'organs', src: '/virtual-lab/organs.webp', title: 'Organs of the body', alt: '3D organs of the chest and abdomen: lungs, liver, stomach, intestines and bladder' },
-  { id: 'muscles', src: '/virtual-lab/muscles.webp', title: 'The muscular system', alt: '3D muscular system: biceps, triceps, quadriceps, hamstrings and calf muscles' },
-  { id: 'plant-cell', src: '/virtual-lab/plant-cell.webp', title: 'The plant cell', alt: '3D plant cell: cell wall, vacuole, chloroplasts, nucleus and mitochondria' },
-  { id: 'saturn-v', src: '/virtual-lab/saturn-v.webp', title: 'Saturn V rocket', alt: '3D Saturn V rocket with its three stages and the Apollo spacecraft labelled' },
-  { id: 'perseverance', src: '/virtual-lab/perseverance.webp', title: 'Perseverance Mars rover', alt: '3D Perseverance Mars rover with its cameras, robotic arm and rocker-bogie wheels labelled' },
+  { id: 'real-heart', src: '/lab-images/real-heart.webp', title: 'The heart', alt: '3D human heart cut open: four chambers, tricuspid and bicuspid valves and papillary muscles' },
+  { id: 'brain', src: '/lab-images/brain.webp', title: 'The brain', alt: '3D human brain with the frontal, parietal, temporal and occipital lobes, cerebellum and brainstem' },
+  { id: 'eye', src: '/lab-images/eye.webp', title: 'The eye', alt: 'Cut-away 3D human eye: cornea, iris, lens, ciliary muscle, retina and optic nerve' },
+  { id: 'organs', src: '/lab-images/organs.webp', title: 'Organs of the body', alt: '3D organs of the chest and abdomen: lungs, liver, stomach, intestines and bladder' },
+  { id: 'muscles', src: '/lab-images/muscles.webp', title: 'The muscular system', alt: '3D muscular system: biceps, triceps, quadriceps, hamstrings and calf muscles' },
+  { id: 'plant-cell', src: '/lab-images/plant-cell.webp', title: 'The plant cell', alt: '3D plant cell: cell wall, vacuole, chloroplasts, nucleus and mitochondria' },
+  { id: 'saturn-v', src: '/lab-images/saturn-v.webp', title: 'Saturn V rocket', alt: '3D Saturn V rocket with its three stages and the Apollo spacecraft labelled' },
+  { id: 'perseverance', src: '/lab-images/perseverance.webp', title: 'Perseverance Mars rover', alt: '3D Perseverance Mars rover with its cameras, robotic arm and rocker-bogie wheels labelled' },
 ]
 
 export const VL_FEATURES = [
