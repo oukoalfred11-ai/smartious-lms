@@ -73,6 +73,9 @@ import { HUB_TITLES, guideTitle, nairobiAreaTitle, fitTitle, fitDesc } from '../
 import { ARTICLES_INDEX } from '../src/data/generated/articlesIndex.js'
 import { guidesFor } from '../src/data/geoGuides.js'
 import { naMeta, usLead, caLead, US_HEADLINE, CA_HEADLINE } from '../src/data/naFocus.js'
+import { VL_PATH, VL_META, VL_HERO, VL_IMAGES, VL_BONES, VL_MODEL_IMAGES, VL_FEATURES, VL_KENYA, VL_CURRICULA, VL_FAQS, VL_CREDITS, VL_PRACTICALS, VL_MODELS } from '../src/data/virtualLab.js'
+import { EXPERIMENTS } from '../../shared/lab/experiments/index.js'
+import { MODELS } from '../src/lab/models/catalogue.js'
 
 const NOINDEX_ONLY = process.argv.includes('--noindex-only')
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -267,7 +270,7 @@ const MAIN_LINKS = [
   { href: '/about', label: 'About Smartious' }, { href: '/curricula', label: 'Curricula' }, { href: '/programs', label: 'Programmes' },
   { href: '/homeschool', label: 'Homeschooling' }, { href: '/tuition', label: 'Private tuition' }, { href: '/pricing', label: 'Fees' },
   { href: '/teachers', label: 'Our team' }, { href: '/faq', label: 'FAQ' }, { href: '/blog', label: 'Guides and articles' },
-  { href: '/contact', label: 'Contact' }, { href: '/assessment', label: 'Book an assessment' },
+  { href: '/contact', label: 'Contact' }, { href: '/virtual-lab', label: 'Virtual Lab' }, { href: '/assessment', label: 'Book an assessment' },
 ]
 const SERVICE_LINKS = SERVICES.map(sv => ({ href: '/services/' + sv.slug, label: sv.h }))
 const CURRICULA_LINKS = CURRICULA.map(c => ({ href: '/curricula/' + c.slug, label: c.h, note: c.badge }))
@@ -506,6 +509,51 @@ for (const [id, s] of Object.entries(STATIC_META)) {
       : id === 'virtual-school-kenya' ? [h2('More for Kenyan families'), links([{ href: '/online-school/kenya', label: 'Online school and homeschool in Kenya' }, { href: '/tuition-nairobi', label: 'Tuition in Nairobi' }])]
       : [h2('More for Ukrainian families'), links([{ href: '/online-school/ukraine', label: 'Online school in Ukraine' }])],
     ld: [serviceLd({ name: x.h1 || m.title, desc: m.desc, path: s.path, area: isCa ? 'Canada' : id.includes('kenya') ? 'Kenya' : 'Ukraine' })] })
+}
+
+// Virtual Lab (src/data/virtualLab.js; the page is pages/VirtualLabPage.jsx)
+{
+  const practicalCount = VL_PRACTICALS.reduce((a, g) => a + g.items.length, 0)
+  if (practicalCount !== EXPERIMENTS.length || VL_MODELS.length !== MODELS.length)
+    console.warn(`seo-static: src/data/virtualLab.js lists ${practicalCount} practicals and ${VL_MODELS.length} models, the lab has ${EXPERIMENTS.length} and ${MODELS.length}: update the page`)
+  const img = (i) => `<figure><img src="${esc(i.src)}" alt="${esc(i.alt)}" width="${i.w || 720}" height="${i.h || 576}" loading="lazy"/><figcaption>${esc(i.title || i.alt)}</figcaption></figure>`
+  const SUBJ = { chemistry: 'Chemistry', biology: 'Biology', physics: 'Physics' }
+  const url = ORIGIN + VL_PATH
+  add({ path: VL_PATH, title: VL_META.title, desc: VL_META.desc, h1: VL_HERO.h1, image: VL_IMAGES.hero, ogImage: VL_META.ogImage,
+    images: [VL_IMAGES.hero, VL_IMAGES.bench, VL_IMAGES.cupboard, ...VL_BONES, ...VL_MODEL_IMAGES],
+    body: [
+      p(VL_HERO.lead), img(VL_IMAGES.hero),
+      h2('Try it now: an acid–base titration in 3D'), p('Find the concentration of an unknown acid: set up the bench, rinse and fill the burette, pipette 25.0 cm³ of acid, add the indicator, titrate to the end point and check your answer. Free, with no sign-up.'),
+      h2('A real laboratory, not a slideshow'), ...VL_FEATURES.map(f => h3(f.h) + p(f.p)), img(VL_IMAGES.cupboard),
+      h2('The human skeleton and bones in 3D'), ...VL_BONES.map(b => h3(b.title) + p(b.text) + img(b)),
+      h2('3D models for biology and physics'), bullets(VL_MODELS.map(m => [m.title.replace(' (real anatomical model)', ''), m.topic])),
+      h2(VL_KENYA.h2), p(VL_KENYA.intro), ...VL_KENYA.items.map(([h, t]) => h3(h) + p(t)), p(VL_KENYA.note),
+      h2('All ' + practicalCount + ' virtual practicals'),
+      ...['chemistry', 'biology', 'physics'].map(sub => h3(SUBJ[sub]) + VL_PRACTICALS.filter(g => g.subject === sub).map(g => p(g.group) + bullets(g.items)).join('')),
+      h2('One lab for every science curriculum'), ...VL_CURRICULA.map(([h, t]) => h3(h) + p(t)),
+      h2('Get the full Virtual Lab with Smartious'), links([{ href: '/assessment', label: 'Book an assessment' }, { href: '/curricula', label: 'Curricula we teach' }, { href: '/homeschool', label: 'Online homeschool' }]),
+      p(VL_CREDITS),
+    ],
+    faqs: VL_FAQS, faqsTitle: 'Virtual lab: frequently asked questions',
+    related: [h2('Programmes with the Virtual Lab'), links([{ href: '/curricula/igcse', label: 'Cambridge IGCSE' }, { href: '/curricula/a-level', label: 'Cambridge A-Level' }, { href: '/online-school/kenya', label: 'Online school in Kenya' }, { href: '/homeschool', label: 'Online homeschool' }, { href: '/tuition', label: 'Private tuition' }].filter(l => !/^\/curricula\//.test(l.href) || CURRICULA.some(c => '/curricula/' + c.slug === l.href)))],
+    crumbs: [['Virtual Lab', VL_PATH]],
+    src: ['src/data/virtualLab.js', 'src/pages/VirtualLabPage.jsx'],
+    ld: [
+      { '@context': 'https://schema.org', '@type': 'WebApplication', '@id': url + '#app', name: 'Smartious Virtual Lab', url, description: VL_META.desc,
+        applicationCategory: 'EducationalApplication', operatingSystem: 'Any (web browser)', browserRequirements: 'Requires a modern browser; 3D view uses WebGL',
+        image: ORIGIN + VL_IMAGES.hero.src, screenshot: [VL_IMAGES.hero, VL_IMAGES.bench, VL_IMAGES.cupboard].map(i => ORIGIN + i.src),
+        isAccessibleForFree: true, inLanguage: 'en', provider: { '@id': ORG_ID }, publisher: { '@id': ORG_ID },
+        featureList: VL_FEATURES.map(f => f.h),
+        offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD', description: 'The titration practical and the 3D skeleton on this page are free; the full lab is included in Smartious programmes.' } },
+      { '@context': 'https://schema.org', '@type': 'LearningResource', '@id': url + '#titration', name: 'Acid–base titration: virtual practical in 3D', url: url + '#try',
+        description: 'Find the concentration of an unknown acid by titration with 0.100 mol dm⁻³ sodium hydroxide, step by step on a 3D bench.',
+        learningResourceType: ['Simulation', 'Virtual laboratory'], educationalLevel: ['Secondary school', 'IGCSE', 'KCSE', 'A-Level'],
+        teaches: ['Acid–base titration', 'Volumetric analysis', 'Reading a burette', 'Concordant titres', 'Mole calculations'],
+        about: { '@type': 'Thing', name: 'Chemistry practical' }, isAccessibleForFree: true, inLanguage: 'en', image: ORIGIN + VL_IMAGES.hero.src, provider: { '@id': ORG_ID } },
+      { '@context': 'https://schema.org', '@type': 'LearningResource', '@id': url + '#skeleton', name: 'The human skeleton in 3D: labelled bones', url: url + '#bones',
+        description: VL_BONES[0].text, learningResourceType: ['3D model', 'Interactive resource'], educationalLevel: ['Secondary school', 'IGCSE', 'KCSE', 'CBE'],
+        teaches: ['Bones of the human skeleton', 'Joints', 'Support and movement'], isAccessibleForFree: true, inLanguage: 'en', image: ORIGIN + VL_BONES[0].src, provider: { '@id': ORG_ID } },
+    ] })
 }
 
 // ── Country hubs and city pages ──
@@ -866,6 +914,14 @@ function render(pg) {
   html = setMeta(html, 'property', 'og:locale', pg.locale || 'en_US')
   html = setMeta(html, 'name', 'twitter:title', pg.title)
   html = setMeta(html, 'name', 'twitter:description', desc)
+  if (pg.image) {
+    html = setMeta(html, 'property', 'og:image', ORIGIN + (pg.ogImage || pg.image.src))
+    html = setMeta(html, 'property', 'og:image:alt', pg.image.alt)
+    html = setMeta(html, 'name', 'twitter:image', ORIGIN + (pg.ogImage || pg.image.src))
+    html = html.replace(/\s*<meta property="og:image:(width|height)" content="[^"]*"\s*\/?>/g, '')
+    // The hero image is the largest thing on the page: fetch it early.
+    html = html.replace('</head>', () => `  <link rel="preload" as="image" href="${esc(pg.image.src)}" fetchpriority="high"/>\n</head>`)
+  }
   const alt = (ALTERNATES.get(pg.path) || []).map(a => `<link rel="alternate" hreflang="${a.hreflang}" href="${a.href}"/>`).join('\n  ')
   const lds = [crumbLd(pg), faqLd(pg.faqs), ...(pg.ld || [])].filter(Boolean).map(ldTag).join('\n  ')
   html = html.replace('</head>', () => `  <link rel="canonical" href="${url}"/>\n  ${alt ? alt + '\n  ' : ''}${lds}\n  ${STYLE}\n</head>`)
@@ -912,8 +968,8 @@ const gitDate = (file) => {
 const lastmod = (pg) => (pg.src && pg.src.length ? pg.src : ['src/pages/LandingPage.jsx']).map(gitDate).sort().pop()
 const sm = '<?xml version="1.0" encoding="UTF-8"?>\n' +
   '<!-- GENERATED by scripts/seo-static.mjs at build time: every indexable page with static HTML. Do not edit by hand. -->\n' +
-  '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
-  written.filter(pg => !pg.noindex).map(pg => `  <url><loc>${esc(ORIGIN + (pg.path === '/' ? '/' : pg.path))}</loc><lastmod>${lastmod(pg)}</lastmod></url>`).join('\n') +
+  '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n' +
+  written.filter(pg => !pg.noindex).map(pg => `  <url><loc>${esc(ORIGIN + (pg.path === '/' ? '/' : pg.path))}</loc><lastmod>${lastmod(pg)}</lastmod>${(pg.images || []).map(i => `<image:image><image:loc>${esc(ORIGIN + i.src)}</image:loc></image:image>`).join('')}</url>`).join('\n') +
   '\n</urlset>\n'
 writeFileSync(join(DIST, 'sitemap.xml'), sm)
 try { writeFileSync(join(ROOT, 'public', 'sitemap.xml'), sm) } catch (e) { console.warn('seo-static: could not refresh public/sitemap.xml:', e.message) }

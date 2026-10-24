@@ -39,8 +39,10 @@ export function ModelsLibrary() {
 
 function shuffle(list) { const a = [...list]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]] } return a }
 
-export function ModelViewer() {
-  const { id } = useParams()
+// modelId + embedded: one model on a public page (/virtual-lab), without the library links.
+export function ModelViewer({ modelId, embedded = false } = {}) {
+  const params = useParams()
+  const id = modelId || params.id
   const meta = getModel(id)
   const box = useRef(null)
   const stageRef = useRef(null)
@@ -114,11 +116,11 @@ export function ModelViewer() {
   if (!meta) return <section><p className="lab-error" role="alert">That model is not in the library.</p><Link className="lab-btn" to="/lab/models">All models</Link></section>
   return (
     <section>
-      <div className="lab-row">
+      {!embedded && <div className="lab-row">
         <Link to="/lab/models" className="lab-btn sm ghost">← All models</Link>
         <h2 style={{ margin: 0 }}>{meta.title}</h2>
         <span className={'lab-badge ' + meta.subject}>{meta.topic}</span>
-      </div>
+      </div>}
       <div className="m3d-layout">
         <div>
           <div ref={box} className="m3d-stage" role="img" aria-label={'3D model: ' + meta.title + '. Drag to turn it, scroll or pinch to zoom.'}>
