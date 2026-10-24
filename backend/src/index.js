@@ -205,6 +205,10 @@ mongoose.connect(MONGODB_URI)
       console.log(`API running on port ${PORT} [${process.env.NODE_ENV || 'development'}]`)
     );
 
+    // Remove the records left by the retired daily self check-in (keeps
+    // students' pre-cutover days, which are their attendance history).
+    require('./lib/purgeCheckins').purgeOldCheckins().catch(e => console.error('[checkin] purge', e.message));
+
     // Invoice reminder scheduler: chases unpaid invoices three days
     // before each service period ends, skipping students on a break.
     startReminderScheduler();
