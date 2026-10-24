@@ -24,7 +24,8 @@ class Blend:
         self._dna(next(b for b in self.blocks if b['code'] == 'DNA1'))
 
     def _dna(self, b):
-        d = self.data; p = b['start']
+        d = self.data; p = b['start']; base = p
+        al = lambda q: base + ((q - base + 3) & ~3)          # sections are 4-byte aligned within the DNA block
         assert d[p:p + 4] == b'SDNA'; p += 4
         def section(tag):
             nonlocal p
@@ -32,13 +33,13 @@ class Blend:
         section(b'NAME'); n, = struct.unpack(self.end + 'i', d[p:p + 4]); p += 4
         names = []
         for _ in range(n): e = d.index(b'\0', p); names.append(d[p:e].decode('latin1')); p = e + 1
-        p = (p + 3) & ~3
+        p = al(p)
         section(b'TYPE'); n, = struct.unpack(self.end + 'i', d[p:p + 4]); p += 4
         types = []
         for _ in range(n): e = d.index(b'\0', p); types.append(d[p:e].decode('latin1')); p = e + 1
-        p = (p + 3) & ~3
+        p = al(p)
         section(b'TLEN'); tlen = list(struct.unpack(self.end + 'h' * n, d[p:p + 2 * n])); p += 2 * n
-        p = (p + 3) & ~3
+        p = al(p)
         section(b'STRC'); ns, = struct.unpack(self.end + 'i', d[p:p + 4]); p += 4
         self.structs = []; self.struct_by_name = {}
         for _ in range(ns):

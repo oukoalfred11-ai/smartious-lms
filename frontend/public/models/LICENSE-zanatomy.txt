@@ -1,0 +1,32 @@
+heart-v1.glb, organs-v1.glb, brain-v1.glb — real anatomical models used in the
+Smartious Virtual Lab (/lab/models/real-heart, /lab/models/organs, /lab/models/brain)
+
+Source: the Z-Anatomy atlas (Startup.blend, https://github.com/Z-Anatomy/Models-of-human-anatomy),
+https://www.z-anatomy.com
+
+Attribution, in the form required by Z-Anatomy:
+  "BodyParts3D - The Database Center for Life Science - CC-BY-SA 2.1 Japan"
+     The original model: https://dbarchive.biosciencedbc.jp/en/bodyparts3d/download.html
+  "Z-Anatomy - The libre 3D atlas of anatomy - CC-BY-SA 4.0"
+
+Authors (as listed by Z-Anatomy): Kousaku OKUBO (original model 'BodyParts3D'),
+Gauthier KERVYN (design, 3D, anatomy), Marcin ZIELINSKI (Blender add-on),
+Lluis VINENT (Unity development).
+
+Licence: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
+  https://creativecommons.org/licenses/by-sa/4.0/
+The underlying BodyParts3D data is licensed CC BY-SA 2.1 Japan
+  https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html
+These files are derivative works and are distributed under the same licence (CC BY-SA 4.0).
+You may copy, share and adapt them, with the attribution above, under the same licence.
+
+Parts of the atlas that Z-Anatomy licenses for non-commercial use only (the kidney,
+CC BY-NC, and the inner ear, CC BY-NC-SA) are not included in any of these files.
+
+Changes made by Smartious (2026): converted from Blender to glTF binary with
+tools/models/blend2glb.py; kept a selection of structures from the cardiovascular,
+visceral and nervous systems (label lines, text and helper objects removed);
+the brain simplified to about 1 mm; converted to a Y-up coordinate system; smooth
+normals computed; positions stored as 16-bit integers (KHR_mesh_quantization);
+materials replaced with plain colours.
+The descriptions shown in the lab are Smartious's own and are not part of these files.
