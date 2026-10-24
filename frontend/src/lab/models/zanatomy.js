@@ -121,3 +121,35 @@ export const knee = fromGLTF({
   ],
   status: () => 'The knee is a synovial joint, a hinge joint: it bends and straightens in one direction. Cartilage and synovial fluid reduce friction; ligaments hold the bones together. Seen from behind; turn it round to see the kneecap.',
 })
+
+// The right hip: a ball and socket joint (--crop-y). The slider pulls the femur out of its socket.
+export const hip = fromGLTF({
+  url: '/models/hip-v1.glb',
+  size: 0.45,
+  view: { yaw: -1.2, pitch: 0.1 },   // from the side, facing the socket
+  materials: (m) => {
+    const kind = kindOf(m)
+    if (kind === 'Ligament') { m.material = m.material.clone(); m.material.color.set('#D9A441') }
+    if (kind === 'Articular capsule') {
+      m.material = m.material.clone()
+      Object.assign(m.material, { transparent: true, opacity: 0.18, depthWrite: false, side: THREE.DoubleSide })
+      m.material.color.set('#8FC1E3')
+    }
+  },
+  explode: [
+    { match: /^Femur/, offset: [-0.11, -0.025, 0.02] },
+    { match: /^(Articular capsule|Descending part of iliofemoral|Transverse part of iliofemoral|Ischiofemoral|Pubofemoral|Ligament of head of femur|Frenula)/, fade: true },
+  ],
+  explodeLabel: 'Pull the femur out',
+  parts: [
+    { id: 'ball', name: 'Head of femur (the ball)', match: /^Femur/, centreOf: /^Acetabular labrum/, info: 'The rounded top of the femur. It fits into the cup-shaped socket of the hip bone and can turn in almost every direction.' },
+    { id: 'socket', name: 'Acetabulum (the socket)', match: /^Hip bone/, centreOf: /^Acetabular labrum/, info: 'A deep cup in the side of the hip bone. Because the ball sits deep in it, the hip is very stable as well as able to move in many directions.' },
+    { id: 'femur', name: 'Femur (thigh bone)', match: /^Femur/, info: 'The longest bone in the body. Its head is the ball of the hip joint.' },
+    { id: 'hipbone', name: 'Hip bone (pelvis)', match: /^Hip bone/, info: 'Three fused bones (ilium, ischium and pubis). With the other hip bone and the sacrum it forms the pelvis.' },
+    { id: 'labrum', name: 'Cartilage rim (labrum)', match: /^Acetabular labrum/, info: 'A ring of cartilage around the socket that deepens it and holds the ball in. The ball and socket are also covered with smooth cartilage.' },
+    { id: 'ligaments', name: 'Ligaments', match: /iliofemoral|^Ischiofemoral|^Pubofemoral/, info: 'Strong bands joining the femur to the hip bone around the joint. The iliofemoral ligament, at the front, is the strongest in the body.' },
+    { id: 'headlig', name: 'Ligament of the head of femur', match: /^Ligament of head of femur/, info: 'A small ligament inside the joint, from the socket to the ball, that carries a blood vessel to the head of the femur.' },
+    { id: 'capsule', name: 'Joint capsule', match: /^Articular capsule/, info: 'A tough sleeve around the joint. Its synovial membrane makes synovial fluid, which lubricates the joint.' },
+  ],
+  status: () => 'The hip is a ball and socket joint: it can move in all directions (forwards, backwards, sideways and round). Compare the knee, a hinge joint that moves one way only. Use the slider to pull the femur out.',
+})

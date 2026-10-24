@@ -119,7 +119,9 @@ export function createModelStage(container, { onSelect = () => {}, low = false }
     const cx = (minX + maxX) / 2
     const items = labels.map(l => {
       const w = worldOf(l.part.anchor), p = lab.project(w)
-      return { l, x: p.x, y: p.y, behind: p.behind, hidden: !p.behind && hiddenBehind(l.part, w) }
+      // A part pulled out of view (explode) has no label, like one behind the camera.
+      const behind = p.behind || !!l.part.hidden
+      return { l, x: p.x, y: p.y, behind, hidden: !behind && hiddenBehind(l.part, w) }
     })
     const colW = Math.min(210, Math.max(120, W * 0.2))
     const sides = { left: items.filter(i => i.x < cx), right: items.filter(i => i.x >= cx) }
