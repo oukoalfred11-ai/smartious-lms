@@ -3,9 +3,11 @@
  *
  *   fromGLTF({
  *     url,                          the file (e.g. /models/heart.glb, served from frontend/public)
- *     parts: [{ id, name, info, match, anchor?, anchorFrom? }],
+ *     parts: [{ id, name, info, match?, material?, not?, anchor?, anchorFrom?, side? }],
  *                                   match: a RegExp tested on each mesh's name (and its parents'),
- *                                   or a list of exact names; anchor (optional, root coordinates)
+ *                                   or a list of exact names; material (RegExp) matches the Z-Anatomy
+ *                                   material kept in the node's extras; not (RegExp) leaves names out;
+ *                                   anchor (optional, root coordinates)
  *                                   overrides the automatic label point; anchorFrom (RegExp) picks
  *                                   which matched meshes the automatic point is taken from (e.g. /\.l$/
  *                                   for one of a pair, so the label does not point between them);
@@ -33,6 +35,10 @@ const matches = (o, match) => {
   const names = nameChain(o)
   return Array.isArray(match) ? names.some(n => match.includes(n)) : names.some(n => match.test(n))
 }
+// Extra data written by tools/models/blend2glb.py (the Z-Anatomy material of each object).
+const materialOf = (o) => { while (o) { if (o.userData?.material) return o.userData.material; o = o.parent } return '' }
+/** A part's meshes: by name (match), by Z-Anatomy material (material), minus names matching `not`. */
+const partMeshes = (meshes, p) => meshes.filter(m => (!p.match || matches(m, p.match)) && (!p.material || p.material.test(materialOf(m))) && !(p.not && matches(m, p.not)))
 
 /** A point on the outside of a part, facing away from the model's centre: where its label line ends. */
 function labelPoint(meshes, root, centre, plane = null) {
@@ -98,7 +104,7 @@ export function fromGLTF(spec) {
     }
     const parts = []
     for (const p of spec.parts) {
-      const objects = meshes.filter(m => matches(m, p.match))
+      const objects = partMeshes(meshes, p)
       if (!objects.length) { console.warn('[models] no mesh matches part', p.id, 'in', spec.url); continue }
       let from = p.anchorFrom ? objects.filter(m => matches(m, p.anchorFrom)) : objects
       if (p.side) {
