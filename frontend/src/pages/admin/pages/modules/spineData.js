@@ -5666,6 +5666,149 @@ const IBDP2_ECONOMICS_SL = [
     ] },
 ]
 
+// IB DP Digital Society (HL)
+// The current guide (first assessment 2024): the inquiry process, concepts, content and contexts, plus the HL extension (challenges and interventions).
+const IBDP2_DIGITAL_SOCIETY_HL = [
+  { topic: 'Y1 · Inquiry and Concepts', code: 'Y1-IC',
+    subtopics: [
+      { name: 'The Digital Society Inquiry Process: Exploring, Investigating, Reflecting (DP Year 1)', code: 'Y1-IC.1' },
+      { name: 'Sources, Claims and Perspectives in Digital Society (DP Year 1)', code: 'Y1-IC.2' },
+      { name: 'Concept: Change (DP Year 1)', code: 'Y1-IC.3' },
+      { name: 'Concept: Expression (DP Year 1)', code: 'Y1-IC.4' },
+      { name: 'Concept: Identity (DP Year 1)', code: 'Y1-IC.5' },
+      { name: 'Concept: Power (DP Year 1)', code: 'Y1-IC.6' },
+      { name: 'Concept: Space (DP Year 1)', code: 'Y1-IC.7' },
+      { name: 'Concept: Systems (DP Year 1)', code: 'Y1-IC.8' },
+      { name: 'Concept: Values and Ethics (DP Year 1)', code: 'Y1-IC.9' },
+    ] },
+  { topic: 'Y1 · Content: Data, Algorithms and Computers', code: 'Y1-C1',
+    subtopics: [
+      { name: 'Data: Types, Collection and Ownership (DP Year 1)', code: 'Y1-C1.1' },
+      { name: 'Data: Analysis, Visualisation and Bias (DP Year 1)', code: 'Y1-C1.2' },
+      { name: 'Algorithms: How They Work and Where They Are Used (DP Year 1)', code: 'Y1-C1.3' },
+      { name: 'Algorithms: Decision-Making, Bias and Accountability (DP Year 1)', code: 'Y1-C1.4' },
+      { name: 'Computers: Hardware, Software and Digital Devices (DP Year 1)', code: 'Y1-C1.5' },
+      { name: 'Computers: Access, Use and the Digital Divide (DP Year 1)', code: 'Y1-C1.6' },
+    ] },
+  { topic: 'Y1 · Content: Media, Networks and the Internet', code: 'Y1-C2',
+    subtopics: [
+      { name: 'Media: Digital Media, Platforms and Social Media (DP Year 1)', code: 'Y1-C2.1' },
+      { name: 'Media: Information, Misinformation and Influence (DP Year 1)', code: 'Y1-C2.2' },
+      { name: 'Networks and the Internet: How the Internet Works (DP Year 1)', code: 'Y1-C2.3' },
+      { name: 'Networks and the Internet: Connectivity, Security and Surveillance (DP Year 1)', code: 'Y1-C2.4' },
+    ] },
+  { topic: 'Y1 · Content: AI, Robots and Autonomous Technologies', code: 'Y1-C3',
+    subtopics: [
+      { name: 'Artificial Intelligence: Machine Learning and Its Uses (DP Year 1)', code: 'Y1-C3.1' },
+      { name: 'Artificial Intelligence: Impacts, Risks and Regulation (DP Year 1)', code: 'Y1-C3.2' },
+      { name: 'Robots and Autonomous Technologies: Types and Applications (DP Year 1)', code: 'Y1-C3.3' },
+      { name: 'Robots and Autonomous Technologies: Work, Safety and Responsibility (DP Year 1)', code: 'Y1-C3.4' },
+    ] },
+  { topic: 'Y2 · Contexts', code: 'Y2-CX',
+    subtopics: [
+      { name: 'Context: Cultural (DP Year 2)', code: 'Y2-CX.1' },
+      { name: 'Context: Economic (DP Year 2)', code: 'Y2-CX.2' },
+      { name: 'Context: Environmental (DP Year 2)', code: 'Y2-CX.3' },
+      { name: 'Context: Health (DP Year 2)', code: 'Y2-CX.4' },
+      { name: 'Context: Human Knowledge (DP Year 2)', code: 'Y2-CX.5' },
+      { name: 'Context: Political (DP Year 2)', code: 'Y2-CX.6' },
+      { name: 'Context: Social (DP Year 2)', code: 'Y2-CX.7' },
+    ] },
+  { topic: 'Y2 · HL Extension: Challenges and Interventions', code: 'Y2-HL',
+    subtopics: [
+      { name: 'Challenge: Global Well-being (HL, DP Year 2)', code: 'Y2-HL.1' },
+      { name: 'Challenge: Governance and Human Rights (HL, DP Year 2)', code: 'Y2-HL.2' },
+      { name: 'Challenge: Sustainable Development (HL, DP Year 2)', code: 'Y2-HL.3' },
+      { name: 'Analysing Interventions: Who Acts, How and With What Effect (HL, DP Year 2)', code: 'Y2-HL.4' },
+      { name: 'Evaluating Interventions and Recommending Steps (HL, DP Year 2)', code: 'Y2-HL.5' },
+    ] },
+  { topic: 'Y2 · Internal Assessment: Inquiry Project', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Choosing an Inquiry Focus and Guiding Question (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Selecting and Evaluating Sources (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Analysing Impacts and Implications for People and Communities (DP Year 2)', code: 'Y2-IA.3' },
+      { name: 'Producing the Recorded Presentation (DP Year 2)', code: 'Y2-IA.4' },
+      { name: 'Inquiry Process Document and Reflection (DP Year 2)', code: 'Y2-IA.5' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique: Structured and Extended Responses (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique: Source-Based Analysis (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Paper 3 Technique: Responding to a Challenge and Intervention (HL) (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.6' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.7' },
+    ] },
+]
+
+// IB DP Digital Society (SL)
+// The current guide (first assessment 2024): the inquiry process, concepts, content and contexts; no HL extension.
+const IBDP2_DIGITAL_SOCIETY_SL = [
+  { topic: 'Y1 · Inquiry and Concepts', code: 'Y1-IC',
+    subtopics: [
+      { name: 'The Digital Society Inquiry Process: Exploring, Investigating, Reflecting (DP Year 1)', code: 'Y1-IC.1' },
+      { name: 'Sources, Claims and Perspectives in Digital Society (DP Year 1)', code: 'Y1-IC.2' },
+      { name: 'Concept: Change (DP Year 1)', code: 'Y1-IC.3' },
+      { name: 'Concept: Expression (DP Year 1)', code: 'Y1-IC.4' },
+      { name: 'Concept: Identity (DP Year 1)', code: 'Y1-IC.5' },
+      { name: 'Concept: Power (DP Year 1)', code: 'Y1-IC.6' },
+      { name: 'Concept: Space (DP Year 1)', code: 'Y1-IC.7' },
+      { name: 'Concept: Systems (DP Year 1)', code: 'Y1-IC.8' },
+      { name: 'Concept: Values and Ethics (DP Year 1)', code: 'Y1-IC.9' },
+    ] },
+  { topic: 'Y1 · Content: Data, Algorithms and Computers', code: 'Y1-C1',
+    subtopics: [
+      { name: 'Data: Types, Collection and Ownership (DP Year 1)', code: 'Y1-C1.1' },
+      { name: 'Data: Analysis, Visualisation and Bias (DP Year 1)', code: 'Y1-C1.2' },
+      { name: 'Algorithms: How They Work and Where They Are Used (DP Year 1)', code: 'Y1-C1.3' },
+      { name: 'Algorithms: Decision-Making, Bias and Accountability (DP Year 1)', code: 'Y1-C1.4' },
+      { name: 'Computers: Hardware, Software and Digital Devices (DP Year 1)', code: 'Y1-C1.5' },
+      { name: 'Computers: Access, Use and the Digital Divide (DP Year 1)', code: 'Y1-C1.6' },
+    ] },
+  { topic: 'Y1 · Content: Media, Networks and the Internet', code: 'Y1-C2',
+    subtopics: [
+      { name: 'Media: Digital Media, Platforms and Social Media (DP Year 1)', code: 'Y1-C2.1' },
+      { name: 'Media: Information, Misinformation and Influence (DP Year 1)', code: 'Y1-C2.2' },
+      { name: 'Networks and the Internet: How the Internet Works (DP Year 1)', code: 'Y1-C2.3' },
+      { name: 'Networks and the Internet: Connectivity, Security and Surveillance (DP Year 1)', code: 'Y1-C2.4' },
+    ] },
+  { topic: 'Y1 · Content: AI, Robots and Autonomous Technologies', code: 'Y1-C3',
+    subtopics: [
+      { name: 'Artificial Intelligence: Machine Learning and Its Uses (DP Year 1)', code: 'Y1-C3.1' },
+      { name: 'Artificial Intelligence: Impacts, Risks and Regulation (DP Year 1)', code: 'Y1-C3.2' },
+      { name: 'Robots and Autonomous Technologies: Types and Applications (DP Year 1)', code: 'Y1-C3.3' },
+      { name: 'Robots and Autonomous Technologies: Work, Safety and Responsibility (DP Year 1)', code: 'Y1-C3.4' },
+    ] },
+  { topic: 'Y2 · Contexts', code: 'Y2-CX',
+    subtopics: [
+      { name: 'Context: Cultural (DP Year 2)', code: 'Y2-CX.1' },
+      { name: 'Context: Economic (DP Year 2)', code: 'Y2-CX.2' },
+      { name: 'Context: Environmental (DP Year 2)', code: 'Y2-CX.3' },
+      { name: 'Context: Health (DP Year 2)', code: 'Y2-CX.4' },
+      { name: 'Context: Human Knowledge (DP Year 2)', code: 'Y2-CX.5' },
+      { name: 'Context: Political (DP Year 2)', code: 'Y2-CX.6' },
+      { name: 'Context: Social (DP Year 2)', code: 'Y2-CX.7' },
+    ] },
+  { topic: 'Y2 · Internal Assessment: Inquiry Project', code: 'Y2-IA',
+    subtopics: [
+      { name: 'Choosing an Inquiry Focus and Guiding Question (DP Year 2)', code: 'Y2-IA.1' },
+      { name: 'Selecting and Evaluating Sources (DP Year 2)', code: 'Y2-IA.2' },
+      { name: 'Analysing Impacts and Implications for People and Communities (DP Year 2)', code: 'Y2-IA.3' },
+      { name: 'Producing the Recorded Presentation (DP Year 2)', code: 'Y2-IA.4' },
+      { name: 'Inquiry Process Document and Reflection (DP Year 2)', code: 'Y2-IA.5' },
+    ] },
+  { topic: 'Y2 · Assessment and Revision', code: 'Y2-AR',
+    subtopics: [
+      { name: 'Paper 1 Technique: Structured and Extended Responses (DP Year 2)', code: 'Y2-AR.1' },
+      { name: 'Paper 2 Technique: Source-Based Analysis (DP Year 2)', code: 'Y2-AR.2' },
+      { name: 'Command Terms in DP Papers (DP Year 2)', code: 'Y2-AR.3' },
+      { name: 'Markbands and What Examiners Reward (DP Year 2)', code: 'Y2-AR.4' },
+      { name: 'Past Paper Practice (DP Year 2)', code: 'Y2-AR.5' },
+      { name: 'Revision Planning (DP Year 2)', code: 'Y2-AR.6' },
+    ] },
+]
+
 // IB DP Business Management (HL)
 // Higher Level: core plus the HL extension inline.
 const IBDP2_BUSINESS_MANAGEMENT_HL = [
@@ -7682,6 +7825,10 @@ export const IBDP_LIBRARY = [
     source: 'IB DP Computer Science (HL) \u2014 23-lesson scheme (HL)' },
   { match: /^Computer Science \(SL\)$/i, const_: IBDP2_COMPUTER_SCIENCE_SL,
     source: 'IB DP Computer Science (SL) \u2014 19-lesson scheme (SL)' },
+  { match: /^Digital Society \(HL\)$/i, const_: IBDP2_DIGITAL_SOCIETY_HL,
+    source: 'IB DP Digital Society (HL) \u2014 47-lesson scheme (HL)' },
+  { match: /^Digital Society \(SL\)$/i, const_: IBDP2_DIGITAL_SOCIETY_SL,
+    source: 'IB DP Digital Society (SL) \u2014 41-lesson scheme (SL)' },
   { match: /^Economics \(HL\)$/i, const_: IBDP2_ECONOMICS_HL,
     source: 'IB DP Economics (HL) \u2014 23-lesson scheme (HL)' },
   { match: /^Economics \(SL\)$/i, const_: IBDP2_ECONOMICS_SL,

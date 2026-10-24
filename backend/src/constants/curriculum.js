@@ -254,6 +254,7 @@ const SUBJECTS = [
   { id: 'psychology',          name: 'Psychology',                 category: 'Business & Social Sciences', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBDP', 'BNC', 'American', 'Canadian'] },
   { id: 'sociology',           name: 'Sociology',                  category: 'Business & Social Sciences', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBDP', 'BNC', 'American', 'Canadian'] },
   { id: 'travel_tourism',      name: 'Travel & Tourism',           category: 'Business & Social Sciences', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE'] },
+  { id: 'ib_digital_society',  name: 'Digital Society',            category: 'Business & Social Sciences', availableIn: ['IBDP'] },
   { id: 'ap_economics',        name: 'AP Economics (Macro/Micro)', category: 'Business & Social Sciences', availableIn: ['American'] },
   { id: 'ap_psychology',       name: 'AP Psychology',              category: 'Business & Social Sciences', availableIn: ['American'] },
 
