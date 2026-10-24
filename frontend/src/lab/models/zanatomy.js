@@ -65,3 +65,30 @@ export const brain = fromGLTF({
   ],
   status: () => 'A real human brain. Each lobe of the cerebrum has its own colour; the grooves (sulci) between them show where one lobe ends and the next begins.',
 })
+
+// Superficial muscles over the skeleton. Muscles hidden under others were left
+// out when converting (tools/models/README.md), so the file stays small.
+const L = -1   // label the one on the viewer's left
+export const muscles = fromGLTF({
+  url: '/models/muscles-v1.glb',
+  size: 0.9,
+  view: { yaw: 0.3, pitch: 0.05 },
+  parts: [
+    { id: 'masseter', at: 0.895, name: 'Masseter', match: /masseter/, side: R, info: 'A strong muscle at the side of the jaw. It contracts to close the jaw when you chew.' },
+    { id: 'scm', at: 0.855, name: 'Sternocleidomastoid', match: /^Sternocleidomastoid/, side: R, info: 'Runs from behind the ear to the sternum and clavicle. It turns and bends the head.' },
+    { id: 'trapezius', name: 'Trapezius', match: /trapezius muscle/, side: R, info: 'A large diamond-shaped muscle of the upper back and neck. It raises, pulls back and turns the shoulder blades.' },
+    { id: 'deltoid', at: 0.8, name: 'Deltoid', match: /deltoid muscle/, side: L, info: 'The rounded muscle over the shoulder joint. It lifts the arm out to the side, forwards and backwards.' },
+    { id: 'pectoralis', at: 0.745, name: 'Pectoralis major', match: /pectoralis major/, side: R, info: 'The large chest muscle. It pulls the arm forwards and across the body, as in a push-up.' },
+    { id: 'biceps', at: 0.7, name: 'Biceps', match: /biceps brachii/, side: L, info: 'At the front of the upper arm. When it contracts it bends (flexes) the arm at the elbow. Biceps and triceps are an antagonistic pair: when one contracts, the other relaxes.' },
+    { id: 'triceps', name: 'Triceps', match: /triceps brachii/, side: L, info: 'At the back of the upper arm. When it contracts it straightens (extends) the arm at the elbow, working against the biceps.' },
+    { id: 'latissimus', name: 'Latissimus dorsi', match: /^Latissimus dorsi/, side: R, info: 'A broad, flat muscle of the lower back that pulls the arm down and backwards, as in climbing or swimming.' },
+    { id: 'oblique', at: 0.58, name: 'Abdominal muscles (external oblique)', match: /^External abdominal oblique/, side: R, info: 'Muscles of the abdominal wall. They bend and twist the trunk, hold the organs in place and help force air out in heavy breathing.' },
+    { id: 'gluteus', name: 'Gluteus maximus', match: /^Gluteus maximus/, side: R, info: 'The large muscle of the buttock, the biggest in the body. It straightens the hip when you stand up, climb or run.' },
+    { id: 'quadriceps', at: 0.37, name: 'Quadriceps', match: /^(Rectus femoris|Vastus)/, side: R, info: 'Four muscles at the front of the thigh that straighten the leg at the knee. The hamstrings are their antagonists.' },
+    { id: 'hamstrings', name: 'Hamstrings', match: /^(Long head of biceps femoris|Short head of biceps femoris|Semitendinosus|Semimembranosus)/, side: R, info: 'Three muscles at the back of the thigh that bend the leg at the knee and straighten the hip.' },
+    { id: 'sartorius', at: 0.43, name: 'Sartorius', match: /^Sartorius/, side: R, info: 'The longest muscle in the body, a strap running across the front of the thigh. It helps bend the hip and knee.' },
+    { id: 'calf', name: 'Calf (gastrocnemius and soleus)', match: /gastrocnemius|^Soleus/, side: R, info: 'The calf muscles pull on the heel through the Achilles tendon, raising the heel so you can stand on tiptoe, walk and jump.' },
+    { id: 'tibialis', at: 0.18, name: 'Tibialis anterior', match: /^Tibialis anterior/, side: R, info: 'At the front of the shin. It lifts the front of the foot, the antagonist of the calf muscles.' },
+  ],
+  status: () => 'Skeletal muscles move the body by contracting and pulling on bones through tendons. A muscle can only pull, so muscles work in antagonistic pairs.',
+})

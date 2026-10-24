@@ -20,7 +20,7 @@ export const saturnV = fromGLTF({
     { id: 's2', name: 'Second stage (S-II)', at: 0.5, info: 'Five J-2 engines burning liquid hydrogen and liquid oxygen, from about 67 km up to the edge of space.' },
     { id: 's1', name: 'First stage (S-IC)', at: 0.25, info: 'Five F-1 engines burning kerosene and liquid oxygen, giving about 34 million newtons of thrust for the first 2½ minutes. Empty stages are dropped, so the rocket’s mass falls and its acceleration rises.' },
     { id: 'f1', name: 'F-1 engines', match: /^polySurfa/, at: 0.02, info: 'Hot gas is pushed out of the nozzles downwards at high speed; by Newton’s third law the gas pushes the rocket upwards with an equal and opposite force.' },
-    { id: 'fins', name: 'Fins', match: /^(group6 pCu|group7 pCu|pCube1 gr)/, at: 0.045, info: 'Four fins at the base keep the rocket stable in the lower atmosphere.' },
+    { id: 'fins', name: 'Fins', match: /^(group6 pCu|group7 pCu|pCube1 gr)/, side: 1, at: 0.045, info: 'Four fins at the base keep the rocket stable in the lower atmosphere.' },
   ],
   status: () => 'The Saturn V: 110 m tall and almost 3 000 tonnes at launch. It carried the Apollo astronauts to the Moon from 1969 to 1972.',
 })
