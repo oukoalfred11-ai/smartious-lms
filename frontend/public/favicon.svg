@@ -1,32 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- The Smartious crest (as in /brand/logo.png): crimson shield with a gold rim, gold star, open book -->
   <defs>
-    <linearGradient id="shield" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%"  stop-color="#A8203A"/>
-      <stop offset="100%" stop-color="#6B0F1E"/>
-    </linearGradient>
-    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%"  stop-color="#F0CC5A"/>
-      <stop offset="100%" stop-color="#B8960C"/>
+    <linearGradient id="shield" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#B8243D"/>
+      <stop offset="100%" stop-color="#86122A"/>
     </linearGradient>
   </defs>
-
-  <!-- Background shield (rounded square with subtle bottom taper) -->
-  <path d="M8 10 Q8 4 14 4 L50 4 Q56 4 56 10 L56 40 Q56 50 32 60 Q8 50 8 40 Z"
-        fill="url(#shield)"/>
-
-  <!-- Gold star at the top -->
-  <path d="M32 12 L34 18 L40 18 L35.2 22 L37 28 L32 24.5 L27 28 L28.8 22 L24 18 L30 18 Z"
-        fill="url(#gold)"/>
-
-  <!-- Open book (white, bottom-heavy) -->
-  <g transform="translate(32 42)">
-    <!-- left page -->
-    <path d="M-12 -5 Q-12 -7 -10 -7 L-1 -5 L-1 7 L-10 5 Q-12 5 -12 3 Z"
-          fill="#FEFDFB" stroke="#FEFDFB" stroke-width="0.5"/>
-    <!-- right page -->
-    <path d="M12 -5 Q12 -7 10 -7 L1 -5 L1 7 L10 5 Q12 5 12 3 Z"
-          fill="#FEFDFB" stroke="#FEFDFB" stroke-width="0.5"/>
-    <!-- spine line -->
-    <line x1="0" y1="-5" x2="0" y2="7" stroke="#FEFDFB" stroke-width="1.2" stroke-linecap="round"/>
+  <path d="M12.5 2 H51.5 Q57 2 57 7.5 V35 Q57 49.5 32 62 Q7 49.5 7 35 V7.5 Q7 2 12.5 2 Z" fill="url(#shield)" stroke="#D3A54B" stroke-width="0.9"/>
+  <path d="M14 5.2 H50 Q53.8 5.2 53.8 9 V35 Q53.8 47.5 32 58.4 Q10.2 47.5 10.2 35 V9 Q10.2 5.2 14 5.2 Z" fill="none" stroke="#D9AE5C" stroke-opacity=".55" stroke-width=".6"/>
+  <path d="M32 9.5 L33.9 15.2 L39.9 15.2 L35 18.7 L36.9 24.4 L32 20.9 L27.1 24.4 L29 18.7 L24.1 15.2 L30.1 15.2 Z" fill="#D7A23C"/>
+  <path d="M18 27 Q24.5 26.2 31 28 V47 Q24.5 45.4 18 46 Z" fill="#FFFFFF"/>
+  <path d="M46 27 Q39.5 26.2 33 28 V47 Q39.5 45.4 46 46 Z" fill="#F4F1F2"/>
+  <g stroke="#D9A3B0" stroke-width=".7" stroke-linecap="round">
+    <path d="M20.5 32 H28.5 M20.5 35.5 H28.5 M20.5 39 H28.5"/>
+    <path d="M35.5 32 H43.5 M35.5 35.5 H43.5 M35.5 39 H43.5"/>
   </g>
 </svg>

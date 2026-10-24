@@ -209,32 +209,24 @@ const bgById = (id) => BACKGROUNDS.find(b => b.id === id) || BACKGROUNDS[0]
 const isDark = (id) => id !== 'bone'
 
 // ── Shared canvas helpers ────────────────────────────────
-// The EXACT crest from LoginPage.jsx, rasterized once at high
-// resolution and drawn as an image — identical to the site's mark,
-// including the three book lines and inner shield stroke the old
-// hand-drawn approximation missed.
-const CREST_SVG = `<svg width="480" height="480" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+// The site's crest (public/favicon.svg, the same drawing as components/SmartiousCrest.jsx),
+// rasterized once at high resolution and drawn as an image.
+const CREST_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="480" height="480">
+  <!-- The Smartious crest (as in /brand/logo.png): crimson shield with a gold rim, gold star, open book -->
   <defs>
-    <linearGradient id="stu-grad" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#A8203A"/>
-      <stop offset="100%" stop-color="#7A1026"/>
+    <linearGradient id="stu-shield" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#B8243D"/>
+      <stop offset="100%" stop-color="#86122A"/>
     </linearGradient>
   </defs>
-  <path d="M40 6 L68 14 Q70 14 70 17 L70 44 Q70 60 40 74 Q10 60 10 44 L10 17 Q10 14 12 14 Z"
-        fill="url(#stu-grad)" stroke="#6A0E20" stroke-width="0.6"/>
-  <path d="M40 10 L64 17 Q65.5 17 65.5 19 L65.5 44 Q65.5 57 40 69 Q14.5 57 14.5 44 L14.5 19 Q14.5 17 16 17 Z"
-        fill="none" stroke="rgba(255,255,255,.14)" stroke-width="0.8"/>
-  <polygon points="40,19 42.2,26 49.5,26 43.7,30.4 45.9,37.5 40,33 34.1,37.5 36.3,30.4 30.5,26 37.8,26"
-           fill="#C9973A" stroke="#C89A28" stroke-width="0.4"/>
-  <g transform="translate(40 52)">
-    <path d="M-14 -4 L-14 8 L-1 9 L-1 -3 Q-8 -5 -14 -4 Z" fill="#FFFFFF" stroke="#FDFAF4" stroke-width=".4"/>
-    <path d="M14 -4 L14 8 L1 9 L1 -3 Q8 -5 14 -4 Z" fill="#FFFFFF" stroke="#FDFAF4" stroke-width=".4"/>
-    <line x1="-10" y1="-0.5" x2="-4" y2="-0.5" stroke="#A8203A" stroke-width=".5" stroke-linecap="round"/>
-    <line x1="-10" y1="2" x2="-4" y2="2" stroke="#A8203A" stroke-width=".5" stroke-linecap="round"/>
-    <line x1="-10" y1="4.5" x2="-4" y2="4.5" stroke="#A8203A" stroke-width=".5" stroke-linecap="round"/>
-    <line x1="4" y1="-0.5" x2="10" y2="-0.5" stroke="#A8203A" stroke-width=".5" stroke-linecap="round"/>
-    <line x1="4" y1="2" x2="10" y2="2" stroke="#A8203A" stroke-width=".5" stroke-linecap="round"/>
-    <line x1="4" y1="4.5" x2="10" y2="4.5" stroke="#A8203A" stroke-width=".5" stroke-linecap="round"/>
+  <path d="M12.5 2 H51.5 Q57 2 57 7.5 V35 Q57 49.5 32 62 Q7 49.5 7 35 V7.5 Q7 2 12.5 2 Z" fill="url(#stu-shield)" stroke="#D3A54B" stroke-width="0.9"/>
+  <path d="M14 5.2 H50 Q53.8 5.2 53.8 9 V35 Q53.8 47.5 32 58.4 Q10.2 47.5 10.2 35 V9 Q10.2 5.2 14 5.2 Z" fill="none" stroke="#D9AE5C" stroke-opacity=".55" stroke-width=".6"/>
+  <path d="M32 9.5 L33.9 15.2 L39.9 15.2 L35 18.7 L36.9 24.4 L32 20.9 L27.1 24.4 L29 18.7 L24.1 15.2 L30.1 15.2 Z" fill="#D7A23C"/>
+  <path d="M18 27 Q24.5 26.2 31 28 V47 Q24.5 45.4 18 46 Z" fill="#FFFFFF"/>
+  <path d="M46 27 Q39.5 26.2 33 28 V47 Q39.5 45.4 46 46 Z" fill="#F4F1F2"/>
+  <g stroke="#D9A3B0" stroke-width=".7" stroke-linecap="round">
+    <path d="M20.5 32 H28.5 M20.5 35.5 H28.5 M20.5 39 H28.5"/>
+    <path d="M35.5 32 H43.5 M35.5 35.5 H43.5 M35.5 39 H43.5"/>
   </g>
 </svg>`
 

@@ -1,34 +1,12 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth, useToast } from '../context/ctx.jsx'
+import SmartiousCrest from '../components/SmartiousCrest.jsx'
 
 // Inline Smartious logo — crimson gradient shield, gold star, white open book
 const SmartiousLogo = ({ size = 40, withText = false }) => (
   <div style={{display:'inline-flex',alignItems:'center',gap:12}}>
-    <svg width={size} height={size} viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Smartious Homeschool">
-      <defs>
-        <linearGradient id="al-grad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"  stopColor="#A8203A"/>
-          <stop offset="100%" stopColor="#7A1026"/>
-        </linearGradient>
-      </defs>
-      <path d="M40 6 L68 14 Q70 14 70 17 L70 44 Q70 60 40 74 Q10 60 10 44 L10 17 Q10 14 12 14 Z"
-            fill="url(#al-grad)" stroke="#6A0E20" strokeWidth="0.6"/>
-      <path d="M40 10 L64 17 Q65.5 17 65.5 19 L65.5 44 Q65.5 57 40 69 Q14.5 57 14.5 44 L14.5 19 Q14.5 17 16 17 Z"
-            fill="none" stroke="rgba(255,255,255,.14)" strokeWidth="0.8"/>
-      <polygon points="40,19 42.2,26 49.5,26 43.7,30.4 45.9,37.5 40,33 34.1,37.5 36.3,30.4 30.5,26 37.8,26"
-               fill="#F0CC5A" stroke="#C89A28" strokeWidth="0.4"/>
-      <g transform="translate(40 52)">
-        <path d="M-14 -4 L-14 8 L-1 9 L-1 -3 Q-8 -5 -14 -4 Z" fill="#FEFDFB" stroke="#F7F3ED" strokeWidth=".4"/>
-        <path d="M14 -4 L14 8 L1 9 L1 -3 Q8 -5 14 -4 Z"       fill="#FEFDFB" stroke="#F7F3ED" strokeWidth=".4"/>
-        <line x1="-10" y1="-0.5" x2="-4" y2="-0.5" stroke="#A8203A" strokeWidth=".5" strokeLinecap="round"/>
-        <line x1="-10" y1="2"    x2="-4" y2="2"    stroke="#A8203A" strokeWidth=".5" strokeLinecap="round"/>
-        <line x1="-10" y1="4.5"  x2="-4" y2="4.5"  stroke="#A8203A" strokeWidth=".5" strokeLinecap="round"/>
-        <line x1="4"   y1="-0.5" x2="10" y2="-0.5" stroke="#A8203A" strokeWidth=".5" strokeLinecap="round"/>
-        <line x1="4"   y1="2"    x2="10" y2="2"    stroke="#A8203A" strokeWidth=".5" strokeLinecap="round"/>
-        <line x1="4"   y1="4.5"  x2="10" y2="4.5"  stroke="#A8203A" strokeWidth=".5" strokeLinecap="round"/>
-      </g>
-    </svg>
+    <SmartiousCrest size={size} />
     {withText && (
       <div style={{display:'flex',flexDirection:'column',lineHeight:1.1}}>
         <div style={{fontFamily:"'Playfair Display',serif",fontSize: size*0.55, fontWeight:700, color:'#FEFDFB'}}>
