@@ -108,6 +108,12 @@ export const knee = fromGLTF({
       m.material.color.set('#8FC1E3')
     }
   },
+  // Lower the tibia (with the menisci on top of it) away from the femur.
+  explode: [
+    { match: /^(Tibia|Fibula|Lateral meniscus|Medial meniscus|Transverse ligament of knee|.*meniscotibial|Anterior ligament of fibular head|Posterior ligament of fibular head)/, offset: [0, -0.07, 0] },
+    { match: /^(Articular capsule|Anterior cruciate|Posterior cruciate|Superficial part of tibial collateral|Deep part of tibial collateral|Oblique popliteal|Arcuate popliteal|Popliteofibular|Meniscopatellar)/, fade: true },
+  ],
+  explodeLabel: 'Open the joint',
   parts: [
     { id: 'femur', name: 'Femur (thigh bone)', match: /^Femur/, info: 'Its two rounded ends (condyles) roll and glide on the top of the tibia as the knee bends.' },
     { id: 'tibia', name: 'Tibia (shin bone)', match: /^Tibia/, info: 'Carries the body’s weight from the knee to the ankle. Its flat top is covered by cartilage and the menisci.' },
@@ -119,7 +125,7 @@ export const knee = fromGLTF({
     { id: 'mcl', name: 'Collateral ligament', match: /tibial collateral/, info: 'Runs down the inner side of the knee and stops it bending sideways, so the joint moves only like a hinge.' },
     { id: 'capsule', name: 'Joint capsule', match: /^Articular capsule/, info: 'A tough sleeve around the joint. Its lining, the synovial membrane, makes synovial fluid, which fills the joint and lubricates it.' },
   ],
-  status: () => 'The knee is a synovial joint, a hinge joint: it bends and straightens in one direction. Cartilage and synovial fluid reduce friction; ligaments hold the bones together. Seen from behind; turn it round to see the kneecap.',
+  status: () => 'The knee is a synovial joint, a hinge joint: it bends and straightens in one direction. Cartilage and synovial fluid reduce friction; ligaments hold the bones together. Seen from behind; turn it round to see the kneecap, or open the joint to see the cartilage.',
 })
 
 // The right hip: a ball and socket joint (--crop-y). The slider pulls the femur out of its socket.
@@ -152,4 +158,39 @@ export const hip = fromGLTF({
     { id: 'capsule', name: 'Joint capsule', match: /^Articular capsule/, info: 'A tough sleeve around the joint. Its synovial membrane makes synovial fluid, which lubricates the joint.' },
   ],
   status: () => 'The hip is a ball and socket joint: it can move in all directions (forwards, backwards, sideways and round). Compare the knee, a hinge joint that moves one way only. Use the slider to pull the femur out.',
+})
+
+// The skull (--crop-y above the neck), each bone in its own colour as in a school atlas.
+const SKULL_COLOURS = [
+  [/^Frontal bone/, '#E9C46A'], [/^Parietal bone/, '#8AB6D6'], [/^Occipital bone/, '#B39DDB'],
+  [/^Temporal bone/, '#9CCC9C'], [/^Sphenoid bone/, '#F4A261'], [/^Ethmoid bone/, '#EF9A9A'],
+  [/^Zygomatic bone/, '#7FC8C0'], [/^Maxilla/, '#F6C98B'], [/^Mandible/, '#CDA0D8'], [/^Nasal bone/, '#F2A28B'],
+]
+export const skull = fromGLTF({
+  url: '/models/skull-v1.glb',
+  size: 0.4,
+  view: { yaw: 0.5, pitch: 0.1 },
+  materials: (m) => {
+    const name = m.userData?.name || m.parent?.userData?.name || ''
+    const hit = SKULL_COLOURS.find(([re]) => re.test(name))
+    if (hit) { m.material = m.material.clone(); m.material.color.set(hit[1]) }
+  },
+  explode: [{ match: /^(Mandible|Lower )/, offset: [0, -0.05, 0.015] }],
+  explodeLabel: 'Open the jaw',
+  parts: [
+    { id: 'frontal', name: 'Frontal bone', match: /^Frontal bone/, info: 'The forehead and the roofs of the eye sockets. It protects the front of the brain.' },
+    { id: 'parietal', name: 'Parietal bones', match: /^Parietal bone/, side: R, info: 'A pair of bones forming the top and sides of the cranium.' },
+    { id: 'temporal', name: 'Temporal bones', match: /^Temporal bone/, side: R, info: 'At the sides of the skull around the ears. They hold the middle and inner ear, and the jaw hinges on them.' },
+    { id: 'occipital', name: 'Occipital bone', match: /^Occipital bone/, info: 'The back and base of the skull. The spinal cord passes through the large hole in it (the foramen magnum).' },
+    { id: 'sphenoid', name: 'Sphenoid bone', match: /^Sphenoid bone/, side: R, info: 'A butterfly-shaped bone across the base of the skull, joined to all the other cranial bones.' },
+    { id: 'zygomatic', name: 'Zygomatic bones (cheekbones)', match: /^Zygomatic bone/, side: R, info: 'The cheekbones, which form the outer edge of the eye sockets.' },
+    { id: 'nasal', name: 'Nasal bones', match: /^Nasal bone/, info: 'Two small bones forming the bridge of the nose; the rest of the nose is cartilage.' },
+    { id: 'maxilla', name: 'Maxilla (upper jaw)', match: /^Maxilla/, side: R, info: 'Two bones fused together that form the upper jaw and hold the upper teeth. It does not move.' },
+    { id: 'mandible', name: 'Mandible (lower jaw)', match: /^Mandible/, info: 'The only bone of the skull that moves. It hinges on the temporal bones, for chewing and speaking.' },
+    { id: 'incisors', name: 'Incisors', match: /incisor/, side: R, info: 'Flat, chisel-shaped front teeth for biting and cutting food. An adult has eight.' },
+    { id: 'canines', name: 'Canines', match: /canine/, side: R, info: 'Pointed teeth for gripping and tearing food. An adult has four.' },
+    { id: 'premolars', name: 'Premolars', match: /premolar/, side: R, info: 'Teeth with two cusps that crush and grind food. An adult has eight.' },
+    { id: 'molars', name: 'Molars', match: /molar tooth/, side: R, info: 'Large, broad teeth at the back with several cusps, for grinding food. Adults have up to twelve, including wisdom teeth.' },
+  ],
+  status: () => 'The skull: the cranium protects the brain, and the facial bones shape the face. Its bones are joined by sutures, joints that cannot move; only the mandible moves.',
 })
