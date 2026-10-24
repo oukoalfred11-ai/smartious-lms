@@ -154,6 +154,50 @@ router.get('/stats', auth, requireRole('admin', 'ops_manager', 'dos', 'accountan
   }
 });
 
+// GET /programmes-summary — students per programme (live), and for the
+// Principal and Finance this year's invoiced and paid totals per programme.
+const PROGRAMMES = ['Homeschool', 'Tuition', 'IUFP', 'Study Abroad', 'Pre-University'];
+router.get('/programmes-summary', auth, requireRole('admin', 'ops_manager', 'dos', 'accountant', 'sales'), async (req, res) => {
+  try {
+    const counts = await User.aggregate([
+      { $match: { role: 'student' } },
+      { $group: { _id: { programme: { $ifNull: ['$programme', ''] }, active: { $ne: ['$isActive', false] } }, n: { $sum: 1 } } },
+    ]);
+    const yearStart = new Date(Date.UTC(new Date().getUTCFullYear(), 0, 1));
+    const rows = [...PROGRAMMES, ''].map(programme => ({
+      programme,
+      active: counts.filter(c => c._id.programme === programme && c._id.active).reduce((a, c) => a + c.n, 0),
+      inactive: counts.filter(c => c._id.programme === programme && !c._id.active).reduce((a, c) => a + c.n, 0),
+      newThisYear: 0,
+    }));
+    const fresh = await User.aggregate([
+      { $match: { role: 'student', createdAt: { $gte: yearStart } } },
+      { $group: { _id: { $ifNull: ['$programme', ''] }, n: { $sum: 1 } } },
+    ]);
+    fresh.forEach(f => { const r = rows.find(x => x.programme === f._id); if (r) r.newThisYear = f.n; });
+
+    let fees = null;
+    if (['admin', 'accountant'].includes(req.user.role)) {
+      const Invoice = require('../models/Invoice');
+      fees = await Invoice.aggregate([
+        { $match: { issueDate: { $gte: yearStart }, status: { $in: ['sent', 'paid', 'overdue'] } } },
+        { $lookup: { from: 'users', localField: 'studentId', foreignField: '_id', as: 'student' } },
+        { $group: {
+          _id: { programme: { $ifNull: [{ $first: '$student.programme' }, ''] }, currency: '$currency' },
+          invoiced: { $sum: '$totalDue' },
+          // A paid invoice counts in full (older ones have no paidAmount); part-payments on open ones count as paid so far.
+          paid: { $sum: { $cond: [{ $eq: ['$status', 'paid'] }, { $cond: [{ $gt: ['$paidAmount', 0] }, '$paidAmount', '$totalDue'] }, { $ifNull: ['$paidAmount', 0] }] } },
+          count: { $sum: 1 },
+        } },
+        { $project: { _id: 0, programme: '$_id.programme', currency: '$_id.currency', invoiced: 1, paid: 1, count: 1 } },
+      ]);
+    }
+    res.json({ success: true, programmes: rows, fees, since: yearStart });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
 // GET all users (admin only) with advanced search and filtering
 router.get('/', auth, requireRole('admin', 'ops_manager', 'teacher'), async (req, res) => {
   try {
