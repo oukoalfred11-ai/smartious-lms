@@ -3,7 +3,8 @@
    ───────────────────────────────────────────────────────────────────
    The country hubs and main city pages for the January 2027 intake
    markets (the Gulf, Nigeria and Kenya), plus Hong Kong, where the site
-   already ranks for "homeschool" and "online school". The city links are used by the
+   already ranks for "homeschool" and "online school", and Tbilisi and Atlanta
+   (Georgia the country and Georgia, USA). The city links are used by the
    home page and the footer in LandingPage.jsx; both lists are used by
    scripts/seo-static.mjs (static home page and footer), so the app and the
    crawler HTML link to the same pages. Every href must be an indexable
@@ -38,4 +39,6 @@ export const PRIORITY_CITY_LINKS = [
   ['/homeschool-nairobi', 'Nairobi'],
   ['/homeschool-mombasa', 'Mombasa'],
   ['/homeschool-hong-kong-cn', 'Hong Kong'],
+  ['/homeschool-tbilisi-ge', 'Tbilisi, Georgia'],
+  ['/homeschool-atlanta-ga', 'Atlanta, Georgia (USA)'],
 ]

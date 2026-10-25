@@ -59,6 +59,7 @@ export const GEORGIA_CITIES = [
   {
     slug: 'tbilisi-ge',
     name: 'Tbilisi',
+    seoTitle: 'Online School & Homeschool in Tbilisi, Georgia | Smartious',
     county: 'Tbilisi',
     region: 'Capital · the Caucasus\'s relocation and remote-work hub · a growing tech and services economy · home to the country\'s international-school tier and its English-taught universities',
     primaryKeyword: 'Online school and homeschool in Tbilisi',
@@ -435,6 +436,9 @@ export const GEORGIA_COUNTRY = {
   slug: 'georgia',
   name: 'Georgia',
   longName: 'Georgia (Sakartvelo)',
+  seoDesc: 'Online school and homeschool in Georgia (Sakartvelo): live Cambridge IGCSE, A-Level, IB and American AP for Tbilisi and Batumi families. From USD 423/month.',
+  // Not the US state: point families searching for that to the right page.
+  seeAlso: [{ href: '/homeschool-georgia', label: 'Looking for Georgia, USA? Online school and homeschool in Georgia, USA (Atlanta, Savannah, Augusta)' }],
   adjective: 'Georgian',
   flag: '🇬🇪',
   hub: '/online-school/georgia',
