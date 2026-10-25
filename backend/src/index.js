@@ -109,6 +109,7 @@ app.use('/api/paystack',   require('./routes/paystack'));
 app.use('/api/community',  require('./routes/community'));
 app.use('/api/announcements', require('./routes/announcements'));
 app.use('/api/user-logs', require('./routes/user-logs'));
+app.use('/api/mail-suppressions', require('./routes/mail-suppressions'));
 app.use('/api/support', require('./routes/support'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/dm', require('./routes/dm'));
@@ -211,6 +212,10 @@ mongoose.connect(MONGODB_URI)
 
     // Students who graduated or left before lib/studentExit existed are
     // still on upcoming lessons; take them off (idempotent).
+    // Read delivery-failure notices from the school inbox, stop mailing the
+    // addresses that bounced and file the notices away (lib/bounceScanner.js).
+    require('./lib/bounceScanner').startBounceScanner();
+
     require('./lib/studentExit').detachAllLeavers().catch(e => console.error('[leavers] detach', e.message));
 
     // Invoice reminder scheduler: chases unpaid invoices three days

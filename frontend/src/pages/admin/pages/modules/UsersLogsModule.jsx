@@ -6,6 +6,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { api } from '../../../../context/ctx.jsx'
 import { PSection } from '../shared/ui.jsx'
+import BouncedEmailsPanel from './BouncedEmailsPanel.jsx'
 
 const GOLD = '#C9973A', CRIM = '#7D1025', INK = '#231715', MUT = '#8A8378', LINE = '#E5DFD3'
 const GREEN = '#15803D'
@@ -180,6 +181,7 @@ export default function UsersLogsModule({ toast }) {
           )}
         </div>
       </div>
+      <BouncedEmailsPanel toast={toast} />
       <div style={{ fontSize: 10.5, color: MUT }}>{data.method}</div>
     </div>
   )
