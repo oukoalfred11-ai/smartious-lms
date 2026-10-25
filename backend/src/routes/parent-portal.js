@@ -488,7 +488,10 @@ async function sendClassReminders() {
         sent++
         console.log(`[class reminder] ${classHeadline(cls)} · ${student.firstName} ${student.lastName} → ${describeRecipients(resolved)}`)
       } catch (e) {
-        failed = true
+        // A permanent refusal (bad address) is not retried every minute:
+        // mailPolicy has suppressed the address. Only temporary faults retry.
+        if (require('../lib/mailSuppression').isPermanentError(e)) newlyDone.push(String(student._id))
+        else failed = true
         console.error('[class reminder]', resolved.to.join(', '), e.message)
       }
     }
@@ -505,7 +508,11 @@ async function sendClassReminders() {
         })
         newlyDone.push('teacher')
         sent++
-      } catch (e) { failed = true; console.error('[class reminder] teacher', teacher.email, e.message) }
+      } catch (e) {
+        if (require('../lib/mailSuppression').isPermanentError(e)) newlyDone.push('teacher')
+        else failed = true
+        console.error('[class reminder] teacher', teacher.email, e.message)
+      }
     } else if (!done.has('teacher')) newlyDone.push('teacher')
 
     const update = { $addToSet: { remindedRecipients: { $each: newlyDone } } }

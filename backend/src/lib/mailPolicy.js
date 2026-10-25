@@ -23,6 +23,10 @@
  *                     regardless of which SMTP service is underneath
  *                     now or in the future.
  *
+ *   SUPPRESSION     — no system email goes to an address that bounced
+ *                     or was refused before (lib/mailSuppression.js),
+ *                     gate bypass or not; a refused send records it.
+ *
  *   RECIPIENT GATE  — no system email reaches an archived account,
  *                     a paused (on break) student, or a deactivated
  *                     student or parent, whichever of the many send
@@ -150,7 +154,40 @@ nodemailer.createTransport = function patchedCreateTransport(...args) {
         }
       }
 
-      return send(out);
+      // ── Suppressed addresses (bounced or rejected before) ──
+      // Applies to every mail, gate bypass or not: a dead address only
+      // fills the school inbox with failure notices.
+      let ms = null;
+      try {
+        ms = require('./mailSuppression');
+        const dead = await ms.suppressedSet([...normalizeAddresses(out.to), ...normalizeAddresses(out.cc)]);
+        if (dead.size) {
+          const keptTo = filterField(out.to, dead);
+          const keptCc = filterField(out.cc, dead);
+          console.log('[mailPolicy] suppressed (bounced before): ' + [...dead].join(', ') + ' from "' + (out.subject || 'no subject') + '"');
+          if (!keptTo.length) {
+            return { accepted: [], rejected: [], messageId: 'skipped-suppressed', suppressedSkip: true };
+          }
+          out.to = keptTo.join(', ');
+          if (out.cc !== undefined) out.cc = keptCc.length ? keptCc.join(', ') : undefined;
+        }
+      } catch (e) {
+        console.error('[mailPolicy] suppression check failed, sending anyway:', e.message);
+      }
+
+      try {
+        const result = await send(out);
+        // Partly refused (some recipients rejected outright): never mail those again.
+        if (ms && result && result.rejected && result.rejected.length) {
+          ms.suppress(ms.rejectedAddresses(result), 'rejected', result.response || '').catch(() => {});
+        }
+        return result;
+      } catch (err) {
+        if (ms && ms.isPermanentError(err)) {
+          ms.suppress(ms.rejectedAddresses(err, out), 'rejected', err.response || err.message).catch(() => {});
+        }
+        throw err;
+      }
     };
 
     if (typeof callback === 'function') {
