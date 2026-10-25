@@ -25,9 +25,12 @@ export function guidesFor(hubSlug, place = '', n = 4) {
     .filter(([, a]) => a.country === code)
     .map(([slug, a], i) => {
       const hay = (a.t + ' ' + slug.replace(/-/g, ' ')).toLowerCase()
-      return { slug, title: a.t, i, featured: !!a.featured, named: ps.some(x => hay.includes(x)) }
+      // The country's own "Online School in …" / "Virtual School in …" guides rank
+      // with the featured ones, so a hub with many guides still links them.
+      const school = /^(online|virtual)-school-/.test(slug) && slug.includes(code)
+      return { slug, title: a.t, i, featured: !!a.featured || school, named: ps.some(x => hay.includes(x)) }
     })
-    // Place-named first, then featured guides, then the newest.
+    // Place-named first, then featured (and the country's school guides), then the newest.
     .sort((a, b) => Number(b.named) - Number(a.named) || Number(b.featured) - Number(a.featured) || b.i - a.i)
     .slice(0, n)
     .map(({ slug, title }) => ({ slug, title }))

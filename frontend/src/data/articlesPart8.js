@@ -24,7 +24,7 @@ export const ARTICLES_PART_8 = {
 
   // ═══════════════ COUNTRY GUIDE: USA ═══════════════
   'homeschooling-usa-2026-guide': {
-    cat:'online-school', country:'', featured:true,
+    cat:'online-school', country:'usa', featured:true,
     img:'linear-gradient(135deg,#0A1020,#8B1A2E)', splash:'https://images.unsplash.com/photo-1569931727762-93b30b4e3bc2?w=1200&q=75', splashAlt:'An American student learning at home through a live online class',
     t:'Homeschooling in the USA: The Complete 2026 Guide for Parents',
     date:'August 2026 \u00b7 13 min read',
@@ -63,7 +63,7 @@ export const ARTICLES_PART_8 = {
 
   // ═══════════════ COUNTRY GUIDE: CANADA ═══════════════
   'homeschooling-canada-2026-guide': {
-    cat:'online-school', country:'', featured:true,
+    cat:'online-school', country:'canada', featured:true,
     img:'linear-gradient(135deg,#0A1020,#1E5AA8)', splash:'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&q=75', splashAlt:'A Canadian student in a live online lesson at the family kitchen table',
     t:'Homeschooling in Canada: The Complete 2026 Guide for Parents',
     date:'August 2026 \u00b7 13 min read',
@@ -101,7 +101,7 @@ export const ARTICLES_PART_8 = {
 
   // ═══════════════ COUNTRY GUIDE: UK ═══════════════
   'homeschooling-uk-2026-guide': {
-    cat:'online-school', country:'', featured:true,
+    cat:'online-school', country:'united-kingdom', featured:true,
     img:'linear-gradient(135deg,#0A1020,#C9973A)', splash:'/blog/homeschool-uk-guide.jpg', splashAlt:'A British student studying at home with a live online teacher on screen',
     t:'Homeschooling in the UK: The Complete 2026 Guide for Parents',
     date:'August 2026 \u00b7 14 min read',
@@ -140,7 +140,7 @@ export const ARTICLES_PART_8 = {
 
   // ═══════════════ UK DEEP ARTICLE: THE 2026 ACT ═══════════════
   'childrens-wellbeing-schools-act-2026-home-education': {
-    cat:'online-school', country:'', featured:true,
+    cat:'online-school', country:'united-kingdom', featured:true,
     img:'linear-gradient(135deg,#1A0F14,#8B1A2E)', splash:'https://images.unsplash.com/photo-1543832923-44667a44c804?w=1200&q=75', splashAlt:'A parent reading official guidance at a kitchen table beside a child studying',
     t:'The Children\u2019s Wellbeing and Schools Act 2026: A Plain English Guide for Home Educating Parents',
     date:'August 2026 \u00b7 11 min read',
@@ -177,7 +177,7 @@ export const ARTICLES_PART_8 = {
 
   // ═══════════════ UK DIASPORA WEDGE ═══════════════
   'african-parents-uk-online-school': {
-    cat:'online-school', country:'', featured:true,
+    cat:'online-school', country:'united-kingdom', featured:true,
     img:'linear-gradient(135deg,#0A1020,#C9973A)', splash:'/blog/homeschool-uk-guide.jpg', splashAlt:'A family in the UK joining a live class taught from Nairobi',
     t:'For African Parents in the UK: Home Standards for Your Child, Without Sending Them Home',
     date:'August 2026 \u00b7 10 min read',
@@ -216,7 +216,7 @@ export const ARTICLES_PART_8 = {
 
   // ═══════════════ CANADA DEEP ARTICLE: THE OSSD PROBLEM ═══════════════
   'ossd-homeschool-ontario-university': {
-    cat:'online-school', country:'', featured:true,
+    cat:'online-school', country:'canada', featured:true,
     img:'linear-gradient(135deg,#0A1020,#1E5AA8)', splash:'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=1200&q=75', splashAlt:'An Ontario student planning university applications at a desk',
     t:'The OSSD Problem: How Homeschooled Ontario Students Actually Reach University',
     date:'August 2026 \u00b7 11 min read',

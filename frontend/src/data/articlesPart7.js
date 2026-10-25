@@ -29,7 +29,7 @@ export const ARTICLES_PART_7 = {
 
   // ═══════════════ AFRICA ═══════════════
   'best-online-virtual-homeschool-africa': {
-    cat:'online-school', country:'', featured:true,
+    cat:'online-school', country:'global', featured:true,
     img:'linear-gradient(135deg,#0A1020,#8B1A2E)', splash:'https://images.unsplash.com/photo-1577086664693-894d8405334a?w=1200&q=75', splashAlt:'A student in Africa working through a live online lesson at home',
     t:'Online, Virtual and Homeschool Education in Africa: A Country-by-Country Guide',
     date:'August 2026 \u00b7 12 min read',
@@ -81,7 +81,7 @@ export const ARTICLES_PART_7 = {
 
   // ═══════════════ ASIA AND THE PACIFIC ═══════════════
   'best-online-virtual-homeschool-asia': {
-    cat:'online-school', country:'', featured:true,
+    cat:'online-school', country:'global', featured:true,
     img:'linear-gradient(135deg,#06121A,#8B1A2E)', splash:'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&q=75', splashAlt:'A student in Asia joining a live online class from home',
     t:'Online, Virtual and Homeschool Education in Asia and the Pacific: A Country-by-Country Guide',
     date:'August 2026 \u00b7 13 min read',
@@ -142,7 +142,7 @@ export const ARTICLES_PART_7 = {
 
   // ═══════════════ EUROPE ═══════════════
   'best-online-virtual-homeschool-europe': {
-    cat:'online-school', country:'', featured:true,
+    cat:'online-school', country:'global', featured:true,
     img:'linear-gradient(135deg,#0A1A14,#1E2F5F)', splash:'https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=1200&q=75', splashAlt:'A student in Europe studying at home with an online lesson on screen',
     t:'Online, Virtual and Homeschool Education in Europe: A Country-by-Country Guide',
     date:'August 2026 \u00b7 13 min read',
@@ -208,7 +208,7 @@ export const ARTICLES_PART_7 = {
 
   // ═══════════════ THE AMERICAS ═══════════════
   'best-online-virtual-homeschool-americas': {
-    cat:'online-school', country:'', featured:true,
+    cat:'online-school', country:'global', featured:true,
     img:'linear-gradient(135deg,#0A1020,#1E2F5F)', splash:'https://images.unsplash.com/photo-1569931727762-93b30b4e3bc2?w=1200&q=75', splashAlt:'A student in the Americas learning at home in a live online class',
     t:'Online, Virtual and Homeschool Education in the Americas: A Country-by-Country Guide',
     date:'August 2026 \u00b7 13 min read',
@@ -269,7 +269,7 @@ export const ARTICLES_PART_7 = {
   // FIGURES: every number here is verifiable against the site itself.
   // If a figure changes, change it here too.
   'smartious-homeschool-global': {
-    cat:'homeschool', country:'', featured:true,
+    cat:'homeschool', country:'global', featured:true,
     img:'linear-gradient(135deg,#080C14,#8B1A2E)', splash:'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1200&q=75', splashAlt:'Homeschooled students in different countries learning together in a live Smartious online class',
     t:'Online, Virtual and Homeschool Education in Ninety-Nine Countries \u2014 the Guides and the School Behind Them',
     date:'August 2026 \u00b7 14 min read',
