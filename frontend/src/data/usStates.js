@@ -159,8 +159,10 @@ export const US_STATES = {
     accentColor: '#C13E80',
     pitch: 'Live Cambridge IGCSE and A-Level for Georgia families. Preserves HOPE Scholarship eligibility while strengthening Georgia Tech, Emory, and Ivy League applications.',
     proof: 'HOPE Scholarship covers up to 100% of tuition at UGA, Georgia Tech and other GA universities — homeschool graduates are fully eligible.',
-    metaTitle: 'Online Homeschool Georgia — HOPE Scholarship Eligible | Live Cambridge IGCSE & A-Level | Smartious',
-    metaDesc: 'Live online homeschool for Georgia families. Cambridge IGCSE and A-Level — preserves HOPE Scholarship eligibility. Built for UGA, Georgia Tech, Emory, Spelman and Morehouse. From USD 423 per month.',
+    metaTitle: 'Georgia Online School & Homeschool (USA) | HOPE Scholarship',
+    metaDesc: 'K-12 online school and homeschool for Georgia, USA families in Atlanta, Savannah and Augusta: live classes, HOPE Scholarship eligible. From USD 423/month.',
+    // Not the country: point families in Tbilisi or Batumi to the right page.
+    seeAlso: [{ href: '/online-school/georgia', label: 'Looking for Georgia the country? Online school and homeschool in Tbilisi and Batumi' }],
     faqs: [
       { q: 'Can Smartious teach Georgia homeschool students under Declaration of Intent rules?', a: 'Yes. Georgia requires homeschool families to file an annual Declaration of Intent (DOI) between September 1–30 with the local school superintendent, maintain attendance records (180 days of instruction), and complete standardised testing every 3 years. Smartious meets all instructional and record-keeping requirements — we provide transcripts and curriculum documentation aligned with Georgia\'s DOI process.' },
       { q: 'How much does Smartious cost for Georgia families in USD?', a: 'Tuition starts from USD 423 per month, and the exact figure depends on the pathway, the year group and the subjects your child takes. Request pricing through the enrolment form and we send the full structure the same day. Every programme includes live qualified teachers, recorded lessons for review, marked work and termly reports, with no surprise fees.' },

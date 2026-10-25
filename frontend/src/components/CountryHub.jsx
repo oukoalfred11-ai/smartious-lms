@@ -139,6 +139,12 @@ function CountryHub({
           </h1>
           <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
           <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
+          {/* A place that shares its name with another (Georgia): link the other page. */}
+          {(country.seeAlso || []).map(l => (
+            <p key={l.href} style={{fontSize:14,marginTop:-12,marginBottom:22}}>
+              <a href={l.href} onClick={(e) => { if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return; e.preventDefault(); nav(l.href); window.scrollTo(0, 0) }} style={{color:V.gold3}}>{l.label} →</a>
+            </p>
+          ))}
           <div style={{display:'flex',gap:14,flexWrap:'wrap',alignItems:'center'}}>
             <a href={'/assessment?from=' + country.slug} onClick={(e) => { if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return; e.preventDefault(); nav('/assessment?from=' + country.slug) }}
               style={{textDecoration:'none',background:V.gold3,color:V.ink,border:'none',padding:'18px 36px',borderRadius:10,fontSize:16,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,letterSpacing:'.01em',boxShadow:'0 8px 24px rgba(201,151,58,.35)',transition:'all .18s ease'}}

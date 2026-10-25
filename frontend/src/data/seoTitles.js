@@ -60,6 +60,8 @@ HUB_TITLES['/online-school/uae'] = 'Homeschooling & Online School in Dubai & UAE
 // USA and Canada lead with the American curriculum and the OSSD (src/data/naFocus.js).
 HUB_TITLES['/online-school/usa'] = 'K-12 Online School in the USA | American Curriculum & AP'
 HUB_TITLES['/online-school/canada'] = 'Online OSSD School & Homeschool in Canada | Smartious'
+// Georgia the country, not the US state (/homeschool-georgia): name the capital.
+HUB_TITLES['/online-school/georgia'] = 'Online School & Homeschool in Georgia (Tbilisi) | Smartious'
 
 // ── Nairobi tuition areas (/tuition/<slug>) ──────────────────
 // Keeps the area's own wording: "Tuition Along Thika Road", and no

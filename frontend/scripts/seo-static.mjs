@@ -598,7 +598,7 @@ for (const { file, country: c, cities } of CITY_FILES) {
   // The country data's own seoTitle/seoDesc/h1 are the tuned values; the app uses them too.
   add({ path: c.hub, title: c.seoTitle || (m && m.title) || 'Online School in ' + name + ' | IGCSE, A-Level & IB | Smartious', desc: c.seoDesc || (m && m.desc) || c.heroSubhead,
     h1: c.h1 || 'Online School & Homeschool in ' + (c.heroH1Suffix || name), body: [
-      p(c.heroSubhead), p(c.heroValueProp),
+      p(c.heroSubhead), p(c.heroValueProp), c.seeAlso?.length ? links(c.seeAlso) : '',
       cityLinks.length ? h2(c.citiesSectionTitle || 'Cities') + p(c.citiesSectionBody) + links(cityLinks) : '',
       c.legalFramework?.length ? h2('Homeschool laws and regulation in ' + name) + p(c.legalFrameworkIntro) + c.legalFramework.map(x => h3(x.h) + p(x.p)).join('') : '',
       c.whySmartious?.length ? h2('Why ' + name + ' families choose Smartious') + c.whySmartious.map(x => x && x.h ? h3(x.h) + p(x.p) : p(itemText(x))).join('') : '',
@@ -706,7 +706,7 @@ function regionPage({ slug, s, country, hub, childLinks, parent, src }) {
   const m = naMeta(ca ? 'ca' : 'us', { slug, name: s.name, oldTitle: s.metaTitle, oldDesc: s.metaDesc })
   return add({ path, title: m.title, desc: m.desc || clip(s.pitch),
     h1: (ca ? CA_HEADLINE : US_HEADLINE) + ' for ' + s.name + (parent ? ', ' + parent.name : '') + ' Families', body: [
-      p(ca ? caLead(s.name) : usLead(s.name)), p(s.pitch), p(s.proof), p(s.uniqueHook), p(s.metroPop),
+      p(ca ? caLead(s.name) : usLead(s.name)), s.seeAlso?.length ? links(s.seeAlso) : '', p(s.pitch), p(s.proof), p(s.uniqueHook), p(s.metroPop),
       bullets([['Homeschool rules', [s.difficulty, s.difficultyDetail].filter(Boolean).join(' — ')], ['Paperwork', s.paperworkLevel], ['Live class times', [s.classTime, s.classTimeBenefit].filter(Boolean).join(' — ')], ['Exam centres', s.examCentre], ['Population', [s.pop, s.popLabel].filter(Boolean).join(' ')]].filter(r => r[1])),
       s.legalSummary ? h2('Homeschool law in ' + s.name) + p(s.legalSummary) : '',
       s.universities?.length || s.topUnis?.length ? h2('University pathways') + bullets(s.universities || s.topUnis) : '',
@@ -885,7 +885,7 @@ const crumbLd = (pg) => {
     itemListElement: list.map(([name, path], i) => ({ '@type': 'ListItem', position: i + 1, name: clip(name, 80), item: ORIGIN + (path === '/' ? '/' : href(path)) })),
   }
 }
-const KEY_HUBS = ['kenya', 'uae', 'qatar', 'saudi-arabia', 'kuwait', 'bahrain', 'oman', 'nigeria', 'united-kingdom', 'usa', 'canada', 'south-africa', 'australia', 'india', 'germany']
+const KEY_HUBS = ['kenya', 'uae', 'qatar', 'saudi-arabia', 'kuwait', 'bahrain', 'oman', 'nigeria', 'united-kingdom', 'usa', 'canada', 'south-africa', 'australia', 'india', 'germany', 'georgia']
 const FOOT_HUBS = KEY_HUBS.map(s => byPath.get('/online-school/' + s)).filter(Boolean)
   .map(pg => `<a href="${pg.path}">${esc(pg.crumbs?.[0]?.[0] || pg.path.split('/').pop())}</a>`).join(' · ')
 

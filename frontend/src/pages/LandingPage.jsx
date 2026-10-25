@@ -1884,7 +1884,7 @@ const PAGE_META = {
   },
   'homeschooling-georgia': {
     title: 'Online School, Virtual School & Homeschool Georgia (Tbilisi) | Cambridge IGCSE, A-Level, IB — Smartious',
-    desc: 'Online, virtual school & homeschool for Georgia (the country). Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Tbilisi, Batumi, Kutaisi, Rustavi, Gudauri, and Kakheti. The eksternati route planned properly, the 2024 grade-ten boundary stated exactly, and secondary school optional after it. From USD 423/month.',
+    desc: 'Online school and homeschool in Georgia (Sakartvelo): live Cambridge IGCSE, A-Level, IB and American AP for Tbilisi and Batumi families. From USD 423/month.',
   },
   'homeschooling-azerbaijan': {
     title: 'Online School, Virtual School & Homeschool Azerbaijan | Cambridge IGCSE, A-Level, IB — Smartious',
@@ -12166,6 +12166,12 @@ export default function LandingPage() {
               <p style={{fontSize:'clamp(.95rem,1.4vw,1.05rem)',color:'rgba(255,255,255,.72)',maxWidth:760,lineHeight:1.6,marginTop:-14,marginBottom:28}}>
                 {s.pitch}
               </p>
+              {/* A place that shares its name with another (Georgia): link the other page. */}
+              {(s.seeAlso || []).map(l => (
+                <p key={l.href} style={{fontSize:14,marginTop:-14,marginBottom:24}}>
+                  <a href={l.href} onClick={linkClick(() => nav(l.href))} style={{color:'#fff',textDecoration:'underline'}}>{l.label} →</a>
+                </p>
+              ))}
               <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:36}}>
                 <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('consult_booked'); nav('/assessment') })}
                   style={{background:s.accentColor,color:V.ink,border:'none',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',letterSpacing:'.01em'}}>
@@ -24248,7 +24254,7 @@ function Footer({ P }) {
           <div>
             <div className="ft-ch">Online School</div>
             <ul className="ft-lk">
-              {[['kenya','Kenya'],['uae','UAE & Dubai'],['united-kingdom','United Kingdom'],['usa','USA'],['canada','Canada'],['nigeria','Nigeria'],['south-africa','South Africa'],['saudi-arabia','Saudi Arabia'],['qatar','Qatar'],['kuwait','Kuwait'],['bahrain','Bahrain'],['oman','Oman'],['australia','Australia']].map(([slug, l]) => (
+              {[['kenya','Kenya'],['uae','UAE & Dubai'],['united-kingdom','United Kingdom'],['usa','USA'],['canada','Canada'],['nigeria','Nigeria'],['south-africa','South Africa'],['saudi-arabia','Saudi Arabia'],['qatar','Qatar'],['kuwait','Kuwait'],['bahrain','Bahrain'],['oman','Oman'],['australia','Australia'],['georgia','Georgia (Tbilisi)']].map(([slug, l]) => (
                 <li key={slug}><a {...go('/online-school/' + slug, () => footerNav('/online-school/' + slug))}>{l}</a></li>
               ))}
             </ul>
