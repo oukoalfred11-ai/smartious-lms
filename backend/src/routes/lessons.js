@@ -467,10 +467,15 @@ router.get('/student/my-subjects', auth, async (req, res) => {
       .populate('teacherId', 'firstName lastName isActive isOnLeave')
       .lean();
 
-    // Filter to allocations whose teacher is still active
-    const valid = allocations.filter(a =>
-      a.teacherId && a.teacherId.isActive && a.subjectId
-    );
+    // Lessons belong to the subject (MODEL A below), so a subject stays
+    // visible when its teacher's account is deactivated or missing; the
+    // student must not lose their content. The teacher name is then blank.
+    const seen = new Set();
+    const valid = allocations.filter(a => {
+      if (!a.subjectId || seen.has(String(a.subjectId._id))) return false;
+      seen.add(String(a.subjectId._id));
+      return true;
+    });
 
     if (valid.length === 0)
       return res.json({ success: true, data: { subjects: [] } });
@@ -496,8 +501,8 @@ router.get('/student/my-subjects', auth, async (req, res) => {
         category:    a.subjectId.category,
         color:       a.subjectId.color,
         coverImage:  a.subjectId.coverImage,
-        teacherId:   a.teacherId._id,
-        teacherName: (a.teacherId.firstName || '') + ' ' + (a.teacherId.lastName || ''),
+        teacherId:   a.teacherId && a.teacherId.isActive ? a.teacherId._id : null,
+        teacherName: a.teacherId && a.teacherId.isActive ? ((a.teacherId.firstName || '') + ' ' + (a.teacherId.lastName || '')).trim() : '',
         lessonCount: totalLessons,
         masteredCount,
         progressPct: totalLessons > 0
@@ -531,8 +536,8 @@ router.get('/student/subject/:subjectId', auth, async (req, res) => {
 
     if (!allocation)
       return res.status(403).json({ success: false, message: 'Not enrolled in this subject.' });
-    if (!allocation.teacherId || !allocation.teacherId.isActive)   // a teacher on leave keeps their students
-      return res.status(403).json({ success: false, message: 'No active teacher allocated.' });
+    // The lessons belong to the subject: an inactive or missing teacher does
+    // not lock the student out of them (a teacher on leave keeps their students).
 
     const lessons = await Lesson.find({
       subjectId: req.params.subjectId,
@@ -543,11 +548,11 @@ router.get('/student/subject/:subjectId', auth, async (req, res) => {
       success: true,
       data: {
         lessons,
-        teacher: {
+        teacher: allocation.teacherId && allocation.teacherId.isActive ? {
           _id:       allocation.teacherId._id,
           firstName: allocation.teacherId.firstName,
           lastName:  allocation.teacherId.lastName,
-        },
+        } : null,
       },
     });
   } catch (e) {

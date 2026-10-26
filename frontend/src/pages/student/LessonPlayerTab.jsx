@@ -381,7 +381,7 @@ function StudentSubjectCard({ subject, onOpen }) {
           {subject.subjectName}
         </div>
         <div style={{ fontSize: 11.5, color: BRAND.inkMute, marginBottom: 12 }}>
-          {subject.teacherName}
+          {subject.teacherName || 'Teacher to be assigned'}
         </div>
 
         <div style={{

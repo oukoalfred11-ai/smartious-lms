@@ -559,6 +559,9 @@ export default function StudentPortal() {
   const [curriculumExpandedSubject, setCurriculumExpandedSubject] = useState(null)
   // Map of subjectName → [homework items], fetched once when curriculum is opened
   const [curriculumHwBySubject, setCurriculumHwBySubject] = useState(null)
+  // The subjects allocated to the student (with a teacher), used by the
+  // curriculum page when the student record's own subject list is empty.
+  const [allocatedSubjects, setAllocatedSubjects] = useState([])
 
   // Fetch the student's homework list the first time they open the curriculum
   // page, then group by subject for per-card counts. Refresh whenever the
@@ -584,6 +587,10 @@ export default function StudentPortal() {
         // Non-fatal — cards just won't show homework counts
         if (!cancelled) setCurriculumHwBySubject({})
       }
+      try {
+        const { data } = await api.get('/lessons/student/my-subjects')
+        if (!cancelled) setAllocatedSubjects(data?.data?.subjects || [])
+      } catch { /* the record's own subjects still show */ }
     })()
     return () => { cancelled = true }
   }, [page])
@@ -1353,13 +1360,18 @@ export default function StudentPortal() {
                 />
               )
             }
-            const enrolledCurriculum = user?.curriculum || ''
+            const enrolledCurriculum = user?.curriculum || allocatedSubjects[0]?.curriculum || ''
             const enrolledGrade      = user?.gradeLevel || user?.grade || ''
             // user.subjects is the canonical source per the User model
-            // (string array, e.g. ['Mathematics','Physics','Chemistry'])
-            const enrolledSubjects   = Array.isArray(user?.subjects)
+            // (string array, e.g. ['Mathematics','Physics','Chemistry']).
+            // When it is empty, the allocated subjects stand in, so a
+            // student set up through allocations alone still sees cards.
+            const recordSubjects     = Array.isArray(user?.subjects)
               ? user.subjects.filter(Boolean)
               : []
+            const enrolledSubjects   = recordSubjects.length
+              ? recordSubjects
+              : [...new Set(allocatedSubjects.map(s => s.subjectName).filter(Boolean))]
 
             // Curriculum metadata (display name, org, description) from store
             const curriculumInfo = store.curricula?.find(c =>
