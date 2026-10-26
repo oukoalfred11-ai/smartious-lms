@@ -856,7 +856,7 @@ function SyllabusSpineTab({ toast }) {
               }}>Load Cambridge Lower Secondary spine</button>
             )}
             {(curriculum === 'CambridgeIGCSE' || curriculum === 'EdexcelIGCSE') && (
-              <button onClick={loadIgcseSpine} disabled={busy} title="Auto-detects which IGCSE spine matches the selected subject. Cambridge and Edexcel IGCSE share the same teaching content and lesson sequence — they differ only in exam papers." style={{
+              <button onClick={loadIgcseSpine} disabled={busy} title="Auto-detects which IGCSE spine matches the selected subject, for the board selected on the left. Where the boards differ (Chemistry: Cambridge 0620 vs Edexcel 4CH1), make sure the right board is selected before loading." style={{
                 background: '#fff', color: '#9A7B16', border: '1.5px dashed ' + TOKENS.gold,
                 borderRadius: 7, padding: '8px 16px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
               }}>Load IGCSE spine</button>
