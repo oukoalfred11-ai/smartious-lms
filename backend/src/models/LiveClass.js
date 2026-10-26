@@ -253,15 +253,9 @@ liveClassSchema.index({ teacherId: 1, outcome: 1, scheduledAt: -1 });
 
 // Virtual: computed status — accounts for the actual date even if the
 // `status` field hasn't been flipped yet.
+// Open to join for the whole set period (lib/classWindow.js).
 liveClassSchema.virtual('computedStatus').get(function() {
-  if (this.status === 'cancelled' || this.status === 'ended') return this.status;
-  if (this.status === 'live') return 'live';
-  const now = Date.now();
-  const start = new Date(this.scheduledAt).getTime();
-  const end   = start + (this.durationMins || 0) * 60000;
-  if (now < start)  return 'scheduled';
-  if (now <= end)   return 'live';
-  return 'ended';
+  return require('../lib/classWindow').classStatus(this);
 });
 
 liveClassSchema.set('toJSON',   { virtuals: true });

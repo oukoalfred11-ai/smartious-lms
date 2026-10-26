@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { api } from '../../../../context/ctx.jsx'
 import { AnalyticsStrip } from '../shared/charts.jsx'
 import { TOKENS } from '../shared/tokens.js'
+import { joinClassroom } from '../../../../lib/joinClassroom.js'
 
 const LINE = TOKENS.line || '#EAE4DC'
 const S600 = TOKENS.s600 || '#6B5D57'
@@ -72,7 +73,7 @@ export default function LiveClassesModule({ toast }) {
       toast?.ok?.('Recording deleted.')
     } catch { toast?.error?.('Could not delete.') }
   }
-  const joinClass = (id) => window.open(`/classroom/${id}`, '_blank', 'noopener')
+  const joinClass = (id) => joinClassroom(id)
 
   const card = { background: '#fff', border: `1.5px solid ${LINE}`, borderRadius: 14, padding: 18 }
   const btn = (kind) => ({

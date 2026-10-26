@@ -33,6 +33,7 @@ import QuizGame from './QuizGame.jsx'
 import AchievementTab from './AchievementTab.jsx'
 import LibraryViewer from '../../components/LibraryViewer.jsx'
 import MobileTabBar, { MORE_TAB, useIsPhone, useBackHandler } from '../../components/ui/MobileTabBar.jsx'
+import { joinClassroom } from '../../lib/joinClassroom.js'
 // ── Badge icon SVGs ───────────────────────────────────────
 const BADGE_ICONS = {
   streak_7:    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#F97316" strokeWidth="2" strokeLinecap="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3z"/></svg>,
@@ -3636,7 +3637,8 @@ function LiveClassesTab({ user, toast, goTo }) {
 function LiveClassCard({ lc, subjectColour, fmtDateTime, countdownText, canJoin, toast, goTo, muted }) {
   const { user } = useAuth()
   // In person for this student (same rule as backend lib/learningMode.js):
-  // an In-person student, or a lesson held at the centre. No join button.
+  // an In-person student, or a lesson held at the centre. They can still
+  // join online (Join online), for days nobody can reach the centre.
   const inPerson = /in.?person|physical|centre|center/i.test(user?.deliveryMode || '') || lc.deliveryMode === 'physical'
   const col = subjectColour(lc.subject)
   const isLive = lc.computedStatus === 'live'
@@ -3650,11 +3652,13 @@ function LiveClassCard({ lc, subjectColour, fmtDateTime, countdownText, canJoin,
     // (mobile friendly; leaving returns to the portal). Link classes
     // open the external meeting in a new tab, exactly as before.
     if (lc.classroomMode === 'native') {
-      window.location.assign('/classroom/' + lc._id)
+      joinClassroom(lc._id)
       return
     }
+    // No outside link (e.g. a centre lesson moved online for the day):
+    // every lesson has a Smartious Classroom room, so use that.
     if (!lc.meetingLink) {
-      toast?.error?.('No meeting link set for this class.')
+      joinClassroom(lc._id)
       return
     }
     window.open(lc.meetingLink, '_blank', 'noopener,noreferrer')
@@ -3688,9 +3692,22 @@ function LiveClassCard({ lc, subjectColour, fmtDateTime, countdownText, canJoin,
       ]}
       meta={lc.preparationLessonId?.title ? `Prep: ${lc.preparationLessonId.title}` : null}
       footer={
-        inPerson && !isEnded ? (
+        inPerson && !isEnded && (isLive || canJoin?.(lc)) ? (
+          // Centre lessons can also be joined online, so learning goes on
+          // on days nobody can reach the centre (protests, closures).
+          <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+            <div style={{ fontSize:12, color:'var(--s500)', textAlign:'center' }}>
+              At the centre{isLive ? ' \u2014 in progress' : ''} \u00b7 can't come in? Join online
+            </div>
+            <button className="btn btn-p"
+              style={{ width:'100%', justifyContent:'center', background:col, borderColor:col }}
+              onClick={onJoin}>
+              Join online
+            </button>
+          </div>
+        ) : inPerson && !isEnded ? (
           <div style={{ fontSize:12, color:'var(--s500)', textAlign:'center' }}>
-            At the centre{isLive ? ' \u2014 in progress' : ''}
+            At the centre \u00b7 you can also join online from here at lesson time
           </div>
         ) : isLive || canJoin?.(lc) ? (
           <button className="btn btn-p"

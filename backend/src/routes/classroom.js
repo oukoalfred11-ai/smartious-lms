@@ -502,15 +502,8 @@ router.get('/live/all', auth, requireRole(...ADMIN), async (req, res) => {
       .select('title subject grade kind scheduledAt durationMins status endedAt recordings assignedStudents teacherId')
       .lean();
 
-    const effective = (c) => {
-      if (c.status === 'ended') return 'ended';
-      const start = new Date(c.scheduledAt).getTime();
-      const end = start + (c.durationMins || 60) * 60000;
-      if (c.status === 'live') return now.getTime() - end > 6 * 3600 * 1000 ? 'ended' : 'live';
-      if (now.getTime() < start) return 'scheduled';
-      if (now.getTime() <= end) return 'live';
-      return 'ended';
-    };
+    const { classStatus } = require('../lib/classWindow');
+    const effective = (c) => classStatus(c, now);
 
     const shape = (c, eff) => ({
       _id: c._id, title: c.title, subject: c.subject, grade: c.grade,

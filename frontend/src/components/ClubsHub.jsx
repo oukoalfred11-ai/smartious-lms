@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { api } from '../context/ctx.jsx'
 import HeroPanelVideo from './HeroPanelVideo.jsx'
+import { joinClassroom } from '../lib/joinClassroom.js'
 
 /**
  * ClubsHub: the Smartious Clubs experience for students (and parents, read
@@ -123,7 +124,7 @@ export default function ClubsHub({ user, toast, readOnly = false }) {
       refreshDetail(clubId); load()
     } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not schedule.') }
   }
-  const joinMeeting = (id) => window.open('/classroom/' + id, '_blank', 'noopener')
+  const joinMeeting = (id) => joinClassroom(id)
 
   const mine = clubs.filter(c => c.isMember || c.isLeader)
   const led = clubs.filter(c => c.isLeader)

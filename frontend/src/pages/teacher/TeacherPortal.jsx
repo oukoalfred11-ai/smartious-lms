@@ -21,6 +21,7 @@ import { LessonsToClose, ExtraLessonForm, MissedSessions } from '../../component
 import { HelpRequests } from '../../components/lessons/LessonPlan.jsx'
 import HomeworkEditor from '../../components/lessons/HomeworkEditor.jsx'
 import EndOfLessonOverlay from '../../components/lessons/EndOfLessonOverlay.jsx'
+import { joinClassroom } from '../../lib/joinClassroom.js'
 
 // ──────────────────────────────────────────────────────
 // DESIGN TOKENS — mirrors the admin Dashboard's TOKENS
@@ -14914,7 +14915,7 @@ function MyClassesTab({ user, toast, onEndLesson }) {
                         const soonOrLive = cls.status === 'live' || (isToday && start - Date.now() < 6 * 3600e3)
                         if (cls.status === 'cancelled' || !soonOrLive) return null
                         return (
-                          <button onClick={() => window.open('/classroom/' + cls._id, '_blank')}
+                          <button onClick={() => joinClassroom(cls._id)}
                             style={{ padding: '5px 12px', borderRadius: 7, border: 'none', background: cls.status === 'live' ? '#15803D' : '#7D1025', color: '#fff', fontSize: 10.5, fontWeight: 800, cursor: 'pointer' }}>
                             {cls.status === 'live' ? 'Join live' : 'Start class'}
                           </button>

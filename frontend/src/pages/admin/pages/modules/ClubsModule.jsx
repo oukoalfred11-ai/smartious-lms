@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { api } from '../../../../context/ctx.jsx'
 import { TOKENS } from '../shared/tokens.js'
+import { joinClassroom } from '../../../../lib/joinClassroom.js'
 
 const LINE = TOKENS.line || '#EAE4DC'
 const S600 = TOKENS.s600 || '#6B5D57'
@@ -229,7 +230,7 @@ export default function ClubsModule({ toast }) {
               <div key={m._id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: `1px solid ${LINE}`, fontSize: 13 }}>
                 <span style={{ flex: 1, fontWeight: 600, color: TOKENS.s900 }}>{m.title} {m.status === 'live' && <span style={{ fontSize: 10, color: '#fff', background: '#DC2626', padding: '1px 7px', borderRadius: 999, fontWeight: 800 }}>LIVE</span>}</span>
                 <span style={{ color: S600, fontSize: 12 }}>{fmtWhen(m.scheduledAt)}</span>
-                <button style={btn(true, detail.club.color)} onClick={() => window.open('/classroom/' + m._id, '_blank', 'noopener')}>{m.status === 'live' ? 'Join' : 'Open'}</button>
+                <button style={btn(true, detail.club.color)} onClick={() => joinClassroom(m._id)}>{m.status === 'live' ? 'Join' : 'Open'}</button>
                 <button style={{ ...btn(false), color: '#B91C1C', borderColor: '#FCA5A5' }} onClick={() => cancelMeeting(m)}>Cancel</button>
               </div>
             ))}

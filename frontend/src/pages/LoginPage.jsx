@@ -56,7 +56,14 @@ export default function LoginPage() {
       }
       toast.ok(`Welcome back, ${user.firstName}!`)
       const ROLE_PATHS = { student:'/student', parent:'/parent' }
-      nav(ROLE_PATHS[user.role] || '/portal')
+      // Opened from a lesson link (e.g. the daily timetable email): go
+      // straight into that lesson; leaving it returns to the portal.
+      let after = null
+      try { after = sessionStorage.getItem('smartious.afterLogin'); sessionStorage.removeItem('smartious.afterLogin') } catch (e2) { /* noop */ }
+      if (after && /^\/classroom\/[\w-]+$/.test(after)) {
+        try { sessionStorage.setItem('smartious.classroomReturn', ROLE_PATHS[user.role] || '/portal') } catch (e2) { /* noop */ }
+        nav(after)
+      } else nav(ROLE_PATHS[user.role] || '/portal')
     } catch (e) {
       setErr(e.message || 'Invalid email or password.')
     }
