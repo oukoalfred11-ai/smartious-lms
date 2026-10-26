@@ -83,6 +83,8 @@ async function loadPlan(entry) {
     mode: 'lessons',
     taught: ordered.filter(l => used.has(String(l._id))).map(l => ({ ...l, key: String(l._id), confirmed: used.get(String(l._id)).confirmed, taughtOn: used.get(String(l._id)).at })),
     queue: ordered.filter(l => !used.has(String(l._id))),
+    // Every item in plan order with its taught state (null = still to teach).
+    all: ordered.map(l => ({ ...l, key: String(l._id), taught: used.get(String(l._id)) || null })),
     members,
   };
 }
@@ -93,7 +95,7 @@ async function loadSubtopicPlan(entry) {
   const SyllabusTopic = require('../models/SyllabusTopic');
   const members = await groupEntries(entry);
   const topics = await SyllabusTopic.find({ subjectId: entry.subjectId }).sort({ topicOrder: 1 }).lean();
-  if (!topics.length) return { mode: 'none', taught: [], queue: [], members };
+  if (!topics.length) return { mode: 'none', taught: [], queue: [], all: [], members };
   const stamped = await LiveClass.find({
     timetableEntryId: { $in: members.map(m => m._id) },
     syllabusSubtopicName: { $nin: [null, ''] },
@@ -106,6 +108,7 @@ async function loadSubtopicPlan(entry) {
     mode: 'subtopics',
     taught: ordered.filter(x => used.has(x.key)).map(x => ({ ...x, confirmed: used.get(x.key).confirmed, taughtOn: used.get(x.key).at })),
     queue: ordered.filter(x => !used.has(x.key)),
+    all: ordered.map(x => ({ ...x, taught: used.get(x.key) || null })),
     members,
   };
 }
@@ -155,6 +158,7 @@ async function restampForEntryId(entryId) {
 }
 
 module.exports = {
+  taughtKeys,
   loadPublishedLessons, topicNameOf, groupEntries, loadPlan, loadSubtopicPlan,
   restampFuture, restampForEntryId,
 };

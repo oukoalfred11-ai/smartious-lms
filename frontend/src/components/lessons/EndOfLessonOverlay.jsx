@@ -169,7 +169,20 @@ export default function EndOfLessonOverlay({ classId, toast, onClose }) {
                   <select style={field} value={nextPick} onChange={e => setNextPick(e.target.value)}>
                     {!info.next.current && <option value="">Not chosen yet</option>}
                     {info.today && <option value={info.today.value}>Continue today: {info.today.label}</option>}
-                    {info.options.map(o => <option key={o.value} value={o.value}>{o.label}{o.value === info.next.current ? ' (planned)' : ''}</option>)}
+                    {/* The whole syllabus, by topic. Taught items are marked, not
+                        hidden, so any part can be chosen (or taught again). */}
+                    {(() => {
+                      const groups = []
+                      for (const o of info.options) {
+                        const g = o.group || ''
+                        if (!groups.length || groups[groups.length - 1].name !== g) groups.push({ name: g, items: [] })
+                        groups[groups.length - 1].items.push(o)
+                      }
+                      const opt = (o) => <option key={o.value} value={o.value}>{o.label}{o.value === info.next.current ? ' (planned)' : ''}</option>
+                      return groups.map((g, i) => g.name
+                        ? <optgroup key={g.name + i} label={g.name}>{g.items.map(opt)}</optgroup>
+                        : g.items.map(opt))
+                    })()}
                   </select>
                 </label>
                 {!info.options.length && !info.today && <div style={{ fontSize: 12, color: C.mut }}>This class has no lesson plan to choose from.</div>}
