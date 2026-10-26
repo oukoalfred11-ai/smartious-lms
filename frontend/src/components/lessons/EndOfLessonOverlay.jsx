@@ -94,7 +94,7 @@ export default function EndOfLessonOverlay({ classId, toast, onClose }) {
   )
 
   return (
-    <div role="dialog" aria-modal="true" aria-label="End of lesson" style={{ position: 'fixed', inset: 0, zIndex: 2000, background: C.bg, overflowY: 'auto', fontFamily: 'Inter,-apple-system,sans-serif' }}>
+    <div role="dialog" aria-modal="true" aria-label="End of lesson" style={{ position: 'fixed', inset: 0, zIndex: 2000, background: C.bg, color: C.ink, colorScheme: 'light', overflowY: 'auto', fontFamily: 'Inter,-apple-system,sans-serif' }}>
       <div style={{ maxWidth: 820, margin: '0 auto', padding: '22px 16px 60px', display: 'grid', gap: 14 }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
           <div style={{ flex: 1 }}>
@@ -185,7 +185,8 @@ export default function EndOfLessonOverlay({ classId, toast, onClose }) {
                     })()}
                   </select>
                 </label>
-                {!info.options.length && !info.today && <div style={{ fontSize: 12, color: C.mut }}>This class has no lesson plan to choose from.</div>}
+                {info.syllabusNote && <div style={{ fontSize: 12, color: C.amber }}>{info.syllabusNote}</div>}
+                {!info.options.length && !info.today && !info.syllabusNote && <div style={{ fontSize: 12, color: C.mut }}>This class has no lesson plan to choose from.</div>}
               </div>
             )}
           </Step>

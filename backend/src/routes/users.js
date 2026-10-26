@@ -1294,6 +1294,15 @@ router.delete('/:id', auth, requireRole('admin', 'ops_manager'), async (req, res
       }
     }
 
+    // A deleted student comes off upcoming lessons and timetable slots
+    // (past lessons keep their record), as when a student leaves.
+    if (target.role === 'student') {
+      try {
+        const r = await require('../lib/studentExit').detachFromSchedule([target._id]);
+        console.log(`✓ Deleted student ${target.email}: off ${r.lessons} upcoming lesson(s), ${r.slots} timetable slot(s)`);
+      } catch (e) { console.error('Failed to take the deleted student off the schedule:', e.message); }
+    }
+
     await target.deleteOne();
     res.json({
       success: true,
