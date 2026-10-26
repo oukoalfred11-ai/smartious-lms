@@ -87,9 +87,17 @@ const invoiceSchema = new mongoose.Schema({
   // invoices paid before these fields existed.
   paidSource:   { type: String, default: '' },
   paidMarkedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
-  // Set when the three-week rule (or a person) cancels an unpaid
-  // invoice. Cancelled invoices are kept as records, never deleted.
+  // Set when a person cancels an invoice (PATCH /:id/status). Cancelled
+  // invoices are kept as records, never deleted.
   cancelledAt:  { type: Date, default: null },
+  cancelledBy:  { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+  cancelReason: { type: String, default: '' },     // 'manual' when a person cancelled it
+  // The three-week rule: an invoice still unpaid three weeks after it was
+  // issued stops being chased automatically, but stays OPEN (unpaid, in
+  // "Who has not paid", markable as paid whenever the money comes in).
+  // Staff can still send a reminder by hand, or resume automatic ones.
+  remindersStoppedAt:     { type: Date, default: null },
+  remindersStoppedReason: { type: String, default: '' },
 
   // ── Notes ────────────────────────────────────────────────
   paymentNote: { type: String, default: '' },

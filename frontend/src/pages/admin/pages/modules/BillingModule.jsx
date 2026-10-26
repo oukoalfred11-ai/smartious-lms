@@ -89,6 +89,18 @@ function InvoicesTab({ toast, refreshKey }) {
     } finally { setSendingId(null) }
   }
 
+  const reopenInvoice = async (inv) => {
+    try {
+      const overdue = inv.dueDate && new Date(inv.dueDate) < new Date()
+      await api.patch('/invoices/' + inv._id + '/status', { status: overdue ? 'overdue' : 'sent' })
+      await api.patch('/invoices/' + inv._id + '/auto-remind', { autoRemind: false }).catch(() => {})
+      toast?.success?.('Invoice ' + inv.invoiceNo + ' is open (unpaid) again. Automatic reminders are off; send one by hand or resume them from "Who has not paid".')
+      load()
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Could not reopen the invoice.')
+    }
+  }
+
   const toggleAutoRemind = async (inv) => {
     try {
       const { data } = await api.patch('/invoices/' + inv._id + '/auto-remind', { autoRemind: !inv.autoRemind })
@@ -295,7 +307,9 @@ function InvoicesTab({ toast, refreshKey }) {
                           <td style={{ padding:'11px 14px', fontFamily:'monospace', fontSize:11.5, fontWeight:700, color:TOKENS.crimson }}>
                             {inv.invoiceNo}
                             {inv.autoRemind === false && (
-                              <div style={{ fontSize:9.5, color:TOKENS.s400, fontWeight:600 }}>auto paused</div>
+                              <div style={{ fontSize:9.5, color:TOKENS.s400, fontWeight:600 }} title={inv.remindersStoppedReason || ''}>
+                                {inv.remindersStoppedAt ? 'auto reminders stopped (3 weeks unpaid)' : 'auto paused'}
+                              </div>
                             )}
                           </td>
                           <td style={{ padding:'11px 14px' }}>
@@ -389,6 +403,13 @@ function InvoicesTab({ toast, refreshKey }) {
                         <span style={{ fontSize:10.5, fontWeight:700, color: r.status==='paid' ? '#065F46' : '#991B1B' }}>
                           {r.status === 'paid' ? 'Paid since' : 'Still unpaid'}
                         </span>
+                        {/* Close it right here when the family pays after a reminder. */}
+                        {r.status !== 'paid' && (
+                          <button onClick={() => openMarkPaid({ _id: r.invoiceId, invoiceNo: r.invoiceNo, totalDue: r.totalDue, billedToEmail: r.billedToEmail })}
+                            style={{ display:'block', marginTop:4, fontSize:10.5, background:'#D1FAE5', color:'#065F46', border:'none', padding:'3px 8px', borderRadius:5, cursor:'pointer', fontWeight:700 }}>
+                            Mark paid
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -493,12 +514,17 @@ function InvoicesTab({ toast, refreshKey }) {
                           this button on 'sent' made overdue invoices impossible
                           to mark paid, so reminders kept going to parents who
                           had already settled. */}
-                      {['sent', 'overdue', 'draft'].includes(inv.status) && (
+                      {/* Cancelled too: money can still come in later. */}
+                      {['sent', 'overdue', 'draft', 'cancelled'].includes(inv.status) && (
                         <button onClick={() => openMarkPaid(inv)} style={{ fontSize:11, background:'#D1FAE5', color:'#065F46', border:'none', padding:'4px 8px', borderRadius:5, cursor:'pointer', fontWeight:700 }}>Mark paid</button>
                       )}
                       {['sent', 'overdue', 'draft'].includes(inv.status) && CARD_CURRENCIES.includes(inv.currency) && (
                         <button onClick={() => { setCardInvoice(inv); setView('paystack') }} title="Send a Paystack card payment link for this invoice"
                           style={{ fontSize:11, background:'#fff', color:TOKENS.crimson, border:'1px solid '+TOKENS.crimson, padding:'4px 8px', borderRadius:5, cursor:'pointer', fontWeight:700 }}>Card link</button>
+                      )}
+                      {inv.status === 'cancelled' && (
+                        <button onClick={() => reopenInvoice(inv)} title="Put this invoice back as unpaid (no automatic reminders)"
+                          style={{ fontSize:11, background:'#fff', color:TOKENS.s700, border:'1px solid '+TOKENS.line, padding:'4px 8px', borderRadius:5, cursor:'pointer', fontWeight:700 }}>Reopen as unpaid</button>
                       )}
                       {inv.status === 'paid' && (
                         <button onClick={() => viewReceipt(inv)} style={{ fontSize:11, background:'#065F46', color:'#fff', border:'none', padding:'4px 8px', borderRadius:5, cursor:'pointer', fontWeight:700 }}>▤ Receipt</button>

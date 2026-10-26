@@ -217,7 +217,7 @@ router.get('/collections', auth, ALLOWED, async (req, res) => {
     const soon = new Date(now.getTime() + 7 * 86400000)
 
     const open = await Invoice.find({ ...scope, status: { $in: ['sent', 'overdue'] } })
-      .select('invoiceNo billedToName billedToEmail studentName currency totalDue paidAmount dueDate servicePeriodStart servicePeriodEnd status lastReminderAt reminderCount autoRemind studentId')
+      .select('invoiceNo billedToName billedToEmail studentName currency totalDue paidAmount dueDate servicePeriodStart servicePeriodEnd status lastReminderAt reminderCount autoRemind remindersStoppedAt remindersStoppedReason studentId createdAt')
       .lean()
 
     const outstandingOf = i => Number(i.totalDue || 0) - Number(i.paidAmount || 0)
@@ -304,6 +304,7 @@ router.get('/reminders', auth, ALLOWED, async (req, res) => {
           invoiceId:   inv._id,
           invoiceNo:   inv.invoiceNo,
           billedToName: inv.billedToName,
+          billedToEmail: inv.billedToEmail,
           studentName: inv.studentName,
           currency:    inv.currency,
           totalDue:    inv.totalDue,
@@ -435,7 +436,9 @@ router.patch('/:id/status', auth, ALLOWED, async (req, res) => {
     }
 
     const upd = { status }
-    if (status === 'cancelled') upd.cancelledAt = new Date()
+    if (status === 'cancelled') Object.assign(upd, { cancelledAt: new Date(), cancelledBy: req.user._id, cancelReason: 'manual' })
+    // Reopened by hand: it is a live unpaid invoice again.
+    if (['sent', 'overdue'].includes(status)) Object.assign(upd, { cancelledAt: null })
     const inv = await Invoice.findByIdAndUpdate(req.params.id,{ $set:upd },{ new:true })
     if (!inv) return res.status(404).json({ success:false, message:'Invoice not found.' })
     return res.json({ success:true, data:{ invoice:inv } })

@@ -303,37 +303,37 @@ async function sendReminder(invoice, { kind = 'manual', sentBy = null, automatic
  */
 async function runDueReminders({ dryRun = false } = {}) {
   const now = new Date()
-  const summary = { scanned: 0, sent: 0, skippedOnBreak: 0, skippedNoEmail: 0, failed: 0, expiredCancelled: 0, details: [] }
+  const summary = { scanned: 0, sent: 0, skippedOnBreak: 0, skippedNoEmail: 0, failed: 0, remindersStopped: 0, details: [] }
 
   // ── The three week rule ──────────────────────────────────
-  // An invoice still unpaid three weeks after it was issued is
-  // cancelled, and with it every future reminder it would have sent
-  // (only 'sent'/'overdue' invoices are chased). It is kept as a
-  // record, never deleted. Runs before the reminder pass so an expired
-  // invoice never gets one last chase. Guarded so an invoice whose
-  // money already covers the total is NEVER cancelled, even if its
-  // status was left unflipped — the self-heal below closes those as
-  // paid. Paid and cancelled invoices are permanent records: untouched.
+  // An invoice still unpaid three weeks after it was issued stops
+  // receiving AUTOMATIC reminders (autoRemind off), but it stays open:
+  // unpaid, listed in "Who has not paid", and markable as paid later.
+  // It used to be cancelled, which hid it while families who had been
+  // reminded came to pay. Runs before the reminder pass so a stopped
+  // invoice never gets one last chase. Stopped once only: if staff turn
+  // automatic reminders back on, this rule leaves it alone. An invoice
+  // already partly paid is never touched (it needs a person).
   if (!dryRun) {
     const cutoff = new Date(now.getTime() - 21 * 24 * 3600 * 1000)
     try {
-      const expired = await Invoice.updateMany({
-        status: { $in: ['draft', 'sent', 'overdue'] },
+      const stopped = await Invoice.updateMany({
+        status: { $in: ['sent', 'overdue'] },
         createdAt: { $lte: cutoff },
-        // Money already received on it (e.g. a card part payment) means
-        // it needs a person, not an automatic cancel.
+        autoRemind: { $ne: false },
+        remindersStoppedAt: null,
         $or: [{ paidAmount: null }, { paidAmount: { $lte: 0 } }],
         $expr: { $gt: [
           { $subtract: [{ $ifNull: ['$totalDue', 0] }, { $ifNull: ['$paidAmount', 0] }] }, 0,
         ] },
       }, {
-        $set: { status: 'cancelled', cancelledAt: now },
+        $set: { autoRemind: false, remindersStoppedAt: now, remindersStoppedReason: 'Unpaid three weeks after issue: automatic reminders stopped' },
       })
-      summary.expiredCancelled = expired.modifiedCount || 0
-      if (summary.expiredCancelled > 0)
-        console.log(`[reminders] cancelled ${summary.expiredCancelled} invoice(s) unpaid for over 3 weeks`)
+      summary.remindersStopped = stopped.modifiedCount || 0
+      if (summary.remindersStopped > 0)
+        console.log(`[reminders] stopped automatic reminders on ${summary.remindersStopped} invoice(s) unpaid for over 3 weeks (still open)`)
     } catch (e) {
-      console.error('[reminders] expiry cancel failed:', e.message)
+      console.error('[reminders] three-week stop failed:', e.message)
     }
   }
 
@@ -391,7 +391,43 @@ async function runDueReminders({ dryRun = false } = {}) {
   return summary
 }
 
+/**
+ * Undo the old three-week rule, which CANCELLED unpaid invoices: put each
+ * one back as an open unpaid invoice (overdue when its due date has
+ * passed) with automatic reminders stopped, so it can be found and marked
+ * paid. Only invoices the rule itself cancelled are touched: unpaid,
+ * cancelled at least three weeks after issue, and not cancelled by a
+ * person (manual cancels record cancelReason 'manual'; the app had no
+ * cancel button before that). Idempotent; runs at start-up.
+ */
+async function restoreAutoCancelledInvoices({ dryRun = false } = {}) {
+  const found = await Invoice.find({
+    status: 'cancelled',
+    cancelReason: { $in: ['', null] },
+    cancelledBy: null,
+    cancelledAt: { $ne: null },
+    $or: [{ paidAmount: null }, { paidAmount: { $lte: 0 } }],
+    $expr: { $gte: [{ $subtract: ['$cancelledAt', '$createdAt'] }, 21 * 24 * 3600 * 1000 - 3600 * 1000] },
+  }).select('invoiceNo billedToName currency totalDue dueDate cancelledAt').lean()
+  if (dryRun || !found.length) return found
+  const now = new Date()
+  for (const inv of found) {
+    const overdue = inv.dueDate && new Date(inv.dueDate) < now
+    await Invoice.updateOne({ _id: inv._id, status: 'cancelled' }, {
+      $set: {
+        status: overdue ? 'overdue' : 'sent', autoRemind: false,
+        remindersStoppedAt: inv.cancelledAt,
+        remindersStoppedReason: 'Unpaid three weeks after issue: automatic reminders stopped (restored from automatic cancellation)',
+        cancelledAt: null,
+      },
+    })
+  }
+  console.log(`[reminders] restored ${found.length} invoice(s) the old three-week rule had cancelled: ${found.map(i => i.invoiceNo).join(', ')}`)
+  return found
+}
+
 module.exports = {
+  restoreAutoCancelledInvoices,
   reminderKindFor,
   resolveInvoiceRecipients,
   studentIsOnBreak,

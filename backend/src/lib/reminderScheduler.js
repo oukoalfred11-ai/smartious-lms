@@ -53,6 +53,12 @@ function startReminderScheduler() {
   const delay = hoursUntilNextRun(targetHour)
   console.log(`[reminders] scheduler armed for ${targetHour}:00 (first run in ${Math.round(delay / HOUR_MS)}h)`)
 
+  // Once at start-up: reopen invoices the old three-week rule cancelled.
+  setTimeout(() => {
+    require('./invoiceReminders').restoreAutoCancelledInvoices()
+      .catch(e => console.error('[reminders] restore of auto-cancelled invoices failed:', e.message))
+  }, 30 * 1000)
+
   setTimeout(() => {
     runOnce('daily')
     timer = setInterval(() => runOnce('daily'), 24 * HOUR_MS)
