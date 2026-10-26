@@ -855,36 +855,62 @@ router.get('/:id/homework/bank', auth, requireRole('teacher', ...STAFF_ROLES), a
 async function syllabusOptions(lc) {
   const { buildNextOptions } = require('../lib/nextLessonOptions');
   const { loadPlan, loadSubtopicPlan, loadPublishedLessons, taughtKeys } = require('../lib/lessonPlan');
+  const { subtopicItems, stampKey, taughtFilter } = require('../lib/scheduling');
+  const Subject = require('../models/Subject');
+  let members = null, subj = null;
   if (lc.timetableEntryId) {
     const TimetableEntry = require('../models/TimetableEntry');
     const entry = await TimetableEntry.findById(lc.timetableEntryId._id || lc.timetableEntryId).lean();
     if (entry && entry.subjectId) {
       const plan = await loadPlan(entry);
+      members = plan.members;
       const subtopicPlan = plan.mode === 'subtopics' ? plan : plan.mode === 'lessons' ? await loadSubtopicPlan(entry) : null;
-      return { options: buildNextOptions({ lessonPlan: plan, subtopicPlan }), members: plan.members };
+      const options = buildNextOptions({ lessonPlan: plan, subtopicPlan });
+      if (options.length) return { options, members };
+      subj = await Subject.findById(entry.subjectId).select('subjectName curriculum').lean();
     }
   }
-  try {
-    const Subject = require('../models/Subject');
-    const SyllabusTopic = require('../models/SyllabusTopic');
-    const { subtopicItems, stampKey, taughtFilter } = require('../lib/scheduling');
-    const subj = await Subject.findOne({ subjectName: lc.subject, ...(lc.curriculum ? { curriculum: lc.curriculum } : {}) }).select('_id').lean()
-      || await Subject.findOne({ subjectName: lc.subject }).select('_id').lean();
-    if (!subj) return { options: [], members: null };
-    const topics = await SyllabusTopic.find({ subjectId: subj._id }).sort({ topicOrder: 1 }).lean();
+  // What this teacher's classes with these students have covered.
+  const coveredBy = async () => {
     const past = await LiveClass.find({
       teacherId: lc.teacherId, subject: lc.subject, assignedStudents: { $in: lc.assignedStudents || [] },
       syllabusSubtopicName: { $nin: [null, ''] }, ...taughtFilter(),
     }).select('syllabusTopicName syllabusSubtopicName scheduledAt outcome coverage').lean();
-    const used = taughtKeys(past, x => stampKey(x.syllabusTopicName, x.syllabusSubtopicName), []);
-    const lessons = await loadPublishedLessons(subj._id);
-    return { options: buildNextOptions({
-      lessonPlan: lessons.length ? { mode: 'lessons', all: lessons.map(l => ({ ...l, key: String(l._id), taught: null })) } : null,
-      subtopicPlan: { all: subtopicItems(topics, null).map(x => ({ ...x, taught: used.get(x.key) || null })) },
-    }), members: null };
+    return taughtKeys(past, x => stampKey(x.syllabusTopicName, x.syllabusSubtopicName), []);
+  };
+  try {
+    if (!subj) {
+      subj = await Subject.findOne({ subjectName: lc.subject, ...(lc.curriculum ? { curriculum: lc.curriculum } : {}) }).select('subjectName curriculum').lean()
+        || await Subject.findOne({ subjectName: lc.subject }).select('subjectName curriculum').lean();
+    }
+    if (subj) {
+      const SyllabusTopic = require('../models/SyllabusTopic');
+      const topics = await SyllabusTopic.find({ subjectId: subj._id }).sort({ topicOrder: 1 }).lean();
+      const lessons = await loadPublishedLessons(subj._id);
+      if (topics.length || lessons.length) {
+        const used = await coveredBy();
+        const options = buildNextOptions({
+          lessonPlan: lessons.length ? { mode: 'lessons', all: lessons.map(l => ({ ...l, key: String(l._id), taught: null })) } : null,
+          subtopicPlan: { all: subtopicItems(topics, null).map(x => ({ ...x, taught: used.get(x.key) || null })) },
+        });
+        if (options.length) return { options, members };
+      }
+    }
+    // No syllabus loaded for this subject: the standard one from the
+    // built-in library, so the teacher always has a list to choose from.
+    const { librarySpine } = require('../lib/spineLibrary');
+    const curriculum = (subj && subj.curriculum) || lc.curriculum;
+    const name = (subj && subj.subjectName) || lc.subject;
+    const lib = await librarySpine(curriculum, name);
+    if (lib) {
+      const used = await coveredBy();
+      const options = buildNextOptions({ lessonPlan: null, subtopicPlan: { all: subtopicItems(lib.topics, null).map(x => ({ ...x, taught: used.get(x.key) || null })) } });
+      return { options, members, note: `This subject's syllabus has not been loaded yet, so the standard ${lib.source.split(' \u2014 ')[0]} syllabus is shown. An admin can load it under Curriculum.` };
+    }
+    return { options: [], members, note: `No syllabus is loaded for ${name}${curriculum ? ' (' + curriculum + ')' : ''}. An admin can load it under Curriculum.` };
   } catch (e) {
     console.error('[liveclasses] syllabus options:', e.message);
-    return { options: [], members: null };
+    return { options: [], members };
   }
 }
 
@@ -893,8 +919,8 @@ async function syllabusOptions(lc) {
 router.get('/:id/lesson-options', auth, requireRole('teacher', ...STAFF_ROLES), async (req, res) => {
   try {
     const lc = await ownClass(req, res); if (!lc) return;
-    const { options } = await syllabusOptions(lc);
-    res.json({ success: true, data: { options } });
+    const { options, note } = await syllabusOptions(lc);
+    res.json({ success: true, data: { options, note: note || '' } });
   } catch (e) {
     console.error('[liveclasses lesson-options]', e.message);
     res.status(500).json({ success: false, message: 'Could not load the syllabus.' });
@@ -907,7 +933,7 @@ router.get('/:id/next', auth, requireRole('teacher', ...STAFF_ROLES), async (req
     const after = new Date(Math.max(Date.now(), new Date(lc.scheduledAt).getTime()));
     const label = (c) => c.syllabusSubtopicName ? `${c.syllabusTopicName ? c.syllabusTopicName + ': ' : ''}${c.syllabusSubtopicName}` : (c.syllabusTopicName || '');
     let next = null;
-    const { options: syllabus, members } = await syllabusOptions(lc);
+    const { options: syllabus, members, note: syllabusNote } = await syllabusOptions(lc);
     let options = syllabus;
     if (members) {
       next = await LiveClass.findOne({
@@ -950,6 +976,7 @@ router.get('/:id/next', auth, requireRole('teacher', ...STAFF_ROLES), async (req
       next: next ? { _id: next._id, scheduledAt: next.scheduledAt, subject: next.subject, label: label(next), current } : null,
       today: todayOption,
       options,
+      syllabusNote: syllabusNote || '',
     } });
   } catch (e) {
     console.error('[liveclasses next]', e.message);

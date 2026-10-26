@@ -14693,7 +14693,7 @@ function MyClassesTab({ user, toast, onEndLesson }) {
   const openLessonPicker = (cls) => {
     setLessonFor({ cls, options: null })
     api.get(`/liveclasses/${cls._id}/lesson-options`)
-      .then(r => setLessonFor(x => x && ({ ...x, options: r.data?.data?.options || [] })))
+      .then(r => setLessonFor(x => x && ({ ...x, options: r.data?.data?.options || [], note: r.data?.data?.note || '' })))
       .catch(e => setLessonFor(x => x && ({ ...x, options: [], error: e?.response?.data?.message || 'Could not load the syllabus.' })))
   }
   const pickLesson = async (cls, opt) => {
@@ -15052,7 +15052,8 @@ function MyClassesTab({ user, toast, onEndLesson }) {
                 })()}
               </select>
             )}
-            {lessonFor.options && !lessonFor.options.length && !lessonFor.error && <div style={{ fontSize: 12.5, color: C.mut }}>This subject has no syllabus or published lessons yet.</div>}
+            {lessonFor.note && <div style={{ fontSize: 12, color: '#B45309' }}>{lessonFor.note}</div>}
+            {lessonFor.options && !lessonFor.options.length && !lessonFor.error && !lessonFor.note && <div style={{ fontSize: 12.5, color: C.mut }}>This subject has no syllabus or published lessons yet.</div>}
             <div style={{ fontSize: 11, color: C.mut }}>The lessons after it move along so nothing is taught twice. To change the order of the whole plan, use Lesson order.</div>
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <button onClick={() => setLessonFor(null)} style={{ padding: '9px 16px', borderRadius: 9, border: `1.5px solid ${C.line}`, background: '#fff', color: C.mut, fontSize: 12.5, fontWeight: 800, cursor: 'pointer' }}>Close</button>

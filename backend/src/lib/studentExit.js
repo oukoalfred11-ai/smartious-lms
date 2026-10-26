@@ -61,6 +61,20 @@ async function detachFromSchedule(studentIds, { now = new Date() } = {}) {
 async function detachAllLeavers() {
   if (String(process.env.DETACH_LEAVERS || '').toLowerCase() === 'off') return null
   const ids = (await User.find(LEFT_FILTER).select('_id').lean()).map(u => u._id)
+  // Plus deleted accounts still sitting on lessons and slots (deleting a
+  // student did not take them off the schedule before).
+  const onSchedule = [...new Set([
+    ...(await LiveClass.distinct('assignedStudents', { status: 'scheduled', scheduledAt: { $gte: new Date() } })),
+    ...(await TimetableEntry.distinct('assignedStudents', {})),
+  ].map(String))]
+  if (onSchedule.length) {
+    const existing = new Set((await User.find({ _id: { $in: onSchedule } }).select('_id').lean()).map(u => String(u._id)))
+    const gone = onSchedule.filter(id => !existing.has(id))
+    if (gone.length) {
+      console.log(`[leavers] ${gone.length} deleted student account(s) still on the schedule: taking them off`)
+      ids.push(...gone)
+    }
+  }
   const r = await detachFromSchedule(ids)
   if (r.lessons || r.slots) console.log(`[leavers] ${ids.length} graduated/left students: off ${r.lessons} upcoming lessons (${r.lessonsCancelled} now empty, cancelled) and ${r.slots} timetable slots (${r.slotsOff} switched off)`)
   return r
