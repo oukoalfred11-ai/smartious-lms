@@ -195,6 +195,14 @@ if (!MONGODB_URI) {
   process.exit(1);
 }
 
+// Database connection drops are logged: while disconnected, requests fail
+// (the sign-in check answers 503 and the app retries rather than signing
+// anyone out), so these lines explain any burst of failed requests.
+mongoose.connection.on('disconnected', () => console.error('[db] MongoDB disconnected'));
+mongoose.connection.on('reconnected', () => console.log('[db] MongoDB reconnected'));
+mongoose.connection.on('error', (e) => console.error('[db] MongoDB error:', e.message));
+if (!process.env.JWT_SECRET) console.error('[auth] JWT_SECRET is not set: every sign-in will be rejected.');
+
 mongoose.connect(MONGODB_URI)
   .then(() => {
     console.log('[OK] MongoDB connected');

@@ -52,6 +52,14 @@ api.interceptors.response.use(r => {
 }, err => {
   const status = err.response?.status
   const url = err.config?.url || ''
+  // The server could not check the session for a moment (a database
+  // blip): 503 AUTH_UNAVAILABLE. It is not a sign-out; retry once.
+  const cfg = err.config
+  if (status === 503 && cfg && !cfg._smRetried) {
+    cfg._smRetried = true
+    const wait = Math.min(5000, 1000 * (Number(err.response?.headers?.['retry-after']) || 2))
+    return new Promise(r => setTimeout(r, wait)).then(() => api(cfg))
+  }
   // ── Paused account gate ──────────────────────────────────
   // A paused student / parent is rejected everywhere with
   // code ACCOUNT_PAUSED. Route them to the branded paused

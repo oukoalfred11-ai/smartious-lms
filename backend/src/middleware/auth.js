@@ -6,8 +6,10 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const auth = async (req, res, next) => {
   try {
     const header = req.headers.authorization;
-    if (!header || !header.startsWith('Bearer '))
+    if (!header || !header.startsWith('Bearer ')) {
+      authLog(req, 'no token sent');
       return res.status(401).json({ success: false, message: 'No token provided.' });
+    }
 
     const token = header.split(' ')[1];
     const decoded = jwt.verify(token, JWT_SECRET);
@@ -37,10 +39,14 @@ const auth = async (req, res, next) => {
         user.lastActive = new Date();
       }
     } catch (e) { /* presence is best effort */ }
-    if (!user)
+    if (!user) {
+      authLog(req, 'the account in the token no longer exists');
       return res.status(401).json({ success: false, message: 'Token is no longer valid.' });
-    if (!user.isActive)
+    }
+    if (!user.isActive) {
+      authLog(req, 'account deactivated: ' + user.email);
       return res.status(403).json({ success: false, message: 'Account deactivated.' });
+    }
 
     // ── Pause enforcement (session layer) ───────────────────
     // A paused student, and any parent ALL of whose linked
@@ -90,9 +96,38 @@ const auth = async (req, res, next) => {
     req.user = user;
     next();
   } catch (e) {
-    return res.status(401).json({ success: false, message: 'Unauthorized.' });
+    // Only a bad or expired token is an authentication failure (401). Any
+    // other error (the database briefly unreachable, a timeout) used to be
+    // reported as 401 "Unauthorized." too, and the app logs out on a 401,
+    // so a short database blip signed people out and blocked every module.
+    // Those now answer 503: the session is kept and the request retried.
+    if (e && /^(TokenExpiredError|JsonWebTokenError|NotBeforeError)$/.test(e.name)) {
+      authLog(req, e.name === 'TokenExpiredError' ? 'expired token' : 'invalid token: ' + e.message);
+      return res.status(401).json({ success: false, code: e.name === 'TokenExpiredError' ? 'SESSION_EXPIRED' : 'INVALID_TOKEN',
+        message: e.name === 'TokenExpiredError' ? 'Your session has expired. Please sign in again.' : 'Your session is not valid. Please sign in again.' });
+    }
+    if (e && e.name === 'CastError') {
+      authLog(req, 'token names an invalid user id');
+      return res.status(401).json({ success: false, code: 'INVALID_TOKEN', message: 'Your session is not valid. Please sign in again.' });
+    }
+    console.error('[auth] could not check the session (' + req.method + ' ' + req.originalUrl + '): ' + (e && (e.name + ': ' + e.message)));
+    res.set('Retry-After', '2');
+    return res.status(503).json({ success: false, code: 'AUTH_UNAVAILABLE', message: 'The server is busy for a moment. Please try again.' });
   }
 };
+
+// One line per rejected session, so the reason is visible in the server
+// log (it used to be silent), without flooding it: at most one per
+// reason and path every minute.
+const seen = new Map();
+function authLog(req, why) {
+  const key = why + ' ' + (req.baseUrl || req.originalUrl);
+  const now = Date.now();
+  if (now - (seen.get(key) || 0) < 60000) return;
+  seen.set(key, now);
+  if (seen.size > 500) seen.clear();
+  console.warn('[auth] 401 ' + req.method + ' ' + req.originalUrl + ': ' + why);
+}
 
 // Route families a QA reviewer never sees, even read only: money,
 // staff pay and admissions pipelines are outside an accreditor's
