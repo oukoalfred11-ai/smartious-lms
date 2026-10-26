@@ -14688,17 +14688,17 @@ function MyClassesTab({ user, toast, onEndLesson }) {
   const [tab, setTab] = useState('week')
   const [hwFor, setHwFor] = useState(null)          // class whose homework is open
   const [lessonFor, setLessonFor] = useState(null)  // { cls, options|null, error }
+  // The whole syllabus, by topic, taught items marked rather than hidden
+  // (same list as the end-of-lesson pop-up: backend lib/nextLessonOptions.js).
   const openLessonPicker = (cls) => {
-    const entryId = cls.timetableEntryId ? String(cls.timetableEntryId._id || cls.timetableEntryId) : ''
-    if (!entryId) { setLessonFor({ cls, options: [], error: 'This lesson is not part of a timetabled lesson plan. Set its topic when you book it.' }); return }
     setLessonFor({ cls, options: null })
-    api.get(`/timetable/${entryId}/lesson-plan`)
-      .then(r => setLessonFor(x => x && ({ ...x, options: (r.data?.data?.queue || []).map(l => ({ value: l._id || l.key, label: `${l.topicName && l.topicName !== l.title ? l.topicName + ': ' : ''}${l.title}`, key: l.key })) })))
-      .catch(e => setLessonFor(x => x && ({ ...x, options: [], error: e?.response?.data?.message || 'Could not load the lesson plan.' })))
+    api.get(`/liveclasses/${cls._id}/lesson-options`)
+      .then(r => setLessonFor(x => x && ({ ...x, options: r.data?.data?.options || [] })))
+      .catch(e => setLessonFor(x => x && ({ ...x, options: [], error: e?.response?.data?.message || 'Could not load the syllabus.' })))
   }
   const pickLesson = async (cls, opt) => {
     try {
-      const body = opt.key ? { topicName: opt.key.split('||')[0], subtopicName: opt.key.split('||')[1] } : { lessonId: opt.value }
+      const body = opt.lessonId ? { lessonId: opt.lessonId } : { topicName: opt.topicName || '', subtopicName: opt.subtopicName }
       const r = await api.patch(`/liveclasses/${cls._id}/lesson`, body)
       toast?.ok?.(r.data?.message || 'Lesson set.')
       setLessonFor(null); load()
@@ -15040,10 +15040,19 @@ function MyClassesTab({ user, toast, onEndLesson }) {
             {lessonFor.options && lessonFor.options.length > 0 && (
               <select defaultValue="" style={inp} onChange={e => { const o = lessonFor.options.find(x => String(x.value) === e.target.value); if (o) pickLesson(lessonFor.cls, o) }}>
                 <option value="">Choose a lesson…</option>
-                {lessonFor.options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                {(() => {
+                  const groups = []
+                  for (const o of lessonFor.options) {
+                    const g = o.group || ''
+                    if (!groups.length || groups[groups.length - 1].name !== g) groups.push({ name: g, items: [] })
+                    groups[groups.length - 1].items.push(o)
+                  }
+                  const opt = (o) => <option key={o.value} value={o.value}>{o.label}</option>
+                  return groups.map((g, i) => g.name ? <optgroup key={g.name + i} label={g.name}>{g.items.map(opt)}</optgroup> : g.items.map(opt))
+                })()}
               </select>
             )}
-            {lessonFor.options && !lessonFor.options.length && !lessonFor.error && <div style={{ fontSize: 12.5, color: C.mut }}>Every lesson in the plan has been taught.</div>}
+            {lessonFor.options && !lessonFor.options.length && !lessonFor.error && <div style={{ fontSize: 12.5, color: C.mut }}>This subject has no syllabus or published lessons yet.</div>}
             <div style={{ fontSize: 11, color: C.mut }}>The lessons after it move along so nothing is taught twice. To change the order of the whole plan, use Lesson order.</div>
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <button onClick={() => setLessonFor(null)} style={{ padding: '9px 16px', borderRadius: 9, border: `1.5px solid ${C.line}`, background: '#fff', color: C.mut, fontSize: 12.5, fontWeight: 800, cursor: 'pointer' }}>Close</button>
