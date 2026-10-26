@@ -56,17 +56,9 @@ async function notifyStudents(studentIds, classParams, isUpdate = false) {
 // don't get virtuals, so we re-derive in JS).
 // ─────────────────────────────────────────────────────────
 
-const computeStatus = (lc) => {
-  if (!lc) return 'scheduled';
-  if (lc.status === 'cancelled' || lc.status === 'ended') return lc.status;
-  if (lc.status === 'live') return 'live';
-  const now = Date.now();
-  const start = new Date(lc.scheduledAt).getTime();
-  const end   = start + (lc.durationMins || 0) * 60000;
-  if (now < start)  return 'scheduled';
-  if (now <= end)   return 'live';
-  return 'ended';
-};
+// Joinable for the whole set period (lib/classWindow.js), so a closed
+// record or a dropped connection never locks anyone out mid-lesson.
+const computeStatus = (lc) => require('../lib/classWindow').classStatus(lc);
 
 const withComputedStatus = (arr) => arr.map(lc => ({
   ...lc,

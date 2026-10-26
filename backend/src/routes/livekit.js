@@ -55,6 +55,10 @@ router.post('/token/:classId', auth, async (req, res) => {
     const isAssembly = cls.kind === 'assembly';
     let allowed = isAssembly || STAFF.includes(req.user.role) ||
       (cls.assignedStudents || []).some((x) => String(x) === String(req.user._id));
+    if (!allowed && req.user.role === 'parent') {
+      const kids = [...(req.user.linkedStudents || []), ...(req.user.children || [])].map(String);
+      allowed = (cls.assignedStudents || []).some((x) => kids.includes(String(x)));
+    }
     if (!allowed && cls.clubId) {
       const club = await Club.findById(cls.clubId).select('members leaders').lean();
       allowed = !!club && [...(club.members || []), ...(club.leaders || [])]

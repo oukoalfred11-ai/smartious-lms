@@ -8,6 +8,7 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/ctx.jsx'
 import LiveClassroom from '../components/ui/LiveClassroom.jsx'
+import { classroomReturnPath } from '../lib/joinClassroom.js'
 
 export default function ClassroomPage() {
   const { liveClassId } = useParams()
@@ -19,7 +20,8 @@ export default function ClassroomPage() {
       user={user}
       // A teacher lands on the end-of-lesson pop-up: close the lesson,
       // check the homework and choose the next lesson.
-      onLeave={() => navigate(user?.role === 'teacher' ? `/teacher?ended=${liveClassId}` : '/portal')}
+      // Everyone else goes back to the portal page they joined from.
+      onLeave={() => navigate(user?.role === 'teacher' ? `/teacher?ended=${liveClassId}` : (classroomReturnPath() || '/portal'))}
     />
   )
 }

@@ -257,7 +257,10 @@ router.get('/children/:id/liveclasses', auth, async (req, res) => {
       .sort({ startAt: -1, scheduledAt: -1, createdAt: -1 }).limit(120).lean()
     const now = new Date()
     const when = c => new Date(c.startAt || c.scheduledAt || c.date || c.createdAt)
-    const past = classes.filter(c => when(c) < now || c.status === 'completed' || c.status === 'ended')
+    // A class stays "upcoming" (joinable) until its set period is over,
+    // not from the minute it starts (lib/classWindow.js).
+    const { closesAt } = require('../lib/classWindow')
+    const past = classes.filter(c => (c.scheduledAt ? closesAt(c) < now.getTime() : when(c) < now) || c.status === 'completed')
     const upcoming = classes.filter(c => !past.includes(c)).reverse()
     // A class whose time has passed was HELD only if it ended properly or
     // somebody was in the room; otherwise it is 'not_confirmed', never
@@ -270,8 +273,10 @@ router.get('/children/:id/liveclasses', auth, async (req, res) => {
     // Published recordings ride along on covered classes, so the
     // portal can offer Watch recording. Only featured ones show;
     // an admin unpublishing a weak recording hides it here too.
+    const { classStatus } = require('../lib/classWindow')
     const shape = c => ({
       ...c,
+      computedStatus: classStatus(c, now.getTime()),
       outcome: classOutcome(c, now, heldIds),
       recordings: (c.recordings || [])
         .filter(r => r.featured)

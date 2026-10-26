@@ -7,6 +7,7 @@ import MessagesHub from '../../components/MessagesHub.jsx'
 import AdmissionDocuments from '../../components/AdmissionDocuments.jsx'
 import { api } from '../../context/ctx.jsx'
 import MobileTabBar, { MORE_TAB, useIsPhone, useBackHandler } from '../../components/ui/MobileTabBar.jsx'
+import { joinClassroom } from '../../lib/joinClassroom.js'
 
 // ── Tokens matching admin/student/teacher portals ──────────
 const C = {
@@ -933,17 +934,17 @@ function ParentLessons({ child }) {
         <div style={{ fontSize:11.5, color:C.s500, marginTop:2 }}>{c.subject} \u00B7 {c.teacherId ? c.teacherId.firstName+' '+c.teacherId.lastName : ''} \u00B7 {fmt(c)}</div>
       </div>
       {!done && (
-        <button onClick={() => window.open('/classroom/'+c._id, '_blank', 'noopener')}
+        <button onClick={() => joinClassroom(c._id)}
           title="Join this class to watch how the lesson is going"
           style={{
             display:'inline-flex', alignItems:'center', gap:6, padding:'7px 14px', borderRadius:9,
             border:'none', cursor:'pointer', fontSize:12, fontWeight:800, whiteSpace:'nowrap',
-            background: c.status==='live' ? 'linear-gradient(120deg,#8B1A2E,#A32438)' : '#fff',
-            color: c.status==='live' ? '#fff' : C.crimson,
-            boxShadow: c.status==='live' ? '0 3px 12px rgba(139,26,46,.35)' : `inset 0 0 0 1.5px ${C.crimson}`,
+            background: (c.computedStatus || c.status)==='live' ? 'linear-gradient(120deg,#8B1A2E,#A32438)' : '#fff',
+            color: (c.computedStatus || c.status)==='live' ? '#fff' : C.crimson,
+            boxShadow: (c.computedStatus || c.status)==='live' ? '0 3px 12px rgba(139,26,46,.35)' : `inset 0 0 0 1.5px ${C.crimson}`,
           }}>
-          {c.status==='live' && <span style={{ width:7, height:7, borderRadius:'50%', background:'#fff', animation:'pulse 1.2s infinite' }}/>}
-          {c.status==='live' ? 'Join now' : 'Join & monitor'}
+          {(c.computedStatus || c.status)==='live' && <span style={{ width:7, height:7, borderRadius:'50%', background:'#fff', animation:'pulse 1.2s infinite' }}/>}
+          {(c.computedStatus || c.status)==='live' ? 'Join now' : 'Join & monitor'}
         </button>
       )}
       {done && Array.isArray(c.recordings) && c.recordings.length > 0 && (

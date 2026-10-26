@@ -37,13 +37,17 @@ function tomorrow(now) {
 function buildEmail(st, lessons, day) {
   const rows = lessons.map(l => {
     const cancelled = l.status === 'cancelled'
-    const where = inPersonLesson(l, st) ? (l.timetableEntryId?.location || 'At the centre') : 'Online (student portal)'
+    const centre = inPersonLesson(l, st)
+    const where = centre ? (l.timetableEntryId?.location || 'At the centre') : 'Online (student portal)'
+    // Every lesson has a live classroom link, so a centre lesson can go
+    // ahead online on a day nobody can get to the centre.
+    const join = `<br><a href="${PORTAL()}/classroom/${l._id}" style="color:#7D1025;font-weight:700">${centre ? 'Or join online' : 'Join the lesson'}</a>`
     const teacher = l.teacherId ? `${l.teacherId.firstName} ${l.teacherId.lastName || ''}`.trim() : ''
     const topic = [l.syllabusTopicName, l.syllabusSubtopicName].filter(Boolean).join(': ')
     return `<tr style="${cancelled ? 'color:#9A8F86;text-decoration:line-through;' : ''}">
       <td style="padding:7px 8px;border-bottom:1px solid #EEE7DB;white-space:nowrap;vertical-align:top"><strong>${esc(time(l.scheduledAt))}</strong></td>
       <td style="padding:7px 8px;border-bottom:1px solid #EEE7DB;vertical-align:top"><strong>${esc(l.subject || l.title || 'Lesson')}</strong>${teacher ? `<br><span style="font-size:12px;color:#6B6B6B">${esc(teacher)}</span>` : ''}${topic ? `<br><span style="font-size:12px;color:#6B6B6B">${esc(topic)}</span>` : ''}</td>
-      <td style="padding:7px 8px;border-bottom:1px solid #EEE7DB;vertical-align:top;font-size:12.5px">${cancelled ? '<span style="text-decoration:none;color:#B91C1C;font-weight:700">Cancelled</span>' : esc(where)}</td>
+      <td style="padding:7px 8px;border-bottom:1px solid #EEE7DB;vertical-align:top;font-size:12.5px">${cancelled ? '<span style="text-decoration:none;color:#B91C1C;font-weight:700">Cancelled</span>' : esc(where) + join}</td>
     </tr>`
   }).join('')
   const { page } = require('./lessonNotices')
@@ -54,6 +58,7 @@ function buildEmail(st, lessons, day) {
       `Here is ${esc(st.firstName)}'s timetable for tomorrow, <strong>${esc(day)}</strong> (Nairobi time).`,
       table,
       `<strong>Need a change?</strong> Please contact the academic office before ${esc(day)}: +254 182 071 920 (call or WhatsApp) or academics@smartioushomeschool.com.`,
+      `<strong>Can't get to the centre?</strong> Every lesson also runs live online. Use the join link next to the lesson, or sign in to the student portal and press <strong>Join online</strong> on the lesson at its time. The link stays open for the whole lesson, so after a power or internet cut just join again.`,
       'Homework is set and handed in online in the student portal.',
     ], { href: PORTAL() + '/student', label: 'Open the student portal' }),
   }

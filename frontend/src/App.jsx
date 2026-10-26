@@ -90,7 +90,11 @@ function Guard({ children, roles }) {
       <div className="spinner" />
     </div>
   )
-  if (!user) return <Navigate to="/login" replace />
+  if (!user) {
+    // A lesson link from an email: come back to the lesson after sign-in.
+    try { if (window.location.pathname.startsWith('/classroom/')) sessionStorage.setItem('smartious.afterLogin', window.location.pathname) } catch (e) { /* private mode */ }
+    return <Navigate to="/login" replace />
+  }
   // Wrong portal for this role: let RoleRedirect pick the right one
   // (ops_manager lives at /ops and accountant at /accounts, not /<role>).
   if (roles && !roles.includes(user.role)) return <Navigate to="/portal" replace />
