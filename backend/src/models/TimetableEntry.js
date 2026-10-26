@@ -131,6 +131,11 @@ const timetableEntrySchema = new mongoose.Schema({
   // Same idea for spines that carry their plan as topics/subtopics
   // instead of Lesson docs: keys of "Topic||Subtopic" in teach order.
   topicPlanOrder: [{ type: String }],
+  // Topics the teacher put back in the plan ("not taught"): a lesson id
+  // (or "Topic||Subtopic" key) and when. Past classes stamped with it no
+  // longer count as teaching it unless the teacher confirmed them as
+  // taught (lib/scheduling.js countsAfterReturn).
+  planReturned: [{ key: String, at: Date, by: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, _id: false }],
   assignedStudents: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

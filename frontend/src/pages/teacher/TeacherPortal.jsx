@@ -10371,6 +10371,18 @@ function ScheduleClassesTab({ user, toast }) {
   }
   const teachNext = (ix) => move(ix, 0)
 
+  // A topic counted as taught only by date goes back into the plan.
+  const returnToPlan = async (l) => {
+    if (!sel) return
+    setSaving(true)
+    try {
+      const r = await api.post(`/timetable/${sel._id}/lesson-plan/return`, { key: l.key || l._id })
+      toast?.ok?.(r.data?.message || 'Back in the plan.')
+      openSlot(sel)
+    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not put it back.') }
+    finally { setSaving(false) }
+  }
+
   const save = async () => {
     if (!sel || !queue.length) return
     setSaving(true)
@@ -10508,13 +10520,21 @@ function ScheduleClassesTab({ user, toast }) {
             </div>
             {dirty && <div style={{ marginTop: 10, fontSize: 11.5, color: CRIM, fontWeight: 700 }}>Unsaved order - press Save order to apply it to your scheduled lessons.</div>}
             {plan.taught?.length > 0 && (
-              <details style={{ marginTop: 12 }}>
-                <summary style={{ fontSize: 11, fontWeight: 900, letterSpacing: '.1em', color: GOLD, cursor: 'pointer' }}>TAUGHT ({plan.taught.length})</summary>
+              <details open={plan.taught.some(l => l.confirmed === false)} style={{ marginTop: 12 }}>
+                <summary style={{ fontSize: 11, fontWeight: 900, letterSpacing: '.1em', color: GOLD, cursor: 'pointer' }}>TAUGHT ({plan.taught.length}){plan.taught.some(l => l.confirmed === false) ? <span style={{ color: '#B45309', letterSpacing: 0, fontWeight: 700 }}> {'\u00b7'} {plan.taught.filter(l => l.confirmed === false).length} counted by date only</span> : null}</summary>
                 <div style={{ display: 'grid', gap: 3, marginTop: 6, maxHeight: 180, overflow: 'auto' }}>
                   {plan.taught.map((l, i) => (
                     <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '3px 6px' }}>
-                      <span style={{ width: 15, height: 15, borderRadius: '50%', background: GOLD, color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 900 }}>{'\u2713'}</span>
-                      <span style={{ fontSize: 11.5, color: MUT }}>{l.title}</span>
+                      <span style={{ width: 15, height: 15, borderRadius: '50%', background: l.confirmed === false ? '#D6CFC2' : GOLD, color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 900, flexShrink: 0 }}>{'\u2713'}</span>
+                      <span style={{ fontSize: 11.5, color: MUT, flex: 1, minWidth: 0 }}>
+                        {l.title}
+                        {l.confirmed === false && <span style={{ fontSize: 10, color: '#B45309' }}> {'\u00b7'} counted by date{l.taughtOn ? ' (' + new Date(l.taughtOn).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ')' : ''}, not confirmed</span>}
+                      </span>
+                      {l.confirmed === false && (
+                        <button onClick={() => returnToPlan(l)} disabled={saving}
+                          title="This was counted as taught only because a past lesson carried it. Put it back in the plan so a coming lesson teaches it."
+                          style={{ padding: '3px 9px', borderRadius: 7, border: `1px solid ${TRACK}`, background: '#fff', color: CRIM, fontSize: 10.5, fontWeight: 800, cursor: 'pointer', whiteSpace: 'nowrap' }}>Not taught: put back</button>
+                      )}
                     </div>
                   ))}
                 </div>

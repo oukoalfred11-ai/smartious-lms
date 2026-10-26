@@ -11,8 +11,27 @@ const TimetableEntry = require('../models/TimetableEntry');
 const LiveClass = require('../models/LiveClass');
 const Lesson = require('../models/Lesson');
 const {
-  groupKey, orderLessons, subtopicItems, stampKey, stampFor, taughtFilter,
+  groupKey, orderLessons, subtopicItems, stampKey, stampFor, taughtFilter, returnedMap, countsAfterReturn,
 } = require('./scheduling');
+
+/**
+ * The classes that count as having taught each key, minus those a put-back
+ * rules out. Returns key → { confirmed, at } (confirmed: the teacher closed
+ * a class as taught in full; at: the latest such class).
+ */
+function taughtKeys(classes, keyOf, members) {
+  const ret = returnedMap(members);
+  const out = new Map();
+  for (const c of classes) {
+    const k = keyOf(c);
+    if (!k) continue;
+    if (ret.has(k) && !countsAfterReturn(c, ret.get(k))) continue;
+    const confirmed = c.outcome === 'taught' && c.coverage !== 'partial';
+    const was = out.get(k);
+    out.set(k, { confirmed: confirmed || !!(was && was.confirmed), at: !was || new Date(c.scheduledAt) > new Date(was.at) ? c.scheduledAt : was.at });
+  }
+  return out;
+}
 
 /** Published lessons of a subject in spine order, each with its topic name. */
 async function loadPublishedLessons(subjectId) {
@@ -53,17 +72,17 @@ async function loadPlan(entry) {
   const members = await groupEntries(entry);
   // Taught = closed by the teacher as taught in full (or, before the
   // close-the-lesson cutover, any past lesson that was not cancelled).
-  const usedIds = await LiveClass.distinct('preparationLessonId', {
+  const past = await LiveClass.find({
     timetableEntryId: { $in: members.map(m => m._id) }, preparationLessonId: { $ne: null },
     ...taughtFilter(),
-  });
-  const usedSet = new Set(usedIds.map(String));
+  }).select('preparationLessonId scheduledAt outcome coverage').lean();
+  const used = taughtKeys(past, c => String(c.preparationLessonId), members);
   const orderSource = members.find(m => Array.isArray(m.lessonOrder) && m.lessonOrder.length) || entry;
   const ordered = orderLessons(lessons, orderSource.lessonOrder);
   return {
     mode: 'lessons',
-    taught: ordered.filter(l => usedSet.has(String(l._id))),
-    queue: ordered.filter(l => !usedSet.has(String(l._id))),
+    taught: ordered.filter(l => used.has(String(l._id))).map(l => ({ ...l, key: String(l._id), confirmed: used.get(String(l._id)).confirmed, taughtOn: used.get(String(l._id)).at })),
+    queue: ordered.filter(l => !used.has(String(l._id))),
     members,
   };
 }
@@ -79,14 +98,14 @@ async function loadSubtopicPlan(entry) {
     timetableEntryId: { $in: members.map(m => m._id) },
     syllabusSubtopicName: { $nin: [null, ''] },
     ...taughtFilter(),
-  }).select('syllabusTopicName syllabusSubtopicName').lean();
-  const usedKeys = new Set(stamped.map(x => stampKey(x.syllabusTopicName, x.syllabusSubtopicName)));
+  }).select('syllabusTopicName syllabusSubtopicName scheduledAt outcome coverage').lean();
+  const used = taughtKeys(stamped, x => stampKey(x.syllabusTopicName, x.syllabusSubtopicName), members);
   const os = members.find(m => Array.isArray(m.topicPlanOrder) && m.topicPlanOrder.length);
   const ordered = subtopicItems(topics, os ? os.topicPlanOrder : null);
   return {
     mode: 'subtopics',
-    taught: ordered.filter(x => usedKeys.has(x.key)),
-    queue: ordered.filter(x => !usedKeys.has(x.key)),
+    taught: ordered.filter(x => used.has(x.key)).map(x => ({ ...x, confirmed: used.get(x.key).confirmed, taughtOn: used.get(x.key).at })),
+    queue: ordered.filter(x => !used.has(x.key)),
     members,
   };
 }

@@ -467,4 +467,32 @@ router.patch('/:id/lesson-plan', auth, async (req, res) => {
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
 
+// POST /timetable/:id/lesson-plan/return  { key }
+// "Not taught - put it back": a topic counted as taught only because a
+// past class carried it (no teacher record) returns to the plan, and the
+// coming classes are re-planned to teach it. key = lesson id, or
+// "Topic||Subtopic" when the plan follows the syllabus. A topic the teacher
+// confirmed as taught is not put back.
+router.post('/:id/lesson-plan/return', auth, async (req, res) => {
+  try {
+    const entry = await TimetableEntry.findById(req.params.id).lean();
+    if (!entry || entry.isActive === false) return res.status(404).json({ success: false, message: 'Slot not found.' });
+    if (!canManage(req, entry)) return res.status(403).json({ success: false, message: 'Not your slot.' });
+    const key = String(req.body?.key || '').trim();
+    if (!key) return res.status(400).json({ success: false, message: 'key required.' });
+    const { taught, members } = await loadPlan(entry);
+    const item = taught.find(x => (x.key || String(x._id)) === key);
+    if (!item) return res.status(400).json({ success: false, message: 'That topic is not counted as taught for this class.' });
+    if (item.confirmed) {
+      const on = item.taughtOn ? new Date(item.taughtOn).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : 'a past lesson';
+      return res.status(409).json({ success: false, message: `You confirmed this as taught (${on}), so it stays taught. Reopen that lesson's record to change it.` });
+    }
+    const ids = members.map(m => m._id);
+    await TimetableEntry.updateMany({ _id: { $in: ids } }, { $pull: { planReturned: { key } } });
+    await TimetableEntry.updateMany({ _id: { $in: ids } }, { $push: { planReturned: { key, at: new Date(), by: req.user._id } } });
+    const restamped = await restampFuture(entry);
+    res.json({ success: true, message: `"${item.title || item.name}" is back in the plan.${restamped ? ' ' + restamped + ' coming class(es) re-planned.' : ''}` });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
 module.exports = router;

@@ -26,7 +26,7 @@ const LiveClass = require('../models/LiveClass');
 const ClassroomSession = require('../models/ClassroomSession');
 const {
   occurrencesFor, durationOf, planEntryOccurrences, groupKey,
-  buildLessonQueue, buildSubtopicQueue, stampKey, stampFor, serialize, consumesTopicFilter, closedDaySet,
+  buildLessonQueue, buildSubtopicQueue, stampKey, stampFor, serialize, consumesTopicFilter, closedDaySet, returnedMap, countsAfterReturn,
 } = require('./scheduling');
 
 const isDuplicateKey = (e) => e && (e.code === 11000 || /E11000/.test(String(e.message || '')));
@@ -49,13 +49,17 @@ async function buildQueue(members) {
   const memberIds = members.map(m => m._id);
   const lessons = await loadPublishedLessons(lead.subjectId);
   if (lessons.length) {
-    const used = await LiveClass.distinct('preparationLessonId', {
+    const ret = returnedMap(members);
+    const used = (await LiveClass.find({
       timetableEntryId: { $in: memberIds },
       preparationLessonId: { $ne: null },
       // Cancelled, not-held, student-absent and partly covered lessons
       // give their topic back.
       ...consumesTopicFilter(),
-    });
+    }).select('preparationLessonId scheduledAt outcome coverage').lean())
+      // A topic the teacher put back counts only by confirmed or later classes.
+      .filter(c => { const k = String(c.preparationLessonId); return !ret.has(k) || countsAfterReturn(c, ret.get(k)) })
+      .map(c => c.preparationLessonId);
     // The teacher's custom sequence (any member carrying one) outranks spine order.
     const orderSource = members.find(m => Array.isArray(m.lessonOrder) && m.lessonOrder.length);
     return buildLessonQueue({ lessons, usedLessonIds: used, lessonOrder: orderSource && orderSource.lessonOrder });
@@ -68,11 +72,13 @@ async function buildQueue(members) {
     timetableEntryId: { $in: memberIds },
     syllabusSubtopicName: { $nin: [null, ''] },
     ...consumesTopicFilter(),
-  }).select('syllabusTopicName syllabusSubtopicName').lean();
+  }).select('syllabusTopicName syllabusSubtopicName scheduledAt outcome coverage').lean();
   const os = members.find(m => Array.isArray(m.topicPlanOrder) && m.topicPlanOrder.length);
+  const ret = returnedMap(members);
   return buildSubtopicQueue({
     topics,
-    usedKeys: stamped.map(x => stampKey(x.syllabusTopicName, x.syllabusSubtopicName)),
+    usedKeys: stamped.map(x => stampKey(x.syllabusTopicName, x.syllabusSubtopicName))
+      .filter((k, i) => !ret.has(k) || countsAfterReturn(stamped[i], ret.get(k))),
     topicPlanOrder: os && os.topicPlanOrder,
   });
 }
