@@ -199,3 +199,13 @@ test('leave covers whole days, to the end of the last day in Nairobi', () => {
   const w = leaveWindow({ leaveStartDate: new Date('2026-10-20T00:00:00Z'), leaveEndDate: new Date('2026-10-22T00:00:00Z') })
   assert.equal(iso(w.to), '2026-10-22T20:59:59.000Z')
 })
+
+test('a topic put back in the plan is taught only by a confirmed or later class', () => {
+  const at = new Date('2026-10-26T09:00:00Z')
+  const ret = S.returnedMap([{ planReturned: [{ key: 'A||x', at: new Date('2026-10-20') }] }, { planReturned: [{ key: 'A||x', at }] }])
+  assert.equal(+ret.get('A||x'), +at)                                         // the latest put-back wins
+  assert.equal(S.countsAfterReturn({ scheduledAt: '2026-10-08T10:00:00Z' }, at), false)                        // past, date only
+  assert.equal(S.countsAfterReturn({ scheduledAt: '2026-10-08T10:00:00Z', outcome: 'taught' }, at), true)      // confirmed
+  assert.equal(S.countsAfterReturn({ scheduledAt: '2026-10-08T10:00:00Z', outcome: 'taught', coverage: 'partial' }, at), false)
+  assert.equal(S.countsAfterReturn({ scheduledAt: '2026-10-28T10:00:00Z' }, at), true)                         // re-planned, later
+})

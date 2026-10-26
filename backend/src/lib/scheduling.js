@@ -305,6 +305,25 @@ function consumesTopicFilter() {
   };
 }
 
+/** Topics the teacher put back in the plan, across a group: key → when (the latest). */
+function returnedMap(members) {
+  const m = new Map();
+  for (const e of members || []) for (const r of e.planReturned || []) {
+    const t = new Date(r.at);
+    if (r.key && (!m.has(r.key) || m.get(r.key) < t)) m.set(r.key, t);
+  }
+  return m;
+}
+
+/**
+ * Whether a class still counts as teaching a topic the teacher put back:
+ * only if the teacher confirmed it as taught in full, or it is scheduled
+ * after the topic was put back (it was re-planned to teach it).
+ */
+function countsAfterReturn(cls, at) {
+  return (cls.outcome === 'taught' && cls.coverage !== 'partial') || new Date(cls.scheduledAt) >= at;
+}
+
 /**
  * Mongo filter: lessons that count as TAUGHT for the plan view. Before
  * the cutover, any past non-cancelled lesson; after it, only lessons the
@@ -451,7 +470,7 @@ module.exports = {
   groupKey, orderLessons, subtopicItems, stampKey, buildLessonQueue, buildSubtopicQueue, stampFor,
   studentVisibilityFilter,
   REMINDER_LEAD_MIN, reminderWindow, isReminderDue, reminderStudents, classTypeLabel,
-  closeCutover, isHeldClass, needsClosing, consumesTopic, consumesTopicFilter, taughtFilter,
+  closeCutover, isHeldClass, needsClosing, consumesTopic, consumesTopicFilter, taughtFilter, returnedMap, countsAfterReturn,
   classOutcome, closeUpdate, OUTCOMES,
   ABSENCE_ALERT_AFTER_MIN, absenceAlertDue, absentStudents, findClashes, closedDaySet,
   serialize,
