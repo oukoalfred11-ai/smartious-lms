@@ -53,6 +53,58 @@ export class SfuEngine {
     this._camSaver = null;
     this._camTrack = null;
     this._lk = null;
+    // Remote audio is played by LiveKit itself (track.attach() into hidden
+    // <audio> elements kept here), not by the classroom's audio rail: only
+    // then does LiveKit see the elements, detect a browser autoplay block
+    // (onAudioBlocked) and unlock them all with startAudio() on one tap.
+    // A shared MediaStream that gained its audio track after play() also
+    // stayed silent on some browsers (Safari); attach() gives every track
+    // its own element.
+    this.handlesAudio = true;
+    this._audioBox = null;
+    this._audioEls = new Map(); // track sid -> { track, el }
+  }
+
+  _attachAudio(track) {
+    try {
+      if (typeof document === 'undefined') return;
+      if (!this._audioBox) {
+        this._audioBox = document.createElement('div');
+        this._audioBox.style.display = 'none';
+        this._audioBox.setAttribute('data-classroom-audio', '');
+        document.body.appendChild(this._audioBox);
+      }
+      const key = track.sid || track.mediaStreamTrack?.id;
+      if (this._audioEls.has(key)) return;
+      const el = track.attach();
+      el.autoplay = true;
+      el.setAttribute('playsinline', '');
+      this._audioBox.appendChild(el);
+      this._audioEls.set(key, { track, el });
+      const p = el.play && el.play();
+      if (p && p.catch) p.catch(() => this.onAudioBlocked(true));
+    } catch (e) { console.error('[sfu] audio attach:', e.message); }
+  }
+
+  _detachAudio(track) {
+    const key = track.sid || track.mediaStreamTrack?.id;
+    const rec = this._audioEls.get(key);
+    if (!rec) return;
+    try { rec.track.detach(rec.el); } catch (e) { /* noop */ }
+    try { rec.el.remove(); } catch (e) { /* noop */ }
+    this._audioEls.delete(key);
+  }
+
+  _detachAllAudio() {
+    for (const { track } of [...this._audioEls.values()]) this._detachAudio(track);
+  }
+
+  /** Nudge every remote audio element that the browser paused (tab
+   *  switch, fullscreen, device change). Cheap; called on a timer. */
+  _resumeAudio() {
+    for (const { el } of this._audioEls.values()) {
+      if (el.paused) { const p = el.play && el.play(); if (p && p.catch) p.catch(() => this.onAudioBlocked(true)); }
+    }
   }
 
   async start() {
@@ -69,10 +121,12 @@ export class SfuEngine {
       try { stream.addTrack(track.mediaStreamTrack); } catch (e) { /* dup */ }
       this._streams.set(id, stream);
       this._emit(id);
+      if (track.kind === 'audio') this._attachAudio(track);
       if (track.kind === 'video') this._applyRemote(participant);
     });
     this.room.on(RoomEvent.TrackUnsubscribed, (track, _pub, participant) => {
       const id = participant.identity;
+      if (track.kind === 'audio') this._detachAudio(track);
       const stream = this._streams.get(id);
       if (stream) { try { stream.removeTrack(track.mediaStreamTrack); } catch (e) { /* noop */ } this._emit(id); }
     });
@@ -128,11 +182,20 @@ export class SfuEngine {
     if (this.publish) await this.setPublishing(true);
     this.onMediaState('connected');
     if (!this.room.canPlaybackAudio) this.onAudioBlocked(true);
+    this._resumeTimer = setInterval(() => this._resumeAudio(), 3000);
+    if (typeof document !== 'undefined') {
+      this._onVisible = () => this._resumeAudio();
+      document.addEventListener('visibilitychange', this._onVisible);
+    }
   }
 
   /** The person tapped the enable-audio button. */
   async startAudio() {
-    try { await this.room.startAudio(); this.onAudioBlocked(!this.room.canPlaybackAudio); }
+    try {
+      await this.room.startAudio();
+      for (const { el } of this._audioEls.values()) { try { await el.play(); } catch (e) { /* still blocked */ } }
+      this.onAudioBlocked(!this.room.canPlaybackAudio || [...this._audioEls.values()].some(r => r.el.paused));
+    }
     catch (e) { console.error('[sfu] startAudio:', e.message); }
   }
 
@@ -146,6 +209,7 @@ export class SfuEngine {
     // repopulates cleanly when the room comes back.
     for (const [, key] of this._emittedKey) { try { this.onPeerClosed(key); } catch (e) { /* noop */ } }
     this._streams.clear(); this._emittedKey.clear();
+    this._detachAllAudio();
     let attempt = 0;
     while (!this._closed) {
       attempt += 1;
@@ -225,6 +289,7 @@ export class SfuEngine {
   /** Hot-add or swap the local microphone after joining (the Enable
    *  camera-and-mic flow). Publishes the fresh track to the room. */
   async addLocalAudioTrack(track) {
+    if (!this.publish) return; // assembly audience: published on stage invite
     try {
       if (this.micPub && this.micPub.track) {
         await this.room.localParticipant.unpublishTrack(this.micPub.track, false);
@@ -299,6 +364,14 @@ export class SfuEngine {
   }
   connectTo() { /* media comes from the SFU, not per-peer offers */ }
   close() { /* per-peer teardown handled by ParticipantDisconnected */ }
-  reset() { try { this.room && this.room.disconnect(); } catch (e) { /* noop */ } this._streams.clear(); this._emittedKey.clear(); this._quality.clear(); }
-  destroy() { this._closed = true; this.reset(); this.room = null; }
+  reset() { try { this.room && this.room.disconnect(); } catch (e) { /* noop */ } this._detachAllAudio(); this._streams.clear(); this._emittedKey.clear(); this._quality.clear(); }
+  destroy() {
+    this._closed = true;
+    clearInterval(this._resumeTimer);
+    if (this._onVisible && typeof document !== 'undefined') document.removeEventListener('visibilitychange', this._onVisible);
+    this.reset();
+    try { this._audioBox && this._audioBox.remove(); } catch (e) { /* noop */ }
+    this._audioBox = null;
+    this.room = null;
+  }
 }
