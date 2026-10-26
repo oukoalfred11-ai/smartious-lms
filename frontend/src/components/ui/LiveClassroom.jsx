@@ -669,6 +669,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   const [quality, setQuality] = useState({})       // socketId -> good|fair|poor|down
   const [reconnecting, setReconnecting] = useState(false)
   const [audioBlocked, setAudioBlocked] = useState(false)  // browser autoplay refused audio until a tap
+  const [mediaWaiting, setMediaWaiting] = useState(0)      // >0: still connecting audio/video (attempt number)
   const hadConnectedRef = useRef(false)
 
   useEffect(() => {
@@ -1098,8 +1099,8 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
         // 4. Media engine, initialized IN PARALLEL with the socket join.
         // The room must come alive (roster, role, chat, board) the moment
         // the socket connects; media transport attaches when it is ready.
-        // SFU gets a hard 8-second budget, then mesh takes over. Peers who
-        // arrive before the engine exists are queued and connected after.
+        // Peers who arrive before the engine exists are queued and
+        // connected after (see initEngine for the one-engine rule).
         const pendingConnects = []
         const wireEngine = (eng) => {
           engine = eng
@@ -1110,58 +1111,76 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
             try { eng.connectTo(id) } catch (e) { /* noop */ }
           }
         }
+        // One room, one media system. Every participant must be on the SAME
+        // engine: a learner on mesh cannot hear anyone on the SFU, and nobody
+        // there hears them. The SFU used to get 8 seconds and then each
+        // client fell back to mesh on its own, so one slow connection meant
+        // a silent class for that person ("audio failure"). Now, when the
+        // server runs the SFU, a client keeps retrying the SFU (longer each
+        // time, with a visible banner) and never splits off to mesh. Mesh is
+        // used only when the server has no SFU configured, i.e. for everyone.
+        const buildSfu = (sfuCfg) => new SfuEngine({
+          url: sfuCfg.url, token: sfuCfg.token, localStream: stream,
+          publish: sfuCfg.canPublish !== false,
+          onCanPublishChanged: (can) => {
+            setAudience(!can)
+            if (can) {
+              engineRef.current?.setPublishing?.(true)
+              toast?.ok?.("You have been invited to the stage. Your mic and camera are now live.")
+            } else {
+              engineRef.current?.setPublishing?.(false)
+              toast?.ok?.('You are back in the audience.')
+            }
+          },
+          onTrack: (id, s2) => setStreams(prev => ({ ...prev, [id]: s2 })),
+          onPeerClosed: (id) => setStreams(prev => { const n = { ...prev }; delete n[id]; return n }),
+          resolveSocketId: (uid) => { const bare = String(uid).split('#')[0]; return rosterRef.current?.find(r => String(r.userId) === bare)?.socketId || null },
+          // Fresh token for a full media rejoin — the join token expires.
+          getToken: async () => {
+            try { const r = await api.post('/livekit/token/' + liveClassId); return r.data?.data?.token || null }
+            catch (e) { return null }
+          },
+          onMediaState: (st) => setReconnecting(st === 'reconnecting'),
+          onAudioBlocked: (blocked) => setAudioBlocked(!!blocked),
+        })
+        const sleep = (ms) => new Promise(r => setTimeout(r, ms))
         const initEngine = async () => {
-          let sfuCfg = null
-          try {
-            const cfgR = await api.get('/livekit/config')
-            if (cfgR.data?.data?.engine === 'sfu') {
-              const tkR = await api.post('/livekit/token/' + liveClassId)
-              if (tkR.data?.success) sfuCfg = tkR.data.data
-            }
-          } catch (e) { /* mesh fallback */ }
+          // 1. Which engine does the server run? Retried: guessing wrong
+          //    would split the room.
+          let engineKind = null
+          for (let a = 1; !cancelled && !engineKind; a++) {
+            try { engineKind = (await api.get('/livekit/config')).data?.data?.engine || 'mesh' }
+            catch (e) { if (a > 1) setMediaWaiting(a); await sleep(Math.min(1500 * a, 8000)) }
+          }
           if (cancelled) return
-
-          if (sfuCfg) {
-            let sfuEngine = null
-            try {
-              if (sfuCfg.canPublish === false) setAudience(true)
-              if (sfuCfg.kind === 'assembly') setMainView('meeting')
-              sfuEngine = new SfuEngine({
-                url: sfuCfg.url, token: sfuCfg.token, localStream: stream,
-                publish: sfuCfg.canPublish !== false,
-                onCanPublishChanged: (can) => {
-                  setAudience(!can)
-                  if (can) {
-                    engineRef.current?.setPublishing?.(true)
-                    toast?.ok?.("You have been invited to the stage. Your mic and camera are now live.")
-                  } else {
-                    engineRef.current?.setPublishing?.(false)
-                    toast?.ok?.('You are back in the audience.')
-                  }
-                },
-                onTrack: (id, s2) => setStreams(prev => ({ ...prev, [id]: s2 })),
-                onPeerClosed: (id) => setStreams(prev => { const n = { ...prev }; delete n[id]; return n }),
-                resolveSocketId: (uid) => { const bare = String(uid).split('#')[0]; return rosterRef.current?.find(r => String(r.userId) === bare)?.socketId || null },
-                // Fresh token for a full media rejoin — the join token expires.
-                getToken: async () => {
-                  try { const r = await api.post('/livekit/token/' + liveClassId); return r.data?.data?.token || null }
-                  catch (e) { return null }
-                },
-                onMediaState: (st) => setReconnecting(st === 'reconnecting'),
-                onAudioBlocked: (blocked) => setAudioBlocked(!!blocked),
-              })
-              await Promise.race([
-                sfuEngine.start(),
-                new Promise((_, rej) => setTimeout(() => rej(new Error('SFU connect timed out after 8s')), 8000)),
-              ])
-              if (cancelled) { try { sfuEngine.destroy() } catch (e) { /* noop */ } return }
-              wireEngine(sfuEngine)
-              return
-            } catch (sfuErr) {
-              console.error('[classroom] SFU unavailable, using mesh:', (sfuErr && sfuErr.message) || sfuErr)
-              try { if (sfuEngine) sfuEngine.destroy() } catch (e2) { /* noop */ }
-              setAudience(false)
+          if (engineKind === 'sfu') {
+            for (let attempt = 1; !cancelled; attempt++) {
+              let sfuEngine = null
+              try {
+                const tkR = await api.post('/livekit/token/' + liveClassId)
+                const sfuCfg = tkR.data?.success ? tkR.data.data : null
+                if (!sfuCfg) throw new Error(tkR.data?.message || 'no media token')
+                if (sfuCfg.canPublish === false) setAudience(true)
+                if (sfuCfg.kind === 'assembly' && attempt === 1) setMainView('meeting')
+                sfuEngine = buildSfu(sfuCfg)
+                const budget = attempt === 1 ? 15000 : 25000
+                await Promise.race([
+                  sfuEngine.start(),
+                  new Promise((_, rej) => setTimeout(() => rej(new Error('SFU connect timed out after ' + budget / 1000 + 's')), budget)),
+                ])
+                if (cancelled) { try { sfuEngine.destroy() } catch (e) { /* noop */ } return }
+                setMediaWaiting(0)
+                wireEngine(sfuEngine)
+                return
+              } catch (sfuErr) {
+                console.error('[classroom] SFU attempt ' + attempt + ' failed:', (sfuErr && sfuErr.message) || sfuErr)
+                try { if (sfuEngine) sfuEngine.destroy() } catch (e2) { /* noop */ }
+                if (cancelled) return
+                setMediaWaiting(attempt)
+                await sleep(Math.min(2000 * attempt, 10000))
+              }
             }
+            return
           }
           if (cancelled) return
           wireEngine(new MeshEngine({
@@ -1767,6 +1786,39 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
     engineRef.current?.setTrackEnabled('audio', next)
     socketRef.current?.emit('state', { micOn: next })
   }
+  // Mic watchdog. A microphone can die mid-lesson (headset unplugged,
+  // Bluetooth drop, another app or the OS taking it): the track ends and
+  // the class stops hearing this person while their button still shows
+  // the mic as on. Re-acquire it automatically instead of waiting for
+  // them to notice and toggle it.
+  const micHealRef = useRef({ busy: false, last: 0 })
+  useEffect(() => {
+    if (!micOn || phase !== 'live') return
+    const heal = async () => {
+      const eng = engineRef.current
+      if (!eng || eng.publish === false) return
+      const t = eng.localStream?.getAudioTracks?.()[0]
+      if (t && t.readyState === 'live') return
+      const h = micHealRef.current
+      if (h.busy || Date.now() - h.last < 15000) return
+      h.busy = true; h.last = Date.now()
+      try {
+        if (await ensureLiveTrack('audio')) {
+          engineRef.current?.setTrackEnabled('audio', true)
+          toast?.ok?.('Your microphone dropped out and was reconnected.')
+        }
+      } finally { h.busy = false }
+    }
+    const t = engineRef.current?.localStream?.getAudioTracks?.()[0]
+    t?.addEventListener?.('ended', heal)
+    navigator.mediaDevices?.addEventListener?.('devicechange', heal)
+    const iv = setInterval(heal, 5000)
+    return () => {
+      t?.removeEventListener?.('ended', heal)
+      navigator.mediaDevices?.removeEventListener?.('devicechange', heal)
+      clearInterval(iv)
+    }
+  }, [micOn, phase, engineTick, localStream])
   const toggleCam = async () => {
     const next = !camOn
     if (next && !(await ensureLiveTrack('video'))) return
@@ -1933,9 +1985,29 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       const eng = engineRef.current
       if (!eng || !fresh) return
       for (const track of fresh.getTracks()) {
-        if (!eng.localStream.getTracks().some(t => t.kind === track.kind)) {
+        const existing = eng.localStream.getTracks().find(t => t.kind === track.kind)
+        if (existing && existing.readyState === 'live') { track.stop(); continue }
+        if (existing) eng.localStream.removeTrack(existing)
+        // Same hot-add as ensureLiveTrack: the SFU publishes the track to
+        // the room (it has no peer connections of its own — calling
+        // eng.peers here crashed, so a learner who enabled the mic after
+        // joining was never heard); mesh adds it to every connection.
+        if (eng.handlesAudio && eng.publish === false) {
+          // Assembly audience: kept ready, published on a stage invite.
           eng.localStream.addTrack(track)
-          for (const { pc } of eng.peers.values()) pc.addTrack(track, eng.localStream)
+        } else if (track.kind === 'video' && eng.handlesAudio) {
+          eng.localStream.addTrack(track)
+          await eng.replaceVideoTrack(track)
+        } else if (track.kind === 'audio' && typeof eng.addLocalAudioTrack === 'function') {
+          eng.localStream.addTrack(track)
+          await eng.addLocalAudioTrack(track)
+        } else if (eng.peers) {
+          eng.localStream.addTrack(track)
+          for (const { pc } of eng.peers.values()) {
+            const sender = pc.getSenders().find(s2 => s2.track && s2.track.kind === track.kind)
+            if (sender) await sender.replaceTrack(track).catch(() => {})
+            else pc.addTrack(track, eng.localStream)
+          }
         }
       }
       const hasVideo = eng.localStream.getVideoTracks().length > 0
@@ -2588,7 +2660,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
           audio element placed there is destroyed the moment the teacher
           maximises the whiteboard, which silenced every student. Mounted
           here, sound survives every view switch and fullscreen toggle. */}
-      <AudioRail streams={streams} />
+      {!engineRef.current?.handlesAudio && <AudioRail streams={streams} />}
 
       {/* ── Top bar (hidden in focus mode) ── */}
       {!focus && (
@@ -2660,6 +2732,11 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
           <Btn onClick={retryMedia} style={{ background: C.gold, color: '#111', fontWeight: 800, padding: '6px 14px' }}>
             Enable camera and mic
           </Btn>
+        </div>
+      )}
+      {!reconnecting && mediaWaiting > 0 && phase === 'live' && (
+        <div style={{ background: '#7C2D12', color: '#FED7AA', fontSize: 12, padding: '7px 16px', fontWeight: 700 }}>
+          Connecting class audio and video{mediaWaiting > 1 ? ' (attempt ' + mediaWaiting + ')' : ''}... stay on this page, it keeps trying on its own.
         </div>
       )}
       {reconnecting && phase === 'live' && (
