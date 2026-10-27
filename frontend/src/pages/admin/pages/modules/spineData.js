@@ -20445,6 +20445,133 @@ export const IAL_LIBRARY = [
     source: 'Edexcel International A Level Mathematics \u2014 modular scheme (P1-P4, M1, M2, S1, S2, D1)' },
 ]
 
+// Cambridge International AS & A Level Statistics (Mathematics 9709,
+// Probability & Statistics).
+// Cambridge has no separate A Level Statistics syllabus: statistics is
+// examined inside Mathematics 9709 as Paper 5 (Probability & Statistics 1,
+// AS) and Paper 6 (Probability & Statistics 2, A Level). This spine is
+// those two papers at lesson level, for a school that timetables
+// statistics as its own subject. Topics follow the syllabus numbering
+// (5.1-5.5, 6.1-6.5); S1/S2 prefixes match the 9709 Mathematics spine.
+const ALEVEL_STATISTICS_9709 = [
+  // ─────────────── PAPER 5 · PROBABILITY & STATISTICS 1 (AS) ───────────────
+  { topic: 'S1 · 5.1 Representation of Data', code: 'ST-S1-1',
+    subtopics: [
+      { name: 'Types of Data and Choosing a Suitable Representation', code: 'ST-S1-1.1' },
+      { name: 'Stem-and-Leaf Diagrams, Including Back-to-Back', code: 'ST-S1-1.2' },
+      { name: 'Box-and-Whisker Plots, Quartiles and Outliers', code: 'ST-S1-1.3' },
+      { name: 'Histograms with Unequal Class Widths: Frequency Density', code: 'ST-S1-1.4' },
+      { name: 'Cumulative Frequency Graphs: Median, Quartiles and Percentiles', code: 'ST-S1-1.5' },
+      { name: 'Measures of Central Tendency: Mean, Median and Mode', code: 'ST-S1-1.6' },
+      { name: 'Measures of Variation: Range, Interquartile Range, Standard Deviation', code: 'ST-S1-1.7' },
+      { name: 'Mean and Standard Deviation from Grouped Data', code: 'ST-S1-1.8' },
+      { name: 'Using Summary Totals: Σx, Σx², Σ(x − a), Σ(x − a)²', code: 'ST-S1-1.9' },
+      { name: 'Comparing Data Sets and Interpreting in Context', code: 'ST-S1-1.10' },
+    ] },
+
+  { topic: 'S1 · 5.2 Permutations and Combinations', code: 'ST-S1-2',
+    subtopics: [
+      { name: 'Factorials and Arrangements of Distinct Objects', code: 'ST-S1-2.1' },
+      { name: 'Arrangements with Repeated Objects', code: 'ST-S1-2.2' },
+      { name: 'Arrangements with Restrictions: Together, Apart, Ends', code: 'ST-S1-2.3' },
+      { name: 'Arrangements in a Line from a Selection (ⁿPᵣ)', code: 'ST-S1-2.4' },
+      { name: 'Selections (ⁿCᵣ) With and Without Restrictions', code: 'ST-S1-2.5' },
+      { name: 'Problems Combining Selection and Arrangement', code: 'ST-S1-2.6' },
+    ] },
+
+  { topic: 'S1 · 5.3 Probability', code: 'ST-S1-3',
+    subtopics: [
+      { name: 'Sample Spaces and Probability by Counting', code: 'ST-S1-3.1' },
+      { name: 'Using Permutations and Combinations in Probability', code: 'ST-S1-3.2' },
+      { name: 'Addition and Multiplication of Probabilities', code: 'ST-S1-3.3' },
+      { name: 'Mutually Exclusive Events', code: 'ST-S1-3.4' },
+      { name: 'Independent Events and Testing for Independence', code: 'ST-S1-3.5' },
+      { name: 'Tree Diagrams', code: 'ST-S1-3.6' },
+      { name: 'Venn Diagrams and Two-Way Tables', code: 'ST-S1-3.7' },
+      { name: 'Conditional Probability', code: 'ST-S1-3.8' },
+    ] },
+
+  { topic: 'S1 · 5.4 Discrete Random Variables', code: 'ST-S1-4',
+    subtopics: [
+      { name: 'Probability Distribution Tables', code: 'ST-S1-4.1' },
+      { name: 'Expectation E(X) and Variance Var(X)', code: 'ST-S1-4.2' },
+      { name: 'The Binomial Distribution: Conditions and Probabilities', code: 'ST-S1-4.3' },
+      { name: 'Cumulative Binomial Probabilities and Problems in Context', code: 'ST-S1-4.4' },
+      { name: 'Mean and Variance of the Binomial Distribution', code: 'ST-S1-4.5' },
+      { name: 'The Geometric Distribution: Probabilities and Mean', code: 'ST-S1-4.6' },
+      { name: 'Choosing Between Binomial and Geometric Models; the Mode', code: 'ST-S1-4.7' },
+    ] },
+
+  { topic: 'S1 · 5.5 The Normal Distribution', code: 'ST-S1-5',
+    subtopics: [
+      { name: 'Properties of the Normal Distribution and the Normal Curve', code: 'ST-S1-5.1' },
+      { name: 'Standardising and Using the Normal Distribution Tables', code: 'ST-S1-5.2' },
+      { name: 'Finding Values from Given Probabilities (Inverse Normal)', code: 'ST-S1-5.3' },
+      { name: 'Finding an Unknown Mean and/or Standard Deviation', code: 'ST-S1-5.4' },
+      { name: 'Modelling with the Normal Distribution in Context', code: 'ST-S1-5.5' },
+      { name: 'Normal Approximation to the Binomial with Continuity Correction', code: 'ST-S1-5.6' },
+    ] },
+
+  // ─────────────── PAPER 6 · PROBABILITY & STATISTICS 2 (A Level) ───────────────
+  { topic: 'S2 · 6.1 The Poisson Distribution', code: 'ST-S2-1',
+    subtopics: [
+      { name: 'Conditions for a Poisson Model', code: 'ST-S2-1.1' },
+      { name: 'Calculating Poisson Probabilities', code: 'ST-S2-1.2' },
+      { name: 'Mean and Variance of the Poisson Distribution', code: 'ST-S2-1.3' },
+      { name: 'Changing the Interval: Scaling λ', code: 'ST-S2-1.4' },
+      { name: 'Poisson Approximation to the Binomial', code: 'ST-S2-1.5' },
+      { name: 'Normal Approximation to the Poisson with Continuity Correction', code: 'ST-S2-1.6' },
+    ] },
+
+  { topic: 'S2 · 6.2 Linear Combinations of Random Variables', code: 'ST-S2-2',
+    subtopics: [
+      { name: 'E(aX + b) and Var(aX + b)', code: 'ST-S2-2.1' },
+      { name: 'E(aX + bY) and Var(aX + bY) for Independent Variables', code: 'ST-S2-2.2' },
+      { name: 'Sums of Independent Poisson Variables', code: 'ST-S2-2.3' },
+      { name: 'Linear Combinations of Independent Normal Variables', code: 'ST-S2-2.4' },
+      { name: 'X₁ + X₂ versus 2X: Problems in Context', code: 'ST-S2-2.5' },
+    ] },
+
+  { topic: 'S2 · 6.3 Continuous Random Variables', code: 'ST-S2-3',
+    subtopics: [
+      { name: 'Probability Density Functions and Their Properties', code: 'ST-S2-3.1' },
+      { name: 'Probabilities by Integration', code: 'ST-S2-3.2' },
+      { name: 'Finding Unknown Constants in a PDF', code: 'ST-S2-3.3' },
+      { name: 'Mean and Variance of a Continuous Random Variable', code: 'ST-S2-3.4' },
+      { name: 'Median and Percentiles of a Continuous Random Variable', code: 'ST-S2-3.5' },
+    ] },
+
+  { topic: 'S2 · 6.4 Sampling and Estimation', code: 'ST-S2-4',
+    subtopics: [
+      { name: 'Populations, Samples and Random Sampling', code: 'ST-S2-4.1' },
+      { name: 'The Distribution of the Sample Mean', code: 'ST-S2-4.2' },
+      { name: 'The Central Limit Theorem', code: 'ST-S2-4.3' },
+      { name: 'Unbiased Estimates of Population Mean and Variance', code: 'ST-S2-4.4' },
+      { name: 'Confidence Intervals for a Population Mean', code: 'ST-S2-4.5' },
+      { name: 'Confidence Intervals for a Population Proportion (Large Samples)', code: 'ST-S2-4.6' },
+    ] },
+
+  { topic: 'S2 · 6.5 Hypothesis Tests', code: 'ST-S2-5',
+    subtopics: [
+      { name: 'Hypothesis Testing Concepts: H₀, H₁, Significance Level', code: 'ST-S2-5.1' },
+      { name: 'Critical Regions and One-Tailed vs Two-Tailed Tests', code: 'ST-S2-5.2' },
+      { name: 'Hypothesis Tests Using the Binomial Distribution', code: 'ST-S2-5.3' },
+      { name: 'Hypothesis Tests Using the Poisson Distribution', code: 'ST-S2-5.4' },
+      { name: 'Hypothesis Tests for a Population Mean Using the Normal Distribution', code: 'ST-S2-5.5' },
+      { name: 'Type I and Type II Errors and Their Probabilities', code: 'ST-S2-5.6' },
+    ] },
+
+  { topic: 'Statistics Exam Technique & Revision', code: 'ST-EX',
+    subtopics: [
+      { name: 'Using the List of Formulae and Statistical Tables (MF19)', code: 'ST-EX.1' },
+      { name: 'Stating Distributions, Assumptions and Conclusions in Context', code: 'ST-EX.2' },
+      { name: 'Accuracy, Rounding and Continuity Corrections', code: 'ST-EX.3' },
+      { name: 'Past Paper Practice: Paper 5 (Probability & Statistics 1)', code: 'ST-EX.4' },
+      { name: 'Past Paper Practice: Paper 6 (Probability & Statistics 2)', code: 'ST-EX.5' },
+      { name: 'Mock Exam Review and Revision Planning', code: 'ST-EX.6' },
+    ] },
+]
+
 export const ALEVEL_LIBRARY = [
   { match: KISWAHILI_MATCH, const_: KISWAHILI_A_LEVEL, source: 'Cambridge A Level Kiswahili \u2014 ' + KISWAHILI_SOURCES.aLevel },
   { match: /\bbiology\b/i, const_: ALEVEL_BIOLOGY_9700,
@@ -20462,6 +20589,10 @@ export const ALEVEL_LIBRARY = [
   // Further Mathematics MUST precede any /math/ matcher, or it loads
   // Mathematics 9709 — which is what was happening. 9231 is a separate
   // syllabus that ASSUMES 9709 rather than extending it.
+  // Statistics comes first: a subject called "Mathematics (Statistics)" or
+  // "Probability & Statistics" is the statistics papers, not all of 9709.
+  { match: /\bstatistic/i, const_: ALEVEL_STATISTICS_9709,
+    source: 'Cambridge International AS & A Level Mathematics 9709 Statistics (Paper 5 & Paper 6) \u2014 71-lesson scheme' },
   { match: /\bfurther\s+math/i, const_: ALEVEL_FURTHER_MATHS_9231,
     source: 'Cambridge International AS & A Level Further Mathematics 9231 \u2014 100-lesson scheme' },
   { match: /\blatin\b/i, const_: ALEVEL_LATIN_9787,
