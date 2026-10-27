@@ -19,7 +19,8 @@ const jwt = require('jsonwebtoken')
 const args = process.argv.slice(2)
 const apiArg = args.indexOf('--api')
 const API = (apiArg >= 0 ? args[apiArg + 1] : '') || process.env.AUDIT_API || `http://localhost:${process.env.PORT || 5000}`
-const query = args.filter((a, i) => i !== apiArg && i !== apiArg + 1).join(' ').trim()
+// Without --api, apiArg is -1: skip nothing (apiArg + 1 would drop the first word).
+const query = args.filter((a, i) => apiArg < 0 || (i !== apiArg && i !== apiArg + 1)).join(' ').trim()
 const ok = (s) => console.log('  ✓ ' + s)
 const bad = (s) => console.log('  ✗ ' + s)
 const info = (s) => console.log('    ' + s)
