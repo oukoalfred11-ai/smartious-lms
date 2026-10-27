@@ -89,6 +89,8 @@ const ALL_SUBJECTS = [
   // ── CambridgeALevel ─────────────────────────────────────
   { curriculum:'CambridgeALevel', subjectName:'Mathematics',          category:'Mathematics' },
   { curriculum:'CambridgeALevel', subjectName:'Further Mathematics',  category:'Mathematics' },
+  // Statistics = 9709 Papers 5 & 6, for schools that timetable it on its own.
+  { curriculum:'CambridgeALevel', subjectName:'Statistics',           category:'Mathematics' },
   { curriculum:'CambridgeALevel', subjectName:'English Language',     category:'Languages' },
   { curriculum:'CambridgeALevel', subjectName:'English Literature',   category:'Languages' },
   { curriculum:'CambridgeALevel', subjectName:'Physics',              category:'Sciences' },

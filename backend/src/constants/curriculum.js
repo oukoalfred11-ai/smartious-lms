@@ -212,6 +212,7 @@ const SUBJECTS = [
   { id: 'mathematics',         name: 'Mathematics',                category: 'Mathematics', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBDP', 'BNC', 'American', 'Canadian'] },
   { id: 'additional_math',     name: 'Additional Mathematics',     category: 'Mathematics', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE'] },
   { id: 'further_math',        name: 'Further Mathematics',        category: 'Mathematics', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'BNC'] },
+  { id: 'statistics',          name: 'Statistics',                 category: 'Mathematics', availableIn: ['CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel'] },
   { id: 'ap_calculus',         name: 'AP Calculus',                category: 'Mathematics', availableIn: ['American'] },
   { id: 'ap_statistics',       name: 'AP Statistics',              category: 'Mathematics', availableIn: ['American'] },
   { id: 'ib_math_aa',          name: 'IB Mathematics: Analysis & Approaches', category: 'Mathematics', availableIn: ['IBDP'] },
