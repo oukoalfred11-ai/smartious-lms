@@ -47,24 +47,33 @@ function fmtTime(hhmm) {
 
 // ── GET /api/parent/children ──────────────────────────────
 // Returns all students linked to the logged-in parent
+// A parent's children, however they were linked: the parent's
+// linkedStudents / children lists, the student's linkedParents, or the
+// student's parentEmail (any letter case). Links to deleted accounts are
+// dropped. A deleted child used to come back as null in the list, which
+// crashed the portal into a blank page.
+const escRe = (s) => String(s || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+async function childIdsOf(parentId, email) {
+  const parent = await User.findById(parentId).select('linkedStudents children email').lean()
+  if (!parent) return null
+  const mail = email || parent.email || ''
+  const or = [
+    { _id: { $in: [...(parent.linkedStudents || []), ...(parent.children || [])].filter(Boolean) } },
+    { linkedParents: parent._id },
+  ]
+  if (mail) or.push({ parentEmail: new RegExp('^' + escRe(mail.trim()) + '$', 'i') })
+  const kids = await User.find({ role: 'student', $or: or }).select('_id').lean()
+  return kids.map(k => String(k._id))
+}
+
 router.get('/children', auth, async (req, res) => {
   try {
-    const parent = await User.findById(req.user._id)
-      .populate('linkedStudents','firstName lastName email admissionNo admissionNumber curriculum gradeLevel programme avatar parentEmail parentName')
-      .lean()
-    if (!parent) return fail(res,404,'Parent not found.')
-
-    // Also find students where parentEmail matches parent email
-    const byEmail = await User.find({ role:'student', parentEmail: req.user.email })
+    const ids = await childIdsOf(req.user._id, req.user.email)
+    if (!ids) return fail(res,404,'Parent not found.')
+    const children = await User.find({ _id: { $in: ids } })
       .select('firstName lastName email admissionNo admissionNumber curriculum gradeLevel programme avatar parentEmail parentName')
-      .lean()
-
-    // Merge, deduplicate
-    const linked  = parent.linkedStudents || []
-    const all     = [...linked]
-    byEmail.forEach(s => { if (!all.some(x=>String(x._id)===String(s._id))) all.push(s) })
-
-    return ok(res, { children: all })
+      .sort({ firstName: 1 }).lean()
+    return ok(res, { children })
   } catch(e) { return fail(res,e.status||500,e.message) }
 })
 
@@ -411,10 +420,10 @@ router.get('/children/:id/fees', auth, async (req, res) => {
 async function assertAccess(reqUser, student) {
   if (['admin','dos','accountant','ops_manager'].includes(reqUser.role)) return
   if (reqUser.role==='parent') {
-    const parent = await User.findById(reqUser._id).select('linkedStudents email').lean()
-    const linked = (parent?.linkedStudents||[]).map(String)
-    const byEmail = student.parentEmail === reqUser.email
-    if (!linked.includes(String(student._id)) && !byEmail)
+    // Same rule as the children list (childIdsOf), so every child the
+    // portal shows can also be opened.
+    const ids = (await childIdsOf(reqUser._id, reqUser.email)) || []
+    if (!ids.includes(String(student._id)))
       throw Object.assign(new Error('Not authorised to view this student.'), {status:403})
     return
   }

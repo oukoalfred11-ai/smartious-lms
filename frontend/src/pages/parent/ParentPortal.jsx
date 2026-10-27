@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, Component } from 'react'
 import CommunityChatView from '../../components/CommunityChat.jsx'
 import AnnouncementsStrip from '../../components/AnnouncementsStrip.jsx'
 import { LessonPlan } from '../../components/lessons/LessonPlan.jsx'
@@ -94,6 +94,7 @@ export default function ParentPortal() {
   const [linkAdm,         setLinkAdm]         = useState('')
   const [linking,         setLinking]         = useState(false)
   const [toast,           setToast]           = useState(null)
+  const [kidsError,       setKidsError]       = useState('')   // the children list failed to load
 
   const showToast = (msg, type='ok') => {
     setToast({ msg, type })
@@ -103,14 +104,21 @@ export default function ParentPortal() {
   useEffect(() => {
     const raw = localStorage.getItem('sm_user')
     if (raw) { try { setUser(JSON.parse(raw)) } catch {} }
+    loadChildren()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Empty entries are dropped (a link to a deleted account), and a failed
+  // load says so with a retry, instead of looking like "no child linked".
+  function loadChildren() {
+    setKidsError('')
     api.get('/parent/children')
       .then(r => {
-        const kids = r.data?.data?.children || []
+        const kids = (r.data?.data?.children || []).filter(k => k && k._id)
         setChildren(kids)
-        if (kids.length > 0) setSelectedChild(kids[0])
+        setSelectedChild(prev => kids.find(k => prev && String(k._id) === String(prev._id)) || kids[0] || null)
       })
-      .catch(() => {})
-  }, [])
+      .catch(e => setKidsError(e?.response?.data?.message || 'Could not load your children\'s details. Check your connection and try again.'))
+  }
 
   const linkStudent = async () => {
     if (!linkAdm.trim()) return
@@ -120,7 +128,7 @@ export default function ParentPortal() {
       showToast(r.data?.message || 'Student linked!')
       setLinkModal(false); setLinkAdm('')
       const r2 = await api.get('/parent/children')
-      const kids = r2.data?.data?.children || []
+      const kids = (r2.data?.data?.children || []).filter(k => k && k._id)
       setChildren(kids)
       if (kids.length > 0 && !selectedChild) setSelectedChild(kids[0])
     } catch(e) { showToast(e?.response?.data?.message || 'Failed to link student.', 'err') }
@@ -291,10 +299,16 @@ export default function ParentPortal() {
 
         {/* Content */}
         <div key={isMobile ? page : undefined} className={isMobile ? 'sm-page-in' : undefined} style={{ flex:1, overflowY:'auto', WebkitOverflowScrolling:'touch', padding:isMobile?'16px 14px calc(96px + env(safe-area-inset-bottom))':'24px 28px', maxWidth:1400, margin:'0 auto', width:'100%', boxSizing:'border-box', animation:isMobile?undefined:'fadeIn .25s ease' }}>
-          {!selectedChild&&page!=='messages'&&page!=='programme'&&page!=='tutor' ? (
+          {kidsError && !selectedChild ? (
+            <div style={{ maxWidth:520, margin:'60px auto', textAlign:'center', color:C.ink }}>
+              <div style={{ fontSize:16, fontWeight:700, marginBottom:8 }}>Your portal could not load</div>
+              <div style={{ fontSize:13.5, color:C.s500, marginBottom:16 }}>{kidsError}</div>
+              <button onClick={loadChildren} style={{ background:C.crimson, color:'#fff', border:'none', padding:'9px 20px', borderRadius:8, fontSize:13, fontWeight:700, cursor:'pointer' }}>Try again</button>
+            </div>
+          ) : !selectedChild&&page!=='messages'&&page!=='programme'&&page!=='tutor' ? (
             <NoChildLinked onLink={()=>setLinkModal(true)}/>
           ) : (
-            <>
+            <SectionBoundary key={page + ':' + (selectedChild?._id || '')} onHome={() => setPage('dashboard')}>
               {page==='dashboard'  && <ParentDashboard   child={selectedChild} showToast={showToast} setPage={setPage}/>}
               {page==='reports'    && <ParentReports      child={selectedChild} showToast={showToast}/>}
               {page==='homework'   && <ParentHomework     child={selectedChild} showToast={showToast}/>}
@@ -316,7 +330,7 @@ export default function ParentPortal() {
               {page==='community'  && <CommunityChatView  user={user} toast={{ ok: m => showToast(m,'ok'), error: m => showToast(m,'error') }}/>}
               {page==='programme'  && <ParentProgramme    child={selectedChild}/>}
               {page==='tutor'      && <ParentTutor        child={selectedChild}/>}
-            </>
+            </SectionBoundary>
           )}
         </div>
       </div>
@@ -359,6 +373,28 @@ export default function ParentPortal() {
 }
 
 // ── No child linked placeholder ───────────────────────────
+// One section failing (bad data, a bug) shows a message in that section
+// instead of blanking the whole portal; the menu keeps working.
+class SectionBoundary extends Component {
+  constructor(props) { super(props); this.state = { error: null } }
+  static getDerivedStateFromError(error) { return { error } }
+  componentDidCatch(error, info) { console.error('[parent portal] section crashed:', error, info) }
+  render() {
+    if (!this.state.error) return this.props.children
+    return (
+      <div style={{ maxWidth:560, margin:'40px auto', background:'#fff', border:`1px solid ${C.line}`, borderRadius:12, padding:22, color:C.ink }}>
+        <div style={{ fontSize:16, fontWeight:700, marginBottom:6 }}>This section could not be shown</div>
+        <div style={{ fontSize:13, color:C.s500, marginBottom:12 }}>The rest of the portal still works from the menu. If this keeps happening, tell the school and mention the message below.</div>
+        <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
+          <button onClick={() => this.setState({ error: null })} style={{ background:C.crimson, color:'#fff', border:'none', padding:'8px 16px', borderRadius:8, fontSize:13, fontWeight:700, cursor:'pointer' }}>Try again</button>
+          <button onClick={() => { this.setState({ error: null }); this.props.onHome?.() }} style={{ background:'#fff', color:C.crimson, border:`1px solid ${C.crimson}`, padding:'8px 16px', borderRadius:8, fontSize:13, fontWeight:700, cursor:'pointer' }}>Go to dashboard</button>
+        </div>
+        <pre style={{ marginTop:12, whiteSpace:'pre-wrap', fontSize:11.5, color:C.s500, background:'#F8F2E6', borderRadius:8, padding:10 }}>{String(this.state.error)}</pre>
+      </div>
+    )
+  }
+}
+
 function NoChildLinked({ onLink }) {
   return (
     <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:400, textAlign:'center' }}>
@@ -416,7 +452,7 @@ function ParentDashboard({ child, showToast, setPage }) {
   const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
   const today = DAYS[now.getDay()]
   const nowMins = now.getHours()*60+now.getMinutes()
-  const toMins = h => { const [hh,mm]=h.split(':').map(Number); return hh*60+mm }
+  const toMins = h => { const [hh,mm]=String(h||'0:0').split(':').map(Number); return (hh||0)*60+(mm||0) }
   const todayClasses = (data.tt||[]).filter(e=>e.dayOfWeek===today).sort((a,b)=>toMins(a.startTime)-toMins(b.startTime))
   const nextClass = todayClasses.find(e=>toMins(e.startTime)>nowMins)
   const liveClass = todayClasses.find(e=>nowMins>=toMins(e.startTime)&&nowMins<toMins(e.endTime))
