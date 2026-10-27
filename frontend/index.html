@@ -8,6 +8,33 @@
        with a static file (dist/x.html); this covers app-only routes served by
        the SPA fallback, where both forms would otherwise return 200. -->
   <script>(function(l){var p=l.pathname;if(p.length>1&&/\/$/.test(p)){l.replace((p.replace(/\/+$/,'')||'/')+l.search+l.hash)}})(location);</script>
+  <!-- Blank-page watchdog (plain ES5 on purpose, so it runs on browsers too
+       old for the app itself). If the app has not drawn anything 12 seconds
+       after load, it shows a message instead of a white page and reports
+       the first error and the browser to the server log
+       (POST /api/client-errors), so a "blank portal" has a visible cause. -->
+  <script>
+  (function(w,d){
+    var errs=[];
+    function api(){var b='%VITE_API_URL%';return (b.charAt(0)==='%'?'':b.replace(/\/+$/,''))+'/api/client-errors'}
+    function who(){try{var u=JSON.parse(localStorage.getItem('sm_user')||'null');return u?(u.email||'')+' ('+(u.role||'')+')':''}catch(e){return ''}}
+    function send(kind,msg,stack){try{var body=JSON.stringify({kind:kind,message:String(msg||'').slice(0,500),stack:String(stack||'').slice(0,800),path:location.pathname,ua:navigator.userAgent,user:who()});
+      if(navigator.sendBeacon){navigator.sendBeacon(api(),new Blob([body],{type:'text/plain'}))}else{var x=new XMLHttpRequest();x.open('POST',api(),true);x.setRequestHeader('Content-Type','text/plain');x.send(body)}}catch(e){}}
+    w.__smReportError=send;
+    w.addEventListener('error',function(e){var m=e&&(e.message||(e.target&&e.target.src&&('could not load '+e.target.src)));if(m){errs.push(m);if(errs.length<4)send('load-error',m,e.error&&e.error.stack)}},true);
+    w.addEventListener('unhandledrejection',function(e){var r=e&&e.reason;var m=r&&(r.message||String(r));if(m&&errs.length<4){errs.push(m);send('promise',m,r&&r.stack)}});
+    w.addEventListener('load',function(){setTimeout(function(){
+      var root=d.getElementById('root');
+      if(!root||root.children.length>0)return;
+      send('blank-page','Nothing drawn 12s after load'+(errs.length?': '+errs[0]:''),'');
+      root.innerHTML='<div style="font-family:Arial,sans-serif;max-width:520px;margin:60px auto;padding:24px;background:#fff;border:1px solid #E5DFD3;border-radius:12px;color:#1F2937">'+
+        '<div style="font-size:20px;font-weight:bold;color:#7D1025;margin-bottom:10px">Smartious could not start</div>'+
+        '<p style="font-size:15px;line-height:1.5">This page did not load. Please reload. If it stays blank, your browser may be too old: update it (Settings, Software update) or open the portal in the latest Google Chrome.</p>'+
+        '<button onclick="location.reload()" style="background:#7D1025;color:#fff;border:0;padding:11px 20px;border-radius:8px;font-size:15px;font-weight:bold">Reload</button>'+
+        '<p style="font-size:12px;color:#6B7280;margin-top:16px">For support: '+(errs[0]?String(errs[0]).replace(/</g,'&lt;')+' &middot; ':'')+navigator.userAgent.replace(/</g,'&lt;')+'</p></div>';
+    },12000)});
+  })(window,document);
+  </script>
   <!-- Installed app (iOS home screen / Smartious apps) -->
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="mobile-web-app-capable" content="yes"/>

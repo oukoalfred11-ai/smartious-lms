@@ -63,6 +63,7 @@ app.use(rateLimit({
 
 // ── Routes ────────────────────────────────────────────────
 app.use('/api/auth',           authLimiter, require('./routes/auth'));
+app.use('/api/client-errors',  require('./routes/client-errors'));
 app.use('/api/users',          require('./routes/users'));
 app.use('/api/communication', require('./routes/communication'));
 app.use('/api/teachers',       require('./routes/teachers'));

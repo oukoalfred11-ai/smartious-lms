@@ -378,7 +378,10 @@ export default function ParentPortal() {
 class SectionBoundary extends Component {
   constructor(props) { super(props); this.state = { error: null } }
   static getDerivedStateFromError(error) { return { error } }
-  componentDidCatch(error, info) { console.error('[parent portal] section crashed:', error, info) }
+  componentDidCatch(error, info) {
+    console.error('[parent portal] section crashed:', error, info)
+    try { window.__smReportError?.('parent-section-crash', error && error.message, (error && error.stack || '') + ' | ' + (info?.componentStack || '').slice(0, 300)) } catch (x) { /* noop */ }
+  }
   render() {
     if (!this.state.error) return this.props.children
     return (

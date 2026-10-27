@@ -28,6 +28,8 @@ class ErrorBoundary extends React.Component {
   static getDerivedStateFromError(e) { return { error: e } }
   componentDidCatch(e, info) {
     console.error('React crash:', e, info)
+    // Reported to the server log (index.html watchdog's sender).
+    if (!isChunkError(e)) { try { window.__smReportError?.('react-crash', e && e.message, (e && e.stack || '') + ' | ' + (info?.componentStack || '').slice(0, 300)) } catch (x) { /* noop */ } }
     if (isChunkError(e) && reloadForNewVersion()) this.setState({ reloading: true })
   }
   render() {
