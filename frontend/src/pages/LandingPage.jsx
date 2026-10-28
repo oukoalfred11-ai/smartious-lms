@@ -24142,7 +24142,7 @@ export default function LandingPage() {
           : page === 'province-landing' ? [ 'canada', CA_PROVINCES[currentProvinceSlug]?.name ] : page === 'ca-city-landing' ? [ 'canada', CA_CITIES[currentCaCitySlug]?.name ]
           : typeof canonicalOverride === 'string' && canonicalOverride.startsWith('/online-school/') ? [ canonicalOverride.split('/').pop(), '' ] : null
         if (!region) return null
-        const g = guidesFor(region[0], region[1] || '')
+        const g = guidesFor(region[0], region[1] || '', region[1] ? 4 : 6)   // country hubs list six
         if (!g.length) return null
         return (
           <section className="sec" style={{background:V.white,paddingTop:40,paddingBottom:40}}><div className="wrap">

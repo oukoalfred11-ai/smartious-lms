@@ -1,6 +1,8 @@
 // South African city data for Smartious Homeschool
 // Schema mirrors kenyaCities/ethiopiaCities/rwandaCities so the city renderer is shared.
-// 6 cities — Johannesburg, Cape Town, Pretoria, Durban, Gqeberha (PE), Stellenbosch.
+// 14 places — Johannesburg, Cape Town, Pretoria, Durban, Gqeberha (PE), Stellenbosch,
+// and (October 2026) Centurion, Umhlanga and Ballito, Somerset West, Bloemfontein,
+// Polokwane, Mbombela, George and the Garden Route, East London.
 // URL pattern: /homeschool-<city-slug>-za
 
 export const SOUTH_AFRICA_CITIES = [
@@ -55,7 +57,7 @@ export const SOUTH_AFRICA_CITIES = [
     ],
     growingReason: 'Johannesburg as South Africa\'s economic capital — Sandton being the highest concentration of corporate headquarters on the African continent — creates significant demand for international curriculum delivery. The combination of multinational corporate transfer families, ambitious SA professional families considering semigration, AISJ and top private school alternative-seekers, plus the established homeschool culture (SA has Africa\'s largest formal homeschool sector at 100,000+ families) makes Johannesburg the largest single market for live online Cambridge curriculum delivery on the African continent — bigger than Nairobi, Lagos, Cairo, or Addis Ababa.',
     curricula: {
-      cambridge: 'Cambridge IGCSE (Grades 10-11) and A-Level (Grades 11-12) — Smartious\'s primary offer for Johannesburg families. British Council Johannesburg (Parktown) plus Cambridge-authorised SA centres host examinations. Pathway accepted by Wits, UCT, Stellenbosch, UP, UJ, plus UK Russell Group, US Ivy League, Canadian U15, Australian Group of Eight universities. Cambridge A-Level often grants first-year credit at SA universities.',
+      cambridge: 'Cambridge IGCSE (Grades 10-11) and A-Level (Grades 11-12) — Smartious\'s primary offer for Johannesburg families. British Council Johannesburg (Parktown) plus Cambridge-authorised SA centres host examinations. Pathway accepted by Wits, UCT, Stellenbosch, UP, UJ, plus UK Russell Group, US Ivy League, Canadian U15, Australian Group of Eight universities. Students without the NSC enter SA universities through a USAf exemption based on their AS and A Level results, and each faculty sets its own requirements.',
       cbc: 'Available for Johannesburg families with Kenyan citizenship ties or considering Kenya relocation.',
       ib: 'IB Diploma Programme (DP) — Grades 11-12 — full six-group delivery with TOK and Extended Essay supervision. AISJ alternative-seekers often choose IB DP given AISJ\'s IB curriculum.',
       american: 'American Curriculum — Common Core-aligned through Grade 8, then AP courses for Grades 9-12. Particularly suited to AISJ alternative families and US-based diaspora returnees.',
@@ -119,7 +121,7 @@ export const SOUTH_AFRICA_CITIES = [
       ['SAST live class scheduling', 'Live classes run 9 AM – 6 PM SAST (UTC+2) — exactly matching Cape Town school hours. Whole-day flexibility leaves afternoons for outdoor pursuits, sports, music, surfing.'],
       ['Cape Town outdoor lifestyle alignment', 'Online schedule enables Cape Town\'s lifestyle advantages — morning surf at Muizenberg, afternoon hike up Lion\'s Head, weekend sailing in Hout Bay — without sacrificing academic depth.'],
       ['Cambridge exam access at British Council Cape Town', 'British Council Cape Town and various Cambridge-authorised Western Cape centres (Bishops, SACS, Reddam House, AISJ Cape Town, ISASA member schools) host Cambridge IGCSE and A-Level examinations during May/November series.'],
-      ['UCT, Stellenbosch, UWC pathway preserved', 'Cambridge A-Level qualifications grant first-year credit and direct admission at UCT, Stellenbosch University, UWC. Domestic SA university pathway maintained alongside international portability.'],
+      ['UCT, Stellenbosch, UWC pathway preserved', 'Cambridge AS and A Levels lead to UCT, Stellenbosch University and UWC through the USAf exemption, with each faculty setting its own requirements. Domestic SA university pathway maintained alongside international portability.'],
       ['Load shedding resilience built in', 'Every live class recorded automatically. Stage 4-6 outages don\'t cost lessons — async review, then back to live the next day.'],
     ],
     growingReason: 'Cape Town\'s combination of City Bowl professional families, Constantia/Bishopscourt/Camps Bay private school alternative-seekers, UCT academic households, the substantial tech sector (Naspers/Prosus, Takealot, Allan Gray, Investec), and the unique lifestyle-academic balance demanded by outdoor-pursuing families creates a distinctive Cape Town homeschool market. Semigration patterns specifically toward the UK and Australia (and increasingly Mauritius) make Cambridge curriculum portability particularly valuable. Cape Town is South Africa\'s second-largest single market for live online Cambridge curriculum delivery, behind Johannesburg.',
@@ -134,7 +136,7 @@ export const SOUTH_AFRICA_CITIES = [
     onlineLearningDetail: 'Live online instruction in South Africa Standard Time (UTC+2) matching Cape Town local time. Works across Vodacom, MTN, Telkom 4G/5G LTE, fibre internet, plus Starlink satellite for households wanting absolute reliability. Recorded sessions provide load shedding resilience.',
     faqs: [
       { q: 'How does Smartious compare to Cape Town private schools like Bishops, SACS, Herschel?', a: 'Bishops (R190,000+/year), SACS (R140,000+/year), Herschel (R180,000+/year), Westerford (R55,000+/year semi-public), Rondebosch Boys (R85,000+/year), Reddam House (R200,000+/year) provide physical campus education with established sports, arts, and pastoral programmes. Smartious provides live online Cambridge, IB, or American curriculum from USD 5,076/year (~ZAR 92,400/year) — meaningfully below private school total cost. The trade-off: no physical campus or in-school sports/arts programme, but the same internationally recognised academic qualifications. Many Cape Town families combine Smartious academic instruction with local sports clubs, music academies, surfing schools — the Cape Town lifestyle advantage.' },
-      { q: 'Can my Cape Town child apply to UCT, Stellenbosch, or UWC with Cambridge qualifications?', a: 'Yes. UCT, Stellenbosch University, UWC, and all SA universities accept Cambridge IGCSE and A-Level qualifications. Cambridge A-Level qualifications often grant first-year credit at SA universities (effectively skipping into second year). The international portability is the additional advantage — same qualifications work for UK Russell Group, US Ivy League, Canadian U15, Australian Group of Eight, UAE branch campuses simultaneously.' },
+      { q: 'Can my Cape Town child apply to UCT, Stellenbosch, or UWC with Cambridge qualifications?', a: 'Yes. UCT, Stellenbosch University, UWC, and all SA universities accept Cambridge IGCSE and A-Level qualifications. Students without the NSC enter SA universities through a USAf exemption based on their AS and A Level results, and each faculty sets its own requirements. The international portability is the additional advantage — same qualifications work for UK Russell Group, US Ivy League, Canadian U15, Australian Group of Eight, UAE branch campuses simultaneously.' },
       { q: 'Where do Cape Town students sit Cambridge IGCSE and A-Level examinations?', a: 'British Council Cape Town (City Bowl) and various Cambridge-authorised Western Cape centres (Bishops, SACS, Reddam House Cape Town, AISJ Cape Town, ISASA member schools) host Cambridge IGCSE and A-Level examinations during May/November series. Smartious handles examination registration logistics.' },
       { q: 'How does Smartious work with the Cape Town outdoor lifestyle?', a: 'Live classes 9 AM – 6 PM SAST leave evenings and weekends free, with flexible afternoons depending on subject load. Cape Town homeschool families typically combine academics with morning surf at Muizenberg, afternoon hikes up Lion\'s Head or Table Mountain, weekend sailing in Hout Bay, mountain biking in Tokai Forest. Recorded sessions enable async review during peak surf swell or family trips.' },
       { q: 'How does Smartious work with WCED homeschool registration under BELA Act 2024?', a: 'Western Cape families register with the Western Cape Education Department (WCED) under the updated BELA Act 2024 framework. Smartious provides curriculum, scheme of work, learning outcomes, and assessment documentation suitable for WCED compliance. Pestalozzi Trust (SA homeschool legal support organisation) provides additional registration guidance if needed.' },
@@ -202,7 +204,7 @@ export const SOUTH_AFRICA_CITIES = [
     onlineLearningDetail: 'Live online instruction in South Africa Standard Time (UTC+2). Works across Vodacom, MTN, Telkom 4G/5G LTE, fibre internet. Recorded sessions for load shedding resilience.',
     faqs: [
       { q: 'How does Smartious work for Pretoria diplomatic families?', a: 'For foreign embassy and AU representation families on Pretoria postings, Smartious provides Cambridge IGCSE/A-Level, IB Diploma, or American AP curriculum that transfers seamlessly to next postings. Documentation suitable for embassy school verification and university applications anywhere worldwide.' },
-      { q: 'Can my Pretoria child apply to University of Pretoria (Tuks) with Cambridge qualifications?', a: 'Yes. University of Pretoria, University of South Africa (UNISA), Tshwane University of Technology, and all SA universities accept Cambridge IGCSE and A-Level qualifications. Cambridge A-Level often grants first-year credit at SA universities.' },
+      { q: 'Can my Pretoria child apply to University of Pretoria (Tuks) with Cambridge qualifications?', a: 'Yes. University of Pretoria, University of South Africa (UNISA), Tshwane University of Technology, and all SA universities accept Cambridge IGCSE and A-Level qualifications. Students without the NSC enter SA universities through a USAf exemption based on their AS and A Level results, and each faculty sets its own requirements.' },
       { q: 'How does Smartious work with Afrikaans-medium school background?', a: 'For Pretoria families with children transitioning from Afrikaans-medium schools (Hoërskool Affies, Hoërskool Menlopark, etc.) to international curriculum, Smartious provides graduated English-medium academic instruction. Typical transition: 6-12 months of structured Cambridge English Language preparation alongside subject instruction. Afrikaans home language and cultural identity maintained through family and community, not via the academic curriculum.' },
       { q: 'Where do Pretoria students sit Cambridge IGCSE and A-Level examinations?', a: 'British Council Pretoria plus Cambridge-authorised Pretoria centres (Crawford Pretoria, ISASA member schools) host Cambridge examinations during May/November series. Smartious handles examination registration logistics.' },
       { q: 'How does Smartious work with the BELA Act 2024 homeschool registration?', a: 'Pretoria families register with the Gauteng Department of Education (same as Johannesburg families) under the BELA Act 2024 framework. Smartious provides curriculum, scheme of work, learning outcomes, and assessment documentation suitable for Gauteng DBE compliance.' },
@@ -380,7 +382,7 @@ export const SOUTH_AFRICA_CITIES = [
     ],
     whyChoose: [
       ['Cape Winelands lifestyle compatibility', 'Live classes 9 AM – 6 PM SAST leave afternoons free for vineyard family life, outdoor pursuits in the Cape Winelands, Helderberg hiking, wine harvest participation — supporting whole-child Cape Winelands development.'],
-      ['Stellenbosch University academic family alignment', 'For Stellenbosch University faculty households, Smartious provides international academic exposure for children alongside strong SU academic culture. Cambridge A-Level qualifications grant first-year credit at Stellenbosch University.'],
+      ['Stellenbosch University academic family alignment', 'For Stellenbosch University faculty households, Smartious provides international academic exposure for children alongside strong SU academic culture. Cambridge AS and A Levels lead to Stellenbosch University through the USAf exemption.'],
       ['Wine industry international portability', 'For wine estate ownership and management families with international connections (France, Italy, Argentina, Chile, Australia, USA wine industry contacts), Cambridge curriculum portability matters for children\'s eventual international university and career options.'],
       ['Paul Roos / Bloemhof alternative without Afrikaans-medium constraint', 'For Stellenbosch families wanting Cambridge international curriculum specifically (not the Afrikaans-medium Paul Roos / Bloemhof curriculum), Smartious provides clear international academic pathway.'],
       ['Cambridge exam access at British Council Cape Town', 'Stellenbosch students travel to British Council Cape Town (45-minute drive) for Cambridge May/November examinations.'],
@@ -397,12 +399,814 @@ export const SOUTH_AFRICA_CITIES = [
     homeTuitionDetail: 'Premium tier includes optional in-person home tuition supplementation in Mostertsdrift, Welgevallen, Dalsig during examination preparation periods.',
     onlineLearningDetail: 'Live online instruction in South Africa Standard Time (UTC+2). Works across Vodacom, MTN, Telkom 4G/5G LTE, fibre internet (Stellenbosch has strong infrastructure given university presence). Recorded sessions for load shedding resilience.',
     faqs: [
-      { q: 'How does Smartious work for Stellenbosch University academic families?', a: 'For Stellenbosch University faculty households (one of SA\'s top universities with strong academic culture spanning business, agriculture, sciences, medicine, languages), Smartious provides international academic exposure for children alongside SU academic culture at home. Cambridge A-Level qualifications grant first-year credit at Stellenbosch University, preserving the local university pathway while opening international options.' },
+      { q: 'How does Smartious work for Stellenbosch University academic families?', a: 'For Stellenbosch University faculty households (one of SA\'s top universities with strong academic culture spanning business, agriculture, sciences, medicine, languages), Smartious provides international academic exposure for children alongside SU academic culture at home. Cambridge AS and A Levels lead to Stellenbosch University through the USAf exemption, preserving the local university pathway while opening international options.' },
       { q: 'What are the Stellenbosch private school alternatives?', a: 'Paul Roos Gymnasium (highly competitive Afrikaans-medium boys\' school), Bloemhof Girls\' High School (Afrikaans-medium), Rhenish Girls\' High (semi-private), Stellenbosch Waldorf School (Steiner education). For families wanting Cambridge international curriculum specifically (not directly offered at these schools), Smartious provides clear international academic pathway from Stellenbosch.' },
       { q: 'How does Smartious work for Cape Winelands wine estate families?', a: 'For wine estate ownership and management families with international connections (France, Italy, Argentina, Chile, Australia, USA wine industry contacts), Cambridge curriculum provides children with internationally portable academic qualifications matching the family\'s international business orientation. Cambridge French A-Level particularly relevant for families with French wine industry connections.' },
       { q: 'Where do Stellenbosch students sit Cambridge examinations?', a: 'British Council Cape Town (City Bowl) hosts Cambridge IGCSE and A-Level examinations during May/November series — 45-minute drive from Stellenbosch. Cambridge-authorised Western Cape centres (Bishops, SACS, Reddam House Cape Town) also host examinations.' },
       { q: 'How does Smartious work with Afrikaans-medium school background?', a: 'For Stellenbosch families with children transitioning from Afrikaans-medium primary schools (Hoërskool Stellenbosch area schools) to international curriculum, Smartious provides graduated English-medium academic instruction. Typical transition: 6-12 months of structured Cambridge English Language preparation alongside subject instruction. Afrikaans home/community language and cultural identity maintained independently.' },
       { q: 'How does Smartious work with WCED homeschool registration under BELA Act 2024?', a: 'Stellenbosch families register with the Western Cape Education Department (WCED) under the BELA Act 2024 framework (same as Cape Town families). Smartious provides comprehensive curriculum and assessment documentation suitable for WCED compliance.' },
+    ],
+  },
+
+  // ── October 2026: eight more South African places ──
+  {
+    slug: "centurion-za",
+    name: "Centurion",
+    county: "Gauteng",
+    region: "City of Tshwane · Between Pretoria and Johannesburg on the N1 · Gautrain corridor",
+    primaryKeyword: "Online school and homeschooling in Centurion",
+    heroTagline: "For Centurion families in Irene, Eldoraigne, Midstream and Highveld: commuting professionals between Pretoria and Johannesburg who want an international qualification without another school run.",
+    intro: "Live online Cambridge IGCSE, AS and A Level, Pearson Edexcel, IB Diploma and American AP for Centurion families in Irene, Eldoraigne, Lyttelton, Midstream Estate, Rooihuiskraal, Wierda Park, Heuweloord, Copperleaf, Pierre van Ryneveld and Highveld Techno Park. Centurion sits on the N1 between Pretoria’s government and diplomatic quarter and Johannesburg’s financial district, and many households here have one parent commuting each way. That shapes what families ask for: a qualification that travels, subjects the local school cannot staff, and an evening that is not spent in traffic.",
+    heroImg: "https://images.unsplash.com/photo-1577948000111-9c970dfe3743?w=1600&q=80&auto=format&fit=crop",
+    altTexts: {
+     "hero": "Centurion in Gauteng, between Pretoria and Johannesburg"
+    },
+    seoDesc: "Online school and homeschooling in Centurion: live Cambridge IGCSE, A Level, Edexcel, IB and AP for Irene, Midstream and Eldoraigne families. Alongside school or full-time.",
+    challenges: [
+     "Two-city households: one parent in Pretoria, one in Sandton, and a school run that competes with the N1 and the R21 every morning.",
+     "Large security estates such as Midstream and Copperleaf with young families who want continuity if a job moves to another city or country.",
+     "Learners who want separate Physics and Chemistry, Further Mathematics or Computer Science at A Level, which few local schools can staff for a small group.",
+     "Families weighing the NSC against an international route, and wanting to keep both open while they decide."
+    ],
+    familySituations: [
+     "Irene and Lyttelton families with a parent in government, a parastatal or a Pretoria embassy.",
+     "Midstream and Copperleaf estate families whose children are at a nearby school and want one to three international subjects alongside it.",
+     "Highveld Techno Park technology and engineering households planning study abroad.",
+     "Families relocating between Gauteng and the Western Cape who want one continuous record."
+    ],
+    nearbyAreas: [
+     "Irene",
+     "Eldoraigne",
+     "Lyttelton",
+     "Midstream Estate",
+     "Rooihuiskraal",
+     "Wierda Park",
+     "Heuweloord",
+     "Copperleaf",
+     "Pierre van Ryneveld",
+     "Highveld Techno Park",
+     "Zwartkop",
+     "Thatchfield",
+     "Olievenhoutbosch",
+     "Hennopspark",
+     "Doringkloof",
+     "Clubview",
+     "Raslouw",
+     "Monavoni",
+     "Kosmosdal",
+     "Blue Valley Golf Estate"
+    ],
+    subjects: [
+     "Cambridge IGCSE, AS and A Level: Mathematics, Further Mathematics, English, the sciences as separate subjects, Computer Science, Economics, Business",
+     "Pearson Edexcel International GCSE and International A Level",
+     "IB Diploma Programme",
+     "American curriculum with Advanced Placement",
+     "SAT, IELTS and TOEFL preparation"
+    ],
+    whyChoose: [
+     [
+      "Between two cities, on one record",
+      "Whether the next job is in Pretoria, Johannesburg or abroad, the subjects, teachers and examination board stay the same."
+     ],
+     [
+      "Subjects a small group cannot get locally",
+      "Further Mathematics, separate sciences and Computer Science at A Level, taught live by subject specialists."
+     ],
+     [
+      "Keep the NSC, add the international door",
+      "Stay at your Centurion school for the NSC and take one to three Cambridge subjects with us, planned against the USAf exemption rules."
+     ],
+     [
+      "Evenings back",
+      "Live classes after school, at home, instead of a second commute to an extra-lessons centre."
+     ]
+    ],
+    growingReason: "Centurion has grown from a dormitory suburb into a city of its own, with estates, offices and the Gautrain station drawing families who work on either side of it. Its households are disproportionately mobile: diplomatic, government, technology and corporate careers that may move city or country within a few years. That makes a portable, internationally read qualification unusually valuable here, and a live online school a practical way to add one without changing school.",
+    curricula: {
+     "cambridge": "Cambridge IGCSE, AS and A Level, taught live, with examinations at authorised centres in Gauteng that families book.",
+     "ib": "IB Diploma Programme.",
+     "american": "American curriculum with AP, for US-bound learners and US-linked families."
+    },
+    homeschoolDetail: "Centurion is in the City of Tshwane, so families educating full-time at home register with the Gauteng Department of Education under the South African Schools Act as amended by the BELA Act. Learners who stay enrolled at a school and take extra subjects online need no home-education registration.",
+    homeTuitionDetail: "Teaching is online; families who also want in-person help usually combine our live classes with a local tutor for exam technique.",
+    onlineLearningDetail: "Live classes on South Africa Standard Time (UTC+2), one hour behind our Nairobi base, with two teaching teams so slots are available across the day. Lessons are recorded for rewatching, and the classroom has a data-saver mode for mobile connections.",
+    faqs: [
+     {
+      "q": "Can my child stay at a Centurion school and study Cambridge subjects with you?",
+      "a": "Yes, and it is the most common arrangement. Your child keeps the NSC at school and takes one to three Cambridge subjects live with us after school, planned so that the combination supports the USAf exemption if needed."
+     },
+     {
+      "q": "Do we need to register with the Gauteng Department of Education?",
+      "a": "Only if your child studies full-time at home. Then you register for home education with the Gauteng Department of Education. A learner enrolled at a school who takes extra subjects online does not need home-education registration."
+     },
+     {
+      "q": "What does it cost?",
+      "a": "From USD 423/month for Primary (about R 7,700 at ~18 rand to the dollar), varying by curriculum and level. Examination entries are paid separately to the examination centre."
+     },
+     {
+      "q": "Where are examinations written?",
+      "a": "At authorised Cambridge or Pearson Edexcel examination centres in Gauteng, which families book. We help you find a centre with capacity for your child’s subjects and plan entries early."
+     }
+    ],
+  },
+  {
+    slug: "umhlanga-za",
+    name: "Umhlanga and Ballito",
+    county: "KwaZulu-Natal",
+    region: "Durban North Coast · uMhlanga Ridge to the Dolphin Coast · Near King Shaka International",
+    primaryKeyword: "Online school and homeschooling in Umhlanga and Ballito",
+    heroTagline: "For North Coast families from uMhlanga Rocks and La Lucia to Ballito, Zimbali and Salt Rock: estate living, a fast-growing coast, and children who need an international route without a long drive south.",
+    intro: "Live online Cambridge IGCSE, AS and A Level, Pearson Edexcel, IB Diploma and American AP for families along the Durban North Coast: uMhlanga Rocks, Umhlanga Ridge, La Lucia, Mount Edgecombe, Sibaya, Cornubia and, further north, Ballito, Simbithi, Zimbali, Salt Rock and Sheffield Beach. The North Coast has grown faster than its school places, and families moving up from Durban, Johannesburg and abroad often find that the subject combination they want is either oversubscribed or a long drive away. A live online school brings the specialist to the estate.",
+    heroImg: "https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=1600&q=80&auto=format&fit=crop",
+    altTexts: {
+     "hero": "The KwaZulu-Natal North Coast near Umhlanga and Ballito"
+    },
+    seoDesc: "Online school and homeschooling in Umhlanga and Ballito: live Cambridge IGCSE, A Level, Edexcel, IB and AP for North Coast families in La Lucia, Zimbali, Simbithi and Salt Rock.",
+    challenges: [
+     "A coast growing faster than its school places, with waiting lists for popular schools and long drives on the N2 for the rest.",
+     "Families semigrating from Gauteng mid-year, when moving a child between schools is hardest.",
+     "Remote-working households and returning families who want an international record that also works if they move abroad.",
+     "Learners at strong local schools who want an A Level subject the school does not offer."
+    ],
+    familySituations: [
+     "Ballito, Simbithi and Zimbali estate families who moved from Johannesburg and want continuity.",
+     "uMhlanga Ridge professionals in finance, logistics and the Dube TradePort economy.",
+     "Returning South African families who lived in the UK, the Gulf or Australia and want to keep their child on a British-system route.",
+     "Surfing, sailing and sport-focused learners who need a timetable that fits training."
+    ],
+    nearbyAreas: [
+     "uMhlanga Rocks",
+     "Umhlanga Ridge",
+     "La Lucia",
+     "Mount Edgecombe",
+     "Sibaya",
+     "Cornubia",
+     "Glenashley",
+     "Durban North",
+     "La Mercy",
+     "Tongaat",
+     "Ballito",
+     "Simbithi Eco-Estate",
+     "Zimbali",
+     "Salt Rock",
+     "Sheffield Beach",
+     "Shaka’s Rock",
+     "Westbrook",
+     "Compensation Beach",
+     "Blythedale",
+     "KwaDukuza"
+    ],
+    subjects: [
+     "Cambridge IGCSE, AS and A Level: Mathematics, Further Mathematics, English, the sciences as separate subjects, Computer Science, Economics, Business",
+     "Pearson Edexcel International GCSE and International A Level",
+     "IB Diploma Programme",
+     "American curriculum with Advanced Placement",
+     "SAT, IELTS and TOEFL preparation"
+    ],
+    whyChoose: [
+     [
+      "A semigration-proof record",
+      "Move up the coast, back to Gauteng or abroad; the subjects and board stay the same."
+     ],
+     [
+      "No N2 commute for one subject",
+      "The specialist teaches live from home, after school or around training."
+     ],
+     [
+      "Mid-year moves made easier",
+      "Start with us when you arrive, whatever the month, and join a local school when a place opens."
+     ],
+     [
+      "Returning-family continuity",
+      "Children coming back from the UK or the Gulf stay on Cambridge or Edexcel without a gap."
+     ]
+    ],
+    growingReason: "The Durban North Coast, from uMhlanga to Ballito, is one of the fastest-growing residential corridors in South Africa, driven by estate development, the King Shaka International Airport and Dube TradePort economy, and a steady stream of families semigrating from Gauteng and returning from abroad. School capacity has not kept pace, and many of the families arriving here are exactly those who value a portable, internationally read qualification.",
+    curricula: {
+     "cambridge": "Cambridge IGCSE, AS and A Level, with examinations at authorised centres in KwaZulu-Natal that families book.",
+     "ib": "IB Diploma Programme.",
+     "american": "American curriculum with AP."
+    },
+    homeschoolDetail: "Families educating full-time at home register with the KwaZulu-Natal Department of Education under the South African Schools Act as amended by the BELA Act. A learner enrolled at a school who adds online subjects needs no home-education registration.",
+    homeTuitionDetail: "Teaching is online; families often pair our live classes with local sport, surf or music programmes during the day.",
+    onlineLearningDetail: "Live classes on South Africa Standard Time (UTC+2), with two teaching teams so slots can be fitted around training and school. Lessons are recorded for rewatching.",
+    faqs: [
+     {
+      "q": "We are moving to Ballito mid-year. Can my child start with you before a school place opens?",
+      "a": "Yes. Your child can start live classes with us in any month and continue them alongside a local school once a place opens, so the move does not cost a term."
+     },
+     {
+      "q": "Do we register with the KwaZulu-Natal Department of Education?",
+      "a": "Only for full-time study at home. Learners who stay enrolled at a school and take extra subjects online do not need home-education registration."
+     },
+     {
+      "q": "Can my child keep a British-system route after returning from the UK?",
+      "a": "Yes. Cambridge IGCSE and A Level, or Pearson Edexcel International GCSE and A Level, continue with us exactly as they would have abroad, and South African university entry runs through the USAf exemption."
+     },
+     {
+      "q": "What does it cost?",
+      "a": "From USD 423/month for Primary (about R 7,700 at ~18 rand to the dollar), varying by curriculum and level. Examination entries are paid to the centre."
+     }
+    ],
+  },
+  {
+    slug: "somerset-west-za",
+    name: "Somerset West",
+    county: "Western Cape",
+    region: "Helderberg basin · City of Cape Town · Between the mountains and False Bay",
+    primaryKeyword: "Online school and homeschooling in Somerset West",
+    heroTagline: "For Helderberg families in Somerset West, Strand and Gordon’s Bay: wine-farm and estate living, semigrants from Gauteng, and teenagers who want subjects the local options cannot staff.",
+    intro: "Live online Cambridge IGCSE, AS and A Level, Pearson Edexcel, IB Diploma and American AP for Helderberg families in Somerset West, Strand, Gordon’s Bay, Sir Lowry’s Pass and the estates in between: Erinvale, Helderberg Village, Spanish Farm, Heritage Park and the wine-farm valleys below the Hottentots-Holland mountains. Somerset West combines Cape Town convenience with a smaller-town feel, and it has drawn a large number of semigrants and remote workers. Many of them want a qualification that travels and a subject or two that the local schools cannot offer.",
+    heroImg: "https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=1600&q=80&auto=format&fit=crop",
+    altTexts: {
+     "hero": "Somerset West in the Helderberg, Western Cape"
+    },
+    seoDesc: "Online school and homeschooling in Somerset West: live Cambridge IGCSE, A Level, Edexcel, IB and AP for Helderberg families in Strand, Gordon’s Bay and the estates. Alongside school or full-time.",
+    challenges: [
+     "Semigrant families from Gauteng arriving at different points in the year and finding popular schools full.",
+     "Remote-working parents with international employers who want a record that would transfer abroad.",
+     "Teenagers wanting A Level subjects such as Further Mathematics, Computer Science or separate sciences that small local cohorts cannot sustain.",
+     "The drive into Cape Town for specialist teaching or examination preparation."
+    ],
+    familySituations: [
+     "Erinvale, Helderberg Village and Spanish Farm families who semigrated from Johannesburg or Pretoria.",
+     "Remote workers for UK, European or US employers who may relocate again.",
+     "Wine-farm and agricultural families in the Helderberg valleys.",
+     "Families whose children are at a local school and want one to three Cambridge subjects alongside it."
+    ],
+    nearbyAreas: [
+     "Strand",
+     "Gordon’s Bay",
+     "Sir Lowry’s Pass",
+     "Erinvale",
+     "Helderberg Village",
+     "Spanish Farm",
+     "Heritage Park",
+     "Somerset Lakes",
+     "Stellenbosch (about 20 km)",
+     "Firgrove",
+     "Croydon",
+     "Macassar",
+     "Broadlands",
+     "Bridgewater",
+     "Paardevlei",
+     "Land en Zeezicht",
+     "Golden Acre",
+     "Rome Glen",
+     "Briza",
+     "Mountainside"
+    ],
+    subjects: [
+     "Cambridge IGCSE, AS and A Level: Mathematics, Further Mathematics, English, the sciences as separate subjects, Computer Science, Economics, Business",
+     "Pearson Edexcel International GCSE and International A Level",
+     "IB Diploma Programme",
+     "American curriculum with Advanced Placement",
+     "SAT, IELTS and TOEFL preparation"
+    ],
+    whyChoose: [
+     [
+      "Built for semigrants",
+      "Arrive in any month and keep the same subjects and teachers through the move."
+     ],
+     [
+      "Remote-work households",
+      "A Cambridge or Edexcel record transfers if the family moves abroad for the next job."
+     ],
+     [
+      "Small-cohort subjects",
+      "A Level Further Mathematics, Computer Science and separate sciences taught live by specialists."
+     ],
+     [
+      "No drive into the city",
+      "Specialist teaching and examination preparation at home, after school."
+     ]
+    ],
+    growingReason: "The Helderberg has become one of the main destinations for families semigrating to the Western Cape, and for remote workers who want space without losing access to Cape Town and its airport. Those families are mobile by temperament and often by employer, and they value a qualification that would transfer abroad. The local school market is good but finite, which is where a live online school adds the subjects and continuity families are looking for.",
+    curricula: {
+     "cambridge": "Cambridge IGCSE, AS and A Level, with examinations at authorised centres in the Western Cape that families book.",
+     "ib": "IB Diploma Programme.",
+     "american": "American curriculum with AP."
+    },
+    homeschoolDetail: "Families educating full-time at home register with the Western Cape Education Department under the South African Schools Act as amended by the BELA Act. Learners enrolled at a school who add online subjects do not need home-education registration.",
+    homeTuitionDetail: "Teaching is online; for in-person support, families often combine our live classes with local tutoring.",
+    onlineLearningDetail: "Live classes on South Africa Standard Time (UTC+2), with two teaching teams so slots are available across the day. Lessons are recorded for rewatching, with a data-saver mode for mobile connections.",
+    faqs: [
+     {
+      "q": "We are semigrating to Somerset West. When can my child start?",
+      "a": "In any month. Your child can start live classes before the move and continue through it, joining a local school when a place opens if you want one."
+     },
+     {
+      "q": "Do we need to register with the Western Cape Education Department?",
+      "a": "Only if your child studies full-time at home. A learner enrolled at a school who takes extra subjects online needs no home-education registration."
+     },
+     {
+      "q": "My employer may move us abroad. Does the qualification travel?",
+      "a": "Yes. Cambridge IGCSE and A Level and Pearson Edexcel International A Levels are read directly by universities in the UK, Europe, North America and Australia, and the teaching continues with us wherever you move."
+     },
+     {
+      "q": "What does it cost?",
+      "a": "From USD 423/month for Primary (about R 7,700 at ~18 rand to the dollar), varying by curriculum and level. Examination entries are paid to the centre."
+     }
+    ],
+  },
+  {
+    slug: "bloemfontein-za",
+    name: "Bloemfontein",
+    county: "Free State",
+    region: "Mangaung · Judicial capital · University of the Free State",
+    primaryKeyword: "Online school and homeschooling in Bloemfontein",
+    heroTagline: "For Bloemfontein families in Westdene, Universitas, Bayswater and Langenhoven Park: a university and legal city in the centre of the country, where international subject choice is narrower than in the metros.",
+    intro: "Live online Cambridge IGCSE, AS and A Level, Pearson Edexcel, IB Diploma and American AP for Bloemfontein families in Westdene, Universitas, Bayswater, Fichardt Park, Langenhoven Park, Brandwag, Dan Pienaar, Hospitaalpark and the estates around the city. Bloemfontein is South Africa’s judicial capital and home to the University of the Free State, with a strong school tradition in both English and Afrikaans. What the city has less of is international subject choice: families who want Cambridge or Edexcel A Levels, or a subject the local school does not offer, usually look to Gauteng or board.",
+    heroImg: "https://images.unsplash.com/photo-1577948000111-9c970dfe3743?w=1600&q=80&auto=format&fit=crop",
+    altTexts: {
+     "hero": "Bloemfontein, the Free State capital"
+    },
+    seoDesc: "Online school and homeschooling in Bloemfontein: live Cambridge IGCSE, A Level, Edexcel, IB and AP for Free State families in Westdene, Universitas and Langenhoven Park, without boarding.",
+    challenges: [
+     "International subject choice in the Free State is narrower than in the metros, and boarding in Gauteng is the traditional answer.",
+     "Academic and medical families at the university and the city’s hospitals who want options for study abroad.",
+     "Legal-profession families linked to the Supreme Court of Appeal who may move between cities.",
+     "Afrikaans-medium learners who want to add an English-medium international qualification."
+    ],
+    familySituations: [
+     "University of the Free State academic families planning postgraduate years abroad.",
+     "Medical families at Universitas and the city’s hospitals.",
+     "Legal-profession households linked to the courts.",
+     "Agricultural families across the Free State who want to avoid boarding at a young age."
+    ],
+    nearbyAreas: [
+     "Westdene",
+     "Universitas",
+     "Bayswater",
+     "Fichardt Park",
+     "Langenhoven Park",
+     "Brandwag",
+     "Dan Pienaar",
+     "Hospitaalpark",
+     "Willows",
+     "Pellissier",
+     "Heuwelsig",
+     "Woodland Hills",
+     "Noordhoek",
+     "Fauna",
+     "Hilton",
+     "Arboretum",
+     "Lourier Park",
+     "Botshabelo",
+     "Thaba Nchu",
+     "Brandfort"
+    ],
+    subjects: [
+     "Cambridge IGCSE, AS and A Level: Mathematics, Further Mathematics, English, the sciences as separate subjects, Computer Science, Economics, Business",
+     "Pearson Edexcel International GCSE and International A Level",
+     "IB Diploma Programme",
+     "American curriculum with Advanced Placement",
+     "SAT, IELTS and TOEFL preparation"
+    ],
+    whyChoose: [
+     [
+      "International subjects without boarding",
+      "Cambridge and Edexcel A Levels taught live, at home in Bloemfontein."
+     ],
+     [
+      "Alongside a strong local school",
+      "Keep the NSC at school and add one to three international subjects."
+     ],
+     [
+      "Bilingual families",
+      "Add an English-medium international qualification alongside an Afrikaans-medium school."
+     ],
+     [
+      "Academic and medical families",
+      "A record read directly by universities abroad, for children of families who may spend years overseas."
+     ]
+    ],
+    growingReason: "Bloemfontein has a strong school tradition and a university and professional population with international connections, but the international subject market is smaller than in Johannesburg or Cape Town. For families who want Cambridge or Edexcel A Levels without sending a child away to board, a live online school is the practical answer.",
+    curricula: {
+     "cambridge": "Cambridge IGCSE, AS and A Level, with examinations at authorised centres that families book; we help find the nearest centre with capacity.",
+     "ib": "IB Diploma Programme.",
+     "american": "American curriculum with AP."
+    },
+    homeschoolDetail: "Families educating full-time at home register with the Free State Department of Education under the South African Schools Act as amended by the BELA Act. Learners enrolled at a school who add online subjects need no home-education registration.",
+    homeTuitionDetail: "Teaching is online; examination travel is planned with each family, because the nearest centre for some subjects may be outside the city.",
+    onlineLearningDetail: "Live classes on South Africa Standard Time (UTC+2), with lessons recorded for rewatching and a data-saver mode for weaker connections.",
+    faqs: [
+     {
+      "q": "Can my child do Cambridge A Levels in Bloemfontein without boarding?",
+      "a": "Yes. We teach Cambridge AS and A Level live online, and your child writes the examinations at an authorised centre that you book. We help find the nearest centre with capacity for your child’s subjects."
+     },
+     {
+      "q": "My child is at an Afrikaans-medium school. Can they add an international qualification?",
+      "a": "Yes. Many learners keep their school and the NSC and take one to three Cambridge subjects in English with us, which also strengthens their English for study abroad."
+     },
+     {
+      "q": "Do we register with the Free State Department of Education?",
+      "a": "Only for full-time study at home. Learners enrolled at a school who add online subjects do not need home-education registration."
+     },
+     {
+      "q": "What does it cost?",
+      "a": "From USD 423/month for Primary (about R 7,700 at ~18 rand to the dollar), varying by curriculum and level. Examination entries are paid to the centre."
+     }
+    ],
+  },
+  {
+    slug: "polokwane-za",
+    name: "Polokwane",
+    county: "Limpopo",
+    region: "Limpopo capital · On the N1 to Zimbabwe · Platinum and agriculture",
+    primaryKeyword: "Online school and homeschooling in Polokwane",
+    heroTagline: "For Polokwane families in Bendor, Fauna Park, Flora Park and Welgelegen: the capital of a mining and farming province, where international A Levels have usually meant boarding in Gauteng.",
+    intro: "Live online Cambridge IGCSE, AS and A Level, Pearson Edexcel, IB Diploma and American AP for Polokwane families in Bendor, Fauna Park, Flora Park, Welgelegen, Ivy Park, Sterpark, Westenburg, Seshego and the estates on the city’s edge, and for families across Limpopo: Mokopane and the platinum operations to the west, the farming districts, and the towns on the road north to the Zimbabwe border. Polokwane is a provincial capital with a growing professional class, but international subject choice is limited, and many families have sent teenagers to board in Pretoria or Johannesburg.",
+    heroImg: "https://images.unsplash.com/photo-1577948000111-9c970dfe3743?w=1600&q=80&auto=format&fit=crop",
+    altTexts: {
+     "hero": "Polokwane, the Limpopo provincial capital"
+    },
+    seoDesc: "Online school and homeschooling in Polokwane and Limpopo: live Cambridge IGCSE, A Level, Edexcel, IB and AP for families in Bendor and Fauna Park and across the platinum belt, without boarding.",
+    challenges: [
+     "International subjects are rarely available locally, so A Level ambitions usually mean boarding in Gauteng.",
+     "Mining and engineering families at platinum operations who may be transferred within South Africa or abroad.",
+     "Long distances to examination centres for international qualifications.",
+     "Professional families in government, health and the university who want options for study abroad."
+    ],
+    familySituations: [
+     "Mining, engineering and contractor families at the platinum operations around Mokopane.",
+     "Government and provincial-administration families in Polokwane.",
+     "Medical and academic families linked to the University of Limpopo and the city’s hospitals.",
+     "Farming families across Limpopo who want to delay boarding."
+    ],
+    nearbyAreas: [
+     "Bendor",
+     "Fauna Park",
+     "Flora Park",
+     "Welgelegen",
+     "Ivy Park",
+     "Sterpark",
+     "Westenburg",
+     "Seshego",
+     "Mankweng",
+     "Polokwane Extension",
+     "Eduan Park",
+     "Nirvana",
+     "Annadale",
+     "Mokopane",
+     "Tzaneen",
+     "Haenertsburg",
+     "Louis Trichardt (Makhado)",
+     "Lebowakgomo",
+     "Modimolle",
+     "Bela-Bela"
+    ],
+    subjects: [
+     "Cambridge IGCSE, AS and A Level: Mathematics, Further Mathematics, English, the sciences as separate subjects, Computer Science, Economics, Business",
+     "Pearson Edexcel International GCSE and International A Level",
+     "IB Diploma Programme",
+     "American curriculum with Advanced Placement",
+     "SAT, IELTS and TOEFL preparation"
+    ],
+    whyChoose: [
+     [
+      "A Levels without boarding",
+      "Live Cambridge and Edexcel A Levels at home in Polokwane."
+     ],
+     [
+      "Mining-transfer continuity",
+      "The record continues unchanged if the family moves to another operation or abroad."
+     ],
+     [
+      "Examination planning from day one",
+      "We plan centres and travel early, because the nearest centre can be far."
+     ],
+     [
+      "Alongside the local school",
+      "Keep the NSC and add the international subjects that open doors abroad."
+     ]
+    ],
+    growingReason: "Limpopo’s platinum, agriculture and public-sector economies have built a professional class in and around Polokwane with national and international careers. The international school market has not followed at the same pace, so families who want Cambridge or Edexcel A Levels have usually had to board their children in Gauteng. A live online school lets them keep their children at home.",
+    curricula: {
+     "cambridge": "Cambridge IGCSE, AS and A Level, with examinations at authorised centres that families book, often in Gauteng.",
+     "ib": "IB Diploma Programme.",
+     "american": "American curriculum with AP."
+    },
+    homeschoolDetail: "Families educating full-time at home register with the Limpopo Department of Education under the South African Schools Act as amended by the BELA Act. Learners enrolled at a school who add online subjects need no home-education registration.",
+    homeTuitionDetail: "Teaching is online; we plan examination travel with each family in advance.",
+    onlineLearningDetail: "Live classes on South Africa Standard Time (UTC+2), with lessons recorded for rewatching and a data-saver mode that suits mobile and satellite connections.",
+    faqs: [
+     {
+      "q": "Can my child study A Levels in Polokwane instead of boarding in Gauteng?",
+      "a": "Yes. We teach Cambridge and Pearson Edexcel AS and A Levels live online. Examinations are written at authorised centres that families book; we plan the centre and travel with you from the start."
+     },
+     {
+      "q": "We work at a platinum operation and may be transferred. What happens to the schooling?",
+      "a": "It continues unchanged. The subjects, teachers and examination board stay the same wherever the next posting is, in South Africa or abroad."
+     },
+     {
+      "q": "Does the internet in Limpopo cope with live classes?",
+      "a": "Most families use fibre or mobile data, and some use satellite. Our classroom reconnects automatically and has a data-saver mode, and lessons are recorded for rewatching."
+     },
+     {
+      "q": "What does it cost?",
+      "a": "From USD 423/month for Primary (about R 7,700 at ~18 rand to the dollar), varying by curriculum and level. Examination entries are paid to the centre."
+     }
+    ],
+  },
+  {
+    slug: "mbombela-za",
+    name: "Mbombela (Nelspruit)",
+    county: "Mpumalanga",
+    region: "Mpumalanga capital · The Lowveld · Gateway to the Kruger National Park",
+    primaryKeyword: "Online school and homeschooling in Mbombela (Nelspruit)",
+    heroTagline: "For Lowveld families in Mbombela, White River, Hazyview and Barberton: citrus and macadamia farms, lodges near the Kruger, and children who need a route to university that does not start with boarding.",
+    intro: "Live online Cambridge IGCSE, AS and A Level, Pearson Edexcel, IB Diploma and American AP for families across the Lowveld: Mbombela (formerly Nelspruit) in Sonheuwel, West Acres, Steiltes, Riverside Park and Stonehenge; White River; Hazyview and the lodges near the Kruger National Park; Barberton; and the farms of the Crocodile and Sabie valleys. Lowveld families live with distance, from farms, lodges and conservation work, and the traditional answer to secondary school has been boarding. A live online school offers another one.",
+    heroImg: "https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=1600&q=80&auto=format&fit=crop",
+    altTexts: {
+     "hero": "The Lowveld around Mbombela, Mpumalanga"
+    },
+    seoDesc: "Online school and homeschooling in Mbombela (Nelspruit) and the Lowveld: live Cambridge IGCSE, A Level, Edexcel, IB and AP for families in White River, Hazyview, Barberton and on farms and lodges.",
+    challenges: [
+     "Distance: farms, lodges and conservation posts far from secondary schools with international subjects.",
+     "Lodge, conservation and tourism families who move between properties and seasons.",
+     "Farming families in citrus, macadamia and timber who want to delay boarding.",
+     "Long travel to examination centres for international qualifications."
+    ],
+    familySituations: [
+     "Lodge, safari and conservation families near the Kruger National Park.",
+     "Citrus, macadamia and timber farming families in the Crocodile, Sabie and Kaap valleys.",
+     "Professional families in Mbombela in government, health and business.",
+     "International families on conservation or development contracts who need a portable record."
+    ],
+    nearbyAreas: [
+     "Sonheuwel",
+     "West Acres",
+     "Steiltes",
+     "Riverside Park",
+     "Stonehenge",
+     "Nelspruit Extension",
+     "Valencia Park",
+     "Drum Rock",
+     "White River",
+     "Hazyview",
+     "Barberton",
+     "Sabie",
+     "Graskop",
+     "Malelane",
+     "Komatipoort",
+     "Karino",
+     "Kabokweni",
+     "KaNyamazane",
+     "Rocky Drift",
+     "Plaston"
+    ],
+    subjects: [
+     "Cambridge IGCSE, AS and A Level: Mathematics, Further Mathematics, English, the sciences as separate subjects, Computer Science, Economics, Business",
+     "Pearson Edexcel International GCSE and International A Level",
+     "IB Diploma Programme",
+     "American curriculum with Advanced Placement",
+     "SAT, IELTS and TOEFL preparation"
+    ],
+    whyChoose: [
+     [
+      "The specialist comes to the farm or lodge",
+      "Live lessons wherever the family lives, with lessons recorded for rewatching."
+     ],
+     [
+      "Delay or avoid boarding",
+      "International subjects at home through the secondary years."
+     ],
+     [
+      "Conservation and lodge mobility",
+      "The same teachers and board as families move between properties or countries."
+     ],
+     [
+      "Examination travel planned early",
+      "We plan centres and travel with each family from the start."
+     ]
+    ],
+    growingReason: "The Lowveld’s economy, tourism around the Kruger National Park, conservation, citrus, macadamia and timber, places families far from the schools that offer international subjects. Many have boarded their children in Gauteng or KwaZulu-Natal. With fibre in the towns and mobile or satellite connections elsewhere, a live online school now lets those families keep their children at home.",
+    curricula: {
+     "cambridge": "Cambridge IGCSE, AS and A Level, with examinations at authorised centres that families book.",
+     "ib": "IB Diploma Programme.",
+     "american": "American curriculum with AP."
+    },
+    homeschoolDetail: "Families educating full-time at home register with the Mpumalanga Department of Education under the South African Schools Act as amended by the BELA Act. Learners enrolled at a school who add online subjects need no home-education registration.",
+    homeTuitionDetail: "Teaching is online; examination travel is planned with each family.",
+    onlineLearningDetail: "Live classes on South Africa Standard Time (UTC+2). The classroom reconnects automatically after drops and has a data-saver mode suited to mobile and satellite links; lessons are recorded for rewatching.",
+    faqs: [
+     {
+      "q": "We live on a lodge near the Kruger. Can our child study online with you?",
+      "a": "Yes, provided you have a workable connection; many lodge families use satellite or mobile data. The classroom has a data-saver mode and reconnects automatically, and lessons are recorded for rewatching."
+     },
+     {
+      "q": "Can our child avoid boarding for secondary school?",
+      "a": "Yes. Your child can study Cambridge or Pearson Edexcel subjects live with us at home through IGCSE and A Level, either full-time with home-education registration or alongside a local school."
+     },
+     {
+      "q": "Do we register with the Mpumalanga Department of Education?",
+      "a": "Only for full-time study at home. Learners enrolled at a school who add online subjects need no home-education registration."
+     },
+     {
+      "q": "What does it cost?",
+      "a": "From USD 423/month for Primary (about R 7,700 at ~18 rand to the dollar), varying by curriculum and level. Examination entries are paid to the centre."
+     }
+    ],
+  },
+  {
+    slug: "george-za",
+    name: "George and the Garden Route",
+    county: "Western Cape",
+    region: "Garden Route · George, Wilderness, Knysna, Mossel Bay and Plettenberg Bay",
+    primaryKeyword: "Online school and homeschooling in George and the Garden Route",
+    heroTagline: "For Garden Route families from George and Wilderness to Knysna, Plettenberg Bay and Mossel Bay: one of South Africa’s favourite semigration destinations, with fewer international subject options than the cities families moved from.",
+    intro: "Live online Cambridge IGCSE, AS and A Level, Pearson Edexcel, IB Diploma and American AP for families along the Garden Route: George in Heather Park, Denneoord, Blanco, Kingswood and Fancourt; Wilderness; Herold’s Bay and Victoria Bay; Knysna; Plettenberg Bay; Sedgefield; and Mossel Bay. The Garden Route has drawn a steady flow of families from Gauteng and abroad, many of them remote workers, and the region’s schools are good but smaller than those in the metros. Families who want a particular A Level subject or an international route often find the choice narrower than where they came from.",
+    heroImg: "https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=1600&q=80&auto=format&fit=crop",
+    altTexts: {
+     "hero": "The Garden Route coast near George"
+    },
+    seoDesc: "Online school and homeschooling in George and the Garden Route: live Cambridge IGCSE, A Level, Edexcel, IB and AP for families in Wilderness, Knysna, Plettenberg Bay and Mossel Bay.",
+    challenges: [
+     "Semigrant and remote-working families arriving from Gauteng and abroad, often mid-year.",
+     "Smaller local schools that cannot staff every A Level subject for a small group.",
+     "Distances between towns along the N2 and to examination centres.",
+     "Families who may move again, abroad or back to a city, within a few years."
+    ],
+    familySituations: [
+     "Remote-working families in George, Wilderness and Sedgefield employed by international companies.",
+     "Plettenberg Bay and Knysna families in tourism, hospitality and property.",
+     "Mossel Bay families in the energy and port economy.",
+     "Golf-estate and retirement-belt families raising teenagers who want university options abroad."
+    ],
+    nearbyAreas: [
+     "Heather Park",
+     "Denneoord",
+     "Blanco",
+     "Kingswood Golf Estate",
+     "Fancourt",
+     "Glen Barrie",
+     "Eden",
+     "Bergsig",
+     "Pacaltsdorp",
+     "Herold’s Bay",
+     "Victoria Bay",
+     "Wilderness",
+     "Sedgefield",
+     "Knysna",
+     "Brenton-on-Sea",
+     "Plettenberg Bay",
+     "Mossel Bay",
+     "Great Brak River",
+     "Hartenbos",
+     "Oudtshoorn"
+    ],
+    subjects: [
+     "Cambridge IGCSE, AS and A Level: Mathematics, Further Mathematics, English, the sciences as separate subjects, Computer Science, Economics, Business",
+     "Pearson Edexcel International GCSE and International A Level",
+     "IB Diploma Programme",
+     "American curriculum with Advanced Placement",
+     "SAT, IELTS and TOEFL preparation"
+    ],
+    whyChoose: [
+     [
+      "For families who moved here for the life",
+      "Keep the international subjects your child had in the city, without the city."
+     ],
+     [
+      "Remote-work households",
+      "A record that transfers if the next move is abroad."
+     ],
+     [
+      "Every A Level subject",
+      "Further Mathematics, Computer Science and separate sciences taught live, whatever the local cohort size."
+     ],
+     [
+      "One record along the N2",
+      "Move between Garden Route towns without changing curriculum."
+     ]
+    ],
+    growingReason: "The Garden Route is one of the most popular semigration destinations in South Africa, and remote work has accelerated the trend. The families arriving are often professionals who had access to a wide school market in Johannesburg, Cape Town or abroad and want to keep their children’s international options open in a region where school cohorts are smaller. A live online school fills exactly that gap.",
+    curricula: {
+     "cambridge": "Cambridge IGCSE, AS and A Level, with examinations at authorised centres that families book; we plan travel where the nearest centre is distant.",
+     "ib": "IB Diploma Programme.",
+     "american": "American curriculum with AP."
+    },
+    homeschoolDetail: "Families educating full-time at home register with the Western Cape Education Department under the South African Schools Act as amended by the BELA Act. Learners enrolled at a school who add online subjects need no home-education registration.",
+    homeTuitionDetail: "Teaching is online; families often combine it with the Garden Route’s outdoor and sports programmes during the day.",
+    onlineLearningDetail: "Live classes on South Africa Standard Time (UTC+2), with two teaching teams for flexible slots, lessons recorded for rewatching and a data-saver mode.",
+    faqs: [
+     {
+      "q": "We moved to the Garden Route from Johannesburg. Can our child keep Cambridge subjects?",
+      "a": "Yes. Your child continues Cambridge or Pearson Edexcel subjects live with us, alongside a local school or full-time at home with registration, whatever the month you arrive."
+     },
+     {
+      "q": "Can my child take an A Level subject the local school does not offer?",
+      "a": "Yes. We teach A Level subjects such as Further Mathematics, Computer Science and separate sciences live, whatever the size of the local cohort."
+     },
+     {
+      "q": "Do we register with the Western Cape Education Department?",
+      "a": "Only for full-time study at home. Learners enrolled at a school who add online subjects need no home-education registration."
+     },
+     {
+      "q": "What does it cost?",
+      "a": "From USD 423/month for Primary (about R 7,700 at ~18 rand to the dollar), varying by curriculum and level. Examination entries are paid to the centre."
+     }
+    ],
+  },
+  {
+    slug: "east-london-za",
+    name: "East London",
+    county: "Eastern Cape",
+    region: "Buffalo City · Automotive and port city · Nahoon, Beacon Bay and Gonubie",
+    primaryKeyword: "Online school and homeschooling in East London",
+    heroTagline: "For East London families in Nahoon, Beacon Bay, Gonubie, Vincent and Berea: an automotive and port city where international subject choice is narrower than in the metros.",
+    intro: "Live online Cambridge IGCSE, AS and A Level, Pearson Edexcel, IB Diploma and American AP for East London families in Nahoon, Beacon Bay, Gonubie, Vincent, Berea, Bunkers Hill, Abbotsford, Bonnie Doon and Quigney, and across Buffalo City. East London’s economy is built around automotive manufacturing, the port and the East London Industrial Development Zone, which bring professional families with international careers. Its schools have a strong tradition, but families who want international A Levels, or subjects their school cannot staff, often look to Gauteng, the Western Cape or boarding.",
+    heroImg: "https://images.unsplash.com/photo-1577948000111-9c970dfe3743?w=1600&q=80&auto=format&fit=crop",
+    altTexts: {
+     "hero": "East London on the Eastern Cape coast"
+    },
+    seoDesc: "Online school and homeschooling in East London: live Cambridge IGCSE, A Level, Edexcel, IB and AP for Buffalo City families in Nahoon, Beacon Bay and Gonubie, alongside school or full-time.",
+    challenges: [
+     "Automotive and industrial-zone families who may be transferred to another plant in South Africa or abroad.",
+     "Limited local availability of international A Levels and specialist subjects.",
+     "Distance from the larger examination centres in the metros.",
+     "Families weighing boarding elsewhere for the final school years."
+    ],
+    familySituations: [
+     "Automotive-industry management and engineering families on potential international transfers.",
+     "Port, logistics and industrial-zone professional families.",
+     "Medical, legal and academic families linked to the city’s hospitals and university campuses.",
+     "Coastal families who want to keep teenagers at home rather than board."
+    ],
+    nearbyAreas: [
+     "Nahoon",
+     "Beacon Bay",
+     "Gonubie",
+     "Vincent",
+     "Berea",
+     "Bunkers Hill",
+     "Abbotsford",
+     "Bonnie Doon",
+     "Quigney",
+     "Selborne",
+     "Stirling",
+     "Baysville",
+     "Cambridge",
+     "Amalinda",
+     "Dorchester Heights",
+     "Kidd’s Beach",
+     "Kei Mouth",
+     "Mdantsane",
+     "King William’s Town (Qonce)",
+     "Bhisho"
+    ],
+    subjects: [
+     "Cambridge IGCSE, AS and A Level: Mathematics, Further Mathematics, English, the sciences as separate subjects, Computer Science, Economics, Business",
+     "Pearson Edexcel International GCSE and International A Level",
+     "IB Diploma Programme",
+     "American curriculum with Advanced Placement",
+     "SAT, IELTS and TOEFL preparation"
+    ],
+    whyChoose: [
+     [
+      "Automotive-transfer continuity",
+      "The same subjects and board if the family is moved to another plant or country."
+     ],
+     [
+      "International A Levels at home",
+      "Avoid boarding elsewhere for the final years."
+     ],
+     [
+      "Alongside a strong local school",
+      "Keep the NSC and add one to three international subjects."
+     ],
+     [
+      "Examination planning early",
+      "We plan centres and travel from the start."
+     ]
+    ],
+    growingReason: "East London’s automotive plant, port and industrial development zone have built a professional community with international careers and the possibility of transfer. The city’s school tradition is strong, but international A Levels and specialist subjects are harder to find than in the metros, which is where a live online school helps families keep their children at home.",
+    curricula: {
+     "cambridge": "Cambridge IGCSE, AS and A Level, with examinations at authorised centres that families book.",
+     "ib": "IB Diploma Programme.",
+     "american": "American curriculum with AP, relevant for US-linked automotive families."
+    },
+    homeschoolDetail: "Families educating full-time at home register with the Eastern Cape Department of Education under the South African Schools Act as amended by the BELA Act. Learners enrolled at a school who add online subjects need no home-education registration.",
+    homeTuitionDetail: "Teaching is online; examination travel is planned with each family.",
+    onlineLearningDetail: "Live classes on South Africa Standard Time (UTC+2), with lessons recorded for rewatching and a data-saver mode for mobile connections.",
+    faqs: [
+     {
+      "q": "We may be transferred by an automotive company. What happens to our child’s schooling?",
+      "a": "It continues unchanged. The subjects, teachers and examination board stay the same wherever the next posting is, in South Africa or abroad."
+     },
+     {
+      "q": "Can my child take A Levels in East London?",
+      "a": "Yes. We teach Cambridge and Pearson Edexcel AS and A Levels live online, and your child writes the examinations at an authorised centre that you book; we help find one with capacity."
+     },
+     {
+      "q": "Do we register with the Eastern Cape Department of Education?",
+      "a": "Only for full-time study at home. Learners enrolled at a school who add online subjects need no home-education registration."
+     },
+     {
+      "q": "What does it cost?",
+      "a": "From USD 423/month for Primary (about R 7,700 at ~18 rand to the dollar), varying by curriculum and level. Examination entries are paid to the centre."
+     }
     ],
   },
 ]
@@ -438,7 +1242,7 @@ export const SOUTH_AFRICA_COUNTRY = {
   heroValueProp: 'Lower than Cambridge Home School Online (UK). The Bishops / SACS / Herschel / Michaelhouse / Hilton / St Stithians / St John\'s / KES alternative. Built for semigration evaluators (UK, Australia, Canada, Mauritius, UAE), private school capacity-constrained families, plus African families wanting Cambridge curriculum portability. Load-shedding-resilient with recorded sessions.',
   whatsappTrigger: 'Hi Smartious, I would like online homeschooling for my child in South Africa.',
   citiesSectionTitle: 'Online homeschooling across South Africa',
-  citiesSectionBody: 'Six major South African urban areas. Each page covers local private school alternatives, BELA Act 2024 compliance, family situations and answers — from Johannesburg Sandton financial families to Cape Town City Bowl households to Stellenbosch Cape Winelands wine estate communities.',
+  citiesSectionBody: 'Fourteen South African cities and regions. Each page covers local private school alternatives, BELA Act 2024 compliance, family situations and answers — from Johannesburg Sandton financial families to Cape Town City Bowl households to Stellenbosch Cape Winelands wine estate communities.',
 
   trustSignals: [
     { metric: 'Established', value: '2018', sub: 'Nairobi-based' },
@@ -547,7 +1351,7 @@ export const SOUTH_AFRICA_COUNTRY = {
     },
     {
       h: 'NSC vs Cambridge IGCSE/A-Level',
-      p: 'NSC (National Senior Certificate) is the South African school-leaving qualification administered by Umalusi and IEB. NSC qualifications work for all South African universities (UCT, Wits, Stellenbosch, UJ, UP, etc.) but require credential evaluation for international universities. Cambridge IGCSE and A-Level qualifications are accepted by all major SA universities (often granting first-year credit) AND by international universities worldwide (UK, US, Canadian, Australian) without credential evaluation. For families considering semigration, Cambridge provides immediate international portability.',
+      p: 'NSC (National Senior Certificate) is the South African school-leaving qualification administered by Umalusi and IEB. NSC qualifications work for all South African universities (UCT, Wits, Stellenbosch, UJ, UP, etc.) but require credential evaluation for international universities. Cambridge IGCSE and A-Level qualifications are accepted by all major SA universities through the USAf exemption AND by international universities worldwide (UK, US, Canadian, Australian) without credential evaluation. For families considering semigration, Cambridge provides immediate international portability.',
     },
     {
       h: 'Cambridge International examination centres',
@@ -563,7 +1367,7 @@ export const SOUTH_AFRICA_COUNTRY = {
     },
     {
       h: 'University acceptance — SA and worldwide',
-      p: 'Cambridge IGCSE and A-Level qualifications are accepted by all SA universities — UCT, Wits, Stellenbosch, UWC, UP, UJ, UNISA, NMU, Rhodes — plus UK Russell Group, US Ivy League, Canadian U15, Australian Group of Eight universities. Cambridge A-Level often grants first-year credit at SA universities.',
+      p: 'Cambridge IGCSE and A-Level qualifications are accepted by all SA universities — UCT, Wits, Stellenbosch, UWC, UP, UJ, UNISA, NMU, Rhodes — plus UK Russell Group, US Ivy League, Canadian U15, Australian Group of Eight universities. Students without the NSC enter SA universities through a USAf exemption based on their AS and A Level results, and each faculty sets its own requirements.',
     },
   ],
 
@@ -609,7 +1413,7 @@ export const SOUTH_AFRICA_COUNTRY = {
     },
     {
       q: 'Can my SA child apply to UCT, Wits, Stellenbosch, UJ, UP with Cambridge qualifications?',
-      a: 'Yes. UCT (University of Cape Town), Wits (University of the Witwatersrand), Stellenbosch University, UJ (University of Johannesburg), UP (University of Pretoria), UNISA, NMU, Rhodes, and all SA universities accept Cambridge IGCSE and A-Level qualifications. Cambridge A-Level qualifications often grant first-year credit at SA universities (effectively skipping into second year). The international portability is the additional advantage — same qualifications work for UK Russell Group, US Ivy League, Canadian U15, Australian Group of Eight, UAE branch campuses simultaneously.',
+      a: 'Yes. UCT (University of Cape Town), Wits (University of the Witwatersrand), Stellenbosch University, UJ (University of Johannesburg), UP (University of Pretoria), UNISA, NMU, Rhodes, and all SA universities accept Cambridge IGCSE and A-Level qualifications. Students without the NSC enter SA universities through a USAf exemption based on their AS and A Level results, and each faculty sets its own requirements. The international portability is the additional advantage — same qualifications work for UK Russell Group, US Ivy League, Canadian U15, Australian Group of Eight, UAE branch campuses simultaneously.',
     },
     {
       q: 'My family is considering semigration to UK / Australia / Canada / Mauritius / UAE. How does Cambridge help?',

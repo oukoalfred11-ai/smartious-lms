@@ -27,7 +27,7 @@ export function guidesFor(hubSlug, place = '', n = 4) {
       const hay = (a.t + ' ' + slug.replace(/-/g, ' ')).toLowerCase()
       // The country's own "Online School in …" / "Virtual School in …" guides rank
       // with the featured ones, so a hub with many guides still links them.
-      const school = /^(online|virtual)-school-/.test(slug) && slug.includes(code)
+      const school = /^(online|virtual)-school-/.test(slug) && (slug.includes(code) || slug.includes(hubSlug))
       return { slug, title: a.t, i, featured: !!a.featured || school, named: ps.some(x => hay.includes(x)) }
     })
     // Place-named first, then featured (and the country's school guides), then the newest.
