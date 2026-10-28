@@ -14,6 +14,7 @@ const Exam     = require('../models/Exam')
 const ExamSubmission = require('../models/ExamSubmission')
 const attendanceFacts = require('../lib/attendanceFacts')
 const { scoresFor } = require('../lib/reportScores')
+const { computeTerm } = require('../lib/termResults')
 // Term end dates arrive as YYYY-MM-DD (UTC midnight); lessons that day count.
 const endOfDay = (d) => (d.getUTCHours() === 0 && d.getUTCMinutes() === 0 ? new Date(d.getTime() + 864e5 - 1) : d)
 
@@ -218,46 +219,14 @@ router.post('/generate', auth, ALLOWED, async (req, res) => {
     const tStart = new Date(termStart)
     const tEnd   = new Date(termEnd)
 
-    // ── Attendance ───────────────────────────────────────────
-    // Attended / scheduled LESSONS in the term (legacy day register for
-    // dates before the cutover). Stored in the existing scheduledDays /
-    // attendedDays fields; already-stored reports are left untouched.
-    // The body's scheduledDays is only a fallback when nothing was scheduled.
-    const af = await attendanceFacts.oneStudent(studentId, tStart, endOfDay(tEnd), { lessons:false })
-    const scheduledCount = af.scheduled || Number(scheduledDays) || 0
-    const totalAttended  = af.attended
-    const absentDays     = scheduledCount - totalAttended
-    const attendanceRate = scheduledCount ? Math.round((totalAttended / scheduledCount) * 100) : 0
-
-    // ── Scores per subject: online exams + marks keyed in by the Dean ──
-    const scores = await scoresFor(studentId, tStart, endOfDay(tEnd))
-    const subjectResults = Object.entries(scores).map(([subject, r]) => {
-      const meta = subjectComments[subject] || {}
-      return {
-        subject,
-        teacherId:       meta.teacherId || null,
-        teacherInitials: meta.initials  || '',
-        weeklyScores:    r.weekly.map(w => w.pct),
-        weeklyTests:     r.weekly,
-        weeklyAverage:   r.weeklyAverage,
-        endTermScore:    r.endTerm,
-        endTermSource:   r.endTermSource || '',
-        weightedScore:   r.finalScore,
-        letterGrade:     gradeFor(student.curriculum, r.finalScore, student.gradeLevel),
-        teacherComment:  meta.comment || '',
-        missedWeekly:    r.weeklyAverage == null,
-        missedEndTerm:   r.endTerm == null,
-      }
-    })
-
-    // Overall averages
-    const withScores = subjectResults.filter(s => s.weightedScore !== null)
-    const overallAverage = withScores.length
-      ? Math.round(withScores.reduce((s,r)=>s+r.weightedScore,0) / withScores.length)
-      : null
-    const endTermAverage = subjectResults.filter(s=>s.endTermScore!==null).length
-      ? Math.round(subjectResults.filter(s=>s.endTermScore!==null).reduce((s,r)=>s+r.endTermScore,0) / subjectResults.filter(s=>s.endTermScore!==null).length)
-      : null
+    // ── Scores per subject (online exams + marks keyed in by the Dean)
+    // and attendance: attended / scheduled LESSONS in the term (legacy day
+    // register before the cutover). The body's scheduledDays is only a
+    // fallback when nothing was scheduled.
+    const t = await computeTerm(student, tStart, tEnd, { comments: subjectComments, scheduledFallback: scheduledDays })
+    const subjectResults = t.subjects
+    const { scheduledDays: scheduledCount, attendedDays: totalAttended, absentDays, punctualityPct: attendanceRate } = t.attendance
+    const { overallAverage, endTermAverage } = t
 
     const DEFAULT_HABITS = {
       effort:3, participation:3, homework:3, organisation:3,
@@ -752,6 +721,6 @@ async function notifyParentReportReady(report, student) {
   for (const email of emails) { try { await t.sendMail({ from:process.env.EMAIL_FROM||'Smartious <hello@smartioushomeschool.com>', to:email, subject:`New report — ${report.studentName} · ${report.subject||'General'}`, html }); sent++ } catch(e) { console.error('[report notify]',email,e.message) } }
   return sent
 }
-module.exports.notifyParentReportReady = notifyParentReportReady
-
 module.exports = router
+// Also used by routes/marks.js (the Dean publishing end-of-term reports).
+module.exports.notifyParentReportReady = notifyParentReportReady
