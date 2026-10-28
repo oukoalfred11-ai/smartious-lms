@@ -64,6 +64,7 @@ import { SOCIAL_LINKS, SOCIAL_URLS, KAREN_MAP_URL } from '../data/social.js'
 import SocialLinks from '../components/SocialLinks.jsx'
 import { HUB_TITLES, guideTitle, nairobiAreaTitle, fitTitle, fitDesc } from '../data/seoTitles.js'
 import { guidesFor } from '../data/geoGuides.js'
+import { CONTINENTAL_SERIES, guideCountryRows, aboutGuideText } from '../data/continentalGuides.js'
 import { naMeta, usLead, caLead, US_HEADLINE, CA_HEADLINE } from '../data/naFocus.js'
 
 
@@ -23690,6 +23691,35 @@ export default function LandingPage() {
                   </section>
                 )}
 
+                {/* Continental guides: every country's online- and virtual-school
+                    guides, from the article index (data/continentalGuides.js). */}
+                {a.guideCountries && (() => {
+                  const rows = guideCountryRows(a.countryLinks, ARTICLES_INDEX)
+                  if (!rows.length) return null
+                  return (
+                    <section style={{marginBottom:44}}>
+                      <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginBottom:8,letterSpacing:'-.01em',position:'relative',paddingLeft:18}}>
+                        <span style={{position:'absolute',left:0,top:14,width:8,height:8,borderRadius:'50%',background:V.cr}}/>
+                        {a.guideCountriesHeading || 'Online school and virtual school guides, country by country'}
+                      </h2>
+                      <p style={{fontSize:16.5,color:V.ink2,lineHeight:1.85,marginBottom:18,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif"}}>
+                        {a.guideCountriesIntro || 'For each country: the online school guide (what studying online alongside or instead of a local school involves there) and the virtual school guide (families outside the capital, remote regions and the decisions at each stage).'}
+                      </p>
+                      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(250px,1fr))',gap:'6px 18px'}}>
+                        {rows.map(r => (
+                          <div key={r.slug} style={{padding:'8px 0',borderBottom:`1px solid ${V.bone3}`,fontSize:14,lineHeight:1.6}}>
+                            <a href={'/online-school/' + r.slug} style={{fontWeight:700,color:V.ink,textDecoration:'none'}}>{r.name}</a>
+                            <span style={{color:V.sl}}>{' — '}</span>
+                            {r.guides.map((g, i) => (
+                              <span key={g.slug}>{i > 0 && <span style={{color:V.sl}}>{' · '}</span>}<a href={'/blog/' + g.slug} title={g.title} style={{color:V.cr,textDecoration:'none'}}>{g.label}</a></span>
+                            ))}
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+                  )
+                })()}
+
                 {/* Article links — pillar/flagship cross-linking. Real <a href> to /blog/. */}
                 {a.articleLinks && a.articleLinks.length > 0 && (
                   <section style={{marginBottom:44}}>
@@ -23737,6 +23767,26 @@ export default function LandingPage() {
                     </div>
                   </section>
                 )}
+
+                {/* Continental Guides: the series, and when this guide was first published */}
+                {a.series === 'continental' && (() => {
+                  const about = aboutGuideText(a, currentArticle)
+                  return (
+                    <section style={{marginBottom:20}}>
+                      <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',fontWeight:700,color:V.ink,marginBottom:12}}>The Continental Guides</h2>
+                      <div style={{display:'flex',flexWrap:'wrap',gap:8,marginBottom:22}}>
+                        {CONTINENTAL_SERIES.map(c => c.slug === currentArticle
+                          ? <span key={c.slug} style={{padding:'7px 14px',borderRadius:99,background:V.cr,color:'#fff',fontSize:13,fontWeight:700}}>{c.name}</span>
+                          : <a key={c.slug} href={'/blog/' + c.slug} style={{padding:'7px 14px',borderRadius:99,border:`1px solid ${V.bone3}`,background:V.white,color:V.ink,fontSize:13,fontWeight:600,textDecoration:'none'}}>{c.name}</a>)}
+                      </div>
+                      <div style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'18px 22px'}}>
+                        <div style={{fontSize:11,fontWeight:700,color:V.cr,letterSpacing:'.14em',textTransform:'uppercase',marginBottom:8}}>About this guide</div>
+                        <p style={{fontSize:14.5,color:V.ink2,lineHeight:1.75,margin:'0 0 8px'}}>{about.body}</p>
+                        <p style={{fontSize:13,color:V.sl,lineHeight:1.6,margin:0}}>{about.cite}</p>
+                      </div>
+                    </section>
+                  )
+                })()}
 
                 {/* Conclusion */}
                 <div style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,padding:'28px 32px',marginTop:48,position:'relative',overflow:'hidden'}}>
