@@ -64,6 +64,8 @@ app.use(rateLimit({
 // ── Routes ────────────────────────────────────────────────
 app.use('/api/auth',           authLimiter, require('./routes/auth'));
 app.use('/api/client-errors',  require('./routes/client-errors'));
+app.use('/api/careers',        require('./routes/careers'));
+app.use('/api/partnerships',   require('./routes/partnerships'));
 app.use('/api/users',          require('./routes/users'));
 app.use('/api/communication', require('./routes/communication'));
 app.use('/api/teachers',       require('./routes/teachers'));
@@ -224,6 +226,14 @@ mongoose.connect(MONGODB_URI)
     // Read delivery-failure notices from the school inbox, stop mailing the
     // addresses that bounced and file the notices away (lib/bounceScanner.js).
     require('./lib/bounceScanner').startBounceScanner();
+    // Careers: drafts nobody submitted are removed after 14 days, with their files.
+    {
+      const purge = () => require('./routes/careers').purgeStaleDrafts()
+        .then(n => { if (n) console.log(`[careers] removed ${n} unfinished application draft(s)`) })
+        .catch(e => console.error('[careers] draft purge', e.message))
+      setTimeout(purge, 5 * 60 * 1000)
+      setInterval(purge, 24 * 3600 * 1000)
+    }
 
     require('./lib/studentExit').detachAllLeavers().catch(e => console.error('[leavers] detach', e.message));
 

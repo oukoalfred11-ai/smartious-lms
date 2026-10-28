@@ -72,6 +72,7 @@ import { PRIORITY_HUB_LINKS, PRIORITY_CITY_LINKS } from '../src/data/priorityLin
 import { HUB_TITLES, guideTitle, nairobiAreaTitle, fitTitle, fitDesc } from '../src/data/seoTitles.js'
 import { ARTICLES_INDEX } from '../src/data/generated/articlesIndex.js'
 import { CONTINENTAL_SERIES, guideCountryRows, aboutGuideText, fmtMonthYear } from '../src/data/continentalGuides.js'
+import { POSITIONS as JOB_POSITIONS, APPLICANT_DOCS, PARTNERSHIP_TYPES } from '../src/data/careers.js'
 import { guidesFor } from '../src/data/geoGuides.js'
 import { naMeta, usLead, caLead, US_HEADLINE, CA_HEADLINE } from '../src/data/naFocus.js'
 import { VL_PATH, VL_META, VL_HERO, VL_IMAGES, VL_BONES, VL_MODEL_IMAGES, VL_FEATURES, VL_KENYA, VL_INTERNATIONAL, VL_FAQS, VL_CREDITS, VL_PRACTICALS, VL_MODELS } from '../src/data/virtualLab.js'
@@ -514,6 +515,25 @@ for (const [id, s] of Object.entries(STATIC_META)) {
 }
 
 // Virtual Lab (src/data/virtualLab.js; the page is pages/VirtualLabPage.jsx)
+// Careers and Partnerships (pages/CareersPage.jsx, pages/PartnershipsPage.jsx)
+{
+  add({ path: '/careers', title: 'Careers: Teach Online with Smartious', desc: 'Teach Cambridge, Pearson Edexcel, IB and AP live online to students in 40+ countries. Apply with your documents and a demo lesson.',
+    h1: 'Teach live, small classes of motivated students, from wherever you are', src: ['src/data/careers.js', 'src/pages/CareersPage.jsx'],
+    body: [
+      p('Smartious teaches Cambridge, Pearson Edexcel, IB and AP students in more than forty countries, live. We hire subject specialists who teach well on camera, mark carefully and care about each learner.'),
+      h2('Positions'), links(JOB_POSITIONS.map(x => ({ href: '/careers', label: x.label, note: x.hint }))),
+      h2('How we hire'), p('Apply with your details, subjects, documents and a demo lesson; we screen qualifications and documents; subject leads review the demo lesson; we interview; and we make an offer once safeguarding checks are complete.'),
+      h2('Documents to have ready'), links(APPLICANT_DOCS.map(d => ({ href: '/careers', label: d.label + (d.required ? '' : ' (optional)'), note: d.hint }))),
+      p('And a demo lesson of 10 to 20 minutes taught online, as a video file or a link.'),
+    ] })
+  add({ path: '/partnerships', title: 'Partnerships | Smartious', desc: 'Partner with Smartious: university scholarships, exam centres, teacher training, co-curricular providers, schools and employers.',
+    h1: 'Partner with Smartious to reach learners in more than forty countries', src: ['src/data/careers.js', 'src/pages/PartnershipsPage.jsx'],
+    body: [
+      p('Universities offering scholarships, examination centres, teacher-training and co-curricular providers, schools, employers and more. Choose the kind of partnership and tell us what you have in mind; every enquiry gets a reference and a named contact.'),
+      h2('Ways to partner'), links(PARTNERSHIP_TYPES.map(t => ({ href: '/partnerships', label: t.label, note: t.pitch }))),
+    ] })
+}
+
 {
   const practicalCount = VL_PRACTICALS.reduce((a, g) => a + g.items.length, 0)
   if (practicalCount !== EXPERIMENTS.length || VL_MODELS.length !== MODELS.length)

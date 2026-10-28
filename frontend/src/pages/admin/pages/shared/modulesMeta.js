@@ -17,6 +17,8 @@ export const MODULES = {
   clubs:         { label: 'Clubs',          accent: TOKENS.crimson, icon: 'users' },
   announcements: { label: 'Announcements', accent: TOKENS.crimson, icon: 'mail' },
   frontdesk:   { label: 'Front Desk',   accent: TOKENS.accentAmber, icon: 'frontdesk' },
+  careers:      { label: 'Careers',      accent: TOKENS.accentTeal,  icon: 'teacher' },
+  partnerships: { label: 'Partnerships', accent: TOKENS.gold,        icon: 'frontdesk' },
   payroll:     { label: 'Payroll',      accent: TOKENS.accentEmerald, icon: 'payroll' },
   leave:       { label: 'Leave',        accent: TOKENS.accentSlate, icon: 'leave' },
   programmes:  { label: 'Programmes',   accent: TOKENS.accentPurple, icon: 'programmes' },
