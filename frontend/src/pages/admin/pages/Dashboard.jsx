@@ -16,6 +16,8 @@ import StaffFile from '../../../components/StaffFile.jsx'
 import AdmissionDocsModule from './modules/AdmissionDocsModule.jsx'
 import MyProfileModule, { Avatar as ProfileAvatar } from './modules/MyProfileModule.jsx'
 import FrontDeskModule from './modules/FrontDeskModule.jsx'
+import CareersModule from './modules/CareersModule.jsx'
+import PartnershipsModule from './modules/PartnershipsModule.jsx'
 import AssessmentModule from './modules/AssessmentModule.jsx'
 import CRMModule, { SalesPerformanceModule } from './modules/CRMModule.jsx'
 import { DOSAnalyticsModule, DOSExamsModule, DOSHomeworkModule, DOSAttendanceModule, DOSTimetableModule, DOSBreakModule } from './modules/DOSModules.jsx'
@@ -80,9 +82,9 @@ const resetForm = () => ({ ...DEFAULT_USER_FORM })
 const NAV_SECTIONS = {
   admin: [
     { label: 'Overview',    items: ['command', 'dashboard', 'analytics'] },
-    { label: 'People',      items: ['users', 'admissiondocs', 'teachers', 'allocations', 'sessions', 'communication', 'support', 'dmoversight', 'community', 'announcements'] },
+    { label: 'People',      items: ['users', 'admissiondocs', 'teachers', 'careers', 'allocations', 'sessions', 'communication', 'support', 'dmoversight', 'community', 'announcements'] },
     { label: 'Reports',     items: ['reports', 'dosanalytics'] },
-    { label: 'Operations',  items: ['frontdesk', 'assessment', 'documents', 'payroll', 'leave', 'programmes', 'inventory'] },
+    { label: 'Operations',  items: ['frontdesk', 'assessment', 'partnerships', 'documents', 'payroll', 'leave', 'programmes', 'inventory'] },
     { label: 'Teaching',    items: ['liveclasses', 'clubs', 'grouprooms', 'curriculum', 'oversight', 'dosattend', 'virtuallab'] },
     { label: 'Question Bank', items: ['questionbank'] },
     { label: 'Quality',     items: ['qaoverview', 'teacherprofiles', 'tdp', 'accreditations'] },
@@ -108,7 +110,7 @@ const NAV_SECTIONS = {
   ],
   qa: [
     { label: 'Overview',  items: ['dashboard'] },
-    { label: 'Our School', items: ['teacherprofiles', 'tdp', 'accreditations'] },
+    { label: 'Our School', items: ['teacherprofiles', 'careers', 'tdp', 'accreditations', 'partnerships'] },
     { label: 'Academics', items: ['curriculum', 'questionbank', 'exams'] },
     { label: 'Quality & Reports', items: ['reports', 'dosanalytics', 'dosattend'] },
     { label: 'Me',          items: ['myprofile', 'mystafffile'] },
@@ -120,11 +122,11 @@ const NAV_SECTIONS = {
     { label: 'Overview',    items: ['dashboard'] },
     { label: 'Academics',   items: ['oversight', 'dosattend', 'liveclasses', 'clubs', 'exams', 'doshomework', 'dostimetable', 'questionbank', 'virtuallab'] },
     { label: 'Students',    items: ['admissiondocs', 'sessions'] },
-    { label: 'People',      items: ['users', 'teachers', 'allocations', 'communication', 'teacherratings'] },
+    { label: 'People',      items: ['users', 'teachers', 'careers', 'allocations', 'communication', 'teacherratings'] },
     { label: 'Support',     items: ['support', 'dmoversight'] },
     // CRM, Front Desk and Group Rooms stay out of Operations per policy.
     // Invoices and receipts (Documents) are Finance's, not Dean & Operations'.
-    { label: 'Operations',  items: ['leave', 'programmes', 'inventory'] },
+    { label: 'Operations',  items: ['partnerships', 'leave', 'programmes', 'inventory'] },
     { label: 'Reports',     items: ['reports', 'dosanalytics'] },
     { label: 'System',      items: ['userlogs', 'settings', 'ai'] },
     { label: 'Me',          items: ['myprofile', 'mystafffile'] },
@@ -471,6 +473,8 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         {safePage === 'clubs' && <ClubsModule toast={toast} />}
         {safePage === 'announcements' && <AnnouncementsModule toast={toast} />}
         {safePage === 'frontdesk' && <FrontDeskModule refreshKey={refreshKey} toast={toast} />}
+        {safePage === 'careers' && <CareersModule toast={toast} />}
+        {safePage === 'partnerships' && <PartnershipsModule toast={toast} />}
         {safePage === 'documents' && <DocumentsModule toast={toast} />}
         {safePage === 'teacherprofiles' && <TeamProfilesModule toast={toast} />}
         {safePage === 'mystafffile' && <StaffFile toast={toast} showTeaching={false} />}
