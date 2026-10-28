@@ -73,6 +73,7 @@ import { HUB_TITLES, guideTitle, nairobiAreaTitle, fitTitle, fitDesc } from '../
 import { ARTICLES_INDEX } from '../src/data/generated/articlesIndex.js'
 import { CONTINENTAL_SERIES, guideCountryRows, aboutGuideText, fmtMonthYear } from '../src/data/continentalGuides.js'
 import { POSITIONS as JOB_POSITIONS, APPLICANT_DOCS, PARTNERSHIP_TYPES } from '../src/data/careers.js'
+import { PARTNERSHIP_PAGES } from '../src/data/partnershipPages.js'
 import { guidesFor } from '../src/data/geoGuides.js'
 import { naMeta, usLead, caLead, US_HEADLINE, CA_HEADLINE } from '../src/data/naFocus.js'
 import { VL_PATH, VL_META, VL_HERO, VL_IMAGES, VL_BONES, VL_MODEL_IMAGES, VL_FEATURES, VL_KENYA, VL_INTERNATIONAL, VL_FAQS, VL_CREDITS, VL_PRACTICALS, VL_MODELS } from '../src/data/virtualLab.js'
@@ -530,8 +531,25 @@ for (const [id, s] of Object.entries(STATIC_META)) {
     h1: 'Partner with Smartious to reach learners in more than forty countries', src: ['src/data/careers.js', 'src/pages/PartnershipsPage.jsx'],
     body: [
       p('Universities offering scholarships, examination centres, teacher-training and co-curricular providers, schools, employers and more. Choose the kind of partnership and tell us what you have in mind; every enquiry gets a reference and a named contact.'),
-      h2('Ways to partner'), links(PARTNERSHIP_TYPES.map(t => ({ href: '/partnerships', label: t.label, note: t.pitch }))),
+      h2('Ways to partner'), links(PARTNERSHIP_TYPES.map(t => ({ href: PARTNERSHIP_PAGES[t.key] ? '/partnerships/' + PARTNERSHIP_PAGES[t.key].slug : '/partnerships', label: t.label, note: t.pitch }))),
     ] })
+  // One page per partnership type (src/data/partnershipPages.js).
+  for (const [key, pg] of Object.entries(PARTNERSHIP_PAGES)) {
+    const t = PARTNERSHIP_TYPES.find(x => x.key === key)
+    const path = '/partnerships/' + pg.slug
+    add({ path, title: pg.title, desc: pg.desc, h1: pg.h1, src: ['src/data/partnershipPages.js'],
+      body: [
+        p(pg.intro),
+        h2('Who this partnership is for'), links(pg.forWho.map(w => ({ href: path, label: w }))),
+        h2('What partners get'), ...pg.offer.map(([h, x]) => h3(h) + p(x)),
+        h2('How it works'), `<ol>${pg.steps.map(st => `<li>${esc(st)}</li>`).join('')}</ol>`,
+        p('What we ask of partners: ' + pg.ask),
+        h2('Start a ' + (t?.label || 'partnership').toLowerCase() + ' enquiry'), links([{ href: path, label: 'Enquiry form on this page' }, { href: '/partnerships', label: 'All partnership types' }]),
+      ],
+      faqs: pg.faqs, faqsTitle: 'Questions partners ask',
+      related: [h2('Other partnerships'), links(Object.entries(PARTNERSHIP_PAGES).filter(([k]) => k !== key).map(([k, o]) => ({ href: '/partnerships/' + o.slug, label: PARTNERSHIP_TYPES.find(x => x.key === k)?.label || o.h1 })))],
+      crumbs: [['Partnerships', '/partnerships'], [t?.label || pg.h1, path]] })
+  }
 }
 
 {

@@ -4,15 +4,20 @@
  * centres, training providers, co-curricular providers and the rest of
  * PARTNERSHIP_TYPES in data/careers.js); the form then asks that type's
  * own questions, so every enquiry arrives with what we need to act on it.
+ * With `typeKey` it renders that type's own page (/partnerships/<slug>,
+ * content in data/partnershipPages.js) with the form preset to the type.
  * Backend: routes/partnerships.js.
  */
 import { useState } from 'react'
 import { api } from '../context/ctx.jsx'
 import { PARTNERSHIP_TYPES } from '../data/careers.js'
+import { PARTNERSHIP_PAGES } from '../data/partnershipPages.js'
 
 const C = { cr: '#8B1A2E', gold: '#C9973A', ink: '#080C14', sl: '#2E3D55', mut: '#6B7280', bone: '#FDFAF4', bone2: '#F8F2E6', line: '#E8DFCC', green: '#15803D', red: '#B91C1C' }
 const field = { width: '100%', boxSizing: 'border-box', border: `1px solid ${C.line}`, borderRadius: 9, padding: '11px 12px', fontSize: 15, fontFamily: 'inherit', color: C.ink, background: '#fff' }
 const lbl = { display: 'block', fontSize: 13.5, fontWeight: 700, color: C.ink, marginBottom: 6 }
+
+const TYPE_LABEL = (k) => PARTNERSHIP_TYPES.find(t => t.key === k)?.label || ''
 
 const WHY = [
   ['Students in more than forty countries', 'Cambridge, Pearson Edexcel, IB and AP learners, taught live, from Primary to A Level.'],
@@ -47,8 +52,8 @@ function DetailField({ fd, value, onChange }) {
     placeholder={fd.placeholder || ''} value={value ?? ''} onChange={e => onChange(fd.type === 'number' ? (e.target.value === '' ? '' : Number(e.target.value)) : e.target.value)} />
 }
 
-export default function PartnershipsPage() {
-  const [type, setType] = useState('')
+export default function PartnershipsPage({ typeKey = '' }) {
+  const [type, setType] = useState(typeKey)
   const [f, setF] = useState({ organisation: '', website: '', country: '', city: '', contactName: '', contactRole: '', email: '', phone: '', message: '', howHeard: '', consent: false, website2: '' })
   const [details, setDetails] = useState({})
   const [busy, setBusy] = useState(false)
@@ -56,7 +61,8 @@ export default function PartnershipsPage() {
   const [done, setDone] = useState(null)
   const t = PARTNERSHIP_TYPES.find(x => x.key === type)
   const set = (k, v) => setF(p => ({ ...p, [k]: v }))
-  const choose = (k) => { setType(k); setDetails({}); setErr(''); setTimeout(() => document.getElementById('enquire')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 30) }
+  const choose = (k, scroll = true) => { setType(k); setDetails({}); setErr(''); if (scroll) setTimeout(() => document.getElementById('enquire')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 30) }
+  const page = typeKey ? PARTNERSHIP_PAGES[typeKey] : null
 
   const submit = async (e) => {
     e.preventDefault()
@@ -82,37 +88,78 @@ export default function PartnershipsPage() {
     <main>
       <section style={{ background: `linear-gradient(135deg, ${C.ink} 0%, #1A2238 55%, ${C.cr} 140%)`, color: '#fff', padding: '72px 0 60px' }}>
         <div className="wrap" style={{ maxWidth: 980 }}>
-          <div className="eyebrow" style={{ color: C.gold }}>Partnerships</div>
+          <div className="eyebrow" style={{ color: C.gold }}>{page ? <><a href="/partnerships" style={{ color: C.gold, textDecoration: 'none' }}>Partnerships</a> {'\u203A'} {TYPE_LABEL(typeKey)}</> : 'Partnerships'}</div>
           <h1 style={{ fontFamily: "'DM Serif Display',Georgia,serif", fontSize: 'clamp(2.2rem,5vw,3.6rem)', fontWeight: 400, lineHeight: 1.08, margin: '8px 0 16px' }}>
-            Partner with Smartious <em style={{ color: C.gold }}>to reach learners in more than forty countries</em>
+            {page ? page.h1 : <>Partner with Smartious <em style={{ color: C.gold }}>to reach learners in more than forty countries</em></>}
           </h1>
           <p style={{ fontSize: 18, lineHeight: 1.7, color: 'rgba(255,255,255,.82)', maxWidth: 760, margin: '0 0 26px' }}>
-            Universities offering scholarships, examination centres, teacher-training and co-curricular providers, schools, employers and more. Choose the kind of partnership below and tell us what you have in mind; every enquiry gets a reference and a named contact.
+            {page ? page.intro : 'Universities offering scholarships, examination centres, teacher-training and co-curricular providers, schools, employers and more. Choose the kind of partnership below and tell us what you have in mind; every enquiry gets a reference and a named contact.'}
           </p>
+          {page && <a href="#enquire" onClick={e => { e.preventDefault(); document.getElementById('enquire')?.scrollIntoView({ behavior: 'smooth' }) }}
+            style={{ display: 'inline-block', background: C.gold, color: C.ink, padding: '15px 28px', borderRadius: 10, fontWeight: 800, textDecoration: 'none' }}>Start an enquiry</a>}
         </div>
       </section>
 
-      <section style={{ background: C.bone, padding: '56px 0' }}>
+      {page && (
+        <section style={{ background: C.bone, padding: '56px 0' }}>
+          <div className="wrap" style={{ maxWidth: 1100, display: 'grid', gap: 30 }}>
+            <div>
+              <h2 style={h2}>Who this partnership is for</h2>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>{page.forWho.map(w => <span key={w} style={{ background: '#fff', border: `1px solid ${C.line}`, borderRadius: 99, padding: '8px 14px', fontSize: 14, color: C.sl }}>{w}</span>)}</div>
+            </div>
+            <div>
+              <h2 style={h2}>What partners get</h2>
+              <div style={grid(250)}>{page.offer.map(([h, p]) => <div key={h} style={card}><div style={{ fontWeight: 800, color: C.ink, marginBottom: 6 }}>{h}</div><div style={{ fontSize: 14.5, color: C.sl, lineHeight: 1.65 }}>{p}</div></div>)}</div>
+            </div>
+            <div>
+              <h2 style={h2}>How it works</h2>
+              <div style={grid(220)}>{page.steps.map((st, i) => (
+                <div key={i} style={card}><div style={{ width: 28, height: 28, borderRadius: '50%', background: C.cr, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, marginBottom: 8 }}>{i + 1}</div><div style={{ fontSize: 14.5, color: C.sl, lineHeight: 1.6 }}>{st}</div></div>
+              ))}</div>
+              <p style={{ fontSize: 15, color: C.sl, lineHeight: 1.7, marginTop: 16 }}><strong style={{ color: C.ink }}>What we ask of partners:</strong> {page.ask}</p>
+            </div>
+            <div>
+              <h2 style={h2}>Questions partners ask</h2>
+              <div style={{ display: 'grid', gap: 10 }}>{page.faqs.map(q => (
+                <details key={q.q} style={{ ...card, padding: '14px 18px' }}><summary style={{ fontWeight: 700, color: C.ink, cursor: 'pointer' }}>{q.q}</summary><p style={{ fontSize: 14.5, color: C.sl, lineHeight: 1.7, margin: '10px 0 0' }}>{q.a}</p></details>
+              ))}</div>
+            </div>
+            <div style={{ fontSize: 14, color: C.sl }}>
+              Other partnerships: {PARTNERSHIP_TYPES.filter(pt => pt.key !== typeKey && PARTNERSHIP_PAGES[pt.key]).map((pt, i, a) => <span key={pt.key}><a href={'/partnerships/' + PARTNERSHIP_PAGES[pt.key].slug} style={{ color: C.cr }}>{pt.label}</a>{i < a.length - 1 ? ' \u00b7 ' : ''}</span>)}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {!page && <section style={{ background: C.bone, padding: '56px 0' }}>
         <div className="wrap" style={{ maxWidth: 1100 }}>
           <div style={{ ...grid(260), marginBottom: 34 }}>
             {WHY.map(([h, p]) => <div key={h} style={card}><div style={{ fontWeight: 800, color: C.ink, marginBottom: 6 }}>{h}</div><div style={{ fontSize: 14.5, color: C.sl, lineHeight: 1.65 }}>{p}</div></div>)}
           </div>
           <h2 style={h2}>Ways to partner</h2>
           <div style={grid(250)}>
-            {PARTNERSHIP_TYPES.map(pt => (
-              <button key={pt.key} type="button" onClick={() => choose(pt.key)} style={{ ...card, textAlign: 'left', cursor: 'pointer', fontFamily: 'inherit', borderColor: type === pt.key ? C.cr : C.line, boxShadow: type === pt.key ? '0 0 0 2px rgba(139,26,46,.15)' : 'none' }}>
-                <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.1em', textTransform: 'uppercase', color: C.gold, marginBottom: 4 }}>{pt.short}</div>
-                <div style={{ fontWeight: 800, fontSize: 16, color: C.ink, marginBottom: 6 }}>{pt.label}</div>
-                <div style={{ fontSize: 14, color: C.sl, lineHeight: 1.6 }}>{pt.pitch}</div>
-              </button>
-            ))}
+            {PARTNERSHIP_TYPES.map(pt => {
+              const pg = PARTNERSHIP_PAGES[pt.key]
+              return (
+                <div key={pt.key} style={{ ...card, display: 'flex', flexDirection: 'column', borderColor: type === pt.key ? C.cr : C.line }}>
+                  <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.1em', textTransform: 'uppercase', color: C.gold, marginBottom: 4 }}>{pt.short}</div>
+                  {pg ? <a href={'/partnerships/' + pg.slug} style={{ fontWeight: 800, fontSize: 16, color: C.ink, marginBottom: 6, textDecoration: 'none' }}>{pt.label}</a>
+                    : <div style={{ fontWeight: 800, fontSize: 16, color: C.ink, marginBottom: 6 }}>{pt.label}</div>}
+                  <div style={{ fontSize: 14, color: C.sl, lineHeight: 1.6, flex: 1 }}>{pt.pitch}</div>
+                  <div style={{ display: 'flex', gap: 12, marginTop: 12, fontSize: 13.5, fontWeight: 700 }}>
+                    {pg && <a href={'/partnerships/' + pg.slug} style={{ color: C.cr }}>Learn more</a>}
+                    <button type="button" onClick={() => choose(pt.key)} style={{ background: 'none', border: 'none', padding: 0, color: C.sl, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13.5 }}>Enquire</button>
+                  </div>
+                </div>
+              )
+            })}
           </div>
         </div>
-      </section>
+      </section>}
 
       <section id="enquire" style={{ background: C.bone2, padding: '56px 0' }}>
         <div className="wrap" style={{ maxWidth: 820 }}>
-          <h2 style={h2}>Start a partnership enquiry</h2>
+          <h2 style={h2}>{page ? 'Start a ' + TYPE_LABEL(typeKey).toLowerCase() + ' partnership enquiry' : 'Start a partnership enquiry'}</h2>
           {done ? (
             <div style={{ ...card, borderColor: '#A7F3D0', background: '#ECFDF5' }}>
               <div style={{ fontSize: 20, fontWeight: 800, color: C.green, marginBottom: 8 }}>Enquiry received</div>
