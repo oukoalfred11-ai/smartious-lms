@@ -71,6 +71,7 @@ import { CA_CITIES, CA_CITIES_BY_PROVINCE } from '../src/data/caCities.js'
 import { PRIORITY_HUB_LINKS, PRIORITY_CITY_LINKS } from '../src/data/priorityLinks.js'
 import { HUB_TITLES, guideTitle, nairobiAreaTitle, fitTitle, fitDesc } from '../src/data/seoTitles.js'
 import { ARTICLES_INDEX } from '../src/data/generated/articlesIndex.js'
+import { CONTINENTAL_SERIES, guideCountryRows, aboutGuideText, fmtMonthYear } from '../src/data/continentalGuides.js'
 import { guidesFor } from '../src/data/geoGuides.js'
 import { naMeta, usLead, caLead, US_HEADLINE, CA_HEADLINE } from '../src/data/naFocus.js'
 import { VL_PATH, VL_META, VL_HERO, VL_IMAGES, VL_BONES, VL_MODEL_IMAGES, VL_FEATURES, VL_KENYA, VL_INTERNATIONAL, VL_FAQS, VL_CREDITS, VL_PRACTICALS, VL_MODELS } from '../src/data/virtualLab.js'
@@ -756,16 +757,34 @@ for (const [slug, a] of Object.entries(FULL_ARTICLES)) {
     path, title: guideTitle(a.metaTitle, a.t), desc: a.metaDesc || clip(a.intro), h1: a.t,
     src: [ARTICLES_INDEX[slug]?.part ? 'src/data/' + ARTICLES_INDEX[slug].part + '.js' : 'src/data/fullArticles.js'],
     body: [
-      a.author ? `<p class="ss-by">By ${esc(a.author)}${a.role ? ', ' + esc(a.role) : ''}${a.date ? ' · ' + esc(a.date) : ''}</p>` : '',
+      a.author ? `<p class="ss-by">By ${esc(a.author)}${a.role ? ', ' + esc(a.role) : ''}${a.date ? ' · ' + esc(a.date) : ''}` +
+        `${a.published ? ' · First published <time datetime="' + esc(a.published) + '">' + esc(fmtMonthYear(a.published)) + '</time>' : ''}` +
+        `${a.updated ? ' · Updated <time datetime="' + esc(a.updated) + '">' + esc(fmtMonthYear(a.updated, true)) + '</time>' : ''}</p>` : '',
       p(a.intro),
       a.country === 'uae' ? h2('Smartious for families in Dubai and the UAE') + links(UAE_PRODUCT_LINKS) : '',
       ...(a.sections || []).map(s => h2(s.h) + (Array.isArray(s.p) ? s.p.map(p).join('') : p(s.p))),
+      // Pillar link grids, as the app renders them (real links for crawlers
+      // that do not run JavaScript).
+      a.countryLinks?.length ? h2(a.countryLinksHeading || 'Every country we teach in this region') + p(a.countryLinksIntro) +
+        links(a.countryLinks.map(cl => ({ href: '/online-school/' + cl.slug, label: cl.name, note: cl.note }))) : '',
+      a.guideCountries ? (() => {
+        const rows = guideCountryRows(a.countryLinks, ARTICLES_INDEX)
+        return rows.length ? h2(a.guideCountriesHeading || 'Online school and virtual school guides, country by country') +
+          `<ul class="ss-links">${rows.map(r => `<li><a href="${esc(href('/online-school/' + r.slug))}">${esc(r.name)}</a> — ` +
+            r.guides.map(g => `<a href="${esc(href('/blog/' + g.slug))}">${esc(g.label)}</a>`).join(' · ') + '</li>').join('')}</ul>` : ''
+      })() : '',
+      a.articleLinks?.length ? h2(a.articleLinksHeading || 'Read next') + p(a.articleLinksIntro) +
+        links(a.articleLinks.map(al => ({ href: '/blog/' + al.slug, label: al.name, note: al.note }))) : '',
+      a.series === 'continental' ? h2('The Continental Guides') +
+        links(CONTINENTAL_SERIES.filter(c => c.slug !== slug && FULL_ARTICLES[c.slug]).map(c => ({ href: '/blog/' + c.slug, label: c.name }))) +
+        h2('About this guide') + p(aboutGuideText(a, slug).body) + p(aboutGuideText(a, slug).cite) : '',
       p(a.conclusion),
     ],
     faqs: a.faqs, related: [h2('Next steps'), links(money)],
     crumbs: [['Guides', '/blog'], [a.t, path]],
     ld: [{ '@context': 'https://schema.org', '@type': 'Article', headline: clip(a.t, 110), description: clip(a.metaDesc || a.intro, 300), url: ORIGIN + path,
       mainEntityOfPage: ORIGIN + path, publisher: ORG, author: a.author ? { '@type': 'Person', name: a.author } : ORG,
+      ...(a.published ? { datePublished: a.published } : {}), ...(a.updated || a.published ? { dateModified: a.updated || a.published } : {}),
       ...(a.img && /^https?:|^\//.test(a.img) ? { image: a.img.startsWith('/') ? ORIGIN + a.img : a.img } : {}) }],
   })
 }
