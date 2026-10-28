@@ -316,7 +316,8 @@ const hubLinks = () => [...CITY_FILES.map(({ country: c }) => ({ href: c.hub, la
 // The guides written for a hub's country (src/data/geoGuides.js), as a
 // related-links block; empty when the country has none.
 const guideLinks = (hub, place, heading) => {
-  const g = guidesFor(String(hub || '').split('/').pop(), place)
+  // Country hubs (no place) list six guides; city and region pages four.
+  const g = guidesFor(String(hub || '').split('/').pop(), place, [].concat(place || []).filter(Boolean).length ? 4 : 6)
   return g.length ? [h2(heading), links(g.map(x => ({ href: '/blog/' + x.slug, label: x.title })))] : []
 }
 

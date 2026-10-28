@@ -912,7 +912,11 @@ export const COUNTRIES = [
       { q: 'Are classes scheduled in South African time?',
         a: 'Yes. Smartious runs live group classes across three time-zone bands — UK & Africa, Americas, and Asia-Pacific — with a stable small team of subject specialists in each band. South African students join the UK & Africa band (SAST is GMT+2, just one hour behind East Africa Time), with live sessions timetabled during South African daytime hours. Every class is recorded for unlimited rewatch. Students in Johannesburg, Cape Town, Pretoria and Durban join the same live cohorts as classmates in Nairobi, London, Lagos, Dubai and Doha.' },
       { q: 'Will South African universities accept Smartious qualifications?',
-        a: 'Yes. The University of Cape Town (UCT), Wits, Stellenbosch, University of Pretoria, University of Johannesburg (UJ), Rhodes, UKZN, North-West, Free State and every other South African university accept Cambridge IGCSE, Cambridge A-Level, IB Diploma and Pearson Edexcel for direct admission. Cambridge A-Level subjects often grant first-year exemption credit at SA universities. We support both SA university applications (via Universities South Africa) and international applications (UCAS for UK, Common App for USA).' },
+        a: 'Yes, through the exemption route. South African public universities admit applicants without the NSC on the basis of an exemption certificate from the Matriculation Board of Universities South Africa (USAf). Holders of Cambridge International AS and A Levels, Pearson Edexcel International AS and A Levels and the IB Diploma apply for it; the subject combination and grades must meet the USAf rules, and the IGCSE alone does not qualify. The exemption is the minimum: UCT, Wits, Stellenbosch, Pretoria, UJ, Rhodes, UKZN and the other universities then set their own faculty requirements, often in specific subjects. We plan subject combinations against the USAf rules from Grade 10, and support South African applications as well as UCAS (UK) and Common App (USA).' },
+      { q: 'Does my child need a USAf exemption certificate?',
+        a: 'Only if they finish school without the NSC, for example with Cambridge or Pearson Edexcel AS and A Levels or the IB Diploma, and want to study at a South African university. Learners who stay at school for the NSC and add Cambridge subjects with us do not need one for South African entry. Our guide to the USAf exemption sets out the rules and when to plan them.' },
+      { q: 'What happens to live classes during load-shedding or an outage?',
+        a: 'Your child rejoins when power or the connection returns; the class stays open for its scheduled time, and lessons are recorded for rewatching. The classroom reconnects automatically and has a data-saver mode for mobile data. We recommend a UPS or small inverter for the router and fibre terminal.' },
       { q: 'Can my child enter Smartious in Grade 10 if they are currently at an SA school?',
         a: 'Yes. Mid-stream Grade 10 entry from SA schools is routine, but the Cambridge pathway works best for families who commit by the start of Year 10. A child currently in CAPS Grade 10 who wants to switch to Cambridge IGCSE typically starts the IGCSE programme in our Year 10 — which sits exams at the end of Year 11 (their Grade 11 equivalent). We discuss each family\'s specific timeline during admissions to ensure the Cambridge or Edexcel pathway fits their university goals.' },
       { q: 'My family is in Sandton / Cape Town / Constantia / Durban — can I do Smartious alongside a Cambridge SA school?',
@@ -944,7 +948,7 @@ export const COUNTRIES = [
       heading: 'Matric pathway by assessment body — quick guide',
       intro: 'Grades 10-12 require commitment to one assessment body for matric. Here is how each pathway works, where Smartious fits, and what each route opens up.',
       rows: [
-        { pathway: 'Cambridge International', delivers: 'Smartious delivers · Cambridge IGCSE then A-Level', sa: 'Accepted at every SA university · A-Level often grants first-year credit', global: 'Recognised in 160+ countries · Gold standard UK/global' },
+        { pathway: 'Cambridge International', delivers: 'Smartious delivers · Cambridge IGCSE then A-Level', sa: 'Accepted at SA universities via the USAf exemption', global: 'Recognised in 160+ countries · Gold standard UK/global' },
         { pathway: 'Pearson Edexcel', delivers: 'Smartious delivers · IGCSE then International AS/A Level', sa: 'Accepted at every SA university', global: 'Recognised in 80+ countries · Strong UK access' },
         { pathway: 'IB Diploma', delivers: 'Smartious delivers · MYP then Diploma', sa: 'Accepted at every SA university with strong recognition', global: 'Globally recognised · Strong US and European access' },
         { pathway: 'IEB matric', delivers: 'Not Smartious · use Brainline, Teneo, or IEB school', sa: 'NSC matric · Strong SA university recognition', global: 'Some international recognition · less than Cambridge/IB' },
@@ -953,7 +957,7 @@ export const COUNTRIES = [
     },
     saUniversities: {
       heading: 'University pathways for South African students',
-      intro: 'Smartious qualifications open doors to the best universities in South Africa, across Africa, and worldwide. Cambridge A-Level results often grant first-year credit at SA universities.',
+      intro: 'Smartious qualifications open doors to universities in South Africa, across Africa and worldwide. Students without the NSC enter South African universities through an exemption certificate from Universities South Africa (USAf), based on their AS and A Level or IB results; each faculty then sets its own requirements.',
       domestic: [
         'University of Cape Town (UCT)',
         'University of the Witwatersrand (Wits)',
