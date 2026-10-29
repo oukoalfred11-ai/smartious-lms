@@ -74,6 +74,7 @@ import { ARTICLES_INDEX } from '../src/data/generated/articlesIndex.js'
 import { CONTINENTAL_SERIES, guideCountryRows, aboutGuideText, fmtMonthYear } from '../src/data/continentalGuides.js'
 import { POSITIONS as JOB_POSITIONS, APPLICANT_DOCS, PARTNERSHIP_TYPES } from '../src/data/careers.js'
 import { PARTNERSHIP_PAGES } from '../src/data/partnershipPages.js'
+import { BOARD_SCHOOLS } from '../src/data/boardSchools.js'
 import { guidesFor } from '../src/data/geoGuides.js'
 import { naMeta, usLead, caLead, US_HEADLINE, CA_HEADLINE } from '../src/data/naFocus.js'
 import { VL_PATH, VL_META, VL_HERO, VL_IMAGES, VL_BONES, VL_MODEL_IMAGES, VL_FEATURES, VL_KENYA, VL_INTERNATIONAL, VL_FAQS, VL_CREDITS, VL_PRACTICALS, VL_MODELS } from '../src/data/virtualLab.js'
@@ -271,6 +272,7 @@ for (const f of readdirSync(DATA).filter(f => f.endsWith('Cities.js')).sort()) {
 const hubName = (c) => c.name || c.longName || c.country
 const MAIN_LINKS = [
   { href: '/about', label: 'About Smartious' }, { href: '/curricula', label: 'Curricula' }, { href: '/programs', label: 'Programmes' },
+  { href: '/cambridge-online-school', label: 'Cambridge online school' }, { href: '/pearson-edexcel-online-school', label: 'Pearson Edexcel online school' },
   { href: '/homeschool', label: 'Homeschooling' }, { href: '/tuition', label: 'Private tuition' }, { href: '/pricing', label: 'Fees' },
   { href: '/teachers', label: 'Our team' }, { href: '/faq', label: 'FAQ' }, { href: '/blog', label: 'Guides and articles' },
   { href: '/contact', label: 'Contact' }, { href: '/virtual-lab', label: 'Virtual Lab' }, { href: '/assessment', label: 'Book an assessment' },
@@ -404,7 +406,10 @@ for (const c of CURRICULA) {
     ...(d.sections || []).map(s => h2(s.h) + (Array.isArray(s.p) ? s.p.map(p).join('') : p(s.p)) + bullets(s.items)),
     d.whyChoose ? h2('Why choose ' + c.h) + p(d.whyChoose) : '',
     h2('Fees'), p(FEE_SCHOOL + '. One-to-one tuition: ' + FEE_TUITION + '.'),
-  ], related: [h2('Other curricula'), links(CURRICULA_LINKS.filter(l => l.href !== path))],
+  ], related: [h2('Other curricula'), links([
+    ...(/cambridge/i.test(c.badge) ? [{ href: '/' + BOARD_SCHOOLS.cambridge.slug, label: 'Cambridge online school', note: BOARD_SCHOOLS.cambridge.eyebrow }] : []),
+    ...(c.slug === 'edexcel' ? [{ href: '/' + BOARD_SCHOOLS.edexcel.slug, label: 'Pearson Edexcel online school', note: BOARD_SCHOOLS.edexcel.eyebrow }] : []),
+    ...CURRICULA_LINKS.filter(l => l.href !== path)])],
   crumbs: [['Curricula', '/curricula'], [c.h, path]], src: ['src/data/curricula.js'],
   ld: [{ '@context': 'https://schema.org', '@type': 'Course', name: c.h + (d.tagline ? ' — ' + d.tagline : ''), description: clip(d.overview || c.desc, 300),
     url: ORIGIN + path, provider: ORG, ...(c.badge ? { educationalCredentialAwarded: c.badge } : {}),
@@ -516,6 +521,29 @@ for (const [id, s] of Object.entries(STATIC_META)) {
 }
 
 // Virtual Lab (src/data/virtualLab.js; the page is pages/VirtualLabPage.jsx)
+// Cambridge and Pearson Edexcel online school pages (src/data/boardSchools.js)
+for (const [key, b] of Object.entries(BOARD_SCHOOLS)) {
+  const path = '/' + b.slug, other = BOARD_SCHOOLS[b.other]
+  add({ path, title: b.title, desc: b.desc, h1: b.h1, src: ['src/data/boardSchools.js', 'src/pages/BoardSchoolPage.jsx'],
+    body: [
+      p(b.eyebrow + '.'), p(b.intro),
+      ...b.status.map(([h, x]) => h2(h) + p(x)),
+      h2(b.board + ' stages we teach'), ...b.stages.map(st => h3(st.name + ' (' + st.ages.toLowerCase() + ')') + p(st.p)),
+      h2('Subjects'), ...Object.entries(b.subjects).map(([lv, list]) => h3(b.board + ' ' + lv) + bullets(list)), p(b.subjectsNote),
+      h2('What a ' + b.board + ' student gets'), ...b.included.map(([h, x]) => h3(h) + p(x)),
+      h2(b.board + ' examinations'), bullets(b.exams),
+      h2('How to choose a ' + b.board + ' online school'), `<ol>${b.choose.map(([h, x]) => `<li><strong>${esc(h)}</strong> ${esc(x)}</li>`).join('')}</ol>`,
+      p(b.compare),
+      h2('Fees'), p(FEE_SCHOOL + '.'),
+      h2('Join'), links([{ href: '/assessment', label: 'Book an assessment', note: 'every student starts here' }]),
+    ],
+    faqs: b.faqs, faqsTitle: b.board + ' online school: questions families ask',
+    related: [h2('Related'), links([{ href: '/' + other.slug, label: other.board + ' online school' },
+      ...CURRICULA_LINKS.filter(l => key === 'cambridge' ? /igcse|a-level/.test(l.href) : /edexcel|british/.test(l.href)), { href: '/curricula', label: 'All curricula' }, { href: '/pricing', label: 'Fees' }])],
+    crumbs: [[b.board + ' online school', path]],
+    ld: [serviceLd({ name: b.board + ' online school', desc: b.desc, path })] })
+}
+
 // Careers and Partnerships (pages/CareersPage.jsx, pages/PartnershipsPage.jsx)
 {
   add({ path: '/careers', title: 'Careers: Teach Online with Smartious', desc: 'Teach Cambridge, Pearson Edexcel, IB and AP live online to students in 40+ countries. Apply with your documents and a demo lesson.',
