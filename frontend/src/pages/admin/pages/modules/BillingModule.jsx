@@ -1058,6 +1058,12 @@ const formFromInvoice = (inv) => ({
 const BLANK_CARD_FORM = { payerName: '', email: '', amount: '', currency: 'KES', description: 'School fees' }
 
 function CardPayments({ toast, onBack, prefillInvoice = null }) {
+  const { user } = useAuth()
+  const canMark = ['admin', 'superadmin', 'accountant', 'accounts'].includes(user?.role)
+  const [markFor, setMarkFor] = React.useState(null)   // request being marked paid
+  const [mk, setMk] = React.useState({ method: 'Bank transfer', paidAt: '', note: '', sendReceipt: true })
+  const [busyRef, setBusyRef] = React.useState('')
+  const [checkingAll, setCheckingAll] = React.useState(false)
   const [f, setF] = React.useState(() => prefillInvoice ? formFromInvoice(prefillInvoice) : BLANK_CARD_FORM)
   const [invoiceId, setInvoiceId] = React.useState(prefillInvoice?._id || '')
   const [unpaid, setUnpaid] = React.useState(prefillInvoice ? [prefillInvoice] : [])
@@ -1126,6 +1132,45 @@ function CardPayments({ toast, onBack, prefillInvoice = null }) {
     setChecking('')
   }
 
+  const checkAll = async () => {
+    setCheckingAll(true)
+    try {
+      const r = await api.post('/paystack/verify-pending')
+      const d = r.data?.data || {}
+      toast?.ok?.(`Checked ${d.checked || 0} pending request${d.checked === 1 ? '' : 's'} with Paystack: ${d.paid || 0} paid.`)
+      load(); if (d.paid) loadUnpaid()
+    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not check with Paystack.') }
+    setCheckingAll(false)
+  }
+  const openReceipt = async (ref) => {
+    const w = window.open('', '_blank')
+    try {
+      const r = await api.get('/paystack/requests/' + ref + '/receipt.pdf', { responseType: 'blob' })
+      const url = URL.createObjectURL(new Blob([r.data], { type: 'application/pdf' }))
+      if (w) w.location.href = url; else window.location.href = url
+    } catch { w?.close(); toast?.error?.('Could not open the receipt.') }
+  }
+  const sendReceipt = async (row) => {
+    const email = window.prompt('Send the receipt to:', row.receiptSentTo || row.email)
+    if (!email) return
+    setBusyRef(row.reference)
+    try { const r = await api.post('/paystack/requests/' + row.reference + '/receipt', { email }); toast?.ok?.(r.data?.message || 'Receipt sent.'); load() }
+    catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not send the receipt.') }
+    setBusyRef('')
+  }
+  const markPaid = async () => {
+    if (!mk.note.trim()) return toast?.error?.('Add a note: the transaction or bank reference.')
+    setBusyRef(markFor.reference)
+    try {
+      const r = await api.post('/paystack/requests/' + markFor.reference + '/mark-paid', { ...mk, paidAt: mk.paidAt || undefined })
+      toast?.ok?.(r.data?.message || 'Marked paid.')
+      setMarkFor(null); setMk({ method: 'Bank transfer', paidAt: '', note: '', sendReceipt: true })
+      load(); loadUnpaid()
+    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not mark it paid.') }
+    setBusyRef('')
+  }
+  const small = { background: '#fff', color: TOKENS.crimson, border: '1.5px solid ' + TOKENS.line, padding: '5px 10px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: 'pointer' }
+
   const STATUS = { pending: '#B45309', paid: '#166534', failed: '#B91C1C', abandoned: '#5A5A62' }
   const inp = { width: '100%', padding: '9px 11px', border: '1.5px solid ' + TOKENS.line, borderRadius: 8, fontSize: 12.5 }
   const lbl = { fontSize: 11.5, fontWeight: 700, color: TOKENS.s600, display: 'block', marginBottom: 4 }
@@ -1185,7 +1230,12 @@ function CardPayments({ toast, onBack, prefillInvoice = null }) {
       </div>
 
       <div style={{ background: '#fff', border: '1.5px solid ' + TOKENS.line, borderRadius: 12, padding: 18 }}>
-        <div style={{ fontSize: 13.5, fontWeight: 800, color: TOKENS.s900, marginBottom: 10 }}>Recent card payment requests</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, flexWrap: 'wrap' }}>
+          <div style={{ fontSize: 13.5, fontWeight: 800, color: TOKENS.s900, flex: 1 }}>Recent card payment requests</div>
+          {rows.some(r => r.status === 'pending') && (
+            <button onClick={checkAll} disabled={checkingAll} style={small}>{checkingAll ? 'Checking...' : 'Check all pending'}</button>
+          )}
+        </div>
         {rows.length === 0 ? (
           <div style={{ fontSize: 12.5, color: TOKENS.s500 }}>No requests yet.</div>
         ) : (
@@ -1210,14 +1260,26 @@ function CardPayments({ toast, onBack, prefillInvoice = null }) {
                     <td style={{ padding: '8px', borderBottom: '1px solid ' + TOKENS.line }}>
                       <span style={{ color: STATUS[r.status] || TOKENS.s500, fontWeight: 800, fontSize: 11.5, textTransform: 'uppercase' }}>{r.status}</span>
                       {r.channel ? <span style={{ fontSize: 10.5, color: TOKENS.s500 }}>{' \u00b7 '}{r.channel}</span> : null}
+                      {r.manual && <div style={{ fontSize: 10.5, color: TOKENS.s500 }}>Marked by {r.markedPaidByName || 'staff'}{r.manualNote ? ': ' + r.manualNote : ''}</div>}
+                      {r.status === 'paid' && <div style={{ fontSize: 10.5, color: r.receiptSentAt ? '#166534' : '#B45309' }}>
+                        {r.receiptSentAt ? 'Receipt sent ' + new Date(r.receiptSentAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + (r.receiptSentTo ? ' to ' + r.receiptSentTo : '') : 'No receipt sent yet'}
+                      </div>}
                     </td>
                     <td style={{ padding: '8px', borderBottom: '1px solid ' + TOKENS.line, whiteSpace: 'nowrap' }}>
+                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                       {r.status !== 'paid' && (
-                        <button onClick={() => verify(r.reference)} disabled={checking === r.reference}
-                          style={{ background: '#fff', color: TOKENS.crimson, border: '1.5px solid ' + TOKENS.line, padding: '5px 10px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>
+                        <button onClick={() => verify(r.reference)} disabled={checking === r.reference} style={small}>
                           {checking === r.reference ? 'Checking...' : 'Check status'}
                         </button>
                       )}
+                      {r.status !== 'paid' && canMark && (
+                        <button onClick={() => { setMarkFor(r); setMk({ method: 'Bank transfer', paidAt: '', note: '', sendReceipt: true }) }} style={small} title="Record money received another way (bank, M-Pesa, cash)">Mark paid</button>
+                      )}
+                      {r.status === 'paid' && <>
+                        <button onClick={() => openReceipt(r.reference)} style={small}>Receipt</button>
+                        <button onClick={() => sendReceipt(r)} disabled={busyRef === r.reference} style={small}>{busyRef === r.reference ? 'Sending...' : r.receiptSentAt ? 'Resend receipt' : 'Send receipt'}</button>
+                      </>}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -1226,9 +1288,32 @@ function CardPayments({ toast, onBack, prefillInvoice = null }) {
           </div>
         )}
         <div style={{ fontSize: 10.5, color: TOKENS.s500, marginTop: 10, lineHeight: 1.5 }}>
-          Check status asks Paystack directly, so a payment shows as PAID only when Paystack confirms the money. When a request turns PAID, accounts@ receives a confirmation email automatically, and a linked invoice is marked paid.
+          Check status asks Paystack directly, so a payment shows as PAID only when Paystack confirms the money (with the webhook set up, this happens on its own). When a request turns PAID the parent is emailed a receipt, accounts@ receives a confirmation, and a linked invoice is marked paid. Mark paid is for money received another way; Paystack is asked first.
         </div>
       </div>
+
+      {markFor && (
+        <div onClick={() => setMarkFor(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(8,12,20,.5)', zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 12, padding: 20, width: 420, maxWidth: '100%', display: 'grid', gap: 12 }}>
+            <div style={{ fontSize: 15, fontWeight: 800, color: TOKENS.s900 }}>Mark paid: {markFor.currency} {Number(markFor.amount).toLocaleString()}</div>
+            <div style={{ fontSize: 12, color: TOKENS.s500 }}>{markFor.payerName || markFor.email}{markFor.invoiceNo ? ' \u00b7 invoice ' + markFor.invoiceNo : ''}. Paystack is checked first; if it shows the card payment, that is recorded instead.</div>
+            <div><label style={lbl}>How was it paid *</label>
+              <select value={mk.method} onChange={e => setMk(m => ({ ...m, method: e.target.value }))} style={{ ...inp, background: '#fff' }}>
+                {['Bank transfer', 'M-Pesa', 'Paystack (confirmed in dashboard)', 'Cash', 'Cheque', 'Wire transfer', 'Other'].map(m => <option key={m}>{m}</option>)}
+              </select>
+            </div>
+            <div><label style={lbl}>Date paid</label><input type="date" value={mk.paidAt} onChange={e => setMk(m => ({ ...m, paidAt: e.target.value }))} style={inp}/></div>
+            <div><label style={lbl}>Reference or note *</label><input value={mk.note} onChange={e => setMk(m => ({ ...m, note: e.target.value }))} placeholder="e.g. M-Pesa QJK7XY2Z, or bank ref" style={inp} maxLength={300}/></div>
+            <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 12.5 }}>
+              <input type="checkbox" checked={mk.sendReceipt} onChange={e => setMk(m => ({ ...m, sendReceipt: e.target.checked }))}/> Email the receipt to {markFor.email}
+            </label>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={() => setMarkFor(null)} style={small}>Cancel</button>
+              <button onClick={markPaid} disabled={busyRef === markFor.reference} style={{ background: TOKENS.crimson, color: '#fff', border: 'none', padding: '8px 16px', borderRadius: 7, fontSize: 12.5, fontWeight: 700, cursor: 'pointer' }}>{busyRef === markFor.reference ? 'Saving...' : 'Mark paid'}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

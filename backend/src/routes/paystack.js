@@ -15,6 +15,16 @@
  *     call any time; money status always comes from Paystack, never
  *     from the client.
  *
+ * POST /api/paystack/verify-pending             check every pending request with Paystack
+ * POST /api/paystack/requests/:ref/mark-paid     { method, note, paidAt?, sendReceipt? } accounts/admin
+ * GET  /api/paystack/requests/:ref/receipt.pdf   the receipt (paid requests)
+ * POST /api/paystack/requests/:ref/receipt       { email? } email the receipt (again)
+ * POST /api/paystack/webhook                     Paystack's charge.success (signed)
+ *
+ * A confirmed payment emails the payer a receipt: the linked invoice's
+ * receipt when the invoice is marked paid, otherwise a receipt for the
+ * payment itself (lib/paystackReceipt.js).
+ *
  * Env: PAYSTACK_SECRET_KEY (sk_live_... or sk_test_...).
  * Currencies must be enabled on the Paystack account to be usable.
  */
@@ -26,6 +36,7 @@ const mongoose = require('mongoose');
 const PaystackRequest = require('../models/PaystackRequest');
 const Invoice = require('../models/Invoice');
 const { markInvoicePaid } = require('../lib/markInvoicePaid');
+const { sendPaystackReceipt, receiptFor } = require('../lib/paystackReceipt');
 
 const PAYSTACK_CURRENCIES = ['KES', 'USD', 'NGN', 'GHS', 'ZAR'];
 const balanceOf = (inv) => Math.max(0, Number(inv.totalDue || 0) - Number(inv.paidAmount || 0));
@@ -68,7 +79,7 @@ async function settleLinkedInvoice(doc, d) {
   if (!inv) return 'invoice_missing';
   const cur = String(d.currency || doc.currency || '').toUpperCase();
   const received = round2(Number(d.amount || 0) / 100);
-  const tag = `Paystack ${doc.reference}: ${cur} ${received}`;
+  const tag = (doc.manual ? `${doc.manualMethod} (marked paid by ${doc.markedPaidByName || 'staff'}: ${doc.manualNote}) for Paystack request ` : 'Paystack ') + `${doc.reference}: ${cur} ${received}`;
   const addNote = (text) => Invoice.updateOne({ _id: inv._id }, {
     $set: { paymentNote: [String(inv.paymentNote || '').trim(), text].filter(Boolean).join(' | ') },
   });
@@ -87,8 +98,8 @@ async function settleLinkedInvoice(doc, d) {
       paidAmount: total,
       paidAt: doc.paidAt || new Date(),
       note: tag,
-      source: 'paystack',
-      actorId: doc.createdBy || null,
+      source: doc.manual ? 'manual' : 'paystack',
+      actorId: doc.manual ? doc.markedPaidBy : (doc.createdBy || null),
     });
     return changed ? 'marked_paid' : 'already_paid';
   }
@@ -235,79 +246,191 @@ router.get('/requests', auth, ALLOWED, async (req, res) => {
   }
 });
 
+// ── Confirmation (shared by Check status, the webhook and Mark paid) ──
+
+function paidNotice(paidDoc) {
+  ;(async () => {
+    try {
+      const nodemailer = require('nodemailer');
+      const t = nodemailer.createTransport({
+        host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+        port: parseInt(process.env.EMAIL_PORT || '587', 10),
+        secure: false,
+        auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASSWORD },
+      });
+      await t.sendMail({
+        from: process.env.EMAIL_FROM || 'Smartious Homeschool <hello@smartioushomeschool.com>',
+        to: 'accounts@smartioushomeschool.com',
+        subject: 'PAID — ' + fmtAmount(paidDoc.amount, paidDoc.currency) + ' from ' + (paidDoc.payerName || paidDoc.email) + (paidDoc.manual ? ' (marked by hand)' : ''),
+        text: (paidDoc.manual ? 'Payment marked paid by ' + (paidDoc.markedPaidByName || 'staff') + ' (' + paidDoc.manualMethod + '): ' + paidDoc.manualNote : 'Card payment received.') +
+          '\n\nPayer: ' + (paidDoc.payerName || '') + '\nEmail: ' + paidDoc.email +
+          '\nAmount: ' + fmtAmount(paidDoc.amount, paidDoc.currency) + '\nFor: ' + paidDoc.description +
+          '\nReference: ' + paidDoc.reference + '\nChannel: ' + (paidDoc.channel || '') + '\nPaid at: ' + paidDoc.paidAt +
+          (paidDoc.invoiceNo ? '\nInvoice: ' + paidDoc.invoiceNo + ' (' + (OUTCOME_TEXT[paidDoc.invoiceOutcome] || paidDoc.invoiceOutcome || 'not updated') + ')' : ''),
+      });
+    } catch (e) { console.error('[paystack] paid notice failed:', e.message); }
+  })();
+}
+
+/**
+ * After the one atomic flip to paid: settle the linked invoice (which
+ * emails its own receipt), or email the payer a receipt for the payment
+ * itself, and tell accounts. d: { amount (lowest unit), currency }.
+ */
+async function afterFirstPaid(doc, d, { sendReceipt = true } = {}) {
+  if (doc.invoiceId) {
+    try {
+      const outcome = await settleLinkedInvoice(doc, d);
+      doc = await PaystackRequest.findByIdAndUpdate(doc._id, { $set: { invoiceOutcome: outcome } }, { new: true });
+    } catch (e) { console.error('[paystack] invoice settle failed:', doc.reference, e.message); }
+  }
+  // The invoice receipt goes out when the invoice is marked paid; any other
+  // case (no invoice, part payment, mismatch) gets a receipt for this payment.
+  if (sendReceipt && doc.invoiceOutcome !== 'marked_paid') {
+    try { await sendPaystackReceipt(doc); doc = await PaystackRequest.findById(doc._id); }
+    catch (e) { console.error('[paystack] receipt failed:', doc.reference, e.message); }
+  } else if (doc.invoiceOutcome === 'marked_paid') {
+    doc = await PaystackRequest.findByIdAndUpdate(doc._id, { $set: { receiptSentAt: new Date(), receiptSentTo: doc.email } }, { new: true });
+  }
+  paidNotice(doc);
+  return doc;
+}
+
+/** Ask Paystack for the truth about one request and record it. */
+async function syncWithPaystack(doc) {
+  const vRes = await fetch(PAYSTACK + '/transaction/verify/' + encodeURIComponent(doc.reference), {
+    headers: { Authorization: 'Bearer ' + KEY() },
+  });
+  const v = await vRes.json();
+  const d = v?.data;
+  if (!(v.status && d)) return { doc, paystackStatus: null };
+  const map = { success: 'paid', failed: 'failed', abandoned: 'abandoned' };
+  const newStatus = map[d.status] || 'pending';
+  const fields = { channel: d.channel || doc.channel, gatewayResponse: d.gateway_response || doc.gatewayResponse };
+  if (newStatus === 'paid') {
+    // Atomic flip: two confirmations at once must not both count as the
+    // first (double receipts, double notes).
+    const flipped = await PaystackRequest.findOneAndUpdate(
+      { _id: doc._id, status: { $ne: 'paid' } },
+      { $set: { ...fields, status: 'paid', paidAt: d.paid_at ? new Date(d.paid_at) : new Date() } },
+      { new: true }
+    );
+    doc = flipped ? await afterFirstPaid(flipped, d) : await PaystackRequest.findById(doc._id);
+  } else if (doc.status !== 'paid') {
+    // A confirmed payment is never downgraded.
+    Object.assign(doc, fields, { status: newStatus });
+    await doc.save();
+  }
+  return { doc, paystackStatus: d.status };
+}
+
 // ── Verify against Paystack (the source of truth) ─────────
 router.get('/verify/:reference', auth, ALLOWED, async (req, res) => {
   try {
     if (!KEY()) return res.status(500).json({ success: false, message: 'PAYSTACK_SECRET_KEY is not set on the server.' });
-    let doc = await PaystackRequest.findOne({ reference: req.params.reference });
+    const doc = await PaystackRequest.findOne({ reference: req.params.reference });
     if (!doc) return res.status(404).json({ success: false, message: 'Request not found.' });
-
-    const vRes = await fetch(PAYSTACK + '/transaction/verify/' + encodeURIComponent(doc.reference), {
-      headers: { Authorization: 'Bearer ' + KEY() },
-    });
-    const v = await vRes.json();
-    const d = v?.data;
-    if (v.status && d) {
-      const map = { success: 'paid', failed: 'failed', abandoned: 'abandoned' };
-      const newStatus = map[d.status] || 'pending';
-      const fields = {
-        channel: d.channel || doc.channel,
-        gatewayResponse: d.gateway_response || doc.gatewayResponse,
-      };
-
-      let firstPaid = false;
-      if (newStatus === 'paid') {
-        // Atomic flip: two "Check status" clicks at once must not both
-        // count as the first confirmation (double receipts, double notes).
-        const flipped = await PaystackRequest.findOneAndUpdate(
-          { _id: doc._id, status: { $ne: 'paid' } },
-          { $set: { ...fields, status: 'paid', paidAt: d.paid_at ? new Date(d.paid_at) : new Date() } },
-          { new: true }
-        );
-        if (flipped) { firstPaid = true; doc = flipped; }
-        else doc = await PaystackRequest.findById(doc._id);
-      } else if (doc.status !== 'paid') {
-        // A confirmed payment is never downgraded.
-        Object.assign(doc, fields, { status: newStatus });
-        await doc.save();
-      }
-
-      if (firstPaid) {
-        // Tied to an invoice: settle it through the shared path.
-        if (doc.invoiceId) {
-          try {
-            const outcome = await settleLinkedInvoice(doc, d);
-            doc = await PaystackRequest.findByIdAndUpdate(doc._id, { $set: { invoiceOutcome: outcome } }, { new: true });
-          } catch (e) { console.error('[paystack] invoice settle failed:', doc.reference, e.message); }
-        }
-
-        // First confirmation of payment: tell accounts once.
-        const paidDoc = doc;
-        ;(async () => {
-          try {
-            const nodemailer = require('nodemailer');
-            const t = nodemailer.createTransport({
-              host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-              port: parseInt(process.env.EMAIL_PORT || '587', 10),
-              secure: false,
-              auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASSWORD },
-            });
-            await t.sendMail({
-              from: process.env.EMAIL_FROM || 'Smartious Homeschool <hello@smartioushomeschool.com>',
-              to: 'accounts@smartioushomeschool.com',
-              subject: 'PAID \u2014 ' + fmtAmount(paidDoc.amount, paidDoc.currency) + ' from ' + (paidDoc.payerName || paidDoc.email),
-              text: 'Card payment received.\n\nPayer: ' + (paidDoc.payerName || '') + '\nEmail: ' + paidDoc.email +
-                '\nAmount: ' + fmtAmount(paidDoc.amount, paidDoc.currency) + '\nFor: ' + paidDoc.description +
-                '\nReference: ' + paidDoc.reference + '\nChannel: ' + paidDoc.channel + '\nPaid at: ' + paidDoc.paidAt +
-                (paidDoc.invoiceNo ? '\nInvoice: ' + paidDoc.invoiceNo + ' (' + (OUTCOME_TEXT[paidDoc.invoiceOutcome] || paidDoc.invoiceOutcome || 'not updated') + ')' : ''),
-            });
-          } catch (e) { console.error('[paystack] paid notice failed:', e.message); }
-        })();
-      }
-    }
-    return res.json({ success: true, data: { request: doc } });
+    const out = await syncWithPaystack(doc);
+    return res.json({ success: true, data: { request: out.doc } });
   } catch (e) {
     return res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// ── Check every pending request at once ───────────────────
+router.post('/verify-pending', auth, ALLOWED, async (req, res) => {
+  try {
+    if (!KEY()) return res.status(500).json({ success: false, message: 'PAYSTACK_SECRET_KEY is not set on the server.' });
+    const pending = await PaystackRequest.find({ status: 'pending', createdAt: { $gte: new Date(Date.now() - 90 * 864e5) } }).limit(60);
+    let paid = 0;
+    for (const doc of pending) {
+      try { const out = await syncWithPaystack(doc); if (out.doc.status === 'paid') paid++; } catch (e) { console.error('[paystack] verify-pending', doc.reference, e.message); }
+    }
+    return res.json({ success: true, data: { checked: pending.length, paid } });
+  } catch (e) { return res.status(500).json({ success: false, message: e.message }); }
+});
+
+// ── Mark paid by hand ─────────────────────────────────────
+// For money that reached us another way (bank transfer, M-Pesa, cash)
+// against a card request, or a payment Paystack shows but this record
+// missed. Paystack is asked first: if it confirms the payment, that is
+// recorded as a normal card payment. Accounts and admin only.
+const CAN_MARK = ['admin', 'superadmin', 'accountant', 'accounts'];
+router.post('/requests/:reference/mark-paid', auth, async (req, res) => {
+  try {
+    if (!CAN_MARK.includes(req.user?.role)) return res.status(403).json({ success: false, message: 'Only accounts or an admin can mark a payment paid.' });
+    const doc = await PaystackRequest.findOne({ reference: req.params.reference });
+    if (!doc) return res.status(404).json({ success: false, message: 'Request not found.' });
+    if (doc.status === 'paid') return res.status(400).json({ success: false, message: 'This request is already paid.' });
+    const method = String(req.body?.method || '').trim().slice(0, 60);
+    const note = String(req.body?.note || '').trim().slice(0, 300);
+    if (!method) return res.status(400).json({ success: false, message: 'Choose how the money was paid.' });
+    if (!note) return res.status(400).json({ success: false, message: 'Add a note: the transaction or bank reference, or why it is being marked paid.' });
+    const paidAt = req.body?.paidAt && !isNaN(new Date(req.body.paidAt)) ? new Date(req.body.paidAt) : new Date();
+    if (paidAt > new Date(Date.now() + 864e5)) return res.status(400).json({ success: false, message: 'The payment date cannot be in the future.' });
+
+    // Paystack first: a real card payment is recorded as one.
+    if (KEY()) {
+      try {
+        const out = await syncWithPaystack(doc);
+        if (out.doc.status === 'paid') return res.json({ success: true, message: 'Paystack confirms this payment; recorded as a card payment.', data: { request: out.doc } });
+      } catch (e) { console.error('[paystack] mark-paid verify', e.message); }
+    }
+    const who = [req.user.firstName, req.user.lastName].filter(Boolean).join(' ') || req.user.email || '';
+    const flipped = await PaystackRequest.findOneAndUpdate(
+      { _id: doc._id, status: { $ne: 'paid' } },
+      { $set: { status: 'paid', paidAt, manual: true, manualMethod: method, manualNote: note, channel: method, markedPaidBy: req.user._id, markedPaidByName: who } },
+      { new: true }
+    );
+    if (!flipped) return res.status(409).json({ success: false, message: 'This request was just marked paid.' });
+    const out = await afterFirstPaid(flipped, { amount: Math.round(Number(flipped.amount) * 100), currency: flipped.currency }, { sendReceipt: req.body?.sendReceipt !== false });
+    return res.json({ success: true, message: 'Marked paid.' + (out.receiptSentAt ? ' Receipt sent to ' + out.receiptSentTo + '.' : ''), data: { request: out } });
+  } catch (e) { return res.status(500).json({ success: false, message: e.message }); }
+});
+
+// ── Receipts ──────────────────────────────────────────────
+router.get('/requests/:reference/receipt.pdf', auth, ALLOWED, async (req, res) => {
+  try {
+    const doc = await PaystackRequest.findOne({ reference: req.params.reference }).lean();
+    if (!doc) return res.status(404).json({ success: false, message: 'Request not found.' });
+    if (doc.status !== 'paid') return res.status(400).json({ success: false, message: 'A receipt is only available once the payment is paid.' });
+    const { buildReceiptPdfBuffer } = require('../lib/invoicePdf');
+    const { inv, receiptNo } = await receiptFor(doc);
+    const pdf = await buildReceiptPdfBuffer(inv, receiptNo);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', (req.query.download ? 'attachment' : 'inline') + '; filename="' + receiptNo + '.pdf"');
+    return res.send(pdf);
+  } catch (e) { return res.status(500).json({ success: false, message: e.message }); }
+});
+
+router.post('/requests/:reference/receipt', auth, ALLOWED, async (req, res) => {
+  try {
+    const doc = await PaystackRequest.findOne({ reference: req.params.reference }).lean();
+    if (!doc) return res.status(404).json({ success: false, message: 'Request not found.' });
+    const out = await sendPaystackReceipt(doc, { to: req.body?.email });
+    return res.json({ success: true, message: `Receipt ${out.receiptNo} sent to ${out.to}.`, data: { request: await PaystackRequest.findById(doc._id).lean() } });
+  } catch (e) { return res.status(400).json({ success: false, message: e.message }); }
+});
+
+// ── Webhook: Paystack tells us the moment a payment succeeds ──
+// Set https://<api>/api/paystack/webhook as the webhook URL in the
+// Paystack dashboard. Signed with the secret key (x-paystack-signature,
+// HMAC-SHA512 of the raw body); the payment is then re-checked with
+// Paystack before anything is recorded.
+router.post('/webhook', async (req, res) => {
+  try {
+    if (!KEY() || !req.rawBody) return res.sendStatus(400);
+    const sig = crypto.createHmac('sha512', KEY()).update(req.rawBody).digest('hex');
+    const given = String(req.headers['x-paystack-signature'] || '');
+    if (sig.length !== given.length || !crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(given))) return res.sendStatus(401);
+    res.sendStatus(200);   // acknowledge at once; Paystack retries slow endpoints
+    const ev = req.body || {};
+    if (ev.event !== 'charge.success' || !ev.data?.reference) return;
+    const doc = await PaystackRequest.findOne({ reference: ev.data.reference });
+    if (doc && doc.status !== 'paid') await syncWithPaystack(doc);
+  } catch (e) {
+    console.error('[paystack webhook]', e.message);
+    if (!res.headersSent) res.sendStatus(500);
   }
 });
 

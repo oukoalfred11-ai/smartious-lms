@@ -285,7 +285,7 @@ async function buildReceiptPdfBuffer(inv, receiptNo) {
   return docToBuffer(doc => {
     let y = header(doc, 'RECEIPT', receiptNo, 'Paid', fmtDate(inv.paidAt || new Date()), GREEN)
     doc.fillColor(GREY).font('Helvetica').fontSize(9)
-      .text('For invoice: ' + inv.invoiceNo, 330, 88, { width: 217, align: 'right' })
+      .text(inv.receiptFor || ('For invoice: ' + inv.invoiceNo), 330, 88, { width: 217, align: 'right' })
     y = billedToBlock(doc, inv, y, GREEN, GREEN_TINT)
     y = itemsTable(doc, inv, y, GREEN, GREEN_TINT)
     const stampY = y + 30
