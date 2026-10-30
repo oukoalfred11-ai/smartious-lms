@@ -6,7 +6,7 @@
  * list is in frontend/src/data/careers.js), sanitised on the way in.
  */
 const mongoose = require('mongoose')
-const { PARTNERSHIP_TYPES, PARTNERSHIP_STATUSES } = require('../constants/careers')
+const { PARTNERSHIP_TYPES, PARTNERSHIP_STATUSES, PARTNER_DOCS } = require('../constants/careers')
 
 const by = {
   by:   { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
@@ -29,6 +29,10 @@ const partnershipEnquirySchema = new mongoose.Schema({
   details:      { type: mongoose.Schema.Types.Mixed, default: {} },
   message:      { type: String, default: '', trim: true, maxlength: 4000 },
   howHeard:     { type: String, default: '', trim: true, maxlength: 120 },
+  // Proof the organisation is real: government registration, licence and
+  // proof of operations (required), and any other supporting document.
+  // Private R2 keys; staff open them through signed links.
+  documents: [{ _id: false, category: { type: String, enum: PARTNER_DOCS }, key: String, filename: String, mimeType: String, sizeBytes: Number }],
 
   status: { type: String, enum: PARTNERSHIP_STATUSES, default: 'new', index: true },
   statusHistory: [{ status: String, note: { type: String, default: '' }, ...by }],

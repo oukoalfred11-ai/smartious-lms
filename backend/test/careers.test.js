@@ -87,3 +87,23 @@ test('website and server lists use the same keys', async () => {
   assert.deepStrictEqual(keys(F.PARTNERSHIP_TYPES), C.PARTNERSHIP_TYPES)
   assert.deepStrictEqual(keys(F.PARTNERSHIP_STATUSES), C.PARTNERSHIP_STATUSES)
 })
+
+test('partner documents: registration, licence and proof of operations are required, and keys must be ours', () => {
+  const { partnerUploadKey, signKey, cleanPartnerDocs } = require('../src/lib/careers')
+  const up = (category) => { const key = partnerUploadKey(category, 'My Cert.pdf'); return { category, key, sig: signKey(key), filename: 'My Cert.pdf', mimeType: 'application/pdf', sizeBytes: 1000 } }
+  const all = C.REQUIRED_PARTNER_DOCS.map(up)
+  assert.deepStrictEqual(cleanPartnerDocs(all).missing, [])
+  assert.strictEqual(cleanPartnerDocs(all).docs.length, 3)
+  assert.deepStrictEqual(cleanPartnerDocs(all.slice(1)).missing, ['registration'])
+  const forged = { ...all[0], key: 'partnerships/uploads/x/registration-a.pdf' }
+  assert.deepStrictEqual(cleanPartnerDocs([forged, ...all.slice(1)]).missing, ['registration'])
+  const relabelled = { ...all[1], category: 'registration' }   // a licence file claimed as the registration
+  assert.deepStrictEqual(cleanPartnerDocs([relabelled, all[1], all[2]]).missing, ['registration'])
+  assert.match(all[0].key, /^partnerships\/uploads\/[0-9a-f-]{36}\/registration-my-cert.pdf$/)
+})
+
+test('partner document lists match on website and server', async () => {
+  const F = await import(pathToFileURL(path.join(__dirname, '../../frontend/src/data/careers.js')).href)
+  assert.deepStrictEqual(F.PARTNER_DOCS.map(d => d.key), C.PARTNER_DOCS)
+  assert.deepStrictEqual(F.PARTNER_DOCS.filter(d => d.required).map(d => d.key), C.REQUIRED_PARTNER_DOCS)
+})

@@ -234,6 +234,14 @@ mongoose.connect(MONGODB_URI)
       setTimeout(purge, 5 * 60 * 1000)
       setInterval(purge, 24 * 3600 * 1000)
     }
+    // Partnerships: documents uploaded for an enquiry that was never sent, after two days.
+    {
+      const purge = () => require('./routes/partnerships').purgeOrphanUploads()
+        .then(n => { if (n) console.log(`[partnerships] removed ${n} unused upload(s)`) })
+        .catch(e => console.error('[partnerships] upload purge', e.message))
+      setTimeout(purge, 7 * 60 * 1000)
+      setInterval(purge, 24 * 3600 * 1000)
+    }
 
     require('./lib/studentExit').detachAllLeavers().catch(e => console.error('[leavers] detach', e.message));
 

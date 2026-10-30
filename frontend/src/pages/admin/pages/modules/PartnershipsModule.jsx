@@ -89,7 +89,7 @@ export default function PartnershipsModule({ toast }) {
               const due = p.followUpOn && new Date(p.followUpOn) <= new Date()
               return (
                 <tr key={p._id} onClick={() => setOpen(p._id)} style={{ borderTop: `1px solid ${line}`, cursor: 'pointer' }}>
-                  <td style={td}><div style={{ fontWeight: 700, color: TOKENS.ink }}>{p.organisation}</div><div style={{ fontSize: 11, color: TOKENS.s500 }}>{p.ref}</div></td>
+                  <td style={td}><div style={{ fontWeight: 700, color: TOKENS.ink }}>{p.organisation}</div><div style={{ fontSize: 11, color: TOKENS.s500 }}>{p.ref} · {(p.documents || []).length ? `${p.documents.length} document${p.documents.length === 1 ? '' : 's'}` : <span style={{ color: '#92400E' }}>no documents</span>}</div></td>
                   <td style={td}>{TYPE[p.type]?.label || p.type}</td>
                   <td style={td}>{p.contactName}<div style={{ fontSize: 11, color: TOKENS.s500 }}>{p.email}</div></td>
                   <td style={td}>{p.country || '—'}</td>
@@ -177,6 +177,23 @@ function EnquiryPanel({ id, toast, onClose, onChanged }) {
             <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.1em', textTransform: 'uppercase', color: TOKENS.crimson, marginBottom: 8 }}>{t?.label || 'Details'}</div>
             {Object.entries(p.details || {}).map(([k, v]) => <React.Fragment key={k}>{row(fieldLabel[k] || k, Array.isArray(v) ? v.join(', ') : String(v))}</React.Fragment>)}
             {row('Message', p.message)}{row('Heard about us', p.howHeard)}
+          </div>
+
+          <div className="card" style={{ padding: 14, marginTop: 12, display: 'grid', gap: 8 }}>
+            <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.1em', textTransform: 'uppercase', color: TOKENS.crimson }}>Verification documents</div>
+            {(p.missingDocs || []).length > 0 && (
+              <div style={{ fontSize: 12.5, color: '#92400E', background: '#FEF3C7', borderRadius: 8, padding: '7px 10px' }}>
+                Missing: {p.missingDocs.join(', ')}{p.documents?.length ? '' : ' (sent before documents were required)'}. Ask for them before going further.
+              </div>
+            )}
+            {(p.documents || []).map((d, i) => (
+              <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'center', fontSize: 13, padding: '6px 0', borderBottom: `1px solid ${line}` }}>
+                <span style={{ width: 230, flexShrink: 0, color: TOKENS.s500 }}>{d.label}</span>
+                <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.filename}{d.sizeBytes ? ` · ${(d.sizeBytes / 1048576).toFixed(1)} MB` : ''}</span>
+                {d.url ? <a className="btn btn-s btn-sm" href={d.url} target="_blank" rel="noopener noreferrer">Open</a> : <span style={{ color: TOKENS.s500 }}>Unavailable</span>}
+              </div>
+            ))}
+            <div style={{ fontSize: 11.5, color: TOKENS.s500 }}>Check that names and registration numbers match the organisation, and that the licence is current. Links last an hour; reopen the enquiry for new ones.</div>
           </div>
 
           <div className="card" style={{ padding: 14, marginTop: 12, display: 'grid', gap: 8 }}>
