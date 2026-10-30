@@ -42,7 +42,8 @@ app.use(cors({
 }));
 
 // ── Body parsing ─────────────────────────────────────────
-app.use(express.json({ limit: '50mb' }));
+// The raw body is kept for the Paystack webhook, whose signature covers the exact bytes.
+app.use(express.json({ limit: '50mb', verify: (req, res, buf) => { if (req.originalUrl.startsWith('/api/paystack/webhook')) req.rawBody = buf } }));
 app.use(express.urlencoded({ extended: true }));
 
 // ── Rate limiting ─────────────────────────────────────────

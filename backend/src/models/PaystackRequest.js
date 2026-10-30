@@ -36,6 +36,17 @@ const paystackRequestSchema = new mongoose.Schema({
   // accounts team: 'marked_paid', 'already_paid', 'partial',
   // 'currency_mismatch', 'invoice_missing'.
   invoiceOutcome: { type: String, default: '' },
+
+  // Receipt emailed to the payer (automatically on payment, or by hand).
+  receiptSentAt: { type: Date, default: null },
+  receiptSentTo: { type: String, default: '' },
+  // Marked paid by a person (money confirmed outside Paystack's records,
+  // e.g. paid by bank transfer instead): who, how and why.
+  manual:       { type: Boolean, default: false },
+  manualMethod: { type: String, default: '' },
+  manualNote:   { type: String, default: '' },
+  markedPaidBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+  markedPaidByName: { type: String, default: '' },
 }, { timestamps: true });
 
 paystackRequestSchema.index({ createdAt: -1 });
