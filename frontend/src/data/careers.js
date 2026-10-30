@@ -84,6 +84,19 @@ export const PARTNERSHIP_STATUSES = [
   { key: 'archived',      label: 'Archived',      color: '#6B7280', bg: '#F3F4F6' },
 ]
 
+// Documents every organisation uploads with an enquiry (keys match
+// backend/src/constants/careers.js PARTNER_DOCS). PDF, Word or an image, 15 MB each.
+export const PARTNER_DOCS = [
+  { key: 'registration', label: 'Government registration certificate', required: true,
+    hint: 'Certificate of incorporation, business or company registration, or charity or NGO registration, issued by the government.' },
+  { key: 'licence', label: 'Operating licence or accreditation', required: true,
+    hint: 'The licence or permit that allows you to operate, e.g. a ministry or education-authority licence, exam board approval, or trade licence.' },
+  { key: 'proof_of_operations', label: 'Proof of operations', required: true,
+    hint: 'A recent document showing you trade today: tax compliance certificate, bank reference letter, audited accounts or a utility bill, from the last 12 months.' },
+  { key: 'other', label: 'Other supporting document', required: false,
+    hint: 'Optional: a company profile, brochure or proposal.' },
+]
+
 // Each type: who it is for, what we offer them, and its own questions.
 // field types: text, textarea, number, select (options), multi (options), date
 export const PARTNERSHIP_TYPES = [

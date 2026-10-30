@@ -6,11 +6,14 @@
  * own questions, so every enquiry arrives with what we need to act on it.
  * With `typeKey` it renders that type's own page (/partnerships/<slug>,
  * content in data/partnershipPages.js) with the form preset to the type.
+ * Every organisation must upload its government registration, operating
+ * licence and proof of operations (PARTNER_DOCS) before it can send the
+ * enquiry; files go straight to private storage via a signed upload link.
  * Backend: routes/partnerships.js.
  */
 import { useState } from 'react'
 import { api } from '../context/ctx.jsx'
-import { PARTNERSHIP_TYPES } from '../data/careers.js'
+import { PARTNERSHIP_TYPES, PARTNER_DOCS } from '../data/careers.js'
 import { PARTNERSHIP_PAGES } from '../data/partnershipPages.js'
 
 const C = { cr: '#8B1A2E', gold: '#C9973A', ink: '#080C14', sl: '#2E3D55', mut: '#6B7280', bone: '#FDFAF4', bone2: '#F8F2E6', line: '#E8DFCC', green: '#15803D', red: '#B91C1C' }
@@ -24,6 +27,48 @@ const WHY = [
   ['A school, not a marketplace', 'One academic team, one timetable and one record per student, so a partnership reaches real learners and is measured.'],
   ['Structured to work with', 'A named contact, a reference for every enquiry, and a clear route from conversation to agreement.'],
 ]
+
+const ACCEPT = '.pdf,.doc,.docx,.png,.jpg,.jpeg,.webp'
+const MAX_MB = 15
+
+function put(url, file, onPct) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+    xhr.open('PUT', url)
+    xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream')
+    xhr.upload.onprogress = e => { if (e.total) onPct(Math.round(100 * e.loaded / e.total)) }
+    xhr.onload = () => (xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error('Upload failed (' + xhr.status + '). Please try again.')))
+    xhr.onerror = () => reject(new Error('Upload failed. Check your connection and try again.'))
+    xhr.send(file)
+  })
+}
+
+// One document slot: pick a file, it uploads at once, with progress.
+function DocSlot({ d, value, onPick, onClear }) {
+  const v = value || {}
+  return (
+    <div style={{ border: `1px solid ${v.status === 'done' ? '#A7F3D0' : v.status === 'error' ? '#FECACA' : C.line}`, background: v.status === 'done' ? '#F0FDF4' : '#fff', borderRadius: 10, padding: '12px 14px' }}>
+      <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+        <div style={{ flex: '1 1 260px' }}>
+          <div style={{ fontWeight: 800, fontSize: 14.5, color: C.ink }}>{d.label}{d.required ? <span style={{ color: C.cr }}> *</span> : <span style={{ color: C.mut, fontWeight: 600 }}> (optional)</span>}</div>
+          <div style={{ fontSize: 12.5, color: C.mut, lineHeight: 1.5, marginTop: 2 }}>{d.hint}</div>
+        </div>
+        <label style={{ padding: '8px 14px', borderRadius: 8, border: `1.5px solid ${C.cr}`, color: C.cr, fontWeight: 800, fontSize: 13, cursor: v.status === 'uploading' ? 'wait' : 'pointer', whiteSpace: 'nowrap', background: '#fff' }}>
+          {v.status === 'done' ? 'Replace' : 'Choose file'}
+          <input type="file" accept={ACCEPT} hidden disabled={v.status === 'uploading'} onChange={e => { const file = e.target.files?.[0]; e.target.value = ''; if (file) onPick(file) }} />
+        </label>
+      </div>
+      {v.status && (
+        <div style={{ marginTop: 8, fontSize: 13, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+          {v.status === 'uploading' && <><div style={{ flex: '1 1 160px', height: 6, background: C.line, borderRadius: 99, overflow: 'hidden' }}><div style={{ width: (v.pct || 0) + '%', height: '100%', background: C.cr }} /></div><span style={{ color: C.mut }}>{v.pct || 0}%</span></>}
+          {v.status === 'done' && <><span style={{ color: C.green, fontWeight: 800 }}>✓ Uploaded</span><span style={{ color: C.sl, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 260 }}>{v.filename}</span>
+            <button type="button" onClick={onClear} style={{ background: 'none', border: 'none', color: C.mut, cursor: 'pointer', textDecoration: 'underline', fontFamily: 'inherit', fontSize: 12.5 }}>Remove</button></>}
+          {v.status === 'error' && <span style={{ color: C.red }}>{v.error}</span>}
+        </div>
+      )}
+    </div>
+  )
+}
 
 function Input({ label, req, children }) {
   return <label style={{ display: 'block' }}><span style={lbl}>{label}{req && <span style={{ color: C.cr }}> *</span>}</span>{children}</label>
@@ -56,6 +101,22 @@ export default function PartnershipsPage({ typeKey = '' }) {
   const [type, setType] = useState(typeKey)
   const [f, setF] = useState({ organisation: '', website: '', country: '', city: '', contactName: '', contactRole: '', email: '', phone: '', message: '', howHeard: '', consent: false, website2: '' })
   const [details, setDetails] = useState({})
+  const [docs, setDocs] = useState({})     // category → { status, pct, error, key, sig, filename, mimeType, sizeBytes }
+  const setDoc = (k, v) => setDocs(d => ({ ...d, [k]: v }))
+  const uploadDoc = async (category, file) => {
+    if (file.size > MAX_MB * 1024 * 1024) { setDoc(category, { status: 'error', error: `Each document must be under ${MAX_MB} MB.` }); return }
+    setDoc(category, { status: 'uploading', pct: 0, filename: file.name })
+    try {
+      const r = await api.post('/partnerships/upload', { category, fileName: file.name, mimeType: file.type, fileSize: file.size })
+      const { uploadUrl, key, sig } = r.data.data
+      await put(uploadUrl, file, pct => setDoc(category, { status: 'uploading', pct, filename: file.name }))
+      setDoc(category, { status: 'done', key, sig, filename: file.name, mimeType: file.type, sizeBytes: file.size })
+    } catch (x) {
+      setDoc(category, { status: 'error', error: x?.response?.data?.message || x.message || 'Upload failed. Please try again.' })
+    }
+  }
+  const missingDocs = PARTNER_DOCS.filter(d => d.required && docs[d.key]?.status !== 'done')
+  const uploading = Object.values(docs).some(v => v?.status === 'uploading')
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
   const [done, setDone] = useState(null)
@@ -68,11 +129,14 @@ export default function PartnershipsPage({ typeKey = '' }) {
     e.preventDefault()
     setErr('')
     if (!type) { setErr('Choose the kind of partnership.'); return }
+    if (uploading) { setErr('Wait for your documents to finish uploading.'); return }
+    if (missingDocs.length) { setErr('Upload your ' + missingDocs.map(d => d.label.toLowerCase()).join(', ') + '.'); document.getElementById('partner-docs')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); return }
     if (!f.consent) { setErr('Please confirm that we may contact you about this enquiry.'); return }
     setBusy(true)
     try {
       const clean = Object.fromEntries(Object.entries(details).filter(([, v]) => v !== '' && v != null && !(Array.isArray(v) && !v.length)))
-      const r = await api.post('/partnerships', { type, ...f, details: clean })
+      const documents = Object.entries(docs).filter(([, v]) => v?.status === 'done').map(([category, v]) => ({ category, key: v.key, sig: v.sig, filename: v.filename, mimeType: v.mimeType, sizeBytes: v.sizeBytes }))
+      const r = await api.post('/partnerships', { type, ...f, details: clean, documents })
       setDone(r.data.data.ref)
     } catch (x) {
       const d = x?.response?.data
@@ -196,6 +260,13 @@ export default function PartnershipsPage({ typeKey = '' }) {
                   </div>
                 </div>
               )}
+              <div id="partner-docs" style={{ borderTop: `1px solid ${C.line}`, paddingTop: 14, display: 'grid', gap: 10 }}>
+                <div style={{ fontWeight: 800, color: C.cr, fontSize: 13, letterSpacing: '.08em', textTransform: 'uppercase' }}>Verification documents</div>
+                <p style={{ margin: 0, fontSize: 13.5, color: C.sl, lineHeight: 1.6 }}>
+                  We partner only with registered organisations. Upload your government registration, your operating licence and a recent proof of operations; we cannot review an enquiry without them. PDF, Word or an image, up to {MAX_MB} MB each. Documents are kept private and seen only by our partnerships team.
+                </p>
+                {PARTNER_DOCS.map(d => <DocSlot key={d.key} d={d} value={docs[d.key]} onPick={file => uploadDoc(d.key, file)} onClear={() => setDoc(d.key, null)} />)}
+              </div>
               <Input label="What do you have in mind?"><textarea style={{ ...field, minHeight: 120 }} value={f.message} onChange={e => set('message', e.target.value)} maxLength={4000} /></Input>
               <Input label="How did you hear about us?"><input style={field} value={f.howHeard} onChange={e => set('howHeard', e.target.value)} /></Input>
               {/* Honeypot: hidden from people, filled by bots. */}
@@ -205,7 +276,8 @@ export default function PartnershipsPage({ typeKey = '' }) {
                 Smartious may store these details and contact me about this enquiry.
               </label>
               {err && <div role="alert" style={{ color: C.red, background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 9, padding: '10px 12px', fontSize: 14 }}>{err}</div>}
-              <div><button type="submit" disabled={busy} style={{ padding: '13px 26px', borderRadius: 10, fontSize: 15, fontWeight: 800, border: 'none', background: C.cr, color: '#fff', cursor: busy ? 'wait' : 'pointer', fontFamily: 'inherit' }}>{busy ? 'Sending…' : 'Send enquiry'}</button></div>
+              <div><button type="submit" disabled={busy || uploading} style={{ padding: '13px 26px', borderRadius: 10, fontSize: 15, fontWeight: 800, border: 'none', background: C.cr, color: '#fff', cursor: busy ? 'wait' : 'pointer', fontFamily: 'inherit' }}>{busy ? 'Sending…' : uploading ? 'Uploading documents…' : 'Send enquiry'}</button>
+                {missingDocs.length > 0 && <div style={{ fontSize: 12.5, color: C.mut, marginTop: 6 }}>Still needed: {missingDocs.map(d => d.label).join(', ')}.</div>}</div>
             </form>
           )}
         </div>

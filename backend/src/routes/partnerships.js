@@ -4,7 +4,11 @@
  * Mounted at /api/partnerships.
  *
  * Public (no sign-in, rate-limited):
- *   POST /            { type, organisation, contactName, email, …, details, message } → { ref }
+ *   POST /upload      { category, fileName, mimeType, fileSize } → { uploadUrl, key, sig }
+ *                     the browser PUTs the file straight to R2 (private)
+ *   POST /            { type, organisation, contactName, email, …, details, message,
+ *                       documents: [{ category, key, sig, filename, mimeType, sizeBytes }] } → { ref }
+ *                     registration, licence and proof of operations are required
  *
  * Staff:
  *   GET   /                    filters: type, status, country, q, followUp (due|none), from, to, sort, page
@@ -19,7 +23,9 @@ const express = require('express')
 const rateLimit = require('express-rate-limit')
 const { auth, requireRole } = require('../middleware/auth')
 const { PARTNERSHIP_TYPES, PARTNERSHIP_STATUSES } = require('../constants/careers')
-const { cleanDetails, ref, isEmail, isUrl, str } = require('../lib/careers')
+const { PARTNER_DOCS, REQUIRED_PARTNER_DOCS } = require('../constants/careers')
+const { cleanDetails, ref, isEmail, isUrl, str, checkUpload, partnerUploadKey, signKey, cleanPartnerDocs, PARTNER_PREFIX } = require('../lib/careers')
+const r2 = require('../lib/r2Files')
 
 const router = express.Router()
 const STAFF = ['admin', 'dos', 'ops_manager', 'qa']
@@ -34,6 +40,23 @@ const TYPE_LABEL = {
   content_publisher: 'Content and publishing', corporate_family: 'Corporate family benefits', education_agent: 'Education agent',
   ngo_foundation: 'NGO or foundation', media: 'Media and events', other: 'Other',
 }
+
+const DOC_LABEL = { registration: 'Government registration certificate', licence: 'Operating licence or accreditation', proof_of_operations: 'Proof of operations', other: 'Other supporting document' }
+
+const uploadLimit = rateLimit({ windowMs: 60 * 60 * 1000, max: 40, standardHeaders: true, legacyHeaders: false,
+  message: { success: false, message: 'Too many uploads from this connection. Try again in an hour.' } })
+
+router.post('/upload', uploadLimit, async (req, res) => {
+  try {
+    if (!r2.ready()) return fail(res, 503, 'Document uploads are not available right now. Please try again later, or email hello@smartioushomeschool.com.')
+    const { category, fileName, mimeType, fileSize } = req.body || {}
+    if (!PARTNER_DOCS.includes(category)) return fail(res, 400, 'Unknown document type.')
+    const err = checkUpload({ kind: 'document', mimeType, fileSize })
+    if (err) return fail(res, 400, err)
+    const key = partnerUploadKey(category, fileName)
+    res.json({ success: true, data: { uploadUrl: await r2.signedPut(key, mimeType), key, sig: signKey(key) } })
+  } catch (e) { fail(res, 500, e.message) }
+})
 
 const submitLimit = rateLimit({ windowMs: 60 * 60 * 1000, max: 10, standardHeaders: true, legacyHeaders: false,
   message: { success: false, message: 'Too many enquiries from this connection. Try again in an hour.' } })
@@ -54,6 +77,9 @@ router.post('/', submitLimit, async (req, res) => {
     if (!isEmail(doc.email)) errors.push('Enter a valid email address.')
     if (doc.website && !isUrl(doc.website)) errors.push('The website must start with http:// or https://.')
     if (!doc.country) errors.push('Enter your country.')
+    const { docs, missing } = cleanPartnerDocs(b.documents)
+    if (missing.length) errors.push('Upload your ' + missing.map(k => DOC_LABEL[k].toLowerCase()).join(', ') + '.')
+    doc.documents = docs
     if (!b.consent) errors.push('Confirm that we may contact you about this enquiry.')
     if (errors.length) return fail(res, 400, errors[0], { errors })
     if (b.website2) return res.json({ success: true, data: { ref: 'SMP' } })   // honeypot: bots fill every field
@@ -128,8 +154,8 @@ router.get('/export.csv', auth, requireRole(...STAFF), async (req, res) => {
     const items = await Model().find(filterFrom({ ...req.query, _me: req.user._id })).sort(SORTS[req.query.sort] || SORTS.newest).limit(5000).lean()
     const cell = (v) => { const s = v instanceof Date ? v.toISOString().slice(0, 10) : typeof v === 'object' && v ? Object.entries(v).map(([k, x]) => `${k}: ${Array.isArray(x) ? x.join('/') : x}`).join('; ') : String(v == null ? '' : v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s }
     const cols = [['Reference', 'ref'], ['Type', 'type'], ['Organisation', 'organisation'], ['Website', 'website'], ['Country', 'country'], ['City', 'city'], ['Contact', 'contactName'],
-      ['Role', 'contactRole'], ['Email', 'email'], ['Phone', 'phone'], ['Details', 'details'], ['Message', 'message'], ['Status', 'status'], ['Assigned to', 'assignedToName'], ['Follow up', 'followUpOn'], ['Received', 'createdAt']]
-    const csv = [cols.map(c => c[0]).join(','), ...items.map(a => cols.map(([, k]) => cell(k === 'type' ? TYPE_LABEL[a.type] || a.type : a[k])).join(','))].join('\n')
+      ['Role', 'contactRole'], ['Email', 'email'], ['Phone', 'phone'], ['Details', 'details'], ['Documents', 'documents'], ['Message', 'message'], ['Status', 'status'], ['Assigned to', 'assignedToName'], ['Follow up', 'followUpOn'], ['Received', 'createdAt']]
+    const csv = [cols.map(c => c[0]).join(','), ...items.map(a => cols.map(([, k]) => cell(k === 'type' ? TYPE_LABEL[a.type] || a.type : k === 'documents' ? (a.documents || []).map(d => DOC_LABEL[d.category] || d.category).join('; ') : a[k])).join(','))].join('\n')
     res.setHeader('Content-Type', 'text/csv; charset=utf-8')
     res.setHeader('Content-Disposition', `attachment; filename="partnership-enquiries-${new Date().toISOString().slice(0, 10)}.csv"`)
     res.send('﻿' + csv)
@@ -140,6 +166,8 @@ router.get('/:id', auth, requireRole(...STAFF), async (req, res) => {
   try {
     const p = await Model().findById(req.params.id).lean()
     if (!p) return fail(res, 404, 'Enquiry not found.')
+    p.documents = await Promise.all((p.documents || []).map(async d => ({ ...d, label: DOC_LABEL[d.category] || d.category, url: await r2.signedGet(d.key, d.filename) })))
+    p.missingDocs = REQUIRED_PARTNER_DOCS.filter(k => !p.documents.some(d => d.category === k)).map(k => DOC_LABEL[k])
     res.json({ success: true, data: { enquiry: p } })
   } catch (e) { fail(res, 500, e.message) }
 })
@@ -186,11 +214,25 @@ router.post('/:id/notes', auth, requireRole(...STAFF), async (req, res) => {
 
 router.delete('/:id', auth, requireRole('admin'), async (req, res) => {
   try {
-    const r = await Model().deleteOne({ _id: req.params.id })
-    if (!r.deletedCount) return fail(res, 404, 'Enquiry not found.')
+    const p = await Model().findById(req.params.id).select('documents').lean()
+    if (!p) return fail(res, 404, 'Enquiry not found.')
+    await Model().deleteOne({ _id: req.params.id })
+    await r2.remove((p.documents || []).map(d => d.key))
     res.json({ success: true, message: 'Enquiry deleted.' })
   } catch (e) { fail(res, 500, e.message) }
 })
 
+// Files uploaded with an enquiry that was never sent: removed after two days.
+async function purgeOrphanUploads() {
+  if (!r2.ready()) return 0
+  const keys = await r2.list(PARTNER_PREFIX, 2 * 864e5)
+  if (!keys.length) return 0
+  const used = new Set((await Model().find({ 'documents.key': { $in: keys } }).select('documents.key').lean()).flatMap(p => p.documents.map(d => d.key)))
+  const orphans = keys.filter(k => !used.has(k))
+  await r2.remove(orphans)
+  return orphans.length
+}
+
 module.exports = router
 module.exports.filterFrom = filterFrom
+module.exports.purgeOrphanUploads = purgeOrphanUploads

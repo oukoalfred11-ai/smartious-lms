@@ -35,6 +35,10 @@ const PARTNERSHIP_TYPES = [
   'technology', 'content_publisher', 'corporate_family', 'education_agent', 'ngo_foundation', 'media', 'other',
 ]
 const PARTNERSHIP_STATUSES = ['new', 'in_discussion', 'proposal', 'agreement', 'active', 'declined', 'archived']
+// Documents every organisation uploads with an enquiry (labels in frontend/src/data/careers.js).
+const PARTNER_DOCS = ['registration', 'licence', 'proof_of_operations', 'other']
+const REQUIRED_PARTNER_DOCS = ['registration', 'licence', 'proof_of_operations']
+const PARTNER_MAX_FILES = 8
 
 // ── Uploads ────────────────────────────────────────────────
 const DOC_MIME = [
@@ -49,6 +53,6 @@ const MAX_FILES = 30                          // per application, all kinds
 module.exports = {
   POSITIONS, TEACHING_POSITIONS, APPLICATION_STATUSES, OPEN_STATUSES,
   APPLICANT_DOCS, REQUIRED_DOCS, REQUIRED_DOCS_STAFF, requiredDocsFor, PENDING_OK, REVIEW_CRITERIA,
-  PARTNERSHIP_TYPES, PARTNERSHIP_STATUSES,
+  PARTNERSHIP_TYPES, PARTNERSHIP_STATUSES, PARTNER_DOCS, REQUIRED_PARTNER_DOCS, PARTNER_MAX_FILES,
   DOC_MIME, VIDEO_MIME, DOC_MAX_BYTES, VIDEO_MAX_BYTES, MAX_FILES,
 }

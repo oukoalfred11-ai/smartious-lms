@@ -559,6 +559,7 @@ for (const [key, b] of Object.entries(BOARD_SCHOOLS)) {
     h1: 'Partner with Smartious to reach learners in more than forty countries', src: ['src/data/careers.js', 'src/pages/PartnershipsPage.jsx'],
     body: [
       p('Universities offering scholarships, examination centres, teacher-training and co-curricular providers, schools, employers and more. Choose the kind of partnership and tell us what you have in mind; every enquiry gets a reference and a named contact.'),
+      p('We partner only with registered organisations: every enquiry includes the organisation\u2019s government registration certificate, its operating licence or accreditation, and a recent proof of operations.'),
       h2('Ways to partner'), links(PARTNERSHIP_TYPES.map(t => ({ href: PARTNERSHIP_PAGES[t.key] ? '/partnerships/' + PARTNERSHIP_PAGES[t.key].slug : '/partnerships', label: t.label, note: t.pitch }))),
     ] })
   // One page per partnership type (src/data/partnershipPages.js).

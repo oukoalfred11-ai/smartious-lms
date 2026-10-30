@@ -8,11 +8,16 @@
  *   flags(app)                                     → { docsComplete, hasDemo, missingDocs }
  *   avgScore(reviews)                              → mean of each review's mean, 1 dp
  *   cleanDetails(obj)                              → a partnership's type-specific answers
+ *   partnerUploadKey(category, fileName)           → partnerships/uploads/<uuid>/<category>-<name>
+ *   signKey(key) / cleanPartnerDocs(list)          → the partner's uploaded documents, checked:
+ *        each key must carry our signature (issued with the upload URL), so an
+ *        enquiry can only reference files uploaded through this form
  */
 const crypto = require('crypto')
 const {
   POSITIONS, TEACHING_POSITIONS, APPLICANT_DOCS, requiredDocsFor, PENDING_OK, REVIEW_CRITERIA,
   DOC_MIME, VIDEO_MIME, DOC_MAX_BYTES, VIDEO_MAX_BYTES,
+  PARTNER_DOCS, REQUIRED_PARTNER_DOCS, PARTNER_MAX_FILES,
 } = require('../constants/careers')
 
 const str = (v, n) => String(v == null ? '' : v).trim().slice(0, n)
@@ -160,4 +165,27 @@ function cleanDetails(obj) {
 const ref = (prefix, n, d = new Date()) => `${prefix}-${d.getUTCFullYear()}-${String(n).padStart(4, '0')}`
 const hashToken = (t) => crypto.createHash('sha256').update(String(t)).digest('hex')
 
-module.exports = { checkUpload, uploadKey, cleanFile, cleanApplication, flags, avgScore, cleanDetails, ref, hashToken, isEmail, isUrl, str }
+// ── Partnership documents ────────────────────────────────────
+const PARTNER_PREFIX = 'partnerships/uploads/'
+const safeName = (f) => String(f || 'file').toLowerCase().replace(/[^a-z0-9._-]+/g, '-').replace(/^-+|-+$/g, '').slice(-80) || 'file'
+function partnerUploadKey(category, fileName) {
+  return `${PARTNER_PREFIX}${crypto.randomUUID()}/${category}-${safeName(fileName)}`
+}
+const signKey = (key) => crypto.createHmac('sha256', process.env.JWT_SECRET || 'smartious-dev').update('partner-doc:' + key).digest('hex').slice(0, 32)
+const sameSig = (a, b) => { const x = Buffer.from(String(a || '')), y = Buffer.from(String(b || '')); return x.length === y.length && crypto.timingSafeEqual(x, y) }
+
+/** → { docs: [{ category, key, filename, mimeType, sizeBytes }], missing: [category] } */
+function cleanPartnerDocs(input) {
+  const docs = []
+  for (const d of (Array.isArray(input) ? input : []).slice(0, PARTNER_MAX_FILES)) {
+    if (!d || !PARTNER_DOCS.includes(d.category)) continue
+    const key = String(d.key || '')
+    if (!key.startsWith(PARTNER_PREFIX) || !key.split('/')[3]?.startsWith(d.category + '-') || !sameSig(d.sig, signKey(key))) continue
+    if (docs.some(x => x.key === key)) continue
+    docs.push({ category: d.category, key: key.slice(0, 300), filename: str(d.filename, 200), mimeType: str(d.mimeType, 100), sizeBytes: Math.max(0, Number(d.sizeBytes) || 0) })
+  }
+  const missing = REQUIRED_PARTNER_DOCS.filter(k => !docs.some(d => d.category === k))
+  return { docs, missing }
+}
+
+module.exports = { partnerUploadKey, signKey, cleanPartnerDocs, PARTNER_PREFIX, checkUpload, uploadKey, cleanFile, cleanApplication, flags, avgScore, cleanDetails, ref, hashToken, isEmail, isUrl, str }
