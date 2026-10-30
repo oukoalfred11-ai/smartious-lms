@@ -15,7 +15,8 @@ import { NEW_TYPES, ANSWER_TYPE_META, AnswerKeyEditor, AnswerKeyLine, answerKeyP
 import { NestedQuestionEditor, AttachmentList, AnnotationCanvas, sumLeafMarks, labelAt } from '../../components/exam/NestedQuestion.jsx'
 import ManageSubjectTab from './ManageSubjectTab.jsx'
 import TeacherLeaveRequest from './TeacherLeaveRequest.jsx'
-import LibraryViewer from '../../components/LibraryViewer.jsx'
+import LibraryShelf from '../../components/library/LibraryShelf.jsx'
+import LessonPlayerTab from '../student/LessonPlayerTab.jsx'
 import MobileTabBar, { IconParts, useBackHandler } from '../../components/ui/MobileTabBar.jsx'
 import { LessonsToClose, ExtraLessonForm, MissedSessions } from '../../components/lessons/LessonControl.jsx'
 import { HelpRequests } from '../../components/lessons/LessonPlan.jsx'
@@ -208,6 +209,14 @@ const NavIcon = ({ name, active }) => {
             <rect x="5" y="4" width="14" height="17" rx="2" fill="#fff" fillOpacity=".25"/>
             <rect x="9" y="2" width="6" height="3" rx="1" fill="#fff" stroke="#fff" strokeWidth="1.6"/>
             <path d="M8.5 12.5l2 2 4-4.5"/>
+          </g>
+        )
+      case 'lessonplayer': // play button in a screen
+        return (
+          <g fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="2" y="4" width="20" height="14" rx="2" fill="#fff" fillOpacity=".25"/>
+            <polygon points="10 8 15 11 10 14 10 8" fill="#fff"/>
+            <line x1="8" y1="21" x2="16" y2="21"/>
           </g>
         )
       case 'library': // stack of books
@@ -680,6 +689,7 @@ export default function TeacherPortal() {
     mshauri: 'Mshauri AI',
     profile: 'My Profile',
     leave: 'Leave Requests',
+    lessonplayer: 'Lesson Player',
   }
 
   const nav = [
@@ -687,6 +697,7 @@ export default function TeacherPortal() {
       {id:'dashboard',     label:'Dashboard',        iconName:'dashboard',     icon:'rect:3:3:7:7:1|rect:14:3:7:7:1|rect:14:14:7:7:1|rect:3:14:7:7:1'},
       {id:'students',      label:'My Students',      iconName:'students',      icon:'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2|circle:9:7:4|M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75'},
       {id:'attendance',    label:'Attendance',       iconName:'attendance',    icon:'rect:5:4:14:17:2|rect:9:2:6:3:1|M8.5 12.5l2 2 4-4.5'},
+      {id:'lessonplayer',  label:'Lesson Player',    iconName:'lessonplayer',  icon:'rect:2:4:20:14:2|M10 8l5 3-5 3z|line:8:21:16:21'},
       {id:'library',       label:'Library',          iconName:'library',       icon:'M4 19.5A2.5 2.5 0 0 1 6.5 17H20|M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'},
       {id:'myclasses',     label:'My Classes',       iconName:'timetable',     icon:'rect:3:4:18:18:2|line:16:2:16:6|line:8:2:8:6|line:3:10:21:10'},
       {id:'clubs',         label:'My Clubs',         iconName:'clubs',         icon:'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2|circle:9:7:4|M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75' },
@@ -761,6 +772,7 @@ export default function TeacherPortal() {
           {page==='myclasses'  && <MyClassesTab key={classesKey} user={currentUser} toast={toast} onEndLesson={setEndedId}/>}
           {page==='exams'      && <ExamsTab                user={currentUser} toast={toast}/>}
           {page==='library'    && <TeacherLibraryTab       user={currentUser} toast={toast}/>}
+          {page==='lessonplayer' && <LessonPlayerTab       user={currentUser} toast={toast} setPage={setPage} mode="teacher"/>}
           {page==='live'       && <TeacherLiveClassesTab   user={currentUser} toast={toast}/>}
           {page==='marking'    && <HomeworkTab             user={currentUser} toast={toast}/>}
           {page==='questionbank' && <QuestionBankTab       user={currentUser} store={store} setPage={setPage} toast={toast}/>}
@@ -986,6 +998,7 @@ export default function TeacherPortal() {
           {page === 'attendance' && <AttendanceTab user={currentUser} toast={toast} />}
 
           {page === 'library' && <TeacherLibraryTab user={currentUser} toast={toast} />}
+          {page === 'lessonplayer' && <LessonPlayerTab user={currentUser} toast={toast} setPage={setPage} mode="teacher" />}
 
           {page === 'myclasses' && <MyClassesTab key={classesKey} user={currentUser} toast={toast} onEndLesson={setEndedId} />}
 
@@ -13892,8 +13905,6 @@ function ExternalEmailAdder({ onAdd, pickedEmails, toast }) {
 // backend; only metadata flows through React.
 // ═══════════════════════════════════════════════════════════
 function TeacherLibraryTab({ user, toast }) {
-  const [books, setBooks] = useState([])
-  const [loadingBooks, setLoadingBooks] = useState(true)
   const [subjects, setSubjects] = useState([])
   const [loadingSubjects, setLoadingSubjects] = useState(true)
 
@@ -13909,21 +13920,12 @@ function TeacherLibraryTab({ user, toast }) {
   const [uploadProgress, setUploadProgress] = useState(0)
   const fileInputRef = useRef(null)
 
-  // Viewer state
-  const [viewerBook, setViewerBook] = useState(null)
+  // Bumped after an upload, edit or delete so the shelf reloads.
+  const [reloadKey, setReloadKey] = useState(0)
 
-  // Load books visible to this teacher
-  const loadBooks = async () => {
-    setLoadingBooks(true)
-    try {
-      const { data } = await api.get('/library')
-      setBooks(data?.data?.books || [])
-    } catch (e) {
-      toast?.error?.('Failed to load books: ' + (e?.response?.data?.message || e.message))
-    } finally {
-      setLoadingBooks(false)
-    }
-  }
+  // The shelf (LibraryShelf) loads the books; this reloads it.
+  const loadBooks = () => setReloadKey(k => k + 1)
+
 
   // Load all available subjects for the upload form dropdown.
   // We deliberately use /subjects (full active list) rather than
@@ -13954,8 +13956,6 @@ function TeacherLibraryTab({ user, toast }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  useEffect(() => { loadBooks() // eslint-disable-next-line
-  }, [])
 
   const onFilePick = (file) => {
     if (!file) return
@@ -14112,56 +14112,9 @@ function TeacherLibraryTab({ user, toast }) {
     }
   }
 
-  // Group books for display.
-  // Coursebooks: "Subject - Curriculum".
-  // Mocks and past papers: "Section - Subject - Year" folders,
-  // newest year first, papers sorted Paper 1 to Paper 6 inside.
-  const booksBySubject = (() => {
-    const SEC_LABEL = { mock: 'Mock Exams', past_paper: 'Past Papers' }
-    const groups = {}
-    for (const b of books) {
-      let k
-      if (b.section === 'mock' || b.section === 'past_paper') {
-        const yr = b.examYear ? String(b.examYear) : 'Unsorted'
-        k = SEC_LABEL[b.section] + ' · ' + b.subjectName + ' · ' + yr
-      } else {
-        k = b.subjectName + ' · ' + b.curriculum
-      }
-      if (!groups[k]) groups[k] = []
-      groups[k].push(b)
-    }
-    for (const k of Object.keys(groups)) {
-      groups[k].sort((a, b2) => (a.paperNumber || 99) - (b2.paperNumber || 99)
-        || String(a.session || '').localeCompare(String(b2.session || ''))
-        || String(a.title || '').localeCompare(String(b2.title || '')))
-    }
-    return groups
-  })()
 
   return (
     <div>
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom: 20 }}>
-        <div>
-          <div className="sec-tag">Coursebooks by subject</div>
-          <h2 className="serif" style={{ fontSize: 26, color: 'var(--s900)', margin: '6px 0 4px' }}>
-            Library
-          </h2>
-          <div style={{ fontSize: 13, color: '#6B6B6B' }}>
-            Upload PDF coursebooks. Your students will be able to read them inline (no download).
-          </div>
-        </div>
-        {!showUploadForm && (
-          <button onClick={() => setShowUploadForm(true)}
-            style={{
-              background: '#7D1025', color: '#fff', border: 'none',
-              padding: '10px 18px', borderRadius: 8,
-              fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
-            }}>
-            + Upload book
-          </button>
-        )}
-      </div>
-
       {/* Upload form */}
       {showUploadForm && (
         <div className="card" style={{ padding: 20, marginBottom: 22, border: '1.5px solid #C9A030' }}>
@@ -14409,67 +14362,23 @@ function TeacherLibraryTab({ user, toast }) {
         </div>
       )}
 
-      {/* Books list, grouped by subject */}
-      {loadingBooks ? (
-        <div style={{ fontSize: 13, color: '#9A9A9A', fontStyle: 'italic', padding: 20 }}>
-          Loading library...
-        </div>
-      ) : books.length === 0 ? (
-        <div className="card" style={{ padding: 30, textAlign: 'center' }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: '#1A1A1A', marginBottom: 4 }}>
-            No books yet
-          </div>
-          <div style={{ fontSize: 12.5, color: '#6B6B6B' }}>
-            Click "Upload book" to add your first coursebook PDF.
-          </div>
-        </div>
-      ) : (
-        <div style={{ display:'flex', flexDirection:'column', gap: 22 }}>
-          {Object.keys(booksBySubject).sort((a, b2) => {
-            const isPaperA = a.startsWith('Mock Exams') || a.startsWith('Past Papers')
-            const isPaperB = b2.startsWith('Mock Exams') || b2.startsWith('Past Papers')
-            if (isPaperA !== isPaperB) return isPaperA ? 1 : -1
-            if (isPaperA && isPaperB) {
-              const ya = parseInt(a.split(' · ').pop(), 10) || 0
-              const yb = parseInt(b2.split(' · ').pop(), 10) || 0
-              const baseA = a.slice(0, a.lastIndexOf(' · '))
-              const baseB = b2.slice(0, b2.lastIndexOf(' · '))
-              const base = baseA.localeCompare(baseB)
-              if (base !== 0) return base
-              return yb - ya
-            }
-            return a.localeCompare(b2)
-          }).map(groupKey => (
-            <div key={groupKey}>
-              <div style={{
-                fontSize: 11, fontWeight: 700, color: '#7D1025',
-                letterSpacing: '.08em', textTransform: 'uppercase',
-                marginBottom: 8, paddingBottom: 6, borderBottom: '1px solid #E8E2D6',
-              }}>
-                {groupKey}
-              </div>
-              <div style={{
-                display:'grid',
-                gridTemplateColumns:'repeat(auto-fill, minmax(280px, 1fr))',
-                gap: 12,
-              }}>
-                {booksBySubject[groupKey].map(book => (
-                  <BookCard key={book._id} book={book}
-                    onView={() => setViewerBook(book)}
-                    onEdit={() => setEditBook({ ...book, gradesText: (book.grades||[]).join(', ') })}
-                    onDelete={() => removeBook(book)}
-                    canDelete={String(book.uploadedBy) === String(user?._id) || user?.role === 'admin'}/>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Viewer modal */}
-      {viewerBook && (
-        <LibraryViewer book={viewerBook} api={api} onClose={() => setViewerBook(null)}/>
-      )}
+      {/* Books: the same shelf students see, with edit and delete on each book */}
+      <LibraryShelf user={user} toast={toast} reloadKey={reloadKey} readOnly={false}
+        mySubjects={subjects.filter(s => (user?.teachingSpecialties || []).some(t => String(t.subjectId?._id || t.subjectId) === String(s._id))).map(s => s.subjectName)}
+        toolbar={!showUploadForm && (
+          <button onClick={() => setShowUploadForm(true)}
+            style={{ background: '#7D1025', color: '#fff', border: 'none', padding: '10px 18px', borderRadius: 8, fontSize: 12.5, fontWeight: 700, cursor: 'pointer' }}>
+            + Upload book
+          </button>
+        )}
+        cardActions={(book) => {
+          const canDelete = String(book.uploadedBy) === String(user?._id) || user?.role === 'admin'
+          const small = { background: '#FDFAF4', border: '1px solid #E8E2D6', borderRadius: 6, padding: '6px 10px', fontSize: 11.5, fontWeight: 700, cursor: 'pointer', color: '#3A2E1E' }
+          return <>
+            <button onClick={() => setEditBook({ ...book, gradesText: (book.grades || []).join(', ') })} style={small}>Edit</button>
+            {canDelete && <button onClick={() => removeBook(book)} style={{ ...small, color: '#9A2434' }}>Delete</button>}
+          </>
+        }} />
 
       {/* Edit book modal */}
       {editBook && (
@@ -14556,107 +14465,6 @@ function TeacherLibraryTab({ user, toast }) {
   )
 }
 
-// ─────────────────────────────────────────────────────────
-// BookCard
-// Compact card showing one library book with view / delete actions.
-// Used by both teacher and student library lists.
-// ─────────────────────────────────────────────────────────
-function BookCard({ book, onView, onDelete, onEdit, canDelete }) {
-  const sizeMB = book.sizeBytes ? (book.sizeBytes / (1024 * 1024)).toFixed(1) + ' MB' : ''
-  return (
-    <div style={{
-      background: '#fff', border: '1px solid #E8E2D6', borderRadius: 10,
-      padding: 14, display: 'flex', flexDirection: 'column',
-    }}>
-      <div style={{ display:'flex', gap: 10, marginBottom: 10 }}>
-        {book.coverUrl ? (
-          <img src={book.coverUrl} alt="" loading="lazy" style={{
-            width: 38, height: 48, borderRadius: 4, objectFit: 'cover',
-            objectPosition: 'top', flexShrink: 0, border: '1px solid #C9A030',
-          }}/>
-        ) : (
-          <div style={{
-            width: 38, height: 48, borderRadius: 4,
-            background: 'linear-gradient(135deg, #7D1025 0%, #5C0B1B 100%)',
-            flexShrink: 0,
-            display:'flex', alignItems:'center', justifyContent:'center',
-            color: '#C9A030', fontSize: 9, fontWeight: 800, letterSpacing: '.05em',
-          }}>PDF</div>
-        )}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{
-            fontWeight: 700, fontSize: 13, color: '#1A1A1A',
-            lineHeight: 1.3,
-            display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-          }}>{book.title}</div>
-          {book.author && (
-            <div style={{ fontSize: 11, color: '#6B6B6B', marginTop: 3 }}>{book.author}</div>
-          )}
-        </div>
-      </div>
-
-      {book.description && (
-        <div style={{
-          fontSize: 11.5, color: '#6B6B6B', marginBottom: 8,
-          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-          overflow: 'hidden', lineHeight: 1.4,
-        }}>
-          {book.description}
-        </div>
-      )}
-
-      {(book.paperNumber || book.examYear) && (
-        <div style={{ marginBottom: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          {book.paperNumber && (
-            <span style={{ fontSize: 10, fontWeight: 800, color: '#7D1025', background: '#F7E9EC', border: '1px solid #E4C3CB', borderRadius: 99, padding: '2px 9px', letterSpacing: '.04em' }}>
-              PAPER {book.paperNumber}
-            </span>
-          )}
-          {book.examYear && (
-            <span style={{ fontSize: 10, fontWeight: 800, color: '#7D5A0F', background: '#FDF7E2', border: '1px solid #E8D58F', borderRadius: 99, padding: '2px 9px', letterSpacing: '.04em' }}>
-              {book.examYear}{book.session ? ' - ' + book.session.toUpperCase() : ''}
-            </span>
-          )}
-        </div>
-      )}
-      <div style={{ fontSize: 10.5, color: '#9A9A9A', marginBottom: 10 }}>
-        {sizeMB}
-        {book.grades?.length ? ' · ' + book.grades.join(', ') : ''}
-        {book.uploadedByName ? ' · by ' + book.uploadedByName : ''}
-      </div>
-
-      <div style={{ display:'flex', gap: 6, marginTop: 'auto' }}>
-        {canDelete && onEdit && (
-          <button onClick={onEdit} style={{
-            flex: 1, background: '#FDFAF4', color: '#7D1025',
-            border: '1px solid #C9A030', borderRadius: 7, padding: '7px 0',
-            fontSize: 12, fontWeight: 700, cursor: 'pointer',
-          }}>Edit</button>
-        )}
-        <button onClick={onView}
-          style={{
-            flex: 1,
-            background: '#7D1025', color: '#fff', border: 'none',
-            padding: '7px 12px', borderRadius: 6,
-            fontSize: 11.5, fontWeight: 700, cursor: 'pointer',
-          }}>
-          Open
-        </button>
-        {canDelete && onDelete && (
-          <button onClick={onDelete}
-            style={{
-              background: 'transparent', color: '#9A2434',
-              border: '1px solid #E8E2D6', padding: '7px 12px',
-              borderRadius: 6, fontSize: 11.5, fontWeight: 700, cursor: 'pointer',
-            }}>
-            Delete
-          </button>
-        )}
-      </div>
-    </div>
-  )
-}
 
 // ═══════════════════════════════════════════════════════════════════
 // MY CLASSES — the teacher's one place for lessons (it replaces the old
