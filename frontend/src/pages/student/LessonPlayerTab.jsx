@@ -13,11 +13,17 @@
  * doesn't mark it. Progress pies aggregate teacher-marked records.
  *
  * PDF.js: uses react-pdf (added as dep alongside this commit).
- * Set up to disable text selection + right-click + download.
+ * Set up to disable text selection + right-click + download. Notes
+ * open full screen for reading (button, or F; Esc to leave).
+ *
+ * mode="teacher" (Teacher portal): the same views for the teacher's own
+ * subjects, from /lessons/my-subjects and /lessons/subject/:id. Draft
+ * lessons are shown with a badge, since students only see published ones;
+ * there is no mastery for the teacher.
  */
 
 import HeroPanelVideo from '../../components/HeroPanelVideo.jsx'
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { api } from '../../context/ctx.jsx'
 import { imageForSubject, colorForSubject } from '../../utils/subjectImages.js'
 import { Document, Page, pdfjs } from 'react-pdf'
@@ -39,7 +45,8 @@ const BRAND = {
   white:     '#fff',
 }
 
-export default function LessonPlayerTab({ user, toast, setPage }) {
+export default function LessonPlayerTab({ user, toast, setPage, mode = 'student' }) {
+  const teacherView = mode === 'teacher'
   // ── DATA ──
   const [subjects, setSubjects]   = useState([])
   const [subjectsLoading, setSubjectsLoading] = useState(true)
@@ -59,8 +66,11 @@ export default function LessonPlayerTab({ user, toast, setPage }) {
   const loadSubjects = useCallback(async () => {
     setSubjectsLoading(true)
     try {
-      const { data } = await api.get('/lessons/student/my-subjects')
-      if (data?.success) setSubjects(data.data?.subjects || [])
+      const { data } = await api.get(teacherView ? '/lessons/my-subjects' : '/lessons/student/my-subjects')
+      if (data?.success) setSubjects((data.data?.subjects || []).map(s => teacherView ? {
+        ...s, lessonCount: s.lessonCount || 0, masteredCount: 0, progressPct: 0,
+        teacherName: [user?.firstName, user?.lastName].filter(Boolean).join(' '),
+      } : s))
       else toast?.error?.(data?.message || 'Failed to load subjects.')
     } catch (e) {
       console.error('[lesson-player] subjects load failed:', e?.response?.data?.message || e.message)
@@ -68,9 +78,10 @@ export default function LessonPlayerTab({ user, toast, setPage }) {
     } finally {
       setSubjectsLoading(false)
     }
-  }, [toast])
+  }, [toast, teacherView, user?.firstName, user?.lastName])
 
   const loadProgress = useCallback(async () => {
+    if (teacherView) return
     try {
       const { data } = await api.get('/lesson-progress/my')
       if (data?.success) {
@@ -80,15 +91,15 @@ export default function LessonPlayerTab({ user, toast, setPage }) {
     } catch (e) {
       console.error('[lesson-player] progress load failed:', e.message)
     }
-  }, [])
+  }, [teacherView])
 
   const loadLessons = useCallback(async (subjectId) => {
     setLessonsLoading(true)
     try {
-      const { data } = await api.get('/lessons/student/subject/' + subjectId)
+      const { data } = await api.get((teacherView ? '/lessons/subject/' : '/lessons/student/subject/') + subjectId)
       if (data?.success) {
         setLessons(data.data?.lessons || [])
-        setTeacher(data.data?.teacher || null)
+        setTeacher(teacherView ? { firstName: user?.firstName, lastName: user?.lastName } : (data.data?.teacher || null))
       } else {
         toast?.error?.(data?.message || 'Failed to load lessons.')
       }
@@ -98,7 +109,7 @@ export default function LessonPlayerTab({ user, toast, setPage }) {
     } finally {
       setLessonsLoading(false)
     }
-  }, [toast])
+  }, [toast, teacherView, user?.firstName, user?.lastName])
 
   useEffect(() => { loadSubjects(); loadProgress() }, [loadSubjects, loadProgress])
   useEffect(() => {
@@ -122,6 +133,7 @@ export default function LessonPlayerTab({ user, toast, setPage }) {
         progressMap={progressMap}
         onSelectLesson={setSelectedLesson}
         onOpenLibrary={() => setPage && setPage('library')}
+        teacherView={teacherView}
       />
     )
   }
@@ -206,7 +218,7 @@ export default function LessonPlayerTab({ user, toast, setPage }) {
               No lessons yet
             </div>
             <div style={{ fontSize: 13, color: BRAND.inkMute }}>
-              Your teacher hasn't published any lessons for this subject yet. Check back soon.
+              {teacherView ? 'No lessons for this subject yet. Add them in Manage My Subject.' : "Your teacher hasn't published any lessons for this subject yet. Check back soon."}
             </div>
           </div>
         ) : (
@@ -230,6 +242,7 @@ export default function LessonPlayerTab({ user, toast, setPage }) {
                         mastered={!!progressMap[l._id]}
                         masteredAt={progressMap[l._id]?.masteredAt}
                         onOpen={() => setSelectedLesson(l)}
+                        draft={teacherView && l.status !== 'published'}
                       />
                     ))}
                   </div>
@@ -270,7 +283,7 @@ export default function LessonPlayerTab({ user, toast, setPage }) {
               : 'Lesson Player'}
           </h1>
           <div style={{ fontSize: 13, opacity: .85, marginTop: 6 }}>
-            Video lessons, notes, and progress tracking — guided by your teachers.
+            {teacherView ? 'Your lessons exactly as your students see them: video, notes and the lesson list.' : 'Video lessons, notes, and progress tracking — guided by your teachers.'}
           </div>
         </div>
       </div>
@@ -298,7 +311,7 @@ export default function LessonPlayerTab({ user, toast, setPage }) {
             No subjects yet
           </div>
           <div style={{ fontSize: 13.5, color: BRAND.inkMute, maxWidth: 420, margin: '0 auto', lineHeight: 1.55 }}>
-            You haven't been allocated a teacher for any subject yet. Once an admin allocates you, your subjects and lessons will appear here.
+            {teacherView ? 'No subjects are linked to your teaching profile yet. Once the Dean adds them, your subjects and lessons appear here.' : "You haven't been allocated a teacher for any subject yet. Once an admin allocates you, your subjects and lessons will appear here."}
           </div>
         </div>
       ) : (
@@ -412,7 +425,7 @@ function StudentSubjectCard({ subject, onOpen }) {
 // ═══════════════════════════════════════════════════════════
 // LESSON ROW
 // ═══════════════════════════════════════════════════════════
-function StudentLessonRow({ lesson, mastered, masteredAt, onOpen }) {
+function StudentLessonRow({ lesson, mastered, masteredAt, onOpen, draft = false }) {
   return (
     <div className="card" style={{
       padding: '12px 14px', cursor: 'pointer',
@@ -457,6 +470,12 @@ function StudentLessonRow({ lesson, mastered, masteredAt, onOpen }) {
           {lesson.durationMins > 0 && <span>{lesson.durationMins} min</span>}
         </div>
       </div>
+      {draft && (
+        <div title="Students only see published lessons" style={{
+          background: '#FFF4DC', color: '#8A5A00', fontSize: 10.5, fontWeight: 800, letterSpacing: '.08em',
+          padding: '3px 10px', borderRadius: 99, textTransform: 'uppercase', whiteSpace: 'nowrap',
+        }}>Draft · hidden from students</div>
+      )}
       {mastered && (
         <div style={{
           background: '#DCFCE7', color: '#15803D',
@@ -508,7 +527,7 @@ const PLAYER = {
   goldD:   '#C9973A',
 }
 
-function LessonDetailView({ lesson, subject, teacher, mastered, onBack, lessons = [], progressMap = {}, onSelectLesson, onOpenLibrary }) {
+function LessonDetailView({ lesson, subject, teacher, mastered, onBack, lessons = [], progressMap = {}, onSelectLesson, onOpenLibrary, teacherView = false }) {
   const [pane, setPane] = useState('video')
   const [listOpen, setListOpen] = useState(false)   // mobile lesson drawer
 
@@ -729,7 +748,7 @@ function LessonDetailView({ lesson, subject, teacher, mastered, onBack, lessons 
                 <span style={{ fontSize: 13 }}>No video for this lesson yet.</span>
               </div>
             )}
-            {pane === 'notes' && hasNotes && <NotesPdfViewer url={lesson.notesPdfUrl} />}
+            {pane === 'notes' && hasNotes && <NotesPdfViewer url={lesson.notesPdfUrl} title={lesson.title} />}
             {pane === 'notes' && !hasNotes && (
               <div style={{ height: '100%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: PLAYER.mute, fontSize: 13 }}>
                 No notes for this lesson yet.
@@ -737,11 +756,17 @@ function LessonDetailView({ lesson, subject, teacher, mastered, onBack, lessons 
             )}
             {pane === 'progress' && (
               <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, padding: 30, color: PLAYER.mute }}>
-                <ProgressRing percentage={pct} size={104} color={G} trackColor="rgba(255,255,255,.10)" />
+                {!teacherView && <ProgressRing percentage={pct} size={104} color={G} trackColor="rgba(255,255,255,.10)" />}
+                {teacherView ? (
+                  <div style={{ fontSize: 12.5, textAlign: 'center', maxWidth: 360, lineHeight: 1.6 }}>
+                    Students see their own mastery here: {playlist.filter(l => l.status === 'published').length} of {playlist.length} lessons are published. You mark mastery for each student in Manage My Subject.
+                  </div>
+                ) : <>
                 <div style={{ fontSize: 15, color: PLAYER.text, fontWeight: 700 }}>{doneCount} of {playlist.length} lessons mastered</div>
                 <div style={{ fontSize: 12.5, textAlign: 'center', maxWidth: 340, lineHeight: 1.6 }}>
                   Your teacher marks a lesson as mastered once you have shown you understand it. Keep going.
                 </div>
+                </>}
               </div>
             )}
           </div>
@@ -811,113 +836,136 @@ function LessonDetailView({ lesson, subject, teacher, mastered, onBack, lessons 
 // ═══════════════════════════════════════════════════════════
 // PDF VIEWER — react-pdf with download/right-click disabled
 // ═══════════════════════════════════════════════════════════
-function NotesPdfViewer({ url }) {
+function NotesPdfViewer({ url, title = '' }) {
   const [numPages, setNumPages] = useState(0)
   const [pageNum, setPageNum]   = useState(1)
   const [pdfWidth, setPdfWidth] = useState(0)
   const [loadError, setLoadError] = useState(null)
-  const containerRef = useMemo(() => ({ current: null }), [])
+  // Full screen: the notes fill the screen (the browser's own full screen
+  // where it is allowed, else a fixed overlay, e.g. on iPhone), with zoom.
+  const [full, setFull] = useState(false)
+  const [zoom, setZoom] = useState(1)
+  const boxRef = useRef(null)      // the viewer, full screen or not
+  const scrollRef = useRef(null)   // the scrolling page area, measured for width
 
-  // Track container width for responsive PDF page width
+  const measure = useCallback(() => {
+    const el = scrollRef.current
+    if (!el) return
+    const avail = el.clientWidth - 24
+    const base = full ? Math.min(avail, 1100) : Math.min(avail, 900)
+    setPdfWidth(Math.max(200, Math.round(base * zoom)))
+  }, [full, zoom])
   useEffect(() => {
-    const measure = () => {
-      if (containerRef.current) {
-        setPdfWidth(Math.min(containerRef.current.offsetWidth - 24, 900))
-      }
-    }
     measure()
     window.addEventListener('resize', measure)
     return () => window.removeEventListener('resize', measure)
-  }, [containerRef])
+  }, [measure])
+
+  const enter = () => {
+    setFull(true)
+    const el = boxRef.current
+    try { const r = el?.requestFullscreen?.() || el?.webkitRequestFullscreen?.(); r?.catch?.(() => {}) } catch {}
+  }
+  const exit = useCallback(() => {
+    setFull(false); setZoom(1)
+    try { if (document.fullscreenElement || document.webkitFullscreenElement) (document.exitFullscreen || document.webkitExitFullscreen).call(document)?.catch?.(() => {}) } catch {}
+  }, [])
+  // Leaving the browser's full screen (Esc, swipe) leaves ours too.
+  useEffect(() => {
+    const onChange = () => { if (!document.fullscreenElement && !document.webkitFullscreenElement) { setFull(false); setZoom(1) } }
+    document.addEventListener('fullscreenchange', onChange)
+    document.addEventListener('webkitfullscreenchange', onChange)
+    return () => { document.removeEventListener('fullscreenchange', onChange); document.removeEventListener('webkitfullscreenchange', onChange) }
+  }, [])
+  // Keys: arrows turn pages, F toggles full screen, Esc leaves it, +/- zoom.
+  useEffect(() => {
+    const onKey = (e) => {
+      if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target?.tagName || '')) return
+      if (e.key === 'ArrowRight' || e.key === 'PageDown') setPageNum(p => Math.min(numPages || 1, p + 1))
+      else if (e.key === 'ArrowLeft' || e.key === 'PageUp') setPageNum(p => Math.max(1, p - 1))
+      else if (e.key === 'f' || e.key === 'F') { full ? exit() : enter() }
+      else if (e.key === 'Escape' && full) exit()
+      else if (full && (e.key === '+' || e.key === '=')) setZoom(z => Math.min(2.5, +(z + 0.25).toFixed(2)))
+      else if (full && e.key === '-') setZoom(z => Math.max(0.5, +(z - 0.25).toFixed(2)))
+      else return
+      e.preventDefault()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [numPages, full, exit]) // eslint-disable-line react-hooks/exhaustive-deps
+  // Back to the top of the page when it changes.
+  useEffect(() => { if (scrollRef.current) scrollRef.current.scrollTop = 0 }, [pageNum])
 
   const onLoad = ({ numPages: n }) => { setNumPages(n); setPageNum(1) }
   const onLoadError = (err) => { setLoadError(err?.message || 'Failed to load PDF'); }
 
+  const iconBtn = (disabled) => ({
+    background: 'transparent', border: 'none', color: BRAND.cream, padding: 6, display: 'flex',
+    cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? .4 : 1,
+  })
+  const Chevron = ({ dir }) => (
+    <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points={dir === 'left' ? '15 18 9 12 15 6' : '9 18 15 12 9 6'}/>
+    </svg>
+  )
+  const FsIcon = () => full
+    ? <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M16 21v-3a2 2 0 0 1 2-2h3"/></svg>
+    : <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+
   return (
-    <div
-      ref={(el) => { containerRef.current = el; if (el) setPdfWidth(Math.min(el.offsetWidth - 24, 900)) }}
-      onContextMenu={(e) => e.preventDefault()}
+    <div ref={boxRef} onContextMenu={(e) => e.preventDefault()}
       style={{
-        flex: 1,
-        background: '#525659',
-        overflow: 'auto',
-        padding: 12,
-        userSelect: 'none',
-        WebkitUserSelect: 'none',
-        minHeight: 400,
-        position: 'relative',
-      }}
-    >
-      {loadError ? (
+        flex: 1, display: 'flex', flexDirection: 'column', background: '#525659',
+        userSelect: 'none', WebkitUserSelect: 'none', minHeight: 400, position: 'relative',
+        ...(full ? { position: 'fixed', inset: 0, zIndex: 3000, minHeight: 0, background: '#3B3E43' } : {}),
+      }}>
+      {/* Toolbar */}
+      {!loadError && (
         <div style={{
-          color: BRAND.cream, textAlign: 'center', padding: 40, fontSize: 13,
+          display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', background: 'rgba(0,0,0,.55)',
+          color: BRAND.cream, fontSize: 12.5, fontWeight: 600, flexShrink: 0,
         }}>
-          Could not load notes: {loadError}
+          <div style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', opacity: .85 }}>
+            {full ? (title || 'Notes') : ''}
+          </div>
+          <button onClick={() => setPageNum(p => Math.max(1, p - 1))} disabled={pageNum <= 1} aria-label="Previous page" style={iconBtn(pageNum <= 1)}><Chevron dir="left"/></button>
+          <span style={{ minWidth: 56, textAlign: 'center' }}>{numPages ? `${pageNum} / ${numPages}` : '…'}</span>
+          <button onClick={() => setPageNum(p => Math.min(numPages, p + 1))} disabled={pageNum >= numPages} aria-label="Next page" style={iconBtn(pageNum >= numPages)}><Chevron dir="right"/></button>
+          {full && <>
+            <span style={{ width: 1, height: 18, background: 'rgba(255,255,255,.2)', margin: '0 4px' }}/>
+            <button onClick={() => setZoom(z => Math.max(0.5, +(z - 0.25).toFixed(2)))} aria-label="Zoom out" style={{ ...iconBtn(zoom <= 0.5), fontSize: 17, fontWeight: 800 }}>{'−'}</button>
+            <button onClick={() => setZoom(1)} style={{ ...iconBtn(false), fontSize: 12 }} title="Fit to width">{Math.round(zoom * 100)}%</button>
+            <button onClick={() => setZoom(z => Math.min(2.5, +(z + 0.25).toFixed(2)))} aria-label="Zoom in" style={{ ...iconBtn(zoom >= 2.5), fontSize: 17, fontWeight: 800 }}>+</button>
+          </>}
+          <span style={{ flex: 1 }}/>
+          <button onClick={full ? exit : enter} aria-label={full ? 'Exit full screen' : 'Read full screen'} title={full ? 'Exit full screen (Esc)' : 'Read full screen (F)'}
+            style={{ ...iconBtn(false), gap: 6, alignItems: 'center', fontSize: 12.5, fontWeight: 700, padding: '6px 10px', borderRadius: 7, background: 'rgba(255,255,255,.1)' }}>
+            <FsIcon/>{full ? 'Exit' : 'Full screen'}
+          </button>
         </div>
-      ) : (
-        <>
+      )}
+
+      {/* Pages */}
+      <div ref={scrollRef} style={{ flex: 1, overflow: 'auto', padding: 12, WebkitOverflowScrolling: 'touch' }}>
+        {loadError ? (
+          <div style={{ color: BRAND.cream, textAlign: 'center', padding: 40, fontSize: 13 }}>
+            Could not load notes: {loadError}
+          </div>
+        ) : (
           <Document
             file={url}
             onLoadSuccess={onLoad}
             onLoadError={onLoadError}
-            loading={
-              <div style={{ color: BRAND.cream, textAlign: 'center', padding: 40, fontSize: 13 }}>
-                Loading notes...
-              </div>
-            }
+            loading={<div style={{ color: BRAND.cream, textAlign: 'center', padding: 40, fontSize: 13 }}>Loading notes...</div>}
           >
             {pdfWidth > 0 && (
-              <Page
-                pageNumber={pageNum}
-                width={pdfWidth}
-                renderTextLayer={false}
-                renderAnnotationLayer={false}
-              />
+              <div style={{ width: 'fit-content', margin: '0 auto', boxShadow: '0 6px 24px rgba(0,0,0,.35)' }}>
+                <Page pageNumber={pageNum} width={pdfWidth} renderTextLayer={false} renderAnnotationLayer={false} />
+              </div>
             )}
           </Document>
-
-          {/* Page navigator */}
-          {numPages > 0 && (
-            <div style={{
-              position: 'sticky', bottom: 0,
-              marginTop: 8,
-              background: 'rgba(0,0,0,.7)', color: BRAND.cream,
-              padding: '6px 10px', borderRadius: 6,
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-              fontSize: 12, fontWeight: 600,
-              maxWidth: 220, margin: '8px auto 0',
-            }}>
-              <button
-                onClick={() => setPageNum(p => Math.max(1, p - 1))}
-                disabled={pageNum <= 1}
-                style={{
-                  background: 'transparent', border: 'none', color: BRAND.cream,
-                  cursor: pageNum <= 1 ? 'not-allowed' : 'pointer',
-                  opacity: pageNum <= 1 ? .4 : 1,
-                  padding: 4,
-                }}>
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="15 18 9 12 15 6"/>
-                </svg>
-              </button>
-              <span>{pageNum} / {numPages}</span>
-              <button
-                onClick={() => setPageNum(p => Math.min(numPages, p + 1))}
-                disabled={pageNum >= numPages}
-                style={{
-                  background: 'transparent', border: 'none', color: BRAND.cream,
-                  cursor: pageNum >= numPages ? 'not-allowed' : 'pointer',
-                  opacity: pageNum >= numPages ? .4 : 1,
-                  padding: 4,
-                }}>
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="9 18 15 12 9 6"/>
-                </svg>
-              </button>
-            </div>
-          )}
-        </>
-      )}
+        )}
+      </div>
     </div>
   )
 }
