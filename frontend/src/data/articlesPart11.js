@@ -489,7 +489,13 @@ export const ARTICLES_PART_11 = {
       PRICING, CONTACT, WHATSAPP,
     ],
     articleLinksHeading: 'Read next',
-    articleLinks: GULF_READ,
+    articleLinks: [
+      { name: 'Accredited Online School in Bahrain', slug: 'accredited-online-school-bahrain', note: 'What accreditation means, and what to check.' },
+      { name: 'IGCSE and A Level Exams in Bahrain', slug: 'igcse-a-level-exams-bahrain-british-council', note: 'British Council Bahrain entries and deadlines.' },
+      { name: 'University in Bahrain After Online A Level', slug: 'university-bahrain-igcse-a-level-online', note: 'University of Bahrain, HEC and equivalency.' },
+      { name: 'Is Homeschooling Legal in Bahrain?', slug: 'homeschooling-legal-bahrain', note: 'Citizens and expatriates.' },
+      ...GULF_READ,
+    ],
   },
 
   // ═══════════════ CITY GUIDE: LAGOS ═══════════════
