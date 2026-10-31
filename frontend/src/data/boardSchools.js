@@ -106,7 +106,7 @@ export const BOARD_SCHOOLS = {
       ['Parent portal', 'Timetable, attendance, test marks, reports and invoices in one place for parents.'],
     ],
     exams: [
-      'Pearson Edexcel International A Level units can be sat in the January, May/June and October/November series. International GCSE examinations run in the January and May/June series, with November in some subjects.',
+      'Pearson Edexcel International A Level units can be sat in the January, May/June and October/November series. International GCSE examinations run in the January and May/June series.',
       'Written papers are sat in person, under exam conditions, at a centre. We enter students as a Pearson Edexcel approved centre and agree the sitting arrangements with each family before the entry deadline.',
       'Results and certificates are issued by Pearson and are the same qualification a student at any other Edexcel school receives.',
     ],

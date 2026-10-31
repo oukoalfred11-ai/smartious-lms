@@ -32,6 +32,7 @@ export const PRIORITY_CITY_LINKS = [
   ['/homeschool-jeddah-sa', 'Jeddah'],
   ['/homeschool-kuwait-city-kw', 'Kuwait City'],
   ['/homeschool-manama-bh', 'Manama'],
+  ['/homeschool-saar-bh', 'Saar'],
   ['/homeschool-muscat-om', 'Muscat'],
   ['/homeschool-lagos-ng', 'Lagos'],
   ['/homeschool-abuja-ng', 'Abuja'],

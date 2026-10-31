@@ -2073,7 +2073,13 @@ export const ARTICLES_PART_13 = {
         "a": "Basic education is compulsory, and the rules for homeschooling and online schooling are not set out in detail and can differ for citizens and residents. Check with the Ministry of Education."
       }
     ],
-    "conclusion": "Bahrain’s schools are good; its sixth-form sets are small. A live subject teacher solves that arithmetic without anyone changing school, keeps causeway families on one programme in two countries, and leaves the university choice open at home and abroad. Wherever you are on the island, book an assessment, and we will start with the subjects your child’s school can and cannot offer, then tell you honestly whether you need us."
+    "conclusion": "Bahrain’s schools are good; its sixth-form sets are small. A live subject teacher solves that arithmetic without anyone changing school, keeps causeway families on one programme in two countries, and leaves the university choice open at home and abroad. Wherever you are on the island, book an assessment, and we will start with the subjects your child’s school can and cannot offer, then tell you honestly whether you need us.",
+    "articleLinksHeading": "More guides for families in Bahrain",
+    "articleLinks": [
+      { "name": "Online British School in Bahrain", "slug": "online-british-school-bahrain", "note": "Cambridge and Pearson Edexcel online, and how to choose." },
+      { "name": "University in Bahrain After Online A Level", "slug": "university-bahrain-igcse-a-level-online", "note": "University of Bahrain, HEC and equivalency." },
+      { "name": "Best Online Schools in Bahrain 2026/27", "slug": "best-online-schools-bahrain", "note": "How to compare them fairly." }
+    ]
   },
 
   "virtual-school-oman-dhofar-interior-and-coast": {

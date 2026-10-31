@@ -16,6 +16,7 @@ export const ARTICLE_PART_LOADERS = {
   articlesPart12: () => import('../articlesPart12.js'),
   articlesPart13: () => import('../articlesPart13.js'),
   articlesPart14: () => import('../articlesPart14.js'),
+  articlesPart15: () => import('../articlesPart15.js'),
 }
 
 // module list (comma-separated) → space-separated slugs
@@ -27,7 +28,7 @@ const HOMESCHOOL = {
  "australiaCities": "sydney-au melbourne-au brisbane-au perth-au adelaide-au regional-au",
  "austriaCities": "vienna-at graz-at salzburg-at linz-at innsbruck-at bregenz-at",
  "azerbaijanCities": "baku-az ganja-az sumgait-az mingachevir-az gabala-az lankaran-az",
- "bahrainCities": "manama-bh riffa-bh",
+ "bahrainCities": "manama-bh riffa-bh saar-bh juffair-bh amwaj-islands-bh muharraq-bh isa-town-bh hamad-town-bh",
  "bangladeshCities": "dhaka-bd chattogram-bd sylhet-bd khulna-bd rajshahi-bd",
  "belgiumCities": "brussels-be antwerp-be ghent-be leuven-be waterloo-be mons-be",
  "boliviaCities": "santa-cruz-bo la-paz-bo cochabamba-bo tarija-bo potosi-bo",
