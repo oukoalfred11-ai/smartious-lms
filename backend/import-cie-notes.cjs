@@ -874,7 +874,9 @@ async function main() {
         };
 
         // 7a. Lessons backup, once
-        if (!bkCount) {
+        if (!bkCount && !originals.length) {
+          console.log('  no original lessons on the subject: nothing to back up');
+        } else if (!bkCount) {
           await db.collection(BK).insertMany(originals.map((d) => ({ ...d })), { ordered: true });
           const n = await db.collection(BK).countDocuments({});
           if (n !== originals.length) throw new Error(`Backup ${BK} has ${n} docs after insert, expected ${originals.length}.`);
