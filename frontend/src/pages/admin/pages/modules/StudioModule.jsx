@@ -1057,7 +1057,10 @@ function renderScene(ctx, W, H, scene, media, p) {
     }
     ctx.globalAlpha = 1
   } else if (scene.type === 'outro') {
-    bgById(scene.bg || 'ink').paint(ctx, W, H)
+    // Brand background, or the scene's own photo/video clip with the
+    // text shadowed so it reads over footage (untinted unless chosen).
+    const ob = paintSceneBg(ctx, W, H, scene, media)
+    if (ob.onMedia && !hasTint(scene.tint)) textShadowOn(ctx, B)
     const cs = B * 0.17
     if (scene.brand === 'logo' && _logoImg) {
       const lh = cs * 0.72
@@ -1087,6 +1090,7 @@ function renderScene(ctx, W, H, scene, media, p) {
     }
     ctx.textAlign = 'left'
     ctx.globalAlpha = 1
+    textShadowOff(ctx)
   } else if (scene.type === 'bullets') {
     // Media background for bullet scenes: cover fill plus a dark
     // tint so the white list stays readable over any footage.
@@ -1981,7 +1985,12 @@ function Thumb({ draw, deps, w, h, active, onClick, label }) {
     </button>
   )
 }
-const thumbSize = (format) => format === 'story' ? { w: 36, h: 64 } : format === 'youtube' ? { w: 96, h: 54 } : { w: 52, h: 52 }
+// Scene-strip miniatures keep each format's shape (64px tall, at most 96 wide).
+const thumbSize = (format) => {
+  const f = FORMATS[format] || { W: 1, H: 1 }
+  const h = Math.min(64, Math.round(96 * f.H / f.W))
+  return { w: Math.round(h * f.W / f.H), h }
+}
 
 const SavedChip = ({ savedAt, onNew }) => (
   <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginLeft: 'auto' }}>
@@ -2093,7 +2102,16 @@ const TRANSITIONS = [
 // playback; previews draw at this long side, exports at full size.
 const PREVIEW_LONG = 960
 
+// Sizes per platform. The social presets are each platform's own
+// recommended upload size (1080 wide); the 4K ones are for the highest
+// quality and for re-cutting later.
 const FORMATS = {
+  tiktok:   { W: 1080, H: 1920, label: 'TikTok 9:16 (1080x1920)', group: 'Social' },
+  reels:    { W: 1080, H: 1920, label: 'Instagram Reels / Stories 9:16 (1080x1920)', group: 'Social' },
+  igpost:   { W: 1080, H: 1350, label: 'Instagram feed post 4:5 (1080x1350)', group: 'Social' },
+  igsquare: { W: 1080, H: 1080, label: 'Instagram square 1:1 (1080x1080)', group: 'Social' },
+  shorts:   { W: 1080, H: 1920, label: 'YouTube Shorts 9:16 (1080x1920)', group: 'Social' },
+  yt1080:   { W: 1920, H: 1080, label: 'YouTube 16:9 HD (1920x1080)', group: 'Social' },
   story: { W: 2160, H: 3840, label: 'Story 4K 9:16' },
   square: { W: 2160, H: 2160, label: 'Square 4K 1:1' },
   youtube: { W: 3840, H: 2160, label: 'YouTube 4K 16:9' },
@@ -2107,6 +2125,21 @@ const FORMATS = {
   // while the file (quarter the pixels, lower bitrate tier) lands
   // several times smaller and uploads several times faster.
   bannerhd: { W: 1920, H: 512, label: 'Dashboard Banner 15:4 HD (small file, recommended)' },
+}
+const FORMAT_GROUP = (f) => f.group || (/Banner/.test(f.label) ? 'Dashboard banner' : 'High quality 4K')
+const isTall = (format) => { const f = FORMATS[format] || FORMATS.square; return f.H > f.W * 1.2 }
+// One dropdown for every size, grouped: social platforms first.
+function FormatPicker({ value, onChange }) {
+  const groups = {}
+  Object.entries(FORMATS).forEach(([k, f]) => { (groups[FORMAT_GROUP(f)] ||= []).push([k, f]) })
+  return (
+    <select value={value} onChange={e => onChange(e.target.value)}
+      style={{ border: '1.5px solid ' + TOKENS.line, borderRadius: 8, padding: '7px 9px', fontSize: 12, fontWeight: 700, fontFamily: 'inherit', maxWidth: '100%' }}>
+      {Object.entries(groups).map(([g, list]) => (
+        <optgroup key={g} label={g}>{list.map(([k, f]) => <option key={k} value={k}>{f.label}</option>)}</optgroup>
+      ))}
+    </select>
+  )
 }
 
 function CardMaker({ toast }) {
@@ -2438,9 +2471,7 @@ function CardMaker({ toast }) {
       {/* Controls */}
       <div style={{ flex: '1 1 320px', minWidth: 300, maxWidth: 430, display: 'flex', flexDirection: 'column', gap: 11 }}>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
-          {Object.entries(FORMATS).map(([k, f]) => (
-            <button key={k} onClick={() => setFormat(k)} style={{ ...btn(format === k), fontSize: 11.5, padding: '7px 11px' }}>{f.label}</button>
-          ))}
+          <FormatPicker value={format} onChange={setFormat} />
           <SavedChip savedAt={savedAt} onNew={newProject} />
         </div>
 
@@ -2573,9 +2604,9 @@ function CardMaker({ toast }) {
 
       {/* Preview */}
       <div style={{ flex: '1 1 340px', minWidth: 280 }}>
-        <canvas ref={cvRef} style={{ width: '100%', maxWidth: format === 'story' ? 320 : 480, borderRadius: 14, boxShadow: '0 10px 30px rgba(0,0,0,.15)', display: 'block' }} />
+        <canvas ref={cvRef} style={{ width: '100%', maxWidth: isTall(format) ? 320 : 480, borderRadius: 14, boxShadow: '0 10px 30px rgba(0,0,0,.15)', display: 'block' }} />
         {(playing || rendering) && (
-          <div style={{ marginTop: 8, height: 5, background: 'rgba(0,0,0,.08)', borderRadius: 99, maxWidth: format === 'story' ? 320 : 480 }}>
+          <div style={{ marginTop: 8, height: 5, background: 'rgba(0,0,0,.08)', borderRadius: 99, maxWidth: isTall(format) ? 320 : 480 }}>
             <div style={{ width: (progress * 100) + '%', height: '100%', background: GOLD, borderRadius: 99, transition: 'width .15s linear' }} />
           </div>
         )}
@@ -2869,9 +2900,7 @@ function VideoMaker({ toast }) {
     <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap' }}>
       <div style={{ flex: '1 1 320px', minWidth: 300, maxWidth: 430, display: 'flex', flexDirection: 'column', gap: 11 }}>
         <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
-          {Object.entries(FORMATS).map(([k, f]) => (
-            <button key={k} onClick={() => setFormat(k)} style={{ ...btn(format === k), fontSize: 11.5, padding: '7px 11px' }}>{f.label}</button>
-          ))}
+          <FormatPicker value={format} onChange={setFormat} />
           <span style={{ fontSize: 11.5, color: TOKENS.s500, fontWeight: 700 }}>{Math.round(totalDur)}s total</span>
           <SavedChip savedAt={savedAt} onNew={newProject} />
         </div>
@@ -2891,7 +2920,7 @@ function VideoMaker({ toast }) {
             <button key={k} onClick={() => {
               if (!window.confirm('Replace the scenes in this project with the "' + l + '" template? Uploaded clips are removed from the scenes.')) return
               setScenes(TEMPLATES[k]()); setCur(0); setMedias({}); setMediaBlobs({}); setVoMap({}); setVoBlobs({})
-              if (k === 'explainer') setFormat('story')
+              if (k === 'explainer' || k === 'vlog') setFormat('tiktok')
             }} style={{ ...btn(false), fontSize: 11.5, padding: '7px 11px' }}>{l}</button>
           ))}
         </div>
@@ -2947,14 +2976,14 @@ function VideoMaker({ toast }) {
           )}
         </div>
 
-        {scene.type !== 'title' && scene.type !== 'outro' && (
+        {scene.type !== 'title' && (
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {BACKGROUNDS.map(b => (
               <button key={b.id} onClick={() => upd({ bg: b.id, useImage: false })} style={{ ...btn(scene.bg === b.id && !scene.useImage), padding: '7px 11px', fontSize: 11.5 }}>{b.label}</button>
             ))}
-            {/* Every content scene takes a photo or video background.
-                Only the title and outro stay brand-only (their row is
-                hidden above), so the film opens and closes on-brand. */}
+            {/* Every scene but the title takes a photo or video
+                background, the closing (outro) scene included. The
+                title stays brand-only so the film opens on-brand. */}
             <label style={{ ...btn(scene.useImage), display: 'inline-block', fontSize: 11.5, padding: '7px 11px' }}>
               Photo / video clip
               <input type="file" accept="image/*,video/*" onChange={onMedia} style={{ display: 'none' }} />
@@ -3065,9 +3094,9 @@ function VideoMaker({ toast }) {
 
       {/* Preview */}
       <div style={{ flex: '1 1 340px', minWidth: 280 }}>
-        <canvas ref={cvRef} style={{ width: '100%', maxWidth: format === 'story' ? 300 : 440, borderRadius: 14, boxShadow: '0 10px 30px rgba(0,0,0,.2)', display: 'block', background: '#000' }} />
+        <canvas ref={cvRef} style={{ width: '100%', maxWidth: isTall(format) ? 300 : 440, borderRadius: 14, boxShadow: '0 10px 30px rgba(0,0,0,.2)', display: 'block', background: '#000' }} />
         {(playing || rendering) && (
-          <div style={{ marginTop: 8, height: 5, background: 'rgba(0,0,0,.08)', borderRadius: 99, maxWidth: format === 'story' ? 300 : 440 }}>
+          <div style={{ marginTop: 8, height: 5, background: 'rgba(0,0,0,.08)', borderRadius: 99, maxWidth: isTall(format) ? 300 : 440 }}>
             <div style={{ width: (progress * 100) + '%', height: '100%', background: GOLD, borderRadius: 99, transition: 'width .15s linear' }} />
           </div>
         )}
@@ -3433,9 +3462,7 @@ function FilmMaker({ toast }) {
   return (
     <div style={{ display: 'grid', gap: 14 }}>
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
-        {Object.entries(FORMATS).map(([k, f]) => (
-          <button key={k} onClick={() => setFormat(k)} style={{ ...btn(format === k), fontSize: 11.5, padding: '7px 11px' }}>{f.label}</button>
-        ))}
+        <FormatPicker value={format} onChange={setFormat} />
         <span style={{ fontSize: 11.5, color: TOKENS.s500, fontWeight: 700 }}>{Math.round(total)}s total</span>
         <SavedChip savedAt={savedAt} onNew={newProject} />
       </div>
