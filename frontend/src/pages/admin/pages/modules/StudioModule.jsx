@@ -123,6 +123,26 @@ const BACKGROUNDS = [
     blob(ctx, w * 0.9, h * 0.1, Math.min(w, h) * 0.5, 'rgba(201,151,58,.14)')
     blob(ctx, w * 0.08, h * 0.92, Math.min(w, h) * 0.45, 'rgba(139,26,46,.08)')
   }},
+  // Kinetic-ad backgrounds: a bright crimson gradient with fine flowing
+  // lines (the "Our goal is simple" scene), and a flat slate end card.
+  { id: 'flow', label: 'Crimson flow', paint: (ctx, w, h) => {
+    const g = ctx.createLinearGradient(0, 0, w, h)
+    g.addColorStop(0, '#E0455E'); g.addColorStop(1, '#B3203A')
+    ctx.fillStyle = g; ctx.fillRect(0, 0, w, h)
+    ctx.save()
+    ctx.strokeStyle = 'rgba(255,255,255,.16)'; ctx.lineWidth = Math.max(1, Math.min(w, h) * 0.0012)
+    for (let i = 0; i < 26; i++) {
+      const k = i / 25
+      ctx.beginPath()
+      ctx.moveTo(w * (0.55 + k * 0.5), -h * 0.02)
+      ctx.bezierCurveTo(w * (0.2 + k * 0.4), h * 0.35, w * (1.05 - k * 0.2), h * 0.55, w * (0.62 + k * 0.45), h * 1.02)
+      ctx.stroke()
+    }
+    ctx.restore()
+  }},
+  { id: 'slate', label: 'Slate', paint: (ctx, w, h) => {
+    ctx.fillStyle = '#14394C'; ctx.fillRect(0, 0, w, h)
+  }},
   { id: 'gold', label: 'Gold band', paint: (ctx, w, h) => {
     const g0 = ctx.createLinearGradient(0, 0, 0, h)
     g0.addColorStop(0, '#10131C'); g0.addColorStop(1, '#07090F')
@@ -148,12 +168,14 @@ async function loadBrandFonts() {
   if (!document.getElementById('sm-studio-fonts')) {
     const l = document.createElement('link')
     l.id = 'sm-studio-fonts'; l.rel = 'stylesheet'
-    l.href = 'https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&family=Bebas+Neue&family=Playfair+Display:wght@700;800&display=swap'
+    l.href = 'https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&family=Bebas+Neue&family=Playfair+Display:wght@700;800&family=Fredoka:wght@600;700&display=swap'
     document.head.appendChild(l)
   }
   try {
     await Promise.all([
       document.fonts.load('900 64px Montserrat'),
+      document.fonts.load('500 40px Montserrat'),
+      document.fonts.load('700 64px Fredoka'),
       document.fonts.load('400 64px "Bebas Neue"'),
       document.fonts.load('800 64px "Playfair Display"'),
       document.fonts.ready,
@@ -357,6 +379,394 @@ function drawWordsPop(ctx, text, x, y, p, gap = 0.1) {
     }
     cx += ww
   })
+}
+
+// ═══════════════════════════════════════════════════════════
+// KINETIC WORD ART — the explainer-ad look (white caption boxes that
+// type on, chips that stack, speech bubbles, highlight pills, a logo
+// wipe) and the bubbly vlog title. Text takes light markup:
+//   **bold words**   ==accent-coloured words==
+// Timings are in seconds from the start of the scene, so typing runs
+// at the same speed whatever the scene's length.
+// ═══════════════════════════════════════════════════════════
+const ACCENTS = {
+  crimson: { c: '#C8243F', chip: '#F6E3E7', chipText: '#7A1226', bubbly: ['#FFD3E2', '#FF7EAA'], line: '#7A1226' },
+  gold:    { c: '#B7831F', chip: '#F8EDD3', chipText: '#6B4A0E', bubbly: ['#FFF0BF', '#F5B83D'], line: '#6B4106' },
+  purple:  { c: '#5B3FD6', chip: '#E9E3FF', chipText: '#3A2A8C', bubbly: ['#EEE3FF', '#B48CFF'], line: '#43239A' },
+  navy:    { c: '#1F4E8C', chip: '#E2ECF8', chipText: '#163A68', bubbly: ['#D9E9FF', '#7FB0FF'], line: '#14306B' },
+}
+const accentOf = (k) => ACCENTS[k] || ACCENTS.crimson
+const TYPE_CPS = 32         // characters per second when typing on
+const ease2 = (t) => { t = clamp01(t); return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2 }
+const backOut = (t) => { t = clamp01(t); const c = 1.7; return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2) }
+const kFont = (px, bold, family = 'Montserrat') => family === 'Fredoka'
+  ? `700 ${px}px Fredoka, "Arial Rounded MT Bold", Arial, sans-serif`
+  : `${bold ? 800 : 500} ${px}px Montserrat, Arial, sans-serif`
+
+// "We offer **fully online** courses" -> words, each a list of styled segments
+function richWords(text) {
+  const words = []
+  let b = false, a = false, cur = null
+  for (const part of String(text || '').split(/(\*\*|==|\s+)/)) {
+    if (!part) continue
+    if (part === '**') { b = !b; continue }
+    if (part === '==') { a = !a; continue }
+    if (/^\s+$/.test(part)) { cur = null; continue }
+    if (!cur) { cur = []; words.push(cur) }
+    cur.push({ t: part, b, a })
+  }
+  return words
+}
+const richPlain = (text) => String(text || '').replace(/\*\*|==/g, '')
+// Lay words out in lines no wider than maxW.
+function richLayout(ctx, text, px, maxW) {
+  const lines = []
+  let line = { words: [], w: 0 }
+  ctx.font = kFont(px, false)
+  const sp = ctx.measureText(' ').width
+  for (const segs of richWords(text)) {
+    let ww = 0
+    const ms = segs.map(sg => { ctx.font = kFont(px, sg.b || sg.a); const w = ctx.measureText(sg.t).width; ww += w; return { ...sg, w } })
+    if (line.words.length && line.w + sp + ww > maxW) { lines.push(line); line = { words: [], w: 0 } }
+    line.w += (line.words.length ? sp : 0) + ww
+    line.words.push({ segs: ms, w: ww })
+  }
+  if (line.words.length) lines.push(line)
+  return { lines, sp, w: Math.max(0, ...lines.map(l => l.w)) }
+}
+// Draw laid-out lines centred on cx; only the first `chars` characters
+// (typewriter). Returns nothing; colours: text, accent.
+function richDraw(ctx, lay, px, cx, y, lh, chars, colText, colAccent) {
+  let left = chars
+  ctx.textBaseline = 'alphabetic'
+  lay.lines.forEach((ln, li) => {
+    let x = cx - ln.w / 2
+    const yy = y + li * lh
+    ln.words.forEach((wd, wi) => {
+      if (wi) { x += lay.sp; left -= 1 }
+      wd.segs.forEach(sg => {
+        if (left <= 0) return
+        const shown = left >= sg.t.length ? sg.t : sg.t.slice(0, Math.max(0, Math.floor(left)))
+        ctx.font = kFont(px, sg.b || sg.a)
+        ctx.fillStyle = sg.a ? colAccent : colText
+        ctx.fillText(shown, x, yy)
+        x += sg.w
+        left -= sg.t.length
+      })
+    })
+  })
+}
+const richCount = (text) => richPlain(text).replace(/\s+/g, ' ').trim().length
+
+function roundRect(ctx, x, y, w, h, r) {
+  r = Math.min(r, h / 2, w / 2)
+  ctx.beginPath()
+  ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r)
+  ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h)
+  ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r)
+  ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y)
+  ctx.closePath()
+}
+function softShadow(ctx, B, on) {
+  if (on) { ctx.shadowColor = 'rgba(0,0,0,.22)'; ctx.shadowBlur = B * 0.02; ctx.shadowOffsetY = B * 0.006 }
+  else textShadowOff(ctx)
+}
+// A white caption box whose text types on. Returns the box's bottom y.
+function captionBox(ctx, W, H, text, cx, top, s0, s, px, accent, opt = {}) {
+  const B = Math.min(W, H)
+  if (!richPlain(text).trim() || s < s0) return top
+  const lay = richLayout(ctx, text, px, W * (opt.maxW || 0.72))
+  const lh = px * 1.28, pad = px * 0.7
+  const bw = lay.w + pad * 2, bh = lay.lines.length * lh + pad * 1.15
+  const k = easeOut((s - s0) / 0.3)
+  ctx.save()
+  ctx.globalAlpha *= k
+  ctx.translate(cx, top + bh / 2); ctx.scale(0.92 + 0.08 * k, 0.92 + 0.08 * k); ctx.translate(-cx, -(top + bh / 2))
+  softShadow(ctx, B, true)
+  ctx.fillStyle = opt.fill || '#FFFFFF'
+  if (opt.bubble) {
+    // speech bubble: rounded box with a tail under one corner
+    roundRect(ctx, cx - bw / 2, top, bw, bh, px * 0.5); ctx.fill()
+    const tx = opt.tailRight ? cx + bw / 2 - px * 1.6 : cx - bw / 2 + px * 1.2
+    ctx.beginPath(); ctx.moveTo(tx, top + bh - 2); ctx.lineTo(tx + px * 0.9 * (opt.tailRight ? 1 : -0.2), top + bh + px * 0.75); ctx.lineTo(tx + px * 1.0, top + bh - 2); ctx.closePath(); ctx.fill()
+  } else {
+    roundRect(ctx, cx - bw / 2, top, bw, bh, px * 0.32); ctx.fill()
+  }
+  softShadow(ctx, B, false)
+  const chars = opt.instant ? 1e9 : (s - s0 - 0.15) * TYPE_CPS
+  richDraw(ctx, lay, px, cx, top + pad * 0.6 + px * 0.95, lh, chars, opt.color || '#16213A', accent.c)
+  ctx.restore()
+  return top + bh
+}
+// Typing time for a piece of rich text, in seconds.
+const typeTime = (text) => 0.15 + richCount(text) / TYPE_CPS
+
+function paintSceneBg(ctx, W, H, scene, media) {
+  const B = Math.min(W, H)
+  const iw = media && (media.videoWidth || media.width)
+  if (scene.useImage && media && iw) {
+    const ih = media.videoHeight || media.height
+    const scale = scene.fitMode === 'fit' ? Math.min(W / iw, H / ih) : Math.max(W / iw, H / ih)
+    if (scene.fitMode === 'fit') { ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H) }
+    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high'
+    ctx.filter = gradeFilter(scene.grade) || 'none'
+    ctx.drawImage(media, (W - iw * scale) / 2, (H - ih * scale) / 2, iw * scale, ih * scale)
+    ctx.filter = 'none'
+    paintTint(ctx, W, H, scene.tint, false)
+    return { onMedia: true, dark: true }
+  }
+  bgById(scene.bg || 'ink').paint(ctx, W, H)
+  return { onMedia: false, dark: isDark(scene.bg || 'ink') }
+}
+
+// Bubbly title letter: layered outline, gradient fill, letter-by-letter pop.
+function bubblyLine(ctx, text, cx, y, px, s0, s, acc) {
+  ctx.font = kFont(px, true, 'Fredoka')
+  const chars = [...String(text)]
+  const widths = chars.map(c => ctx.measureText(c).width)
+  const total = widths.reduce((a, b) => a + b, 0)
+  let x = cx - total / 2
+  chars.forEach((c, i) => {
+    const k = backOut((s - s0 - i * 0.045) / 0.35)
+    const w = widths[i]
+    if (k > 0 && c.trim()) {
+      ctx.save()
+      ctx.translate(x + w / 2, y - px * 0.35)
+      ctx.scale(k, k)
+      ctx.rotate((1 - Math.min(1, k)) * (i % 2 ? 0.4 : -0.4))
+      ctx.lineJoin = 'round'
+      ctx.textAlign = 'center'
+      ctx.strokeStyle = acc.line; ctx.lineWidth = px * 0.34; ctx.strokeText(c, 0, px * 0.35)
+      ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = px * 0.18; ctx.strokeText(c, 0, px * 0.35)
+      const g = ctx.createLinearGradient(0, -px * 0.45, 0, px * 0.35)
+      g.addColorStop(0, acc.bubbly[0]); g.addColorStop(1, acc.bubbly[1])
+      ctx.fillStyle = g; ctx.fillText(c, 0, px * 0.35)
+      ctx.restore()
+    }
+    x += w
+  })
+  ctx.textAlign = 'left'
+  return total
+}
+function sparkle(ctx, x, y, r, a, col) {
+  if (a <= 0) return
+  ctx.save(); ctx.globalAlpha *= a; ctx.fillStyle = col
+  ctx.beginPath()
+  for (let i = 0; i < 8; i++) {
+    const ang = i * Math.PI / 4, rr = i % 2 ? r * 0.28 : r
+    ctx.lineTo(x + Math.cos(ang) * rr, y + Math.sin(ang) * rr)
+  }
+  ctx.closePath(); ctx.fill(); ctx.restore()
+}
+
+// The kinetic scene types. Returns true when it drew the scene.
+function renderKinetic(ctx, W, H, scene, media, p) {
+  const t = scene.type
+  if (!['logobox', 'captions', 'bubbles', 'highlight', 'bubbly'].includes(t)) return false
+  const B = Math.min(W, H)
+  const dur = +scene.duration || 4
+  const s = clamp01(p) * dur
+  const acc = accentOf(scene.accent)
+  const bg = paintSceneBg(ctx, W, H, scene, media)
+  const onLight = !bg.dark && !bg.onMedia
+  const freeText = onLight ? '#16213A' : '#FFFFFF'
+  const freeShadow = (on) => { if (!onLight && on) textShadowOn(ctx, B); else textShadowOff(ctx) }
+  const big = B * 0.064, mid = B * 0.052
+
+  if (t === 'logobox') {
+    // Logo wipes in from the left, then the tagline box types on.
+    const lp = ease2(s / 0.9)
+    const lh = B * 0.12
+    const top = H * (scene.layout === 'middle' ? 0.36 : 0.08)
+    if (_logoImg) {
+      let lw = lh * (_logoImg.naturalWidth / Math.max(_logoImg.naturalHeight, 1))
+      const h2 = lw > W * 0.7 ? lh * (W * 0.7) / lw : lh; lw = Math.min(lw, W * 0.7)
+      ctx.save(); ctx.beginPath(); ctx.rect((W - lw) / 2, top - 4, lw * lp, h2 + 8); ctx.clip()
+      ctx.drawImage(_logoImg, (W - lw) / 2, top, lw, h2)
+      ctx.restore()
+    } else {
+      ctx.save(); ctx.beginPath(); ctx.rect(0, top - lh, W * lp, lh * 3); ctx.clip()
+      ctx.textAlign = 'center'; ctx.fillStyle = freeText; ctx.font = kFont(lh * 0.8, true)
+      ctx.fillText('Smartious', W / 2, top + lh * 0.75); ctx.textAlign = 'left'; ctx.restore()
+    }
+    captionBox(ctx, W, H, scene.headline, W / 2, top + lh + B * 0.03, 1.0, s, mid * 0.8, acc)
+    return true
+  }
+
+  if (t === 'captions') {
+    // 1) caption box types on, 2) the accent line types on, 3) chips stack in.
+    let y = captionBox(ctx, W, H, scene.kicker, W / 2, H * 0.1, 0.2, s, mid, acc)
+    const s1 = 0.2 + (richPlain(scene.kicker).trim() ? typeTime(scene.kicker) + 0.35 : 0)
+    let s2 = s1
+    if (richPlain(scene.headline).trim() && s >= s1) {
+      const lay = richLayout(ctx, scene.headline, big, W * 0.8)
+      const y0 = Math.max(y + B * 0.12, H * 0.42)
+      ctx.save(); freeShadow(true)
+      richDraw(ctx, lay, big, W / 2, y0, big * 1.22, (s - s1) * TYPE_CPS, freeText, onLight ? acc.c : '#FFD27A')
+      ctx.restore()
+      y = y0 + (lay.lines.length - 1) * big * 1.22 + big * 0.6
+      s2 = s1 + typeTime(scene.headline) + 0.25
+    } else if (richPlain(scene.headline).trim()) {
+      y = Math.max(y + B * 0.12, H * 0.42)
+    }
+    String(scene.body || '').split('\n').map(x => x.trim()).filter(Boolean).slice(0, 6).forEach((chip, i) => {
+      const c0 = s2 + i * 0.45
+      const k = backOut((s - c0) / 0.4)
+      if (k <= 0) return
+      ctx.font = kFont(mid * 0.9, true)
+      const tw = ctx.measureText(richPlain(chip)).width
+      const cw = tw + mid * 1.4, ch = mid * 1.65
+      const cy = y + B * 0.04 + i * ch * 1.3
+      ctx.save()
+      ctx.translate(W / 2, cy + ch / 2); ctx.scale(k, k); ctx.translate(-W / 2, -(cy + ch / 2))
+      softShadow(ctx, B, true)
+      ctx.fillStyle = acc.chip; roundRect(ctx, (W - cw) / 2, cy, cw, ch, ch * 0.22); ctx.fill()
+      softShadow(ctx, B, false)
+      ctx.fillStyle = acc.chipText; ctx.textAlign = 'center'
+      ctx.fillText(richPlain(chip), W / 2, cy + ch * 0.66)
+      ctx.textAlign = 'left'
+      ctx.restore()
+    })
+    return true
+  }
+
+  if (t === 'bubbles') {
+    // Speech bubbles pop in one after another, stacking down the screen.
+    const items = String(scene.body || '').split('\n').map(x => x.trim()).filter(Boolean).slice(0, 5)
+    let y = H * (scene.layout === 'top' ? 0.12 : scene.layout === 'middle' ? 0.32 : 0.5)
+    let at = 0.3
+    items.forEach((it, i) => {
+      const bottom = captionBox(ctx, W, H, it, W / 2 + (i % 2 ? B * 0.03 : -B * 0.03), y, at, s, mid * 0.92, acc, { bubble: true, tailRight: i % 2 === 1, maxW: 0.7 })
+      y = (s >= at ? bottom : y + mid * 3) + mid * 1.2
+      at += typeTime(it) + 0.35
+    })
+    return true
+  }
+
+  if (t === 'highlight') {
+    // A line types on, then a pill pops in and types its own words.
+    const lay = richLayout(ctx, scene.headline, big, W * 0.8)
+    const y0 = H * 0.44 - (lay.lines.length - 1) * big * 0.6
+    ctx.save(); freeShadow(true)
+    richDraw(ctx, lay, big, W / 2, y0, big * 1.22, (s - 0.2) * TYPE_CPS, freeText, onLight ? acc.c : '#FFD27A')
+    ctx.restore()
+    const pill = richPlain(scene.body).trim()
+    if (pill) {
+      const p0 = 0.2 + (richPlain(scene.headline).trim() ? typeTime(scene.headline) + 0.3 : 0)
+      const k = backOut((s - p0) / 0.4)
+      if (k > 0) {
+        const px = big * 1.05
+        ctx.font = kFont(px, true)
+        const tw = ctx.measureText(pill).width
+        const pw = tw + px * 0.9, ph = px * 1.5
+        const py = y0 + (lay.lines.length - 1) * big * 1.22 + big * 0.9
+        const inverse = scene.pill === 'white'
+        ctx.save()
+        ctx.translate(W / 2, py + ph / 2); ctx.scale(k, k); ctx.translate(-W / 2, -(py + ph / 2))
+        softShadow(ctx, B, true)
+        ctx.fillStyle = inverse ? '#FFFFFF' : acc.c
+        roundRect(ctx, (W - pw) / 2, py, pw, ph, ph * 0.18); ctx.fill()
+        softShadow(ctx, B, false)
+        const n = Math.max(0, Math.floor((s - p0 - 0.15) * TYPE_CPS))
+        ctx.fillStyle = inverse ? acc.c : '#FFFFFF'
+        ctx.font = kFont(px, true)
+        ctx.fillText(pill.slice(0, n), (W - tw) / 2, py + ph * 0.68)
+        ctx.restore()
+      }
+    }
+    return true
+  }
+
+  // 'bubbly': puffy outlined title, sparkles, typed sub-line and a tilted sticker.
+  const titleLines = String(scene.headline || '').split('\n').map(x => x.trim()).filter(Boolean).slice(0, 3)
+  const tpx = Math.min(B * 0.13, W * 0.9 / Math.max(4, ...titleLines.map(l => l.length)) * 1.55)
+  const top = H * (scene.layout === 'top' ? 0.16 : scene.layout === 'lower' ? 0.52 : 0.3)
+  let at = 0.15, maxW = 0
+  titleLines.forEach((ln, i) => {
+    maxW = Math.max(maxW, bubblyLine(ctx, ln, W / 2, top + i * tpx * 1.08, tpx, at, s, acc))
+    at += ln.length * 0.045 + 0.15
+  })
+  const endY = top + (titleLines.length - 1) * tpx * 1.08
+  const tw = (s * 3) % (Math.PI * 2)
+  sparkle(ctx, W / 2 + maxW / 2 + tpx * 0.15, top - tpx * 0.75, tpx * 0.22, clamp01(s - at + 0.2) * (0.6 + 0.4 * Math.sin(tw)), '#FFFFFF')
+  sparkle(ctx, W / 2 - maxW / 2 - tpx * 0.05, endY + tpx * 0.1, tpx * 0.16, clamp01(s - at) * (0.6 + 0.4 * Math.cos(tw)), acc.bubbly[1])
+  sparkle(ctx, W / 2 + maxW / 2 - tpx * 0.2, endY + tpx * 0.35, tpx * 0.12, clamp01(s - at - 0.2) * (0.6 + 0.4 * Math.sin(tw + 1)), '#FFFFFF')
+  // sub-line types on (white with a shadow)
+  if (richPlain(scene.kicker).trim() && s > at) {
+    const lay = richLayout(ctx, scene.kicker, mid * 0.85, W * 0.8)
+    ctx.save(); textShadowOn(ctx, B)
+    richDraw(ctx, lay, mid * 0.85, W / 2, endY + tpx * 0.95, mid * 1.1, (s - at) * TYPE_CPS, '#FFFFFF', acc.bubbly[1])
+    ctx.restore()
+    at += typeTime(scene.kicker) + 0.2
+  }
+  // sticker stamps in, tilted
+  const st = richPlain(scene.body).trim()
+  if (st) {
+    const k = backOut((s - at) / 0.35)
+    if (k > 0) {
+      const px = mid * 0.95
+      ctx.font = kFont(px, true, 'Fredoka')
+      const sw = ctx.measureText(st).width + px * 1.1, sh = px * 1.55
+      const sx = W / 2 + maxW * 0.08, sy = endY + tpx * 1.7
+      ctx.save()
+      ctx.translate(sx, sy); ctx.rotate(-0.12); ctx.scale(1.6 - 0.6 * k, 1.6 - 0.6 * k)
+      ctx.globalAlpha *= clamp01(k * 1.4)
+      softShadow(ctx, B, true)
+      ctx.fillStyle = '#FFFFFF'; roundRect(ctx, -sw / 2 - px * 0.18, -sh / 2 - px * 0.18, sw + px * 0.36, sh + px * 0.36, px * 0.4); ctx.fill()
+      softShadow(ctx, B, false)
+      ctx.fillStyle = acc.bubbly[1]; roundRect(ctx, -sw / 2, -sh / 2, sw, sh, px * 0.32); ctx.fill()
+      ctx.fillStyle = '#FFFFFF'; ctx.textAlign = 'center'
+      ctx.fillText(st, 0, px * 0.38)
+      ctx.restore()
+    }
+  }
+  textShadowOff(ctx)
+  return true
+}
+
+// Scene transitions, drawn over the first TRANSITION seconds of a scene.
+const TRANSITION = 0.6
+const SCENE_TRANSITIONS = [['cut', 'Cut'], ['curve', 'Curved wipe'], ['slide', 'Slide'], ['fade', 'Fade']]
+let _offA = null, _offB = null
+const offscreen = (c, W, H) => { if (!c) c = document.createElement('canvas'); if (c.width !== W || c.height !== H) { c.width = W; c.height = H } return c }
+// Draw the timeline at time t: scenes back to back, with each scene's
+// chosen transition in from the one before.
+function drawTimeline(ctx, W, H, t, list, medias, render) {
+  let acc = 0
+  for (let i = 0; i < list.length; i++) {
+    const d = +list[i].duration || 4
+    if (t < acc + d || i === list.length - 1) {
+      const s = t - acc
+      const tr = list[i].enter || 'cut'
+      if (i === 0 || tr === 'cut' || s >= TRANSITION) {
+        render(ctx, W, H, list[i], medias[i], Math.min(1, Math.max(0, s / d)))
+        return i
+      }
+      const q = ease2(s / TRANSITION)
+      _offA = offscreen(_offA, W, H); _offB = offscreen(_offB, W, H)
+      const a = _offA.getContext('2d'), b = _offB.getContext('2d')
+      a.setTransform(1, 0, 0, 1, 0, 0); b.setTransform(1, 0, 0, 1, 0, 0)
+      render(a, W, H, list[i - 1], medias[i - 1], 1)
+      render(b, W, H, list[i], medias[i], Math.min(1, Math.max(0, s / d)))
+      if (tr === 'fade') {
+        ctx.drawImage(_offA, 0, 0); ctx.globalAlpha = q; ctx.drawImage(_offB, 0, 0); ctx.globalAlpha = 1
+      } else if (tr === 'slide') {
+        ctx.drawImage(_offA, -q * W, 0); ctx.drawImage(_offB, (1 - q) * W, 0)
+      } else {
+        // curved wipe: a big arc sweeps in from the lower left, trailing an accent band
+        ctx.drawImage(_offA, 0, 0)
+        const R = q * Math.hypot(W, H) * 1.15, band = Math.min(W, H) * 0.16
+        const cx = -W * 0.15, cy = H * 1.1
+        ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, R + band, 0, Math.PI * 2); ctx.clip()
+        ctx.fillStyle = accentOf(list[i].accent).c; ctx.fillRect(0, 0, W, H); ctx.restore()
+        ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, Math.max(0, R), 0, Math.PI * 2); ctx.clip()
+        ctx.drawImage(_offB, 0, 0); ctx.restore()
+      }
+      return i
+    }
+    acc += d
+  }
+  return list.length - 1
 }
 
 // Animated version of renderCard: p 0..1 across the card's screen
@@ -575,6 +985,7 @@ function renderCard(ctx, W, H, card, media, p = 1) {
 // MOTION SCENE RENDERER — p runs 0..1 over the scene duration.
 // ═══════════════════════════════════════════════════════════
 function renderScene(ctx, W, H, scene, media, p) {
+  if (renderKinetic(ctx, W, H, scene, media, p)) return
   const B = Math.min(W, H)
   if (scene.type === 'title') {
     bgById(scene.bg || 'crimson').paint(ctx, W, H)
@@ -669,6 +1080,8 @@ function renderScene(ctx, W, H, scene, media, p) {
     drawLines(ctx, lines, W * 0.1, H * 0.3 + cs + B * 0.1, B * 0.078, 'center', W * 0.8)
     ctx.fillStyle = GOLD
     ctx.font = `700 ${B * 0.042}px Arial`
+    // drawLines leaves textAlign at 'left'; the CTA line is centred.
+    ctx.textAlign = 'center'
     if (scene.body && String(scene.body).trim()) {
       ctx.fillText(scene.body, W / 2, H * 0.3 + cs + B * 0.1 + lines.length * B * 0.078 + B * 0.04)
     }
@@ -1587,7 +2000,39 @@ const SCENE_TYPES = [
   ['bullets', 'Bullet reveal'],
   ['stat', 'Big number'],
   ['outro', 'Outro + CTA'],
+  // Kinetic word art (explainer-ad and vlog styles)
+  ['logobox', 'Logo + tagline box'],
+  ['captions', 'Caption box + chips'],
+  ['bubbles', 'Speech bubbles'],
+  ['highlight', 'Line + highlight pill'],
+  ['bubbly', 'Bubbly vlog title + sticker'],
 ]
+const KINETIC = ['logobox', 'captions', 'bubbles', 'highlight', 'bubbly']
+// Copy for each kinetic type, and two ready-made films built from them.
+const KINETIC_DEFAULTS = {
+  logobox:   { headline: 'Your **live online** school, wherever you are', layout: 'top' },
+  captions:  { kicker: 'We teach **Cambridge and Pearson Edexcel** live online', headline: 'For families ==on the move==, looking to:', body: 'Keep one curriculum\nAvoid the school run\nAim for top universities' },
+  bubbles:   { body: 'Study from **anywhere**, on a laptop or tablet.\nLive classes with **real teachers**.\nWritten reports **every term**.', layout: 'lower' },
+  highlight: { headline: 'Our goal is simple: make world-class education', body: 'open to every child', bg: 'flow' },
+  bubbly:    { headline: 'Nairobi\nNational\nMuseum', kicker: 'Smartious Homeschool Global', body: 'Mini vlog', layout: 'middle' },
+}
+const kScene = (type, patch = {}) => ({ ...newScene(type), ...patch })
+const TEMPLATES = {
+  explainer: () => [
+    kScene('logobox', { duration: 4, useImage: false, bg: 'bone' }),
+    kScene('captions', { duration: 8, bg: 'bone', enter: 'slide' }),
+    kScene('highlight', { duration: 4, enter: 'curve' }),
+    kScene('bubbles', { duration: 7, bg: 'bone', enter: 'slide' }),
+    kScene('highlight', { duration: 4, bg: 'slate', enter: 'fade', headline: 'Families in **40+ countries** learn with us', body: 'Will YOUR child be next?', pill: 'white' }),
+    kScene('outro', { duration: 4, enter: 'fade', headline: 'Book an assessment', body: 'smartioushomeschool.com' }),
+  ],
+  vlog: () => [
+    kScene('bubbly', { duration: 5, bg: 'mesh' }),
+    kScene('text', { duration: 4, enter: 'slide', headline: 'Learning beyond the classroom', body: 'Add a clip from the trip with Photo / video clip.' }),
+    kScene('bubbles', { duration: 6, bg: 'mesh', enter: 'slide', body: 'What did we see? **Everything!**\nOur favourite part: ==the snakes==' }),
+    kScene('outro', { duration: 4, enter: 'fade', headline: 'Learn with Smartious', body: 'smartioushomeschool.com' }),
+  ],
+}
 
 const inputStyle = { width: '100%', boxSizing: 'border-box', border: '1.5px solid ' + TOKENS.line, borderRadius: 8, padding: '9px 11px', fontSize: 12.5, outline: 'none', fontFamily: 'inherit' }
 const btn = (primary) => ({ background: primary ? TOKENS.crimson : '#fff', color: primary ? '#fff' : TOKENS.s700, border: primary ? 'none' : '1.5px solid ' + TOKENS.line, borderRadius: 9, padding: '9px 15px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer' })
@@ -2143,6 +2588,7 @@ function CardMaker({ toast }) {
 // MOTION VIDEO MAKER
 // ═══════════════════════════════════════════════════════════
 const newScene = (type = 'text') => ({
+  ...(KINETIC.includes(type) ? { accent: 'crimson', enter: 'cut', pill: 'accent' } : {}),
   type, bg: type === 'title' ? 'crimson' : 'mesh', tint: 'none',
   useImage: false, duration: type === 'title' ? 3 : 5,
   fitMode: 'cover', grade: 'none', popCorner: Math.floor(Math.random() * 4), textFx: 'rise',
@@ -2150,7 +2596,8 @@ const newScene = (type = 'text') => ({
   kicker: type === 'bullets' ? 'Why Smartious' : 'Smartious Homeschool',
   headline: type === 'title' ? 'Homeschool Global' : type === 'outro' ? 'Enrol for 2026' : type === 'stat' ? '250+' : 'Your message here',
   body: type === 'bullets' ? 'Cambridge, IGCSE, IB and CBC\nLive classes with real teachers\nLearn from anywhere in the world' : type === 'outro' ? 'smartioushomeschool.com' : 'One clear supporting sentence goes here.',
-  footer: 'smartioushomeschool.com',
+  footer: KINETIC.includes(type) ? '' : 'smartioushomeschool.com',
+  ...(KINETIC_DEFAULTS[type] || {}),
 })
 
 function VideoMaker({ toast }) {
@@ -2336,8 +2783,7 @@ function VideoMaker({ toast }) {
         if (v && v.play) { try { v.currentTime = 0 } catch (e) { /* not seekable yet */ } v.play().catch(() => {}) }
         lastIdx = idx
       }
-      const d = +scenes[idx].duration || 4
-      renderScene(ctx, RW, RH, deck(scenes[idx]), medias[idx], Math.min(1, Math.max(0, (t - acc) / d)))
+      drawTimeline(ctx, RW, RH, t, scenes.map(deck), medias, renderScene)
       if (now - lastProg > 120) { setProgress(t / totalDur); lastProg = now }
       rafRef.current = requestAnimationFrame(step)
     }
@@ -2353,17 +2799,7 @@ function VideoMaker({ toast }) {
   }
   const stopPreview = () => { if (stopRef.current) stopRef.current() }
 
-  const drawSceneAt = (ctx, t) => {
-    let acc = 0
-    for (let i = 0; i < scenes.length; i++) {
-      const d = +scenes[i].duration || 4
-      if (t < acc + d || i === scenes.length - 1) {
-        renderScene(ctx, W, H, deck(scenes[i]), medias[i], Math.min(1, (t - acc) / d))
-        return
-      }
-      acc += d
-    }
-  }
+  const drawSceneAt = (ctx, t) => { drawTimeline(ctx, W, H, t, scenes.map(deck), medias, renderScene) }
   // The scene's background video at its own time (from the start of the
   // scene), looping if the scene outlasts the clip.
   const sceneMediaAt = (t) => {
@@ -2448,6 +2884,18 @@ function VideoMaker({ toast }) {
           ))}
         </div>
 
+        {/* Ready-made films in the kinetic word-art styles */}
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+          <span style={{ fontSize: 11.5, fontWeight: 700, color: TOKENS.s600 }}>Start from:</span>
+          {[['explainer', 'Explainer ad (captions, chips, bubbles)'], ['vlog', 'Mini vlog (bubbly title)']].map(([k, l]) => (
+            <button key={k} onClick={() => {
+              if (!window.confirm('Replace the scenes in this project with the "' + l + '" template? Uploaded clips are removed from the scenes.')) return
+              setScenes(TEMPLATES[k]()); setCur(0); setMedias({}); setMediaBlobs({}); setVoMap({}); setVoBlobs({})
+              if (k === 'explainer') setFormat('story')
+            }} style={{ ...btn(false), fontSize: 11.5, padding: '7px 11px' }}>{l}</button>
+          ))}
+        </div>
+
         {/* Scene strip: live miniatures of every scene */}
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'flex-start' }}>
           {scenes.map((s, i) => (
@@ -2529,19 +2977,57 @@ function VideoMaker({ toast }) {
           </div>
         )}
 
-        {scene.type !== 'title' && scene.type !== 'outro' && (
-          <input value={scene.kicker} onChange={e => upd({ kicker: e.target.value })} placeholder="Kicker (small gold label)" style={inputStyle} />
+        {/* Transition into this scene (any scene but the first) */}
+        {cur > 0 && (
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+            <span style={{ fontSize: 11.5, fontWeight: 700, color: TOKENS.s600 }}>Transition in:</span>
+            {SCENE_TRANSITIONS.map(([k, l]) => (
+              <button key={k} onClick={() => upd({ enter: k })} style={{ ...btn((scene.enter || 'cut') === k), padding: '7px 10px', fontSize: 11 }}>{l}</button>
+            ))}
+          </div>
         )}
-        <input value={scene.headline} onChange={e => upd({ headline: e.target.value })}
-          placeholder={scene.type === 'stat' ? 'The number, e.g. 250+' : scene.type === 'title' ? 'Sub-line under the crest' : 'Headline'} style={inputStyle} />
-        <textarea value={scene.body} onChange={e => upd({ body: e.target.value })} rows={scene.type === 'bullets' ? 4 : 2}
-          placeholder={scene.type === 'bullets' ? 'One bullet per line (up to 5)' : scene.type === 'outro' ? 'CTA line, e.g. smartioushomeschool.com' : 'Supporting sentence'}
-          style={{ ...inputStyle, resize: 'vertical' }} />
+        {KINETIC.includes(scene.type) && (
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+            <span style={{ fontSize: 11.5, fontWeight: 700, color: TOKENS.s600 }}>Accent:</span>
+            {Object.keys(ACCENTS).map(k => (
+              <button key={k} onClick={() => upd({ accent: k })} title={k}
+                style={{ width: 26, height: 26, borderRadius: '50%', cursor: 'pointer', background: ACCENTS[k].c, border: (scene.accent || 'crimson') === k ? '3px solid ' + TOKENS.s900 : '2px solid #fff', boxShadow: '0 0 0 1px ' + TOKENS.line }} />
+            ))}
+            {['logobox', 'bubbles', 'bubbly'].includes(scene.type) && [['top', 'Top'], ['middle', 'Middle'], ['lower', 'Lower']].map(([k, l]) => (
+              <button key={k} onClick={() => upd({ layout: k })} style={{ ...btn((scene.layout || 'top') === k), padding: '7px 10px', fontSize: 11 }}>{l}</button>
+            ))}
+            {scene.type === 'highlight' && [['accent', 'Colour pill'], ['white', 'White pill']].map(([k, l]) => (
+              <button key={k} onClick={() => upd({ pill: k })} style={{ ...btn((scene.pill || 'accent') === k), padding: '7px 10px', fontSize: 11 }}>{l}</button>
+            ))}
+          </div>
+        )}
+        {KINETIC.includes(scene.type) && (
+          <div style={{ fontSize: 11, color: TOKENS.s500, lineHeight: 1.5 }}>
+            Text styling: <b>**bold words**</b> and <b>==accent words==</b>. Text types on at a steady speed, so give long text a longer scene.
+          </div>
+        )}
+
+        {((scene.type !== 'title' && scene.type !== 'outro' && !KINETIC.includes(scene.type)) || scene.type === 'captions' || scene.type === 'bubbly') && (
+          <input value={scene.kicker} onChange={e => upd({ kicker: e.target.value })}
+            placeholder={scene.type === 'captions' ? 'Top caption box, e.g. We teach **Cambridge** live online' : scene.type === 'bubbly' ? 'Sub-line that types on, e.g. Smartious Homeschool Global' : 'Kicker (small gold label)'} style={inputStyle} />
+        )}
+        {scene.type === 'bubbly' ? (
+          <textarea value={scene.headline} onChange={e => upd({ headline: e.target.value })} rows={3}
+            placeholder={'Bubbly title, one line per row, e.g.\nNairobi\nNational\nMuseum'} style={{ ...inputStyle, resize: 'vertical' }} />
+        ) : scene.type !== 'bubbles' && (
+          <input value={scene.headline} onChange={e => upd({ headline: e.target.value })}
+            placeholder={scene.type === 'stat' ? 'The number, e.g. 250+' : scene.type === 'title' ? 'Sub-line under the crest' : scene.type === 'logobox' ? 'Tagline box under the logo' : scene.type === 'captions' ? 'Accent line, e.g. For ==busy families==, looking to:' : scene.type === 'highlight' ? 'Line that types on' : 'Headline'} style={inputStyle} />
+        )}
+        {scene.type !== 'logobox' && (
+          <textarea value={scene.body} onChange={e => upd({ body: e.target.value })} rows={scene.type === 'bullets' || scene.type === 'captions' || scene.type === 'bubbles' ? 4 : 2}
+            placeholder={scene.type === 'bullets' ? 'One bullet per line (up to 5)' : scene.type === 'outro' ? 'CTA line, e.g. smartioushomeschool.com' : scene.type === 'captions' ? 'Chips, one per line (up to 6)' : scene.type === 'bubbles' ? 'Speech bubbles, one per line (up to 5)' : scene.type === 'highlight' ? 'Pill text, e.g. open to every child' : scene.type === 'bubbly' ? 'Sticker text, e.g. Mini vlog' : 'Supporting sentence'}
+            style={{ ...inputStyle, resize: 'vertical' }} />
+        )}
         {/* Mirrors the renderer exactly: every scene type except
             title and outro can print a footer (including legacy
             scenes from older saved projects whose type names differ),
             so every such scene gets the field to edit or clear it. */}
-        {scene.type !== 'title' && scene.type !== 'outro' && (
+        {scene.type !== 'title' && scene.type !== 'outro' && !KINETIC.includes(scene.type) && (
           <input value={scene.footer ?? ''} onChange={e => upd({ footer: e.target.value })}
             placeholder="Footer line, e.g. smartioushomeschool.com. Clear this to remove it from the scene"
             style={inputStyle} />
@@ -3114,3 +3600,6 @@ async function decodeClipAudioFile(file) {
     return buf
   } catch (e) { return null }
 }
+
+// For visual checks of the motion renderer outside the editor.
+export { renderScene as renderStudioScene, drawTimeline as drawStudioTimeline, TEMPLATES as STUDIO_TEMPLATES, loadBrandFonts as loadStudioFonts, loadLogoAsset as loadStudioLogo }
