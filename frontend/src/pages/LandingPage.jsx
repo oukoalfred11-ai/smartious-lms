@@ -527,11 +527,11 @@ const styles = `
     .lp .kenya-cmp-row > div:nth-child(3){padding:6px 14px 14px!important}
     .lp .kenya-cmp-row > div:nth-child(3)::before{content:'Smartious: ';font-weight:700;color:${V.cr};font-size:11px;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:3px}
   }
-  /* FLOATING ASSISTANCE + WHATSAPP */
+  /* FLOATING ASSISTANCE + BOOK AN ASSESSMENT (.fab-wa kept as the class name) */
   .lp .fab-stack{position:fixed;right:20px;bottom:20px;z-index:9998;display:flex;flex-direction:column;gap:12px;align-items:flex-end;pointer-events:none}
   .lp .fab-stack > *{pointer-events:auto}
-  .lp .fab-wa{display:flex;align-items:center;gap:10px;background:#25D366;color:#fff;border:none;border-radius:50px;padding:13px 18px 13px 15px;font-size:13.5px;font-weight:700;cursor:pointer;box-shadow:0 10px 30px rgba(37,211,102,.45),0 4px 10px rgba(37,211,102,.35);transition:all .25s;font-family:'Plus Jakarta Sans',system-ui,sans-serif;text-decoration:none}
-  .lp .fab-wa:hover{background:#1FB855;transform:translateY(-2px) scale(1.02);box-shadow:0 14px 40px rgba(37,211,102,.55),0 6px 14px rgba(37,211,102,.4)}
+  .lp .fab-wa{display:flex;align-items:center;gap:10px;background:${V.gold3};color:#fff;border:none;border-radius:50px;padding:13px 18px 13px 15px;font-size:13.5px;font-weight:700;cursor:pointer;box-shadow:0 10px 30px rgba(201,151,58,.45),0 4px 10px rgba(201,151,58,.35);transition:all .25s;font-family:'Plus Jakarta Sans',system-ui,sans-serif;text-decoration:none}
+  .lp .fab-wa:hover{background:${V.cr};transform:translateY(-2px) scale(1.02);box-shadow:0 14px 40px rgba(139,26,46,.5),0 6px 14px rgba(139,26,46,.35)}
   .lp .fab-wa-ic{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0;animation:lp-pulse 2.4s ease-in-out infinite}
   .lp .fab-help{display:flex;align-items:center;gap:10px;background:${V.cr};color:#fff;border:none;border-radius:50px;padding:13px 18px 13px 15px;font-size:13.5px;font-weight:700;cursor:pointer;box-shadow:0 10px 30px rgba(139,26,46,.45),0 4px 10px rgba(139,26,46,.35);transition:all .25s;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
   .lp .fab-help:hover{background:${V.cr2};transform:translateY(-2px) scale(1.02);box-shadow:0 14px 40px rgba(139,26,46,.55),0 6px 14px rgba(139,26,46,.4)}
@@ -558,8 +558,9 @@ const styles = `
   .lp .fab-panel-ft{padding:12px 22px 16px;background:${V.bone};border-top:1px solid ${V.bone3};font-size:11px;color:${V.sl2};text-align:center;line-height:1.6}
   .lp .fab-panel-ft strong{color:${V.ink2}}
   @media(max-width:480px){
-    .lp .fab-wa span.fab-lbl,.lp .fab-help span.fab-lbl{display:none}
-    .lp .fab-wa,.lp .fab-help{padding:13px 14px}
+    .lp .fab-help span.fab-lbl{display:none}
+    .lp .fab-help{padding:13px 14px}
+    .lp .fab-wa{padding:12px 16px 12px 13px;font-size:13px}
     .lp .fab-stack{right:14px;bottom:14px;gap:10px}
     .lp .fab-panel{right:14px;bottom:140px;width:calc(100vw - 28px);max-height:calc(100vh - 160px);overflow:auto}
   }
@@ -2767,9 +2768,6 @@ export default function LandingPage() {
   const [assessmentLevel, setAssessmentLevel] = useState('')
   const [enrollError, setEnrollError] = useState('')
   const [fabOpen, setFabOpen] = useState(false)
-  // WhatsApp quick contact (admissions line), with the page the visitor came from.
-  const whatsappHref = 'https://wa.me/254745021212?text=' + encodeURIComponent(
-    'Hello Smartious, I would like to know more about admissions. (Page: smartioushomeschool.com' + window.location.pathname + ')')
 
   // Build a fresh placement test when user reaches Step 4.
   // Also rebuilds if they go back and change their level/curriculum.
@@ -24040,19 +24038,22 @@ export default function LandingPage() {
 
       </>)}
 
-      {/* ── FLOATING ASSISTANCE + WHATSAPP ── */}
+      {/* ── FLOATING ASSISTANCE + BOOK AN ASSESSMENT ──
+          The floating button leads to the assessment form, not WhatsApp:
+          every enquiry should arrive as an assessment request, so it is
+          recorded as a lead. Hidden on the assessment page itself. */}
       <div className="fab-stack">
-        <a
-          className="fab-wa"
-          href={whatsappHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Chat with Smartious admissions on WhatsApp"
-          onClick={() => { try { window.gtag && window.gtag('event', 'whatsapp_click', { page_path: window.location.pathname }) } catch {} }}
-        >
-          <span className="fab-wa-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.21 3.08c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2.01-1.42.25-.7.25-1.29.17-1.42-.07-.12-.27-.2-.57-.35z"/><path d="M12.04 2C6.5 2 2 6.48 2 12c0 1.77.46 3.5 1.34 5.02L2 22l5.12-1.34A9.95 9.95 0 0 0 12.04 22C17.57 22 22 17.52 22 12S17.57 2 12.04 2zm0 18.2c-1.57 0-3.1-.42-4.44-1.21l-.32-.19-3.04.8.81-2.96-.21-.33A8.17 8.17 0 0 1 3.82 12c0-4.53 3.69-8.2 8.22-8.2 4.53 0 8.2 3.67 8.2 8.2 0 4.53-3.67 8.2-8.2 8.2z"/></svg></span>
-          <span className="fab-lbl">WhatsApp us</span>
-        </a>
+        {page !== 'assessment' && (
+          <a
+            className="fab-wa lp-btnlink"
+            href="/assessment"
+            aria-label="Book an assessment"
+            onClick={linkClick(() => { try { window.gtag && window.gtag('event', 'assessment_fab_click', { page_path: window.location.pathname }) } catch {} setFabOpen(false); nav('/assessment') })}
+          >
+            <span className="fab-wa-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="9 15.5 11 17.5 15 13.5"/></svg></span>
+            <span className="fab-lbl">Book an assessment</span>
+          </a>
+        )}
 <button
           className="fab-help"
           onClick={() => setFabOpen(o => !o)}
@@ -24084,15 +24085,9 @@ export default function LandingPage() {
           </div>
           <div className="fab-panel-body">
             <div className="fab-panel-msg">
-              Welcome to <strong>Smartious Homeschool</strong>! How can we help you today? Choose an option below or message us directly.
+              Welcome to <strong>Smartious Homeschool</strong>! The quickest way to start is to <strong>book an assessment</strong>: tell us about your child and admissions will reply with a placement plan.
             </div>
             <div className="fab-opts">
-              <a className="fab-opt" href={whatsappHref} target="_blank" rel="noopener noreferrer" onClick={() => setFabOpen(false)} style={{textDecoration:'none'}}>
-                <span className="fab-opt-ic" style={{background:'rgba(37,211,102,.12)',color:'#1FB855'}}>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.5 2 2 6.48 2 12c0 1.77.46 3.5 1.34 5.02L2 22l5.12-1.34A9.95 9.95 0 0 0 12.04 22C17.57 22 22 17.52 22 12S17.57 2 12.04 2z"/></svg>
-                </span>
-                Chat on WhatsApp
-              </a>
               <a className="fab-opt lp-btnlink" href={'/assessment'} onClick={linkClick(() => { setFabOpen(false); nav('/assessment') })}>
                 <span className="fab-opt-ic">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
