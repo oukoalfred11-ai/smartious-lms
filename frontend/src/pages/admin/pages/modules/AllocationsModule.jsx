@@ -881,7 +881,7 @@ function AllocateTeacherModal({ studentId, studentName, curriculum, subjectId, s
               </div>
               <div>
                 <div style={{ fontSize:12.5, fontWeight:700, color:TOKENS.s900, marginBottom:2 }}>Can be grouped with similar students</div>
-                <div style={{ fontSize:11, color:TOKENS.s500, lineHeight:1.5 }}>On = shared class slot with others on the same subject. Off = dedicated 1-to-1 slot.</div>
+                <div style={{ fontSize:11, color:TOKENS.s500, lineHeight:1.5 }}>A note for the teacher: On = can share a class with others on the same subject; Off = 1-to-1. Allocating never creates timetable slots: the teacher sets the class times in the timetable.</div>
               </div>
             </label>
           </div>

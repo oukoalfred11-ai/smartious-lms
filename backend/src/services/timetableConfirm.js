@@ -7,9 +7,10 @@
  * as they are actually taught and does two things:
  *
  *   1. CONFIRM — the first lesson that starts for a student and
- *      subject sets the real day and time. The entry then stops
- *      moving. If the prediction was wrong, the entry is corrected
- *      and the original kept so someone can see by how much.
+ *      subject marks the entry confirmed. It never moves the entry:
+ *      a slot keeps the day and time its teacher set until a teacher
+ *      edits or deletes it (a lesson moved for one week must not drag
+ *      the weekly slot with it).
  *
  *   2. ADVANCE — as lessons are delivered, the entry's title tracks
  *      the syllabus, so the timetable reads
@@ -78,24 +79,11 @@ async function confirmFromLesson(entry, live) {
   const when = live.startedAt || live.scheduledAt
   if (!when) return null
 
-  const actual = slotOf(when)
-  const start = tidy(actual.startTime)
-  const mins = live.durationMins || 60
-  const moved = entry.dayOfWeek !== actual.dayOfWeek || entry.startTime !== start
-
-  if (moved) {
-    entry.provisionalSlot = `${entry.dayOfWeek} ${entry.startTime}-${entry.endTime}`
-    entry.dayOfWeek = actual.dayOfWeek
-    entry.startTime = start
-    entry.endTime = addMinutes(start, mins)
-  }
   entry.confirmed = true
   entry.confirmedAt = new Date()
   entry.confirmedFrom = live._id
   entry.needsConfirmation = false
-  return moved
-    ? `moved from ${entry.provisionalSlot} to ${entry.dayOfWeek} ${entry.startTime}-${entry.endTime}`
-    : `confirmed at ${entry.dayOfWeek} ${entry.startTime}`
+  return `confirmed at ${entry.dayOfWeek} ${entry.startTime}`
 }
 
 /** Refresh an entry's title to name the next lesson. */

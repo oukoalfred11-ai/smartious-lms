@@ -1178,6 +1178,7 @@ function TeacherStatusTab({ teacher, onSaved, onClose, toast }) {
                   <div style={{ fontWeight: 700, marginBottom: 6 }}>Deleting {deleteImpact.teacherName} will:</div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                     <div>• Deactivate <strong>{deleteImpact.activeAllocations}</strong> active student allocation{deleteImpact.activeAllocations === 1 ? '' : 's'} — reassign these to another teacher afterwards</div>
+                    <div>• <strong>Delete</strong> {deleteImpact.timetableSlots ?? 0} weekly timetable slot{deleteImpact.timetableSlots === 1 ? '' : 's'} and the students' upcoming classes in them — past lessons are kept</div>
                     <div>• <strong>Keep</strong> all {deleteImpact.authoredLessons} lesson{deleteImpact.authoredLessons === 1 ? '' : 's'} they authored — these stay with the subject</div>
                     <div>• Remove the teacher's login and account permanently</div>
                   </div>
