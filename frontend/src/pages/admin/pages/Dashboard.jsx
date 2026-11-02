@@ -48,6 +48,7 @@ import CommandModule from './modules/CommandModule.jsx'
 import ClubsModule from './modules/ClubsModule.jsx'
 import AnnouncementsModule from './modules/AnnouncementsModule.jsx'
 import StudioModule from './modules/StudioModule.jsx'
+import LeadsModule from './modules/LeadsModule.jsx'
 import SettingsModule from './modules/SettingsModule.jsx'
 import { LeaveModule, ProgrammesModule, GroupRoomsModule, WebsiteModule, MshauriModule, SuggestionsModule } from './modules/MiscModules.jsx'
 
@@ -88,7 +89,7 @@ const NAV_SECTIONS = {
     { label: 'Teaching',    items: ['liveclasses', 'clubs', 'grouprooms', 'curriculum', 'oversight', 'dosattend', 'virtuallab'] },
     { label: 'Question Bank', items: ['questionbank'] },
     { label: 'Quality',     items: ['qaoverview', 'teacherprofiles', 'tdp', 'accreditations'] },
-    { label: 'Marketing',   items: ['studio'] },
+    { label: 'Marketing',   items: ['leads', 'studio'] },
     { label: 'System',      items: ['userlogs', 'billing', 'website', 'settings', 'ai', 'suggestions'] },
     { label: 'Me',          items: ['myprofile', 'mystafffile'] },
   ],
@@ -101,7 +102,7 @@ const NAV_SECTIONS = {
   ],
   sales: [
     { label: 'Overview',    items: ['dashboard', 'salesperf'] },
-    { label: 'CRM',         items: ['crm'] },
+    { label: 'CRM',         items: ['crm', 'leads'] },
     { label: 'Billing',     items: ['billing'] },
     { label: 'Admissions',  items: ['assessment', 'frontdesk', 'communication'] },
     { label: 'Content',     items: ['documents'] },
@@ -475,6 +476,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         {safePage === 'frontdesk' && <FrontDeskModule refreshKey={refreshKey} toast={toast} />}
         {safePage === 'careers' && <CareersModule toast={toast} />}
         {safePage === 'partnerships' && <PartnershipsModule toast={toast} />}
+        {safePage === 'leads' && <LeadsModule toast={toast} />}
         {safePage === 'documents' && <DocumentsModule toast={toast} />}
         {safePage === 'teacherprofiles' && <TeamProfilesModule toast={toast} />}
         {safePage === 'mystafffile' && <StaffFile toast={toast} showTeaching={false} />}
