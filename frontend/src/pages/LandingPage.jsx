@@ -23705,7 +23705,18 @@ export default function LandingPage() {
                       <span style={{position:'absolute',left:0,top:14,width:8,height:8,borderRadius:'50%',background:V.cr}}/>
                       {s.h}
                     </h2>
-                    <p style={{fontSize:16.5,color:V.ink2,lineHeight:1.85,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif"}}>{s.p}</p>
+                    {/* Optional section photo (s.img / s.imgAlt), e.g. the parent guides in articlesPart16.js */}
+                    {s.img && (
+                      <figure style={{margin:'0 0 20px'}}>
+                        <img src={s.img} alt={s.imgAlt || ''} loading="lazy" decoding="async"
+                          onError={e => { e.currentTarget.style.display = 'none' }}
+                          style={{display:'block',width:'100%',height:'auto',borderRadius:14,border:`1px solid ${V.bone3}`}}/>
+                      </figure>
+                    )}
+                    {/* s.p may be one paragraph or an array of paragraphs */}
+                    {(Array.isArray(s.p) ? s.p : [s.p]).map((para, j) => (
+                      <p key={j} style={{fontSize:16.5,color:V.ink2,lineHeight:1.85,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",margin:j ? '16px 0 0' : 0}}>{para}</p>
+                    ))}
                   </section>
                 ))}
 
