@@ -19,6 +19,7 @@ import { ARTICLES_PART_12 } from './articlesPart12.js'
 import { ARTICLES_PART_13 } from './articlesPart13.js'
 import { ARTICLES_PART_14 } from './articlesPart14.js'
 import { ARTICLES_PART_15 } from './articlesPart15.js'
+import { ARTICLES_PART_16 } from './articlesPart16.js'
 
 export const FULL_ARTICLES = {
   ...ARTICLES_PART_1,
@@ -36,4 +37,5 @@ export const FULL_ARTICLES = {
   ...ARTICLES_PART_13,
   ...ARTICLES_PART_14,
   ...ARTICLES_PART_15,
+  ...ARTICLES_PART_16,
 }

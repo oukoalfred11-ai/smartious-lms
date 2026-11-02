@@ -830,7 +830,9 @@ for (const [slug, a] of Object.entries(FULL_ARTICLES)) {
         `${a.updated ? ' · Updated <time datetime="' + esc(a.updated) + '">' + esc(fmtMonthYear(a.updated, true)) + '</time>' : ''}</p>` : '',
       p(a.intro),
       a.country === 'uae' ? h2('Smartious for families in Dubai and the UAE') + links(UAE_PRODUCT_LINKS) : '',
-      ...(a.sections || []).map(s => h2(s.h) + (Array.isArray(s.p) ? s.p.map(p).join('') : p(s.p))),
+      ...(a.sections || []).map(s => h2(s.h) +
+        (s.img ? `<figure><img src="${esc(s.img)}" alt="${esc(s.imgAlt || '')}" loading="lazy" decoding="async" style="width:100%;height:auto"/></figure>` : '') +
+        (Array.isArray(s.p) ? s.p.map(p).join('') : p(s.p))),
       // Pillar link grids, as the app renders them (real links for crawlers
       // that do not run JavaScript).
       a.countryLinks?.length ? h2(a.countryLinksHeading || 'Every country we teach in this region') + p(a.countryLinksIntro) +
@@ -849,11 +851,19 @@ for (const [slug, a] of Object.entries(FULL_ARTICLES)) {
       p(a.conclusion),
     ],
     faqs: a.faqs, related: [h2('Next steps'), links(money)],
+    // A local hero photo becomes the page's og:image (Google Discover and
+    // social cards use it) and, with any local section photos, the
+    // sitemap's image entries.
+    ...(a.splash && a.splash.startsWith('/') ? {
+      image: { src: a.splash, alt: a.splashAlt || a.t },
+      images: [{ src: a.splash }, ...(a.sections || []).filter(s => s.img && s.img.startsWith('/')).map(s => ({ src: s.img }))],
+    } : {}),
     crumbs: [['Guides', '/blog'], [a.t, path]],
     ld: [{ '@context': 'https://schema.org', '@type': 'Article', headline: clip(a.t, 110), description: clip(a.metaDesc || a.intro, 300), url: ORIGIN + path,
       mainEntityOfPage: ORIGIN + path, publisher: ORG, author: a.author ? { '@type': 'Person', name: a.author } : ORG,
       ...(a.published ? { datePublished: a.published } : {}), ...(a.updated || a.published ? { dateModified: a.updated || a.published } : {}),
-      ...(a.img && /^https?:|^\//.test(a.img) ? { image: a.img.startsWith('/') ? ORIGIN + a.img : a.img } : {}) }],
+      ...(a.splash && /^https?:|^\//.test(a.splash) ? { image: a.splash.startsWith('/') ? ORIGIN + a.splash : a.splash }
+        : a.img && /^https?:|^\//.test(a.img) ? { image: a.img.startsWith('/') ? ORIGIN + a.img : a.img } : {}) }],
   })
 }
 if (intakeMissing) console.warn('seo-static: /blog/' + INTAKE + ' does not exist yet — blog posts link only to their hub and /pricing')
