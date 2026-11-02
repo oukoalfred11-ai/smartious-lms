@@ -9,9 +9,11 @@
  * Removed (year promotion graduates terminal grades without archiving).
  *
  * detachFromSchedule() takes leavers off upcoming lessons and timetable
- * slots. A lesson or slot left with nobody on it is cancelled / switched
- * off, so the teacher is not reminded about an empty class. Past lessons
- * are never touched. It runs on exit and graduation, and once at startup
+ * slots. A lesson left with nobody on it is cancelled, so the teacher is
+ * not reminded about an empty class. The SLOT itself is never switched
+ * off or deleted: a slot a teacher set stays until a teacher deletes it
+ * (an empty slot simply produces no classes; timetableMaterializer.js).
+ * Past lessons are never touched. It runs on exit and graduation, and once at startup
  * (index.js) for students who left before it existed; it is idempotent.
  */
 const LiveClass = require('../models/LiveClass')
@@ -45,15 +47,9 @@ async function detachFromSchedule(studentIds, { now = new Date() } = {}) {
     { $set: { status: 'cancelled', cancelledAt: now, cancelReason: 'No students left on this lesson (graduated or left).' } },
   )
   const slots = await TimetableEntry.updateMany({ _id: { $in: slotIds } }, { $pull: { assignedStudents: { $in: ids } } })
-  // A slot with no students and no curriculum+grade audience serves nobody.
-  const slotsOff = await TimetableEntry.updateMany(
-    { _id: { $in: slotIds }, isActive: { $ne: false }, assignedStudents: { $size: 0 },
-      $or: [{ audienceCurriculum: { $in: ['', null] } }, { audienceGrade: { $in: ['', null] } }] },
-    { $set: { isActive: false } },
-  )
   return {
     lessons: lessons.modifiedCount || 0, lessonsCancelled: lessonsCancelled.modifiedCount || 0,
-    slots: slots.modifiedCount || 0, slotsOff: slotsOff.modifiedCount || 0,
+    slots: slots.modifiedCount || 0, slotsOff: 0,
   }
 }
 
@@ -76,7 +72,7 @@ async function detachAllLeavers() {
     }
   }
   const r = await detachFromSchedule(ids)
-  if (r.lessons || r.slots) console.log(`[leavers] ${ids.length} graduated/left students: off ${r.lessons} upcoming lessons (${r.lessonsCancelled} now empty, cancelled) and ${r.slots} timetable slots (${r.slotsOff} switched off)`)
+  if (r.lessons || r.slots) console.log(`[leavers] ${ids.length} graduated/left students: off ${r.lessons} upcoming lessons (${r.lessonsCancelled} now empty, cancelled) and ${r.slots} timetable slots (slots kept)`)
   return r
 }
 

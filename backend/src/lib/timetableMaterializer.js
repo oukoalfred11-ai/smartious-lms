@@ -20,6 +20,13 @@
  *
  * Idempotent: safe to run any number of times. Protective: it never
  * deletes an instance that has recordings or that any student joined.
+ *
+ * Slots belong to teachers. Nothing here switches a slot off or deletes
+ * it, with one exception: a slot whose teacher's account no longer
+ * exists (the teacher left and was deleted) is deleted, and its future
+ * classes with it. A slot left with no students and no grade audience
+ * stays on the timetable but produces no classes until students are
+ * added again or a teacher deletes it.
  */
 const TimetableEntry = require('../models/TimetableEntry');
 const LiveClass = require('../models/LiveClass');
@@ -83,8 +90,24 @@ async function buildQueue(members) {
   });
 }
 
+// Slots of deleted teachers: delete them (their future classes then go in
+// step 1 below). Only when the lookup succeeds and finds no such user.
+async function removeDeletedTeachersSlots() {
+  const User = require('../models/User');
+  const teacherIds = (await TimetableEntry.distinct('teacherId', { teacherId: { $ne: null } })).map(String);
+  if (!teacherIds.length) return 0;
+  const existing = new Set((await User.find({ _id: { $in: teacherIds } }).select('_id').lean()).map(u => String(u._id)));
+  const gone = teacherIds.filter(id => !existing.has(id));
+  if (!gone.length) return 0;
+  const r = await TimetableEntry.deleteMany({ teacherId: { $in: gone } });
+  if (r.deletedCount) console.log(`[timetable] ${r.deletedCount} slot(s) of ${gone.length} deleted teacher account(s) removed`);
+  return r.deletedCount || 0;
+}
+const servesNobody = (e) => !(e.assignedStudents || []).length && !(e.audienceCurriculum && e.audienceGrade);
+
 async function reconcileOnce() {
   const now = new Date();
+  try { await removeDeletedTeachersSlots(); } catch (e) { console.error('[timetable] deleted-teacher slots:', e.message); }
   const entries = await TimetableEntry.find({}).lean();
   // School holidays and breaks in the horizon: no lessons on those days.
   let closedDays = new Set();
@@ -121,6 +144,8 @@ async function reconcileOnce() {
   // 2. Per active entry: desired vs existing.
   for (const entry of entries) {
     if (entry.isActive === false) continue;
+    // An empty slot stays on the timetable but makes no new classes.
+    if (servesNobody(entry)) continue;
     // Every instance that sits in the future or stands for a future
     // occurrence - including one moved earlier (perhaps already taught)
     // whose original slot is still ahead.

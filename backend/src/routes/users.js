@@ -1235,6 +1235,9 @@ router.get('/:id/delete-impact', auth, requireRole('admin', 'ops_manager'), asyn
     });
     // Lessons this teacher authored (kept — shown for transparency)
     const authoredLessons = await Lesson.countDocuments({ teacherId: req.params.id });
+    // Their weekly timetable slots are deleted with them, and so are the
+    // students' upcoming classes in those slots.
+    const timetableSlots = await require('../models/TimetableEntry').countDocuments({ teacherId: req.params.id });
 
     res.json({
       success: true,
@@ -1242,6 +1245,7 @@ router.get('/:id/delete-impact', auth, requireRole('admin', 'ops_manager'), asyn
         teacherName: `${target.firstName || ''} ${target.lastName || ''}`.trim(),
         activeAllocations,    // these will be deactivated
         authoredLessons,      // these are KEPT (belong to the subject)
+        timetableSlots,       // these are DELETED, with their upcoming classes
         blocked: !!target.isMainAdmin || !!target.isDemo,
       },
     });
@@ -1265,7 +1269,7 @@ router.delete('/:id', auth, requireRole('admin', 'ops_manager'), async (req, res
       return res.status(403).json({ success: false, message: 'Demo users cannot be deleted.' });
     }
 
-    let deactivatedAllocations = 0;
+    let deactivatedAllocations = 0, deletedSlots = 0;
 
     if (target.role === 'teacher') {
       // MODEL A: the teacher's lessons, questions, and other content
@@ -1286,6 +1290,17 @@ router.delete('/:id', auth, requireRole('admin', 'ops_manager'), async (req, res
         console.error('Failed to deactivate allocations:', allocErr.message);
       }
 
+      // The teacher's timetable goes with them: their weekly slots are
+      // deleted, and the materializer then removes the upcoming classes
+      // those slots made (past lessons are kept).
+      try {
+        const r = await require('../models/TimetableEntry').deleteMany({ teacherId: target._id });
+        deletedSlots = r.deletedCount || 0;
+        console.log(`✓ Deleted ${deletedSlots} timetable slot(s) of deleted teacher ${target.email}`);
+      } catch (ttErr) {
+        console.error('Failed to delete the teacher\'s timetable slots:', ttErr.message);
+      }
+
       try {
         await Teacher.deleteOne({ email: target.email });
         console.log(`✓ Teacher record deleted for ${target.firstName} ${target.lastName}`);
@@ -1304,10 +1319,11 @@ router.delete('/:id', auth, requireRole('admin', 'ops_manager'), async (req, res
     }
 
     await target.deleteOne();
+    if (deletedSlots) require('../lib/timetableMaterializer').reconcileSoon();
     res.json({
       success: true,
-      message: 'User deleted.',
-      data: { deactivatedAllocations },
+      message: 'User deleted.' + (deletedSlots ? ` ${deletedSlots} timetable slot(s) and their upcoming classes removed.` : ''),
+      data: { deactivatedAllocations, deletedSlots },
     });
   } catch (e) {
     console.error('[users delete]', e.message);

@@ -79,10 +79,11 @@ test('a leaver comes off upcoming lessons and slots; past lessons are kept', asy
   assert.equal(L('L2').status, 'scheduled')
   assert.deepEqual(L('L3').assignedStudents, ['grad'])      // the past is untouched
   assert.equal(L('L4').status, 'scheduled')                 // other students' lessons untouched
-  assert.equal(T('T1').isActive, false)                     // empty slot switched off
+  assert.equal(T('T1').isActive, true)                      // slots stay until a teacher deletes them
+  assert.deepEqual(T('T1').assignedStudents, [])            // ...but the leaver is off it
   assert.equal(T('T2').isActive, true)
-  assert.equal(T('T3').isActive, true)                      // still has a grade audience
-  assert.deepEqual(r, { lessons: 2, lessonsCancelled: 1, slots: 3, slotsOff: 1 })
+  assert.equal(T('T3').isActive, true)
+  assert.deepEqual(r, { lessons: 2, lessonsCancelled: 1, slots: 3, slotsOff: 0 })
   assert.deepEqual(await detachFromSchedule(['grad'], { now }), { lessons: 0, lessonsCancelled: 0, slots: 0, slotsOff: 0 })
 })
 
