@@ -18,6 +18,7 @@
  *   PATCH /weekly/:id                           { remarks }                   weekly report remark
  */
 const express = require('express')
+const { teachersWhere } = require('../lib/teachers');
 const mongoose = require('mongoose')
 const router = express.Router()
 const { auth, requireRole } = require('../middleware/auth')
@@ -89,7 +90,7 @@ router.get('/students', async (req, res) => {
 
 router.get('/teachers', async (req, res) => {
   try {
-    const list = await User.find({ role: 'teacher', isActive: { $ne: false }, archived: { $ne: true } })
+    const list = await User.find(teachersWhere({ isActive: { $ne: false }, archived: { $ne: true } }))
       .select('firstName lastName').sort({ firstName: 1 }).lean()
     res.json({ success: true, data: list.map(t => ({ _id: t._id, name: nameOf(t) })) })
   } catch (e) { res.status(500).json({ success: false, message: e.message }) }
@@ -100,7 +101,7 @@ async function setClassTeacher(req, studentId, teacherId) {
   if (!st) return null
   let teacher = null
   if (teacherId) {
-    teacher = await User.findOne({ _id: teacherId, role: 'teacher' }).select('firstName lastName').lean()
+    teacher = await User.findOne(teachersWhere({ _id: teacherId })).select('firstName lastName').lean()
     if (!teacher) throw Object.assign(new Error('Choose a teacher.'), { status: 400 })
   }
   const before = nameOf(st.classTeacherId)

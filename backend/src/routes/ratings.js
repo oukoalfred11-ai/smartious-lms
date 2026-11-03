@@ -10,6 +10,7 @@
  * POST /api/ratings/show-cause/:teacherId — apply show-cause deduction
  */
 const express = require('express')
+const { teachersWhere, isTeacher } = require('../lib/teachers');
 const router  = express.Router()
 const { auth, requireRole } = require('../middleware/auth')
 const TeacherRating = require('../models/TeacherRating')
@@ -26,7 +27,7 @@ router.post('/', auth, requireRole('student','parent'), async (req, res) => {
     if (!score || score < 1 || score > 5) return fail(res,400,'Score must be 1–5.')
 
     const teacher = await User.findById(teacherId).select('firstName lastName role').lean()
-    if (!teacher || teacher.role !== 'teacher') return fail(res,404,'Teacher not found.')
+    if (!teacher || !isTeacher(teacher)) return fail(res,404,'Teacher not found.')
 
     const raterName = req.user.firstName + ' ' + req.user.lastName
 
@@ -65,7 +66,7 @@ router.get('/my', auth, requireRole('teacher'), async (req, res) => {
 // ── GET /api/ratings/all — COO/admin all teachers ────────
 router.get('/all', auth, requireRole('admin','ops_manager','dos'), async (req, res) => {
   try {
-    const teachers = await User.find({ role:'teacher', isActive:true })
+    const teachers = await User.find(teachersWhere({ isActive: true }))
       .select('firstName lastName email subjects curriculum jobTitle')
       .lean()
 
@@ -102,7 +103,7 @@ router.get('/teacher/:id', auth, requireRole('admin','ops_manager','dos','teache
 router.delete('/teacher/:id/reset', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const teacher = await User.findById(req.params.id).select('firstName lastName role').lean()
-    if (!teacher || teacher.role !== 'teacher') {
+    if (!teacher || !isTeacher(teacher)) {
       return res.status(404).json({ success: false, message: 'Teacher not found.' })
     }
     const r = await TeacherRating.deleteMany({ teacherId: req.params.id })

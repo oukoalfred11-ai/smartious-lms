@@ -20,6 +20,7 @@
  * events are engagement, not the academic register).
  */
 const express = require('express');
+const { teachersWhere } = require('../lib/teachers');
 const mongoose = require('mongoose');
 const router = express.Router();
 const { auth, requireRole } = require('../middleware/auth');
@@ -169,7 +170,7 @@ router.get('/teachers', auth, requireRole(...STAFF), async (req, res) => {
         { $group: { _id: '$t', avg: { $avg: '$percentage' }, n: { $sum: 1 }, turnaround: { $avg: '$turnaroundDays' } } },
       ]),
       TeacherRating.aggregate([{ $group: { _id: '$teacherId', avg: { $avg: '$score' }, n: { $sum: 1 } } }]),
-      User.find({ role: 'teacher', isActive: { $ne: false } }).select('firstName lastName').lean(),
+      User.find(teachersWhere({ isActive: { $ne: false } })).select('firstName lastName').lean(),
     ]);
     const exams = Object.fromEntries(examAgg.map(r => [String(r._id), r]));
     const ratings = Object.fromEntries(ratingAgg.map(r => [String(r._id), r]));
@@ -263,7 +264,7 @@ router.get('/question-bank', auth, requireRole(...STAFF), async (req, res) => {
         { $match: { isActive: { $ne: false } } },
         { $group: { _id: '$subject', n: { $sum: 1 } } }, { $sort: { n: 1 } },
       ]),
-      User.find({ role: 'teacher', isActive: { $ne: false } }).select('firstName lastName').lean(),
+      User.find(teachersWhere({ isActive: { $ne: false } })).select('firstName lastName').lean(),
     ]);
 
     // Reshape weekly into per-teacher series.

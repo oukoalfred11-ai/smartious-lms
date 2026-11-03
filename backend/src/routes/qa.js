@@ -160,7 +160,7 @@ const ROLE_ORDER = Object.fromEntries(TEAM_ROLES.map((r, i) => [r, i]));
 const teamSort = (a, b) => (ROLE_ORDER[a.role] - ROLE_ORDER[b.role])
   || [a.firstName, a.lastName].join(' ').localeCompare([b.firstName, b.lastName].join(' '));
 /** Title, group and required documents for one person. */
-const decorate = (u) => ({ ...u, teacherCategory: u.role === 'teacher' ? (u.teacherCategory || 'teacher') : undefined, alsoQA: (u.additionalRoles || []).includes('qa'), teamTitle: teamTitle(u), group: teamGroup(u.role) });
+const decorate = (u) => ({ ...u, teacherCategory: u.role === 'teacher' ? (u.teacherCategory || 'teacher') : undefined, alsoQA: (u.additionalRoles || []).includes('qa'), alsoTeaches: (u.additionalRoles || []).includes('teacher'), teamTitle: teamTitle(u), group: teamGroup(u.role) });
 const DOC_FIELDS = 'teacherId category title subject description expiresAt verifiedAt verifiedByName uploadedBy uploadedByName file createdAt';
 
 // Trainings each teacher attended, as { [teacherId]: { count, hours, last } }.
@@ -327,6 +327,7 @@ async function getMember(req, res) {
       teacherCategories: TEACHER_CATEGORIES,
       canEdit: TEAM_EDIT_ROLES.includes(req.user.role),
       canAssignQA: req.user.role === 'admin' && ['dos', 'ops_manager'].includes(person.role),
+      canAssignTeaching: req.user.role === 'admin' && person.role !== 'teacher',
     } });
   } catch (e) {
     console.error('[qa member]', e.message);
@@ -342,7 +343,16 @@ router.patch('/team/:id', auth, requireRole(...TEAM_EDIT_ROLES), async (req, res
     if (!mongoose.isValidObjectId(req.params.id)) return res.status(400).json({ success: false, message: 'Invalid id.' });
     const person = await User.findOne({ _id: req.params.id, role: { $in: TEAM_ROLES } });
     if (!person) return res.status(404).json({ success: false, message: 'Team member not found.' });
-    const { teacherCategory, jobTitle, alsoQA } = req.body || {};
+    const { teacherCategory, jobTitle, alsoQA, alsoTeaches } = req.body || {};
+    // Teaching as an extra responsibility (e.g. an accountant who teaches):
+    // the account gets a Teaching section that opens the teacher portal, and
+    // can be allocated students and timetable slots. Only the Principal.
+    if (alsoTeaches !== undefined) {
+      if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Only the Principal can add teaching to an account.' });
+      if (person.role === 'teacher') return res.status(400).json({ success: false, message: 'This account is already a teacher.' });
+      const rest = (person.additionalRoles || []).filter(r => r !== 'teacher');
+      person.additionalRoles = alsoTeaches ? [...rest, 'teacher'] : rest;
+    }
     // Quality Assurance as an extra responsibility for a Dean & Operations
     // account. Only the Principal assigns it.
     if (alsoQA !== undefined) {

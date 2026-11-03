@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const { teachersWhere, isTeacher } = require('../lib/teachers');
 const GroupRoom = require('../models/GroupRoom');
 const User   = require('../models/User');
 const Teacher = require('../models/Teacher');
@@ -280,7 +281,7 @@ router.get('/students/list', auth, requireRole('admin', 'ops_manager'), async (r
 // GET all teachers (for allocations)
 router.get('/teachers/list', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
-    const teachers = await User.find({ role: 'teacher' })
+    const teachers = await User.find(teachersWhere())
       .select('_id firstName lastName email phone curriculum subjects createdAt status isActive isOnLeave leaveStartDate leaveEndDate jobTitle teacherCategory avatar bio yearsOfExperience teachingSpecialties statusReason sentEmails')
       .sort('firstName')
       .limit(500);
@@ -471,7 +472,7 @@ router.patch('/teachers/:id/specialties', auth, requireRole('admin', 'ops_manage
     const { curricula, subjectIds } = req.body;
 
     const teacher = await User.findById(req.params.id);
-    if (!teacher || teacher.role !== 'teacher')
+    if (!isTeacher(teacher))
       return res.status(404).json({ success: false, message: 'Teacher not found.' });
 
     if (!Array.isArray(curricula) || !Array.isArray(subjectIds))

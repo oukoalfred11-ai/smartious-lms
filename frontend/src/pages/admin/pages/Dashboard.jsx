@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import BirthdayBanner from '../../../components/BirthdayBanner.jsx'
 import SuggestionBox from '../../../components/SuggestionBox.jsx'
 import { useToast, useAuth, api } from '../../../context/ctx.jsx'
@@ -153,12 +153,16 @@ function resolvePage(page, allowed) {
 // Sections for a signed-in person: their role's menu, plus Quality when
 // their account also holds Quality Assurance (additionalRoles).
 const QUALITY_SECTION = { label: 'Quality', items: ['qaoverview', 'teacherprofiles', 'tdp', 'accreditations'] }
+// An account that also teaches (additionalRoles 'teacher', e.g. an
+// accountant) gets a Teaching section that opens the teacher portal.
+const TEACHING_SECTION = { label: 'Teaching', items: ['teaching'] }
 function navFor(role, user) {
-  const base = NAV_SECTIONS[role] || NAV_SECTIONS.admin
-  const alsoQA = (user?.additionalRoles || []).includes('qa') && !base.some(sec => sec.items.includes('teacherprofiles'))
-  if (!alsoQA) return base
-  const i = base.findIndex(sec => sec.label === 'Me')
-  return i < 0 ? [...base, QUALITY_SECTION] : [...base.slice(0, i), QUALITY_SECTION, ...base.slice(i)]
+  let base = NAV_SECTIONS[role] || NAV_SECTIONS.admin
+  const extra = (user?.additionalRoles || [])
+  const add = (sec) => { const i = base.findIndex(x => x.label === 'Me'); base = i < 0 ? [...base, sec] : [...base.slice(0, i), sec, ...base.slice(i)] }
+  if (extra.includes('qa') && !base.some(sec => sec.items.includes('teacherprofiles'))) add(QUALITY_SECTION)
+  if (extra.includes('teacher') && role !== 'teacher') add(TEACHING_SECTION)
+  return base
 }
 
 function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
@@ -341,6 +345,8 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
 export default function AdminDashboard({ page, setPage, userStats, pendingAllocations, refreshKey, onUserSaved, forcedRole = undefined }) {
   const toast = useToast()
   const auth = useAuth()
+  // Back in their own portal: requests go as their own role again.
+  useEffect(() => { try { sessionStorage.removeItem('smartious.actAs') } catch (e) { /* private mode */ } }, [])
 
   const [userModal, setUserModal] = useState(false)
   const [userForm, setUserForm] = useState(resetForm())
@@ -477,6 +483,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         {safePage === 'careers' && <CareersModule toast={toast} />}
         {safePage === 'partnerships' && <PartnershipsModule toast={toast} />}
         {safePage === 'leads' && <LeadsModule toast={toast} />}
+        {safePage === 'teaching' && <TeachingLauncher />}
         {safePage === 'documents' && <DocumentsModule toast={toast} />}
         {safePage === 'teacherprofiles' && <TeamProfilesModule toast={toast} />}
         {safePage === 'mystafffile' && <StaffFile toast={toast} showTeaching={false} />}
@@ -634,6 +641,54 @@ function RoleOverview({ role, setPage, userStats, pendingAllocations, auth }) {
 }
 
 // The Virtual Science Laboratory is its own app at /lab.
+// Teaching: for a staff account that also teaches. Picks a teacher module
+// and opens the teacher portal on it, in teaching mode (TeacherPortal.jsx).
+const TEACHER_MODULES = [
+  ['dashboard', 'Teaching dashboard', 'Today\'s classes, homework to mark and alerts'],
+  ['myclasses', 'My Classes & timetable', 'Your weekly timetable, start and join live classes'],
+  ['students', 'My Students', 'The students you teach, their progress and parents'],
+  ['attendance', 'Attendance', 'Class registers'],
+  ['managesubject', 'Manage My Subject', 'Lessons, notes and videos for your subject'],
+  ['lessonplayer', 'Lesson Player', 'Your lessons as students see them'],
+  ['library', 'Library', 'Coursebooks and past papers'],
+  ['marking', 'Homework', 'Set and mark homework'],
+  ['exambuilder', 'Exams', 'Build and mark exams'],
+  ['questionbank', 'Question Bank', 'Questions for exams and practice'],
+  ['reports', 'Weekly Reports', 'Weekly reports to parents'],
+  ['communication', 'Messages', 'Messages with students and parents'],
+]
+function TeachingLauncher() {
+  const nav = useNavigate()
+  const [pick, setPick] = useState('dashboard')
+  const open = (p) => { try { sessionStorage.setItem('smartious.actAs', 'teacher') } catch (e) { /* private mode */ } nav('/teacher?page=' + p) }
+  const card = { textAlign: 'left', padding: 16, borderRadius: 12, border: '1px solid ' + TOKENS.s200, background: '#fff', color: TOKENS.s900, cursor: 'pointer' }
+  return (
+    <div>
+      <h2 style={{ fontSize: 22, margin: '0 0 6px' }}>Teaching</h2>
+      <p style={{ color: TOKENS.s500, margin: '0 0 16px', maxWidth: 680 }}>
+        You also teach. Open the teacher portal on any module to run your classes, mark work and see your students, exactly as teachers do. A bar at the top of the teacher portal brings you back here.
+      </p>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginBottom: 18 }}>
+        <select value={pick} onChange={e => setPick(e.target.value)}
+          style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid ' + TOKENS.s200, fontSize: 14, fontFamily: 'inherit', minWidth: 260 }}>
+          {TEACHER_MODULES.map(([k, l]) => <option key={k} value={k}>{l}</option>)}
+        </select>
+        <button type="button" onClick={() => open(pick)}
+          style={{ padding: '10px 18px', borderRadius: 8, border: 'none', background: TOKENS.crimson, color: '#fff', fontWeight: 800, fontSize: 14, cursor: 'pointer' }}>
+          Open in teacher portal →
+        </button>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 10, maxWidth: 980 }}>
+        {TEACHER_MODULES.map(([k, l, d]) => (
+          <button key={k} type="button" onClick={() => open(k)} style={card}>
+            <b>{l}</b><div style={{ color: TOKENS.s500, fontSize: 13, marginTop: 3 }}>{d}</div>
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function VirtualLabLauncher() {
   const card = { display: 'block', padding: 20, borderRadius: 12, border: '1px solid ' + TOKENS.s200, background: '#fff', color: TOKENS.s900, textDecoration: 'none', marginBottom: 12, maxWidth: 560 }
   return (

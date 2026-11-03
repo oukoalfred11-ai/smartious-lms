@@ -10,6 +10,7 @@
  *   Admin        create/edit clubs, assign leaders, seed the starter set.
  */
 const express = require('express');
+const { teachersWhere } = require('../lib/teachers');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { auth, requireRole } = require('../middleware/auth');
@@ -450,7 +451,7 @@ router.patch('/:id', auth, requireRole('teacher', ...ADMIN), async (req, res) =>
 // GET /api/clubs/admin/teachers   pick-list for assigning leaders
 router.get('/admin/teachers', auth, requireRole(...ADMIN), async (req, res) => {
   try {
-    const rows = await User.find({ role: 'teacher', isActive: { $ne: false } }).select('firstName lastName avatar').sort({ firstName: 1 }).lean();
+    const rows = await User.find(teachersWhere({ isActive: { $ne: false } })).select('firstName lastName avatar').sort({ firstName: 1 }).lean();
     res.json({ success: true, data: { teachers: rows.map(t => ({ _id: t._id, name: [t.firstName, t.lastName].filter(Boolean).join(' '), avatar: t.avatar || '' })) } });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });

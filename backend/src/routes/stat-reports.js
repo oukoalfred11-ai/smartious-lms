@@ -12,6 +12,7 @@
  *   columns: [{ key, label, type }], rows }
  */
 const express = require('express')
+const { teachersWhere } = require('../lib/teachers');
 const router = express.Router()
 const { auth, requireRole } = require('../middleware/auth')
 const User = require('../models/User')
@@ -197,7 +198,7 @@ const REPORTS = {
   async teachers(q) {
     const w = windowOf(q, 30)
     const [teachers, facts, allocs] = await Promise.all([
-      User.find({ role: 'teacher', isActive: { $ne: false } }).select('firstName lastName email teacherCategory').sort({ firstName: 1 }).lean(),
+      User.find(teachersWhere({ isActive: { $ne: false } })).select('firstName lastName email teacherCategory').sort({ firstName: 1 }).lean(),
       attendanceFacts.sessionFacts(w.from, w.to, { limit: 3000 }),
       Allocation.aggregate([{ $match: { status: 'Active' } }, { $group: { _id: '$teacherId', students: { $addToSet: '$studentId' } } }]),
     ])

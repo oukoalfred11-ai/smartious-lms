@@ -6,6 +6,7 @@
  * Mounted at /api/dos
  */
 const express  = require('express')
+const { teachersWhere } = require('../lib/teachers');
 const router   = express.Router()
 const mongoose = require('mongoose')
 const { auth, requireRole } = require('../middleware/auth')
@@ -175,7 +176,7 @@ router.get('/homework-compliance', auth, ALLOWED, async (req, res) => {
     if (termEnd)   dateFilter.$lte = new Date(termEnd)
 
     // Get all teachers (or one specific)
-    const teacherFilter = { role:'teacher', isActive:true }
+    const teacherFilter = teachersWhere({ isActive: true })
     if (teacherId) teacherFilter._id = new mongoose.Types.ObjectId(teacherId)
     const teachers = await User.find(teacherFilter).select('firstName lastName').lean()
 

@@ -97,7 +97,9 @@ function Guard({ children, roles }) {
   }
   // Wrong portal for this role: let RoleRedirect pick the right one
   // (ops_manager lives at /ops and accountant at /accounts, not /<role>).
-  if (roles && !roles.includes(user.role)) return <Navigate to="/portal" replace />
+  // A staff account that also teaches may use the teacher routes.
+  const alsoTeaches = roles && roles.includes('teacher') && (user.additionalRoles || []).includes('teacher')
+  if (roles && !roles.includes(user.role) && !alsoTeaches) return <Navigate to="/portal" replace />
   return children
 }
 

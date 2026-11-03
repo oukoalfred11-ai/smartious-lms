@@ -503,6 +503,21 @@ function MobileBottomTabs({ tabs, page, setPage }) {
 }
 
 
+// The bar shown in teaching mode: who you are working as, and the way back.
+const PORTAL_NAMES = { accountant: 'Accounts', admin: 'Admin', dos: 'Dean & Operations', ops_manager: 'Dean & Operations', sales: 'Sales', qa: 'Quality' }
+function TeachingModeBar({ role, onBack }) {
+  return (
+    <div style={{ position: 'fixed', top: 10, left: '50%', transform: 'translateX(-50%)', zIndex: 900, display: 'flex', alignItems: 'center', gap: 10,
+      background: '#1A0F0E', color: '#fff', borderRadius: 99, padding: '6px 6px 6px 14px', boxShadow: '0 6px 20px rgba(0,0,0,.25)', fontSize: 12.5, fontWeight: 700 }}>
+      <span style={{ color: '#E7C77A' }}>Teaching mode</span>
+      <button type="button" onClick={onBack}
+        style={{ border: 'none', background: '#7D1025', color: '#fff', borderRadius: 99, padding: '6px 12px', fontSize: 12, fontWeight: 800, cursor: 'pointer' }}>
+        ← Back to {PORTAL_NAMES[role] || 'my'} portal
+      </button>
+    </div>
+  )
+}
+
 export default function TeacherPortal() {
   const toast  = useToast()
   const store  = useStore()
@@ -534,7 +549,14 @@ export default function TeacherPortal() {
     ? ('Mr. ' + (currentUser.firstName || '') + ' ' + (currentUser.lastName || '')).trim()
     : 'Teacher'
 
-  const [page, setPage] = useState('dashboard')
+  // A staff account that also teaches (e.g. an accountant) works here in
+  // teaching mode: every API call goes as a teacher (context/ctx.jsx), and
+  // a bar at the top leads back to their own portal. ?page= opens a module.
+  const actingRole = currentUser && currentUser.role !== 'teacher' && (currentUser.additionalRoles || []).includes('teacher') ? currentUser.role : ''
+  if (actingRole) { try { sessionStorage.setItem('smartious.actAs', 'teacher') } catch (e) { /* private mode */ } }
+  const [page, setPage] = useState(() => {
+    try { return new URLSearchParams(window.location.search).get('page') || 'dashboard' } catch { return 'dashboard' }
+  })
   const navigateTo = useNavigate()
   // Schedule Classes and Timetable are one module now: My Classes.
   useEffect(() => { if (['timetable', 'scheduleclasses', 'schedule'].includes(page)) setPage('myclasses') }, [page])
@@ -788,6 +810,7 @@ export default function TeacherPortal() {
 
         <MobileBottomTabs tabs={TEACHER_MOBILE_TABS} page={page} setPage={setPage}/>
         {endedId && <EndOfLessonOverlay classId={endedId} toast={toast} onClose={closeEnded}/>}
+        {actingRole && <TeachingModeBar role={actingRole} onBack={() => { try { sessionStorage.removeItem('smartious.actAs') } catch (e) {} navigateTo('/portal') }} />}
       </div>
     )
   }
@@ -795,6 +818,7 @@ export default function TeacherPortal() {
 
   return (
     <div className="app">
+      {actingRole && <TeachingModeBar role={actingRole} onBack={() => { try { sessionStorage.removeItem('smartious.actAs') } catch (e) {} navigateTo('/portal') }} />}
       <style>{`
         /* ══ THE INVERSION, AND WHY THE --s* SCALE MUST BE RESTORED ══
            The line below inverts the ink/parchment scale for the dark
