@@ -1,4 +1,5 @@
 const express = require('express');
+const { teachersWhere, isTeacher } = require('../lib/teachers');
 const Allocation = require('../models/Allocation');
 const User = require('../models/User');
 const Subject = require('../models/Subject');
@@ -274,8 +275,7 @@ router.get('/suggest-teachers/:studentId/:subjectId', auth, requireRole('admin',
     if (!subject)
       return res.status(404).json({ success: false, message: 'Subject not found' });
 
-    const qualifiedTeachers = await User.find({
-      role: 'teacher',
+    const qualifiedTeachers = await User.find(teachersWhere({
       isActive: true,
       teachingSpecialties: {
         $elemMatch: {
@@ -283,7 +283,7 @@ router.get('/suggest-teachers/:studentId/:subjectId', auth, requireRole('admin',
           curriculum: student.curriculum
         }
       }
-    }).select('firstName lastName email');
+    })).select('firstName lastName email');
 
     const existingAllocation = await Allocation.findOne({
       studentId: studentId,
@@ -346,7 +346,7 @@ router.post('/', auth, requireRole('admin', 'ops_manager'), async (req, res) => 
       return res.status(400).json({ success: false, message: 'Student is not enrolled in this subject' });
 
     const teacher = await User.findById(teacherId);
-    if (!teacher || teacher.role !== 'teacher')
+    if (!isTeacher(teacher))
       return res.status(404).json({ success: false, message: 'Teacher not found' });
 
     const hasSpecialty = teacher.teachingSpecialties?.some(ts =>
@@ -482,7 +482,7 @@ router.patch('/:id', auth, requireRole('admin', 'ops_manager'), async (req, res)
 
     if (teacherId && teacherId !== allocation.teacherId.toString()) {
       const teacher = await User.findById(teacherId);
-      if (!teacher || teacher.role !== 'teacher')
+      if (!isTeacher(teacher))
         return res.status(404).json({ success: false, message: 'Teacher not found' });
 
       const hasSpecialty = teacher.teachingSpecialties?.some(ts =>

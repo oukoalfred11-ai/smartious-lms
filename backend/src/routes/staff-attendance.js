@@ -13,6 +13,7 @@
  * marked, excluding leave and off days.
  */
 const express = require('express')
+const { teachersWhere } = require('../lib/teachers');
 const mongoose = require('mongoose')
 const router = express.Router()
 const { auth, requireRole } = require('../middleware/auth')
@@ -42,7 +43,7 @@ router.get('/', auth, DEAN, async (req, res) => {
     const day = isDay(req.query.day) ? req.query.day : zonedDayKey(new Date(), TZ)
     const { start, end } = dayBounds(day)
     const [teachers, marks, leaves, lessons] = await Promise.all([
-      User.find({ role: 'teacher', isActive: { $ne: false }, archived: { $ne: true } }).select('firstName lastName email teacherCategory').sort({ firstName: 1, lastName: 1 }).lean(),
+      User.find(teachersWhere({ isActive: { $ne: false }, archived: { $ne: true } })).select('firstName lastName email teacherCategory').sort({ firstName: 1, lastName: 1 }).lean(),
       StaffAttendance.find({ day }).populate('markedBy', 'firstName lastName').lean(),
       TeacherLeaveRequest.find({ status: 'Approved', leaveStartDate: { $lte: end }, leaveEndDate: { $gte: start } }).select('teacherId leaveType leaveStartDate leaveEndDate').lean(),
       LiveClass.find({ scheduledAt: { $gte: start, $lte: end }, status: { $ne: 'cancelled' }, kind: { $in: ['lesson', null] } })
@@ -83,7 +84,7 @@ router.post('/', auth, DEAN, async (req, res) => {
       if (!mongoose.isValidObjectId(m?.staffId)) continue
       if (m.status === null || m.status === '') { cleared += (await StaffAttendance.deleteOne({ staffId: m.staffId, day })).deletedCount; continue }
       if (!STAFF_MARKS.includes(m.status)) return res.status(400).json({ success: false, message: 'Unknown mark: ' + m.status })
-      if (!(await User.exists({ _id: m.staffId, role: 'teacher' }))) continue
+      if (!(await User.exists(teachersWhere({ _id: m.staffId })))) continue
       await StaffAttendance.updateOne({ staffId: m.staffId, day },
         { $set: { status: m.status, note: String(m.note || '').trim().slice(0, 300), markedBy: req.user._id } }, { upsert: true })
       saved++
@@ -109,7 +110,7 @@ router.get('/summary', auth, DEAN, async (req, res) => {
     const to = isDay(req.query.to) ? req.query.to : zonedDayKey(new Date(), TZ)
     const from = isDay(req.query.from) ? req.query.from : zonedDayKey(new Date(Date.now() - 30 * 864e5), TZ)
     const [teachers, by] = await Promise.all([
-      User.find({ role: 'teacher', isActive: { $ne: false }, archived: { $ne: true } }).select('firstName lastName').sort({ firstName: 1 }).lean(),
+      User.find(teachersWhere({ isActive: { $ne: false }, archived: { $ne: true } })).select('firstName lastName').sort({ firstName: 1 }).lean(),
       summary(from, to),
     ])
     const rows = teachers.map(t => {

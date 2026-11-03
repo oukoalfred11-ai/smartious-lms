@@ -27,6 +27,7 @@
  */
 
 const express = require('express');
+const { teachersWhere } = require('../lib/teachers');
 const router = express.Router();
 const mongoose = require('mongoose');
 
@@ -352,7 +353,7 @@ router.get('/overview', auth, requireRole('admin', 'ops_manager', 'dos', 'teache
     const User = require('../models/User');
     const Subject = require('../models/Subject');
     const [teachers, students, perTeacher, weekendCount, subjects] = await Promise.all([
-      User.find({ role: 'teacher', isActive: { $ne: false } }).select('firstName lastName').sort({ firstName: 1 }).lean(),
+      User.find(teachersWhere({ isActive: { $ne: false } })).select('firstName lastName').sort({ firstName: 1 }).lean(),
       User.find({ role: 'student', isActive: { $ne: false } }).select('firstName lastName gradeLevel admissionNo').sort({ firstName: 1 }).lean(),
       TimetableEntry.aggregate([
         { $match: { isActive: true } },

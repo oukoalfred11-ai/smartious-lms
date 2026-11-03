@@ -37,6 +37,9 @@ api.interceptors.request.use(cfg => {
   if (t && t !== 'undefined' && t !== 'null') {
     cfg.headers.Authorization = `Bearer ${t}`
   }
+  // Teaching mode: a staff account that also teaches (e.g. an accountant)
+  // works in the teacher portal as a teacher (backend middleware/auth.js).
+  try { if (sessionStorage.getItem('smartious.actAs') === 'teacher') cfg.headers['X-Act-As'] = 'teacher' } catch (e) { /* private mode */ }
   return cfg
 })
 

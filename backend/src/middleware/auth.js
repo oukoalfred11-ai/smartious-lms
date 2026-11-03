@@ -94,6 +94,20 @@ const auth = async (req, res, next) => {
     }
 
     req.user = user;
+
+    // ── Teaching mode ───────────────────────────────────────
+    // A staff account that also teaches (additionalRoles 'teacher'), for
+    // example an accountant, works in the teacher portal, which sends
+    // X-Act-As: teacher. For those requests the account IS a teacher, so
+    // every "my students / my classes" rule written for teachers applies
+    // unchanged. A plain copy carries the role, never the stored document,
+    // so it cannot be saved back. /api/auth always sees the real role.
+    if (String(req.headers['x-act-as'] || '').toLowerCase() === 'teacher'
+        && user.role !== 'teacher'
+        && (user.additionalRoles || []).includes('teacher')
+        && !String(req.originalUrl || '').startsWith('/api/auth')) {
+      req.user = { ...user.toObject(), role: 'teacher', realRole: user.role, actingAs: 'teacher' };
+    }
     next();
   } catch (e) {
     // Only a bad or expired token is an authentication failure (401). Any

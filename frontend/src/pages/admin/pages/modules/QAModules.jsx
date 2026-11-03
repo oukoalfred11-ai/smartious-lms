@@ -731,6 +731,21 @@ function MemberProfile({ id, toast, onBack }) {
                 </button>
               </div>
             )}
+            {p.canAssignTeaching && (
+              <div style={{ marginBottom: 14, padding: '12px 14px', border: '1.5px solid ' + (t.alsoTeaches ? GOLD : LINE), borderRadius: 12, background: t.alsoTeaches ? TOKENS.goldPale : '#fff', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                <div style={{ flex: 1, minWidth: 220 }}>
+                  <div style={{ fontSize: 13, fontWeight: 800, color: TOKENS.s900 }}>Also teaches</div>
+                  <div style={{ fontSize: 11.5, color: TOKENS.s500, marginTop: 2 }}>
+                    Adds a Teaching section to this account that opens the teacher portal, and lists them with the teachers so they can be given subjects, students and timetable slots. Set their subjects in Teachers afterwards.
+                  </div>
+                </div>
+                <button disabled={busy === 'role'} onClick={() => saveRole({ alsoTeaches: !t.alsoTeaches })}
+                  style={{ width: 52, height: 30, borderRadius: 99, border: 'none', cursor: 'pointer', position: 'relative', background: t.alsoTeaches ? CR : '#D6D0C4', flexShrink: 0 }}
+                  aria-label="Also teaches">
+                  <span style={{ position: 'absolute', top: 4, left: t.alsoTeaches ? 26 : 4, width: 22, height: 22, borderRadius: '50%', background: '#fff', transition: 'left .16s', boxShadow: '0 1px 3px rgba(0,0,0,.25)' }} />
+                </button>
+              </div>
+            )}
             <div style={lbl}>Job title shown on the profile</div>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               <input style={{ ...inp, maxWidth: 320 }} value={titleDraft ?? (t.jobTitle || '')} placeholder={titleOf(t)}
