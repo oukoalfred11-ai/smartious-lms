@@ -10,3 +10,11 @@ test('built-in syllabus is found by curriculum and subject name', async () => {
   assert.strictEqual(await librarySpine('CambridgeALevel', 'No such subject'), null)
   assert.strictEqual(await librarySpine('UnknownCurriculum', 'Chemistry'), null)
 })
+
+test('Cambridge Lower Secondary Religious Studies has its own scheme', async () => {
+  const r = await librarySpine('CambridgeLowerSec', 'Religious Studies')
+  assert.ok(r && /Religious Studies/.test(r.source))
+  assert.ok(r.topics.length >= 10)
+  const h = await librarySpine('CambridgeLowerSec', 'History')
+  assert.ok(h && /History/.test(h.source))
+})

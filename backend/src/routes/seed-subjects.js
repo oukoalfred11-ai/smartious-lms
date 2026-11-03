@@ -161,6 +161,7 @@ const ALL_SUBJECTS = [
   { curriculum:'CambridgeLowerSec', subjectName:'French',             category:'Languages' },
   { curriculum:'CambridgeLowerSec', subjectName:'Arabic',             category:'Languages' },
   { curriculum:'CambridgeLowerSec', subjectName:'Kiswahili',          category:'Languages' },
+  { curriculum:'CambridgeLowerSec', subjectName:'Religious Studies',  category:'Humanities' },
 
   // ── EdexcelLowerSec ──────────────────────────────────────
   { curriculum:'EdexcelLowerSec', subjectName:'Mathematics',          category:'Mathematics' },

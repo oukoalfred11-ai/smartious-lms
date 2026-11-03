@@ -9375,6 +9375,117 @@ const LOWERSEC_HISTORY = [
     ] },
 ]
 
+// Lower Secondary Religious Studies — Cambridge (Stages 7-9).
+//
+// NO CHECKPOINT SYLLABUS EXISTS FOR THIS
+// Cambridge does not publish a Lower Secondary Religious Studies
+// curriculum, so, as for Geography and History, this is a school scheme
+// in the standard Key Stage 3 shape, built to feed Cambridge IGCSE
+// Religious Studies (0490): the major world religions studied side by
+// side, their beliefs, practices and texts, then ethics and big
+// questions, with the skills of explaining and evaluating taught in
+// every stage rather than once.
+//
+// It is a study ABOUT religion, not instruction in one: students learn
+// what different communities believe and why, and argue a view with
+// evidence while treating every tradition with respect.
+const LOWERSEC_RELIGIOUS_STUDIES = [
+  { topic: 'S7 · Studying Religion', code: 'S7-SR',
+    subtopics: [
+      { name: 'What Is Religion? Belief, Practice and Community (Stage 7)', code: 'S7-SR.1' },
+      { name: 'Respectful Enquiry: Studying Beliefs Other Than Our Own (Stage 7)', code: 'S7-SR.2' },
+      { name: 'Sources of Authority: Scripture, Tradition and Leaders (Stage 7)', code: 'S7-SR.3' },
+      { name: 'Symbols and What They Express (Stage 7)', code: 'S7-SR.4' },
+    ] },
+  { topic: 'S7 · The Abrahamic Faiths', code: 'S7-AB',
+    subtopics: [
+      { name: 'Judaism: Abraham, Moses and the Covenant (Stage 7)', code: 'S7-AB.1' },
+      { name: 'Judaism: Torah, Shabbat and the Synagogue (Stage 7)', code: 'S7-AB.2' },
+      { name: 'Christianity: Jesus of Nazareth and His Teaching (Stage 7)', code: 'S7-AB.3' },
+      { name: 'Christianity: The Bible, the Church and Prayer (Stage 7)', code: 'S7-AB.4' },
+      { name: 'Islam: The Prophet Muhammad and the Revelation of the Qur’an (Stage 7)', code: 'S7-AB.5' },
+      { name: 'Islam: The Five Pillars (Stage 7)', code: 'S7-AB.6' },
+      { name: 'Shared Roots and Distinct Beliefs of the Abrahamic Faiths (Stage 7)', code: 'S7-AB.7' },
+    ] },
+  { topic: 'S7 · Faiths of South and East Asia', code: 'S7-AS',
+    subtopics: [
+      { name: 'Hinduism: Brahman, the Deities and Dharma (Stage 7)', code: 'S7-AS.1' },
+      { name: 'Hinduism: Worship in the Home and the Mandir (Stage 7)', code: 'S7-AS.2' },
+      { name: 'Buddhism: The Life of the Buddha (Stage 7)', code: 'S7-AS.3' },
+      { name: 'Buddhism: The Four Noble Truths and the Eightfold Path (Stage 7)', code: 'S7-AS.4' },
+      { name: 'Sikhism: Guru Nanak and the Gurdwara (Stage 7)', code: 'S7-AS.5' },
+    ] },
+  { topic: 'S7 · Religion in Africa and Our Community', code: 'S7-AF',
+    subtopics: [
+      { name: 'African Traditional Religion: God, Ancestors and Community (Stage 7)', code: 'S7-AF.1' },
+      { name: 'Religious Diversity in Our Country and City (Stage 7)', code: 'S7-AF.2' },
+      { name: 'Explaining a Belief Clearly: Writing Skills (Stage 7)', code: 'S7-AF.3' },
+    ] },
+
+  { topic: 'S8 · Sacred Texts', code: 'S8-ST',
+    subtopics: [
+      { name: 'How Sacred Texts Were Formed and Passed On (Stage 8)', code: 'S8-ST.1' },
+      { name: 'Reading and Interpreting a Sacred Text (Stage 8)', code: 'S8-ST.2' },
+      { name: 'The Bible: Parables and Their Meaning (Stage 8)', code: 'S8-ST.3' },
+      { name: 'The Qur’an and the Hadith (Stage 8)', code: 'S8-ST.4' },
+      { name: 'The Bhagavad Gita and the Dhammapada (Stage 8)', code: 'S8-ST.5' },
+    ] },
+  { topic: 'S8 · Worship, Festivals and Pilgrimage', code: 'S8-WF',
+    subtopics: [
+      { name: 'Why People Worship: Prayer, Meditation and Ritual (Stage 8)', code: 'S8-WF.1' },
+      { name: 'Festivals: Passover, Easter and Christmas (Stage 8)', code: 'S8-WF.2' },
+      { name: 'Festivals: Ramadan, Eid al-Fitr and Eid al-Adha (Stage 8)', code: 'S8-WF.3' },
+      { name: 'Festivals: Diwali, Vesak and Vaisakhi (Stage 8)', code: 'S8-WF.4' },
+      { name: 'Pilgrimage: Hajj, Jerusalem, Varanasi and Bodh Gaya (Stage 8)', code: 'S8-WF.5' },
+      { name: 'Places of Worship Compared (Stage 8)', code: 'S8-WF.6' },
+    ] },
+  { topic: 'S8 · The Journey of Life', code: 'S8-JL',
+    subtopics: [
+      { name: 'Birth and Initiation Ceremonies (Stage 8)', code: 'S8-JL.1' },
+      { name: 'Coming of Age: Bar and Bat Mitzvah, Confirmation, Amrit (Stage 8)', code: 'S8-JL.2' },
+      { name: 'Marriage and Family in Religious Traditions (Stage 8)', code: 'S8-JL.3' },
+      { name: 'Death, Mourning and Beliefs About the Afterlife (Stage 8)', code: 'S8-JL.4' },
+    ] },
+  { topic: 'S8 · Religion in Action', code: 'S8-RA',
+    subtopics: [
+      { name: 'Charity and Service: Zakat, Tithing and Seva (Stage 8)', code: 'S8-RA.1' },
+      { name: 'Inspiring Lives: Religious Leaders Who Changed Society (Stage 8)', code: 'S8-RA.2' },
+      { name: 'Religion and the Arts: Architecture, Music and Calligraphy (Stage 8)', code: 'S8-RA.3' },
+      { name: 'Comparing Two Religions: Structured Writing (Stage 8)', code: 'S8-RA.4' },
+    ] },
+
+  { topic: 'S9 · Ethics and Moral Decisions', code: 'S9-EM',
+    subtopics: [
+      { name: 'How Do We Decide What Is Right? Sources of Moral Guidance (Stage 9)', code: 'S9-EM.1' },
+      { name: 'The Golden Rule Across Religions (Stage 9)', code: 'S9-EM.2' },
+      { name: 'Wealth, Poverty and Justice (Stage 9)', code: 'S9-EM.3' },
+      { name: 'Peace, Conflict and Forgiveness (Stage 9)', code: 'S9-EM.4' },
+      { name: 'Prejudice, Discrimination and Equality (Stage 9)', code: 'S9-EM.5' },
+      { name: 'Stewardship: Religion and the Environment (Stage 9)', code: 'S9-EM.6' },
+      { name: 'The Sanctity of Life: Medical Ethics (Stage 9)', code: 'S9-EM.7' },
+    ] },
+  { topic: 'S9 · Big Questions', code: 'S9-BQ',
+    subtopics: [
+      { name: 'Does God Exist? Arguments For and Against (Stage 9)', code: 'S9-BQ.1' },
+      { name: 'The Problem of Evil and Suffering (Stage 9)', code: 'S9-BQ.2' },
+      { name: 'Religion and Science: Conflict or Conversation? (Stage 9)', code: 'S9-BQ.3' },
+      { name: 'What Happens When We Die? (Stage 9)', code: 'S9-BQ.4' },
+    ] },
+  { topic: 'S9 · Religion in the Modern World', code: 'S9-MW',
+    subtopics: [
+      { name: 'Religious Freedom and Human Rights (Stage 9)', code: 'S9-MW.1' },
+      { name: 'Interfaith Dialogue and Living Together (Stage 9)', code: 'S9-MW.2' },
+      { name: 'Religion, Media and Misunderstanding (Stage 9)', code: 'S9-MW.3' },
+    ] },
+  { topic: 'S9 · Bridge to IGCSE', code: 'S9-BR',
+    subtopics: [
+      { name: 'Evaluating a Statement: Arguing More Than One View (Stage 9)', code: 'S9-BR.1' },
+      { name: 'Using Sources and Quotations as Evidence (Stage 9)', code: 'S9-BR.2' },
+      { name: 'Extended Writing Under Timed Conditions (Stage 9)', code: 'S9-BR.3' },
+      { name: 'End-of-Stage Review and Preparing for IGCSE Religious Studies (Stage 9)', code: 'S9-BR.4' },
+    ] },
+]
+
 // ── Edexcel International Lower Secondary — Years 7-9 ──────────
 
 const ILOWERSEC_GEOGRAPHY = [
@@ -9795,6 +9906,8 @@ export const LOWER_SEC_LIBRARY = [
     source: 'Cambridge Lower Secondary Geography \u2014 59-lesson scheme (Stages 7-9)' },
   { match: /\bhistory\b/i,                const_: LOWERSEC_HISTORY,
     source: 'Cambridge Lower Secondary History \u2014 50-lesson scheme (Stages 7-9)' },
+  { match: /\breligio/i,                 const_: LOWERSEC_RELIGIOUS_STUDIES,
+    source: 'Cambridge Lower Secondary Religious Studies \u2014 school scheme (no Checkpoint syllabus), 56-lesson scheme (Stages 7-9), building to IGCSE 0490' },
   { match: /\bglobal\s*perspective/i,     const_: LOWERSEC_GLOBAL_1129,
     source: 'Cambridge Lower Secondary Global Perspectives 1129 \u2014 41-lesson scheme (Stages 7-9)' },
   { match: /\bart\b/i,                    const_: LOWERSEC_ART_DESIGN,
