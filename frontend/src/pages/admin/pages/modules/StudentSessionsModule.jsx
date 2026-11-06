@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { api } from '../../../../context/ctx.jsx'
+import { api, useAuth } from '../../../../context/ctx.jsx'
 import { TOKENS } from '../shared/tokens.js'
 import { PCard } from '../shared/ui.jsx'
 import LeaversPanel from './LeaversPanel.jsx'
@@ -42,6 +42,7 @@ const inp = { width: '100%', padding: '9px 12px', border: '1px solid ' + TOKENS.
 const lbl = { display: 'block', fontSize: 11, fontWeight: 700, color: TOKENS.s500 || '#6B7280', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '.4px' }
 
 function StudentSessionsModule({ toast, refreshKey }) {
+  const { user: me } = useAuth() || {}
   const [students, setStudents] = useState([])
   const [stats, setStats] = useState({ total: 0, paused: 0, active: 0, byType: {} })
   const [loading, setLoading] = useState(true)
@@ -195,7 +196,7 @@ function StudentSessionsModule({ toast, refreshKey }) {
       </div>
 
       {/* ── Leavers and alumni (reloads with the years data after an exit, reinstatement or promotion) ── */}
-      <LeaversPanel refreshKey={refreshKey} reloadOn={yearsData} toast={toast} onChanged={() => { load(); loadYears() }} />
+      <LeaversPanel refreshKey={refreshKey} reloadOn={yearsData} toast={toast} role={me?.role} onChanged={() => { load(); loadYears() }} />
 
       {/* ── Exit modal: left or graduated ── */}
       {exiting && (
