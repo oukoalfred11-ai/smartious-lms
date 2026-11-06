@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { api } from '../../../../context/ctx.jsx'
 import { AnalyticsStrip } from '../shared/charts.jsx'
 import { TOKENS } from '../shared/tokens.js'
 import { joinClassroom } from '../../../../lib/joinClassroom.js'
+import LiveNowStrip from './LiveNowStrip.jsx'
 
 const LINE = TOKENS.line || '#EAE4DC'
 const S600 = TOKENS.s600 || '#6B5D57'
@@ -17,6 +18,7 @@ const fmtDate = (d) => d ? new Date(d).toLocaleString('en-GB', { day:'numeric', 
 
 export default function LiveClassesModule({ toast }) {
   const [tab, setTab] = useState('recordings')
+  const openedRef = useRef(false)
   const [recordings, setRecordings] = useState([])
   const [liveClasses, setLiveClasses] = useState([])
   const [loading, setLoading] = useState(true)
@@ -42,6 +44,7 @@ export default function LiveClassesModule({ toast }) {
     ]).then(([r, l]) => {
       setRecordings(r.data?.data?.recordings || [])
       setLiveClasses(l.data?.data?.classes || [])
+      if (!openedRef.current) { openedRef.current = true; if ((l.data?.data?.classes || []).some(c => c.status === 'live')) setTab('live') }
       setPast(l.data?.data?.past || [])
     }).finally(() => setLoading(false))
   }, [])
@@ -104,6 +107,8 @@ export default function LiveClassesModule({ toast }) {
           Every class records automatically. Review recordings, delete weak ones, and add the best onto their lesson in the player.
         </p>
       </div>
+
+      <LiveNowStrip />
 
       <div style={{ display: 'flex', gap: 6, background: TOKENS.cream, padding: 5, borderRadius: 10, width: 'fit-content' }}>
         {tabBtn('recordings', 'Recordings', recordings.length)}
