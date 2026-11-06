@@ -87,6 +87,19 @@ const examSchema = new mongoose.Schema({
     index: true,
   },
 
+  // Dean verification. A teacher's exam starts 'pending' and students see
+  // nothing (no list entry, no paper, no email) until the Dean, the
+  // Operations Manager or an admin approves it. 'returned' sends it back
+  // to the teacher with a note; any edit resubmits it. Exams set by staff,
+  // and every exam made before this rule, are 'approved'.
+  approval: {
+    status:      { type: String, enum: ['pending', 'approved', 'returned'], default: 'approved', index: true },
+    submittedAt: { type: Date, default: null },
+    reviewedBy:  { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+    reviewedAt:  { type: Date, default: null },
+    note:        { type: String, default: '', trim: true },
+  },
+
   totalMarks:     { type: Number, default: 0 },
   totalQuestions: { type: Number, default: 0 },
 

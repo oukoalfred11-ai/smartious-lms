@@ -5,6 +5,7 @@ import { DOSSpinner, PSection } from '../shared/ui.jsx'
 import { LessonsToClose } from '../../../../components/lessons/LessonControl.jsx'
 import { SchoolCalendarManager } from '../../../../components/lessons/SchoolCalendar.jsx'
 import { ClickStat, useStatReport } from '../shared/StatReport.jsx'
+import ExamReviewPanel from './ExamReviewPanel.jsx'
 
 export function DOSAnalyticsModule({ toast, refreshKey }) {
   const [overview, setOverview]   = useState(null)
@@ -303,6 +304,7 @@ export function DOSExamsModule({ toast, refreshKey }) {
   return (
     <>
       <PSection tag="Dean of Studies" title="Exams &" em="Assessments" sub="All weekly assessments and end-of-term exams. Click any exam to see student scores and grade distribution."/>
+      <ExamReviewPanel toast={toast} onDecided={load} />
       <div style={{ display:'flex', gap:8, marginBottom:14, flexWrap:'wrap', alignItems:'center' }}>
         <input value={filters.search} onChange={e=>setFilters(p=>({...p,search:e.target.value}))} placeholder="Search exam or subject..."
           style={{ flex:'1 1 200px', padding:'8px 11px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:13, fontFamily:'inherit' }}/>
@@ -337,7 +339,10 @@ export function DOSExamsModule({ toast, refreshKey }) {
                   onMouseEnter={ev=>ev.currentTarget.style.background=TOKENS.cream}
                   onMouseLeave={ev=>ev.currentTarget.style.background='transparent'}
                   onClick={()=>openExam(e)}>
-                  <td style={{ padding:'10px 12px', fontWeight:700, fontSize:13, color:TOKENS.s900 }}>{e.title}</td>
+                  <td style={{ padding:'10px 12px', fontWeight:700, fontSize:13, color:TOKENS.s900 }}>{e.title}
+                    {e.approval?.status === 'pending' && <span style={{ marginLeft:6, padding:'1px 7px', borderRadius:99, fontSize:9.5, fontWeight:800, background:'#FEF3C7', color:'#92400E' }}>AWAITING VERIFICATION</span>}
+                    {e.approval?.status === 'returned' && <span style={{ marginLeft:6, padding:'1px 7px', borderRadius:99, fontSize:9.5, fontWeight:800, background:'#FEE2E2', color:'#991B1B' }}>RETURNED</span>}
+                  </td>
                   <td style={{ padding:'10px 12px' }}><span style={{ padding:'2px 9px', borderRadius:99, fontSize:10.5, fontWeight:700, background:end?'#FDE7EC':'#DBEAFE', color:end?'#7D1025':'#1E40AF' }}>{end?'End-term':'Weekly'}</span></td>
                   <td style={{ padding:'10px 12px', fontSize:12.5, color:TOKENS.s700 }}>{e.subject||'—'}</td>
                   <td style={{ padding:'10px 12px', fontSize:12, color:TOKENS.s500 }}>{e.curriculum||'—'}</td>

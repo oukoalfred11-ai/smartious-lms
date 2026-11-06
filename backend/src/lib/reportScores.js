@@ -51,7 +51,7 @@ async function scoresFor(studentId, tStart, tEnd) {
   const Exam = require('../models/Exam')
   const ExamSubmission = require('../models/ExamSubmission')
   const MarkEntry = require('../models/MarkEntry')
-  const exams = await Exam.find({ assignedStudents: studentId, startAt: { $gte: tStart, $lte: tEnd } })
+  const exams = await Exam.find({ assignedStudents: studentId, startAt: { $gte: tStart, $lte: tEnd }, ...require('./examApproval').PUBLISHED })
     .select('title subject startAt totalMarks').lean()
   const subs = exams.length ? await ExamSubmission.find({ examId: { $in: exams.map(e => e._id) }, studentId, status: { $in: ['graded', 'returned'] } }).lean() : []
   const byExam = new Map(subs.map(s => [String(s.examId), s]))

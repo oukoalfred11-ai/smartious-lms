@@ -87,7 +87,7 @@ const NAV_SECTIONS = {
     { label: 'People',      items: ['users', 'admissiondocs', 'teachers', 'careers', 'allocations', 'sessions', 'communication', 'support', 'dmoversight', 'community', 'announcements', 'teacherratings'] },
     { label: 'Reports',     items: ['reports', 'dosanalytics'] },
     { label: 'Operations',  items: ['frontdesk', 'assessment', 'partnerships', 'documents', 'payroll', 'leave', 'programmes', 'inventory'] },
-    { label: 'Teaching',    items: ['liveclasses', 'clubs', 'grouprooms', 'curriculum', 'oversight', 'dosattend', 'virtuallab'] },
+    { label: 'Teaching',    items: ['liveclasses', 'clubs', 'grouprooms', 'curriculum', 'oversight', 'dosattend', 'exams', 'virtuallab'] },
     { label: 'Question Bank', items: ['questionbank'] },
     { label: 'Quality',     items: ['qaoverview', 'teacherprofiles', 'tdp', 'accreditations'] },
     { label: 'Marketing',   items: ['leads', 'studio'] },
