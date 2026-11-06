@@ -8,6 +8,8 @@
  * GET  /api/ratings/my            — teacher sees their own rating summary
  * GET  /api/ratings/all           — COO/admin sees all teachers + ratings
  * POST /api/ratings/show-cause/:teacherId — apply show-cause deduction
+ * DELETE /api/ratings/teacher/:id/reset — reset one teacher's ratings
+ * DELETE /api/ratings/reset-all  — reset every teacher's ratings ({ confirm: 'RESET' })
  */
 const express = require('express')
 const { teachersWhere, isTeacher } = require('../lib/teachers');
@@ -112,6 +114,19 @@ router.delete('/teacher/:id/reset', auth, requireRole('admin', 'ops_manager'), a
   } catch (e) {
     return res.status(500).json({ success: false, message: e.message })
   }
+})
+
+// DELETE /api/ratings/reset-all — wipe every teacher's ratings and
+// show-cause deductions so all scores start afresh (a new term or review
+// period). Admin and the Operations Manager only; the request must carry
+// { confirm: 'RESET' } so it cannot fire by accident.
+router.delete('/reset-all', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
+  try {
+    if (String((req.body && req.body.confirm) || '') !== 'RESET') return fail(res, 400, 'Type RESET to confirm.')
+    const r = await TeacherRating.deleteMany({})
+    console.log(`[ratings] reset for ALL teachers: ${r.deletedCount} rating(s) removed by ${req.user.email}`)
+    return ok(res, { removed: r.deletedCount }, `All teacher ratings reset (${r.deletedCount} removed). Every score starts afresh.`)
+  } catch (e) { return fail(res, 500, e.message) }
 })
 
 router.post('/show-cause/:teacherId', auth, requireRole('admin','ops_manager'), async (req, res) => {

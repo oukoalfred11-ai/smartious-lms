@@ -232,6 +232,32 @@ export function TeacherRatingsModule({ toast, refreshKey }) {
     finally { setScSaving(false) }
   }
 
+  const [resetting, setResetting] = useState(null) // teacher id, or 'all'
+  const resetOne = async (t) => {
+    if (!window.confirm(`Reset all ratings for ${t.firstName} ${t.lastName}? ${t.ratingCount || 0} rating(s) and any show-cause deductions will be removed and their score starts afresh. This cannot be undone.`)) return
+    setResetting(t._id)
+    try {
+      const r = await api.delete('/ratings/teacher/' + t._id + '/reset')
+      toast?.ok?.(r.data?.message || 'Ratings reset.')
+      if (selected && String(selected._id) === String(t._id)) setSelected(null)
+      load()
+    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not reset ratings.') }
+    finally { setResetting(null) }
+  }
+  const resetAll = async () => {
+    const total = teachers.reduce((s, t) => s + (t.ratingCount || 0), 0)
+    const typed = window.prompt(`This removes all ${total} rating(s) and show-cause deductions for every teacher, so every score starts afresh. It cannot be undone.\n\nType RESET to confirm.`)
+    if (typed == null) return
+    if (typed.trim() !== 'RESET') { toast?.error?.('Not reset: type RESET to confirm.'); return }
+    setResetting('all')
+    try {
+      const r = await api.delete('/ratings/reset-all', { data: { confirm: 'RESET' } })
+      toast?.ok?.(r.data?.message || 'All ratings reset.')
+      setSelected(null); load()
+    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not reset ratings.') }
+    finally { setResetting(null) }
+  }
+
   const stars = (n) => {
     if (!n) return <span style={{ color:TOKENS.s400, fontSize:12 }}>No ratings</span>
     return (
@@ -253,6 +279,16 @@ export function TeacherRatingsModule({ toast, refreshKey }) {
     <>
       <PSection tag="COO Portal" title="Teacher" em="Ratings"
         sub="Performance ratings submitted by parents and students. Show-cause deductions reduce the adjusted rating."/>
+
+      {teachers.some(t => (t.ratingCount || 0) > 0) && (
+        <div style={{ display:'flex', justifyContent:'flex-end', marginBottom:12 }}>
+          <button onClick={resetAll} disabled={resetting === 'all'}
+            title="Remove every teacher's ratings and deductions so all scores start afresh"
+            style={{ padding:'8px 14px', borderRadius:8, border:'1px solid #FCA5A5', background:'#fff', color:'#991B1B', fontSize:12.5, fontWeight:700, cursor:'pointer' }}>
+            {resetting === 'all' ? 'Resetting…' : 'Reset all ratings'}
+          </button>
+        </div>
+      )}
 
       <div className="card" style={{ overflow:'hidden', marginBottom:20 }}>
         {loading ? <div style={{ padding:40, textAlign:'center', color:TOKENS.s400, fontSize:13 }}>Loading...</div>
@@ -291,6 +327,13 @@ export function TeacherRatingsModule({ toast, refreshKey }) {
                       <button onClick={()=>openDetail(t)} style={{ padding:'5px 10px', borderRadius:6, border:`1px solid ${TOKENS.line}`, background:'#fff', color:TOKENS.s700, fontSize:11.5, fontWeight:600, cursor:'pointer' }}>
                         View reviews
                       </button>
+                      {(t.ratingCount || 0) > 0 && (
+                        <button onClick={()=>resetOne(t)} disabled={resetting===t._id}
+                          title="Remove this teacher's ratings so their score starts afresh"
+                          style={{ padding:'5px 10px', borderRadius:6, border:`1px solid ${TOKENS.line}`, background:'#fff', color:TOKENS.s700, fontSize:11.5, fontWeight:700, cursor:'pointer' }}>
+                          {resetting===t._id ? 'Resetting…' : 'Reset'}
+                        </button>
+                      )}
                       <button onClick={()=>{ setScModal(t); setScReason('') }} style={{ padding:'5px 10px', borderRadius:6, border:'none', background:'#991B1B', color:'#fff', fontSize:11.5, fontWeight:700, cursor:'pointer' }}>
                         Show cause
                       </button>
