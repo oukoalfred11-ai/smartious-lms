@@ -280,9 +280,8 @@ const MAIN_LINKS = [
 const SERVICE_LINKS = SERVICES.map(sv => ({ href: '/services/' + sv.slug, label: sv.h }))
 const CURRICULA_LINKS = CURRICULA.map(c => ({ href: '/curricula/' + c.slug, label: c.h, note: c.badge }))
 const UAE_PRODUCT_LINKS = [
-  { href: '/homeschool-dubai-ae', label: 'Online school in Dubai', note: 'Full-time live classes and homeschooling, IGCSE to A-Level and IB' },
-  { href: '/tuition-uae', label: 'Online tutors in Dubai', note: '1-on-1 tuition in IGCSE, A-Level and IB subjects' },
-  { href: '/online-school/uae', label: 'Abu Dhabi, Sharjah and the rest of the UAE', note: 'Every emirate we teach in' },
+  { href: '/homeschool-dubai-ae', label: 'Online school & homeschooling in Dubai', note: 'Full-time live classes on UAE time, IGCSE to A-Level and IB' },
+  { href: '/online-school/uae', label: 'Online school in Abu Dhabi, Sharjah and the rest of the UAE', note: 'Every emirate we teach in' },
 ]
 const CTA_LINKS = [
   { href: '/assessment', label: 'Book a free assessment' },
@@ -359,7 +358,7 @@ for (const id of MAIN_IDS) {
   if (id === 'programs' || id === 'homeschool' || id === 'tuition') body.push(h2('Services'), links(SERVICE_LINKS))
   if (id === 'programs') body.push(h2('University pathways'), links([{ href: '/iufp', label: 'International University Foundation Programme (IUFP)' }, { href: '/study-abroad', label: 'Study abroad support' }, { href: '/pre-university', label: 'Pre-university programme' }, { href: '/test-prep', label: 'Test preparation' }, { href: '/languages', label: 'Languages' }]))
   if (id === 'tuition' || id === 'tuition-nairobi') body.push(h2('Tuition by area in Nairobi'), links(NAIROBI_AREAS.map(a => ({ href: '/tuition/' + a.slug, label: 'Tutors in ' + a.name }))))
-  if (id === 'tuition') body.push(h2('Tuition in the UAE and the UK'), links([{ href: '/tuition-uae', label: 'Online tutors in Dubai and the UAE' }, { href: '/tuition-uk', label: 'Tutors in the UK' }]))
+  // UAE and UK tuition pages are retired (public/_redirects): online school only there.
   if (id === 'test-prep') body.push(h2('Tests we prepare for'), links(TEST_PREP.map(t => ({ href: '/test-prep/' + t.slug, label: t.code + ' preparation', note: t.fullName }))))
   if (id === 'languages') body.push(h2('Languages'), links(LANGUAGES.map(l => ({ href: '/languages/' + l.slug, label: 'Learn ' + l.name }))))
   if (id === 'study-abroad') body.push(h2('Destinations'), links(STUDY_ABROAD.map(d => ({ href: '/study-abroad/' + d.slug, label: 'Study in ' + (d.fullName || d.name) }))))
@@ -479,27 +478,9 @@ for (const a of NAIROBI_AREAS) {
   ], crumbs: [['Tuition in Nairobi', '/tuition-nairobi'], [a.name, path]], kind: 'tuition', src: ['src/data/nairobiAreas.js'],
   ld: [serviceLd({ name: 'Tuition in ' + a.name + ', Nairobi', desc: a.seoDesc || a.intro, path, area: a.name + ', Nairobi, Kenya', kind: 'tuition' })] })
 }
-// UK tuition
-{
-  const m = metaFor('tuition-uk') || { title: 'Tutors in the UK | GCSE, A-Level & 11+ | Smartious', desc: 'Live online GCSE, IGCSE, A-Level, IB and 11+ tuition for UK families.' }
-  const x = jsxContent('tuition-uk')
-  const cities = [...new Set(UK_AREAS.map(a => a.city))]
-  add({ path: '/tuition-uk', title: m.title, desc: m.desc, h1: x.h1 || 'Tutors in the UK', body: [p(m.desc), ...x.html,
-    ...cities.map(city => h2('Tutors in ' + city) + links(UK_AREAS.filter(a => a.city === city).map(a => ({ href: '/tuition-uk/' + a.slug, label: 'Tutors in ' + a.name + ', ' + a.city })))),
-  ], faqs: x.faqs, related: [h2('Online school in the UK'), links([{ href: '/online-school/united-kingdom', label: 'Online school and homeschool in the UK' }])],
-  ld: [serviceLd({ name: 'Private tuition in the UK', desc: m.desc, path: '/tuition-uk', area: 'United Kingdom', kind: 'tuition' })] })
-  for (const a of UK_AREAS) {
-    const path = '/tuition-uk/' + a.slug
-    add({ path, title: a.seoTitle || 'Online Tuition in ' + a.name + ', ' + a.city + ' | GCSE, A-Level & 11+ Tutors | Smartious',
-      desc: a.seoDesc || (PAGE_META['uk-area'] || {}).desc || clip(a.intro), h1: 'Tuition in ' + a.name + ', ' + a.city, body: [
-        p(a.region), p(a.intro), p(a.introExtended), p(a.parentProfile), p(a.commuteNote), p(a.pricingNote),
-        a.commonSubjects?.length ? h2('Subjects') + bullets(a.commonSubjects) : '', a.localSchools?.length ? h2('Local schools we prepare students for') + bullets(a.localSchools) : '',
-      ], faqs: a.localFaqs, related: [h2('Other areas in ' + a.city), links(UK_AREAS.filter(x => x !== a && x.city === a.city).map(x => ({ href: '/tuition-uk/' + x.slug, label: 'Tutors in ' + x.name }))),
-        links([{ href: '/tuition-uk', label: 'All UK tuition' }])],
-      crumbs: [['Tuition in the UK', '/tuition-uk'], [a.name, path]], src: ['src/data/ukAreas.js'],
-      ld: [serviceLd({ name: 'Tuition in ' + a.name + ', ' + a.city, desc: a.seoDesc || a.intro, path, area: a.name + ', ' + a.city + ', United Kingdom', kind: 'tuition' })] })
-  }
-}
+// UK tuition (/tuition-uk, /tuition-uk/<area>) is retired: public/_redirects
+// 301s each page to the matching UK online school page.
+
 // Virtual school and funding pages (hand-written JSX pages)
 const STATIC_META = {
   'ab-funding': { path: '/alberta-home-ed-funding', title: 'Alberta Home Education Funding | Use Your $850 CAD on Smartious', desc: 'How Alberta home education funding works and how families use their annual allocation on live online Cambridge IGCSE and A-Level classes with Smartious.' },
@@ -673,7 +654,6 @@ for (const { file, country: c, cities } of CITY_FILES) {
       c.whySmartious?.length ? h2('Why ' + name + ' families choose Smartious') + c.whySmartious.map(x => x && x.h ? h3(x.h) + p(x.p) : p(itemText(x))).join('') : '',
       h2('Fees and admission'), p(FEE_SCHOOL + '. One-to-one tuition: ' + FEE_TUITION + '.'),
       c.slug === 'kenya' ? h2('More for Kenyan families') + links([{ href: '/virtual-school-kenya', label: 'Virtual school in Kenya' }, { href: '/tuition-nairobi', label: 'Tuition in Nairobi' }]) : '',
-      c.slug === 'united-kingdom' ? h2('Tuition in the UK') + links([{ href: '/tuition-uk', label: 'Tutors in the UK' }]) : '',
       c.slug === 'ukraine' ? h2('Virtual school for Ukrainian families') + links([{ href: '/virtual-school-ukraine', label: 'Virtual school for Ukrainian families in Ukraine and abroad' }]) : '',
     ], faqs: c.faqs, related: guideLinks(c.hub, '', 'Guides for families in this country'), crumbs: [[name, c.hub]], src: ['src/data/' + file],
     ld: [serviceLd({ name: 'Online school and homeschool in ' + name, desc: (m && m.desc) || c.heroSubhead, path: c.hub, area: name })] })
@@ -702,16 +682,15 @@ for (const { file, country: c, cities } of CITY_FILES) {
 add({
   path: '/online-school/uae',
   // Same title and description as the app's UAE hub (LandingPage.jsx, page 'homeschooling-uae').
-  title: 'Homeschooling & Online School in Dubai and the UAE',
-  desc: 'Live online classes for Dubai, Abu Dhabi and Sharjah families: IGCSE, A-Level, Edexcel, American. From USD 423/month (≈ AED 1,553). January 2027 intake.',
-  h1: 'Homeschooling & Online School in Dubai and the UAE',
+  title: 'Online School & Home Schooling in UAE | Fees from AED 1,553',
+  desc: 'Online school and homeschooling for Dubai, Abu Dhabi and Sharjah: live IGCSE, A-Level and American classes on UAE time. From USD 423/month (≈ AED 1,553).',
+  h1: 'Online School & Homeschooling in Dubai and the UAE',
   body: [
     p(UAE_COUNTRY.heroSubhead), p(UAE_COUNTRY.heroValueProp),
     h2(UAE_COUNTRY.citiesSectionTitle || 'Cities we teach in'),
     links(UAE_CITIES.map(c => ({ href: '/homeschool-' + c.slug, label: 'Online school in ' + c.name, note: c.region }))),
-    h2('Online tuition'), links([{ href: '/tuition-uae', label: 'Online tutors in Dubai and the UAE' }]),
     h2('Why families choose Smartious'), bullets(UAE_COUNTRY.whySmartious),
-    h2('Fees and admission'), p(FEE_SCHOOL + '. One-to-one tuition: ' + FEE_TUITION + '.'),
+    h2('Fees and admission'), p(FEE_SCHOOL + '.'),
   ],
   faqs: UAE_COUNTRY.faqs, related: guideLinks('/online-school/uae', '', 'Guides for families in this country'), crumbs: [['UAE', '/online-school/uae']], src: ['src/data/uaeCities.js', 'src/pages/LandingPage.jsx'],
   ld: [serviceLd({ name: 'Online school and homeschool in the UAE', desc: UAE_COUNTRY.heroSubhead, path: '/online-school/uae', area: 'United Arab Emirates' })],
@@ -720,14 +699,12 @@ for (const c of UAE_CITIES) {
   const path = '/homeschool-' + c.slug
   const pg = add({
     path, title: c.seoTitle || ('Online School & Homeschooling in ' + c.name + ' | IGCSE, A-Level, IB | Smartious'), desc: c.seoDesc,
-    h1: 'Online school and homeschooling in ' + c.name,
+    h1: c.primaryKeyword || ('Online school and homeschooling in ' + c.name),
     body: [
       p(c.heroTagline), p(c.intro),
       c.challenges?.length ? h2('Challenges ' + c.name + ' families face') + bullets(c.challenges) : '',
       h2('Why ' + c.name + ' families choose Smartious'), bullets(c.whyChoose),
       h2('Subjects'), bullets(c.subjects), p(c.onlineLearningDetail), p(c.homeschoolDetail),
-      h2('Online tuition in ' + c.name),
-      links(UAE_AREAS.filter(a => a.emirate === c.name).map(a => ({ href: '/tuition-uae/' + a.slug, label: 'Online tutors in ' + a.name }))),
     ],
     faqs: c.faqs, related: [h2('More in the UAE'), links([{ href: '/online-school/uae', label: 'Homeschooling and online school in Dubai and the UAE' },
       ...UAE_CITIES.filter(x => x !== c).map(x => ({ href: '/homeschool-' + x.slug, label: 'Online school in ' + x.name }))])],
@@ -736,36 +713,9 @@ for (const c of UAE_CITIES) {
   })
   if (pg.path === path) CITY_PAGES.push({ slug: c.slug, pg, countrySlug: 'uae', cityName: c.name, countryName: 'UAE' })
 }
-add({
-  path: '/tuition-uae',
-  // Same title and description as the app (LandingPage.jsx, page 'tuition-uae').
-  title: 'Online Tutors in Dubai & UAE | IGCSE, A-Level | Smartious',
-  desc: 'Live online 1-on-1 tuition in Dubai, Abu Dhabi and Sharjah: IGCSE, A-Level, IB, Edexcel and AP with qualified tutors. From USD 15/hour (about AED 55).',
-  h1: 'Online tutors in Dubai and the UAE',
-  body: [
-    p('Live online 1-on-1 tuition for Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and American AP, with lessons timed for the Gulf day. Smartious tuition in the UAE is online only.'),
-    ...['Dubai', 'Abu Dhabi', 'Sharjah'].map(em => {
-      const list = UAE_AREAS.filter(a => a.emirate === em)
-      return list.length ? h2(em) + links(list.map(a => ({ href: '/tuition-uae/' + a.slug, label: 'Online tutors in ' + a.name }))) : ''
-    }),
-  ],
-  related: [h2('Full-time online school'), links([UAE_PRODUCT_LINKS[0], UAE_PRODUCT_LINKS[2]])], src: ['src/data/uaeAreas.js', 'src/pages/LandingPage.jsx'],
-  ld: [serviceLd({ name: 'Online tuition in the UAE', desc: 'Live online 1-on-1 tuition for UAE families.', path: '/tuition-uae', area: 'United Arab Emirates', kind: 'tuition' })],
-})
-for (const a of UAE_AREAS) {
-  const path = '/tuition-uae/' + a.slug
-  add({
-    path, title: a.seoTitle || ('Online Tuition in ' + a.name + ', ' + a.emirate + ' | Smartious'), desc: a.seoDesc,
-    h1: 'Online tuition in ' + a.name + ', ' + a.emirate,
-    body: [p(a.intro), p(a.introExtended), p(a.onlineNote), p(a.pricingNote)],
-    faqs: a.localFaqs, related: [
-      h2('Nearby areas'), links((a.nearbyAreas || []).map(s => UAE_AREAS.find(x => x.slug === s)).filter(Boolean).map(x => ({ href: '/tuition-uae/' + x.slug, label: 'Online tutors in ' + x.name }))),
-      h2('Smartious in the UAE'), links(UAE_PRODUCT_LINKS),
-    ],
-    crumbs: [['Tuition in the UAE', '/tuition-uae'], [a.name, path]], src: ['src/data/uaeAreas.js'],
-    ld: [serviceLd({ name: 'Online tuition in ' + a.name, desc: a.seoDesc || a.intro, path, area: a.name + ', ' + a.emirate + ', United Arab Emirates', kind: 'tuition' })],
-  })
-}
+// UAE tuition (/tuition-uae, /tuition-uae/<area>) is retired: tutoring in the
+// UAE needs a MoHRE private teacher permit. public/_redirects 301s each page
+// to its emirate's online school page.
 
 // US states and cities, Canadian provinces and cities (/homeschool-<slug>)
 function regionPage({ slug, s, country, hub, childLinks, parent, src }) {

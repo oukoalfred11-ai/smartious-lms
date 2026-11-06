@@ -19,6 +19,7 @@ export const ARTICLE_PART_LOADERS = {
   articlesPart15: () => import('../articlesPart15.js'),
   articlesPart16: () => import('../articlesPart16.js'),
   articlesPart17: () => import('../articlesPart17.js'),
+  articlesPart18: () => import('../articlesPart18.js'),
 }
 
 // module list (comma-separated) → space-separated slugs

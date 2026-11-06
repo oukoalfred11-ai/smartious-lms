@@ -1563,9 +1563,8 @@ function articleProduct(a) {
     heading: 'Smartious for families in Dubai and the UAE',
     text: 'Smartious teaches Dubai families live online: Cambridge IGCSE, A-Level, IB and American programmes, with qualified teachers and lessons timed for the Gulf day.',
     links: [
-      { href: '/homeschool-dubai-ae', label: 'Online school in Dubai', note: 'Full-time live classes and homeschooling, IGCSE to A-Level and IB' },
-      { href: '/tuition-uae', label: 'Online tutors in Dubai', note: '1-on-1 tuition in IGCSE, A-Level and IB subjects' },
-      { href: '/online-school/uae', label: 'Abu Dhabi, Sharjah and the rest of the UAE', note: 'Every emirate we teach in' },
+      { href: '/homeschool-dubai-ae', label: 'Online school & homeschooling in Dubai', note: 'Full-time live classes on UAE time, IGCSE to A-Level and IB' },
+      { href: '/online-school/uae', label: 'Online school in Abu Dhabi, Sharjah and the rest of the UAE', note: 'Every emirate we teach in' },
     ],
   }
   const slug = ARTICLE_COUNTRY_ALIAS[c] || c
@@ -2768,6 +2767,15 @@ export default function LandingPage() {
   const [assessmentLevel, setAssessmentLevel] = useState('')
   const [enrollError, setEnrollError] = useState('')
   const [fabOpen, setFabOpen] = useState(false)
+  // UAE market pages (WhatsApp button, UAE only): the hub, the emirate
+  // pages and the UAE guides (by country tag, or a UAE place in the slug).
+  const UAE_SLUG = /(^|-)(uae|dubai|abu-dhabi|sharjah|ajman|ras-al-khaimah|emirates|al-ain)(-|$)/
+  const isUaePage = typeof window !== 'undefined' && (() => {
+    const p = window.location.pathname
+    if (p === '/online-school/uae' || /^\/homeschool-[a-z-]+-ae$/.test(p)) return true
+    const m = /^\/blog\/([^/]+)/.exec(p)
+    return !!m && (UAE_SLUG.test(m[1]) || ARTICLES_INDEX?.[m[1]]?.country === 'uae')
+  })()
 
   // Build a fresh placement test when user reaches Step 4.
   // Also rebuilds if they go back and change their level/curriculum.
@@ -4071,6 +4079,17 @@ export default function LandingPage() {
       }
       return
     }
+    // UAE and UK tuition pages are retired (online school only there):
+    // public/_redirects 301s each one to the matching online school page;
+    // this covers in-app navigation and old cached links.
+    if (path === '/tuition-uae' || path.startsWith('/tuition-uae/')) {
+      window.location.replace('/online-school/uae')
+      return
+    }
+    if (path === '/tuition-uk' || path.startsWith('/tuition-uk/')) {
+      window.location.replace('/online-school/united-kingdom')
+      return
+    }
     if (path === '/tuition-uae') {
       setPage('tuition-uae')
       return
@@ -4324,8 +4343,8 @@ export default function LandingPage() {
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'homeschooling-uae') {
-    metaTitle = 'Homeschooling & Online School in Dubai and the UAE'
-    metaDesc  = 'Live online classes for Dubai, Abu Dhabi and Sharjah families: IGCSE, A-Level, Edexcel, American. From USD 423/month (≈ AED 1,553). January 2027 intake.'
+    metaTitle = 'Online School & Home Schooling in UAE | Fees from AED 1,553'
+    metaDesc  = 'Online school and homeschooling for Dubai, Abu Dhabi and Sharjah: live IGCSE, A-Level and American classes on UAE time. From USD 423/month (≈ AED 1,553).'
   } else if (page === 'homeschooling-egypt') {
     metaTitle = 'Online School, Virtual School & Homeschool for Egyptian Families — Cambridge IGCSE & A-Level | Smartious'
     metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Egyptian families across Cairo, New Cairo, Sheikh Zayed, Alexandria, New Administrative Capital, Sharm El Sheikh. Cairo American College / MES / BISC / NCBIS / Hayah / El Alsson / Schutz alternative. Immediate enrolment. From USD 423/month. USD pricing protects against EGP volatility.'
@@ -6657,7 +6676,6 @@ export default function LandingPage() {
                         ['/online-school/kenya', 'Homeschooling and online school in Kenya'],
                         ['/tuition-nairobi', 'Tuition in Nairobi (21 areas)'],
                         ['/online-school/uae', 'Homeschooling in Dubai and the UAE'],
-                        ['/tuition-uae', 'Online tutors in Dubai and the UAE'],
                         ['/online-school/qatar', 'Online school in Qatar'],
                         ['/online-school/saudi-arabia', 'Online school in Saudi Arabia'],
                         ['/online-school/kuwait', 'Online school in Kuwait'],
@@ -15430,7 +15448,7 @@ export default function LandingPage() {
               <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
                 <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow} · Virtual school</div>
                 <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
-                  Homeschooling &amp; Online School in <em style={{color:V.gold3,fontStyle:'italic'}}>Dubai and the UAE</em>
+                  Online School &amp; Homeschooling in <em style={{color:V.gold3,fontStyle:'italic'}}>Dubai and the UAE</em>
                 </h1>
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
                 <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
@@ -15545,10 +15563,10 @@ export default function LandingPage() {
                 </h2>
                 <div style={{display:'flex',flexDirection:'column',gap:12}}>
                   {[
-                    {q:'Can UAE families use Smartious?', a:'Yes. Families across the UAE use Smartious as home education with live online classes. If you will need a transfer certificate, re-enrolment in a UAE school or MOE equivalency later, ask us at admissions and check the current requirements with KHDA, ADEK or the Ministry of Education.'},
-                    {q:'What does that mean for my child’s qualifications?', a:'IGCSE and A-Level certificates are issued by the exam boards (Cambridge or Pearson Edexcel), not by Smartious. UAE universities and the Ministry of Education set their own entry and equivalency rules, so check the current requirements for your child’s plans.'},
-                    {q:'Do we need to register home education with the authorities?', a:'Rules can differ by emirate and can change. Check with KHDA (Dubai), ADEK (Abu Dhabi) or the Ministry of Education for your family’s situation before you start.'},
-                    {q:'Can my child move into a UAE school later?', a:'UAE schools make their own admission and placement decisions, usually after their own assessment. We provide reports on your child’s work and progress to support the application.'},
+                    {q:'Is online school or home schooling legal in the UAE?', a:'For expatriate families, yes in practice: homeschooling with an international online school is widely used, and the authorities have said it is not prohibited, although KHDA (Dubai) and ADEK (Abu Dhabi) do not license or recognise homeschooling programmes. Emirati families are subject to compulsory schooling rules and should speak to the Ministry of Education first. Smartious does not claim KHDA, ADEK or Ministry approval.'},
+                    {q:'Will my child’s qualifications be recognised?', a:'The certificates are what count, and they come from the exam boards, not from us. Smartious students sit Cambridge and Pearson Edexcel IGCSE, AS and A-Level as private candidates at authorised centres such as the British Council in the UAE, and receive the same certificates as school candidates. The Ministry of Education then decides equivalency: its guide has asked for five IGCSE or GCSE passes and two AS or one A-Level, not counting Arabic and Islamic Education. Check the current guide on moe.gov.ae before choosing subjects.'},
+                    {q:'Online school or homeschooling: what is the difference?', a:'With homeschooling the parent plans and teaches. With an online school, qualified teachers teach live classes on a timetable, mark the work and write the reports, and you supervise at home. Smartious is the second: a full school day, at home, on UAE time.'},
+                    {q:'Can my child move into a Dubai or Abu Dhabi school later?', a:'Usually, yes. Schools make their own admission and placement decisions, often after their own assessment. Keep reports, attendance records and exam certificates, ask the school you hope to join what it will need before you start, and check whether equivalency applies to the grades studied with us. We provide reports, attendance records and transcripts for the application.'},
                   ].map((f, i) => (
                     <details key={i} style={{background:V.bone,padding:'16px 22px',borderRadius:10,cursor:'pointer',border:`1px solid ${V.bone3}`}}>
                       <summary style={{fontWeight:600,color:V.ink,fontSize:14.5}}>{f.q}</summary>
@@ -15566,10 +15584,10 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.bone,paddingTop:40,paddingBottom:40}}><div className="wrap">
               <div style={{maxWidth:980,margin:'0 auto',textAlign:'center'}}>
                 <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,margin:'0 0 14px',lineHeight:1.2}}>
-                  Homeschooling in Dubai, Abu Dhabi and Sharjah
+                  Online school and homeschooling in Dubai, Abu Dhabi and Sharjah
                 </h2>
                 <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
-                  {[['dubai-ae','Homeschooling in Dubai'],['abu-dhabi-ae','Homeschooling in Abu Dhabi'],['sharjah-ae','Homeschooling in Sharjah']].map(([slug, label]) => (
+                  {[['dubai-ae','Online school & homeschooling in Dubai'],['abu-dhabi-ae','Home schooling in Abu Dhabi'],['sharjah-ae','Online school in Sharjah']].map(([slug, label]) => (
                     <a key={slug} href={'/homeschool-' + slug}
                       onClick={linkClick(() => { setCurrentUaeCity(slug); nav('/homeschool-' + slug); window.scrollTo(0, 0) })}
                       style={{display:'inline-block',padding:'12px 20px',borderRadius:8,background:V.white,border:`1.5px solid ${V.cr}`,color:V.cr,fontWeight:700,fontSize:14}}>
@@ -19000,7 +19018,7 @@ export default function LandingPage() {
                     { label:'International Baccalaureate (IB)', text: city.curricula.ib },
                     { label:'Kenya CBC', text: city.curricula.cbc },
                     { label:'American Curriculum', text: city.curricula.american },
-                  ].map((cur, i) => (
+                  ].filter(cur => cur.text).map((cur, i) => (
                     <div key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px'}}>
                       <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:8}}>Curriculum</div>
                       <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',color:V.ink,marginBottom:10,lineHeight:1.3,fontWeight:400}}>{cur.label}</h3>
@@ -24058,6 +24076,25 @@ export default function LandingPage() {
           every enquiry should arrive as an assessment request, so it is
           recorded as a lead. Hidden on the assessment page itself. */}
       <div className="fab-stack">
+        {/* UAE pages only: WhatsApp is how UAE families get in touch, so the
+            UAE hub, the emirate pages and the UAE guides add a WhatsApp
+            button whose pre-filled message asks to book an assessment
+            (admissions then sends the assessment link, so it still
+            becomes a recorded lead). Everywhere else: the assessment only. */}
+        {isUaePage && (
+          <a
+            className="fab-wa"
+            href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hello Smartious, we live in the UAE and would like to book an assessment for our child. (Page: smartioushomeschool.com' + (typeof window !== 'undefined' ? window.location.pathname : '') + ')')}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="WhatsApp Smartious admissions to book an assessment"
+            style={{background:'#25D366'}}
+            onClick={() => { try { window.gtag && window.gtag('event', 'whatsapp_click', { page_path: window.location.pathname, market: 'uae' }) } catch {} }}
+          >
+            <span className="fab-wa-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M12.04 2C6.5 2 2 6.48 2 12c0 1.77.46 3.5 1.34 5.02L2 22l5.12-1.34A9.95 9.95 0 0 0 12.04 22C17.58 22 22 17.52 22 12S17.58 2 12.04 2zm5.82 14.13c-.25.7-1.45 1.33-2 1.4-.51.07-1.16.1-1.87-.12-.43-.14-.98-.32-1.69-.62-2.97-1.28-4.9-4.27-5.05-4.47-.15-.2-1.2-1.6-1.2-3.05 0-1.45.76-2.16 1.03-2.46.27-.3.59-.37.78-.37h.56c.18 0 .42-.07.66.5.25.6.84 2.05.91 2.2.07.15.12.32.02.52-.1.2-.15.32-.3.5-.15.17-.31.39-.44.52-.15.15-.3.31-.13.6.17.3.77 1.27 1.65 2.06 1.13 1.01 2.09 1.32 2.39 1.47.3.15.47.12.64-.07.17-.2.74-.86.94-1.16.2-.3.39-.25.66-.15.27.1 1.72.81 2.02.96.3.15.49.22.56.35.07.12.07.72-.18 1.42z"/></svg></span>
+            <span className="fab-lbl">WhatsApp us</span>
+          </a>
+        )}
         {page !== 'assessment' && (
           <a
             className="fab-wa lp-btnlink"

@@ -28,6 +28,62 @@
 /enroll                  /assessment                 301
 /consult                 /assessment                 301
 
+# ─── Retired tuition pages (November 2026) ──────────────────────
+# UAE tutoring needs a MoHRE private teacher permit, and the UAE and UK
+# tuition pages brought almost no traffic. Each one 301s to the online
+# school page for the same place. Forced (!) because old builds may
+# still hold a static file at these paths.
+/online-school/dubai     /homeschool-dubai-ae        301!
+/tuition-uae             /online-school/uae          301!
+/tuition-uae/downtown-dubai              /homeschool-dubai-ae         301!
+/tuition-uae/dubai-marina                /homeschool-dubai-ae         301!
+/tuition-uae/jlt                         /homeschool-dubai-ae         301!
+/tuition-uae/palm-jumeirah               /homeschool-dubai-ae         301!
+/tuition-uae/arabian-ranches             /homeschool-dubai-ae         301!
+/tuition-uae/al-barsha                   /homeschool-dubai-ae         301!
+/tuition-uae/saadiyat-island             /homeschool-abu-dhabi-ae     301!
+/tuition-uae/yas-island                  /homeschool-abu-dhabi-ae     301!
+/tuition-uae/khalifa-city                /homeschool-abu-dhabi-ae     301!
+/tuition-uae/sharjah-al-khan             /homeschool-sharjah-ae       301!
+/tuition-uae/mirdif                      /homeschool-dubai-ae         301!
+/tuition-uae/dubai-hills-estate          /homeschool-dubai-ae         301!
+/tuition-uae/motor-city                  /homeschool-dubai-ae         301!
+/tuition-uae/mbr-city                    /homeschool-dubai-ae         301!
+/tuition-uae/business-bay                /homeschool-dubai-ae         301!
+/tuition-uae/jumeirah                    /homeschool-dubai-ae         301!
+/tuition-uae/al-reem-island              /homeschool-abu-dhabi-ae     301!
+/tuition-uae/al-raha                     /homeschool-abu-dhabi-ae     301!
+/tuition-uae/abu-dhabi-corniche          /homeschool-abu-dhabi-ae     301!
+/tuition-uae/mbz-city                    /homeschool-abu-dhabi-ae     301!
+/tuition-uae/springs-meadows             /homeschool-dubai-ae         301!
+/tuition-uae/emirates-hills              /homeschool-dubai-ae         301!
+/tuition-uae/dubai-silicon-oasis         /homeschool-dubai-ae         301!
+/tuition-uae/damac-hills                 /homeschool-dubai-ae         301!
+/tuition-uae/jvc                         /homeschool-dubai-ae         301!
+/tuition-uae/the-greens                  /homeschool-dubai-ae         301!
+/tuition-uae/tecom-barsha-heights        /homeschool-dubai-ae         301!
+/tuition-uae/*           /online-school/uae          301!
+/tuition-uk              /online-school/united-kingdom 301!
+/tuition-uk/kensington-london            /homeschool-london-uk        301!
+/tuition-uk/chelsea-london               /homeschool-london-uk        301!
+/tuition-uk/notting-hill-london          /homeschool-london-uk        301!
+/tuition-uk/hampstead-london             /homeschool-london-uk        301!
+/tuition-uk/wimbledon-london             /homeschool-london-uk        301!
+/tuition-uk/dulwich-london               /homeschool-london-uk        301!
+/tuition-uk/didsbury-manchester          /homeschool-manchester-uk    301!
+/tuition-uk/altrincham-manchester        /homeschool-manchester-uk    301!
+/tuition-uk/salford-manchester           /homeschool-manchester-uk    301!
+/tuition-uk/edgbaston-birmingham         /homeschool-birmingham-uk    301!
+/tuition-uk/solihull-birmingham          /homeschool-birmingham-uk    301!
+/tuition-uk/harborne-birmingham          /homeschool-birmingham-uk    301!
+/tuition-uk/roundhay-leeds               /homeschool-leeds-uk         301!
+/tuition-uk/alwoodley-leeds              /homeschool-leeds-uk         301!
+/tuition-uk/clifton-bristol              /homeschool-bristol-uk       301!
+/tuition-uk/redland-bristol              /homeschool-bristol-uk       301!
+/tuition-uk/morningside-edinburgh        /homeschool-edinburgh-uk     301!
+/tuition-uk/new-town-edinburgh           /homeschool-edinburgh-uk     301!
+/tuition-uk/*            /online-school/united-kingdom 301!
+
 # ─── Country hub canonical consolidation (301s) ──────────────────
 /us-families             /online-school/usa          301
 /ca-families             /online-school/canada       301
