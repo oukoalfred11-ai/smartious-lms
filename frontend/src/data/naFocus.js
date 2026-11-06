@@ -31,7 +31,15 @@ export function caLead(place) {
 }
 
 /** { title, desc } for a US state or city page (country 'us') or a Canadian province or city page ('ca'). */
-export function naMeta(country, { slug, name, oldTitle = '', oldDesc = '' }) {
+// "No registration · No testing" -> "no registration, no testing"
+// The first two rules only, so the snippet stays under 158 characters.
+const lawText = (state) => {
+  const d = String(state?.difficultyDetail || '').split(/\s*·\s*/).filter(Boolean).slice(0, 2)
+    .map(x => /^[A-Z][a-z]/.test(x) ? x.charAt(0).toLowerCase() + x.slice(1) : x).join(', ')
+  return d ? `${state.name} rules: ${d}.` : ''
+}
+
+export function naMeta(country, { slug, name, oldTitle = '', oldDesc = '', state = null }) {
   if (oldTitle && HOOK.test(oldTitle)) return { title: oldTitle, desc: oldDesc }
   const code = codeOf(slug)
   const place = code ? `${name}, ${code}` : name
@@ -43,10 +51,18 @@ export function naMeta(country, { slug, name, oldTitle = '', oldDesc = '' }) {
         `Online OSSD school for ${name}: the Ontario Secondary School Diploma through our Ontario partner school, live classes. From USD 423/month.`),
     }
   }
+  // US titles and snippets lead with what a searcher compares: the place,
+  // live teachers, and that state's homeschool rules (Search Console,
+  // Aug-Nov 2026: city pages at positions 6-13 drew almost no clicks on the
+  // old brand-led "K-12 Online School & Homeschool in X | Smartious").
+  const law = lawText(state)
   return {
-    title: fit(MAX_T, `${US_HEADLINE} in ${place} | Smartious`, `${US_HEADLINE} in ${name} | Smartious`, `K-12 Online School in ${place} | Smartious`, `K-12 Online School in ${name}`),
+    title: fit(MAX_T, `Online School & Homeschool in ${place} | Live Teachers`, `Online School & Homeschool in ${place}`,
+      `Online Homeschool in ${name} | Live Teachers`, `Online Homeschool in ${name}`),
     desc: fit(MAX_D,
-      `K-12 online school and homeschool for ${name} families: the American curriculum with AP, taught live in US time zones. From USD 423/month.`,
-      `K-12 online school and homeschool in ${name}: American curriculum with AP, taught live. From USD 423/month.`),
+      law && `Live K-12 classes with real teachers for ${name} families, American curriculum with AP. ${law} From USD 423/month.`,
+      law && `Live K-12 classes with real teachers in ${name}, American curriculum and AP. ${law} From USD 423/month.`,
+      `Live K-12 classes with real teachers for ${name} families: the American curriculum with AP, on US time. From USD 423/month.`,
+      `Live K-12 online classes for ${name}: American curriculum with AP. From USD 423/month.`),
   }
 }

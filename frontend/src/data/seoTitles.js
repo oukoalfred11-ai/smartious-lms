@@ -56,7 +56,8 @@ export function hubTitle(name, homeschool) {
 }
 // path → title, for the hubs whose titles were over 60 characters
 export const HUB_TITLES = Object.fromEntries(HUBS.map(([slug, name, h]) => ['/online-school/' + slug, hubTitle(name, h)]))
-HUB_TITLES['/online-school/uae'] = 'Homeschooling & Online School in Dubai & UAE | Smartious'
+HUB_TITLES['/online-school/uae'] = 'Online School & Home Schooling in UAE | Fees from AED 1,553'
+HUB_TITLES['/online-school/united-kingdom'] = 'Online School UK | Live British IGCSE & A-Level Classes'
 // USA and Canada lead with the American curriculum and the OSSD (src/data/naFocus.js).
 HUB_TITLES['/online-school/usa'] = 'K-12 Online School in the USA | American Curriculum & AP'
 HUB_TITLES['/online-school/canada'] = 'Online OSSD School & Homeschool in Canada | Smartious'

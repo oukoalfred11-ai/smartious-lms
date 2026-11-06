@@ -722,7 +722,7 @@ function regionPage({ slug, s, country, hub, childLinks, parent, src }) {
   const path = '/homeschool-' + slug
   // USA: K-12 American curriculum; Canada: the OSSD (src/data/naFocus.js).
   const ca = country === 'Canada'
-  const m = naMeta(ca ? 'ca' : 'us', { slug, name: s.name, oldTitle: s.metaTitle, oldDesc: s.metaDesc })
+  const m = naMeta(ca ? 'ca' : 'us', { slug, name: s.name, oldTitle: s.metaTitle, oldDesc: s.metaDesc, state: ca ? null : (US_STATES[slug] || US_STATES[s.state] || null) })
   return add({ path, title: m.title, desc: m.desc || clip(s.pitch),
     h1: (ca ? CA_HEADLINE : US_HEADLINE) + ' for ' + s.name + (parent ? ', ' + parent.name : '') + ' Families', body: [
       p(ca ? caLead(s.name) : usLead(s.name)), s.seeAlso?.length ? links(s.seeAlso) : '', p(s.pitch), p(s.proof), p(s.uniqueHook), p(s.metroPop),
