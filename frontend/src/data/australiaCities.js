@@ -70,11 +70,12 @@ export const AUSTRALIA_CITIES = [
     county: 'New South Wales',
     region: 'The largest city · Greater Western Sydney\'s South Asian heartland — Parramatta, Westmead, Blacktown · returning-expat corridor · NESA\'s regulated registration regime',
     primaryKeyword: 'Online school and homeschool in Sydney',
+    seoTitle: 'Online School & Homeschool in Sydney | Cambridge & OSSD',
     heroTagline: 'For Sydney families from Parramatta to the Northern Beaches — live Cambridge delivery in the Australian afternoon, alongside your NESA registration.',
-    intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Sydney families. Sydney holds Australia\'s largest and most internationally connected population — Greater Western Sydney\'s South Asian communities around Parramatta, Westmead, and Blacktown; African and Caribbean diaspora families across the metropolitan area; and a steady flow of Australian families returning from postings in Singapore, the UAE, Hong Kong, and London with children mid-stream in IGCSE or IB. Australian public schools are free and capable and we are not built to compete with them. Smartious serves the families whose academic needs sit alongside or outside that system: Cambridge continuity, diaspora connection, and pathway flexibility to UK, US, Indian, and African universities as well as Australian ones. In NSW, home education means registration with NESA — Smartious is not Australian-registered and does not replace that registration; we supply the curriculum, live teaching, and documentation it asks for.',
+    intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Sydney families. Sydney holds Australia\'s largest and most internationally connected population — Greater Western Sydney\'s South Asian communities around Parramatta, Westmead, and Blacktown; African and Caribbean diaspora families across the metropolitan area; and a steady flow of Australian families returning from postings in Singapore, the UAE, Hong Kong, and London with children mid-stream in IGCSE or IB. Australian public schools are free and capable and we are not built to compete with them. Smartious serves the families whose academic needs sit alongside or outside that system: Cambridge continuity, diaspora connection, and pathway flexibility to UK, US, Indian, and African universities as well as Australian ones. In NSW, home education means registration with NESA — Smartious is not Australian-registered and does not replace that registration; we supply the curriculum, live teaching, and documentation it asks for. Students in Grades 9 to 12 can also earn the Ontario Secondary School Diploma (OSSD) online through our Ontario partner school, taught live in the Sydney afternoon: the Canadian diploma that opens Canadian universities and is read by Australian, UK and US admissions offices too.',
     heroImg: 'https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Sydney Harbour Bridge and Opera House' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Sydney families — Cambridge alongside NESA registration, diaspora and returning-expat pathways. From USD 423/month.',
+    seoDesc: 'Live online school for Sydney families: Cambridge IGCSE and A-Level, IB, American AP and the Ontario OSSD, alongside NESA registration. From USD 423/month.',
     challenges: [
       'NSW is among the more regulated states: NESA registration, curriculum alignment, home visits, and periodic renewal.',
       'Returning expat children mid-IGCSE or mid-IB find most Australian schools follow the state curriculum and ATAR pathway instead.',
@@ -92,6 +93,7 @@ export const AUSTRALIA_CITIES = [
     ],
     nearbyAreas: ['Parramatta', 'Westmead', 'Blacktown', 'Liverpool', 'Hills District', 'North Shore', 'Northern Beaches'],
     subjects: [
+      'Ontario Secondary School Diploma (OSSD), Grades 9 to 12, through our Ontario partner school: ENG4U, MHF4U, MCV4U, SCH4U, SPH4U, SBI4U and more',
       'Cambridge IGCSE Mathematics, Additional Mathematics, English Language, English Literature',
       'Cambridge IGCSE Sciences (Biology, Chemistry, Physics, Combined Science)',
       'Cambridge IGCSE Hindi, Urdu and home language support, French, Spanish',
@@ -104,6 +106,7 @@ export const AUSTRALIA_CITIES = [
       'University application support — UAC and ATAR-equivalent conversion, UCAS (UK), Common Application (US), and Indian and African university applications',
     ],
     whyChoose: [
+      ['The Ontario diploma, from Sydney', 'Grades 9 to 12 Ontario credit courses (ENG4U, MHF4U, MCV4U, SCH4U, SPH4U and more) taught live, with the official OSSD transcript issued by our Ontario partner school. The University of Sydney accepts the OSSD only from schools that have passed its own verification, so we help each family check the current list and entry rules before Grade 11.'],
       ['Cambridge continuity the state system cannot offer', 'A child mid-IGCSE or mid-IB returning from abroad keeps the same curriculum, teachers, and examination board — no lost year to curriculum mismatch.'],
       ['Documentation your NESA application needs', 'Structured curriculum, live teaching records, assessment, and progress reports — produced continuously, in the form a registration application asks for. The registration itself remains between the family and NESA.'],
       ['A-Levels that convert and travel', 'Cambridge A-Level results convert to ATAR equivalents through UAC — confirmed with the admissions centre — while also being read natively by UCAS and recognised in 160+ countries.'],
@@ -113,7 +116,7 @@ export const AUSTRALIA_CITIES = [
     growingReason: 'Sydney holds Australia\'s largest internationally connected population — Greater Western Sydney\'s South Asian communities, African and Caribbean diaspora families, and a constant returning-expat flow — inside NSW\'s more regulated NESA registration regime and an independent-school tier at AUD 25,000-45,000. Sydney runs AEST (UTC+10 / AEDT +11), 7-8 hours ahead of Nairobi EAT.',
     curricula: {
       cambridge: 'Cambridge IGCSE and Cambridge A-Level — Smartious\'s primary offer for Sydney families. Examinations at authorised private-candidate centres in Sydney, confirmed per family per session.',
-      cbc: 'Kenya CBC available for Sydney families with East African ties.',
+      ossd: 'Ontario Secondary School Diploma (OSSD), Grades 9 to 12, through our Ontario partner school, taught live in the Australian afternoon.',
       ib: 'IB Diploma Programme — continuity for families returning mid-programme from international schools.',
       american: 'American Curriculum with AP — for families targeting American universities.',
     },
@@ -121,6 +124,8 @@ export const AUSTRALIA_CITIES = [
     homeTuitionDetail: 'Smartious does not operate in-person tuition in Australia; the live online programme is complete on its own, and families typically pair it with local homeschool co-ops, sports clubs, and community groups.',
     onlineLearningDetail: 'Live online via Smartious LMS. Classes are scheduled so Australian students join during their own afternoon and early evening rather than late at night, with every session recorded for unlimited rewatch — which is what makes the model work across the Australian time zones.',
     faqs: [
+      { q: 'Can my child earn the Ontario Secondary School Diploma (OSSD) online from Sydney?', a: 'Yes. Students in Grades 9 to 12 take Ontario credit courses live with our teachers, and our Ontario partner school, inspected by the Ontario Ministry of Education, records the credits and issues the official OSSD and transcript. The requirements are the usual Ontario ones: 30 credits, the literacy requirement (normally the OSSLT, written in person under supervision) and 40 hours of community involvement. The OSSD sits alongside your NESA registration; it does not replace it.' },
+      { q: 'Do Sydney universities accept the OSSD?', a: 'Australian universities list the OSSD among recognised overseas qualifications, but each sets its own rules. The University of Sydney, for example, accepts the OSSD only from schools that have passed its verification process and asks students who completed it outside Canada for an English test score; UTS and UNSW publish their own course requirements, usually built on six Grade 12 U or M courses. Rules change each year, so we check the current requirements with you for the courses your child is aiming at.' },
       { q: 'Is online homeschooling legal in Sydney and NSW?', a: 'Home education is legal in every Australian state and territory, and in NSW it requires registration with NESA — including curriculum alignment, home visits, and periodic renewal. Smartious is not Australian-registered and does not replace that registration: we provide the curriculum, live teaching, assessment, and progress documentation a registration application needs, and NESA remains the authority on your registration.' },
       { q: 'We are returning from Singapore or Dubai mid-IGCSE — can our child continue?', a: 'Yes, and it is one of our most common Australian scenarios. Most Australian schools follow the state curriculum and ATAR pathway, so a child mid-Cambridge or mid-IB cannot simply continue. Smartious keeps the same curriculum, examination board, and teaching, with mid-term enrolment year-round.' },
       { q: 'Will Australian universities accept Cambridge A-Levels?', a: 'Cambridge A-Level results convert to ATAR equivalents through UAC in NSW and the ACT, with the conversion and any programme requirements confirmed with the admissions centre. Many families choose A-Levels precisely for the wider optionality — UCAS reads them natively and they are recognised in 160+ countries.' },
@@ -136,11 +141,12 @@ export const AUSTRALIA_CITIES = [
     county: 'Victoria',
     region: 'The second city · Wyndham, Tarneit and the west\'s South Asian growth corridor · the largest African-Australian community · VRQA\'s moderate registration regime',
     primaryKeyword: 'Online school and homeschool in Melbourne',
+    seoTitle: 'Online School & Homeschool in Melbourne | Cambridge & OSSD',
     heroTagline: 'For Melbourne families from Wyndham to Box Hill — Cambridge delivered live in the Australian afternoon, in the state with the lightest registration path.',
-    intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Melbourne families. Melbourne\'s western growth corridor — Wyndham, Tarneit, Hoppers Crossing, Point Cook — has become one of Australia\'s densest South Asian communities, and Victoria holds the country\'s largest African-Australian population. Both groups share a specific ambition: an education that connects academically to home and opens universities on several continents at once. Victoria also runs one of the more workable registration regimes — VRQA registration with a brief education plan, without mandatory home visits or testing. Smartious supplies the curriculum, live teaching, and documentation that supports it; the registration itself stays between the family and the VRQA.',
+    intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Melbourne families. Melbourne\'s western growth corridor — Wyndham, Tarneit, Hoppers Crossing, Point Cook — has become one of Australia\'s densest South Asian communities, and Victoria holds the country\'s largest African-Australian population. Both groups share a specific ambition: an education that connects academically to home and opens universities on several continents at once. Victoria also runs one of the more workable registration regimes — VRQA registration with a brief education plan, without mandatory home visits or testing. Smartious supplies the curriculum, live teaching, and documentation that supports it; the registration itself stays between the family and the VRQA. Students in Grades 9 to 12 can also earn the Ontario Secondary School Diploma (OSSD) online through our Ontario partner school, a route Melbourne families choose for Canadian universities while keeping Melbourne, Monash and the wider Australian sector open.',
     heroImg: 'https://images.unsplash.com/photo-1514395462725-fb4566210144?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Melbourne skyline over the Yarra' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Melbourne families — Cambridge alongside VRQA registration, diaspora pathways. From USD 423/month.',
+    seoDesc: 'Live online school for Melbourne families: Cambridge IGCSE and A-Level, IB, American AP and the Ontario OSSD, alongside VRQA registration. From USD 423/month.',
     challenges: [
       'Victoria requires VRQA registration with an education plan — lighter than NSW, but still a formal process the family owns.',
       'The western growth corridor\'s schools are stretched by rapid population growth.',
@@ -157,6 +163,7 @@ export const AUSTRALIA_CITIES = [
     ],
     nearbyAreas: ['Wyndham Vale', 'Tarneit', 'Point Cook', 'Hoppers Crossing', 'Box Hill', 'Dandenong', 'Craigieburn'],
     subjects: [
+      'Ontario Secondary School Diploma (OSSD), Grades 9 to 12, through our Ontario partner school: ENG4U, MHF4U, MCV4U, SCH4U, SPH4U, SBI4U and more',
       'Cambridge IGCSE Mathematics, Additional Mathematics, English Language, English Literature',
       'Cambridge IGCSE Sciences (Biology, Chemistry, Physics, Combined Science)',
       'Cambridge IGCSE Hindi, Urdu and home language support, French',
@@ -169,6 +176,7 @@ export const AUSTRALIA_CITIES = [
       'University application support — VTAC and ATAR-equivalent conversion, UCAS (UK), Common Application (US), and Indian and African university applications',
     ],
     whyChoose: [
+      ['The Ontario diploma, from Melbourne', 'Ontario credit courses taught live in the Melbourne afternoon, with the official OSSD transcript issued by our Ontario partner school. Prerequisites matter: Melbourne\'s engineering degrees, for example, look for Advanced Functions (MHF4U) and Calculus and Vectors (MCV4U), so we plan Grade 11 and 12 around the courses your child is aiming at.'],
       ['Fits Victoria\'s lighter registration path', 'VRQA registration runs on a plan rather than home visits — and a structured Cambridge curriculum with documented progress is exactly the substance a plan describes. The registration stays yours; the documentation is ours.'],
       ['Built for the west\'s growth corridor', 'Live small-group teaching regardless of how stretched local enrolments are, with no catchment and no waitlist.'],
       ['Diaspora ambition, one record', 'Australian, UK, US, Indian, and African universities from a single Cambridge school record.'],
@@ -178,7 +186,7 @@ export const AUSTRALIA_CITIES = [
     growingReason: 'Melbourne\'s western corridor — Wyndham, Tarneit, Point Cook — is one of Australia\'s densest South Asian communities, and Victoria holds the country\'s largest African-Australian population, inside a moderate VRQA registration regime and an independent tier at AUD 25,000-45,000. Melbourne runs AEST (UTC+10 / AEDT +11), 7-8 hours ahead of Nairobi EAT.',
     curricula: {
       cambridge: 'Cambridge IGCSE and Cambridge A-Level — Smartious\'s primary offer for Melbourne families. Examinations at authorised private-candidate centres in Melbourne, confirmed per session.',
-      cbc: 'Kenya CBC available for Melbourne families with East African ties — Victoria\'s African-Australian community is the country\'s largest.',
+      ossd: 'Ontario Secondary School Diploma (OSSD), Grades 9 to 12, through our Ontario partner school, taught live in the Australian afternoon.',
       ib: 'IB Diploma Programme — continuity for families returning mid-programme.',
       american: 'American Curriculum with AP — for families targeting American universities.',
     },
@@ -186,8 +194,10 @@ export const AUSTRALIA_CITIES = [
     homeTuitionDetail: 'Smartious does not operate in-person tuition in Australia; families typically pair the live online programme with local homeschool co-ops and community activities.',
     onlineLearningDetail: 'Live online via Smartious LMS, scheduled so Melbourne students join in their own afternoon and early evening rather than late at night, with every session recorded.',
     faqs: [
+      { q: 'Can my child earn the OSSD online while we live in Melbourne?', a: 'Yes. Ontario credit courses are taught live by our teachers and recorded by our Ontario partner school, which issues the official Ontario Secondary School Diploma and transcript. Your child needs 30 credits, the literacy requirement (normally the OSSLT, written in person under supervision, which the school arranges) and 40 hours of community involvement. In Victoria the OSSD sits alongside your VRQA home-schooling registration; it does not replace it.' },
+      { q: 'Will the University of Melbourne or Monash accept the OSSD?', a: 'Both list Canadian qualifications among those they assess, and both set course-by-course requirements: an overall result on the best six Grade 12 U or M courses, English, and subject prerequisites such as MHF4U and MCV4U for engineering. Requirements and minimum results change each year and differ for domestic and international applicants, so we check the current rules for your child\'s courses with the university or VTAC before Grade 11.' },
       { q: 'How does Victoria\'s registration compare with NSW?', a: 'Victoria is lighter: VRQA registration with an education plan, and no mandatory home visits or testing, where NSW involves NESA registration with curriculum alignment and home visits. Either way the registration is the family\'s, not ours — Smartious is not Australian-registered and supplies the curriculum and documentation rather than the registration.' },
-      { q: 'Is Smartious a fit for African-Australian families in Victoria?', a: 'It is one of our core Australian groups. Cambridge IGCSE and A-Level keep a child academically connected to home systems while opening Australian, UK, and African universities from the same record — and our Kenya CBC option exists for families who want it.' },
+      { q: 'Is Smartious a fit for African-Australian families in Victoria?', a: 'It is one of our core Australian groups. Cambridge IGCSE and A-Level keep a child academically connected to home systems while opening Australian, UK, and African universities from the same record.' },
       { q: 'Where do Melbourne students sit examinations?', a: 'At authorised private-candidate centres in Melbourne, confirmed per family per session, with mock examinations run beforehand.' },
     ],
   },
@@ -199,11 +209,12 @@ export const AUSTRALIA_CITIES = [
     county: 'Queensland',
     region: 'The fast-growing southeast · Queensland\'s Home Education Unit — the country\'s most workable registration regime · a large migrant and diaspora population',
     primaryKeyword: 'Online school and homeschool in Brisbane',
+    seoTitle: 'Online School & Homeschool in Brisbane | Cambridge & OSSD',
     heroTagline: 'For Brisbane and Gold Coast families — Cambridge delivered live into the state with Australia\'s most workable homeschool registration.',
-    intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Brisbane and Gold Coast families. Southeast Queensland is one of Australia\'s fastest-growing regions, drawing interstate movers, migrants, and a substantial diaspora population — and Queensland runs the country\'s most workable home education regime: plan-based registration with the Home Education Unit, no home visits, and an annual report. For families wanting an internationally recognised curriculum with real structure behind it, that combination is unusually favourable. Smartious supplies the curriculum, live teaching, and the annual-report substance; the HEU registration remains the family\'s own.',
+    intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Brisbane and Gold Coast families. Southeast Queensland is one of Australia\'s fastest-growing regions, drawing interstate movers, migrants, and a substantial diaspora population — and Queensland runs the country\'s most workable home education regime: plan-based registration with the Home Education Unit, no home visits, and an annual report. For families wanting an internationally recognised curriculum with real structure behind it, that combination is unusually favourable. Smartious supplies the curriculum, live teaching, and the annual-report substance; the HEU registration remains the family\'s own. Students in Grades 9 to 12 can also earn the Ontario Secondary School Diploma (OSSD) online through our Ontario partner school, which suits Queensland\'s plan-based home education registration well: the Ontario course outlines and reports slot straight into the plan and the annual report.',
     heroImg: 'https://images.unsplash.com/photo-1566734904496-9309bb1798ae?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Brisbane river and city skyline' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Brisbane and Gold Coast families — Cambridge alongside Queensland HEU registration. From USD 423/month.',
+    seoDesc: 'Live online school for Brisbane and the Gold Coast: Cambridge IGCSE, A-Level, IB, American AP and Ontario\'s OSSD, beside HEU registration. From USD 423/month.',
     challenges: [
       'Rapid southeast Queensland growth is stretching school enrolments and catchments.',
       'Registration is plan-based with an annual report — workable, but it still needs real curriculum substance behind it.',
@@ -220,6 +231,7 @@ export const AUSTRALIA_CITIES = [
     ],
     nearbyAreas: ['Brisbane CBD', 'Logan', 'Ipswich', 'Gold Coast', 'Sunshine Coast', 'Redlands', 'Moreton Bay'],
     subjects: [
+      'Ontario Secondary School Diploma (OSSD), Grades 9 to 12, through our Ontario partner school: ENG4U, MHF4U, MCV4U, SCH4U, SPH4U, SBI4U and more',
       'Cambridge IGCSE Mathematics, Additional Mathematics, English Language, English Literature',
       'Cambridge IGCSE Sciences (Biology, Chemistry, Physics, Combined Science)',
       'Cambridge IGCSE home language support, French, Spanish',
@@ -232,6 +244,7 @@ export const AUSTRALIA_CITIES = [
       'University application support — QTAC and ATAR-equivalent conversion, UCAS (UK), Common Application (US)',
     ],
     whyChoose: [
+      ['The Ontario diploma, from Brisbane', 'Ontario credit courses taught live in the Queensland afternoon, with the official OSSD transcript issued by our Ontario partner school. The Ontario course outlines and our reports are the kind of evidence a Queensland HEU education plan and annual report ask for, and the diploma is read by UQ, QUT, Griffith and Bond as well as Canadian universities.'],
       ['Matched to Queensland\'s plan-based regime', 'The HEU asks for a plan and an annual report; a structured Cambridge curriculum with continuous assessment and progress records is exactly that substance. Registration stays with the family.'],
       ['No catchment, no waitlist', 'Growth-corridor enrolment pressure stops mattering when the school has no geography.'],
       ['A-Levels that convert and travel', 'Conversion to ATAR equivalents through QTAC — confirmed with the admissions centre — plus native UCAS recognition.'],
@@ -241,7 +254,7 @@ export const AUSTRALIA_CITIES = [
     growingReason: 'Southeast Queensland is one of Australia\'s fastest-growing regions, with a substantial migrant and diaspora population — and the country\'s most workable home education regime: plan-based HEU registration, no home visits, annual report. Queensland runs AEST (UTC+10) year-round, 7 hours ahead of Nairobi EAT.',
     curricula: {
       cambridge: 'Cambridge IGCSE and Cambridge A-Level — Smartious\'s primary offer for Queensland families. Examinations at authorised private-candidate centres in Brisbane, confirmed per session.',
-      cbc: 'Kenya CBC available for Queensland families with East African ties.',
+      ossd: 'Ontario Secondary School Diploma (OSSD), Grades 9 to 12, through our Ontario partner school, taught live in the Australian afternoon.',
       ib: 'IB Diploma Programme available for families targeting this pathway.',
       american: 'American Curriculum with AP — for families targeting American universities.',
     },
@@ -249,6 +262,8 @@ export const AUSTRALIA_CITIES = [
     homeTuitionDetail: 'Smartious does not operate in-person tuition in Australia; families typically pair the live online programme with Queensland\'s active homeschool co-op network.',
     onlineLearningDetail: 'Live online via Smartious LMS, landing in the Brisbane afternoon on a stable year-round offset, with every session recorded for unlimited rewatch.',
     faqs: [
+      { q: 'Can my child do the OSSD online in Brisbane or on the Gold Coast?', a: 'Yes. Students in Grades 9 to 12 take Ontario credit courses live with our teachers, and our Ontario partner school issues the official Ontario Secondary School Diploma and transcript once your child has 30 credits, the literacy requirement (normally the OSSLT, written in person under supervision) and 40 hours of community involvement. In Queensland it sits alongside your Home Education Unit registration; the OSSD course outlines and our reports help with the education plan and the annual report.' },
+      { q: 'Do Queensland universities accept the OSSD?', a: 'UQ, QUT, Griffith and Bond assess overseas qualifications including the OSSD, each with its own course requirements, usually an overall result on six Grade 12 U or M courses plus English and subject prerequisites. Domestic applicants go through QTAC and international applicants often apply direct. Rules change each year, so we confirm the current requirements for your child\'s courses before Grade 11.' },
       { q: 'Why is Queensland considered easier for homeschooling?', a: 'The Home Education Unit registers families on a plan, without home visits, and asks for an annual report on progress — a lighter touch than NSW, WA, SA, or the NT. It still needs genuine curriculum substance, which is what a structured Cambridge programme with documented assessment provides.' },
       { q: 'What happens if we move interstate?', a: 'There is no reciprocal recognition between Australian states — moving to NSW means registering again from scratch with NESA. The Smartious curriculum, teachers, and examination board continue unchanged through the move, which is precisely what makes the transition manageable.' },
       { q: 'Where do Brisbane students sit examinations?', a: 'At authorised private-candidate centres in Brisbane, confirmed per family per session, with mock examinations beforehand.' },
@@ -262,11 +277,12 @@ export const AUSTRALIA_CITIES = [
     county: 'Western Australia',
     region: 'The Indian Ocean capital · the mining and resources economy with its FIFO rotations · a large South Asian and South African community · the best-aligned Australian time zone',
     primaryKeyword: 'Online school and homeschool in Perth',
+    seoTitle: 'Online School & Homeschool in Perth | Cambridge & OSSD',
     heroTagline: 'For Perth families — the Indian Ocean capital, closest of all Australian cities to our teaching clock, and built for FIFO rhythms.',
-    intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Perth families. Perth faces the Indian Ocean rather than the Pacific, and its economy reflects it: mining and resources, fly-in fly-out rotations to the Pilbara and beyond, and a workforce recruited from South Africa, the UK, India, and across the Gulf. Western Australia runs one of the more regulated registration regimes, and Perth\'s independent tier carries capital-city fees. Smartious delivers the international pathways live on the best-aligned Australian clock — AWST is five hours ahead of our Nairobi base, so classes land comfortably in the Perth afternoon — with every session recorded, which is what makes the model work for rotation families.',
+    intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Perth families. Perth faces the Indian Ocean rather than the Pacific, and its economy reflects it: mining and resources, fly-in fly-out rotations to the Pilbara and beyond, and a workforce recruited from South Africa, the UK, India, and across the Gulf. Western Australia runs one of the more regulated registration regimes, and Perth\'s independent tier carries capital-city fees. Smartious delivers the international pathways live on the best-aligned Australian clock — AWST is five hours ahead of our Nairobi base, so classes land comfortably in the Perth afternoon — with every session recorded, which is what makes the model work for rotation families. Students in Grades 9 to 12 can also earn the Ontario Secondary School Diploma (OSSD) online through our Ontario partner school. Perth sits only five hours ahead of our teaching base, so OSSD classes land in the Perth early afternoon, the easiest fit in the country.',
     heroImg: 'https://images.unsplash.com/photo-1573935448851-e0f6b2d80d5e?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Perth skyline and the Swan River' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Perth families — mining and FIFO rhythms, best Australian timezone alignment. From USD 423/month.',
+    seoDesc: 'Live online school for Perth: Cambridge IGCSE and A-Level, IB, American AP and the Ontario OSSD, in Australia\'s best-aligned time zone. From USD 423/month.',
     challenges: [
       'Western Australia runs one of the more regulated registration regimes — registration, curriculum alignment, and periodic visits.',
       'FIFO rotations mean a parent is regularly away and family rhythms do not match a fixed school week.',
@@ -283,6 +299,7 @@ export const AUSTRALIA_CITIES = [
     ],
     nearbyAreas: ['Perth CBD', 'Joondalup', 'Fremantle', 'Rockingham', 'Mandurah', 'Karratha and the Pilbara', 'Kalgoorlie'],
     subjects: [
+      'Ontario Secondary School Diploma (OSSD), Grades 9 to 12, through our Ontario partner school: ENG4U, MHF4U, MCV4U, SCH4U, SPH4U, SBI4U and more',
       'Cambridge IGCSE Mathematics, Additional Mathematics, English Language, English Literature',
       'Cambridge IGCSE Sciences (Biology, Chemistry, Physics, Combined Science)',
       'Cambridge IGCSE home language support, Afrikaans-community support, French',
@@ -295,6 +312,7 @@ export const AUSTRALIA_CITIES = [
       'University application support — TISC and ATAR-equivalent conversion, UCAS (UK), Common Application (US), South African university applications',
     ],
     whyChoose: [
+      ['The Ontario diploma, from Perth', 'Ontario credit courses taught live in the Perth early afternoon, with the official OSSD transcript issued by our Ontario partner school. A route Perth families with Canadian ties, and FIFO families who may move, choose because the diploma travels: UWA, Curtin, Murdoch and ECU assess it, and so do Canadian, UK and US universities.'],
       ['The best Australian timezone alignment we have', 'AWST is five hours ahead of Nairobi — the closest of any Australian city, so live classes sit comfortably in the Perth afternoon.'],
       ['Built for FIFO rhythms', 'Live classes plus unlimited recordings hold the academic pace through rotation weeks, travel, and the swing-shift household.'],
       ['Curriculum that crosses the Indian Ocean', 'Perth, the Pilbara, Johannesburg, or Dubai — same teachers, same examination board, no enrolment break.'],
@@ -304,7 +322,7 @@ export const AUSTRALIA_CITIES = [
     growingReason: 'Perth is the Indian Ocean capital of Australia\'s mining and resources economy — FIFO rotations, and a workforce recruited from South Africa, the UK, India, and the Gulf — inside one of the more regulated registration regimes. Perth runs AWST (UTC+8) year-round, five hours ahead of Nairobi EAT: the closest Australian alignment.',
     curricula: {
       cambridge: 'Cambridge IGCSE and Cambridge A-Level — Smartious\'s primary offer for Perth families. Examinations at authorised private-candidate centres in Perth, confirmed per session.',
-      cbc: 'Kenya CBC available for Perth families with East African ties.',
+      ossd: 'Ontario Secondary School Diploma (OSSD), Grades 9 to 12, through our Ontario partner school, taught live in the Australian afternoon.',
       ib: 'IB Diploma Programme available for families targeting this pathway.',
       american: 'American Curriculum with AP — for families targeting American universities.',
     },
@@ -312,6 +330,8 @@ export const AUSTRALIA_CITIES = [
     homeTuitionDetail: 'Smartious does not operate in-person tuition in Australia; the live online programme is complete on its own.',
     onlineLearningDetail: 'Live online via Smartious LMS on the closest Australian offset — five hours ahead of our Nairobi base — so classes land in the Perth afternoon, with every session recorded for rotation weeks and travel.',
     faqs: [
+      { q: 'Can my child earn the OSSD online from Perth?', a: 'Yes. Ontario credit courses are taught live by our teachers and recorded by our Ontario partner school, which issues the official Ontario Secondary School Diploma and transcript. The requirements are 30 credits, the literacy requirement (normally the OSSLT, written in person under supervision, arranged by the school) and 40 hours of community involvement. In Western Australia the OSSD sits alongside your home education registration with the Department of Education and does not replace it.' },
+      { q: 'Do Perth universities accept the OSSD?', a: 'UWA, Curtin, Murdoch and Edith Cowan assess overseas qualifications including the OSSD, each with its own course requirements, usually built on six Grade 12 U or M courses with English and subject prerequisites. Domestic applicants apply through TISC and international applicants often apply direct. We check the current rules for your child\'s courses before Grade 11.' },
       { q: 'Does this work for FIFO families?', a: 'It is one of the strongest fits we have: live classes with unlimited recordings hold the academic pace regardless of rotation weeks, and the schedule lands in the Perth afternoon rather than late at night.' },
       { q: 'We may relocate to the Gulf or South Africa — does the school follow?', a: 'Yes — same teachers, same curriculum, same examination board, with examinations sat at authorised centres wherever the family is. Resources careers move; the school does not have to.' },
       { q: 'Where do Perth students sit examinations?', a: 'At authorised private-candidate centres in Perth, confirmed per family per session.' },
@@ -325,11 +345,12 @@ export const AUSTRALIA_CITIES = [
     county: 'South Australia',
     region: 'The compact capital · defence, space, and university industries · a growing migrant intake · South Australia\'s more regulated registration regime',
     primaryKeyword: 'Online school and homeschool in Adelaide',
+    seoTitle: 'Online School & Homeschool in Adelaide | Cambridge & OSSD',
     heroTagline: 'For Adelaide families — the defence and space capital, with Cambridge delivered live into the South Australian afternoon.',
-    intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Adelaide families. Adelaide has rebuilt itself around defence shipbuilding, the national space agency, and a strong university sector — industries that recruit internationally and bring families on project timelines rather than admission cycles. South Australia runs one of the more regulated home education regimes, and the city\'s independent tier carries the usual Australian fees. Smartious delivers the international pathways live into the Adelaide afternoon, with the structured curriculum and documented progress a regulated registration expects — and the portability that project-based careers need.',
+    intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for Adelaide families. Adelaide has rebuilt itself around defence shipbuilding, the national space agency, and a strong university sector — industries that recruit internationally and bring families on project timelines rather than admission cycles. South Australia runs one of the more regulated home education regimes, and the city\'s independent tier carries the usual Australian fees. Smartious delivers the international pathways live into the Adelaide afternoon, with the structured curriculum and documented progress a regulated registration expects — and the portability that project-based careers need. Students in Grades 9 to 12 can also earn the Ontario Secondary School Diploma (OSSD) online through our Ontario partner school, taught live in the Adelaide afternoon, for families with Canadian ties or Canadian university plans.',
     heroImg: 'https://images.unsplash.com/photo-1566734904496-9309bb1798ae?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Adelaide city and parklands' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Adelaide families — defence and space sector, Cambridge alongside SA registration. From USD 423/month.',
+    seoDesc: 'Live online school for Adelaide: Cambridge IGCSE and A-Level, IB, American AP and the Ontario OSSD, alongside SA home education. From USD 423/month.',
     challenges: [
       'South Australia runs a more regulated registration regime — registration, alignment, and periodic review.',
       'Defence, space, and university contracts bring families mid-year and move them again.',
@@ -346,6 +367,7 @@ export const AUSTRALIA_CITIES = [
     ],
     nearbyAreas: ['Adelaide CBD', 'North Adelaide', 'Osborne and the shipyards', 'Mawson Lakes', 'Glenelg', 'Adelaide Hills', 'Gawler'],
     subjects: [
+      'Ontario Secondary School Diploma (OSSD), Grades 9 to 12, through our Ontario partner school: ENG4U, MHF4U, MCV4U, SCH4U, SPH4U, SBI4U and more',
       'Cambridge IGCSE Mathematics, Additional Mathematics, English Language, English Literature',
       'Cambridge IGCSE Sciences (Biology, Chemistry, Physics, Combined Science)',
       'Cambridge IGCSE home language support, French, Spanish',
@@ -358,6 +380,7 @@ export const AUSTRALIA_CITIES = [
       'University application support — SATAC and ATAR-equivalent conversion, UCAS (UK), Common Application (US)',
     ],
     whyChoose: [
+      ['The Ontario diploma, from Adelaide', 'Ontario credit courses taught live in the Adelaide afternoon, with the official OSSD transcript issued by our Ontario partner school. Adelaide University and Flinders assess the OSSD for entry, and the same diploma opens Canadian universities directly, which suits defence and research families on international postings.'],
       ['STEM depth for a defence and space city', 'Cambridge A-Level Mathematics, Further Mathematics, and Physics — led by a founder with a BEd in Mathematics and Physics — suit the sector\'s families precisely.'],
       ['Enrolment on the project\'s timeline', 'Families arrive mid-contract; admission is year-round with no waitlist.'],
       ['Documentation for a regulated state', 'Structured curriculum, assessment, and progress records produced continuously — with the registration itself remaining the family\'s own.'],
@@ -367,7 +390,7 @@ export const AUSTRALIA_CITIES = [
     growingReason: 'Adelaide has rebuilt around defence shipbuilding, the space agency, and its universities — industries recruiting internationally on project timelines — inside one of the more regulated registration regimes and a compact international-school market. Adelaide runs ACST (UTC+9:30 / ACDT +10:30), about 6.5-7.5 hours ahead of Nairobi EAT.',
     curricula: {
       cambridge: 'Cambridge IGCSE and Cambridge A-Level — Smartious\'s primary offer for Adelaide families. Examinations at authorised private-candidate centres in Adelaide, confirmed per session.',
-      cbc: 'Kenya CBC available for Adelaide families with East African ties.',
+      ossd: 'Ontario Secondary School Diploma (OSSD), Grades 9 to 12, through our Ontario partner school, taught live in the Australian afternoon.',
       ib: 'IB Diploma Programme available for families targeting this pathway.',
       american: 'American Curriculum with AP — for families targeting American universities.',
     },
@@ -375,6 +398,9 @@ export const AUSTRALIA_CITIES = [
     homeTuitionDetail: 'Smartious does not operate in-person tuition in Australia; the live online programme is complete on its own.',
     onlineLearningDetail: 'Live online via Smartious LMS, landing in the Adelaide afternoon and early evening, with every session recorded for unlimited rewatch.',
     faqs: [
+      { q: 'Can my child earn the OSSD online from Adelaide?', a: 'Yes. A Grade 9 to 12 student in Adelaide joins Ontario credit classes live each afternoon, Adelaide time, and our Ontario partner school keeps the credit record and grants the diploma. Along the way your child writes the Ontario literacy test once, in person, at a supervised sitting the school organises locally, and logs 40 volunteer hours, which Adelaide students often gather through SA Country Fire Service cadets, Surf Life Saving SA, parkrun marshalling or a parish or temple. South Australian home education approval from the Department for Education still applies alongside it.' },
+      { q: 'Do Adelaide University and Flinders accept the OSSD?', a: 'Both read overseas school qualifications including the Ontario diploma, and each sets its own entry rules per degree, typically looking at the six strongest Grade 12 university-preparation courses, with English and any subject prerequisites on top. Local applicants lodge through SATAC; overseas applicants generally apply straight to the university. Because entry scores move every year, we confirm the rules for the degrees your child is weighing before Grade 11 subjects are chosen.' },
+      { q: 'We are a defence or space-sector family posted to Adelaide from Canada. Can our child keep the Ontario curriculum?', a: 'Yes, and this is the situation the OSSD route suits best. Families arriving for the submarine and shipbuilding programmes at Osborne, RAAF Base Edinburgh, Lot Fourteen and the space agency often come mid-way through Ontario high school. Credits already earned in Canada carry straight across, the course codes stay the same, and when the posting ends your child can return to an Ontario school without repeating a year.' },
       { q: 'We arrived on a defence or space contract mid-year — how fast can schooling start?', a: 'Admission is year-round with no waitlist, and students typically begin within a week of the assessment — with the curriculum continuing unchanged if the contract later moves the family on.' },
       { q: 'Where do Adelaide students sit examinations?', a: 'At authorised private-candidate centres in Adelaide, confirmed per family per session.' },
     ],
@@ -387,11 +413,12 @@ export const AUSTRALIA_CITIES = [
     county: 'All states and territories',
     region: 'Regional NSW, Victoria, Queensland, WA, the Top End and Tasmania · a century-old distance-education tradition · almost no local Cambridge or IB provision anywhere',
     primaryKeyword: 'Online school and homeschool in regional and remote Australia',
+    seoTitle: 'Online School & Homeschool in Regional Australia | OSSD',
     heroTagline: 'For regional and remote families — the country that invented schooling by radio, now served by live international classes.',
-    intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for families across regional and remote Australia. No country understands distance education like this one: schooling by radio and correspondence has served the outback for generations, and Australians take remote learning seriously because it built the bush. What regional Australia has never had is international curriculum — local Cambridge or IB options are limited or non-existent across regional NSW, Victoria, Queensland, Western Australia, the Top End, and Tasmania, and boarding in a capital has been the standard answer for families who wanted them. Smartious changes that arithmetic: identical live small-group teaching to any address with a stable connection, alongside whichever state registration applies.',
+    intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, and American Curriculum with Advanced Placement (AP) for families across regional and remote Australia. No country understands distance education like this one: schooling by radio and correspondence has served the outback for generations, and Australians take remote learning seriously because it built the bush. What regional Australia has never had is international curriculum — local Cambridge or IB options are limited or non-existent across regional NSW, Victoria, Queensland, Western Australia, the Top End, and Tasmania, and boarding in a capital has been the standard answer for families who wanted them. Smartious changes that arithmetic: identical live small-group teaching to any address with a stable connection, alongside whichever state registration applies. Students in Grades 9 to 12 can also earn the Ontario Secondary School Diploma (OSSD) online through our Ontario partner school, the same live classes a city student gets, delivered to a station or a regional town.',
     heroImg: 'https://images.unsplash.com/photo-1529108190281-9a4f620bc2d8?w=1600&q=80&auto=format&fit=crop',
     altTexts: { hero: 'Regional Australian landscape at golden hour' },
-    seoDesc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for regional and remote Australian families — international curriculum where none exists locally. From USD 423/month.',
+    seoDesc: 'Live online school for regional and remote Australia: Cambridge IGCSE and A-Level, IB, American AP and the Ontario OSSD. From USD 423/month.',
     challenges: [
       'Local Cambridge and IB options are limited or absent across most of regional and remote Australia.',
       'Boarding in a capital city has been the traditional answer — expensive, and it separates the family.',
@@ -409,6 +436,7 @@ export const AUSTRALIA_CITIES = [
     ],
     nearbyAreas: ['Regional NSW', 'Regional Victoria', 'Regional Queensland and Cairns', 'Regional WA and the Pilbara', 'The Top End and Darwin', 'Tasmania', 'Central Australia'],
     subjects: [
+      'Ontario Secondary School Diploma (OSSD), Grades 9 to 12, through our Ontario partner school: ENG4U, MHF4U, MCV4U, SCH4U, SPH4U, SBI4U and more',
       'Cambridge IGCSE Mathematics, Additional Mathematics, English Language, English Literature',
       'Cambridge IGCSE Sciences (Biology, Chemistry, Physics, Combined Science)',
       'Cambridge IGCSE Geography, Business Studies, home language support',
@@ -421,6 +449,7 @@ export const AUSTRALIA_CITIES = [
       'University application support — state ATAR-equivalent conversion, UCAS (UK), Common Application (US)',
     ],
     whyChoose: [
+      ['The Ontario diploma, anywhere in Australia', 'Ontario credit courses taught live, with the official OSSD transcript issued by our Ontario partner school. Only the literacy test has to be written in person under supervision, and the school arranges where; everything else happens at home.'],
       ['International curriculum where none exists locally', 'The same live Cambridge teaching a Sydney student gets, delivered to a station, a regional town, or a mining community.'],
       ['An alternative to sending a child away', 'Boarding in a capital has been the default answer for regional families wanting more. Live small-group teaching at home keeps the family together without costing the education.'],
       ['Built for distance the way this country understands it', 'Live classes plus unlimited recordings, designed for connectivity that varies and seasons that do not negotiate.'],
@@ -430,7 +459,7 @@ export const AUSTRALIA_CITIES = [
     growingReason: 'Regional and remote Australia has a century-old distance-education tradition and almost no local Cambridge or IB provision — leaving capital-city boarding as the traditional answer for families wanting international curriculum. Regional Australia spans AEST, ACST, and AWST, 5-8 hours ahead of Nairobi EAT.',
     curricula: {
       cambridge: 'Cambridge IGCSE and Cambridge A-Level — Smartious\'s primary offer for regional Australia. Examinations at authorised private-candidate centres in the nearest capital, confirmed per session with travel planned well ahead.',
-      cbc: 'Kenya CBC available for regional families with East African ties.',
+      ossd: 'Ontario Secondary School Diploma (OSSD), Grades 9 to 12, through our Ontario partner school, taught live in the Australian afternoon.',
       ib: 'IB Diploma Programme available for families targeting this pathway.',
       american: 'American Curriculum with AP — for families targeting American universities.',
     },
@@ -438,6 +467,7 @@ export const AUSTRALIA_CITIES = [
     homeTuitionDetail: 'Smartious does not operate in-person tuition in Australia; regional families typically pair the live online programme with local co-ops, sports, and community groups.',
     onlineLearningDetail: 'Live online via Smartious LMS, landing in the local afternoon across every Australian time zone, with every session recorded — built for variable regional connectivity and seasonal workloads.',
     faqs: [
+      { q: 'Can a student in regional or remote Australia earn the OSSD online?', a: 'Yes. All the teaching is live online, and our Ontario partner school issues the official Ontario Secondary School Diploma and transcript after 30 credits, the literacy requirement and 40 hours of community involvement, which can include volunteering in your own community. The literacy test (the OSSLT) is written in person under supervision, so the school arranges an approved place and supervisor, usually in the nearest regional centre or capital. The OSSD sits alongside your state home education registration; it does not replace it.' },
       { q: 'Does this really work from a remote property?', a: 'With a stable connection, yes — and the recorded library covers the sessions a patchy day interrupts. Australia has run remote education successfully for a century; what we add is the international curriculum that was never part of it.' },
       { q: 'Is this an alternative to boarding?', a: 'For many regional families it is exactly that: the same live teaching and examination boards as a capital-city student, delivered home, with travel needed only for examination sittings a few times a year.' },
       { q: 'How does registration work if we move states?', a: 'There is no reciprocal recognition — you register again from scratch with the new state authority, which remains the family\'s relationship. The Smartious curriculum, teachers, and examination board continue unchanged through the move.' },
@@ -480,7 +510,7 @@ export const AUSTRALIA_COUNTRY = {
   heroImage: 'https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?w=1600&q=80&auto=format&fit=crop',
   heroEyebrow: 'Online international school for Australia',
   heroH1Suffix: 'Australia',
-  heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, and American AP for diaspora, returning-expat, regional, and Cambridge-pathway families across Sydney, Melbourne, Brisbane, Perth, Adelaide, and regional Australia. Australian public schools are free and capable and we do not compete with them — Smartious is for families whose academic needs sit alongside or outside that system. Classes run in the Australian afternoon, not late at night, and we are clear about one thing: we are not Australian-registered and do not replace your state homeschool registration.',
+  heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP and the Ontario Secondary School Diploma (OSSD, through our Ontario partner school) for diaspora, returning-expat, regional, and Cambridge-pathway families across Sydney, Melbourne, Brisbane, Perth, Adelaide, and regional Australia. Australian public schools are free and capable and we do not compete with them — Smartious is for families whose academic needs sit alongside or outside that system. Classes run in the Australian afternoon, not late at night, and we are clear about one thing: we are not Australian-registered and do not replace your state homeschool registration.',
   heroValueProp: 'From USD 423/month (~AUD 643). Small live classes 4-6 students, Cambridge / IB / American AP through to A-Level — against an independent-school tier at roughly AUD 25,000-45,000, with A-Level results converting to ATAR equivalents through your state admissions centre.',
   whatsappTrigger: 'Hi, I would like to enquire about Smartious for our family in Australia',
 
@@ -537,6 +567,8 @@ export const AUSTRALIA_COUNTRY = {
   ],
 
   faqs: [
+    { q: 'Can my child earn the Ontario Secondary School Diploma (OSSD) online from Australia?', a: 'Yes. Students in Grades 9 to 12 take Ontario credit courses live with our teachers, timetabled into the Australian afternoon, and our Ontario partner school, inspected by the Ontario Ministry of Education, records the credits and issues the official OSSD and transcript. Your child needs 30 credits, the literacy requirement (normally the OSSLT, written in person under supervision, which the school arranges) and 40 hours of community involvement. The OSSD sits alongside your state home education registration; it does not replace it.' },
+    { q: 'Do Australian universities accept the OSSD?', a: 'Australian universities list the OSSD among the overseas qualifications they assess, but each sets its own rules: usually an overall result on six Grade 12 U or M courses, English, and subject prerequisites such as MHF4U and MCV4U for engineering. Some go further: the University of Sydney accepts the OSSD only from schools that have passed its verification process and asks students who completed it outside Canada for an English test score. Rules change each year, so we check the current requirements for your child\'s courses before Grade 11.' },
     { q: 'Is homeschooling legal in Australia?', a: 'Yes — in every state and territory, though each legislates separately. Queensland is the most workable (plan-based HEU registration, no home visits, annual report); Victoria is moderate (VRQA registration with an education plan); NSW, WA, SA and the NT are more regulated (alignment, home visits, renewal); Tasmania and the ACT sit in between.' },
     { q: 'Can Smartious register my child for homeschooling?', a: 'No — and this matters. Smartious is not Australian-registered and does not substitute for state homeschool registration. We provide the structured curriculum, live teaching, assessment, and progress documentation your registration application or review needs; the registration relationship stays between your family and your state authority.' },
     { q: 'What happens if we move interstate?', a: 'There is no reciprocal recognition between states — you register again from scratch with the new authority. The Smartious curriculum, teachers, and examination board continue unchanged, which is what makes the transition manageable.' },
