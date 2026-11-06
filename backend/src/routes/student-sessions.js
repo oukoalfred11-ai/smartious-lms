@@ -274,6 +274,30 @@ router.get('/leavers', auth, STAFF, async (req, res) => {
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
 
+// GET    /leavers/:id/delete-impact  what a permanent delete removes
+// DELETE /leavers/:id { confirm: 'DELETE', deleteParents }
+// For students marked as left who never really enrolled: removes the
+// account and every record filed against it (lib/studentPurge.js).
+// Admin and the Operations Manager only; refused when the student has
+// a paid invoice or card payment.
+const PURGERS = requireRole('admin', 'ops_manager')
+router.get('/leavers/:id/delete-impact', auth, PURGERS, async (req, res) => {
+  try {
+    const { impactOf, blockReason } = require('../lib/studentPurge')
+    const impact = await impactOf(req.params.id)
+    if (!impact) return res.status(404).json({ success: false, message: 'Student not found.' })
+    res.json({ success: true, data: { ...impact, blocked: blockReason(impact) } })
+  } catch (e) { res.status(500).json({ success: false, message: e.message }) }
+})
+router.delete('/leavers/:id', auth, PURGERS, async (req, res) => {
+  try {
+    if (String(req.body?.confirm || '') !== 'DELETE') return res.status(400).json({ success: false, message: 'Type DELETE to confirm.' })
+    const r = await require('../lib/studentPurge').purgeStudent(req.params.id, { deleteParents: req.body?.deleteParents === true })
+    console.log(`[purge] ${r.name} deleted permanently by ${req.user.email}: ${r.records} record(s), ${r.parentsDeleted} parent account(s)`)
+    res.json({ success: true, message: `${r.name} deleted permanently with ${r.records} record(s)${r.parentsDeleted ? ` and ${r.parentsDeleted} parent account(s)` : ''}.`, data: r })
+  } catch (e) { res.status(e.status || 500).json({ success: false, message: e.message }) }
+})
+
 // POST /years/init { academicYear } — snapshot every active student
 // into the year at their current grade. Idempotent per student+year.
 router.post('/years/init', auth, STAFF, async (req, res) => {

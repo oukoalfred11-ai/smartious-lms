@@ -45,7 +45,8 @@ function Breakdown({ title, items }) {
   )
 }
 
-export default function LeaversPanel({ refreshKey, reloadOn, toast, onChanged }) {
+export default function LeaversPanel({ refreshKey, reloadOn, toast, onChanged, role }) {
+  const canPurge = role === 'admin' || role === 'ops_manager'
   const [data, setData] = useState(null)
   const [error, setError] = useState('')
   const [tab, setTab] = useState('graduated')
@@ -63,6 +64,29 @@ export default function LeaversPanel({ refreshKey, reloadOn, toast, onChanged })
   // Bring a leaver or alumnus back: the account and any parents archived
   // with them are reactivated with full history (PATCH /reinstate).
   // An alumnus returning for a new stage can be given their new grade.
+  // Permanently delete a leaver who never really enrolled: shows what
+  // goes with them first, then asks for DELETE typed out.
+  const purge = async (r) => {
+    let imp
+    try { imp = (await api.get('/student-sessions/leavers/' + r.studentId + '/delete-impact')).data?.data }
+    catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not check this student.'); return }
+    if (imp.blocked) { window.alert(imp.blocked); return }
+    const lines = imp.counts.length ? imp.counts.map(c => `  • ${c.n} ${c.label}`).join('\n') : '  • no other records'
+    const only = imp.parents.filter(p => p.onlyChild)
+    let deleteParents = false
+    if (only.length) deleteParents = window.confirm(`${only.map(p => p.name || p.email).join(', ')} ${only.length === 1 ? 'has' : 'have'} no other child at Smartious.\n\nOK: delete ${only.length === 1 ? 'that parent account' : 'those parent accounts'} too.\nCancel: keep ${only.length === 1 ? 'it' : 'them'}.`)
+    const typed = window.prompt(`Delete ${imp.name} permanently?\n\nThis removes the account and:\n${lines}${deleteParents ? `\n  • ${only.length} parent account(s)` : ''}\n\nThis cannot be undone. Type DELETE to confirm.`)
+    if (typed == null) return
+    if (typed.trim() !== 'DELETE') { toast?.error?.('Not deleted: type DELETE to confirm.'); return }
+    setBusy(r.studentId)
+    try {
+      const res = await api.delete('/student-sessions/leavers/' + r.studentId, { data: { confirm: 'DELETE', deleteParents } })
+      toast?.ok?.(res.data?.message || 'Deleted.')
+      setTick(t => t + 1); onChanged?.()
+    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not delete.') }
+    finally { setBusy(null) }
+  }
+
   const reactivate = async (r) => {
     const alum = r.kind === 'graduated'
     const msg = `Reactivate ${r.name}? Their account${alum ? '' : ' and any parent accounts archived with them'} come back with full history, and a welcome back email is sent.`
@@ -164,6 +188,13 @@ export default function LeaversPanel({ refreshKey, reloadOn, toast, onChanged })
                     style={{ padding: '5px 10px', borderRadius: 7, border: 'none', background: '#065F46', color: '#fff', fontSize: 11, fontWeight: 800, cursor: 'pointer', whiteSpace: 'nowrap' }}>
                     {busy === r.studentId ? 'Reactivating…' : 'Reactivate'}
                   </button>
+                  {canPurge && (
+                    <button type="button" disabled={busy === r.studentId} onClick={() => purge(r)}
+                      title="Delete this student and all their records permanently (for students who never really enrolled)"
+                      style={{ marginLeft: 6, padding: '5px 10px', borderRadius: 7, border: '1px solid #FCA5A5', background: '#fff', color: '#991B1B', fontSize: 11, fontWeight: 800, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                      Delete
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}</tbody>
