@@ -11645,7 +11645,7 @@ export default function LandingPage() {
                         }}>{st.abbr}</span>
                       </div>
                       <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:18,fontWeight:400,color:V.ink,marginBottom:6}}>{st.name}</div>
-                      <div style={{fontSize:12,color:V.sl,marginBottom:8,lineHeight:1.5}}>{st.pop} families</div>
+                      {st.pop && <div style={{fontSize:12,color:V.sl,marginBottom:8,lineHeight:1.5}}>{st.pop} families</div>}
                       <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
                         <span style={{fontSize:10,padding:'3px 8px',background:V.bone3,borderRadius:99,color:V.sl2,fontWeight:600}}>{st.difficulty}</span>
                         {st.voucher && <span style={{fontSize:10,padding:'3px 8px',background:V.gold+'22',color:V.gold,borderRadius:99,fontWeight:700}}>{st.voucher.amount} voucher</span>}
@@ -12209,15 +12209,17 @@ export default function LandingPage() {
                 </a>
                 <a href={`/blog/${s.blogSlug}`}
                   style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.3)',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:700,textDecoration:'none',display:'inline-block'}}>
-                  Read the full {s.name} guide →
+                  Read the 50-state homeschool law guide →
                 </a>
               </div>
               {/* Fact strip */}
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(170px,1fr))',gap:12,marginTop:36,paddingTop:28,borderTop:'1px solid rgba(255,255,255,.12)'}}>
+                {s.pop && (
                 <div>
                   <div style={{fontSize:11,letterSpacing:'.1em',textTransform:'uppercase',opacity:.6,marginBottom:4}}>Homeschool families</div>
                   <div style={{fontSize:18,fontWeight:800}}>{s.pop}</div>
                 </div>
+                )}
                 <div>
                   <div style={{fontSize:11,letterSpacing:'.1em',textTransform:'uppercase',opacity:.6,marginBottom:4}}>Paperwork</div>
                   <div style={{fontSize:18,fontWeight:800,color:s.accentColor}}>{s.difficulty}</div>
@@ -12283,7 +12285,7 @@ export default function LandingPage() {
                     <strong style={{color:V.ink}}>Paperwork burden:</strong> {s.paperworkLevel}
                   </p>
                   <a href={`/blog/${s.blogSlug}`} style={{color:V.cr,fontWeight:700,fontSize:13.5,textDecoration:'none',borderBottom:'1px solid '+V.cr}}>
-                    Read the complete {s.name} legal guide →
+                    Read the 50-state homeschool law guide →
                   </a>
                 </div>
                 {s.voucher && (
@@ -12431,7 +12433,7 @@ export default function LandingPage() {
               </div>
               <div style={{textAlign:'center',marginTop:32}}>
                 <a href={`/blog/${s.blogSlug}`} style={{color:V.cr,fontWeight:700,fontSize:14,textDecoration:'none',borderBottom:'1px solid '+V.cr}}>
-                  Read the complete {s.name} homeschool guide →
+                  Read the 50-state homeschool law guide →
                 </a>
               </div>
             </div>
@@ -12519,15 +12521,17 @@ export default function LandingPage() {
                 </a>
                 <a href={`/blog/${s.blogSlug}`}
                   style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.3)',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:700,textDecoration:'none',display:'inline-block'}}>
-                  Read the full {s.name} guide →
+                  Read the 50-state homeschool law guide →
                 </a>
               </div>
               {/* Fact strip */}
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(170px,1fr))',gap:12,marginTop:36,paddingTop:28,borderTop:'1px solid rgba(255,255,255,.12)'}}>
+                {s.pop && (
                 <div>
                   <div style={{fontSize:11,letterSpacing:'.1em',textTransform:'uppercase',opacity:.6,marginBottom:4}}>Homeschool families</div>
                   <div style={{fontSize:18,fontWeight:800}}>{s.pop}</div>
                 </div>
+                )}
                 <div>
                   <div style={{fontSize:11,letterSpacing:'.1em',textTransform:'uppercase',opacity:.6,marginBottom:4}}>Paperwork</div>
                   <div style={{fontSize:18,fontWeight:800,color:s.accentColor}}>{s.difficulty}</div>
@@ -12593,7 +12597,7 @@ export default function LandingPage() {
                     <strong style={{color:V.ink}}>Paperwork burden:</strong> {s.paperworkLevel}
                   </p>
                   <a href={`/blog/${s.blogSlug}`} style={{color:V.cr,fontWeight:700,fontSize:13.5,textDecoration:'none',borderBottom:'1px solid '+V.cr}}>
-                    Read the complete {s.name} legal guide →
+                    Read the 50-state homeschool law guide →
                   </a>
                 </div>
                 {s.voucher && (
@@ -12762,7 +12766,7 @@ export default function LandingPage() {
               </div>
               <div style={{textAlign:'center',marginTop:32}}>
                 <a href={`/blog/${s.blogSlug}`} style={{color:V.cr,fontWeight:700,fontSize:14,textDecoration:'none',borderBottom:'1px solid '+V.cr}}>
-                  Read the complete {s.name} homeschool guide →
+                  Read the 50-state homeschool law guide →
                 </a>
               </div>
             </div>
@@ -12860,7 +12864,7 @@ export default function LandingPage() {
                 </a>
                 <a href={`/blog/${s.blogSlug}`}
                   style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.3)',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:700,textDecoration:'none',display:'inline-block'}}>
-                  Read full {s.name} homeschool guide →
+                  Read the 50-state homeschool law guide →
                 </a>
               </div>
               {/* Fact strip */}
@@ -13548,7 +13552,7 @@ export default function LandingPage() {
                 </a>
                 <a href={`/blog/${s.blogSlug}`}
                   style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.3)',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:700,textDecoration:'none',display:'inline-block'}}>
-                  Read full {s.name} homeschool guide →
+                  Read the 50-state homeschool law guide →
                 </a>
               </div>
               {/* Fact strip */}
