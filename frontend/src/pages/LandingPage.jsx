@@ -1975,8 +1975,8 @@ const PAGE_META = {
     desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (through our Ontario partner school) for Irish and expat families across Dublin (South Dublin D4/6/14/18 — NAISD Leopardstown, SEK Kilternan, St. Andrew\'s catchment plus Silicon Docks Google/Meta/LinkedIn corporate), Cork (Apple European HQ + pharma cluster), Galway (Ireland\'s medtech capital — Medtronic + Boston Scientific), Limerick (Analog Devices, Dell), Waterford (South East biotech), and Kildare (Intel Leixlip Fab 34 semiconductor). Post-Brexit UK family continuity + multinational corporate rotation + Túsla-compatible homeschool. From USD 423/month.',
   },
   'homeschooling-united-kingdom': {
-    title: 'Online School, Virtual School & Homeschool UK | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (through our Ontario partner school) for UK families across London (all 32 boroughs — Westminster / Eton / Harrow / St. Paul\'s alternative), Manchester (Northern Powerhouse — Manchester Grammar School alternative), Birmingham (HSBC UK HQ + JLR Solihull + King Edward VI alternative), Leeds (Channel 4 Northern HQ + Grammar School at Leeds alternative), Bristol (Airbus UK Filton + Bristol Grammar + Clifton alternative), and Edinburgh (Scotland — Cambridge / A-Level pathway alternative to Scottish CfE). Below Cambridge Home School Online (£10,950/year) from USD 423/month. Elective Home Education, Section 19 alternative provision, SEND-friendly. From USD 423/month.',
+    title: 'Online School UK | Live British IGCSE & A-Level Classes',
+    desc: 'Full-time online school for UK home-educating families: live Cambridge and Pearson Edexcel IGCSE and A-Level classes in UK school hours. From USD 423/month.',
   },
   'homeschooling-india': {
     title: 'Online School, Virtual School & Homeschool India | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
@@ -4273,13 +4273,13 @@ export default function LandingPage() {
   } else if (page === 'state-landing' && currentStateSlug && US_STATES[currentStateSlug]) {
     const s = US_STATES[currentStateSlug]
     // USA: K-12 American curriculum; Canada: the OSSD (src/data/naFocus.js).
-    const m = naMeta('us', { slug: currentStateSlug, name: s.name, oldTitle: s.metaTitle, oldDesc: s.metaDesc })
+    const m = naMeta('us', { slug: currentStateSlug, name: s.name, oldTitle: s.metaTitle, oldDesc: s.metaDesc, state: s })
     metaTitle = m.title
     metaDesc  = m.desc
   } else if (page === 'city-landing' && currentCitySlug && US_CITIES[currentCitySlug]) {
     const c = US_CITIES[currentCitySlug]
     // USA: K-12 American curriculum; Canada: the OSSD (src/data/naFocus.js).
-    const m = naMeta('us', { slug: currentCitySlug, name: c.name, oldTitle: c.metaTitle, oldDesc: c.metaDesc })
+    const m = naMeta('us', { slug: currentCitySlug, name: c.name, oldTitle: c.metaTitle, oldDesc: c.metaDesc, state: US_STATES[c.state] })
     metaTitle = m.title
     metaDesc  = m.desc
   } else if (page === 'province-landing' && currentProvinceSlug && CA_PROVINCES[currentProvinceSlug]) {
