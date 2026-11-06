@@ -3489,6 +3489,20 @@ const exFormatDateTime = (iso) => {
     d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true })
 }
 
+// Dean verification badge: a teacher's exam reaches students only once
+// the Dean publishes it (routes/exams.js, approval).
+const ExApprovalBadge = ({ exam, full }) => {
+  const st = exam?.approval?.status
+  if (!st || st === 'approved') return null
+  const pending = st === 'pending'
+  return (
+    <span title={pending ? 'Students cannot see this exam until the Dean verifies and publishes it.' : 'Returned by the Dean. Edit the exam to send it back.'}
+      style={{ background: pending ? '#FEF3C7' : '#FEE2E2', color: pending ? '#92400E' : '#991B1B', fontSize: 9.5, fontWeight: 800, letterSpacing: '.08em', padding: '2px 8px', borderRadius: 99 }}>
+      {pending ? 'AWAITING DEAN' : 'RETURNED'}{full && !pending && exam.approval.note ? ': ' + exam.approval.note : ''}
+    </span>
+  )
+}
+
 // Compute exam status from start time and duration
 const exComputeStatus = (exam) => {
   const now = Date.now()
@@ -4101,7 +4115,9 @@ function ExamsTab({ user, store, setPage, toast }) {
     try {
       const { data } = await api.post('/exams', payload)
       if (data?.success) {
-        toast?.ok?.(formSelectedStudents.length
+        toast?.ok?.(data.data?.exam?.approval?.status === 'pending'
+          ? (data.message || 'Exam saved and sent to the Dean to verify.')
+          : formSelectedStudents.length
           ? 'Exam scheduled. ' + formSelectedStudents.length + ' student(s) will be notified.'
           : 'Exam saved. No students assigned yet — you can still download the paper.')
         await loadExamsFromServer() // refresh
@@ -4263,6 +4279,16 @@ function ExamsTab({ user, store, setPage, toast }) {
           Back to Exams
         </button>
 
+        {selectedExam.approval?.status && selectedExam.approval.status !== 'approved' && (
+          <div style={{ padding: '10px 14px', borderRadius: 10, marginBottom: 14, fontSize: 13, lineHeight: 1.5,
+            background: selectedExam.approval.status === 'pending' ? '#FFFBEB' : '#FEF2F2',
+            border: '1.5px solid ' + (selectedExam.approval.status === 'pending' ? '#F59E0B' : '#FCA5A5'),
+            color: selectedExam.approval.status === 'pending' ? '#92400E' : '#991B1B' }}>
+            {selectedExam.approval.status === 'pending'
+              ? <><b>Awaiting the Dean's verification.</b> Students cannot see this exam, and no one is notified, until it is published.</>
+              : <><b>Returned by the Dean.</b> {selectedExam.approval.note} Edit the exam and it goes back for verification.</>}
+          </div>
+        )}
         {/* ── Paper downloads ────────────────────────────────────
             One standard Smartious paper, generated server-side, so
             every assessment looks the same regardless of who set it.
@@ -5703,6 +5729,7 @@ function ExamsTab({ user, store, setPage, toast }) {
                         fontSize: 9.5, fontWeight: 800, letterSpacing: '.08em',
                         padding: '2px 8px', borderRadius: 99,
                       }}>{statusBadge.label}</span>
+                      <ExApprovalBadge exam={exam} />
                       {status === 'active' && (
                         <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#B91C1C', animation: 'pulse 1.5s infinite' }}/>
                       )}

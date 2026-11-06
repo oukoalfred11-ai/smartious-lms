@@ -89,6 +89,25 @@ function withComputedStatus(examOrArray) {
   return examOrArray ? { ...examOrArray, computedStatus: computeStatus(examOrArray) } : examOrArray;
 }
 
+// ── Dean verification ─────────────────────────────────────
+// Staff who verify and publish exams. A teacher's exam waits for one of
+// them; their own exams publish straight away.
+const { REVIEWERS, isPublished, PUBLISHED, initialApproval, needsReverification } = require('../lib/examApproval');
+
+async function tellReviewers(exam, teacher) {
+  try {
+    const User = require('../models/User');
+    const { notify } = require('../lib/notify');
+    const staff = await User.find({ role: { $in: ['dos', 'ops_manager'] }, isActive: { $ne: false } }).select('_id').lean();
+    const who = teacher ? [teacher.firstName, teacher.lastName].filter(Boolean).join(' ') : 'A teacher';
+    await notify(staff.map(s => s._id), {
+      title: 'Exam to verify: ' + (exam.subject || '') + ' ' + (exam.paperNumber || ''),
+      body: `${who} set "${exam.title}" (${exam.grade}, ${new Date(exam.startAt).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}). Review and publish it under Exams.`,
+      module: 'exams',
+    });
+  } catch (e) { /* best effort */ }
+}
+
 // ═══════════════════════════════════════════════════════════
 // TEACHER ROUTES
 // ═══════════════════════════════════════════════════════════
@@ -199,10 +218,16 @@ router.post('/', auth, requireRole('teacher','admin', 'dos', 'ops_manager'), asy
       customQuestions: customQuestions || [],
       assignedStudents: validStudentIds,
       groupRoomIds: validGroupIds,
+      approval: initialApproval(req.user.role, req.user._id),
     });
 
     await recomputeAggregates(exam);
     await exam.save();
+
+    if (!isPublished(exam)) {
+      tellReviewers(exam, req.user).catch(() => {});
+      return res.status(201).json({ success:true, message:'Exam saved and sent to the Dean to verify. Students will see it, and be notified, once it is published.', data: { exam } });
+    }
 
     // Emails go out in the background; scheduling never waits on SMTP.
     notifyExamRecipients(exam).catch(() => {});
@@ -284,12 +309,25 @@ router.put('/:id', auth, requireRole('teacher','admin', 'dos', 'ops_manager'), a
                       'questionIds','customQuestions','assignedStudents','groupRoomIds','status'];
     editable.forEach(k => { if (k in req.body) exam[k] = req.body[k]; });
 
+    // A teacher's change to the paper goes back to the Dean, unless the
+    // sitting has already started (then it stays as it is).
+    let resubmitted = false;
+    if (needsReverification(req.user.role, req.body, exam.startAt)) {
+      resubmitted = true;
+      exam.approval = { status: 'pending', submittedAt: new Date(), reviewedBy: null, reviewedAt: null, note: '' };
+    }
+
     await recomputeAggregates(exam);
     await exam.save();
 
+    if (resubmitted) {
+      tellReviewers(exam, req.user).catch(() => {});
+      return res.json({ success:true, message:'Exam updated and sent to the Dean to verify again. Students will not see it until it is published.', data: { exam } });
+    }
+
     // A changed sitting time is the one update families MUST hear about.
     const newStartAt = exam.startAt ? new Date(exam.startAt).getTime() : 0;
-    const rescheduled = 'startAt' in req.body && newStartAt !== prevStartAt;
+    const rescheduled = 'startAt' in req.body && newStartAt !== prevStartAt && isPublished(exam);
     if (rescheduled) notifyExamRecipients(exam, { isUpdate: true }).catch(() => {});
 
     res.json({ success:true, message: rescheduled ? 'Exam updated. Students and parents are being notified of the new time.' : 'Exam updated.', data: { exam } });
@@ -320,6 +358,67 @@ router.delete('/:id', auth, requireRole('teacher','admin', 'dos', 'ops_manager')
     res.status(500).json({ success:false, message:'Failed to delete exam.' });
   }
 });
+
+// ═══════════════════════════════════════════════════════════
+// Dean verification
+//   GET  /api/exams/review/queue      exams waiting, and recent decisions
+//   GET  /api/exams/:id/review        the full paper with answers
+//   POST /api/exams/:id/approve       publish to students { note? }
+//   POST /api/exams/:id/return        back to the teacher { note }
+// ═══════════════════════════════════════════════════════════
+router.get('/review/queue', auth, requireRole(...REVIEWERS), async (req, res) => {
+  try {
+    const since = new Date(Date.now() - 30 * 86400000);
+    const sel = 'title subject curriculum grade paperNumber startAt durationMins totalMarks totalQuestions assignedStudents groupRoomIds teacherId approval createdAt';
+    const [pending, recent] = await Promise.all([
+      Exam.find({ 'approval.status': 'pending' }).sort({ startAt: 1 }).select(sel).populate('teacherId', 'firstName lastName email').lean(),
+      Exam.find({ 'approval.status': { $in: ['approved', 'returned'] }, 'approval.reviewedAt': { $gte: since }, 'approval.submittedAt': { $ne: null } })
+        .sort({ 'approval.reviewedAt': -1 }).limit(50).select(sel)
+        .populate('teacherId', 'firstName lastName').populate('approval.reviewedBy', 'firstName lastName').lean(),
+    ]);
+    res.json({ success: true, data: { pending: withComputedStatus(pending), recent: withComputedStatus(recent) } });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+router.get('/:id/review', auth, requireRole(...REVIEWERS), async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) return res.status(400).json({ success: false, message: 'Invalid exam id.' });
+    const exam = await Exam.findById(req.params.id).populate('teacherId', 'firstName lastName email').lean();
+    if (!exam) return res.status(404).json({ success: false, message: 'Exam not found.' });
+    const questions = await loadExamQuestions(exam);
+    res.json({ success: true, data: { exam: withComputedStatus(exam), questions } });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+async function decide(req, res, outcome) {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) return res.status(400).json({ success: false, message: 'Invalid exam id.' });
+    const exam = await Exam.findById(req.params.id);
+    if (!exam) return res.status(404).json({ success: false, message: 'Exam not found.' });
+    const note = String(req.body?.note || '').trim().slice(0, 1000);
+    if (outcome === 'returned' && !note) return res.status(400).json({ success: false, message: 'Tell the teacher what to change.' });
+    if (outcome === 'approved') {
+      const end = new Date(exam.startAt).getTime() + (exam.durationMins || 0) * 60000;
+      if (end < Date.now()) return res.status(400).json({ success: false, message: 'This exam\'s time has already passed. Return it so the teacher can set a new time.' });
+      if ((exam.totalQuestions || 0) === 0) return res.status(400).json({ success: false, message: 'This exam has no questions.' });
+    }
+    const wasPublished = isPublished(exam);
+    exam.approval = { status: outcome, submittedAt: exam.approval?.submittedAt || null, reviewedBy: req.user._id, reviewedAt: new Date(), note };
+    await exam.save();
+
+    const { notify } = require('../lib/notify');
+    const who = [req.user.firstName, req.user.lastName].filter(Boolean).join(' ') || 'The Dean';
+    if (outcome === 'approved') {
+      if (!wasPublished) notifyExamRecipients(exam).catch(() => {});
+      notify(exam.teacherId, { title: 'Exam published: ' + exam.title, body: `${who} verified and published it.${note ? ' Note: ' + note : ''} Students and parents are being notified.`, module: 'exams' }).catch(() => {});
+      return res.json({ success: true, message: 'Exam published. Students and parents are being notified.', data: { exam } });
+    }
+    notify(exam.teacherId, { title: 'Exam returned: ' + exam.title, body: `${who}: ${note}. Edit the exam and it goes back for verification.`, module: 'exams' }).catch(() => {});
+    res.json({ success: true, message: 'Exam returned to the teacher.', data: { exam } });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+}
+router.post('/:id/approve', auth, requireRole(...REVIEWERS), (req, res) => decide(req, res, 'approved'));
+router.post('/:id/return',  auth, requireRole(...REVIEWERS), (req, res) => decide(req, res, 'returned'));
 
 // ═══════════════════════════════════════════════════════════
 // GET /api/exams/teacher/marking-queue
@@ -588,6 +687,7 @@ router.get('/student/list', auth, async (req, res) => {
         groupRoomIds.length ? { groupRoomIds: { $in: groupRoomIds } } : { _id: null },
       ],
       status: { $ne: 'archived' },
+      ...PUBLISHED,
     })
       .sort({ startAt: -1 })
       .populate('teacherId', 'firstName lastName')
@@ -725,6 +825,8 @@ router.get('/:id/take', auth, async (req, res) => {
     const assigned = (exam.assignedStudents || []).some(id => String(id) === studentId);
     if (!assigned && req.user.role !== 'admin')
       return res.status(403).json({ success:false, message:'Not assigned to you.' });
+    if (!isPublished(exam) && !REVIEWERS.includes(req.user.role))
+      return res.status(403).json({ success:false, message:'This exam has not been published yet.' });
 
     // Compute status from raw fields (virtual doesn't survive .lean())
     const computedStatus = computeStatus(exam);
@@ -953,6 +1055,7 @@ router.get('/:id/paper.pdf', auth, async (req, res) => {
     if (req.user.role === 'student') {
       const assigned = (exam.assignedStudents || []).map(String).includes(String(req.user._id));
       if (!assigned) return res.status(403).json({ success:false, message:'Not assigned to you.' });
+      if (!isPublished(exam)) return res.status(403).json({ success:false, message:'This paper has not been published yet.' });
       if (exam.startAt && new Date(exam.startAt) > new Date())
         return res.status(403).json({ success:false, message:'This paper is not available yet.' });
     }
