@@ -195,7 +195,7 @@ function StudentSessionsModule({ toast, refreshKey }) {
       </div>
 
       {/* ── Leavers and alumni (reloads with the years data after an exit, reinstatement or promotion) ── */}
-      <LeaversPanel refreshKey={refreshKey} reloadOn={yearsData} />
+      <LeaversPanel refreshKey={refreshKey} reloadOn={yearsData} toast={toast} onChanged={() => { load(); loadYears() }} />
 
       {/* ── Exit modal: left or graduated ── */}
       {exiting && (

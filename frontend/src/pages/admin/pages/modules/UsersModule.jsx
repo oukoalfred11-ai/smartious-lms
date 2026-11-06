@@ -1097,7 +1097,7 @@ function UsersModule({ refreshKey, toast, setUserForm, setUserModal, openAddUser
                       </td>
                       <td style={{ padding: '14px 16px', textAlign: 'center' }}>
                         <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
-                          {u.archived && u.role === 'student' && (
+                          {u.role === 'student' && (u.archived || ['Graduated', 'Removed'].includes(u.studentStatus)) && (
                             <button className="btn btn-sm" style={{ background: '#065F46', color: '#fff', border: 'none' }} onClick={() => handleReinstate(u)}>Reinstate</button>
                           )}
                           {(u.role === 'student' || u.role === 'parent') && !u.archived && (

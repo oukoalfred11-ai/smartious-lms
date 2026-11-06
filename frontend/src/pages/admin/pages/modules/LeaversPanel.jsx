@@ -45,18 +45,38 @@ function Breakdown({ title, items }) {
   )
 }
 
-export default function LeaversPanel({ refreshKey, reloadOn }) {
+export default function LeaversPanel({ refreshKey, reloadOn, toast, onChanged }) {
   const [data, setData] = useState(null)
   const [error, setError] = useState('')
   const [tab, setTab] = useState('graduated')
   const [q, setQ] = useState('')
   const [year, setYear] = useState('all')
 
+  const [tick, setTick] = useState(0)
+  const [busy, setBusy] = useState(null)
   useEffect(() => {
     api.get('/student-sessions/leavers')
       .then(r => { setData(r.data?.data || null); setError('') })
       .catch(e => setError(e?.response?.data?.message || 'Could not load leavers.'))
-  }, [refreshKey, reloadOn])
+  }, [refreshKey, reloadOn, tick])
+
+  // Bring a leaver or alumnus back: the account and any parents archived
+  // with them are reactivated with full history (PATCH /reinstate).
+  // An alumnus returning for a new stage can be given their new grade.
+  const reactivate = async (r) => {
+    const alum = r.kind === 'graduated'
+    const msg = `Reactivate ${r.name}? Their account${alum ? '' : ' and any parent accounts archived with them'} come back with full history, and a welcome back email is sent.`
+      + `\n\nNew grade (optional, e.g. Year 12). Leave blank to keep ${r.grade || 'their last grade'}.`
+    const grade = window.prompt(msg, '')
+    if (grade === null) return
+    setBusy(r.studentId)
+    try {
+      const res = await api.patch('/student-sessions/reinstate/' + r.studentId, grade.trim() ? { gradeLevel: grade.trim() } : {})
+      toast?.ok?.(res.data?.message || 'Reactivated.')
+      setTick(t => t + 1); onChanged?.()
+    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not reactivate.') }
+    finally { setBusy(null) }
+  }
 
   if (error) return <div style={{ fontSize: 12, color: '#B91C1C', marginBottom: 16 }}>{error}</div>
   if (!data) return null
@@ -128,7 +148,7 @@ export default function LeaversPanel({ refreshKey, reloadOn }) {
       ) : (
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11.5 }}>
-            <thead><tr>{['Name', 'Final grade', 'Curriculum', 'Joined', tab === 'graduated' ? 'Graduated' : 'Left', 'With us', tab === 'graduated' ? 'Note' : 'Reason', 'Contact'].map(h => <th key={h} style={th}>{h}</th>)}</tr></thead>
+            <thead><tr>{['Name', 'Final grade', 'Curriculum', 'Joined', tab === 'graduated' ? 'Graduated' : 'Left', 'With us', tab === 'graduated' ? 'Note' : 'Reason', 'Contact', ''].map(h => <th key={h} style={th}>{h}</th>)}</tr></thead>
             <tbody>{rows.map(r => (
               <tr key={r.studentId}>
                 <td style={td}><b>{r.name}</b>{r.admissionNumber && <div style={{ color: TOKENS.s400 }}>{r.admissionNumber}</div>}</td>
@@ -139,6 +159,12 @@ export default function LeaversPanel({ refreshKey, reloadOn }) {
                 <td style={td}>{span(r.months)}</td>
                 <td style={td}>{r.reason || '–'}</td>
                 <td style={td}>{[r.email, r.parentEmail && r.parentEmail !== r.email ? 'Parent: ' + r.parentEmail : ''].filter(Boolean).map(x => <div key={x}>{x}</div>)}</td>
+                <td style={td}>
+                  <button type="button" disabled={busy === r.studentId} onClick={() => reactivate(r)}
+                    style={{ padding: '5px 10px', borderRadius: 7, border: 'none', background: '#065F46', color: '#fff', fontSize: 11, fontWeight: 800, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                    {busy === r.studentId ? 'Reactivating…' : 'Reactivate'}
+                  </button>
+                </td>
               </tr>
             ))}</tbody>
           </table>

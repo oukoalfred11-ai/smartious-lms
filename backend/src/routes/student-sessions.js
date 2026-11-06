@@ -421,17 +421,42 @@ router.patch('/reinstate/:studentId', auth, STAFF, async (req, res) => {
   try {
     const student = await User.findById(req.params.studentId);
     if (!student || student.role !== 'student') return res.status(404).json({ success: false, message: 'Student not found.' });
-    if (!student.archived && student.isActive !== false) {
+    // Left, graduated (archived, or graduated by year promotion), or
+    // switched off: all of these can come back.
+    const { hasLeft } = require('../lib/studentExit');
+    if (!student.archived && student.isActive !== false && !hasLeft(student)) {
       return res.status(400).json({ success: false, message: 'This student is already active.' });
     }
+    const wasAlumni = student.studentStatus === 'Graduated';
+    // A returning student may come back at a new level, e.g. an alumnus
+    // back for A-Level: { gradeLevel, curriculum } are optional.
+    const gradeLevel = String(req.body?.gradeLevel || '').trim();
+    const curriculum = String(req.body?.curriculum || '').trim();
+    if (gradeLevel) student.gradeLevel = gradeLevel;
+    if (curriculum) student.curriculum = curriculum;
     student.archived = false;
     student.archivedAt = undefined;
     student.isActive = true;
     student.studentStatus = 'Active';
     student.statusChangedAt = new Date();
     student.statusChangedBy = req.user._id;
-    student.statusReason = 'Reinstated';
+    student.statusReason = wasAlumni ? 'Reactivated (returning alumnus)' : 'Reinstated';
     await student.save();
+
+    // Back on the current year's roll, so year tools and retention count
+    // them again. The record of the year they left stays as it was unless
+    // it is this same year, which is reopened.
+    try {
+      const year = student.academicYear;
+      if (year) {
+        await Enrollment.updateOne(
+          { studentId: student._id, academicYear: year },
+          { $set: { status: 'active', endedAt: null, reason: 'Reinstated', grade: student.gradeLevel || 'Unassigned', curriculum: student.curriculum || '' },
+            $setOnInsert: { startedAt: new Date() } },
+          { upsert: true }
+        );
+      }
+    } catch (e) { console.error('[reinstate] enrollment:', e.message); }
 
     const parentIds = new Set((student.linkedParents || []).map(String));
     const byLink = await User.find({ role: 'parent', linkedStudents: student._id }).select('_id');
