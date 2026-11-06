@@ -83,7 +83,7 @@ const resetForm = () => ({ ...DEFAULT_USER_FORM })
 const NAV_SECTIONS = {
   admin: [
     { label: 'Overview',    items: ['command', 'dashboard', 'analytics'] },
-    { label: 'People',      items: ['users', 'admissiondocs', 'teachers', 'careers', 'allocations', 'sessions', 'communication', 'support', 'dmoversight', 'community', 'announcements'] },
+    { label: 'People',      items: ['users', 'admissiondocs', 'teachers', 'careers', 'allocations', 'sessions', 'communication', 'support', 'dmoversight', 'community', 'announcements', 'teacherratings'] },
     { label: 'Reports',     items: ['reports', 'dosanalytics'] },
     { label: 'Operations',  items: ['frontdesk', 'assessment', 'partnerships', 'documents', 'payroll', 'leave', 'programmes', 'inventory'] },
     { label: 'Teaching',    items: ['liveclasses', 'clubs', 'grouprooms', 'curriculum', 'oversight', 'dosattend', 'virtuallab'] },
