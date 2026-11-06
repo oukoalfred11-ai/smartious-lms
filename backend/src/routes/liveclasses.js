@@ -311,7 +311,7 @@ router.get('/:id', auth, async (req, res) => {
     if (!lc) return res.status(404).json({ success:false, message:'Class not found.' });
 
     const isOwner   = String(lc.teacherId?._id || lc.teacherId) === String(req.user._id);
-    const isAdmin   = req.user.role === 'admin';
+    const isAdmin   = STAFF_ROLES.includes(req.user.role);   // admin, Dean, Operations Manager
     const isStudent = (lc.assignedStudents || []).some(s => String(s._id || s) === String(req.user._id));
 
     if (!isOwner && !isAdmin && !isStudent)

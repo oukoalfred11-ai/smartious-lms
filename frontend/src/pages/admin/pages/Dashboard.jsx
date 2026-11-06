@@ -37,6 +37,7 @@ import CurriculumModule from './modules/CurriculumModule.jsx'
 import BillingModule, { FeeCollectionModule } from './modules/BillingModule.jsx'
 import CommunityModule from './modules/CommunityModule.jsx'
 import LiveClassesModule from './modules/LiveClassesModule.jsx'
+import LiveNowStrip from './modules/LiveNowStrip.jsx'
 import MasteryModule from './modules/MasteryModule.jsx'
 import DOSPerformanceModule from './modules/DOSPerformanceModule.jsx'
 import CentreRegisterModule from './modules/CentreRegisterModule.jsx'
@@ -465,6 +466,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         <BirthdayBanner />
         <SuggestionBox />
         {safePage === 'dashboard'   && forcedRole === 'qa' && <QAOverviewModule toast={toast} setPage={setPage} />}
+        {safePage === 'dashboard'   && (deanPortal || !forcedRole) && <LiveNowStrip title="Live classes now" />}
         {safePage === 'dashboard'   && deanPortal && <CommandModule toast={toast} role={forcedRole} />}
         {safePage === 'dashboard'   && forcedRole && forcedRole !== 'qa' && !deanPortal && <RoleOverview role={forcedRole} setPage={setPage} userStats={userStats} pendingAllocations={pendingAllocations} auth={auth} />}
         {safePage === 'qaoverview'  && <QAOverviewModule toast={toast} setPage={setPage} />}

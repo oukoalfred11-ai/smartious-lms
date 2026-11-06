@@ -2284,7 +2284,9 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   const autoRecTried = useRef(false)
   useEffect(() => {
     if (phase !== 'live') return
-    if (!isTeacher) return                 // only a teacher/admin browser records
+    // Only the class's teacher or an admin records. A Dean or Operations
+    // Manager joining to observe never starts a second recording.
+    if (myRole !== 'teacher' && myRole !== 'admin') return
     if (autoRecTried.current) return       // once per session
     if (recRef.current) return             // already recording
     if (!liveClassId) return
@@ -2294,7 +2296,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       if (!recRef.current) startRecording().catch(() => {})
     }, 2500)
     return () => clearTimeout(t)
-  }, [phase, isTeacher, liveClassId])   // eslint-disable-line react-hooks/exhaustive-deps
+  }, [phase, isTeacher, myRole, liveClassId])   // eslint-disable-line react-hooks/exhaustive-deps
 
   // ═══ PUSH CONTENT TO BOARD (teacher) ═══════════════════════
   // Places the image at the centre of the teacher's current view in
