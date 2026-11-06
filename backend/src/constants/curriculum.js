@@ -148,6 +148,7 @@ const SUBJECTS = [
   { id: 'cbe_business',          name: 'Business Studies',                category: 'Business & Social Sciences',  availableIn: ['KenyaCBE'] },
   { id: 'cbe_computer_sci',      name: 'Computer Science',                category: 'Technology',                  availableIn: ['KenyaCBE'] },
   { id: 'cbe_pretech',           name: 'Pre-Technical Studies',           category: 'Technology',                  availableIn: ['KenyaCBE'] },
+  { id: 'cbe_art_design',        name: 'Art and Design',                  category: 'Creative Arts',               availableIn: ['KenyaCBE'] },
   { id: 'cbe_music',             name: 'Music',                           category: 'Creative Arts',               availableIn: ['KenyaCBE'] },
   { id: 'cbe_pe_sports',         name: 'Physical Education and Sports',   category: 'Physical Education',          availableIn: ['KenyaCBE'] },
   { id: 'cbe_health',            name: 'Health Education',                category: 'Life Skills',                 availableIn: ['KenyaCBE'] },
@@ -269,6 +270,8 @@ const SUBJECTS = [
   { id: 'ap_computer_science', name: 'AP Computer Science',        category: 'Technology', availableIn: ['American'] },
 
   // ── ARTS ──────────────────────────────────────────────
+  // Pearson Edexcel International GCSE Global Citizenship 4GL1 (Edexcel only).
+  { id: 'global_citizenship',  name: 'Global Citizenship',         category: 'Humanities', availableIn: ['EdexcelIGCSE'] },
   { id: 'art_design',          name: 'Art & Design',               category: 'Arts', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBDP', 'BNC', 'American', 'Canadian'] },
   { id: 'visual_arts',         name: 'Visual Arts',                category: 'Arts', availableIn: ['IBDP', 'American', 'Canadian'] },
   { id: 'music',               name: 'Music',                      category: 'Arts', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'AQAALevel', 'IBDP', 'BNC', 'American', 'Canadian'] },
