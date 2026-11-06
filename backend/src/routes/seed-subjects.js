@@ -83,6 +83,8 @@ const ALL_SUBJECTS = [
   { curriculum:'EdexcelIGCSE', subjectName:'Swahili',                 category:'Languages' },
   { curriculum:'EdexcelIGCSE', subjectName:'Kiswahili',               category:'Languages' },
   { curriculum:'EdexcelIGCSE', subjectName:'German',                  category:'Languages' },
+  { curriculum:'EdexcelIGCSE', subjectName:'Italian',                 category:'Languages' },
+  { curriculum:'EdexcelIGCSE', subjectName:'Global Citizenship',      category:'Humanities' },
   { curriculum:'EdexcelIGCSE', subjectName:'Chinese',                 category:'Languages' },
   { curriculum:'EdexcelIGCSE', subjectName:'Media Studies',           category:'Arts' },
 
@@ -321,6 +323,7 @@ const ALL_SUBJECTS = [
   { curriculum:'KenyaCBE', subjectName:'Hindu Religious Education',       category:'Humanities' },
   { curriculum:'KenyaCBE', subjectName:'Business Studies',                category:'Business' },
   { curriculum:'KenyaCBE', subjectName:'Computer Science',                category:'Technology' },
+  { curriculum:'KenyaCBE', subjectName:'Art and Design',                  category:'Arts' },
   { curriculum:'KenyaCBE', subjectName:'Pre-Technical Studies',           category:'Technology' },
   { curriculum:'KenyaCBE', subjectName:'Music',                           category:'Arts' },
   { curriculum:'KenyaCBE', subjectName:'Physical Education and Sports',   category:'Physical Education' },

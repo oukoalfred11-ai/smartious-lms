@@ -7945,16 +7945,107 @@ export const IBDP_LIBRARY = [
     source: 'IB DP Mathematics: Applications and Interpretation \u2014 24-lesson scheme (HL)' },
 ]
 
-// Kenya CBE Physics — exported from the live database.
-// 40 topics / 203 lessons across Forms 1-4, with 1,877 questions
-// filed. This is KCSE-era Physics content that moved under CBE in
-// the KenyaCBC->KenyaCBE rename. It is richer than anything in this
-// file and is captured here so a spine load cannot destroy it.
-
+// Kenya CBE Art and Design (Grades 7-12)
+// 7 topics / 68 lessons. Grades 7-9 follow the visual arts strand of
+// Junior School Creative Arts; Senior School follows the Fine Arts strands:
+// Picture Making Techniques, Multimedia Arts and Indigenous Crafts, with a
+// portfolio and assessment strand. Check the KICD curriculum design for the
+// learner's grade before planning a term.
+const CBE_ART_DESIGN = [
+  { topic: "Grade 7 · Visual Arts Foundations (Creative Arts, Junior School)", code: "G7",
+    subtopics: [
+      { name: "Elements of Art: Line, Shape, Form, Colour, Texture, Value and Space", code: "G7.1" },
+      { name: "Drawing from Observation: Still Life with Pencil Shading", code: "G7.2" },
+      { name: "The Colour Wheel: Primary, Secondary and Tertiary Colours", code: "G7.3" },
+      { name: "Painting Techniques: Flat Wash, Graded Wash and Dry Brush", code: "G7.4" },
+      { name: "Pattern and Motif: Repeat Patterns from Kenyan Fabrics", code: "G7.5" },
+      { name: "Collage with Found and Recycled Materials", code: "G7.6" },
+      { name: "Modelling in Clay: Pinch Pots and Coil Building", code: "G7.7" },
+      { name: "Simple Printing: Leaf, Stencil and Block Prints", code: "G7.8" },
+      { name: "Talking About Art: Describing and Appraising Artworks", code: "G7.9" },
+      { name: "End of Grade Portfolio and Exhibition", code: "G7.10" },
+    ] },
+  { topic: "Grade 8 · Visual Arts Development (Creative Arts, Junior School)", code: "G8",
+    subtopics: [
+      { name: "Principles of Design: Balance, Contrast, Emphasis, Rhythm and Unity", code: "G8.1" },
+      { name: "Perspective Drawing: One-Point and Two-Point", code: "G8.2" },
+      { name: "Drawing the Human Figure: Proportion and Gesture", code: "G8.3" },
+      { name: "Colour Mixing: Tints, Shades and Colour Harmonies", code: "G8.4" },
+      { name: "Poster and Graphic Design: Lettering and Layout", code: "G8.5" },
+      { name: "Weaving: Sisal, Raffia and Paper Weaving", code: "G8.6" },
+      { name: "Beadwork: Patterns and Meanings in Kenyan Communities", code: "G8.7" },
+      { name: "Relief Sculpture in Clay or Papier-Mache", code: "G8.8" },
+      { name: "Kenyan and African Artists and Their Work", code: "G8.9" },
+      { name: "End of Grade Portfolio and Exhibition", code: "G8.10" },
+    ] },
+  { topic: "Grade 9 · Visual Arts in Context (Creative Arts, Junior School)", code: "G9",
+    subtopics: [
+      { name: "Composition: Planning a Picture with Thumbnails", code: "G9.1" },
+      { name: "Landscape Painting in Watercolour or Poster Colour", code: "G9.2" },
+      { name: "Portraiture: Proportions of the Face", code: "G9.3" },
+      { name: "Lino and Block Printing: Cutting and Printing a Design", code: "G9.4" },
+      { name: "Tie and Dye and Batik", code: "G9.5" },
+      { name: "Basketry and Mat Making", code: "G9.6" },
+      { name: "Pottery: Decorating and Firing Techniques", code: "G9.7" },
+      { name: "Product and Package Design for an Enterprise", code: "G9.8" },
+      { name: "Art and Culture: Visual Arts in Kenyan Ceremonies and Heritage", code: "G9.9" },
+      { name: "Junior School Project and Exhibition", code: "G9.10" },
+    ] },
+  { topic: "Senior School Fine Arts · Strand 1: Picture Making Techniques", code: "PM",
+    subtopics: [
+      { name: "Drawing Media: Pencil, Charcoal, Pastel and Ink", code: "PM.1" },
+      { name: "Observational and Imaginative Drawing", code: "PM.2" },
+      { name: "Tonal Drawing and Rendering Form", code: "PM.3" },
+      { name: "Painting with Watercolour", code: "PM.4" },
+      { name: "Painting with Acrylic and Oils", code: "PM.5" },
+      { name: "Mural Painting: Planning and Scaling Up", code: "PM.6" },
+      { name: "Relief Printing: Lino and Woodcut", code: "PM.7" },
+      { name: "Screen Printing and Stencils", code: "PM.8" },
+      { name: "Mosaic and Collage Picture Making", code: "PM.9" },
+      { name: "Composition, Subject Matter and Personal Style", code: "PM.10" },
+      { name: "Art Criticism: Analysing Pictures by Kenyan and World Artists", code: "PM.11" },
+    ] },
+  { topic: "Senior School Fine Arts · Strand 2: Multimedia Arts", code: "MA",
+    subtopics: [
+      { name: "What Multimedia Art Is: Combining Media", code: "MA.1" },
+      { name: "Mixed Media Artworks", code: "MA.2" },
+      { name: "Photography: Composition, Light and Editing", code: "MA.3" },
+      { name: "Digital Drawing and Painting", code: "MA.4" },
+      { name: "Graphic Design: Logos, Branding and Typography", code: "MA.5" },
+      { name: "Illustration and Comic Art", code: "MA.6" },
+      { name: "Animation Basics: Storyboards and Stop Motion", code: "MA.7" },
+      { name: "Installation Art and Assemblage", code: "MA.8" },
+      { name: "Copyright, Ethics and Sharing Art Online", code: "MA.9" },
+      { name: "Presenting Work Digitally: E-Portfolios", code: "MA.10" },
+    ] },
+  { topic: "Senior School Fine Arts · Strand 3: Indigenous Crafts", code: "IC",
+    subtopics: [
+      { name: "Indigenous Crafts of Kenyan Communities: an Overview", code: "IC.1" },
+      { name: "Pottery: Hand-Building and Traditional Firing", code: "IC.2" },
+      { name: "Basketry: Kiondo and Coiled Baskets", code: "IC.3" },
+      { name: "Weaving and Textile Crafts", code: "IC.4" },
+      { name: "Beadwork and Body Adornment", code: "IC.5" },
+      { name: "Wood Carving: Tools, Safety and Techniques", code: "IC.6" },
+      { name: "Soapstone Carving (Kisii Stone)", code: "IC.7" },
+      { name: "Leatherwork", code: "IC.8" },
+      { name: "Craft Enterprise: Costing, Pricing and Marketing Crafts", code: "IC.9" },
+      { name: "Conserving Craft Heritage and Sustainable Materials", code: "IC.10" },
+    ] },
+  { topic: "Senior School Fine Arts · Portfolio, Projects and Assessment", code: "PF",
+    subtopics: [
+      { name: "Keeping a Sketchbook and Process Journal", code: "PF.1" },
+      { name: "Developing a Project from a Theme", code: "PF.2" },
+      { name: "Research, Experiment, Refine, Present", code: "PF.3" },
+      { name: "Self and Peer Assessment of Artworks", code: "PF.4" },
+      { name: "Curating and Mounting an Exhibition", code: "PF.5" },
+      { name: "Careers in Art, Design and the Creative Economy", code: "PF.6" },
+      { name: "Final Portfolio Review", code: "PF.7" },
+    ] },
+]
 
 // ═══════════════════════════════════════════════════════════
 // KENYA CBE LIBRARY
-// Empty for now. CBE Physics carried a 203-lesson Forms 1-4 spine, but
+// Art and Design (Grades 7-12) has its own scheme above. CBE Physics carried a 203-lesson Forms 1-4 spine, but
 // that is KCSE content — it moved here only through the CBC-to-CBE
 // rename. It now sits in KCSE_LIBRARY where it belongs, and CBE will get
 // its own Grade 1-12 spines when they are built.
@@ -7963,6 +8054,8 @@ export const IBDP_LIBRARY = [
 // falling through to a Cambridge matcher and replacing a live bank.
 // ═══════════════════════════════════════════════════════════
 export const CBE_LIBRARY = [
+  { match: /\bart\b|fine\s+arts?/i, const_: CBE_ART_DESIGN,
+    source: 'Kenya CBE Art and Design \u2014 68-lesson scheme (Grades 7-12)' },
   // Kenya CBE Physics carries the 203-lesson Forms 1-4 scheme that came
   // over in the CBC-to-CBE rename, with the question bank filed against
   // its lesson names. It shares the KCSE_PHYSICS constant deliberately:
@@ -12662,6 +12755,214 @@ const IGCSE_ADD_MATHS_0606 = [
     ] },
 ]
 
+// Pearson Edexcel International GCSE Global Citizenship 4GL1
+// 6 topics / 72 lessons. Section A is the Community Action Project;
+// the four themes follow the specification (Politics and Governance,
+// Economic Development and the Environment, Culture and Community,
+// Technology), each ending in a "Making a difference" lesson that feeds
+// the project. One externally examined paper.
+const IGCSE_GLOBAL_CITIZENSHIP_EDX = [
+  { topic: "Section A · The Community Action Project", code: "CAP",
+    subtopics: [
+      { name: "What Global Citizenship Is: Rights, Responsibilities and Action", code: "CAP.1" },
+      { name: "Choosing a Community Issue: Local Problems with Global Roots", code: "CAP.2" },
+      { name: "Researching the Issue: Primary and Secondary Sources", code: "CAP.3" },
+      { name: "Planning the Action: Aims, Stakeholders and Timeline", code: "CAP.4" },
+      { name: "Working with Others: Roles, Partners and Decision-Making", code: "CAP.5" },
+      { name: "Carrying Out the Action and Keeping Evidence", code: "CAP.6" },
+      { name: "Measuring Impact: What Changed and How We Know", code: "CAP.7" },
+      { name: "Evaluating the Project: Strengths, Limits and Next Steps", code: "CAP.8" },
+      { name: "Writing About the Project Under Exam Conditions", code: "CAP.9" },
+    ] },
+  { topic: "Theme 1 · Politics and Governance", code: "PG",
+    subtopics: [
+      { name: "Power, Authority and Legitimacy", code: "PG.1" },
+      { name: "Types of Political System: Democracy, Monarchy, Authoritarian Rule", code: "PG.2" },
+      { name: "Representative and Direct Democracy", code: "PG.3" },
+      { name: "Elections and Electoral Systems: First-Past-the-Post and Proportional Representation", code: "PG.4" },
+      { name: "Political Parties, Pressure Groups and Lobbying", code: "PG.5" },
+      { name: "The Role of the Media and Free Expression in Politics", code: "PG.6" },
+      { name: "Human Rights: The Universal Declaration and Its Origins", code: "PG.7" },
+      { name: "Rights in Practice: Children's Rights and the UNCRC", code: "PG.8" },
+      { name: "The Rule of Law, Courts and Fair Trials", code: "PG.9" },
+      { name: "International Law and Law-Making Institutions", code: "PG.10" },
+      { name: "The United Nations: Structure, Security Council and Agencies", code: "PG.11" },
+      { name: "Regional Organisations: the African Union, the EU and ASEAN", code: "PG.12" },
+      { name: "Non-Governmental Organisations and Civil Society", code: "PG.13" },
+      { name: "Global Challenges for Governance: Conflict, Refugees and Peacekeeping", code: "PG.14" },
+      { name: "Corruption, Transparency and Good Governance", code: "PG.15" },
+      { name: "Making a Difference: Campaigning, Petitions and Youth Participation", code: "PG.16" },
+    ] },
+  { topic: "Theme 2 · Economic Development and the Environment", code: "ED",
+    subtopics: [
+      { name: "Measuring Development: GDP, GNI and the Human Development Index", code: "ED.1" },
+      { name: "The Development Gap: Causes of Global Inequality", code: "ED.2" },
+      { name: "Globalisation: Trade, Transnational Corporations and Supply Chains", code: "ED.3" },
+      { name: "Fair Trade, Ethical Consumption and Workers' Rights", code: "ED.4" },
+      { name: "Aid: Types of Aid and Its Effectiveness", code: "ED.5" },
+      { name: "Debt, Investment and Economic Growth", code: "ED.6" },
+      { name: "The Sustainable Development Goals", code: "ED.7" },
+      { name: "Population, Urbanisation and Resource Use", code: "ED.8" },
+      { name: "Climate Change: Causes and Evidence", code: "ED.9" },
+      { name: "Climate Change: Impacts on People and Places", code: "ED.10" },
+      { name: "International Responses to Climate Change: Paris Agreement and COP", code: "ED.11" },
+      { name: "Biodiversity, Deforestation and Conservation", code: "ED.12" },
+      { name: "Water, Food and Energy Security", code: "ED.13" },
+      { name: "Waste, Pollution and the Circular Economy", code: "ED.14" },
+      { name: "Making a Difference: Local Sustainability Action", code: "ED.15" },
+    ] },
+  { topic: "Theme 3 · Culture and Community", code: "CC",
+    subtopics: [
+      { name: "Identity: What Shapes Who We Are", code: "CC.1" },
+      { name: "Multiple Identities: Local, National and Global", code: "CC.2" },
+      { name: "Communities: Types, Cohesion and Belonging", code: "CC.3" },
+      { name: "Diversity: Ethnicity, Religion and Language", code: "CC.4" },
+      { name: "Migration: Push and Pull Factors", code: "CC.5" },
+      { name: "Migration: Impacts on Origin and Destination Communities", code: "CC.6" },
+      { name: "Refugees and Asylum Seekers", code: "CC.7" },
+      { name: "Prejudice, Discrimination and Stereotyping", code: "CC.8" },
+      { name: "Equality and Inclusion: Gender, Disability and Minority Rights", code: "CC.9" },
+      { name: "Culture and Globalisation: Cultural Exchange and Homogenisation", code: "CC.10" },
+      { name: "Protecting Cultural Heritage and Indigenous Communities", code: "CC.11" },
+      { name: "Conflict and Reconciliation Within Communities", code: "CC.12" },
+      { name: "Making a Difference: Building Inclusive Communities", code: "CC.13" },
+    ] },
+  { topic: "Theme 4 · Technology", code: "TE",
+    subtopics: [
+      { name: "How Technology Changes Communities", code: "TE.1" },
+      { name: "The Digital Divide: Access to Technology Worldwide", code: "TE.2" },
+      { name: "Social Media, Communication and Global Networks", code: "TE.3" },
+      { name: "Technology and Political Participation: E-Democracy and Online Activism", code: "TE.4" },
+      { name: "Misinformation, Fake News and Media Literacy", code: "TE.5" },
+      { name: "Privacy, Personal Data and Online Rights", code: "TE.6" },
+      { name: "Surveillance, Security and Civil Liberties", code: "TE.7" },
+      { name: "Cybercrime and Online Safety", code: "TE.8" },
+      { name: "Technology, Work and Automation", code: "TE.9" },
+      { name: "Technology and Sustainable Development: Renewables and Innovation", code: "TE.10" },
+      { name: "Ethics of Emerging Technology: Artificial Intelligence and Biotechnology", code: "TE.11" },
+      { name: "Making a Difference: Using Technology for Social Good", code: "TE.12" },
+    ] },
+  { topic: "Exam Preparation · Paper 1", code: "EX",
+    subtopics: [
+      { name: "The Paper: Sections, Marks and Timing", code: "EX.1" },
+      { name: "Command Words: Identify, Explain, Assess, Evaluate", code: "EX.2" },
+      { name: "Using Sources and Data in Answers", code: "EX.3" },
+      { name: "Writing Extended Answers: Arguments, Evidence and Judgement", code: "EX.4" },
+      { name: "Past Paper Practice: Politics and Governance with Technology", code: "EX.5" },
+      { name: "Past Paper Practice: Culture and Community with Economic Development", code: "EX.6" },
+      { name: "Mock Exam and Review", code: "EX.7" },
+    ] },
+]
+
+// Italian, Pearson Edexcel GCSE (9-1) Italian 1IN0 for Edexcel IGCSE students
+// 7 topics / 80 lessons. Pearson has no International GCSE in Italian,
+// so Edexcel students take the GCSE: five themes, four papers (listening,
+// speaking, reading, writing), Foundation or Higher tier. Grammar and exam
+// skills are their own strands, as in the IGCSE MFL spines.
+const IGCSE_ITALIAN_EDX = [
+  { topic: "Theme 1 · Identity and Culture — Italian", code: "T1",
+    subtopics: [
+      { name: "Introducing Yourself: Name, Age, Birthday and Nationality", code: "T1.1" },
+      { name: "Family Members and Describing Relatives", code: "T1.2" },
+      { name: "Physical Appearance and Personality", code: "T1.3" },
+      { name: "Friendship and Relationships", code: "T1.4" },
+      { name: "Daily Routine and Reflexive Verbs", code: "T1.5" },
+      { name: "Food, Meals and Mealtimes in Italy", code: "T1.6" },
+      { name: "Shopping for Food and Clothes", code: "T1.7" },
+      { name: "Social Media and Technology in Everyday Life", code: "T1.8" },
+      { name: "Free Time: Hobbies and Interests", code: "T1.9" },
+      { name: "Sport and Keeping Fit", code: "T1.10" },
+      { name: "Music, Cinema and Television", code: "T1.11" },
+      { name: "Reading and Books", code: "T1.12" },
+      { name: "Celebrations and Festivals in Italy: Natale, Pasqua, Carnevale", code: "T1.13" },
+      { name: "Customs and Traditions: Saints' Days, Ferragosto and Family Events", code: "T1.14" },
+    ] },
+  { topic: "Theme 2 · Local Area, Holiday and Travel — Italian", code: "T2",
+    subtopics: [
+      { name: "Describing Your Town and Region", code: "T2.1" },
+      { name: "Places in Town and Asking for Directions", code: "T2.2" },
+      { name: "Weather and Seasons", code: "T2.3" },
+      { name: "Holiday Preferences and Types of Holiday", code: "T2.4" },
+      { name: "Past Holidays: the Passato Prossimo with Avere and Essere", code: "T2.5" },
+      { name: "Future Holiday Plans", code: "T2.6" },
+      { name: "Transport and Buying Tickets", code: "T2.7" },
+      { name: "Accommodation: Hotels, Campsites and Booking", code: "T2.8" },
+      { name: "At the Restaurant: Ordering and Complaints", code: "T2.9" },
+      { name: "Tourist Transactions: Shops, Money and Lost Property", code: "T2.10" },
+      { name: "Regions of Italy: Geography and Famous Cities", code: "T2.11" },
+      { name: "Comparing Town and Countryside", code: "T2.12" },
+    ] },
+  { topic: "Theme 3 · School — Italian", code: "T3",
+    subtopics: [
+      { name: "School Subjects and Opinions", code: "T3.1" },
+      { name: "The School Day and Timetable", code: "T3.2" },
+      { name: "Types of School in Italy and at Home", code: "T3.3" },
+      { name: "School Rules and Uniform", code: "T3.4" },
+      { name: "Teachers and Classmates", code: "T3.5" },
+      { name: "School Activities, Clubs and Trips", code: "T3.6" },
+      { name: "Exchanges and Studying Abroad", code: "T3.7" },
+      { name: "Pressures and Problems at School", code: "T3.8" },
+    ] },
+  { topic: "Theme 4 · Future Aspirations, Study and Work — Italian", code: "T4",
+    subtopics: [
+      { name: "Plans After Your Exams", code: "T4.1" },
+      { name: "Further Education and University", code: "T4.2" },
+      { name: "Jobs and Professions", code: "T4.3" },
+      { name: "Part-Time Jobs and Work Experience", code: "T4.4" },
+      { name: "Applying for a Job: CV and Interview Language", code: "T4.5" },
+      { name: "Ambitions, Hopes and Dreams: the Conditional", code: "T4.6" },
+      { name: "Using Languages in the World of Work", code: "T4.7" },
+      { name: "Volunteering and Gap Years", code: "T4.8" },
+    ] },
+  { topic: "Theme 5 · International and Global Dimension — Italian", code: "T5",
+    subtopics: [
+      { name: "Bringing the World Together: International Sports Events", code: "T5.1" },
+      { name: "Music Festivals and Global Events", code: "T5.2" },
+      { name: "Campaigns and Good Causes", code: "T5.3" },
+      { name: "Environmental Issues: Pollution and Climate", code: "T5.4" },
+      { name: "Being Green at Home and at School: Recycling and Saving Energy", code: "T5.5" },
+      { name: "Poverty, Homelessness and Helping Others", code: "T5.6" },
+      { name: "Health and Healthy Living Worldwide", code: "T5.7" },
+    ] },
+  { topic: "Grammar · Italian", code: "GR",
+    subtopics: [
+      { name: "Nouns, Gender and Plurals", code: "GR.1" },
+      { name: "Definite and Indefinite Articles", code: "GR.2" },
+      { name: "Adjectives: Agreement and Position", code: "GR.3" },
+      { name: "Present Tense: Regular -are, -ere and -ire Verbs", code: "GR.4" },
+      { name: "Present Tense: Irregular Verbs (essere, avere, fare, andare)", code: "GR.5" },
+      { name: "Prepositions and Articulated Prepositions (al, della, nel)", code: "GR.6" },
+      { name: "Possessive Adjectives and Pronouns", code: "GR.7" },
+      { name: "Negatives and Question Words", code: "GR.8" },
+      { name: "The Passato Prossimo and Past Participle Agreement", code: "GR.9" },
+      { name: "The Imperfetto and Using Past Tenses Together", code: "GR.10" },
+      { name: "The Future Tense", code: "GR.11" },
+      { name: "The Conditional", code: "GR.12" },
+      { name: "Direct and Indirect Object Pronouns", code: "GR.13" },
+      { name: "Ci and Ne", code: "GR.14" },
+      { name: "Reflexive Verbs in All Tenses", code: "GR.15" },
+      { name: "Comparatives and Superlatives", code: "GR.16" },
+      { name: "The Imperative", code: "GR.17" },
+      { name: "Introduction to the Present Subjunctive (Higher)", code: "GR.18" },
+      { name: "Relative Pronouns: che, cui", code: "GR.19" },
+      { name: "Modal Verbs: dovere, potere, volere", code: "GR.20" },
+    ] },
+  { topic: "Exam Skills · Listening, Speaking, Reading and Writing", code: "SK",
+    subtopics: [
+      { name: "Paper 1 Listening: Strategies and Practice", code: "SK.1" },
+      { name: "Paper 2 Speaking: Role Play", code: "SK.2" },
+      { name: "Paper 2 Speaking: Picture-Based Task", code: "SK.3" },
+      { name: "Paper 2 Speaking: Conversation on Two Themes", code: "SK.4" },
+      { name: "Paper 3 Reading: Comprehension and Inference", code: "SK.5" },
+      { name: "Paper 3 Reading: Translation from Italian into English", code: "SK.6" },
+      { name: "Paper 4 Writing: Short Tasks and Photo Descriptions", code: "SK.7" },
+      { name: "Paper 4 Writing: Extended Writing (90 and 150 Words)", code: "SK.8" },
+      { name: "Paper 4 Writing: Translation from English into Italian", code: "SK.9" },
+      { name: "Foundation or Higher Tier: Choosing and Preparing", code: "SK.10" },
+      { name: "Mock Exams and Review", code: "SK.11" },
+    ] },
+]
+
 export const IGCSE_LIBRARY = [
   // Sciences (also in IGCSE_SCIENCES_LIBRARY for legacy compat)
   { match: /\bbiology\b/i,                       const_: IGCSE_BIOLOGY_0610,      source: 'IGCSE Biology — 130-lesson scheme (Cambridge 0610 & Edexcel 4BI1)' },
@@ -12700,6 +13001,13 @@ export const IGCSE_LIBRARY = [
   // Swahili is matched before the others because "Swahili (Kiswahili)"
   // and "Kiswahili" are both live subject names in the catalogue.
   { match: /\b(swahili|kiswahili)\b/i,       const_: IGCSE_SWAHILI_0262, source: 'Cambridge IGCSE Swahili 0262 \u2014 130-lesson scheme' },
+  // Edexcel only. Global Citizenship 4GL1 and Italian (Pearson GCSE 1IN0).
+  { match: /global\s+citizenship/i,
+    byCurriculum: { EdexcelIGCSE: { const_: IGCSE_GLOBAL_CITIZENSHIP_EDX, source: 'Pearson Edexcel International GCSE Global Citizenship 4GL1 \u2014 72-lesson scheme' } },
+    const_: IGCSE_GLOBAL_CITIZENSHIP_EDX, source: 'Pearson Edexcel International GCSE Global Citizenship 4GL1 \u2014 72-lesson scheme' },
+  { match: /\bitalian\b/i,
+    byCurriculum: { EdexcelIGCSE: { const_: IGCSE_ITALIAN_EDX, source: 'Pearson Edexcel GCSE Italian 1IN0 \u2014 80-lesson scheme' } },
+    const_: IGCSE_ITALIAN_EDX, source: 'Pearson Edexcel GCSE Italian 1IN0 \u2014 80-lesson scheme' },
   { match: /\bfrench\b/i,                    const_: IGCSE_FRENCH_0520,  source: 'Cambridge IGCSE French 0520 \u2014 127-lesson scheme' },
   { match: /\bspanish\b/i,                   const_: IGCSE_SPANISH_0530, source: 'Cambridge IGCSE Spanish 0530 \u2014 127-lesson scheme' },
   { match: /\bgerman\b/i,                    const_: IGCSE_GERMAN_0525,  source: 'Cambridge IGCSE German 0525 \u2014 128-lesson scheme' },
