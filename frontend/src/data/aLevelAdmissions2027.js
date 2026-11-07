@@ -19,6 +19,7 @@
 
 export const A_LEVEL_2027 = {
   slug: 'a-level-admissions-2027',
+  ctaH: 'Begin your A Level journey',
   title: 'A Level Admissions 2027 | Cambridge & Edexcel, Live Online',
   desc: 'A Level admissions for January 2027: Cambridge International and Pearson Edexcel A Levels taught live online, for students anywhere in the world. Apply by 5 January.',
   eyebrow: 'Admissions now open · January 2027 intake',
@@ -93,3 +94,13 @@ export const A_LEVEL_FEE_LINE = 'From USD 423/month for Primary, payable termly;
 
 // Every A Level subject we teach, either board, A to Z (for the "all subjects" list).
 export const ALL_A_LEVEL_SUBJECTS = [...new Set(Object.values(A_LEVEL_SUBJECTS).flatMap(b => Object.values(b).flat()))].sort((a, b) => a.localeCompare(b))
+
+// Everything pages/AdmissionsPage.jsx needs for this course.
+export const A_LEVEL_ADMISSION = {
+  pg: A_LEVEL_2027, subjects: A_LEVEL_SUBJECTS, all: ALL_A_LEVEL_SUBJECTS, fee: A_LEVEL_FEE_LINE,
+  level: 'A Level',
+  boardNames: { cambridge: 'Cambridge International AS & A Level', edexcel: 'Pearson Edexcel A Level' },
+  routesHeading: 'Two A Level routes: Cambridge and Pearson Edexcel',
+  ctaText: 'Apply by 5 January 2027. Every admission starts with an assessment, so your child begins at the right point in every subject.',
+  also: [['/cambridge-online-school', 'Cambridge online school'], ['/pearson-edexcel-online-school', 'Pearson Edexcel online school'], ['/curricula/a-level', 'A Level curriculum'], ['/igcse-admissions-2027', 'IGCSE admissions 2027']],
+}

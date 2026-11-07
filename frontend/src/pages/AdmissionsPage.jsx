@@ -1,10 +1,11 @@
 /**
- * ALevelAdmissionsPage — /a-level-admissions-2027, rendered inside
- * LandingPage. Content: data/aLevelAdmissions2027.js (the static HTML for
- * search engines is built from the same file by scripts/seo-static.mjs).
+ * AdmissionsPage — the 2027 admissions pages, rendered inside LandingPage:
+ *   /a-level-admissions-2027  data/aLevelAdmissions2027.js (A_LEVEL_ADMISSION)
+ *   /igcse-admissions-2027    data/igcseAdmissions2027.js  (IGCSE_ADMISSION)
+ * The static HTML for search engines is built from the same files by
+ * scripts/seo-static.mjs.
  */
 import { useState } from 'react'
-import { A_LEVEL_2027 as pg, A_LEVEL_SUBJECTS, ALL_A_LEVEL_SUBJECTS, A_LEVEL_FEE_LINE } from '../data/aLevelAdmissions2027.js'
 
 const C = { cr: '#7D1025', cr2: '#8B1A2E', gold: '#C9973A', ink: '#1A0A0E', sl: '#3D3438', mut: '#6B6266', bone: '#F7F1E8', bone2: '#EFE6D6', line: '#E6DACB' }
 const serif = "'DM Serif Display',Georgia,serif"
@@ -47,7 +48,8 @@ function SubjectBoard({ name, groups }) {
   )
 }
 
-export default function ALevelAdmissionsPage({ nav }) {
+export default function AdmissionsPage({ nav, admission }) {
+  const { pg, subjects, all, fee, level, boardNames, routesHeading, ctaText, also } = admission
   const go = (path) => (e) => { if (nav && !e.metaKey && !e.ctrlKey) { e.preventDefault(); nav(path) } }
   return (
     <main style={{ background: C.bone, color: C.ink }}>
@@ -73,7 +75,7 @@ export default function ALevelAdmissionsPage({ nav }) {
             <a href="/assessment" onClick={go('/assessment')} style={btn(true)}>Book an assessment <span aria-hidden style={{ color: C.gold }}>→</span></a>
             <a href="#subjects" style={btn(false)}>See all subjects</a>
           </div>
-          <p style={{ fontSize: 13.5, color: C.mut, margin: '16px 0 0' }}>{A_LEVEL_FEE_LINE}</p>
+          <p style={{ fontSize: 13.5, color: C.mut, margin: '16px 0 0' }}>{fee}</p>
         </div>
       </section>
 
@@ -92,7 +94,7 @@ export default function ALevelAdmissionsPage({ nav }) {
       {/* Two boards */}
       <section style={{ padding: '28px 0' }}>
         <div style={wrap}>
-          <h2 style={h2}>Two A Level routes: Cambridge and Pearson Edexcel</h2>
+          <h2 style={h2}>{routesHeading}</h2>
           <div style={grid(320)}>
             {pg.boards.map(b => (
               <div key={b.h} style={{ ...card, borderLeft: `3px solid ${C.cr}` }}>
@@ -109,11 +111,11 @@ export default function ALevelAdmissionsPage({ nav }) {
       {/* Subjects */}
       <section id="subjects" style={{ padding: '36px 0', background: '#fff', borderTop: `1px solid ${C.line}`, borderBottom: `1px solid ${C.line}` }}>
         <div style={wrap}>
-          <h2 style={h2}>A Level subjects we teach</h2>
-          <p style={{ color: C.sl, lineHeight: 1.7, fontSize: 15, maxWidth: 860, margin: '0 0 20px' }}>{ALL_A_LEVEL_SUBJECTS.length} subjects across the two boards. {pg.subjectsNote}</p>
+          <h2 style={h2}>{level} subjects we teach</h2>
+          <p style={{ color: C.sl, lineHeight: 1.7, fontSize: 15, maxWidth: 860, margin: '0 0 20px' }}>{all.length} subjects across the two boards. {pg.subjectsNote}</p>
           <div style={grid(340)}>
-            <SubjectBoard name="Cambridge International AS & A Level" groups={A_LEVEL_SUBJECTS.cambridge} />
-            <SubjectBoard name="Pearson Edexcel A Level" groups={A_LEVEL_SUBJECTS.edexcel} />
+            <SubjectBoard name={boardNames.cambridge} groups={subjects.cambridge} />
+            <SubjectBoard name={boardNames.edexcel} groups={subjects.edexcel} />
           </div>
         </div>
       </section>
@@ -136,7 +138,7 @@ export default function ALevelAdmissionsPage({ nav }) {
       {/* How admission works */}
       <section style={{ padding: '28px 0 40px' }}>
         <div style={wrap}>
-          <h2 style={h2}>How A Level admission works</h2>
+          <h2 style={h2}>How {level} admission works</h2>
           <ol style={{ listStyle: 'none', padding: 0, margin: 0, ...grid(200) }}>
             {pg.steps.map(([h, p], i) => (
               <li key={h} style={card}>
@@ -157,7 +159,7 @@ export default function ALevelAdmissionsPage({ nav }) {
             <p style={{ margin: 0, color: C.sl, lineHeight: 1.7, fontSize: 15 }}>{pg.exams}</p>
           </div>
           <div>
-            <h2 style={h2}>Where A Levels lead</h2>
+            <h2 style={h2}>{pg.leadsHeading || 'Where ' + level + 's lead'}</h2>
             <p style={{ margin: 0, color: C.sl, lineHeight: 1.7, fontSize: 15 }}>{pg.universities}</p>
           </div>
         </div>
@@ -166,7 +168,7 @@ export default function ALevelAdmissionsPage({ nav }) {
       {/* FAQ */}
       <section style={{ padding: '40px 0' }}>
         <div style={{ ...wrap, maxWidth: 880 }}>
-          <h2 style={h2}>A Level admissions 2027: questions families ask</h2>
+          <h2 style={h2}>{level} admissions 2027: questions families ask</h2>
           {pg.faqs.map(f => <Faq key={f.q} {...f} />)}
         </div>
       </section>
@@ -174,11 +176,11 @@ export default function ALevelAdmissionsPage({ nav }) {
       {/* CTA */}
       <section style={{ padding: '52px 0', background: C.cr, color: '#fff', textAlign: 'center' }}>
         <div style={wrap}>
-          <h2 style={{ ...h2, color: '#fff' }}>Begin your A Level journey in <em style={{ color: C.gold }}>January 2027</em></h2>
-          <p style={{ color: 'rgba(255,255,255,.85)', maxWidth: 640, margin: '0 auto 22px', lineHeight: 1.7 }}>Apply by 5 January 2027. Every admission starts with an assessment, so your child begins at the right point in every subject.</p>
+          <h2 style={{ ...h2, color: '#fff' }}>{pg.ctaH || 'Begin ' + level} in <em style={{ color: C.gold }}>January 2027</em></h2>
+          <p style={{ color: 'rgba(255,255,255,.85)', maxWidth: 640, margin: '0 auto 22px', lineHeight: 1.7 }}>{ctaText}</p>
           <a href="/assessment" onClick={go('/assessment')} style={{ ...btn(false), background: '#fff', border: 'none' }}>Book an assessment <span aria-hidden>→</span></a>
           <p style={{ fontSize: 13.5, color: 'rgba(255,255,255,.75)', margin: '18px 0 0' }}>
-            Also: <a href="/cambridge-online-school" onClick={go('/cambridge-online-school')} style={{ color: '#F3D9A4' }}>Cambridge online school</a> {'·'} <a href="/pearson-edexcel-online-school" onClick={go('/pearson-edexcel-online-school')} style={{ color: '#F3D9A4' }}>Pearson Edexcel online school</a> {'·'} <a href="/curricula/a-level" onClick={go('/curricula/a-level')} style={{ color: '#F3D9A4' }}>A Level curriculum</a>
+            Also: {also.map(([href, label], i) => <span key={href}>{i ? ' · ' : ''}<a href={href} onClick={go(href)} style={{ color: '#F3D9A4' }}>{label}</a></span>)}
           </p>
         </div>
       </section>

@@ -89,6 +89,9 @@
 /a-level-admission-2027  /a-level-admissions-2027    301
 /a-level-2027            /a-level-admissions-2027    301
 /alevel-admissions-2027  /a-level-admissions-2027    301
+/igcse-admissions        /igcse-admissions-2027      301
+/igcse-admission-2027    /igcse-admissions-2027      301
+/igcse-2027              /igcse-admissions-2027      301
 
 # ─── Country hub canonical consolidation (301s) ──────────────────
 /us-families             /online-school/usa          301

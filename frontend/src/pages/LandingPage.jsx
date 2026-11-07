@@ -67,7 +67,10 @@ import { guidesFor } from '../data/geoGuides.js'
 import { CONTINENTAL_SERIES, guideCountryRows, aboutGuideText } from '../data/continentalGuides.js'
 import { PARTNERSHIP_PAGES, PARTNERSHIP_SLUG_TO_KEY } from '../data/partnershipPages.js'
 import { BOARD_SCHOOLS, BOARD_SCHOOL_SLUG_TO_KEY } from '../data/boardSchools.js'
-import { A_LEVEL_2027 } from '../data/aLevelAdmissions2027.js'
+import { A_LEVEL_2027, A_LEVEL_ADMISSION } from '../data/aLevelAdmissions2027.js'
+import { IGCSE_2027, IGCSE_ADMISSION } from '../data/igcseAdmissions2027.js'
+// 2027 admissions pages by path: /a-level-admissions-2027, /igcse-admissions-2027.
+const ADMISSIONS_2027 = { ['/' + A_LEVEL_2027.slug]: A_LEVEL_ADMISSION, ['/' + IGCSE_2027.slug]: IGCSE_ADMISSION }
 import { naMeta, usLead, caLead, US_HEADLINE, CA_HEADLINE } from '../data/naFocus.js'
 
 
@@ -345,8 +348,8 @@ const CareersPage = lazy(() => import('./CareersPage.jsx'))
 const PartnershipsPage = lazy(() => import('./PartnershipsPage.jsx'))
 // /cambridge-online-school and /pearson-edexcel-online-school (data/boardSchools.js).
 const BoardSchoolPage = lazy(() => import('./BoardSchoolPage.jsx'))
-// /a-level-admissions-2027 (data/aLevelAdmissions2027.js).
-const ALevelAdmissionsPage = lazy(() => import('./ALevelAdmissionsPage.jsx'))
+// /a-level-admissions-2027 and /igcse-admissions-2027 (data/*Admissions2027.js).
+const AdmissionsPage = lazy(() => import('./AdmissionsPage.jsx'))
 
 const V = {
   // Crimson (kept — already aligned with LMS)
@@ -1098,7 +1101,7 @@ function GuideCrossLinks({ guideSlug, guideName, hubHref, hubName }) {
   )
 }
 
-const PAGES = ['home','virtual-lab','careers','partnerships','partnership-type','board-school','a-level-2027','about','curricula','curriculum-detail','services','service-detail','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','tuition-uk','uk-area','homeschooling-kenya','kenya-city','virtual-school-kenya','virtual-school-ukraine','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','homeschooling-indonesia','thailand-city','indonesia-city','homeschooling-malaysia','malaysia-city','homeschooling-turkey','turkey-city','homeschooling-kuwait','kuwait-city','homeschooling-nigeria','nigeria-city','homeschooling-bahrain','bahrain-city','homeschooling-oman','oman-city','homeschooling-taiwan','taiwan-city','homeschooling-ireland','ireland-city','homeschooling-united-kingdom','uk-city','homeschooling-india','india-city','homeschooling-germany','germany-city','homeschooling-romania','romania-city','homeschooling-ukraine','ukraine-city','homeschooling-spain','spain-city','homeschooling-denmark','denmark-city','homeschooling-france','france-city','homeschooling-italy','italy-city','homeschooling-poland','poland-city','homeschooling-portugal','portugal-city','homeschooling-czech-republic','czech-city','homeschooling-belgium','belgium-city','homeschooling-sweden','sweden-city','homeschooling-netherlands','netherlands-city','homeschooling-norway','norway-city','homeschooling-new-zealand','new-zealand-city','homeschooling-austria','austria-city','homeschooling-hungary','hungary-city','homeschooling-finland','finland-city','homeschooling-greece','greece-city','homeschooling-azerbaijan','azerbaijan-city','homeschooling-georgia','georgia-city','homeschooling-pakistan','pakistan-city','homeschooling-australia','australia-city','homeschooling-luxembourg','luxembourg-city-page','homeschooling-switzerland','switzerland-city','homeschooling-slovakia','slovakia-city','homeschooling-slovenia','slovenia-city','homeschooling-croatia','croatia-city','homeschooling-serbia','serbia-city','homeschooling-bulgaria','bulgaria-city','homeschooling-albania','albania-city','homeschooling-north-macedonia','north-macedonia-city','homeschooling-montenegro','montenegro-city','homeschooling-bosnia','bosnia-city','homeschooling-kosovo','kosovo-city','homeschooling-zambia','zambia-city','homeschooling-zimbabwe','zimbabwe-city','homeschooling-botswana','botswana-city','homeschooling-namibia','namibia-city','homeschooling-algeria','algeria-city','homeschooling-tunisia','tunisia-city','homeschooling-mauritius','mauritius-city','homeschooling-ghana','ghana-city','homeschooling-angola','angola-city','homeschooling-drc','drc-city','homeschooling-mexico','mexico-city-page','homeschooling-brazil','brazil-city','homeschooling-colombia','colombia-city','homeschooling-argentina','argentina-city','homeschooling-chile','chile-city','homeschooling-peru','peru-city','homeschooling-ecuador','ecuador-city','homeschooling-panama','panama-city-page','homeschooling-costa-rica','costa-rica-city','homeschooling-dominican-republic','dominican-city','homeschooling-uruguay','uruguay-city','homeschooling-guatemala','guatemala-city-page','homeschooling-paraguay','paraguay-city','homeschooling-bolivia','bolivia-city','homeschooling-venezuela','venezuela-city','homeschooling-puerto-rico','puerto-rico-city','homeschooling-israel','israel-city','homeschooling-jordan','jordan-city','homeschooling-iraq','iraq-city','homeschooling-cyprus','cyprus-city','homeschooling-lebanon','lebanon-city','homeschooling-myanmar','myanmar-city','homeschooling-maldives','maldives-city','homeschooling-china','china-city','homeschooling-bangladesh','bangladesh-city','homeschooling-nepal','nepal-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','login','assessment','contact','privacy','terms','cookies','gdpr','child-protection','academic-integrity','ai-policy','inclusion-policy','language-policy','article']
+const PAGES = ['home','virtual-lab','careers','partnerships','partnership-type','board-school','admissions-2027','about','curricula','curriculum-detail','services','service-detail','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','tuition-uk','uk-area','homeschooling-kenya','kenya-city','virtual-school-kenya','virtual-school-ukraine','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','homeschooling-indonesia','thailand-city','indonesia-city','homeschooling-malaysia','malaysia-city','homeschooling-turkey','turkey-city','homeschooling-kuwait','kuwait-city','homeschooling-nigeria','nigeria-city','homeschooling-bahrain','bahrain-city','homeschooling-oman','oman-city','homeschooling-taiwan','taiwan-city','homeschooling-ireland','ireland-city','homeschooling-united-kingdom','uk-city','homeschooling-india','india-city','homeschooling-germany','germany-city','homeschooling-romania','romania-city','homeschooling-ukraine','ukraine-city','homeschooling-spain','spain-city','homeschooling-denmark','denmark-city','homeschooling-france','france-city','homeschooling-italy','italy-city','homeschooling-poland','poland-city','homeschooling-portugal','portugal-city','homeschooling-czech-republic','czech-city','homeschooling-belgium','belgium-city','homeschooling-sweden','sweden-city','homeschooling-netherlands','netherlands-city','homeschooling-norway','norway-city','homeschooling-new-zealand','new-zealand-city','homeschooling-austria','austria-city','homeschooling-hungary','hungary-city','homeschooling-finland','finland-city','homeschooling-greece','greece-city','homeschooling-azerbaijan','azerbaijan-city','homeschooling-georgia','georgia-city','homeschooling-pakistan','pakistan-city','homeschooling-australia','australia-city','homeschooling-luxembourg','luxembourg-city-page','homeschooling-switzerland','switzerland-city','homeschooling-slovakia','slovakia-city','homeschooling-slovenia','slovenia-city','homeschooling-croatia','croatia-city','homeschooling-serbia','serbia-city','homeschooling-bulgaria','bulgaria-city','homeschooling-albania','albania-city','homeschooling-north-macedonia','north-macedonia-city','homeschooling-montenegro','montenegro-city','homeschooling-bosnia','bosnia-city','homeschooling-kosovo','kosovo-city','homeschooling-zambia','zambia-city','homeschooling-zimbabwe','zimbabwe-city','homeschooling-botswana','botswana-city','homeschooling-namibia','namibia-city','homeschooling-algeria','algeria-city','homeschooling-tunisia','tunisia-city','homeschooling-mauritius','mauritius-city','homeschooling-ghana','ghana-city','homeschooling-angola','angola-city','homeschooling-drc','drc-city','homeschooling-mexico','mexico-city-page','homeschooling-brazil','brazil-city','homeschooling-colombia','colombia-city','homeschooling-argentina','argentina-city','homeschooling-chile','chile-city','homeschooling-peru','peru-city','homeschooling-ecuador','ecuador-city','homeschooling-panama','panama-city-page','homeschooling-costa-rica','costa-rica-city','homeschooling-dominican-republic','dominican-city','homeschooling-uruguay','uruguay-city','homeschooling-guatemala','guatemala-city-page','homeschooling-paraguay','paraguay-city','homeschooling-bolivia','bolivia-city','homeschooling-venezuela','venezuela-city','homeschooling-puerto-rico','puerto-rico-city','homeschooling-israel','israel-city','homeschooling-jordan','jordan-city','homeschooling-iraq','iraq-city','homeschooling-cyprus','cyprus-city','homeschooling-lebanon','lebanon-city','homeschooling-myanmar','myanmar-city','homeschooling-maldives','maldives-city','homeschooling-china','china-city','homeschooling-bangladesh','bangladesh-city','homeschooling-nepal','nepal-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','login','assessment','contact','privacy','terms','cookies','gdpr','child-protection','academic-integrity','ai-policy','inclusion-policy','language-policy','article']
 
 // ─────────────────────────────────────────────────────────────────
 // Google Business Profile reviews — Smartious Homeschool & Tuition
@@ -2514,6 +2517,7 @@ export default function LandingPage() {
   const [currentCurriculum, setCurrentCurriculum] = useState(null)
   const [currentService, setCurrentService] = useState(null)
   const [currentPartnership, setCurrentPartnership] = useState(null)   // /partnerships/<slug> → type key
+  const [currentAdmission, setCurrentAdmission] = useState(null)       // /a-level-admissions-2027 etc.
   const [currentBoard, setCurrentBoard] = useState(null)               // /cambridge-online-school etc. → board key
   const [currentCountry, setCurrentCountry] = useState(null)
   const [currentTuitionArea, setCurrentTuitionArea] = useState(null)
@@ -3635,7 +3639,7 @@ export default function LandingPage() {
       setCurrentBoard(BOARD_SCHOOL_SLUG_TO_KEY[path.slice(1)]); setPage('board-school')
       return
     }
-    if (path === '/' + A_LEVEL_2027.slug) { setPage('a-level-2027'); return }
+    if (ADMISSIONS_2027[path]) { setCurrentAdmission(path); setPage('admissions-2027'); return }
     if (path.startsWith('/partnerships/')) {
       const key = PARTNERSHIP_SLUG_TO_KEY[path.slice('/partnerships/'.length)]
       if (key) { setCurrentPartnership(key); setPage('partnership-type') } else setPage('not-found')
@@ -4234,7 +4238,7 @@ export default function LandingPage() {
   if (page === 'virtual-lab') { metaTitle = VL_META.title; metaDesc = VL_META.desc }
   if (page === 'careers') { metaTitle = 'Careers: Teach Online with Smartious'; metaDesc = 'Teach Cambridge, Pearson Edexcel, IB and AP live online to students in 40+ countries. Apply with your documents and a demo lesson.' }
   if (page === 'board-school' && BOARD_SCHOOLS[currentBoard]) { metaTitle = BOARD_SCHOOLS[currentBoard].title; metaDesc = BOARD_SCHOOLS[currentBoard].desc }
-  if (page === 'a-level-2027') { metaTitle = A_LEVEL_2027.title; metaDesc = A_LEVEL_2027.desc }
+  if (page === 'admissions-2027' && ADMISSIONS_2027[currentAdmission]) { metaTitle = ADMISSIONS_2027[currentAdmission].pg.title; metaDesc = ADMISSIONS_2027[currentAdmission].pg.desc }
   if (page === 'partnership-type' && PARTNERSHIP_PAGES[currentPartnership]) { metaTitle = PARTNERSHIP_PAGES[currentPartnership].title; metaDesc = PARTNERSHIP_PAGES[currentPartnership].desc }
   if (page === 'partnerships') { metaTitle = 'Partnerships | Smartious'; metaDesc = 'Partner with Smartious: university scholarships, exam centres, teacher training, co-curricular providers, schools and employers.' }
 
@@ -7455,6 +7459,11 @@ export default function LandingPage() {
               {(() => { const b = /cambridge/i.test(c.badge) ? BOARD_SCHOOLS.cambridge : c.slug === 'edexcel' ? BOARD_SCHOOLS.edexcel : null
                 return b && <a href={'/' + b.slug} onClick={linkClick(() => nav('/' + b.slug))} style={{display:'block',background:V.white,border:`1px solid ${V.bone3}`,borderLeft:`3px solid ${V.cr}`,borderRadius:12,padding:'14px 18px',marginBottom:16,color:V.ink,textDecoration:'none',fontSize:14.5}}>
                   <b>{b.eyebrow}.</b> See our {b.board} online school: stages, subjects, examinations and fees →</a> })()}
+              {/igcse|edexcel/.test(c.slug) && (
+                <a href={'/' + IGCSE_2027.slug} onClick={linkClick(() => nav('/' + IGCSE_2027.slug))}
+                  style={{display:'block',background:V.cr,color:'#fff',borderRadius:12,padding:'14px 18px',marginBottom:16,textDecoration:'none',fontSize:14.5,lineHeight:1.5}}>
+                  <b>IGCSE admissions 2027 are open.</b> Years 10 and 11, Cambridge and Pearson Edexcel, live online, January 2027 intake: all subjects and how to apply →</a>
+              )}
               {/a-level|edexcel/.test(c.slug) && (
                 <a href={'/' + A_LEVEL_2027.slug} onClick={linkClick(() => nav('/' + A_LEVEL_2027.slug))}
                   style={{display:'block',background:V.cr,color:'#fff',borderRadius:12,padding:'14px 18px',marginBottom:16,textDecoration:'none',fontSize:14.5,lineHeight:1.5}}>
@@ -13782,8 +13791,8 @@ export default function LandingPage() {
       {page === 'partnerships' && (
         <Suspense fallback={<div style={{minHeight:'80vh',background:V.ink}} />}><PartnershipsPage /></Suspense>
       )}
-      {page === 'a-level-2027' && (
-        <Suspense fallback={<div style={{minHeight:'80vh',background:V.bone}} />}><ALevelAdmissionsPage nav={nav} /></Suspense>
+      {page === 'admissions-2027' && ADMISSIONS_2027[currentAdmission] && (
+        <Suspense fallback={<div style={{minHeight:'80vh',background:V.bone}} />}><AdmissionsPage key={currentAdmission} nav={nav} admission={ADMISSIONS_2027[currentAdmission]} /></Suspense>
       )}
       {page === 'board-school' && currentBoard && (
         <Suspense fallback={<div style={{minHeight:'80vh',background:V.ink}} />}><BoardSchoolPage key={currentBoard} boardKey={currentBoard} /></Suspense>
@@ -24409,6 +24418,7 @@ function Footer({ P }) {
             <div className="ft-ch">Online School</div>
             <ul className="ft-lk">
               {Object.values(BOARD_SCHOOLS).map(b => <li key={b.slug}><a {...go('/' + b.slug, () => footerNav('/' + b.slug))}>{b.board} Online School</a></li>)}
+              <li><a {...go('/' + IGCSE_2027.slug, () => footerNav('/' + IGCSE_2027.slug))}>IGCSE Admissions 2027</a></li>
               <li><a {...go('/' + A_LEVEL_2027.slug, () => footerNav('/' + A_LEVEL_2027.slug))}>A Level Admissions 2027</a></li>
               {[['kenya','Kenya'],['uae','UAE & Dubai'],['united-kingdom','United Kingdom'],['usa','USA'],['canada','Canada'],['nigeria','Nigeria'],['south-africa','South Africa'],['saudi-arabia','Saudi Arabia'],['qatar','Qatar'],['kuwait','Kuwait'],['bahrain','Bahrain'],['oman','Oman'],['australia','Australia'],['georgia','Georgia (Tbilisi)']].map(([slug, l]) => (
                 <li key={slug}><a {...go('/online-school/' + slug, () => footerNav('/online-school/' + slug))}>{l}</a></li>

@@ -16,3 +16,10 @@ test('A Level admissions page lists every A Level subject in the database', asyn
   assert.deepStrictEqual(page('cambridge'), fromSeed('CambridgeALevel'))
   assert.deepStrictEqual(page('edexcel'), fromSeed('EdexcelALevel'))
 })
+
+test('IGCSE admissions page lists every IGCSE subject in the database', async () => {
+  const { IGCSE_SUBJECTS } = await import(pathToFileURL(path.join(__dirname, '../../frontend/src/data/igcseAdmissions2027.js')).href)
+  const page = (b) => Object.values(IGCSE_SUBJECTS[b]).flat().sort()
+  assert.deepStrictEqual(page('cambridge'), fromSeed('CambridgeIGCSE'))
+  assert.deepStrictEqual(page('edexcel'), fromSeed('EdexcelIGCSE'))
+})
