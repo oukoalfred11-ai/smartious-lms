@@ -84,6 +84,12 @@
 /tuition-uk/new-town-edinburgh           /homeschool-edinburgh-uk     301!
 /tuition-uk/*            /online-school/united-kingdom 301!
 
+# ─── A Level admissions 2027: short and alternative URLs ─────────
+/a-level-admissions      /a-level-admissions-2027    301
+/a-level-admission-2027  /a-level-admissions-2027    301
+/a-level-2027            /a-level-admissions-2027    301
+/alevel-admissions-2027  /a-level-admissions-2027    301
+
 # ─── Country hub canonical consolidation (301s) ──────────────────
 /us-families             /online-school/usa          301
 /ca-families             /online-school/canada       301

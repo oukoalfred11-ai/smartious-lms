@@ -75,6 +75,7 @@ import { CONTINENTAL_SERIES, guideCountryRows, aboutGuideText, fmtMonthYear } fr
 import { POSITIONS as JOB_POSITIONS, APPLICANT_DOCS, PARTNERSHIP_TYPES } from '../src/data/careers.js'
 import { PARTNERSHIP_PAGES } from '../src/data/partnershipPages.js'
 import { BOARD_SCHOOLS } from '../src/data/boardSchools.js'
+import { A_LEVEL_2027, A_LEVEL_SUBJECTS, ALL_A_LEVEL_SUBJECTS } from '../src/data/aLevelAdmissions2027.js'
 import { guidesFor } from '../src/data/geoGuides.js'
 import { naMeta, usLead, caLead, US_HEADLINE, CA_HEADLINE } from '../src/data/naFocus.js'
 import { VL_PATH, VL_META, VL_HERO, VL_IMAGES, VL_BONES, VL_MODEL_IMAGES, VL_FEATURES, VL_KENYA, VL_INTERNATIONAL, VL_FAQS, VL_CREDITS, VL_PRACTICALS, VL_MODELS } from '../src/data/virtualLab.js'
@@ -273,6 +274,7 @@ const hubName = (c) => c.name || c.longName || c.country
 const MAIN_LINKS = [
   { href: '/about', label: 'About Smartious' }, { href: '/curricula', label: 'Curricula' }, { href: '/programs', label: 'Programmes' },
   { href: '/cambridge-online-school', label: 'Cambridge online school' }, { href: '/pearson-edexcel-online-school', label: 'Pearson Edexcel online school' },
+  { href: '/a-level-admissions-2027', label: 'A Level admissions 2027' },
   { href: '/homeschool', label: 'Homeschooling' }, { href: '/tuition', label: 'Private tuition' }, { href: '/pricing', label: 'Fees' },
   { href: '/teachers', label: 'Our team' }, { href: '/faq', label: 'FAQ' }, { href: '/blog', label: 'Guides and articles' },
   { href: '/contact', label: 'Contact' }, { href: '/virtual-lab', label: 'Virtual Lab' }, { href: '/assessment', label: 'Book an assessment' },
@@ -408,6 +410,7 @@ for (const c of CURRICULA) {
   ], related: [h2('Other curricula'), links([
     ...(/cambridge/i.test(c.badge) ? [{ href: '/' + BOARD_SCHOOLS.cambridge.slug, label: 'Cambridge online school', note: BOARD_SCHOOLS.cambridge.eyebrow }] : []),
     ...(c.slug === 'edexcel' ? [{ href: '/' + BOARD_SCHOOLS.edexcel.slug, label: 'Pearson Edexcel online school', note: BOARD_SCHOOLS.edexcel.eyebrow }] : []),
+    ...(/a-level|edexcel/.test(c.slug) ? [{ href: '/' + A_LEVEL_2027.slug, label: 'A Level admissions 2027', note: 'January 2027 intake, Cambridge and Pearson Edexcel' }] : []),
     ...CURRICULA_LINKS.filter(l => l.href !== path)])],
   crumbs: [['Curricula', '/curricula'], [c.h, path]], src: ['src/data/curricula.js'],
   ld: [{ '@context': 'https://schema.org', '@type': 'Course', name: c.h + (d.tagline ? ' — ' + d.tagline : ''), description: clip(d.overview || c.desc, 300),
@@ -502,6 +505,39 @@ for (const [id, s] of Object.entries(STATIC_META)) {
 }
 
 // Virtual Lab (src/data/virtualLab.js; the page is pages/VirtualLabPage.jsx)
+// A Level admissions 2027 (src/data/aLevelAdmissions2027.js; pages/ALevelAdmissionsPage.jsx)
+{
+  const pg = A_LEVEL_2027, path = '/' + pg.slug
+  const boardSubjects = (name, groups) => h3(name + ' (' + Object.values(groups).flat().length + ' subjects)') + Object.entries(groups).map(([area, list]) => `<p><strong>${esc(area)}:</strong> ${list.map(esc).join(', ')}</p>`).join('')
+  add({ path, title: pg.title, desc: pg.desc, h1: pg.h1, src: ['src/data/aLevelAdmissions2027.js', 'src/pages/ALevelAdmissionsPage.jsx'],
+    image: { src: pg.banner.src, alt: pg.banner.alt, width: pg.banner.width, height: pg.banner.height },
+    body: [
+      `<figure><img src="${esc(pg.banner.src)}" alt="${esc(pg.banner.alt)}" width="${pg.banner.width}" height="${pg.banner.height}"/></figure>`,
+      p(pg.eyebrow + '.'), p(pg.intro),
+      bullets(pg.facts),
+      h2('Two A Level routes: Cambridge and Pearson Edexcel'), ...pg.boards.map(b => h3(b.h) + p(b.sub + '. ' + b.p)),
+      h2('A Level subjects we teach'), p(ALL_A_LEVEL_SUBJECTS.length + ' subjects across the two boards. ' + pg.subjectsNote),
+      boardSubjects('Cambridge International AS & A Level', A_LEVEL_SUBJECTS.cambridge),
+      boardSubjects('Pearson Edexcel A Level', A_LEVEL_SUBJECTS.edexcel),
+      h2('Who joins in January 2027'), bullets(pg.who),
+      h2('How A Level admission works'), `<ol>${pg.steps.map(([h, x]) => `<li><strong>${esc(h)}</strong> ${esc(x)}</li>`).join('')}</ol>`,
+      h2('Exams, wherever you live'), p(pg.exams),
+      h2('Where A Levels lead'), p(pg.universities),
+      h2('Fees'), p(FEE_SCHOOL + '.'),
+      h2('Apply'), links([{ href: '/assessment', label: 'Book an assessment', note: 'apply by 5 January 2027' }]),
+    ],
+    faqs: pg.faqs, faqsTitle: 'A Level admissions 2027: questions families ask',
+    related: [h2('Related'), links([{ href: '/cambridge-online-school', label: 'Cambridge online school' }, { href: '/pearson-edexcel-online-school', label: 'Pearson Edexcel online school' },
+      ...CURRICULA_LINKS.filter(l => /a-level|edexcel/.test(l.href)), { href: '/pricing', label: 'Fees' }])],
+    crumbs: [['A Level admissions 2027', path]],
+    ld: [serviceLd({ name: 'A Level admissions 2027: Cambridge and Pearson Edexcel, online', desc: pg.desc, path }),
+      { '@context': 'https://schema.org', '@type': 'EducationalOccupationalProgram', name: 'Cambridge and Pearson Edexcel A Level, January 2027 intake',
+        description: pg.desc, url: ORIGIN + path, provider: { '@id': ORG_ID }, educationalProgramMode: 'online', startDate: '2027-01-05',
+        applicationDeadline: '2027-01-05', timeToComplete: 'P2Y', occupationalCredentialAwarded: 'Cambridge International AS & A Level; Pearson Edexcel A Level',
+        image: ORIGIN + pg.banner.src, hasCourse: ALL_A_LEVEL_SUBJECTS.map(n => ({ '@type': 'Course', name: n + ' A Level', provider: { '@id': ORG_ID } })) }],
+  })
+}
+
 // Cambridge and Pearson Edexcel online school pages (src/data/boardSchools.js)
 for (const [key, b] of Object.entries(BOARD_SCHOOLS)) {
   const path = '/' + b.slug, other = BOARD_SCHOOLS[b.other]
