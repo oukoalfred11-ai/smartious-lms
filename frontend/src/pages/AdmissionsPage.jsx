@@ -5,7 +5,7 @@
  * The static HTML for search engines is built from the same files by
  * scripts/seo-static.mjs.
  */
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const C = { cr: '#7D1025', cr2: '#8B1A2E', gold: '#C9973A', ink: '#1A0A0E', sl: '#3D3438', mut: '#6B6266', bone: '#F7F1E8', bone2: '#EFE6D6', line: '#E6DACB' }
 const serif = "'DM Serif Display',Georgia,serif"
@@ -51,10 +51,24 @@ function SubjectBoard({ name, groups }) {
 export default function AdmissionsPage({ nav, admission }) {
   const { pg, subjects, all, fee, level, boardNames, routesHeading, ctaText, also } = admission
   const go = (path) => (e) => { if (nav && !e.metaKey && !e.ctrlKey) { e.preventDefault(); nav(path) } }
+  // The site header (.lp-header: announcement bar + menu) is fixed and its
+  // height changes with screen width, so the banner starts below whatever
+  // height it has now; otherwise the top of the artwork hides behind it.
+  const [headerH, setHeaderH] = useState(110)
+  useEffect(() => {
+    const el = document.querySelector('.lp-header')
+    if (!el) return
+    const measure = () => setHeaderH(el.getBoundingClientRect().height || 110)
+    measure()
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(measure) : null
+    ro?.observe(el)
+    window.addEventListener('resize', measure)
+    return () => { ro?.disconnect(); window.removeEventListener('resize', measure) }
+  }, [])
   return (
     <main style={{ background: C.bone, color: C.ink }}>
       {/* Banner: the school's admissions artwork, then the same message as text */}
-      <section style={{ background: C.bone }}>
+      <section style={{ background: C.bone, paddingTop: headerH }}>
         <div style={{ maxWidth: 1440, margin: '0 auto' }}>
           <picture>
             <source media="(max-width: 760px)" srcSet={pg.banner.srcSmall} />
