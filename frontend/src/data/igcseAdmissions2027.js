@@ -187,5 +187,5 @@ export const IGCSE_ADMISSION = {
   boardNames: { cambridge: 'Cambridge IGCSE', edexcel: 'Pearson Edexcel International GCSE' },
   routesHeading: 'Two IGCSE routes: Cambridge and Pearson Edexcel',
   ctaText: 'Apply by 5 January 2027. Every admission starts with an assessment, so your child begins Year 10 or Year 11 at the right point in every subject.',
-  also: [['/cambridge-online-school', 'Cambridge online school'], ['/pearson-edexcel-online-school', 'Pearson Edexcel online school'], ['/curricula/igcse', 'IGCSE curriculum'], ['/a-level-admissions-2027', 'A Level admissions 2027']],
+  also: [['/cambridge-online-school', 'Cambridge online school'], ['/pearson-edexcel-online-school', 'Pearson Edexcel online school'], ['/curricula/igcse', 'IGCSE curriculum'], ['/lower-secondary-admissions-2027', 'Lower Secondary admissions 2027'], ['/a-level-admissions-2027', 'A Level admissions 2027']],
 }

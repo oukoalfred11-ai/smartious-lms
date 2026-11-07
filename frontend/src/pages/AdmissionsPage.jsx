@@ -2,6 +2,7 @@
  * AdmissionsPage — the 2027 admissions pages, rendered inside LandingPage:
  *   /a-level-admissions-2027  data/aLevelAdmissions2027.js (A_LEVEL_ADMISSION)
  *   /igcse-admissions-2027    data/igcseAdmissions2027.js  (IGCSE_ADMISSION)
+ *   /lower-secondary-admissions-2027  data/lowerSecondaryAdmissions2027.js (LOWER_SEC_ADMISSION)
  * The static HTML for search engines is built from the same files by
  * scripts/seo-static.mjs.
  */
@@ -169,7 +170,7 @@ export default function AdmissionsPage({ nav, admission }) {
       <section style={{ padding: '36px 0', background: '#fff', borderTop: `1px solid ${C.line}`, borderBottom: `1px solid ${C.line}` }}>
         <div style={{ ...wrap, ...grid(340) }}>
           <div>
-            <h2 style={h2}>Exams, wherever you live</h2>
+            <h2 style={h2}>{pg.examsHeading || 'Exams, wherever you live'}</h2>
             <p style={{ margin: 0, color: C.sl, lineHeight: 1.7, fontSize: 15 }}>{pg.exams}</p>
           </div>
           <div>

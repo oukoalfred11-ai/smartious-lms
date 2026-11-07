@@ -77,6 +77,7 @@ import { PARTNERSHIP_PAGES } from '../src/data/partnershipPages.js'
 import { BOARD_SCHOOLS } from '../src/data/boardSchools.js'
 import { A_LEVEL_ADMISSION } from '../src/data/aLevelAdmissions2027.js'
 import { IGCSE_ADMISSION } from '../src/data/igcseAdmissions2027.js'
+import { LOWER_SEC_ADMISSION } from '../src/data/lowerSecondaryAdmissions2027.js'
 import { guidesFor } from '../src/data/geoGuides.js'
 import { naMeta, usLead, caLead, US_HEADLINE, CA_HEADLINE } from '../src/data/naFocus.js'
 import { VL_PATH, VL_META, VL_HERO, VL_IMAGES, VL_BONES, VL_MODEL_IMAGES, VL_FEATURES, VL_KENYA, VL_INTERNATIONAL, VL_FAQS, VL_CREDITS, VL_PRACTICALS, VL_MODELS } from '../src/data/virtualLab.js'
@@ -275,7 +276,7 @@ const hubName = (c) => c.name || c.longName || c.country
 const MAIN_LINKS = [
   { href: '/about', label: 'About Smartious' }, { href: '/curricula', label: 'Curricula' }, { href: '/programs', label: 'Programmes' },
   { href: '/cambridge-online-school', label: 'Cambridge online school' }, { href: '/pearson-edexcel-online-school', label: 'Pearson Edexcel online school' },
-  { href: '/igcse-admissions-2027', label: 'IGCSE admissions 2027' }, { href: '/a-level-admissions-2027', label: 'A Level admissions 2027' },
+  { href: '/lower-secondary-admissions-2027', label: 'Lower Secondary admissions 2027' }, { href: '/igcse-admissions-2027', label: 'IGCSE admissions 2027' }, { href: '/a-level-admissions-2027', label: 'A Level admissions 2027' },
   { href: '/homeschool', label: 'Homeschooling' }, { href: '/tuition', label: 'Private tuition' }, { href: '/pricing', label: 'Fees' },
   { href: '/teachers', label: 'Our team' }, { href: '/faq', label: 'FAQ' }, { href: '/blog', label: 'Guides and articles' },
   { href: '/contact', label: 'Contact' }, { href: '/virtual-lab', label: 'Virtual Lab' }, { href: '/assessment', label: 'Book an assessment' },
@@ -508,10 +509,10 @@ for (const [id, s] of Object.entries(STATIC_META)) {
 
 // Virtual Lab (src/data/virtualLab.js; the page is pages/VirtualLabPage.jsx)
 // 2027 admissions pages: A Level and IGCSE (src/data/*Admissions2027.js; pages/AdmissionsPage.jsx)
-for (const adm of [A_LEVEL_ADMISSION, IGCSE_ADMISSION]) {
+for (const adm of [A_LEVEL_ADMISSION, IGCSE_ADMISSION, LOWER_SEC_ADMISSION]) {
   const { pg, subjects, all, level, boardNames, routesHeading } = adm, path = '/' + pg.slug
   const boardSubjects = (name, groups) => h3(name + ' (' + Object.values(groups).flat().length + ' subjects)') + Object.entries(groups).map(([area, list]) => `<p><strong>${esc(area)}:</strong> ${list.map(esc).join(', ')}</p>`).join('')
-  const src = level === 'IGCSE' ? 'src/data/igcseAdmissions2027.js' : 'src/data/aLevelAdmissions2027.js'
+  const src = { IGCSE: 'src/data/igcseAdmissions2027.js', 'Lower Secondary': 'src/data/lowerSecondaryAdmissions2027.js' }[level] || 'src/data/aLevelAdmissions2027.js'
   add({ path, title: pg.title, desc: pg.desc, h1: pg.h1, src: [src, 'src/pages/AdmissionsPage.jsx'],
     image: { src: pg.banner.src, alt: pg.banner.alt, width: pg.banner.width, height: pg.banner.height },
     body: [
@@ -524,7 +525,7 @@ for (const adm of [A_LEVEL_ADMISSION, IGCSE_ADMISSION]) {
       boardSubjects(boardNames.edexcel, subjects.edexcel),
       h2('Who joins in January 2027'), bullets(pg.who),
       h2('How ' + level + ' admission works'), `<ol>${pg.steps.map(([h, x]) => `<li><strong>${esc(h)}</strong> ${esc(x)}</li>`).join('')}</ol>`,
-      h2('Exams, wherever you live'), p(pg.exams),
+      h2(pg.examsHeading || 'Exams, wherever you live'), p(pg.exams),
       h2(pg.leadsHeading || 'Where ' + level + 's lead'), p(pg.universities),
       h2('Fees'), p(FEE_SCHOOL + '.'),
       h2('Apply'), links([{ href: '/assessment', label: 'Book an assessment', note: 'apply by 5 January 2027' }]),
@@ -535,7 +536,7 @@ for (const adm of [A_LEVEL_ADMISSION, IGCSE_ADMISSION]) {
     ld: [serviceLd({ name: level + ' admissions 2027: Cambridge and Pearson Edexcel, online', desc: pg.desc, path }),
       { '@context': 'https://schema.org', '@type': 'EducationalOccupationalProgram', name: boardNames.cambridge + ' and ' + boardNames.edexcel + ', January 2027 intake',
         description: pg.desc, url: ORIGIN + path, provider: { '@id': ORG_ID }, educationalProgramMode: 'online', startDate: '2027-01-05',
-        applicationDeadline: '2027-01-05', timeToComplete: 'P2Y', occupationalCredentialAwarded: boardNames.cambridge + '; ' + boardNames.edexcel,
+        applicationDeadline: '2027-01-05', timeToComplete: level === 'Lower Secondary' ? 'P3Y' : 'P2Y', occupationalCredentialAwarded: boardNames.cambridge + '; ' + boardNames.edexcel,
         image: ORIGIN + pg.banner.src, hasCourse: all.map(n => ({ '@type': 'Course', name: n + ' ' + level, provider: { '@id': ORG_ID } })) }],
   })
 }

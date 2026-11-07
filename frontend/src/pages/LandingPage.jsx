@@ -69,8 +69,9 @@ import { PARTNERSHIP_PAGES, PARTNERSHIP_SLUG_TO_KEY } from '../data/partnershipP
 import { BOARD_SCHOOLS, BOARD_SCHOOL_SLUG_TO_KEY } from '../data/boardSchools.js'
 import { A_LEVEL_2027, A_LEVEL_ADMISSION } from '../data/aLevelAdmissions2027.js'
 import { IGCSE_2027, IGCSE_ADMISSION } from '../data/igcseAdmissions2027.js'
+import { LOWER_SEC_2027, LOWER_SEC_ADMISSION } from '../data/lowerSecondaryAdmissions2027.js'
 // 2027 admissions pages by path: /a-level-admissions-2027, /igcse-admissions-2027.
-const ADMISSIONS_2027 = { ['/' + A_LEVEL_2027.slug]: A_LEVEL_ADMISSION, ['/' + IGCSE_2027.slug]: IGCSE_ADMISSION }
+const ADMISSIONS_2027 = { ['/' + A_LEVEL_2027.slug]: A_LEVEL_ADMISSION, ['/' + IGCSE_2027.slug]: IGCSE_ADMISSION, ['/' + LOWER_SEC_2027.slug]: LOWER_SEC_ADMISSION }
 import { naMeta, usLead, caLead, US_HEADLINE, CA_HEADLINE } from '../data/naFocus.js'
 
 
@@ -24418,6 +24419,7 @@ function Footer({ P }) {
             <div className="ft-ch">Online School</div>
             <ul className="ft-lk">
               {Object.values(BOARD_SCHOOLS).map(b => <li key={b.slug}><a {...go('/' + b.slug, () => footerNav('/' + b.slug))}>{b.board} Online School</a></li>)}
+              <li><a {...go('/' + LOWER_SEC_2027.slug, () => footerNav('/' + LOWER_SEC_2027.slug))}>Lower Secondary Admissions 2027</a></li>
               <li><a {...go('/' + IGCSE_2027.slug, () => footerNav('/' + IGCSE_2027.slug))}>IGCSE Admissions 2027</a></li>
               <li><a {...go('/' + A_LEVEL_2027.slug, () => footerNav('/' + A_LEVEL_2027.slug))}>A Level Admissions 2027</a></li>
               {[['kenya','Kenya'],['uae','UAE & Dubai'],['united-kingdom','United Kingdom'],['usa','USA'],['canada','Canada'],['nigeria','Nigeria'],['south-africa','South Africa'],['saudi-arabia','Saudi Arabia'],['qatar','Qatar'],['kuwait','Kuwait'],['bahrain','Bahrain'],['oman','Oman'],['australia','Australia'],['georgia','Georgia (Tbilisi)']].map(([slug, l]) => (
