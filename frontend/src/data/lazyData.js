@@ -78,6 +78,7 @@ export let NAMIBIA_CITIES = [], NAMIBIA_COUNTRY = null
 export let ALGERIA_CITIES = [], ALGERIA_COUNTRY = null
 export let TUNISIA_CITIES = [], TUNISIA_COUNTRY = null
 export let MAURITIUS_CITIES = [], MAURITIUS_COUNTRY = null
+export let SINGAPORE_CITIES = [], SINGAPORE_COUNTRY = null
 export let GHANA_CITIES = [], GHANA_COUNTRY = null
 export let ANGOLA_CITIES = [], ANGOLA_COUNTRY = null
 export let DRC_CITIES = [], DRC_COUNTRY = null
@@ -188,6 +189,7 @@ const MODULES = {
   algeriaCities: [() => import('./algeriaCities.js'), m => { ALGERIA_CITIES = m.ALGERIA_CITIES; ALGERIA_COUNTRY = m.ALGERIA_COUNTRY }, ['algeria-city', 'homeschooling-algeria']],
   tunisiaCities: [() => import('./tunisiaCities.js'), m => { TUNISIA_CITIES = m.TUNISIA_CITIES; TUNISIA_COUNTRY = m.TUNISIA_COUNTRY }, ['tunisia-city', 'homeschooling-tunisia']],
   mauritiusCities: [() => import('./mauritiusCities.js'), m => { MAURITIUS_CITIES = m.MAURITIUS_CITIES; MAURITIUS_COUNTRY = m.MAURITIUS_COUNTRY }, ['mauritius-city', 'homeschooling-mauritius']],
+  singaporeCities: [() => import('./singaporeCities.js'), m => { SINGAPORE_CITIES = m.SINGAPORE_CITIES; SINGAPORE_COUNTRY = m.SINGAPORE_COUNTRY }, ['singapore-city', 'homeschooling-singapore']],
   ghanaCities: [() => import('./ghanaCities.js'), m => { GHANA_CITIES = m.GHANA_CITIES; GHANA_COUNTRY = m.GHANA_COUNTRY }, ['ghana-city', 'homeschooling-ghana']],
   angolaCities: [() => import('./angolaCities.js'), m => { ANGOLA_CITIES = m.ANGOLA_CITIES; ANGOLA_COUNTRY = m.ANGOLA_COUNTRY }, ['angola-city', 'homeschooling-angola']],
   drcCities: [() => import('./drcCities.js'), m => { DRC_CITIES = m.DRC_CITIES; DRC_COUNTRY = m.DRC_COUNTRY }, ['drc-city', 'homeschooling-drc']],
