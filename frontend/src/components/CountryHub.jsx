@@ -667,6 +667,8 @@ function CountryHub({
             {region:'East & Southeast Asia', hubs:[
               {slug:'japan', name:'Japan', note:'Tokyo · Yokohama · Osaka · Kobe'},
               {slug:'south-korea', name:'South Korea', note:'Seoul · Songdo · Busan'},
+              {slug:'singapore', name:'Singapore', note:'Bukit Timah · East Coast · one-north'},
+              {slug:'malaysia', name:'Malaysia', note:'Kuala Lumpur · Penang · Johor Bahru'},
               {slug:'vietnam', name:'Vietnam', note:'HCMC · Hanoi · Da Nang'},
               {slug:'thailand', name:'Thailand', note:'Bangkok · Chiang Mai · Phuket'},
               {slug:'indonesia', name:'Indonesia', note:'Jakarta · Bali · Surabaya'},

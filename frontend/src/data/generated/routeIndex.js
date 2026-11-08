@@ -21,6 +21,7 @@ export const ARTICLE_PART_LOADERS = {
   articlesPart17: () => import('../articlesPart17.js'),
   articlesPart18: () => import('../articlesPart18.js'),
   articlesPart19: () => import('../articlesPart19.js'),
+  articlesPart20: () => import('../articlesPart20.js'),
 }
 
 // module list (comma-separated) → space-separated slugs
@@ -103,6 +104,7 @@ const HOMESCHOOL = {
  "rwandaCities": "kigali-rw huye-rw musanze-rw rubavu-rw",
  "saudiArabiaCities": "riyadh-sa jeddah-sa dhahran-sa al-khobar-sa neom-sa",
  "serbiaCities": "belgrade-rs novi-sad-rs nis-rs kragujevac-rs subotica-rs bor-rs",
+ "singaporeCities": "central-singapore-sg east-singapore-sg west-singapore-sg",
  "slovakiaCities": "bratislava-sk kosice-sk zilina-sk nitra-sk trnava-sk poprad-sk",
  "sloveniaCities": "ljubljana-si maribor-si koper-si kranj-si novo-mesto-si nova-gorica-si",
  "southAfricaCities": "johannesburg-za cape-town-za pretoria-za durban-za gqeberha-za stellenbosch-za centurion-za umhlanga-za somerset-west-za bloemfontein-za polokwane-za mbombela-za george-za east-london-za",

@@ -39,7 +39,7 @@ const HUBS = [
   ['new-zealand', 'New Zealand', 1], ['north-macedonia', 'North Macedonia', 0], ['norway', 'Norway', 1], ['pakistan', 'Pakistan', 1],
   ['panama', 'Panama', 0], ['paraguay', 'Paraguay', 0], ['peru', 'Peru', 0], ['poland', 'Poland', 1],
   ['portugal', 'Portugal', 1], ['puerto-rico', 'Puerto Rico', 0], ['romania', 'Romania', 1], ['rwanda', 'Rwanda', 1],
-  ['serbia', 'Serbia', 1], ['slovakia', 'Slovakia', 1], ['slovenia', 'Slovenia', 1], ['somalia', 'Somalia', 1],
+  ['serbia', 'Serbia', 1], ['singapore', 'Singapore', 1], ['slovakia', 'Slovakia', 1], ['slovenia', 'Slovenia', 1], ['somalia', 'Somalia', 1],
   ['south-africa', 'South Africa', 1], ['south-korea', 'South Korea', 1], ['spain', 'Spain', 1], ['sweden', 'Sweden', 1],
   ['switzerland', 'Switzerland', 1], ['taiwan', 'Taiwan', 1], ['tanzania', 'Tanzania', 1], ['thailand', 'Thailand', 1],
   ['tunisia', 'Tunisia', 0], ['turkey', 'Türkiye', 1], ['uganda', 'Uganda', 1], ['ukraine', 'Ukraine', 1],
@@ -57,6 +57,7 @@ export function hubTitle(name, homeschool) {
 // path → title, for the hubs whose titles were over 60 characters
 export const HUB_TITLES = Object.fromEntries(HUBS.map(([slug, name, h]) => ['/online-school/' + slug, hubTitle(name, h)]))
 HUB_TITLES['/online-school/uae'] = 'Online School & Home Schooling in UAE | Fees from AED 1,553'
+HUB_TITLES['/online-school/singapore'] = 'Online School & Homeschool in Singapore | Live IGCSE & A-Level'
 HUB_TITLES['/online-school/united-kingdom'] = 'Online School UK | Live British IGCSE & A-Level Classes'
 // USA and Canada lead with the American curriculum and the OSSD (src/data/naFocus.js).
 HUB_TITLES['/online-school/usa'] = 'K-12 Online School in the USA | American Curriculum & AP'
