@@ -37,6 +37,11 @@ const paystackRequestSchema = new mongoose.Schema({
   // 'currency_mismatch', 'invoice_missing'.
   invoiceOutcome: { type: String, default: '' },
 
+  // The payment-request email (the parent's Pay Now link): when it went
+  // out and to whom, or why it failed, so a silent failure shows on screen.
+  requestEmailSentAt:  { type: Date, default: null },
+  requestEmailSentTo:  { type: String, default: '' },
+  requestEmailError:   { type: String, default: '' },
   // Receipt emailed to the payer (automatically on payment, or by hand).
   receiptSentAt: { type: Date, default: null },
   receiptSentTo: { type: String, default: '' },
