@@ -8331,7 +8331,16 @@ export default function LandingPage() {
               </>
             )}
 
-            {/* HERO */}
+            {/* HERO — CountryArtHero when the country has artwork (public/images/countries/<slug>-art-*.webp), else the classic hero */}
+            {imageExists(`/images/countries/${ctry.slug}-art-1920.webp`) ? (
+              <CountryArtHero nav={nav} slug={ctry.slug} tagline=""
+                eyebrow={ctry.country}
+                lead={ctry.h.endsWith(ctry.country) ? ctry.h.slice(0, -ctry.country.length).trim() : ctry.h}
+                name={ctry.h.endsWith(ctry.country) ? ctry.country : ''}
+                subhead={ctry.tagline} cities={ctry.localFacts}
+                primary={{ label: 'Book assessment', href: '/assessment' }}
+                alt={`Online school in ${ctry.country}: live classes with expert teachers`}/>
+            ) : (
             <div className="pg-hero"><div className="wrap">
               <div className="eyebrow">{ctry.country}</div>
               <h1 className="pg-h">{ctry.h.split(' ').slice(0, -2).join(' ')} <em>{ctry.h.split(' ').slice(-2).join(' ')}</em></h1>
@@ -8351,6 +8360,7 @@ export default function LandingPage() {
                 <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </div>
             </div></div>
+            )}
 
             {/* WHY SMARTIOUS — PAIN POINTS */}
             <section className="sec" style={{background:V.bone}}><div className="wrap">
