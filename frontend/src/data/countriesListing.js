@@ -15,7 +15,7 @@ export const COUNTRY_PLATES = [
   { slug: 'nigeria', name: 'Nigeria', region: 'West Africa', cities: 'Lagos, Abuja, Port Harcourt', code: 'NG', img: true },
   { slug: 'kenya', name: 'Kenya', region: 'East Africa', cities: 'Nairobi, Mombasa', code: 'KE', img: true },
   { slug: 'uae', name: 'UAE', region: 'Gulf', cities: 'Dubai, Abu Dhabi, Sharjah', code: 'AE', img: true },
-  { slug: 'saudi-arabia', name: 'Saudi Arabia', region: 'Gulf', cities: 'Riyadh, Jeddah', code: 'SA' },
+  { slug: 'saudi-arabia', name: 'Saudi Arabia', region: 'Gulf', cities: 'Riyadh, Jeddah', code: 'SA', img: true },
   { slug: 'qatar', name: 'Qatar', region: 'Gulf', cities: 'Doha', code: 'QA' },
   { slug: 'kuwait', name: 'Kuwait', region: 'Gulf', cities: 'Kuwait City', code: 'KW' },
   { slug: 'bahrain', name: 'Bahrain', region: 'Gulf', cities: 'Manama, Saar', code: 'BH' },
