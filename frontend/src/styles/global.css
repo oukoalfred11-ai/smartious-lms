@@ -238,7 +238,13 @@ html, body {
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* No sideways scroll. 'clip', not 'hidden': hidden on both html and body
+     turns <body> into its own scroll box, so the window never scrolls and
+     window.scrollTo(0, 0) after a link click leaves the next page where the
+     last one was (e.g. at the footer). 'hidden' stays as the fallback for
+     browsers without 'clip'. */
   overflow-x: hidden;
+  overflow-x: clip;
 }
 #root { height: 100% }
 a { color: inherit; text-decoration: none }
