@@ -6065,7 +6065,7 @@ export default function LandingPage() {
                     <ul style={{listStyle:'none',padding:0,margin:'0 0 16px',display:'flex',flexDirection:'column',gap:6}}>
                       {card.bullets.map((b, i) => (
                         <li key={i} style={{display:'flex',alignItems:'flex-start',gap:8,fontSize:12.5,color:V.ink,lineHeight:1.55}}>
-                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={V.gold3} strokeWidth="3" strokeLinecap="round" style={{flexShrink:0,marginTop:3}}><path d="M5 12l5 5L20 7"/></svg>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={V.cr} strokeWidth="3" strokeLinecap="round" style={{flexShrink:0,marginTop:3}}><path d="M5 12l5 5L20 7"/></svg>
                           <span dangerouslySetInnerHTML={{__html:b}}/>
                         </li>
                       ))}
@@ -6272,30 +6272,20 @@ export default function LandingPage() {
               marginTop:36,
             }}>
               {[
-                ['Live, not self-paced','Every Smartious class is taught live by a qualified teacher in real time. Recordings are a supplement, not the product. This is how children actually learn — not watching videos alone.'],
-                ['Fraction of private fees','USD 4,000–6,000 per year for a full programme. Private international schools in Dubai, Lagos and Cairo charge 5–25× more for the same Cambridge or American curriculum.'],
-                ['Real exam credentials','Students sit Cambridge IGCSE, A-Level, IB, Edexcel and AP examinations at official British Council and Cambridge centres. Qualifications are identical to brick-and-mortar school graduates.'],
-                ['Continuity across moves','One school that follows your family from Nairobi to Dubai to London. Same teachers, same curriculum, same friends — no disruption when life changes.'],
-                ['Wednesday enrichment','Every week, 2-hour reserved window for sports, clubs, leadership and music. The kind of holistic education premium private schools charge a fortune to provide.'],
-                ['AI-augmented, human-led','Mshauri AI tutor reinforces concepts between live lessons. Adaptive practice, instant feedback. AI accelerates the human teacher rather than replacing them.'],
-              ].map(([h, p]) => (
+                ['Live, not self-paced','video','Every Smartious class is taught live by a qualified teacher in real time. Recordings are a supplement, not the product. This is how children actually learn — not watching videos alone.'],
+                ['Fraction of private fees','wallet','USD 4,000–6,000 per year for a full programme. Private international schools in Dubai, Lagos and Cairo charge 5–25× more for the same Cambridge or American curriculum.'],
+                ['Real exam credentials','verified','Students sit Cambridge IGCSE, A-Level, IB, Edexcel and AP examinations at official British Council and Cambridge centres. Qualifications are identical to brick-and-mortar school graduates.'],
+                ['Continuity across moves','plane','One school that follows your family from Nairobi to Dubai to London. Same teachers, same curriculum, same friends — no disruption when life changes.'],
+                ['Wednesday enrichment','trophy','Every week, 2-hour reserved window for sports, clubs, leadership and music. The kind of holistic education premium private schools charge a fortune to provide.'],
+                ['AI-augmented, human-led','robot','Mshauri AI tutor reinforces concepts between live lessons. Adaptive practice, instant feedback. AI accelerates the human teacher rather than replacing them.'],
+              ].map(([h, ic, p]) => (
                 <div key={h} style={{
                   background:'rgba(255,255,255,.03)',
                   border:'1px solid rgba(255,255,255,.08)',
                   borderRadius:10,
                   padding:'20px 18px',
                 }}>
-                  <div style={{
-                    width:32, height:32, borderRadius:6,
-                    background:'rgba(212,175,55,.15)',
-                    border:'1px solid rgba(212,175,55,.35)',
-                    display:'flex', alignItems:'center', justifyContent:'center',
-                    marginBottom:14,
-                  }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={V.gold2} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="20 6 9 17 4 12"/>
-                    </svg>
-                  </div>
+                  <div style={{marginBottom:14}}><IconTile name={ic}/></div>
                   <h3 style={{
                     fontSize:14.5, fontWeight:700, color:'#fff',
                     marginBottom:8, lineHeight:1.3,
