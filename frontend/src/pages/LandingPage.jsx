@@ -52,6 +52,7 @@ import {
 import { CURRICULA } from '../data/curricula.js'
 import { SERVICES } from '../data/services.js'
 import CountryCityPage from '../components/CountryCityPage.jsx'
+import { IconTile } from '../components/SolidIcon.jsx'
 import CountryArtHero from '../components/CountryArtHero.jsx'
 import CountryHub from '../components/CountryHub.jsx'
 import { imageExists } from '../data/generated/publicImages.js'
@@ -5802,27 +5803,7 @@ export default function LandingPage() {
                 <a className="btn-o lt h-act-3 lp-btnlink" style={{borderColor:'rgba(247,243,237,.45)',color:'rgba(247,243,237,.9)'}} href={pageToPath('programs')} onClick={linkClick(() => P('programs'))}>View Programmes</a>
               </div>
             </div>
-            <div className="h-stats">
-              {[['8 years','Of online teaching'],['78+','Qualified tutors'],['5','Curricula'],['40+','Countries served']].map(([n,l]) => (
-                <div key={l} className="hs">
-                  <div className="hs-n"><em>{n}</em></div>
-                  <div className="hs-l">{l}</div>
-                </div>
-              ))}
-            </div>
           </section>
-
-          {/* Mobile-only stats strip — sits below the hero so it doesn't block the video */}
-          <div className="h-stats-strip">
-            <div className="h-stats-strip-grid">
-              {[['8','Years'],['78+','Tutors'],['5','Curricula'],['40+','Countries']].map(([n,l]) => (
-                <div key={l} className="hms">
-                  <div className="hms-n">{n.includes('+')?<>{n.replace('+','')}<em>+</em></>:n}</div>
-                  <div className="hms-l">{l}</div>
-                </div>
-              ))}
-            </div>
-          </div>
 
           {/* Mobile page summary strip */}
           <div style={{display:'none'}} className="mob-page-strip">
@@ -5876,15 +5857,16 @@ export default function LandingPage() {
               Only verifiable claims — no fabricated stats.
           ═══════════════════════════════════════════ */}
           <section style={{background:V.bone,borderBottom:'1px solid '+V.bone3}}>
-            <div className="wrap" style={{padding:'32px 48px'}}>
+            <div className="wrap" style={{padding:'32px clamp(16px, 4vw, 48px)'}}>
               <div style={{
                 display:'grid',
-                gridTemplateColumns:'repeat(auto-fit, minmax(160px, 1fr))',
+                gridTemplateColumns:'repeat(auto-fit, minmax(140px, 1fr))',
                 gap:24,
                 textAlign:'center',
               }}>
                 {[
                   ['Since 2018', 'Online school & homeschool'],
+                  ['78+ tutors', 'Hand-picked, degree-qualified'],
                   ['Cambridge & Edexcel', 'IGCSE & A-Level prep'],
                   ['IB Diploma', 'Live virtual classes'],
                   ['Kenya CBC', 'KICD-aligned, KCSE-eligible'],
@@ -5918,19 +5900,17 @@ export default function LandingPage() {
               margin:'36px auto 0',
             }}>
               {[
-                ['Families on the move','Diplomatic, corporate and mission families who change countries every few years and want school to move with the child rather than start again in every city.'],
-                ['Athletes and performers','Young athletes, dancers and musicians whose training deserves a timetable that bends around it without ever lowering the academic bar.'],
-                ['Gifted students','Children who have outgrown the pace of their class. We let them move faster while keeping real depth and rigour.'],
-                ['Children who need a fresh start','When crowded classrooms, bullying or anxiety have turned school into a struggle, a calm class with teachers who truly notice changes everything.'],
-                ['Cambridge and Edexcel candidates','Students preparing for IGCSE and A Level examinations who want structured teaching and close personal support from specialists in their exact papers.'],
-                ['IB students seeking depth','Diploma and MYP students at IB World Schools who want specialist support in Higher Level Mathematics and the sciences.'],
-                ['Diaspora families','Kenyan and African families in the UAE, the UK, Canada, the USA and Australia who want their children educated to the standard of home.'],
-                ['Children who thrive one to one','Some children simply learn best with a teacher of their own. Ours adapt to each child, whatever their pace and learning style.'],
-              ].map(([h, p]) => (
-                <div key={h} className="reveal" style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'18px 20px',display:'flex',gap:12}}>
-                  <div style={{flexShrink:0,width:28,height:28,borderRadius:'50%',background:`rgba(201,151,58,.15)`,color:V.gold2,display:'flex',alignItems:'center',justifyContent:'center'}}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M5 12l5 5L20 7"/></svg>
-                  </div>
+                ['Families on the move','plane','Diplomatic, corporate and mission families who change countries every few years and want school to move with the child rather than start again in every city.'],
+                ['Athletes and performers','trophy','Young athletes, dancers and musicians whose training deserves a timetable that bends around it without ever lowering the academic bar.'],
+                ['Gifted students','star','Children who have outgrown the pace of their class. We let them move faster while keeping real depth and rigour.'],
+                ['Children who need a fresh start','heart','When crowded classrooms, bullying or anxiety have turned school into a struggle, a calm class with teachers who truly notice changes everything.'],
+                ['Cambridge and Edexcel candidates','mortarboard','Students preparing for IGCSE and A Level examinations who want structured teaching and close personal support from specialists in their exact papers.'],
+                ['IB students seeking depth','flask','Diploma and MYP students at IB World Schools who want specialist support in Higher Level Mathematics and the sciences.'],
+                ['Diaspora families','globe','Kenyan and African families in the UAE, the UK, Canada, the USA and Australia who want their children educated to the standard of home.'],
+                ['Children who thrive one to one','person','Some children simply learn best with a teacher of their own. Ours adapt to each child, whatever their pace and learning style.'],
+              ].map(([h, ic, p]) => (
+                <div key={h} className="reveal" style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'18px 20px',display:'flex',gap:14,alignItems:'flex-start'}}>
+                  <IconTile name={ic}/>
                   <div style={{flex:1}}>
                     <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1rem',color:V.ink,marginBottom:6,lineHeight:1.3,fontWeight:400}}>{h}</h3>
                     <p style={{fontSize:13,color:V.sl,lineHeight:1.6,margin:0}} dangerouslySetInnerHTML={{__html:p}}/>
@@ -5961,18 +5941,18 @@ export default function LandingPage() {
               margin:'36px auto 0',
             }}>
               {[
-                ['Bullying','A child who was once eager now dreads the school gate, and the school has run out of answers. Safety comes first, and it should never be negotiable.'],
-                ['Long commutes','Hours lost in traffic every single day, in Nairobi, Dubai or London alike. That time belongs to rest, family and proper study.'],
-                ['Overcrowded classes','In a class of fifty, even a devoted teacher cannot see every child. Quiet students disappear, and gaps grow in silence.'],
-                ['Frequent relocation','A posting abroad every few years should not mean a new school, a new syllabus and a new start for your child each time.'],
-                ['A child who learns differently','Some children need more pace, some need more patience, and most schools are built for neither. Ours adapts to the child in front of us.'],
-                ['Falling grades','Reports trending downward despite real effort, with nobody able to explain why or show the way back.'],
-                ['Sport and the arts','Serious training and rehearsal deserve a school day that bends around them without lowering a single academic standard.'],
-                ['The cost of international schools','In many cities, day school fees now rival university tuition. Families deserve the same standard of education at a price that makes sense.'],
-              ].map(([h, p]) => (
+                ['Bullying','shield','A child who was once eager now dreads the school gate, and the school has run out of answers. Safety comes first, and it should never be negotiable.'],
+                ['Long commutes','car','Hours lost in traffic every single day, in Nairobi, Dubai or London alike. That time belongs to rest, family and proper study.'],
+                ['Overcrowded classes','group','In a class of fifty, even a devoted teacher cannot see every child. Quiet students disappear, and gaps grow in silence.'],
+                ['Frequent relocation','plane','A posting abroad every few years should not mean a new school, a new syllabus and a new start for your child each time.'],
+                ['A child who learns differently','bulb','Some children need more pace, some need more patience, and most schools are built for neither. Ours adapts to the child in front of us.'],
+                ['Falling grades','trendDown','Reports trending downward despite real effort, with nobody able to explain why or show the way back.'],
+                ['Sport and the arts','music','Serious training and rehearsal deserve a school day that bends around them without lowering a single academic standard.'],
+                ['The cost of international schools','wallet','In many cities, day school fees now rival university tuition. Families deserve the same standard of education at a price that makes sense.'],
+              ].map(([h, ic, p]) => (
                 <div key={h} className="reveal" style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'16px 18px'}}>
-                  <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:8}}>
-                    <div style={{width:24,height:24,borderRadius:'50%',background:`rgba(139,26,46,.1)`,color:V.cr,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,fontWeight:700}}>!</div>
+                  <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:10}}>
+                    <IconTile name={ic}/>
                     <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1rem',color:V.cr,margin:0,lineHeight:1.3,fontWeight:400}}>{h}</h3>
                   </div>
                   <p style={{fontSize:12.5,color:V.sl,lineHeight:1.6,margin:0}} dangerouslySetInnerHTML={{__html:p}}/>
