@@ -19,7 +19,8 @@ const CSS = `
 .cah-media{position:relative;min-height:100%}
 .cah-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:right center;display:block}
 .cah-media::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,#F8F3EA 0%,rgba(248,243,234,.82) 10%,rgba(248,243,234,0) 32%)}
-.cah-eb{font-family:'DM Sans',system-ui,sans-serif;font-weight:700;font-size:12px;line-height:1.5;letter-spacing:.18em;text-transform:uppercase;color:#7D1025;margin:0 0 16px}
+.cah-tag{font-family:'DM Sans',system-ui,sans-serif;font-weight:800;font-size:13px;line-height:1.5;letter-spacing:.2em;text-transform:uppercase;color:#7D1025;margin:0 0 6px}
+.cah-eb{font-family:'DM Sans',system-ui,sans-serif;font-weight:700;font-size:12px;line-height:1.5;letter-spacing:.16em;text-transform:uppercase;color:#8C5A64;margin:0 0 16px}
 .cah h1{margin:0 0 20px;color:#7D1025;font-family:'Source Serif 4',Georgia,serif;font-weight:700;line-height:1}
 .cah-l1{display:block;font-style:italic;font-weight:600;font-size:clamp(1.45rem,2.3vw,2.3rem);line-height:1.15;margin-bottom:8px}
 .cah-l2{display:block;font-size:clamp(3rem,6vw,5.6rem);letter-spacing:-.02em;line-height:.98}
@@ -37,20 +38,22 @@ const CSS = `
 .cah-also{font-family:'DM Sans',system-ui,sans-serif;font-size:14px;margin:0 0 18px}
 .cah-also a{color:#7D1025;font-weight:700}
 .cah-vp{background:#fff;border-bottom:1px solid #EFE6D8}
-.cah-vp p{font-family:'DM Sans',system-ui,sans-serif;max-width:860px;margin:0 auto;padding:30px 24px;font-size:16px;line-height:1.7;color:#3B2A2F;text-align:center}
+.cah-vp{padding:14px 0}
+.cah-vp p{font-family:'DM Sans',system-ui,sans-serif;max-width:860px;margin:0 auto;padding:14px 24px;font-size:16px;line-height:1.7;color:#3B2A2F;text-align:center}
 @media (max-width: 960px){
   .cah-grid{grid-template-columns:1fr;min-height:0}
   .cah-media{order:-1;min-height:0;aspect-ratio:4/3;max-height:62vh}
   .cah-media::before{background:linear-gradient(180deg,rgba(248,243,234,0) 62%,#F8F3EA 100%)}
   .cah-text{justify-content:flex-start;padding:4px 20px 40px}
   .cah-box{max-width:640px}
+  .cah-tag{font-size:12px;letter-spacing:.14em}
   .cah-eb{font-size:11px;letter-spacing:.14em;margin-bottom:12px}
   .cah-l1{font-size:1.45rem}
   .cah-l2{font-size:clamp(2.7rem,12vw,3.6rem)}
   .cah-l2.long{font-size:clamp(2.1rem,9vw,2.8rem)}
   .cah-sub{font-size:16px}
   .cah-b1,.cah-b2{flex:1 1 auto;justify-content:center}
-  .cah-vp p{font-size:15px;text-align:left;padding:24px 20px}
+  .cah-vp p{font-size:15px;text-align:left;padding:12px 20px}
 }
 `
 
@@ -67,6 +70,7 @@ const Arrow = () => (
 
 /**
  * slug      — artwork file prefix (/images/countries/<slug>-art-*.webp)
+ * tagline   — small line above the eyebrow (default "Live classes with expert teachers")
  * lead      — first line of the H1, e.g. "Online school & homeschool in"
  * name      — the large second line of the H1, e.g. "Kenya"
  * eyebrow, subhead, valueProp — copy from the country data
@@ -74,8 +78,10 @@ const Arrow = () => (
  * primary   — { label, href, onClick? }   secondary — same, optional
  * seeAlso   — [{ label, href }] links shown above the buttons
  */
-export default function CountryArtHero({ slug, lead, name, eyebrow, subhead, valueProp, cities = [], primary, secondary, note, seeAlso = [], nav, alt }) {
+export default function CountryArtHero({ slug, tagline = 'Live classes with expert teachers', lead, name, eyebrow, subhead, valueProp, cities = [], primary, secondary, note, seeAlso = [], nav, alt }) {
   const art = `/images/countries/${slug}-art-1920.webp`
+  // A very long subhead would stretch the hero and over-zoom the artwork; it moves to the strip below.
+  const longSub = (subhead || '').length > 500
   return (
     <>
       <style>{CSS}</style>
@@ -83,12 +89,13 @@ export default function CountryArtHero({ slug, lead, name, eyebrow, subhead, val
         <div className="cah-grid">
           <div className="cah-text">
             <div className="cah-box">
+              {tagline && <p className="cah-tag">{tagline}</p>}
               {eyebrow && <p className="cah-eb">{eyebrow}</p>}
               <h1>
                 <span className="cah-l1">{lead}</span>{' '}
                 <span className={'cah-l2' + (name.length > 9 ? ' long' : '')}>{name}</span>
               </h1>
-              {subhead && <p className="cah-sub">{subhead}</p>}
+              {subhead && !longSub && <p className="cah-sub">{subhead}</p>}
               {cities.length > 0 && (
                 <ul className="cah-chips" aria-label="Cities we serve">
                   {cities.map(c => <li key={c}>{c}</li>)}
@@ -111,7 +118,7 @@ export default function CountryArtHero({ slug, lead, name, eyebrow, subhead, val
           </div>
         </div>
       </section>
-      {valueProp && <div className="cah-vp"><p>{valueProp}</p></div>}
+      {(valueProp || longSub) && <div className="cah-vp">{longSub && <p>{subhead}</p>}{valueProp && <p>{valueProp}</p>}</div>}
     </>
   )
 }
